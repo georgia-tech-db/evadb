@@ -46,4 +46,5 @@ class PlanOprType(Enum):
     EXPLAIN = auto()
     CREATE_INDEX = auto()
     APPLY_AND_MERGE = auto()
+    EXTRACT_OBJECT = auto()
     # add other types

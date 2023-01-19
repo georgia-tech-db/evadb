@@ -21,6 +21,7 @@ from eva.optimizer.operators import (
     LogicalDrop,
     LogicalDropUDF,
     LogicalExplain,
+    LogicalExtractObject,
     LogicalFilter,
     LogicalFunctionScan,
     LogicalGet,
@@ -52,6 +53,7 @@ from eva.parser.select_statement import SelectStatement
 from eva.parser.show_statement import ShowStatement
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
+from eva.parser.types import UDFType
 from eva.parser.upload_statement import UploadStatement
 from eva.utils.logging_manager import logger
 
@@ -74,11 +76,21 @@ class StatementToPlanConvertor:
 
         elif table_ref.is_table_valued_expr():
             tve = table_ref.table_valued_expr
-            self._plan = LogicalFunctionScan(
-                func_expr=tve.func_expr,
-                alias=table_ref.alias,
-                do_unnest=tve.do_unnest,
-            )
+            if tve.name.lower() == UDFType.EXTRACT_OBJECT:
+                expr = tve.func_expr
+                self._plan = LogicalExtractObject(
+                    expr=expr,
+                    detector=expr.children[1],
+                    tracker=expr.children[2],
+                    alias=table_ref.alias,
+                    do_unnest=tve.do_unnest,
+                )
+            else:
+                self._plan = LogicalFunctionScan(
+                    func_expr=tve.func_expr,
+                    alias=table_ref.alias,
+                    do_unnest=tve.do_unnest,
+                )
 
         elif table_ref.is_select():
             # NestedQuery

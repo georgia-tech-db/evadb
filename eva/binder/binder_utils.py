@@ -107,3 +107,5 @@ def check_table_object_is_video(table_ref: TableRef) -> None:
     if not is_video_table(table_ref.table.table_obj):
         err_msg = "GROUP BY only supported for video tables"
         raise BinderError(err_msg)
+
+    

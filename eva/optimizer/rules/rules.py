@@ -30,6 +30,7 @@ from eva.parser.types import JoinType
 from eva.plan_nodes.apply_and_merge_plan import ApplyAndMergePlan
 from eva.plan_nodes.create_mat_view_plan import CreateMaterializedViewPlan
 from eva.plan_nodes.explain_plan import ExplainPlan
+from eva.plan_nodes.extract_object_plan import ExtractObjectPlan
 from eva.plan_nodes.hash_join_build_plan import HashJoinBuildPlan
 from eva.plan_nodes.predicate_plan import PredicatePlan
 from eva.plan_nodes.project_plan import ProjectPlan
@@ -49,6 +50,7 @@ from eva.optimizer.operators import (
     LogicalDrop,
     LogicalDropUDF,
     LogicalExplain,
+    LogicalExtractObject,
     LogicalFilter,
     LogicalFunctionScan,
     LogicalGet,
@@ -322,7 +324,7 @@ class PushDownFilterThroughJoin(Rule):
 class XformLateralJoinToLinearFlow(Rule):
     """If the inner node of a lateral join is a function-valued expression, we
     eliminate the join node and make the inner node the parent of the outer node. This
-    produces a linear #data flow path. Because this scenario is common in our system,
+    produces a linear data flow path. Because this scenario is common in our system,
     we chose to explicitly convert it to a linear flow, which simplifies the
     implementation of other optimizations such as UDF reuse and parallelized plans by
     removing the join."""
@@ -411,6 +413,37 @@ class PushDownFilterThroughApplyAndMerge(Rule):
             root_node.append_child(apply_and_merge)
 
         return root_node
+
+
+class XformExtractObjectToLinearFlow(Rule):
+    """If the inner node of a lateral join is a Extract_Object function-valued expression, we eliminate the join node and make the inner node the parent of the outer node. This produces a linear data flow path.
+
+     LogicalJoin(Lateral)               LogicalExtractObject
+     /           \                 ->        |
+    A        LogicalExtractObject            A
+    """
+
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALJOIN)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        pattern.append_child(Pattern(OperatorType.LOGICAL_EXTRACT_OBJECT))
+        super().__init__(RuleType.XFORM_EXTRACT_OBJECT_TO_LINEAR_FLOW, pattern)
+
+    def promise(self):
+        return Promise.XFORM_EXTRACT_OBJECT_TO_LINEAR_FLOW
+
+    def check(self, before: LogicalJoin, context: OptimizerContext):
+        if before.join_type == JoinType.LATERAL_JOIN:
+            if before.join_predicate is None and not before.join_project:
+                return True
+        return False
+
+    def apply(self, before: LogicalJoin, context: OptimizerContext):
+        A: Dummy = before.children[0]
+        logical_extract_obj = before.children[1]
+        logical_extract_obj.clear_children()
+        logical_extract_obj.append_child(A)
+        return logical_extract_obj
 
 
 # REWRITE RULES END
@@ -984,6 +1017,32 @@ class LogicalApplyAndMergeToPhysical(Rule):
 
     def apply(self, before: LogicalApplyAndMerge, context: OptimizerContext):
         after = ApplyAndMergePlan(before.func_expr, before.alias, before.do_unnest)
+        for child in before.children:
+            after.append_child(child)
+        return after
+
+
+class LogicalExtractObjectToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICAL_EXTRACT_OBJECT)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_EXTRACT_OBJECT_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_EXTRACT_OBJECT_TO_PHYSICAL
+
+    def check(self, grp_id: int, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalExtractObject, context: OptimizerContext):
+        after = ExtractObjectPlan(
+            before.expr,
+            before.detector,
+            before.tracker,
+            before.tracker_args,
+            before.alias,
+            before.do_unnest,
+        )
         for child in before.children:
             after.append_child(child)
         return after

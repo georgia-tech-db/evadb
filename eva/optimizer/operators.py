@@ -60,6 +60,7 @@ class OperatorType(IntEnum):
     LOGICALEXPLAIN = auto()
     LOGICALCREATEINDEX = auto()
     LOGICAL_APPLY_AND_MERGE = auto()
+    LOGICAL_EXTRACT_OBJECT = auto()
     LOGICALDELIMITER = auto()
 
 
@@ -902,6 +903,56 @@ class LogicalFunctionScan(Operator):
 
     def __hash__(self) -> int:
         return hash((super().__hash__(), self.func_expr, self.do_unnest, self.alias))
+
+
+class LogicalExtractObject(Operator):
+    def __init__(
+        self,
+        expr: AbstractExpression,
+        detector: FunctionExpression,
+        tracker: FunctionExpression,
+        alias: Alias,
+        do_unnest: bool = False,
+        children: List = None,
+    ):
+        super().__init__(OperatorType.LOGICAL_EXTRACT_OBJECT, children)
+        self.expr = expr
+        self.detector = detector
+        self.tracker = tracker
+        self.do_unnest = do_unnest
+        self.alias = alias
+        self.tracker_args = dict(
+            frame=expr.children[0].col_alias,
+            fid=f"{expr.children[0].table_name}.id",
+            labels=detector.projection_columns[0],
+            scores=detector.projection_columns[1],
+            bboxes=detector.projection_columns[2],
+        )
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalExtractObject):
+            return False
+        return (
+            is_subtree_equal
+            and self.expr == other.expr
+            and self.detector == other.detector
+            and self.tracker == other.tracker
+            and self.do_unnest == other.do_unnest
+            and self.alias == other.alias
+        )
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                super().__hash__(),
+                self.expr,
+                self.detector,
+                self.tracker,
+                self.do_unnest,
+                self.alias,
+            )
+        )
 
 
 class LogicalJoin(Operator):
