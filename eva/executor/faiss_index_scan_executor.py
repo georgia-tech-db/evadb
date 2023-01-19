@@ -59,7 +59,7 @@ class FaissIndexScanExecutor(AbstractExecutor):
         )
         search_batch = self.search_query_expr.evaluate(dummy_batch)
 
-        # Scan index and .
+        # Scan index. The search batch comes from the Open call.
         search_batch.drop_column_alias()
         search_feat = search_batch.column_as_numpy_array("features")[0]
         search_feat = search_feat.reshape(1, -1)

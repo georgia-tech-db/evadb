@@ -499,7 +499,7 @@ class CombineSimilarityOrderByAndLimitToFaissIndexScan(Rule):
 
         # Get column catalog entry and udf_signature.
         column_catalog_entry = tv_expr.col_object
-        udf_signature = base_func_expr.signature()
+        udf_signature = None if isinstance(base_func_expr, TupleValueExpression) else base_func_expr.signature()
 
         # Get index catalog. Check if an index exists for matching
         # udf signature and table columns.
