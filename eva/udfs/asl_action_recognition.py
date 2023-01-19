@@ -26,7 +26,7 @@ try:
 
 except ImportError:
     raise ImportError(
-        f"torchvision>=0.14.0 is required to use MVITActionRecognition, found {torchvision.__version__}"
+        f"torchvision>=0.14.0 is required to use video_resnet, found {torchvision.__version__}"
     )
 import torch.nn as nn
 import torchvision
@@ -34,7 +34,7 @@ import torchvision
 from eva.models.catalog.frame_info import FrameInfo
 from eva.models.catalog.properties import ColorSpace
 from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
-
+from eva.configuration.constants import UDF_DIR
 
 class ASLActionRecognition(PytorchAbstractClassifierUDF):
     @property
@@ -55,14 +55,14 @@ class ASLActionRecognition(PytorchAbstractClassifierUDF):
         self.asl_weights_url = (
             "https://gatech.box.com/shared/static/crjhyy4nc2i5nayesfljutwc1y3bpw2q.pth"
         )
-        self.asl_weights_path = os.getcwd() + "/asl_weights.pth"
+        self.asl_weights_path =  os.getcwd() + "/asl_weights.pth"
         self.download_weights()
 
         self.weights = R3D_18_Weights.DEFAULT
         self.model = r3d_18(weights=self.weights)
         in_feats = self.model.fc.in_features
         self.model.fc = nn.Linear(in_feats, 20)
-        self.model.load_state_dict(torch.load(self.asl_weights_path))
+        self.model.load_state_dict(torch.load(self.asl_weights_path, map_location='cpu'))
         self.model.eval()
 
         self.preprocess = self.weights.transforms()
