@@ -82,7 +82,9 @@ class SimilarityTests(unittest.TestCase):
                     pd.DataFrame(
                         [
                             {
-                                "feature_col": base_img.astype(np.float32).reshape(1, -1),
+                                "feature_col": base_img.astype(np.float32).reshape(
+                                    1, -1
+                                ),
                                 "dummy": i,
                             }
                         ]
@@ -221,8 +223,12 @@ class SimilarityTests(unittest.TestCase):
         for i in range(3):
             self.assertTrue(
                 np.array_equal(
-                    expected_batch.frames["testsimilarityfeaturetable.feature_col"].to_numpy()[i],
-                    actual_batch.frames["testsimilarityfeaturetable.feature_col"].to_numpy()[i],
+                    expected_batch.frames[
+                        "testsimilarityfeaturetable.feature_col"
+                    ].to_numpy()[i],
+                    actual_batch.frames[
+                        "testsimilarityfeaturetable.feature_col"
+                    ].to_numpy()[i],
                 )
             )
 
