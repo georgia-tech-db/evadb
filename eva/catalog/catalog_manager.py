@@ -42,10 +42,8 @@ from eva.utils.logging_manager import logger
 
 
 class CatalogManager(object):
-    _instance = None
-
     def __new__(cls):
-        if cls._instance is None:
+        if not hasattr(cls, "_instance"):
             cls._instance = super(CatalogManager, cls).__new__(cls)
 
             cls._instance._bootstrap_catalog()
@@ -255,11 +253,11 @@ class CatalogManager(object):
         name: str,
         save_file_path: str,
         index_type: IndexType,
-        secondary_index_table: TableCatalogEntry,
         feat_column: ColumnCatalogEntry,
+        udf_signature: str,
     ) -> IndexCatalogEntry:
         index_catalog_entry = self._index_service.insert_entry(
-            name, save_file_path, index_type, secondary_index_table, feat_column
+            name, save_file_path, index_type, feat_column, udf_signature
         )
         return index_catalog_entry
 

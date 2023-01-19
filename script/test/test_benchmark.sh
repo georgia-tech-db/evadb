@@ -2,7 +2,6 @@
 
 # generates a report for tests marked as benchmark tests
 
-
 # temporarily remove __init__.py from root if it exists
 if [ -f ./__init__.py ]; then
    mv ./__init__.py ./__init__.py.bak
@@ -16,12 +15,27 @@ then
     exit $return_code
 fi
 
+
 # Run only benchmark tests
-PYTHONPATH=./ pytest test/ --cov-report term --cov-config=.coveragerc --cov=eva/ -s -v --log-level=WARNING ${1:-} -m "benchmark"
-test_code=$?
-if [ $test_code -ne 0 ];
+if [ -e ".benchmarks" ];
 then
-    exit $test_code
+    echo "SUBSEQUENT RUN"
+    # SUBSEQUENT RUNS
+    PYTHONPATH=./ pytest test/  --benchmark-autosave --benchmark-compare  -s -v --benchmark-compare-fail=min:50% --log-level=WARNING ${1:-} -m "benchmark"
+    test_code=$?
+    if [ $test_code -ne 0 ];
+    then
+        exit $test_code
+    fi
+else
+    echo "FIRST RUN"
+    # FIRST RUN FOR REFERENCE
+    PYTHONPATH=./ pytest test/  --benchmark-autosave -s -v --log-level=WARNING ${1:-} -m "benchmark"
+    test_code=$?
+    if [ $test_code -ne 0 ];
+    then
+        exit $test_code
+    fi
 fi
 
 # restore __init__.py if it exists

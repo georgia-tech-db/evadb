@@ -19,9 +19,9 @@ from eva.expression.abstract_expression import AbstractExpression, ExpressionTyp
 from eva.expression.expression_utils import (
     conjuction_list_to_expression_tree,
     contains_single_column,
-    expression_tree_to_conjunction_list,
     get_columns_in_predicate,
     is_simple_predicate,
+    to_conjunction_list,
 )
 from eva.parser.alias import Alias
 from eva.parser.create_statement import ColumnDefinition
@@ -62,7 +62,7 @@ def extract_equi_join_keys(
     right_table_aliases: List[str],
 ) -> Tuple[List[AbstractExpression], List[AbstractExpression]]:
 
-    pred_list = expression_tree_to_conjunction_list(join_predicate)
+    pred_list = to_conjunction_list(join_predicate)
     left_join_keys = []
     right_join_keys = []
     for pred in pred_list:
@@ -111,7 +111,7 @@ def extract_pushdown_predicate(
 
     pushdown_preds = []
     rem_pred = []
-    pred_list = expression_tree_to_conjunction_list(predicate)
+    pred_list = to_conjunction_list(predicate)
     for pred in pred_list:
         if contains_single_column(pred, column_alias) and is_simple_predicate(pred):
             pushdown_preds.append(pred)
@@ -139,7 +139,7 @@ def extract_pushdown_predicate_for_alias(
     if predicate is None:
         return None, None
 
-    pred_list = expression_tree_to_conjunction_list(predicate)
+    pred_list = to_conjunction_list(predicate)
     pushdown_preds = []
     rem_pred = []
     aliases = [alias.alias_name for alias in aliases]

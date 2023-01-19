@@ -14,6 +14,9 @@
 # limitations under the License.
 import logging
 
+__all__ = ["logger"]
+
+
 LOG_handler = logging.StreamHandler()
 LOG_formatter = logging.Formatter(
     fmt="%(asctime)-15s %(levelname)-6s"
