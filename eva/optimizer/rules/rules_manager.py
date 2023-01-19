@@ -20,9 +20,9 @@ from typing import List
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.experimental.ray.optimizer.rules.rules import LogicalExchangeToPhysical
 
-# from eva.experimental.ray.optimizer.rules.rules import (
-#     LogicalProjectToPhysical as DistributedLogicalProjectToPhysical,
-# )
+from eva.experimental.ray.optimizer.rules.rules import (
+    LogicalProjectToPhysical as DistributedLogicalProjectToPhysical,
+)
 from eva.optimizer.rules.rules import (
     EmbedFilterIntoGet,
     EmbedProjectIntoGet,
@@ -67,9 +67,9 @@ from eva.optimizer.rules.rules import (
 )
 from eva.optimizer.rules.rules_base import Rule
 
-# from eva.experimental.ray.optimizer.rules.rules import (
-#     LogicalGetToSeqScan as DistributedLogicalGetToSeqScan,
-# )
+from eva.experimental.ray.optimizer.rules.rules import (
+    LogicalGetToSeqScan as DistributedLogicalGetToSeqScan,
+)
 
 
 class RulesManager:
@@ -99,9 +99,9 @@ class RulesManager:
             LogicalLoadToPhysical(),
             LogicalUploadToPhysical(),
             LogicalSampleToUniformSample(),
-            # DistributedLogicalGetToSeqScan()
-            # if ray_enabled
-            # else SequentialLogicalGetToSeqScan(),
+            DistributedLogicalGetToSeqScan()
+            if ray_enabled
+            else SequentialLogicalGetToSeqScan(),
             SequentialLogicalGetToSeqScan(),
             LogicalDerivedGetToPhysical(),
             LogicalUnionToPhysical(),
@@ -113,9 +113,9 @@ class RulesManager:
             LogicalFunctionScanToPhysical(),
             LogicalCreateMaterializedViewToPhysical(),
             LogicalFilterToPhysical(),
-            # DistributedLogicalProjectToPhysical()
-            # if ray_enabled
-            # else SequentialLogicalProjectToPhysical(),
+            DistributedLogicalProjectToPhysical()
+            if ray_enabled
+            else SequentialLogicalProjectToPhysical(),
             SequentialLogicalProjectToPhysical(),
             LogicalShowToPhysical(),
             LogicalExplainToPhysical(),
