@@ -100,7 +100,6 @@ class RulesManager:
             DistributedLogicalGetToSeqScan()
             if ray_enabled
             else SequentialLogicalGetToSeqScan(),
-            SequentialLogicalGetToSeqScan(),
             LogicalDerivedGetToPhysical(),
             LogicalUnionToPhysical(),
             LogicalGroupByToPhysical(),
@@ -114,7 +113,6 @@ class RulesManager:
             DistributedLogicalProjectToPhysical()
             if ray_enabled
             else SequentialLogicalProjectToPhysical(),
-            SequentialLogicalProjectToPhysical(),
             LogicalShowToPhysical(),
             LogicalExplainToPhysical(),
             LogicalCreateIndexToFaiss(),
