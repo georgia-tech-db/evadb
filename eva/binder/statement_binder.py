@@ -210,7 +210,7 @@ class StatementBinder:
     @bind.register(FunctionExpression)
     def _bind_func_expr(self, node: FunctionExpression):
         # handle the special case of "extract_object"
-        if node.name.upper() == str(UDFType.EXTRACT_OBJECT):
+        if node.name.upper() == str(UDFType.ExtractObject):
             handle_extract_object(node, self)
             return
         # bind all the children
@@ -279,31 +279,42 @@ def handle_extract_object(node: FunctionExpression, binder_context: StatementBin
         logger.error(err_msg)
         raise BinderError(err_msg)
 
-    """We   
+    """ 
+    1. Bind the source video data
+    2. Create the detector function expression using the provided name.
+    3. Create the tracker function expression. Its inputs are id, data, output of detector.
+    4. Bind the extract object function expression and append the new children. 
     """
+
+    # 1. Bind the source video
     video_data = node.children[0]
     binder_context.bind(video_data)
 
+    # 2. Construct the detector
     # convert detector to FunctionExpression before binding
     # eg. YoloV5 -> YoloV5(data)
-    detector_name = node.children[1].col_name
-    detector = FunctionExpression(None, detector_name)
+    detector = FunctionExpression(None, node.children[1].col_name)
     detector.append_child(video_data.copy())
-    node.children[1] = detector
-    binder_context.bind(node.children[1])
+    binder_context.bind(detector)
 
+    # 3. Construct the tracker
     # convert tracker to FunctionExpression before binding
     # eg. ByteTracker -> ByteTracker(id, data, labels, bboxes, scores)
     tracker = FunctionExpression(None, node.children[2].col_name)
     # create the video id expression
     columns = get_video_table_column_definitions()
     tracker.append_child(
-        TupleValueExpression(col_name=columns[1], table_alias=video_data.table_alias)
+        TupleValueExpression(
+            col_name=columns[1].name, table_alias=video_data.table_alias
+        )
     )
     tracker.append_child(video_data.copy())
     binder_context.bind(tracker)
     # append the output of detector
     for obj in detector.output_objs:
         tracker.append_child(obj)
-    
-    node.children[1] = tracker
+
+    # 4. Bind the extract object expression.
+    node.children = []
+    binder_context.bind(node)
+    node.children = [video_data, detector, tracker]

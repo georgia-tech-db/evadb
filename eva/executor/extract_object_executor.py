@@ -61,7 +61,7 @@ class ExtractObjectExecutor(AbstractExecutor):
                 )
                 results.append(
                     {
-                        "object_ids": ids.numpy(),
+                        "oids": ids.numpy(),
                         "labels": track_labels.numpy(),
                         "bboxes": track_bboxes.numpy()[:, :-1],
                         "scores": track_bboxes.numpy()[:, -1],
