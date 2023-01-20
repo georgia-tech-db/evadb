@@ -273,7 +273,7 @@ class PytorchTest(unittest.TestCase):
     def test_should_run_extract_object(self):
         udf = """CREATE UDF
             IF NOT EXISTS  ByteTracker
-            INPUT (seconds INTEGER)
+            INPUT (fid INTEGER, data NDARRAY UINT8(3, ANYDIM, ANYDIM))
             OUTPUT (timestamp NDARRAY STR(8))
             TYPE NdarrayUDF
             IMPL "{}/udfs/trackers/openmm_tracker.py";
