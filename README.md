@@ -142,18 +142,15 @@ IMPL  'eva/udfs/fastrcnn_object_detector.py';
 
 ### 🔮 [License Plate Recognition](https://github.com/georgia-tech-db/eva-application-template) (Plate Detection + OCR Extraction Models)
 
-| Source Image  | Query Result |
-|---------------|--------------|
-|<img alt="Source Image" src="https://raw.githubusercontent.com/georgia-tech-db/eva-application-template/main/README_files/README_14_6.png" width="400"> |<img alt="Query Result" src="https://raw.githubusercontent.com/georgia-tech-db/license-plate-recognition/main/README_files/README_18_1.png" width="400"> |
+| Query Result |
+|--------------|
+<img alt="Query Result" src="https://github.com/georgia-tech-db/license-plate-recognition/blob/main/README_files/README_12_3.png" width="400"> |
 
 ### 🔮 [Meme Toxicity Classification](https://github.com/georgia-tech-db/toxicity-classification) (OCR Extraction + Toxicity Classification Models)
 
-| Source Image  | Query Result |
-|---------------|--------------|
-|<img alt="Source Image" src="https://raw.githubusercontent.com/georgia-tech-db/toxicity-classification/main/README_files/README_16_1.png" width="300"> |<img alt="Query Result" src="https://raw.githubusercontent.com/georgia-tech-db/toxicity-classification/main/README_files/README_16_2.png" width="300"> |
-
-
-
+| Query Result |
+|--------------|
+<img alt="Query Result" src="https://raw.githubusercontent.com/georgia-tech-db/toxicity-classification/main/README_files/README_16_2.png" width="300"> |
 
 ## Community
 
