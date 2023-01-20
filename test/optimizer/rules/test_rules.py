@@ -27,6 +27,7 @@ from eva.optimizer.operators import (
     LogicalQueryDerivedGet,
 )
 from eva.optimizer.rules.rules import (
+    CombineSimilarityOrderByAndLimitToFaissIndexScan,
     EmbedFilterIntoDerivedGet,
     EmbedFilterIntoGet,
     EmbedProjectIntoDerivedGet,
@@ -41,6 +42,7 @@ from eva.optimizer.rules.rules import (
     LogicalDropToPhysical,
     LogicalDropUDFToPhysical,
     LogicalExplainToPhysical,
+    LogicalFaissIndexScanToPhysical,
     LogicalFilterToPhysical,
     LogicalFunctionScanToPhysical,
     LogicalGetToSeqScan,
@@ -160,6 +162,7 @@ class TestRules(unittest.TestCase):
             XformLateralJoinToLinearFlow(),
             PushDownFilterThroughApplyAndMerge(),
             PushDownFilterThroughJoin(),
+            CombineSimilarityOrderByAndLimitToFaissIndexScan(),
         ]
         self.assertEqual(
             len(supported_rewrite_rules), len(RulesManager().rewrite_rules)
@@ -206,6 +209,7 @@ class TestRules(unittest.TestCase):
             LogicalExplainToPhysical(),
             LogicalCreateIndexToFaiss(),
             LogicalApplyAndMergeToPhysical(),
+            LogicalFaissIndexScanToPhysical(),
         ]
 
         ray_enabled = ConfigurationManager().get_value("experimental", "ray")

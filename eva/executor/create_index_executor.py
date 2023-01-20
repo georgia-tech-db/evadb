@@ -146,6 +146,10 @@ class CreateIndexExecutor(AbstractExecutor):
                     # Pandas wraps numpy array as an object inside a numpy
                     # array. Use zero index to get the actual numpy array.
                     feat = input_batch.column_as_numpy_array(feat_col_name)[0]
+
+                # Transform to 2-D.
+                feat = feat.reshape(1, -1)
+
                 if index is None:
                     input_dim = feat.shape[-1]
                     index = create_faiss_index(self.node.index_type, input_dim)
