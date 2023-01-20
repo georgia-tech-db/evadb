@@ -171,7 +171,7 @@ class AbstractExpression(ABC):
         Returns:
             the generator object.
         """
-        queue = deque(self)
+        queue = deque([self])
         while queue:
             node = queue.popleft()
             yield node

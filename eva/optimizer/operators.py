@@ -1114,6 +1114,7 @@ class LogicalCreateIndex(Operator):
         table_ref: TableRef,
         col_list: List[ColumnDefinition],
         index_type: IndexType,
+        udf_func: FunctionExpression = None,
         children: List = None,
     ):
         super().__init__(OperatorType.LOGICALCREATEINDEX, children)
@@ -1121,6 +1122,7 @@ class LogicalCreateIndex(Operator):
         self._table_ref = table_ref
         self._col_list = col_list
         self._index_type = index_type
+        self._udf_func = udf_func
 
     @property
     def name(self):
@@ -1138,6 +1140,10 @@ class LogicalCreateIndex(Operator):
     def index_type(self):
         return self._index_type
 
+    @property
+    def udf_func(self):
+        return self._udf_func
+
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
         if not isinstance(other, LogicalCreateIndex):
@@ -1148,6 +1154,7 @@ class LogicalCreateIndex(Operator):
             and self.table_ref == other.table_ref
             and self.col_list == other.col_list
             and self.index_type == other.index_type
+            and self.udf_func == other.udf_func
         )
 
     def __hash__(self) -> int:
@@ -1158,6 +1165,7 @@ class LogicalCreateIndex(Operator):
                 self.table_ref,
                 tuple(self.col_list),
                 self.index_type,
+                self.udf_func,
             )
         )
 

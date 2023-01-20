@@ -59,7 +59,11 @@ class OpenCVReader(AbstractReader):
                 _, frame = video.read()
                 frame_id = begin
                 while frame is not None and frame_id <= end:
-                    yield {"id": frame_id, "data": frame}
+                    yield {
+                        "id": frame_id,
+                        "data": frame,
+                        "seconds": frame_id // video.get(cv2.CAP_PROP_FPS),
+                    }
                     _, frame = video.read()
                     frame_id += 1
         else:

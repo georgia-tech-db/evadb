@@ -23,7 +23,7 @@ from typing import TYPE_CHECKING, Iterable, Optional, List
 from eva.catalog.catalog_type import TableType
 from eva.catalog.catalog_utils import construct_udf_cache_catalog_entry, is_video_table
 from eva.expression.expression_utils import (
-    and_,
+    conjuction_list_to_expression_tree,
 )
 from eva.expression.function_expression import (
     FunctionExpression,
@@ -151,7 +151,7 @@ class EmbedFilterIntoGet(Rule):
                 unsupported_opr = LogicalFilter(unsupported_pred)
                 unsupported_opr.append_child(new_get_opr)
                 new_get_opr = unsupported_opr
-            return new_get_opr
+            yield new_get_opr
         else:
             yield before
 
@@ -404,7 +404,7 @@ class PushDownFilterThroughJoin(Rule):
             new_join_node.append_child(right)
 
         if rem_pred:
-            new_join_node.join_predicate = and_(
+            new_join_node.join_predicate = conjuction_list_to_expression_tree(
                 [rem_pred, new_join_node.join_predicate]
             )
 
@@ -633,6 +633,7 @@ class LogicalCreateIndexToFaiss(Rule):
             before.table_ref,
             before.col_list,
             before.index_type,
+            before.udf_func,
         )
         yield after
 

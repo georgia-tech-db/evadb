@@ -6,6 +6,7 @@ orbs:
 workflows:
   main:
     jobs:
+        - Windows   
         - test:
             name: "Linux - Python v3.7"
             v: "3.7"
@@ -18,9 +19,8 @@ workflows:
         - test:
             name: "Linux - Python v3.10"
             v: "3.10"
-        - Windows
         #- test:
-        #    name: "Python v3.11"  # missing Torchvision
+        #    name: "Linux - Python v3.11"  # missing Torchvision
         #    v: "3.11"
 
 jobs:
@@ -46,8 +46,7 @@ jobs:
           command: |
             pip install --upgrade pip
             pip install evadb
-            
-        # bash script/test/package.sh
+            bash script/test/package.sh
 
       - run:
           name: Install EVA package from GitHub repo with all dependencies
@@ -68,14 +67,13 @@ jobs:
           paths:
             - /home/circleci/.cache/torch/hub/
             - /home/circleci/.EasyOCR/
-
     
   Windows:
     executor: win/default
     parameters:
       v:
         type: string
-        default: "3.7" 
+        default: "3.10" 
     steps:
       - checkout
 

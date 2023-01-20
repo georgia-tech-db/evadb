@@ -296,6 +296,17 @@ def copy_sample_videos_to_upload_dir():
     )
 
 
+def copy_sample_images_to_upload_dir():
+    shutil.copyfile(
+        "data/detoxify/meme1.jpg",
+        os.path.join(upload_dir_from_config, "meme1.jpg"),
+    )
+    shutil.copyfile(
+        "data/detoxify/meme2.jpg",
+        os.path.join(upload_dir_from_config, "meme2.jpg"),
+    )
+
+
 def file_remove(path):
     try:
         os.remove(os.path.join(upload_dir_from_config, path))
@@ -315,6 +326,7 @@ def create_dummy_batches(num_frames=NUM_FRAMES, filters=[], batch_size=10, start
                 "myvideo.data": np.array(
                     np.ones((2, 2, 3)) * float(i + 1) * 25, dtype=np.uint8
                 ),
+                "myvideo.seconds": 0.0,
             }
         )
 
@@ -341,6 +353,7 @@ def create_dummy_4d_batches(
                 "myvideo.name": "dummy.avi",
                 "myvideo.id": segment[0] + start_id,
                 "myvideo.data": segment_data,
+                "myvideo.seconds": 0.0,
             }
         )
 
@@ -445,7 +458,9 @@ class DummyFeatureExtractor(AbstractClassifierUDF):
 
         def _extract_feature(row: pd.Series):
             feat_input = row[0]
-            return feat_input.astype(np.float32)
+            feat_input = feat_input.reshape(1, -1)
+            feat_input = feat_input.astype(np.float32)
+            return feat_input
 
         ret = pd.DataFrame()
         ret["features"] = df.apply(_extract_feature, axis=1)
