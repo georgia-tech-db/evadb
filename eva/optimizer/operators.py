@@ -1215,26 +1215,26 @@ class LogicalFaissIndexScan(Operator):
     def __init__(
         self,
         index_name: str,
-        query_num: int,
-        query_expr: FunctionExpression,
+        limit_count: ConstantValueExpression,
+        search_query_expr: FunctionExpression,
         children: List = None,
     ):
         super().__init__(OperatorType.LOGICALFAISSINDEXSCAN, children)
         self._index_name = index_name
-        self._query_num = query_num
-        self._query_expr = query_expr
+        self._limit_count = limit_count
+        self._search_query_expr = search_query_expr
 
     @property
     def index_name(self):
         return self._index_name
 
     @property
-    def query_num(self):
-        return self._query_num
+    def limit_count(self):
+        return self._limit_count
 
     @property
-    def query_expr(self):
-        return self._query_expr
+    def search_query_expr(self):
+        return self._search_query_expr
 
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
@@ -1243,8 +1243,8 @@ class LogicalFaissIndexScan(Operator):
         return (
             is_subtree_equal
             and self.index_name == other.index_name
-            and self.query_num == other.query_num
-            and self.query_expr == other.query_expr
+            and self.limit_count == other.limit_count
+            and self.search_query_expr == other.search_query_expr
         )
 
     def __hash__(self) -> int:
@@ -1252,7 +1252,7 @@ class LogicalFaissIndexScan(Operator):
             (
                 super().__hash__(),
                 self.index_name,
-                self.query_num,
-                self.query_expr,
+                self.limit_count,
+                self.search_query_expr,
             )
         )

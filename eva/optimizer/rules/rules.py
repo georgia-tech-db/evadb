@@ -1117,7 +1117,7 @@ class LogicalFaissIndexScanToPhysical(Rule):
 
     def apply(self, before: LogicalFaissIndexScan, context: OptimizerContext):
         after = FaissIndexScanPlan(
-            before.index_name, before.query_num, before.query_expr
+            before.index_name, before.limit_count, before.search_query_expr
         )
         for child in before.children:
             after.append_child(child)

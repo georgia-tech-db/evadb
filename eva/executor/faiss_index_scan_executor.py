@@ -21,13 +21,14 @@ from eva.catalog.catalog_manager import CatalogManager
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.faiss_index_scan_plan import FaissIndexScanPlan
+from eva.catalog.sql_config import IDENTIFIER_COLUMN
 
 
 # Helper function for getting row_id column alias.
 def get_row_id_column_alias(column_list):
     for column in column_list:
         alias, col_name = column.split(".")
-        if col_name == "_row_id":
+        if col_name == IDENTIFIER_COLUMN:
             return alias
 
 
@@ -78,7 +79,7 @@ class FaissIndexScanExecutor(AbstractExecutor):
             column_list = batch.columns
             if not row_id_col_name:
                 row_id_alias = get_row_id_column_alias(column_list)
-                row_id_col_name = "{}._row_id".format(row_id_alias)
+                row_id_col_name = "{}.{}".format(row_id_alias, IDENTIFIER_COLUMN)
 
             # Nested join.
             for _, row in batch.frames.iterrows():
@@ -87,7 +88,6 @@ class FaissIndexScanExecutor(AbstractExecutor):
                         res_row = dict()
                         for col_name in column_list:
                             res_row[col_name] = row[col_name]
-                        res_row["similarity.distance"] = distance_list[idx]
                         res_row_list[idx] = res_row
 
         yield Batch(pd.DataFrame(res_row_list))
