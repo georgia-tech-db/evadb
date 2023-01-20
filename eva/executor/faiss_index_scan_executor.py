@@ -18,10 +18,10 @@ import faiss
 import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
+from eva.catalog.sql_config import IDENTIFIER_COLUMN
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.faiss_index_scan_plan import FaissIndexScanPlan
-from eva.catalog.sql_config import IDENTIFIER_COLUMN
 
 
 # Helper function for getting row_id column alias.
