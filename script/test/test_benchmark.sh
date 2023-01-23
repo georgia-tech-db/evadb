@@ -7,14 +7,6 @@ if [ -f ./__init__.py ]; then
    mv ./__init__.py ./__init__.py.bak
 fi
 
-# Run black, isort, linter 
-sh script/formatting/pre-push.sh
-return_code=$?
-if [ $return_code -ne 0 ];
-then
-    exit $return_code
-fi
-
 git log | head
 
 # Run only benchmark tests
@@ -22,7 +14,7 @@ if [ -e ".benchmarks" ];
 then
     echo "SUBSEQUENT RUN"
     # SUBSEQUENT RUNS
-    PYTHONPATH=./ pytest test/  --benchmark-autosave --benchmark-compare  -v --benchmark-compare-fail=min:10%  ${1:-} -m "benchmark"
+    PYTHONPATH=./ pytest test/  --benchmark-autosave --benchmark-compare --benchmark-columns="mean" --benchmark-group-by="name"  -v --benchmark-compare-fail=min:10%  ${1:-} -m "benchmark"
     test_code=$?
     if [ $test_code -ne 0 ];
     then
@@ -31,12 +23,21 @@ then
 else
     echo "FIRST RUN"
     # FIRST RUN FOR REFERENCE
-    PYTHONPATH=./ pytest test/  --benchmark-autosave -v ${1:-} -m "benchmark"
+    PYTHONPATH=./ pytest test/  --benchmark-autosave --benchmark-columns="mean" -v ${1:-} -m "benchmark"
     test_code=$?
     if [ $test_code -ne 0 ];
     then
         exit $test_code
     fi
+fi
+
+# Check demo page
+curl https://ada-00.cc.gatech.edu/eva/playground
+demo_code=$?
+if [ $demo_code -ne 0 ];
+then
+    echo "Demo down!"
+    exit $demo_code
 fi
 
 # restore __init__.py if it exists
