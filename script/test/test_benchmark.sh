@@ -15,6 +15,7 @@ then
     exit $return_code
 fi
 
+git log | head
 
 # Run only benchmark tests
 if [ -e ".benchmarks" ];
