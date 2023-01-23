@@ -22,7 +22,7 @@ if [ -e ".benchmarks" ];
 then
     echo "SUBSEQUENT RUN"
     # SUBSEQUENT RUNS
-    PYTHONPATH=./ pytest test/  --benchmark-autosave --benchmark-compare  -s -v --benchmark-compare-fail=min:50% --log-level=WARNING ${1:-} -m "benchmark"
+    PYTHONPATH=./ pytest test/  --benchmark-autosave --benchmark-compare  -v --benchmark-compare-fail=min:10%  ${1:-} -m "benchmark"
     test_code=$?
     if [ $test_code -ne 0 ];
     then
@@ -31,7 +31,7 @@ then
 else
     echo "FIRST RUN"
     # FIRST RUN FOR REFERENCE
-    PYTHONPATH=./ pytest test/  --benchmark-autosave -s -v --log-level=WARNING ${1:-} -m "benchmark"
+    PYTHONPATH=./ pytest test/  --benchmark-autosave -v ${1:-} -m "benchmark"
     test_code=$?
     if [ $test_code -ne 0 ];
     then
