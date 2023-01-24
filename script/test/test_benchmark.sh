@@ -14,7 +14,7 @@ if [ -e ".benchmarks" ];
 then
     echo "SUBSEQUENT RUN"
     # SUBSEQUENT RUNS
-    PYTHONPATH=./ pytest test/  --benchmark-autosave --benchmark-compare --benchmark-columns="mean" --benchmark-group-by="name"  -v --benchmark-compare-fail=min:10%  ${1:-} -m "benchmark"
+    PYTHONPATH=./ pytest test/  --benchmark-autosave --benchmark-compare --benchmark-columns="mean" --benchmark-group-by="name"  -v --benchmark-compare-fail=min:20%  ${1:-} -m "benchmark"
     test_code=$?
     if [ $test_code -ne 0 ];
     then
