@@ -44,7 +44,6 @@ class ASLActionRecognition(PytorchAbstractClassifierUDF):
 
     def download_weights(self):
         if not os.path.exists(self.asl_weights_path):
-            torch.hub.set_dir(os.getcwd())
             torch.hub.download_url_to_file(
                 self.asl_weights_url,
                 self.asl_weights_path,
@@ -56,9 +55,7 @@ class ASLActionRecognition(PytorchAbstractClassifierUDF):
         self.asl_weights_url = (
             "https://gatech.box.com/shared/static/crjhyy4nc2i5nayesfljutwc1y3bpw2q.pth"
         )
-        self.asl_weights_path = (
-            str(EVA_DEFAULT_DIR) + "/" + str(UDF_DIR) + "/asl_weights.pth"
-        )
+        self.asl_weights_path = torch.hub.get_dir() + "/asl_weights.pth"
         self.download_weights()
 
         self.weights = R3D_18_Weights.DEFAULT
