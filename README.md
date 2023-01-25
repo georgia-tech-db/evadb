@@ -23,13 +23,13 @@
 
 EVA is a **database system tailored for video analytics** -- think MySQL for videos. It supports a SQL-like language for querying videos for:
 
- * `examining the "emotion palette" of different actors <https://evadb.readthedocs.io/en/stable/source/tutorials/03-emotion-analysis.html>`_
- * `analysing traffic flow at an intersection <https://evadb.readthedocs.io/en/stable/source/tutorials/02-object-detection.html>`_
- * `classifying images based on their content <https://evadb.readthedocs.io/en/stable/source/tutorials/01-mnist.html>`_
- * `recogizing license plates <https://github.com/georgia-tech-db/license-plate-recognition>`_
- * `analysing toxicity of social media memes <https://github.com/georgia-tech-db/toxicity-classification>`_
-
-EVA comes with a wide range of commonly used models for analyzing images and videos including image classification, object detection, action classification, OCR, face detection, etc. It is fully implemented in Python, and `licensed under the Apache license <https://github.com/georgia-tech-db/eva>`.
+ * <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/03-emotion-analysis.html">Examining the "emotion palette" of actors in a movie</a>
+ * <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/02-object-detection.html">Analysing traffic flow at an intersection </a>
+ * <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/01-mnist.html">Classifying images based on their content</a>
+ * <a href="https://github.com/georgia-tech-db/license-plate-recognition">Recogizing license plates </a>
+ * <a href="https://github.com/georgia-tech-db/toxicity-classification">Analysing toxicity of social media memes </a>
+ 
+EVA comes with a wide range of commonly used models for analyzing images and videos including image classification, object detection, action classification, OCR, face detection, etc. It is fully implemented in Python, and licensed under the Apache license.
 
 If you are wondering why you might need a video database system, start with page on <a href="https://evadb.readthedocs.io/en/stable/source/overview/video.html#">Video Database Systems</a>. It describes how EVA lets users easily make use of deep learning models and how they can reduce money spent on inference on large image or video datasets.
 
@@ -121,7 +121,7 @@ IMPL  'eva/udfs/fastrcnn_object_detector.py';
 ```mysql
    -- Analyse emotions of faces in a video
    SELECT id, bbox, EmotionDetector(Crop(data, bbox)) 
-   FROM HAPPY JOIN LATERAL UNNEST(FaceDetector(data)) AS Face(bbox, conf)  
+   FROM MyVideo JOIN LATERAL UNNEST(FaceDetector(data)) AS Face(bbox, conf)  
    WHERE id < 15;
 ```
 
