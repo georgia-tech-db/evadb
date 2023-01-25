@@ -46,8 +46,6 @@ class InsertExecutor(AbstractExecutor):
             num_value = len(self.node.value_list)
             num_column = len(self.node.column_list)
 
-
-
             # TODO: Validate if it is properly divisible
             num_of_inserts = num_value//num_column
 
@@ -66,15 +64,7 @@ class InsertExecutor(AbstractExecutor):
             class Struct(object): pass
             batch = Struct()
             batch.frames = dataframe
-            # columns_list = []
-            # for column in table_obj.columns:
-            #     columns_list.append(
-            #         TableValuedExpression(
-            #             col_name=column.name,
-            #             table_alias=table_obj.name.lower(),
-            #             col_object=column,
-            #         )
-            #     )
+            
             storage_engine = StorageEngine.factory(table_obj)
             storage_engine.write(table_obj, batch)
         except Exception as e:
