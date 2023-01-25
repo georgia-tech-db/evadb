@@ -43,23 +43,13 @@ class InsertExecutor(AbstractExecutor):
             database_name = self.node.table_ref.table.database_name
             table_obj = self.catalog.get_table_catalog_entry(table_name, database_name)
             
-            num_value = len(self.node.value_list)
-            num_column = len(self.node.column_list)
-
-            # TODO: Validate if it is properly divisible
-            num_of_inserts = num_value//num_column
-
-            values = []
-            for num in range(num_of_inserts):
-                batch = []
-                for column in range(num_column):
-                    batch.append(self.node.value_list[num*num_column + column].value)
-                values.append(batch)
-            
+            # Values to insert and Columns
+            values = self.node.value_list[0].value
             column_list = []
             for i in self.node.column_list:
                 column_list.append(i.col_name)
             
+            # Adding all to dataframe
             dataframe = pd.DataFrame(values, columns=column_list)
             class Struct(object): pass
             batch = Struct()
@@ -77,7 +67,7 @@ class InsertExecutor(AbstractExecutor):
             yield Batch(
                 pd.DataFrame(
                     [
-                        f"Number of rows loaded: {str(len(self.node.value_list))}"
+                        f"Number of rows loaded: {str(len(values))}"
                     ]
                 )
             )
