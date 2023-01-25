@@ -14,6 +14,7 @@
 # limitations under the License.
 import pandas as pd
 from eva.catalog.models.table_catalog import TableCatalogEntry
+from eva.catalog.catalog_type import TableType
 from eva.catalog.catalog_manager import CatalogManager
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError
@@ -42,6 +43,10 @@ class InsertExecutor(AbstractExecutor):
             table_name = self.node.table_ref.table.table_name
             database_name = self.node.table_ref.table.database_name
             table_obj = self.catalog.get_table_catalog_entry(table_name, database_name)
+            
+            # Implemented only for STRUCTURED_DATA
+            if table_obj.table_type != TableType.STRUCTURED_DATA:
+                raise NotImplementedError("INSERT only implemented for structured data")
             
             # Values to insert and Columns
             values = self.node.value_list[0].value
