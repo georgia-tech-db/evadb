@@ -21,12 +21,15 @@
 
 # EVA Multimedia Database System
 
-EVA is a **database system tailored for video analytics** -- think PostgreSQL for videos. It supports a SQL-like language for querying videos like:
+EVA is a **database system tailored for video analytics** -- think MySQL for videos. It supports a SQL-like language for querying videos for:
 
- * examining the movement of vehicles in a traffic video
- * finding touchdowns in a football game
+ * `examining the "emotion palette" of different actors <https://evadb.readthedocs.io/en/stable/source/tutorials/03-emotion-analysis.html>`_
+ * `analysing traffic flow at an intersection <https://evadb.readthedocs.io/en/stable/source/tutorials/02-object-detection.html>`_
+ * `classifying images based on their content <https://evadb.readthedocs.io/en/stable/source/tutorials/01-mnist.html>`_
+ * `recogizing license plates <https://github.com/georgia-tech-db/license-plate-recognition>`_
+ * `analysing toxicity of social media memes <https://github.com/georgia-tech-db/toxicity-classification>`_
 
-EVA comes with a wide range of commonly used computer vision models. It written in Python, and it is licensed under the Apache license. 
+EVA comes with a wide range of commonly used models for analyzing images and videos including image classification, object detection, action classification, OCR, face detection, etc. It is fully implemented in Python, and `licensed under the Apache license <https://github.com/georgia-tech-db/eva>`.
 
 If you are wondering why you might need a video database system, start with page on <a href="https://evadb.readthedocs.io/en/stable/source/overview/video.html#">Video Database Systems</a>. It describes how EVA lets users easily make use of deep learning models and how they can reduce money spent on inference on large image or video datasets.
 
