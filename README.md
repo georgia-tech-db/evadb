@@ -170,9 +170,11 @@ Join the EVA community on [Slack](https://join.slack.com/t/eva-db/shared_invite/
 [![Coverage Status](https://coveralls.io/repos/github/georgia-tech-db/eva/badge.svg?branch=master)](https://coveralls.io/github/georgia-tech-db/eva?branch=master)
 [![Documentation Status](https://readthedocs.org/projects/evadb/badge/?version=stable)](https://evadb.readthedocs.io/en/stable/index.html)
 
-To file a bug or request a feature, please use GitHub issues. Pull requests are welcome.
-For more information on installing from source and contributing to EVA, see our
-[contributing guidelines](https://evadb.readthedocs.io/en/stable/source/contribute/index.html).
+We welcome all kinds of contributions to EVA.
+To file a bug or request a feature, please use <a href="https://github.com/georgia-tech-db/eva/issues">GitHub issues</a>. <a href="https://github.com/georgia-tech-db/eva/pulls">Pull requests</a> are welcome.
+
+For more information on contributing to EVA, see our
+[contribution guide](https://evadb.readthedocs.io/en/stable/source/contribute/index.html).
 
 ## License
 Copyright (c) 2018-2022 [Georgia Tech Database Group](http://db.cc.gatech.edu/)
