@@ -36,6 +36,7 @@ from eva.optimizer.operators import (
     LogicalShow,
     LogicalUnion,
     LogicalUpload,
+    LogicalInsert
 )
 from eva.optimizer.optimizer_utils import column_definition_to_udf_io
 from eva.parser.create_index_statement import CreateIndexStatement
@@ -53,6 +54,7 @@ from eva.parser.show_statement import ShowStatement
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
 from eva.parser.upload_statement import UploadStatement
+from eva.parser.delete_statement import DeleteTableStatement
 from eva.utils.logging_manager import logger
 
 
@@ -186,6 +188,14 @@ class StatementToPlanConvertor:
         Arguments:
             statement {AbstractStatement} - - [input insert statement]
         """
+        # load data, could be used for insert
+        insert_data_opr = LogicalInsert(
+            statement.table_ref,
+            statement.column_list,
+            statement.value_list,
+        )
+        self._plan = insert_data_opr
+        
         """
         table_ref = statement.table
         table_metainfo = bind_dataset(table_ref.table)
@@ -351,6 +361,8 @@ class StatementToPlanConvertor:
             self.visit_explain(statement)
         elif isinstance(statement, CreateIndexStatement):
             self.visit_create_index(statement)
+        elif isinstance(statement, DeleteTableStatement):
+            self.visit_delete(statement)
         return self._plan
 
     @property

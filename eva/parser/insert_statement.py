@@ -36,12 +36,12 @@ class InsertTableStatement(AbstractStatement):
 
     def __init__(
         self,
-        table: TableRef,
+        table_ref: TableRef,
         column_list: List[AbstractExpression] = None,
         value_list: List[AbstractExpression] = None,
     ):
         super().__init__(StatementType.INSERT)
-        self._table = table
+        self._table_ref = table_ref
         self._column_list = column_list
         self._value_list = value_list
 
@@ -52,8 +52,8 @@ class InsertTableStatement(AbstractStatement):
         return print_str
 
     @property
-    def table(self) -> TableRef:
-        return self._table
+    def table_ref(self) -> TableRef:
+        return self._table_ref
 
     @property
     def column_list(self) -> List[AbstractExpression]:
