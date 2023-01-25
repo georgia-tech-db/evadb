@@ -138,6 +138,9 @@ class PlanExecutor:
             executor_node = ApplyAndMergeExecutor(node=plan)
         elif plan_opr_type == PlanOprType.FAISS_INDEX_SCAN:
             executor_node = FaissIndexScanExecutor(node=plan)
+        elif plan_opr_type == PlanOprType.DELETE:
+            executor_node = DeleteExecutor(node=plan)
+
         # EXPLAIN does not need to build execution tree for its children
         if plan_opr_type != PlanOprType.EXPLAIN:
             # Build Executor Tree for children

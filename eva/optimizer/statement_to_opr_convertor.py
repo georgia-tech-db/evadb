@@ -36,7 +36,8 @@ from eva.optimizer.operators import (
     LogicalShow,
     LogicalUnion,
     LogicalUpload,
-    LogicalInsert
+    LogicalInsert,
+    LogicalDelete
 )
 from eva.optimizer.optimizer_utils import column_definition_to_udf_io
 from eva.parser.create_index_statement import CreateIndexStatement
@@ -326,6 +327,15 @@ class StatementToPlanConvertor:
             statement.udf_func,
         )
         self._plan = create_index_opr
+    
+    def visit_delete(self, statement: DeleteTableStatement):
+        # Filter Operator
+        predicate = statement.where_clause
+        if predicate is not None:
+            self._visit_select_predicate(predicate)
+        
+        # delete_statement = LogicalDelete()
+        # self._plan = delete_statement
 
     def visit(self, statement: AbstractStatement):
         """Based on the instance of the statement the corresponding

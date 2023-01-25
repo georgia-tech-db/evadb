@@ -24,7 +24,21 @@ from eva.parser.table_ref import TableRef
 ##################################################################
 class Delete:
     def delete_statement(self, tree):
-        delete_stmt = self.visit_children(tree)
+        table_ref = None
+        where_clause = None
+        for child in tree.children:
+            if isinstance(child, Tree):
+                if child.data == "table_name":
+                    table_name = self.visit(child)
+                    table_ref = TableRef(table_name)
+                elif child.data == "where_expr":
+                    where_clause = self.visit(child)
+                elif child.data == "order_by_clause":
+                    order_clause = self.visit(child)
+                elif child.data == "limit_clause":
+                    limit_count = self.visit(child)
+                    
+        delete_stmt = DeleteTableStatement(table_ref, where_clause, order_clause, limit_count)
         return delete_stmt
 
     

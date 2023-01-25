@@ -398,7 +398,7 @@ class LogicalInsert(Operator):
     """[Logical Node for Insert operation]
 
     Arguments:
-        table(TableCatalogEntry): table to intert data into
+        table(TableCatalogEntry): table to insert data into
         column_list{List[AbstractExpression]}:
             [After binding annotated column_list]
         value_list{List[AbstractExpression]}:
@@ -450,6 +450,14 @@ class LogicalInsert(Operator):
             )
         )
 
+class LogicalDelete(Operator):
+    """[Logical Node for Delete Operation]
+
+    Arguments:
+        table_ref(TableCatalogEntry): table to delete tuples from
+        
+
+    """
 
 class LogicalCreate(Operator):
     """Logical node for create table operations

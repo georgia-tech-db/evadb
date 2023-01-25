@@ -26,34 +26,36 @@ class DeleteTableStatement(AbstractStatement):
 
     Attributes
     ----------
-    TableRef:
+    TableRef: TableRef
         table reference in the delete table statement
-    ColumnList:
-        list of columns
-    ValueList:
-        list of values to remove
+    _where_clause : AbstractExpression
+        predicate of the select query, represented as a expression tree.
     """
 
     def __init__(
         self,
-        table: TableRef,
+        table_ref: TableRef,
         where_clause: AbstractExpression = None,
+        orderby_clause: AbstractExpression = None,
+        limit_count: AbstractExpression = None
     ):
-        super().__init__(StatementType.INSERT)
-        self._table = table
+        super().__init__(StatementType.DELETE)
+        self._table_ref = table_ref
         self._where_clause = where_clause
+        self._orderby_list = orderby_clause
+        self._limit_count = limit_count
 
     def __str__(self) -> str:
-        print_str = "DELETE FROM {}".format(
+        delete_str = "DELETE FROM {}".format(
             self._table
         )
         if self._where_clause is not None:
-            print_str += " WHERE " + str(self._where_clause)
+            delete_str += " WHERE " + str(self._where_clause)
         
-        return print_str
+        return delete_str
 
     @property
-    def table(self):
+    def table_ref(self):
         return self._table
     
     @property
@@ -63,7 +65,7 @@ class DeleteTableStatement(AbstractStatement):
     @where_clause.setter
     def where_clause(self, where_expr: AbstractExpression):
         self._where_clause = where_expr
-
+    
     def __eq__(self, other):
         if not isinstance(other, DeleteTableStatement):
             return False
