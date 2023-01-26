@@ -40,6 +40,7 @@ class OperatorType(IntEnum):
     LOGICALFILTER = auto()
     LOGICALPROJECT = auto()
     LOGICALINSERT = auto()
+    LOGICALDELETE = auto()
     LOGICALCREATE = auto()
     LOGICALRENAME = auto()
     LOGICALDROP = auto()
@@ -62,7 +63,6 @@ class OperatorType(IntEnum):
     LOGICAL_APPLY_AND_MERGE = auto()
     LOGICALFAISSINDEXSCAN = auto()
     LOGICALDELIMITER = auto()
-    LOGICALDELETE = auto()
 
 
 class Operator:
