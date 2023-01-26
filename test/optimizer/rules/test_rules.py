@@ -27,6 +27,7 @@ from eva.optimizer.operators import (
     LogicalQueryDerivedGet,
 )
 from eva.optimizer.rules.rules import (
+    CombineSimilarityOrderByAndLimitToFaissIndexScan,
     EmbedFilterIntoDerivedGet,
     EmbedFilterIntoGet,
     EmbedProjectIntoDerivedGet,
@@ -41,6 +42,7 @@ from eva.optimizer.rules.rules import (
     LogicalDropToPhysical,
     LogicalDropUDFToPhysical,
     LogicalExplainToPhysical,
+    LogicalFaissIndexScanToPhysical,
     LogicalFilterToPhysical,
     LogicalFunctionScanToPhysical,
     LogicalGetToSeqScan,
@@ -160,6 +162,7 @@ class TestRules(unittest.TestCase):
             XformLateralJoinToLinearFlow(),
             PushDownFilterThroughApplyAndMerge(),
             PushDownFilterThroughJoin(),
+            CombineSimilarityOrderByAndLimitToFaissIndexScan(),
         ]
         self.assertEqual(
             len(supported_rewrite_rules), len(RulesManager().rewrite_rules)
@@ -206,6 +209,7 @@ class TestRules(unittest.TestCase):
             LogicalExplainToPhysical(),
             LogicalCreateIndexToFaiss(),
             LogicalApplyAndMergeToPhysical(),
+            LogicalFaissIndexScanToPhysical(),
         ]
 
         ray_enabled = ConfigurationManager().get_value("experimental", "ray")
@@ -234,7 +238,7 @@ class TestRules(unittest.TestCase):
         logi_get = LogicalGet(MagicMock(), MagicMock(), MagicMock())
         logi_project = LogicalProject([expr1, expr2, expr3], [logi_get])
 
-        rewrite_opr = rule.apply(logi_project, MagicMock())
+        rewrite_opr = next(rule.apply(logi_project, MagicMock()))
         self.assertFalse(rewrite_opr is logi_get)
         self.assertEqual(rewrite_opr.target_list, [expr1, expr2, expr3])
 
@@ -246,7 +250,7 @@ class TestRules(unittest.TestCase):
         logi_get = LogicalGet(MagicMock(), MagicMock(), MagicMock())
         logi_filter = LogicalFilter(predicate, [logi_get])
 
-        rewrite_opr = rule.apply(logi_filter, MagicMock())
+        rewrite_opr = next(rule.apply(logi_filter, MagicMock()))
         self.assertFalse(rewrite_opr is logi_get)
         self.assertEqual(rewrite_opr.predicate, predicate)
 
@@ -258,7 +262,7 @@ class TestRules(unittest.TestCase):
         logi_derived_get = LogicalQueryDerivedGet(MagicMock())
         logi_filter = LogicalFilter(predicate, [logi_derived_get])
 
-        rewrite_opr = rule.apply(logi_filter, MagicMock())
+        rewrite_opr = next(rule.apply(logi_filter, MagicMock()))
         self.assertFalse(rewrite_opr is logi_derived_get)
         self.assertEqual(rewrite_opr.predicate, predicate)
 
@@ -270,6 +274,6 @@ class TestRules(unittest.TestCase):
         logi_derived_get = LogicalQueryDerivedGet(MagicMock())
         logi_project = LogicalProject(target_list, [logi_derived_get])
 
-        rewrite_opr = rule.apply(logi_project, MagicMock())
+        rewrite_opr = next(rule.apply(logi_project, MagicMock()))
         self.assertFalse(rewrite_opr is logi_derived_get)
         self.assertEqual(rewrite_opr.target_list, target_list)

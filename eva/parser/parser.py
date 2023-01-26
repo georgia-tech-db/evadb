@@ -20,11 +20,10 @@ class Parser(object):
     Parser based on EVAQL grammar: eva.lark
     """
 
-    _instance = None
     _lark_parser = None
 
     def __new__(cls):
-        if cls._instance is None:
+        if not hasattr(cls, "_instance"):
             cls._instance = super(Parser, cls).__new__(cls)
             cls._instance._initialized = False
         return cls._instance

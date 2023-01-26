@@ -129,17 +129,17 @@ class StatementToPlanConvertor:
         if statement.groupby_clause is not None:
             self._visit_groupby(statement.groupby_clause)
 
-        # Projection operator
-        select_columns = statement.target_list
-
-        if select_columns is not None:
-            self._visit_projection(select_columns)
-
         if statement.orderby_list is not None:
             self._visit_orderby(statement.orderby_list)
 
         if statement.limit_count is not None:
             self._visit_limit(statement.limit_count)
+
+        # Projection operator
+        select_columns = statement.target_list
+
+        if select_columns is not None:
+            self._visit_projection(select_columns)
 
     def _visit_sample(self, sample_freq):
         sample_opr = LogicalSample(sample_freq)
@@ -313,6 +313,7 @@ class StatementToPlanConvertor:
             statement.table_ref,
             statement.col_list,
             statement.index_type,
+            statement.udf_func,
         )
         self._plan = create_index_opr
 

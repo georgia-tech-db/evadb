@@ -458,7 +458,9 @@ class DummyFeatureExtractor(AbstractClassifierUDF):
 
         def _extract_feature(row: pd.Series):
             feat_input = row[0]
-            return feat_input.astype(np.float32)
+            feat_input = feat_input.reshape(1, -1)
+            feat_input = feat_input.astype(np.float32)
+            return feat_input
 
         ret = pd.DataFrame()
         ret["features"] = df.apply(_extract_feature, axis=1)

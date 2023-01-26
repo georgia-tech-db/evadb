@@ -94,3 +94,7 @@ class NdArrayType(EVAEnum):
 
 class IndexType(EVAEnum):
     HNSW  # noqa: F821
+
+    @classmethod
+    def is_faiss_index_type(cls, t):
+        return t in [cls.HNSW]

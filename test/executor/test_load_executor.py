@@ -16,7 +16,7 @@ import unittest
 from test.util import create_sample_csv, file_remove
 
 import pandas as pd
-from mock import MagicMock, call, patch
+from mock import MagicMock, patch
 
 from eva.executor.executor_utils import ExecutorError
 from eva.executor.load_executor import LoadDataExecutor
@@ -72,8 +72,6 @@ class LoadExecutorTest(unittest.TestCase):
     def test_should_call_csv_reader_and_storage_engine(
         self, factory_mock, catalog_mock
     ):
-        batch_frames = [list(range(5))] * 2
-
         # creates a dummy.csv
         create_sample_csv()
 
@@ -104,10 +102,7 @@ class LoadExecutorTest(unittest.TestCase):
         load_executor = LoadDataExecutor(plan)
         batch = next(load_executor.exec())
         catalog_mock.assert_called_once_with("dummy", None)
-        factory_mock.return_value.write.has_calls(
-            call(table_obj, batch_frames[0]),
-            call(table_obj, batch_frames[1]),
-        )
+        self.assertEqual(factory_mock.return_value.write.call_args.args[0], table_obj)
 
         # Note: We call exec() from the child classes.
         self.assertEqual(

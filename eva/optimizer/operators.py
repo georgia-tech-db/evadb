@@ -60,6 +60,7 @@ class OperatorType(IntEnum):
     LOGICALEXPLAIN = auto()
     LOGICALCREATEINDEX = auto()
     LOGICAL_APPLY_AND_MERGE = auto()
+    LOGICALFAISSINDEXSCAN = auto()
     LOGICALDELIMITER = auto()
 
 
@@ -133,9 +134,10 @@ class Dummy(Operator):
     It track the group_id of the matching operator.
     """
 
-    def __init__(self, group_id: int):
+    def __init__(self, group_id: int, opr: Operator):
         super().__init__(OperatorType.DUMMY, None)
         self.group_id = group_id
+        self.opr = opr
 
     def __hash__(self) -> int:
         return hash((super().__hash__(), self.group_id))
@@ -1095,6 +1097,7 @@ class LogicalCreateIndex(Operator):
         table_ref: TableRef,
         col_list: List[ColumnDefinition],
         index_type: IndexType,
+        udf_func: FunctionExpression = None,
         children: List = None,
     ):
         super().__init__(OperatorType.LOGICALCREATEINDEX, children)
@@ -1102,6 +1105,7 @@ class LogicalCreateIndex(Operator):
         self._table_ref = table_ref
         self._col_list = col_list
         self._index_type = index_type
+        self._udf_func = udf_func
 
     @property
     def name(self):
@@ -1119,6 +1123,10 @@ class LogicalCreateIndex(Operator):
     def index_type(self):
         return self._index_type
 
+    @property
+    def udf_func(self):
+        return self._udf_func
+
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
         if not isinstance(other, LogicalCreateIndex):
@@ -1129,6 +1137,7 @@ class LogicalCreateIndex(Operator):
             and self.table_ref == other.table_ref
             and self.col_list == other.col_list
             and self.index_type == other.index_type
+            and self.udf_func == other.udf_func
         )
 
     def __hash__(self) -> int:
@@ -1139,6 +1148,7 @@ class LogicalCreateIndex(Operator):
                 self.table_ref,
                 tuple(self.col_list),
                 self.index_type,
+                self.udf_func,
             )
         )
 
@@ -1197,5 +1207,52 @@ class LogicalApplyAndMerge(Operator):
                 self.do_unnest,
                 self.alias,
                 self._merge_type,
+            )
+        )
+
+
+class LogicalFaissIndexScan(Operator):
+    def __init__(
+        self,
+        index_name: str,
+        limit_count: ConstantValueExpression,
+        search_query_expr: FunctionExpression,
+        children: List = None,
+    ):
+        super().__init__(OperatorType.LOGICALFAISSINDEXSCAN, children)
+        self._index_name = index_name
+        self._limit_count = limit_count
+        self._search_query_expr = search_query_expr
+
+    @property
+    def index_name(self):
+        return self._index_name
+
+    @property
+    def limit_count(self):
+        return self._limit_count
+
+    @property
+    def search_query_expr(self):
+        return self._search_query_expr
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalFaissIndexScan):
+            return False
+        return (
+            is_subtree_equal
+            and self.index_name == other.index_name
+            and self.limit_count == other.limit_count
+            and self.search_query_expr == other.search_query_expr
+        )
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                super().__hash__(),
+                self.index_name,
+                self.limit_count,
+                self.search_query_expr,
             )
         )

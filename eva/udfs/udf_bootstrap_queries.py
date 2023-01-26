@@ -41,7 +41,7 @@ DummyMultiObjectDetector_udf_query = """CREATE UDF
 DummyFeatureExtractor_udf_query = """CREATE UDF
                   IF NOT EXISTS DummyFeatureExtractor
                   INPUT (Frame_Array NDARRAY UINT8(3, ANYDIM, ANYDIM))
-                  OUTPUT (features NDARRAY UINT8(3, ANYDIM, ANYDIM))
+                  OUTPUT (features NDARRAY FLOAT32(1, ANYDIM))
                   TYPE Classification
                   IMPL '{}/../test/util.py';
         """.format(
@@ -152,6 +152,15 @@ Mvit_udf_query = """CREATE UDF IF NOT EXISTS MVITActionRecognition
         OUTPUT (labels NDARRAY STR(ANYDIM))
         TYPE  Classification
         IMPL  '{}/udfs/mvit_action_recognition.py';
+        """.format(
+    EVA_INSTALLATION_DIR
+)
+
+Asl_udf_query = """CREATE UDF IF NOT EXISTS ASLActionRecognition
+        INPUT  (Frame_Array NDARRAY UINT8(3, 16, 224, 224))
+        OUTPUT (labels NDARRAY STR(ANYDIM))
+        TYPE  Classification
+        IMPL  '{}/udfs/asl_action_recognition.py';
         """.format(
     EVA_INSTALLATION_DIR
 )

@@ -13,7 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from abc import ABC, abstractmethod
+from collections import deque
+from copy import deepcopy
 from enum import IntEnum, auto, unique
+from typing import Any
 
 
 @unique
@@ -132,3 +135,70 @@ class AbstractExpression(ABC):
 
     def __hash__(self) -> int:
         return hash((self.etype, self.rtype, tuple(self.children)))
+
+    def __deepcopy__(self, memo):
+        cls = self.__class__
+        result = cls.__new__(cls)
+        memo[id(self)] = result
+        for k, v in self.__dict__.items():
+            setattr(result, k, deepcopy(v, memo))
+        return result
+
+    def copy(self):
+        """Returns a deepcopy of the expression tree."""
+        return deepcopy(self)
+
+    def walk(self, bfs=True):
+        """
+        Returns a generator which visits all nodes in expression tree.
+
+        Args:
+            bfs (bool): if True, use breadth-first search (BFS) traversal order;
+                if False, use the depth-first search (DFS) traversal order
+
+        Returns:
+            the generator object.
+        """
+        if bfs:
+            yield from self.bfs()
+        else:
+            yield from self.dfs()
+
+    def bfs(self):
+        """Returns a generator which visits all nodes in expression tree in
+        breadth-first search (BFS) traversal order.
+
+        Returns:
+            the generator object.
+        """
+        queue = deque([self])
+        while queue:
+            node = queue.popleft()
+            yield node
+            for child in node.children:
+                queue.append(child)
+
+    def dfs(self):
+        """Returns a generator which visits all nodes in expression tree in depth-first
+        search (DFS) traversal order.
+
+        Returns:
+            the generator object.
+        """
+        yield self
+        for child in self.children:
+            yield from child.dfs()
+
+    def find_all(self, expresison_type: Any):
+        """Returns a generator which visits all the nodes in expresison tree and yields one that matches the passed `expression_type`.
+
+        Args:
+            expresison_type (Any): expression type to match with
+
+        Returns:
+            the generator object.
+        """
+
+        for node in self.bfs():
+            if isinstance(node, expresison_type):
+                yield node

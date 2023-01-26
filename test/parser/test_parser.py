@@ -69,6 +69,31 @@ class ParserTests(unittest.TestCase):
         actual_stmt = eva_stmt_list[0]
         self.assertEqual(actual_stmt, expected_stmt)
 
+        # create index on UDF expression
+        create_index_query = (
+            "CREATE INDEX testindex ON MyVideo (FeatureExtractor(featCol)) USING HNSW;"
+        )
+        eva_stmt_list = parser.parse(create_index_query)
+
+        # check stmt itself
+        self.assertIsInstance(eva_stmt_list, list)
+        self.assertEqual(len(eva_stmt_list), 1)
+        self.assertEqual(eva_stmt_list[0].stmt_type, StatementType.CREATE_INDEX)
+
+        func_expr = FunctionExpression(None, "FeatureExtractor")
+        func_expr.append_child(TupleValueExpression("featCol"))
+        expected_stmt = CreateIndexStatement(
+            "testindex",
+            TableRef(TableInfo("MyVideo")),
+            [
+                ColumnDefinition("featCol", None, None, None),
+            ],
+            IndexType.HNSW,
+            func_expr,
+        )
+        actual_stmt = eva_stmt_list[0]
+        self.assertEqual(actual_stmt, expected_stmt)
+
     @unittest.skip("Skip parser exception handling testcase, moved to binder")
     def test_create_index_exception_statement(self):
         parser = Parser()

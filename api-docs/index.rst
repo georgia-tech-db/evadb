@@ -1,12 +1,12 @@
 .. meta::
    :description:
-       EVA Multimedia Database System -- Where SQL meets Deep Learning.
+       EVA Multimedia Database System | SQL meets Deep Learning
    :keywords: database, deep learning, video analytics
 
 EVA DATABASE SYSTEM
 =====
 
-..  rubric:: Multimedia Database System -- Where SQL meets Deep Learning
+..  rubric:: Multimedia Database System | SQL meets Deep Learning
 
 ..  figure:: https://raw.githubusercontent.com/georgia-tech-db/eva/master/api-docs/images/eva/eva-banner.png
     :target: https://github.com/georgia-tech-db/eva
@@ -20,16 +20,19 @@ EVA DATABASE SYSTEM
 What is EVA?
 ------------
 
-EVA is a **database system tailored for video analytics** -- think PostgreSQL for videos. It supports a SQL-like language for querying videos like:
+EVA is a **database system tailored for video analytics** -- think MySQL for videos. It supports a SQL-like language for querying videos like:
 
- * examining the "emotion palette" of different actors
- * finding gameplays that lead to a touchdown in a football game
+ * `examining the "emotion palette" of different actors <https://evadb.readthedocs.io/en/stable/source/tutorials/03-emotion-analysis.html>`_
+ * `analysing traffic flow at an intersection <https://evadb.readthedocs.io/en/stable/source/tutorials/02-object-detection.html>`_
+ * `classifying images based on their content <https://evadb.readthedocs.io/en/stable/source/tutorials/01-mnist.html>`_
+ * `recogizing license plates <https://github.com/georgia-tech-db/license-plate-recognition>`_
+ * `analysing toxicity of social media memes <https://github.com/georgia-tech-db/toxicity-classification>`_
 
-EVA comes with a wide range of commonly used computer vision models. It written in Python, and it is licensed under the Apache license. The source code is available at https://github.com/georgia-tech-db/eva.
+EVA comes with a wide range of commonly used models for analyzing images and videos including image classification, object detection, action classification, OCR, face detection, etc. It is fully implemented in Python, and `licensed under the Apache license <https://github.com/georgia-tech-db/eva>`.
 
 If you are wondering why you might need a video database system, start with page on `Video Database Systems <source/overview/video.html>`_. It describes how EVA lets users easily make use of deep learning models and how they can reduce money spent on inference on large image or video datasets.
 
-The `Getting Started <source/overview/installation.html>`_ page shows how you can use EVA for different computer vision tasks: image classification, object detection, action recognition, and how you can easily extend EVA to support your custom deep learning model in the form of user-defined functions.
+The `Getting Started <source/overview/installation.html>`_ page shows how you can use EVA for different computer vision tasks, and how you can easily extend EVA to support your custom deep learning model in the form of user-defined functions.
 
 The `User Guides <source/tutorials/index.html>`_ section contains Jupyter Notebooks that demonstrate how to use various features of EVA. Each notebook includes a link to Google Colab, where you can run the code by yourself.
 

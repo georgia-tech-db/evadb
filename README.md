@@ -21,12 +21,15 @@
 
 # EVA Multimedia Database System
 
-EVA is a **database system tailored for video analytics** -- think PostgreSQL for videos. It supports a SQL-like language for querying videos like:
+EVA is a **database system tailored for video analytics** -- think MySQL for videos. It supports a SQL-like language for querying videos for:
 
- * examining the movement of vehicles in a traffic video
- * finding touchdowns in a football game
-
-EVA comes with a wide range of commonly used computer vision models. It written in Python, and it is licensed under the Apache license. 
+ * <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/03-emotion-analysis.html">Examining the "emotion palette" of actors in a movie</a>
+ * <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/02-object-detection.html">Analysing traffic flow at an intersection </a>
+ * <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/01-mnist.html">Classifying images based on their content</a>
+ * <a href="https://github.com/georgia-tech-db/license-plate-recognition">Recogizing license plates </a>
+ * <a href="https://github.com/georgia-tech-db/toxicity-classification">Analysing toxicity of social media memes </a>
+ 
+EVA comes with a wide range of commonly used models for analyzing images and videos including image classification, object detection, action classification, OCR, face detection, etc. It is fully implemented in Python, and licensed under the Apache license.
 
 If you are wondering why you might need a video database system, start with page on <a href="https://evadb.readthedocs.io/en/stable/source/overview/video.html#">Video Database Systems</a>. It describes how EVA lets users easily make use of deep learning models and how they can reduce money spent on inference on large image or video datasets.
 
@@ -118,7 +121,7 @@ IMPL  'eva/udfs/fastrcnn_object_detector.py';
 ```mysql
    -- Analyse emotions of faces in a video
    SELECT id, bbox, EmotionDetector(Crop(data, bbox)) 
-   FROM HAPPY JOIN LATERAL UNNEST(FaceDetector(data)) AS Face(bbox, conf)  
+   FROM MyVideo JOIN LATERAL UNNEST(FaceDetector(data)) AS Face(bbox, conf)  
    WHERE id < 15;
 ```
 
@@ -142,18 +145,15 @@ IMPL  'eva/udfs/fastrcnn_object_detector.py';
 
 ### 🔮 [License Plate Recognition](https://github.com/georgia-tech-db/eva-application-template) (Plate Detection + OCR Extraction Models)
 
-| Source Image  | Query Result |
-|---------------|--------------|
-|<img alt="Source Image" src="https://raw.githubusercontent.com/georgia-tech-db/eva-application-template/main/README_files/README_14_6.png" width="400"> |<img alt="Query Result" src="https://raw.githubusercontent.com/georgia-tech-db/license-plate-recognition/main/README_files/README_18_1.png" width="400"> |
+| Query Result |
+|--------------|
+<img alt="Query Result" src="https://github.com/georgia-tech-db/license-plate-recognition/blob/main/README_files/README_12_3.png" width="400"> |
 
 ### 🔮 [Meme Toxicity Classification](https://github.com/georgia-tech-db/toxicity-classification) (OCR Extraction + Toxicity Classification Models)
 
-| Source Image  | Query Result |
-|---------------|--------------|
-|<img alt="Source Image" src="https://raw.githubusercontent.com/georgia-tech-db/toxicity-classification/main/README_files/README_16_1.png" width="300"> |<img alt="Query Result" src="https://raw.githubusercontent.com/georgia-tech-db/toxicity-classification/main/README_files/README_16_2.png" width="300"> |
-
-
-
+| Query Result |
+|--------------|
+<img alt="Query Result" src="https://raw.githubusercontent.com/georgia-tech-db/toxicity-classification/main/README_files/README_16_2.png" width="300"> |
 
 ## Community
 
@@ -170,9 +170,11 @@ Join the EVA community on [Slack](https://join.slack.com/t/eva-db/shared_invite/
 [![Coverage Status](https://coveralls.io/repos/github/georgia-tech-db/eva/badge.svg?branch=master)](https://coveralls.io/github/georgia-tech-db/eva?branch=master)
 [![Documentation Status](https://readthedocs.org/projects/evadb/badge/?version=stable)](https://evadb.readthedocs.io/en/stable/index.html)
 
-To file a bug or request a feature, please use GitHub issues. Pull requests are welcome.
-For more information on installing from source and contributing to EVA, see our
-[contributing guidelines](https://evadb.readthedocs.io/en/stable/source/contribute/index.html).
+We welcome all kinds of contributions to EVA.
+To file a bug or request a feature, please use <a href="https://github.com/georgia-tech-db/eva/issues">GitHub issues</a>. <a href="https://github.com/georgia-tech-db/eva/pulls">Pull requests</a> are welcome.
+
+For more information on contributing to EVA, see our
+[contribution guide](https://evadb.readthedocs.io/en/stable/source/contribute/index.html).
 
 ## License
 Copyright (c) 2018-2022 [Georgia Tech Database Group](http://db.cc.gatech.edu/)
