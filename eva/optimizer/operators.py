@@ -464,23 +464,43 @@ class LogicalDelete(Operator):
     """
     def __init__(
         self,
-        table: TableRef,
-        children=None,
+        table_ref: TableRef,
+        where_clause: AbstractExpression = None,
+        orderby_clause: AbstractExpression = None,
+        limit_count: AbstractExpression = None
     ):
         super().__init__(OperatorType.LOGICALDELETE, children)
-        self._table = table
+        self._table_ref = table_ref
+        self._where_clause = where_clause
+        self._orderby_clause = orderby_clause
+        self._limit_count = limit_count
     
     @property
     def table(self):
-        return self._table
+        return self._table_ref
+    
+    @property
+    def where_clause(self):
+        return self._where_clause
+
+    @property
+    def orderby_clause(self):
+        return self._orderby_clause
+    
+    @property
+    def limit_count(self):
+        return self._limit_count
     
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
         if not isinstance(other, LogicalDelete):
             return False
         return (
-            is_subtree_equal
+            is_subtree_equal 
             and self.table == other.table
+            and self.where_clause == other.where_clause
+            and self.orderby_clause == other.orderby_clause
+            and self.limit_count == self.limit_count
         )
     
     def __hash__(self) -> int:
@@ -488,6 +508,9 @@ class LogicalDelete(Operator):
             (
                 super().__hash__(),
                 self.table,
+                self.where_clause,
+                self.orderby_clause,
+                self.limit_count
             )
         )
 

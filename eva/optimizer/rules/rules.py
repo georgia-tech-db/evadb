@@ -58,6 +58,7 @@ from eva.optimizer.operators import (
     LogicalGet,
     LogicalGroupBy,
     LogicalInsert,
+    LogicalDelete,
     LogicalJoin,
     LogicalLimit,
     LogicalLoadData,
@@ -82,6 +83,7 @@ from eva.plan_nodes.function_scan_plan import FunctionScanPlan
 from eva.plan_nodes.groupby_plan import GroupByPlan
 from eva.plan_nodes.hash_join_probe_plan import HashJoinProbePlan
 from eva.plan_nodes.insert_plan import InsertPlan
+from eva.plan_nodes.delete_plan import DeletePlan
 from eva.plan_nodes.lateral_join_plan import LateralJoinPlan
 from eva.plan_nodes.limit_plan import LimitPlan
 from eva.plan_nodes.load_data_plan import LoadDataPlan
@@ -688,6 +690,21 @@ class LogicalInsertToPhysical(Rule):
 
     def apply(self, before: LogicalInsert, context: OptimizerContext):
         after = InsertPlan(before.table, before.column_list, before.value_list)
+        yield after
+
+class LogicalDeleteToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALDELETE)
+        super().__init__(RuleType.LOGICAL_DELETE_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_DELETE_TO_PHYSICAL
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalDelete, context: OptimizerContext):
+        after = DeletePlan(before.table, before.where_clause, before.orderby_clause, before.limit_count)
         yield after
 
 

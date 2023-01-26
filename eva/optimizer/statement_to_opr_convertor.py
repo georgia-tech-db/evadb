@@ -330,10 +330,17 @@ class StatementToPlanConvertor:
     
     def visit_delete(self, statement: DeleteTableStatement):
         # Filter Operator
+
+        table_ref = statement.table_ref
+        if table_ref is None:
+            logger.error("From entry missing in select statement")
+            return None
+
+        self.visit_table_ref(table_ref)
+
         predicate = statement.where_clause
         if predicate is not None:
-            filter_opr = LogicalFilter(predicate)
-            self._plan = filter_opr
+            self._visit_select_predicate(predicate)
         
         if statement.orderby_list is not None:
             self._visit_orderby(statement.orderby_list)
@@ -341,7 +348,12 @@ class StatementToPlanConvertor:
         if statement.limit_count is not None:
             self._visit_limit(statement.limit_count)
         
-        delete_opr = LogicalDelete(statement.table_ref)
+        delete_opr = LogicalDelete(
+            statement.table_ref,
+            statement.where_clause,
+            statement.orderby_list,
+            statement.limit_count
+            )
         delete_opr.append_child(self._plan)
         self._plan = delete_opr
 

@@ -50,6 +50,7 @@ from eva.optimizer.rules.rules import (
     LogicalGroupByToPhysical,
     LogicalInnerJoinCommutativity,
     LogicalInsertToPhysical,
+    LogicalDeleteToPhysical,
     LogicalJoinToPhysicalHashJoin,
     LogicalLateralJoinToPhysical,
     LogicalLimitToPhysical,
