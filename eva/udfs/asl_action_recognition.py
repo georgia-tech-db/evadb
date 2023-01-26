@@ -75,9 +75,7 @@ class ASLActionRecognition(PytorchAbstractClassifierUDF):
 
     @property
     def labels(self) -> np.array([str]):
-        with open(
-            str(EVA_DEFAULT_DIR) + "/" + str(UDF_DIR) + "/asl_20_actions_map.pkl", "rb"
-        ) as f:
+        with open("asl_20_actions_map.pkl", "rb") as f:
             action_to_index_map = pkl.load(f)
         actions_arr = [""] * len(action_to_index_map)
         for action, index in action_to_index_map.items():
