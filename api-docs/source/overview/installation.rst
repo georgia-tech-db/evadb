@@ -25,7 +25,7 @@ EVA is based on a `client-server architecture <https://www.postgresql.org/docs/1
 Part 2: Start a Jupyter Notebook Client
 ----
 
-Here is an `illustrative Jupyter notebook <https://evadb.readthedocs.io/en/latest/source/tutorials/01-mnist.html>`_ focusing on MNIST image classification using EVA. The notebook works on `Google Colab <https://colab.research.google.com/github/georgia-tech-db/eva/blob/master/tutorials/01-mnist.ipynb>`_. 
+Here is an `illustrative Jupyter notebook <https://evadb.readthedocs.io/en/stable/source/tutorials/01-mnist.html>`_ focusing on MNIST image classification using EVA. The notebook works on `Google Colab <https://colab.research.google.com/github/georgia-tech-db/eva/blob/master/tutorials/01-mnist.ipynb>`_. 
 
 Connect to the EVA server
 ~~~~
@@ -48,7 +48,7 @@ To connect to the EVA server in the notebook, use the following Python code:
 Load video for analysis
 ~~~~
 
-Download the MNIST video.
+Download the MNIST video for analysis.
 
 .. code-block:: bash
 
@@ -62,27 +62,12 @@ Use the LOAD statement is used to load a video onto a table in EVA server.
     response = cursor.fetch_all()
     print(response)
 
-Run a query
-~~~~
-
-Run a query over the video to retrieve the output of the MNIST CNN function that is included in EVA as a built-in user-defined function (UDF).
-
-.. code-block:: python
-
-    cursor.execute("""SELECT id, MnistCNN(data).label 
-                    FROM MNISTVideoTable 
-                    WHERE id < 5;""")
-    response = cursor.fetch_all()
-    print(response)
-
-That's it! You can now run more complex queries.
-
 Part 3: Register an user-defined function (UDF)
 ----
 
-User-defined functions allow us to combine SQL with deep learning models. These functions can wrap around deep learning models. 
+User-defined functions allow us to combine SQL with deep learning models. These functions wrap around deep learning models.
 
-Download an user-defined function for classifying MNIST images.
+Download the user-defined function for classifying MNIST images.
 
 .. code-block:: bash
 
@@ -99,7 +84,7 @@ Download an user-defined function for classifying MNIST images.
     response = cursor.fetch_all()
     print(response)
 
-Run a more interesting query using the newly registered UDF
+Run a query using the newly registered UDF!
 ~~~~
 
 .. code-block:: python
@@ -109,10 +94,10 @@ Run a more interesting query using the newly registered UDF
                       WHERE id = 30;""")
     response = cursor.fetch_all()
 
-Visualize the Output
+Visualize the output
 ~~~~
 
-The output of the query is `visualized in the notebook <https://evadb.readthedocs.io/en/latest/source/tutorials/01-mnist.html#visualize-output-of-query-on-the-video>`_.
+The output of the query is `visualized in the notebook <https://evadb.readthedocs.io/en/stable/source/tutorials/01-mnist.html#visualize-output-of-query-on-the-video>`_.
 
 
 Part 5: Start a Command Line Client
