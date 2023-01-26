@@ -98,6 +98,7 @@ class RulesManager:
             LogicalCreateUDFToPhysical(),
             LogicalDropUDFToPhysical(),
             LogicalInsertToPhysical(),
+            LogicalDeleteToPhysical(),
             LogicalLoadToPhysical(),
             LogicalUploadToPhysical(),
             LogicalSampleToUniformSample(),

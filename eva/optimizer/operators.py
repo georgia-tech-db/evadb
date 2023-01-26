@@ -467,7 +467,8 @@ class LogicalDelete(Operator):
         table_ref: TableRef,
         where_clause: AbstractExpression = None,
         orderby_clause: AbstractExpression = None,
-        limit_count: AbstractExpression = None
+        limit_count: AbstractExpression = None,
+        children=None
     ):
         super().__init__(OperatorType.LOGICALDELETE, children)
         self._table_ref = table_ref
