@@ -21,14 +21,7 @@ class DeleteExecutor(AbstractExecutor):
 
     def exec(self, *args, **kwargs) -> Iterator[Batch]:
         try:
-            child_executor = self.children[0]
-            for batch in child_executor.exec(*args, **kwargs):
-                batch = apply_predicate(batch, self.predicate)
-                if not batch.empty():
-                    yield batch
+            print("hello, world!")
         except Exception as e:
             logger.error(e)
             raise ExecutorError(e)
-
-    def __call__(self, **kwargs) -> Generator[Batch, None, None]:
-        yield from self.exec(**kwargs)

@@ -189,7 +189,7 @@ class StatementToPlanConvertor:
         Arguments:
             statement {AbstractStatement} - - [input insert statement]
         """
-        # load data, could be used for insert
+        # not removing previous commented code
         insert_data_opr = LogicalInsert(
             statement.table_ref,
             statement.column_list,
@@ -332,10 +332,18 @@ class StatementToPlanConvertor:
         # Filter Operator
         predicate = statement.where_clause
         if predicate is not None:
-            self._visit_select_predicate(predicate)
+            filter_opr = LogicalFilter(predicate)
+            self._plan = filter_opr
         
-        # delete_statement = LogicalDelete()
-        # self._plan = delete_statement
+        if statement.orderby_list is not None:
+            self._visit_orderby(statement.orderby_list)
+
+        if statement.limit_count is not None:
+            self._visit_limit(statement.limit_count)
+        
+        delete_opr = LogicalDelete(statement.table_ref)
+        delete_opr.append_child(self._plan)
+        self._plan = delete_opr
 
     def visit(self, statement: AbstractStatement):
         """Based on the instance of the statement the corresponding

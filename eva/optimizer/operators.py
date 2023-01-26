@@ -62,6 +62,7 @@ class OperatorType(IntEnum):
     LOGICAL_APPLY_AND_MERGE = auto()
     LOGICALFAISSINDEXSCAN = auto()
     LOGICALDELIMITER = auto()
+    LOGICALDELETE = auto()
 
 
 class Operator:
@@ -262,7 +263,10 @@ class LogicalQueryDerivedGet(Operator):
 
 
 class LogicalFilter(Operator):
-    def __init__(self, predicate: AbstractExpression, children=None):
+    def __init__(self,
+        predicate: AbstractExpression,
+        children=None
+        ):
         self._predicate = predicate
         super().__init__(OperatorType.LOGICALFILTER, children)
 
@@ -454,10 +458,38 @@ class LogicalDelete(Operator):
     """[Logical Node for Delete Operation]
 
     Arguments:
-        table_ref(TableCatalogEntry): table to delete tuples from
-        
+        table(TableCatalogEntry): table to delete tuples from
+        rows: 
 
     """
+    def __init__(
+        self,
+        table: TableRef,
+        children=None,
+    ):
+        super().__init__(OperatorType.LOGICALDELETE, children)
+        self._table = table
+    
+    @property
+    def table(self):
+        return self._table
+    
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalDelete):
+            return False
+        return (
+            is_subtree_equal
+            and self.table == other.table
+        )
+    
+    def __hash__(self) -> int:
+        return hash(
+            (
+                super().__hash__(),
+                self.table,
+            )
+        )
 
 class LogicalCreate(Operator):
     """Logical node for create table operations

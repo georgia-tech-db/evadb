@@ -26,6 +26,8 @@ class Delete:
     def delete_statement(self, tree):
         table_ref = None
         where_clause = None
+        order_clause = None
+        limit_count = None
         for child in tree.children:
             if isinstance(child, Tree):
                 if child.data == "table_name":

@@ -15,6 +15,7 @@
 from typing import List
 
 from eva.expression.abstract_expression import AbstractExpression
+from eva.expression.constant_value_expression import ConstantValueExpression
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
 from eva.parser.types import StatementType
@@ -56,7 +57,7 @@ class DeleteTableStatement(AbstractStatement):
 
     @property
     def table_ref(self):
-        return self._table
+        return self._table_ref
     
     @property
     def where_clause(self):
@@ -65,6 +66,23 @@ class DeleteTableStatement(AbstractStatement):
     @where_clause.setter
     def where_clause(self, where_expr: AbstractExpression):
         self._where_clause = where_expr
+    
+    @property
+    def orderby_list(self):
+        return self._orderby_list
+
+    @orderby_list.setter
+    def orderby_list(self, orderby_list_new):
+        # orderby_list_new: List[(TupleValueExpression, int)]
+        self._orderby_list = orderby_list_new
+    
+    @property
+    def limit_count(self):
+        return self._limit_count
+
+    @limit_count.setter
+    def limit_count(self, limit_count_new: ConstantValueExpression):
+        self._limit_count = limit_count_new
     
     def __eq__(self, other):
         if not isinstance(other, DeleteTableStatement):
