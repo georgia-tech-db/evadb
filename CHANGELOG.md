@@ -11,6 +11,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### [Deprecated]
 ### [Removed]
 
+##  [0.1.4] - 2023-01-28
+### [Added]
+
+* PR #559: Added Order By + Limit to FaissIndexScan optimization rule.
+* PR #552: Added expression signature.
+* PR #551: Added support for aggregation, toxicity detection, and querying based on video timestamps.
+* PR #557: Update documentation for notebook.
+* PR #562: Added benchmark and server tests.
+* PR #565: Updated rule and expression implementations.
+* PR #560: Added UDF for ASL recognition.
+
+### [Changed]
+
+* PR #558: fix: emotion analysis colab link.
+* PR #561: fix: Circlie CI error.
+* PR #553: fix: secondary index and udf expression signature in index.
+
+### [Deprecated]
+
+### [Removed]
+
 ##  [0.1.3] - 2023-01-02
 ### [Added]
 
