@@ -165,7 +165,7 @@ class Batch:
         new_batch = Batch(new_frames)
         return new_batch
 
-    def apply_function_expression(self, expr: Callable) -> None:
+    def apply_function_expression(self, expr: Callable) -> Batch:
         """
         Execute function expression on frames.
         """
@@ -454,6 +454,7 @@ class Batch:
 
     def to_numpy(self):
         return self._frames.to_numpy()
+
     def rename(self, columns) -> None:
         "Rename column names"
         self._frames.rename(columns=columns, inplace=True)

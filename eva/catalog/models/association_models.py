@@ -12,8 +12,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from eva.catalog.models.base_model import BaseModel
 from sqlalchemy import Column, ForeignKey, Table
+
+from eva.catalog.models.base_model import BaseModel
 
 # dependency table to maintain a many-to-many relationship between udf_catalog and udf_cache_catalog. This is important to ensure that any changes to udf are propogated to udf_cache. For example, deletion of a udf should also clear the associated caches.
 

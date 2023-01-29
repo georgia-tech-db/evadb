@@ -13,76 +13,40 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import (
-    create_dummy_batches,
-    create_sample_video,
-    create_table,
-    file_remove,
-    load_inbuilt_udfs,
-)
+from test.util import load_inbuilt_udfs
 
-import numpy as np
-import pandas as pd
-import pytest
-
-from eva.binder.binder_utils import BinderError
 from eva.catalog.catalog_manager import CatalogManager
-from eva.models.storage.batch import Batch
-from eva.readers.opencv_reader import OpenCVReader
+from eva.optimizer.plan_generator import PlanGenerator
+from eva.optimizer.rules.rules import CacheFunctionExpressionInApply
+from eva.optimizer.rules.rules_manager import disable_rules
 from eva.server.command_handler import execute_query_fetch_all
-
-NUM_FRAMES = 10
 
 
 class ReuseTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         CatalogManager().reset()
-        #create_sample_video(NUM_FRAMES)
-        load_query = """LOAD VIDEO './data/top_gun.mp4' INTO top_gun;"""
+        load_query = """LOAD VIDEO './data/ua_detrac/ua_detrac.mp4' INTO DETRAC;"""
         execute_query_fetch_all(load_query)
         load_inbuilt_udfs()
-        #cls.table1 = create_table("table1", 100, 3)
-        #cls.table2 = create_table("table2", 500, 3)
-        #cls.table3 = create_table("table3", 1000, 3)
-        #pass
 
     @classmethod
     def tearDownClass(cls):
-        #file_remove("dummy.avi")
-        pass
+        execute_query_fetch_all("DROP TABLE IF EXISTS DETRAC;")
 
-    def test_query_1(self):
-        select_query = """SELECT id, bbox FROM top_gun JOIN 
-                        LATERAL FastRCNNObjectDetector(data) AS Obj(bbox, conf, label) WHERE id < 5;"""
+    def test_reuse(self):
+        select_query = """SELECT id, label FROM DETRAC JOIN
+            LATERAL YoloV5(data) AS Obj(label, bbox, conf) WHERE id < 5;"""
 
-        actual_batch = execute_query_fetch_all(select_query)
-        print(f"actual_batch: {actual_batch}")
+        execute_query_fetch_all(select_query)
+        select_query = """SELECT id, label FROM DETRAC JOIN
+            LATERAL YoloV5(data) AS Obj(label, bbox, conf) WHERE id < 15;"""
 
-        # assert false
-        self.assertEqual(1 == 1, False)
-    
-    def test_query_2(self):
-        select_query = """SELECT id, bbox FROM top_gun JOIN 
-                        LATERAL FastRCNNObjectDetector(data) AS Obj(bbox, conf, label) WHERE id < 5;"""
+        reuse_batch = execute_query_fetch_all(select_query)
 
-        actual_batch = execute_query_fetch_all(select_query)
-        print(f"actual_batch: {actual_batch}")
-
-        # assert false
-        self.assertEqual(1 == 1, False)
-
-    '''
-    def test_query_3(self):
-        select_query = """SELECT id, bbox FROM top_gun JOIN 
-                        LATERAL FastRCNNObjectDetector(data) AS Obj(bbox, conf, label) WHERE id < 300;"""
-
-        actual_batch = execute_query_fetch_all(select_query)
-        print(f"actual_batch: {actual_batch}")
-
-        # assert false
-        self.assertEqual(1 == 1, False)
-    '''
-
-if __name__ == "__main__":
-    unittest.main()
+        with disable_rules([CacheFunctionExpressionInApply()]) as rules_manager:
+            custom_plan_generator = PlanGenerator(rules_manager)
+            without_reuse_batch = execute_query_fetch_all(
+                select_query, plan_generator=custom_plan_generator
+            )
+        self.assertEqual(without_reuse_batch, reuse_batch)

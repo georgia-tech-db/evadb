@@ -13,11 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import List, Tuple
+
 from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.catalog_type import TableType
 from eva.catalog.catalog_utils import get_table_primary_columns
 from eva.catalog.models.column_catalog import ColumnCatalogEntry
-
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 from eva.expression.abstract_expression import AbstractExpression, ExpressionType
 from eva.expression.expression_utils import (
@@ -27,14 +26,10 @@ from eva.expression.expression_utils import (
     is_simple_predicate,
     to_conjunction_list,
 )
-from eva.expression.function_expression import (
-    FunctionExpression,
-    FunctionExpressionCache,
-)
+from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.alias import Alias
 from eva.parser.create_statement import ColumnDefinition
-from eva.utils.kv_cache import DiskKVCache
 from eva.utils.logging_manager import logger
 
 
@@ -192,39 +187,6 @@ def extract_function_expressions(
         function_exprs,
         conjuction_list_to_expression_tree(remaining_exprs),
     )
-
-
-def enable_cache(func_expr: FunctionExpression, copy: True) -> FunctionExpression:
-    """Enable caching for the provided function expression.
-
-    It constructs teh appropriate cache object for the provided functionExpression.
-    (1) Compute the function expression signature.
-    (2) Check catalog if a cache object exists for the current signature.
-        If there exists an entry, use it else create a new entry
-    (3) set the cache key, this requires replacing `data` column with the unique IDENTIFIER column
-
-    Args:
-        func_expr (FunctionExpression): Expression to enable caching
-        copy (True): if true, a new FunctionExpression object is created, else modify inplace
-
-    Returns:
-        FunctionExpression: the expresiosn with cache enabled
-    """
-
-    # 1. compute function signature
-    signature = func_expr.signature()
-
-    # 2.
-    udf_cache = CatalogManager().get_udf_cache_catalog_entry(func_expr)
-    if udf_cache is None:
-        CatalogManager().insert_udf_cache_catalog_entry(func_expr)
-
-    cache_key_expr = _optimize_cache_expr(func_expr.children)
-
-    cache = FunctionExpressionCache(
-        DiskKVCache(udf_cache.path), cache_key_expr=cache_key_expr
-    )
-    return func_expr.copy().enable_cache(cache)
 
 
 def optimize_cache_key(expr: FunctionExpression):

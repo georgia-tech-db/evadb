@@ -202,6 +202,7 @@ class StatementBinder:
         table_alias, col_obj = self._binder_context.get_binded_column(
             node.col_name, node.table_alias
         )
+        node.table_alias = table_alias
         node.col_alias = "{}.{}".format(table_alias, node.col_name.lower())
         node.col_object = col_obj
 

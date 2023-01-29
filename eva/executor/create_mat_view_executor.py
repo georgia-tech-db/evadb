@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from eva.catalog.catalog_manager import CatalogManager
+from eva.catalog.catalog_type import ColumnType, NdArrayType
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError, handle_if_not_exists
 from eva.expression.abstract_expression import ExpressionType
@@ -21,7 +22,6 @@ from eva.plan_nodes.create_mat_view_plan import CreateMaterializedViewPlan
 from eva.plan_nodes.types import PlanOprType
 from eva.storage.storage_engine import StorageEngine
 from eva.utils.logging_manager import logger
-from eva.catalog.catalog_type import ColumnType, NdArrayType
 
 
 class CreateMaterializedViewExecutor(AbstractExecutor):
@@ -34,7 +34,7 @@ class CreateMaterializedViewExecutor(AbstractExecutor):
 
     def exec(self, *args, **kwargs):
         """Create materialized view executor"""
-      
+
         child = self.children[0]
         project_cols = None
 
@@ -50,15 +50,14 @@ class CreateMaterializedViewExecutor(AbstractExecutor):
                 child.node.opr_type,
                 PlanOprType.SEQUENTIAL_SCAN,
                 PlanOprType.PROJECT,
-                PlanOprType.FUNCTION_SCAN
+                PlanOprType.FUNCTION_SCAN,
             )
 
             logger.error(err_msg)
             raise ExecutorError(err_msg)
 
-
         if not handle_if_not_exists(self.node.view.table, self.node.if_not_exists):
-            
+
             # TODO: Temporarily handling the case of materialized view creation separately
             if child.node.opr_type == PlanOprType.FUNCTION_SCAN:
 
@@ -68,7 +67,7 @@ class CreateMaterializedViewExecutor(AbstractExecutor):
                         col_name="frame_id",
                         col_type=ColumnType.INTEGER,
                         col_array_type=NdArrayType.ANYTYPE,
-                        col_dim=[]
+                        col_dim=[],
                     )
                 ]
 
@@ -78,11 +77,11 @@ class CreateMaterializedViewExecutor(AbstractExecutor):
                             col_name=op_obj.name,
                             col_type=op_obj.type,
                             col_array_type=op_obj.array_type,
-                            col_dim=op_obj.array_dimensions
+                            col_dim=op_obj.array_dimensions,
                         )
                     )
             else:
-                
+
                 # gather child projected column objects
                 child_objs = []
                 for child_col in project_cols:

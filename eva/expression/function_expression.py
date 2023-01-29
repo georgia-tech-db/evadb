@@ -12,11 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from dataclasses import dataclass
 from typing import Callable, List
 
 import numpy as np
 import pandas as pd
-from dataclasses import dataclass
+
 from eva.catalog.models.udf_catalog import UdfCatalogEntry
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 from eva.constants import NO_GPU
@@ -97,27 +98,25 @@ class FunctionExpression(AbstractExpression):
 
     def has_cache(self):
         return self._cache is not None
-    
 
     def evaluate(self, batch: Batch, **kwargs) -> Batch:
         new_batch = batch
-        child_batches = [child.evaluate(batch, **kwargs) for child in self.children]
 
-        if len(child_batches):
-            batch_sizes = [len(child_batch) for child_batch in child_batches]
-            are_all_equal_length = all(batch_sizes[0] == x for x in batch_sizes)
-            maximum_batch_size = max(batch_sizes)
-            if not are_all_equal_length:
-                for child_batch in child_batches:
-                    if len(child_batch) != maximum_batch_size:
-                        if len(child_batch) == 1:
-                            # duplicate row inplace
-                            child_batch.repeat(maximum_batch_size)
-                        else:
-                            raise Exception(
-                                "Not all columns in the batch have equal elements"
-                            )
-            new_batch = Batch.merge_column_wise(child_batches)
+        # if len(child_batches):
+        #     batch_sizes = [len(child_batch) for child_batch in child_batches]
+        #     are_all_equal_length = all(batch_sizes[0] == x for x in batch_sizes)
+        #     maximum_batch_size = max(batch_sizes)
+        #     if not are_all_equal_length:
+        #         for child_batch in child_batches:
+        #             if len(child_batch) != maximum_batch_size:
+        #                 if len(child_batch) == 1:
+        #                     # duplicate row inplace
+        #                     child_batch.repeat(maximum_batch_size)
+        #                 else:
+        #                     raise Exception(
+        #                         "Not all columns in the batch have equal elements"
+        #                     )
+        #     new_batch = Batch.merge_column_wise(child_batches)
 
         func = self._gpu_enabled_function()
         outcomes = self._apply_function_expression(func, new_batch, **kwargs)
@@ -165,8 +164,12 @@ class FunctionExpression(AbstractExpression):
         (3) iterate over each cache miss row and store the results in the cache;
         (4) stitch back the partial cache results with the new func calls.
         """
+        func_args = Batch.merge_column_wise(
+            [child.evaluate(batch, **kwargs) for child in self.children]
+        )
+
         if not self._cache:
-            return batch.apply_function_expression(func)
+            return func_args.apply_function_expression(func)
 
         cols = [obj.name for obj in self.output_objs]
 
@@ -177,25 +180,28 @@ class FunctionExpression(AbstractExpression):
 
         results = np.full([len(batch), len(cols)], None)
         keys = batch
-        if self._cache.cache_key:
-            keys = [child.evaluate(batch, **kwargs) for child in self._cache.cache_key]
+        if self._cache.key:
+            keys = [child.evaluate(batch, **kwargs) for child in self._cache.key]
             keys = Batch.merge_column_wise(keys)
+            assert len(keys) == len(batch), "Not all rows have the cache key"
+
         cache_miss = []
         for idx, key in keys.iterrows():
-            val = self._cache.cache.get(key.to_numpy())
+            val = self._cache.store.get(key.to_numpy())
             results[idx] = val
 
-        cache_miss = np.asarray(results[:, 0] == None)
-
         # 2. call func for cache miss rows
+        cache_miss = np.equal(results[:, 0], None)
         if cache_miss.any():
-            batch = batch[list(cache_miss)]
-            cache_miss_results = batch.apply_function_expression(func)
+            func_args = func_args[list(cache_miss)]
+            cache_miss_results = func_args.apply_function_expression(func)
 
             # 3. set the cache results
-            for key, value in zip(batch.iterrows(), cache_miss_results.iterrows()):
-                assert key[0] == value[0]
-                self._cache.cache.set(key[1].to_numpy(), value[1].to_numpy())
+            missing_keys = keys[list(cache_miss)]
+            for key, value in zip(
+                missing_keys.iterrows(), cache_miss_results.iterrows()
+            ):
+                self._cache.store.set(key[1].to_numpy(), value[1].to_numpy())
 
             # 4. merge the cache results
             results[cache_miss] = cache_miss_results.to_numpy()

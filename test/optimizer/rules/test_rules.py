@@ -63,7 +63,7 @@ from eva.optimizer.rules.rules import (
     PushDownFilterThroughJoin,
     XformLateralJoinToLinearFlow,
 )
-from eva.optimizer.rules.rules_manager import RulesManager
+from eva.optimizer.rules.rules_manager import RulesManager, disable_rules
 from eva.server.command_handler import execute_query_fetch_all
 
 
@@ -273,3 +273,12 @@ class TestRules(unittest.TestCase):
         rewrite_opr = next(rule.apply(logi_project, MagicMock()))
         self.assertFalse(rewrite_opr is logi_derived_get)
         self.assertEqual(rewrite_opr.target_list, target_list)
+
+    def test_disable_rules(self):
+        with disable_rules([PushDownFilterThroughApplyAndMerge()]) as rules_manager:
+            self.assertFalse(
+                any(
+                    isinstance(PushDownFilterThroughApplyAndMerge, type(x))
+                    for x in rules_manager.rewrite_rules
+                )
+            )

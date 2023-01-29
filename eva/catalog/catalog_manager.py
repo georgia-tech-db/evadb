@@ -37,7 +37,6 @@ from eva.catalog.services.udf_catalog_service import UdfCatalogService
 from eva.catalog.services.udf_io_catalog_service import UdfIOCatalogService
 from eva.catalog.sql_config import IDENTIFIER_COLUMN
 from eva.expression.function_expression import FunctionExpression
-from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.create_statement import ColumnDefinition
 from eva.parser.table_ref import TableInfo
 from eva.parser.types import FileFormatType

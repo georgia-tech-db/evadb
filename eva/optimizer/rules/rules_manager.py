@@ -26,6 +26,7 @@ from eva.experimental.ray.optimizer.rules.rules import (
     LogicalProjectToPhysical as DistributedLogicalProjectToPhysical,
 )
 from eva.optimizer.rules.rules import (
+    CacheFunctionExpressionInApply,
     EmbedFilterIntoGet,
     EmbedProjectIntoGet,
     EmbedSampleIntoGet,
@@ -68,8 +69,6 @@ from eva.optimizer.rules.rules import (
     XformLateralJoinToLinearFlow,
 )
 from eva.optimizer.rules.rules_base import Rule
-
-from eva.optimizer.rules.rules import CacheFunctionExpressionInApply
 
 
 class RulesManager:
@@ -159,7 +158,7 @@ class RulesManager:
                 _remove_from_list(self.implementation_rules, rule)
             elif rule.is_rewrite_rule():
                 _remove_from_list(self.rewrite_rules, rule)
-            elif rule.is_logical_rule(rule):
+            elif rule.is_logical_rule():
                 _remove_from_list(self.logical_rules, rule)
             else:
                 raise Exception(f"Provided Invalid rule {rule}")
@@ -174,7 +173,7 @@ class RulesManager:
                 _add_to_list(self.implementation_rules, rule)
             elif rule.is_rewrite_rule():
                 _add_to_list(self.rewrite_rules, rule)
-            elif rule.is_logical_rule(rule):
+            elif rule.is_logical_rule():
                 _add_to_list(self.logical_rules, rule)
             else:
                 raise Exception(f"Provided Invalid rule {rule}")

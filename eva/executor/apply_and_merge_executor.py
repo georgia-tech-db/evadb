@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import Iterator
-from eva.catalog.catalog_manager import CatalogManager
 
+from eva.catalog.catalog_manager import CatalogManager
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError
 from eva.expression.function_expression import FunctionExpressionCache
@@ -51,10 +51,14 @@ class ApplyAndMergeExecutor(AbstractExecutor):
             name = self.func_expr.signature()
             cache_entry = catalog_manager.get_udf_cache_catalog_entry_by_name(name)
             if not cache_entry:
-                cache_entry = catalog_manager.insert_udf_cache_catalog_entry(self.func_expr)
+                cache_entry = catalog_manager.insert_udf_cache_catalog_entry(
+                    self.func_expr
+                )
             cache_key = self.func_expr._cache.key
-            self.func_expr._cache = FunctionExpressionCache(DiskKVCache(cache_entry.cache_path), cache_key)
-                
+            self.func_expr._cache = FunctionExpressionCache(
+                key=cache_key, store=DiskKVCache(cache_entry.cache_path)
+            )
+
         for batch in child_executor.exec(**kwargs):
             res = self.func_expr.evaluate(batch)
             try:

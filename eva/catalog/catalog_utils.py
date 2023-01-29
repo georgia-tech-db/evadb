@@ -124,13 +124,15 @@ def construct_udf_cache_catalog_entry(
     for expr in func_expr.find_all(FunctionExpression):
         udf_depends.append(expr.udf_obj)
     for expr in func_expr.find_all(TupleValueExpression):
-        col_depends.append(expr.col_obj)
+        col_depends.append(expr.col_object)
     cache_name = func_expr.signature()
     cache_path = str(generate_file_path(cache_name))
+    args = tuple([arg.signature() for arg in func_expr.children])
     entry = UdfCacheCatalogEntry(
         name=func_expr.signature(),
         udf_id=func_expr.udf_obj.row_id,
         cache_path=cache_path,
+        args=args,
         udf_depends=udf_depends,
         col_depends=col_depends,
     )

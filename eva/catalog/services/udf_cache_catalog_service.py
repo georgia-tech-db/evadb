@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,16 +12,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Any, List
-from eva.catalog.models.column_catalog import ColumnCatalogEntry
+
+from sqlalchemy.orm.exc import NoResultFound
 
 from eva.catalog.models.udf_cache_catalog import UdfCacheCatalog, UdfCacheCatalogEntry
-from eva.catalog.models.udf_catalog import UdfCatalogEntry
 from eva.catalog.services.base_service import BaseService
 from eva.catalog.services.column_catalog_service import ColumnCatalogService
 from eva.catalog.services.udf_catalog_service import UdfCatalogService
 from eva.utils.errors import CatalogError
-
 from eva.utils.logging_manager import logger
 
 
@@ -49,7 +47,6 @@ class UdfCacheCatalogService(BaseService):
                 name=entry.name,
                 udf_id=entry.udf_id,
                 cache_path=entry.cache_path,
-                num_args=len(entry.args),
                 args=entry.args,
             )
 
@@ -74,8 +71,11 @@ class UdfCacheCatalogService(BaseService):
 
     def get_entry_by_name(self, name: str) -> UdfCacheCatalogEntry:
 
-        entry = self.model.query.filter(self.model._name == name).one_or_none()
-        return entry.as_dataclass()
+        try:
+            entry = self.model.query.filter(self.model._name == name).one()
+            return entry.as_dataclass()
+        except NoResultFound:
+            return None
 
     def delete_entry(self, cache: UdfCacheCatalogEntry):
         """Delete cache table from the db

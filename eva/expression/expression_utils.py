@@ -296,4 +296,3 @@ def is_simple_predicate(predicate: AbstractExpression) -> bool:
     ]
 
     return _has_simple_expressions(predicate) and contains_single_column(predicate)
-

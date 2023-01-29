@@ -14,17 +14,11 @@
 # limitations under the License.
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
-from enum import Flag, IntEnum, auto
-from itertools import chain, combinations
-from pathlib import Path
-from typing import TYPE_CHECKING, Iterable, Optional, List
+from typing import TYPE_CHECKING
 
 from eva.catalog.catalog_type import TableType
-from eva.catalog.catalog_utils import construct_udf_cache_catalog_entry, is_video_table
-from eva.expression.expression_utils import (
-    conjuction_list_to_expression_tree,
-)
+from eva.catalog.catalog_utils import is_video_table
+from eva.expression.expression_utils import conjuction_list_to_expression_tree
 from eva.expression.function_expression import (
     FunctionExpression,
     FunctionExpressionCache,
@@ -45,8 +39,6 @@ from eva.plan_nodes.hash_join_build_plan import HashJoinBuildPlan
 from eva.plan_nodes.predicate_plan import PredicatePlan
 from eva.plan_nodes.project_plan import ProjectPlan
 from eva.plan_nodes.show_info_plan import ShowInfoPlan
-from eva.utils.generic_utils import get_str_hash
-from eva.utils.kv_cache import DiskKVCache
 
 if TYPE_CHECKING:
     from eva.optimizer.optimizer_context import OptimizerContext
@@ -100,7 +92,6 @@ from eva.plan_nodes.seq_scan_plan import SeqScanPlan
 from eva.plan_nodes.storage_plan import StoragePlan
 from eva.plan_nodes.union_plan import UnionPlan
 from eva.plan_nodes.upload_plan import UploadPlan
-
 
 ##############################################
 # REWRITE RULES START
@@ -339,10 +330,10 @@ class CacheFunctionExpressionInApply(Rule):
     def apply(self, before: LogicalApplyAndMerge, context: OptimizerContext):
         optimized_key = optimize_cache_key(before.func_expr)
         if optimized_key == before.func_expr.children:
-            optimized_key = None
+            optimized_key = [None]
 
         new_func_expr = before.func_expr.copy().enable_cache(
-            FunctionExpressionCache(optimized_key, None)
+            FunctionExpressionCache(tuple(optimized_key), None)
         )
         after = LogicalApplyAndMerge(
             func_expr=new_func_expr, alias=before.alias, do_unnest=before.do_unnest
