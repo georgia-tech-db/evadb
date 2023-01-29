@@ -975,7 +975,6 @@ class LogicalCreateMaterializedViewToPhysical(Rule):
             before.view,
             columns=before.col_list,
             if_not_exists=before.if_not_exists,
-            yield_output=before.yield_output,
         )
         for child in before.children:
             after.append_child(child)

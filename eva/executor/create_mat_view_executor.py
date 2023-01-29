@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.catalog_type import ColumnType, NdArrayType
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError, handle_if_not_exists
 from eva.expression.abstract_expression import ExpressionType
@@ -32,72 +31,55 @@ class CreateMaterializedViewExecutor(AbstractExecutor):
     def validate(self):
         pass
 
-    def exec(self, *args, **kwargs):
+    def exec(self):
         """Create materialized view executor"""
-
-        child = self.children[0]
-        project_cols = None
-
-        # only support seq scan/project/function scan
-        if child.node.opr_type == PlanOprType.SEQUENTIAL_SCAN:
-            project_cols = child.project_expr
-        elif child.node.opr_type == PlanOprType.PROJECT:
-            project_cols = child.target_list
-        elif child.node.opr_type == PlanOprType.FUNCTION_SCAN:
-            pass
-        else:
-            err_msg = "Invalid query {}, expected {} or {} or {}".format(
-                child.node.opr_type,
-                PlanOprType.SEQUENTIAL_SCAN,
-                PlanOprType.PROJECT,
-                PlanOprType.FUNCTION_SCAN,
-            )
-
-            logger.error(err_msg)
-            raise ExecutorError(err_msg)
-
-        if not handle_if_not_exists(self.node.view.table, self.node.if_not_exists):
-
-            # TODO: Temporarily handling the case of materialized view creation separately
-            if child.node.opr_type == PlanOprType.FUNCTION_SCAN:
-
-                # hardcode the col info as id for now
-                col_defs = [
-                    ColumnDefinition(
-                        col_name="frame_id",
-                        col_type=ColumnType.INTEGER,
-                        col_array_type=NdArrayType.ANYTYPE,
-                        col_dim=[],
-                    )
-                ]
-
-                for op_obj in child.func_expr.output_objs:
-                    col_defs.append(
-                        ColumnDefinition(
-                            col_name=op_obj.name,
-                            col_type=op_obj.type,
-                            col_array_type=op_obj.array_type,
-                            col_dim=op_obj.array_dimensions,
-                        )
-                    )
+        if not handle_if_not_exists(self.node.view, self.node.if_not_exists):
+            child = self.children[0]
+            project_cols = None
+            # only support seq scan based materialization
+            if child.node.opr_type == PlanOprType.SEQUENTIAL_SCAN:
+                project_cols = child.project_expr
+            elif child.node.opr_type == PlanOprType.PROJECT:
+                project_cols = child.target_list
             else:
+                err_msg = "Invalid query {}, expected {} or {}".format(
+                    child.node.opr_type,
+                    PlanOprType.SEQUENTIAL_SCAN,
+                    PlanOprType.PROJECT,
+                )
 
-                # gather child projected column objects
-                child_objs = []
-                for child_col in project_cols:
-                    if child_col.etype == ExpressionType.TUPLE_VALUE:
-                        child_objs.append(child_col.col_object)
-                    elif child_col.etype == ExpressionType.FUNCTION_EXPRESSION:
-                        child_objs.extend(child_col.output_objs)
+                logger.error(err_msg)
+                raise ExecutorError(err_msg)
 
-                # Number of projected columns should be equal to mat view columns
-                if len(self.node.columns) != len(child_objs):
-                    err_msg = "# projected columns mismatch, expected {} found {}\
-                    ".format(
-                        len(self.node.columns), len(child_objs)
+            # gather child projected column objects
+            child_objs = []
+            for child_col in project_cols:
+                if child_col.etype == ExpressionType.TUPLE_VALUE:
+                    child_objs.append(child_col.col_object)
+                elif child_col.etype == ExpressionType.FUNCTION_EXPRESSION:
+                    child_objs.extend(child_col.output_objs)
+
+            # Number of projected columns should be equal to mat view columns
+            if len(self.node.columns) != len(child_objs):
+                err_msg = "# projected columns mismatch, expected {} found {}\
+                ".format(
+                    len(self.node.columns), len(child_objs)
+                )
+                logger.error(err_msg)
+                raise ExecutorError(err_msg)
+
+            col_defs = []
+            # Copy column type info from child columns
+            for idx, child_col_obj in enumerate(child_objs):
+                col = self.node.columns[idx]
+                col_defs.append(
+                    ColumnDefinition(
+                        col.name,
+                        child_col_obj.type,
+                        child_col_obj.array_type,
+                        child_col_obj.array_dimensions,
                     )
-                    logger.error(err_msg)
-                    raise ExecutorError(err_msg)
+                )
 
             view_catalog_entry = self.catalog.create_and_insert_table_catalog_entry(
                 self.node.view, col_defs
