@@ -1,6 +1,6 @@
 <div >
   <a href="https://evadb.readthedocs.io/">
-    <img src="https://raw.githubusercontent.com/georgia-tech-db/eva/master/api-docs/images/eva/eva-banner.png" alt="EVA" width="1000px" margin-left="-5px">
+    <img src="https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/images/eva/eva-banner.png" alt="EVA" width="1000px" margin-left="-5px">
   </a>
   <div>
         <h3>Try It Out!</h3>
@@ -162,7 +162,11 @@ IMPL  'eva/udfs/fastrcnn_object_detector.py';
 Join the EVA community on [Slack](https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg) to ask questions and to share your ideas for improving EVA.
 
 <a href="https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg">              
+<<<<<<< HEAD
+    <img src="https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/images/eva/eva-slack.jpg" alt="EVA Slack Channel" width="500">
+=======
     <img src="https://raw.githubusercontent.com/georgia-tech-db/eva/master/api-docs/images/eva/eva-slack.png" alt="EVA Slack Channel" width="500">
+>>>>>>> master
 </a>
 
 ## Contributing to EVA

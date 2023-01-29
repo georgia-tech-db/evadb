@@ -103,7 +103,7 @@ html_sidebars = {
 html_static_path = ['_static']
 html_css_files = ['custom.css']
 
-# Adding the Tutorial notebooks to ./api-docs/source/tutorials/
+# Adding the Tutorial notebooks to ./docs/source/tutorials/
 
 for i in os.listdir('../tutorials'):
     if i.endswith('.ipynb'):

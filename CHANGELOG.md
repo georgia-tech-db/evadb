@@ -102,7 +102,7 @@ Thanks to @gaurav274, @xzdandy, @LordDarkula, @jarulraj, @Anirudh58, @Aryan-Rajo
 * PR #373: Reduce number of file transactions in configuration (#373)
 * PR #372: bugfix: Make ConfigurationManager read and update operate on eva.yml (#372)
 * PR #367: Dataset support (#367)
-* PR #362: Automatically adding Tutorial Notebooks to api-docs (#362) 
+* PR #362: Automatically adding Tutorial Notebooks to docs (#362) 
 * PR #359: Layout for EVA Documentation (#359)
 * PR #355: docs: Adding instructions for setup on M1 Mac (#355)
 * PR #344: Updated the tutorial notebooks (#344)
