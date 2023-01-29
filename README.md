@@ -163,7 +163,7 @@ Join the EVA community on [Slack](https://join.slack.com/t/eva-db/shared_invite/
 
 <a href="https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg">              
     <img src="https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/images/eva/eva-slack.png" alt="EVA Slack Channel" width="500">
-</a>
+</a>s
 
 ## Contributing to EVA
 
