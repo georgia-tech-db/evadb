@@ -40,7 +40,7 @@ source_suffix = [".rst", ".md"]
 master_doc = "index"
 
 # General information about the project.
-project = "EVA Video Database System"
+project = "EVA AI-Relational Database System"
 copyright = str(date.today().year) + ", Georgia Tech Database Group."
 author = u"Georgia Tech Database Group"
 
