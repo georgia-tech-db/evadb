@@ -64,31 +64,31 @@ The <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/index.html"
 
 ## Quick Start
 
-1. EVA supports Python versions 3.7 through 3.10. To install EVA, we recommend using the pip package manager.
+1. To install EVA, we recommend using the pip package manager (EVA supports Python versions 3.7+).
 
 ```shell
 pip install evadb
 ```
 
-1. EVA works on Jupyter notebooks -- illustrative notebooks are available in the [Tutorials](https://github.com/georgia-tech-db/eva/blob/master/tutorials/03-emotion-analysis.ipynb) folder. EVA adopts a client-server architecture and comes with a terminal-based client. To start the EVA server and a terminal-based client, use the following commands:
+2. EVA is based on a client-server architecture. It works in Jupyter notebooks (illustrative notebooks are available in the [Tutorials](https://github.com/georgia-tech-db/eva/blob/master/tutorials/03-emotion-analysis.ipynb) folder) and also supports a terminal-based client. To start the EVA server and a terminal-based client, use the following commands:
 ```shell
 eva_server &   # launch server
 eva_client     # launch client
 ```
 
-2. Load a video onto the server using the client (we use [ua_detrac.mp4](data/ua_detrac/ua_detrac.mp4) video as an example):
+3. Load a video onto the EVA server from the client (we use [ua_detrac.mp4](data/ua_detrac/ua_detrac.mp4) video as an example):
 
 ```mysql
 LOAD VIDEO "data/ua_detrac/ua_detrac.mp4" INTO MyVideo;
 ```
 
-3. That's it! You can now start running queries over the loaded video:
+4. That's it! You can now run queries over the loaded video:
 
 ```mysql
 SELECT id, data FROM MyVideo WHERE id < 5;
 ```
 
-4. Search for frames in the video that contain a car
+5. Search for frames in the video that contain a car
 
 ```mysql
 SELECT id, data FROM MyVideo WHERE ['car'] <@ FastRCNNObjectDetector(data).labels;
@@ -97,19 +97,19 @@ SELECT id, data FROM MyVideo WHERE ['car'] <@ FastRCNNObjectDetector(data).label
 |---------------|--------------|
 |<img alt="Source Video" src="https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/traffic-input.webp" width="300"> |<img alt="Query Result" src="https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/traffic-output.webp" width="300"> |
 
-5. Search for frames in the video that contain a pedestrian and a car
+6. Search for frames in the video that contain a pedestrian and a car
 
 ```mysql
 SELECT id, data FROM MyVideo WHERE ['pedestrian', 'car'] <@ FastRCNNObjectDetector(data).labels;
 ```
 
-6. Search for frames in the video with more than 3 cars
+7. Search for frames in the video with more than 3 cars
 
 ```mysql
 SELECT id, data FROM MyVideo WHERE Array_Count(FastRCNNObjectDetector(data).labels, 'car') > 3;
 ```
 
-7. You can create a new user-defined function (UDF) that wraps around your custom vision model or an off-the-shelf model like FastRCNN:
+8. You can create a new user-defined function (UDF) that wraps around your custom vision model or an off-the-shelf model like FastRCNN:
 ```mysql
 CREATE UDF IF NOT EXISTS MyUDF
 INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
@@ -119,7 +119,7 @@ TYPE  Classification
 IMPL  'eva/udfs/fastrcnn_object_detector.py';
 ```
 
-8. You can combine multiple user-defined functions in a single query to accomplish more complicated tasks.
+9. You can combine multiple user-defined functions in a single query to accomplish more complicated tasks.
 ```mysql
    -- Analyse emotions of faces in a video
    SELECT id, bbox, EmotionDetector(Crop(data, bbox)) 
