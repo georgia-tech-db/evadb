@@ -87,7 +87,7 @@ html_theme_options = {
 external_toc_path = "_toc.yml"  # optional, default: _toc.yml
 external_toc_exclude_missing = False  # optional, default: False
 
-html_logo = "_static/mascots/eva-logo.png"
+html_logo = "images/eva/eva-logo.png"
 
 html_sidebars = {
     "**": [
