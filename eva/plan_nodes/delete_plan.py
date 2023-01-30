@@ -40,10 +40,18 @@ class DeletePlan(AbstractPlan):
     ):
 
         super().__init__(PlanOprType.DELETE)
-        self.table_ref = table_ref
+        self._table_ref = table_ref
         self._where_clause = where_clause
         self._orderby_list = orderby_clause
         self._limit_count = limit_count
+    
+    @property
+    def table_ref(self):
+        return self._table_ref
+    
+    @property
+    def where_clause(self):
+        return self._where_clause
 
     def __str__(self):
         return "DeletePlan(table={}, \

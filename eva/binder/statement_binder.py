@@ -33,6 +33,7 @@ from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
 from eva.parser.explain_statement import ExplainStatement
 from eva.parser.rename_statement import RenameTableStatement
 from eva.parser.select_statement import SelectStatement
+from eva.parser.delete_statement import DeleteTableStatement
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
 from eva.utils.generic_utils import path_to_class
@@ -142,6 +143,16 @@ class StatementBinder:
             self._binder_context = StatementBinderContext()
             self.bind(node.union_link)
             self._binder_context = current_context
+
+    @bind.register(DeleteTableStatement)
+    def _bind_delete_statement(self, node: DeleteTableStatement):
+        self.bind(node.table_ref)
+        if node.where_clause:
+            self.bind(node.where_clause)
+        if node.orderby_list:
+            for expr in node.orderby_list:
+                self.bind(expr[0])
+
 
     @bind.register(CreateMaterializedViewStatement)
     def _bind_create_mat_statement(self, node: CreateMaterializedViewStatement):
