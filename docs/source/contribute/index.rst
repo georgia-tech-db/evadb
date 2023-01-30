@@ -117,7 +117,7 @@ We recommend using Visual Studio Code with a debugger for developing EVA. Here a
 Architecture Diagram
 ====
 
-.. image:: ../../images/eva-arch.png
+.. image:: ../../images/eva/eva-arch.png
    :width: 1200
 
 Troubleshooting
