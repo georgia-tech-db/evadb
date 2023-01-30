@@ -47,7 +47,8 @@ minimal_requirement = [
     "pyyaml>=5.1",
     "importlib-metadata<5.0",
     "ray>=1.13.0",
-    "aenum>=2.2.0"
+    "aenum>=2.2.0",
+    "diskcache>=5.4.0"
 ]
 
 formatter_libs = [

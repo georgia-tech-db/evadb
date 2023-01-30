@@ -1,0 +1,1 @@
+<img alt="Catalog Tables" src="https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/images/eva/catalog.png">
