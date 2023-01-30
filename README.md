@@ -165,6 +165,10 @@ Join the EVA community on [Slack](https://join.slack.com/t/eva-db/shared_invite/
     <img src="https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/images/eva/eva-slack.png" alt="EVA Slack Channel" width="500">
 </a>
 
+### Architecture Diagram of EVA
+
+<img src="https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/images/eva/eva-arch.png" alt="EVA Architecture Diagram" width="500">
+
 ## Contributing to EVA
 
 [![PyPI Version](https://img.shields.io/pypi/v/evadb.svg)](https://pypi.org/project/evadb)
