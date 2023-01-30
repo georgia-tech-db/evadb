@@ -269,6 +269,13 @@ class CatalogManager(object):
     def get_index_catalog_entry_by_name(self, name: str) -> IndexCatalogEntry:
         return self._index_service.get_entry_by_name(name)
 
+    def get_index_catalog_entry_by_column_and_udf_signature(
+        self, column: ColumnCatalogEntry, udf_signature: str
+    ):
+        return self._index_service.get_entry_by_column_and_udf_signature(
+            column, udf_signature
+        )
+
     def drop_index_catalog_entry(self, index_name: str) -> bool:
         return self._index_service.delete_entry_by_name(index_name)
 

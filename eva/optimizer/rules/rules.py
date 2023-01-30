@@ -16,6 +16,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import TableType
 from eva.catalog.catalog_utils import is_video_table
 from eva.expression.expression_utils import conjuction_list_to_expression_tree
@@ -23,6 +24,7 @@ from eva.expression.function_expression import (
     FunctionExpression,
     FunctionExpressionCache,
 )
+from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.optimizer.optimizer_utils import (
     extract_equi_join_keys,
     extract_pushdown_predicate,
@@ -31,7 +33,7 @@ from eva.optimizer.optimizer_utils import (
 )
 from eva.optimizer.rules.pattern import Pattern
 from eva.optimizer.rules.rules_base import Promise, Rule, RuleType
-from eva.parser.types import JoinType
+from eva.parser.types import JoinType, ParserOrderBySortType
 from eva.plan_nodes.apply_and_merge_plan import ApplyAndMergePlan
 from eva.plan_nodes.create_mat_view_plan import CreateMaterializedViewPlan
 from eva.plan_nodes.explain_plan import ExplainPlan
@@ -54,6 +56,7 @@ from eva.optimizer.operators import (
     LogicalDrop,
     LogicalDropUDF,
     LogicalExplain,
+    LogicalFaissIndexScan,
     LogicalFilter,
     LogicalFunctionScan,
     LogicalGet,
@@ -78,6 +81,7 @@ from eva.plan_nodes.create_plan import CreatePlan
 from eva.plan_nodes.create_udf_plan import CreateUDFPlan
 from eva.plan_nodes.drop_plan import DropPlan
 from eva.plan_nodes.drop_udf_plan import DropUDFPlan
+from eva.plan_nodes.faiss_index_scan_plan import FaissIndexScanPlan
 from eva.plan_nodes.function_scan_plan import FunctionScanPlan
 from eva.plan_nodes.groupby_plan import GroupByPlan
 from eva.plan_nodes.hash_join_probe_plan import HashJoinProbePlan
@@ -494,6 +498,114 @@ class PushDownFilterThroughApplyAndMerge(Rule):
             root_node.append_child(apply_and_merge)
 
         yield root_node
+
+
+class CombineSimilarityOrderByAndLimitToFaissIndexScan(Rule):
+    """
+    This rule currently rewrites Order By + Limit to a Faiss index scan.
+    Because Faiss index only works for similarity search, the rule will
+    only be applied when the Order By is on Similarity expression. For
+    simplicity, we also only enable this rule when the Similarity expression
+    applies to the full table. Predicated query will yield incorrect results
+    if we use an index scan.
+
+    Limit(10)
+        |
+    OrderBy(func)        ->        IndexScan(10)
+        |                               |
+        A                               A
+    """
+
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALLIMIT)
+        orderby_pattern = Pattern(OperatorType.LOGICALORDERBY)
+        orderby_pattern.append_child(Pattern(OperatorType.DUMMY))
+        pattern.append_child(orderby_pattern)
+        super().__init__(
+            RuleType.COMBINE_SIMILARITY_ORDERBY_AND_LIMIT_TO_FAISS_INDEX_SCAN, pattern
+        )
+
+        # Entries populate after rule egibility validation.
+        self._index_catalog_entry = None
+        self._query_func_expr = None
+
+    def promise(self):
+        return Promise.COMBINE_SIMILARITY_ORDERBY_AND_LIMIT_TO_FAISS_INDEX_SCAN
+
+    def check(self, before: LogicalLimit, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalLimit, context: OptimizerContext):
+        catalog_manager = CatalogManager()
+
+        # Get corresponding nodes.
+        limit_node = before
+        orderby_node = before.children[0]
+        sub_tree_root = orderby_node.children[0]
+
+        # Check if predicate exists on table.
+        def _exists_predicate(opr):
+            if isinstance(opr, LogicalFilter):
+                return True
+            elif isinstance(opr, LogicalGet):
+                return opr.predicate is not None
+            elif isinstance(opr, LogicalQueryDerivedGet):
+                return opr.predicate is not None
+            exists_predicate = False
+            for child in opr.children:
+                exists_predicate |= _exists_predicate(child)
+            return exists_predicate
+
+        if _exists_predicate(sub_tree_root.opr):
+            return
+
+        # Check if orderby runs on similarity expression.
+        # Current optimization will only accept Similarity expression.
+        func_orderby_expr = None
+        for column, sort_type in orderby_node.orderby_list:
+            if (
+                isinstance(column, FunctionExpression)
+                and sort_type == ParserOrderBySortType.ASC
+            ):
+                func_orderby_expr = column
+        if not func_orderby_expr or func_orderby_expr.name != "Similarity":
+            return
+
+        # Check if there exists an index on table and column.
+        query_func_expr, base_func_expr = func_orderby_expr.children
+
+        # Get table and column of orderby.
+        tv_expr = base_func_expr
+        while not isinstance(tv_expr, TupleValueExpression):
+            tv_expr = tv_expr.children[0]
+
+        # Get column catalog entry and udf_signature.
+        column_catalog_entry = tv_expr.col_object
+        udf_signature = (
+            None
+            if isinstance(base_func_expr, TupleValueExpression)
+            else base_func_expr.signature()
+        )
+
+        # Get index catalog. Check if an index exists for matching
+        # udf signature and table columns.
+        index_catalog_entry = (
+            catalog_manager.get_index_catalog_entry_by_column_and_udf_signature(
+                column_catalog_entry, udf_signature
+            )
+        )
+        if not index_catalog_entry:
+            return
+
+        # Construct the Faiss index scan plan.
+        faiss_index_scan_node = LogicalFaissIndexScan(
+            index_catalog_entry.name,
+            limit_node.limit_count,
+            query_func_expr,
+        )
+        for child in orderby_node.children:
+            faiss_index_scan_node.append_child(child)
+        yield faiss_index_scan_node
 
 
 # REWRITE RULES END
@@ -1068,6 +1180,27 @@ class LogicalApplyAndMergeToPhysical(Rule):
 
     def apply(self, before: LogicalApplyAndMerge, context: OptimizerContext):
         after = ApplyAndMergePlan(before.func_expr, before.alias, before.do_unnest)
+        for child in before.children:
+            after.append_child(child)
+        yield after
+
+
+class LogicalFaissIndexScanToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALFAISSINDEXSCAN)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_FAISS_INDEX_SCAN_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_FAISS_INDEX_SCAN_TO_PHYSICAL
+
+    def check(self, grp_id: int, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalFaissIndexScan, context: OptimizerContext):
+        after = FaissIndexScanPlan(
+            before.index_name, before.limit_count, before.search_query_expr
+        )
         for child in before.children:
             after.append_child(child)
         yield after

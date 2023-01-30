@@ -173,7 +173,10 @@ class OptimizeExpression(OptimizerTask):
         rules = rules_manager.logical_rules
         # if exploring, we don't need to consider implementation rules
         if not self.explore:
-            rules.extend(rules_manager.implementation_rules)
+            # rules.extend(rules_manager.implementation_rules)
+            # Original code commented out here. It falsely modifies the internal logical
+            # rule list.
+            rules = rules_manager.logical_rules + rules_manager.implementation_rules
 
         valid_rules = []
         for rule in rules:

@@ -55,6 +55,18 @@ class IndexCatalogService(BaseService):
         except NoResultFound:
             return None
 
+    def get_entry_by_column_and_udf_signature(
+        self, column: ColumnCatalogEntry, udf_signature: str
+    ):
+        try:
+            entry = self.model.query.filter(
+                self.model._feat_column_id == column.row_id,
+                self.model._udf_signature == udf_signature,
+            ).one()
+            return entry.as_dataclass()
+        except NoResultFound:
+            return None
+
     def delete_entry_by_name(self, name: str):
         try:
             index_obj = self.model.query.filter(self.model._name == name).one()

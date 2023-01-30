@@ -1,9 +1,6 @@
 format: jb-book
 root: index
 parts:
-  - caption: Version
-    chapters:
-      - file: source/version
 
   - caption: Overview
     chapters:
@@ -56,3 +53,7 @@ parts:
         title: Releasing 
       - file: source/contribute/packaging
         title: Packaging Models
+
+  - caption: Documentation
+    chapters:
+      - file: source/version
