@@ -87,7 +87,6 @@ class RulesManager:
             PushDownFilterThroughJoin(),
             PushDownFilterThroughApplyAndMerge(),
             XformLateralJoinToLinearFlow(),
-            PushDownFilterThroughJoin(),
             # TODO: Add flag to enable/disable this rule
         ]
 

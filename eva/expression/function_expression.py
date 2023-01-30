@@ -100,26 +100,8 @@ class FunctionExpression(AbstractExpression):
         return self._cache is not None
 
     def evaluate(self, batch: Batch, **kwargs) -> Batch:
-        new_batch = batch
-
-        # if len(child_batches):
-        #     batch_sizes = [len(child_batch) for child_batch in child_batches]
-        #     are_all_equal_length = all(batch_sizes[0] == x for x in batch_sizes)
-        #     maximum_batch_size = max(batch_sizes)
-        #     if not are_all_equal_length:
-        #         for child_batch in child_batches:
-        #             if len(child_batch) != maximum_batch_size:
-        #                 if len(child_batch) == 1:
-        #                     # duplicate row inplace
-        #                     child_batch.repeat(maximum_batch_size)
-        #                 else:
-        #                     raise Exception(
-        #                         "Not all columns in the batch have equal elements"
-        #                     )
-        #     new_batch = Batch.merge_column_wise(child_batches)
-
         func = self._gpu_enabled_function()
-        outcomes = self._apply_function_expression(func, new_batch, **kwargs)
+        outcomes = self._apply_function_expression(func, batch, **kwargs)
         outcomes = outcomes.project(self.projection_columns)
         outcomes.modify_column_alias(self.alias)
         return outcomes
@@ -185,13 +167,13 @@ class FunctionExpression(AbstractExpression):
             keys = Batch.merge_column_wise(keys)
             assert len(keys) == len(batch), "Not all rows have the cache key"
 
-        cache_miss = []
+        cache_miss = np.full(len(batch), True)
         for idx, key in keys.iterrows():
             val = self._cache.store.get(key.to_numpy())
             results[idx] = val
+            cache_miss[idx] = val is None
 
         # 2. call func for cache miss rows
-        cache_miss = np.equal(results[:, 0], None)
         if cache_miss.any():
             func_args = func_args[list(cache_miss)]
             cache_miss_results = func_args.apply_function_expression(func)

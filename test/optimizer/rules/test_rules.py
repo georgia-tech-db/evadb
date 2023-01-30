@@ -27,6 +27,7 @@ from eva.optimizer.operators import (
     LogicalQueryDerivedGet,
 )
 from eva.optimizer.rules.rules import (
+    CacheFunctionExpressionInApply,
     EmbedFilterIntoDerivedGet,
     EmbedFilterIntoGet,
     EmbedProjectIntoDerivedGet,
@@ -170,7 +171,10 @@ class TestRules(unittest.TestCase):
                 any(isinstance(rule, type(x)) for x in RulesManager().rewrite_rules)
             )
 
-        supported_logical_rules = [LogicalInnerJoinCommutativity()]
+        supported_logical_rules = [
+            LogicalInnerJoinCommutativity(),
+            CacheFunctionExpressionInApply(),
+        ]
         self.assertEqual(
             len(supported_logical_rules), len(RulesManager().logical_rules)
         )
