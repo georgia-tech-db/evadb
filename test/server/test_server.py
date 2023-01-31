@@ -22,6 +22,7 @@ from unittest.mock import MagicMock
 import mock
 import pytest
 
+from eva.eva_cmd_client import eva_client
 from eva.server.networking_utils import serialize_message
 from eva.server.server import EvaServer, start_server
 
@@ -38,6 +39,7 @@ class ServerTests(unittest.TestCase):
     def test_server_protocol_connection_lost(self):
 
         socket_timeout = 65
+        EvaServer.__connections__ = 0
 
         eva_server = EvaServer(socket_timeout)
         eva_server.transport = mock.Mock()
@@ -47,6 +49,8 @@ class ServerTests(unittest.TestCase):
         # connection made
         eva_server.connection_made(eva_server.transport)
         self.assertEqual(EvaServer.__connections__, 1, "connection not made")
+
+        time.sleep(1)
 
         # connection lost
         eva_server.connection_lost(None)
@@ -84,7 +88,7 @@ class ServerTests(unittest.TestCase):
             eva_server.data_received(query_message)
 
     @pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
-    def test_server(self):
+    def test_server_integration_test(self):
 
         host = "0.0.0.0"
         port = 5489
@@ -92,14 +96,28 @@ class ServerTests(unittest.TestCase):
 
         def timeout_server():
             # need a more robust mechanism for when to cancel the future
-            time.sleep(2)
+            time.sleep(5)
             self.stop_server_future.cancel()
+
+        def start_client():
+            asyncio.set_event_loop(self.loop)
+            eva_client(host=host, port=port)
 
         thread = threading.Thread(target=timeout_server)
         thread.daemon = True
         thread.start()
 
-        with self.assertRaises(SystemExit):
+        thread = threading.Thread(target=start_client)
+        thread.daemon = True
+        thread.start()
+
+        time.sleep(2)
+
+        thread = threading.Thread(target=start_client)
+        thread.daemon = True
+        thread.start()
+
+        with self.assertRaises(asyncio.exceptions.CancelledError):
             start_server(
                 host=host,
                 port=port,

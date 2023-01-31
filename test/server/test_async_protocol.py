@@ -97,9 +97,19 @@ class AsyncProtocolTests(unittest.TestCase):
         t = MagicMock()
         mock_set.return_value = True
 
-        client.connection_made(t)
+        client.connection_made()
         mock_set.assert_called_once_with(t, 60, 0)
         t.abort.assert_not_called()
+
+    def test_connection_socket_error(self):
+        client = EvaClient()
+        transport = MagicMock()
+        socket = MagicMock()
+        socket.setsockopt.side_effect = OSError
+        transport.get_extra_info.return_value = socket
+
+        client.connection_made(transport)
+        client.transport.abort.assert_called_once()
 
     def test_connection_lost_no_exception(self):
         client = EvaClient()

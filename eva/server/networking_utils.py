@@ -41,11 +41,10 @@ async def realtime_server_status(protocol, server_closed):
             protocol.__connections__ != previous_connections
             or protocol.__errors__ != previous_errors
         ):
-
             previous_connections = protocol.__connections__
             previous_errors = protocol.__errors__
 
-            logger.debug(
+            logger.info(
                 "Status: "
                 + "connections: "
                 + str(previous_connections)

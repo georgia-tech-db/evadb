@@ -60,6 +60,8 @@ class EvaClient(asyncio.Protocol):
     Eva asyncio protocol to send data to server and get results back.
     `send_message` to send query to EVA server and results are stored in
     `self.queue`.
+
+    Based on https://github.com/ambv/aioecho
     """
 
     __connections__ = 0

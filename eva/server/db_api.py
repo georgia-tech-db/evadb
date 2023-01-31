@@ -142,4 +142,4 @@ async def connect_async(host: str, port: int, max_retry_count: int = 3):
 
 def connect(host: str, port: int, max_retry_count: int = 3):
     loop = asyncio.get_event_loop()
-    return loop.run_until_complete(connect_async(host, port, max_retry_count))
+    return loop.create_task(connect_async(host, port, max_retry_count))
