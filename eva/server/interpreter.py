@@ -15,7 +15,6 @@
 import os
 import sys
 from cmd import Cmd
-from contextlib import ExitStack
 from typing import Dict
 
 # Skip readline on Windows
@@ -124,6 +123,5 @@ def start_cmd_client(host: str, port: int):
     - Socket will be automatically closed by the exit stack.
     """
 
-    with ExitStack() as _:
-        connection = connect(host, port)
-        handle_user_input(connection)
+    connection = connect(host, port)
+    handle_user_input(connection)

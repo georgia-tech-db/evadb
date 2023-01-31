@@ -97,7 +97,7 @@ class AsyncProtocolTests(unittest.TestCase):
         t = MagicMock()
         mock_set.return_value = True
 
-        client.connection_made()
+        client.connection_made(t)
         mock_set.assert_called_once_with(t, 60, 0)
         t.abort.assert_not_called()
 
