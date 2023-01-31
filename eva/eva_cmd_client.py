@@ -39,7 +39,7 @@ def eva_client(host="0.0.0.0", port=5432):
 
     # Launch server
     try:
-        start_cmd_client(host=host, port=port)
+        start_cmd_client(host, port)
     except Exception as e:
         logger.critical(e)
 

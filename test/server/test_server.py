@@ -130,5 +130,6 @@ class ServerTests(unittest.TestCase):
                 stop_server_future=self.stop_server_future,
             )
 
-            for task in asyncio.all_tasks():
-                task.cancel()
+        self.loop.close()
+        client_loop.stop()
+        client_loop.close()
