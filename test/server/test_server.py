@@ -95,6 +95,7 @@ class ServerTests(unittest.TestCase):
         socket_timeout = 60
 
         asyncio.set_event_loop(self.loop)
+        client_loop = asyncio.new_event_loop()
 
         def timeout_server():
             # need a more robust mechanism for when to cancel the future
@@ -102,7 +103,6 @@ class ServerTests(unittest.TestCase):
             self.stop_server_future.cancel()
 
         def start_client():
-            client_loop = asyncio.new_event_loop()
             asyncio.set_event_loop(client_loop)
             time.sleep(2)
             eva_client(host=host, port=port)
@@ -129,3 +129,6 @@ class ServerTests(unittest.TestCase):
                 socket_timeout=socket_timeout,
                 stop_server_future=self.stop_server_future,
             )
+
+            for task in asyncio.all_tasks():
+                task.cancel()
