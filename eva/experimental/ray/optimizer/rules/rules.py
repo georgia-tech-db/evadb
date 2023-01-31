@@ -53,7 +53,7 @@ class LogicalExchangeToPhysical(Rule):
         after = ExchangePlan(before.view)
         for child in before.children:
             after.append_child(child)
-        return after
+        yield after
 
 
 class LogicalProjectToPhysical(Rule):
@@ -74,7 +74,7 @@ class LogicalProjectToPhysical(Rule):
             after.append_child(child)
         upper = ExchangePlan(parallelism=1)
         upper.append_child(after)
-        return upper
+        yield upper
 
 
 class LogicalGetToSeqScan(Rule):
@@ -117,4 +117,4 @@ class LogicalGetToSeqScan(Rule):
             return scan
         upper = ExchangePlan(parallelism=2)
         upper.append_child(scan)
-        return upper
+        yield upper
