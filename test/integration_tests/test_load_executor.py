@@ -53,6 +53,18 @@ class LoadExecutorTest(unittest.TestCase):
         # clean up
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideos;")
 
+    def test_should_load_s3_video(self):
+        query = f"LOAD VIDEO 's3://suryatej-personal/mnist.mp4' INTO MyS3Video;"
+        execute_query_fetch_all(query)
+
+        select_query = """SELECT * FROM MyS3Video;"""
+
+        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch.sort()
+        expected_batch = list(create_dummy_batches())[0]
+        self.assertEqual(actual_batch, expected_batch)
+        execute_query_fetch_all("DROP TABLE IF EXISTS MyS3Video;")
+
     # integration test for load video
     def test_should_load_video_in_table(self):
         query = f"LOAD VIDEO '{self.video_file_path}' INTO MyVideo;"

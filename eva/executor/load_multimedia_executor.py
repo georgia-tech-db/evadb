@@ -18,6 +18,7 @@ import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.models.table_catalog import TableCatalogEntry
+from eva.configuration.configuration_manager import ConfigurationManager
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError, iter_path_regex, validate_media
 from eva.models.storage.batch import Batch
@@ -25,6 +26,7 @@ from eva.plan_nodes.load_data_plan import LoadDataPlan
 from eva.storage.abstract_storage_engine import AbstractStorageEngine
 from eva.storage.storage_engine import StorageEngine
 from eva.utils.logging_manager import logger
+from eva.utils.s3_utils import download_from_s3
 
 
 class LoadMultimediaExecutor(AbstractExecutor):
@@ -41,7 +43,19 @@ class LoadMultimediaExecutor(AbstractExecutor):
         table_obj = None
         try:
             valid_files = []
-            for file_path in iter_path_regex(self.node.file_path):
+            search_path = self.node.file_path
+
+            # If it is a s3 path, download the file to local
+            if search_path.as_posix().startswith("s3:/"):
+                s3_dir = Path(
+                    ConfigurationManager().get_value("storage", "s3_download_dir")
+                )
+                dst_path = s3_dir / self.node.table_info.table_name
+                dst_path.mkdir(parents=True, exist_ok=True)
+                download_from_s3(self.node.file_path, dst_path)
+                search_path = dst_path / "*"
+
+            for file_path in iter_path_regex(search_path):
                 file_path = Path(file_path)
                 if validate_media(file_path, self.media_type):
                     valid_files.append(str(file_path))
@@ -49,6 +63,7 @@ class LoadMultimediaExecutor(AbstractExecutor):
                     err_msg = f"Load {self.media_type.name} failed due to invalid file {str(file_path)}"
                     logger.error(err_msg)
                     raise ValueError(file_path)
+
             # Create catalog entry
             table_info = self.node.table_info
             database_name = table_info.database_name

@@ -26,6 +26,7 @@ from eva.configuration.constants import (
     EVA_DEFAULT_DIR,
     EVA_UPLOAD_DIR,
     INDEX_DIR,
+    S3_DOWNLOAD_DIR,
     UDF_DIR,
 )
 from eva.utils.logging_manager import logger as eva_logger
@@ -59,10 +60,12 @@ def bootstrap_environment(eva_config_dir: Path, eva_installation_dir: Path):
     dataset_location = EVA_DEFAULT_DIR / EVA_DATASET_DIR
     upload_dir = eva_config_dir / EVA_UPLOAD_DIR
     index_dir = eva_config_dir / INDEX_DIR
+    s3_dir = eva_config_dir / S3_DOWNLOAD_DIR
 
     eva_config_dir.mkdir(parents=True, exist_ok=True)
     upload_dir.mkdir(parents=True, exist_ok=True)
     index_dir.mkdir(parents=True, exist_ok=True)
+    s3_dir.mkdir(parents=True, exist_ok=True)
 
     # copy eva.yml into config path
     if not config_file_path.exists():
@@ -92,6 +95,7 @@ def bootstrap_environment(eva_config_dir: Path, eva_installation_dir: Path):
         config_obj["core"]["catalog_database_uri"] = DB_DEFAULT_URI
         config_obj["storage"]["upload_dir"] = str(upload_dir.resolve())
         config_obj["storage"]["index_dir"] = str(index_dir.resolve())
+        config_obj["storage"]["s3_download_dir"] = str(s3_dir.resolve())
 
         yml_file.seek(0)
         yml_file.write(yaml.dump(config_obj))
