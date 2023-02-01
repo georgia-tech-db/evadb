@@ -61,7 +61,8 @@ test_libs = [
     "pytest-virtualenv",
     "coveralls>=3.0.1",
     "mock>=4.0.3",
-    "flake8>=3.9.1"
+    "flake8>=3.9.1",
+    "moto[s3]>=4.1.1"
 ]
 
 notebook_libs = [

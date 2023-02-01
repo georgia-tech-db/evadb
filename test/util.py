@@ -40,6 +40,7 @@ NUM_FRAMES = 10
 FRAME_SIZE = 2 * 2 * 3
 config = ConfigurationManager()
 upload_dir_from_config = config.get_value("storage", "upload_dir")
+s3_dir_from_config = config.get_value("storage", "s3_download_dir")
 
 
 EVA_TEST_DATA_DIR = Path(config.get_value("core", "eva_installation_dir")).parent
@@ -314,6 +315,13 @@ def file_remove(path):
         pass
 
 
+def file_remove_from_s3(path):
+    try:
+        os.remove(os.path.join(s3_dir_from_config, path))
+    except FileNotFoundError:
+        pass
+
+
 def create_dummy_batches(num_frames=NUM_FRAMES, filters=[], batch_size=10, start_id=0):
     if not filters:
         filters = range(num_frames)
@@ -322,6 +330,31 @@ def create_dummy_batches(num_frames=NUM_FRAMES, filters=[], batch_size=10, start
         data.append(
             {
                 "myvideo.name": os.path.join(upload_dir_from_config, "dummy.avi"),
+                "myvideo.id": i + start_id,
+                "myvideo.data": np.array(
+                    np.ones((2, 2, 3)) * float(i + 1) * 25, dtype=np.uint8
+                ),
+                "myvideo.seconds": 0.0,
+            }
+        )
+
+        if len(data) % batch_size == 0:
+            yield Batch(pd.DataFrame(data))
+            data = []
+    if data:
+        yield Batch(pd.DataFrame(data))
+
+
+def create_dummy_batches_s3(
+    num_frames=NUM_FRAMES, filters=[], batch_size=10, start_id=0
+):
+    if not filters:
+        filters = range(num_frames)
+    data = []
+    for i in filters:
+        data.append(
+            {
+                "myvideo.name": os.path.join(s3_dir_from_config, "MyVideo/dummy.avi"),
                 "myvideo.id": i + start_id,
                 "myvideo.data": np.array(
                     np.ones((2, 2, 3)) * float(i + 1) * 25, dtype=np.uint8
