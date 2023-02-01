@@ -85,7 +85,7 @@ class LogicalGetToSeqScan(Rule):
     def promise(self):
         return Promise.LOGICAL_GET_TO_SEQSCAN
 
-    def check(self, before: Operator, context: OptimizerContext):
+    def check(self, before: LogicalGet, context: OptimizerContext):
         return True
 
     def apply(self, before: LogicalGet, context: OptimizerContext):
