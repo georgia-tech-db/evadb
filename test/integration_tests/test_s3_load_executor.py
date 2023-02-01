@@ -12,18 +12,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import unittest
-from moto import mock_s3
 import os
+import unittest
+from test.util import create_dummy_batches_s3, create_sample_video, file_remove_from_s3
+
 import boto3
+import pandas as pd
+from moto import mock_s3
 
 from eva.catalog.catalog_manager import CatalogManager
+from eva.configuration.constants import EVA_ROOT_DIR
+from eva.models.storage.batch import Batch
+from eva.parser.types import FileFormatType
 from eva.server.command_handler import execute_query_fetch_all
-from test.util import (
-    create_dummy_batches_s3,
-    create_sample_video,
-    file_remove_from_s3,
-)
 
 
 class S3LoadExecutorTest(unittest.TestCase):
@@ -49,16 +50,14 @@ class S3LoadExecutorTest(unittest.TestCase):
         bucket = s3_resource.Bucket(self.bucket_name)
         bucket.create()
 
-        s3_client = boto3.client('s3')
-        s3_client.upload_file(self.video_file_path, self.bucket_name, "dummy.avi")
-
-
     def tearDown(self):
         file_remove_from_s3("MyVideo/dummy.avi")
         self.mock_s3.stop()
 
+    def test_s3_single_file_load_executor(self):
+        s3_client = boto3.client("s3")
+        s3_client.upload_file(self.video_file_path, self.bucket_name, "dummy.avi")
 
-    def test_s3_load_executor(self):
         query = f"LOAD VIDEO 's3://{self.bucket_name}/dummy.avi' INTO MyVideo;"
         execute_query_fetch_all(query)
 
@@ -69,3 +68,20 @@ class S3LoadExecutorTest(unittest.TestCase):
         expected_batch = list(create_dummy_batches_s3())[0]
         self.assertEqual(actual_batch, expected_batch)
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
+
+    def test_s3_multiple_file_load_executor(self):
+        s3_client = boto3.client("s3")
+
+        video_path = f"{EVA_ROOT_DIR}/data/sample_videos/1"
+
+        for file in os.listdir(video_path):
+            s3_client.upload_file(f"{video_path}/{file}", self.bucket_name, file)
+
+        query = f"""LOAD VIDEO "s3://{self.bucket_name}/*.mp4" INTO MyVideos;"""
+        result = execute_query_fetch_all(query)
+        expected = Batch(
+            pd.DataFrame([f"Number of loaded {FileFormatType.VIDEO.name}: 2"])
+        )
+        self.assertEqual(result, expected)
+
+        execute_query_fetch_all("DROP TABLE IF EXISTS MyVideos;")
