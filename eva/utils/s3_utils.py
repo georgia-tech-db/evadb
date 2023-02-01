@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import re
 from pathlib import Path
 
 import boto3
@@ -32,8 +33,12 @@ def download_from_s3(s3_uri, save_dir):
     """
     Downloads a file from s3 to the local file system
     """
-    s3 = boto3.client("s3")
-    bucket_name, key = parse_s3_uri(s3_uri.as_posix())
-    save_path = Path(save_dir) / key
-    s3.download_file(bucket_name, key, save_path)
-    return save_path
+    s3_client = boto3.client("s3")
+    s3_uri = s3_uri.as_posix()
+    bucket_name, regex_key = parse_s3_uri(s3_uri)
+    s3_bucket = boto3.resource("s3").Bucket(bucket_name)
+    for obj in s3_bucket.objects.all():
+        if re.search(re.sub("\*", ".*", regex_key), obj.key):  # noqa: W605
+            key = obj.key.replace("/", "_")
+            save_path = Path(save_dir) / key
+            s3_client.download_file(bucket_name, key, save_path)

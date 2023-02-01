@@ -54,7 +54,7 @@ class LoadExecutorTest(unittest.TestCase):
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideos;")
 
     def test_should_load_s3_video(self):
-        query = f"LOAD VIDEO 's3://suryatej-personal/mnist.mp4' INTO MyS3Video;"
+        query = f"LOAD VIDEO 's3://suryatej-personal/*.mp4' INTO MyS3Video;"
         execute_query_fetch_all(query)
 
         select_query = """SELECT * FROM MyS3Video;"""
