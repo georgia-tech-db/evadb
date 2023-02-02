@@ -102,6 +102,9 @@ class EVACursor(object):
 
         return query
 
+    def stop_query(self):
+        self._pending_query = False
+
     def __getattr__(self, name):
         """
         Auto generate sync function calls from async

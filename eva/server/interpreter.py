@@ -40,7 +40,8 @@ class EvaCommandInterpreter(Cmd):
                 self.cmdloop(intro)
                 quit_loop = True
             except KeyboardInterrupt:
-                print("\ncommand interrupted...\n")
+                self.cursor.stop_query()
+                print("Interrupting query")
 
     def preloop(self):
         # To retain command history across multiple client sessions

@@ -146,3 +146,14 @@ class DBAPITests(unittest.TestCase):
 
         query = "test_query"
         cursor.execute(query)
+
+    def test_client_stop_query(self):
+        connection = AsyncMock()
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        connection.protocol.loop = loop
+
+        eva_cursor = EVACursor(connection)
+        eva_cursor.execute("test_query")
+        eva_cursor.stop_query()
+        self.assertEqual(eva_cursor._pending_query, False)
