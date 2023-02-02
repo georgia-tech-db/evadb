@@ -1,9 +1,9 @@
 LOAD
 ====
 
-.. _1-load-the-video-file:
+.. _1-load-video-from-filesystem:
 
-LOAD VIDEO 
+LOAD VIDEO FROM FILESYSTEM
 ----
 
 .. code:: mysql
@@ -17,7 +17,19 @@ LOAD VIDEO
 When a video is loaded, there is no need to specify the schema for the video table. EVA automatically generates the following schema with two columns:
 ``id`` and ``data``, that correspond to the frame id and frame content (in Numpy format).
 
-.. _2-load-the-csv-file:
+.. _2-load-video-from-s3:
+
+LOAD VIDEO FROM S3
+----
+
+.. code:: mysql
+
+   LOAD VIDEO 's3://bucket/dummy.avi' INTO MyVideo;
+   LOAD VIDEO 's3://bucket/eva_videos/*.mp4' INTO MyVideos;
+
+The videos are downloaded to a directory that can be configured in the EVA configuration file under `storage:s3_download_dir`. The default directory is ``~/.eva/s3_downloads``.
+
+.. _3-load-the-csv-file:
 
 LOAD CSV 
 ----
