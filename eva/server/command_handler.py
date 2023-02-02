@@ -65,7 +65,7 @@ def handle_request(transport, request_message):
     """
     logger.debug("Receive request: --|" + str(request_message) + "|--")
 
-    #time.sleep(3)
+    # time.sleep(3)
     error = False
     error_msg = None
     query_runtime = Timer()
