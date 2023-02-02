@@ -18,11 +18,11 @@ class DeleteExecutor(AbstractExecutor):
         pass
 
     def exec(self, **kwargs) -> Iterator[Batch]:
+        # Uses Where clause
         try:
             child_executor = self.children[0]
-            for batch in child_executor.exec(**kwargs):
-                batch = apply_project(batch, self.target_list)
-
+            for batch in child_executor.exec(*args, **kwargs):
+                batch = apply_predicate(batch, self.predicate)
                 if not batch.empty():
                     yield batch
         except Exception as e:
