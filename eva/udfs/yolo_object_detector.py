@@ -29,13 +29,6 @@ except ImportError as e:
         f"Failed to import with error {e}, \
         please try `pip install torch`"
     )
-try:
-    import yolov5
-except ImportError as e:
-    raise ImportError(
-        f"Failed to import with error {e}, \
-        please try `pip install yolov5`"
-    )
 
 
 class YoloV5(PytorchAbstractClassifierUDF):
