@@ -51,7 +51,7 @@ class YoloV5(PytorchAbstractClassifierUDF):
 
     def setup(self, threshold=0.85):
         self.threshold = threshold
-        self.model = yolov5.load("yolov5s.pt", verbose=False)
+        self.model = torch.hub.load('ultralytics/yolov5', 'yolov5s', verbose=False)
 
     @property
     def input_format(self) -> FrameInfo:
