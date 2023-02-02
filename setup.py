@@ -100,7 +100,6 @@ udf_libs = [
     "facenet-pytorch>=2.5.2", # FACE DETECTION
     "easyocr>=1.5.0",         # OCR EXTRACTION
     "ipython",
-    "yolov5",                 # OBJECT DETECION
     "detoxify"                # TEXT TOXICITY CLASSIFICATION
 ]
 
