@@ -22,7 +22,6 @@ from unittest.mock import MagicMock
 import mock
 import pytest
 
-from eva.eva_cmd_client import eva_client
 from eva.server.networking_utils import serialize_message
 from eva.server.server import EvaServer, start_server
 
@@ -94,38 +93,14 @@ class ServerTests(unittest.TestCase):
         port = 5489
         socket_timeout = 60
 
-        asyncio.set_event_loop(self.loop)
-        client_loop = asyncio.new_event_loop()
-
         def timeout_server():
             # need a more robust mechanism for when to cancel the future
             time.sleep(10)
             self.stop_server_future.cancel()
 
-        def start_client():
-            asyncio.set_event_loop(client_loop)
-            time.sleep(2)
-            eva_client(host=host, port=port)
-
-        thread0 = threading.Thread(target=timeout_server)
-        thread0.daemon = True
-        thread0.start()
-
-        stop_event1 = threading.Event()
-        thread1 = threading.Thread(
-            target=start_client,
-            args=(stop_event1,),
-        )
-        thread1.start()
-
-        time.sleep(2)
-
-        stop_event2 = threading.Event()
-        thread2 = threading.Thread(
-            target=start_client,
-            args=(stop_event2,),
-        )
-        thread2.start()
+        thread = threading.Thread(target=timeout_server)
+        thread.daemon = True
+        thread.start()
 
         with self.assertRaises(asyncio.exceptions.CancelledError):
             start_server(
@@ -135,13 +110,3 @@ class ServerTests(unittest.TestCase):
                 socket_timeout=socket_timeout,
                 stop_server_future=self.stop_server_future,
             )
-
-        stop_event1.set()
-        thread1.join()
-
-        stop_event2.set()
-        thread2.join()
-
-        self.loop.close()
-        client_loop.stop()
-        client_loop.close()
