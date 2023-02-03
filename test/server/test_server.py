@@ -107,19 +107,25 @@ class ServerTests(unittest.TestCase):
             time.sleep(2)
             eva_client(host=host, port=port)
 
-        thread = threading.Thread(target=timeout_server)
-        thread.daemon = True
-        thread.start()
+        thread0 = threading.Thread(target=timeout_server)
+        thread0.daemon = True
+        thread0.start()
 
-        thread = threading.Thread(target=start_client)
-        thread.daemon = True
-        thread.start()
+        stop_event1 = threading.Event()
+        thread1 = threading.Thread(
+            target=start_client,
+            args=(stop_event1,),
+        )
+        thread1.start()
 
         time.sleep(2)
 
-        thread = threading.Thread(target=start_client)
-        thread.daemon = True
-        thread.start()
+        stop_event2 = threading.Event()
+        thread2 = threading.Thread(
+            target=start_client,
+            args=(stop_event2,),
+        )
+        thread2.start()
 
         with self.assertRaises(asyncio.exceptions.CancelledError):
             start_server(
@@ -129,6 +135,12 @@ class ServerTests(unittest.TestCase):
                 socket_timeout=socket_timeout,
                 stop_server_future=self.stop_server_future,
             )
+
+        stop_event1.set()
+        thread1.join()
+
+        stop_event2.set()
+        thread2.join()
 
         self.loop.close()
         client_loop.stop()
