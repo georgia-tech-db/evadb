@@ -1,4 +1,5 @@
 from typing import Generator, Iterator
+import pandas as pd
 
 from eva.catalog.catalog_type import TableType
 from eva.executor.abstract_executor import AbstractExecutor
@@ -24,19 +25,28 @@ class DeleteExecutor(AbstractExecutor):
     def exec(self, **kwargs) -> Iterator[Batch]:
         # Uses Where clause
         try:
+            # All the batches that need to be deleted
+            del_batch: Batch = Batch()
             storage_engine = StorageEngine.factory(self.node.table)
 
             if self.node.table.table_type == TableType.VIDEO_DATA:
-                return storage_engine.read(
+                del_batch =  storage_engine.read(
                     self.node.table,
                     self.node.batch_mem_size,
                     predicate=self.node.predicate,
                     sampling_rate=self.node.sampling_rate,
                 )
             elif self.node.table.table_type == TableType.IMAGE_DATA:
-                return storage_engine.read(self.node.table)
+                del_batch =  storage_engine.read(self.node.table)
             elif self.node.table.table_type == TableType.STRUCTURED_DATA:
-                return storage_engine.read(self.node.table, self.node.batch_mem_size)
+                storage_engine.delete(self.node.table, self.predicate)
+                yield Batch(
+                pd.DataFrame(
+                    [
+                        f"Deleted row"
+                    ]
+                )
+            )
             else:
                 raise ExecutorError(
                     f"Unsupported TableType  {self.node.table.table_type} encountered"

@@ -12,6 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import Any, Dict, Iterator, List
+
 from pathlib import Path
 from typing import Iterator
 
@@ -37,3 +39,19 @@ class ImageStorageEngine(AbstractMediaStorageEngine):
                     column_name = table.columns[1].name
                     batch.frames[column_name] = str(file_name)
                     yield batch
+    
+    def delete(self, table: TableCatalogEntry, predicate: Dict[str, Any]):
+
+
+        # for image_files in self._rdb_handler.read(self._get_metadata_table(table), 12):
+        #     remove_files = []
+        remove_files = []
+        for column, value in predicate.items:
+            if column not in table.columns:
+                 raise Exception(
+                        f"where_clause contains a column {column} not in the table"
+                    )
+            reader = CVImageReader(str(value), batch_mem_size=1)
+            reader.delete()
+
+

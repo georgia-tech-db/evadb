@@ -16,6 +16,7 @@
 from typing import Dict, Iterator
 
 import cv2
+import os
 
 from eva.readers.abstract_reader import AbstractReader
 from eva.utils.logging_manager import logger
@@ -33,3 +34,11 @@ class CVImageReader(AbstractReader):
             raise Exception(err_msg)
         else:
             yield {"data": frame}
+    
+    def delete(self):
+        file_url = str(self.file_url)
+        try:
+            os.remove(file_url)
+        except Exception as e:
+            raise FileNotFoundError(f"Error was: {e}")
+        # shutil remove or something
