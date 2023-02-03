@@ -47,9 +47,9 @@ class S3LoadExecutorTest(unittest.TestCase):
         os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
 
         self.mock_s3.start()
-        
+
         self.s3_client = boto3.client("s3")
-    
+
     def upload_single_file(self, bucket_name="test-bucket"):
         self.s3_client.create_bucket(Bucket=bucket_name)
         self.s3_client.upload_file(self.video_file_path, bucket_name, "dummy.avi")
@@ -94,7 +94,7 @@ class S3LoadExecutorTest(unittest.TestCase):
         self.assertEqual(result, expected)
 
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideos;")
-    
+
     def test_s3_multiple_file_multiple_load_executor(self):
         bucket_name = "multiple-file-multiple-load-bucket"
         self.upload_single_file(bucket_name)
@@ -109,14 +109,14 @@ class S3LoadExecutorTest(unittest.TestCase):
 
         select_query = """SELECT * FROM MyVideos;"""
         result = execute_query_fetch_all(select_query)
-        result_videos = list(result.frames['myvideos.name'].unique())
+        result_videos = list(result.frames["myvideos.name"].unique())
 
         expected_videos = [
             self.s3_download_dir + "/MyVideos/1.mp4",
             self.s3_download_dir + "/MyVideos/2.mp4",
-            self.video_file_path
+            self.video_file_path,
         ]
-        
+
         self.assertEqual(result_videos, expected_videos)
 
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideos;")
