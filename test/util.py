@@ -313,7 +313,14 @@ def file_remove(path, parent_dir=upload_dir_from_config):
     except FileNotFoundError:
         pass
 
-def create_dummy_batches(num_frames=NUM_FRAMES, filters=[], batch_size=10, start_id=0, video_dir=upload_dir_from_config):
+
+def create_dummy_batches(
+    num_frames=NUM_FRAMES,
+    filters=[],
+    batch_size=10,
+    start_id=0,
+    video_dir=upload_dir_from_config,
+):
     if not filters:
         filters = range(num_frames)
     data = []
@@ -334,6 +341,7 @@ def create_dummy_batches(num_frames=NUM_FRAMES, filters=[], batch_size=10, start
             data = []
     if data:
         yield Batch(pd.DataFrame(data))
+
 
 def create_dummy_4d_batches(
     num_frames=NUM_FRAMES, filters=[], batch_size=10, start_id=0
