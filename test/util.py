@@ -307,28 +307,20 @@ def copy_sample_images_to_upload_dir():
     )
 
 
-def file_remove(path):
+def file_remove(path, parent_dir=upload_dir_from_config):
     try:
-        os.remove(os.path.join(upload_dir_from_config, path))
+        os.remove(os.path.join(parent_dir, path))
     except FileNotFoundError:
         pass
 
-
-def file_remove_from_s3(path):
-    try:
-        os.remove(os.path.join(s3_dir_from_config, path))
-    except FileNotFoundError:
-        pass
-
-
-def create_dummy_batches(num_frames=NUM_FRAMES, filters=[], batch_size=10, start_id=0):
+def create_dummy_batches(num_frames=NUM_FRAMES, filters=[], batch_size=10, start_id=0, video_dir=upload_dir_from_config):
     if not filters:
         filters = range(num_frames)
     data = []
     for i in filters:
         data.append(
             {
-                "myvideo.name": os.path.join(upload_dir_from_config, "dummy.avi"),
+                "myvideo.name": os.path.join(video_dir, "dummy.avi"),
                 "myvideo.id": i + start_id,
                 "myvideo.data": np.array(
                     np.ones((2, 2, 3)) * float(i + 1) * 25, dtype=np.uint8
@@ -342,32 +334,6 @@ def create_dummy_batches(num_frames=NUM_FRAMES, filters=[], batch_size=10, start
             data = []
     if data:
         yield Batch(pd.DataFrame(data))
-
-
-def create_dummy_batches_s3(
-    num_frames=NUM_FRAMES, filters=[], batch_size=10, start_id=0
-):
-    if not filters:
-        filters = range(num_frames)
-    data = []
-    for i in filters:
-        data.append(
-            {
-                "myvideo.name": os.path.join(s3_dir_from_config, "MyVideo/dummy.avi"),
-                "myvideo.id": i + start_id,
-                "myvideo.data": np.array(
-                    np.ones((2, 2, 3)) * float(i + 1) * 25, dtype=np.uint8
-                ),
-                "myvideo.seconds": 0.0,
-            }
-        )
-
-        if len(data) % batch_size == 0:
-            yield Batch(pd.DataFrame(data))
-            data = []
-    if data:
-        yield Batch(pd.DataFrame(data))
-
 
 def create_dummy_4d_batches(
     num_frames=NUM_FRAMES, filters=[], batch_size=10, start_id=0

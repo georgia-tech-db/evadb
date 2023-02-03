@@ -14,7 +14,8 @@
 # limitations under the License.
 import os
 import unittest
-from test.util import create_dummy_batches_s3, create_sample_video, file_remove_from_s3
+from eva.configuration.configuration_manager import ConfigurationManager
+from test.util import create_dummy_batches, create_sample_video, file_remove
 
 import boto3
 import pandas as pd
@@ -35,6 +36,7 @@ class S3LoadExecutorTest(unittest.TestCase):
         # reset the catalog manager before running each test
         CatalogManager().reset()
         self.video_file_path = create_sample_video()
+        self.s3_download_dir = ConfigurationManager().get_value("storage", "s3_download_dir")
 
         """Mocked AWS Credentials for moto."""
         os.environ["AWS_ACCESS_KEY_ID"] = "testing"
@@ -51,7 +53,7 @@ class S3LoadExecutorTest(unittest.TestCase):
         bucket.create()
 
     def tearDown(self):
-        file_remove_from_s3("MyVideo/dummy.avi")
+        file_remove("MyVideo/dummy.avi", parent_dir=self.s3_download_dir)
         self.mock_s3.stop()
 
     def test_s3_single_file_load_executor(self):
@@ -65,7 +67,7 @@ class S3LoadExecutorTest(unittest.TestCase):
 
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()
-        expected_batch = list(create_dummy_batches_s3())[0]
+        expected_batch = list(create_dummy_batches(video_dir=f"{self.s3_download_dir}/MyVideo"))[0]
         self.assertEqual(actual_batch, expected_batch)
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
 
