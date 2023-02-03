@@ -35,6 +35,7 @@ class S3LoadExecutorTest(unittest.TestCase):
         # reset the catalog manager before running each test
         CatalogManager().reset()
         self.video_file_path = create_sample_video()
+        self.multiple_video_file_path = f"{EVA_ROOT_DIR}/data/sample_videos/1"
         self.s3_download_dir = ConfigurationManager().get_value(
             "storage", "s3_download_dir"
         )
@@ -56,13 +57,17 @@ class S3LoadExecutorTest(unittest.TestCase):
 
     def upload_multiple_files(self, bucket_name="test-bucket"):
         self.s3_client.create_bucket(Bucket=bucket_name)
-        video_path = f"{EVA_ROOT_DIR}/data/sample_videos/1"
+        video_path = self.multiple_video_file_path
 
         for file in os.listdir(video_path):
             self.s3_client.upload_file(f"{video_path}/{file}", bucket_name, file)
 
     def tearDown(self):
         file_remove("MyVideo/dummy.avi", parent_dir=self.s3_download_dir)
+
+        for file in os.listdir(self.multiple_video_file_path):
+            file_remove(f"MyVideos/{file}", parent_dir=self.s3_download_dir)
+
         self.mock_s3.stop()
 
     def test_s3_single_file_load_executor(self):
