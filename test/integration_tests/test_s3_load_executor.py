@@ -30,7 +30,6 @@ from eva.server.command_handler import execute_query_fetch_all
 
 class S3LoadExecutorTest(unittest.TestCase):
     mock_s3 = mock_s3()
-    bucket_name = "test-bucket"
 
     def setUp(self):
         # reset the catalog manager before running each test
@@ -48,21 +47,29 @@ class S3LoadExecutorTest(unittest.TestCase):
         os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
 
         self.mock_s3.start()
+        
+        self.s3_client = boto3.client("s3")
+    
+    def upload_single_file(self, bucket_name="test-bucket"):
+        self.s3_client.create_bucket(Bucket=bucket_name)
+        self.s3_client.upload_file(self.video_file_path, bucket_name, "dummy.avi")
 
-        # you can use boto3.client("s3") if you prefer
-        s3_resource = boto3.resource("s3")
-        bucket = s3_resource.Bucket(self.bucket_name)
-        bucket.create()
+    def upload_multiple_files(self, bucket_name="test-bucket"):
+        self.s3_client.create_bucket(Bucket=bucket_name)
+        video_path = f"{EVA_ROOT_DIR}/data/sample_videos/1"
+
+        for file in os.listdir(video_path):
+            self.s3_client.upload_file(f"{video_path}/{file}", bucket_name, file)
 
     def tearDown(self):
         file_remove("MyVideo/dummy.avi", parent_dir=self.s3_download_dir)
         self.mock_s3.stop()
 
     def test_s3_single_file_load_executor(self):
-        s3_client = boto3.client("s3")
-        s3_client.upload_file(self.video_file_path, self.bucket_name, "dummy.avi")
+        bucket_name = "single-file-bucket"
+        self.upload_single_file(bucket_name)
 
-        query = f"LOAD VIDEO 's3://{self.bucket_name}/dummy.avi' INTO MyVideo;"
+        query = f"LOAD VIDEO 's3://{bucket_name}/dummy.avi' INTO MyVideo;"
         execute_query_fetch_all(query)
 
         select_query = """SELECT * FROM MyVideo;"""
@@ -76,18 +83,40 @@ class S3LoadExecutorTest(unittest.TestCase):
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
 
     def test_s3_multiple_file_load_executor(self):
-        s3_client = boto3.client("s3")
+        bucket_name = "multiple-file-bucket"
+        self.upload_multiple_files(bucket_name)
 
-        video_path = f"{EVA_ROOT_DIR}/data/sample_videos/1"
-
-        for file in os.listdir(video_path):
-            s3_client.upload_file(f"{video_path}/{file}", self.bucket_name, file)
-
-        query = f"""LOAD VIDEO "s3://{self.bucket_name}/*.mp4" INTO MyVideos;"""
+        query = f"""LOAD VIDEO "s3://{bucket_name}/*.mp4" INTO MyVideos;"""
         result = execute_query_fetch_all(query)
         expected = Batch(
             pd.DataFrame([f"Number of loaded {FileFormatType.VIDEO.name}: 2"])
         )
         self.assertEqual(result, expected)
+
+        execute_query_fetch_all("DROP TABLE IF EXISTS MyVideos;")
+    
+    def test_s3_multiple_file_multiple_load_executor(self):
+        bucket_name = "multiple-file-multiple-load-bucket"
+        self.upload_single_file(bucket_name)
+        self.upload_multiple_files(bucket_name)
+
+        insert_query_one = f"""LOAD VIDEO "s3://{bucket_name}/1.mp4" INTO MyVideos;"""
+        execute_query_fetch_all(insert_query_one)
+        insert_query_two = f"""LOAD VIDEO "s3://{bucket_name}/2.mp4" INTO MyVideos;"""
+        execute_query_fetch_all(insert_query_two)
+        insert_query_three = f"LOAD VIDEO '{self.video_file_path}' INTO MyVideos;"
+        execute_query_fetch_all(insert_query_three)
+
+        select_query = """SELECT * FROM MyVideos;"""
+        result = execute_query_fetch_all(select_query)
+        result_videos = list(result.frames['myvideos.name'].unique())
+
+        expected_videos = [
+            self.s3_download_dir + "/MyVideos/1.mp4",
+            self.s3_download_dir + "/MyVideos/2.mp4",
+            self.video_file_path
+        ]
+        
+        self.assertEqual(result_videos, expected_videos)
 
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideos;")

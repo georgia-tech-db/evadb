@@ -37,8 +37,11 @@ def download_from_s3(s3_uri, save_dir):
     s3_uri = s3_uri.as_posix()
     bucket_name, regex_key = parse_s3_uri(s3_uri)
     s3_bucket = boto3.resource("s3").Bucket(bucket_name)
+    file_save_paths = []
     for obj in s3_bucket.objects.all():
         if re.search(re.sub("\*", ".*", regex_key), obj.key):  # noqa: W605
             key = obj.key.replace("/", "_")
             save_path = Path(save_dir) / key
             s3_client.download_file(bucket_name, key, save_path)
+            file_save_paths.append(save_path)
+    return file_save_paths

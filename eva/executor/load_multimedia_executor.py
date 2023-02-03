@@ -42,20 +42,22 @@ class LoadMultimediaExecutor(AbstractExecutor):
         storage_engine = None
         table_obj = None
         try:
+            video_files = []
             valid_files = []
-            search_path = self.node.file_path
 
             # If it is a s3 path, download the file to local
-            if search_path.as_posix().startswith("s3:/"):
+            if self.node.file_path.as_posix().startswith("s3:/"):
                 s3_dir = Path(
                     ConfigurationManager().get_value("storage", "s3_download_dir")
                 )
                 dst_path = s3_dir / self.node.table_info.table_name
                 dst_path.mkdir(parents=True, exist_ok=True)
-                download_from_s3(self.node.file_path, dst_path)
-                search_path = dst_path / "*"
+                video_files = download_from_s3(self.node.file_path, dst_path)
+            else:
+                # Local Storage
+                video_files = iter_path_regex(self.node.file_path)
 
-            for file_path in iter_path_regex(search_path):
+            for file_path in video_files:
                 file_path = Path(file_path)
                 if validate_media(file_path, self.media_type):
                     valid_files.append(str(file_path))
