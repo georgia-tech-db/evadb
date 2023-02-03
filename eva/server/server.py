@@ -128,7 +128,6 @@ def start_server(
         loop.run_until_complete(stop_server_future)
 
     except KeyboardInterrupt:
-
         logger.info("Interrupting server")
 
     finally:

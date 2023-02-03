@@ -35,7 +35,6 @@ async def realtime_server_status(protocol, server_closed):
     previous_errors = 0
 
     while not server_closed.done() and not server_closed.cancelled():
-
         # Only report changes
         if (
             protocol.__connections__ != previous_connections

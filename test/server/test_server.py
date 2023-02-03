@@ -36,7 +36,6 @@ class ServerTests(unittest.TestCase):
         super().__init__(*args, **kwargs)
 
     def test_server_protocol_connection_lost(self):
-
         socket_timeout = 65
         EvaServer.__connections__ = 0
 
@@ -66,7 +65,6 @@ class ServerTests(unittest.TestCase):
         self.assertEqual(EvaServer.__errors__, 1, "connection not errored out")
 
     def test_server_protocol_data_received(self):
-
         socket_timeout = 60
 
         eva_server = EvaServer(socket_timeout)
@@ -88,7 +86,6 @@ class ServerTests(unittest.TestCase):
 
     @pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
     def test_server_integration_test(self):
-
         host = "0.0.0.0"
         port = 5489
         socket_timeout = 60

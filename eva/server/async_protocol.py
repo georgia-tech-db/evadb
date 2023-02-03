@@ -89,7 +89,6 @@ class EvaClient(asyncio.Protocol):
         logger.debug("[ " + str(self.id) + " ]" + " Connected to server")
 
     def connection_lost(self, exc, exc2=None):
-
         logger.debug("[ " + str(self.id) + " ]" + " Disconnected from server")
 
         try:
