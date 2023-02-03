@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * PR #580: Added features to load videos from S3.
 
 ### [Changed]
+
+* PR #581: fix: debugging issuse in yolov5
+
 ### [Deprecated]
 ### [Removed]
 

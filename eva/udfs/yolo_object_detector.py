@@ -29,13 +29,6 @@ except ImportError as e:
         f"Failed to import with error {e}, \
         please try `pip install torch`"
     )
-try:
-    import yolov5
-except ImportError as e:
-    raise ImportError(
-        f"Failed to import with error {e}, \
-        please try `pip install yolov5`"
-    )
 
 
 class YoloV5(PytorchAbstractClassifierUDF):
@@ -51,7 +44,7 @@ class YoloV5(PytorchAbstractClassifierUDF):
 
     def setup(self, threshold=0.85):
         self.threshold = threshold
-        self.model = yolov5.load("yolov5s.pt", verbose=False)
+        self.model = torch.hub.load("ultralytics/yolov5", "yolov5s", verbose=False)
 
     @property
     def input_format(self) -> FrameInfo:
