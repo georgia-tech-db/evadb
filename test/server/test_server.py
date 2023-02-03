@@ -99,7 +99,7 @@ class ServerTests(unittest.TestCase):
         thread.daemon = True
         thread.start()
 
-        with self.assertRaises(asyncio.exceptions.CancelledError):
+        with self.assertRaises(SystemExit):
             start_server(
                 host=host,
                 port=port,
