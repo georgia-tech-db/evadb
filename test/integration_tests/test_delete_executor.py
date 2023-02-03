@@ -55,16 +55,16 @@ class DeleteExecutorTest(unittest.TestCase):
 
         # Create table.
         feat_col_list = [
-            ColumnDefinition("id", ColumnType.INTEGER, NdArrayType.UINT8, (1)),
-            ColumnDefinition("feat", ColumnType.NDARRAY, NdArrayType.FLOAT32, (1, 3)),
-            ColumnDefinition("input", ColumnType.NDARRAY, NdArrayType.UINT8, (1, 3)),
+            ColumnDefinition("id", ColumnType.INTEGER, None, None),
+            ColumnDefinition("feat", ColumnType.NDARRAY, None, (1, 3)),
+            ColumnDefinition("input", ColumnType.NDARRAY, None, (1, 3)),
         ]
         feat_col_entries = xform_column_definitions_to_catalog_entries(feat_col_list)
 
         input_col_list = [
-            ColumnDefinition("id", ColumnType.INTEGER, NdArrayType.UINT8, (1)),
-            ColumnDefinition("feat", ColumnType.NDARRAY, NdArrayType.FLOAT32, (1, 3)),
-            ColumnDefinition("input", ColumnType.NDARRAY, NdArrayType.UINT8, (1, 3)),
+            ColumnDefinition("id", ColumnType.INTEGER, None, None),
+            ColumnDefinition("feat", ColumnType.NDARRAY, None, (1, 3)),
+            ColumnDefinition("input", ColumnType.NDARRAY, None, (1, 3)),
         ]
         input_col_entries = xform_column_definitions_to_catalog_entries(input_col_list)
 

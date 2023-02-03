@@ -1,7 +1,8 @@
 from typing import Generator, Iterator
 
 from eva.executor.abstract_executor import AbstractExecutor
-from eva.executor.executor_utils import ExecutorError, apply_project
+from eva.executor.executor_utils import ExecutorError, apply_predicate
+from eva.catalog.catalog_manager import CatalogManager
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.project_plan import ProjectPlan
 from eva.utils.logging_manager import logger
@@ -12,7 +13,8 @@ class DeleteExecutor(AbstractExecutor):
 
     def __init__(self, node: ProjectPlan):
         super().__init__(node)
-        self.target_list = node.target_list
+        self.predicate = node.where_clause
+        self.catalog = CatalogManager()
 
     def validate(self):
         pass
