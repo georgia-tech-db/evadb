@@ -199,6 +199,7 @@ class OptimizeExpression(OptimizerTask):
                     self.optimizer_context.task_stack.push(
                         ExploreGroup(group, self.optimizer_context)
                     )
+        print("out of the loop")
 
 
 class ApplyRule(OptimizerTask):
@@ -254,7 +255,7 @@ class OptimizeGroup(OptimizerTask):
     def execute(self):
         # Todo: Get the property from the context
         if self.group.get_best_expr(PropertyType.DEFAULT):
-            return
+            return # does this get hit? 
 
         # optimize all the logical exprs with the same context
         for expr in self.group.logical_exprs:
@@ -281,7 +282,7 @@ class OptimizeInputs(OptimizerTask):
         for child_id in self.root_expr.children:
             child_grp = memo.get_group_by_id(child_id)
             if child_grp.get_best_expr(PropertyType.DEFAULT):
-                cost += child_grp.get_best_expr_cost(PropertyType.DEFAULT)
+                cost += child_grp.get_best_expr_cost(PropertyType.DEFAULT) #this never hits which means it keeps pushing the same inputs and groups on the stack 
             else:
                 self.optimizer_context.task_stack.push(
                     OptimizeInputs(self.root_expr, self.optimizer_context)
