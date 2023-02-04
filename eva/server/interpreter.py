@@ -20,6 +20,8 @@ from typing import Dict
 import asyncio
 from asyncio import StreamReader, StreamWriter
 from eva.utils.logging_manager import logger
+from collections import deque
+from typing import Callable, Deque, Awaitable
 
 # Skip readline on Windows
 if os.name != "nt":
@@ -78,12 +80,14 @@ class EvaCommandInterpreter(Cmd):
 
     def default(self, line):
         """Considers the input as a query"""
-        return self.do_query(line)
+        logger.info("default")
+        self.do_query(line)
 
-    async def do_query(self, query):
+    def do_query(self, query):
         """Takes in SQL query and generates the output"""
+        logger.info("do query")
         self.cursor.execute(query)
-        message = self.cursor.fetch_all()
+        message =  self.cursor.fetch_all()
         print(message)
         return False
 
@@ -99,7 +103,7 @@ with open(version_file_path, "r") as version_file:
     exec(version_file.read(), VERSION_DICT)
 
 
-async def handle_user_input(reader, writer):
+def handle_user_input(reader, writer):
     """
     Reads from stdin in separate thread
 
@@ -120,6 +124,51 @@ async def handle_user_input(reader, writer):
     )
 
 
+class MessageStore:
+    def __init__(self, max_size: int):
+        self._deque = deque(maxlen=max_size)
+
+    async def append(self, item):
+        self._deque.append(item)
+
+async def read_line(stdin_reader: StreamReader) -> str:
+    delete_char = b'\x7f'
+    input_buffer = deque()
+    while (input_char := await stdin_reader.read(1)) != b'\n':
+        if input_char == delete_char:
+            if len(input_buffer) > 0:
+                input_buffer.pop()
+                sys.stdout.flush()
+        else:
+            input_buffer.append(input_char)
+            sys.stdout.write(input_char.decode())
+            sys.stdout.flush()
+    return b''.join(input_buffer).decode()
+
+async def send_message(message: str, writer: StreamWriter):
+    writer.write((message + '\n').encode())
+    await writer.drain()
+
+async def read_and_send(stdin_reader: StreamReader,
+                        writer: StreamWriter): 
+    while True:
+        message = await read_line(stdin_reader)
+        await send_message(message, writer)
+
+async def listen_for_messages(reader: StreamReader,
+                              message_store: MessageStore): 
+    while (message := await reader.readline()) != b'':
+        await message_store.append(message.decode())
+    await message_store.append('Server closed connection.')
+
+
+async def create_stdin_reader() -> StreamReader:
+    stream_reader = asyncio.StreamReader()
+    protocol = asyncio.StreamReaderProtocol(stream_reader)
+    loop = asyncio.get_running_loop()
+    await loop.connect_read_pipe(lambda: protocol, sys.stdin)
+    return stream_reader
+
 async def start_cmd_client(host: str, port: int):
     """
     Wait for the connection to open and the task to be processed.
@@ -131,10 +180,15 @@ async def start_cmd_client(host: str, port: int):
 
     reader, writer = await asyncio.open_connection(host, port)
 
-    input_listener = asyncio.create_task(handle_user_input(reader, writer))
+    messages = MessageStore(100)
+    message_listener = asyncio.create_task(
+                    listen_for_messages(reader, messages)) 
+
+    stdin_reader = await create_stdin_reader()
+    input_listener = asyncio.create_task(read_and_send(stdin_reader, writer))
 
     try:
-        await asyncio.wait([input_listener], 
+        await asyncio.wait([message_listener, input_listener], 
                             return_when=asyncio.FIRST_COMPLETED)
     except Exception as e:
         logger.error('Error.', exc_info=e)

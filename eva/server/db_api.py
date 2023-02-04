@@ -71,7 +71,7 @@ class EVACursor(object):
         """
         fetch_all is the same as fetch_one for now.
         """
-        return await self.fetch_one_async()
+        return await self.fetch_one()
 
     def _upload_transformation(self, query: str) -> str:
         """
