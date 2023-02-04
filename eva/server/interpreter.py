@@ -17,12 +17,14 @@ import sys
 from cmd import Cmd
 from contextlib import ExitStack
 from typing import Dict
+import asyncio
+from asyncio import StreamReader, StreamWriter
 
 # Skip readline on Windows
 if os.name != "nt":
     from readline import read_history_file, set_history_length, write_history_file
 
-from eva.server.db_api import connect
+from eva.server.db_api import EVAConnection
 
 # History file to persist EVA  command history across multiple client sessions
 histfile = "eva.history"
@@ -57,8 +59,8 @@ class EvaCommandInterpreter(Cmd):
             set_history_length(histfile_size)
             write_history_file(histfile)
 
-    def set_connection(self, connection):
-        self.connection = connection
+    def set_connection(self, reader, writer):
+        self.connection = EVAConnection(reader, writer)
         self.cursor = self.connection.cursor()
 
     def emptyline(self):
@@ -80,7 +82,8 @@ class EvaCommandInterpreter(Cmd):
     def do_query(self, query):
         """Takes in SQL query and generates the output"""
         self.cursor.execute(query)
-        print(self.cursor.fetch_all())
+        message = self.cursor.fetch_all()
+        print(message)
         return False
 
 
@@ -95,7 +98,7 @@ with open(version_file_path, "r") as version_file:
     exec(version_file.read(), VERSION_DICT)
 
 
-def handle_user_input(connection):
+def handle_user_input(reader, writer):
     """
     Reads from stdin in separate thread
 
@@ -107,7 +110,7 @@ def handle_user_input(connection):
     prompt = EvaCommandInterpreter()
     prompt.prompt = "eva=#"
 
-    prompt.set_connection(connection)
+    prompt.set_connection(reader, writer)
 
     VERSION = VERSION_DICT["VERSION"]
 
@@ -116,7 +119,7 @@ def handle_user_input(connection):
     )
 
 
-def start_cmd_client(host: str, port: int):
+async def start_cmd_client(host: str, port: int):
     """
     Wait for the connection to open and the task to be processed.
 
@@ -125,6 +128,6 @@ def start_cmd_client(host: str, port: int):
     - Socket will be automatically closed by the exit stack.
     """
 
-    with ExitStack() as _:
-        connection = connect(host, port)
-        handle_user_input(connection)
+    reader, writer = await asyncio.open_connection(host, port)
+
+    handle_user_input(reader, writer)

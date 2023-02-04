@@ -51,17 +51,17 @@ class EvaServer:
         task = asyncio.Task(self.handle_client(client_reader, client_writer))
         self._clients[task] = (client_reader, client_writer)
 
-        async def client_done(task):
+        def close_client(task):
             del self._clients[task]
             client_writer.close()
-            await client_writer.wait_closed()
-            logger.info("Close Client Connection")
+            logger.info("End connection")
 
-        logger.info("New Client Connection")
-        task.add_done_callback(client_done)
+        logger.info("New client connection")
+        task.add_done_callback(close_client)
+
 
     async def handle_client(self, client_reader: StreamReader, 
-                     client_writer: StreamWriter):
+                                  client_writer: StreamWriter):
         
         try:
             while (data := await asyncio.wait_for(
@@ -72,7 +72,6 @@ class EvaServer:
 
                 if message in ["quit", "exit"]:
                     logger.info("Close client")
-                    # client_done will cleanup
                     return
 
                 logger.info("Handle request")
@@ -80,4 +79,3 @@ class EvaServer:
 
         except Exception as e:
             logger.error('Error reading from client.', exc_info=e)
-                
