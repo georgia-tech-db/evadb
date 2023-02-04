@@ -22,6 +22,8 @@ from asyncio import StreamReader, StreamWriter
 from eva.utils.logging_manager import logger
 from collections import deque
 from typing import Callable, Deque, Awaitable
+from eva.models.server.response import Response
+from pprint import pprint
 
 # Skip readline on Windows
 if os.name != "nt":
@@ -157,8 +159,10 @@ async def read_and_send(stdin_reader: StreamReader,
 
 async def listen_for_messages(reader: StreamReader,
                               message_store: MessageStore): 
-    while (message := await reader.readline()) != b'':
-        await message_store.append(message.decode())
+    while (message := await reader.readline()) != b'':     
+        logger.info("listen for messages")
+        pprint(message)   
+        #await message_store.append(message.decode())
     await message_store.append('Server closed connection.')
 
 

@@ -15,6 +15,7 @@
 import asyncio
 import base64
 import os
+from pprint import pprint
 
 from eva.models.server.response import Response
 from asyncio import StreamReader, StreamWriter
@@ -61,7 +62,9 @@ class EVACursor(object):
         """
         try:
             message = await self._connection._reader.readline()
-            response = await asyncio.coroutine(Response.deserialize)(message)
+            pprint(message)
+            response = Response()
+            #response = await asyncio.coroutine(Response.deserialize)(message)
         except Exception as e:
             raise e
         self._pending_query = False

@@ -14,6 +14,7 @@
 # limitations under the License.
 import asyncio
 from typing import Iterator, Optional
+from pprint import pprint
 
 from eva.binder.statement_binder import StatementBinder
 from eva.binder.statement_binder_context import StatementBinderContext
@@ -92,8 +93,10 @@ def handle_request(client_writer, request_message):
 
     query_runtime.log_elapsed_time("Query Response Time")
 
-    responseData = serialize_message(response)
+    pprint(response)
 
-    client_writer.write(responseData)
+    response_data = serialize_message(response)
+    
+    client_writer.write(response_data)
 
     return response
