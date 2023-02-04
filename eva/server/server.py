@@ -13,134 +13,71 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import asyncio
-import os
-import signal
 import string
 
-from eva.server.async_protocol import EvaProtocolBuffer
 from eva.server.command_handler import handle_request
-from eva.server.networking_utils import realtime_server_status, set_socket_io_timeouts
 from eva.utils.generic_utils import PickleSerializer
 from eva.utils.logging_manager import logger
+from asyncio import StreamReader, StreamWriter
 
-
-class EvaServer(asyncio.Protocol):
-
+class EvaServer:
     """
     Receives messages and offloads them to another task for processing them.
-
-    - It never creates any asynchronous tasks itself
-    - It doesn't have to know anything about any event loops
-    - It tracks its progress via the class-level counters
     """
 
-    # These counters are used for realtime server monitoring
-    __connections__ = 0
-    __errors__ = 0
-    _socket_timeout = 0
+    def __init__(self):
+        self._clients = {}  # client -> (reader, writer)
 
-    def __init__(self, socket_timeout):
-        self.transport = None
-        self._socket_timeout = socket_timeout
-        self.buffer = EvaProtocolBuffer()
+    async def start_eva_server(self, host: string, port: int):
+        """
+        Start the server
+        Server objects are asynchronous context managers.
 
-    def connection_made(self, transport):
-        self.transport = transport
+        hostname: hostname of the server
+        port: port of the server
+        """
+        logger.info("Start Server")
 
-        # Set timeout for sockets
-        if not set_socket_io_timeouts(self.transport, self._socket_timeout, 0):
-            self.transport.abort()
-            return
+        server = await asyncio.start_server(self.accept_client, host, port)
 
-        # Each client connection creates a new protocol instance
-        peername = transport.get_extra_info("peername")
-        logger.debug(
-            "Connection from client: " + str(peername) + str(self._socket_timeout)
-        )
-        EvaServer.__connections__ += 1
-
-    def connection_lost(self, exc):
-        # free sockets early, free sockets often
-        if exc:
-            EvaServer.__errors__ += 1
-            self.transport.abort()
-        else:
-            self.transport.close()
-        EvaServer.__connections__ -= 1
-
-    def data_received(self, data: bytes):
-        # Request from client
-        self.buffer.feed_data(data)
-        while self.buffer.has_complete_message():
-            request_message = self.buffer.read_message()
-            request_message = PickleSerializer.deserialize(request_message)
-            if request_message in ["quit", "exit"]:
-                logger.debug("Close client socket")
-                return self.transport.close()
-            else:
-                logger.debug("Handle request")
-                asyncio.create_task(handle_request(self.transport, request_message))
-
-
-def start_server(
-    host: string, port: int, loop, socket_timeout: int, stop_server_future
-):
-    """
-    Start the server.
-    Server objects are asynchronous context managers.
-
-    hostname: hostname of the server
-    stop_server_future: future for externally stopping the server
-    """
-
-    logger.info("Start Server")
-
-    # Register signal handler
-    def raiseSystemExit(_, __):
-        raise SystemExit
-
-    if os.name != "nt":
-        signals = [signal.SIGINT, signal.SIGTERM, signal.SIGHUP]
-    else:
-        signals = [signal.SIGINT, signal.SIGTERM, signal.SIGBREAK]
-
-    for handled_signal in signals:
-        signal.signal(handled_signal, raiseSystemExit)
-
-    # Get a reference to the event loop
-    # loop = asyncio.get_event_loop()
-
-    # Start the eva server
-    coro = loop.create_server(lambda: EvaServer(socket_timeout), host, port)
-    server = loop.run_until_complete(coro)
-
-    for socket in server.sockets:
-        logger.info(
-            "PID(" + str(os.getpid()) + ") serving on " + str(socket.getsockname())
-        )
-
-    server_closed = loop.create_task(server.wait_closed())
-
-    # Start the realtime status monitor
-    monitor = loop.create_task(realtime_server_status(EvaServer, server_closed))
-
-    try:
-        loop.run_until_complete(stop_server_future)
-
-    except KeyboardInterrupt:
-        logger.info("Interrupting server")
-
-    finally:
-        # Stop monitor
-        monitor.cancel()
-
-        logger.info("Shutting down server")
-
-        # Close server
-        server.close()
-
-        # Stop event loop
-        loop.run_until_complete(server.wait_closed())
-        loop.close()
+        async with server:
+            await server.serve_forever()
 
         logger.info("Successfully shutdown server")
+
+    async def accept_client(self, client_reader: StreamReader, 
+                            client_writer: StreamWriter): 
+
+        task = asyncio.Task(self.handle_client(client_reader, client_writer))
+        self._clients[task] = (client_reader, client_writer)
+
+        async def client_done(task):
+            del self._clients[task]
+            client_writer.close()
+            await client_writer.wait_closed()
+            logger.info("Close Client Connection")
+
+        logger.info("New Client Connection")
+        task.add_done_callback(client_done)
+
+    async def handle_client(self, client_reader: StreamReader, 
+                     client_writer: StreamWriter):
+        
+        try:
+            while (data := await asyncio.wait_for(
+                        client_reader.readline(),
+                        timeout=60.0)):
+                message = data.decode()
+                logger.info("Received %s", message)
+
+                if message in ["quit", "exit"]:
+                    logger.info("Close client")
+                    # client_done will cleanup
+                    return
+
+                logger.info("Handle request")
+                asyncio.create_task(handle_request(client_writer, message))
+
+        except Exception as e:
+            logger.error('Error reading from client.', exc_info=e)
+                

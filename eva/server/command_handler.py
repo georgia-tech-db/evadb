@@ -56,14 +56,14 @@ def execute_query_fetch_all(query, **kwargs) -> Optional[Batch]:
 
 
 @asyncio.coroutine
-def handle_request(transport, request_message):
+def handle_request(client_writer, request_message):
     """
     Reads a request from a client and processes it
 
     If user inputs 'quit' stops the event loop
     otherwise just echoes user input
     """
-    logger.debug("Receive request: --|" + str(request_message) + "|--")
+    logger.info("Receive request: --|" + str(request_message) + "|--")
 
     # time.sleep(3)
     error = False
@@ -94,6 +94,6 @@ def handle_request(transport, request_message):
 
     responseData = serialize_message(response)
 
-    transport.write(responseData)
+    client_writer.write(responseData)
 
     return response

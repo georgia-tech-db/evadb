@@ -30,36 +30,22 @@ EVA_CODE_DIR = abspath(join(THIS_DIR, ".."))
 sys.path.append(EVA_CODE_DIR)
 
 from eva.configuration.configuration_manager import ConfigurationManager  # noqa: E402
-from eva.server.server import start_server  # noqa: E402
+from eva.server.server import EvaServer 
 from eva.udfs.udf_bootstrap_queries import init_builtin_udfs  # noqa: E402
 
 
-def eva():
+async def start_eva_server():
     """
-    Start the eva system
+    Start the eva server
     """
     # Get the hostname and port information from the configuration file
     config = ConfigurationManager()
-    hostname = config.get_value("server", "host")
+    host = config.get_value("server", "host")
     port = config.get_value("server", "port")
-    socket_timeout = config.get_value("server", "socket_timeout")
-    loop = asyncio.new_event_loop()
-    stop_server_future = loop.create_future()
 
-    # Launch server
-    try:
-        asyncio.run(
-            start_server(
-                host=hostname,
-                port=port,
-                loop=loop,
-                socket_timeout=socket_timeout,
-                stop_server_future=stop_server_future,
-            )
-        )
+    eva_server = EvaServer()
 
-    except Exception as e:
-        logger.critical(e)
+    await eva_server.start_eva_server(host, port)
 
 
 def stop_server():
@@ -101,7 +87,8 @@ def main():
     if args.start:
         mode = ConfigurationManager().get_value("core", "mode")
         init_builtin_udfs(mode=mode)
-        eva()
+        
+        asyncio.run(start_eva_server())
 
 
 if __name__ == "__main__":

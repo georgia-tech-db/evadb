@@ -86,10 +86,10 @@ class EvaClient(asyncio.Protocol):
             logger.debug("[ " + str(self.id) + " ]" + " Could not set timeout")
             return
 
-        logger.debug("[ " + str(self.id) + " ]" + " Connected to server")
+        logger.info("[ " + str(self.id) + " ]" + " Connected to server")
 
     def connection_lost(self, exc, exc2=None):
-        logger.debug("[ " + str(self.id) + " ]" + " Disconnected from server")
+        logger.info("[ " + str(self.id) + " ]" + " Disconnected from server")
 
         try:
             self.transport.abort()  # free sockets early, free sockets often
@@ -115,5 +115,6 @@ class EvaClient(asyncio.Protocol):
     @asyncio.coroutine
     def send_message(self, message: str):
         # Send request to server
+        logger.info("Send message: --|" + str(message) + "|--")
         request_chunk = serialize_message(message)
         self.transport.write(request_chunk)
