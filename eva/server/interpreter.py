@@ -125,26 +125,17 @@ def handle_user_input(reader, writer):
         intro="eva (v " + VERSION + ')\nType "help" for help'
     )
 
-
-class MessageStore:
-    def __init__(self, max_size: int):
-        self._deque = deque(maxlen=max_size)
-
-    async def append(self, item):
-        self._deque.append(item)
-
 async def read_line(stdin_reader: StreamReader) -> str:
     delete_char = b'\x7f'
     input_buffer = deque()
     while (input_char := await stdin_reader.read(1)) != b'\n':
+        # If the input character is backspace, remove the last character
         if input_char == delete_char:
             if len(input_buffer) > 0:
                 input_buffer.pop()
-                sys.stdout.flush()
+        # Else, append it to the buffer and echo.
         else:
-            input_buffer.append(input_char)
-            sys.stdout.write(input_char.decode())
-            sys.stdout.flush()
+            input_buffer.append(input_char)            
     return b''.join(input_buffer).decode()
 
 async def send_message(message: str, writer: StreamWriter):
@@ -158,18 +149,13 @@ async def read_from_client_and_send_to_server(
         message = await read_line(stdin_reader)
         await send_message(message, writer)
 
-async def listen_for_messages_from_server(reader: StreamReader,
-                              message_store: MessageStore): 
-    
+async def listen_for_messages_from_server(reader: StreamReader):     
     while True:   
         message = await reader.read(n=100000)
         if message == b'':
             break
         response = Response.deserialize(message) 
-        logger.info(response)
-        #await message_store.append(message.decode())
-    logger.info("server close")
-    await message_store.append('Server closed connection.')
+        sys.stdout.write(str(response))
 
 
 async def create_stdin_reader() -> StreamReader:
@@ -191,9 +177,7 @@ async def start_cmd_client(host: str, port: int):
     reader, writer = await asyncio.open_connection(host, port)
 
     # listen for messages from the server
-    messages = MessageStore(100)
-    message_listener = asyncio.create_task(
-                    listen_for_messages_from_server(reader, messages)) 
+    message_listener = asyncio.create_task(listen_for_messages_from_server(reader)) 
 
     # read input from the client and send it to the server.
     stdin_reader = await create_stdin_reader()

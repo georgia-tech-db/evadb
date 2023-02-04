@@ -67,14 +67,14 @@ class EvaServer:
             while (data := await asyncio.wait_for(
                         client_reader.readline(),
                         timeout=60.0)):
-                message = data.decode()
-                logger.info("Received %s", message)
-
-                if message in ["quit", "exit"]:
-                    logger.info("Close client")
+                message = data.decode().rstrip()
+                logger.debug("Received --|%s|--", message)
+                
+                if message in ["QUIT", "EXIT"]:
+                    logger.debug("Close client")
                     return
 
-                logger.info("Handle request")
+                logger.debug("Handle request")
                 asyncio.create_task(handle_request(client_writer, message))
 
         except Exception as e:

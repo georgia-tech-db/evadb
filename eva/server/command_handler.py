@@ -63,7 +63,7 @@ def handle_request(client_writer, request_message):
     If user inputs 'quit' stops the event loop
     otherwise just echoes user input
     """
-    logger.info("Receive request: --|" + str(request_message) + "|--")
+    logger.debug("Receive request: --|" + str(request_message) + "|--")
 
     # time.sleep(3)
     error = False
@@ -92,7 +92,7 @@ def handle_request(client_writer, request_message):
 
     query_runtime.log_elapsed_time("Query Response Time")
 
-    logger.info(response)
+    logger.debug(response)
 
     response_data = Response.serialize(response) 
 
