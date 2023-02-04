@@ -19,6 +19,7 @@ from pprint import pprint
 
 from eva.models.server.response import Response
 from asyncio import StreamReader, StreamWriter
+from eva.utils.logging_manager import logger
 
 class EVAConnection:
     def __init__(self, reader, writer):
@@ -62,7 +63,7 @@ class EVACursor(object):
         """
         try:
             message = await self._connection._reader.readline()
-            pprint(message)
+            logger.info(message)
             response = Response()
             #response = await asyncio.coroutine(Response.deserialize)(message)
         except Exception as e:

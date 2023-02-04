@@ -24,7 +24,6 @@ from eva.models.storage.batch import Batch
 from eva.optimizer.plan_generator import PlanGenerator
 from eva.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
 from eva.parser.parser import Parser
-from eva.server.networking_utils import serialize_message
 from eva.utils.logging_manager import logger
 from eva.utils.timer import Timer
 
@@ -93,10 +92,10 @@ def handle_request(client_writer, request_message):
 
     query_runtime.log_elapsed_time("Query Response Time")
 
-    pprint(response)
+    logger.info(response)
 
-    response_data = serialize_message(response)
-    
+    response_data = Response.serialize(response) 
+
     client_writer.write(response_data)
 
     return response

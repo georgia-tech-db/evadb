@@ -151,18 +151,24 @@ async def send_message(message: str, writer: StreamWriter):
     writer.write((message + '\n').encode())
     await writer.drain()
 
-async def read_and_send(stdin_reader: StreamReader,
+async def read_from_client_and_send_to_server(
+                        stdin_reader: StreamReader,
                         writer: StreamWriter): 
     while True:
         message = await read_line(stdin_reader)
         await send_message(message, writer)
 
-async def listen_for_messages(reader: StreamReader,
+async def listen_for_messages_from_server(reader: StreamReader,
                               message_store: MessageStore): 
-    while (message := await reader.readline()) != b'':     
-        logger.info("listen for messages")
-        pprint(message)   
+    
+    while True:   
+        message = await reader.read(n=100000)
+        if message == b'':
+            break
+        response = Response.deserialize(message) 
+        logger.info(response)
         #await message_store.append(message.decode())
+    logger.info("server close")
     await message_store.append('Server closed connection.')
 
 
@@ -184,12 +190,14 @@ async def start_cmd_client(host: str, port: int):
 
     reader, writer = await asyncio.open_connection(host, port)
 
+    # listen for messages from the server
     messages = MessageStore(100)
     message_listener = asyncio.create_task(
-                    listen_for_messages(reader, messages)) 
+                    listen_for_messages_from_server(reader, messages)) 
 
+    # read input from the client and send it to the server.
     stdin_reader = await create_stdin_reader()
-    input_listener = asyncio.create_task(read_and_send(stdin_reader, writer))
+    input_listener = asyncio.create_task(read_from_client_and_send_to_server(stdin_reader, writer))
 
     try:
         await asyncio.wait([message_listener, input_listener], 

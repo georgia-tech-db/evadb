@@ -82,7 +82,7 @@ def set_socket_io_timeouts(transport, seconds, useconds=0):
         return False
 
 
-def serialize_message(message: Any):
+def serialize_message_with_length(message: Any):
     pickled_message = PickleSerializer.serialize(message)
     header = struct.pack("!Q", len(pickled_message))
     data = header + pickled_message
