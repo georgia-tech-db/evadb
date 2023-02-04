@@ -142,28 +142,38 @@ async def send_message(message: str, writer: StreamWriter):
     writer.write((message + '\n').encode())
     await writer.drain()
 
-async def read_from_client_and_send_to_server(
-                        stdin_reader: StreamReader,
-                        writer: StreamWriter): 
-    while True:
-        message = await read_line(stdin_reader)
-        await send_message(message, writer)
-
-async def listen_for_messages_from_server(reader: StreamReader):     
-    while True:   
-        message = await reader.read(n=100000)
-        if message == b'':
-            break
-        response = Response.deserialize(message) 
-        sys.stdout.write(str(response))
-
-
 async def create_stdin_reader() -> StreamReader:
     stream_reader = asyncio.StreamReader()
     protocol = asyncio.StreamReaderProtocol(stream_reader)
     loop = asyncio.get_running_loop()
     await loop.connect_read_pipe(lambda: protocol, sys.stdin)
     return stream_reader
+
+async def read_from_client_and_send_to_server(
+                        stdin_reader: StreamReader,
+                        writer: StreamWriter,
+                        server_reader: StreamReader): 
+
+    VERSION = VERSION_DICT["VERSION"]
+    intro="eva (v " + VERSION + ')\nType "help" for help' + '\n'
+    sys.stdout.write(intro)
+    sys.stdout.flush()
+
+    prompt = "eva=#"
+
+    while True:
+        sys.stdout.write(prompt)
+        sys.stdout.flush()        
+        message = await read_line(stdin_reader)
+        await send_message(message, writer)
+
+        message = await server_reader.read(n=100000)
+        if message == b'':
+            break
+        response = Response.deserialize(message) 
+        sys.stdout.write(str(response) + '\n')
+        sys.stdout.flush()
+
 
 async def start_cmd_client(host: str, port: int):
     """
@@ -176,15 +186,12 @@ async def start_cmd_client(host: str, port: int):
 
     reader, writer = await asyncio.open_connection(host, port)
 
-    # listen for messages from the server
-    message_listener = asyncio.create_task(listen_for_messages_from_server(reader)) 
-
     # read input from the client and send it to the server.
     stdin_reader = await create_stdin_reader()
-    input_listener = asyncio.create_task(read_from_client_and_send_to_server(stdin_reader, writer))
+    input_listener = asyncio.create_task(read_from_client_and_send_to_server(stdin_reader, writer, reader))
 
     try:
-        await asyncio.wait([message_listener, input_listener], 
+        await asyncio.wait([input_listener], 
                             return_when=asyncio.FIRST_COMPLETED)
     except Exception as e:
         logger.error('Error.', exc_info=e)
