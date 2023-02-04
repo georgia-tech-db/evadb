@@ -19,6 +19,7 @@ from contextlib import ExitStack
 from typing import Dict
 import asyncio
 from asyncio import StreamReader, StreamWriter
+from eva.utils.logging_manager import logger
 
 # Skip readline on Windows
 if os.name != "nt":
@@ -79,7 +80,7 @@ class EvaCommandInterpreter(Cmd):
         """Considers the input as a query"""
         return self.do_query(line)
 
-    def do_query(self, query):
+    async def do_query(self, query):
         """Takes in SQL query and generates the output"""
         self.cursor.execute(query)
         message = self.cursor.fetch_all()
@@ -98,7 +99,7 @@ with open(version_file_path, "r") as version_file:
     exec(version_file.read(), VERSION_DICT)
 
 
-def handle_user_input(reader, writer):
+async def handle_user_input(reader, writer):
     """
     Reads from stdin in separate thread
 
@@ -130,4 +131,12 @@ async def start_cmd_client(host: str, port: int):
 
     reader, writer = await asyncio.open_connection(host, port)
 
-    handle_user_input(reader, writer)
+    input_listener = asyncio.create_task(handle_user_input(reader, writer))
+
+    try:
+        await asyncio.wait([input_listener], 
+                            return_when=asyncio.FIRST_COMPLETED)
+    except Exception as e:
+        logger.error('Error.', exc_info=e)
+        writer.close()
+        await writer.wait_closed()

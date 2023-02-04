@@ -38,7 +38,7 @@ def eva_client(host="0.0.0.0", port=5432):
     # Sets up logger
     config = ConfigurationManager()  # noqa: F841
 
-    # Launch server
+    # Launch client
     try:
         asyncio.run(start_cmd_client(host, port))
     except Exception as e:

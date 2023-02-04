@@ -41,7 +41,7 @@ class EVACursor(object):
         self._connection = connection
         self._pending_query = False
 
-    async def execute_async(self, query: str):
+    async def execute(self, query: str):
         """
         Send query to the EVA server.
         """
@@ -55,7 +55,7 @@ class EVACursor(object):
         await self._connection._writer.drain()
         self._pending_query = True
 
-    async def fetch_one_async(self) -> Response:
+    async def fetch_one(self) -> Response:
         """
         fetch_one returns one batch instead of one row for now.
         """
@@ -67,7 +67,7 @@ class EVACursor(object):
         self._pending_query = False
         return response
 
-    async def fetch_all_async(self) -> Response:
+    async def fetch_all(self) -> Response:
         """
         fetch_all is the same as fetch_one for now.
         """
@@ -99,19 +99,3 @@ class EVACursor(object):
 
     def stop_query(self):
         self._pending_query = False
-
-    def __getattr__(self, name):
-        """
-        Auto generate sync function calls from async
-        Sync function calls should not be used in an async environment.
-        """
-        func = object.__getattribute__(self, "%s_async" % name)
-        if not asyncio.iscoroutinefunction(func):
-            raise AttributeError
-
-        def func_sync(*args, **kwargs):
-            loop = asyncio.get_event_loop()
-            res = loop.run_until_complete(func(*args, **kwargs))
-            return res
-
-        return func_sync
