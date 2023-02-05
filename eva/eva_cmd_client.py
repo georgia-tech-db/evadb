@@ -41,6 +41,8 @@ def eva_client(host="0.0.0.0", port=5432):
     # Launch client
     try:
         asyncio.run(start_cmd_client(host, port))
+    except KeyboardInterrupt:
+        pass        
     except Exception as e:
         logger.critical(e)
 

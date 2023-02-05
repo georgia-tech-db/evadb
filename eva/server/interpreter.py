@@ -62,7 +62,7 @@ async def read_from_client_and_send_to_server(
                         server_reader: StreamReader): 
 
     VERSION = VERSION_DICT["VERSION"]
-    intro="eva (v " + VERSION + ')\nType "help" for help' + '\n'
+    intro="eva (v " + VERSION + ')\nType "EXIT" to exit' + '\n'
     sys.stdout.write(intro)
     sys.stdout.flush()
 
@@ -74,16 +74,15 @@ async def read_from_client_and_send_to_server(
     while True:
         sys.stdout.write(prompt)
         sys.stdout.flush()
-        try:
-            query = await read_line(stdin_reader)
-            await cursor.execute(query)
-            response = await cursor.fetch_all()
-            sys.stdout.write(str(response) + '\n')
-            sys.stdout.flush()
-        except KeyboardInterrupt:
-            cursor.stop_query()
-            sys.stdout.write("Interrupting query")
-            sys.stdout.flush()
+        query = await read_line(stdin_reader)
+
+        if query in ["EXIT", "QUIT"]:
+            return
+
+        await cursor.execute(query)
+        response = await cursor.fetch_all()
+        sys.stdout.write(str(response) + '\n')
+        sys.stdout.flush()
 
 async def start_cmd_client(host: str, port: int):
     """
