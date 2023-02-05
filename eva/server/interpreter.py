@@ -20,6 +20,7 @@ from asyncio import StreamReader, StreamWriter
 from eva.utils.logging_manager import logger
 from collections import deque
 from eva.models.server.response import Response
+from eva.server.db_api import EVAConnection
 
 # version.py defines the VERSION and VERSION_SHORT variables
 VERSION_DICT: Dict[str, str] = {}
@@ -67,19 +68,22 @@ async def read_from_client_and_send_to_server(
 
     prompt = "eva=#"
 
+    connection = EVAConnection(server_reader, writer)
+    cursor = connection.cursor()
+
     while True:
         sys.stdout.write(prompt)
-        sys.stdout.flush()        
-        message = await read_line(stdin_reader)
-        await send_message(message, writer)
-
-        message = await server_reader.read(n=100000)
-        if message == b'':
-            break
-        response = Response.deserialize(message) 
-        sys.stdout.write(str(response) + '\n')
         sys.stdout.flush()
-
+        try:
+            query = await read_line(stdin_reader)
+            await cursor.execute(query)
+            response = await cursor.fetch_all()
+            sys.stdout.write(str(response) + '\n')
+            sys.stdout.flush()
+        except KeyboardInterrupt:
+            cursor.stop_query()
+            sys.stdout.write("Interrupting query")
+            sys.stdout.flush()
 
 async def start_cmd_client(host: str, port: int):
     """

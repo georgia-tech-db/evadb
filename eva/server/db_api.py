@@ -33,10 +33,6 @@ class EVAConnection:
             self._cursor = EVACursor(self)
         return self._cursor
 
-    @property
-    def protocol(self):
-        return self._protocol
-
 
 class EVACursor(object):
     def __init__(self, connection):
@@ -62,10 +58,8 @@ class EVACursor(object):
         fetch_one returns one batch instead of one row for now.
         """
         try:
-            message = await self._connection._reader.readline()
-            logger.info(message)
-            response = Response()
-            #response = await asyncio.coroutine(Response.deserialize)(message)
+            message = await self._connection._reader.read(n=100000)
+            response = Response.deserialize(message) 
         except Exception as e:
             raise e
         self._pending_query = False
