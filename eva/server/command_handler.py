@@ -62,7 +62,7 @@ def handle_request(client_writer, request_message):
     If user inputs 'quit' stops the event loop
     otherwise just echoes user input
     """
-    logger.debug("Receive request: --|" + str(request_message) + "|--")
+    logger.info("Receive request: --|" + str(request_message) + "|--")
 
     error = False
     error_msg = None
@@ -94,6 +94,7 @@ def handle_request(client_writer, request_message):
 
     response_data = Response.serialize(response) 
 
+    client_writer.write(b'%d\n' % len(response_data))
     client_writer.write(response_data)
 
     return response

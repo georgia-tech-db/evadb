@@ -67,10 +67,10 @@ class EvaServer:
                         client_reader.readline(),
                         timeout=60.0)):
                 message = data.decode().rstrip()
-                logger.debug("Received --|%s|--", message)
+                logger.info("Received --|%s|--", message)
                 
-                if message in ["QUIT", "EXIT"]:
-                    logger.debug("Close client")
+                if message in ["EXIT;", "QUIT;"]:
+                    logger.info("Close client")
                     return
 
                 logger.debug("Handle request")

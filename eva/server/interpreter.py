@@ -43,14 +43,8 @@ async def read_line(stdin_reader: StreamReader) -> str:
         # Else, append it to the buffer and echo.
         else:
             input_buffer.append(input_char)            
-    query = b''.join(input_buffer).decode()
-    query = query.replace('\n', ' ')
-    query = query.lstrip()
-    return query
-
-async def send_message(message: str, writer: StreamWriter):
-    writer.write((message + '\n').encode())
-    await writer.drain()
+    message = b''.join(input_buffer).decode()
+    return message
 
 async def create_stdin_reader() -> StreamReader:
     stream_reader = asyncio.StreamReader()
@@ -78,7 +72,10 @@ async def read_from_client_and_send_to_server(
         sys.stdout.write(prompt)
         sys.stdout.flush()
         query = await read_line(stdin_reader)
+        logger.info("Query: --|" + query + "|--")
 
+        query = query.lstrip()
+        query = query.rstrip()
         if query in ["EXIT", "QUIT"]:
             return
 

@@ -16,7 +16,9 @@ import asyncio
 import base64
 import os
 
-from eva.models.server.response import Response
+from eva.models.storage.batch import Batch
+from eva.models.server.response import Response, ResponseStatus
+from eva.utils.logging_manager import logger
 
 class EVAConnection:
     def __init__(self, reader, writer):
@@ -45,7 +47,7 @@ class EVACursor(object):
                 "EVA does not support concurrent queries. \
                     Call fetch_all() to complete the pending query"
             )
-        query = query.replace('\n', ' ')
+        query = self._multiline_query_transformation(query)
         query = self._upload_transformation(query)
         self._connection._writer.write((query + '\n').encode())
         await self._connection._writer.drain()
@@ -55,15 +57,14 @@ class EVACursor(object):
         """
         fetch_one returns one batch instead of one row for now.
         """
+        response = Response(status=ResponseStatus.FAIL, 
+                            batch=Batch(frames=None))
         try:
-            message = b''
-            while True:
-                print("foo")
-                chunk = await self._connection._reader.read(1024)
-                if chunk == b'':
-                    break
-                message += chunk
-            response = Response.deserialize(message)
+            prefix = await self._connection._reader.readline()
+            if prefix != b'':
+                message_length = int(prefix)
+                message = await self._connection._reader.readexactly(message_length)
+                response = Response.deserialize(message)
         except Exception as e:
             raise e
         self._pending_query = False
@@ -75,6 +76,14 @@ class EVACursor(object):
         """
         return await self.fetch_one_async()
 
+    def _multiline_query_transformation(self, query: str) -> str:
+        query = query.replace('\n', ' ')
+        query = query.lstrip()
+        query = query.rstrip(" ;")
+        query += ";"
+        logger.info("Query: " + query)
+        return query
+        
     def _upload_transformation(self, query: str) -> str:
         """
         Special case:
