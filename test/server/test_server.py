@@ -22,7 +22,7 @@ from unittest.mock import MagicMock
 import mock
 import pytest
 
-from eva.server.server import EvaServer, start_server
+from eva.server.server import EvaServer
 
 
 class ServerTests(unittest.TestCase):
@@ -98,11 +98,7 @@ class ServerTests(unittest.TestCase):
         thread.daemon = True
         thread.start()
 
+        eva_server = EvaServer(socket_timeout)
+
         with self.assertRaises(SystemExit):
-            start_server(
-                host=host,
-                port=port,
-                loop=self.loop,
-                socket_timeout=socket_timeout,
-                stop_server_future=self.stop_server_future,
-            )
+            eva_server.start_eva_server(host=host, port=port)
