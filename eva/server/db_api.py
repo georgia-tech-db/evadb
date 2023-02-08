@@ -15,11 +15,8 @@
 import asyncio
 import base64
 import os
-from pprint import pprint
 
 from eva.models.server.response import Response
-from asyncio import StreamReader, StreamWriter
-from eva.utils.logging_manager import logger
 
 class EVAConnection:
     def __init__(self, reader, writer):
@@ -39,7 +36,7 @@ class EVACursor(object):
         self._connection = connection
         self._pending_query = False
 
-    async def execute(self, query: str):
+    async def execute_async(self, query: str):
         """
         Send query to the EVA server.
         """
@@ -48,28 +45,35 @@ class EVACursor(object):
                 "EVA does not support concurrent queries. \
                     Call fetch_all() to complete the pending query"
             )
+        query = query.replace('\n', ' ')
         query = self._upload_transformation(query)
         self._connection._writer.write((query + '\n').encode())
         await self._connection._writer.drain()
         self._pending_query = True
 
-    async def fetch_one(self) -> Response:
+    async def fetch_one_async(self) -> Response:
         """
         fetch_one returns one batch instead of one row for now.
         """
         try:
-            message = await self._connection._reader.read(n=100000)
-            response = Response.deserialize(message) 
+            message = b''
+            while True:
+                print("foo")
+                chunk = await self._connection._reader.read(1024)
+                if chunk == b'':
+                    break
+                message += chunk
+            response = Response.deserialize(message)
         except Exception as e:
             raise e
         self._pending_query = False
         return response
 
-    async def fetch_all(self) -> Response:
+    async def fetch_all_async(self) -> Response:
         """
         fetch_all is the same as fetch_one for now.
         """
-        return await self.fetch_one()
+        return await self.fetch_one_async()
 
     def _upload_transformation(self, query: str) -> str:
         """
@@ -97,3 +101,28 @@ class EVACursor(object):
 
     def stop_query(self):
         self._pending_query = False
+
+    def __getattr__(self, name):
+        """
+        Auto generate sync function calls from async
+        Sync function calls should not be used in an async environment.
+        """
+        func = object.__getattribute__(self, "%s_async" % name)
+        if not asyncio.iscoroutinefunction(func):
+            raise AttributeError
+
+        def func_sync(*args, **kwargs):
+            loop = asyncio.get_event_loop()
+            res = loop.run_until_complete(func(*args, **kwargs))
+            return res
+
+        return func_sync
+
+async def get_connection(host: str, port: int)  -> EVAConnection:
+    reader, writer = await asyncio.open_connection(host, port)
+    connection = EVAConnection(reader, writer)
+    return connection
+
+def connect(host: str, port: int) -> EVAConnection:
+    connection = asyncio.run(get_connection(host, port))
+    return connection

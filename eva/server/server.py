@@ -16,7 +16,6 @@ import asyncio
 import string
 
 from eva.server.command_handler import handle_request
-from eva.utils.generic_utils import PickleSerializer
 from eva.utils.logging_manager import logger
 from asyncio import StreamReader, StreamWriter
 

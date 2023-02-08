@@ -14,12 +14,12 @@
 # limitations under the License.
 import os
 import sys
-from typing import Dict
 import asyncio
 from asyncio import StreamReader, StreamWriter
-from eva.utils.logging_manager import logger
 from collections import deque
-from eva.models.server.response import Response
+from typing import Dict
+
+from eva.utils.logging_manager import logger
 from eva.server.db_api import EVAConnection
 
 # version.py defines the VERSION and VERSION_SHORT variables
@@ -35,7 +35,7 @@ with open(version_file_path, "r") as version_file:
 async def read_line(stdin_reader: StreamReader) -> str:
     delete_char = b'\x7f'
     input_buffer = deque()
-    while (input_char := await stdin_reader.read(1)) != b'\n':
+    while (input_char := await stdin_reader.read(1)) != b';':
         # If the input character is backspace, remove the last character
         if input_char == delete_char:
             if len(input_buffer) > 0:
@@ -43,7 +43,10 @@ async def read_line(stdin_reader: StreamReader) -> str:
         # Else, append it to the buffer and echo.
         else:
             input_buffer.append(input_char)            
-    return b''.join(input_buffer).decode()
+    query = b''.join(input_buffer).decode()
+    query = query.replace('\n', ' ')
+    query = query.lstrip()
+    return query
 
 async def send_message(message: str, writer: StreamWriter):
     writer.write((message + '\n').encode())
@@ -62,7 +65,7 @@ async def read_from_client_and_send_to_server(
                         server_reader: StreamReader): 
 
     VERSION = VERSION_DICT["VERSION"]
-    intro="eva (v " + VERSION + ')\nType "EXIT" to exit' + '\n'
+    intro="eva (v " + VERSION + ')\nType "EXIT;" to exit the client' + '\n'
     sys.stdout.write(intro)
     sys.stdout.flush()
 
@@ -79,18 +82,14 @@ async def read_from_client_and_send_to_server(
         if query in ["EXIT", "QUIT"]:
             return
 
-        await cursor.execute(query)
-        response = await cursor.fetch_all()
+        await cursor.execute_async(query)
+        response = await cursor.fetch_all_async()
         sys.stdout.write(str(response) + '\n')
         sys.stdout.flush()
 
 async def start_cmd_client(host: str, port: int):
     """
-    Wait for the connection to open and the task to be processed.
-
-    - There's retry logic to make sure we're connecting even in
-      the face of momentary ECONNRESET on the server-side.
-    - Socket will be automatically closed by the exit stack.
+        Start client
     """
 
     reader, writer = await asyncio.open_connection(host, port)

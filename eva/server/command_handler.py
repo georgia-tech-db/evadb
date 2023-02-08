@@ -14,8 +14,6 @@
 # limitations under the License.
 import asyncio
 from typing import Iterator, Optional
-from pprint import pprint
-import time
 
 from eva.binder.statement_binder import StatementBinder
 from eva.binder.statement_binder_context import StatementBinderContext
@@ -66,7 +64,6 @@ def handle_request(client_writer, request_message):
     """
     logger.debug("Receive request: --|" + str(request_message) + "|--")
 
-    time.sleep(3)
     error = False
     error_msg = None
     query_runtime = Timer()
