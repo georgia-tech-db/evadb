@@ -16,8 +16,7 @@ import asyncio
 import base64
 import os
 
-from eva.models.server.response import Response, ResponseStatus
-from eva.models.storage.batch import Batch
+from eva.models.server.response import Response
 from eva.utils.logging_manager import logger
 
 
@@ -60,7 +59,7 @@ class EVACursor(object):
         """
         try:
             prefix = await self._connection._reader.readline()
-            assert(prefix != b"")
+            assert prefix != b""
             message_length = int(prefix)
             message = await self._connection._reader.readexactly(message_length)
             response = Response.deserialize(message)
