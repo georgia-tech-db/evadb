@@ -20,16 +20,16 @@ from signal import SIGTERM
 
 from psutil import process_iter
 
-from eva.configuration.configuration_manager import ConfigurationManager  # noqa: E402
-from eva.server.server import EvaServer
-from eva.udfs.udf_bootstrap_queries import init_builtin_udfs  # noqa: E402
-
 """
 To allow running eva_server from any location
 """
 THIS_DIR = dirname(__file__)
 EVA_CODE_DIR = abspath(join(THIS_DIR, ".."))
 sys.path.append(EVA_CODE_DIR)
+
+from eva.configuration.configuration_manager import ConfigurationManager  # noqa: E402
+from eva.server.server import EvaServer  # noqa: E402
+from eva.udfs.udf_bootstrap_queries import init_builtin_udfs  # noqa: E402
 
 
 async def start_eva_server():
