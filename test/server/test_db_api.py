@@ -61,37 +61,39 @@ class DBAPITests(unittest.TestCase):
         query = "test_query"
         asyncio.run(eva_cursor.execute_async(query))
         self.assertEqual(eva_cursor._pending_query, True)
-        connection.protocol.send_message.assert_called_with(query)
 
         # concurrent queries not allowed
         with self.assertRaises(SystemError):
             asyncio.run(eva_cursor.execute_async(query))
 
-    @mock.patch.object(Response, "deserialize")
-    def test_eva_cursor_fetch_one_async(self, mock_response):
+    def test_eva_cursor_fetch_one_async(self):
         connection = AsyncMock()
         eva_cursor = EVACursor(connection)
-        response = "test_response"
-        mock_response.side_effect = [response]
-        expected = asyncio.run(eva_cursor.fetch_one_async())
+        message = "test_response"
+        serialized_message = Response.serialize("test_response")
+        serialized_message_length = b"%d" % len(serialized_message)
+        connection._reader.readline.side_effect = [serialized_message_length]
+        connection._reader.readexactly.side_effect = [serialized_message]
+        response = asyncio.run(eva_cursor.fetch_one_async())
         self.assertEqual(eva_cursor._pending_query, False)
-        connection.protocol.queue.get.assert_called_once()
-        self.assertEqual(expected, response)
+        self.assertEqual(message, response)
 
-    @mock.patch.object(Response, "deserialize")
-    def test_eva_cursor_fetch_one_sync(self, mock_response):
-        connection = AsyncMock()
+    def test_eva_cursor_fetch_one_sync(self):
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        connection.protocol.loop = loop
 
+        connection = AsyncMock()
         eva_cursor = EVACursor(connection)
-        response = "test_response"
-        mock_response.side_effect = [response]
-        expected = eva_cursor.fetch_one()
+
+        message = "test_response"
+        serialized_message = Response.serialize("test_response")
+        serialized_message_length = b"%d" % len(serialized_message)
+        connection._reader.readline.side_effect = [serialized_message_length]
+        connection._reader.readexactly.side_effect = [serialized_message]
+
+        response = eva_cursor.fetch_one()
         self.assertEqual(eva_cursor._pending_query, False)
-        connection.protocol.queue.get.assert_called_once()
-        self.assertEqual(expected, response)
+        self.assertEqual(message, response)
 
     def test_eva_connection(self):
         hostname = "localhost"

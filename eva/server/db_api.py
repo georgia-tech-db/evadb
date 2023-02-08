@@ -58,13 +58,12 @@ class EVACursor(object):
         """
         fetch_one returns one batch instead of one row for now.
         """
-        response = Response(status=ResponseStatus.FAIL, batch=Batch(frames=None))
         try:
             prefix = await self._connection._reader.readline()
-            if prefix != b"":
-                message_length = int(prefix)
-                message = await self._connection._reader.readexactly(message_length)
-                response = Response.deserialize(message)
+            assert(prefix != b"")
+            message_length = int(prefix)
+            message = await self._connection._reader.readexactly(message_length)
+            response = Response.deserialize(message)
         except Exception as e:
             raise e
         self._pending_query = False
