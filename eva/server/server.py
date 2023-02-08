@@ -14,10 +14,11 @@
 # limitations under the License.
 import asyncio
 import string
+from asyncio import StreamReader, StreamWriter
 
 from eva.server.command_handler import handle_request
 from eva.utils.logging_manager import logger
-from asyncio import StreamReader, StreamWriter
+
 
 class EvaServer:
     """
@@ -44,9 +45,9 @@ class EvaServer:
 
         logger.info("Successfully shutdown server")
 
-    async def accept_client(self, client_reader: StreamReader, 
-                            client_writer: StreamWriter): 
-
+    async def accept_client(
+        self, client_reader: StreamReader, client_writer: StreamWriter
+    ):
         task = asyncio.Task(self.handle_client(client_reader, client_writer))
         self._clients[task] = (client_reader, client_writer)
 
@@ -58,17 +59,16 @@ class EvaServer:
         logger.info("New client connection")
         task.add_done_callback(close_client)
 
-
-    async def handle_client(self, client_reader: StreamReader, 
-                                  client_writer: StreamWriter):
-        
+    async def handle_client(
+        self, client_reader: StreamReader, client_writer: StreamWriter
+    ):
         try:
-            while (data := await asyncio.wait_for(
-                        client_reader.readline(),
-                        timeout=60.0)):
+            while data := await asyncio.wait_for(
+                client_reader.readline(), timeout=60.0
+            ):
                 message = data.decode().rstrip()
                 logger.info("Received --|%s|--", message)
-                
+
                 if message in ["EXIT;", "QUIT;"]:
                     logger.info("Close client")
                     return
@@ -77,4 +77,4 @@ class EvaServer:
                 asyncio.create_task(handle_request(client_writer, message))
 
         except Exception as e:
-            logger.error('Error reading from client.', exc_info=e)
+            logger.error("Error reading from client.", exc_info=e)

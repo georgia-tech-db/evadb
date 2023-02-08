@@ -92,9 +92,9 @@ def handle_request(client_writer, request_message):
 
     logger.debug(response)
 
-    response_data = Response.serialize(response) 
+    response_data = Response.serialize(response)
 
-    client_writer.write(b'%d\n' % len(response_data))
+    client_writer.write(b"%d\n" % len(response_data))
     client_writer.write(response_data)
 
     return response

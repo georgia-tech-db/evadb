@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import argparse
-import sys
 import asyncio
+import sys
 from os.path import abspath, dirname, join
 
 from eva.utils.logging_manager import logger
@@ -42,7 +42,7 @@ def eva_client(host="0.0.0.0", port=5432):
     try:
         asyncio.run(start_cmd_client(host, port))
     except KeyboardInterrupt:
-        pass        
+        pass
     except Exception as e:
         logger.critical(e)
 

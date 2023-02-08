@@ -16,9 +16,10 @@ import asyncio
 import base64
 import os
 
-from eva.models.storage.batch import Batch
 from eva.models.server.response import Response, ResponseStatus
+from eva.models.storage.batch import Batch
 from eva.utils.logging_manager import logger
+
 
 class EVAConnection:
     def __init__(self, reader, writer):
@@ -49,7 +50,7 @@ class EVACursor(object):
             )
         query = self._multiline_query_transformation(query)
         query = self._upload_transformation(query)
-        self._connection._writer.write((query + '\n').encode())
+        self._connection._writer.write((query + "\n").encode())
         await self._connection._writer.drain()
         self._pending_query = True
 
@@ -57,11 +58,10 @@ class EVACursor(object):
         """
         fetch_one returns one batch instead of one row for now.
         """
-        response = Response(status=ResponseStatus.FAIL, 
-                            batch=Batch(frames=None))
+        response = Response(status=ResponseStatus.FAIL, batch=Batch(frames=None))
         try:
             prefix = await self._connection._reader.readline()
-            if prefix != b'':
+            if prefix != b"":
                 message_length = int(prefix)
                 message = await self._connection._reader.readexactly(message_length)
                 response = Response.deserialize(message)
@@ -77,13 +77,13 @@ class EVACursor(object):
         return await self.fetch_one_async()
 
     def _multiline_query_transformation(self, query: str) -> str:
-        query = query.replace('\n', ' ')
+        query = query.replace("\n", " ")
         query = query.lstrip()
         query = query.rstrip(" ;")
         query += ";"
         logger.info("Query: " + query)
         return query
-        
+
     def _upload_transformation(self, query: str) -> str:
         """
         Special case:
@@ -127,10 +127,12 @@ class EVACursor(object):
 
         return func_sync
 
-async def get_connection(host: str, port: int)  -> EVAConnection:
+
+async def get_connection(host: str, port: int) -> EVAConnection:
     reader, writer = await asyncio.open_connection(host, port)
     connection = EVAConnection(reader, writer)
     return connection
+
 
 def connect(host: str, port: int) -> EVAConnection:
     connection = asyncio.run(get_connection(host, port))
