@@ -25,7 +25,6 @@ from unittest.mock import MagicMock
 import mock
 
 from eva.models.server.response import Response
-from eva.server.async_protocol import EvaClient
 from eva.server.db_api import EVACursor, connect
 
 
@@ -106,7 +105,6 @@ class DBAPITests(unittest.TestCase):
         connection = connect(hostname, mock_server.server_port)
         cursor = connection.cursor()
 
-        self.assertEquals(type(connection._protocol), EvaClient)
         self.assertEquals(type(cursor), EVACursor)
 
         # test upload transformation with existing file
