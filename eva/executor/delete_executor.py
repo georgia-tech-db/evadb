@@ -41,27 +41,21 @@ class DeleteExecutor(AbstractExecutor):
             del_batch = Batch()
 
             if table_catalog.table_type == TableType.VIDEO_DATA:
-                del_batch =  storage_engine.read(
-                    table_catalog,
-                    batch_mem,
-                    predicate=self.node.predicate,
-                )
+                raise NotImplementedError("DELETE only implemented for structured data")
             elif table_catalog.table_type == TableType.IMAGE_DATA:
-                del_batch =  storage_engine.read(table_catalog)
+                raise NotImplementedError("DELETE only implemented for structured data")
             elif table_catalog.table_type == TableType.STRUCTURED_DATA:
                 del_batch = storage_engine.read(table_catalog, batch_mem)
+                del_batch = list(del_batch)[0]
             
-            del_batch = list(del_batch)[0]
             original_column_names = list(del_batch.frames.columns)
-            column_names = [f"{table_catalog.name}.{name}" for name in original_column_names if not name=="_row_id"]
+            column_names = [f"{table_catalog.name.lower()}.{name}" for name in original_column_names if not name=="_row_id"]
             column_names.insert(0, '_row_id')
             del_batch.frames.columns = column_names
             del_batch = apply_predicate(del_batch, self.predicate)
+
             ######################################################
             # All the batches that need to be deleted
-            
-            ## extract all the rows to DELETE
-            ## TODO: use where_clause to do this
             
             if table_catalog.table_type == TableType.VIDEO_DATA:
                 storage_engine.delete(

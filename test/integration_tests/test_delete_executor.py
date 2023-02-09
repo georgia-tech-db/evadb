@@ -21,6 +21,7 @@ import pandas as pd
 from eva.catalog.catalog_manager import CatalogManager
 from eva.server.command_handler import execute_query_fetch_all
 from eva.catalog.catalog_type import ColumnType, IndexType, NdArrayType, TableType
+from eva.configuration.constants import EVA_ROOT_DIR
 from eva.catalog.catalog_utils import xform_column_definitions_to_catalog_entries
 from eva.catalog.sql_config import IDENTIFIER_COLUMN
 from eva.configuration.configuration_manager import ConfigurationManager
@@ -40,7 +41,9 @@ class DeleteExecutorTest(unittest.TestCase):
 
         load_inbuilt_udfs()
 
-        # Create feature vector table and raw input table.
+        #########################################################
+        # Create a table for testing Delete with Structured Data#
+        #########################################################
         id1 = 5
         id2 = 15
         id3 = 25
@@ -111,19 +114,28 @@ class DeleteExecutorTest(unittest.TestCase):
         )
         storage_engine.write(input_tb_entry, input_batch_data)
 
+        ####################################################
+        # Create a table for testing Delete with Video Data#
+        ####################################################
+
+        path = f"{EVA_ROOT_DIR}/data/sample_videos/1/*.mp4"
+        query = f'LOAD VIDEO "{path}" INTO TestDeleteVideos;'
+        result = execute_query_fetch_all(query)
+
+
+
     def tearDown(self):
         file_remove("dummy.avi")
 
     # integration test
     @unittest.skip("Not supported in current version")
-    def test_should_delete_frame_in_video(self):
+    def test_should_delete_single_video_in_table(self):
 
-        delete_query = "DELETE FROM MyVideo WHERE id=40;"
+        path = f"{EVA_ROOT_DIR}/data/sample_videos/1/2.mp4"
+        delete_query = f"""DELETE FROM TestDeleteVideos WHERE name="{path}";"""
         batch = execute_query_fetch_all(delete_query)
-        delete_query_2 = "DELETE FROM MyVideo WHERE id=41"
-        batch = execute_query_fetch_all(delete_query_2)
 
-        query = "SELECT id, data FROM MyVideo WHERE id=41;"
+        query = "SELECT name FROM MyVideo"
         batch = execute_query_fetch_all(query)
         self.assertIsNone(
             np.testing.assert_array_equal(
@@ -140,7 +152,7 @@ class DeleteExecutorTest(unittest.TestCase):
                 np.array([[[41, 41, 41], [41, 41, 41]], [[41, 41, 41], [41, 41, 41]]]),
             )
         )
-    
+
     def test_should_delete_tuple_in_table(self):
         delete_query = "DELETE FROM testDeleteOne WHERE id=5;"
         batch = execute_query_fetch_all(delete_query)
@@ -151,8 +163,8 @@ class DeleteExecutorTest(unittest.TestCase):
         batch = execute_query_fetch_all(query)
         self.assertIsNone(
             np.testing.assert_array_equal(
-                batch.frames["feat"][0],
-                np.array([[[100, 100, 100]], [[200, 200, 200]]]),
+                batch.frames["testdeleteone.id"].array,
+                np.array([15, 25], dtype=np.int64),
             )
         )
 
@@ -160,7 +172,7 @@ class DeleteExecutorTest(unittest.TestCase):
         batch = execute_query_fetch_all(query)
         self.assertIsNone(
             np.testing.assert_array_equal(
-                batch.frames["data"][0],
-                np.array([[[200, 200, 200]]]),
+                batch.frames["testdeletetwo.id"].array,
+                np.array([15, 25], dtype=np.int64),
             )
         )
