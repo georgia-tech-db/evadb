@@ -996,8 +996,9 @@ class LogicalJoinToPhysicalFuzzyJoin(Rule):
     def promise(self):
         return Promise.LOGICAL_JOIN_TO_PHYSICAL_FUZZY_JOIN
 
-    def check(self, before: Operator, context: OptimizerContext):
-        return before.join_type == JoinType.INNER_JOIN and before.join_predicate.startswith("FuzzyJoin")
+    def check(self, before: LogicalJoin, context: OptimizerContext):
+        j_child: FunctionExpression = before.join_predicate.children[0]
+        return before.join_type == JoinType.INNER_JOIN and j_child.name.startswith("FuzzyJoin")
 
     def apply(self, join_node: LogicalJoin, context: OptimizerContext):
         fuzzy_join_plan = FuzzyNestedJoinPlan(join_node.join_type, join_node.join_predicate)

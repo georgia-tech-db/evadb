@@ -43,8 +43,8 @@ class FuzzyJoinExecutor(AbstractExecutor):
         outer = self.children[0]
         inner = self.children[1]
         try:
-            for row1 in outer:
-                for row2 in inner:
+            for row1 in outer.exec():
+                for row2 in inner.exec():
                     result_batch = Batch.join(row1, row2)
                     result_batch.reset_index()
                     result_batch = apply_predicate(result_batch, self.predicate)

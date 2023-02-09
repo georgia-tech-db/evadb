@@ -27,6 +27,7 @@ from eva.executor.explain_executor import ExplainExecutor
 from eva.executor.faiss_index_scan_executor import FaissIndexScanExecutor
 from eva.executor.function_scan_executor import FunctionScanExecutor
 from eva.executor.groupby_executor import GroupByExecutor
+from eva.executor.fuzzy_join_executor import FuzzyJoinExecutor
 from eva.executor.hash_join_executor import HashJoinExecutor
 from eva.executor.insert_executor import InsertExecutor
 from eva.executor.join_build_executor import BuildJoinExecutor
@@ -112,6 +113,8 @@ class PlanExecutor:
             executor_node = LimitExecutor(node=plan)
         elif plan_opr_type == PlanOprType.SAMPLE:
             executor_node = SampleExecutor(node=plan)
+        elif plan_opr_type == PlanOprType.FUZZY_JOIN:
+            executor_node = FuzzyJoinExecutor(node=plan)
         elif plan_opr_type == PlanOprType.LATERAL_JOIN:
             executor_node = LateralJoinExecutor(node=plan)
         elif plan_opr_type == PlanOprType.HASH_JOIN:
