@@ -12,64 +12,58 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from enum import Enum, auto, unique
+
+from eva.utils.generic_utils import EVAEnum
 
 
-class ColumnConstraintEnum(Enum):
-    NOTNULL = auto()
-    DEFAULT = auto()
-    PRIMARY = auto()
-    UNIQUE = auto()
+class ColumnConstraintEnum(EVAEnum):
+    NOTNULL  # noqa: F821
+    DEFAULT  # noqa: F821
+    PRIMARY  # noqa: F821
+    UNIQUE  # noqa: F821
 
 
-@unique
-class StatementType(Enum):
+class StatementType(EVAEnum):
     """
-    Manages enums for all the sql-like statements supported
+    Manages EVAEnums for all the sql-like statements supported
     """
 
-    SELECT = (auto(),)
-    CREATE = (auto(),)
-    RENAME = (auto(),)
-    DROP = (auto(),)
-    INSERT = (auto(),)
-    CREATE_UDF = (auto(),)
-    LOAD_DATA = (auto(),)
-    UPLOAD = (auto(),)
-    CREATE_MATERIALIZED_VIEW = (auto(),)
-    SHOW = (auto(),)
-    DROP_UDF = auto()
-    EXPLAIN = (auto(),)
+    SELECT  # noqa: F821
+    CREATE  # noqa: F821
+    RENAME  # noqa: F821
+    DROP  # noqa: F821
+    INSERT  # noqa: F821
+    CREATE_UDF  # noqa: F821
+    LOAD_DATA  # noqa: F821
+    UPLOAD  # noqa: F821
+    CREATE_MATERIALIZED_VIEW  # noqa: F821
+    SHOW  # noqa: F821
+    DROP_UDF  # noqa: F821
+    EXPLAIN  # noqa: F821
+    CREATE_INDEX  # noqa: F821
     # add other types
 
 
-@unique
-class ParserOrderBySortType(Enum):
+class ParserOrderBySortType(EVAEnum):
     """
-    Manages enums for all order by sort types
-    """
-
-    ASC = auto()
-    DESC = auto()
-
-
-@unique
-class JoinType(Enum):
-    LATERAL_JOIN = auto()
-    INNER_JOIN = auto()
-
-
-@unique
-class FileFormatType(Enum):
-    """
-    Manages enums for all order by sort types
+    Manages EVAEnums for all order by sort types
     """
 
-    VIDEO = auto()
-    CSV = auto()
+    ASC  # noqa: F821
+    DESC  # noqa: F821
 
 
-@unique
-class ShowType(Enum):
-    UDFS = auto()
-    TABLES = auto()
+class JoinType(EVAEnum):
+    LATERAL_JOIN  # noqa: F821
+    INNER_JOIN  # noqa: F821
+
+
+class FileFormatType(EVAEnum):
+    VIDEO  # noqa: F821
+    CSV  # noqa: F821
+    IMAGE  # noqa: F821
+
+
+class ShowType(EVAEnum):
+    UDFS  # noqa: F821
+    TABLES  # noqa: F821

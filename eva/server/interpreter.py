@@ -13,10 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import os
+import sys
 from cmd import Cmd
 from contextlib import ExitStack
-from readline import read_history_file, set_history_length, write_history_file
 from typing import Dict
+
+# Skip readline on Windows
+if os.name != "nt":
+    from readline import read_history_file, set_history_length, write_history_file
 
 from eva.server.db_api import connect
 
@@ -33,20 +37,24 @@ class EvaCommandInterpreter(Cmd):
         quit_loop = False
         while quit_loop is not True:
             try:
-                self.cmdloop()
+                self.cmdloop(intro)
                 quit_loop = True
             except KeyboardInterrupt:
                 print("\ncommand interrupted...\n")
 
     def preloop(self):
         # To retain command history across multiple client sessions
-        if os.path.exists(histfile):
-            read_history_file(histfile)
+        if sys.platform != "msys":
+            if os.path.exists(histfile):
+                read_history_file(histfile)
+            else:
+                set_history_length(histfile_size)
+                write_history_file(histfile)
 
     def postloop(self):
-        # To retain command history across multiple client sessions
-        set_history_length(histfile_size)
-        write_history_file(histfile)
+        if sys.platform != "msys":
+            set_history_length(histfile_size)
+            write_history_file(histfile)
 
     def set_connection(self, connection):
         self.connection = connection
@@ -77,7 +85,12 @@ class EvaCommandInterpreter(Cmd):
 
 # version.py defines the VERSION and VERSION_SHORT variables
 VERSION_DICT: Dict[str, str] = {}
-with open("eva/version.py", "r") as version_file:
+
+current_file_dir = os.path.dirname(__file__)
+current_file_parent_dir = os.path.join(current_file_dir, os.pardir)
+version_file_path = os.path.join(current_file_parent_dir, "version.py")
+
+with open(version_file_path, "r") as version_file:
     exec(version_file.read(), VERSION_DICT)
 
 

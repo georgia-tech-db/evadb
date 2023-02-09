@@ -14,9 +14,10 @@
 # limitations under the License.
 from typing import Any
 
+import numpy as np
 import pandas as pd
 
-from eva.catalog.column_type import ColumnType
+from eva.catalog.catalog_type import ColumnType
 from eva.expression.abstract_expression import AbstractExpression, ExpressionType
 from eva.models.storage.batch import Batch
 
@@ -31,8 +32,11 @@ class ConstantValueExpression(AbstractExpression):
         self._value = value
         self._v_type = v_type
 
-    def evaluate(self, *args, **kwargs):
-        return Batch(pd.DataFrame({0: [self._value]}))
+    def evaluate(self, batch: Batch, **kwargs):
+        return Batch(pd.DataFrame({0: [self._value] * len(batch)}))
+
+    def signature(self) -> str:
+        return str(self)
 
     @property
     def value(self):
@@ -57,6 +61,14 @@ class ConstantValueExpression(AbstractExpression):
             return is_equal and all(self.value == other.value)
         else:
             return is_equal and self.value == other.value
+
+    def __str__(self) -> str:
+        expr_str = ""
+        if not isinstance(self._value, np.ndarray):
+            expr_str = f"{str(self._value)}"
+        else:
+            expr_str = f"{np.array_str(self._value)}"
+        return expr_str
 
     def __hash__(self) -> int:
         return hash((super().__hash__(), self.v_type, str(self.value)))

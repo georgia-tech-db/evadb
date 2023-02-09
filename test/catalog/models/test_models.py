@@ -14,116 +14,98 @@
 # limitations under the License.
 import unittest
 
-from eva.catalog.column_type import ColumnType, NdArrayType
-from eva.catalog.df_schema import DataFrameSchema
-from eva.catalog.models.df_column import DataFrameColumn
-from eva.catalog.models.df_metadata import DataFrameMetadata
-from eva.catalog.models.udf import UdfMetadata
-from eva.catalog.models.udf_io import UdfIO
+from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
+from eva.catalog.models.column_catalog import ColumnCatalogEntry
+from eva.catalog.models.index_catalog import IndexCatalogEntry
+from eva.catalog.models.table_catalog import TableCatalogEntry
+from eva.catalog.models.udf_catalog import UdfCatalogEntry
+from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 
 
 class CatalogModelsTest(unittest.TestCase):
     def test_df_column(self):
-        df_col = DataFrameColumn("name", ColumnType.TEXT, is_nullable=False)
+        df_col = ColumnCatalogEntry("name", ColumnType.TEXT, is_nullable=False)
         df_col.array_dimensions = [1, 2]
-        df_col.metadata_id = 1
+        df_col.table_id = 1
         self.assertEqual(df_col.array_type, None)
         self.assertEqual(df_col.array_dimensions, [1, 2])
         self.assertEqual(df_col.is_nullable, False)
         self.assertEqual(df_col.name, "name")
         self.assertEqual(df_col.type, ColumnType.TEXT)
-        self.assertEqual(df_col.metadata_id, 1)
-        self.assertEqual(df_col.id, None)
-        self.assertEqual(str(df_col), "Column: (name, TEXT, False, None[1, 2])")
+        self.assertEqual(df_col.table_id, 1)
+        self.assertEqual(df_col.row_id, None)
 
     def test_df_equality(self):
-        df_col = DataFrameColumn("name", ColumnType.TEXT, is_nullable=False)
+        df_col = ColumnCatalogEntry("name", ColumnType.TEXT, is_nullable=False)
         self.assertEqual(df_col, df_col)
-        df_col1 = DataFrameColumn("name2", ColumnType.TEXT, is_nullable=False)
+        df_col1 = ColumnCatalogEntry("name2", ColumnType.TEXT, is_nullable=False)
         self.assertNotEqual(df_col, df_col1)
-        df_col1 = DataFrameColumn("name", ColumnType.INTEGER, is_nullable=False)
+        df_col1 = ColumnCatalogEntry("name", ColumnType.INTEGER, is_nullable=False)
         self.assertNotEqual(df_col, df_col1)
-        df_col1 = DataFrameColumn("name", ColumnType.INTEGER, is_nullable=True)
+        df_col1 = ColumnCatalogEntry("name", ColumnType.INTEGER, is_nullable=True)
         self.assertNotEqual(df_col, df_col1)
-        df_col1 = DataFrameColumn("name", ColumnType.INTEGER, is_nullable=False)
+        df_col1 = ColumnCatalogEntry("name", ColumnType.INTEGER, is_nullable=False)
         self.assertNotEqual(df_col, df_col1)
-        df_col.array_dimensions = [2, 4]
-        df_col1 = DataFrameColumn(
+        df_col._array_dimensions = [2, 4]
+        df_col1 = ColumnCatalogEntry(
             "name", ColumnType.INTEGER, is_nullable=False, array_dimensions=[1, 2]
         )
         self.assertNotEqual(df_col, df_col1)
 
-        df_col.metadata_id = 1
-        df_col1 = DataFrameColumn(
+        df_col._table_id = 1
+        df_col1 = ColumnCatalogEntry(
             "name",
             ColumnType.INTEGER,
             is_nullable=False,
             array_dimensions=[2, 4],
-            metadata_id=2,
+            table_id=2,
         )
         self.assertNotEqual(df_col, df_col1)
 
-    def test_df_metadata(self):
-        df_metadata = DataFrameMetadata("name", "eva_dataset")
-        column_1 = DataFrameColumn("frame_id", ColumnType.INTEGER, False)
-        column_2 = DataFrameColumn("frame_label", ColumnType.INTEGER, False)
-        col_list = [column_1, column_2]
-        schema = DataFrameSchema("name", col_list)
-        df_metadata.schema = col_list
+    def test_table_catalog_entry_equality(self):
 
-        self.assertEqual(df_metadata.name, "name")
-        self.assertEqual(df_metadata.file_url, "eva_dataset")
-        self.assertEqual(df_metadata.id, None)
-        self.assertEqual(df_metadata.identifier_column, "id")
-        self.assertEqual(df_metadata.schema, schema)
-
-    def test_df_metadata_equality(self):
-        df_metadata = DataFrameMetadata("name", "eva_dataset")
-        column_1 = DataFrameColumn("frame_id", ColumnType.INTEGER, False)
-        column_2 = DataFrameColumn("frame_label", ColumnType.INTEGER, False)
+        column_1 = ColumnCatalogEntry("frame_id", ColumnType.INTEGER, False)
+        column_2 = ColumnCatalogEntry("frame_label", ColumnType.INTEGER, False)
         col_list = [column_1, column_2]
-        df_metadata.schema = col_list
-        self.assertEqual(df_metadata, df_metadata)
+        table_catalog_entry = TableCatalogEntry(
+            "name", "eva_dataset", table_type=TableType.VIDEO_DATA, columns=col_list
+        )
+        self.assertEqual(table_catalog_entry, table_catalog_entry)
 
-        df_metadata1 = DataFrameMetadata("name2", "eva_dataset")
-        column_1 = DataFrameColumn("frame_id", ColumnType.INTEGER, False)
-        column_2 = DataFrameColumn("frame_label", ColumnType.INTEGER, False)
-        col_list = [column_1, column_2]
-        df_metadata1.schema = col_list
-        self.assertNotEqual(df_metadata, df_metadata1)
-        df_metadata2 = DataFrameMetadata("name2", "eva_dataset")
-        df_metadata2.schema = col_list[1:]
-        self.assertNotEqual(df_metadata1, df_metadata2)
+        table_catalog_entry1 = TableCatalogEntry(
+            "name2", "eva_dataset", table_type=TableType.VIDEO_DATA, columns=col_list
+        )
+
+        self.assertNotEqual(table_catalog_entry, table_catalog_entry1)
 
     def test_udf(self):
-        udf = UdfMetadata("udf", "fasterRCNN", "ObjectDetection")
-        self.assertEqual(udf.id, None)
+        udf = UdfCatalogEntry("udf", "fasterRCNN", "ObjectDetection")
+        self.assertEqual(udf.row_id, None)
         self.assertEqual(udf.impl_file_path, "fasterRCNN")
         self.assertEqual(udf.name, "udf")
         self.assertEqual(udf.type, "ObjectDetection")
-        self.assertEqual(str(udf), "udf: (udf, fasterRCNN, ObjectDetection)\n")
 
     def test_udf_hash(self):
-        udf1 = UdfMetadata("udf", "fasterRCNN", "ObjectDetection")
-        udf2 = UdfMetadata("udf", "fasterRCNN", "ObjectDetection")
+        udf1 = UdfCatalogEntry("udf", "fasterRCNN", "ObjectDetection")
+        udf2 = UdfCatalogEntry("udf", "fasterRCNN", "ObjectDetection")
 
         self.assertEqual(hash(udf1), hash(udf2))
 
     def test_udf_equality(self):
-        udf = UdfMetadata("udf", "fasterRCNN", "ObjectDetection")
+        udf = UdfCatalogEntry("udf", "fasterRCNN", "ObjectDetection")
         self.assertEqual(udf, udf)
-        udf2 = UdfMetadata("udf2", "fasterRCNN", "ObjectDetection")
+        udf2 = UdfCatalogEntry("udf2", "fasterRCNN", "ObjectDetection")
         self.assertNotEqual(udf, udf2)
-        udf3 = UdfMetadata("udf", "fasterRCNN2", "ObjectDetection")
+        udf3 = UdfCatalogEntry("udf", "fasterRCNN2", "ObjectDetection")
         self.assertNotEqual(udf, udf3)
-        udf4 = UdfMetadata("udf2", "fasterRCNN", "ObjectDetection3")
+        udf4 = UdfCatalogEntry("udf2", "fasterRCNN", "ObjectDetection3")
         self.assertNotEqual(udf, udf4)
 
     def test_udf_io(self):
-        udf_io = UdfIO(
+        udf_io = UdfIOCatalogEntry(
             "name", ColumnType.NDARRAY, True, NdArrayType.UINT8, [2, 3], True, 1
         )
-        self.assertEqual(udf_io.id, None)
+        self.assertEqual(udf_io.row_id, None)
         self.assertEqual(udf_io.udf_id, 1)
         self.assertEqual(udf_io.is_input, True)
         self.assertEqual(udf_io.is_nullable, True)
@@ -133,17 +115,54 @@ class CatalogModelsTest(unittest.TestCase):
         self.assertEqual(udf_io.type, ColumnType.NDARRAY)
 
     def test_udf_io_equality(self):
-        udf_io = UdfIO("name", ColumnType.FLOAT, True, None, [2, 3], True, 1)
+        udf_io = UdfIOCatalogEntry(
+            "name", ColumnType.FLOAT, True, None, [2, 3], True, 1
+        )
         self.assertEqual(udf_io, udf_io)
-        udf_io2 = UdfIO("name2", ColumnType.FLOAT, True, None, [2, 3], True, 1)
+        udf_io2 = UdfIOCatalogEntry(
+            "name2", ColumnType.FLOAT, True, None, [2, 3], True, 1
+        )
         self.assertNotEqual(udf_io, udf_io2)
-        udf_io2 = UdfIO("name", ColumnType.INTEGER, True, None, [2, 3], True, 1)
+        udf_io2 = UdfIOCatalogEntry(
+            "name", ColumnType.INTEGER, True, None, [2, 3], True, 1
+        )
         self.assertNotEqual(udf_io, udf_io2)
-        udf_io2 = UdfIO("name", ColumnType.FLOAT, False, None, [2, 3], True, 1)
+        udf_io2 = UdfIOCatalogEntry(
+            "name", ColumnType.FLOAT, False, None, [2, 3], True, 1
+        )
         self.assertNotEqual(udf_io, udf_io2)
-        udf_io2 = UdfIO("name", ColumnType.FLOAT, True, None, [2, 3, 4], True, 1)
+        udf_io2 = UdfIOCatalogEntry(
+            "name", ColumnType.FLOAT, True, None, [2, 3, 4], True, 1
+        )
         self.assertNotEqual(udf_io, udf_io2)
-        udf_io2 = UdfIO("name", ColumnType.FLOAT, True, None, [2, 3], False, 1)
+        udf_io2 = UdfIOCatalogEntry(
+            "name", ColumnType.FLOAT, True, None, [2, 3], False, 1
+        )
         self.assertNotEqual(udf_io, udf_io2)
-        udf_io2 = UdfIO("name", ColumnType.FLOAT, True, None, [2, 3], True, 2)
+        udf_io2 = UdfIOCatalogEntry(
+            "name", ColumnType.FLOAT, True, None, [2, 3], True, 2
+        )
         self.assertNotEqual(udf_io, udf_io2)
+
+    def test_index(self):
+        index = IndexCatalogEntry("index", "FaissSavePath", "HNSW")
+        self.assertEqual(index.row_id, None)
+        self.assertEqual(index.name, "index")
+        self.assertEqual(index.save_file_path, "FaissSavePath")
+        self.assertEqual(index.type, "HNSW")
+
+    def test_index_hash(self):
+        index1 = IndexCatalogEntry("index", "FaissSavePath", "HNSW")
+        index2 = IndexCatalogEntry("index", "FaissSavePath", "HNSW")
+
+        self.assertEqual(hash(index1), hash(index2))
+
+    def test_index_equality(self):
+        index = IndexCatalogEntry("index", "FaissSavePath", "HNSW")
+        self.assertEqual(index, index)
+        index2 = IndexCatalogEntry("index2", "FaissSavePath", "HNSW")
+        self.assertNotEqual(index, index2)
+        index3 = IndexCatalogEntry("index", "FaissSavePath3", "HNSW")
+        self.assertNotEqual(index, index3)
+        index4 = IndexCatalogEntry("index", "FaissSavePath", "HNSW4")
+        self.assertNotEqual(index, index4)

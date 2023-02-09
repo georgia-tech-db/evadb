@@ -177,3 +177,10 @@ test_evadb/
 # tutorials
 tutorials/*.py
 *.pth
+*.pt
+
+# benchmark
+.benchmarks
+eva.txt
+prof/
+output.txt

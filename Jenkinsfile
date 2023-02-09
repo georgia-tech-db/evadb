@@ -1,3 +1,5 @@
+def buildNumber = BUILD_NUMBER as int; if (buildNumber > 1) milestone(buildNumber - 1); milestone(buildNumber) // JENKINS-43353 / JENKINS-58625
+
 pipeline {
   agent {
       dockerfile {
@@ -25,12 +27,6 @@ pipeline {
                   pip install cython
                   pip install -e ."[dev]"
               '''
-          }
-        }
-        stage('Generate Parser Files') {
-          
-          steps {
-            sh 'sh script/antlr4/generate_parser.sh'
           }
         }
       }

@@ -15,7 +15,7 @@
 from abc import ABCMeta, abstractmethod
 from typing import Iterator
 
-from eva.catalog.models.df_metadata import DataFrameMetadata
+from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.expression.abstract_expression import AbstractExpression
 from eva.models.storage.batch import Batch
 
@@ -29,7 +29,7 @@ class AbstractStorageEngine(metaclass=ABCMeta):
     """
 
     @abstractmethod
-    def create(self, table: DataFrameMetadata):
+    def create(self, table: TableCatalogEntry):
         """Interface that implements all the necessary task required for
             creating the basic unit of storage(table or dataframe)
 
@@ -38,7 +38,7 @@ class AbstractStorageEngine(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def write(self, table: DataFrameMetadata, rows: Batch):
+    def write(self, table: TableCatalogEntry, rows: Batch):
         """Interface responsible for inserting the rows into the required
         table. Internally calls the _open function and does the required
         task.
@@ -51,7 +51,7 @@ class AbstractStorageEngine(metaclass=ABCMeta):
     @abstractmethod
     def read(
         self,
-        table: DataFrameMetadata,
+        table: TableCatalogEntry,
         batch_mem_size: int,
         predicate: AbstractExpression = None,
     ) -> Iterator[Batch]:

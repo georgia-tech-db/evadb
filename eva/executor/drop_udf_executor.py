@@ -17,7 +17,7 @@ import pandas as pd
 from eva.catalog.catalog_manager import CatalogManager
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
-from eva.planner.drop_udf_plan import DropUDFPlan
+from eva.plan_nodes.drop_udf_plan import DropUDFPlan
 from eva.utils.logging_manager import logger
 
 
@@ -29,14 +29,11 @@ class DropUDFExecutor(AbstractExecutor):
         pass
 
     def exec(self):
-        """Drop UDF executor
-
-        Calls the catalog to drop udf metadata.
-        """
+        """Drop UDF executor"""
         catalog_manager = CatalogManager()
 
         # check catalog if it already has this udf entry
-        if not catalog_manager.get_udf_by_name(self.node.name):
+        if not catalog_manager.get_udf_catalog_entry_by_name(self.node.name):
             err_msg = (
                 f"UDF {self.node.name} does not exist, therefore cannot be dropped."
             )
@@ -46,7 +43,7 @@ class DropUDFExecutor(AbstractExecutor):
                 logger.exception(err_msg)
                 raise RuntimeError(err_msg)
         else:
-            catalog_manager.drop_udf(self.node.name)
+            catalog_manager.delete_udf_catalog_entry_by_name(self.node.name)
             yield Batch(
                 pd.DataFrame(
                     {f"UDF {self.node.name} successfully dropped"},

@@ -14,7 +14,8 @@
 # limitations under the License.
 from typing import Callable, List
 
-from eva.catalog.models.udf_io import UdfIO
+from eva.catalog.models.udf_catalog import UdfCatalogEntry
+from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 from eva.constants import NO_GPU
 from eva.executor.execution_context import Context
 from eva.expression.abstract_expression import AbstractExpression, ExpressionType
@@ -47,7 +48,7 @@ class FunctionExpression(AbstractExpression):
         name: str,
         output: str = None,
         alias: Alias = None,
-        **kwargs
+        **kwargs,
     ):
 
         super().__init__(ExpressionType.FUNCTION_EXPRESSION, **kwargs)
@@ -57,7 +58,8 @@ class FunctionExpression(AbstractExpression):
         self._function_instance = None
         self._output = output
         self.alias = alias
-        self.output_objs: List[UdfIO] = []
+        self.udf_obj: UdfCatalogEntry = None
+        self.output_objs: List[UdfIOCatalogEntry] = []
         self.projection_columns: List[str] = []
 
     @property
@@ -67,6 +69,14 @@ class FunctionExpression(AbstractExpression):
     @property
     def output(self):
         return self._output
+
+    @property
+    def col_alias(self):
+        col_alias_list = []
+        if self.alias is not None:
+            for col in self.alias.col_names:
+                col_alias_list.append("{}.{}".format(self.alias.alias_name, col))
+        return col_alias_list
 
     @property
     def function(self):
@@ -103,6 +113,27 @@ class FunctionExpression(AbstractExpression):
         outcomes.modify_column_alias(self.alias)
         return outcomes
 
+    def signature(self) -> str:
+        """It constructs the signature of the function expression.
+        It traverses the children (function arguments) and compute signature for each child. The output is in the form `udf_name(arg1, arg2, ...)`.
+
+        Returns:
+            str: signature string
+        """
+        child_sigs = []
+        for child in self.children:
+            child_sigs.append(child.signature())
+
+        func_sig = f"{self.name}({','.join(child_sigs)})"
+        if self._output and len(self.udf_obj.outputs) > 1:
+            # In this situation, the function expression has multiple output columns,
+            # but only one of them is projected. As a result, we must generate a
+            # signature that includes only the projected column in order to distinguish
+            # it from the scenario where all columns are projected.
+            func_sig = f"{func_sig}.{self.output_objs[0].name}"
+
+        return func_sig
+
     def _gpu_enabled_function(self):
         if self._function_instance is None:
             self._function_instance = self.function()
@@ -111,6 +142,10 @@ class FunctionExpression(AbstractExpression):
                 if device != NO_GPU:
                     self._function_instance = self._function_instance.to_device(device)
         return self._function_instance
+
+    def __str__(self) -> str:
+        expr_str = f"{self.name}()"
+        return expr_str
 
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)

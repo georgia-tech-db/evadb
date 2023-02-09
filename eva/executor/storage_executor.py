@@ -14,10 +14,13 @@
 # limitations under the License.
 from typing import Generator, Iterator
 
+from eva.catalog.catalog_type import TableType
 from eva.executor.abstract_executor import AbstractExecutor
+from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
-from eva.planner.storage_plan import StoragePlan
-from eva.storage.storage_engine import StorageEngine, VideoStorageEngine
+from eva.plan_nodes.storage_plan import StoragePlan
+from eva.storage.storage_engine import StorageEngine
+from eva.utils.logging_manager import logger
 
 
 class StorageExecutor(AbstractExecutor):
@@ -28,15 +31,27 @@ class StorageExecutor(AbstractExecutor):
         pass
 
     def exec(self) -> Iterator[Batch]:
-        if self.node.video.is_video:
-            return VideoStorageEngine.read(
-                self.node.video,
-                self.node.batch_mem_size,
-                predicate=self.node.predicate,
-                sampling_rate=self.node.sampling_rate,
-            )
-        else:
-            return StorageEngine.read(self.node.video, self.node.batch_mem_size)
+        try:
+            storage_engine = StorageEngine.factory(self.node.table)
+
+            if self.node.table.table_type == TableType.VIDEO_DATA:
+                return storage_engine.read(
+                    self.node.table,
+                    self.node.batch_mem_size,
+                    predicate=self.node.predicate,
+                    sampling_rate=self.node.sampling_rate,
+                )
+            elif self.node.table.table_type == TableType.IMAGE_DATA:
+                return storage_engine.read(self.node.table)
+            elif self.node.table.table_type == TableType.STRUCTURED_DATA:
+                return storage_engine.read(self.node.table, self.node.batch_mem_size)
+            else:
+                raise ExecutorError(
+                    f"Unsupported TableType  {self.node.table.table_type} encountered"
+                )
+        except Exception as e:
+            logger.error(e)
+            raise ExecutorError(e)
 
     def __call__(self, **kwargs) -> Generator[Batch, None, None]:
         yield from self.exec()

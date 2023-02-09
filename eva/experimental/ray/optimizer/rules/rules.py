@@ -32,9 +32,9 @@ from eva.optimizer.operators import (
     OperatorType,
 )
 from eva.optimizer.rules.rules_base import Promise, Rule, RuleType
-from eva.planner.project_plan import ProjectPlan
-from eva.planner.seq_scan_plan import SeqScanPlan
-from eva.planner.storage_plan import StoragePlan
+from eva.plan_nodes.project_plan import ProjectPlan
+from eva.plan_nodes.seq_scan_plan import SeqScanPlan
+from eva.plan_nodes.storage_plan import StoragePlan
 
 
 class LogicalExchangeToPhysical(Rule):
@@ -72,7 +72,7 @@ class LogicalProjectToPhysical(Rule):
         after = ProjectPlan(before.target_list)
         for child in before.children:
             after.append_child(child)
-        upper = ExchangePlan(parallelism=2, ray_conf={"num_gpus": 1})
+        upper = ExchangePlan(parallelism=2)
         upper.append_child(after)
         return upper
 
@@ -103,7 +103,7 @@ class LogicalGetToSeqScan(Rule):
         lower = ExchangePlan(parallelism=1)
         lower.append_child(
             StoragePlan(
-                before.dataset_metadata,
+                before.table_obj,
                 batch_mem_size=batch_mem_size,
                 predicate=before.predicate,
                 sampling_rate=before.sampling_rate,
@@ -115,6 +115,6 @@ class LogicalGetToSeqScan(Rule):
             [isinstance(expr, FunctionExpression) for expr in before.target_list]
         ):
             return scan
-        upper = ExchangePlan(parallelism=2, ray_conf={"num_gpus": 1})
+        upper = ExchangePlan(parallelism=2)
         upper.append_child(scan)
         return upper

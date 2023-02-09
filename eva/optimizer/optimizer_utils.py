@@ -14,14 +14,14 @@
 # limitations under the License.
 from typing import List, Tuple
 
-from eva.catalog.catalog_manager import CatalogManager
+from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 from eva.expression.abstract_expression import AbstractExpression, ExpressionType
 from eva.expression.expression_utils import (
     conjuction_list_to_expression_tree,
     contains_single_column,
-    expression_tree_to_conjunction_list,
     get_columns_in_predicate,
     is_simple_predicate,
+    to_conjunction_list,
 )
 from eva.parser.alias import Alias
 from eva.parser.create_statement import ColumnDefinition
@@ -29,7 +29,7 @@ from eva.utils.logging_manager import logger
 
 
 def column_definition_to_udf_io(col_list: List[ColumnDefinition], is_input: bool):
-    """Create the UdfIO object fro each column definition provided
+    """Create the UdfIOCatalogEntry object fro each column definition provided
 
     Arguments:
         col_list(List[ColumnDefinition]): parsed input/output definitions
@@ -44,11 +44,12 @@ def column_definition_to_udf_io(col_list: List[ColumnDefinition], is_input: bool
             logger.error("Empty column definition while creating udf io")
             result_list.append(col)
         result_list.append(
-            CatalogManager().udf_io(
+            UdfIOCatalogEntry(
                 col.name,
                 col.type,
+                col.cci.nullable,
                 array_type=col.array_type,
-                dimensions=col.dimension,
+                array_dimensions=col.dimension,
                 is_input=is_input,
             )
         )
@@ -61,7 +62,7 @@ def extract_equi_join_keys(
     right_table_aliases: List[str],
 ) -> Tuple[List[AbstractExpression], List[AbstractExpression]]:
 
-    pred_list = expression_tree_to_conjunction_list(join_predicate)
+    pred_list = to_conjunction_list(join_predicate)
     left_join_keys = []
     right_join_keys = []
     for pred in pred_list:
@@ -110,7 +111,7 @@ def extract_pushdown_predicate(
 
     pushdown_preds = []
     rem_pred = []
-    pred_list = expression_tree_to_conjunction_list(predicate)
+    pred_list = to_conjunction_list(predicate)
     for pred in pred_list:
         if contains_single_column(pred, column_alias) and is_simple_predicate(pred):
             pushdown_preds.append(pred)
@@ -138,7 +139,7 @@ def extract_pushdown_predicate_for_alias(
     if predicate is None:
         return None, None
 
-    pred_list = expression_tree_to_conjunction_list(predicate)
+    pred_list = to_conjunction_list(predicate)
     pushdown_preds = []
     rem_pred = []
     aliases = [alias.alias_name for alias in aliases]

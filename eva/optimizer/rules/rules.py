@@ -16,7 +16,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from eva.catalog.catalog_manager import CatalogManager
+from eva.catalog.catalog_type import TableType
+from eva.catalog.catalog_utils import is_video_table
 from eva.expression.expression_utils import conjuction_list_to_expression_tree
+from eva.expression.function_expression import FunctionExpression
+from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.optimizer.optimizer_utils import (
     extract_equi_join_keys,
     extract_pushdown_predicate,
@@ -24,13 +29,14 @@ from eva.optimizer.optimizer_utils import (
 )
 from eva.optimizer.rules.pattern import Pattern
 from eva.optimizer.rules.rules_base import Promise, Rule, RuleType
-from eva.parser.types import JoinType
-from eva.planner.create_mat_view_plan import CreateMaterializedViewPlan
-from eva.planner.explain_plan import ExplainPlan
-from eva.planner.hash_join_build_plan import HashJoinBuildPlan
-from eva.planner.predicate_plan import PredicatePlan
-from eva.planner.project_plan import ProjectPlan
-from eva.planner.show_info_plan import ShowInfoPlan
+from eva.parser.types import JoinType, ParserOrderBySortType
+from eva.plan_nodes.apply_and_merge_plan import ApplyAndMergePlan
+from eva.plan_nodes.create_mat_view_plan import CreateMaterializedViewPlan
+from eva.plan_nodes.explain_plan import ExplainPlan
+from eva.plan_nodes.hash_join_build_plan import HashJoinBuildPlan
+from eva.plan_nodes.predicate_plan import PredicatePlan
+from eva.plan_nodes.project_plan import ProjectPlan
+from eva.plan_nodes.show_info_plan import ShowInfoPlan
 
 if TYPE_CHECKING:
     from eva.optimizer.optimizer_context import OptimizerContext
@@ -38,12 +44,15 @@ if TYPE_CHECKING:
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.optimizer.operators import (
     Dummy,
+    LogicalApplyAndMerge,
     LogicalCreate,
+    LogicalCreateIndex,
     LogicalCreateMaterializedView,
     LogicalCreateUDF,
     LogicalDrop,
     LogicalDropUDF,
     LogicalExplain,
+    LogicalFaissIndexScan,
     LogicalFilter,
     LogicalFunctionScan,
     LogicalGet,
@@ -63,24 +72,26 @@ from eva.optimizer.operators import (
     Operator,
     OperatorType,
 )
-from eva.planner.create_plan import CreatePlan
-from eva.planner.create_udf_plan import CreateUDFPlan
-from eva.planner.drop_plan import DropPlan
-from eva.planner.drop_udf_plan import DropUDFPlan
-from eva.planner.function_scan_plan import FunctionScanPlan
-from eva.planner.groupby_plan import GroupByPlan
-from eva.planner.hash_join_probe_plan import HashJoinProbePlan
-from eva.planner.insert_plan import InsertPlan
-from eva.planner.lateral_join_plan import LateralJoinPlan
-from eva.planner.limit_plan import LimitPlan
-from eva.planner.load_data_plan import LoadDataPlan
-from eva.planner.orderby_plan import OrderByPlan
-from eva.planner.rename_plan import RenamePlan
-from eva.planner.sample_plan import SamplePlan
-from eva.planner.seq_scan_plan import SeqScanPlan
-from eva.planner.storage_plan import StoragePlan
-from eva.planner.union_plan import UnionPlan
-from eva.planner.upload_plan import UploadPlan
+from eva.plan_nodes.create_index_plan import CreateIndexPlan
+from eva.plan_nodes.create_plan import CreatePlan
+from eva.plan_nodes.create_udf_plan import CreateUDFPlan
+from eva.plan_nodes.drop_plan import DropPlan
+from eva.plan_nodes.drop_udf_plan import DropUDFPlan
+from eva.plan_nodes.faiss_index_scan_plan import FaissIndexScanPlan
+from eva.plan_nodes.function_scan_plan import FunctionScanPlan
+from eva.plan_nodes.groupby_plan import GroupByPlan
+from eva.plan_nodes.hash_join_probe_plan import HashJoinProbePlan
+from eva.plan_nodes.insert_plan import InsertPlan
+from eva.plan_nodes.lateral_join_plan import LateralJoinPlan
+from eva.plan_nodes.limit_plan import LimitPlan
+from eva.plan_nodes.load_data_plan import LoadDataPlan
+from eva.plan_nodes.orderby_plan import OrderByPlan
+from eva.plan_nodes.rename_plan import RenamePlan
+from eva.plan_nodes.sample_plan import SamplePlan
+from eva.plan_nodes.seq_scan_plan import SeqScanPlan
+from eva.plan_nodes.storage_plan import StoragePlan
+from eva.plan_nodes.union_plan import UnionPlan
+from eva.plan_nodes.upload_plan import UploadPlan
 
 ##############################################
 # REWRITE RULES START
@@ -99,7 +110,7 @@ class EmbedFilterIntoGet(Rule):
         # System supports predicate pushdown only while reading video data
         predicate = before.predicate
         lget: LogicalGet = before.children[0]
-        if predicate and lget.dataset_metadata.is_video:
+        if predicate and is_video_table(lget.table_obj):
             # System only supports pushing basic range predicates on id
             video_alias = lget.video.alias
             col_alias = f"{video_alias}.id"
@@ -120,7 +131,7 @@ class EmbedFilterIntoGet(Rule):
         if pushdown_pred:
             new_get_opr = LogicalGet(
                 lget.video,
-                lget.dataset_metadata,
+                lget.table_obj,
                 alias=lget.alias,
                 predicate=pushdown_pred,
                 target_list=lget.target_list,
@@ -130,10 +141,10 @@ class EmbedFilterIntoGet(Rule):
             if unsupported_pred:
                 unsupported_opr = LogicalFilter(unsupported_pred)
                 unsupported_opr.append_child(new_get_opr)
-                return unsupported_opr
-            return new_get_opr
+                new_get_opr = unsupported_opr
+            yield new_get_opr
         else:
-            return before
+            yield before
 
 
 class EmbedSampleIntoGet(Rule):
@@ -148,7 +159,7 @@ class EmbedSampleIntoGet(Rule):
     def check(self, before: LogicalSample, context: OptimizerContext):
         # System supports sample pushdown only while reading video data
         lget: LogicalGet = before.children[0]
-        if lget.dataset_metadata.is_video:
+        if lget.table_obj.table_type == TableType.VIDEO_DATA:
             return True
         return False
 
@@ -157,14 +168,14 @@ class EmbedSampleIntoGet(Rule):
         lget: LogicalGet = before.children[0]
         new_get_opr = LogicalGet(
             lget.video,
-            lget.dataset_metadata,
+            lget.table_obj,
             alias=lget.alias,
             predicate=lget.predicate,
             target_list=lget.target_list,
             sampling_rate=sample_freq,
             children=lget.children,
         )
-        return new_get_opr
+        yield new_get_opr
 
 
 class EmbedProjectIntoGet(Rule):
@@ -185,7 +196,7 @@ class EmbedProjectIntoGet(Rule):
         lget = before.children[0]
         new_get_opr = LogicalGet(
             lget.video,
-            lget.dataset_metadata,
+            lget.table_obj,
             alias=lget.alias,
             predicate=lget.predicate,
             target_list=target_list,
@@ -193,7 +204,7 @@ class EmbedProjectIntoGet(Rule):
             children=lget.children,
         )
 
-        return new_get_opr
+        yield new_get_opr
 
 
 # For nested queries
@@ -223,7 +234,7 @@ class EmbedFilterIntoDerivedGet(Rule):
             target_list=ld_get.target_list,
             children=ld_get.children,
         )
-        return new_opr
+        yield new_opr
 
 
 class EmbedProjectIntoDerivedGet(Rule):
@@ -250,7 +261,7 @@ class EmbedProjectIntoDerivedGet(Rule):
             target_list=target_list,
             children=ld_get.children,
         )
-        return new_opr
+        yield new_opr
 
 
 # Join Queries
@@ -310,7 +321,209 @@ class PushDownFilterThroughJoin(Rule):
                 [rem_pred, new_join_node.join_predicate]
             )
 
-        return new_join_node
+        yield new_join_node
+
+
+class XformLateralJoinToLinearFlow(Rule):
+    """If the inner node of a lateral join is a function-valued expression, we
+    eliminate the join node and make the inner node the parent of the outer node. This
+    produces a linear #data flow path. Because this scenario is common in our system,
+    we chose to explicitly convert it to a linear flow, which simplifies the
+    implementation of other optimizations such as UDF reuse and parallelized plans by
+    removing the join."""
+
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALJOIN)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        pattern.append_child(Pattern(OperatorType.LOGICALFUNCTIONSCAN))
+        super().__init__(RuleType.XFORM_LATERAL_JOIN_TO_LINEAR_FLOW, pattern)
+
+    def promise(self):
+        return Promise.XFORM_LATERAL_JOIN_TO_LINEAR_FLOW
+
+    def check(self, before: LogicalJoin, context: OptimizerContext):
+        if before.join_type == JoinType.LATERAL_JOIN:
+            if before.join_predicate is None and not before.join_project:
+                return True
+        return False
+
+    def apply(self, before: LogicalJoin, context: OptimizerContext):
+        #     LogicalJoin(Lateral)              LogicalApplyAndMerge
+        #     /           \                 ->       |
+        #    A        LogicalFunctionScan            A
+
+        A: Dummy = before.children[0]
+        logical_func_scan: LogicalFunctionScan = before.children[1]
+        logical_apply_merge = LogicalApplyAndMerge(
+            logical_func_scan.func_expr,
+            logical_func_scan.alias,
+            logical_func_scan.do_unnest,
+        )
+        logical_apply_merge.append_child(A)
+        yield logical_apply_merge
+
+
+class PushDownFilterThroughApplyAndMerge(Rule):
+    """If it is feasible to partially or fully push the predicate contained within the
+    logical filter through the ApplyAndMerge operator, we should do so. This is often
+    beneficial, for instance, in order to prevent decoding additional frames beyond
+    those that satisfy the predicate.
+    Eg:
+
+    Filter(id < 10 and func.label = 'car')           Filter(func.label = 'car')
+            |                                                   |
+        ApplyAndMerge(func)                  ->          ApplyAndMerge(func)
+            |                                                   |
+            A                                            Filter(id < 10)
+                                                                |
+                                                                A
+
+    """
+
+    def __init__(self):
+        appply_merge_pattern = Pattern(OperatorType.LOGICAL_APPLY_AND_MERGE)
+        appply_merge_pattern.append_child(Pattern(OperatorType.DUMMY))
+        pattern = Pattern(OperatorType.LOGICALFILTER)
+        pattern.append_child(appply_merge_pattern)
+        super().__init__(RuleType.PUSHDOWN_FILTER_THROUGH_APPLY_AND_MERGE, pattern)
+
+    def promise(self):
+        return Promise.PUSHDOWN_FILTER_THROUGH_APPLY_AND_MERGE
+
+    def check(self, before: LogicalFilter, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalFilter, context: OptimizerContext):
+        A: Dummy = before.children[0].children[0]
+        apply_and_merge: LogicalApplyAndMerge = before.children[0]
+        aliases = context.memo.get_group_by_id(A.group_id).aliases
+        predicate = before.predicate
+        pushdown_pred, rem_pred = extract_pushdown_predicate_for_alias(
+            predicate, aliases
+        )
+
+        # if we find a feasible pushdown predicate, add a new filter node between
+        # ApplyAndMerge and Dummy
+        if pushdown_pred:
+            pushdown_filter = LogicalFilter(predicate=pushdown_pred)
+            pushdown_filter.append_child(A)
+            apply_and_merge.children = [pushdown_filter]
+
+        # If we have partial predicate make it the root
+        root_node = apply_and_merge
+        if rem_pred:
+            root_node = LogicalFilter(predicate=rem_pred)
+            root_node.append_child(apply_and_merge)
+
+        yield root_node
+
+
+class CombineSimilarityOrderByAndLimitToFaissIndexScan(Rule):
+    """
+    This rule currently rewrites Order By + Limit to a Faiss index scan.
+    Because Faiss index only works for similarity search, the rule will
+    only be applied when the Order By is on Similarity expression. For
+    simplicity, we also only enable this rule when the Similarity expression
+    applies to the full table. Predicated query will yield incorrect results
+    if we use an index scan.
+
+    Limit(10)
+        |
+    OrderBy(func)        ->        IndexScan(10)
+        |                               |
+        A                               A
+    """
+
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALLIMIT)
+        orderby_pattern = Pattern(OperatorType.LOGICALORDERBY)
+        orderby_pattern.append_child(Pattern(OperatorType.DUMMY))
+        pattern.append_child(orderby_pattern)
+        super().__init__(
+            RuleType.COMBINE_SIMILARITY_ORDERBY_AND_LIMIT_TO_FAISS_INDEX_SCAN, pattern
+        )
+
+        # Entries populate after rule egibility validation.
+        self._index_catalog_entry = None
+        self._query_func_expr = None
+
+    def promise(self):
+        return Promise.COMBINE_SIMILARITY_ORDERBY_AND_LIMIT_TO_FAISS_INDEX_SCAN
+
+    def check(self, before: LogicalLimit, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalLimit, context: OptimizerContext):
+        catalog_manager = CatalogManager()
+
+        # Get corresponding nodes.
+        limit_node = before
+        orderby_node = before.children[0]
+        sub_tree_root = orderby_node.children[0]
+
+        # Check if predicate exists on table.
+        def _exists_predicate(opr):
+            if isinstance(opr, LogicalFilter):
+                return True
+            elif isinstance(opr, LogicalGet):
+                return opr.predicate is not None
+            elif isinstance(opr, LogicalQueryDerivedGet):
+                return opr.predicate is not None
+            exists_predicate = False
+            for child in opr.children:
+                exists_predicate |= _exists_predicate(child)
+            return exists_predicate
+
+        if _exists_predicate(sub_tree_root.opr):
+            return
+
+        # Check if orderby runs on similarity expression.
+        # Current optimization will only accept Similarity expression.
+        func_orderby_expr = None
+        for column, sort_type in orderby_node.orderby_list:
+            if (
+                isinstance(column, FunctionExpression)
+                and sort_type == ParserOrderBySortType.ASC
+            ):
+                func_orderby_expr = column
+        if not func_orderby_expr or func_orderby_expr.name != "Similarity":
+            return
+
+        # Check if there exists an index on table and column.
+        query_func_expr, base_func_expr = func_orderby_expr.children
+
+        # Get table and column of orderby.
+        tv_expr = base_func_expr
+        while not isinstance(tv_expr, TupleValueExpression):
+            tv_expr = tv_expr.children[0]
+
+        # Get column catalog entry and udf_signature.
+        column_catalog_entry = tv_expr.col_object
+        udf_signature = (
+            None
+            if isinstance(base_func_expr, TupleValueExpression)
+            else base_func_expr.signature()
+        )
+
+        # Get index catalog. Check if an index exists for matching
+        # udf signature and table columns.
+        index_catalog_entry = (
+            catalog_manager.get_index_catalog_entry_by_column_and_udf_signature(
+                column_catalog_entry, udf_signature
+            )
+        )
+        if not index_catalog_entry:
+            return
+
+        # Construct the Faiss index scan plan.
+        faiss_index_scan_node = LogicalFaissIndexScan(
+            index_catalog_entry.name,
+            limit_node.limit_count,
+            query_func_expr,
+        )
+        for child in orderby_node.children:
+            faiss_index_scan_node.append_child(child)
+        yield faiss_index_scan_node
 
 
 # REWRITE RULES END
@@ -342,7 +555,7 @@ class LogicalInnerJoinCommutativity(Rule):
         new_join = LogicalJoin(before.join_type, before.join_predicate)
         new_join.append_child(before.rhs())
         new_join.append_child(before.lhs())
-        return new_join
+        yield new_join
 
 
 # LOGICAL RULES END
@@ -366,7 +579,7 @@ class LogicalCreateToPhysical(Rule):
 
     def apply(self, before: LogicalCreate, context: OptimizerContext):
         after = CreatePlan(before.video, before.column_list, before.if_not_exists)
-        return after
+        yield after
 
 
 class LogicalRenameToPhysical(Rule):
@@ -382,7 +595,7 @@ class LogicalRenameToPhysical(Rule):
 
     def apply(self, before: LogicalRename, context: OptimizerContext):
         after = RenamePlan(before.old_table_ref, before.new_name)
-        return after
+        yield after
 
 
 class LogicalDropToPhysical(Rule):
@@ -397,8 +610,8 @@ class LogicalDropToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalDrop, context: OptimizerContext):
-        after = DropPlan(before.table_refs, before.if_exists)
-        return after
+        after = DropPlan(before.table_infos, before.if_exists)
+        yield after
 
 
 class LogicalCreateUDFToPhysical(Rule):
@@ -421,7 +634,29 @@ class LogicalCreateUDFToPhysical(Rule):
             before.impl_path,
             before.udf_type,
         )
-        return after
+        yield after
+
+
+class LogicalCreateIndexToFaiss(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALCREATEINDEX)
+        super().__init__(RuleType.LOGICAL_CREATE_INDEX_TO_FAISS, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_CREATE_INDEX_TO_FAISS
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalCreateIndex, context: OptimizerContext):
+        after = CreateIndexPlan(
+            before.name,
+            before.table_ref,
+            before.col_list,
+            before.index_type,
+            before.udf_func,
+        )
+        yield after
 
 
 class LogicalDropUDFToPhysical(Rule):
@@ -437,7 +672,7 @@ class LogicalDropUDFToPhysical(Rule):
 
     def apply(self, before: LogicalDropUDF, context: OptimizerContext):
         after = DropUDFPlan(before.name, before.if_exists)
-        return after
+        yield after
 
 
 class LogicalInsertToPhysical(Rule):
@@ -452,8 +687,8 @@ class LogicalInsertToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalInsert, context: OptimizerContext):
-        after = InsertPlan(before.table_metainfo, before.column_list, before.value_list)
-        return after
+        after = InsertPlan(before.table, before.column_list, before.value_list)
+        yield after
 
 
 class LogicalLoadToPhysical(Rule):
@@ -479,13 +714,13 @@ class LogicalLoadToPhysical(Rule):
         if config_batch_mem_size:
             batch_mem_size = config_batch_mem_size
         after = LoadDataPlan(
-            before.table_metainfo,
+            before.table_info,
             before.path,
             batch_mem_size,
             before.column_list,
             before.file_options,
         )
-        return after
+        yield after
 
 
 class LogicalUploadToPhysical(Rule):
@@ -513,13 +748,13 @@ class LogicalUploadToPhysical(Rule):
         after = UploadPlan(
             before.path,
             before.video_blob,
-            before.table_metainfo,
+            before.table_info,
             batch_mem_size,
             before.column_list,
             before.file_options,
         )
 
-        return after
+        yield after
 
 
 class LogicalGetToSeqScan(Rule):
@@ -547,13 +782,13 @@ class LogicalGetToSeqScan(Rule):
         after = SeqScanPlan(None, before.target_list, before.alias)
         after.append_child(
             StoragePlan(
-                before.dataset_metadata,
+                before.table_obj,
                 batch_mem_size=batch_mem_size,
                 predicate=before.predicate,
                 sampling_rate=before.sampling_rate,
             )
         )
-        return after
+        yield after
 
 
 class LogicalSampleToUniformSample(Rule):
@@ -572,7 +807,7 @@ class LogicalSampleToUniformSample(Rule):
         after = SamplePlan(before.sample_freq)
         for child in before.children:
             after.append_child(child)
-        return after
+        yield after
 
 
 class LogicalDerivedGetToPhysical(Rule):
@@ -590,7 +825,7 @@ class LogicalDerivedGetToPhysical(Rule):
     def apply(self, before: LogicalQueryDerivedGet, context: OptimizerContext):
         after = SeqScanPlan(before.predicate, before.target_list, before.alias)
         after.append_child(before.children[0])
-        return after
+        yield after
 
 
 class LogicalUnionToPhysical(Rule):
@@ -611,7 +846,7 @@ class LogicalUnionToPhysical(Rule):
         after = UnionPlan(before.all)
         for child in before.children:
             after.append_child(child)
-        return after
+        yield after
 
 
 class LogicalGroupByToPhysical(Rule):
@@ -630,7 +865,7 @@ class LogicalGroupByToPhysical(Rule):
         after = GroupByPlan(before.groupby_clause)
         for child in before.children:
             after.append_child(child)
-        return after
+        yield after
 
 
 class LogicalOrderByToPhysical(Rule):
@@ -649,7 +884,7 @@ class LogicalOrderByToPhysical(Rule):
         after = OrderByPlan(before.orderby_list)
         for child in before.children:
             after.append_child(child)
-        return after
+        yield after
 
 
 class LogicalLimitToPhysical(Rule):
@@ -668,7 +903,7 @@ class LogicalLimitToPhysical(Rule):
         after = LimitPlan(before.limit_count)
         for child in before.children:
             after.append_child(child)
-        return after
+        yield after
 
 
 class LogicalFunctionScanToPhysical(Rule):
@@ -684,7 +919,7 @@ class LogicalFunctionScanToPhysical(Rule):
 
     def apply(self, before: LogicalFunctionScan, context: OptimizerContext):
         after = FunctionScanPlan(before.func_expr, before.do_unnest)
-        return after
+        yield after
 
 
 class LogicalLateralJoinToPhysical(Rule):
@@ -708,7 +943,7 @@ class LogicalLateralJoinToPhysical(Rule):
         lateral_join_plan.join_project = join_node.join_project
         lateral_join_plan.append_child(join_node.lhs())
         lateral_join_plan.append_child(join_node.rhs())
-        return lateral_join_plan
+        yield lateral_join_plan
 
 
 class LogicalJoinToPhysicalHashJoin(Rule):
@@ -750,7 +985,7 @@ class LogicalJoinToPhysicalHashJoin(Rule):
         )
         probe_side.append_child(build_plan)
         probe_side.append_child(b)
-        return probe_side
+        yield probe_side
 
 
 class LogicalCreateMaterializedViewToPhysical(Rule):
@@ -773,7 +1008,7 @@ class LogicalCreateMaterializedViewToPhysical(Rule):
         )
         for child in before.children:
             after.append_child(child)
-        return after
+        yield after
 
 
 class LogicalFilterToPhysical(Rule):
@@ -792,7 +1027,7 @@ class LogicalFilterToPhysical(Rule):
         after = PredicatePlan(before.predicate)
         for child in before.children:
             after.append_child(child)
-        return after
+        yield after
 
 
 class LogicalProjectToPhysical(Rule):
@@ -811,7 +1046,7 @@ class LogicalProjectToPhysical(Rule):
         after = ProjectPlan(before.target_list)
         for child in before.children:
             after.append_child(child)
-        return after
+        yield after
 
 
 class LogicalShowToPhysical(Rule):
@@ -827,7 +1062,7 @@ class LogicalShowToPhysical(Rule):
 
     def apply(self, before: LogicalShow, context: OptimizerContext):
         after = ShowInfoPlan(before.show_type)
-        return after
+        yield after
 
 
 class LogicalExplainToPhysical(Rule):
@@ -846,7 +1081,47 @@ class LogicalExplainToPhysical(Rule):
         after = ExplainPlan(before.explainable_opr)
         for child in before.children:
             after.append_child(child)
-        return after
+        yield after
+
+
+class LogicalApplyAndMergeToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICAL_APPLY_AND_MERGE)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_APPLY_AND_MERGE_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_APPLY_AND_MERGE_TO_PHYSICAL
+
+    def check(self, grp_id: int, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalApplyAndMerge, context: OptimizerContext):
+        after = ApplyAndMergePlan(before.func_expr, before.alias, before.do_unnest)
+        for child in before.children:
+            after.append_child(child)
+        yield after
+
+
+class LogicalFaissIndexScanToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALFAISSINDEXSCAN)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_FAISS_INDEX_SCAN_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_FAISS_INDEX_SCAN_TO_PHYSICAL
+
+    def check(self, grp_id: int, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalFaissIndexScan, context: OptimizerContext):
+        after = FaissIndexScanPlan(
+            before.index_name, before.limit_count, before.search_query_expr
+        )
+        for child in before.children:
+            after.append_child(child)
+        yield after
 
 
 # IMPLEMENTATION RULES END

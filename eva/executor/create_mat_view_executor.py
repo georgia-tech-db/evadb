@@ -12,12 +12,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from eva.binder.binder_utils import create_table_metadata, handle_if_not_exists
+from eva.catalog.catalog_manager import CatalogManager
 from eva.executor.abstract_executor import AbstractExecutor
+from eva.executor.executor_utils import ExecutorError, handle_if_not_exists
 from eva.expression.abstract_expression import ExpressionType
 from eva.parser.create_statement import ColumnDefinition
-from eva.planner.create_mat_view_plan import CreateMaterializedViewPlan
-from eva.planner.types import PlanOprType
+from eva.plan_nodes.create_mat_view_plan import CreateMaterializedViewPlan
+from eva.plan_nodes.types import PlanOprType
 from eva.storage.storage_engine import StorageEngine
 from eva.utils.logging_manager import logger
 
@@ -25,6 +26,7 @@ from eva.utils.logging_manager import logger
 class CreateMaterializedViewExecutor(AbstractExecutor):
     def __init__(self, node: CreateMaterializedViewPlan):
         super().__init__(node)
+        self.catalog = CatalogManager()
 
     def validate(self):
         pass
@@ -47,7 +49,7 @@ class CreateMaterializedViewExecutor(AbstractExecutor):
                 )
 
                 logger.error(err_msg)
-                raise RuntimeError(err_msg)
+                raise ExecutorError(err_msg)
 
             # gather child projected column objects
             child_objs = []
@@ -64,7 +66,7 @@ class CreateMaterializedViewExecutor(AbstractExecutor):
                     len(self.node.columns), len(child_objs)
                 )
                 logger.error(err_msg)
-                raise RuntimeError(err_msg)
+                raise ExecutorError(err_msg)
 
             col_defs = []
             # Copy column type info from child columns
@@ -79,10 +81,13 @@ class CreateMaterializedViewExecutor(AbstractExecutor):
                     )
                 )
 
-            view_metainfo = create_table_metadata(self.node.view, col_defs)
-            StorageEngine.create(table=view_metainfo)
+            view_catalog_entry = self.catalog.create_and_insert_table_catalog_entry(
+                self.node.view, col_defs
+            )
+            storage_engine = StorageEngine.factory(view_catalog_entry)
+            storage_engine.create(table=view_catalog_entry)
 
             # Populate the view
             for batch in child.exec():
                 batch.drop_column_alias()
-                StorageEngine.write(view_metainfo, batch)
+                storage_engine.write(view_catalog_entry, batch)

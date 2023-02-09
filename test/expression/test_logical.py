@@ -28,6 +28,8 @@ from eva.models.storage.batch import Batch
 class LogicalExpressionsTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # create a dummy batch
+        self.batch = Batch(pd.DataFrame([0]))
 
     def test_logical_and(self):
         const_exp1 = ConstantValueExpression(1)
@@ -46,7 +48,7 @@ class LogicalExpressionsTest(unittest.TestCase):
             comparison_expression_left,
             comparison_expression_right,
         )
-        self.assertEqual([True], logical_expr.evaluate(None).frames[0].tolist())
+        self.assertEqual([True], logical_expr.evaluate(self.batch).frames[0].tolist())
 
     def test_logical_or(self):
         const_exp1 = ConstantValueExpression(1)
@@ -65,7 +67,7 @@ class LogicalExpressionsTest(unittest.TestCase):
             comparison_expression_left,
             comparison_expression_right,
         )
-        self.assertEqual([True], logical_expr.evaluate(None).frames[0].tolist())
+        self.assertEqual([True], logical_expr.evaluate(self.batch).frames[0].tolist())
 
     def test_logical_not(self):
         const_exp1 = ConstantValueExpression(0)
@@ -77,7 +79,7 @@ class LogicalExpressionsTest(unittest.TestCase):
         logical_expr = LogicalExpression(
             ExpressionType.LOGICAL_NOT, None, comparison_expression_right
         )
-        self.assertEqual([True], logical_expr.evaluate(None).frames[0].tolist())
+        self.assertEqual([True], logical_expr.evaluate(self.batch).frames[0].tolist())
 
     def test_short_circuiting_and_complete(self):
         # tests whether right-hand side is bypassed completely with and

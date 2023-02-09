@@ -12,11 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import List
+from typing import List, Tuple
 
-from eva.catalog.column_type import ColumnType, NdArrayType
+from eva.catalog.catalog_type import ColumnType, NdArrayType
 from eva.parser.statement import AbstractStatement
-from eva.parser.table_ref import TableRef
+from eva.parser.table_ref import TableInfo
 from eva.parser.types import StatementType
 
 
@@ -47,13 +47,13 @@ class ColumnDefinition:
         col_name: str,
         col_type: ColumnType,
         col_array_type: NdArrayType,
-        col_dim: List[int],
+        col_dim: Tuple[int],
         cci: ColConstraintInfo = ColConstraintInfo(),
     ):
         self._name = col_name
         self._type = col_type
         self._array_type = col_array_type
-        self._dimension = col_dim or []
+        self._dimension = col_dim or ()
         self._cci = cci
 
     @property
@@ -77,9 +77,20 @@ class ColumnDefinition:
         return self._cci
 
     def __str__(self):
-        return "{} {} {} {}".format(
-            self._name, self._type, self.array_type, self._dimension
-        )
+        dimension_str = ""
+        if self._dimension is not None:
+            dimension_str += "["
+            for dim in self._dimension:
+                dimension_str += str(dim) + ", "
+            dimension_str = dimension_str.rstrip(", ")
+            dimension_str += "]"
+
+        if self.array_type is None:
+            return "{} {}".format(self._name, self._type)
+        else:
+            return "{} {} {} {}".format(
+                self._name, self._type, self.array_type, dimension_str
+            )
 
     def __eq__(self, other):
         if not isinstance(other, ColumnDefinition):
@@ -94,9 +105,7 @@ class ColumnDefinition:
         )
 
     def __hash__(self) -> int:
-        return hash(
-            (self.name, self.type, self.array_type, tuple(self.dimension), self.cci)
-        )
+        return hash((self.name, self.type, self.array_type, self.dimension, self.cci))
 
 
 class CreateTableStatement(AbstractStatement):
@@ -109,22 +118,28 @@ class CreateTableStatement(AbstractStatement):
 
     def __init__(
         self,
-        table_ref: TableRef,
+        table_info: TableInfo,
         if_not_exists: bool,
         column_list: List[ColumnDefinition] = None,
     ):
         super().__init__(StatementType.CREATE)
-        self._table_ref = table_ref
+        self._table_info = table_info
         self._if_not_exists = if_not_exists
         self._column_list = column_list
 
     def __str__(self) -> str:
-        print_str = "CREATE TABLE {} ({}) ".format(self._table_ref, self._if_not_exists)
+        print_str = "CREATE TABLE {} ({}) \n".format(
+            self._table_info, self._if_not_exists
+        )
+
+        for column in self.column_list:
+            print_str += str(column) + "\n"
+
         return print_str
 
     @property
-    def table_ref(self):
-        return self._table_ref
+    def table_info(self):
+        return self._table_info
 
     @property
     def if_not_exists(self):
@@ -138,7 +153,7 @@ class CreateTableStatement(AbstractStatement):
         if not isinstance(other, CreateTableStatement):
             return False
         return (
-            self.table_ref == other.table_ref
+            self.table_info == other.table_info
             and self.if_not_exists == other.if_not_exists
             and self.column_list == other.column_list
         )
@@ -147,8 +162,8 @@ class CreateTableStatement(AbstractStatement):
         return hash(
             (
                 super().__hash__(),
-                self.table_ref,
+                self.table_info,
                 self.if_not_exists,
-                tuple(self.column_list),
+                tuple(self.column_list or []),
             )
         )

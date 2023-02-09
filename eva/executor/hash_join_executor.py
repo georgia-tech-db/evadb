@@ -17,7 +17,7 @@ from typing import Iterator
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import apply_predicate, apply_project
 from eva.models.storage.batch import Batch
-from eva.planner.hash_join_probe_plan import HashJoinProbePlan
+from eva.plan_nodes.hash_join_probe_plan import HashJoinProbePlan
 
 
 class HashJoinExecutor(AbstractExecutor):
