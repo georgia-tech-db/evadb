@@ -34,6 +34,7 @@ class PlanOprType(Enum):
     LIMIT = auto()
     SAMPLE = auto()
     FUNCTION_SCAN = auto()
+    FUZZY_JOIN = auto()
     HASH_JOIN = auto()
     LATERAL_JOIN = auto()
     HASH_BUILD = auto()

@@ -34,6 +34,7 @@ from eva.plan_nodes.apply_and_merge_plan import ApplyAndMergePlan
 from eva.plan_nodes.create_mat_view_plan import CreateMaterializedViewPlan
 from eva.plan_nodes.explain_plan import ExplainPlan
 from eva.plan_nodes.hash_join_build_plan import HashJoinBuildPlan
+from eva.plan_nodes.fuzzy_join_plan import FuzzyNestedJoinPlan
 from eva.plan_nodes.predicate_plan import PredicatePlan
 from eva.plan_nodes.project_plan import ProjectPlan
 from eva.plan_nodes.show_info_plan import ShowInfoPlan
@@ -933,10 +934,7 @@ class LogicalLateralJoinToPhysical(Rule):
         return Promise.LOGICAL_LATERAL_JOIN_TO_PHYSICAL
 
     def check(self, before: Operator, context: OptimizerContext):
-        if before.join_type == JoinType.LATERAL_JOIN:
-            return True
-        else:
-            return False
+        return before.join_type == JoinType.LATERAL_JOIN
 
     def apply(self, join_node: LogicalJoin, context: OptimizerContext):
         lateral_join_plan = LateralJoinPlan(join_node.join_predicate)
@@ -987,6 +985,25 @@ class LogicalJoinToPhysicalHashJoin(Rule):
         probe_side.append_child(b)
         yield probe_side
 
+
+class LogicalJoinToPhysicalFuzzyJoin(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALJOIN)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_JOIN_TO_PHYSICAL_FUZZY_JOIN, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_JOIN_TO_PHYSICAL_FUZZY_JOIN
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return before.join_type == JoinType.INNER_JOIN and before.join_predicate.startswith("FuzzyJoin")
+
+    def apply(self, join_node: LogicalJoin, context: OptimizerContext):
+        fuzzy_join_plan = FuzzyNestedJoinPlan(join_node.join_type, join_node.join_predicate)
+        fuzzy_join_plan.append_child(join_node.lhs())
+        fuzzy_join_plan.append_child(join_node.rhs())
+        yield fuzzy_join_plan
 
 class LogicalCreateMaterializedViewToPhysical(Rule):
     def __init__(self):
