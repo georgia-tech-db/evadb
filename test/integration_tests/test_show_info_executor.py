@@ -78,7 +78,6 @@ class ShowExecutorTest(unittest.TestCase):
 
     @pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
     def test_show_tables(self):
-
         result = execute_query_fetch_all("SHOW TABLES;")
         self.assertEqual(len(result), 3)
         expected = {"name": ["MyVideo", "MNIST", "Actions"]}
