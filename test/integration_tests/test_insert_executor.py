@@ -13,9 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import create_sample_video, file_remove
+import os
+from test.util import create_sample_video, file_remove, load_inbuilt_udfs
 
 import numpy as np
+import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.server.command_handler import execute_query_fetch_all
@@ -26,6 +28,17 @@ class InsertExecutorTest(unittest.TestCase):
         # reset the catalog manager before running each test
         CatalogManager().reset()
         create_sample_video()
+
+        query = """CREATE TABLE IF NOT EXISTS tables
+            (
+                name TEXT(100),
+                features NDARRAY FLOAT32(1, ANYDIM)
+            );
+        """
+        execute_query_fetch_all(query)
+
+        load_inbuilt_udfs()
+
 
     def tearDown(self):
         file_remove("dummy.avi")
@@ -77,3 +90,32 @@ class InsertExecutorTest(unittest.TestCase):
                 np.array([[[41, 41, 41], [41, 41, 41]], [[41, 41, 41], [41, 41, 41]]]),
             )
         )
+
+
+    def test_should_insert_features_in_table(self):
+        data = pd.read_csv("./test/data/features.csv")
+        for i in data.iterrows():
+            query = f"""INSERT INTO tables (name, features) VALUES (
+                        [
+                            ['{i[1][2]}', {[list(i[1][1][0])]}]
+                        ]
+                        );"""
+            batch = execute_query_fetch_all(query)
+            print(batch)
+        
+        query = "SELECT name FROM tables;"
+        batch = execute_query_fetch_all(query)
+
+        self.assertIsNone(
+            np.testing.assert_array_equal(
+                batch.frames['tables.name'].array,
+                np.array(
+                    [
+                        '/home/greatsage/projects/intern/gt/test_eva/similarity/data/sad.jpg',
+                        '/home/greatsage/projects/intern/gt/test_eva/similarity/data/happy.jpg',
+                        '/home/greatsage/projects/intern/gt/test_eva/similarity/data/angry.jpg'
+                    ]
+                )
+            )
+        )
+        

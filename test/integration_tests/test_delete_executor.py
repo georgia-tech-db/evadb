@@ -152,6 +152,30 @@ class DeleteExecutorTest(unittest.TestCase):
                 np.array([[[41, 41, 41], [41, 41, 41]], [[41, 41, 41], [41, 41, 41]]]),
             )
         )
+    
+    @unittest.skip("Not supported in current version")
+    def test_should_delete_single_image_in_table(self):
+        path = f"{EVA_ROOT_DIR}/data/sample_videos/1/2.mp4"
+        delete_query = f"""DELETE FROM TestDeleteVideos WHERE name="{path}";"""
+        batch = execute_query_fetch_all(delete_query)
+
+        query = "SELECT name FROM MyVideo"
+        batch = execute_query_fetch_all(query)
+        self.assertIsNone(
+            np.testing.assert_array_equal(
+                batch.frames["data"][0],
+                np.array([[[40, 40, 40], [40, 40, 40]], [[40, 40, 40], [40, 40, 40]]]),
+            )
+        )
+
+        query = "SELECT id, data FROM MyVideo WHERE id = 41;"
+        batch = execute_query_fetch_all(query)
+        self.assertIsNone(
+            np.testing.assert_array_equal(
+                batch.frames["data"][0],
+                np.array([[[41, 41, 41], [41, 41, 41]], [[41, 41, 41], [41, 41, 41]]]),
+            )
+        )
 
     def test_should_delete_tuple_in_table(self):
         delete_query = "DELETE FROM testDeleteOne WHERE id=5;"
