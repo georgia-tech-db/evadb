@@ -34,7 +34,7 @@ class FuzzyNestedJoinPlan(AbstractPlan):
         self,
         join_type: JoinType,
         join_predicate: AbstractExpression = None):
-        self._join_predicate = join_predicate
+        self.join_predicate = join_predicate
         super().__init__(
             PlanOprType.LATERAL_JOIN, join_type, join_predicate
         )
@@ -46,4 +46,4 @@ class FuzzyNestedJoinPlan(AbstractPlan):
         )
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(), self.join_type, self._join_predicate))
+        return hash((super().__hash__(), self.join_type, self.join_predicate))
