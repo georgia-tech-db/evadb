@@ -37,34 +37,35 @@ class InsertExecutor(AbstractExecutor):
 
     def exec(self):
         storage_engine = None
-        table_obj = None
+        table_catalog_entry = None
         try:    
             # Get catalog entry
             table_name = self.node.table_ref.table.table_name
             database_name = self.node.table_ref.table.database_name
-            table_obj = self.catalog.get_table_catalog_entry(table_name, database_name)
+            table_catalog_entry = self.catalog.get_table_catalog_entry(table_name, database_name)
             
             # Implemented only for STRUCTURED_DATA
-            if table_obj.table_type != TableType.STRUCTURED_DATA:
+            if table_catalog_entry.table_type != TableType.STRUCTURED_DATA:
                 raise NotImplementedError("INSERT only implemented for structured data")
             
             # Values to insert and Columns
-            values = self.node.value_list[0].value
-            column_list = []
+            values_to_insert = self.node.value_list[0].value
+            columns_to_insert = []
             for i in self.node.column_list:
-                column_list.append(i.col_name)
+                columns_to_insert.append(i.col_name)
             
             # Adding all to dataframe
-            dataframe = pd.DataFrame(values, columns=column_list)
-            class Struct(object): pass
-            batch = Struct()
-            batch.frames = dataframe
+            dataframe = pd.DataFrame(values_to_insert, columns=columns_to_insert)
+            batch = Batch(dataframe)
+            # class Struct(object): pass
+            # batch = Struct()
+            # batch.frames = dataframe
             
-            storage_engine = StorageEngine.factory(table_obj)
-            storage_engine.write(table_obj, batch)
+            storage_engine = StorageEngine.factory(table_catalog_entry)
+            storage_engine.write(table_catalog_entry, batch)
         except Exception as e:
-            if storage_engine and table_obj:
-                self._rollback_load(storage_engine, table_obj, False)
+            if storage_engine and table_catalog_entry:
+                self._rollback_load(storage_engine, table_catalog_entry, False)
             err_msg = f"Load {self.media_type.name} failed: encountered unexpected error {str(e)}"
             logger.error(err_msg)
             raise ExecutorError(err_msg)
@@ -72,7 +73,7 @@ class InsertExecutor(AbstractExecutor):
             yield Batch(
                 pd.DataFrame(
                     [
-                        f"Number of rows loaded: {str(len(values))}"
+                        f"Number of rows loaded: {str(len(values_to_insert))}"
                     ]
                 )
             )
