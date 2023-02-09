@@ -36,7 +36,7 @@ class Array_Count(AbstractUDF):
         And the search key is expected to be of shape (4,5),
         else we throw an error.
 
-        frames: DataFrame
+        inp: DataFrame
             col1        col2
         0   ndarray1    search_key
         1   ndarray2    search_key
