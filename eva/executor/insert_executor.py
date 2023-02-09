@@ -54,19 +54,14 @@ class InsertExecutor(AbstractExecutor):
             for i in self.node.column_list:
                 columns_to_insert.append(i.col_name)
             
-            # Adding all to dataframe
+            # Adding all values to Batch for insert
             dataframe = pd.DataFrame(values_to_insert, columns=columns_to_insert)
             batch = Batch(dataframe)
-            # class Struct(object): pass
-            # batch = Struct()
-            # batch.frames = dataframe
             
             storage_engine = StorageEngine.factory(table_catalog_entry)
             storage_engine.write(table_catalog_entry, batch)
         except Exception as e:
-            if storage_engine and table_catalog_entry:
-                self._rollback_load(storage_engine, table_catalog_entry, False)
-            err_msg = f"Load {self.media_type.name} failed: encountered unexpected error {str(e)}"
+            err_msg = f"Insert {self.media_type.name} failed: encountered unexpected error {str(e)}"
             logger.error(err_msg)
             raise ExecutorError(err_msg)
         else:
