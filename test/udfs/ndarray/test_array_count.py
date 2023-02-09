@@ -14,12 +14,12 @@
 # limitations under the License.
 import unittest
 
-from eva.udfs.ndarray.array_count import ArrayCount
+from eva.udfs.ndarray.array_count import Array_Count
 
 
 class ArrayCountTests(unittest.TestCase):
     def setUp(self):
-        self.array_count = ArrayCount()
+        self.array_count = Array_Count()
 
     def test_array_count_name_exists(self):
         assert hasattr(self.array_count, "name")
