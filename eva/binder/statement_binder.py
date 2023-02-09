@@ -149,9 +149,6 @@ class StatementBinder:
         self.bind(node.table_ref)
         if node.where_clause:
             self.bind(node.where_clause)
-        if node.orderby_list:
-            for expr in node.orderby_list:
-                self.bind(expr[0])
 
 
     @bind.register(CreateMaterializedViewStatement)
