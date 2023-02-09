@@ -61,11 +61,6 @@ def path_to_class(filepath: PathLike, classname: str):
     Returns:
         type: A class for given path
     """
-    resolved = Path(filepath).resolve()
-    if resolved.suffix in [".pickle", ".pkl"]:
-        with resolved.open("rb") as f:
-            return pickle.load(f)
-
     try:
         abs_path = Path(filepath).resolve()
         spec = importlib.util.spec_from_file_location(abs_path.stem, abs_path)
