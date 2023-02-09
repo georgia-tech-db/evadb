@@ -8,7 +8,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### [Breaking Changes]
 ### [Added]
 ### [Changed]
+
+* PR #581: fix: debugging issuse in yolov5
+
 ### [Deprecated]
+### [Removed]
+
+##  [0.1.4] - 2023-01-28
+### [Added]
+
+* PR #559: Added Order By + Limit to FaissIndexScan optimization rule.
+* PR #552: Added expression signature.
+* PR #551: Added support for aggregation, toxicity detection, and querying based on video timestamps.
+* PR #557: Update documentation for notebook.
+* PR #562: Added benchmark and server tests.
+* PR #565: Updated rule and expression implementations.
+* PR #560: Added UDF for ASL recognition.
+
+### [Changed]
+
+* PR #558: fix: emotion analysis colab link.
+* PR #561: fix: Circlie CI error.
+* PR #553: fix: secondary index and udf expression signature in index.
+
+### [Deprecated]
+
 ### [Removed]
 
 ##  [0.1.3] - 2023-01-02
@@ -81,7 +105,7 @@ Thanks to @gaurav274, @xzdandy, @LordDarkula, @jarulraj, @Anirudh58, @Aryan-Rajo
 * PR #373: Reduce number of file transactions in configuration (#373)
 * PR #372: bugfix: Make ConfigurationManager read and update operate on eva.yml (#372)
 * PR #367: Dataset support (#367)
-* PR #362: Automatically adding Tutorial Notebooks to api-docs (#362) 
+* PR #362: Automatically adding Tutorial Notebooks to docs (#362) 
 * PR #359: Layout for EVA Documentation (#359)
 * PR #355: docs: Adding instructions for setup on M1 Mac (#355)
 * PR #344: Updated the tutorial notebooks (#344)
