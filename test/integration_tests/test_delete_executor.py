@@ -116,7 +116,7 @@ class DeleteExecutorTest(unittest.TestCase):
 
     # integration test
     @unittest.skip("Not supported in current version")
-    def test_should_delete_video_in_table(self):
+    def test_should_delete_frame_in_video(self):
 
         delete_query = "DELETE FROM MyVideo WHERE id=40;"
         batch = execute_query_fetch_all(delete_query)
@@ -147,7 +147,7 @@ class DeleteExecutorTest(unittest.TestCase):
         delete_query_2 = "DELETE FROM testDeleteTwo WHERE id<20;"
         batch = execute_query_fetch_all(delete_query_2)
 
-        query = "SELECT id, feat FROM testDeleteOne;"
+        query = "SELECT * FROM testDeleteOne;"
         batch = execute_query_fetch_all(query)
         self.assertIsNone(
             np.testing.assert_array_equal(

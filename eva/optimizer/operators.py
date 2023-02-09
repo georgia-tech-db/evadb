@@ -477,7 +477,7 @@ class LogicalDelete(Operator):
         self._limit_count = limit_count
     
     @property
-    def table(self):
+    def table_ref(self):
         return self._table_ref
     
     @property
@@ -498,7 +498,7 @@ class LogicalDelete(Operator):
             return False
         return (
             is_subtree_equal 
-            and self.table == other.table
+            and self.table_ref == other.table_ref
             and self.where_clause == other.where_clause
             and self.orderby_clause == other.orderby_clause
             and self.limit_count == self.limit_count
@@ -508,7 +508,7 @@ class LogicalDelete(Operator):
         return hash(
             (
                 super().__hash__(),
-                self.table,
+                self.table_ref,
                 self.where_clause,
                 self.orderby_clause,
                 self.limit_count
