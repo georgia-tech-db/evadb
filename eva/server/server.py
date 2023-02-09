@@ -38,12 +38,15 @@ class EvaServer:
         """
         logger.info("Start Server")
 
-        server = await asyncio.start_server(self.accept_client, host, port)
+        self._server = await asyncio.start_server(self.accept_client, host, port)
 
-        async with server:
-            await server.serve_forever()
+        async with self._server:
+            await self._server.serve_forever()
 
         logger.info("Successfully shutdown server")
+
+    async def stop_eva_server(self):
+        self._server.close()
 
     async def accept_client(
         self, client_reader: StreamReader, client_writer: StreamWriter

@@ -79,14 +79,13 @@ class ServerTests(unittest.TestCase):
 
         def timeout_server():
             # need a more robust mechanism for when to cancel the future
-            time.sleep(10)
-            self.stop_server_future.cancel()
-
-        thread = threading.Thread(target=timeout_server)
-        thread.daemon = True
-        thread.start()
+            time.sleep(2)
 
         eva_server = EvaServer()
 
-        with self.assertRaises(SystemExit):
-            eva_server.start_eva_server(host=host, port=port)
+        thread = threading.Thread(target=timeout_server, args=[eva_server])
+        thread.daemon = True
+        thread.start()
+
+        asyncio.run(eva_server.start_eva_server(host=host, port=port))
+        asyncio.run(eva_server.stop_eva_server())
