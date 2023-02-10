@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ##  [Unreleased]
 ### [Breaking Changes]
 ### [Added]
+
+* PR #568: feat: INSERT and DELETE
+
 ### [Changed]
 
 * PR #581: fix: debugging issuse in yolov5
