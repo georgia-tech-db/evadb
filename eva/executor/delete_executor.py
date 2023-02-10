@@ -47,7 +47,8 @@ class DeleteExecutor(AbstractExecutor):
             elif table_catalog.table_type == TableType.STRUCTURED_DATA:
                 del_batch = storage_engine.read(table_catalog, batch_mem)
                 del_batch = list(del_batch)[0]
-            
+
+            # Added because of inconsistency in col_alias in Structured data Batch project function
             original_column_names = list(del_batch.frames.columns)
             column_names = [f"{table_catalog.name.lower()}.{name}" for name in original_column_names if not name=="_row_id"]
             column_names.insert(0, '_row_id')
@@ -67,9 +68,6 @@ class DeleteExecutor(AbstractExecutor):
             elif table_catalog.table_type == TableType.STRUCTURED_DATA:
                 del_batch.frames.columns = original_column_names
                 table_needed = del_batch.frames[[f"{self.predicate.children[0].col_name}"]]
-                # delete_dict = {
-                #     self.predicate.children[0].col_name : table_needed.iloc[0]
-                # }
                 storage_engine.delete(table_catalog, table_needed.iloc[0])
             yield Batch(
             pd.DataFrame(

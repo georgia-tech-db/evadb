@@ -37,14 +37,10 @@ class DeleteTableStatement(AbstractStatement):
         self,
         table_ref: TableRef,
         where_clause: AbstractExpression = None,
-        orderby_clause: AbstractExpression = None,
-        limit_count: AbstractExpression = None
     ):
         super().__init__(StatementType.DELETE)
         self._table_ref = table_ref
         self._where_clause = where_clause
-        self._orderby_list = orderby_clause
-        self._limit_count = limit_count
 
     def __str__(self) -> str:
         delete_str = "DELETE FROM {}".format(
@@ -67,22 +63,6 @@ class DeleteTableStatement(AbstractStatement):
     def where_clause(self, where_expr: AbstractExpression):
         self._where_clause = where_expr
     
-    @property
-    def orderby_list(self):
-        return self._orderby_list
-
-    @orderby_list.setter
-    def orderby_list(self, orderby_list_new):
-        # orderby_list_new: List[(TupleValueExpression, int)]
-        self._orderby_list = orderby_list_new
-    
-    @property
-    def limit_count(self):
-        return self._limit_count
-
-    @limit_count.setter
-    def limit_count(self, limit_count_new: ConstantValueExpression):
-        self._limit_count = limit_count_new
     
     def __eq__(self, other):
         if not isinstance(other, DeleteTableStatement):

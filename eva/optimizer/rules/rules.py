@@ -704,7 +704,7 @@ class LogicalDeleteToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalDelete, context: OptimizerContext):
-        after = DeletePlan(before.table_ref, before.where_clause, before.orderby_clause, before.limit_count)
+        after = DeletePlan(before.table_ref, before.where_clause)
         yield after
 
 

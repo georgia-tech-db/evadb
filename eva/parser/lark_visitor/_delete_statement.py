@@ -26,8 +26,6 @@ class Delete:
     def delete_statement(self, tree):
         table_ref = None
         where_clause = None
-        order_clause = None
-        limit_count = None
         for child in tree.children:
             if isinstance(child, Tree):
                 if child.data == "table_name":
@@ -35,10 +33,6 @@ class Delete:
                     table_ref = TableRef(table_name)
                 elif child.data == "where_expr":
                     where_clause = self.visit(child)
-                elif child.data == "order_by_clause":
-                    order_clause = self.visit(child)
-                elif child.data == "limit_clause":
-                    limit_count = self.visit(child)
                     
         delete_stmt = DeleteTableStatement(table_ref, where_clause, order_clause, limit_count)
         return delete_stmt

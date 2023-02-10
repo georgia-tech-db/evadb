@@ -92,7 +92,7 @@ class InsertExecutorTest(unittest.TestCase):
         )
 
 
-    def test_should_insert_features_in_table(self):
+    def test_should_insert_tuples_in_table(self):
         data = pd.read_csv("./test/data/features.csv")
         for i in data.iterrows():
             query = f"""INSERT INTO tables (name, features) VALUES (

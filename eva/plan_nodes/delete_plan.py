@@ -35,15 +35,11 @@ class DeletePlan(AbstractPlan):
         self,
         table_ref: TableRef,
         where_clause: AbstractExpression = None,
-        orderby_clause: AbstractExpression = None,
-        limit_count: AbstractExpression = None
     ):
 
         super().__init__(PlanOprType.DELETE)
         self._table_ref = table_ref
         self._where_clause = where_clause
-        self._orderby_list = orderby_clause
-        self._limit_count = limit_count
     
     @property
     def table_ref(self):
@@ -58,8 +54,7 @@ class DeletePlan(AbstractPlan):
             where_clause={}, \
             orderby_clause={}, \
             limit_count={})".format(
-            self.table_ref, self._where_clause, self._orderby_list,
-            self._limit_count
+            self.table_ref, self._where_clause
         )
 
     def __hash__(self) -> int:
@@ -68,7 +63,6 @@ class DeletePlan(AbstractPlan):
                 super().__hash__(),
                 self.table_ref,
                 self._where_clause,
-                self._orderby_list,
-                self._limit_count
+                
             )
         )

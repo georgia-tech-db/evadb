@@ -458,23 +458,19 @@ class LogicalDelete(Operator):
     """[Logical Node for Delete Operation]
 
     Arguments:
-        table(TableCatalogEntry): table to delete tuples from
-        rows: 
+        table_ref(TableCatalogEntry): table to delete tuples from,
+        where_clause(AbstractExpression): the predicate used to select which rows to delete,
 
     """
     def __init__(
         self,
         table_ref: TableRef,
         where_clause: AbstractExpression = None,
-        orderby_clause: AbstractExpression = None,
-        limit_count: AbstractExpression = None,
         children=None
     ):
         super().__init__(OperatorType.LOGICALDELETE, children)
         self._table_ref = table_ref
         self._where_clause = where_clause
-        self._orderby_clause = orderby_clause
-        self._limit_count = limit_count
     
     @property
     def table_ref(self):
@@ -483,14 +479,6 @@ class LogicalDelete(Operator):
     @property
     def where_clause(self):
         return self._where_clause
-
-    @property
-    def orderby_clause(self):
-        return self._orderby_clause
-    
-    @property
-    def limit_count(self):
-        return self._limit_count
     
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
@@ -500,8 +488,6 @@ class LogicalDelete(Operator):
             is_subtree_equal 
             and self.table_ref == other.table_ref
             and self.where_clause == other.where_clause
-            and self.orderby_clause == other.orderby_clause
-            and self.limit_count == self.limit_count
         )
     
     def __hash__(self) -> int:
@@ -510,8 +496,6 @@ class LogicalDelete(Operator):
                 super().__hash__(),
                 self.table_ref,
                 self.where_clause,
-                self.orderby_clause,
-                self.limit_count
             )
         )
 
