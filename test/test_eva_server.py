@@ -13,11 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-import asyncio
 
 from mock import MagicMock, patch
 
-from eva.eva_server import main, start_eva_server
+from eva.eva_server import main
 
 
 class EVAServerTest(unittest.TestCase):
@@ -36,4 +35,3 @@ class EVAServerTest(unittest.TestCase):
         mock_udfs.assert_called_with(mode=mock_obj_1())
         mock_eva.assert_called_once()
         mock_run.assert_called_once()
-

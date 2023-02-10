@@ -13,14 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import asyncio
-import sys
-import threading
 import time
 import unittest
-from mock import MagicMock, patch
 
 import mock
 import pytest
+from mock import MagicMock, patch
 
 from eva.server.server import EvaServer
 
@@ -51,10 +49,7 @@ class ServerTests(unittest.TestCase):
 
         time.sleep(1)
 
-
-
     def test_server_protocol_data_received(self):
-
         eva_server = EvaServer()
         eva_server.transport = mock.Mock()
         eva_server.transport.close = MagicMock(return_value="closed")
@@ -72,20 +67,12 @@ class ServerTests(unittest.TestCase):
             # error due to lack of asyncio loop
             eva_server.data_received(query_message)
 
-    @pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
-    def test_server_integration_test(self):
-        host = "0.0.0.0"
-        port = 5489
 
-        def timeout_server():
-            # need a more robust mechanism for when to cancel the future
-            time.sleep(2)
-
-        eva_server = EvaServer()
-
-        thread = threading.Thread(target=timeout_server, args=[eva_server])
-        thread.daemon = True
-        thread.start()
-
-        asyncio.run(eva_server.start_eva_server(host=host, port=port))
-        asyncio.run(eva_server.stop_eva_server())
+@pytest.fixture
+async def server(event_loop):
+    eva_server = EvaServer()
+    host = "0.0.0.0"
+    port = 5489
+    await eva_server.start_eva_server(host=host, port=port)
+    yield eva_server
+    eva_server.stop()

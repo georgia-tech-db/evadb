@@ -46,6 +46,7 @@ class EvaServer:
         logger.info("Successfully shutdown server")
 
     async def stop_eva_server(self):
+        logger.info("Stop server")
         self._server.close()
 
     async def accept_client(
