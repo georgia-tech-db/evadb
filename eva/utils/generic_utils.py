@@ -16,7 +16,10 @@ import hashlib
 import importlib
 import pickle
 import sys
+import subprocess
+import tempfile
 import uuid
+from contextlib import contextmanager
 from pathlib import Path
 
 from aenum import AutoEnum, unique
@@ -133,6 +136,16 @@ def get_size(obj, seen=None):
     elif hasattr(obj, "__iter__") and not isinstance(obj, (str, bytes, bytearray)):
         size += sum([get_size(i, seen) for i in obj])
     return size
+
+
+@contextmanager
+def extract_audio(file_path: str):
+    outfile = tempfile.NamedTemporaryFile(prefix='eva_audio_extract_', suffix='.wav', mode='w+b')
+    subprocess.call(['ffmpeg', '-y', '-i', file_path, outfile.name], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+    try:
+        yield outfile.name
+    finally:
+        outfile.close()
 
 
 class PickleSerializer(object):

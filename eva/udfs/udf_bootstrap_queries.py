@@ -127,6 +127,24 @@ YoloV5_udf_query = """CREATE UDF IF NOT EXISTS YoloV5
     EVA_INSTALLATION_DIR
 )
 
+AudioSearch_udf_query = """CREATE UDF IF NOT EXISTS AudioSearch
+    INPUT    (path ANYTYPE, phrase ANYTYPE)
+    OUTPUT   (start_time ANYTYPE, end_time ANYTYPE)
+    TYPE     AudioUDF
+    IMPL     "{}/udfs/audio_search.py";
+    """.format(
+    EVA_INSTALLATION_DIR
+)
+
+SemanticSearch_udf_query = """CREATE UDF IF NOT EXISTS SemanticSearch
+    INPUT    (path ANYTYPE, phrase ANYTYPE)
+    OUTPUT   (start_time ANYTYPE, end_time ANYTYPE)
+    TYPE     AudioUDF
+    IMPL     "{}/udfs/semantic_search.py";
+    """.format(
+    EVA_INSTALLATION_DIR
+)
+
 ocr_udf_query = """CREATE UDF IF NOT EXISTS OCRExtractor
       INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
       OUTPUT (labels NDARRAY STR(10), bboxes NDARRAY FLOAT32(ANYDIM, 4),
@@ -181,6 +199,8 @@ def init_builtin_udfs(mode="debug"):
         Crop_udf_query,
         Open_udf_query,
         YoloV5_udf_query,
+        AudioSearch_udf_query,
+        SemanticSearch_udf_query,
         Similarity_udf_query
         # Disabled because required packages (eg., easy_ocr might not be preinstalled)
         # face_detection_udf_query,
