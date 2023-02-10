@@ -81,4 +81,4 @@ class EvaServer:
                 asyncio.create_task(handle_request(client_writer, message))
 
         except Exception as e:
-            logger.error("Error reading from client.", exc_info=e)
+            logger.info("Error reading from client.", exc_info=e)

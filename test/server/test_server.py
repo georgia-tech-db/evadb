@@ -13,66 +13,38 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import asyncio
-import time
 import unittest
 
-import mock
-import pytest
-from mock import MagicMock, patch
+from mock import MagicMock
 
 from eva.server.server import EvaServer
 
 
-class ServerTests(unittest.TestCase):
-    def setUp(self):
-        self.loop = asyncio.new_event_loop()
-        self.stop_server_future = self.loop.create_future()
-        asyncio.set_event_loop(None)
-
+class ServerTests(unittest.IsolatedAsyncioTestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    @patch("asyncio.Task")
-    def test_server_protocol_connection_lost(self, mock_task):
-        EvaServer.__connections__ = 0
-
+    async def test_server_functions(self):
         eva_server = EvaServer()
-        eva_server.transport = mock.Mock()
-        eva_server.transport.close = MagicMock(return_value="closed")
-        eva_server.transport.abort = MagicMock(return_value="aborted")
 
         # connection made
-        client_reader = MagicMock()
-        client_writer = MagicMock()
-        asyncio.run(eva_server.accept_client(client_reader, client_writer))
-        self.assertEqual(len(eva_server._clients), 1, "connection not made")
+        client_reader1 = asyncio.StreamReader()
+        client_writer1 = MagicMock()
+        client_reader2 = asyncio.StreamReader()
+        client_writer2 = MagicMock()
 
-        time.sleep(1)
+        # first client
+        client_reader1.feed_data(b"SHOW UDFS;\n")
+        client_reader1.feed_data(b"EXIT;\n")
 
-    def test_server_protocol_data_received(self):
-        eva_server = EvaServer()
-        eva_server.transport = mock.Mock()
-        eva_server.transport.close = MagicMock(return_value="closed")
-        eva_server.transport.abort = MagicMock(return_value="aborted")
+        await eva_server.accept_client(client_reader1, client_writer1)
+        assert len(eva_server._clients) == 1
 
-        quit_message = "quit"
-        self.assertEqual(
-            eva_server.data_received(quit_message), "closed", "transport not closed"
-        )
+        # another client
+        client_reader2.feed_data(b"\xC4pple")  # trigger UnicodeDecodeError
+        client_reader2.feed_eof()
 
-        asyncio.set_event_loop(None)
+        await eva_server.accept_client(client_reader2, client_writer2)
+        assert len(eva_server._clients) == 2
 
-        query_message = "query"
-        with self.assertRaises(RuntimeError):
-            # error due to lack of asyncio loop
-            eva_server.data_received(query_message)
-
-
-@pytest.fixture
-async def server(event_loop):
-    eva_server = EvaServer()
-    host = "0.0.0.0"
-    port = 5489
-    await eva_server.start_eva_server(host=host, port=port)
-    yield eva_server
-    eva_server.stop()
+        await eva_server.handle_client(client_reader2, client_writer2)
