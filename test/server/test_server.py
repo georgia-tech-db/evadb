@@ -48,3 +48,5 @@ class ServerTests(unittest.IsolatedAsyncioTestCase):
         assert len(eva_server._clients) == 2
 
         await eva_server.handle_client(client_reader2, client_writer2)
+
+        await eva_server.stop_eva_server()
