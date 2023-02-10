@@ -22,15 +22,11 @@ from eva.parser.types import StatementType
 
 
 class DeleteTableStatement(AbstractStatement):
-    """
-    Delete Table Statement constructed after parsing the input query
+    """Delete Table Statement constructed after parsing the input query
 
-    Attributes
-    ----------
-    TableRef: TableRef
-        table reference in the delete table statement
-    _where_clause : AbstractExpression
-        predicate of the select query, represented as a expression tree.
+    Attributes:
+        TableRef: table reference in the delete table statement
+        _where_clause : predicate of the select query, represented as a expression tree.
     """
 
     def __init__(
@@ -43,9 +39,7 @@ class DeleteTableStatement(AbstractStatement):
         self._where_clause = where_clause
 
     def __str__(self) -> str:
-        delete_str = "DELETE FROM {}".format(
-            self._table
-        )
+        delete_str = f"DELETE FROM {self._table}"
         if self._where_clause is not None:
             delete_str += " WHERE " + str(self._where_clause)
         
