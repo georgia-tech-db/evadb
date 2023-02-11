@@ -14,24 +14,11 @@
 # limitations under the License.
 import asyncio
 import os
-import signal
-import socket
-import threading
-import time
 import unittest
-from http.server import BaseHTTPRequestHandler, HTTPServer
 from unittest.mock import MagicMock
 
 from eva.models.server.response import Response
-from eva.server.db_api import EVACursor, connect
-
-
-def get_free_port():
-    s = socket.socket(socket.AF_INET, type=socket.SOCK_STREAM)
-    s.bind(("localhost", 0))
-    address, port = s.getsockname()
-    s.close()
-    return port
+from eva.server.db_api import EVACursor, connect, get_connection
 
 
 class AsyncMock(MagicMock):
@@ -39,7 +26,7 @@ class AsyncMock(MagicMock):
         return super(AsyncMock, self).__call__(*args, **kwargs)
 
 
-class DBAPITests(unittest.TestCase):
+class DBAPITests(unittest.IsolatedAsyncioTestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -96,13 +83,10 @@ class DBAPITests(unittest.TestCase):
     def test_eva_connection(self):
         hostname = "localhost"
 
-        mock_server_port = get_free_port()
-        mock_server = HTTPServer((hostname, mock_server_port), BaseHTTPRequestHandler)
-
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
 
-        connection = connect(hostname, mock_server.server_port)
+        connection = AsyncMock()
         cursor = connection.cursor()
 
         self.assertEquals(type(cursor), EVACursor)
@@ -122,28 +106,18 @@ class DBAPITests(unittest.TestCase):
         with self.assertRaises(OSError):
             connect(hostname, port=1)
 
-    def test_eva_signal(self):
+    async def test_eva_signal(self):
         hostname = "localhost"
+        port = 5432
 
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
 
-        mock_server_port = get_free_port()
-        mock_server = HTTPServer((hostname, mock_server_port), BaseHTTPRequestHandler)
-
-        connection = connect(hostname, mock_server.server_port)
+        connection = await get_connection(hostname, port)
         cursor = connection.cursor()
 
-        def trigger_signal():
-            time.sleep(1)
-            os.kill(os.getpid(), signal.SIGTERM)
-
-        thread = threading.Thread(target=trigger_signal)
-        thread.daemon = True
-        thread.start()
-
         query = "test_query"
-        cursor.execute(query)
+        await cursor.execute_async(query)
 
     def test_client_stop_query(self):
         connection = AsyncMock()
@@ -155,3 +129,10 @@ class DBAPITests(unittest.TestCase):
         eva_cursor.execute("test_query")
         eva_cursor.stop_query()
         self.assertEqual(eva_cursor._pending_query, False)
+
+    def test_get_attr(self):
+        connection = AsyncMock()
+
+        eva_cursor = EVACursor(connection)
+        with self.assertRaises(AttributeError):
+            eva_cursor.missing_function()

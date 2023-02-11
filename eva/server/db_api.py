@@ -114,9 +114,10 @@ class EVACursor(object):
         Auto generate sync function calls from async
         Sync function calls should not be used in an async environment.
         """
-        func = object.__getattribute__(self, "%s_async" % name)
-        if not asyncio.iscoroutinefunction(func):
-            raise AttributeError
+        try:
+            func = object.__getattribute__(self, "%s_async" % name)
+        except Exception as e:
+            raise e
 
         def func_sync(*args, **kwargs):
             loop = asyncio.get_event_loop()

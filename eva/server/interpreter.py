@@ -39,6 +39,7 @@ async def read_line(stdin_reader: StreamReader) -> str:
     while (input_char := await stdin_reader.read(1)) != b";":
         # If the input character is backspace, remove the last character
         if input_char == delete_char:
+            print(input_char)
             if len(input_buffer) > 0:
                 input_buffer.pop()
         # Else, append it to the buffer and echo.
@@ -104,3 +105,4 @@ async def start_cmd_client(host: str, port: int):
         logger.error("Error.", exc_info=e)
         writer.close()
         await writer.wait_closed()
+        raise e

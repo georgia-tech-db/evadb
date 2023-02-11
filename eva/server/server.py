@@ -49,7 +49,7 @@ class EvaServer:
     async def stop_eva_server(self):
         logger.info("Stop server")
         if self._server is not None:
-            self._server.close()
+            await self._server.close()
 
     async def accept_client(
         self, client_reader: StreamReader, client_writer: StreamWriter

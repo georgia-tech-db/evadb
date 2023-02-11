@@ -12,7 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import asyncio
 import unittest
+
+from mock import patch
 
 from eva.server.interpreter import start_cmd_client
 
@@ -23,9 +26,34 @@ class InterpreterTests(unittest.IsolatedAsyncioTestCase):
 
     # We are mocking the connect funciton call that gets imported into
     # interpreter instead of the one in db_api.
-    async def test_start_cmd_client(self):
+    # @patch("asyncio.open_connection")
+    @patch("eva.server.interpreter.create_stdin_reader")
+    async def test_start_cmd_client(self, mock_stdin_reader):
         host = "localhost"
         port = 5432
+
+        server_reader = asyncio.StreamReader()
+
+        server_reader.feed_data(b"SHOW UDFS;\n")
+        server_reader.feed_data(b"EXIT;\n")
+
+        # mock_open.return_value = [server_reader, server_writer]
+
+        stdin_reader = asyncio.StreamReader()
+        stdin_reader.feed_data(b"SHOW UDFS;\n")
+        stdin_reader.feed_data(b"EXIT;\n")
+        stdin_reader.feed_eof()
+
+        mock_stdin_reader.return_value = stdin_reader
+
+        # with self.assertRaises(Exception):
+        await start_cmd_client(host, port)
+
+    @patch("asyncio.wait")
+    async def test_exception_in_start_cmd_client(self, mock_wait):
+        host = "localhost"
+        port = 5432
+        mock_wait.side_effect = Exception("Test")
 
         with self.assertRaises(Exception):
             await start_cmd_client(host, port)

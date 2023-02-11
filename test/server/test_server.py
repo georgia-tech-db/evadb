@@ -15,7 +15,7 @@
 import asyncio
 import unittest
 
-from mock import MagicMock
+from mock import MagicMock, patch
 
 from eva.server.server import EvaServer
 
@@ -24,8 +24,13 @@ class ServerTests(unittest.IsolatedAsyncioTestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    async def test_server_functions(self):
+    @patch("asyncio.start_server")
+    async def test_server_functions(self, mock_start):
         eva_server = EvaServer()
+        host = "localhost"
+        port = 5432
+
+        await eva_server.start_eva_server(host, port)
 
         # connection made
         client_reader1 = asyncio.StreamReader()
