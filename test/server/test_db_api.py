@@ -87,18 +87,18 @@ class DBAPITests(unittest.IsolatedAsyncioTestCase):
         asyncio.set_event_loop(loop)
 
         connection = AsyncMock()
-        cursor = connection.cursor()
+        eva_cursor = EVACursor(connection)
 
         # test upload transformation with existing file
-        cursor._upload_transformation('UPLOAD PATH "upload.txt" BLOB')
+        eva_cursor._upload_transformation('UPLOAD PATH "upload.txt" BLOB')
 
         # test upload transformation with non-existing file
         with self.assertRaises(FileNotFoundError):
-            cursor._upload_transformation('UPLOAD PATH "blah.txt" BLOB')
+            eva_cursor._upload_transformation('UPLOAD PATH "blah.txt" BLOB')
 
         # test attr
         with self.assertRaises(AttributeError):
-            cursor.__getattr__("foo")
+            eva_cursor.__getattr__("foo")
 
         # test connection error with incorrect port
         with self.assertRaises(OSError):
