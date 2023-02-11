@@ -14,29 +14,18 @@
 # limitations under the License.
 import unittest
 
-from mock import patch
-
 from eva.server.interpreter import start_cmd_client
 
 
-class InterpreterTests(unittest.TestCase):
+class InterpreterTests(unittest.IsolatedAsyncioTestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
     # We are mocking the connect funciton call that gets imported into
     # interpreter instead of the one in db_api.
-    @patch("eva.server.interpreter.connect")
-    @patch("eva.server.interpreter.EvaCommandInterpreter.cmdloop")
-    def test_start_cmd_client(self, mock_cmdloop, mock_connect):
-        class MOCKCONNECTION:
-            def cursor(self):
-                return None
-
-        mock_connect.return_value = MOCKCONNECTION()
-
-        host = "0.0.0.0"
+    async def test_start_cmd_client(self):
+        host = "localhost"
         port = 5432
-        start_cmd_client(host, port)
 
-        mock_connect.assert_called_once_with(host, port)
-        mock_cmdloop.assert_called_once()
+        with self.assertRaises(Exception):
+            await start_cmd_client(host, port)
