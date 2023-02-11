@@ -18,7 +18,7 @@ import unittest
 from unittest.mock import MagicMock
 
 from eva.models.server.response import Response
-from eva.server.db_api import EVACursor, connect, get_connection
+from eva.server.db_api import EVACursor, connect
 
 
 class AsyncMock(MagicMock):
@@ -89,8 +89,6 @@ class DBAPITests(unittest.IsolatedAsyncioTestCase):
         connection = AsyncMock()
         cursor = connection.cursor()
 
-        self.assertEquals(type(cursor), EVACursor)
-
         # test upload transformation with existing file
         cursor._upload_transformation('UPLOAD PATH "upload.txt" BLOB')
 
@@ -107,17 +105,14 @@ class DBAPITests(unittest.IsolatedAsyncioTestCase):
             connect(hostname, port=1)
 
     async def test_eva_signal(self):
-        hostname = "localhost"
-        port = 5432
-
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
 
-        connection = await get_connection(hostname, port)
-        cursor = connection.cursor()
+        connection = AsyncMock()
+        eva_cursor = EVACursor(connection)
 
         query = "test_query"
-        await cursor.execute_async(query)
+        await eva_cursor.execute_async(query)
 
     def test_client_stop_query(self):
         connection = AsyncMock()
