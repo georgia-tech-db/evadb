@@ -14,8 +14,8 @@
 # limitations under the License.
 import asyncio
 import os
+import sys
 import unittest
-from test.markers import asyncio_skip_marker
 from unittest.mock import MagicMock
 
 from eva.models.server.response import Response
@@ -27,109 +27,111 @@ class AsyncMock(MagicMock):
         return super(AsyncMock, self).__call__(*args, **kwargs)
 
 
-@asyncio_skip_marker
-class DBAPITests(unittest.IsolatedAsyncioTestCase):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+# Check for Python 3.8+ for IsolatedAsyncioTestCase support
+if sys.version_info >= (3, 8):
 
-    def setUp(self) -> None:
-        f = open("upload.txt", "w")
-        f.write("dummy data")
-        f.close()
-        return super().setUp()
+    class DBAPITests(unittest.IsolatedAsyncioTestCase):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
 
-    def tearDown(self) -> None:
-        os.remove("upload.txt")
-        return super().tearDown()
+        def setUp(self) -> None:
+            f = open("upload.txt", "w")
+            f.write("dummy data")
+            f.close()
+            return super().setUp()
 
-    def test_eva_cursor_execute_async(self):
-        connection = AsyncMock()
-        eva_cursor = EVACursor(connection)
-        query = "test_query"
-        asyncio.run(eva_cursor.execute_async(query))
-        self.assertEqual(eva_cursor._pending_query, True)
+        def tearDown(self) -> None:
+            os.remove("upload.txt")
+            return super().tearDown()
 
-        # concurrent queries not allowed
-        with self.assertRaises(SystemError):
+        def test_eva_cursor_execute_async(self):
+            connection = AsyncMock()
+            eva_cursor = EVACursor(connection)
+            query = "test_query"
             asyncio.run(eva_cursor.execute_async(query))
+            self.assertEqual(eva_cursor._pending_query, True)
 
-    def test_eva_cursor_fetch_one_async(self):
-        connection = AsyncMock()
-        eva_cursor = EVACursor(connection)
-        message = "test_response"
-        serialized_message = Response.serialize("test_response")
-        serialized_message_length = b"%d" % len(serialized_message)
-        connection._reader.readline.side_effect = [serialized_message_length]
-        connection._reader.readexactly.side_effect = [serialized_message]
-        response = asyncio.run(eva_cursor.fetch_one_async())
-        self.assertEqual(eva_cursor._pending_query, False)
-        self.assertEqual(message, response)
+            # concurrent queries not allowed
+            with self.assertRaises(SystemError):
+                asyncio.run(eva_cursor.execute_async(query))
 
-    def test_eva_cursor_fetch_one_sync(self):
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
+        def test_eva_cursor_fetch_one_async(self):
+            connection = AsyncMock()
+            eva_cursor = EVACursor(connection)
+            message = "test_response"
+            serialized_message = Response.serialize("test_response")
+            serialized_message_length = b"%d" % len(serialized_message)
+            connection._reader.readline.side_effect = [serialized_message_length]
+            connection._reader.readexactly.side_effect = [serialized_message]
+            response = asyncio.run(eva_cursor.fetch_one_async())
+            self.assertEqual(eva_cursor._pending_query, False)
+            self.assertEqual(message, response)
 
-        connection = AsyncMock()
-        eva_cursor = EVACursor(connection)
+        def test_eva_cursor_fetch_one_sync(self):
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
 
-        message = "test_response"
-        serialized_message = Response.serialize("test_response")
-        serialized_message_length = b"%d" % len(serialized_message)
-        connection._reader.readline.side_effect = [serialized_message_length]
-        connection._reader.readexactly.side_effect = [serialized_message]
+            connection = AsyncMock()
+            eva_cursor = EVACursor(connection)
 
-        response = eva_cursor.fetch_one()
-        self.assertEqual(eva_cursor._pending_query, False)
-        self.assertEqual(message, response)
+            message = "test_response"
+            serialized_message = Response.serialize("test_response")
+            serialized_message_length = b"%d" % len(serialized_message)
+            connection._reader.readline.side_effect = [serialized_message_length]
+            connection._reader.readexactly.side_effect = [serialized_message]
 
-    def test_eva_connection(self):
-        hostname = "localhost"
+            response = eva_cursor.fetch_one()
+            self.assertEqual(eva_cursor._pending_query, False)
+            self.assertEqual(message, response)
 
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
+        def test_eva_connection(self):
+            hostname = "localhost"
 
-        connection = AsyncMock()
-        eva_cursor = EVACursor(connection)
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
 
-        # test upload transformation with existing file
-        eva_cursor._upload_transformation('UPLOAD PATH "upload.txt" BLOB')
+            connection = AsyncMock()
+            eva_cursor = EVACursor(connection)
 
-        # test upload transformation with non-existing file
-        with self.assertRaises(FileNotFoundError):
-            eva_cursor._upload_transformation('UPLOAD PATH "blah.txt" BLOB')
+            # test upload transformation with existing file
+            eva_cursor._upload_transformation('UPLOAD PATH "upload.txt" BLOB')
 
-        # test attr
-        with self.assertRaises(AttributeError):
-            eva_cursor.__getattr__("foo")
+            # test upload transformation with non-existing file
+            with self.assertRaises(FileNotFoundError):
+                eva_cursor._upload_transformation('UPLOAD PATH "blah.txt" BLOB')
 
-        # test connection error with incorrect port
-        with self.assertRaises(OSError):
-            connect(hostname, port=1)
+            # test attr
+            with self.assertRaises(AttributeError):
+                eva_cursor.__getattr__("foo")
 
-    async def test_eva_signal(self):
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
+            # test connection error with incorrect port
+            with self.assertRaises(OSError):
+                connect(hostname, port=1)
 
-        connection = AsyncMock()
-        eva_cursor = EVACursor(connection)
+        async def test_eva_signal(self):
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
 
-        query = "test_query"
-        await eva_cursor.execute_async(query)
+            connection = AsyncMock()
+            eva_cursor = EVACursor(connection)
 
-    def test_client_stop_query(self):
-        connection = AsyncMock()
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        connection.protocol.loop = loop
+            query = "test_query"
+            await eva_cursor.execute_async(query)
 
-        eva_cursor = EVACursor(connection)
-        eva_cursor.execute("test_query")
-        eva_cursor.stop_query()
-        self.assertEqual(eva_cursor._pending_query, False)
+        def test_client_stop_query(self):
+            connection = AsyncMock()
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            connection.protocol.loop = loop
 
-    def test_get_attr(self):
-        connection = AsyncMock()
+            eva_cursor = EVACursor(connection)
+            eva_cursor.execute("test_query")
+            eva_cursor.stop_query()
+            self.assertEqual(eva_cursor._pending_query, False)
 
-        eva_cursor = EVACursor(connection)
-        with self.assertRaises(AttributeError):
-            eva_cursor.missing_function()
+        def test_get_attr(self):
+            connection = AsyncMock()
+
+            eva_cursor = EVACursor(connection)
+            with self.assertRaises(AttributeError):
+                eva_cursor.missing_function()
