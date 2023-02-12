@@ -49,7 +49,7 @@ class EVACursor(object):
             )
         query = self._multiline_query_transformation(query)
         query = self._upload_transformation(query)
-        await self._connection._writer.write((query + "\n").encode())
+        self._connection._writer.write((query + "\n").encode())
         await self._connection._writer.drain()
         self._pending_query = True
 
