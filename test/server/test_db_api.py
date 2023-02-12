@@ -16,13 +16,13 @@ import asyncio
 import os
 import sys
 import unittest
-from unittest.mock import AsyncMock
 
 from eva.models.server.response import Response
 from eva.server.db_api import EVACursor, connect
 
 # Check for Python 3.8+ for IsolatedAsyncioTestCase support
 if sys.version_info >= (3, 8):
+    from unittest.mock import AsyncMock
 
     class DBAPITests(unittest.IsolatedAsyncioTestCase):
         def __init__(self, *args, **kwargs):
