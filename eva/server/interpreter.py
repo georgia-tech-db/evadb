@@ -36,7 +36,7 @@ with open(version_file_path, "r") as version_file:
 async def read_line(stdin_reader: StreamReader) -> str:
     delete_char = b"\x7f"
     input_buffer = deque()
-    while (input_char := await stdin_reader.read(1)) != b";":
+    while (input_char := await stdin_reader.read(1)) != b";": # noqa: E999
         # If the input character is backspace, remove the last character
         if input_char == delete_char:
             print(input_char)
