@@ -76,7 +76,7 @@ async def read_from_client_and_send_to_server(
         sys.stdout.write(prompt)
         sys.stdout.flush()
         query = await read_line(stdin_reader)
-        logger.info("Query: --|" + query + "|--")
+        logger.debug("Query: --|" + query + "|--")
 
         query = query.lstrip()
         query = query.rstrip()

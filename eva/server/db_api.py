@@ -79,7 +79,7 @@ class EVACursor(object):
         query = query.lstrip()
         query = query.rstrip(" ;")
         query += ";"
-        logger.info("Query: " + query)
+        logger.debug("Query: " + query)
         return query
 
     def _upload_transformation(self, query: str) -> str:

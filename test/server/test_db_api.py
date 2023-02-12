@@ -16,16 +16,10 @@ import asyncio
 import os
 import sys
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock
 
 from eva.models.server.response import Response
 from eva.server.db_api import EVACursor, connect
-
-
-class AsyncMock(MagicMock):
-    async def __call__(self, *args, **kwargs):
-        return super(AsyncMock, self).__call__(*args, **kwargs)
-
 
 # Check for Python 3.8+ for IsolatedAsyncioTestCase support
 if sys.version_info >= (3, 8):
@@ -45,7 +39,7 @@ if sys.version_info >= (3, 8):
             return super().tearDown()
 
         def test_eva_cursor_execute_async(self):
-            connection = AsyncMock()
+            connection = MagicMock()
             eva_cursor = EVACursor(connection)
             query = "test_query"
             asyncio.run(eva_cursor.execute_async(query))
@@ -56,7 +50,7 @@ if sys.version_info >= (3, 8):
                 asyncio.run(eva_cursor.execute_async(query))
 
         def test_eva_cursor_fetch_one_async(self):
-            connection = AsyncMock()
+            connection = MagicMock()
             eva_cursor = EVACursor(connection)
             message = "test_response"
             serialized_message = Response.serialize("test_response")
