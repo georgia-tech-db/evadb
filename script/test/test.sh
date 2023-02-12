@@ -50,7 +50,7 @@ fi
 if [ "$OSTYPE" != "msys" ];
 # Non-Windows
 then
-    python3.7 pytest test/ --cov-report term-missing:skip-covered  --cov-config=.coveragerc --cov-context=test --cov=eva/ -s -v --log-level=WARNING ${1:-} -m "not benchmark" 
+    python3.7 -m pytest test/ --cov-report term-missing:skip-covered  --cov-config=.coveragerc --cov-context=test --cov=eva/ -s -v --log-level=WARNING ${1:-} -m "not benchmark" 
     test_code=$?
     if [ "$test_code" != "0" ];
     then
