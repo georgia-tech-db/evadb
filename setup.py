@@ -59,6 +59,7 @@ test_libs = [
     "pytest>=6.1.2",
     "pytest-cov>=2.11.1",
     "pytest-virtualenv",
+    "pytest-asyncio",
     "coveralls>=3.0.1",
     "mock>=4.0.3",
     "flake8>=3.9.1"
