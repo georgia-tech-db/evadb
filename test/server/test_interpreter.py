@@ -13,13 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import asyncio
+import sys
 import unittest
 
+import pytest
 from mock import MagicMock, patch
 
 from eva.server.interpreter import start_cmd_client
 
 
+@pytest.mark.skipif(sys.version_info < (3, 8), reason="requires python3.8")
 class InterpreterTests(unittest.IsolatedAsyncioTestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
