@@ -69,7 +69,7 @@ class EvaServer:
         self, client_reader: StreamReader, client_writer: StreamWriter
     ):
         try:
-            while data := await asyncio.wait_for(
+            while data := await asyncio.wait_for(    # noqa: E999
                 client_reader.readline(), timeout=60.0
             ):
                 message = data.decode().rstrip()
