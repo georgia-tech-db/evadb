@@ -13,16 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import asyncio
-import sys
 import unittest
+from test.markers import asyncio_skip_marker
 
-import pytest
 from mock import MagicMock, patch
 
 from eva.server.server import EvaServer
 
 
-@pytest.mark.skipif(sys.version_info < (3, 8), reason="requires python3.8")
+@asyncio_skip_marker
 class ServerTests(unittest.IsolatedAsyncioTestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

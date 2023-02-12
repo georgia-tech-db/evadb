@@ -13,11 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import os
-import sys
 import unittest
+from test.markers import windows_skip_marker
 
 import pandas as pd
-import pytest
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
@@ -76,9 +75,8 @@ class ShowExecutorTest(unittest.TestCase):
         self.assertTrue(all(expected_df.name == result.frames.name))
         self.assertTrue(all(expected_df.type == result.frames.type))
 
-    @pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
+    @windows_skip_marker
     def test_show_tables(self):
-
         result = execute_query_fetch_all("SHOW TABLES;")
         self.assertEqual(len(result), 3)
         expected = {"name": ["MyVideo", "MNIST", "Actions"]}

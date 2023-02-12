@@ -14,11 +14,9 @@
 # limitations under the License.
 import asyncio
 import os
-import sys
 import unittest
+from test.markers import asyncio_skip_marker
 from unittest.mock import MagicMock
-
-import pytest
 
 from eva.models.server.response import Response
 from eva.server.db_api import EVACursor, connect
@@ -29,7 +27,7 @@ class AsyncMock(MagicMock):
         return super(AsyncMock, self).__call__(*args, **kwargs)
 
 
-@pytest.mark.skipif(sys.version_info < (3, 8), reason="requires python3.8")
+@asyncio_skip_marker
 class DBAPITests(unittest.IsolatedAsyncioTestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
