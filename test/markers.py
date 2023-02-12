@@ -13,8 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pytest
 import sys
+
+import pytest
 
 asyncio_skip_marker = pytest.mark.skipif(
     sys.version_info < (3, 8), reason="Test case requires asyncio support"
