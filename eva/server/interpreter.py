@@ -42,7 +42,6 @@ async def read_line(stdin_reader: StreamReader) -> str:
             break
         # If the input character is backspace, remove the last character
         if input_char == delete_char:
-            print(input_char)
             if len(input_buffer) > 0:
                 input_buffer.pop()
         # Else, append it to the buffer and echo.
