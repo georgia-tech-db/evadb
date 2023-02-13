@@ -12,10 +12,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import asyncio
 import sys
 import unittest
 
-import mock
+from mock import patch
+
+from eva.eva_cmd_client import eva_client, main
 
 # Check for Python 3.8+ for IsolatedAsyncioTestCase support
 if sys.version_info >= (3, 8):
@@ -24,27 +27,39 @@ if sys.version_info >= (3, 8):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
 
-        @mock.patch("eva.eva_cmd_client.eva_client")
-        def test_main(self, mock_client):
-            from eva.eva_cmd_client import main
+        def get_mock_stdin_reader(self) -> asyncio.StreamReader:
+            stdin_reader = asyncio.StreamReader()
+            stdin_reader.feed_data(b"EXIT;\n")
+            stdin_reader.feed_eof()
+            return stdin_reader
 
-            with mock.patch.object(sys, "argv", ["test"]):
+        @patch("eva.server.interpreter.create_stdin_reader")
+        def test_main(self, mock_stdin_reader):
+            mock_stdin_reader.return_value = self.get_mock_stdin_reader()
+
+            with patch.object(sys, "argv", ["test"]):
                 main()
-            mock_client.assert_called_once_with()
 
-        @mock.patch("eva.server.interpreter.start_cmd_client")
-        async def test_eva_client(self, mock_client):
-            from eva.eva_cmd_client import eva_client
+        @patch("eva.server.interpreter.create_stdin_reader")
+        async def test_eva_client(self, mock_stdin_reader):
+            mock_stdin_reader.return_value = self.get_mock_stdin_reader()
 
             await eva_client()
-            mock_client.assert_called_once()
 
-        @mock.patch("eva.server.interpreter.start_cmd_client")
-        async def test_exception_in_eva_client(self, mock_client):
-            from eva.eva_cmd_client import eva_client
+        @patch("eva.server.interpreter.create_stdin_reader")
+        @patch("eva.server.interpreter.start_cmd_client")
+        async def test_exception_in_eva_client(self, mock_client, mock_stdin_reader):
+            mock_stdin_reader.return_value = self.get_mock_stdin_reader()
 
             mock_client.side_effect = Exception("Test")
             await eva_client()
+
+        @patch("eva.server.interpreter.create_stdin_reader")
+        @patch("eva.server.interpreter.start_cmd_client")
+        async def test_keyboard_interrupt_in_eva_client(
+            self, mock_client, mock_stdin_reader
+        ):
+            mock_stdin_reader.return_value = self.get_mock_stdin_reader()
 
             mock_client.side_effect = KeyboardInterrupt
             # Pass exception

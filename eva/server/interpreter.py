@@ -94,6 +94,8 @@ async def start_cmd_client(host: str, port: int):
     Start client
     """
 
+    print("start")
+
     reader, writer = await asyncio.open_connection(host, port)
     stdin_reader = await create_stdin_reader()
 
