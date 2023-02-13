@@ -17,29 +17,43 @@ import unittest
 
 import mock
 
+# Check for Python 3.8+ for IsolatedAsyncioTestCase support
+if sys.version_info >= (3, 8):
 
-class CMDClientTest(unittest.TestCase):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    class CMDClientTest(unittest.IsolatedAsyncioTestCase):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
 
-    @mock.patch("eva.eva_cmd_client.eva_client")
-    def test_main(self, mock_client):
-        from eva.eva_cmd_client import main
+        @mock.patch("eva.eva_cmd_client.eva_client")
+        def test_main(self, mock_client):
+            from eva.eva_cmd_client import main
 
-        with mock.patch.object(sys, "argv", ["test"]):
-            main()
-        mock_client.assert_called_once_with(host="0.0.0.0", port=5432)
+            with mock.patch.object(sys, "argv", ["test"]):
+                main()
+            mock_client.assert_called_once_with(host="0.0.0.0", port=5432)
 
-    def test_parse_args(self):
-        from eva.eva_cmd_client import parse_args
+        def test_parse_args(self):
+            from eva.eva_cmd_client import parse_args
 
-        args = parse_args(["-P", "2345", "-H", "test"])
-        self.assertEqual(args.host, "test")
-        self.assertEqual(args.port, 2345)
+            args = parse_args(["-P", "2345", "-H", "test"])
+            self.assertEqual(args.host, "test")
+            self.assertEqual(args.port, 2345)
 
-    @mock.patch("eva.server.interpreter.start_cmd_client")
-    def test_eva_client(self, mock_client):
-        from eva.eva_cmd_client import eva_client
+        @mock.patch("eva.server.interpreter.start_cmd_client")
+        def test_eva_client(self, mock_client):
+            from eva.eva_cmd_client import eva_client
 
-        eva_client()
-        mock_client.assert_called_once()
+            eva_client()
+            mock_client.assert_called_once()
+
+        @mock.patch("eva.server.interpreter.start_cmd_client")
+        async def test_exception_in_eva_client(self, mock_client):
+            from eva.eva_cmd_client import eva_client
+
+            mock_client.side_effect = Exception("Test")
+            with self.assertRaises(Exception):
+                await eva_client()
+
+            mock_client.side_effect = KeyboardInterrupt
+            # Pass exception
+            await eva_client()
