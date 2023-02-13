@@ -44,7 +44,8 @@ if sys.version_info >= (3, 8):
             from eva.eva_cmd_client import eva_client
 
             mock_client.side_effect = Exception("Test")
-            await eva_client()
+            with self.assertRaises(Exception):
+                await eva_client()
 
             mock_client.side_effect = KeyboardInterrupt
             # Pass exception
