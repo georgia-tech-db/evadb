@@ -52,7 +52,8 @@ if sys.version_info >= (3, 8):
             await start_cmd_client(host, port)
 
         @patch("asyncio.wait")
-        async def test_exception_in_start_cmd_client(self, mock_wait):
+        @patch("eva.server.interpreter.read_from_client_and_send_to_server")
+        async def test_exception_in_start_cmd_client(self, mock_read, mock_wait):
             host = "localhost"
             port = 5432
             mock_wait.side_effect = Exception("Test")
