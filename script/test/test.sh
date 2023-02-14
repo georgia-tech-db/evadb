@@ -8,7 +8,10 @@ if [ -f ./__init__.py ]; then
    mv ./__init__.py ./__init__.py.bak
 fi
 
+PYTHON_VERSION=`python -c 'import sys; version=sys.version_info[:3]; print("{0}.{1}".format(*version))'`
+
 echo "OSTYPE: --|${OSTYPE}|--"
+echo "PYTHON VERSION: --|${PYTHON_VERSION}|--"
 
 ##################################################
 ## LINTER TESTS
@@ -87,10 +90,21 @@ then
         exit $notebook_test_code
     else
         echo "NOTEBOOK CODE: --|${notebook_test_code}|-- SUCCESS"
-        exit 0 # Success 
     fi
 else
     exit 0 # Success 
+fi
+
+##################################################
+## UPLOAD COVERAGE
+## based on Python version
+##################################################
+
+if [ "$PYTHON_VERSION" == "3.10" ];
+then 
+    echo "Uploading coverage report"
+    coveralls
+    exit 0 # Success     
 fi
 
 # restore __init__.py if it exists
