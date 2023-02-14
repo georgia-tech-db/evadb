@@ -100,9 +100,9 @@ fi
 ## based on Python version
 ##################################################
 
-if [ "$PYTHON_VERSION" == "3.10" ];
+if [ "$PYTHON_VERSION" = "3.10" ];
 then 
-    echo "Uploading coverage report"
+    echo "UPLOADING COVERAGE REPORT"
     coveralls
     exit 0 # Success     
 fi
