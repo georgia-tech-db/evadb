@@ -40,9 +40,7 @@ class DeleteExecutor(AbstractExecutor):
 
     def exec(self, **kwargs) -> Iterator[Batch]:
         try:
-            ########################################################
-            ### Use the predicate to get the rows to be deleted ####
-            ########################################################
+            # using apply_predicate to get rows
             config_batch_mem_size = ConfigurationManager().get_value(
                 "executor", "batch_mem_size"
             )
@@ -73,7 +71,6 @@ class DeleteExecutor(AbstractExecutor):
             del_batch.frames.columns = column_names
             del_batch = apply_predicate(del_batch, self.predicate)
 
-            ######################################################
             # All the batches that need to be deleted
 
             if table_catalog.table_type == TableType.VIDEO_DATA:
