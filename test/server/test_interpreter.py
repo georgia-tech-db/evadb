@@ -12,75 +12,51 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import contextlib
-import io
+import asyncio
+import sys
 import unittest
-from unittest.mock import MagicMock
 
-from mock import patch
+from mock import MagicMock, patch
 
-from eva.server.interpreter import EvaCommandInterpreter, start_cmd_client
+from eva.server.interpreter import start_cmd_client
 
+# Check for Python 3.8+ for IsolatedAsyncioTestCase support
+if sys.version_info >= (3, 8):
 
-class InterpreterTests(unittest.TestCase):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    class InterpreterTests(unittest.IsolatedAsyncioTestCase):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
 
-    def test_cmd_emptyline_should_return_false(self):
-        prompt = EvaCommandInterpreter()
-        prompt.prompt = "> "
+        @patch("asyncio.open_connection")
+        @patch("eva.server.interpreter.create_stdin_reader")
+        async def test_start_cmd_client(self, mock_stdin_reader, mock_open):
+            host = "localhost"
+            port = 5432
 
-        with io.StringIO() as buf:
-            with contextlib.redirect_stdout(buf):
-                self.assertFalse(prompt.emptyline())
-                self.assertTrue("Enter a valid query" in buf.getvalue())
+            server_reader = asyncio.StreamReader()
+            server_writer = MagicMock()
 
-    def test_cmd_exit_should_return_true(self):
-        prompt = EvaCommandInterpreter()
+            server_reader.feed_data(b"SHOW UDFS;\n")
+            server_reader.feed_data(b"EXIT;\n")
 
-        self.assertEqual(SystemExit, prompt.do_quit(None))
-        self.assertEqual(SystemExit, prompt.do_exit(None))
+            mock_open.return_value = (server_reader, server_writer)
 
-    @patch("eva.server.interpreter.EvaCommandInterpreter.emptyline")
-    def test_onecmd_with_emptyline(self, mock_emptyline):
-        prompt = EvaCommandInterpreter()
-        mock_emptyline.return_value = False
+            stdin_reader = asyncio.StreamReader()
+            stdin_reader.feed_data(b"SHOW UDFS;\n")
+            stdin_reader.feed_data(b"EXIT;\n")
+            stdin_reader.feed_eof()
 
-        prompt.onecmd("")
-        mock_emptyline.assert_called_once()
+            mock_stdin_reader.return_value = stdin_reader
 
-    def test_onecmd_with_exit(self):
-        prompt = EvaCommandInterpreter()
-        self.assertEqual(SystemExit, prompt.onecmd("exit"))
-        self.assertEqual(SystemExit, prompt.onecmd("quit"))
+            # with self.assertRaises(Exception):
+            await start_cmd_client(host, port)
 
-    def test_onecmd_with_do_query(self):
-        prompt = EvaCommandInterpreter()
-        prompt.cursor = MagicMock()
-        prompt.cursor.fetch_all.return_value = "123"
+        @patch("asyncio.wait")
+        @patch("eva.server.interpreter.read_from_client_and_send_to_server")
+        async def test_exception_in_start_cmd_client(self, mock_read, mock_wait):
+            host = "localhost"
+            port = 5432
+            mock_wait.side_effect = Exception("Test")
 
-        query = "SELECT id FROM MyVIdeo"
-        with io.StringIO() as buf:
-            with contextlib.redirect_stdout(buf):
-                self.assertFalse(prompt.onecmd(query))
-                prompt.cursor.execute.assert_called_once_with(query)
-                prompt.cursor.fetch_all.assert_called_once_with()
-                self.assertTrue("123" in buf.getvalue())
-
-    # We are mocking the connect funciton call that gets imported into
-    # interpreter instead of the one in db_api.
-    @patch("eva.server.interpreter.connect")
-    @patch("eva.server.interpreter.EvaCommandInterpreter.cmdloop")
-    def test_start_cmd_client(self, mock_cmdloop, mock_connect):
-        class MOCKCONNECTION:
-            def cursor(self):
-                return None
-
-        mock_connect.return_value = MOCKCONNECTION()
-
-        host = "0.0.0.0"
-        port = 5432
-        start_cmd_client(host, port)
-
-        mock_connect.assert_called_once_with(host, port)
-        mock_cmdloop.assert_called_once()
+            with self.assertRaises(Exception):
+                await start_cmd_client(host, port)
