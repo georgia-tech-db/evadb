@@ -14,7 +14,6 @@
 # limitations under the License.
 from lark.tree import Tree
 
-from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.delete_statement import DeleteTableStatement
 from eva.parser.table_ref import TableRef
 
@@ -33,8 +32,6 @@ class Delete:
                     table_ref = TableRef(table_name)
                 elif child.data == "where_expr":
                     where_clause = self.visit(child)
-                    
+
         delete_stmt = DeleteTableStatement(table_ref, where_clause)
         return delete_stmt
-
-    

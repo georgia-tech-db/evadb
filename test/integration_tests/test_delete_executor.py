@@ -13,22 +13,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import create_sample_video, file_remove, load_inbuilt_udfs
+from test.util import file_remove, load_inbuilt_udfs
 
 import numpy as np
 import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.server.command_handler import execute_query_fetch_all
-from eva.catalog.catalog_type import ColumnType, IndexType, NdArrayType, TableType
-from eva.configuration.constants import EVA_ROOT_DIR
+from eva.catalog.catalog_type import ColumnType, TableType
 from eva.catalog.catalog_utils import xform_column_definitions_to_catalog_entries
 from eva.catalog.sql_config import IDENTIFIER_COLUMN
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.parser.create_statement import ColumnDefinition
-from eva.utils.generic_utils import generate_file_path
+from eva.configuration.constants import EVA_ROOT_DIR
 from eva.models.storage.batch import Batch
+from eva.parser.create_statement import ColumnDefinition
+from eva.server.command_handler import execute_query_fetch_all
 from eva.storage.storage_engine import StorageEngine
+from eva.utils.generic_utils import generate_file_path
 
 
 class DeleteExecutorTest(unittest.TestCase):
@@ -95,7 +95,7 @@ class DeleteExecutorTest(unittest.TestCase):
         feat_batch_data = Batch(
             pd.DataFrame(
                 data={
-                    "id":   [id1, id2, id3],
+                    "id": [id1, id2, id3],
                     "feat": [feat1, feat2, feat3],
                     "input": [input1, input2, input3],
                 }
@@ -106,7 +106,7 @@ class DeleteExecutorTest(unittest.TestCase):
         input_batch_data = Batch(
             pd.DataFrame(
                 data={
-                    "id":   [id1, id2, id3],
+                    "id": [id1, id2, id3],
                     "feat": [feat1, feat2, feat3],
                     "input": [input1, input2, input3],
                 }
@@ -120,9 +120,7 @@ class DeleteExecutorTest(unittest.TestCase):
 
         path = f"{EVA_ROOT_DIR}/data/sample_videos/1/*.mp4"
         query = f'LOAD VIDEO "{path}" INTO TestDeleteVideos;'
-        result = execute_query_fetch_all(query)
-
-
+        _ = execute_query_fetch_all(query)
 
     def tearDown(self):
         file_remove("dummy.avi")
@@ -152,7 +150,7 @@ class DeleteExecutorTest(unittest.TestCase):
                 np.array([[[41, 41, 41], [41, 41, 41]], [[41, 41, 41], [41, 41, 41]]]),
             )
         )
-    
+
     @unittest.skip("Not supported in current version")
     def test_should_delete_single_image_in_table(self):
         path = f"{EVA_ROOT_DIR}/data/sample_videos/1/2.mp4"

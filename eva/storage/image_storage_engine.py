@@ -12,8 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Any, Dict, Iterator, List
-
 from pathlib import Path
 from typing import Iterator
 
@@ -39,6 +37,3 @@ class ImageStorageEngine(AbstractMediaStorageEngine):
                     column_name = table.columns[1].name
                     batch.frames[column_name] = str(file_name)
                     yield batch
-
-
-

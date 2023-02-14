@@ -263,10 +263,7 @@ class LogicalQueryDerivedGet(Operator):
 
 
 class LogicalFilter(Operator):
-    def __init__(self,
-        predicate: AbstractExpression,
-        children=None
-        ):
+    def __init__(self, predicate: AbstractExpression, children=None):
         self._predicate = predicate
         super().__init__(OperatorType.LOGICALFILTER, children)
 
@@ -454,6 +451,7 @@ class LogicalInsert(Operator):
             )
         )
 
+
 class LogicalDelete(Operator):
     """[Logical Node for Delete Operation]
 
@@ -462,34 +460,35 @@ class LogicalDelete(Operator):
         where_clause(AbstractExpression): the predicate used to select which rows to delete,
 
     """
+
     def __init__(
         self,
         table_ref: TableRef,
         where_clause: AbstractExpression = None,
-        children=None
+        children=None,
     ):
         super().__init__(OperatorType.LOGICALDELETE, children)
         self._table_ref = table_ref
         self._where_clause = where_clause
-    
+
     @property
     def table_ref(self):
         return self._table_ref
-    
+
     @property
     def where_clause(self):
         return self._where_clause
-    
+
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
         if not isinstance(other, LogicalDelete):
             return False
         return (
-            is_subtree_equal 
+            is_subtree_equal
             and self.table_ref == other.table_ref
             and self.where_clause == other.where_clause
         )
-    
+
     def __hash__(self) -> int:
         return hash(
             (
@@ -498,6 +497,7 @@ class LogicalDelete(Operator):
                 self.where_clause,
             )
         )
+
 
 class LogicalCreate(Operator):
     """Logical node for create table operations

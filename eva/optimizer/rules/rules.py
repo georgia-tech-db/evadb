@@ -49,6 +49,7 @@ from eva.optimizer.operators import (
     LogicalCreateIndex,
     LogicalCreateMaterializedView,
     LogicalCreateUDF,
+    LogicalDelete,
     LogicalDrop,
     LogicalDropUDF,
     LogicalExplain,
@@ -58,7 +59,6 @@ from eva.optimizer.operators import (
     LogicalGet,
     LogicalGroupBy,
     LogicalInsert,
-    LogicalDelete,
     LogicalJoin,
     LogicalLimit,
     LogicalLoadData,
@@ -76,6 +76,7 @@ from eva.optimizer.operators import (
 from eva.plan_nodes.create_index_plan import CreateIndexPlan
 from eva.plan_nodes.create_plan import CreatePlan
 from eva.plan_nodes.create_udf_plan import CreateUDFPlan
+from eva.plan_nodes.delete_plan import DeletePlan
 from eva.plan_nodes.drop_plan import DropPlan
 from eva.plan_nodes.drop_udf_plan import DropUDFPlan
 from eva.plan_nodes.faiss_index_scan_plan import FaissIndexScanPlan
@@ -83,7 +84,6 @@ from eva.plan_nodes.function_scan_plan import FunctionScanPlan
 from eva.plan_nodes.groupby_plan import GroupByPlan
 from eva.plan_nodes.hash_join_probe_plan import HashJoinProbePlan
 from eva.plan_nodes.insert_plan import InsertPlan
-from eva.plan_nodes.delete_plan import DeletePlan
 from eva.plan_nodes.lateral_join_plan import LateralJoinPlan
 from eva.plan_nodes.limit_plan import LimitPlan
 from eva.plan_nodes.load_data_plan import LoadDataPlan
@@ -691,6 +691,7 @@ class LogicalInsertToPhysical(Rule):
     def apply(self, before: LogicalInsert, context: OptimizerContext):
         after = InsertPlan(before.table, before.column_list, before.value_list)
         yield after
+
 
 class LogicalDeleteToPhysical(Rule):
     def __init__(self):

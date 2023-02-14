@@ -18,6 +18,7 @@ from lark import Tree, visitors
 
 from eva.parser.lark_visitor._common_clauses_ids import CommonClauses
 from eva.parser.lark_visitor._create_statements import CreateTable
+from eva.parser.lark_visitor._delete_statement import Delete
 from eva.parser.lark_visitor._drop_statement import DropTable
 from eva.parser.lark_visitor._explain_statement import Explain
 from eva.parser.lark_visitor._expressions import Expressions
@@ -29,7 +30,6 @@ from eva.parser.lark_visitor._select_statement import Select
 from eva.parser.lark_visitor._show_statements import Show
 from eva.parser.lark_visitor._table_sources import TableSources
 from eva.parser.lark_visitor._upload_statement import Upload
-from eva.parser.lark_visitor._delete_statement import Delete
 
 # To add new functionality to the parser, create a new file under
 # the lark_visitor directory, and implement a new class which

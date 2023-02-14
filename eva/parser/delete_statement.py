@@ -12,10 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import List
-
 from eva.expression.abstract_expression import AbstractExpression
-from eva.expression.constant_value_expression import ConstantValueExpression
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
 from eva.parser.types import StatementType
@@ -42,13 +39,13 @@ class DeleteTableStatement(AbstractStatement):
         delete_str = f"DELETE FROM {self._table}"
         if self._where_clause is not None:
             delete_str += " WHERE " + str(self._where_clause)
-        
+
         return delete_str
 
     @property
     def table_ref(self):
         return self._table_ref
-    
+
     @property
     def where_clause(self):
         return self._where_clause
@@ -56,22 +53,11 @@ class DeleteTableStatement(AbstractStatement):
     @where_clause.setter
     def where_clause(self, where_expr: AbstractExpression):
         self._where_clause = where_expr
-    
-    
+
     def __eq__(self, other):
         if not isinstance(other, DeleteTableStatement):
             return False
-        return (
-            self._table == other._table
-            and self.where_clause == other.where_clause
-        )
-    
+        return self._table == other._table and self.where_clause == other.where_clause
+
     def __hash__(self) -> int:
-        return hash(
-            (
-                super().__hash__(),
-                self.table,
-                tuple(self.where_clause)
-            )
-        )
-    
+        return hash((super().__hash__(), self.table, tuple(self.where_clause)))

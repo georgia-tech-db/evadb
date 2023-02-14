@@ -12,10 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import List
-
-from eva.parser.table_ref import TableRef
 from eva.expression.abstract_expression import AbstractExpression
+from eva.parser.table_ref import TableRef
 from eva.plan_nodes.abstract_plan import AbstractPlan
 from eva.plan_nodes.types import PlanOprType
 
@@ -40,20 +38,18 @@ class DeletePlan(AbstractPlan):
         super().__init__(PlanOprType.DELETE)
         self._table_ref = table_ref
         self._where_clause = where_clause
-    
+
     @property
     def table_ref(self):
         return self._table_ref
-    
+
     @property
     def where_clause(self):
         return self._where_clause
 
     def __str__(self):
         return "DeletePlan(table={}, \
-            where_clause={}, \
-            orderby_clause={}, \
-            limit_count={})".format(
+            where_clause={})".format(
             self.table_ref, self._where_clause
         )
 
@@ -63,6 +59,5 @@ class DeletePlan(AbstractPlan):
                 super().__hash__(),
                 self.table_ref,
                 self._where_clause,
-                
             )
         )

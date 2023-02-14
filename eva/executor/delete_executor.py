@@ -83,7 +83,7 @@ class DeleteExecutor(AbstractExecutor):
                     [f"{self.predicate.children[0].col_name}"]
                 ]
                 storage_engine.delete(table_catalog, table_needed.iloc[0])
-            yield Batch(pd.DataFrame([f"Deleted row"]))
+            yield Batch(pd.DataFrame(["Deleted row"]))
 
         except Exception as e:
             logger.error(e)
