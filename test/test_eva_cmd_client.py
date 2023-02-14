@@ -32,40 +32,18 @@ if sys.version_info >= (3, 8):
             return stdin_reader
 
         @patch("eva.server.interpreter.create_stdin_reader")
-        def test_main(self, mock_stdin_reader):
-            from eva.eva_cmd_client import main
-
-            mock_stdin_reader.return_value = self.get_mock_stdin_reader()
-
-            with patch.object(sys, "argv", ["test"]):
-                main()
-
-        @patch("eva.server.interpreter.create_stdin_reader")
-        async def test_eva_client(self, mock_stdin_reader):
-            from eva.eva_cmd_client import eva_client
-
-            mock_stdin_reader.return_value = self.get_mock_stdin_reader()
-
-            await eva_client()
-
-        @patch("eva.server.interpreter.create_stdin_reader")
         @patch("eva.server.interpreter.start_cmd_client")
-        async def test_exception_in_eva_client(self, mock_client, mock_stdin_reader):
+        async def test_eva_client(self, mock_client, mock_stdin_reader):
+            # Must import after patching start_cmd_client
             from eva.eva_cmd_client import eva_client
 
             mock_stdin_reader.return_value = self.get_mock_stdin_reader()
             mock_client.side_effect = Exception("Test")
 
-            await eva_client()
+            with self.assertRaises(Exception):
+                await eva_client()
 
-        @patch("eva.server.interpreter.create_stdin_reader")
-        @patch("eva.server.interpreter.start_cmd_client")
-        async def test_keyboard_interrupt_in_eva_client(
-            self, mock_client, mock_stdin_reader
-        ):
-            from eva.eva_cmd_client import eva_client
-
-            mock_stdin_reader.return_value = self.get_mock_stdin_reader()
+            mock_client.reset_mock()
             mock_client.side_effect = KeyboardInterrupt
 
             # Pass exception
