@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### [Breaking Changes]
 ### [Added]
 ### [Changed]
+
+* PR #581: fix: debugging issuse in yolov5
+
 ### [Deprecated]
 ### [Removed]
 
