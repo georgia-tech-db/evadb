@@ -18,8 +18,6 @@ import unittest
 
 from mock import patch
 
-from eva.eva_cmd_client import eva_client, main
-
 # Check for Python 3.8+ for IsolatedAsyncioTestCase support
 if sys.version_info >= (3, 8):
 
@@ -35,6 +33,8 @@ if sys.version_info >= (3, 8):
 
         @patch("eva.server.interpreter.create_stdin_reader")
         def test_main(self, mock_stdin_reader):
+            from eva.eva_cmd_client import main
+
             mock_stdin_reader.return_value = self.get_mock_stdin_reader()
 
             with patch.object(sys, "argv", ["test"]):
@@ -42,6 +42,8 @@ if sys.version_info >= (3, 8):
 
         @patch("eva.server.interpreter.create_stdin_reader")
         async def test_eva_client(self, mock_stdin_reader):
+            from eva.eva_cmd_client import eva_client
+
             mock_stdin_reader.return_value = self.get_mock_stdin_reader()
 
             await eva_client()
@@ -49,6 +51,8 @@ if sys.version_info >= (3, 8):
         @patch("eva.server.interpreter.create_stdin_reader")
         @patch("eva.server.interpreter.start_cmd_client")
         async def test_exception_in_eva_client(self, mock_client, mock_stdin_reader):
+            from eva.eva_cmd_client import eva_client
+
             mock_stdin_reader.return_value = self.get_mock_stdin_reader()
             mock_client.side_effect = Exception("Test")
 
@@ -59,8 +63,10 @@ if sys.version_info >= (3, 8):
         async def test_keyboard_interrupt_in_eva_client(
             self, mock_client, mock_stdin_reader
         ):
-            mock_stdin_reader.return_value = self.get_mock_stdin_reader()
+            from eva.eva_cmd_client import eva_client
 
+            mock_stdin_reader.return_value = self.get_mock_stdin_reader()
             mock_client.side_effect = KeyboardInterrupt
+
             # Pass exception
             await eva_client()
