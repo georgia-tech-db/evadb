@@ -50,8 +50,8 @@ if sys.version_info >= (3, 8):
         @patch("eva.server.interpreter.start_cmd_client")
         async def test_exception_in_eva_client(self, mock_client, mock_stdin_reader):
             mock_stdin_reader.return_value = self.get_mock_stdin_reader()
-
             mock_client.side_effect = Exception("Test")
+
             await eva_client()
 
         @patch("eva.server.interpreter.create_stdin_reader")
