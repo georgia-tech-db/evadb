@@ -510,6 +510,7 @@ REAL_LITERAL:                        (DEC_DIGIT+)? "." DEC_DIGIT+
                                      | DEC_DIGIT+ "." EXPONENT_NUM_PART
                                      | (DEC_DIGIT+)? "." (DEC_DIGIT+ EXPONENT_NUM_PART)
                                      | DEC_DIGIT+ EXPONENT_NUM_PART
+                                     | (DEC_DIGIT+) "." (DEC_DIGIT+) "e" "-"? DEC_DIGIT+
 
 
 // Hack for dotID
