@@ -138,9 +138,9 @@ class PlanNodeTests(unittest.TestCase):
         plan_str = "UploadPlan(file_path={}, \
             video_blob={}, \
             table_id={}, \
-            batch_mem_size={}, \
             column_list={}, \
-            file_options={})".format(
+            file_options={}, \
+            batch_mem_size={})".format(
             file_path,
             "video blob",
             table_info,
