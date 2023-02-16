@@ -111,13 +111,13 @@ class PlanNodeTests(unittest.TestCase):
         column_list = None
         batch_mem_size = 3000
         plan_str = "LoadDataPlan(table_id={}, file_path={}, \
-            batch_mem_size={}, \
             column_list={}, \
-            file_options={})".format(
-            table_info, file_path, batch_mem_size, column_list, file_options
+            file_options={}, \
+            batch_mem_size={})".format(
+            table_info, file_path, column_list, file_options, batch_mem_size
         )
         plan = LoadDataPlan(
-            table_info, file_path, batch_mem_size, column_list, file_options
+            table_info, file_path, column_list, file_options, batch_mem_size
         )
         self.assertEqual(plan.opr_type, PlanOprType.LOAD_DATA)
         self.assertEqual(plan.table_info, table_info)
@@ -144,17 +144,12 @@ class PlanNodeTests(unittest.TestCase):
             file_path,
             "video blob",
             table_info,
-            batch_mem_size,
             column_list,
             file_options,
+            batch_mem_size,
         )
         plan = UploadPlan(
-            file_path,
-            video_blob,
-            table_info,
-            batch_mem_size,
-            column_list,
-            file_options,
+            file_path, video_blob, table_info, column_list, file_options, batch_mem_size
         )
         self.assertEqual(plan.opr_type, PlanOprType.UPLOAD)
         self.assertEqual(plan.file_path, file_path)

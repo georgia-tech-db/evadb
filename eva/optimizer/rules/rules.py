@@ -720,9 +720,6 @@ class LogicalLoadToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalLoadData, context: OptimizerContext):
-        # Configure the batch_mem_size.
-        # We assume the optimizer decides the batch_mem_size.
-        # ToDO: Experiment heuristics.
         after = LoadDataPlan(
             before.table_info,
             before.path,
@@ -744,9 +741,6 @@ class LogicalUploadToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalUpload, context: OptimizerContext):
-        # Configure the batch_mem_size.
-        # We assume the optimizer decides the batch_mem_size.
-        # ToDO: Experiment heuristics.
         after = UploadPlan(
             before.path,
             before.video_blob,

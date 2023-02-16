@@ -148,9 +148,7 @@ class SQLStorageEngine(AbstractStorageEngine):
             raise Exception(err_msg)
 
     def read(
-        self,
-        table: TableCatalogEntry,
-        batch_mem_size: int,
+        self, table: TableCatalogEntry, batch_mem_size: int = 30000000
     ) -> Iterator[Batch]:
         """
         Reads the table and return a batch iterator for the

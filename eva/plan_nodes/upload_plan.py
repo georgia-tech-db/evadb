@@ -78,15 +78,15 @@ class UploadPlan(AbstractPlan):
         return "UploadPlan(file_path={}, \
             video_blob={}, \
             table_id={}, \
-            batch_mem_size={}, \
             column_list={}, \
-            file_options={})".format(
+            file_options={}, \
+            batch_mem_size={})".format(
             self.file_path,
             "video blob",
             self.table_info,
-            self.batch_mem_size,
             self.column_list,
             self.file_options,
+            self.batch_mem_size,
         )
 
     def __hash__(self) -> int:
@@ -96,8 +96,8 @@ class UploadPlan(AbstractPlan):
                 self.file_path,
                 self.video_blob,
                 self.table_info,
-                self.batch_mem_size,
                 tuple(self.column_list),
                 frozenset(self.file_options.items()),
+                self.batch_mem_size,
             )
         )
