@@ -74,7 +74,8 @@ class DeleteExecutor(AbstractExecutor):
                 table_needed = del_batch.frames[
                     [f"{self.predicate.children[0].col_name}"]
                 ]
-                storage_engine.delete(table_catalog, table_needed.iloc[0])
+                for num in range(len(del_batch)):
+                    storage_engine.delete(table_catalog, table_needed.iloc[num])
             yield Batch(pd.DataFrame(["Deleted row"]))
 
         except Exception as e:
