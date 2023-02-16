@@ -67,7 +67,7 @@ class InsertTableStatement(AbstractStatement):
         if not isinstance(other, InsertTableStatement):
             return False
         return (
-            self.table == other.table
+            self.table_ref == other.table_ref
             and self.column_list == other.column_list
             and self.value_list == other.value_list
         )
@@ -76,7 +76,7 @@ class InsertTableStatement(AbstractStatement):
         return hash(
             (
                 super().__hash__(),
-                self.table,
+                self.table_ref,
                 tuple(self.column_list),
                 tuple(self.value_list),
             )
