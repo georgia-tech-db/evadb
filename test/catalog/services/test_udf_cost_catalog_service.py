@@ -22,7 +22,7 @@ from eva.catalog.services.udf_cost_catalog_service import UdfCostCatalogService
 UDF_TYPE = "classification"
 UDF_NAME = "name"
 UDF_COST = 1
-FRAME_COUNT = 1 
+FRAME_COUNT = 1
 RESOLUTION = 1
 
 

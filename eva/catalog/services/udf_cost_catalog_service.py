@@ -16,26 +16,26 @@ from typing import List
 
 from sqlalchemy.orm.exc import NoResultFound
 
-from eva.catalog.models.udf_cost_catalog import UdfCostCatalog
-from eva.catalog.models.udf_cost_catalog import UdfCostCatalogEntry
+from eva.catalog.models.udf_cost_catalog import UdfCostCatalog, UdfCostCatalogEntry
 from eva.catalog.services.base_service import BaseService
-from eva.utils.logging_manager import logger
 
 
 class UdfCostCatalogService(BaseService):
     def __init__(self):
         super().__init__(UdfCostCatalog)
 
-    def insert_entry(self, name: str, type: str, cost: int, frame_count: int, resolution: int) -> UdfCostCatalogEntry:
+    def insert_entry(
+        self, name: str, type: str, cost: int, frame_count: int, resolution: int
+    ) -> UdfCostCatalogEntry:
         """Insert a new udf cost entry
 
         Arguments:
             name (str): name of the udf
-            type(str): type of the udf 
-            cost(int) : cost of the 
-            frame_count = number of frames used in the cost estimation 
+            type(str): type of the udf
+            cost(int) : cost of the
+            frame_count = number of frames used in the cost estimation
             resolution = resolution of the videos used in the cost estimation
-            
+
         Returns:
             UdfCostCatalogEntry: Returns the new entry created
         """
@@ -59,7 +59,6 @@ class UdfCostCatalogService(BaseService):
         except NoResultFound:
             return None
 
-   
     def get_all_entries(self) -> List[UdfCostCatalogEntry]:
         try:
             objs = self.model.query.all()

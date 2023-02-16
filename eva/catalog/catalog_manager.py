@@ -240,12 +240,7 @@ class CatalogManager(object):
     "udf cost catalog services"
 
     def insert_udf_cost_catalog_entry(
-        self,
-        name: str,
-        type: str,
-        cost: int, 
-        frame_count: int,
-        resolution: int
+        self, name: str, type: str, cost: int, frame_count: int, resolution: int
     ) -> UdfCostCatalogEntry:
         """Inserts a UDF cost catalog entry.
         It persists the entry to the database.
@@ -254,7 +249,7 @@ class CatalogManager(object):
             name(str): name of the udf
             type(str): what kind of udf operator like classification,
                                                         detection etc
-            cost(int): cost of this UDF 
+            cost(int): cost of this UDF
             frame_count(int): count of the frames used for this cost estimation
             resolution(int): resolution of the frames used for this estimation
 
@@ -262,7 +257,9 @@ class CatalogManager(object):
             The persisted UdfCostCatalogEntry object.
         """
 
-        udf_entry = self._udf_cost_catlog_service.insert_entry(name, type, cost, frame_count, resolution)
+        udf_entry = self._udf_cost_catlog_service.insert_entry(
+            name, type, cost, frame_count, resolution
+        )
         return udf_entry
 
     "UdfIO services"
