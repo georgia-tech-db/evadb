@@ -44,7 +44,7 @@ class UdfCostCatalogServiceTest(TestCase):
         mocked.query.filter.return_value.one.assert_called_once()
         self.assertEqual(actual, expected.as_dataclass.return_value)
 
-    @patch("eva.catalog.services.udf_catalog_service.UdfCatalog")
+    @patch("eva.catalog.services.udf_cost_catalog_service.UdfCostCatalog")
     def test_get_all_udfs_should_return_empty(self, mocked):
         service = UdfCostCatalogService()
         mocked.query.all.side_effect = Exception(NoResultFound)
