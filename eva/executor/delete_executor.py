@@ -18,7 +18,6 @@ import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import TableType
-from eva.configuration.configuration_manager import ConfigurationManager
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError, apply_predicate
 from eva.models.storage.batch import Batch
@@ -40,13 +39,6 @@ class DeleteExecutor(AbstractExecutor):
 
     def exec(self, **kwargs) -> Iterator[Batch]:
         try:
-            # using apply_predicate to get rows
-            config_batch_mem_size = ConfigurationManager().get_value(
-                "executor", "batch_mem_size"
-            )
-            batch_mem = 30000000
-            if config_batch_mem_size:
-                batch_mem = config_batch_mem_size
             table_catalog = self.node.table_ref.table.table_obj
             storage_engine = StorageEngine.factory(table_catalog)
 
@@ -57,7 +49,7 @@ class DeleteExecutor(AbstractExecutor):
             elif table_catalog.table_type == TableType.IMAGE_DATA:
                 raise NotImplementedError("DELETE only implemented for structured data")
             elif table_catalog.table_type == TableType.STRUCTURED_DATA:
-                del_batch = storage_engine.read(table_catalog, batch_mem)
+                del_batch = storage_engine.read(table_catalog)
                 del_batch = list(del_batch)[0]
 
             # Added because of inconsistency in col_alias in Structured data Batch project function

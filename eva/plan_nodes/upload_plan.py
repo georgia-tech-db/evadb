@@ -38,17 +38,17 @@ class UploadPlan(AbstractPlan):
         file_path: Path,
         video_blob: str,
         table_info: TableInfo,
-        batch_mem_size: int,
         column_list: List[AbstractExpression] = None,
         file_options: dict = None,
+        batch_mem_size: int = 30000000,
     ):
         super().__init__(PlanOprType.UPLOAD)
         self._file_path = file_path
         self._video_blob = video_blob
         self._table_info = table_info
-        self._batch_mem_size = batch_mem_size
         self._column_list = column_list
         self._file_options = file_options
+        self._batch_mem_size = batch_mem_size
 
     @property
     def file_path(self):

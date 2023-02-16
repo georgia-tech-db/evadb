@@ -36,16 +36,16 @@ class LoadDataPlan(AbstractPlan):
         self,
         table_info: TableInfo,
         file_path: Path,
-        batch_mem_size: int,
         column_list: List[AbstractExpression] = None,
         file_options: dict = None,
+        batch_mem_size: int = 30000000,
     ):
         super().__init__(PlanOprType.LOAD_DATA)
         self._table_info = table_info
         self._file_path = file_path
-        self._batch_mem_size = batch_mem_size
         self._column_list = column_list
         self._file_options = file_options
+        self._batch_mem_size = batch_mem_size
 
     @property
     def table_info(self):

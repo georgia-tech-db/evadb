@@ -37,7 +37,6 @@ class StoragePlan(AbstractPlan):
     def __init__(
         self,
         table: TableCatalogEntry,
-        batch_mem_size: int,
         skip_frames: int = 0,
         offset: int = None,
         limit: int = None,
@@ -45,6 +44,7 @@ class StoragePlan(AbstractPlan):
         curr_shard: int = 0,
         predicate: AbstractExpression = None,
         sampling_rate: int = None,
+        batch_mem_size: int = 30000000,
     ):
         super().__init__(PlanOprType.STORAGE_PLAN)
         self._table = table

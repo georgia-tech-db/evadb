@@ -41,7 +41,6 @@ from eva.plan_nodes.show_info_plan import ShowInfoPlan
 if TYPE_CHECKING:
     from eva.optimizer.optimizer_context import OptimizerContext
 
-from eva.configuration.configuration_manager import ConfigurationManager
 from eva.optimizer.operators import (
     Dummy,
     LogicalApplyAndMerge,
@@ -724,17 +723,9 @@ class LogicalLoadToPhysical(Rule):
         # Configure the batch_mem_size.
         # We assume the optimizer decides the batch_mem_size.
         # ToDO: Experiment heuristics.
-
-        batch_mem_size = 30000000  # 30mb
-        config_batch_mem_size = ConfigurationManager().get_value(
-            "executor", "batch_mem_size"
-        )
-        if config_batch_mem_size:
-            batch_mem_size = config_batch_mem_size
         after = LoadDataPlan(
             before.table_info,
             before.path,
-            batch_mem_size,
             before.column_list,
             before.file_options,
         )
@@ -756,18 +747,10 @@ class LogicalUploadToPhysical(Rule):
         # Configure the batch_mem_size.
         # We assume the optimizer decides the batch_mem_size.
         # ToDO: Experiment heuristics.
-
-        batch_mem_size = 30000000  # 30mb
-        config_batch_mem_size = ConfigurationManager().get_value(
-            "executor", "batch_mem_size"
-        )
-        if config_batch_mem_size:
-            batch_mem_size = config_batch_mem_size
         after = UploadPlan(
             before.path,
             before.video_blob,
             before.table_info,
-            batch_mem_size,
             before.column_list,
             before.file_options,
         )
@@ -790,18 +773,10 @@ class LogicalGetToSeqScan(Rule):
         # Configure the batch_mem_size. It decides the number of rows
         # read in a batch from storage engine.
         # ToDO: Experiment heuristics.
-
-        batch_mem_size = 30000000  # 30mb
-        config_batch_mem_size = ConfigurationManager().get_value(
-            "executor", "batch_mem_size"
-        )
-        if config_batch_mem_size:
-            batch_mem_size = config_batch_mem_size
         after = SeqScanPlan(None, before.target_list, before.alias)
         after.append_child(
             StoragePlan(
                 before.table_obj,
-                batch_mem_size=batch_mem_size,
                 predicate=before.predicate,
                 sampling_rate=before.sampling_rate,
             )
