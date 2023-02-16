@@ -20,6 +20,7 @@ import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.server.command_handler import execute_query_fetch_all
+from eva.utils.logging_manager import logger
 
 
 class InsertExecutorTest(unittest.TestCase):
@@ -102,15 +103,16 @@ class InsertExecutorTest(unittest.TestCase):
 
         query = "SELECT name FROM tables;"
         batch = execute_query_fetch_all(query)
+        logger.info(batch)
 
         self.assertIsNone(
             np.testing.assert_array_equal(
                 batch.frames["tables.name"].array,
                 np.array(
                     [
-                        "/home/greatsage/projects/intern/gt/test_eva/similarity/data/sad.jpg",
-                        "/home/greatsage/projects/intern/gt/test_eva/similarity/data/happy.jpg",
-                        "/home/greatsage/projects/intern/gt/test_eva/similarity/data/angry.jpg",
+                        "test_eva/similarity/data/sad.jpg",
+                        "test_eva/similarity/data/happy.jpg",
+                        "test_eva/similarity/data/angry.jpg",
                     ]
                 ),
             )

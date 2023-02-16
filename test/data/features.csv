@@ -1,4 +1,4 @@
 ,featureextractor.features,demo.name
-0,[[0.33136845 0.80949706 1.0741047  ... 0.4779176  0.06470174 0.23867413]],/home/greatsage/projects/intern/gt/test_eva/similarity/data/sad.jpg
-1,[[0.04659024 0.72479135 0.06302969 ... 0.43765038 0.1236425  0.3284795 ]],/home/greatsage/projects/intern/gt/test_eva/similarity/data/happy.jpg
-2,[[0.08975399 1.0819144  0.2047303  ... 0.11765847 0.01942885 0.19524546]],/home/greatsage/projects/intern/gt/test_eva/similarity/data/angry.jpg
+0,[[0.33136845 0.80949706 1.0741047  ... 0.4779176  0.06470174 0.23867413]],test_eva/similarity/data/sad.jpg
+1,[[0.04659024 0.72479135 0.06302969 ... 0.43765038 0.1236425  0.3284795 ]],test_eva/similarity/data/happy.jpg
+2,[[0.08975399 1.0819144  0.2047303  ... 0.11765847 0.01942885 0.19524546]],test_eva/similarity/data/angry.jpg
