@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 from typing import Dict, Iterator
 
 import cv2
@@ -33,3 +34,11 @@ class CVImageReader(AbstractReader):
             raise Exception(err_msg)
         else:
             yield {"data": frame}
+
+    def delete(self):
+        file_url = str(self.file_url)
+        try:
+            os.remove(file_url)
+        except Exception as e:
+            raise FileNotFoundError(f"Error was: {e}")
+        # shutil remove or something

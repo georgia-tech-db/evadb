@@ -18,6 +18,7 @@ from lark import Tree, visitors
 
 from eva.parser.lark_visitor._common_clauses_ids import CommonClauses
 from eva.parser.lark_visitor._create_statements import CreateTable
+from eva.parser.lark_visitor._delete_statement import Delete
 from eva.parser.lark_visitor._drop_statement import DropTable
 from eva.parser.lark_visitor._explain_statement import Explain
 from eva.parser.lark_visitor._expressions import Expressions
@@ -70,6 +71,7 @@ class LarkInterpreter(
     DropTable,
     Show,
     Explain,
+    Delete,
 ):
     def __init__(self, query):
         super().__init__()

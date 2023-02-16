@@ -70,7 +70,7 @@ drop_udf: DROP UDF if_exists? udf_name
 
 //    Primary DML Statements
 
-delete_statement: DELETE FROM table_name (WHERE expression)? order_by_clause? (LIMIT decimal_literal)?
+delete_statement: DELETE FROM table_name (WHERE where_expr)? order_by_clause? (LIMIT decimal_literal)?
     
 insert_statement: INSERT INTO? table_name (("(" uid_list ")")? insert_statement_value)
     
@@ -510,6 +510,7 @@ REAL_LITERAL:                        (DEC_DIGIT+)? "." DEC_DIGIT+
                                      | DEC_DIGIT+ "." EXPONENT_NUM_PART
                                      | (DEC_DIGIT+)? "." (DEC_DIGIT+ EXPONENT_NUM_PART)
                                      | DEC_DIGIT+ EXPONENT_NUM_PART
+                                     | (DEC_DIGIT+) "." (DEC_DIGIT+) "e" "-"? DEC_DIGIT+
 
 
 // Hack for dotID

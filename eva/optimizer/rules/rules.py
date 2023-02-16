@@ -49,6 +49,7 @@ from eva.optimizer.operators import (
     LogicalCreateIndex,
     LogicalCreateMaterializedView,
     LogicalCreateUDF,
+    LogicalDelete,
     LogicalDrop,
     LogicalDropUDF,
     LogicalExplain,
@@ -75,6 +76,7 @@ from eva.optimizer.operators import (
 from eva.plan_nodes.create_index_plan import CreateIndexPlan
 from eva.plan_nodes.create_plan import CreatePlan
 from eva.plan_nodes.create_udf_plan import CreateUDFPlan
+from eva.plan_nodes.delete_plan import DeletePlan
 from eva.plan_nodes.drop_plan import DropPlan
 from eva.plan_nodes.drop_udf_plan import DropUDFPlan
 from eva.plan_nodes.faiss_index_scan_plan import FaissIndexScanPlan
@@ -688,6 +690,22 @@ class LogicalInsertToPhysical(Rule):
 
     def apply(self, before: LogicalInsert, context: OptimizerContext):
         after = InsertPlan(before.table, before.column_list, before.value_list)
+        yield after
+
+
+class LogicalDeleteToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALDELETE)
+        super().__init__(RuleType.LOGICAL_DELETE_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_DELETE_TO_PHYSICAL
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalDelete, context: OptimizerContext):
+        after = DeletePlan(before.table_ref, before.where_clause)
         yield after
 
 

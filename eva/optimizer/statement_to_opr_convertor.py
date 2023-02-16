@@ -18,6 +18,7 @@ from eva.optimizer.operators import (
     LogicalCreateIndex,
     LogicalCreateMaterializedView,
     LogicalCreateUDF,
+    LogicalDelete,
     LogicalDrop,
     LogicalDropUDF,
     LogicalExplain,
@@ -25,6 +26,7 @@ from eva.optimizer.operators import (
     LogicalFunctionScan,
     LogicalGet,
     LogicalGroupBy,
+    LogicalInsert,
     LogicalJoin,
     LogicalLimit,
     LogicalLoadData,
@@ -42,6 +44,7 @@ from eva.parser.create_index_statement import CreateIndexStatement
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
 from eva.parser.create_statement import CreateTableStatement
 from eva.parser.create_udf_statement import CreateUDFStatement
+from eva.parser.delete_statement import DeleteTableStatement
 from eva.parser.drop_statement import DropTableStatement
 from eva.parser.drop_udf_statement import DropUDFStatement
 from eva.parser.explain_statement import ExplainStatement
@@ -186,6 +189,14 @@ class StatementToPlanConvertor:
         Arguments:
             statement {AbstractStatement} - - [input insert statement]
         """
+        # not removing previous commented code
+        insert_data_opr = LogicalInsert(
+            statement.table_ref,
+            statement.column_list,
+            statement.value_list,
+        )
+        self._plan = insert_data_opr
+
         """
         table_ref = statement.table
         table_metainfo = bind_dataset(table_ref.table)
@@ -317,6 +328,14 @@ class StatementToPlanConvertor:
         )
         self._plan = create_index_opr
 
+    def visit_delete(self, statement: DeleteTableStatement):
+
+        delete_opr = LogicalDelete(
+            statement.table_ref,
+            statement.where_clause,
+        )
+        self._plan = delete_opr
+
     def visit(self, statement: AbstractStatement):
         """Based on the instance of the statement the corresponding
            visit is called.
@@ -351,6 +370,8 @@ class StatementToPlanConvertor:
             self.visit_explain(statement)
         elif isinstance(statement, CreateIndexStatement):
             self.visit_create_index(statement)
+        elif isinstance(statement, DeleteTableStatement):
+            self.visit_delete(statement)
         return self._plan
 
     @property
