@@ -128,7 +128,6 @@ class DeleteExecutorTest(unittest.TestCase):
     # integration test
     @unittest.skip("Not supported in current version")
     def test_should_delete_single_video_in_table(self):
-
         path = f"{EVA_ROOT_DIR}/data/sample_videos/1/2.mp4"
         delete_query = f"""DELETE FROM TestDeleteVideos WHERE name="{path}";"""
         batch = execute_query_fetch_all(delete_query)

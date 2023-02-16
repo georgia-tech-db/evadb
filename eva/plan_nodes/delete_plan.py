@@ -34,7 +34,6 @@ class DeletePlan(AbstractPlan):
         table_ref: TableRef,
         where_clause: AbstractExpression = None,
     ):
-
         super().__init__(PlanOprType.DELETE)
         self._table_ref = table_ref
         self._where_clause = where_clause

@@ -37,7 +37,6 @@ class InsertPlan(AbstractPlan):
         column_list: List[AbstractExpression],
         value_list: List[AbstractExpression],
     ):
-
         super().__init__(PlanOprType.INSERT)
         self.table_ref = table_ref
         self.column_list = column_list

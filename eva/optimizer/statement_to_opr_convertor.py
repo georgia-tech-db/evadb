@@ -329,7 +329,6 @@ class StatementToPlanConvertor:
         self._plan = create_index_opr
 
     def visit_delete(self, statement: DeleteTableStatement):
-
         delete_opr = LogicalDelete(
             statement.table_ref,
             statement.where_clause,

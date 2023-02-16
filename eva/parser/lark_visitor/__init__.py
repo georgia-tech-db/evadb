@@ -42,7 +42,6 @@ _Leaf_T = TypeVar("_Leaf_T")
 class LarkBaseInterpreter(visitors.Interpreter):
     # Override default behavior of Interpreter
     def visit_children(self, tree: Tree[_Leaf_T]) -> List:
-
         output = [
             self._visit_tree(child) if isinstance(child, Tree) else child
             for child in tree.children
