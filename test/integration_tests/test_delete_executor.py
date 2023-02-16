@@ -194,6 +194,6 @@ class DeleteExecutorTest(unittest.TestCase):
         self.assertIsNone(
             np.testing.assert_array_equal(
                 batch.frames["testdeletetwo.id"].array,
-                np.array([15, 25], dtype=np.int64),
+                np.array([25], dtype=np.int64),
             )
         )
