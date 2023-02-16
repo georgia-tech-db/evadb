@@ -29,10 +29,9 @@ class InsertExecutorTest(unittest.TestCase):
         CatalogManager().reset()
         create_sample_video()
 
-        query = """CREATE TABLE IF NOT EXISTS tables
+        query = """CREATE TABLE IF NOT EXISTS CSVTable
             (
-                name TEXT(100),
-                features NDARRAY FLOAT32(1, ANYDIM)
+                name TEXT(100)
             );
         """
         execute_query_fetch_all(query)
@@ -93,21 +92,20 @@ class InsertExecutorTest(unittest.TestCase):
     def test_should_insert_tuples_in_table(self):
         data = pd.read_csv("./test/data/features.csv")
         for i in data.iterrows():
-            query = f"""INSERT INTO tables (name, features) VALUES (
-                        [
-                            ['{i[1][2]}', {[list(i[1][1][0])]}]
-                        ]
+            logger.info(i[1][1])
+            query = f"""INSERT INTO CSVTable (name) VALUES (
+                            '{i[1][1]}'
                         );"""
+            logger.info(query)
             batch = execute_query_fetch_all(query)
-            print(batch)
 
-        query = "SELECT name FROM tables;"
+        query = "SELECT name FROM CSVTable;"
         batch = execute_query_fetch_all(query)
         logger.info(batch)
 
         self.assertIsNone(
             np.testing.assert_array_equal(
-                batch.frames["tables.name"].array,
+                batch.frames["csvtable.name"].array,
                 np.array(
                     [
                         "test_eva/similarity/data/sad.jpg",

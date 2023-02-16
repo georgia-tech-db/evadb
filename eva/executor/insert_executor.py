@@ -49,20 +49,24 @@ class InsertExecutor(AbstractExecutor):
             if table_catalog_entry.table_type != TableType.STRUCTURED_DATA:
                 raise NotImplementedError("INSERT only implemented for structured data")
 
-            # Values to insert and Columns
-            values_to_insert = self.node.value_list[0].value
+            values_to_insert = []
+            for i in self.node.value_list:
+                values_to_insert.append(i.value)
+            tuple_to_insert = tuple(values_to_insert)
             columns_to_insert = []
             for i in self.node.column_list:
                 columns_to_insert.append(i.col_name)
 
             # Adding all values to Batch for insert
-            dataframe = pd.DataFrame(values_to_insert, columns=columns_to_insert)
+            logger.info(values_to_insert)
+            logger.info(columns_to_insert)
+            dataframe = pd.DataFrame([tuple_to_insert], columns=columns_to_insert)
             batch = Batch(dataframe)
 
             storage_engine = StorageEngine.factory(table_catalog_entry)
             storage_engine.write(table_catalog_entry, batch)
         except Exception as e:
-            err_msg = f"Insert {self.media_type.name} failed: encountered unexpected error {str(e)}"
+            err_msg = f"Insert failed: encountered unexpected error {str(e)}"
             logger.error(err_msg)
             raise ExecutorError(err_msg)
         else:
