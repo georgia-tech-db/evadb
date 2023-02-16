@@ -35,7 +35,7 @@ class UdfCatalog(BaseModel):
     _impl_file_path = Column("impl_file_path", String(128))
     _type = Column("type", String(100))
 
-    # UdfIOCatalog stroing the input/output attributes of the udf
+    # UdfIOCatalog storing the input/output attributes of the udf
     _attributes = relationship(
         "UdfIOCatalog", back_populates="_udf", cascade="all, delete, delete-orphan"
     )

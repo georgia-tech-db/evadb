@@ -26,11 +26,13 @@ from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.catalog.models.index_catalog import IndexCatalogEntry
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.catalog.models.udf_catalog import UdfCatalogEntry
+from eva.catalog.models.udf_cost_catalog import UdfCostCatalogEntry
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 from eva.catalog.services.column_catalog_service import ColumnCatalogService
 from eva.catalog.services.index_catalog_service import IndexCatalogService
 from eva.catalog.services.table_catalog_service import TableCatalogService
 from eva.catalog.services.udf_catalog_service import UdfCatalogService
+from eva.catalog.services.udf_cost_catalog_service import UdfCostCatalogService
 from eva.catalog.services.udf_io_catalog_service import UdfIOCatalogService
 from eva.catalog.sql_config import IDENTIFIER_COLUMN
 from eva.parser.create_statement import ColumnDefinition
@@ -54,6 +56,7 @@ class CatalogManager(object):
         self._table_catalog_service: TableCatalogService = TableCatalogService()
         self._column_service: ColumnCatalogService = ColumnCatalogService()
         self._udf_service: UdfCatalogService = UdfCatalogService()
+        self._udf_cost_catlog_service: UdfCostCatalogService = UdfCostCatalogService()
         self._udf_io_service: UdfIOCatalogService = UdfIOCatalogService()
         self._index_service: IndexCatalogService = IndexCatalogService()
 
@@ -233,6 +236,34 @@ class CatalogManager(object):
 
     def get_all_udf_catalog_entries(self):
         return self._udf_service.get_all_entries()
+
+    "udf cost catalog services"
+
+    def insert_udf_cost_catalog_entry(
+        self,
+        name: str,
+        type: str,
+        cost: int, 
+        frame_count: int,
+        resolution: int
+    ) -> UdfCostCatalogEntry:
+        """Inserts a UDF cost catalog entry.
+        It persists the entry to the database.
+
+        Arguments:
+            name(str): name of the udf
+            type(str): what kind of udf operator like classification,
+                                                        detection etc
+            cost(int): cost of this UDF 
+            frame_count(int): count of the frames used for this cost estimation
+            resolution(int): resolution of the frames used for this estimation
+
+        Returns:
+            The persisted UdfCostCatalogEntry object.
+        """
+
+        udf_entry = self._udf_cost_catlog_service.insert_entry(name, type, cost, frame_count, resolution)
+        return udf_entry
 
     "UdfIO services"
 
