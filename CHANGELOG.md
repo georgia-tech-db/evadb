@@ -1,4 +1,4 @@
-# Changelog
+x# Changelog
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
@@ -8,7 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### [Breaking Changes]
 ### [Added]
 
-* PR #568: feat: INSERT and DELETE
+* PR #580: Added features to load videos from S3.
+* PR #568: feat: added support for INSERT and DELETE operators for structured data
 
 ### [Changed]
 
