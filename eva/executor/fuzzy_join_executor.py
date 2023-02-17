@@ -30,16 +30,7 @@ class FuzzyJoinExecutor(AbstractExecutor):
         pass
 
     def exec(self, *args, **kwargs) -> Iterator[Batch]:
-        # look at either function scan executor or lateral join executor
-        # children are fine
-        # executes correctly
-        # apply predicate
-        # apply project
-        # throw error
-
-
-        # do a nested loop join
-        
+        # does a nested loop join
         outer = self.children[0]
         inner = self.children[1]
         try:

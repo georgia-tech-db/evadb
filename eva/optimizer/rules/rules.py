@@ -955,7 +955,8 @@ class LogicalJoinToPhysicalHashJoin(Rule):
         return Promise.LOGICAL_JOIN_TO_PHYSICAL_HASH_JOIN
 
     def check(self, before: Operator, context: OptimizerContext):
-        return before.join_type == JoinType.INNER_JOIN
+        j_child: FunctionExpression = before.join_predicate.children[0]
+        return before.join_type == JoinType.INNER_JOIN and (not(j_child) or not(j_child.name.startswith("FuzzyJoin")))
 
     def apply(self, join_node: LogicalJoin, context: OptimizerContext):
         #          HashJoinPlan                       HashJoinProbePlan

@@ -12,16 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import numpy as np
 import pandas as pd
 
 from thefuzz import fuzz
-from thefuzz import process
 
 from eva.udfs.abstract.abstract_udf import AbstractUDF
-
-from test.util import create_sample_image, load_inbuilt_udfs
-
 
 class FuzzyJoin(AbstractUDF):
     def setup(self):
@@ -38,26 +33,6 @@ class FuzzyJoin(AbstractUDF):
         Returns:
             ret (pd.DataFrame): The cropped frame.
         """
-
-        def fuzzyjoin(row: pd.Series) -> float:
-            
-            print("row")
-            print(type(row))
-            print(row.shape )
-            ratio = fuzz.ratio(row[0], row[1])
-            print(ratio)
-
-            return 0.1
-
-            #create duplicate column to retain team name from df2
-            df2['team_match'] = df2['team']
-
-            #convert team name in df2 to team name it most closely matches in df1
-            df2['team'] = df2['team'].apply(lambda x: difflib.get_close_matches(x, df1['team'])[0])
-
-            #merge the DataFrames into one
-            df3 = df1.merge(df2)
-
         ret = pd.DataFrame()
-        ret["distance"] = df.apply(fuzzyjoin, axis=1)
+        ret["distance"] = df.apply(lambda row: fuzz.ratio(row[0], row[1]), axis=1)
         return ret

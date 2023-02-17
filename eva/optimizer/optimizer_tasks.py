@@ -183,7 +183,7 @@ class OptimizeExpression(OptimizerTask):
             if rule.top_match(self.root_expr.opr):
                 valid_rules.append(rule)
 
-        sorted(valid_rules, key=lambda x: x.promise())
+        valid_rules = sorted(valid_rules, key=lambda x: x.promise())
 
         for rule in valid_rules:
             # apply the rule
