@@ -91,7 +91,9 @@ class InsertExecutorTest(unittest.TestCase):
         )
 
     def test_should_insert_tuples_in_table(self):
-        EVA_INSTALLATION_DIR = ConfigurationManager().get_value("core", "eva_installation_dir")
+        EVA_INSTALLATION_DIR = ConfigurationManager().get_value(
+            "core", "eva_installation_dir"
+        )
         data = pd.read_csv(f"{EVA_INSTALLATION_DIR}../test/data/features.csv")
         for i in data.iterrows():
             logger.info(i[1][1])
