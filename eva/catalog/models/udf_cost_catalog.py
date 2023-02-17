@@ -39,9 +39,9 @@ class UdfCostCatalog(BaseModel):
     _resolution = Column("resolution", Integer())
 
     # TODO: Add hardware information - GPU information etc. - It can be its own table.
-
+    # TODO: Add relation to UdfCatalog table as one of below:
     # _name = relationship("UdfCatlog", back_populates="_name")
-    _name = Column("name", Integer, ForeignKey("udf_catalog._name"))
+    # _name = Column("name", Integer, ForeignKey("udf_catalog._name"))
 
     def __init__(
         self, name: str, type: str, cost: int, frame_count: int, resolution: int
@@ -75,7 +75,6 @@ class UdfCostCatalogEntry:
     thorughput_cost: int = None
 
     def display_format(self):
-        # TODO: figure out what needs to be returned in the display format
         data_type = self.type.name
 
         return {"name": self.name, "data_type": data_type}
