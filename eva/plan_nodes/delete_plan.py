@@ -12,15 +12,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import List
-
-from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.expression.abstract_expression import AbstractExpression
+from eva.parser.table_ref import TableRef
 from eva.plan_nodes.abstract_plan import AbstractPlan
 from eva.plan_nodes.types import PlanOprType
 
 
-class InsertPlan(AbstractPlan):
+class DeletePlan(AbstractPlan):
     """This plan is used for storing information required for insert
     operations.
 
@@ -33,20 +31,25 @@ class InsertPlan(AbstractPlan):
 
     def __init__(
         self,
-        table_ref: TableCatalogEntry,
-        column_list: List[AbstractExpression],
-        value_list: List[AbstractExpression],
+        table_ref: TableRef,
+        where_clause: AbstractExpression = None,
     ):
-        super().__init__(PlanOprType.INSERT)
-        self.table_ref = table_ref
-        self.column_list = column_list
-        self.value_list = value_list
+        super().__init__(PlanOprType.DELETE)
+        self._table_ref = table_ref
+        self._where_clause = where_clause
+
+    @property
+    def table_ref(self):
+        return self._table_ref
+
+    @property
+    def where_clause(self):
+        return self._where_clause
 
     def __str__(self):
-        return "InsertPlan(table={}, \
-            column_list={}, \
-            value_list={})".format(
-            self.table_ref, self.columns_list, self.value_list
+        return "DeletePlan(table={}, \
+            where_clause={})".format(
+            self.table_ref, self._where_clause
         )
 
     def __hash__(self) -> int:
@@ -54,7 +57,6 @@ class InsertPlan(AbstractPlan):
             (
                 super().__hash__(),
                 self.table_ref,
-                tuple(self.column_list),
-                tuple(self.value_list),
+                self._where_clause,
             )
         )
