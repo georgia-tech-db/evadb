@@ -101,7 +101,7 @@ udf_libs = [
     "easyocr>=1.5.0",         # OCR EXTRACTION
     "ipython",
     "yolov5",                 # OBJECT DETECION
-    "detoxify"                # TEXT TOXICITY CLASSIFICATION
+    "detoxify",                # TEXT TOXICITY CLASSIFICATION
     "thefuzz"                 # FUZZY STRING MATCHING
 ]
 
