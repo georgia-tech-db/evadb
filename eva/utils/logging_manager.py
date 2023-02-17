@@ -28,3 +28,6 @@ LOG_handler.setFormatter(LOG_formatter)
 logger = logging.getLogger(__name__)
 logger.addHandler(LOG_handler)
 logger.setLevel(logging.WARN)
+
+# yolov5 logger
+logging.getLogger("yolov5").setLevel(logging.WARNING)  
