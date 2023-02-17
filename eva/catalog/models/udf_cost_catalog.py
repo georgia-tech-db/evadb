@@ -14,7 +14,7 @@
 # limitations under the License.
 from dataclasses import dataclass
 
-from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy import Column, Integer, String
 
 from eva.catalog.models.base_model import BaseModel
 
@@ -38,10 +38,12 @@ class UdfCostCatalog(BaseModel):
     _frame_count = Column("frame_count", Integer())
     _resolution = Column("resolution", Integer())
 
-    # TODO: Add hardware information - GPU information etc. - It can be its own table.
-    # TODO: Add relation to UdfCatalog table as one of below:
-    # _name = relationship("UdfCatlog", back_populates="_name")
-    # _name = Column("name", Integer, ForeignKey("udf_catalog._name"))
+    """ 
+    TODO: Add hardware information - GPU information etc. - It can be its own table.
+    TODO: Add relation to UdfCatalog table as one of below:
+    _name = relationship("UdfCatlog", back_populates="_name")
+    _name = Column("name", Integer, ForeignKey("udf_catalog._name"))
+    """
 
     def __init__(
         self, name: str, type: str, cost: int, frame_count: int, resolution: int
