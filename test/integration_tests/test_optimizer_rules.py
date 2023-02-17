@@ -86,6 +86,13 @@ class OptimizerRulesTest(unittest.TestCase):
 
         self.assertEqual(result_without_xform_rule, result_with_rule)
 
+    @patch("eva.expression.function_expression.FunctionExpression.evaluate")
+    def test_should_support_right_join(self, evaluate_mock):
+        query = """SELECT A.id FROM MyVideo AS A JOIN  MyVideo AS B
+                    WHERE A.id = B.id AND B.id < 2"""
+        result = execute_query_fetch_all(query)
+        print(result)
+
     def test_should_pushdown_without_pushdown_join_rule(self):
         query = """SELECT id, obj.labels
                   FROM MyVideo JOIN LATERAL
