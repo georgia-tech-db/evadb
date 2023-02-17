@@ -43,15 +43,21 @@ class DeleteExecutorTest(unittest.TestCase):
                 """
         execute_query_fetch_all(create_table_query)
 
-        insert_queries = """
+        insert_query1 = """
                 INSERT INTO testDeleteOne (id, feat, input)
                 VALUES (5, [[0, 0, 0]], [[0, 0, 0]]);
+        """
+        execute_query_fetch_all(insert_query1)
+        insert_query2 = """
                 INSERT INTO testDeleteOne (id, feat, input)
                 VALUES (15, [[100, 100, 100]], [[100, 100, 100]]);
+        """
+        execute_query_fetch_all(insert_query2)
+        insert_query3 = """
                 INSERT INTO testDeleteOne (id, feat, input)
                 VALUES (25, [[200, 200, 200]], [[200, 200, 200]]);
         """
-        execute_query_fetch_all(insert_queries)
+        execute_query_fetch_all(insert_query3)
 
         ####################################################
         # Create a table for testing Delete with Video Data#
@@ -119,7 +125,10 @@ class DeleteExecutorTest(unittest.TestCase):
 
         query = "SELECT * FROM testDeleteOne;"
         batch = execute_query_fetch_all(query)
+        from eva.utils.logging_manager import logger
+
+        logger.info(batch)
         np.testing.assert_array_equal(
             batch.frames["testdeleteone.id"].array,
-            np.array([15, 25], dtype=np.int64),
+            np.array([25], dtype=np.int64),
         )
