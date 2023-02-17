@@ -14,7 +14,7 @@
 # limitations under the License.
 from dataclasses import dataclass
 
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, ForeignKey, Integer, String
 
 from eva.catalog.models.base_model import BaseModel
 
@@ -24,8 +24,11 @@ from eva.catalog.models.base_model import BaseModel
 class UdfCostCatalog(BaseModel):
     """The `UdfCostCatalog` catalog stores information about the runtime of user-defined functions (UDFs)
     in the system. It maintains the following information for each UDF.
-    TODO: add params
-
+    `_cost:` name of the UDF
+    `_cost:` cost of this UDF
+    `_type:` an optional tag associated with the UDF (useful for grouping similar UDFs, such as multiple object detection UDFs)
+    `_frame_count:` number of frames used to calculate the cost
+    `_resolution:` resolution of the video
     """
 
     __tablename__ = "udf_cost_catalog"
@@ -37,12 +40,8 @@ class UdfCostCatalog(BaseModel):
 
     # TODO: Add hardware information - GPU information etc. - It can be its own table.
 
-    # TODO: UdfCatalog storing the input/output attributes of the udf
-    # _name = relationship(
-    #     "UdfCatlog", back_populates="_name", cascade="all, delete, delete-orphan"
-    # )
-
-    _name = Column("name", String(100))
+    # _name = relationship("UdfCatlog", back_populates="_name")
+    _name = Column("name", Integer, ForeignKey("udf_catalog.name"))
 
     def __init__(
         self, name: str, type: str, cost: int, frame_count: int, resolution: int
