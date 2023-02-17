@@ -40,6 +40,7 @@ NUM_FRAMES = 10
 FRAME_SIZE = 2 * 2 * 3
 config = ConfigurationManager()
 upload_dir_from_config = config.get_value("storage", "upload_dir")
+s3_dir_from_config = config.get_value("storage", "s3_download_dir")
 
 
 EVA_TEST_DATA_DIR = Path(config.get_value("core", "eva_installation_dir")).parent
@@ -180,7 +181,6 @@ def create_sample_csv_as_blob(num_frames=NUM_FRAMES):
 
 
 def create_dummy_csv_batches(target_columns=None):
-
     if target_columns:
         df = pd.read_csv(
             os.path.join(upload_dir_from_config, "dummy.csv"),
@@ -307,21 +307,27 @@ def copy_sample_images_to_upload_dir():
     )
 
 
-def file_remove(path):
+def file_remove(path, parent_dir=upload_dir_from_config):
     try:
-        os.remove(os.path.join(upload_dir_from_config, path))
+        os.remove(os.path.join(parent_dir, path))
     except FileNotFoundError:
         pass
 
 
-def create_dummy_batches(num_frames=NUM_FRAMES, filters=[], batch_size=10, start_id=0):
+def create_dummy_batches(
+    num_frames=NUM_FRAMES,
+    filters=[],
+    batch_size=10,
+    start_id=0,
+    video_dir=upload_dir_from_config,
+):
     if not filters:
         filters = range(num_frames)
     data = []
     for i in filters:
         data.append(
             {
-                "myvideo.name": os.path.join(upload_dir_from_config, "dummy.avi"),
+                "myvideo.name": os.path.join(video_dir, "dummy.avi"),
                 "myvideo.id": i + start_id,
                 "myvideo.data": np.array(
                     np.ones((2, 2, 3)) * float(i + 1) * 25, dtype=np.uint8
