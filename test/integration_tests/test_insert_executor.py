@@ -19,6 +19,7 @@ import numpy as np
 import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
+from eva.configuration.configuration_manager import ConfigurationManager
 from eva.server.command_handler import execute_query_fetch_all
 from eva.utils.logging_manager import logger
 
@@ -90,7 +91,8 @@ class InsertExecutorTest(unittest.TestCase):
         )
 
     def test_should_insert_tuples_in_table(self):
-        data = pd.read_csv("./test/data/features.csv")
+        EVA_INSTALLATION_DIR = ConfigurationManager().get_value("core", "eva_installation_dir")
+        data = pd.read_csv(f"{EVA_INSTALLATION_DIR}../test/data/features.csv")
         for i in data.iterrows():
             logger.info(i[1][1])
             query = f"""INSERT INTO CSVTable (name) VALUES (
