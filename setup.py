@@ -102,6 +102,7 @@ udf_libs = [
     "ipython",
     "yolov5",                 # OBJECT DETECION
     "detoxify"                # TEXT TOXICITY CLASSIFICATION
+    "thefuzz"                 # FUZZY STRING MATCHING
 ]
 
 ### NEEDED FOR EXPERIMENTAL FEATURES
