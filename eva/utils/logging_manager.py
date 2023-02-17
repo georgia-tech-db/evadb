@@ -30,4 +30,4 @@ logger.addHandler(LOG_handler)
 logger.setLevel(logging.WARN)
 
 # yolov5 logger
-logging.getLogger("yolov5").setLevel(logging.WARNING)  
+logging.getLogger("yolov5").setLevel(logging.WARNING)
