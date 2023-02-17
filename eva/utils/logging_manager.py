@@ -27,4 +27,4 @@ LOG_handler.setFormatter(LOG_formatter)
 
 logger = logging.getLogger(__name__)
 logger.addHandler(LOG_handler)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.WARN)

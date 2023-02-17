@@ -32,13 +32,13 @@ class AbstractReader(metaclass=ABCMeta):
         file_url (str): path to read data from
     """
 
-    def __init__(self, file_url: str, batch_mem_size: int, offset=None):
+    def __init__(self, file_url: str, offset=None, batch_mem_size: int = 30000000):
         # Opencv doesn't support pathlib.Path so convert to raw str
         if isinstance(file_url, Path):
             file_url = str(file_url)
         self.file_url = file_url
-        self.batch_mem_size = batch_mem_size
         self.offset = offset
+        self.batch_mem_size = batch_mem_size
 
     def read(self) -> Iterator[Batch]:
         """

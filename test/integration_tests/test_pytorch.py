@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import os
-import sys
 import unittest
+from test.markers import windows_skip_marker
 from test.util import (
     copy_sample_images_to_upload_dir,
     copy_sample_videos_to_upload_dir,
@@ -130,7 +130,7 @@ class PytorchTest(unittest.TestCase):
         self.assertEqual(len(actual_batch), 5)
 
     @pytest.mark.torchtest
-    @pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
+    @windows_skip_marker
     def test_should_run_pytorch_and_ocr(self):
         create_udf_query = """CREATE UDF IF NOT EXISTS OCRExtractor
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
@@ -226,7 +226,7 @@ class PytorchTest(unittest.TestCase):
         self.assertTrue(np.array_equal(img, similar_data))
 
     @pytest.mark.torchtest
-    @pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
+    @windows_skip_marker
     def test_should_run_ocr_on_cropped_data(self):
         create_udf_query = """CREATE UDF IF NOT EXISTS OCRExtractor
                   INPUT  (text NDARRAY STR(100))
@@ -249,7 +249,7 @@ class PytorchTest(unittest.TestCase):
         self.assertTrue(res["ocrextractor.scores"][2][0] > 0.9)
 
     @pytest.mark.torchtest
-    @pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
+    @windows_skip_marker
     def test_should_run_detoxify_on_text(self):
         create_udf_query = """CREATE UDF IF NOT EXISTS OCRExtractor
                   INPUT  (text NDARRAY STR(100))

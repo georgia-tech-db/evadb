@@ -60,7 +60,6 @@ jobs:
           command: |
             source test_evadb/bin/activate
             sh script/test/test.sh
-            coveralls
 
       - save_cache:
           key: v1-model_cache-{{ checksum "setup.py" }}

@@ -40,6 +40,7 @@ class OperatorType(IntEnum):
     LOGICALFILTER = auto()
     LOGICALPROJECT = auto()
     LOGICALINSERT = auto()
+    LOGICALDELETE = auto()
     LOGICALCREATE = auto()
     LOGICALRENAME = auto()
     LOGICALDROP = auto()
@@ -398,7 +399,7 @@ class LogicalInsert(Operator):
     """[Logical Node for Insert operation]
 
     Arguments:
-        table(TableCatalogEntry): table to intert data into
+        table(TableCatalogEntry): table to insert data into
         column_list{List[AbstractExpression]}:
             [After binding annotated column_list]
         value_list{List[AbstractExpression]}:
@@ -447,6 +448,53 @@ class LogicalInsert(Operator):
                 self.table,
                 tuple(self.value_list),
                 tuple(self.column_list),
+            )
+        )
+
+
+class LogicalDelete(Operator):
+    """[Logical Node for Delete Operation]
+
+    Arguments:
+        table_ref(TableCatalogEntry): table to delete tuples from,
+        where_clause(AbstractExpression): the predicate used to select which rows to delete,
+
+    """
+
+    def __init__(
+        self,
+        table_ref: TableRef,
+        where_clause: AbstractExpression = None,
+        children=None,
+    ):
+        super().__init__(OperatorType.LOGICALDELETE, children)
+        self._table_ref = table_ref
+        self._where_clause = where_clause
+
+    @property
+    def table_ref(self):
+        return self._table_ref
+
+    @property
+    def where_clause(self):
+        return self._where_clause
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalDelete):
+            return False
+        return (
+            is_subtree_equal
+            and self.table_ref == other.table_ref
+            and self.where_clause == other.where_clause
+        )
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                super().__hash__(),
+                self.table_ref,
+                self.where_clause,
             )
         )
 

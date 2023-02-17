@@ -41,7 +41,6 @@ from eva.plan_nodes.show_info_plan import ShowInfoPlan
 if TYPE_CHECKING:
     from eva.optimizer.optimizer_context import OptimizerContext
 
-from eva.configuration.configuration_manager import ConfigurationManager
 from eva.optimizer.operators import (
     Dummy,
     LogicalApplyAndMerge,
@@ -49,6 +48,7 @@ from eva.optimizer.operators import (
     LogicalCreateIndex,
     LogicalCreateMaterializedView,
     LogicalCreateUDF,
+    LogicalDelete,
     LogicalDrop,
     LogicalDropUDF,
     LogicalExplain,
@@ -75,6 +75,7 @@ from eva.optimizer.operators import (
 from eva.plan_nodes.create_index_plan import CreateIndexPlan
 from eva.plan_nodes.create_plan import CreatePlan
 from eva.plan_nodes.create_udf_plan import CreateUDFPlan
+from eva.plan_nodes.delete_plan import DeletePlan
 from eva.plan_nodes.drop_plan import DropPlan
 from eva.plan_nodes.drop_udf_plan import DropUDFPlan
 from eva.plan_nodes.faiss_index_scan_plan import FaissIndexScanPlan
@@ -691,6 +692,22 @@ class LogicalInsertToPhysical(Rule):
         yield after
 
 
+class LogicalDeleteToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALDELETE)
+        super().__init__(RuleType.LOGICAL_DELETE_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_DELETE_TO_PHYSICAL
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalDelete, context: OptimizerContext):
+        after = DeletePlan(before.table_ref, before.where_clause)
+        yield after
+
+
 class LogicalLoadToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALLOADDATA)
@@ -703,20 +720,9 @@ class LogicalLoadToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalLoadData, context: OptimizerContext):
-        # Configure the batch_mem_size.
-        # We assume the optimizer decides the batch_mem_size.
-        # ToDO: Experiment heuristics.
-
-        batch_mem_size = 30000000  # 30mb
-        config_batch_mem_size = ConfigurationManager().get_value(
-            "executor", "batch_mem_size"
-        )
-        if config_batch_mem_size:
-            batch_mem_size = config_batch_mem_size
         after = LoadDataPlan(
             before.table_info,
             before.path,
-            batch_mem_size,
             before.column_list,
             before.file_options,
         )
@@ -735,21 +741,10 @@ class LogicalUploadToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalUpload, context: OptimizerContext):
-        # Configure the batch_mem_size.
-        # We assume the optimizer decides the batch_mem_size.
-        # ToDO: Experiment heuristics.
-
-        batch_mem_size = 30000000  # 30mb
-        config_batch_mem_size = ConfigurationManager().get_value(
-            "executor", "batch_mem_size"
-        )
-        if config_batch_mem_size:
-            batch_mem_size = config_batch_mem_size
         after = UploadPlan(
             before.path,
             before.video_blob,
             before.table_info,
-            batch_mem_size,
             before.column_list,
             before.file_options,
         )
@@ -772,18 +767,10 @@ class LogicalGetToSeqScan(Rule):
         # Configure the batch_mem_size. It decides the number of rows
         # read in a batch from storage engine.
         # ToDO: Experiment heuristics.
-
-        batch_mem_size = 30000000  # 30mb
-        config_batch_mem_size = ConfigurationManager().get_value(
-            "executor", "batch_mem_size"
-        )
-        if config_batch_mem_size:
-            batch_mem_size = config_batch_mem_size
         after = SeqScanPlan(None, before.target_list, before.alias)
         after.append_child(
             StoragePlan(
                 before.table_obj,
-                batch_mem_size=batch_mem_size,
                 predicate=before.predicate,
                 sampling_rate=before.sampling_rate,
             )

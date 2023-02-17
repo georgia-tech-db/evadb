@@ -8,7 +8,10 @@ if [ -f ./__init__.py ]; then
    mv ./__init__.py ./__init__.py.bak
 fi
 
+PYTHON_VERSION=`python -c 'import sys; version=sys.version_info[:3]; print("{0}.{1}".format(*version))'`
+
 echo "OSTYPE: --|${OSTYPE}|--"
+echo "PYTHON VERSION: --|${PYTHON_VERSION}|--"
 
 ##################################################
 ## LINTER TESTS
@@ -50,7 +53,7 @@ fi
 if [ "$OSTYPE" != "msys" ];
 # Non-Windows
 then
-    PYTHONPATH=./ pytest test/ --cov-report term --cov-config=.coveragerc --cov=eva/ -s -v --log-level=WARNING ${1:-} -m "not benchmark" 
+    PYTHONPATH=./ pytest test/ --cov-report term-missing:skip-covered  --cov-config=.coveragerc --cov-context=test --cov=eva/ -s -v --log-level=WARNING ${1:-} -m "not benchmark" 
     test_code=$?
     if [ "$test_code" != "0" ];
     then
@@ -87,10 +90,21 @@ then
         exit $notebook_test_code
     else
         echo "NOTEBOOK CODE: --|${notebook_test_code}|-- SUCCESS"
-        exit 0 # Success 
     fi
 else
     exit 0 # Success 
+fi
+
+##################################################
+## UPLOAD COVERAGE
+## based on Python version
+##################################################
+
+if [ "$PYTHON_VERSION" = "3.10" ];
+then 
+    echo "UPLOADING COVERAGE REPORT"
+    coveralls
+    exit 0 # Success     
 fi
 
 # restore __init__.py if it exists
