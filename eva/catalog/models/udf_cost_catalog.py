@@ -41,7 +41,7 @@ class UdfCostCatalog(BaseModel):
     # TODO: Add hardware information - GPU information etc. - It can be its own table.
 
     # _name = relationship("UdfCatlog", back_populates="_name")
-    _name = Column("name", Integer, ForeignKey("udf_catalog.name"))
+    _name = Column("name", Integer, ForeignKey("udf_catalog._name"))
 
     def __init__(
         self, name: str, type: str, cost: int, frame_count: int, resolution: int
