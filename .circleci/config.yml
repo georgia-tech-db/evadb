@@ -19,6 +19,7 @@ workflows:
         - test:
             name: "Linux - Python v3.10"
             v: "3.10"
+        - Pip
         #- test:
         #    name: "Linux - Python v3.11"  # missing Torchvision
         #    v: "3.11"
@@ -32,21 +33,10 @@ jobs:
     resource_class: large
     docker:
       # https://circleci.com/docs/circleci-images#language-image-variants
-      # This comes with python and openjdk11
       - image: "cimg/python:<< parameters.v >>"
     steps:
 
       - checkout
-      - restore_cache:
-          keys:
-            - v1-model_cache-{{ checksum "setup.py" }}
-
-      - run:
-          name: Install EVA package from pip and start server
-          command: |
-            pip install --upgrade pip
-            pip install evadb
-            bash script/test/package.sh
 
       - run:
           name: Install EVA package from GitHub repo with all dependencies
@@ -60,12 +50,6 @@ jobs:
           command: |
             source test_evadb/bin/activate
             sh script/test/test.sh
-
-      - save_cache:
-          key: v1-model_cache-{{ checksum "setup.py" }}
-          paths:
-            - /home/circleci/.cache/torch/hub/
-            - /home/circleci/.EasyOCR/
     
   Windows:
     executor: win/default
@@ -86,3 +70,16 @@ jobs:
             test_evadb\Scripts\activate
             pip install ".[dev]"       
             sh script\test\test.sh
+
+  Pip:
+    resource_class: large
+    docker:
+      - image: "cimg/python"
+    steps:
+
+      - run:
+          name: Install EVA package from pip and start server
+          command: |
+            pip install --upgrade pip
+            pip install evadb
+            bash script/test/package.sh
