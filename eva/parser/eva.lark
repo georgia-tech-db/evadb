@@ -110,7 +110,7 @@ table_sources: table_source
     
 table_source: table_source_item_with_sample join_part* 
     
-table_source_item_with_sample: table_source_item alias_clause? sample_clause?
+table_source_item_with_sample: table_source_item alias_clause? (sample_clause | sample_clause_with_type)?
 
 table_source_item: table_name | subquery_table_source_item   
     
@@ -121,6 +121,8 @@ table_valued_function: function_call
 subquery_table_source_item: (select_statement | LR_BRACKET select_statement RR_BRACKET)
     
 sample_clause: SAMPLE decimal_literal
+
+sample_clause_with_type: SAMPLE decimal_literal string_literal
 
 join_part: JOIN table_source_item_with_sample (ON expression | USING LR_BRACKET uid_list RR_BRACKET)?  ->inner_join
          | JOIN LATERAL table_valued_function alias_clause? ->lateral_join

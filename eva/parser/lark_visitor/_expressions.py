@@ -127,3 +127,10 @@ class Expressions:
         sample_list = self.visit_children(tree)
         assert len(sample_list) == 2
         return ConstantValueExpression(sample_list[1])
+
+    def sample_clause_with_type(self, tree):
+        sample_list = self.visit_children(tree)
+        assert len(sample_list) == 3
+        return ConstantValueExpression(sample_list[1]), ConstantValueExpression(
+            sample_list[2]
+        )

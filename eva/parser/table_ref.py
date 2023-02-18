@@ -156,15 +156,21 @@ class TableRef:
         table: Union[TableInfo, TableValuedExpression, SelectStatement, JoinNode],
         alias: Alias = None,
         sample_freq: float = None,
+        sample_type: str = None,
     ):
 
         self._ref_handle = table
         self._sample_freq = sample_freq
         self.alias = alias or self.generate_alias()
+        self._sample_type = sample_type
 
     @property
     def sample_freq(self):
         return self._sample_freq
+
+    @property
+    def sample_type(self):
+        return self._sample_type
 
     def is_table_atom(self) -> bool:
         return isinstance(self._ref_handle, TableInfo)
@@ -231,6 +237,8 @@ class TableRef:
         table_ref_str = f"{str(self._ref_handle)}"
         if self.sample_freq is not None:
             table_ref_str += f" {str(self.sample_freq)}"
+        if self.sample_type is not None:
+            table_ref_str += f" {str(self.sample_type)}"
         return table_ref_str
 
     def __eq__(self, other):
@@ -240,7 +248,8 @@ class TableRef:
             self._ref_handle == other._ref_handle
             and self.alias == other.alias
             and self.sample_freq == other.sample_freq
+            and self.sample_type == other.sample_type
         )
 
     def __hash__(self) -> int:
-        return hash((self._ref_handle, self.alias, self.sample_freq))
+        return hash((self._ref_handle, self.alias, self.sample_freq, self.sample_type))

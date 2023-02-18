@@ -103,7 +103,7 @@ class StatementToPlanConvertor:
             self._plan = join_plan
 
         if table_ref.sample_freq:
-            self._visit_sample(table_ref.sample_freq)
+            self._visit_sample(table_ref.sample_freq, table_ref.sample_type)
 
     def visit_select(self, statement: SelectStatement):
         """converter for select statement
@@ -144,8 +144,8 @@ class StatementToPlanConvertor:
         if select_columns is not None:
             self._visit_projection(select_columns)
 
-    def _visit_sample(self, sample_freq):
-        sample_opr = LogicalSample(sample_freq)
+    def _visit_sample(self, sample_freq, sample_type):
+        sample_opr = LogicalSample(sample_freq, sample_type)
         sample_opr.append_child(self._plan)
         self._plan = sample_opr
 
