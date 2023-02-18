@@ -161,7 +161,6 @@ class SQLStorageEngine(AbstractStorageEngine):
             Iterator of Batch read.
         """
         try:
-            print("hi")
             table_to_read = self._try_loading_table_via_reflection(table.name)
             result = self._sql_engine.execute(table_to_read.select())
             data_batch = []
