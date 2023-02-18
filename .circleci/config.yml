@@ -78,7 +78,7 @@ jobs:
           name: Test and upload coverage report to coveralls
           command: |
             source test_evadb/bin/activate
-            sh script/test/test.sh -m "<< parameters.mode >>"
+            bash script/test/test.sh -m "<< parameters.mode >>"
     
   Windows:
     executor: win/default
@@ -98,7 +98,7 @@ jobs:
             virtualenv test_evadb
             test_evadb\Scripts\activate
             pip install ".[dev]"       
-            sh script\test\test.sh
+            bash script\test\test.sh
 
   Pip:
     resource_class: large
