@@ -56,6 +56,9 @@ jobs:
       v:
         type: string
         default: "3.7"
+      mode:
+        type: string
+        default: "ALL"
     resource_class: large
     docker:
       # https://circleci.com/docs/circleci-images#language-image-variants
