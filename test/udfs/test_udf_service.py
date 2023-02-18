@@ -16,7 +16,7 @@
 import numpy as np
 import pytest
 
-from eva.udfs.udf_service import UDFService
+from eva.udfs.contrib.decorators.aubhro.udf_service import UDFService
 
 
 @pytest.fixture(scope="session")
