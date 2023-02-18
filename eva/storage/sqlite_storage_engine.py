@@ -77,7 +77,7 @@ class SQLStorageEngine(AbstractStorageEngine):
             insp.reflect_table(table, None)
             return table
         else:
-            err_msg = f"No table found with name {table.name}"
+            err_msg = f"No table found with name {table_name}"
             logger.exception(err_msg)
             raise Exception(err_msg)
 
@@ -143,7 +143,7 @@ class SQLStorageEngine(AbstractStorageEngine):
             self._sql_engine.execute(table_to_update.insert(), data)
             self._sql_session.commit()
         except Exception as e:
-            err_msg = f"Failed to udpate the table {table.name} with exception {str(e)}"
+            err_msg = f"Failed to update the table {table.name} with exception {str(e)}"
             logger.exception(err_msg)
             raise Exception(err_msg)
 
@@ -161,6 +161,7 @@ class SQLStorageEngine(AbstractStorageEngine):
             Iterator of Batch read.
         """
         try:
+            print("hi")
             table_to_read = self._try_loading_table_via_reflection(table.name)
             result = self._sql_engine.execute(table_to_read.select())
             data_batch = []
