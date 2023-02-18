@@ -8,17 +8,43 @@ workflows:
     jobs:
         - Windows   
         - test:
-            name: "Linux - Python v3.7"
+            name: "Test -- Linux - Python v3.7"
             v: "3.7"
+            mode: "TEST"
         - test:
-            name: "Linux - Python v3.8"
+            name: "Test -- Linux - Python v3.8"
             v: "3.8"
+            mode: "TEST"
         - test:
-            name: "Linux - Python v3.9"
+            name: "Test -- Linux - Python v3.9"
             v: "3.9"
+            mode: "TEST"
         - test:
-            name: "Linux - Python v3.10"
+            name: "Test -- Linux - Python v3.10"
             v: "3.10"
+            mode: "TEST"
+        ### NOTEBOOKS
+        - test:
+            name: "Notebook -- Linux - Python v3.7"
+            v: "3.7"
+            mode: "NOTEBOOK"
+        - test:
+            name: "Notebook -- Linux - Python v3.8"
+            v: "3.8"
+            mode: "NOTEBOOK"
+        - test:
+            name: "Notebook -- Linux - Python v3.9"
+            v: "3.9"
+            mode: "NOTEBOOK"
+        - test:
+            name: "Notebook -- Linux - Python v3.10"
+            v: "3.10"
+            mode: "NOTEBOOK"
+        ### LINTER
+        - test:
+            name: "Linter -- Linux"
+            v: "3.10"
+            mode: "LINTER"
         - Pip
         #- test:
         #    name: "Linux - Python v3.11"  # missing Torchvision
@@ -49,7 +75,7 @@ jobs:
           name: Test and upload coverage report to coveralls
           command: |
             source test_evadb/bin/activate
-            sh script/test/test.sh
+            sh script/test/test.sh -m "<< parameters.mode >>"
     
   Windows:
     executor: win/default
