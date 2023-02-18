@@ -300,7 +300,7 @@ class PushDownFilterThroughJoin(Rule):
             predicate, left_group_aliases
         )
         right_pushdown_pred, rem_pred = extract_pushdown_predicate_for_alias(
-            rem_pred, right_group_aliases
+            predicate, right_group_aliases
         )
 
         if left_pushdown_pred:
@@ -318,7 +318,7 @@ class PushDownFilterThroughJoin(Rule):
             new_join_node.append_child(right)
 
         if rem_pred:
-            new_join_node.join_predicate = conjuction_list_to_expression_tree(
+            new_join_node._join_predicate = conjuction_list_to_expression_tree(
                 [rem_pred, new_join_node.join_predicate]
             )
 
