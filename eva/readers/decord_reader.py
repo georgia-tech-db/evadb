@@ -16,6 +16,7 @@ from typing import Dict, Iterator
 
 import cv2
 import decord
+import math
 
 from eva.constants import IFRAMES
 from eva.expression.abstract_expression import AbstractExpression
@@ -41,6 +42,7 @@ class DecordReader(AbstractReader):
             can be converted to ranges. Defaults to None.
             sampling_rate (int, optional): Set if the caller wants one frame
             every `sampling_rate` number of frames. For example, if `sampling_rate = 10`, it returns every 10th frame. If both `predicate` and `sampling_rate` are specified, `sampling_rate` is given precedence.
+            sampling_type (str, optional): Set as 'iframe' if caller want to sample on top on iframes only.
         """
         self._predicate = predicate
         self._sampling_rate = sampling_rate or 1
@@ -60,7 +62,6 @@ class DecordReader(AbstractReader):
 
         if self._sampling_type == IFRAMES:
             iframes = video.get_key_indices()
-            print(iframes)
             idx = 0
             for (begin, end) in range_list:
                 while idx < len(iframes) and iframes[idx] < begin:
@@ -83,7 +84,7 @@ class DecordReader(AbstractReader):
                         yield {
                             "id": frame_id,
                             "data": frame,
-                            "seconds": frame_id // video.get(cv2.CAP_PROP_FPS),
+                            "seconds": math.floor(video.get_frame_timestamp(frame_id)[0]),
                         }
                     else:
                         break

@@ -81,7 +81,6 @@ class TableSources:
                     sample_freq = self.visit(child)
                 elif child.data == "sample_clause_with_type":
                     sample_freq, sample_type = self.visit(child)
-                    print(sample_freq, sample_type)
                 elif child.data == "alias_clause":
                     alias = self.visit(child)
 
