@@ -200,7 +200,7 @@ decimal_literal: DECIMAL_LITERAL | ZERO_DECIMAL | ONE_DECIMAL | TWO_DECIMAL | AN
 //    Data Types
 
 array_type: INT8 | UINT8 | INT16 | INT32 | INT64
-    | UNICODE | BOOL
+    | UNICODE | BOOLEAN
     | FLOAT32 | FLOAT64 | DECIMAL
     | STR | DATETIME | ANYTYPE
     
@@ -395,7 +395,6 @@ INT16:                               "INT16"
 INT32:                               "INT32"
 INT64:                               "INT64"
 UNICODE:                             "UNICODE"
-BOOL:                                "BOOL"
 FLOAT32:                             "FLOAT32"
 FLOAT64:                             "FLOAT64"
 DECIMAL:                             "DECIMAL"
