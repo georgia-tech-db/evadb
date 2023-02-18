@@ -77,6 +77,8 @@ jobs:
       - image: "cimg/python:3.10"
     steps:
 
+      - checkout
+
       - run:
           name: Install EVA package from pip and start server
           command: |
