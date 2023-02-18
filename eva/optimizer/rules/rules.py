@@ -300,7 +300,7 @@ class PushDownFilterThroughJoin(Rule):
             predicate, left_group_aliases
         )
         right_pushdown_pred, rem_pred = extract_pushdown_predicate_for_alias(
-            predicate, right_group_aliases
+            rem_pred, right_group_aliases
         )
 
         if left_pushdown_pred:
