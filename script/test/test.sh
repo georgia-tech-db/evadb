@@ -115,8 +115,6 @@ then
     else
         echo "NOTEBOOK CODE: --|${notebook_test_code}|-- SUCCESS"
     fi
-else
-    exit 0 # Success 
 fi
 
 ##################################################
@@ -124,7 +122,7 @@ fi
 ## based on Python version
 ##################################################
 
-if [[ "$PYTHON_VERSION" = "3.10"  && 
+if [[ ( "$PYTHON_VERSION" = "3.10" )  && 
       ( "$MODE" = "TEST" || "$MODE" = "ALL" ) ]];
 then 
     echo "UPLOADING COVERAGE REPORT"
