@@ -1,0 +1,552 @@
+// Top Level Description
+
+start: (sql_statement? ";")+
+
+sql_statement: ddl_statement | dml_statement | utility_statement
+        
+ddl_statement: create_database | create_table | create_index | create_udf | create_materialized_view
+    | drop_database | drop_table | drop_udf | drop_index | rename_table
+    
+dml_statement: select_statement | insert_statement | update_statement
+    | delete_statement | load_statement | upload_statement
+    
+utility_statement: describe_statement | show_statement | help_statement | explain_statement
+
+// Data Definition Language
+
+//    Create statements
+
+create_database: CREATE DATABASE if_not_exists? uid
+
+create_index: CREATE INDEX uid ON table_name index_elem index_type?
+
+create_table: CREATE TABLE if_not_exists? table_name create_definitions 
+    
+// Rename statements
+
+rename_table: RENAME TABLE table_name TO table_name
+    
+// Create UDFs
+create_udf: CREATE UDF if_not_exists? udf_name INPUT create_definitions OUTPUT create_definitions TYPE udf_type IMPL udf_impl
+
+// Create Materialized View
+create_materialized_view: CREATE MATERIALIZED VIEW if_not_exists? table_name ("(" uid_list ")") AS select_statement 
+
+// Details
+udf_name: uid
+
+udf_type: uid
+
+udf_impl: string_literal
+
+index_type: USING HNSW
+
+index_elem: ("(" uid_list ")"
+          | "(" function_call ")")
+
+create_definitions: "(" create_definition ("," create_definition)* ")"
+
+create_definition: uid column_definition          -> column_declaration
+
+column_definition: data_type column_constraint*
+    
+column_constraint: null_notnull            ->null_column_constraint
+                 | DEFAULT default_value   ->default_column_constraint   
+                 | PRIMARY? KEY   ->primary_key_column_constraint
+                 | UNIQUE KEY?    ->unique_key_column_constraint    
+
+//    Drop statements
+
+drop_database: DROP DATABASE if_exists? uid
+    
+drop_index: DROP INDEX uid ON table_name
+    
+drop_table: DROP TABLE if_exists? table_name
+    
+drop_udf: DROP UDF if_exists? udf_name
+    
+
+// Data Manipulation Language
+
+//    Primary DML Statements
+
+delete_statement: DELETE FROM table_name (WHERE expression)? order_by_clause? (LIMIT decimal_literal)?
+    
+insert_statement: INSERT INTO? table_name (("(" uid_list ")")? insert_statement_value)
+    
+select_statement: query_specification                          ->simple_select
+               | select_statement UNION ALL? select_statement  ->union_select
+    
+update_statement: UPDATE table_name (AS? uid)? SET updated_element ("," updated_element)* (WHERE expression)? order_by_clause? limit_clause?
+    
+load_statement: LOAD file_format file_name INTO table_name (("(" uid_list ")"))?
+    
+file_format: CSV | VIDEO | IMAGE
+
+file_options: FORMAT file_format
+    
+upload_statement: UPLOAD PATH file_name BLOB video_blob INTO table_name (("(" uid_list ")"))? (WITH file_options)?
+    
+file_name: string_literal
+    
+video_blob: string_literal
+    
+// details
+
+insert_statement_value: select_statement
+    | (VALUES | VALUE) "(" expressions_with_defaults ")" ("," "(" expressions_with_defaults ")")*
+    
+
+updated_element: full_column_name "=" (expression | DEFAULT)
+ 
+order_by_clause: ORDER BY order_by_expression ("," order_by_expression)*
+
+order_by_expression: expression sort_order?
+
+sort_order: ASC | DESC
+
+// Forcing EXPLICIT JOIN KEYWORD
+table_sources: table_source
+    
+table_source: table_source_item_with_sample join_part* 
+    
+table_source_item_with_sample: table_source_item alias_clause? sample_clause?
+
+table_source_item: table_name | subquery_table_source_item   
+    
+
+table_valued_function: function_call                                
+    | UNNEST LR_BRACKET function_call RR_BRACKET   
+    
+subquery_table_source_item: (select_statement | LR_BRACKET select_statement RR_BRACKET)
+    
+sample_clause: SAMPLE decimal_literal
+
+join_part: JOIN table_source_item_with_sample (ON expression | USING LR_BRACKET uid_list RR_BRACKET)?  ->inner_join
+         | JOIN LATERAL table_valued_function alias_clause? ->lateral_join
+    
+alias_clause: AS? uid "(" uid_list ")" | AS? uid
+    
+// Select Statement Details
+
+query_expression: "(" query_specification ")" | "(" query_expression ")"
+    
+query_specification: SELECT select_elements from_clause order_by_clause? limit_clause?
+    
+select_elements: (STAR | select_element ) ("," select_element)*
+    
+select_element: full_id "." STAR       ->select_star_element      
+              | (LOCAL_ID VAR_ASSIGN)? expression (AS? uid)?  ->select_expression_element                 
+    
+from_clause: FROM table_sources (WHERE where_expr)? (GROUP BY  group_by_item ("," group_by_item)* )? (HAVING expression)?
+
+where_expr: expression
+
+group_by_item: expression sort_order?
+    
+limit_clause: LIMIT ((decimal_literal ",")? decimal_literal  | decimal_literal OFFSET decimal_literal)
+    	
+// Utility Statements
+
+describe_statement: DESCRIBE table_name
+    
+help_statement: HELP STRING_LITERAL
+    
+show_statement: SHOW (UDFS | TABLES)
+
+explain_statement: EXPLAIN explainable_statement
+
+explainable_statement : select_statement | insert_statement | update_statement | delete_statement | create_materialized_view
+
+// Common Clauses
+
+//    DB Objects
+
+full_id: uid dotted_id?
+    
+table_name: full_id
+        
+full_column_name: uid (dotted_id dotted_id? )?
+    
+index_column_name: uid ("(" decimal_literal ")")? sort_order?
+    
+user_name: STRING_USER_NAME | ID
+
+uuid_set: decimal_literal "-" decimal_literal "-" decimal_literal "-" decimal_literal "-" decimal_literal (":" decimal_literal "-" decimal_literal)+
+    
+uid: simple_id | REVERSE_QUOTE_ID
+    
+simple_id: ID
+    
+dotted_id: DOT_ID | "." uid
+
+//    Literals
+    
+string_literal: STRING_LITERAL
+
+boolean_literal: TRUE | FALSE
+
+null_notnull: NOT? NULL_LITERAL
+
+array_literal: LR_SQ_BRACKET  constant ("," constant)* RR_SQ_BRACKET
+             | LR_SQ_BRACKET RR_SQ_BRACKET
+
+constant: string_literal | decimal_literal | boolean_literal | real_literal | array_literal
+
+real_literal: REAL_LITERAL
+
+decimal_literal: DECIMAL_LITERAL | ZERO_DECIMAL | ONE_DECIMAL | TWO_DECIMAL | ANYDIM
+
+//    Data Types
+
+array_type: INT8 | UINT8 | INT16 | INT32 | INT64
+    | UNICODE | BOOL
+    | FLOAT32 | FLOAT64 | DECIMAL
+    | STR | DATETIME | ANYTYPE
+    
+
+data_type: BOOLEAN      ->simple_data_type                                  
+    | TEXT length_one_dimension?   ->dimension_data_type                     
+    | INTEGER UNSIGNED?      ->integer_data_type                        
+    | FLOAT length_two_dimension? UNSIGNED?      ->dimension_data_type         
+    | NDARRAY array_type? length_dimension_list?    ->array_data_type     
+    | ANYTYPE        ->any_data_type                                 
+    
+
+length_one_dimension: "(" decimal_literal ")"
+    
+length_two_dimension: "(" decimal_literal "," decimal_literal ")"
+    
+length_dimension_list: "(" ( decimal_literal  ",")* decimal_literal ")"
+    
+//    Common Lists
+
+uid_list: uid ("," uid)*
+            
+expressions: expression ("," expression)*
+    
+expressions_with_defaults: expression_or_default ("," expression_or_default)*
+    
+
+//    Common Expressions
+
+default_value: NULL_LITERAL | constant
+    
+expression_or_default: expression | DEFAULT
+    
+if_exists: IF EXISTS
+
+if_not_exists: IF NOT EXISTS
+
+//    Functions
+
+function_call: udf_function         ->udf_function_call           
+    | aggregate_windowed_function   ->aggregate_function_call
+
+udf_function: simple_id "(" function_args ")" dotted_id?
+    
+aggregate_windowed_function: aggregate_function_name "(" function_arg ")"
+                           | COUNT "(" (STAR | function_arg) ")"
+    
+
+aggregate_function_name: AVG | MAX | MIN | SUM | FIRST | LAST | SEGMENT
+
+function_args: (function_arg) ("," function_arg)*
+    
+function_arg: constant | expression
+
+//    Expressions, predicates
+
+// Simplified approach for expression
+expression: (NOT | "!") expression ->not_expression  | expression logical_operator expression ->logical_expression | predicate IS NOT? (TRUE | FALSE | UNKNOWN) ->is_expression | predicate   ->predicate_expression
+    
+
+predicate: predicate NOT? IN "(" (select_statement | expressions) ")"  ->in_predicate
+    | predicate IS null_notnull   ->is_null_predicate
+    | predicate comparison_operator predicate  -> binary_comparison_predicate 
+    | predicate comparison_operator (ALL | ANY | SOME) "(" select_statement ")"   ->subquery_comparison_predicate
+    | predicate NOT? LIKE predicate (STRING_LITERAL)?   
+    | assign_var   ->expression_atom_predicate   
+    | expression_atom 
+
+assign_var.1: LOCAL_ID VAR_ASSIGN expression_atom  
+
+// Add in ASTVisitor null_notnull in constant
+expression_atom.2: constant       ->constant_expression_atom                                              
+    | full_column_name           ->full_column_name_expression_atom                                     
+    | function_call    ->function_call_expression_atom                                             
+    | unary_operator expression_atom   ->unary_expression_atom                               
+    | "(" expression ("," expression)* ")"    ->nested_expression_atom                     
+    | "(" select_statement ")" ->subquery_expession_atom                                       
+    | expression_atom bit_operator expression_atom   ->bit_expression_atom       
+    | expression_atom math_operator expression_atom 
+
+unary_operator: EXCLAMATION_SYMBOL | BIT_NOT_OP | PLUS | MINUS | NOT 
+    
+comparison_operator: EQUAL_SYMBOL | GREATER_SYMBOL | LESS_SYMBOL | GREATER_OR_EQUAL_SYMBOL | LESS_OR_EQUAL_SYMBOL | NOT_EQUAL_SYMBOL | CONTAINS_SYMBOL | CONTAINED_IN_SYMBOL
+    
+logical_operator: AND | XOR | OR 
+    
+bit_operator: "<<" | ">>" | "&" | "^" | "|"
+
+math_operator: STAR | DIVIDE | MODULUS | DIV | MOD | PLUS | MINUS | MINUSMINUS
+
+// KEYWORDS
+
+ALL:                                 "ALL"
+ALTER:                               "ALTER"
+AND:                                 "AND"
+ANY:                                 "ANY"
+ANYDIM:                              "ANYDIM"
+AS:                                  "AS"
+ASC:                                 "ASC"
+BLOB:                                "BLOB"
+BY:                                  "BY"
+COLUMN:                              "COLUMN"
+CREATE:                              "CREATE"
+DATABASE:                            "DATABASE"
+DEFAULT:                             "DEFAULT"
+DELETE:                              "DELETE"
+DESC:                                "DESC"
+DESCRIBE:                            "DESCRIBE"
+DISTINCT:                            "DISTINCT"
+DROP:                                "DROP"
+EXIT:                                "EXIT"
+EXISTS:                              "EXISTS"
+EXPLAIN:                             "EXPLAIN"
+FALSE:                               "FALSE"
+FROM:                                "FROM"
+GROUP:                               "GROUP"
+HAVING:                              "HAVING"
+IF:                                  "IF"
+IN:                                  "IN"
+FILE:                                "FILE"
+INDIR:                               "INDIR"
+INTO:                                "INTO"
+INDEX:                               "INDEX"
+INSERT:                              "INSERT"
+IS:                                  "IS"
+JOIN:                                "JOIN"
+KEY:                                 "KEY"
+LATERAL:                             "LATERAL"
+LIKE:                                "LIKE"
+LIMIT:                               "LIMIT"
+LOAD:                                "LOAD"
+NO:                                  "NO"
+NOT:                                 "NOT"
+NULL_LITERAL:                        "NULL"
+OFFSET:                              "OFFSET"
+ON:                                  "ON"
+OR:                                  "OR"
+ORDER:                               "ORDER"
+PATH:                                "PATH"
+PRIMARY:                             "PRIMARY"
+REFERENCES:                          "REFERENCES"
+RENAME:                              "RENAME"
+SAMPLE:                              "SAMPLE"
+SELECT:                             "SELECT"
+SET:                                 "SET"
+SHUTDOWN:                            "SHUTDOWN"
+SHOW:                                "SHOW"
+SOME:                                "SOME"
+TABLE:                               "TABLE"
+TABLES:                              "TABLES"
+TO:                                  "TO"
+TRUE:                                "TRUE"
+UDFS:                                "UDFS"
+UNION:                               "UNION"
+UNIQUE:                              "UNIQUE"
+UNKNOWN:                             "UNKNOWN"
+UNLOCK:                              "UNLOCK"
+UNNEST:                              "UNNEST"
+UNSIGNED:                            "UNSIGNED"
+UPDATE:                              "UPDATE"
+UPLOAD:                              "UPLOAD"
+USING:                               "USING"
+VALUES:                              "VALUES"
+WHERE:                               "WHERE"
+XOR:                                 "XOR"
+
+// File Formats
+WITH:                 "WITH"
+FORMAT:               "FORMAT"
+CSV:                  "CSV"
+VIDEO:                "VIDEO"
+IMAGE:                "IMAGE"
+
+// Index types
+HNSW:                                "HNSW"
+
+// Computer vision tasks
+
+OBJECT_DETECTION:                    "OBJECT_DETECTION"
+ACTION_CLASSICATION:                 "ACTION_CLASSICATION"
+
+// DATA TYPE Keywords
+
+BOOLEAN:                             "BOOLEAN"
+INTEGER:                             "INTEGER"
+FLOAT:                               "FLOAT"
+TEXT:                                "TEXT"
+NDARRAY:                             "NDARRAY"
+INT8:                                "INT8"
+UINT8:                               "UINT8"
+INT16:                               "INT16"
+INT32:                               "INT32"
+INT64:                               "INT64"
+UNICODE:                             "UNICODE"
+BOOL:                                "BOOL"
+FLOAT32:                             "FLOAT32"
+FLOAT64:                             "FLOAT64"
+DECIMAL:                             "DECIMAL"
+STR:                                 "STR"
+DATETIME:                            "DATETIME"
+ANYTYPE:                             "ANYTYPE"
+
+// Group function Keywords
+
+AVG:                                 "AVG"
+COUNT:                               "COUNT"
+MAX:                                 "MAX"
+MIN:                                 "MIN"
+STD:                                 "STD"
+SUM:                                 "SUM"
+FCOUNT: 						     "FCOUNT"
+FIRST:                               "FIRST"
+LAST:                                "LAST"
+SEGMENT:                             "SEGMENT"
+
+// Keywords, but can be ID
+// Common Keywords, but can be ID
+
+AUTO_INCREMENT:                      "AUTO_INCREMENT"
+HELP:                                "HELP"
+TEMPTABLE:                           "TEMPTABLE"
+VALUE:                               "VALUE"
+
+// UDF
+UDF:						                "UDF"
+INPUT:                          "INPUT"
+OUTPUT:                         "OUTPUT"
+TYPE:                           "TYPE"
+IMPL:                           "IMPL"
+
+// MATERIALIZED
+MATERIALIZED:                   "MATERIALIZED"
+VIEW:                           "VIEW"
+
+// Common function names
+
+ABS:                                 "ABS"
+
+// Operators
+// Operators. Assigns
+
+VAR_ASSIGN:                          ":="
+PLUS_ASSIGN:                         "+="
+MINUS_ASSIGN:                        "-="
+MULT_ASSIGN:                         "*="
+DIV_ASSIGN:                          "/="
+MOD_ASSIGN:                          "%="
+AND_ASSIGN:                          "&="
+XOR_ASSIGN:                          "^="
+OR_ASSIGN:                           "|="
+
+
+// Operators. Arithmetics
+
+STAR:                                "*"
+DIVIDE:                              "/"
+MODULUS:                              "%"
+PLUS:                                "+"
+MINUSMINUS:                          "--"
+MINUS:                               "-"
+DIV:                                 "DIV"
+MOD:                                 "MOD"
+
+
+// Operators. Comparation
+
+EQUAL_SYMBOL:                        "="
+GREATER_SYMBOL:                      ">"
+LESS_SYMBOL:                         "<"
+EXCLAMATION_SYMBOL:                  "!"
+GREATER_OR_EQUAL_SYMBOL:             "<="
+LESS_OR_EQUAL_SYMBOL:                ">="
+NOT_EQUAL_SYMBOL:                    "<>"
+CONTAINS_SYMBOL:                     "@>"
+CONTAINED_IN_SYMBOL:                 "<@"
+
+// Operators. Bit
+
+BIT_NOT_OP:                          "~"
+BIT_OR_OP:                           "|"
+BIT_AND_OP:                          "&"
+BIT_XOR_OP:                          "^"
+
+// Constructors symbols
+
+DOT:                                 "."
+LR_BRACKET:                          "("
+RR_BRACKET:                          ")"
+LR_SQ_BRACKET:                       "["
+RR_SQ_BRACKET:                       "]"
+COMMA:                               ","
+SEMI:                                ";"
+AT_SIGN:                             "@"
+ZERO_DECIMAL:                        "0"
+ONE_DECIMAL:                         "1"
+TWO_DECIMAL:                         "2"
+SINGLE_QUOTE_SYMB:                   "\""
+DOUBLE_QUOTE_SYMB:                   "\"\""
+REVERSE_QUOTE_SYMB:                  "`"
+COLON_SYMB:                          ":"
+
+// Literal Primitives
+
+STRING_LITERAL:                      DQUOTA_STRING | SQUOTA_STRING
+DECIMAL_LITERAL:                     DEC_DIGIT+
+REAL_LITERAL:                        (DEC_DIGIT+)? "." DEC_DIGIT+
+                                     | DEC_DIGIT+ "." EXPONENT_NUM_PART
+                                     | (DEC_DIGIT+)? "." (DEC_DIGIT+ EXPONENT_NUM_PART)
+                                     | DEC_DIGIT+ EXPONENT_NUM_PART
+
+
+// Hack for dotID
+// Prevent recognize string:         .123somelatin AS ((.123), FLOAT_LITERAL), ((somelatin), ID)
+//  it must recoginze:               .123somelatin AS ((.), DOT), (123somelatin, ID)
+
+DOT_ID:                              "." ID_LITERAL
+
+
+
+// Identifiers
+
+ID:                                  ID_LITERAL
+REVERSE_QUOTE_ID:                    "`" /[^"`"]*/ "`"
+STRING_USER_NAME:                    (SQUOTA_STRING | DQUOTA_STRING | BQUOTA_STRING | ID_LITERAL) "@" (SQUOTA_STRING | DQUOTA_STRING | BQUOTA_STRING | ID_LITERAL)
+LOCAL_ID:                            "@" (/[A-Z0-9._$]+/ | SQUOTA_STRING | DQUOTA_STRING | BQUOTA_STRING)
+GLOBAL_ID:                           "@" "@" (/[A-Z0-9._$]+/ | BQUOTA_STRING)
+
+// Fragments for Literal primitives
+
+EXPONENT_NUM_PART:          /"E" "-"? DEC_DIGIT+/
+ID_LITERAL:                 /[A-Za-z_$0-9]*?[A-Za-z_$]+?[A-Za-z_$0-9]*/
+DQUOTA_STRING:              /"[^";]*"/
+SQUOTA_STRING:              /'[^';]*'/
+BQUOTA_STRING:              /`[^'`]*`/
+DEC_DIGIT:                  /[0-9]/
+
+// LARK
+
+NEWLINE: "\n"
+COMMENT: MINUSMINUS /[^\n]*/ NEWLINE
+MULTILINE_COMMENT: /\/\*(\*(?!\/)|[^*])*\*\//
+
+%import common.CNAME
+%import common.ESCAPED_STRING
+%import common.WS
+
+%ignore WS
+%ignore COMMENT
+%ignore MULTILINE_COMMENT

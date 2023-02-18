@@ -14,8 +14,8 @@
 # limitations under the License.
 
 _MAJOR = "0"
-_MINOR = "0"
-_REVISION = "13+dev"
+_MINOR = "1"
+_REVISION = "5+dev"
 
 VERSION_SHORT = f"{_MAJOR}.{_MINOR}"
 VERSION = f"{_MAJOR}.{_MINOR}.{_REVISION}"

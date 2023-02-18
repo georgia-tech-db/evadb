@@ -16,7 +16,7 @@ from typing import Iterator
 
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
-from eva.planner.limit_plan import LimitPlan
+from eva.plan_nodes.limit_plan import LimitPlan
 
 
 class LimitExecutor(AbstractExecutor):

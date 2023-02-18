@@ -30,15 +30,13 @@ class StatementBinderPython37Tests(unittest.TestCase):
         with patch.object(StatementBinder, "bind") as mock_binder:
             binder = StatementBinder(StatementBinderContext())
             select_statement = MagicMock()
-            mocks = [MagicMock(), MagicMock(), MagicMock(), MagicMock(), MagicMock()]
+            mocks = [MagicMock(), MagicMock(), MagicMock(), MagicMock()]
             select_statement.target_list = mocks[:2]
             select_statement.orderby_list = [(mocks[2], 0), (mocks[3], 0)]
-            select_statement.groupby_clause = mocks[4]
-            select_statement.groupby_clause.value = "8f"
+            select_statement.groupby_clause = None
             binder._bind_select_statement(select_statement)
             mock_binder.assert_any_call(select_statement.from_table)
             mock_binder.assert_any_call(select_statement.where_clause)
-            mock_binder.assert_any_call(select_statement.groupby_clause)
             mock_binder.assert_any_call(select_statement.union_link)
             for mock in mocks:
                 mock_binder.assert_any_call(mock)

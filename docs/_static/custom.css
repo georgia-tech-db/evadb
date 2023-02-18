@@ -1,0 +1,197 @@
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital@0;1&family=Source+Serif+Pro:ital,wght@0,400;0,600;1,400&display=swap');
+
+:root {
+  --orange: #FF9300;
+}
+
+body {font-family: 'Source Serif Pro', serif;}
+aside, table {font-family: 'Source Sans Pro', sans-serif;}
+
+
+/*aside.sidebar-drawer {background: #ABC;}
+aside.sidebar-drawer div.sidebar-container {background: #acb;}
+div.content {background: #bca;}
+div.article-container {background: #bac;}
+aside.toc-drawer {background: #bbb};}
+aside.toc-drawer {background: #cba}
+article aside.sidebar {background: #ccc;}
+*/
+
+/* --------- left and right TOCs --------- */
+
+.sidebar-drawer {
+    width: calc(50% - 28em);
+    min-width: 13em;
+}
+.sidebar-container, .toc-drawer {
+    width: 12em;
+}
+
+/* --------- asides --------- */
+
+article .sidebar {
+    width: 100%;
+    position: relative;
+    float: none;
+    margin: 2em 0;
+    background: none; border: none;
+}
+article aside.sidebar {
+    border: 1px solid #999;
+    border-left: 2px solid #999;
+    border-radius: 0;
+}
+article .sidebar>* {
+    font-size: 90%;
+    border: none
+}
+article .sidebar p.sidebar-title {
+    border: none;
+    font-weight: 600;
+}
+
+/* --------- widths at different breakpoints --------- */
+/*  break out content asides and images at 52em */
+
+@media only screen and (min-width: 52em) {
+    .content {
+        position: relative;
+        padding: 0 1em 0 15em;
+        width: 36em;
+    }
+    article .sidebar,
+    h2 {
+        position: absolute; left: 0;
+        width: 12rem;
+        margin: -2rem 2rem 0 1rem;
+        padding-top: 2rem;
+        text-align: right;
+        background: none;
+    }
+    article aside.sidebar {border: none;}
+    article .sidebar>:first-child {margin-top: 0;}
+    article .sidebar>*,
+    article .sidebar .sidebar-title {padding-left: 0; padding-right: 0;}
+    img.wider, table.wider, figure.wider, hr {
+        width: 50em; max-width: 50em;
+        margin: 2em 0;
+        left: -14em;
+        position: relative;
+    }
+    article .sidebar>ol, article .sidebar>ul {text-align: left; padding-left: 1.2rem;}
+    img.floated {
+        width: 50%;
+        float: right;
+        margin-bottom: 1rem; margin-left: 1rem;
+    }
+    h2>.headerlink,
+    .sidebar p .headerlink {
+        position: absolute; top: 0; right: 0;
+    }
+    h2 + * {margin-top: 2rem;}
+}
+
+@media only screen and (min-width: 67em) {
+    .content {padding: 0 1em 0 17em;}
+    article .sidebar,
+    h2 {width: 14rem;}
+    img.wider, table.wider, figure.wider, hr {
+        width: 52em; max-width: 52em;
+        margin: 2em 0;
+        left: -16em;
+        position: relative;
+    }
+}
+
+@media only screen and (min-width: 82em) {
+    .content {padding: 0 3em 0 17em;}
+}
+
+/* --------- headings --------- */
+
+h1 {font-size: 2rem;}
+
+/* --------- misc --------- */
+
+p.rubric {
+    text-transform: none;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 110%;
+}
+
+hr.docutils {background-color: var(--orange);}
+
+blockquote.epigraph {
+    border-left: none;
+    padding: 1em 0 1em 3em;
+}
+blockquote p.attribution {padding-left: 3em; font-style: normal;
+
+/*    margin: 0 3em;
+    padding-bottom: 2em;
+*/}
+
+figcaption {text-align: right; font-style: italic;}
+
+div.lined div.sd-col:nth-child(2n) {border-bottom: 1px solid var(--orange);}
+
+@media only screen and (min-width: 36em) {
+    div.lined div.sd-col {border-bottom: 1px solid var(--orange);}
+}
+
+a:link, a:visited {color: var(--orange);}
+
+/* --------- TOC sidebar --------- */
+
+div.sidebar-tree .toctree-l1>.reference {color: #666;}
+div.sidebar-tree .toctree-l1>.reference:hover {color: var(--orange);}
+
+div.sidebar-tree ul {
+    border-bottom: 1px solid var(--orange);
+    padding: 1em 0;
+}
+
+input.sidebar-search {border: none;}
+
+/* --------- embed --------- */
+
+.embed-responsive {
+  position: relative;
+  width: 100%;
+}
+.embed-responsive:before {
+  display: block;
+  content: "";
+}
+.embed-responsive-item,
+.embed-responsive iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+.embed-responsive-16by9::before {
+    padding-top: 56.25%;
+}
+.embed-responsive-4by3::before {
+    padding-top: 75%;
+}
+
+/* --------- furniture --------- */
+
+.nav-overlay-icon .icon svg, .toc-overlay-icon .icon svg, .theme-toggle svg {color: var(--orange);}
+
+.toc-tree li.scroll-current>.reference {color: var(--orange);}
+
+/* --------- tables --------- */
+
+.table-wrapper {overflow-x: visible;}
+table.docutils {box-shadow: none;}
+table.docutils th.head {padding: .5rem 0;}
+table.docutils td, table.docutils th {border-right: 1px solid var(--orange);}
+table.docutils th.stub {text-align: right;}
+table.docutils tr:last-child td,
+table.docutils tr:last-child th {border-bottom: none;}
+table.docutils thead {border-bottom: 1px solid var(--orange);}

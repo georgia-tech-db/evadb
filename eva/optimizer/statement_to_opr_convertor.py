@@ -15,6 +15,7 @@
 from eva.expression.abstract_expression import AbstractExpression
 from eva.optimizer.operators import (
     LogicalCreate,
+    LogicalCreateIndex,
     LogicalCreateMaterializedView,
     LogicalCreateUDF,
     LogicalDrop,
@@ -37,6 +38,7 @@ from eva.optimizer.operators import (
     LogicalUpload,
 )
 from eva.optimizer.optimizer_utils import column_definition_to_udf_io
+from eva.parser.create_index_statement import CreateIndexStatement
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
 from eva.parser.create_statement import CreateTableStatement
 from eva.parser.create_udf_statement import CreateUDFStatement
@@ -57,7 +59,6 @@ from eva.utils.logging_manager import logger
 class StatementToPlanConvertor:
     def __init__(self):
         self._plan = None
-        self._dataset = None
 
     def visit_table_ref(self, table_ref: TableRef):
         """Bind table ref object and convert to LogicalGet, LogicalJoin,
@@ -68,8 +69,8 @@ class StatementToPlanConvertor:
         """
         if table_ref.is_table_atom():
             # Table
-            catalog_vid_metadata = table_ref.table.table_obj
-            self._plan = LogicalGet(table_ref, catalog_vid_metadata, table_ref.alias)
+            catalog_entry = table_ref.table.table_obj
+            self._plan = LogicalGet(table_ref, catalog_entry, table_ref.alias)
 
         elif table_ref.is_table_valued_expr():
             tve = table_ref.table_valued_expr
@@ -128,17 +129,17 @@ class StatementToPlanConvertor:
         if statement.groupby_clause is not None:
             self._visit_groupby(statement.groupby_clause)
 
-        # Projection operator
-        select_columns = statement.target_list
-
-        if select_columns is not None:
-            self._visit_projection(select_columns)
-
         if statement.orderby_list is not None:
             self._visit_orderby(statement.orderby_list)
 
         if statement.limit_count is not None:
             self._visit_limit(statement.limit_count)
+
+        # Projection operator
+        select_columns = statement.target_list
+
+        if select_columns is not None:
+            self._visit_projection(select_columns)
 
     def _visit_sample(self, sample_freq):
         sample_opr = LogicalSample(sample_freq)
@@ -214,12 +215,12 @@ class StatementToPlanConvertor:
         Arguments:
             statement {AbstractStatement} - - [Create statement]
         """
-        table_ref = statement.table_ref
-        if table_ref is None:
+        table_info = statement.table_info
+        if table_info is None:
             logger.error("Missing Table Name In Create Statement")
 
         create_opr = LogicalCreate(
-            table_ref, statement.column_list, statement.if_not_exists
+            table_info, statement.column_list, statement.if_not_exists
         )
         self._plan = create_opr
 
@@ -232,7 +233,7 @@ class StatementToPlanConvertor:
         self._plan = rename_opr
 
     def visit_drop(self, statement: DropTableStatement):
-        drop_opr = LogicalDrop(statement.table_refs, statement.if_exists)
+        drop_opr = LogicalDrop(statement.table_infos, statement.if_exists)
         self._plan = drop_opr
 
     def visit_create_udf(self, statement: CreateUDFStatement):
@@ -267,9 +268,8 @@ class StatementToPlanConvertor:
         Arguments:
             statement(LoadDataStatement): [Load data statement]
         """
-        table_metainfo = statement.table_ref.table.table_obj
         load_data_opr = LogicalLoadData(
-            table_metainfo,
+            statement.table_info,
             statement.path,
             statement.column_list,
             statement.file_options,
@@ -281,11 +281,10 @@ class StatementToPlanConvertor:
         Arguments:
             statement(UploadStatement): [Upload statement]
         """
-        table_metainfo = statement.table_ref.table.table_obj
         upload_opr = LogicalUpload(
             statement.path,
             statement.video_blob,
-            table_metainfo,
+            statement.table_info,
             statement.column_list,
             statement.file_options,
         )
@@ -293,7 +292,7 @@ class StatementToPlanConvertor:
 
     def visit_materialized_view(self, statement: CreateMaterializedViewStatement):
         mat_view_opr = LogicalCreateMaterializedView(
-            statement.view_ref, statement.col_list, statement.if_not_exists
+            statement.view_info, statement.col_list, statement.if_not_exists
         )
 
         self.visit_select(statement.query)
@@ -307,6 +306,16 @@ class StatementToPlanConvertor:
     def visit_explain(self, statement: ExplainStatement):
         explain_opr = LogicalExplain([self.visit(statement.explainable_stmt)])
         self._plan = explain_opr
+
+    def visit_create_index(self, statement: CreateIndexStatement):
+        create_index_opr = LogicalCreateIndex(
+            statement.name,
+            statement.table_ref,
+            statement.col_list,
+            statement.index_type,
+            statement.udf_func,
+        )
+        self._plan = create_index_opr
 
     def visit(self, statement: AbstractStatement):
         """Based on the instance of the statement the corresponding
@@ -340,6 +349,8 @@ class StatementToPlanConvertor:
             self.visit_show(statement)
         elif isinstance(statement, ExplainStatement):
             self.visit_explain(statement)
+        elif isinstance(statement, CreateIndexStatement):
+            self.visit_create_index(statement)
         return self._plan
 
     @property

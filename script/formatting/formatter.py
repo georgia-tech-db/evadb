@@ -273,9 +273,6 @@ if __name__ == "__main__":
         sys.exit("file_name and dir_name cannot be specified together")
 
     # CHECK IF FORMATTERS ARE INSTALLED
-    is_tool(BLACK_BINARY)
-    is_tool(FLAKE_BINARY)
-    is_tool(ISORT_BINARY)
     if args.file_name:
         LOG.info("Scanning file: " + "".join(args.file_name))
         format_file(

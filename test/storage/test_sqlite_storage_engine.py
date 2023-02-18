@@ -16,9 +16,11 @@ import shutil
 import unittest
 from test.util import create_dummy_batches
 
-from eva.catalog.column_type import ColumnType, NdArrayType
-from eva.catalog.models.df_column import DataFrameColumn
-from eva.catalog.models.df_metadata import DataFrameMetadata
+import pytest
+
+from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
+from eva.catalog.models.column_catalog import ColumnCatalogEntry
+from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.storage.sqlite_storage_engine import SQLStorageEngine
 
 
@@ -28,10 +30,12 @@ class SQLStorageEngineTest(unittest.TestCase):
         self.table = None
 
     def create_sample_table(self):
-        table_info = DataFrameMetadata("dataset", "dataset")
-        column_0 = DataFrameColumn("name", ColumnType.TEXT, False)
-        column_1 = DataFrameColumn("id", ColumnType.INTEGER, False)
-        column_2 = DataFrameColumn(
+        table_info = TableCatalogEntry(
+            "dataset", "dataset", table_type=TableType.VIDEO_DATA
+        )
+        column_0 = ColumnCatalogEntry("name", ColumnType.TEXT, is_nullable=False)
+        column_1 = ColumnCatalogEntry("id", ColumnType.INTEGER, is_nullable=False)
+        column_2 = ColumnCatalogEntry(
             "data", ColumnType.NDARRAY, False, NdArrayType.UINT8, [2, 2, 3]
         )
         table_info.schema = [column_0, column_1, column_2]
@@ -67,3 +71,13 @@ class SQLStorageEngineTest(unittest.TestCase):
         self.assertTrue(read_batch, dummy_batches)
         # clean up
         sqlengine.drop(self.table)
+
+    def test_rename(self):
+
+        table_info = TableCatalogEntry(
+            "new_name", "new_name", table_type=TableType.VIDEO_DATA
+        )
+        sqlengine = SQLStorageEngine()
+
+        with pytest.raises(Exception):
+            sqlengine.rename(self.table, table_info)

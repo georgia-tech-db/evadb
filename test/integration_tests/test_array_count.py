@@ -23,14 +23,17 @@ from eva.server.command_handler import execute_query_fetch_all
 
 
 class ArrayCountTests(unittest.TestCase):
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         CatalogManager().reset()
-        create_sample_video(NUM_FRAMES)
-        load_query = """LOAD FILE 'dummy.avi' INTO MyVideo;"""
+        video_file_path = create_sample_video(NUM_FRAMES)
+        load_query = f"LOAD VIDEO '{video_file_path}' INTO MyVideo;"
         execute_query_fetch_all(load_query)
         load_inbuilt_udfs()
 
-    def tearDown(self):
+    @classmethod
+    def tearDownClass(cls):
+        execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
         file_remove("dummy.avi")
 
     # integration test
@@ -62,7 +65,7 @@ class ArrayCountTests(unittest.TestCase):
 
     def test_array_count(self):
         select_query = """SELECT id FROM MyVideo WHERE
-            ArrayCount(DummyMultiObjectDetector(data).labels, 'person') = 2
+            Array_Count(DummyMultiObjectDetector(data).labels, 'person') = 2
             ORDER BY id;"""
         actual_batch = execute_query_fetch_all(select_query)
         expected = [{"myvideo.id": i} for i in range(0, NUM_FRAMES, 3)]
@@ -70,7 +73,7 @@ class ArrayCountTests(unittest.TestCase):
         self.assertEqual(actual_batch, expected_batch)
 
         select_query = """SELECT id FROM MyVideo
-            WHERE ArrayCount(DummyObjectDetector(data).label, 'bicycle') = 1
+            WHERE Array_Count(DummyObjectDetector(data).label, 'bicycle') = 1
             ORDER BY id;"""
         actual_batch = execute_query_fetch_all(select_query)
         expected = [{"myvideo.id": i} for i in range(1, NUM_FRAMES, 2)]

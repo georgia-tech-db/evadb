@@ -17,7 +17,7 @@ from typing import List
 from eva.parser.create_statement import ColumnDefinition
 from eva.parser.select_statement import SelectStatement
 from eva.parser.statement import AbstractStatement
-from eva.parser.table_ref import TableRef
+from eva.parser.table_ref import TableInfo
 from eva.parser.types import StatementType
 
 
@@ -31,26 +31,28 @@ class CreateMaterializedViewStatement(AbstractStatement):
 
     def __init__(
         self,
-        view_ref: TableRef,
+        view_info: TableInfo,
         col_list: List[ColumnDefinition],
         if_not_exists: bool,
         query: SelectStatement,
     ):
         super().__init__(StatementType.CREATE_MATERIALIZED_VIEW)
-        self._view_ref = view_ref
+        self._view_info = view_info
         self._col_list = col_list
         self._if_not_exists = if_not_exists
         self._query = query
 
     def __str__(self) -> str:
-        print_str = "CREATE MATERIALIZED VIEW {} ({}) AS {} ".format(
-            self._view_ref, self._col_list, self._query
-        )
-        return print_str
+        column_list_str = ""
+        for col in self._col_list:
+            column_list_str += str(col) + ", "
+        column_list_str = column_list_str.rstrip(", ")
+
+        return f"CREATE MATERIALIZED VIEW {self._view_info} ({column_list_str}) AS {self._query}"
 
     @property
-    def view_ref(self):
-        return self._view_ref
+    def view_info(self):
+        return self._view_info
 
     @property
     def if_not_exists(self):
@@ -68,7 +70,7 @@ class CreateMaterializedViewStatement(AbstractStatement):
         if not isinstance(other, CreateMaterializedViewStatement):
             return False
         return (
-            self.view_ref == other.view_ref
+            self.view_info == other.view_info
             and self.col_list == other.col_list
             and self.if_not_exists == other.if_not_exists
             and self.query == other.query
@@ -78,8 +80,8 @@ class CreateMaterializedViewStatement(AbstractStatement):
         return hash(
             (
                 super().__hash__(),
-                self.view_ref,
-                tuple(self.col_list),
+                self.view_info,
+                tuple(self.col_list or []),
                 self.if_not_exists,
                 self.query,
             )

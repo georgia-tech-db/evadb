@@ -22,15 +22,28 @@ from eva.expression.logical_expression import LogicalExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
 
 
-def expression_tree_to_conjunction_list(expression_tree):
+def to_conjunction_list(
+    expression_tree: AbstractExpression,
+) -> List[AbstractExpression]:
+    """Convert expression tree to list of conjuntives
+
+    Note: It does not normalize the expression tree before extracting the conjuntives.
+
+    Args:
+        expression_tree (AbstractExpression): expression tree to transform
+
+    Returns:
+        List[AbstractExpression]: list of conjunctives
+
+    Example:
+        to_conjunction_list(AND(AND(a,b), OR(c,d))): [a, b, OR(c,d)]
+        to_conjunction_list(OR(AND(a,b), c)): [OR(AND(a,b), c)]
+            returns the original expression, does not normalize
+    """
     expression_list = []
     if expression_tree.etype == ExpressionType.LOGICAL_AND:
-        expression_list.extend(
-            expression_tree_to_conjunction_list(expression_tree.children[0])
-        )
-        expression_list.extend(
-            expression_tree_to_conjunction_list(expression_tree.children[1])
-        )
+        expression_list.extend(to_conjunction_list(expression_tree.children[0]))
+        expression_list.extend(to_conjunction_list(expression_tree.children[1]))
     else:
         expression_list.append(expression_tree)
 
@@ -40,13 +53,17 @@ def expression_tree_to_conjunction_list(expression_tree):
 def conjuction_list_to_expression_tree(
     expression_list: List[AbstractExpression],
 ) -> AbstractExpression:
-    """Convert expression list to expression tree wuing conjuction connector
+    """Convert expression list to expression tree using conjuction connector
 
+    [a, b, c] -> AND( AND(a, b), c)
     Args:
         expression_list (List[AbstractExpression]): list of conjunctives
 
     Returns:
         AbstractExpression: expression tree
+
+    Example:
+        conjuction_list_to_expression_tree([a, b, c] ): AND( AND(a, b), c)
     """
     if len(expression_list) == 0:
         return None
@@ -60,11 +77,12 @@ def extract_range_list_from_comparison_expr(
     expr: ComparisonExpression, lower_bound: int, upper_bound: int
 ) -> List:
     """Extracts the valid range from the comparison expression.
+
     The expression needs to be amongst <, >, <=, >=, =, !=.
 
     Args:
         expr (ComparisonExpression): comparison expression with two children
-            that are leaf expression nodes. If the input doesnot match,
+            that are leaf expression nodes. If the input does not match,
             the function return False
         lower_bound (int): lower bound of the comparison predicate
         upper_bound (int): upper bound of the comparison predicate
@@ -136,7 +154,10 @@ def extract_range_list_from_predicate(
 ) -> List:
     """The function converts the range predicate on the column in the
         `predicate` to a list of [(start_1, end_1), ... ] pairs.
-        Assumes the predicate contains conditions on only one column
+
+        It assumes the predicate contains conditions on only one column.
+        It is the responsibilty of the caller that `predicate` does not contains
+        conditions on multiple columns.
 
     Args:
         predicate (AbstractExpression): Input predicate to extract
@@ -202,7 +223,7 @@ def extract_range_list_from_predicate(
         )
 
     else:
-        raise RuntimeError(f"Contains unsuporrted expression {type(predicate)}")
+        raise RuntimeError(f"Contains unsupported expression {type(predicate)}")
 
 
 def get_columns_in_predicate(predicate: AbstractExpression) -> Set[str]:

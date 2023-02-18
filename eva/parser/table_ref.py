@@ -104,9 +104,15 @@ class JoinNode:
         )
 
     def __str__(self) -> str:
-        return "JOIN {} ({}, {}) ON {}".format(
-            self.join_type, self.left, self.right, self.predicate
-        )
+        if self.predicate is not None:
+            return "{} {} {} ON {}".format(
+                self.left, self.join_type, self.right, self.predicate
+            )
+        else:
+            return "{} {} {}".format(self.left, self.join_type, self.right)
+
+    def __hash__(self) -> int:
+        return hash((self.join_type, self.left, self.right, self.predicate))
 
 
 class TableValuedExpression:
@@ -121,6 +127,9 @@ class TableValuedExpression:
     @property
     def do_unnest(self):
         return self._do_unnest
+
+    def __str__(self) -> str:
+        return "{}".format(self._func_expr)
 
     def __eq__(self, other):
         if not isinstance(other, TableValuedExpression):
@@ -219,9 +228,9 @@ class TableRef:
             raise RuntimeError("Nested select should have alias")
 
     def __str__(self):
-        table_ref_str = "TABLE REF:: ( {} SAMPLE FREQUENCY {})".format(
-            str(self._ref_handle), str(self.sample_freq)
-        )
+        table_ref_str = f"{str(self._ref_handle)}"
+        if self.sample_freq is not None:
+            table_ref_str += f" {str(self.sample_freq)}"
         return table_ref_str
 
     def __eq__(self, other):

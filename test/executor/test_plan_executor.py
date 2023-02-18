@@ -17,7 +17,8 @@ from unittest.mock import MagicMock, patch
 
 import pandas as pd
 
-from eva.catalog.models.df_metadata import DataFrameMetadata
+from eva.catalog.catalog_type import TableType
+from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.executor.create_executor import CreateExecutor
 from eva.executor.create_udf_executor import CreateUDFExecutor
 from eva.executor.drop_udf_executor import DropUDFExecutor
@@ -28,17 +29,17 @@ from eva.executor.pp_executor import PPExecutor
 from eva.executor.seq_scan_executor import SequentialScanExecutor
 from eva.executor.upload_executor import UploadExecutor
 from eva.models.storage.batch import Batch
-from eva.planner.create_plan import CreatePlan
-from eva.planner.create_udf_plan import CreateUDFPlan
-from eva.planner.drop_plan import DropPlan
-from eva.planner.drop_udf_plan import DropUDFPlan
-from eva.planner.insert_plan import InsertPlan
-from eva.planner.load_data_plan import LoadDataPlan
-from eva.planner.pp_plan import PPScanPlan
-from eva.planner.rename_plan import RenamePlan
-from eva.planner.seq_scan_plan import SeqScanPlan
-from eva.planner.storage_plan import StoragePlan
-from eva.planner.upload_plan import UploadPlan
+from eva.plan_nodes.create_plan import CreatePlan
+from eva.plan_nodes.create_udf_plan import CreateUDFPlan
+from eva.plan_nodes.drop_plan import DropPlan
+from eva.plan_nodes.drop_udf_plan import DropUDFPlan
+from eva.plan_nodes.insert_plan import InsertPlan
+from eva.plan_nodes.load_data_plan import LoadDataPlan
+from eva.plan_nodes.pp_plan import PPScanPlan
+from eva.plan_nodes.rename_plan import RenamePlan
+from eva.plan_nodes.seq_scan_plan import SeqScanPlan
+from eva.plan_nodes.storage_plan import StoragePlan
+from eva.plan_nodes.upload_plan import UploadPlan
 
 
 class PlanExecutorTest(unittest.TestCase):
@@ -275,7 +276,7 @@ class PlanExecutorTest(unittest.TestCase):
         )
 
         # Build plan tree
-        video = DataFrameMetadata("dataset", "dummy.avi")
+        video = TableCatalogEntry("dataset", "dummy.avi", table_type=TableType.VIDEO)
         batch_1 = Batch(pd.DataFrame({"data": [1, 2, 3]}))
         batch_2 = Batch(pd.DataFrame({"data": [4, 5, 6]}))
         class_instatnce.load.return_value = map(lambda x: x, [batch_1, batch_2])

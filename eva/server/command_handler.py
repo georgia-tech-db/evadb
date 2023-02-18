@@ -28,28 +28,28 @@ from eva.utils.logging_manager import logger
 from eva.utils.timer import Timer
 
 
-def execute_query(query, report_time: bool = False) -> Iterator[Batch]:
+def execute_query(query, report_time: bool = False, **kwargs) -> Iterator[Batch]:
     """
     Execute the query and return a result generator.
     """
-
     query_compile_time = Timer()
+    plan_generator = kwargs.pop("plan_generator", PlanGenerator())
     with query_compile_time:
         stmt = Parser().parse(query)[0]
         StatementBinder(StatementBinderContext()).bind(stmt)
         l_plan = StatementToPlanConvertor().visit(stmt)
-        p_plan = PlanGenerator().build(l_plan)
+        p_plan = plan_generator.build(l_plan)
         output = PlanExecutor(p_plan).execute_plan()
 
     query_compile_time.log_elapsed_time("Query Compile Time")
     return output
 
 
-def execute_query_fetch_all(query) -> Optional[Batch]:
+def execute_query_fetch_all(query, **kwargs) -> Optional[Batch]:
     """
     Execute the query and fetch all results into one Batch object.
     """
-    output = execute_query(query, report_time=True)
+    output = execute_query(query, report_time=True, **kwargs)
     if output:
         batch_list = list(output)
         return Batch.concat(batch_list, copy=False)

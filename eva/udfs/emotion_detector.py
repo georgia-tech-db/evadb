@@ -108,7 +108,7 @@ class EmotionDetector(PytorchAbstractClassifierUDF):
 
         # pull model from dropbox if not present
         if not os.path.exists(model_path):
-            model_url = "https://www.dropbox.com/s/bqblykok62d28mn/emotion_detector.t7"
+            model_url = "https://www.dropbox.com/s/x0a8bz53apvmoc9/emotion_detector.t7"
             subprocess.run(["wget", model_url, "--directory-prefix", output_directory])
 
         # self.get_device() infers device from the loaded model, so not using it
@@ -156,7 +156,7 @@ class EmotionDetector(PytorchAbstractClassifierUDF):
         """
 
         # result dataframe
-        outcome = pd.DataFrame()
+        outcome = []
 
         # convert to 3 channels, ten crop and stack
         frames = frames.repeat(3, 1, 1)
@@ -172,12 +172,11 @@ class EmotionDetector(PytorchAbstractClassifierUDF):
         _, predicted = torch.max(predictions.data, 0)
 
         # save results
-        outcome = outcome.append(
+        outcome.append(
             {
                 "labels": self.labels[predicted.item()],
                 "scores": score.cpu().detach().numpy()[predicted.item()],
-            },
-            ignore_index=True,
+            }
         )
 
-        return outcome
+        return pd.DataFrame(outcome, columns=["labels", "scores"])

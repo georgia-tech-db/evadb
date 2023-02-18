@@ -73,7 +73,7 @@ class PytorchAbstractClassifierUDF(AbstractClassifierUDF, nn.Module, GPUCompatib
             chunks = torch.split(tens_batch, gpu_batch_size)
             outcome = pd.DataFrame()
             for tensor in chunks:
-                outcome = outcome.append(self.forward(tensor), ignore_index=True)
+                outcome = pd.concat([outcome, self.forward(tensor)], ignore_index=True)
             return outcome
         else:
             return self.forward(frames)

@@ -13,14 +13,13 @@ executor:
   # batch size used for gpu_operations
   gpu_batch_size: 1
 
-  gpus: {'127.0.0.1': [0]}
+  gpus: { "127.0.0.1": [0] }
 
 storage:
   upload_dir: ""
-  engine: "eva.storage.sqlite_storage_engine.SQLStorageEngine"
-  video_engine: "eva.storage.opencv_storage_engine.OpenCVStorageEngine"
-  video_engine_version: 0
-
+  structured_data_engine: "eva.storage.sqlite_storage_engine.SQLStorageEngine"
+  video_engine: "eva.storage.video_storage_engine.OpenCVStorageEngine"
+  image_engine: "eva.storage.image_storage_engine.ImageStorageEngine"
 server:
   host: "0.0.0.0"
   port: 5432

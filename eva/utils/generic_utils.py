@@ -20,6 +20,8 @@ import uuid
 from os import PathLike
 from pathlib import Path
 
+from aenum import AutoEnum, unique
+
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.utils.logging_manager import logger
 
@@ -59,11 +61,6 @@ def path_to_class(filepath: PathLike, classname: str):
     Returns:
         type: A class for given path
     """
-    resolved = Path(filepath).resolve()
-    if resolved.suffix in [".pickle", ".pkl"]:
-        with resolved.open("rb") as f:
-            return pickle.load(f)
-
     try:
         abs_path = Path(filepath).resolve()
         spec = importlib.util.spec_from_file_location(abs_path.stem, abs_path)
@@ -147,3 +144,9 @@ class PickleSerializer(object):
     @classmethod
     def deserialize(cls, data):
         return pickle.loads(data)
+
+
+@unique
+class EVAEnum(AutoEnum):
+    def __str__(self):
+        return self.name

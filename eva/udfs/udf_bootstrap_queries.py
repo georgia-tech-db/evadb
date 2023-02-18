@@ -38,8 +38,18 @@ DummyMultiObjectDetector_udf_query = """CREATE UDF
     EVA_INSTALLATION_DIR
 )
 
+DummyFeatureExtractor_udf_query = """CREATE UDF
+                  IF NOT EXISTS DummyFeatureExtractor
+                  INPUT (Frame_Array NDARRAY UINT8(3, ANYDIM, ANYDIM))
+                  OUTPUT (features NDARRAY FLOAT32(1, ANYDIM))
+                  TYPE Classification
+                  IMPL '{}/../test/util.py';
+        """.format(
+    EVA_INSTALLATION_DIR
+)
+
 ArrayCount_udf_query = """CREATE UDF
-            IF NOT EXISTS  ArrayCount
+            IF NOT EXISTS  Array_Count
             INPUT (Input_Array NDARRAY ANYTYPE, Search_Key ANYTYPE)
             OUTPUT (key_count INTEGER)
             TYPE NdarrayUDF
@@ -58,11 +68,41 @@ Crop_udf_query = """CREATE UDF IF NOT EXISTS Crop
     EVA_INSTALLATION_DIR, NDARRAY_DIR
 )
 
+Open_udf_query = """CREATE UDF IF NOT EXISTS Open
+                INPUT (img_path TEXT(1000))
+                OUTPUT (data NDARRAY UINT8(3, ANYDIM, ANYDIM))
+                TYPE NdarrayUDF
+                IMPL "{}/udfs/{}/open.py";
+        """.format(
+    EVA_INSTALLATION_DIR, NDARRAY_DIR
+)
+
+Similarity_udf_query = """CREATE UDF IF NOT EXISTS Similarity
+                    INPUT (Frame_Array_Open NDARRAY UINT8(3, ANYDIM, ANYDIM),
+                           Frame_Array_Base NDARRAY UINT8(3, ANYDIM, ANYDIM),
+                           Feature_Extractor_Name TEXT(100))
+                    OUTPUT (distance FLOAT(32, 7))
+                    TYPE NdarrayUDF
+                    IMPL "{}/udfs/{}/similarity.py";
+        """.format(
+    EVA_INSTALLATION_DIR, NDARRAY_DIR
+)
+
 Unnest_udf_query = """CREATE UDF IF NOT EXISTS Unnest
                 INPUT  (inp NDARRAY ANYTYPE)
                 OUTPUT (out ANYTYPE)
                 TYPE  NdarrayUDF
                 IMPL  "{}/udfs/{}/unnest.py";
+        """.format(
+    EVA_INSTALLATION_DIR, NDARRAY_DIR
+)
+
+Timestamp_udf_query = """CREATE UDF
+            IF NOT EXISTS  Timestamp
+            INPUT (seconds INTEGER)
+            OUTPUT (timestamp NDARRAY STR(8))
+            TYPE NdarrayUDF
+            IMPL "{}/udfs/{}/timestamp.py";
         """.format(
     EVA_INSTALLATION_DIR, NDARRAY_DIR
 )
@@ -73,6 +113,16 @@ Fastrcnn_udf_query = """CREATE UDF IF NOT EXISTS FastRCNNObjectDetector
                 scores NDARRAY FLOAT32(ANYDIM))
       TYPE  Classification
       IMPL  '{}/udfs/fastrcnn_object_detector.py';
+      """.format(
+    EVA_INSTALLATION_DIR
+)
+
+YoloV5_udf_query = """CREATE UDF IF NOT EXISTS YoloV5
+      INPUT  (Frame_Array NDARRAY UINT8(3, ANYDIM, ANYDIM))
+      OUTPUT (labels NDARRAY STR(ANYDIM), bboxes NDARRAY FLOAT32(ANYDIM, 4),
+                scores NDARRAY FLOAT32(ANYDIM))
+      TYPE  Classification
+      IMPL  '{}/udfs/yolo_object_detector.py';
       """.format(
     EVA_INSTALLATION_DIR
 )
@@ -106,6 +156,15 @@ Mvit_udf_query = """CREATE UDF IF NOT EXISTS MVITActionRecognition
     EVA_INSTALLATION_DIR
 )
 
+Asl_udf_query = """CREATE UDF IF NOT EXISTS ASLActionRecognition
+        INPUT  (Frame_Array NDARRAY UINT8(3, 16, 224, 224))
+        OUTPUT (labels NDARRAY STR(ANYDIM))
+        TYPE  Classification
+        IMPL  '{}/udfs/asl_action_recognition.py';
+        """.format(
+    EVA_INSTALLATION_DIR
+)
+
 
 def init_builtin_udfs(mode="debug"):
     """
@@ -117,14 +176,25 @@ def init_builtin_udfs(mode="debug"):
     """
     queries = [
         Fastrcnn_udf_query,
-        Mvit_udf_query,
         ArrayCount_udf_query,
+        Timestamp_udf_query,
         Crop_udf_query,
+        Open_udf_query,
+        YoloV5_udf_query,
+        Similarity_udf_query
         # Disabled because required packages (eg., easy_ocr might not be preinstalled)
         # face_detection_udf_query,
         # ocr_udf_query,
+        # Disabled as it requires specific pytorch package
+        # Mvit_udf_query,
     ]
-    queries.extend([DummyObjectDetector_udf_query, DummyMultiObjectDetector_udf_query])
+    queries.extend(
+        [
+            DummyObjectDetector_udf_query,
+            DummyMultiObjectDetector_udf_query,
+            DummyFeatureExtractor_udf_query,
+        ]
+    )
 
     for query in queries:
         execute_query_fetch_all(query)

@@ -179,7 +179,7 @@ class ExpressionUtilsTest(unittest.TestCase):
         )
         self.assertFalse(is_simple_predicate(expr))
 
-    def test_conjuction_list_to_expression_tree(self):
+    def test_and_(self):
         expr1 = self.gen_cmp_expr(10)
         expr2 = self.gen_cmp_expr(20)
         new_expr = conjuction_list_to_expression_tree([expr1, expr2])

@@ -1,71 +1,89 @@
 version: 2.1
 
+orbs:
+  win: circleci/windows@2.2.0
+
 workflows:
   main:
     jobs:
+        - Windows   
         - test:
-            name: "Python v3.7"
+            name: "Linux - Python v3.7"
             v: "3.7"
         - test:
-            name: "Python v3.8"
+            name: "Linux - Python v3.8"
             v: "3.8"
         - test:
-            name: "Python v3.9"
+            name: "Linux - Python v3.9"
             v: "3.9"
         - test:
-            name: "Python v3.10"
+            name: "Linux - Python v3.10"
             v: "3.10"
         #- test:
-        #    name: "Python v3.11"  # missing Torchvision
+        #    name: "Linux - Python v3.11"  # missing Torchvision
         #    v: "3.11"
 
 jobs:
-  test: 
+  test:
     parameters:
       v:
         type: string
-        default: "3.7" 
+        default: "3.7"
     resource_class: large
     docker:
       # https://circleci.com/docs/circleci-images#language-image-variants
       # This comes with python and openjdk11
-      - image: "cimg/python:<< parameters.v >>-browsers"
+      - image: "cimg/python:<< parameters.v >>"
     steps:
+
       - checkout
-
       - restore_cache:
           keys:
-            - v11-model_cache-{{ checksum "setup.py" }}
-
-      - restore_cache:
-          keys:
-            - v11-pip-cache-{{ checksum "setup.py" }}
+            - v1-model_cache-{{ checksum "setup.py" }}
 
       - run:
-          name: Install EVA package with test dependencies
+          name: Install EVA package from pip and start server
+          command: |
+            pip install --upgrade pip
+            pip install evadb
+            bash script/test/package.sh
+
+      - run:
+          name: Install EVA package from GitHub repo with all dependencies
           command: |
             "python<< parameters.v >>" -m venv test_evadb
             source test_evadb/bin/activate
-            pip install --upgrade pip
-            sh script/antlr4/generate_parser.sh
             pip install ".[dev]"
 
       - run:
           name: Test and upload coverage report to coveralls
           command: |
-            sudo apt-get update          
-            sudo apt-get install lsof 
             source test_evadb/bin/activate
             sh script/test/test.sh
             coveralls
 
       - save_cache:
-          key: v11-model_cache-{{ checksum "setup.py" }}
+          key: v1-model_cache-{{ checksum "setup.py" }}
           paths:
             - /home/circleci/.cache/torch/hub/
             - /home/circleci/.EasyOCR/
+    
+  Windows:
+    executor: win/default
+    parameters:
+      v:
+        type: string
+        default: "3.10" 
+    steps:
+      - checkout
 
-      - save_cache:
-          key: v11-pip-cache-{{ checksum "setup.py" }}
-          paths:
-            - ./test_evadb/
+      - run: 
+          name: Test windows
+          command: |
+            Set-StrictMode -Version Latest
+            $ErrorActionPreference = 'Continue'
+            pip install virtualenv
+            virtualenv test_evadb
+            test_evadb\Scripts\activate
+            pip install ".[dev]"       
+            sh script\test\test.sh

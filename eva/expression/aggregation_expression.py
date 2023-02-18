@@ -37,14 +37,14 @@ class AggregationExpression(AbstractExpression):
         )  # can also be a float
 
     def evaluate(self, *args, **kwargs):
-        batch = self.get_child(0).evaluate(*args, **kwargs)
+        batch: Batch = self.get_child(0).evaluate(*args, **kwargs)
         if self.etype == ExpressionType.AGGREGATION_FIRST:
             batch = batch[0]
-        if self.etype == ExpressionType.AGGREGATION_LAST:
+        elif self.etype == ExpressionType.AGGREGATION_LAST:
             batch = batch[-1]
-        if self.etype == ExpressionType.AGGREGATION_SEGMENT:
+        elif self.etype == ExpressionType.AGGREGATION_SEGMENT:
             batch = Batch.stack(batch)
-        if self.etype == ExpressionType.AGGREGATION_SUM:
+        elif self.etype == ExpressionType.AGGREGATION_SUM:
             batch.aggregate("sum")
         elif self.etype == ExpressionType.AGGREGATION_COUNT:
             batch.aggregate("count")
@@ -55,10 +55,48 @@ class AggregationExpression(AbstractExpression):
         elif self.etype == ExpressionType.AGGREGATION_MAX:
             batch.aggregate("max")
         batch.reset_index()
-        # TODO ACTION:
-        # Add raise exception if data type doesn't match
 
+        column_name = self.etype.name
+        if column_name.find("AGGREGATION_") != -1:
+            # AGGREGATION_MAX -> MAX
+            updated_column_name = column_name.replace("AGGREGATION_", "")
+            batch.modify_column_alias(updated_column_name)
+
+        # TODO: Raise exception if data type doesn't match
         return batch
+
+    def get_symbol(self) -> str:
+
+        if self.etype == ExpressionType.AGGREGATION_FIRST:
+            return "FIRST"
+        if self.etype == ExpressionType.AGGREGATION_LAST:
+            return "LAST"
+        if self.etype == ExpressionType.AGGREGATION_SEGMENT:
+            return "SEGMENT"
+        if self.etype == ExpressionType.AGGREGATION_SUM:
+            return "SUM"
+        elif self.etype == ExpressionType.AGGREGATION_COUNT:
+            return "COUNT"
+        elif self.etype == ExpressionType.AGGREGATION_AVG:
+            return "AVG"
+        elif self.etype == ExpressionType.AGGREGATION_MIN:
+            return "MIN"
+        elif self.etype == ExpressionType.AGGREGATION_MAX:
+            return "MAX"
+        else:
+            raise NotImplementedError
+
+    def signature(self) -> str:
+        child_sigs = []
+        for child in self.children:
+            child_sigs.append(child.signature())
+        return f"{self.get_symbol().lower()}({','.join(child_sigs)})"
+
+    def __str__(self) -> str:
+        expr_str = ""
+        if self.etype:
+            expr_str = f"{str(self.get_symbol())}()"
+        return expr_str
 
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)

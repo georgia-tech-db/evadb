@@ -13,11 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pickle
-import tempfile
+import sys
 import unittest
 from pathlib import Path
 
+import pytest
 from mock import MagicMock, patch
 
 from eva.readers.opencv_reader import OpenCVReader
@@ -27,10 +27,6 @@ from eva.utils.generic_utils import (
     path_to_class,
     str_to_class,
 )
-
-
-class Dummy:
-    value: int
 
 
 class ModulePathTest(unittest.TestCase):
@@ -49,14 +45,6 @@ class ModulePathTest(unittest.TestCase):
     def test_should_raise_if_class_does_not_exists(self):
         with self.assertRaises(RuntimeError):
             path_to_class("eva/readers/opencv_reader.py", "OpenCV")
-
-    def test_should_load_class_from_pickle(self):
-        with tempfile.NamedTemporaryFile(suffix=".pickle") as pickle_file:
-            with open(pickle_file.name, "wb") as f:
-                pickle.dump(Dummy, f, pickle.HIGHEST_PROTOCOL)
-
-            dummy_type = path_to_class(pickle_file.name, "Dummy")
-            self.assertEqual(Dummy, dummy_type)
 
     def test_should_use_torch_to_check_if_gpu_is_available(self):
         # Emulate a missing import
@@ -80,6 +68,7 @@ class ModulePathTest(unittest.TestCase):
         is_gpu_available()
 
     @patch("eva.utils.generic_utils.ConfigurationManager")
+    @pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
     def test_should_return_a_random_full_path(self, mock_conf):
         mock_conf_inst = MagicMock()
         mock_conf.return_value = mock_conf_inst

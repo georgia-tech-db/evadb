@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import sys
 import unittest
 from pathlib import Path
 from test.util import EVA_TEST_DATA_DIR
@@ -19,6 +20,7 @@ from unittest.mock import patch
 
 import cv2
 import pandas as pd
+import pytest
 
 from eva.models.storage.batch import Batch
 
@@ -35,6 +37,7 @@ class FaceNet(unittest.TestCase):
         img = cv2.imread(str(path))
         return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
+    @pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
     def test_should_return_batches_equivalent_to_number_of_frames(self):
         from eva.udfs.face_detector import FaceDetector
 

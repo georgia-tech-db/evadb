@@ -22,7 +22,7 @@ from eva.executor.orderby_executor import OrderByExecutor
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.models.storage.batch import Batch
 from eva.parser.types import ParserOrderBySortType
-from eva.planner.orderby_plan import OrderByPlan
+from eva.plan_nodes.orderby_plan import OrderByPlan
 
 
 class OrderByExecutorTest(unittest.TestCase):

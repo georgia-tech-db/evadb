@@ -15,8 +15,8 @@
 
 from typing import Any, Dict
 
-from eva.planner.abstract_plan import AbstractPlan
-from eva.planner.types import PlanOprType
+from eva.plan_nodes.abstract_plan import AbstractPlan
+from eva.plan_nodes.types import PlanOprType
 
 
 class ExchangePlan(AbstractPlan):
@@ -28,10 +28,15 @@ class ExchangePlan(AbstractPlan):
             UNION (deduplication) vs UNION ALL (non-deduplication)
     """
 
-    def __init__(self, parallelism: int = 1, ray_conf: Dict[str, Any] = None):
+    def __init__(
+        self, parallelism: int = 1, ray_conf: Dict[str, Any] = {"num_gpus": 1}
+    ):
         self.parallelism = parallelism
         self.ray_conf = ray_conf
         super().__init__(PlanOprType.EXCHANGE)
+
+    def __str__(self) -> str:
+        return "ExchangePlan"
 
     def __hash__(self) -> int:
         return hash(

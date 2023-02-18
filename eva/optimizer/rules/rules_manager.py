@@ -14,6 +14,9 @@
 # limitations under the License.
 from __future__ import annotations
 
+from contextlib import contextmanager
+from typing import List
+
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.experimental.ray.optimizer.rules.rules import LogicalExchangeToPhysical
 from eva.experimental.ray.optimizer.rules.rules import (
@@ -23,9 +26,12 @@ from eva.experimental.ray.optimizer.rules.rules import (
     LogicalProjectToPhysical as DistributedLogicalProjectToPhysical,
 )
 from eva.optimizer.rules.rules import (
+    CombineSimilarityOrderByAndLimitToFaissIndexScan,
     EmbedFilterIntoGet,
     EmbedProjectIntoGet,
     EmbedSampleIntoGet,
+    LogicalApplyAndMergeToPhysical,
+    LogicalCreateIndexToFaiss,
     LogicalCreateMaterializedViewToPhysical,
     LogicalCreateToPhysical,
     LogicalCreateUDFToPhysical,
@@ -33,6 +39,7 @@ from eva.optimizer.rules.rules import (
     LogicalDropToPhysical,
     LogicalDropUDFToPhysical,
     LogicalExplainToPhysical,
+    LogicalFaissIndexScanToPhysical,
     LogicalFilterToPhysical,
     LogicalFunctionScanToPhysical,
 )
@@ -58,20 +65,14 @@ from eva.optimizer.rules.rules import (
     LogicalShowToPhysical,
     LogicalUnionToPhysical,
     LogicalUploadToPhysical,
+    PushDownFilterThroughApplyAndMerge,
     PushDownFilterThroughJoin,
+    XformLateralJoinToLinearFlow,
 )
+from eva.optimizer.rules.rules_base import Rule
 
 
 class RulesManager:
-    """Singelton class to manage all the rules in our system"""
-
-    _instance = None
-
-    def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super(RulesManager, cls).__new__(cls)
-        return cls._instance
-
     def __init__(self):
         self._logical_rules = [LogicalInnerJoinCommutativity()]
 
@@ -82,6 +83,9 @@ class RulesManager:
             # EmbedProjectIntoDerivedGet(),
             EmbedSampleIntoGet(),
             PushDownFilterThroughJoin(),
+            PushDownFilterThroughApplyAndMerge(),
+            XformLateralJoinToLinearFlow(),
+            CombineSimilarityOrderByAndLimitToFaissIndexScan(),
         ]
 
         ray_enabled = ConfigurationManager().get_value("experimental", "ray")
@@ -114,6 +118,9 @@ class RulesManager:
             else SequentialLogicalProjectToPhysical(),
             LogicalShowToPhysical(),
             LogicalExplainToPhysical(),
+            LogicalCreateIndexToFaiss(),
+            LogicalApplyAndMergeToPhysical(),
+            LogicalFaissIndexScanToPhysical(),
         ]
 
         if ray_enabled:
@@ -137,3 +144,49 @@ class RulesManager:
     @property
     def all_rules(self):
         return self._all_rules
+
+    def disable_rules(self, rules: List[Rule]):
+        def _remove_from_list(rule_list, rule_to_remove):
+            for rule in rule_list:
+                if rule.rule_type == rule_to_remove.rule_type:
+                    rule_list.remove(rule)
+
+        for rule in rules:
+            if rule.is_implementation_rule():
+                _remove_from_list(self.implementation_rules, rule)
+            elif rule.is_rewrite_rule():
+                _remove_from_list(self.rewrite_rules, rule)
+            elif rule.is_logical_rule(rule):
+                _remove_from_list(self.logical_rules, rule)
+            else:
+                raise Exception(f"Provided Invalid rule {rule}")
+
+    def add_rules(self, rules: List[Rule]):
+        def _add_to_list(rule_list, rule_to_remove):
+            if any([rule.rule_type != rule_to_remove.rule_type for rule in rule_list]):
+                rule_list.append(rule)
+
+        for rule in rules:
+            if rule.is_implementation_rule():
+                _add_to_list(self.implementation_rules, rule)
+            elif rule.is_rewrite_rule():
+                _add_to_list(self.rewrite_rules, rule)
+            elif rule.is_logical_rule(rule):
+                _add_to_list(self.logical_rules, rule)
+            else:
+                raise Exception(f"Provided Invalid rule {rule}")
+
+
+@contextmanager
+def disable_rules(rules: List[Rule]):
+    """Use this function to temporarily drop rules.
+        Useful for testing and debugging purposes.
+    Args:
+        rules (List[Rule]): List of rules to temporirly drop
+    """
+    try:
+        rules_manager = RulesManager()
+        rules_manager.disable_rules(rules)
+        yield rules_manager
+    finally:
+        rules_manager.add_rules(rules)

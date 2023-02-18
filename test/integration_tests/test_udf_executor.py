@@ -25,6 +25,7 @@ import pandas as pd
 
 from eva.binder.binder_utils import BinderError
 from eva.catalog.catalog_manager import CatalogManager
+from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
 from eva.server.command_handler import execute_query_fetch_all
 
@@ -34,8 +35,8 @@ NUM_FRAMES = 10
 class UDFExecutorTest(unittest.TestCase):
     def setUp(self):
         CatalogManager().reset()
-        create_sample_video(NUM_FRAMES)
-        load_query = """LOAD FILE 'dummy.avi' INTO MyVideo;"""
+        video_file_path = create_sample_video(NUM_FRAMES)
+        load_query = f"LOAD VIDEO '{video_file_path}' INTO MyVideo;"
         execute_query_fetch_all(load_query)
 
         create_udf_query = """CREATE UDF DummyObjectDetector
@@ -48,6 +49,7 @@ class UDFExecutorTest(unittest.TestCase):
 
     def tearDown(self):
         file_remove("dummy.avi")
+        execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
 
     # integration test
 
@@ -125,6 +127,9 @@ class UDFExecutorTest(unittest.TestCase):
                 filters=[i for i in range(2, NUM_FRAMES) if i % 2 == 0]
             )
         )[0]
+        expected_batch = expected_batch.project(
+            ["myvideo.name", "myvideo.id", "myvideo.data"]
+        )
         expected_batch.modify_column_alias("T")
         self.assertEqual(actual_batch, expected_batch)
 
@@ -137,7 +142,7 @@ class UDFExecutorTest(unittest.TestCase):
                   IMPL  'test/util.py';
         """
         # Try to create duplicate UDF
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ExecutorError):
             actual = execute_query_fetch_all(create_udf_query.format(udf_name))
             expected = Batch(pd.DataFrame([f"UDF {udf_name} already exists."]))
             self.assertEqual(actual, expected)
@@ -170,5 +175,5 @@ class UDFExecutorTest(unittest.TestCase):
                   TYPE  Classification
                   IMPL  'test/util.py';
         """
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ExecutorError):
             execute_query_fetch_all(create_udf_query)
