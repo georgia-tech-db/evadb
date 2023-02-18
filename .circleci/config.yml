@@ -74,7 +74,7 @@ jobs:
   Pip:
     resource_class: large
     docker:
-      - image: "cimg/python"
+      - image: "cimg/python:3.10"
     steps:
 
       - run:
