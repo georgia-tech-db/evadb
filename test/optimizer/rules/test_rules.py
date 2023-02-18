@@ -70,7 +70,7 @@ from eva.optimizer.rules.rules_manager import RulesManager
 from eva.server.command_handler import execute_query_fetch_all
 
 
-class TestRules(unittest.TestCase):
+class RulesTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # reset the catalog manager before running each test
