@@ -19,7 +19,6 @@ from eva.server.command_handler import execute_query_fetch_all
 
 
 class CreateTableTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         pass
