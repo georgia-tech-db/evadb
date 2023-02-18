@@ -6,38 +6,37 @@ orbs:
 workflows:
   main:
     jobs:
-        - Windows   
         - test:
-            name: "Test | Python v3.7 | Linux"
+            name: "Test | v3.7 | Linux"
             v: "3.7"
             mode: "TEST"
         - test:
-            name: "Test | Python v3.8 | Linux"
+            name: "Test | v3.8 | Linux"
             v: "3.8"
             mode: "TEST"
         - test:
-            name: "Test | Python v3.9 | Linux"
+            name: "Test | v3.9 | Linux"
             v: "3.9"
             mode: "TEST"
         - test:
-            name: "Test | Python v3.9 | Linux"
+            name: "Test | v3.10 | Linux"
             v: "3.10"
             mode: "TEST"
         ### NOTEBOOKS
         - test:
-            name: "Notebook | Python v3.7 | Linux"
+            name: "Notebook | v3.7 | Linux"
             v: "3.7"
             mode: "NOTEBOOK"
         - test:
-            name: "Notebook | Python v3.8 | Linux"
+            name: "Notebook | v3.8 | Linux"
             v: "3.8"
             mode: "NOTEBOOK"
         - test:
-            name: "Notebook | Python v3.9 | Linux"
+            name: "Notebook | v3.9 | Linux"
             v: "3.9"
             mode: "NOTEBOOK"
         - test:
-            name: "Notebook | Python v3.10 | Linux"
+            name: "Notebook | v3.10 | Linux"
             v: "3.10"
             mode: "NOTEBOOK"
         ### LINTER
@@ -46,8 +45,9 @@ workflows:
             v: "3.10"
             mode: "LINTER"
         - Pip
+        - Windows   
         #- test:
-        #    name: "Linux - Python v3.11"  # missing Torchvision
+        #    name: "Linux -  v3.11"  # missing Torchvision
         #    v: "3.11"
 
 jobs:

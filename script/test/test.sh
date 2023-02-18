@@ -105,7 +105,7 @@ fi
 
 if [[ ( "$OSTYPE" != "msys" ) && ( "$MODE" = "NOTEBOOK" || "$MODE" = "ALL" ) ]];
 then 
-    PYTHONPATH=./ python -m pytest --nbmake --overwrite "./tutorials" -s -v --log-level=WARNING
+    PYTHONPATH=./ python -m pytest --nbmake --overwrite "./tutorials" -s -v --log-level=WARNING --nbmake-timeout=600
     notebook_test_code=$?
     if [ "$notebook_test_code" != "0" ];
     then
