@@ -91,8 +91,6 @@ class RulesTest(unittest.TestCase):
             Promise.LOGICAL_INNER_JOIN_COMMUTATIVITY,
             Promise.EMBED_FILTER_INTO_GET,
             Promise.EMBED_PROJECT_INTO_GET,
-            Promise.EMBED_FILTER_INTO_DERIVED_GET,
-            Promise.EMBED_PROJECT_INTO_DERIVED_GET,
             Promise.EMBED_SAMPLE_INTO_GET,
             Promise.XFORM_LATERAL_JOIN_TO_LINEAR_FLOW,
             Promise.PUSHDOWN_FILTER_THROUGH_JOIN,
