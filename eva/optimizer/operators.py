@@ -140,9 +140,6 @@ class Dummy(Operator):
         self.group_id = group_id
         self.opr = opr
 
-    def __hash__(self) -> int:
-        return hash((super().__hash__(), self.group_id))
-
 
 class LogicalGet(Operator):
     def __init__(
@@ -179,17 +176,9 @@ class LogicalGet(Operator):
     def predicate(self):
         return self._predicate
 
-    @predicate.setter
-    def predicate(self, predicate):
-        self._predicate = predicate
-
     @property
     def target_list(self):
         return self._target_list
-
-    @target_list.setter
-    def target_list(self, target_list):
-        self._target_list = target_list
 
     @property
     def sampling_rate(self):

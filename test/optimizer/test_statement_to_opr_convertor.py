@@ -331,7 +331,11 @@ statement_to_opr_convertor.column_definition_to_udf_io"
         for i in range(length):
             self.assertEqual(plans[i], plans[i])
             self.assertNotEqual(str(plans[i]), None)
-            if i >= 1:  # compare against next plan
+            # compare against dummy plan
+            if plans[i] != dummy_plan:
+                self.assertNotEqual(plans[i], dummy_plan)
+            # compare against next plan
+            if i >= 1:
                 self.assertNotEqual(plans[i - 1], plans[i])
 
         derived_operators = list(get_all_subclasses(Operator))
