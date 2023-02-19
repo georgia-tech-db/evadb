@@ -1099,12 +1099,10 @@ class LogicalExchange(Operator):
         super().__init__(OperatorType.LOGICALEXCHANGE, children)
 
     def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
         if not isinstance(other, LogicalExchange):
             return False
-        return True
-
-    def __hash__(self) -> int:
-        return super().__hash__()
+        return is_subtree_equal
 
 
 class LogicalExplain(Operator):

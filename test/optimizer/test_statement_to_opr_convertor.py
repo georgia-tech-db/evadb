@@ -243,9 +243,12 @@ statement_to_opr_convertor.column_definition_to_udf_io"
         mock.assert_called_once()
         mock.assert_called_with(stmt)
 
-    def test_check_plan_equality(
-        self,
-    ):
+    def test_inequality_in_operator(self):
+        dummy_plan = Dummy(MagicMock(), MagicMock())
+        object = MagicMock()
+        self.assertNotEqual(dummy_plan, object)
+
+    def test_check_plan_equality(self):
         plans = []
         dummy_plan = Dummy(MagicMock(), MagicMock())
         create_plan = LogicalCreate(MagicMock(), MagicMock())
