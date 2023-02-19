@@ -354,9 +354,10 @@ class PushDownFilterThroughApplyAndMerge(Rule):
 
         # If we have partial predicate make it the root
         root_node = apply_and_merge
-        if rem_pred:
-            root_node = LogicalFilter(predicate=rem_pred)
-            root_node.append_child(apply_and_merge)
+        assert rem_pred is None
+        # if rem_pred:
+        #    root_node = LogicalFilter(predicate=rem_pred)
+        #    root_node.append_child(apply_and_merge)
 
         yield root_node
 
