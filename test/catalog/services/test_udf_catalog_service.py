@@ -14,7 +14,7 @@
 # limitations under the License.
 from unittest import TestCase
 
-from mock import patch
+from mock import MagicMock, patch
 from sqlalchemy.orm.exc import NoResultFound
 
 from eva.catalog.services.udf_catalog_service import UdfCatalogService
@@ -68,8 +68,18 @@ class UdfCatalogServiceTest(TestCase):
             )
 
     @patch("eva.catalog.services.udf_catalog_service.UdfCatalog")
-    def test_get_all_udfs_should_return_empty(self, mocked):
+    def test_udf_catalog_exception(self, mock_udf_catalog):
+        mock_udf_catalog.query.filter.side_effect = Exception("filter_error")
+        mock_udf_catalog.query.all.side_effect = NoResultFound
+
         service = UdfCatalogService()
-        mocked.query.all.side_effect = Exception(NoResultFound)
+
         with self.assertRaises(Exception):
-            self.assertEqual(service.get_all_entries(), [])
+            service.get_entry_by_name(MagicMock())
+
+        with self.assertRaises(Exception):
+            service.get_entry_by_id(MagicMock())
+
+        self.assertFalse(service.delete_entry_by_name(MagicMock()))
+
+        self.assertEqual(service.get_all_entries(), [])
