@@ -25,16 +25,13 @@ from eva.experimental.ray.optimizer.rules.rules import LogicalExchangeToPhysical
 from eva.optimizer.operators import (
     LogicalFilter,
     LogicalGet,
+    LogicalJoin,
     LogicalProject,
-    LogicalQueryDerivedGet,
     LogicalSample,
-    LogicalJoin    
 )
 from eva.optimizer.rules.rules import (
     CombineSimilarityOrderByAndLimitToFaissIndexScan,
-    EmbedFilterIntoDerivedGet,
     EmbedFilterIntoGet,
-    EmbedProjectIntoDerivedGet,
     EmbedProjectIntoGet,
     EmbedSampleIntoGet,
     LogicalApplyAndMergeToPhysical,
@@ -70,8 +67,9 @@ from eva.optimizer.rules.rules import (
     XformLateralJoinToLinearFlow,
 )
 from eva.optimizer.rules.rules_manager import RulesManager
-from eva.server.command_handler import execute_query_fetch_all
 from eva.parser.types import JoinType
+from eva.server.command_handler import execute_query_fetch_all
+
 
 class RulesTest(unittest.TestCase):
     @classmethod
@@ -249,30 +247,6 @@ class RulesTest(unittest.TestCase):
         rewrite_opr = next(rule.apply(logi_filter, MagicMock()))
         self.assertFalse(rewrite_opr is logi_get)
         self.assertEqual(rewrite_opr.predicate, predicate)
-
-    def test_embed_filter_into_derived_get(self):
-        rule = EmbedFilterIntoDerivedGet()
-        predicate = MagicMock()
-
-        logi_derived_get = LogicalQueryDerivedGet(MagicMock())
-        logi_filter = LogicalFilter(predicate, [logi_derived_get])
-
-        self.assertTrue(rule.check(logi_derived_get, MagicMock()))
-        rewrite_opr = next(rule.apply(logi_filter, MagicMock()))
-        self.assertFalse(rewrite_opr is logi_derived_get)
-        self.assertEqual(rewrite_opr.predicate, predicate)
-
-    def test_embed_project_into_derived_get(self):
-        rule = EmbedProjectIntoDerivedGet()
-        target_list = MagicMock()
-
-        logi_derived_get = LogicalQueryDerivedGet(MagicMock())
-        logi_project = LogicalProject(target_list, [logi_derived_get])
-
-        self.assertTrue(rule.check(logi_derived_get, MagicMock()))
-        rewrite_opr = next(rule.apply(logi_project, MagicMock()))
-        self.assertFalse(rewrite_opr is logi_derived_get)
-        self.assertEqual(rewrite_opr.target_list, target_list)
 
     def test_embed_sample_into_get_does_not_work_with_structured_data(self):
         rule = EmbedSampleIntoGet()

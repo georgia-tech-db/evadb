@@ -88,7 +88,6 @@ from eva.plan_nodes.limit_plan import LimitPlan
 from eva.plan_nodes.load_data_plan import LoadDataPlan
 from eva.plan_nodes.orderby_plan import OrderByPlan
 from eva.plan_nodes.rename_plan import RenamePlan
-from eva.plan_nodes.sample_plan import SamplePlan
 from eva.plan_nodes.seq_scan_plan import SeqScanPlan
 from eva.plan_nodes.storage_plan import StoragePlan
 from eva.plan_nodes.union_plan import UnionPlan
@@ -206,63 +205,6 @@ class EmbedProjectIntoGet(Rule):
         )
 
         yield new_get_opr
-
-
-# For nested queries
-
-
-class EmbedFilterIntoDerivedGet(Rule):
-    def __init__(self):
-        pattern = Pattern(OperatorType.LOGICALFILTER)
-        pattern_get = Pattern(OperatorType.LOGICALQUERYDERIVEDGET)
-        pattern_get.append_child(Pattern(OperatorType.DUMMY))
-        pattern.append_child(pattern_get)
-        super().__init__(RuleType.EMBED_FILTER_INTO_DERIVED_GET, pattern)
-
-    def promise(self):
-        return Promise.EMBED_FILTER_INTO_DERIVED_GET
-
-    def check(self, before: LogicalFilter, context: OptimizerContext):
-        # nothing else to check if logical match found return true
-        return True
-
-    def apply(self, before: LogicalFilter, context: OptimizerContext):
-        predicate = before.predicate
-        ld_get = before.children[0]
-        new_opr = LogicalQueryDerivedGet(
-            alias=ld_get.alias,
-            predicate=predicate,
-            target_list=ld_get.target_list,
-            children=ld_get.children,
-        )
-        yield new_opr
-
-
-class EmbedProjectIntoDerivedGet(Rule):
-    def __init__(self):
-        pattern = Pattern(OperatorType.LOGICALPROJECT)
-        pattern_get = Pattern(OperatorType.LOGICALQUERYDERIVEDGET)
-        pattern_get.append_child(Pattern(OperatorType.DUMMY))
-        pattern.append_child(pattern_get)
-        super().__init__(RuleType.EMBED_PROJECT_INTO_DERIVED_GET, pattern)
-
-    def promise(self):
-        return Promise.EMBED_PROJECT_INTO_DERIVED_GET
-
-    def check(self, before: LogicalProject, context: OptimizerContext):
-        # nothing else to check if logical match found return true
-        return True
-
-    def apply(self, before: LogicalProject, context: OptimizerContext):
-        target_list = before.target_list
-        ld_get = before.children[0]
-        new_opr = LogicalQueryDerivedGet(
-            alias=ld_get.alias,
-            predicate=ld_get.predicate,
-            target_list=target_list,
-            children=ld_get.children,
-        )
-        yield new_opr
 
 
 # Join Queries
