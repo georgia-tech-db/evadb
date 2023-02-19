@@ -47,16 +47,17 @@ EVA_TEST_DATA_DIR = Path(config.get_value("core", "eva_installation_dir")).paren
 
 
 def get_all_subclasses(cls):
-        subclass_list = []
+    subclass_list = []
 
-        def recurse(klass):
-            for subclass in klass.__subclasses__():
-                subclass_list.append(subclass)
-                recurse(subclass)
+    def recurse(klass):
+        for subclass in klass.__subclasses__():
+            subclass_list.append(subclass)
+            recurse(subclass)
 
-        recurse(cls)
+    recurse(cls)
 
-        return set(subclass_list)
+    return set(subclass_list)
+
 
 def get_logical_query_plan(query: str) -> Operator:
     """Get the query plan
@@ -483,4 +484,3 @@ class DummyFeatureExtractor(AbstractClassifierUDF):
         ret = pd.DataFrame()
         ret["features"] = df.apply(_extract_feature, axis=1)
         return ret
-

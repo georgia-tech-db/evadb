@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+from inspect import signature
+from test.util import get_all_subclasses
 
 from mock import MagicMock, patch
 
@@ -26,8 +28,8 @@ from eva.optimizer.operators import (
     LogicalDelete,
     LogicalDrop,
     LogicalDropUDF,
-    LogicalExplain,
     LogicalExchange,
+    LogicalExplain,
     LogicalFaissIndexScan,
     LogicalFilter,
     LogicalFunctionScan,
@@ -35,8 +37,8 @@ from eva.optimizer.operators import (
     LogicalGroupBy,
     LogicalInsert,
     LogicalJoin,
-    LogicalLoadData,
     LogicalLimit,
+    LogicalLoadData,
     LogicalOrderBy,
     LogicalProject,
     LogicalQueryDerivedGet,
@@ -45,6 +47,7 @@ from eva.optimizer.operators import (
     LogicalShow,
     LogicalUnion,
     LogicalUpload,
+    Operator,
 )
 from eva.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
 from eva.parser.create_index_statement import CreateIndexStatement
@@ -56,9 +59,7 @@ from eva.parser.explain_statement import ExplainStatement
 from eva.parser.insert_statement import InsertTableStatement
 from eva.parser.rename_statement import RenameTableStatement
 from eva.parser.select_statement import SelectStatement
-from eva.parser.table_ref import TableInfo, TableRef
-from eva.optimizer.operators import Operator
-from test.util import get_all_subclasses
+from eva.parser.table_ref import TableRef
 
 
 class StatementToOprTest(unittest.TestCase):
@@ -248,7 +249,9 @@ statement_to_opr_convertor.column_definition_to_udf_io"
         plans = []
         dummy_plan = Dummy(MagicMock(), MagicMock())
         create_plan = LogicalCreate(MagicMock(), MagicMock())
-        create_udf_plan = LogicalCreateUDF(MagicMock(), MagicMock(), MagicMock(), MagicMock(), MagicMock(), MagicMock())
+        create_udf_plan = LogicalCreateUDF(
+            MagicMock(), MagicMock(), MagicMock(), MagicMock(), MagicMock(), MagicMock()
+        )
         create_index_plan = LogicalCreateIndex(
             MagicMock(), MagicMock(), MagicMock(), MagicMock(), MagicMock()
         )
@@ -256,7 +259,9 @@ statement_to_opr_convertor.column_definition_to_udf_io"
             MagicMock(), MagicMock(), MagicMock(), MagicMock()
         )
         delete_plan = LogicalDelete(MagicMock())
-        insert_plan = LogicalInsert(MagicMock(), MagicMock(), [MagicMock()], [MagicMock()])
+        insert_plan = LogicalInsert(
+            MagicMock(), MagicMock(), [MagicMock()], [MagicMock()]
+        )
         query_derived_plan = LogicalQueryDerivedGet(MagicMock())
         load_plan = LogicalLoadData(MagicMock(), MagicMock(), MagicMock(), MagicMock())
         limit_plan = LogicalLimit(MagicMock())
@@ -321,12 +326,17 @@ statement_to_opr_convertor.column_definition_to_udf_io"
 
         length = len(plans)
         self.assertEqual(length, len(derived_operators))
-        self.assertEqual(
-            len(list(set(derived_operators) - set(plan_type_list))), 0
-            )
+        self.assertEqual(len(list(set(derived_operators) - set(plan_type_list))), 0)
 
         for i in range(length):
             self.assertEqual(plans[i], plans[i])
             self.assertNotEqual(str(plans[i]), None)
             if i >= 1:  # compare against next plan
                 self.assertNotEqual(plans[i - 1], plans[i])
+
+        derived_operators = list(get_all_subclasses(Operator))
+
+        for derived_operator in derived_operators:
+            sig = signature(derived_operator.__init__)
+            params = sig.parameters
+            self.assertLess(len(params), 10)
