@@ -18,6 +18,8 @@ from test.util import create_sample_video, load_inbuilt_udfs
 from mock import MagicMock
 
 from eva.catalog.catalog_manager import CatalogManager
+from eva.catalog.catalog_type import TableType
+from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.experimental.ray.optimizer.rules.rules import LogicalExchangeToPhysical
 from eva.optimizer.operators import (
@@ -25,6 +27,7 @@ from eva.optimizer.operators import (
     LogicalGet,
     LogicalProject,
     LogicalQueryDerivedGet,
+    LogicalSample,
 )
 from eva.optimizer.rules.rules import (
     CombineSimilarityOrderByAndLimitToFaissIndexScan,
@@ -86,71 +89,63 @@ class RulesTest(unittest.TestCase):
 
     def test_rules_promises_order(self):
         # Promise of all rewrite should be greater than implementation
-        self.assertTrue(
-            Promise.EMBED_FILTER_INTO_DERIVED_GET > Promise.IMPLEMENTATION_DELIMETER
-        )
-        self.assertTrue(
-            Promise.EMBED_PROJECT_INTO_DERIVED_GET > Promise.IMPLEMENTATION_DELIMETER
-        )
-        self.assertTrue(
-            Promise.EMBED_SAMPLE_INTO_GET > Promise.IMPLEMENTATION_DELIMETER
-        )
-        self.assertTrue(
-            Promise.EMBED_FILTER_INTO_GET > Promise.IMPLEMENTATION_DELIMETER
-        )
-        self.assertTrue(
-            Promise.EMBED_PROJECT_INTO_GET > Promise.IMPLEMENTATION_DELIMETER
-        )
+        rewrite_promises = [
+            Promise.LOGICAL_INNER_JOIN_COMMUTATIVITY,
+            Promise.EMBED_FILTER_INTO_GET,
+            Promise.EMBED_PROJECT_INTO_GET,
+            Promise.EMBED_FILTER_INTO_DERIVED_GET,
+            Promise.EMBED_PROJECT_INTO_DERIVED_GET,
+            Promise.EMBED_SAMPLE_INTO_GET,
+            Promise.XFORM_LATERAL_JOIN_TO_LINEAR_FLOW,
+            Promise.PUSHDOWN_FILTER_THROUGH_JOIN,
+            Promise.PUSHDOWN_FILTER_THROUGH_APPLY_AND_MERGE,
+            Promise.COMBINE_SIMILARITY_ORDERBY_AND_LIMIT_TO_FAISS_INDEX_SCAN,
+        ]
+
+        for promise in rewrite_promises:
+            self.assertTrue(promise > Promise.IMPLEMENTATION_DELIMETER)
 
         # Promise of implementation rules should be lesser than rewrite rules
-        self.assertTrue(
-            Promise.LOGICAL_CREATE_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
-        )
-        self.assertTrue(
-            Promise.LOGICAL_CREATE_UDF_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
-        )
-        self.assertTrue(
-            Promise.LOGICAL_DERIVED_GET_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
-        )
-        self.assertTrue(
-            Promise.LOGICAL_GET_TO_SEQSCAN < Promise.IMPLEMENTATION_DELIMETER
-        )
-        self.assertTrue(
-            Promise.LOGICAL_INSERT_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
-        )
-        self.assertTrue(
-            Promise.LOGICAL_LIMIT_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
-        )
-        self.assertTrue(
-            Promise.LOGICAL_GROUPBY_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
-        )
-        self.assertTrue(
-            Promise.LOGICAL_ORDERBY_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
-        )
-        self.assertTrue(
-            Promise.LOGICAL_SAMPLE_TO_UNIFORMSAMPLE < Promise.IMPLEMENTATION_DELIMETER
-        )
-        self.assertTrue(
-            Promise.LOGICAL_LOAD_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
-        )
-        self.assertTrue(
-            Promise.LOGICAL_UPLOAD_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
-        )
-        self.assertTrue(
-            Promise.LOGICAL_UNION_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
-        )
-        self.assertTrue(
-            Promise.LOGICAL_RENAME_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
-        )
-        self.assertTrue(
-            Promise.LOGICAL_DROP_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
-        )
-        self.assertTrue(
-            Promise.LOGICAL_EXPLAIN_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
-        )
-        self.assertTrue(
-            Promise.LOGICAL_CREATE_INDEX_TO_FAISS < Promise.IMPLEMENTATION_DELIMETER
-        )
+        implementation_promises = [
+            Promise.LOGICAL_EXCHANGE_TO_PHYSICAL,
+            Promise.LOGICAL_UNION_TO_PHYSICAL,
+            Promise.LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL,
+            Promise.LOGICAL_GROUPBY_TO_PHYSICAL,
+            Promise.LOGICAL_ORDERBY_TO_PHYSICAL,
+            Promise.LOGICAL_LIMIT_TO_PHYSICAL,
+            Promise.LOGICAL_INSERT_TO_PHYSICAL,
+            Promise.LOGICAL_DELETE_TO_PHYSICAL,
+            Promise.LOGICAL_RENAME_TO_PHYSICAL,
+            Promise.LOGICAL_DROP_TO_PHYSICAL,
+            Promise.LOGICAL_LOAD_TO_PHYSICAL,
+            Promise.LOGICAL_UPLOAD_TO_PHYSICAL,
+            Promise.LOGICAL_CREATE_TO_PHYSICAL,
+            Promise.LOGICAL_CREATE_UDF_TO_PHYSICAL,
+            Promise.LOGICAL_SAMPLE_TO_UNIFORMSAMPLE,
+            Promise.LOGICAL_GET_TO_SEQSCAN,
+            Promise.LOGICAL_DERIVED_GET_TO_PHYSICAL,
+            Promise.LOGICAL_LATERAL_JOIN_TO_PHYSICAL,
+            Promise.LOGICAL_JOIN_TO_PHYSICAL_HASH_JOIN,
+            Promise.LOGICAL_FUNCTION_SCAN_TO_PHYSICAL,
+            Promise.LOGICAL_FILTER_TO_PHYSICAL,
+            Promise.LOGICAL_PROJECT_TO_PHYSICAL,
+            Promise.LOGICAL_SHOW_TO_PHYSICAL,
+            Promise.LOGICAL_DROP_UDF_TO_PHYSICAL,
+            Promise.LOGICAL_EXPLAIN_TO_PHYSICAL,
+            Promise.LOGICAL_CREATE_INDEX_TO_FAISS,
+            Promise.LOGICAL_APPLY_AND_MERGE_TO_PHYSICAL,
+            Promise.LOGICAL_FAISS_INDEX_SCAN_TO_PHYSICAL,
+        ]
+
+        for promise in implementation_promises:
+            self.assertTrue(promise < Promise.IMPLEMENTATION_DELIMETER)
+
+        promise_count = len(Promise)
+        rewrite_count = len(set(rewrite_promises))
+        implementation_count = len(set(implementation_promises))
+
+        # rewrite_count + implementation_count + 1 (for IMPLEMENTATION_DELIMETER)
+        self.assertEqual(rewrite_count + implementation_count + 1, promise_count)
 
     def test_supported_rules(self):
         # adding/removing rules should update this test
@@ -279,3 +274,15 @@ class RulesTest(unittest.TestCase):
         rewrite_opr = next(rule.apply(logi_project, MagicMock()))
         self.assertFalse(rewrite_opr is logi_derived_get)
         self.assertEqual(rewrite_opr.target_list, target_list)
+
+    def test_embed_sample_into_get_does_not_work_with_structured_data(self):
+        rule = EmbedSampleIntoGet()
+
+        table_obj = TableCatalogEntry(
+            name="foo", table_type=TableType.STRUCTURED_DATA, file_url=MagicMock()
+        )
+
+        logi_get = LogicalGet(MagicMock(), table_obj, MagicMock(), MagicMock())
+        logi_sample = LogicalSample(MagicMock(), children=[logi_get])
+
+        self.assertFalse(rule.check(logi_sample, MagicMock()))
