@@ -46,6 +46,18 @@ s3_dir_from_config = config.get_value("storage", "s3_download_dir")
 EVA_TEST_DATA_DIR = Path(config.get_value("core", "eva_installation_dir")).parent
 
 
+def get_all_subclasses(cls):
+        subclass_list = []
+
+        def recurse(klass):
+            for subclass in klass.__subclasses__():
+                subclass_list.append(subclass)
+                recurse(subclass)
+
+        recurse(cls)
+
+        return set(subclass_list)
+
 def get_logical_query_plan(query: str) -> Operator:
     """Get the query plan
 
@@ -471,3 +483,4 @@ class DummyFeatureExtractor(AbstractClassifierUDF):
         ret = pd.DataFrame()
         ret["features"] = df.apply(_extract_feature, axis=1)
         return ret
+

@@ -132,7 +132,7 @@ class Operator:
 class Dummy(Operator):
     """
     Acts as a placeholder for matching any operator in optimizer.
-    It track the group_id of the matching operator.
+    It tracks the group_id of the matching operator.
     """
 
     def __init__(self, group_id: int, opr: Operator):
