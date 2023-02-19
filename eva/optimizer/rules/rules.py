@@ -222,7 +222,7 @@ class EmbedFilterIntoDerivedGet(Rule):
     def promise(self):
         return Promise.EMBED_FILTER_INTO_DERIVED_GET
 
-    def check(self, before: Operator, context: OptimizerContext):
+    def check(self, before: LogicalFilter, context: OptimizerContext):
         # nothing else to check if logical match found return true
         return True
 
@@ -249,7 +249,7 @@ class EmbedProjectIntoDerivedGet(Rule):
     def promise(self):
         return Promise.EMBED_PROJECT_INTO_DERIVED_GET
 
-    def check(self, before: Operator, context: OptimizerContext):
+    def check(self, before: LogicalProject, context: OptimizerContext):
         # nothing else to check if logical match found return true
         return True
 
@@ -775,25 +775,6 @@ class LogicalGetToSeqScan(Rule):
                 sampling_rate=before.sampling_rate,
             )
         )
-        yield after
-
-
-class LogicalSampleToUniformSample(Rule):
-    def __init__(self):
-        pattern = Pattern(OperatorType.LOGICALSAMPLE)
-        pattern.append_child(Pattern(OperatorType.DUMMY))
-        super().__init__(RuleType.LOGICAL_SAMPLE_TO_UNIFORMSAMPLE, pattern)
-
-    def promise(self):
-        return Promise.LOGICAL_SAMPLE_TO_UNIFORMSAMPLE
-
-    def check(self, before: Operator, context: OptimizerContext):
-        return True
-
-    def apply(self, before: LogicalSample, context: OptimizerContext):
-        after = SamplePlan(before.sample_freq)
-        for child in before.children:
-            after.append_child(child)
         yield after
 
 

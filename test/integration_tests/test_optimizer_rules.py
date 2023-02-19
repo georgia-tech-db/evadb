@@ -86,6 +86,8 @@ class OptimizerRulesTest(unittest.TestCase):
 
         self.assertEqual(result_without_xform_rule, result_with_rule)
 
+        
+
     def test_should_support_pushdown_with_right_join(self):
         query = """SELECT A.id FROM MyVideo AS A JOIN MyVideo AS B
                     WHERE A.id = B.id AND B.id < 10"""

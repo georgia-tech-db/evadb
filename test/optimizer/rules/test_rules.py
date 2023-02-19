@@ -28,6 +28,7 @@ from eva.optimizer.operators import (
     LogicalProject,
     LogicalQueryDerivedGet,
     LogicalSample,
+    LogicalJoin    
 )
 from eva.optimizer.rules.rules import (
     CombineSimilarityOrderByAndLimitToFaissIndexScan,
@@ -60,7 +61,6 @@ from eva.optimizer.rules.rules import (
     LogicalOrderByToPhysical,
     LogicalProjectToPhysical,
     LogicalRenameToPhysical,
-    LogicalSampleToUniformSample,
     LogicalShowToPhysical,
     LogicalUnionToPhysical,
     LogicalUploadToPhysical,
@@ -71,7 +71,7 @@ from eva.optimizer.rules.rules import (
 )
 from eva.optimizer.rules.rules_manager import RulesManager
 from eva.server.command_handler import execute_query_fetch_all
-
+from eva.parser.types import JoinType
 
 class RulesTest(unittest.TestCase):
     @classmethod
@@ -189,7 +189,6 @@ class RulesTest(unittest.TestCase):
             LogicalDeleteToPhysical(),
             LogicalLoadToPhysical(),
             LogicalUploadToPhysical(),
-            LogicalSampleToUniformSample(),
             LogicalGetToSeqScan(),
             LogicalDerivedGetToPhysical(),
             LogicalUnionToPhysical(),
@@ -251,26 +250,26 @@ class RulesTest(unittest.TestCase):
         self.assertFalse(rewrite_opr is logi_get)
         self.assertEqual(rewrite_opr.predicate, predicate)
 
-    # EmbedFilterIntoDerivedGet
-    def test_simple_filter_into_derived_get(self):
+    def test_embed_filter_into_derived_get(self):
         rule = EmbedFilterIntoDerivedGet()
         predicate = MagicMock()
 
         logi_derived_get = LogicalQueryDerivedGet(MagicMock())
         logi_filter = LogicalFilter(predicate, [logi_derived_get])
 
+        self.assertTrue(rule.check(logi_derived_get, MagicMock()))
         rewrite_opr = next(rule.apply(logi_filter, MagicMock()))
         self.assertFalse(rewrite_opr is logi_derived_get)
         self.assertEqual(rewrite_opr.predicate, predicate)
 
-    # EmbedProjectIntoDerivedGet
-    def test_simple_project_into_derived_get(self):
+    def test_embed_project_into_derived_get(self):
         rule = EmbedProjectIntoDerivedGet()
         target_list = MagicMock()
 
         logi_derived_get = LogicalQueryDerivedGet(MagicMock())
         logi_project = LogicalProject(target_list, [logi_derived_get])
 
+        self.assertTrue(rule.check(logi_derived_get, MagicMock()))
         rewrite_opr = next(rule.apply(logi_project, MagicMock()))
         self.assertFalse(rewrite_opr is logi_derived_get)
         self.assertEqual(rewrite_opr.target_list, target_list)
@@ -286,3 +285,8 @@ class RulesTest(unittest.TestCase):
         logi_sample = LogicalSample(MagicMock(), children=[logi_get])
 
         self.assertFalse(rule.check(logi_sample, MagicMock()))
+
+    def test_xform_lateral_join_does_not_work_with_other_join(self):
+        rule = XformLateralJoinToLinearFlow()
+        logi_join = LogicalJoin(JoinType.INNER_JOIN)
+        self.assertFalse(rule.check(logi_join, MagicMock()))
