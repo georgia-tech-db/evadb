@@ -18,7 +18,7 @@ import unittest
 
 from mock import AsyncMock, MagicMock, patch
 
-from eva.server.interpreter import start_cmd_client
+from eva.server.interpreter import start_cmd_client, create_stdin_reader
 
 # Check for Python 3.8+ for IsolatedAsyncioTestCase support
 if sys.version_info >= (3, 8):
@@ -84,3 +84,11 @@ if sys.version_info >= (3, 8):
 
             with self.assertRaises(Exception):
                 await start_cmd_client(host, port)
+
+        @patch("asyncio.events.AbstractEventLoop.connect_read_pipe")
+        async def test_create_stdin_reader(self, mock_read_pipe):
+
+            sys.stdin = MagicMock()
+
+            stdin_reader = await create_stdin_reader()
+            self.assertNotEqual(stdin_reader, None)

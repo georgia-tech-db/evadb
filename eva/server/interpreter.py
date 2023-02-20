@@ -34,19 +34,12 @@ with open(version_file_path, "r") as version_file:
 
 
 async def read_line(stdin_reader: StreamReader) -> str:
-    delete_char = b"\x7f"
     input_buffer = deque()
     while True:
         input_char = await stdin_reader.read(1)
         if input_char == b";":
             break
-        # If the input character is backspace, remove the last character
-        if input_char == delete_char:
-            if len(input_buffer) > 0:
-                input_buffer.pop()
-        # Else, append it to the buffer and echo.
-        else:
-            input_buffer.append(input_char)
+        input_buffer.append(input_char)
     message = b"".join(input_buffer).decode()
     return message
 
