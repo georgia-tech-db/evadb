@@ -101,4 +101,5 @@ async def start_cmd_client(host: str, port: int):
         if writer is not None:
             writer.close()
             await writer.wait_closed()
+            await input_listener.cancel()
         raise e
