@@ -87,7 +87,6 @@ async def start_cmd_client(host: str, port: int):
     Start client
     """
     try:
-        reader, writer = None, None
         reader, writer = await asyncio.open_connection(host, port)
         stdin_reader = await create_stdin_reader()
 
@@ -98,8 +97,5 @@ async def start_cmd_client(host: str, port: int):
         await asyncio.wait([input_listener], return_when=asyncio.FIRST_COMPLETED)
     except Exception as e:
         logger.error("Error.", exc_info=e)
-        if writer is not None:
-            writer.close()
-            await writer.wait_closed()
-            await input_listener.cancel()
-        raise e
+        writer.close()
+        # await writer.wait_closed()
