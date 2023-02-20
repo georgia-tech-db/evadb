@@ -16,9 +16,9 @@ import asyncio
 import sys
 import unittest
 
-from mock import AsyncMock, MagicMock, patch
+from mock import MagicMock, patch
 
-from eva.server.interpreter import start_cmd_client, create_stdin_reader
+from eva.server.interpreter import create_stdin_reader, start_cmd_client
 
 # Check for Python 3.8+ for IsolatedAsyncioTestCase support
 if sys.version_info >= (3, 8):
@@ -55,39 +55,15 @@ if sys.version_info >= (3, 8):
             # with self.assertRaises(Exception):
             await start_cmd_client(host, port)
 
-        @patch("asyncio.wait")
         @patch("asyncio.open_connection")
-        @patch("eva.server.interpreter.create_stdin_reader")
-        @patch("eva.server.db_api.EVACursor.fetch_all_async")
-        async def test_exception_in_start_cmd_client(
-            self, mock_fetch, mock_stdin_reader, mock_open, mock_wait
-        ):
-            host = "localhost"
-            port = 5432
-
-            server_reader = asyncio.StreamReader()
-            server_writer = AsyncMock()
-
-            server_reader.feed_data(b"SHOW UDFS;\n")
-            server_reader.feed_data(b"EXIT;\n")
-
-            mock_open.return_value = (server_reader, server_writer)
-
-            stdin_reader = asyncio.StreamReader()
-            stdin_reader.feed_data(b"SHOW UDFS;\n")
-            stdin_reader.feed_data(b"EXIT;\n")
-            stdin_reader.feed_eof()
-
-            mock_stdin_reader.return_value = stdin_reader
-
-            mock_wait.side_effect = Exception("wait")
+        async def test_exception_in_start_cmd_client(self, mock_open):
+            mock_open.side_effect = Exception("open")
 
             with self.assertRaises(Exception):
-                await start_cmd_client(host, port)
+                await start_cmd_client(MagicMock(), MagicMock())
 
         @patch("asyncio.events.AbstractEventLoop.connect_read_pipe")
         async def test_create_stdin_reader(self, mock_read_pipe):
-
             sys.stdin = MagicMock()
 
             stdin_reader = await create_stdin_reader()

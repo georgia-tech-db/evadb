@@ -86,17 +86,19 @@ async def start_cmd_client(host: str, port: int):
     """
     Start client
     """
-    reader, writer = await asyncio.open_connection(host, port)
-    stdin_reader = await create_stdin_reader()
-
-    input_listener = asyncio.create_task(
-        read_from_client_and_send_to_server(stdin_reader, writer, reader)
-    )
-
     try:
+        reader, writer = None, None
+        reader, writer = await asyncio.open_connection(host, port)
+        stdin_reader = await create_stdin_reader()
+
+        input_listener = asyncio.create_task(
+            read_from_client_and_send_to_server(stdin_reader, writer, reader)
+        )
+
         await asyncio.wait([input_listener], return_when=asyncio.FIRST_COMPLETED)
     except Exception as e:
         logger.error("Error.", exc_info=e)
-        writer.close()
-        await writer.wait_closed()
+        if writer is not None:
+            writer.close()
+            await writer.wait_closed()
         raise e
