@@ -196,6 +196,34 @@ class ParserTests(unittest.TestCase):
             self.assertIsInstance(eva_statement_list[0], AbstractStatement)
             self.assertEqual(eva_statement_list[0], expected_stmt)
 
+    def test_create_table_statement_with_rare_datatypes(self):
+        parser = Parser()
+        query = """CREATE TABLE IF NOT EXISTS Dummy (
+                  C NDARRAY UINT8(5),
+                  D NDARRAY INT16(5),
+                  E NDARRAY INT32(5),
+                  F NDARRAY INT64(5),
+                  G NDARRAY UNICODE(5),
+                  H NDARRAY BOOLEAN(5),
+                  I NDARRAY FLOAT64(5),
+                  J NDARRAY DECIMAL(5),
+                  K NDARRAY DATETIME(5)
+            );"""
+
+        eva_statement_list = parser.parse(query)
+        self.assertIsInstance(eva_statement_list, list)
+        self.assertEqual(len(eva_statement_list), 1)
+        self.assertIsInstance(eva_statement_list[0], AbstractStatement)
+
+    def test_create_table_statement_without_proper_datatype(self):
+        parser = Parser()
+        query = """CREATE TABLE IF NOT EXISTS Dummy (
+                  C NDARRAY INT(5)
+                );"""
+
+        with self.assertRaises(Exception):
+            parser.parse(query)
+
     def test_create_table_exception_statement(self):
         parser = Parser()
 

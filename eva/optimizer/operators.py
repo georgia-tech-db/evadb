@@ -132,16 +132,13 @@ class Operator:
 class Dummy(Operator):
     """
     Acts as a placeholder for matching any operator in optimizer.
-    It track the group_id of the matching operator.
+    It tracks the group_id of the matching operator.
     """
 
     def __init__(self, group_id: int, opr: Operator):
         super().__init__(OperatorType.DUMMY, None)
         self.group_id = group_id
         self.opr = opr
-
-    def __hash__(self) -> int:
-        return hash((super().__hash__(), self.group_id))
 
 
 class LogicalGet(Operator):
@@ -179,17 +176,9 @@ class LogicalGet(Operator):
     def predicate(self):
         return self._predicate
 
-    @predicate.setter
-    def predicate(self, predicate):
-        self._predicate = predicate
-
     @property
     def target_list(self):
         return self._target_list
-
-    @target_list.setter
-    def target_list(self, target_list):
-        self._target_list = target_list
 
     @property
     def sampling_rate(self):
@@ -1110,12 +1099,10 @@ class LogicalExchange(Operator):
         super().__init__(OperatorType.LOGICALEXCHANGE, children)
 
     def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
         if not isinstance(other, LogicalExchange):
             return False
-        return True
-
-    def __hash__(self) -> int:
-        return super().__hash__()
+        return is_subtree_equal
 
 
 class LogicalExplain(Operator):

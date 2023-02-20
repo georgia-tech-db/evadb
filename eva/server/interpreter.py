@@ -34,19 +34,12 @@ with open(version_file_path, "r") as version_file:
 
 
 async def read_line(stdin_reader: StreamReader) -> str:
-    delete_char = b"\x7f"
     input_buffer = deque()
     while True:
         input_char = await stdin_reader.read(1)
         if input_char == b";":
             break
-        # If the input character is backspace, remove the last character
-        if input_char == delete_char:
-            if len(input_buffer) > 0:
-                input_buffer.pop()
-        # Else, append it to the buffer and echo.
-        else:
-            input_buffer.append(input_char)
+        input_buffer.append(input_char)
     message = b"".join(input_buffer).decode()
     return message
 
@@ -93,17 +86,16 @@ async def start_cmd_client(host: str, port: int):
     """
     Start client
     """
-    reader, writer = await asyncio.open_connection(host, port)
-    stdin_reader = await create_stdin_reader()
-
-    input_listener = asyncio.create_task(
-        read_from_client_and_send_to_server(stdin_reader, writer, reader)
-    )
-
     try:
+        reader, writer = await asyncio.open_connection(host, port)
+        stdin_reader = await create_stdin_reader()
+
+        input_listener = asyncio.create_task(
+            read_from_client_and_send_to_server(stdin_reader, writer, reader)
+        )
+
         await asyncio.wait([input_listener], return_when=asyncio.FIRST_COMPLETED)
     except Exception as e:
         logger.error("Error.", exc_info=e)
         writer.close()
-        await writer.wait_closed()
-        raise e
+        # await writer.wait_closed()

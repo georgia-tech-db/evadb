@@ -69,7 +69,8 @@ def conjuction_list_to_expression_tree(
         return None
     prev_expr = expression_list[0]
     for expr in expression_list[1:]:
-        prev_expr = LogicalExpression(ExpressionType.LOGICAL_AND, prev_expr, expr)
+        if expr is not None:
+            prev_expr = LogicalExpression(ExpressionType.LOGICAL_AND, prev_expr, expr)
     return prev_expr
 
 

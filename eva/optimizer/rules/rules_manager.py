@@ -62,7 +62,6 @@ from eva.optimizer.rules.rules import (
 )
 from eva.optimizer.rules.rules import (
     LogicalRenameToPhysical,
-    LogicalSampleToUniformSample,
     LogicalShowToPhysical,
     LogicalUnionToPhysical,
     LogicalUploadToPhysical,
@@ -101,7 +100,6 @@ class RulesManager:
             LogicalDeleteToPhysical(),
             LogicalLoadToPhysical(),
             LogicalUploadToPhysical(),
-            LogicalSampleToUniformSample(),
             DistributedLogicalGetToSeqScan()
             if ray_enabled
             else SequentialLogicalGetToSeqScan(),

@@ -46,7 +46,7 @@ class PytorchTest(unittest.TestCase):
         ua_detrac = f"{EVA_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
         mnist = f"{EVA_ROOT_DIR}/data/mnist/mnist.mp4"
         actions = f"{EVA_ROOT_DIR}/data/actions/actions.mp4"
-        asl_actions = f"{EVA_ROOT_DIR}/data/actions/computer_asl.avi"
+        asl_actions = f"{EVA_ROOT_DIR}/data/actions/computer_asl.mp4"
         meme1 = f"{EVA_ROOT_DIR}/data/detoxify/meme1.jpg"
         meme2 = f"{EVA_ROOT_DIR}/data/detoxify/meme2.jpg"
 
@@ -63,7 +63,7 @@ class PytorchTest(unittest.TestCase):
         file_remove("ua_detrac.mp4")
         file_remove("mnist.mp4")
         file_remove("actions.mp4")
-        file_remove("computer_asl.avi")
+        file_remove("computer_asl.mp4")
 
         execute_query_fetch_all("DROP TABLE IF EXISTS Actions;")
         execute_query_fetch_all("DROP TABLE IF EXISTS Mnist;")
@@ -105,11 +105,14 @@ class PytorchTest(unittest.TestCase):
     def test_should_run_pytorch_and_asl(self):
         execute_query_fetch_all(Asl_udf_query)
         select_query = """SELECT FIRST(id), ASLActionRecognition(SEGMENT(data))
-                        FROM Asl_actions SAMPLE 5 GROUP BY '16f';"""
+                        FROM Asl_actions
+                        SAMPLE 5
+                        GROUP BY '16f';"""
         actual_batch = execute_query_fetch_all(select_query)
 
         res = actual_batch.frames
 
+        self.assertEqual(len(res), 1)
         for idx in res.index:
             self.assertTrue("computer" in res["aslactionrecognition.labels"][idx])
 

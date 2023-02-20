@@ -14,3 +14,6 @@ exclude_lines =
     class LogicalExchangeToPhysical(Rule):
     class LogicalExchange(Operator):
 
+[html]
+show_contexts = True
+

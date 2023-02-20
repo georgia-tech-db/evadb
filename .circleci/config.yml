@@ -6,21 +6,48 @@ orbs:
 workflows:
   main:
     jobs:
-        - Windows   
         - test:
-            name: "Linux - Python v3.7"
+            name: "Test | v3.7 | Linux"
             v: "3.7"
+            mode: "TEST"
         - test:
-            name: "Linux - Python v3.8"
+            name: "Test | v3.8 | Linux"
             v: "3.8"
+            mode: "TEST"
         - test:
-            name: "Linux - Python v3.9"
+            name: "Test | v3.9 | Linux"
             v: "3.9"
+            mode: "TEST"
         - test:
-            name: "Linux - Python v3.10"
+            name: "Test | v3.10 | Linux"
             v: "3.10"
+            mode: "TEST"
+        ### NOTEBOOKS
+        - test:
+            name: "Notebook | v3.7 | Linux"
+            v: "3.7"
+            mode: "NOTEBOOK"
+        - test:
+            name: "Notebook | v3.8 | Linux"
+            v: "3.8"
+            mode: "NOTEBOOK"
+        - test:
+            name: "Notebook | v3.9 | Linux"
+            v: "3.9"
+            mode: "NOTEBOOK"
+        - test:
+            name: "Notebook | v3.10 | Linux"
+            v: "3.10"
+            mode: "NOTEBOOK"
+        ### LINTER
+        - test:
+            name: "Linter | Linux"
+            v: "3.10"
+            mode: "LINTER"
+        - Pip
+        - Windows   
         #- test:
-        #    name: "Linux - Python v3.11"  # missing Torchvision
+        #    name: "Linux -  v3.11"  # missing Torchvision
         #    v: "3.11"
 
 jobs:
@@ -29,24 +56,16 @@ jobs:
       v:
         type: string
         default: "3.7"
+      mode:
+        type: string
+        default: "ALL"
     resource_class: large
     docker:
       # https://circleci.com/docs/circleci-images#language-image-variants
-      # This comes with python and openjdk11
       - image: "cimg/python:<< parameters.v >>"
     steps:
 
       - checkout
-      - restore_cache:
-          keys:
-            - v1-model_cache-{{ checksum "setup.py" }}
-
-      - run:
-          name: Install EVA package from pip and start server
-          command: |
-            pip install --upgrade pip
-            pip install evadb
-            bash script/test/package.sh
 
       - run:
           name: Install EVA package from GitHub repo with all dependencies
@@ -59,13 +78,7 @@ jobs:
           name: Test and upload coverage report to coveralls
           command: |
             source test_evadb/bin/activate
-            sh script/test/test.sh
-
-      - save_cache:
-          key: v1-model_cache-{{ checksum "setup.py" }}
-          paths:
-            - /home/circleci/.cache/torch/hub/
-            - /home/circleci/.EasyOCR/
+            bash script/test/test.sh -m "<< parameters.mode >>"
     
   Windows:
     executor: win/default
@@ -85,4 +98,19 @@ jobs:
             virtualenv test_evadb
             test_evadb\Scripts\activate
             pip install ".[dev]"       
-            sh script\test\test.sh
+            bash script\test\test.sh
+
+  Pip:
+    resource_class: large
+    docker:
+      - image: "cimg/python:3.10"
+    steps:
+
+      - checkout
+
+      - run:
+          name: Install EVA package from pip and start server
+          command: |
+            pip install --upgrade pip
+            pip install evadb
+            bash script/test/package.sh

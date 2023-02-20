@@ -88,7 +88,6 @@ from eva.plan_nodes.limit_plan import LimitPlan
 from eva.plan_nodes.load_data_plan import LoadDataPlan
 from eva.plan_nodes.orderby_plan import OrderByPlan
 from eva.plan_nodes.rename_plan import RenamePlan
-from eva.plan_nodes.sample_plan import SamplePlan
 from eva.plan_nodes.seq_scan_plan import SeqScanPlan
 from eva.plan_nodes.storage_plan import StoragePlan
 from eva.plan_nodes.union_plan import UnionPlan
@@ -208,63 +207,6 @@ class EmbedProjectIntoGet(Rule):
         yield new_get_opr
 
 
-# For nested queries
-
-
-class EmbedFilterIntoDerivedGet(Rule):
-    def __init__(self):
-        pattern = Pattern(OperatorType.LOGICALFILTER)
-        pattern_get = Pattern(OperatorType.LOGICALQUERYDERIVEDGET)
-        pattern_get.append_child(Pattern(OperatorType.DUMMY))
-        pattern.append_child(pattern_get)
-        super().__init__(RuleType.EMBED_FILTER_INTO_DERIVED_GET, pattern)
-
-    def promise(self):
-        return Promise.EMBED_FILTER_INTO_DERIVED_GET
-
-    def check(self, before: Operator, context: OptimizerContext):
-        # nothing else to check if logical match found return true
-        return True
-
-    def apply(self, before: LogicalFilter, context: OptimizerContext):
-        predicate = before.predicate
-        ld_get = before.children[0]
-        new_opr = LogicalQueryDerivedGet(
-            alias=ld_get.alias,
-            predicate=predicate,
-            target_list=ld_get.target_list,
-            children=ld_get.children,
-        )
-        yield new_opr
-
-
-class EmbedProjectIntoDerivedGet(Rule):
-    def __init__(self):
-        pattern = Pattern(OperatorType.LOGICALPROJECT)
-        pattern_get = Pattern(OperatorType.LOGICALQUERYDERIVEDGET)
-        pattern_get.append_child(Pattern(OperatorType.DUMMY))
-        pattern.append_child(pattern_get)
-        super().__init__(RuleType.EMBED_PROJECT_INTO_DERIVED_GET, pattern)
-
-    def promise(self):
-        return Promise.EMBED_PROJECT_INTO_DERIVED_GET
-
-    def check(self, before: Operator, context: OptimizerContext):
-        # nothing else to check if logical match found return true
-        return True
-
-    def apply(self, before: LogicalProject, context: OptimizerContext):
-        target_list = before.target_list
-        ld_get = before.children[0]
-        new_opr = LogicalQueryDerivedGet(
-            alias=ld_get.alias,
-            predicate=ld_get.predicate,
-            target_list=target_list,
-            children=ld_get.children,
-        )
-        yield new_opr
-
-
 # Join Queries
 class PushDownFilterThroughJoin(Rule):
     def __init__(self):
@@ -318,7 +260,7 @@ class PushDownFilterThroughJoin(Rule):
             new_join_node.append_child(right)
 
         if rem_pred:
-            new_join_node.join_predicate = conjuction_list_to_expression_tree(
+            new_join_node._join_predicate = conjuction_list_to_expression_tree(
                 [rem_pred, new_join_node.join_predicate]
             )
 
@@ -412,9 +354,10 @@ class PushDownFilterThroughApplyAndMerge(Rule):
 
         # If we have partial predicate make it the root
         root_node = apply_and_merge
-        if rem_pred:
-            root_node = LogicalFilter(predicate=rem_pred)
-            root_node.append_child(apply_and_merge)
+        assert rem_pred is None
+        # if rem_pred:
+        #    root_node = LogicalFilter(predicate=rem_pred)
+        #    root_node.append_child(apply_and_merge)
 
         yield root_node
 
@@ -464,16 +407,10 @@ class CombineSimilarityOrderByAndLimitToFaissIndexScan(Rule):
 
         # Check if predicate exists on table.
         def _exists_predicate(opr):
-            if isinstance(opr, LogicalFilter):
-                return True
-            elif isinstance(opr, LogicalGet):
+            if isinstance(opr, LogicalGet):
                 return opr.predicate is not None
-            elif isinstance(opr, LogicalQueryDerivedGet):
-                return opr.predicate is not None
-            exists_predicate = False
-            for child in opr.children:
-                exists_predicate |= _exists_predicate(child)
-            return exists_predicate
+            # LogicalFilter
+            return True
 
         if _exists_predicate(sub_tree_root.opr):
             return
@@ -775,25 +712,6 @@ class LogicalGetToSeqScan(Rule):
                 sampling_rate=before.sampling_rate,
             )
         )
-        yield after
-
-
-class LogicalSampleToUniformSample(Rule):
-    def __init__(self):
-        pattern = Pattern(OperatorType.LOGICALSAMPLE)
-        pattern.append_child(Pattern(OperatorType.DUMMY))
-        super().__init__(RuleType.LOGICAL_SAMPLE_TO_UNIFORMSAMPLE, pattern)
-
-    def promise(self):
-        return Promise.LOGICAL_SAMPLE_TO_UNIFORMSAMPLE
-
-    def check(self, before: Operator, context: OptimizerContext):
-        return True
-
-    def apply(self, before: LogicalSample, context: OptimizerContext):
-        after = SamplePlan(before.sample_freq)
-        for child in before.children:
-            after.append_child(child)
         yield after
 
 
