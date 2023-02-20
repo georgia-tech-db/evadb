@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import argparse
+import asyncio
 import sys
 from os.path import abspath, dirname, join
 
@@ -29,40 +29,28 @@ from eva.configuration.configuration_manager import ConfigurationManager  # noqa
 from eva.server.interpreter import start_cmd_client  # noqa: E402
 
 
-def eva_client(host="0.0.0.0", port=5432):
+async def eva_client():
     """
     Start the eva system
     """
 
-    # Sets up logger
-    config = ConfigurationManager()  # noqa: F841
+    # Get the hostname and port information from the configuration file
+    config = ConfigurationManager()
+    host = config.get_value("server", "host")
+    port = config.get_value("server", "port")
 
-    # Launch server
+    # Launch client
     try:
-        start_cmd_client(host=host, port=port)
+        await start_cmd_client(host, port)
+    except KeyboardInterrupt:
+        pass
     except Exception as e:
         logger.critical(e)
-
-
-def parse_args(args):
-    parser = argparse.ArgumentParser(description="")
-    parser.add_argument(
-        "-H",
-        "--host",
-        dest="host",
-        type=str,
-        help="Host address for EVA server",
-        default="0.0.0.0",
-    )
-    parser.add_argument(
-        "-P", "--port", dest="port", type=int, help="Port for EVA server", default=5432
-    )
-    return parser.parse_args(args)
+        raise e
 
 
 def main():
-    args = parse_args(sys.argv[1:])
-    eva_client(host=args.host, port=args.port)
+    asyncio.run(eva_client())
 
 
 if __name__ == "__main__":

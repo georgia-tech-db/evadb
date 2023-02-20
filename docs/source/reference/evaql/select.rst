@@ -26,7 +26,7 @@ Search for frames containing greater than 3 cars
 .. code:: sql
 
    SELECT id FROM MyVideo
-   WHERE Array_Count(FastRCNNObjectDetector(data).label, 'car') > 3
+   WHERE ArrayCount(FastRCNNObjectDetector(data).label, 'car') > 3
    ORDER BY id;
 
 SELECT WITH MULTIPLE UDFS
