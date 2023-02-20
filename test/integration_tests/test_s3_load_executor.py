@@ -119,8 +119,8 @@ class S3LoadExecutorTest(unittest.TestCase):
 
         s3_dir_path = Path(self.s3_download_dir)
         expected_videos = [
-            s3_dir_path / "MyVideos/1.mp4",
-            s3_dir_path / "MyVideos/2.mp4",
+            (s3_dir_path / "MyVideos/1.mp4").as_posix(),
+            (s3_dir_path / "MyVideos/2.mp4").as_posix(),
             self.video_file_path,
         ]
 
