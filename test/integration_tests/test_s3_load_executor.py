@@ -115,13 +115,15 @@ class S3LoadExecutorTest(unittest.TestCase):
 
         select_query = """SELECT * FROM MyVideos;"""
         result = execute_query_fetch_all(select_query)
-        result_videos = [Path(video).as_posix() for video in result.frames["myvideos.name"].unique()]
-        
+        result_videos = [
+            Path(video).as_posix() for video in result.frames["myvideos.name"].unique()
+        ]
+
         s3_dir_path = Path(self.s3_download_dir)
         expected_videos = [
             (s3_dir_path / "MyVideos/1.mp4").as_posix(),
             (s3_dir_path / "MyVideos/2.mp4").as_posix(),
-            self.video_file_path,
+            Path(self.video_file_path).as_posix(),
         ]
 
         self.assertEqual(result_videos, expected_videos)
