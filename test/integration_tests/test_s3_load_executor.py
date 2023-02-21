@@ -83,7 +83,9 @@ class S3LoadExecutorTest(unittest.TestCase):
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()
         expected_batch = list(
-            create_dummy_batches(video_dir=os.path.join(self.s3_download_dir, "MyVideo"))
+            create_dummy_batches(
+                video_dir=os.path.join(self.s3_download_dir, "MyVideo")
+            )
         )[0]
         self.assertEqual(actual_batch, expected_batch)
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
