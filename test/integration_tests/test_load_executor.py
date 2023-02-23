@@ -106,6 +106,9 @@ class LoadExecutorTest(unittest.TestCase):
             "Dataset file not found. Please check the files still exists at the original path.",
         )
 
+        # create the file again for other test cases
+        create_sample_video()
+
     def test_should_load_videos_in_table(self):
         path = f"{EVA_ROOT_DIR}/data/sample_videos/1/*.mp4"
         query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
