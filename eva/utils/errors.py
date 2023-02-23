@@ -14,3 +14,11 @@
 # limitations under the License.
 class CatalogError(Exception):
     pass
+
+
+class DatasetFileNotFoundError(Exception):
+    def __init__(
+        self,
+        message="Dataset file not found. Please check the files still exists at the original path.",
+    ):
+        super().__init__(message)
