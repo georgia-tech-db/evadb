@@ -114,8 +114,8 @@ class AbstractMediaStorageEngine(AbstractStorageEngine):
                     raise FileExistsError(
                         f"Duplicate File: {media_file} already exists in the table {table.name}"
                     )
-                os.symlink(str(media_file), str(dst_path))
-                # shutil.copy2(str(media_file), str(dst_path))
+                src_path = os.path.join(os.getcwd(), media_file)
+                os.symlink(src_path, dst_path)
                 copied_files.append(dst_path)
             # assuming sql write is an atomic operation
             self._rdb_handler.write(
