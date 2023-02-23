@@ -360,7 +360,6 @@ class LoadExecutorTest(unittest.TestCase):
     ###################################
     # integration tests for csv
     def test_should_load_csv_in_table(self):
-
         # loading a csv requires a table to be created first
         create_table_query = """
 
@@ -400,7 +399,6 @@ class LoadExecutorTest(unittest.TestCase):
         execute_query_fetch_all(drop_query)
 
     def test_should_load_csv_with_columns_in_table(self):
-
         # loading a csv requires a table to be created first
         create_table_query = """
 
