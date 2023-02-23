@@ -26,7 +26,7 @@ from eva.models.storage.batch import Batch
 from eva.parser.table_ref import TableInfo
 from eva.storage.abstract_storage_engine import AbstractStorageEngine
 from eva.storage.sqlite_storage_engine import SQLStorageEngine
-from eva.utils.errors import CatalogError
+from eva.utils.errors import CatalogError, DatasetFileNotFoundError
 from eva.utils.logging_manager import logger
 
 
@@ -114,7 +114,9 @@ class AbstractMediaStorageEngine(AbstractStorageEngine):
                     raise FileExistsError(
                         f"Duplicate File: {media_file} already exists in the table {table.name}"
                     )
-                src_path = os.path.join(os.getcwd(), media_file)
+                src_path = Path.cwd() / media_file
+                if not src_path.exists():
+                    raise DatasetFileNotFoundError()
                 os.symlink(src_path, dst_path)
                 copied_files.append(dst_path)
             # assuming sql write is an atomic operation

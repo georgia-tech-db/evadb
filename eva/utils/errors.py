@@ -19,6 +19,6 @@ class CatalogError(Exception):
 class DatasetFileNotFoundError(Exception):
     def __init__(
         self,
-        message="Dataset file not found. Please check the files still exists at the original path.",
+        message="The dataset file could not be found. Please verify that the file exists in the specified path.",
     ):
         super().__init__(message)
