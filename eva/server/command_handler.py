@@ -23,7 +23,6 @@ from eva.models.storage.batch import Batch
 from eva.optimizer.plan_generator import PlanGenerator
 from eva.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
 from eva.parser.parser import Parser
-from eva.server.networking_utils import serialize_message
 from eva.utils.logging_manager import logger
 from eva.utils.timer import Timer
 
@@ -56,7 +55,7 @@ def execute_query_fetch_all(query, **kwargs) -> Optional[Batch]:
 
 
 @asyncio.coroutine
-def handle_request(transport, request_message):
+def handle_request(client_writer, request_message):
     """
     Reads a request from a client and processes it
 
@@ -91,8 +90,11 @@ def handle_request(transport, request_message):
 
     query_runtime.log_elapsed_time("Query Response Time")
 
-    responseData = serialize_message(response)
+    logger.debug(response)
 
-    transport.write(responseData)
+    response_data = Response.serialize(response)
+
+    client_writer.write(b"%d\n" % len(response_data))
+    client_writer.write(response_data)
 
     return response

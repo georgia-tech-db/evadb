@@ -31,8 +31,8 @@ class Response:
     Data model for EVA server response
     """
 
-    status: ResponseStatus
-    batch: Batch
+    status: ResponseStatus = ResponseStatus.FAIL
+    batch: Batch = None
     error: Optional[str] = None
     query_time: Optional[float] = None
 
