@@ -13,10 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 import unittest
 from test.util import EVA_TEST_DATA_DIR
 
-import os
 import pandas as pd
 
 
