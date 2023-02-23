@@ -140,8 +140,33 @@ def get_size(obj, seen=None):
 
 @contextmanager
 def extract_audio(file_path: str):
-    outfile = tempfile.NamedTemporaryFile(prefix='eva_audio_extract_', suffix='.wav', mode='w+b')
-    subprocess.call(['ffmpeg', '-y', '-i', file_path, outfile.name], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+    """
+    Extract audio from media file passed and save it to a temporary file
+
+    Arguments:
+        file_path: the absolute path of the file to extract audio from
+
+    Returns:
+        str: path to the audio file
+    """
+    if file_path.endswith(".wav"):
+        return file_path
+
+    try:
+        subprocess.check_output(["ffmpeg", "-version"], stderr=subprocess.STDOUT)
+    except OSError as e:
+        err_msg = f"Failed to find ffmpeg with error {e}"
+        logger.error(err_msg)
+        raise RuntimeError(err_msg)
+
+    outfile = tempfile.NamedTemporaryFile(
+        prefix="eva_audio_extract_", suffix=".wav", mode="w+b"
+    )
+    subprocess.call(
+        ["ffmpeg", "-y", "-i", file_path, outfile.name],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.STDOUT,
+    )
     try:
         yield outfile.name
     finally:

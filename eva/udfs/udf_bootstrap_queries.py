@@ -128,19 +128,10 @@ YoloV5_udf_query = """CREATE UDF IF NOT EXISTS YoloV5
 )
 
 AudioSearch_udf_query = """CREATE UDF IF NOT EXISTS AudioSearch
-    INPUT    (path ANYTYPE, phrase ANYTYPE)
-    OUTPUT   (start_time ANYTYPE, end_time ANYTYPE)
+    INPUT    (path TEXT(100), phrase TEXT(100))
+    OUTPUT   (start_time FLOAT(32, 7), end_time FLOAT(32, 7))
     TYPE     AudioUDF
     IMPL     "{}/udfs/audio_search.py";
-    """.format(
-    EVA_INSTALLATION_DIR
-)
-
-SemanticSearch_udf_query = """CREATE UDF IF NOT EXISTS SemanticSearch
-    INPUT    (path ANYTYPE, phrase ANYTYPE)
-    OUTPUT   (start_time ANYTYPE, end_time ANYTYPE)
-    TYPE     AudioUDF
-    IMPL     "{}/udfs/semantic_search.py";
     """.format(
     EVA_INSTALLATION_DIR
 )
@@ -199,12 +190,11 @@ def init_builtin_udfs(mode="debug"):
         Crop_udf_query,
         Open_udf_query,
         YoloV5_udf_query,
-        AudioSearch_udf_query,
-        SemanticSearch_udf_query,
-        Similarity_udf_query
+        Similarity_udf_query,
         # Disabled because required packages (eg., easy_ocr might not be preinstalled)
         # face_detection_udf_query,
         # ocr_udf_query,
+        # AudioSearch_udf_query,
         # Disabled as it requires specific pytorch package
         # Mvit_udf_query,
     ]

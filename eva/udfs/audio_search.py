@@ -17,6 +17,7 @@ import re
 import string
 
 import pandas as pd
+import torch
 
 from eva.udfs.abstract.abstract_udf import AbstractUDF
 from eva.utils.generic_utils import extract_audio
@@ -31,43 +32,54 @@ except ImportError as e:
 
 
 class AudioSearch(AbstractUDF):
-
     @property
     def name(self) -> str:
         return "AudioSearch"
 
     def setup(self):
-        self.transcriber = whisper.load_model("base")
-        self.segment_window = 3
-        self.segment_overlap = 2
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.transcriber = whisper.load_model("base", device=self.device)
+        self.segment_window = 2
+        self.segment_overlap = 1
 
     def forward(self, data: pd.DataFrame) -> pd.DataFrame:
         video_path = data.iloc[0].values[0]
         # string translator for removing punctuation
-        punctuation_translator = str.maketrans('', '', string.punctuation)
-        phrase = data.iloc[0].values[1].translate(punctuation_translator).lower().strip()
+        punctuation_translator = str.maketrans("", "", string.punctuation)
+        phrase = (
+            data.iloc[0].values[1].translate(punctuation_translator).lower().strip()
+        )
 
         # get text segments from video using whisper
         segments = []
         with extract_audio(video_path) as audio_path:
-            result = self.transcriber.transcribe(audio_path, fp16=False)
-            for segment in result['segments']:
-                segments.append({
-                    'start': segment['start'],
-                    'end': segment['end'],
-                    'text': segment['text'].translate(punctuation_translator).lower().strip()
-                })
+            result = self.transcriber.transcribe(
+                audio_path, fp16=torch.cuda.is_available()
+            )
+            for segment in result["segments"]:
+                segments.append(
+                    {
+                        "start": segment["start"],
+                        "end": segment["end"],
+                        "text": segment["text"]
+                        .translate(punctuation_translator)
+                        .lower()
+                        .strip(),
+                    }
+                )
 
         # do a rolling merge of the text segments, as the search phrase may extend over multiple segments
         merged = []
         for first in range(0, len(segments), self.segment_overlap):
-            last = min(len(segments) - 1, first + self.segment_window)
-            text = ' '.join(segment['text'] for segment in segments[first:last])
-            merged.append({
-                'start': segments[first]['start'],
-                'end': segments[last]['end'],
-                'text': text
-            })
+            last = min(len(segments) - 1, first + self.segment_window - 1)
+            text = " ".join(segment["text"] for segment in segments[first : last + 1])
+            merged.append(
+                {
+                    "start": segments[first]["start"],
+                    "end": segments[last]["end"],
+                    "text": text,
+                }
+            )
 
         del segments
         # TODO: cache merged text segments
@@ -76,19 +88,24 @@ class AudioSearch(AbstractUDF):
         output = pd.DataFrame()
         # do a regex search
         for segment in merged:
-            if segment['start'] > last_found and re.search(r'\b{}\b'.format(phrase), segment['text']):
+            if segment["start"] >= last_found and re.search(
+                r"\b{}\b".format(phrase), segment["text"]
+            ):
                 # save end timestamp of the merged segment so that we can skip over all merged segments
                 # that will also satisfy the search phrase as we did a rolling merge previously
-                last_found = segment['end']
-                print(segment)
-                output = pd.concat([
-                    output,
-                    pd.DataFrame([
-                        {
-                            'start_time': segment['start'],
-                            'end_time': segment['end']
-                        }
-                    ])
-                ])
+                last_found = segment["end"]
+                output = pd.concat(
+                    [
+                        output,
+                        pd.DataFrame(
+                            [
+                                {
+                                    "start_time": segment["start"],
+                                    "end_time": segment["end"],
+                                }
+                            ]
+                        ),
+                    ]
+                )
 
         return output
