@@ -15,7 +15,7 @@
 from dataclasses import dataclass
 
 from sqlalchemy import Column, Integer, String
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import ForeignKey, relationship
 
 from eva.catalog.models.base_model import BaseModel
 
