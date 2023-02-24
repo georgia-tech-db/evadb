@@ -44,7 +44,7 @@ class UdfCostCatalog(BaseModel):
     def __init__(
         self, name: str, type: str, cost: int, frame_count: int, resolution: int
     ):
-        self._name = name
+        self._udf_name = name
         self._type = type
         self._cost = cost
         self._frame_count = frame_count
@@ -52,7 +52,7 @@ class UdfCostCatalog(BaseModel):
 
     def as_dataclass(self) -> "UdfCostCatalogEntry":
         return UdfCostCatalog(
-            name=self._name,
+            name=self._udf_name,
             type=self._type,
             cost=self._cost,
             frame_count=self._frame_count,
