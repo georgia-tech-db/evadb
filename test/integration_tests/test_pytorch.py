@@ -113,6 +113,27 @@ class PytorchTest(unittest.TestCase):
         for idx in res.index:
             self.assertTrue("computer" in res["aslactionrecognition.labels"][idx])
 
+
+    @pytest.mark.torchtest
+    def test_should_run_pytorch_and_yolo_decorators(self):
+        create_udf_query = """CREATE UDF YoloDecorators
+                  INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
+                  OUTPUT (labels NDARRAY STR(10),
+                          bboxes NDARRAY FLOAT32(ANYDIM, 4),
+                          scores NDARRAY FLOAT32(ANYDIM))
+                  TYPE  ObjectDetection
+                  IMPL  'eva/udfs/contrib/decorators/ish/yolo_object_detection_decorators.py';
+        """
+        execute_query_fetch_all(create_udf_query)
+
+        select_query = """SELECT YoloDecorators(data) FROM MyVideo
+                        WHERE id < 5;"""
+        actual_batch = execute_query_fetch_all(select_query)
+        print(actual_batch)
+        #self.assertEqual(len(actual_batch), 5)
+
+
+
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_facenet(self):
         create_udf_query = """CREATE UDF FaceDetector
@@ -290,3 +311,11 @@ class PytorchTest(unittest.TestCase):
         actual_batch = execute_query_fetch_all(select_query)
 
         self.assertEqual(len(actual_batch), 60)
+
+
+
+if __name__ == '__main__':
+    suite = unittest.TestSuite()
+    suite.addTest(PytorchTest(
+        'test_should_run_pytorch_and_yolo_decorators'))
+    unittest.TextTestRunner().run(suite)
