@@ -40,9 +40,7 @@ class UdfCatalog(BaseModel):
         "UdfIOCatalog", back_populates="_udf", cascade="all, delete, delete-orphan"
     )
 
-    _name2 = relationship(
-        "UdfCostCatlog", back_populates="_name3", cascade="all, delete, delete-orphan"
-    )
+    _name2 = relationship("UdfCostCatlog")
 
     def __init__(self, name: str, impl_file_path: str, type: str):
         self._name = name
