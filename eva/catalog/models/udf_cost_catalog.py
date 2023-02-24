@@ -14,7 +14,7 @@
 # limitations under the License.
 from dataclasses import dataclass
 
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from eva.catalog.models.base_model import BaseModel
