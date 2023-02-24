@@ -14,7 +14,7 @@
 # limitations under the License.
 from dataclasses import dataclass
 
-from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
 
 from eva.catalog.models.base_model import BaseModel
@@ -36,7 +36,7 @@ class UdfCostCatalog(BaseModel):
     _cost = Column("cost", Integer())
     _frame_count = Column("frame_count", Integer())
     _resolution = Column("resolution", Integer())
-    _name = Column("name", String(100), unique=true)
+    _name = Column("name", String(100), unique=True)
 
     _name = relationship("UdfCatalog", back_populates="udf_catalog._name")
 
