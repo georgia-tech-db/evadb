@@ -29,3 +29,9 @@ Catalog Models
 
 These contain the data model that is used by the catalog services.  
 Each model represents a table in the underlying database.
+
+.. |pic1| image:: images/reference/catalog.png
+    :width: 45%
+    :alt: Source Video
+
+|pic1|

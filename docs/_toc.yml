@@ -38,6 +38,9 @@ parts:
       - file: source/reference/udf
         title: User-Defined Functions
 
+      - file: source/reference/catalog
+        title: Catalog Manager
+
       - file: source/reference/gpu
         title: Configure GPU
 
