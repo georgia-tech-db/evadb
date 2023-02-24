@@ -15,10 +15,9 @@
 from dataclasses import dataclass
 
 from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import relationship
 
 from eva.catalog.models.base_model import BaseModel
-
-# from sqlalchemy.orm import relationship
 
 
 class UdfCostCatalog(BaseModel):
@@ -41,9 +40,10 @@ class UdfCostCatalog(BaseModel):
     """
     TODO: Add hardware information - GPU information etc. - It can be its own table.
     TODO: Add relation to UdfCatalog table as one of below:
-    _name = relationship("UdfCatlog", back_populates="_name")
     _name = Column("name", Integer, ForeignKey("udf_catalog._name"))
     """
+
+    _name = relationship("UdfCatlog", back_populates="_name")
 
     def __init__(
         self, name: str, type: str, cost: int, frame_count: int, resolution: int
