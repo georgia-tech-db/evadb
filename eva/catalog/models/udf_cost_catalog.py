@@ -36,6 +36,7 @@ class UdfCostCatalog(BaseModel):
     _cost = Column("cost", Integer())
     _frame_count = Column("frame_count", Integer())
     _resolution = Column("resolution", Integer())
+    _name = Column("name", Integer, ForeignKey("udf_catalog._name"))
 
     """
     TODO: Add hardware information - GPU information etc. - It can be its own table.
