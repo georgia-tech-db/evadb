@@ -103,7 +103,7 @@ class LoadExecutorTest(unittest.TestCase):
             execute_query_fetch_all(select_query)
         self.assertEqual(
             str(e.exception),
-            "Dataset file not found. Please check the files still exists at the original path.",
+            "The dataset file could not be found. Please verify that the file exists in the specified path.",
         )
 
         # create the file again for other test cases
