@@ -26,7 +26,7 @@ def setup(use_cache: bool,
                 else:
                     args[0].model = yolov5.load("yolov5s.pt", verbose=False)
                     
-            #set the batch and caching parameters.
+            #TODO set the batch and caching parameters.
             
             arg_fn(*args, **kwargs)
             
@@ -34,6 +34,7 @@ def setup(use_cache: bool,
     
     return inner_fn
 
+#TODO implement the decorators for the preprocessing function
 
 def forward(input_signature: EvaArgument): 
     
