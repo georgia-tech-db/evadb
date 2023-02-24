@@ -18,9 +18,11 @@ import pandas as pd
 
 from eva.models.catalog.frame_info import FrameInfo
 from eva.models.catalog.properties import ColorSpace
-from eva.udfs.contrib.decorators.ish.udf_decorators import setup, forward
-from eva.udfs.contrib.decorators.ish.io_descriptors.data_types.type_tensor import PyTorchTensor
 from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
+from eva.udfs.contrib.decorators.ish.io_descriptors.data_types.type_tensor import (
+    PyTorchTensor,
+)
+from eva.udfs.contrib.decorators.ish.udf_decorators import forward, setup
 
 try:
     import torch
@@ -44,11 +46,7 @@ class YoloDecorators(PytorchAbstractClassifierUDF):
     def name(self) -> str:
         return "yolo"
 
-    @setup(
-        use_cache=True,
-        udf_type="object_detection",
-        batch=True
-    )
+    @setup(use_cache=True, udf_type="object_detection", batch=True)
     def setup(self, threshold=0.85):
         self.threshold = threshold
         self.model = torch.hub.load("ultralytics/yolov5", "yolov5s", verbose=False)
@@ -153,9 +151,7 @@ class YoloDecorators(PytorchAbstractClassifierUDF):
             "toothbrush",
         ]
 
-    @forward(
-        input_signature= PyTorchTensor(shape=(1, 3, 540, 960), dtype="float32")
-    )
+    @forward(input_signature=PyTorchTensor(shape=(1, 3, 540, 960), dtype="float32"))
     def forward(self, frames: Tensor) -> pd.DataFrame:
         """
         Performs predictions on input frames
@@ -186,17 +182,7 @@ class YoloDecorators(PytorchAbstractClassifierUDF):
             )
 
             outcome.append(
-                {
-                    "labels": pred_class,
-                    "bboxes": pred_boxes,
-                    "scores": pred_score,
-                },
+                {"labels": pred_class, "bboxes": pred_boxes, "scores": pred_score}
             )
-        return pd.DataFrame(
-            outcome,
-            columns=[
-                "labels",
-                "bboxes",
-                "scores",
-            ],
-        )
+
+        return pd.DataFrame(outcome, columns=["labels", "bboxes", "scores"])
