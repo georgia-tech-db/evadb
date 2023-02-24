@@ -25,6 +25,7 @@ from eva.models.storage.batch import Batch
 from eva.plan_nodes.load_data_plan import LoadDataPlan
 from eva.storage.abstract_storage_engine import AbstractStorageEngine
 from eva.storage.storage_engine import StorageEngine
+from eva.utils.errors import DatasetFileNotFoundError
 from eva.utils.logging_manager import logger
 from eva.utils.s3_utils import download_from_s3
 
@@ -56,6 +57,12 @@ class LoadMultimediaExecutor(AbstractExecutor):
             else:
                 # Local Storage
                 video_files = iter_path_regex(self.node.file_path)
+
+            # If there are no files found on path or S3, raise an error
+            if not any(video_files):
+                raise DatasetFileNotFoundError(
+                    f"Load {self.media_type.name} failed due to no files found on path {str(self.node.file_path)}"
+                )
 
             for file_path in video_files:
                 file_path = Path(file_path)
