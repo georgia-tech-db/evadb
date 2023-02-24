@@ -43,7 +43,7 @@ class UdfCostCatalog(BaseModel):
     _name = Column("name", Integer, ForeignKey("udf_catalog._name"))
     """
 
-    _name = relationship("UdfCatlog", back_populates="_name")
+    _name3 = relationship("UdfCatlog", back_populates="_name2")
 
     def __init__(
         self, name: str, type: str, cost: int, frame_count: int, resolution: int
