@@ -115,8 +115,6 @@ class AbstractMediaStorageEngine(AbstractStorageEngine):
                         f"Duplicate File: {media_file} already exists in the table {table.name}"
                     )
                 src_path = Path.cwd() / media_file
-                if not src_path.exists():
-                    raise DatasetFileNotFoundError()
                 os.symlink(src_path, dst_path)
                 copied_files.append(dst_path)
             # assuming sql write is an atomic operation
