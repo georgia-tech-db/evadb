@@ -49,9 +49,9 @@ class InsertExecutor(AbstractExecutor):
             if table_catalog_entry.table_type != TableType.STRUCTURED_DATA:
                 raise NotImplementedError("INSERT only implemented for structured data")
 
-            values_to_insert = [value.value for value in self.node.value_list]
+            values_to_insert = [val_node.value for val_node in self.node.value_list]
             tuple_to_insert = tuple(values_to_insert)
-            columns_to_insert = [value.col_name for value in self.node.column_list]
+            columns_to_insert = [col_node.col_name for col_node in self.node.column_list]
 
             # Adding all values to Batch for insert
             logger.info(values_to_insert)
