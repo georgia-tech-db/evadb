@@ -49,13 +49,9 @@ class InsertExecutor(AbstractExecutor):
             if table_catalog_entry.table_type != TableType.STRUCTURED_DATA:
                 raise NotImplementedError("INSERT only implemented for structured data")
 
-            values_to_insert = []
-            for i in self.node.value_list:
-                values_to_insert.append(i.value)
+            values_to_insert = [value.value for value in self.node.value_list]
             tuple_to_insert = tuple(values_to_insert)
-            columns_to_insert = []
-            for i in self.node.column_list:
-                columns_to_insert.append(i.col_name)
+            columns_to_insert = [value.col_name for value in self.node.column_list]
 
             # Adding all values to Batch for insert
             logger.info(values_to_insert)
@@ -72,18 +68,4 @@ class InsertExecutor(AbstractExecutor):
         else:
             yield Batch(
                 pd.DataFrame([f"Number of rows loaded: {str(len(values_to_insert))}"])
-            )
-
-    def _rollback_load(
-        self,
-        storage_engine: AbstractStorageEngine,
-        table_obj: TableCatalogEntry,
-        do_create: bool,
-    ):
-        try:
-            if do_create:
-                storage_engine.drop(table_obj)
-        except Exception as e:
-            logger.exception(
-                f"Unexpected Exception {e} occured while rolling back. This is bad as the {self.media_type.name} table can be in a corrupt state. Please verify the table {table_obj} for correctness."
             )

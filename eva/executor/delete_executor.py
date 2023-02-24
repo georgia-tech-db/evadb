@@ -76,11 +76,8 @@ class DeleteExecutor(AbstractExecutor):
                 ]
                 for num in range(len(del_batch)):
                     storage_engine.delete(table_catalog, table_needed.iloc[num])
-            yield Batch(pd.DataFrame(["Deleted row"]))
+            yield Batch(pd.DataFrame(["Deleted rows"]))
 
         except Exception as e:
             logger.error(e)
             raise ExecutorError(e)
-
-    def __call__(self, **kwargs) -> Generator[Batch, None, None]:
-        yield from self.exec(**kwargs)
