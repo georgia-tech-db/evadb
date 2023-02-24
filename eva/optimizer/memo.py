@@ -128,8 +128,5 @@ class Memo:
 
         assert (
             expr.group_id is not UNDEFINED_GROUP_ID
-        ), """Expr
-                                                        should have a
-                                                        valid group
-                                                        id"""
+        ), """Expr should have a valid group id"""
         return expr
