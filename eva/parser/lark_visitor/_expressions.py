@@ -101,6 +101,8 @@ class Expressions:
             return ExpressionType.COMPARE_CONTAINS
         elif op == "<@":
             return ExpressionType.COMPARE_IS_CONTAINED
+        elif op == "LIKE":
+            return ExpressionType.COMPARE_LIKE
         else:
             return ExpressionType.INVALID
 

@@ -68,6 +68,8 @@ class ComparisonExpression(AbstractExpression):
             return Batch.compare_contains(lbatch, rbatch)
         elif self.etype == ExpressionType.COMPARE_IS_CONTAINED:
             return Batch.compare_is_contained(lbatch, rbatch)
+        elif self.etype == ExpressionType.COMPARE_LIKE:
+            return Batch.compare_is_like(lbatch, rbatch)
         else:
             raise NotImplementedError
 

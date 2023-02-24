@@ -33,6 +33,7 @@ class ExpressionType(IntEnum):
     COMPARE_NEQ = auto()
     COMPARE_CONTAINS = auto()
     COMPARE_IS_CONTAINED = auto()
+    COMPARE_LIKE = auto()
     # Logical operators
     LOGICAL_AND = auto()
     LOGICAL_OR = auto()
