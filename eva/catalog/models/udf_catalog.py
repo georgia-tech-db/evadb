@@ -31,7 +31,7 @@ class UdfCatalog(BaseModel):
 
     __tablename__ = "udf_catalog"
 
-    _name = Column("name", String(100), unique=True, primaryjoin=True)
+    _name = Column("name", String(100), unique=True)
     _impl_file_path = Column("impl_file_path", String(128))
     _type = Column("type", String(100))
     _checksum = Column("checksum", String(512))
@@ -41,7 +41,7 @@ class UdfCatalog(BaseModel):
         "UdfIOCatalog", back_populates="_udf", cascade="all, delete, delete-orphan"
     )
 
-    _name = relationship("UdfCostCatalog", back_populates="udf_cost_catalog._udf_name")
+    #_name = relationship("UdfCostCatalog", back_populates="udf_cost_catalog._udf_name")
 
     def __init__(self, name: str, impl_file_path: str, type: str, checksum: str):
         self._name = name
