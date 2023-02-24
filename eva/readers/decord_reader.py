@@ -12,11 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import math
 from typing import Dict, Iterator
 
-import cv2
 import decord
-import math
 
 from eva.constants import IFRAMES
 from eva.expression.abstract_expression import AbstractExpression
@@ -84,7 +83,9 @@ class DecordReader(AbstractReader):
                         yield {
                             "id": frame_id,
                             "data": frame,
-                            "seconds": math.floor(video.get_frame_timestamp(frame_id)[0]),
+                            "seconds": math.floor(
+                                video.get_frame_timestamp(frame_id)[0]
+                            ),
                         }
                     else:
                         break
