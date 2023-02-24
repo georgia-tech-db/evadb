@@ -26,7 +26,7 @@ from eva.models.storage.batch import Batch
 from eva.parser.table_ref import TableInfo
 from eva.storage.abstract_storage_engine import AbstractStorageEngine
 from eva.storage.sqlite_storage_engine import SQLStorageEngine
-from eva.utils.errors import CatalogError, DatasetFileNotFoundError
+from eva.utils.errors import CatalogError
 from eva.utils.logging_manager import logger
 
 
