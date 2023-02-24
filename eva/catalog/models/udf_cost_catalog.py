@@ -36,7 +36,7 @@ class UdfCostCatalog(BaseModel):
     _cost = Column("cost", Integer())
     _frame_count = Column("frame_count", Integer())
     _resolution = Column("resolution", Integer())
-    _udf_name = Column("name", String(100), unique=True)
+    _udf_name = Column("name", String(100), primaryjoin=True)
 
     _udf_name = relationship("UdfCatalog", back_populates="udf_catalog._name")
 
