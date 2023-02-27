@@ -11,13 +11,14 @@ CatalogManager class that provides a set of services to interact with a database
 This data is stored in the eva_catalog.db file which can be found in ~/.eva/<version>/ folder.  
 
 Catalog manager currently has 5 services in it:  
+
 .. code:: python
 
-    TableCatalogService()
-    ColumnCatalogService()  
-    UdfCatalogService()  
-    UdfIOCatalogService()  
-    IndexCatalogService()  
+    TableCatalogService()  
+    ColumnCatalogService()   
+    UdfCatalogService()   
+    UdfIOCatalogService()   
+    IndexCatalogService()   
 
 Catalog Services
 ----------------
@@ -30,8 +31,8 @@ Catalog Models
 These contain the data model that is used by the catalog services.  
 Each model represents a table in the underlying database.
 
-.. |pic1| image:: images/reference/catalog.png
+.. |pic1| image:: ../../images/reference/catalog.png
     :width: 45%
-    :alt: Source Video
+    :alt: Catalog Diagram
 
 |pic1|
