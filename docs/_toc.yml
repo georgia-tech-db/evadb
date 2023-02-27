@@ -33,27 +33,35 @@ parts:
           - file: source/reference/evaql/create
           - file: source/reference/evaql/drop
           - file: source/reference/evaql/insert
+          - file: source/reference/evaql/delete
           - file: source/reference/evaql/rename
 
       - file: source/reference/udf
         title: User-Defined Functions
 
-      - file: source/reference/catalog
-        title: Catalog Manager
-
       - file: source/reference/gpu
         title: Configure GPU
 
+
   - caption: Developer Guide
     chapters:
+      - file: source/contribute/internals
+        title: EVA internals
+        sections:
+          - file: source/contribute/internals/catalog
+
       - file: source/contribute/index
         title: Contributing to EVA
+
       - file: source/contribute/debugging
         title: Debugging 
+
       - file: source/contribute/new_command
         title: Extending EVA
+
       - file: source/contribute/release
         title: Releasing 
+
       - file: source/contribute/packaging
         title: Packaging Models
 

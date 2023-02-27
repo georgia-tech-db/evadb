@@ -1,5 +1,5 @@
-EVA Catalog Manager Reference
-=============================
+Catalog
+=======
 
 Catalog Manager
 ---------------
