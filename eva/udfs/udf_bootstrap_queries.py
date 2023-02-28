@@ -49,7 +49,7 @@ DummyFeatureExtractor_udf_query = """CREATE UDF
 )
 
 ArrayCount_udf_query = """CREATE UDF
-            IF NOT EXISTS  Array_Count
+            IF NOT EXISTS  ArrayCount
             INPUT (Input_Array NDARRAY ANYTYPE, Search_Key ANYTYPE)
             OUTPUT (key_count INTEGER)
             TYPE NdarrayUDF
@@ -179,8 +179,8 @@ def init_builtin_udfs(mode="debug"):
         ArrayCount_udf_query,
         Timestamp_udf_query,
         Crop_udf_query,
-        Open_udf_query,
         YoloV5_udf_query,
+        Open_udf_query,
         Similarity_udf_query
         # Disabled because required packages (eg., easy_ocr might not be preinstalled)
         # face_detection_udf_query,

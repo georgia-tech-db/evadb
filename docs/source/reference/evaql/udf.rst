@@ -13,13 +13,13 @@ Here is a list of built-in user-defined functions in EVA.
     id   name                    impl
     0    FastRCNNObjectDetector  eva/udfs/fastrcnn_object_detector.p
     1    MVITActionRecognition   eva/udfs/mvit_action_recognition.py
-    2    Array_Count             eva/udfs/ndarray/array_count.py
+    2    ArrayCount              eva/udfs/ndarray/array_count.py
     3    Crop                    eva/eva/udfs/ndarray/crop.py
 
 
 FastRCNNObjectDetector is a model for detecting objects. MVITActionRecognition is a model for recognizing actions. 
 
-Array_Count and Crop are utility functions for counting the number of objects in an array and cropping a bounding box from an image, resepectively.
+ArrayCount and Crop are utility functions for counting the number of objects in an array and cropping a bounding box from an image, resepectively.
 
 SELECT WITH MULTIPLE UDFS
 ----

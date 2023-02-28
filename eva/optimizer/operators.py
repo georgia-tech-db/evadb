@@ -41,6 +41,7 @@ class OperatorType(IntEnum):
     LOGICALFILTER = auto()
     LOGICALPROJECT = auto()
     LOGICALINSERT = auto()
+    LOGICALDELETE = auto()
     LOGICALCREATE = auto()
     LOGICALRENAME = auto()
     LOGICALDROP = auto()
@@ -160,16 +161,13 @@ class Operator:
 class Dummy(Operator):
     """
     Acts as a placeholder for matching any operator in optimizer.
-    It track the group_id of the matching operator.
+    It tracks the group_id of the matching operator.
     """
 
     def __init__(self, group_id: int, opr: Operator):
         super().__init__(OperatorType.DUMMY, None)
         self.group_id = group_id
         self.opr = opr
-
-    def __hash__(self) -> int:
-        return hash((super().__hash__(), self.group_id))
 
 
 class LogicalGet(Operator):
@@ -207,17 +205,9 @@ class LogicalGet(Operator):
     def predicate(self):
         return self._predicate
 
-    @predicate.setter
-    def predicate(self, predicate):
-        self._predicate = predicate
-
     @property
     def target_list(self):
         return self._target_list
-
-    @target_list.setter
-    def target_list(self, target_list):
-        self._target_list = target_list
 
     @property
     def sampling_rate(self):
@@ -427,7 +417,7 @@ class LogicalInsert(Operator):
     """[Logical Node for Insert operation]
 
     Arguments:
-        table(TableCatalogEntry): table to intert data into
+        table(TableCatalogEntry): table to insert data into
         column_list{List[AbstractExpression]}:
             [After binding annotated column_list]
         value_list{List[AbstractExpression]}:
@@ -476,6 +466,53 @@ class LogicalInsert(Operator):
                 self.table,
                 tuple(self.value_list),
                 tuple(self.column_list),
+            )
+        )
+
+
+class LogicalDelete(Operator):
+    """[Logical Node for Delete Operation]
+
+    Arguments:
+        table_ref(TableCatalogEntry): table to delete tuples from,
+        where_clause(AbstractExpression): the predicate used to select which rows to delete,
+
+    """
+
+    def __init__(
+        self,
+        table_ref: TableRef,
+        where_clause: AbstractExpression = None,
+        children=None,
+    ):
+        super().__init__(OperatorType.LOGICALDELETE, children)
+        self._table_ref = table_ref
+        self._where_clause = where_clause
+
+    @property
+    def table_ref(self):
+        return self._table_ref
+
+    @property
+    def where_clause(self):
+        return self._where_clause
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalDelete):
+            return False
+        return (
+            is_subtree_equal
+            and self.table_ref == other.table_ref
+            and self.where_clause == other.where_clause
+        )
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                super().__hash__(),
+                self.table_ref,
+                self.where_clause,
             )
         )
 
@@ -1091,12 +1128,10 @@ class LogicalExchange(Operator):
         super().__init__(OperatorType.LOGICALEXCHANGE, children)
 
     def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
         if not isinstance(other, LogicalExchange):
             return False
-        return True
-
-    def __hash__(self) -> int:
-        return super().__hash__()
+        return is_subtree_equal
 
 
 class LogicalExplain(Operator):

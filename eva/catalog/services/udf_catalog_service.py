@@ -50,9 +50,7 @@ class UdfCatalogService(BaseService):
 
         try:
             udf_obj = self.model.query.filter(self.model._name == name).one()
-            if udf_obj:
-                return udf_obj.as_dataclass()
-            return udf_obj
+            return udf_obj.as_dataclass()
         except NoResultFound:
             return None
 

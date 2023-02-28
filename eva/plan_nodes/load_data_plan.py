@@ -36,16 +36,16 @@ class LoadDataPlan(AbstractPlan):
         self,
         table_info: TableInfo,
         file_path: Path,
-        batch_mem_size: int,
         column_list: List[AbstractExpression] = None,
         file_options: dict = None,
+        batch_mem_size: int = 30000000,
     ):
         super().__init__(PlanOprType.LOAD_DATA)
         self._table_info = table_info
         self._file_path = file_path
-        self._batch_mem_size = batch_mem_size
         self._column_list = column_list
         self._file_options = file_options
+        self._batch_mem_size = batch_mem_size
 
     @property
     def table_info(self):
@@ -69,14 +69,14 @@ class LoadDataPlan(AbstractPlan):
 
     def __str__(self):
         return "LoadDataPlan(table_id={}, file_path={}, \
-            batch_mem_size={}, \
             column_list={}, \
-            file_options={})".format(
+            file_options={}, \
+            batch_mem_size={})".format(
             self.table_info,
             self.file_path,
-            self.batch_mem_size,
             self.column_list,
             self.file_options,
+            self.batch_mem_size,
         )
 
     def __hash__(self) -> int:
@@ -85,8 +85,8 @@ class LoadDataPlan(AbstractPlan):
                 super().__hash__(),
                 self.table_info,
                 self.file_path,
-                self.batch_mem_size,
                 tuple(self.column_list),
                 frozenset(self.file_options.items()),
+                self.batch_mem_size,
             )
         )
