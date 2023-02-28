@@ -19,17 +19,15 @@ from typing import TYPE_CHECKING
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import TableType
 from eva.catalog.catalog_utils import is_video_table
+from eva.constants import CACHEABLE_UDFS
 from eva.expression.expression_utils import conjuction_list_to_expression_tree
-from eva.expression.function_expression import (
-    FunctionExpression,
-    FunctionExpressionCache,
-)
+from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.optimizer.optimizer_utils import (
+    enable_cache,
     extract_equi_join_keys,
     extract_pushdown_predicate,
     extract_pushdown_predicate_for_alias,
-    optimize_cache_key,
 )
 from eva.optimizer.rules.pattern import Pattern
 from eva.optimizer.rules.rules_base import Promise, Rule, RuleType
@@ -327,18 +325,15 @@ class CacheFunctionExpressionInApply(Rule):
 
     def check(self, before: LogicalApplyAndMerge, context: OptimizerContext):
         # already cache enabled
-        if before.func_expr.has_cache():
+        # replace the cacheable condition once we have the propperty supported as part of the UDF itself.
+        if before.func_expr.has_cache() or before.func_expr.name not in CACHEABLE_UDFS:
             return False
         return True
 
     def apply(self, before: LogicalApplyAndMerge, context: OptimizerContext):
-        optimized_key = optimize_cache_key(before.func_expr)
-        if optimized_key == before.func_expr.children:
-            optimized_key = [None]
-
-        new_func_expr = before.func_expr.copy().enable_cache(
-            FunctionExpressionCache(tuple(optimized_key), None)
-        )
+        # todo: this will create a ctaalog entry even in the case of explain command
+        # We should run this code conditionally
+        new_func_expr = enable_cache(before.func_expr)
         after = LogicalApplyAndMerge(
             func_expr=new_func_expr, alias=before.alias, do_unnest=before.do_unnest
         )

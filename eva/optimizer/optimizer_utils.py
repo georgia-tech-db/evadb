@@ -26,10 +26,14 @@ from eva.expression.expression_utils import (
     is_simple_predicate,
     to_conjunction_list,
 )
-from eva.expression.function_expression import FunctionExpression
+from eva.expression.function_expression import (
+    FunctionExpression,
+    FunctionExpressionCache,
+)
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.alias import Alias
 from eva.parser.create_statement import ColumnDefinition
+from eva.utils.kv_cache import DiskKVCache
 from eva.utils.logging_manager import logger
 
 
@@ -227,3 +231,29 @@ def optimize_cache_key(expr: FunctionExpression):
 
             return new_keys
     return keys
+
+
+def enable_cache(func_expr: FunctionExpression) -> FunctionExpression:
+    """Enables cache for a function expression.
+
+    The cache key is optimized by replacing it with logical equivalent expressions.
+    A cache entry is inserted in the catalog corresponding to the expression.
+
+    Args:
+        func_expr (FunctionExpression): The function expression to enable cache for.
+
+    Returns:
+        FunctionExpression: The function expression with cache enabled.
+    """
+    optimized_key = optimize_cache_key(func_expr)
+    if optimized_key == func_expr.children:
+        optimized_key = [None]
+
+    name = func_expr.signature()
+    cache_entry = CatalogManager().get_udf_cache_catalog_entry_by_name(name)
+    if not cache_entry:
+        cache_entry = CatalogManager().insert_udf_cache_catalog_entry(func_expr)
+    cache = FunctionExpressionCache(
+        key=tuple(optimized_key), store=DiskKVCache(cache_entry.cache_path)
+    )
+    return func_expr.copy().enable_cache(cache)

@@ -27,7 +27,6 @@ from eva.catalog.catalog_type import ColumnType, IndexType, NdArrayType, TableTy
 from eva.catalog.catalog_utils import xform_column_definitions_to_catalog_entries
 from eva.catalog.sql_config import IDENTIFIER_COLUMN
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.configuration.constants import EVA_DEFAULT_DIR, INDEX_DIR
 from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
 from eva.parser.create_statement import ColumnDefinition
@@ -39,8 +38,7 @@ from eva.utils.generic_utils import generate_file_path
 class CreateIndexTest(unittest.TestCase):
     def _index_save_path(self):
         return str(
-            EVA_DEFAULT_DIR
-            / INDEX_DIR
+            Path(ConfigurationManager().get_value("storage", "index_dir"))
             / Path("{}_{}.index".format("HNSW", "testCreateIndexName"))
         )
 

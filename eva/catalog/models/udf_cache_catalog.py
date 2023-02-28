@@ -24,8 +24,6 @@ from eva.catalog.models.association_models import (
     depend_udf_and_udf_cache,
 )
 from eva.catalog.models.base_model import BaseModel
-from eva.catalog.models.column_catalog import ColumnCatalogEntry
-from eva.catalog.models.udf_catalog import UdfCatalogEntry
 
 
 class UdfCacheCatalog(BaseModel):
@@ -53,11 +51,13 @@ class UdfCacheCatalog(BaseModel):
     _udf_depends = relationship(
         "UdfCatalog",
         secondary=depend_udf_and_udf_cache,
+        back_populates="_dep_caches",
         # cascade="all, delete-orphan",
     )
     _col_depends = relationship(
         "ColumnCatalog",
         secondary=depend_column_and_udf_cache,
+        back_populates="_dep_caches",
         # cascade="all, delete-orphan",
     )
 
@@ -68,8 +68,8 @@ class UdfCacheCatalog(BaseModel):
         self._args = str(args)
 
     def as_dataclass(self) -> "UdfCacheCatalogEntry":
-        udf_depends = [obj.as_dataclass() for obj in self._udf_depends]
-        col_depends = [obj.as_dataclass() for obj in self._col_depends]
+        udf_depends = [obj._row_id for obj in self._udf_depends]
+        col_depends = [obj._row_id for obj in self._col_depends]
         return UdfCacheCatalogEntry(
             row_id=self._row_id,
             name=self._name,
@@ -91,6 +91,7 @@ class UdfCacheCatalogEntry:
     udf_id: int
     cache_path: str
     args: Tuple[str]
-    udf_depends: Tuple[UdfCatalogEntry] = field(compare=False, default_factory=tuple)
-    col_depends: Tuple[ColumnCatalogEntry] = field(compare=False, default_factory=tuple)
+    # row_ids of the dependent udfs and columns
+    udf_depends: Tuple[int] = field(compare=False, default_factory=tuple)
+    col_depends: Tuple[int] = field(compare=False, default_factory=tuple)
     row_id: int = None

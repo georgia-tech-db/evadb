@@ -17,6 +17,7 @@ from typing import List
 
 from eva.catalog.catalog_type import ColumnType, IndexType, TableType
 from eva.catalog.catalog_utils import (
+    cleanup_storage,
     construct_udf_cache_catalog_entry,
     get_image_table_column_definitions,
     get_video_table_column_definitions,
@@ -84,10 +85,12 @@ class CatalogManager(object):
     def _shutdown_catalog(self):
         """
         This method is responsible for gracefully shutting the
-        catalog manager. Currently, it includes dropping the catalog database
+        catalog manager.
         """
         logger.info("Shutting catalog")
         drop_db()
+        # clean up the dataset, index, and cache directories
+        cleanup_storage()
 
     "Table catalog services"
 

@@ -12,12 +12,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import annotations
+
+import typing
 from dataclasses import dataclass, field
 from typing import List
+
+if typing.TYPE_CHECKING:
+    from eva.catalog.models.udf_cache_catalog import UdfCacheCatalogEntry
 
 from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
 
+from eva.catalog.models.association_models import depend_udf_and_udf_cache
 from eva.catalog.models.base_model import BaseModel
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 
@@ -35,9 +42,17 @@ class UdfCatalog(BaseModel):
     _impl_file_path = Column("impl_file_path", String(128))
     _type = Column("type", String(100))
 
-    # UdfIOCatalog stroing the input/output attributes of the udf
+    # UdfIOCatalog storing the input/output attributes of the udf
     _attributes = relationship(
         "UdfIOCatalog", back_populates="_udf", cascade="all, delete, delete-orphan"
+    )
+
+    # list of UdfCacheCatalog entries dependent on the udf
+    _dep_caches = relationship(
+        "UdfCacheCatalog",
+        secondary=depend_udf_and_udf_cache,
+        back_populates="_udf_depends",
+        cascade="all, delete",
     )
 
     def __init__(self, name: str, impl_file_path: str, type: str):
@@ -54,6 +69,7 @@ class UdfCatalog(BaseModel):
             else:
                 outputs.append(attribute.as_dataclass())
 
+        caches = [cache.as_dataclass() for cache in self._dep_caches]
         return UdfCatalogEntry(
             row_id=self._row_id,
             name=self._name,
@@ -61,6 +77,7 @@ class UdfCatalog(BaseModel):
             type=self._type,
             args=args,
             outputs=outputs,
+            dep_caches=caches,
         )
 
 
@@ -76,6 +93,7 @@ class UdfCatalogEntry:
     row_id: int = None
     args: List[UdfIOCatalogEntry] = field(compare=False, default_factory=list)
     outputs: List[UdfIOCatalogEntry] = field(compare=False, default_factory=list)
+    dep_caches: List[UdfCacheCatalogEntry] = field(compare=False, default_factory=list)
 
     def display_format(self):
         def _to_str(col):

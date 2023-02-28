@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from dataclasses import dataclass
-from typing import Callable, List
+from typing import Callable, List, Tuple
 
 import numpy as np
 import pandas as pd
@@ -229,12 +229,9 @@ class FunctionExpressionCache:
     """dataclass for cache-related attributes
 
     Args:
-        key (`AbstractExpression`): the expression to evaluate to get the key.
-        If `None`, use the function arguments as the key. This is useful when the
-        system wants to use logically equivalent columns as the key (e.g., frame number
-        instead of frame data).
+        key (`AbstractExpression`): the list of abstract expression to evaluate to get the key. If `None`, use the function arguments as the key. This is useful when the system wants to use logically equivalent columns as the key (e.g., frame number instead of frame data).
         store (`DiskKVCache`): the cache object to get/set key-value pairs
     """
 
-    key: AbstractExpression
+    key: Tuple[AbstractExpression]
     store: DiskKVCache = None

@@ -12,16 +12,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import uuid
+from pathlib import Path
 from typing import List
 
 from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
 from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.catalog.models.udf_cache_catalog import UdfCacheCatalogEntry
+from eva.configuration.configuration_manager import ConfigurationManager
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
-from eva.utils.generic_utils import generate_file_path
+from eva.utils.generic_utils import get_str_hash, remove_directory_contents
 
 
 def is_video_table(table: TableCatalogEntry):
@@ -122,11 +125,15 @@ def construct_udf_cache_catalog_entry(
     udf_depends = []
     col_depends = []
     for expr in func_expr.find_all(FunctionExpression):
-        udf_depends.append(expr.udf_obj)
+        udf_depends.append(expr.udf_obj.row_id)
     for expr in func_expr.find_all(TupleValueExpression):
-        col_depends.append(expr.col_object)
+        col_depends.append(expr.col_object.row_id)
     cache_name = func_expr.signature()
-    cache_path = str(generate_file_path(cache_name))
+
+    # add salt to the cache_name so that we generate unique name
+    path = str(get_str_hash(cache_name + uuid.uuid4().hex))
+    cache_dir = ConfigurationManager().get_value("storage", "cache_dir")
+    cache_path = str(Path(cache_dir) / Path(f"{path}_{func_expr.name}"))
     args = tuple([arg.signature() for arg in func_expr.children])
     entry = UdfCacheCatalogEntry(
         name=func_expr.signature(),
@@ -138,3 +145,10 @@ def construct_udf_cache_catalog_entry(
     )
 
     return entry
+
+
+def cleanup_storage():
+    config = ConfigurationManager()
+    remove_directory_contents(config.get_value("storage", "index_dir"))
+    remove_directory_contents(config.get_value("storage", "cache_dir"))
+    remove_directory_contents(config.get_value("core", "datasets_dir"))

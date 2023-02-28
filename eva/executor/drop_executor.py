@@ -12,6 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import shutil
+
 import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
@@ -57,6 +59,14 @@ class DropExecutor(AbstractExecutor):
         except RuntimeError as err:
             raise ExecutorError(str(err))
         storage_engine.drop(table=table_obj)
+
+        # Remove the cache data linked with the table
+        # We only remove the data-structures related to the cache,
+        # catalog takes care of removing the cache entries from the catalog table
+        # based on the foreign key dependecies.
+        for col_obj in table_obj.columns:
+            for cache in col_obj.dep_caches:
+                shutil.rmtree(cache.cache_path)
 
         success = catalog_manager.delete_table_catalog_entry(table_obj)
 
