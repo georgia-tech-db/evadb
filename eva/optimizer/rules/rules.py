@@ -571,6 +571,7 @@ class LogicalCreateUDFToPhysical(Rule):
             before.outputs,
             before.impl_path,
             before.udf_type,
+            before.metadata
         )
         yield after
 

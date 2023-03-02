@@ -77,6 +77,7 @@ class Functions:
         output_definitions = []
         impl_path = None
         udf_type = None
+        metadata = []
 
         create_definitions_index = 0
         for child in tree.children:
@@ -98,6 +99,10 @@ class Functions:
                     udf_type = self.visit(child)
                 elif child.data == "udf_impl":
                     impl_path = self.visit(child).value
+                elif child.data == "udf_metadata":
+                    # Each UDF metadata is a key value pair
+                    key_value_pair = self.visit(child)
+                    metadata.append((key_value_pair[0].value , key_value_pair[1].value)),
                 else:
                     raise ValueError(
                         f"CREATE/DROP UDF Failed: Unidentified selector child: {child.data!r}"
@@ -111,6 +116,7 @@ class Functions:
             output_definitions,
             impl_path,
             udf_type,
+            metadata,
         )
 
     def get_aggregate_function_type(self, agg_func_name):

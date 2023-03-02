@@ -12,6 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import List, Tuple
+
 from eva.catalog.models.udf_metadata_catalog import UdfMetadataCatalog, UdfMetadataCatalogEntry
 from eva.catalog.services.base_service import BaseService
 
@@ -20,14 +22,11 @@ class UdfMetadataCatalogService(BaseService):
     def __init__(self):
         super().__init__(UdfMetadataCatalog)
     
-    def insert_entry(self,
-        key:str,
-        value:str,
-        udf_id:int
-    ):
-        metadata_entry = UdfMetadataCatalog(
-            key=key,
-            value=value,
-            udf_id=udf_id
-        )
-        metadata_entry.save()
+    def insert_entries(self, entries: List[UdfMetadataCatalogEntry]):
+        for entry in entries:
+            metadata_obj = UdfMetadataCatalog(
+                key=entry.key,
+                value=entry.value,
+                udf_id=entry.udf_id
+            )
+            metadata_obj.save()

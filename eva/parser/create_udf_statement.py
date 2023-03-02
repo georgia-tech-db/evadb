@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from pathlib import Path
-from typing import List
+from typing import List, Tuple
 
 from eva.parser.create_statement import ColumnDefinition
 from eva.parser.statement import AbstractStatement
@@ -39,6 +39,8 @@ class CreateUDFStatement(AbstractStatement):
             the path provided should be relative to the UDF dir.
         udf_type: str
             udf type. it ca be object detection, classification etc.
+        metadata: List[Tuple[str, str]]
+            metadata, list of key value pairs used for storing metadata of udfs, mostly used for advanced udf types
     """
 
     def __init__(
@@ -49,6 +51,7 @@ class CreateUDFStatement(AbstractStatement):
         outputs: List[ColumnDefinition],
         impl_path: str,
         udf_type: str = None,
+        metadata: List[Tuple[str, str]] = None,
     ):
         super().__init__(StatementType.CREATE_UDF)
         self._name = name
@@ -57,6 +60,7 @@ class CreateUDFStatement(AbstractStatement):
         self._outputs = outputs
         self._impl_path = Path(impl_path)
         self._udf_type = udf_type
+        self._metadata = metadata
 
     def __str__(self) -> str:
         input_str = ""
@@ -71,7 +75,13 @@ class CreateUDFStatement(AbstractStatement):
                 output_str += str(expr) + ", "
             output_str = output_str.rstrip(", ")
 
-        return f"CREATE UDF {self._name} INPUT ({input_str}) OUTPUT ({output_str}) TYPE {self._udf_type} IMPL {self._impl_path.name}"
+        metadata_str = ""
+        if self._metadata is not None:
+            for key, value in self._metadata:
+                metadata_str += f"{key}={value}, "
+            metadata_str = metadata_str.rstrip(", ")
+
+        return f"CREATE UDF {self._name} INPUT ({input_str}) OUTPUT ({output_str}) TYPE {self._udf_type} IMPL {self._impl_path.name} ({metadata_str}))"
 
     @property
     def name(self):
@@ -97,6 +107,10 @@ class CreateUDFStatement(AbstractStatement):
     def udf_type(self):
         return self._udf_type
 
+    @property
+    def metadata(self):
+        return self._metadata
+
     def __eq__(self, other):
         if not isinstance(other, CreateUDFStatement):
             return False
@@ -107,6 +121,7 @@ class CreateUDFStatement(AbstractStatement):
             and self.outputs == other.outputs
             and self.impl_path == other.impl_path
             and self.udf_type == other.udf_type
+            and self.metadata == other.metadata
         )
 
     def __hash__(self) -> int:
@@ -119,5 +134,6 @@ class CreateUDFStatement(AbstractStatement):
                 tuple(self.outputs),
                 self.impl_path,
                 self.udf_type,
+                tuple(self.metadata)
             )
         )

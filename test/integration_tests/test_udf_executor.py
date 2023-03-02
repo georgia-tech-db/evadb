@@ -32,6 +32,22 @@ from eva.server.command_handler import execute_query_fetch_all
 NUM_FRAMES = 10
 
 
+class UDFCreatorTest(unittest.TestCase):
+    def setUp(self) -> None:
+        CatalogManager().reset()
+
+    def test_my_new_command(self):
+        create_udf_query = """CREATE UDF DummyObjectDetector 
+            INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
+            OUTPUT (label NDARRAY STR(10))
+            TYPE Classification
+            IMPL 'test/util.py'
+            'KEY1' 'VALUE1'
+            'KEY2' 'VALUE2';
+        """
+        execute_query_fetch_all(create_udf_query) 
+
+
 class UDFExecutorTest(unittest.TestCase):
     def setUp(self):
         CatalogManager().reset()

@@ -27,6 +27,7 @@ from eva.catalog.models.index_catalog import IndexCatalogEntry
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.catalog.models.udf_catalog import UdfCatalogEntry
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
+from eva.catalog.models.udf_metadata_catalog import UdfMetadataCatalogEntry
 from eva.catalog.services.column_catalog_service import ColumnCatalogService
 from eva.catalog.services.index_catalog_service import IndexCatalogService
 from eva.catalog.services.table_catalog_service import TableCatalogService
@@ -197,6 +198,7 @@ class CatalogManager(object):
         impl_file_path: str,
         type: str,
         udf_io_list: List[UdfIOCatalogEntry],
+        udf_metadata_list: List[UdfMetadataCatalogEntry],
     ) -> UdfCatalogEntry:
         """Inserts a UDF catalog entry along with UDF_IO entries.
         It persists the entry to the database.
@@ -216,7 +218,9 @@ class CatalogManager(object):
         for udf_io in udf_io_list:
             udf_io.udf_id = udf_entry.row_id
         self._udf_io_service.insert_entries(udf_io_list)
-        self._udf_metadata_service.insert_entry(key="key", value="value", udf_id=udf_entry.row_id)
+        for udf_metadata in udf_metadata_list:
+            udf_metadata.udf_id = udf_entry.row_id
+        self._udf_metadata_service.insert_entries(udf_metadata_list)
         return udf_entry
 
     def get_udf_catalog_entry_by_name(self, name: str) -> UdfCatalogEntry:

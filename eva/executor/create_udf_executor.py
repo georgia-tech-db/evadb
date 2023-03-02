@@ -61,7 +61,7 @@ class CreateUDFExecutor(AbstractExecutor):
             logger.error(err_msg)
             raise RuntimeError(err_msg)
         catalog_manager.insert_udf_catalog_entry(
-            self.node.name, impl_path, self.node.udf_type, io_list
+            self.node.name, impl_path, self.node.udf_type, io_list, self.node.metadata
         )
         yield Batch(
             pd.DataFrame([f"UDF {self.node.name} successfully added to the database."])
