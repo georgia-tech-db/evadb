@@ -32,6 +32,7 @@ from eva.catalog.services.index_catalog_service import IndexCatalogService
 from eva.catalog.services.table_catalog_service import TableCatalogService
 from eva.catalog.services.udf_catalog_service import UdfCatalogService
 from eva.catalog.services.udf_io_catalog_service import UdfIOCatalogService
+from eva.catalog.services.udf_metadata_catalog_service import UdfMetadataCatalogService
 from eva.catalog.sql_config import IDENTIFIER_COLUMN
 from eva.parser.create_statement import ColumnDefinition
 from eva.parser.table_ref import TableInfo
@@ -55,6 +56,7 @@ class CatalogManager(object):
         self._column_service: ColumnCatalogService = ColumnCatalogService()
         self._udf_service: UdfCatalogService = UdfCatalogService()
         self._udf_io_service: UdfIOCatalogService = UdfIOCatalogService()
+        self._udf_metadata_service: UdfMetadataCatalogService = UdfMetadataCatalogService()
         self._index_service: IndexCatalogService = IndexCatalogService()
 
     def reset(self):
@@ -214,6 +216,7 @@ class CatalogManager(object):
         for udf_io in udf_io_list:
             udf_io.udf_id = udf_entry.row_id
         self._udf_io_service.insert_entries(udf_io_list)
+        self._udf_metadata_service.insert_entry(key="key", value="value", udf_id=udf_entry.row_id)
         return udf_entry
 
     def get_udf_catalog_entry_by_name(self, name: str) -> UdfCatalogEntry:
