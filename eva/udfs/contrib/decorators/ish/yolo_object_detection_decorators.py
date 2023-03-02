@@ -19,6 +19,9 @@ import pandas as pd
 from eva.models.catalog.frame_info import FrameInfo
 from eva.models.catalog.properties import ColorSpace
 from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
+from eva.udfs.contrib.decorators.ish.io_descriptors.data_types.type_pandas_dataframe import (
+    PandasDataframe,
+)
 from eva.udfs.contrib.decorators.ish.io_descriptors.data_types.type_tensor import (
     PyTorchTensor,
 )
@@ -151,7 +154,10 @@ class YoloDecorators(PytorchAbstractClassifierUDF):
             "toothbrush",
         ]
 
-    @forward(input_signature=PyTorchTensor(shape=(1, 3, 540, 960), dtype="float32"))
+    @forward(
+        input_signature=PyTorchTensor(shape=(1, 3, 540, 960), dtype="float32"),
+        output_signature=PandasDataframe(columns=["labels", "bboxes", "scores"]),
+    )
     def forward(self, frames: Tensor) -> pd.DataFrame:
         """
         Performs predictions on input frames

@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import warnings
+
 import torch
 import yolov5
 
@@ -20,19 +22,12 @@ from eva.udfs.contrib.decorators.ish.io_descriptors.eva_arguments import EvaArgu
 from eva.udfs.contrib.decorators.ish.io_descriptors.type_exception import TypeException
 
 
-def setup(use_cache: bool, udf_type: str, batch: bool, model_path: str = None):
+def setup(use_cache: bool, batch: bool):
     def inner_fn(arg_fn):
         print("Cache is set: ", use_cache)
         print("batching is set: ", batch)
 
         def wrapper(*args, **kwargs):
-
-            # setup the model
-            if udf_type == "object_detection":
-                if model_path:
-                    args[0].model = torch.load(model_path)
-                else:
-                    args[0].model = yolov5.load("yolov5s.pt", verbose=False)
 
             # TODO set the batch and caching parameters.
 
@@ -43,10 +38,7 @@ def setup(use_cache: bool, udf_type: str, batch: bool, model_path: str = None):
     return inner_fn
 
 
-# TODO implement the decorators for the preprocessing function
-
-
-def forward(input_signature: EvaArgument):
+def forward(input_signature: EvaArgument, output_signature: EvaArgument):
     def inner_fn(arg_fn):
         def wrapper(*args):
 
@@ -68,6 +60,18 @@ def forward(input_signature: EvaArgument):
 
             # first argument is self and second is frames.
             output = arg_fn(args[0], frames)
+
+            # check output type
+            if not (output_signature.check_type(output)):
+                raise TypeException(
+                    "Expected %s as output but received %s"
+                    % (output_signature.name(), type(output))
+                )
+
+            # check if the column headers are matching
+            if output_signature.is_output_columns_set():
+                if not output_signature.check_column_names(output):
+                    warnings.warn("Column header names are not matching")
 
             return output
 
