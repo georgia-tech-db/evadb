@@ -26,3 +26,9 @@ class EvaArgument(object):
 
     def name(self):
         pass
+
+    def is_output_columns_set(self):
+        pass
+
+    def check_column_names(self, input_object):
+        pass
