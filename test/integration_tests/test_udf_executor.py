@@ -48,20 +48,57 @@ class UDFCreatorTest(unittest.TestCase):
     def tearDown(self) -> None:
         file_remove("dummy.avi")
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
+    
+    def test_object_detection_huggingface(self):
+        create_udf_query = """CREATE UDF DummyObjectDetector 
+            INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
+            OUTPUT (label NDARRAY STR(10))
+            TYPE HuggingFace
+            IMPL 'abc'
+            'task' 'object-detection'
+        """
+        execute_query_fetch_all(create_udf_query) 
 
-    def test_my_old_command(self):
+        select_query = "SELECT DummyObjectDetector(data) FROM DETRAC;"
+        result = execute_query_fetch_all(select_query)
+        pass
+
+    def test_image_classification_huggingface(self):
         create_udf_query = """CREATE UDF DummyObjectDetector 
             INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
             OUTPUT (label NDARRAY STR(10))
             TYPE HuggingFace
             IMPL 'abc'
             'task' 'image-classification'
-            'model' 'roberta-large-mnli';
         """
         execute_query_fetch_all(create_udf_query) 
 
-        select_query = "SELECT DummyObjectDetector(data) FROM MNIST;"
-        execute_query_fetch_all(select_query)
+        select_query = "SELECT DummyObjectDetector(data) FROM DETRAC;"
+        result = execute_query_fetch_all(select_query)
+        pass
+
+    def test_text_classification_huggingface(self):
+        create_table_query = """CREATE TABLE IF NOT EXISTS MyCSV (
+                id INTEGER UNIQUE,
+                comment TEXT(30)
+            );"""
+        execute_query_fetch_all(create_table_query)
+
+        load_table_query = """LOAD CSV '/Users/suryatej/Downloads/Project/eva/comments.csv' INTO MyCSV;"""
+        execute_query_fetch_all(load_table_query)
+
+        create_udf_query = """CREATE UDF DummyObjectDetector 
+            INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
+            OUTPUT (label NDARRAY STR(10))
+            TYPE HuggingFace
+            IMPL 'abc'
+            'task' 'text-classification'
+        """
+        execute_query_fetch_all(create_udf_query) 
+
+        select_query = "SELECT DummyObjectDetector(comment) FROM MyCSV;"
+        result = execute_query_fetch_all(select_query)
+        pass
 
     def test_my_new_command(self):
         create_udf_query = """CREATE UDF DummyObjectDetector 
@@ -74,7 +111,8 @@ class UDFCreatorTest(unittest.TestCase):
         execute_query_fetch_all(create_udf_query) 
 
         select_query = "SELECT DummyObjectDetector(data) FROM DETRAC;"
-        execute_query_fetch_all(select_query)
+        result = execute_query_fetch_all(select_query)
+        pass
 
 class UDFExecutorTest(unittest.TestCase):
     def setUp(self):

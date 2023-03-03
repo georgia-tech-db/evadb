@@ -17,38 +17,46 @@ from typing import Any, Dict, Union, List, List
 
 from eva.catalog.models.udf_catalog import UdfCatalogEntry
 from transformers import pipeline
-from transformers.pipelines import ImageClassificationPipeline, ObjectDetectionPipeline
+from transformers.pipelines import ImageClassificationPipeline, ObjectDetectionPipeline, TextClassificationPipeline
 from PIL import Image
 import numpy as np
 import pandas as pd
 
+def image_data_preprocesser(images):
+    frames_list = images.values.tolist()
+    frames = np.array(frames_list)
+    frames = np.vstack(frames)
+    images = [Image.fromarray(row) for row in frames]
+    return images
+
+def data_postprocesser(model_output):
+    outcome = pd.DataFrame() 
+    for i in range(len(model_output)):
+        outcome = outcome.append(model_output[i], ignore_index=True)
+    return outcome
 
 class CustomImageClassification(ImageClassificationPipeline):
     def __call__(self, images, **kwargs):
-        frames_list = images.values.tolist()
-        frames = np.array(frames_list)
-        frames = np.vstack(frames)
-        images = [Image.fromarray(row) for row in frames][:2]
+        images = image_data_preprocesser(images)
         model_output = super().__call__(images, **kwargs)
-        outcome = pd.DataFrame() 
-        for i in range(len(model_output)):
-            outcome = outcome.append(model_output[i], ignore_index=True)
+        outcome = data_postprocesser(model_output)
         return outcome
     
 class CustomObjectDetection(ObjectDetectionPipeline):
     def __call__(self, images, **kwargs):
-        frames_list = images.values.tolist()
-        frames = np.array(frames_list)
-        frames = np.vstack(frames)
-        images = [Image.fromarray(row) for row in frames][:2]
+        images = image_data_preprocesser(images)
         model_output = super().__call__(images, **kwargs)
-        outcome = pd.DataFrame() 
-        for i in range(len(model_output)):
-            outcome = outcome.append(model_output[i], ignore_index=True)
+        outcome = data_postprocesser(model_output)
+        return outcome
+    
+class CustomTextClassification(TextClassificationPipeline):
+    def __call__(self, texts, **kwargs):
+        texts = texts.values.flatten().tolist()
+        model_output = super().__call__(texts, **kwargs)
+        outcome = data_postprocesser(model_output)
         return outcome
 
-task_class_mapping = {'image-classification': CustomImageClassification, 'object-detection': CustomObjectDetection}
-
+task_class_mapping = {'image-classification': CustomImageClassification, 'object-detection': CustomObjectDetection, 'text-classification': CustomTextClassification}
 
 def bind_hf_func_from_udf(udf_obj: UdfCatalogEntry):
     """
