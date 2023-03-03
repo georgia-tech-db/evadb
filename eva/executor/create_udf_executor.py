@@ -15,6 +15,7 @@
 import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
+from eva.configuration.constants import EVA_DEFAULT_DIR
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.create_udf_plan import CreateUDFPlan
@@ -50,16 +51,25 @@ class CreateUDFExecutor(AbstractExecutor):
         io_list.extend(self.node.inputs)
         io_list.extend(self.node.outputs)
         impl_path = self.node.impl_path.absolute().as_posix()
-        # check if we can create the udf object
-        try:
-            path_to_class(impl_path, self.node.name)()
-        except Exception as e:
-            err_msg = (
-                f"{str(e)}. Please verify that the UDF class name in the "
-                f"implementation file matches the provided UDF name {self.node.name}."
-            )
-            logger.error(err_msg)
-            raise RuntimeError(err_msg)
+        skip_udf_class_check = False
+
+        # if it's a type of HuggingFaceModel, override the impl_path
+        if self.node.impl_path.name == 'HuggingFace':
+            impl_path = f'{EVA_DEFAULT_DIR}/udfs/generic_huggingface_model.py'
+            skip_udf_class_check = True
+
+        if not skip_udf_class_check:
+            # check if we can create the udf object
+            try:
+                path_to_class(impl_path, self.node.name)()
+            except Exception as e:
+                err_msg = (
+                    f"{str(e)}. Please verify that the UDF class name in the "
+                    f"implementation file matches the provided UDF name {self.node.name}."
+                )
+                logger.error(err_msg)
+                raise RuntimeError(err_msg)
+
         catalog_manager.insert_udf_catalog_entry(
             self.node.name, impl_path, self.node.udf_type, io_list, self.node.metadata
         )

@@ -41,7 +41,7 @@ class UDFCreatorTest(unittest.TestCase):
             INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
             OUTPUT (label NDARRAY STR(10))
             TYPE Classification
-            IMPL 'test/util.py'
+            IMPL 'HuggingFace'
             'KEY1' 'VALUE1'
             'KEY2' 'VALUE2';
         """
