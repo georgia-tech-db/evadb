@@ -73,8 +73,10 @@ class CreateUDFStatement(AbstractStatement):
 
         if len(input_str)>0:
             return f"CREATE UDF {self._name} INPUT ({input_str}) OUTPUT ({output_str}) TYPE {self._udf_type} IMPL {self._impl_path.name}"
-        else:
+        elif len(self._udf_type)>0:
             return f"CREATE UDF {self._name} TYPE {self._udf_type} IMPL {self._impl_path.name}"
+        else:
+            return f"CREATE UDF {self._name} IMPL {self._impl_path.name}"
 
     @property
     def name(self):
