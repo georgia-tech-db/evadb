@@ -20,7 +20,7 @@ from eva.udfs.contrib.decorators.ish.io_descriptors.type_exception import TypeEx
 
 # decorator for the setup function. It will be used to set the cache, batching and
 # udf_type parameters in the catalog
-def setup(use_cache: bool, batch: bool):
+def setup(use_cache: bool, udf_type: str, batch: bool):
     
     def inner_fn(arg_fn):
         print("Cache is set: ", use_cache)
