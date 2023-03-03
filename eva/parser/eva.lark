@@ -27,7 +27,7 @@ create_table: CREATE TABLE if_not_exists? table_name create_definitions
 rename_table: RENAME TABLE table_name TO table_name
     
 // Create UDFs
-create_udf: CREATE UDF if_not_exists? udf_name INPUT create_definitions OUTPUT create_definitions TYPE udf_type IMPL udf_impl
+create_udf: CREATE UDF if_not_exists? udf_name INPUT create_definitions OUTPUT create_definitions TYPE udf_type IMPL udf_impl | CREATE UDF if_not_exists? udf_name TYPE udf_type IMPL udf_impl
 
 // Create Materialized View
 create_materialized_view: CREATE MATERIALIZED VIEW if_not_exists? table_name ("(" uid_list ")") AS select_statement 
