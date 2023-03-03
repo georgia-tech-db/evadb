@@ -27,7 +27,6 @@ from eva.optimizer.operators import (
     LogicalExchange,
     LogicalGet,
     LogicalProject,
-    Operator,
     OperatorType,
 )
 from eva.optimizer.rules.rules_base import Promise, Rule, RuleType
