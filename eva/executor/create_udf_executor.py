@@ -50,13 +50,15 @@ class CreateUDFExecutor(AbstractExecutor):
         io_list = []
         io_list.extend(self.node.inputs)
         io_list.extend(self.node.outputs)
-        impl_path = self.node.impl_path.absolute().as_posix()
+        
         skip_udf_class_check = False
 
         # if it's a type of HuggingFaceModel, override the impl_path
         if self.node.udf_type == 'HuggingFace':
             impl_path = f'{EVA_DEFAULT_DIR}/udfs/generic_huggingface_model.py'
             skip_udf_class_check = True
+        else:
+            impl_path = self.node.impl_path.absolute().as_posix()
 
         if not skip_udf_class_check:
             # check if we can create the udf object
