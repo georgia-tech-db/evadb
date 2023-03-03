@@ -38,6 +38,7 @@ from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
 from eva.utils.generic_utils import path_to_class
 from eva.utils.logging_manager import logger
+from eva.utils.huggingface_utils import bind_hf_func_from_udf
 
 if sys.version_info >= (3, 8):
     from functools import singledispatchmethod
@@ -231,17 +232,17 @@ class StatementBinder:
         udf_name = udf_obj.name
 
         if udf_obj.type == 'HuggingFace':
-            udf_name = "GenericHuggingfaceModel"
-
-        try:
-            node.function = path_to_class(udf_file_path, udf_name)
-        except Exception as e:
-            err_msg = (
-                f"{str(e)}. Please verify that the UDF class name in the"
-                "implementation file matches the UDF name."
-            )
-            logger.error(err_msg)
-            raise BinderError(err_msg)
+            node.function = bind_hf_func_from_udf(udf_obj)
+        else:
+            try:
+                node.function = path_to_class(udf_file_path, udf_name)
+            except Exception as e:
+                err_msg = (
+                    f"{str(e)}. Please verify that the UDF class name in the"
+                    "implementation file matches the UDF name."
+                )
+                logger.error(err_msg)
+                raise BinderError(err_msg)
 
         node.udf_obj = udf_obj
         output_objs = self._catalog.get_udf_io_catalog_output_entries(udf_obj)
