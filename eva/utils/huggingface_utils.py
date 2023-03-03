@@ -17,26 +17,37 @@ from typing import Any, Dict, Union, List, List
 
 from eva.catalog.models.udf_catalog import UdfCatalogEntry
 from transformers import pipeline
-from transformers.pipelines import ImageClassificationPipeline
+from transformers.pipelines import ImageClassificationPipeline, ObjectDetectionPipeline
 from PIL import Image
 import numpy as np
 import pandas as pd
 
 
-class MyPipeline(ImageClassificationPipeline):
+class CustomImageClassification(ImageClassificationPipeline):
     def __call__(self, images, **kwargs):
-        if self.task == "image-classification":
-            frames_list = images.values.tolist()
-            frames = np.array(frames_list)
-            frames = np.vstack(frames)
-            # convert a pandas dataframe of images in RGB to a list of PIL images
-            images = [Image.fromarray(row) for row in frames][:2]
+        frames_list = images.values.tolist()
+        frames = np.array(frames_list)
+        frames = np.vstack(frames)
+        images = [Image.fromarray(row) for row in frames][:2]
         model_output = super().__call__(images, **kwargs)
         outcome = pd.DataFrame() 
         for i in range(len(model_output)):
             outcome = outcome.append(model_output[i], ignore_index=True)
         return outcome
     
+class CustomObjectDetection(ObjectDetectionPipeline):
+    def __call__(self, images, **kwargs):
+        frames_list = images.values.tolist()
+        frames = np.array(frames_list)
+        frames = np.vstack(frames)
+        images = [Image.fromarray(row) for row in frames][:2]
+        model_output = super().__call__(images, **kwargs)
+        outcome = pd.DataFrame() 
+        for i in range(len(model_output)):
+            outcome = outcome.append(model_output[i], ignore_index=True)
+        return outcome
+
+task_class_mapping = {'image-classification': CustomImageClassification, 'object-detection': CustomObjectDetection}
 
 
 def bind_hf_func_from_udf(udf_obj: UdfCatalogEntry):
@@ -47,4 +58,4 @@ def bind_hf_func_from_udf(udf_obj: UdfCatalogEntry):
     for metadata in udf_obj.metadata:
         key = metadata.key.lower()
         default_args[key] = metadata.value
-    return  lambda : pipeline(**default_args, pipeline_class=MyPipeline)
+    return  lambda : pipeline(**default_args, pipeline_class=task_class_mapping.get(default_args['task']))

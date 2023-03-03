@@ -42,6 +42,9 @@ class UDFCreatorTest(unittest.TestCase):
         query = """LOAD VIDEO 'data/mnist/mnist.mp4' INTO MNIST;"""
         execute_query_fetch_all(query)
 
+        query = """LOAD VIDEO 'data/ua_detrac/ua_detrac.mp4' INTO DETRAC;"""
+        execute_query_fetch_all(query)
+
     def tearDown(self) -> None:
         file_remove("dummy.avi")
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
@@ -66,11 +69,11 @@ class UDFCreatorTest(unittest.TestCase):
             OUTPUT (label NDARRAY STR(10))
             TYPE HuggingFace
             IMPL 'abc'
-            'task' 'image-classification'
+            'task' 'object-detection'
         """
         execute_query_fetch_all(create_udf_query) 
 
-        select_query = "SELECT DummyObjectDetector(data) FROM MNIST;"
+        select_query = "SELECT DummyObjectDetector(data) FROM DETRAC;"
         execute_query_fetch_all(select_query)
 
 class UDFExecutorTest(unittest.TestCase):
