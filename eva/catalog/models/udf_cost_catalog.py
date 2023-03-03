@@ -13,12 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from dataclasses import dataclass
-
 from sqlalchemy import Column, ForeignKey, Integer, String
-
 from eva.catalog.models.base_model import BaseModel
-
-# from sqlalchemy.orm import relationship
 
 
 class UdfCostCatalog(BaseModel):
@@ -38,9 +34,7 @@ class UdfCostCatalog(BaseModel):
     _frame_count = Column("frame_count", Integer())
     _resolution = Column("resolution", Integer())
     _udf_id = Column("udf_id", Integer(), ForeignKey("udf_catalog._row_id"))
-
     _udf_name = Column("name", String(100), ForeignKey("udf_catalog.name"))
-    # _udf_name = relationship("UdfCatalog", back_populates="udf_catalog._name")
 
     def __init__(
         self, name: str, type: str, cost: int, frame_count: int, resolution: int
