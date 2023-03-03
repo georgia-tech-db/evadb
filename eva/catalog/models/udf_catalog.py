@@ -20,6 +20,7 @@ from sqlalchemy.orm import relationship
 
 from eva.catalog.models.base_model import BaseModel
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
+from eva.catalog.models.udf_metadata_catalog import UdfMetadataCatalogEntry
 
 
 class UdfCatalog(BaseModel):
@@ -56,6 +57,10 @@ class UdfCatalog(BaseModel):
                 args.append(attribute.as_dataclass())
             else:
                 outputs.append(attribute.as_dataclass())
+    
+        metadata = []
+        for meta_key_value in self._metadata:
+            metadata.append(meta_key_value.as_dataclass())
 
         return UdfCatalogEntry(
             row_id=self._row_id,
@@ -64,6 +69,7 @@ class UdfCatalog(BaseModel):
             type=self._type,
             args=args,
             outputs=outputs,
+            metadata=metadata,
         )
 
 
@@ -79,6 +85,7 @@ class UdfCatalogEntry:
     row_id: int = None
     args: List[UdfIOCatalogEntry] = field(compare=False, default_factory=list)
     outputs: List[UdfIOCatalogEntry] = field(compare=False, default_factory=list)
+    metadata: List[UdfMetadataCatalogEntry] = field(compare=False, default_factory=list)
 
     def display_format(self):
         def _to_str(col):
@@ -91,4 +98,5 @@ class UdfCatalogEntry:
             "outputs": [_to_str(col) for col in self.outputs],
             "type": self.type,
             "impl": self.impl_file_path,
+            "meatdata": self.metadata,
         }
