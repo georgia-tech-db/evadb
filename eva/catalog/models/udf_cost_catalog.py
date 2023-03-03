@@ -13,7 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from dataclasses import dataclass
+
 from sqlalchemy import Column, ForeignKey, Integer, String
+
 from eva.catalog.models.base_model import BaseModel
 
 
