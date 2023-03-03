@@ -15,33 +15,33 @@
 
 import warnings
 
-import torch
-import yolov5
-
 from eva.udfs.contrib.decorators.ish.io_descriptors.eva_arguments import EvaArgument
 from eva.udfs.contrib.decorators.ish.io_descriptors.type_exception import TypeException
 
-
+# decorator for the setup function. It will be used to set the cache, batching and
+# udf_type parameters in the catalog
 def setup(use_cache: bool, batch: bool):
+    
     def inner_fn(arg_fn):
         print("Cache is set: ", use_cache)
         print("batching is set: ", batch)
 
         def wrapper(*args, **kwargs):
 
-            # TODO set the batch and caching parameters.
+            # TODO set the batch and caching parameters. update in catalog
 
+            #calling the setup function defined by the user inside the udf implementation
             arg_fn(*args, **kwargs)
 
         return wrapper
 
     return inner_fn
 
-
+# decorator for the forward function. This will validate the shape and data type of inputs and outputs from the UDF. 
+# Additionally if the output is a Pandas dataframe, then it will check if the column names are matching.
 def forward(input_signature: EvaArgument, output_signature: EvaArgument):
     def inner_fn(arg_fn):
         def wrapper(*args):
-
             frames = args[1]
 
             # check type of input

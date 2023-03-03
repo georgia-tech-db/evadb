@@ -18,6 +18,7 @@ from eva.udfs.contrib.decorators.ish.io_descriptors.eva_arguments import EvaArgu
 
 
 class PandasDataframe(EvaArgument):
+    """EVA data type for Pandas Dataframe"""
     def __init__(self, columns) -> None:
         super().__init__()
         self.columns = columns

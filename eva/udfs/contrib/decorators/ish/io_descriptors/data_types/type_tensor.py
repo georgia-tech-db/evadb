@@ -18,6 +18,7 @@ from eva.udfs.contrib.decorators.ish.io_descriptors.eva_arguments import EvaArgu
 
 
 class PyTorchTensor(EvaArgument):
+    """EVA data type for PyTorch Tensor"""
     def __init__(self, shape=None, dtype=None) -> None:
         super().__init__()
         self.shape = shape

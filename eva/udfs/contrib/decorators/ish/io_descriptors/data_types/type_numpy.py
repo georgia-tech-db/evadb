@@ -18,6 +18,8 @@ from eva.udfs.contrib.decorators.ish.io_descriptors.eva_arguments import EvaArgu
 
 
 class NumpyArray(EvaArgument):
+    """EVA data type for Numpy Array"""
+    
     def __init__(self, shape=None, dtype=None) -> None:
         super().__init__()
         self.shape = shape
