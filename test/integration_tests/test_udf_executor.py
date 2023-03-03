@@ -35,18 +35,27 @@ NUM_FRAMES = 10
 class UDFCreatorTest(unittest.TestCase):
     def setUp(self) -> None:
         CatalogManager().reset()
+        video_file_path = create_sample_video(NUM_FRAMES)
+        load_query = f"LOAD VIDEO '{video_file_path}' INTO MyVideo;"
+        execute_query_fetch_all(load_query)
+
+    def tearDown(self) -> None:
+        file_remove("dummy.avi")
+        execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
 
     def test_my_new_command(self):
         create_udf_query = """CREATE UDF DummyObjectDetector 
             INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
             OUTPUT (label NDARRAY STR(10))
-            TYPE Classification
-            IMPL 'HuggingFace'
+            TYPE HuggingFace
+            IMPL 'abc'
             'KEY1' 'VALUE1'
             'KEY2' 'VALUE2';
         """
         execute_query_fetch_all(create_udf_query) 
 
+        select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo;"
+        actual_batch = execute_query_fetch_all(select_query)
 
 class UDFExecutorTest(unittest.TestCase):
     def setUp(self):

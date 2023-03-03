@@ -32,3 +32,6 @@ class GenericHuggingfaceModel(AbstractUDF, GPUCompatible):
     
     def forward(self, *args, **kwargs) -> None:
         pass
+
+    def to_device(self, device: str) -> GPUCompatible:
+        pass 

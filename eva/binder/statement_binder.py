@@ -226,9 +226,15 @@ class StatementBinder:
             )
             logger.error(err_msg)
             raise BinderError(err_msg)
+        
+        udf_file_path = udf_obj.impl_file_path
+        udf_name = udf_obj.name
+
+        if udf_obj.type == 'HuggingFace':
+            udf_name = "GenericHuggingfaceModel"
 
         try:
-            node.function = path_to_class(udf_obj.impl_file_path, udf_obj.name)
+            node.function = path_to_class(udf_file_path, udf_name)
         except Exception as e:
             err_msg = (
                 f"{str(e)}. Please verify that the UDF class name in the"
