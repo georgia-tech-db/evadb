@@ -12,34 +12,39 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import asyncio
 import sys
 import unittest
 
-import mock
+from mock import patch
 
+# Check for Python 3.8+ for IsolatedAsyncioTestCase support
+if sys.version_info >= (3, 8):
 
-class CMDClientTest(unittest.TestCase):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    class CMDClientTest(unittest.IsolatedAsyncioTestCase):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
 
-    @mock.patch("eva.eva_cmd_client.eva_client")
-    def test_main(self, mock_client):
-        from eva.eva_cmd_client import main
+        def get_mock_stdin_reader(self) -> asyncio.StreamReader:
+            stdin_reader = asyncio.StreamReader()
+            stdin_reader.feed_data(b"EXIT;\n")
+            stdin_reader.feed_eof()
+            return stdin_reader
 
-        with mock.patch.object(sys, "argv", ["test"]):
-            main()
-        mock_client.assert_called_once_with(host="0.0.0.0", port=5432)
+        @patch("eva.server.interpreter.create_stdin_reader")
+        @patch("eva.server.interpreter.start_cmd_client")
+        async def test_eva_client(self, mock_client, mock_stdin_reader):
+            # Must import after patching start_cmd_client
+            from eva.eva_cmd_client import eva_client
 
-    def test_parse_args(self):
-        from eva.eva_cmd_client import parse_args
+            mock_stdin_reader.return_value = self.get_mock_stdin_reader()
+            mock_client.side_effect = Exception("Test")
 
-        args = parse_args(["-P", "2345", "-H", "test"])
-        self.assertEqual(args.host, "test")
-        self.assertEqual(args.port, 2345)
+            with self.assertRaises(Exception):
+                await eva_client()
 
-    @mock.patch("eva.server.interpreter.start_cmd_client")
-    def test_eva_client(self, mock_client):
-        from eva.eva_cmd_client import eva_client
+            mock_client.reset_mock()
+            mock_client.side_effect = KeyboardInterrupt
 
-        eva_client()
-        mock_client.assert_called_once()
+            # Pass exception
+            await eva_client()

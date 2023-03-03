@@ -21,7 +21,6 @@ from eva.optimizer.rules.pattern import Pattern
 if TYPE_CHECKING:
     from eva.optimizer.optimizer_context import OptimizerContext
 
-from eva.configuration.configuration_manager import ConfigurationManager
 from eva.experimental.ray.planner.exchange_plan import ExchangePlan
 from eva.expression.function_expression import FunctionExpression
 from eva.optimizer.operators import (
@@ -92,19 +91,11 @@ class LogicalGetToSeqScan(Rule):
         # Configure the batch_mem_size. It decides the number of rows
         # read in a batch from storage engine.
         # ToDO: Experiment heuristics.
-
-        batch_mem_size = 30000000  # 30mb
-        config_batch_mem_size = ConfigurationManager().get_value(
-            "executor", "batch_mem_size"
-        )
-        if config_batch_mem_size:
-            batch_mem_size = config_batch_mem_size
         scan = SeqScanPlan(None, before.target_list, before.alias)
         lower = ExchangePlan(parallelism=1)
         lower.append_child(
             StoragePlan(
                 before.table_obj,
-                batch_mem_size=batch_mem_size,
                 predicate=before.predicate,
                 sampling_rate=before.sampling_rate,
             )

@@ -52,7 +52,7 @@ class AbstractStorageEngine(metaclass=ABCMeta):
     def read(
         self,
         table: TableCatalogEntry,
-        batch_mem_size: int,
+        batch_mem_size: int = 30000000,
         predicate: AbstractExpression = None,
     ) -> Iterator[Batch]:
         """Interface responsible for yielding row/rows to the client.
