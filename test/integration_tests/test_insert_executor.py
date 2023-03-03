@@ -13,12 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import create_sample_video, file_remove
+from test.util import create_sample_video, file_remove, load_inbuilt_udfs
 
 import numpy as np
+import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.server.command_handler import execute_query_fetch_all
+from eva.utils.logging_manager import logger
 
 
 class InsertExecutorTest(unittest.TestCase):
@@ -26,6 +28,15 @@ class InsertExecutorTest(unittest.TestCase):
         # reset the catalog manager before running each test
         CatalogManager().reset()
         create_sample_video()
+
+        query = """CREATE TABLE IF NOT EXISTS CSVTable
+            (
+                name TEXT(100)
+            );
+        """
+        execute_query_fetch_all(query)
+
+        load_inbuilt_udfs()
 
     def tearDown(self):
         file_remove("dummy.avi")
@@ -36,14 +47,28 @@ class InsertExecutorTest(unittest.TestCase):
         query = """LOAD VIDEO 'dummy.avi' INTO MyVideo;"""
         execute_query_fetch_all(query)
 
-        insert_query = """ INSERT INTO MyVideo (id, data) VALUES (40,
-                            [[[40, 40, 40] , [40, 40, 40]],
-                            [[40, 40, 40], [40, 40, 40]]]);"""
+        insert_query = """ INSERT INTO MyVideo (id, data) VALUES (
+            [
+                [
+                    40,
+                    [
+                        [[40, 40, 40], [40, 40, 40]],
+                        [[40, 40, 40], [40, 40, 40]]
+                    ]
+                ]
+            ]);"""
         execute_query_fetch_all(insert_query)
 
-        insert_query_2 = """ INSERT INTO MyVideo (id, data) VALUES (41,
-                            [[[41, 41, 41] , [41, 41, 41]],
-                            [[41, 41, 41], [41, 41, 41]]]);"""
+        insert_query_2 = """ INSERT INTO MyVideo (id, data) VALUES (
+            [
+                [
+                    41,
+                    [
+                        [[41, 41, 41] , [41, 41, 41]],
+                        [[41, 41, 41], [41, 41, 41]]
+                    ]
+                ]
+            ]);"""
         execute_query_fetch_all(insert_query_2)
 
         query = "SELECT id, data FROM MyVideo WHERE id = 40"
@@ -61,5 +86,32 @@ class InsertExecutorTest(unittest.TestCase):
             np.testing.assert_array_equal(
                 batch.frames["data"][0],
                 np.array([[[41, 41, 41], [41, 41, 41]], [[41, 41, 41], [41, 41, 41]]]),
+            )
+        )
+
+    def test_should_insert_tuples_in_table(self):
+        data = pd.read_csv("./test/data/features.csv")
+        for i in data.iterrows():
+            logger.info(i[1][1])
+            query = f"""INSERT INTO CSVTable (name) VALUES (
+                            '{i[1][1]}'
+                        );"""
+            logger.info(query)
+            batch = execute_query_fetch_all(query)
+
+        query = "SELECT name FROM CSVTable;"
+        batch = execute_query_fetch_all(query)
+        logger.info(batch)
+
+        self.assertIsNone(
+            np.testing.assert_array_equal(
+                batch.frames["csvtable.name"].array,
+                np.array(
+                    [
+                        "test_eva/similarity/data/sad.jpg",
+                        "test_eva/similarity/data/happy.jpg",
+                        "test_eva/similarity/data/angry.jpg",
+                    ]
+                ),
             )
         )

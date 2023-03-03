@@ -15,6 +15,7 @@
 import unittest
 
 from mock import MagicMock, patch
+from sqlalchemy.orm.exc import NoResultFound
 
 from eva.catalog.catalog_type import TableType
 from eva.catalog.services.table_catalog_service import TableCatalogService
@@ -67,3 +68,28 @@ class TableCatalogServiceTest(unittest.TestCase):
         expected = mocked.query.filter.return_value.one_or_none.return_value
 
         self.assertEqual(actual, expected.as_dataclass.return_value)
+
+    @patch("eva.catalog.services.table_catalog_service.TableCatalog")
+    def test_table_catalog_exception(self, mock_table_catalog):
+        mock_table_catalog.side_effect = Exception("model_error")
+        mock_table_catalog.query.filter.side_effect = Exception("filter_error")
+        mock_table_catalog.query.all.side_effect = NoResultFound
+
+        service = TableCatalogService()
+
+        with self.assertRaises(Exception):
+            service.insert_entry(
+                TABLE_NAME,
+                TABLE_URL,
+                table_type=TABLE_TYPE,
+                identifier_column=IDENTIFIER,
+                column_list=MagicMock(),
+            )
+
+        with self.assertRaises(Exception):
+            service.delete_entry(MagicMock())
+
+        with self.assertRaises(Exception):
+            service.rename_entry(MagicMock(), MagicMock())
+
+        self.assertEqual(service.get_all_entries(), [])

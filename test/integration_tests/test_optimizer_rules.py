@@ -86,11 +86,19 @@ class OptimizerRulesTest(unittest.TestCase):
 
         self.assertEqual(result_without_xform_rule, result_with_rule)
 
+    def test_should_support_pushdown_with_right_join(self):
+        query = """SELECT A.id, DummyObjectDetector(B.data).label
+                    FROM MyVideo AS A JOIN MyVideo AS B
+                    WHERE A.id = B.id AND B.id < 10
+                    AND DummyObjectDetector(B.data).label = ['person'];"""
+        result = execute_query_fetch_all(query)
+        self.assertEqual(len(result), 6)
+
     def test_should_pushdown_without_pushdown_join_rule(self):
         query = """SELECT id, obj.labels
-                  FROM MyVideo JOIN LATERAL
+                    FROM MyVideo JOIN LATERAL
                     FastRCNNObjectDetector(data) AS obj(labels, bboxes, scores)
-                  WHERE id < 2;"""
+                    WHERE id < 2;"""
 
         time_with_rule = Timer()
         result_with_rule = None

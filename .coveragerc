@@ -1,6 +1,5 @@
 [run]
 omit = 
-    eva/parser/evaql/*
     eva/udfs/abstract/*
     eva/udfs/emotion_detector.py
     eva/experimental/*
@@ -14,4 +13,7 @@ exclude_lines =
     if ray_enabled:
     class LogicalExchangeToPhysical(Rule):
     class LogicalExchange(Operator):
+
+[html]
+show_contexts = True
 

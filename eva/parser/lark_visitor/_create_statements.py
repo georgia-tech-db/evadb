@@ -26,7 +26,6 @@ from eva.parser.create_statement import (
 )
 from eva.parser.table_ref import TableRef
 from eva.parser.types import ColumnConstraintEnum
-from eva.utils.logging_manager import logger
 
 
 ##################################################################
@@ -94,7 +93,6 @@ class CreateTable:
             )
 
     def column_definition(self, tree):
-
         data_type = None
         array_type = None
         dimensions = None
@@ -129,7 +127,6 @@ class CreateTable:
         return ColumnConstraintEnum.NOTNULL
 
     def simple_data_type(self, tree):
-
         data_type = None
         array_type = None
         dimensions = []
@@ -141,15 +138,12 @@ class CreateTable:
         return data_type, array_type, dimensions
 
     def integer_data_type(self, tree):
-
         data_type = None
         array_type = None
         dimensions = []
 
         token = tree.children[0]
         if token == "INTEGER":
-            data_type = ColumnType.INTEGER
-        elif token == "UNSIGNED":
             data_type = ColumnType.INTEGER
 
         return data_type, array_type, dimensions
@@ -202,7 +196,7 @@ class CreateTable:
             array_type = NdArrayType.INT64
         elif token == "UNICODE":
             array_type = NdArrayType.UNICODE
-        elif token == "BOOL":
+        elif token == "BOOLEAN":
             array_type = NdArrayType.BOOL
         elif token == "FLOAT32":
             array_type = NdArrayType.FLOAT32
@@ -216,10 +210,6 @@ class CreateTable:
             array_type = NdArrayType.DATETIME
         elif token == "ANYTYPE":
             array_type = NdArrayType.ANYTYPE
-        else:
-            err_msg = "Unsupported NdArray datatype found in the query"
-            logger.error(err_msg)
-            raise RuntimeError(err_msg)
         return array_type
 
     def dimension_helper(self, tree):

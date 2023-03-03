@@ -15,16 +15,15 @@
 import asyncio
 import base64
 import os
-import random
 
 from eva.models.server.response import Response
-from eva.server.async_protocol import EvaClient
+from eva.utils.logging_manager import logger
 
 
 class EVAConnection:
-    def __init__(self, transport, protocol):
-        self._transport = transport
-        self._protocol = protocol
+    def __init__(self, reader, writer):
+        self._reader = reader
+        self._writer = writer
         self._cursor = None
 
     def cursor(self):
@@ -33,19 +32,11 @@ class EVAConnection:
             self._cursor = EVACursor(self)
         return self._cursor
 
-    @property
-    def protocol(self):
-        return self._protocol
-
 
 class EVACursor(object):
     def __init__(self, connection):
         self._connection = connection
         self._pending_query = False
-
-    @property
-    def connection(self):
-        return self._connection
 
     async def execute_async(self, query: str):
         """
@@ -56,17 +47,23 @@ class EVACursor(object):
                 "EVA does not support concurrent queries. \
                     Call fetch_all() to complete the pending query"
             )
+        query = self._multiline_query_transformation(query)
         query = self._upload_transformation(query)
-        await self.connection.protocol.send_message(query)
+        self._connection._writer.write((query + "\n").encode())
+        await self._connection._writer.drain()
         self._pending_query = True
 
     async def fetch_one_async(self) -> Response:
         """
         fetch_one returns one batch instead of one row for now.
         """
+        response = Response()
         try:
-            message = await self.connection.protocol.queue.get()
-            response = await asyncio.coroutine(Response.deserialize)(message)
+            prefix = await self._connection._reader.readline()
+            if prefix != b"":
+                message_length = int(prefix)
+                message = await self._connection._reader.readexactly(message_length)
+                response = Response.deserialize(message)
         except Exception as e:
             raise e
         self._pending_query = False
@@ -77,6 +74,14 @@ class EVACursor(object):
         fetch_all is the same as fetch_one for now.
         """
         return await self.fetch_one_async()
+
+    def _multiline_query_transformation(self, query: str) -> str:
+        query = query.replace("\n", " ")
+        query = query.lstrip()
+        query = query.rstrip(" ;")
+        query += ";"
+        logger.debug("Query: " + query)
+        return query
 
     def _upload_transformation(self, query: str) -> str:
         """
@@ -102,14 +107,18 @@ class EVACursor(object):
 
         return query
 
+    def stop_query(self):
+        self._pending_query = False
+
     def __getattr__(self, name):
         """
         Auto generate sync function calls from async
         Sync function calls should not be used in an async environment.
         """
-        func = object.__getattribute__(self, "%s_async" % name)
-        if not asyncio.iscoroutinefunction(func):
-            raise AttributeError
+        try:
+            func = object.__getattribute__(self, "%s_async" % name)
+        except Exception as e:
+            raise e
 
         def func_sync(*args, **kwargs):
             loop = asyncio.get_event_loop()
@@ -119,27 +128,12 @@ class EVACursor(object):
         return func_sync
 
 
-async def connect_async(host: str, port: int, max_retry_count: int = 3):
-    loop = asyncio.get_event_loop()
-
-    retries = max_retry_count * [1]
-
-    while True:
-        try:
-            transport, protocol = await loop.create_connection(
-                lambda: EvaClient(), host, port
-            )
-
-        except Exception as e:
-            if not retries:
-                raise e
-            await asyncio.sleep(retries.pop(0) - random.random())
-        else:
-            break
-
-    return EVAConnection(transport, protocol)
+async def get_connection(host: str, port: int) -> EVAConnection:
+    reader, writer = await asyncio.open_connection(host, port)
+    connection = EVAConnection(reader, writer)
+    return connection
 
 
-def connect(host: str, port: int, max_retry_count: int = 3):
-    loop = asyncio.get_event_loop()
-    return loop.run_until_complete(connect_async(host, port, max_retry_count))
+def connect(host: str, port: int) -> EVAConnection:
+    connection = asyncio.run(get_connection(host, port))
+    return connection

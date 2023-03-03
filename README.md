@@ -106,7 +106,7 @@ SELECT id, data FROM MyVideo WHERE ['pedestrian', 'car'] <@ FastRCNNObjectDetect
 7. Search for frames in the video with more than 3 cars
 
 ```mysql
-SELECT id, data FROM MyVideo WHERE Array_Count(FastRCNNObjectDetector(data).labels, 'car') > 3;
+SELECT id, data FROM MyVideo WHERE ArrayCount(FastRCNNObjectDetector(data).labels, 'car') > 3;
 ```
 
 8. You can create a new user-defined function (UDF) that wraps around your custom vision model or an off-the-shelf model like FastRCNN:
