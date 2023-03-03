@@ -32,7 +32,13 @@ def setup(use_cache: bool, udf_type: str, batch: bool):
 
             #calling the setup function defined by the user inside the udf implementation
             arg_fn(*args, **kwargs)
-
+        
+        
+        tags = {}
+        tags['cache'] = use_cache
+        tags['udf_type'] = udf_type
+        tags['batching'] = batch
+        wrapper.tags = tags
         return wrapper
 
     return inner_fn
@@ -45,36 +51,41 @@ def forward(input_signature: EvaArgument, output_signature: EvaArgument):
             frames = args[1]
 
             # check type of input
-            if not (input_signature.check_type(frames)):
-                raise TypeException(
-                    "Expected %s but received %s"
-                    % (input_signature.name(), type(args[0]))
-                )
-            else:
-                print("correct input")
-
-            # check shape of input
             if input_signature:
-                if not (input_signature.check_shape(frames)):
-                    raise TypeException("Mismatch in shape of array.")
+                if not (input_signature.check_type(frames)):
+                    raise TypeException(
+                        "Expected %s but received %s"
+                        % (input_signature.name(), type(args[0]))
+                    )
+                else:
+                    print("correct input")
+
+                # check shape of input
+                if input_signature:
+                    if not (input_signature.check_shape(frames)):
+                        raise TypeException("Mismatch in shape of array.")
 
             # first argument is self and second is frames.
             output = arg_fn(args[0], frames)
 
             # check output type
-            if not (output_signature.check_type(output)):
-                raise TypeException(
-                    "Expected %s as output but received %s"
-                    % (output_signature.name(), type(output))
-                )
+            if output_signature:
+                if not (output_signature.check_type(output)):
+                    raise TypeException(
+                        "Expected %s as output but received %s"
+                        % (output_signature.name(), type(output))
+                    )
 
-            # check if the column headers are matching
-            if output_signature.is_output_columns_set():
-                if not output_signature.check_column_names(output):
-                    warnings.warn("Column header names are not matching")
+                # check if the column headers are matching
+                if output_signature.is_output_columns_set():
+                    if not output_signature.check_column_names(output):
+                        warnings.warn("Column header names are not matching")
 
             return output
-
+        tags = {}
+        tags['input'] = input_signature
+        tags['output'] = output_signature
+        wrapper.tags = tags
         return wrapper
 
     return inner_fn
