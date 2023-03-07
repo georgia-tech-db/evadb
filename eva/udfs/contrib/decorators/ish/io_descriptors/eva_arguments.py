@@ -34,7 +34,7 @@ class EvaArgument(object):
         pass
 
     @abstractmethod
-    def check_type(self, input_object) -> bool:
+    def check_type(self, input_object: any) -> bool:
         """Checks the type of the input_object with 
         
         Args:
@@ -46,7 +46,8 @@ class EvaArgument(object):
         """
         pass
 
-    def check_shape(self, input_object, required_shape) -> bool:
+    @abstractmethod
+    def check_shape(self, input_object: any, required_shape) -> bool:
         """Checks the shape of the input_object with 
         
         Args:
@@ -59,6 +60,7 @@ class EvaArgument(object):
         
         pass
 
+    @abstractmethod
     def name(self):
         """Returns the name of the EvaArgument. 
         
@@ -66,6 +68,7 @@ class EvaArgument(object):
         """
         pass
 
+    @abstractmethod
     def is_output_columns_set(self):
         """Checks if the output columns are set. 
         
@@ -74,6 +77,7 @@ class EvaArgument(object):
         """
         pass
 
+    @abstractmethod
     def check_column_names(self, output_object):
         """Checks if the output column names match the required column names list.
         
@@ -86,3 +90,21 @@ class EvaArgument(object):
         
         """
         pass
+    
+    @abstractmethod
+    def reshape(self, input_object: any):
+        """function to reshape the input object to the required shape given in the constructor
+
+        Args:
+            input_object (any): the object which must be reshaped
+        """
+        pass
+    
+    @abstractmethod
+    def convert_data_type(self, input_object: any):
+        """convert the data type of input object to that given in the constructor.
+
+        Args:
+            input_object (any): object whose data type must be updated.
+        """
+        
