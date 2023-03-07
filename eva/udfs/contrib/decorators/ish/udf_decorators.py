@@ -16,7 +16,7 @@
 import warnings
 
 from eva.udfs.contrib.decorators.ish.io_descriptors.eva_arguments import EvaArgument
-from eva.udfs.contrib.decorators.ish.io_descriptors.type_exception import TypeException
+from eva.utils.errors import TypeException
 
 # decorator for the setup function. It will be used to set the cache, batching and
 # udf_type parameters in the catalog
@@ -43,28 +43,42 @@ def setup(use_cache: bool, udf_type: str, batch: bool):
 
     return inner_fn
 
-# decorator for the forward function. This will validate the shape and data type of inputs and outputs from the UDF. 
-# Additionally if the output is a Pandas dataframe, then it will check if the column names are matching.
+ 
 def forward(input_signature: EvaArgument, output_signature: EvaArgument):
+    """decorator for the forward function. This will validate the shape and data type of inputs and outputs from the UDF. 
+
+    Additionally if the output is a Pandas dataframe, then it will check if the column names are matching.
+    Args:
+        input_signature (EvaArgument): Constraints for the input. 
+            shape : shape should be in the format (batch_size, nos_of_channels, width, height)
+        output_signature (EvaArgument): _description_
+    """
     def inner_fn(arg_fn):
         def wrapper(*args):
+            
             frames = args[1]
 
-            # check type of input
+            # check shape of input
             if input_signature:
+                if not (input_signature.check_shape(frames)):
+                    try:
+                        frames = input_signature.reshape(frames)
+                    except TypeException as e:
+                        msg = "Shape mismatch of Input parameter. "+str(e)
+                        raise TypeException(msg)
+            
+            # check type of input
                 if not (input_signature.check_type(frames)):
-                    raise TypeException(
-                        "Expected %s but received %s"
-                        % (input_signature.name(), type(args[0]))
-                    )
-                else:
-                    print("correct input")
+                    try:
+                        frames = input_signature.convert_data_type(frames)
+                        
+                    except TypeException as e:
+                        msg = "Datatype mismatch of Input parameter. "+str(e)
+                        raise TypeException(msg)
+            
 
-                # check shape of input
-                if input_signature:
-                    if not (input_signature.check_shape(frames)):
-                        raise TypeException("Mismatch in shape of array.")
-
+            print("Input validated successfully")
+            
             # first argument is self and second is frames.
             output = arg_fn(args[0], frames)
 
@@ -79,9 +93,10 @@ def forward(input_signature: EvaArgument, output_signature: EvaArgument):
                 # check if the column headers are matching
                 if output_signature.is_output_columns_set():
                     if not output_signature.check_column_names(output):
-                        warnings.warn("Column header names are not matching")
+                        raise TypeException("Column header names are not matching")
 
             return output
+        
         tags = {}
         tags['input'] = input_signature
         tags['output'] = output_signature
