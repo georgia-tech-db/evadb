@@ -13,8 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import torch
-
+import numpy as np
 from eva.udfs.contrib.decorators.ish.io_descriptors.eva_arguments import EvaArgument
+from eva.utils.errors import TypeException
 
 
 class PyTorchTensor(EvaArgument):
@@ -39,8 +40,25 @@ class PyTorchTensor(EvaArgument):
                     input_object.dtype == torch.float32
                 )
 
-        else:
+        elif (not self.dtype):
             return isinstance(input_object, torch.Tensor)
+        
+    def convert_data_type(self, input_object: any):
+        try:
+            
+            if self.dtype == "int32":
+                return input_object.to(torch.int32)
+            elif self.dtype == "float16":
+                return input_object.to(torch.float16)
+            elif self.dtype == "float32":
+                return input_object.to(torch.float32)
+            elif (not self.dtype):
+                return input_object
+            
+        except:
+            raise TypeException("Cannot convert the input object to the required type")
+            
+        
 
     def check_shape(self, input_object) -> bool:
         if self.shape:
@@ -48,6 +66,25 @@ class PyTorchTensor(EvaArgument):
                 return False
 
         return True
+    
+    def reshape(self, input_object: any):
+        torch_tensor = None
+        
+        if isinstance(input_object, list):
+            torch_tensor = torch.Tensor(input_object)
+        elif isinstance(input_object, np.ndarray):
+            torch_tensor = torch.from_numpy(input_object)
+        elif isinstance(input_object, torch.Tensor):
+            torch_tensor = input_object
+           
+        if (torch_tensor == None):
+            raise TypeException("Argument type not recognized. Must be numpy array or list to be converted to Tensor")
+         
+        try:
+            return torch.reshape(input_object, self.shape)
+        except:
+            raise TypeError("Cannot be reshaped to required shape %s" % (self.shape, ))
+    
 
     def name(self):
         return "PyTorch Tensor"
