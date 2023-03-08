@@ -83,7 +83,7 @@ class PyTorchTensor(EvaArgument):
         try:
             return torch.reshape(input_object, self.shape)
         except:
-            raise TypeError("Cannot be reshaped to required shape %s" % (self.shape, ))
+            raise TypeException("Cannot be reshaped to required shape %s" % (self.shape, ))
     
 
     def name(self):
