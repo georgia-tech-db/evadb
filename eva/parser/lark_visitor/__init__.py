@@ -18,6 +18,7 @@ from lark import Tree, visitors
 
 from eva.parser.lark_visitor._common_clauses_ids import CommonClauses
 from eva.parser.lark_visitor._create_statements import CreateTable
+from eva.parser.lark_visitor._delete_statement import Delete
 from eva.parser.lark_visitor._drop_statement import DropTable
 from eva.parser.lark_visitor._explain_statement import Explain
 from eva.parser.lark_visitor._expressions import Expressions
@@ -41,7 +42,6 @@ _Leaf_T = TypeVar("_Leaf_T")
 class LarkBaseInterpreter(visitors.Interpreter):
     # Override default behavior of Interpreter
     def visit_children(self, tree: Tree[_Leaf_T]) -> List:
-
         output = [
             self._visit_tree(child) if isinstance(child, Tree) else child
             for child in tree.children
@@ -70,6 +70,7 @@ class LarkInterpreter(
     DropTable,
     Show,
     Explain,
+    Delete,
 ):
     def __init__(self, query):
         super().__init__()

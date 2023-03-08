@@ -14,96 +14,47 @@
 # limitations under the License.
 import asyncio
 import sys
-import threading
-import time
 import unittest
-from unittest.mock import MagicMock
 
-import mock
-import pytest
+from mock import MagicMock, patch
 
-from eva.server.networking_utils import serialize_message
-from eva.server.server import EvaServer, start_server
+from eva.server.server import EvaServer
 
+# Check for Python 3.8+ for IsolatedAsyncioTestCase support
+if sys.version_info >= (3, 8):
 
-class ServerTests(unittest.TestCase):
-    def setUp(self):
-        self.loop = asyncio.new_event_loop()
-        self.stop_server_future = self.loop.create_future()
-        asyncio.set_event_loop(None)
+    class ServerTests(unittest.IsolatedAsyncioTestCase):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        @patch("asyncio.start_server")
+        async def test_server_functions(self, mock_start):
+            eva_server = EvaServer()
+            host = "localhost"
+            port = 5432
 
-    def test_server_protocol_connection_lost(self):
+            await eva_server.start_eva_server(host, port)
 
-        socket_timeout = 65
+            # connection made
+            client_reader1 = asyncio.StreamReader()
+            client_writer1 = MagicMock()
+            client_reader2 = asyncio.StreamReader()
+            client_writer2 = MagicMock()
 
-        eva_server = EvaServer(socket_timeout)
-        eva_server.transport = mock.Mock()
-        eva_server.transport.close = MagicMock(return_value="closed")
-        eva_server.transport.abort = MagicMock(return_value="aborted")
+            # first client
+            client_reader1.feed_data(b"SHOW UDFS;\n")
+            client_reader1.feed_data(b"EXIT;\n")
 
-        # connection made
-        eva_server.connection_made(eva_server.transport)
-        self.assertEqual(EvaServer.__connections__, 1, "connection not made")
+            await eva_server.accept_client(client_reader1, client_writer1)
+            assert len(eva_server._clients) == 1
 
-        # connection lost
-        eva_server.connection_lost(None)
-        self.assertEqual(EvaServer.__connections__, 0, "connection not lost")
-        self.assertEqual(EvaServer.__errors__, 0, "connection not errored out")
+            # another client
+            client_reader2.feed_data(b"\xC4pple")  # trigger UnicodeDecodeError
+            client_reader2.feed_eof()
 
-        # connection made
-        eva_server.connection_made(eva_server.transport)
-        self.assertEqual(EvaServer.__connections__, 1, "connection not made")
+            await eva_server.accept_client(client_reader2, client_writer2)
+            assert len(eva_server._clients) == 2
 
-        # connection lost with error
-        eva_server.connection_lost(mock.Mock())
-        self.assertEqual(EvaServer.__connections__, 0, "connection not lost")
-        self.assertEqual(EvaServer.__errors__, 1, "connection not errored out")
+            await eva_server.handle_client(client_reader2, client_writer2)
 
-    def test_server_protocol_data_received(self):
-
-        socket_timeout = 60
-
-        eva_server = EvaServer(socket_timeout)
-        eva_server.transport = mock.Mock()
-        eva_server.transport.close = MagicMock(return_value="closed")
-        eva_server.transport.abort = MagicMock(return_value="aborted")
-
-        quit_message = serialize_message("quit")
-        self.assertEqual(
-            eva_server.data_received(quit_message), "closed", "transport not closed"
-        )
-
-        asyncio.set_event_loop(None)
-
-        query_message = serialize_message("query")
-        with self.assertRaises(RuntimeError):
-            # error due to lack of asyncio loop
-            eva_server.data_received(query_message)
-
-    @pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
-    def test_server(self):
-
-        host = "0.0.0.0"
-        port = 5489
-        socket_timeout = 60
-
-        def timeout_server():
-            # need a more robust mechanism for when to cancel the future
-            time.sleep(2)
-            self.stop_server_future.cancel()
-
-        thread = threading.Thread(target=timeout_server)
-        thread.daemon = True
-        thread.start()
-
-        with self.assertRaises(SystemExit):
-            start_server(
-                host=host,
-                port=port,
-                loop=self.loop,
-                socket_timeout=socket_timeout,
-                stop_server_future=self.stop_server_future,
-            )
+            await eva_server.stop_eva_server()

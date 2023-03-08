@@ -18,15 +18,15 @@ import pandas as pd
 from eva.udfs.abstract.abstract_udf import AbstractUDF
 
 
-class Array_Count(AbstractUDF):
+class ArrayCount(AbstractUDF):
     @property
     def name(self) -> str:
-        return "Array_Count"
+        return "ArrayCount"
 
     def setup(self):
         pass
 
-    def forward(self, inp: pd.DataFrame) -> pd.DataFrame:
+    def forward(self, frames: pd.DataFrame) -> pd.DataFrame:
         """
         It will return a count of search element for each tuple.
         The idea is to flatten the input array along the first dimension and
@@ -36,7 +36,7 @@ class Array_Count(AbstractUDF):
         And the search key is expected to be of shape (4,5),
         else we throw an error.
 
-        inp: DataFrame
+        frames: DataFrame
             col1        col2
         0   ndarray1    search_key
         1   ndarray2    search_key
@@ -48,11 +48,11 @@ class Array_Count(AbstractUDF):
 
         """
         # sanity check
-        if len(inp.columns) != 2:
+        if len(frames.columns) != 2:
             raise ValueError("input contains more than one column")
 
-        search_element = inp[inp.columns[-1]][0]
-        values = pd.DataFrame(inp[inp.columns[0]])
+        search_element = frames[frames.columns[-1]][0]
+        values = pd.DataFrame(frames[frames.columns[0]])
 
         count_result = values.apply(
             lambda x: self.count_in_row(x[0], search_element), axis=1

@@ -18,7 +18,7 @@ Here is an example where we first define a UDF wrapping around the FastRCNN obje
 
     --- Use the function to retrieve frames that contain more than 3 cars
     SELECT id FROM MyVideo
-    WHERE Array_Count(FastRCNNObjectDetector(data).label, 'car') > 3
+    WHERE ArrayCount(FastRCNNObjectDetector(data).label, 'car') > 3
     ORDER BY id;
 
 This page presents a list of all the EVAQL statements that you can leverage in your Jupyter Notebooks.

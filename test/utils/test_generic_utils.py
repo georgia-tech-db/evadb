@@ -13,11 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import sys
 import unittest
 from pathlib import Path
+from test.markers import windows_skip_marker
 
-import pytest
 from mock import MagicMock, patch
 
 from eva.readers.opencv_reader import OpenCVReader
@@ -67,8 +66,8 @@ class ModulePathTest(unittest.TestCase):
         builtins.__import__ = realimport
         is_gpu_available()
 
+    @windows_skip_marker
     @patch("eva.utils.generic_utils.ConfigurationManager")
-    @pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
     def test_should_return_a_random_full_path(self, mock_conf):
         mock_conf_inst = MagicMock()
         mock_conf.return_value = mock_conf_inst
