@@ -130,10 +130,6 @@ class UdfDecoratorTest(unittest.TestCase):
         
     
     
-if __name__ == "__main__":
-    suite = unittest.TestSuite()
-    suite.addTest(UdfDecoratorTest("test_forward_fn_numpy_output_mismatch"))
-    unittest.TextTestRunner().run(suite)
 
         
     
