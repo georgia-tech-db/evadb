@@ -17,9 +17,10 @@ import numpy as np
 from eva.udfs.contrib.decorators.ish.io_descriptors.eva_arguments import EvaArgument
 from eva.utils.errors import TypeException
 
+
 class NumpyArray(EvaArgument):
     """EVA data type for Numpy Array"""
-    
+
     def __init__(self, shape=None, dtype=None) -> None:
         super().__init__()
         self.shape = shape
@@ -40,7 +41,7 @@ class NumpyArray(EvaArgument):
                     input_object.dtype == np.float32
                 )
 
-        elif (not self.dtype):
+        elif not self.dtype:
             return isinstance(input_object, np.ndarray)
 
     def convert_data_type(self, input_object: any):
@@ -52,12 +53,14 @@ class NumpyArray(EvaArgument):
                 return arr.astype(np.float16)
             elif self.dtype == "float32":
                 return arr.astype(np.float32)
-            elif (not self.dtype):
+            elif not self.dtype:
                 return arr
-            
-        except:
-            raise TypeException("Cannot convert the input object to the required type")
-            
+
+        except Exception as e:
+            raise TypeException(
+                "Cannot convert the input object to the required type. Error message: "
+                + str(e)
+            )
 
     def check_shape(self, input_object) -> bool:
         if self.shape:
@@ -69,11 +72,13 @@ class NumpyArray(EvaArgument):
     def reshape(self, input_object):
         try:
             return np.reshape(input_object, self.shape)
-        except:
-            raise TypeException("The input object cannot be reshaped to %s" % (self.shape,))
-        
-    
-    
-    
+
+        except Exception as e:
+
+            raise TypeException(
+                "The input object cannot be reshaped to %s. Error is %s"
+                % (self.shape, str(e))
+            )
+
     def name(self):
         return "NumpyArray"

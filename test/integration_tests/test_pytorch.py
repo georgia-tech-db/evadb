@@ -116,7 +116,6 @@ class PytorchTest(unittest.TestCase):
         for idx in res.index:
             self.assertTrue("computer" in res["aslactionrecognition.labels"][idx])
 
-
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_yolo_decorators(self):
         create_udf_query = """CREATE UDF YoloDecorators
@@ -132,10 +131,7 @@ class PytorchTest(unittest.TestCase):
         select_query = """SELECT YoloDecorators(data) FROM MyVideo
                         WHERE id < 5;"""
         actual_batch = execute_query_fetch_all(select_query)
-        print(actual_batch)
-        #self.assertEqual(len(actual_batch), 5)
-
-
+        self.assertEqual(len(actual_batch), 5)
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_facenet(self):
@@ -316,9 +312,7 @@ class PytorchTest(unittest.TestCase):
         self.assertEqual(len(actual_batch), 60)
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     suite = unittest.TestSuite()
-    suite.addTest(PytorchTest(
-        'test_should_run_pytorch_and_yolo_decorators'))
+    suite.addTest(PytorchTest("test_should_run_pytorch_and_yolo_decorators"))
     unittest.TextTestRunner().run(suite)
