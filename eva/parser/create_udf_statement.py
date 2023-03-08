@@ -71,9 +71,9 @@ class CreateUDFStatement(AbstractStatement):
                 output_str += str(expr) + ", "
             output_str = output_str.rstrip(", ")
 
-        if len(input_str)>0:
+        if len(input_str) > 0:
             return f"CREATE UDF {self._name} INPUT ({input_str}) OUTPUT ({output_str}) TYPE {self._udf_type} IMPL {self._impl_path.name}"
-        elif len(self._udf_type)>0:
+        elif len(self._udf_type) > 0:
             return f"CREATE UDF {self._name} TYPE {self._udf_type} IMPL {self._impl_path.name}"
         else:
             return f"CREATE UDF {self._name} IMPL {self._impl_path.name}"
