@@ -76,19 +76,28 @@ def forward(input_signature: EvaArgument, output_signature: EvaArgument):
                         msg = "Datatype mismatch of Input parameter. "+str(e)
                         raise TypeException(msg)
             
-
-            print("Input validated successfully")
             
             # first argument is self and second is frames.
             output = arg_fn(args[0], frames)
 
             # check output type
             if output_signature:
+                #check shape
+                if not (output_signature.check_shape(output)):
+                    try:
+                        frames = output_signature.reshape(output)
+                    except TypeException as e:
+                        msg = "Shape mismatch of Output parameter. "+str(e)
+                        raise TypeException(msg)
+            
+                # check type of output
                 if not (output_signature.check_type(output)):
-                    raise TypeException(
-                        "Expected %s as output but received %s"
-                        % (output_signature.name(), type(output))
-                    )
+                    try:
+                        output = output_signature.convert_data_type(output)
+                        
+                    except TypeException as e:
+                        msg = "Datatype mismatch of Output parameter. "+str(e)
+                        raise TypeException(msg)
 
                 # check if the column headers are matching
                 if output_signature.is_output_columns_set():
