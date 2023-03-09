@@ -74,11 +74,8 @@ def load_udf_class_from_file(filepath, classname=None):
         raise RuntimeError(err_msg)
 
     # Try to load the specified class by name
-    if classname:
-        if hasattr(module, classname):
-            return getattr(module, classname)
-        else:
-            raise RuntimeError(f"Class {classname} not found in {filepath}")
+    if classname and hasattr(module, classname):
+        return getattr(module, classname)
 
     # If class name not specified, check if there is only one class in the file
     classes = [
