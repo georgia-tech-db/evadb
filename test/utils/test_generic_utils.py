@@ -33,19 +33,16 @@ class ModulePathTest(unittest.TestCase):
         vl = str_to_class("eva.readers.opencv_reader.OpenCVReader")
         self.assertEqual(vl, OpenCVReader)
 
-
     def test_should_return_correct_class_for_path(self):
         vl = load_udf_class_from_file("eva/readers/opencv_reader.py", "OpenCVReader")
         # Can't check that v1 = OpenCVReader because the above function returns opencv_reader.OpenCVReader instead of eva.readers.opencv_reader.OpenCVReader
-        # So we check the qualname instead, qualname is the path to the class including the module name 
+        # So we check the qualname instead, qualname is the path to the class including the module name
         # Ref: https://peps.python.org/pep-3155/#rationale
         assert vl.__qualname__ == OpenCVReader.__qualname__
-
 
     def test_should_return_correct_class_for_path_without_classname(self):
         vl = load_udf_class_from_file("eva/readers/opencv_reader.py")
         assert vl.__qualname__ == OpenCVReader.__qualname__
-
 
     def test_should_raise_if_specified_class_does_not_exists(self):
         with self.assertRaises(RuntimeError):
