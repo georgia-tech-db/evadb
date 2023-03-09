@@ -122,8 +122,8 @@ class StatementBinderTests(unittest.TestCase):
             mock_binder.assert_called_with(stmt.explainable_stmt)
 
     @patch("eva.binder.statement_binder.CatalogManager")
-    @patch("eva.binder.statement_binder.path_to_class")
-    def test_bind_func_expr(self, mock_path_to_class, mock_catalog):
+    @patch("eva.binder.statement_binder.load_udf_class_from_file")
+    def test_bind_func_expr(self, mock_load_udf_class_from_file, mock_catalog):
         # setup
         func_expr = MagicMock(
             name="func_expr", alias=Alias("func_expr"), output_col_aliases=[]
@@ -142,7 +142,9 @@ class StatementBinderTests(unittest.TestCase):
             mock_catalog().get_udf_io_catalog_output_entries
         ) = MagicMock()
         mock_get_udf_outputs.return_value = func_ouput_objs
-        mock_path_to_class.return_value.return_value = "path_to_class"
+        mock_load_udf_class_from_file.return_value.return_value = (
+            "load_udf_class_from_file"
+        )
 
         # Case 1 set output
         func_expr.output = "out1"
@@ -151,14 +153,16 @@ class StatementBinderTests(unittest.TestCase):
 
         mock_get_name.assert_called_with(func_expr.name)
         mock_get_udf_outputs.assert_called_with(udf_obj)
-        mock_path_to_class.assert_called_with(udf_obj.impl_file_path, udf_obj.name)
+        mock_load_udf_class_from_file.assert_called_with(
+            udf_obj.impl_file_path, udf_obj.name
+        )
         self.assertEqual(func_expr.output_objs, [obj1])
         print(str(func_expr.alias))
         self.assertEqual(
             func_expr.alias,
             Alias("func_expr", ["out1"]),
         )
-        self.assertEqual(func_expr.function(), "path_to_class")
+        self.assertEqual(func_expr.function(), "load_udf_class_from_file")
 
         # Case 2 output not set
         func_expr.output = None
@@ -168,7 +172,9 @@ class StatementBinderTests(unittest.TestCase):
 
         mock_get_name.assert_called_with(func_expr.name)
         mock_get_udf_outputs.assert_called_with(udf_obj)
-        mock_path_to_class.assert_called_with(udf_obj.impl_file_path, udf_obj.name)
+        mock_load_udf_class_from_file.assert_called_with(
+            udf_obj.impl_file_path, udf_obj.name
+        )
         self.assertEqual(func_expr.output_objs, func_ouput_objs)
         self.assertEqual(
             func_expr.alias,
@@ -177,12 +183,12 @@ class StatementBinderTests(unittest.TestCase):
                 ["out1", "out2"],
             ),
         )
-        self.assertEqual(func_expr.function(), "path_to_class")
+        self.assertEqual(func_expr.function(), "load_udf_class_from_file")
 
         # Raise error if the class object cannot be created
-        mock_path_to_class.reset_mock()
-        mock_error_msg = "mock_path_to_class_error"
-        mock_path_to_class.side_effect = MagicMock(
+        mock_load_udf_class_from_file.reset_mock()
+        mock_error_msg = "mock_load_udf_class_from_file_error"
+        mock_load_udf_class_from_file.side_effect = MagicMock(
             side_effect=RuntimeError(mock_error_msg)
         )
         binder = StatementBinder(StatementBinderContext())
