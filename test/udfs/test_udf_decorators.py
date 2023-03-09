@@ -18,14 +18,10 @@ import numpy as np
 import pytest
 import torch
 
-from eva.udfs.contrib.decorators.ish.io_descriptors.data_types.type_numpy import (
-    NumpyArray,
-)
-from eva.udfs.contrib.decorators.ish.io_descriptors.data_types.type_tensor import (
-    PyTorchTensor,
-)
-from eva.udfs.contrib.decorators.ish.udf_decorators import forward
+
+from eva.udfs.decorators.udf_decorators import forward
 from eva.utils.errors import TypeException
+from eva.io_descriptors.eva_data_types import NumpyArray, PyTorchTensor, PandasDataframe
 
 
 @forward(input_signature=NumpyArray(), output_signature=NumpyArray())
@@ -143,3 +139,9 @@ class UdfDecoratorTest(unittest.TestCase):
         torch_tensor = torch.ones((1, 3), dtype=torch.float64)
         with self.assertRaises(TypeException):
             forward_fn_pytorch_input_output_constraint(None, torch_tensor)
+
+
+if __name__ == "__main__":
+    suite = unittest.TestSuite()
+    suite.addTest(UdfDecoratorTest("test_forward_fn_pytorch_raise_exception"))
+    unittest.TextTestRunner().run(suite)

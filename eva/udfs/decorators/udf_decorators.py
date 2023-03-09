@@ -14,9 +14,8 @@
 # limitations under the License.
 
 
-from eva.udfs.contrib.decorators.ish.io_descriptors.eva_arguments import EvaArgument
 from eva.utils.errors import TypeException
-
+from eva.io_descriptors.eva_arguments import EvaArgument
 
 # decorator for the setup function. It will be used to set the cache, batching and
 # udf_type parameters in the catalog
@@ -119,3 +118,4 @@ def forward(input_signature: EvaArgument, output_signature: EvaArgument):
         return wrapper
 
     return inner_fn
+
