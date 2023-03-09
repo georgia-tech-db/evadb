@@ -88,7 +88,7 @@ def load_udf_class_from_file(filepath, classname=None):
     ]
     if len(classes) != 1:
         raise RuntimeError(
-            f"{filepath} contains {len(classes)} classes, please specify the main class by naming the UDF with the same name."
+            f"{filepath} contains {len(classes)} classes, please specify the correct class to load by naming the UDF with the same name in the CREATE query."
         )
     return classes[0]
 
