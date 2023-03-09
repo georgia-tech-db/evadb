@@ -82,10 +82,14 @@ def load_udf_class_from_file(filepath, classname=None):
             raise RuntimeError(f"Class {classname} not found in {filepath}")
 
     # If class name not specified, check if there is only one class in the file
-    classes = [obj for name, obj in inspect.getmembers(module) if inspect.isclass(obj)]
+    classes = [
+        obj
+        for _, obj in inspect.getmembers(module, inspect.isclass)
+        if obj.__module__ == module.__name__
+    ]
     if len(classes) != 1:
         raise RuntimeError(
-            f"{filepath} contains multiple classes, please specify the main class by naming the UDF with the same name."
+            f"{filepath} contains {len(classes)} classes, please specify the main class by naming the UDF with the same name."
         )
     return classes[0]
 
