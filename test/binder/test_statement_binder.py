@@ -142,7 +142,9 @@ class StatementBinderTests(unittest.TestCase):
             mock_catalog().get_udf_io_catalog_output_entries
         ) = MagicMock()
         mock_get_udf_outputs.return_value = func_ouput_objs
-        mock_load_udf_class_from_file.return_value.return_value = "load_udf_class_from_file"
+        mock_load_udf_class_from_file.return_value.return_value = (
+            "load_udf_class_from_file"
+        )
 
         # Case 1 set output
         func_expr.output = "out1"
@@ -151,7 +153,9 @@ class StatementBinderTests(unittest.TestCase):
 
         mock_get_name.assert_called_with(func_expr.name)
         mock_get_udf_outputs.assert_called_with(udf_obj)
-        mock_load_udf_class_from_file.assert_called_with(udf_obj.impl_file_path, udf_obj.name)
+        mock_load_udf_class_from_file.assert_called_with(
+            udf_obj.impl_file_path, udf_obj.name
+        )
         self.assertEqual(func_expr.output_objs, [obj1])
         print(str(func_expr.alias))
         self.assertEqual(
@@ -168,7 +172,9 @@ class StatementBinderTests(unittest.TestCase):
 
         mock_get_name.assert_called_with(func_expr.name)
         mock_get_udf_outputs.assert_called_with(udf_obj)
-        mock_load_udf_class_from_file.assert_called_with(udf_obj.impl_file_path, udf_obj.name)
+        mock_load_udf_class_from_file.assert_called_with(
+            udf_obj.impl_file_path, udf_obj.name
+        )
         self.assertEqual(func_expr.output_objs, func_ouput_objs)
         self.assertEqual(
             func_expr.alias,
