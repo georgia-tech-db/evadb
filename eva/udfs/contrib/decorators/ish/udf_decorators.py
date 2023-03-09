@@ -26,7 +26,6 @@ def setup(use_cache: bool, udf_type: str, batch: bool):
         print("batching is set: ", batch)
 
         def wrapper(*args, **kwargs):
-
             # TODO set the batch and caching parameters. update in catalog
 
             # calling the setup function defined by the user inside the udf implementation
@@ -54,7 +53,6 @@ def forward(input_signature: EvaArgument, output_signature: EvaArgument):
 
     def inner_fn(arg_fn):
         def wrapper(*args):
-
             frames = args[1]
 
             # check shape of input

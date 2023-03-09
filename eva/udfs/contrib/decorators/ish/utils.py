@@ -12,11 +12,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Type, List
+from typing import List, Type
+
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 from eva.udfs.abstract.abstract_udf import AbstractUDF
 
-def load_io_from_udf_decorators(udf: Type[AbstractUDF], is_input=False) -> List[Type[UdfIOCatalogEntry]]:
+
+def load_io_from_udf_decorators(
+    udf: Type[AbstractUDF], is_input=False
+) -> List[Type[UdfIOCatalogEntry]]:
     """Load the inputs/outputs from the udf decorators and return a list of UdfIOCatalogEntry objects
 
     Args:
