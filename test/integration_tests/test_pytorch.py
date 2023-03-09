@@ -307,7 +307,4 @@ class PytorchTest(unittest.TestCase):
         self.assertEqual(len(actual_batch), 60)
 
 
-if __name__ == "__main__":
-    suite = unittest.TestSuite()
-    suite.addTest(PytorchTest("test_should_run_pytorch_and_yolo_decorators"))
-    unittest.TextTestRunner().run(suite)
+
