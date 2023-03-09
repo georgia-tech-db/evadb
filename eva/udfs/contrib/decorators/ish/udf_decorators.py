@@ -59,7 +59,9 @@ def forward(input_signature: EvaArgument, output_signature: EvaArgument):
 
             # check shape of input
             if input_signature:
-                if not (input_signature.check_shape(frames)):
+                if (input_signature.is_shape_defined) and (
+                    not (input_signature.check_shape(frames))
+                ):
                     try:
                         frames = input_signature.reshape(frames)
                     except TypeException as e:
@@ -67,7 +69,9 @@ def forward(input_signature: EvaArgument, output_signature: EvaArgument):
                         raise TypeException(msg)
 
                 # check type of input
-                if not (input_signature.check_type(frames)):
+                if (input_signature.is_dtype_defined) and (
+                    not (input_signature.check_type(frames))
+                ):
                     try:
                         frames = input_signature.convert_data_type(frames)
 
@@ -81,7 +85,9 @@ def forward(input_signature: EvaArgument, output_signature: EvaArgument):
             # check output type
             if output_signature:
                 # check shape
-                if not (output_signature.check_shape(output)):
+                if (output_signature.is_shape_defined) and (
+                    not (output_signature.check_shape(output))
+                ):
                     try:
                         frames = output_signature.reshape(output)
                     except TypeException as e:
@@ -89,7 +95,9 @@ def forward(input_signature: EvaArgument, output_signature: EvaArgument):
                         raise TypeException(msg)
 
                 # check type of output
-                if not (output_signature.check_type(output)):
+                if (output_signature.is_dtype_defined) and (
+                    not (output_signature.check_type(output))
+                ):
                     try:
                         output = output_signature.convert_data_type(output)
 
