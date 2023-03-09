@@ -136,7 +136,6 @@ class Functions:
         return agg_func_type
 
     def aggregate_windowed_function(self, tree):
-
         agg_func_arg = None
         agg_func_name = None
 
