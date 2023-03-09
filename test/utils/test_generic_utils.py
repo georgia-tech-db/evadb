@@ -21,6 +21,7 @@ from mock import MagicMock, patch
 
 from eva.readers.opencv_reader import OpenCVReader
 from eva.utils.generic_utils import (
+    validate_kwargs,
     generate_file_path,
     is_gpu_available,
     load_udf_class_from_file,
@@ -29,6 +30,10 @@ from eva.utils.generic_utils import (
 
 
 class ModulePathTest(unittest.TestCase):
+    def test_helper_validates_kwargs(self):
+        with self.assertRaises(TypeError):
+            validate_kwargs({"a": 1, "b": 2}, ["a"], "Invalid keyword argument:")
+
     def test_should_return_correct_class_for_string(self):
         vl = str_to_class("eva.readers.opencv_reader.OpenCVReader")
         self.assertEqual(vl, OpenCVReader)
@@ -43,6 +48,10 @@ class ModulePathTest(unittest.TestCase):
     def test_should_return_correct_class_for_path_without_classname(self):
         vl = load_udf_class_from_file("eva/readers/opencv_reader.py")
         assert vl.__qualname__ == OpenCVReader.__qualname__
+
+    def test_should_raise_on_missing_file(self):
+        with self.assertRaises(RuntimeError):
+            load_udf_class_from_file("eva/readers/opencv_reader_abdfdsfds.py")
 
     def test_should_raise_if_class_does_not_exists(self):
         with self.assertRaises(RuntimeError):
