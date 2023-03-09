@@ -21,11 +21,11 @@ from mock import MagicMock, patch
 
 from eva.readers.opencv_reader import OpenCVReader
 from eva.utils.generic_utils import (
-    validate_kwargs,
     generate_file_path,
     is_gpu_available,
     load_udf_class_from_file,
     str_to_class,
+    validate_kwargs,
 )
 
 
