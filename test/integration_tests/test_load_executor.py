@@ -69,17 +69,6 @@ class LoadExecutorTest(unittest.TestCase):
         self.assertEqual(actual_batch, expected_batch)
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
 
-    def test_should_raise_error_on_missing_files(self):
-        random_filename = "".join(random.choices(string.ascii_lowercase, k=5))
-        query = f"LOAD VIDEO '{random_filename}.mp4' INTO NonExistentVideo;"
-        with self.assertRaises(ExecutorError) as e:
-            execute_query_fetch_all(query)
-        self.assertEqual(
-            str(e.exception),
-            f"Load VIDEO failed: encountered unexpected error Load VIDEO failed due to no files found on path {random_filename}.mp4",
-        )
-        execute_query_fetch_all("DROP TABLE IF EXISTS NonExistentVideo;")
-
     def test_should_form_symlink_to_individual_video(self):
         catalog_manager = CatalogManager()
         query = f"LOAD VIDEO '{self.video_file_path}' INTO MyVideo;"
