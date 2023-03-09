@@ -15,7 +15,7 @@
 from abc import abstractmethod
 from typing import Tuple
 
-from eva.catalog.catalog_type import ColumnType, Dimension, NdArrayType
+from eva.catalog.catalog_type import ColumnType, NdArrayType
 
 
 class EvaArgument(object):
