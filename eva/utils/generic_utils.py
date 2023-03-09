@@ -14,6 +14,7 @@
 # limitations under the License.
 import hashlib
 import importlib
+import inspect
 import pickle
 import sys
 import uuid
@@ -49,28 +50,40 @@ def str_to_class(class_path: str):
     return getattr(module, class_name)
 
 
-def path_to_class(filepath: str, classname: str):
+def load_udf_class_from_file(filepath, classname=None):
     """
-    Convert the class in the path file into an object
+    Load a class from a Python file.
 
-    Arguments:
-        filepath: absolute path of file
-        classname: the name of the imported class
+    Args:
+        filepath (str): The path to the Python file.
+        classname (str, optional): The name of the class to load. If not specified, the function will try to load a class with the same name as the file. Defaults to None.
 
     Returns:
-        type: A class for given path
+        The class instance.
+
+    Raises:
+        ImportError: If the file can't be imported.
+        ValueError: If the class name is not found or there is more than one class in the file.
     """
-    try:
-        abs_path = Path(filepath).resolve()
-        spec = importlib.util.spec_from_file_location(abs_path.stem, abs_path)
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-        classobj = getattr(module, classname)
-    except Exception as e:
-        err_msg = f"Failed to import {classname} from {filepath}\nException: {str(e)}"
-        logger.error(err_msg)
-        raise RuntimeError(err_msg)
-    return classobj
+    module_name = inspect.getmodulename(filepath)
+    if module_name is None:
+        raise ImportError(f"Couldn't import module from {filepath}")
+    module = importlib.import_module(module_name, filepath)
+
+    # Try to load the specified class by name
+    if classname:
+        if hasattr(module, classname):
+            return getattr(module, classname)
+        else:
+            raise RuntimeError(f"Class {classname} not found in {filepath}")
+
+    # If class name not specified, check if there is only one class in the file
+    classes = [obj for name, obj in inspect.getmembers(module) if inspect.isclass(obj)]
+    if len(classes) != 1:
+        raise RuntimeError(
+            f"{filepath} contains multiple classes, please specify the main class by naming the UDF with the same name."
+        )
+    return classes[0]
 
 
 def is_gpu_available() -> bool:
