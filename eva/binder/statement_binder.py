@@ -229,7 +229,7 @@ class StatementBinder:
 
         try:
             node.function = load_udf_class_from_file(
-                udf_obj.impl_file_path, udf_obj.name
+                udf_obj.impl_file_path
             )
         except Exception as e:
             err_msg = (
