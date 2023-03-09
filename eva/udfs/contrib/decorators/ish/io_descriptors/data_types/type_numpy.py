@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import numpy as np
+from typing import Tuple
+from eva.catalog.catalog_type import ColumnType, NdArrayType
 
 from eva.udfs.contrib.decorators.ish.io_descriptors.eva_arguments import EvaArgument
 from eva.utils.errors import TypeException
@@ -21,39 +23,37 @@ from eva.utils.errors import TypeException
 class NumpyArray(EvaArgument):
     """EVA data type for Numpy Array"""
 
-    def __init__(self, shape=None, dtype=None) -> None:
-        super().__init__()
-        self.shape = shape
-        self.dtype = dtype
+    def __init__(self, name: str, is_nullable: bool = False, type: NdArrayType = None, dimensions: Tuple[int] = None) -> None:
+        super().__init__(name=name, type=ColumnType.NDARRAY, is_nullable=is_nullable, array_type=type, array_dimensions=dimensions)
 
     def check_type(self, input_object) -> bool:
-        if self.dtype:
-            if self.dtype == "int32":
+        if self.array_type:
+            if self.array_type == "int32":
                 return isinstance(input_object, np.ndarray) and (
                     input_object.dtype == np.int32
                 )
-            elif self.dtype == "float16":
+            elif self.array_type == "float16":
                 return isinstance(input_object, np.ndarray) and (
                     input_object.dtype == np.float16
                 )
-            elif self.dtype == "float32":
+            elif self.array_type == "float32":
                 return isinstance(input_object, np.ndarray) and (
                     input_object.dtype == np.float32
                 )
 
-        elif not self.dtype:
+        elif not self.array_type:
             return isinstance(input_object, np.ndarray)
 
     def convert_data_type(self, input_object: any):
         try:
             arr = np.asarray(input_object)
-            if self.dtype == "int32":
+            if self.array_type == "int32":
                 return arr.astype(np.int32)
-            elif self.dtype == "float16":
+            elif self.array_type == "float16":
                 return arr.astype(np.float16)
-            elif self.dtype == "float32":
+            elif self.array_type == "float32":
                 return arr.astype(np.float32)
-            elif not self.dtype:
+            elif not self.array_type:
                 return arr
 
         except Exception as e:

@@ -45,9 +45,9 @@ class CreateUDFStatement(AbstractStatement):
         self,
         name: str,
         if_not_exists: bool,
-        inputs: List[ColumnDefinition],
-        outputs: List[ColumnDefinition],
         impl_path: str,
+        inputs: List[ColumnDefinition] = [],
+        outputs: List[ColumnDefinition] = [],
         udf_type: str = None,
     ):
         super().__init__(StatementType.CREATE_UDF)
