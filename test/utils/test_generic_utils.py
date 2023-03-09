@@ -23,7 +23,7 @@ from eva.readers.opencv_reader import OpenCVReader
 from eva.utils.generic_utils import (
     generate_file_path,
     is_gpu_available,
-    path_to_class,
+    load_udf_class_from_file,
     str_to_class,
 )
 
@@ -38,12 +38,12 @@ class ModulePathTest(unittest.TestCase):
                    instead of eva.readers.opencv_reader.OpenCVReader"
     )
     def test_should_return_correct_class_for_path(self):
-        vl = path_to_class("eva/readers/opencv_reader.py", "OpenCVReader")
+        vl = load_udf_class_from_file("eva/readers/opencv_reader.py", "OpenCVReader")
         self.assertEqual(vl, OpenCVReader)
 
     def test_should_raise_if_class_does_not_exists(self):
         with self.assertRaises(RuntimeError):
-            path_to_class("eva/readers/opencv_reader.py", "OpenCV")
+            load_udf_class_from_file("eva/readers/opencv_reader.py", "OpenCV")
 
     def test_should_use_torch_to_check_if_gpu_is_available(self):
         # Emulate a missing import

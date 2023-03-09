@@ -65,10 +65,14 @@ def load_udf_class_from_file(filepath, classname=None):
         ImportError: If the file can't be imported.
         ValueError: If the class name is not found or there is more than one class in the file.
     """
-    module_name = inspect.getmodulename(filepath)
-    if module_name is None:
-        raise ImportError(f"Couldn't import module from {filepath}")
-    module = importlib.import_module(module_name, filepath)
+    try:
+        abs_path = Path(filepath).resolve()
+        spec = importlib.util.spec_from_file_location(abs_path.stem, abs_path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+    except Exception as e:
+        err_msg = f"Couldn't load UDF from {filepath}. Ensure that the file exists and that it is a valid Python file."
+        raise RuntimeError(err_msg) 
 
     # Try to load the specified class by name
     if classname:
