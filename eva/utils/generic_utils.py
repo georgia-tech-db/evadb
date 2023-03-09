@@ -71,7 +71,7 @@ def load_udf_class_from_file(filepath, classname=None):
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
     except Exception as e:
-        err_msg = f"Couldn't load UDF from {filepath}. Ensure that the file exists and that it is a valid Python file."
+        err_msg = f"Couldn't load UDF from {filepath} : {str(e)}. Ensure that the file exists and that it is a valid Python file."
         raise RuntimeError(err_msg)
 
     # Try to load the specified class by name
