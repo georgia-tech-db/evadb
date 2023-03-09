@@ -14,9 +14,7 @@
 # limitations under the License.
 import glob
 import os
-import random
 import shutil
-import string
 import tempfile
 import unittest
 from pathlib import Path
