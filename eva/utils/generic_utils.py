@@ -52,7 +52,7 @@ def str_to_class(class_path: str):
 
 def load_udf_class_from_file(filepath, classname=None):
     """
-    Load a class from a Python file.
+    Load a class from a Python file. If the classname is not specified, the function will check if there is only one class in the file and load that. If there are multiple classes, it will raise an error.
 
     Args:
         filepath (str): The path to the Python file.
@@ -62,8 +62,7 @@ def load_udf_class_from_file(filepath, classname=None):
         The class instance.
 
     Raises:
-        ImportError: If the file can't be imported.
-        ValueError: If the class name is not found or there is more than one class in the file.
+        RuntimeError: If the class name is not found or there is more than one class in the file.
     """
     try:
         abs_path = Path(filepath).resolve()
