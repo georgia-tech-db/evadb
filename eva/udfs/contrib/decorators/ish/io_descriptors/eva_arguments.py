@@ -42,9 +42,11 @@ class EvaArgument(object):
             dtype (str): datatype of the elements. Types are int32, float16 and float32.
 
         """
-        self.shape = shape
-        self.dtype = dtype
-        self.columns = columns
+        self.name = name
+        self.type = type
+        self.is_nullable = is_nullable
+        self.array_type = array_type
+        self.array_dimensions = array_dimensions
 
     @abstractmethod
     def check_type(self, input_object: any) -> bool:

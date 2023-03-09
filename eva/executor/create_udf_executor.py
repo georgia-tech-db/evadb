@@ -59,7 +59,7 @@ class CreateUDFExecutor(AbstractExecutor):
             err_msg = f"Error creating UDF: {str(e)}"
             logger.error(err_msg)
             raise RuntimeError(err_msg)
-        
+
         io_list = []
         if self.node.inputs:
             io_list.extend(self.node.inputs)
@@ -72,7 +72,6 @@ class CreateUDFExecutor(AbstractExecutor):
         else:
             # try to load the outputs from decorators, the outputs from CREATE statement take precedence
             io_list.extend(load_io_from_udf_decorators(udf, is_input=False))
-        
 
         catalog_manager.insert_udf_catalog_entry(
             self.node.name, impl_path, self.node.udf_type, io_list

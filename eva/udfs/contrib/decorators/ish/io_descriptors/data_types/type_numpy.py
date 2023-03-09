@@ -12,10 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import numpy as np
 from typing import Tuple
-from eva.catalog.catalog_type import ColumnType, NdArrayType
 
+import numpy as np
+
+from eva.catalog.catalog_type import ColumnType, NdArrayType
 from eva.udfs.contrib.decorators.ish.io_descriptors.eva_arguments import EvaArgument
 from eva.utils.errors import TypeException
 
@@ -23,8 +24,20 @@ from eva.utils.errors import TypeException
 class NumpyArray(EvaArgument):
     """EVA data type for Numpy Array"""
 
-    def __init__(self, name: str, is_nullable: bool = False, type: NdArrayType = None, dimensions: Tuple[int] = None) -> None:
-        super().__init__(name=name, type=ColumnType.NDARRAY, is_nullable=is_nullable, array_type=type, array_dimensions=dimensions)
+    def __init__(
+        self,
+        name: str,
+        is_nullable: bool = False,
+        type: NdArrayType = None,
+        dimensions: Tuple[int] = None,
+    ) -> None:
+        super().__init__(
+            name=name,
+            type=ColumnType.NDARRAY,
+            is_nullable=is_nullable,
+            array_type=type,
+            array_dimensions=dimensions,
+        )
 
     def check_type(self, input_object) -> bool:
         if self.array_type:
@@ -74,7 +87,6 @@ class NumpyArray(EvaArgument):
             return np.reshape(input_object, self.shape)
 
         except Exception as e:
-
             raise TypeException(
                 "The input object cannot be reshaped to %s. Error is %s"
                 % (self.shape, str(e))
