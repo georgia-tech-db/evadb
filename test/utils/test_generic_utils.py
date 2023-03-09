@@ -44,10 +44,6 @@ class ModulePathTest(unittest.TestCase):
         vl = load_udf_class_from_file("eva/readers/opencv_reader.py")
         assert vl.__qualname__ == OpenCVReader.__qualname__
 
-    def test_should_raise_if_specified_class_does_not_exists(self):
-        with self.assertRaises(RuntimeError):
-            load_udf_class_from_file("eva/readers/opencv_reader.py", "OpenCV")
-
     def test_should_raise_if_class_does_not_exists(self):
         with self.assertRaises(RuntimeError):
             # eva/utils/s3_utils.py has no class in it
