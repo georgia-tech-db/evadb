@@ -42,7 +42,9 @@ class EvaArgument(object):
             dtype (str): datatype of the elements. Types are int32, float16 and float32.
 
         """
-        pass
+        self.shape = shape
+        self.dtype = dtype
+        self.columns = columns
 
     @abstractmethod
     def check_type(self, input_object: any) -> bool:
@@ -58,7 +60,7 @@ class EvaArgument(object):
         pass
 
     @abstractmethod
-    def check_shape(self, input_object: any, required_shape) -> bool:
+    def check_shape(self, input_object: any, required_shape: tuple = None) -> bool:
         """Checks the shape of the input_object with
 
         Args:
@@ -118,3 +120,17 @@ class EvaArgument(object):
         Args:
             input_object (any): object whose data type must be updated.
         """
+
+    def is_shape_defined(self):
+        """returns True if the size has been specified. False otherwise"""
+        if self.shape is None:
+            return False
+
+        return True
+
+    def is_dtype_defined(self):
+        """returns True if the dtype has been specified. False otherwise"""
+        if self.dtype is None:
+            return False
+
+        return True

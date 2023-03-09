@@ -119,11 +119,6 @@ class PytorchTest(unittest.TestCase):
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_yolo_decorators(self):
         create_udf_query = """CREATE UDF YoloDecorators
-                  INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
-                  OUTPUT (labels NDARRAY STR(10),
-                          bboxes NDARRAY FLOAT32(ANYDIM, 4),
-                          scores NDARRAY FLOAT32(ANYDIM))
-                  TYPE  ObjectDetection
                   IMPL  'eva/udfs/contrib/decorators/ish/yolo_object_detection_decorators.py';
         """
         execute_query_fetch_all(create_udf_query)

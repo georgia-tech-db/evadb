@@ -24,6 +24,9 @@ class PandasDataframe(EvaArgument):
         super().__init__()
         self.columns = columns
 
+    def check_shape(self, input_object: any, required_shape: tuple = None) -> bool:
+        return True
+
     def check_column_names(self, input_object):
         obj_cols = list(input_object.columns)
         return obj_cols == self.columns
