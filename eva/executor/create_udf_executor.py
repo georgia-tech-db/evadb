@@ -52,7 +52,7 @@ class CreateUDFExecutor(AbstractExecutor):
         impl_path = self.node.impl_path.absolute().as_posix()
         # check if we can create the udf object
         try:
-            load_udf_class_from_file(impl_path)()
+            load_udf_class_from_file(impl_path, self.node.name)()
         except Exception as e:
             err_msg = f"Error creating UDF: {str(e)}"
             logger.error(err_msg)
