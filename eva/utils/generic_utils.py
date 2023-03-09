@@ -72,7 +72,7 @@ def load_udf_class_from_file(filepath, classname=None):
         spec.loader.exec_module(module)
     except Exception as e:
         err_msg = f"Couldn't load UDF from {filepath}. Ensure that the file exists and that it is a valid Python file."
-        raise RuntimeError(err_msg) 
+        raise RuntimeError(err_msg)
 
     # Try to load the specified class by name
     if classname:

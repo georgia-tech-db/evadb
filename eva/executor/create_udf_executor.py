@@ -54,9 +54,7 @@ class CreateUDFExecutor(AbstractExecutor):
         try:
             load_udf_class_from_file(impl_path, self.node.name)()
         except Exception as e:
-            err_msg = (
-                f"Error creating UDF: {str(e)}"
-            )
+            err_msg = f"Error creating UDF: {str(e)}"
             logger.error(err_msg)
             raise RuntimeError(err_msg)
         catalog_manager.insert_udf_catalog_entry(
