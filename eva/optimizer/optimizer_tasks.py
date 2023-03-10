@@ -199,7 +199,6 @@ class OptimizeExpression(OptimizerTask):
                     self.optimizer_context.task_stack.push(
                         ExploreGroup(group, self.optimizer_context)
                     )
-        print("out of the loop")
 
 
 class ApplyRule(OptimizerTask):
