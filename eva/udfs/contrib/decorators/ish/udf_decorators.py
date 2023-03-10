@@ -15,7 +15,6 @@
 
 
 from eva.udfs.contrib.decorators.ish.io_descriptors.eva_arguments import EvaArgument
-from eva.utils.errors import TypeException
 
 
 # decorator for the setup function. It will be used to set the cache, batching and
