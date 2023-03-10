@@ -119,7 +119,7 @@ class PytorchTest(unittest.TestCase):
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_yolo_decorators(self):
         create_udf_query = """CREATE UDF YoloDecorators
-                  IMPL  'eva/udfs/contrib/decorators/ish/yolo_object_detection_decorators.py';
+                  IMPL  'eva/udfs/decorators/yolo_object_detection_decorators.py';
         """
         execute_query_fetch_all(create_udf_query)
 
@@ -306,8 +306,3 @@ class PytorchTest(unittest.TestCase):
 
         self.assertEqual(len(actual_batch), 60)
 
-
-if __name__ == "__main__":
-    suite = unittest.TestSuite()
-    suite.addTest(PytorchTest("test_should_run_pytorch_and_yolo_decorators"))
-    unittest.TextTestRunner().run(suite)
