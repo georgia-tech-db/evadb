@@ -20,7 +20,7 @@ from eva.parser.types import JoinType
 from eva.plan_nodes.types import PlanOprType
 
 
-class FuzzyNestedJoinPlan(AbstractJoin):
+class FuzzyJoinPlan(AbstractJoin):
     """
     This plan is used for storing information required for FuzzyJoin.
     TODO:  Add more details
@@ -43,7 +43,7 @@ class FuzzyNestedJoinPlan(AbstractJoin):
         return self._join_predicate
 
     def __str__(self):
-        return "FuzzyNestedJoinPlan(join_type={}, \
+        return "FuzzyJoinPlan(join_type={}, \
             predicate={})".format(
             self.join_type, self.join_predicate
         )

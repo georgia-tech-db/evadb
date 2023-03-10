@@ -17,12 +17,12 @@ from typing import Generator, Iterator
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError, apply_predicate
 from eva.models.storage.batch import Batch
-from eva.plan_nodes.fuzzy_join_plan import FuzzyNestedJoinPlan
+from eva.plan_nodes.fuzzy_join_plan import FuzzyJoinPlan
 from eva.utils.logging_manager import logger
 
 
 class FuzzyJoinExecutor(AbstractExecutor):
-    def __init__(self, node: FuzzyNestedJoinPlan):
+    def __init__(self, node: FuzzyJoinPlan):
         super().__init__(node)
         self.predicate = node.join_predicate
 

@@ -18,7 +18,7 @@ from eva.optimizer.group_expression import GroupExpression
 from eva.plan_nodes.abstract_plan import AbstractPlan
 from eva.plan_nodes.hash_join_build_plan import HashJoinBuildPlan
 from eva.plan_nodes.hash_join_probe_plan import HashJoinProbePlan
-from eva.plan_nodes.fuzzy_join_plan import FuzzyNestedJoinPlan
+from eva.plan_nodes.fuzzy_join_plan import FuzzyJoinPlan
 from eva.plan_nodes.seq_scan_plan import SeqScanPlan
 
 
@@ -39,8 +39,8 @@ class CostModel:
         def cost(opr: AbstractPlan):
             return 1.0
 
-        @cost.register(FuzzyNestedJoinPlan)
-        def cost_hash_join_build_plan(opr: FuzzyNestedJoinPlan):
+        @cost.register(FuzzyJoinPlan)
+        def cost_hash_join_build_plan(opr: FuzzyJoinPlan):
             return 1.0
 
         @cost.register(HashJoinBuildPlan)
