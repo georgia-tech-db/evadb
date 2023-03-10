@@ -14,6 +14,7 @@
 # limitations under the License.
 from typing import Callable, List
 
+from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.models.udf_catalog import UdfCatalogEntry
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 from eva.constants import NO_GPU
@@ -22,8 +23,8 @@ from eva.expression.abstract_expression import AbstractExpression, ExpressionTyp
 from eva.models.storage.batch import Batch
 from eva.parser.alias import Alias
 from eva.udfs.gpu_compatible import GPUCompatible
-from eva.catalog.catalog_manager import CatalogManager
 from eva.utils.timer import Timer
+
 
 class FunctionExpression(AbstractExpression):
     """
@@ -124,9 +125,7 @@ class FunctionExpression(AbstractExpression):
             outcomes = outcomes.project(self.projection_columns)
             outcomes.modify_column_alias(self.alias)
         resolution = None
-        udf_obj = catalog_manager.get_udf_catalog_entry_by_name(
-            self._name
-        )
+        udf_obj = catalog_manager.get_udf_catalog_entry_by_name(self._name)
         self.persistCost(
             self._name,
             udf_obj.type if udf_obj else None,
