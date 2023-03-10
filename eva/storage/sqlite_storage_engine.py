@@ -29,6 +29,8 @@ from eva.parser.table_ref import TableInfo
 from eva.storage.abstract_storage_engine import AbstractStorageEngine
 from eva.utils.generic_utils import PickleSerializer, get_size
 from eva.utils.logging_manager import logger
+from eva.expression.comparison_expression import ComparisonExpression
+from eva.expression.abstract_expression import ExpressionType
 
 # Leveraging Dynamic schema in SQLAlchemy
 # https://sparrigan.github.io/sql/sqla/2016/01/03/dynamic-tables.html
@@ -184,7 +186,27 @@ class SQLStorageEngine(AbstractStorageEngine):
             logger.exception(err_msg)
             raise Exception(err_msg)
 
-    def delete(self, table: TableCatalogEntry, where_clause: Dict[str, Any]):
+    def single_predicate_node_to_filter(self, table: TableCatalogEntry, predicate_node: ComparisonExpression):
+        filter_clause = []
+        column = predicate_node.children[0].col_name
+        value = predicate_node.children[1].value
+        
+        if (predicate_node.etype == ExpressionType.COMPARE_EQUAL):
+            filter_clause.append(table.columns[column] == value)
+        elif (predicate_node.etype == ExpressionType.COMPARE_GREATER):
+            filter_clause.append(table.columns[column] > value)
+        elif (predicate_node.etype == ExpressionType.COMPARE_LESSER):
+            filter_clause.append(table.columns[column] < value)
+        elif (predicate_node.etype == ExpressionType.COMPARE_GEQ):
+            filter_clause.append(table.columns[column] >= value)
+        elif (predicate_node.etype == ExpressionType.COMPARE_LEQ):
+            filter_clause.append(table.columns[column] <= value)
+        elif (predicate_node.etype == ExpressionType.COMPARE_NEQ):
+            filter_clause.append(table.columns[column] != value)
+        
+        return filter_clause
+
+    def delete(self, table: TableCatalogEntry, where_clause: ComparisonExpression):
         """Delete tuples from the table where rows satisfy the where_clause.
         The current implementation only handles equality predicates.
 
@@ -196,20 +218,13 @@ class SQLStorageEngine(AbstractStorageEngine):
         """
         try:
             table_to_delete_from = self._try_loading_table_via_reflection(table.name)
-            table_columns = [
-                col.name
-                for col in table_to_delete_from.columns
-                if col.name != "_row_id"
-            ]
-            filter_clause = []
+            
+            filter_clause = self.single_predicate_node_to_filter(
+                table=table_to_delete_from,
+                predicate_node=where_clause
+                )
             # verify where clause and convert to sqlalchemy supported filter
             # https://stackoverflow.com/questions/34026210/where-filter-from-table-object-using-a-dictionary-or-kwargs
-            for column, value in where_clause.items():
-                if column not in table_columns:
-                    raise Exception(
-                        f"where_clause contains a column {column} not in the table {table_to_delete_from}"
-                    )
-                filter_clause.append(table_to_delete_from.columns[column] == value)
 
             d = table_to_delete_from.delete().where(and_(*filter_clause))
             self._sql_engine.execute(d)
