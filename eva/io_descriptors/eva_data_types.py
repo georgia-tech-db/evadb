@@ -19,7 +19,7 @@ import pandas as pd
 import torch
 
 from eva.catalog.catalog_type import ColumnType, NdArrayType
-from eva.io_descriptors.eva_arguments import IOColumnArgument, IOArgument
+from eva.io_descriptors.eva_arguments import IOArgument, IOColumnArgument
 
 
 class NumpyArray(IOColumnArgument):
@@ -65,7 +65,7 @@ class NumpyArray(IOColumnArgument):
 
         return True
 
-    def name(self):
+    def arg_name(self):
         return "NumpyArray"
 
 
@@ -112,16 +112,20 @@ class PyTorchTensor(IOColumnArgument):
 
         return True
 
-    def name(self):
+    def arg_name(self):
         return "PyTorch Tensor"
 
 
 class PandasDataframe(IOArgument):
     """EVA data type for Pandas Dataframe"""
 
-    def __init__(self, columns) -> None:
+    def __init__(self, columns, shape, enforce_columns, enforce_shape) -> None:
         super().__init__()
         self.columns = columns
+
+        self.type = ColumnType.NDARRAY
+        self.array_type = NdArrayType.ANYTYPE
+        self.is_nullable = False
 
     def check_shape(self, input_object: any, required_shape: tuple = None) -> bool:
         return True
@@ -136,5 +140,5 @@ class PandasDataframe(IOArgument):
     def is_output_columns_set(self):
         return not (self.columns is None)
 
-    def name(self):
-        return "PandasDataframe"
+    def arg_name(self):
+        return "PandasDataframes"
