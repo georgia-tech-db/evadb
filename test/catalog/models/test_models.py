@@ -63,7 +63,6 @@ class CatalogModelsTest(unittest.TestCase):
         self.assertNotEqual(df_col, df_col1)
 
     def test_table_catalog_entry_equality(self):
-
         column_1 = ColumnCatalogEntry("frame_id", ColumnType.INTEGER, False)
         column_2 = ColumnCatalogEntry("frame_label", ColumnType.INTEGER, False)
         col_list = [column_1, column_2]
