@@ -84,13 +84,15 @@ class UdfDecoratorTest(unittest.TestCase):
 
         # input shape is mismatched
         np_arr = np.ones((1, 2), dtype=np.int32)
-        ans = forward_fn_numpy_input_output_constraint(None, np_arr)
-        self.assertTrue(np.equal(ans, 2))
+        with self.assertRaises(TypeException):
+            ans = forward_fn_numpy_input_output_constraint(None, np_arr)
+        
 
         # input data type is mismatched
         np_arr = np.ones((1, 2), dtype=np.float64)
-        ans = forward_fn_numpy_input_output_constraint(None, np_arr)
-        self.assertTrue(np.equal(ans, 2))
+        with self.assertRaises(TypeException):
+            ans = forward_fn_numpy_input_output_constraint(None, np_arr)
+        
 
     @pytest.mark.torchtest
     def test_forward_fn_numpy_output_mismatch(self):
@@ -116,22 +118,20 @@ class UdfDecoratorTest(unittest.TestCase):
     @pytest.mark.torchtest
     def test_forward_fn_pytorch_with_constraints(self):
         # all the constraints are satisfied
-        torch_tensor = torch.ones((2, 1))
+        torch_tensor = torch.ones((2, 1), dtype=torch.int32)
         self.assertTrue(
             torch.eq(forward_fn_pytorch_input_output_constraint(None, torch_tensor), 2)
         )
 
         # input shape is mismatched
         torch_tensor = torch.ones((1, 2))
-        self.assertTrue(
-            torch.eq(forward_fn_pytorch_input_output_constraint(None, torch_tensor), 2)
-        )
+        with self.assertRaises(TypeException):
+            forward_fn_pytorch_input_output_constraint(None, torch_tensor)
 
         # input data type is mismatched
         torch_tensor = torch.ones((1, 2), dtype=torch.float64)
-        self.assertTrue(
-            torch.eq(forward_fn_pytorch_input_output_constraint(None, torch_tensor), 2)
-        )
+        with self.assertRaises(TypeException):
+            forward_fn_pytorch_input_output_constraint(None, torch_tensor)
 
     @pytest.mark.torchtest
     def test_forward_fn_pytorch_raise_exception(self):
@@ -141,7 +141,3 @@ class UdfDecoratorTest(unittest.TestCase):
             forward_fn_pytorch_input_output_constraint(None, torch_tensor)
 
 
-if __name__ == "__main__":
-    suite = unittest.TestSuite()
-    suite.addTest(UdfDecoratorTest("test_forward_fn_pytorch_raise_exception"))
-    unittest.TextTestRunner().run(suite)
