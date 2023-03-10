@@ -24,22 +24,17 @@ class UdfCostCatalogService(BaseService):
     def __init__(self):
         super().__init__(UdfCostCatalog)
 
-    def insert_entry(
-        self, name: str, type: str, cost: int, frame_count: int, resolution: int
-    ) -> UdfCostCatalogEntry:
+    def insert_entry(self, name: str, cost: int) -> UdfCostCatalogEntry:
         """Insert a new udf cost entry
 
         Arguments:
             name (str): name of the udf
-            type(str): type of the udf
-            cost(int) : cost of the
-            frame_count = number of frames used in the cost estimation
-            resolution = resolution of the videos used in the cost estimation
+            cost(int) : cost of the udf
 
         Returns:
             UdfCostCatalogEntry: Returns the new entry created
         """
-        udf_obj = self.model(name, type, cost, frame_count, resolution)
+        udf_obj = self.model(name, cost)
         udf_obj = udf_obj.save()
         return udf_obj.as_dataclass()
 

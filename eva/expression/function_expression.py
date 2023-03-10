@@ -87,23 +87,10 @@ class FunctionExpression(AbstractExpression):
     def function(self, func: Callable):
         self._function = func
 
-    def persistCost(self, name, type, frame_count, resolution, time):
-        # TODO: compute cost using time
-        cost = time
-        from eva.catalog.catalog_manager import CatalogManager
-
-        catalog_manager = CatalogManager()
-        catalog_manager.insert_udf_cost_catalog_entry(
-            name, type, cost, frame_count, resolution
-        )
-
     def evaluate(self, batch: Batch, **kwargs) -> Batch:
+        self._iterationCount += 1
         new_batch = batch
         child_batches = [child.evaluate(batch, **kwargs) for child in self.children]
-        from eva.catalog.catalog_manager import CatalogManager
-
-        catalog_manager = CatalogManager()
-
         if len(child_batches):
             batch_sizes = [len(child_batch) for child_batch in child_batches]
             are_all_equal_length = all(batch_sizes[0] == x for x in batch_sizes)
@@ -127,15 +114,8 @@ class FunctionExpression(AbstractExpression):
             outcomes.apply_function_expression(func)
             outcomes = outcomes.project(self.projection_columns)
             outcomes.modify_column_alias(self.alias)
-        resolution = None
-        udf_obj = catalog_manager.get_udf_catalog_entry_by_name(self._name)
-        self.persistCost(
-            self._name,
-            udf_obj.type if udf_obj else None,
-            outcomes.frames.shape[0],
-            resolution,
-            function_expr_timer.total_elapsed_time,
-        )
+        if not (self._iterationCount % 10):
+            self.profileExpression(function_expr_timer.total_elapsed_time)
         return outcomes
 
     def signature(self) -> str:

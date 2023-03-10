@@ -31,29 +31,18 @@ class UdfCostCatalog(BaseModel):
 
     __tablename__ = "udf_cost_catalog"
 
-    _type = Column("type", String(100))
     _cost = Column("cost", Integer())
-    _frame_count = Column("frame_count", Integer())
-    _resolution = Column("resolution", Integer())
-    _udf_id = Column("udf_id", Integer(), ForeignKey("udf_catalog._row_id"))
+    # _udf_id = Column("udf_id", Integer(), ForeignKey("udf_catalog._row_id"))
     _udf_name = Column("name", String(100), ForeignKey("udf_catalog.name"))
 
-    def __init__(
-        self, name: str, type: str, cost: int, frame_count: int, resolution: int
-    ):
+    def __init__(self, name: str, cost: int):
         self._udf_name = name
-        self._type = type
         self._cost = cost
-        self._frame_count = frame_count
-        self._resolution = resolution
 
     def as_dataclass(self) -> "UdfCostCatalogEntry":
         return UdfCostCatalog(
             name=self._udf_name,
-            type=self._type,
             cost=self._cost,
-            frame_count=self._frame_count,
-            resolution=self._resolution,
         )
 
 
@@ -64,12 +53,7 @@ class UdfCostCatalogEntry:
     """
 
     name: str
-    impl_file_path: str
-    type: str
-    row_id: int
-    thorughput_cost: int = None
+    cost: int = None
 
     def display_format(self):
-        data_type = self.type.name
-
-        return {"name": self.name, "data_type": data_type}
+        return {"name": self.name, "cost": self.cost}
