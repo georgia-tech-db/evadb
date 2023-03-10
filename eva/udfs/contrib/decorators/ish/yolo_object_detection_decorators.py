@@ -20,9 +20,6 @@ from eva.catalog.catalog_type import NdArrayType
 from eva.models.catalog.frame_info import FrameInfo
 from eva.models.catalog.properties import ColorSpace
 from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
-from eva.udfs.contrib.decorators.ish.io_descriptors.data_types.type_pandas_dataframe import (
-    PandasDataframe,
-)
 from eva.udfs.contrib.decorators.ish.io_descriptors.data_types.type_tensor import (
     PyTorchTensor,
 )
@@ -156,17 +153,34 @@ class YoloDecorators(PytorchAbstractClassifierUDF):
         ]
 
     @forward(
-        input_signature=[PyTorchTensor(
-            name="input_col",
-            is_nullable=False,
-            type=NdArrayType.FLOAT32,
-            dimensions=(1, 3, 540, 960),
-        )],
+        input_signature=[
+            PyTorchTensor(
+                name="input_col",
+                is_nullable=False,
+                type=NdArrayType.FLOAT32,
+                dimensions=(1, 3, 540, 960),
+            )
+        ],
         output_signature=[
-            PyTorchTensor(name="labels", is_nullable=False, type=NdArrayType.INT64, dimensions=(1,)),
-            PyTorchTensor(name="bboxes", is_nullable=False, type=NdArrayType.FLOAT32, dimensions=(1, 4)),
-            PyTorchTensor(name="scores", is_nullable=False, type=NdArrayType.FLOAT32, dimensions=(1,))
-        ]
+            PyTorchTensor(
+                name="labels",
+                is_nullable=False,
+                type=NdArrayType.INT64,
+                dimensions=(1,),
+            ),
+            PyTorchTensor(
+                name="bboxes",
+                is_nullable=False,
+                type=NdArrayType.FLOAT32,
+                dimensions=(1, 4),
+            ),
+            PyTorchTensor(
+                name="scores",
+                is_nullable=False,
+                type=NdArrayType.FLOAT32,
+                dimensions=(1,),
+            ),
+        ],
     )
     def forward(self, frames: Tensor) -> pd.DataFrame:
         """
