@@ -27,7 +27,6 @@ from eva.optimizer.operators import (
     LogicalExchange,
     LogicalGet,
     LogicalProject,
-    Operator,
     OperatorType,
 )
 from eva.optimizer.rules.rules_base import Promise, Rule, RuleType
@@ -52,7 +51,7 @@ class LogicalExchangeToPhysical(Rule):
         after = ExchangePlan(before.view)
         for child in before.children:
             after.append_child(child)
-        return after
+        yield after
 
 
 class LogicalProjectToPhysical(Rule):
@@ -71,9 +70,9 @@ class LogicalProjectToPhysical(Rule):
         after = ProjectPlan(before.target_list)
         for child in before.children:
             after.append_child(child)
-        upper = ExchangePlan(parallelism=2)
+        upper = ExchangePlan(parallelism=1)
         upper.append_child(after)
-        return upper
+        yield upper
 
 
 class LogicalGetToSeqScan(Rule):
@@ -84,7 +83,7 @@ class LogicalGetToSeqScan(Rule):
     def promise(self):
         return Promise.LOGICAL_GET_TO_SEQSCAN
 
-    def check(self, before: Operator, context: OptimizerContext):
+    def check(self, before: LogicalGet, context: OptimizerContext):
         return True
 
     def apply(self, before: LogicalGet, context: OptimizerContext):
@@ -108,4 +107,4 @@ class LogicalGetToSeqScan(Rule):
             return scan
         upper = ExchangePlan(parallelism=2)
         upper.append_child(scan)
-        return upper
+        yield upper
