@@ -16,16 +16,11 @@ from typing import List
 
 import pandas as pd
 
+from eva.io_descriptors.eva_data_types import PandasDataframe, PyTorchTensor
 from eva.models.catalog.frame_info import FrameInfo
 from eva.models.catalog.properties import ColorSpace
 from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
-from eva.udfs.contrib.decorators.ish.io_descriptors.data_types.type_pandas_dataframe import (
-    PandasDataframe,
-)
-from eva.udfs.contrib.decorators.ish.io_descriptors.data_types.type_tensor import (
-    PyTorchTensor,
-)
-from eva.udfs.contrib.decorators.ish.udf_decorators import forward, setup
+from eva.udfs.decorators.udf_decorators import forward, setup
 
 try:
     import torch

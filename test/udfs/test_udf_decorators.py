@@ -18,10 +18,9 @@ import numpy as np
 import pytest
 import torch
 
-
+from eva.io_descriptors.eva_data_types import NumpyArray, PyTorchTensor
 from eva.udfs.decorators.udf_decorators import forward
-from eva.utils.errors import TypeException
-from eva.io_descriptors.eva_data_types import NumpyArray, PyTorchTensor, PandasDataframe
+from eva.utils.errors import UDFInputOutputTypeException
 
 
 @forward(input_signature=NumpyArray(), output_signature=NumpyArray())
@@ -84,28 +83,26 @@ class UdfDecoratorTest(unittest.TestCase):
 
         # input shape is mismatched
         np_arr = np.ones((1, 2), dtype=np.int32)
-        with self.assertRaises(TypeException):
+        with self.assertRaises(UDFInputOutputTypeException):
             ans = forward_fn_numpy_input_output_constraint(None, np_arr)
-        
 
         # input data type is mismatched
         np_arr = np.ones((1, 2), dtype=np.float64)
-        with self.assertRaises(TypeException):
+        with self.assertRaises(UDFInputOutputTypeException):
             ans = forward_fn_numpy_input_output_constraint(None, np_arr)
-        
 
     @pytest.mark.torchtest
     def test_forward_fn_numpy_output_mismatch(self):
         # the shape of output is different so raises an exception
         np_arr = np.ones((1, 2), dtype=np.float64)
-        with self.assertRaises(TypeException):
+        with self.assertRaises(UDFInputOutputTypeException):
             forward_fn_numpy_output_mismatch(None, np_arr)
 
     @pytest.mark.torchtest
     def test_forward_fn_numpy_raise_exception(self):
         # the numpy array cannot be reshaped to the required shape. hence it throws an exception
         np_arr = np.ones((3, 1), dtype=np.int32)
-        with self.assertRaises(TypeException):
+        with self.assertRaises(UDFInputOutputTypeException):
             forward_fn_numpy_input_output_constraint(None, np_arr)
 
     @pytest.mark.torchtest
@@ -125,19 +122,17 @@ class UdfDecoratorTest(unittest.TestCase):
 
         # input shape is mismatched
         torch_tensor = torch.ones((1, 2))
-        with self.assertRaises(TypeException):
+        with self.assertRaises(UDFInputOutputTypeException):
             forward_fn_pytorch_input_output_constraint(None, torch_tensor)
 
         # input data type is mismatched
         torch_tensor = torch.ones((1, 2), dtype=torch.float64)
-        with self.assertRaises(TypeException):
+        with self.assertRaises(UDFInputOutputTypeException):
             forward_fn_pytorch_input_output_constraint(None, torch_tensor)
 
     @pytest.mark.torchtest
     def test_forward_fn_pytorch_raise_exception(self):
         # the tensor cannot be reshaped to the required shape
         torch_tensor = torch.ones((1, 3), dtype=torch.float64)
-        with self.assertRaises(TypeException):
+        with self.assertRaises(UDFInputOutputTypeException):
             forward_fn_pytorch_input_output_constraint(None, torch_tensor)
-
-
