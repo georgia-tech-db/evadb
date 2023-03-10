@@ -19,6 +19,7 @@ from eva.binder.binder_utils import (
     bind_table_info,
     check_groupby_pattern,
     check_table_object_is_video,
+    check_column_name_is_string,
     extend_star,
 )
 from eva.binder.statement_binder_context import StatementBinderContext
@@ -27,6 +28,7 @@ from eva.catalog.catalog_type import IndexType, NdArrayType, TableType
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
+from eva.expression.abstract_expression import ExpressionType
 from eva.parser.alias import Alias
 from eva.parser.create_index_statement import CreateIndexStatement
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
@@ -120,6 +122,9 @@ class StatementBinder:
         self.bind(node.from_table)
         if node.where_clause:
             self.bind(node.where_clause)
+            if node.where_clause.etype == ExpressionType.COMPARE_LIKE:
+                check_column_name_is_string(node.where_clause.children[0])
+                
         if node.target_list:
             # SELECT * support
             if (
