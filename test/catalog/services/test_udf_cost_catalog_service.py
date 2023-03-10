@@ -30,7 +30,7 @@ class UdfCostCatalogServiceTest(TestCase):
     @patch("eva.catalog.services.udf_cost_catalog_service.UdfCostCatalog")
     def test_create_udf_should_create_model(self, mocked):
         service = UdfCostCatalogService()
-        service.insert_entry(UDF_NAME, UDF_TYPE, UDF_COST, FRAME_COUNT, RESOLUTION)
+        service.insert_entry(UDF_NAME, UDF_COST)
         mocked.assert_called_with(UDF_NAME, UDF_TYPE, UDF_COST, FRAME_COUNT, RESOLUTION)
         mocked.return_value.save.assert_called_once()
 
