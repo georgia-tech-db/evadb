@@ -16,12 +16,10 @@ import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import TableType
-from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.insert_plan import InsertPlan
-from eva.storage.abstract_storage_engine import AbstractStorageEngine
 from eva.storage.storage_engine import StorageEngine
 from eva.utils.logging_manager import logger
 
@@ -51,7 +49,9 @@ class InsertExecutor(AbstractExecutor):
 
             values_to_insert = [val_node.value for val_node in self.node.value_list]
             tuple_to_insert = tuple(values_to_insert)
-            columns_to_insert = [col_node.col_name for col_node in self.node.column_list]
+            columns_to_insert = [
+                col_node.col_name for col_node in self.node.column_list
+            ]
 
             # Adding all values to Batch for insert
             logger.info(values_to_insert)

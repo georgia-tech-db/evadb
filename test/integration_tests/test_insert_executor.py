@@ -47,12 +47,12 @@ class InsertExecutorTest(unittest.TestCase):
         query = """LOAD VIDEO 'dummy.avi' INTO MyVideo;"""
         execute_query_fetch_all(query)
 
-        insert_query = """ INSERT INTO MyVideo (id, data) VALUES 
+        insert_query = """ INSERT INTO MyVideo (id, data) VALUES
             (40, [[40, 40, 40], [40, 40, 40]],
                  [[40, 40, 40], [40, 40, 40]]);"""
         execute_query_fetch_all(insert_query)
 
-        insert_query_2 = """ INSERT INTO MyVideo (id, data) VALUES 
+        insert_query_2 = """ INSERT INTO MyVideo (id, data) VALUES
         ( 41, [[41, 41, 41] , [41, 41, 41]],
                 [[41, 41, 41], [41, 41, 41]]);"""
         execute_query_fetch_all(insert_query_2)

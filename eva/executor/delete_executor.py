@@ -12,14 +12,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Generator, Iterator
+from typing import Iterator
 
 import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import TableType
 from eva.executor.abstract_executor import AbstractExecutor
-from eva.executor.executor_utils import ExecutorError, apply_predicate
+from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.project_plan import ProjectPlan
 from eva.storage.storage_engine import StorageEngine
