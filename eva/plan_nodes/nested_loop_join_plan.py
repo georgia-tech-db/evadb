@@ -19,25 +19,21 @@ from eva.plan_nodes.abstract_join_plan import AbstractJoin
 from eva.plan_nodes.types import PlanOprType
 
 
-class FuzzyJoinPlan(AbstractJoin):
+class NestedLoopJoinPlan(AbstractJoin):
     """
-    This plan is used for storing information required for FuzzyJoin.
-    TODO:  Add more details
-
-    Arguments:
-        TODO: Add arguments
+    This plan is used for storing information required for a nested loop join.
     """
 
     def __init__(self, join_type: JoinType, join_predicate: AbstractExpression = None):
         self._join_predicate = join_predicate
-        super().__init__(PlanOprType.FUZZY_JOIN, join_type, join_predicate)
+        super().__init__(PlanOprType.NESTED_LOOP_JOIN, join_type, join_predicate)
 
     @property
     def join_predicate(self):
         return self._join_predicate
 
     def __str__(self):
-        return "FuzzyJoinPlan(join_type={}, \
+        return "NestedLoopJoinPlan(join_type={}, \
             predicate={})".format(
             self.join_type, self.join_predicate
         )

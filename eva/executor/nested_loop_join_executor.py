@@ -17,12 +17,12 @@ from typing import Generator, Iterator
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError, apply_predicate
 from eva.models.storage.batch import Batch
-from eva.plan_nodes.fuzzy_join_plan import FuzzyJoinPlan
+from eva.plan_nodes.nested_loop_join_plan import NestedLoopJoinPlan
 from eva.utils.logging_manager import logger
 
 
-class FuzzyJoinExecutor(AbstractExecutor):
-    def __init__(self, node: FuzzyJoinPlan):
+class NestedLoopJoinExecutor(AbstractExecutor):
+    def __init__(self, node: NestedLoopJoinPlan):
         super().__init__(node)
         self.predicate = node.join_predicate
 
@@ -30,7 +30,6 @@ class FuzzyJoinExecutor(AbstractExecutor):
         pass
 
     def exec(self, *args, **kwargs) -> Iterator[Batch]:
-        # does a nested loop join
         outer = self.children[0]
         inner = self.children[1]
         try:

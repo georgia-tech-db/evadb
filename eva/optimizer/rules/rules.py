@@ -33,8 +33,8 @@ from eva.parser.types import JoinType, ParserOrderBySortType
 from eva.plan_nodes.apply_and_merge_plan import ApplyAndMergePlan
 from eva.plan_nodes.create_mat_view_plan import CreateMaterializedViewPlan
 from eva.plan_nodes.explain_plan import ExplainPlan
-from eva.plan_nodes.fuzzy_join_plan import FuzzyJoinPlan
 from eva.plan_nodes.hash_join_build_plan import HashJoinBuildPlan
+from eva.plan_nodes.nested_loop_join_plan import NestedLoopJoinPlan
 from eva.plan_nodes.predicate_plan import PredicatePlan
 from eva.plan_nodes.project_plan import ProjectPlan
 from eva.plan_nodes.show_info_plan import ShowInfoPlan
@@ -894,15 +894,15 @@ class LogicalJoinToPhysicalHashJoin(Rule):
         yield probe_side
 
 
-class LogicalJoinToPhysicalFuzzyJoin(Rule):
+class LogicalJoinToPhysicalNestedLoopJoin(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALJOIN)
         pattern.append_child(Pattern(OperatorType.DUMMY))
         pattern.append_child(Pattern(OperatorType.DUMMY))
-        super().__init__(RuleType.LOGICAL_JOIN_TO_PHYSICAL_FUZZY_JOIN, pattern)
+        super().__init__(RuleType.LOGICAL_JOIN_TO_PHYSICAL_NESTED_LOOP_JOIN, pattern)
 
     def promise(self):
-        return Promise.LOGICAL_JOIN_TO_PHYSICAL_FUZZY_JOIN
+        return Promise.LOGICAL_JOIN_TO_PHYSICAL_NESTED_LOOP_JOIN
 
     def check(self, before: LogicalJoin, context: OptimizerContext):
         j_child: FunctionExpression = before.join_predicate.children[0]
@@ -911,10 +911,12 @@ class LogicalJoinToPhysicalFuzzyJoin(Rule):
         )
 
     def apply(self, join_node: LogicalJoin, context: OptimizerContext):
-        fuzzy_join_plan = FuzzyJoinPlan(join_node.join_type, join_node.join_predicate)
-        fuzzy_join_plan.append_child(join_node.lhs())
-        fuzzy_join_plan.append_child(join_node.rhs())
-        yield fuzzy_join_plan
+        nested_loop_join_plan = NestedLoopJoinPlan(
+            join_node.join_type, join_node.join_predicate
+        )
+        nested_loop_join_plan.append_child(join_node.lhs())
+        nested_loop_join_plan.append_child(join_node.rhs())
+        yield nested_loop_join_plan
 
 
 class LogicalCreateMaterializedViewToPhysical(Rule):

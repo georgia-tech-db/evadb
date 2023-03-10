@@ -27,7 +27,6 @@ from eva.executor.executor_utils import ExecutorError
 from eva.executor.explain_executor import ExplainExecutor
 from eva.executor.faiss_index_scan_executor import FaissIndexScanExecutor
 from eva.executor.function_scan_executor import FunctionScanExecutor
-from eva.executor.fuzzy_join_executor import FuzzyJoinExecutor
 from eva.executor.groupby_executor import GroupByExecutor
 from eva.executor.hash_join_executor import HashJoinExecutor
 from eva.executor.insert_executor import InsertExecutor
@@ -35,6 +34,7 @@ from eva.executor.join_build_executor import BuildJoinExecutor
 from eva.executor.lateral_join_executor import LateralJoinExecutor
 from eva.executor.limit_executor import LimitExecutor
 from eva.executor.load_executor import LoadDataExecutor
+from eva.executor.nested_loop_join_executor import NestedLoopJoinExecutor
 from eva.executor.orderby_executor import OrderByExecutor
 from eva.executor.pp_executor import PPExecutor
 from eva.executor.predicate_executor import PredicateExecutor
@@ -114,8 +114,8 @@ class PlanExecutor:
             executor_node = LimitExecutor(node=plan)
         elif plan_opr_type == PlanOprType.SAMPLE:
             executor_node = SampleExecutor(node=plan)
-        elif plan_opr_type == PlanOprType.FUZZY_JOIN:
-            executor_node = FuzzyJoinExecutor(node=plan)
+        elif plan_opr_type == PlanOprType.NESTED_LOOP_JOIN:
+            executor_node = NestedLoopJoinExecutor(node=plan)
         elif plan_opr_type == PlanOprType.LATERAL_JOIN:
             executor_node = LateralJoinExecutor(node=plan)
         elif plan_opr_type == PlanOprType.HASH_JOIN:
