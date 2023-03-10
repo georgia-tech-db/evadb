@@ -59,9 +59,11 @@ test_libs = [
     "pytest>=6.1.2",
     "pytest-cov>=2.11.1",
     "pytest-virtualenv",
+    "pytest-asyncio",
     "coveralls>=3.0.1",
     "mock>=4.0.3",
-    "flake8>=3.9.1"
+    "flake8>=3.9.1",
+    "moto[s3]>=4.1.1"
 ]
 
 notebook_libs = [
@@ -100,9 +102,9 @@ udf_libs = [
     "facenet-pytorch>=2.5.2", # FACE DETECTION
     "easyocr>=1.5.0",         # OCR EXTRACTION
     "ipython",
-    "yolov5",                 # OBJECT DETECION
-    "detoxify",                # TEXT TOXICITY CLASSIFICATION
-    "thefuzz"                 # FUZZY STRING MATCHING
+    "yolov5<=7.0.6",          # OBJECT DETECTION
+    "detoxify"                # TEXT TOXICITY CLASSIFICATION
+    "thefuzz"                 # FUZZY STRING MATCHINGz
 ]
 
 ### NEEDED FOR EXPERIMENTAL FEATURES

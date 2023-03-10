@@ -4,7 +4,7 @@ Contributing
 We welcome all kinds of contributions to EVA.
 
 -  `Code reviews <https://github.com/georgia-tech-db/eva/pulls>`_
--  `Improving documentation <https://github.com/georgia-tech-db/eva/tree/master/api-docs>`_
+-  `Improving documentation <https://github.com/georgia-tech-db/eva/tree/master/docs>`_
 -  `Tutorials and applications <https://github.com/georgia-tech-db/eva/tree/master/tutorials>`_
 -  New features
 
@@ -68,7 +68,7 @@ Follow the following steps to contribute to EVA:
 
 -  Run the `test script <#testing>`__ to ensure that all the test cases pass.
 -  If you are adding a new EVAQL command, add an illustrative example usage in 
-   the `documentation <https://github.com/georgia-tech-db/eva/tree/master/api-docs>`_.
+   the `documentation <https://github.com/georgia-tech-db/eva/tree/master/docs>`_.
 - Run the following command to ensure that code is properly formatted.
 
 .. code-block:: python
@@ -96,6 +96,29 @@ formatting the Python code. For docstrings and documentation, we use
        Returns:
            bool: The return value. True for success, False otherwise.
 
+Debugging
+====
+
+We recommend using Visual Studio Code with a debugger for developing EVA. Here are the steps for setting up the development environment:
+
+1. Install the `Python extension <https://marketplace.visualstudio.com/items?itemName=ms-python.python>`__ in Visual Studio Code.
+
+2. Install the `Python Test Explorer extension <https://marketplace.visualstudio.com/items?itemName=LittleFoxTeam.vscode-python-test-adapter>`__.
+
+3. Follow these instructions to run a particular test case from the file:
+`Getting started <https://github.com/kondratyev-nv/vscode-python-test-adapter#getting-started>`__.
+
+.. image:: images/eva-debug-1.jpg
+   :width: 1200
+
+.. image:: images/eva-debug-2.jpg
+   :width: 1200
+
+Architecture Diagram
+====
+
+.. image:: ../../images/eva/eva-arch.png
+   :width: 1200
 
 Troubleshooting
 ====

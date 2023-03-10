@@ -40,7 +40,7 @@ source_suffix = [".rst", ".md"]
 master_doc = "index"
 
 # General information about the project.
-project = "EVA Video Database System"
+project = "EVA AI-Relational Database System"
 copyright = str(date.today().year) + ", Georgia Tech Database Group."
 author = u"Georgia Tech Database Group"
 
@@ -87,7 +87,7 @@ html_theme_options = {
 external_toc_path = "_toc.yml"  # optional, default: _toc.yml
 external_toc_exclude_missing = False  # optional, default: False
 
-html_logo = "_static/mascots/eva-logo.png"
+html_logo = "images/eva/eva-logo.png"
 
 html_sidebars = {
     "**": [
@@ -103,7 +103,7 @@ html_sidebars = {
 html_static_path = ['_static']
 html_css_files = ['custom.css']
 
-# Adding the Tutorial notebooks to ./api-docs/source/tutorials/
+# Adding the Tutorial notebooks to ./docs/source/tutorials/
 
 for i in os.listdir('../tutorials'):
     if i.endswith('.ipynb'):

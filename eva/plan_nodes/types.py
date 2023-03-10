@@ -22,6 +22,7 @@ class PlanOprType(Enum):
     STORAGE_PLAN = auto()
     PP_FILTER = auto()
     INSERT = auto()
+    DELETE = auto()
     CREATE = auto()
     RENAME = auto()
     DROP = auto()

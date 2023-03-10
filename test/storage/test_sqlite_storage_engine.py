@@ -73,7 +73,6 @@ class SQLStorageEngineTest(unittest.TestCase):
         sqlengine.drop(self.table)
 
     def test_rename(self):
-
         table_info = TableCatalogEntry(
             "new_name", "new_name", table_type=TableType.VIDEO_DATA
         )
@@ -81,3 +80,34 @@ class SQLStorageEngineTest(unittest.TestCase):
 
         with pytest.raises(Exception):
             sqlengine.rename(self.table, table_info)
+
+    def test_sqlite_storage_engine_exceptions(self):
+        sqlengine = SQLStorageEngine()
+
+        missing_table_info = TableCatalogEntry(
+            "missing_table", None, table_type=TableType.VIDEO_DATA
+        )
+
+        with self.assertRaises(Exception):
+            sqlengine.drop(missing_table_info)
+
+        with self.assertRaises(Exception):
+            sqlengine.write(missing_table_info, None)
+
+        with self.assertRaises(Exception):
+            read_batch = list(sqlengine.read(missing_table_info))
+            self.assertEqual(read_batch, None)
+
+        with self.assertRaises(Exception):
+            sqlengine.delete(missing_table_info, None)
+
+    def test_cannot_delete_missing_column(self):
+        sqlengine = SQLStorageEngine()
+        sqlengine.create(self.table)
+
+        incorrect_where_clause = {"foo": None}
+
+        with self.assertRaises(Exception):
+            sqlengine.delete(self.table, incorrect_where_clause)
+        # clean up
+        sqlengine.drop(self.table)

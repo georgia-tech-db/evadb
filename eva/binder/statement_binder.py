@@ -30,6 +30,7 @@ from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.alias import Alias
 from eva.parser.create_index_statement import CreateIndexStatement
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
+from eva.parser.delete_statement import DeleteTableStatement
 from eva.parser.explain_statement import ExplainStatement
 from eva.parser.rename_statement import RenameTableStatement
 from eva.parser.select_statement import SelectStatement
@@ -142,6 +143,12 @@ class StatementBinder:
             self._binder_context = StatementBinderContext()
             self.bind(node.union_link)
             self._binder_context = current_context
+
+    @bind.register(DeleteTableStatement)
+    def _bind_delete_statement(self, node: DeleteTableStatement):
+        self.bind(node.table_ref)
+        if node.where_clause:
+            self.bind(node.where_clause)
 
     @bind.register(CreateMaterializedViewStatement)
     def _bind_create_mat_statement(self, node: CreateMaterializedViewStatement):

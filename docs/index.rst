@@ -1,14 +1,14 @@
 .. meta::
    :description:
-       EVA Multimedia Database System | SQL meets Deep Learning
+       EVA AI-Relational Database System | SQL meets Deep Learning
    :keywords: database, deep learning, video analytics
 
 EVA DATABASE SYSTEM
 =====
 
-..  rubric:: Multimedia Database System | SQL meets Deep Learning
+..  rubric:: AI-Relational Database System | SQL meets Deep Learning
 
-..  figure:: https://raw.githubusercontent.com/georgia-tech-db/eva/master/api-docs/images/eva/eva-banner.png
+..  figure:: https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/images/eva/eva-banner.png
     :target: https://github.com/georgia-tech-db/eva
     :width: 100%
     :alt: EVA Banner
@@ -20,15 +20,18 @@ EVA DATABASE SYSTEM
 What is EVA?
 ------------
 
-EVA is a **database system tailored for video analytics** -- think MySQL for videos. It supports a SQL-like language for querying videos like:
+EVA is an **open-source AI-relational database with first-class support for deep learning models**. It aims to support AI-powered database applications that operate on both structured (tables) and unstructured data (videos, text, podcasts, PDFs, etc.) with deep learning models.
 
- * `examining the "emotion palette" of different actors <https://evadb.readthedocs.io/en/stable/source/tutorials/03-emotion-analysis.html>`_
- * `analysing traffic flow at an intersection <https://evadb.readthedocs.io/en/stable/source/tutorials/02-object-detection.html>`_
- * `classifying images based on their content <https://evadb.readthedocs.io/en/stable/source/tutorials/01-mnist.html>`_
- * `recogizing license plates <https://github.com/georgia-tech-db/license-plate-recognition>`_
- * `analysing toxicity of social media memes <https://github.com/georgia-tech-db/toxicity-classification>`_
+EVA accelerates AI pipelines using a collection of optimizations inspired by relational database systems including function caching, sampling, and cost-based operator reordering. It comes with a wide range of models for analyzing unstructured data including image classification, object detection, OCR, face detection, etc. It is fully implemented in Python, and `licensed under the Apache license <https://github.com/georgia-tech-db/eva>`__.
 
-EVA comes with a wide range of commonly used models for analyzing images and videos including image classification, object detection, action classification, OCR, face detection, etc. It is fully implemented in Python, and `licensed under the Apache license <https://github.com/georgia-tech-db/eva>`.
+EVA supports a AI-oriented query language for analysing unstructured data. Here are some illustrative applications:
+
+ * `Examining the emotion palette of actors in a movie <https://evadb.readthedocs.io/en/stable/source/tutorials/03-emotion-analysis.html>`_
+ * `Analysing traffic flow at an intersection <https://evadb.readthedocs.io/en/stable/source/tutorials/02-object-detection.html>`_
+ * `Classifying images based on their content <https://evadb.readthedocs.io/en/stable/source/tutorials/01-mnist.html>`_
+ * `Recogizing license plates <https://github.com/georgia-tech-db/license-plate-recognition>`_
+ * `Analysing toxicity of social media memes <https://github.com/georgia-tech-db/toxicity-classification>`_
+
 
 If you are wondering why you might need a video database system, start with page on `Video Database Systems <source/overview/video.html>`_. It describes how EVA lets users easily make use of deep learning models and how they can reduce money spent on inference on large image or video datasets.
 
@@ -122,7 +125,7 @@ Community
 
 Join the EVA community on `Slack <https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg>`_ to ask questions and to share your ideas for improving EVA.
 
-..  figure:: https://raw.githubusercontent.com/georgia-tech-db/eva/master/api-docs/images/eva/eva-slack.jpg
+..  figure:: https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/images/eva/eva-slack.png
     :target: https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg
     :width: 100%
     :alt: EVA Slack Channel

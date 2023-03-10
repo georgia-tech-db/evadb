@@ -35,6 +35,7 @@ from eva.optimizer.rules.rules import (
     LogicalCreateMaterializedViewToPhysical,
     LogicalCreateToPhysical,
     LogicalCreateUDFToPhysical,
+    LogicalDeleteToPhysical,
     LogicalDerivedGetToPhysical,
     LogicalDropToPhysical,
     LogicalDropUDFToPhysical,
@@ -62,7 +63,6 @@ from eva.optimizer.rules.rules import (
 )
 from eva.optimizer.rules.rules import (
     LogicalRenameToPhysical,
-    LogicalSampleToUniformSample,
     LogicalShowToPhysical,
     LogicalUnionToPhysical,
     LogicalUploadToPhysical,
@@ -98,9 +98,9 @@ class RulesManager:
             LogicalCreateUDFToPhysical(),
             LogicalDropUDFToPhysical(),
             LogicalInsertToPhysical(),
+            LogicalDeleteToPhysical(),
             LogicalLoadToPhysical(),
             LogicalUploadToPhysical(),
-            LogicalSampleToUniformSample(),
             DistributedLogicalGetToSeqScan()
             if ray_enabled
             else SequentialLogicalGetToSeqScan(),
