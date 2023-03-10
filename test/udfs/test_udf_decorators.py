@@ -23,7 +23,7 @@ from eva.udfs.decorators.udf_decorators import forward
 from eva.utils.errors import UDFInputOutputTypeException
 
 
-@forward(input_signatures=[NumpyArray()], output_signatures=[NumpyArray()])
+@forward(input_signatures=[NumpyArray()], output_signature=NumpyArray())
 def forward_fn_numpy_no_constraints(self_obj, np_array):
     ans = np.asarray(np.sum(np_array))
     return ans
@@ -31,7 +31,7 @@ def forward_fn_numpy_no_constraints(self_obj, np_array):
 
 @forward(
     input_signatures=[NumpyArray(dtype="int32", shape=(2, 1))],
-    output_signatures=[NumpyArray(dtype="int32", shape=(1, 1))],
+    output_signature=NumpyArray(dtype="int32", shape=(1, 1)),
 )
 def forward_fn_numpy_input_output_constraint(self_obj, np_array):
     ans = np.sum(np_array, axis=0)
@@ -41,7 +41,7 @@ def forward_fn_numpy_input_output_constraint(self_obj, np_array):
 
 @forward(
     input_signatures=[NumpyArray(dtype="int32", shape=(2, 1))],
-    output_signatures=[NumpyArray(dtype="int32", shape=(3, 1))],
+    output_signature=NumpyArray(dtype="int32", shape=(3, 1)),
 )
 def forward_fn_numpy_output_mismatch(self_obj, np_array):
     ans = np.sum(np_array, axis=0)
@@ -49,7 +49,7 @@ def forward_fn_numpy_output_mismatch(self_obj, np_array):
     return np.expand_dims(ans, 1)
 
 
-@forward(input_signatures=[PyTorchTensor()], output_signatures=[PyTorchTensor()])
+@forward(input_signatures=[PyTorchTensor()], output_signature=PyTorchTensor())
 def forward_fn_pytorch_no_constraints(self_obj, torch_tensor):
     ans = torch.sum(torch_tensor)
     return ans
@@ -57,7 +57,7 @@ def forward_fn_pytorch_no_constraints(self_obj, torch_tensor):
 
 @forward(
     input_signatures=[PyTorchTensor(dtype="int32", shape=(2, 1))],
-    output_signatures=[PyTorchTensor(dtype="int32", shape=(1, 1))],
+    output_signature=PyTorchTensor(dtype="int32", shape=(1, 1)),
 )
 def forward_fn_pytorch_input_output_constraint(self_obj, torch_tensor):
     ans = torch.sum(torch_tensor)
