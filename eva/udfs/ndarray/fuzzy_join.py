@@ -18,13 +18,13 @@ from thefuzz import fuzz
 from eva.udfs.abstract.abstract_udf import AbstractUDF
 
 
-class FuzzyJoin(AbstractUDF):
+class FuzzDistance(AbstractUDF):
     def setup(self):
         pass
 
     @property
     def name(self):
-        return "FuzzyJoin"
+        return "FuzzDistance"
 
     def forward(self, df: pd.DataFrame) -> pd.DataFrame:
         """

@@ -957,7 +957,7 @@ class LogicalJoinToPhysicalHashJoin(Rule):
     def check(self, before: Operator, context: OptimizerContext):
         j_child: FunctionExpression = before.join_predicate.children[0]
         return before.join_type == JoinType.INNER_JOIN and (
-            not (j_child) or not (j_child.name.startswith("FuzzyJoin"))
+            not (j_child) or not (j_child.name.startswith("FuzzDistance"))
         )
 
     def apply(self, join_node: LogicalJoin, context: OptimizerContext):
@@ -1002,7 +1002,7 @@ class LogicalJoinToPhysicalFuzzyJoin(Rule):
     def check(self, before: LogicalJoin, context: OptimizerContext):
         j_child: FunctionExpression = before.join_predicate.children[0]
         return before.join_type == JoinType.INNER_JOIN and j_child.name.startswith(
-            "FuzzyJoin"
+            "FuzzDistance"
         )
 
     def apply(self, join_node: LogicalJoin, context: OptimizerContext):

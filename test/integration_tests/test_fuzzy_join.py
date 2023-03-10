@@ -78,7 +78,7 @@ class FuzzyJoinTests(unittest.TestCase):
         execute_query_fetch_all(fuzzy_udf)
 
         fuzzy_join_query = """SELECT * FROM MyVideo a JOIN MyVideoCSV b
-                      ON FuzzyJoin(a.id, b.id) = 100;"""
+                      ON FuzzDistance(a.id, b.id) = 100;"""
 
         actual_batch = execute_query_fetch_all(fuzzy_join_query)
         self.assertEqual(len(actual_batch), 10)
