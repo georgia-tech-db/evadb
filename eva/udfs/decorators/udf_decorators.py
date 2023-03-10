@@ -22,8 +22,6 @@ from eva.utils.errors import UDFInputOutputTypeException
 # udf_type parameters in the catalog
 def setup(use_cache: bool, udf_type: str, batch: bool):
     def inner_fn(arg_fn):
-        print("Cache is set: ", use_cache)
-        print("batching is set: ", batch)
 
         def wrapper(*args, **kwargs):
 
