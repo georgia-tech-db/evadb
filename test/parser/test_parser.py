@@ -757,6 +757,7 @@ class ParserTests(unittest.TestCase):
         create_udf = CreateUDFStatement(
             "udf",
             False,
+            Path("data/fastrcnn.py"),
             [
                 ColumnDefinition(
                     "frame",
@@ -766,7 +767,6 @@ class ParserTests(unittest.TestCase):
                 )
             ],
             [ColumnDefinition("labels", ColumnType.NDARRAY, NdArrayType.STR, (10))],
-            Path("data/fastrcnn.py"),
             "Classification",
         )
         select_stmt = SelectStatement()
