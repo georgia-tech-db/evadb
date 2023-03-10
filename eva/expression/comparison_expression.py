@@ -74,7 +74,6 @@ class ComparisonExpression(AbstractExpression):
             raise NotImplementedError
 
     def get_symbol(self) -> str:
-
         if self.etype == ExpressionType.COMPARE_EQUAL:
             return "="
         elif self.etype == ExpressionType.COMPARE_GREATER:
