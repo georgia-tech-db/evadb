@@ -14,8 +14,9 @@
 # limitations under the License.
 
 
-from eva.utils.errors import TypeException
 from eva.io_descriptors.eva_arguments import EvaArgument
+from eva.utils.errors import UDFInputOutputTypeException
+
 
 # decorator for the setup function. It will be used to set the cache, batching and
 # udf_type parameters in the catalog
@@ -59,16 +60,17 @@ def forward(input_signature: EvaArgument, output_signature: EvaArgument):
             # check shape of input
             if input_signature:
                 if (input_signature.is_shape_defined) and (
-                    not (input_signature.check_shape(frames))):
+                    not (input_signature.check_shape(frames))
+                ):
                     msg = "Shape mismatch of input parameter. "
-                    raise TypeException(msg)
+                    raise UDFInputOutputTypeException(msg)
 
                 # check type of input
                 if (input_signature.is_dtype_defined) and (
                     not (input_signature.check_type(frames))
                 ):
                     msg = "Datatype mismatch of Input parameter. "
-                    raise TypeException(msg)
+                    raise UDFInputOutputTypeException(msg)
 
             # first argument is self and second is frames.
             output = arg_fn(args[0], frames)
@@ -80,19 +82,21 @@ def forward(input_signature: EvaArgument, output_signature: EvaArgument):
                     not (output_signature.check_shape(output))
                 ):
                     msg = "Shape mismatch of Output parameter. "
-                    raise TypeException(msg)
+                    raise UDFInputOutputTypeException(msg)
 
                 # check type of output
                 if (output_signature.is_dtype_defined) and (
                     not (output_signature.check_type(output))
                 ):
                     msg = "Datatype mismatch of Output parameter. "
-                    raise TypeException(msg)
+                    raise UDFInputOutputTypeException(msg)
 
                 # check if the column headers are matching
                 if output_signature.is_output_columns_set():
                     if not output_signature.check_column_names(output):
-                        raise TypeException("Column header names are not matching")
+                        raise UDFInputOutputTypeException(
+                            "Column header names are not matching"
+                        )
 
             return output
 
@@ -103,4 +107,3 @@ def forward(input_signature: EvaArgument, output_signature: EvaArgument):
         return wrapper
 
     return inner_fn
-
