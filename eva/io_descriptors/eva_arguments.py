@@ -17,37 +17,18 @@ from typing import Tuple
 
 from eva.catalog.catalog_type import ColumnType, NdArrayType
 
-
-class EvaArgument(object):
+class IOArgument(object):
     """
     Base class for the data types that are used inside Eva. This class is inherited by the NumPyArray,
-    PyTorchTensor and PandasDataFrame classes.
+    PyTorchTensor classes.
     The functions are implemented in the child classes.
 
     """
 
     @abstractmethod
-    def __init__(
-        self,
-        name: str = None,
-        type: ColumnType = None,
-        is_nullable: bool = None,
-        array_type: NdArrayType = None,
-        array_dimensions: Tuple[int] = None,
-    ) -> None:
-        """The parameters like shape, data type are passed as parameters to be initialized
-
-        Args:
-            shape (tuple[int]): a tuple of integers of the required shape.
-            dtype (str): datatype of the elements. Types are int32, float16 and float32.
-
-        """
-        self.name = name
-        self.type = type
-        self.is_nullable = is_nullable
-        self.array_type = array_type
-        self.array_dimensions = array_dimensions
-
+    def __init__(self) -> None:
+        pass
+    
     @abstractmethod
     def check_type(self, input_object: any) -> bool:
         """Checks the type of the input_object with
@@ -130,3 +111,37 @@ class EvaArgument(object):
     def is_dtype_defined(self):
         """returns True if the dtype has been specified. False otherwise"""
         return True
+
+    
+    
+    
+
+
+class IOColumnArgument(object):
+    """
+    
+    """
+
+    @abstractmethod
+    def __init__(
+        self,
+        name: str = None,
+        type: ColumnType = None,
+        is_nullable: bool = None,
+        array_type: NdArrayType = None,
+        array_dimensions: Tuple[int] = None,
+    ) -> None:
+        """The parameters like shape, data type are passed as parameters to be initialized
+
+        Args:
+            shape (tuple[int]): a tuple of integers of the required shape.
+            dtype (str): datatype of the elements. Types are int32, float16 and float32.
+
+        """
+        self.name = name
+        self.type = type
+        self.is_nullable = is_nullable
+        self.array_type = array_type
+        self.array_dimensions = array_dimensions
+
+    

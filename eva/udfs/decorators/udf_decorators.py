@@ -16,7 +16,7 @@
 
 from typing import List
 
-from eva.io_descriptors.eva_arguments import EvaArgument
+from eva.io_descriptors.eva_arguments import IOArgument
 
 
 # decorator for the setup function. It will be used to set the cache, batching and
@@ -39,7 +39,7 @@ def setup(use_cache: bool, udf_type: str, batch: bool):
     return inner_fn
 
 
-def forward(input_signatures: List[EvaArgument], output_signature: EvaArgument):
+def forward(input_signatures: List[IOArgument], output_signature: List[IOArgument]):
     """decorator for the forward function. This will validate the shape and data type of inputs and outputs from the UDF.
 
     Additionally if the output is a Pandas dataframe, then it will check if the column names are matching.
@@ -55,7 +55,6 @@ def forward(input_signatures: List[EvaArgument], output_signature: EvaArgument):
 
             # first argument is self and second is frames.
             output = arg_fn(args[0], frames)
-
             return output
 
         tags = {}
