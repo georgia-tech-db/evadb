@@ -91,6 +91,7 @@ class FunctionExpression(AbstractExpression):
         # TODO: compute cost using time
         cost = time
         from eva.catalog.catalog_manager import CatalogManager
+
         catalog_manager = CatalogManager()
         catalog_manager.insert_udf_cost_catalog_entry(
             name, type, cost, frame_count, resolution
@@ -100,6 +101,7 @@ class FunctionExpression(AbstractExpression):
         new_batch = batch
         child_batches = [child.evaluate(batch, **kwargs) for child in self.children]
         from eva.catalog.catalog_manager import CatalogManager
+
         catalog_manager = CatalogManager()
 
         if len(child_batches):
