@@ -16,7 +16,8 @@ from typing import List
 
 import pandas as pd
 
-from eva.io_descriptors.eva_data_types import PandasDataframe, PyTorchTensor
+from eva.catalog.catalog_type import NdArrayType
+from eva.io_descriptors.eva_data_types import PyTorchTensor
 from eva.models.catalog.frame_info import FrameInfo
 from eva.models.catalog.properties import ColorSpace
 from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
@@ -150,8 +151,34 @@ class YoloDecorators(PytorchAbstractClassifierUDF):
         ]
 
     @forward(
-        input_signatures=[PyTorchTensor(shape=(1, 3, 540, 960), dtype="float32")],
-        output_signature=PandasDataframe(columns=["labels", "bboxes", "scores"]),
+        input_signature=[
+            PyTorchTensor(
+                name="input_col",
+                is_nullable=False,
+                type=NdArrayType.FLOAT32,
+                dimensions=(1, 3, 540, 960),
+            )
+        ],
+        output_signature=[
+            PyTorchTensor(
+                name="labels",
+                is_nullable=False,
+                type=NdArrayType.INT64,
+                dimensions=(1,),
+            ),
+            PyTorchTensor(
+                name="bboxes",
+                is_nullable=False,
+                type=NdArrayType.FLOAT32,
+                dimensions=(1, 4),
+            ),
+            PyTorchTensor(
+                name="scores",
+                is_nullable=False,
+                type=NdArrayType.FLOAT32,
+                dimensions=(1,),
+            ),
+        ],
     )
     def forward(self, frames: Tensor) -> pd.DataFrame:
         """

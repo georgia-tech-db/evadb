@@ -107,9 +107,9 @@ class Functions:
         return CreateUDFStatement(
             udf_name,
             if_not_exists,
+            impl_path,
             input_definitions,
             output_definitions,
-            impl_path,
             udf_type,
         )
 
@@ -136,7 +136,6 @@ class Functions:
         return agg_func_type
 
     def aggregate_windowed_function(self, tree):
-
         agg_func_arg = None
         agg_func_name = None
 
