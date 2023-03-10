@@ -39,7 +39,7 @@ def setup(use_cache: bool, udf_type: str, batch: bool):
     return inner_fn
 
 
-def forward(input_signatures: List[IOArgument], output_signature: List[IOArgument]):
+def forward(input_signatures: List[IOArgument], output_signatures: List[IOArgument]):
     """decorator for the forward function. This will validate the shape and data type of inputs and outputs from the UDF.
 
     Additionally if the output is a Pandas dataframe, then it will check if the column names are matching.
@@ -59,7 +59,7 @@ def forward(input_signatures: List[IOArgument], output_signature: List[IOArgumen
 
         tags = {}
         tags["input"] = input_signatures
-        tags["output"] = output_signature
+        tags["output"] = output_signatures
         wrapper.tags = tags
         return wrapper
 

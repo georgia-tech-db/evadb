@@ -15,6 +15,7 @@
 from typing import List, Type
 
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
+from eva.io_descriptors.eva_data_types import PandasDataframe
 from eva.udfs.abstract.abstract_udf import AbstractUDF
 
 
@@ -34,14 +35,30 @@ def load_io_from_udf_decorators(
     io_signature = udf.forward.tags[tag_key]
     result_list = []
     for io in io_signature:
-        result_list.append(
-            UdfIOCatalogEntry(
-                io.name,
-                io.type,
-                io.is_nullable,
-                array_type=io.array_type,
-                array_dimensions=io.array_dimensions,
-                is_input=is_input,
+        if isinstance(io, PandasDataframe):
+            columns = io.columns
+
+            for col in columns:
+                result_list.append(
+                    UdfIOCatalogEntry(
+                        col,
+                        io.type,
+                        io.is_nullable,
+                        io.array_type,
+                        array_dimensions=None,
+                        is_input=is_input,
+                    )
+                )
+
+        else:
+            result_list.append(
+                UdfIOCatalogEntry(
+                    io.name,
+                    io.type,
+                    io.is_nullable,
+                    array_type=io.array_type,
+                    array_dimensions=io.array_dimensions,
+                    is_input=is_input,
+                )
             )
-        )
     return result_list

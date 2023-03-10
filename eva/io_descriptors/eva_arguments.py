@@ -17,6 +17,7 @@ from typing import Tuple
 
 from eva.catalog.catalog_type import ColumnType, NdArrayType
 
+
 class IOArgument(object):
     """
     Base class for the data types that are used inside Eva. This class is inherited by the NumPyArray,
@@ -28,7 +29,7 @@ class IOArgument(object):
     @abstractmethod
     def __init__(self) -> None:
         pass
-    
+
     @abstractmethod
     def check_type(self, input_object: any) -> bool:
         """Checks the type of the input_object with
@@ -57,7 +58,7 @@ class IOArgument(object):
         pass
 
     @abstractmethod
-    def name(self):
+    def arg_name(self):
         """Returns the name of the EvaArgument.
 
         It is used in the construction of the error messages.
@@ -112,15 +113,9 @@ class IOArgument(object):
         """returns True if the dtype has been specified. False otherwise"""
         return True
 
-    
-    
-    
-
 
 class IOColumnArgument(object):
-    """
-    
-    """
+    """ """
 
     @abstractmethod
     def __init__(
@@ -143,5 +138,3 @@ class IOColumnArgument(object):
         self.is_nullable = is_nullable
         self.array_type = array_type
         self.array_dimensions = array_dimensions
-
-    
