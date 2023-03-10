@@ -22,7 +22,7 @@ from eva.catalog.models.base_model import BaseModel
 class UdfCostCatalog(BaseModel):
     """The `UdfCostCatalog` catalog stores information about the runtime of user-defined functions (UDFs)
     in the system. It maintains the following information for each UDF.
-    `_cost:` name of the UDF
+    `_name:` name of the UDF
     `_cost:` cost of this UDF
     `_type:` an optional tag associated with the UDF (useful for grouping similar UDFs, such as multiple object detection UDFs)
     `_frame_count:` number of frames used to calculate the cost
