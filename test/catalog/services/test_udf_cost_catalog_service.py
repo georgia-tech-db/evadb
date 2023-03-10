@@ -19,11 +19,8 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from eva.catalog.services.udf_cost_catalog_service import UdfCostCatalogService
 
-UDF_TYPE = "classification"
 UDF_NAME = "name"
 UDF_COST = 1
-FRAME_COUNT = 1
-RESOLUTION = 1
 
 
 class UdfCostCatalogServiceTest(TestCase):
@@ -31,14 +28,13 @@ class UdfCostCatalogServiceTest(TestCase):
     def test_create_udf_should_create_model(self, mocked):
         service = UdfCostCatalogService()
         service.insert_entry(UDF_NAME, UDF_COST)
-        mocked.assert_called_with(UDF_NAME, UDF_TYPE, UDF_COST, FRAME_COUNT, RESOLUTION)
+        mocked.assert_called_with(UDF_NAME, UDF_COST)
         mocked.return_value.save.assert_called_once()
 
     @patch("eva.catalog.services.udf_cost_catalog_service.UdfCostCatalog")
     def test_udf_by_name_should_query_model_with_name(self, mocked):
         service = UdfCostCatalogService()
         expected = mocked.query.filter.return_value.one.return_value
-
         actual = service.get_entry_by_name(UDF_NAME)
         mocked.query.filter.assert_called_with(mocked._name == UDF_NAME)
         mocked.query.filter.return_value.one.assert_called_once()
