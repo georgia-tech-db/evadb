@@ -16,6 +16,7 @@
 
 from eva.io_descriptors.eva_arguments import EvaArgument
 from eva.utils.errors import UDFInputOutputTypeException
+from typing import List
 
 
 # decorator for the setup function. It will be used to set the cache, batching and
@@ -40,9 +41,9 @@ def setup(use_cache: bool, udf_type: str, batch: bool):
     return inner_fn
 
 
-def forward(input_signature: EvaArgument, output_signature: EvaArgument):
+def forward(input_signatures: List[EvaArgument], output_signature: EvaArgument):
     """decorator for the forward function. This will validate the shape and data type of inputs and outputs from the UDF.
-
+    
     Additionally if the output is a Pandas dataframe, then it will check if the column names are matching.
     Args:
         input_signature (EvaArgument): Constraints for the input.
@@ -53,53 +54,53 @@ def forward(input_signature: EvaArgument, output_signature: EvaArgument):
     def inner_fn(arg_fn):
         def wrapper(*args):
 
-            frames = args[1]
-
             # check shape of input
-            if input_signature:
-                if (input_signature.is_shape_defined) and (
-                    not (input_signature.check_shape(frames))
-                ):
-                    msg = "Shape mismatch of input parameter. "
-                    raise UDFInputOutputTypeException(msg)
+            if len(input_signatures)>0:
+                
+                for function_param_index, input_signature in enumerate(input_signatures):
+                    if (input_signature.is_shape_defined) and (
+                        not (input_signature.check_shape(args[function_param_index+1]))
+                    ):
+                        msg = "Shape mismatch of input parameter. "
+                        raise UDFInputOutputTypeException(msg)
 
-                # check type of input
-                if (input_signature.is_dtype_defined) and (
-                    not (input_signature.check_type(frames))
-                ):
-                    msg = "Datatype mismatch of Input parameter. "
-                    raise UDFInputOutputTypeException(msg)
+                    # check type of input
+                    if (input_signature.is_dtype_defined) and (
+                        not (input_signature.check_type(args[function_param_index+1]))
+                    ):
+                        msg = "Datatype mismatch of Input parameter. "
+                        raise UDFInputOutputTypeException(msg)
 
-            # first argument is self and second is frames.
-            output = arg_fn(args[0], frames)
+            
+            fn_output = arg_fn(*args)
 
             # check output type
             if output_signature:
                 # check shape
-                if (output_signature.is_shape_defined) and (
-                    not (output_signature.check_shape(output))
-                ):
+                if ((output_signature.is_shape_defined) and 
+                    not (output_signature.check_shape(fn_output)
+                )):
                     msg = "Shape mismatch of Output parameter. "
                     raise UDFInputOutputTypeException(msg)
 
                 # check type of output
-                if (output_signature.is_dtype_defined) and (
-                    not (output_signature.check_type(output))
-                ):
+                if ((output_signature.is_dtype_defined) and 
+                    not (output_signature.check_type(fn_output)
+                )):
                     msg = "Datatype mismatch of Output parameter. "
                     raise UDFInputOutputTypeException(msg)
 
                 # check if the column headers are matching
                 if output_signature.is_output_columns_set():
-                    if not output_signature.check_column_names(output):
+                    if not output_signature.check_column_names(fn_output):
                         raise UDFInputOutputTypeException(
                             "Column header names are not matching"
                         )
 
-            return output
+            return fn_output
 
         tags = {}
-        tags["input"] = input_signature
+        tags["input"] = input_signatures
         tags["output"] = output_signature
         wrapper.tags = tags
         return wrapper
