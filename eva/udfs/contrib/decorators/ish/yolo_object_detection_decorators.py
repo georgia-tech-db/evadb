@@ -156,13 +156,17 @@ class YoloDecorators(PytorchAbstractClassifierUDF):
         ]
 
     @forward(
-        input_signature=PyTorchTensor(
+        input_signature=[PyTorchTensor(
             name="input_col",
             is_nullable=False,
             type=NdArrayType.FLOAT32,
             dimensions=(1, 3, 540, 960),
-        ),
-        output_signature=PandasDataframe(columns=["labels", "bboxes", "scores"]),
+        )],
+        output_signature=[
+            PyTorchTensor(name="labels", is_nullable=False, type=NdArrayType.INT64, dimensions=(1,)),
+            PyTorchTensor(name="bboxes", is_nullable=False, type=NdArrayType.FLOAT32, dimensions=(1, 4)),
+            PyTorchTensor(name="scores", is_nullable=False, type=NdArrayType.FLOAT32, dimensions=(1,))
+        ]
     )
     def forward(self, frames: Tensor) -> pd.DataFrame:
         """

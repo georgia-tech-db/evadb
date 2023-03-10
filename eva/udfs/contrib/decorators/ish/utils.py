@@ -40,7 +40,7 @@ def load_io_from_udf_decorators(
                 io.type,
                 io.is_nullable,
                 array_type=io.array_type,
-                array_dimensions=io.dimension,
+                array_dimensions=io.array_dimensions,
                 is_input=is_input,
             )
         )

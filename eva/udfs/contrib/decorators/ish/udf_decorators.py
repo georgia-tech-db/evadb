@@ -55,58 +55,8 @@ def forward(input_signature: EvaArgument, output_signature: EvaArgument):
         def wrapper(*args):
             frames = args[1]
 
-            # check shape of input
-            if input_signature:
-                if (input_signature.is_shape_defined) and (
-                    not (input_signature.check_shape(frames))
-                ):
-                    try:
-                        frames = input_signature.reshape(frames)
-                    except TypeException as e:
-                        msg = "Shape mismatch of Input parameter. " + str(e)
-                        raise TypeException(msg)
-
-                # check type of input
-                if (input_signature.is_dtype_defined) and (
-                    not (input_signature.check_type(frames))
-                ):
-                    try:
-                        frames = input_signature.convert_data_type(frames)
-
-                    except TypeException as e:
-                        msg = "Datatype mismatch of Input parameter. " + str(e)
-                        raise TypeException(msg)
-
             # first argument is self and second is frames.
             output = arg_fn(args[0], frames)
-
-            # check output type
-            if output_signature:
-                # check shape
-                if (output_signature.is_shape_defined) and (
-                    not (output_signature.check_shape(output))
-                ):
-                    try:
-                        frames = output_signature.reshape(output)
-                    except TypeException as e:
-                        msg = "Shape mismatch of Output parameter. " + str(e)
-                        raise TypeException(msg)
-
-                # check type of output
-                if (output_signature.is_dtype_defined) and (
-                    not (output_signature.check_type(output))
-                ):
-                    try:
-                        output = output_signature.convert_data_type(output)
-
-                    except TypeException as e:
-                        msg = "Datatype mismatch of Output parameter. " + str(e)
-                        raise TypeException(msg)
-
-                # check if the column headers are matching
-                if output_signature.is_output_columns_set():
-                    if not output_signature.check_column_names(output):
-                        raise TypeException("Column header names are not matching")
 
             return output
 

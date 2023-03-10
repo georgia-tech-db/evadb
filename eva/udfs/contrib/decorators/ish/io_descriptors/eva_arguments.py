@@ -125,14 +125,8 @@ class EvaArgument(object):
 
     def is_shape_defined(self):
         """returns True if the size has been specified. False otherwise"""
-        if self.shape is None:
-            return False
-
         return True
 
     def is_dtype_defined(self):
         """returns True if the dtype has been specified. False otherwise"""
-        if self.dtype is None:
-            return False
-
         return True
