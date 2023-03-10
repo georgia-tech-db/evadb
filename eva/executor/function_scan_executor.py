@@ -21,6 +21,7 @@ from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.function_scan_plan import FunctionScanPlan
 from eva.utils.logging_manager import logger
+from eva.utils.timer import Timer
 
 
 class FunctionScanExecutor(AbstractExecutor):
@@ -55,10 +56,9 @@ class FunctionScanExecutor(AbstractExecutor):
         catalog_manager = CatalogManager()
         try:
             if not lateral_input.empty():
-                t_start = time()
-                res = self.func_expr.evaluate(lateral_input)
-                t_end = time()
-                time_taken = t_end - t_start
+                function_expr_timer = Timer()
+                with function_expr_timer:
+                    res = self.func_expr.evaluate(lateral_input)
                 resolution = None
                 udf_obj = catalog_manager.get_udf_catalog_entry_by_name(
                     self.func_expr.name
@@ -72,7 +72,7 @@ class FunctionScanExecutor(AbstractExecutor):
                     type,
                     lateral_input.frames.shape[0],
                     resolution,
-                    time_taken,
+                    function_expr_timer.total_elapsed_time,
                 )
                 if not res.empty():
                     if self.do_unnest:
