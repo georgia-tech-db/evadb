@@ -12,22 +12,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import os
 import unittest
-import pytest
+from pathlib import Path
+from test.util import create_sample_csv, create_sample_video, file_remove
 
-from test.util import (
-    create_sample_csv,
-    create_sample_video,
-    file_remove,
-)
+import pytest
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.server.command_handler import execute_query_fetch_all
-from pathlib import Path
 from eva.configuration.constants import EVA_ROOT_DIR
+from eva.server.command_handler import execute_query_fetch_all
+
 EVA_INSTALLATION_DIR = ConfigurationManager().get_value("core", "eva_installation_dir")
+
 
 class FuzzyJoinTests(unittest.TestCase):
     def setUp(self):
@@ -37,7 +34,7 @@ class FuzzyJoinTests(unittest.TestCase):
             f"{EVA_ROOT_DIR}/test/data/uadetrac/small-data/MVI_20011/*.jpg"
         )
         create_sample_csv()
-        
+
         # Prepare needed UDFs and data.
         # loading a csv requires a table to be created first
         create_table_query = """
@@ -66,7 +63,7 @@ class FuzzyJoinTests(unittest.TestCase):
         # file_remove("dummy.csv")
         # clean up
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
-        
+
     @pytest.mark.torchtest
     def test_fuzzyjoin(self):
 
@@ -76,10 +73,10 @@ class FuzzyJoinTests(unittest.TestCase):
                     TYPE NdarrayUDF
                     IMPL "{}/udfs/{}/fuzzy_join.py";
         """.format(
-    EVA_INSTALLATION_DIR, "ndarray"
-)
+            EVA_INSTALLATION_DIR, "ndarray"
+        )
         execute_query_fetch_all(fuzzy_udf)
-    
+
         fuzzy_join_query = """SELECT * FROM MyVideo a JOIN MyVideoCSV b
                       ON FuzzyJoin(a.id, b.id) = 100;"""
 

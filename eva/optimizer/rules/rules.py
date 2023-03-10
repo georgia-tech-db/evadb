@@ -33,8 +33,8 @@ from eva.parser.types import JoinType, ParserOrderBySortType
 from eva.plan_nodes.apply_and_merge_plan import ApplyAndMergePlan
 from eva.plan_nodes.create_mat_view_plan import CreateMaterializedViewPlan
 from eva.plan_nodes.explain_plan import ExplainPlan
-from eva.plan_nodes.hash_join_build_plan import HashJoinBuildPlan
 from eva.plan_nodes.fuzzy_join_plan import FuzzyJoinPlan
+from eva.plan_nodes.hash_join_build_plan import HashJoinBuildPlan
 from eva.plan_nodes.predicate_plan import PredicatePlan
 from eva.plan_nodes.project_plan import ProjectPlan
 from eva.plan_nodes.show_info_plan import ShowInfoPlan
@@ -956,7 +956,9 @@ class LogicalJoinToPhysicalHashJoin(Rule):
 
     def check(self, before: Operator, context: OptimizerContext):
         j_child: FunctionExpression = before.join_predicate.children[0]
-        return before.join_type == JoinType.INNER_JOIN and (not(j_child) or not(j_child.name.startswith("FuzzyJoin")))
+        return before.join_type == JoinType.INNER_JOIN and (
+            not (j_child) or not (j_child.name.startswith("FuzzyJoin"))
+        )
 
     def apply(self, join_node: LogicalJoin, context: OptimizerContext):
         #          HashJoinPlan                       HashJoinProbePlan
@@ -999,13 +1001,16 @@ class LogicalJoinToPhysicalFuzzyJoin(Rule):
 
     def check(self, before: LogicalJoin, context: OptimizerContext):
         j_child: FunctionExpression = before.join_predicate.children[0]
-        return before.join_type == JoinType.INNER_JOIN and j_child.name.startswith("FuzzyJoin")
+        return before.join_type == JoinType.INNER_JOIN and j_child.name.startswith(
+            "FuzzyJoin"
+        )
 
     def apply(self, join_node: LogicalJoin, context: OptimizerContext):
         fuzzy_join_plan = FuzzyJoinPlan(join_node.join_type, join_node.join_predicate)
         fuzzy_join_plan.append_child(join_node.lhs())
         fuzzy_join_plan.append_child(join_node.rhs())
         yield fuzzy_join_plan
+
 
 class LogicalCreateMaterializedViewToPhysical(Rule):
     def __init__(self):

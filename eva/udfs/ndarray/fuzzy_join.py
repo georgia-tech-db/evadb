@@ -13,10 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import pandas as pd
-
 from thefuzz import fuzz
 
 from eva.udfs.abstract.abstract_udf import AbstractUDF
+
 
 class FuzzyJoin(AbstractUDF):
     def setup(self):
@@ -28,7 +28,7 @@ class FuzzyJoin(AbstractUDF):
 
     def forward(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Find the distance between two dataframes using <> distance metric. 
+        Find the distance between two dataframes using <> distance metric.
 
         Returns:
             ret (pd.DataFrame): The cropped frame.

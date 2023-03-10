@@ -40,7 +40,7 @@ class CostModel:
             return 1.0
 
         @cost.register(FuzzyJoinPlan)
-        def cost_hash_join_build_plan(opr: FuzzyJoinPlan):
+        def cost_fuzzy_join_build_plan(opr: FuzzyJoinPlan):
             return 1.0
 
         @cost.register(HashJoinBuildPlan)

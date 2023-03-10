@@ -12,11 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import List
 
 from eva.expression.abstract_expression import AbstractExpression
-from eva.plan_nodes.abstract_join_plan import AbstractJoin
 from eva.parser.types import JoinType
+from eva.plan_nodes.abstract_join_plan import AbstractJoin
 from eva.plan_nodes.types import PlanOprType
 
 
@@ -29,15 +28,10 @@ class FuzzyJoinPlan(AbstractJoin):
         TODO: Add arguments
     """
 
-    def __init__(
-        self,
-        join_type: JoinType,
-        join_predicate: AbstractExpression = None):
+    def __init__(self, join_type: JoinType, join_predicate: AbstractExpression = None):
         self._join_predicate = join_predicate
-        super().__init__(
-            PlanOprType.FUZZY_JOIN, join_type, join_predicate
-        )
-    
+        super().__init__(PlanOprType.FUZZY_JOIN, join_type, join_predicate)
+
     @property
     def join_predicate(self):
         return self._join_predicate
