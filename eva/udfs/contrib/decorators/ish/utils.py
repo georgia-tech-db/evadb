@@ -30,7 +30,7 @@ def load_io_from_udf_decorators(
     Returns:
         Type[UdfIOCatalogEntry]: UdfIOCatalogEntry object created from the input decorator in setup
     """
-    tag_key = "inputs" if is_input else "outputs"
+    tag_key = "input" if is_input else "output"
     io_signature = udf.forward.tags[tag_key]
     result_list = []
     for io in io_signature:
