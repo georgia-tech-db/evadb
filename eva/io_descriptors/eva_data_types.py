@@ -19,10 +19,10 @@ import pandas as pd
 import torch
 
 from eva.catalog.catalog_type import ColumnType, NdArrayType
-from eva.io_descriptors.eva_arguments import EvaArgument
+from eva.io_descriptors.eva_arguments import IOColumnArgument, IOArgument
 
 
-class NumpyArray(EvaArgument):
+class NumpyArray(IOColumnArgument):
     """EVA data type for Numpy Array"""
 
     def __init__(
@@ -69,7 +69,7 @@ class NumpyArray(EvaArgument):
         return "NumpyArray"
 
 
-class PyTorchTensor(EvaArgument):
+class PyTorchTensor(IOColumnArgument):
     """EVA data type for PyTorch Tensor"""
 
     def __init__(
@@ -116,7 +116,7 @@ class PyTorchTensor(EvaArgument):
         return "PyTorch Tensor"
 
 
-class PandasDataframe(EvaArgument):
+class PandasDataframe(IOArgument):
     """EVA data type for Pandas Dataframe"""
 
     def __init__(self, columns) -> None:
