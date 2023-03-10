@@ -17,9 +17,7 @@ import importlib
 import pickle
 import subprocess
 import sys
-import tempfile
 import uuid
-from contextlib import contextmanager
 from pathlib import Path
 
 from aenum import AutoEnum, unique
@@ -138,7 +136,6 @@ def get_size(obj, seen=None):
     return size
 
 
-@contextmanager
 def extract_audio(file_path: str):
     """
     Extract audio from media file passed and save it to a temporary file
@@ -149,9 +146,6 @@ def extract_audio(file_path: str):
     Returns:
         str: path to the audio file
     """
-    if file_path.endswith(".wav"):
-        return file_path
-
     try:
         subprocess.check_output(["ffmpeg", "-version"], stderr=subprocess.STDOUT)
     except OSError as e:
@@ -159,18 +153,17 @@ def extract_audio(file_path: str):
         logger.error(err_msg)
         raise RuntimeError(err_msg)
 
-    outfile = tempfile.NamedTemporaryFile(
-        prefix="eva_audio_extract_", suffix=".wav", mode="w+b"
-    )
+    audio_file_path = Path(file_path).with_suffix(".wav")
+
+    if audio_file_path.exists():
+        return audio_file_path
+
     subprocess.call(
-        ["ffmpeg", "-y", "-i", file_path, outfile.name],
+        ["ffmpeg", "-y", "-i", file_path, audio_file_path],
         stdout=subprocess.DEVNULL,
         stderr=subprocess.STDOUT,
     )
-    try:
-        yield outfile.name
-    finally:
-        outfile.close()
+    return audio_file_path
 
 
 class PickleSerializer(object):

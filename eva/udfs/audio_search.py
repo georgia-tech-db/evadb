@@ -16,11 +16,11 @@
 import re
 import string
 
+import numpy as np
 import pandas as pd
 import torch
 
 from eva.udfs.abstract.abstract_udf import AbstractUDF
-from eva.utils.generic_utils import extract_audio
 
 try:
     import whisper
@@ -38,12 +38,13 @@ class AudioSearch(AbstractUDF):
 
     def setup(self):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.transcriber = whisper.load_model("base", device=self.device)
-        self.segment_window = 2
+        self.model = whisper.load_model("base", device=self.device)
+        self.segment_window = 1
         self.segment_overlap = 1
 
     def forward(self, data: pd.DataFrame) -> pd.DataFrame:
-        video_path = data.iloc[0].values[0]
+        # join all the individual audio segments
+        audio_segments = np.concatenate(data.iloc[:, 0])
         # string translator for removing punctuation
         punctuation_translator = str.maketrans("", "", string.punctuation)
         phrase = (
@@ -52,21 +53,18 @@ class AudioSearch(AbstractUDF):
 
         # get text segments from video using whisper
         segments = []
-        with extract_audio(video_path) as audio_path:
-            result = self.transcriber.transcribe(
-                audio_path, fp16=torch.cuda.is_available()
+        result = self.model.transcribe(audio_segments, fp16=torch.cuda.is_available())
+        for segment in result["segments"]:
+            segments.append(
+                {
+                    "start": segment["start"],
+                    "end": segment["end"],
+                    "text": segment["text"]
+                    .translate(punctuation_translator)
+                    .lower()
+                    .strip(),
+                }
             )
-            for segment in result["segments"]:
-                segments.append(
-                    {
-                        "start": segment["start"],
-                        "end": segment["end"],
-                        "text": segment["text"]
-                        .translate(punctuation_translator)
-                        .lower()
-                        .strip(),
-                    }
-                )
 
         # do a rolling merge of the text segments, as the search phrase may extend over multiple segments
         merged = []

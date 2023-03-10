@@ -30,8 +30,15 @@ class StorageExecutor(AbstractExecutor):
     def validate(self):
         pass
 
-    def exec(self) -> Iterator[Batch]:
+    def exec(self, **kwargs) -> Iterator[Batch]:
         try:
+            if "storage_engine_type" in kwargs:
+                storage_engine_type = kwargs["storage_engine_type"]
+                storage_engine = StorageEngine.get_engine(storage_engine_type)
+
+                if storage_engine_type == "audio_engine":
+                    return storage_engine.read(self.node.table)
+
             storage_engine = StorageEngine.factory(self.node.table)
 
             if self.node.table.table_type == TableType.VIDEO_DATA:

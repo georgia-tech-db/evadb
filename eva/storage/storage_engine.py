@@ -32,6 +32,21 @@ class StorageEngine:
         )(),
     }
 
+    engines = {
+        "structured_data_engine": str_to_class(
+            ConfigurationManager().get_value("storage", "structured_data_engine")
+        )(),
+        "video_engine": str_to_class(
+            ConfigurationManager().get_value("storage", "video_engine")
+        )(),
+        "image_engine": str_to_class(
+            ConfigurationManager().get_value("storage", "image_engine")
+        )(),
+        "audio_engine": str_to_class(
+            ConfigurationManager().get_value("storage", "audio_engine")
+        )(),
+    }
+
     @classmethod
     def factory(cls, table: TableCatalogEntry) -> AbstractStorageEngine:
         if table is None:
@@ -40,3 +55,10 @@ class StorageEngine:
             return cls.storages[table.table_type]
 
         raise RuntimeError(f"Invalid table type {table.table_type}")
+
+    @classmethod
+    def get_engine(cls, engine_type: str) -> AbstractStorageEngine:
+        if engine_type in cls.engines:
+            return cls.engines[engine_type]
+
+        raise RuntimeError(f"Invalid engine type {engine_type}")

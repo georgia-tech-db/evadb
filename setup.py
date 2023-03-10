@@ -103,7 +103,8 @@ udf_libs = [
     "easyocr>=1.5.0",         # OCR EXTRACTION
     "ipython",
     "yolov5<=7.0.6",          # OBJECT DETECTION
-    "detoxify"                # TEXT TOXICITY CLASSIFICATION
+    "detoxify",               # TEXT TOXICITY CLASSIFICATION
+    "librosa",                # AUDIO SEARCH 
 ]
 
 ### NEEDED FOR EXPERIMENTAL FEATURES

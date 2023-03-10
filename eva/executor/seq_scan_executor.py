@@ -16,6 +16,7 @@ from typing import Generator, Iterator
 
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError, apply_predicate, apply_project
+from eva.expression.function_expression import FunctionExpression
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.seq_scan_plan import SeqScanPlan
 from eva.utils.logging_manager import logger
@@ -39,6 +40,10 @@ class SequentialScanExecutor(AbstractExecutor):
         pass
 
     def exec(self, **kwargs) -> Iterator[Batch]:
+        for expr in self.project_expr:
+            if isinstance(expr, FunctionExpression):
+                if expr.udf_obj.type == "AudioUDF":
+                    kwargs["storage_engine_type"] = "audio_engine"
 
         try:
             child_executor = self.children[0]

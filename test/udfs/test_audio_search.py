@@ -17,7 +17,10 @@ import os
 import unittest
 from test.util import EVA_TEST_DATA_DIR
 
+import librosa
 import pandas as pd
+
+from eva.utils.generic_utils import extract_audio
 
 
 class AudioSearch(unittest.TestCase):
@@ -27,11 +30,15 @@ class AudioSearch(unittest.TestCase):
             EVA_TEST_DATA_DIR, "data", "sample_videos", "touchdown.mp4"
         )
 
-    @unittest.skip("disable test due to model downloading time")
+    def _load_audio(self, path):
+        audio_file = extract_audio(path)
+        return librosa.load(audio_file, sr=16_000)
+
     def test_should_return_phrase_window(self):
         from eva.udfs.audio_search import AudioSearch
 
-        data = pd.DataFrame([{"path": self.video_path, "phrase": "rushing touchdown"}])
+        audio_array, _ = self._load_audio(self.video_path)
+        data = pd.DataFrame([{"data": audio_array, "phrase": "rushing touchdown"}])
         audio_search = AudioSearch()
         audio_search.segment_window = 2
         audio_search.segment_overlap = 1
@@ -39,11 +46,11 @@ class AudioSearch(unittest.TestCase):
 
         self.assertEqual(len(result), 1)
 
-    @unittest.skip("disable test due to model downloading time")
     def test_should_return_phrase_windows(self):
         from eva.udfs.audio_search import AudioSearch
 
-        data = pd.DataFrame([{"path": self.video_path, "phrase": "touchdown"}])
+        audio_array, _ = self._load_audio(self.video_path)
+        data = pd.DataFrame([{"data": audio_array, "phrase": "touchdown"}])
         audio_search = AudioSearch()
         audio_search.segment_window = 1
         audio_search.segment_overlap = 1
