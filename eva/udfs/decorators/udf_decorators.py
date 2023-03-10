@@ -15,14 +15,12 @@
 
 
 from eva.io_descriptors.eva_arguments import EvaArgument
-from eva.utils.errors import UDFInputOutputTypeException
 
 
 # decorator for the setup function. It will be used to set the cache, batching and
 # udf_type parameters in the catalog
 def setup(use_cache: bool, udf_type: str, batch: bool):
     def inner_fn(arg_fn):
-
         def wrapper(*args, **kwargs):
             # TODO set the batch and caching parameters. update in catalog
 

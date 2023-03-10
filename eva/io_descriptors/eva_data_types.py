@@ -17,8 +17,8 @@ from typing import Tuple
 import numpy as np
 import pandas as pd
 import torch
-from eva.catalog.catalog_type import ColumnType, NdArrayType
 
+from eva.catalog.catalog_type import ColumnType, NdArrayType
 from eva.io_descriptors.eva_arguments import EvaArgument
 
 
