@@ -13,6 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from abc import abstractmethod
+from typing import Tuple
+
+from eva.catalog.catalog_type import ColumnType, NdArrayType
 
 
 class EvaArgument(object):
@@ -24,7 +27,14 @@ class EvaArgument(object):
     """
 
     @abstractmethod
-    def __init__(self, shape=None, dtype=None, columns=None) -> None:
+    def __init__(
+        self,
+        name: str = None,
+        type: ColumnType = None,
+        is_nullable: bool = None,
+        array_type: NdArrayType = None,
+        array_dimensions: Tuple[int] = None,
+    ) -> None:
         """The parameters like shape, data type are passed as parameters to be initialized
 
         Args:
@@ -32,9 +42,11 @@ class EvaArgument(object):
             dtype (str): datatype of the elements. Types are int32, float16 and float32.
 
         """
-        self.shape = shape
-        self.dtype = dtype
-        self.columns = columns
+        self.name = name
+        self.type = type
+        self.is_nullable = is_nullable
+        self.array_type = array_type
+        self.array_dimensions = array_dimensions
 
     @abstractmethod
     def check_type(self, input_object: any) -> bool:
@@ -113,14 +125,8 @@ class EvaArgument(object):
 
     def is_shape_defined(self):
         """returns True if the size has been specified. False otherwise"""
-        if self.shape is None:
-            return False
-
         return True
 
     def is_dtype_defined(self):
         """returns True if the dtype has been specified. False otherwise"""
-        if self.dtype is None:
-            return False
-
         return True

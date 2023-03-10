@@ -12,20 +12,33 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import Tuple
+
 import numpy as np
 import pandas as pd
 import torch
 
+from eva.catalog.catalog_type import ColumnType, NdArrayType
 from eva.io_descriptors.eva_arguments import EvaArgument
 
 
 class NumpyArray(EvaArgument):
     """EVA data type for Numpy Array"""
 
-    def __init__(self, shape=None, dtype=None) -> None:
-        super().__init__()
-        self.shape = shape
-        self.dtype = dtype
+    def __init__(
+        self,
+        name: str,
+        is_nullable: bool = False,
+        type: NdArrayType = None,
+        dimensions: Tuple[int] = None,
+    ) -> None:
+        super().__init__(
+            name=name,
+            type=ColumnType.NDARRAY,
+            is_nullable=is_nullable,
+            array_type=type,
+            array_dimensions=dimensions,
+        )
 
     def check_type(self, input_object) -> bool:
         if self.dtype:
@@ -59,27 +72,37 @@ class NumpyArray(EvaArgument):
 class PyTorchTensor(EvaArgument):
     """EVA data type for PyTorch Tensor"""
 
-    def __init__(self, shape=None, dtype=None) -> None:
-        super().__init__()
-        self.shape = shape
-        self.dtype = dtype
+    def __init__(
+        self,
+        name: str,
+        is_nullable: bool = False,
+        type: NdArrayType = None,
+        dimensions: Tuple[int] = None,
+    ) -> None:
+        super().__init__(
+            name=name,
+            type=ColumnType.NDARRAY,
+            is_nullable=is_nullable,
+            array_type=type,
+            array_dimensions=dimensions,
+        )
 
     def check_type(self, input_object) -> bool:
-        if self.dtype:
-            if self.dtype == "int32":
+        if self.array_type:
+            if self.array_type == "int32":
                 return isinstance(input_object, torch.Tensor) and (
                     input_object.dtype == torch.int32
                 )
-            elif self.dtype == "float16":
+            elif self.array_type == "float16":
                 return isinstance(input_object, torch.Tensor) and (
                     input_object.dtype == torch.float16
                 )
-            elif self.dtype == "float32":
+            elif self.array_type == "float32":
                 return isinstance(input_object, torch.Tensor) and (
                     input_object.dtype == torch.float32
                 )
 
-        elif not self.dtype:
+        elif not self.array_type:
             return isinstance(input_object, torch.Tensor)
 
     def check_shape(self, input_object) -> bool:

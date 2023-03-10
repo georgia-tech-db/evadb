@@ -583,6 +583,7 @@ class ParserTests(unittest.TestCase):
         expected_stmt = CreateUDFStatement(
             "FastRCNN",
             False,
+            Path("data/fastrcnn.py"),
             [
                 ColumnDefinition(
                     "Frame_Array",
@@ -600,7 +601,6 @@ class ParserTests(unittest.TestCase):
                     "Bbox", ColumnType.NDARRAY, NdArrayType.UINT8, (10, 4), expected_cci
                 ),
             ],
-            Path("data/fastrcnn.py"),
             "Classification",
         )
         eva_statement_list = parser.parse(create_udf_query)
@@ -757,6 +757,7 @@ class ParserTests(unittest.TestCase):
         create_udf = CreateUDFStatement(
             "udf",
             False,
+            Path("data/fastrcnn.py"),
             [
                 ColumnDefinition(
                     "frame",
@@ -766,7 +767,6 @@ class ParserTests(unittest.TestCase):
                 )
             ],
             [ColumnDefinition("labels", ColumnType.NDARRAY, NdArrayType.STR, (10))],
-            Path("data/fastrcnn.py"),
             "Classification",
         )
         select_stmt = SelectStatement()
