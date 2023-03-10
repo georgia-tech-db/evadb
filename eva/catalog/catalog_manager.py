@@ -14,6 +14,7 @@
 # limitations under the License.
 from pathlib import Path
 from typing import List
+import shutil
 
 from eva.catalog.catalog_type import ColumnType, IndexType, TableType
 from eva.catalog.catalog_utils import (
@@ -295,6 +296,9 @@ class CatalogManager(object):
         return self._udf_cache_service.get_entry_by_name(name)
 
     def drop_udf_cache_catalog_entry(self, entry: UdfCacheCatalogEntry) -> bool:
+        # remove the data structure associated with the entry
+        if entry:
+            shutil.rmtree(entry.cache_path)
         return self._udf_cache_service.delete_entry(entry)
 
     """ Utils """

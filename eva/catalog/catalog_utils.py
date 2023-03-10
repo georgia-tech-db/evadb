@@ -146,6 +146,8 @@ def construct_udf_cache_catalog_entry(
 
     return entry
 
+def is_udf_cache_catalog_entry_valid(entry: UdfCacheCatalogEntry):
+    udf_depends
 
 def cleanup_storage():
     config = ConfigurationManager()
