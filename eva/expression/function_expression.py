@@ -14,7 +14,6 @@
 # limitations under the License.
 from typing import Callable, List
 
-from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.models.udf_catalog import UdfCatalogEntry
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 from eva.constants import NO_GPU
@@ -91,6 +90,7 @@ class FunctionExpression(AbstractExpression):
     def persistCost(self, name, type, frame_count, resolution, time):
         # TODO: compute cost using time
         cost = time
+        from eva.catalog.catalog_manager import CatalogManager
         catalog_manager = CatalogManager()
         catalog_manager.insert_udf_cost_catalog_entry(
             name, type, cost, frame_count, resolution
@@ -99,6 +99,7 @@ class FunctionExpression(AbstractExpression):
     def evaluate(self, batch: Batch, **kwargs) -> Batch:
         new_batch = batch
         child_batches = [child.evaluate(batch, **kwargs) for child in self.children]
+        from eva.catalog.catalog_manager import CatalogManager
         catalog_manager = CatalogManager()
 
         if len(child_batches):
