@@ -18,7 +18,7 @@ from eva.catalog.catalog_manager import CatalogManager
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.create_udf_plan import CreateUDFPlan
-from eva.udfs.contrib.decorators.ish.utils import load_io_from_udf_decorators
+from eva.udfs.decorators.utils import load_io_from_udf_decorators
 from eva.utils.generic_utils import load_udf_class_from_file
 from eva.utils.logging_manager import logger
 
