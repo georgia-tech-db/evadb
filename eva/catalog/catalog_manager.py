@@ -204,7 +204,6 @@ class CatalogManager(object):
             impl_file_path(str): implementation path of the udf
             type(str): what kind of udf operator like classification,
                                                         detection etc
-            checksum(str): checksum of the python file for consistency
             udf_io_list(List[UdfIOCatalogEntry]): input/output udf info list
 
         Returns:

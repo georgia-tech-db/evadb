@@ -146,7 +146,8 @@ class CatalogManagerTests(unittest.TestCase):
 
     @mock.patch("eva.catalog.catalog_manager.UdfCatalogService")
     @mock.patch("eva.catalog.catalog_manager.UdfIOCatalogService")
-    def test_insert_udf(self, udfio_mock, udf_mock):
+    @mock.patch("eva.catalog.catalog_manager.get_file_checksum")
+    def test_insert_udf(self, checksum_mock, udfio_mock, udf_mock):
         catalog = CatalogManager()
         udf_io_list = [MagicMock()]
         actual = catalog.insert_udf_catalog_entry(
@@ -154,8 +155,9 @@ class CatalogManagerTests(unittest.TestCase):
         )
         udfio_mock.return_value.insert_entries.assert_called_with(udf_io_list)
         udf_mock.return_value.insert_entry.assert_called_with(
-            "udf", "sample.py", "classification"
+            "udf", "sample.py", "classification", checksum_mock.return_value
         )
+        checksum_mock.assert_called_with("sample.py")
         self.assertEqual(actual, udf_mock.return_value.insert_entry.return_value)
 
     @mock.patch("eva.catalog.catalog_manager.UdfCatalogService")

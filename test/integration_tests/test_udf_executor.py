@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import tempfile
 import unittest
 from test.util import (
     DummyObjectDetector,
@@ -177,3 +178,32 @@ class UDFExecutorTest(unittest.TestCase):
         """
         with self.assertRaises(ExecutorError):
             execute_query_fetch_all(create_udf_query)
+
+    def test_should_raise_if_udf_file_is_modified(self):
+        execute_query_fetch_all("DROP UDF DummyObjectDetector;")
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".py") as tmp_file:
+            with open("test/util.py", "r") as file:
+                tmp_file.write(file.read())
+
+            tmp_file.seek(0)
+
+            udf_name = "DummyObjectDetector"
+            create_udf_query = """CREATE UDF {}
+                    INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
+                    OUTPUT (label NDARRAY STR(10))
+                    TYPE  Classification
+                    IMPL  '{}';
+            """
+            execute_query_fetch_all(create_udf_query.format(udf_name, tmp_file.name))
+
+            # Modify the udf file by appending
+            tmp_file.seek(0, 2)
+            tmp_file.write("#comment")
+            tmp_file.seek(0)
+
+            select_query = (
+                "SELECT id,DummyObjectDetector(data) FROM MyVideo ORDER BY id;"
+            )
+
+            with self.assertRaises(BinderError):
+                execute_query_fetch_all(select_query)

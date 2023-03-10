@@ -79,26 +79,27 @@ class CatalogModelsTest(unittest.TestCase):
         self.assertNotEqual(table_catalog_entry, table_catalog_entry1)
 
     def test_udf(self):
-        udf = UdfCatalogEntry("udf", "fasterRCNN", "ObjectDetection")
+        udf = UdfCatalogEntry("udf", "fasterRCNN", "ObjectDetection", "checksum")
         self.assertEqual(udf.row_id, None)
         self.assertEqual(udf.impl_file_path, "fasterRCNN")
         self.assertEqual(udf.name, "udf")
         self.assertEqual(udf.type, "ObjectDetection")
+        self.assertEqual(udf.checksum, "checksum")
 
     def test_udf_hash(self):
-        udf1 = UdfCatalogEntry("udf", "fasterRCNN", "ObjectDetection")
-        udf2 = UdfCatalogEntry("udf", "fasterRCNN", "ObjectDetection")
+        udf1 = UdfCatalogEntry("udf", "fasterRCNN", "ObjectDetection", "checksum")
+        udf2 = UdfCatalogEntry("udf", "fasterRCNN", "ObjectDetection", "checksum")
 
         self.assertEqual(hash(udf1), hash(udf2))
 
     def test_udf_equality(self):
-        udf = UdfCatalogEntry("udf", "fasterRCNN", "ObjectDetection")
+        udf = UdfCatalogEntry("udf", "fasterRCNN", "ObjectDetection", "checksum")
         self.assertEqual(udf, udf)
-        udf2 = UdfCatalogEntry("udf2", "fasterRCNN", "ObjectDetection")
+        udf2 = UdfCatalogEntry("udf2", "fasterRCNN", "ObjectDetection", "checksum")
         self.assertNotEqual(udf, udf2)
-        udf3 = UdfCatalogEntry("udf", "fasterRCNN2", "ObjectDetection")
+        udf3 = UdfCatalogEntry("udf", "fasterRCNN2", "ObjectDetection", "checksum")
         self.assertNotEqual(udf, udf3)
-        udf4 = UdfCatalogEntry("udf2", "fasterRCNN", "ObjectDetection3")
+        udf4 = UdfCatalogEntry("udf2", "fasterRCNN", "ObjectDetection3", "checksum")
         self.assertNotEqual(udf, udf4)
 
     def test_udf_io(self):

@@ -23,14 +23,15 @@ UDF_TYPE = "classification"
 UDF_IMPL_PATH = "file1"
 UDF_NAME = "name"
 UDF_ID = 123
+UDF_CHECKSUM = "hexdigest"
 
 
 class UdfCatalogServiceTest(TestCase):
     @patch("eva.catalog.services.udf_catalog_service.UdfCatalog")
     def test_create_udf_should_create_model(self, mocked):
         service = UdfCatalogService()
-        service.insert_entry(UDF_NAME, UDF_IMPL_PATH, UDF_TYPE)
-        mocked.assert_called_with(UDF_NAME, UDF_IMPL_PATH, UDF_TYPE)
+        service.insert_entry(UDF_NAME, UDF_IMPL_PATH, UDF_TYPE, UDF_CHECKSUM)
+        mocked.assert_called_with(UDF_NAME, UDF_IMPL_PATH, UDF_TYPE, UDF_CHECKSUM)
         mocked.return_value.save.assert_called_once()
 
     @patch("eva.catalog.services.udf_catalog_service.UdfCatalog")
