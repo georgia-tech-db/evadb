@@ -22,7 +22,8 @@ from eva.expression.abstract_expression import AbstractExpression, ExpressionTyp
 from eva.models.storage.batch import Batch
 from eva.parser.alias import Alias
 from eva.udfs.gpu_compatible import GPUCompatible
-
+from eva.catalog.catalog_manager import CatalogManager
+from eva.utils.timer import Timer
 
 class FunctionExpression(AbstractExpression):
     """
@@ -86,9 +87,18 @@ class FunctionExpression(AbstractExpression):
     def function(self, func: Callable):
         self._function = func
 
+    def persistCost(self, name, type, frame_count, resolution, time):
+        # TODO: compute cost using time
+        cost = time
+        catalog_manager = CatalogManager()
+        catalog_manager.insert_udf_cost_catalog_entry(
+            name, type, cost, frame_count, resolution
+        )
+
     def evaluate(self, batch: Batch, **kwargs) -> Batch:
         new_batch = batch
         child_batches = [child.evaluate(batch, **kwargs) for child in self.children]
+        catalog_manager = CatalogManager()
 
         if len(child_batches):
             batch_sizes = [len(child_batch) for child_batch in child_batches]
@@ -108,9 +118,22 @@ class FunctionExpression(AbstractExpression):
 
         func = self._gpu_enabled_function()
         outcomes = new_batch
-        outcomes.apply_function_expression(func)
-        outcomes = outcomes.project(self.projection_columns)
-        outcomes.modify_column_alias(self.alias)
+        function_expr_timer = Timer()
+        with function_expr_timer:
+            outcomes.apply_function_expression(func)
+            outcomes = outcomes.project(self.projection_columns)
+            outcomes.modify_column_alias(self.alias)
+        resolution = None
+        udf_obj = catalog_manager.get_udf_catalog_entry_by_name(
+            self._name
+        )
+        self.persistCost(
+            self._name,
+            udf_obj.type if udf_obj else None,
+            outcomes.frames.shape[0],
+            resolution,
+            function_expr_timer.total_elapsed_time,
+        )
         return outcomes
 
     def signature(self) -> str:

@@ -14,13 +14,11 @@
 # limitations under the License.
 from typing import Iterator
 
-from eva.catalog.catalog_manager import CatalogManager
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.function_scan_plan import FunctionScanPlan
 from eva.utils.logging_manager import logger
-from eva.utils.timer import Timer
 
 
 class FunctionScanExecutor(AbstractExecutor):
@@ -39,40 +37,14 @@ class FunctionScanExecutor(AbstractExecutor):
     def validate(self):
         pass
 
-    def persistCost(self, name, type, frame_count, resolution, time):
-        # TODO: compute cost using time
-        cost = time
-        catalog_manager = CatalogManager()
-        catalog_manager.insert_udf_cost_catalog_entry(
-            name, type, cost, frame_count, resolution
-        )
-
     def exec(self, *args, **kwargs) -> Iterator[Batch]:
         assert (
             "lateral_input" in kwargs
         ), "Key lateral_input not passed to the FunctionScan"
         lateral_input = kwargs.get("lateral_input")
-        catalog_manager = CatalogManager()
         try:
             if not lateral_input.empty():
-                function_expr_timer = Timer()
-                with function_expr_timer:
-                    res = self.func_expr.evaluate(lateral_input)
-                resolution = None
-                udf_obj = catalog_manager.get_udf_catalog_entry_by_name(
-                    self.func_expr.name
-                )
-                if udf_obj:
-                    type = udf_obj.type
-                else:
-                    type = None
-                self.persistCost(
-                    self.func_expr.name,
-                    type,
-                    lateral_input.frames.shape[0],
-                    resolution,
-                    function_expr_timer.total_elapsed_time,
-                )
+                res = self.func_expr.evaluate(lateral_input)
                 if not res.empty():
                     if self.do_unnest:
                         res.unnest()
