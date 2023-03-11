@@ -27,7 +27,7 @@ class InsertExecutorTest(unittest.TestCase):
     def setUp(self):
         # reset the catalog manager before running each test
         CatalogManager().reset()
-        create_sample_video()
+        self.video_file_path = create_sample_video()
 
         query = """CREATE TABLE IF NOT EXISTS CSVTable
             (
@@ -44,7 +44,7 @@ class InsertExecutorTest(unittest.TestCase):
     # integration test
     @unittest.skip("Not supported in current version")
     def test_should_load_video_in_table(self):
-        query = """LOAD VIDEO 'dummy.avi' INTO MyVideo;"""
+        query = f"""LOAD VIDEO '{self.video_file_path}' INTO MyVideo;"""
         execute_query_fetch_all(query)
 
         insert_query = """ INSERT INTO MyVideo (id, data) VALUES (
