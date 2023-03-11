@@ -281,6 +281,7 @@ class OptimizeInputs(OptimizerTask):
         for child_id in self.root_expr.children:
             child_grp = memo.get_group_by_id(child_id)
             if child_grp.get_best_expr(PropertyType.DEFAULT):
+                # Note: May never get hit when using EVA on Ray
                 cost += child_grp.get_best_expr_cost(PropertyType.DEFAULT)
             else:
                 self.optimizer_context.task_stack.push(
