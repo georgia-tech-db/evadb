@@ -58,12 +58,6 @@ class LoadMultimediaExecutor(AbstractExecutor):
                 # Local Storage
                 video_files = iter_path_regex(self.node.file_path)
 
-            # If there are no files found on path or S3, raise an error
-            if not any(video_files):
-                raise DatasetFileNotFoundError(
-                    f"Load {self.media_type.name} failed due to no files found on path {str(self.node.file_path)}"
-                )
-
             for file_path in video_files:
                 file_path = Path(file_path)
                 if validate_media(file_path, self.media_type):
@@ -72,6 +66,11 @@ class LoadMultimediaExecutor(AbstractExecutor):
                     err_msg = f"Load {self.media_type.name} failed due to invalid file {str(file_path)}"
                     logger.error(err_msg)
                     raise ValueError(file_path)
+
+            if not valid_files:
+                raise DatasetFileNotFoundError(
+                    f"Load {self.media_type.name} failed due to no valid files found on path {str(self.node.file_path)}"
+                )
 
             # Create catalog entry
             table_info = self.node.table_info
