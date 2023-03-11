@@ -861,6 +861,10 @@ class LogicalJoinToPhysicalHashJoin(Rule):
 
     def check(self, before: Operator, context: OptimizerContext):
         j_child: FunctionExpression = before.join_predicate.children[0]
+        """
+        We don't want to apply this rule to the join when FuzzDistance
+        is being used, which implies that the join is a FuzzyJoin
+        """
         return before.join_type == JoinType.INNER_JOIN and (
             not (j_child) or not (j_child.name.startswith("FuzzDistance"))
         )
@@ -905,6 +909,10 @@ class LogicalJoinToPhysicalNestedLoopJoin(Rule):
         return Promise.LOGICAL_JOIN_TO_PHYSICAL_NESTED_LOOP_JOIN
 
     def check(self, before: LogicalJoin, context: OptimizerContext):
+        """
+        We want to apply this rule to the join when FuzzDistance
+        is being used, which implies that the join is a FuzzyJoin
+        """
         j_child: FunctionExpression = before.join_predicate.children[0]
         return before.join_type == JoinType.INNER_JOIN and j_child.name.startswith(
             "FuzzDistance"
