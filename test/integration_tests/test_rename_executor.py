@@ -23,8 +23,8 @@ class RenameExecutorTest(unittest.TestCase):
     def setUp(self):
         # reset the catalog manager before running each test
         CatalogManager().reset()
-        create_sample_video()
-        create_sample_csv()
+        self.video_file_path = create_sample_video()
+        self.csv_file_path = create_sample_csv()
 
     def tearDown(self):
         file_remove("dummy.avi")
@@ -33,7 +33,7 @@ class RenameExecutorTest(unittest.TestCase):
     # integration test
     def test_should_rename_table(self):
         catalog_manager = CatalogManager()
-        query = """LOAD VIDEO 'dummy.avi' INTO MyVideo;"""
+        query = f"""LOAD VIDEO '{self.video_file_path}' INTO MyVideo;"""
         execute_query_fetch_all(query)
 
         self.assertTrue(catalog_manager.get_table_catalog_entry("MyVideo") is not None)
@@ -61,7 +61,7 @@ class RenameExecutorTest(unittest.TestCase):
         execute_query_fetch_all(create_table_query)
 
         # load the CSV
-        load_query = """LOAD CSV 'dummy.csv' INTO MyVideoCSV (id, frame_id, video_id, dataset_name);"""
+        load_query = f"""LOAD CSV '{self.csv_file_path}' INTO MyVideoCSV (id, frame_id, video_id, dataset_name);"""
         execute_query_fetch_all(load_query)
 
         with self.assertRaises(Exception) as cm:
