@@ -177,7 +177,10 @@ class LoadExecutorTest(unittest.TestCase):
         query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
         with self.assertRaises(ExecutorError) as exc_info:
             execute_query_fetch_all(query)
-        self.assertIn("Load VIDEO failed due to no valid files found on path", str(exc_info.exception))
+        self.assertIn(
+            "Load VIDEO failed due to no valid files found on path",
+            str(exc_info.exception),
+        )
 
     def test_should_fail_to_load_corrupt_video(self):
         # should fail on an empty file
@@ -270,7 +273,10 @@ class LoadExecutorTest(unittest.TestCase):
         query = f"""LOAD IMAGE "{path}" INTO MyImages;"""
         with self.assertRaises(ExecutorError) as exc_info:
             execute_query_fetch_all(query)
-        self.assertIn("Load IMAGE failed due to no valid files found on path", str(exc_info.exception))
+        self.assertIn(
+            "Load IMAGE failed due to no valid files found on path",
+            str(exc_info.exception),
+        )
 
     def test_should_fail_to_load_images_with_same_path(self):
         image_files = glob.glob(
