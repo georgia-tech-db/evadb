@@ -172,6 +172,12 @@ class LoadExecutorTest(unittest.TestCase):
 
         self.assertEqual(expected_output, after_load_fail)
 
+    def test_should_fail_to_load_missing_video(self):
+        path = f"{EVA_ROOT_DIR}/data/sample_videos/missing.mp4"
+        query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
+        with self.assertRaises(Exception):
+            execute_query_fetch_all(query)
+
     def test_should_fail_to_load_corrupt_video(self):
         # should fail on an empty file
         tempfile_name = os.urandom(24).hex()
@@ -257,6 +263,12 @@ class LoadExecutorTest(unittest.TestCase):
             pd.DataFrame([f"Number of loaded {FileFormatType.IMAGE.name}: {num_files}"])
         )
         self.assertEqual(result, expected)
+    
+    def test_should_fail_to_load_missing_image(self):
+        path = f"{EVA_ROOT_DIR}/data/sample_images/missing.jpg"
+        query = f"""LOAD IMAGE "{path}" INTO MyImages;"""
+        with self.assertRaises(Exception):
+            execute_query_fetch_all(query)
 
     def test_should_fail_to_load_images_with_same_path(self):
         image_files = glob.glob(
