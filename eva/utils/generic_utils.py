@@ -152,6 +152,22 @@ def get_size(obj, seen=None):
     return size
 
 
+def get_file_checksum(fname: str) -> str:
+    """Compute checksum of the file contents
+
+    Args:
+        fname (str): file path
+
+    Returns:
+        str: hash string representing the checksum of the file content
+    """
+    hash_md5 = hashlib.md5()
+    with open(fname, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            hash_md5.update(chunk)
+    return hash_md5.hexdigest()
+
+
 class PickleSerializer(object):
     @classmethod
     def serialize(cls, data):

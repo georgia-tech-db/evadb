@@ -34,16 +34,18 @@ class UdfCatalog(BaseModel):
     _name = Column("name", String(100), unique=True)
     _impl_file_path = Column("impl_file_path", String(128))
     _type = Column("type", String(100))
+    _checksum = Column("checksum", String(512))
 
     # UdfIOCatalog stroing the input/output attributes of the udf
     _attributes = relationship(
         "UdfIOCatalog", back_populates="_udf", cascade="all, delete, delete-orphan"
     )
 
-    def __init__(self, name: str, impl_file_path: str, type: str):
+    def __init__(self, name: str, impl_file_path: str, type: str, checksum: str):
         self._name = name
         self._impl_file_path = impl_file_path
         self._type = type
+        self._checksum = checksum
 
     def as_dataclass(self) -> "UdfCatalogEntry":
         args = []
@@ -59,6 +61,7 @@ class UdfCatalog(BaseModel):
             name=self._name,
             impl_file_path=self._impl_file_path,
             type=self._type,
+            checksum=self._checksum,
             args=args,
             outputs=outputs,
         )
@@ -73,6 +76,7 @@ class UdfCatalogEntry:
     name: str
     impl_file_path: str
     type: str
+    checksum: str
     row_id: int = None
     args: List[UdfIOCatalogEntry] = field(compare=False, default_factory=list)
     outputs: List[UdfIOCatalogEntry] = field(compare=False, default_factory=list)

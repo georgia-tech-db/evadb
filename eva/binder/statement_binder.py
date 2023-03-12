@@ -36,7 +36,7 @@ from eva.parser.rename_statement import RenameTableStatement
 from eva.parser.select_statement import SelectStatement
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
-from eva.utils.generic_utils import load_udf_class_from_file
+from eva.utils.generic_utils import get_file_checksum, load_udf_class_from_file
 from eva.utils.logging_manager import logger
 
 if sys.version_info >= (3, 8):
@@ -223,6 +223,18 @@ class StatementBinder:
             err_msg = (
                 f"UDF with name {node.name} does not exist in the catalog. "
                 "Please create the UDF using CREATE UDF command."
+            )
+            logger.error(err_msg)
+            raise BinderError(err_msg)
+
+        # Verify the consistency of the UDF. If the checksum of the UDF does not match
+        # the one stored in the catalog, an error will be thrown and the user will be
+        # asked to register the UDF again.
+        if get_file_checksum(udf_obj.impl_file_path) != udf_obj.checksum:
+            err_msg = (
+                f"UDF file {udf_obj.impl_file_path} has been modified from the "
+                "registration. Please create a new UDF using the CREATE UDF command or "
+                "UPDATE the existing one."
             )
             logger.error(err_msg)
             raise BinderError(err_msg)
