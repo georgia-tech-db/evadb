@@ -263,7 +263,7 @@ class LoadExecutorTest(unittest.TestCase):
             pd.DataFrame([f"Number of loaded {FileFormatType.IMAGE.name}: {num_files}"])
         )
         self.assertEqual(result, expected)
-    
+
     def test_should_fail_to_load_missing_image(self):
         path = f"{EVA_ROOT_DIR}/data/sample_images/missing.jpg"
         query = f"""LOAD IMAGE "{path}" INTO MyImages;"""
