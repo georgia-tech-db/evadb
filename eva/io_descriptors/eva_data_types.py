@@ -12,11 +12,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Tuple, Type
-from git import List
+from typing import List, Tuple, Type
 
 import numpy as np
-import pandas as pd
 import torch
 
 from eva.catalog.catalog_type import ColumnType, NdArrayType
@@ -126,11 +124,13 @@ class PandasDataframe(IOArgument):
         self.columns = columns
         self.column_types = column_types
         self.column_shapes = column_shapes
-    
+
     def generate_catalog_entries(self, is_input=False) -> List[Type[UdfIOCatalogEntry]]:
         catalog_entries = []
 
-        for column_name, column_type, column_shape in zip(self.columns, self.column_types, self.column_shapes):
+        for column_name, column_type, column_shape in zip(
+            self.columns, self.column_types, self.column_shapes
+        ):
             catalog_entries.append(
                 UdfIOCatalogEntry(
                     name=column_name,
@@ -138,10 +138,10 @@ class PandasDataframe(IOArgument):
                     is_nullable=False,
                     array_type=column_type,
                     array_dimensions=column_shape,
-                    is_input=is_input
+                    is_input=is_input,
                 )
             )
-                
+
         return catalog_entries
 
     def arg_name(self):

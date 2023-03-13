@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from abc import abstractmethod
-from typing import Tuple, List, Type
+from typing import List, Tuple, Type
 
 from eva.catalog.catalog_type import ColumnType, NdArrayType
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
@@ -32,7 +32,9 @@ class IOArgument(object):
         pass
 
     @abstractmethod
-    def generate_catalog_entries(self, *args, **kwargs) -> List[Type[UdfIOCatalogEntry]]:
+    def generate_catalog_entries(
+        self, *args, **kwargs
+    ) -> List[Type[UdfIOCatalogEntry]]:
         """Generates the catalog IO entries from the Argument.
 
         Returns:
@@ -150,7 +152,6 @@ class IOColumnArgument(IOArgument):
         self.array_type = array_type
         self.array_dimensions = array_dimensions
 
-    
     def generate_catalog_entries(self, is_input=False) -> List[Type[UdfIOCatalogEntry]]:
         """Generates the catalog IO entries from the Argument.
 
@@ -165,5 +166,6 @@ class IOColumnArgument(IOArgument):
                 is_nullable=self.is_nullable,
                 array_type=self.array_type,
                 array_dimensions=self.array_dimensions,
-                is_input=is_input)
+                is_input=is_input,
+            )
         ]
