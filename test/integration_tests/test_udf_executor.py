@@ -14,15 +14,11 @@
 # limitations under the License.
 import tempfile
 import unittest
-from eva.catalog.catalog_type import ColumnType, NdArrayType
-from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 from test.util import (
     DummyObjectDetector,
     create_dummy_batches,
     create_sample_video,
     file_remove,
-    gen_input_signature_for_object_detection,
-    gen_output_signature_for_object_detection
 )
 
 import numpy as np
@@ -30,6 +26,7 @@ import pandas as pd
 
 from eva.binder.binder_utils import BinderError
 from eva.catalog.catalog_manager import CatalogManager
+from eva.catalog.catalog_type import ColumnType, NdArrayType
 from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
 from eva.server.command_handler import execute_query_fetch_all
@@ -211,7 +208,7 @@ class UDFExecutorTest(unittest.TestCase):
 
             with self.assertRaises(BinderError):
                 execute_query_fetch_all(select_query)
-    
+
     def test_create_udf_with_decorators(self):
         execute_query_fetch_all("DROP UDF IF EXISTS DummyObjectDetectorDecorators;")
         create_udf_query = """CREATE UDF DummyObjectDetectorDecorators
@@ -220,17 +217,22 @@ class UDFExecutorTest(unittest.TestCase):
         execute_query_fetch_all(create_udf_query)
 
         catalog_manager = CatalogManager()
-        udf_obj = catalog_manager.get_udf_catalog_entry_by_name("DummyObjectDetectorDecorators")
+        udf_obj = catalog_manager.get_udf_catalog_entry_by_name(
+            "DummyObjectDetectorDecorators"
+        )
         udf_inputs = catalog_manager.get_udf_io_catalog_input_entries(udf_obj)
         self.assertEquals(len(udf_inputs), 1)
-        
+
         udf_input = udf_inputs[0]
 
-        expected_attributes = {"name" : "Frame_Array", "type" : ColumnType.NDARRAY, "is_nullable" : False, "array_type" : NdArrayType.UINT8, "array_dimensions" : (3, 256, 256), "is_input" : True}
+        expected_attributes = {
+            "name": "Frame_Array",
+            "type": ColumnType.NDARRAY,
+            "is_nullable": False,
+            "array_type": NdArrayType.UINT8,
+            "array_dimensions": (3, 256, 256),
+            "is_input": True,
+        }
 
         for attr in expected_attributes:
             self.assertEquals(getattr(udf_input, attr), expected_attributes[attr])
-
-
-
-

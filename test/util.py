@@ -35,9 +35,9 @@ from eva.parser.parser import Parser
 from eva.plan_nodes.abstract_plan import AbstractPlan
 from eva.server.command_handler import execute_query_fetch_all
 from eva.udfs.abstract.abstract_udf import AbstractClassifierUDF
-from eva.udfs.decorators.io_descriptors.data_types import PandasDataframe, NumpyArray
-from eva.udfs.udf_bootstrap_queries import init_builtin_udfs
 from eva.udfs.decorators import udf_decorators
+from eva.udfs.decorators.io_descriptors.data_types import NumpyArray, PandasDataframe
+from eva.udfs.udf_bootstrap_queries import init_builtin_udfs
 
 NUM_FRAMES = 10
 FRAME_SIZE = 2 * 2 * 3
@@ -487,7 +487,7 @@ class DummyFeatureExtractor(AbstractClassifierUDF):
         ret = pd.DataFrame()
         ret["features"] = df.apply(_extract_feature, axis=1)
         return ret
-    
+
 
 class DummyObjectDetectorDecorators(AbstractClassifierUDF):
     @udf_decorators.setup(use_cache=True, udf_type="object_detection", batch=True)
@@ -505,17 +505,21 @@ class DummyObjectDetectorDecorators(AbstractClassifierUDF):
     @property
     def labels(self):
         return ["__background__", "person", "bicycle"]
-    
+
     @udf_decorators.forward(
-            input_signatures=[ PandasDataframe(
-            columns=["Frame_Array"],
-            column_types=[NdArrayType.UINT8],
-            column_shapes=[(3, 256, 256)]
-        )],
-            output_signatures=[ NumpyArray(
-            name="label",
-            type=NdArrayType.STR,
-        )]
+        input_signatures=[
+            PandasDataframe(
+                columns=["Frame_Array"],
+                column_types=[NdArrayType.UINT8],
+                column_shapes=[(3, 256, 256)],
+            )
+        ],
+        output_signatures=[
+            NumpyArray(
+                name="label",
+                type=NdArrayType.STR,
+            )
+        ],
     )
     def forward(self, df: pd.DataFrame) -> pd.DataFrame:
         ret = pd.DataFrame()
