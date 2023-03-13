@@ -39,7 +39,7 @@ from eva.parser.create_statement import ColumnDefinition
 from eva.parser.table_ref import TableInfo
 from eva.parser.types import FileFormatType
 from eva.utils.errors import CatalogError
-from eva.utils.generic_utils import generate_file_path
+from eva.utils.generic_utils import generate_file_path, get_file_checksum
 from eva.utils.logging_manager import logger
 
 
@@ -216,7 +216,8 @@ class CatalogManager(object):
             The persisted UdfCatalogEntry object.
         """
 
-        udf_entry = self._udf_service.insert_entry(name, impl_file_path, type)
+        checksum = get_file_checksum(impl_file_path)
+        udf_entry = self._udf_service.insert_entry(name, impl_file_path, type, checksum)
         for udf_io in udf_io_list:
             udf_io.udf_id = udf_entry.row_id
         self._udf_io_service.insert_entries(udf_io_list)

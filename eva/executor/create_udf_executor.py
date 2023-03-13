@@ -18,7 +18,7 @@ from eva.catalog.catalog_manager import CatalogManager
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.create_udf_plan import CreateUDFPlan
-from eva.utils.generic_utils import path_to_class
+from eva.utils.generic_utils import load_udf_class_from_file
 from eva.utils.logging_manager import logger
 
 
@@ -52,12 +52,9 @@ class CreateUDFExecutor(AbstractExecutor):
         impl_path = self.node.impl_path.absolute().as_posix()
         # check if we can create the udf object
         try:
-            path_to_class(impl_path, self.node.name)()
+            load_udf_class_from_file(impl_path, self.node.name)()
         except Exception as e:
-            err_msg = (
-                f"{str(e)}. Please verify that the UDF class name in the "
-                f"implementation file matches the provided UDF name {self.node.name}."
-            )
+            err_msg = f"Error creating UDF: {str(e)}"
             logger.error(err_msg)
             raise RuntimeError(err_msg)
         catalog_manager.insert_udf_catalog_entry(
