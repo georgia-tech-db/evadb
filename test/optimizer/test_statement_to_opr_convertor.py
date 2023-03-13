@@ -174,9 +174,6 @@ statement_to_opr_convertor.metadata_definition_to_udf_metadata"
         "eva.optimizer.\
 statement_to_opr_convertor.column_definition_to_udf_io"
     )
-    @patch(
-        "eva.optimizer.statement_to_opr_convertor.metadata_definition_to_udf_metadata"
-    )
     def test_visit_drop_udf(self, mock, l_drop_udf_mock):
         convertor = StatementToPlanConvertor()
         stmt = MagicMock()
