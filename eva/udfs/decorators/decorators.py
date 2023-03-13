@@ -19,7 +19,7 @@ from typing import List
 from eva.udfs.decorators.io_descriptors.abstract_types import IOArgument
 
 
-def setup(use_cache: bool, udf_type: str, batch: bool):
+def setup(cachable: bool, udf_type: str, batchable: bool):
     """decorator for the setup function. It will be used to set the cache, batching and
     udf_type parameters in the catalog
 

@@ -35,7 +35,7 @@ from eva.parser.parser import Parser
 from eva.plan_nodes.abstract_plan import AbstractPlan
 from eva.server.command_handler import execute_query_fetch_all
 from eva.udfs.abstract.abstract_udf import AbstractClassifierUDF
-from eva.udfs.decorators import udf_decorators
+from eva.udfs.decorators import decorators
 from eva.udfs.decorators.io_descriptors.data_types import NumpyArray, PandasDataframe
 from eva.udfs.udf_bootstrap_queries import init_builtin_udfs
 
@@ -490,7 +490,7 @@ class DummyFeatureExtractor(AbstractClassifierUDF):
 
 
 class DummyObjectDetectorDecorators(AbstractClassifierUDF):
-    @udf_decorators.setup(use_cache=True, udf_type="object_detection", batch=True)
+    @decorators.setup(use_cache=True, udf_type="object_detection", batch=True)
     def setup(self, *args, **kwargs):
         pass
 
@@ -506,7 +506,7 @@ class DummyObjectDetectorDecorators(AbstractClassifierUDF):
     def labels(self):
         return ["__background__", "person", "bicycle"]
 
-    @udf_decorators.forward(
+    @decorators.forward(
         input_signatures=[
             PandasDataframe(
                 columns=["Frame_Array"],
