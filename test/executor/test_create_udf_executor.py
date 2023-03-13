@@ -40,12 +40,12 @@ class CreateUdfExecutorTest(unittest.TestCase):
                 "outputs": ["out"],
                 "impl_path": impl_path,
                 "udf_type": "classification",
-                "metadata": {"key": "value"},
+                "metadata": {"key1": "value1", "key2" : "value2"},
             },
         )
 
         create_udf_executor = CreateUDFExecutor(plan)
         next(create_udf_executor.exec())
         catalog_instance.insert_udf_catalog_entry.assert_called_with(
-            "udf", "test.py", "classification", ["inp", "out"], {"key": "value"}
+            "udf", "test.py", "classification", ["inp", "out"], {"key1": "value1", "key2": "value2"}
         )
