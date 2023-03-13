@@ -19,9 +19,15 @@ from typing import List
 from eva.udfs.decorators.io_descriptors.abstract_types import IOArgument
 
 
-# decorator for the setup function. It will be used to set the cache, batching and
-# udf_type parameters in the catalog
 def setup(use_cache: bool, udf_type: str, batch: bool):
+    """decorator for the setup function. It will be used to set the cache, batching and
+    udf_type parameters in the catalog
+
+    Args:
+        use_cache (bool): True if the udf should be cached
+        udf_type (str): Type of the udf
+        batch (bool): True if the udf should be batched
+    """
     def inner_fn(arg_fn):
         def wrapper(*args, **kwargs):
             # calling the setup function defined by the user inside the udf implementation
@@ -38,13 +44,11 @@ def setup(use_cache: bool, udf_type: str, batch: bool):
 
 
 def forward(input_signatures: List[IOArgument], output_signatures: List[IOArgument]):
-    """decorator for the forward function. This will validate the shape and data type of inputs and outputs from the UDF.
+    """decorator for the forward function. It will be used to set the input and output. 
 
-    Additionally if the output is a Pandas dataframe, then it will check if the column names are matching.
     Args:
-        input_signature (EvaArgument): Constraints for the input.
-            shape : shape should be in the format (batch_size, nos_of_channels, width, height)
-        output_signature (EvaArgument): _description_
+        input_signature (List[IOArgument]): List of input arguments for the udf
+        output_signature ( List[IOArgument])): List of output arguments for the udf
     """
 
     def inner_fn(arg_fn):
