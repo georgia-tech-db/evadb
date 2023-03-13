@@ -43,9 +43,6 @@ class NumpyArray(IOColumnArgument):
             array_dimensions=dimensions,
         )
 
-    def arg_name(self):
-        return "NumpyArray"
-
 
 class PyTorchTensor(IOColumnArgument):
     """Descriptor data type for PyTorch Tensor"""
@@ -64,9 +61,6 @@ class PyTorchTensor(IOColumnArgument):
             array_type=type,
             array_dimensions=dimensions,
         )
-
-    def arg_name(self):
-        return "PyTorch Tensor"
 
 
 class PandasDataframe(IOArgument):
@@ -96,6 +90,3 @@ class PandasDataframe(IOArgument):
             )
 
         return catalog_entries
-
-    def arg_name(self):
-        return "PandasDataframes"
