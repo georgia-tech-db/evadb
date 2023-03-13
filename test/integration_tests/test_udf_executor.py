@@ -225,7 +225,7 @@ class UDFExecutorTest(unittest.TestCase):
 
         udf_input = udf_inputs[0]
 
-        expected_attributes = {
+        expected_input_attributes = {
             "name": "Frame_Array",
             "type": ColumnType.NDARRAY,
             "is_nullable": False,
@@ -234,5 +234,24 @@ class UDFExecutorTest(unittest.TestCase):
             "is_input": True,
         }
 
-        for attr in expected_attributes:
-            self.assertEquals(getattr(udf_input, attr), expected_attributes[attr])
+        for attr in expected_input_attributes:
+            self.assertEquals(getattr(udf_input, attr), expected_input_attributes[attr])
+
+        udf_outputs = catalog_manager.get_udf_io_catalog_output_entries(udf_obj)
+        self.assertEquals(len(udf_outputs), 1)
+
+        udf_output = udf_outputs[0]
+        expected_output_attributes = {
+            "name": "label",
+            "type": ColumnType.NDARRAY,
+            "is_nullable": False,
+            "array_type": NdArrayType.STR,
+            "array_dimensions": (),
+            "is_input": False,
+        }
+
+        for attr in expected_output_attributes:
+            self.assertEquals(
+                getattr(udf_output, attr), expected_output_attributes[attr]
+            )
+    
