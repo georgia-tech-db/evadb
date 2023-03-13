@@ -57,7 +57,9 @@ class CatalogManager(object):
         self._column_service: ColumnCatalogService = ColumnCatalogService()
         self._udf_service: UdfCatalogService = UdfCatalogService()
         self._udf_io_service: UdfIOCatalogService = UdfIOCatalogService()
-        self._udf_metadata_service: UdfMetadataCatalogService = UdfMetadataCatalogService()
+        self._udf_metadata_service: UdfMetadataCatalogService = (
+            UdfMetadataCatalogService()
+        )
         self._index_service: IndexCatalogService = IndexCatalogService()
 
     def reset(self):

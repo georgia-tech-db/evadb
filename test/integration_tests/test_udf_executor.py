@@ -37,7 +37,7 @@ class UDFCreatorTest(unittest.TestCase):
         CatalogManager().reset()
 
     def test_my_new_command(self):
-        create_udf_query = """CREATE UDF DummyObjectDetector 
+        create_udf_query = """CREATE UDF DummyObjectDetector
             INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
             OUTPUT (label NDARRAY STR(10))
             TYPE Classification
@@ -45,7 +45,7 @@ class UDFCreatorTest(unittest.TestCase):
             'KEY1' 'VALUE1'
             'KEY2' 'VALUE2';
         """
-        execute_query_fetch_all(create_udf_query) 
+        execute_query_fetch_all(create_udf_query)
 
 
 class UDFExecutorTest(unittest.TestCase):

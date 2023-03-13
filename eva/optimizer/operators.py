@@ -677,7 +677,7 @@ class LogicalCreateUDF(Operator):
     @property
     def udf_type(self):
         return self._udf_type
-    
+
     @property
     def metadata(self):
         return self._metadata
@@ -707,7 +707,7 @@ class LogicalCreateUDF(Operator):
                 tuple(self.outputs),
                 self.udf_type,
                 self.impl_path,
-                tuple(self.metadata)
+                tuple(self.metadata),
             )
         )
 

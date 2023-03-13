@@ -102,7 +102,7 @@ class Functions:
                 elif child.data == "udf_metadata":
                     # Each UDF metadata is a key value pair
                     key_value_pair = self.visit(child)
-                    metadata.append((key_value_pair[0].value , key_value_pair[1].value)),
+                    metadata.append((key_value_pair[0].value, key_value_pair[1].value)),
                 else:
                     raise ValueError(
                         f"CREATE/DROP UDF Failed: Unidentified selector child: {child.data!r}"
@@ -142,7 +142,6 @@ class Functions:
         return agg_func_type
 
     def aggregate_windowed_function(self, tree):
-
         agg_func_arg = None
         agg_func_name = None
 

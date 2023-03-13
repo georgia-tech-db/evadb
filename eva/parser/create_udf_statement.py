@@ -134,6 +134,6 @@ class CreateUDFStatement(AbstractStatement):
                 tuple(self.outputs),
                 self.impl_path,
                 self.udf_type,
-                tuple(self.metadata)
+                tuple(self.metadata),
             )
         )
