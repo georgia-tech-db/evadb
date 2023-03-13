@@ -155,7 +155,9 @@ class CatalogManagerTests(unittest.TestCase):
             "udf", "sample.py", "classification", udf_io_list, udf_metadata_list
         )
         udfio_mock.return_value.insert_entries.assert_called_with(udf_io_list)
-        udfmetadata_mock.return_value.insert_entries.assert_called_with(udf_metadata_list)
+        udfmetadata_mock.return_value.insert_entries.assert_called_with(
+            udf_metadata_list
+        )
         udf_mock.return_value.insert_entry.assert_called_with(
             "udf", "sample.py", "classification"
         )
