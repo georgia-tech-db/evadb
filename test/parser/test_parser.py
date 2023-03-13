@@ -609,7 +609,7 @@ class ParserTests(unittest.TestCase):
         self.assertIsInstance(eva_statement_list, list)
         self.assertEqual(len(eva_statement_list), 1)
         self.assertEqual(eva_statement_list[0].stmt_type, StatementType.CREATE_UDF)
-
+        self.assertEqual(str(eva_statement_list[0]), str(expected_stmt))
         create_udf_stmt = eva_statement_list[0]
 
         self.assertEqual(create_udf_stmt, expected_stmt)
