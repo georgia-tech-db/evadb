@@ -13,32 +13,33 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+
 from eva.catalog.catalog_type import NdArrayType
-from eva.udfs.decorators.decorators import setup, forward
+from eva.udfs.decorators.decorators import forward, setup
 from eva.udfs.decorators.io_descriptors.data_types import NumpyArray, PandasDataframe
 
-class DecoratorTests(unittest.TestCase):
 
+class DecoratorTests(unittest.TestCase):
     def test_setup_flags_are_updated(self):
         @setup(cachable=True, udf_type="classification", batchable=True)
         def setup_func():
             pass
 
         setup_func()
-        assert setup_func.tags["cachable"] == True
-        assert setup_func.tags["udf_type"] == "classification"
-        assert setup_func.tags["batchable"] == True
-    
+        self.assertTrue(setup_func.tags["cachable"])
+        self.assertTrue(setup_func.tags["batchable"])
+        self.assertEqual(setup_func.tags["udf_type"], "classification")
+
     def test_setup_flags_are_updated_with_default_values(self):
         @setup()
         def setup_func():
             pass
 
         setup_func()
-        assert setup_func.tags["cachable"] == False
-        assert setup_func.tags["udf_type"] == "Abstract"
-        assert setup_func.tags["batchable"] == True
-    
+        self.assertFalse(setup_func.tags["cachable"])
+        self.assertTrue(setup_func.tags["batchable"])
+        self.assertEqual(setup_func.tags["udf_type"], "Abstract")
+
     def test_forward_flags_are_updated(self):
         input_type = PandasDataframe(
             columns=["Frame_Array"],
@@ -49,12 +50,11 @@ class DecoratorTests(unittest.TestCase):
             name="label",
             type=NdArrayType.STR,
         )
+
         @forward(input_signatures=[input_type], output_signatures=[output_type])
         def forward_func():
             pass
 
         forward_func()
-        assert forward_func.tags["input"] == [input_type]
-        assert forward_func.tags["output"] == [output_type]
-
-    
+        self.assertEqual(forward_func.tags["input"], [input_type])
+        self.assertEqual(forward_func.tags["output"], [output_type])
