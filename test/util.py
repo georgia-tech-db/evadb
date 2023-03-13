@@ -490,7 +490,7 @@ class DummyFeatureExtractor(AbstractClassifierUDF):
 
 
 class DummyObjectDetectorDecorators(AbstractClassifierUDF):
-    @decorators.setup(use_cache=True, udf_type="object_detection", batch=True)
+    @decorators.setup(cachable=True, udf_type="object_detection", batchable=True)
     def setup(self, *args, **kwargs):
         pass
 
