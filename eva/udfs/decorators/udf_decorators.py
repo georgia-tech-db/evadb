@@ -16,7 +16,7 @@
 
 from typing import List
 
-from eva.io_descriptors.eva_arguments import IOArgument
+from eva.io_descriptors.arguments import IOArgument
 
 
 # decorator for the setup function. It will be used to set the cache, batching and
