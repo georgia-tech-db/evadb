@@ -23,6 +23,7 @@ import pandas as pd
 
 from eva.binder.statement_binder import StatementBinder
 from eva.binder.statement_binder_context import StatementBinderContext
+from eva.catalog.catalog_type import NdArrayType
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.models.catalog.frame_info import FrameInfo
 from eva.models.catalog.properties import ColorSpace
@@ -34,7 +35,9 @@ from eva.parser.parser import Parser
 from eva.plan_nodes.abstract_plan import AbstractPlan
 from eva.server.command_handler import execute_query_fetch_all
 from eva.udfs.abstract.abstract_udf import AbstractClassifierUDF
+from eva.udfs.decorators.io_descriptors.data_types import PandasDataframe, NumpyArray
 from eva.udfs.udf_bootstrap_queries import init_builtin_udfs
+from eva.udfs.decorators import udf_decorators
 
 NUM_FRAMES = 10
 FRAME_SIZE = 2 * 2 * 3
@@ -484,3 +487,43 @@ class DummyFeatureExtractor(AbstractClassifierUDF):
         ret = pd.DataFrame()
         ret["features"] = df.apply(_extract_feature, axis=1)
         return ret
+    
+
+class DummyObjectDetectorDecorators(AbstractClassifierUDF):
+    @udf_decorators.setup(use_cache=True, udf_type="object_detection", batch=True)
+    def setup(self, *args, **kwargs):
+        pass
+
+    @property
+    def name(self) -> str:
+        return "DummyObjectDetectorDecorators"
+
+    @property
+    def input_format(self):
+        return FrameInfo(-1, -1, 3, ColorSpace.RGB)
+
+    @property
+    def labels(self):
+        return ["__background__", "person", "bicycle"]
+    
+    @udf_decorators.forward(
+            input_signatures=[ PandasDataframe(
+            columns=["Frame_Array"],
+            column_types=[NdArrayType.UINT8],
+            column_shapes=[(3, 256, 256)]
+        )],
+            output_signatures=[ NumpyArray(
+            name="label",
+            type=NdArrayType.STR,
+        )]
+    )
+    def forward(self, df: pd.DataFrame) -> pd.DataFrame:
+        ret = pd.DataFrame()
+        ret["label"] = df.apply(self.classify_one, axis=1)
+        return ret
+
+    def classify_one(self, frames: np.ndarray):
+        # odd are labeled bicycle and even person
+        i = int(frames[0][0][0][0] * 25) - 1
+        label = self.labels[i % 2 + 1]
+        return np.array([label])
