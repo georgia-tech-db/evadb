@@ -45,7 +45,7 @@ class YoloDecorators(PytorchAbstractClassifierUDF):
     def name(self) -> str:
         return "yolo"
 
-    @setup(use_cache=True, udf_type="object_detection", batch=True)
+    @setup(cachable=True, udf_type="object_detection", batchable=True)
     def setup(self, threshold=0.85):
         self.threshold = threshold
         self.model = torch.hub.load("ultralytics/yolov5", "yolov5s", verbose=False)
