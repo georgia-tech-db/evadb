@@ -603,7 +603,7 @@ class ParserTests(unittest.TestCase):
             ],
             Path("data/fastrcnn.py"),
             "Classification",
-            [("KEY", "VALUE")]
+            [("KEY", "VALUE")],
         )
         eva_statement_list = parser.parse(create_udf_query)
         self.assertIsInstance(eva_statement_list, list)
