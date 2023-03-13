@@ -35,30 +35,5 @@ def load_io_from_udf_decorators(
     io_signature = udf.forward.tags[tag_key]
     result_list = []
     for io in io_signature:
-        if isinstance(io, PandasDataframe):
-            columns = io.columns
-
-            for col in columns:
-                result_list.append(
-                    UdfIOCatalogEntry(
-                        col,
-                        io.type,
-                        io.is_nullable,
-                        io.array_type,
-                        array_dimensions=None,
-                        is_input=is_input,
-                    )
-                )
-
-        else:
-            result_list.append(
-                UdfIOCatalogEntry(
-                    io.name,
-                    io.type,
-                    io.is_nullable,
-                    array_type=io.array_type,
-                    array_dimensions=io.array_dimensions,
-                    is_input=is_input,
-                )
-            )
+        result_list.extend(io.generate_catalog_entries(is_input))
     return result_list

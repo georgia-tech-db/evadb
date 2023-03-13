@@ -12,13 +12,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Tuple
+from typing import Tuple, Type
+from git import List
 
 import numpy as np
 import pandas as pd
 import torch
 
 from eva.catalog.catalog_type import ColumnType, NdArrayType
+from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 from eva.io_descriptors.eva_arguments import IOArgument, IOColumnArgument
 
 
@@ -119,26 +121,28 @@ class PyTorchTensor(IOColumnArgument):
 class PandasDataframe(IOArgument):
     """EVA data type for Pandas Dataframe"""
 
-    def __init__(self, columns, shape, enforce_columns, enforce_shape) -> None:
+    def __init__(self, columns, column_types=[], column_shapes=[]) -> None:
         super().__init__()
         self.columns = columns
+        self.column_types = column_types
+        self.column_shapes = column_shapes
+    
+    def generate_catalog_entries(self, is_input=False) -> List[Type[UdfIOCatalogEntry]]:
+        catalog_entries = []
 
-        self.type = ColumnType.NDARRAY
-        self.array_type = NdArrayType.ANYTYPE
-        self.is_nullable = False
-
-    def check_shape(self, input_object: any, required_shape: tuple = None) -> bool:
-        return True
-
-    def check_column_names(self, input_object):
-        obj_cols = list(input_object.columns)
-        return obj_cols == self.columns
-
-    def check_type(self, input_object) -> bool:
-        return isinstance(input_object, pd.DataFrame)
-
-    def is_output_columns_set(self):
-        return not (self.columns is None)
+        for column_name, column_type, column_shape in zip(self.columns, self.column_types, self.column_shapes):
+            catalog_entries.append(
+                UdfIOCatalogEntry(
+                    name=column_name,
+                    type=ColumnType.NDARRAY,
+                    is_nullable=False,
+                    array_type=column_type,
+                    array_dimensions=column_shape,
+                    is_input=is_input
+                )
+            )
+                
+        return catalog_entries
 
     def arg_name(self):
         return "PandasDataframes"

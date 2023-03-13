@@ -13,9 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from abc import abstractmethod
-from typing import Tuple
+from typing import Tuple, List, Type
 
 from eva.catalog.catalog_type import ColumnType, NdArrayType
+from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 
 
 class IOArgument(object):
@@ -29,6 +30,16 @@ class IOArgument(object):
     @abstractmethod
     def __init__(self) -> None:
         pass
+
+    @abstractmethod
+    def generate_catalog_entries(self, *args, **kwargs) -> List[Type[UdfIOCatalogEntry]]:
+        """Generates the catalog IO entries from the Argument.
+
+        Returns:
+            list: list of catalog entries for the EvaArgument.
+
+        """
+        raise NotImplementedError
 
     @abstractmethod
     def check_type(self, input_object: any) -> bool:
@@ -114,7 +125,7 @@ class IOArgument(object):
         return True
 
 
-class IOColumnArgument(object):
+class IOColumnArgument(IOArgument):
     """ """
 
     @abstractmethod
@@ -138,3 +149,21 @@ class IOColumnArgument(object):
         self.is_nullable = is_nullable
         self.array_type = array_type
         self.array_dimensions = array_dimensions
+
+    
+    def generate_catalog_entries(self, is_input=False) -> List[Type[UdfIOCatalogEntry]]:
+        """Generates the catalog IO entries from the Argument.
+
+        Returns:
+            list: list of catalog entries for the EvaArgument.
+
+        """
+        return [
+            UdfIOCatalogEntry(
+                name=self.name,
+                type=self.type,
+                is_nullable=self.is_nullable,
+                array_type=self.array_type,
+                array_dimensions=self.array_dimensions,
+                is_input=is_input)
+        ]

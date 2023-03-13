@@ -162,9 +162,8 @@ class YoloDecorators(PytorchAbstractClassifierUDF):
         output_signatures=[
             PandasDataframe(
                 columns=["labels", "bboxes", "scores"],
-                shape=(5, 3),
-                enforce_columns=False,
-                enforce_shape=False,
+                column_types = [NdArrayType.STR, NdArrayType.FLOAT32, NdArrayType.FLOAT32],
+                column_shapes = [(None,), (None,), (None,)],
             )
         ],
     )

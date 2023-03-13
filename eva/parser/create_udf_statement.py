@@ -59,24 +59,32 @@ class CreateUDFStatement(AbstractStatement):
         self._udf_type = udf_type
 
     def __str__(self) -> str:
+        exists_str = ""
+        if self._if_not_exists:
+            exists_str += "IF NOT EXISTS"
+
         input_str = ""
         if self._inputs is not None:
+            input_str += "INPUT ("
             for expr in self._inputs:
                 input_str += str(expr) + ", "
             input_str = input_str.rstrip(", ")
+            input_str += ")"
 
         output_str = ""
         if self._outputs is not None:
+            output_str += "OUTPUT ("
             for expr in self._outputs:
                 output_str += str(expr) + ", "
             output_str = output_str.rstrip(", ")
+            output_str += ")"
+        
+        type_str = ""
+        if self._udf_type is not None:
+            type_str += "TYPE " + self._udf_type
 
-        if len(input_str) > 0:
-            return f"CREATE UDF {self._name} INPUT ({input_str}) OUTPUT ({output_str}) TYPE {self._udf_type} IMPL {self._impl_path.name}"
-        elif len(self._udf_type) > 0:
-            return f"CREATE UDF {self._name} TYPE {self._udf_type} IMPL {self._impl_path.name}"
-        else:
-            return f"CREATE UDF {self._name} IMPL {self._impl_path.name}"
+        return f"CREATE UDF {exists_str}{self._name} {input_str} {output_str} {type_str} IMPL {self._impl_path.name}"
+
 
     @property
     def name(self):

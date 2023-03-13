@@ -24,8 +24,6 @@ from eva.io_descriptors.eva_arguments import IOArgument
 def setup(use_cache: bool, udf_type: str, batch: bool):
     def inner_fn(arg_fn):
         def wrapper(*args, **kwargs):
-            # TODO set the batch and caching parameters. update in catalog
-
             # calling the setup function defined by the user inside the udf implementation
             arg_fn(*args, **kwargs)
 
@@ -51,11 +49,8 @@ def forward(input_signatures: List[IOArgument], output_signatures: List[IOArgume
 
     def inner_fn(arg_fn):
         def wrapper(*args):
-            frames = args[1]
-
-            # first argument is self and second is frames.
-            output = arg_fn(args[0], frames)
-            return output
+            # calling the forward function defined by the user inside the udf implementation
+            return arg_fn(*args)
 
         tags = {}
         tags["input"] = input_signatures
