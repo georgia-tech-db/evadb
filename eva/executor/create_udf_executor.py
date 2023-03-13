@@ -21,6 +21,7 @@ from eva.plan_nodes.create_udf_plan import CreateUDFPlan
 from eva.udfs.decorators.utils import load_io_from_udf_decorators
 from eva.utils.generic_utils import load_udf_class_from_file
 from eva.utils.logging_manager import logger
+from eva.utils.errors import UDFIODefinitionError
 
 
 class CreateUDFExecutor(AbstractExecutor):
@@ -61,17 +62,22 @@ class CreateUDFExecutor(AbstractExecutor):
             raise RuntimeError(err_msg)
 
         io_list = []
-        if self.node.inputs:
-            io_list.extend(self.node.inputs)
-        else:
-            # try to load the inputs from decorators, the inputs from CREATE statement take precedence
-            io_list.extend(load_io_from_udf_decorators(udf, is_input=True))
+        try:
+            if self.node.inputs:
+                io_list.extend(self.node.inputs)
+            else:
+                # try to load the inputs from decorators, the inputs from CREATE statement take precedence
+                io_list.extend(load_io_from_udf_decorators(udf, is_input=True))
 
-        if self.node.outputs:
-            io_list.extend(self.node.outputs)
-        else:
-            # try to load the outputs from decorators, the outputs from CREATE statement take precedence
-            io_list.extend(load_io_from_udf_decorators(udf, is_input=False))
+            if self.node.outputs:
+                io_list.extend(self.node.outputs)
+            else:
+                # try to load the outputs from decorators, the outputs from CREATE statement take precedence
+                io_list.extend(load_io_from_udf_decorators(udf, is_input=False))
+        except UDFIODefinitionError as e:
+            err_msg = f"Error creating UDF, input/output definition incorrect: {str(e)}"
+            logger.error(err_msg)
+            raise RuntimeError(err_msg)
 
         catalog_manager.insert_udf_catalog_entry(
             self.node.name, impl_path, self.node.udf_type, io_list

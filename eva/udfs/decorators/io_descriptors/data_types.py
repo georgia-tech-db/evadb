@@ -14,12 +14,13 @@
 # limitations under the License.
 from typing import List, Tuple, Type
 
-from eva.catalog.catalog_type import ColumnType, NdArrayType
+from eva.catalog.catalog_type import ColumnType, Dimension, NdArrayType
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 from eva.udfs.decorators.io_descriptors.abstract_types import (
     IOArgument,
     IOColumnArgument,
 )
+from eva.utils.errors import UDFIODefinitionError
 
 
 class NumpyArray(IOColumnArgument):
@@ -71,6 +72,19 @@ class PandasDataframe(IOArgument):
 
     def generate_catalog_entries(self, is_input=False) -> List[Type[UdfIOCatalogEntry]]:
         catalog_entries = []
+
+        if not self.column_types:
+            self.column_types = [NdArrayType.ANYTYPE] * len(self.columns)
+        
+        if not self.column_shapes:
+            self.column_shapes = [Dimension.ANYDIM] * len(self.columns)
+
+        # check that columns, column_types and column_shpes are of same length
+        if len(self.columns) != len(self.column_types) or len(self.columns) != len(self.column_shapes):
+            raise UDFIODefinitionError(
+                "columns, column_types and column_shapes should be of same length if specified. "
+            )
+    
 
         for column_name, column_type, column_shape in zip(
             self.columns, self.column_types, self.column_shapes

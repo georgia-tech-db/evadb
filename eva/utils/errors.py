@@ -15,6 +15,8 @@
 class CatalogError(Exception):
     pass
 
+class UDFIODefinitionError(Exception):
+    pass
 
 class DatasetFileNotFoundError(Exception):
     def __init__(
