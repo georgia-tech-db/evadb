@@ -128,7 +128,11 @@ class StatementToOprTest(unittest.TestCase):
         "eva.optimizer.\
 statement_to_opr_convertor.column_definition_to_udf_io"
     )
-    def test_visit_create_udf(self, mock, l_create_udf_mock):
+    @patch(
+        "eva.optimizer.\
+statement_to_opr_convertor.metadata_definition_to_udf_metadata"
+    )
+    def test_visit_create_udf(self, metadata_def_mock, col_def_mock, l_create_udf_mock):
         convertor = StatementToPlanConvertor()
         stmt = MagicMock()
         stmt.name = "name"
@@ -137,10 +141,13 @@ statement_to_opr_convertor.column_definition_to_udf_io"
         stmt.outputs = ["out"]
         stmt.impl_path = "tmp.py"
         stmt.udf_type = "classification"
-        mock.side_effect = ["inp", "out"]
+        stmt.metadata = [("key", "value")]
+        col_def_mock.side_effect = ["inp", "out"]
+        metadata_def_mock.side_effect = [{"key": "value"}]
         convertor.visit_create_udf(stmt)
-        mock.assert_any_call(stmt.inputs, True)
-        mock.assert_any_call(stmt.outputs, False)
+        col_def_mock.assert_any_call(stmt.inputs, True)
+        col_def_mock.assert_any_call(stmt.outputs, False)
+        metadata_def_mock.assert_any_call(stmt.metadata)
         l_create_udf_mock.assert_called_once()
         l_create_udf_mock.assert_called_with(
             stmt.name,
@@ -149,6 +156,7 @@ statement_to_opr_convertor.column_definition_to_udf_io"
             "out",
             stmt.impl_path,
             stmt.udf_type,
+            {"key": "value"}
         )
 
     def test_visit_should_call_create_udf(self):
@@ -166,6 +174,7 @@ statement_to_opr_convertor.column_definition_to_udf_io"
         "eva.optimizer.\
 statement_to_opr_convertor.column_definition_to_udf_io"
     )
+    @patch("eva.optimizer.statement_to_opr_convertor.metadata_definition_to_udf_metadata")
     def test_visit_drop_udf(self, mock, l_drop_udf_mock):
         convertor = StatementToPlanConvertor()
         stmt = MagicMock()
