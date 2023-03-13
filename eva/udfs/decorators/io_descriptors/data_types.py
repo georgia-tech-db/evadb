@@ -75,16 +75,17 @@ class PandasDataframe(IOArgument):
 
         if not self.column_types:
             self.column_types = [NdArrayType.ANYTYPE] * len(self.columns)
-        
+
         if not self.column_shapes:
             self.column_shapes = [Dimension.ANYDIM] * len(self.columns)
 
         # check that columns, column_types and column_shpes are of same length
-        if len(self.columns) != len(self.column_types) or len(self.columns) != len(self.column_shapes):
+        if len(self.columns) != len(self.column_types) or len(self.columns) != len(
+            self.column_shapes
+        ):
             raise UDFIODefinitionError(
                 "columns, column_types and column_shapes should be of same length if specified. "
             )
-    
 
         for column_name, column_type, column_shape in zip(
             self.columns, self.column_types, self.column_shapes
