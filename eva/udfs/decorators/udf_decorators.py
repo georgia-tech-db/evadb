@@ -16,7 +16,7 @@
 
 from typing import List
 
-from eva.io_descriptors.arguments import IOArgument
+from eva.udfs.decorators.io_descriptors.abstract_types import IOArgument
 
 
 # decorator for the setup function. It will be used to set the cache, batching and

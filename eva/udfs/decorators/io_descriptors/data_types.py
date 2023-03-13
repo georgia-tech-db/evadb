@@ -19,11 +19,11 @@ import torch
 
 from eva.catalog.catalog_type import ColumnType, NdArrayType
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
-from eva.io_descriptors.arguments import IOArgument, IOColumnArgument
+from eva.udfs.decorators.io_descriptors.abstract_types import IOArgument, IOColumnArgument
 
 
 class NumpyArray(IOColumnArgument):
-    """EVA data type for Numpy Array"""
+    """Descriptor data type for Numpy Array"""
 
     def __init__(
         self,
@@ -70,7 +70,7 @@ class NumpyArray(IOColumnArgument):
 
 
 class PyTorchTensor(IOColumnArgument):
-    """EVA data type for PyTorch Tensor"""
+    """Descriptor data type for PyTorch Tensor"""
 
     def __init__(
         self,
@@ -117,7 +117,7 @@ class PyTorchTensor(IOColumnArgument):
 
 
 class PandasDataframe(IOArgument):
-    """EVA data type for Pandas Dataframe"""
+    """Descriptor data type for Pandas Dataframe"""
 
     def __init__(self, columns, column_types=[], column_shapes=[]) -> None:
         super().__init__()
