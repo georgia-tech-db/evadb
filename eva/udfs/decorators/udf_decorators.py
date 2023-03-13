@@ -28,6 +28,7 @@ def setup(use_cache: bool, udf_type: str, batch: bool):
         udf_type (str): Type of the udf
         batch (bool): True if the udf should be batched
     """
+
     def inner_fn(arg_fn):
         def wrapper(*args, **kwargs):
             # calling the setup function defined by the user inside the udf implementation
@@ -44,7 +45,7 @@ def setup(use_cache: bool, udf_type: str, batch: bool):
 
 
 def forward(input_signatures: List[IOArgument], output_signatures: List[IOArgument]):
-    """decorator for the forward function. It will be used to set the input and output. 
+    """decorator for the forward function. It will be used to set the input and output.
 
     Args:
         input_signature (List[IOArgument]): List of input arguments for the udf
