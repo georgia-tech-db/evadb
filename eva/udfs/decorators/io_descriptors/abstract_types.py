@@ -43,7 +43,7 @@ class IOArgument(object):
 
 
 class IOColumnArgument(IOArgument):
-    """ 
+    """
     Base class for IO arguments that are represented indvidually as columns in the catalog.
     """
 

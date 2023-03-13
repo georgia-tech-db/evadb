@@ -19,7 +19,10 @@ import torch
 
 from eva.catalog.catalog_type import ColumnType, NdArrayType
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
-from eva.udfs.decorators.io_descriptors.abstract_types import IOArgument, IOColumnArgument
+from eva.udfs.decorators.io_descriptors.abstract_types import (
+    IOArgument,
+    IOColumnArgument,
+)
 
 
 class NumpyArray(IOColumnArgument):
