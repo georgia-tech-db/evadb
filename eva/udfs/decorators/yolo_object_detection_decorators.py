@@ -17,7 +17,7 @@ from typing import List
 import pandas as pd
 
 from eva.catalog.catalog_type import NdArrayType
-from eva.io_descriptors.eva_data_types import PandasDataframe, PyTorchTensor
+from eva.io_descriptors.data_types import PandasDataframe, PyTorchTensor
 from eva.models.catalog.frame_info import FrameInfo
 from eva.models.catalog.properties import ColorSpace
 from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
