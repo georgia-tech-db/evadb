@@ -61,7 +61,7 @@ class CreateUDFStatement(AbstractStatement):
     def __str__(self) -> str:
         exists_str = ""
         if self._if_not_exists:
-            exists_str += "IF NOT EXISTS"
+            exists_str += "IF NOT EXISTS "
 
         input_str = ""
         if self._inputs is not None:

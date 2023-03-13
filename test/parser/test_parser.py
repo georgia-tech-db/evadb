@@ -571,7 +571,7 @@ class ParserTests(unittest.TestCase):
 
     def test_create_udf_statement(self):
         parser = Parser()
-        create_udf_query = """CREATE UDF FastRCNN
+        create_udf_query = """CREATE UDF IF NOT EXISTS FastRCNN
                   INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
                   OUTPUT (Labels NDARRAY STR(10), Bbox NDARRAY UINT8(10, 4))
                   TYPE  Classification
@@ -582,7 +582,7 @@ class ParserTests(unittest.TestCase):
         expected_cci.nullable = True
         expected_stmt = CreateUDFStatement(
             "FastRCNN",
-            False,
+            True,
             Path("data/fastrcnn.py"),
             [
                 ColumnDefinition(
