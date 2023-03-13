@@ -13,14 +13,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+
 from eva.catalog.catalog_type import ColumnType, Dimension, NdArrayType
-from eva.udfs.decorators.io_descriptors.data_types import NumpyArray, PyTorchTensor, PandasDataframe
+from eva.udfs.decorators.io_descriptors.data_types import (
+    NumpyArray,
+    PandasDataframe,
+    PyTorchTensor,
+)
 from eva.utils.errors import UDFIODefinitionError
 
+
 class UDFIODescriptorsTests(unittest.TestCase):
-    
     def test_catalog_entry_for_numpy_entry(self):
-        numpy_array = NumpyArray(name="input", is_nullable=False, type=NdArrayType.UINT8, dimensions=(2, 2))
+        numpy_array = NumpyArray(
+            name="input", is_nullable=False, type=NdArrayType.UINT8, dimensions=(2, 2)
+        )
         catalog_entries = numpy_array.generate_catalog_entries()
 
         # check that there is only a single catalog entry
@@ -36,7 +43,9 @@ class UDFIODescriptorsTests(unittest.TestCase):
         self.assertEqual(catalog_entry.is_input, False)
 
     def test_catalog_entry_for_pytorch_entry(self):
-        pytorch_tensor = PyTorchTensor(name="input", is_nullable=False, type=NdArrayType.UINT8, dimensions=(2, 2))
+        pytorch_tensor = PyTorchTensor(
+            name="input", is_nullable=False, type=NdArrayType.UINT8, dimensions=(2, 2)
+        )
         catalog_entries = pytorch_tensor.generate_catalog_entries()
 
         # check that there is only a single catalog entry
@@ -55,7 +64,7 @@ class UDFIODescriptorsTests(unittest.TestCase):
         # dataframe has only columns defined
         pandas_dataframe = PandasDataframe(columns=["Frame_Array"])
         catalog_entries = pandas_dataframe.generate_catalog_entries()
-        
+
         # check that there is only a single catalog entry
         self.assertEqual(len(catalog_entries), 1)
 
@@ -66,7 +75,6 @@ class UDFIODescriptorsTests(unittest.TestCase):
         self.assertEqual(catalog_entry.is_nullable, False)
         self.assertEqual(catalog_entry.array_type, NdArrayType.ANYTYPE)
         self.assertEqual(catalog_entry.array_dimensions, Dimension.ANYDIM)
-    
 
     def test_catalog_entry_for_pandas_entry_with_single_column(self):
         pandas_dataframe = PandasDataframe(
@@ -148,4 +156,3 @@ class UDFIODescriptorsTests(unittest.TestCase):
         )
         with self.assertRaises(UDFIODefinitionError):
             pandas_dataframe.generate_catalog_entries()
-
