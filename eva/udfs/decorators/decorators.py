@@ -35,9 +35,9 @@ def setup(cachable: bool, udf_type: str, batchable: bool):
             arg_fn(*args, **kwargs)
 
         tags = {}
-        tags["cache"] = use_cache
+        tags["cachable"] = cachable
         tags["udf_type"] = udf_type
-        tags["batching"] = batch
+        tags["batchable"] = batchable
         wrapper.tags = tags
         return wrapper
 
