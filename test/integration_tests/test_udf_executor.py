@@ -254,4 +254,3 @@ class UDFExecutorTest(unittest.TestCase):
             self.assertEquals(
                 getattr(udf_output, attr), expected_output_attributes[attr]
             )
-    
