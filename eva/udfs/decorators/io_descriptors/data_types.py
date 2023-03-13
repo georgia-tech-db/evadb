@@ -43,31 +43,6 @@ class NumpyArray(IOColumnArgument):
             array_dimensions=dimensions,
         )
 
-    def check_type(self, input_object) -> bool:
-        if self.dtype:
-            if self.dtype == "int32":
-                return isinstance(input_object, np.ndarray) and (
-                    input_object.dtype == np.int32
-                )
-            elif self.dtype == "float16":
-                return isinstance(input_object, np.ndarray) and (
-                    input_object.dtype == np.float16
-                )
-            elif self.dtype == "float32":
-                return isinstance(input_object, np.ndarray) and (
-                    input_object.dtype == np.float32
-                )
-
-        elif not self.dtype:
-            return isinstance(input_object, np.ndarray)
-
-    def check_shape(self, input_object) -> bool:
-        if self.shape:
-            if input_object.shape != self.shape:
-                return False
-
-        return True
-
     def arg_name(self):
         return "NumpyArray"
 
@@ -89,31 +64,6 @@ class PyTorchTensor(IOColumnArgument):
             array_type=type,
             array_dimensions=dimensions,
         )
-
-    def check_type(self, input_object) -> bool:
-        if self.array_type:
-            if self.array_type == "int32":
-                return isinstance(input_object, torch.Tensor) and (
-                    input_object.dtype == torch.int32
-                )
-            elif self.array_type == "float16":
-                return isinstance(input_object, torch.Tensor) and (
-                    input_object.dtype == torch.float16
-                )
-            elif self.array_type == "float32":
-                return isinstance(input_object, torch.Tensor) and (
-                    input_object.dtype == torch.float32
-                )
-
-        elif not self.array_type:
-            return isinstance(input_object, torch.Tensor)
-
-    def check_shape(self, input_object) -> bool:
-        if self.shape:
-            if input_object.shape != self.shape:
-                return False
-
-        return True
 
     def arg_name(self):
         return "PyTorch Tensor"
