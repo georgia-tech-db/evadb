@@ -15,7 +15,6 @@
 from typing import List, Type
 
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
-from eva.io_descriptors.eva_data_types import PandasDataframe
 from eva.udfs.abstract.abstract_udf import AbstractUDF
 
 

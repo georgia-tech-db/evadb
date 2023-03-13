@@ -78,13 +78,12 @@ class CreateUDFStatement(AbstractStatement):
                 output_str += str(expr) + ", "
             output_str = output_str.rstrip(", ")
             output_str += ")"
-        
+
         type_str = ""
         if self._udf_type is not None:
             type_str += "TYPE " + self._udf_type
 
         return f"CREATE UDF {exists_str}{self._name} {input_str} {output_str} {type_str} IMPL {self._impl_path.name}"
-
 
     @property
     def name(self):
