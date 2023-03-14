@@ -39,7 +39,7 @@ class IOArgument(ABC):
             list: list of catalog entries for the EvaArgument.
 
         """
-        raise NotImplementedError
+        pass
 
 
 class IOColumnArgument(IOArgument):
