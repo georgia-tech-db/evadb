@@ -24,8 +24,6 @@ except ImportError:
     raise ImportError(
         f"torchvision>=0.14.0 is required to use MVITActionRecognition, found {torchvision.__version__}"
     )
-from eva.models.catalog.frame_info import FrameInfo
-from eva.models.catalog.properties import ColorSpace
 from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
 
 

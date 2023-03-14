@@ -18,9 +18,6 @@ from typing import List, Union
 import pandas as pd
 from numpy.typing import ArrayLike
 
-from eva.models.catalog.frame_info import FrameInfo
-from eva.models.catalog.properties import ColorSpace
-
 InputType = Union[pd.DataFrame, ArrayLike]
 
 

@@ -25,8 +25,6 @@ from eva.binder.statement_binder import StatementBinder
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.catalog.catalog_type import NdArrayType
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.models.catalog.frame_info import FrameInfo
-from eva.models.catalog.properties import ColorSpace
 from eva.models.storage.batch import Batch
 from eva.optimizer.operators import Operator
 from eva.optimizer.plan_generator import PlanGenerator

@@ -31,8 +31,6 @@ except ImportError:
 import torch.nn as nn
 import torchvision
 
-from eva.models.catalog.frame_info import FrameInfo
-from eva.models.catalog.properties import ColorSpace
 from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
 
 

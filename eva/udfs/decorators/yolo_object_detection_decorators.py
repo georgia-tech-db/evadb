@@ -17,8 +17,6 @@ from typing import List
 import pandas as pd
 
 from eva.catalog.catalog_type import NdArrayType
-from eva.models.catalog.frame_info import FrameInfo
-from eva.models.catalog.properties import ColorSpace
 from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
 from eva.udfs.decorators.decorators import forward, setup
 from eva.udfs.decorators.io_descriptors.data_types import PandasDataframe, PyTorchTensor
@@ -49,7 +47,6 @@ class YoloDecorators(PytorchAbstractClassifierUDF):
     def setup(self, threshold=0.85):
         self.threshold = threshold
         self.model = torch.hub.load("ultralytics/yolov5", "yolov5s", verbose=False)
-
 
     @property
     def labels(self) -> List[str]:
