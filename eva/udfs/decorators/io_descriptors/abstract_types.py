@@ -12,14 +12,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from typing import List, Tuple, Type
 
 from eva.catalog.catalog_type import ColumnType, NdArrayType
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 
 
-class IOArgument(object):
+class IOArgument(ABC):
     """
     Base class for representing inputs/outputs (IO) of a UDF using decorators. This class defines methods
     that are common for all the IO arguments.
