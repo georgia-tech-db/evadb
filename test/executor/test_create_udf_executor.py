@@ -15,8 +15,8 @@
 import unittest
 
 from mock import MagicMock, patch
-from eva.catalog.catalog_type import NdArrayType
 
+from eva.catalog.catalog_type import NdArrayType
 from eva.executor.create_udf_executor import CreateUDFExecutor
 from eva.udfs.decorators.io_descriptors.data_types import PandasDataframe
 
@@ -50,10 +50,12 @@ class CreateUdfExecutorTest(unittest.TestCase):
         catalog_instance.insert_udf_catalog_entry.assert_called_with(
             "udf", "test.py", "classification", ["inp", "out"]
         )
-    
+
     @patch("eva.executor.create_udf_executor.CatalogManager")
     @patch("eva.executor.create_udf_executor.load_udf_class_from_file")
-    def test_should_raise_error_on_incorrect_io_definition(self, load_udf_class_from_file_mock, mock):
+    def test_should_raise_error_on_incorrect_io_definition(
+        self, load_udf_class_from_file_mock, mock
+    ):
         catalog_instance = mock.return_value
         catalog_instance.get_udf_catalog_entry_by_name.return_value = None
         catalog_instance.insert_udf_catalog_entry.return_value = "udf"
@@ -66,7 +68,10 @@ class CreateUdfExecutorTest(unittest.TestCase):
             column_types=[NdArrayType.UINT8],
             column_shapes=[(3, 256, 256), (3, 256, 256)],
         )
-        load_udf_class_from_file_mock.return_value.forward.tags = {"input":  [incorrect_input_definition] , "output": []}
+        load_udf_class_from_file_mock.return_value.forward.tags = {
+            "input": [incorrect_input_definition],
+            "output": [],
+        }
         plan = type(
             "CreateUDFPlan",
             (),
@@ -84,6 +89,8 @@ class CreateUdfExecutorTest(unittest.TestCase):
         # check a string in the error message
         with self.assertRaises(RuntimeError) as ce:
             next(create_udf_executor.exec())
-        self.assertIn("Error creating UDF, input/output definition incorrect:", str(ce.exception))
+        self.assertIn(
+            "Error creating UDF, input/output definition incorrect:", str(ce.exception)
+        )
 
         catalog_instance.insert_udf_catalog_entry.assert_not_called()
