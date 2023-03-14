@@ -57,10 +57,6 @@ class FastRCNNObjectDetector(PytorchAbstractClassifierUDF):
         self.model.eval()
 
     @property
-    def input_format(self) -> FrameInfo:
-        return FrameInfo(-1, -1, 3, ColorSpace.RGB)
-
-    @property
     def labels(self) -> List[str]:
         return [
             "__background__",

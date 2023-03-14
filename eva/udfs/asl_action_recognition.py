@@ -69,10 +69,6 @@ class ASLActionRecognition(PytorchAbstractClassifierUDF):
         self.preprocess = self.weights.transforms()
 
     @property
-    def input_format(self) -> FrameInfo:
-        return FrameInfo(-1, -1, 3, ColorSpace.RGB)
-
-    @property
     def labels(self) -> np.array([str]):
         current_file_path = os.path.dirname(os.path.realpath(__file__))
         pkl_file_path = os.path.join(current_file_path, "asl_20_actions_map.pkl")

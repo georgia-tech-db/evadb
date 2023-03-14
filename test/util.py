@@ -404,10 +404,6 @@ class DummyObjectDetector(AbstractClassifierUDF):
         return "DummyObjectDetector"
 
     @property
-    def input_format(self):
-        return FrameInfo(-1, -1, 3, ColorSpace.RGB)
-
-    @property
     def labels(self):
         return ["__background__", "person", "bicycle"]
 
@@ -434,10 +430,6 @@ class DummyMultiObjectDetector(AbstractClassifierUDF):
     @property
     def name(self) -> str:
         return "DummyMultiObjectDetector"
-
-    @property
-    def input_format(self):
-        return FrameInfo(-1, -1, 3, ColorSpace.RGB)
 
     @property
     def labels(self):
@@ -468,10 +460,6 @@ class DummyFeatureExtractor(AbstractClassifierUDF):
         return "DummyFeatureExtractor"
 
     @property
-    def input_format(self):
-        return FrameInfo(-1, -1, 3, ColorSpace.RGB)
-
-    @property
     def labels(self):
         return []
 
@@ -497,10 +485,6 @@ class DummyObjectDetectorDecorators(AbstractClassifierUDF):
     @property
     def name(self) -> str:
         return "DummyObjectDetectorDecorators"
-
-    @property
-    def input_format(self):
-        return FrameInfo(-1, -1, 3, ColorSpace.RGB)
 
     @property
     def labels(self):

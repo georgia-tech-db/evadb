@@ -63,10 +63,6 @@ class AbstractUDF(metaclass=ABCMeta):
     def name(self) -> str:
         pass
 
-    @property
-    def input_format(self) -> FrameInfo:
-        return FrameInfo(-1, -1, 3, ColorSpace.RGB)
-
 
 class AbstractClassifierUDF(AbstractUDF):
     @property

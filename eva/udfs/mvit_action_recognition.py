@@ -41,10 +41,6 @@ class MVITActionRecognition(PytorchAbstractClassifierUDF):
         self.model.eval()
 
     @property
-    def input_format(self) -> FrameInfo:
-        return FrameInfo(-1, -1, 3, ColorSpace.RGB)
-
-    @property
     def labels(self) -> np.array([str]):
         return np.array(self.weights.meta["categories"])
 

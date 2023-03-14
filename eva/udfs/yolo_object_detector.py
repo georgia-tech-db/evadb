@@ -49,10 +49,6 @@ class YoloV5(PytorchAbstractClassifierUDF):
         self.model = torch.hub.load("ultralytics/yolov5", "yolov5s", verbose=False)
 
     @property
-    def input_format(self) -> FrameInfo:
-        return FrameInfo(640, 1280, 3, ColorSpace.RGB)
-
-    @property
     def labels(self) -> List[str]:
         return [
             "__background__",

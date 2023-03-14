@@ -41,9 +41,6 @@ class ToxicityClassifier(AbstractClassifierUDF):
         self.threshold = threshold
         self.model = detoxify.Detoxify("original")
 
-    @property
-    def input_format(self) -> str:
-        return str
 
     @property
     def labels(self) -> List[str]:
