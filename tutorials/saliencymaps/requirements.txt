@@ -1,0 +1,6 @@
+evadb
+pandas
+numpy
+torch
+torchvision
+pydicom
