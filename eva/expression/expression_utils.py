@@ -21,6 +21,8 @@ from eva.expression.constant_value_expression import ConstantValueExpression
 from eva.expression.logical_expression import LogicalExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
 
+from eva.catalog.models.table_catalog import TableCatalogEntry
+
 
 def to_conjunction_list(
     expression_tree: AbstractExpression,
@@ -297,3 +299,26 @@ def is_simple_predicate(predicate: AbstractExpression) -> bool:
     ]
 
     return _has_simple_expressions(predicate) and contains_single_column(predicate)
+
+
+def predicate_node_to_filter(
+        self, table: TableCatalogEntry, predicate_node: ComparisonExpression
+    ):
+        filter_clause = []
+        column = predicate_node.children[0].col_name
+        value = predicate_node.children[1].value
+
+        if predicate_node.etype == ExpressionType.COMPARE_EQUAL:
+            filter_clause.append(table.columns[column] == value)
+        elif predicate_node.etype == ExpressionType.COMPARE_GREATER:
+            filter_clause.append(table.columns[column] > value)
+        elif predicate_node.etype == ExpressionType.COMPARE_LESSER:
+            filter_clause.append(table.columns[column] < value)
+        elif predicate_node.etype == ExpressionType.COMPARE_GEQ:
+            filter_clause.append(table.columns[column] >= value)
+        elif predicate_node.etype == ExpressionType.COMPARE_LEQ:
+            filter_clause.append(table.columns[column] <= value)
+        elif predicate_node.etype == ExpressionType.COMPARE_NEQ:
+            filter_clause.append(table.columns[column] != value)
+
+        return filter_clause

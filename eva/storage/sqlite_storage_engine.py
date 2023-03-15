@@ -26,6 +26,7 @@ from eva.catalog.schema_utils import SchemaUtils
 from eva.catalog.sql_config import IDENTIFIER_COLUMN, SQLConfig
 from eva.expression.abstract_expression import ExpressionType
 from eva.expression.comparison_expression import ComparisonExpression
+from eva.expression.expression_utils import predicate_node_to_filter
 from eva.models.storage.batch import Batch
 from eva.parser.table_ref import TableInfo
 from eva.storage.abstract_storage_engine import AbstractStorageEngine
@@ -186,27 +187,7 @@ class SQLStorageEngine(AbstractStorageEngine):
             logger.exception(err_msg)
             raise Exception(err_msg)
 
-    def single_predicate_node_to_filter(
-        self, table: TableCatalogEntry, predicate_node: ComparisonExpression
-    ):
-        filter_clause = []
-        column = predicate_node.children[0].col_name
-        value = predicate_node.children[1].value
-
-        if predicate_node.etype == ExpressionType.COMPARE_EQUAL:
-            filter_clause.append(table.columns[column] == value)
-        elif predicate_node.etype == ExpressionType.COMPARE_GREATER:
-            filter_clause.append(table.columns[column] > value)
-        elif predicate_node.etype == ExpressionType.COMPARE_LESSER:
-            filter_clause.append(table.columns[column] < value)
-        elif predicate_node.etype == ExpressionType.COMPARE_GEQ:
-            filter_clause.append(table.columns[column] >= value)
-        elif predicate_node.etype == ExpressionType.COMPARE_LEQ:
-            filter_clause.append(table.columns[column] <= value)
-        elif predicate_node.etype == ExpressionType.COMPARE_NEQ:
-            filter_clause.append(table.columns[column] != value)
-
-        return filter_clause
+    
 
     def delete(self, table: TableCatalogEntry, where_clause: ComparisonExpression):
         """Delete tuples from the table where rows satisfy the where_clause.
