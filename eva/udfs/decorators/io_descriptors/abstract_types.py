@@ -40,6 +40,20 @@ class IOArgument(ABC):
 
         """
         pass
+    
+    @abstractmethod
+    def check_array_and_convert_shape(self, input_obj):
+        pass
+    
+    @abstractmethod
+    def check_array_and_convert_type(self, input_obj, data_type):
+        pass
+    
+    def is_array_type_defined(self):
+        return not(self.array_type == None)
+    
+    def is_shape_defined(self):
+        return not(self.array_dimensions == None)
 
 
 class IOColumnArgument(IOArgument):
@@ -86,3 +100,6 @@ class IOColumnArgument(IOArgument):
                 is_input=is_input,
             )
         ]
+    
+            
+        

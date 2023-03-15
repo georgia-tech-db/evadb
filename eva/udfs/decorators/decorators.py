@@ -17,6 +17,7 @@
 from typing import List
 
 from eva.udfs.decorators.io_descriptors.abstract_types import IOArgument
+from eva.utils.errors import UDFIODefinitionError
 
 
 def setup(cachable: bool = False, udf_type: str = "Abstract", batchable: bool = True):
@@ -53,7 +54,34 @@ def forward(input_signatures: List[IOArgument], output_signatures: List[IOArgume
     """
 
     def inner_fn(arg_fn):
+        
         def wrapper(*args):
+            
+            #checking the user constraints
+            for i, input_signature in enumerate(input_signatures):
+                args_lst = []
+                args_lst.append(args[0])
+                
+                #if data type has been specified
+                if input_signature.is_array_type_defined():
+                    
+                    try:
+                        #the first argument is self, so starting from index 1
+                        args_lst.append(input_signature.check_array_and_convert_type(args[i+1]))
+                    except UDFIODefinitionError as e:
+                        msg = "Data type mismatch of Input parameter. " + str(e)
+                        raise UDFIODefinitionError(msg)
+                
+                #if the shape has been specified
+                if input_signature.is_shape_defined():
+                    try:
+                        args_lst[i+1] = input_signature.check_array_and_convert_shape(args_lst[i+1])
+                    except UDFIODefinitionError as e:
+                        msg = "Shape mismatch of Input parameter. " + str(e)
+                        raise UDFIODefinitionError(msg)
+                    
+                args = tuple(args_lst)
+            
             # calling the forward function defined by the user inside the udf implementation
             return arg_fn(*args)
 
