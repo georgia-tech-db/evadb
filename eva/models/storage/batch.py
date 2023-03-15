@@ -175,12 +175,9 @@ class Batch:
         """
         in_place sort
         """
+        assert self.empty() is not False
         if by is None:
-            if not self.empty():
-                by = self.columns[0]
-            else:
-                logger.warn("Sorting an empty batch")
-                return
+            by = self.columns[0]
         self._frames.sort_values(by=by, ignore_index=True, inplace=True)
 
     def sort_orderby(self, by, sort_type=None) -> None:
@@ -196,21 +193,16 @@ class Batch:
         if sort_type is None:
             sort_type = [True]
 
-        if by is not None:
-            for column in by:
-                if column not in self._frames.columns:
-                    logger.error(
-                        "Can not orderby non-projected column: {}".format(column)
-                    )
-                    raise KeyError(
-                        "Can not orderby non-projected column: {}".format(column)
-                    )
+        assert by is not None
+        for column in by:
+            if column not in self._frames.columns:
+                raise KeyError(
+                    "Can not orderby non-projected column: {}".format(column)
+                )
 
-            self._frames.sort_values(
-                by, ascending=sort_type, ignore_index=True, inplace=True
-            )
-        else:
-            logger.warn("Columns and Sort Type are required for orderby")
+        self._frames.sort_values(
+            by, ascending=sort_type, ignore_index=True, inplace=True
+        )
 
     def invert(self) -> None:
         self._frames = ~self._frames
@@ -246,22 +238,8 @@ class Batch:
         cols = cols or []
         verfied_cols = [c for c in cols if c in self._frames]
         unknown_cols = list(set(cols) - set(verfied_cols))
-        if len(unknown_cols):
-            logger.warn(
-                "Unexpected columns %s\n\
-                                 Frames: %s"
-                % (unknown_cols, self._frames)
-            )
+        assert len(unknown_cols) == 0
         return Batch(self._frames[verfied_cols])
-
-    def repeat(self, times: int) -> None:
-        """
-        Repeat the rows of a dataframe.
-
-        Arguments:
-            times: number of times to repeat
-        """
-        self._frames = pd.DataFrame(np.repeat(self._frames.to_numpy(), times, axis=0))
 
     @classmethod
     def merge_column_wise(cls, batches: List[Batch], auto_renaming=False) -> Batch:
@@ -274,9 +252,9 @@ class Batch:
         Returns:
             Batch: Merged batch object
         """
-
         if not len(batches):
             return Batch()
+
         frames = [batch.frames for batch in batches]
         new_frames = pd.concat(frames, axis=1, copy=False, ignore_index=False).fillna(
             method="ffill"
@@ -421,7 +399,6 @@ class Batch:
                     f"Expected {len(alias.col_names)} columns {alias.col_names},"
                     f"got {len(self.columns)} columns {self.columns}."
                 )
-                logger.error(err_msg)
                 raise RuntimeError(err_msg)
             new_col_names = [
                 "{}.{}".format(alias.alias_name, col_name)
