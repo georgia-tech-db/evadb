@@ -187,8 +187,6 @@ class SQLStorageEngine(AbstractStorageEngine):
             logger.exception(err_msg)
             raise Exception(err_msg)
 
-    
-
     def delete(self, table: TableCatalogEntry, where_clause: ComparisonExpression):
         """Delete tuples from the table where rows satisfy the where_clause.
         The current implementation only handles equality predicates.
