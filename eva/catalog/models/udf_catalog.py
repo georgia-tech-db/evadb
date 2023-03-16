@@ -36,7 +36,7 @@ class UdfCatalog(BaseModel):
     _type = Column("type", String(100))
     _checksum = Column("checksum", String(512))
 
-    # UdfIOCatalog stroing the input/output attributes of the udf
+    # UdfIOCatalog storing the input/output attributes of the udf
     _attributes = relationship(
         "UdfIOCatalog", back_populates="_udf", cascade="all, delete, delete-orphan"
     )
