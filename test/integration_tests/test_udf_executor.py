@@ -26,6 +26,7 @@ import pandas as pd
 
 from eva.binder.binder_utils import BinderError
 from eva.catalog.catalog_manager import CatalogManager
+from eva.catalog.catalog_type import ColumnType, NdArrayType
 from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
 from eva.server.command_handler import execute_query_fetch_all
@@ -207,3 +208,49 @@ class UDFExecutorTest(unittest.TestCase):
 
             with self.assertRaises(BinderError):
                 execute_query_fetch_all(select_query)
+
+    def test_create_udf_with_decorators(self):
+        execute_query_fetch_all("DROP UDF IF EXISTS DummyObjectDetectorDecorators;")
+        create_udf_query = """CREATE UDF DummyObjectDetectorDecorators
+                  IMPL  'test/util.py';
+        """
+        execute_query_fetch_all(create_udf_query)
+
+        catalog_manager = CatalogManager()
+        udf_obj = catalog_manager.get_udf_catalog_entry_by_name(
+            "DummyObjectDetectorDecorators"
+        )
+        udf_inputs = catalog_manager.get_udf_io_catalog_input_entries(udf_obj)
+        self.assertEquals(len(udf_inputs), 1)
+
+        udf_input = udf_inputs[0]
+
+        expected_input_attributes = {
+            "name": "Frame_Array",
+            "type": ColumnType.NDARRAY,
+            "is_nullable": False,
+            "array_type": NdArrayType.UINT8,
+            "array_dimensions": (3, 256, 256),
+            "is_input": True,
+        }
+
+        for attr in expected_input_attributes:
+            self.assertEquals(getattr(udf_input, attr), expected_input_attributes[attr])
+
+        udf_outputs = catalog_manager.get_udf_io_catalog_output_entries(udf_obj)
+        self.assertEquals(len(udf_outputs), 1)
+
+        udf_output = udf_outputs[0]
+        expected_output_attributes = {
+            "name": "label",
+            "type": ColumnType.NDARRAY,
+            "is_nullable": False,
+            "array_type": NdArrayType.STR,
+            "array_dimensions": (),
+            "is_input": False,
+        }
+
+        for attr in expected_output_attributes:
+            self.assertEquals(
+                getattr(udf_output, attr), expected_output_attributes[attr]
+            )

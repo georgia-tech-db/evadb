@@ -17,8 +17,6 @@ from typing import List
 import numpy as np
 import pandas as pd
 
-from eva.models.catalog.frame_info import FrameInfo
-from eva.models.catalog.properties import ColorSpace
 from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
 
 try:
@@ -55,10 +53,6 @@ class FastRCNNObjectDetector(PytorchAbstractClassifierUDF):
             pretrained=True, progress=False
         )
         self.model.eval()
-
-    @property
-    def input_format(self) -> FrameInfo:
-        return FrameInfo(-1, -1, 3, ColorSpace.RGB)
 
     @property
     def labels(self) -> List[str]:

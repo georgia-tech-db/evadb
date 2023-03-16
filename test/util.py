@@ -22,9 +22,8 @@ import pandas as pd
 
 from eva.binder.statement_binder import StatementBinder
 from eva.binder.statement_binder_context import StatementBinderContext
+from eva.catalog.catalog_type import NdArrayType
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.models.catalog.frame_info import FrameInfo
-from eva.models.catalog.properties import ColorSpace
 from eva.models.storage.batch import Batch
 from eva.optimizer.operators import Operator
 from eva.optimizer.plan_generator import PlanGenerator
@@ -33,6 +32,8 @@ from eva.parser.parser import Parser
 from eva.plan_nodes.abstract_plan import AbstractPlan
 from eva.server.command_handler import execute_query_fetch_all
 from eva.udfs.abstract.abstract_udf import AbstractClassifierUDF
+from eva.udfs.decorators import decorators
+from eva.udfs.decorators.io_descriptors.data_types import NumpyArray, PandasDataframe
 from eva.udfs.udf_bootstrap_queries import init_builtin_udfs
 
 NUM_FRAMES = 10
@@ -339,10 +340,6 @@ class DummyObjectDetector(AbstractClassifierUDF):
         return "DummyObjectDetector"
 
     @property
-    def input_format(self):
-        return FrameInfo(-1, -1, 3, ColorSpace.RGB)
-
-    @property
     def labels(self):
         return ["__background__", "person", "bicycle"]
 
@@ -369,10 +366,6 @@ class DummyMultiObjectDetector(AbstractClassifierUDF):
     @property
     def name(self) -> str:
         return "DummyMultiObjectDetector"
-
-    @property
-    def input_format(self):
-        return FrameInfo(-1, -1, 3, ColorSpace.RGB)
 
     @property
     def labels(self):
@@ -403,10 +396,6 @@ class DummyFeatureExtractor(AbstractClassifierUDF):
         return "DummyFeatureExtractor"
 
     @property
-    def input_format(self):
-        return FrameInfo(-1, -1, 3, ColorSpace.RGB)
-
-    @property
     def labels(self):
         return []
 
@@ -422,3 +411,43 @@ class DummyFeatureExtractor(AbstractClassifierUDF):
         ret = pd.DataFrame()
         ret["features"] = df.apply(_extract_feature, axis=1)
         return ret
+
+
+class DummyObjectDetectorDecorators(AbstractClassifierUDF):
+    @decorators.setup(cachable=True, udf_type="object_detection", batchable=True)
+    def setup(self, *args, **kwargs):
+        pass
+
+    @property
+    def name(self) -> str:
+        return "DummyObjectDetectorDecorators"
+
+    @property
+    def labels(self):
+        return ["__background__", "person", "bicycle"]
+
+    @decorators.forward(
+        input_signatures=[
+            PandasDataframe(
+                columns=["Frame_Array"],
+                column_types=[NdArrayType.UINT8],
+                column_shapes=[(3, 256, 256)],
+            )
+        ],
+        output_signatures=[
+            NumpyArray(
+                name="label",
+                type=NdArrayType.STR,
+            )
+        ],
+    )
+    def forward(self, df: pd.DataFrame) -> pd.DataFrame:
+        ret = pd.DataFrame()
+        ret["label"] = df.apply(self.classify_one, axis=1)
+        return ret
+
+    def classify_one(self, frames: np.ndarray):
+        # odd are labeled bicycle and even person
+        i = int(frames[0][0][0][0] * 25) - 1
+        label = self.labels[i % 2 + 1]
+        return np.array([label])
