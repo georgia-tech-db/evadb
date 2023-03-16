@@ -99,8 +99,8 @@ class EmotionDetector(PytorchAbstractClassifierUDF):
     def _download_weights(self, weights_url, weights_path):
         if not os.path.exists(weights_path):
             torch.hub.download_url_to_file(
-                self.weights_url,
-                self.weights_path,
+                weights_url,
+                weights_path,
                 hash_prefix=None,
                 progress=True,
             )
