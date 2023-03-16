@@ -16,8 +16,6 @@ import unittest
 from pathlib import Path
 from test.util import create_sample_csv, create_sample_video, file_remove
 
-import pytest
-
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.configuration.constants import EVA_ROOT_DIR
@@ -63,8 +61,8 @@ class FuzzyJoinTests(unittest.TestCase):
         # file_remove("dummy.csv")
         # clean up
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
+        execute_query_fetch_all("DROP TABLE IF EXISTS MyVideoCSV;")
 
-    @pytest.mark.torchtest
     def test_fuzzyjoin(self):
         fuzzy_udf = """CREATE UDF IF NOT EXISTS FuzzDistance
                     INPUT (Input_Array1 NDARRAY ANYTYPE, Input_Array2 NDARRAY ANYTYPE)

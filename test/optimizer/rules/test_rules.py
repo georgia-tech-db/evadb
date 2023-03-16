@@ -123,6 +123,7 @@ class RulesTest(unittest.TestCase):
             Promise.LOGICAL_DERIVED_GET_TO_PHYSICAL,
             Promise.LOGICAL_LATERAL_JOIN_TO_PHYSICAL,
             Promise.LOGICAL_JOIN_TO_PHYSICAL_HASH_JOIN,
+            Promise.LOGICAL_JOIN_TO_PHYSICAL_NESTED_LOOP_JOIN,
             Promise.LOGICAL_FUNCTION_SCAN_TO_PHYSICAL,
             Promise.LOGICAL_FILTER_TO_PHYSICAL,
             Promise.LOGICAL_PROJECT_TO_PHYSICAL,
