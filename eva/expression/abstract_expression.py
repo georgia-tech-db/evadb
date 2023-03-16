@@ -78,16 +78,6 @@ class AbstractExpression(ABC):
         self._etype = exp_type
         self._rtype = rtype
         self._children = children or []
-        self._averageTime = 0
-        self._numberOfCalls = 0
-        self._iterationCount = 0
-
-    def profileExpression(self, time):
-        numberOfEvaluationsTimed = self._numberOfCalls / 10
-        self._averageTime = (self._averageTime * numberOfEvaluationsTimed + time) / (
-            numberOfEvaluationsTimed + 1
-        )
-        self._numberOfCalls += 10
 
     def get_child(self, index: int):
         if index < 0 or index >= len(self._children):
