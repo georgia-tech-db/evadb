@@ -66,7 +66,6 @@ class FuzzyJoinTests(unittest.TestCase):
 
     @pytest.mark.torchtest
     def test_fuzzyjoin(self):
-
         fuzzy_udf = """CREATE UDF IF NOT EXISTS FuzzDistance
                     INPUT (Input_Array1 NDARRAY ANYTYPE, Input_Array2 NDARRAY ANYTYPE)
                     OUTPUT (distance FLOAT(32, 7))
