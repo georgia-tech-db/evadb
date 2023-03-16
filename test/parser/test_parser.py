@@ -571,7 +571,7 @@ class ParserTests(unittest.TestCase):
 
     def test_create_udf_statement(self):
         parser = Parser()
-        create_udf_query = """CREATE UDF FastRCNN
+        create_udf_query = """CREATE UDF IF NOT EXISTS FastRCNN
                   INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
                   OUTPUT (Labels NDARRAY STR(10), Bbox NDARRAY UINT8(10, 4))
                   TYPE  Classification
@@ -582,7 +582,8 @@ class ParserTests(unittest.TestCase):
         expected_cci.nullable = True
         expected_stmt = CreateUDFStatement(
             "FastRCNN",
-            False,
+            True,
+            Path("data/fastrcnn.py"),
             [
                 ColumnDefinition(
                     "Frame_Array",
@@ -600,13 +601,13 @@ class ParserTests(unittest.TestCase):
                     "Bbox", ColumnType.NDARRAY, NdArrayType.UINT8, (10, 4), expected_cci
                 ),
             ],
-            Path("data/fastrcnn.py"),
             "Classification",
         )
         eva_statement_list = parser.parse(create_udf_query)
         self.assertIsInstance(eva_statement_list, list)
         self.assertEqual(len(eva_statement_list), 1)
         self.assertEqual(eva_statement_list[0].stmt_type, StatementType.CREATE_UDF)
+        self.assertEqual(str(eva_statement_list[0]), str(expected_stmt))
 
         create_udf_stmt = eva_statement_list[0]
 
@@ -757,6 +758,7 @@ class ParserTests(unittest.TestCase):
         create_udf = CreateUDFStatement(
             "udf",
             False,
+            Path("data/fastrcnn.py"),
             [
                 ColumnDefinition(
                     "frame",
@@ -766,7 +768,6 @@ class ParserTests(unittest.TestCase):
                 )
             ],
             [ColumnDefinition("labels", ColumnType.NDARRAY, NdArrayType.STR, (10))],
-            Path("data/fastrcnn.py"),
             "Classification",
         )
         select_stmt = SelectStatement()

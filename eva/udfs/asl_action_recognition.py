@@ -31,8 +31,6 @@ except ImportError:
 import torch.nn as nn
 import torchvision
 
-from eva.models.catalog.frame_info import FrameInfo
-from eva.models.catalog.properties import ColorSpace
 from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
 
 
@@ -67,10 +65,6 @@ class ASLActionRecognition(PytorchAbstractClassifierUDF):
         self.model.eval()
 
         self.preprocess = self.weights.transforms()
-
-    @property
-    def input_format(self) -> FrameInfo:
-        return FrameInfo(-1, -1, 3, ColorSpace.RGB)
 
     @property
     def labels(self) -> np.array([str]):
