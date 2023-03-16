@@ -12,12 +12,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import logging
 from typing import List
 
 import pandas as pd
 
+from eva.catalog.catalog_type import NdArrayType
 from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
+from eva.udfs.decorators.decorators import forward, setup
+from eva.udfs.decorators.io_descriptors.data_types import PandasDataframe, PyTorchTensor
 
 try:
     import torch
@@ -30,7 +32,7 @@ except ImportError as e:
     )
 
 
-class YoloV5(PytorchAbstractClassifierUDF):
+class YoloDecorators(PytorchAbstractClassifierUDF):
     """
     Arguments:
         threshold (float): Threshold for classifier confidence score
@@ -41,8 +43,8 @@ class YoloV5(PytorchAbstractClassifierUDF):
     def name(self) -> str:
         return "yolo"
 
+    @setup(cachable=True, udf_type="object_detection", batchable=True)
     def setup(self, threshold=0.85):
-        logging.getLogger("yolov5").setLevel(logging.CRITICAL)  # yolov5
         self.threshold = threshold
         self.model = torch.hub.load("ultralytics/yolov5", "yolov5s", verbose=False)
 
@@ -142,6 +144,27 @@ class YoloV5(PytorchAbstractClassifierUDF):
             "toothbrush",
         ]
 
+    @forward(
+        input_signatures=[
+            PyTorchTensor(
+                name="input_col",
+                is_nullable=False,
+                type=NdArrayType.FLOAT32,
+                dimensions=(1, 3, 540, 960),
+            )
+        ],
+        output_signatures=[
+            PandasDataframe(
+                columns=["labels", "bboxes", "scores"],
+                column_types=[
+                    NdArrayType.STR,
+                    NdArrayType.FLOAT32,
+                    NdArrayType.FLOAT32,
+                ],
+                column_shapes=[(None,), (None,), (None,)],
+            )
+        ],
+    )
     def forward(self, frames: Tensor) -> pd.DataFrame:
         """
         Performs predictions on input frames
@@ -172,17 +195,7 @@ class YoloV5(PytorchAbstractClassifierUDF):
             )
 
             outcome.append(
-                {
-                    "labels": pred_class,
-                    "bboxes": pred_boxes,
-                    "scores": pred_score,
-                },
+                {"labels": pred_class, "bboxes": pred_boxes, "scores": pred_score}
             )
-        return pd.DataFrame(
-            outcome,
-            columns=[
-                "labels",
-                "bboxes",
-                "scores",
-            ],
-        )
+
+        return pd.DataFrame(outcome, columns=["labels", "bboxes", "scores"])
