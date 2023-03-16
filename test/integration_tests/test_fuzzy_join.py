@@ -33,7 +33,7 @@ class FuzzyJoinTests(unittest.TestCase):
         self.image_files_path = Path(
             f"{EVA_ROOT_DIR}/test/data/uadetrac/small-data/MVI_20011/*.jpg"
         )
-        create_sample_csv()
+        self.csv_file_path = create_sample_csv()
 
         # Prepare needed UDFs and data.
         # loading a csv requires a table to be created first
@@ -51,7 +51,7 @@ class FuzzyJoinTests(unittest.TestCase):
         execute_query_fetch_all(create_table_query)
 
         # load the CSV
-        load_query = """LOAD CSV 'dummy.csv' INTO MyVideoCSV;"""
+        load_query = f"LOAD CSV '{self.csv_file_path}' INTO MyVideoCSV;"
         execute_query_fetch_all(load_query)
 
         # load the video to be joined with the csv
@@ -60,13 +60,12 @@ class FuzzyJoinTests(unittest.TestCase):
 
     def tearDown(self):
         file_remove("dummy.avi")
-        # file_remove("dummy.csv")
+        file_remove("dummy.csv")
         # clean up
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
 
     @pytest.mark.torchtest
     def test_fuzzyjoin(self):
-
         fuzzy_udf = """CREATE UDF IF NOT EXISTS FuzzDistance
                     INPUT (Input_Array1 NDARRAY ANYTYPE, Input_Array2 NDARRAY ANYTYPE)
                     OUTPUT (distance FLOAT(32, 7))
