@@ -51,7 +51,7 @@ minimal_requirement = [
 ]
 
 formatter_libs = [
-    "black>=22.6.0",
+    "black>=23.1.0",
     "isort>=5.10.1"
 ]
 

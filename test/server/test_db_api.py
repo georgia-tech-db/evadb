@@ -87,13 +87,6 @@ if sys.version_info >= (3, 8):
             connection = AsyncMock()
             eva_cursor = EVACursor(connection)
 
-            # test upload transformation with existing file
-            eva_cursor._upload_transformation('UPLOAD PATH "upload.txt" BLOB')
-
-            # test upload transformation with non-existing file
-            with self.assertRaises(FileNotFoundError):
-                eva_cursor._upload_transformation('UPLOAD PATH "blah.txt" BLOB')
-
             # test attr
             with self.assertRaises(AttributeError):
                 eva_cursor.__getattr__("foo")

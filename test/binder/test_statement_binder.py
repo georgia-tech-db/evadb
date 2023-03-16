@@ -123,7 +123,10 @@ class StatementBinderTests(unittest.TestCase):
 
     @patch("eva.binder.statement_binder.CatalogManager")
     @patch("eva.binder.statement_binder.load_udf_class_from_file")
-    def test_bind_func_expr(self, mock_load_udf_class_from_file, mock_catalog):
+    @patch("eva.binder.statement_binder.get_file_checksum")
+    def test_bind_func_expr(
+        self, mock_get_file_checksum, mock_load_udf_class_from_file, mock_catalog
+    ):
         # setup
         func_expr = MagicMock(
             name="func_expr", alias=Alias("func_expr"), output_col_aliases=[]
@@ -145,12 +148,14 @@ class StatementBinderTests(unittest.TestCase):
         mock_load_udf_class_from_file.return_value.return_value = (
             "load_udf_class_from_file"
         )
+        mock_get_file_checksum.return_value = udf_obj.checksum
 
         # Case 1 set output
         func_expr.output = "out1"
         binder = StatementBinder(StatementBinderContext())
         binder._bind_func_expr(func_expr)
 
+        mock_get_file_checksum.assert_called_with(udf_obj.impl_file_path)
         mock_get_name.assert_called_with(func_expr.name)
         mock_get_udf_outputs.assert_called_with(udf_obj)
         mock_load_udf_class_from_file.assert_called_with(
@@ -170,6 +175,7 @@ class StatementBinderTests(unittest.TestCase):
         binder = StatementBinder(StatementBinderContext())
         binder._bind_func_expr(func_expr)
 
+        mock_get_file_checksum.assert_called_with(udf_obj.impl_file_path)
         mock_get_name.assert_called_with(func_expr.name)
         mock_get_udf_outputs.assert_called_with(udf_obj)
         mock_load_udf_class_from_file.assert_called_with(

@@ -12,12 +12,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import os
-
 import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.configuration.configuration_manager import ConfigurationManager
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError
 from eva.expression.tuple_value_expression import TupleValueExpression
@@ -31,8 +28,6 @@ from eva.utils.logging_manager import logger
 class LoadCSVExecutor(AbstractExecutor):
     def __init__(self, node: LoadDataPlan):
         super().__init__(node)
-        config = ConfigurationManager()
-        self.upload_dir = config.get_value("storage", "upload_dir")
         self.catalog = CatalogManager()
 
     def validate(self):
@@ -72,7 +67,7 @@ class LoadCSVExecutor(AbstractExecutor):
         # converters is a dictionary of functions that convert the values
         # in the column to the desired type
         csv_reader = CSVReader(
-            os.path.join(self.upload_dir, self.node.file_path),
+            self.node.file_path,
             column_list=column_list,
             batch_mem_size=self.node.batch_mem_size,
         )
