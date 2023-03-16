@@ -871,8 +871,9 @@ class LogicalJoinToPhysicalHashJoin(Rule):
         if isinstance(j_child, FunctionExpression):
             if j_child.name.startswith("FuzzDistance"):
                 return before.join_type == JoinType.INNER_JOIN and (
-                    not (j_child) or not (j_child.name.startswith("FuzzDistance")))
-        else: 
+                    not (j_child) or not (j_child.name.startswith("FuzzDistance"))
+                )
+        else:
             return before.join_type == JoinType.INNER_JOIN
 
     def apply(self, join_node: LogicalJoin, context: OptimizerContext):
