@@ -175,7 +175,8 @@ class Batch:
         """
         in_place sort
         """
-        assert self.empty() is not False
+        if self.empty():
+            return
         if by is None:
             by = self.columns[0]
         self._frames.sort_values(by=by, ignore_index=True, inplace=True)

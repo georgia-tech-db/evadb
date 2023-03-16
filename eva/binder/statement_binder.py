@@ -98,10 +98,10 @@ class StatementBinder:
                 col = [
                     col for col in table_ref_obj.columns if col.name == col_def.name
                 ][0]
-                if not col.array_type == NdArrayType.FLOAT32:
-                    raise BinderError("Index input needs to be float32.")
-                if not len(col.array_dimensions) == 2:
-                    raise BinderError("Index input needs to be 2 dimensional.")
+                assert (
+                    col.array_type == NdArrayType.FLOAT32
+                ), "Index input needs to be float32."
+                assert len(col.array_dimensions) == 2
             else:
                 # Output of the UDF should be 2 dimension and float32 type.
                 catalog_manager = CatalogManager()
