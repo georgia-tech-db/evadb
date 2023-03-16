@@ -51,7 +51,6 @@ class FunctionExpression(AbstractExpression):
         alias: Alias = None,
         **kwargs,
     ):
-
         super().__init__(ExpressionType.FUNCTION_EXPRESSION, **kwargs)
         self._context = Context()
         self._name = name
