@@ -58,6 +58,8 @@ class FunctionExpression(AbstractExpression):
         self._function = func
         self._function_instance = None
         self._output = output
+        self._averageTime = 0
+        self._iterationCount = 0
         self.alias = alias
         self.udf_obj: UdfCatalogEntry = None
         self.output_objs: List[UdfIOCatalogEntry] = []
@@ -87,8 +89,29 @@ class FunctionExpression(AbstractExpression):
     def function(self, func: Callable):
         self._function = func
 
+    def persistCost(self, udf_id, name, time):
+        from eva.catalog.catalog_manager import CatalogManager
+
+        catalog_manager = CatalogManager()
+        # get
+        # update
+        catalog_manager.insert_udf_cost_catalog_entry(udf_id, name, time)
+
+    def profileAndPersist(self, udf_obj, name, time, numberOfCalls):
+        if not (udf_obj):
+            return
+        udf_id = udf_obj.row_id
+        # update self._iterationCount using function in base_model
+        # table_obj in renamte_entry in table_catalog_service
+        self._averageTime = (self._averageTime * (numberOfCalls - 1) + time) / (
+            numberOfCalls
+        )
+
+        # Persist only every 100th evaluation of the function expression
+        if not (numberOfCalls % 100):
+            self.persistCost(udf_id, name, self._averageTime)
+
     def evaluate(self, batch: Batch, **kwargs) -> Batch:
-        self._iterationCount += 1
         new_batch = batch
         child_batches = [child.evaluate(batch, **kwargs) for child in self.children]
         if len(child_batches):
@@ -114,8 +137,9 @@ class FunctionExpression(AbstractExpression):
             outcomes.apply_function_expression(func)
             outcomes = outcomes.project(self.projection_columns)
             outcomes.modify_column_alias(self.alias)
-        if not (self._iterationCount % 10):
-            self.profileExpression(function_expr_timer.total_elapsed_time)
+        self.profileAndPersist(
+            self.udf_obj, self.name, function_expr_timer.total_elapsed_time, len(batch)
+        )
         return outcomes
 
     def signature(self) -> str:

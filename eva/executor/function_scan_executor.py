@@ -14,7 +14,6 @@
 # limitations under the License.
 from typing import Iterator
 
-from eva.catalog.catalog_manager import CatalogManager
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
@@ -37,13 +36,6 @@ class FunctionScanExecutor(AbstractExecutor):
 
     def validate(self):
         pass
-
-    def persistCost(self, name, time):
-        catalog_manager = CatalogManager()
-        catalog_manager.insert_udf_cost_catalog_entry(
-            name,
-            time,
-        )
 
     def exec(self, *args, **kwargs) -> Iterator[Batch]:
         assert (

@@ -240,7 +240,7 @@ class CatalogManager(object):
     "udf cost catalog services"
 
     def insert_udf_cost_catalog_entry(
-        self, name: str, cost: int
+        self, udf_id: int, name: str, cost: int
     ) -> UdfCostCatalogEntry:
         """Persists UDF cost catalog entry.
 
@@ -252,7 +252,7 @@ class CatalogManager(object):
             The persisted UdfCostCatalogEntry object.
         """
 
-        udf_entry = self._udf_cost_catlog_service.insert_entry(name, cost)
+        udf_entry = self._udf_cost_catlog_service.insert_entry(udf_id, name, cost)
         return udf_entry
 
     "UdfIO services"
