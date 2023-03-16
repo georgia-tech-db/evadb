@@ -28,7 +28,6 @@ class PlanOprType(Enum):
     DROP = auto()
     CREATE_UDF = auto()
     LOAD_DATA = auto()
-    UPLOAD = auto()
     UNION = auto()
     GROUP_BY = auto()
     ORDER_BY = auto()
