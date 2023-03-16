@@ -8,7 +8,7 @@ ddl_statement: create_database | create_table | create_index | create_udf | crea
     | drop_database | drop_table | drop_udf | drop_index | rename_table
     
 dml_statement: select_statement | insert_statement | update_statement
-    | delete_statement | load_statement | upload_statement
+    | delete_statement | load_statement
     
 utility_statement: describe_statement | show_statement | help_statement | explain_statement
 
@@ -85,12 +85,8 @@ file_format: CSV | VIDEO | IMAGE
 
 file_options: FORMAT file_format
     
-upload_statement: UPLOAD PATH file_name BLOB video_blob INTO table_name (("(" uid_list ")"))? (WITH file_options)?
-    
 file_name: string_literal
-    
-video_blob: string_literal
-    
+        
 // details
 
 insert_statement_value: select_statement
@@ -361,7 +357,6 @@ UNLOCK:                              "UNLOCK"
 UNNEST:                              "UNNEST"
 UNSIGNED:                            "UNSIGNED"
 UPDATE:                              "UPDATE"
-UPLOAD:                              "UPLOAD"
 USING:                               "USING"
 VALUES:                              "VALUES"
 WHERE:                               "WHERE"

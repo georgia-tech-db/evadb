@@ -40,7 +40,6 @@ from eva.parser.select_statement import SelectStatement
 from eva.parser.statement import AbstractStatement, StatementType
 from eva.parser.table_ref import JoinNode, TableInfo, TableRef, TableValuedExpression
 from eva.parser.types import FileFormatType, JoinType, ParserOrderBySortType
-from eva.parser.upload_statement import UploadStatement
 
 
 class ParserTests(unittest.TestCase):
@@ -658,61 +657,6 @@ class ParserTests(unittest.TestCase):
 
         load_data_stmt = eva_statement_list[0]
         self.assertEqual(load_data_stmt, expected_stmt)
-
-    def test_upload_statement(self):
-        parser = Parser()
-        upload_query = """UPLOAD PATH 'data/video.mp4' BLOB "b'AAAA'"
-                          INTO MyVideo WITH FORMAT VIDEO;"""
-
-        file_options = {}
-        file_options["file_format"] = FileFormatType.VIDEO
-        column_list = None
-
-        expected_stmt = UploadStatement(
-            Path("data/video.mp4"),
-            "b'AAAA'",
-            TableInfo("MyVideo"),
-            column_list,
-            file_options,
-        )
-
-        eva_statement_list = parser.parse(upload_query)
-        self.assertIsInstance(eva_statement_list, list)
-        self.assertEqual(len(eva_statement_list), 1)
-        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.UPLOAD)
-
-        upload_stmt = eva_statement_list[0]
-        self.assertEqual(upload_stmt, expected_stmt)
-
-    def test_upload_csv_data_statement(self):
-        parser = Parser()
-
-        upload_query = """UPLOAD PATH 'data/meta.csv' BLOB "b'AAAA'"
-                          INTO
-                          MyMeta (id, frame_id, video_id, label)
-                          WITH FORMAT CSV;"""
-
-        file_options = {}
-        file_options["file_format"] = FileFormatType.CSV
-        expected_stmt = UploadStatement(
-            Path("data/meta.csv"),
-            "b'AAAA'",
-            TableInfo("MyMeta"),
-            [
-                TupleValueExpression("id"),
-                TupleValueExpression("frame_id"),
-                TupleValueExpression("video_id"),
-                TupleValueExpression("label"),
-            ],
-            file_options,
-        )
-        eva_statement_list = parser.parse(upload_query)
-        self.assertIsInstance(eva_statement_list, list)
-        self.assertEqual(len(eva_statement_list), 1)
-        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.UPLOAD)
-
-        upload_stmt = eva_statement_list[0]
-        self.assertEqual(upload_stmt, expected_stmt)
 
     def test_nested_select_statement(self):
         parser = Parser()
