@@ -21,7 +21,6 @@ from eva.catalog.catalog_type import TableType
 from eva.catalog.catalog_utils import is_video_table
 from eva.expression.expression_utils import (
     conjuction_list_to_expression_tree,
-    to_conjunction_list,
 )
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
@@ -509,24 +508,30 @@ class ReorderPredicates(Rule):
     def check(self, before: LogicalFilter, context: OptimizerContext):
         return before.predicate.get_function_expression_children_count() > 1
 
-    def getCostFromCatalog (self, funcExpr: FunctionExpression):
+    def getCostFromCatalog(self, funcExpr: FunctionExpression):
         catalog_manager = CatalogManager()
-        udf_obj_entry = catalog_manager.get_udf_cost_catalog_entry(funcExpr.udf_obj.row_id)
+        udf_obj_entry = catalog_manager.get_udf_cost_catalog_entry(
+            funcExpr.udf_obj.row_id
+        )
 
         # return high cost if unknown
-        return 99 if udf_obj_entry == None else udf_obj_entry.cost
+        return 99 if udf_obj_entry is None else udf_obj_entry.cost
 
     def apply(self, before: LogicalFilter, context: OptimizerContext):
         #     [TODO] Draw reordering here
         # Each element would be (index, cost)
         funcExpressionCostMap = []
-        for child, idx in zip(before.predicate._children, range(len(before.predicate.children))):
+        for child, idx in zip(
+            before.predicate._children, range(len(before.predicate.children))
+        ):
             funcExpressionCost = 0
             for funcExpr in child.children:
-                if (isinstance(funcExpr, FunctionExpression)):
-                    funcExpressionCost = funcExpressionCost + self.getCostFromCatalog (funcExpr)
+                if isinstance(funcExpr, FunctionExpression):
+                    funcExpressionCost = funcExpressionCost + self.getCostFromCatalog(
+                        funcExpr
+                    )
             funcExpressionCostMap.append((idx, funcExpressionCost))
-        funcExpressionCostMap = sorted(funcExpressionCostMap, key = lambda x:x[1])
+        funcExpressionCostMap = sorted(funcExpressionCostMap, key=lambda x: x[1])
         yield before
 
 

@@ -101,7 +101,7 @@ class AbstractExpression(ABC):
         functionExpressionCount = 0
         for child in self._children:
             for c in child.children:
-                if (isinstance(c, FunctionExpression)):
+                if isinstance(c, FunctionExpression):
                     functionExpressionCount = functionExpressionCount + 1
         return functionExpressionCount
 

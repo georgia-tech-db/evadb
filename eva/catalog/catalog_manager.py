@@ -243,9 +243,7 @@ class CatalogManager(object):
     def get_all_udf_cost_catalog_entries(self):
         return self._udf_cost_catlog_service.get_all_entries()
 
-    def get_udf_cost_catalog_entry(
-        self, udf_id: int
-    ) -> UdfCostCatalogEntry:
+    def get_udf_cost_catalog_entry(self, udf_id: int) -> UdfCostCatalogEntry:
         """Get UDF cost from the catalog entry.
 
         Arguments:
