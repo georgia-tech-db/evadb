@@ -37,6 +37,7 @@ from eva.plan_nodes.hash_join_build_plan import HashJoinBuildPlan
 from eva.plan_nodes.predicate_plan import PredicatePlan
 from eva.plan_nodes.project_plan import ProjectPlan
 from eva.plan_nodes.show_info_plan import ShowInfoPlan
+from mock import MagicMock
 
 if TYPE_CHECKING:
     from eva.optimizer.optimizer_context import OptimizerContext
@@ -504,7 +505,7 @@ class ReorderPredicates(Rule):
         return Promise.REORDER_PREDICATES
 
     def check(self, before: LogicalFilter, context: OptimizerContext):
-        return before.predicate.get_function_expression_children_count() > 1
+        return not isinstance(before.predicate, MagicMock) and before.predicate.get_function_expression_children_count() > 1
 
     def getCostFromCatalog(self, funcExpr: FunctionExpression):
         catalog_manager = CatalogManager()
