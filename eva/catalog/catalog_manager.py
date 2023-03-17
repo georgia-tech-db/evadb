@@ -287,6 +287,27 @@ class CatalogManager(object):
     def get_all_index_catalog_entries(self):
         return self._index_service.get_all_entries()
 
+    """ UDF Metadata Catalog"""
+
+    def get_udf_metadata_entries_by_udf_name(
+        self, udf_name: str
+    ) -> List[UdfMetadataCatalogEntry]:
+        """
+        Get the UDF metadata information for the provided udf.
+
+        Arguments:
+             udf_name (str): name of the UDF
+
+        Returns:
+            UdfMetadataCatalogEntry objects
+        """
+        udf_entry = self.get_udf_catalog_entry_by_name(udf_name)
+        if udf_entry:
+            entries = self._udf_metadata_service.get_entries_by_udf_id(udf_entry.row_id)
+            return entries
+        else:
+            return []
+
     """ Utils """
 
     def create_and_insert_table_catalog_entry(

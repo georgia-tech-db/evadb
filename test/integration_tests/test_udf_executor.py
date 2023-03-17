@@ -157,6 +157,55 @@ class UDFExecutorTest(unittest.TestCase):
         )
         self.assertEqual(actual, expected)
 
+    def test_should_create_udf_with_metadata(self):
+        udf_name = "DummyObjectDetector"
+        execute_query_fetch_all(f"DROP UDF {udf_name};")
+        create_udf_query = """CREATE UDF {}
+                  INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
+                  OUTPUT (label NDARRAY STR(10))
+                  TYPE  Classification
+                  IMPL  'test/util.py'
+                  'CACHE' 'TRUE'
+                  'BATCH' 'FALSE';
+        """
+        execute_query_fetch_all(create_udf_query.format(udf_name))
+
+        # try fetching the metadata values
+        entries = CatalogManager().get_udf_metadata_entries_by_udf_name(udf_name)
+        self.assertEqual(len(entries), 2)
+        metadata = [(entry.key, entry.value) for entry in entries]
+
+        expected_metadata = [("CACHE", "TRUE"), ("BATCH", "FALSE")]
+        self.assertEqual(set(metadata), set(expected_metadata))
+
+    def test_should_return_empty_metadata_list_for_missing_udf(self):
+        # missing udf should return empty list
+        entries = CatalogManager().get_udf_metadata_entries_by_udf_name("randomUDF")
+        self.assertEqual(len(entries), 0)
+
+    def test_should_return_empty_metadata_list_if_udf_is_removed(self):
+        udf_name = "DummyObjectDetector"
+        execute_query_fetch_all(f"DROP UDF {udf_name};")
+        create_udf_query = """CREATE UDF {}
+                  INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
+                  OUTPUT (label NDARRAY STR(10))
+                  TYPE  Classification
+                  IMPL  'test/util.py'
+                  'CACHE' 'TRUE'
+                  'BATCH' 'FALSE';
+        """
+        execute_query_fetch_all(create_udf_query.format(udf_name))
+
+        # try fetching the metadata values
+        entries = CatalogManager().get_udf_metadata_entries_by_udf_name(udf_name)
+        self.assertEqual(len(entries), 2)
+
+        # remove the udf
+        execute_query_fetch_all(f"DROP UDF {udf_name};")
+        # try fetching the metadata values
+        entries = CatalogManager().get_udf_metadata_entries_by_udf_name(udf_name)
+        self.assertEqual(len(entries), 0)
+
     def test_should_raise_using_missing_udf(self):
         select_query = "SELECT id,DummyObjectDetector1(data) FROM MyVideo \
             ORDER BY id;"

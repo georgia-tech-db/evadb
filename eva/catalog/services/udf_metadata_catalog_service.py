@@ -19,6 +19,8 @@ from eva.catalog.models.udf_metadata_catalog import (
     UdfMetadataCatalogEntry,
 )
 from eva.catalog.services.base_service import BaseService
+from eva.utils.errors import CatalogError
+from eva.utils.logging_manager import logger
 
 
 class UdfMetadataCatalogService(BaseService):
@@ -26,8 +28,25 @@ class UdfMetadataCatalogService(BaseService):
         super().__init__(UdfMetadataCatalog)
 
     def insert_entries(self, entries: List[UdfMetadataCatalogEntry]):
-        for entry in entries:
-            metadata_obj = UdfMetadataCatalog(
-                key=entry.key, value=entry.value, udf_id=entry.udf_id
+        try:
+            for entry in entries:
+                metadata_obj = UdfMetadataCatalog(
+                    key=entry.key, value=entry.value, udf_id=entry.udf_id
+                )
+                metadata_obj.save()
+        except Exception as e:
+            logger.exception(
+                f"Failed to insert entry {entry} into udf metadata catalog with exception {str(e)}"
             )
-            metadata_obj.save()
+            raise CatalogError(e)
+
+    def get_entries_by_udf_id(self, udf_id: int) -> List[UdfMetadataCatalogEntry]:
+        try:
+            result = self.model.query.filter(
+                self.model._udf_id == udf_id,
+            ).all()
+            return [obj.as_dataclass() for obj in result]
+        except Exception as e:
+            error = f"Getting metadata entries for UDF id {udf_id} raised {e}"
+            logger.error(error)
+            raise CatalogError(error)
