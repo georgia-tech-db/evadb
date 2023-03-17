@@ -18,7 +18,7 @@ import re
 from typing import TYPE_CHECKING, List
 
 from eva.catalog.catalog_type import TableType
-from eva.catalog.catalog_utils import is_video_table, is_string_col
+from eva.catalog.catalog_utils import is_string_col, is_video_table
 from eva.catalog.sql_config import IDENTIFIER_COLUMN
 
 if TYPE_CHECKING:
@@ -107,9 +107,9 @@ def check_table_object_is_video(table_ref: TableRef) -> None:
     if not is_video_table(table_ref.table.table_obj):
         err_msg = "GROUP BY only supported for video tables"
         raise BinderError(err_msg)
-    
+
+
 def check_column_name_is_string(col_ref) -> None:
     if not is_string_col(col_ref.col_object):
         err_msg = "LIKE only supported for string columns"
         raise BinderError(err_msg)
-
