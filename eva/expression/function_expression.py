@@ -108,7 +108,7 @@ class FunctionExpression(AbstractExpression):
         # >= because each batch could have a non-multiple of 10 frame count
         if self._iterationCount - self._lastIterationCount >= 10:
             self.persistCost(udf_id, name, self._averageTime)
-        self._lastIterationCount = self._iterationCount
+            self._lastIterationCount = self._iterationCount
 
     def evaluate(self, batch: Batch, **kwargs) -> Batch:
         new_batch = batch

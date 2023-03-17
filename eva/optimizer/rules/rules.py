@@ -535,6 +535,7 @@ class ReorderPredicates(Rule):
                     )
             funcExpressionCostMap.append((idx, funcExpressionCost))
         funcExpressionCostMap = sorted(funcExpressionCostMap, key=lambda x: x[1])
+        #   [TODO] shuffle children in above index order
         yield before
 
 
