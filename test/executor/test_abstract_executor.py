@@ -14,13 +14,12 @@
 # limitations under the License.
 import unittest
 from inspect import signature
+from test.util import get_all_subclasses
 
 from eva.executor.abstract_executor import AbstractExecutor
-from test.util import get_all_subclasses
 
 
 class AbstractExecutorTest(unittest.TestCase):
-
     def test_constructor_args(self):
         derived_executor_classes = list(get_all_subclasses(AbstractExecutor))
         for derived_executor_class in derived_executor_classes:
