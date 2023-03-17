@@ -128,9 +128,7 @@ class OptimizerRulesTest(unittest.TestCase):
         udfQuery2 = """SELECT id, DummyObjectDetector(data) FROM MyVideo \
             WHERE DummyObjectDetector(data).label = ['bicycle'] ORDER BY id;"""
         execute_query_fetch_all(udfQuery2)
-        
-        catalog_manager = CatalogManager()
-        temp = catalog_manager.get_all_udf_cost_catalog_entries()
+
         udfPredicateReorderingQuery = """SELECT id, FastRCNNObjectDetector(data), DummyObjectDetector(data) FROM MyVideo \
             WHERE FastRCNNObjectDetector(data).labels = ['person'] OR DummyObjectDetector(data).label = ['bicycle'] ORDER BY id;"""
         result = execute_query_fetch_all(udfPredicateReorderingQuery)

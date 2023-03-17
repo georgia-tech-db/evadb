@@ -19,9 +19,7 @@ from typing import TYPE_CHECKING
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import TableType
 from eva.catalog.catalog_utils import is_video_table
-from eva.expression.expression_utils import (
-    conjuction_list_to_expression_tree,
-)
+from eva.expression.expression_utils import conjuction_list_to_expression_tree
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.optimizer.optimizer_utils import (
