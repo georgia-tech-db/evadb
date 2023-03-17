@@ -154,6 +154,7 @@ def create_sample_csv(num_frames=NUM_FRAMES):
     df_sample_meta.to_csv(
         os.path.join(upload_dir_from_config, "dummy.csv"), index=False
     )
+    return os.path.join(upload_dir_from_config, "dummy.csv")
 
 
 def create_sample_csv_as_blob(num_frames=NUM_FRAMES):

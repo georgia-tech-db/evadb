@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
 import shutil
 import zlib
 from pathlib import Path
@@ -113,7 +114,8 @@ class AbstractMediaStorageEngine(AbstractStorageEngine):
                     raise FileExistsError(
                         f"Duplicate File: {media_file} already exists in the table {table.name}"
                     )
-                shutil.copy2(str(media_file), str(dst_path))
+                src_path = Path.cwd() / media_file
+                os.symlink(src_path, dst_path)
                 copied_files.append(dst_path)
             # assuming sql write is an atomic operation
             self._rdb_handler.write(

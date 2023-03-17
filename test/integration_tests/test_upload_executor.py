@@ -38,6 +38,7 @@ class UploadExecutorTest(unittest.TestCase):
         file_remove("dummy.avi")
         file_remove("dummy.csv")
 
+    @unittest.skip("System doesn't use UPLOAD anymore")
     # integration test
     def test_should_upload_file_to_location(self):
         query = (
@@ -54,6 +55,7 @@ class UploadExecutorTest(unittest.TestCase):
             actual_blob = str(base64.b64encode(bytes_read))
         self.assertEqual(actual_blob, expected_blob)
 
+    @unittest.skip("System doesn't use UPLOAD anymore")
     # integration test for csv
     def test_should_upload_csv_to_table(self):
         # loading a csv requires a table to be created first
