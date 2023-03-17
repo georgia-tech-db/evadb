@@ -46,7 +46,6 @@ from eva.optimizer.operators import (
     LogicalSample,
     LogicalShow,
     LogicalUnion,
-    LogicalUpload,
     Operator,
 )
 from eva.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
@@ -276,9 +275,6 @@ statement_to_opr_convertor.column_definition_to_udf_io"
         query_derived_plan = LogicalQueryDerivedGet(MagicMock())
         load_plan = LogicalLoadData(MagicMock(), MagicMock(), MagicMock(), MagicMock())
         limit_plan = LogicalLimit(MagicMock())
-        upload_plan = LogicalUpload(
-            MagicMock(), MagicMock(), MagicMock(), MagicMock(), MagicMock(), MagicMock()
-        )
         rename_plan = LogicalRename(MagicMock(), MagicMock())
 
         explain_plan = LogicalExplain([MagicMock()])
@@ -310,7 +306,6 @@ statement_to_opr_convertor.column_definition_to_udf_io"
         plans.append(query_derived_plan)
         plans.append(load_plan)
         plans.append(limit_plan)
-        plans.append(upload_plan)
         plans.append(rename_plan)
         plans.append(drop_plan)
         plans.append(drop_udf_plan)

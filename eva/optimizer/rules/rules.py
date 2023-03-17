@@ -68,7 +68,6 @@ from eva.optimizer.operators import (
     LogicalSample,
     LogicalShow,
     LogicalUnion,
-    LogicalUpload,
     Operator,
     OperatorType,
 )
@@ -91,7 +90,6 @@ from eva.plan_nodes.rename_plan import RenamePlan
 from eva.plan_nodes.seq_scan_plan import SeqScanPlan
 from eva.plan_nodes.storage_plan import StoragePlan
 from eva.plan_nodes.union_plan import UnionPlan
-from eva.plan_nodes.upload_plan import UploadPlan
 
 ##############################################
 # REWRITE RULES START
@@ -664,29 +662,6 @@ class LogicalLoadToPhysical(Rule):
             before.column_list,
             before.file_options,
         )
-        yield after
-
-
-class LogicalUploadToPhysical(Rule):
-    def __init__(self):
-        pattern = Pattern(OperatorType.LOGICALUPLOAD)
-        super().__init__(RuleType.LOGICAL_UPLOAD_TO_PHYSICAL, pattern)
-
-    def promise(self):
-        return Promise.LOGICAL_UPLOAD_TO_PHYSICAL
-
-    def check(self, before: Operator, context: OptimizerContext):
-        return True
-
-    def apply(self, before: LogicalUpload, context: OptimizerContext):
-        after = UploadPlan(
-            before.path,
-            before.video_blob,
-            before.table_info,
-            before.column_list,
-            before.file_options,
-        )
-
         yield after
 
 

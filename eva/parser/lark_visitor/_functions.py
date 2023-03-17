@@ -112,9 +112,9 @@ class Functions:
         return CreateUDFStatement(
             udf_name,
             if_not_exists,
+            impl_path,
             input_definitions,
             output_definitions,
-            impl_path,
             udf_type,
             metadata,
         )

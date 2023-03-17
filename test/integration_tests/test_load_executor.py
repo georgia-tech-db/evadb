@@ -46,7 +46,7 @@ class LoadExecutorTest(unittest.TestCase):
         self.image_files_path = Path(
             f"{EVA_ROOT_DIR}/test/data/uadetrac/small-data/MVI_20011/*.jpg"
         )
-        create_sample_csv()
+        self.csv_file_path = create_sample_csv()
 
     def tearDown(self):
         file_remove("dummy.avi")
@@ -397,7 +397,7 @@ class LoadExecutorTest(unittest.TestCase):
         execute_query_fetch_all(create_table_query)
 
         # load the CSV
-        load_query = """LOAD CSV 'dummy.csv' INTO MyVideoCSV;"""
+        load_query = f"LOAD CSV '{self.csv_file_path}' INTO MyVideoCSV;"
         execute_query_fetch_all(load_query)
 
         # execute a select query
@@ -432,7 +432,9 @@ class LoadExecutorTest(unittest.TestCase):
         execute_query_fetch_all(create_table_query)
 
         # load the CSV
-        load_query = """LOAD CSV 'dummy.csv' INTO MyVideoCSV (id, frame_id, video_id, dataset_name);"""
+        load_query = """LOAD CSV '{}' INTO MyVideoCSV (id, frame_id, video_id, dataset_name);""".format(
+            self.csv_file_path
+        )
         execute_query_fetch_all(load_query)
 
         # execute a select query
