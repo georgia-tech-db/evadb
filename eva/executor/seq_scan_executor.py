@@ -35,11 +35,7 @@ class SequentialScanExecutor(AbstractExecutor):
         self.project_expr = node.columns
         self.alias = node.alias
 
-    def validate(self):
-        pass
-
     def exec(self, **kwargs) -> Iterator[Batch]:
-
         try:
             child_executor = self.children[0]
             for batch in child_executor.exec(**kwargs):

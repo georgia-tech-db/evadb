@@ -34,9 +34,6 @@ class FunctionScanExecutor(AbstractExecutor):
         self.func_expr = node.func_expr
         self.do_unnest = node.do_unnest
 
-    def validate(self):
-        pass
-
     def exec(self, *args, **kwargs) -> Iterator[Batch]:
         assert (
             "lateral_input" in kwargs

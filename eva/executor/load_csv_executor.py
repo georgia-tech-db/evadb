@@ -35,9 +35,6 @@ class LoadCSVExecutor(AbstractExecutor):
         self.upload_dir = config.get_value("storage", "upload_dir")
         self.catalog = CatalogManager()
 
-    def validate(self):
-        pass
-
     def exec(self):
         """
         Read the input csv file using pandas and persist data

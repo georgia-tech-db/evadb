@@ -32,9 +32,6 @@ class SampleExecutor(AbstractExecutor):
         super().__init__(node)
         self._sample_freq = node.sample_freq.value
 
-    def validate(self):
-        pass
-
     def exec(self) -> Iterator[Batch]:
         child_executor = self.children[0]
 

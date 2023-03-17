@@ -30,9 +30,6 @@ class QueueReaderExecutor(AbstractExecutor):
     def __init__(self):
         super().__init__(None)
 
-    def validate(self):
-        pass
-
     def exec(self, **kwargs) -> Iterator[Batch]:
         assert (
             "input_queues" in kwargs
@@ -62,9 +59,6 @@ class ExchangeExecutor(AbstractExecutor):
         self.parallelism = node.parallelism
         self.ray_conf = node.ray_conf
         super().__init__(node)
-
-    def validate(self):
-        pass
 
     def exec(self, is_top=True) -> Iterator[Batch]:
         assert (

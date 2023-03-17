@@ -59,10 +59,6 @@ class AbstractExecutor(ABC):
         return self._node
 
     @abstractmethod
-    def validate(self):
-        pass
-
-    @abstractmethod
     def exec(self) -> Iterable[Batch]:
         """
         This method is implemented by every executor.

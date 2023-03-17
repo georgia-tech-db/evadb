@@ -25,9 +25,6 @@ class DropUDFExecutor(AbstractExecutor):
     def __init__(self, node: DropUDFPlan):
         super().__init__(node)
 
-    def validate(self):
-        pass
-
     def exec(self):
         """Drop UDF executor"""
         catalog_manager = CatalogManager()

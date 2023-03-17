@@ -28,9 +28,6 @@ class PredicateExecutor(AbstractExecutor):
         super().__init__(node)
         self.predicate = node.predicate
 
-    def validate(self):
-        pass
-
     def exec(self, *args, **kwargs) -> Iterator[Batch]:
         try:
             child_executor = self.children[0]

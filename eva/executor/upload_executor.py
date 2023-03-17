@@ -29,9 +29,6 @@ class UploadExecutor(AbstractExecutor):
         config = ConfigurationManager()
         self.upload_dir = config.get_value("storage", "upload_dir")
 
-    def validate(self):
-        pass
-
     def exec(self):
         """
         Upload the video blob into the location defined by 'path'

@@ -28,9 +28,6 @@ class BuildJoinExecutor(AbstractExecutor):
         self.join_type = node.join_type
         self.build_keys = node.build_keys
 
-    def validate(self):
-        pass
-
     def exec(self, *args, **kwargs) -> Iterator[Batch]:
         try:
             child_executor = self.children[0]

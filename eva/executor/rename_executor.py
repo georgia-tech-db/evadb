@@ -23,9 +23,6 @@ class RenameExecutor(AbstractExecutor):
     def __init__(self, node: RenamePlan):
         super().__init__(node)
 
-    def validate(self):
-        pass
-
     def exec(self):
         """rename table executor
 

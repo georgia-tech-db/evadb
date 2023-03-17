@@ -28,9 +28,6 @@ class ProjectExecutor(AbstractExecutor):
         super().__init__(node)
         self.target_list = node.target_list
 
-    def validate(self):
-        pass
-
     def exec(self, **kwargs) -> Iterator[Batch]:
         try:
             child_executor = self.children[0]

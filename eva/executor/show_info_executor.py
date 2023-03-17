@@ -28,9 +28,6 @@ class ShowInfoExecutor(AbstractExecutor):
     def __init__(self, node: ShowInfoPlan):
         super().__init__(node)
 
-    def validate(self):
-        pass
-
     def exec(self):
         try:
             catalog_manager = CatalogManager()

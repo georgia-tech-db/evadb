@@ -31,9 +31,6 @@ class InsertExecutor(AbstractExecutor):
         super().__init__(node)
         self.catalog = CatalogManager()
 
-    def validate(self):
-        pass
-
     def exec(self):
         storage_engine = None
         table_catalog_entry = None

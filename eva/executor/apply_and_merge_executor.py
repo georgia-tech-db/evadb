@@ -38,9 +38,6 @@ class ApplyAndMergeExecutor(AbstractExecutor):
         self.do_unnest = node.do_unnest
         self.alias = node.alias
 
-    def validate(self):
-        pass
-
     def exec(self, *args, **kwargs) -> Iterator[Batch]:
         child_executor = self.children[0]
         for batch in child_executor.exec(**kwargs):

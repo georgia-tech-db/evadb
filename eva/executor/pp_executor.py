@@ -34,9 +34,6 @@ class PPExecutor(AbstractExecutor):
         super().__init__(node)
         self.predicate = node.predicate
 
-    def validate(self):
-        pass
-
     def exec(self) -> Iterator[Batch]:
         child_executor = self.children[0]
         for batch in child_executor.exec():

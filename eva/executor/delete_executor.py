@@ -34,9 +34,6 @@ class DeleteExecutor(AbstractExecutor):
         self.predicate = node.where_clause
         self.catalog = CatalogManager()
 
-    def validate(self):
-        pass
-
     def exec(self, **kwargs) -> Iterator[Batch]:
         try:
             table_catalog = self.node.table_ref.table.table_obj

@@ -31,9 +31,6 @@ class UnionExecutor(AbstractExecutor):
     def __init__(self, node: UnionPlan):
         super().__init__(node)
 
-    def validate(self):
-        pass
-
     def exec(self) -> Iterator[Batch]:
         if self.node.all is False:
             logger.warn("Only UNION ALL is supported now.")

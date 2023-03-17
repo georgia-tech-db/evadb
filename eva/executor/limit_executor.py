@@ -32,9 +32,6 @@ class LimitExecutor(AbstractExecutor):
         super().__init__(node)
         self._limit_count = node.limit_value
 
-    def validate(self):
-        pass
-
     def exec(self) -> Iterator[Batch]:
         child_executor = self.children[0]
         remaining_tuples = self._limit_count

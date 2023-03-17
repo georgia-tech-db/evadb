@@ -23,9 +23,6 @@ class LoadDataExecutor(AbstractExecutor):
     def __init__(self, node: LoadDataPlan):
         super().__init__(node)
 
-    def validate(self):
-        pass
-
     def exec(self):
         """
         Use TYPE to determine the type of data to load.

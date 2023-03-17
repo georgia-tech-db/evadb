@@ -27,9 +27,6 @@ class LateralJoinExecutor(AbstractExecutor):
         self.predicate = node.join_predicate
         self.join_project = node.join_project
 
-    def validate(self):
-        pass
-
     def exec(self, *args, **kwargs) -> Iterator[Batch]:
         outer = self.children[0]
         inner = self.children[1]

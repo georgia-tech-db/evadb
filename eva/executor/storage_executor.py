@@ -27,9 +27,6 @@ class StorageExecutor(AbstractExecutor):
     def __init__(self, node: StoragePlan):
         super().__init__(node)
 
-    def validate(self):
-        pass
-
     def exec(self) -> Iterator[Batch]:
         try:
             storage_engine = StorageEngine.factory(self.node.table)
