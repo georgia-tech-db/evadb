@@ -122,8 +122,8 @@ class OptimizerRulesTest(unittest.TestCase):
         self.assertEqual(query_plan, query_plan_without_pushdown_join_rule)
 
     def test_should_reorder_predicate(self):
-        # udfQuery1 = """SELECT id, FastRCNNObjectDetector(data) FROM MyVideo WHERE FastRCNNObjectDetector(data).labels = ['person'] ORDER BY id;"""
-        # execute_query_fetch_all(udfQuery1)
+        udfQuery1 = """SELECT id, FastRCNNObjectDetector(data) FROM MyVideo WHERE FastRCNNObjectDetector(data).labels = ['person'] ORDER BY id;"""
+        execute_query_fetch_all(udfQuery1)
         udfQuery1 = """SELECT id, DummyObjectDetector(data) FROM MyVideo \
             WHERE DummyObjectDetector(data).label = ['bicycle'] ORDER BY id;"""
         execute_query_fetch_all(udfQuery1)
