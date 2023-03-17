@@ -32,7 +32,7 @@ class StoragePlan(AbstractPlan):
         total_shards (int): number of shards of data (if sharded)
         curr_shard (int): current curr_shard if data is sharded
         sampling_rate (int): uniform sampling rate
-        sampling_type (str): special sampling type like iframes
+        sampling_type (str): special sampling type like IFRAMES
     """
 
     def __init__(

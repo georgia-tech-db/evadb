@@ -23,6 +23,7 @@ from test.util import (
     upload_dir_from_config,
 )
 
+from eva.constants import IFRAMES
 from eva.expression.abstract_expression import ExpressionType
 from eva.expression.comparison_expression import ComparisonExpression
 from eva.expression.constant_value_expression import ConstantValueExpression
@@ -38,14 +39,17 @@ class DecordLoaderTest(unittest.TestCase):
     def tearDown(self):
         file_remove("dummy.avi")
 
-    def test_should_sample_every_k_frame(self):
+    def test_should_sample_only_iframe(self):
+        file_url = os.path.join(upload_dir_from_config, "dummy.avi")
         for k in range(1, 10):
             video_loader = DecordReader(
-                file_url=os.path.join(upload_dir_from_config, "dummy.avi"),
+                file_url=file_url,
                 batch_mem_size=FRAME_SIZE * NUM_FRAMES,
+                sampling_type=IFRAMES,
                 sampling_rate=k,
             )
             batches = list(video_loader.read())
+
             expected = list(
                 create_dummy_batches(filters=[i for i in range(0, NUM_FRAMES, k)])
             )
@@ -65,8 +69,6 @@ class DecordLoaderTest(unittest.TestCase):
                 predicate=predicate,
             )
             batches = list(video_loader.read())
-            for batch in batches:
-                print(batch)
             value = NUM_FRAMES // 2
             start = value + k - (value % k) if value % k else value
             expected = list(
@@ -101,3 +103,69 @@ class DecordLoaderTest(unittest.TestCase):
                 create_dummy_batches(filters=[i for i in range(start, 8, k)])
             )
         self.assertTrue(batches, expected)
+
+    def test_should_return_one_batch(self):
+        video_loader = DecordReader(
+            file_url=os.path.join(upload_dir_from_config, "dummy.avi"),
+            batch_mem_size=NUM_FRAMES * FRAME_SIZE,
+        )
+        batches = list(video_loader.read())
+        expected = list(create_dummy_batches())
+        self.assertTrue(batches, expected)
+
+    def test_should_return_batches_equivalent_to_number_of_frames(self):
+        video_loader = DecordReader(
+            file_url=os.path.join(upload_dir_from_config, "dummy.avi"),
+            batch_mem_size=FRAME_SIZE,
+        )
+        batches = list(video_loader.read())
+        expected = list(create_dummy_batches(batch_size=1))
+        self.assertTrue(batches, expected)
+
+    def test_should_skip_first_two_frames_with_offset_two(self):
+        video_loader = DecordReader(
+            file_url=os.path.join(upload_dir_from_config, "dummy.avi"),
+            batch_mem_size=FRAME_SIZE * (NUM_FRAMES - 2),
+            offset=2,
+        )
+        batches = list(video_loader.read())
+        expected = list(create_dummy_batches(filters=[i for i in range(2, NUM_FRAMES)]))
+
+        self.assertTrue(batches, expected)
+
+    def test_should_start_frame_number_from_two(self):
+        video_loader = DecordReader(
+            file_url=os.path.join(upload_dir_from_config, "dummy.avi"),
+            batch_mem_size=FRAME_SIZE * NUM_FRAMES,
+            offset=2,
+        )
+        batches = list(video_loader.read())
+        expected = list(
+            create_dummy_batches(filters=[i for i in range(0, NUM_FRAMES)], start_id=2)
+        )
+        self.assertTrue(batches, expected)
+
+    def test_should_skip_first_two_frames_and_batch_size_equal_to_no_of_frames(
+        self,
+    ):
+        video_loader = DecordReader(
+            file_url=os.path.join(upload_dir_from_config, "dummy.avi"),
+            batch_mem_size=FRAME_SIZE * NUM_FRAMES,
+            offset=2,
+        )
+        batches = list(video_loader.read())
+        expected = list(create_dummy_batches(filters=[i for i in range(2, NUM_FRAMES)]))
+        self.assertTrue(batches, expected)
+
+    def test_should_sample_every_k_frame(self):
+        for k in range(1, 10):
+            video_loader = DecordReader(
+                file_url=os.path.join(upload_dir_from_config, "dummy.avi"),
+                batch_mem_size=FRAME_SIZE * NUM_FRAMES,
+                sampling_rate=k,
+            )
+            batches = list(video_loader.read())
+            expected = list(
+                create_dummy_batches(filters=[i for i in range(0, NUM_FRAMES, k)])
+            )
+            self.assertTrue(batches, expected)

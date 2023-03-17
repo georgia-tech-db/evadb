@@ -41,7 +41,7 @@ class DecordReader(AbstractReader):
             can be converted to ranges. Defaults to None.
             sampling_rate (int, optional): Set if the caller wants one frame
             every `sampling_rate` number of frames. For example, if `sampling_rate = 10`, it returns every 10th frame. If both `predicate` and `sampling_rate` are specified, `sampling_rate` is given precedence.
-            sampling_type (str, optional): Set as 'iframe' if caller want to sample on top on iframes only.
+            sampling_type (str, optional): Set as IFRAMES if caller want to sample on top on iframes only. e.g if the IFRAME frame numbers are [10,20,30,40,50] then'SAMPLE IFRAMES 2' will return [10,30,50]
         """
         self._predicate = predicate
         self._sampling_rate = sampling_rate or 1
@@ -71,7 +71,13 @@ class DecordReader(AbstractReader):
                     frame = video[frame_id]
                     idx += self._sampling_rate
                     if frame is not None:
-                        yield {"id": frame_id, "data": frame}
+                        yield {
+                            "id": frame_id,
+                            "data": frame,
+                            "seconds": math.floor(
+                                video.get_frame_timestamp(frame_id)[0]
+                            ),
+                        }
                     else:
                         break
         elif self._sampling_rate == 1:
@@ -99,6 +105,12 @@ class DecordReader(AbstractReader):
                 for frame_id in range(begin, end + 1, self._sampling_rate):
                     frame = video[frame_id]
                     if frame is not None:
-                        yield {"id": frame_id, "data": frame}
+                        yield {
+                            "id": frame_id,
+                            "data": frame,
+                            "seconds": math.floor(
+                                video.get_frame_timestamp(frame_id)[0]
+                            ),
+                        }
                     else:
                         break

@@ -76,6 +76,10 @@ class OpenCVReader(AbstractReader):
                     video.set(cv2.CAP_PROP_POS_FRAMES, frame_id)
                     _, frame = video.read()
                     if frame is not None:
-                        yield {"id": frame_id, "data": frame}
+                        yield {
+                            "id": frame_id,
+                            "data": frame,
+                            "seconds": frame_id // video.get(cv2.CAP_PROP_FPS),
+                        }
                     else:
                         break
