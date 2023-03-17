@@ -14,7 +14,6 @@
 # limitations under the License.
 
 import os
-import subprocess
 from typing import List
 
 import numpy as np
@@ -26,7 +25,6 @@ from PIL import Image
 from torch import Tensor
 from torchvision import transforms
 
-from eva.configuration.constants import EVA_DEFAULT_DIR
 from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
 
 # VGG configuration
@@ -98,22 +96,30 @@ class EmotionDetector(PytorchAbstractClassifierUDF):
     def name(self) -> str:
         return "EmotionDetector"
 
+    def _download_weights(self, weights_url, weights_path):
+        if not os.path.exists(weights_path):
+            torch.hub.download_url_to_file(
+                weights_url,
+                weights_path,
+                hash_prefix=None,
+                progress=True,
+            )
+
     def setup(self, threshold=0.85):
         self.threshold = threshold
+        model_url = (
+            "https://www.dropbox.com/s/x0a8bz53apvmoc9/emotion_detector.t7?raw=1"
+        )
+        model_weights_path = torch.hub.get_dir() + "/emotion_detector.t7"
+        # pull model weights from dropbox if not present
+        self._download_weights(model_url, model_weights_path)
 
         # load model
         self.model = VGG("VGG19")
-        output_directory = os.path.join(EVA_DEFAULT_DIR, "udfs", "models")
-        model_path = os.path.join(output_directory, "emotion_detector.t7")
-
-        # pull model from dropbox if not present
-        if not os.path.exists(model_path):
-            model_url = "https://www.dropbox.com/s/x0a8bz53apvmoc9/emotion_detector.t7"
-            subprocess.run(["wget", model_url, "--directory-prefix", output_directory])
 
         # self.get_device() infers device from the loaded model, so not using it
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        model_state = torch.load(model_path, map_location=device)
+        model_state = torch.load(model_weights_path, map_location=device)
         self.model.load_state_dict(model_state["net"])
         self.model.eval()
 

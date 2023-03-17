@@ -16,7 +16,6 @@ executor:
   gpus: { "127.0.0.1": [0] }
 
 storage:
-  upload_dir: ""
   s3_download_dir: ""
   structured_data_engine: "eva.storage.sqlite_storage_engine.SQLStorageEngine"
   video_engine: "eva.storage.video_storage_engine.OpenCVStorageEngine"

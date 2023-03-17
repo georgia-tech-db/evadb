@@ -25,6 +25,7 @@ from eva.models.storage.batch import Batch
 from eva.plan_nodes.load_data_plan import LoadDataPlan
 from eva.storage.abstract_storage_engine import AbstractStorageEngine
 from eva.storage.storage_engine import StorageEngine
+from eva.utils.errors import DatasetFileNotFoundError
 from eva.utils.logging_manager import logger
 from eva.utils.s3_utils import download_from_s3
 
@@ -65,6 +66,11 @@ class LoadMultimediaExecutor(AbstractExecutor):
                     err_msg = f"Load {self.media_type.name} failed due to invalid file {str(file_path)}"
                     logger.error(err_msg)
                     raise ValueError(file_path)
+
+            if not valid_files:
+                raise DatasetFileNotFoundError(
+                    f"Load {self.media_type.name} failed due to no valid files found on path {str(self.node.file_path)}"
+                )
 
             # Create catalog entry
             table_info = self.node.table_info

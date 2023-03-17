@@ -29,7 +29,6 @@ from eva.plan_nodes.load_data_plan import LoadDataPlan
 from eva.plan_nodes.rename_plan import RenamePlan
 from eva.plan_nodes.types import PlanOprType
 from eva.plan_nodes.union_plan import UnionPlan
-from eva.plan_nodes.upload_plan import UploadPlan
 
 
 class PlanNodeTests(unittest.TestCase):
@@ -122,39 +121,6 @@ class PlanNodeTests(unittest.TestCase):
         self.assertEqual(plan.opr_type, PlanOprType.LOAD_DATA)
         self.assertEqual(plan.table_info, table_info)
         self.assertEqual(plan.file_path, file_path)
-        self.assertEqual(plan.batch_mem_size, batch_mem_size)
-
-        self.assertEqual(str(plan), plan_str)
-
-    def test_upload_plan(self):
-        file_path = "test.mp4"
-        video_blob = "b'AAAA'"
-        table_info = "info"
-        file_format = FileFormatType.VIDEO
-        file_options = {}
-        file_options["file_format"] = file_format
-        column_list = None
-        batch_mem_size = 3000
-        plan_str = "UploadPlan(file_path={}, \
-            video_blob={}, \
-            table_id={}, \
-            column_list={}, \
-            file_options={}, \
-            batch_mem_size={})".format(
-            file_path,
-            "video blob",
-            table_info,
-            column_list,
-            file_options,
-            batch_mem_size,
-        )
-        plan = UploadPlan(
-            file_path, video_blob, table_info, column_list, file_options, batch_mem_size
-        )
-        self.assertEqual(plan.opr_type, PlanOprType.UPLOAD)
-        self.assertEqual(plan.file_path, file_path)
-        self.assertEqual(plan.video_blob, video_blob)
-        self.assertEqual(plan.table_info, table_info)
         self.assertEqual(plan.batch_mem_size, batch_mem_size)
 
         self.assertEqual(str(plan), plan_str)
