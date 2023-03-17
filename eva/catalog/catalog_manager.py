@@ -240,6 +240,24 @@ class CatalogManager(object):
 
     "udf cost catalog services"
 
+    def get_all_udf_cost_catalog_entries(self):
+        return self._udf_cost_catlog_service.get_all_entries()
+
+    def get_udf_cost_catalog_entry(
+        self, udf_id: int
+    ) -> UdfCostCatalogEntry:
+        """Get UDF cost from the catalog entry.
+
+        Arguments:
+            udf_id(int): id of the UDF
+
+        Returns:
+            The persisted UdfCostCatalogEntry object.
+        """
+
+        udf_entry = self._udf_cost_catlog_service.get_entry_by_id(udf_id)
+        return udf_entry
+
     def insert_udf_cost_catalog_entry(
         self, udf_id: int, name: str, cost: int
     ) -> UdfCostCatalogEntry:

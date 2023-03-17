@@ -95,6 +95,7 @@ class RulesTest(unittest.TestCase):
             Promise.PUSHDOWN_FILTER_THROUGH_JOIN,
             Promise.PUSHDOWN_FILTER_THROUGH_APPLY_AND_MERGE,
             Promise.COMBINE_SIMILARITY_ORDERBY_AND_LIMIT_TO_FAISS_INDEX_SCAN,
+            Promise.REORDER_PREDICATES,
         ]
 
         for promise in rewrite_promises:

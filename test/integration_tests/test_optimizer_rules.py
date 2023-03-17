@@ -120,3 +120,18 @@ class OptimizerRulesTest(unittest.TestCase):
 
         self.assertEqual(result_without_pushdown_join_rule, result_with_rule)
         self.assertEqual(query_plan, query_plan_without_pushdown_join_rule)
+
+    def test_should_reorder_predicate(self):
+        udfQuery1 = """SELECT id, FastRCNNObjectDetector(data) FROM MyVideo \
+            WHERE FastRCNNObjectDetector(data).labels = ['person'] ORDER BY id;"""
+        execute_query_fetch_all(udfQuery1)
+        udfQuery2 = """SELECT id, DummyObjectDetector(data) FROM MyVideo \
+            WHERE DummyObjectDetector(data).label = ['bicycle'] ORDER BY id;"""
+        execute_query_fetch_all(udfQuery2)
+        
+        catalog_manager = CatalogManager()
+        temp = catalog_manager.get_all_udf_cost_catalog_entries()
+        udfPredicateReorderingQuery = """SELECT id, FastRCNNObjectDetector(data), DummyObjectDetector(data) FROM MyVideo \
+            WHERE FastRCNNObjectDetector(data).labels = ['person'] OR DummyObjectDetector(data).label = ['bicycle'] ORDER BY id;"""
+        result = execute_query_fetch_all(udfPredicateReorderingQuery)
+        print(result.frames[0][0])

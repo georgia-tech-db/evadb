@@ -56,7 +56,7 @@ class UdfCostCatalogService(BaseService):
         except NoResultFound:
             return None
 
-    def get_entry_by_name(self, name: str) -> UdfCostCatalogEntry:
+    def get_entry_by_id(self, id: int) -> UdfCostCatalogEntry:
         """return the udf cost entry that matches the name provided.
            None if no such entry found.
 
@@ -65,7 +65,7 @@ class UdfCostCatalogService(BaseService):
         """
 
         try:
-            udf_obj = self.model.query.filter(self.model._name == name).one()
+            udf_obj = self.model.query.filter(self.model._udf_id == id).one()
             if udf_obj:
                 return udf_obj.as_dataclass()
             return udf_obj
