@@ -59,6 +59,7 @@ class FunctionExpression(AbstractExpression):
         self._output = output
         self._averageTime = 0
         self._iterationCount = 0
+        self._lastIterationCount = 0
         self.alias = alias
         self.udf_obj: UdfCatalogEntry = None
         self.output_objs: List[UdfIOCatalogEntry] = []
@@ -94,21 +95,25 @@ class FunctionExpression(AbstractExpression):
         catalog_manager = CatalogManager()
         # get
         # update
-        catalog_manager.insert_udf_cost_catalog_entry(udf_id, name, time)
+        #catalog_manager.insert_udf_cost_catalog_entry(udf_id, name, time)
+        catalog_manager.upsert_udf_cost_catalog_entry(udf_id, name, self._averageTime)
 
-    def profileAndPersist(self, udf_obj, name, time, numberOfCalls):
+    def profileAndPersist(self, udf_obj, name, time, numberOfFrames):
+        # numberOfCalls is passed len(batches). Count number of 100 intervals that have passed since the last call
         if not (udf_obj):
             return
         udf_id = udf_obj.row_id
         # update self._iterationCount using function in base_model
         # table_obj in renamte_entry in table_catalog_service
-        self._averageTime = (self._averageTime * (numberOfCalls - 1) + time) / (
-            numberOfCalls
+        self._iterationCount = self._iterationCount + numberOfFrames
+        self._averageTime = (self._averageTime * (numberOfFrames - 1) + time) / (
+            numberOfFrames
         )
 
-        # Persist only every 100th evaluation of the function expression
-        if not (numberOfCalls % 100):
+        # Persist only every 10th evaluation of the function expression
+        if (self._iterationCount - self._lastIterationCount >= 10):
             self.persistCost(udf_id, name, self._averageTime)
+        self._lastIterationCount = self._iterationCount
 
     def evaluate(self, batch: Batch, **kwargs) -> Batch:
         new_batch = batch

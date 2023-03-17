@@ -39,6 +39,23 @@ class UdfCostCatalogService(BaseService):
         udf_obj = udf_obj.save()
         return udf_obj.as_dataclass()
 
+    def upsert_entry(self, udf_id: int, name: str, new_cost: int):
+        """Upserts a new udf cost entry
+
+        Arguments:
+            udf_if(int): id of the udf
+            cost(int)  : cost of the udf
+        """
+        try:
+            udf_obj = self.model.query.filter(self.model._udf_id == udf_id).one()
+            if udf_obj:
+                udf_obj.update(cost=new_cost)
+            else:
+                udf_obj = self.model(udf_id, name, new_cost)
+                udf_obj = udf_obj.save()
+        except NoResultFound:
+            return None
+
     def get_entry_by_name(self, name: str) -> UdfCostCatalogEntry:
         """return the udf cost entry that matches the name provided.
            None if no such entry found.
