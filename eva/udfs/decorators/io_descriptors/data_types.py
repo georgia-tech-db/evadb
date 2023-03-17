@@ -65,7 +65,6 @@ class NumpyArray(IOColumnArgument):
             else:
                 raise UDFIODefinitionError("Unknown data type. Only input types List and Tensor can be converted to Numpy array")
             
-        
         if self.array_type == NdArrayType.INT8:
             return input_object.astype(np.int8)
         elif self.type == NdArrayType.INT16:
@@ -80,14 +79,8 @@ class NumpyArray(IOColumnArgument):
             return input_object.astype(np.float64)
         else:
             raise UDFIODefinitionError("Unknown array type.")
-            
         
-        
-            
-        
-        
-
-
+ 
 class PyTorchTensor(IOColumnArgument):
     """Descriptor data type for PyTorch Tensor"""
 
@@ -105,29 +98,42 @@ class PyTorchTensor(IOColumnArgument):
             array_type=type,
             array_dimensions=dimensions,
         )
-        
-    def check_shape(self, input_object):
-        torch_tensor = None
-
-        if isinstance(input_object, list):
-            torch_tensor = torch.Tensor(input_object)
-        elif isinstance(input_object, np.ndarray):
-            torch_tensor = torch.from_numpy(input_object)
-        elif isinstance(input_object, torch.Tensor):
-            torch_tensor = input_object
-
-        if not torch_tensor:
-            raise UDFIODefinitionError(
-                "Argument type not recognized. Must be numpy array or list to be converted to Tensor"
-            )
-
+                    
+    def check_array_and_convert_shape(self, input_object):
         try:
-            return torch.reshape(input_object, self.shape)
+            return torch.reshape(input_object, self.array_dimensions)
+
         except Exception as e:
             raise UDFIODefinitionError(
-                "Cannot be reshaped to required shape %s. Error: %s"
-                % (self.shape, str(e))
+                "The input object cannot be reshaped to %s. Error is %s"
+                % (self.array_dimensions, str(e))
             )
+            
+    def check_array_and_convert_type(self, input_object):
+        
+        if not isinstance(input_object, torch.Tensor):
+            if isinstance(input_object, list):
+                input_object = torch.Tensor(input_object)
+            elif isinstance(input_object, np.ndarray):
+                input_object = torch.from_numpy(input_object)
+            else:
+                raise UDFIODefinitionError("Unknown data type. Only input types List and Tensor can be converted to Numpy array")
+            
+        if self.array_type == NdArrayType.INT8:
+            return input_object.to(torch.int8)
+        elif self.type == NdArrayType.INT16:
+            return input_object.to(torch.int16)
+        elif self.array_type == NdArrayType.INT32:
+            return input_object.to(torch.int32)
+        elif self.array_type == NdArrayType.INT64:
+            return input_object.to(torch.int64)
+        elif self.array_type == NdArrayType.FLOAT32:
+            return input_object.to(torch.float32)
+        elif self.array_type == NdArrayType.FLOAT64:
+            return input_object.to(torch.float64)
+        else:
+            raise UDFIODefinitionError("Unknown array type.")
+    
 
 
 class PandasDataframe(IOArgument):
@@ -171,3 +177,12 @@ class PandasDataframe(IOArgument):
             )
 
         return catalog_entries
+    
+    def check_array_and_convert_shape(self, input_obj):
+        pass
+    
+    def check_array_and_convert_type(self, input_obj, data_type):
+        pass
+    
+    def validate_pandas_outputs(self, input_obj):
+        pass
