@@ -93,24 +93,19 @@ class FunctionExpression(AbstractExpression):
         from eva.catalog.catalog_manager import CatalogManager
 
         catalog_manager = CatalogManager()
-        # get
-        # update
-        # catalog_manager.insert_udf_cost_catalog_entry(udf_id, name, time)
         catalog_manager.upsert_udf_cost_catalog_entry(udf_id, name, self._averageTime)
 
     def profileAndPersist(self, udf_obj, name, time, numberOfFrames):
-        # numberOfCalls is passed len(batches). Count number of 100 intervals that have passed since the last call
         if not (udf_obj):
             return
         udf_id = udf_obj.row_id
-        # update self._iterationCount using function in base_model
-        # table_obj in renamte_entry in table_catalog_service
         self._iterationCount = self._iterationCount + numberOfFrames
         self._averageTime = (self._averageTime * (numberOfFrames - 1) + time) / (
             numberOfFrames
         )
 
         # Persist only every 10th evaluation of the function expression
+        # >= because each batch could have a non-multiple of 10 frame count
         if self._iterationCount - self._lastIterationCount >= 10:
             self.persistCost(udf_id, name, self._averageTime)
         self._lastIterationCount = self._iterationCount
