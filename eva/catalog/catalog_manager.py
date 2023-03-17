@@ -255,7 +255,7 @@ class CatalogManager(object):
 
         udf_entry = self._udf_cost_catlog_service.insert_entry(udf_id, name, cost)
         return udf_entry
-    
+
     def upsert_udf_cost_catalog_entry(
         self, udf_id: int, name: str, avgCost: int
     ) -> UdfCostCatalogEntry:

@@ -95,7 +95,7 @@ class FunctionExpression(AbstractExpression):
         catalog_manager = CatalogManager()
         # get
         # update
-        #catalog_manager.insert_udf_cost_catalog_entry(udf_id, name, time)
+        # catalog_manager.insert_udf_cost_catalog_entry(udf_id, name, time)
         catalog_manager.upsert_udf_cost_catalog_entry(udf_id, name, self._averageTime)
 
     def profileAndPersist(self, udf_obj, name, time, numberOfFrames):
@@ -111,7 +111,7 @@ class FunctionExpression(AbstractExpression):
         )
 
         # Persist only every 10th evaluation of the function expression
-        if (self._iterationCount - self._lastIterationCount >= 10):
+        if self._iterationCount - self._lastIterationCount >= 10:
             self.persistCost(udf_id, name, self._averageTime)
         self._lastIterationCount = self._iterationCount
 
