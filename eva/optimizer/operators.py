@@ -20,6 +20,7 @@ from eva.catalog.catalog_type import IndexType
 from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
+from eva.catalog.models.udf_metadata_catalog import UdfMetadataCatalogEntry
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.constant_value_expression import ConstantValueExpression
 from eva.expression.function_expression import FunctionExpression
@@ -640,6 +641,7 @@ class LogicalCreateUDF(Operator):
         outputs: List[UdfIOCatalogEntry],
         impl_path: Path,
         udf_type: str = None,
+        metadata: List[UdfMetadataCatalogEntry] = None,
         children: List = None,
     ):
         super().__init__(OperatorType.LOGICALCREATEUDF, children)
@@ -649,6 +651,7 @@ class LogicalCreateUDF(Operator):
         self._outputs = outputs
         self._impl_path = impl_path
         self._udf_type = udf_type
+        self._metadata = metadata
 
     @property
     def name(self):
@@ -674,6 +677,10 @@ class LogicalCreateUDF(Operator):
     def udf_type(self):
         return self._udf_type
 
+    @property
+    def metadata(self):
+        return self._metadata
+
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
         if not isinstance(other, LogicalCreateUDF):
@@ -686,6 +693,7 @@ class LogicalCreateUDF(Operator):
             and self.outputs == other.outputs
             and self.udf_type == other.udf_type
             and self.impl_path == other.impl_path
+            and self.metadata == other.metadata
         )
 
     def __hash__(self) -> int:
@@ -698,6 +706,7 @@ class LogicalCreateUDF(Operator):
                 tuple(self.outputs),
                 self.udf_type,
                 self.impl_path,
+                tuple(self.metadata),
             )
         )
 

@@ -40,6 +40,11 @@ class UdfCatalog(BaseModel):
     _attributes = relationship(
         "UdfIOCatalog", back_populates="_udf", cascade="all, delete, delete-orphan"
     )
+    _metadata = relationship(
+        "UdfMetadataCatalog",
+        back_populates="_udf",
+        cascade="all, delete, delete-orphan",
+    )
 
     def __init__(self, name: str, impl_file_path: str, type: str, checksum: str):
         self._name = name
