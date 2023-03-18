@@ -122,13 +122,14 @@ class OptimizerRulesTest(unittest.TestCase):
         self.assertEqual(query_plan, query_plan_without_pushdown_join_rule)
 
     def test_should_reorder_predicate(self):
-        udfQuery1 = """SELECT id, FastRCNNObjectDetector(data) FROM MyVideo WHERE FastRCNNObjectDetector(data).labels = ['person'] ORDER BY id;"""
-        execute_query_fetch_all(udfQuery1)
-        udfQuery1 = """SELECT id, DummyObjectDetector(data) FROM MyVideo \
-            WHERE DummyObjectDetector(data).label = ['bicycle'] ORDER BY id;"""
-        execute_query_fetch_all(udfQuery1)
-
-        udfPredicateReorderingQuery = """SELECT id, DummyObjectDetector(data), DummyObjectDetector(data) FROM MyVideo \
+        # udfQuery1 = """SELECT id FROM MyVideo WHERE FastRCNNObjectDetector(data).labels = ['person'] ORDER BY id;"""
+        # execute_query_fetch_all(udfQuery1)
+        # udfQuery1 = """SELECT id, DummyObjectDetector(data) FROM MyVideo \
+        #     WHERE DummyObjectDetector(data).label = ['bicycle'] ORDER BY id;"""
+        # udfPredicateReorderingQuery = """SELECT id, DummyObjectDetector(data), DummyObjectDetector(data) FROM MyVideo \
+        #     WHERE DummyObjectDetector(data).label = ['person'] OR DummyObjectDetector(data).label = ['bicycle'] ORDER BY id;"""
+        udfPredicateReorderingQuery = """SELECT id FROM MyVideo \
             WHERE DummyObjectDetector(data).label = ['person'] OR DummyObjectDetector(data).label = ['bicycle'] ORDER BY id;"""
+        execute_query_fetch_all(udfPredicateReorderingQuery)
         result = execute_query_fetch_all(udfPredicateReorderingQuery)
         print(result.frames[0][0])
