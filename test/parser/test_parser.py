@@ -30,6 +30,7 @@ from eva.parser.create_statement import (
     CreateTableStatement,
 )
 from eva.parser.create_udf_statement import CreateUDFStatement
+from eva.parser.delete_statement import DeleteTableStatement
 from eva.parser.drop_statement import DropTableStatement
 from eva.parser.drop_udf_statement import DropUDFStatement
 from eva.parser.insert_statement import InsertTableStatement
@@ -285,7 +286,7 @@ class ParserTests(unittest.TestCase):
         single_queries.append("SELECT CLASS FROM TAIPAI WHERE CLASS = 'VAN';")
         single_queries.append(
             "SELECT CLASS,REDNESS FROM TAIPAI \
-            WHERE CLASS = 'VAN' AND REDNESS > 20;"
+            WHERE CLASS = 'VAN' AND REDNESS > 20.5;"
         )
         single_queries.append(
             "SELECT CLASS FROM TAIPAI \
@@ -309,7 +310,7 @@ class ParserTests(unittest.TestCase):
         multiple_queries = []
         multiple_queries.append(
             "SELECT CLASS FROM TAIPAI \
-                WHERE (CLASS = 'VAN' AND REDNESS < 300)  OR REDNESS > 500; \
+                WHERE (CLASS != 'VAN' AND REDNESS < 300)  OR REDNESS > 500; \
                 SELECT REDNESS FROM TAIPAI \
                 WHERE (CLASS = 'VAN' AND REDNESS = 300)"
         )
@@ -568,6 +569,28 @@ class ParserTests(unittest.TestCase):
 
         insert_stmt = eva_statement_list[0]
         self.assertEqual(insert_stmt, expected_stmt)
+
+    def test_delete_statement(self):
+        parser = Parser()
+        delete_statement = """DELETE FROM Foo WHERE id > 5"""
+
+        eva_statement_list = parser.parse(delete_statement)
+        self.assertIsInstance(eva_statement_list, list)
+        self.assertEqual(len(eva_statement_list), 1)
+        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.DELETE)
+
+        delete_stmt = eva_statement_list[0]
+
+        expected_stmt = DeleteTableStatement(
+            TableRef(TableInfo("Foo")),
+            ComparisonExpression(
+                ExpressionType.COMPARE_GREATER,
+                TupleValueExpression("id"),
+                ConstantValueExpression(5),
+            ),
+        )
+
+        self.assertEqual(delete_stmt, expected_stmt)
 
     def test_create_udf_statement(self):
         parser = Parser()

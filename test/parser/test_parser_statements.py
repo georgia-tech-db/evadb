@@ -40,6 +40,7 @@ class ParserStatementTests(unittest.TestCase):
                     ORDER BY CLASS, REDNESS DESC;"
             "INSERT INTO MyVideo (Frame_ID, Frame_Path)\
                                     VALUES    (1, '/mnt/frames/1.png');",
+            """DELETE FROM Foo WHERE id < 6""",
             """LOAD VIDEO 'data/video.mp4' INTO MyVideo""",
             """LOAD IMAGE 'data/pic.jpg' INTO MyImage""",
             """LOAD CSV 'data/meta.csv' INTO

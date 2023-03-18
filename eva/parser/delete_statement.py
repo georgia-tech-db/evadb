@@ -36,7 +36,7 @@ class DeleteTableStatement(AbstractStatement):
         self._where_clause = where_clause
 
     def __str__(self) -> str:
-        delete_str = f"DELETE FROM {self._table}"
+        delete_str = f"DELETE FROM {self._table_ref}"
         if self._where_clause is not None:
             delete_str += " WHERE " + str(self._where_clause)
 
@@ -57,7 +57,10 @@ class DeleteTableStatement(AbstractStatement):
     def __eq__(self, other):
         if not isinstance(other, DeleteTableStatement):
             return False
-        return self._table == other._table and self.where_clause == other.where_clause
+        return (
+            self._table_ref == other._table_ref
+            and self.where_clause == other.where_clause
+        )
 
     def __hash__(self) -> int:
         return hash((super().__hash__(), self.table, tuple(self.where_clause)))
