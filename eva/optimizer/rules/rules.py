@@ -504,9 +504,7 @@ class ReorderPredicates(Rule):
         return Promise.REORDER_PREDICATES
 
     def check(self, before: LogicalFilter, context: OptimizerContext):
-        return (
-            before.predicate.get_function_expression_children_count() > 1
-        )
+        return before.predicate.get_function_expression_children_count() > 1
 
     def getCostFromCatalog(self, funcExpr: FunctionExpression):
         catalog_manager = CatalogManager()
