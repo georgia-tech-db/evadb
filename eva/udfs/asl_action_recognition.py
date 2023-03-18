@@ -49,9 +49,8 @@ class ASLActionRecognition(PytorchAbstractClassifierUDF):
             )
 
     def setup(self):
-        self.asl_weights_url = (
-            "https://www.dropbox.com/s/q88relzj1klpmre/asl_top20_resnet_wts.pth?raw=1"
-        )
+        self.asl_weights_url = "https://www.dropbox.com/scl/fo/0qqlygcv1csoxp9kz1zut/h/asl_top20_resnet_wts.pth?raw=1"
+
         self.asl_weights_path = torch.hub.get_dir() + "/asl_weights.pth"
         self.download_weights()
 

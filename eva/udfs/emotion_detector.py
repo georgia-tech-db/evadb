@@ -107,9 +107,7 @@ class EmotionDetector(PytorchAbstractClassifierUDF):
 
     def setup(self, threshold=0.85):
         self.threshold = threshold
-        model_url = (
-            "https://www.dropbox.com/s/x0a8bz53apvmoc9/emotion_detector.t7?raw=1"
-        )
+        model_url = "https://www.dropbox.com/scl/fo/0qqlygcv1csoxp9kz1zut/h/emotion_detector.t7?raw=1"
         model_weights_path = torch.hub.get_dir() + "/emotion_detector.t7"
         # pull model weights from dropbox if not present
         self._download_weights(model_url, model_weights_path)
