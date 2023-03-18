@@ -18,9 +18,6 @@ from typing import List, Union
 import pandas as pd
 from numpy.typing import ArrayLike
 
-from eva.models.catalog.frame_info import FrameInfo
-from eva.models.catalog.properties import ColorSpace
-
 InputType = Union[pd.DataFrame, ArrayLike]
 
 
@@ -62,10 +59,6 @@ class AbstractUDF(metaclass=ABCMeta):
     @abstractmethod
     def name(self) -> str:
         pass
-
-    @property
-    def input_format(self) -> FrameInfo:
-        return FrameInfo(-1, -1, 3, ColorSpace.RGB)
 
 
 class AbstractClassifierUDF(AbstractUDF):

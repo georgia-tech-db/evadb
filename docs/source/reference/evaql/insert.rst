@@ -1,6 +1,17 @@
 INSERT 
 =======
 
+TABLE MyVideo
+-------------
+
+MyVideo Table schema
+
+.. code:: mysql
+
+    CREATE TABLE MyVideo
+    (id INTEGER,
+    data NDARRAY FLOAT32(ANYDIM));
+
 INSERT INTO TABLE
 -----
 

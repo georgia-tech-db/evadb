@@ -14,6 +14,7 @@
 # limitations under the License.
 import os
 import unittest
+from pathlib import Path
 from test.util import create_dummy_batches, create_sample_video, file_remove
 
 import boto3
@@ -82,7 +83,9 @@ class S3LoadExecutorTest(unittest.TestCase):
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()
         expected_batch = list(
-            create_dummy_batches(video_dir=f"{self.s3_download_dir}/MyVideo")
+            create_dummy_batches(
+                video_dir=os.path.join(self.s3_download_dir, "MyVideo")
+            )
         )[0]
         self.assertEqual(actual_batch, expected_batch)
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
@@ -114,12 +117,15 @@ class S3LoadExecutorTest(unittest.TestCase):
 
         select_query = """SELECT * FROM MyVideos;"""
         result = execute_query_fetch_all(select_query)
-        result_videos = list(result.frames["myvideos.name"].unique())
+        result_videos = [
+            Path(video).as_posix() for video in result.frames["myvideos.name"].unique()
+        ]
 
+        s3_dir_path = Path(self.s3_download_dir)
         expected_videos = [
-            self.s3_download_dir + "/MyVideos/1.mp4",
-            self.s3_download_dir + "/MyVideos/2.mp4",
-            self.video_file_path,
+            (s3_dir_path / "MyVideos/1.mp4").as_posix(),
+            (s3_dir_path / "MyVideos/2.mp4").as_posix(),
+            Path(self.video_file_path).as_posix(),
         ]
 
         self.assertEqual(result_videos, expected_videos)

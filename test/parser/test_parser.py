@@ -40,7 +40,6 @@ from eva.parser.select_statement import SelectStatement
 from eva.parser.statement import AbstractStatement, StatementType
 from eva.parser.table_ref import JoinNode, TableInfo, TableRef, TableValuedExpression
 from eva.parser.types import FileFormatType, JoinType, ParserOrderBySortType
-from eva.parser.upload_statement import UploadStatement
 
 
 class ParserTests(unittest.TestCase):
@@ -195,6 +194,34 @@ class ParserTests(unittest.TestCase):
             self.assertEqual(len(eva_statement_list), 1)
             self.assertIsInstance(eva_statement_list[0], AbstractStatement)
             self.assertEqual(eva_statement_list[0], expected_stmt)
+
+    def test_create_table_statement_with_rare_datatypes(self):
+        parser = Parser()
+        query = """CREATE TABLE IF NOT EXISTS Dummy (
+                  C NDARRAY UINT8(5),
+                  D NDARRAY INT16(5),
+                  E NDARRAY INT32(5),
+                  F NDARRAY INT64(5),
+                  G NDARRAY UNICODE(5),
+                  H NDARRAY BOOLEAN(5),
+                  I NDARRAY FLOAT64(5),
+                  J NDARRAY DECIMAL(5),
+                  K NDARRAY DATETIME(5)
+            );"""
+
+        eva_statement_list = parser.parse(query)
+        self.assertIsInstance(eva_statement_list, list)
+        self.assertEqual(len(eva_statement_list), 1)
+        self.assertIsInstance(eva_statement_list[0], AbstractStatement)
+
+    def test_create_table_statement_without_proper_datatype(self):
+        parser = Parser()
+        query = """CREATE TABLE IF NOT EXISTS Dummy (
+                  C NDARRAY INT(5)
+                );"""
+
+        with self.assertRaises(Exception):
+            parser.parse(query)
 
     def test_create_table_exception_statement(self):
         parser = Parser()
@@ -543,18 +570,20 @@ class ParserTests(unittest.TestCase):
 
     def test_create_udf_statement(self):
         parser = Parser()
-        create_udf_query = """CREATE UDF FastRCNN
+        create_udf_query = """CREATE UDF IF NOT EXISTS FastRCNN
                   INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
                   OUTPUT (Labels NDARRAY STR(10), Bbox NDARRAY UINT8(10, 4))
                   TYPE  Classification
-                  IMPL  'data/fastrcnn.py';
+                  IMPL  'data/fastrcnn.py'
+                  "KEY" "VALUE";
         """
 
         expected_cci = ColConstraintInfo()
         expected_cci.nullable = True
         expected_stmt = CreateUDFStatement(
             "FastRCNN",
-            False,
+            True,
+            Path("data/fastrcnn.py"),
             [
                 ColumnDefinition(
                     "Frame_Array",
@@ -572,13 +601,14 @@ class ParserTests(unittest.TestCase):
                     "Bbox", ColumnType.NDARRAY, NdArrayType.UINT8, (10, 4), expected_cci
                 ),
             ],
-            Path("data/fastrcnn.py"),
             "Classification",
+            [("KEY", "VALUE")],
         )
         eva_statement_list = parser.parse(create_udf_query)
         self.assertIsInstance(eva_statement_list, list)
         self.assertEqual(len(eva_statement_list), 1)
         self.assertEqual(eva_statement_list[0].stmt_type, StatementType.CREATE_UDF)
+        self.assertEqual(str(eva_statement_list[0]), str(expected_stmt))
 
         create_udf_stmt = eva_statement_list[0]
 
@@ -631,61 +661,6 @@ class ParserTests(unittest.TestCase):
         load_data_stmt = eva_statement_list[0]
         self.assertEqual(load_data_stmt, expected_stmt)
 
-    def test_upload_statement(self):
-        parser = Parser()
-        upload_query = """UPLOAD PATH 'data/video.mp4' BLOB "b'AAAA'"
-                          INTO MyVideo WITH FORMAT VIDEO;"""
-
-        file_options = {}
-        file_options["file_format"] = FileFormatType.VIDEO
-        column_list = None
-
-        expected_stmt = UploadStatement(
-            Path("data/video.mp4"),
-            "b'AAAA'",
-            TableInfo("MyVideo"),
-            column_list,
-            file_options,
-        )
-
-        eva_statement_list = parser.parse(upload_query)
-        self.assertIsInstance(eva_statement_list, list)
-        self.assertEqual(len(eva_statement_list), 1)
-        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.UPLOAD)
-
-        upload_stmt = eva_statement_list[0]
-        self.assertEqual(upload_stmt, expected_stmt)
-
-    def test_upload_csv_data_statement(self):
-        parser = Parser()
-
-        upload_query = """UPLOAD PATH 'data/meta.csv' BLOB "b'AAAA'"
-                          INTO
-                          MyMeta (id, frame_id, video_id, label)
-                          WITH FORMAT CSV;"""
-
-        file_options = {}
-        file_options["file_format"] = FileFormatType.CSV
-        expected_stmt = UploadStatement(
-            Path("data/meta.csv"),
-            "b'AAAA'",
-            TableInfo("MyMeta"),
-            [
-                TupleValueExpression("id"),
-                TupleValueExpression("frame_id"),
-                TupleValueExpression("video_id"),
-                TupleValueExpression("label"),
-            ],
-            file_options,
-        )
-        eva_statement_list = parser.parse(upload_query)
-        self.assertIsInstance(eva_statement_list, list)
-        self.assertEqual(len(eva_statement_list), 1)
-        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.UPLOAD)
-
-        upload_stmt = eva_statement_list[0]
-        self.assertEqual(upload_stmt, expected_stmt)
-
     def test_nested_select_statement(self):
         parser = Parser()
         sub_query = """SELECT CLASS FROM TAIPAI WHERE CLASS = 'VAN'"""
@@ -729,6 +704,7 @@ class ParserTests(unittest.TestCase):
         create_udf = CreateUDFStatement(
             "udf",
             False,
+            Path("data/fastrcnn.py"),
             [
                 ColumnDefinition(
                     "frame",
@@ -738,7 +714,6 @@ class ParserTests(unittest.TestCase):
                 )
             ],
             [ColumnDefinition("labels", ColumnType.NDARRAY, NdArrayType.STR, (10))],
-            Path("data/fastrcnn.py"),
             "Classification",
         )
         select_stmt = SelectStatement()

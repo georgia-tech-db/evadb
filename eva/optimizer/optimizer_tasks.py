@@ -183,7 +183,7 @@ class OptimizeExpression(OptimizerTask):
             if rule.top_match(self.root_expr.opr):
                 valid_rules.append(rule)
 
-        sorted(valid_rules, key=lambda x: x.promise())
+        valid_rules = sorted(valid_rules, key=lambda x: x.promise())
 
         for rule in valid_rules:
             # apply the rule
@@ -281,6 +281,7 @@ class OptimizeInputs(OptimizerTask):
         for child_id in self.root_expr.children:
             child_grp = memo.get_group_by_id(child_id)
             if child_grp.get_best_expr(PropertyType.DEFAULT):
+                # Note: May never get hit when using EVA on Ray
                 cost += child_grp.get_best_expr_cost(PropertyType.DEFAULT)
             else:
                 self.optimizer_context.task_stack.push(

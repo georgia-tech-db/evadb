@@ -24,7 +24,7 @@ class DropExecutorTest(unittest.TestCase):
     def setUp(self):
         # reset the catalog manager before running each test
         CatalogManager().reset()
-        create_sample_video()
+        self.video_file_path = create_sample_video()
 
     def tearDown(self):
         file_remove("dummy.avi")
@@ -32,7 +32,7 @@ class DropExecutorTest(unittest.TestCase):
     # integration test
     def test_should_drop_table(self):
         catalog_manager = CatalogManager()
-        query = """LOAD VIDEO 'dummy.avi' INTO MyVideo;"""
+        query = f"""LOAD VIDEO '{self.video_file_path}' INTO MyVideo;"""
         execute_query_fetch_all(query)
 
         # catalog should contain vidoe table and the metedata table

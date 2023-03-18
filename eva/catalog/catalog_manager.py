@@ -27,17 +27,19 @@ from eva.catalog.models.index_catalog import IndexCatalogEntry
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.catalog.models.udf_catalog import UdfCatalogEntry
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
+from eva.catalog.models.udf_metadata_catalog import UdfMetadataCatalogEntry
 from eva.catalog.services.column_catalog_service import ColumnCatalogService
 from eva.catalog.services.index_catalog_service import IndexCatalogService
 from eva.catalog.services.table_catalog_service import TableCatalogService
 from eva.catalog.services.udf_catalog_service import UdfCatalogService
 from eva.catalog.services.udf_io_catalog_service import UdfIOCatalogService
+from eva.catalog.services.udf_metadata_catalog_service import UdfMetadataCatalogService
 from eva.catalog.sql_config import IDENTIFIER_COLUMN
 from eva.parser.create_statement import ColumnDefinition
 from eva.parser.table_ref import TableInfo
 from eva.parser.types import FileFormatType
 from eva.utils.errors import CatalogError
-from eva.utils.generic_utils import generate_file_path
+from eva.utils.generic_utils import generate_file_path, get_file_checksum
 from eva.utils.logging_manager import logger
 
 
@@ -55,6 +57,9 @@ class CatalogManager(object):
         self._column_service: ColumnCatalogService = ColumnCatalogService()
         self._udf_service: UdfCatalogService = UdfCatalogService()
         self._udf_io_service: UdfIOCatalogService = UdfIOCatalogService()
+        self._udf_metadata_service: UdfMetadataCatalogService = (
+            UdfMetadataCatalogService()
+        )
         self._index_service: IndexCatalogService = IndexCatalogService()
 
     def reset(self):
@@ -195,6 +200,7 @@ class CatalogManager(object):
         impl_file_path: str,
         type: str,
         udf_io_list: List[UdfIOCatalogEntry],
+        udf_metadata_list: List[UdfMetadataCatalogEntry],
     ) -> UdfCatalogEntry:
         """Inserts a UDF catalog entry along with UDF_IO entries.
         It persists the entry to the database.
@@ -210,10 +216,14 @@ class CatalogManager(object):
             The persisted UdfCatalogEntry object.
         """
 
-        udf_entry = self._udf_service.insert_entry(name, impl_file_path, type)
+        checksum = get_file_checksum(impl_file_path)
+        udf_entry = self._udf_service.insert_entry(name, impl_file_path, type, checksum)
         for udf_io in udf_io_list:
             udf_io.udf_id = udf_entry.row_id
         self._udf_io_service.insert_entries(udf_io_list)
+        for udf_metadata in udf_metadata_list:
+            udf_metadata.udf_id = udf_entry.row_id
+        self._udf_metadata_service.insert_entries(udf_metadata_list)
         return udf_entry
 
     def get_udf_catalog_entry_by_name(self, name: str) -> UdfCatalogEntry:
@@ -276,6 +286,27 @@ class CatalogManager(object):
 
     def get_all_index_catalog_entries(self):
         return self._index_service.get_all_entries()
+
+    """ UDF Metadata Catalog"""
+
+    def get_udf_metadata_entries_by_udf_name(
+        self, udf_name: str
+    ) -> List[UdfMetadataCatalogEntry]:
+        """
+        Get the UDF metadata information for the provided udf.
+
+        Arguments:
+             udf_name (str): name of the UDF
+
+        Returns:
+            UdfMetadataCatalogEntry objects
+        """
+        udf_entry = self.get_udf_catalog_entry_by_name(udf_name)
+        if udf_entry:
+            entries = self._udf_metadata_service.get_entries_by_udf_id(udf_entry.row_id)
+            return entries
+        else:
+            return []
 
     """ Utils """
 

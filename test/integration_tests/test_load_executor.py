@@ -32,6 +32,7 @@ import pandas as pd
 from eva.binder.binder_utils import BinderError
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
+from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
 from eva.parser.types import FileFormatType
 from eva.server.command_handler import execute_query_fetch_all
@@ -45,7 +46,7 @@ class LoadExecutorTest(unittest.TestCase):
         self.image_files_path = Path(
             f"{EVA_ROOT_DIR}/test/data/uadetrac/small-data/MVI_20011/*.jpg"
         )
-        create_sample_csv()
+        self.csv_file_path = create_sample_csv()
 
     def tearDown(self):
         file_remove("dummy.avi")
@@ -66,6 +67,48 @@ class LoadExecutorTest(unittest.TestCase):
         self.assertEqual(actual_batch, expected_batch)
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
 
+    def test_should_form_symlink_to_individual_video(self):
+        catalog_manager = CatalogManager()
+        query = f"LOAD VIDEO '{self.video_file_path}' INTO MyVideo;"
+        execute_query_fetch_all(query)
+
+        table_catalog_entry = catalog_manager.get_table_catalog_entry("MyVideo")
+        video_dir = table_catalog_entry.file_url
+
+        # the video directory would have only a single file
+        self.assertEqual(len(os.listdir(video_dir)), 1)
+        video_file = os.listdir(video_dir)[0]
+        # check that the file is a symlink to self.video_file_path
+        video_file_path = os.path.join(video_dir, video_file)
+        self.assertTrue(os.path.islink(video_file_path))
+        self.assertEqual(os.readlink(video_file_path), self.video_file_path)
+
+        execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
+
+    def test_should_raise_error_on_removing_symlinked_file(self):
+        query = f"LOAD VIDEO '{self.video_file_path}' INTO MyVideo;"
+        execute_query_fetch_all(query)
+
+        select_query = """SELECT * FROM MyVideo;"""
+        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch.sort()
+        expected_batch = list(create_dummy_batches())[0]
+        self.assertEqual(actual_batch, expected_batch)
+
+        # remove the source file
+        file_remove("dummy.avi")
+
+        # try to read the table again
+        with self.assertRaises(ExecutorError) as e:
+            execute_query_fetch_all(select_query)
+        self.assertEqual(
+            str(e.exception),
+            "The dataset file could not be found. Please verify that the file exists in the specified path.",
+        )
+
+        # create the file again for other test cases
+        create_sample_video()
+
     def test_should_load_videos_in_table(self):
         path = f"{EVA_ROOT_DIR}/data/sample_videos/1/*.mp4"
         query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
@@ -74,6 +117,28 @@ class LoadExecutorTest(unittest.TestCase):
             pd.DataFrame([f"Number of loaded {FileFormatType.VIDEO.name}: 2"])
         )
         self.assertEqual(result, expected)
+
+    def test_should_form_symlink_to_multiple_videos(self):
+        catalog_manager = CatalogManager()
+        path = f"{EVA_ROOT_DIR}/data/sample_videos/1/*.mp4"
+        query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
+        execute_query_fetch_all(query)
+
+        table_catalog_entry = catalog_manager.get_table_catalog_entry("MyVideos")
+        video_dir = table_catalog_entry.file_url
+
+        # the video directory would have two files
+        self.assertEqual(len(os.listdir(video_dir)), 2)
+        video_files = os.listdir(video_dir)
+        # check that the files are symlinks to the original videos
+        for video_file in video_files:
+            video_file_path = os.path.join(video_dir, video_file)
+            self.assertTrue(os.path.islink(video_file_path))
+            self.assertTrue(
+                os.readlink(video_file_path).startswith(
+                    f"{EVA_ROOT_DIR}/data/sample_videos/1"
+                )
+            )
 
     def test_should_load_videos_with_same_name_but_different_path(self):
         path = f"{EVA_ROOT_DIR}/data/sample_videos/**/*.mp4"
@@ -106,6 +171,16 @@ class LoadExecutorTest(unittest.TestCase):
         after_load_fail = execute_query_fetch_all("SELECT id FROM MyVideos;")
 
         self.assertEqual(expected_output, after_load_fail)
+
+    def test_should_fail_to_load_missing_video(self):
+        path = f"{EVA_ROOT_DIR}/data/sample_videos/missing.mp4"
+        query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
+        with self.assertRaises(ExecutorError) as exc_info:
+            execute_query_fetch_all(query)
+        self.assertIn(
+            "Load VIDEO failed due to no valid files found on path",
+            str(exc_info.exception),
+        )
 
     def test_should_fail_to_load_corrupt_video(self):
         # should fail on an empty file
@@ -192,6 +267,16 @@ class LoadExecutorTest(unittest.TestCase):
             pd.DataFrame([f"Number of loaded {FileFormatType.IMAGE.name}: {num_files}"])
         )
         self.assertEqual(result, expected)
+
+    def test_should_fail_to_load_missing_image(self):
+        path = f"{EVA_ROOT_DIR}/data/sample_images/missing.jpg"
+        query = f"""LOAD IMAGE "{path}" INTO MyImages;"""
+        with self.assertRaises(ExecutorError) as exc_info:
+            execute_query_fetch_all(query)
+        self.assertIn(
+            "Load IMAGE failed due to no valid files found on path",
+            str(exc_info.exception),
+        )
 
     def test_should_fail_to_load_images_with_same_path(self):
         image_files = glob.glob(
@@ -295,7 +380,6 @@ class LoadExecutorTest(unittest.TestCase):
     ###################################
     # integration tests for csv
     def test_should_load_csv_in_table(self):
-
         # loading a csv requires a table to be created first
         create_table_query = """
 
@@ -313,7 +397,7 @@ class LoadExecutorTest(unittest.TestCase):
         execute_query_fetch_all(create_table_query)
 
         # load the CSV
-        load_query = """LOAD CSV 'dummy.csv' INTO MyVideoCSV;"""
+        load_query = f"LOAD CSV '{self.csv_file_path}' INTO MyVideoCSV;"
         execute_query_fetch_all(load_query)
 
         # execute a select query
@@ -335,7 +419,6 @@ class LoadExecutorTest(unittest.TestCase):
         execute_query_fetch_all(drop_query)
 
     def test_should_load_csv_with_columns_in_table(self):
-
         # loading a csv requires a table to be created first
         create_table_query = """
 
@@ -349,7 +432,9 @@ class LoadExecutorTest(unittest.TestCase):
         execute_query_fetch_all(create_table_query)
 
         # load the CSV
-        load_query = """LOAD CSV 'dummy.csv' INTO MyVideoCSV (id, frame_id, video_id, dataset_name);"""
+        load_query = """LOAD CSV '{}' INTO MyVideoCSV (id, frame_id, video_id, dataset_name);""".format(
+            self.csv_file_path
+        )
         execute_query_fetch_all(load_query)
 
         # execute a select query

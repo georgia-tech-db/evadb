@@ -52,6 +52,7 @@ from eva.optimizer.rules.rules import (
     LogicalInnerJoinCommutativity,
     LogicalInsertToPhysical,
     LogicalJoinToPhysicalHashJoin,
+    LogicalJoinToPhysicalNestedLoopJoin,
     LogicalLateralJoinToPhysical,
     LogicalLimitToPhysical,
     LogicalLoadToPhysical,
@@ -62,10 +63,8 @@ from eva.optimizer.rules.rules import (
 )
 from eva.optimizer.rules.rules import (
     LogicalRenameToPhysical,
-    LogicalSampleToUniformSample,
     LogicalShowToPhysical,
     LogicalUnionToPhysical,
-    LogicalUploadToPhysical,
     PushDownFilterThroughApplyAndMerge,
     PushDownFilterThroughJoin,
     XformLateralJoinToLinearFlow,
@@ -100,8 +99,6 @@ class RulesManager:
             LogicalInsertToPhysical(),
             LogicalDeleteToPhysical(),
             LogicalLoadToPhysical(),
-            LogicalUploadToPhysical(),
-            LogicalSampleToUniformSample(),
             DistributedLogicalGetToSeqScan()
             if ray_enabled
             else SequentialLogicalGetToSeqScan(),
@@ -110,6 +107,7 @@ class RulesManager:
             LogicalGroupByToPhysical(),
             LogicalOrderByToPhysical(),
             LogicalLimitToPhysical(),
+            LogicalJoinToPhysicalNestedLoopJoin(),
             LogicalLateralJoinToPhysical(),
             LogicalJoinToPhysicalHashJoin(),
             LogicalFunctionScanToPhysical(),

@@ -37,9 +37,11 @@ from eva.optimizer.operators import (
     LogicalSample,
     LogicalShow,
     LogicalUnion,
-    LogicalUpload,
 )
-from eva.optimizer.optimizer_utils import column_definition_to_udf_io
+from eva.optimizer.optimizer_utils import (
+    column_definition_to_udf_io,
+    metadata_definition_to_udf_metadata,
+)
 from eva.parser.create_index_statement import CreateIndexStatement
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
 from eva.parser.create_statement import CreateTableStatement
@@ -55,7 +57,6 @@ from eva.parser.select_statement import SelectStatement
 from eva.parser.show_statement import ShowStatement
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
-from eva.parser.upload_statement import UploadStatement
 from eva.utils.logging_manager import logger
 
 
@@ -255,6 +256,7 @@ class StatementToPlanConvertor:
         """
         annotated_inputs = column_definition_to_udf_io(statement.inputs, True)
         annotated_outputs = column_definition_to_udf_io(statement.outputs, False)
+        annotated_metadata = metadata_definition_to_udf_metadata(statement.metadata)
 
         create_udf_opr = LogicalCreateUDF(
             statement.name,
@@ -263,6 +265,7 @@ class StatementToPlanConvertor:
             annotated_outputs,
             statement.impl_path,
             statement.udf_type,
+            annotated_metadata,
         )
         self._plan = create_udf_opr
 
@@ -286,20 +289,6 @@ class StatementToPlanConvertor:
             statement.file_options,
         )
         self._plan = load_data_opr
-
-    def visit_upload(self, statement: UploadStatement):
-        """Convertor for parsed upload statement
-        Arguments:
-            statement(UploadStatement): [Upload statement]
-        """
-        upload_opr = LogicalUpload(
-            statement.path,
-            statement.video_blob,
-            statement.table_info,
-            statement.column_list,
-            statement.file_options,
-        )
-        self._plan = upload_opr
 
     def visit_materialized_view(self, statement: CreateMaterializedViewStatement):
         mat_view_opr = LogicalCreateMaterializedView(
@@ -359,8 +348,6 @@ class StatementToPlanConvertor:
             self.visit_drop_udf(statement)
         elif isinstance(statement, LoadDataStatement):
             self.visit_load_data(statement)
-        elif isinstance(statement, UploadStatement):
-            self.visit_upload(statement)
         elif isinstance(statement, CreateMaterializedViewStatement):
             self.visit_materialized_view(statement)
         elif isinstance(statement, ShowStatement):

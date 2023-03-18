@@ -20,6 +20,7 @@ from eva.catalog.catalog_type import IndexType
 from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
+from eva.catalog.models.udf_metadata_catalog import UdfMetadataCatalogEntry
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.constant_value_expression import ConstantValueExpression
 from eva.expression.function_expression import FunctionExpression
@@ -46,7 +47,6 @@ class OperatorType(IntEnum):
     LOGICALDROP = auto()
     LOGICALCREATEUDF = auto()
     LOGICALLOADDATA = auto()
-    LOGICALUPLOAD = auto()
     LOGICALQUERYDERIVEDGET = auto()
     LOGICALUNION = auto()
     LOGICALGROUPBY = auto()
@@ -132,16 +132,13 @@ class Operator:
 class Dummy(Operator):
     """
     Acts as a placeholder for matching any operator in optimizer.
-    It track the group_id of the matching operator.
+    It tracks the group_id of the matching operator.
     """
 
     def __init__(self, group_id: int, opr: Operator):
         super().__init__(OperatorType.DUMMY, None)
         self.group_id = group_id
         self.opr = opr
-
-    def __hash__(self) -> int:
-        return hash((super().__hash__(), self.group_id))
 
 
 class LogicalGet(Operator):
@@ -181,17 +178,9 @@ class LogicalGet(Operator):
     def predicate(self):
         return self._predicate
 
-    @predicate.setter
-    def predicate(self, predicate):
-        self._predicate = predicate
-
     @property
     def target_list(self):
         return self._target_list
-
-    @target_list.setter
-    def target_list(self, target_list):
-        self._target_list = target_list
 
     @property
     def sampling_rate(self):
@@ -674,6 +663,7 @@ class LogicalCreateUDF(Operator):
         outputs: List[UdfIOCatalogEntry],
         impl_path: Path,
         udf_type: str = None,
+        metadata: List[UdfMetadataCatalogEntry] = None,
         children: List = None,
     ):
         super().__init__(OperatorType.LOGICALCREATEUDF, children)
@@ -683,6 +673,7 @@ class LogicalCreateUDF(Operator):
         self._outputs = outputs
         self._impl_path = impl_path
         self._udf_type = udf_type
+        self._metadata = metadata
 
     @property
     def name(self):
@@ -708,6 +699,10 @@ class LogicalCreateUDF(Operator):
     def udf_type(self):
         return self._udf_type
 
+    @property
+    def metadata(self):
+        return self._metadata
+
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
         if not isinstance(other, LogicalCreateUDF):
@@ -720,6 +715,7 @@ class LogicalCreateUDF(Operator):
             and self.outputs == other.outputs
             and self.udf_type == other.udf_type
             and self.impl_path == other.impl_path
+            and self.metadata == other.metadata
         )
 
     def __hash__(self) -> int:
@@ -732,6 +728,7 @@ class LogicalCreateUDF(Operator):
                 tuple(self.outputs),
                 self.udf_type,
                 self.impl_path,
+                tuple(self.metadata),
             )
         )
 
@@ -838,90 +835,6 @@ class LogicalLoadData(Operator):
                 super().__hash__(),
                 self.table_info,
                 self.path,
-                tuple(self.column_list),
-                frozenset(self.file_options.items()),
-            )
-        )
-
-
-class LogicalUpload(Operator):
-    """Logical node for upload operation
-
-    Arguments:
-        path(Path): file path (with prefix prepended) where
-                    the data is uploaded
-        video_blob(str): base64 encoded video string
-    """
-
-    def __init__(
-        self,
-        path: Path,
-        video_blob: str,
-        table_info: TableInfo,
-        column_list: List[AbstractExpression] = None,
-        file_options: dict = dict(),
-        children: List = None,
-    ):
-        super().__init__(OperatorType.LOGICALUPLOAD, children=children)
-        self._path = path
-        self._video_blob = video_blob
-        self._table_info = table_info
-        self._column_list = column_list or []
-        self._file_options = file_options
-
-    @property
-    def path(self):
-        return self._path
-
-    @property
-    def video_blob(self):
-        return self._video_blob
-
-    @property
-    def table_info(self):
-        return self._table_info
-
-    @property
-    def column_list(self):
-        return self._column_list
-
-    @property
-    def file_options(self):
-        return self._file_options
-
-    def __str__(self):
-        return "LogicalUpload(path: {}, \
-                blob: {}, \
-                table: {}, \
-                column_list: {}, \
-                file_options: {})".format(
-            self.path,
-            "video blob",
-            self.table_info,
-            self.column_list,
-            self.file_options,
-        )
-
-    def __eq__(self, other):
-        is_subtree_equal = super().__eq__(other)
-        if not isinstance(other, LogicalUpload):
-            return False
-        return (
-            is_subtree_equal
-            and self.path == other.path
-            and self.video_blob == other.video_blob
-            and self.table_info == other.table_info
-            and self.column_list == other.column_list
-            and self.file_options == other.file_options
-        )
-
-    def __hash__(self) -> int:
-        return hash(
-            (
-                super().__hash__(),
-                self.path,
-                self.video_blob,
-                self.table_info,
                 tuple(self.column_list),
                 frozenset(self.file_options.items()),
             )
@@ -1132,12 +1045,10 @@ class LogicalExchange(Operator):
         super().__init__(OperatorType.LOGICALEXCHANGE, children)
 
     def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
         if not isinstance(other, LogicalExchange):
             return False
-        return True
-
-    def __hash__(self) -> int:
-        return super().__hash__()
+        return is_subtree_equal
 
 
 class LogicalExplain(Operator):
