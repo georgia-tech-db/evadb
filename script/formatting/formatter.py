@@ -20,8 +20,15 @@ import re
 import subprocess
 import sys
 from pathlib import Path
+import asyncio
 
 import pkg_resources
+
+def background(f):
+    def wrapped(*args, **kwargs):
+        return asyncio.get_event_loop().run_in_executor(None, f, *args, **kwargs)
+
+    return wrapped
 
 # ==============================================
 # CONFIGURATION
@@ -224,6 +231,23 @@ def format_dir(dir_path, add_header, strip_header, format_code):
 
 # END ADD_HEADERS_DIR(DIR_PATH)
 
+@background
+def check_file(file):
+    print(file)
+    valid = False
+    # only format the default directories
+    file_path = str(Path(file).absolute())
+    for source_dir in DEFAULT_DIRS:
+        source_path = str(Path(source_dir).resolve())
+        if file_path.startswith(source_path):
+            valid = True
+
+    if valid:
+        if not check_header(file):
+            format_file(file, False, True, False)
+            format_file(file, True, False, False)
+        format_file(file, False, False, True)
+
 # ==============================================
 # Main Function
 # ==============================================
@@ -303,18 +327,6 @@ if __name__ == "__main__":
             .rstrip()
             .split("\n")
         )
-        for file in files:
-            print(file)
-            valid = False
-            # only format the defualt directories
-            file_path = str(Path(file).absolute())
-            for source_dir in DEFAULT_DIRS:
-                source_path = str(Path(source_dir).resolve())
-                if file_path.startswith(source_path):
-                    valid = True
 
-            if valid:
-                if not check_header(file):
-                    format_file(file, False, True, False)
-                    format_file(file, True, False, False)
-                format_file(file, False, False, True)
+        for file in files:
+            check_file(file)
