@@ -62,7 +62,7 @@ class DecordReader(AbstractReader):
         if self._sampling_type == IFRAMES:
             iframes = video.get_key_indices()
             idx = 0
-            for (begin, end) in range_list:
+            for begin, end in range_list:
                 while idx < len(iframes) and iframes[idx] < begin:
                     idx += self._sampling_rate
 
@@ -81,7 +81,7 @@ class DecordReader(AbstractReader):
                     else:
                         break
         elif self._sampling_rate == 1:
-            for (begin, end) in range_list:
+            for begin, end in range_list:
                 frame_id = begin
                 while frame_id <= end:
                     frame = video[frame_id]
@@ -98,7 +98,6 @@ class DecordReader(AbstractReader):
                     frame_id += 1
         else:
             for begin, end in range_list:
-
                 # align begin with sampling rate
                 if begin % self._sampling_rate:
                     begin += self._sampling_rate - (begin % self._sampling_rate)

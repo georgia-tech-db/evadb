@@ -158,7 +158,6 @@ class TableRef:
         sample_freq: float = None,
         sample_type: str = None,
     ):
-
         self._ref_handle = table
         self._sample_freq = sample_freq
         self.alias = alias or self.generate_alias()

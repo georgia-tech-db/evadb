@@ -35,7 +35,6 @@ class OpenCVStorageEngine(AbstractMediaStorageEngine):
         sampling_rate: int = None,
         sampling_type: str = None,
     ) -> Iterator[Batch]:
-
         for video_files in self._rdb_handler.read(self._get_metadata_table(table), 12):
             for video_file_name in video_files.frames["file_url"]:
                 system_file_name = self._xform_file_url_to_file_name(video_file_name)

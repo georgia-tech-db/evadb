@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import os
 import unittest
 from test.util import (
     FRAME_SIZE,
@@ -20,7 +19,6 @@ from test.util import (
     create_dummy_batches,
     create_sample_video,
     file_remove,
-    upload_dir_from_config,
 )
 
 from eva.constants import IFRAMES
@@ -34,16 +32,15 @@ from eva.readers.decord_reader import DecordReader
 
 class DecordLoaderTest(unittest.TestCase):
     def setUp(self):
-        create_sample_video()
+        self.video_file_url = create_sample_video()
 
     def tearDown(self):
         file_remove("dummy.avi")
 
     def test_should_sample_only_iframe(self):
-        file_url = os.path.join(upload_dir_from_config, "dummy.avi")
         for k in range(1, 10):
             video_loader = DecordReader(
-                file_url=file_url,
+                file_url=self.video_file_url,
                 batch_mem_size=FRAME_SIZE * NUM_FRAMES,
                 sampling_type=IFRAMES,
                 sampling_rate=k,
@@ -63,7 +60,7 @@ class DecordLoaderTest(unittest.TestCase):
         )
         for k in range(2, 4):
             video_loader = DecordReader(
-                file_url=os.path.join(upload_dir_from_config, "dummy.avi"),
+                file_url=self.video_file_url,
                 batch_mem_size=FRAME_SIZE * NUM_FRAMES,
                 sampling_rate=k,
                 predicate=predicate,
@@ -92,7 +89,7 @@ class DecordLoaderTest(unittest.TestCase):
         )
         for k in range(2, 4):
             video_loader = DecordReader(
-                file_url=os.path.join(upload_dir_from_config, "dummy.avi"),
+                file_url=self.video_file_url,
                 batch_mem_size=FRAME_SIZE * NUM_FRAMES,
                 sampling_rate=k,
                 predicate=predicate,
@@ -106,7 +103,7 @@ class DecordLoaderTest(unittest.TestCase):
 
     def test_should_return_one_batch(self):
         video_loader = DecordReader(
-            file_url=os.path.join(upload_dir_from_config, "dummy.avi"),
+            file_url=self.video_file_url,
             batch_mem_size=NUM_FRAMES * FRAME_SIZE,
         )
         batches = list(video_loader.read())
@@ -115,7 +112,7 @@ class DecordLoaderTest(unittest.TestCase):
 
     def test_should_return_batches_equivalent_to_number_of_frames(self):
         video_loader = DecordReader(
-            file_url=os.path.join(upload_dir_from_config, "dummy.avi"),
+            file_url=self.video_file_url,
             batch_mem_size=FRAME_SIZE,
         )
         batches = list(video_loader.read())
@@ -124,7 +121,7 @@ class DecordLoaderTest(unittest.TestCase):
 
     def test_should_skip_first_two_frames_with_offset_two(self):
         video_loader = DecordReader(
-            file_url=os.path.join(upload_dir_from_config, "dummy.avi"),
+            file_url=self.video_file_url,
             batch_mem_size=FRAME_SIZE * (NUM_FRAMES - 2),
             offset=2,
         )
@@ -135,7 +132,7 @@ class DecordLoaderTest(unittest.TestCase):
 
     def test_should_start_frame_number_from_two(self):
         video_loader = DecordReader(
-            file_url=os.path.join(upload_dir_from_config, "dummy.avi"),
+            file_url=self.video_file_url,
             batch_mem_size=FRAME_SIZE * NUM_FRAMES,
             offset=2,
         )
@@ -149,7 +146,7 @@ class DecordLoaderTest(unittest.TestCase):
         self,
     ):
         video_loader = DecordReader(
-            file_url=os.path.join(upload_dir_from_config, "dummy.avi"),
+            file_url=self.video_file_url,
             batch_mem_size=FRAME_SIZE * NUM_FRAMES,
             offset=2,
         )
@@ -160,7 +157,7 @@ class DecordLoaderTest(unittest.TestCase):
     def test_should_sample_every_k_frame(self):
         for k in range(1, 10):
             video_loader = DecordReader(
-                file_url=os.path.join(upload_dir_from_config, "dummy.avi"),
+                file_url=self.video_file_url,
                 batch_mem_size=FRAME_SIZE * NUM_FRAMES,
                 sampling_rate=k,
             )
