@@ -16,8 +16,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from mock import MagicMock
-
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import TableType
 from eva.catalog.catalog_utils import is_video_table
@@ -507,8 +505,7 @@ class ReorderPredicates(Rule):
 
     def check(self, before: LogicalFilter, context: OptimizerContext):
         return (
-            not isinstance(before.predicate, MagicMock)
-            and before.predicate.get_function_expression_children_count() > 1
+            before.predicate.get_function_expression_children_count() > 1
         )
 
     def getCostFromCatalog(self, funcExpr: FunctionExpression):
