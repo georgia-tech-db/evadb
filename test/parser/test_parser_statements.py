@@ -34,10 +34,12 @@ class ParserStatementTests(unittest.TestCase):
                 WHERE (CLASS = 'VAN' AND REDNESS < 300)  OR REDNESS > 500;",
             "SELECT CLASS, REDNESS FROM TAIPAI \
             UNION ALL SELECT CLASS, REDNESS FROM SHANGHAI;",
+            "SELECT CLASS, REDNESS FROM TAIPAI \
+            UNION SELECT CLASS, REDNESS FROM SHANGHAI;",
             "SELECT FIRST(id) FROM TAIPAI GROUP BY '8f';",
             "SELECT CLASS, REDNESS FROM TAIPAI \
                     WHERE (CLASS = 'VAN' AND REDNESS < 400 ) OR REDNESS > 700 \
-                    ORDER BY CLASS, REDNESS DESC;"
+                    ORDER BY CLASS, REDNESS DESC;",
             "INSERT INTO MyVideo (Frame_ID, Frame_Path)\
                                     VALUES    (1, '/mnt/frames/1.png');",
             """DELETE FROM Foo WHERE id < 6""",

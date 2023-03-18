@@ -76,10 +76,6 @@ class LoadDataStatement(AbstractStatement):
     def column_list(self) -> List[AbstractExpression]:
         return self._column_list
 
-    @column_list.setter
-    def column_list(self, col_list: List[AbstractExpression]):
-        self._column_list = col_list
-
     @property
     def file_options(self) -> dict:
         return self._file_options

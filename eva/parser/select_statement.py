@@ -21,7 +21,6 @@ if typing.TYPE_CHECKING:
     from eva.parser.table_ref import TableRef
 
 from eva.expression.abstract_expression import AbstractExpression
-from eva.expression.constant_value_expression import ConstantValueExpression
 from eva.parser.statement import AbstractStatement
 from eva.parser.types import ParserOrderBySortType, StatementType
 
@@ -104,29 +103,15 @@ class SelectStatement(AbstractStatement):
     def groupby_clause(self):
         return self._groupby_clause
 
-    @groupby_clause.setter
-    def groupby_clause(self, groupby_expr: AbstractExpression):
-        self._groupby_clause = groupby_expr
-
     @property
     def orderby_list(self):
         return self._orderby_list
-
-    @orderby_list.setter
-    def orderby_list(self, orderby_list_new):
-        # orderby_list_new: List[(TupleValueExpression, int)]
-        self._orderby_list = orderby_list_new
 
     @property
     def limit_count(self):
         return self._limit_count
 
-    @limit_count.setter
-    def limit_count(self, limit_count_new: ConstantValueExpression):
-        self._limit_count = limit_count_new
-
     def __str__(self) -> str:
-
         target_list_str = ""
         if self._target_list is not None:
             for expr in self._target_list:
