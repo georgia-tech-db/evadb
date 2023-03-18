@@ -63,4 +63,4 @@ class DeleteTableStatement(AbstractStatement):
         )
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(), self.table, tuple(self.where_clause)))
+        return hash((super().__hash__(), self._table_ref, self.where_clause))
