@@ -17,11 +17,9 @@ import pandas as pd
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import TableType
 from eva.executor.abstract_executor import AbstractExecutor
-from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
 from eva.parser.types import ShowType
 from eva.plan_nodes.show_info_plan import ShowInfoPlan
-from eva.utils.logging_manager import logger
 
 
 class ShowInfoExecutor(AbstractExecutor):
