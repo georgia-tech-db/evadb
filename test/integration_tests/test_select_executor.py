@@ -574,7 +574,7 @@ class SelectExecutorTest(unittest.TestCase):
 
     def test_hash_join_with_multiple_tables(self):
         select_query = """SELECT * FROM table1 JOIN table2
-                          ON table1.a0 = table2.a0 JOIN table3
+                          ON table2.a0 = table1.a0 JOIN table3
                           ON table3.a1 = table1.a1 WHERE table1.a2 > 50;"""
         actual_batch = execute_query_fetch_all(select_query)
         tmp = pd.merge(
