@@ -20,7 +20,6 @@ from eva.udfs.abstract.abstract_udf import AbstractUDF
 
 
 class AbstractUDFTest(unittest.TestCase):
-
     def test_udf_abstract_functions(self):
         derived_udf_classes = list(get_all_subclasses(AbstractUDF))
         for derived_udf_class in derived_udf_classes:
