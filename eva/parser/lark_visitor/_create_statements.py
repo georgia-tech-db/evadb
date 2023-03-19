@@ -58,8 +58,6 @@ class CreateTable:
                 create_definition = None
                 if child.data == "column_declaration":
                     create_definition = self.visit(child)
-                elif child.data == "index_declaration":
-                    create_definition = self.visit(child)
                 column_definitions.append(create_definition)
 
         return column_definitions

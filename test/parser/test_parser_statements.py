@@ -36,6 +36,7 @@ class ParserStatementTests(unittest.TestCase):
             "RENAME TABLE student TO student_info",
             "DROP TABLE IF EXISTS student_info",
             "DROP UDF FastRCNN;",
+            "SELECT MIN(id), MAX(id), SUM(id) FROM ABC",
             "SELECT CLASS FROM TAIPAI \
                 WHERE (CLASS = 'VAN' AND REDNESS < 300)  OR REDNESS > 500;",
             "SELECT CLASS, REDNESS FROM TAIPAI \

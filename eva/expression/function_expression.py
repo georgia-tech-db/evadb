@@ -50,7 +50,6 @@ class FunctionExpression(AbstractExpression):
         alias: Alias = None,
         **kwargs,
     ):
-
         super().__init__(ExpressionType.FUNCTION_EXPRESSION, **kwargs)
         self._context = Context()
         self._name = name
@@ -93,17 +92,9 @@ class FunctionExpression(AbstractExpression):
         if len(child_batches):
             batch_sizes = [len(child_batch) for child_batch in child_batches]
             are_all_equal_length = all(batch_sizes[0] == x for x in batch_sizes)
-            maximum_batch_size = max(batch_sizes)
-            if not are_all_equal_length:
-                for child_batch in child_batches:
-                    if len(child_batch) != maximum_batch_size:
-                        if len(child_batch) == 1:
-                            # duplicate row inplace
-                            child_batch.repeat(maximum_batch_size)
-                        else:
-                            raise Exception(
-                                "Not all columns in the batch have equal elements"
-                            )
+            assert (
+                are_all_equal_length is False
+            ), "All columns in batch must have equal elements"
             new_batch = Batch.merge_column_wise(child_batches)
 
         func = self._gpu_enabled_function()
@@ -125,13 +116,6 @@ class FunctionExpression(AbstractExpression):
             child_sigs.append(child.signature())
 
         func_sig = f"{self.name}({','.join(child_sigs)})"
-        if self._output and len(self.udf_obj.outputs) > 1:
-            # In this situation, the function expression has multiple output columns,
-            # but only one of them is projected. As a result, we must generate a
-            # signature that includes only the projected column in order to distinguish
-            # it from the scenario where all columns are projected.
-            func_sig = f"{func_sig}.{self.output_objs[0].name}"
-
         return func_sig
 
     def _gpu_enabled_function(self):
