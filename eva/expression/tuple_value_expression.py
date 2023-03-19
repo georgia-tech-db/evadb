@@ -17,7 +17,6 @@ from typing import Union
 from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 from eva.models.storage.batch import Batch
-from eva.utils.logging_manager import logger
 
 from .abstract_expression import (
     AbstractExpression,
