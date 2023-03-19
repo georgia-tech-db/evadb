@@ -58,9 +58,17 @@ class TupleValueExpression(AbstractExpression):
     def col_object(self) -> Union[ColumnCatalogEntry, UdfIOCatalogEntry]:
         return self._col_object
 
+    @col_object.setter
+    def col_object(self, value: Union[ColumnCatalogEntry, UdfIOCatalogEntry]):
+        self._col_object = value
+
     @property
     def col_alias(self) -> str:
         return self._col_alias
+
+    @col_alias.setter
+    def col_alias(self, value: str):
+        self._col_alias = value
 
     def evaluate(self, batch: Batch, *args, **kwargs):
         if "mask" in kwargs:
