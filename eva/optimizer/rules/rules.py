@@ -135,6 +135,7 @@ class EmbedFilterIntoGet(Rule):
                 predicate=pushdown_pred,
                 target_list=lget.target_list,
                 sampling_rate=lget.sampling_rate,
+                sampling_type=lget.sampling_type,
                 children=lget.children,
             )
             if unsupported_pred:
@@ -164,6 +165,7 @@ class EmbedSampleIntoGet(Rule):
 
     def apply(self, before: LogicalSample, context: OptimizerContext):
         sample_freq = before.sample_freq.value
+        sample_type = before.sample_type.value.value if before.sample_type else None
         lget: LogicalGet = before.children[0]
         new_get_opr = LogicalGet(
             lget.video,
@@ -172,6 +174,7 @@ class EmbedSampleIntoGet(Rule):
             predicate=lget.predicate,
             target_list=lget.target_list,
             sampling_rate=sample_freq,
+            sampling_type=sample_type,
             children=lget.children,
         )
         yield new_get_opr
@@ -200,6 +203,7 @@ class EmbedProjectIntoGet(Rule):
             predicate=lget.predicate,
             target_list=target_list,
             sampling_rate=lget.sampling_rate,
+            sampling_type=lget.sampling_type,
             children=lget.children,
         )
 
@@ -687,6 +691,7 @@ class LogicalGetToSeqScan(Rule):
                 before.table_obj,
                 predicate=before.predicate,
                 sampling_rate=before.sampling_rate,
+                sampling_type=before.sampling_type,
             )
         )
         yield after

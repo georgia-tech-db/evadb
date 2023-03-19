@@ -69,6 +69,7 @@ class TableSources:
 
     def table_source_item_with_sample(self, tree):
         sample_freq = None
+        sample_type = None
         alias = None
         table = None
 
@@ -78,10 +79,14 @@ class TableSources:
                     table = self.visit(child)
                 elif child.data == "sample_clause":
                     sample_freq = self.visit(child)
+                elif child.data == "sample_clause_with_type":
+                    sample_type, sample_freq = self.visit(child)
                 elif child.data == "alias_clause":
                     alias = self.visit(child)
 
-        return TableRef(table=table, alias=alias, sample_freq=sample_freq)
+        return TableRef(
+            table=table, alias=alias, sample_freq=sample_freq, sample_type=sample_type
+        )
 
     def table_source_item(self, tree):
         return self.visit(tree.children[0])

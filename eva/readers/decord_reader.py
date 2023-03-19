@@ -12,25 +12,38 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import math
 from typing import Dict, Iterator
 
-import cv2
-
+from eva.constants import IFRAMES
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.expression_utils import extract_range_list_from_predicate
 from eva.readers.abstract_reader import AbstractReader
 from eva.utils.logging_manager import logger
 
+# Lazy import to avoid torch init failures
+_decord = None
 
-class OpenCVReader(AbstractReader):
+
+def _lazy_import_decord():
+    global _decord
+    if _decord is None:
+        import decord
+
+        _decord = decord
+    return _decord
+
+
+class DecordReader(AbstractReader):
     def __init__(
         self,
         *args,
         predicate: AbstractExpression = None,
         sampling_rate: int = None,
+        sampling_type: str = None,
         **kwargs
     ):
-        """Read frames from the disk and returns as a RGB numpy array
+        """Read frames from the disk
 
         Args:
             predicate (AbstractExpression, optional): If only subset of frames
@@ -38,14 +51,17 @@ class OpenCVReader(AbstractReader):
             can be converted to ranges. Defaults to None.
             sampling_rate (int, optional): Set if the caller wants one frame
             every `sampling_rate` number of frames. For example, if `sampling_rate = 10`, it returns every 10th frame. If both `predicate` and `sampling_rate` are specified, `sampling_rate` is given precedence.
+            sampling_type (str, optional): Set as IFRAMES if caller want to sample on top on iframes only. e.g if the IFRAME frame numbers are [10,20,30,40,50] then'SAMPLE IFRAMES 2' will return [10,30,50]
         """
         self._predicate = predicate
         self._sampling_rate = sampling_rate or 1
+        self._sampling_type = sampling_type
         super().__init__(*args, **kwargs)
 
     def _read(self) -> Iterator[Dict]:
-        video = cv2.VideoCapture(self.file_url)
-        num_frames = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
+        decord = _lazy_import_decord()
+        video = decord.VideoReader(self.file_url)
+        num_frames = int(len(video))
         if self._predicate:
             range_list = extract_range_list_from_predicate(
                 self._predicate, 0, num_frames - 1
@@ -53,18 +69,43 @@ class OpenCVReader(AbstractReader):
         else:
             range_list = [(0, num_frames - 1)]
         logger.debug("Reading frames")
-        if self._sampling_rate == 1:
+
+        if self._sampling_type == IFRAMES:
+            iframes = video.get_key_indices()
+            idx = 0
             for begin, end in range_list:
-                video.set(cv2.CAP_PROP_POS_FRAMES, begin)
-                _, frame = video.read()
+                while idx < len(iframes) and iframes[idx] < begin:
+                    idx += self._sampling_rate
+
+                while idx < len(iframes) and iframes[idx] <= end:
+                    frame_id = iframes[idx]
+                    frame = video[frame_id]
+                    idx += self._sampling_rate
+                    if frame is not None:
+                        yield {
+                            "id": frame_id,
+                            "data": frame,
+                            "seconds": math.floor(
+                                video.get_frame_timestamp(frame_id)[0]
+                            ),
+                        }
+                    else:
+                        break
+        elif self._sampling_rate == 1:
+            for begin, end in range_list:
                 frame_id = begin
-                while frame is not None and frame_id <= end:
-                    yield {
-                        "id": frame_id,
-                        "data": cv2.cvtColor(frame, cv2.COLOR_BGR2RGB),
-                        "seconds": frame_id // video.get(cv2.CAP_PROP_FPS),
-                    }
-                    _, frame = video.read()
+                while frame_id <= end:
+                    frame = video[frame_id]
+                    if frame is not None:
+                        yield {
+                            "id": frame_id,
+                            "data": frame,
+                            "seconds": math.floor(
+                                video.get_frame_timestamp(frame_id)[0]
+                            ),
+                        }
+                    else:
+                        break
                     frame_id += 1
         else:
             for begin, end in range_list:
@@ -72,13 +113,14 @@ class OpenCVReader(AbstractReader):
                 if begin % self._sampling_rate:
                     begin += self._sampling_rate - (begin % self._sampling_rate)
                 for frame_id in range(begin, end + 1, self._sampling_rate):
-                    video.set(cv2.CAP_PROP_POS_FRAMES, frame_id)
-                    _, frame = video.read()
+                    frame = video[frame_id]
                     if frame is not None:
                         yield {
                             "id": frame_id,
-                            "data": cv2.cvtColor(frame, cv2.COLOR_BGR2RGB),
-                            "seconds": frame_id // video.get(cv2.CAP_PROP_FPS),
+                            "data": frame,
+                            "seconds": math.floor(
+                                video.get_frame_timestamp(frame_id)[0]
+                            ),
                         }
                     else:
                         break
