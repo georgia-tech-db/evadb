@@ -36,7 +36,6 @@ from eva.catalog.sql_config import IDENTIFIER_COLUMN
 from eva.parser.create_statement import ColumnDefinition
 from eva.parser.table_ref import TableInfo
 from eva.parser.types import FileFormatType
-from eva.utils.errors import CatalogError
 from eva.utils.generic_utils import generate_file_path, get_file_checksum
 from eva.utils.logging_manager import logger
 
