@@ -25,10 +25,7 @@ def is_video_table(table: TableCatalogEntry):
 
 
 def is_string_col(col: ColumnCatalogEntry):
-    if col.type == ColumnType.TEXT or col.array_type == NdArrayType.STR:
-        return True
-    else:
-        return False
+    return col.type == ColumnType.TEXT or col.array_type == NdArrayType.STR
 
 
 def get_video_table_column_definitions() -> List[ColumnDefinition]:
