@@ -93,7 +93,7 @@ class FunctionExpression(AbstractExpression):
             batch_sizes = [len(child_batch) for child_batch in child_batches]
             are_all_equal_length = all(batch_sizes[0] == x for x in batch_sizes)
             assert (
-                are_all_equal_length is False
+                are_all_equal_length is True
             ), "All columns in batch must have equal elements"
             new_batch = Batch.merge_column_wise(child_batches)
 

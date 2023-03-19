@@ -17,6 +17,8 @@ import os
 import sys
 import unittest
 
+from mock import MagicMock, patch
+
 from eva.models.server.response import Response
 from eva.server.db_api import EVACursor, connect
 
@@ -49,7 +51,7 @@ if sys.version_info >= (3, 8):
             with self.assertRaises(SystemError):
                 asyncio.run(eva_cursor.execute_async(query))
 
-        def test_eva_cursor_fetch_one_async(self):
+        def test_eva_cursor_fetch_all_async(self):
             connection = AsyncMock()
             eva_cursor = EVACursor(connection)
             message = "test_response"
@@ -57,7 +59,7 @@ if sys.version_info >= (3, 8):
             serialized_message_length = b"%d" % len(serialized_message)
             connection._reader.readline.side_effect = [serialized_message_length]
             connection._reader.readexactly.side_effect = [serialized_message]
-            response = asyncio.run(eva_cursor.fetch_one_async())
+            response = asyncio.run(eva_cursor.fetch_all_async())
             self.assertEqual(eva_cursor._pending_query, False)
             self.assertEqual(message, response)
 
@@ -129,3 +131,13 @@ if sys.version_info >= (3, 8):
             eva_cursor = EVACursor(connection)
             with self.assertRaises(AttributeError):
                 eva_cursor.missing_function()
+
+        @patch("asyncio.open_connection")
+        def test_get_connection(self, mock_open):
+            server_reader = asyncio.StreamReader()
+            server_writer = MagicMock()
+            mock_open.return_value = (server_reader, server_writer)
+
+            connection = connect("localhost", port=1)
+
+            self.assertNotEqual(connection, None)
