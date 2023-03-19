@@ -14,7 +14,7 @@
 # limitations under the License.
 from dataclasses import dataclass
 
-from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy import Column, Float, ForeignKey, Integer, String
 
 from eva.catalog.models.base_model import BaseModel
 
@@ -29,11 +29,11 @@ class UdfCostCatalog(BaseModel):
 
     __tablename__ = "udf_cost_catalog"
 
-    _cost = Column("cost", Integer())
-    _udf_name = Column("name", String(100), ForeignKey("udf_catalog.name"))
-    _udf_id = Column("udf_id", Integer(), ForeignKey("udf_catalog._row_id"))
+    _udf_id = Column("udf_id", Integer, ForeignKey("udf_catalog._row_id"))
+    _udf_name = Column("name", String(128), ForeignKey("udf_catalog.name"))
+    _cost = Column("cost", Float)
 
-    def __init__(self, udf_id: int, name: str, cost: int):
+    def __init__(self, udf_id: int, name: str, cost: float):
         self._udf_id = udf_id
         self._udf_name = name
         self._cost = cost
@@ -49,7 +49,7 @@ class UdfCostCatalogEntry:
     """
 
     name: str
-    cost: int = None
+    cost: float = None
     udf_id: int = None
 
     def display_format(self):

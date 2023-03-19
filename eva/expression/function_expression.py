@@ -14,7 +14,6 @@
 # limitations under the License.
 from typing import Callable, List
 
-from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.models.udf_catalog import UdfCatalogEntry
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 from eva.constants import NO_GPU
@@ -89,6 +88,8 @@ class FunctionExpression(AbstractExpression):
         self._function = func
 
     def persist_stats(self):
+        from eva.catalog.catalog_manager import CatalogManager
+
         if self.udf_obj is None:
             return
         udf_id = self.udf_obj.row_id

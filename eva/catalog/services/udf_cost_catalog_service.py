@@ -36,7 +36,7 @@ class UdfCostCatalogService(BaseService):
         """
         try:
             udf_obj = self.model(udf_id, name, cost)
-            udf_obj = udf_obj.save()
+            udf_obj.save()
         except Exception as e:
             raise CatalogError(
                 f"Error while inserting entry to UdfCostCatalog: {str(e)}"
@@ -51,12 +51,14 @@ class UdfCostCatalogService(BaseService):
             cost(int)  : cost of the udf
         """
         try:
-            udf_obj = self.model.query.filter(self.model._udf_id == udf_id).one()
+            udf_obj = self.model.query.filter(
+                self.model._udf_id == udf_id
+            ).one_or_none()
             if udf_obj:
                 udf_obj.update(cost=new_cost)
             else:
                 udf_obj = self.model(udf_id, name, new_cost)
-                udf_obj = udf_obj.save()
+                udf_obj.save()
         except Exception as e:
             raise CatalogError(
                 f"Error while upserting entry to UdfCostCatalog: {str(e)}"
