@@ -332,8 +332,6 @@ class CatalogManager(object):
         elif format_type is FileFormatType.IMAGE:
             columns = get_image_table_column_definitions()
             table_type = TableType.IMAGE_DATA
-        else:
-            raise CatalogError(f"Format Type {format_type} is not supported")
 
         return self.create_and_insert_table_catalog_entry(
             TableInfo(name), columns, table_type=table_type
@@ -353,10 +351,9 @@ class CatalogManager(object):
         # use file_url as the metadata table name
         media_metadata_name = Path(input_table.file_url).stem
         obj = self.get_table_catalog_entry(media_metadata_name)
-        if not obj:
-            err = f"Table with name {media_metadata_name} does not exist in catalog"
-            logger.exception(err)
-            raise CatalogError(err)
+        assert (
+            obj is not None
+        ), f"Table with name {media_metadata_name} does not exist in catalog"
 
         return obj
 
@@ -378,10 +375,7 @@ class CatalogManager(object):
         # use file_url as the metadata table name
         media_metadata_name = Path(input_table.file_url).stem
         obj = self.get_table_catalog_entry(media_metadata_name)
-        if obj:
-            err_msg = f"Table with name {media_metadata_name} already exists"
-            logger.exception(err_msg)
-            raise CatalogError(err_msg)
+        assert obj is None, "Table with name {media_metadata_name} already exists"
 
         columns = [ColumnDefinition("file_url", ColumnType.TEXT, None, None)]
         obj = self.create_and_insert_table_catalog_entry(

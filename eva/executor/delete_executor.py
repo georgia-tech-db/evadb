@@ -36,7 +36,6 @@ class DeleteExecutor(AbstractExecutor):
     def exec(self, **kwargs) -> Iterator[Batch]:
         table_catalog = self.node.table_ref.table.table_obj
         storage_engine = StorageEngine.factory(table_catalog)
-
         del_batch = Batch()
 
         assert (
@@ -59,11 +58,7 @@ class DeleteExecutor(AbstractExecutor):
 
         # All the batches that need to be deleted
 
-        if table_catalog.table_type == TableType.VIDEO_DATA:
-            storage_engine.delete(table_catalog, del_batch)
-        elif table_catalog.table_type == TableType.IMAGE_DATA:
-            storage_engine.delete(table_catalog, del_batch)
-        elif table_catalog.table_type == TableType.STRUCTURED_DATA:
+        if table_catalog.table_type == TableType.STRUCTURED_DATA:
             del_batch.frames.columns = original_column_names
             table_needed = del_batch.frames[[f"{self.predicate.children[0].col_name}"]]
             for num in range(len(del_batch)):
