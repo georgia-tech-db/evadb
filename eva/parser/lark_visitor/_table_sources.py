@@ -202,10 +202,6 @@ class TableSources:
 
         return TableValuedExpression(func_expr, do_unnest=has_unnest)
 
-    # Nested sub query
-    def subquery_table_item(self, tree):
-        return self.visit(tree.children[0])
-
     def subquery_table_source_item(self, tree):
         subquery_table_source_item = None
         for child in tree.children:
@@ -235,8 +231,9 @@ class TableSources:
 
         # FIX: Complex logic
         if left_select_statement is not None:
-            while left_select_statement.union_link is not None:
-                left_select_statement = left_select_statement.union_link
+            assert (
+                left_select_statement.union_link is None
+            ), "Checking for the correctness of the operator"
 
             # We need to check the correctness for union operator.
             # Here when parsing or later operator, plan?

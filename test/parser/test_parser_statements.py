@@ -97,6 +97,7 @@ class ParserStatementTests(unittest.TestCase):
         self.assertNotEqual(ref_stmt.__str__(), None)
 
         statement_to_query_dict = {}
+        statement_to_query_dict[ref_stmt] = queries[0]
 
         for other_query in queries[1:]:
             stmt = parser.parse(other_query)[0]
