@@ -36,8 +36,7 @@ class Timestamp(AbstractUDF):
         """
 
         # Sanity check
-        if len(inp.columns) != 1:
-            raise ValueError("input must only contain one column (seconds)")
+        assert len(inp.columns) == 1, "Input must only contain one column (seconds)"
 
         seconds = pd.DataFrame(inp[inp.columns[0]])
         timestamp_result = seconds.apply(lambda x: self.format_timestamp(x[0]), axis=1)

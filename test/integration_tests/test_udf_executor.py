@@ -181,6 +181,9 @@ class UDFExecutorTest(unittest.TestCase):
 
     def test_should_raise_if_udf_file_is_modified(self):
         execute_query_fetch_all("DROP UDF DummyObjectDetector;")
+
+        execute_query_fetch_all("DROP UDF IF EXISTS DummyObjectDetector;")
+
         with tempfile.NamedTemporaryFile(mode="w", suffix=".py") as tmp_file:
             with open("test/util.py", "r") as file:
                 tmp_file.write(file.read())

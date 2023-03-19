@@ -31,6 +31,11 @@ class ShowInfoExecutor(AbstractExecutor):
     def exec(self):
         catalog_manager = CatalogManager()
         show_entries = []
+
+        assert (
+            self.node.show_type is ShowType.UDFS or ShowType.TABLES
+        ), f"Show command does not support type {self.node.show_type}"
+
         if self.node.show_type is ShowType.UDFS:
             udfs = catalog_manager.get_all_udf_catalog_entries()
             for udf in udfs:
@@ -41,8 +46,5 @@ class ShowInfoExecutor(AbstractExecutor):
                 if table.table_type != TableType.SYSTEM_STRUCTURED_DATA:
                     show_entries.append(table.name)
             show_entries = {"name": show_entries}
-        else:
-            err_msg = f"Show command does not support type {self.node.show_type}"
-            logger.error(err_msg)
-            raise ExecutorError(err_msg)
+
         yield Batch(pd.DataFrame(show_entries))
