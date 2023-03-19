@@ -13,10 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from eva.executor.abstract_executor import AbstractExecutor
-from eva.executor.executor_utils import ExecutorError
 from eva.plan_nodes.rename_plan import RenamePlan
 from eva.storage.storage_engine import StorageEngine
-from eva.utils.logging_manager import logger
 
 
 class RenameExecutor(AbstractExecutor):
@@ -28,11 +26,6 @@ class RenameExecutor(AbstractExecutor):
 
         Calls the catalog to modified catalog entry corresponding to the table.
         """
-        try:
-            obj = self.node.old_table.table.table_obj
-            storage_engine = StorageEngine.factory(obj)
-            storage_engine.rename(obj, self.node.new_name)
-        except Exception as e:
-            err = f"Rename Failed: {str(e)}"
-            logger.exception(err)
-            raise ExecutorError(err)
+        obj = self.node.old_table.table.table_obj
+        storage_engine = StorageEngine.factory(obj)
+        storage_engine.rename(obj, self.node.new_name)

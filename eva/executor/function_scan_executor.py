@@ -15,10 +15,8 @@
 from typing import Iterator
 
 from eva.executor.abstract_executor import AbstractExecutor
-from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.function_scan_plan import FunctionScanPlan
-from eva.utils.logging_manager import logger
 
 
 class FunctionScanExecutor(AbstractExecutor):
@@ -39,14 +37,10 @@ class FunctionScanExecutor(AbstractExecutor):
             "lateral_input" in kwargs
         ), "Key lateral_input not passed to the FunctionScan"
         lateral_input = kwargs.get("lateral_input")
-        try:
-            if not lateral_input.empty():
-                res = self.func_expr.evaluate(lateral_input)
-                if not res.empty():
-                    if self.do_unnest:
-                        res.unnest()
+        if not lateral_input.empty():
+            res = self.func_expr.evaluate(lateral_input)
+            if not res.empty():
+                if self.do_unnest:
+                    res.unnest()
 
-                    yield res
-        except Exception as e:
-            logger.error(e)
-            raise ExecutorError(e)
+                yield res

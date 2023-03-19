@@ -17,7 +17,6 @@ import pandas as pd
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import TableType
 from eva.executor.abstract_executor import AbstractExecutor
-from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.insert_plan import InsertPlan
 from eva.storage.storage_engine import StorageEngine
@@ -32,40 +31,36 @@ class InsertExecutor(AbstractExecutor):
     def exec(self):
         storage_engine = None
         table_catalog_entry = None
-        try:
-            # Get catalog entry
-            table_name = self.node.table_ref.table.table_name
-            database_name = self.node.table_ref.table.database_name
-            table_catalog_entry = self.catalog.get_table_catalog_entry(
-                table_name, database_name
-            )
 
-            # Implemented only for STRUCTURED_DATA
-            assert (
-                table_catalog_entry.table_type == TableType.STRUCTURED_DATA
-            ), "INSERT only implemented for structured data"
+        # Get catalog entry
+        table_name = self.node.table_ref.table.table_name
+        database_name = self.node.table_ref.table.database_name
+        table_catalog_entry = self.catalog.get_table_catalog_entry(
+            table_name, database_name
+        )
 
-            values_to_insert = []
-            for i in self.node.value_list:
-                values_to_insert.append(i.value)
-            tuple_to_insert = tuple(values_to_insert)
-            columns_to_insert = []
-            for i in self.node.column_list:
-                columns_to_insert.append(i.col_name)
+        # Implemented only for STRUCTURED_DATA
+        assert (
+            table_catalog_entry.table_type == TableType.STRUCTURED_DATA
+        ), "INSERT only implemented for structured data"
 
-            # Adding all values to Batch for insert
-            logger.info(values_to_insert)
-            logger.info(columns_to_insert)
-            dataframe = pd.DataFrame([tuple_to_insert], columns=columns_to_insert)
-            batch = Batch(dataframe)
+        values_to_insert = []
+        for i in self.node.value_list:
+            values_to_insert.append(i.value)
+        tuple_to_insert = tuple(values_to_insert)
+        columns_to_insert = []
+        for i in self.node.column_list:
+            columns_to_insert.append(i.col_name)
 
-            storage_engine = StorageEngine.factory(table_catalog_entry)
-            storage_engine.write(table_catalog_entry, batch)
-        except Exception as e:
-            err_msg = f"Insert failed: encountered unexpected error {str(e)}"
-            logger.error(err_msg)
-            raise ExecutorError(err_msg)
-        else:
-            yield Batch(
-                pd.DataFrame([f"Number of rows loaded: {str(len(values_to_insert))}"])
-            )
+        # Adding all values to Batch for insert
+        logger.info(values_to_insert)
+        logger.info(columns_to_insert)
+        dataframe = pd.DataFrame([tuple_to_insert], columns=columns_to_insert)
+        batch = Batch(dataframe)
+
+        storage_engine = StorageEngine.factory(table_catalog_entry)
+        storage_engine.write(table_catalog_entry, batch)
+
+        yield Batch(
+            pd.DataFrame([f"Number of rows loaded: {str(len(values_to_insert))}"])
+        )

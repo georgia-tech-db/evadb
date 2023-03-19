@@ -12,13 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Generator, Iterator
+from typing import Iterator
 
 from eva.executor.abstract_executor import AbstractExecutor
-from eva.executor.executor_utils import ExecutorError, apply_predicate, apply_project
+from eva.executor.executor_utils import apply_predicate, apply_project
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.seq_scan_plan import SeqScanPlan
-from eva.utils.logging_manager import logger
 
 
 class SequentialScanExecutor(AbstractExecutor):
@@ -36,24 +35,17 @@ class SequentialScanExecutor(AbstractExecutor):
         self.alias = node.alias
 
     def exec(self, **kwargs) -> Iterator[Batch]:
-        try:
-            child_executor = self.children[0]
-            for batch in child_executor.exec(**kwargs):
-                # apply alias to the batch
-                # id, data -> myvideo.id, myvideo.data
-                if self.alias:
-                    batch.modify_column_alias(self.alias)
+        child_executor = self.children[0]
+        for batch in child_executor.exec(**kwargs):
+            # apply alias to the batch
+            # id, data -> myvideo.id, myvideo.data
+            if self.alias:
+                batch.modify_column_alias(self.alias)
 
-                # We do the predicate first
-                batch = apply_predicate(batch, self.predicate)
-                # Then do project
-                batch = apply_project(batch, self.project_expr)
+            # We do the predicate first
+            batch = apply_predicate(batch, self.predicate)
+            # Then do project
+            batch = apply_project(batch, self.project_expr)
 
-                if not batch.empty():
-                    yield batch
-        except Exception as e:
-            logger.error(e)
-            raise ExecutorError(e)
-
-    def __call__(self, **kwargs) -> Generator[Batch, None, None]:
-        yield from self.exec(**kwargs)
+            if not batch.empty():
+                yield batch

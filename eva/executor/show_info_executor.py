@@ -29,25 +29,20 @@ class ShowInfoExecutor(AbstractExecutor):
         super().__init__(node)
 
     def exec(self):
-        try:
-            catalog_manager = CatalogManager()
-            show_entries = []
-            if self.node.show_type is ShowType.UDFS:
-                udfs = catalog_manager.get_all_udf_catalog_entries()
-                for udf in udfs:
-                    show_entries.append(udf.display_format())
-            elif self.node.show_type is ShowType.TABLES:
-                tables = catalog_manager.get_all_table_catalog_entries()
-                for table in tables:
-                    if table.table_type != TableType.SYSTEM_STRUCTURED_DATA:
-                        show_entries.append(table.name)
-                show_entries = {"name": show_entries}
-            else:
-                err_msg = f"Show command does not support type {self.node.show_type}"
-                logger.error(err_msg)
-                raise ExecutorError(err_msg)
-            yield Batch(pd.DataFrame(show_entries))
-        except Exception as e:
-            err_msg = f"Show executor failed with exception {str(e)}"
-            logger.exception(err_msg)
+        catalog_manager = CatalogManager()
+        show_entries = []
+        if self.node.show_type is ShowType.UDFS:
+            udfs = catalog_manager.get_all_udf_catalog_entries()
+            for udf in udfs:
+                show_entries.append(udf.display_format())
+        elif self.node.show_type is ShowType.TABLES:
+            tables = catalog_manager.get_all_table_catalog_entries()
+            for table in tables:
+                if table.table_type != TableType.SYSTEM_STRUCTURED_DATA:
+                    show_entries.append(table.name)
+            show_entries = {"name": show_entries}
+        else:
+            err_msg = f"Show command does not support type {self.node.show_type}"
+            logger.error(err_msg)
             raise ExecutorError(err_msg)
+        yield Batch(pd.DataFrame(show_entries))

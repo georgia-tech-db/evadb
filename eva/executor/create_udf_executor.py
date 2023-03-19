@@ -47,13 +47,9 @@ class CreateUDFExecutor(AbstractExecutor):
         io_list.extend(self.node.inputs)
         io_list.extend(self.node.outputs)
         impl_path = self.node.impl_path.absolute().as_posix()
-        # check if we can create the udf object
-        try:
-            load_udf_class_from_file(impl_path, self.node.name)()
-        except Exception as e:
-            err_msg = f"Error creating UDF: {str(e)}"
-            logger.error(err_msg)
-            raise RuntimeError(err_msg)
+
+        load_udf_class_from_file(impl_path, self.node.name)()
+
         catalog_manager.insert_udf_catalog_entry(
             self.node.name, impl_path, self.node.udf_type, io_list
         )
