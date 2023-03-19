@@ -254,7 +254,7 @@ class RulesTest(unittest.TestCase):
         )
 
         logi_get = LogicalGet(MagicMock(), table_obj, MagicMock(), MagicMock())
-        logi_sample = LogicalSample(MagicMock(), children=[logi_get])
+        logi_sample = LogicalSample(MagicMock(), MagicMock(), children=[logi_get])
 
         self.assertFalse(rule.check(logi_sample, MagicMock()))
 

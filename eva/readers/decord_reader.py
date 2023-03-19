@@ -15,13 +15,23 @@
 import math
 from typing import Dict, Iterator
 
-import decord
-
 from eva.constants import IFRAMES
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.expression_utils import extract_range_list_from_predicate
 from eva.readers.abstract_reader import AbstractReader
 from eva.utils.logging_manager import logger
+
+# Lazy import to avoid torch init failures
+_decord = None
+
+
+def _lazy_import_decord():
+    global _decord
+    if _decord is None:
+        import decord
+
+        _decord = decord
+    return _decord
 
 
 class DecordReader(AbstractReader):
@@ -49,6 +59,7 @@ class DecordReader(AbstractReader):
         super().__init__(*args, **kwargs)
 
     def _read(self) -> Iterator[Dict]:
+        decord = _lazy_import_decord()
         video = decord.VideoReader(self.file_url)
         num_frames = int(len(video))
         if self._predicate:
