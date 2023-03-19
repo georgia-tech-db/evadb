@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Generator, Iterator
+from typing import Iterator
 
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import apply_predicate, apply_project
@@ -37,6 +37,3 @@ class LateralJoinExecutor(AbstractExecutor):
                 result_batch = apply_project(result_batch, self.join_project)
                 if not result_batch.empty():
                     yield result_batch
-
-    def __call__(self, *args, **kwargs) -> Generator[Batch, None, None]:
-        yield from self.exec(*args, **kwargs)

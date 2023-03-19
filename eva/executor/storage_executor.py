@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Generator, Iterator
+from typing import Iterator
 
 from eva.catalog.catalog_type import TableType
 from eva.executor.abstract_executor import AbstractExecutor
@@ -39,6 +39,3 @@ class StorageExecutor(AbstractExecutor):
             return storage_engine.read(self.node.table)
         elif self.node.table.table_type == TableType.STRUCTURED_DATA:
             return storage_engine.read(self.node.table, self.node.batch_mem_size)
-
-    def __call__(self, **kwargs) -> Generator[Batch, None, None]:
-        yield from self.exec()

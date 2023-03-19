@@ -96,6 +96,3 @@ class ExchangeExecutor(AbstractExecutor):
                 yield res
         else:
             return output_queue
-
-    def __call__(self, batch: Batch) -> Batch:
-        pass

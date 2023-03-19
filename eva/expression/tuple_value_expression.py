@@ -47,17 +47,9 @@ class TupleValueExpression(AbstractExpression):
     def table_id(self) -> int:
         return self._table_id
 
-    @table_id.setter
-    def table_id(self, id: int):
-        self._table_id = id
-
     @property
     def table_alias(self) -> str:
         return self._table_alias
-
-    @table_alias.setter
-    def table_alias(self, name: str):
-        self._table_alias = name
 
     @property
     def col_name(self) -> str:
@@ -67,17 +59,9 @@ class TupleValueExpression(AbstractExpression):
     def col_object(self) -> Union[ColumnCatalogEntry, UdfIOCatalogEntry]:
         return self._col_object
 
-    @col_object.setter
-    def col_object(self, value: Union[ColumnCatalogEntry, UdfIOCatalogEntry]):
-        self._col_object = value
-
     @property
     def col_alias(self) -> str:
         return self._col_alias
-
-    @col_alias.setter
-    def col_alias(self, value: str):
-        self._col_alias = value
 
     def evaluate(self, batch: Batch, *args, **kwargs):
         if "mask" in kwargs:
@@ -98,10 +82,6 @@ class TupleValueExpression(AbstractExpression):
             return f"{self.col_object.table_name}.{self.col_object.name}"
         elif isinstance(self.col_object, UdfIOCatalogEntry):
             return f"{self.col_object.udf_name}.{self.col_object.name}"
-        else:
-            err_msg = f"Unsupported type of self.col_object {type(self.col_object)}, expected ColumnCatalogEntry or UdfIOCatalogEntry"
-            logger.error(err_msg)
-            raise ValueError(err_msg)
 
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
