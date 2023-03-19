@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from sqlalchemy.orm.exc import NoResultFound
 
 from eva.catalog.models.udf_cost_catalog import UdfCostCatalog, UdfCostCatalogEntry
 from eva.catalog.services.base_service import BaseService
@@ -57,8 +56,7 @@ class UdfCostCatalogService(BaseService):
             if udf_obj:
                 udf_obj.update(cost=new_cost)
             else:
-                udf_obj = self.model(udf_id, name, new_cost)
-                udf_obj.save()
+                self.insert_entry(udf_id, name, new_cost)
         except Exception as e:
             raise CatalogError(
                 f"Error while upserting entry to UdfCostCatalog: {str(e)}"
@@ -73,11 +71,11 @@ class UdfCostCatalogService(BaseService):
         """
 
         try:
-            udf_obj = self.model.query.filter(self.model._name == name).one()
+            udf_obj = self.model.query.filter(
+                self.model._udf_name == name
+            ).one_or_none()
             if udf_obj:
                 return udf_obj.as_dataclass()
-            return udf_obj
-        except NoResultFound:
             return None
         except Exception as e:
             raise CatalogError(

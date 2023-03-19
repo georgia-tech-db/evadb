@@ -55,6 +55,7 @@ class SQLConfig:
 
             def _enable_sqlite_pragma(dbapi_con, con_record):
                 dbapi_con.execute("pragma foreign_keys=ON")
+                dbapi_con.execute("pragma synchronous=NORMAL")
                 dbapi_con.execute("pragma journal_mode=WAL")
 
             event.listen(self.engine, "connect", _enable_sqlite_pragma)

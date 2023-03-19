@@ -35,10 +35,10 @@ class UdfCostCatalogServiceTest(TestCase):
     @patch("eva.catalog.services.udf_cost_catalog_service.UdfCostCatalog")
     def test_udf_by_name_should_query_model_with_name(self, mocked):
         service = UdfCostCatalogService()
-        expected = mocked.query.filter.return_value.one.return_value
+        expected = mocked.query.filter.return_value.one_or_none.return_value
         actual = service.get_entry_by_name(UDF_NAME)
-        mocked.query.filter.assert_called_with(mocked._name == UDF_NAME)
-        mocked.query.filter.return_value.one.assert_called_once()
+        mocked.query.filter.assert_called_with(mocked._udf_name == UDF_NAME)
+        mocked.query.filter.return_value.one_or_none.assert_called_once()
         self.assertEqual(actual, expected.as_dataclass.return_value)
 
     @patch("eva.catalog.services.udf_cost_catalog_service.UdfCostCatalog")

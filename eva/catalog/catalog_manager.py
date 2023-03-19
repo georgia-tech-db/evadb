@@ -58,7 +58,7 @@ class CatalogManager(object):
         self._table_catalog_service: TableCatalogService = TableCatalogService()
         self._column_service: ColumnCatalogService = ColumnCatalogService()
         self._udf_service: UdfCatalogService = UdfCatalogService()
-        self._udf_cost_catlog_service: UdfCostCatalogService = UdfCostCatalogService()
+        self._udf_cost_catalog_service: UdfCostCatalogService = UdfCostCatalogService()
         self._udf_io_service: UdfIOCatalogService = UdfIOCatalogService()
         self._udf_metadata_service: UdfMetadataCatalogService = (
             UdfMetadataCatalogService()
@@ -263,8 +263,7 @@ class CatalogManager(object):
             The persisted UdfCostCatalogEntry object.
         """
 
-        udf_entry = self._udf_cost_catlog_service.insert_entry(udf_id, name, cost)
-        return udf_entry
+        self._udf_cost_catalog_service.insert_entry(udf_id, name, cost)
 
     def upsert_udf_cost_catalog_entry(
         self, udf_id: int, name: str, cost: int
@@ -280,8 +279,10 @@ class CatalogManager(object):
             The persisted UdfCostCatalogEntry object.
         """
 
-        udf_entry = self._udf_cost_catlog_service.upsert_entry(udf_id, name, cost)
-        return udf_entry
+        self._udf_cost_catalog_service.upsert_entry(udf_id, name, cost)
+
+    def get_udf_cost_catalog_entry(self, name: str):
+        return self._udf_cost_catalog_service.get_entry_by_name(name)
 
     "UdfIO services"
 
