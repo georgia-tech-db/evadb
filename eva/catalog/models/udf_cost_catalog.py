@@ -39,7 +39,12 @@ class UdfCostCatalog(BaseModel):
         self._cost = cost
 
     def as_dataclass(self) -> "UdfCostCatalogEntry":
-        return UdfCostCatalog(udf_id=self._udf_id, name=self._udf_name, cost=self._cost)
+        return UdfCostCatalog(
+            udf_id=self._udf_id,
+            name=self._udf_name,
+            cost=self._cost,
+            row_id=self._row_id,
+        )
 
 
 @dataclass(unsafe_hash=True)
@@ -51,6 +56,7 @@ class UdfCostCatalogEntry:
     name: str
     cost: float = None
     udf_id: int = None
+    row_id: int = None
 
     def display_format(self):
         return {"udf_id": self.udf_id, "name": self.name, "cost": self.cost}
