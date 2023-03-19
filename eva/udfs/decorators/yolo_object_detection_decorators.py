@@ -183,6 +183,8 @@ class YoloDecorators(PytorchAbstractClassifierUDF):
 
         outcome = []
 
+        # Convert to HWC
+        # https://github.com/ultralytics/yolov5/blob/3e55763d45f9c5f8217e4dad5ba1e6c1f42e3bf8/models/common.py#L658
         frames = torch.permute(frames, (0, 2, 3, 1))
         predictions = self.model([its.cpu().detach().numpy() * 255 for its in frames])
 

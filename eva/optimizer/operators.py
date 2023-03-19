@@ -20,6 +20,7 @@ from eva.catalog.catalog_type import IndexType
 from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
+from eva.catalog.models.udf_metadata_catalog import UdfMetadataCatalogEntry
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.constant_value_expression import ConstantValueExpression
 from eva.expression.function_expression import FunctionExpression
@@ -149,6 +150,7 @@ class LogicalGet(Operator):
         predicate: AbstractExpression = None,
         target_list: List[AbstractExpression] = None,
         sampling_rate: int = None,
+        sampling_type: str = None,
         children=None,
     ):
         self._video = video
@@ -157,6 +159,7 @@ class LogicalGet(Operator):
         self._predicate = predicate
         self._target_list = target_list
         self._sampling_rate = sampling_rate
+        self._sampling_type = sampling_type
         super().__init__(OperatorType.LOGICALGET, children)
 
     @property
@@ -183,6 +186,10 @@ class LogicalGet(Operator):
     def sampling_rate(self):
         return self._sampling_rate
 
+    @property
+    def sampling_type(self):
+        return self._sampling_type
+
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
         if not isinstance(other, LogicalGet):
@@ -195,6 +202,7 @@ class LogicalGet(Operator):
             and self.predicate == other.predicate
             and self.target_list == other.target_list
             and self.sampling_rate == other.sampling_rate
+            and self.sampling_type == other.sampling_type
         )
 
     def __hash__(self) -> int:
@@ -207,6 +215,7 @@ class LogicalGet(Operator):
                 self.predicate,
                 tuple(self.target_list or []),
                 self.sampling_rate,
+                self.sampling_type,
             )
         )
 
@@ -346,22 +355,36 @@ class LogicalLimit(Operator):
 
 
 class LogicalSample(Operator):
-    def __init__(self, sample_freq: ConstantValueExpression, children: List = None):
+    def __init__(
+        self,
+        sample_freq: ConstantValueExpression,
+        sample_type: ConstantValueExpression,
+        children: List = None,
+    ):
         super().__init__(OperatorType.LOGICALSAMPLE, children)
         self._sample_freq = sample_freq
+        self._sample_type = sample_type
 
     @property
     def sample_freq(self):
         return self._sample_freq
 
+    @property
+    def sample_type(self):
+        return self._sample_type
+
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
         if not isinstance(other, LogicalSample):
             return False
-        return is_subtree_equal and self.sample_freq == other.sample_freq
+        return (
+            is_subtree_equal
+            and self.sample_freq == other.sample_freq
+            and self.sample_type == other.sample_type
+        )
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(), self.sample_freq))
+        return hash((super().__hash__(), self.sample_freq, self.sample_type))
 
 
 class LogicalUnion(Operator):
@@ -640,6 +663,7 @@ class LogicalCreateUDF(Operator):
         outputs: List[UdfIOCatalogEntry],
         impl_path: Path,
         udf_type: str = None,
+        metadata: List[UdfMetadataCatalogEntry] = None,
         children: List = None,
     ):
         super().__init__(OperatorType.LOGICALCREATEUDF, children)
@@ -649,6 +673,7 @@ class LogicalCreateUDF(Operator):
         self._outputs = outputs
         self._impl_path = impl_path
         self._udf_type = udf_type
+        self._metadata = metadata
 
     @property
     def name(self):
@@ -674,6 +699,10 @@ class LogicalCreateUDF(Operator):
     def udf_type(self):
         return self._udf_type
 
+    @property
+    def metadata(self):
+        return self._metadata
+
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
         if not isinstance(other, LogicalCreateUDF):
@@ -686,6 +715,7 @@ class LogicalCreateUDF(Operator):
             and self.outputs == other.outputs
             and self.udf_type == other.udf_type
             and self.impl_path == other.impl_path
+            and self.metadata == other.metadata
         )
 
     def __hash__(self) -> int:
@@ -698,6 +728,7 @@ class LogicalCreateUDF(Operator):
                 tuple(self.outputs),
                 self.udf_type,
                 self.impl_path,
+                tuple(self.metadata),
             )
         )
 

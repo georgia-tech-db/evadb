@@ -14,6 +14,7 @@
 # limitations under the License.
 from typing import Callable, List
 
+from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.models.udf_catalog import UdfCatalogEntry
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 from eva.constants import NO_GPU
@@ -22,7 +23,7 @@ from eva.expression.abstract_expression import AbstractExpression, ExpressionTyp
 from eva.models.storage.batch import Batch
 from eva.parser.alias import Alias
 from eva.udfs.gpu_compatible import GPUCompatible
-from eva.utils.timer import Timer
+from eva.utils.stats import UDFStats
 
 
 class FunctionExpression(AbstractExpression):
@@ -57,13 +58,11 @@ class FunctionExpression(AbstractExpression):
         self._function = func
         self._function_instance = None
         self._output = output
-        self._averageTime = 0
-        self._iterationCount = 0
-        self._lastIterationCount = 0
         self.alias = alias
         self.udf_obj: UdfCatalogEntry = None
         self.output_objs: List[UdfIOCatalogEntry] = []
         self.projection_columns: List[str] = []
+        self._stats = UDFStats()
 
     @property
     def name(self):
@@ -89,26 +88,21 @@ class FunctionExpression(AbstractExpression):
     def function(self, func: Callable):
         self._function = func
 
-    def persistCost(self, udf_id, name, time):
-        from eva.catalog.catalog_manager import CatalogManager
-
-        catalog_manager = CatalogManager()
-        catalog_manager.upsert_udf_cost_catalog_entry(udf_id, name, self._averageTime)
-
-    def profileAndPersist(self, udf_obj, name, time, numberOfFrames):
-        if not (udf_obj):
+    def persist_stats(self):
+        if self.udf_obj is None:
             return
-        udf_id = udf_obj.row_id
-        self._iterationCount = self._iterationCount + numberOfFrames
-        self._averageTime = (self._averageTime * (numberOfFrames - 1) + time) / (
-            numberOfFrames
+        udf_id = self.udf_obj.row_id
+        cost_per_func_call = (
+            self._stats.timer.total_elapsed_time / self._stats.num_calls
         )
 
-        # Persist only every 10th evaluation of the function expression
-        # >= because each batch could have a non-multiple of 10 frame count
-        if self._iterationCount - self._lastIterationCount >= 10:
-            self.persistCost(udf_id, name, self._averageTime)
-        self._lastIterationCount = self._iterationCount
+        # persist stats to catalog only if it differ by greater than 10% from
+        # the previous value
+        if abs(self._stats.prev_cost - cost_per_func_call) > cost_per_func_call / 10:
+            CatalogManager().upsert_udf_cost_catalog_entry(
+                udf_id, self.udf_obj.name, cost_per_func_call
+            )
+            self._stats.prev_cost = cost_per_func_call
 
     def evaluate(self, batch: Batch, **kwargs) -> Batch:
         new_batch = batch
@@ -131,14 +125,20 @@ class FunctionExpression(AbstractExpression):
 
         func = self._gpu_enabled_function()
         outcomes = new_batch
-        function_expr_timer = Timer()
-        with function_expr_timer:
+
+        # record the time taken for the udf execution
+        with self._stats.timer:
+            # apply the function and project the required columns
             outcomes.apply_function_expression(func)
             outcomes = outcomes.project(self.projection_columns)
             outcomes.modify_column_alias(self.alias)
-        self.profileAndPersist(
-            self.udf_obj, self.name, function_expr_timer.total_elapsed_time, len(batch)
-        )
+
+        # record the number of function calls
+        self._stats.num_calls += len(batch)
+
+        # persist the stats to catalog
+        self.persist_stats()
+
         return outcomes
 
     def signature(self) -> str:

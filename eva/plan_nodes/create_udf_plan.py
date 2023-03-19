@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import List
 
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
+from eva.catalog.models.udf_metadata_catalog import UdfMetadataCatalogEntry
 from eva.plan_nodes.abstract_plan import AbstractPlan
 from eva.plan_nodes.types import PlanOprType
 
@@ -50,6 +51,7 @@ class CreateUDFPlan(AbstractPlan):
         outputs: List[UdfIOCatalogEntry],
         impl_file_path: Path,
         udf_type: str = None,
+        metadata: List[UdfMetadataCatalogEntry] = None,
     ):
         super().__init__(PlanOprType.CREATE_UDF)
         self._name = name
@@ -58,6 +60,7 @@ class CreateUDFPlan(AbstractPlan):
         self._outputs = outputs
         self._impl_path = impl_file_path
         self._udf_type = udf_type
+        self._metadata = metadata
 
     @property
     def name(self):
@@ -83,19 +86,25 @@ class CreateUDFPlan(AbstractPlan):
     def udf_type(self):
         return self._udf_type
 
+    @property
+    def metadata(self):
+        return self._metadata
+
     def __str__(self):
         return "CreateUDFPlan(name={}, \
             if_not_exists={}, \
             inputs={}, \
             outputs={}, \
             impl_file_path={}, \
-            udf_type={})".format(
+            udf_type={}, \
+            metadata={})".format(
             self._name,
             self._if_not_exists,
             self._inputs,
             self._outputs,
             self._impl_path,
             self._udf_type,
+            self._metadata,
         )
 
     def __hash__(self) -> int:
@@ -107,5 +116,6 @@ class CreateUDFPlan(AbstractPlan):
                 tuple(self.outputs),
                 self.impl_path,
                 self.udf_type,
+                tuple(self.metadata),
             )
         )

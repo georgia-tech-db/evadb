@@ -574,7 +574,8 @@ class ParserTests(unittest.TestCase):
                   INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
                   OUTPUT (Labels NDARRAY STR(10), Bbox NDARRAY UINT8(10, 4))
                   TYPE  Classification
-                  IMPL  'data/fastrcnn.py';
+                  IMPL  'data/fastrcnn.py'
+                  "KEY" "VALUE";
         """
 
         expected_cci = ColConstraintInfo()
@@ -601,6 +602,7 @@ class ParserTests(unittest.TestCase):
                 ),
             ],
             "Classification",
+            [("KEY", "VALUE")],
         )
         eva_statement_list = parser.parse(create_udf_query)
         self.assertIsInstance(eva_statement_list, list)

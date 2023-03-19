@@ -38,7 +38,10 @@ from eva.optimizer.operators import (
     LogicalShow,
     LogicalUnion,
 )
-from eva.optimizer.optimizer_utils import column_definition_to_udf_io
+from eva.optimizer.optimizer_utils import (
+    column_definition_to_udf_io,
+    metadata_definition_to_udf_metadata,
+)
 from eva.parser.create_index_statement import CreateIndexStatement
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
 from eva.parser.create_statement import CreateTableStatement
@@ -101,7 +104,7 @@ class StatementToPlanConvertor:
             self._plan = join_plan
 
         if table_ref.sample_freq:
-            self._visit_sample(table_ref.sample_freq)
+            self._visit_sample(table_ref.sample_freq, table_ref.sample_type)
 
     def visit_select(self, statement: SelectStatement):
         """converter for select statement
@@ -142,8 +145,8 @@ class StatementToPlanConvertor:
         if select_columns is not None:
             self._visit_projection(select_columns)
 
-    def _visit_sample(self, sample_freq):
-        sample_opr = LogicalSample(sample_freq)
+    def _visit_sample(self, sample_freq, sample_type):
+        sample_opr = LogicalSample(sample_freq, sample_type)
         sample_opr.append_child(self._plan)
         self._plan = sample_opr
 
@@ -253,6 +256,7 @@ class StatementToPlanConvertor:
         """
         annotated_inputs = column_definition_to_udf_io(statement.inputs, True)
         annotated_outputs = column_definition_to_udf_io(statement.outputs, False)
+        annotated_metadata = metadata_definition_to_udf_metadata(statement.metadata)
 
         create_udf_opr = LogicalCreateUDF(
             statement.name,
@@ -261,6 +265,7 @@ class StatementToPlanConvertor:
             annotated_outputs,
             statement.impl_path,
             statement.udf_type,
+            annotated_metadata,
         )
         self._plan = create_udf_opr
 
