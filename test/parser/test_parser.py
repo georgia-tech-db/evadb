@@ -924,6 +924,23 @@ class ParserTests(unittest.TestCase):
         expected_stmt = SelectStatement([tuple_frame], from_table)
         self.assertEqual(select_stmt, expected_stmt)
 
+    def test_class_equality(self):
+        table_info = TableInfo("MyVideo")
+        table_ref = TableRef(TableInfo("MyVideo"))
+        tuple_frame = TupleValueExpression("frame")
+        func_expr = FunctionExpression(
+            func=None, name="ObjectDet", children=[tuple_frame]
+        )
+        join_node = JoinNode(
+            TableRef(TableInfo("MyVideo")),
+            TableRef(TableValuedExpression(func_expr), alias=Alias("OD")),
+            join_type=JoinType.LATERAL_JOIN,
+        )
+        self.assertNotEqual(table_info, table_ref)
+        self.assertNotEqual(tuple_frame, table_ref)
+        self.assertNotEqual(join_node, table_ref)
+        self.assertNotEqual(table_ref, table_info)
+
     def test_lark(self):
         query = """CREATE UDF FaceDetector
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))

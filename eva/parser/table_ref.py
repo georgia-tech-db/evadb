@@ -157,7 +157,6 @@ class TableRef:
         alias: Alias = None,
         sample_freq: float = None,
     ):
-
         self._ref_handle = table
         self._sample_freq = sample_freq
         self.alias = alias or self.generate_alias()
@@ -218,14 +217,12 @@ class TableRef:
         )
         return self._ref_handle
 
-    def generate_alias(self) -> str:
+    def generate_alias(self) -> Alias:
         # create alias for the table
         # TableInfo -> table_name.lower()
         # SelectStatement -> select
         if isinstance(self._ref_handle, TableInfo):
             return Alias(self._ref_handle.table_name.lower())
-        elif isinstance(self._ref_handle, SelectStatement):
-            raise RuntimeError("Nested select should have alias")
 
     def __str__(self):
         table_ref_str = f"{str(self._ref_handle)}"
