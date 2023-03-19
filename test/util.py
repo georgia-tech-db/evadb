@@ -20,6 +20,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 import pandas as pd
+from mock import MagicMock
 
 from eva.binder.statement_binder import StatementBinder
 from eva.binder.statement_binder_context import StatementBinderContext
@@ -57,6 +58,62 @@ def get_all_subclasses(cls):
     recurse(cls)
 
     return set(subclass_list)
+
+
+def get_mock_object(class_type, number_of_args):
+    if number_of_args == 1:
+        return class_type()
+    elif number_of_args == 2:
+        return class_type(MagicMock())
+    elif number_of_args == 3:
+        return class_type(MagicMock(), MagicMock())
+    elif number_of_args == 4:
+        return class_type(MagicMock(), MagicMock(), MagicMock())
+    elif number_of_args == 5:
+        return class_type(MagicMock(), MagicMock(), MagicMock(), MagicMock())
+    elif number_of_args == 6:
+        return class_type(
+            MagicMock(), MagicMock(), MagicMock(), MagicMock(), MagicMock()
+        )
+    elif number_of_args == 7:
+        return class_type(
+            MagicMock(), MagicMock(), MagicMock(), MagicMock(), MagicMock(), MagicMock()
+        )
+    elif number_of_args == 8:
+        return class_type(
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+        )
+    elif number_of_args == 9:
+        return class_type(
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+        )
+    elif number_of_args == 10:
+        return class_type(
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+        )
+    else:
+        raise Exception("Too many args")
 
 
 def get_logical_query_plan(query: str) -> Operator:

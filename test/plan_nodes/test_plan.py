@@ -13,12 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+from inspect import isabstract, signature
+from test.util import get_all_subclasses, get_mock_object
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import ColumnType
 from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.parser.table_ref import TableInfo, TableRef
 from eva.parser.types import FileFormatType
+from eva.plan_nodes.abstract_plan import AbstractPlan
 from eva.plan_nodes.create_mat_view_plan import CreateMaterializedViewPlan
 from eva.plan_nodes.create_plan import CreatePlan
 from eva.plan_nodes.create_udf_plan import CreateUDFPlan
@@ -172,3 +175,13 @@ class PlanNodeTests(unittest.TestCase):
         self.assertEqual(plan.opr_type, PlanOprType.CREATE_MATERIALIZED_VIEW)
         self.assertEqual(plan.view, dummy_view)
         self.assertEqual(plan.columns, columns)
+
+    def test_abstract_plan_str(self):
+        derived_plan_classes = list(get_all_subclasses(AbstractPlan))
+        for derived_plan_class in derived_plan_classes:
+            sig = signature(derived_plan_class.__init__)
+            params = sig.parameters
+            if isabstract(derived_plan_class) is False:
+                print(derived_plan_class)
+                obj = get_mock_object(derived_plan_class, len(params))
+                print(str(obj))
