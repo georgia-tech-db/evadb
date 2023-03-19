@@ -31,8 +31,9 @@ class DropExecutor(AbstractExecutor):
     def exec(self):
         """Drop table executor"""
         catalog_manager = CatalogManager()
-        if len(self.node.table_infos) > 1:
-            logger.exception("Drop supports only single table")
+
+        assert len(self.node.table_infos) == 1, "Drop supports only single table"
+
         table_info: TableInfo = self.node.table_infos[0]
 
         if not catalog_manager.check_table_exists(
@@ -46,21 +47,14 @@ class DropExecutor(AbstractExecutor):
                 logger.exception(err_msg)
                 raise ExecutorError(err_msg)
 
-        try:
-            table_obj = catalog_manager.get_table_catalog_entry(
-                table_info.table_name, table_info.database_name
-            )
-            storage_engine = StorageEngine.factory(table_obj)
-        except RuntimeError as err:
-            raise ExecutorError(str(err))
+        table_obj = catalog_manager.get_table_catalog_entry(
+            table_info.table_name, table_info.database_name
+        )
+        storage_engine = StorageEngine.factory(table_obj)
+
         storage_engine.drop(table=table_obj)
 
-        success = catalog_manager.delete_table_catalog_entry(table_obj)
-
-        if not success:
-            err_msg = "Failed to drop {}".format(table_info)
-            logger.exception(err_msg)
-            raise ExecutorError(err_msg)
+        catalog_manager.delete_table_catalog_entry(table_obj)
 
         yield Batch(
             pd.DataFrame(
