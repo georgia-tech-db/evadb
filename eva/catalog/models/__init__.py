@@ -18,8 +18,12 @@ __all__ = (
     "ColumnCatalog",
     "UdfCatalog",
     "UdfIOCatalog",
+    "UdfMetadataCatalog",
+    "UdfCostCatalog",
     "TableCatalogEntry",
     "ColumnCatalogEntry",
     "UdfCatalogEntry",
     "UdfIOCatalogEntry",
+    "UdfMetadataCatalogEntry",
+    "UdfCostCatalogEntry",
 )

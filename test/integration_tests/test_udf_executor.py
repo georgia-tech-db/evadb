@@ -303,3 +303,8 @@ class UDFExecutorTest(unittest.TestCase):
             self.assertEquals(
                 getattr(udf_output, attr), expected_output_attributes[attr]
             )
+
+    def test_udf_cost_entry_created(self):
+        execute_query_fetch_all("SELECT DummyObjectDetector(data) FROM MyVideo")
+        entry = CatalogManager().get_udf_cost_catalog_entry("DummyObjectDetector")
+        self.assertIsNotNone(entry)

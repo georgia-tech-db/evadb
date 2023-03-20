@@ -26,12 +26,14 @@ from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.catalog.models.index_catalog import IndexCatalogEntry
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.catalog.models.udf_catalog import UdfCatalogEntry
+from eva.catalog.models.udf_cost_catalog import UdfCostCatalogEntry
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 from eva.catalog.models.udf_metadata_catalog import UdfMetadataCatalogEntry
 from eva.catalog.services.column_catalog_service import ColumnCatalogService
 from eva.catalog.services.index_catalog_service import IndexCatalogService
 from eva.catalog.services.table_catalog_service import TableCatalogService
 from eva.catalog.services.udf_catalog_service import UdfCatalogService
+from eva.catalog.services.udf_cost_catalog_service import UdfCostCatalogService
 from eva.catalog.services.udf_io_catalog_service import UdfIOCatalogService
 from eva.catalog.services.udf_metadata_catalog_service import UdfMetadataCatalogService
 from eva.catalog.sql_config import IDENTIFIER_COLUMN
@@ -56,6 +58,7 @@ class CatalogManager(object):
         self._table_catalog_service: TableCatalogService = TableCatalogService()
         self._column_service: ColumnCatalogService = ColumnCatalogService()
         self._udf_service: UdfCatalogService = UdfCatalogService()
+        self._udf_cost_catalog_service: UdfCostCatalogService = UdfCostCatalogService()
         self._udf_io_service: UdfIOCatalogService = UdfIOCatalogService()
         self._udf_metadata_service: UdfMetadataCatalogService = (
             UdfMetadataCatalogService()
@@ -243,6 +246,27 @@ class CatalogManager(object):
 
     def get_all_udf_catalog_entries(self):
         return self._udf_service.get_all_entries()
+
+    "udf cost catalog services"
+
+    def upsert_udf_cost_catalog_entry(
+        self, udf_id: int, name: str, cost: int
+    ) -> UdfCostCatalogEntry:
+        """Upserts UDF cost catalog entry.
+
+        Arguments:
+            udf_id(int): unique udf id
+            name(str): the name of the udf
+            cost(int): cost of this UDF
+
+        Returns:
+            The persisted UdfCostCatalogEntry object.
+        """
+
+        self._udf_cost_catalog_service.upsert_entry(udf_id, name, cost)
+
+    def get_udf_cost_catalog_entry(self, name: str):
+        return self._udf_cost_catalog_service.get_entry_by_name(name)
 
     "UdfIO services"
 

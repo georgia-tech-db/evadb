@@ -59,7 +59,7 @@ class PytorchTest(unittest.TestCase):
         file_remove("computer_asl.mp4")
 
         execute_query_fetch_all("DROP TABLE IF EXISTS Actions;")
-        execute_query_fetch_all("DROP TABLE IF EXISTS Mnist;")
+        execute_query_fetch_all("DROP TABLE IF EXISTS MNIST;")
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
         execute_query_fetch_all("DROP TABLE IF EXISTS Asl_actions;")
         execute_query_fetch_all("DROP TABLE IF EXISTS MemeImages;")

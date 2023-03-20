@@ -31,7 +31,7 @@ class UdfMetadataCatalog(BaseModel):
         `_udf_id:` the `_row_id` of the `UdfCatalog` entry to which the attribute belongs
     """
 
-    __tablename__ = "udfmetadata_catalog"
+    __tablename__ = "udf_metadata_catalog"
 
     _key = Column("key", String(100))
     _value = Column("value", String(100))
