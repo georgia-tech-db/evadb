@@ -39,7 +39,7 @@ class UdfCostCatalog(BaseModel):
         self._cost = cost
 
     def as_dataclass(self) -> "UdfCostCatalogEntry":
-        return UdfCostCatalog(
+        return UdfCostCatalogEntry(
             udf_id=self._udf_id,
             name=self._udf_name,
             cost=self._cost,
