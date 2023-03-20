@@ -249,22 +249,6 @@ class CatalogManager(object):
 
     "udf cost catalog services"
 
-    def insert_udf_cost_catalog_entry(
-        self, udf_id: int, name: str, cost: int
-    ) -> UdfCostCatalogEntry:
-        """Persists UDF cost catalog entry.
-
-        Arguments:
-            udf_id(int): unique udf id
-            name(str): name of the udf
-            cost(int): cost of this UDF
-
-        Returns:
-            The persisted UdfCostCatalogEntry object.
-        """
-
-        self._udf_cost_catalog_service.insert_entry(udf_id, name, cost)
-
     def upsert_udf_cost_catalog_entry(
         self, udf_id: int, name: str, cost: int
     ) -> UdfCostCatalogEntry:

@@ -15,9 +15,9 @@
 from unittest import TestCase
 
 from mock import patch
-from sqlalchemy.orm.exc import NoResultFound
 
 from eva.catalog.services.udf_cost_catalog_service import UdfCostCatalogService
+from eva.utils.errors import CatalogError
 
 UDF_ID = 123
 UDF_NAME = "name"
@@ -42,8 +42,34 @@ class UdfCostCatalogServiceTest(TestCase):
         self.assertEqual(actual, expected.as_dataclass.return_value)
 
     @patch("eva.catalog.services.udf_cost_catalog_service.UdfCostCatalog")
-    def test_get_all_udfs_should_return_empty(self, mocked):
+    def test_insert_should_raise_exception(self, mock):
         service = UdfCostCatalogService()
-        mocked.query.all.side_effect = Exception(NoResultFound)
-        with self.assertRaises(Exception):
-            self.assertEqual(service.get_all_entries(), [])
+        mock.side_effect = Exception("exception")
+        with self.assertRaises(CatalogError) as cm:
+            service.insert_entry(UDF_ID, UDF_NAME, UDF_COST)
+        self.assertEqual(
+            str(cm.exception),
+            "Error while inserting entry to UdfCostCatalog: exception",
+        )
+
+    @patch("eva.catalog.services.udf_cost_catalog_service.UdfCostCatalog")
+    def test_upsert_entry_should_raise_exception(self, mock):
+        service = UdfCostCatalogService()
+        mock.query.filter.side_effect = Exception("exception")
+        with self.assertRaises(CatalogError) as cm:
+            service.upsert_entry(UDF_ID, UDF_NAME, UDF_COST)
+        self.assertEqual(
+            str(cm.exception),
+            "Error while upserting entry to UdfCostCatalog: exception",
+        )
+
+    @patch("eva.catalog.services.udf_cost_catalog_service.UdfCostCatalog")
+    def test_get_entry_should_raise_exception(self, mock):
+        service = UdfCostCatalogService()
+        mock.query.filter.side_effect = Exception("exception")
+        with self.assertRaises(CatalogError) as cm:
+            service.get_entry_by_name(UDF_NAME)
+        self.assertEqual(
+            str(cm.exception),
+            f"Error while getting entry for udf {UDF_NAME} from UdfCostCatalog: exception",
+        )
