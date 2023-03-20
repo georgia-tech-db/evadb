@@ -50,10 +50,6 @@ class DeleteTableStatement(AbstractStatement):
     def where_clause(self):
         return self._where_clause
 
-    @where_clause.setter
-    def where_clause(self, where_expr: AbstractExpression):
-        self._where_clause = where_expr
-
     def __eq__(self, other):
         if not isinstance(other, DeleteTableStatement):
             return False

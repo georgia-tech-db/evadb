@@ -50,6 +50,8 @@ class ParserStatementTests(unittest.TestCase):
                     ORDER BY CLASS, REDNESS DESC;",
             "INSERT INTO MyVideo (Frame_ID, Frame_Path)\
                                     VALUES    (1, '/mnt/frames/1.png');",
+            """INSERT INTO testDeleteOne (id, feat, salary, input)
+                VALUES (15, 2.5, [[100, 100, 100]], [[100, 100, 100]]);""",
             """DELETE FROM Foo WHERE id < 6""",
             """LOAD VIDEO 'data/video.mp4' INTO MyVideo""",
             """LOAD IMAGE 'data/pic.jpg' INTO MyImage""",
@@ -84,7 +86,7 @@ class ParserStatementTests(unittest.TestCase):
                   IMPL  'eva/udfs/face_detector.py';
             """,
             "SHOW TABLES;",
-            "SHOW UDFS",
+            "SHOW UDFS;",
             "EXPLAIN SELECT a FROM foo;",
             """SELECT data FROM MyVideo WHERE id < 5
                     ORDER BY Similarity(FeatureExtractor(Open("abc.jpg")),
