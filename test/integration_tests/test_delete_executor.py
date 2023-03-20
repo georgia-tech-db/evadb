@@ -37,6 +37,7 @@ class DeleteExecutorTest(unittest.TestCase):
                 CREATE TABLE IF NOT EXISTS testDeleteOne
                 (
                  id INTEGER,
+                 dummyfloat FLOAT(5, 3),
                  feat   NDARRAY FLOAT32(1, 3),
                  input  NDARRAY UINT8(1, 3)
                  );
@@ -44,18 +45,18 @@ class DeleteExecutorTest(unittest.TestCase):
         execute_query_fetch_all(create_table_query)
 
         insert_query1 = """
-                INSERT INTO testDeleteOne (id, feat, input)
-                VALUES (5, [[0, 0, 0]], [[0, 0, 0]]);
+                INSERT INTO testDeleteOne (id, dummyfloat, feat, input)
+                VALUES (5, 1.5, [[0, 0, 0]], [[0, 0, 0]]);
         """
         execute_query_fetch_all(insert_query1)
         insert_query2 = """
-                INSERT INTO testDeleteOne (id, feat, input)
-                VALUES (15, [[100, 100, 100]], [[100, 100, 100]]);
+                INSERT INTO testDeleteOne (id, dummyfloat,feat, input)
+                VALUES (15, 2.5, [[100, 100, 100]], [[100, 100, 100]]);
         """
         execute_query_fetch_all(insert_query2)
         insert_query3 = """
-                INSERT INTO testDeleteOne (id, feat, input)
-                VALUES (25, [[200, 200, 200]], [[200, 200, 200]]);
+                INSERT INTO testDeleteOne (id, dummyfloat,feat, input)
+                VALUES (25, 3.5, [[200, 200, 200]], [[200, 200, 200]]);
         """
         execute_query_fetch_all(insert_query3)
 
