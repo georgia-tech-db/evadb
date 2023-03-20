@@ -27,7 +27,7 @@ from eva.optimizer.rules.rules import (
 )
 from eva.optimizer.rules.rules_manager import disable_rules
 from eva.server.command_handler import execute_query_fetch_all
-from eva.utils.timer import Timer
+from eva.utils.stats import Timer
 
 
 class OptimizerRulesTest(unittest.TestCase):

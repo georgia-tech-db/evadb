@@ -5,13 +5,15 @@ CatalogManager class that provides a set of services to interact with a database
 
 This data is stored in the eva_catalog.db file which can be found in ~/.eva/<version>/ folder.  
 
-Catalog manager currently has 5 services in it:  
+Catalog manager currently has 7 services in it:  
 ```
 TableCatalogService()
 ColumnCatalogService()  
 UdfCatalogService()  
 UdfIOCatalogService()  
-IndexCatalogService()  
+IndexCatalogService() 
+UdfCostCatalogService() 
+UdfMetadataCatalogService()
 ```
 
 ## Catalog Services  
@@ -25,9 +27,9 @@ Fields:
 name: str  
 file_url: str  
 table_type: TableType  
-identifier_column: str = "id"  
-columns: List[ColumnCatalogEntry] = field(compare=False, default_factory=list)  
-row_id: int = None  
+identifier_column: str
+columns: List[ColumnCatalogEntry]
+row_id: int
 ```
 
 ### ColumnCatalog
@@ -35,12 +37,12 @@ Fields:
 ```
 name: str  
 type: ColumnType  
-is_nullable: bool = False  
-array_type: NdArrayType = None  
-array_dimensions: Tuple[int] = field(default_factory=tuple)  
-table_id: int = None  
-table_name: str = None  
-row_id: int = None  
+is_nullable: bool
+array_type: NdArrayType 
+array_dimensions: Tuple[int]
+table_id: int  
+table_name: str 
+row_id: int 
 ```
 
 ### IndexCatalog
@@ -49,10 +51,10 @@ Fields:
 name: str  
 save_file_path: str  
 type: IndexType  
-row_id: int = None  
-feat_column_id: int = None  
-udf_signature: str = None  
-feat_column: ColumnCatalogEntry = None  
+row_id: int 
+feat_column_id: int
+udf_signature: str 
+feat_column: ColumnCatalogEntry 
 ```
 ### UdfCatalog
 Fields:  
@@ -60,20 +62,39 @@ Fields:
 name: str  
 impl_file_path: str  
 type: str  
-row_id: int = None  
-args: List[UdfIOCatalogEntry] = field(compare=False, default_factory=list)  
-outputs: List[UdfIOCatalogEntry] = field(compare=False, default_factory=list)  
+row_id: int
+args: List[UdfIOCatalogEntry]
+outputs: List[UdfIOCatalogEntry]  
 ```
 ### UdfIOCatalog
 Fields:  
 ```
 name: str  
 type: ColumnType  
-is_nullable: bool = False  
-array_type: NdArrayType = None  
-array_dimensions: Tuple[int] = None  
-is_input: bool = True  
-udf_id: int = None  
-udf_name: str = None  
-row_id: int = None  
+is_nullable: bool 
+array_type: NdArrayType
+array_dimensions: Tuple[int] 
+is_input: bool  
+udf_id: int  
+udf_name: str  
+row_id: int  
+```
+
+### UdfCostCatalog
+Fields:  
+```
+udf_id: int
+name: str
+cost: float
+row_id: int
+```
+
+### UdfMetadataCatalog
+Fields:  
+```
+key: str
+value: str
+udf_id: int
+udf_name: str
+row_id: int 
 ```

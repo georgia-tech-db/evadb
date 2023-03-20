@@ -31,14 +31,19 @@ class UdfCatalog(BaseModel):
 
     __tablename__ = "udf_catalog"
 
-    _name = Column("name", String(100), unique=True)
+    _name = Column("name", String(128), unique=True)
     _impl_file_path = Column("impl_file_path", String(128))
-    _type = Column("type", String(100))
+    _type = Column("type", String(128))
     _checksum = Column("checksum", String(512))
 
     # UdfIOCatalog storing the input/output attributes of the udf
     _attributes = relationship(
         "UdfIOCatalog", back_populates="_udf", cascade="all, delete, delete-orphan"
+    )
+    _metadata = relationship(
+        "UdfMetadataCatalog",
+        back_populates="_udf",
+        cascade="all, delete, delete-orphan",
     )
 
     def __init__(self, name: str, impl_file_path: str, type: str, checksum: str):

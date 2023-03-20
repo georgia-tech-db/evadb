@@ -266,6 +266,28 @@ class SelectExecutorTest(unittest.TestCase):
         self.assertEqual(len(actual_batch), len(expected_batch[0]))
         self.assertEqual(actual_batch, expected_batch[0])
 
+    def test_select_and_iframe_sample(self):
+        select_query = "SELECT id FROM MyVideo SAMPLE IFRAMES 7 ORDER BY id;"
+        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch.sort()
+
+        expected_batch = list(create_dummy_batches(filters=range(0, NUM_FRAMES, 7)))
+        expected_batch[0] = expected_batch[0].project(["myvideo.id"])
+
+        self.assertEqual(len(actual_batch), len(expected_batch[0]))
+        self.assertEqual(actual_batch, expected_batch[0])
+
+    def test_select_and_iframe_sample_without_sampling_rate(self):
+        select_query = "SELECT id FROM MyVideo SAMPLE IFRAMES ORDER BY id;"
+        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch.sort()
+
+        expected_batch = list(create_dummy_batches(filters=range(0, NUM_FRAMES, 1)))
+        expected_batch[0] = expected_batch[0].project(["myvideo.id"])
+
+        self.assertEqual(len(actual_batch), len(expected_batch[0]))
+        self.assertEqual(actual_batch, expected_batch[0])
+
     def test_select_and_groupby_first(self):
         # groupby and orderby together not tested because groupby
         # only applies to video data which is already sorted

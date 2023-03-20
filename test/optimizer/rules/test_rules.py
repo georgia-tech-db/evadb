@@ -52,6 +52,7 @@ from eva.optimizer.rules.rules import (
     LogicalInnerJoinCommutativity,
     LogicalInsertToPhysical,
     LogicalJoinToPhysicalHashJoin,
+    LogicalJoinToPhysicalNestedLoopJoin,
     LogicalLateralJoinToPhysical,
     LogicalLimitToPhysical,
     LogicalLoadToPhysical,
@@ -122,6 +123,7 @@ class RulesTest(unittest.TestCase):
             Promise.LOGICAL_DERIVED_GET_TO_PHYSICAL,
             Promise.LOGICAL_LATERAL_JOIN_TO_PHYSICAL,
             Promise.LOGICAL_JOIN_TO_PHYSICAL_HASH_JOIN,
+            Promise.LOGICAL_JOIN_TO_PHYSICAL_NESTED_LOOP_JOIN,
             Promise.LOGICAL_FUNCTION_SCAN_TO_PHYSICAL,
             Promise.LOGICAL_FILTER_TO_PHYSICAL,
             Promise.LOGICAL_PROJECT_TO_PHYSICAL,
@@ -191,6 +193,7 @@ class RulesTest(unittest.TestCase):
             LogicalGroupByToPhysical(),
             LogicalOrderByToPhysical(),
             LogicalLimitToPhysical(),
+            LogicalJoinToPhysicalNestedLoopJoin(),
             LogicalLateralJoinToPhysical(),
             LogicalFunctionScanToPhysical(),
             LogicalJoinToPhysicalHashJoin(),
@@ -254,7 +257,7 @@ class RulesTest(unittest.TestCase):
         )
 
         logi_get = LogicalGet(MagicMock(), table_obj, MagicMock(), MagicMock())
-        logi_sample = LogicalSample(MagicMock(), children=[logi_get])
+        logi_sample = LogicalSample(MagicMock(), MagicMock(), children=[logi_get])
 
         self.assertFalse(rule.check(logi_sample, MagicMock()))
 

@@ -34,6 +34,7 @@ from eva.plan_nodes.apply_and_merge_plan import ApplyAndMergePlan
 from eva.plan_nodes.create_mat_view_plan import CreateMaterializedViewPlan
 from eva.plan_nodes.explain_plan import ExplainPlan
 from eva.plan_nodes.hash_join_build_plan import HashJoinBuildPlan
+from eva.plan_nodes.nested_loop_join_plan import NestedLoopJoinPlan
 from eva.plan_nodes.predicate_plan import PredicatePlan
 from eva.plan_nodes.project_plan import ProjectPlan
 from eva.plan_nodes.show_info_plan import ShowInfoPlan
@@ -134,6 +135,7 @@ class EmbedFilterIntoGet(Rule):
                 predicate=pushdown_pred,
                 target_list=lget.target_list,
                 sampling_rate=lget.sampling_rate,
+                sampling_type=lget.sampling_type,
                 children=lget.children,
             )
             if unsupported_pred:
@@ -163,6 +165,7 @@ class EmbedSampleIntoGet(Rule):
 
     def apply(self, before: LogicalSample, context: OptimizerContext):
         sample_freq = before.sample_freq.value
+        sample_type = before.sample_type.value.value if before.sample_type else None
         lget: LogicalGet = before.children[0]
         new_get_opr = LogicalGet(
             lget.video,
@@ -171,6 +174,7 @@ class EmbedSampleIntoGet(Rule):
             predicate=lget.predicate,
             target_list=lget.target_list,
             sampling_rate=sample_freq,
+            sampling_type=sample_type,
             children=lget.children,
         )
         yield new_get_opr
@@ -199,6 +203,7 @@ class EmbedProjectIntoGet(Rule):
             predicate=lget.predicate,
             target_list=target_list,
             sampling_rate=lget.sampling_rate,
+            sampling_type=lget.sampling_type,
             children=lget.children,
         )
 
@@ -518,6 +523,8 @@ class ReorderPredicates(Rule):
     def apply(self, before: LogicalFilter, context: OptimizerContext):
         #     [TODO] Draw reordering here
         # Each element would be (index, cost)
+        yield before
+        return
         funcExpressionCostMap = []
         for child, idx in zip(
             before.predicate._children, range(len(before.predicate.children))
@@ -609,6 +616,7 @@ class LogicalCreateUDFToPhysical(Rule):
             before.outputs,
             before.impl_path,
             before.udf_type,
+            before.metadata,
         )
         yield after
 
@@ -725,6 +733,7 @@ class LogicalGetToSeqScan(Rule):
                 before.table_obj,
                 predicate=before.predicate,
                 sampling_rate=before.sampling_rate,
+                sampling_type=before.sampling_type,
             )
         )
         yield after
@@ -853,10 +862,7 @@ class LogicalLateralJoinToPhysical(Rule):
         return Promise.LOGICAL_LATERAL_JOIN_TO_PHYSICAL
 
     def check(self, before: Operator, context: OptimizerContext):
-        if before.join_type == JoinType.LATERAL_JOIN:
-            return True
-        else:
-            return False
+        return before.join_type == JoinType.LATERAL_JOIN
 
     def apply(self, join_node: LogicalJoin, context: OptimizerContext):
         lateral_join_plan = LateralJoinPlan(join_node.join_predicate)
@@ -877,7 +883,21 @@ class LogicalJoinToPhysicalHashJoin(Rule):
         return Promise.LOGICAL_JOIN_TO_PHYSICAL_HASH_JOIN
 
     def check(self, before: Operator, context: OptimizerContext):
-        return before.join_type == JoinType.INNER_JOIN
+        """
+        We don't want to apply this rule to the join when FuzzDistance
+        is being used, which implies that the join is a FuzzyJoin
+        """
+        if before.join_predicate is None:
+            return False
+        j_child: FunctionExpression = before.join_predicate.children[0]
+
+        if isinstance(j_child, FunctionExpression):
+            if j_child.name.startswith("FuzzDistance"):
+                return before.join_type == JoinType.INNER_JOIN and (
+                    not (j_child) or not (j_child.name.startswith("FuzzDistance"))
+                )
+        else:
+            return before.join_type == JoinType.INNER_JOIN
 
     def apply(self, join_node: LogicalJoin, context: OptimizerContext):
         #          HashJoinPlan                       HashJoinProbePlan
@@ -906,6 +926,39 @@ class LogicalJoinToPhysicalHashJoin(Rule):
         probe_side.append_child(build_plan)
         probe_side.append_child(b)
         yield probe_side
+
+
+class LogicalJoinToPhysicalNestedLoopJoin(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALJOIN)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_JOIN_TO_PHYSICAL_NESTED_LOOP_JOIN, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_JOIN_TO_PHYSICAL_NESTED_LOOP_JOIN
+
+    def check(self, before: LogicalJoin, context: OptimizerContext):
+        """
+        We want to apply this rule to the join when FuzzDistance
+        is being used, which implies that the join is a FuzzyJoin
+        """
+        if before.join_predicate is None:
+            return False
+        j_child: FunctionExpression = before.join_predicate.children[0]
+        if not isinstance(j_child, FunctionExpression):
+            return False
+        return before.join_type == JoinType.INNER_JOIN and j_child.name.startswith(
+            "FuzzDistance"
+        )
+
+    def apply(self, join_node: LogicalJoin, context: OptimizerContext):
+        nested_loop_join_plan = NestedLoopJoinPlan(
+            join_node.join_type, join_node.join_predicate
+        )
+        nested_loop_join_plan.append_child(join_node.lhs())
+        nested_loop_join_plan.append_child(join_node.rhs())
+        yield nested_loop_join_plan
 
 
 class LogicalCreateMaterializedViewToPhysical(Rule):

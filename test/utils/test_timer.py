@@ -22,7 +22,7 @@ from unittest.mock import MagicMock
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.server.command_handler import handle_request
-from eva.utils.timer import Timer
+from eva.utils.stats import Timer
 
 NUM_FRAMES = 10
 
