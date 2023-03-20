@@ -65,6 +65,7 @@ class AbstractUDFTest(unittest.TestCase):
         base_id = 0
         ref_object = None
         for c in class_list:
+            base_id = base_id + 1
             sig = inspect.signature(c.__init__)
             params = sig.parameters
             len_params = len(params)
@@ -79,5 +80,4 @@ class AbstractUDFTest(unittest.TestCase):
                 else:
                     self.assertNotEqual(ref_object, dummy_object)
             except Exception:
-                print(c)
                 pass
