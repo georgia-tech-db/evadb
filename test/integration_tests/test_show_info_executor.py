@@ -92,3 +92,6 @@ class ShowExecutorTest(unittest.TestCase):
         expected = {"name": ["MyVideo", "MNIST", "Actions"]}
         expected_df = pd.DataFrame(expected)
         self.assertEqual(result, Batch(expected_df))
+
+        # stop the server
+        os.system("nohup eva_server --stop")

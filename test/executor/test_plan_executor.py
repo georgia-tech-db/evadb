@@ -27,7 +27,6 @@ from eva.executor.load_executor import LoadDataExecutor
 from eva.executor.plan_executor import PlanExecutor
 from eva.executor.pp_executor import PPExecutor
 from eva.executor.seq_scan_executor import SequentialScanExecutor
-from eva.executor.upload_executor import UploadExecutor
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.create_plan import CreatePlan
 from eva.plan_nodes.create_udf_plan import CreateUDFPlan
@@ -39,7 +38,6 @@ from eva.plan_nodes.pp_plan import PPScanPlan
 from eva.plan_nodes.rename_plan import RenamePlan
 from eva.plan_nodes.seq_scan_plan import SeqScanPlan
 from eva.plan_nodes.storage_plan import StoragePlan
-from eva.plan_nodes.upload_plan import UploadPlan
 
 
 class PlanExecutorTest(unittest.TestCase):
@@ -123,16 +121,9 @@ class PlanExecutorTest(unittest.TestCase):
         executor = PlanExecutor(plan)._build_execution_tree(plan)
         self.assertIsInstance(executor, LoadDataExecutor)
 
-        plan = UploadPlan(
-            MagicMock(), MagicMock(), MagicMock(), MagicMock(), MagicMock(), MagicMock()
-        )
-        executor = PlanExecutor(plan)._build_execution_tree(plan)
-        self.assertIsInstance(executor, UploadExecutor)
-
     @patch("eva.executor.plan_executor.PlanExecutor._build_execution_tree")
     @patch("eva.executor.plan_executor.PlanExecutor._clean_execution_tree")
     def test_execute_plan_for_seq_scan_plan(self, mock_clean, mock_build):
-
         batch_list = [
             Batch(pd.DataFrame([1])),
             Batch(pd.DataFrame([2])),
@@ -153,7 +144,6 @@ class PlanExecutorTest(unittest.TestCase):
     @patch("eva.executor.plan_executor.PlanExecutor._build_execution_tree")
     @patch("eva.executor.plan_executor.PlanExecutor._clean_execution_tree")
     def test_execute_plan_for_pp_scan_plan(self, mock_clean, mock_build):
-
         batch_list = [
             Batch(pd.DataFrame([1])),
             Batch(pd.DataFrame([2])),
@@ -175,7 +165,6 @@ class PlanExecutorTest(unittest.TestCase):
     def test_execute_plan_for_create_insert_load_upload_plans(
         self, mock_clean, mock_build
     ):
-
         # CreateExecutor
         tree = MagicMock(node=CreatePlan(None, [], False))
         mock_build.return_value = tree
@@ -218,21 +207,9 @@ class PlanExecutorTest(unittest.TestCase):
         mock_clean.assert_called_once()
         self.assertEqual(actual, [])
 
-        # UploadExecutor
-        mock_build.reset_mock()
-        mock_clean.reset_mock()
-        tree = MagicMock(node=UploadPlan(None, None, None, None, None, None))
-        mock_build.return_value = tree
-        actual = list(PlanExecutor(None).execute_plan())
-        tree.exec.assert_called_once()
-        mock_build.assert_called_once_with(None)
-        mock_clean.assert_called_once()
-        self.assertEqual(actual, [])
-
     @patch("eva.executor.plan_executor.PlanExecutor._build_execution_tree")
     @patch("eva.executor.plan_executor.PlanExecutor._clean_execution_tree")
     def test_execute_plan_for_rename_plans(self, mock_clean, mock_build):
-
         # RenameExecutor
         tree = MagicMock(node=RenamePlan(None, None))
         mock_build.return_value = tree
@@ -245,7 +222,6 @@ class PlanExecutorTest(unittest.TestCase):
     @patch("eva.executor.plan_executor.PlanExecutor._build_execution_tree")
     @patch("eva.executor.plan_executor.PlanExecutor._clean_execution_tree")
     def test_execute_plan_for_drop_plans(self, mock_clean, mock_build):
-
         # DropExecutor
         tree = MagicMock(node=DropPlan(None, None))
         mock_build.return_value = tree

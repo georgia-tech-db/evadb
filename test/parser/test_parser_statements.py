@@ -57,12 +57,6 @@ class ParserStatementTests(unittest.TestCase):
             """LOAD IMAGE 'data/pic.jpg' INTO MyImage""",
             """LOAD CSV 'data/meta.csv' INTO
                              MyMeta (id, frame_id, video_id, label);""",
-            """UPLOAD PATH 'data/video.mp4' BLOB "b'AAAA'"
-                          INTO MyVideo WITH FORMAT VIDEO;""",
-            """UPLOAD PATH 'data/meta.csv' BLOB "b'AAAA'"
-                          INTO
-                          MyMeta (id, frame_id, video_id, label)
-                          WITH FORMAT CSV;""",
             """SELECT Licence_plate(bbox) FROM
                             (SELECT Yolo(frame).bbox FROM autonomous_vehicle_1
                               WHERE Yolo(frame).label = 'vehicle') AS T

@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event
 from sqlalchemy.orm import scoped_session, sessionmaker
 
 from eva.configuration.configuration_manager import ConfigurationManager
@@ -48,5 +48,17 @@ class SQLConfig:
         uri = ConfigurationManager().get_value("core", "catalog_database_uri")
         # set echo=True to log SQL
         self.engine = create_engine(uri)
+
+        if self.engine.url.get_backend_name() == "sqlite":
+            # enforce foreign key constraint and wal logging for sqlite
+            # https://docs.sqlalchemy.org/en/20/dialects/sqlite.html#foreign-key-support
+
+            def _enable_sqlite_pragma(dbapi_con, con_record):
+                dbapi_con.execute("pragma foreign_keys=ON")
+                dbapi_con.execute("pragma synchronous=NORMAL")
+                dbapi_con.execute("pragma journal_mode=WAL")
+
+            event.listen(self.engine, "connect", _enable_sqlite_pragma)
+
         # statements
         self.session = scoped_session(sessionmaker(bind=self.engine))

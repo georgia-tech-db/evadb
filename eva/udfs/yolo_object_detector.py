@@ -17,8 +17,6 @@ from typing import List
 
 import pandas as pd
 
-from eva.models.catalog.frame_info import FrameInfo
-from eva.models.catalog.properties import ColorSpace
 from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
 
 try:
@@ -47,10 +45,6 @@ class YoloV5(PytorchAbstractClassifierUDF):
         logging.getLogger("yolov5").setLevel(logging.CRITICAL)  # yolov5
         self.threshold = threshold
         self.model = torch.hub.load("ultralytics/yolov5", "yolov5s", verbose=False)
-
-    @property
-    def input_format(self) -> FrameInfo:
-        return FrameInfo(640, 1280, 3, ColorSpace.RGB)
 
     @property
     def labels(self) -> List[str]:
@@ -165,7 +159,8 @@ class YoloV5(PytorchAbstractClassifierUDF):
         # because of yolov5 error with Tensors
 
         outcome = []
-
+        # Convert to HWC
+        # https://github.com/ultralytics/yolov5/blob/3e55763d45f9c5f8217e4dad5ba1e6c1f42e3bf8/models/common.py#L658
         frames = torch.permute(frames, (0, 2, 3, 1))
         predictions = self.model([its.cpu().detach().numpy() * 255 for its in frames])
 

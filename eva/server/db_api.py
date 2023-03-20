@@ -13,8 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import asyncio
-import base64
-import os
 
 from eva.models.server.response import Response
 from eva.utils.logging_manager import logger
@@ -48,7 +46,6 @@ class EVACursor(object):
                     Call fetch_all() to complete the pending query"
             )
         query = self._multiline_query_transformation(query)
-        query = self._upload_transformation(query)
         self._connection._writer.write((query + "\n").encode())
         await self._connection._writer.drain()
         self._pending_query = True
@@ -78,30 +75,6 @@ class EVACursor(object):
         query = query.rstrip(" ;")
         query += ";"
         logger.debug("Query: " + query)
-        return query
-
-    def _upload_transformation(self, query: str) -> str:
-        """
-        Special case:
-         - UPLOAD: the client read the file and uses base64 to encode
-         the content into a string.
-        """
-        if "UPLOAD" in query:
-            query_list = query.split()
-            file_path = query_list[2][1:-1]
-            dst_path = os.path.basename(file_path)
-
-            try:
-                with open(file_path, "rb") as f:
-                    bytes_read = f.read()
-                    b64_string = str(base64.b64encode(bytes_read))
-                    query = f"UPLOAD PATH '{dst_path}' BLOB \"{b64_string}\""
-
-                    for token in query_list[3:]:
-                        query += token + " "
-            except Exception as e:
-                raise e
-
         return query
 
     def stop_query(self):

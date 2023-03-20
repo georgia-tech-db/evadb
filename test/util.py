@@ -14,7 +14,6 @@
 # limitations under the License.
 import base64
 import os
-import shutil
 from pathlib import Path
 
 import cv2
@@ -24,9 +23,8 @@ from mock import MagicMock
 
 from eva.binder.statement_binder import StatementBinder
 from eva.binder.statement_binder_context import StatementBinderContext
+from eva.catalog.catalog_type import NdArrayType
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.models.catalog.frame_info import FrameInfo
-from eva.models.catalog.properties import ColorSpace
 from eva.models.storage.batch import Batch
 from eva.optimizer.operators import Operator
 from eva.optimizer.plan_generator import PlanGenerator
@@ -35,12 +33,14 @@ from eva.parser.parser import Parser
 from eva.plan_nodes.abstract_plan import AbstractPlan
 from eva.server.command_handler import execute_query_fetch_all
 from eva.udfs.abstract.abstract_udf import AbstractClassifierUDF
+from eva.udfs.decorators import decorators
+from eva.udfs.decorators.io_descriptors.data_types import NumpyArray, PandasDataframe
 from eva.udfs.udf_bootstrap_queries import init_builtin_udfs
 
 NUM_FRAMES = 10
 FRAME_SIZE = 2 * 2 * 3
 config = ConfigurationManager()
-upload_dir_from_config = config.get_value("storage", "upload_dir")
+tmp_dir_from_config = config.get_value("storage", "tmp_dir")
 s3_dir_from_config = config.get_value("storage", "s3_download_dir")
 
 
@@ -183,7 +183,7 @@ def convert_bbox(bbox):
 
 def create_sample_csv(num_frames=NUM_FRAMES):
     try:
-        os.remove(os.path.join(upload_dir_from_config, "dummy.csv"))
+        os.remove(os.path.join(tmp_dir_from_config, "dummy.csv"))
     except FileNotFoundError:
         pass
 
@@ -208,59 +208,20 @@ def create_sample_csv(num_frames=NUM_FRAMES):
             index += 1
 
     df_sample_meta = pd.DataFrame.from_dict(sample_meta, "index")
-    df_sample_meta.to_csv(
-        os.path.join(upload_dir_from_config, "dummy.csv"), index=False
-    )
-    return os.path.join(upload_dir_from_config, "dummy.csv")
-
-
-def create_sample_csv_as_blob(num_frames=NUM_FRAMES):
-    try:
-        os.remove(os.path.join(upload_dir_from_config, "dummy.csv"))
-    except FileNotFoundError:
-        pass
-
-    sample_meta = {}
-
-    index = 0
-    sample_labels = ["car", "pedestrian", "bicycle"]
-    num_videos = 2
-    for video_id in range(num_videos):
-        for frame_id in range(num_frames):
-            random_coords = 200 + 300 * np.random.random(4)
-            sample_meta[index] = {
-                "id": index,
-                "frame_id": frame_id,
-                "video_id": video_id,
-                "dataset_name": "test_dataset",
-                "label": sample_labels[np.random.choice(len(sample_labels))],
-                "bbox": ",".join([str(coord) for coord in random_coords]),
-                "object_id": np.random.choice(3),
-            }
-
-            index += 1
-
-    df_sample_meta = pd.DataFrame.from_dict(sample_meta, "index")
-    df_sample_meta.to_csv(
-        os.path.join(upload_dir_from_config, "dummy.csv"), index=False
-    )
-
-    with open(os.path.join(upload_dir_from_config, "dummy.csv"), "rb") as f:
-        bytes_read = f.read()
-        b64_string = str(base64.b64encode(bytes_read))
-    return b64_string
+    df_sample_meta.to_csv(os.path.join(tmp_dir_from_config, "dummy.csv"), index=False)
+    return os.path.join(tmp_dir_from_config, "dummy.csv")
 
 
 def create_dummy_csv_batches(target_columns=None):
     if target_columns:
         df = pd.read_csv(
-            os.path.join(upload_dir_from_config, "dummy.csv"),
+            os.path.join(tmp_dir_from_config, "dummy.csv"),
             converters={"bbox": convert_bbox},
             usecols=target_columns,
         )
     else:
         df = pd.read_csv(
-            os.path.join(upload_dir_from_config, "dummy.csv"),
+            os.path.join(tmp_dir_from_config, "dummy.csv"),
             converters={"bbox": convert_bbox},
         )
 
@@ -268,15 +229,16 @@ def create_dummy_csv_batches(target_columns=None):
 
 
 def create_csv(num_rows, columns):
+    csv_path = os.path.join(tmp_dir_from_config, "dummy.csv")
     try:
-        os.remove(os.path.join(upload_dir_from_config, "dummy.csv"))
+        os.remove(csv_path)
     except FileNotFoundError:
         pass
     df = pd.DataFrame(columns=columns)
     for col in columns:
         df[col] = np.random.randint(1, 100, num_rows)
-    df.to_csv(os.path.join(upload_dir_from_config, "dummy.csv"), index=False)
-    return df
+    df.to_csv(csv_path, index=False)
+    return df, csv_path
 
 
 def create_table(table_name, num_rows, num_columns):
@@ -288,34 +250,36 @@ def create_table(table_name, num_rows, num_columns):
     )
     execute_query_fetch_all(create_table_query)
     columns = ["a{}".format(i) for i in range(num_columns)]
-    df = create_csv(num_rows, columns)
+    df, csv_file_path = create_csv(num_rows, columns)
     # load the CSV
-    load_query = """LOAD CSV 'dummy.csv' INTO {};""".format(table_name)
+    load_query = f"LOAD CSV '{csv_file_path}' INTO {table_name};"
     execute_query_fetch_all(load_query)
     df.columns = [f"{table_name}.{col}" for col in df.columns]
     return df
 
 
 def create_sample_image():
+    img_path = os.path.join(tmp_dir_from_config, "dummy.jpg")
     try:
-        os.remove(os.path.join(upload_dir_from_config, "dummy.jpg"))
+        os.remove(img_path)
     except FileNotFoundError:
         pass
 
     img = np.array(np.ones((3, 3, 3)), dtype=np.uint8)
     img[0] -= 1
     img[2] += 1
-    cv2.imwrite(os.path.join(upload_dir_from_config, "dummy.jpg"), img)
+    cv2.imwrite(img_path, img)
+    return img_path
 
 
 def create_sample_video(num_frames=NUM_FRAMES):
     try:
-        os.remove(os.path.join(upload_dir_from_config, "dummy.avi"))
+        os.remove(os.path.join(tmp_dir_from_config, "dummy.avi"))
     except FileNotFoundError:
         pass
 
     out = cv2.VideoWriter(
-        os.path.join(upload_dir_from_config, "dummy.avi"),
+        os.path.join(tmp_dir_from_config, "dummy.avi"),
         cv2.VideoWriter_fourcc("M", "J", "P", "G"),
         10,
         (2, 2),
@@ -325,17 +289,17 @@ def create_sample_video(num_frames=NUM_FRAMES):
         out.write(frame)
 
     out.release()
-    return os.path.join(upload_dir_from_config, "dummy.avi")
+    return os.path.join(tmp_dir_from_config, "dummy.avi")
 
 
 def create_sample_video_as_blob(num_frames=NUM_FRAMES):
     try:
-        os.remove(os.path.join(upload_dir_from_config, "dummy.avi"))
+        os.remove(os.path.join(tmp_dir_from_config, "dummy.avi"))
     except FileNotFoundError:
         pass
 
     out = cv2.VideoWriter(
-        os.path.join(upload_dir_from_config, "dummy.avi"),
+        os.path.join(tmp_dir_from_config, "dummy.avi"),
         cv2.VideoWriter_fourcc("M", "J", "P", "G"),
         10,
         (2, 2),
@@ -346,39 +310,13 @@ def create_sample_video_as_blob(num_frames=NUM_FRAMES):
 
     out.release()
 
-    with open(os.path.join(upload_dir_from_config, "dummy.avi"), "rb") as f:
+    with open(os.path.join(tmp_dir_from_config, "dummy.avi"), "rb") as f:
         bytes_read = f.read()
         b64_string = str(base64.b64encode(bytes_read))
     return b64_string
 
 
-def copy_sample_videos_to_upload_dir():
-    shutil.copyfile(
-        "data/ua_detrac/ua_detrac.mp4",
-        os.path.join(upload_dir_from_config, "ua_detrac.mp4"),
-    )
-    shutil.copyfile(
-        "data/mnist/mnist.mp4",
-        os.path.join(upload_dir_from_config, "mnist.mp4"),
-    )
-    shutil.copyfile(
-        "data/actions/actions.mp4",
-        os.path.join(upload_dir_from_config, "actions.mp4"),
-    )
-
-
-def copy_sample_images_to_upload_dir():
-    shutil.copyfile(
-        "data/detoxify/meme1.jpg",
-        os.path.join(upload_dir_from_config, "meme1.jpg"),
-    )
-    shutil.copyfile(
-        "data/detoxify/meme2.jpg",
-        os.path.join(upload_dir_from_config, "meme2.jpg"),
-    )
-
-
-def file_remove(path, parent_dir=upload_dir_from_config):
+def file_remove(path, parent_dir=tmp_dir_from_config):
     try:
         os.remove(os.path.join(parent_dir, path))
     except FileNotFoundError:
@@ -390,7 +328,7 @@ def create_dummy_batches(
     filters=[],
     batch_size=10,
     start_id=0,
-    video_dir=upload_dir_from_config,
+    video_dir=tmp_dir_from_config,
 ):
     if not filters:
         filters = range(num_frames)
@@ -459,10 +397,6 @@ class DummyObjectDetector(AbstractClassifierUDF):
         return "DummyObjectDetector"
 
     @property
-    def input_format(self):
-        return FrameInfo(-1, -1, 3, ColorSpace.RGB)
-
-    @property
     def labels(self):
         return ["__background__", "person", "bicycle"]
 
@@ -489,10 +423,6 @@ class DummyMultiObjectDetector(AbstractClassifierUDF):
     @property
     def name(self) -> str:
         return "DummyMultiObjectDetector"
-
-    @property
-    def input_format(self):
-        return FrameInfo(-1, -1, 3, ColorSpace.RGB)
 
     @property
     def labels(self):
@@ -523,10 +453,6 @@ class DummyFeatureExtractor(AbstractClassifierUDF):
         return "DummyFeatureExtractor"
 
     @property
-    def input_format(self):
-        return FrameInfo(-1, -1, 3, ColorSpace.RGB)
-
-    @property
     def labels(self):
         return []
 
@@ -542,3 +468,43 @@ class DummyFeatureExtractor(AbstractClassifierUDF):
         ret = pd.DataFrame()
         ret["features"] = df.apply(_extract_feature, axis=1)
         return ret
+
+
+class DummyObjectDetectorDecorators(AbstractClassifierUDF):
+    @decorators.setup(cachable=True, udf_type="object_detection", batchable=True)
+    def setup(self, *args, **kwargs):
+        pass
+
+    @property
+    def name(self) -> str:
+        return "DummyObjectDetectorDecorators"
+
+    @property
+    def labels(self):
+        return ["__background__", "person", "bicycle"]
+
+    @decorators.forward(
+        input_signatures=[
+            PandasDataframe(
+                columns=["Frame_Array"],
+                column_types=[NdArrayType.UINT8],
+                column_shapes=[(3, 256, 256)],
+            )
+        ],
+        output_signatures=[
+            NumpyArray(
+                name="label",
+                type=NdArrayType.STR,
+            )
+        ],
+    )
+    def forward(self, df: pd.DataFrame) -> pd.DataFrame:
+        ret = pd.DataFrame()
+        ret["label"] = df.apply(self.classify_one, axis=1)
+        return ret
+
+    def classify_one(self, frames: np.ndarray):
+        # odd are labeled bicycle and even person
+        i = int(frames[0][0][0][0] * 25) - 1
+        label = self.labels[i % 2 + 1]
+        return np.array([label])

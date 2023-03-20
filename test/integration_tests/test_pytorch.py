@@ -15,12 +15,7 @@
 import os
 import unittest
 from test.markers import windows_skip_marker
-from test.util import (
-    copy_sample_images_to_upload_dir,
-    copy_sample_videos_to_upload_dir,
-    file_remove,
-    load_inbuilt_udfs,
-)
+from test.util import file_remove, load_inbuilt_udfs
 
 import cv2
 import numpy as np
@@ -41,8 +36,6 @@ class PytorchTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         CatalogManager().reset()
-        copy_sample_videos_to_upload_dir()
-        copy_sample_images_to_upload_dir()
         ua_detrac = f"{EVA_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
         mnist = f"{EVA_ROOT_DIR}/data/mnist/mnist.mp4"
         actions = f"{EVA_ROOT_DIR}/data/actions/actions.mp4"
@@ -66,7 +59,7 @@ class PytorchTest(unittest.TestCase):
         file_remove("computer_asl.mp4")
 
         execute_query_fetch_all("DROP TABLE IF EXISTS Actions;")
-        execute_query_fetch_all("DROP TABLE IF EXISTS Mnist;")
+        execute_query_fetch_all("DROP TABLE IF EXISTS MNIST;")
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
         execute_query_fetch_all("DROP TABLE IF EXISTS Asl_actions;")
         execute_query_fetch_all("DROP TABLE IF EXISTS MemeImages;")
@@ -115,6 +108,18 @@ class PytorchTest(unittest.TestCase):
         self.assertEqual(len(res), 1)
         for idx in res.index:
             self.assertTrue("computer" in res["aslactionrecognition.labels"][idx])
+
+    @pytest.mark.torchtest
+    def test_should_run_pytorch_and_yolo_decorators(self):
+        create_udf_query = """CREATE UDF YoloDecorators
+                  IMPL  'eva/udfs/decorators/yolo_object_detection_decorators.py';
+        """
+        execute_query_fetch_all(create_udf_query)
+
+        select_query = """SELECT YoloDecorators(data) FROM MyVideo
+                        WHERE id < 5;"""
+        actual_batch = execute_query_fetch_all(select_query)
+        self.assertEqual(len(actual_batch), 5)
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_facenet(self):
@@ -208,9 +213,9 @@ class PytorchTest(unittest.TestCase):
         img = batch_res.frames["myvideo.data"][0]
 
         config = ConfigurationManager()
-        upload_dir_from_config = config.get_value("storage", "upload_dir")
+        tmp_dir_from_config = config.get_value("storage", "tmp_dir")
 
-        img_save_path = os.path.join(upload_dir_from_config, "dummy.jpg")
+        img_save_path = os.path.join(tmp_dir_from_config, "dummy.jpg")
         try:
             os.remove(img_save_path)
         except FileNotFoundError:

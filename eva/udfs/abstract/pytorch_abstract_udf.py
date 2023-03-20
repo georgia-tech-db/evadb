@@ -45,8 +45,7 @@ class PytorchAbstractClassifierUDF(AbstractClassifierUDF, nn.Module, GPUCompatib
 
     def transform(self, images: np.ndarray):
         composed = Compose(self.transforms)
-        # reverse the channels from opencv
-        return composed(Image.fromarray(images[:, :, ::-1])).unsqueeze(0)
+        return composed(Image.fromarray(images)).unsqueeze(0)
 
     def __call__(self, *args, **kwargs) -> pd.DataFrame:
         """

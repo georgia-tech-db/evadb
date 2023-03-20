@@ -47,7 +47,8 @@ minimal_requirement = [
     "pyyaml>=5.1",
     "importlib-metadata<5.0",
     "ray>=1.13.0",
-    "aenum>=2.2.0"
+    "aenum>=2.2.0",
+    "decord>=0.6.0"
 ]
 
 formatter_libs = [
@@ -103,7 +104,8 @@ udf_libs = [
     "easyocr>=1.5.0",         # OCR EXTRACTION
     "ipython",
     "yolov5<=7.0.6",          # OBJECT DETECTION
-    "detoxify"                # TEXT TOXICITY CLASSIFICATION
+    "detoxify",               # TEXT TOXICITY CLASSIFICATION
+    "thefuzz"                 # FUZZY STRING MATCHINGz
 ]
 
 ### NEEDED FOR EXPERIMENTAL FEATURES

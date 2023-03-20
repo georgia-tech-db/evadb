@@ -15,6 +15,7 @@
 from typing import List, Tuple
 
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
+from eva.catalog.models.udf_metadata_catalog import UdfMetadataCatalogEntry
 from eva.expression.abstract_expression import AbstractExpression, ExpressionType
 from eva.expression.expression_utils import (
     conjuction_list_to_expression_tree,
@@ -48,6 +49,23 @@ def column_definition_to_udf_io(col_list: List[ColumnDefinition], is_input: bool
                 array_type=col.array_type,
                 array_dimensions=col.dimension,
                 is_input=is_input,
+            )
+        )
+    return result_list
+
+
+def metadata_definition_to_udf_metadata(metadata_list: List[Tuple[str, str]]):
+    """Create the UdfMetadataCatalogEntry object for each metadata definition provided
+
+    Arguments:
+        col_list(List[Tuple[str, str]]): parsed metadata definitions
+    """
+    result_list = []
+    for metadata in metadata_list:
+        result_list.append(
+            UdfMetadataCatalogEntry(
+                metadata[0],
+                metadata[1],
             )
         )
     return result_list
