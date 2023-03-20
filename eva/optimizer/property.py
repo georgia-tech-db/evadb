@@ -29,6 +29,8 @@ class Property:
         return self._property_type
 
     def __eq__(self, other):
+        if not isinstance(other, Property):
+            return False
         return self.property_type == other.property_type
 
     def __hash__(self):

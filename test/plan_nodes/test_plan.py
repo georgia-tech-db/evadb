@@ -181,7 +181,8 @@ class PlanNodeTests(unittest.TestCase):
         for derived_plan_class in derived_plan_classes:
             sig = signature(derived_plan_class.__init__)
             params = sig.parameters
+            plan_dict = {}
             if isabstract(derived_plan_class) is False:
-                print(derived_plan_class)
                 obj = get_mock_object(derived_plan_class, len(params))
                 print(str(obj))
+                plan_dict[obj] = obj

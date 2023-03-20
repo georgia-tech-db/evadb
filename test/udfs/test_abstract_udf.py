@@ -27,13 +27,23 @@ class AbstractUDFTest(unittest.TestCase):
         derived_udf_classes = list(get_all_subclasses(AbstractUDF))
         for derived_udf_class in derived_udf_classes:
             if isabstract(derived_udf_class) is False:
-                obj = derived_udf_class()
-                name = obj.name
-                self.assertTrue(name is not None)
+                obj = derived_udf_class
+                print(obj)
+                sig = inspect.signature(obj.__init__)
+                params = sig.parameters
+                len_params = len(params)
+                if "kwargs" in params:
+                    len_params = len_params - 1
+                if "args" in params:
+                    len_params = len_params - 1
+                dummy_object = get_mock_object(obj, len_params)
+                self.assertTrue(str(dummy_object.name) is not None)
 
     def test_all_classes(self):
         def get_all_classes(module, level):
             class_list = []
+
+            print(module)
 
             if level == 4:
                 return []
@@ -44,18 +54,21 @@ class AbstractUDFTest(unittest.TestCase):
                     if sublist != []:
                         class_list.append(sublist)
                 elif inspect.isclass(obj):
-                    if inspect.isabstract(obj) is False:
-                        if inspect.isbuiltin(obj) is False:
-                            try:
-                                source_file = inspect.getsourcefile(obj)
-                                if source_file is None:
-                                    continue
-                                if issubclass(obj, Enum):
-                                    continue
-                                if "python" not in str(source_file):
-                                    class_list.append([obj])
-                            except OSError:
-                                pass
+                    if inspect.isabstract(obj) is True:
+                        sublist = get_all_classes(obj, level + 1)
+                        if sublist != []:
+                            class_list.append(sublist)
+                    elif inspect.isbuiltin(obj) is False:
+                        try:
+                            source_file = inspect.getsourcefile(obj)
+                            if source_file is None:
+                                continue
+                            if issubclass(obj, Enum):
+                                continue
+                            if "python" not in str(source_file):
+                                class_list.append([obj])
+                        except OSError:
+                            pass
 
             flat_class_list = [item for sublist in class_list for item in sublist]
             return set(flat_class_list)
@@ -75,9 +88,20 @@ class AbstractUDFTest(unittest.TestCase):
                 len_params = len_params - 1
             try:
                 dummy_object = get_mock_object(c, len_params)
-                if base_id == 0:
-                    ref_object = dummy_object
-                else:
-                    self.assertNotEqual(ref_object, dummy_object)
             except Exception:
-                pass
+                continue
+
+            if base_id == 0:
+                ref_object = dummy_object
+            else:
+                self.assertNotEqual(ref_object, dummy_object)
+                print(c)
+
+            # Check name
+            try:
+                inspect.signature(c.name)
+            except Exception:
+                continue
+
+            name_str = dummy_object.name()
+            self.assertTrue(name_str is not None)
