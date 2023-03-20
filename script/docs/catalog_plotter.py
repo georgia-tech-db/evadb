@@ -1,7 +1,8 @@
 # updated SQLA schema display to work with pydot 1.0.2
 
+from eva.catalog.catalog_manager import CatalogManager
+from eva.configuration.configuration_manager import ConfigurationManager
 from sqlalchemy.orm.properties import RelationshipProperty
-from sqlalchemy.orm import sync
 import pydot
 import types
 
@@ -389,7 +390,6 @@ def create_schema_graph(
         restrict_tables = set([t.lower() for t in restrict_tables])
     tables = [t for t in tables if t.name.lower() in restrict_tables]
     for table in tables:
-
         graph.add_node(
             pydot.Node(
                 str(table.name),
@@ -462,8 +462,8 @@ def show_schema_graph(*args, **kwargs):
 #########################################################################
 # ###########################################################################
 
-
-db = "sqlite:////home/gkakkar7/.eva/0.1.5+dev/eva_catalog.db"
+db_uri = ConfigurationManager().get_value("core", "catalog_database_uri")
+catalog = CatalogManager()
 restrict_tables = [
     "column_catalog",
     "table_catalog",
@@ -473,9 +473,11 @@ restrict_tables = [
     "depend_udf_and_udf_cache",
     "index_catalog",
     "udfio_catalog",
+    "udf_cost_catalog",
+    "udf_metadata_catalog",
 ]
 graph = create_schema_graph(
-    metadata=MetaData(db),
+    metadata=MetaData(db_uri),
     concentrate=True,
     rankdir="TD",
     font="trebuchet ms",
@@ -483,4 +485,4 @@ graph = create_schema_graph(
     restrict_tables=restrict_tables,
     format_table_name={"bold": True, "fontsize": 10.0},
 )
-graph.write_png("/nethome/gkakkar7/VDBMS/eva/docs/images/eva/catalog.png")
+graph.write_png("docs/images/reference/catalog.png")
