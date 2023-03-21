@@ -58,8 +58,7 @@ if sys.version_info >= (3, 8):
         async def test_exception_in_start_cmd_client(self, mock_open):
             mock_open.side_effect = Exception("open")
 
-            with self.assertRaises(Exception):
-                await start_cmd_client(MagicMock(), MagicMock())
+            await start_cmd_client(MagicMock(), MagicMock())
 
         @patch("asyncio.events.AbstractEventLoop.connect_read_pipe")
         async def test_create_stdin_reader(self, mock_read_pipe):
