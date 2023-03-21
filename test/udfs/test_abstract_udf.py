@@ -96,6 +96,7 @@ class AbstractUDFTest(unittest.TestCase):
             if base_id == 0:
                 ref_object = dummy_object
             else:
+                self.assertEqual(dummy_object, dummy_object)
                 self.assertNotEqual(ref_object, dummy_object)
 
             # Check name
