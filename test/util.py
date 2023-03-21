@@ -14,12 +14,16 @@
 # limitations under the License.
 import base64
 import os
+import socket
+import sys
+from contextlib import closing
 from pathlib import Path
 
 import cv2
 import numpy as np
 import pandas as pd
-from mock import MagicMock
+import pytest
+from mock import MagicMock, patch
 
 from eva.binder.statement_binder import StatementBinder
 from eva.binder.statement_binder_context import StatementBinderContext
@@ -45,6 +49,30 @@ s3_dir_from_config = config.get_value("storage", "s3_download_dir")
 
 
 EVA_TEST_DATA_DIR = Path(config.get_value("core", "eva_installation_dir")).parent
+
+
+@pytest.fixture(scope="session", autouse=True)
+def fix_print():
+    """
+    pytest-xdist disables stdout capturing by default, which means that print() statements
+    are not captured and displayed in the terminal.
+    That's because xdist cannot support -s for technical reasons wrt the process execution mechanism
+    https://github.com/pytest-dev/pytest-xdist/issues/354
+    """
+    original_print = print
+    with patch("builtins.print") as mock_print:
+        mock_print.side_effect = lambda *args, **kwargs: original_print(
+            *args, **{"file": sys.stderr, **kwargs}
+        )
+        yield mock_print
+
+
+@pytest.fixture
+def worker_id(request):
+    if hasattr(request.config, "slaveinput"):
+        return request.config.slaveinput["slaveid"]
+    else:
+        return "master"
 
 
 # Ref: https://stackoverflow.com/a/63851681
@@ -128,6 +156,13 @@ def get_mock_object(class_type, number_of_args):
         )
     else:
         raise Exception("Too many args")
+
+
+def find_free_port():
+    with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
+        s.bind(("", 0))
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        return s.getsockname()[1]
 
 
 def get_logical_query_plan(query: str) -> Operator:

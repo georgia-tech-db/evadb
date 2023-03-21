@@ -16,37 +16,12 @@ import asyncio
 import os
 import sys
 import unittest
+from test.util import worker_id
 
-import pytest
 from mock import MagicMock, patch
 
 from eva.models.server.response import Response
 from eva.server.db_api import EVACursor, connect
-
-
-@pytest.fixture(scope="session", autouse=True)
-def fix_print():
-    """
-    pytest-xdist disables stdout capturing by default, which means that print() statements
-    are not captured and displayed in the terminal.
-    That's because xdist cannot support -s for technical reasons wrt the process execution mechanism
-    https://github.com/pytest-dev/pytest-xdist/issues/354
-    """
-    original_print = print
-    with patch("builtins.print") as mock_print:
-        mock_print.side_effect = lambda *args, **kwargs: original_print(
-            *args, **{"file": sys.stderr, **kwargs}
-        )
-        yield mock_print
-
-
-@pytest.fixture
-def worker_id(request):
-    if hasattr(request.config, "slaveinput"):
-        return request.config.slaveinput["slaveid"]
-    else:
-        return "master"
-
 
 # Check for Python 3.8+ for IsolatedAsyncioTestCase support
 if sys.version_info >= (3, 8):
