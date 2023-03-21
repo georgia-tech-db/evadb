@@ -62,7 +62,7 @@ test_libs = [
     "pytest-random-order>=1.0.4",
     "pytest-virtualenv",
     "pytest-asyncio",
-    "pytest-xdist"
+    "pytest-xdist",
     "coveralls>=3.0.1",
     "mock>=4.0.3",
     "flake8>=3.9.1",
