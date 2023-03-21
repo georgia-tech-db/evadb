@@ -161,10 +161,6 @@ class Rule(ABC):
     def pattern(self):
         return self._pattern
 
-    @pattern.setter
-    def pattern(self, pattern):
-        self._pattern = pattern
-
     def top_match(self, opr: Operator) -> bool:
         return opr.opr_type == self.pattern.opr_type
 
