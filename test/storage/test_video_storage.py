@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import create_sample_video
+from test.util import create_sample_video, worker_id
 from unittest.mock import MagicMock
 
 import mock
@@ -34,7 +34,9 @@ class VideoStorageEngineTest(unittest.TestCase):
 
     def create_sample_table(self):
         table_info = TableCatalogEntry(
-            "dataset", "dataset", table_type=TableType.VIDEO_DATA
+            str(worker_id) + "dataset",
+            str(worker_id) + "dataset",
+            table_type=TableType.VIDEO_DATA,
         )
         column_1 = ColumnCatalogEntry("id", ColumnType.INTEGER, False)
         column_2 = ColumnCatalogEntry(

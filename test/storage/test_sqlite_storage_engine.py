@@ -14,7 +14,7 @@
 # limitations under the License.
 import shutil
 import unittest
-from test.util import create_dummy_batches
+from test.util import create_dummy_batches, worker_id
 
 import pytest
 
@@ -31,7 +31,9 @@ class SQLStorageEngineTest(unittest.TestCase):
 
     def create_sample_table(self):
         table_info = TableCatalogEntry(
-            "dataset", "dataset", table_type=TableType.VIDEO_DATA
+            str(worker_id) + "dataset",
+            str(worker_id) + "dataset",
+            table_type=TableType.VIDEO_DATA,
         )
         column_0 = ColumnCatalogEntry("name", ColumnType.TEXT, is_nullable=False)
         column_1 = ColumnCatalogEntry("id", ColumnType.INTEGER, is_nullable=False)
@@ -46,7 +48,7 @@ class SQLStorageEngineTest(unittest.TestCase):
 
     def tearDown(self):
         try:
-            shutil.rmtree("dataset", ignore_errors=True)
+            shutil.rmtree(str(worker_id) + "dataset", ignore_errors=True)
         except ValueError:
             pass
 
