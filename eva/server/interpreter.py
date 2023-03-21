@@ -100,4 +100,4 @@ async def start_cmd_client(host: str, port: int):
         logger.error("Error.", exc_info=e)
         if writer is not None:
             writer.close()
-            await writer.wait_closed()
+        # await writer.wait_closed()

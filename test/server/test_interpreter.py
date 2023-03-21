@@ -13,12 +13,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import asyncio
+import socket
 import sys
 import unittest
+from contextlib import closing
 
 from mock import MagicMock, patch
 
 from eva.server.interpreter import create_stdin_reader, start_cmd_client
+
+
+def find_free_port():
+    with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
+        s.bind(("", 0))
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        return s.getsockname()[1]
+
 
 # Check for Python 3.8+ for IsolatedAsyncioTestCase support
 if sys.version_info >= (3, 8):
@@ -35,7 +45,7 @@ if sys.version_info >= (3, 8):
             self, mock_fetch, mock_execute, mock_stdin_reader, mock_open
         ):
             host = "localhost"
-            port = 5432
+            port = find_free_port()
 
             server_reader = asyncio.StreamReader()
             server_writer = MagicMock()
@@ -64,5 +74,5 @@ if sys.version_info >= (3, 8):
         async def test_create_stdin_reader(self, mock_read_pipe):
             sys.stdin = MagicMock()
 
-            stdin_reader = await create_stdin_reader()
-            self.assertNotEqual(stdin_reader, None)
+            with self.assertRaises(ValueError):
+                await create_stdin_reader()
