@@ -148,6 +148,12 @@ class RulesManager:
                     rule_list.remove(rule)
 
         for rule in rules:
+            assert (
+                rule.is_implementation_rule()
+                or rule.is_rewrite_rule()
+                or rule.is_logical_rule()
+            ), f"Provided Invalid rule {rule}"
+
             if rule.is_implementation_rule():
                 _remove_from_list(self.implementation_rules, rule)
             elif rule.is_rewrite_rule():
@@ -161,6 +167,12 @@ class RulesManager:
                 rule_list.append(rule)
 
         for rule in rules:
+            assert (
+                rule.is_implementation_rule()
+                or rule.is_rewrite_rule()
+                or rule.is_logical_rule()
+            ), f"Provided Invalid rule {rule}"
+
             if rule.is_implementation_rule():
                 _add_to_list(self.implementation_rules, rule)
             elif rule.is_rewrite_rule():

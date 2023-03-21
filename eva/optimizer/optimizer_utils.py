@@ -79,12 +79,12 @@ def extract_equi_join_keys(
     pred_list = to_conjunction_list(join_predicate)
     left_join_keys = []
     right_join_keys = []
-    left_table_alias_strs = []
-    right_table_alias_strs = []
-    for left_table_alias in left_table_aliases:
-        left_table_alias_strs.append(left_table_alias.alias_name)
-    for right_table_alias in right_table_aliases:
-        right_table_alias_strs.append(right_table_alias.alias_name)
+    left_table_alias_strs = [
+        left_table_alias.alias_name for left_table_alias in left_table_aliases
+    ]
+    right_table_alias_strs = [
+        right_table_alias.alias_name for right_table_alias in right_table_aliases
+    ]
 
     for pred in pred_list:
         if pred.etype == ExpressionType.COMPARE_EQUAL:

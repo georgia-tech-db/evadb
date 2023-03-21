@@ -25,18 +25,22 @@ from eva.udfs.abstract.abstract_udf import AbstractUDF
 class AbstractUDFTest(unittest.TestCase):
     def test_udf_abstract_functions(self):
         derived_udf_classes = list(get_all_subclasses(AbstractUDF))
+
+        # Go over each derived class of AbstractUDF
         for derived_udf_class in derived_udf_classes:
             if isabstract(derived_udf_class) is False:
-                obj = derived_udf_class
-                print(obj)
-                sig = inspect.signature(obj.__init__)
+                class_type = derived_udf_class
+                # Check class init signature
+                # Ref: https://stackoverflow.com/a/2677263
+                sig = inspect.signature(class_type.__init__)
                 params = sig.parameters
                 len_params = len(params)
                 if "kwargs" in params:
                     len_params = len_params - 1
                 if "args" in params:
                     len_params = len_params - 1
-                dummy_object = get_mock_object(obj, len_params)
+                # Construct dummy object of given type
+                dummy_object = get_mock_object(class_type, len_params)
                 self.assertTrue(str(dummy_object.name) is not None)
 
     def test_all_classes(self):
@@ -77,9 +81,9 @@ class AbstractUDFTest(unittest.TestCase):
 
         base_id = 0
         ref_object = None
-        for c in class_list:
+        for class_type in class_list:
             base_id = base_id + 1
-            sig = inspect.signature(c.__init__)
+            sig = inspect.signature(class_type.__init__)
             params = sig.parameters
             len_params = len(params)
             if "kwargs" in params:
@@ -87,7 +91,7 @@ class AbstractUDFTest(unittest.TestCase):
             if "args" in params:
                 len_params = len_params - 1
             try:
-                dummy_object = get_mock_object(c, len_params)
+                dummy_object = get_mock_object(class_type, len_params)
             except Exception:
                 continue
 
@@ -95,11 +99,11 @@ class AbstractUDFTest(unittest.TestCase):
                 ref_object = dummy_object
             else:
                 self.assertNotEqual(ref_object, dummy_object)
-                print(c)
+                print(class_type)
 
             # Check name
             try:
-                inspect.signature(c.name)
+                inspect.signature(class_type.name)
             except Exception:
                 continue
 

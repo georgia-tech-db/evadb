@@ -150,5 +150,4 @@ class PlanNodeTests(unittest.TestCase):
             plan_dict = {}
             if isabstract(derived_plan_class) is False:
                 obj = get_mock_object(derived_plan_class, len(params))
-                print(str(obj))
                 plan_dict[obj] = obj

@@ -47,6 +47,7 @@ s3_dir_from_config = config.get_value("storage", "s3_download_dir")
 EVA_TEST_DATA_DIR = Path(config.get_value("core", "eva_installation_dir")).parent
 
 
+# Ref: https://stackoverflow.com/a/63851681
 def get_all_subclasses(cls):
     subclass_list = []
 
