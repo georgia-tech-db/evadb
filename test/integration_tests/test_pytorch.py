@@ -162,7 +162,7 @@ class PytorchTest(unittest.TestCase):
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_resnet50(self):
-        create_udf_query = """CREATE UDF FeatureExtractor
+        create_udf_query = """CREATE UDF IF NOT EXISTS FeatureExtractor 
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
                   OUTPUT (features NDARRAY FLOAT32(ANYDIM))
                   TYPE  Classification

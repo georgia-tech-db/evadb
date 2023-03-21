@@ -97,5 +97,5 @@ async def start_cmd_client(host: str, port: int):
         await asyncio.wait([input_listener], return_when=asyncio.FIRST_COMPLETED)
     except Exception as e:
         logger.error("Error.", exc_info=e)
-        writer.close()
+        if writer is not None: writer.close()
         # await writer.wait_closed()
