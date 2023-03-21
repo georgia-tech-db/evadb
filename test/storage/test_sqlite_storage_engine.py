@@ -24,6 +24,7 @@ from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.storage.sqlite_storage_engine import SQLStorageEngine
 
 
+@pytest.mark.notparallel
 class SQLStorageEngineTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

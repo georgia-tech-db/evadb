@@ -15,6 +15,7 @@
 import unittest
 from test.util import create_sample_video, load_inbuilt_udfs
 
+import pytest
 from mock import MagicMock, patch
 
 from eva.catalog.catalog_manager import CatalogManager
@@ -73,6 +74,7 @@ from eva.parser.types import JoinType
 from eva.server.command_handler import execute_query_fetch_all
 
 
+@pytest.mark.notparallel
 class RulesTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

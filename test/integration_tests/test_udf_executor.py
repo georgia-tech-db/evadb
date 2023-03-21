@@ -23,6 +23,7 @@ from test.util import (
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from eva.binder.binder_utils import BinderError
 from eva.catalog.catalog_manager import CatalogManager
@@ -34,6 +35,7 @@ from eva.server.command_handler import execute_query_fetch_all
 NUM_FRAMES = 10
 
 
+@pytest.mark.notparallel
 class UDFExecutorTest(unittest.TestCase):
     def setUp(self):
         CatalogManager().reset()

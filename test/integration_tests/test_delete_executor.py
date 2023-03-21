@@ -16,6 +16,7 @@ import unittest
 from test.util import file_remove, load_inbuilt_udfs
 
 import numpy as np
+import pytest
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.configuration_manager import ConfigurationManager
@@ -23,6 +24,7 @@ from eva.configuration.constants import EVA_ROOT_DIR
 from eva.server.command_handler import execute_query_fetch_all
 
 
+@pytest.mark.notparallel
 class DeleteExecutorTest(unittest.TestCase):
     def setUp(self):
         # Bootstrap configuration manager.

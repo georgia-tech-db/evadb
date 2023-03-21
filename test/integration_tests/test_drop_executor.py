@@ -16,11 +16,14 @@ import unittest
 from pathlib import Path
 from test.util import create_sample_video, file_remove
 
+import pytest
+
 from eva.catalog.catalog_manager import CatalogManager
 from eva.executor.executor_utils import ExecutorError
 from eva.server.command_handler import execute_query_fetch_all
 
 
+@pytest.mark.notparallel
 class DropExecutorTest(unittest.TestCase):
     def setUp(self):
         # reset the catalog manager before running each test
@@ -67,6 +70,7 @@ class DropExecutorTest(unittest.TestCase):
             execute_query_fetch_all(drop_query)
 
 
+@pytest.mark.notparallel
 class DropUDFExecutorTest(unittest.TestCase):
     def setUp(self):
         CatalogManager().reset()

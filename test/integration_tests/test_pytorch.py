@@ -32,6 +32,7 @@ from eva.udfs.udf_bootstrap_queries import (
 )
 
 
+@pytest.mark.notparallel
 class PytorchTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

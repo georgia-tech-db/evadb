@@ -16,6 +16,8 @@ import unittest
 from pathlib import Path
 from test.util import create_sample_csv, create_sample_video, file_remove
 
+import pytest
+
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.configuration.constants import EVA_ROOT_DIR
@@ -24,6 +26,7 @@ from eva.server.command_handler import execute_query_fetch_all
 EVA_INSTALLATION_DIR = ConfigurationManager().get_value("core", "eva_installation_dir")
 
 
+@pytest.mark.notparallel
 class FuzzyJoinTests(unittest.TestCase):
     def setUp(self):
         CatalogManager().reset()

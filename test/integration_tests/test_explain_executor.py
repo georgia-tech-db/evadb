@@ -15,6 +15,8 @@
 import unittest
 from test.util import create_sample_video, create_table, file_remove, load_inbuilt_udfs
 
+import pytest
+
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.optimizer.plan_generator import PlanGenerator
@@ -29,6 +31,7 @@ from eva.server.command_handler import execute_query_fetch_all
 NUM_FRAMES = 10
 
 
+@pytest.mark.notparallel
 class ExplainExecutorTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

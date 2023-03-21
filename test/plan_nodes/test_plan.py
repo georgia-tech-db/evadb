@@ -16,6 +16,8 @@ import unittest
 from inspect import isabstract, signature
 from test.util import get_all_subclasses, get_mock_object
 
+import pytest
+
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import ColumnType
 from eva.catalog.models.column_catalog import ColumnCatalogEntry
@@ -34,6 +36,7 @@ from eva.plan_nodes.types import PlanOprType
 from eva.plan_nodes.union_plan import UnionPlan
 
 
+@pytest.mark.notparallel
 class PlanNodeTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
