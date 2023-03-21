@@ -76,7 +76,7 @@ if [[ "$OSTYPE" != "msys" ]];
 then
     if [[ "$MODE" = "TEST" || "$MODE" = "ALL" ]];
     then
-        PYTHONPATH=./ pytest --cov-report term-missing:skip-covered  --cov-config=.coveragerc --cov-context=test --cov=eva/ -s -v --log-level=WARNING -m "not benchmark" -m "not notparallel" -n 8
+        PYTHONPATH=./ pytest --cov-report term-missing:skip-covered  --cov-config=.coveragerc --cov-context=test --cov=eva/ -s -v --log-level=WARNING -m "not benchmark" -m "not notparallel" 
         test_code=$?
         if [ "$test_code" != "0" ];
         then
@@ -85,7 +85,7 @@ then
         else
             echo "PYTEST (N=AUTO) CODE: --|${test_code}|-- SUCCESS"
         fi
-        PYTHONPATH=./ pytest --cov-append --cov-report term-missing:skip-covered  --cov-config=.coveragerc --cov-context=test --cov=eva/ -s -v --log-level=WARNING -m "not benchmark" -m "notparallel" -n 1
+        PYTHONPATH=./ pytest --cov-append --cov-report term-missing:skip-covered  --cov-config=.coveragerc --cov-context=test --cov=eva/ -s -v --log-level=WARNING -m "not benchmark" -m "notparallel" 
         test_code=$?
         if [ "$test_code" != "0" ];
         then
