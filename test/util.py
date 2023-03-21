@@ -19,7 +19,6 @@ from pathlib import Path
 import cv2
 import numpy as np
 import pandas as pd
-
 from eva.binder.statement_binder import StatementBinder
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.catalog.catalog_type import NdArrayType
@@ -285,6 +284,9 @@ def create_dummy_batches(
                     np.ones((2, 2, 3)) * float(i + 1) * 25, dtype=np.uint8
                 ),
                 "myvideo.seconds": 0.0,
+                "myvideo.audio": np.array(
+                    np.ones(1) * float(i + 1) * 25, dtype=np.uint8
+                ),
             }
         )
 

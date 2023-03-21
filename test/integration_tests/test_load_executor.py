@@ -28,7 +28,6 @@ from test.util import (
 
 import numpy as np
 import pandas as pd
-
 from eva.binder.binder_utils import BinderError
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
@@ -145,7 +144,7 @@ class LoadExecutorTest(unittest.TestCase):
         query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
         result = execute_query_fetch_all(query)
         expected = Batch(
-            pd.DataFrame([f"Number of loaded {FileFormatType.VIDEO.name}: 3"])
+            pd.DataFrame([f"Number of loaded {FileFormatType.VIDEO.name}: 4"])
         )
         self.assertEqual(result, expected)
 

@@ -15,7 +15,7 @@
 from typing import Dict, Iterator
 
 import cv2
-
+import numpy as np
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.expression_utils import extract_range_list_from_predicate
 from eva.readers.abstract_reader import AbstractReader
@@ -63,6 +63,7 @@ class OpenCVReader(AbstractReader):
                         "id": frame_id,
                         "data": cv2.cvtColor(frame, cv2.COLOR_BGR2RGB),
                         "seconds": frame_id // video.get(cv2.CAP_PROP_FPS),
+                        "audio": np.empty(0),
                     }
                     _, frame = video.read()
                     frame_id += 1
@@ -79,6 +80,7 @@ class OpenCVReader(AbstractReader):
                             "id": frame_id,
                             "data": cv2.cvtColor(frame, cv2.COLOR_BGR2RGB),
                             "seconds": frame_id // video.get(cv2.CAP_PROP_FPS),
+                            "audio": np.empty(0),
                         }
                     else:
                         break

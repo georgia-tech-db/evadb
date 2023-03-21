@@ -252,3 +252,104 @@ class TableRef:
 
     def __hash__(self) -> int:
         return hash((self._ref_handle, self.alias, self.sample_freq, self.sample_type))
+
+
+class AVTableRef(TableRef):
+    def __init__(self, table_ref: TableRef):
+        if table_ref.is_table_atom():
+            super().__init__(
+                table_ref.table,
+                table_ref.alias,
+                table_ref.sample_freq,
+                table_ref.sample_type,
+            )
+        elif table_ref.is_table_valued_expr():
+            super().__init__(
+                table_ref.table_valued_expr,
+                table_ref.alias,
+                table_ref.sample_freq,
+                table_ref.sample_type,
+            )
+        elif table_ref.is_select():
+            super().__init__(
+                table_ref.select_statement,
+                table_ref.alias,
+                table_ref.sample_freq,
+                table_ref.sample_type,
+            )
+        elif table_ref.is_join():
+            super().__init__(
+                table_ref.join_node,
+                table_ref.alias,
+                table_ref.sample_freq,
+                table_ref.sample_type,
+            )
+        self._get_audio: bool = False
+        self._get_video: bool = False
+
+    @property
+    def get_audio(self) -> bool:
+        return self._get_audio
+
+    @property
+    def get_video(self) -> bool:
+        return self._get_video
+
+    @get_audio.setter
+    def get_audio(self, get_audio):
+        self._get_audio = get_audio
+
+    @get_video.setter
+    def get_video(self, get_video):
+        self._get_video = get_video
+
+    def __eq__(self, other):
+        is_base_ref_equal = super().__eq__(other)
+        if not isinstance(other, AVTableRef):
+            return False
+        return (
+            is_base_ref_equal
+            and self.get_audio == other.get_audio
+            and self.get_video == other.get_video
+        )
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                super().__hash__(),
+                self.get_audio,
+                self.get_video,
+            )
+        )
+
+
+class ImageTableRef(TableRef):
+    def __init__(self, table_ref: TableRef):
+        if table_ref.is_table_atom():
+            super().__init__(
+                table_ref.table,
+                table_ref.alias,
+                table_ref.sample_freq,
+                table_ref.sample_type,
+            )
+        elif table_ref.is_table_valued_expr():
+            super().__init__(
+                table_ref.table_valued_expr,
+                table_ref.alias,
+                table_ref.sample_freq,
+                table_ref.sample_type,
+            )
+        elif table_ref.is_select():
+            super().__init__(
+                table_ref.select_statement,
+                table_ref.alias,
+                table_ref.sample_freq,
+                table_ref.sample_type,
+            )
+        elif table_ref.is_join():
+            super().__init__(
+                table_ref.join_node,
+                table_ref.alias,
+                table_ref.sample_freq,
+                table_ref.sample_type,
+            )

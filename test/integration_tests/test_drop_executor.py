@@ -14,6 +14,8 @@
 # limitations under the License.
 import unittest
 from pathlib import Path
+
+from eva.catalog.catalog_utils import get_video_table_column_definitions
 from test.util import create_sample_video, file_remove
 
 from eva.catalog.catalog_manager import CatalogManager
@@ -42,7 +44,10 @@ class DropExecutorTest(unittest.TestCase):
         column_objects = catalog_manager.get_column_catalog_entries_by_table(
             table_catalog_entry
         )
-        self.assertEqual(len(column_objects), 5)
+        # no of column objects should equal what we have defined plus one for row_id
+        self.assertEqual(
+            len(column_objects), len(get_video_table_column_definitions()) + 1
+        )
         self.assertTrue(Path(video_dir).exists())
         video_metadata_table = (
             catalog_manager.get_multimedia_metadata_table_catalog_entry(

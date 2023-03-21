@@ -15,15 +15,14 @@
 import unittest
 
 import mock
-from mock import ANY, MagicMock
-
 from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
+from eva.catalog.catalog_type import ColumnType, TableType
+from eva.catalog.catalog_utils import get_video_table_column_definitions
 from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.catalog.models.udf_catalog import UdfCatalogEntry
-from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
 from eva.parser.table_ref import TableInfo
 from eva.parser.types import FileFormatType
+from mock import ANY, MagicMock
 
 
 class CatalogManagerTests(unittest.TestCase):
@@ -68,16 +67,7 @@ class CatalogManagerTests(unittest.TestCase):
             name=name, format_type=FileFormatType.VIDEO
         )
 
-        columns = [
-            ColumnDefinition(
-                "name", ColumnType.TEXT, None, None, ColConstraintInfo(unique=True)
-            ),
-            ColumnDefinition("id", ColumnType.INTEGER, None, None),
-            ColumnDefinition(
-                "data", ColumnType.NDARRAY, NdArrayType.UINT8, (None, None, None)
-            ),
-            ColumnDefinition("seconds", ColumnType.FLOAT, None, []),
-        ]
+        columns = get_video_table_column_definitions()
 
         mock.assert_called_once_with(
             TableInfo(name),

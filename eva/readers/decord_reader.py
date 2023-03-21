@@ -15,6 +15,7 @@
 import math
 from typing import Dict, Iterator
 
+import numpy as np
 from eva.constants import IFRAMES
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.expression_utils import extract_range_list_from_predicate
@@ -41,7 +42,9 @@ class DecordReader(AbstractReader):
         predicate: AbstractExpression = None,
         sampling_rate: int = None,
         sampling_type: str = None,
-        **kwargs
+        read_audio: bool = False,
+        read_video: bool = True,
+        **kwargs,
     ):
         """Read frames from the disk
 
@@ -56,10 +59,16 @@ class DecordReader(AbstractReader):
         self._predicate = predicate
         self._sampling_rate = sampling_rate or 1
         self._sampling_type = sampling_type
+        self._read_audio = read_audio
+        self._read_video = read_video
         super().__init__(*args, **kwargs)
 
     def _read(self) -> Iterator[Dict]:
         decord = _lazy_import_decord()
+        if self._read_audio:
+            for frame in self.get_av_frames():
+                yield frame
+            return
         video = decord.VideoReader(self.file_url)
         num_frames = int(len(video))
         if self._predicate:
@@ -88,6 +97,7 @@ class DecordReader(AbstractReader):
                             "seconds": math.floor(
                                 video.get_frame_timestamp(frame_id)[0]
                             ),
+                            "audio": np.empty(0),
                         }
                     else:
                         break
@@ -103,6 +113,7 @@ class DecordReader(AbstractReader):
                             "seconds": math.floor(
                                 video.get_frame_timestamp(frame_id)[0]
                             ),
+                            "audio": np.empty(0),
                         }
                     else:
                         break
@@ -121,6 +132,45 @@ class DecordReader(AbstractReader):
                             "seconds": math.floor(
                                 video.get_frame_timestamp(frame_id)[0]
                             ),
+                            "audio": np.empty(0),
                         }
                     else:
                         break
+
+    def get_av_frames(self) -> Iterator[Dict]:
+        decord = _lazy_import_decord()
+        if self._sampling_type is not None:
+            err_msg = "Sampling type not supported with audio based queries"
+            logger.exception(err_msg)
+            raise Exception(err_msg)
+        if self._sampling_rate != 1:
+            err_msg = "Sampling rate not supported with audio based queries"
+            logger.exception(err_msg)
+            raise Exception(err_msg)
+        av = decord.AVReader(self.file_url, mono=True, sample_rate=16000)
+        num_frames = len(av)
+        if self._predicate:
+            range_list = extract_range_list_from_predicate(
+                self._predicate, 0, num_frames - 1
+            )
+        else:
+            range_list = [(0, num_frames - 1)]
+        logger.debug("Reading frames")
+
+        video_frame = np.empty((0, 0, 0))
+        for begin, end in range_list:
+            frame_id = begin
+            while frame_id <= end:
+                audio_frame = av[frame_id][0].asnumpy()
+                if self._read_video:
+                    video_frame = av[frame_id][1]
+                if audio_frame is not None:
+                    yield {
+                        "id": frame_id,
+                        "data": video_frame,
+                        "seconds": 0,
+                        "audio": audio_frame,
+                    }
+                else:
+                    break
+                frame_id += 1

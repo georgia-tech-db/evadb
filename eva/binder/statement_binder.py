@@ -20,6 +20,8 @@ from eva.binder.binder_utils import (
     check_groupby_pattern,
     check_table_object_is_video,
     extend_star,
+    get_table_ref_subclass,
+    set_audio_video_tuple_flags,
 )
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.catalog.catalog_manager import CatalogManager
@@ -131,6 +133,8 @@ class StatementBinder:
                 node.target_list = extend_star(self._binder_context)
             for expr in node.target_list:
                 self.bind(expr)
+        node.from_table = get_table_ref_subclass(node.from_table)
+        set_audio_video_tuple_flags(node)
         if node.groupby_clause:
             self.bind(node.groupby_clause)
             check_groupby_pattern(node.groupby_clause.value)
