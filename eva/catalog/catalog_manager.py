@@ -379,6 +379,11 @@ class CatalogManager(object):
         Returns:
             TableCatalogEntry: newly inserted table catalog entry
         """
+        assert format_type in [
+            FileFormatType.VIDEO,
+            FileFormatType.IMAGE,
+        ], f"Format Type {format_type} is not supported"
+
         if format_type is FileFormatType.VIDEO:
             columns = get_video_table_column_definitions()
             table_type = TableType.VIDEO_DATA

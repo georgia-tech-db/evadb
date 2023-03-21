@@ -91,6 +91,7 @@ class LoadMultimediaExecutor(AbstractExecutor):
             storage_engine = StorageEngine.factory(table_obj)
             if do_create:
                 storage_engine.create(table_obj)
+
             storage_engine.write(
                 table_obj,
                 Batch(pd.DataFrame({"file_path": valid_files})),

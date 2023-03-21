@@ -50,15 +50,3 @@ class StorageExecutor(AbstractExecutor):
         except Exception as e:
             logger.error(e)
             raise ExecutorError(e)
-
-        if self.node.table.table_type == TableType.VIDEO_DATA:
-            return storage_engine.read(
-                self.node.table,
-                self.node.batch_mem_size,
-                predicate=self.node.predicate,
-                sampling_rate=self.node.sampling_rate,
-            )
-        elif self.node.table.table_type == TableType.IMAGE_DATA:
-            return storage_engine.read(self.node.table)
-        elif self.node.table.table_type == TableType.STRUCTURED_DATA:
-            return storage_engine.read(self.node.table, self.node.batch_mem_size)

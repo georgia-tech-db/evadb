@@ -13,9 +13,4 @@ exclude_lines =
     if ray_enabled:
     class LogicalExchangeToPhysical(Rule):
     class LogicalExchange(Operator):
-show_missing = true
-skip_covered= true
-
-[html]
-show_contexts = true
 

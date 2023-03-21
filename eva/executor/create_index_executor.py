@@ -57,6 +57,10 @@ class CreateIndexExecutor(AbstractExecutor):
         # Get the index type.
         index_type = self.node.index_type
 
+        assert IndexType.is_faiss_index_type(
+            index_type
+        ), "Index type {} is not supported.".format(index_type)
+
         if IndexType.is_faiss_index_type(index_type):
             self._create_faiss_index()
 

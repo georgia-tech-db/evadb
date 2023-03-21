@@ -46,6 +46,17 @@ class ComparisonExpression(AbstractExpression):
             rbatch
         ), f"Left and Right batch does not have equal elements: left: {len(lbatch)} right: {len(rbatch)}"
 
+        assert self.etype in [
+            ExpressionType.COMPARE_EQUAL,
+            ExpressionType.COMPARE_GREATER,
+            ExpressionType.COMPARE_LESSER,
+            ExpressionType.COMPARE_GEQ,
+            ExpressionType.COMPARE_LEQ,
+            ExpressionType.COMPARE_NEQ,
+            ExpressionType.COMPARE_CONTAINS,
+            ExpressionType.COMPARE_IS_CONTAINED,
+        ], f"Expression type not supported {self.etype}"
+
         if self.etype == ExpressionType.COMPARE_EQUAL:
             return Batch.from_eq(lbatch, rbatch)
         elif self.etype == ExpressionType.COMPARE_GREATER:
