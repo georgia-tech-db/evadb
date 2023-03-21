@@ -52,11 +52,11 @@ class DropExecutor(AbstractExecutor):
         )
         storage_engine = StorageEngine.factory(table_obj)
 
-        assert storage_engine.drop(table=table_obj), "Failed to drop {}".format(
-            table_info
-        )
+        storage_engine.drop(table=table_obj)
 
-        catalog_manager.delete_table_catalog_entry(table_obj)
+        assert catalog_manager.delete_table_catalog_entry(
+            table_obj
+        ), "Failed to drop {}".format(table_info)
 
         yield Batch(
             pd.DataFrame(

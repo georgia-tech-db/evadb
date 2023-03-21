@@ -47,8 +47,6 @@ class AbstractUDFTest(unittest.TestCase):
         def get_all_classes(module, level):
             class_list = []
 
-            print(module)
-
             if level == 4:
                 return []
 
@@ -99,7 +97,6 @@ class AbstractUDFTest(unittest.TestCase):
                 ref_object = dummy_object
             else:
                 self.assertNotEqual(ref_object, dummy_object)
-                print(class_type)
 
             # Check name
             try:
