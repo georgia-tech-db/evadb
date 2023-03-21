@@ -50,9 +50,12 @@ EVA_TEST_DATA_DIR = Path(config.get_value("core", "eva_installation_dir")).paren
 
 
 def prefix_worker_id(base: str):
-    worker_id = os.environ["PYTEST_XDIST_WORKER"]
-    assert worker_id is not None
-    prefixed_base = str(worker_id) + "_" + base
+    try:
+        worker_id = os.environ["PYTEST_XDIST_WORKER"]
+        prefixed_base = str(worker_id) + "_" + base
+    except KeyError:
+        # Single threaded mode
+        prefixed_base = base
     return prefixed_base
 
 

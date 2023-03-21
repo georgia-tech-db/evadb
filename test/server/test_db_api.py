@@ -16,7 +16,7 @@ import asyncio
 import os
 import sys
 import unittest
-from test.util import worker_id
+from test.util import prefix_worker_id
 
 from mock import MagicMock, patch
 
@@ -33,14 +33,14 @@ if sys.version_info >= (3, 8):
 
         def setUp(self) -> None:
             print("setUp")
-            f = open(str(worker_id) + "upload.txt", "w")
+            f = open(prefix_worker_id("upload.txt"), "w")
             f.write("dummy data")
             f.close()
             return super().setUp()
 
         def tearDown(self) -> None:
             print("tearDown")
-            os.remove(str(worker_id) + "upload.txt")
+            os.remove(prefix_worker_id("upload.txt"))
             return super().tearDown()
 
         def test_eva_cursor_execute_async(self):
