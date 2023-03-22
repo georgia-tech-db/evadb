@@ -59,9 +59,10 @@ class SQLConfig:
         Retrieves the database uri for connection from ConfigurationManager.
         """
         uri = ConfigurationManager().get_value("core", "catalog_database_uri")
+        # parallelize using xdist
+        worker_uri = prefix_worker_id(str(uri))
         # set echo=True to log SQL
-        updated_uri = prefix_worker_id(str(uri))
-        self.engine = create_engine(updated_uri)
+        self.engine = create_engine(worker_uri)
 
         if self.engine.url.get_backend_name() == "sqlite":
             # enforce foreign key constraint and wal logging for sqlite
