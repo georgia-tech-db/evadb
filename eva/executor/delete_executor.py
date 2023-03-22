@@ -45,7 +45,8 @@ class DeleteExecutor(AbstractExecutor):
         del_batch = storage_engine.read(table_catalog)
         del_batch = list(del_batch)[0]
 
-        # Added because of inconsistency in col_alias in Structured data Batch project function
+        # Added because of inconsistency in col_alias
+        # in structured data Batch project function
         original_column_names = list(del_batch.frames.columns)
         column_names = [
             f"{table_catalog.name.lower()}.{name}"
@@ -57,11 +58,9 @@ class DeleteExecutor(AbstractExecutor):
         del_batch = apply_predicate(del_batch, self.predicate)
 
         # All the batches that need to be deleted
-
-        if table_catalog.table_type == TableType.STRUCTURED_DATA:
-            del_batch.frames.columns = original_column_names
-            table_needed = del_batch.frames[[f"{self.predicate.children[0].col_name}"]]
-            for num in range(len(del_batch)):
-                storage_engine.delete(table_catalog, table_needed.iloc[num])
+        del_batch.frames.columns = original_column_names
+        table_needed = del_batch.frames[[f"{self.predicate.children[0].col_name}"]]
+        for num in range(len(del_batch)):
+            storage_engine.delete(table_catalog, table_needed.iloc[num])
 
         yield Batch(pd.DataFrame(["Deleted row"]))

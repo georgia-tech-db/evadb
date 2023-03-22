@@ -20,6 +20,8 @@ from sqlalchemy_utils import create_database, database_exists, drop_database
 from eva.catalog.sql_config import SQLConfig
 from eva.utils.logging_manager import logger
 
+db_session = SQLConfig().session
+
 
 class CustomModel:
     """This overrides the default `_declarative_constructor` constructor.
@@ -30,7 +32,6 @@ class CustomModel:
     Declares and int `_row_id` field for all tables
     """
 
-    db_session = SQLConfig().session
     query = db_session.query_property()
     _row_id = Column("_row_id", Integer, primary_key=True)
 
@@ -49,10 +50,10 @@ class CustomModel:
 
         """
         try:
-            self.db_session.add(self)
+            db_session.add(self)
             self._commit()
         except Exception as e:
-            self.db_session.rollback()
+            db_session.rollback()
             logger.error(f"Database save failed : {str(e)}")
             raise e
         return self
@@ -72,26 +73,26 @@ class CustomModel:
                     setattr(self, attr, value)
             return self.save()
         except Exception as e:
-            self.db_session.rollback()
+            db_session.rollback()
             logger.error(f"Database update failed : {str(e)}")
             raise e
 
     def delete(self):
         """Delete and commit"""
         try:
-            self.db_session.delete(self)
+            db_session.delete(self)
             self._commit()
         except Exception as e:
-            self.db_session.rollback()
+            db_session.rollback()
             logger.error(f"Database delete failed : {str(e)}")
             raise e
 
     def _commit(self):
         """Try to commit. If an error is raised, the session is rollbacked."""
         try:
-            self.db_session.commit()
+            db_session.commit()
         except SQLAlchemyError as e:
-            self.db_session.rollback()
+            db_session.rollback()
             logger.error(f"Database commit failed : {str(e)}")
             raise e
 
@@ -114,7 +115,6 @@ def drop_db():
     """Drop all of the record from tables and the tables themselves. Drop the
     database as well."""
     engine = SQLConfig().engine
-    db_session = SQLConfig().session
     if database_exists(engine.url):
         db_session.commit()
         BaseModel.metadata.drop_all()

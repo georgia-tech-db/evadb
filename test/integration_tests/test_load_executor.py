@@ -166,7 +166,7 @@ class LoadExecutorTest(unittest.TestCase):
         # try adding duplicate files to the table
         path = f"{EVA_ROOT_DIR}/data/sample_videos/**/*.mp4"
         query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
-        with self.assertRaises(Exception):
+        with self.assertRaises(AssertionError):
             execute_query_fetch_all(query)
 
         # original data should be preserved

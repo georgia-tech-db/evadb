@@ -158,7 +158,7 @@ class StatementBinder:
     def _bind_rename_table_statement(self, node: RenameTableStatement):
         self.bind(node.old_table_ref)
         assert (
-            node.old_table_ref.table.table_obj.table_type == TableType.STRUCTURED_DATA
+            node.old_table_ref.table.table_obj.table_type != TableType.STRUCTURED_DATA
         ), "Rename not yet supported on structured data"
 
     @bind.register(TableRef)

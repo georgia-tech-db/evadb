@@ -275,7 +275,7 @@ class StatementBinderTests(unittest.TestCase):
 
             create_index_statement.col_list = ["foo"]
             create_index_statement.index_type = "bar"
-            with self.assertRaises(BinderError):
+            with self.assertRaises(AssertionError):
                 binder._bind_create_index_statement(create_index_statement)
 
             udf_obj = MagicMock()
@@ -286,10 +286,10 @@ class StatementBinderTests(unittest.TestCase):
                 CatalogManager, "get_udf_catalog_entry_by_name", return_value=udf_obj
             ):
                 create_index_statement.index_type = IndexType.HNSW
-                with self.assertRaises(BinderError):
+                with self.assertRaises(AssertionError):
                     binder._bind_create_index_statement(create_index_statement)
                 output.array_type = NdArrayType.FLOAT32
-                with self.assertRaises(BinderError):
+                with self.assertRaises(AssertionError):
                     binder._bind_create_index_statement(create_index_statement)
                 output.array_dimensions = [1, 100]
                 binder._bind_create_index_statement(create_index_statement)

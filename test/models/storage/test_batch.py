@@ -149,5 +149,5 @@ class BatchTest(unittest.TestCase):
     def test_sort_orderby_should_raise_exception_on_missing_column(self):
         batch = Batch(create_dataframe(5))
 
-        with self.assertRaises(KeyError):
+        with self.assertRaises(AssertionError):
             batch.sort_orderby(by=["foo"])

@@ -196,10 +196,9 @@ class Batch:
 
         assert by is not None
         for column in by:
-            if column not in self._frames.columns:
-                raise KeyError(
-                    "Can not orderby non-projected column: {}".format(column)
-                )
+            assert (
+                column in self._frames.columns
+            ), "Can not orderby non-projected column: {}".format(column)
 
         self._frames.sort_values(
             by, ascending=sort_type, ignore_index=True, inplace=True
