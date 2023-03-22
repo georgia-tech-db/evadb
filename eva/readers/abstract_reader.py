@@ -36,7 +36,7 @@ class AbstractReader(metaclass=ABCMeta):
     def __init__(self, file_url: str, offset=None, batch_mem_size: int = 30000000):
         # Check if the file still exists, if not raise an exception
         if not Path(file_url).exists():
-            raise DatasetFileNotFoundError()
+            raise DatasetFileNotFoundError(file_url)
 
         # Opencv doesn't support pathlib.Path so convert to raw str
         if isinstance(file_url, Path):

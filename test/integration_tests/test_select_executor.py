@@ -13,12 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import (
+from test.util import (  # file_remove,
     create_dummy_4d_batches,
     create_dummy_batches,
     create_sample_video,
     create_table,
-    file_remove,
     get_logical_query_plan,
     load_inbuilt_udfs,
 )
@@ -55,14 +54,15 @@ class SelectExecutorTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        file_remove("dummy.avi")
-        drop_query = """DROP TABLE table1;"""
-        execute_query_fetch_all(drop_query)
-        drop_query = """DROP TABLE table2;"""
-        execute_query_fetch_all(drop_query)
-        drop_query = """DROP TABLE table3;"""
-        execute_query_fetch_all(drop_query)
-        execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
+        # file_remove("dummy.avi")
+        # drop_query = """DROP TABLE table1;"""
+        # execute_query_fetch_all(drop_query)
+        # drop_query = """DROP TABLE table2;"""
+        # execute_query_fetch_all(drop_query)
+        # drop_query = """DROP TABLE table3;"""
+        # execute_query_fetch_all(drop_query)
+        # execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
+        pass
 
     def test_sort_on_nonprojected_column(self):
         """This tests doing an order by on a column

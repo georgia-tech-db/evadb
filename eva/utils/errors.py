@@ -21,8 +21,6 @@ class UDFIODefinitionError(Exception):
 
 
 class DatasetFileNotFoundError(Exception):
-    def __init__(
-        self,
-        message="The dataset file could not be found. Please verify that the file exists in the specified path.",
-    ):
+    def __init__(self, file_url):
+        message = f"The dataset file {file_url} could not be found. Please verify that the file exists in the specified path."
         super().__init__(message)
