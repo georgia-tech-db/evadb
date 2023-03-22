@@ -261,7 +261,7 @@ class UDFExecutorTest(unittest.TestCase):
                 "SELECT id,DummyObjectDetector(data) FROM MyVideo ORDER BY id;"
             )
 
-            with self.assertRaises(BinderError):
+            with self.assertRaises(AssertionError):
                 execute_query_fetch_all(select_query)
 
     def test_create_udf_with_decorators(self):

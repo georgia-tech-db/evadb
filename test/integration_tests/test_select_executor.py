@@ -554,7 +554,7 @@ class SelectExecutorTest(unittest.TestCase):
                   FROM MyVideo JOIN LATERAL
                     DummyMultiObjectDetector(data) AS T(a, b);
                 """
-        with self.assertRaises(BinderError) as cm:
+        with self.assertRaises(AssertionError) as cm:
             execute_query_fetch_all(query)
         self.assertEqual(str(cm.exception), "Expected 1 output columns for T, got 2.")
 

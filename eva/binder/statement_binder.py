@@ -275,5 +275,4 @@ class StatementBinder:
 
         assert len(node.alias.col_names) == len(
             node.output_objs
-        ), f"""Expected {len(node.output_objs)} output columns for
-                {node.alias.alias_name}, got {len(node.alias.col_names)}."""
+        ), f"""Expected {len(node.output_objs)} output columns for {node.alias.alias_name}, got {len(node.alias.col_names)}."""
