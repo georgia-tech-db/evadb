@@ -13,17 +13,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import List, Tuple
+from eva.catalog.catalog_manager import CatalogManager
 
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 from eva.catalog.models.udf_metadata_catalog import UdfMetadataCatalogEntry
+from eva.constants import DEFAULT_FUNCTION_EXPRESSION_COST
 from eva.expression.abstract_expression import AbstractExpression, ExpressionType
 from eva.expression.expression_utils import (
-    conjuction_list_to_expression_tree,
+    conjunction_list_to_expression_tree,
     contains_single_column,
     get_columns_in_predicate,
     is_simple_predicate,
     to_conjunction_list,
 )
+from eva.expression.function_expression import FunctionExpression
 from eva.parser.alias import Alias
 from eva.parser.create_statement import ColumnDefinition
 from eva.utils.logging_manager import logger
@@ -136,8 +139,8 @@ def extract_pushdown_predicate(
             rem_pred.append(pred)
 
     return (
-        conjuction_list_to_expression_tree(pushdown_preds),
-        conjuction_list_to_expression_tree(rem_pred),
+        conjunction_list_to_expression_tree(pushdown_preds),
+        conjunction_list_to_expression_tree(rem_pred),
     )
 
 
@@ -168,6 +171,31 @@ def extract_pushdown_predicate_for_alias(
         else:
             rem_pred.append(pred)
     return (
-        conjuction_list_to_expression_tree(pushdown_preds),
-        conjuction_list_to_expression_tree(rem_pred),
+        conjunction_list_to_expression_tree(pushdown_preds),
+        conjunction_list_to_expression_tree(rem_pred),
     )
+
+
+def get_func_expression_execution_cost(expr: FunctionExpression) -> float:
+    """
+    This function computes the estimated cost of executing a given function expression
+    based on the statistics in the catalog. If no statistics are available, it assumes
+    a default cost, DEFAULT_FUNCTION_EXPRESSION_COST. If the function expression is
+    nested, it computes the total cost including all the child function expressions.
+
+    Args:
+        expr (FunctionExpression): The FunctionExpression object whose cost needs to be
+        computed.
+
+    Returns:
+        float: The estimated cost of executing the function expression.
+    """
+    total_cost = 0
+    # iterate over all the function expression and accumulate the cost
+    for child_expr in expr.find_all(FunctionExpression):
+        cost_entry = CatalogManager().get_udf_cost_catalog_entry(child_expr.name)
+        if cost_entry:
+            total_cost += cost_entry.cost
+        else:
+            total_cost += DEFAULT_FUNCTION_EXPRESSION_COST
+    return total_cost

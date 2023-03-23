@@ -627,3 +627,28 @@ class SelectExecutorTest(unittest.TestCase):
         )
         signature = plan.target_list[0].signature()
         self.assertEqual(signature, "DummyMultiObjectDetector(MyVideo.data)")
+
+    def test_complex_logical_expressions(self):
+        query = """SELECT id FROM MyVideo 
+            WHERE DummyObjectDetector(data).label = ['{}']  ORDER BY id;"""
+        persons = execute_query_fetch_all(query.format("person")).frames.to_numpy()
+        bicycles = execute_query_fetch_all(query.format("bicycle")).frames.to_numpy()
+        import numpy as np
+
+        self.assertTrue(len(np.intersect1d(persons, bicycles)) == 0)
+
+        query_or = """SELECT id FROM MyVideo \
+            WHERE DummyObjectDetector(data).label = ['person']  
+                OR DummyObjectDetector(data).label = ['bicycle'] 
+            ORDER BY id;"""
+        actual = execute_query_fetch_all(query_or)
+        expected = execute_query_fetch_all("SELECT id FROM MyVideo ORDER BY id")
+        self.assertEqual(expected, actual)
+
+        query_and = """SELECT id FROM MyVideo \
+            WHERE DummyObjectDetector(data).label = ['person']  
+                AND DummyObjectDetector(data).label = ['bicycle'] 
+            ORDER BY id;"""
+
+        expected = execute_query_fetch_all(query_and)
+        self.assertEqual(len(expected), 0)

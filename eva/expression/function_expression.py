@@ -57,9 +57,6 @@ class FunctionExpression(AbstractExpression):
         self._function = func
         self._function_instance = None
         self._output = output
-        self._averageTime = 0
-        self._iterationCount = 0
-        self._lastIterationCount = 0
         self.alias = alias
         self.udf_obj: UdfCatalogEntry = None
         self.output_objs: List[UdfIOCatalogEntry] = []

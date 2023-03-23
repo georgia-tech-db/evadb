@@ -121,15 +121,32 @@ class OptimizerRulesTest(unittest.TestCase):
         self.assertEqual(result_without_pushdown_join_rule, result_with_rule)
         self.assertEqual(query_plan, query_plan_without_pushdown_join_rule)
 
-    def test_should_reorder_predicate(self):
-        # udfQuery1 = """SELECT id FROM MyVideo WHERE FastRCNNObjectDetector(data).labels = ['person'] ORDER BY id;"""
-        # execute_query_fetch_all(udfQuery1)
-        # udfQuery1 = """SELECT id, DummyObjectDetector(data) FROM MyVideo \
-        #     WHERE DummyObjectDetector(data).label = ['bicycle'] ORDER BY id;"""
-        # udfPredicateReorderingQuery = """SELECT id, DummyObjectDetector(data), DummyObjectDetector(data) FROM MyVideo \
-        #     WHERE DummyObjectDetector(data).label = ['person'] OR DummyObjectDetector(data).label = ['bicycle'] ORDER BY id;"""
+    @patch("from eva.optimizer.optimizer_utils.get_func_expression_execution_cost")
+    def test_should_reorder_predicate(self, mock):
+        def side_effect_func(name):
+            if name == "DummyObjectDetector":
+                return 5
+            else:
+                return 10
+
+        mock.side_effect = side_effect_func
+        
+        query = """SELECT id FROM MyVideo \
+            WHERE DummyObjectDetector(data).label = ['person']  AND DummyMultiObjectDetector(data).label  ORDER BY id;"""
+        persons = execute_query_fetch_all(query.format("person")).frames.to_numpy()
+        bicycles = execute_query_fetch_all(query.format("bicycle")).frames.to_numpy()
+        import numpy as np
+
+        self.assertTrue(len(np.intersect1d(persons, bicycles)) == 0)
+
+        query_or = """SELECT id FROM MyVideo \
+            WHERE DummyObjectDetector(data).label = ['person']  OR DummyObjectDetector(data).label = ['bicycle'] ORDER BY id;"""
+        actual = execute_query_fetch_all(query_or)
+        expected = execute_query_fetch_all("SELECT id FROM MyVideo ORDER BY id")
+        self.assertEqual(expected, actual)
+
         udfPredicateReorderingQuery = """SELECT id FROM MyVideo \
-            WHERE DummyObjectDetector(data).label = ['person'] OR DummyObjectDetector(data).label = ['bicycle'] ORDER BY id;"""
-        execute_query_fetch_all(udfPredicateReorderingQuery)
+            WHERE DummyObjectDetector(data).label = ['person']  ORDER BY id;"""
+
         result = execute_query_fetch_all(udfPredicateReorderingQuery)
         print(result.frames[0][0])
