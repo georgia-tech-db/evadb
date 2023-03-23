@@ -48,6 +48,12 @@ s3_dir_from_config = config.get_value("storage", "s3_download_dir")
 EVA_TEST_DATA_DIR = Path(config.get_value("core", "eva_installation_dir")).parent
 
 
+def explain_query_plan(query):
+    explain_query = "EXPLAIN {}".format(query)
+    actual_batch = execute_query_fetch_all(explain_query)
+    return "\n" + actual_batch.frames.iloc[0][0]
+
+
 def prefix_worker_id(base: str):
     try:
         worker_id = os.environ["PYTEST_XDIST_WORKER"]
