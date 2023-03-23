@@ -15,7 +15,9 @@
 import math
 from typing import Dict, Iterator
 
+import ffmpeg
 import numpy as np
+
 from eva.constants import IFRAMES
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.expression_utils import extract_range_list_from_predicate
@@ -66,9 +68,13 @@ class DecordReader(AbstractReader):
     def _read(self) -> Iterator[Dict]:
         decord = _lazy_import_decord()
         if self._read_audio:
-            for frame in self.get_av_frames():
-                yield frame
-            return
+            if "audio" in [
+                stream["codec_type"]
+                for stream in ffmpeg.probe(self.file_url)["streams"]
+            ]:
+                for frame in self.get_av_frames():
+                    yield frame
+                return
         video = decord.VideoReader(self.file_url)
         num_frames = int(len(video))
         if self._predicate:
@@ -138,15 +144,14 @@ class DecordReader(AbstractReader):
                         break
 
     def get_av_frames(self) -> Iterator[Dict]:
+        assert (
+            self._sampling_type is None
+        ), "Sampling type not supported with audio based queries"
+        assert (
+            self._sampling_rate == 1
+        ), "Sampling rate not supported with audio based queries"
+        ans = ffmpeg.probe(self.file_url)["streams"]
         decord = _lazy_import_decord()
-        if self._sampling_type is not None:
-            err_msg = "Sampling type not supported with audio based queries"
-            logger.exception(err_msg)
-            raise Exception(err_msg)
-        if self._sampling_rate != 1:
-            err_msg = "Sampling rate not supported with audio based queries"
-            logger.exception(err_msg)
-            raise Exception(err_msg)
         av = decord.AVReader(self.file_url, mono=True, sample_rate=16000)
         num_frames = len(av)
         if self._predicate:

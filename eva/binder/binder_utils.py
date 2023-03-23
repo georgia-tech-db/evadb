@@ -112,6 +112,18 @@ def check_table_object_is_video(table_ref: TableRef) -> None:
 
 
 def get_table_ref_subclass(table_ref: TableRef) -> TableRef:
+    """
+    Changes the table_ref object to the appropriate
+    child class based on the type of table being queried
+
+    Arguments:
+         table_ref (TableRef): the original table_ref object
+         from the statement being bound
+
+    Returns:
+        TableRef -  the child table ref object if table being
+        queried has video/image else the original object
+    """
     if table_ref.is_table_atom():
         if table_ref.table.table_obj.table_type == TableType.VIDEO_DATA:
             return AVTableRef(table_ref)
@@ -124,45 +136,53 @@ def get_table_ref_subclass(table_ref: TableRef) -> TableRef:
     return table_ref
 
 
-def set_audio_video_tuple_flags(node: SelectStatement):
+def set_av_table_ref_flags(node: SelectStatement):
+    """
+    Sets the has_audio/has_video flags for the AVTableRef object,
+    if present in the select statement
+
+    Arguments:
+         node (SelectStatement): the select statement being bound
+    """
+
+    # For simple queries like SELECT UDF(..) FROM Table,
+    # go over the tuples passed as arguments to the UDF
     if node.from_table.is_table_atom():
-        has_audio_tuple = False
-        has_video_tuple = False
         if node.target_list:
             for expr in node.target_list:
-                if isinstance(expr, FunctionExpression):
-                    for child in expr.children:
-                        if isinstance(child, TupleValueExpression):
-                            has_audio_tuple = (
-                                has_audio_tuple or child.col_object.name == "audio"
-                            )
-                            has_video_tuple = (
-                                has_video_tuple or child.col_object.name == "data"
-                            )
-        node.from_table.get_audio = has_audio_tuple
-        node.from_table.get_video = has_video_tuple
+                set_av_table_ref_flags_from_func_expr(node.from_table, expr)
+    # For join based queries like SELECT * FROM Table JOIN LATERAL UDF(..),
+    # go over the tuples passed as arguments to the UDF present on either side of the join
     elif node.from_table.is_join():
         left = node.from_table.join_node.left
         right = node.from_table.join_node.right
+        # if the table to the left of the join is a video table and there is a UDF on the right
         if isinstance(left, AVTableRef) and right.is_table_valued_expr():
-            for child in right.table_valued_expr.func_expr.children:
-                has_audio_tuple = False
-                has_video_tuple = False
-                if isinstance(child, TupleValueExpression):
-                    has_audio_tuple = (
-                        has_audio_tuple or child.col_object.name == "audio"
-                    )
-                    has_video_tuple = has_video_tuple or child.col_object.name == "data"
-                left.get_audio = has_audio_tuple
-                left.get_video = has_video_tuple
+            set_av_table_ref_flags_from_func_expr(
+                left, right.table_valued_expr.func_expr
+            )
+        # if the table to the right of the join is a video table and there is a UDF on the left
         elif isinstance(right, AVTableRef) and left.is_table_valued_expr():
-            for child in left.table_valued_expr.func_expr.children:
-                has_audio_tuple = False
-                has_video_tuple = False
-                if isinstance(child, TupleValueExpression):
-                    has_audio_tuple = (
-                        has_audio_tuple or child.col_object.name == "audio"
-                    )
-                    has_video_tuple = has_video_tuple or child.col_object.name == "data"
-                right.get_audio = has_audio_tuple
-                right.get_video = has_video_tuple
+            set_av_table_ref_flags_from_func_expr(
+                right, left.table_valued_expr.func_expr
+            )
+
+
+def set_av_table_ref_flags_from_func_expr(
+    table_ref: TableRef, func_expr: FunctionExpression
+):
+    """
+    Helper method to set the has_audio/has_video flags for the AVTableRef object,
+    if the func_expr uses audio/video columns
+
+    Arguments:
+         table_ref (TableRef): the table_ref of the statement being bound
+         func_expr (FunctionExpression): the func_expr from the statement being bound
+    """
+    if not isinstance(table_ref, AVTableRef):
+        return
+    for expr in func_expr.find_all(TupleValueExpression):
+        if expr.col_object.name == "audio":
+            table_ref.get_audio = True
+        if expr.col_object.name == "data":
+            table_ref.get_video = True

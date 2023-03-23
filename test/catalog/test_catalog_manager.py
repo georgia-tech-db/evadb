@@ -15,6 +15,8 @@
 import unittest
 
 import mock
+from mock import ANY, MagicMock
+
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import ColumnType, TableType
 from eva.catalog.catalog_utils import get_video_table_column_definitions
@@ -22,7 +24,6 @@ from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.catalog.models.udf_catalog import UdfCatalogEntry
 from eva.parser.table_ref import TableInfo
 from eva.parser.types import FileFormatType
-from mock import ANY, MagicMock
 
 
 class CatalogManagerTests(unittest.TestCase):

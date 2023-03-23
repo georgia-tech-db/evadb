@@ -16,6 +16,7 @@ from typing import Dict, Iterator
 
 import cv2
 import numpy as np
+
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.expression_utils import extract_range_list_from_predicate
 from eva.readers.abstract_reader import AbstractReader

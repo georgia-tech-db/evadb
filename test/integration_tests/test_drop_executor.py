@@ -14,11 +14,10 @@
 # limitations under the License.
 import unittest
 from pathlib import Path
-
-from eva.catalog.catalog_utils import get_video_table_column_definitions
 from test.util import create_sample_video, file_remove
 
 from eva.catalog.catalog_manager import CatalogManager
+from eva.catalog.catalog_utils import get_video_table_column_definitions
 from eva.server.command_handler import execute_query_fetch_all
 
 

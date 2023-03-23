@@ -184,6 +184,12 @@ class TableRef:
         return isinstance(self._ref_handle, JoinNode)
 
     @property
+    def ref_handle(
+        self,
+    ) -> Union[TableInfo, TableValuedExpression, SelectStatement, JoinNode]:
+        return self._ref_handle
+
+    @property
     def table(self) -> TableInfo:
         assert isinstance(
             self._ref_handle, TableInfo
@@ -256,34 +262,12 @@ class TableRef:
 
 class AVTableRef(TableRef):
     def __init__(self, table_ref: TableRef):
-        if table_ref.is_table_atom():
-            super().__init__(
-                table_ref.table,
-                table_ref.alias,
-                table_ref.sample_freq,
-                table_ref.sample_type,
-            )
-        elif table_ref.is_table_valued_expr():
-            super().__init__(
-                table_ref.table_valued_expr,
-                table_ref.alias,
-                table_ref.sample_freq,
-                table_ref.sample_type,
-            )
-        elif table_ref.is_select():
-            super().__init__(
-                table_ref.select_statement,
-                table_ref.alias,
-                table_ref.sample_freq,
-                table_ref.sample_type,
-            )
-        elif table_ref.is_join():
-            super().__init__(
-                table_ref.join_node,
-                table_ref.alias,
-                table_ref.sample_freq,
-                table_ref.sample_type,
-            )
+        super().__init__(
+            table_ref.ref_handle,
+            table_ref.alias,
+            table_ref.sample_freq,
+            table_ref.sample_type,
+        )
         self._get_audio: bool = False
         self._get_video: bool = False
 
@@ -325,31 +309,9 @@ class AVTableRef(TableRef):
 
 class ImageTableRef(TableRef):
     def __init__(self, table_ref: TableRef):
-        if table_ref.is_table_atom():
-            super().__init__(
-                table_ref.table,
-                table_ref.alias,
-                table_ref.sample_freq,
-                table_ref.sample_type,
-            )
-        elif table_ref.is_table_valued_expr():
-            super().__init__(
-                table_ref.table_valued_expr,
-                table_ref.alias,
-                table_ref.sample_freq,
-                table_ref.sample_type,
-            )
-        elif table_ref.is_select():
-            super().__init__(
-                table_ref.select_statement,
-                table_ref.alias,
-                table_ref.sample_freq,
-                table_ref.sample_type,
-            )
-        elif table_ref.is_join():
-            super().__init__(
-                table_ref.join_node,
-                table_ref.alias,
-                table_ref.sample_freq,
-                table_ref.sample_type,
-            )
+        super().__init__(
+            table_ref.ref_handle,
+            table_ref.alias,
+            table_ref.sample_freq,
+            table_ref.sample_type,
+        )
