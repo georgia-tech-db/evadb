@@ -87,6 +87,7 @@ jobs:
             - run:
                 name: Enable Ray setting in the config.yml file
                 command: |
+                  source test_evadb/bin/activate
                   python -c "import yaml;f = open('eva/eva.yml', 'r+');config_obj = yaml.load(f, Loader=yaml.FullLoader);config_obj['experimental']['ray'] = True;f.seek(0);f.write(yaml.dump(config_obj));f.truncate();"
 
       - run:
