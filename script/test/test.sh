@@ -76,25 +76,16 @@ if [[ "$OSTYPE" != "msys" ]];
 then
     if [[ "$MODE" = "TEST" || "$MODE" = "ALL" ]];
     then
-        PYTHONPATH=./ pytest --cov-report term-missing:skip-covered  --cov-config=.coveragerc --cov-context=test --cov=eva/ -s -v --log-level=WARNING -m "not benchmark" -m "not notparallel" -n 4
+        PYTHONPATH=./ pytest --cov-report term-missing:skip-covered  --cov-config=.coveragerc --cov-context=test --cov=eva/ -s -v --log-level=WARNING -m "not benchmark"
         test_code=$?
         if [ "$test_code" != "0" ];
         then
-            echo "PYTEST (PARALLEL) CODE: --|${test_code}|-- FAILURE"
+            echo "PYTEST CODE: --|${test_code}|-- FAILURE"
             exit $test_code
         else
-            echo "PYTEST (PARALLEL) CODE: --|${test_code}|-- SUCCESS"
+            echo "PYTEST CODE: --|${test_code}|-- SUCCESS"
         fi
-        PYTHONPATH=./ pytest --cov-report term-missing:skip-covered  --cov-config=.coveragerc --cov-append --cov-context=test --cov=eva/ -s -v --log-level=WARNING -m "not benchmark" -m "notparallel" -n 1
-        test_code=$?
-        if [ "$test_code" != "0" ];
-        then
-            echo "PYTEST (SEQUENTIAL) CODE: --|${test_code}|-- FAILURE"
-            exit $test_code
-        else
-            echo "PYTEST (SEQUENTIAL) CODE: --|${test_code}|-- SUCCESS"
-        fi
-    fi
+     fi
 # Windows -- no need for coverage report
 else
     PYTHONPATH=./ pytest -p no:cov test/ -m "not benchmark"
