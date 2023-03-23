@@ -36,10 +36,7 @@ class LoadMultimediaExecutor(AbstractExecutor):
         self.catalog = CatalogManager()
         self.media_type = self.node.file_options["file_format"]
 
-    def validate(self):
-        pass
-
-    def exec(self):
+    def exec(self, *args, **kwargs):
         storage_engine = None
         table_obj = None
         try:
@@ -93,11 +90,8 @@ class LoadMultimediaExecutor(AbstractExecutor):
 
             storage_engine = StorageEngine.factory(table_obj)
             if do_create:
-                success = storage_engine.create(table_obj)
-                if not success:
-                    raise ExecutorError(
-                        f"StorageEngine {storage_engine} create call failed"
-                    )
+                storage_engine.create(table_obj)
+
             storage_engine.write(
                 table_obj,
                 Batch(pd.DataFrame({"file_path": valid_files})),
@@ -126,10 +120,5 @@ class LoadMultimediaExecutor(AbstractExecutor):
         table_obj: TableCatalogEntry,
         do_create: bool,
     ):
-        try:
-            if do_create:
-                storage_engine.drop(table_obj)
-        except Exception as e:
-            logger.exception(
-                f"Unexpected Exception {e} occured while rolling back. This is bad as the {self.media_type.name} table can be in a corrupt state. Please verify the table {table_obj} for correctness."
-            )
+        if do_create:
+            storage_engine.drop(table_obj)

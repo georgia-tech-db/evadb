@@ -12,18 +12,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Dict, Iterator
+import unittest
+from inspect import signature
+from test.util import get_all_subclasses
 
-import cv2
-
-from eva.readers.abstract_reader import AbstractReader
+from eva.executor.abstract_executor import AbstractExecutor
 
 
-class CVImageReader(AbstractReader):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def _read(self) -> Iterator[Dict]:
-        frame = cv2.imread(str(self.file_url))
-        assert frame is not None, f"Failed to read image file {self.file_url}"
-        yield {"data": frame}
+class AbstractExecutorTest(unittest.TestCase):
+    def test_constructor_args(self):
+        derived_executor_classes = list(get_all_subclasses(AbstractExecutor))
+        for derived_executor_class in derived_executor_classes:
+            sig = signature(derived_executor_class.__init__)
+            params = sig.parameters
+            self.assertTrue(len(params) < 10)

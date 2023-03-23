@@ -14,7 +14,7 @@
 # limitations under the License.
 import shutil
 import unittest
-from test.util import create_dummy_batches
+from test.util import create_dummy_batches, prefix_worker_id
 
 import pytest
 
@@ -24,6 +24,7 @@ from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.storage.sqlite_storage_engine import SQLStorageEngine
 
 
+@pytest.mark.notparallel
 class SQLStorageEngineTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -31,7 +32,9 @@ class SQLStorageEngineTest(unittest.TestCase):
 
     def create_sample_table(self):
         table_info = TableCatalogEntry(
-            "dataset", "dataset", table_type=TableType.VIDEO_DATA
+            prefix_worker_id("dataset"),
+            prefix_worker_id("dataset"),
+            table_type=TableType.VIDEO_DATA,
         )
         column_0 = ColumnCatalogEntry("name", ColumnType.TEXT, is_nullable=False)
         column_1 = ColumnCatalogEntry("id", ColumnType.INTEGER, is_nullable=False)
@@ -46,7 +49,7 @@ class SQLStorageEngineTest(unittest.TestCase):
 
     def tearDown(self):
         try:
-            shutil.rmtree("dataset", ignore_errors=True)
+            shutil.rmtree(prefix_worker_id("dataset"), ignore_errors=True)
         except ValueError:
             pass
 

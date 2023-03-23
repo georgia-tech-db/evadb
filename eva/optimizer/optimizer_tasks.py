@@ -14,6 +14,7 @@
 # limitations under the License.
 from __future__ import annotations
 
+from abc import abstractmethod
 from enum import IntEnum, auto
 from typing import TYPE_CHECKING, List
 
@@ -48,13 +49,10 @@ class OptimizerTask:
         self._optimizer_context = optimizer_context
 
     @property
-    def task_type(self):
-        return self._task_type
-
-    @property
     def optimizer_context(self):
         return self._optimizer_context
 
+    @abstractmethod
     def execute(self):
         raise NotImplementedError
 
@@ -192,13 +190,13 @@ class OptimizeExpression(OptimizerTask):
             )
 
             # explore the input group if necessary
-            for idx, child in enumerate(rule.pattern.children):
-                if len(child.children):
-                    child_grp_id = self.root_expr.children[idx]
-                    group = self.optimizer_context.memo.get_group_by_id(child_grp_id)
-                    self.optimizer_context.task_stack.push(
-                        ExploreGroup(group, self.optimizer_context)
-                    )
+            # for idx, child in enumerate(rule.pattern.children):
+            #    if len(child.children):
+            #        child_grp_id = self.root_expr.children[idx]
+            #        group = self.optimizer_context.memo.get_group_by_id(child_grp_id)
+            #        self.optimizer_context.task_stack.push(
+            #            ExploreGroup(group, self.optimizer_context)
+            #        )
 
 
 class ApplyRule(OptimizerTask):
@@ -296,25 +294,25 @@ class OptimizeInputs(OptimizerTask):
         grp.add_expr_cost(self.root_expr, PropertyType.DEFAULT, cost)
 
 
-class ExploreGroup(OptimizerTask):
-    """
-    Derive all logical group-expression for matching a pattern
-    """
+# class ExploreGroup(OptimizerTask):
+#     """
+#     Derive all logical group-expression for matching a pattern
+#     """
 
-    def __init__(self, group: Group, optimizer_context: OptimizerContext):
-        self.group = group
-        super().__init__(optimizer_context, OptimizerTaskType.EXPLORE_GROUP)
+#     def __init__(self, group: Group, optimizer_context: OptimizerContext):
+#         self.group = group
+#         super().__init__(optimizer_context, OptimizerTaskType.EXPLORE_GROUP)
 
-    def execute(self):
-        # return if the group is already explored
-        if self.group.is_explored():
-            return
+#     def execute(self):
+#         # return if the group is already explored
+#         if self.group.is_explored():
+#             return
 
-        # explore all the logical expression
-        for expr in self.group.logical_exprs:
-            self.optimizer_context.task_stack.push(
-                OptimizeExpression(expr, self.optimizer_context, explore=True)
-            )
+#         # explore all the logical expression
+#         for expr in self.group.logical_exprs:
+#             self.optimizer_context.task_stack.push(
+#                 OptimizeExpression(expr, self.optimizer_context, explore=True)
+#             )
 
-        # mark the group explored
-        self.group.mark_explored()
+#         # mark the group explored
+#         self.group.mark_explored()

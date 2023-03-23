@@ -26,7 +26,6 @@ from eva.expression.expression_utils import (
 )
 from eva.parser.alias import Alias
 from eva.parser.create_statement import ColumnDefinition
-from eva.utils.logging_manager import logger
 
 
 def column_definition_to_udf_io(col_list: List[ColumnDefinition], is_input: bool):
@@ -41,9 +40,7 @@ def column_definition_to_udf_io(col_list: List[ColumnDefinition], is_input: bool
 
     result_list = []
     for col in col_list:
-        if col is None:
-            logger.error("Empty column definition while creating udf io")
-            result_list.append(col)
+        assert col is not None, "Empty column definition while creating udf io"
         result_list.append(
             UdfIOCatalogEntry(
                 col.name,
@@ -76,12 +73,19 @@ def metadata_definition_to_udf_metadata(metadata_list: List[Tuple[str, str]]):
 
 def extract_equi_join_keys(
     join_predicate: AbstractExpression,
-    left_table_aliases: List[str],
-    right_table_aliases: List[str],
+    left_table_aliases: List[Alias],
+    right_table_aliases: List[Alias],
 ) -> Tuple[List[AbstractExpression], List[AbstractExpression]]:
     pred_list = to_conjunction_list(join_predicate)
     left_join_keys = []
     right_join_keys = []
+    left_table_alias_strs = [
+        left_table_alias.alias_name for left_table_alias in left_table_aliases
+    ]
+    right_table_alias_strs = [
+        right_table_alias.alias_name for right_table_alias in right_table_aliases
+    ]
+
     for pred in pred_list:
         if pred.etype == ExpressionType.COMPARE_EQUAL:
             left_child = pred.children[0]
@@ -92,14 +96,14 @@ def extract_equi_join_keys(
                 and right_child.etype == ExpressionType.TUPLE_VALUE
             ):
                 if (
-                    left_child.table_alias in left_table_aliases
-                    and right_child.table_alias in right_table_aliases
+                    left_child.table_alias in left_table_alias_strs
+                    and right_child.table_alias in right_table_alias_strs
                 ):
                     left_join_keys.append(left_child)
                     right_join_keys.append(right_child)
                 elif (
-                    left_child.table_alias in right_table_aliases
-                    and right_child.table_alias in left_table_aliases
+                    left_child.table_alias in right_table_alias_strs
+                    and right_child.table_alias in left_table_alias_strs
                 ):
                     left_join_keys.append(right_child)
                     right_join_keys.append(left_child)

@@ -31,6 +31,7 @@ from eva.server.command_handler import execute_query_fetch_all
 NUM_FRAMES = 10
 
 
+@pytest.mark.notparallel
 class MaterializedViewTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

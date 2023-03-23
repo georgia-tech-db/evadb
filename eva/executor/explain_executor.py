@@ -24,10 +24,7 @@ class ExplainExecutor(AbstractExecutor):
     def __init__(self, node: ExplainPlan):
         super().__init__(node)
 
-    def validate(self):
-        pass
-
-    def exec(self):
+    def exec(self, *args, **kwargs):
         # Traverse optimized physical plan, which is commonly supported.
         # Logical plan can be also printted by passing explainable_opr
         # attribute of the node, but is not done for now.

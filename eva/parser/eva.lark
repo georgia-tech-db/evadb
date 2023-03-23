@@ -476,7 +476,7 @@ LESS_SYMBOL:                         "<"
 EXCLAMATION_SYMBOL:                  "!"
 GREATER_OR_EQUAL_SYMBOL:             "<="
 LESS_OR_EQUAL_SYMBOL:                ">="
-NOT_EQUAL_SYMBOL:                    "<>"
+NOT_EQUAL_SYMBOL:                    "!="
 CONTAINS_SYMBOL:                     "@>"
 CONTAINED_IN_SYMBOL:                 "<@"
 

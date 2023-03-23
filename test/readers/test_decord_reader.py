@@ -21,6 +21,8 @@ from test.util import (
     file_remove,
 )
 
+import pytest
+
 from eva.constants import IFRAMES
 from eva.expression.abstract_expression import ExpressionType
 from eva.expression.comparison_expression import ComparisonExpression
@@ -30,6 +32,7 @@ from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.readers.decord_reader import DecordReader
 
 
+@pytest.mark.notparallel
 class DecordLoaderTest(unittest.TestCase):
     def setUp(self):
         self.video_file_url = create_sample_video()

@@ -12,13 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Generator, Iterator
+from typing import Iterator
 
 from eva.executor.abstract_executor import AbstractExecutor
-from eva.executor.executor_utils import ExecutorError, apply_predicate
+from eva.executor.executor_utils import apply_predicate
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.nested_loop_join_plan import NestedLoopJoinPlan
-from eva.utils.logging_manager import logger
 
 
 class NestedLoopJoinExecutor(AbstractExecutor):
@@ -26,25 +25,13 @@ class NestedLoopJoinExecutor(AbstractExecutor):
         super().__init__(node)
         self.predicate = node.join_predicate
 
-    def validate(self):
-        pass
-
     def exec(self, *args, **kwargs) -> Iterator[Batch]:
         outer = self.children[0]
         inner = self.children[1]
-        try:
-            for row1 in outer.exec():
-                for row2 in inner.exec():
-                    result_batch = Batch.join(row1, row2)
-                    result_batch.reset_index()
-                    result_batch = apply_predicate(result_batch, self.predicate)
-                    if not result_batch.empty():
-                        yield result_batch
-        except Exception as e:
-            logger.error(e)
-            raise ExecutorError(e)
-
-        pass
-
-    def __call__(self, *args, **kwargs) -> Generator[Batch, None, None]:
-        yield from self.exec(*args, **kwargs)
+        for row1 in outer.exec():
+            for row2 in inner.exec():
+                result_batch = Batch.join(row1, row2)
+                result_batch.reset_index()
+                result_batch = apply_predicate(result_batch, self.predicate)
+                if not result_batch.empty():
+                    yield result_batch

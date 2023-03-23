@@ -19,6 +19,7 @@ import numpy as np
 import pandas as pd
 
 from eva.models.storage.batch import Batch
+from eva.parser.alias import Alias
 
 
 class BatchTest(unittest.TestCase):
@@ -75,6 +76,7 @@ class BatchTest(unittest.TestCase):
         batch_2 = Batch(frames=create_dataframe())
 
         self.assertEqual(batch_2, batch_1 + batch_2)
+        self.assertEqual(batch_2, batch_2 + batch_1)
 
     def test_adding_batch_frame_with_outcomes_returns_new_batch_frame(self):
         batch_1 = Batch(frames=create_dataframe())
@@ -107,6 +109,9 @@ class BatchTest(unittest.TestCase):
         batch_4 = Batch(frames=pd.DataFrame([{"id": 0, "data": 1}]))
         self.assertEqual(batch_3, batch_4)
 
+        # Special case
+        self.assertEqual(Batch.merge_column_wise([]), Batch())
+
     def test_should_fail_for_list(self):
         frames = [{"id": 0, "data": [1, 2]}, {"id": 1, "data": [1, 2]}]
         self.assertRaises(ValueError, Batch, frames)
@@ -127,3 +132,22 @@ class BatchTest(unittest.TestCase):
         batch = Batch(create_dataframe_same(2))
         self.assertRaises(ValueError, Batch.stack, batch)
         # TODO ACTION: Add test cases for stack correctness
+
+    def test_modify_column_alias_should_raise_exception(self):
+        batch = Batch(create_dataframe(5))
+        dummy_alias = Alias("dummy", col_names=["t1"])
+
+        with self.assertRaises(RuntimeError):
+            batch.modify_column_alias(dummy_alias)
+
+    def test_drop_column_alias_should_work_on_frame_without_alias(self):
+        batch = Batch(create_dataframe(5))
+
+        # Frame with no alias
+        batch.drop_column_alias()
+
+    def test_sort_orderby_should_raise_exception_on_missing_column(self):
+        batch = Batch(create_dataframe(5))
+
+        with self.assertRaises(AssertionError):
+            batch.sort_orderby(by=["foo"])

@@ -15,6 +15,7 @@
 import unittest
 from test.util import load_inbuilt_udfs
 
+import pytest
 from mock import patch
 
 from eva.catalog.catalog_manager import CatalogManager
@@ -30,12 +31,14 @@ from eva.server.command_handler import execute_query_fetch_all
 from eva.utils.stats import Timer
 
 
+@pytest.mark.notparallel
 class OptimizerRulesTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         CatalogManager().reset()
         ua_detrac = f"{EVA_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
         execute_query_fetch_all(f"LOAD VIDEO '{ua_detrac}' INTO MyVideo;")
+        execute_query_fetch_all(f"LOAD VIDEO '{ua_detrac}' INTO MyVideo2;")
         load_inbuilt_udfs()
 
     @classmethod

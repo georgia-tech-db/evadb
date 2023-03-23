@@ -141,10 +141,6 @@ class RulesManager:
     def logical_rules(self):
         return self._logical_rules
 
-    @property
-    def all_rules(self):
-        return self._all_rules
-
     def disable_rules(self, rules: List[Rule]):
         def _remove_from_list(rule_list, rule_to_remove):
             for rule in rule_list:
@@ -152,14 +148,18 @@ class RulesManager:
                     rule_list.remove(rule)
 
         for rule in rules:
+            assert (
+                rule.is_implementation_rule()
+                or rule.is_rewrite_rule()
+                or rule.is_logical_rule()
+            ), f"Provided Invalid rule {rule}"
+
             if rule.is_implementation_rule():
                 _remove_from_list(self.implementation_rules, rule)
             elif rule.is_rewrite_rule():
                 _remove_from_list(self.rewrite_rules, rule)
-            elif rule.is_logical_rule(rule):
+            elif rule.is_logical_rule():
                 _remove_from_list(self.logical_rules, rule)
-            else:
-                raise Exception(f"Provided Invalid rule {rule}")
 
     def add_rules(self, rules: List[Rule]):
         def _add_to_list(rule_list, rule_to_remove):
@@ -167,14 +167,18 @@ class RulesManager:
                 rule_list.append(rule)
 
         for rule in rules:
+            assert (
+                rule.is_implementation_rule()
+                or rule.is_rewrite_rule()
+                or rule.is_logical_rule()
+            ), f"Provided Invalid rule {rule}"
+
             if rule.is_implementation_rule():
                 _add_to_list(self.implementation_rules, rule)
             elif rule.is_rewrite_rule():
                 _add_to_list(self.rewrite_rules, rule)
-            elif rule.is_logical_rule(rule):
+            elif rule.is_logical_rule():
                 _add_to_list(self.logical_rules, rule)
-            else:
-                raise Exception(f"Provided Invalid rule {rule}")
 
 
 @contextmanager

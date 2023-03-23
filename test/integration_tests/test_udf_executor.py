@@ -23,6 +23,7 @@ from test.util import (
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from eva.binder.binder_utils import BinderError
 from eva.catalog.catalog_manager import CatalogManager
@@ -34,6 +35,7 @@ from eva.server.command_handler import execute_query_fetch_all
 NUM_FRAMES = 10
 
 
+@pytest.mark.notparallel
 class UDFExecutorTest(unittest.TestCase):
     def setUp(self):
         CatalogManager().reset()
@@ -231,6 +233,10 @@ class UDFExecutorTest(unittest.TestCase):
 
     def test_should_raise_if_udf_file_is_modified(self):
         execute_query_fetch_all("DROP UDF DummyObjectDetector;")
+
+        # Test IF EXISTS
+        execute_query_fetch_all("DROP UDF IF EXISTS DummyObjectDetector;")
+
         with tempfile.NamedTemporaryFile(mode="w", suffix=".py") as tmp_file:
             with open("test/util.py", "r") as file:
                 tmp_file.write(file.read())
@@ -255,7 +261,7 @@ class UDFExecutorTest(unittest.TestCase):
                 "SELECT id,DummyObjectDetector(data) FROM MyVideo ORDER BY id;"
             )
 
-            with self.assertRaises(BinderError):
+            with self.assertRaises(AssertionError):
                 execute_query_fetch_all(select_query)
 
     def test_create_udf_with_decorators(self):

@@ -14,11 +14,14 @@
 # limitations under the License.
 import base64
 import os
+import socket
+from contextlib import closing
 from pathlib import Path
 
 import cv2
 import numpy as np
 import pandas as pd
+from mock import MagicMock
 
 from eva.binder.statement_binder import StatementBinder
 from eva.binder.statement_binder_context import StatementBinderContext
@@ -46,6 +49,17 @@ s3_dir_from_config = config.get_value("storage", "s3_download_dir")
 EVA_TEST_DATA_DIR = Path(config.get_value("core", "eva_installation_dir")).parent
 
 
+def prefix_worker_id(base: str):
+    try:
+        worker_id = os.environ["PYTEST_XDIST_WORKER"]
+        prefixed_base = str(worker_id) + "_" + base
+    except KeyError:
+        # Single threaded mode
+        prefixed_base = base
+    return prefixed_base
+
+
+# Ref: https://stackoverflow.com/a/63851681
 def get_all_subclasses(cls):
     subclass_list = []
 
@@ -57,6 +71,82 @@ def get_all_subclasses(cls):
     recurse(cls)
 
     return set(subclass_list)
+
+
+def get_mock_object(class_type, number_of_args):
+    if number_of_args == 1:
+        return class_type()
+    elif number_of_args == 2:
+        return class_type(MagicMock())
+    elif number_of_args == 3:
+        return class_type(MagicMock(), MagicMock())
+    elif number_of_args == 4:
+        return class_type(MagicMock(), MagicMock(), MagicMock())
+    elif number_of_args == 5:
+        return class_type(MagicMock(), MagicMock(), MagicMock(), MagicMock())
+    elif number_of_args == 6:
+        return class_type(
+            MagicMock(), MagicMock(), MagicMock(), MagicMock(), MagicMock()
+        )
+    elif number_of_args == 7:
+        return class_type(
+            MagicMock(), MagicMock(), MagicMock(), MagicMock(), MagicMock(), MagicMock()
+        )
+    elif number_of_args == 8:
+        return class_type(
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+        )
+    elif number_of_args == 9:
+        return class_type(
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+        )
+    elif number_of_args == 10:
+        return class_type(
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+        )
+    elif number_of_args == 11:
+        return class_type(
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+        )
+    else:
+        raise Exception("Too many args")
+
+
+def find_free_port():
+    with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
+        s.bind(("", 0))
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        return s.getsockname()[1]
 
 
 def get_logical_query_plan(query: str) -> Operator:
