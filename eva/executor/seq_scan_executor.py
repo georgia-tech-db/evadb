@@ -34,7 +34,7 @@ class SequentialScanExecutor(AbstractExecutor):
         self.project_expr = node.columns
         self.alias = node.alias
 
-    def exec(self, **kwargs) -> Iterator[Batch]:
+    def exec(self, *args, **kwargs) -> Iterator[Batch]:
         child_executor = self.children[0]
         for batch in child_executor.exec(**kwargs):
             # apply alias to the batch

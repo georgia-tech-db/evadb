@@ -36,7 +36,7 @@ class LoadMultimediaExecutor(AbstractExecutor):
         self.catalog = CatalogManager()
         self.media_type = self.node.file_options["file_format"]
 
-    def exec(self):
+    def exec(self, *args, **kwargs):
         storage_engine = None
         table_obj = None
         try:

@@ -33,7 +33,7 @@ class DeleteExecutor(AbstractExecutor):
         self.predicate = node.where_clause
         self.catalog = CatalogManager()
 
-    def exec(self, **kwargs) -> Iterator[Batch]:
+    def exec(self, *args, **kwargs) -> Iterator[Batch]:
         table_catalog = self.node.table_ref.table.table_obj
         storage_engine = StorageEngine.factory(table_catalog)
         del_batch = Batch()

@@ -28,7 +28,7 @@ class DropExecutor(AbstractExecutor):
     def __init__(self, node: DropPlan):
         super().__init__(node)
 
-    def exec(self):
+    def exec(self, *args, **kwargs):
         """Drop table executor"""
         catalog_manager = CatalogManager()
 
