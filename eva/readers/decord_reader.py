@@ -150,7 +150,6 @@ class DecordReader(AbstractReader):
         assert (
             self._sampling_rate == 1
         ), "Sampling rate not supported with audio based queries"
-        ans = ffmpeg.probe(self.file_url)["streams"]
         decord = _lazy_import_decord()
         av = decord.AVReader(self.file_url, mono=True, sample_rate=16000)
         num_frames = len(av)
