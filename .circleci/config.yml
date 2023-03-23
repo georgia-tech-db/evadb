@@ -50,7 +50,7 @@ workflows:
             v: "3.10"
             mode: "RAY TEST"
         - Pip
-        - Windows   
+        - Windows
         #- test:
         #    name: "Linux -  v3.11"  # missing Torchvision
         #    v: "3.11"
@@ -80,31 +80,31 @@ jobs:
             pip install ".[dev]"
 
       # Enable Ray conditionally
-      when:
-        condition:
-          - equal: [ RAY TEST, << parameters.mode >>]
-        steps:
-          - run: 
-            name: Enable Ray setting in the config.yml file
-            command: |
-              python -c "import yaml;f = open('eva/eva.yml', 'r+');config_obj = yaml.load(f, Loader=yaml.FullLoader);config_obj['experimental']['ray'] = True;f.seek(0);f.write(yaml.dump(config_obj));f.truncate();"
+      - when:
+          condition:
+            equal: [ RAY TEST, << parameters.mode >> ]
+          steps:
+            - run:
+                name: Enable Ray setting in the config.yml file
+                command: |
+                  python -c "import yaml;f = open('eva/eva.yml', 'r+');config_obj = yaml.load(f, Loader=yaml.FullLoader);config_obj['experimental']['ray'] = True;f.seek(0);f.write(yaml.dump(config_obj));f.truncate();"
 
       - run:
           name: Test and upload coverage report to coveralls
           command: |
             source test_evadb/bin/activate
             bash script/test/test.sh -m "<< parameters.mode >>"
-    
+
   Windows:
     executor: win/default
     parameters:
       v:
         type: string
-        default: "3.10" 
+        default: "3.10"
     steps:
       - checkout
 
-      - run: 
+      - run:
           name: Test windows
           command: |
             Set-StrictMode -Version Latest
@@ -112,7 +112,7 @@ jobs:
             pip install virtualenv
             virtualenv test_evadb
             test_evadb\Scripts\activate
-            pip install ".[dev]"       
+            pip install ".[dev]"
             bash script\test\test.sh
 
   Pip:
