@@ -105,7 +105,8 @@ class LogicalGetToSeqScan(Rule):
         if before.target_list is None or not any(
             [isinstance(expr, FunctionExpression) for expr in before.target_list]
         ):
-            return scan
+            yield scan
+            return
         upper = ExchangePlan(parallelism=2)
         upper.append_child(scan)
         yield upper

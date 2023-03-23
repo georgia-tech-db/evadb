@@ -65,7 +65,7 @@ class ExplainExecutorTest(unittest.TestCase):
         select_query = "EXPLAIN SELECT id, data FROM MyVideo"
         batch = execute_query_fetch_all(select_query)
         expected_output = (
-            """|__ SeqScanPlan\n    |__ ExchangePlan\n    |__ StoragePlan\n"""
+            """|__ SeqScanPlan\n    |__ ExchangePlan\n        |__ StoragePlan\n"""
             if ray_enabled
             else """|__ SeqScanPlan\n    |__ StoragePlan\n"""
         )
@@ -78,7 +78,7 @@ class ExplainExecutorTest(unittest.TestCase):
                 select_query, plan_generator=custom_plan_generator
             )
             expected_output = (
-                """|__ ProjectPlan\n    |__ LateralJoinPlan\n        |__ SeqScanPlan\n        |__ ExchangePlan\n            |__ StoragePlan\n        |__ FunctionScanPlan\n"""
+                """|__ ExchangePlan\n    |__ ProjectPlan\n        |__ LateralJoinPlan\n            |__ SeqScanPlan\n                |__ ExchangePlan\n                    |__ StoragePlan\n            |__ FunctionScanPlan\n"""
                 if ray_enabled
                 else """|__ ProjectPlan\n    |__ LateralJoinPlan\n        |__ SeqScanPlan\n            |__ StoragePlan\n        |__ FunctionScanPlan\n"""
             )
@@ -98,7 +98,7 @@ class ExplainExecutorTest(unittest.TestCase):
                 select_query, plan_generator=custom_plan_generator
             )
             expected_output = (
-                """|__ ProjectPlan\n    |__ LateralJoinPlan\n        |__ SeqScanPlan\n        |__ ExchangePlan\n            |__ StoragePlan\n        |__ FunctionScanPlan\n"""
+                """|__ ExchangePlan\n    |__ ProjectPlan\n        |__ LateralJoinPlan\n            |__ SeqScanPlan\n                |__ ExchangePlan\n                    |__ StoragePlan\n            |__ FunctionScanPlan\n"""
                 if ray_enabled
                 else """|__ ProjectPlan\n    |__ LateralJoinPlan\n        |__ SeqScanPlan\n            |__ StoragePlan\n        |__ FunctionScanPlan\n"""
             )
