@@ -69,7 +69,6 @@ class ExchangeExecutor(AbstractExecutor):
 
         # Start with checking if current executor has any child.
         if len(curr_exec.children) > 0:
-
             # Check if child executor is ExchangeExecutor. If so, return.
             # Otherwise, traverse further down.
             if isinstance(curr_exec.children[0], ExchangeExecutor):
@@ -77,7 +76,6 @@ class ExchangeExecutor(AbstractExecutor):
             else:
                 for child in curr_exec.children:
                     yield from self._find_all_parent_executor_of_exchange(child)
-
 
     def exec(self, is_top=True) -> Iterator[Batch]:
         assert (
