@@ -33,9 +33,6 @@ def ray_stage_wait_and_alert(tasks: ray.ObjectRef, output_queue: Queue):
 def ray_stage(
     executor: Callable, input_queues: List[Queue], output_queues: List[Queue]
 ):
-    if len(input_queues) > 1 or len(output_queues) > 1:
-        raise NotImplementedError
-
     gen = executor(input_queues=input_queues)
     for next_item in gen:
         for oq in output_queues:
