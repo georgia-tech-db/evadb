@@ -20,7 +20,10 @@ from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import TableType
 from eva.catalog.catalog_utils import is_video_table
 from eva.constants import CACHEABLE_UDFS
-from eva.expression.expression_utils import conjuction_list_to_expression_tree
+from eva.expression.expression_utils import (
+    conjunction_list_to_expression_tree,
+    to_conjunction_list,
+)
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.optimizer.optimizer_utils import (
@@ -28,6 +31,7 @@ from eva.optimizer.optimizer_utils import (
     extract_equi_join_keys,
     extract_pushdown_predicate,
     extract_pushdown_predicate_for_alias,
+    get_expression_execution_cost,
 )
 from eva.optimizer.rules.pattern import Pattern
 from eva.optimizer.rules.rules_base import Promise, Rule, RuleType
@@ -340,7 +344,7 @@ class PushDownFilterThroughJoin(Rule):
             new_join_node.append_child(right)
 
         if rem_pred:
-            new_join_node._join_predicate = conjuction_list_to_expression_tree(
+            new_join_node._join_predicate = conjunction_list_to_expression_tree(
                 [rem_pred, new_join_node.join_predicate]
             )
 
@@ -574,6 +578,64 @@ class LogicalInnerJoinCommutativity(Rule):
         new_join.append_child(before.rhs())
         new_join.append_child(before.lhs())
         yield new_join
+
+
+class ReorderPredicates(Rule):
+    """
+    The current implementation orders conjuncts based on their individual cost.
+    The optimization for OR clauses has `not` been implemented yet. Additionally, we do
+    not optimize predicates that are not user-defined functions since we assume that
+    they will likely be pushed to the underlying relational database, which will handle
+    the optimization process.
+    """
+
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALFILTER)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.REORDER_PREDICATES, pattern)
+
+    def promise(self):
+        return Promise.REORDER_PREDICATES
+
+    def check(self, before: LogicalFilter, context: OptimizerContext):
+        # there exists atleast one Function Expression
+        return len(list(before.predicate.find_all(FunctionExpression))) > 0
+
+    def apply(self, before: LogicalFilter, context: OptimizerContext):
+        # Decompose the expression tree into a list of conjuncts
+        conjuncts = to_conjunction_list(before.predicate)
+
+        # Segregate the conjuncts into simple and function expressions
+        contains_func_exprs = []
+        simple_exprs = []
+        for conjunct in conjuncts:
+            if list(conjunct.find_all(FunctionExpression)):
+                contains_func_exprs.append(conjunct)
+            else:
+                simple_exprs.append(conjunct)
+
+        # Compute the cost of every function expression and sort them in
+        # ascending order of cost
+        function_expr_cost_tuples = [
+            (expr, get_expression_execution_cost(expr)) for expr in contains_func_exprs
+        ]
+        function_expr_cost_tuples = sorted(
+            function_expr_cost_tuples, key=lambda x: x[1]
+        )
+
+        # Build the final ordered list of conjuncts
+        ordered_conjuncts = simple_exprs + [
+            expr for (expr, _) in function_expr_cost_tuples
+        ]
+
+        # we do not return a new plan if nothing has changed
+        # this ensures we do not keep applying this optimization
+        if ordered_conjuncts != conjuncts:
+            # Build expression tree based on the ordered conjuncts
+            reordered_predicate = conjunction_list_to_expression_tree(ordered_conjuncts)
+            reordered_filter_node = LogicalFilter(predicate=reordered_predicate)
+            reordered_filter_node.append_child(before.children[0])
+            yield reordered_filter_node
 
 
 # LOGICAL RULES END

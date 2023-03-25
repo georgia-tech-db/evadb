@@ -66,6 +66,7 @@ from eva.optimizer.rules.rules import (
     Promise,
     PushDownFilterThroughApplyAndMerge,
     PushDownFilterThroughJoin,
+    ReorderPredicates,
     Rule,
     RuleType,
     XformLateralJoinToLinearFlow,
@@ -101,6 +102,7 @@ class RulesTest(unittest.TestCase):
             Promise.PUSHDOWN_FILTER_THROUGH_JOIN,
             Promise.PUSHDOWN_FILTER_THROUGH_APPLY_AND_MERGE,
             Promise.COMBINE_SIMILARITY_ORDERBY_AND_LIMIT_TO_FAISS_INDEX_SCAN,
+            Promise.REORDER_PREDICATES,
         ]
 
         for promise in rewrite_promises:
@@ -160,6 +162,7 @@ class RulesTest(unittest.TestCase):
             PushDownFilterThroughApplyAndMerge(),
             PushDownFilterThroughJoin(),
             CombineSimilarityOrderByAndLimitToFaissIndexScan(),
+            ReorderPredicates(),
         ]
         self.assertEqual(
             len(supported_rewrite_rules), len(RulesManager().rewrite_rules)
