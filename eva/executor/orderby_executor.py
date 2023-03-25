@@ -80,13 +80,17 @@ class OrderByExecutor(AbstractExecutor):
             aggregated_batch_list.append(batch)
         aggregated_batch = Batch.concat(aggregated_batch_list, copy=False)
 
+        # nothing to order by
+        if not len(aggregated_batch):
+            return
+
         # Column can be a functional expression, so if it
         # is not in columns, it needs to be re-evaluated.
         merge_batch_list = [aggregated_batch]
         for col in self._columns:
             col_name_list = self._extract_column_name(col)
             for col_name in col_name_list:
-                if col_name not in aggregated_batch.frames:
+                if col_name not in aggregated_batch.columns:
                     batch = col.evaluate(aggregated_batch)
                     merge_batch_list.append(batch)
         if len(merge_batch_list) > 1:

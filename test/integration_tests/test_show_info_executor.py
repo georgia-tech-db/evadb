@@ -79,6 +79,7 @@ class ShowExecutorTest(unittest.TestCase):
 
     @windows_skip_marker
     def test_show_tables(self):
+        # Note this test can causes sqlalchemy issues if the eva_server is not stopped
         result = execute_query_fetch_all("SHOW TABLES;")
         self.assertEqual(len(result), 3)
         expected = {"name": ["MyVideo", "MNIST", "Actions"]}

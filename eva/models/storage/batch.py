@@ -238,7 +238,7 @@ class Batch:
         cols = cols or []
         verfied_cols = [c for c in cols if c in self._frames]
         unknown_cols = list(set(cols) - set(verfied_cols))
-        assert len(unknown_cols) == 0
+        assert len(unknown_cols) == 0, unknown_cols
         return Batch(self._frames[verfied_cols])
 
     @classmethod
