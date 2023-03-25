@@ -17,6 +17,7 @@ import unittest
 from test.markers import windows_skip_marker
 
 import pandas as pd
+import pytest
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
@@ -27,6 +28,7 @@ from eva.udfs.udf_bootstrap_queries import ArrayCount_udf_query, Fastrcnn_udf_qu
 NUM_FRAMES = 10
 
 
+@pytest.mark.notparallel
 class ShowExecutorTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

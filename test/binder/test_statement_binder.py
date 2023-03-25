@@ -18,6 +18,8 @@ from unittest.mock import MagicMock, patch
 from eva.binder.binder_utils import BinderError
 from eva.binder.statement_binder import StatementBinder
 from eva.binder.statement_binder_context import StatementBinderContext
+from eva.catalog.catalog_manager import CatalogManager
+from eva.catalog.catalog_type import IndexType, NdArrayType
 from eva.parser.alias import Alias
 
 
@@ -262,3 +264,48 @@ class StatementBinderTests(unittest.TestCase):
             mock.assert_called_with(tve.col_name, tve.table_alias)
             self.assertEqual(tve.col_object, "col_obj")
             self.assertEqual(tve.col_alias, col_alias)
+
+    def test_bind_create_index(self):
+        with patch.object(StatementBinder, "bind"):
+            binder = StatementBinder(StatementBinderContext())
+            create_index_statement = MagicMock()
+
+            with self.assertRaises(AssertionError):
+                binder._bind_create_index_statement(create_index_statement)
+
+            create_index_statement.col_list = ["foo"]
+            create_index_statement.index_type = "bar"
+            with self.assertRaises(AssertionError):
+                binder._bind_create_index_statement(create_index_statement)
+
+            udf_obj = MagicMock()
+            output = MagicMock()
+            udf_obj.outputs = [output]
+
+            with patch.object(
+                CatalogManager, "get_udf_catalog_entry_by_name", return_value=udf_obj
+            ):
+                create_index_statement.index_type = IndexType.HNSW
+                with self.assertRaises(AssertionError):
+                    binder._bind_create_index_statement(create_index_statement)
+                output.array_type = NdArrayType.FLOAT32
+                with self.assertRaises(AssertionError):
+                    binder._bind_create_index_statement(create_index_statement)
+                output.array_dimensions = [1, 100]
+                binder._bind_create_index_statement(create_index_statement)
+
+            create_index_statement.udf_func = None
+            col_def = MagicMock()
+            col_def.name = "a"
+            create_index_statement.col_list = [col_def]
+            col = MagicMock()
+            col.name = "a"
+            create_index_statement.table_ref.table.table_obj.columns = [col]
+
+            with self.assertRaises(AssertionError):
+                binder._bind_create_index_statement(create_index_statement)
+            col.array_type = NdArrayType.FLOAT32
+            with self.assertRaises(AssertionError):
+                binder._bind_create_index_statement(create_index_statement)
+            col.array_dimensions = [1, 10]
+            binder._bind_create_index_statement(create_index_statement)

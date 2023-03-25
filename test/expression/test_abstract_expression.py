@@ -14,7 +14,9 @@
 # limitations under the License.
 import unittest
 
-from eva.expression.abstract_expression import ExpressionType
+from mock import patch
+
+from eva.expression.abstract_expression import AbstractExpression, ExpressionType
 from eva.expression.comparison_expression import ComparisonExpression
 from eva.expression.constant_value_expression import ConstantValueExpression
 from eva.expression.logical_expression import LogicalExpression
@@ -101,3 +103,11 @@ class AbstractExpressionsTest(unittest.TestCase):
             [None],
             [exp for exp in list(expr.find_all(TupleValueExpression))],
         )
+
+    def test_not_implemented_functions(self):
+        with self.assertRaises(TypeError):
+            x = AbstractExpression(exp_type=ExpressionType.LOGICAL_AND)
+
+        with patch.object(AbstractExpression, "__abstractmethods__", set()):
+            x = AbstractExpression(exp_type=ExpressionType.LOGICAL_AND)
+            x.evaluate()

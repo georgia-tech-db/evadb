@@ -15,6 +15,7 @@
 import unittest
 
 import mock
+import pytest
 from mock import ANY, MagicMock
 
 from eva.catalog.catalog_manager import CatalogManager
@@ -26,6 +27,7 @@ from eva.parser.table_ref import TableInfo
 from eva.parser.types import FileFormatType
 
 
+@pytest.mark.notparallel
 class CatalogManagerTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

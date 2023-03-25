@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Generator, Iterator
+from typing import Iterator
 
 from eva.catalog.catalog_type import TableType
 from eva.executor.abstract_executor import AbstractExecutor
@@ -27,10 +27,7 @@ class StorageExecutor(AbstractExecutor):
     def __init__(self, node: StoragePlan):
         super().__init__(node)
 
-    def validate(self):
-        pass
-
-    def exec(self) -> Iterator[Batch]:
+    def exec(self, *args, **kwargs) -> Iterator[Batch]:
         try:
             storage_engine = StorageEngine.factory(self.node.table)
 
@@ -53,6 +50,3 @@ class StorageExecutor(AbstractExecutor):
         except Exception as e:
             logger.error(e)
             raise ExecutorError(e)
-
-    def __call__(self, **kwargs) -> Generator[Batch, None, None]:
-        yield from self.exec()

@@ -15,7 +15,8 @@
 import unittest
 from test.util import create_sample_video, load_inbuilt_udfs
 
-from mock import MagicMock
+import pytest
+from mock import MagicMock, patch
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import TableType
@@ -65,6 +66,8 @@ from eva.optimizer.rules.rules import (
     PushDownFilterThroughApplyAndMerge,
     PushDownFilterThroughJoin,
     ReorderPredicates,
+    Rule,
+    RuleType,
     XformLateralJoinToLinearFlow,
 )
 from eva.optimizer.rules.rules_manager import RulesManager
@@ -72,6 +75,7 @@ from eva.parser.types import JoinType
 from eva.server.command_handler import execute_query_fetch_all
 
 
+@pytest.mark.notparallel
 class RulesTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -265,3 +269,13 @@ class RulesTest(unittest.TestCase):
         rule = XformLateralJoinToLinearFlow()
         logi_join = LogicalJoin(JoinType.INNER_JOIN)
         self.assertFalse(rule.check(logi_join, MagicMock()))
+
+    def test_rule_base_errors(self):
+        with patch.object(Rule, "__abstractmethods__", set()):
+            rule = Rule(rule_type=RuleType.INVALID_RULE)
+            with self.assertRaises(NotImplementedError):
+                rule.promise()
+            with self.assertRaises(NotImplementedError):
+                rule.check(MagicMock(), MagicMock())
+            with self.assertRaises(NotImplementedError):
+                rule.apply(MagicMock())

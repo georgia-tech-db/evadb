@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import (
+from test.util import (  # file_remove,
     create_dummy_4d_batches,
     create_dummy_batches,
     create_sample_video,
@@ -37,6 +37,7 @@ from eva.server.command_handler import execute_query_fetch_all
 NUM_FRAMES = 10
 
 
+@pytest.mark.notparallel
 class SelectExecutorTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -553,7 +554,7 @@ class SelectExecutorTest(unittest.TestCase):
                   FROM MyVideo JOIN LATERAL
                     DummyMultiObjectDetector(data) AS T(a, b);
                 """
-        with self.assertRaises(BinderError) as cm:
+        with self.assertRaises(AssertionError) as cm:
             execute_query_fetch_all(query)
         self.assertEqual(str(cm.exception), "Expected 1 output columns for T, got 2.")
 
@@ -596,7 +597,7 @@ class SelectExecutorTest(unittest.TestCase):
 
     def test_hash_join_with_multiple_tables(self):
         select_query = """SELECT * FROM table1 JOIN table2
-                          ON table1.a0 = table2.a0 JOIN table3
+                          ON table2.a0 = table1.a0 JOIN table3
                           ON table3.a1 = table1.a1 WHERE table1.a2 > 50;"""
         actual_batch = execute_query_fetch_all(select_query)
         tmp = pd.merge(
@@ -629,7 +630,7 @@ class SelectExecutorTest(unittest.TestCase):
         self.assertEqual(signature, "DummyMultiObjectDetector(MyVideo.data)")
 
     def test_complex_logical_expressions(self):
-        query = """SELECT id FROM MyVideo 
+        query = """SELECT id FROM MyVideo
             WHERE DummyObjectDetector(data).label = ['{}']  ORDER BY id;"""
         persons = execute_query_fetch_all(query.format("person")).frames.to_numpy()
         bicycles = execute_query_fetch_all(query.format("bicycle")).frames.to_numpy()
@@ -638,16 +639,16 @@ class SelectExecutorTest(unittest.TestCase):
         self.assertTrue(len(np.intersect1d(persons, bicycles)) == 0)
 
         query_or = """SELECT id FROM MyVideo \
-            WHERE DummyObjectDetector(data).label = ['person']  
-                OR DummyObjectDetector(data).label = ['bicycle'] 
+            WHERE DummyObjectDetector(data).label = ['person']
+                OR DummyObjectDetector(data).label = ['bicycle']
             ORDER BY id;"""
         actual = execute_query_fetch_all(query_or)
         expected = execute_query_fetch_all("SELECT id FROM MyVideo ORDER BY id")
         self.assertEqual(expected, actual)
 
         query_and = """SELECT id FROM MyVideo \
-            WHERE DummyObjectDetector(data).label = ['person']  
-                AND DummyObjectDetector(data).label = ['bicycle'] 
+            WHERE DummyObjectDetector(data).label = ['person']
+                AND DummyObjectDetector(data).label = ['bicycle']
             ORDER BY id;"""
 
         expected = execute_query_fetch_all(query_and)

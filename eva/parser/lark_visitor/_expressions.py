@@ -28,10 +28,8 @@ from eva.expression.logical_expression import LogicalExpression
 class Expressions:
     def string_literal(self, tree):
         text = tree.children[0]
-        if text is not None:
-            return ConstantValueExpression(text[1:-1], ColumnType.TEXT)
-        else:
-            return None
+        assert text is not None
+        return ConstantValueExpression(text[1:-1], ColumnType.TEXT)
 
     def array_literal(self, tree):
         array_elements = []
@@ -42,16 +40,6 @@ class Expressions:
 
         res = ConstantValueExpression(np.array(array_elements), ColumnType.NDARRAY)
         return res
-
-    def expression_atom(self, tree):
-        output = self.visit_children(tree)
-        # flatten
-        output = output[0]
-        return output
-
-    def comparison_expression(self, tree):
-        left = self.visit_children(tree.children[0])
-        return left
 
     def constant(self, tree):
         for child in tree.children:
@@ -101,8 +89,6 @@ class Expressions:
             return ExpressionType.COMPARE_CONTAINS
         elif op == "<@":
             return ExpressionType.COMPARE_IS_CONTAINED
-        else:
-            return ExpressionType.INVALID
 
     def logical_operator(self, tree):
         op = str(tree.children[0])
@@ -111,8 +97,6 @@ class Expressions:
             return ExpressionType.LOGICAL_OR
         elif op == "AND":
             return ExpressionType.LOGICAL_AND
-        else:
-            return ExpressionType.INVALID
 
     def expressions_with_defaults(self, tree):
         expr_list = []
