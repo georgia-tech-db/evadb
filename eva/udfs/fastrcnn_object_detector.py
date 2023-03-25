@@ -50,7 +50,7 @@ class FastRCNNObjectDetector(PytorchAbstractClassifierUDF):
     def setup(self, threshold=0.85):
         self.threshold = threshold
         self.model = torchvision.models.detection.fasterrcnn_resnet50_fpn(
-            pretrained=True, progress=False
+            weights="COCO_V1", progress=False
         )
         self.model.eval()
 
