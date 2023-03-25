@@ -28,11 +28,7 @@ class HashJoinExecutor(AbstractExecutor):
         self.probe_keys = node.probe_keys
         self.join_project = node.join_project
 
-    def validate(self):
-        pass
-
     def exec(self, *args, **kwargs) -> Iterator[Batch]:
-
         build_table = self.children[0]
         probe_table = self.children[1]
         hash_keys = [key.col_alias for key in self.probe_keys]

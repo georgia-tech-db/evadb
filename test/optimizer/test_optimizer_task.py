@@ -25,7 +25,12 @@ from eva.optimizer.operators import (
     LogicalQueryDerivedGet,
 )
 from eva.optimizer.optimizer_context import OptimizerContext
-from eva.optimizer.optimizer_tasks import BottomUpRewrite, OptimizeGroup, TopDownRewrite
+from eva.optimizer.optimizer_tasks import (
+    BottomUpRewrite,
+    OptimizeGroup,
+    OptimizerTask,
+    TopDownRewrite,
+)
 from eva.optimizer.property import PropertyType
 from eva.optimizer.rules.rules_manager import RulesManager
 from eva.plan_nodes.predicate_plan import PredicatePlan
@@ -37,6 +42,12 @@ class TestOptimizerTask(unittest.TestCase):
     def execute_task_stack(self, task_stack):
         while not task_stack.empty():
             task = task_stack.pop()
+            task.execute()
+
+    def test_abstract_optimizer_task(self):
+        task = OptimizerTask(MagicMock(), MagicMock())
+
+        with self.assertRaises(NotImplementedError):
             task.execute()
 
     def top_down_rewrite(self, opr):

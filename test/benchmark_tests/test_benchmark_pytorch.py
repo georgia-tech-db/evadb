@@ -24,6 +24,7 @@ from eva.server.command_handler import execute_query_fetch_all
     warmup_iterations=1,
     min_rounds=1,
 )
+@pytest.mark.notparallel
 def test_should_run_pytorch_and_yolo(benchmark, setup_pytorch_tests):
     select_query = """SELECT YoloV5(data) FROM MyVideo
                     WHERE id < 5;"""
@@ -37,6 +38,7 @@ def test_should_run_pytorch_and_yolo(benchmark, setup_pytorch_tests):
     warmup_iterations=1,
     min_rounds=1,
 )
+@pytest.mark.notparallel
 def test_should_run_pytorch_and_facenet(benchmark, setup_pytorch_tests):
     create_udf_query = """CREATE UDF IF NOT EXISTS FaceDetector
                 INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
@@ -60,6 +62,7 @@ def test_should_run_pytorch_and_facenet(benchmark, setup_pytorch_tests):
     warmup_iterations=1,
     min_rounds=1,
 )
+@pytest.mark.notparallel
 def test_should_run_pytorch_and_resnet50(benchmark, setup_pytorch_tests):
     create_udf_query = """CREATE UDF IF NOT EXISTS FeatureExtractor
                 INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
@@ -86,6 +89,7 @@ def test_should_run_pytorch_and_resnet50(benchmark, setup_pytorch_tests):
     warmup_iterations=1,
     min_rounds=1,
 )
+@pytest.mark.notparallel
 def test_lateral_join(benchmark, setup_pytorch_tests):
     select_query = """SELECT id, a FROM MyVideo JOIN LATERAL
                     YoloV5(data) AS T(a,b,c) WHERE id < 5;"""

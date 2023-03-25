@@ -19,10 +19,6 @@ class MnistCNN(PytorchAbstractClassifierUDF):
         self.model.eval()
 
     @property
-    def input_format(self):
-        return FrameInfo(1, 28, 28, ColorSpace.RGB)
-
-    @property
     def labels(self):
         return list([str(num) for num in range(10)])
 

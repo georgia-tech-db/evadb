@@ -27,6 +27,7 @@ from eva.models.storage.batch import Batch
 from eva.parser.alias import Alias
 from eva.udfs.gpu_compatible import GPUCompatible
 from eva.utils.kv_cache import DiskKVCache
+from eva.utils.stats import UDFStats
 
 
 class FunctionExpression(AbstractExpression):
@@ -55,7 +56,6 @@ class FunctionExpression(AbstractExpression):
         alias: Alias = None,
         **kwargs,
     ):
-
         super().__init__(ExpressionType.FUNCTION_EXPRESSION, **kwargs)
         self._context = Context()
         self._name = name
@@ -67,6 +67,7 @@ class FunctionExpression(AbstractExpression):
         self.output_objs: List[UdfIOCatalogEntry] = []
         self.projection_columns: List[str] = []
         self._cache: FunctionExpressionCache = None
+        self._stats = UDFStats()
 
     @property
     def name(self):
@@ -99,11 +100,50 @@ class FunctionExpression(AbstractExpression):
     def has_cache(self):
         return self._cache is not None
 
+    def persist_stats(self):
+        from eva.catalog.catalog_manager import CatalogManager
+
+        if self.udf_obj is None:
+            return
+        udf_id = self.udf_obj.row_id
+        cost_per_func_call = (
+            self._stats.timer.total_elapsed_time / self._stats.num_calls
+        )
+
+        # persist stats to catalog only if it differ by greater than 10% from
+        # the previous value
+        if abs(self._stats.prev_cost - cost_per_func_call) > cost_per_func_call / 10:
+            CatalogManager().upsert_udf_cost_catalog_entry(
+                udf_id, self.udf_obj.name, cost_per_func_call
+            )
+            self._stats.prev_cost = cost_per_func_call
+
     def evaluate(self, batch: Batch, **kwargs) -> Batch:
+        new_batch = batch
+        child_batches = [child.evaluate(batch, **kwargs) for child in self.children]
+        if len(child_batches):
+            batch_sizes = [len(child_batch) for child_batch in child_batches]
+            are_all_equal_length = all(batch_sizes[0] == x for x in batch_sizes)
+            assert (
+                are_all_equal_length is True
+            ), "All columns in batch must have equal elements"
+            new_batch = Batch.merge_column_wise(child_batches)
+
         func = self._gpu_enabled_function()
-        outcomes = self._apply_function_expression(func, batch, **kwargs)
-        outcomes = outcomes.project(self.projection_columns)
-        outcomes.modify_column_alias(self.alias)
+
+        # record the time taken for the udf execution
+        with self._stats.timer:
+            # apply the function and project the required columns
+            outcomes = self._apply_function_expression(func, new_batch, **kwargs)
+            outcomes = outcomes.project(self.projection_columns)
+            outcomes.modify_column_alias(self.alias)
+
+        # record the number of function calls
+        self._stats.num_calls += len(batch)
+
+        # persist the stats to catalog
+        self.persist_stats()
+
         return outcomes
 
     def signature(self) -> str:
@@ -118,13 +158,6 @@ class FunctionExpression(AbstractExpression):
             child_sigs.append(child.signature())
 
         func_sig = f"{self.name}({','.join(child_sigs)})"
-        if self._output and len(self.udf_obj.outputs) > 1:
-            # In this situation, the function expression has multiple output columns,
-            # but only one of them is projected. As a result, we must generate a
-            # signature that includes only the projected column in order to distinguish
-            # it from the scenario where all columns are projected.
-            func_sig = f"{func_sig}.{self.output_objs[0].name}"
-
         return func_sig
 
     def _gpu_enabled_function(self):

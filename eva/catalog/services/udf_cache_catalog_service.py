@@ -42,7 +42,6 @@ class UdfCacheCatalogService(BaseService):
             `UdfCacheCatalogEntry`
         """
         try:
-
             cache_obj = self.model(
                 name=entry.name,
                 udf_id=entry.udf_id,
@@ -70,7 +69,6 @@ class UdfCacheCatalogService(BaseService):
             return cache_obj.as_dataclass()
 
     def get_entry_by_name(self, name: str) -> UdfCacheCatalogEntry:
-
         try:
             entry = self.model.query.filter(self.model._name == name).one()
             return entry.as_dataclass()

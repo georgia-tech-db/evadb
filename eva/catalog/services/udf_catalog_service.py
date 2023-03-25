@@ -25,18 +25,21 @@ class UdfCatalogService(BaseService):
     def __init__(self):
         super().__init__(UdfCatalog)
 
-    def insert_entry(self, name: str, impl_path: str, type: str) -> UdfCatalogEntry:
+    def insert_entry(
+        self, name: str, impl_path: str, type: str, checksum: str
+    ) -> UdfCatalogEntry:
         """Insert a new udf entry
 
         Arguments:
             name (str): name of the udf
             impl_path (str): path to the udf implementation relative to eva/udf
             type (str): udf operator kind, classification or detection or etc
+            checksum(str): checksum of the udf file content, used for consistency
 
         Returns:
             UdfCatalogEntry: Returns the new entry created
         """
-        udf_obj = self.model(name, impl_path, type)
+        udf_obj = self.model(name, impl_path, type, checksum)
         udf_obj = udf_obj.save()
         return udf_obj.as_dataclass()
 

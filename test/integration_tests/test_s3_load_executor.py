@@ -19,6 +19,7 @@ from test.util import create_dummy_batches, create_sample_video, file_remove
 
 import boto3
 import pandas as pd
+import pytest
 from moto import mock_s3
 
 from eva.catalog.catalog_manager import CatalogManager
@@ -29,6 +30,7 @@ from eva.parser.types import FileFormatType
 from eva.server.command_handler import execute_query_fetch_all
 
 
+@pytest.mark.notparallel
 class S3LoadExecutorTest(unittest.TestCase):
     mock_s3 = mock_s3()
 

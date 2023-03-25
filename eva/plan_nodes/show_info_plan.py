@@ -27,7 +27,10 @@ class ShowInfoPlan(AbstractPlan):
         return self._show_type
 
     def __str__(self):
-        return "ShowUDFPlan" if self._show_type == ShowType.UDF else "ShowTablePlan"
+        if self._show_type == ShowType.UDFS:
+            return "ShowUDFPlan"
+        else:
+            return "ShowTablePlan"
 
     def __hash__(self) -> int:
         return hash((super().__hash__(), self.show_type))

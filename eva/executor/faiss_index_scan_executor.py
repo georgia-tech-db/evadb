@@ -39,9 +39,6 @@ class FaissIndexScanExecutor(AbstractExecutor):
         self.limit_count = node.limit_count
         self.search_query_expr = node.search_query_expr
 
-    def validate(self):
-        pass
-
     def exec(self, *args, **kwargs) -> Iterator[Batch]:
         catalog_manager = CatalogManager()
 

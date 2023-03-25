@@ -33,10 +33,6 @@ class LimitPlan(AbstractPlan):
         super().__init__(PlanOprType.LIMIT)
 
     @property
-    def limit_expression(self):
-        return self._limit_count
-
-    @property
     def limit_value(self):
         return self._limit_count.value
 

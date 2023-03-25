@@ -36,7 +36,6 @@ class StatementType(EVAEnum):
     DELETE  # noqa: F821
     CREATE_UDF  # noqa: F821
     LOAD_DATA  # noqa: F821
-    UPLOAD  # noqa: F821
     CREATE_MATERIALIZED_VIEW  # noqa: F821
     SHOW  # noqa: F821
     DROP_UDF  # noqa: F821

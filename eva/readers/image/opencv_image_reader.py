@@ -12,14 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-import os
 from typing import Dict, Iterator
 
 import cv2
 
 from eva.readers.abstract_reader import AbstractReader
-from eva.utils.logging_manager import logger
 
 
 class CVImageReader(AbstractReader):
@@ -28,17 +25,5 @@ class CVImageReader(AbstractReader):
 
     def _read(self) -> Iterator[Dict]:
         frame = cv2.imread(str(self.file_url))
-        if frame is None:
-            err_msg = f"Failed to read image file {self.file_url}"
-            logger.exception(err_msg)
-            raise Exception(err_msg)
-        else:
-            yield {"data": frame}
-
-    def delete(self):
-        file_url = str(self.file_url)
-        try:
-            os.remove(file_url)
-        except Exception as e:
-            raise FileNotFoundError(f"Error was: {e}")
-        # shutil remove or something
+        assert frame is not None, f"Failed to read image file {self.file_url}"
+        yield {"data": frame}

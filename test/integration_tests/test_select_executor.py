@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import (
+from test.util import (  # file_remove,
     create_dummy_4d_batches,
     create_dummy_batches,
     create_sample_video,
@@ -37,6 +37,7 @@ from eva.server.command_handler import execute_query_fetch_all
 NUM_FRAMES = 10
 
 
+@pytest.mark.notparallel
 class SelectExecutorTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -261,6 +262,28 @@ class SelectExecutorTest(unittest.TestCase):
         actual_batch.sort()
 
         expected_batch = list(create_dummy_batches(filters=range(0, NUM_FRAMES, 7)))
+        expected_batch[0] = expected_batch[0].project(["myvideo.id"])
+
+        self.assertEqual(len(actual_batch), len(expected_batch[0]))
+        self.assertEqual(actual_batch, expected_batch[0])
+
+    def test_select_and_iframe_sample(self):
+        select_query = "SELECT id FROM MyVideo SAMPLE IFRAMES 7 ORDER BY id;"
+        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch.sort()
+
+        expected_batch = list(create_dummy_batches(filters=range(0, NUM_FRAMES, 7)))
+        expected_batch[0] = expected_batch[0].project(["myvideo.id"])
+
+        self.assertEqual(len(actual_batch), len(expected_batch[0]))
+        self.assertEqual(actual_batch, expected_batch[0])
+
+    def test_select_and_iframe_sample_without_sampling_rate(self):
+        select_query = "SELECT id FROM MyVideo SAMPLE IFRAMES ORDER BY id;"
+        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch.sort()
+
+        expected_batch = list(create_dummy_batches(filters=range(0, NUM_FRAMES, 1)))
         expected_batch[0] = expected_batch[0].project(["myvideo.id"])
 
         self.assertEqual(len(actual_batch), len(expected_batch[0]))
@@ -531,7 +554,7 @@ class SelectExecutorTest(unittest.TestCase):
                   FROM MyVideo JOIN LATERAL
                     DummyMultiObjectDetector(data) AS T(a, b);
                 """
-        with self.assertRaises(BinderError) as cm:
+        with self.assertRaises(AssertionError) as cm:
             execute_query_fetch_all(query)
         self.assertEqual(str(cm.exception), "Expected 1 output columns for T, got 2.")
 
@@ -574,7 +597,7 @@ class SelectExecutorTest(unittest.TestCase):
 
     def test_hash_join_with_multiple_tables(self):
         select_query = """SELECT * FROM table1 JOIN table2
-                          ON table1.a0 = table2.a0 JOIN table3
+                          ON table2.a0 = table1.a0 JOIN table3
                           ON table3.a1 = table1.a1 WHERE table1.a2 > 50;"""
         actual_batch = execute_query_fetch_all(select_query)
         tmp = pd.merge(

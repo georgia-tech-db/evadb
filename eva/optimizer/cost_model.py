@@ -19,6 +19,7 @@ from eva.plan_nodes.abstract_plan import AbstractPlan
 from eva.plan_nodes.apply_and_merge_plan import ApplyAndMergePlan
 from eva.plan_nodes.hash_join_build_plan import HashJoinBuildPlan
 from eva.plan_nodes.hash_join_probe_plan import HashJoinProbePlan
+from eva.plan_nodes.nested_loop_join_plan import NestedLoopJoinPlan
 from eva.plan_nodes.seq_scan_plan import SeqScanPlan
 
 
@@ -37,6 +38,10 @@ class CostModel:
 
         @singledispatch
         def cost(opr: AbstractPlan):
+            return 1.0
+
+        @cost.register(NestedLoopJoinPlan)
+        def cost_nested_loop_join_build_plan(opr: NestedLoopJoinPlan):
             return 1.0
 
         @cost.register(HashJoinBuildPlan)

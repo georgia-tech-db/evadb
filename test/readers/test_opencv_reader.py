@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import os
 import unittest
 from test.util import (
     FRAME_SIZE,
@@ -20,8 +19,9 @@ from test.util import (
     create_dummy_batches,
     create_sample_video,
     file_remove,
-    upload_dir_from_config,
 )
+
+import pytest
 
 from eva.expression.abstract_expression import ExpressionType
 from eva.expression.comparison_expression import ComparisonExpression
@@ -31,16 +31,17 @@ from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.readers.opencv_reader import OpenCVReader
 
 
+@pytest.mark.notparallel
 class VideoLoaderTest(unittest.TestCase):
     def setUp(self):
-        create_sample_video()
+        self.video_file_path = create_sample_video()
 
     def tearDown(self):
         file_remove("dummy.avi")
 
     def test_should_return_one_batch(self):
         video_loader = OpenCVReader(
-            file_url=os.path.join(upload_dir_from_config, "dummy.avi"),
+            file_url=self.video_file_path,
             batch_mem_size=NUM_FRAMES * FRAME_SIZE,
         )
         batches = list(video_loader.read())
@@ -49,7 +50,7 @@ class VideoLoaderTest(unittest.TestCase):
 
     def test_should_return_batches_equivalent_to_number_of_frames(self):
         video_loader = OpenCVReader(
-            file_url=os.path.join(upload_dir_from_config, "dummy.avi"),
+            file_url=self.video_file_path,
             batch_mem_size=FRAME_SIZE,
         )
         batches = list(video_loader.read())
@@ -58,7 +59,7 @@ class VideoLoaderTest(unittest.TestCase):
 
     def test_should_skip_first_two_frames_with_offset_two(self):
         video_loader = OpenCVReader(
-            file_url=os.path.join(upload_dir_from_config, "dummy.avi"),
+            file_url=self.video_file_path,
             batch_mem_size=FRAME_SIZE * (NUM_FRAMES - 2),
             offset=2,
         )
@@ -69,7 +70,7 @@ class VideoLoaderTest(unittest.TestCase):
 
     def test_should_start_frame_number_from_two(self):
         video_loader = OpenCVReader(
-            file_url=os.path.join(upload_dir_from_config, "dummy.avi"),
+            file_url=self.video_file_path,
             batch_mem_size=FRAME_SIZE * NUM_FRAMES,
             offset=2,
         )
@@ -83,7 +84,7 @@ class VideoLoaderTest(unittest.TestCase):
         self,
     ):
         video_loader = OpenCVReader(
-            file_url=os.path.join(upload_dir_from_config, "dummy.avi"),
+            file_url=self.video_file_path,
             batch_mem_size=FRAME_SIZE * NUM_FRAMES,
             offset=2,
         )
@@ -94,7 +95,7 @@ class VideoLoaderTest(unittest.TestCase):
     def test_should_sample_every_k_frame(self):
         for k in range(1, 10):
             video_loader = OpenCVReader(
-                file_url=os.path.join(upload_dir_from_config, "dummy.avi"),
+                file_url=self.video_file_path,
                 batch_mem_size=FRAME_SIZE * NUM_FRAMES,
                 sampling_rate=k,
             )
@@ -112,7 +113,7 @@ class VideoLoaderTest(unittest.TestCase):
         )
         for k in range(2, 4):
             video_loader = OpenCVReader(
-                file_url=os.path.join(upload_dir_from_config, "dummy.avi"),
+                file_url=self.video_file_path,
                 batch_mem_size=FRAME_SIZE * NUM_FRAMES,
                 sampling_rate=k,
                 predicate=predicate,
@@ -143,7 +144,7 @@ class VideoLoaderTest(unittest.TestCase):
         )
         for k in range(2, 4):
             video_loader = OpenCVReader(
-                file_url=os.path.join(upload_dir_from_config, "dummy.avi"),
+                file_url=self.video_file_path,
                 batch_mem_size=FRAME_SIZE * NUM_FRAMES,
                 sampling_rate=k,
                 predicate=predicate,

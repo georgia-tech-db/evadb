@@ -42,15 +42,20 @@ class ComparisonExpression(AbstractExpression):
         lbatch = self.get_child(0).evaluate(*args, **kwargs)
         rbatch = self.get_child(1).evaluate(*args, **kwargs)
 
-        if len(lbatch) != len(rbatch):
-            if len(lbatch) == 1:
-                lbatch.repeat(len(rbatch))
-            elif len(rbatch) == 1:
-                rbatch.repeat(len(lbatch))
-            else:
-                raise Exception(
-                    f"Left and Right batch does not have equal elements: left: {len(lbatch)} right: {len(rbatch)}"
-                )
+        assert len(lbatch) == len(
+            rbatch
+        ), f"Left and Right batch does not have equal elements: left: {len(lbatch)} right: {len(rbatch)}"
+
+        assert self.etype in [
+            ExpressionType.COMPARE_EQUAL,
+            ExpressionType.COMPARE_GREATER,
+            ExpressionType.COMPARE_LESSER,
+            ExpressionType.COMPARE_GEQ,
+            ExpressionType.COMPARE_LEQ,
+            ExpressionType.COMPARE_NEQ,
+            ExpressionType.COMPARE_CONTAINS,
+            ExpressionType.COMPARE_IS_CONTAINED,
+        ], f"Expression type not supported {self.etype}"
 
         if self.etype == ExpressionType.COMPARE_EQUAL:
             return Batch.from_eq(lbatch, rbatch)
@@ -68,11 +73,8 @@ class ComparisonExpression(AbstractExpression):
             return Batch.compare_contains(lbatch, rbatch)
         elif self.etype == ExpressionType.COMPARE_IS_CONTAINED:
             return Batch.compare_is_contained(lbatch, rbatch)
-        else:
-            raise NotImplementedError
 
     def get_symbol(self) -> str:
-
         if self.etype == ExpressionType.COMPARE_EQUAL:
             return "="
         elif self.etype == ExpressionType.COMPARE_GREATER:
@@ -89,8 +91,6 @@ class ComparisonExpression(AbstractExpression):
             return "@>"
         elif self.etype == ExpressionType.COMPARE_IS_CONTAINED:
             return "<@"
-        else:
-            raise NotImplementedError
 
     def __str__(self) -> str:
         expr_str = "("

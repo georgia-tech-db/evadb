@@ -60,7 +60,6 @@ class RuleType(Flag):
     LOGICAL_INSERT_TO_PHYSICAL = auto()
     LOGICAL_DELETE_TO_PHYSICAL = auto()
     LOGICAL_LOAD_TO_PHYSICAL = auto()
-    LOGICAL_UPLOAD_TO_PHYSICAL = auto()
     LOGICAL_CREATE_TO_PHYSICAL = auto()
     LOGICAL_RENAME_TO_PHYSICAL = auto()
     LOGICAL_DROP_TO_PHYSICAL = auto()
@@ -71,6 +70,7 @@ class RuleType(Flag):
     LOGICAL_DERIVED_GET_TO_PHYSICAL = auto()
     LOGICAL_LATERAL_JOIN_TO_PHYSICAL = auto()
     LOGICAL_JOIN_TO_PHYSICAL_HASH_JOIN = auto()
+    LOGICAL_JOIN_TO_PHYSICAL_NESTED_LOOP_JOIN = auto()
     LOGICAL_FUNCTION_SCAN_TO_PHYSICAL = auto()
     LOGICAL_FILTER_TO_PHYSICAL = auto()
     LOGICAL_PROJECT_TO_PHYSICAL = auto()
@@ -105,14 +105,16 @@ class Promise(IntEnum):
     LOGICAL_RENAME_TO_PHYSICAL = auto()
     LOGICAL_DROP_TO_PHYSICAL = auto()
     LOGICAL_LOAD_TO_PHYSICAL = auto()
-    LOGICAL_UPLOAD_TO_PHYSICAL = auto()
     LOGICAL_CREATE_TO_PHYSICAL = auto()
     LOGICAL_CREATE_UDF_TO_PHYSICAL = auto()
     LOGICAL_SAMPLE_TO_UNIFORMSAMPLE = auto()
     LOGICAL_GET_TO_SEQSCAN = auto()
     LOGICAL_DERIVED_GET_TO_PHYSICAL = auto()
     LOGICAL_LATERAL_JOIN_TO_PHYSICAL = auto()
+
     LOGICAL_JOIN_TO_PHYSICAL_HASH_JOIN = auto()
+    LOGICAL_JOIN_TO_PHYSICAL_NESTED_LOOP_JOIN = auto()
+
     LOGICAL_FUNCTION_SCAN_TO_PHYSICAL = auto()
     LOGICAL_FILTER_TO_PHYSICAL = auto()
     LOGICAL_PROJECT_TO_PHYSICAL = auto()
@@ -162,10 +164,6 @@ class Rule(ABC):
     @property
     def pattern(self):
         return self._pattern
-
-    @pattern.setter
-    def pattern(self, pattern):
-        self._pattern = pattern
 
     def top_match(self, opr: Operator) -> bool:
         return opr.opr_type == self.pattern.opr_type

@@ -12,10 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
 import shutil
 import zlib
 from pathlib import Path
-from typing import Iterator
 
 import pandas as pd
 
@@ -25,7 +25,6 @@ from eva.models.storage.batch import Batch
 from eva.parser.table_ref import TableInfo
 from eva.storage.abstract_storage_engine import AbstractStorageEngine
 from eva.storage.sqlite_storage_engine import SQLStorageEngine
-from eva.utils.errors import CatalogError
 from eva.utils.logging_manager import logger
 
 
@@ -72,15 +71,17 @@ class AbstractMediaStorageEngine(AbstractStorageEngine):
         return True
 
     def drop(self, table: TableCatalogEntry):
-        dir_path = Path(table.file_url)
         try:
+            dir_path = Path(table.file_url)
             shutil.rmtree(str(dir_path))
             metadata_table = self._get_metadata_table(table)
             self._rdb_handler.drop(metadata_table)
             # remove the metadata table from the catalog
             CatalogManager().delete_table_catalog_entry(metadata_table)
         except Exception as e:
-            logger.exception(f"Failed to drop the image table {e}")
+            err_msg = f"Failed to drop the image table {e}"
+            logger.exception(err_msg)
+            raise Exception(err_msg)
 
     def delete(self, table: TableCatalogEntry, rows: Batch):
         try:
@@ -113,7 +114,8 @@ class AbstractMediaStorageEngine(AbstractStorageEngine):
                     raise FileExistsError(
                         f"Duplicate File: {media_file} already exists in the table {table.name}"
                     )
-                shutil.copy2(str(media_file), str(dst_path))
+                src_path = Path.cwd() / media_file
+                os.symlink(src_path, dst_path)
                 copied_files.append(dst_path)
             # assuming sql write is an atomic operation
             self._rdb_handler.write(
@@ -131,15 +133,8 @@ class AbstractMediaStorageEngine(AbstractStorageEngine):
         else:
             return True
 
-    def read(self, table: TableCatalogEntry) -> Iterator[Batch]:
-        raise NotImplementedError
-
     def rename(self, old_table: TableCatalogEntry, new_name: TableInfo):
         try:
             CatalogManager().rename_table_catalog_entry(old_table, new_name)
-        except CatalogError as err:
-            raise Exception(f"Failed to rename table {new_name} with exception {err}")
         except Exception as e:
-            raise Exception(
-                f"Unexpected exception {str(e)} occured during rename operation"
-            )
+            raise Exception(f"Failed to rename table {new_name} with exception {e}")

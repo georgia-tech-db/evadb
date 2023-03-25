@@ -46,8 +46,20 @@ class InsertTableStatement(AbstractStatement):
         self._value_list = value_list
 
     def __str__(self) -> str:
+        column_list_str = ""
+        if self._column_list is not None:
+            for expr in self._column_list:
+                column_list_str += str(expr) + ", "
+            column_list_str = column_list_str.rstrip(", ")
+
+        value_list_str = ""
+        if self._value_list is not None:
+            for expr in self._value_list:
+                value_list_str += str(expr) + ", "
+            value_list_str = value_list_str.rstrip(", ")
+
         print_str = "INSERT INTO {}({}) VALUES ({}) ".format(
-            self._table, self._column_list, self._value_list
+            self._table_ref, column_list_str, value_list_str
         )
         return print_str
 

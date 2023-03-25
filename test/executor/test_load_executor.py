@@ -73,9 +73,7 @@ class LoadExecutorTest(unittest.TestCase):
         self, factory_mock, catalog_mock
     ):
         # creates a dummy.csv
-        create_sample_csv()
-
-        file_path = "dummy.csv"
+        file_path = create_sample_csv()
         table_info = TableInfo("dummy")
         batch_mem_size = 3000
         file_options = {}
