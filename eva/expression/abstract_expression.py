@@ -93,16 +93,6 @@ class AbstractExpression(ABC):
     def get_children_count(self) -> int:
         return len(self._children)
 
-    def get_function_expression_children_count(self) -> int:
-        from eva.expression.function_expression import FunctionExpression
-
-        functionExpressionCount = 0
-        for child in self._children:
-            for c in child.children:
-                if isinstance(c, FunctionExpression):
-                    functionExpressionCount = functionExpressionCount + 1
-        return functionExpressionCount
-
     @property
     def etype(self) -> ExpressionType:
         return self._etype

@@ -180,16 +180,17 @@ def extract_pushdown_predicate_for_alias(
     )
 
 
-def get_func_expression_execution_cost(expr: FunctionExpression) -> float:
+def get_expression_execution_cost(expr: AbstractExpression) -> float:
     """
-    This function computes the estimated cost of executing a given function expression
-    based on the statistics in the catalog. If no statistics are available, it assumes
-    a default cost, DEFAULT_FUNCTION_EXPRESSION_COST. If the function expression is
-    nested, it computes the total cost including all the child function expressions.
+    This function computes the estimated cost of executing the given abstract expression
+    based on the statistics in the catalog. The function assumes that all the
+    expression, except for the FunctionExpression, have a cost of zero.
+    For FunctionExpression, it checks the catalog for relevant statistics; if none are
+    available, it uses a default cost of DEFAULT_FUNCTION_EXPRESSION_COST.
 
     Args:
-        expr (FunctionExpression): The FunctionExpression object whose cost needs to be
-        computed.
+        expr (AbstractExpression): The AbstractExpression object whose cost
+        needs to be computed.
 
     Returns:
         float: The estimated cost of executing the function expression.

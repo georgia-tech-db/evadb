@@ -29,7 +29,7 @@ from eva.optimizer.optimizer_utils import (
     extract_equi_join_keys,
     extract_pushdown_predicate,
     extract_pushdown_predicate_for_alias,
-    get_func_expression_execution_cost,
+    get_expression_execution_cost,
 )
 from eva.optimizer.rules.pattern import Pattern
 from eva.optimizer.rules.rules_base import Promise, Rule, RuleType
@@ -504,9 +504,12 @@ class LogicalInnerJoinCommutativity(Rule):
 
 
 class ReorderPredicates(Rule):
-    """The current implementation orders conjuncts based on their individual cost.
-    The optimization for OR clauses has `not` been implemented yet. Additionally, we do not optimize predicates that are not user-defined functions since we assume that
-    they will likely be pushed to the underlying relational database, which will handle the optimization process.
+    """
+    The current implementation orders conjuncts based on their individual cost.
+    The optimization for OR clauses has `not` been implemented yet. Additionally, we do
+    not optimize predicates that are not user-defined functions since we assume that
+    they will likely be pushed to the underlying relational database, which will handle
+    the optimization process.
     """
 
     def __init__(self):
@@ -518,7 +521,7 @@ class ReorderPredicates(Rule):
         return Promise.REORDER_PREDICATES
 
     def check(self, before: LogicalFilter, context: OptimizerContext):
-        # there exists atleast oen Function Expression
+        # there exists atleast one Function Expression
         return len(list(before.predicate.find_all(FunctionExpression))) > 0
 
     def apply(self, before: LogicalFilter, context: OptimizerContext):
@@ -526,18 +529,18 @@ class ReorderPredicates(Rule):
         conjuncts = to_conjunction_list(before.predicate)
 
         # Segregate the conjuncts into simple and function expressions
-        func_exprs = []
+        contains_func_exprs = []
         simple_exprs = []
         for conjunct in conjuncts:
-            if isinstance(conjunct, FunctionExpression):
-                func_exprs.append(conjunct)
+            if list(conjunct.find_all(FunctionExpression)):
+                contains_func_exprs.append(conjunct)
             else:
                 simple_exprs.append(conjunct)
 
         # Compute the cost of every function expression and sort them in
         # ascending order of cost
         function_expr_cost_tuples = [
-            (expr, get_func_expression_execution_cost(expr)) for expr in func_exprs
+            (expr, get_expression_execution_cost(expr)) for expr in contains_func_exprs
         ]
         function_expr_cost_tuples = sorted(
             function_expr_cost_tuples, key=lambda x: x[1]
@@ -548,8 +551,8 @@ class ReorderPredicates(Rule):
             expr for (expr, _) in function_expr_cost_tuples
         ]
 
-        # we don't return a new plan if nothing has changed
-        # this ensures we do nt keep applying this optimization
+        # we do not return a new plan if nothing has changed
+        # this ensures we do not keep applying this optimization
         if ordered_conjuncts != conjuncts:
             # Build expression tree based on the ordered conjuncts
             reordered_predicate = conjunction_list_to_expression_tree(ordered_conjuncts)

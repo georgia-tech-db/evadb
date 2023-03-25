@@ -13,13 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import load_inbuilt_udfs
+from test.util import get_physical_query_plan, load_inbuilt_udfs
 
 import pytest
-from mock import patch
+from mock import MagicMock, patch
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
+from eva.expression.comparison_expression import ComparisonExpression
 from eva.optimizer.plan_generator import PlanGenerator
 from eva.optimizer.rules.rules import (
     PushDownFilterThroughApplyAndMerge,
@@ -27,6 +28,7 @@ from eva.optimizer.rules.rules import (
     XformLateralJoinToLinearFlow,
 )
 from eva.optimizer.rules.rules_manager import disable_rules
+from eva.plan_nodes.predicate_plan import PredicatePlan
 from eva.server.command_handler import execute_query_fetch_all
 from eva.utils.stats import Timer
 
@@ -124,32 +126,95 @@ class OptimizerRulesTest(unittest.TestCase):
         self.assertEqual(result_without_pushdown_join_rule, result_with_rule)
         self.assertEqual(query_plan, query_plan_without_pushdown_join_rule)
 
-    @patch("from eva.optimizer.optimizer_utils.get_func_expression_execution_cost")
+    @patch("eva.catalog.catalog_manager.CatalogManager.get_udf_cost_catalog_entry")
     def test_should_reorder_predicate(self, mock):
         def side_effect_func(name):
-            if name == "DummyObjectDetector":
-                return 5
+            if name == "DummyMultiObjectDetector":
+                return MagicMock(cost=10)
             else:
-                return 10
+                return MagicMock(cost=5)
 
         mock.side_effect = side_effect_func
 
-        query = """SELECT id FROM MyVideo \
-            WHERE DummyObjectDetector(data).label = ['person']  AND DummyMultiObjectDetector(data).label  ORDER BY id;"""
-        persons = execute_query_fetch_all(query.format("person")).frames.to_numpy()
-        bicycles = execute_query_fetch_all(query.format("bicycle")).frames.to_numpy()
-        import numpy as np
+        cheap_pred = "DummyObjectDetector(data).label = ['person']"
+        costly_pred = "DummyMultiObjectDetector(data).labels @> ['person']"
 
-        self.assertTrue(len(np.intersect1d(persons, bicycles)) == 0)
+        query = f"SELECT id FROM MyVideo WHERE {costly_pred} AND {cheap_pred};"
 
-        query_or = """SELECT id FROM MyVideo \
-            WHERE DummyObjectDetector(data).label = ['person']  OR DummyObjectDetector(data).label = ['bicycle'] ORDER BY id;"""
-        actual = execute_query_fetch_all(query_or)
-        expected = execute_query_fetch_all("SELECT id FROM MyVideo ORDER BY id")
-        self.assertEqual(expected, actual)
+        plan = get_physical_query_plan(query)
+        predicate_plans = list(plan.find_all(PredicatePlan))
+        self.assertEqual(len(predicate_plans), 1)
 
-        udfPredicateReorderingQuery = """SELECT id FROM MyVideo \
-            WHERE DummyObjectDetector(data).label = ['person']  ORDER BY id;"""
+        left: ComparisonExpression = predicate_plans[0].predicate.children[0]
+        right: ComparisonExpression = predicate_plans[0].predicate.children[1]
 
-        result = execute_query_fetch_all(udfPredicateReorderingQuery)
-        print(result.frames[0][0])
+        # predicates reordered based on the cost
+        self.assertEqual(left.children[0].name, "DummyObjectDetector")
+        self.assertEqual(right.children[0].name, "DummyMultiObjectDetector")
+
+    @patch("eva.catalog.catalog_manager.CatalogManager.get_udf_cost_catalog_entry")
+    def test_should_reorder_multiple_predicates(self, mock):
+        def side_effect_func(name):
+            if name == "DummyMultiObjectDetector":
+                return MagicMock(cost=10)
+            else:
+                return MagicMock(cost=5)
+
+        mock.side_effect = side_effect_func
+
+        chepeast_pred = "id<10"
+        cheap_pred = "DummyObjectDetector(data).label = ['person']"
+        costly_pred = "DummyMultiObjectDetector(data).labels @> ['person']"
+
+        query = (
+            f"SELECT id FROM MyVideo WHERE {costly_pred} AND {cheap_pred} AND "
+            f"{chepeast_pred};"
+        )
+
+        plan = get_physical_query_plan(query)
+        predicate_plans = list(plan.find_all(PredicatePlan))
+        self.assertEqual(len(predicate_plans), 1)
+
+        left = predicate_plans[0].predicate.children[0]
+        right = predicate_plans[0].predicate.children[1]
+
+        # only 2 comparison expressions as id predicate is pushed down
+        self.assertIsInstance(left, ComparisonExpression)
+        self.assertIsInstance(right, ComparisonExpression)
+        # predicates reordered based on the cost
+        self.assertEqual(left.children[0].name, "DummyObjectDetector")
+        self.assertEqual(right.children[0].name, "DummyMultiObjectDetector")
+
+    @patch("eva.catalog.catalog_manager.CatalogManager.get_udf_cost_catalog_entry")
+    def test_should_not_reorder_predicates(self, mock):
+        def _check(cost_func):
+            mock.side_effect = cost_func
+            cheap_pred = "DummyObjectDetector(data).label = ['person']"
+            costly_pred = "DummyMultiObjectDetector(data).labels @> ['person']"
+
+            query = f"SELECT id FROM MyVideo WHERE {cheap_pred} AND {costly_pred};"
+            plan = get_physical_query_plan(query)
+
+            predicate_plans = list(plan.find_all(PredicatePlan))
+            self.assertEqual(len(predicate_plans), 1)
+
+            left: ComparisonExpression = predicate_plans[0].predicate.children[0]
+            right: ComparisonExpression = predicate_plans[0].predicate.children[1]
+
+            # predicates should not be reordered
+            self.assertEqual(left.children[0].name, "DummyObjectDetector")
+            self.assertEqual(right.children[0].name, "DummyMultiObjectDetector")
+
+        # no reordering if first predicate has lower cost
+        _check(
+            lambda name: MagicMock(cost=10)
+            if name == "DummyMultiObjectDetector"
+            else MagicMock(cost=5)
+        )
+
+        # no reordering if both predicates have same cost
+        _check(
+            lambda name: MagicMock(cost=5)
+            if name == "DummyMultiObjectDetector"
+            else MagicMock(cost=5)
+        )
