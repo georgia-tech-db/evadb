@@ -14,8 +14,6 @@
 # limitations under the License.
 from typing import List
 
-from sqlalchemy.orm.exc import NoResultFound
-
 from eva.catalog.models.udf_metadata_catalog import (
     UdfMetadataCatalog,
     UdfMetadataCatalogEntry,
@@ -52,10 +50,3 @@ class UdfMetadataCatalogService(BaseService):
             error = f"Getting metadata entries for UDF id {udf_id} raised {e}"
             logger.error(error)
             raise CatalogError(error)
-
-    def get_all_entries(self) -> List[UdfMetadataCatalogEntry]:
-        try:
-            entries = self.model.query.all()
-            return [entry.as_dataclass() for entry in entries]
-        except NoResultFound:
-            return []
