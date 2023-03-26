@@ -24,7 +24,6 @@ from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.catalog.schema_utils import SchemaUtils
 from eva.catalog.sql_config import IDENTIFIER_COLUMN, SQLConfig
-from eva.expression.abstract_expression import ExpressionType
 from eva.expression.comparison_expression import ComparisonExpression
 from eva.expression.expression_utils import predicate_node_to_filter
 from eva.models.storage.batch import Batch
@@ -200,7 +199,7 @@ class SQLStorageEngine(AbstractStorageEngine):
         try:
             table_to_delete_from = self._try_loading_table_via_reflection(table.name)
 
-            filter_clause = self.single_predicate_node_to_filter(
+            filter_clause = predicate_node_to_filter(
                 table=table_to_delete_from, predicate_node=where_clause
             )
             # verify where clause and convert to sqlalchemy supported filter

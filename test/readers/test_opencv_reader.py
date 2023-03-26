@@ -21,6 +21,8 @@ from test.util import (
     file_remove,
 )
 
+import pytest
+
 from eva.expression.abstract_expression import ExpressionType
 from eva.expression.comparison_expression import ComparisonExpression
 from eva.expression.constant_value_expression import ConstantValueExpression
@@ -29,6 +31,7 @@ from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.readers.opencv_reader import OpenCVReader
 
 
+@pytest.mark.notparallel
 class VideoLoaderTest(unittest.TestCase):
     def setUp(self):
         self.video_file_path = create_sample_video()

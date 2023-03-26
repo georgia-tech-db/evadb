@@ -18,6 +18,7 @@ from typing import Iterator
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.expression.abstract_expression import AbstractExpression
 from eva.models.storage.batch import Batch
+from eva.readers.decord_reader import DecordReader
 from eva.readers.opencv_reader import OpenCVReader
 from eva.storage.abstract_media_storage_engine import AbstractMediaStorageEngine
 
@@ -32,8 +33,8 @@ class OpenCVStorageEngine(AbstractMediaStorageEngine):
         batch_mem_size: int,
         predicate: AbstractExpression = None,
         sampling_rate: int = None,
+        sampling_type: str = None,
     ) -> Iterator[Batch]:
-
         for video_files in self._rdb_handler.read(self._get_metadata_table(table), 12):
             for video_file_name in video_files.frames["file_url"]:
                 system_file_name = self._xform_file_url_to_file_name(video_file_name)
@@ -44,6 +45,15 @@ class OpenCVStorageEngine(AbstractMediaStorageEngine):
                     predicate=predicate,
                     sampling_rate=sampling_rate,
                 )
+
+                if sampling_type is not None:
+                    reader = DecordReader(
+                        str(video_file),
+                        batch_mem_size=batch_mem_size,
+                        predicate=predicate,
+                        sampling_rate=sampling_rate,
+                        sampling_type=sampling_type,
+                    )
                 for batch in reader.read():
                     column_name = table.columns[1].name
                     batch.frames[column_name] = str(video_file_name)

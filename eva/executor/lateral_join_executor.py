@@ -12,13 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Generator, Iterator
+from typing import Iterator
 
 from eva.executor.abstract_executor import AbstractExecutor
-from eva.executor.executor_utils import ExecutorError, apply_predicate, apply_project
+from eva.executor.executor_utils import apply_predicate, apply_project
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.lateral_join_plan import LateralJoinPlan
-from eva.utils.logging_manager import logger
 
 
 class LateralJoinExecutor(AbstractExecutor):
@@ -27,24 +26,14 @@ class LateralJoinExecutor(AbstractExecutor):
         self.predicate = node.join_predicate
         self.join_project = node.join_project
 
-    def validate(self):
-        pass
-
     def exec(self, *args, **kwargs) -> Iterator[Batch]:
         outer = self.children[0]
         inner = self.children[1]
-        try:
-            for outer_batch in outer.exec(**kwargs):
-                for result_batch in inner.exec(lateral_input=outer_batch):
-                    result_batch = Batch.join(outer_batch, result_batch)
-                    result_batch.reset_index()
-                    result_batch = apply_predicate(result_batch, self.predicate)
-                    result_batch = apply_project(result_batch, self.join_project)
-                    if not result_batch.empty():
-                        yield result_batch
-        except Exception as e:
-            logger.error(e)
-            raise ExecutorError(e)
-
-    def __call__(self, *args, **kwargs) -> Generator[Batch, None, None]:
-        yield from self.exec(*args, **kwargs)
+        for outer_batch in outer.exec(**kwargs):
+            for result_batch in inner.exec(lateral_input=outer_batch):
+                result_batch = Batch.join(outer_batch, result_batch)
+                result_batch.reset_index()
+                result_batch = apply_predicate(result_batch, self.predicate)
+                result_batch = apply_project(result_batch, self.join_project)
+                if not result_batch.empty():
+                    yield result_batch

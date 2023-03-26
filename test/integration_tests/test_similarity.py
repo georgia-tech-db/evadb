@@ -17,6 +17,7 @@ from test.util import create_sample_image, load_inbuilt_udfs
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.models.storage.batch import Batch
@@ -24,6 +25,7 @@ from eva.server.command_handler import execute_query_fetch_all
 from eva.storage.storage_engine import StorageEngine
 
 
+@pytest.mark.notparallel
 class SimilarityTests(unittest.TestCase):
     def setUp(self):
         CatalogManager().reset()

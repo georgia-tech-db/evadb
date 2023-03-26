@@ -42,6 +42,7 @@ class RuleType(Flag):
     XFORM_LATERAL_JOIN_TO_LINEAR_FLOW = auto()
     PUSHDOWN_FILTER_THROUGH_APPLY_AND_MERGE = auto()
     COMBINE_SIMILARITY_ORDERBY_AND_LIMIT_TO_FAISS_INDEX_SCAN = auto()
+    REORDER_PREDICATES = auto()
 
     REWRITE_DELIMETER = auto()
 
@@ -69,6 +70,7 @@ class RuleType(Flag):
     LOGICAL_DERIVED_GET_TO_PHYSICAL = auto()
     LOGICAL_LATERAL_JOIN_TO_PHYSICAL = auto()
     LOGICAL_JOIN_TO_PHYSICAL_HASH_JOIN = auto()
+    LOGICAL_JOIN_TO_PHYSICAL_NESTED_LOOP_JOIN = auto()
     LOGICAL_FUNCTION_SCAN_TO_PHYSICAL = auto()
     LOGICAL_FILTER_TO_PHYSICAL = auto()
     LOGICAL_PROJECT_TO_PHYSICAL = auto()
@@ -109,7 +111,10 @@ class Promise(IntEnum):
     LOGICAL_GET_TO_SEQSCAN = auto()
     LOGICAL_DERIVED_GET_TO_PHYSICAL = auto()
     LOGICAL_LATERAL_JOIN_TO_PHYSICAL = auto()
+
     LOGICAL_JOIN_TO_PHYSICAL_HASH_JOIN = auto()
+    LOGICAL_JOIN_TO_PHYSICAL_NESTED_LOOP_JOIN = auto()
+
     LOGICAL_FUNCTION_SCAN_TO_PHYSICAL = auto()
     LOGICAL_FILTER_TO_PHYSICAL = auto()
     LOGICAL_PROJECT_TO_PHYSICAL = auto()
@@ -134,6 +139,7 @@ class Promise(IntEnum):
     PUSHDOWN_FILTER_THROUGH_JOIN = auto()
     PUSHDOWN_FILTER_THROUGH_APPLY_AND_MERGE = auto()
     COMBINE_SIMILARITY_ORDERBY_AND_LIMIT_TO_FAISS_INDEX_SCAN = auto()
+    REORDER_PREDICATES = auto()
 
 
 class Rule(ABC):
@@ -156,10 +162,6 @@ class Rule(ABC):
     @property
     def pattern(self):
         return self._pattern
-
-    @pattern.setter
-    def pattern(self, pattern):
-        self._pattern = pattern
 
     def top_match(self, opr: Operator) -> bool:
         return opr.opr_type == self.pattern.opr_type

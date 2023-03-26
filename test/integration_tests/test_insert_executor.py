@@ -17,12 +17,14 @@ from test.util import create_sample_video, file_remove, load_inbuilt_udfs
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.server.command_handler import execute_query_fetch_all
 from eva.utils.logging_manager import logger
 
 
+@pytest.mark.notparallel
 class InsertExecutorTest(unittest.TestCase):
     def setUp(self):
         # reset the catalog manager before running each test

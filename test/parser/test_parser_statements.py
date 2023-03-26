@@ -27,19 +27,32 @@ class ParserStatementTests(unittest.TestCase):
 
         queries = [
             "CREATE INDEX testindex ON MyVideo (featCol) USING HNSW;",
+            """CREATE TABLE IF NOT EXISTS Persons (
+                  Frame_ID INTEGER UNIQUE,
+                  Frame_Data TEXT(10),
+                  Frame_Value FLOAT(1000, 201),
+                  Frame_Array NDARRAY UINT8(5, 100, 2432, 4324, 100)
+            )""",
             "RENAME TABLE student TO student_info",
             "DROP TABLE IF EXISTS student_info",
+            "DROP TABLE student_info",
             "DROP UDF FastRCNN;",
+            "SELECT MIN(id), MAX(id), SUM(id) FROM ABC",
             "SELECT CLASS FROM TAIPAI \
                 WHERE (CLASS = 'VAN' AND REDNESS < 300)  OR REDNESS > 500;",
             "SELECT CLASS, REDNESS FROM TAIPAI \
             UNION ALL SELECT CLASS, REDNESS FROM SHANGHAI;",
+            "SELECT CLASS, REDNESS FROM TAIPAI \
+            UNION SELECT CLASS, REDNESS FROM SHANGHAI;",
             "SELECT FIRST(id) FROM TAIPAI GROUP BY '8f';",
             "SELECT CLASS, REDNESS FROM TAIPAI \
                     WHERE (CLASS = 'VAN' AND REDNESS < 400 ) OR REDNESS > 700 \
-                    ORDER BY CLASS, REDNESS DESC;"
+                    ORDER BY CLASS, REDNESS DESC;",
             "INSERT INTO MyVideo (Frame_ID, Frame_Path)\
                                     VALUES    (1, '/mnt/frames/1.png');",
+            """INSERT INTO testDeleteOne (id, feat, salary, input)
+                VALUES (15, 2.5, [[100, 100, 100]], [[100, 100, 100]]);""",
+            """DELETE FROM Foo WHERE id < 6""",
             """LOAD VIDEO 'data/video.mp4' INTO MyVideo""",
             """LOAD IMAGE 'data/pic.jpg' INTO MyImage""",
             """LOAD CSV 'data/meta.csv' INTO
@@ -67,7 +80,7 @@ class ParserStatementTests(unittest.TestCase):
                   IMPL  'eva/udfs/face_detector.py';
             """,
             "SHOW TABLES;",
-            "SHOW UDFS",
+            "SHOW UDFS;",
             "EXPLAIN SELECT a FROM foo;",
             """SELECT data FROM MyVideo WHERE id < 5
                     ORDER BY Similarity(FeatureExtractor(Open("abc.jpg")),
@@ -80,6 +93,7 @@ class ParserStatementTests(unittest.TestCase):
         self.assertNotEqual(ref_stmt.__str__(), None)
 
         statement_to_query_dict = {}
+        statement_to_query_dict[ref_stmt] = queries[0]
 
         for other_query in queries[1:]:
             stmt = parser.parse(other_query)[0]

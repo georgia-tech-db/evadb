@@ -17,11 +17,9 @@ import pandas as pd
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import TableType
 from eva.executor.abstract_executor import AbstractExecutor
-from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.insert_plan import InsertPlan
 from eva.storage.storage_engine import StorageEngine
-from eva.utils.logging_manager import logger
 
 
 class InsertExecutor(AbstractExecutor):
@@ -29,43 +27,33 @@ class InsertExecutor(AbstractExecutor):
         super().__init__(node)
         self.catalog = CatalogManager()
 
-    def validate(self):
-        pass
-
-    def exec(self):
+    def exec(self, *args, **kwargs):
         storage_engine = None
         table_catalog_entry = None
-        try:
-            # Get catalog entry
-            table_name = self.node.table_ref.table.table_name
-            database_name = self.node.table_ref.table.database_name
-            table_catalog_entry = self.catalog.get_table_catalog_entry(
-                table_name, database_name
-            )
 
-            # Implemented only for STRUCTURED_DATA
-            if table_catalog_entry.table_type != TableType.STRUCTURED_DATA:
-                raise NotImplementedError("INSERT only implemented for structured data")
+        # Get catalog entry
+        table_name = self.node.table_ref.table.table_name
+        database_name = self.node.table_ref.table.database_name
+        table_catalog_entry = self.catalog.get_table_catalog_entry(
+            table_name, database_name
+        )
 
-            values_to_insert = [val_node.value for val_node in self.node.value_list]
-            tuple_to_insert = tuple(values_to_insert)
-            columns_to_insert = [
-                col_node.col_name for col_node in self.node.column_list
-            ]
+        # Implemented only for STRUCTURED_DATA
+        assert (
+            table_catalog_entry.table_type == TableType.STRUCTURED_DATA
+        ), "INSERT only implemented for structured data"
 
-            # Adding all values to Batch for insert
-            logger.info(values_to_insert)
-            logger.info(columns_to_insert)
-            dataframe = pd.DataFrame([tuple_to_insert], columns=columns_to_insert)
-            batch = Batch(dataframe)
+        values_to_insert = [val_node.value for val_node in self.node.value_list]
+        tuple_to_insert = tuple(values_to_insert)
+        columns_to_insert = [col_node.col_name for col_node in self.node.column_list]
 
-            storage_engine = StorageEngine.factory(table_catalog_entry)
-            storage_engine.write(table_catalog_entry, batch)
-        except Exception as e:
-            err_msg = f"Insert failed: encountered unexpected error {str(e)}"
-            logger.error(err_msg)
-            raise ExecutorError(err_msg)
-        else:
-            yield Batch(
-                pd.DataFrame([f"Number of rows loaded: {str(len(values_to_insert))}"])
-            )
+        # Adding all values to Batch for insert
+        dataframe = pd.DataFrame([tuple_to_insert], columns=columns_to_insert)
+        batch = Batch(dataframe)
+
+        storage_engine = StorageEngine.factory(table_catalog_entry)
+        storage_engine.write(table_catalog_entry, batch)
+
+        yield Batch(
+            pd.DataFrame([f"Number of rows loaded: {str(len(values_to_insert))}"])
+        )

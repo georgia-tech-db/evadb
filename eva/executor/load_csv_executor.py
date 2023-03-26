@@ -30,10 +30,7 @@ class LoadCSVExecutor(AbstractExecutor):
         super().__init__(node)
         self.catalog = CatalogManager()
 
-    def validate(self):
-        pass
-
-    def exec(self):
+    def exec(self, *args, **kwargs):
         """
         Read the input csv file using pandas and persist data
         using storage engine

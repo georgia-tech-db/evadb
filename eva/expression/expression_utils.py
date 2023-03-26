@@ -51,7 +51,7 @@ def to_conjunction_list(
     return expression_list
 
 
-def conjuction_list_to_expression_tree(
+def conjunction_list_to_expression_tree(
     expression_list: List[AbstractExpression],
 ) -> AbstractExpression:
     """Convert expression list to expression tree using conjuction connector
@@ -64,7 +64,7 @@ def conjuction_list_to_expression_tree(
         AbstractExpression: expression tree
 
     Example:
-        conjuction_list_to_expression_tree([a, b, c] ): AND( AND(a, b), c)
+        conjunction_list_to_expression_tree([a, b, c] ): AND( AND(a, b), c)
     """
     if len(expression_list) == 0:
         return None
@@ -301,7 +301,7 @@ def is_simple_predicate(predicate: AbstractExpression) -> bool:
 
 
 def predicate_node_to_filter(
-    self, table: TableCatalogEntry, predicate_node: ComparisonExpression
+    table: TableCatalogEntry, predicate_node: ComparisonExpression
 ):
     filter_clause = []
     column = predicate_node.children[0].col_name
