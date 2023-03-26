@@ -14,12 +14,11 @@
 # limitations under the License.
 import os
 import random
-import socket
-from typing import List, Set
+from typing import List
 
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.constants import NO_GPU
-from eva.utils.generic_utils import is_gpu_available, get_gpu_count
+from eva.utils.generic_utils import get_gpu_count, is_gpu_available
 
 
 class Context:

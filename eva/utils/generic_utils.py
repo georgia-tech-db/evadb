@@ -112,6 +112,7 @@ def get_gpu_count() -> int:
     """
     try:
         import torch
+
         return torch.cuda.device_count()
     except ImportError:
         return 0

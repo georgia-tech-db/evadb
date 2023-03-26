@@ -24,7 +24,9 @@ class ExecutionContextTest(unittest.TestCase):
     @patch("eva.executor.execution_context.ConfigurationManager")
     @patch("eva.executor.execution_context.get_gpu_count")
     @patch("eva.executor.execution_context.is_gpu_available")
-    def test_gpu_devices_gets_populated_from_config(self, gpu_check, get_gpu_count, cfm):
+    def test_gpu_devices_gets_populated_from_config(
+        self, gpu_check, get_gpu_count, cfm
+    ):
         gpu_check.return_value = True
         get_gpu_count.return_value = 3
         cfm.return_value.get_value.return_value = [0, 1]
