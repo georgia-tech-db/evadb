@@ -13,6 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import List
+
+from sqlalchemy.orm.exc import NoResultFound
+
 from eva.catalog.models.udf_cost_catalog import UdfCostCatalog, UdfCostCatalogEntry
 from eva.catalog.services.base_service import BaseService
 from eva.utils.errors import CatalogError
@@ -81,3 +85,10 @@ class UdfCostCatalogService(BaseService):
             raise CatalogError(
                 f"Error while getting entry for udf {name} from UdfCostCatalog: {str(e)}"
             )
+
+    def get_all_entries(self) -> List[UdfCostCatalogEntry]:
+        try:
+            entries = self.model.query.all()
+            return [entry.as_dataclass() for entry in entries]
+        except NoResultFound:
+            return []
