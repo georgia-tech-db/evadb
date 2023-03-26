@@ -69,10 +69,3 @@ class ColumnCatalogService(BaseService):
 
         except NoResultFound:
             return None
-
-    def get_all_entries(self) -> List[ColumnCatalogEntry]:
-        try:
-            entries = self.model.query.all()
-            return [entry.as_dataclass() for entry in entries]
-        except NoResultFound:
-            return []

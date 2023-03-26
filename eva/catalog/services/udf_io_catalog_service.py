@@ -14,8 +14,6 @@
 # limitations under the License.
 from typing import List
 
-from sqlalchemy.orm.exc import NoResultFound
-
 from eva.catalog.models.udf_io_catalog import UdfIOCatalog, UdfIOCatalogEntry
 from eva.catalog.services.base_service import BaseService
 from eva.utils.logging_manager import logger
@@ -67,10 +65,3 @@ class UdfIOCatalogService(BaseService):
                 udf_id=io.udf_id,
             )
             io_obj.save()
-
-    def get_all_entries(self) -> List[UdfIOCatalogEntry]:
-        try:
-            entries = self.model.query.all()
-            return [entry.as_dataclass() for entry in entries]
-        except NoResultFound:
-            return []
