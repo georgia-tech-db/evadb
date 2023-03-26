@@ -106,6 +106,17 @@ def is_gpu_available() -> bool:
         return False
 
 
+def get_gpu_count() -> int:
+    """
+    Check number of GPUs through Torch.
+    """
+    try:
+        import torch
+        return torch.cuda.device_count()
+    except ImportError:
+        return 0
+
+
 def generate_file_path(name: str = "") -> Path:
     """Generates a arbitrary file_path(md5 hash) based on the a random salt
     and name

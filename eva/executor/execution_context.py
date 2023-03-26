@@ -19,7 +19,7 @@ from typing import List, Set
 
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.constants import NO_GPU
-from eva.utils.generic_utils import is_gpu_available
+from eva.utils.generic_utils import is_gpu_available, get_gpu_count
 
 
 class Context:
@@ -42,30 +42,26 @@ class Context:
     def gpus(self):
         return self._gpus
 
-    def _possible_addresses(self) -> Set:
-        host = socket.gethostname()
-        result_address = {host}
-        true_host, aliases, address = socket.gethostbyaddr(host)
-        result_address.add(true_host)
-        result_address.update(set(aliases).union(set(address)))
-        return result_address
-
     def _populate_gpu_from_config(self) -> List:
-        gpu_conf = self._config_manager.get_value("executor", "gpus")
-        gpu_conf = gpu_conf if gpu_conf else {}
-        this_address = self._possible_addresses()
-        intersection_addresses = this_address.intersection(gpu_conf.keys())
-        if len(intersection_addresses) != 0:
-            return [str(gpu) for gpu in gpu_conf.get(intersection_addresses.pop())]
-        return []
+        # Populate GPU IDs from yaml config file.
+        gpu_conf = self._config_manager.get_value("executor", "gpu_ids")
+        gpu_conf = gpu_conf if gpu_conf else []
+        availble_gpus = [i for i in range(get_gpu_count())]
+        return list(set(availble_gpus) & set(gpu_conf))
 
     def _populate_gpu_from_env(self) -> List:
-        gpus = map(
+        # Populate GPU IDs from env variable.
+        gpu_conf = map(
             lambda x: x.strip(), os.environ.get("GPU_DEVICES", "").strip().split(",")
         )
-        return list(filter(lambda x: x, gpus))
+        gpu_conf = list(filter(lambda x: x, gpu_conf))
+        gpu_conf = [int(gpu_id) for gpu_id in gpu_conf]
+        availble_gpus = [i for i in range(get_gpu_count())]
+        return list(set(gpu_conf) & set(availble_gpus))
 
     def _populate_gpu_ids(self) -> List:
+        # Populate available GPU IDs from Torch library. Then, select subset of GPUs
+        # from available GPUs based on user configuration.
         if not is_gpu_available():
             return []
         gpus = self._populate_gpu_from_config()
