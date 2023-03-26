@@ -304,20 +304,24 @@ def predicate_node_to_filter(
     table: TableCatalogEntry, predicate_node: ComparisonExpression
 ):
     filter_clause = []
-    column = predicate_node.children[0].col_name
-    value = predicate_node.children[1].value
 
-    if predicate_node.etype == ExpressionType.COMPARE_EQUAL:
-        filter_clause.append(table.columns[column] == value)
-    elif predicate_node.etype == ExpressionType.COMPARE_GREATER:
-        filter_clause.append(table.columns[column] > value)
-    elif predicate_node.etype == ExpressionType.COMPARE_LESSER:
-        filter_clause.append(table.columns[column] < value)
-    elif predicate_node.etype == ExpressionType.COMPARE_GEQ:
-        filter_clause.append(table.columns[column] >= value)
-    elif predicate_node.etype == ExpressionType.COMPARE_LEQ:
-        filter_clause.append(table.columns[column] <= value)
-    elif predicate_node.etype == ExpressionType.COMPARE_NEQ:
-        filter_clause.append(table.columns[column] != value)
+    print(predicate_node)
+
+    for child in predicate_node.children:
+        column = child.get_child(0).col_name
+        value = child.get_child(1).value
+
+        if predicate_node.etype == ExpressionType.COMPARE_EQUAL:
+            filter_clause.append(table.columns[column] == value)
+        elif predicate_node.etype == ExpressionType.COMPARE_GREATER:
+            filter_clause.append(table.columns[column] > value)
+        elif predicate_node.etype == ExpressionType.COMPARE_LESSER:
+            filter_clause.append(table.columns[column] < value)
+        elif predicate_node.etype == ExpressionType.COMPARE_GEQ:
+            filter_clause.append(table.columns[column] >= value)
+        elif predicate_node.etype == ExpressionType.COMPARE_LEQ:
+            filter_clause.append(table.columns[column] <= value)
+        elif predicate_node.etype == ExpressionType.COMPARE_NEQ:
+            filter_clause.append(table.columns[column] != value)
 
     return filter_clause
