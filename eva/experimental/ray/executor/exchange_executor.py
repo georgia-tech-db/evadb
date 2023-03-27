@@ -46,6 +46,9 @@ class QueueReaderExecutor(AbstractExecutor):
             if next_item is StageCompleteSignal:
                 iq.put(StageCompleteSignal)
                 break
+            elif isinstance(next_item, ExecutorError):
+                # Raise ExecutorError immediately from queue.
+                raise next_item
             else:
                 yield next_item
 
@@ -107,6 +110,7 @@ class ExchangeExecutor(AbstractExecutor):
             if res is StageCompleteSignal:
                 break
             elif isinstance(res, ExecutorError):
+                # Raise ExecutorError for the topmost Exchange.
                 raise res
             else:
                 yield res
