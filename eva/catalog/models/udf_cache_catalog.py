@@ -20,8 +20,7 @@ from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from eva.catalog.models.association_models import (
-    depend_column_and_udf_cache,
-    depend_udf_and_udf_cache,
+    association_table_udf_column_and_udf_cache
 )
 from eva.catalog.models.base_model import BaseModel
 
@@ -50,15 +49,16 @@ class UdfCacheCatalog(BaseModel):
 
     _col_depends = relationship(
         "ColumnCatalog",
-        secondary=depend_column_and_udf_cache,
+        secondary=association_table_udf_column_and_udf_cache,
         back_populates="_dep_caches",
         # cascade="all, delete-orphan",
     )
 
     _udf_depends = relationship(
         "UdfCatalog",
-        secondary=depend_udf_and_udf_cache,
+        secondary=association_table_udf_column_and_udf_cache,
         back_populates="_dep_caches",
+        
         # cascade="all, delete-orphan",
     )
 

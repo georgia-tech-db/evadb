@@ -27,7 +27,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.types import Enum
 
 from eva.catalog.catalog_type import ColumnType, Dimension, NdArrayType
-from eva.catalog.models.association_models import depend_column_and_udf_cache
+from eva.catalog.models.association_models import association_table_udf_column_and_udf_cache
 from eva.catalog.models.base_model import BaseModel
 
 
@@ -61,7 +61,7 @@ class ColumnCatalog(BaseModel):
     # list of associated UdfCacheCatalog entries
     _dep_caches = relationship(
         "UdfCacheCatalog",
-        secondary=depend_column_and_udf_cache,
+        secondary=association_table_udf_column_and_udf_cache,
         back_populates="_col_depends",
         cascade="all, delete",
     )

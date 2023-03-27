@@ -24,7 +24,7 @@ if typing.TYPE_CHECKING:
 from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
 
-from eva.catalog.models.association_models import depend_udf_and_udf_cache
+from eva.catalog.models.association_models import association_table_udf_column_and_udf_cache
 from eva.catalog.models.base_model import BaseModel
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 
@@ -60,7 +60,7 @@ class UdfCatalog(BaseModel):
     # list of UdfCacheCatalog entries dependent on the udf
     _dep_caches = relationship(
         "UdfCacheCatalog",
-        secondary=depend_udf_and_udf_cache,
+        secondary=association_table_udf_column_and_udf_cache,
         back_populates="_udf_depends",
         cascade="all, delete",
     )
