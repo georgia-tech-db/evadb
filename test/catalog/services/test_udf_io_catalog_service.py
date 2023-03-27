@@ -24,7 +24,7 @@ UDF_NAME = "name"
 UDF_ID = 123
 
 
-class UdfCatalogServiceTest(TestCase):
+class UdfIOCatalogServiceTest(TestCase):
     @patch("eva.catalog.services.udf_io_catalog_service.UdfIOCatalog")
     def test_get_inputs_by_udf_id_should_query_model_with_id(self, mocked):
         service = UdfIOCatalogService()

@@ -43,6 +43,9 @@ class MaterializedViewTest(unittest.TestCase):
         ua_detrac = f"{EVA_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
         execute_query_fetch_all(f"LOAD VIDEO '{ua_detrac}' INTO UATRAC;")
         load_inbuilt_udfs()
+        from eva.udfs.udf_bootstrap_queries import YoloV5_udf_query
+
+        execute_query_fetch_all(YoloV5_udf_query)
 
     @classmethod
     def tearDownClass(cls):
