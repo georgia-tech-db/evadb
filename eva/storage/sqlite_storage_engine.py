@@ -17,6 +17,7 @@ from typing import Iterator, List
 import numpy as np
 import pandas as pd
 from sqlalchemy import Table, inspect
+from sqlalchemy.sql.expression import ColumnElement
 
 from eva.catalog.catalog_type import ColumnType
 from eva.catalog.models.base_model import BaseModel
@@ -24,8 +25,6 @@ from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.catalog.schema_utils import SchemaUtils
 from eva.catalog.sql_config import IDENTIFIER_COLUMN, SQLConfig
-from eva.expression.comparison_expression import ComparisonExpression
-from eva.expression.expression_utils import predicate_node_to_filter_clause
 from eva.models.storage.batch import Batch
 from eva.parser.table_ref import TableInfo
 from eva.storage.abstract_storage_engine import AbstractStorageEngine
@@ -186,26 +185,19 @@ class SQLStorageEngine(AbstractStorageEngine):
             logger.exception(err_msg)
             raise Exception(err_msg)
 
-    def delete(self, table: TableCatalogEntry, where_clause: ComparisonExpression):
+    def delete(
+        self, table: TableCatalogEntry, sqlalchemy_filter_clause: ColumnElement[bool]
+    ):
         """Delete tuples from the table where rows satisfy the where_clause.
         The current implementation only handles equality predicates.
 
         Argument:
             table: table metadata object of the table
-            where_clause (Dict[str, Any]): where clause use to find the tuples to
-            remove. The key should be the column name and value should be the tuple
-            value. The function assumes an equality condition
+            where_clause: clause used to find the tuples to remove.
         """
         try:
             table_to_delete_from = self._try_loading_table_via_reflection(table.name)
-
-            filter_clause = predicate_node_to_filter_clause(
-                table=table_to_delete_from, predicate_node=where_clause
-            )
-            # verify where clause and convert to sqlalchemy supported filter
-            # https://stackoverflow.com/questions/34026210/where-filter-from-table-object-using-a-dictionary-or-kwargs
-
-            d = table_to_delete_from.delete().where(filter_clause)
+            d = table_to_delete_from.delete().where(sqlalchemy_filter_clause)
             self._sql_engine.execute(d)
             self._sql_session.commit()
         except Exception as e:

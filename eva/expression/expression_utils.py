@@ -15,9 +15,6 @@
 
 from typing import List, Set
 
-from sqlalchemy import and_, or_
-
-from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.expression.abstract_expression import AbstractExpression, ExpressionType
 from eva.expression.comparison_expression import ComparisonExpression
 from eva.expression.constant_value_expression import ConstantValueExpression
@@ -300,51 +297,3 @@ def is_simple_predicate(predicate: AbstractExpression) -> bool:
     ]
 
     return _has_simple_expressions(predicate) and contains_single_column(predicate)
-
-
-def predicate_node_to_filter_clause(
-    table: TableCatalogEntry, predicate_node: ComparisonExpression
-):
-    filter_clause = None
-    left = predicate_node.get_child(0)
-    right = predicate_node.get_child(1)
-
-    if type(left) == TupleValueExpression:
-        column = left.col_name
-        x = table.columns[column]
-    elif type(left) == ConstantValueExpression:
-        value = left.value
-        x = value
-    else:
-        left_filter_clause = predicate_node_to_filter_clause(table, left)
-
-    if type(right) == TupleValueExpression:
-        column = right.col_name
-        y = table.columns[column]
-    elif type(right) == ConstantValueExpression:
-        value = right.value
-        y = value
-    else:
-        right_filter_clause = predicate_node_to_filter_clause(table, right)
-
-    if type(predicate_node) == LogicalExpression:
-        if predicate_node.etype == ExpressionType.LOGICAL_AND:
-            filter_clause = and_(left_filter_clause, right_filter_clause)
-        elif predicate_node.etype == ExpressionType.LOGICAL_OR:
-            filter_clause = or_(left_filter_clause, right_filter_clause)
-
-    elif type(predicate_node) == ComparisonExpression:
-        if predicate_node.etype == ExpressionType.COMPARE_EQUAL:
-            filter_clause = x == y
-        elif predicate_node.etype == ExpressionType.COMPARE_GREATER:
-            filter_clause = x > y
-        elif predicate_node.etype == ExpressionType.COMPARE_LESSER:
-            filter_clause = x < y
-        elif predicate_node.etype == ExpressionType.COMPARE_GEQ:
-            filter_clause = x >= y
-        elif predicate_node.etype == ExpressionType.COMPARE_LEQ:
-            filter_clause = x <= y
-        elif predicate_node.etype == ExpressionType.COMPARE_NEQ:
-            filter_clause = x != y
-
-    return filter_clause
