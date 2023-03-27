@@ -23,6 +23,7 @@ from eva.experimental.ray.executor.ray_stage import (
     ray_stage_wait_and_alert,
 )
 from eva.experimental.ray.planner.exchange_plan import ExchangePlan
+from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
 
 
@@ -105,6 +106,8 @@ class ExchangeExecutor(AbstractExecutor):
             res = output_queue.get(block=True)
             if res is StageCompleteSignal:
                 break
+            elif isinstance(res, ExecutorError):
+                raise res
             else:
                 yield res
         else:

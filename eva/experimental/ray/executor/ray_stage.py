@@ -15,7 +15,11 @@
 from typing import Callable, List
 
 import ray
+
 from ray.util.queue import Queue
+from ray.exceptions import RayError
+
+from eva.executor.executor_utils import ExecutorError
 
 
 class StageCompleteSignal:
@@ -24,9 +28,13 @@ class StageCompleteSignal:
 
 @ray.remote(num_cpus=0)
 def ray_stage_wait_and_alert(tasks: ray.ObjectRef, output_queue: Queue):
-    ray.get(tasks)
-    for q in output_queue:
-        q.put(StageCompleteSignal)
+    try:
+        ray.get(tasks)
+        for q in output_queue:
+            q.put(StageCompleteSignal)
+    except RayError as e:
+        for q in output_queue:
+            q.put(ExecutorError(e.cause))
 
 
 @ray.remote
