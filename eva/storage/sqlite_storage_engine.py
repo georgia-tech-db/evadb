@@ -16,7 +16,7 @@ from typing import Iterator, List
 
 import numpy as np
 import pandas as pd
-from sqlalchemy import Table, and_, inspect
+from sqlalchemy import Table, inspect
 
 from eva.catalog.catalog_type import ColumnType
 from eva.catalog.models.base_model import BaseModel
@@ -25,7 +25,7 @@ from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.catalog.schema_utils import SchemaUtils
 from eva.catalog.sql_config import IDENTIFIER_COLUMN, SQLConfig
 from eva.expression.comparison_expression import ComparisonExpression
-from eva.expression.expression_utils import predicate_node_to_filter
+from eva.expression.expression_utils import predicate_node_to_filter_clause
 from eva.models.storage.batch import Batch
 from eva.parser.table_ref import TableInfo
 from eva.storage.abstract_storage_engine import AbstractStorageEngine
@@ -199,13 +199,13 @@ class SQLStorageEngine(AbstractStorageEngine):
         try:
             table_to_delete_from = self._try_loading_table_via_reflection(table.name)
 
-            filter_clause = predicate_node_to_filter(
+            filter_clause = predicate_node_to_filter_clause(
                 table=table_to_delete_from, predicate_node=where_clause
             )
             # verify where clause and convert to sqlalchemy supported filter
             # https://stackoverflow.com/questions/34026210/where-filter-from-table-object-using-a-dictionary-or-kwargs
 
-            d = table_to_delete_from.delete().where(and_(*filter_clause))
+            d = table_to_delete_from.delete().where(filter_clause)
             self._sql_engine.execute(d)
             self._sql_session.commit()
         except Exception as e:

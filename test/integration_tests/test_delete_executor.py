@@ -123,20 +123,13 @@ class DeleteExecutorTest(unittest.TestCase):
         )
 
     def test_should_delete_tuple_in_table(self):
-        query = "SELECT * FROM testDeleteOne;"
-        batch = execute_query_fetch_all(query)
-        from pprint import pprint
-
-        pprint(str(batch))
-
-        delete_query = """DELETE FROM testDeleteOne WHERE id < 20
-                          AND dummyfloat < 2;"""
+        delete_query = (
+            """DELETE FROM testDeleteOne WHERE id < 20 OR dummyfloat < 2 AND id < 5;"""
+        )
         batch = execute_query_fetch_all(delete_query)
 
         query = "SELECT * FROM testDeleteOne;"
         batch = execute_query_fetch_all(query)
-
-        pprint(str(batch))
 
         np.testing.assert_array_equal(
             batch.frames["testdeleteone.id"].array,
