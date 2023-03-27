@@ -50,7 +50,7 @@ class Context:
     def _populate_gpu_from_env(self) -> List:
         # Populate GPU IDs from env variable.
         gpu_conf = map(
-            lambda x: x.strip(), os.environ.get("GPU_DEVICES", "").strip().split(",")
+            lambda x: x.strip(), os.environ.get("CUDA_VISIBLE_DEVICES", "").strip().split(",")
         )
         gpu_conf = list(filter(lambda x: x, gpu_conf))
         gpu_conf = [int(gpu_id) for gpu_id in gpu_conf]

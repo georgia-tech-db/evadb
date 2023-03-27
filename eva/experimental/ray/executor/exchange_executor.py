@@ -93,6 +93,7 @@ class ExchangeExecutor(AbstractExecutor):
             iq = yield from parent_exec.children[0].exec(is_top=False)
             input_queues.append(iq)
             queue_exec = QueueReaderExecutor()
+            # Set queue index if an executor has multiple input executors.
             queue_exec.q_idx = len(input_queues) - 1
             parent_exec.children = [queue_exec]
 
