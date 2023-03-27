@@ -123,9 +123,8 @@ class DeleteExecutorTest(unittest.TestCase):
         )
 
     def test_should_delete_tuple_in_table(self):
-        delete_query = (
-            """DELETE FROM testDeleteOne WHERE id < 20 OR dummyfloat < 2 AND id < 5;"""
-        )
+        delete_query = """DELETE FROM testDeleteOne WHERE
+               id < 20 OR dummyfloat < 2 AND id < 5 AND 20 > id;"""
         batch = execute_query_fetch_all(delete_query)
 
         query = "SELECT * FROM testDeleteOne;"
