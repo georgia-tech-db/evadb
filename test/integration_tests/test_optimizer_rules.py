@@ -32,6 +32,7 @@ from eva.optimizer.rules.rules_manager import disable_rules
 from eva.plan_nodes.predicate_plan import PredicatePlan
 from eva.server.command_handler import execute_query_fetch_all
 from eva.utils.stats import Timer
+from test.util import shutdown_ray
 
 
 @pytest.mark.notparallel
@@ -46,6 +47,7 @@ class OptimizerRulesTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        shutdown_ray()
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
 
     @patch("eva.expression.function_expression.FunctionExpression.evaluate")

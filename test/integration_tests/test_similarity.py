@@ -23,6 +23,7 @@ from eva.catalog.catalog_manager import CatalogManager
 from eva.models.storage.batch import Batch
 from eva.server.command_handler import execute_query_fetch_all
 from eva.storage.storage_engine import StorageEngine
+from test.util import shutdown_ray
 
 
 @pytest.mark.notparallel
@@ -94,6 +95,8 @@ class SimilarityTests(unittest.TestCase):
             base_img -= 1
 
     def tearDown(self):
+        shutdown_ray()
+
         drop_table_query = "DROP TABLE testSimilarityTable;"
         execute_query_fetch_all(drop_table_query)
         drop_table_query = "DROP TABLE testSimilarityFeatureTable;"

@@ -28,6 +28,7 @@ from eva.configuration.constants import EVA_ROOT_DIR
 from eva.models.storage.batch import Batch
 from eva.parser.types import FileFormatType
 from eva.server.command_handler import execute_query_fetch_all
+from test.util import shutdown_ray
 
 
 @pytest.mark.notparallel
@@ -66,6 +67,8 @@ class S3LoadExecutorTest(unittest.TestCase):
             self.s3_client.upload_file(f"{video_path}/{file}", bucket_name, file)
 
     def tearDown(self):
+        shutdown_ray()
+
         file_remove("MyVideo/dummy.avi", parent_dir=self.s3_download_dir)
 
         for file in os.listdir(self.multiple_video_file_path):

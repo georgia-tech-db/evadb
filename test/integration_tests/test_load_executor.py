@@ -30,6 +30,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
+import ray
+
 from eva.binder.binder_utils import BinderError
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
@@ -37,6 +39,7 @@ from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
 from eva.parser.types import FileFormatType
 from eva.server.command_handler import execute_query_fetch_all
+from test.util import shutdown_ray
 
 
 @pytest.mark.notparallel
@@ -51,6 +54,8 @@ class LoadExecutorTest(unittest.TestCase):
         self.csv_file_path = create_sample_csv()
 
     def tearDown(self):
+        shutdown_ray()
+
         file_remove("dummy.avi")
         file_remove("dummy.csv")
         # clean up

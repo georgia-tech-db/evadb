@@ -31,6 +31,7 @@ from eva.catalog.catalog_type import ColumnType, NdArrayType
 from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
 from eva.server.command_handler import execute_query_fetch_all
+from test.util import shutdown_ray
 
 NUM_FRAMES = 10
 
@@ -52,6 +53,7 @@ class UDFExecutorTest(unittest.TestCase):
         execute_query_fetch_all(create_udf_query)
 
     def tearDown(self):
+        shutdown_ray()
         file_remove("dummy.avi")
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
 

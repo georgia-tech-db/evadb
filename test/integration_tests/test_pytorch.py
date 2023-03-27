@@ -25,7 +25,12 @@ from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.configuration.constants import EVA_ROOT_DIR
 from eva.server.command_handler import execute_query_fetch_all
-from eva.udfs.udf_bootstrap_queries import Asl_udf_query, Mvit_udf_query
+from eva.udfs.udf_bootstrap_queries import (
+    Asl_udf_query,
+    Mvit_udf_query,
+    Timestamp_udf_query,
+)
+from test.util import shutdown_ray
 
 
 @pytest.mark.notparallel
@@ -50,6 +55,8 @@ class PytorchTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        shutdown_ray()
+
         file_remove("ua_detrac.mp4")
         file_remove("mnist.mp4")
         file_remove("actions.mp4")

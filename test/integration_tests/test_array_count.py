@@ -26,6 +26,7 @@ import pytest
 from eva.catalog.catalog_manager import CatalogManager
 from eva.models.storage.batch import Batch
 from eva.server.command_handler import execute_query_fetch_all
+from test.util import shutdown_ray
 
 
 @pytest.mark.notparallel
@@ -40,6 +41,7 @@ class ArrayCountTests(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        shutdown_ray()
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
         file_remove("dummy.avi")
 

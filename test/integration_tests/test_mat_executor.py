@@ -27,6 +27,7 @@ from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
 from eva.models.storage.batch import Batch
 from eva.server.command_handler import execute_query_fetch_all
+from test.util import shutdown_ray
 
 NUM_FRAMES = 10
 
@@ -46,6 +47,7 @@ class MaterializedViewTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        shutdown_ray()
         file_remove("dummy.avi")
         file_remove("ua_detrac.mp4")
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")

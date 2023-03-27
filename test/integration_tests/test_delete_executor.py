@@ -22,6 +22,7 @@ from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.configuration.constants import EVA_ROOT_DIR
 from eva.server.command_handler import execute_query_fetch_all
+from test.util import shutdown_ray
 
 
 @pytest.mark.notparallel
@@ -70,6 +71,7 @@ class DeleteExecutorTest(unittest.TestCase):
         _ = execute_query_fetch_all(query)
 
     def tearDown(self):
+        shutdown_ray()
         file_remove("dummy.avi")
 
     # integration test

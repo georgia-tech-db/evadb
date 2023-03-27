@@ -22,6 +22,7 @@ import pytest
 from eva.catalog.catalog_manager import CatalogManager
 from eva.server.command_handler import execute_query_fetch_all
 from eva.utils.logging_manager import logger
+from test.util import shutdown_ray
 
 
 @pytest.mark.notparallel
@@ -40,6 +41,7 @@ class InsertExecutorTest(unittest.TestCase):
         load_udfs_for_testing(mode="minimal")
 
     def tearDown(self):
+        shutdown_ray()
         file_remove("dummy.avi")
 
     # integration test

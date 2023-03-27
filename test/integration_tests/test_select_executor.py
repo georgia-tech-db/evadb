@@ -33,6 +33,7 @@ from eva.configuration.constants import EVA_ROOT_DIR
 from eva.models.storage.batch import Batch
 from eva.readers.decord_reader import DecordReader
 from eva.server.command_handler import execute_query_fetch_all
+from test.util import shutdown_ray
 
 NUM_FRAMES = 10
 
@@ -55,6 +56,8 @@ class SelectExecutorTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        shutdown_ray()
+
         file_remove("dummy.avi")
         drop_query = """DROP TABLE table1;"""
         execute_query_fetch_all(drop_query)

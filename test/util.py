@@ -18,6 +18,7 @@ from contextlib import closing
 from pathlib import Path
 
 import cv2
+import ray
 import numpy as np
 import pandas as pd
 from mock import MagicMock
@@ -46,6 +47,11 @@ s3_dir_from_config = config.get_value("storage", "s3_download_dir")
 
 
 EVA_TEST_DATA_DIR = Path(config.get_value("core", "eva_installation_dir")).parent
+
+
+def shutdown_ray():
+    if ConfigurationManager().get_value("experimental", "ray"):
+        ray.shutdown()
 
 
 def explain_query_plan(query):
