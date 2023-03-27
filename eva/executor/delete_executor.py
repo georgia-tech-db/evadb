@@ -71,6 +71,11 @@ class DeleteExecutor(AbstractExecutor):
                 filter_clause = or_(left_filter_clause, right_filter_clause)
 
         elif type(predicate_node) == ComparisonExpression:
+            assert (
+                predicate_node.etype != ExpressionType.COMPARE_CONTAINS
+                and predicate_node.etype != ExpressionType.COMPARE_IS_CONTAINED
+            ), f"Predicate type {predicate_node.etype} not supported in delete"
+
             if predicate_node.etype == ExpressionType.COMPARE_EQUAL:
                 filter_clause = x == y
             elif predicate_node.etype == ExpressionType.COMPARE_GREATER:
@@ -83,11 +88,6 @@ class DeleteExecutor(AbstractExecutor):
                 filter_clause = x <= y
             elif predicate_node.etype == ExpressionType.COMPARE_NEQ:
                 filter_clause = x != y
-
-            assert (
-                predicate_node.etype != ExpressionType.COMPARE_CONTAINS
-                and predicate_node.etype != ExpressionType.COMPARE_IS_CONTAINED
-            ), f"Predicate of type {predicate_node.etype} not supported in delete"
 
         return filter_clause
 
