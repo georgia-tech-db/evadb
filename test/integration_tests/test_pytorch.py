@@ -51,6 +51,9 @@ class PytorchTest(unittest.TestCase):
         execute_query_fetch_all(f"LOAD IMAGE '{meme1}' INTO MemeImages;")
         execute_query_fetch_all(f"LOAD IMAGE '{meme2}' INTO MemeImages;")
         load_inbuilt_udfs()
+        from eva.udfs.udf_bootstrap_queries import YoloV5_udf_query
+
+        execute_query_fetch_all(YoloV5_udf_query)
 
     @classmethod
     def tearDownClass(cls):
