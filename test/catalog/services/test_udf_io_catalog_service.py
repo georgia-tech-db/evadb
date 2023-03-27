@@ -64,3 +64,12 @@ class UdfCatalogServiceTest(TestCase):
         self.assertEqual(
             f"Getting outputs for UDF id {UDF_ID} raised error", str(cm.exception)
         )
+
+    @patch("eva.catalog.services.udf_io_catalog_service.UdfIOCatalog")
+    def test_get_all_entries_should_raise(self, mock):
+        service = UdfIOCatalogService()
+        mock.query.all.side_effect = Exception("error")
+        with self.assertRaises(Exception) as cm:
+            result = service.get_all_entries()
+            self.assertEqual(result, [])
+        self.assertEqual("error", str(cm.exception))
