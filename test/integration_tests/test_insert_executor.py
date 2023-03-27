@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import create_sample_video, file_remove, load_inbuilt_udfs
+from test.util import create_sample_video, file_remove, load_udfs_for_testing
 
 import numpy as np
 import pandas as pd
@@ -37,8 +37,7 @@ class InsertExecutorTest(unittest.TestCase):
             );
         """
         execute_query_fetch_all(query)
-
-        load_inbuilt_udfs()
+        load_udfs_for_testing(mode="minimal")
 
     def tearDown(self):
         file_remove("dummy.avi")

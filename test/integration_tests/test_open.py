@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import create_sample_image, file_remove, load_inbuilt_udfs
+from test.util import create_sample_image, file_remove, load_udfs_for_testing
 
 import numpy as np
 import pandas as pd
@@ -32,7 +32,7 @@ class OpenTests(unittest.TestCase):
         CatalogManager().reset()
         ConfigurationManager()
         # Load built-in UDFs.
-        load_inbuilt_udfs()
+        load_udfs_for_testing(mode="minimal")
 
         # Insert image path.
         self.img_path = create_sample_image()

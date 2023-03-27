@@ -15,7 +15,7 @@
 import os
 import unittest
 from test.markers import windows_skip_marker
-from test.util import file_remove, load_inbuilt_udfs
+from test.util import file_remove, load_udfs_for_testing
 
 import cv2
 import numpy as np
@@ -50,10 +50,7 @@ class PytorchTest(unittest.TestCase):
         execute_query_fetch_all(f"LOAD VIDEO '{asl_actions}' INTO Asl_actions;")
         execute_query_fetch_all(f"LOAD IMAGE '{meme1}' INTO MemeImages;")
         execute_query_fetch_all(f"LOAD IMAGE '{meme2}' INTO MemeImages;")
-        load_inbuilt_udfs()
-        from eva.udfs.udf_bootstrap_queries import YoloV5_udf_query
-
-        execute_query_fetch_all(YoloV5_udf_query)
+        load_udfs_for_testing()
 
     @classmethod
     def tearDownClass(cls):

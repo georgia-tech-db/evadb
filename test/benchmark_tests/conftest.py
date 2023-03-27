@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from test.util import load_inbuilt_udfs
+from test.util import load_udfs_for_testing
 
 import pytest
 
@@ -25,7 +25,7 @@ def setup_pytorch_tests():
     CatalogManager().reset()
     execute_query_fetch_all("LOAD VIDEO 'data/ua_detrac/ua_detrac.mp4' INTO MyVideo;")
     execute_query_fetch_all("LOAD VIDEO 'data/mnist/mnist.mp4' INTO MNIST;")
-    load_inbuilt_udfs()
+    load_udfs_for_testing()
     from eva.udfs.udf_bootstrap_queries import YoloV5_udf_query
 
     execute_query_fetch_all(YoloV5_udf_query)

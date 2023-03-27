@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import get_physical_query_plan, load_inbuilt_udfs
+from test.util import get_physical_query_plan, load_udfs_for_testing
 
 import pytest
 from mock import MagicMock, patch
@@ -42,7 +42,7 @@ class OptimizerRulesTest(unittest.TestCase):
         ua_detrac = f"{EVA_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
         execute_query_fetch_all(f"LOAD VIDEO '{ua_detrac}' INTO MyVideo;")
         execute_query_fetch_all(f"LOAD VIDEO '{ua_detrac}' INTO MyVideo2;")
-        load_inbuilt_udfs()
+        load_udfs_for_testing(mode="minimal")
 
     @classmethod
     def tearDownClass(cls):
