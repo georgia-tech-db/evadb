@@ -15,7 +15,12 @@
 import os
 import unittest
 from pathlib import Path
-from test.util import create_dummy_batches, create_sample_video, file_remove
+from test.util import (
+    create_dummy_batches,
+    create_sample_video,
+    file_remove,
+    shutdown_ray,
+)
 
 import boto3
 import pandas as pd
@@ -28,7 +33,6 @@ from eva.configuration.constants import EVA_ROOT_DIR
 from eva.models.storage.batch import Batch
 from eva.parser.types import FileFormatType
 from eva.server.command_handler import execute_query_fetch_all
-from test.util import shutdown_ray
 
 
 @pytest.mark.notparallel

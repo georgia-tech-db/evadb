@@ -19,6 +19,7 @@ from test.util import (
     create_dummy_batches,
     create_sample_video,
     file_remove,
+    shutdown_ray,
 )
 
 import numpy as np
@@ -31,7 +32,6 @@ from eva.catalog.catalog_type import ColumnType, NdArrayType
 from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
 from eva.server.command_handler import execute_query_fetch_all
-from test.util import shutdown_ray
 
 NUM_FRAMES = 10
 

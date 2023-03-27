@@ -17,13 +17,13 @@ from typing import Iterator
 from ray.util.queue import Queue
 
 from eva.executor.abstract_executor import AbstractExecutor
+from eva.executor.executor_utils import ExecutorError
 from eva.experimental.ray.executor.ray_stage import (
     StageCompleteSignal,
     ray_stage,
     ray_stage_wait_and_alert,
 )
 from eva.experimental.ray.planner.exchange_plan import ExchangePlan
-from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
 
 

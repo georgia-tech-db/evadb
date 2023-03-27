@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import create_sample_image, load_udfs_for_testing
+from test.util import create_sample_image, load_udfs_for_testing, shutdown_ray
 
 import numpy as np
 import pandas as pd
@@ -23,7 +23,6 @@ from eva.catalog.catalog_manager import CatalogManager
 from eva.models.storage.batch import Batch
 from eva.server.command_handler import execute_query_fetch_all
 from eva.storage.storage_engine import StorageEngine
-from test.util import shutdown_ray
 
 
 @pytest.mark.notparallel

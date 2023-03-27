@@ -14,7 +14,7 @@
 # limitations under the License.
 import unittest
 from pathlib import Path
-from test.util import create_sample_csv, create_sample_video, file_remove
+from test.util import create_sample_csv, create_sample_video, file_remove, shutdown_ray
 
 import pytest
 
@@ -22,7 +22,6 @@ from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.configuration.constants import EVA_ROOT_DIR
 from eva.server.command_handler import execute_query_fetch_all
-from test.util import shutdown_ray
 
 EVA_INSTALLATION_DIR = ConfigurationManager().get_value("core", "eva_installation_dir")
 

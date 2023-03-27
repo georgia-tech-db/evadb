@@ -18,9 +18,9 @@ from contextlib import closing
 from pathlib import Path
 
 import cv2
-import ray
 import numpy as np
 import pandas as pd
+import ray
 from mock import MagicMock
 
 from eva.binder.statement_binder import StatementBinder

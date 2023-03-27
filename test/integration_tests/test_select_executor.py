@@ -21,6 +21,7 @@ from test.util import (  # file_remove,
     file_remove,
     get_logical_query_plan,
     load_udfs_for_testing,
+    shutdown_ray,
 )
 
 import numpy as np
@@ -33,7 +34,6 @@ from eva.configuration.constants import EVA_ROOT_DIR
 from eva.models.storage.batch import Batch
 from eva.readers.decord_reader import DecordReader
 from eva.server.command_handler import execute_query_fetch_all
-from test.util import shutdown_ray
 
 NUM_FRAMES = 10
 

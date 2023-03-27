@@ -15,7 +15,7 @@
 import os
 import unittest
 from test.markers import windows_skip_marker
-from test.util import file_remove, load_udfs_for_testing
+from test.util import file_remove, load_udfs_for_testing, shutdown_ray
 
 import cv2
 import numpy as np
@@ -30,7 +30,6 @@ from eva.udfs.udf_bootstrap_queries import (
     Mvit_udf_query,
     Timestamp_udf_query,
 )
-from test.util import shutdown_ray
 
 
 @pytest.mark.notparallel

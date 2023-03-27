@@ -15,9 +15,8 @@
 from typing import Callable, List
 
 import ray
-
-from ray.util.queue import Queue
 from ray.exceptions import RayError
+from ray.util.queue import Queue
 
 from eva.executor.executor_utils import ExecutorError
 

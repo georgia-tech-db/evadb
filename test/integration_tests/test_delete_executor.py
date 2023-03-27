@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import file_remove, load_udfs_for_testing
+from test.util import file_remove, load_udfs_for_testing, shutdown_ray
 
 import numpy as np
 import pytest
@@ -22,7 +22,6 @@ from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.configuration.constants import EVA_ROOT_DIR
 from eva.server.command_handler import execute_query_fetch_all
-from test.util import shutdown_ray
 
 
 @pytest.mark.notparallel

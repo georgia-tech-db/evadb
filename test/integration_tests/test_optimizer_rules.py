@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import get_physical_query_plan, load_udfs_for_testing
+from test.util import get_physical_query_plan, load_udfs_for_testing, shutdown_ray
 
 import pytest
 from mock import MagicMock, patch
@@ -32,7 +32,6 @@ from eva.optimizer.rules.rules_manager import disable_rules
 from eva.plan_nodes.predicate_plan import PredicatePlan
 from eva.server.command_handler import execute_query_fetch_all
 from eva.utils.stats import Timer
-from test.util import shutdown_ray
 
 
 @pytest.mark.notparallel

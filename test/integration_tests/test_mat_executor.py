@@ -18,6 +18,7 @@ from test.util import (
     create_sample_video,
     file_remove,
     load_udfs_for_testing,
+    shutdown_ray,
 )
 
 import pandas as pd
@@ -27,7 +28,6 @@ from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
 from eva.models.storage.batch import Batch
 from eva.server.command_handler import execute_query_fetch_all
-from test.util import shutdown_ray
 
 NUM_FRAMES = 10
 
