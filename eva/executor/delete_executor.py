@@ -84,6 +84,11 @@ class DeleteExecutor(AbstractExecutor):
             elif predicate_node.etype == ExpressionType.COMPARE_NEQ:
                 filter_clause = x != y
 
+            assert (
+                predicate_node.etype != ExpressionType.COMPARE_CONTAINS
+                and predicate_node.etype != ExpressionType.COMPARE_IS_CONTAINED
+            ), f"Predicate of type {predicate_node.etype} not supported in delete"
+
         return filter_clause
 
     def exec(self, *args, **kwargs) -> Iterator[Batch]:
