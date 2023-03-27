@@ -50,6 +50,10 @@ class TupleValueExpression(AbstractExpression):
     def table_alias(self) -> str:
         return self._table_alias
 
+    @table_alias.setter
+    def table_alias(self, table_alias):
+        self._table_alias = table_alias
+
     @property
     def col_name(self) -> str:
         return self._col_name

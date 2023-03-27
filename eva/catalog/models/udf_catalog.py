@@ -53,6 +53,10 @@ class UdfCatalog(BaseModel):
         cascade="all, delete, delete-orphan",
     )
 
+    _caches = relationship(
+        "UdfCacheCatalog",
+        cascade="all, delete, delete-orphan",
+    )
     # list of UdfCacheCatalog entries dependent on the udf
     _dep_caches = relationship(
         "UdfCacheCatalog",

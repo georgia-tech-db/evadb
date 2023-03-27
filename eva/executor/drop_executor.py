@@ -21,6 +21,7 @@ from eva.models.storage.batch import Batch
 from eva.parser.table_ref import TableInfo
 from eva.plan_nodes.drop_plan import DropPlan
 from eva.storage.storage_engine import StorageEngine
+from eva.utils.generic_utils import remove_directory_contents
 from eva.utils.logging_manager import logger
 
 
@@ -53,6 +54,14 @@ class DropExecutor(AbstractExecutor):
         storage_engine = StorageEngine.factory(table_obj)
 
         storage_engine.drop(table=table_obj)
+
+        # Remove the cache data linked with the table
+        # We only remove the data-structures related to the cache,
+        # catalog takes care of removing the cache entries from the catalog table
+        # based on the foreign key dependecies.
+        for col_obj in table_obj.columns:
+            for cache in col_obj.dep_caches:
+                remove_directory_contents(cache.cache_path)
 
         assert catalog_manager.delete_table_catalog_entry(
             table_obj

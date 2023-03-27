@@ -70,11 +70,11 @@ class CreateIndexExecutor(AbstractExecutor):
         )
 
     def _get_index_save_path(self) -> Path:
-        cache_dir = Path(ConfigurationManager().get_value("storage", "index_dir"))
-        if not cache_dir.exists():
-            cache_dir.mkdir(parents=True, exist_ok=True)
+        index_dir = Path(ConfigurationManager().get_value("storage", "index_dir"))
+        if not index_dir.exists():
+            index_dir.mkdir(parents=True, exist_ok=True)
         return str(
-            cache_dir / Path("{}_{}.index".format(self.node.index_type, self.node.name))
+            index_dir / Path("{}_{}.index".format(self.node.index_type, self.node.name))
         )
 
     def _create_faiss_index(self):

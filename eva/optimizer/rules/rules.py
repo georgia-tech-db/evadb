@@ -216,54 +216,6 @@ class EmbedProjectIntoGet(Rule):
         yield new_get_opr
 
 
-class CacheFunctionExpressionInFilter(Rule):
-    """This rule creates an alternative of LogicalFilter with caching enabled.
-
-    For each `FunctionExpression` in the expression tree, it considers two alternatives:
-    with and without cache enabled. If there are `n` function expressions in the tree,
-    it will generate `2^n` expression trees. This can rapidly increase the number of
-    possible plans. An alternative approach is to iteratively consider one function
-    expression at a time, which can benefit from early pruning. However, typically the
-    value of n is low, so it may not be worth the extra bookkeeping.
-
-    """
-
-    def __init__(self):
-        pattern = Pattern(OperatorType.LOGICALFILTER)
-        pattern.append_child(Pattern(OperatorType.DUMMY))
-        super().__init__(RuleType.CACHE_FUNCTION_EXPRESISON_IN_FILTER, pattern)
-
-    def promise(self):
-        return Promise.CACHE_FUNCTION_EXPRESISON_IN_FILTER
-
-    def check(self, before: LogicalFilter, context: OptimizerContext):
-        # filter should have atleast one UDF
-        predicate = before.predicate
-        if predicate.find(FunctionExpression):
-            return True
-        else:
-            return False
-
-    def apply(self, before: LogicalFilter, context: OptimizerContext):
-        # def powerset(s):
-        #     "powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"
-        #     return chain.from_iterable(combinations(s, r) for r in range(len(s)+1))
-
-        # predicate = before.predicate
-        # possible_filters = []
-        # func_exprs = list(predicate.find_all(FunctionExpression))
-        # func_exprs_with_caching = func_exprs
-        # for subset in powerset(range(func_exprs)):
-        #     new_expr = predicate
-        #     for idx in subset:
-        #         # replace the expr with new expr and create a new tree
-        #         new_expr = expr.replace(expr_with_caching, copy=True)
-        #     possible_filters.append(new_expr.root())
-
-        # return possible_filters
-        yield
-
-
 class CacheFunctionExpressionInApply(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICAL_APPLY_AND_MERGE)
@@ -274,9 +226,15 @@ class CacheFunctionExpressionInApply(Rule):
         return Promise.CACHE_FUNCTION_EXPRESISON_IN_APPLY
 
     def check(self, before: LogicalApplyAndMerge, context: OptimizerContext):
+        expr = before.func_expr
         # already cache enabled
-        # replace the cacheable condition once we have the propperty supported as part of the UDF itself.
-        if before.func_expr.has_cache() or before.func_expr.name not in CACHEABLE_UDFS:
+        # replace the cacheable condition once we have the property supported as part of the UDF itself.
+        if expr.has_cache() or expr.name not in CACHEABLE_UDFS:
+            return False
+        # we do not support caching function expression instances with multiple arguments or nested function expressions
+        if len(expr.children) > 1 or not isinstance(
+            expr.children[0], TupleValueExpression
+        ):
             return False
         return True
 

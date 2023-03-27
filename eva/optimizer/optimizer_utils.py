@@ -276,12 +276,6 @@ def enable_cache(func_expr: FunctionExpression) -> FunctionExpression:
     if not cache_entry:
         cache_entry = CatalogManager().insert_udf_cache_catalog_entry(func_expr)
 
-    # if the cache entry is no longer valid (udf has been modified), delete the cache
-    # entry and insert a new one
-    # elif not is_cache_valid(cache_entry):
-    #     CatalogManager().drop_udf_cache_catalog_entry(cache_entry)
-    #     cache_entry = CatalogManager().insert_udf_cache_catalog_entry(func_expr)
-
     cache = FunctionExpressionCache(
         key=tuple(optimized_key), store=DiskKVCache(cache_entry.cache_path)
     )

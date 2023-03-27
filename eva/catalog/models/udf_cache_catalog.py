@@ -48,15 +48,16 @@ class UdfCacheCatalog(BaseModel):
     _cache_path = Column("cache_path", String(256))
     _args = Column("args", String(1024))
 
-    _udf_depends = relationship(
-        "UdfCatalog",
-        secondary=depend_udf_and_udf_cache,
-        back_populates="_dep_caches",
-        # cascade="all, delete-orphan",
-    )
     _col_depends = relationship(
         "ColumnCatalog",
         secondary=depend_column_and_udf_cache,
+        back_populates="_dep_caches",
+        # cascade="all, delete-orphan",
+    )
+
+    _udf_depends = relationship(
+        "UdfCatalog",
+        secondary=depend_udf_and_udf_cache,
         back_populates="_dep_caches",
         # cascade="all, delete-orphan",
     )

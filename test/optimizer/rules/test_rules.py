@@ -148,7 +148,7 @@ class RulesTest(unittest.TestCase):
         implementation_count = len(set(implementation_promises))
 
         # rewrite_count + implementation_count + 1 (for IMPLEMENTATION_DELIMETER)
-        self.assertEqual(rewrite_count + implementation_count + 1, promise_count)
+        self.assertEqual(rewrite_count + implementation_count + 2, promise_count)
 
     def test_supported_rules(self):
         # adding/removing rules should update this test

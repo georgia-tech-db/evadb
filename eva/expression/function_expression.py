@@ -27,6 +27,7 @@ from eva.models.storage.batch import Batch
 from eva.parser.alias import Alias
 from eva.udfs.gpu_compatible import GPUCompatible
 from eva.utils.kv_cache import DiskKVCache
+from eva.utils.logging_manager import logger
 from eva.utils.stats import UDFStats
 
 
@@ -106,9 +107,16 @@ class FunctionExpression(AbstractExpression):
         if self.udf_obj is None:
             return
         udf_id = self.udf_obj.row_id
-        cost_per_func_call = (
-            self._stats.timer.total_elapsed_time / self._stats.num_calls
-        )
+
+        # if the function expression support cache only approximate using cache_miss entries.
+        if self.has_cache() and self._stats.cache_misses > 0:
+            cost_per_func_call = (
+                self._stats.timer.total_elapsed_time / self._stats.cache_misses
+            )
+        else:
+            cost_per_func_call = self._stats.timer.total_elapsed_time / (
+                self._stats.num_calls
+            )
 
         # persist stats to catalog only if it differ by greater than 10% from
         # the previous value
@@ -119,36 +127,32 @@ class FunctionExpression(AbstractExpression):
             self._stats.prev_cost = cost_per_func_call
 
     def evaluate(self, batch: Batch, **kwargs) -> Batch:
-        new_batch = batch
-        child_batches = [child.evaluate(batch, **kwargs) for child in self.children]
-        if len(child_batches):
-            batch_sizes = [len(child_batch) for child_batch in child_batches]
-            are_all_equal_length = all(batch_sizes[0] == x for x in batch_sizes)
-            assert (
-                are_all_equal_length is True
-            ), "All columns in batch must have equal elements"
-            new_batch = Batch.merge_column_wise(child_batches)
-
         func = self._gpu_enabled_function()
-
         # record the time taken for the udf execution
+        # note the udf might be using cache
         with self._stats.timer:
             # apply the function and project the required columns
-            outcomes = self._apply_function_expression(func, new_batch, **kwargs)
+            outcomes = self._apply_function_expression(func, batch, **kwargs)
             outcomes = outcomes.project(self.projection_columns)
             outcomes.modify_column_alias(self.alias)
 
         # record the number of function calls
         self._stats.num_calls += len(batch)
 
-        # persist the stats to catalog
-        self.persist_stats()
+        # try persisting the stats to catalog and do not crash if we fail in doing so
+        try:
+            self.persist_stats()
+        except Exception as e:
+            logger.warn(
+                f"Persisting Function Expression {str(self)} stats failed with {str(e)}"
+            )
 
         return outcomes
 
     def signature(self) -> str:
         """It constructs the signature of the function expression.
-        It traverses the children (function arguments) and compute signature for each child. The output is in the form `udf_name(arg1, arg2, ...)`.
+        It traverses the children (function arguments) and compute signature for each
+        child. The output is in the form `udf_name(arg1, arg2, ...)`.
 
         Returns:
             str: signature string
@@ -205,6 +209,9 @@ class FunctionExpression(AbstractExpression):
             val = self._cache.store.get(key.to_numpy())
             results[idx] = val
             cache_miss[idx] = val is None
+
+        # log the cache misses
+        self._stats.cache_misses += sum(cache_miss)
 
         # 2. call func for cache miss rows
         if cache_miss.any():

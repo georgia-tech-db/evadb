@@ -132,6 +132,8 @@ class Batch:
             return f"{self._frames}"
 
     def __eq__(self, other: Batch):
+        # this function does not work if a column is a nested numpy arrays
+        # (eg, bboxes from yolo).
         return self._frames[sorted(self.columns)].equals(
             other.frames[sorted(other.columns)]
         )
