@@ -25,6 +25,7 @@ from eva.optimizer.plan_generator import PlanGenerator
 from eva.optimizer.rules.rules import CacheFunctionExpressionInApply
 from eva.optimizer.rules.rules_manager import disable_rules
 from eva.server.command_handler import execute_query_fetch_all
+from eva.utils.stats import Timer
 
 
 class ReuseTest(unittest.TestCase):
@@ -48,13 +49,20 @@ class ReuseTest(unittest.TestCase):
     def test_reuse_when_query_is_duplicate(self):
         select_query = """SELECT id, label FROM DETRAC JOIN
             LATERAL YoloV5(data) AS Obj(label, bbox, conf) WHERE id < 15;"""
+        no_reuse_timer = Timer()
+        reuse_timer = Timer()
 
-        execute_query_fetch_all(select_query)
-        select_query = """SELECT id, label FROM DETRAC JOIN
-            LATERAL YoloV5(data) AS Obj(label, bbox, conf) WHERE id < 15;"""
+        with no_reuse_timer:
+            execute_query_fetch_all(select_query)
+        with reuse_timer:
+            reuse_batch = execute_query_fetch_all(select_query)
 
-        reuse_batch = execute_query_fetch_all(select_query)
         self._verify_reuse_correctness(select_query, reuse_batch)
+
+        # reuse should be faster than no reuse
+        self.assertTrue(
+            no_reuse_timer.total_elapsed_time > reuse_timer.total_elapsed_time
+        )
 
     def test_reuse_partial(self):
         select_query = """SELECT id, label FROM DETRAC JOIN
