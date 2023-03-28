@@ -19,6 +19,7 @@ import ffmpeg
 import numpy as np
 
 from eva.constants import IFRAMES
+from eva.executor.executor_utils import ExecutorError
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.expression_utils import extract_range_list_from_predicate
 from eva.readers.abstract_reader import AbstractReader
@@ -68,13 +69,16 @@ class DecordReader(AbstractReader):
     def _read(self) -> Iterator[Dict]:
         decord = _lazy_import_decord()
         if self._read_audio:
-            if "audio" in [
-                stream["codec_type"]
-                for stream in ffmpeg.probe(self.file_url)["streams"]
-            ]:
-                for frame in self.get_av_frames():
-                    yield frame
-                return
+            try:
+                if "audio" in [
+                    stream["codec_type"]
+                    for stream in ffmpeg.probe(self.file_url)["streams"]
+                ]:
+                    for frame in self.get_av_frames():
+                        yield frame
+                    return
+            except ffmpeg.Error as e:
+                raise ExecutorError(e.stderr)
         video = decord.VideoReader(self.file_url)
         num_frames = int(len(video))
         if self._predicate:
