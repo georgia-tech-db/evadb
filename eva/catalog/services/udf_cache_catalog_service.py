@@ -30,7 +30,17 @@ class UdfCacheCatalogService(BaseService):
         self._udf_service: UdfCatalogService = UdfCatalogService()
 
     def insert_entry(self, entry: UdfCacheCatalogEntry) -> UdfCacheCatalogEntry:
-        """Insert a new udf cache entry into udf cache catalog."""
+        """Insert a new udf cache entry into udf cache catalog.
+        Arguments:
+            `name` (str): name of the cache table
+            `udf_id` (int): `row_id` of the UDF on which the cache is built
+            `cache_path` (str): path of the cache table
+            `args` (List[Any]): arguments of the UDF whose output is being cached
+            `udf_depends` (List[UdfCatalogEntry]): dependent UDF  entries
+            `col_depends` (List[ColumnCatalogEntry]): dependent column entries
+        Returns:
+            `UdfCacheCatalogEntry`
+        """
         try:
             cache_obj = self.model(
                 name=entry.name,
@@ -38,6 +48,15 @@ class UdfCacheCatalogService(BaseService):
                 cache_path=entry.cache_path,
                 args=entry.args,
             )
+
+            cache_obj._udf_depends = [
+                self._udf_service.get_entry_by_id(udf_id, return_alchemy=True)
+                for udf_id in entry.udf_depends
+            ]
+            cache_obj._col_depends = [
+                self._column_service.get_entry_by_id(col_id, return_alchemy=True)
+                for col_id in entry.col_depends
+            ]
             cache_obj = cache_obj.save()
 
         except Exception as e:

@@ -61,7 +61,7 @@ class SQLConfig:
         # parallelize using xdist
         # worker_uri = prefix_worker_id(str(uri))
         # set echo=True to log SQL
-        self.engine = create_engine(uri, echo=True)
+        self.engine = create_engine(uri)
 
         if self.engine.url.get_backend_name() == "sqlite":
             # enforce foreign key constraint and wal logging for sqlite

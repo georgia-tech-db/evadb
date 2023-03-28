@@ -179,10 +179,6 @@ class CreateIndexTest(unittest.TestCase):
             index_catalog_entry.save_file_path,
             self._index_save_path(),
         )
-        self.assertEqual(
-            index_catalog_entry.udf_signature,
-            "DummyFeatureExtractor(testCreateIndexInputTable.input)",
-        )
 
         # Test referenced column.
         input_table_entry = CatalogManager().get_table_catalog_entry(

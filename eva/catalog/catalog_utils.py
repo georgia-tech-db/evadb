@@ -109,17 +109,22 @@ def construct_udf_cache_catalog_entry(
     func_expr: FunctionExpression,
 ) -> UdfCacheCatalogEntry:
     """Constructs a udf cache catalog entry from a given function expression.
-
     It is assumed that the function expression has already been bound using the binder.
-    The cache name is represented using function signature.
-
+    The catalog entry is populated with dependent udfs and columns by traversing the
+    expression tree. The cache name is represented by the signature of the function
+    expression.
     Args:
         func_expr (FunctionExpression): the function expression with which the cache is
-        associated
-
+        assoicated
     Returns:
         UdfCacheCatalogEntry: the udf cache catalog entry
     """
+    udf_depends = []
+    col_depends = []
+    for expr in func_expr.find_all(FunctionExpression):
+        udf_depends.append(expr.udf_obj.row_id)
+    for expr in func_expr.find_all(TupleValueExpression):
+        col_depends.append(expr.col_object.row_id)
     cache_name = func_expr.signature()
 
     # add salt to the cache_name so that we generate unique name
@@ -132,6 +137,8 @@ def construct_udf_cache_catalog_entry(
         udf_id=func_expr.udf_obj.row_id,
         cache_path=cache_path,
         args=args,
+        udf_depends=udf_depends,
+        col_depends=col_depends,
     )
 
     return entry

@@ -13,11 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from ast import literal_eval
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Tuple
-from sqlalchemy.orm import relationship
-from sqlalchemy import Column, ForeignKey, Integer, String, UniqueConstraint
 
+from sqlalchemy import Column, ForeignKey, Integer, String, UniqueConstraint
+from sqlalchemy.orm import relationship
+
+from eva.catalog.models.association_models import (
+    depend_column_and_udf_cache,
+    depend_udf_and_udf_cache,
+)
 from eva.catalog.models.base_model import BaseModel
 
 
@@ -43,7 +48,21 @@ class UdfCacheCatalog(BaseModel):
     _args = Column("args", String(1024))
 
     __table_args__ = (UniqueConstraint("name", "udf_id"), {})
-    
+
+    _col_depends = relationship(
+        "ColumnCatalog",
+        secondary=depend_column_and_udf_cache,
+        back_populates="_dep_caches",
+        # cascade="all, delete-orphan",
+    )
+
+    _udf_depends = relationship(
+        "UdfCatalog",
+        secondary=depend_udf_and_udf_cache,
+        back_populates="_dep_caches",
+        # cascade="all, delete-orphan",
+    )
+
     def __init__(self, name: str, udf_id: int, cache_path: str, args: Tuple[str]):
         self._name = name
         self._udf_id = udf_id
@@ -51,12 +70,16 @@ class UdfCacheCatalog(BaseModel):
         self._args = str(args)
 
     def as_dataclass(self) -> "UdfCacheCatalogEntry":
+        udf_depends = [obj._row_id for obj in self._udf_depends]
+        col_depends = [obj._row_id for obj in self._col_depends]
         return UdfCacheCatalogEntry(
             row_id=self._row_id,
             name=self._name,
             udf_id=self._udf_id,
             cache_path=self._cache_path,
             args=literal_eval(self._args),
+            udf_depends=udf_depends,
+            col_depends=col_depends,
         )
 
 
@@ -71,3 +94,5 @@ class UdfCacheCatalogEntry:
     cache_path: str
     args: Tuple[str]
     row_id: int = None
+    udf_depends: Tuple[int] = field(compare=False, default_factory=tuple)
+    col_depends: Tuple[int] = field(compare=False, default_factory=tuple)

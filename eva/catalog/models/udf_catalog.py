@@ -14,14 +14,13 @@
 # limitations under the License.
 from __future__ import annotations
 
-import typing
 from dataclasses import dataclass, field
 from typing import List
-
 
 from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
 
+from eva.catalog.models.association_models import depend_udf_and_udf_cache
 from eva.catalog.models.base_model import BaseModel
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 
@@ -51,9 +50,16 @@ class UdfCatalog(BaseModel):
     )
 
     # caches
-    _caches = relationship(
+    # _caches = relationship(
+    #     "UdfCacheCatalog",
+    #     cascade="all, delete, delete-orphan",
+    # )
+
+    _dep_caches = relationship(
         "UdfCacheCatalog",
-        cascade="all, delete, delete-orphan",
+        secondary=depend_udf_and_udf_cache,
+        back_populates="_udf_depends",
+        cascade="all, delete",
     )
 
     def __init__(self, name: str, impl_file_path: str, type: str, checksum: str):
@@ -79,7 +85,7 @@ class UdfCatalog(BaseModel):
             checksum=self._checksum,
             args=args,
             outputs=outputs,
-            caches=[entry.as_dataclass() for entry in self._caches],
+            dep_caches=[entry.as_dataclass() for entry in self._dep_caches],
         )
 
 
@@ -96,7 +102,7 @@ class UdfCatalogEntry:
     row_id: int = None
     args: List[UdfIOCatalogEntry] = field(compare=False, default_factory=list)
     outputs: List[UdfIOCatalogEntry] = field(compare=False, default_factory=list)
-    caches: List[UdfIOCatalogEntry] = field(compare=False, default_factory=list)
+    dep_caches: List[UdfIOCatalogEntry] = field(compare=False, default_factory=list)
 
     def display_format(self):
         def _to_str(col):

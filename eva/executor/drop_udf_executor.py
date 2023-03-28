@@ -47,7 +47,7 @@ class DropUDFExecutor(AbstractExecutor):
             # catalog takes care of removing the cache entries from the catalog table
             # based on the foreign key dependecies.
             udf_entry = catalog_manager.get_udf_catalog_entry_by_name(self.node.name)
-            for cache in udf_entry.caches:
+            for cache in udf_entry.dep_caches:
                 shutil.rmtree(cache.cache_path)
             catalog_manager.delete_udf_catalog_entry_by_name(self.node.name)
             yield Batch(
