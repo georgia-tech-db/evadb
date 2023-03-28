@@ -75,7 +75,7 @@ class ComparisonExpression(AbstractExpression):
         elif self.etype == ExpressionType.COMPARE_IS_CONTAINED:
             return Batch.compare_is_contained(lbatch, rbatch)
         elif self.etype == ExpressionType.COMPARE_LIKE:
-            return Batch.compare_is_like(lbatch, rbatch)
+            return Batch.compare_like(lbatch, rbatch)
 
     def get_symbol(self) -> str:
         if self.etype == ExpressionType.COMPARE_EQUAL:

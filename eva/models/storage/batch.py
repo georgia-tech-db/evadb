@@ -126,7 +126,7 @@ class Batch:
         )
 
     @classmethod
-    def compare_is_like(cls, batch1: Batch, batch2: Batch) -> None:
+    def compare_like(cls, batch1: Batch, batch2: Batch) -> None:
         col = batch1._frames.iloc[:, 0]
         regex = batch2._frames.iloc[:, 0][0]
         return cls(pd.DataFrame(col.astype("str").str.match(pat=regex)))
