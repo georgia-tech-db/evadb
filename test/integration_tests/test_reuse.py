@@ -15,7 +15,7 @@
 import os
 import unittest
 from pathlib import Path
-from test.util import get_logical_query_plan, load_inbuilt_udfs
+from test.util import get_logical_query_plan, load_udfs_for_testing
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
@@ -32,7 +32,7 @@ class ReuseTest(unittest.TestCase):
         CatalogManager().reset()
         ua_detrac = f"{EVA_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
         execute_query_fetch_all(f"LOAD VIDEO '{ua_detrac}' INTO DETRAC;")
-        load_inbuilt_udfs()
+        load_udfs_for_testing()
 
     def tearDown(self):
         execute_query_fetch_all("DROP TABLE IF EXISTS DETRAC;")

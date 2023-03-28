@@ -49,12 +49,6 @@ class UdfCatalog(BaseModel):
         cascade="all, delete, delete-orphan",
     )
 
-    # caches
-    # _caches = relationship(
-    #     "UdfCacheCatalog",
-    #     cascade="all, delete, delete-orphan",
-    # )
-
     _dep_caches = relationship(
         "UdfCacheCatalog",
         secondary=depend_udf_and_udf_cache,
