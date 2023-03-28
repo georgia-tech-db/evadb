@@ -34,6 +34,8 @@ class OpenCVStorageEngine(AbstractMediaStorageEngine):
         predicate: AbstractExpression = None,
         sampling_rate: int = None,
         sampling_type: str = None,
+        read_audio: bool = False,
+        read_video: bool = True,
     ) -> Iterator[Batch]:
         for video_files in self._rdb_handler.read(self._get_metadata_table(table), 12):
             for video_file_name in video_files.frames["file_url"]:
@@ -46,13 +48,15 @@ class OpenCVStorageEngine(AbstractMediaStorageEngine):
                     sampling_rate=sampling_rate,
                 )
 
-                if sampling_type is not None:
+                if sampling_type is not None or read_audio:
                     reader = DecordReader(
                         str(video_file),
                         batch_mem_size=batch_mem_size,
                         predicate=predicate,
                         sampling_rate=sampling_rate,
                         sampling_type=sampling_type,
+                        read_audio=read_audio,
+                        read_video=read_video,
                     )
                 for batch in reader.read():
                     column_name = table.columns[1].name

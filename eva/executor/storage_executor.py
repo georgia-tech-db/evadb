@@ -14,12 +14,14 @@
 # limitations under the License.
 from typing import Iterator
 
-from eva.catalog.catalog_type import TableType
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
+from eva.parser.table_ref import AVTableRef, ImageTableRef, TableRef
 from eva.plan_nodes.storage_plan import StoragePlan
-from eva.storage.storage_engine import StorageEngine
+from eva.storage.image_storage_engine import ImageStorageEngine
+from eva.storage.sqlite_storage_engine import SQLStorageEngine
+from eva.storage.video_storage_engine import OpenCVStorageEngine
 from eva.utils.logging_manager import logger
 
 
@@ -29,20 +31,22 @@ class StorageExecutor(AbstractExecutor):
 
     def exec(self, *args, **kwargs) -> Iterator[Batch]:
         try:
-            storage_engine = StorageEngine.factory(self.node.table)
-
-            if self.node.table.table_type == TableType.VIDEO_DATA:
-                return storage_engine.read(
+            if isinstance(self.node.table_ref, AVTableRef):
+                return OpenCVStorageEngine().read(
                     self.node.table,
                     self.node.batch_mem_size,
                     predicate=self.node.predicate,
                     sampling_rate=self.node.sampling_rate,
                     sampling_type=self.node.sampling_type,
+                    read_audio=self.node.table_ref.get_audio,
+                    read_video=self.node.table_ref.get_video,
                 )
-            elif self.node.table.table_type == TableType.IMAGE_DATA:
-                return storage_engine.read(self.node.table)
-            elif self.node.table.table_type == TableType.STRUCTURED_DATA:
-                return storage_engine.read(self.node.table, self.node.batch_mem_size)
+            elif isinstance(self.node.table_ref, ImageTableRef):
+                return ImageStorageEngine().read(self.node.table)
+            elif isinstance(self.node.table_ref, TableRef):
+                return SQLStorageEngine().read(
+                    self.node.table, self.node.batch_mem_size
+                )
             else:
                 raise ExecutorError(
                     f"Unsupported TableType  {self.node.table.table_type} encountered"

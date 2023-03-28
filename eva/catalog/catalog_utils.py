@@ -39,6 +39,7 @@ def get_video_table_column_definitions() -> List[ColumnDefinition]:
             "data", ColumnType.NDARRAY, NdArrayType.UINT8, (None, None, None)
         ),
         ColumnDefinition("seconds", ColumnType.FLOAT, None, []),
+        ColumnDefinition("audio", ColumnType.NDARRAY, NdArrayType.UINT8, (None)),
     ]
     return columns
 
