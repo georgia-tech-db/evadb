@@ -30,9 +30,6 @@ class QueueReaderExecutor(AbstractExecutor):
     def __init__(self):
         super().__init__(None)
 
-    def validate(self):
-        pass
-
     def exec(self, **kwargs) -> Iterator[Batch]:
         assert (
             "input_queues" in kwargs
@@ -63,9 +60,6 @@ class ExchangeExecutor(AbstractExecutor):
         self.ray_conf = node.ray_conf
         super().__init__(node)
 
-    def validate(self):
-        pass
-
     def exec(self, is_top=True) -> Iterator[Batch]:
         assert (
             len(self.children) == 1
@@ -84,6 +78,7 @@ class ExchangeExecutor(AbstractExecutor):
             input_queues.append(iq)
             queue_exec = QueueReaderExecutor()
             curr_exec.children = [queue_exec]
+            # curr_exec.append_child(queue_exec)
 
         output_queue = Queue(maxsize=100)
         ray_task = []
@@ -102,6 +97,3 @@ class ExchangeExecutor(AbstractExecutor):
                 yield res
         else:
             return output_queue
-
-    def __call__(self, batch: Batch) -> Batch:
-        pass

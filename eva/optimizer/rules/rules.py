@@ -19,13 +19,17 @@ from typing import TYPE_CHECKING
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import TableType
 from eva.catalog.catalog_utils import is_video_table
-from eva.expression.expression_utils import conjuction_list_to_expression_tree
+from eva.expression.expression_utils import (
+    conjunction_list_to_expression_tree,
+    to_conjunction_list,
+)
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.optimizer.optimizer_utils import (
     extract_equi_join_keys,
     extract_pushdown_predicate,
     extract_pushdown_predicate_for_alias,
+    get_expression_execution_cost,
 )
 from eva.optimizer.rules.pattern import Pattern
 from eva.optimizer.rules.rules_base import Promise, Rule, RuleType
@@ -34,6 +38,7 @@ from eva.plan_nodes.apply_and_merge_plan import ApplyAndMergePlan
 from eva.plan_nodes.create_mat_view_plan import CreateMaterializedViewPlan
 from eva.plan_nodes.explain_plan import ExplainPlan
 from eva.plan_nodes.hash_join_build_plan import HashJoinBuildPlan
+from eva.plan_nodes.nested_loop_join_plan import NestedLoopJoinPlan
 from eva.plan_nodes.predicate_plan import PredicatePlan
 from eva.plan_nodes.project_plan import ProjectPlan
 from eva.plan_nodes.show_info_plan import ShowInfoPlan
@@ -41,7 +46,6 @@ from eva.plan_nodes.show_info_plan import ShowInfoPlan
 if TYPE_CHECKING:
     from eva.optimizer.optimizer_context import OptimizerContext
 
-from eva.configuration.configuration_manager import ConfigurationManager
 from eva.optimizer.operators import (
     Dummy,
     LogicalApplyAndMerge,
@@ -49,6 +53,7 @@ from eva.optimizer.operators import (
     LogicalCreateIndex,
     LogicalCreateMaterializedView,
     LogicalCreateUDF,
+    LogicalDelete,
     LogicalDrop,
     LogicalDropUDF,
     LogicalExplain,
@@ -68,13 +73,13 @@ from eva.optimizer.operators import (
     LogicalSample,
     LogicalShow,
     LogicalUnion,
-    LogicalUpload,
     Operator,
     OperatorType,
 )
 from eva.plan_nodes.create_index_plan import CreateIndexPlan
 from eva.plan_nodes.create_plan import CreatePlan
 from eva.plan_nodes.create_udf_plan import CreateUDFPlan
+from eva.plan_nodes.delete_plan import DeletePlan
 from eva.plan_nodes.drop_plan import DropPlan
 from eva.plan_nodes.drop_udf_plan import DropUDFPlan
 from eva.plan_nodes.faiss_index_scan_plan import FaissIndexScanPlan
@@ -87,11 +92,9 @@ from eva.plan_nodes.limit_plan import LimitPlan
 from eva.plan_nodes.load_data_plan import LoadDataPlan
 from eva.plan_nodes.orderby_plan import OrderByPlan
 from eva.plan_nodes.rename_plan import RenamePlan
-from eva.plan_nodes.sample_plan import SamplePlan
 from eva.plan_nodes.seq_scan_plan import SeqScanPlan
 from eva.plan_nodes.storage_plan import StoragePlan
 from eva.plan_nodes.union_plan import UnionPlan
-from eva.plan_nodes.upload_plan import UploadPlan
 
 ##############################################
 # REWRITE RULES START
@@ -136,6 +139,7 @@ class EmbedFilterIntoGet(Rule):
                 predicate=pushdown_pred,
                 target_list=lget.target_list,
                 sampling_rate=lget.sampling_rate,
+                sampling_type=lget.sampling_type,
                 children=lget.children,
             )
             if unsupported_pred:
@@ -165,6 +169,7 @@ class EmbedSampleIntoGet(Rule):
 
     def apply(self, before: LogicalSample, context: OptimizerContext):
         sample_freq = before.sample_freq.value
+        sample_type = before.sample_type.value.value if before.sample_type else None
         lget: LogicalGet = before.children[0]
         new_get_opr = LogicalGet(
             lget.video,
@@ -173,6 +178,7 @@ class EmbedSampleIntoGet(Rule):
             predicate=lget.predicate,
             target_list=lget.target_list,
             sampling_rate=sample_freq,
+            sampling_type=sample_type,
             children=lget.children,
         )
         yield new_get_opr
@@ -201,67 +207,11 @@ class EmbedProjectIntoGet(Rule):
             predicate=lget.predicate,
             target_list=target_list,
             sampling_rate=lget.sampling_rate,
+            sampling_type=lget.sampling_type,
             children=lget.children,
         )
 
         yield new_get_opr
-
-
-# For nested queries
-
-
-class EmbedFilterIntoDerivedGet(Rule):
-    def __init__(self):
-        pattern = Pattern(OperatorType.LOGICALFILTER)
-        pattern_get = Pattern(OperatorType.LOGICALQUERYDERIVEDGET)
-        pattern_get.append_child(Pattern(OperatorType.DUMMY))
-        pattern.append_child(pattern_get)
-        super().__init__(RuleType.EMBED_FILTER_INTO_DERIVED_GET, pattern)
-
-    def promise(self):
-        return Promise.EMBED_FILTER_INTO_DERIVED_GET
-
-    def check(self, before: Operator, context: OptimizerContext):
-        # nothing else to check if logical match found return true
-        return True
-
-    def apply(self, before: LogicalFilter, context: OptimizerContext):
-        predicate = before.predicate
-        ld_get = before.children[0]
-        new_opr = LogicalQueryDerivedGet(
-            alias=ld_get.alias,
-            predicate=predicate,
-            target_list=ld_get.target_list,
-            children=ld_get.children,
-        )
-        yield new_opr
-
-
-class EmbedProjectIntoDerivedGet(Rule):
-    def __init__(self):
-        pattern = Pattern(OperatorType.LOGICALPROJECT)
-        pattern_get = Pattern(OperatorType.LOGICALQUERYDERIVEDGET)
-        pattern_get.append_child(Pattern(OperatorType.DUMMY))
-        pattern.append_child(pattern_get)
-        super().__init__(RuleType.EMBED_PROJECT_INTO_DERIVED_GET, pattern)
-
-    def promise(self):
-        return Promise.EMBED_PROJECT_INTO_DERIVED_GET
-
-    def check(self, before: Operator, context: OptimizerContext):
-        # nothing else to check if logical match found return true
-        return True
-
-    def apply(self, before: LogicalProject, context: OptimizerContext):
-        target_list = before.target_list
-        ld_get = before.children[0]
-        new_opr = LogicalQueryDerivedGet(
-            alias=ld_get.alias,
-            predicate=ld_get.predicate,
-            target_list=target_list,
-            children=ld_get.children,
-        )
-        yield new_opr
 
 
 # Join Queries
@@ -317,7 +267,7 @@ class PushDownFilterThroughJoin(Rule):
             new_join_node.append_child(right)
 
         if rem_pred:
-            new_join_node.join_predicate = conjuction_list_to_expression_tree(
+            new_join_node._join_predicate = conjunction_list_to_expression_tree(
                 [rem_pred, new_join_node.join_predicate]
             )
 
@@ -411,9 +361,10 @@ class PushDownFilterThroughApplyAndMerge(Rule):
 
         # If we have partial predicate make it the root
         root_node = apply_and_merge
-        if rem_pred:
-            root_node = LogicalFilter(predicate=rem_pred)
-            root_node.append_child(apply_and_merge)
+        assert rem_pred is None
+        # if rem_pred:
+        #    root_node = LogicalFilter(predicate=rem_pred)
+        #    root_node.append_child(apply_and_merge)
 
         yield root_node
 
@@ -463,16 +414,10 @@ class CombineSimilarityOrderByAndLimitToFaissIndexScan(Rule):
 
         # Check if predicate exists on table.
         def _exists_predicate(opr):
-            if isinstance(opr, LogicalFilter):
-                return True
-            elif isinstance(opr, LogicalGet):
+            if isinstance(opr, LogicalGet):
                 return opr.predicate is not None
-            elif isinstance(opr, LogicalQueryDerivedGet):
-                return opr.predicate is not None
-            exists_predicate = False
-            for child in opr.children:
-                exists_predicate |= _exists_predicate(child)
-            return exists_predicate
+            # LogicalFilter
+            return True
 
         if _exists_predicate(sub_tree_root.opr):
             return
@@ -558,6 +503,64 @@ class LogicalInnerJoinCommutativity(Rule):
         yield new_join
 
 
+class ReorderPredicates(Rule):
+    """
+    The current implementation orders conjuncts based on their individual cost.
+    The optimization for OR clauses has `not` been implemented yet. Additionally, we do
+    not optimize predicates that are not user-defined functions since we assume that
+    they will likely be pushed to the underlying relational database, which will handle
+    the optimization process.
+    """
+
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALFILTER)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.REORDER_PREDICATES, pattern)
+
+    def promise(self):
+        return Promise.REORDER_PREDICATES
+
+    def check(self, before: LogicalFilter, context: OptimizerContext):
+        # there exists atleast one Function Expression
+        return len(list(before.predicate.find_all(FunctionExpression))) > 0
+
+    def apply(self, before: LogicalFilter, context: OptimizerContext):
+        # Decompose the expression tree into a list of conjuncts
+        conjuncts = to_conjunction_list(before.predicate)
+
+        # Segregate the conjuncts into simple and function expressions
+        contains_func_exprs = []
+        simple_exprs = []
+        for conjunct in conjuncts:
+            if list(conjunct.find_all(FunctionExpression)):
+                contains_func_exprs.append(conjunct)
+            else:
+                simple_exprs.append(conjunct)
+
+        # Compute the cost of every function expression and sort them in
+        # ascending order of cost
+        function_expr_cost_tuples = [
+            (expr, get_expression_execution_cost(expr)) for expr in contains_func_exprs
+        ]
+        function_expr_cost_tuples = sorted(
+            function_expr_cost_tuples, key=lambda x: x[1]
+        )
+
+        # Build the final ordered list of conjuncts
+        ordered_conjuncts = simple_exprs + [
+            expr for (expr, _) in function_expr_cost_tuples
+        ]
+
+        # we do not return a new plan if nothing has changed
+        # this ensures we do not keep applying this optimization
+        if ordered_conjuncts != conjuncts:
+            # Build expression tree based on the ordered conjuncts
+            reordered_predicate = conjunction_list_to_expression_tree(ordered_conjuncts)
+            reordered_filter_node = LogicalFilter(predicate=reordered_predicate)
+            reordered_filter_node.append_child(before.children[0])
+            yield reordered_filter_node
+
+
 # LOGICAL RULES END
 ##############################################
 
@@ -633,6 +636,7 @@ class LogicalCreateUDFToPhysical(Rule):
             before.outputs,
             before.impl_path,
             before.udf_type,
+            before.metadata,
         )
         yield after
 
@@ -691,6 +695,22 @@ class LogicalInsertToPhysical(Rule):
         yield after
 
 
+class LogicalDeleteToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALDELETE)
+        super().__init__(RuleType.LOGICAL_DELETE_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_DELETE_TO_PHYSICAL
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalDelete, context: OptimizerContext):
+        after = DeletePlan(before.table_ref, before.where_clause)
+        yield after
+
+
 class LogicalLoadToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALLOADDATA)
@@ -703,57 +723,12 @@ class LogicalLoadToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalLoadData, context: OptimizerContext):
-        # Configure the batch_mem_size.
-        # We assume the optimizer decides the batch_mem_size.
-        # ToDO: Experiment heuristics.
-
-        batch_mem_size = 30000000  # 30mb
-        config_batch_mem_size = ConfigurationManager().get_value(
-            "executor", "batch_mem_size"
-        )
-        if config_batch_mem_size:
-            batch_mem_size = config_batch_mem_size
         after = LoadDataPlan(
             before.table_info,
             before.path,
-            batch_mem_size,
             before.column_list,
             before.file_options,
         )
-        yield after
-
-
-class LogicalUploadToPhysical(Rule):
-    def __init__(self):
-        pattern = Pattern(OperatorType.LOGICALUPLOAD)
-        super().__init__(RuleType.LOGICAL_UPLOAD_TO_PHYSICAL, pattern)
-
-    def promise(self):
-        return Promise.LOGICAL_UPLOAD_TO_PHYSICAL
-
-    def check(self, before: Operator, context: OptimizerContext):
-        return True
-
-    def apply(self, before: LogicalUpload, context: OptimizerContext):
-        # Configure the batch_mem_size.
-        # We assume the optimizer decides the batch_mem_size.
-        # ToDO: Experiment heuristics.
-
-        batch_mem_size = 30000000  # 30mb
-        config_batch_mem_size = ConfigurationManager().get_value(
-            "executor", "batch_mem_size"
-        )
-        if config_batch_mem_size:
-            batch_mem_size = config_batch_mem_size
-        after = UploadPlan(
-            before.path,
-            before.video_blob,
-            before.table_info,
-            batch_mem_size,
-            before.column_list,
-            before.file_options,
-        )
-
         yield after
 
 
@@ -772,41 +747,15 @@ class LogicalGetToSeqScan(Rule):
         # Configure the batch_mem_size. It decides the number of rows
         # read in a batch from storage engine.
         # ToDO: Experiment heuristics.
-
-        batch_mem_size = 30000000  # 30mb
-        config_batch_mem_size = ConfigurationManager().get_value(
-            "executor", "batch_mem_size"
-        )
-        if config_batch_mem_size:
-            batch_mem_size = config_batch_mem_size
         after = SeqScanPlan(None, before.target_list, before.alias)
         after.append_child(
             StoragePlan(
                 before.table_obj,
-                batch_mem_size=batch_mem_size,
                 predicate=before.predicate,
                 sampling_rate=before.sampling_rate,
+                sampling_type=before.sampling_type,
             )
         )
-        yield after
-
-
-class LogicalSampleToUniformSample(Rule):
-    def __init__(self):
-        pattern = Pattern(OperatorType.LOGICALSAMPLE)
-        pattern.append_child(Pattern(OperatorType.DUMMY))
-        super().__init__(RuleType.LOGICAL_SAMPLE_TO_UNIFORMSAMPLE, pattern)
-
-    def promise(self):
-        return Promise.LOGICAL_SAMPLE_TO_UNIFORMSAMPLE
-
-    def check(self, before: Operator, context: OptimizerContext):
-        return True
-
-    def apply(self, before: LogicalSample, context: OptimizerContext):
-        after = SamplePlan(before.sample_freq)
-        for child in before.children:
-            after.append_child(child)
         yield after
 
 
@@ -933,10 +882,7 @@ class LogicalLateralJoinToPhysical(Rule):
         return Promise.LOGICAL_LATERAL_JOIN_TO_PHYSICAL
 
     def check(self, before: Operator, context: OptimizerContext):
-        if before.join_type == JoinType.LATERAL_JOIN:
-            return True
-        else:
-            return False
+        return before.join_type == JoinType.LATERAL_JOIN
 
     def apply(self, join_node: LogicalJoin, context: OptimizerContext):
         lateral_join_plan = LateralJoinPlan(join_node.join_predicate)
@@ -957,7 +903,21 @@ class LogicalJoinToPhysicalHashJoin(Rule):
         return Promise.LOGICAL_JOIN_TO_PHYSICAL_HASH_JOIN
 
     def check(self, before: Operator, context: OptimizerContext):
-        return before.join_type == JoinType.INNER_JOIN
+        """
+        We don't want to apply this rule to the join when FuzzDistance
+        is being used, which implies that the join is a FuzzyJoin
+        """
+        if before.join_predicate is None:
+            return False
+        j_child: FunctionExpression = before.join_predicate.children[0]
+
+        if isinstance(j_child, FunctionExpression):
+            if j_child.name.startswith("FuzzDistance"):
+                return before.join_type == JoinType.INNER_JOIN and (
+                    not (j_child) or not (j_child.name.startswith("FuzzDistance"))
+                )
+        else:
+            return before.join_type == JoinType.INNER_JOIN
 
     def apply(self, join_node: LogicalJoin, context: OptimizerContext):
         #          HashJoinPlan                       HashJoinProbePlan
@@ -986,6 +946,39 @@ class LogicalJoinToPhysicalHashJoin(Rule):
         probe_side.append_child(build_plan)
         probe_side.append_child(b)
         yield probe_side
+
+
+class LogicalJoinToPhysicalNestedLoopJoin(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALJOIN)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_JOIN_TO_PHYSICAL_NESTED_LOOP_JOIN, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_JOIN_TO_PHYSICAL_NESTED_LOOP_JOIN
+
+    def check(self, before: LogicalJoin, context: OptimizerContext):
+        """
+        We want to apply this rule to the join when FuzzDistance
+        is being used, which implies that the join is a FuzzyJoin
+        """
+        if before.join_predicate is None:
+            return False
+        j_child: FunctionExpression = before.join_predicate.children[0]
+        if not isinstance(j_child, FunctionExpression):
+            return False
+        return before.join_type == JoinType.INNER_JOIN and j_child.name.startswith(
+            "FuzzDistance"
+        )
+
+    def apply(self, join_node: LogicalJoin, context: OptimizerContext):
+        nested_loop_join_plan = NestedLoopJoinPlan(
+            join_node.join_type, join_node.join_predicate
+        )
+        nested_loop_join_plan.append_child(join_node.lhs())
+        nested_loop_join_plan.append_child(join_node.rhs())
+        yield nested_loop_join_plan
 
 
 class LogicalCreateMaterializedViewToPhysical(Rule):

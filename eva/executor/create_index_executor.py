@@ -47,10 +47,7 @@ class CreateIndexExecutor(AbstractExecutor):
     def __init__(self, node: CreateIndexPlan):
         super().__init__(node)
 
-    def validate(self):
-        pass
-
-    def exec(self):
+    def exec(self, *args, **kwargs):
         catalog_manager = CatalogManager()
         if catalog_manager.get_index_catalog_entry_by_name(self.node.name):
             msg = f"Index {self.node.name} already exists."
@@ -60,10 +57,12 @@ class CreateIndexExecutor(AbstractExecutor):
         # Get the index type.
         index_type = self.node.index_type
 
+        assert IndexType.is_faiss_index_type(
+            index_type
+        ), "Index type {} is not supported.".format(index_type)
+
         if IndexType.is_faiss_index_type(index_type):
             self._create_faiss_index()
-        else:
-            raise ExecutorError("Index type {} is not supported.".format(index_type))
 
         yield Batch(
             pd.DataFrame(
@@ -77,39 +76,6 @@ class CreateIndexExecutor(AbstractExecutor):
             / INDEX_DIR
             / Path("{}_{}.index".format(self.node.index_type, self.node.name))
         )
-
-    # Comment out since Index IO is not needed for now.
-    # def _get_index_io_list(self, input_dim):
-    #     # Input dimension is inferred from the actual feature.
-    #     catalog_manager = CatalogManager()
-    #     input_index_io = catalog_manager.index_io(
-    #         "input_feature",
-    #         ColumnType.NDARRAY,
-    #         NdArrayType.FLOAT32,
-    #         [Dimension.ANYDIM, input_dim],
-    #         True,
-    #     )
-
-    #     # Output dimension depends on number of searched
-    #     # feature vectors and top N similar feature vectors.
-    #     # IndexIO has detailed documentation about input and
-    #     # output format of index.
-    #     id_index_io = catalog_manager.index_io(
-    #         "logical_id",
-    #         ColumnType.NDARRAY,
-    #         NdArrayType.INT64,
-    #         [Dimension.ANYDIM, Dimension.ANYDIM],
-    #         False,
-    #     )
-    #     distance_index_io = catalog_manager.index_io(
-    #         "distance",
-    #         ColumnType.NDARRAY,
-    #         NdArrayType.FLOAT32,
-    #         [Dimension.ANYDIM, Dimension.ANYDIM],
-    #         False,
-    #     )
-
-    #     return [input_index_io, id_index_io, distance_index_io]
 
     def _create_faiss_index(self):
         try:

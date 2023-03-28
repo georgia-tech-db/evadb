@@ -14,17 +14,19 @@
 # limitations under the License.
 from unittest import TestCase
 
-from mock import patch
+import pytest
+from mock import MagicMock, patch
 from sqlalchemy.orm.exc import NoResultFound
 
+from eva.catalog.catalog_type import ColumnType, IndexType
+from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.catalog.services.index_catalog_service import IndexCatalogService
 
-INDEX_TYPE = "HSNW"
-INDEX_IMPL_PATH = "file1"
 INDEX_NAME = "name"
 INDEX_ID = 123
 
 
+@pytest.mark.notparallel
 class IndexCatalogServiceTest(TestCase):
     @patch("eva.catalog.services.index_catalog_service.IndexCatalog")
     def test_index_by_name_should_query_model_with_name(self, mocked):
@@ -83,8 +85,29 @@ class IndexCatalogServiceTest(TestCase):
                 )
 
     @patch("eva.catalog.services.index_catalog_service.IndexCatalog")
-    def test_get_all_indices_should_return_empty(self, mocked):
+    def test_index_catalog_exception(self, mock_index_catalog):
+        mock_index_catalog.query.filter.side_effect = NoResultFound
+        mock_index_catalog.query.all.side_effect = NoResultFound
+
         service = IndexCatalogService()
-        mocked.query.all.side_effect = Exception(NoResultFound)
-        with self.assertRaises(Exception):
-            self.assertEqual(service.get_all_entries(), [])
+
+        self.assertEqual(service.get_entry_by_name(MagicMock()), None)
+
+        self.assertEqual(service.get_entry_by_id(MagicMock()), None)
+
+        self.assertEqual(service.get_all_entries(), [])
+
+    def test_index_get_all_entries(self):
+        INDEX_NAME = "name"
+        INDEX_URL = "file1"
+        INDEX_TYPE = IndexType.HNSW
+        FEAT_COLUMN = ColumnCatalogEntry("abc", ColumnType.INTEGER)
+
+        service = IndexCatalogService()
+
+        service.insert_entry(INDEX_NAME, INDEX_URL, INDEX_TYPE, FEAT_COLUMN, "sig")
+
+        output = service.get_all_entries()
+        self.assertEqual(len(output), 1)
+
+        service.delete_entry_by_name(INDEX_NAME)

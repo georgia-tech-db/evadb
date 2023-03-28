@@ -27,7 +27,7 @@ def to_conjunction_list(
 ) -> List[AbstractExpression]:
     """Convert expression tree to list of conjuntives
 
-    Note: It does not normalize the expression tree before extracting the conjuntives.
+    Note: It does not normalize the expression tree before extracting the conjunctives.
 
     Args:
         expression_tree (AbstractExpression): expression tree to transform
@@ -50,7 +50,7 @@ def to_conjunction_list(
     return expression_list
 
 
-def conjuction_list_to_expression_tree(
+def conjunction_list_to_expression_tree(
     expression_list: List[AbstractExpression],
 ) -> AbstractExpression:
     """Convert expression list to expression tree using conjuction connector
@@ -63,13 +63,14 @@ def conjuction_list_to_expression_tree(
         AbstractExpression: expression tree
 
     Example:
-        conjuction_list_to_expression_tree([a, b, c] ): AND( AND(a, b), c)
+        conjunction_list_to_expression_tree([a, b, c] ): AND( AND(a, b), c)
     """
     if len(expression_list) == 0:
         return None
     prev_expr = expression_list[0]
     for expr in expression_list[1:]:
-        prev_expr = LogicalExpression(ExpressionType.LOGICAL_AND, prev_expr, expr)
+        if expr is not None:
+            prev_expr = LogicalExpression(ExpressionType.LOGICAL_AND, prev_expr, expr)
     return prev_expr
 
 

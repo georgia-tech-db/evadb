@@ -16,20 +16,22 @@ import unittest
 
 from mock import MagicMock, patch
 
+from eva.catalog.catalog_type import NdArrayType
 from eva.executor.create_udf_executor import CreateUDFExecutor
+from eva.udfs.decorators.io_descriptors.data_types import PandasDataframe
 
 
 class CreateUdfExecutorTest(unittest.TestCase):
     @patch("eva.executor.create_udf_executor.CatalogManager")
-    @patch("eva.executor.create_udf_executor.path_to_class")
-    def test_should_create_udf(self, path_to_class_mock, mock):
+    @patch("eva.executor.create_udf_executor.load_udf_class_from_file")
+    def test_should_create_udf(self, load_udf_class_from_file_mock, mock):
         catalog_instance = mock.return_value
         catalog_instance.get_udf_catalog_entry_by_name.return_value = None
         catalog_instance.insert_udf_catalog_entry.return_value = "udf"
         impl_path = MagicMock()
         abs_path = impl_path.absolute.return_value = MagicMock()
         abs_path.as_posix.return_value = "test.py"
-        path_to_class_mock.return_value.return_value = "mock_class"
+        load_udf_class_from_file_mock.return_value.return_value = "mock_class"
         plan = type(
             "CreateUDFPlan",
             (),
@@ -40,11 +42,60 @@ class CreateUdfExecutorTest(unittest.TestCase):
                 "outputs": ["out"],
                 "impl_path": impl_path,
                 "udf_type": "classification",
+                "metadata": {"key1": "value1", "key2": "value2"},
             },
         )
 
         create_udf_executor = CreateUDFExecutor(plan)
         next(create_udf_executor.exec())
         catalog_instance.insert_udf_catalog_entry.assert_called_with(
-            "udf", "test.py", "classification", ["inp", "out"]
+            "udf",
+            "test.py",
+            "classification",
+            ["inp", "out"],
+            {"key1": "value1", "key2": "value2"},
         )
+
+    @patch("eva.executor.create_udf_executor.CatalogManager")
+    @patch("eva.executor.create_udf_executor.load_udf_class_from_file")
+    def test_should_raise_error_on_incorrect_io_definition(
+        self, load_udf_class_from_file_mock, mock
+    ):
+        catalog_instance = mock.return_value
+        catalog_instance.get_udf_catalog_entry_by_name.return_value = None
+        catalog_instance.insert_udf_catalog_entry.return_value = "udf"
+        impl_path = MagicMock()
+        abs_path = impl_path.absolute.return_value = MagicMock()
+        abs_path.as_posix.return_value = "test.py"
+        load_udf_class_from_file_mock.return_value.return_value = "mock_class"
+        incorrect_input_definition = PandasDataframe(
+            columns=["Frame_Array", "Frame_Array_2"],
+            column_types=[NdArrayType.UINT8],
+            column_shapes=[(3, 256, 256), (3, 256, 256)],
+        )
+        load_udf_class_from_file_mock.return_value.forward.tags = {
+            "input": [incorrect_input_definition],
+            "output": [],
+        }
+        plan = type(
+            "CreateUDFPlan",
+            (),
+            {
+                "name": "udf",
+                "if_not_exists": False,
+                "inputs": [],
+                "outputs": [],
+                "impl_path": impl_path,
+                "udf_type": "classification",
+            },
+        )
+
+        create_udf_executor = CreateUDFExecutor(plan)
+        # check a string in the error message
+        with self.assertRaises(RuntimeError) as ce:
+            next(create_udf_executor.exec())
+        self.assertIn(
+            "Error creating UDF, input/output definition incorrect:", str(ce.exception)
+        )
+
+        catalog_instance.insert_udf_catalog_entry.assert_not_called()

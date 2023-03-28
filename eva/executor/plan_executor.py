@@ -20,6 +20,7 @@ from eva.executor.create_executor import CreateExecutor
 from eva.executor.create_index_executor import CreateIndexExecutor
 from eva.executor.create_mat_view_executor import CreateMaterializedViewExecutor
 from eva.executor.create_udf_executor import CreateUDFExecutor
+from eva.executor.delete_executor import DeleteExecutor
 from eva.executor.drop_executor import DropExecutor
 from eva.executor.drop_udf_executor import DropUDFExecutor
 from eva.executor.executor_utils import ExecutorError
@@ -33,6 +34,7 @@ from eva.executor.join_build_executor import BuildJoinExecutor
 from eva.executor.lateral_join_executor import LateralJoinExecutor
 from eva.executor.limit_executor import LimitExecutor
 from eva.executor.load_executor import LoadDataExecutor
+from eva.executor.nested_loop_join_executor import NestedLoopJoinExecutor
 from eva.executor.orderby_executor import OrderByExecutor
 from eva.executor.pp_executor import PPExecutor
 from eva.executor.predicate_executor import PredicateExecutor
@@ -43,7 +45,6 @@ from eva.executor.seq_scan_executor import SequentialScanExecutor
 from eva.executor.show_info_executor import ShowInfoExecutor
 from eva.executor.storage_executor import StorageExecutor
 from eva.executor.union_executor import UnionExecutor
-from eva.executor.upload_executor import UploadExecutor
 from eva.experimental.ray.executor.exchange_executor import ExchangeExecutor
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.abstract_plan import AbstractPlan
@@ -102,8 +103,6 @@ class PlanExecutor:
             executor_node = DropUDFExecutor(node=plan)
         elif plan_opr_type == PlanOprType.LOAD_DATA:
             executor_node = LoadDataExecutor(node=plan)
-        elif plan_opr_type == PlanOprType.UPLOAD:
-            executor_node = UploadExecutor(node=plan)
         elif plan_opr_type == PlanOprType.GROUP_BY:
             executor_node = GroupByExecutor(node=plan)
         elif plan_opr_type == PlanOprType.ORDER_BY:
@@ -112,6 +111,8 @@ class PlanExecutor:
             executor_node = LimitExecutor(node=plan)
         elif plan_opr_type == PlanOprType.SAMPLE:
             executor_node = SampleExecutor(node=plan)
+        elif plan_opr_type == PlanOprType.NESTED_LOOP_JOIN:
+            executor_node = NestedLoopJoinExecutor(node=plan)
         elif plan_opr_type == PlanOprType.LATERAL_JOIN:
             executor_node = LateralJoinExecutor(node=plan)
         elif plan_opr_type == PlanOprType.HASH_JOIN:
@@ -138,6 +139,9 @@ class PlanExecutor:
             executor_node = ApplyAndMergeExecutor(node=plan)
         elif plan_opr_type == PlanOprType.FAISS_INDEX_SCAN:
             executor_node = FaissIndexScanExecutor(node=plan)
+        elif plan_opr_type == PlanOprType.DELETE:
+            executor_node = DeleteExecutor(node=plan)
+
         # EXPLAIN does not need to build execution tree for its children
         if plan_opr_type != PlanOprType.EXPLAIN:
             # Build Executor Tree for children

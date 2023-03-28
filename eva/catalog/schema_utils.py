@@ -36,7 +36,9 @@ class SchemaUtils(object):
         elif column_type == ColumnType.NDARRAY:
             sqlalchemy_column = Column(LargeBinary)
         else:
-            logger.error("Invalid column type: " + str(column_type))
+            msg = "Invalid column type: " + str(column_type)
+            logger.error(msg)
+            raise NotImplementedError
 
         return sqlalchemy_column
 

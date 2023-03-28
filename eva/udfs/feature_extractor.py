@@ -27,7 +27,7 @@ class FeatureExtractor(PytorchAbstractClassifierUDF):
     """ """
 
     def setup(self):
-        self.model = models.resnet50(pretrained=True, progress=False)
+        self.model = models.resnet50(weights="IMAGENET1K_V2", progress=False)
         for param in self.model.parameters():
             param.requires_grad = False
         self.model.fc = torch.nn.Identity()

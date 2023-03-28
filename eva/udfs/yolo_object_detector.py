@@ -12,12 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import logging
 from typing import List
 
 import pandas as pd
 
-from eva.models.catalog.frame_info import FrameInfo
-from eva.models.catalog.properties import ColorSpace
 from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
 
 try:
@@ -28,13 +27,6 @@ except ImportError as e:
     raise ImportError(
         f"Failed to import with error {e}, \
         please try `pip install torch`"
-    )
-try:
-    import yolov5
-except ImportError as e:
-    raise ImportError(
-        f"Failed to import with error {e}, \
-        please try `pip install yolov5`"
     )
 
 
@@ -50,12 +42,9 @@ class YoloV5(PytorchAbstractClassifierUDF):
         return "yolo"
 
     def setup(self, threshold=0.85):
+        logging.getLogger("yolov5").setLevel(logging.CRITICAL)  # yolov5
         self.threshold = threshold
-        self.model = yolov5.load("yolov5s.pt", verbose=False)
-
-    @property
-    def input_format(self) -> FrameInfo:
-        return FrameInfo(640, 1280, 3, ColorSpace.RGB)
+        self.model = torch.hub.load("ultralytics/yolov5", "yolov5s", verbose=False)
 
     @property
     def labels(self) -> List[str]:
@@ -170,7 +159,8 @@ class YoloV5(PytorchAbstractClassifierUDF):
         # because of yolov5 error with Tensors
 
         outcome = []
-
+        # Convert to HWC
+        # https://github.com/ultralytics/yolov5/blob/3e55763d45f9c5f8217e4dad5ba1e6c1f42e3bf8/models/common.py#L658
         frames = torch.permute(frames, (0, 2, 3, 1))
         predictions = self.model([its.cpu().detach().numpy() * 255 for its in frames])
 

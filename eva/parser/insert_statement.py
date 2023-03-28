@@ -36,24 +36,36 @@ class InsertTableStatement(AbstractStatement):
 
     def __init__(
         self,
-        table: TableRef,
+        table_ref: TableRef,
         column_list: List[AbstractExpression] = None,
         value_list: List[AbstractExpression] = None,
     ):
         super().__init__(StatementType.INSERT)
-        self._table = table
+        self._table_ref = table_ref
         self._column_list = column_list
         self._value_list = value_list
 
     def __str__(self) -> str:
+        column_list_str = ""
+        if self._column_list is not None:
+            for expr in self._column_list:
+                column_list_str += str(expr) + ", "
+            column_list_str = column_list_str.rstrip(", ")
+
+        value_list_str = ""
+        if self._value_list is not None:
+            for expr in self._value_list:
+                value_list_str += str(expr) + ", "
+            value_list_str = value_list_str.rstrip(", ")
+
         print_str = "INSERT INTO {}({}) VALUES ({}) ".format(
-            self._table, self._column_list, self._value_list
+            self._table_ref, column_list_str, value_list_str
         )
         return print_str
 
     @property
-    def table(self) -> TableRef:
-        return self._table
+    def table_ref(self) -> TableRef:
+        return self._table_ref
 
     @property
     def column_list(self) -> List[AbstractExpression]:
@@ -67,7 +79,7 @@ class InsertTableStatement(AbstractStatement):
         if not isinstance(other, InsertTableStatement):
             return False
         return (
-            self.table == other.table
+            self.table_ref == other.table_ref
             and self.column_list == other.column_list
             and self.value_list == other.value_list
         )
@@ -76,7 +88,7 @@ class InsertTableStatement(AbstractStatement):
         return hash(
             (
                 super().__hash__(),
-                self.table,
+                self.table_ref,
                 tuple(self.column_list),
                 tuple(self.value_list),
             )

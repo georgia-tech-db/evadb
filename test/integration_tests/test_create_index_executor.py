@@ -20,6 +20,7 @@ from test.util import load_inbuilt_udfs
 import faiss
 import numpy as np
 import pandas as pd
+import pytest
 from mock import patch
 
 from eva.catalog.catalog_manager import CatalogManager
@@ -36,6 +37,7 @@ from eva.storage.storage_engine import StorageEngine
 from eva.utils.generic_utils import generate_file_path
 
 
+@pytest.mark.notparallel
 class CreateIndexTest(unittest.TestCase):
     def _index_save_path(self):
         return str(

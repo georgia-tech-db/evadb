@@ -18,6 +18,7 @@ from eva.optimizer.operators import (
     LogicalCreateIndex,
     LogicalCreateMaterializedView,
     LogicalCreateUDF,
+    LogicalDelete,
     LogicalDrop,
     LogicalDropUDF,
     LogicalExplain,
@@ -25,6 +26,7 @@ from eva.optimizer.operators import (
     LogicalFunctionScan,
     LogicalGet,
     LogicalGroupBy,
+    LogicalInsert,
     LogicalJoin,
     LogicalLimit,
     LogicalLoadData,
@@ -35,13 +37,16 @@ from eva.optimizer.operators import (
     LogicalSample,
     LogicalShow,
     LogicalUnion,
-    LogicalUpload,
 )
-from eva.optimizer.optimizer_utils import column_definition_to_udf_io
+from eva.optimizer.optimizer_utils import (
+    column_definition_to_udf_io,
+    metadata_definition_to_udf_metadata,
+)
 from eva.parser.create_index_statement import CreateIndexStatement
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
 from eva.parser.create_statement import CreateTableStatement
 from eva.parser.create_udf_statement import CreateUDFStatement
+from eva.parser.delete_statement import DeleteTableStatement
 from eva.parser.drop_statement import DropTableStatement
 from eva.parser.drop_udf_statement import DropUDFStatement
 from eva.parser.explain_statement import ExplainStatement
@@ -52,7 +57,6 @@ from eva.parser.select_statement import SelectStatement
 from eva.parser.show_statement import ShowStatement
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
-from eva.parser.upload_statement import UploadStatement
 from eva.utils.logging_manager import logger
 
 
@@ -100,7 +104,7 @@ class StatementToPlanConvertor:
             self._plan = join_plan
 
         if table_ref.sample_freq:
-            self._visit_sample(table_ref.sample_freq)
+            self._visit_sample(table_ref.sample_freq, table_ref.sample_type)
 
     def visit_select(self, statement: SelectStatement):
         """converter for select statement
@@ -141,8 +145,8 @@ class StatementToPlanConvertor:
         if select_columns is not None:
             self._visit_projection(select_columns)
 
-    def _visit_sample(self, sample_freq):
-        sample_opr = LogicalSample(sample_freq)
+    def _visit_sample(self, sample_freq, sample_type):
+        sample_opr = LogicalSample(sample_freq, sample_type)
         sample_opr.append_child(self._plan)
         self._plan = sample_opr
 
@@ -186,6 +190,14 @@ class StatementToPlanConvertor:
         Arguments:
             statement {AbstractStatement} - - [input insert statement]
         """
+        # not removing previous commented code
+        insert_data_opr = LogicalInsert(
+            statement.table_ref,
+            statement.column_list,
+            statement.value_list,
+        )
+        self._plan = insert_data_opr
+
         """
         table_ref = statement.table
         table_metainfo = bind_dataset(table_ref.table)
@@ -244,6 +256,7 @@ class StatementToPlanConvertor:
         """
         annotated_inputs = column_definition_to_udf_io(statement.inputs, True)
         annotated_outputs = column_definition_to_udf_io(statement.outputs, False)
+        annotated_metadata = metadata_definition_to_udf_metadata(statement.metadata)
 
         create_udf_opr = LogicalCreateUDF(
             statement.name,
@@ -252,6 +265,7 @@ class StatementToPlanConvertor:
             annotated_outputs,
             statement.impl_path,
             statement.udf_type,
+            annotated_metadata,
         )
         self._plan = create_udf_opr
 
@@ -275,20 +289,6 @@ class StatementToPlanConvertor:
             statement.file_options,
         )
         self._plan = load_data_opr
-
-    def visit_upload(self, statement: UploadStatement):
-        """Convertor for parsed upload statement
-        Arguments:
-            statement(UploadStatement): [Upload statement]
-        """
-        upload_opr = LogicalUpload(
-            statement.path,
-            statement.video_blob,
-            statement.table_info,
-            statement.column_list,
-            statement.file_options,
-        )
-        self._plan = upload_opr
 
     def visit_materialized_view(self, statement: CreateMaterializedViewStatement):
         mat_view_opr = LogicalCreateMaterializedView(
@@ -317,6 +317,13 @@ class StatementToPlanConvertor:
         )
         self._plan = create_index_opr
 
+    def visit_delete(self, statement: DeleteTableStatement):
+        delete_opr = LogicalDelete(
+            statement.table_ref,
+            statement.where_clause,
+        )
+        self._plan = delete_opr
+
     def visit(self, statement: AbstractStatement):
         """Based on the instance of the statement the corresponding
            visit is called.
@@ -341,8 +348,6 @@ class StatementToPlanConvertor:
             self.visit_drop_udf(statement)
         elif isinstance(statement, LoadDataStatement):
             self.visit_load_data(statement)
-        elif isinstance(statement, UploadStatement):
-            self.visit_upload(statement)
         elif isinstance(statement, CreateMaterializedViewStatement):
             self.visit_materialized_view(statement)
         elif isinstance(statement, ShowStatement):
@@ -351,6 +356,8 @@ class StatementToPlanConvertor:
             self.visit_explain(statement)
         elif isinstance(statement, CreateIndexStatement):
             self.visit_create_index(statement)
+        elif isinstance(statement, DeleteTableStatement):
+            self.visit_delete(statement)
         return self._plan
 
     @property

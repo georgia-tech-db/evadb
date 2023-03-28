@@ -14,18 +14,21 @@
 # limitations under the License.
 from typing import List, Tuple
 
+from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
+from eva.catalog.models.udf_metadata_catalog import UdfMetadataCatalogEntry
+from eva.constants import DEFAULT_FUNCTION_EXPRESSION_COST
 from eva.expression.abstract_expression import AbstractExpression, ExpressionType
 from eva.expression.expression_utils import (
-    conjuction_list_to_expression_tree,
+    conjunction_list_to_expression_tree,
     contains_single_column,
     get_columns_in_predicate,
     is_simple_predicate,
     to_conjunction_list,
 )
+from eva.expression.function_expression import FunctionExpression
 from eva.parser.alias import Alias
 from eva.parser.create_statement import ColumnDefinition
-from eva.utils.logging_manager import logger
 
 
 def column_definition_to_udf_io(col_list: List[ColumnDefinition], is_input: bool):
@@ -40,9 +43,7 @@ def column_definition_to_udf_io(col_list: List[ColumnDefinition], is_input: bool
 
     result_list = []
     for col in col_list:
-        if col is None:
-            logger.error("Empty column definition while creating udf io")
-            result_list.append(col)
+        assert col is not None, "Empty column definition while creating udf io"
         result_list.append(
             UdfIOCatalogEntry(
                 col.name,
@@ -56,15 +57,38 @@ def column_definition_to_udf_io(col_list: List[ColumnDefinition], is_input: bool
     return result_list
 
 
+def metadata_definition_to_udf_metadata(metadata_list: List[Tuple[str, str]]):
+    """Create the UdfMetadataCatalogEntry object for each metadata definition provided
+
+    Arguments:
+        col_list(List[Tuple[str, str]]): parsed metadata definitions
+    """
+    result_list = []
+    for metadata in metadata_list:
+        result_list.append(
+            UdfMetadataCatalogEntry(
+                metadata[0],
+                metadata[1],
+            )
+        )
+    return result_list
+
+
 def extract_equi_join_keys(
     join_predicate: AbstractExpression,
-    left_table_aliases: List[str],
-    right_table_aliases: List[str],
+    left_table_aliases: List[Alias],
+    right_table_aliases: List[Alias],
 ) -> Tuple[List[AbstractExpression], List[AbstractExpression]]:
-
     pred_list = to_conjunction_list(join_predicate)
     left_join_keys = []
     right_join_keys = []
+    left_table_alias_strs = [
+        left_table_alias.alias_name for left_table_alias in left_table_aliases
+    ]
+    right_table_alias_strs = [
+        right_table_alias.alias_name for right_table_alias in right_table_aliases
+    ]
+
     for pred in pred_list:
         if pred.etype == ExpressionType.COMPARE_EQUAL:
             left_child = pred.children[0]
@@ -75,14 +99,14 @@ def extract_equi_join_keys(
                 and right_child.etype == ExpressionType.TUPLE_VALUE
             ):
                 if (
-                    left_child.table_alias in left_table_aliases
-                    and right_child.table_alias in right_table_aliases
+                    left_child.table_alias in left_table_alias_strs
+                    and right_child.table_alias in right_table_alias_strs
                 ):
                     left_join_keys.append(left_child)
                     right_join_keys.append(right_child)
                 elif (
-                    left_child.table_alias in right_table_aliases
-                    and right_child.table_alias in left_table_aliases
+                    left_child.table_alias in right_table_alias_strs
+                    and right_child.table_alias in left_table_alias_strs
                 ):
                     left_join_keys.append(right_child)
                     right_join_keys.append(left_child)
@@ -119,8 +143,8 @@ def extract_pushdown_predicate(
             rem_pred.append(pred)
 
     return (
-        conjuction_list_to_expression_tree(pushdown_preds),
-        conjuction_list_to_expression_tree(rem_pred),
+        conjunction_list_to_expression_tree(pushdown_preds),
+        conjunction_list_to_expression_tree(rem_pred),
     )
 
 
@@ -151,6 +175,32 @@ def extract_pushdown_predicate_for_alias(
         else:
             rem_pred.append(pred)
     return (
-        conjuction_list_to_expression_tree(pushdown_preds),
-        conjuction_list_to_expression_tree(rem_pred),
+        conjunction_list_to_expression_tree(pushdown_preds),
+        conjunction_list_to_expression_tree(rem_pred),
     )
+
+
+def get_expression_execution_cost(expr: AbstractExpression) -> float:
+    """
+    This function computes the estimated cost of executing the given abstract expression
+    based on the statistics in the catalog. The function assumes that all the
+    expression, except for the FunctionExpression, have a cost of zero.
+    For FunctionExpression, it checks the catalog for relevant statistics; if none are
+    available, it uses a default cost of DEFAULT_FUNCTION_EXPRESSION_COST.
+
+    Args:
+        expr (AbstractExpression): The AbstractExpression object whose cost
+        needs to be computed.
+
+    Returns:
+        float: The estimated cost of executing the function expression.
+    """
+    total_cost = 0
+    # iterate over all the function expression and accumulate the cost
+    for child_expr in expr.find_all(FunctionExpression):
+        cost_entry = CatalogManager().get_udf_cost_catalog_entry(child_expr.name)
+        if cost_entry:
+            total_cost += cost_entry.cost
+        else:
+            total_cost += DEFAULT_FUNCTION_EXPRESSION_COST
+    return total_cost

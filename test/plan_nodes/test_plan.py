@@ -13,12 +13,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+from inspect import isabstract, signature
+from test.util import get_all_subclasses, get_mock_object
+
+import pytest
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import ColumnType
 from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.parser.table_ref import TableInfo, TableRef
 from eva.parser.types import FileFormatType
+from eva.plan_nodes.abstract_plan import AbstractPlan
 from eva.plan_nodes.create_mat_view_plan import CreateMaterializedViewPlan
 from eva.plan_nodes.create_plan import CreatePlan
 from eva.plan_nodes.create_udf_plan import CreateUDFPlan
@@ -29,9 +34,9 @@ from eva.plan_nodes.load_data_plan import LoadDataPlan
 from eva.plan_nodes.rename_plan import RenamePlan
 from eva.plan_nodes.types import PlanOprType
 from eva.plan_nodes.union_plan import UnionPlan
-from eva.plan_nodes.upload_plan import UploadPlan
 
 
+@pytest.mark.notparallel
 class PlanNodeTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -111,55 +116,17 @@ class PlanNodeTests(unittest.TestCase):
         column_list = None
         batch_mem_size = 3000
         plan_str = "LoadDataPlan(table_id={}, file_path={}, \
-            batch_mem_size={}, \
             column_list={}, \
-            file_options={})".format(
-            table_info, file_path, batch_mem_size, column_list, file_options
+            file_options={}, \
+            batch_mem_size={})".format(
+            table_info, file_path, column_list, file_options, batch_mem_size
         )
         plan = LoadDataPlan(
-            table_info, file_path, batch_mem_size, column_list, file_options
+            table_info, file_path, column_list, file_options, batch_mem_size
         )
         self.assertEqual(plan.opr_type, PlanOprType.LOAD_DATA)
         self.assertEqual(plan.table_info, table_info)
         self.assertEqual(plan.file_path, file_path)
-        self.assertEqual(plan.batch_mem_size, batch_mem_size)
-
-        self.assertEqual(str(plan), plan_str)
-
-    def test_upload_plan(self):
-        file_path = "test.mp4"
-        video_blob = "b'AAAA'"
-        table_info = "info"
-        file_format = FileFormatType.VIDEO
-        file_options = {}
-        file_options["file_format"] = file_format
-        column_list = None
-        batch_mem_size = 3000
-        plan_str = "UploadPlan(file_path={}, \
-            video_blob={}, \
-            table_id={}, \
-            batch_mem_size={}, \
-            column_list={}, \
-            file_options={})".format(
-            file_path,
-            "video blob",
-            table_info,
-            batch_mem_size,
-            column_list,
-            file_options,
-        )
-        plan = UploadPlan(
-            file_path,
-            video_blob,
-            table_info,
-            batch_mem_size,
-            column_list,
-            file_options,
-        )
-        self.assertEqual(plan.opr_type, PlanOprType.UPLOAD)
-        self.assertEqual(plan.file_path, file_path)
-        self.assertEqual(plan.video_blob, video_blob)
-        self.assertEqual(plan.table_info, table_info)
         self.assertEqual(plan.batch_mem_size, batch_mem_size)
 
         self.assertEqual(str(plan), plan_str)
@@ -177,3 +144,13 @@ class PlanNodeTests(unittest.TestCase):
         self.assertEqual(plan.opr_type, PlanOprType.CREATE_MATERIALIZED_VIEW)
         self.assertEqual(plan.view, dummy_view)
         self.assertEqual(plan.columns, columns)
+
+    def test_abstract_plan_str(self):
+        derived_plan_classes = list(get_all_subclasses(AbstractPlan))
+        for derived_plan_class in derived_plan_classes:
+            sig = signature(derived_plan_class.__init__)
+            params = sig.parameters
+            plan_dict = {}
+            if isabstract(derived_plan_class) is False:
+                obj = get_mock_object(derived_plan_class, len(params))
+                plan_dict[obj] = obj

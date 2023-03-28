@@ -18,7 +18,9 @@ from eva.catalog.catalog_manager import CatalogManager
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.create_udf_plan import CreateUDFPlan
-from eva.utils.generic_utils import path_to_class
+from eva.udfs.decorators.utils import load_io_from_udf_decorators
+from eva.utils.errors import UDFIODefinitionError
+from eva.utils.generic_utils import load_udf_class_from_file
 from eva.utils.logging_manager import logger
 
 
@@ -26,10 +28,7 @@ class CreateUDFExecutor(AbstractExecutor):
     def __init__(self, node: CreateUDFPlan):
         super().__init__(node)
 
-    def validate(self):
-        pass
-
-    def exec(self):
+    def exec(self, *args, **kwargs):
         """Create udf executor
 
         Calls the catalog to insert a udf catalog entry.
@@ -46,22 +45,39 @@ class CreateUDFExecutor(AbstractExecutor):
                 msg = f"UDF {self.node.name} already exists."
                 logger.error(msg)
                 raise RuntimeError(msg)
-        io_list = []
-        io_list.extend(self.node.inputs)
-        io_list.extend(self.node.outputs)
+
+        # load the udf class from the file
         impl_path = self.node.impl_path.absolute().as_posix()
-        # check if we can create the udf object
         try:
-            path_to_class(impl_path, self.node.name)()
+            # loading the udf class from the file
+            udf = load_udf_class_from_file(impl_path, self.node.name)
+            # initializing the udf class calls the setup method internally
+            udf()
         except Exception as e:
-            err_msg = (
-                f"{str(e)}. Please verify that the UDF class name in the "
-                f"implementation file matches the provided UDF name {self.node.name}."
-            )
+            err_msg = f"Error creating UDF: {str(e)}"
             logger.error(err_msg)
             raise RuntimeError(err_msg)
+
+        io_list = []
+        try:
+            if self.node.inputs:
+                io_list.extend(self.node.inputs)
+            else:
+                # try to load the inputs from decorators, the inputs from CREATE statement take precedence
+                io_list.extend(load_io_from_udf_decorators(udf, is_input=True))
+
+            if self.node.outputs:
+                io_list.extend(self.node.outputs)
+            else:
+                # try to load the outputs from decorators, the outputs from CREATE statement take precedence
+                io_list.extend(load_io_from_udf_decorators(udf, is_input=False))
+        except UDFIODefinitionError as e:
+            err_msg = f"Error creating UDF, input/output definition incorrect: {str(e)}"
+            logger.error(err_msg)
+            raise RuntimeError(err_msg)
+
         catalog_manager.insert_udf_catalog_entry(
-            self.node.name, impl_path, self.node.udf_type, io_list
+            self.node.name, impl_path, self.node.udf_type, io_list, self.node.metadata
         )
         yield Batch(
             pd.DataFrame([f"UDF {self.node.name} successfully added to the database."])

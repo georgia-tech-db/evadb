@@ -12,11 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Any, Dict, Iterator, List
+from typing import Iterator, List
 
 import numpy as np
 import pandas as pd
-from sqlalchemy import Table, and_, inspect
+from sqlalchemy import Table, inspect
+from sqlalchemy.sql.expression import ColumnElement
 
 from eva.catalog.catalog_type import ColumnType
 from eva.catalog.models.base_model import BaseModel
@@ -77,7 +78,7 @@ class SQLStorageEngine(AbstractStorageEngine):
             insp.reflect_table(table, None)
             return table
         else:
-            err_msg = f"No table found with name {table.name}"
+            err_msg = f"No table found with name {table_name}"
             logger.exception(err_msg)
             raise Exception(err_msg)
 
@@ -143,14 +144,12 @@ class SQLStorageEngine(AbstractStorageEngine):
             self._sql_engine.execute(table_to_update.insert(), data)
             self._sql_session.commit()
         except Exception as e:
-            err_msg = f"Failed to udpate the table {table.name} with exception {str(e)}"
+            err_msg = f"Failed to update the table {table.name} with exception {str(e)}"
             logger.exception(err_msg)
             raise Exception(err_msg)
 
     def read(
-        self,
-        table: TableCatalogEntry,
-        batch_mem_size: int,
+        self, table: TableCatalogEntry, batch_mem_size: int = 30000000
     ) -> Iterator[Batch]:
         """
         Reads the table and return a batch iterator for the
@@ -186,34 +185,19 @@ class SQLStorageEngine(AbstractStorageEngine):
             logger.exception(err_msg)
             raise Exception(err_msg)
 
-    def delete(self, table: TableCatalogEntry, where_clause: Dict[str, Any]):
+    def delete(
+        self, table: TableCatalogEntry, sqlalchemy_filter_clause: ColumnElement[bool]
+    ):
         """Delete tuples from the table where rows satisfy the where_clause.
         The current implementation only handles equality predicates.
 
         Argument:
             table: table metadata object of the table
-            where_clause (Dict[str, Any]): where clause use to find the tuples to
-            remove. The key should be the column name and value should be the tuple
-            value. The function assumes an equality condition
+            where_clause: clause used to find the tuples to remove.
         """
         try:
             table_to_delete_from = self._try_loading_table_via_reflection(table.name)
-            table_columns = [
-                col.name
-                for col in table_to_delete_from.columns
-                if col.name != "_row_id"
-            ]
-            filter_clause = []
-            # verify where clause and convert to sqlalchemy supported filter
-            # https://stackoverflow.com/questions/34026210/where-filter-from-table-object-using-a-dictionary-or-kwargs
-            for column, value in where_clause.items():
-                if column not in table_columns:
-                    raise Exception(
-                        f"where_clause contains a column {column} not in the table {table_to_delete_from}"
-                    )
-                filter_clause.append(table_to_delete_from.columns[column] == value)
-
-            d = table_to_delete_from.delete().where(and_(*filter_clause))
+            d = table_to_delete_from.delete().where(sqlalchemy_filter_clause)
             self._sql_engine.execute(d)
             self._sql_session.commit()
         except Exception as e:
