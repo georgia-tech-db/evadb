@@ -20,7 +20,7 @@ from test.util import (  # file_remove,
     create_table,
     file_remove,
     get_logical_query_plan,
-    load_inbuilt_udfs,
+    load_udfs_for_testing,
 )
 
 import numpy as np
@@ -48,7 +48,7 @@ class SelectExecutorTest(unittest.TestCase):
         ua_detrac = f"{EVA_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
         load_query = f"LOAD VIDEO '{ua_detrac}' INTO DETRAC;"
         execute_query_fetch_all(load_query)
-        load_inbuilt_udfs()
+        load_udfs_for_testing()
         cls.table1 = create_table("table1", 100, 3)
         cls.table2 = create_table("table2", 500, 3)
         cls.table3 = create_table("table3", 1000, 3)

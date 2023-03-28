@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import create_sample_video, load_inbuilt_udfs
+from test.util import create_sample_video, load_udfs_for_testing
 
 import pytest
 from mock import MagicMock, patch
@@ -84,7 +84,7 @@ class RulesTest(unittest.TestCase):
         video_file_path = create_sample_video()
         load_query = f"LOAD VIDEO '{video_file_path}' INTO MyVideo;"
         execute_query_fetch_all(load_query)
-        load_inbuilt_udfs()
+        load_udfs_for_testing(mode="minimal")
 
     @classmethod
     def tearDownClass(cls):

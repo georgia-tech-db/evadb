@@ -179,7 +179,6 @@ def init_builtin_udfs(mode="debug"):
         ArrayCount_udf_query,
         Timestamp_udf_query,
         Crop_udf_query,
-        YoloV5_udf_query,
         Open_udf_query,
         Similarity_udf_query
         # Disabled because required packages (eg., easy_ocr might not be preinstalled)
@@ -195,6 +194,9 @@ def init_builtin_udfs(mode="debug"):
             DummyFeatureExtractor_udf_query,
         ]
     )
+
+    if mode != "minimal":
+        queries.extend([YoloV5_udf_query])
 
     for query in queries:
         execute_query_fetch_all(query)
