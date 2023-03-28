@@ -13,7 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import NUM_FRAMES, create_sample_video, file_remove, load_inbuilt_udfs
+from test.util import (
+    NUM_FRAMES,
+    create_sample_video,
+    file_remove,
+    load_udfs_for_testing,
+)
 
 import pandas as pd
 import pytest
@@ -31,7 +36,7 @@ class ArrayCountTests(unittest.TestCase):
         video_file_path = create_sample_video(NUM_FRAMES)
         load_query = f"LOAD VIDEO '{video_file_path}' INTO MyVideo;"
         execute_query_fetch_all(load_query)
-        load_inbuilt_udfs()
+        load_udfs_for_testing(mode="minimal")
 
     @classmethod
     def tearDownClass(cls):

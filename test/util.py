@@ -416,8 +416,9 @@ def create_dummy_4d_batches(
         yield Batch(df)
 
 
-def load_inbuilt_udfs():
-    mode = ConfigurationManager().get_value("core", "mode")
+def load_udfs_for_testing(mode="debug"):
+    # DEBUG OR RELEASE MODE: ALL UDFs
+    # MINIMAL MODE: NO YOLO
     init_builtin_udfs(mode=mode)
 
 

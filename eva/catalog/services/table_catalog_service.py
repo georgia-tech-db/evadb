@@ -12,9 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import List
-
-from sqlalchemy.orm.exc import NoResultFound
 
 from eva.catalog.catalog_type import TableType
 from eva.catalog.models.table_catalog import TableCatalog, TableCatalogEntry
@@ -126,12 +123,3 @@ class TableCatalogService(BaseService):
             )
             logger.error(err_msg)
             raise RuntimeError(err_msg)
-
-    def get_all_entries(self, return_alchemy=False) -> List[TableCatalogEntry]:
-        try:
-            entries = self.model.query.all()
-            return [
-                entry if return_alchemy else entry.as_dataclass() for entry in entries
-            ]
-        except NoResultFound:
-            return []

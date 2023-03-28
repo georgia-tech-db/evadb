@@ -70,16 +70,18 @@ class UdfCatalogServiceTest(TestCase):
 
     @patch("eva.catalog.services.udf_catalog_service.UdfCatalog")
     def test_udf_catalog_exception(self, mock_udf_catalog):
-        mock_udf_catalog.query.filter.side_effect = Exception("filter_error")
+        mock_udf_catalog.query.filter.side_effect = NoResultFound
         mock_udf_catalog.query.all.side_effect = NoResultFound
 
         service = UdfCatalogService()
 
-        with self.assertRaises(Exception):
-            service.get_entry_by_name(MagicMock())
+        result = None
+        result = service.get_entry_by_name(MagicMock())
+        self.assertEqual(result, None)
 
-        with self.assertRaises(Exception):
-            service.get_entry_by_id(MagicMock())
+        result = None
+        result = service.get_entry_by_id(MagicMock())
+        self.assertEqual(result, None)
 
         self.assertFalse(service.delete_entry_by_name(MagicMock()))
 

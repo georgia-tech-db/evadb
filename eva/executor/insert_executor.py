@@ -20,7 +20,6 @@ from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.insert_plan import InsertPlan
 from eva.storage.storage_engine import StorageEngine
-from eva.utils.logging_manager import logger
 
 
 class InsertExecutor(AbstractExecutor):
@@ -44,17 +43,11 @@ class InsertExecutor(AbstractExecutor):
             table_catalog_entry.table_type == TableType.STRUCTURED_DATA
         ), "INSERT only implemented for structured data"
 
-        values_to_insert = []
-        for i in self.node.value_list:
-            values_to_insert.append(i.value)
+        values_to_insert = [val_node.value for val_node in self.node.value_list]
         tuple_to_insert = tuple(values_to_insert)
-        columns_to_insert = []
-        for i in self.node.column_list:
-            columns_to_insert.append(i.col_name)
+        columns_to_insert = [col_node.col_name for col_node in self.node.column_list]
 
         # Adding all values to Batch for insert
-        logger.info(values_to_insert)
-        logger.info(columns_to_insert)
         dataframe = pd.DataFrame([tuple_to_insert], columns=columns_to_insert)
         batch = Batch(dataframe)
 

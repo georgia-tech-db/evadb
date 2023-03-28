@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import create_sample_video, file_remove, load_inbuilt_udfs
+from test.util import create_sample_video, file_remove, load_udfs_for_testing
 
 import numpy as np
 import pandas as pd
@@ -37,8 +37,7 @@ class InsertExecutorTest(unittest.TestCase):
             );
         """
         execute_query_fetch_all(query)
-
-        load_inbuilt_udfs()
+        load_udfs_for_testing(mode="minimal")
 
     def tearDown(self):
         file_remove("dummy.avi")
@@ -49,28 +48,14 @@ class InsertExecutorTest(unittest.TestCase):
         query = f"""LOAD VIDEO '{self.video_file_path}' INTO MyVideo;"""
         execute_query_fetch_all(query)
 
-        insert_query = """ INSERT INTO MyVideo (id, data) VALUES (
-            [
-                [
-                    40,
-                    [
-                        [[40, 40, 40], [40, 40, 40]],
-                        [[40, 40, 40], [40, 40, 40]]
-                    ]
-                ]
-            ]);"""
+        insert_query = """ INSERT INTO MyVideo (id, data) VALUES
+            (40, [[40, 40, 40], [40, 40, 40]],
+                 [[40, 40, 40], [40, 40, 40]]);"""
         execute_query_fetch_all(insert_query)
 
-        insert_query_2 = """ INSERT INTO MyVideo (id, data) VALUES (
-            [
-                [
-                    41,
-                    [
-                        [[41, 41, 41] , [41, 41, 41]],
-                        [[41, 41, 41], [41, 41, 41]]
-                    ]
-                ]
-            ]);"""
+        insert_query_2 = """ INSERT INTO MyVideo (id, data) VALUES
+        ( 41, [[41, 41, 41] , [41, 41, 41]],
+                [[41, 41, 41], [41, 41, 41]]);"""
         execute_query_fetch_all(insert_query_2)
 
         query = "SELECT id, data FROM MyVideo WHERE id = 40"

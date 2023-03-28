@@ -15,7 +15,7 @@
 import os
 import unittest
 from pathlib import Path
-from test.util import load_inbuilt_udfs
+from test.util import load_udfs_for_testing
 
 import faiss
 import numpy as np
@@ -51,8 +51,7 @@ class CreateIndexTest(unittest.TestCase):
 
         # Reset catalog.
         CatalogManager().reset()
-
-        load_inbuilt_udfs()
+        load_udfs_for_testing(mode="minimal")
 
         # Create feature vector table and raw input table.
         feat1 = np.array([[0, 0, 0]]).astype(np.float32)
