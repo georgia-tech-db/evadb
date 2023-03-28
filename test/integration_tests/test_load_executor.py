@@ -45,6 +45,7 @@ class LoadExecutorTest(unittest.TestCase):
         # reset the catalog manager before running each test
         CatalogManager().reset()
         self.video_file_path = create_sample_video()
+        self.video_file_path = Path(f"{EVA_ROOT_DIR}/data/sample_videos/touchdown.mp4")
         self.image_files_path = Path(
             f"{EVA_ROOT_DIR}/test/data/uadetrac/small-data/MVI_20011/*.jpg"
         )
@@ -68,8 +69,8 @@ class LoadExecutorTest(unittest.TestCase):
         expected_batch = list(create_dummy_batches())[0]
         from pprint import pprint
 
-        pprint(str(actual_batch))
-        pprint(str(expected_batch))
+        pprint(actual_batch.frames["myvideo.data"][1])
+        pprint(expected_batch.frames["myvideo.data"][1])
         self.assertEqual(actual_batch, expected_batch)
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
 
