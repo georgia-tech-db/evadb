@@ -123,14 +123,14 @@ class DeleteExecutorTest(unittest.TestCase):
         )
 
     def test_should_delete_tuple_in_table(self):
-        delete_query = "DELETE FROM testDeleteOne WHERE id < 20;"
+        delete_query = """DELETE FROM testDeleteOne WHERE
+               id < 20 OR dummyfloat < 2 AND id < 5 AND 20 > id
+               AND id <= 20 AND id >= 5 OR id != 15 OR id = 15;"""
         batch = execute_query_fetch_all(delete_query)
 
         query = "SELECT * FROM testDeleteOne;"
         batch = execute_query_fetch_all(query)
-        from eva.utils.logging_manager import logger
 
-        logger.info(batch)
         np.testing.assert_array_equal(
             batch.frames["testdeleteone.id"].array,
             np.array([25], dtype=np.int64),
