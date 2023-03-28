@@ -18,13 +18,10 @@ import typing
 from dataclasses import dataclass, field
 from typing import List
 
-if typing.TYPE_CHECKING:
-    from eva.catalog.models.udf_cache_catalog import UdfCacheCatalogEntry
 
 from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
 
-from eva.catalog.models.association_models import association_table_udf_column_and_udf_cache
 from eva.catalog.models.base_model import BaseModel
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 
@@ -53,16 +50,10 @@ class UdfCatalog(BaseModel):
         cascade="all, delete, delete-orphan",
     )
 
+    # caches
     _caches = relationship(
         "UdfCacheCatalog",
         cascade="all, delete, delete-orphan",
-    )
-    # list of UdfCacheCatalog entries dependent on the udf
-    _dep_caches = relationship(
-        "UdfCacheCatalog",
-        secondary=association_table_udf_column_and_udf_cache,
-        back_populates="_udf_depends",
-        cascade="all, delete",
     )
 
     def __init__(self, name: str, impl_file_path: str, type: str, checksum: str):
@@ -80,7 +71,6 @@ class UdfCatalog(BaseModel):
             else:
                 outputs.append(attribute.as_dataclass())
 
-        caches = [cache.as_dataclass() for cache in self._dep_caches]
         return UdfCatalogEntry(
             row_id=self._row_id,
             name=self._name,
@@ -89,7 +79,7 @@ class UdfCatalog(BaseModel):
             checksum=self._checksum,
             args=args,
             outputs=outputs,
-            dep_caches=caches,
+            caches=[entry.as_dataclass() for entry in self._caches],
         )
 
 
@@ -106,7 +96,7 @@ class UdfCatalogEntry:
     row_id: int = None
     args: List[UdfIOCatalogEntry] = field(compare=False, default_factory=list)
     outputs: List[UdfIOCatalogEntry] = field(compare=False, default_factory=list)
-    dep_caches: List[UdfCacheCatalogEntry] = field(compare=False, default_factory=list)
+    caches: List[UdfIOCatalogEntry] = field(compare=False, default_factory=list)
 
     def display_format(self):
         def _to_str(col):

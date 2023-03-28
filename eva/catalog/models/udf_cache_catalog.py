@@ -13,15 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from ast import literal_eval
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Tuple
-
-from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
+from sqlalchemy import Column, ForeignKey, Integer, String, UniqueConstraint
 
-from eva.catalog.models.association_models import (
-    association_table_udf_column_and_udf_cache
-)
 from eva.catalog.models.base_model import BaseModel
 
 
@@ -35,33 +31,19 @@ class UdfCacheCatalog(BaseModel):
     `_args:` A serialized list of `ColumnCatalog` `_row_id`s for each argument of the
     UDF. If the argument is a function expression, it stores the string representation
     of the expression tree.
-    `_udf_depends:` A list of `UdfCatalog`s of the UDFs that the cache depends on,
-    including both the UDF being cached and the UDFs in the arguments.
-    `_col_depends:` A list of `ColumnCatalog`s of the columns that the cache depends on.
     """
 
     __tablename__ = "udf_cache"
 
     _name = Column("name", String(128))
-    _udf_id = Column("udf_id", Integer, ForeignKey("udf_catalog._row_id"))
+    _udf_id = Column(
+        "udf_id", Integer, ForeignKey("udf_catalog._row_id", ondelete="CASCADE")
+    )
     _cache_path = Column("cache_path", String(256))
     _args = Column("args", String(1024))
 
-    _col_depends = relationship(
-        "ColumnCatalog",
-        secondary=association_table_udf_column_and_udf_cache,
-        back_populates="_dep_caches",
-        # cascade="all, delete-orphan",
-    )
-
-    _udf_depends = relationship(
-        "UdfCatalog",
-        secondary=association_table_udf_column_and_udf_cache,
-        back_populates="_dep_caches",
-        
-        # cascade="all, delete-orphan",
-    )
-
+    __table_args__ = (UniqueConstraint("name", "udf_id"), {})
+    
     def __init__(self, name: str, udf_id: int, cache_path: str, args: Tuple[str]):
         self._name = name
         self._udf_id = udf_id
@@ -69,16 +51,12 @@ class UdfCacheCatalog(BaseModel):
         self._args = str(args)
 
     def as_dataclass(self) -> "UdfCacheCatalogEntry":
-        udf_depends = [obj._row_id for obj in self._udf_depends]
-        col_depends = [obj._row_id for obj in self._col_depends]
         return UdfCacheCatalogEntry(
             row_id=self._row_id,
             name=self._name,
             udf_id=self._udf_id,
             cache_path=self._cache_path,
             args=literal_eval(self._args),
-            udf_depends=udf_depends,
-            col_depends=col_depends,
         )
 
 
@@ -92,7 +70,4 @@ class UdfCacheCatalogEntry:
     udf_id: int
     cache_path: str
     args: Tuple[str]
-    # row_ids of the dependent udfs and columns
-    udf_depends: Tuple[int] = field(compare=False, default_factory=tuple)
-    col_depends: Tuple[int] = field(compare=False, default_factory=tuple)
     row_id: int = None

@@ -55,14 +55,6 @@ class DropExecutor(AbstractExecutor):
 
         storage_engine.drop(table=table_obj)
 
-        # Remove the cache data linked with the table
-        # We only remove the data-structures related to the cache,
-        # catalog takes care of removing the cache entries from the catalog table
-        # based on the foreign key dependecies.
-        for col_obj in table_obj.columns:
-            for cache in col_obj.dep_caches:
-                remove_directory_contents(cache.cache_path)
-
         assert catalog_manager.delete_table_catalog_entry(
             table_obj
         ), "Failed to drop {}".format(table_info)

@@ -152,7 +152,7 @@ class FunctionExpression(AbstractExpression):
     def signature(self) -> str:
         """It constructs the signature of the function expression.
         It traverses the children (function arguments) and compute signature for each
-        child. The output is in the form `udf_name(arg1, arg2, ...)`.
+        child. The output is in the form `udf_name[row_id](arg1, arg2, ...)`.
 
         Returns:
             str: signature string
@@ -161,7 +161,7 @@ class FunctionExpression(AbstractExpression):
         for child in self.children:
             child_sigs.append(child.signature())
 
-        func_sig = f"{self.name}({','.join(child_sigs)})"
+        func_sig = f"{self.name}[{self.udf_obj.row_id}]({','.join(child_sigs)})"
         return func_sig
 
     def _gpu_enabled_function(self):
