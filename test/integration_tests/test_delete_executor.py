@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import file_remove, load_inbuilt_udfs
+from test.util import file_remove, load_udfs_for_testing
 
 import numpy as np
 import pytest
@@ -32,8 +32,7 @@ class DeleteExecutorTest(unittest.TestCase):
 
         # Reset catalog.
         CatalogManager().reset()
-
-        load_inbuilt_udfs()
+        load_udfs_for_testing(mode="minimal")
 
         create_table_query = """
                 CREATE TABLE IF NOT EXISTS testDeleteOne

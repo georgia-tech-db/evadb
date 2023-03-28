@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import create_sample_image, load_inbuilt_udfs
+from test.util import create_sample_image, load_udfs_for_testing
 
 import numpy as np
 import pandas as pd
@@ -31,7 +31,7 @@ class SimilarityTests(unittest.TestCase):
         CatalogManager().reset()
 
         # Prepare needed UDFs and data_col.
-        load_inbuilt_udfs()
+        load_udfs_for_testing(mode="minimal")
         self.img_path = create_sample_image()
 
         # Create base comparison table.

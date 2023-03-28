@@ -12,8 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import List
-
 from sqlalchemy.orm.exc import NoResultFound
 
 from eva.catalog.models.udf_catalog import UdfCatalog, UdfCatalogEntry
@@ -87,10 +85,3 @@ class UdfCatalogService(BaseService):
             logger.exception(f"Delete udf failed for name {name} with error {str(e)}")
             return False
         return True
-
-    def get_all_entries(self) -> List[UdfCatalogEntry]:
-        try:
-            objs = self.model.query.all()
-            return [obj.as_dataclass() for obj in objs]
-        except NoResultFound:
-            return []
