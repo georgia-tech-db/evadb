@@ -87,8 +87,6 @@ def xform_column_definitions_to_catalog_entries(
     Arguments:
         col_list {List[ColumnDefinition]} -- parsed col list to be created
     """
-    if isinstance(col_list, ColumnDefinition):
-        col_list = [col_list]
 
     result_list = []
     for col in col_list:

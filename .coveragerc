@@ -8,7 +8,8 @@ omit =
 exclude_lines =
     # pragma: no cover
     if TYPE_CHECKING:
-
+    if typing.TYPE_CHECKING
+    
     # Ray Execution
     if ray_enabled:
     class LogicalExchangeToPhysical(Rule):

@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import pickle
-import shutil
 from typing import Any
 
 from diskcache import FanoutCache
@@ -46,6 +45,3 @@ class DiskKVCache:
 
     def set(self, key: Any, value: Any):
         self._cache.set(key, value)
-
-    def cleanup(self):
-        shutil.rmtree(self._path)

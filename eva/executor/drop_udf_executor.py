@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import shutil
+
 
 import pandas as pd
 
@@ -42,13 +42,9 @@ class DropUDFExecutor(AbstractExecutor):
                 logger.exception(err_msg)
                 raise RuntimeError(err_msg)
         else:
-            # Remove the cache data linked with the udf
-            # We only remove the data-structures related to the cache,
-            # catalog takes care of removing the cache entries from the catalog table
-            # based on the foreign key dependecies.
             udf_entry = catalog_manager.get_udf_catalog_entry_by_name(self.node.name)
             for cache in udf_entry.dep_caches:
-                shutil.rmtree(cache.cache_path)
+                catalog_manager.drop_udf_cache_catalog_entry(cache)
             catalog_manager.delete_udf_catalog_entry_by_name(self.node.name)
             yield Batch(
                 pd.DataFrame(
