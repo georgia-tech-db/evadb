@@ -53,7 +53,7 @@ class DecordLoaderTest(unittest.TestCase):
             expected = list(
                 create_dummy_batches(filters=[i for i in range(0, NUM_FRAMES, k)])
             )
-            self.assertTrue(batches, expected)
+            self.assertEqual(batches, expected)
 
     def test_should_sample_every_k_frame_with_predicate(self):
         col = TupleValueExpression("id")

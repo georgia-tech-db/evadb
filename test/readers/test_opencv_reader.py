@@ -46,7 +46,7 @@ class VideoLoaderTest(unittest.TestCase):
         )
         batches = list(video_loader.read())
         expected = list(create_dummy_batches())
-        self.assertTrue(batches, expected)
+        self.assertEqual(batches, expected)
 
     def test_should_return_batches_equivalent_to_number_of_frames(self):
         video_loader = OpenCVReader(
