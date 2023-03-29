@@ -26,7 +26,7 @@ class ShowInfoExecutor(AbstractExecutor):
     def __init__(self, node: ShowInfoPlan):
         super().__init__(node)
 
-    def exec(self):
+    def exec(self, *args, **kwargs):
         catalog_manager = CatalogManager()
         show_entries = []
 

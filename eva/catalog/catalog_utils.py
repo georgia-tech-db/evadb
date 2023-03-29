@@ -24,6 +24,10 @@ def is_video_table(table: TableCatalogEntry):
     return table.table_type == TableType.VIDEO_DATA
 
 
+def is_string_col(col: ColumnCatalogEntry):
+    return col.type == ColumnType.TEXT or col.array_type == NdArrayType.STR
+
+
 def get_video_table_column_definitions() -> List[ColumnDefinition]:
     """
     name: video path

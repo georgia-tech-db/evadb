@@ -67,6 +67,7 @@ from eva.optimizer.rules.rules import (
     LogicalUnionToPhysical,
     PushDownFilterThroughApplyAndMerge,
     PushDownFilterThroughJoin,
+    ReorderPredicates,
     XformLateralJoinToLinearFlow,
 )
 from eva.optimizer.rules.rules_base import Rule
@@ -74,7 +75,9 @@ from eva.optimizer.rules.rules_base import Rule
 
 class RulesManager:
     def __init__(self):
-        self._logical_rules = [LogicalInnerJoinCommutativity()]
+        self._logical_rules = [
+            LogicalInnerJoinCommutativity(),
+        ]
 
         self._rewrite_rules = [
             EmbedFilterIntoGet(),
@@ -86,6 +89,7 @@ class RulesManager:
             PushDownFilterThroughApplyAndMerge(),
             XformLateralJoinToLinearFlow(),
             CombineSimilarityOrderByAndLimitToFaissIndexScan(),
+            ReorderPredicates(),
         ]
 
         ray_enabled = ConfigurationManager().get_value("experimental", "ray")

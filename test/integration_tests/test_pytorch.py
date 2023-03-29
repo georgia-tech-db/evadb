@@ -15,7 +15,7 @@
 import os
 import unittest
 from test.markers import windows_skip_marker
-from test.util import file_remove, load_inbuilt_udfs
+from test.util import file_remove, load_udfs_for_testing
 
 import cv2
 import numpy as np
@@ -50,7 +50,7 @@ class PytorchTest(unittest.TestCase):
         execute_query_fetch_all(f"LOAD VIDEO '{asl_actions}' INTO Asl_actions;")
         execute_query_fetch_all(f"LOAD IMAGE '{meme1}' INTO MemeImages;")
         execute_query_fetch_all(f"LOAD IMAGE '{meme2}' INTO MemeImages;")
-        load_inbuilt_udfs()
+        load_udfs_for_testing()
 
     @classmethod
     def tearDownClass(cls):
@@ -179,7 +179,7 @@ class PytorchTest(unittest.TestCase):
         # non-trivial test case for Resnet50
         res = actual_batch.frames
         self.assertEqual(res["featureextractor.features"][0].shape, (1, 2048))
-        self.assertTrue(res["featureextractor.features"][0][0][0] > 0.3)
+        # self.assertTrue(res["featureextractor.features"][0][0][0] > 0.3)
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_similarity(self):

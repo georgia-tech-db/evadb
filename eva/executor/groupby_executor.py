@@ -35,7 +35,7 @@ class GroupByExecutor(AbstractExecutor):
         super().__init__(node)
         self._segment_length = int(node.groupby_clause.value[:-1])
 
-    def exec(self) -> Iterator[Batch]:
+    def exec(self, *args, **kwargs) -> Iterator[Batch]:
         child_executor = self.children[0]
 
         buffer = Batch(pd.DataFrame())

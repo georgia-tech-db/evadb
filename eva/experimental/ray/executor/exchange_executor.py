@@ -78,6 +78,7 @@ class ExchangeExecutor(AbstractExecutor):
             input_queues.append(iq)
             queue_exec = QueueReaderExecutor()
             curr_exec.children = [queue_exec]
+            # curr_exec.append_child(queue_exec)
 
         output_queue = Queue(maxsize=100)
         ray_task = []

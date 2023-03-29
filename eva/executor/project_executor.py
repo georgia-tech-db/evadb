@@ -27,7 +27,7 @@ class ProjectExecutor(AbstractExecutor):
         super().__init__(node)
         self.target_list = node.target_list
 
-    def exec(self, **kwargs) -> Iterator[Batch]:
+    def exec(self, *args, **kwargs) -> Iterator[Batch]:
         child_executor = self.children[0]
         for batch in child_executor.exec(**kwargs):
             batch = apply_project(batch, self.target_list)

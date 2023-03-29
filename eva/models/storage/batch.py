@@ -125,6 +125,12 @@ class Batch:
             )
         )
 
+    @classmethod
+    def compare_like(cls, batch1: Batch, batch2: Batch) -> None:
+        col = batch1._frames.iloc[:, 0]
+        regex = batch2._frames.iloc[:, 0][0]
+        return cls(pd.DataFrame(col.astype("str").str.match(pat=regex)))
+
     def __str__(self) -> str:
         with pd.option_context(
             "display.pprint_nest_depth", 1, "display.max_colwidth", 100
@@ -238,7 +244,7 @@ class Batch:
         cols = cols or []
         verfied_cols = [c for c in cols if c in self._frames]
         unknown_cols = list(set(cols) - set(verfied_cols))
-        assert len(unknown_cols) == 0
+        assert len(unknown_cols) == 0, unknown_cols
         return Batch(self._frames[verfied_cols])
 
     @classmethod

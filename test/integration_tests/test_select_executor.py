@@ -20,7 +20,7 @@ from test.util import (  # file_remove,
     create_table,
     file_remove,
     get_logical_query_plan,
-    load_inbuilt_udfs,
+    load_udfs_for_testing,
 )
 
 import numpy as np
@@ -48,7 +48,7 @@ class SelectExecutorTest(unittest.TestCase):
         ua_detrac = f"{EVA_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
         load_query = f"LOAD VIDEO '{ua_detrac}' INTO DETRAC;"
         execute_query_fetch_all(load_query)
-        load_inbuilt_udfs()
+        load_udfs_for_testing()
         cls.table1 = create_table("table1", 100, 3)
         cls.table2 = create_table("table2", 500, 3)
         cls.table3 = create_table("table3", 1000, 3)
@@ -628,3 +628,28 @@ class SelectExecutorTest(unittest.TestCase):
         )
         signature = plan.target_list[0].signature()
         self.assertEqual(signature, "DummyMultiObjectDetector(MyVideo.data)")
+
+    def test_complex_logical_expressions(self):
+        query = """SELECT id FROM MyVideo
+            WHERE DummyObjectDetector(data).label = ['{}']  ORDER BY id;"""
+        persons = execute_query_fetch_all(query.format("person")).frames.to_numpy()
+        bicycles = execute_query_fetch_all(query.format("bicycle")).frames.to_numpy()
+        import numpy as np
+
+        self.assertTrue(len(np.intersect1d(persons, bicycles)) == 0)
+
+        query_or = """SELECT id FROM MyVideo \
+            WHERE DummyObjectDetector(data).label = ['person']
+                OR DummyObjectDetector(data).label = ['bicycle']
+            ORDER BY id;"""
+        actual = execute_query_fetch_all(query_or)
+        expected = execute_query_fetch_all("SELECT id FROM MyVideo ORDER BY id")
+        self.assertEqual(expected, actual)
+
+        query_and = """SELECT id FROM MyVideo \
+            WHERE DummyObjectDetector(data).label = ['person']
+                AND DummyObjectDetector(data).label = ['bicycle']
+            ORDER BY id;"""
+
+        expected = execute_query_fetch_all(query_and)
+        self.assertEqual(len(expected), 0)

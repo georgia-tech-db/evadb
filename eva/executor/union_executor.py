@@ -30,7 +30,7 @@ class UnionExecutor(AbstractExecutor):
     def __init__(self, node: UnionPlan):
         super().__init__(node)
 
-    def exec(self) -> Iterator[Batch]:
+    def exec(self, *args, **kwargs) -> Iterator[Batch]:
         assert self.node.all is True, "Only UNION ALL is supported now."
 
         # We should have only two children

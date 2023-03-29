@@ -47,7 +47,7 @@ class CreateIndexExecutor(AbstractExecutor):
     def __init__(self, node: CreateIndexPlan):
         super().__init__(node)
 
-    def exec(self):
+    def exec(self, *args, **kwargs):
         catalog_manager = CatalogManager()
         if catalog_manager.get_index_catalog_entry_by_name(self.node.name):
             msg = f"Index {self.node.name} already exists."

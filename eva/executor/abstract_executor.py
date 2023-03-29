@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from abc import ABC, abstractmethod
-from typing import Iterable, List, TypeVar
+from typing import Generator, Iterable, List, TypeVar
 
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.abstract_plan import AbstractPlan
@@ -50,15 +50,22 @@ class AbstractExecutor(ABC):
         """
         return self._children
 
+    @children.setter
+    def children(self, children):
+        self._children = children
+
     @property
     def node(self) -> AbstractPlan:
         return self._node
 
     @abstractmethod
-    def exec(self) -> Iterable[Batch]:
+    def exec(self, *args, **kwargs) -> Iterable[Batch]:
         """
         This method is implemented by every executor.
         Contains logic for that executor;
         For retrival based executor : It fetchs frame batches from
         child nodes and emits it to parent node.
         """
+
+    def __call__(self, *args, **kwargs) -> Generator[Batch, None, None]:
+        yield from self.exec(*args, **kwargs)

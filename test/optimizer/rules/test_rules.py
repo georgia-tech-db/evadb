@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import create_sample_video, load_inbuilt_udfs
+from test.util import create_sample_video, load_udfs_for_testing
 
 import pytest
 from mock import MagicMock, patch
@@ -65,6 +65,7 @@ from eva.optimizer.rules.rules import (
     Promise,
     PushDownFilterThroughApplyAndMerge,
     PushDownFilterThroughJoin,
+    ReorderPredicates,
     Rule,
     RuleType,
     XformLateralJoinToLinearFlow,
@@ -83,7 +84,7 @@ class RulesTest(unittest.TestCase):
         video_file_path = create_sample_video()
         load_query = f"LOAD VIDEO '{video_file_path}' INTO MyVideo;"
         execute_query_fetch_all(load_query)
-        load_inbuilt_udfs()
+        load_udfs_for_testing(mode="minimal")
 
     @classmethod
     def tearDownClass(cls):
@@ -100,6 +101,7 @@ class RulesTest(unittest.TestCase):
             Promise.PUSHDOWN_FILTER_THROUGH_JOIN,
             Promise.PUSHDOWN_FILTER_THROUGH_APPLY_AND_MERGE,
             Promise.COMBINE_SIMILARITY_ORDERBY_AND_LIMIT_TO_FAISS_INDEX_SCAN,
+            Promise.REORDER_PREDICATES,
         ]
 
         for promise in rewrite_promises:
@@ -159,6 +161,7 @@ class RulesTest(unittest.TestCase):
             PushDownFilterThroughApplyAndMerge(),
             PushDownFilterThroughJoin(),
             CombineSimilarityOrderByAndLimitToFaissIndexScan(),
+            ReorderPredicates(),
         ]
         self.assertEqual(
             len(supported_rewrite_rules), len(RulesManager().rewrite_rules)

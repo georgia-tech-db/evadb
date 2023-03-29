@@ -24,7 +24,7 @@ class CreateExecutor(AbstractExecutor):
         super().__init__(node)
         self.catalog = CatalogManager()
 
-    def exec(self):
+    def exec(self, *args, **kwargs):
         if not handle_if_not_exists(self.node.table_info, self.node.if_not_exists):
             catalog_entry = self.catalog.create_and_insert_table_catalog_entry(
                 self.node.table_info, self.node.column_list

@@ -21,7 +21,7 @@ class RenameExecutor(AbstractExecutor):
     def __init__(self, node: RenamePlan):
         super().__init__(node)
 
-    def exec(self):
+    def exec(self, *args, **kwargs):
         """rename table executor
 
         Calls the catalog to modified catalog entry corresponding to the table.

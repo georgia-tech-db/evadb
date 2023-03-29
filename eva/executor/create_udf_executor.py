@@ -28,7 +28,7 @@ class CreateUDFExecutor(AbstractExecutor):
     def __init__(self, node: CreateUDFPlan):
         super().__init__(node)
 
-    def exec(self):
+    def exec(self, *args, **kwargs):
         """Create udf executor
 
         Calls the catalog to insert a udf catalog entry.
