@@ -133,6 +133,8 @@ class PyTorchTensor(IOColumnArgument):
             return input_object.to(torch.float64)
         else:
             raise UDFIODefinitionError("Unknown array type.")
+        
+    
     
 
 
@@ -184,5 +186,16 @@ class PandasDataframe(IOArgument):
     def check_array_and_convert_type(self, input_obj, data_type):
         pass
     
-    def validate_pandas_outputs(self, input_obj):
-        pass
+    def validate_object(self, obj, input_flag):
+        
+        if len(self.columns) != len(obj.columns):
+            if input_flag:
+                msg = "Number of columns in the Pandas dataframe input is not matching"
+            else:
+                msg = "Number of columns in the Pandas dataframe output is not matching"
+            raise UDFIODefinitionError(msg)
+        
+        return obj
+            
+            
+        

@@ -15,6 +15,7 @@
 import unittest
 import numpy as np
 import torch
+import pandas as pd
 
 from eva.catalog.catalog_type import NdArrayType
 from eva.udfs.decorators.decorators import forward, setup
@@ -211,6 +212,45 @@ class DecoratorTests(unittest.TestCase):
         with self.assertRaises(UDFIODefinitionError):
             forward_func_shape_matched(None, input_object_1)
         
+    def test_forward_pandas_output_matched(self):
+        @forward(input_signatures= [],
+                 output_signatures=[PandasDataframe(
+                     columns=["A", "B"],
+                     column_types=[NdArrayType.STR,
+                                   NdArrayType.STR],
+                     column_shapes=[(None,), (None,)]
+                 )]
+                 )
+        def forward_func_output_matched(self, input_obj):
+            df = pd.DataFrame({
+                "A":["a", "a"],
+                "B":["b", "b"]
+            })
+            return df
+        
+        output = forward_func_output_matched(None, [])
+        self.assertTrue(len(output.columns) == 2)
+        
+    def test_forward_pandas_output_mismatched(self):
+        @forward(input_signatures= [],
+                 output_signatures=[PandasDataframe(
+                     columns=["A", "B"],
+                     column_types=[NdArrayType.STR,
+                                   NdArrayType.STR],
+                     column_shapes=[(None,), (None,)]
+                 )]
+                 )
+        def forward_func_output_matched(self, input_obj):
+            df = pd.DataFrame({
+                "A":["a", "a"],
+                "B":["b", "b"],
+                "C":["c", "c"]
+            })
+            return df
+        
+        with self.assertRaises(UDFIODefinitionError):
+            forward_func_output_matched(None, [])
+        
         
     
         
@@ -220,7 +260,14 @@ class DecoratorTests(unittest.TestCase):
 if __name__ == "__main__":
     suite = unittest.TestSuite()
     my_tests = DecoratorTests()
+    suite.addTest(DecoratorTests("test_forward_pandas_output_mismatched"))
+    suite.addTest(DecoratorTests("test_forward_pandas_output_matched"))
     suite.addTest(DecoratorTests("test_forward_pytorch_input_shapes_are_mismatched"))
+    suite.addTest(DecoratorTests("test_forward_pytorch_input_shapes_are_reshaped"))
+    suite.addTest(DecoratorTests("test_forward_pytorch_input_shapes_are_matched"))
+    suite.addTest(DecoratorTests("test_forward_func_numpy_input_shape_mismatched"))
+    suite.addTest(DecoratorTests("test_forward_func_numpy_input_reshaped"))
+    suite.addTest(DecoratorTests("test_forward_numpy_input_shapes_are_matched"))
     unittest.TextTestRunner().run(suite)
         
     
