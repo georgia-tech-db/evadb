@@ -98,3 +98,20 @@ class IndexType(EVAEnum):
     @classmethod
     def is_faiss_index_type(cls, t):
         return t in [cls.HNSW]
+
+
+class ColumnName(EVAEnum):
+    name  # noqa: F821
+    id  # noqa: F821
+    data  # noqa: F821
+    seconds  # noqa: F821
+    audio  # noqa: F821
+
+    def __eq__(self, other):
+        if isinstance(other, str):
+            return self.name == other
+
+        if isinstance(other, EVAEnum):
+            return self.value == other.value
+
+        return False

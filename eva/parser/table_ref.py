@@ -157,8 +157,8 @@ class TableRef:
         alias: Alias = None,
         sample_freq: float = None,
         sample_type: str = None,
-        get_audio: bool = None,
-        get_video: bool = None,
+        get_audio: bool = False,
+        get_video: bool = True,
     ):
         self._ref_handle = table
         self._sample_freq = sample_freq
@@ -183,6 +183,14 @@ class TableRef:
     @property
     def get_video(self):
         return self._get_video
+
+    @get_audio.setter
+    def get_audio(self, get_audio):
+        self._get_audio = get_audio
+
+    @get_video.setter
+    def get_video(self, get_video):
+        self._get_video = get_video
 
     def is_table_atom(self) -> bool:
         return isinstance(self._ref_handle, TableInfo)

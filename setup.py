@@ -48,8 +48,7 @@ minimal_requirement = [
     "importlib-metadata<5.0",
     "ray>=1.13.0",
     "aenum>=2.2.0",
-    "decord>=0.6.0",
-    "ffmpeg-python>=0.2.0",
+    "decord>=0.6.0"
 ]
 
 formatter_libs = [

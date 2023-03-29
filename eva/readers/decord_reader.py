@@ -56,6 +56,8 @@ class DecordReader(AbstractReader):
             sampling_rate (int, optional): Set if the caller wants one frame
             every `sampling_rate` number of frames. For example, if `sampling_rate = 10`, it returns every 10th frame. If both `predicate` and `sampling_rate` are specified, `sampling_rate` is given precedence.
             sampling_type (str, optional): Set as IFRAMES if caller want to sample on top on iframes only. e.g if the IFRAME frame numbers are [10,20,30,40,50] then'SAMPLE IFRAMES 2' will return [10,30,50]
+            read_audio (bool, optional): Whether to read audio stream from the video. Defaults to False
+            read_video (bool, optional): Whether to read video stream from the video. Defaults to True
         """
         self._predicate = predicate
         self._sampling_rate = sampling_rate or 1
@@ -66,19 +68,19 @@ class DecordReader(AbstractReader):
 
     def _read(self) -> Iterator[Dict]:
         decord = _lazy_import_decord()
-
+        has_audio = False
         # Check for availability of audio stream
         # If there is an audio stream => AVReader
         # Else => VideoReader (no audio)
-        try:
-            av_reader = decord.AVReader(self.file_url)
-            v_reader = decord.VideoReader(self.file_url)
-            has_audio = True
-        except decord._ffi.base.DECORDError as error_msg:
-            if "Can't find audio stream" in str(error_msg):
-                print("No audio stream in video")
-                has_audio = False
-            v_reader = decord.VideoReader(self.file_url)
+        if self._read_audio:
+            try:
+                av_reader = decord.AVReader(self.file_url, mono=True, sample_rate=16000)
+                has_audio = True
+            except decord._ffi.base.DECORDError as error_msg:
+                if "Can't find audio stream" in str(error_msg):
+                    print("No audio stream in video")
+
+        v_reader = decord.VideoReader(self.file_url)
 
         num_frames = int(len(v_reader))
         if self._predicate:
@@ -100,9 +102,13 @@ class DecordReader(AbstractReader):
                     frame_id = iframes[idx]
                     if has_audio:
                         frame_audio, frame = av_reader[frame_id]
+                        frame_audio = frame_audio.asnumpy()
+                        if self._read_video is None or not self._read_video:
+                            frame = np.empty(0)
                     else:
                         frame = v_reader[frame_id]
                         frame_audio = np.empty(0)
+                    frame = frame.asnumpy()
                     timestamp = v_reader.get_frame_timestamp(frame_id)[0]
                     idx += self._sampling_rate
                     if frame is not None:
@@ -120,9 +126,13 @@ class DecordReader(AbstractReader):
                 while frame_id <= end:
                     if has_audio:
                         frame_audio, frame = av_reader[frame_id]
+                        frame_audio = frame_audio.asnumpy()
+                        if self._read_video is None or not self._read_video:
+                            frame = np.empty(0)
                     else:
                         frame = v_reader[frame_id]
                         frame_audio = np.empty(0)
+                    frame = frame.asnumpy()
                     timestamp = v_reader.get_frame_timestamp(frame_id)[0]
                     if frame is not None:
                         yield {
@@ -142,9 +152,13 @@ class DecordReader(AbstractReader):
                 for frame_id in range(begin, end + 1, self._sampling_rate):
                     if has_audio:
                         frame_audio, frame = av_reader[frame_id]
+                        frame_audio = frame_audio.asnumpy()
+                        if self._read_video is None or not self._read_video:
+                            frame = np.empty(0)
                     else:
                         frame = v_reader[frame_id]
                         frame_audio = np.empty(0)
+                    frame = frame.asnumpy()
                     timestamp = v_reader.get_frame_timestamp(frame_id)[0]
                     if frame is not None:
                         yield {

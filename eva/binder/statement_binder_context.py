@@ -48,6 +48,8 @@ class StatementBinderContext:
         self._table_alias_map: Dict[str, TableCatalogEntry] = dict()
         self._derived_table_alias_map: Dict[str, Dict[str, CatalogColumnType]] = dict()
         self._catalog = CatalogManager()
+        self._retrieve_audio = False
+        self._retrieve_video = False
 
     def _check_duplicate_alias(self, alias: str):
         """
@@ -210,4 +212,13 @@ class StatementBinderContext:
         return alias_match, match_obj
 
     def enable_audio_retrieval(self):
-        print("enable audio retrieval")
+        self._retrieve_audio = True
+
+    def is_retrieve_audio(self):
+        return self._retrieve_audio
+
+    def enable_video_retrieval(self):
+        self._retrieve_video = True
+
+    def is_retrieve_video(self):
+        return self._retrieve_video

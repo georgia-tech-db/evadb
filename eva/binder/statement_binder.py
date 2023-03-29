@@ -23,7 +23,7 @@ from eva.binder.binder_utils import (
 )
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.catalog_type import IndexType, NdArrayType, TableType
+from eva.catalog.catalog_type import ColumnName, IndexType, NdArrayType, TableType
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
@@ -142,6 +142,10 @@ class StatementBinder:
             self._binder_context = StatementBinderContext()
             self.bind(node.union_link)
             self._binder_context = current_context
+        if self._binder_context.is_retrieve_audio():
+            node.from_table.get_audio = True
+        if self._binder_context.is_retrieve_video():
+            node.from_table.get_video = True
 
     @bind.register(DeleteTableStatement)
     def _bind_delete_statement(self, node: DeleteTableStatement):
@@ -207,8 +211,10 @@ class StatementBinder:
         table_alias, col_obj = self._binder_context.get_binded_column(
             node.col_name, node.table_alias
         )
-        if node.col_name == "audio":
+        if node.col_name == ColumnName.audio:
             self._binder_context.enable_audio_retrieval()
+        if node.col_name == ColumnName.data:
+            self._binder_context.enable_video_retrieval()
         node.col_alias = "{}.{}".format(table_alias, node.col_name.lower())
         node.col_object = col_obj
 

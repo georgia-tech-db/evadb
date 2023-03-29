@@ -45,7 +45,6 @@ class LoadExecutorTest(unittest.TestCase):
         # reset the catalog manager before running each test
         CatalogManager().reset()
         self.video_file_path = create_sample_video()
-        self.video_file_path = Path(f"{EVA_ROOT_DIR}/data/sample_videos/touchdown.mp4")
         self.image_files_path = Path(
             f"{EVA_ROOT_DIR}/test/data/uadetrac/small-data/MVI_20011/*.jpg"
         )
