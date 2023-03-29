@@ -22,7 +22,7 @@ from eva.readers.decord_reader import DecordReader
 from eva.storage.abstract_media_storage_engine import AbstractMediaStorageEngine
 
 
-class OpenCVStorageEngine(AbstractMediaStorageEngine):
+class DecordStorageEngine(AbstractMediaStorageEngine):
     def __init__(self) -> None:
         super().__init__()
 
