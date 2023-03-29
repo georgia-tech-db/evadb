@@ -163,6 +163,18 @@ class SelectExecutorTest(unittest.TestCase):
         expected_batch = expected_batch.project(["mnist.id", "mnist.data"])
         self.assertEqual(actual_batch, expected_batch)
 
+    def test_should_load_and_select_real_audio_in_table(self):
+        query = """LOAD VIDEO 'data/sample_videos/touchdown.mp4'
+                   INTO MNIST;"""
+        execute_query_fetch_all(query)
+
+        select_query = "SELECT id, audio FROM MNIST;"
+        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch.sort("mnist.id")
+        from pprint import pprint
+
+        pprint(str(actual_batch))
+
     def test_select_and_where_video_in_table(self):
         select_query = "SELECT * FROM MyVideo WHERE id = 5;"
         actual_batch = execute_query_fetch_all(select_query)

@@ -157,11 +157,16 @@ class TableRef:
         alias: Alias = None,
         sample_freq: float = None,
         sample_type: str = None,
+        get_audio: bool = None,
+        get_video: bool = None,
     ):
         self._ref_handle = table
         self._sample_freq = sample_freq
-        self.alias = alias or self.generate_alias()
         self._sample_type = sample_type
+        self._get_audio = get_audio
+        self._get_video = get_video
+        # Alias generation must happen after ref handle is initialized
+        self.alias = alias or self.generate_alias()
 
     @property
     def sample_freq(self):
@@ -170,6 +175,14 @@ class TableRef:
     @property
     def sample_type(self):
         return self._sample_type
+
+    @property
+    def get_audio(self):
+        return self._get_audio
+
+    @property
+    def get_video(self):
+        return self._get_video
 
     def is_table_atom(self) -> bool:
         return isinstance(self._ref_handle, TableInfo)
@@ -242,6 +255,10 @@ class TableRef:
             table_ref_str += f" {str(self.sample_freq)}"
         if self.sample_type is not None:
             table_ref_str += f" {str(self.sample_type)}"
+        if self._get_video is not None:
+            table_ref_str += f" {str(self._get_video)}"
+        if self._get_audio is not None:
+            table_ref_str += f" {str(self._get_audio)}"
         return table_ref_str
 
     def __eq__(self, other):
@@ -252,64 +269,18 @@ class TableRef:
             and self.alias == other.alias
             and self.sample_freq == other.sample_freq
             and self.sample_type == other.sample_type
-        )
-
-    def __hash__(self) -> int:
-        return hash((self._ref_handle, self.alias, self.sample_freq, self.sample_type))
-
-
-class AVTableRef(TableRef):
-    def __init__(self, table_ref: TableRef):
-        super().__init__(
-            table_ref.ref_handle,
-            table_ref.alias,
-            table_ref.sample_freq,
-            table_ref.sample_type,
-        )
-        self._get_audio: bool = False
-        self._get_video: bool = False
-
-    @property
-    def get_audio(self) -> bool:
-        return self._get_audio
-
-    @property
-    def get_video(self) -> bool:
-        return self._get_video
-
-    @get_audio.setter
-    def get_audio(self, get_audio):
-        self._get_audio = get_audio
-
-    @get_video.setter
-    def get_video(self, get_video):
-        self._get_video = get_video
-
-    def __eq__(self, other):
-        is_base_ref_equal = super().__eq__(other)
-        if not isinstance(other, AVTableRef):
-            return False
-        return (
-            is_base_ref_equal
-            and self.get_audio == other.get_audio
             and self.get_video == other.get_video
+            and self.get_audio == other.get_audio
         )
 
     def __hash__(self) -> int:
         return hash(
             (
-                super().__hash__(),
-                self.get_audio,
+                self._ref_handle,
+                self.alias,
+                self.sample_freq,
+                self.sample_type,
                 self.get_video,
+                self.get_audio,
             )
-        )
-
-
-class ImageTableRef(TableRef):
-    def __init__(self, table_ref: TableRef):
-        super().__init__(
-            table_ref.ref_handle,
-            table_ref.alias,
-            table_ref.sample_freq,
-            table_ref.sample_type,
         )

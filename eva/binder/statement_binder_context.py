@@ -208,3 +208,6 @@ class StatementBinderContext:
             raise BinderError(err_msg)
 
         return alias_match, match_obj
+
+    def enable_audio_retrieval(self):
+        print("enable audio retrieval")

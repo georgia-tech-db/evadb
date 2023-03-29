@@ -20,8 +20,6 @@ from eva.binder.binder_utils import (
     check_groupby_pattern,
     check_table_object_is_video,
     extend_star,
-    get_table_ref_subclass,
-    set_av_table_ref_flags,
 )
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.catalog.catalog_manager import CatalogManager
@@ -144,8 +142,6 @@ class StatementBinder:
             self._binder_context = StatementBinderContext()
             self.bind(node.union_link)
             self._binder_context = current_context
-        node.from_table = get_table_ref_subclass(node.from_table)
-        set_av_table_ref_flags(node)
 
     @bind.register(DeleteTableStatement)
     def _bind_delete_statement(self, node: DeleteTableStatement):
@@ -211,6 +207,8 @@ class StatementBinder:
         table_alias, col_obj = self._binder_context.get_binded_column(
             node.col_name, node.table_alias
         )
+        if node.col_name == "audio":
+            self._binder_context.enable_audio_retrieval()
         node.col_alias = "{}.{}".format(table_alias, node.col_name.lower())
         node.col_object = col_obj
 
