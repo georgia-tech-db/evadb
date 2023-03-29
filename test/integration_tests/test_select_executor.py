@@ -31,7 +31,7 @@ from eva.binder.binder_utils import BinderError
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
 from eva.models.storage.batch import Batch
-from eva.readers.opencv_reader import OpenCVReader
+from eva.readers.decord_reader import DecordReader
 from eva.server.command_handler import execute_query_fetch_all
 
 NUM_FRAMES = 10
@@ -154,7 +154,7 @@ class SelectExecutorTest(unittest.TestCase):
         select_query = "SELECT id, data FROM MNIST;"
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort("mnist.id")
-        video_reader = OpenCVReader("data/mnist/mnist.mp4")
+        video_reader = DecordReader("data/mnist/mnist.mp4")
         expected_batch = Batch(frames=pd.DataFrame())
         for batch in video_reader.read():
             batch.frames["name"] = "mnist.mp4"
