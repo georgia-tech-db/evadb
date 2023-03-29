@@ -24,7 +24,7 @@ from eva.optimizer.plan_generator import PlanGenerator
 from eva.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
 from eva.parser.parser import Parser
 from eva.utils.logging_manager import logger
-from eva.utils.timer import Timer
+from eva.utils.stats import Timer
 
 
 def execute_query(query, report_time: bool = False, **kwargs) -> Iterator[Batch]:

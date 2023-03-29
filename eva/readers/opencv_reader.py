@@ -30,7 +30,7 @@ class OpenCVReader(AbstractReader):
         sampling_rate: int = None,
         **kwargs
     ):
-        """Read frames from the disk
+        """Read frames from the disk and returns as a RGB numpy array
 
         Args:
             predicate (AbstractExpression, optional): If only subset of frames
@@ -54,21 +54,20 @@ class OpenCVReader(AbstractReader):
             range_list = [(0, num_frames - 1)]
         logger.debug("Reading frames")
         if self._sampling_rate == 1:
-            for (begin, end) in range_list:
+            for begin, end in range_list:
                 video.set(cv2.CAP_PROP_POS_FRAMES, begin)
                 _, frame = video.read()
                 frame_id = begin
                 while frame is not None and frame_id <= end:
                     yield {
                         "id": frame_id,
-                        "data": frame,
+                        "data": cv2.cvtColor(frame, cv2.COLOR_BGR2RGB),
                         "seconds": frame_id // video.get(cv2.CAP_PROP_FPS),
                     }
                     _, frame = video.read()
                     frame_id += 1
         else:
             for begin, end in range_list:
-
                 # align begin with sampling rate
                 if begin % self._sampling_rate:
                     begin += self._sampling_rate - (begin % self._sampling_rate)
@@ -76,6 +75,10 @@ class OpenCVReader(AbstractReader):
                     video.set(cv2.CAP_PROP_POS_FRAMES, frame_id)
                     _, frame = video.read()
                     if frame is not None:
-                        yield {"id": frame_id, "data": frame}
+                        yield {
+                            "id": frame_id,
+                            "data": cv2.cvtColor(frame, cv2.COLOR_BGR2RGB),
+                            "seconds": frame_id // video.get(cv2.CAP_PROP_FPS),
+                        }
                     else:
                         break

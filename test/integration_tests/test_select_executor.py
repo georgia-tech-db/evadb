@@ -13,14 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import (
+from test.util import (  # file_remove,
     create_dummy_4d_batches,
     create_dummy_batches,
     create_sample_video,
     create_table,
     file_remove,
     get_logical_query_plan,
-    load_inbuilt_udfs,
+    load_udfs_for_testing,
 )
 
 import numpy as np
@@ -37,6 +37,7 @@ from eva.server.command_handler import execute_query_fetch_all
 NUM_FRAMES = 10
 
 
+@pytest.mark.notparallel
 class SelectExecutorTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -47,7 +48,7 @@ class SelectExecutorTest(unittest.TestCase):
         ua_detrac = f"{EVA_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
         load_query = f"LOAD VIDEO '{ua_detrac}' INTO DETRAC;"
         execute_query_fetch_all(load_query)
-        load_inbuilt_udfs()
+        load_udfs_for_testing()
         cls.table1 = create_table("table1", 100, 3)
         cls.table2 = create_table("table2", 500, 3)
         cls.table3 = create_table("table3", 1000, 3)
@@ -261,6 +262,28 @@ class SelectExecutorTest(unittest.TestCase):
         actual_batch.sort()
 
         expected_batch = list(create_dummy_batches(filters=range(0, NUM_FRAMES, 7)))
+        expected_batch[0] = expected_batch[0].project(["myvideo.id"])
+
+        self.assertEqual(len(actual_batch), len(expected_batch[0]))
+        self.assertEqual(actual_batch, expected_batch[0])
+
+    def test_select_and_iframe_sample(self):
+        select_query = "SELECT id FROM MyVideo SAMPLE IFRAMES 7 ORDER BY id;"
+        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch.sort()
+
+        expected_batch = list(create_dummy_batches(filters=range(0, NUM_FRAMES, 7)))
+        expected_batch[0] = expected_batch[0].project(["myvideo.id"])
+
+        self.assertEqual(len(actual_batch), len(expected_batch[0]))
+        self.assertEqual(actual_batch, expected_batch[0])
+
+    def test_select_and_iframe_sample_without_sampling_rate(self):
+        select_query = "SELECT id FROM MyVideo SAMPLE IFRAMES ORDER BY id;"
+        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch.sort()
+
+        expected_batch = list(create_dummy_batches(filters=range(0, NUM_FRAMES, 1)))
         expected_batch[0] = expected_batch[0].project(["myvideo.id"])
 
         self.assertEqual(len(actual_batch), len(expected_batch[0]))
@@ -531,7 +554,7 @@ class SelectExecutorTest(unittest.TestCase):
                   FROM MyVideo JOIN LATERAL
                     DummyMultiObjectDetector(data) AS T(a, b);
                 """
-        with self.assertRaises(BinderError) as cm:
+        with self.assertRaises(AssertionError) as cm:
             execute_query_fetch_all(query)
         self.assertEqual(str(cm.exception), "Expected 1 output columns for T, got 2.")
 
@@ -574,7 +597,7 @@ class SelectExecutorTest(unittest.TestCase):
 
     def test_hash_join_with_multiple_tables(self):
         select_query = """SELECT * FROM table1 JOIN table2
-                          ON table1.a0 = table2.a0 JOIN table3
+                          ON table2.a0 = table1.a0 JOIN table3
                           ON table3.a1 = table1.a1 WHERE table1.a2 > 50;"""
         actual_batch = execute_query_fetch_all(select_query)
         tmp = pd.merge(
@@ -605,3 +628,28 @@ class SelectExecutorTest(unittest.TestCase):
         )
         signature = plan.target_list[0].signature()
         self.assertEqual(signature, "DummyMultiObjectDetector(MyVideo.data)")
+
+    def test_complex_logical_expressions(self):
+        query = """SELECT id FROM MyVideo
+            WHERE DummyObjectDetector(data).label = ['{}']  ORDER BY id;"""
+        persons = execute_query_fetch_all(query.format("person")).frames.to_numpy()
+        bicycles = execute_query_fetch_all(query.format("bicycle")).frames.to_numpy()
+        import numpy as np
+
+        self.assertTrue(len(np.intersect1d(persons, bicycles)) == 0)
+
+        query_or = """SELECT id FROM MyVideo \
+            WHERE DummyObjectDetector(data).label = ['person']
+                OR DummyObjectDetector(data).label = ['bicycle']
+            ORDER BY id;"""
+        actual = execute_query_fetch_all(query_or)
+        expected = execute_query_fetch_all("SELECT id FROM MyVideo ORDER BY id")
+        self.assertEqual(expected, actual)
+
+        query_and = """SELECT id FROM MyVideo \
+            WHERE DummyObjectDetector(data).label = ['person']
+                AND DummyObjectDetector(data).label = ['bicycle']
+            ORDER BY id;"""
+
+        expected = execute_query_fetch_all(query_and)
+        self.assertEqual(len(expected), 0)

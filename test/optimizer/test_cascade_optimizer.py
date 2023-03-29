@@ -16,12 +16,14 @@ import unittest
 from test.util import NUM_FRAMES, create_sample_video, file_remove
 
 import pandas as pd
+import pytest
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.models.storage.batch import Batch
 from eva.server.command_handler import execute_query_fetch_all
 
 
+@pytest.mark.notparallel
 class CascadeOptimizer(unittest.TestCase):
     def setUp(self):
         CatalogManager().reset()

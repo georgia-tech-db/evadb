@@ -43,3 +43,10 @@ class Timer:
 
     def log_elapsed_time(self, context: str):
         logger.info("{:s}: {:0.4f} sec".format(context, self.total_elapsed_time))
+
+
+class UDFStats:
+    def __init__(self) -> None:
+        self.num_calls: int = 0
+        self.timer: Timer = Timer()
+        self.prev_cost: float = 0.0
