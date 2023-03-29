@@ -50,15 +50,6 @@ def get_video_table_column_definitions() -> List[ColumnDefinition]:
     return columns
 
 
-def get_table_primary_columns(table_catalog_obj: TableCatalogEntry):
-    if table_catalog_obj.table_type == TableType.VIDEO_DATA:
-        return get_video_table_column_definitions()[:2]
-    elif table_catalog_obj.table_type == TableType.IMAGE_DATA:
-        return get_image_table_column_definitions()[:1]
-    else:
-        raise Exception(f"Unexpected table type {table_catalog_obj.table_type}")
-
-
 def get_image_table_column_definitions() -> List[ColumnDefinition]:
     """
     name: image path
@@ -75,8 +66,13 @@ def get_image_table_column_definitions() -> List[ColumnDefinition]:
     return columns
 
 
-def get_image_table_primary_columns():
-    return get_image_table_column_definitions()[:1]
+def get_table_primary_columns(table_catalog_obj: TableCatalogEntry):
+    if table_catalog_obj.table_type == TableType.VIDEO_DATA:
+        return get_video_table_column_definitions()[:2]
+    elif table_catalog_obj.table_type == TableType.IMAGE_DATA:
+        return get_image_table_column_definitions()[:1]
+    else:
+        raise Exception(f"Unexpected table type {table_catalog_obj.table_type}")
 
 
 def xform_column_definitions_to_catalog_entries(

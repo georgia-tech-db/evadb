@@ -190,22 +190,25 @@ class FunctionExpression(AbstractExpression):
         if not self._cache:
             return func_args.apply_function_expression(func)
 
-        cols = [obj.name for obj in self.output_objs]
+        output_cols = [obj.name for obj in self.output_objs]
 
         # 1. check cache
         # We are required to iterate over the batch row by row and check the cache.
         # This can hurt performance, as we have to stitch together columns to generate
         # row tuples. Is there an alternative approach we can take?
 
-        results = np.full([len(batch), len(cols)], None)
-        keys = batch
+        results = np.full([len(batch), len(output_cols)], None)
+        cache_keys = func_args
+        # cache keys can be different from func_args
+        # see optimize_cache_key
         if self._cache.key:
-            keys = [child.evaluate(batch, **kwargs) for child in self._cache.key]
-            keys = Batch.merge_column_wise(keys)
-            assert len(keys) == len(batch), "Not all rows have the cache key"
+            cache_keys = Batch.merge_column_wise(
+                [child.evaluate(batch, **kwargs) for child in self._cache.key]
+            )
+            assert len(cache_keys) == len(batch), "Not all rows have the cache key"
 
         cache_miss = np.full(len(batch), True)
-        for idx, key in keys.iterrows():
+        for idx, key in cache_keys.iterrows():
             val = self._cache.store.get(key.to_numpy())
             results[idx] = val
             cache_miss[idx] = val is None
@@ -219,7 +222,7 @@ class FunctionExpression(AbstractExpression):
             cache_miss_results = func_args.apply_function_expression(func)
 
             # 3. set the cache results
-            missing_keys = keys[list(cache_miss)]
+            missing_keys = cache_keys[list(cache_miss)]
             for key, value in zip(
                 missing_keys.iterrows(), cache_miss_results.iterrows()
             ):
@@ -229,8 +232,7 @@ class FunctionExpression(AbstractExpression):
             results[cache_miss] = cache_miss_results.to_numpy()
 
         # 5. return the correct batch
-        cols = [obj.name for obj in self.output_objs]
-        return Batch(pd.DataFrame(results, columns=cols))
+        return Batch(pd.DataFrame(results, columns=output_cols))
 
     def __str__(self) -> str:
         expr_str = f"{self.name}()"
