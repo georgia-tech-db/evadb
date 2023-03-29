@@ -102,3 +102,7 @@ class InsertExecutorTest(unittest.TestCase):
                 ),
             )
         )
+
+        query = """SELECT name FROM CSVTable WHERE name LIKE '.*(sad|happy)';"""
+        batch = execute_query_fetch_all(query)
+        self.assertEqual(len(batch._frames), 2)

@@ -125,6 +125,12 @@ class Batch:
             )
         )
 
+    @classmethod
+    def compare_like(cls, batch1: Batch, batch2: Batch) -> None:
+        col = batch1._frames.iloc[:, 0]
+        regex = batch2._frames.iloc[:, 0][0]
+        return cls(pd.DataFrame(col.astype("str").str.match(pat=regex)))
+
     def __str__(self) -> str:
         with pd.option_context(
             "display.pprint_nest_depth", 1, "display.max_colwidth", 100
