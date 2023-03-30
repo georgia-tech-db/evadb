@@ -39,7 +39,7 @@ from eva.udfs.decorators.io_descriptors.data_types import NumpyArray, PandasData
 from eva.udfs.udf_bootstrap_queries import init_builtin_udfs
 
 NUM_FRAMES = 10
-FRAME_SIZE = 2 * 2 * 3
+FRAME_SIZE = (32, 32)
 config = ConfigurationManager()
 tmp_dir_from_config = config.get_value("storage", "tmp_dir")
 s3_dir_from_config = config.get_value("storage", "s3_download_dir")
@@ -317,7 +317,7 @@ def create_sample_video(num_frames=NUM_FRAMES):
         file_name, cv2.VideoWriter_fourcc("M", "J", "P", "G"), fps, (32, 32), False
     )
     for i in range(fps * duration):
-        data = np.array(np.ones((32, 32)) * i, dtype=np.uint8)
+        data = np.array(np.ones((FRAME_SIZE[1], FRAME_SIZE[0])) * i, dtype=np.uint8)
         out.write(data)
     out.release()
 
@@ -346,7 +346,9 @@ def create_dummy_batches(
             {
                 "myvideo.name": os.path.join(video_dir, "dummy.avi"),
                 "myvideo.id": i + start_id,
-                "myvideo.data": np.array(np.ones((32, 32, 3)) * i, dtype=np.uint8),
+                "myvideo.data": np.array(
+                    np.ones((FRAME_SIZE[1], FRAME_SIZE[0], 3)) * i, dtype=np.uint8
+                ),
                 "myvideo.seconds": np.float32(i / num_frames),
             }
         )
@@ -367,7 +369,7 @@ def create_dummy_4d_batches(
     for segment in filters:
         segment_data = []
         for i in segment:
-            segment_data.append(np.ones((32, 32, 3)) * i)
+            segment_data.append(np.ones((FRAME_SIZE[1], FRAME_SIZE[0], 3)) * i)
         segment_data = np.stack(np.array(segment_data, dtype=np.uint8))
         data.append(
             {

@@ -13,13 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import (
-    FRAME_SIZE,
-    NUM_FRAMES,
-    create_dummy_csv_batches,
-    create_sample_csv,
-    file_remove,
-)
+from test.util import create_dummy_csv_batches, create_sample_csv, file_remove
 
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.readers.csv_reader import CSVReader
@@ -43,7 +37,6 @@ class CSVLoaderTest(unittest.TestCase):
         csv_loader = CSVReader(
             file_url=self.csv_file_path,
             column_list=column_list,
-            batch_mem_size=NUM_FRAMES * FRAME_SIZE,
         )
 
         # get the batches
