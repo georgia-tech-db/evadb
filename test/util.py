@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import base64
 import os
 import socket
 from contextlib import closing
@@ -40,7 +39,7 @@ from eva.udfs.decorators.io_descriptors.data_types import NumpyArray, PandasData
 from eva.udfs.udf_bootstrap_queries import init_builtin_udfs
 
 NUM_FRAMES = 10
-FRAME_SIZE = 2 * 2 * 3
+FRAME_SIZE = (32, 32)
 config = ConfigurationManager()
 tmp_dir_from_config = config.get_value("storage", "tmp_dir")
 s3_dir_from_config = config.get_value("storage", "s3_download_dir")
@@ -272,7 +271,7 @@ def create_dummy_csv_batches(target_columns=None):
             converters={"bbox": convert_bbox},
         )
 
-    return Batch(df)
+    yield Batch(df)
 
 
 def create_csv(num_rows, columns):
@@ -320,47 +319,23 @@ def create_sample_image():
 
 
 def create_sample_video(num_frames=NUM_FRAMES):
+    file_name = os.path.join(tmp_dir_from_config, "dummy.avi")
     try:
-        os.remove(os.path.join(tmp_dir_from_config, "dummy.avi"))
+        os.remove(file_name)
     except FileNotFoundError:
         pass
 
+    duration = 1
+    fps = NUM_FRAMES
     out = cv2.VideoWriter(
-        os.path.join(tmp_dir_from_config, "dummy.avi"),
-        cv2.VideoWriter_fourcc("M", "J", "P", "G"),
-        10,
-        (2, 2),
+        file_name, cv2.VideoWriter_fourcc("M", "J", "P", "G"), fps, (32, 32), False
     )
-    for i in range(num_frames):
-        frame = np.array(np.ones((2, 2, 3)) * float(i + 1) * 25, dtype=np.uint8)
-        out.write(frame)
-
-    out.release()
-    return os.path.join(tmp_dir_from_config, "dummy.avi")
-
-
-def create_sample_video_as_blob(num_frames=NUM_FRAMES):
-    try:
-        os.remove(os.path.join(tmp_dir_from_config, "dummy.avi"))
-    except FileNotFoundError:
-        pass
-
-    out = cv2.VideoWriter(
-        os.path.join(tmp_dir_from_config, "dummy.avi"),
-        cv2.VideoWriter_fourcc("M", "J", "P", "G"),
-        10,
-        (2, 2),
-    )
-    for i in range(num_frames):
-        frame = np.array(np.ones((2, 2, 3)) * float(i + 1) * 25, dtype=np.uint8)
-        out.write(frame)
-
+    for i in range(fps * duration):
+        data = np.array(np.ones((FRAME_SIZE[1], FRAME_SIZE[0])) * i, dtype=np.uint8)
+        out.write(data)
     out.release()
 
-    with open(os.path.join(tmp_dir_from_config, "dummy.avi"), "rb") as f:
-        bytes_read = f.read()
-        b64_string = str(base64.b64encode(bytes_read))
-    return b64_string
+    return os.path.join(tmp_dir_from_config, file_name)
 
 
 def file_remove(path, parent_dir=tmp_dir_from_config):
@@ -386,9 +361,9 @@ def create_dummy_batches(
                 "myvideo.name": os.path.join(video_dir, "dummy.avi"),
                 "myvideo.id": i + start_id,
                 "myvideo.data": np.array(
-                    np.ones((2, 2, 3)) * float(i + 1) * 25, dtype=np.uint8
+                    np.ones((FRAME_SIZE[1], FRAME_SIZE[0], 3)) * i, dtype=np.uint8
                 ),
-                "myvideo.seconds": 0,
+                "myvideo.seconds": np.float32(i / num_frames),
                 "myvideo.audio": np.empty(0),
             }
         )
@@ -409,14 +384,14 @@ def create_dummy_4d_batches(
     for segment in filters:
         segment_data = []
         for i in segment:
-            segment_data.append(np.ones((2, 2, 3)) * float(i + 1) * 25)
+            segment_data.append(np.ones((FRAME_SIZE[1], FRAME_SIZE[0], 3)) * i)
         segment_data = np.stack(np.array(segment_data, dtype=np.uint8))
         data.append(
             {
                 "myvideo.name": "dummy.avi",
                 "myvideo.id": segment[0] + start_id,
                 "myvideo.data": segment_data,
-                "myvideo.seconds": 0.0,
+                "myvideo.seconds": np.float32(i / num_frames),
             }
         )
 
@@ -456,7 +431,7 @@ class DummyObjectDetector(AbstractClassifierUDF):
 
     def classify_one(self, frames: np.ndarray):
         # odd are labeled bicycle and even person
-        i = int(frames[0][0][0][0] * 25) - 1
+        i = int(frames[0][0][0][0])
         label = self.labels[i % 2 + 1]
         return np.array([label])
 
@@ -483,8 +458,7 @@ class DummyMultiObjectDetector(AbstractClassifierUDF):
         return ret
 
     def classify_one(self, frames: np.ndarray):
-        # odd are labeled bicycle and even person
-        i = int(frames[0][0][0][0] * 25) - 1
+        i = int(frames[0][0][0][0])
         label = self.labels[i % 3 + 1]
         return np.array([label, label])
 
@@ -554,6 +528,6 @@ class DummyObjectDetectorDecorators(AbstractClassifierUDF):
 
     def classify_one(self, frames: np.ndarray):
         # odd are labeled bicycle and even person
-        i = int(frames[0][0][0][0] * 25) - 1
+        i = int(frames[0][0][0][0]) - 1
         label = self.labels[i % 2 + 1]
         return np.array([label])

@@ -17,6 +17,7 @@ import sys
 from eva.binder.binder_utils import (
     BinderError,
     bind_table_info,
+    check_column_name_is_string,
     check_groupby_pattern,
     check_table_object_is_video,
     extend_star,
@@ -24,7 +25,7 @@ from eva.binder.binder_utils import (
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import ColumnName, IndexType, NdArrayType, TableType
-from eva.expression.abstract_expression import AbstractExpression
+from eva.expression.abstract_expression import AbstractExpression, ExpressionType
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.alias import Alias
@@ -120,6 +121,9 @@ class StatementBinder:
         self.bind(node.from_table)
         if node.where_clause:
             self.bind(node.where_clause)
+            if node.where_clause.etype == ExpressionType.COMPARE_LIKE:
+                check_column_name_is_string(node.where_clause.children[0])
+
         if node.target_list:
             # SELECT * support
             if (
@@ -211,6 +215,7 @@ class StatementBinder:
         table_alias, col_obj = self._binder_context.get_binded_column(
             node.col_name, node.table_alias
         )
+        node.table_alias = table_alias
         if node.col_name == ColumnName.audio:
             self._binder_context.enable_audio_retrieval()
         if node.col_name == ColumnName.data:

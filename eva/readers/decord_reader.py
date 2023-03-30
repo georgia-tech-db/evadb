@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import math
 from typing import Dict, Iterator
 
 import numpy as np
@@ -115,7 +114,7 @@ class DecordReader(AbstractReader):
                         yield {
                             "id": frame_id,
                             "data": frame,
-                            "seconds": math.floor(timestamp),
+                            "seconds": round(timestamp, 2),
                             "audio": frame_audio,
                         }
                     else:
@@ -138,7 +137,7 @@ class DecordReader(AbstractReader):
                         yield {
                             "id": frame_id,
                             "data": frame,
-                            "seconds": math.floor(timestamp),
+                            "seconds": round(timestamp, 2),
                             "audio": frame_audio,
                         }
                     else:
@@ -164,7 +163,7 @@ class DecordReader(AbstractReader):
                         yield {
                             "id": frame_id,
                             "data": frame,
-                            "seconds": math.floor(timestamp),
+                            "seconds": round(timestamp, 2),
                             "audio": frame_audio,
                         }
                     else:

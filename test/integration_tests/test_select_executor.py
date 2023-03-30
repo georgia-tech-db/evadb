@@ -31,7 +31,7 @@ from eva.binder.binder_utils import BinderError
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
 from eva.models.storage.batch import Batch
-from eva.readers.opencv_reader import OpenCVReader
+from eva.readers.decord_reader import DecordReader
 from eva.server.command_handler import execute_query_fetch_all
 
 NUM_FRAMES = 10
@@ -84,9 +84,7 @@ class SelectExecutorTest(unittest.TestCase):
         expected_rows = [
             {
                 "myvideo.id": i,
-                "myvideo.data": np.array(
-                    np.ones((2, 2, 3)) * float(i + 1) * 25, dtype=np.uint8
-                ),
+                "myvideo.data": np.array(np.ones((32, 32, 3)) * i, dtype=np.uint8),
             }
             for i in range(NUM_FRAMES)
         ]
@@ -154,7 +152,7 @@ class SelectExecutorTest(unittest.TestCase):
         select_query = "SELECT id, data FROM MNIST;"
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort("mnist.id")
-        video_reader = OpenCVReader("data/mnist/mnist.mp4")
+        video_reader = DecordReader("data/mnist/mnist.mp4")
         expected_batch = Batch(frames=pd.DataFrame())
         for batch in video_reader.read():
             batch.frames["name"] = "mnist.mp4"
@@ -183,15 +181,7 @@ class SelectExecutorTest(unittest.TestCase):
 
         select_query = "SELECT data FROM MyVideo WHERE id = 5;"
         actual_batch = execute_query_fetch_all(select_query)
-        expected_rows = [
-            {
-                "myvideo.data": np.array(
-                    np.ones((2, 2, 3)) * float(5 + 1) * 25, dtype=np.uint8
-                )
-            }
-        ]
-        expected_batch = Batch(frames=pd.DataFrame(expected_rows))
-        self.assertEqual(actual_batch, expected_batch)
+        self.assertEqual(actual_batch, expected_batch.project(["myvideo.data"]))
 
         select_query = "SELECT id, data FROM MyVideo WHERE id >= 2;"
         actual_batch = execute_query_fetch_all(select_query)
@@ -639,7 +629,16 @@ class SelectExecutorTest(unittest.TestCase):
             "SELECT DummyMultiObjectDetector(data).labels FROM MyVideo"
         )
         signature = plan.target_list[0].signature()
-        self.assertEqual(signature, "DummyMultiObjectDetector(MyVideo.data)")
+        udf_id = (
+            CatalogManager()
+            .get_udf_catalog_entry_by_name("DummyMultiObjectDetector")
+            .row_id
+        )
+        table_entry = CatalogManager().get_table_catalog_entry("MyVideo")
+        col_id = CatalogManager().get_column_catalog_entry(table_entry, "data").row_id
+        self.assertEqual(
+            signature, f"DummyMultiObjectDetector[{udf_id}](MyVideo.data[{col_id}])"
+        )
 
     def test_complex_logical_expressions(self):
         query = """SELECT id FROM MyVideo

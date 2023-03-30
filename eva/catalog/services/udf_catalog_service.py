@@ -55,7 +55,7 @@ class UdfCatalogService(BaseService):
         except NoResultFound:
             return None
 
-    def get_entry_by_id(self, id: int) -> UdfCatalogEntry:
+    def get_entry_by_id(self, id: int, return_alchemy=False) -> UdfCatalogEntry:
         """return the udf entry that matches the id provided.
            None if no such entry found.
 
@@ -65,7 +65,9 @@ class UdfCatalogService(BaseService):
 
         try:
             udf_obj = self.model.query.filter(self.model._row_id == id).one()
-            return udf_obj.as_dataclass()
+            if udf_obj:
+                return udf_obj if return_alchemy else udf_obj.as_dataclass()
+            return udf_obj
         except NoResultFound:
             return None
 

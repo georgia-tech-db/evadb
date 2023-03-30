@@ -31,6 +31,7 @@ from eva.optimizer.operators import (
     LogicalSample,
 )
 from eva.optimizer.rules.rules import (
+    CacheFunctionExpressionInApply,
     CombineSimilarityOrderByAndLimitToFaissIndexScan,
     EmbedFilterIntoGet,
     EmbedProjectIntoGet,
@@ -70,7 +71,7 @@ from eva.optimizer.rules.rules import (
     RuleType,
     XformLateralJoinToLinearFlow,
 )
-from eva.optimizer.rules.rules_manager import RulesManager
+from eva.optimizer.rules.rules_manager import RulesManager, disable_rules
 from eva.parser.types import JoinType
 from eva.server.command_handler import execute_query_fetch_all
 
@@ -147,7 +148,7 @@ class RulesTest(unittest.TestCase):
         implementation_count = len(set(implementation_promises))
 
         # rewrite_count + implementation_count + 1 (for IMPLEMENTATION_DELIMETER)
-        self.assertEqual(rewrite_count + implementation_count + 1, promise_count)
+        self.assertEqual(rewrite_count + implementation_count + 2, promise_count)
 
     def test_supported_rules(self):
         # adding/removing rules should update this test
@@ -172,7 +173,10 @@ class RulesTest(unittest.TestCase):
                 any(isinstance(rule, type(x)) for x in RulesManager().rewrite_rules)
             )
 
-        supported_logical_rules = [LogicalInnerJoinCommutativity()]
+        supported_logical_rules = [
+            LogicalInnerJoinCommutativity(),
+            CacheFunctionExpressionInApply(),
+        ]
         self.assertEqual(
             len(supported_logical_rules), len(RulesManager().logical_rules)
         )
@@ -264,6 +268,15 @@ class RulesTest(unittest.TestCase):
         logi_sample = LogicalSample(MagicMock(), MagicMock(), children=[logi_get])
 
         self.assertFalse(rule.check(logi_sample, MagicMock()))
+
+    def test_disable_rules(self):
+        with disable_rules([PushDownFilterThroughApplyAndMerge()]) as rules_manager:
+            self.assertFalse(
+                any(
+                    isinstance(PushDownFilterThroughApplyAndMerge, type(x))
+                    for x in rules_manager.rewrite_rules
+                )
+            )
 
     def test_xform_lateral_join_does_not_work_with_other_join(self):
         rule = XformLateralJoinToLinearFlow()

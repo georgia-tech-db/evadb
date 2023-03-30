@@ -26,6 +26,7 @@ from eva.experimental.ray.optimizer.rules.rules import (
     LogicalProjectToPhysical as DistributedLogicalProjectToPhysical,
 )
 from eva.optimizer.rules.rules import (
+    CacheFunctionExpressionInApply,
     CombineSimilarityOrderByAndLimitToFaissIndexScan,
     EmbedFilterIntoGet,
     EmbedProjectIntoGet,
@@ -77,6 +78,7 @@ class RulesManager:
     def __init__(self):
         self._logical_rules = [
             LogicalInnerJoinCommutativity(),
+            CacheFunctionExpressionInApply(),
         ]
 
         self._rewrite_rules = [

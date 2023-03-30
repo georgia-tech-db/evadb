@@ -29,8 +29,12 @@ class UdfCostCatalog(BaseModel):
 
     __tablename__ = "udf_cost_catalog"
 
-    _udf_id = Column("udf_id", Integer, ForeignKey("udf_catalog._row_id"))
-    _udf_name = Column("name", String(128), ForeignKey("udf_catalog.name"))
+    _udf_id = Column(
+        "udf_id", Integer, ForeignKey("udf_catalog._row_id", ondelete="CASCADE")
+    )
+    _udf_name = Column(
+        "name", String(128), ForeignKey("udf_catalog.name", ondelete="CASCADE")
+    )
     _cost = Column("cost", Float)
 
     def __init__(self, udf_id: int, name: str, cost: float):
