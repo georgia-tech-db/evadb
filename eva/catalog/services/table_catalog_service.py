@@ -64,18 +64,21 @@ class TableCatalogService(BaseService):
         else:
             return table_catalog_obj.as_dataclass()
 
-    def get_entry_by_id(self, table_id) -> TableCatalogEntry:
+    def get_entry_by_id(self, table_id: int, return_alchemy=False) -> TableCatalogEntry:
         """
         Returns the table by ID
         Arguments:
             table_id (int)
+            return_alchemy (bool): if True, return a sqlalchemy object
         Returns:
            TableCatalogEntry
         """
         entry = self.model.query.filter(self.model._row_id == table_id).one()
-        return entry.as_dataclass()
+        return entry if return_alchemy else entry.as_dataclass()
 
-    def get_entry_by_name(self, database_name, table_name) -> TableCatalogEntry:
+    def get_entry_by_name(
+        self, database_name, table_name, return_alchemy=False
+    ) -> TableCatalogEntry:
         """
         Get the table catalog entry with given table name.
         Arguments:
@@ -87,7 +90,7 @@ class TableCatalogService(BaseService):
         """
         entry = self.model.query.filter(self.model._name == table_name).one_or_none()
         if entry:
-            return entry.as_dataclass()
+            return entry if return_alchemy else entry.as_dataclass()
         return entry
 
     def delete_entry(self, table: TableCatalogEntry):

@@ -627,7 +627,16 @@ class SelectExecutorTest(unittest.TestCase):
             "SELECT DummyMultiObjectDetector(data).labels FROM MyVideo"
         )
         signature = plan.target_list[0].signature()
-        self.assertEqual(signature, "DummyMultiObjectDetector(MyVideo.data)")
+        udf_id = (
+            CatalogManager()
+            .get_udf_catalog_entry_by_name("DummyMultiObjectDetector")
+            .row_id
+        )
+        table_entry = CatalogManager().get_table_catalog_entry("MyVideo")
+        col_id = CatalogManager().get_column_catalog_entry(table_entry, "data").row_id
+        self.assertEqual(
+            signature, f"DummyMultiObjectDetector[{udf_id}](MyVideo.data[{col_id}])"
+        )
 
     def test_complex_logical_expressions(self):
         query = """SELECT id FROM MyVideo

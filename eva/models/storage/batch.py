@@ -138,6 +138,8 @@ class Batch:
             return f"{self._frames}"
 
     def __eq__(self, other: Batch):
+        # this function does not work if a column is a nested numpy arrays
+        # (eg, bboxes from yolo).
         return self._frames[sorted(self.columns)].equals(
             other.frames[sorted(other.columns)]
         )
@@ -171,11 +173,14 @@ class Batch:
         new_batch = Batch(new_frames)
         return new_batch
 
-    def apply_function_expression(self, expr: Callable) -> None:
+    def apply_function_expression(self, expr: Callable) -> Batch:
         """
         Execute function expression on frames.
         """
-        self._frames = expr(self._frames)
+        return Batch(expr(self._frames))
+
+    def iterrows(self):
+        return self._frames.iterrows()
 
     def sort(self, by=None) -> None:
         """
@@ -431,6 +436,9 @@ class Batch:
                 new_col_names.append(col_name)
 
         self._frames.columns = new_col_names
+
+    def to_numpy(self):
+        return self._frames.to_numpy()
 
     def rename(self, columns) -> None:
         "Rename column names"
