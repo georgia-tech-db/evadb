@@ -48,6 +48,7 @@ minimal_requirement = [
     "importlib-metadata<5.0",
     "ray>=1.13.0",
     "aenum>=2.2.0",
+    "diskcache>=5.4.0",
     "decord>=0.6.0"
 ]
 
