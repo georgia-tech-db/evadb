@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import os
 from pathlib import Path
 
 import faiss
@@ -22,7 +21,7 @@ import pandas as pd
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import IndexType
 from eva.catalog.sql_config import IDENTIFIER_COLUMN
-from eva.configuration.constants import EVA_DEFAULT_DIR, INDEX_DIR
+from eva.configuration.configuration_manager import ConfigurationManager
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
@@ -70,11 +69,12 @@ class CreateIndexExecutor(AbstractExecutor):
             )
         )
 
-    def _get_index_save_path(self):
+    def _get_index_save_path(self) -> Path:
+        index_dir = Path(ConfigurationManager().get_value("storage", "index_dir"))
+        if not index_dir.exists():
+            index_dir.mkdir(parents=True, exist_ok=True)
         return str(
-            EVA_DEFAULT_DIR
-            / INDEX_DIR
-            / Path("{}_{}.index".format(self.node.index_type, self.node.name))
+            index_dir / Path("{}_{}.index".format(self.node.index_type, self.node.name))
         )
 
     def _create_faiss_index(self):
@@ -138,8 +138,9 @@ class CreateIndexExecutor(AbstractExecutor):
         except Exception as e:
             # Roll back in reverse order.
             # Delete on-disk index.
-            if os.path.exists(self._get_index_save_path()):
-                os.remove(self._get_index_save_path())
+            index_path = Path(self._get_index_save_path())
+            if index_path.exists():
+                index_path.unlink()
 
             # Throw exception back to user.
             raise ExecutorError(str(e))

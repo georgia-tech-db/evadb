@@ -12,11 +12,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import shutil
 from pathlib import Path
 from typing import List
 
 from eva.catalog.catalog_type import ColumnType, IndexType, TableType
 from eva.catalog.catalog_utils import (
+    cleanup_storage,
+    construct_udf_cache_catalog_entry,
     get_image_table_column_definitions,
     get_video_table_column_definitions,
     xform_column_definitions_to_catalog_entries,
@@ -25,6 +28,7 @@ from eva.catalog.models.base_model import drop_db, init_db
 from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.catalog.models.index_catalog import IndexCatalogEntry
 from eva.catalog.models.table_catalog import TableCatalogEntry
+from eva.catalog.models.udf_cache_catalog import UdfCacheCatalogEntry
 from eva.catalog.models.udf_catalog import UdfCatalogEntry
 from eva.catalog.models.udf_cost_catalog import UdfCostCatalogEntry
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
@@ -32,11 +36,13 @@ from eva.catalog.models.udf_metadata_catalog import UdfMetadataCatalogEntry
 from eva.catalog.services.column_catalog_service import ColumnCatalogService
 from eva.catalog.services.index_catalog_service import IndexCatalogService
 from eva.catalog.services.table_catalog_service import TableCatalogService
+from eva.catalog.services.udf_cache_catalog_service import UdfCacheCatalogService
 from eva.catalog.services.udf_catalog_service import UdfCatalogService
 from eva.catalog.services.udf_cost_catalog_service import UdfCostCatalogService
 from eva.catalog.services.udf_io_catalog_service import UdfIOCatalogService
 from eva.catalog.services.udf_metadata_catalog_service import UdfMetadataCatalogService
 from eva.catalog.sql_config import IDENTIFIER_COLUMN
+from eva.expression.function_expression import FunctionExpression
 from eva.parser.create_statement import ColumnDefinition
 from eva.parser.table_ref import TableInfo
 from eva.parser.types import FileFormatType
@@ -63,6 +69,7 @@ class CatalogManager(object):
             UdfMetadataCatalogService()
         )
         self._index_service: IndexCatalogService = IndexCatalogService()
+        self._udf_cache_service: UdfCacheCatalogService = UdfCacheCatalogService()
 
     def reset(self):
         """
@@ -86,10 +93,12 @@ class CatalogManager(object):
     def _shutdown_catalog(self):
         """
         This method is responsible for gracefully shutting the
-        catalog manager. Currently, it includes dropping the catalog database
+        catalog manager.
         """
         logger.info("Shutting catalog")
         drop_db()
+        # clean up the dataset, index, and cache directories
+        cleanup_storage()
 
     "Table catalog services"
 
@@ -309,6 +318,21 @@ class CatalogManager(object):
 
     def get_all_index_catalog_entries(self):
         return self._index_service.get_all_entries()
+
+    """ Udf Cache related"""
+
+    def insert_udf_cache_catalog_entry(self, func_expr: FunctionExpression):
+        entry = construct_udf_cache_catalog_entry(func_expr)
+        return self._udf_cache_service.insert_entry(entry)
+
+    def get_udf_cache_catalog_entry_by_name(self, name: str) -> UdfCacheCatalogEntry:
+        return self._udf_cache_service.get_entry_by_name(name)
+
+    def drop_udf_cache_catalog_entry(self, entry: UdfCacheCatalogEntry) -> bool:
+        # remove the data structure associated with the entry
+        if entry:
+            shutil.rmtree(entry.cache_path)
+        return self._udf_cache_service.delete_entry(entry)
 
     """ UDF Metadata Catalog"""
 
