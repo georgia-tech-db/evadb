@@ -28,7 +28,6 @@ from eva.server.command_handler import execute_query_fetch_all
 from eva.udfs.udf_bootstrap_queries import (
     Asl_udf_query,
     Mvit_udf_query,
-    Timestamp_udf_query,
 )
 
 
