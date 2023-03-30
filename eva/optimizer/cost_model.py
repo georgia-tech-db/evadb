@@ -16,8 +16,10 @@ from functools import singledispatch
 
 from eva.optimizer.group_expression import GroupExpression
 from eva.plan_nodes.abstract_plan import AbstractPlan
+from eva.plan_nodes.apply_and_merge_plan import ApplyAndMergePlan
 from eva.plan_nodes.hash_join_build_plan import HashJoinBuildPlan
 from eva.plan_nodes.hash_join_probe_plan import HashJoinProbePlan
+from eva.plan_nodes.nested_loop_join_plan import NestedLoopJoinPlan
 from eva.plan_nodes.seq_scan_plan import SeqScanPlan
 
 
@@ -38,6 +40,10 @@ class CostModel:
         def cost(opr: AbstractPlan):
             return 1.0
 
+        @cost.register(NestedLoopJoinPlan)
+        def cost_nested_loop_join_build_plan(opr: NestedLoopJoinPlan):
+            return 1.0
+
         @cost.register(HashJoinBuildPlan)
         def cost_hash_join_build_plan(opr: HashJoinBuildPlan):
             return 1.0
@@ -49,5 +55,11 @@ class CostModel:
         @cost.register(SeqScanPlan)
         def cost_seq_scan(opr: SeqScanPlan):
             return 1.0
+
+        @cost.register(ApplyAndMergePlan)
+        def cost_apply_and_merge(opr: ApplyAndMergePlan):
+            if opr.func_expr.has_cache():
+                return 0
+            return 1
 
         return cost(gexpr.opr)

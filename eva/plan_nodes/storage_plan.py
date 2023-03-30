@@ -32,12 +32,12 @@ class StoragePlan(AbstractPlan):
         total_shards (int): number of shards of data (if sharded)
         curr_shard (int): current curr_shard if data is sharded
         sampling_rate (int): uniform sampling rate
+        sampling_type (str): special sampling type like IFRAMES
     """
 
     def __init__(
         self,
         table: TableCatalogEntry,
-        batch_mem_size: int,
         skip_frames: int = 0,
         offset: int = None,
         limit: int = None,
@@ -45,6 +45,8 @@ class StoragePlan(AbstractPlan):
         curr_shard: int = 0,
         predicate: AbstractExpression = None,
         sampling_rate: int = None,
+        batch_mem_size: int = 30000000,
+        sampling_type: str = None,
     ):
         super().__init__(PlanOprType.STORAGE_PLAN)
         self._table = table
@@ -56,6 +58,7 @@ class StoragePlan(AbstractPlan):
         self._curr_shard = curr_shard
         self._predicate = predicate
         self._sampling_rate = sampling_rate
+        self._sampling_type = sampling_type
 
     @property
     def table(self):
@@ -93,6 +96,10 @@ class StoragePlan(AbstractPlan):
     def sampling_rate(self):
         return self._sampling_rate
 
+    @property
+    def sampling_type(self):
+        return self._sampling_type
+
     def __str__(self):
         return "StoragePlan(video={}, \
             batch_mem_size={}, \
@@ -102,7 +109,8 @@ class StoragePlan(AbstractPlan):
             total_shards={}, \
             curr_shard={}, \
             predicate={}, \
-            sampling_rate={})".format(
+            sampling_rate={}, \
+            sampling_type={})".format(
             self._table,
             self._batch_mem_size,
             self._skip_frames,
@@ -112,6 +120,7 @@ class StoragePlan(AbstractPlan):
             self._curr_shard,
             self._predicate,
             self._sampling_rate,
+            self._sampling_type,
         )
 
     def __hash__(self) -> int:
@@ -127,5 +136,6 @@ class StoragePlan(AbstractPlan):
                 self.curr_shard,
                 self.predicate,
                 self.sampling_rate,
+                self.sampling_type,
             )
         )

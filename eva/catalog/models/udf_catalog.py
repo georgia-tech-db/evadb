@@ -12,12 +12,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from typing import List
 
 from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
 
+from eva.catalog.models.association_models import depend_udf_and_udf_cache
 from eva.catalog.models.base_model import BaseModel
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 
@@ -31,19 +34,33 @@ class UdfCatalog(BaseModel):
 
     __tablename__ = "udf_catalog"
 
-    _name = Column("name", String(100), unique=True)
+    _name = Column("name", String(128), unique=True)
     _impl_file_path = Column("impl_file_path", String(128))
-    _type = Column("type", String(100))
+    _type = Column("type", String(128))
+    _checksum = Column("checksum", String(512))
 
-    # UdfIOCatalog stroing the input/output attributes of the udf
+    # UdfIOCatalog storing the input/output attributes of the udf
     _attributes = relationship(
         "UdfIOCatalog", back_populates="_udf", cascade="all, delete, delete-orphan"
     )
+    _metadata = relationship(
+        "UdfMetadataCatalog",
+        back_populates="_udf",
+        cascade="all, delete, delete-orphan",
+    )
 
-    def __init__(self, name: str, impl_file_path: str, type: str):
+    _dep_caches = relationship(
+        "UdfCacheCatalog",
+        secondary=depend_udf_and_udf_cache,
+        back_populates="_udf_depends",
+        cascade="all, delete",
+    )
+
+    def __init__(self, name: str, impl_file_path: str, type: str, checksum: str):
         self._name = name
         self._impl_file_path = impl_file_path
         self._type = type
+        self._checksum = checksum
 
     def as_dataclass(self) -> "UdfCatalogEntry":
         args = []
@@ -59,8 +76,10 @@ class UdfCatalog(BaseModel):
             name=self._name,
             impl_file_path=self._impl_file_path,
             type=self._type,
+            checksum=self._checksum,
             args=args,
             outputs=outputs,
+            dep_caches=[entry.as_dataclass() for entry in self._dep_caches],
         )
 
 
@@ -73,9 +92,11 @@ class UdfCatalogEntry:
     name: str
     impl_file_path: str
     type: str
+    checksum: str
     row_id: int = None
     args: List[UdfIOCatalogEntry] = field(compare=False, default_factory=list)
     outputs: List[UdfIOCatalogEntry] = field(compare=False, default_factory=list)
+    dep_caches: List[UdfIOCatalogEntry] = field(compare=False, default_factory=list)
 
     def display_format(self):
         def _to_str(col):

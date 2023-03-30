@@ -33,28 +33,27 @@ class InsertPlan(AbstractPlan):
 
     def __init__(
         self,
-        table: TableCatalogEntry,
+        table_ref: TableCatalogEntry,
         column_list: List[AbstractExpression],
         value_list: List[AbstractExpression],
     ):
-
         super().__init__(PlanOprType.INSERT)
-        self.table = table
-        self.columns_list = column_list
+        self.table_ref = table_ref
+        self.column_list = column_list
         self.value_list = value_list
 
     def __str__(self):
         return "InsertPlan(table={}, \
             column_list={}, \
             value_list={})".format(
-            self.table, self.columns_list, self.value_list
+            self.table_ref, self.column_list, self.value_list
         )
 
     def __hash__(self) -> int:
         return hash(
             (
                 super().__hash__(),
-                self.table,
+                self.table_ref,
                 tuple(self.column_list),
                 tuple(self.value_list),
             )

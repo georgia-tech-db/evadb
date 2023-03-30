@@ -41,27 +41,33 @@ minimal_requirement = [
     "opencv-python>=4.5.4.60,<4.6.0.66",  # bug in easyocr
     "pandas>=1.1.5",
     "Pillow>=8.4.0",
-    "sqlalchemy>=1.4.0",
+    "sqlalchemy>=1.4.0,<2.0.0", # major changes in 2.0.0
     "sqlalchemy-utils>=0.36.6",
     "lark>=1.0.0",
     "pyyaml>=5.1",
     "importlib-metadata<5.0",
     "ray>=1.13.0",
-    "aenum>=2.2.0"
+    "aenum>=2.2.0",
+    "diskcache>=5.4.0",
+    "decord>=0.6.0"
 ]
 
 formatter_libs = [
-    "black>=22.6.0",
+    "black>=23.1.0",
     "isort>=5.10.1"
 ]
 
 test_libs = [
     "pytest>=6.1.2",
     "pytest-cov>=2.11.1",
+    "pytest-random-order>=1.0.4",
     "pytest-virtualenv",
+    "pytest-asyncio",
+    "pytest-xdist",
     "coveralls>=3.0.1",
     "mock>=4.0.3",
-    "flake8>=3.9.1"
+    "flake8>=3.9.1",
+    "moto[s3]>=4.1.1"
 ]
 
 notebook_libs = [
@@ -100,8 +106,9 @@ udf_libs = [
     "facenet-pytorch>=2.5.2", # FACE DETECTION
     "easyocr>=1.5.0",         # OCR EXTRACTION
     "ipython",
-    "yolov5",                 # OBJECT DETECION
-    "detoxify"                # TEXT TOXICITY CLASSIFICATION
+    "yolov5<=7.0.6",          # OBJECT DETECTION
+    "detoxify",               # TEXT TOXICITY CLASSIFICATION
+    "thefuzz"                 # FUZZY STRING MATCHINGz
 ]
 
 ### NEEDED FOR EXPERIMENTAL FEATURES

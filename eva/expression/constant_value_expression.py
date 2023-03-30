@@ -33,7 +33,10 @@ class ConstantValueExpression(AbstractExpression):
         self._v_type = v_type
 
     def evaluate(self, batch: Batch, **kwargs):
-        return Batch(pd.DataFrame({0: [self._value] * len(batch)}))
+        batch = Batch(pd.DataFrame({0: [self._value] * len(batch)}))
+        if "mask" in kwargs:
+            batch = batch[kwargs["mask"]]
+        return batch
 
     def signature(self) -> str:
         return str(self)

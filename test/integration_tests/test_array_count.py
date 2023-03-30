@@ -13,15 +13,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import NUM_FRAMES, create_sample_video, file_remove, load_inbuilt_udfs
+from test.util import (
+    NUM_FRAMES,
+    create_sample_video,
+    file_remove,
+    load_udfs_for_testing,
+)
 
 import pandas as pd
+import pytest
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.models.storage.batch import Batch
 from eva.server.command_handler import execute_query_fetch_all
 
 
+@pytest.mark.notparallel
 class ArrayCountTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -29,7 +36,7 @@ class ArrayCountTests(unittest.TestCase):
         video_file_path = create_sample_video(NUM_FRAMES)
         load_query = f"LOAD VIDEO '{video_file_path}' INTO MyVideo;"
         execute_query_fetch_all(load_query)
-        load_inbuilt_udfs()
+        load_udfs_for_testing(mode="minimal")
 
     @classmethod
     def tearDownClass(cls):
@@ -63,9 +70,9 @@ class ArrayCountTests(unittest.TestCase):
         expected_batch = Batch(frames=pd.DataFrame(expected))
         self.assertEqual(actual_batch, expected_batch)
 
-    def test_array_count(self):
+    def test_array_count_integration_test(self):
         select_query = """SELECT id FROM MyVideo WHERE
-            Array_Count(DummyMultiObjectDetector(data).labels, 'person') = 2
+            ArrayCount(DummyMultiObjectDetector(data).labels, 'person') = 2
             ORDER BY id;"""
         actual_batch = execute_query_fetch_all(select_query)
         expected = [{"myvideo.id": i} for i in range(0, NUM_FRAMES, 3)]
@@ -73,7 +80,7 @@ class ArrayCountTests(unittest.TestCase):
         self.assertEqual(actual_batch, expected_batch)
 
         select_query = """SELECT id FROM MyVideo
-            WHERE Array_Count(DummyObjectDetector(data).label, 'bicycle') = 1
+            WHERE ArrayCount(DummyObjectDetector(data).label, 'bicycle') = 1
             ORDER BY id;"""
         actual_batch = execute_query_fetch_all(select_query)
         expected = [{"myvideo.id": i} for i in range(1, NUM_FRAMES, 2)]

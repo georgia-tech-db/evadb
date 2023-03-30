@@ -17,6 +17,7 @@ import sys
 from eva.binder.binder_utils import (
     BinderError,
     bind_table_info,
+    check_column_name_is_string,
     check_groupby_pattern,
     check_table_object_is_video,
     extend_star,
@@ -25,19 +26,20 @@ from eva.binder.statement_binder_context import StatementBinderContext
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import IndexType, NdArrayType, TableType
 from eva.catalog.catalog_utils import get_video_table_column_definitions
-from eva.expression.abstract_expression import AbstractExpression
+from eva.expression.abstract_expression import AbstractExpression, ExpressionType
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.alias import Alias
 from eva.parser.create_index_statement import CreateIndexStatement
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
+from eva.parser.delete_statement import DeleteTableStatement
 from eva.parser.explain_statement import ExplainStatement
 from eva.parser.rename_statement import RenameTableStatement
 from eva.parser.select_statement import SelectStatement
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
 from eva.parser.types import UDFType
-from eva.utils.generic_utils import path_to_class
+from eva.utils.generic_utils import get_file_checksum, load_udf_class_from_file
 from eva.utils.logging_manager import logger
 
 if sys.version_info >= (3, 8):
@@ -91,37 +93,39 @@ class StatementBinder:
         # TODO: create index currently only works on TableInfo, but will extend later.
         assert node.table_ref.is_table_atom(), "Index can only be created on Tableinfo"
 
-        if IndexType.is_faiss_index_type(node.index_type):
-            if not node.udf_func:
-                # Feature table type needs to be float32 numpy array.
-                col_def = node.col_list[0]
-                table_ref_obj = node.table_ref.table.table_obj
-                col = [
-                    col for col in table_ref_obj.columns if col.name == col_def.name
-                ][0]
-                if not col.array_type == NdArrayType.FLOAT32:
-                    raise BinderError("Index input needs to be float32.")
-                if not len(col.array_dimensions) == 2:
-                    raise BinderError("Index input needs to be 2 dimensional.")
-            else:
-                # Output of the UDF should be 2 dimension and float32 type.
-                catalog_manager = CatalogManager()
-                udf_obj = catalog_manager.get_udf_catalog_entry_by_name(
-                    node.udf_func.name
-                )
-                for output in udf_obj.outputs:
-                    if not output.array_type == NdArrayType.FLOAT32:
-                        raise BinderError("Index input needs to be float32.")
-                    if not len(output.array_dimensions) == 2:
-                        raise BinderError("Index input needs to be 2 dimensional.")
+        assert IndexType.is_faiss_index_type(
+            node.index_type
+        ), "Index type {} is not supported.".format(node.index_type)
+
+        if not node.udf_func:
+            # Feature table type needs to be float32 numpy array.
+            col_def = node.col_list[0]
+            table_ref_obj = node.table_ref.table.table_obj
+            col = [col for col in table_ref_obj.columns if col.name == col_def.name][0]
+            assert (
+                col.array_type == NdArrayType.FLOAT32
+            ), "Index input needs to be float32."
+            assert len(col.array_dimensions) == 2
         else:
-            raise BinderError("Index type {} is not supported.".format(node.index_type))
+            # Output of the UDF should be 2 dimension and float32 type.
+            catalog_manager = CatalogManager()
+            udf_obj = catalog_manager.get_udf_catalog_entry_by_name(node.udf_func.name)
+            for output in udf_obj.outputs:
+                assert (
+                    output.array_type == NdArrayType.FLOAT32
+                ), "Index input needs to be float32."
+                assert (
+                    len(output.array_dimensions) == 2
+                ), "Index input needs to be 2 dimensional."
 
     @bind.register(SelectStatement)
     def _bind_select_statement(self, node: SelectStatement):
         self.bind(node.from_table)
         if node.where_clause:
             self.bind(node.where_clause)
+            if node.where_clause.etype == ExpressionType.COMPARE_LIKE:
+                check_column_name_is_string(node.where_clause.children[0])
+
         if node.target_list:
             # SELECT * support
             if (
@@ -145,6 +149,12 @@ class StatementBinder:
             self.bind(node.union_link)
             self._binder_context = current_context
 
+    @bind.register(DeleteTableStatement)
+    def _bind_delete_statement(self, node: DeleteTableStatement):
+        self.bind(node.table_ref)
+        if node.where_clause:
+            self.bind(node.where_clause)
+
     @bind.register(CreateMaterializedViewStatement)
     def _bind_create_mat_statement(self, node: CreateMaterializedViewStatement):
         self.bind(node.query)
@@ -153,10 +163,9 @@ class StatementBinder:
     @bind.register(RenameTableStatement)
     def _bind_rename_table_statement(self, node: RenameTableStatement):
         self.bind(node.old_table_ref)
-        if node.old_table_ref.table.table_obj.table_type == TableType.STRUCTURED_DATA:
-            err_msg = "Rename not yet supported on structured data"
-            logger.exception(err_msg)
-            raise BinderError(err_msg)
+        assert (
+            node.old_table_ref.table.table_obj.table_type != TableType.STRUCTURED_DATA
+        ), "Rename not yet supported on structured data"
 
     @bind.register(TableRef)
     def _bind_tableref(self, node: TableRef):
@@ -204,6 +213,7 @@ class StatementBinder:
         table_alias, col_obj = self._binder_context.get_binded_column(
             node.col_name, node.table_alias
         )
+        node.table_alias = table_alias
         node.col_alias = "{}.{}".format(table_alias, node.col_name.lower())
         node.col_object = col_obj
 
@@ -226,8 +236,18 @@ class StatementBinder:
             logger.error(err_msg)
             raise BinderError(err_msg)
 
+        # Verify the consistency of the UDF. If the checksum of the UDF does not match
+        # the one stored in the catalog, an error will be thrown and the user will be
+        # asked to register the UDF again.
+        assert (
+            get_file_checksum(udf_obj.impl_file_path) == udf_obj.checksum
+        ), f"""UDF file {udf_obj.impl_file_path} has been modified from the
+            registration. Please create a new UDF using the CREATE UDF command or UPDATE the existing one."""
+
         try:
-            node.function = path_to_class(udf_obj.impl_file_path, udf_obj.name)
+            node.function = load_udf_class_from_file(
+                udf_obj.impl_file_path, udf_obj.name
+            )
         except Exception as e:
             err_msg = (
                 f"{str(e)}. Please verify that the UDF class name in the"
@@ -264,13 +284,9 @@ class StatementBinder:
                 ]
                 node.alias = Alias(node.alias.alias_name, output_aliases)
 
-        if len(node.alias.col_names) != len(node.output_objs):
-            err_msg = (
-                f"Expected {len(node.output_objs)} output columns for "
-                f"{node.alias.alias_name}, got {len(node.alias.col_names)}."
-            )
-            logger.error(err_msg)
-            raise BinderError(err_msg)
+        assert len(node.alias.col_names) == len(
+            node.output_objs
+        ), f"""Expected {len(node.output_objs)} output columns for {node.alias.alias_name}, got {len(node.alias.col_names)}."""
 
 
 def handle_extract_object(node: FunctionExpression, binder_context: StatementBinder):
@@ -279,11 +295,11 @@ def handle_extract_object(node: FunctionExpression, binder_context: StatementBin
         logger.error(err_msg)
         raise BinderError(err_msg)
 
-    """ 
+    """
     1. Bind the source video data
     2. Create the detector function expression using the provided name.
     3. Create the tracker function expression. Its inputs are id, data, output of detector.
-    4. Bind the extract object function expression and append the new children. 
+    4. Bind the extract object function expression and append the new children.
     """
 
     # 1. Bind the source video

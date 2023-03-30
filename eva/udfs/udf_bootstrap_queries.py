@@ -49,7 +49,7 @@ DummyFeatureExtractor_udf_query = """CREATE UDF
 )
 
 ArrayCount_udf_query = """CREATE UDF
-            IF NOT EXISTS  Array_Count
+            IF NOT EXISTS  ArrayCount
             INPUT (Input_Array NDARRAY ANYTYPE, Search_Key ANYTYPE)
             OUTPUT (key_count INTEGER)
             TYPE NdarrayUDF
@@ -156,6 +156,15 @@ Mvit_udf_query = """CREATE UDF IF NOT EXISTS MVITActionRecognition
     EVA_INSTALLATION_DIR
 )
 
+Asl_udf_query = """CREATE UDF IF NOT EXISTS ASLActionRecognition
+        INPUT  (Frame_Array NDARRAY UINT8(3, 16, 224, 224))
+        OUTPUT (labels NDARRAY STR(ANYDIM))
+        TYPE  Classification
+        IMPL  '{}/udfs/asl_action_recognition.py';
+        """.format(
+    EVA_INSTALLATION_DIR
+)
+
 
 def init_builtin_udfs(mode="debug"):
     """
@@ -171,7 +180,6 @@ def init_builtin_udfs(mode="debug"):
         Timestamp_udf_query,
         Crop_udf_query,
         Open_udf_query,
-        YoloV5_udf_query,
         Similarity_udf_query
         # Disabled because required packages (eg., easy_ocr might not be preinstalled)
         # face_detection_udf_query,
@@ -186,6 +194,9 @@ def init_builtin_udfs(mode="debug"):
             DummyFeatureExtractor_udf_query,
         ]
     )
+
+    if mode != "minimal":
+        queries.extend([YoloV5_udf_query])
 
     for query in queries:
         execute_query_fetch_all(query)

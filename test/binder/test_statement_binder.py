@@ -18,6 +18,8 @@ from unittest.mock import MagicMock, patch
 from eva.binder.binder_utils import BinderError
 from eva.binder.statement_binder import StatementBinder
 from eva.binder.statement_binder_context import StatementBinderContext
+from eva.catalog.catalog_manager import CatalogManager
+from eva.catalog.catalog_type import IndexType, NdArrayType
 from eva.parser.alias import Alias
 
 
@@ -33,7 +35,7 @@ class StatementBinderTests(unittest.TestCase):
             tve.col_name = "col_name"
             binder._bind_tuple_expr(tve)
             col_alias = "{}.{}".format("table_alias", "col_name")
-            mock.assert_called_with(tve.col_name, tve.table_alias)
+            mock.assert_called_once()
             self.assertEqual(tve.col_object, "col_obj")
             self.assertEqual(tve.col_alias, col_alias)
 
@@ -122,8 +124,11 @@ class StatementBinderTests(unittest.TestCase):
             mock_binder.assert_called_with(stmt.explainable_stmt)
 
     @patch("eva.binder.statement_binder.CatalogManager")
-    @patch("eva.binder.statement_binder.path_to_class")
-    def test_bind_func_expr(self, mock_path_to_class, mock_catalog):
+    @patch("eva.binder.statement_binder.load_udf_class_from_file")
+    @patch("eva.binder.statement_binder.get_file_checksum")
+    def test_bind_func_expr(
+        self, mock_get_file_checksum, mock_load_udf_class_from_file, mock_catalog
+    ):
         # setup
         func_expr = MagicMock(
             name="func_expr", alias=Alias("func_expr"), output_col_aliases=[]
@@ -142,23 +147,29 @@ class StatementBinderTests(unittest.TestCase):
             mock_catalog().get_udf_io_catalog_output_entries
         ) = MagicMock()
         mock_get_udf_outputs.return_value = func_ouput_objs
-        mock_path_to_class.return_value.return_value = "path_to_class"
+        mock_load_udf_class_from_file.return_value.return_value = (
+            "load_udf_class_from_file"
+        )
+        mock_get_file_checksum.return_value = udf_obj.checksum
 
         # Case 1 set output
         func_expr.output = "out1"
         binder = StatementBinder(StatementBinderContext())
         binder._bind_func_expr(func_expr)
 
+        mock_get_file_checksum.assert_called_with(udf_obj.impl_file_path)
         mock_get_name.assert_called_with(func_expr.name)
         mock_get_udf_outputs.assert_called_with(udf_obj)
-        mock_path_to_class.assert_called_with(udf_obj.impl_file_path, udf_obj.name)
+        mock_load_udf_class_from_file.assert_called_with(
+            udf_obj.impl_file_path, udf_obj.name
+        )
         self.assertEqual(func_expr.output_objs, [obj1])
         print(str(func_expr.alias))
         self.assertEqual(
             func_expr.alias,
             Alias("func_expr", ["out1"]),
         )
-        self.assertEqual(func_expr.function(), "path_to_class")
+        self.assertEqual(func_expr.function(), "load_udf_class_from_file")
 
         # Case 2 output not set
         func_expr.output = None
@@ -166,9 +177,12 @@ class StatementBinderTests(unittest.TestCase):
         binder = StatementBinder(StatementBinderContext())
         binder._bind_func_expr(func_expr)
 
+        mock_get_file_checksum.assert_called_with(udf_obj.impl_file_path)
         mock_get_name.assert_called_with(func_expr.name)
         mock_get_udf_outputs.assert_called_with(udf_obj)
-        mock_path_to_class.assert_called_with(udf_obj.impl_file_path, udf_obj.name)
+        mock_load_udf_class_from_file.assert_called_with(
+            udf_obj.impl_file_path, udf_obj.name
+        )
         self.assertEqual(func_expr.output_objs, func_ouput_objs)
         self.assertEqual(
             func_expr.alias,
@@ -177,12 +191,12 @@ class StatementBinderTests(unittest.TestCase):
                 ["out1", "out2"],
             ),
         )
-        self.assertEqual(func_expr.function(), "path_to_class")
+        self.assertEqual(func_expr.function(), "load_udf_class_from_file")
 
         # Raise error if the class object cannot be created
-        mock_path_to_class.reset_mock()
-        mock_error_msg = "mock_path_to_class_error"
-        mock_path_to_class.side_effect = MagicMock(
+        mock_load_udf_class_from_file.reset_mock()
+        mock_error_msg = "mock_load_udf_class_from_file_error"
+        mock_load_udf_class_from_file.side_effect = MagicMock(
             side_effect=RuntimeError(mock_error_msg)
         )
         binder = StatementBinder(StatementBinderContext())
@@ -247,6 +261,51 @@ class StatementBinderTests(unittest.TestCase):
             tve.col_name = "col_name"
             binder._bind_tuple_expr(tve)
             col_alias = "{}.{}".format("table_alias", "col_name")
-            mock.assert_called_with(tve.col_name, tve.table_alias)
+            mock.assert_called_once()
             self.assertEqual(tve.col_object, "col_obj")
             self.assertEqual(tve.col_alias, col_alias)
+
+    def test_bind_create_index(self):
+        with patch.object(StatementBinder, "bind"):
+            binder = StatementBinder(StatementBinderContext())
+            create_index_statement = MagicMock()
+
+            with self.assertRaises(AssertionError):
+                binder._bind_create_index_statement(create_index_statement)
+
+            create_index_statement.col_list = ["foo"]
+            create_index_statement.index_type = "bar"
+            with self.assertRaises(AssertionError):
+                binder._bind_create_index_statement(create_index_statement)
+
+            udf_obj = MagicMock()
+            output = MagicMock()
+            udf_obj.outputs = [output]
+
+            with patch.object(
+                CatalogManager, "get_udf_catalog_entry_by_name", return_value=udf_obj
+            ):
+                create_index_statement.index_type = IndexType.HNSW
+                with self.assertRaises(AssertionError):
+                    binder._bind_create_index_statement(create_index_statement)
+                output.array_type = NdArrayType.FLOAT32
+                with self.assertRaises(AssertionError):
+                    binder._bind_create_index_statement(create_index_statement)
+                output.array_dimensions = [1, 100]
+                binder._bind_create_index_statement(create_index_statement)
+
+            create_index_statement.udf_func = None
+            col_def = MagicMock()
+            col_def.name = "a"
+            create_index_statement.col_list = [col_def]
+            col = MagicMock()
+            col.name = "a"
+            create_index_statement.table_ref.table.table_obj.columns = [col]
+
+            with self.assertRaises(AssertionError):
+                binder._bind_create_index_statement(create_index_statement)
+            col.array_type = NdArrayType.FLOAT32
+            with self.assertRaises(AssertionError):
+                binder._bind_create_index_statement(create_index_statement)
+            col.array_dimensions = [1, 10]
+            binder._bind_create_index_statement(create_index_statement)

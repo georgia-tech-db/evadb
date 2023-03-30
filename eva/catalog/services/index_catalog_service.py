@@ -13,10 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import os
-from typing import List
 
 from sqlalchemy.orm.exc import NoResultFound
 
+from eva.catalog.catalog_type import IndexType
 from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.catalog.models.index_catalog import IndexCatalog, IndexCatalogEntry
 from eva.catalog.services.base_service import BaseService
@@ -31,7 +31,7 @@ class IndexCatalogService(BaseService):
         self,
         name: str,
         save_file_path: str,
-        type: str,
+        type: IndexType,
         feat_column: ColumnCatalogEntry,
         udf_signature: str,
     ) -> IndexCatalogEntry:
@@ -55,6 +55,18 @@ class IndexCatalogService(BaseService):
         except NoResultFound:
             return None
 
+    def get_entry_by_column_and_udf_signature(
+        self, column: ColumnCatalogEntry, udf_signature: str
+    ):
+        try:
+            entry = self.model.query.filter(
+                self.model._feat_column_id == column.row_id,
+                self.model._udf_signature == udf_signature,
+            ).one()
+            return entry.as_dataclass()
+        except NoResultFound:
+            return None
+
     def delete_entry_by_name(self, name: str):
         try:
             index_obj = self.model.query.filter(self.model._name == name).one()
@@ -67,10 +79,3 @@ class IndexCatalogService(BaseService):
             logger.exception("Delete index failed for name {}".format(name))
             return False
         return True
-
-    def get_all_entries(self) -> List[IndexCatalogEntry]:
-        try:
-            entries = self.model.query.all()
-            return [entry.as_dataclass() for entry in entries]
-        except NoResultFound:
-            return []

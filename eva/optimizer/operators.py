@@ -12,14 +12,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from collections import deque
 from enum import IntEnum, auto
 from pathlib import Path
-from typing import List
+from typing import Any, List
 
 from eva.catalog.catalog_type import IndexType
 from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
+from eva.catalog.models.udf_metadata_catalog import UdfMetadataCatalogEntry
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.constant_value_expression import ConstantValueExpression
 from eva.expression.function_expression import FunctionExpression
@@ -40,12 +42,12 @@ class OperatorType(IntEnum):
     LOGICALFILTER = auto()
     LOGICALPROJECT = auto()
     LOGICALINSERT = auto()
+    LOGICALDELETE = auto()
     LOGICALCREATE = auto()
     LOGICALRENAME = auto()
     LOGICALDROP = auto()
     LOGICALCREATEUDF = auto()
     LOGICALLOADDATA = auto()
-    LOGICALUPLOAD = auto()
     LOGICALQUERYDERIVEDGET = auto()
     LOGICALUNION = auto()
     LOGICALGROUPBY = auto()
@@ -61,6 +63,7 @@ class OperatorType(IntEnum):
     LOGICALCREATEINDEX = auto()
     LOGICAL_APPLY_AND_MERGE = auto()
     LOGICAL_EXTRACT_OBJECT = auto()
+    LOGICALFAISSINDEXSCAN = auto()
     LOGICALDELIMITER = auto()
 
 
@@ -127,19 +130,45 @@ class Operator:
                 setattr(result, k, v)
         return result
 
+    def bfs(self):
+        """Returns a generator which visits all nodes in operator tree in
+        breadth-first search (BFS) traversal order.
+
+        Returns:
+            the generator object.
+        """
+        queue = deque([self])
+        while queue:
+            node = queue.popleft()
+            yield node
+            for child in node.children:
+                queue.append(child)
+
+    def find_all(self, operator_type: Any):
+        """Returns a generator which visits all the nodes in operator tree and yields one that matches the passed `operator_type`.
+
+        Args:
+            operator_type (Any): operator type to match with
+
+        Returns:
+            the generator object.
+        """
+
+        for node in self.bfs():
+            if isinstance(node, operator_type):
+                yield node
+
 
 class Dummy(Operator):
     """
     Acts as a placeholder for matching any operator in optimizer.
-    It track the group_id of the matching operator.
+    It tracks the group_id of the matching operator.
     """
 
-    def __init__(self, group_id: int):
+    def __init__(self, group_id: int, opr: Operator):
         super().__init__(OperatorType.DUMMY, None)
         self.group_id = group_id
-
-    def __hash__(self) -> int:
-        return hash((super().__hash__(), self.group_id))
+        self.opr = opr
 
 
 class LogicalGet(Operator):
@@ -151,6 +180,7 @@ class LogicalGet(Operator):
         predicate: AbstractExpression = None,
         target_list: List[AbstractExpression] = None,
         sampling_rate: int = None,
+        sampling_type: str = None,
         children=None,
     ):
         self._video = video
@@ -159,6 +189,7 @@ class LogicalGet(Operator):
         self._predicate = predicate
         self._target_list = target_list
         self._sampling_rate = sampling_rate
+        self._sampling_type = sampling_type
         super().__init__(OperatorType.LOGICALGET, children)
 
     @property
@@ -177,21 +208,17 @@ class LogicalGet(Operator):
     def predicate(self):
         return self._predicate
 
-    @predicate.setter
-    def predicate(self, predicate):
-        self._predicate = predicate
-
     @property
     def target_list(self):
         return self._target_list
 
-    @target_list.setter
-    def target_list(self, target_list):
-        self._target_list = target_list
-
     @property
     def sampling_rate(self):
         return self._sampling_rate
+
+    @property
+    def sampling_type(self):
+        return self._sampling_type
 
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
@@ -205,6 +232,7 @@ class LogicalGet(Operator):
             and self.predicate == other.predicate
             and self.target_list == other.target_list
             and self.sampling_rate == other.sampling_rate
+            and self.sampling_type == other.sampling_type
         )
 
     def __hash__(self) -> int:
@@ -217,6 +245,7 @@ class LogicalGet(Operator):
                 self.predicate,
                 tuple(self.target_list or []),
                 self.sampling_rate,
+                self.sampling_type,
             )
         )
 
@@ -356,22 +385,36 @@ class LogicalLimit(Operator):
 
 
 class LogicalSample(Operator):
-    def __init__(self, sample_freq: ConstantValueExpression, children: List = None):
+    def __init__(
+        self,
+        sample_freq: ConstantValueExpression,
+        sample_type: ConstantValueExpression,
+        children: List = None,
+    ):
         super().__init__(OperatorType.LOGICALSAMPLE, children)
         self._sample_freq = sample_freq
+        self._sample_type = sample_type
 
     @property
     def sample_freq(self):
         return self._sample_freq
 
+    @property
+    def sample_type(self):
+        return self._sample_type
+
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
         if not isinstance(other, LogicalSample):
             return False
-        return is_subtree_equal and self.sample_freq == other.sample_freq
+        return (
+            is_subtree_equal
+            and self.sample_freq == other.sample_freq
+            and self.sample_type == other.sample_type
+        )
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(), self.sample_freq))
+        return hash((super().__hash__(), self.sample_freq, self.sample_type))
 
 
 class LogicalUnion(Operator):
@@ -397,7 +440,7 @@ class LogicalInsert(Operator):
     """[Logical Node for Insert operation]
 
     Arguments:
-        table(TableCatalogEntry): table to intert data into
+        table(TableCatalogEntry): table to insert data into
         column_list{List[AbstractExpression]}:
             [After binding annotated column_list]
         value_list{List[AbstractExpression]}:
@@ -446,6 +489,53 @@ class LogicalInsert(Operator):
                 self.table,
                 tuple(self.value_list),
                 tuple(self.column_list),
+            )
+        )
+
+
+class LogicalDelete(Operator):
+    """[Logical Node for Delete Operation]
+
+    Arguments:
+        table_ref(TableCatalogEntry): table to delete tuples from,
+        where_clause(AbstractExpression): the predicate used to select which rows to delete,
+
+    """
+
+    def __init__(
+        self,
+        table_ref: TableRef,
+        where_clause: AbstractExpression = None,
+        children=None,
+    ):
+        super().__init__(OperatorType.LOGICALDELETE, children)
+        self._table_ref = table_ref
+        self._where_clause = where_clause
+
+    @property
+    def table_ref(self):
+        return self._table_ref
+
+    @property
+    def where_clause(self):
+        return self._where_clause
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalDelete):
+            return False
+        return (
+            is_subtree_equal
+            and self.table_ref == other.table_ref
+            and self.where_clause == other.where_clause
+        )
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                super().__hash__(),
+                self.table_ref,
+                self.where_clause,
             )
         )
 
@@ -603,6 +693,7 @@ class LogicalCreateUDF(Operator):
         outputs: List[UdfIOCatalogEntry],
         impl_path: Path,
         udf_type: str = None,
+        metadata: List[UdfMetadataCatalogEntry] = None,
         children: List = None,
     ):
         super().__init__(OperatorType.LOGICALCREATEUDF, children)
@@ -612,6 +703,7 @@ class LogicalCreateUDF(Operator):
         self._outputs = outputs
         self._impl_path = impl_path
         self._udf_type = udf_type
+        self._metadata = metadata
 
     @property
     def name(self):
@@ -637,6 +729,10 @@ class LogicalCreateUDF(Operator):
     def udf_type(self):
         return self._udf_type
 
+    @property
+    def metadata(self):
+        return self._metadata
+
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
         if not isinstance(other, LogicalCreateUDF):
@@ -649,6 +745,7 @@ class LogicalCreateUDF(Operator):
             and self.outputs == other.outputs
             and self.udf_type == other.udf_type
             and self.impl_path == other.impl_path
+            and self.metadata == other.metadata
         )
 
     def __hash__(self) -> int:
@@ -661,6 +758,7 @@ class LogicalCreateUDF(Operator):
                 tuple(self.outputs),
                 self.udf_type,
                 self.impl_path,
+                tuple(self.metadata),
             )
         )
 
@@ -767,90 +865,6 @@ class LogicalLoadData(Operator):
                 super().__hash__(),
                 self.table_info,
                 self.path,
-                tuple(self.column_list),
-                frozenset(self.file_options.items()),
-            )
-        )
-
-
-class LogicalUpload(Operator):
-    """Logical node for upload operation
-
-    Arguments:
-        path(Path): file path (with prefix prepended) where
-                    the data is uploaded
-        video_blob(str): base64 encoded video string
-    """
-
-    def __init__(
-        self,
-        path: Path,
-        video_blob: str,
-        table_info: TableInfo,
-        column_list: List[AbstractExpression] = None,
-        file_options: dict = dict(),
-        children: List = None,
-    ):
-        super().__init__(OperatorType.LOGICALUPLOAD, children=children)
-        self._path = path
-        self._video_blob = video_blob
-        self._table_info = table_info
-        self._column_list = column_list or []
-        self._file_options = file_options
-
-    @property
-    def path(self):
-        return self._path
-
-    @property
-    def video_blob(self):
-        return self._video_blob
-
-    @property
-    def table_info(self):
-        return self._table_info
-
-    @property
-    def column_list(self):
-        return self._column_list
-
-    @property
-    def file_options(self):
-        return self._file_options
-
-    def __str__(self):
-        return "LogicalUpload(path: {}, \
-                blob: {}, \
-                table: {}, \
-                column_list: {}, \
-                file_options: {})".format(
-            self.path,
-            "video blob",
-            self.table_info,
-            self.column_list,
-            self.file_options,
-        )
-
-    def __eq__(self, other):
-        is_subtree_equal = super().__eq__(other)
-        if not isinstance(other, LogicalUpload):
-            return False
-        return (
-            is_subtree_equal
-            and self.path == other.path
-            and self.video_blob == other.video_blob
-            and self.table_info == other.table_info
-            and self.column_list == other.column_list
-            and self.file_options == other.file_options
-        )
-
-    def __hash__(self) -> int:
-        return hash(
-            (
-                super().__hash__(),
-                self.path,
-                self.video_blob,
-                self.table_info,
                 tuple(self.column_list),
                 frozenset(self.file_options.items()),
             )
@@ -1111,12 +1125,10 @@ class LogicalExchange(Operator):
         super().__init__(OperatorType.LOGICALEXCHANGE, children)
 
     def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
         if not isinstance(other, LogicalExchange):
             return False
-        return True
-
-    def __hash__(self) -> int:
-        return super().__hash__()
+        return is_subtree_equal
 
 
 class LogicalExplain(Operator):
@@ -1256,5 +1268,52 @@ class LogicalApplyAndMerge(Operator):
                 self.do_unnest,
                 self.alias,
                 self._merge_type,
+            )
+        )
+
+
+class LogicalFaissIndexScan(Operator):
+    def __init__(
+        self,
+        index_name: str,
+        limit_count: ConstantValueExpression,
+        search_query_expr: FunctionExpression,
+        children: List = None,
+    ):
+        super().__init__(OperatorType.LOGICALFAISSINDEXSCAN, children)
+        self._index_name = index_name
+        self._limit_count = limit_count
+        self._search_query_expr = search_query_expr
+
+    @property
+    def index_name(self):
+        return self._index_name
+
+    @property
+    def limit_count(self):
+        return self._limit_count
+
+    @property
+    def search_query_expr(self):
+        return self._search_query_expr
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalFaissIndexScan):
+            return False
+        return (
+            is_subtree_equal
+            and self.index_name == other.index_name
+            and self.limit_count == other.limit_count
+            and self.search_query_expr == other.search_query_expr
+        )
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                super().__hash__(),
+                self.index_name,
+                self.limit_count,
+                self.search_query_expr,
             )
         )

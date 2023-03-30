@@ -66,9 +66,6 @@ class Batch:
         """
         return self._frames[column_name].to_numpy()
 
-    def to_numpy(self) -> np.ndarray:
-        return self._frames.to_numpy()
-
     def serialize(self):
         obj = {"frames": self._frames, "batch_size": len(self)}
         return PickleSerializer.serialize(obj)
@@ -120,6 +117,12 @@ class Batch:
             )
         )
 
+    @classmethod
+    def compare_like(cls, batch1: Batch, batch2: Batch) -> None:
+        col = batch1._frames.iloc[:, 0]
+        regex = batch2._frames.iloc[:, 0][0]
+        return cls(pd.DataFrame(col.astype("str").str.match(pat=regex)))
+
     def __str__(self) -> str:
         with pd.option_context(
             "display.pprint_nest_depth", 1, "display.max_colwidth", 100
@@ -127,6 +130,8 @@ class Batch:
             return f"{self._frames}"
 
     def __eq__(self, other: Batch):
+        # this function does not work if a column is a nested numpy arrays
+        # (eg, bboxes from yolo).
         return self._frames[sorted(self.columns)].equals(
             other.frames[sorted(other.columns)]
         )
@@ -160,22 +165,23 @@ class Batch:
         new_batch = Batch(new_frames)
         return new_batch
 
-    def apply_function_expression(self, expr: Callable) -> None:
+    def apply_function_expression(self, expr: Callable) -> Batch:
         """
         Execute function expression on frames.
         """
-        self._frames = expr(self._frames)
+        return Batch(expr(self._frames))
+
+    def iterrows(self):
+        return self._frames.iterrows()
 
     def sort(self, by=None) -> None:
         """
         in_place sort
         """
+        if self.empty():
+            return
         if by is None:
-            if not self.empty():
-                by = self.columns[0]
-            else:
-                logger.warn("Sorting an empty batch")
-                return
+            by = self.columns[0]
         self._frames.sort_values(by=by, ignore_index=True, inplace=True)
 
     def sort_orderby(self, by, sort_type=None) -> None:
@@ -191,21 +197,15 @@ class Batch:
         if sort_type is None:
             sort_type = [True]
 
-        if by is not None:
-            for column in by:
-                if column not in self._frames.columns:
-                    logger.error(
-                        "Can not orderby non-projected column: {}".format(column)
-                    )
-                    raise KeyError(
-                        "Can not orderby non-projected column: {}".format(column)
-                    )
+        assert by is not None
+        for column in by:
+            assert (
+                column in self._frames.columns
+            ), "Can not orderby non-projected column: {}".format(column)
 
-            self._frames.sort_values(
-                by, ascending=sort_type, ignore_index=True, inplace=True
-            )
-        else:
-            logger.warn("Columns and Sort Type are required for orderby")
+        self._frames.sort_values(
+            by, ascending=sort_type, ignore_index=True, inplace=True
+        )
 
     def invert(self) -> None:
         self._frames = ~self._frames
@@ -241,12 +241,7 @@ class Batch:
         cols = cols or []
         verfied_cols = [c for c in cols if c in self._frames]
         unknown_cols = list(set(cols) - set(verfied_cols))
-        if len(unknown_cols):
-            logger.warn(
-                "Unexpected columns %s\n\
-                                 Frames: %s"
-                % (unknown_cols, self._frames)
-            )
+        assert len(unknown_cols) == 0, unknown_cols
         return Batch(self._frames[verfied_cols])
 
     def repeat(self, times: int) -> None:
@@ -269,9 +264,9 @@ class Batch:
         Returns:
             Batch: Merged batch object
         """
-
         if not len(batches):
             return Batch()
+
         frames = [batch.frames for batch in batches]
         new_frames = pd.concat(frames, axis=1, copy=False, ignore_index=False).fillna(
             method="ffill"
@@ -418,7 +413,6 @@ class Batch:
                     f"Expected {len(alias.col_names)} columns {alias.col_names},"
                     f"got {len(self.columns)} columns {self.columns}."
                 )
-                logger.error(err_msg)
                 raise RuntimeError(err_msg)
             new_col_names = [
                 "{}.{}".format(alias.alias_name, col_name)
@@ -445,6 +439,9 @@ class Batch:
                 new_col_names.append(col_name)
 
         self._frames.columns = new_col_names
+
+    def to_numpy(self):
+        return self._frames.to_numpy()
 
     def rename(self, columns) -> None:
         "Rename column names"

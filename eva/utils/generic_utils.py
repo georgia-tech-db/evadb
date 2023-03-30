@@ -14,7 +14,10 @@
 # limitations under the License.
 import hashlib
 import importlib
+import inspect
+import os
 import pickle
+import shutil
 import sys
 import uuid
 from pathlib import Path
@@ -49,28 +52,44 @@ def str_to_class(class_path: str):
     return getattr(module, class_name)
 
 
-def path_to_class(filepath: str, classname: str):
+def load_udf_class_from_file(filepath, classname=None):
     """
-    Convert the class in the path file into an object
+    Load a class from a Python file. If the classname is not specified, the function will check if there is only one class in the file and load that. If there are multiple classes, it will raise an error.
 
-    Arguments:
-        filepath: absolute path of file
-        classname: the name of the imported class
+    Args:
+        filepath (str): The path to the Python file.
+        classname (str, optional): The name of the class to load. If not specified, the function will try to load a class with the same name as the file. Defaults to None.
 
     Returns:
-        type: A class for given path
+        The class instance.
+
+    Raises:
+        RuntimeError: If the class name is not found or there is more than one class in the file.
     """
     try:
         abs_path = Path(filepath).resolve()
         spec = importlib.util.spec_from_file_location(abs_path.stem, abs_path)
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
-        classobj = getattr(module, classname)
     except Exception as e:
-        err_msg = f"Failed to import {classname} from {filepath}\nException: {str(e)}"
-        logger.error(err_msg)
+        err_msg = f"Couldn't load UDF from {filepath} : {str(e)}. Ensure that the file exists and that it is a valid Python file."
         raise RuntimeError(err_msg)
-    return classobj
+
+    # Try to load the specified class by name
+    if classname and hasattr(module, classname):
+        return getattr(module, classname)
+
+    # If class name not specified, check if there is only one class in the file
+    classes = [
+        obj
+        for _, obj in inspect.getmembers(module, inspect.isclass)
+        if obj.__module__ == module.__name__
+    ]
+    if len(classes) != 1:
+        raise RuntimeError(
+            f"{filepath} contains {len(classes)} classes, please specify the correct class to load by naming the UDF with the same name in the CREATE query."
+        )
+    return classes[0]
 
 
 def is_gpu_available() -> bool:
@@ -135,6 +154,26 @@ def get_size(obj, seen=None):
     return size
 
 
+def get_str_hash(s: str) -> str:
+    return hashlib.md5(s.encode("utf-8")).hexdigest()
+
+
+def get_file_checksum(fname: str) -> str:
+    """Compute checksum of the file contents
+
+    Args:
+        fname (str): file path
+
+    Returns:
+        str: hash string representing the checksum of the file content
+    """
+    hash_md5 = hashlib.md5()
+    with open(fname, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            hash_md5.update(chunk)
+    return hash_md5.hexdigest()
+
+
 class PickleSerializer(object):
     @classmethod
     def serialize(cls, data):
@@ -149,3 +188,16 @@ class PickleSerializer(object):
 class EVAEnum(AutoEnum):
     def __str__(self):
         return self.name
+
+
+def remove_directory_contents(dir_path):
+    if os.path.exists(dir_path):
+        for filename in os.listdir(dir_path):
+            file_path = os.path.join(dir_path, filename)
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+            except Exception as e:
+                logger.warning(f"Failed to delete {file_path}. Reason: {str(e)}")

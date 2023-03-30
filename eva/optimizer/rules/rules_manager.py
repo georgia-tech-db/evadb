@@ -26,6 +26,8 @@ from eva.experimental.ray.optimizer.rules.rules import (
     LogicalProjectToPhysical as DistributedLogicalProjectToPhysical,
 )
 from eva.optimizer.rules.rules import (
+    CacheFunctionExpressionInApply,
+    CombineSimilarityOrderByAndLimitToFaissIndexScan,
     EmbedFilterIntoGet,
     EmbedProjectIntoGet,
     EmbedSampleIntoGet,
@@ -34,10 +36,12 @@ from eva.optimizer.rules.rules import (
     LogicalCreateMaterializedViewToPhysical,
     LogicalCreateToPhysical,
     LogicalCreateUDFToPhysical,
+    LogicalDeleteToPhysical,
     LogicalDerivedGetToPhysical,
     LogicalDropToPhysical,
     LogicalDropUDFToPhysical,
     LogicalExplainToPhysical,
+    LogicalFaissIndexScanToPhysical,
     LogicalFilterToPhysical,
     LogicalFunctionScanToPhysical,
 )
@@ -49,6 +53,7 @@ from eva.optimizer.rules.rules import (
     LogicalInnerJoinCommutativity,
     LogicalInsertToPhysical,
     LogicalJoinToPhysicalHashJoin,
+    LogicalJoinToPhysicalNestedLoopJoin,
     LogicalLateralJoinToPhysical,
     LogicalLimitToPhysical,
     LogicalLoadToPhysical,
@@ -59,12 +64,11 @@ from eva.optimizer.rules.rules import (
 )
 from eva.optimizer.rules.rules import (
     LogicalRenameToPhysical,
-    LogicalSampleToUniformSample,
     LogicalShowToPhysical,
     LogicalUnionToPhysical,
-    LogicalUploadToPhysical,
     PushDownFilterThroughApplyAndMerge,
     PushDownFilterThroughJoin,
+    ReorderPredicates,
     XformLateralJoinToLinearFlow,
 )
 from eva.optimizer.rules.rules_base import Rule
@@ -72,7 +76,10 @@ from eva.optimizer.rules.rules_base import Rule
 
 class RulesManager:
     def __init__(self):
-        self._logical_rules = [LogicalInnerJoinCommutativity()]
+        self._logical_rules = [
+            LogicalInnerJoinCommutativity(),
+            CacheFunctionExpressionInApply(),
+        ]
 
         self._rewrite_rules = [
             EmbedFilterIntoGet(),
@@ -83,6 +90,8 @@ class RulesManager:
             PushDownFilterThroughJoin(),
             PushDownFilterThroughApplyAndMerge(),
             XformLateralJoinToLinearFlow(),
+            CombineSimilarityOrderByAndLimitToFaissIndexScan(),
+            ReorderPredicates(),
         ]
 
         ray_enabled = ConfigurationManager().get_value("experimental", "ray")
@@ -94,9 +103,8 @@ class RulesManager:
             LogicalCreateUDFToPhysical(),
             LogicalDropUDFToPhysical(),
             LogicalInsertToPhysical(),
+            LogicalDeleteToPhysical(),
             LogicalLoadToPhysical(),
-            LogicalUploadToPhysical(),
-            LogicalSampleToUniformSample(),
             DistributedLogicalGetToSeqScan()
             if ray_enabled
             else SequentialLogicalGetToSeqScan(),
@@ -105,6 +113,7 @@ class RulesManager:
             LogicalGroupByToPhysical(),
             LogicalOrderByToPhysical(),
             LogicalLimitToPhysical(),
+            LogicalJoinToPhysicalNestedLoopJoin(),
             LogicalLateralJoinToPhysical(),
             LogicalJoinToPhysicalHashJoin(),
             LogicalFunctionScanToPhysical(),
@@ -117,6 +126,7 @@ class RulesManager:
             LogicalExplainToPhysical(),
             LogicalCreateIndexToFaiss(),
             LogicalApplyAndMergeToPhysical(),
+            LogicalFaissIndexScanToPhysical(),
         ]
 
         if ray_enabled:
@@ -137,10 +147,6 @@ class RulesManager:
     def logical_rules(self):
         return self._logical_rules
 
-    @property
-    def all_rules(self):
-        return self._all_rules
-
     def disable_rules(self, rules: List[Rule]):
         def _remove_from_list(rule_list, rule_to_remove):
             for rule in rule_list:
@@ -148,14 +154,18 @@ class RulesManager:
                     rule_list.remove(rule)
 
         for rule in rules:
+            assert (
+                rule.is_implementation_rule()
+                or rule.is_rewrite_rule()
+                or rule.is_logical_rule()
+            ), f"Provided Invalid rule {rule}"
+
             if rule.is_implementation_rule():
                 _remove_from_list(self.implementation_rules, rule)
             elif rule.is_rewrite_rule():
                 _remove_from_list(self.rewrite_rules, rule)
-            elif rule.is_logical_rule(rule):
+            elif rule.is_logical_rule():
                 _remove_from_list(self.logical_rules, rule)
-            else:
-                raise Exception(f"Provided Invalid rule {rule}")
 
     def add_rules(self, rules: List[Rule]):
         def _add_to_list(rule_list, rule_to_remove):
@@ -163,14 +173,18 @@ class RulesManager:
                 rule_list.append(rule)
 
         for rule in rules:
+            assert (
+                rule.is_implementation_rule()
+                or rule.is_rewrite_rule()
+                or rule.is_logical_rule()
+            ), f"Provided Invalid rule {rule}"
+
             if rule.is_implementation_rule():
                 _add_to_list(self.implementation_rules, rule)
             elif rule.is_rewrite_rule():
                 _add_to_list(self.rewrite_rules, rule)
-            elif rule.is_logical_rule(rule):
+            elif rule.is_logical_rule():
                 _add_to_list(self.logical_rules, rule)
-            else:
-                raise Exception(f"Provided Invalid rule {rule}")
 
 
 @contextmanager

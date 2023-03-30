@@ -14,7 +14,7 @@
 # limitations under the License.
 import shutil
 import unittest
-from test.util import create_dummy_batches
+from test.util import create_dummy_batches, prefix_worker_id
 
 import pytest
 
@@ -24,6 +24,7 @@ from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.storage.sqlite_storage_engine import SQLStorageEngine
 
 
+@pytest.mark.notparallel
 class SQLStorageEngineTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -31,7 +32,9 @@ class SQLStorageEngineTest(unittest.TestCase):
 
     def create_sample_table(self):
         table_info = TableCatalogEntry(
-            "dataset", "dataset", table_type=TableType.VIDEO_DATA
+            prefix_worker_id("dataset"),
+            prefix_worker_id("dataset"),
+            table_type=TableType.VIDEO_DATA,
         )
         column_0 = ColumnCatalogEntry("name", ColumnType.TEXT, is_nullable=False)
         column_1 = ColumnCatalogEntry("id", ColumnType.INTEGER, is_nullable=False)
@@ -46,7 +49,7 @@ class SQLStorageEngineTest(unittest.TestCase):
 
     def tearDown(self):
         try:
-            shutil.rmtree("dataset", ignore_errors=True)
+            shutil.rmtree(prefix_worker_id("dataset"), ignore_errors=True)
         except ValueError:
             pass
 
@@ -73,7 +76,6 @@ class SQLStorageEngineTest(unittest.TestCase):
         sqlengine.drop(self.table)
 
     def test_rename(self):
-
         table_info = TableCatalogEntry(
             "new_name", "new_name", table_type=TableType.VIDEO_DATA
         )
@@ -81,3 +83,34 @@ class SQLStorageEngineTest(unittest.TestCase):
 
         with pytest.raises(Exception):
             sqlengine.rename(self.table, table_info)
+
+    def test_sqlite_storage_engine_exceptions(self):
+        sqlengine = SQLStorageEngine()
+
+        missing_table_info = TableCatalogEntry(
+            "missing_table", None, table_type=TableType.VIDEO_DATA
+        )
+
+        with self.assertRaises(Exception):
+            sqlengine.drop(missing_table_info)
+
+        with self.assertRaises(Exception):
+            sqlengine.write(missing_table_info, None)
+
+        with self.assertRaises(Exception):
+            read_batch = list(sqlengine.read(missing_table_info))
+            self.assertEqual(read_batch, None)
+
+        with self.assertRaises(Exception):
+            sqlengine.delete(missing_table_info, None)
+
+    def test_cannot_delete_missing_column(self):
+        sqlengine = SQLStorageEngine()
+        sqlengine.create(self.table)
+
+        incorrect_where_clause = {"foo": None}
+
+        with self.assertRaises(Exception):
+            sqlengine.delete(self.table, incorrect_where_clause)
+        # clean up
+        sqlengine.drop(self.table)

@@ -12,8 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import List
-
 from sqlalchemy.orm.exc import NoResultFound
 
 from eva.catalog.models.udf_catalog import UdfCatalog, UdfCatalogEntry
@@ -25,18 +23,21 @@ class UdfCatalogService(BaseService):
     def __init__(self):
         super().__init__(UdfCatalog)
 
-    def insert_entry(self, name: str, impl_path: str, type: str) -> UdfCatalogEntry:
+    def insert_entry(
+        self, name: str, impl_path: str, type: str, checksum: str
+    ) -> UdfCatalogEntry:
         """Insert a new udf entry
 
         Arguments:
             name (str): name of the udf
             impl_path (str): path to the udf implementation relative to eva/udf
             type (str): udf operator kind, classification or detection or etc
+            checksum(str): checksum of the udf file content, used for consistency
 
         Returns:
             UdfCatalogEntry: Returns the new entry created
         """
-        udf_obj = self.model(name, impl_path, type)
+        udf_obj = self.model(name, impl_path, type, checksum)
         udf_obj = udf_obj.save()
         return udf_obj.as_dataclass()
 
@@ -50,13 +51,11 @@ class UdfCatalogService(BaseService):
 
         try:
             udf_obj = self.model.query.filter(self.model._name == name).one()
-            if udf_obj:
-                return udf_obj.as_dataclass()
-            return udf_obj
+            return udf_obj.as_dataclass()
         except NoResultFound:
             return None
 
-    def get_entry_by_id(self, id: int) -> UdfCatalogEntry:
+    def get_entry_by_id(self, id: int, return_alchemy=False) -> UdfCatalogEntry:
         """return the udf entry that matches the id provided.
            None if no such entry found.
 
@@ -67,7 +66,7 @@ class UdfCatalogService(BaseService):
         try:
             udf_obj = self.model.query.filter(self.model._row_id == id).one()
             if udf_obj:
-                return udf_obj.as_dataclass()
+                return udf_obj if return_alchemy else udf_obj.as_dataclass()
             return udf_obj
         except NoResultFound:
             return None
@@ -88,10 +87,3 @@ class UdfCatalogService(BaseService):
             logger.exception(f"Delete udf failed for name {name} with error {str(e)}")
             return False
         return True
-
-    def get_all_entries(self) -> List[UdfCatalogEntry]:
-        try:
-            objs = self.model.query.all()
-            return [obj.as_dataclass() for obj in objs]
-        except NoResultFound:
-            return []

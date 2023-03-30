@@ -17,7 +17,6 @@ from typing import Union
 from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 from eva.models.storage.batch import Batch
-from eva.utils.logging_manager import logger
 
 from .abstract_expression import (
     AbstractExpression,
@@ -47,17 +46,13 @@ class TupleValueExpression(AbstractExpression):
     def table_id(self) -> int:
         return self._table_id
 
-    @table_id.setter
-    def table_id(self, id: int):
-        self._table_id = id
-
     @property
     def table_alias(self) -> str:
         return self._table_alias
 
     @table_alias.setter
-    def table_alias(self, name: str):
-        self._table_alias = name
+    def table_alias(self, table_alias):
+        self._table_alias = table_alias
 
     @property
     def col_name(self) -> str:
@@ -94,14 +89,16 @@ class TupleValueExpression(AbstractExpression):
         Returns:
             str: signature string
         """
+        assert isinstance(self.col_object, ColumnCatalogEntry) or isinstance(
+            self.col_object, UdfIOCatalogEntry
+        ), f"Unsupported type of self.col_object {type(self.col_object)}, expected ColumnCatalogEntry or UdfIOCatalogEntry"
+
+        col_name = self.col_object.name
+        row_id = self.col_object.row_id
         if isinstance(self.col_object, ColumnCatalogEntry):
-            return f"{self.col_object.table_name}.{self.col_object.name}"
+            return f"{self.col_object.table_name}.{col_name}[{row_id}]"
         elif isinstance(self.col_object, UdfIOCatalogEntry):
-            return f"{self.col_object.udf_name}.{self.col_object.name}"
-        else:
-            err_msg = f"Unsupported type of self.col_object {type(self.col_object)}, expected ColumnCatalogEntry or UdfIOCatalogEntry"
-            logger.error(err_msg)
-            raise ValueError(err_msg)
+            return f"{self.col_object.udf_name}.{col_name}[{row_id}]"
 
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)

@@ -14,12 +14,12 @@
 # limitations under the License.
 import unittest
 
-from eva.udfs.ndarray.array_count import Array_Count
+from eva.udfs.ndarray.array_count import ArrayCount
 
 
 class CropTests(unittest.TestCase):
     def setUp(self):
-        self.array_count = Array_Count()
+        self.array_count = ArrayCount()
 
     def test_array_count_name_exists(self):
         assert hasattr(self.array_count, "name")

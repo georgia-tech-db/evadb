@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import os
-import sys
 import unittest
+from test.markers import windows_skip_marker
 
 import pandas as pd
 import pytest
@@ -28,6 +28,7 @@ from eva.udfs.udf_bootstrap_queries import ArrayCount_udf_query, Fastrcnn_udf_qu
 NUM_FRAMES = 10
 
 
+@pytest.mark.notparallel
 class ShowExecutorTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -55,7 +56,7 @@ class ShowExecutorTest(unittest.TestCase):
         self.assertEqual(len(result.columns), 5)
 
         expected = {
-            "name": ["FastRCNNObjectDetector", "Array_Count"],
+            "name": ["FastRCNNObjectDetector", "ArrayCount"],
             "inputs": [
                 ["Frame_Array NDARRAY UINT8 (3, None, None)"],
                 ["Input_Array NDARRAY ANYTYPE ()", "Search_Key ANY"],
@@ -76,9 +77,9 @@ class ShowExecutorTest(unittest.TestCase):
         self.assertTrue(all(expected_df.name == result.frames.name))
         self.assertTrue(all(expected_df.type == result.frames.type))
 
-    @pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
+    @windows_skip_marker
     def test_show_tables(self):
-
+        # Note this test can causes sqlalchemy issues if the eva_server is not stopped
         result = execute_query_fetch_all("SHOW TABLES;")
         self.assertEqual(len(result), 3)
         expected = {"name": ["MyVideo", "MNIST", "Actions"]}
@@ -94,3 +95,6 @@ class ShowExecutorTest(unittest.TestCase):
         expected = {"name": ["MyVideo", "MNIST", "Actions"]}
         expected_df = pd.DataFrame(expected)
         self.assertEqual(result, Batch(expected_df))
+
+        # stop the server
+        os.system("nohup eva_server --stop")

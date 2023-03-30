@@ -15,6 +15,7 @@
 import unittest
 
 import mock
+import pytest
 from mock import ANY, MagicMock
 
 from eva.catalog.catalog_manager import CatalogManager
@@ -26,6 +27,7 @@ from eva.parser.table_ref import TableInfo
 from eva.parser.types import FileFormatType
 
 
+@pytest.mark.notparallel
 class CatalogManagerTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -146,16 +148,23 @@ class CatalogManagerTests(unittest.TestCase):
 
     @mock.patch("eva.catalog.catalog_manager.UdfCatalogService")
     @mock.patch("eva.catalog.catalog_manager.UdfIOCatalogService")
-    def test_insert_udf(self, udfio_mock, udf_mock):
+    @mock.patch("eva.catalog.catalog_manager.UdfMetadataCatalogService")
+    @mock.patch("eva.catalog.catalog_manager.get_file_checksum")
+    def test_insert_udf(self, checksum_mock, udfmetadata_mock, udfio_mock, udf_mock):
         catalog = CatalogManager()
         udf_io_list = [MagicMock()]
+        udf_metadata_list = [MagicMock()]
         actual = catalog.insert_udf_catalog_entry(
-            "udf", "sample.py", "classification", udf_io_list
+            "udf", "sample.py", "classification", udf_io_list, udf_metadata_list
         )
         udfio_mock.return_value.insert_entries.assert_called_with(udf_io_list)
-        udf_mock.return_value.insert_entry.assert_called_with(
-            "udf", "sample.py", "classification"
+        udfmetadata_mock.return_value.insert_entries.assert_called_with(
+            udf_metadata_list
         )
+        udf_mock.return_value.insert_entry.assert_called_with(
+            "udf", "sample.py", "classification", checksum_mock.return_value
+        )
+        checksum_mock.assert_called_with("sample.py")
         self.assertEqual(actual, udf_mock.return_value.insert_entry.return_value)
 
     @mock.patch("eva.catalog.catalog_manager.UdfCatalogService")
