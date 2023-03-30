@@ -257,7 +257,7 @@ def create_dummy_csv_batches(target_columns=None):
             converters={"bbox": convert_bbox},
         )
 
-    return Batch(df)
+    yield Batch(df)
 
 
 def create_csv(num_rows, columns):

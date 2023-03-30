@@ -41,7 +41,9 @@ class CSVLoaderTest(unittest.TestCase):
 
         # get the batches
         batches = list(csv_loader.read())
-        expected = list(create_dummy_csv_batches())
+        expected = list(
+            create_dummy_csv_batches(target_columns=["id", "frame_id", "video_id"])
+        )
 
         # assert batches are equal
-        self.assertTrue(batches, expected)
+        self.assertEqual(batches, expected)
