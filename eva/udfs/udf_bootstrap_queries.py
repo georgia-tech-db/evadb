@@ -117,6 +117,16 @@ Fastrcnn_udf_query = """CREATE UDF IF NOT EXISTS FastRCNNObjectDetector
     EVA_INSTALLATION_DIR
 )
 
+Huggingemotion_udf_query = """CREATE UDF IF NOT EXISTS HuggingFaceEmotionDetector
+      INPUT  (Frame_Array NDARRAY UINT8(3, ANYDIM, ANYDIM))
+      OUTPUT (labels NDARRAY STR(ANYDIM), bboxes NDARRAY FLOAT32(ANYDIM, 4),
+                scores NDARRAY FLOAT32(ANYDIM))
+      TYPE  Classification
+      IMPL  '{}/udfs/huggingface_emotion_detector.py';
+      """.format(
+    EVA_INSTALLATION_DIR
+)
+
 YoloV5_udf_query = """CREATE UDF IF NOT EXISTS YoloV5
       INPUT  (Frame_Array NDARRAY UINT8(3, ANYDIM, ANYDIM))
       OUTPUT (labels NDARRAY STR(ANYDIM), bboxes NDARRAY FLOAT32(ANYDIM, 4),
@@ -176,6 +186,7 @@ def init_builtin_udfs(mode="debug"):
     """
     queries = [
         Fastrcnn_udf_query,
+        Huggingemotion_udf_query,
         ArrayCount_udf_query,
         Timestamp_udf_query,
         Crop_udf_query,
