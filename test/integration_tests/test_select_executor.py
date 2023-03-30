@@ -84,9 +84,7 @@ class SelectExecutorTest(unittest.TestCase):
         expected_rows = [
             {
                 "myvideo.id": i,
-                "myvideo.data": np.array(
-                    np.ones((2, 2, 3)) * float(i + 1) * 25, dtype=np.uint8
-                ),
+                "myvideo.data": np.array(np.ones((32, 32, 3)) * i, dtype=np.uint8),
             }
             for i in range(NUM_FRAMES)
         ]
@@ -171,15 +169,7 @@ class SelectExecutorTest(unittest.TestCase):
 
         select_query = "SELECT data FROM MyVideo WHERE id = 5;"
         actual_batch = execute_query_fetch_all(select_query)
-        expected_rows = [
-            {
-                "myvideo.data": np.array(
-                    np.ones((2, 2, 3)) * float(5 + 1) * 25, dtype=np.uint8
-                )
-            }
-        ]
-        expected_batch = Batch(frames=pd.DataFrame(expected_rows))
-        self.assertEqual(actual_batch, expected_batch)
+        self.assertEqual(actual_batch, expected_batch.project(["myvideo.data"]))
 
         select_query = "SELECT id, data FROM MyVideo WHERE id >= 2;"
         actual_batch = execute_query_fetch_all(select_query)

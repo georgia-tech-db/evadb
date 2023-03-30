@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import math
 from typing import Dict, Iterator
 
 from eva.constants import IFRAMES
@@ -79,15 +78,13 @@ class DecordReader(AbstractReader):
 
                 while idx < len(iframes) and iframes[idx] <= end:
                     frame_id = iframes[idx]
-                    frame = video[frame_id]
+                    frame = video[frame_id].asnumpy()
                     idx += self._sampling_rate
                     if frame is not None:
                         yield {
                             "id": frame_id,
                             "data": frame,
-                            "seconds": math.floor(
-                                video.get_frame_timestamp(frame_id)[0]
-                            ),
+                            "seconds": round(video.get_frame_timestamp(frame_id)[0], 2),
                         }
                     else:
                         break
@@ -95,14 +92,12 @@ class DecordReader(AbstractReader):
             for begin, end in range_list:
                 frame_id = begin
                 while frame_id <= end:
-                    frame = video[frame_id]
+                    frame = video[frame_id].asnumpy()
                     if frame is not None:
                         yield {
                             "id": frame_id,
                             "data": frame,
-                            "seconds": math.floor(
-                                video.get_frame_timestamp(frame_id)[0]
-                            ),
+                            "seconds": round(video.get_frame_timestamp(frame_id)[0], 2),
                         }
                     else:
                         break
@@ -113,14 +108,12 @@ class DecordReader(AbstractReader):
                 if begin % self._sampling_rate:
                     begin += self._sampling_rate - (begin % self._sampling_rate)
                 for frame_id in range(begin, end + 1, self._sampling_rate):
-                    frame = video[frame_id]
+                    frame = video[frame_id].asnumpy()
                     if frame is not None:
                         yield {
                             "id": frame_id,
                             "data": frame,
-                            "seconds": math.floor(
-                                video.get_frame_timestamp(frame_id)[0]
-                            ),
+                            "seconds": round(video.get_frame_timestamp(frame_id)[0], 2),
                         }
                     else:
                         break
