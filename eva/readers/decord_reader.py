@@ -68,27 +68,17 @@ class DecordReader(AbstractReader):
 
     def _read(self) -> Iterator[Dict]:
         decord = _lazy_import_decord()
-        av_reader = None
-        v_reader = None
-        get_frame = self.__get_video_frame
-        # Check for availability of audio stream
-        # If there is an audio stream => AVReader
-        # Else => VideoReader (no audio)
         if self._read_audio:
             try:
-                av_reader = decord.AVReader(self.file_url, mono=True, sample_rate=16000)
-                if self._read_video:
-                    get_frame = self.__get_audio_video_frame
-                    v_reader = decord.VideoReader(self.file_url)
-                else:
-                    get_frame = self.__get_audio_frame
+                reader = decord.AVReader(self.file_url, mono=True, sample_rate=16000)
+                get_frame = self.__get_audio_frame
             except decord._ffi.base.DECORDError as error_msg:
-                assert "Can't find audio stream" in str(error_msg), error_msg
-                v_reader = decord.VideoReader(self.file_url)
+                assert "Can't find audio stream" not in str(error_msg), error_msg
         else:
-            v_reader = decord.VideoReader(self.file_url)
+            reader = decord.VideoReader(self.file_url)
+            get_frame = self.__get_video_frame
 
-        num_frames = int(len(v_reader)) if v_reader else int(len(av_reader))
+        num_frames = int(len(reader))
         if self._predicate:
             range_list = extract_range_list_from_predicate(
                 self._predicate, 0, num_frames - 1
@@ -98,7 +88,8 @@ class DecordReader(AbstractReader):
         logger.debug("Reading frames")
 
         if self._sampling_type == IFRAMES:
-            iframes = v_reader.get_key_indices()
+            assert not self._read_audio, "Cannot use IFRAMES with audio streams"
+            iframes = reader.get_key_indices()
             idx = 0
             for begin, end in range_list:
                 while idx < len(iframes) and iframes[idx] < begin:
@@ -107,13 +98,13 @@ class DecordReader(AbstractReader):
                 while idx < len(iframes) and iframes[idx] <= end:
                     frame_id = iframes[idx]
                     idx += self._sampling_rate
-                    yield get_frame(frame_id, av_reader, v_reader)
+                    yield get_frame(frame_id, reader)
 
         elif self._sampling_rate == 1:
             for begin, end in range_list:
                 frame_id = begin
                 while frame_id <= end:
-                    yield get_frame(frame_id, av_reader, v_reader)
+                    yield get_frame(frame_id, reader)
                     frame_id += 1
         else:
             for begin, end in range_list:
@@ -121,35 +112,21 @@ class DecordReader(AbstractReader):
                 if begin % self._sampling_rate:
                     begin += self._sampling_rate - (begin % self._sampling_rate)
                 for frame_id in range(begin, end + 1, self._sampling_rate):
-                    yield get_frame(frame_id, av_reader, v_reader)
+                    yield get_frame(frame_id, reader)
 
-    def __get_audio_video_frame(self, frame_id, av_reader, v_reader):
-        frame_audio, frame_video = av_reader[frame_id]
-        frame_audio = frame_audio.asnumpy()
+    def __get_video_frame(self, frame_id, reader):
+        frame_video = reader[frame_id]
         frame_video = frame_video.asnumpy()
-        timestamp = v_reader.get_frame_timestamp(frame_id)[0]
+        timestamp = reader.get_frame_timestamp(frame_id)[0]
 
         return {
             VideoColumnName.id.name: frame_id,
             VideoColumnName.data.name: frame_video,
             VideoColumnName.seconds.name: round(timestamp, 2),
-            VideoColumnName.audio.name: frame_audio,
         }
 
-    def __get_video_frame(self, frame_id, av_reader, v_reader):
-        frame_video = v_reader[frame_id]
-        frame_video = frame_video.asnumpy()
-        timestamp = v_reader.get_frame_timestamp(frame_id)[0]
-
-        return {
-            VideoColumnName.id.name: frame_id,
-            VideoColumnName.data.name: frame_video,
-            VideoColumnName.seconds.name: round(timestamp, 2),
-            VideoColumnName.audio.name: np.empty(0),
-        }
-
-    def __get_audio_frame(self, frame_id, av_reader, v_reader):
-        frame_audio, _ = av_reader[frame_id]
+    def __get_audio_frame(self, frame_id, reader):
+        frame_audio, _ = reader[frame_id]
         frame_audio = frame_audio.asnumpy()
 
         return {

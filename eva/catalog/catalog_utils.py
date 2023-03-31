@@ -64,9 +64,6 @@ def get_video_table_column_definitions() -> List[ColumnDefinition]:
             (None, None, None),
         ),
         ColumnDefinition(VideoColumnName.seconds.name, ColumnType.FLOAT, None, []),
-        ColumnDefinition(
-            VideoColumnName.audio.name, ColumnType.NDARRAY, NdArrayType.UINT8, (None)
-        ),
     ]
     return columns
 

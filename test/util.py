@@ -364,7 +364,6 @@ def create_dummy_batches(
                     np.ones((FRAME_SIZE[1], FRAME_SIZE[0], 3)) * i, dtype=np.uint8
                 ),
                 "myvideo.seconds": np.float32(i / num_frames),
-                "myvideo.audio": np.empty(0),
             }
         )
 

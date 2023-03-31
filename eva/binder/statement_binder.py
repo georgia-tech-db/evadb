@@ -146,6 +146,11 @@ class StatementBinder:
             self._binder_context = StatementBinderContext()
             self.bind(node.union_link)
             self._binder_context = current_context
+
+        assert not (
+            self._binder_context.is_retrieve_audio()
+            and self._binder_context.is_retrieve_video()
+        ), "Cannot query over both audio and video streams"
         if self._binder_context.is_retrieve_audio():
             node.from_table.get_audio = True
         if self._binder_context.is_retrieve_video():

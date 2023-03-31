@@ -57,7 +57,7 @@ class DecordLoaderTest(unittest.TestCase):
         new_batches = []
         for batch in batches:
             batch.drop_column_alias()
-            new_batches.append(batch.project(["id", "data", "seconds", "audio"]))
+            new_batches.append(batch.project(["id", "data", "seconds"]))
         return new_batches
 
     def test_should_sample_only_iframe(self):
@@ -151,35 +151,32 @@ class DecordLoaderTest(unittest.TestCase):
             )
             self.assertEqual(batches, expected)
 
-    def test_should_return_empty_audio_frames_for_audioless_video(self):
+    def test_should_throw_error_for_audioless_video(self):
         video_loader = DecordReader(
             file_url=self.video_file_url,
             read_audio=True,
             read_video=True,
         )
-        batches = list(video_loader.read())
-        expected = self._batches_to_reader_convertor(create_dummy_batches())
-        self.assertEqual(batches, expected)
+        try:
+            list(video_loader.read())
+            self.fail("Didn't raise AssertionError")
+        except AssertionError as e:
+            self.assertIn("Can't find audio stream", e.args[0].args[0])
 
-    def test_should_return_both_video_and_audio_frames(self):
-        # running test with sampling rate so that fewer frames are
-        # returned and verified, this helps keep the stored frame data size small
+    def test_should_throw_error_when_sampling_iframes_for_audio(self):
         video_loader = DecordReader(
             file_url=self.video_with_audio_file_url,
-            sampling_rate=100,
+            sampling_type=IFRAMES,
             read_audio=True,
-            read_video=True,
+            read_video=False,
         )
-        batches = list(video_loader.read())
+        try:
+            list(video_loader.read())
+            self.fail("Didn't raise AssertionError")
+        except AssertionError as e:
+            self.assertEquals("Cannot use IFRAMES with audio streams", e.args[0])
 
-        for i, frame in enumerate(self.audio_frames):
-            self.assertTrue(
-                np.array_equiv(self.audio_frames[i], batches[0].frames.iloc[i]["audio"])
-            )
-        # just verify that video frames were read, correctness is verified in prior test cases
-        self.assertEqual(batches[0].frames.loc[0]["data"].shape, (720, 1280, 3))
-
-    def test_should_return_audio_frames_only(self):
+    def test_should_return_audio_frames(self):
         # running test with sampling rate so that fewer frames are
         # returned and verified, this helps keep the stored frame data size small
         video_loader = DecordReader(
