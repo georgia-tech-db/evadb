@@ -13,17 +13,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+from test.util import create_sample_video, prefix_worker_id
 from unittest.mock import MagicMock
 
 import mock
+import pandas as pd
 import pytest
 
 from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
 from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.catalog.models.table_catalog import TableCatalogEntry
+from eva.models.storage.batch import Batch
 from eva.storage.storage_engine import StorageEngine
 
 
+@pytest.mark.notparallel
 class VideoStorageEngineTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -31,7 +35,9 @@ class VideoStorageEngineTest(unittest.TestCase):
 
     def create_sample_table(self):
         table_info = TableCatalogEntry(
-            "dataset", "dataset", table_type=TableType.VIDEO_DATA
+            prefix_worker_id("dataset"),
+            prefix_worker_id("dataset"),
+            table_type=TableType.VIDEO_DATA,
         )
         column_1 = ColumnCatalogEntry("id", ColumnType.INTEGER, False)
         column_2 = ColumnCatalogEntry(
@@ -72,11 +78,39 @@ class VideoStorageEngineTest(unittest.TestCase):
         with self.assertRaises(Exception):
             self.video_engine.delete(table, batch)
 
-    def test_rename(self):
+        self.video_engine.create(self.table, if_not_exists=True)
+        video_file_path = create_sample_video()
+        df = pd.DataFrame([video_file_path], columns=["file_path"])
+        batch = Batch(df)
 
+        # missing file
+        with self.assertRaises(Exception):
+            self.video_engine.delete(self.table, batch)
+
+        self.video_engine.drop(self.table)
+
+    def test_rename(self):
         table_info = TableCatalogEntry(
             "new_name", "new_name", table_type=TableType.VIDEO_DATA
         )
 
         with pytest.raises(Exception):
             self.video_engine.rename(self.table, table_info)
+
+    def test_media_storage_engine_exceptions(self):
+        missing_table_info = TableCatalogEntry(
+            "missing_table", None, table_type=TableType.VIDEO_DATA
+        )
+
+        with self.assertRaises(Exception):
+            self.video_engine.drop(missing_table_info)
+
+        with self.assertRaises(Exception):
+            self.video_engine.write(missing_table_info, None)
+
+        with self.assertRaises(Exception):
+            read_batch = list(self.video_engine.read(missing_table_info))
+            self.assertEqual(read_batch, None)
+
+        with self.assertRaises(Exception):
+            self.video_engine.delete(missing_table_info, None)

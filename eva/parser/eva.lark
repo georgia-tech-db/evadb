@@ -8,7 +8,7 @@ ddl_statement: create_database | create_table | create_index | create_udf | crea
     | drop_database | drop_table | drop_udf | drop_index | rename_table
     
 dml_statement: select_statement | insert_statement | update_statement
-    | delete_statement | load_statement | upload_statement
+    | delete_statement | load_statement
     
 utility_statement: describe_statement | show_statement | help_statement | explain_statement
 
@@ -27,9 +27,7 @@ create_table: CREATE TABLE if_not_exists? table_name create_definitions
 rename_table: RENAME TABLE table_name TO table_name
     
 // Create UDFs
-create_udf: CREATE UDF if_not_exists? udf_name TYPE udf_type udf_metadata*
-
-create_udf_old: udf_name INPUT create_definitions OUTPUT create_definitions IMPL udf_impl
+create_udf: CREATE UDF if_not_exists? udf_name INPUT create_definitions OUTPUT create_definitions TYPE udf_type IMPL udf_impl udf_metadata* | CREATE UDF if_not_exists? udf_name IMPL udf_impl udf_metadata* | CREATE UDF if_not_exists? udf_name TYPE udf_type udf_metadata*
 
 // Create Materialized View
 create_materialized_view: CREATE MATERIALIZED VIEW if_not_exists? table_name ("(" uid_list ")") AS select_statement 
@@ -93,12 +91,8 @@ file_format: CSV | VIDEO | IMAGE
 
 file_options: FORMAT file_format
     
-upload_statement: UPLOAD PATH file_name BLOB video_blob INTO table_name (("(" uid_list ")"))? (WITH file_options)?
-    
 file_name: string_literal
-    
-video_blob: string_literal
-    
+        
 // details
 
 insert_statement_value: select_statement
@@ -118,7 +112,7 @@ table_sources: table_source
     
 table_source: table_source_item_with_sample join_part* 
     
-table_source_item_with_sample: table_source_item alias_clause? sample_clause?
+table_source_item_with_sample: table_source_item alias_clause? (sample_clause | sample_clause_with_type)?
 
 table_source_item: table_name | subquery_table_source_item   
     
@@ -129,6 +123,8 @@ table_valued_function: function_call
 subquery_table_source_item: (select_statement | LR_BRACKET select_statement RR_BRACKET)
     
 sample_clause: SAMPLE decimal_literal
+
+sample_clause_with_type: SAMPLE IFRAMES decimal_literal*
 
 join_part: JOIN table_source_item_with_sample (ON expression | USING LR_BRACKET uid_list RR_BRACKET)?  ->inner_join
          | JOIN LATERAL table_valued_function alias_clause? ->lateral_join
@@ -273,7 +269,6 @@ predicate: predicate NOT? IN "(" (select_statement | expressions) ")"  ->in_pred
     | predicate IS null_notnull   ->is_null_predicate
     | predicate comparison_operator predicate  -> binary_comparison_predicate 
     | predicate comparison_operator (ALL | ANY | SOME) "(" select_statement ")"   ->subquery_comparison_predicate
-    | predicate NOT? LIKE predicate (STRING_LITERAL)?   
     | assign_var   ->expression_atom_predicate   
     | expression_atom 
 
@@ -291,7 +286,7 @@ expression_atom.2: constant       ->constant_expression_atom
 
 unary_operator: EXCLAMATION_SYMBOL | BIT_NOT_OP | PLUS | MINUS | NOT 
     
-comparison_operator: EQUAL_SYMBOL | GREATER_SYMBOL | LESS_SYMBOL | GREATER_OR_EQUAL_SYMBOL | LESS_OR_EQUAL_SYMBOL | NOT_EQUAL_SYMBOL | CONTAINS_SYMBOL | CONTAINED_IN_SYMBOL
+comparison_operator: EQUAL_SYMBOL | GREATER_SYMBOL | LESS_SYMBOL | GREATER_OR_EQUAL_SYMBOL | LESS_OR_EQUAL_SYMBOL | NOT_EQUAL_SYMBOL | CONTAINS_SYMBOL | CONTAINED_IN_SYMBOL | LIKE_SYMBOL
     
 logical_operator: AND | XOR | OR 
     
@@ -352,6 +347,7 @@ PRIMARY:                             "PRIMARY"
 REFERENCES:                          "REFERENCES"
 RENAME:                              "RENAME"
 SAMPLE:                              "SAMPLE"
+IFRAMES:                             "IFRAMES"
 SELECT:                             "SELECT"
 SET:                                 "SET"
 SHUTDOWN:                            "SHUTDOWN"
@@ -369,7 +365,6 @@ UNLOCK:                              "UNLOCK"
 UNNEST:                              "UNNEST"
 UNSIGNED:                            "UNSIGNED"
 UPDATE:                              "UPDATE"
-UPLOAD:                              "UPLOAD"
 USING:                               "USING"
 VALUES:                              "VALUES"
 WHERE:                               "WHERE"
@@ -480,9 +475,10 @@ LESS_SYMBOL:                         "<"
 EXCLAMATION_SYMBOL:                  "!"
 GREATER_OR_EQUAL_SYMBOL:             "<="
 LESS_OR_EQUAL_SYMBOL:                ">="
-NOT_EQUAL_SYMBOL:                    "<>"
+NOT_EQUAL_SYMBOL:                    "!="
 CONTAINS_SYMBOL:                     "@>"
 CONTAINED_IN_SYMBOL:                 "<@"
+LIKE_SYMBOL:                         "LIKE"
 
 // Operators. Bit
 

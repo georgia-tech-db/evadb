@@ -74,6 +74,8 @@ class GroupExpression:
         return (self._rules_explored & rule_id) == rule_id
 
     def __eq__(self, other: "GroupExpression"):
+        if not isinstance(other, GroupExpression):
+            return False
         return (
             self.group_id == other.group_id
             and self.opr == other.opr

@@ -25,6 +25,7 @@ from eva.models.storage.batch import Batch
 from eva.plan_nodes.load_data_plan import LoadDataPlan
 from eva.storage.abstract_storage_engine import AbstractStorageEngine
 from eva.storage.storage_engine import StorageEngine
+from eva.utils.errors import DatasetFileNotFoundError
 from eva.utils.logging_manager import logger
 from eva.utils.s3_utils import download_from_s3
 
@@ -35,10 +36,7 @@ class LoadMultimediaExecutor(AbstractExecutor):
         self.catalog = CatalogManager()
         self.media_type = self.node.file_options["file_format"]
 
-    def validate(self):
-        pass
-
-    def exec(self):
+    def exec(self, *args, **kwargs):
         storage_engine = None
         table_obj = None
         try:
@@ -66,6 +64,11 @@ class LoadMultimediaExecutor(AbstractExecutor):
                     logger.error(err_msg)
                     raise ValueError(file_path)
 
+            if not valid_files:
+                raise DatasetFileNotFoundError(
+                    f"Load {self.media_type.name} failed due to no valid files found on path {str(self.node.file_path)}"
+                )
+
             # Create catalog entry
             table_info = self.node.table_info
             database_name = table_info.database_name
@@ -87,11 +90,8 @@ class LoadMultimediaExecutor(AbstractExecutor):
 
             storage_engine = StorageEngine.factory(table_obj)
             if do_create:
-                success = storage_engine.create(table_obj)
-                if not success:
-                    raise ExecutorError(
-                        f"StorageEngine {storage_engine} create call failed"
-                    )
+                storage_engine.create(table_obj)
+
             storage_engine.write(
                 table_obj,
                 Batch(pd.DataFrame({"file_path": valid_files})),
@@ -120,10 +120,5 @@ class LoadMultimediaExecutor(AbstractExecutor):
         table_obj: TableCatalogEntry,
         do_create: bool,
     ):
-        try:
-            if do_create:
-                storage_engine.drop(table_obj)
-        except Exception as e:
-            logger.exception(
-                f"Unexpected Exception {e} occured while rolling back. This is bad as the {self.media_type.name} table can be in a corrupt state. Please verify the table {table_obj} for correctness."
-            )
+        if do_create:
+            storage_engine.drop(table_obj)

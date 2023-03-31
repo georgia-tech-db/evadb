@@ -21,10 +21,6 @@ class ExplainPlan(AbstractPlan):
         super().__init__(PlanOprType.EXPLAIN)
         self._explainable_plan = explainable_plan
 
-    @property
-    def explainable_plan(self):
-        return self._explainable_plan
-
     def __str__(self) -> str:
         return "ExplainPlan()"
 

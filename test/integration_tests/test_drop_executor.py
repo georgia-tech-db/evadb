@@ -16,15 +16,19 @@ import unittest
 from pathlib import Path
 from test.util import create_sample_video, file_remove
 
+import pytest
+
 from eva.catalog.catalog_manager import CatalogManager
+from eva.executor.executor_utils import ExecutorError
 from eva.server.command_handler import execute_query_fetch_all
 
 
+@pytest.mark.notparallel
 class DropExecutorTest(unittest.TestCase):
     def setUp(self):
         # reset the catalog manager before running each test
         CatalogManager().reset()
-        create_sample_video()
+        self.video_file_path = create_sample_video()
 
     def tearDown(self):
         file_remove("dummy.avi")
@@ -32,7 +36,7 @@ class DropExecutorTest(unittest.TestCase):
     # integration test
     def test_should_drop_table(self):
         catalog_manager = CatalogManager()
-        query = """LOAD VIDEO 'dummy.avi' INTO MyVideo;"""
+        query = f"""LOAD VIDEO '{self.video_file_path}' INTO MyVideo;"""
         execute_query_fetch_all(query)
 
         # catalog should contain vidoe table and the metedata table
@@ -60,7 +64,13 @@ class DropExecutorTest(unittest.TestCase):
         self.assertEqual(len(column_objects), 0)
         self.assertFalse(Path(video_dir).exists())
 
+        # Fail if table already dropped
+        drop_query = """DROP TABLE MyVideo;"""
+        with self.assertRaises(ExecutorError):
+            execute_query_fetch_all(drop_query)
 
+
+@pytest.mark.notparallel
 class DropUDFExecutorTest(unittest.TestCase):
     def setUp(self):
         CatalogManager().reset()

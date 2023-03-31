@@ -13,7 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from abc import ABC, abstractmethod
-from typing import List
+from collections import deque
+from typing import Any, List
 
 from eva.plan_nodes.types import PlanOprType
 
@@ -90,3 +91,32 @@ class AbstractPlan(ABC):
             else:
                 setattr(result, k, v)
         return result
+
+    def bfs(self):
+        """Returns a generator which visits all nodes in plan tree in
+        breadth-first search (BFS) traversal order.
+
+        Returns:
+            the generator object.
+        """
+        queue = deque([self])
+        while queue:
+            node = queue.popleft()
+            yield node
+            for child in node.children:
+                queue.append(child)
+
+    def find_all(self, plan_type: Any):
+        """Returns a generator which visits all the nodes in plan tree and yields one
+        that matches the passed `expression_type`.
+
+        Args:
+            plan_type (Any): plan type to match with
+
+        Returns:
+            the generator object.
+        """
+
+        for node in self.bfs():
+            if isinstance(node, plan_type):
+                yield node

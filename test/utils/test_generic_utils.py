@@ -19,31 +19,51 @@ from test.markers import windows_skip_marker
 
 from mock import MagicMock, patch
 
-from eva.readers.opencv_reader import OpenCVReader
+from eva.readers.decord_reader import DecordReader
 from eva.utils.generic_utils import (
     generate_file_path,
     is_gpu_available,
-    path_to_class,
+    load_udf_class_from_file,
     str_to_class,
+    validate_kwargs,
 )
 
 
 class ModulePathTest(unittest.TestCase):
-    def test_should_return_correct_class_for_string(self):
-        vl = str_to_class("eva.readers.opencv_reader.OpenCVReader")
-        self.assertEqual(vl, OpenCVReader)
+    def test_helper_validates_kwargs(self):
+        with self.assertRaises(TypeError):
+            validate_kwargs({"a": 1, "b": 2}, ["a"], "Invalid keyword argument:")
 
-    @unittest.skip(
-        "This returns opecv_reader.OpenCVReader \
-                   instead of eva.readers.opencv_reader.OpenCVReader"
-    )
+    def test_should_return_correct_class_for_string(self):
+        vl = str_to_class("eva.readers.decord_reader.DecordReader")
+        self.assertEqual(vl, DecordReader)
+
     def test_should_return_correct_class_for_path(self):
-        vl = path_to_class("eva/readers/opencv_reader.py", "OpenCVReader")
-        self.assertEqual(vl, OpenCVReader)
+        vl = load_udf_class_from_file("eva/readers/decord_reader.py", "DecordReader")
+        # Can't check that v1 = DecordReader because the above function returns decord_reader.DecordReader instead of eva.readers.decord_reader.DecordReader
+        # So we check the qualname instead, qualname is the path to the class including the module name
+        # Ref: https://peps.python.org/pep-3155/#rationale
+        assert vl.__qualname__ == DecordReader.__qualname__
+
+    def test_should_return_correct_class_for_path_without_classname(self):
+        vl = load_udf_class_from_file("eva/readers/decord_reader.py")
+        assert vl.__qualname__ == DecordReader.__qualname__
+
+    def test_should_raise_on_missing_file(self):
+        with self.assertRaises(RuntimeError):
+            load_udf_class_from_file("eva/readers/opencv_reader_abdfdsfds.py")
 
     def test_should_raise_if_class_does_not_exists(self):
         with self.assertRaises(RuntimeError):
-            path_to_class("eva/readers/opencv_reader.py", "OpenCV")
+            # eva/utils/s3_utils.py has no class in it
+            # if this test fails due to change in s3_utils.py, change the file to something else
+            load_udf_class_from_file("eva/utils/s3_utils.py")
+
+    def test_should_raise_if_multiple_classes_exist_and_no_class_mentioned(self):
+        with self.assertRaises(RuntimeError):
+            # eva/utils/generic_utils.py has multiple classes in it
+            # if this test fails due to change in generic_utils.py, change the file to something else
+            load_udf_class_from_file("eva/utils/generic_utils.py")
 
     def test_should_use_torch_to_check_if_gpu_is_available(self):
         # Emulate a missing import

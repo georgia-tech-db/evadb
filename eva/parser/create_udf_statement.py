@@ -47,9 +47,9 @@ class CreateUDFStatement(AbstractStatement):
         self,
         name: str,
         if_not_exists: bool,
-        inputs: List[ColumnDefinition],
-        outputs: List[ColumnDefinition],
         impl_path: str,
+        inputs: List[ColumnDefinition] = [],
+        outputs: List[ColumnDefinition] = [],
         udf_type: str = None,
         metadata: List[Tuple[str, str]] = None,
     ):
@@ -63,17 +63,29 @@ class CreateUDFStatement(AbstractStatement):
         self._metadata = metadata
 
     def __str__(self) -> str:
+        exists_str = ""
+        if self._if_not_exists:
+            exists_str += "IF NOT EXISTS "
+
         input_str = ""
         if self._inputs is not None:
+            input_str += "INPUT ("
             for expr in self._inputs:
                 input_str += str(expr) + ", "
             input_str = input_str.rstrip(", ")
+            input_str += ")"
 
         output_str = ""
         if self._outputs is not None:
+            output_str += "OUTPUT ("
             for expr in self._outputs:
                 output_str += str(expr) + ", "
             output_str = output_str.rstrip(", ")
+            output_str += ")"
+
+        type_str = ""
+        if self._udf_type is not None:
+            type_str += "TYPE " + self._udf_type
 
         metadata_str = ""
         if self._metadata is not None:
@@ -134,6 +146,6 @@ class CreateUDFStatement(AbstractStatement):
                 tuple(self.outputs),
                 self.impl_path,
                 self.udf_type,
-                tuple(self.metadata)
+                tuple(self.metadata),
             )
         )

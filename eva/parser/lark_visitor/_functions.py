@@ -21,7 +21,6 @@ from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.create_udf_statement import CreateUDFStatement
 from eva.parser.drop_udf_statement import DropUDFStatement
-from eva.utils.logging_manager import logger
 
 
 ##################################################################
@@ -102,19 +101,14 @@ class Functions:
                 elif child.data == "udf_metadata":
                     # Each UDF metadata is a key value pair
                     key_value_pair = self.visit(child)
-                    metadata.append((key_value_pair[0].value , key_value_pair[1].value)),
-                else:
-                    raise ValueError(
-                        f"CREATE/DROP UDF Failed: Unidentified selector child: {child.data!r}"
-                    )
-                    return None
+                    metadata.append((key_value_pair[0].value, key_value_pair[1].value)),
 
         return CreateUDFStatement(
             udf_name,
             if_not_exists,
+            impl_path,
             input_definitions,
             output_definitions,
-            impl_path,
             udf_type,
             metadata,
         )
@@ -137,12 +131,9 @@ class Functions:
             agg_func_type = ExpressionType.AGGREGATION_LAST
         elif agg_func_name == "SEGMENT":
             agg_func_type = ExpressionType.AGGREGATION_SEGMENT
-        else:
-            logger.error("Aggregate Function {} not supported.".format(agg_func_name))
         return agg_func_type
 
     def aggregate_windowed_function(self, tree):
-
         agg_func_arg = None
         agg_func_name = None
 

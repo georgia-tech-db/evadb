@@ -12,12 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import os
 import unittest
-from test.util import create_sample_image, file_remove, load_inbuilt_udfs
+from test.util import create_sample_image, file_remove, load_udfs_for_testing
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.configuration_manager import ConfigurationManager
@@ -26,15 +26,16 @@ from eva.server.command_handler import execute_query_fetch_all
 from eva.storage.storage_engine import StorageEngine
 
 
+@pytest.mark.notparallel
 class OpenTests(unittest.TestCase):
     def setUp(self):
         CatalogManager().reset()
         ConfigurationManager()
         # Load built-in UDFs.
-        load_inbuilt_udfs()
+        load_udfs_for_testing(mode="minimal")
 
         # Insert image path.
-        create_sample_image()
+        self.img_path = create_sample_image()
         create_table_query = "CREATE TABLE IF NOT EXISTS testOpenTable (num INTEGER);"
         execute_query_fetch_all(create_table_query)
 
@@ -54,10 +55,9 @@ class OpenTests(unittest.TestCase):
 
     def test_open_should_open_image(self):
         # Test query runs successfully with Open function call.
-        config = ConfigurationManager()
-        upload_dir_from_config = config.get_value("storage", "upload_dir")
-        img_path = os.path.join(upload_dir_from_config, "dummy.jpg")
-        select_query = """SELECT num, Open("{}") FROM testOpenTable;""".format(img_path)
+        select_query = """SELECT num, Open("{}") FROM testOpenTable;""".format(
+            self.img_path
+        )
         batch_res = execute_query_fetch_all(select_query)
 
         expected_img = np.array(np.ones((3, 3, 3)), dtype=np.float32)

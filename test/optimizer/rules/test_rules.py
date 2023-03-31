@@ -13,9 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import create_sample_video, load_inbuilt_udfs
+from test.util import create_sample_video, load_udfs_for_testing
 
-from mock import MagicMock
+import pytest
+from mock import MagicMock, patch
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import TableType
@@ -30,6 +31,7 @@ from eva.optimizer.operators import (
     LogicalSample,
 )
 from eva.optimizer.rules.rules import (
+    CacheFunctionExpressionInApply,
     CombineSimilarityOrderByAndLimitToFaissIndexScan,
     EmbedFilterIntoGet,
     EmbedProjectIntoGet,
@@ -52,6 +54,7 @@ from eva.optimizer.rules.rules import (
     LogicalInnerJoinCommutativity,
     LogicalInsertToPhysical,
     LogicalJoinToPhysicalHashJoin,
+    LogicalJoinToPhysicalNestedLoopJoin,
     LogicalLateralJoinToPhysical,
     LogicalLimitToPhysical,
     LogicalLoadToPhysical,
@@ -60,17 +63,20 @@ from eva.optimizer.rules.rules import (
     LogicalRenameToPhysical,
     LogicalShowToPhysical,
     LogicalUnionToPhysical,
-    LogicalUploadToPhysical,
     Promise,
     PushDownFilterThroughApplyAndMerge,
     PushDownFilterThroughJoin,
+    ReorderPredicates,
+    Rule,
+    RuleType,
     XformLateralJoinToLinearFlow,
 )
-from eva.optimizer.rules.rules_manager import RulesManager
+from eva.optimizer.rules.rules_manager import RulesManager, disable_rules
 from eva.parser.types import JoinType
 from eva.server.command_handler import execute_query_fetch_all
 
 
+@pytest.mark.notparallel
 class RulesTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -79,7 +85,7 @@ class RulesTest(unittest.TestCase):
         video_file_path = create_sample_video()
         load_query = f"LOAD VIDEO '{video_file_path}' INTO MyVideo;"
         execute_query_fetch_all(load_query)
-        load_inbuilt_udfs()
+        load_udfs_for_testing(mode="minimal")
 
     @classmethod
     def tearDownClass(cls):
@@ -96,6 +102,7 @@ class RulesTest(unittest.TestCase):
             Promise.PUSHDOWN_FILTER_THROUGH_JOIN,
             Promise.PUSHDOWN_FILTER_THROUGH_APPLY_AND_MERGE,
             Promise.COMBINE_SIMILARITY_ORDERBY_AND_LIMIT_TO_FAISS_INDEX_SCAN,
+            Promise.REORDER_PREDICATES,
         ]
 
         for promise in rewrite_promises:
@@ -114,7 +121,6 @@ class RulesTest(unittest.TestCase):
             Promise.LOGICAL_RENAME_TO_PHYSICAL,
             Promise.LOGICAL_DROP_TO_PHYSICAL,
             Promise.LOGICAL_LOAD_TO_PHYSICAL,
-            Promise.LOGICAL_UPLOAD_TO_PHYSICAL,
             Promise.LOGICAL_CREATE_TO_PHYSICAL,
             Promise.LOGICAL_CREATE_UDF_TO_PHYSICAL,
             Promise.LOGICAL_SAMPLE_TO_UNIFORMSAMPLE,
@@ -122,6 +128,7 @@ class RulesTest(unittest.TestCase):
             Promise.LOGICAL_DERIVED_GET_TO_PHYSICAL,
             Promise.LOGICAL_LATERAL_JOIN_TO_PHYSICAL,
             Promise.LOGICAL_JOIN_TO_PHYSICAL_HASH_JOIN,
+            Promise.LOGICAL_JOIN_TO_PHYSICAL_NESTED_LOOP_JOIN,
             Promise.LOGICAL_FUNCTION_SCAN_TO_PHYSICAL,
             Promise.LOGICAL_FILTER_TO_PHYSICAL,
             Promise.LOGICAL_PROJECT_TO_PHYSICAL,
@@ -141,7 +148,7 @@ class RulesTest(unittest.TestCase):
         implementation_count = len(set(implementation_promises))
 
         # rewrite_count + implementation_count + 1 (for IMPLEMENTATION_DELIMETER)
-        self.assertEqual(rewrite_count + implementation_count + 1, promise_count)
+        self.assertEqual(rewrite_count + implementation_count + 2, promise_count)
 
     def test_supported_rules(self):
         # adding/removing rules should update this test
@@ -155,6 +162,7 @@ class RulesTest(unittest.TestCase):
             PushDownFilterThroughApplyAndMerge(),
             PushDownFilterThroughJoin(),
             CombineSimilarityOrderByAndLimitToFaissIndexScan(),
+            ReorderPredicates(),
         ]
         self.assertEqual(
             len(supported_rewrite_rules), len(RulesManager().rewrite_rules)
@@ -165,7 +173,10 @@ class RulesTest(unittest.TestCase):
                 any(isinstance(rule, type(x)) for x in RulesManager().rewrite_rules)
             )
 
-        supported_logical_rules = [LogicalInnerJoinCommutativity()]
+        supported_logical_rules = [
+            LogicalInnerJoinCommutativity(),
+            CacheFunctionExpressionInApply(),
+        ]
         self.assertEqual(
             len(supported_logical_rules), len(RulesManager().logical_rules)
         )
@@ -184,13 +195,13 @@ class RulesTest(unittest.TestCase):
             LogicalInsertToPhysical(),
             LogicalDeleteToPhysical(),
             LogicalLoadToPhysical(),
-            LogicalUploadToPhysical(),
             LogicalGetToSeqScan(),
             LogicalDerivedGetToPhysical(),
             LogicalUnionToPhysical(),
             LogicalGroupByToPhysical(),
             LogicalOrderByToPhysical(),
             LogicalLimitToPhysical(),
+            LogicalJoinToPhysicalNestedLoopJoin(),
             LogicalLateralJoinToPhysical(),
             LogicalFunctionScanToPhysical(),
             LogicalJoinToPhysicalHashJoin(),
@@ -254,11 +265,30 @@ class RulesTest(unittest.TestCase):
         )
 
         logi_get = LogicalGet(MagicMock(), table_obj, MagicMock(), MagicMock())
-        logi_sample = LogicalSample(MagicMock(), children=[logi_get])
+        logi_sample = LogicalSample(MagicMock(), MagicMock(), children=[logi_get])
 
         self.assertFalse(rule.check(logi_sample, MagicMock()))
+
+    def test_disable_rules(self):
+        with disable_rules([PushDownFilterThroughApplyAndMerge()]) as rules_manager:
+            self.assertFalse(
+                any(
+                    isinstance(PushDownFilterThroughApplyAndMerge, type(x))
+                    for x in rules_manager.rewrite_rules
+                )
+            )
 
     def test_xform_lateral_join_does_not_work_with_other_join(self):
         rule = XformLateralJoinToLinearFlow()
         logi_join = LogicalJoin(JoinType.INNER_JOIN)
         self.assertFalse(rule.check(logi_join, MagicMock()))
+
+    def test_rule_base_errors(self):
+        with patch.object(Rule, "__abstractmethods__", set()):
+            rule = Rule(rule_type=RuleType.INVALID_RULE)
+            with self.assertRaises(NotImplementedError):
+                rule.promise()
+            with self.assertRaises(NotImplementedError):
+                rule.check(MagicMock(), MagicMock())
+            with self.assertRaises(NotImplementedError):
+                rule.apply(MagicMock())

@@ -85,11 +85,11 @@ class CreateUDFPlan(AbstractPlan):
     @property
     def udf_type(self):
         return self._udf_type
-    
+
     @property
     def metadata(self):
         return self._metadata
-    
+
     def __str__(self):
         return "CreateUDFPlan(name={}, \
             if_not_exists={}, \
@@ -104,7 +104,7 @@ class CreateUDFPlan(AbstractPlan):
             self._outputs,
             self._impl_path,
             self._udf_type,
-            self._metadata
+            self._metadata,
         )
 
     def __hash__(self) -> int:
@@ -116,6 +116,6 @@ class CreateUDFPlan(AbstractPlan):
                 tuple(self.outputs),
                 self.impl_path,
                 self.udf_type,
-                tuple(self.metadata)
+                tuple(self.metadata),
             )
         )

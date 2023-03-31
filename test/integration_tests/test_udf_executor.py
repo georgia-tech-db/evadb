@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import tempfile
 import unittest
 from test.util import (
     DummyObjectDetector,
@@ -22,9 +23,11 @@ from test.util import (
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from eva.binder.binder_utils import BinderError
 from eva.catalog.catalog_manager import CatalogManager
+from eva.catalog.catalog_type import ColumnType, NdArrayType
 from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
 from eva.server.command_handler import execute_query_fetch_all
@@ -32,7 +35,7 @@ from eva.server.command_handler import execute_query_fetch_all
 NUM_FRAMES = 10
 
 
-class UDFCreatorTest(unittest.TestCase):
+class HuggingFaceTests(unittest.TestCase):
     def setUp(self) -> None:
         CatalogManager().reset()
         video_file_path = create_sample_video(NUM_FRAMES)
@@ -111,6 +114,7 @@ class UDFCreatorTest(unittest.TestCase):
         result = execute_query_fetch_all(select_query)
         pass
 
+@pytest.mark.notparallel
 class UDFExecutorTest(unittest.TestCase):
     def setUp(self):
         CatalogManager().reset()
@@ -235,6 +239,55 @@ class UDFExecutorTest(unittest.TestCase):
         )
         self.assertEqual(actual, expected)
 
+    def test_should_create_udf_with_metadata(self):
+        udf_name = "DummyObjectDetector"
+        execute_query_fetch_all(f"DROP UDF {udf_name};")
+        create_udf_query = """CREATE UDF {}
+                  INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
+                  OUTPUT (label NDARRAY STR(10))
+                  TYPE  Classification
+                  IMPL  'test/util.py'
+                  'CACHE' 'TRUE'
+                  'BATCH' 'FALSE';
+        """
+        execute_query_fetch_all(create_udf_query.format(udf_name))
+
+        # try fetching the metadata values
+        entries = CatalogManager().get_udf_metadata_entries_by_udf_name(udf_name)
+        self.assertEqual(len(entries), 2)
+        metadata = [(entry.key, entry.value) for entry in entries]
+
+        expected_metadata = [("CACHE", "TRUE"), ("BATCH", "FALSE")]
+        self.assertEqual(set(metadata), set(expected_metadata))
+
+    def test_should_return_empty_metadata_list_for_missing_udf(self):
+        # missing udf should return empty list
+        entries = CatalogManager().get_udf_metadata_entries_by_udf_name("randomUDF")
+        self.assertEqual(len(entries), 0)
+
+    def test_should_return_empty_metadata_list_if_udf_is_removed(self):
+        udf_name = "DummyObjectDetector"
+        execute_query_fetch_all(f"DROP UDF {udf_name};")
+        create_udf_query = """CREATE UDF {}
+                  INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
+                  OUTPUT (label NDARRAY STR(10))
+                  TYPE  Classification
+                  IMPL  'test/util.py'
+                  'CACHE' 'TRUE'
+                  'BATCH' 'FALSE';
+        """
+        execute_query_fetch_all(create_udf_query.format(udf_name))
+
+        # try fetching the metadata values
+        entries = CatalogManager().get_udf_metadata_entries_by_udf_name(udf_name)
+        self.assertEqual(len(entries), 2)
+
+        # remove the udf
+        execute_query_fetch_all(f"DROP UDF {udf_name};")
+        # try fetching the metadata values
+        entries = CatalogManager().get_udf_metadata_entries_by_udf_name(udf_name)
+        self.assertEqual(len(entries), 0)
+
     def test_should_raise_using_missing_udf(self):
         select_query = "SELECT id,DummyObjectDetector1(data) FROM MyVideo \
             ORDER BY id;"
@@ -256,3 +309,87 @@ class UDFExecutorTest(unittest.TestCase):
         """
         with self.assertRaises(ExecutorError):
             execute_query_fetch_all(create_udf_query)
+
+    def test_should_raise_if_udf_file_is_modified(self):
+        execute_query_fetch_all("DROP UDF DummyObjectDetector;")
+
+        # Test IF EXISTS
+        execute_query_fetch_all("DROP UDF IF EXISTS DummyObjectDetector;")
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".py") as tmp_file:
+            with open("test/util.py", "r") as file:
+                tmp_file.write(file.read())
+
+            tmp_file.seek(0)
+
+            udf_name = "DummyObjectDetector"
+            create_udf_query = """CREATE UDF {}
+                    INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
+                    OUTPUT (label NDARRAY STR(10))
+                    TYPE  Classification
+                    IMPL  '{}';
+            """
+            execute_query_fetch_all(create_udf_query.format(udf_name, tmp_file.name))
+
+            # Modify the udf file by appending
+            tmp_file.seek(0, 2)
+            tmp_file.write("#comment")
+            tmp_file.seek(0)
+
+            select_query = (
+                "SELECT id,DummyObjectDetector(data) FROM MyVideo ORDER BY id;"
+            )
+
+            with self.assertRaises(AssertionError):
+                execute_query_fetch_all(select_query)
+
+    def test_create_udf_with_decorators(self):
+        execute_query_fetch_all("DROP UDF IF EXISTS DummyObjectDetectorDecorators;")
+        create_udf_query = """CREATE UDF DummyObjectDetectorDecorators
+                  IMPL  'test/util.py';
+        """
+        execute_query_fetch_all(create_udf_query)
+
+        catalog_manager = CatalogManager()
+        udf_obj = catalog_manager.get_udf_catalog_entry_by_name(
+            "DummyObjectDetectorDecorators"
+        )
+        udf_inputs = catalog_manager.get_udf_io_catalog_input_entries(udf_obj)
+        self.assertEquals(len(udf_inputs), 1)
+
+        udf_input = udf_inputs[0]
+
+        expected_input_attributes = {
+            "name": "Frame_Array",
+            "type": ColumnType.NDARRAY,
+            "is_nullable": False,
+            "array_type": NdArrayType.UINT8,
+            "array_dimensions": (3, 256, 256),
+            "is_input": True,
+        }
+
+        for attr in expected_input_attributes:
+            self.assertEquals(getattr(udf_input, attr), expected_input_attributes[attr])
+
+        udf_outputs = catalog_manager.get_udf_io_catalog_output_entries(udf_obj)
+        self.assertEquals(len(udf_outputs), 1)
+
+        udf_output = udf_outputs[0]
+        expected_output_attributes = {
+            "name": "label",
+            "type": ColumnType.NDARRAY,
+            "is_nullable": False,
+            "array_type": NdArrayType.STR,
+            "array_dimensions": (),
+            "is_input": False,
+        }
+
+        for attr in expected_output_attributes:
+            self.assertEquals(
+                getattr(udf_output, attr), expected_output_attributes[attr]
+            )
+
+    def test_udf_cost_entry_created(self):
+        execute_query_fetch_all("SELECT DummyObjectDetector(data) FROM MyVideo")
+        entry = CatalogManager().get_udf_cost_catalog_entry("DummyObjectDetector")
+        self.assertIsNotNone(entry)

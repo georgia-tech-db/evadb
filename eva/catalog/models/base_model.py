@@ -54,7 +54,7 @@ class CustomModel:
             self._commit()
         except Exception as e:
             db_session.rollback()
-            logger.error("Object already exists in database")
+            logger.error(f"Database save failed : {str(e)}")
             raise e
         return self
 
@@ -74,7 +74,7 @@ class CustomModel:
             return self.save()
         except Exception as e:
             db_session.rollback()
-            logger.error("Failed to update the database object")
+            logger.error(f"Database update failed : {str(e)}")
             raise e
 
     def delete(self):
@@ -82,19 +82,19 @@ class CustomModel:
         try:
             db_session.delete(self)
             self._commit()
-        except Exception:
+        except Exception as e:
             db_session.rollback()
-            logger.error("Object couldn't be deleted")
-            raise Exception
+            logger.error(f"Database delete failed : {str(e)}")
+            raise e
 
     def _commit(self):
         """Try to commit. If an error is raised, the session is rollbacked."""
         try:
             db_session.commit()
-        except SQLAlchemyError:
+        except SQLAlchemyError as e:
             db_session.rollback()
-            logger.error("Exception occurred while committing to database.")
-            raise Exception("Exception occurred while committing to database.")
+            logger.error(f"Database commit failed : {str(e)}")
+            raise e
 
 
 # Custom Base Model to be inherited by all models

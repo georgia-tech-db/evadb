@@ -28,6 +28,7 @@ from test.util import (
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from eva.binder.binder_utils import BinderError
 from eva.catalog.catalog_manager import CatalogManager
@@ -38,6 +39,7 @@ from eva.parser.types import FileFormatType
 from eva.server.command_handler import execute_query_fetch_all
 
 
+@pytest.mark.notparallel
 class LoadExecutorTest(unittest.TestCase):
     def setUp(self):
         # reset the catalog manager before running each test
@@ -46,7 +48,7 @@ class LoadExecutorTest(unittest.TestCase):
         self.image_files_path = Path(
             f"{EVA_ROOT_DIR}/test/data/uadetrac/small-data/MVI_20011/*.jpg"
         )
-        create_sample_csv()
+        self.csv_file_path = create_sample_csv()
 
     def tearDown(self):
         file_remove("dummy.avi")
@@ -164,13 +166,23 @@ class LoadExecutorTest(unittest.TestCase):
         # try adding duplicate files to the table
         path = f"{EVA_ROOT_DIR}/data/sample_videos/**/*.mp4"
         query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
-        with self.assertRaises(Exception):
+        with self.assertRaises(ExecutorError):
             execute_query_fetch_all(query)
 
         # original data should be preserved
         after_load_fail = execute_query_fetch_all("SELECT id FROM MyVideos;")
 
         self.assertEqual(expected_output, after_load_fail)
+
+    def test_should_fail_to_load_missing_video(self):
+        path = f"{EVA_ROOT_DIR}/data/sample_videos/missing.mp4"
+        query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
+        with self.assertRaises(ExecutorError) as exc_info:
+            execute_query_fetch_all(query)
+        self.assertIn(
+            "Load VIDEO failed due to no valid files found on path",
+            str(exc_info.exception),
+        )
 
     def test_should_fail_to_load_corrupt_video(self):
         # should fail on an empty file
@@ -257,6 +269,16 @@ class LoadExecutorTest(unittest.TestCase):
             pd.DataFrame([f"Number of loaded {FileFormatType.IMAGE.name}: {num_files}"])
         )
         self.assertEqual(result, expected)
+
+    def test_should_fail_to_load_missing_image(self):
+        path = f"{EVA_ROOT_DIR}/data/sample_images/missing.jpg"
+        query = f"""LOAD IMAGE "{path}" INTO MyImages;"""
+        with self.assertRaises(ExecutorError) as exc_info:
+            execute_query_fetch_all(query)
+        self.assertIn(
+            "Load IMAGE failed due to no valid files found on path",
+            str(exc_info.exception),
+        )
 
     def test_should_fail_to_load_images_with_same_path(self):
         image_files = glob.glob(
@@ -377,7 +399,7 @@ class LoadExecutorTest(unittest.TestCase):
         execute_query_fetch_all(create_table_query)
 
         # load the CSV
-        load_query = """LOAD CSV 'dummy.csv' INTO MyVideoCSV;"""
+        load_query = f"LOAD CSV '{self.csv_file_path}' INTO MyVideoCSV;"
         execute_query_fetch_all(load_query)
 
         # execute a select query
@@ -390,7 +412,7 @@ class LoadExecutorTest(unittest.TestCase):
         actual_batch.sort()
 
         # assert the batches are equal
-        expected_batch = create_dummy_csv_batches()
+        expected_batch = next(create_dummy_csv_batches())
         expected_batch.modify_column_alias("myvideocsv")
         self.assertEqual(actual_batch, expected_batch)
 
@@ -412,7 +434,9 @@ class LoadExecutorTest(unittest.TestCase):
         execute_query_fetch_all(create_table_query)
 
         # load the CSV
-        load_query = """LOAD CSV 'dummy.csv' INTO MyVideoCSV (id, frame_id, video_id, dataset_name);"""
+        load_query = """LOAD CSV '{}' INTO MyVideoCSV (id, frame_id, video_id, dataset_name);""".format(
+            self.csv_file_path
+        )
         execute_query_fetch_all(load_query)
 
         # execute a select query
@@ -424,7 +448,7 @@ class LoadExecutorTest(unittest.TestCase):
 
         # assert the batches are equal
         select_columns = ["id", "frame_id", "video_id", "dataset_name"]
-        expected_batch = create_dummy_csv_batches(target_columns=select_columns)
+        expected_batch = next(create_dummy_csv_batches(target_columns=select_columns))
         expected_batch.modify_column_alias("myvideocsv")
         self.assertEqual(actual_batch, expected_batch)
 

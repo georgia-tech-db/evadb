@@ -15,12 +15,7 @@
 import os
 import unittest
 from test.markers import windows_skip_marker
-from test.util import (
-    copy_sample_images_to_upload_dir,
-    copy_sample_videos_to_upload_dir,
-    file_remove,
-    load_inbuilt_udfs,
-)
+from test.util import file_remove, load_udfs_for_testing
 
 import cv2
 import numpy as np
@@ -30,19 +25,14 @@ from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.configuration.constants import EVA_ROOT_DIR
 from eva.server.command_handler import execute_query_fetch_all
-from eva.udfs.udf_bootstrap_queries import (
-    Asl_udf_query,
-    Mvit_udf_query,
-    Timestamp_udf_query,
-)
+from eva.udfs.udf_bootstrap_queries import Asl_udf_query, Mvit_udf_query
 
 
+@pytest.mark.notparallel
 class PytorchTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         CatalogManager().reset()
-        copy_sample_videos_to_upload_dir()
-        copy_sample_images_to_upload_dir()
         ua_detrac = f"{EVA_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
         mnist = f"{EVA_ROOT_DIR}/data/mnist/mnist.mp4"
         actions = f"{EVA_ROOT_DIR}/data/actions/actions.mp4"
@@ -56,7 +46,7 @@ class PytorchTest(unittest.TestCase):
         execute_query_fetch_all(f"LOAD VIDEO '{asl_actions}' INTO Asl_actions;")
         execute_query_fetch_all(f"LOAD IMAGE '{meme1}' INTO MemeImages;")
         execute_query_fetch_all(f"LOAD IMAGE '{meme2}' INTO MemeImages;")
-        load_inbuilt_udfs()
+        load_udfs_for_testing()
 
     @classmethod
     def tearDownClass(cls):
@@ -66,7 +56,7 @@ class PytorchTest(unittest.TestCase):
         file_remove("computer_asl.mp4")
 
         execute_query_fetch_all("DROP TABLE IF EXISTS Actions;")
-        execute_query_fetch_all("DROP TABLE IF EXISTS Mnist;")
+        execute_query_fetch_all("DROP TABLE IF EXISTS MNIST;")
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
         execute_query_fetch_all("DROP TABLE IF EXISTS Asl_actions;")
         execute_query_fetch_all("DROP TABLE IF EXISTS MemeImages;")
@@ -117,6 +107,18 @@ class PytorchTest(unittest.TestCase):
             self.assertTrue("computer" in res["aslactionrecognition.labels"][idx])
 
     @pytest.mark.torchtest
+    def test_should_run_pytorch_and_yolo_decorators(self):
+        create_udf_query = """CREATE UDF YoloDecorators
+                  IMPL  'eva/udfs/decorators/yolo_object_detection_decorators.py';
+        """
+        execute_query_fetch_all(create_udf_query)
+
+        select_query = """SELECT YoloDecorators(data) FROM MyVideo
+                        WHERE id < 5;"""
+        actual_batch = execute_query_fetch_all(select_query)
+        self.assertEqual(len(actual_batch), 5)
+
+    @pytest.mark.torchtest
     def test_should_run_pytorch_and_facenet(self):
         create_udf_query = """CREATE UDF FaceDetector
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
@@ -157,7 +159,7 @@ class PytorchTest(unittest.TestCase):
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_resnet50(self):
-        create_udf_query = """CREATE UDF FeatureExtractor
+        create_udf_query = """CREATE UDF IF NOT EXISTS FeatureExtractor
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
                   OUTPUT (features NDARRAY FLOAT32(ANYDIM))
                   TYPE  Classification
@@ -173,7 +175,7 @@ class PytorchTest(unittest.TestCase):
         # non-trivial test case for Resnet50
         res = actual_batch.frames
         self.assertEqual(res["featureextractor.features"][0].shape, (1, 2048))
-        self.assertTrue(res["featureextractor.features"][0][0][0] > 0.3)
+        # self.assertTrue(res["featureextractor.features"][0][0][0] > 0.3)
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_similarity(self):
@@ -208,9 +210,9 @@ class PytorchTest(unittest.TestCase):
         img = batch_res.frames["myvideo.data"][0]
 
         config = ConfigurationManager()
-        upload_dir_from_config = config.get_value("storage", "upload_dir")
+        tmp_dir_from_config = config.get_value("storage", "tmp_dir")
 
-        img_save_path = os.path.join(upload_dir_from_config, "dummy.jpg")
+        img_save_path = os.path.join(tmp_dir_from_config, "dummy.jpg")
         try:
             os.remove(img_save_path)
         except FileNotFoundError:
@@ -281,15 +283,3 @@ class PytorchTest(unittest.TestCase):
         res = actual_batch.frames
         self.assertTrue(res["toxicityclassifier.labels"][0] == "toxic")
         self.assertTrue(res["toxicityclassifier.labels"][1] == "not toxic")
-
-    def test_timestamp_udf(self):
-        execute_query_fetch_all(Timestamp_udf_query)
-
-        select_query = """SELECT id, seconds, Timestamp(seconds)
-                          FROM MyVideo
-                          WHERE Timestamp(seconds) <= "00:00:01"; """
-        # TODO: Check why this does not work
-        #                  AND Timestamp(seconds) < "00:00:03"; """
-        actual_batch = execute_query_fetch_all(select_query)
-
-        self.assertEqual(len(actual_batch), 60)

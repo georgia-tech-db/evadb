@@ -42,13 +42,14 @@ class RuleType(Flag):
     XFORM_LATERAL_JOIN_TO_LINEAR_FLOW = auto()
     PUSHDOWN_FILTER_THROUGH_APPLY_AND_MERGE = auto()
     COMBINE_SIMILARITY_ORDERBY_AND_LIMIT_TO_FAISS_INDEX_SCAN = auto()
+    REORDER_PREDICATES = auto()
 
     REWRITE_DELIMETER = auto()
 
     # TRANSFORMATION RULES (LOGICAL -> LOGICAL)
     LOGICAL_INNER_JOIN_COMMUTATIVITY = auto()
-
-    TRANSFORMATION_DELIMETER = auto()
+    CACHE_FUNCTION_EXPRESISON_IN_APPLY = auto()
+    TRANSFORMATION_DELIMETER = auto()  # do not reposition
 
     # IMPLEMENTATION RULES (LOGICAL -> PHYSICAL)
     LOGICAL_EXCHANGE_TO_PHYSICAL = auto()
@@ -59,7 +60,6 @@ class RuleType(Flag):
     LOGICAL_INSERT_TO_PHYSICAL = auto()
     LOGICAL_DELETE_TO_PHYSICAL = auto()
     LOGICAL_LOAD_TO_PHYSICAL = auto()
-    LOGICAL_UPLOAD_TO_PHYSICAL = auto()
     LOGICAL_CREATE_TO_PHYSICAL = auto()
     LOGICAL_RENAME_TO_PHYSICAL = auto()
     LOGICAL_DROP_TO_PHYSICAL = auto()
@@ -70,6 +70,7 @@ class RuleType(Flag):
     LOGICAL_DERIVED_GET_TO_PHYSICAL = auto()
     LOGICAL_LATERAL_JOIN_TO_PHYSICAL = auto()
     LOGICAL_JOIN_TO_PHYSICAL_HASH_JOIN = auto()
+    LOGICAL_JOIN_TO_PHYSICAL_NESTED_LOOP_JOIN = auto()
     LOGICAL_FUNCTION_SCAN_TO_PHYSICAL = auto()
     LOGICAL_FILTER_TO_PHYSICAL = auto()
     LOGICAL_PROJECT_TO_PHYSICAL = auto()
@@ -104,14 +105,16 @@ class Promise(IntEnum):
     LOGICAL_RENAME_TO_PHYSICAL = auto()
     LOGICAL_DROP_TO_PHYSICAL = auto()
     LOGICAL_LOAD_TO_PHYSICAL = auto()
-    LOGICAL_UPLOAD_TO_PHYSICAL = auto()
     LOGICAL_CREATE_TO_PHYSICAL = auto()
     LOGICAL_CREATE_UDF_TO_PHYSICAL = auto()
     LOGICAL_SAMPLE_TO_UNIFORMSAMPLE = auto()
     LOGICAL_GET_TO_SEQSCAN = auto()
     LOGICAL_DERIVED_GET_TO_PHYSICAL = auto()
     LOGICAL_LATERAL_JOIN_TO_PHYSICAL = auto()
+
     LOGICAL_JOIN_TO_PHYSICAL_HASH_JOIN = auto()
+    LOGICAL_JOIN_TO_PHYSICAL_NESTED_LOOP_JOIN = auto()
+
     LOGICAL_FUNCTION_SCAN_TO_PHYSICAL = auto()
     LOGICAL_FILTER_TO_PHYSICAL = auto()
     LOGICAL_PROJECT_TO_PHYSICAL = auto()
@@ -127,6 +130,7 @@ class Promise(IntEnum):
 
     # TRANSFORMATION RULES (LOGICAL -> LOGICAL)
     LOGICAL_INNER_JOIN_COMMUTATIVITY = auto()
+    CACHE_FUNCTION_EXPRESISON_IN_APPLY = auto()
 
     # REWRITE RULES
     EMBED_FILTER_INTO_GET = auto()
@@ -136,6 +140,7 @@ class Promise(IntEnum):
     PUSHDOWN_FILTER_THROUGH_JOIN = auto()
     PUSHDOWN_FILTER_THROUGH_APPLY_AND_MERGE = auto()
     COMBINE_SIMILARITY_ORDERBY_AND_LIMIT_TO_FAISS_INDEX_SCAN = auto()
+    REORDER_PREDICATES = auto()
 
 
 class Rule(ABC):
@@ -158,10 +163,6 @@ class Rule(ABC):
     @property
     def pattern(self):
         return self._pattern
-
-    @pattern.setter
-    def pattern(self, pattern):
-        self._pattern = pattern
 
     def top_match(self, opr: Operator) -> bool:
         return opr.opr_type == self.pattern.opr_type

@@ -29,8 +29,8 @@ class UdfMetadataCatalog(BaseModel):
         `_value:` value of the metadata (as a string)
         `_udf_id:` the `_row_id` of the `UdfCatalog` entry to which the attribute belongs
     """
-    
-    __tablename__ = "udfmetadata_catalog"
+
+    __tablename__ = "udf_metadata_catalog"
 
     _key = Column("key", String(100))
     _value = Column("value", String(100))
@@ -54,14 +54,12 @@ class UdfMetadataCatalog(BaseModel):
             udf_id=self._udf_id,
             udf_name=self._udf._name,
         )
-    
 
 @dataclass(unsafe_hash=True)
 class UdfMetadataCatalogEntry:
     """Class decouples the `UdfMetadataCatalog` from the sqlalchemy.
     This is done to ensure we don't expose the sqlalchemy dependencies beyond catalog service. Further, sqlalchemy does not allow sharing of objects across threads.
     """
-    
     key: str
     value: str
     udf_id: int = None

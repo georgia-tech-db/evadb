@@ -13,21 +13,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import create_sample_video, file_remove, load_inbuilt_udfs
+from test.util import create_sample_video, file_remove, load_udfs_for_testing
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.server.command_handler import execute_query_fetch_all
 from eva.utils.logging_manager import logger
 
 
+@pytest.mark.notparallel
 class InsertExecutorTest(unittest.TestCase):
     def setUp(self):
         # reset the catalog manager before running each test
         CatalogManager().reset()
-        create_sample_video()
+        self.video_file_path = create_sample_video()
 
         query = """CREATE TABLE IF NOT EXISTS CSVTable
             (
@@ -35,8 +37,7 @@ class InsertExecutorTest(unittest.TestCase):
             );
         """
         execute_query_fetch_all(query)
-
-        load_inbuilt_udfs()
+        load_udfs_for_testing(mode="minimal")
 
     def tearDown(self):
         file_remove("dummy.avi")
@@ -44,31 +45,17 @@ class InsertExecutorTest(unittest.TestCase):
     # integration test
     @unittest.skip("Not supported in current version")
     def test_should_load_video_in_table(self):
-        query = """LOAD VIDEO 'dummy.avi' INTO MyVideo;"""
+        query = f"""LOAD VIDEO '{self.video_file_path}' INTO MyVideo;"""
         execute_query_fetch_all(query)
 
-        insert_query = """ INSERT INTO MyVideo (id, data) VALUES (
-            [
-                [
-                    40,
-                    [
-                        [[40, 40, 40], [40, 40, 40]],
-                        [[40, 40, 40], [40, 40, 40]]
-                    ]
-                ]
-            ]);"""
+        insert_query = """ INSERT INTO MyVideo (id, data) VALUES
+            (40, [[40, 40, 40], [40, 40, 40]],
+                 [[40, 40, 40], [40, 40, 40]]);"""
         execute_query_fetch_all(insert_query)
 
-        insert_query_2 = """ INSERT INTO MyVideo (id, data) VALUES (
-            [
-                [
-                    41,
-                    [
-                        [[41, 41, 41] , [41, 41, 41]],
-                        [[41, 41, 41], [41, 41, 41]]
-                    ]
-                ]
-            ]);"""
+        insert_query_2 = """ INSERT INTO MyVideo (id, data) VALUES
+        ( 41, [[41, 41, 41] , [41, 41, 41]],
+                [[41, 41, 41], [41, 41, 41]]);"""
         execute_query_fetch_all(insert_query_2)
 
         query = "SELECT id, data FROM MyVideo WHERE id = 40"
@@ -115,3 +102,7 @@ class InsertExecutorTest(unittest.TestCase):
                 ),
             )
         )
+
+        query = """SELECT name FROM CSVTable WHERE name LIKE '.*(sad|happy)';"""
+        batch = execute_query_fetch_all(query)
+        self.assertEqual(len(batch._frames), 2)

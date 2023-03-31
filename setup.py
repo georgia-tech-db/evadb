@@ -47,19 +47,23 @@ minimal_requirement = [
     "pyyaml>=5.1",
     "importlib-metadata<5.0",
     "ray>=1.13.0",
-    "aenum>=2.2.0"
+    "aenum>=2.2.0",
+    "diskcache>=5.4.0",
+    "decord>=0.6.0"
 ]
 
 formatter_libs = [
-    "black>=22.6.0",
+    "black>=23.1.0",
     "isort>=5.10.1"
 ]
 
 test_libs = [
     "pytest>=6.1.2",
     "pytest-cov>=2.11.1",
+    "pytest-random-order>=1.0.4",
     "pytest-virtualenv",
     "pytest-asyncio",
+    "pytest-xdist",
     "coveralls>=3.0.1",
     "mock>=4.0.3",
     "flake8>=3.9.1",
@@ -103,7 +107,8 @@ udf_libs = [
     "easyocr>=1.5.0",         # OCR EXTRACTION
     "ipython",
     "yolov5<=7.0.6",          # OBJECT DETECTION
-    "detoxify"                # TEXT TOXICITY CLASSIFICATION
+    "detoxify",               # TEXT TOXICITY CLASSIFICATION
+    "thefuzz"                 # FUZZY STRING MATCHINGz
 ]
 
 ### NEEDED FOR EXPERIMENTAL FEATURES

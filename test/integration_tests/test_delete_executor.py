@@ -13,9 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import file_remove, load_inbuilt_udfs
+from test.util import file_remove, load_udfs_for_testing
 
 import numpy as np
+import pytest
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.configuration_manager import ConfigurationManager
@@ -23,6 +24,7 @@ from eva.configuration.constants import EVA_ROOT_DIR
 from eva.server.command_handler import execute_query_fetch_all
 
 
+@pytest.mark.notparallel
 class DeleteExecutorTest(unittest.TestCase):
     def setUp(self):
         # Bootstrap configuration manager.
@@ -30,13 +32,13 @@ class DeleteExecutorTest(unittest.TestCase):
 
         # Reset catalog.
         CatalogManager().reset()
-
-        load_inbuilt_udfs()
+        load_udfs_for_testing(mode="minimal")
 
         create_table_query = """
                 CREATE TABLE IF NOT EXISTS testDeleteOne
                 (
                  id INTEGER,
+                 dummyfloat FLOAT(5, 3),
                  feat   NDARRAY FLOAT32(1, 3),
                  input  NDARRAY UINT8(1, 3)
                  );
@@ -44,18 +46,18 @@ class DeleteExecutorTest(unittest.TestCase):
         execute_query_fetch_all(create_table_query)
 
         insert_query1 = """
-                INSERT INTO testDeleteOne (id, feat, input)
-                VALUES (5, [[0, 0, 0]], [[0, 0, 0]]);
+                INSERT INTO testDeleteOne (id, dummyfloat, feat, input)
+                VALUES (5, 1.5, [[0, 0, 0]], [[0, 0, 0]]);
         """
         execute_query_fetch_all(insert_query1)
         insert_query2 = """
-                INSERT INTO testDeleteOne (id, feat, input)
-                VALUES (15, [[100, 100, 100]], [[100, 100, 100]]);
+                INSERT INTO testDeleteOne (id, dummyfloat,feat, input)
+                VALUES (15, 2.5, [[100, 100, 100]], [[100, 100, 100]]);
         """
         execute_query_fetch_all(insert_query2)
         insert_query3 = """
-                INSERT INTO testDeleteOne (id, feat, input)
-                VALUES (25, [[200, 200, 200]], [[200, 200, 200]]);
+                INSERT INTO testDeleteOne (id, dummyfloat,feat, input)
+                VALUES (25, 3.5, [[200, 200, 200]], [[200, 200, 200]]);
         """
         execute_query_fetch_all(insert_query3)
 
@@ -120,14 +122,14 @@ class DeleteExecutorTest(unittest.TestCase):
         )
 
     def test_should_delete_tuple_in_table(self):
-        delete_query = "DELETE FROM testDeleteOne WHERE id < 20;"
+        delete_query = """DELETE FROM testDeleteOne WHERE
+               id < 20 OR dummyfloat < 2 AND id < 5 AND 20 > id
+               AND id <= 20 AND id >= 5 OR id != 15 OR id = 15;"""
         batch = execute_query_fetch_all(delete_query)
 
         query = "SELECT * FROM testDeleteOne;"
         batch = execute_query_fetch_all(query)
-        from eva.utils.logging_manager import logger
 
-        logger.info(batch)
         np.testing.assert_array_equal(
             batch.frames["testdeleteone.id"].array,
             np.array([25], dtype=np.int64),

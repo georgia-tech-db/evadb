@@ -15,10 +15,9 @@
 import unittest
 from test.util import (
     DummyObjectDetector,
-    copy_sample_videos_to_upload_dir,
     create_sample_video,
     file_remove,
-    load_inbuilt_udfs,
+    load_udfs_for_testing,
 )
 
 import pandas as pd
@@ -32,18 +31,18 @@ from eva.server.command_handler import execute_query_fetch_all
 NUM_FRAMES = 10
 
 
+@pytest.mark.notparallel
 class MaterializedViewTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # reset the catalog manager before running each test
         CatalogManager().reset()
         video_file_path = create_sample_video()
-        copy_sample_videos_to_upload_dir()
         load_query = f"LOAD VIDEO '{video_file_path}' INTO MyVideo;"
         execute_query_fetch_all(load_query)
         ua_detrac = f"{EVA_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
         execute_query_fetch_all(f"LOAD VIDEO '{ua_detrac}' INTO UATRAC;")
-        load_inbuilt_udfs()
+        load_udfs_for_testing()
 
     @classmethod
     def tearDownClass(cls):

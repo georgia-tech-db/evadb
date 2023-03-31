@@ -20,8 +20,17 @@ import re
 import subprocess
 import sys
 from pathlib import Path
+import asyncio
 
 import pkg_resources
+
+background_loop = asyncio.new_event_loop()
+
+def background(f):
+    def wrapped(*args, **kwargs):
+        return background_loop.run_in_executor(None, f, *args, **kwargs)
+
+    return wrapped
 
 # ==============================================
 # CONFIGURATION
@@ -48,12 +57,7 @@ DEFAULT_DIRS = []
 DEFAULT_DIRS.append(EVA_SRC_DIR)
 DEFAULT_DIRS.append(EVA_TEST_DIR)
 
-IGNORE_FILES = [
-    "evaql_lexer.py",
-    "evaql_parser.py",
-    "evaql_parserListener.py",
-    "evaql_parserVisitor.py",
-]
+IGNORE_FILES = []
 
 FLAKE8_VERSION_REQUIRED = "3.9.1"
 BLACK_VERSION_REQUIRED = "22.6.0"
@@ -181,14 +185,13 @@ def format_file(file_path, add_header, strip_header, format_code):
             fd.write(new_file_data)
 
         elif format_code:
-            LOG.info("Formatting File : " + file_path)
+            #LOG.info("Formatting File : " + file_path)
             # ISORT
             isort_command = f"{ISORT_BINARY} --profile  black  {file_path}"
             os.system(isort_command)
 
             # AUTOPEP
-            black_command = f"{BLACK_BINARY}  {file_path}"
-            # LOG.info(black_command)
+            black_command = f"{BLACK_BINARY} -q {file_path}"
             os.system(black_command)
 
             # AUTOFLAKE
@@ -223,6 +226,23 @@ def format_dir(dir_path, add_header, strip_header, format_code):
 
 
 # END ADD_HEADERS_DIR(DIR_PATH)
+
+@background
+def check_file(file):
+    #print(file)
+    valid = False
+    # only format the default directories
+    file_path = str(Path(file).absolute())
+    for source_dir in DEFAULT_DIRS:
+        source_path = str(Path(source_dir).resolve())
+        if file_path.startswith(source_path):
+            valid = True
+
+    if valid:
+        if not check_header(file):
+            format_file(file, False, True, False)
+            format_file(file, True, False, False)
+        format_file(file, False, False, True)
 
 # ==============================================
 # Main Function
@@ -303,18 +323,6 @@ if __name__ == "__main__":
             .rstrip()
             .split("\n")
         )
-        for file in files:
-            print(file)
-            valid = False
-            # only format the defualt directories
-            file_path = str(Path(file).absolute())
-            for source_dir in DEFAULT_DIRS:
-                source_path = str(Path(source_dir).resolve())
-                if file_path.startswith(source_path):
-                    valid = True
 
-            if valid:
-                if not check_header(file):
-                    format_file(file, False, True, False)
-                    format_file(file, True, False, False)
-                format_file(file, False, False, True)
+        for file in files:
+            check_file(file)

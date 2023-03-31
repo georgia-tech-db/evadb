@@ -46,7 +46,6 @@ from eva.optimizer.operators import (
     LogicalSample,
     LogicalShow,
     LogicalUnion,
-    LogicalUpload,
     Operator,
 )
 from eva.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
@@ -128,7 +127,11 @@ class StatementToOprTest(unittest.TestCase):
         "eva.optimizer.\
 statement_to_opr_convertor.column_definition_to_udf_io"
     )
-    def test_visit_create_udf(self, mock, l_create_udf_mock):
+    @patch(
+        "eva.optimizer.\
+statement_to_opr_convertor.metadata_definition_to_udf_metadata"
+    )
+    def test_visit_create_udf(self, metadata_def_mock, col_def_mock, l_create_udf_mock):
         convertor = StatementToPlanConvertor()
         stmt = MagicMock()
         stmt.name = "name"
@@ -137,10 +140,13 @@ statement_to_opr_convertor.column_definition_to_udf_io"
         stmt.outputs = ["out"]
         stmt.impl_path = "tmp.py"
         stmt.udf_type = "classification"
-        mock.side_effect = ["inp", "out"]
+        stmt.metadata = [("key1", "value1"), ("key2", "value2")]
+        col_def_mock.side_effect = ["inp", "out"]
+        metadata_def_mock.side_effect = [{"key1": "value1", "key2": "value2"}]
         convertor.visit_create_udf(stmt)
-        mock.assert_any_call(stmt.inputs, True)
-        mock.assert_any_call(stmt.outputs, False)
+        col_def_mock.assert_any_call(stmt.inputs, True)
+        col_def_mock.assert_any_call(stmt.outputs, False)
+        metadata_def_mock.assert_any_call(stmt.metadata)
         l_create_udf_mock.assert_called_once()
         l_create_udf_mock.assert_called_with(
             stmt.name,
@@ -149,6 +155,7 @@ statement_to_opr_convertor.column_definition_to_udf_io"
             "out",
             stmt.impl_path,
             stmt.udf_type,
+            {"key1": "value1", "key2": "value2"},
         )
 
     def test_visit_should_call_create_udf(self):
@@ -268,9 +275,6 @@ statement_to_opr_convertor.column_definition_to_udf_io"
         query_derived_plan = LogicalQueryDerivedGet(MagicMock())
         load_plan = LogicalLoadData(MagicMock(), MagicMock(), MagicMock(), MagicMock())
         limit_plan = LogicalLimit(MagicMock())
-        upload_plan = LogicalUpload(
-            MagicMock(), MagicMock(), MagicMock(), MagicMock(), MagicMock(), MagicMock()
-        )
         rename_plan = LogicalRename(MagicMock(), MagicMock())
 
         explain_plan = LogicalExplain([MagicMock()])
@@ -279,7 +283,7 @@ statement_to_opr_convertor.column_definition_to_udf_io"
         drop_plan = LogicalDrop(MagicMock(), MagicMock())
         drop_udf_plan = LogicalDropUDF(MagicMock(), MagicMock())
         get_plan = LogicalGet(MagicMock(), MagicMock(), MagicMock())
-        sample_plan = LogicalSample(MagicMock())
+        sample_plan = LogicalSample(MagicMock(), MagicMock())
         filter_plan = LogicalFilter(MagicMock())
         faiss_plan = LogicalFaissIndexScan(MagicMock(), MagicMock(), MagicMock())
         groupby_plan = LogicalGroupBy(MagicMock())
@@ -302,7 +306,6 @@ statement_to_opr_convertor.column_definition_to_udf_io"
         plans.append(query_derived_plan)
         plans.append(load_plan)
         plans.append(limit_plan)
-        plans.append(upload_plan)
         plans.append(rename_plan)
         plans.append(drop_plan)
         plans.append(drop_udf_plan)
