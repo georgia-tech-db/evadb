@@ -104,12 +104,21 @@ class ReuseTest(unittest.TestCase):
 
     def test_reuse_does_not_work_when_expression_in_where_clause(self):
         # add with subsequent PR
+        # select_query = """
+        #     SELECT id FROM DETRAC
+        #     WHERE ArrayCount(YoloV5(data).labels, 'car') > 3 AND id < 5 AND FastRCNNObjectDetector(data).labels = ['car'];"""
+
         select_query = """
             SELECT id FROM DETRAC
             WHERE ArrayCount(YoloV5(data).labels, 'car') > 3 AND id < 5;"""
+
+        execute_query_fetch_all(select_query)
+        execute_query_fetch_all(select_query)
+
         plan = next(get_logical_query_plan(select_query).find_all(LogicalFilter))
         yolo_expr = None
         for expr in plan.predicate.find_all(FunctionExpression):
+            print(expr.name)
             if expr.name == "YoloV5":
                 yolo_expr = expr
 
