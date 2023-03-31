@@ -412,7 +412,7 @@ class LoadExecutorTest(unittest.TestCase):
         actual_batch.sort()
 
         # assert the batches are equal
-        expected_batch = create_dummy_csv_batches()
+        expected_batch = next(create_dummy_csv_batches())
         expected_batch.modify_column_alias("myvideocsv")
         self.assertEqual(actual_batch, expected_batch)
 
@@ -448,7 +448,7 @@ class LoadExecutorTest(unittest.TestCase):
 
         # assert the batches are equal
         select_columns = ["id", "frame_id", "video_id", "dataset_name"]
-        expected_batch = create_dummy_csv_batches(target_columns=select_columns)
+        expected_batch = next(create_dummy_csv_batches(target_columns=select_columns))
         expected_batch.modify_column_alias("myvideocsv")
         self.assertEqual(actual_batch, expected_batch)
 
