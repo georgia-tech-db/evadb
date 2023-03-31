@@ -44,7 +44,9 @@ class DecordLoaderTest(unittest.TestCase):
         )
         self.frame_size = FRAME_SIZE[0] * FRAME_SIZE[1] * 3
         self.audio_frames = []
-        for line in open(f"{EVA_ROOT_DIR}/test/data/touchdown_audio_frames.csv").readlines():
+        for line in open(
+            f"{EVA_ROOT_DIR}/test/data/touchdown_audio_frames.csv"
+        ).readlines():
             self.audio_frames.append(np.fromstring(line, sep=","))
 
     @classmethod
@@ -171,7 +173,9 @@ class DecordLoaderTest(unittest.TestCase):
         batches = list(video_loader.read())
 
         for i, frame in enumerate(self.audio_frames):
-            self.assertTrue(np.array_equiv(self.audio_frames[i], batches[0].frames.iloc[i]["audio"]))
+            self.assertTrue(
+                np.array_equiv(self.audio_frames[i], batches[0].frames.iloc[i]["audio"])
+            )
         # just verify that video frames were read, correctness is verified in prior test cases
         self.assertEqual(batches[0].frames.loc[0]["data"].shape, (720, 1280, 3))
 
@@ -187,6 +191,8 @@ class DecordLoaderTest(unittest.TestCase):
         batches = list(video_loader.read())
 
         for i, frame in enumerate(self.audio_frames):
-            self.assertTrue(np.array_equiv(self.audio_frames[i], batches[0].frames.iloc[i]["audio"]))
+            self.assertTrue(
+                np.array_equiv(self.audio_frames[i], batches[0].frames.iloc[i]["audio"])
+            )
         # verify that no video frame was read
         self.assertEqual(batches[0].frames.loc[0]["data"].shape, (0,))

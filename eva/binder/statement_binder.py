@@ -24,7 +24,7 @@ from eva.binder.binder_utils import (
 )
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.catalog_type import VideoColumnName, IndexType, NdArrayType, TableType
+from eva.catalog.catalog_type import IndexType, NdArrayType, TableType, VideoColumnName
 from eva.expression.abstract_expression import AbstractExpression, ExpressionType
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression

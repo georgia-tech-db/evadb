@@ -16,7 +16,13 @@ import uuid
 from pathlib import Path
 from typing import List
 
-from eva.catalog.catalog_type import ImageColumnName, VideoColumnName, ColumnType, NdArrayType, TableType
+from eva.catalog.catalog_type import (
+    ColumnType,
+    ImageColumnName,
+    NdArrayType,
+    TableType,
+    VideoColumnName,
+)
 from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.catalog.models.udf_cache_catalog import UdfCacheCatalogEntry
