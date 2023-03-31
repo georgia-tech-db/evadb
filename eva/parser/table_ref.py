@@ -158,7 +158,7 @@ class TableRef:
         sample_freq: float = None,
         sample_type: str = None,
         get_audio: bool = False,
-        get_video: bool = True,
+        get_video: bool = False,
     ):
         self._ref_handle = table
         self._sample_freq = sample_freq

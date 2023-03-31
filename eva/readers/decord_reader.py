@@ -69,6 +69,7 @@ class DecordReader(AbstractReader):
     def _read(self) -> Iterator[Dict]:
         decord = _lazy_import_decord()
         av_reader = None
+        v_reader = None
         get_frame = self.__get_video_frame
         # Check for availability of audio stream
         # If there is an audio stream => AVReader
@@ -78,14 +79,16 @@ class DecordReader(AbstractReader):
                 av_reader = decord.AVReader(self.file_url, mono=True, sample_rate=16000)
                 if self._read_video:
                     get_frame = self.__get_audio_video_frame
+                    v_reader = decord.VideoReader(self.file_url)
                 else:
                     get_frame = self.__get_audio_frame
             except decord._ffi.base.DECORDError as error_msg:
                 assert "Can't find audio stream" in str(error_msg), error_msg
+                v_reader = decord.VideoReader(self.file_url)
+        else:
+            v_reader = decord.VideoReader(self.file_url)
 
-        v_reader = decord.VideoReader(self.file_url)
-
-        num_frames = int(len(v_reader))
+        num_frames = int(len(v_reader)) if v_reader else int(len(av_reader))
         if self._predicate:
             range_list = extract_range_list_from_predicate(
                 self._predicate, 0, num_frames - 1
@@ -120,7 +123,7 @@ class DecordReader(AbstractReader):
                 for frame_id in range(begin, end + 1, self._sampling_rate):
                     yield get_frame(frame_id, av_reader, v_reader)
 
-    def __get_audio_video_frame(self, frame_id, av_reader: decord.AVReader, v_reader: decord.VideoReader):
+    def __get_audio_video_frame(self, frame_id, av_reader, v_reader):
         frame_audio, frame_video = av_reader[frame_id]
         frame_audio = frame_audio.asnumpy()
         frame_video = frame_video.asnumpy()
@@ -133,7 +136,7 @@ class DecordReader(AbstractReader):
             VideoColumnName.audio.name: frame_audio,
         }
 
-    def __get_video_frame(self, frame_id, av_reader: decord.AVReader, v_reader: decord.VideoReader):
+    def __get_video_frame(self, frame_id, av_reader, v_reader):
         frame_video = v_reader[frame_id]
         frame_video = frame_video.asnumpy()
         timestamp = v_reader.get_frame_timestamp(frame_id)[0]
@@ -145,14 +148,13 @@ class DecordReader(AbstractReader):
             VideoColumnName.audio.name: np.empty(0),
         }
 
-    def __get_audio_frame(self, frame_id, av_reader: decord.AVReader, v_reader: decord.VideoReader):
+    def __get_audio_frame(self, frame_id, av_reader, v_reader):
         frame_audio, _ = av_reader[frame_id]
         frame_audio = frame_audio.asnumpy()
-        timestamp = v_reader.get_frame_timestamp(frame_id)[0]
 
         return {
             VideoColumnName.id.name: frame_id,
             VideoColumnName.data.name: np.empty(0),
-            VideoColumnName.seconds.name: round(timestamp, 2),
+            VideoColumnName.seconds.name: 0.0,
             VideoColumnName.audio.name: frame_audio,
         }
