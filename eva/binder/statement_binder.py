@@ -38,8 +38,8 @@ from eva.parser.select_statement import SelectStatement
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
 from eva.utils.generic_utils import get_file_checksum, load_udf_class_from_file
-from eva.utils.logging_manager import logger
 from eva.utils.huggingface_utils import bind_hf_func_from_udf
+from eva.utils.logging_manager import logger
 
 if sys.version_info >= (3, 8):
     from functools import singledispatchmethod
@@ -230,11 +230,11 @@ class StatementBinder:
             )
             logger.error(err_msg)
             raise BinderError(err_msg)
-        
+
         udf_file_path = udf_obj.impl_file_path
         udf_name = udf_obj.name
 
-        if udf_obj.type == 'HuggingFace':
+        if udf_obj.type == "HuggingFace":
             node.function = bind_hf_func_from_udf(udf_obj)
         else:
             # Verify the consistency of the UDF. If the checksum of the UDF does not match

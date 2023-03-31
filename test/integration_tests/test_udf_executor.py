@@ -51,7 +51,7 @@ class HuggingFaceTests(unittest.TestCase):
     def tearDown(self) -> None:
         file_remove("dummy.avi")
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
-    
+
     def test_object_detection_huggingface(self):
         create_udf_query = """CREATE UDF DummyObjectDetector 
             INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
@@ -60,7 +60,7 @@ class HuggingFaceTests(unittest.TestCase):
             IMPL 'abc'
             'task' 'object-detection'
         """
-        execute_query_fetch_all(create_udf_query) 
+        execute_query_fetch_all(create_udf_query)
 
         select_query = "SELECT DummyObjectDetector(data) FROM DETRAC;"
         result = execute_query_fetch_all(select_query)
@@ -74,7 +74,7 @@ class HuggingFaceTests(unittest.TestCase):
             IMPL 'abc'
             'task' 'image-classification'
         """
-        execute_query_fetch_all(create_udf_query) 
+        execute_query_fetch_all(create_udf_query)
 
         select_query = "SELECT DummyObjectDetector(data) FROM DETRAC;"
         result = execute_query_fetch_all(select_query)
@@ -97,7 +97,7 @@ class HuggingFaceTests(unittest.TestCase):
             IMPL 'abc'
             'task' 'text-classification'
         """
-        execute_query_fetch_all(create_udf_query) 
+        execute_query_fetch_all(create_udf_query)
 
         select_query = "SELECT DummyObjectDetector(comment) FROM MyCSV;"
         result = execute_query_fetch_all(select_query)
@@ -108,11 +108,12 @@ class HuggingFaceTests(unittest.TestCase):
             TYPE HuggingFace
             'task' 'object-detection'
         """
-        execute_query_fetch_all(create_udf_query) 
+        execute_query_fetch_all(create_udf_query)
 
         select_query = "SELECT DummyObjectDetector(data) FROM DETRAC;"
         result = execute_query_fetch_all(select_query)
         pass
+
 
 @pytest.mark.notparallel
 class UDFExecutorTest(unittest.TestCase):

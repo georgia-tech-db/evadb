@@ -32,18 +32,18 @@ class CreateUDFExecutor(AbstractExecutor):
     def handle_huggingface_udf(self):
         """Handle HuggingFace UDFs
 
-        HuggingFace UDFs are special UDFs that are not loaded from a file. 
+        HuggingFace UDFs are special UDFs that are not loaded from a file.
         So we do not need to call the setup method on them like we do for other UDFs.
         """
-        impl_path = f'{EVA_DEFAULT_DIR}/udfs/generic_huggingface_model.py'
+        impl_path = f"{EVA_DEFAULT_DIR}/udfs/generic_huggingface_model.py"
         return self.node.name, impl_path, self.node.udf_type, [], self.node.metadata
 
     def handle_generic_udf(self):
         """Handle generic UDFs
 
-        Generic UDFs are loaded from a file. We check for inputs passed by the user during CREATE or try to load io from decorators. 
+        Generic UDFs are loaded from a file. We check for inputs passed by the user during CREATE or try to load io from decorators.
         """
-                # load the udf class from the file
+        # load the udf class from the file
         impl_path = self.node.impl_path.absolute().as_posix()
         try:
             # loading the udf class from the file
@@ -72,8 +72,13 @@ class CreateUDFExecutor(AbstractExecutor):
             err_msg = f"Error creating UDF, input/output definition incorrect: {str(e)}"
             logger.error(err_msg)
             raise RuntimeError(err_msg)
-        return self.node.name, impl_path, self.node.udf_type, io_list, self.node.metadata
-                
+        return (
+            self.node.name,
+            impl_path,
+            self.node.udf_type,
+            io_list,
+            self.node.metadata,
+        )
 
     def exec(self, *args, **kwargs):
         """Create udf executor
@@ -92,9 +97,9 @@ class CreateUDFExecutor(AbstractExecutor):
                 msg = f"UDF {self.node.name} already exists."
                 logger.error(msg)
                 raise RuntimeError(msg)
-        
+
         # if it's a type of HuggingFaceModel, override the impl_path
-        if self.node.udf_type == 'HuggingFace':
+        if self.node.udf_type == "HuggingFace":
             name, impl_path, udf_type, io_list, metadata = self.handle_huggingface_udf()
         else:
             name, impl_path, udf_type, io_list, metadata = self.handle_generic_udf()

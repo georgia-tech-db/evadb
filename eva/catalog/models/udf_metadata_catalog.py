@@ -19,6 +19,7 @@ from sqlalchemy.orm import relationship
 
 from eva.catalog.models.base_model import BaseModel
 
+
 class UdfMetadataCatalog(BaseModel):
     """
     The `UdfMetadataCatalog` catalog stores information about the metadata of user-defined functions (UDFs).
@@ -55,11 +56,13 @@ class UdfMetadataCatalog(BaseModel):
             udf_name=self._udf._name,
         )
 
+
 @dataclass(unsafe_hash=True)
 class UdfMetadataCatalogEntry:
     """Class decouples the `UdfMetadataCatalog` from the sqlalchemy.
     This is done to ensure we don't expose the sqlalchemy dependencies beyond catalog service. Further, sqlalchemy does not allow sharing of objects across threads.
     """
+
     key: str
     value: str
     udf_id: int = None

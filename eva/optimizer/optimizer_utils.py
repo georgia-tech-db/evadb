@@ -63,9 +63,10 @@ def column_definition_to_udf_io(col_list: List[ColumnDefinition], is_input: bool
         )
     return result_list
 
+
 def metadata_definition_to_udf_metadata(metadata_list: List[Tuple[str, str]]):
     """Create the UdfMetadataCatalogEntry object for each metadata definition provided
-    
+
     Arguments:
         col_list(List[Tuple[str, str]]): parsed metadata definitions
     """

@@ -71,7 +71,7 @@ class UdfCatalog(BaseModel):
                 args.append(attribute.as_dataclass())
             else:
                 outputs.append(attribute.as_dataclass())
-    
+
         metadata = []
         for meta_key_value in self._metadata:
             metadata.append(meta_key_value.as_dataclass())

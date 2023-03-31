@@ -22,16 +22,16 @@ class GenericHuggingfaceModel(AbstractUDF, GPUCompatible):
     @property
     def name(self) -> str:
         return "GenericHuggingfaceModel"
-    
+
     def setup(self, *args, **kwargs) -> None:
-        pass 
+        pass
 
     @property
     def input_format(self) -> str:
         return str
-    
+
     def forward(self, *args, **kwargs) -> None:
         pass
 
     def to_device(self, device: str) -> GPUCompatible:
-        pass 
+        pass
