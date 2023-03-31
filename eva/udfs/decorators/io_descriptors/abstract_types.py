@@ -19,6 +19,7 @@ from eva.catalog.catalog_type import ColumnType, NdArrayType
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 from eva.utils.errors import UDFIODefinitionError
 
+
 class IOArgument(ABC):
     """
     Base class for representing inputs/outputs (IO) of a UDF using decorators. This class defines methods
@@ -40,22 +41,22 @@ class IOArgument(ABC):
 
         """
         pass
-    
+
     @abstractmethod
     def check_array_and_convert_shape(self, input_obj):
         pass
-    
+
     @abstractmethod
     def check_array_and_convert_type(self, input_obj, data_type):
         pass
-    
+
     def is_array_type_defined(self):
-        return not(self.array_type == None)
-    
+        return not (self.array_type == None)
+
     def is_shape_defined(self):
-        return not(self.array_dimensions == None)
-    
-    def validate_object(self, object, input_flag = True):
+        return not (self.array_dimensions == None)
+
+    def validate_object(self, object, input_flag=True):
         if self.is_array_type_defined:
             try:
                 object = self.check_array_and_convert_type(object)
@@ -65,7 +66,7 @@ class IOArgument(ABC):
                 else:
                     msg = "Data type mismatch of Output parameter."
                 raise UDFIODefinitionError(msg)
-            
+
         if self.is_shape_defined:
             try:
                 object = self.check_array_and_convert_shape(object)
@@ -75,10 +76,8 @@ class IOArgument(ABC):
                 else:
                     msg = "Shape mismatch of Output parameter."
                 raise UDFIODefinitionError(msg)
-        
+
         return object
-    
-    
 
 
 class IOColumnArgument(IOArgument):
@@ -125,6 +124,3 @@ class IOColumnArgument(IOArgument):
                 is_input=is_input,
             )
         ]
-    
-            
-        

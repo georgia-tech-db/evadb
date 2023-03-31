@@ -13,10 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import List, Tuple, Type
+
 import numpy as np
 import torch
 
-from eva.catalog.catalog_type import NdArrayType
 from eva.catalog.catalog_type import ColumnType, Dimension, NdArrayType
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 from eva.udfs.decorators.io_descriptors.abstract_types import (
@@ -43,7 +43,7 @@ class NumpyArray(IOColumnArgument):
             array_type=type,
             array_dimensions=dimensions,
         )
-        
+
     def check_array_and_convert_shape(self, input_object):
         try:
             return np.reshape(input_object, self.array_dimensions)
@@ -54,17 +54,19 @@ class NumpyArray(IOColumnArgument):
                 "The input object cannot be reshaped to %s. Error is %s"
                 % (self.array_dimensions, str(e))
             )
-                
+
     def check_array_and_convert_type(self, input_object):
-        
+
         if not isinstance(input_object, np.ndarray):
             if isinstance(input_object, list):
                 input_object = np.asarray(input_object)
             elif isinstance(input_object, torch.Tensor):
                 input_object = input_object.numpy()
             else:
-                raise UDFIODefinitionError("Unknown data type. Only input types List and Tensor can be converted to Numpy array")
-            
+                raise UDFIODefinitionError(
+                    "Unknown data type. Only input types List and Tensor can be converted to Numpy array"
+                )
+
         if self.array_type == NdArrayType.INT8:
             return input_object.astype(np.int8)
         elif self.type == NdArrayType.INT16:
@@ -79,8 +81,8 @@ class NumpyArray(IOColumnArgument):
             return input_object.astype(np.float64)
         else:
             raise UDFIODefinitionError("Unknown array type.")
-        
- 
+
+
 class PyTorchTensor(IOColumnArgument):
     """Descriptor data type for PyTorch Tensor"""
 
@@ -98,7 +100,7 @@ class PyTorchTensor(IOColumnArgument):
             array_type=type,
             array_dimensions=dimensions,
         )
-                    
+
     def check_array_and_convert_shape(self, input_object):
         try:
             return torch.reshape(input_object, self.array_dimensions)
@@ -108,17 +110,19 @@ class PyTorchTensor(IOColumnArgument):
                 "The input object cannot be reshaped to %s. Error is %s"
                 % (self.array_dimensions, str(e))
             )
-            
+
     def check_array_and_convert_type(self, input_object):
-        
+
         if not isinstance(input_object, torch.Tensor):
             if isinstance(input_object, list):
                 input_object = torch.Tensor(input_object)
             elif isinstance(input_object, np.ndarray):
                 input_object = torch.from_numpy(input_object)
             else:
-                raise UDFIODefinitionError("Unknown data type. Only input types List and Tensor can be converted to Numpy array")
-            
+                raise UDFIODefinitionError(
+                    "Unknown data type. Only input types List and Tensor can be converted to Numpy array"
+                )
+
         if self.array_type == NdArrayType.INT8:
             return input_object.to(torch.int8)
         elif self.type == NdArrayType.INT16:
@@ -133,9 +137,6 @@ class PyTorchTensor(IOColumnArgument):
             return input_object.to(torch.float64)
         else:
             raise UDFIODefinitionError("Unknown array type.")
-        
-    
-    
 
 
 class PandasDataframe(IOArgument):
@@ -179,23 +180,20 @@ class PandasDataframe(IOArgument):
             )
 
         return catalog_entries
-    
+
     def check_array_and_convert_shape(self, input_obj):
         pass
-    
+
     def check_array_and_convert_type(self, input_obj, data_type):
         pass
-    
+
     def validate_object(self, obj, input_flag):
-        
+
         if len(self.columns) != len(obj.columns):
             if input_flag:
                 msg = "Number of columns in the Pandas dataframe input is not matching"
             else:
                 msg = "Number of columns in the Pandas dataframe output is not matching"
             raise UDFIODefinitionError(msg)
-        
+
         return obj
-            
-            
-        

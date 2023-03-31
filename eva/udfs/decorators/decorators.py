@@ -55,46 +55,44 @@ def forward(input_signatures: List[IOArgument], output_signatures: List[IOArgume
     """
 
     def inner_fn(arg_fn):
-        
         def wrapper(*args):
-            
-            #checking the user constraints
-            if len(input_signatures)>0:
+
+            # checking the user constraints
+            if len(input_signatures) > 0:
                 args_lst = []
                 args_lst.append(args[0])
-                
+
                 for i, input_signature in enumerate(input_signatures):
                     try:
-                        args_lst.append(input_signature.validate_object(args[i+1], True))
+                        args_lst.append(
+                            input_signature.validate_object(args[i + 1], True)
+                        )
                     except UDFIODefinitionError as e:
                         raise UDFIODefinitionError(str(e))
-                   
-                if len(args_lst)>0: 
+
+                if len(args_lst) > 0:
                     args = tuple(args_lst)
-            
+
             # calling the forward function defined by the user inside the udf implementation
             output = arg_fn(*args)
-            
+
             if len(output_signatures) == 1:
                 try:
                     return output_signatures[0].validate_object(output, False)
                 except UDFIODefinitionError as e:
                     raise UDFIODefinitionError(str(e))
             else:
-                output_lst  = []
+                output_lst = []
                 for i, output_signature in enumerate(output_signatures):
                     try:
                         output_lst.append(output_signature.validate_object(output[i]))
-                        
+
                     except UDFIODefinitionError as e:
                         raise UDFIODefinitionError(str(e))
-                    
+
                 output = tuple(output)
-                
+
                 return output
-                    
-                    
-                        
 
         tags = {}
         tags["input"] = input_signatures
@@ -103,22 +101,3 @@ def forward(input_signatures: List[IOArgument], output_signatures: List[IOArgume
         return wrapper
 
     return inner_fn
-
-
-# #if data type has been specified
-                # if input_signature.is_array_type_defined():
-                    
-                #     try:
-                #         #the first argument is self, so starting from index 1
-                #         args_lst.append(input_signature.check_array_and_convert_type(args[i+1]))
-                #     except UDFIODefinitionError as e:
-                #         msg = "Data type mismatch of Input parameter. " + str(e)
-                #         raise UDFIODefinitionError(msg)
-                
-                # #if the shape has been specified
-                # if input_signature.is_shape_defined():
-                #     try:
-                #         args_lst[i+1] = input_signature.check_array_and_convert_shape(args_lst[i+1])
-                #     except UDFIODefinitionError as e:
-                #         msg = "Shape mismatch of Input parameter. " + str(e)
-                #         raise UDFIODefinitionError(msg)
