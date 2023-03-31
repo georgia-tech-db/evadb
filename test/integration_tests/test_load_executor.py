@@ -66,10 +66,6 @@ class LoadExecutorTest(unittest.TestCase):
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()
         expected_batch = list(create_dummy_batches())[0]
-        from pprint import pprint
-
-        pprint(actual_batch.frames["myvideo.data"][1])
-        pprint(expected_batch.frames["myvideo.data"][1])
         self.assertEqual(actual_batch, expected_batch)
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
 

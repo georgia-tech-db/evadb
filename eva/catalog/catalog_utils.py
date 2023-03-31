@@ -16,7 +16,7 @@ import uuid
 from pathlib import Path
 from typing import List
 
-from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
+from eva.catalog.catalog_type import ColumnName, ColumnType, NdArrayType, TableType
 from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.catalog.models.udf_cache_catalog import UdfCacheCatalogEntry
@@ -40,17 +40,27 @@ def get_video_table_column_definitions() -> List[ColumnDefinition]:
     name: video path
     id: frame id
     data: frame data
+    audio: frame audio
     """
     columns = [
         ColumnDefinition(
-            "name", ColumnType.TEXT, None, None, ColConstraintInfo(unique=True)
+            ColumnName.name.name,
+            ColumnType.TEXT,
+            None,
+            None,
+            ColConstraintInfo(unique=True),
         ),
-        ColumnDefinition("id", ColumnType.INTEGER, None, None),
+        ColumnDefinition(ColumnName.id.name, ColumnType.INTEGER, None, None),
         ColumnDefinition(
-            "data", ColumnType.NDARRAY, NdArrayType.UINT8, (None, None, None)
+            ColumnName.data.name,
+            ColumnType.NDARRAY,
+            NdArrayType.UINT8,
+            (None, None, None),
         ),
-        ColumnDefinition("seconds", ColumnType.FLOAT, None, []),
-        ColumnDefinition("audio", ColumnType.NDARRAY, NdArrayType.UINT8, (None)),
+        ColumnDefinition(ColumnName.seconds.name, ColumnType.FLOAT, None, []),
+        ColumnDefinition(
+            ColumnName.audio.name, ColumnType.NDARRAY, NdArrayType.UINT8, (None)
+        ),
     ]
     return columns
 
@@ -62,10 +72,17 @@ def get_image_table_column_definitions() -> List[ColumnDefinition]:
     """
     columns = [
         ColumnDefinition(
-            "name", ColumnType.TEXT, None, None, ColConstraintInfo(unique=True)
+            ColumnName.name.name,
+            ColumnType.TEXT,
+            None,
+            None,
+            ColConstraintInfo(unique=True),
         ),
         ColumnDefinition(
-            "data", ColumnType.NDARRAY, NdArrayType.UINT8, (None, None, None)
+            ColumnName.data.name,
+            ColumnType.NDARRAY,
+            NdArrayType.UINT8,
+            (None, None, None),
         ),
     ]
     return columns

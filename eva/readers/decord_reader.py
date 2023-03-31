@@ -16,6 +16,7 @@ from typing import Dict, Iterator
 
 import numpy as np
 
+from eva.catalog.catalog_type import ColumnName
 from eva.constants import IFRAMES
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.expression_utils import extract_range_list_from_predicate
@@ -67,14 +68,13 @@ class DecordReader(AbstractReader):
 
     def _read(self) -> Iterator[Dict]:
         decord = _lazy_import_decord()
-        has_audio = False
+        av_reader = None
         # Check for availability of audio stream
         # If there is an audio stream => AVReader
         # Else => VideoReader (no audio)
         if self._read_audio:
             try:
                 av_reader = decord.AVReader(self.file_url, mono=True, sample_rate=16000)
-                has_audio = True
             except decord._ffi.base.DECORDError as error_msg:
                 if "Can't find audio stream" in str(error_msg):
                     print("No audio stream in video")
@@ -99,47 +99,19 @@ class DecordReader(AbstractReader):
 
                 while idx < len(iframes) and iframes[idx] <= end:
                     frame_id = iframes[idx]
-                    if has_audio:
-                        frame_audio, frame = av_reader[frame_id]
-                        frame_audio = frame_audio.asnumpy()
-                        if self._read_video is None or not self._read_video:
-                            frame = np.empty(0)
-                    else:
-                        frame = v_reader[frame_id]
-                        frame_audio = np.empty(0)
-                    frame = frame.asnumpy()
-                    timestamp = v_reader.get_frame_timestamp(frame_id)[0]
+                    frame = self.__get_frame(frame_id, av_reader, v_reader)
                     idx += self._sampling_rate
                     if frame is not None:
-                        yield {
-                            "id": frame_id,
-                            "data": frame,
-                            "seconds": round(timestamp, 2),
-                            "audio": frame_audio,
-                        }
+                        yield frame
                     else:
                         break
         elif self._sampling_rate == 1:
             for begin, end in range_list:
                 frame_id = begin
                 while frame_id <= end:
-                    if has_audio:
-                        frame_audio, frame = av_reader[frame_id]
-                        frame_audio = frame_audio.asnumpy()
-                        if self._read_video is None or not self._read_video:
-                            frame = np.empty(0)
-                    else:
-                        frame = v_reader[frame_id]
-                        frame_audio = np.empty(0)
-                    frame = frame.asnumpy()
-                    timestamp = v_reader.get_frame_timestamp(frame_id)[0]
+                    frame = self.__get_frame(frame_id, av_reader, v_reader)
                     if frame is not None:
-                        yield {
-                            "id": frame_id,
-                            "data": frame,
-                            "seconds": round(timestamp, 2),
-                            "audio": frame_audio,
-                        }
+                        yield frame
                     else:
                         break
                     frame_id += 1
@@ -149,22 +121,34 @@ class DecordReader(AbstractReader):
                 if begin % self._sampling_rate:
                     begin += self._sampling_rate - (begin % self._sampling_rate)
                 for frame_id in range(begin, end + 1, self._sampling_rate):
-                    if has_audio:
-                        frame_audio, frame = av_reader[frame_id]
-                        frame_audio = frame_audio.asnumpy()
-                        if self._read_video is None or not self._read_video:
-                            frame = np.empty(0)
-                    else:
-                        frame = v_reader[frame_id]
-                        frame_audio = np.empty(0)
-                    frame = frame.asnumpy()
-                    timestamp = v_reader.get_frame_timestamp(frame_id)[0]
+                    frame = self.__get_frame(frame_id, av_reader, v_reader)
                     if frame is not None:
-                        yield {
-                            "id": frame_id,
-                            "data": frame,
-                            "seconds": round(timestamp, 2),
-                            "audio": frame_audio,
-                        }
+                        yield frame
                     else:
                         break
+
+    def __get_frame(self, frame_id, av_reader, v_reader):
+        if av_reader is not None:
+            frame_audio, frame_video = av_reader[frame_id]
+            frame_audio = frame_audio.asnumpy()
+            if frame_audio is None or frame_video is None:
+                return None
+            if self._read_video is None or not self._read_video:
+                frame_video = np.empty(0)
+            else:
+                frame_video = frame_video.asnumpy()
+        else:
+            frame_video = v_reader[frame_id]
+            if frame_video is None:
+                return None
+            frame_audio = np.empty(0)
+            frame_video = frame_video.asnumpy()
+
+        timestamp = v_reader.get_frame_timestamp(frame_id)[0]
+
+        return {
+            ColumnName.id.name: frame_id,
+            ColumnName.data.name: frame_video,
+            ColumnName.seconds.name: round(timestamp, 2),
+            ColumnName.audio.name: frame_audio,
+        }

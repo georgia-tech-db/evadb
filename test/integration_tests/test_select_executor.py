@@ -163,15 +163,20 @@ class SelectExecutorTest(unittest.TestCase):
 
     def test_should_load_and_select_real_audio_in_table(self):
         query = """LOAD VIDEO 'data/sample_videos/touchdown.mp4'
-                   INTO MNIST;"""
+                   INTO TOUCHDOWN;"""
         execute_query_fetch_all(query)
 
-        select_query = "SELECT id, audio FROM MNIST;"
+        select_query = "SELECT id, audio FROM TOUCHDOWN;"
         actual_batch = execute_query_fetch_all(select_query)
-        actual_batch.sort("mnist.id")
-        from pprint import pprint
-
-        pprint(str(actual_batch))
+        actual_batch.sort("touchdown.id")
+        video_reader = DecordReader("data/sample_videos/touchdown.mp4", read_audio=True)
+        expected_batch = Batch(frames=pd.DataFrame())
+        for batch in video_reader.read():
+            batch.frames["name"] = "touchdown.mp4"
+            expected_batch += batch
+        expected_batch.modify_column_alias("touchdown")
+        expected_batch = expected_batch.project(["touchdown.id", "touchdown.audio"])
+        self.assertEqual(actual_batch, expected_batch)
 
     def test_select_and_where_video_in_table(self):
         select_query = "SELECT * FROM MyVideo WHERE id = 5;"
