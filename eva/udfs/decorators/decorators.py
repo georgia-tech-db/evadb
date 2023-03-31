@@ -17,7 +17,6 @@
 from typing import List
 
 from eva.udfs.decorators.io_descriptors.abstract_types import IOArgument
-from eva.udfs.decorators.io_descriptors.data_types import PandasDataframe
 from eva.utils.errors import UDFIODefinitionError
 
 
@@ -60,11 +59,13 @@ def forward(input_signatures: List[IOArgument], output_signatures: List[IOArgume
             # checking the user constraints
             if len(input_signatures) > 0:
                 args_lst = []
-                args_lst.append(args[0])
+                if len(args) > 0:
+                    args_lst.append(args[0])
 
                 for i, input_signature in enumerate(input_signatures):
                     try:
                         args_lst.append(
+                            # the first object in the forward function is self so we start from the second object
                             input_signature.validate_object(args[i + 1], True)
                         )
                     except UDFIODefinitionError as e:

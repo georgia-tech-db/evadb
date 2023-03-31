@@ -51,16 +51,20 @@ class IOArgument(ABC):
         pass
 
     def is_array_type_defined(self):
-        return not (self.array_type == None)
+        if self.array_type is None:
+            return False
+        return True
 
     def is_shape_defined(self):
-        return not (self.array_dimensions == None)
+        if self.array_dimensions is None:
+            return False
+        return True
 
     def validate_object(self, object, input_flag=True):
         if self.is_array_type_defined:
             try:
                 object = self.check_array_and_convert_type(object)
-            except:
+            except Exception as e:
                 if input_flag:
                     msg = "Data type mismatch of Input parameter. "
                 else:
@@ -70,7 +74,7 @@ class IOArgument(ABC):
         if self.is_shape_defined:
             try:
                 object = self.check_array_and_convert_shape(object)
-            except:
+            except Exception as e:
                 if input_flag:
                     msg = "Shape mismatch of Input parameter. "
                 else:

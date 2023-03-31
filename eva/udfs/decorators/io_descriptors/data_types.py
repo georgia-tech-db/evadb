@@ -79,6 +79,8 @@ class NumpyArray(IOColumnArgument):
             return input_object.astype(np.float32)
         elif self.array_type == NdArrayType.FLOAT64:
             return input_object.astype(np.float64)
+        elif self.array_type == NdArrayType.STR:
+            return input_object
         else:
             raise UDFIODefinitionError("Unknown array type.")
 
