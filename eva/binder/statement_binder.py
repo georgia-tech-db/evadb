@@ -231,9 +231,6 @@ class StatementBinder:
             logger.error(err_msg)
             raise BinderError(err_msg)
 
-        udf_file_path = udf_obj.impl_file_path
-        udf_name = udf_obj.name
-
         if udf_obj.type == "HuggingFace":
             node.function = bind_hf_func_from_udf(udf_obj)
         else:

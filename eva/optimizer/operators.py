@@ -732,10 +732,6 @@ class LogicalCreateUDF(Operator):
     def metadata(self):
         return self._metadata
 
-    @property
-    def metadata(self):
-        return self._metadata
-
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
         if not isinstance(other, LogicalCreateUDF):

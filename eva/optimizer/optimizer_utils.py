@@ -81,23 +81,6 @@ def metadata_definition_to_udf_metadata(metadata_list: List[Tuple[str, str]]):
     return result_list
 
 
-def metadata_definition_to_udf_metadata(metadata_list: List[Tuple[str, str]]):
-    """Create the UdfMetadataCatalogEntry object for each metadata definition provided
-
-    Arguments:
-        col_list(List[Tuple[str, str]]): parsed metadata definitions
-    """
-    result_list = []
-    for metadata in metadata_list:
-        result_list.append(
-            UdfMetadataCatalogEntry(
-                metadata[0],
-                metadata[1],
-            )
-        )
-    return result_list
-
-
 def extract_equi_join_keys(
     join_predicate: AbstractExpression,
     left_table_aliases: List[Alias],
