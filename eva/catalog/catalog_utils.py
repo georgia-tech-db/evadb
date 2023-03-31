@@ -16,7 +16,7 @@ import uuid
 from pathlib import Path
 from typing import List
 
-from eva.catalog.catalog_type import ColumnName, ColumnType, NdArrayType, TableType
+from eva.catalog.catalog_type import ImageColumnName, VideoColumnName, ColumnType, NdArrayType, TableType
 from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.catalog.models.udf_cache_catalog import UdfCacheCatalogEntry
@@ -44,22 +44,22 @@ def get_video_table_column_definitions() -> List[ColumnDefinition]:
     """
     columns = [
         ColumnDefinition(
-            ColumnName.name.name,
+            VideoColumnName.name.name,
             ColumnType.TEXT,
             None,
             None,
             ColConstraintInfo(unique=True),
         ),
-        ColumnDefinition(ColumnName.id.name, ColumnType.INTEGER, None, None),
+        ColumnDefinition(VideoColumnName.id.name, ColumnType.INTEGER, None, None),
         ColumnDefinition(
-            ColumnName.data.name,
+            VideoColumnName.data.name,
             ColumnType.NDARRAY,
             NdArrayType.UINT8,
             (None, None, None),
         ),
-        ColumnDefinition(ColumnName.seconds.name, ColumnType.FLOAT, None, []),
+        ColumnDefinition(VideoColumnName.seconds.name, ColumnType.FLOAT, None, []),
         ColumnDefinition(
-            ColumnName.audio.name, ColumnType.NDARRAY, NdArrayType.UINT8, (None)
+            VideoColumnName.audio.name, ColumnType.NDARRAY, NdArrayType.UINT8, (None)
         ),
     ]
     return columns
@@ -72,14 +72,14 @@ def get_image_table_column_definitions() -> List[ColumnDefinition]:
     """
     columns = [
         ColumnDefinition(
-            ColumnName.name.name,
+            ImageColumnName.name.name,
             ColumnType.TEXT,
             None,
             None,
             ColConstraintInfo(unique=True),
         ),
         ColumnDefinition(
-            ColumnName.data.name,
+            ImageColumnName.data.name,
             ColumnType.NDARRAY,
             NdArrayType.UINT8,
             (None, None, None),

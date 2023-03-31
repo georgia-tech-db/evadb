@@ -100,7 +100,7 @@ class IndexType(EVAEnum):
         return t in [cls.HNSW]
 
 
-class ColumnName(EVAEnum):
+class VideoColumnName(EVAEnum):
     name  # noqa: F821
     id  # noqa: F821
     data  # noqa: F821
@@ -115,3 +115,8 @@ class ColumnName(EVAEnum):
             return self.value == other.value
 
         return False
+
+
+class ImageColumnName(EVAEnum):
+    name  # noqa: F821
+    data  # noqa: F821

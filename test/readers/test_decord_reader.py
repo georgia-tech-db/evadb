@@ -43,6 +43,9 @@ class DecordLoaderTest(unittest.TestCase):
             f"{EVA_ROOT_DIR}/data/sample_videos/touchdown.mp4"
         )
         self.frame_size = FRAME_SIZE[0] * FRAME_SIZE[1] * 3
+        self.audio_frames = []
+        for line in open(f"{EVA_ROOT_DIR}/test/data/touchdown_audio_frames.csv").readlines():
+            self.audio_frames.append(np.fromstring(line, sep=","))
 
     @classmethod
     def tearDownClass(self):
@@ -157,37 +160,33 @@ class DecordLoaderTest(unittest.TestCase):
         self.assertEqual(batches, expected)
 
     def test_should_return_both_video_and_audio_frames(self):
+        # running test with sampling rate so that fewer frames are
+        # returned and verified, this helps keep the stored frame data size small
         video_loader = DecordReader(
-            batch_mem_size=100000000000,
             file_url=self.video_with_audio_file_url,
+            sampling_rate=100,
             read_audio=True,
             read_video=True,
         )
         batches = list(video_loader.read())
-        # gave a big enough batch_mem_size so that all frames fit in one batch
-        self.assertEqual(len(batches[0]), 996)
-        # verify that the 100th frame is read correctly and hope that all the other frames were too!
-        assert np.sum(batches[0].frames.loc[100]["audio"]) == pytest.approx(2.7592432)
-        assert np.min(batches[0].frames.loc[100]["audio"]) == pytest.approx(-0.53818536)
-        assert np.max(batches[0].frames.loc[100]["audio"]) == pytest.approx(0.52696246)
-        self.assertEqual(batches[0].frames.loc[100]["audio"].shape, (1, 534))
+
+        for i, frame in enumerate(self.audio_frames):
+            self.assertTrue(np.array_equiv(self.audio_frames[i], batches[0].frames.iloc[i]["audio"]))
         # just verify that video frames were read, correctness is verified in prior test cases
-        self.assertEqual(batches[0].frames.loc[100]["data"].shape, (720, 1280, 3))
+        self.assertEqual(batches[0].frames.loc[0]["data"].shape, (720, 1280, 3))
 
     def test_should_return_audio_frames_only(self):
+        # running test with sampling rate so that fewer frames are
+        # returned and verified, this helps keep the stored frame data size small
         video_loader = DecordReader(
-            batch_mem_size=100000000000,
             file_url=self.video_with_audio_file_url,
+            sampling_rate=100,
             read_audio=True,
             read_video=False,
         )
         batches = list(video_loader.read())
-        # gave a big enough batch_mem_size so that all frames fit in one batch
-        self.assertEqual(len(batches[0]), 996)
-        # verify that the 100th frame is read correctly and hope that all the other frames were too!
-        assert np.sum(batches[0].frames.loc[100]["audio"]) == pytest.approx(2.7592432)
-        assert np.min(batches[0].frames.loc[100]["audio"]) == pytest.approx(-0.53818536)
-        assert np.max(batches[0].frames.loc[100]["audio"]) == pytest.approx(0.52696246)
-        self.assertEqual(batches[0].frames.loc[100]["audio"].shape, (1, 534))
+
+        for i, frame in enumerate(self.audio_frames):
+            self.assertTrue(np.array_equiv(self.audio_frames[i], batches[0].frames.iloc[i]["audio"]))
         # verify that no video frame was read
-        self.assertEqual(batches[0].frames.loc[100]["data"].shape, (0,))
+        self.assertEqual(batches[0].frames.loc[0]["data"].shape, (0,))
