@@ -43,6 +43,9 @@ class Response:
     def deserialize(cls, data):
         obj = PickleSerializer.deserialize(data)
         return obj
+    
+    def as_df(self):
+        return self.batch.frames
 
     def __str__(self):
         if self.query_time is not None:
