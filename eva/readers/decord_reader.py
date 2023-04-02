@@ -64,21 +64,13 @@ class DecordReader(AbstractReader):
         self._sampling_type = sampling_type
         self._read_audio = read_audio
         self._read_video = read_video
+        self._reader = None
+        self._get_frame = None
         super().__init__(*args, **kwargs)
+        self.initialize_reader()
 
     def _read(self) -> Iterator[Dict]:
-        decord = _lazy_import_decord()
-        if self._read_audio:
-            try:
-                reader = decord.AVReader(self.file_url, mono=True, sample_rate=16000)
-                get_frame = self.__get_audio_frame
-            except decord._ffi.base.DECORDError as error_msg:
-                assert "Can't find audio stream" not in str(error_msg), error_msg
-        else:
-            reader = decord.VideoReader(self.file_url)
-            get_frame = self.__get_video_frame
-
-        num_frames = int(len(reader))
+        num_frames = int(len(self._reader))
         if self._predicate:
             range_list = extract_range_list_from_predicate(
                 self._predicate, 0, num_frames - 1
@@ -89,7 +81,7 @@ class DecordReader(AbstractReader):
 
         if self._sampling_type == IFRAMES:
             assert not self._read_audio, "Cannot use IFRAMES with audio streams"
-            iframes = reader.get_key_indices()
+            iframes = self._reader.get_key_indices()
             idx = 0
             for begin, end in range_list:
                 while idx < len(iframes) and iframes[idx] < begin:
@@ -98,13 +90,13 @@ class DecordReader(AbstractReader):
                 while idx < len(iframes) and iframes[idx] <= end:
                     frame_id = iframes[idx]
                     idx += self._sampling_rate
-                    yield get_frame(frame_id, reader)
+                    yield self._get_frame(frame_id)
 
         elif self._sampling_rate == 1:
             for begin, end in range_list:
                 frame_id = begin
                 while frame_id <= end:
-                    yield get_frame(frame_id, reader)
+                    yield self._get_frame(frame_id)
                     frame_id += 1
         else:
             for begin, end in range_list:
@@ -112,12 +104,26 @@ class DecordReader(AbstractReader):
                 if begin % self._sampling_rate:
                     begin += self._sampling_rate - (begin % self._sampling_rate)
                 for frame_id in range(begin, end + 1, self._sampling_rate):
-                    yield get_frame(frame_id, reader)
+                    yield self._get_frame(frame_id)
 
-    def __get_video_frame(self, frame_id, reader):
-        frame_video = reader[frame_id]
+    def initialize_reader(self):
+        decord = _lazy_import_decord()
+        if self._read_audio:
+            try:
+                self._reader = decord.AVReader(
+                    self.file_url, mono=True, sample_rate=16000
+                )
+                self._get_frame = self.__get_audio_frame
+            except decord._ffi.base.DECORDError as error_msg:
+                assert "Can't find audio stream" not in str(error_msg), error_msg
+        else:
+            self._reader = decord.VideoReader(self.file_url)
+            self._get_frame = self.__get_video_frame
+
+    def __get_video_frame(self, frame_id):
+        frame_video = self._reader[frame_id]
         frame_video = frame_video.asnumpy()
-        timestamp = reader.get_frame_timestamp(frame_id)[0]
+        timestamp = self._reader.get_frame_timestamp(frame_id)[0]
 
         return {
             VideoColumnName.id.name: frame_id,
@@ -125,8 +131,8 @@ class DecordReader(AbstractReader):
             VideoColumnName.seconds.name: round(timestamp, 2),
         }
 
-    def __get_audio_frame(self, frame_id, reader):
-        frame_audio, _ = reader[frame_id]
+    def __get_audio_frame(self, frame_id):
+        frame_audio, _ = self._reader[frame_id]
         frame_audio = frame_audio.asnumpy()
 
         return {

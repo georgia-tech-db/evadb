@@ -152,12 +152,12 @@ class DecordLoaderTest(unittest.TestCase):
             self.assertEqual(batches, expected)
 
     def test_should_throw_error_for_audioless_video(self):
-        video_loader = DecordReader(
-            file_url=self.video_file_url,
-            read_audio=True,
-            read_video=True,
-        )
         try:
+            video_loader = DecordReader(
+                file_url=self.video_file_url,
+                read_audio=True,
+                read_video=True,
+            )
             list(video_loader.read())
             self.fail("Didn't raise AssertionError")
         except AssertionError as e:
