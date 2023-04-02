@@ -23,6 +23,12 @@ from eva.catalog.catalog_type import TableType
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.experimental.ray.optimizer.rules.rules import LogicalExchangeToPhysical
+from eva.experimental.ray.optimizer.rules.rules import (
+    LogicalGetToSeqScan as DistributedLogicalGetToSeqScan,
+)
+from eva.experimental.ray.optimizer.rules.rules import (
+    LogicalProjectToPhysical as DistributedLogicalProjectToPhysical,
+)
 from eva.optimizer.operators import (
     LogicalFilter,
     LogicalGet,
@@ -49,6 +55,11 @@ from eva.optimizer.rules.rules import (
     LogicalFaissIndexScanToPhysical,
     LogicalFilterToPhysical,
     LogicalFunctionScanToPhysical,
+)
+from eva.optimizer.rules.rules import (
+    LogicalGetToSeqScan as SequentialLogicalGetToSeqScan,
+)
+from eva.optimizer.rules.rules import (
     LogicalGroupByToPhysical,
     LogicalInnerJoinCommutativity,
     LogicalInsertToPhysical,
@@ -58,6 +69,11 @@ from eva.optimizer.rules.rules import (
     LogicalLimitToPhysical,
     LogicalLoadToPhysical,
     LogicalOrderByToPhysical,
+)
+from eva.optimizer.rules.rules import (
+    LogicalProjectToPhysical as SequentialLogicalProjectToPhysical,
+)
+from eva.optimizer.rules.rules import (
     LogicalRenameToPhysical,
     LogicalShowToPhysical,
     LogicalUnionToPhysical,
@@ -68,18 +84,6 @@ from eva.optimizer.rules.rules import (
     Rule,
     RuleType,
     XformLateralJoinToLinearFlow,
-)
-from eva.experimental.ray.optimizer.rules.rules import (
-    LogicalGetToSeqScan as DistributedLogicalGetToSeqScan,
-)
-from eva.experimental.ray.optimizer.rules.rules import (
-    LogicalProjectToPhysical as DistributedLogicalProjectToPhysical,
-)
-from eva.optimizer.rules.rules import (
-    LogicalGetToSeqScan as SequentialLogicalGetToSeqScan,
-)
-from eva.optimizer.rules.rules import (
-    LogicalProjectToPhysical as SequentialLogicalProjectToPhysical,
 )
 from eva.optimizer.rules.rules_manager import RulesManager
 from eva.parser.types import JoinType
@@ -207,8 +211,9 @@ class RulesTest(unittest.TestCase):
             LogicalInsertToPhysical(),
             LogicalDeleteToPhysical(),
             LogicalLoadToPhysical(),
-            DistributedLogicalGetToSeqScan() if ray_enabled else
-            SequentialLogicalGetToSeqScan(),
+            DistributedLogicalGetToSeqScan()
+            if ray_enabled
+            else SequentialLogicalGetToSeqScan(),
             LogicalDerivedGetToPhysical(),
             LogicalUnionToPhysical(),
             LogicalGroupByToPhysical(),
@@ -220,8 +225,9 @@ class RulesTest(unittest.TestCase):
             LogicalJoinToPhysicalHashJoin(),
             LogicalCreateMaterializedViewToPhysical(),
             LogicalFilterToPhysical(),
-            DistributedLogicalProjectToPhysical() if ray_enabled else
-            SequentialLogicalProjectToPhysical(),
+            DistributedLogicalProjectToPhysical()
+            if ray_enabled
+            else SequentialLogicalProjectToPhysical(),
             LogicalShowToPhysical(),
             LogicalExplainToPhysical(),
             LogicalCreateIndexToFaiss(),

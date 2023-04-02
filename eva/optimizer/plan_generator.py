@@ -14,6 +14,8 @@
 # limitations under the License.
 from typing import List
 
+from eva.configuration.configuration_manager import ConfigurationManager
+from eva.experimental.ray.planner.exchange_plan import ExchangePlan
 from eva.optimizer.cost_model import CostModel
 from eva.optimizer.operators import Operator
 from eva.optimizer.optimizer_context import OptimizerContext
@@ -22,8 +24,6 @@ from eva.optimizer.optimizer_tasks import BottomUpRewrite, OptimizeGroup, TopDow
 from eva.optimizer.property import PropertyType
 from eva.optimizer.rules.rules_manager import RulesManager
 from eva.plan_nodes.abstract_plan import AbstractPlan
-from eva.experimental.ray.planner.exchange_plan import ExchangePlan
-from eva.configuration.configuration_manager import ConfigurationManager
 from eva.plan_nodes.create_mat_view_plan import CreateMaterializedViewPlan
 
 
@@ -105,6 +105,7 @@ class PlanGenerator:
 
         # Replace exchange plan.
         if is_branch or is_create_mat:
+
             def _recursive_strip_exchange(plan: AbstractPlan, is_top: bool = False):
                 children = []
                 for child_plan in plan.children:
@@ -120,7 +121,9 @@ class PlanGenerator:
 
                 if isinstance(plan, ExchangePlan):
                     if is_top:
-                        assert len(plan.children) == 1, "Top ExchangePlan can only have 1 child."
+                        assert (
+                            len(plan.children) == 1
+                        ), "Top ExchangePlan can only have 1 child."
                         return plan.children[0]
                     else:
                         return plan.children

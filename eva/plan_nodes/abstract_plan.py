@@ -15,6 +15,7 @@
 from abc import ABC, abstractmethod
 from typing import List, Any
 from collections import deque
+from typing import List
 
 from eva.plan_nodes.types import PlanOprType
 
