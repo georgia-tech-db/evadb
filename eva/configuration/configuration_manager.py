@@ -15,6 +15,8 @@
 from typing import Any
 
 import yaml
+from pathlib import Path
+
 
 from eva.configuration.bootstrap_environment import bootstrap_environment
 from eva.configuration.constants import (
@@ -36,9 +38,22 @@ class ConfigurationManager(object):
 
     @classmethod
     def _create_if_not_exists(cls):
+        def prefix_worker_id(path: Path):
+                try:
+                    import os
+                    worker_id = os.environ["PYTEST_XDIST_WORKER"]
+                    path= path / str(worker_id)
+                except KeyError:
+                    worker_id = "gw1"
+                    path= path / str(worker_id)
+                return path
+
         if not cls._yml_path.exists():
+            initial_path = Path(EVA_DEFAULT_DIR)
+            prefixed_eva_config_dir = prefix_worker_id(initial_path)
+            cls._yml_path = prefixed_eva_config_dir / EVA_CONFIG_FILE
             bootstrap_environment(
-                eva_config_dir=EVA_DEFAULT_DIR,
+                eva_config_dir=prefixed_eva_config_dir,
                 eva_installation_dir=EVA_INSTALLATION_DIR,
             )
 

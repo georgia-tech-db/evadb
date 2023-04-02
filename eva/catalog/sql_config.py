@@ -20,17 +20,6 @@ from eva.configuration.configuration_manager import ConfigurationManager
 
 IDENTIFIER_COLUMN = "_row_id"
 
-# import os
-# def prefix_worker_id(uri: str):
-#    try:
-#        worker_id = os.environ["PYTEST_XDIST_WORKER"]
-#        base = "eva_catalog.db"
-#        uri = uri.replace(base, str(worker_id) + "_" + base)
-#    except KeyError:
-#        # Single threaded mode
-#        pass
-#    return uri
-
 
 class SQLConfig:
     """Singleton class for configuring connection to the database.
@@ -58,10 +47,24 @@ class SQLConfig:
         Retrieves the database uri for connection from ConfigurationManager.
         """
         uri = ConfigurationManager().get_value("core", "catalog_database_uri")
+
         # parallelize using xdist
-        # worker_uri = prefix_worker_id(str(uri))
+        def prefix_worker_id(uri: str):
+            try:
+                import os
+                worker_id = os.environ["PYTEST_XDIST_WORKER"]
+                base = "eva_catalog.db"
+                uri = uri.replace(base, "test_" + str(worker_id) + "_" + base)
+            except KeyError:
+                worker_id = "gw1"
+                base = "eva_catalog.db"
+                uri = uri.replace(base, "test_" + str(worker_id) + "_" + base)
+            return uri
+
+        worker_uri = prefix_worker_id(str(uri))
+        print(worker_uri)
         # set echo=True to log SQL
-        self.engine = create_engine(uri)
+        self.engine = create_engine(worker_uri, isolation_level="SERIALIZABLE")
 
         if self.engine.url.get_backend_name() == "sqlite":
             # enforce foreign key constraint and wal logging for sqlite
