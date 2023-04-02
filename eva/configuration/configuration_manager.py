@@ -37,23 +37,24 @@ class ConfigurationManager(object):
 
     @classmethod
     def _create_if_not_exists(cls):
-        def prefix_worker_id(path: Path):
+        def suffix_pytest_xdist_worker_id_to_dir(path: Path):
             try:
                 import os
 
                 worker_id = os.environ["PYTEST_XDIST_WORKER"]
                 path = path / str(worker_id)
             except KeyError:
-                worker_id = "gw1"
-                path = path / str(worker_id)
+                pass
             return path
 
         if not cls._yml_path.exists():
-            initial_path = Path(EVA_DEFAULT_DIR)
-            prefixed_eva_config_dir = prefix_worker_id(initial_path)
-            cls._yml_path = prefixed_eva_config_dir / EVA_CONFIG_FILE
+            initial_eva_config_dir = Path(EVA_DEFAULT_DIR)
+            updated_eva_config_dir = suffix_pytest_xdist_worker_id_to_dir(
+                initial_eva_config_dir
+            )
+            cls._yml_path = updated_eva_config_dir / EVA_CONFIG_FILE
             bootstrap_environment(
-                eva_config_dir=prefixed_eva_config_dir,
+                eva_config_dir=updated_eva_config_dir,
                 eva_installation_dir=EVA_INSTALLATION_DIR,
             )
 

@@ -57,13 +57,10 @@ class SQLConfig:
                 base = "eva_catalog.db"
                 uri = uri.replace(base, "test_" + str(worker_id) + "_" + base)
             except KeyError:
-                worker_id = "gw1"
-                base = "eva_catalog.db"
-                uri = uri.replace(base, "test_" + str(worker_id) + "_" + base)
+                pass
             return uri
 
         worker_uri = prefix_worker_id(str(uri))
-        print(worker_uri)
         # set echo=True to log SQL
         self.engine = create_engine(worker_uri, isolation_level="SERIALIZABLE")
 
