@@ -24,7 +24,7 @@ class ExecutionContextTest(unittest.TestCase):
     @patch("eva.executor.execution_context.ConfigurationManager")
     @patch("eva.executor.execution_context.get_gpu_count")
     @patch("eva.executor.execution_context.is_gpu_available")
-    def test_gpu_devices_gets_populated_from_config(
+    def test_CUDA_VISIBLE_DEVICES_gets_populated_from_config(
         self, gpu_check, get_gpu_count, cfm
     ):
         gpu_check.return_value = True
@@ -38,7 +38,7 @@ class ExecutionContextTest(unittest.TestCase):
     @patch("eva.executor.execution_context.os")
     @patch("eva.executor.execution_context.get_gpu_count")
     @patch("eva.executor.execution_context.is_gpu_available")
-    def test_gpu_devices_gets_populated_from_environment_if_no_config(
+    def test_CUDA_VISIBLE_DEVICES_gets_populated_from_environment_if_no_config(
         self, is_gpu, get_gpu_count, os, cfm
     ):
         is_gpu.return_value = True
@@ -46,7 +46,7 @@ class ExecutionContextTest(unittest.TestCase):
         get_gpu_count.return_value = 3
         os.environ.get.return_value = "0,1"
         context = Context()
-        os.environ.get.assert_called_with("GPU_DEVICES", "")
+        os.environ.get.assert_called_with("CUDA_VISIBLE_DEVICES", "")
 
         self.assertEqual(context.gpus, [0, 1])
 
@@ -54,7 +54,7 @@ class ExecutionContextTest(unittest.TestCase):
     @patch("eva.executor.execution_context.os")
     @patch("eva.executor.execution_context.get_gpu_count")
     @patch("eva.executor.execution_context.is_gpu_available")
-    def test_gpu_devices_should_be_empty_if_nothing_provided(
+    def test_CUDA_VISIBLE_DEVICES_should_be_empty_if_nothing_provided(
         self, gpu_check, get_gpu_count, os, cfm
     ):
         gpu_check.return_value = True
@@ -62,7 +62,7 @@ class ExecutionContextTest(unittest.TestCase):
         cfm.return_value.get_value.return_value = []
         os.environ.get.return_value = ""
         context = Context()
-        os.environ.get.assert_called_with("GPU_DEVICES", "")
+        os.environ.get.assert_called_with("CUDA_VISIBLE_DEVICES", "")
 
         self.assertEqual(context.gpus, [])
 
@@ -87,7 +87,7 @@ class ExecutionContextTest(unittest.TestCase):
         cfm.return_value.get_value.return_value = []
         os.environ.get.return_value = ""
         context = Context()
-        os.environ.get.assert_called_with("GPU_DEVICES", "")
+        os.environ.get.assert_called_with("CUDA_VISIBLE_DEVICES", "")
 
         self.assertEqual(context.gpu_device(), NO_GPU)
 

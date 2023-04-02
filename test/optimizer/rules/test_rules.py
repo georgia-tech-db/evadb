@@ -49,7 +49,6 @@ from eva.optimizer.rules.rules import (
     LogicalFaissIndexScanToPhysical,
     LogicalFilterToPhysical,
     LogicalFunctionScanToPhysical,
-    LogicalGetToSeqScan,
     LogicalGroupByToPhysical,
     LogicalInnerJoinCommutativity,
     LogicalInsertToPhysical,
@@ -59,7 +58,6 @@ from eva.optimizer.rules.rules import (
     LogicalLimitToPhysical,
     LogicalLoadToPhysical,
     LogicalOrderByToPhysical,
-    LogicalProjectToPhysical,
     LogicalRenameToPhysical,
     LogicalShowToPhysical,
     LogicalUnionToPhysical,
@@ -71,7 +69,19 @@ from eva.optimizer.rules.rules import (
     RuleType,
     XformLateralJoinToLinearFlow,
 )
-from eva.optimizer.rules.rules_manager import RulesManager, disable_rules
+from eva.experimental.ray.optimizer.rules.rules import (
+    LogicalGetToSeqScan as DistributedLogicalGetToSeqScan,
+)
+from eva.experimental.ray.optimizer.rules.rules import (
+    LogicalProjectToPhysical as DistributedLogicalProjectToPhysical,
+)
+from eva.optimizer.rules.rules import (
+    LogicalGetToSeqScan as SequentialLogicalGetToSeqScan,
+)
+from eva.optimizer.rules.rules import (
+    LogicalProjectToPhysical as SequentialLogicalProjectToPhysical,
+)
+from eva.optimizer.rules.rules_manager import RulesManager
 from eva.parser.types import JoinType
 from eva.server.command_handler import execute_query_fetch_all
 
@@ -186,6 +196,8 @@ class RulesTest(unittest.TestCase):
                 any(isinstance(rule, type(x)) for x in RulesManager().logical_rules)
             )
 
+        ray_enabled = ConfigurationManager().get_value("experimental", "ray")
+
         supported_implementation_rules = [
             LogicalCreateToPhysical(),
             LogicalRenameToPhysical(),
@@ -195,7 +207,8 @@ class RulesTest(unittest.TestCase):
             LogicalInsertToPhysical(),
             LogicalDeleteToPhysical(),
             LogicalLoadToPhysical(),
-            LogicalGetToSeqScan(),
+            DistributedLogicalGetToSeqScan() if ray_enabled else
+            SequentialLogicalGetToSeqScan(),
             LogicalDerivedGetToPhysical(),
             LogicalUnionToPhysical(),
             LogicalGroupByToPhysical(),
@@ -207,7 +220,8 @@ class RulesTest(unittest.TestCase):
             LogicalJoinToPhysicalHashJoin(),
             LogicalCreateMaterializedViewToPhysical(),
             LogicalFilterToPhysical(),
-            LogicalProjectToPhysical(),
+            DistributedLogicalProjectToPhysical() if ray_enabled else
+            SequentialLogicalProjectToPhysical(),
             LogicalShowToPhysical(),
             LogicalExplainToPhysical(),
             LogicalCreateIndexToFaiss(),
@@ -215,7 +229,6 @@ class RulesTest(unittest.TestCase):
             LogicalFaissIndexScanToPhysical(),
         ]
 
-        ray_enabled = ConfigurationManager().get_value("experimental", "ray")
         if ray_enabled:
             supported_implementation_rules.append(LogicalExchangeToPhysical())
         self.assertEqual(

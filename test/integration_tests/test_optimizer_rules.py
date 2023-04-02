@@ -32,9 +32,11 @@ from eva.optimizer.rules.rules_manager import disable_rules
 from eva.plan_nodes.predicate_plan import PredicatePlan
 from eva.server.command_handler import execute_query_fetch_all
 from eva.utils.stats import Timer
+from eva.configuration.configuration_manager import ConfigurationManager
 
 
 @pytest.mark.notparallel
+@pytest.mark.skipif(ConfigurationManager().get_value("experimental", "ray"), reason="Not necessary for Ray")
 class OptimizerRulesTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

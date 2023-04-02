@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import NUM_FRAMES, create_sample_video, file_remove
+from test.util import NUM_FRAMES, create_sample_video, file_remove, shutdown_ray
 
 import pandas as pd
 import pytest
@@ -30,6 +30,7 @@ class CascadeOptimizer(unittest.TestCase):
         self.video_file_path = create_sample_video(NUM_FRAMES)
 
     def tearDown(self):
+        shutdown_ray()
         file_remove("dummy.avi")
 
     def test_logical_to_physical_udf(self):

@@ -12,6 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import List
+
 from eva.optimizer.cost_model import CostModel
 from eva.optimizer.operators import Operator
 from eva.optimizer.optimizer_context import OptimizerContext
@@ -19,6 +21,10 @@ from eva.optimizer.optimizer_task_stack import OptimizerTaskStack
 from eva.optimizer.optimizer_tasks import BottomUpRewrite, OptimizeGroup, TopDownRewrite
 from eva.optimizer.property import PropertyType
 from eva.optimizer.rules.rules_manager import RulesManager
+from eva.plan_nodes.abstract_plan import AbstractPlan
+from eva.experimental.ray.planner.exchange_plan import ExchangePlan
+from eva.configuration.configuration_manager import ConfigurationManager
+from eva.plan_nodes.create_mat_view_plan import CreateMaterializedViewPlan
 
 
 class PlanGenerator:
@@ -86,8 +92,51 @@ class PlanGenerator:
         optimal_plan = self.build_optimal_physical_plan(root_grp_id, optimizer_context)
         return optimal_plan
 
+    # Disable exchange plan if there is a branch.
+    def post_process(self, physical_plan: AbstractPlan):
+        # Detect whether there is a branch.
+        is_branch, is_create_mat = False, False
+        for plan_node in physical_plan.walk():
+            if len(plan_node.children) > 1:
+                is_branch = True
+                break
+            if isinstance(plan_node, CreateMaterializedViewPlan):
+                is_create_mat = True
+
+        # Replace exchange plan.
+        if is_branch or is_create_mat:
+            def _recursive_strip_exchange(plan: AbstractPlan, is_top: bool = False):
+                children = []
+                for child_plan in plan.children:
+                    return_child = _recursive_strip_exchange(child_plan)
+                    if isinstance(return_child, List):
+                        children += return_child
+                    else:
+                        children += [return_child]
+
+                plan.clear_children()
+                for child in children:
+                    plan.append_child(child)
+
+                if isinstance(plan, ExchangePlan):
+                    if is_top:
+                        assert len(plan.children) == 1, "Top ExchangePlan can only have 1 child."
+                        return plan.children[0]
+                    else:
+                        return plan.children
+                else:
+                    return plan
+
+            return _recursive_strip_exchange(physical_plan, True)
+        else:
+            return physical_plan
+
     def build(self, logical_plan: Operator):
         # apply optimizations
-
         plan = self.optimize(logical_plan)
+
+        # Only run post-processing if Ray is enabled.
+        if ConfigurationManager().get_value("experimental", "ray"):
+            plan = self.post_process(plan)
+
         return plan

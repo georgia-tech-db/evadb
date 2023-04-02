@@ -36,6 +36,8 @@ from eva.optimizer.rules.rules_manager import RulesManager
 from eva.plan_nodes.predicate_plan import PredicatePlan
 from eva.plan_nodes.project_plan import ProjectPlan
 from eva.plan_nodes.seq_scan_plan import SeqScanPlan
+from eva.experimental.ray.planner.exchange_plan import ExchangePlan
+from eva.configuration.configuration_manager import ConfigurationManager
 
 
 class TestOptimizerTask(unittest.TestCase):
@@ -221,12 +223,21 @@ class TestOptimizerTask(unittest.TestCase):
                 opt_cxt, root_grp_id = self.bottom_up_rewrite(root_grp_id, opt_cxt)
                 opt_cxt, root_grp_id = self.implement_group(root_grp_id, opt_cxt)
 
-                expected_expr_order = [
-                    ProjectPlan,
-                    PredicatePlan,
-                    SeqScanPlan,
-                    SeqScanPlan,
-                ]
+                if not ConfigurationManager().get_value("experimental", "ray"):
+                    expected_expr_order = [
+                        ProjectPlan,
+                        PredicatePlan,
+                        SeqScanPlan,
+                        SeqScanPlan,
+                    ]
+                else:
+                    expected_expr_order = [
+                        ExchangePlan,
+                        ProjectPlan,
+                        PredicatePlan,
+                        SeqScanPlan,
+                        SeqScanPlan,
+                    ]
                 curr_grp_id = root_grp_id
                 idx = 0
                 while True:
