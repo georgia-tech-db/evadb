@@ -76,7 +76,7 @@ if [[ "$OSTYPE" != "msys" ]];
 then
     if [[ "$MODE" = "TEST" || "$MODE" = "ALL" ]];
     then
-        PYTHONPATH=./ pytest --cov-report term-missing:skip-covered  --cov-config=.coveragerc --cov-context=test --cov=eva/ -s -v --log-level=WARNING -m "not benchmark"
+        PYTHONPATH=./ python -m pytest --cov-report term-missing:skip-covered  --cov-config=.coveragerc --cov-context=test --cov=eva/ -s -v --log-level=WARNING -m "not benchmark"
         test_code=$?
         if [ "$test_code" != "0" ];
         then
@@ -88,7 +88,7 @@ then
      fi
 # Windows -- no need for coverage report
 else
-    PYTHONPATH=./ pytest -p no:cov test/ -m "not benchmark"
+    PYTHONPATH=./ python -m pytest -p no:cov test/ -m "not benchmark"
     test_code=$?
     if [ "$test_code" != "0" ];
     then
