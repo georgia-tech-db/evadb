@@ -220,7 +220,7 @@ class StatementBinder:
     @bind.register(FunctionExpression)
     def _bind_func_expr(self, node: FunctionExpression):
         # handle the special case of "extract_object"
-        if node.name.upper() == str(UDFType.EXTRACT_OBJECT):
+        if node.name.upper() == str(UDFType.ExtractObject):
             handle_extract_object(node, self)
             return
         # bind all the children
