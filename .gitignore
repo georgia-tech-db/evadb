@@ -184,3 +184,4 @@ tutorials/*.py
 eva.txt
 prof/
 output.txt
+MagicMock/
