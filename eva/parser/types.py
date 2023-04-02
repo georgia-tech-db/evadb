@@ -70,4 +70,4 @@ class ShowType(EVAEnum):
 
 
 class UDFType(EVAEnum):
-    EXTRACTOBJECT  # noqa: F821
+    EXTRACT_OBJECT  # noqa: F821
