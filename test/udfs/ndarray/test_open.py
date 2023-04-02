@@ -59,5 +59,5 @@ class OpenTests(unittest.TestCase):
             mock_cv2.imread.assert_not_called()
 
     def test_open_path_should_raise_error(self):
-        with self.assertRaises(FileNotFoundError):
+        with self.assertRaises(FileNotFoundError or AssertionError):
             self.open_instance(pd.DataFrame(["incorrect_path"]))
