@@ -52,6 +52,7 @@ class SQLConfig:
         def prefix_worker_id(uri: str):
             try:
                 import os
+
                 worker_id = os.environ["PYTEST_XDIST_WORKER"]
                 base = "eva_catalog.db"
                 uri = uri.replace(base, "test_" + str(worker_id) + "_" + base)

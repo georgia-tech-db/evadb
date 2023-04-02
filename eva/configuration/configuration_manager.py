@@ -12,11 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from pathlib import Path
 from typing import Any
 
 import yaml
-from pathlib import Path
-
 
 from eva.configuration.bootstrap_environment import bootstrap_environment
 from eva.configuration.constants import (
@@ -39,14 +38,15 @@ class ConfigurationManager(object):
     @classmethod
     def _create_if_not_exists(cls):
         def prefix_worker_id(path: Path):
-                try:
-                    import os
-                    worker_id = os.environ["PYTEST_XDIST_WORKER"]
-                    path= path / str(worker_id)
-                except KeyError:
-                    worker_id = "gw1"
-                    path= path / str(worker_id)
-                return path
+            try:
+                import os
+
+                worker_id = os.environ["PYTEST_XDIST_WORKER"]
+                path = path / str(worker_id)
+            except KeyError:
+                worker_id = "gw1"
+                path = path / str(worker_id)
+            return path
 
         if not cls._yml_path.exists():
             initial_path = Path(EVA_DEFAULT_DIR)
