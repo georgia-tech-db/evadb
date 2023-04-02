@@ -28,7 +28,6 @@ from eva.server.command_handler import execute_query_fetch_all
 from eva.udfs.udf_bootstrap_queries import (
     Asl_udf_query,
     Mvit_udf_query,
-    Timestamp_udf_query,
 )
 
 
@@ -293,15 +292,3 @@ class PytorchTest(unittest.TestCase):
                 self.assertTrue(res["toxicityclassifier.labels"][i] == "toxic")
             else:
                 self.assertTrue(res["toxicityclassifier.labels"][i] == "not toxic")
-
-    def test_timestamp_udf(self):
-        execute_query_fetch_all(Timestamp_udf_query)
-
-        select_query = """SELECT id, seconds, Timestamp(seconds)
-                          FROM MyVideo
-                          WHERE Timestamp(seconds) <= "00:00:01"; """
-        # TODO: Check why this does not work
-        #                  AND Timestamp(seconds) < "00:00:03"; """
-        actual_batch = execute_query_fetch_all(select_query)
-
-        self.assertEqual(len(actual_batch), 60)

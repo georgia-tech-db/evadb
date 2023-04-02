@@ -85,7 +85,7 @@ from eva.optimizer.rules.rules import (
     RuleType,
     XformLateralJoinToLinearFlow,
 )
-from eva.optimizer.rules.rules_manager import RulesManager
+from eva.optimizer.rules.rules_manager import RulesManager, disable_rules
 from eva.parser.types import JoinType
 from eva.server.command_handler import execute_query_fetch_all
 
