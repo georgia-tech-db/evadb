@@ -48,8 +48,7 @@ workflows:
         - test:
             name: "Test | Ray | v3.10 | Linux"
             v: "3.10"
-            mode: "TEST"
-            ray_enabled: true
+            mode: "RAY"
         - Pip
         - Windows
         #- test:
@@ -65,9 +64,6 @@ jobs:
       mode:
         type: string
         default: "ALL"
-      ray_enabled:
-        type: boolean
-        default: false
     resource_class: large
     docker:
       # https://circleci.com/docs/circleci-images#language-image-variants
@@ -85,7 +81,8 @@ jobs:
 
       # Enable Ray conditionally
       - when:
-          condition: << parameters.ray_enabled >>
+          condition: 
+            equal: [ RAY, << parameters.mode >> ]
           steps:
             - run:
                 name: Enable Ray setting in the config.yml file
@@ -96,7 +93,6 @@ jobs:
       - run:
           name: Test and upload coverage report to coveralls
           command: |
-            export PYTHONUNBUFFERED=1
             source test_evadb/bin/activate
             bash script/test/test.sh -m "<< parameters.mode >>"
 
