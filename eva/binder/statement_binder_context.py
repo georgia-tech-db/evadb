@@ -203,7 +203,7 @@ class StatementBinderContext:
                 alias_match = alias
 
         if num_alias_matches > 1:
-            err_msg = "Ambiguous Column name {col_name}"
+            err_msg = f"Ambiguous Column name {col_name}"
             logger.error(err_msg)
             raise BinderError(err_msg)
 

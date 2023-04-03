@@ -16,7 +16,6 @@ from typing import Iterator
 
 import numpy as np
 import pandas as pd
-import torch
 
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
@@ -29,9 +28,8 @@ class ExtractObjectExecutor(AbstractExecutor):
     def __init__(self, node: ExtractObjectPlan):
         super().__init__(node)
         self.detector = node.detector
-        self.tracker = node.tracker
+        self.tracker = node.tracker.function()
         self.tracker_args = node.tracker_args
-        self.node = node
 
     def validate(self):
         pass
@@ -40,36 +38,22 @@ class ExtractObjectExecutor(AbstractExecutor):
         child_executor = self.children[0]
         for batch in child_executor.exec():
             objects = self.detector.evaluate(batch)
-            labels = objects.column_as_numpy_array(self.tracker_args["labels"])
-            bboxes = objects.column_as_numpy_array(self.tracker_args["bboxes"])
-            scores = objects.column_as_numpy_array(self.tracker_args["scores"])
-            if self.need_frames:
-                frames = batch.column_as_numpy_array(self.tracker_args["frames"])
-            else:
-                frames = np.empty([len(bboxes)])
-            frame_ids = batch.column_as_numpy_array(self.tracker_args["fids"])
+
+            # send row by row to the tracker
             results = []
-            for row in zip(frame_ids, frames, bboxes, scores, labels):
-                # mmtracking library needs to concatenate bboxes with scores
-                row[2] = torch.cat(
-                    [torch.tensor(row[2]), torch.tensor(row[3])[:, None]], axis=1
-                )
-                # convert labels to integers as strings are not supported by pytorch.
-                row[4] = torch.from_numpy(np.array([hash(label) for label in row[4]]))
-                track_bboxes, track_labels, ids = self.tracker.track(
-                    row[1], row[2], row[4], row[0]
-                )
+            for (_, row1), (_, row2) in zip(batch.iterrows(), objects.iterrows()):
                 results.append(
-                    {
-                        "oids": ids.numpy(),
-                        "labels": track_labels.numpy(),
-                        "bboxes": track_bboxes.numpy()[:, :-1],
-                        "scores": track_bboxes.numpy()[:, -1],
-                    }
+                    self.tracker(
+                        np.array(row1[0]),
+                        np.array(row1[1]),
+                        np.stack(row2[0]),
+                        np.stack(row2[1]),
+                        np.stack(row2[2]),
+                    )
                 )
-            outcomes = Batch(pd.DataFrame(results, columns=self.node.output_aliases))
+
+            outcomes = Batch(pd.DataFrame(results, columns=self.node.expr.col_alias))
             outcomes = Batch.merge_column_wise([batch, outcomes])
             if self.node.do_unnest:
-                outcomes.unnest(self.node.output_aliases)
-            outcomes.modify_column_alias(self.node.alias)
+                outcomes.unnest(self.node.expr.col_alias)
             yield outcomes

@@ -12,14 +12,22 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import typing
+
+import numpy
+
 from eva.catalog.catalog_type import NdArrayType
+from eva.udfs.abstract.abstract_udf import AbstractUDF
 from eva.udfs.decorators.decorators import forward, setup
-from eva.udfs.decorators.io_descriptors.data_types import PandasDataframe
+from eva.udfs.decorators.io_descriptors.data_types import NumpyArray
 
 
-class EVATracker:
+class EVATracker(AbstractUDF):
     def __init__(self) -> None:
         pass
+
+    def name(self):
+        return "EVATracker"
 
     @setup(cachable=False, udf_type="object_tracker", batchable=False)
     def setup(self):
@@ -27,46 +35,42 @@ class EVATracker:
 
     @forward(
         input_signatures=[
-            PandasDataframe(
-                columns=["frame_id", "frame", "bboxes", "scores", "labels"],
-                column_types=[
-                    NdArrayType.INT32,
-                    NdArrayType.FLOAT32,
-                    NdArrayType.FLOAT32,
-                    NdArrayType.FLOAT32,
-                    NdArrayType.INT32,
-                ],
-                column_shapes=[(1,), (None, None, 3), (None, 4), (None,), (None,)],
-            )
+            NumpyArray("frame_id", type=NdArrayType.INT32, dimensions=(1,)),
+            NumpyArray("frame", type=NdArrayType.FLOAT32, dimensions=(None, None, 3)),
+            NumpyArray("bboxes", type=NdArrayType.FLOAT32, dimensions=(None, 4)),
+            NumpyArray("scores", type=NdArrayType.FLOAT32, dimensions=(None,)),
+            NumpyArray("labels", type=NdArrayType.INT32, dimensions=(None,)),
         ],
         output_signatures=[
-            PandasDataframe(
-                columns=["track_ids", "track_bboxes", "track_scores", "track_labels"],
-                column_types=[
-                    NdArrayType.INT32,
-                    NdArrayType.FLOAT32,
-                    NdArrayType.FLOAT32,
-                    NdArrayType.INT32,
-                ],
-                column_shapes=[(None,), (None, 4), (None,), (None,)],
-            )
+            NumpyArray("track_ids", type=NdArrayType.INT32, dimensions=(None,)),
+            NumpyArray("track_bboxes", type=NdArrayType.FLOAT32, dimensions=(None, 4)),
+            NumpyArray("track_scores", type=NdArrayType.FLOAT32, dimensions=(None,)),
+            NumpyArray("track_labels", type=NdArrayType.INT32, dimensions=(None,)),
         ],
     )
-    def forward(self, df: PandasDataframe) -> PandasDataframe:
+    def forward(
+        self,
+        frame_id: numpy.ndarray,
+        frame: numpy.ndarray,
+        labels: numpy.ndarray,
+        bboxes: numpy.ndarray,
+        scores: numpy.ndarray,
+    ) -> typing.Tuple[numpy.ndarray, numpy.ndarray, numpy.ndarray, numpy.ndarray]:
         """
         Args:
-            df(PandasDataframe): pandas.Dataframe with following columns:
-                frame_id (int): the frame id of current frame
-                frame (numpy.ndarray): the input frame with shape (C, H, W)
-                bboxes (numpy.ndarray): Array of shape `(n, 4)` or of shape `(4,)` where
-                each row contains `(xmin, ymin, width, height)`.
-                scores (numpy.ndarray): Corresponding scores for each box
-                labels (numpy.ndarray): Corresponding labels for each box
+            frame_id (numpy.ndarray): the frame id of current frame
+            frame (numpy.ndarray): the input frame with shape (C, H, W)
+            labels (numpy.ndarray): Corresponding labels for each box
+            bboxes (numpy.ndarray): Array of shape `(n, 4)` or of shape `(4,)` where
+            each row contains `(xmin, ymin, width, height)`.
+            scores (numpy.ndarray): Corresponding scores for each box
         Returns:
-            PandasDataframe: pandas.DataFrame with following columns:
-                track_ids (numpy.ndarray): Corresponding track id for each box
-                track_bboxes (numpy.ndarray):  Array of shape `(n, 4)` of tracked objects
-                track_scores (numpy.ndarray): Corresponding scores for each box
-                track_labels (numpy.ndarray): Corresponding labels for each box
+            track_ids (numpy.ndarray): Corresponding track id for each box
+            track_labels (numpy.ndarray): Corresponding labels for each box
+            track_bboxes (numpy.ndarray):  Array of shape `(n, 4)` of tracked objects
+            track_scores (numpy.ndarray): Corresponding scores for each box
         """
         raise NotImplementedError
+
+    def __call__(self, *args, **kwargs):
+        return self.forward(*args)

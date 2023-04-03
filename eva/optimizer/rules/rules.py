@@ -433,7 +433,7 @@ class XformExtractObjectToLinearFlow(Rule):
         logical_extract_obj = before.children[1]
         logical_extract_obj.clear_children()
         logical_extract_obj.append_child(A)
-        return logical_extract_obj
+        yield logical_extract_obj
 
 
 class CombineSimilarityOrderByAndLimitToFaissIndexScan(Rule):
@@ -1172,6 +1172,9 @@ class LogicalExtractObjectToPhysical(Rule):
     def promise(self):
         return Promise.LOGICAL_EXTRACT_OBJECT_TO_PHYSICAL
 
+    def check(self, grp_id: int, context: OptimizerContext):
+        return True
+
     def apply(self, before: LogicalExtractObject, context: OptimizerContext):
         after = ExtractObjectPlan(
             before.expr,
@@ -1183,7 +1186,7 @@ class LogicalExtractObjectToPhysical(Rule):
         )
         for child in before.children:
             after.append_child(child)
-        return after
+        yield after
 
 
 class LogicalFaissIndexScanToPhysical(Rule):

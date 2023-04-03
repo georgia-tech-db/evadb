@@ -294,8 +294,29 @@ class PytorchTest(unittest.TestCase):
         execute_query_fetch_all(create_udf_query)
 
         select_query = """
-            SELECT id, T.bboxes, T.scores, T.labels FROM MyVideo
-            JOIN LATERAL EXTRACT_OBJECT(data, YoloV5, NorFairTracker)
-                AS T(id, label, bbox, score); """
+            SELECT id, T.iids, T.bboxes, T.scores, T.labels
+            FROM MyVideo JOIN LATERAL EXTRACT_OBJECT(data, YoloV5, NorFairTracker)
+                AS T(iids, labels, bboxes, scores)
+            WHERE id < 30;
+            """
         actual_batch = execute_query_fetch_all(select_query)
-        self.assertEqual(len(actual_batch), 5)
+        self.assertEqual(len(actual_batch), 30)
+
+    @pytest.mark.torchtest
+    def test_should_run_extract_object_with_unnest(self):
+        create_udf_query = """CREATE UDF NorFairTracker
+                  IMPL  '{}/udfs/trackers/nor_fair/nor_fair.py';
+        """.format(
+            EVA_INSTALLATION_DIR
+        )
+        execute_query_fetch_all(create_udf_query)
+
+        select_query = """
+            SELECT id, T.iid, T.bbox, T.score, T.label
+            FROM MyVideo JOIN LATERAL
+                UNNEST(EXTRACT_OBJECT(data, YoloV5, NorFairTracker)) AS T(iid, label, bbox, score)
+            WHERE id < 30;
+            """
+        actual_batch = execute_query_fetch_all(select_query)
+        # do some more meaningful check
+        self.assertEqual(len(actual_batch), 685)

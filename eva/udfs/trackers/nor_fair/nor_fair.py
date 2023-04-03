@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import pandas as pd
+import numpy as np
 from norfair import Detection, Tracker
 
 from eva.udfs.trackers.tracker import EVATracker
@@ -29,14 +29,16 @@ class NorFairTracker(EVATracker):
             distance_threshold=distance_threshold,
         )
 
-    def forward(self, df):
-        norfair_detections = (
+    def forward(self, frame_id, frame, labels, bboxes, scores):
+        norfair_detections = [
             Detection(
-                points=get_centroid(df["bboxes"].to_numpy()),
-                scores=df["scores"].to_numpy(),
-                label=df["labels"].to_numpy(),
-            ),
-        )
+                points=get_centroid(bbox),
+                scores=np.array([score]),
+                label=hash(label) % 10**8,
+                data=(label, bbox, score),
+            )
+            for (bbox, score, label) in zip(bboxes, scores, labels)
+        ]
 
         tracked_objects = self.tracker.update(detections=norfair_detections)
         bboxes_xyxy = []
@@ -45,13 +47,9 @@ class NorFairTracker(EVATracker):
         ids = []
         for obj in tracked_objects:
             det = obj.last_detection.data
-            bboxes_xyxy.append(det[:4])
-            labels.append(int(det[-1]))
-            scores.append(int(det[-2]))
+            labels.append(det[0])
+            bboxes_xyxy.append(det[1])
+            scores.append(det[2])
             ids.append(obj.id)
 
-        results = pd.DataFrame(
-            [ids, bboxes_xyxy, scores, labels],
-            columns=["track_ids", "track_bboxes", "track_scores", "track_labels"],
-        )
-        return results
+        return np.array(ids), np.array(labels), np.array(bboxes_xyxy), np.array(scores)

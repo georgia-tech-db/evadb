@@ -935,13 +935,13 @@ class LogicalExtractObject(Operator):
         self.tracker = tracker
         self.do_unnest = do_unnest
         self.alias = alias
-        self.tracker_args = dict(
-            frame=expr.children[0].col_alias,
-            fid=f"{expr.children[0].table_name}.id",
-            labels=detector.projection_columns[0],
-            scores=detector.projection_columns[1],
-            bboxes=detector.projection_columns[2],
-        )
+        self.tracker_args = ()
+        #     frame=expr.children[0].col_alias,
+        #     fid=f"{expr.children[0].table_name}.id",
+        #     labels=detector.projection_columns[0],
+        #     scores=detector.projection_columns[1],
+        #     bboxes=detector.projection_columns[2],
+        # )
 
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)

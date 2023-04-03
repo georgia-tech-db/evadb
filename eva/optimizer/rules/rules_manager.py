@@ -25,7 +25,7 @@ from eva.experimental.ray.optimizer.rules.rules import (
 from eva.experimental.ray.optimizer.rules.rules import (
     LogicalProjectToPhysical as DistributedLogicalProjectToPhysical,
 )
-from eva.optimizer.rules.rules import (
+from eva.optimizer.rules.rules import (  # XformExtractObjectToLinearFlow,
     CacheFunctionExpressionInApply,
     CombineSimilarityOrderByAndLimitToFaissIndexScan,
     EmbedFilterIntoGet,
@@ -41,6 +41,7 @@ from eva.optimizer.rules.rules import (
     LogicalDropToPhysical,
     LogicalDropUDFToPhysical,
     LogicalExplainToPhysical,
+    LogicalExtractObjectToPhysical,
     LogicalFaissIndexScanToPhysical,
     LogicalFilterToPhysical,
     LogicalFunctionScanToPhysical,
@@ -48,7 +49,7 @@ from eva.optimizer.rules.rules import (
 from eva.optimizer.rules.rules import (
     LogicalGetToSeqScan as SequentialLogicalGetToSeqScan,
 )
-from eva.optimizer.rules.rules import (
+from eva.optimizer.rules.rules import (  # XformExtractObjectToLinearFlow,
     LogicalGroupByToPhysical,
     LogicalInnerJoinCommutativity,
     LogicalInsertToPhysical,
@@ -62,13 +63,14 @@ from eva.optimizer.rules.rules import (
 from eva.optimizer.rules.rules import (
     LogicalProjectToPhysical as SequentialLogicalProjectToPhysical,
 )
-from eva.optimizer.rules.rules import (
+from eva.optimizer.rules.rules import (  # XformExtractObjectToLinearFlow,
     LogicalRenameToPhysical,
     LogicalShowToPhysical,
     LogicalUnionToPhysical,
     PushDownFilterThroughApplyAndMerge,
     PushDownFilterThroughJoin,
     ReorderPredicates,
+    XformExtractObjectToLinearFlow,
     XformLateralJoinToLinearFlow,
 )
 from eva.optimizer.rules.rules_base import Rule
@@ -89,6 +91,7 @@ class RulesManager:
             EmbedSampleIntoGet(),
             PushDownFilterThroughJoin(),
             PushDownFilterThroughApplyAndMerge(),
+            XformExtractObjectToLinearFlow(),
             XformLateralJoinToLinearFlow(),
             CombineSimilarityOrderByAndLimitToFaissIndexScan(),
             ReorderPredicates(),
@@ -127,6 +130,7 @@ class RulesManager:
             LogicalCreateIndexToFaiss(),
             LogicalApplyAndMergeToPhysical(),
             LogicalFaissIndexScanToPhysical(),
+            LogicalExtractObjectToPhysical(),
         ]
 
         if ray_enabled:

@@ -21,15 +21,15 @@ from eva.binder.binder_utils import (
     check_groupby_pattern,
     check_table_object_is_video,
     extend_star,
+    handle_bind_extract_object_function,
+    resolve_alias_table_value_expression,
 )
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import IndexType, NdArrayType, TableType
-from eva.catalog.catalog_utils import get_video_table_column_definitions
 from eva.expression.abstract_expression import AbstractExpression, ExpressionType
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.parser.alias import Alias
 from eva.parser.create_index_statement import CreateIndexStatement
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
 from eva.parser.delete_statement import DeleteTableStatement
@@ -220,8 +220,8 @@ class StatementBinder:
     @bind.register(FunctionExpression)
     def _bind_func_expr(self, node: FunctionExpression):
         # handle the special case of "extract_object"
-        if node.name.upper() == str(UDFType.ExtractObject):
-            handle_extract_object(node, self)
+        if node.name.upper() == str(UDFType.EXTRACT_OBJECT):
+            handle_bind_extract_object_function(node, self)
             return
         # bind all the children
         for child in node.children:
@@ -271,66 +271,4 @@ class StatementBinder:
             node.output_objs = output_objs
             node.projection_columns = [obj.name.lower() for obj in output_objs]
 
-        default_alias_name = node.name.lower()
-        default_output_col_aliases = [str(obj.name.lower()) for obj in node.output_objs]
-        if not node.alias:
-            node.alias = Alias(default_alias_name, default_output_col_aliases)
-        else:
-            if not len(node.alias.col_names):
-                node.alias = Alias(node.alias.alias_name, default_output_col_aliases)
-            else:
-                output_aliases = [
-                    str(col_name.lower()) for col_name in node.alias.col_names
-                ]
-                node.alias = Alias(node.alias.alias_name, output_aliases)
-
-        assert len(node.alias.col_names) == len(
-            node.output_objs
-        ), f"""Expected {len(node.output_objs)} output columns for {node.alias.alias_name}, got {len(node.alias.col_names)}."""
-
-
-def handle_extract_object(node: FunctionExpression, binder_context: StatementBinder):
-    if len(node.children) != 3:
-        err_msg = f"Invalid arguments provided to {UDFType.EXTRACT_OBJECT}. Example correct usage, (data, Detector, Tracker)"
-        logger.error(err_msg)
-        raise BinderError(err_msg)
-
-    """
-    1. Bind the source video data
-    2. Create the detector function expression using the provided name.
-    3. Create the tracker function expression. Its inputs are id, data, output of detector.
-    4. Bind the extract object function expression and append the new children.
-    """
-
-    # 1. Bind the source video
-    video_data = node.children[0]
-    binder_context.bind(video_data)
-
-    # 2. Construct the detector
-    # convert detector to FunctionExpression before binding
-    # eg. YoloV5 -> YoloV5(data)
-    detector = FunctionExpression(None, node.children[1].col_name)
-    detector.append_child(video_data.copy())
-    binder_context.bind(detector)
-
-    # 3. Construct the tracker
-    # convert tracker to FunctionExpression before binding
-    # eg. ByteTracker -> ByteTracker(id, data, labels, bboxes, scores)
-    tracker = FunctionExpression(None, node.children[2].col_name)
-    # create the video id expression
-    columns = get_video_table_column_definitions()
-    tracker.append_child(
-        TupleValueExpression(
-            col_name=columns[1].name, table_alias=video_data.table_alias
-        )
-    )
-    tracker.append_child(video_data.copy())
-    binder_context.bind(tracker)
-    # append the output of detector
-    for obj in detector.output_objs:
-        tracker.append_child(obj)
-
-    # 4. Bind the extract object expression.
-    node.children = []
-    binder_context.bind(node)
-    node.children = [video_data, detector, tracker]
+        resolve_alias_table_value_expression(node)
