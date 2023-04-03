@@ -137,6 +137,20 @@ def get_mock_object(class_type, number_of_args):
             MagicMock(),
             MagicMock(),
         )
+    elif number_of_args == 12:
+        return class_type(
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+        )
     else:
         raise Exception("Too many args")
 

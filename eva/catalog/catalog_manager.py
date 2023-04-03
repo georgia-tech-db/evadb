@@ -16,7 +16,7 @@ import shutil
 from pathlib import Path
 from typing import List
 
-from eva.catalog.catalog_type import ColumnType, IndexType, TableType
+from eva.catalog.catalog_type import ColumnType, IndexType, TableType, VideoColumnName
 from eva.catalog.catalog_utils import (
     cleanup_storage,
     construct_udf_cache_catalog_entry,
@@ -197,6 +197,14 @@ class CatalogManager(object):
         if col_obj:
             return col_obj
         else:
+            # return a dummy column catalog entry for audio, even though it does not defined for videos
+            if col_name == VideoColumnName.audio:
+                return ColumnCatalogEntry(
+                    col_name,
+                    ColumnType.NDARRAY,
+                    table_id=table_obj.row_id,
+                    table_name=table_obj.name,
+                )
             return None
 
     def get_column_catalog_entries_by_table(self, table_obj: TableCatalogEntry):
