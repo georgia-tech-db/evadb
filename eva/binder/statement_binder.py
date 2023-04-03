@@ -21,6 +21,7 @@ from eva.binder.binder_utils import (
     check_groupby_pattern,
     check_table_object_is_video,
     extend_star,
+    resolve_alias_table_value_expression,
 )
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.catalog.catalog_manager import CatalogManager
@@ -265,19 +266,4 @@ class StatementBinder:
             node.output_objs = output_objs
             node.projection_columns = [obj.name.lower() for obj in output_objs]
 
-        default_alias_name = node.name.lower()
-        default_output_col_aliases = [str(obj.name.lower()) for obj in node.output_objs]
-        if not node.alias:
-            node.alias = Alias(default_alias_name, default_output_col_aliases)
-        else:
-            if not len(node.alias.col_names):
-                node.alias = Alias(node.alias.alias_name, default_output_col_aliases)
-            else:
-                output_aliases = [
-                    str(col_name.lower()) for col_name in node.alias.col_names
-                ]
-                node.alias = Alias(node.alias.alias_name, output_aliases)
-
-        assert len(node.alias.col_names) == len(
-            node.output_objs
-        ), f"""Expected {len(node.output_objs)} output columns for {node.alias.alias_name}, got {len(node.alias.col_names)}."""
+        resolve_alias_table_value_expression(node)
