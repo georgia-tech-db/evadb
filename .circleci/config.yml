@@ -96,6 +96,7 @@ jobs:
       - run:
           name: Test and upload coverage report to coveralls
           command: |
+            export PYTHONUNBUFFERED=1
             source test_evadb/bin/activate
             bash script/test/test.sh -m "<< parameters.mode >>"
 
