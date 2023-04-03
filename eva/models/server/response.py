@@ -45,6 +45,8 @@ class Response:
         return obj
 
     def as_df(self):
+        if self.batch is None:
+            raise RuntimeError("EVAQL command was invalid")
         return self.batch.frames
 
     def __str__(self):
