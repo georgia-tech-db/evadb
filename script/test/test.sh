@@ -79,7 +79,7 @@ then
         PYTHONPATH=./ pytest --cov-report term-missing:skip-covered  --cov-config=.coveragerc --cov-context=test --cov=eva/ -s -v --log-level=WARNING -m "not benchmark"
     elif [[ "$MODE" = "RAY" ]];
     then
-        PYTHONPATH=./ pytest -p no:cov test/ -m "not benchmark"
+        PYTHONPATH=./ pytest -s -v -p no:cov test/ -m "not benchmark"
     fi
 
     test_code=$?
