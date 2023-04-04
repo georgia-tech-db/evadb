@@ -128,7 +128,9 @@ subquery_table_source_item: (select_statement | LR_BRACKET select_statement RR_B
     
 sample_clause: SAMPLE decimal_literal
 
-sample_clause_with_type: SAMPLE IFRAMES decimal_literal*
+sample_clause_with_type: SAMPLE sample_type decimal_literal*
+
+sample_type: IFRAMES | AUDIORATE
 
 join_part: JOIN table_source_item_with_sample (ON expression | USING LR_BRACKET uid_list RR_BRACKET)?  ->inner_join
          | JOIN LATERAL table_valued_function alias_clause? ->lateral_join
@@ -354,6 +356,7 @@ REFERENCES:                          "REFERENCES"
 RENAME:                              "RENAME"
 SAMPLE:                              "SAMPLE"
 IFRAMES:                             "IFRAMES"
+AUDIORATE:                           "AUDIORATE"
 SELECT:                             "SELECT"
 SET:                                 "SET"
 SHUTDOWN:                            "SHUTDOWN"
