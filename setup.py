@@ -49,7 +49,8 @@ minimal_requirement = [
     "ray>=1.13.0",
     "aenum>=2.2.0",
     "diskcache>=5.4.0",
-    "decord>=0.6.0"
+    "decord>=0.6.0",
+    "mock>=4.0.3", # for Dummy UDFs in test/util.py
 ]
 
 formatter_libs = [
@@ -65,7 +66,6 @@ test_libs = [
     "pytest-asyncio",
     "pytest-xdist",
     "coveralls>=3.0.1",
-    "mock>=4.0.3",
     "flake8>=3.9.1",
     "moto[s3]>=4.1.1"
 ]
