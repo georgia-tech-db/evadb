@@ -39,7 +39,7 @@ VERSION = VERSION_DICT["VERSION"]
 minimal_requirement = [
     "numpy>=1.19.5,<=1.23.5",
     "opencv-python>=4.5.4.60,<4.6.0.66",  # bug in easyocr
-    "pandas>=1.1.5",
+    "pandas>=1.1.5,<2.0.0", # major changes in 2.0.0
     "Pillow>=8.4.0",
     "sqlalchemy>=1.4.0,<2.0.0", # major changes in 2.0.0
     "sqlalchemy-utils>=0.36.6",
@@ -49,7 +49,8 @@ minimal_requirement = [
     "ray>=1.13.0",
     "aenum>=2.2.0",
     "diskcache>=5.4.0",
-    "decord=0.6.0"
+    "decord>=0.6.0",
+    "mock>=4.0.3", # for Dummy UDFs in test/util.py
 ]
 
 formatter_libs = [
@@ -65,7 +66,6 @@ test_libs = [
     "pytest-asyncio",
     "pytest-xdist",
     "coveralls>=3.0.1",
-    "mock>=4.0.3",
     "flake8>=3.9.1",
     "moto[s3]>=4.1.1"
 ]
