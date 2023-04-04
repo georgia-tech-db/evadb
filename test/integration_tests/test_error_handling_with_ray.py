@@ -12,26 +12,29 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from pathlib import Path
+import time
 import unittest
+from pathlib import Path
 from test.util import (
     create_sample_image,
-    load_udfs_for_testing,
     explain_query_plan,
+    is_ray_stage_running,
+    load_udfs_for_testing,
     shutdown_ray,
-    is_ray_stage_running
 )
 
-import time
 import pytest
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.server.command_handler import execute_query_fetch_all
 from eva.executor.executor_utils import ExecutorError
+from eva.server.command_handler import execute_query_fetch_all
 
 
-@pytest.mark.skipif(not ConfigurationManager().get_value("experimental", "ray"), reason="Only test for ray execution.")
+@pytest.mark.skipif(
+    not ConfigurationManager().get_value("experimental", "ray"),
+    reason="Only test for ray execution.",
+)
 class ErrorHandlingRayTests(unittest.TestCase):
     def setUp(self):
         CatalogManager().reset()

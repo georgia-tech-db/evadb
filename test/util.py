@@ -14,13 +14,13 @@
 # limitations under the License.
 import os
 import socket
-import psutil
 from contextlib import closing
 from pathlib import Path
 
 import cv2
 import numpy as np
 import pandas as pd
+import psutil
 import ray
 from mock import MagicMock
 
