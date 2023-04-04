@@ -31,7 +31,7 @@ class BatchTest(unittest.TestCase):
     def test_frames_as_numpy_array_should_frames_as_numpy_array(self):
         batch = Batch(frames=create_dataframe_same(2))
         expected = list(np.ones((2, 1, 1)))
-        actual = list(batch.column_as_numpy_array())
+        actual = list(batch.column_as_numpy_array(batch.columns[0]))
         self.assertEqual(expected, actual)
 
     def test_return_only_frames_specified_in_the_indices(self):
