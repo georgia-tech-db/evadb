@@ -302,6 +302,8 @@ class PytorchTest(unittest.TestCase):
         actual_batch = execute_query_fetch_all(select_query)
         self.assertEqual(len(actual_batch), 30)
 
+        execute_query_fetch_all("DROP UDF NorFairTracker;")
+
     @pytest.mark.torchtest
     def test_should_run_extract_object_with_unnest(self):
         create_udf_query = """CREATE UDF NorFairTracker
@@ -320,3 +322,5 @@ class PytorchTest(unittest.TestCase):
         actual_batch = execute_query_fetch_all(select_query)
         # do some more meaningful check
         self.assertEqual(len(actual_batch), 685)
+
+        execute_query_fetch_all("DROP UDF NorFairTracker;")

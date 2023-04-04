@@ -14,9 +14,6 @@
 # limitations under the License.
 from typing import Iterator
 
-import numpy as np
-import pandas as pd
-
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.extract_object_plan import ExtractObjectPlan
@@ -28,32 +25,20 @@ class ExtractObjectExecutor(AbstractExecutor):
     def __init__(self, node: ExtractObjectPlan):
         super().__init__(node)
         self.detector = node.detector
-        self.tracker = node.tracker.function()
-        self.tracker_args = node.tracker_args
-
-    def validate(self):
-        pass
+        self.tracker = node.tracker
 
     def exec(self) -> Iterator[Batch]:
         child_executor = self.children[0]
         for batch in child_executor.exec():
+            # run detector
             objects = self.detector.evaluate(batch)
 
-            # send row by row to the tracker
-            results = []
-            for (_, row1), (_, row2) in zip(batch.iterrows(), objects.iterrows()):
-                results.append(
-                    self.tracker(
-                        np.array(row1[0]),
-                        np.array(row1[1]),
-                        np.stack(row2[0]),
-                        np.stack(row2[1]),
-                        np.stack(row2[2]),
-                    )
-                )
+            # run tracker
+            intermediate_batch = Batch.merge_column_wise([batch, objects])
+            results = self.tracker.evaluate(intermediate_batch)
 
-            outcomes = Batch(pd.DataFrame(results, columns=self.node.expr.col_alias))
-            outcomes = Batch.merge_column_wise([batch, outcomes])
+            # merge batch and tracker outputs and yield
+            outcomes = Batch.merge_column_wise([batch, results])
             if self.node.do_unnest:
-                outcomes.unnest(self.node.expr.col_alias)
+                outcomes.unnest(results.columns)
             yield outcomes

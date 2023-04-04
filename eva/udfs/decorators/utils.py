@@ -32,7 +32,7 @@ def load_io_from_udf_decorators(
     """
     tag_key = "input" if is_input else "output"
     io_signature = None
-    if hasattr(udf.forward, "tags") and tag_key in udf.forward.tags[tag_key]:
+    if hasattr(udf.forward, "tags") and tag_key in udf.forward.tags:
         io_signature = udf.forward.tags[tag_key]
     else:
         # Attempt to populate from the parent class and stop at the first parent class

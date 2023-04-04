@@ -82,7 +82,6 @@ class StatementToPlanConvertor:
             tve = table_ref.table_valued_expr
             if tve.func_expr.name.lower() == str(UDFType.EXTRACT_OBJECT).lower():
                 self._plan = LogicalExtractObject(
-                    expr=tve.func_expr,
                     detector=tve.func_expr.children[1],
                     tracker=tve.func_expr.children[2],
                     alias=table_ref.alias,

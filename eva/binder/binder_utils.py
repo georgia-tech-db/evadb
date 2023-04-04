@@ -206,4 +206,6 @@ def handle_bind_extract_object_function(
     node.projection_columns = [obj.name.lower() for obj in node.output_objs]
 
     # 5. resolve alias based on the what user provided
+    # we assign the alias to tracker as it governs the output of the extract object
     resolve_alias_table_value_expression(node)
+    tracker.alias = node.alias

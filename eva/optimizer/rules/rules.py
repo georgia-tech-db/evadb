@@ -407,7 +407,9 @@ class PushDownFilterThroughApplyAndMerge(Rule):
 
 
 class XformExtractObjectToLinearFlow(Rule):
-    """If the inner node of a lateral join is a Extract_Object function-valued expression, we eliminate the join node and make the inner node the parent of the outer node. This produces a linear data flow path."""
+    """If the inner node of a lateral join is a Extract_Object function-valued
+    expression, we eliminate the join node and make the inner node the parent of the
+    outer node. This produces a linear data flow path."""
 
     #     LogicalJoin(Lateral)               LogicalExtractObject
     #     /           \                 ->        |
@@ -1178,10 +1180,8 @@ class LogicalExtractObjectToPhysical(Rule):
 
     def apply(self, before: LogicalExtractObject, context: OptimizerContext):
         after = ExtractObjectPlan(
-            before.expr,
             before.detector,
             before.tracker,
-            before.tracker_args,
             before.alias,
             before.do_unnest,
         )

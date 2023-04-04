@@ -15,6 +15,7 @@
 import typing
 
 import numpy
+import pandas as pd
 
 from eva.catalog.catalog_type import NdArrayType
 from eva.udfs.abstract.abstract_udf import AbstractUDF
@@ -73,4 +74,22 @@ class EVATracker(AbstractUDF):
         raise NotImplementedError
 
     def __call__(self, *args, **kwargs):
-        return self.forward(*args)
+        assert isinstance(
+            args[0], pd.DataFrame
+        ), f"Expecting pd.DataFrame, got {type(args[0])}"
+
+        results = []
+        print(len(args[0]), args[0].columns)
+        for _, row in args[0].iterrows():
+            tuple = (
+                numpy.array(row[0]),
+                numpy.array(row[1]),
+                numpy.stack(row[2]),
+                numpy.stack(row[3]),
+                numpy.stack(row[4]),
+            )
+            results.append(self.forward(*tuple))
+        return pd.DataFrame(
+            results,
+            columns=["track_ids", "track_labels", "track_bboxes", "track_scores"],
+        )

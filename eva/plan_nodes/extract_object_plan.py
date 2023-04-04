@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.function_expression import FunctionExpression
 from eva.parser.alias import Alias
 from eva.plan_nodes.abstract_plan import AbstractPlan
@@ -23,7 +22,6 @@ class ExtractObjectPlan(AbstractPlan):
     """Extract object plan
 
     Args:
-        expr: the extract object expression
         detector: the object detector to use for extracting objects
         tracker: the object tracking algorithm
         alias: the alias for the `expr`
@@ -32,18 +30,14 @@ class ExtractObjectPlan(AbstractPlan):
 
     def __init__(
         self,
-        expr: AbstractExpression,
         detector: FunctionExpression,
         tracker: FunctionExpression,
-        tracker_args: dict,
         alias: Alias,
         do_unnest: bool,
     ):
         super().__init__(PlanOprType.EXTRACT_OBJECT)
-        self.expr = expr
         self.detector = detector
         self.tracker = tracker
-        self.tracker_args = tracker_args
         self.alias = alias
         self.do_unnest = do_unnest
 
@@ -57,10 +51,8 @@ class ExtractObjectPlan(AbstractPlan):
         return hash(
             (
                 super().__hash__(),
-                self.expr,
                 self.detector,
                 self.tracker,
-                self.tracker_args,
                 self.alias,
                 self.do_unnest,
             )

@@ -46,6 +46,7 @@ from eva.optimizer.rules.rules import (
     LogicalDropToPhysical,
     LogicalDropUDFToPhysical,
     LogicalExplainToPhysical,
+    LogicalExtractObjectToPhysical,
     LogicalFaissIndexScanToPhysical,
     LogicalFilterToPhysical,
     LogicalFunctionScanToPhysical,
@@ -69,6 +70,7 @@ from eva.optimizer.rules.rules import (
     ReorderPredicates,
     Rule,
     RuleType,
+    XformExtractObjectToLinearFlow,
     XformLateralJoinToLinearFlow,
 )
 from eva.optimizer.rules.rules_manager import RulesManager, disable_rules
@@ -103,6 +105,7 @@ class RulesTest(unittest.TestCase):
             Promise.PUSHDOWN_FILTER_THROUGH_APPLY_AND_MERGE,
             Promise.COMBINE_SIMILARITY_ORDERBY_AND_LIMIT_TO_FAISS_INDEX_SCAN,
             Promise.REORDER_PREDICATES,
+            Promise.XFORM_EXTRACT_OBJECT_TO_LINEAR_FLOW,
         ]
 
         for promise in rewrite_promises:
@@ -138,6 +141,7 @@ class RulesTest(unittest.TestCase):
             Promise.LOGICAL_CREATE_INDEX_TO_FAISS,
             Promise.LOGICAL_APPLY_AND_MERGE_TO_PHYSICAL,
             Promise.LOGICAL_FAISS_INDEX_SCAN_TO_PHYSICAL,
+            Promise.LOGICAL_EXTRACT_OBJECT_TO_PHYSICAL,
         ]
 
         for promise in implementation_promises:
@@ -163,6 +167,7 @@ class RulesTest(unittest.TestCase):
             PushDownFilterThroughJoin(),
             CombineSimilarityOrderByAndLimitToFaissIndexScan(),
             ReorderPredicates(),
+            XformExtractObjectToLinearFlow(),
         ]
         self.assertEqual(
             len(supported_rewrite_rules), len(RulesManager().rewrite_rules)
@@ -213,6 +218,7 @@ class RulesTest(unittest.TestCase):
             LogicalCreateIndexToFaiss(),
             LogicalApplyAndMergeToPhysical(),
             LogicalFaissIndexScanToPhysical(),
+            LogicalExtractObjectToPhysical(),
         ]
 
         ray_enabled = ConfigurationManager().get_value("experimental", "ray")
