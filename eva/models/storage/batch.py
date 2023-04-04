@@ -297,8 +297,7 @@ class Batch:
 
     @classmethod
     def concat(cls, batch_list: Iterable[Batch], copy=True) -> Batch:
-        """Concat a list of batches. Avoid the extra copying overhead by
-        the append operation in __add__.
+        """Concat a list of batches.
         Notice: only frames are considered.
         """
 
