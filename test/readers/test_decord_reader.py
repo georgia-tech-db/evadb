@@ -21,8 +21,10 @@ from test.util import (
     file_remove,
 )
 
+import numpy as np
 import pytest
 
+from eva.configuration.constants import EVA_ROOT_DIR
 from eva.constants import IFRAMES
 from eva.expression.abstract_expression import ExpressionType
 from eva.expression.comparison_expression import ComparisonExpression
@@ -37,7 +39,15 @@ class DecordLoaderTest(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         self.video_file_url = create_sample_video()
+        self.video_with_audio_file_url = (
+            f"{EVA_ROOT_DIR}/data/sample_videos/touchdown.mp4"
+        )
         self.frame_size = FRAME_SIZE[0] * FRAME_SIZE[1] * 3
+        self.audio_frames = []
+        for line in open(
+            f"{EVA_ROOT_DIR}/test/data/touchdown_audio_frames.csv"
+        ).readlines():
+            self.audio_frames.append(np.fromstring(line, sep=","))
 
     @classmethod
     def tearDownClass(self):
@@ -140,3 +150,46 @@ class DecordLoaderTest(unittest.TestCase):
                 create_dummy_batches(filters=[i for i in range(0, NUM_FRAMES, k)])
             )
             self.assertEqual(batches, expected)
+
+    def test_should_throw_error_for_audioless_video(self):
+        try:
+            video_loader = DecordReader(
+                file_url=self.video_file_url,
+                read_audio=True,
+                read_video=True,
+            )
+            list(video_loader.read())
+            self.fail("Didn't raise AssertionError")
+        except AssertionError as e:
+            self.assertIn("Can't find audio stream", e.args[0].args[0])
+
+    def test_should_throw_error_when_sampling_iframes_for_audio(self):
+        video_loader = DecordReader(
+            file_url=self.video_with_audio_file_url,
+            sampling_type=IFRAMES,
+            read_audio=True,
+            read_video=False,
+        )
+        try:
+            list(video_loader.read())
+            self.fail("Didn't raise AssertionError")
+        except AssertionError as e:
+            self.assertEquals("Cannot use IFRAMES with audio streams", e.args[0])
+
+    def test_should_return_audio_frames(self):
+        # running test with sampling rate so that fewer frames are
+        # returned and verified, this helps keep the stored frame data size small
+        video_loader = DecordReader(
+            file_url=self.video_with_audio_file_url,
+            sampling_rate=100,
+            read_audio=True,
+            read_video=False,
+        )
+        batches = list(video_loader.read())
+
+        for i, frame in enumerate(self.audio_frames):
+            self.assertTrue(
+                np.array_equiv(self.audio_frames[i], batches[0].frames.iloc[i]["audio"])
+            )
+        # verify that no video frame was read
+        self.assertEqual(batches[0].frames.loc[0]["data"].shape, (0,))

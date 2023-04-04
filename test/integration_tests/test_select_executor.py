@@ -161,6 +161,37 @@ class SelectExecutorTest(unittest.TestCase):
         expected_batch = expected_batch.project(["mnist.id", "mnist.data"])
         self.assertEqual(actual_batch, expected_batch)
 
+    def test_should_load_and_select_real_audio_in_table(self):
+        query = """LOAD VIDEO 'data/sample_videos/touchdown.mp4'
+                   INTO TOUCHDOWN;"""
+        execute_query_fetch_all(query)
+
+        select_query = "SELECT id, audio FROM TOUCHDOWN;"
+        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch.sort("touchdown.id")
+        video_reader = DecordReader("data/sample_videos/touchdown.mp4", read_audio=True)
+        expected_batch = Batch(frames=pd.DataFrame())
+        for batch in video_reader.read():
+            batch.frames["name"] = "touchdown.mp4"
+            expected_batch += batch
+        expected_batch.modify_column_alias("touchdown")
+        expected_batch = expected_batch.project(["touchdown.id", "touchdown.audio"])
+        self.assertEqual(actual_batch, expected_batch)
+
+    def test_should_throw_error_when_both_audio_and_video_selected(self):
+        query = """LOAD VIDEO 'data/sample_videos/touchdown.mp4'
+                   INTO TOUCHDOWN1;"""
+        execute_query_fetch_all(query)
+
+        select_query = "SELECT id, audio, data FROM TOUCHDOWN1;"
+        try:
+            execute_query_fetch_all(select_query)
+            self.fail("Didn't raise AssertionError")
+        except AssertionError as e:
+            self.assertEquals(
+                "Cannot query over both audio and video streams", e.args[0]
+            )
+
     def test_select_and_where_video_in_table(self):
         select_query = "SELECT * FROM MyVideo WHERE id = 5;"
         actual_batch = execute_query_fetch_all(select_query)

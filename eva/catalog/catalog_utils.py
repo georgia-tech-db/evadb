@@ -16,7 +16,13 @@ import uuid
 from pathlib import Path
 from typing import List
 
-from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
+from eva.catalog.catalog_type import (
+    ColumnType,
+    ImageColumnName,
+    NdArrayType,
+    TableType,
+    VideoColumnName,
+)
 from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.catalog.models.udf_cache_catalog import UdfCacheCatalogEntry
@@ -40,16 +46,24 @@ def get_video_table_column_definitions() -> List[ColumnDefinition]:
     name: video path
     id: frame id
     data: frame data
+    audio: frame audio
     """
     columns = [
         ColumnDefinition(
-            "name", ColumnType.TEXT, None, None, ColConstraintInfo(unique=True)
+            VideoColumnName.name.name,
+            ColumnType.TEXT,
+            None,
+            None,
+            ColConstraintInfo(unique=True),
         ),
-        ColumnDefinition("id", ColumnType.INTEGER, None, None),
+        ColumnDefinition(VideoColumnName.id.name, ColumnType.INTEGER, None, None),
         ColumnDefinition(
-            "data", ColumnType.NDARRAY, NdArrayType.UINT8, (None, None, None)
+            VideoColumnName.data.name,
+            ColumnType.NDARRAY,
+            NdArrayType.UINT8,
+            (None, None, None),
         ),
-        ColumnDefinition("seconds", ColumnType.FLOAT, None, []),
+        ColumnDefinition(VideoColumnName.seconds.name, ColumnType.FLOAT, None, []),
     ]
     return columns
 
@@ -61,10 +75,17 @@ def get_image_table_column_definitions() -> List[ColumnDefinition]:
     """
     columns = [
         ColumnDefinition(
-            "name", ColumnType.TEXT, None, None, ColConstraintInfo(unique=True)
+            ImageColumnName.name.name,
+            ColumnType.TEXT,
+            None,
+            None,
+            ColConstraintInfo(unique=True),
         ),
         ColumnDefinition(
-            "data", ColumnType.NDARRAY, NdArrayType.UINT8, (None, None, None)
+            ImageColumnName.data.name,
+            ColumnType.NDARRAY,
+            NdArrayType.UINT8,
+            (None, None, None),
         ),
     ]
     return columns
