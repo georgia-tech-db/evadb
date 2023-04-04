@@ -44,6 +44,9 @@ class QueueReaderExecutor(AbstractExecutor):
             if next_item is StageCompleteSignal:
                 iq.put(StageCompleteSignal)
                 break
+            elif isinstance(next_item, ExecutorError):
+                iq.put(next_item)
+                raise next_item
             else:
                 yield next_item
 

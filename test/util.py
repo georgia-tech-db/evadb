@@ -14,6 +14,7 @@
 # limitations under the License.
 import os
 import socket
+import psutil
 from contextlib import closing
 from pathlib import Path
 
@@ -47,6 +48,10 @@ s3_dir_from_config = config.get_value("storage", "s3_download_dir")
 
 
 EVA_TEST_DATA_DIR = Path(config.get_value("core", "eva_installation_dir")).parent
+
+
+def is_ray_stage_running():
+    return "ray::ray_stage" in (p.name() for p in psutil.process_iter())
 
 
 def shutdown_ray():
