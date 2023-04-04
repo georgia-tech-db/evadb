@@ -116,5 +116,5 @@ class UdfCatalogEntry:
             "outputs": [_to_str(col) for col in self.outputs],
             "type": self.type,
             "impl": self.impl_file_path,
-            "meatdata": self.metadata,
+            "metadata": self.metadata,
         }

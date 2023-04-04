@@ -34,10 +34,16 @@ def image_data_preprocesser(images):
 
 
 def data_postprocesser(model_output):
-    outcome = pd.DataFrame()
-    for i in range(len(model_output)):
-        outcome = outcome.append(model_output[i], ignore_index=True)
-    return outcome
+    # PERF: Can improve performance by avoiding redundant list creation
+    result_list = []
+    for row_output in model_output:
+        # account for the case where we have more than one prediction for an input
+        # eg. object detection
+        if isinstance(row_output, list):
+            row_output = {k: [dic[k] for dic in row_output] for k in row_output[0]}
+        result_list.append(row_output)
+    result_df = pd.DataFrame(result_list)
+    return result_df
 
 
 class CustomImageClassification(ImageClassificationPipeline):

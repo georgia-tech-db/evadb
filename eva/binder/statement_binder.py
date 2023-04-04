@@ -246,6 +246,7 @@ class StatementBinder:
 
         if udf_obj.type == "HuggingFace":
             node.function = bind_hf_func_from_udf(udf_obj)
+            node.projection_columns = ["*"]
         else:
             # Verify the consistency of the UDF. If the checksum of the UDF does not match
             # the one stored in the catalog, an error will be thrown and the user will be
@@ -267,20 +268,20 @@ class StatementBinder:
                 logger.error(err_msg)
                 raise BinderError(err_msg)
 
-        node.udf_obj = udf_obj
-        output_objs = self._catalog.get_udf_io_catalog_output_entries(udf_obj)
-        if node.output:
-            for obj in output_objs:
-                if obj.name.lower() == node.output:
-                    node.output_objs = [obj]
-            if not node.output_objs:
-                err_msg = f"Output {node.output} does not exist for {udf_obj.name}."
-                logger.error(err_msg)
-                raise BinderError(err_msg)
-            node.projection_columns = [node.output]
-        else:
-            node.output_objs = output_objs
-            node.projection_columns = [obj.name.lower() for obj in output_objs]
+            node.udf_obj = udf_obj
+            output_objs = self._catalog.get_udf_io_catalog_output_entries(udf_obj)
+            if node.output:
+                for obj in output_objs:
+                    if obj.name.lower() == node.output:
+                        node.output_objs = [obj]
+                if not node.output_objs:
+                    err_msg = f"Output {node.output} does not exist for {udf_obj.name}."
+                    logger.error(err_msg)
+                    raise BinderError(err_msg)
+                node.projection_columns = [node.output]
+            else:
+                node.output_objs = output_objs
+                node.projection_columns = [obj.name.lower() for obj in output_objs]
 
         default_alias_name = node.name.lower()
         default_output_col_aliases = [str(obj.name.lower()) for obj in node.output_objs]

@@ -287,6 +287,23 @@ def create_csv(num_rows, columns):
     return df, csv_path
 
 
+def create_text_csv(num_rows=30):
+    """
+    Creates a csv with 2 columns: id and comment
+    The comment column has 2 values: "I like this" and "I don't like this" that are alternated
+    """
+    csv_path = os.path.join(tmp_dir_from_config, "dummy.csv")
+    try:
+        os.remove(csv_path)
+    except FileNotFoundError:
+        pass
+    df = pd.DataFrame(columns=["id", "comment"])
+    df["id"] = np.arange(num_rows)
+    df["comment"] = np.where(df["id"] % 2 == 0, "I like this", "I don't like this")
+    df.to_csv(csv_path, index=False)
+    return csv_path
+
+
 def create_table(table_name, num_rows, num_columns):
     # creates a table with num_rows tuples and columns = [a1, a2, a3, ...]
     columns = "".join("a{} INTEGER, ".format(i) for i in range(num_columns - 1))
