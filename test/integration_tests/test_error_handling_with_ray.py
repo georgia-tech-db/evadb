@@ -17,7 +17,6 @@ import unittest
 from pathlib import Path
 from test.util import (
     create_sample_image,
-    explain_query_plan,
     is_ray_stage_running,
     load_udfs_for_testing,
     shutdown_ray,
@@ -66,11 +65,9 @@ class ErrorHandlingRayTests(unittest.TestCase):
         execute_query_fetch_all(create_udf_query)
 
         select_query = """SELECT ToxicityClassifier(data) FROM testRayErrorHandling;"""
-        print(explain_query_plan(select_query))
 
         with self.assertRaises(ExecutorError):
             _ = execute_query_fetch_all(select_query)
 
-        print("error out")
         time.sleep(3)
         self.assertFalse(is_ray_stage_running())
