@@ -39,7 +39,7 @@ VERSION = VERSION_DICT["VERSION"]
 minimal_requirement = [
     "numpy>=1.19.5,<=1.23.5",
     "opencv-python>=4.5.4.60,<4.6.0.66",  # bug in easyocr
-    "pandas>=1.1.5",
+    "pandas>=1.1.5,<2.0.0", # major changes in 2.0.0
     "Pillow>=8.4.0",
     "sqlalchemy>=1.4.0,<2.0.0", # major changes in 2.0.0
     "sqlalchemy-utils>=0.36.6",
