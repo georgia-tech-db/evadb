@@ -25,7 +25,7 @@ from eva.experimental.ray.optimizer.rules.rules import (
 from eva.experimental.ray.optimizer.rules.rules import (
     LogicalProjectToPhysical as DistributedLogicalProjectToPhysical,
 )
-from eva.optimizer.rules.rules import (  # XformExtractObjectToLinearFlow,
+from eva.optimizer.rules.rules import (
     CacheFunctionExpressionInApply,
     CombineSimilarityOrderByAndLimitToFaissIndexScan,
     EmbedFilterIntoGet,
@@ -49,7 +49,7 @@ from eva.optimizer.rules.rules import (  # XformExtractObjectToLinearFlow,
 from eva.optimizer.rules.rules import (
     LogicalGetToSeqScan as SequentialLogicalGetToSeqScan,
 )
-from eva.optimizer.rules.rules import (  # XformExtractObjectToLinearFlow,
+from eva.optimizer.rules.rules import (
     LogicalGroupByToPhysical,
     LogicalInnerJoinCommutativity,
     LogicalInsertToPhysical,
@@ -63,7 +63,7 @@ from eva.optimizer.rules.rules import (  # XformExtractObjectToLinearFlow,
 from eva.optimizer.rules.rules import (
     LogicalProjectToPhysical as SequentialLogicalProjectToPhysical,
 )
-from eva.optimizer.rules.rules import (  # XformExtractObjectToLinearFlow,
+from eva.optimizer.rules.rules import (
     LogicalRenameToPhysical,
     LogicalShowToPhysical,
     LogicalUnionToPhysical,

@@ -244,15 +244,6 @@ class Batch:
         assert len(unknown_cols) == 0, unknown_cols
         return Batch(self._frames[verfied_cols])
 
-    def repeat(self, times: int) -> None:
-        """
-        Repeat the rows of a dataframe.
-
-        Arguments:
-            times: number of times to repeat
-        """
-        self._frames = pd.DataFrame(np.repeat(self.to_numpy(), times, axis=0))
-
     @classmethod
     def merge_column_wise(cls, batches: List[Batch], auto_renaming=False) -> Batch:
         """
