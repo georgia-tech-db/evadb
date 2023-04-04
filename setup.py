@@ -49,7 +49,7 @@ minimal_requirement = [
     "ray>=1.13.0",
     "aenum>=2.2.0",
     "diskcache>=5.4.0",
-    "eva-decord@git+https://github.com/georgia-tech-db/eva-decord.git@master#subdirectory=python"
+    "decord=0.6.0"
 ]
 
 formatter_libs = [
