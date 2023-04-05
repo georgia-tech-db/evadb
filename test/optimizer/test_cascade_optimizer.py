@@ -19,13 +19,13 @@ import pandas as pd
 import pytest
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.models.storage.batch import Batch
-from eva.server.command_handler import execute_query_fetch_all
-from eva.plan_nodes.project_plan import ProjectPlan
-from eva.plan_nodes.nested_loop_join_plan import NestedLoopJoinPlan
-from eva.plan_nodes.storage_plan import StoragePlan
 from eva.experimental.ray.planner.exchange_plan import ExchangePlan
+from eva.models.storage.batch import Batch
 from eva.optimizer.plan_generator import PlanGenerator
+from eva.plan_nodes.nested_loop_join_plan import NestedLoopJoinPlan
+from eva.plan_nodes.project_plan import ProjectPlan
+from eva.plan_nodes.storage_plan import StoragePlan
+from eva.server.command_handler import execute_query_fetch_all
 
 
 @pytest.mark.notparallel

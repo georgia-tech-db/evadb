@@ -115,7 +115,9 @@ class PlanGenerator:
                     plan.append_child(child)
 
                 if isinstance(plan, ExchangePlan):
-                    assert not is_top or len(plan.children) == 1, "Top ExchangePlan can only have 1 child."
+                    assert (
+                        not is_top or len(plan.children) == 1
+                    ), "Top ExchangePlan can only have 1 child."
                     return plan.children
                 else:
                     return [plan]
