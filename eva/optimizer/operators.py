@@ -63,6 +63,7 @@ class OperatorType(IntEnum):
     LOGICALCREATEINDEX = auto()
     LOGICAL_APPLY_AND_MERGE = auto()
     LOGICALFAISSINDEXSCAN = auto()
+    LOGICALOVERWRITE = auto()
     LOGICALDELIMITER = auto()
 
 
@@ -1264,5 +1265,56 @@ class LogicalFaissIndexScan(Operator):
                 self.index_name,
                 self.limit_count,
                 self.search_query_expr,
+            )
+        )
+
+
+class LogicalOverwrite(Operator):
+    """Overwrite node for overwrite data operation
+
+    Arguments:
+        table_info(TableRef): table to overwrite data 
+        operation(str): overwrite the data with the result of operation
+    """
+
+    def __init__(
+        self,
+        table_info: TableInfo,
+        operation: str,
+        children: List = None,
+    ):
+        super().__init__(OperatorType.LOGICALOVERWRITE, children)
+        self._table_info = table_info
+        self._operation = operation
+
+    @property
+    def table_info(self):
+        return self._table_info
+
+    @property
+    def operation(self):
+        return self._operation
+
+    def __str__(self):
+        return "LogicalOverwrite(table: {}, operation: {})".format(
+            self.table_info, self.operation
+        )
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalOverwrite):
+            return False
+        return (
+            is_subtree_equal
+            and self.table_info == other.table_info
+            and self.operation == other.operation
+        )
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                super().__hash__(),
+                self.table_info,
+                self.operation,
             )
         )

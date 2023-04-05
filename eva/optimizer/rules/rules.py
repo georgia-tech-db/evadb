@@ -77,6 +77,7 @@ from eva.optimizer.operators import (
     LogicalUnion,
     Operator,
     OperatorType,
+    LogicalOverwrite,
 )
 from eva.plan_nodes.create_index_plan import CreateIndexPlan
 from eva.plan_nodes.create_plan import CreatePlan
@@ -97,6 +98,7 @@ from eva.plan_nodes.rename_plan import RenamePlan
 from eva.plan_nodes.seq_scan_plan import SeqScanPlan
 from eva.plan_nodes.storage_plan import StoragePlan
 from eva.plan_nodes.union_plan import UnionPlan
+from eva.plan_nodes.overwrite_plan import OverwritePlan
 
 ##############################################
 # REWRITE RULES START
@@ -1152,6 +1154,23 @@ class LogicalFaissIndexScanToPhysical(Rule):
             after.append_child(child)
         yield after
 
+class LogicalOverwriteToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALOVERWRITE)
+        super().__init__(RuleType.LOGICAL_OVERWRITE_TO_PHYSICAL, pattern)
 
+    def promise(self):
+        return Promise.LOGICAL_OVERWRITE_TO_PHYSICAL
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalOverwrite, context: OptimizerContext):
+        after = OverwritePlan(
+            before.table_info,
+            before.operation,
+        )
+        yield after
+        
 # IMPLEMENTATION RULES END
 ##############################################

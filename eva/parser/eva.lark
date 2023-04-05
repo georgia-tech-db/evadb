@@ -8,7 +8,7 @@ ddl_statement: create_database | create_table | create_index | create_udf | crea
     | drop_database | drop_table | drop_udf | drop_index | rename_table
     
 dml_statement: select_statement | insert_statement | update_statement
-    | delete_statement | load_statement
+    | delete_statement | load_statement | overwrite_statement
     
 utility_statement: describe_statement | show_statement | help_statement | explain_statement
 
@@ -84,7 +84,11 @@ select_statement: query_specification                          ->simple_select
                | select_statement UNION ALL? select_statement  ->union_select
     
 update_statement: UPDATE table_name (AS? uid)? SET updated_element ("," updated_element)* (WHERE expression)? order_by_clause? limit_clause?
-    
+
+overwrite_statement: OVERWRITE table_name BY operation
+
+operation: string_literal
+
 load_statement: LOAD file_format file_name INTO table_name (("(" uid_list ")"))?
     
 file_format: CSV | VIDEO | IMAGE
@@ -269,6 +273,7 @@ predicate: predicate NOT? IN "(" (select_statement | expressions) ")"  ->in_pred
     | predicate IS null_notnull   ->is_null_predicate
     | predicate comparison_operator predicate  -> binary_comparison_predicate 
     | predicate comparison_operator (ALL | ANY | SOME) "(" select_statement ")"   ->subquery_comparison_predicate
+    | predicate NOT? LIKE predicate (STRING_LITERAL)?   
     | assign_var   ->expression_atom_predicate   
     | expression_atom 
 
@@ -342,6 +347,7 @@ OFFSET:                              "OFFSET"
 ON:                                  "ON"
 OR:                                  "OR"
 ORDER:                               "ORDER"
+OVERWRITE:                           "OVERWRITE"  
 PATH:                                "PATH"
 PRIMARY:                             "PRIMARY"
 REFERENCES:                          "REFERENCES"
