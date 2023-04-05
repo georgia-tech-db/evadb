@@ -19,6 +19,7 @@ from eva.configuration.constants import EVA_DEFAULT_DIR
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.create_udf_plan import CreateUDFPlan
+from eva.third_party.huggingface.create_udf import gen_hf_io_catalog_entries
 from eva.udfs.decorators.utils import load_io_from_udf_decorators
 from eva.utils.errors import UDFIODefinitionError
 from eva.utils.generic_utils import load_udf_class_from_file
@@ -36,7 +37,14 @@ class CreateUDFExecutor(AbstractExecutor):
         So we do not need to call the setup method on them like we do for other UDFs.
         """
         impl_path = f"{EVA_DEFAULT_DIR}/udfs/generic_huggingface_model.py"
-        return self.node.name, impl_path, self.node.udf_type, [], self.node.metadata
+        io_list = gen_hf_io_catalog_entries(self.node.name, self.node.metadata)
+        return (
+            self.node.name,
+            impl_path,
+            self.node.udf_type,
+            io_list,
+            self.node.metadata,
+        )
 
     def handle_generic_udf(self):
         """Handle generic UDFs

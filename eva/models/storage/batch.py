@@ -247,10 +247,6 @@ class Batch:
         We do a copy for now.
         """
         cols = cols or []
-        # The following is a workaround to support dynamic HuggingFace UDF's
-        # There is no concrete method of knowing the columns of the output beforehand
-        if cols == ["*"]:
-            cols = self._frames.columns.tolist()
         verfied_cols = [c for c in cols if c in self._frames]
         unknown_cols = list(set(cols) - set(verfied_cols))
         assert len(unknown_cols) == 0, unknown_cols

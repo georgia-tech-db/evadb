@@ -41,6 +41,43 @@ class HuggingFaceTests(unittest.TestCase):
         execute_query_fetch_all("DROP TABLE IF EXISTS DETRAC;")
         file_remove(self.csv_file_path)
 
+    def test_io_catalog_entries_populated(self):
+        udf_name, task = "HFObjectDetector", "object-detection"
+        create_udf_query = f"""CREATE UDF {udf_name}
+            TYPE HuggingFace
+            'task' '{task}'
+        """
+
+        execute_query_fetch_all(create_udf_query)
+
+        catalog = CatalogManager()
+        udf = catalog.get_udf_catalog_entry_by_name(udf_name)
+        input_entries = catalog.get_udf_io_catalog_input_entries(udf)
+        output_entries = catalog.get_udf_io_catalog_output_entries(udf)
+
+        # Verify that there is one input entry with the name text
+        self.assertEqual(len(input_entries), 1)
+        self.assertEqual(input_entries[0].name, f"{udf_name}_multimodal")
+
+        # Verify that there are 3 output entries with the names score, label and box
+        self.assertEqual(len(output_entries), 3)
+        self.assertEqual(output_entries[0].name, "score")
+        self.assertEqual(output_entries[1].name, "label")
+        self.assertEqual(output_entries[2].name, "box")
+
+    def test_raise_error_on_unsupported_task(self):
+        udf_name = "HFUnsupportedTask"
+        task = "zero-shot-object-detection"
+        create_udf_query = f"""CREATE UDF {udf_name}
+            TYPE HuggingFace
+            'task' '{task}'
+        """
+        with self.assertRaises(Exception) as exc_info:
+            execute_query_fetch_all(create_udf_query)
+        self.assertIn(
+            f"task:{task} not supported in EVA currently", str(exc_info.exception)
+        )
+
     def test_object_detection(self):
         udf_name = "HFObjectDetector"
         create_udf_query = f"""CREATE UDF {udf_name}
