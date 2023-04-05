@@ -426,8 +426,7 @@ class XformExtractObjectToLinearFlow(Rule):
 
     def check(self, before: LogicalJoin, context: OptimizerContext):
         if before.join_type == JoinType.LATERAL_JOIN:
-            if before.join_predicate is None and not before.join_project:
-                return True
+            return True
         return False
 
     def apply(self, before: LogicalJoin, context: OptimizerContext):

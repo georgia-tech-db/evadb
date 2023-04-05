@@ -46,30 +46,3 @@ def get_centroid(bboxes):
     if one_bbox:
         x = x.flatten()
     return x
-
-
-def xywh2xyxy(xywh):
-    """
-    https://adipandas.github.io/multi-object-tracker/_modules/motrackers/utils/misc.html
-    Convert bounding box coordinates from (xmin, ymin, width, height) to (xmin, ymin, xmax, ymax) format.
-
-    Args:
-        xywh (numpy.ndarray): Bounding box coordinates as `(xmin, ymin, width, height)`.
-
-    Returns:
-        numpy.ndarray : Bounding box coordinates as `(xmin, ymin, xmax, ymax)`.
-
-    """
-
-    if len(xywh.shape) == 2:
-        x = xywh[:, 0] + xywh[:, 2]
-        y = xywh[:, 1] + xywh[:, 3]
-        xyxy = np.concatenate((xywh[:, 0:2], x[:, None], y[:, None]), axis=1).astype(
-            "int"
-        )
-        return xyxy
-    if len(xywh.shape) == 1:
-        x, y, w, h = xywh
-        xr = x + w
-        yb = y + h
-        return np.array([x, y, xr, yb]).astype("int")

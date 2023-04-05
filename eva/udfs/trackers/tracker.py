@@ -79,7 +79,6 @@ class EVATracker(AbstractUDF):
         ), f"Expecting pd.DataFrame, got {type(args[0])}"
 
         results = []
-        print(len(args[0]), args[0].columns)
         for _, row in args[0].iterrows():
             tuple = (
                 numpy.array(row[0]),
