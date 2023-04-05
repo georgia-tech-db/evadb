@@ -37,7 +37,6 @@ from eva.optimizer.operators import (
     LogicalSample,
     LogicalShow,
     LogicalUnion,
-    LogicalOverwrite,
 )
 from eva.optimizer.optimizer_utils import (
     column_definition_to_udf_io,
@@ -59,7 +58,6 @@ from eva.parser.show_statement import ShowStatement
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
 from eva.utils.logging_manager import logger
-from eva.parser.overwrite_statement import OverwriteStatement
 
 
 class StatementToPlanConvertor:
@@ -326,13 +324,6 @@ class StatementToPlanConvertor:
         )
         self._plan = delete_opr
 
-    def visit_overwrite(self, statement: OverwriteStatement):
-        overwrite_opr = LogicalOverwrite(
-            statement.table_info,
-            statement.operation,
-        )
-        self._plan = overwrite_opr
-
     def visit(self, statement: AbstractStatement):
         """Based on the instance of the statement the corresponding
            visit is called.
@@ -367,8 +358,6 @@ class StatementToPlanConvertor:
             self.visit_create_index(statement)
         elif isinstance(statement, DeleteTableStatement):
             self.visit_delete(statement)
-        elif isinstance(statement, OverwriteStatement):
-            self.visit_overwrite(statement)
         return self._plan
 
     @property

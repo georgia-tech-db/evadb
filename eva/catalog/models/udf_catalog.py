@@ -12,12 +12,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from typing import List
 
 from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
 
+from eva.catalog.models.association_models import depend_udf_and_udf_cache
 from eva.catalog.models.base_model import BaseModel
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 
@@ -46,6 +49,13 @@ class UdfCatalog(BaseModel):
         cascade="all, delete, delete-orphan",
     )
 
+    _dep_caches = relationship(
+        "UdfCacheCatalog",
+        secondary=depend_udf_and_udf_cache,
+        back_populates="_udf_depends",
+        cascade="all, delete",
+    )
+
     def __init__(self, name: str, impl_file_path: str, type: str, checksum: str):
         self._name = name
         self._impl_file_path = impl_file_path
@@ -69,6 +79,7 @@ class UdfCatalog(BaseModel):
             checksum=self._checksum,
             args=args,
             outputs=outputs,
+            dep_caches=[entry.as_dataclass() for entry in self._dep_caches],
         )
 
 
@@ -85,6 +96,7 @@ class UdfCatalogEntry:
     row_id: int = None
     args: List[UdfIOCatalogEntry] = field(compare=False, default_factory=list)
     outputs: List[UdfIOCatalogEntry] = field(compare=False, default_factory=list)
+    dep_caches: List[UdfIOCatalogEntry] = field(compare=False, default_factory=list)
 
     def display_format(self):
         def _to_str(col):

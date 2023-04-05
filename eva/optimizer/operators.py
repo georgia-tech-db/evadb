@@ -12,9 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from collections import deque
 from enum import IntEnum, auto
 from pathlib import Path
-from typing import List
+from typing import Any, List
 
 from eva.catalog.catalog_type import IndexType
 from eva.catalog.models.column_catalog import ColumnCatalogEntry
@@ -62,7 +63,6 @@ class OperatorType(IntEnum):
     LOGICALCREATEINDEX = auto()
     LOGICAL_APPLY_AND_MERGE = auto()
     LOGICALFAISSINDEXSCAN = auto()
-    LOGICALOVERWRITE = auto()
     LOGICALDELIMITER = auto()
 
 
@@ -128,6 +128,34 @@ class Operator:
             else:
                 setattr(result, k, v)
         return result
+
+    def bfs(self):
+        """Returns a generator which visits all nodes in operator tree in
+        breadth-first search (BFS) traversal order.
+
+        Returns:
+            the generator object.
+        """
+        queue = deque([self])
+        while queue:
+            node = queue.popleft()
+            yield node
+            for child in node.children:
+                queue.append(child)
+
+    def find_all(self, operator_type: Any):
+        """Returns a generator which visits all the nodes in operator tree and yields one that matches the passed `operator_type`.
+
+        Args:
+            operator_type (Any): operator type to match with
+
+        Returns:
+            the generator object.
+        """
+
+        for node in self.bfs():
+            if isinstance(node, operator_type):
+                yield node
 
 
 class Dummy(Operator):
@@ -1236,56 +1264,5 @@ class LogicalFaissIndexScan(Operator):
                 self.index_name,
                 self.limit_count,
                 self.search_query_expr,
-            )
-        )
-
-
-class LogicalOverwrite(Operator):
-    """Overwrite node for overwrite data operation
-
-    Arguments:
-        table_info(TableRef): table to overwrite data 
-        operation(str): overwrite the data with the result of operation
-    """
-
-    def __init__(
-        self,
-        table_info: TableInfo,
-        operation: str,
-        children: List = None,
-    ):
-        super().__init__(OperatorType.LOGICALOVERWRITE, children)
-        self._table_info = table_info
-        self._operation = operation
-
-    @property
-    def table_info(self):
-        return self._table_info
-
-    @property
-    def operation(self):
-        return self._operation
-
-    def __str__(self):
-        return "LogicalOverwrite(table: {}, operation: {})".format(
-            self.table_info, self.operation
-        )
-
-    def __eq__(self, other):
-        is_subtree_equal = super().__eq__(other)
-        if not isinstance(other, LogicalOverwrite):
-            return False
-        return (
-            is_subtree_equal
-            and self.table_info == other.table_info
-            and self.operation == other.operation
-        )
-
-    def __hash__(self) -> int:
-        return hash(
-            (
-                super().__hash__(),
-                self.table_info,
-                self.operation,
             )
         )
