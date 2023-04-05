@@ -18,7 +18,7 @@ from typing import Dict, List, Type, Union
 import cv2
 import numpy as np
 from PIL import Image, ImageDraw
-from transformers import pipeline
+from transformers import Pipeline, pipeline
 from transformers.pipelines import SUPPORTED_TASKS
 
 from eva.catalog.catalog_type import ColumnType, NdArrayType
@@ -41,18 +41,16 @@ UNSUPPORTED_TASKS = [
 ]
 
 
-def run_pipe_through_text(pipe):
-    # Create dummy text input that could be passed to huggingface text tasks
+def run_pipe_through_text(pipe: Pipeline):
     input = "The cat is on the mat"
     return pipe(input)
 
 
-def run_pipe_through_image(pipe, width=224, height=224):
-    # Create dummy image input that could be passed to huggingface image tasks
+def run_pipe_through_image(pipe: Pipeline):
+    width, height = 224, 224
     dummy_image = Image.new("RGB", (width, height), "white")
     draw = ImageDraw.Draw(dummy_image)
 
-    # Draw a yellow circle
     circle_radius = min(width, height) // 4
     circle_center = (width // 2, height // 2)
     circle_bbox = (
@@ -66,13 +64,15 @@ def run_pipe_through_image(pipe, width=224, height=224):
     return pipe(dummy_image)
 
 
-def run_pipe_through_audio(pipe, duration_ms=1000, sample_rate=16000):
+def run_pipe_through_audio(pipe: Pipeline):
+    duration_ms, sample_rate = 1000, 16000
     num_samples = int(duration_ms * sample_rate / 1000)
     silent_data = np.random.rand(num_samples)
     return pipe(silent_data)
 
 
-def run_pipe_through_video(pipe, width=224, height=224, fps=30, duration_sec=1):
+def run_pipe_through_video(pipe: Pipeline):
+    width, height, fps, duration_sec = 224, 224, 30, 1
     num_frames = fps * duration_sec
     blank_frame = np.zeros((height, width, 3), dtype=np.uint8)
 
@@ -88,7 +88,8 @@ def run_pipe_through_video(pipe, width=224, height=224, fps=30, duration_sec=1):
     return output
 
 
-def run_pipe_through_multi_modal_text_image(pipe, width=224, height=224):
+def run_pipe_through_multi_modal_text_image(pipe: Pipeline):
+    width, height = 224, 224
     image_input = Image.new("RGB", (width, height), "white")
     text_input = "This is a dummy text input"
     return pipe(image=image_input, text=text_input)
@@ -167,6 +168,9 @@ def io_entry_for_inputs(udf_name: str, udf_input: Union[str, List]):
 
 
 def ptype_to_ndarray_type(col_type: type):
+    """
+    Helper function that maps python types to ndarray types
+    """
     if col_type == str:
         return NdArrayType.STR
     elif col_type == float:
@@ -176,6 +180,9 @@ def ptype_to_ndarray_type(col_type: type):
 
 
 def io_entry_for_outputs(udf_outputs: Dict[str, Type]):
+    """
+    Generates the IO Catalog Entry for the output
+    """
     outputs = []
     for col_name, col_type in udf_outputs.items():
         outputs.append(

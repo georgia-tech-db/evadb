@@ -37,8 +37,8 @@ from eva.parser.rename_statement import RenameTableStatement
 from eva.parser.select_statement import SelectStatement
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
+from eva.third_party.huggingface.binder import assign_hf_udf
 from eva.utils.generic_utils import get_file_checksum, load_udf_class_from_file
-from eva.utils.huggingface_utils import bind_hf_func_from_udf
 from eva.utils.logging_manager import logger
 
 if sys.version_info >= (3, 8):
@@ -245,7 +245,7 @@ class StatementBinder:
             raise BinderError(err_msg)
 
         if udf_obj.type == "HuggingFace":
-            node.function = bind_hf_func_from_udf(udf_obj)
+            node.function = assign_hf_udf(udf_obj)
         else:
             # Verify the consistency of the UDF. If the checksum of the UDF does not match
             # the one stored in the catalog, an error will be thrown and the user will be

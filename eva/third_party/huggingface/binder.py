@@ -12,24 +12,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from eva.udfs.abstract.abstract_udf import AbstractUDF
-from eva.udfs.gpu_compatible import GPUCompatible
+from eva.catalog.catalog_type import NdArrayType
+from eva.catalog.models.udf_catalog import UdfCatalogEntry
+from eva.third_party.huggingface.model import ImageHFModel, TextHFModel
 
 
-class GenericHuggingfaceModel(AbstractUDF, GPUCompatible):
-    @property
-    def name(self) -> str:
-        return "GenericHuggingfaceModel"
-
-    def setup(self, *args, **kwargs) -> None:
-        pass
-
-    @property
-    def input_format(self) -> str:
-        return str
-
-    def forward(self, *args, **kwargs) -> None:
-        pass
-
-    def to_device(self, device: str) -> GPUCompatible:
-        pass
+def assign_hf_udf(udf_obj: UdfCatalogEntry):
+    # NOTE: Currently supports one input
+    inputs = udf_obj.args
+    input_type = inputs[0].array_type
+    model_class = ImageHFModel
+    if input_type == NdArrayType.STR:
+        model_class = TextHFModel
+    return lambda: model_class(udf_obj)
