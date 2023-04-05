@@ -23,7 +23,7 @@ import pytest
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.configuration.constants import EVA_INSTALLATION_DIR, EVA_ROOT_DIR
+from eva.configuration.constants import EVA_ROOT_DIR
 from eva.server.command_handler import execute_query_fetch_all
 from eva.udfs.udf_bootstrap_queries import Asl_udf_query, Mvit_udf_query
 
@@ -286,13 +286,6 @@ class PytorchTest(unittest.TestCase):
 
     @pytest.mark.torchtest
     def test_should_run_extract_object(self):
-        create_udf_query = """CREATE UDF NorFairTracker
-                  IMPL  '{}/udfs/trackers/nor_fair/nor_fair.py';
-        """.format(
-            EVA_INSTALLATION_DIR
-        )
-        execute_query_fetch_all(create_udf_query)
-
         select_query = """
             SELECT id, T.iids, T.bboxes, T.scores, T.labels
             FROM MyVideo JOIN LATERAL EXTRACT_OBJECT(data, YoloV5, NorFairTracker)
@@ -301,17 +294,6 @@ class PytorchTest(unittest.TestCase):
             """
         actual_batch = execute_query_fetch_all(select_query)
         self.assertEqual(len(actual_batch), 30)
-
-        execute_query_fetch_all("DROP UDF NorFairTracker;")
-
-    @pytest.mark.torchtest
-    def test_should_run_extract_object_with_unnest(self):
-        create_udf_query = """CREATE UDF NorFairTracker
-                  IMPL  '{}/udfs/trackers/nor_fair/nor_fair.py';
-        """.format(
-            EVA_INSTALLATION_DIR
-        )
-        execute_query_fetch_all(create_udf_query)
 
         select_query = """
             SELECT id, T.iid, T.bbox, T.score, T.label
@@ -322,5 +304,3 @@ class PytorchTest(unittest.TestCase):
         actual_batch = execute_query_fetch_all(select_query)
         # do some more meaningful check
         self.assertEqual(len(actual_batch), 685)
-
-        execute_query_fetch_all("DROP UDF NorFairTracker;")

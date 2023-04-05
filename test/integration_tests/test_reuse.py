@@ -103,6 +103,17 @@ class ReuseTest(unittest.TestCase):
             reuse_batch = execute_query_fetch_all(select_query)
             self._verify_reuse_correctness(select_query, reuse_batch)
 
+    def test_reuse_in_extract_object(self):
+        select_query = """
+            SELECT id, T.iids, T.bboxes, T.scores, T.labels
+            FROM DETRAC JOIN LATERAL EXTRACT_OBJECT(data, YoloV5, NorFairTracker)
+                AS T(iids, labels, bboxes, scores)
+            WHERE id < 30;
+            """
+        execute_query_fetch_all(select_query)
+        reuse_batch = execute_query_fetch_all(select_query)
+        self._verify_reuse_correctness(select_query, reuse_batch)
+
     def test_reuse_does_not_work_when_expression_in_where_clause(self):
         # add with subsequent PR
         select_query = """
