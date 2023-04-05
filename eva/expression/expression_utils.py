@@ -27,7 +27,7 @@ def to_conjunction_list(
 ) -> List[AbstractExpression]:
     """Convert expression tree to list of conjuntives
 
-    Note: It does not normalize the expression tree before extracting the conjunctives.
+    Note: It does not normalize the expression tree before extracting the conjuntives.
 
     Args:
         expression_tree (AbstractExpression): expression tree to transform

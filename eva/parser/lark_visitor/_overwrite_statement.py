@@ -12,14 +12,22 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from eva.catalog.models.base_model import BaseModel
+from lark.tree import Tree
+
+from eva.parser.overwrite_statement import OverwriteStatement
 
 
-class BaseService:
-    """
-    Base service for all the models. Implemented by all other services.
-    The services perform business logic using the model provided
-    """
+class Overwrite:
+    def overwrite_statement(self, tree):
+        table_info = None
+        operation = None
 
-    def __init__(self, model: BaseModel):
-        self.model = model
+        for child in tree.children:
+            if isinstance(child, Tree):
+                if child.data == "table_name":
+                    table_info = self.visit(child)
+                elif child.data == "operation":
+                    operation = self.visit(child).value
+
+        stmt = OverwriteStatement(table_info, operation)
+        return stmt

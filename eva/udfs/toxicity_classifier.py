@@ -68,13 +68,8 @@ class ToxicityClassifier(AbstractClassifierUDF):
             single_result = self.model.predict(text)
             toxicity_score = single_result["toxicity"][0]
             if toxicity_score >= self.threshold:
-                outcome = pd.concat(
-                    [outcome, pd.DataFrame({"labels": ["toxic"]})], ignore_index=True
-                )
+                outcome = outcome.append({"labels": "toxic"}, ignore_index=True)
             else:
-                outcome = pd.concat(
-                    [outcome, pd.DataFrame({"labels": ["not toxic"]})],
-                    ignore_index=True,
-                )
+                outcome = outcome.append({"labels": "not toxic"}, ignore_index=True)
 
         return outcome

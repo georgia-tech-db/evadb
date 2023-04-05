@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import os
+from typing import List
 
 from sqlalchemy.orm.exc import NoResultFound
 
@@ -79,3 +80,10 @@ class IndexCatalogService(BaseService):
             logger.exception("Delete index failed for name {}".format(name))
             return False
         return True
+
+    def get_all_entries(self) -> List[IndexCatalogEntry]:
+        try:
+            entries = self.model.query.all()
+            return [entry.as_dataclass() for entry in entries]
+        except NoResultFound:
+            return []

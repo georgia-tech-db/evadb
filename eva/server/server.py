@@ -70,7 +70,7 @@ class EvaServer:
     ):
         try:
             while True:
-                data = await asyncio.wait_for(client_reader.readline(), timeout=None)
+                data = await asyncio.wait_for(client_reader.readline(), timeout=60.0)
                 if data == b"":
                     break
 

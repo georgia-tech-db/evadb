@@ -12,8 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-
 import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
@@ -55,10 +53,6 @@ class DropExecutor(AbstractExecutor):
         storage_engine = StorageEngine.factory(table_obj)
 
         storage_engine.drop(table=table_obj)
-
-        for col_obj in table_obj.columns:
-            for cache in col_obj.dep_caches:
-                catalog_manager.drop_udf_cache_catalog_entry(cache)
 
         assert catalog_manager.delete_table_catalog_entry(
             table_obj

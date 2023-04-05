@@ -97,6 +97,16 @@ Unnest_udf_query = """CREATE UDF IF NOT EXISTS Unnest
     EVA_INSTALLATION_DIR, NDARRAY_DIR
 )
 
+Timestamp_udf_query = """CREATE UDF
+            IF NOT EXISTS  Timestamp
+            INPUT (seconds INTEGER)
+            OUTPUT (timestamp NDARRAY STR(8))
+            TYPE NdarrayUDF
+            IMPL "{}/udfs/{}/timestamp.py";
+        """.format(
+    EVA_INSTALLATION_DIR, NDARRAY_DIR
+)
+
 Fastrcnn_udf_query = """CREATE UDF IF NOT EXISTS FastRCNNObjectDetector
       INPUT  (Frame_Array NDARRAY UINT8(3, ANYDIM, ANYDIM))
       OUTPUT (labels NDARRAY STR(ANYDIM), bboxes NDARRAY FLOAT32(ANYDIM, 4),
@@ -167,7 +177,9 @@ def init_builtin_udfs(mode="debug"):
     queries = [
         Fastrcnn_udf_query,
         ArrayCount_udf_query,
+        Timestamp_udf_query,
         Crop_udf_query,
+        YoloV5_udf_query,
         Open_udf_query,
         Similarity_udf_query
         # Disabled because required packages (eg., easy_ocr might not be preinstalled)
@@ -176,17 +188,13 @@ def init_builtin_udfs(mode="debug"):
         # Disabled as it requires specific pytorch package
         # Mvit_udf_query,
     ]
-    if mode != "release":
-        queries.extend(
-            [
-                DummyObjectDetector_udf_query,
-                DummyMultiObjectDetector_udf_query,
-                DummyFeatureExtractor_udf_query,
-            ]
-        )
-
-    if mode != "minimal":
-        queries.extend([YoloV5_udf_query])
+    queries.extend(
+        [
+            DummyObjectDetector_udf_query,
+            DummyMultiObjectDetector_udf_query,
+            DummyFeatureExtractor_udf_query,
+        ]
+    )
 
     for query in queries:
         execute_query_fetch_all(query)

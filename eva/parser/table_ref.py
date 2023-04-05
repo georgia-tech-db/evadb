@@ -157,16 +157,11 @@ class TableRef:
         alias: Alias = None,
         sample_freq: float = None,
         sample_type: str = None,
-        get_audio: bool = False,
-        get_video: bool = False,
     ):
         self._ref_handle = table
         self._sample_freq = sample_freq
-        self._sample_type = sample_type
-        self._get_audio = get_audio
-        self._get_video = get_video
-        # Alias generation must happen after ref handle is initialized
         self.alias = alias or self.generate_alias()
+        self._sample_type = sample_type
 
     @property
     def sample_freq(self):
@@ -175,22 +170,6 @@ class TableRef:
     @property
     def sample_type(self):
         return self._sample_type
-
-    @property
-    def get_audio(self):
-        return self._get_audio
-
-    @property
-    def get_video(self):
-        return self._get_video
-
-    @get_audio.setter
-    def get_audio(self, get_audio):
-        self._get_audio = get_audio
-
-    @get_video.setter
-    def get_video(self, get_video):
-        self._get_video = get_video
 
     def is_table_atom(self) -> bool:
         return isinstance(self._ref_handle, TableInfo)
@@ -203,12 +182,6 @@ class TableRef:
 
     def is_join(self) -> bool:
         return isinstance(self._ref_handle, JoinNode)
-
-    @property
-    def ref_handle(
-        self,
-    ) -> Union[TableInfo, TableValuedExpression, SelectStatement, JoinNode]:
-        return self._ref_handle
 
     @property
     def table(self) -> TableInfo:
@@ -263,10 +236,6 @@ class TableRef:
             table_ref_str += f" {str(self.sample_freq)}"
         if self.sample_type is not None:
             table_ref_str += f" {str(self.sample_type)}"
-        if self._get_video is not None:
-            table_ref_str += f" {str(self._get_video)}"
-        if self._get_audio is not None:
-            table_ref_str += f" {str(self._get_audio)}"
         return table_ref_str
 
     def __eq__(self, other):
@@ -277,18 +246,7 @@ class TableRef:
             and self.alias == other.alias
             and self.sample_freq == other.sample_freq
             and self.sample_type == other.sample_type
-            and self.get_video == other.get_video
-            and self.get_audio == other.get_audio
         )
 
     def __hash__(self) -> int:
-        return hash(
-            (
-                self._ref_handle,
-                self.alias,
-                self.sample_freq,
-                self.sample_type,
-                self.get_video,
-                self.get_audio,
-            )
-        )
+        return hash((self._ref_handle, self.alias, self.sample_freq, self.sample_type))

@@ -12,6 +12,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import List
+
+from sqlalchemy.orm.exc import NoResultFound
 
 from eva.catalog.catalog_type import TableType
 from eva.catalog.models.table_catalog import TableCatalog, TableCatalogEntry
@@ -64,21 +67,18 @@ class TableCatalogService(BaseService):
         else:
             return table_catalog_obj.as_dataclass()
 
-    def get_entry_by_id(self, table_id: int, return_alchemy=False) -> TableCatalogEntry:
+    def get_entry_by_id(self, table_id) -> TableCatalogEntry:
         """
         Returns the table by ID
         Arguments:
             table_id (int)
-            return_alchemy (bool): if True, return a sqlalchemy object
         Returns:
            TableCatalogEntry
         """
         entry = self.model.query.filter(self.model._row_id == table_id).one()
-        return entry if return_alchemy else entry.as_dataclass()
+        return entry.as_dataclass()
 
-    def get_entry_by_name(
-        self, database_name, table_name, return_alchemy=False
-    ) -> TableCatalogEntry:
+    def get_entry_by_name(self, database_name, table_name) -> TableCatalogEntry:
         """
         Get the table catalog entry with given table name.
         Arguments:
@@ -90,7 +90,7 @@ class TableCatalogService(BaseService):
         """
         entry = self.model.query.filter(self.model._name == table_name).one_or_none()
         if entry:
-            return entry if return_alchemy else entry.as_dataclass()
+            return entry.as_dataclass()
         return entry
 
     def delete_entry(self, table: TableCatalogEntry):
@@ -123,3 +123,10 @@ class TableCatalogService(BaseService):
             )
             logger.error(err_msg)
             raise RuntimeError(err_msg)
+
+    def get_all_entries(self) -> List[TableCatalogEntry]:
+        try:
+            entries = self.model.query.all()
+            return [entry.as_dataclass() for entry in entries]
+        except NoResultFound:
+            return []

@@ -41,14 +41,6 @@ class ColumnCatalogService(BaseService):
         entries = self.model.query.filter(self.model._table_id == table_id).all()
         return [entry.as_dataclass() for entry in entries]
 
-    def get_entry_by_id(
-        self, col_id: int, return_alchemy=False
-    ) -> List[ColumnCatalogEntry]:
-        entry = self.model.query.filter(self.model._row_id == col_id).one_or_none()
-        if entry:
-            return entry if return_alchemy else entry.as_dataclass()
-        return entry
-
     def insert_entries(self, column_list: List[ColumnCatalogEntry]):
         catalog_column_objs = [
             self.model(
