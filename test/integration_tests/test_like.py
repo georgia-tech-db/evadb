@@ -17,6 +17,7 @@ import unittest
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
 from eva.server.command_handler import execute_query_fetch_all
+from test.util import shutdown_ray
 
 
 class LikeTest(unittest.TestCase):
@@ -30,6 +31,7 @@ class LikeTest(unittest.TestCase):
         execute_query_fetch_all(f"LOAD IMAGE '{meme2}' INTO MemeImages;")
 
     def tearDown(self):
+        shutdown_ray()
         # clean up
         execute_query_fetch_all("DROP TABLE IF EXISTS MemeImages;")
 

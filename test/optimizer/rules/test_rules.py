@@ -202,6 +202,11 @@ class RulesTest(unittest.TestCase):
 
         ray_enabled = ConfigurationManager().get_value("experimental", "ray")
 
+        # For the current version, we choose either the distributed or the
+        # sequential rule, because we do not have a logic to choose one over
+        # the other in the current optimizer. Sequential rewrite is currently
+        # embedded inside distributed rule if ray is enabled. The rule itself
+        # has some simple heuristics to choose one over the other.
         supported_implementation_rules = [
             LogicalCreateToPhysical(),
             LogicalRenameToPhysical(),

@@ -12,8 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import List
-
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.experimental.ray.planner.exchange_plan import ExchangePlan
 from eva.optimizer.cost_model import CostModel
@@ -109,28 +107,20 @@ class PlanGenerator:
             def _recursive_strip_exchange(plan: AbstractPlan, is_top: bool = False):
                 children = []
                 for child_plan in plan.children:
-                    return_child = _recursive_strip_exchange(child_plan)
-                    if isinstance(return_child, List):
-                        children += return_child
-                    else:
-                        children += [return_child]
+                    return_child_list = _recursive_strip_exchange(child_plan)
+                    children += return_child_list
 
                 plan.clear_children()
                 for child in children:
                     plan.append_child(child)
 
                 if isinstance(plan, ExchangePlan):
-                    if is_top:
-                        assert (
-                            len(plan.children) == 1
-                        ), "Top ExchangePlan can only have 1 child."
-                        return plan.children[0]
-                    else:
-                        return plan.children
+                    assert not is_top or len(plan.children) == 1, "Top ExchangePlan can only have 1 child."
+                    return plan.children
                 else:
-                    return plan
+                    return [plan]
 
-            return _recursive_strip_exchange(physical_plan, True)
+            return _recursive_strip_exchange(physical_plan, True)[0]
         else:
             return physical_plan
 
