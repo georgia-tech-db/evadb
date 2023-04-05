@@ -8,7 +8,7 @@ ddl_statement: create_database | create_table | create_index | create_udf | crea
     | drop_database | drop_table | drop_udf | drop_index | rename_table
     
 dml_statement: select_statement | insert_statement | update_statement
-    | delete_statement | load_statement | overwrite_statement
+    | delete_statement | load_statement
     
 utility_statement: describe_statement | show_statement | help_statement | explain_statement
 
@@ -275,7 +275,6 @@ predicate: predicate NOT? IN "(" (select_statement | expressions) ")"  ->in_pred
     | predicate IS null_notnull   ->is_null_predicate
     | predicate comparison_operator predicate  -> binary_comparison_predicate 
     | predicate comparison_operator (ALL | ANY | SOME) "(" select_statement ")"   ->subquery_comparison_predicate
-    | predicate NOT? LIKE predicate (STRING_LITERAL)?   
     | assign_var   ->expression_atom_predicate   
     | expression_atom 
 
@@ -293,7 +292,7 @@ expression_atom.2: constant       ->constant_expression_atom
 
 unary_operator: EXCLAMATION_SYMBOL | BIT_NOT_OP | PLUS | MINUS | NOT 
     
-comparison_operator: EQUAL_SYMBOL | GREATER_SYMBOL | LESS_SYMBOL | GREATER_OR_EQUAL_SYMBOL | LESS_OR_EQUAL_SYMBOL | NOT_EQUAL_SYMBOL | CONTAINS_SYMBOL | CONTAINED_IN_SYMBOL
+comparison_operator: EQUAL_SYMBOL | GREATER_SYMBOL | LESS_SYMBOL | GREATER_OR_EQUAL_SYMBOL | LESS_OR_EQUAL_SYMBOL | NOT_EQUAL_SYMBOL | CONTAINS_SYMBOL | CONTAINED_IN_SYMBOL | LIKE_SYMBOL
     
 logical_operator: AND | XOR | OR 
     
@@ -485,6 +484,7 @@ LESS_OR_EQUAL_SYMBOL:                ">="
 NOT_EQUAL_SYMBOL:                    "!="
 CONTAINS_SYMBOL:                     "@>"
 CONTAINED_IN_SYMBOL:                 "<@"
+LIKE_SYMBOL:                         "LIKE"
 
 // Operators. Bit
 

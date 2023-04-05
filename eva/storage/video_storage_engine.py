@@ -14,18 +14,17 @@
 # limitations under the License.
 import sys
 from pathlib import Path
-from typing import Iterator, List
+from typing import Iterator
 
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.expression.abstract_expression import AbstractExpression
 from eva.models.storage.batch import Batch
 from eva.readers.decord_reader import DecordReader
-from eva.readers.opencv_reader import OpenCVReader
 from eva.storage.abstract_media_storage_engine import AbstractMediaStorageEngine
 from eva.utils.logging_manager import logger
 
 
-class OpenCVStorageEngine(AbstractMediaStorageEngine):
+class DecordStorageEngine(AbstractMediaStorageEngine):
     def __init__(self) -> None:
         super().__init__()
 
@@ -36,6 +35,8 @@ class OpenCVStorageEngine(AbstractMediaStorageEngine):
         predicate: AbstractExpression = None,
         sampling_rate: int = None,
         sampling_type: str = None,
+        read_audio: bool = False,
+        read_video: bool = True,
     ) -> Iterator[Batch]:
         for video_files in self._rdb_handler.read(self._get_metadata_table(table), 12):
             for _, (row_id, video_file_name) in video_files.iterrows():
@@ -52,15 +53,6 @@ class OpenCVStorageEngine(AbstractMediaStorageEngine):
                     sampling_rate=sampling_rate,
                     sampling_type=sampling_type,
                 )
-
-                if sampling_type is not None:
-                    reader = DecordReader(
-                        str(video_file),
-                        batch_mem_size=batch_mem_size,
-                        predicate=predicate,
-                        sampling_rate=sampling_rate,
-                        sampling_type=sampling_type,
-                    )
                 for batch in reader.read():
                     batch.frames[table.columns[0].name] = row_id
                     batch.frames[table.columns[1].name] = str(video_file_name)

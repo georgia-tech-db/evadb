@@ -15,7 +15,9 @@
 import hashlib
 import importlib
 import inspect
+import os
 import pickle
+import shutil
 import sys
 import uuid
 from pathlib import Path
@@ -176,6 +178,10 @@ def get_size(obj, seen=None):
     return size
 
 
+def get_str_hash(s: str) -> str:
+    return hashlib.md5(s.encode("utf-8")).hexdigest()
+
+
 def get_file_checksum(fname: str) -> str:
     """Compute checksum of the file contents
 
@@ -206,3 +212,16 @@ class PickleSerializer(object):
 class EVAEnum(AutoEnum):
     def __str__(self):
         return self.name
+
+
+def remove_directory_contents(dir_path):
+    if os.path.exists(dir_path):
+        for filename in os.listdir(dir_path):
+            file_path = os.path.join(dir_path, filename)
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+            except Exception as e:
+                logger.warning(f"Failed to delete {file_path}. Reason: {str(e)}")

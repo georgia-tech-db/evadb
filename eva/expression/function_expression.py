@@ -12,7 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Callable, List
+from dataclasses import dataclass
+from typing import Callable, List, Tuple
+
+import numpy as np
+import pandas as pd
 
 from eva.catalog.models.udf_catalog import UdfCatalogEntry
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
@@ -22,6 +26,8 @@ from eva.expression.abstract_expression import AbstractExpression, ExpressionTyp
 from eva.models.storage.batch import Batch
 from eva.parser.alias import Alias
 from eva.udfs.gpu_compatible import GPUCompatible
+from eva.utils.kv_cache import DiskKVCache
+from eva.utils.logging_manager import logger
 from eva.utils.stats import UDFStats
 
 
@@ -61,6 +67,7 @@ class FunctionExpression(AbstractExpression):
         self.udf_obj: UdfCatalogEntry = None
         self.output_objs: List[UdfIOCatalogEntry] = []
         self.projection_columns: List[str] = []
+        self._cache: FunctionExpressionCache = None
         self._stats = UDFStats()
 
     @property
@@ -87,15 +94,29 @@ class FunctionExpression(AbstractExpression):
     def function(self, func: Callable):
         self._function = func
 
+    def enable_cache(self, cache: "FunctionExpressionCache"):
+        self._cache = cache
+        return self
+
+    def has_cache(self):
+        return self._cache is not None
+
     def persist_stats(self):
         from eva.catalog.catalog_manager import CatalogManager
 
         if self.udf_obj is None:
             return
         udf_id = self.udf_obj.row_id
-        cost_per_func_call = (
-            self._stats.timer.total_elapsed_time / self._stats.num_calls
-        )
+
+        # if the function expression support cache only approximate using cache_miss entries.
+        if self.has_cache() and self._stats.cache_misses > 0:
+            cost_per_func_call = (
+                self._stats.timer.total_elapsed_time / self._stats.cache_misses
+            )
+        else:
+            cost_per_func_call = self._stats.timer.total_elapsed_time / (
+                self._stats.num_calls
+            )
 
         # persist stats to catalog only if it differ by greater than 10% from
         # the previous value
@@ -106,37 +127,32 @@ class FunctionExpression(AbstractExpression):
             self._stats.prev_cost = cost_per_func_call
 
     def evaluate(self, batch: Batch, **kwargs) -> Batch:
-        new_batch = batch
-        child_batches = [child.evaluate(batch, **kwargs) for child in self.children]
-        if len(child_batches):
-            batch_sizes = [len(child_batch) for child_batch in child_batches]
-            are_all_equal_length = all(batch_sizes[0] == x for x in batch_sizes)
-            assert (
-                are_all_equal_length is True
-            ), "All columns in batch must have equal elements"
-            new_batch = Batch.merge_column_wise(child_batches)
-
         func = self._gpu_enabled_function()
-        outcomes = new_batch
-
         # record the time taken for the udf execution
+        # note the udf might be using cache
         with self._stats.timer:
             # apply the function and project the required columns
-            outcomes.apply_function_expression(func)
+            outcomes = self._apply_function_expression(func, batch, **kwargs)
             outcomes = outcomes.project(self.projection_columns)
             outcomes.modify_column_alias(self.alias)
 
         # record the number of function calls
         self._stats.num_calls += len(batch)
 
-        # persist the stats to catalog
-        self.persist_stats()
+        # try persisting the stats to catalog and do not crash if we fail in doing so
+        try:
+            self.persist_stats()
+        except Exception as e:
+            logger.warn(
+                f"Persisting Function Expression {str(self)} stats failed with {str(e)}"
+            )
 
         return outcomes
 
     def signature(self) -> str:
         """It constructs the signature of the function expression.
-        It traverses the children (function arguments) and compute signature for each child. The output is in the form `udf_name(arg1, arg2, ...)`.
+        It traverses the children (function arguments) and compute signature for each
+        child. The output is in the form `udf_name[row_id](arg1, arg2, ...)`.
 
         Returns:
             str: signature string
@@ -145,7 +161,7 @@ class FunctionExpression(AbstractExpression):
         for child in self.children:
             child_sigs.append(child.signature())
 
-        func_sig = f"{self.name}({','.join(child_sigs)})"
+        func_sig = f"{self.name}[{self.udf_obj.row_id}]({','.join(child_sigs)})"
         return func_sig
 
     def _gpu_enabled_function(self):
@@ -217,6 +233,7 @@ class FunctionExpression(AbstractExpression):
 
         # 5. return the correct batch
         return Batch(pd.DataFrame(results, columns=output_cols))
+
     def __str__(self) -> str:
         expr_str = f"{self.name}()"
         return expr_str
@@ -232,6 +249,7 @@ class FunctionExpression(AbstractExpression):
             and self.alias == other.alias
             and self.function == other.function
             and self.output_objs == other.output_objs
+            and self._cache == other._cache
         )
 
     def __hash__(self) -> int:
@@ -243,5 +261,19 @@ class FunctionExpression(AbstractExpression):
                 self.alias,
                 self.function,
                 tuple(self.output_objs),
+                self._cache,
             )
         )
+
+
+@dataclass(frozen=True)
+class FunctionExpressionCache:
+    """dataclass for cache-related attributes
+
+    Args:
+        key (`AbstractExpression`): the list of abstract expression to evaluate to get the key. If `None`, use the function arguments as the key. This is useful when the system wants to use logically equivalent columns as the key (e.g., frame number instead of frame data).
+        store (`DiskKVCache`): the cache object to get/set key-value pairs
+    """
+
+    key: Tuple[AbstractExpression]
+    store: DiskKVCache = None

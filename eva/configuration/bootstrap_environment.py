@@ -20,6 +20,7 @@ from pathlib import Path
 import yaml
 
 from eva.configuration.constants import (
+    CACHE_DIR,
     DB_DEFAULT_URI,
     EVA_CONFIG_FILE,
     EVA_DATASET_DIR,
@@ -59,6 +60,7 @@ def bootstrap_environment(eva_config_dir: Path, eva_installation_dir: Path):
     default_install_dir = eva_installation_dir
     dataset_location = EVA_DEFAULT_DIR / EVA_DATASET_DIR
     index_dir = eva_config_dir / INDEX_DIR
+    cache_dir = eva_config_dir / CACHE_DIR
     s3_dir = eva_config_dir / S3_DOWNLOAD_DIR
     tmp_dir = eva_config_dir / TMP_DIR
 
@@ -100,6 +102,7 @@ def bootstrap_environment(eva_config_dir: Path, eva_installation_dir: Path):
         config_obj["core"]["datasets_dir"] = str(dataset_location.resolve())
         config_obj["core"]["catalog_database_uri"] = DB_DEFAULT_URI
         config_obj["storage"]["index_dir"] = str(index_dir.resolve())
+        config_obj["storage"]["cache_dir"] = str(cache_dir.resolve())
         config_obj["storage"]["s3_download_dir"] = str(s3_dir.resolve())
         config_obj["storage"]["tmp_dir"] = str(tmp_dir.resolve())
 

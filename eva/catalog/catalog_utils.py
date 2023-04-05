@@ -16,7 +16,13 @@ import uuid
 from pathlib import Path
 from typing import Any, Dict, List
 
-from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
+from eva.catalog.catalog_type import (
+    ColumnType,
+    ImageColumnName,
+    NdArrayType,
+    TableType,
+    VideoColumnName,
+)
 from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.catalog.models.udf_cache_catalog import UdfCacheCatalogEntry
@@ -25,10 +31,15 @@ from eva.configuration.configuration_manager import ConfigurationManager
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
+from eva.utils.generic_utils import get_str_hash, remove_directory_contents
 
 
 def is_video_table(table: TableCatalogEntry):
     return table.table_type == TableType.VIDEO_DATA
+
+
+def is_string_col(col: ColumnCatalogEntry):
+    return col.type == ColumnType.TEXT or col.array_type == NdArrayType.STR
 
 
 def get_video_table_column_definitions() -> List[ColumnDefinition]:
@@ -36,16 +47,24 @@ def get_video_table_column_definitions() -> List[ColumnDefinition]:
     name: video path
     id: frame id
     data: frame data
+    audio: frame audio
     """
     columns = [
         ColumnDefinition(
-            "name", ColumnType.TEXT, None, None, ColConstraintInfo(unique=True)
+            VideoColumnName.name.name,
+            ColumnType.TEXT,
+            None,
+            None,
+            ColConstraintInfo(unique=True),
         ),
-        ColumnDefinition("id", ColumnType.INTEGER, None, None),
+        ColumnDefinition(VideoColumnName.id.name, ColumnType.INTEGER, None, None),
         ColumnDefinition(
-            "data", ColumnType.NDARRAY, NdArrayType.UINT8, (None, None, None)
+            VideoColumnName.data.name,
+            ColumnType.NDARRAY,
+            NdArrayType.UINT8,
+            (None, None, None),
         ),
-        ColumnDefinition("seconds", ColumnType.FLOAT, None, []),
+        ColumnDefinition(VideoColumnName.seconds.name, ColumnType.FLOAT, None, []),
     ]
     return columns
 
@@ -57,13 +76,29 @@ def get_image_table_column_definitions() -> List[ColumnDefinition]:
     """
     columns = [
         ColumnDefinition(
-            "name", ColumnType.TEXT, None, None, ColConstraintInfo(unique=True)
+            ImageColumnName.name.name,
+            ColumnType.TEXT,
+            None,
+            None,
+            ColConstraintInfo(unique=True),
         ),
         ColumnDefinition(
-            "data", ColumnType.NDARRAY, NdArrayType.UINT8, (None, None, None)
+            ImageColumnName.data.name,
+            ColumnType.NDARRAY,
+            NdArrayType.UINT8,
+            (None, None, None),
         ),
     ]
     return columns
+
+
+def get_table_primary_columns(table_catalog_obj: TableCatalogEntry):
+    if table_catalog_obj.table_type == TableType.VIDEO_DATA:
+        return get_video_table_column_definitions()[:2]
+    elif table_catalog_obj.table_type == TableType.IMAGE_DATA:
+        return get_image_table_column_definitions()[:1]
+    else:
+        raise Exception(f"Unexpected table type {table_catalog_obj.table_type}")
 
 
 def xform_column_definitions_to_catalog_entries(
@@ -74,8 +109,6 @@ def xform_column_definitions_to_catalog_entries(
     Arguments:
         col_list {List[ColumnDefinition]} -- parsed col list to be created
     """
-    if isinstance(col_list, ColumnDefinition):
-        col_list = [col_list]
 
     result_list = []
     for col in col_list:

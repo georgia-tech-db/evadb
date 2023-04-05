@@ -19,6 +19,7 @@ from typing import TYPE_CHECKING
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import TableType
 from eva.catalog.catalog_utils import is_video_table
+from eva.constants import CACHEABLE_UDFS
 from eva.expression.expression_utils import (
     conjunction_list_to_expression_tree,
     to_conjunction_list,
@@ -78,7 +79,6 @@ from eva.optimizer.operators import (
     LogicalUnion,
     Operator,
     OperatorType,
-    LogicalOverwrite,
 )
 from eva.plan_nodes.create_index_plan import CreateIndexPlan
 from eva.plan_nodes.create_plan import CreatePlan
@@ -99,7 +99,6 @@ from eva.plan_nodes.rename_plan import RenamePlan
 from eva.plan_nodes.seq_scan_plan import SeqScanPlan
 from eva.plan_nodes.storage_plan import StoragePlan
 from eva.plan_nodes.union_plan import UnionPlan
-from eva.plan_nodes.overwrite_plan import OverwritePlan
 
 ##############################################
 # REWRITE RULES START
@@ -249,6 +248,39 @@ class CacheFunctionExpressionInFilter(Rule):
             predicate=after_predicate, children=before.children
         )
         yield after_operator
+
+
+class CacheFunctionExpressionInApply(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICAL_APPLY_AND_MERGE)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.CACHE_FUNCTION_EXPRESISON_IN_APPLY, pattern)
+
+    def promise(self):
+        return Promise.CACHE_FUNCTION_EXPRESISON_IN_APPLY
+
+    def check(self, before: LogicalApplyAndMerge, context: OptimizerContext):
+        expr = before.func_expr
+        # already cache enabled
+        # replace the cacheable condition once we have the property supported as part of the UDF itself.
+        if expr.has_cache() or expr.name not in CACHEABLE_UDFS:
+            return False
+        # we do not support caching function expression instances with multiple arguments or nested function expressions
+        if len(expr.children) > 1 or not isinstance(
+            expr.children[0], TupleValueExpression
+        ):
+            return False
+        return True
+
+    def apply(self, before: LogicalApplyAndMerge, context: OptimizerContext):
+        # todo: this will create a ctaalog entry even in the case of explain command
+        # We should run this code conditionally
+        new_func_expr = enable_cache(before.func_expr)
+        after = LogicalApplyAndMerge(
+            func_expr=new_func_expr, alias=before.alias, do_unnest=before.do_unnest
+        )
+        after.append_child(before.children[0])
+        yield after
 
 
 # Join Queries
@@ -792,6 +824,7 @@ class LogicalGetToSeqScan(Rule):
         after.append_child(
             StoragePlan(
                 before.table_obj,
+                before.video,
                 predicate=before.predicate,
                 sampling_rate=before.sampling_rate,
                 sampling_type=before.sampling_type,
@@ -1157,10 +1190,6 @@ class LogicalFaissIndexScanToPhysical(Rule):
             after.append_child(child)
         yield after
 
-class LogicalOverwriteToPhysical(Rule):
-    def __init__(self):
-        pattern = Pattern(OperatorType.LOGICALOVERWRITE)
-        super().__init__(RuleType.LOGICAL_OVERWRITE_TO_PHYSICAL, pattern)
 
     def promise(self):
         return Promise.LOGICAL_OVERWRITE_TO_PHYSICAL
@@ -1174,6 +1203,6 @@ class LogicalOverwriteToPhysical(Rule):
             before.operation,
         )
         yield after
-        
+
 # IMPLEMENTATION RULES END
 ##############################################

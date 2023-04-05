@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import time
+from dataclasses import dataclass
 
 from eva.utils.logging_manager import logger
 
@@ -45,8 +46,10 @@ class Timer:
         logger.info("{:s}: {:0.4f} sec".format(context, self.total_elapsed_time))
 
 
+@dataclass
 class UDFStats:
     def __init__(self) -> None:
         self.num_calls: int = 0
         self.timer: Timer = Timer()
         self.prev_cost: float = 0.0
+        self.cache_misses: int = 0

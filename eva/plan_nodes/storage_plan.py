@@ -14,6 +14,7 @@
 # limitations under the License.
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.expression.abstract_expression import AbstractExpression
+from eva.parser.table_ref import TableRef
 from eva.plan_nodes.abstract_plan import AbstractPlan
 from eva.plan_nodes.types import PlanOprType
 
@@ -38,6 +39,7 @@ class StoragePlan(AbstractPlan):
     def __init__(
         self,
         table: TableCatalogEntry,
+        table_ref: TableRef,
         skip_frames: int = 0,
         offset: int = None,
         limit: int = None,
@@ -50,6 +52,7 @@ class StoragePlan(AbstractPlan):
     ):
         super().__init__(PlanOprType.STORAGE_PLAN)
         self._table = table
+        self._table_ref = table_ref
         self._batch_mem_size = batch_mem_size
         self._skip_frames = skip_frames
         self._offset = offset
@@ -63,6 +66,10 @@ class StoragePlan(AbstractPlan):
     @property
     def table(self):
         return self._table
+
+    @property
+    def table_ref(self):
+        return self._table_ref
 
     @property
     def batch_mem_size(self):
@@ -102,6 +109,7 @@ class StoragePlan(AbstractPlan):
 
     def __str__(self):
         return "StoragePlan(video={}, \
+            table_ref={},\
             batch_mem_size={}, \
             skip_frames={}, \
             offset={}, \
@@ -112,6 +120,7 @@ class StoragePlan(AbstractPlan):
             sampling_rate={}, \
             sampling_type={})".format(
             self._table,
+            self._table_ref,
             self._batch_mem_size,
             self._skip_frames,
             self._offset,
@@ -128,6 +137,7 @@ class StoragePlan(AbstractPlan):
             (
                 super().__hash__(),
                 self.table,
+                self.table_ref,
                 self.batch_mem_size,
                 self.skip_frames,
                 self.offset,

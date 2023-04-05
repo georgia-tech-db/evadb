@@ -106,16 +106,6 @@ Unnest_udf_query = """CREATE UDF IF NOT EXISTS Unnest
     EVA_INSTALLATION_DIR, NDARRAY_DIR
 )
 
-Timestamp_udf_query = """CREATE UDF
-            IF NOT EXISTS  Timestamp
-            INPUT (seconds INTEGER)
-            OUTPUT (timestamp NDARRAY STR(8))
-            TYPE NdarrayUDF
-            IMPL "{}/udfs/{}/timestamp.py";
-        """.format(
-    EVA_INSTALLATION_DIR, NDARRAY_DIR
-)
-
 Fastrcnn_udf_query = """CREATE UDF IF NOT EXISTS FastRCNNObjectDetector
       INPUT  (Frame_Array NDARRAY UINT8(3, ANYDIM, ANYDIM))
       OUTPUT (labels NDARRAY STR(ANYDIM), bboxes NDARRAY FLOAT32(ANYDIM, 4),
@@ -187,9 +177,7 @@ def init_builtin_udfs(mode: str = "debug") -> None:
     queries = [
         Fastrcnn_udf_query,
         ArrayCount_udf_query,
-        Timestamp_udf_query,
         Crop_udf_query,
-        YoloV5_udf_query,
         Open_udf_query,
         Similarity_udf_query,
         Annotate_udf_query,

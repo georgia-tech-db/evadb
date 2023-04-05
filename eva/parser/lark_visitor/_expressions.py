@@ -89,6 +89,8 @@ class Expressions:
             return ExpressionType.COMPARE_CONTAINS
         elif op == "<@":
             return ExpressionType.COMPARE_IS_CONTAINED
+        elif op == "LIKE":
+            return ExpressionType.COMPARE_LIKE
 
     def logical_operator(self, tree):
         op = str(tree.children[0])

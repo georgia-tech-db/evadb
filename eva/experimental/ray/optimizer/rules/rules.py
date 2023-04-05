@@ -99,6 +99,7 @@ class LogicalGetToSeqScan(Rule):
         lower.append_child(
             StoragePlan(
                 before.table_obj,
+                before.video,
                 predicate=before.predicate,
                 sampling_rate=before.sampling_rate,
             )
