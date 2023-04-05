@@ -8,7 +8,7 @@ ddl_statement: create_database | create_table | create_index | create_udf | crea
     | drop_database | drop_table | drop_udf | drop_index | rename_table
     
 dml_statement: select_statement | insert_statement | update_statement
-    | delete_statement | load_statement
+    | delete_statement | load_statement | overwrite_statement
     
 utility_statement: describe_statement | show_statement | help_statement | explain_statement
 
@@ -275,6 +275,7 @@ predicate: predicate NOT? IN "(" (select_statement | expressions) ")"  ->in_pred
     | predicate IS null_notnull   ->is_null_predicate
     | predicate comparison_operator predicate  -> binary_comparison_predicate 
     | predicate comparison_operator (ALL | ANY | SOME) "(" select_statement ")"   ->subquery_comparison_predicate
+    | predicate NOT? LIKE predicate (STRING_LITERAL)?   
     | assign_var   ->expression_atom_predicate   
     | expression_atom 
 
@@ -375,6 +376,82 @@ USING:                               "USING"i
 VALUES:                              "VALUES"i
 WHERE:                               "WHERE"i
 XOR:                                 "XOR"i
+=======
+ALL:                                 "ALL"
+ALTER:                               "ALTER"
+AND:                                 "AND"
+ANY:                                 "ANY"
+ANYDIM:                              "ANYDIM"
+AS:                                  "AS"
+ASC:                                 "ASC"
+BLOB:                                "BLOB"
+BY:                                  "BY"
+COLUMN:                              "COLUMN"
+CREATE:                              "CREATE"
+DATABASE:                            "DATABASE"
+DEFAULT:                             "DEFAULT"
+DELETE:                              "DELETE"
+DESC:                                "DESC"
+DESCRIBE:                            "DESCRIBE"
+DISTINCT:                            "DISTINCT"
+DROP:                                "DROP"
+EXIT:                                "EXIT"
+EXISTS:                              "EXISTS"
+EXPLAIN:                             "EXPLAIN"
+FALSE:                               "FALSE"
+FROM:                                "FROM"
+GROUP:                               "GROUP"
+HAVING:                              "HAVING"
+IF:                                  "IF"
+IN:                                  "IN"
+FILE:                                "FILE"
+INDIR:                               "INDIR"
+INTO:                                "INTO"
+INDEX:                               "INDEX"
+INSERT:                              "INSERT"
+IS:                                  "IS"
+JOIN:                                "JOIN"
+KEY:                                 "KEY"
+LATERAL:                             "LATERAL"
+LIKE:                                "LIKE"
+LIMIT:                               "LIMIT"
+LOAD:                                "LOAD"
+NO:                                  "NO"
+NOT:                                 "NOT"
+NULL_LITERAL:                        "NULL"
+OFFSET:                              "OFFSET"
+ON:                                  "ON"
+OR:                                  "OR"
+ORDER:                               "ORDER"
+OVERWRITE:                           "OVERWRITE"  
+PATH:                                "PATH"
+PRIMARY:                             "PRIMARY"
+REFERENCES:                          "REFERENCES"
+RENAME:                              "RENAME"
+SAMPLE:                              "SAMPLE"
+IFRAMES:                             "IFRAMES"
+SELECT:                             "SELECT"
+SET:                                 "SET"
+SHUTDOWN:                            "SHUTDOWN"
+SHOW:                                "SHOW"
+SOME:                                "SOME"
+TABLE:                               "TABLE"
+TABLES:                              "TABLES"
+TO:                                  "TO"
+TRUE:                                "TRUE"
+UDFS:                                "UDFS"
+UNION:                               "UNION"
+UNIQUE:                              "UNIQUE"
+UNKNOWN:                             "UNKNOWN"
+UNLOCK:                              "UNLOCK"
+UNNEST:                              "UNNEST"
+UNSIGNED:                            "UNSIGNED"
+UPDATE:                              "UPDATE"
+USING:                               "USING"
+VALUES:                              "VALUES"
+WHERE:                               "WHERE"
+XOR:                                 "XOR"
+>>>>>>> ee9261ea (Overwrite functionality with OpenCV functions)
 
 // File Formats
 WITH:                 "WITH"i

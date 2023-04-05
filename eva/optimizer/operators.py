@@ -63,6 +63,7 @@ class OperatorType(IntEnum):
     LOGICALCREATEINDEX = auto()
     LOGICAL_APPLY_AND_MERGE = auto()
     LOGICALFAISSINDEXSCAN = auto()
+    LOGICALOVERWRITE = auto()
     LOGICALDELIMITER = auto()
 
 
