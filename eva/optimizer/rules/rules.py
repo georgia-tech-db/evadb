@@ -39,7 +39,6 @@ from eva.parser.types import JoinType, ParserOrderBySortType
 from eva.plan_nodes.apply_and_merge_plan import ApplyAndMergePlan
 from eva.plan_nodes.create_mat_view_plan import CreateMaterializedViewPlan
 from eva.plan_nodes.explain_plan import ExplainPlan
-from eva.plan_nodes.extract_object_plan import ExtractObjectPlan
 from eva.plan_nodes.hash_join_build_plan import HashJoinBuildPlan
 from eva.plan_nodes.nested_loop_join_plan import NestedLoopJoinPlan
 from eva.plan_nodes.predicate_plan import PredicatePlan
@@ -409,11 +408,15 @@ class PushDownFilterThroughApplyAndMerge(Rule):
 class XformExtractObjectToLinearFlow(Rule):
     """If the inner node of a lateral join is a Extract_Object function-valued
     expression, we eliminate the join node and make the inner node the parent of the
-    outer node. This produces a linear data flow path."""
+    outer node. This produces a linear data flow path.
+    TODO: We need to add a sorting operation after detector to ensure we always provide tracker data in order.
+    """
 
-    #     LogicalJoin(Lateral)               LogicalExtractObject
-    #     /           \                 ->        |
-    #    A        LogicalExtractObject            A
+    #                                          LogicalApplyAndMerge(tracker)
+    #     LogicalJoin(Lateral)                         |
+    #     /           \                 ->    LogicalApplyAndMerge(detector)
+    #    A        LogicalExtractObject                 |
+    #                                                  A
 
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALJOIN)
@@ -431,10 +434,19 @@ class XformExtractObjectToLinearFlow(Rule):
 
     def apply(self, before: LogicalJoin, context: OptimizerContext):
         A: Dummy = before.children[0]
-        logical_extract_obj = before.children[1]
-        logical_extract_obj.clear_children()
-        logical_extract_obj.append_child(A)
-        yield logical_extract_obj
+        logical_extract_obj: LogicalExtractObject = before.children[1]
+
+        detector = LogicalApplyAndMerge(
+            logical_extract_obj.detector, alias=logical_extract_obj.detector.alias
+        )
+        tracker = LogicalApplyAndMerge(
+            logical_extract_obj.tracker,
+            alias=logical_extract_obj.alias,
+            do_unnest=logical_extract_obj.do_unnest,
+        )
+        detector.append_child(A)
+        tracker.append_child(detector)
+        yield tracker
 
 
 class CombineSimilarityOrderByAndLimitToFaissIndexScan(Rule):
@@ -1160,30 +1172,6 @@ class LogicalApplyAndMergeToPhysical(Rule):
 
     def apply(self, before: LogicalApplyAndMerge, context: OptimizerContext):
         after = ApplyAndMergePlan(before.func_expr, before.alias, before.do_unnest)
-        for child in before.children:
-            after.append_child(child)
-        yield after
-
-
-class LogicalExtractObjectToPhysical(Rule):
-    def __init__(self):
-        pattern = Pattern(OperatorType.LOGICAL_EXTRACT_OBJECT)
-        pattern.append_child(Pattern(OperatorType.DUMMY))
-        super().__init__(RuleType.LOGICAL_EXTRACT_OBJECT_TO_PHYSICAL, pattern)
-
-    def promise(self):
-        return Promise.LOGICAL_EXTRACT_OBJECT_TO_PHYSICAL
-
-    def check(self, grp_id: int, context: OptimizerContext):
-        return True
-
-    def apply(self, before: LogicalExtractObject, context: OptimizerContext):
-        after = ExtractObjectPlan(
-            before.detector,
-            before.tracker,
-            before.alias,
-            before.do_unnest,
-        )
         for child in before.children:
             after.append_child(child)
         yield after
