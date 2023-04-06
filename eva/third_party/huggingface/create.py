@@ -101,17 +101,7 @@ def run_pipe_through_multi_modal_text_image(pipe: Pipeline):
 
 def infer_output_name_and_type(**pipeline_args):
     """
-    Infer the name and type for each output of the HuggingFace model
-
-    We can do this using the pipeline API from HuggingFace. pipeline is an
-    easy way to use a huggingface model for inference. In EVA, we require users
-    to mention the task they want to perform for simplicity. A HuggingFace task
-    is different from a model(pytorch). There are multiple models that could be used for a given task.
-    Tasks provide an easy interface for inference.
-
-    Refer to https://huggingface.co/transformers/main_classes/pipelines.html for more details
-    on pipelines.
-
+    Infer the name and type for each output of the HuggingFace UDF
     """
     assert "task" in pipeline_args, "Task Not Found In Model Definition"
     task = pipeline_args["task"]

@@ -25,7 +25,16 @@ from eva.udfs.gpu_compatible import GPUCompatible
 class AbstractHFUdf(AbstractUDF, GPUCompatible):
     """
     An abstract class for all HuggingFace models.
-    This class performs the necessary data transformations between EVA and HuggingFace.
+
+    This is implemented using the pipeline API from HuggingFace. pipeline is an
+    easy way to use a huggingface model for inference. In EVA, we require users
+    to mention the task they want to perform for simplicity. A HuggingFace task
+    is different from a model(pytorch). There are a large number of models on HuggingFace
+    hub that can be used for a particular task. The user can specify the model or a default
+    model will be used.
+
+    Refer to https://huggingface.co/transformers/main_classes/pipelines.html for more details
+    on pipelines.
     """
 
     @property
