@@ -26,6 +26,7 @@ def assign_hf_udf(udf_obj: UdfCatalogEntry):
     inputs = udf_obj.args
 
     # NOTE: Currently, we only support models that require a single input.
+    assert len(inputs) == 1, "Only single input models are supported."
     input_type = inputs[0].array_type
 
     # By default, we assume that the input is an image.
