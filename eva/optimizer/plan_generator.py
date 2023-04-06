@@ -69,11 +69,11 @@ class PlanGenerator:
         # from other rules. For instance, if we apply the PushDownFilterThroughJoin
         # rule first, it can prevent the XformLateralJoinToLinearFlow rule from being
         # executed because the filter will be pushed to the right child.
-        top_down_rules = [
-            rule for rule in self.rules_manager.rewrite_rules if rule.is_top_down_rule()
-        ]
+
         optimizer_context.task_stack.push(
-            TopDownRewrite(root_expr, top_down_rules, optimizer_context)
+            TopDownRewrite(
+                root_expr, self.rules_manager.stage_one_rewrite_rules, optimizer_context
+            )
         )
         self.execute_task_stack(optimizer_context.task_stack)
 
@@ -81,7 +81,7 @@ class PlanGenerator:
         root_expr = memo.groups[root_grp_id].logical_exprs[0]
         optimizer_context.task_stack.push(
             BottomUpRewrite(
-                root_expr, self.rules_manager.rewrite_rules, optimizer_context
+                root_expr, self.rules_manager.stage_two_rewrite_rules, optimizer_context
             )
         )
         self.execute_task_stack(optimizer_context.task_stack)

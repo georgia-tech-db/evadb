@@ -84,7 +84,11 @@ class TopDownRewrite(OptimizerTask):
                 if not rule.check(match, self.optimizer_context):
                     continue
                 after = rule.apply(match, self.optimizer_context)
-                for plan in after:
+                plans = list(after)
+                assert (
+                    len(plans) <= 1
+                ), "Rewrite rule cannot generate more than oen alternate plan."
+                for plan in plans:
                     new_expr = self.optimizer_context.replace_expression(
                         plan, self.root_expr.group_id
                     )
@@ -147,7 +151,11 @@ class BottomUpRewrite(OptimizerTask):
                     "In BottomUp, Rule {} matched for {}".format(rule, self.root_expr)
                 )
                 after = rule.apply(match, self.optimizer_context)
-                for plan in after:
+                plans = list(after)
+                assert (
+                    len(plans) <= 1
+                ), "Rewrite rule cannot generate more than oen alternate plan."
+                for plan in plans:
                     new_expr = self.optimizer_context.replace_expression(
                         plan, self.root_expr.group_id
                     )

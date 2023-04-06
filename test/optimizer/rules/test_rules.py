@@ -33,14 +33,12 @@ from eva.optimizer.operators import (
     LogicalFilter,
     LogicalGet,
     LogicalJoin,
-    LogicalProject,
     LogicalSample,
 )
 from eva.optimizer.rules.rules import (
     CacheFunctionExpressionInApply,
     CombineSimilarityOrderByAndLimitToFaissIndexScan,
     EmbedFilterIntoGet,
-    EmbedProjectIntoGet,
     EmbedSampleIntoGet,
     LogicalApplyAndMergeToPhysical,
     LogicalCreateIndexToFaiss,
@@ -110,7 +108,6 @@ class RulesTest(unittest.TestCase):
         rewrite_promises = [
             Promise.LOGICAL_INNER_JOIN_COMMUTATIVITY,
             Promise.EMBED_FILTER_INTO_GET,
-            Promise.EMBED_PROJECT_INTO_GET,
             Promise.EMBED_SAMPLE_INTO_GET,
             Promise.XFORM_LATERAL_JOIN_TO_LINEAR_FLOW,
             Promise.PUSHDOWN_FILTER_THROUGH_JOIN,
@@ -169,23 +166,24 @@ class RulesTest(unittest.TestCase):
         supported_rewrite_rules = [
             EmbedFilterIntoGet(),
             #    EmbedFilterIntoDerivedGet(),
-            EmbedProjectIntoGet(),
             EmbedSampleIntoGet(),
-            #    EmbedProjectIntoDerivedGet(),
             XformLateralJoinToLinearFlow(),
             PushDownFilterThroughApplyAndMerge(),
             PushDownFilterThroughJoin(),
             CombineSimilarityOrderByAndLimitToFaissIndexScan(),
             ReorderPredicates(),
         ]
+        rewrite_rules = (
+            RulesManager().stage_one_rewrite_rules
+            + RulesManager().stage_two_rewrite_rules
+        )
         self.assertEqual(
-            len(supported_rewrite_rules), len(RulesManager().rewrite_rules)
+            len(supported_rewrite_rules),
+            len(rewrite_rules),
         )
         # check all the rule instance exists
         for rule in supported_rewrite_rules:
-            self.assertTrue(
-                any(isinstance(rule, type(x)) for x in RulesManager().rewrite_rules)
-            )
+            self.assertTrue(any(isinstance(rule, type(x)) for x in rewrite_rules))
 
         supported_logical_rules = [
             LogicalInnerJoinCommutativity(),
@@ -255,20 +253,6 @@ class RulesTest(unittest.TestCase):
                 )
             )
 
-    # EmbedProjectIntoGet
-    def test_simple_project_into_get(self):
-        rule = EmbedProjectIntoGet()
-        expr1 = MagicMock()
-        expr2 = MagicMock()
-        expr3 = MagicMock()
-
-        logi_get = LogicalGet(MagicMock(), MagicMock(), MagicMock())
-        logi_project = LogicalProject([expr1, expr2, expr3], [logi_get])
-
-        rewrite_opr = next(rule.apply(logi_project, MagicMock()))
-        self.assertFalse(rewrite_opr is logi_get)
-        self.assertEqual(rewrite_opr.target_list, [expr1, expr2, expr3])
-
     # EmbedFilterIntoGet
     def test_simple_filter_into_get(self):
         rule = EmbedFilterIntoGet()
@@ -298,7 +282,7 @@ class RulesTest(unittest.TestCase):
             self.assertFalse(
                 any(
                     isinstance(PushDownFilterThroughApplyAndMerge, type(x))
-                    for x in rules_manager.rewrite_rules
+                    for x in rules_manager.stage_two_rewrite_rules
                 )
             )
 

@@ -33,13 +33,12 @@ class RuleType(Flag):
     INVALID_RULE = 0
 
     # REWRITE RULES TOP DOWN APPLY FIRST (LOGICAL -> LOGICAL)
-    EMBED_FILTER_INTO_GET = auto()
-    EMBED_SAMPLE_INTO_GET = auto()
-    EMBED_PROJECT_INTO_GET = auto()
     XFORM_LATERAL_JOIN_TO_LINEAR_FLOW = auto()
     TOP_DOWN_DELIMETER = auto()
 
     # REWRITE RULES BOTTOM UP APPLY SECOND (LOGICAL -> LOGICAL)
+    EMBED_FILTER_INTO_GET = auto()
+    EMBED_SAMPLE_INTO_GET = auto()
     PUSHDOWN_FILTER_THROUGH_JOIN = auto()
     PUSHDOWN_FILTER_THROUGH_APPLY_AND_MERGE = auto()
     COMBINE_SIMILARITY_ORDERBY_AND_LIMIT_TO_FAISS_INDEX_SCAN = auto()
@@ -135,7 +134,6 @@ class Promise(IntEnum):
 
     # REWRITE RULES
     EMBED_FILTER_INTO_GET = auto()
-    EMBED_PROJECT_INTO_GET = auto()
     EMBED_SAMPLE_INTO_GET = auto()
     XFORM_LATERAL_JOIN_TO_LINEAR_FLOW = auto()
     PUSHDOWN_FILTER_THROUGH_JOIN = auto()
@@ -177,10 +175,13 @@ class Rule(ABC):
             and self.rule_type.value < RuleType.TRANSFORMATION_DELIMETER.value
         )
 
-    def is_rewrite_rule(self):
-        return self.rule_type.value < RuleType.REWRITE_DELIMETER.value
+    def is_stage_two_rewrite_rules(self):
+        return (
+            self.rule_type.value > RuleType.TOP_DOWN_DELIMETER.value
+            and self.rule_type.value < RuleType.REWRITE_DELIMETER.value
+        )
 
-    def is_top_down_rule(self):
+    def is_stage_one_rewrite_rules(self):
         return self.rule_type.value < RuleType.TOP_DOWN_DELIMETER.value
 
     @abstractmethod
