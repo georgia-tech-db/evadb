@@ -12,13 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import tempfile
 from typing import Dict, List, Type, Union
 
-import cv2
 import numpy as np
 from PIL import Image, ImageDraw
-from transformers import Pipeline, pipeline
+from transformers import pipeline
 
 from eva.catalog.catalog_type import ColumnType, NdArrayType
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
@@ -27,6 +25,7 @@ from eva.third_party.huggingface.model import HFInputTypes
 
 """
 We currently support the following tasks from HuggingFace.
+Each task is mapped to the type of input it expects.
 """
 SUPPORTED_TASKS = {
     "audio-classification": HFInputTypes.AUDIO,
@@ -41,19 +40,17 @@ SUPPORTED_TASKS = {
     "image-to-text": HFInputTypes.IMAGE,
     "object-detection": HFInputTypes.IMAGE,
     "depth-estimation": HFInputTypes.IMAGE,
-    "video-classification": HFInputTypes.VIDEO,
 }
 
 
-def run_pipe_through_text(pipe: Pipeline):
-    input = "The cat is on the mat"
-    return pipe(input)
+def sample_text():
+    return "The cat is on the mat"
 
 
-def run_pipe_through_image(pipe: Pipeline):
+def sample_image():
     width, height = 224, 224
-    dummy_image = Image.new("RGB", (width, height), "white")
-    draw = ImageDraw.Draw(dummy_image)
+    image = Image.new("RGB", (width, height), "white")
+    draw = ImageDraw.Draw(image)
 
     circle_radius = min(width, height) // 4
     circle_center = (width // 2, height // 2)
@@ -64,39 +61,24 @@ def run_pipe_through_image(pipe: Pipeline):
         circle_center[1] + circle_radius,
     )
     draw.ellipse(circle_bbox, fill="yellow")
+    return image
 
-    return pipe(dummy_image)
 
-
-def run_pipe_through_audio(pipe: Pipeline):
+def sample_audio():
     duration_ms, sample_rate = 1000, 16000
     num_samples = int(duration_ms * sample_rate / 1000)
-    silent_data = np.random.rand(num_samples)
-    return pipe(silent_data)
+    audio_data = np.random.rand(num_samples)
+    return audio_data
 
 
-def run_pipe_through_video(pipe: Pipeline):
-    width, height, fps, duration_sec = 224, 224, 30, 1
-    num_frames = fps * duration_sec
-    blank_frame = np.zeros((height, width, 3), dtype=np.uint8)
-
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_file:
-        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-        video_writer = cv2.VideoWriter(temp_file.name, fourcc, fps, (width, height))
-
-        for _ in range(num_frames):
-            video_writer.write(blank_frame)
-
-        video_writer.release()
-        output = pipe(temp_file.name)
-    return output
-
-
-def run_pipe_through_multi_modal_text_image(pipe: Pipeline):
-    width, height = 224, 224
-    image_input = Image.new("RGB", (width, height), "white")
-    text_input = "This is a dummy text input"
-    return pipe(image=image_input, text=text_input)
+def gen_sample_input(input_type: HFInputTypes):
+    if input_type == HFInputTypes.TEXT:
+        return sample_text()
+    elif input_type == HFInputTypes.IMAGE:
+        return sample_image()
+    elif input_type == HFInputTypes.AUDIO:
+        return sample_audio()
+    assert False, "Invalid Input Type for UDF"
 
 
 def infer_output_name_and_type(**pipeline_args):
@@ -111,29 +93,21 @@ def infer_output_name_and_type(**pipeline_args):
     pipe = pipeline(**pipeline_args)
 
     # Run the pipeline through a dummy input to get a sample output
-    model_input = SUPPORTED_TASKS[task]
-    if model_input == HFInputTypes.TEXT:
-        output = run_pipe_through_text(pipe)
-    elif model_input == HFInputTypes.IMAGE:
-        output = run_pipe_through_image(pipe)
-    elif model_input == HFInputTypes.AUDIO:
-        output = run_pipe_through_audio(pipe)
-    elif model_input == HFInputTypes.VIDEO:
-        output = run_pipe_through_video(pipe)
-    elif model_input == HFInputTypes.MULTIMODAL_TEXT_IMAGE:
-        output = run_pipe_through_multi_modal_text_image(pipe)
+    input_type = SUPPORTED_TASKS[task]
+    model_input = gen_sample_input(input_type)
+    model_output = pipe(model_input)
 
     # Get a dictionary of output names and types from the output
-    model_outputs = {}
-    if isinstance(output, list):
-        sample_out = output[0]
+    output_types = {}
+    if isinstance(model_output, list):
+        sample_out = model_output[0]
     else:
-        sample_out = output
+        sample_out = model_output
 
     for key, value in sample_out.items():
-        model_outputs[key] = type(value)
+        output_types[key] = type(value)
 
-    return model_input, model_outputs
+    return input_type, output_types
 
 
 def io_entry_for_inputs(udf_name: str, udf_input: Union[str, List]):

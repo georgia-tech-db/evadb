@@ -32,4 +32,3 @@ EVA supports the following tasks from huggingface:
 - Image-to-Text
 - Object Detection
 - Depth Estimation
-- Video Classification
