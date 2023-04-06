@@ -65,7 +65,8 @@ class PlanGenerator:
         root_expr = memo.groups[root_grp_id].logical_exprs[0]
 
         # TopDown Rewrite
-        # We specify rules that should be applied initially to prevent any interference # from other rules. For instance, if we apply the PushDownFilterThroughJoin
+        # We specify rules that should be applied initially to prevent any interference
+        # from other rules. For instance, if we apply the PushDownFilterThroughJoin
         # rule first, it can prevent the XformLateralJoinToLinearFlow rule from being
         # executed because the filter will be pushed to the right child.
         top_down_rules = [
