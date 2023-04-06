@@ -13,12 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import (
-    create_sample_video,
-    create_table,
-    file_remove,
-    load_udfs_for_testing,
-)
+from test.util import create_sample_video, file_remove, load_udfs_for_testing
 
 import pytest
 
@@ -45,19 +40,10 @@ class ExplainExecutorTest(unittest.TestCase):
         load_query = f"LOAD VIDEO '{video_file_path}' INTO MyVideo;"
         execute_query_fetch_all(load_query)
         load_udfs_for_testing(mode="minimal")
-        cls.table1 = create_table("table1", 100, 3)
-        cls.table2 = create_table("table2", 500, 3)
-        cls.table3 = create_table("table3", 1000, 3)
 
     @classmethod
     def tearDownClass(cls):
         file_remove("dummy.avi")
-        drop_query = """DROP TABLE table1;"""
-        execute_query_fetch_all(drop_query)
-        drop_query = """DROP TABLE table2;"""
-        execute_query_fetch_all(drop_query)
-        drop_query = """DROP TABLE table3;"""
-        execute_query_fetch_all(drop_query)
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
 
     def test_explain_simple_select(self):
@@ -65,9 +51,9 @@ class ExplainExecutorTest(unittest.TestCase):
         select_query = "EXPLAIN SELECT id, data FROM MyVideo"
         batch = execute_query_fetch_all(select_query)
         expected_output = (
-            """|__ SeqScanPlan\n    |__ ExchangePlan\n    |__ StoragePlan\n"""
+            """|__ ExchangePlan\n    |__ ProjectPlan\n        |__ SeqScanPlan\n            |__ ExchangePlan\n                |__ StoragePlan\n"""
             if ray_enabled
-            else """|__ SeqScanPlan\n    |__ StoragePlan\n"""
+            else """|__ ProjectPlan\n    |__ SeqScanPlan\n        |__ StoragePlan\n"""
         )
         self.assertEqual(batch.frames[0][0], expected_output)
 
@@ -78,7 +64,7 @@ class ExplainExecutorTest(unittest.TestCase):
                 select_query, plan_generator=custom_plan_generator
             )
             expected_output = (
-                """|__ ProjectPlan\n    |__ LateralJoinPlan\n        |__ SeqScanPlan\n        |__ ExchangePlan\n            |__ StoragePlan\n        |__ FunctionScanPlan\n"""
+                """|__ ProjectPlan\n    |__ LateralJoinPlan\n        |__ SeqScanPlan\n            |__ StoragePlan\n        |__ FunctionScanPlan\n"""
                 if ray_enabled
                 else """|__ ProjectPlan\n    |__ LateralJoinPlan\n        |__ SeqScanPlan\n            |__ StoragePlan\n        |__ FunctionScanPlan\n"""
             )
@@ -98,7 +84,7 @@ class ExplainExecutorTest(unittest.TestCase):
                 select_query, plan_generator=custom_plan_generator
             )
             expected_output = (
-                """|__ ProjectPlan\n    |__ LateralJoinPlan\n        |__ SeqScanPlan\n        |__ ExchangePlan\n            |__ StoragePlan\n        |__ FunctionScanPlan\n"""
+                """|__ ProjectPlan\n    |__ LateralJoinPlan\n        |__ SeqScanPlan\n            |__ StoragePlan\n        |__ FunctionScanPlan\n"""
                 if ray_enabled
                 else """|__ ProjectPlan\n    |__ LateralJoinPlan\n        |__ SeqScanPlan\n            |__ StoragePlan\n        |__ FunctionScanPlan\n"""
             )

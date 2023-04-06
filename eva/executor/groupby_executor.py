@@ -39,7 +39,7 @@ class GroupByExecutor(AbstractExecutor):
         child_executor = self.children[0]
 
         buffer = Batch(pd.DataFrame())
-        for batch in child_executor.exec():
+        for batch in child_executor.exec(**kwargs):
             new_batch = buffer + batch
             # We assume that all the segments exactly of segment_length size
             # and discard any dangling frames in the end.
