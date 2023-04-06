@@ -310,3 +310,14 @@ class PytorchTest(unittest.TestCase):
         actual_batch = execute_query_fetch_all(select_query)
         # do some more meaningful check
         self.assertEqual(len(actual_batch), 685)
+
+    def test_check_unnest_with_predicate_on_yolo(self):
+        query = """SELECT id, yolov5.label, yolov5.bbox, yolov5.score
+                  FROM MyVideo
+                  JOIN LATERAL UNNEST(YoloV5(data)) AS yolov5(label, bbox, score)
+                  WHERE yolov5.label = 'car' AND id < 10;"""
+
+        actual_batch = execute_query_fetch_all(query)
+
+        # due to unnest the number of returned tuples should be atleast > 10
+        self.assertTrue(len(actual_batch) > 10)

@@ -42,7 +42,6 @@ def apply_predicate(batch: Batch, predicate: AbstractExpression) -> Batch:
     if not batch.empty() and predicate is not None:
         outcomes = predicate.evaluate(batch)
         batch.drop_zero(outcomes)
-        batch.reset_index()
     return batch
 
 
