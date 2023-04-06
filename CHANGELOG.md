@@ -10,6 +10,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### [Deprecated]
 ### [Removed]
 
+##  [0.1.6] - 2023-04-05
+### [Added]
+
+### [Changed]
+
+* PR #636: fix: Timeout Error #636 
+* PR #635: fix: updates to restore build
+* PR #634: fix: Pandas deprecated append call
+* PR #632: fix: Minor code refactor
+
 ##  [0.1.5] - 2023-04-03
 ### [Added]
 
