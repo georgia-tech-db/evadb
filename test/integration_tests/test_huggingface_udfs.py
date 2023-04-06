@@ -16,6 +16,7 @@ import unittest
 from test.util import create_text_csv, file_remove
 
 from eva.catalog.catalog_manager import CatalogManager
+from eva.executor.executor_utils import ExecutorError
 from eva.server.command_handler import execute_query_fetch_all
 
 NUM_FRAMES = 10
@@ -42,7 +43,7 @@ class HuggingFaceTests(unittest.TestCase):
         file_remove(self.csv_file_path)
 
     def test_io_catalog_entries_populated(self):
-        udf_name, task = "HFObjectDetector", "object-detection"
+        udf_name, task = "HFObjectDetector", "image-classification"
         create_udf_query = f"""CREATE UDF {udf_name}
             TYPE HuggingFace
             'task' '{task}'
@@ -57,13 +58,12 @@ class HuggingFaceTests(unittest.TestCase):
 
         # Verify that there is one input entry with the name text
         self.assertEqual(len(input_entries), 1)
-        self.assertEqual(input_entries[0].name, f"{udf_name}_multimodal")
+        self.assertEqual(input_entries[0].name, f"{udf_name}_IMAGE")
 
         # Verify that there are 3 output entries with the names score, label and box
-        self.assertEqual(len(output_entries), 3)
+        self.assertEqual(len(output_entries), 2)
         self.assertEqual(output_entries[0].name, "score")
         self.assertEqual(output_entries[1].name, "label")
-        self.assertEqual(output_entries[2].name, "box")
 
     def test_raise_error_on_unsupported_task(self):
         udf_name = "HFUnsupportedTask"
@@ -72,12 +72,15 @@ class HuggingFaceTests(unittest.TestCase):
             TYPE HuggingFace
             'task' '{task}'
         """
-        with self.assertRaises(Exception) as exc_info:
+        # catch an assert
+
+        with self.assertRaises(ExecutorError) as exc_info:
             execute_query_fetch_all(create_udf_query)
         self.assertIn(
-            f"task:{task} not supported in EVA currently", str(exc_info.exception)
+            f"Task {task} not supported in EVA currently", str(exc_info.exception)
         )
 
+    @unittest.skip("Skip as it requires external library timm")
     def test_object_detection(self):
         udf_name = "HFObjectDetector"
         create_udf_query = f"""CREATE UDF {udf_name}

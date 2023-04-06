@@ -18,10 +18,21 @@ from eva.third_party.huggingface.model import ImageHFModel, TextHFModel
 
 
 def assign_hf_udf(udf_obj: UdfCatalogEntry):
-    # NOTE: Currently supports one input
+    """
+    Assigns the correct HF Model to the UDF. The model assigned depends on
+    the type of input the UDF expects. This is done so that we can
+    process the input correctly before passing it to the HF model.
+    """
     inputs = udf_obj.args
+
+    # NOTE: Currently, we only support models that require a single input.
     input_type = inputs[0].array_type
+
+    # By default, we assume that the input is an image.
     model_class = ImageHFModel
+
+    # If the input is a string, assign a TextHFModel.
     if input_type == NdArrayType.STR:
         model_class = TextHFModel
+
     return lambda: model_class(udf_obj)

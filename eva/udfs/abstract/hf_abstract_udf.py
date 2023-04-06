@@ -38,10 +38,6 @@ class AbstractHFUdf(AbstractUDF, GPUCompatible):
         pipeline_args = {entry.key: entry.value for entry in udf_obj.metadata}
         self.hf_udf_obj = pipeline(**pipeline_args, device=device)
 
-    @property
-    def input_format(self) -> str:
-        return str
-
     def input_formatter(self, inputs: Any):
         """
         Function that formats input from EVA format to HuggingFace format for that particular HF model

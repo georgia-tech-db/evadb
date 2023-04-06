@@ -18,6 +18,15 @@ import numpy as np
 from PIL import Image
 
 from eva.udfs.abstract.hf_abstract_udf import AbstractHFUdf
+from eva.utils.generic_utils import EVAEnum
+
+
+class HFInputTypes(EVAEnum):
+    TEXT  # noqa: F821
+    IMAGE  # noqa: F821
+    AUDIO  # noqa: F821
+    VIDEO  # noqa: F821
+    MULTIMODAL_TEXT_IMAGE  # noqa: F821
 
 
 class TextHFModel(AbstractHFUdf):

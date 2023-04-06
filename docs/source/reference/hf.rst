@@ -1,7 +1,7 @@
 HuggingFace Models in EVA
 ======================
 
-This section provides an overview of how you can use out-of-thebox HuggingFace models in EVA.
+This section provides an overview of how you can use out-of-the-box HuggingFace models in EVA.
 
 
 Creating UDF from HuggingFace

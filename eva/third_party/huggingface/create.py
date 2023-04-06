@@ -19,26 +19,32 @@ import cv2
 import numpy as np
 from PIL import Image, ImageDraw
 from transformers import Pipeline, pipeline
-from transformers.pipelines import SUPPORTED_TASKS
 
 from eva.catalog.catalog_type import ColumnType, NdArrayType
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 from eva.catalog.models.udf_metadata_catalog import UdfMetadataCatalogEntry
+from eva.third_party.huggingface.model import HFInputTypes
 
-UNSUPPORTED_TASKS = [
-    "feature-extraction",
-    "token-classification",
-    "question-answering",
-    "visual-question-answering",
-    "document-question-answering",
-    "table-question-answering",
-    "conversational",
-    "fill-mask",
-    "zero-shot-classification",
-    "zero-shot-image-classification",
-    "zero-shot-object-detection",
-    "zero-shot-audio-classification",
-]
+"""
+We currently support the following tasks from HuggingFace. A HuggingFace task
+is different from a model(pytorch). There are multiple models that could be used for a given task.
+Tasks provide an easy interface for inference.
+"""
+SUPPORTED_TASKS = {
+    "audio-classification": HFInputTypes.AUDIO,
+    "automatic-speech-recognition": HFInputTypes.AUDIO,
+    "text-classification": HFInputTypes.TEXT,
+    "summarization": HFInputTypes.TEXT,
+    "translation": HFInputTypes.TEXT,
+    "text2text-generation": HFInputTypes.TEXT,
+    "text-generation": HFInputTypes.TEXT,
+    "image-classification": HFInputTypes.IMAGE,
+    "image-segmentation": HFInputTypes.IMAGE,
+    "image-to-text": HFInputTypes.IMAGE,
+    "object-detection": HFInputTypes.IMAGE,
+    "depth-estimation": HFInputTypes.IMAGE,
+    "video-classification": HFInputTypes.VIDEO,
+}
 
 
 def run_pipe_through_text(pipe: Pipeline):
@@ -95,65 +101,64 @@ def run_pipe_through_multi_modal_text_image(pipe: Pipeline):
     return pipe(image=image_input, text=text_input)
 
 
-def infer_output_type(**pipeline_args):
+def infer_output_name_and_type(**pipeline_args):
     """
-    Infer the output type of a pipeline based on the task type.
-    Note: The below code is flaky and depends on the version of transformers.
-    It also hard-codes the type assignment to certain tasks.
+    Infer the name and type for each output of the HuggingFace model
+
+    We can do this using the pipeline API from HuggingFace. pipeline is an
+    easy way to use a huggingface model for inference. In EVA, we require users
+    to mention the task they want to perform for simplicity.
+
+    Refer to https://huggingface.co/transformers/main_classes/pipelines.html for more details
+    on pipelines.
+
     """
-    if "task" not in pipeline_args:
-        raise Exception("Task Not Found In Model Definition")
+    assert "task" in pipeline_args, "Task Not Found In Model Definition"
     task = pipeline_args["task"]
-    if task in UNSUPPORTED_TASKS:
-        raise Exception(f"HuggingFace task:{task} not supported in EVA currently")
+    assert task in SUPPORTED_TASKS, f"Task {task} not supported in EVA currently"
 
-    task_input = SUPPORTED_TASKS.get(task, {}).get("type", None)
-    if task_input is None:
-        raise Exception("Task Type Could Not Be Inferred")
-
+    # Construct the pipeline
     pipe = pipeline(**pipeline_args)
-    if task_input == "text":
+
+    # Run the pipeline through a dummy input to get a sample output
+    model_input = SUPPORTED_TASKS[task]
+    if model_input == HFInputTypes.TEXT:
         output = run_pipe_through_text(pipe)
-    elif (
-        task_input == "image"
-        or task == "image-segmentation"
-        or task == "image-to-text"
-        or task == "object-detection"
-    ):
+    elif model_input == HFInputTypes.IMAGE:
         output = run_pipe_through_image(pipe)
-    elif task_input == "audio" or (
-        task_input == "multimodal" and ("audio" in task or "speech" in task)
-    ):
+    elif model_input == HFInputTypes.AUDIO:
         output = run_pipe_through_audio(pipe)
-    elif task_input == "video":
+    elif model_input == HFInputTypes.VIDEO:
         output = run_pipe_through_video(pipe)
-    elif task_input == "multimodal":
+    elif model_input == HFInputTypes.MULTIMODAL_TEXT_IMAGE:
         output = run_pipe_through_multi_modal_text_image(pipe)
 
-    task_outputs = {}
+    # Get a dictionary of output names and types from the output
+    model_outputs = {}
     if isinstance(output, list):
         sample_out = output[0]
     else:
         sample_out = output
-    for key, value in sample_out.items():
-        task_outputs[key] = type(value)
 
-    return task_input, task_outputs
+    for key, value in sample_out.items():
+        model_outputs[key] = type(value)
+
+    return model_input, model_outputs
 
 
 def io_entry_for_inputs(udf_name: str, udf_input: Union[str, List]):
     """
-    Generates the IO Catalog Entry for the input
+    Generates the IO Catalog Entry for the inputs to HF UDFs
     Input is one of ["text", "image", "audio", "video", "multimodal"]
     """
-    if isinstance(udf_input, str):
+    if isinstance(udf_input, HFInputTypes):
         udf_input = [udf_input]
     inputs = []
     for input_type in udf_input:
         array_type = NdArrayType.ANYTYPE
-        if input_type == "text":
+        if input_type == HFInputTypes.TEXT:
             array_type = NdArrayType.STR
-        elif input_type == "image" or udf_input == "audio":
+        elif input_type == HFInputTypes.IMAGE or udf_input == HFInputTypes.AUDIO:
             array_type = NdArrayType.FLOAT32
         inputs.append(
             UdfIOCatalogEntry(
@@ -202,7 +207,7 @@ def gen_hf_io_catalog_entries(udf_name: str, metadata: List[UdfMetadataCatalogEn
     The attributes of the huggingface model can be extracted from metadata.
     """
     pipeline_args = {arg.key: arg.value for arg in metadata}
-    udf_input, udf_output = infer_output_type(**pipeline_args)
+    udf_input, udf_output = infer_output_name_and_type(**pipeline_args)
     annotated_inputs = io_entry_for_inputs(udf_name, udf_input)
     annotated_outputs = io_entry_for_outputs(udf_output)
     return annotated_inputs + annotated_outputs
