@@ -55,6 +55,7 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 *.pyc
+MagicMock/
 # Translations
 *.mo
 *.pot

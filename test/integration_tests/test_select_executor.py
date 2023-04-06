@@ -531,6 +531,22 @@ class SelectExecutorTest(unittest.TestCase):
         )
         self.assertEqual(unnest_batch, expected)
 
+        # unnest with predicate on function expression
+        query = """SELECT id, label
+                FROM MyVideo JOIN LATERAL
+                UNNEST(DummyMultiObjectDetector(data).labels) AS T(label)
+                WHERE id < 2 AND T.label = "person" ORDER BY id;"""
+        unnest_batch = execute_query_fetch_all(query)
+        expected = Batch(
+            pd.DataFrame(
+                {
+                    "myvideo.id": np.array([0, 0], np.intp),
+                    "T.label": np.array(["person", "person"]),
+                }
+            )
+        )
+        self.assertEqual(unnest_batch, expected)
+
     def test_should_raise_error_with_missing_alias_in_lateral_join(self):
         udf_name = "DummyMultiObjectDetector"
         query = """SELECT id, labels

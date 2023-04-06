@@ -41,6 +41,6 @@ class FunctionScanExecutor(AbstractExecutor):
             res = self.func_expr.evaluate(lateral_input)
             if not res.empty():
                 if self.do_unnest:
-                    res.unnest()
+                    res.unnest(res.columns)
 
                 yield res
