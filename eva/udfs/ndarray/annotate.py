@@ -12,9 +12,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import cv2
 import numpy as np
 import pandas as pd
-import cv2
 
 from eva.udfs.abstract.abstract_udf import AbstractUDF
 
@@ -43,18 +43,19 @@ class Annotate(AbstractUDF):
             row = row.to_list()
             frame = row[0]
             labels = row[1]
-           
             bboxes = row[2]
-          
-            x1, y1, x2, y2 = np.asarray(bboxes, dtype="int")
 
-            # TODO: make sure the bbox is valid. Do we need to though?
-         
-            x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
-           
-            frame = cv2.rectangle(frame, (x1, y1), (x2, y2), color, thickness) 
-          
-            # cv2.putText(frame, label, (x1, y1-10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, color, thickness) 
+            for bbox in bboxes: 
+
+                x1, y1, x2, y2 = np.asarray(bbox, dtype="int")
+
+                # TODO: make sure the bbox is valid. Do we need to though?
+
+                x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
+
+                frame = cv2.rectangle(frame, (x1, y1), (x2, y2), color, thickness)
+
+                # cv2.putText(frame, label, (x1, y1-10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, color, thickness)
 
             return frame
         
