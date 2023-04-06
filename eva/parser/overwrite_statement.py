@@ -17,11 +17,7 @@ from typing import List
 
 from eva.expression.abstract_expression import AbstractExpression
 from eva.parser.statement import AbstractStatement
-<<<<<<< HEAD
 from eva.parser.table_ref import TableRef
-=======
-from eva.parser.table_ref import TableInfo
->>>>>>> e0aa7d66 (Overwrite functionality with OpenCV functions)
 from eva.parser.types import StatementType
 
 
