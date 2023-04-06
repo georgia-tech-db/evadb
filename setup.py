@@ -109,7 +109,7 @@ udf_libs = [
     "yolov5<=7.0.6",          # OBJECT DETECTION
     "detoxify",               # TEXT TOXICITY CLASSIFICATION
     "thefuzz",                # FUZZY STRING MATCHINGz
-    "transformers==4.22.1"    # HUGGINGFACE
+    "transformers==4.27.4"    # HUGGINGFACE
 ]
 
 ### NEEDED FOR EXPERIMENTAL FEATURES
