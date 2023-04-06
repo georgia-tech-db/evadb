@@ -23,7 +23,7 @@ from eva.optimizer.property import PropertyType
 from eva.optimizer.rules.rules_manager import RulesManager
 from eva.plan_nodes.abstract_plan import AbstractPlan
 from eva.plan_nodes.create_mat_view_plan import CreateMaterializedViewPlan
-
+from asyncio import wait_for
 
 class PlanGenerator:
     """
@@ -131,9 +131,12 @@ class PlanGenerator:
         else:
             return physical_plan
 
-    def build(self, logical_plan: Operator):
+    async def build(self, logical_plan: Operator):
         # apply optimizations
-        plan = self.optimize(logical_plan)
+        try:
+            plan = await wait_for(self.optimize(logical_plan), timeout=120.0)
+        except TimeoutError:
+            print('Optimizer timed out!')
 
         # Only run post-processing if Ray is enabled.
         if ConfigurationManager().get_value("experimental", "ray"):
