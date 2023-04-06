@@ -136,6 +136,7 @@ class TestOptimizerTask(unittest.TestCase):
                         ProjectPlan,
                         PredicatePlan,
                         SeqScanPlan,
+                        ExchangePlan,
                         ProjectPlan,
                         SeqScanPlan,
                     ]
