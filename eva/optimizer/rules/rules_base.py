@@ -32,14 +32,15 @@ class RuleType(Flag):
     # Don't move this enum, else will break rule exploration logic
     INVALID_RULE = 0
 
-    # REWRITE RULES(LOGICAL -> LOGICAL)
+    # REWRITE RULES TOP DOWN APPLY FIRST (LOGICAL -> LOGICAL)
     EMBED_FILTER_INTO_GET = auto()
-    EMBED_FILTER_INTO_DERIVED_GET = auto()
     EMBED_SAMPLE_INTO_GET = auto()
-    EMBED_PROJECT_INTO_DERIVED_GET = auto()
     EMBED_PROJECT_INTO_GET = auto()
-    PUSHDOWN_FILTER_THROUGH_JOIN = auto()
     XFORM_LATERAL_JOIN_TO_LINEAR_FLOW = auto()
+    TOP_DOWN_DELIMETER = auto()
+
+    # REWRITE RULES BOTTOM UP APPLY SECOND (LOGICAL -> LOGICAL)
+    PUSHDOWN_FILTER_THROUGH_JOIN = auto()
     PUSHDOWN_FILTER_THROUGH_APPLY_AND_MERGE = auto()
     COMBINE_SIMILARITY_ORDERBY_AND_LIMIT_TO_FAISS_INDEX_SCAN = auto()
     REORDER_PREDICATES = auto()
@@ -178,6 +179,9 @@ class Rule(ABC):
 
     def is_rewrite_rule(self):
         return self.rule_type.value < RuleType.REWRITE_DELIMETER.value
+
+    def is_top_down_rule(self):
+        return self.rule_type.value < RuleType.TOP_DOWN_DELIMETER.value
 
     @abstractmethod
     def promise(self) -> int:

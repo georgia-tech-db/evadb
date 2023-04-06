@@ -387,6 +387,11 @@ class PushDownFilterThroughApplyAndMerge(Rule):
             predicate, aliases
         )
 
+        # we do not return a new plan if nothing can be pushed
+        # this ensures we do not keep applying this optimization
+        if pushdown_pred is None:
+            return
+
         # if we find a feasible pushdown predicate, add a new filter node between
         # ApplyAndMerge and Dummy
         if pushdown_pred:
@@ -396,10 +401,10 @@ class PushDownFilterThroughApplyAndMerge(Rule):
 
         # If we have partial predicate make it the root
         root_node = apply_and_merge
-        assert rem_pred is None
-        # if rem_pred:
-        #    root_node = LogicalFilter(predicate=rem_pred)
-        #    root_node.append_child(apply_and_merge)
+        # assert rem_pred is None
+        if rem_pred:
+            root_node = LogicalFilter(predicate=rem_pred)
+            root_node.append_child(apply_and_merge)
 
         yield root_node
 

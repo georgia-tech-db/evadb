@@ -91,6 +91,8 @@ class TopDownRewrite(OptimizerTask):
                     self.optimizer_context.task_stack.push(
                         TopDownRewrite(new_expr, self.rule_set, self.optimizer_context)
                     )
+                    # The root has changed so we cannot apply more rules to the same root, hence return
+                    return
 
                 self.root_expr.mark_rule_explored(rule.rule_type)
         for child in self.root_expr.children:
@@ -152,6 +154,8 @@ class BottomUpRewrite(OptimizerTask):
                     self.optimizer_context.task_stack.push(
                         BottomUpRewrite(new_expr, self.rule_set, self.optimizer_context)
                     )
+                    # The root has changed so we cannot apply more rules to the same root, hence return
+                    return
             self.root_expr.mark_rule_explored(rule.rule_type)
 
 
