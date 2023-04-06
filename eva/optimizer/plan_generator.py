@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from asyncio import wait_for
+
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.experimental.ray.planner.exchange_plan import ExchangePlan
 from eva.optimizer.cost_model import CostModel
@@ -25,6 +26,8 @@ from eva.optimizer.rules.rules_manager import RulesManager
 from eva.plan_nodes.abstract_plan import AbstractPlan
 from eva.plan_nodes.create_mat_view_plan import CreateMaterializedViewPlan
 from eva.utils.logging_manager import logger
+
+
 class PlanGenerator:
     """
     Used for building Physical Plan from Logical Plan.
@@ -136,7 +139,7 @@ class PlanGenerator:
         try:
             plan = await wait_for(self.optimize(logical_plan), timeout=120.0)
         except TimeoutError as e:
-            print('Optimizer timed out!')
+            print("Optimizer timed out!")
             logger.critical(e)
             raise e
 
