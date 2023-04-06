@@ -26,9 +26,7 @@ from eva.catalog.models.udf_metadata_catalog import UdfMetadataCatalogEntry
 from eva.third_party.huggingface.model import HFInputTypes
 
 """
-We currently support the following tasks from HuggingFace. A HuggingFace task
-is different from a model(pytorch). There are multiple models that could be used for a given task.
-Tasks provide an easy interface for inference.
+We currently support the following tasks from HuggingFace.
 """
 SUPPORTED_TASKS = {
     "audio-classification": HFInputTypes.AUDIO,
@@ -107,7 +105,9 @@ def infer_output_name_and_type(**pipeline_args):
 
     We can do this using the pipeline API from HuggingFace. pipeline is an
     easy way to use a huggingface model for inference. In EVA, we require users
-    to mention the task they want to perform for simplicity.
+    to mention the task they want to perform for simplicity. A HuggingFace task
+    is different from a model(pytorch). There are multiple models that could be used for a given task.
+    Tasks provide an easy interface for inference.
 
     Refer to https://huggingface.co/transformers/main_classes/pipelines.html for more details
     on pipelines.

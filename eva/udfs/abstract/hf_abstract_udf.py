@@ -32,11 +32,13 @@ class AbstractHFUdf(AbstractUDF, GPUCompatible):
     def name(self) -> str:
         return "GenericHuggingfaceModel"
 
-    def setup(
-        self, udf_obj: UdfCatalogEntry, device: int = -1, *args, **kwargs
-    ) -> None:
+    def __init__(self, udf_obj: UdfCatalogEntry, device: int = -1, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         pipeline_args = {entry.key: entry.value for entry in udf_obj.metadata}
         self.hf_udf_obj = pipeline(**pipeline_args, device=device)
+
+    def setup(self, *args, **kwargs) -> None:
+        super().setup(*args, **kwargs)
 
     def input_formatter(self, inputs: Any):
         """
