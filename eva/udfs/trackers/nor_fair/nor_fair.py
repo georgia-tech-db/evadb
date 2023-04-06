@@ -28,6 +28,7 @@ class NorFairTracker(EVATracker):
             distance_function="euclidean",
             distance_threshold=distance_threshold,
         )
+        self.prev_frame_id = None
 
     def forward(self, frame_id, frame, labels, bboxes, scores):
         norfair_detections = [
@@ -40,7 +41,11 @@ class NorFairTracker(EVATracker):
             for (bbox, score, label) in zip(bboxes, scores, labels)
         ]
 
-        tracked_objects = self.tracker.update(detections=norfair_detections)
+        # calculate jump between consecutive update calls
+        period = frame_id - self.prev_frame_id if self.prev_frame_id else 1
+        tracked_objects = self.tracker.update(
+            detections=norfair_detections, period=period
+        )
         bboxes_xyxy = []
         labels = []
         scores = []
