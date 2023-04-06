@@ -84,13 +84,20 @@ class TopDownRewrite(OptimizerTask):
                 if not rule.check(match, self.optimizer_context):
                     continue
                 after = rule.apply(match, self.optimizer_context)
-                for plan in after:
+                plans = list(after)
+                assert (
+                    len(plans) <= 1
+                ), "Rewrite rule cannot generate more than oen alternate plan."
+                for plan in plans:
                     new_expr = self.optimizer_context.replace_expression(
                         plan, self.root_expr.group_id
                     )
                     self.optimizer_context.task_stack.push(
                         TopDownRewrite(new_expr, self.rule_set, self.optimizer_context)
                     )
+                    # The root has changed so we cannot apply more rules to the same
+                    # root, hence return
+                    return
 
                 self.root_expr.mark_rule_explored(rule.rule_type)
         for child in self.root_expr.children:
@@ -144,7 +151,11 @@ class BottomUpRewrite(OptimizerTask):
                     "In BottomUp, Rule {} matched for {}".format(rule, self.root_expr)
                 )
                 after = rule.apply(match, self.optimizer_context)
-                for plan in after:
+                plans = list(after)
+                assert (
+                    len(plans) <= 1
+                ), "Rewrite rule cannot generate more than oen alternate plan."
+                for plan in plans:
                     new_expr = self.optimizer_context.replace_expression(
                         plan, self.root_expr.group_id
                     )
@@ -152,6 +163,9 @@ class BottomUpRewrite(OptimizerTask):
                     self.optimizer_context.task_stack.push(
                         BottomUpRewrite(new_expr, self.rule_set, self.optimizer_context)
                     )
+                    # The root has changed so we cannot apply more rules to the same
+                    # root, hence return
+                    return
             self.root_expr.mark_rule_explored(rule.rule_type)
 
 

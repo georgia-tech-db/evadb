@@ -65,9 +65,9 @@ class ExplainExecutorTest(unittest.TestCase):
         select_query = "EXPLAIN SELECT id, data FROM MyVideo"
         batch = execute_query_fetch_all(select_query)
         expected_output = (
-            """|__ SeqScanPlan\n    |__ ExchangePlan\n        |__ StoragePlan\n"""
+            """|__ ProjectPlan\n    |__ SeqScanPlan\n    |__ ExchangePlan\n        |__ StoragePlan\n"""
             if ray_enabled
-            else """|__ SeqScanPlan\n    |__ StoragePlan\n"""
+            else """|__ ProjectPlan\n    |__ SeqScanPlan\n        |__ StoragePlan\n"""
         )
         self.assertEqual(batch.frames[0][0], expected_output)
 
