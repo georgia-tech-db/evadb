@@ -86,7 +86,7 @@ class HuggingFaceTests(unittest.TestCase):
         """
         execute_query_fetch_all(create_udf_query)
 
-        select_query = "SELECT HFObjectDetector(data) FROM DETRAC WHERE id < 10;"
+        select_query = f"SELECT {udf_name}(data) FROM DETRAC WHERE id < 10;"
         output = execute_query_fetch_all(select_query)
         output_frames = output.frames
 
@@ -120,6 +120,9 @@ class HuggingFaceTests(unittest.TestCase):
             self.assertTrue("xmax" in bbox)
             self.assertTrue("ymax" in bbox)
 
+        drop_udf_query = f"DROP UDF {udf_name};"
+        execute_query_fetch_all(drop_udf_query)
+
     def test_image_classification(self):
         udf_name = "HFImageClassifier"
         create_udf_query = f"""CREATE UDF {udf_name}
@@ -145,6 +148,9 @@ class HuggingFaceTests(unittest.TestCase):
         self.assertTrue(
             all(isinstance(x, list) for x in output.frames[udf_name.lower() + ".label"])
         )
+
+        drop_udf_query = f"DROP UDF {udf_name};"
+        execute_query_fetch_all(drop_udf_query)
 
     def test_text_classification(self):
         create_table_query = """CREATE TABLE IF NOT EXISTS MyCSV (
@@ -185,3 +191,6 @@ class HuggingFaceTests(unittest.TestCase):
                 isinstance(x, float) for x in output.frames[udf_name.lower() + ".score"]
             )
         )
+
+        drop_udf_query = f"DROP UDF {udf_name};"
+        execute_query_fetch_all(drop_udf_query)
