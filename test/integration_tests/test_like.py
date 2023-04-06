@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+from test.util import shutdown_ray
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
@@ -30,6 +31,7 @@ class LikeTest(unittest.TestCase):
         execute_query_fetch_all(f"LOAD IMAGE '{meme2}' INTO MemeImages;")
 
     def tearDown(self):
+        shutdown_ray()
         # clean up
         execute_query_fetch_all("DROP TABLE IF EXISTS MemeImages;")
 
