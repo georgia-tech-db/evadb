@@ -21,6 +21,7 @@ from test.util import (  # file_remove,
     file_remove,
     get_logical_query_plan,
     load_udfs_for_testing,
+    shutdown_ray,
 )
 
 import numpy as np
@@ -55,6 +56,8 @@ class SelectExecutorTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        shutdown_ray()
+
         file_remove("dummy.avi")
         drop_query = """DROP TABLE table1;"""
         execute_query_fetch_all(drop_query)
