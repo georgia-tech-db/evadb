@@ -15,7 +15,12 @@
 import os
 import unittest
 from pathlib import Path
-from test.util import create_dummy_batches, create_sample_video, file_remove
+from test.util import (
+    create_dummy_batches,
+    create_sample_video,
+    file_remove,
+    shutdown_ray,
+)
 
 import boto3
 import pandas as pd
@@ -66,6 +71,8 @@ class S3LoadExecutorTest(unittest.TestCase):
             self.s3_client.upload_file(f"{video_path}/{file}", bucket_name, file)
 
     def tearDown(self):
+        shutdown_ray()
+
         file_remove("MyVideo/dummy.avi", parent_dir=self.s3_download_dir)
 
         for file in os.listdir(self.multiple_video_file_path):

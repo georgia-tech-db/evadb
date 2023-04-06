@@ -20,6 +20,8 @@ from pathlib import Path
 import cv2
 import numpy as np
 import pandas as pd
+import psutil
+import ray
 from mock import MagicMock
 
 from eva.binder.statement_binder import StatementBinder
@@ -46,6 +48,15 @@ s3_dir_from_config = config.get_value("storage", "s3_download_dir")
 
 
 EVA_TEST_DATA_DIR = Path(config.get_value("core", "eva_installation_dir")).parent
+
+
+def is_ray_stage_running():
+    return "ray::ray_stage" in (p.name() for p in psutil.process_iter())
+
+
+def shutdown_ray():
+    if ConfigurationManager().get_value("experimental", "ray"):
+        ray.shutdown()
 
 
 def prefix_worker_id(base: str):
