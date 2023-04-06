@@ -15,7 +15,10 @@
 from typing import Callable, List
 
 import ray
+from ray.exceptions import RayError
 from ray.util.queue import Queue
+
+from eva.executor.executor_utils import ExecutorError
 
 
 class StageCompleteSignal:
@@ -24,19 +27,23 @@ class StageCompleteSignal:
 
 @ray.remote(num_cpus=0)
 def ray_stage_wait_and_alert(tasks: ray.ObjectRef, output_queue: Queue):
-    ray.get(tasks)
-    for q in output_queue:
-        q.put(StageCompleteSignal)
+    try:
+        ray.get(tasks)
+        for q in output_queue:
+            q.put(StageCompleteSignal)
+    except RayError as e:
+        for q in output_queue:
+            q.put(ExecutorError(e.cause))
 
 
 @ray.remote
 def ray_stage(
-    exectuor: Callable, input_queues: List[Queue], output_queues: List[Queue]
+    executor: Callable, input_queues: List[Queue], output_queues: List[Queue]
 ):
     if len(input_queues) > 1 or len(output_queues) > 1:
         raise NotImplementedError
 
-    gen = exectuor(input_queues=input_queues)
+    gen = executor(input_queues=input_queues)
     for next_item in gen:
         for oq in output_queues:
             oq.put(next_item)

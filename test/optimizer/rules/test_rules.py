@@ -23,6 +23,12 @@ from eva.catalog.catalog_type import TableType
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.experimental.ray.optimizer.rules.rules import LogicalExchangeToPhysical
+from eva.experimental.ray.optimizer.rules.rules import (
+    LogicalGetToSeqScan as DistributedLogicalGetToSeqScan,
+)
+from eva.experimental.ray.optimizer.rules.rules import (
+    LogicalProjectToPhysical as DistributedLogicalProjectToPhysical,
+)
 from eva.optimizer.operators import (
     LogicalFilter,
     LogicalGet,
@@ -49,7 +55,11 @@ from eva.optimizer.rules.rules import (
     LogicalFaissIndexScanToPhysical,
     LogicalFilterToPhysical,
     LogicalFunctionScanToPhysical,
-    LogicalGetToSeqScan,
+)
+from eva.optimizer.rules.rules import (
+    LogicalGetToSeqScan as SequentialLogicalGetToSeqScan,
+)
+from eva.optimizer.rules.rules import (
     LogicalGroupByToPhysical,
     LogicalInnerJoinCommutativity,
     LogicalInsertToPhysical,
@@ -59,7 +69,11 @@ from eva.optimizer.rules.rules import (
     LogicalLimitToPhysical,
     LogicalLoadToPhysical,
     LogicalOrderByToPhysical,
-    LogicalProjectToPhysical,
+)
+from eva.optimizer.rules.rules import (
+    LogicalProjectToPhysical as SequentialLogicalProjectToPhysical,
+)
+from eva.optimizer.rules.rules import (
     LogicalRenameToPhysical,
     LogicalShowToPhysical,
     LogicalUnionToPhysical,
@@ -189,6 +203,13 @@ class RulesTest(unittest.TestCase):
                 any(isinstance(rule, type(x)) for x in RulesManager().logical_rules)
             )
 
+        ray_enabled = ConfigurationManager().get_value("experimental", "ray")
+
+        # For the current version, we choose either the distributed or the
+        # sequential rule, because we do not have a logic to choose one over
+        # the other in the current optimizer. Sequential rewrite is currently
+        # embedded inside distributed rule if ray is enabled. The rule itself
+        # has some simple heuristics to choose one over the other.
         supported_implementation_rules = [
             LogicalCreateToPhysical(),
             LogicalRenameToPhysical(),
@@ -198,7 +219,9 @@ class RulesTest(unittest.TestCase):
             LogicalInsertToPhysical(),
             LogicalDeleteToPhysical(),
             LogicalLoadToPhysical(),
-            LogicalGetToSeqScan(),
+            DistributedLogicalGetToSeqScan()
+            if ray_enabled
+            else SequentialLogicalGetToSeqScan(),
             LogicalDerivedGetToPhysical(),
             LogicalUnionToPhysical(),
             LogicalGroupByToPhysical(),
@@ -210,7 +233,9 @@ class RulesTest(unittest.TestCase):
             LogicalJoinToPhysicalHashJoin(),
             LogicalCreateMaterializedViewToPhysical(),
             LogicalFilterToPhysical(),
-            LogicalProjectToPhysical(),
+            DistributedLogicalProjectToPhysical()
+            if ray_enabled
+            else SequentialLogicalProjectToPhysical(),
             LogicalShowToPhysical(),
             LogicalExplainToPhysical(),
             LogicalCreateIndexToFaiss(),
@@ -218,7 +243,6 @@ class RulesTest(unittest.TestCase):
             LogicalFaissIndexScanToPhysical(),
         ]
 
-        ray_enabled = ConfigurationManager().get_value("experimental", "ray")
         if ray_enabled:
             supported_implementation_rules.append(LogicalExchangeToPhysical())
         self.assertEqual(

@@ -15,7 +15,7 @@
 import os
 import unittest
 from test.markers import windows_skip_marker
-from test.util import file_remove, load_udfs_for_testing
+from test.util import file_remove, load_udfs_for_testing, shutdown_ray
 
 import cv2
 import numpy as np
@@ -50,6 +50,8 @@ class PytorchTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        shutdown_ray()
+
         file_remove("ua_detrac.mp4")
         file_remove("mnist.mp4")
         file_remove("actions.mp4")
@@ -274,15 +276,19 @@ class PytorchTest(unittest.TestCase):
         """
         execute_query_fetch_all(create_udf_query)
 
-        select_query = """SELECT OCRExtractor(data).labels,
+        select_query = """SELECT name, OCRExtractor(data).labels,
                                  ToxicityClassifier(OCRExtractor(data).labels)
                         FROM MemeImages;"""
         actual_batch = execute_query_fetch_all(select_query)
 
         # non-trivial test case for Detoxify
         res = actual_batch.frames
-        self.assertTrue(res["toxicityclassifier.labels"][0] == "toxic")
-        self.assertTrue(res["toxicityclassifier.labels"][1] == "not toxic")
+        for i in range(2):
+            # Image can be reordered.
+            if "meme1" in res["memeimages.name"][i]:
+                self.assertTrue(res["toxicityclassifier.labels"][i] == "toxic")
+            else:
+                self.assertTrue(res["toxicityclassifier.labels"][i] == "not toxic")
 
     @pytest.mark.torchtest
     def test_should_run_extract_object(self):

@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import get_physical_query_plan, load_udfs_for_testing
+from test.util import get_physical_query_plan, load_udfs_for_testing, shutdown_ray
 
 import numpy as np
 import pandas as pd
@@ -21,6 +21,7 @@ import pytest
 from mock import MagicMock, patch
 
 from eva.catalog.catalog_manager import CatalogManager
+from eva.configuration.configuration_manager import ConfigurationManager
 from eva.configuration.constants import EVA_ROOT_DIR
 from eva.expression.comparison_expression import ComparisonExpression
 from eva.models.storage.batch import Batch
@@ -38,6 +39,10 @@ from eva.utils.stats import Timer
 
 
 @pytest.mark.notparallel
+@pytest.mark.skipif(
+    ConfigurationManager().get_value("experimental", "ray"),
+    reason="Not necessary for Ray",
+)
 class OptimizerRulesTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -49,6 +54,7 @@ class OptimizerRulesTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        shutdown_ray()
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
 
     @patch("eva.expression.function_expression.FunctionExpression.evaluate")
