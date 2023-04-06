@@ -289,7 +289,7 @@ class PytorchTest(unittest.TestCase):
                 self.assertTrue(res["toxicityclassifier.labels"][i] == "toxic")
             else:
                 self.assertTrue(res["toxicityclassifier.labels"][i] == "not toxic")
-    
+
     def test_check_unnest_with_predicate_on_yolo(self):
         query = """SELECT id, yolov5.label, yolov5.bbox, yolov5.score
                   FROM MyVideo
