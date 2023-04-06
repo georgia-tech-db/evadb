@@ -21,6 +21,7 @@ from eva.binder.binder_utils import (
     check_groupby_pattern,
     check_table_object_is_video,
     extend_star,
+    resolve_alias_table_value_expression,
 )
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.catalog.catalog_manager import CatalogManager
@@ -28,7 +29,6 @@ from eva.catalog.catalog_type import IndexType, NdArrayType, TableType, VideoCol
 from eva.expression.abstract_expression import AbstractExpression, ExpressionType
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.parser.alias import Alias
 from eva.parser.create_index_statement import CreateIndexStatement
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
 from eva.parser.delete_statement import DeleteTableStatement
@@ -282,19 +282,4 @@ class StatementBinder:
             node.output_objs = output_objs
             node.projection_columns = [obj.name.lower() for obj in output_objs]
 
-        default_alias_name = node.name.lower()
-        default_output_col_aliases = [str(obj.name.lower()) for obj in node.output_objs]
-        if not node.alias:
-            node.alias = Alias(default_alias_name, default_output_col_aliases)
-        else:
-            if not len(node.alias.col_names):
-                node.alias = Alias(node.alias.alias_name, default_output_col_aliases)
-            else:
-                output_aliases = [
-                    str(col_name.lower()) for col_name in node.alias.col_names
-                ]
-                node.alias = Alias(node.alias.alias_name, output_aliases)
-
-        assert len(node.alias.col_names) == len(
-            node.output_objs
-        ), f"""Expected {len(node.output_objs)} output columns for {node.alias.alias_name}, got {len(node.alias.col_names)}."""
+        resolve_alias_table_value_expression(node)

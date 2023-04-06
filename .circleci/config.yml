@@ -113,4 +113,4 @@ jobs:
           command: |
             pip install --upgrade pip
             pip install evadb
-          ### bash script/test/package.sh
+            bash script/test/package.sh
