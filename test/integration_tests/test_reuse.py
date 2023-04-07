@@ -16,14 +16,22 @@ import os
 import unittest
 from pathlib import Path
 from test.markers import windows_skip_marker
-from test.util import get_logical_query_plan, load_udfs_for_testing, shutdown_ray
+from test.util import (
+    get_logical_query_plan,
+    get_physical_query_plan,
+    load_udfs_for_testing,
+    shutdown_ray,
+)
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
 from eva.expression.function_expression import FunctionExpression
 from eva.optimizer.operators import LogicalFilter, LogicalFunctionScan
 from eva.optimizer.plan_generator import PlanGenerator
-from eva.optimizer.rules.rules import CacheFunctionExpressionInApply
+from eva.optimizer.rules.rules import (
+    CacheFunctionExpressionInApply,
+    CacheFunctionExpressionInFilter,
+)
 from eva.optimizer.rules.rules_manager import disable_rules
 from eva.server.command_handler import execute_query_fetch_all
 from eva.utils.stats import Timer
@@ -41,7 +49,9 @@ class ReuseTest(unittest.TestCase):
         execute_query_fetch_all("DROP TABLE IF EXISTS DETRAC;")
 
     def _verify_reuse_correctness(self, query, reuse_batch):
-        with disable_rules([CacheFunctionExpressionInApply()]) as rules_manager:
+        with disable_rules(
+            [CacheFunctionExpressionInApply(), CacheFunctionExpressionInFilter()]
+        ) as rules_manager:
             custom_plan_generator = PlanGenerator(rules_manager)
             without_reuse_batch = execute_query_fetch_all(
                 query, plan_generator=custom_plan_generator
@@ -106,10 +116,6 @@ class ReuseTest(unittest.TestCase):
 
     def test_reuse_does_not_work_when_expression_in_where_clause(self):
         # add with subsequent PR
-        # select_query = """
-        #     SELECT id FROM DETRAC
-        #     WHERE ArrayCount(YoloV5(data).labels, 'car') > 3 AND id < 5 AND FastRCNNObjectDetector(data).labels = ['car'];"""
-
         select_query = """
             SELECT id FROM DETRAC
             WHERE ArrayCount(YoloV5(data).labels, 'car') > 3 AND id < 5;"""
@@ -120,11 +126,30 @@ class ReuseTest(unittest.TestCase):
         plan = next(get_logical_query_plan(select_query).find_all(LogicalFilter))
         yolo_expr = None
         for expr in plan.predicate.find_all(FunctionExpression):
-            print(expr.name)
             if expr.name == "YoloV5":
                 yolo_expr = expr
 
         self.assertFalse(yolo_expr.has_cache())
+
+    def test_reuse_logical_filter_with_duplicate_query(self):
+        select_query = """
+            SELECT id FROM DETRAC
+            WHERE ArrayCount(YoloV5(data).labels, 'car') > 3 AND id < 5;"""
+        no_reuse_timer = Timer()
+        reuse_timer = Timer()
+
+        with no_reuse_timer:
+            execute_query_fetch_all(select_query)
+        with reuse_timer:
+            reuse_batch = execute_query_fetch_all(select_query)
+
+        self._verify_reuse_correctness(select_query, reuse_batch)
+
+        # reuse should be faster than no reuse
+        print(no_reuse_timer.total_elapsed_time, reuse_timer.total_elapsed_time)
+        self.assertTrue(
+            no_reuse_timer.total_elapsed_time > reuse_timer.total_elapsed_time
+        )
 
     @windows_skip_marker
     def test_reuse_after_server_shutdown(self):
