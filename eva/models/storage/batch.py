@@ -434,3 +434,6 @@ class Batch:
     def rename(self, columns) -> None:
         "Rename column names"
         self._frames.rename(columns=columns, inplace=True)
+
+    def get_columns_as_numpy_array(self, columns: List[str]):
+        return self._frames[columns].to_numpy()

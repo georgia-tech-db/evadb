@@ -269,8 +269,7 @@ def enable_cache_on_tree(expr_tree: AbstractExpression):
 
 def check_expr_validity(expr: FunctionExpression):
     return (
-        False
-        and expr.name in CACHEABLE_UDFS
+        expr.name in CACHEABLE_UDFS
         and not expr.has_cache()
         and len(expr.children) <= 1
         and isinstance(expr.children[0], TupleValueExpression)
