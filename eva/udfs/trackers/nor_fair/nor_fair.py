@@ -43,6 +43,9 @@ class NorFairTracker(EVATracker):
 
         # calculate jump between consecutive update calls
         period = frame_id - self.prev_frame_id if self.prev_frame_id else 1
+        self.prev_frame_id = frame_id
+
+        # call tracker
         tracked_objects = self.tracker.update(
             detections=norfair_detections, period=period
         )
