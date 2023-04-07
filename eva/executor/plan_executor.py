@@ -79,7 +79,6 @@ class PlanExecutor:
             return root
 
         # Get plan node type
-        print(plan)
         plan_opr_type = plan.opr_type
 
         if plan_opr_type == PlanOprType.SEQUENTIAL_SCAN:
