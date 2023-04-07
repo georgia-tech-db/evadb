@@ -25,7 +25,6 @@ from eva.optimizer.property import PropertyType
 from eva.optimizer.rules.rules_manager import RulesManager
 from eva.plan_nodes.abstract_plan import AbstractPlan
 from eva.plan_nodes.create_mat_view_plan import CreateMaterializedViewPlan
-from eva.utils.logging_manager import logger
 
 
 class PlanGenerator:
@@ -138,7 +137,7 @@ class PlanGenerator:
         # apply optimizations
         try:
             plan = await wait_for(self.optimize(logical_plan), timeout=60.0)
-        except TimeoutError as e:
+        except TimeoutError:
             print("Optimizer timed out!")
 
         # Only run post-processing if Ray is enabled.
