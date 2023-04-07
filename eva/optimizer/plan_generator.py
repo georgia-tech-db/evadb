@@ -137,14 +137,12 @@ class PlanGenerator:
     async def build(self, logical_plan: Operator):
         # apply optimizations
         try:
-            plan = await wait_for(self.optimize(logical_plan), timeout=120.0)
+            plan = await wait_for(self.optimize(logical_plan), timeout=60.0)
         except TimeoutError as e:
             print("Optimizer timed out!")
-            logger.critical(e)
-            raise e
-        if plan != b"":
-            # Only run post-processing if Ray is enabled.
-            if ConfigurationManager().get_value("experimental", "ray"):
-                plan = self.post_process(plan)
+
+        # Only run post-processing if Ray is enabled.
+        if ConfigurationManager().get_value("experimental", "ray"):
+            plan = self.post_process(plan)
 
         return plan
