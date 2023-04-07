@@ -142,9 +142,9 @@ class PlanGenerator:
             print("Optimizer timed out!")
             logger.critical(e)
             raise e
-
-        # Only run post-processing if Ray is enabled.
-        if ConfigurationManager().get_value("experimental", "ray"):
-            plan = self.post_process(plan)
+        if plan != b"":
+            # Only run post-processing if Ray is enabled.
+            if ConfigurationManager().get_value("experimental", "ray"):
+                plan = self.post_process(plan)
 
         return plan
