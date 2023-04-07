@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+import asyncio
 
 from eva.models.catalog.frame_info import FrameInfo
 from eva.models.catalog.properties import ColorSpace
@@ -20,13 +21,6 @@ from eva.models.catalog.properties import ColorSpace
 
 class FrameInfoTest(unittest.TestCase):
     def test_frame_info_equality(self):
-        info1 = FrameInfo(
-            height=250, width=250, channels=3, color_space=ColorSpace.GRAY
-        )
-        info2 = FrameInfo(250, 250, 3, color_space=ColorSpace.GRAY)
-        self.assertEqual(info1, info2)
-
-    def test_asyncio_working(self):
         info1 = FrameInfo(
             height=250, width=250, channels=3, color_space=ColorSpace.GRAY
         )
