@@ -47,4 +47,24 @@ dimensions(*Tuple(int)*): shape of the numpy array
                     type=NdArrayType.INT32,
                     dimensions=(2, 2),
     )
+    
 
+PandasDataframe
+----------------
+columns (*List[str]*): list of strings that represent the expected column names in the pandas dataframe that is returned from the UDF.
+
+column_types (*NdArrayType*): expected datatype of the column in the pandas dataframe returned from the UDF. The NdArrayType class is inherited from eva.catalog.catalog_type.
+
+column_shapes (*List[tuples]*): list of tuples that represent the expected shapes of columns in the pandas dataframe returned from the UDF.
+
+.. code-block:: python
+
+    PandasDataframe(
+                columns=["labels", "bboxes", "scores"],
+                column_types=[
+                    NdArrayType.STR,
+                    NdArrayType.FLOAT32,
+                    NdArrayType.FLOAT32,
+                ],
+                column_shapes=[(None,), (None,), (None,)],
+    )
