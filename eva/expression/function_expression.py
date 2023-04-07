@@ -210,7 +210,7 @@ class FunctionExpression(AbstractExpression):
         cache_miss = np.full(len(batch), True)
         for idx, key in cache_keys.iterrows():
             val = self._cache.store.get(key.to_numpy())
-            results[idx] = val
+            results[idx] = val[output_cols].to_numpy() if val is not None else val
             cache_miss[idx] = val is None
 
         # log the cache misses
@@ -226,10 +226,12 @@ class FunctionExpression(AbstractExpression):
             for key, value in zip(
                 missing_keys.iterrows(), cache_miss_results.iterrows()
             ):
-                self._cache.store.set(key[1].to_numpy(), value[1].to_numpy())
+                self._cache.store.set(key[1].to_numpy(), value[1])
 
             # 4. merge the cache results
-            results[cache_miss] = cache_miss_results.to_numpy()
+            results[cache_miss] = cache_miss_results.get_columns_as_numpy_array(
+                output_cols
+            )
 
         # 5. return the correct batch
         return Batch(pd.DataFrame(results, columns=output_cols))

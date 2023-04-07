@@ -187,6 +187,7 @@ class EmbedSampleIntoGet(Rule):
         )
         yield new_get_opr
 
+
 class CacheFunctionExpressionInFilter(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALFILTER)
@@ -216,7 +217,8 @@ class CacheFunctionExpressionInFilter(Rule):
             predicate=after_predicate, children=before.children
         )
         yield after_operator
-        
+
+
 class CacheFunctionExpressionInApply(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICAL_APPLY_AND_MERGE)
