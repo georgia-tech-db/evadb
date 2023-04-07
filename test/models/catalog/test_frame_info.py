@@ -25,3 +25,10 @@ class FrameInfoTest(unittest.TestCase):
         )
         info2 = FrameInfo(250, 250, 3, color_space=ColorSpace.GRAY)
         self.assertEqual(info1, info2)
+
+    def test_asyncio_working(self):
+        info1 = FrameInfo(
+            height=250, width=250, channels=3, color_space=ColorSpace.GRAY
+        )
+        info2 = FrameInfo(250, 250, 3, color_space=ColorSpace.GRAY)
+        self.assertEqual(info1, info2)
