@@ -77,15 +77,19 @@ then
     if [[ "$MODE" = "TEST" || "$MODE" = "ALL" ]];
     then
         PYTHONPATH=./ pytest --cov-report term-missing:skip-covered  --cov-config=.coveragerc --cov-context=test --cov=eva/ -s -v --log-level=WARNING -m "not benchmark"
-        test_code=$?
-        if [ "$test_code" != "0" ];
-        then
-            echo "PYTEST CODE: --|${test_code}|-- FAILURE"
-            exit $test_code
-        else
-            echo "PYTEST CODE: --|${test_code}|-- SUCCESS"
-        fi
-     fi
+    elif [[ "$MODE" = "RAY" ]];
+    then
+        PYTHONPATH=./ pytest -s -v -p no:cov test/ -m "not benchmark"
+    fi
+
+    test_code=$?
+    if [ "$test_code" != "0" ];
+    then
+        echo "PYTEST CODE: --|${test_code}|-- FAILURE"
+        exit $test_code
+    else
+        echo "PYTEST CODE: --|${test_code}|-- SUCCESS"
+    fi
 # Windows -- no need for coverage report
 else
     PYTHONPATH=./ pytest -p no:cov test/ -m "not benchmark"

@@ -17,15 +17,17 @@ import unittest
 from enum import Enum
 from inspect import isabstract
 from test.util import get_all_subclasses, get_mock_object
+from unittest.mock import patch
 
 import eva
 from eva.udfs.abstract.abstract_udf import AbstractUDF
 
 
 class AbstractUDFTest(unittest.TestCase):
-    def test_udf_abstract_functions(self):
+    # Need to mock the HF pipeline function to avoid downloading a model
+    @patch("eva.udfs.abstract.hf_abstract_udf.pipeline")
+    def test_udf_abstract_functions(self, mock_pipeline):
         derived_udf_classes = list(get_all_subclasses(AbstractUDF))
-
         # Go over each derived class of AbstractUDF
         for derived_udf_class in derived_udf_classes:
             if isabstract(derived_udf_class) is False:

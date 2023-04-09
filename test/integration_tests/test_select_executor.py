@@ -21,6 +21,7 @@ from test.util import (  # file_remove,
     file_remove,
     get_logical_query_plan,
     load_udfs_for_testing,
+    shutdown_ray,
 )
 
 import numpy as np
@@ -55,6 +56,8 @@ class SelectExecutorTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        shutdown_ray()
+
         file_remove("dummy.avi")
         drop_query = """DROP TABLE table1;"""
         execute_query_fetch_all(drop_query)
@@ -523,6 +526,22 @@ class SelectExecutorTest(unittest.TestCase):
                 {
                     "myvideo.id": np.array([0, 0, 1, 1], np.intp),
                     "T.label": np.array(["person", "person", "bicycle", "bicycle"]),
+                }
+            )
+        )
+        self.assertEqual(unnest_batch, expected)
+
+        # unnest with predicate on function expression
+        query = """SELECT id, label
+                FROM MyVideo JOIN LATERAL
+                UNNEST(DummyMultiObjectDetector(data).labels) AS T(label)
+                WHERE id < 2 AND T.label = "person" ORDER BY id;"""
+        unnest_batch = execute_query_fetch_all(query)
+        expected = Batch(
+            pd.DataFrame(
+                {
+                    "myvideo.id": np.array([0, 0], np.intp),
+                    "T.label": np.array(["person", "person"]),
                 }
             )
         )

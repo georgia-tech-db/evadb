@@ -36,7 +36,7 @@ class LimitExecutor(AbstractExecutor):
         child_executor = self.children[0]
         remaining_tuples = self._limit_count
         # aggregates the batches into one large batch
-        for batch in child_executor.exec():
+        for batch in child_executor.exec(**kwargs):
             if len(batch) > remaining_tuples:
                 yield batch[:remaining_tuples]
                 return

@@ -72,7 +72,7 @@ class FaissIndexScanExecutor(AbstractExecutor):
         # Load projected columns from disk and join with search results.
         row_id_col_name = None
         res_row_list = [None for _ in range(self.limit_count.value)]
-        for batch in self.children[0].exec():
+        for batch in self.children[0].exec(**kwargs):
             column_list = batch.columns
             if not row_id_col_name:
                 row_id_alias = get_row_id_column_alias(column_list)

@@ -20,6 +20,8 @@ from pathlib import Path
 import cv2
 import numpy as np
 import pandas as pd
+import psutil
+import ray
 from mock import MagicMock
 
 from eva.binder.statement_binder import StatementBinder
@@ -46,6 +48,15 @@ s3_dir_from_config = config.get_value("storage", "s3_download_dir")
 
 
 EVA_TEST_DATA_DIR = Path(config.get_value("core", "eva_installation_dir")).parent
+
+
+def is_ray_stage_running():
+    return "ray::ray_stage" in (p.name() for p in psutil.process_iter())
+
+
+def shutdown_ray():
+    if ConfigurationManager().get_value("experimental", "ray"):
+        ray.shutdown()
 
 
 def prefix_worker_id(base: str):
@@ -203,7 +214,7 @@ def create_dataframe(num_frames=1) -> pd.DataFrame:
 def create_dataframe_same(times=1):
     base_df = create_dataframe()
     for i in range(1, times):
-        base_df = base_df.append(create_dataframe(), ignore_index=True)
+        base_df = pd.concat([base_df, create_dataframe()], ignore_index=True)
     return base_df
 
 
@@ -285,6 +296,23 @@ def create_csv(num_rows, columns):
         df[col] = np.random.randint(1, 100, num_rows)
     df.to_csv(csv_path, index=False)
     return df, csv_path
+
+
+def create_text_csv(num_rows=30):
+    """
+    Creates a csv with 2 columns: id and comment
+    The comment column has 2 values: "I like this" and "I don't like this" that are alternated
+    """
+    csv_path = os.path.join(tmp_dir_from_config, "dummy.csv")
+    try:
+        os.remove(csv_path)
+    except FileNotFoundError:
+        pass
+    df = pd.DataFrame(columns=["id", "comment"])
+    df["id"] = np.arange(num_rows)
+    df["comment"] = np.where(df["id"] % 2 == 0, "I like this", "I don't like this")
+    df.to_csv(csv_path, index=False)
+    return csv_path
 
 
 def create_table(table_name, num_rows, num_columns):
