@@ -55,7 +55,7 @@ workflows:
         - Windows:
             name: "Windows | v3.10"
         - MacOS:
-            name: "MacOS | v3.9"
+            name: "MacOS | v3.8"
         #- test:
         #    name: "Linux -  v3.11"  # missing Torchvision
         #    v: "3.11"
@@ -127,8 +127,8 @@ jobs:
             command: |
               brew update
               brew install pyenv git
-              pyenv install 3.9.13
-              pyenv global 3.9.13
+              pyenv install 3.8.10
+              pyenv global 3.8.10
               eval "$(pyenv init -)"
               python --version
               pip --version
@@ -148,11 +148,9 @@ jobs:
     docker:
       - image: "cimg/python:3.10"
     steps:
-
       - checkout
-
       - run:
-          name: Install EVA package from pip and start server
+          name: Install EVA package from PIP and start server
           command: |
             pip install --upgrade pip
             pip install evadb
