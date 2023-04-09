@@ -44,9 +44,9 @@ class EVATracker(AbstractUDF):
         ],
         output_signatures=[
             NumpyArray("track_ids", type=NdArrayType.INT32, dimensions=(None,)),
+            NumpyArray("track_labels", type=NdArrayType.INT32, dimensions=(None,)),
             NumpyArray("track_bboxes", type=NdArrayType.FLOAT32, dimensions=(None, 4)),
             NumpyArray("track_scores", type=NdArrayType.FLOAT32, dimensions=(None,)),
-            NumpyArray("track_labels", type=NdArrayType.INT32, dimensions=(None,)),
         ],
     )
     def forward(
