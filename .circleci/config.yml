@@ -101,20 +101,18 @@ jobs:
 
   test-windows:
       executor: win/default
-      environment:
-        PATH: "C:\\Python{version}\\;C:\\Python{version}\\Scripts;C:\\Program Files\\Git\\bin\\;C:\\Program Files\\Git\\usr\\bin\\;C:\\Windows\\System32\\;C:\\Windows;C:\\Windows\\System32\\wbem;C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\;$env:APPDATA\\Python\\Scripts;$env:APPDATA\\npm"
       steps:
         - checkout
         - run: |
-            choco install python --version=$(choco search python --exact --limit-output --by-id-only --order-by-version-desc | grep "^python\s*\d\.\d" | awk '{print $2}' | head -n 1) --params "/InstallDir:C:\Python39" -y
+            choco install python --version=3.8.12 --params "/InstallDir:C:\Python38" -y
             python --version
             pip --version
             pip install -r requirements.txt
-            pytest
+            python -m pytest
 
   test-macos:
       macos:
-        xcode: "12.4.0"
+        xcode: "14.2.0"
       environment:
         PYENV_ROOT: /usr/local/pyenv
         PATH: $PYENV_ROOT/bin:$PYENV_ROOT/shims:$PATH
