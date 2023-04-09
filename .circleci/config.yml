@@ -121,6 +121,8 @@ jobs:
         - run: |
             brew update
             brew install pyenv git
+            pyenv install --list
+            pyenv install 3.8.10
             eval "$(pyenv init -)"
             python --version
             pip --version
@@ -131,7 +133,7 @@ jobs:
             pip install ".[dev]"
             source test_evadb/bin/activate
             bash script/test/test.sh 
-            
+
   Windows:
     executor: win/default
     parameters:
