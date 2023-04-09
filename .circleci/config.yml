@@ -117,11 +117,7 @@ jobs:
   test-macos:
       macos:
         xcode: "14.2.0"
-      environment:
-        PYENV_ROOT: /usr/local/pyenv
-        PATH: $PYENV_ROOT/bin:$PYENV_ROOT/shims:$PATH
       steps:
-        - checkout
         - run: |
             brew update
             brew install pyenv
@@ -129,6 +125,7 @@ jobs:
             python --version
             pip --version
             pip install -r requirements.txt
+        - checkout
 
   Windows:
     executor: win/default
