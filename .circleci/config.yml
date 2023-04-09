@@ -97,7 +97,7 @@ jobs:
             bash script/test/test.sh -m "<< parameters.mode >>"
 
   test-windows:
-      windows: latest
+      executor: win/default
       environment:
         PATH: "C:\\Python{version}\\;C:\\Python{version}\\Scripts;C:\\Program Files\\Git\\bin\\;C:\\Program Files\\Git\\usr\\bin\\;C:\\Windows\\System32\\;C:\\Windows;C:\\Windows\\System32\\wbem;C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\;$env:APPDATA\\Python\\Scripts;$env:APPDATA\\npm"
       steps:
