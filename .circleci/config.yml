@@ -79,8 +79,8 @@ jobs:
       - run:
           name: Install EVA package from GitHub repo with all dependencies
           command: |
-            "python<< parameters.v >>" -m pip install --upgrade pip
             "python<< parameters.v >>" -m venv test_evadb
+            "python<< parameters.v >>" -m pip install --upgrade pip
             source test_evadb/bin/activate
             pip install ".[dev]"
 
@@ -106,7 +106,7 @@ jobs:
       steps:
         - checkout
         - run: |
-            choco install python --version=3.8.10 -y
+            choco install python --version=3.10.8 -y
             python --version
             pip --version
             pip install virtualenv
@@ -123,8 +123,8 @@ jobs:
             brew update
             brew install pyenv git
             pyenv install --list
-            pyenv install 3.8.10
-            pyenv global 3.8.10
+            pyenv install 3.10.8
+            pyenv global 3.10.8
             eval "$(pyenv init -)"
             python --version
             pip --version
