@@ -24,6 +24,7 @@ from test.util import (
     create_sample_csv,
     create_sample_video,
     file_remove,
+    shutdown_ray,
 )
 
 import numpy as np
@@ -51,6 +52,8 @@ class LoadExecutorTest(unittest.TestCase):
         self.csv_file_path = create_sample_csv()
 
     def tearDown(self):
+        shutdown_ray()
+
         file_remove("dummy.avi")
         file_remove("dummy.csv")
         # clean up
@@ -147,7 +150,7 @@ class LoadExecutorTest(unittest.TestCase):
         query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
         result = execute_query_fetch_all(query)
         expected = Batch(
-            pd.DataFrame([f"Number of loaded {FileFormatType.VIDEO.name}: 3"])
+            pd.DataFrame([f"Number of loaded {FileFormatType.VIDEO.name}: 4"])
         )
         self.assertEqual(result, expected)
 

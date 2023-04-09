@@ -117,6 +117,17 @@ def prefix_worker_id(path: str):
         # Single threaded mode
         pass
     return path
+    
+def get_gpu_count() -> int:
+    """
+    Check number of GPUs through Torch.
+    """
+    try:
+        import torch
+
+        return torch.cuda.device_count()
+    except ImportError:
+        return 0
 
 
 def generate_file_path(name: str = "") -> Path:

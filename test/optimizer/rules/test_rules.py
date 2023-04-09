@@ -23,18 +23,22 @@ from eva.catalog.catalog_type import TableType
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.experimental.ray.optimizer.rules.rules import LogicalExchangeToPhysical
+from eva.experimental.ray.optimizer.rules.rules import (
+    LogicalGetToSeqScan as DistributedLogicalGetToSeqScan,
+)
+from eva.experimental.ray.optimizer.rules.rules import (
+    LogicalProjectToPhysical as DistributedLogicalProjectToPhysical,
+)
 from eva.optimizer.operators import (
     LogicalFilter,
     LogicalGet,
     LogicalJoin,
-    LogicalProject,
     LogicalSample,
 )
 from eva.optimizer.rules.rules import (
     CacheFunctionExpressionInApply,
     CombineSimilarityOrderByAndLimitToFaissIndexScan,
     EmbedFilterIntoGet,
-    EmbedProjectIntoGet,
     EmbedSampleIntoGet,
     LogicalApplyAndMergeToPhysical,
     LogicalCreateIndexToFaiss,
@@ -49,7 +53,11 @@ from eva.optimizer.rules.rules import (
     LogicalFaissIndexScanToPhysical,
     LogicalFilterToPhysical,
     LogicalFunctionScanToPhysical,
-    LogicalGetToSeqScan,
+)
+from eva.optimizer.rules.rules import (
+    LogicalGetToSeqScan as SequentialLogicalGetToSeqScan,
+)
+from eva.optimizer.rules.rules import (
     LogicalGroupByToPhysical,
     LogicalInnerJoinCommutativity,
     LogicalInsertToPhysical,
@@ -59,7 +67,11 @@ from eva.optimizer.rules.rules import (
     LogicalLimitToPhysical,
     LogicalLoadToPhysical,
     LogicalOrderByToPhysical,
-    LogicalProjectToPhysical,
+)
+from eva.optimizer.rules.rules import (
+    LogicalProjectToPhysical as SequentialLogicalProjectToPhysical,
+)
+from eva.optimizer.rules.rules import (
     LogicalRenameToPhysical,
     LogicalShowToPhysical,
     LogicalUnionToPhysical,
@@ -96,7 +108,6 @@ class RulesTest(unittest.TestCase):
         rewrite_promises = [
             Promise.LOGICAL_INNER_JOIN_COMMUTATIVITY,
             Promise.EMBED_FILTER_INTO_GET,
-            Promise.EMBED_PROJECT_INTO_GET,
             Promise.EMBED_SAMPLE_INTO_GET,
             Promise.XFORM_LATERAL_JOIN_TO_LINEAR_FLOW,
             Promise.PUSHDOWN_FILTER_THROUGH_JOIN,
@@ -155,23 +166,24 @@ class RulesTest(unittest.TestCase):
         supported_rewrite_rules = [
             EmbedFilterIntoGet(),
             #    EmbedFilterIntoDerivedGet(),
-            EmbedProjectIntoGet(),
             EmbedSampleIntoGet(),
-            #    EmbedProjectIntoDerivedGet(),
             XformLateralJoinToLinearFlow(),
             PushDownFilterThroughApplyAndMerge(),
             PushDownFilterThroughJoin(),
             CombineSimilarityOrderByAndLimitToFaissIndexScan(),
             ReorderPredicates(),
         ]
+        rewrite_rules = (
+            RulesManager().stage_one_rewrite_rules
+            + RulesManager().stage_two_rewrite_rules
+        )
         self.assertEqual(
-            len(supported_rewrite_rules), len(RulesManager().rewrite_rules)
+            len(supported_rewrite_rules),
+            len(rewrite_rules),
         )
         # check all the rule instance exists
         for rule in supported_rewrite_rules:
-            self.assertTrue(
-                any(isinstance(rule, type(x)) for x in RulesManager().rewrite_rules)
-            )
+            self.assertTrue(any(isinstance(rule, type(x)) for x in rewrite_rules))
 
         supported_logical_rules = [
             LogicalInnerJoinCommutativity(),
@@ -186,6 +198,13 @@ class RulesTest(unittest.TestCase):
                 any(isinstance(rule, type(x)) for x in RulesManager().logical_rules)
             )
 
+        ray_enabled = ConfigurationManager().get_value("experimental", "ray")
+
+        # For the current version, we choose either the distributed or the
+        # sequential rule, because we do not have a logic to choose one over
+        # the other in the current optimizer. Sequential rewrite is currently
+        # embedded inside distributed rule if ray is enabled. The rule itself
+        # has some simple heuristics to choose one over the other.
         supported_implementation_rules = [
             LogicalCreateToPhysical(),
             LogicalRenameToPhysical(),
@@ -195,7 +214,9 @@ class RulesTest(unittest.TestCase):
             LogicalInsertToPhysical(),
             LogicalDeleteToPhysical(),
             LogicalLoadToPhysical(),
-            LogicalGetToSeqScan(),
+            DistributedLogicalGetToSeqScan()
+            if ray_enabled
+            else SequentialLogicalGetToSeqScan(),
             LogicalDerivedGetToPhysical(),
             LogicalUnionToPhysical(),
             LogicalGroupByToPhysical(),
@@ -207,7 +228,9 @@ class RulesTest(unittest.TestCase):
             LogicalJoinToPhysicalHashJoin(),
             LogicalCreateMaterializedViewToPhysical(),
             LogicalFilterToPhysical(),
-            LogicalProjectToPhysical(),
+            DistributedLogicalProjectToPhysical()
+            if ray_enabled
+            else SequentialLogicalProjectToPhysical(),
             LogicalShowToPhysical(),
             LogicalExplainToPhysical(),
             LogicalCreateIndexToFaiss(),
@@ -215,7 +238,6 @@ class RulesTest(unittest.TestCase):
             LogicalFaissIndexScanToPhysical(),
         ]
 
-        ray_enabled = ConfigurationManager().get_value("experimental", "ray")
         if ray_enabled:
             supported_implementation_rules.append(LogicalExchangeToPhysical())
         self.assertEqual(
@@ -230,20 +252,6 @@ class RulesTest(unittest.TestCase):
                     for x in RulesManager().implementation_rules
                 )
             )
-
-    # EmbedProjectIntoGet
-    def test_simple_project_into_get(self):
-        rule = EmbedProjectIntoGet()
-        expr1 = MagicMock()
-        expr2 = MagicMock()
-        expr3 = MagicMock()
-
-        logi_get = LogicalGet(MagicMock(), MagicMock(), MagicMock())
-        logi_project = LogicalProject([expr1, expr2, expr3], [logi_get])
-
-        rewrite_opr = next(rule.apply(logi_project, MagicMock()))
-        self.assertFalse(rewrite_opr is logi_get)
-        self.assertEqual(rewrite_opr.target_list, [expr1, expr2, expr3])
 
     # EmbedFilterIntoGet
     def test_simple_filter_into_get(self):
@@ -274,7 +282,7 @@ class RulesTest(unittest.TestCase):
             self.assertFalse(
                 any(
                     isinstance(PushDownFilterThroughApplyAndMerge, type(x))
-                    for x in rules_manager.rewrite_rules
+                    for x in rules_manager.stage_two_rewrite_rules
                 )
             )
 
