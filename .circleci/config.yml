@@ -52,9 +52,9 @@ workflows:
             v: "3.10"
             mode: "RAY"
         - Pip
-        - Windows
+        - Windows:
             name: "Windows | v3.10"
-        - MacOS
+        - MacOS:
             name: "MacOS | v3.9"
         #- test:
         #    name: "Linux -  v3.11"  # missing Torchvision
