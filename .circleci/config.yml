@@ -139,6 +139,7 @@ jobs:
               python -m venv test_evadb
               source test_evadb/bin/activate
               pip install --upgrade pip
+              pip debug --verbose | grep -E -o 'macosx_\d+_\d+' | sort | uniq
               pip install eva-decord -vvv
               pip install ".[dev]"
               source test_evadb/bin/activate
