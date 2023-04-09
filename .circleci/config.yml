@@ -53,8 +53,7 @@ workflows:
             mode: "RAY"
         - Pip
         - Windows
-        - test-windows
-        - test-macos
+        - MacOS
         #- test:
         #    name: "Linux -  v3.11"  # missing Torchvision
         #    v: "3.11"
@@ -80,7 +79,7 @@ jobs:
           name: Install EVA package from GitHub repo with all dependencies
           command: |
             "python<< parameters.v >>" -m venv test_evadb
-            "python<< parameters.v >>" -m pip install --upgrade pip
+            pip install --upgrade pip
             source test_evadb/bin/activate
             pip install ".[dev]"
 
@@ -101,7 +100,7 @@ jobs:
             source test_evadb/bin/activate
             bash script/test/test.sh -m "<< parameters.mode >>"
 
-  test-windows:
+  Windows:
       executor: win/default
       steps:
         - checkout
@@ -115,16 +114,15 @@ jobs:
             pip install ".[dev]"
             bash script\test\test.sh
 
-  test-macos:
+  MacOS:
       macos:
         xcode: "14.2.0"
       steps:
         - run: |
             brew update
             brew install pyenv git
-            pyenv install --list
-            pyenv install 3.10.8
-            pyenv global 3.10.8
+            pyenv install 3.9.13
+            pyenv global 3.9.13
             eval "$(pyenv init -)"
             python --version
             pip --version
@@ -132,29 +130,10 @@ jobs:
         - run: |
             python -m venv test_evadb
             source test_evadb/bin/activate
+            pip install --upgrade pip
             pip install ".[dev]"
             source test_evadb/bin/activate
             bash script/test/test.sh 
-
-  Windows:
-    executor: win/default
-    parameters:
-      v:
-        type: string
-        default: "3.10"
-    steps:
-      - checkout
-
-      - run:
-          name: Test windows
-          command: |
-            Set-StrictMode -Version Latest
-            $ErrorActionPreference = 'Continue'
-            pip install virtualenv
-            virtualenv test_evadb
-            test_evadb\Scripts\activate
-            pip install ".[dev]"
-            bash script\test\test.sh
 
   Pip:
     resource_class: large
