@@ -8,46 +8,46 @@ workflows:
   main:
     jobs:
         #### UNIT TESTS
-        - test:
+        - Linux:
             name: "Test | v3.7 | Linux"
             v: "3.7"
             mode: "TEST"
-        - test:
+        - Linux:
             name: "Test | v3.8 | Linux"
             v: "3.8"
             mode: "TEST"
-        - test:
+        - Linux:
             name: "Test | v3.9 | Linux"
             v: "3.9"
             mode: "TEST"
-        - test:
+        - Linux:
             name: "Test | v3.10 | Linux"
             v: "3.10"
             mode: "TEST"
         ### NOTEBOOKS
-        - test:
+        - Linux:
             name: "Notebook | v3.7 | Linux"
             v: "3.7"
             mode: "NOTEBOOK"
-        - test:
+        - Linux:
             name: "Notebook | v3.8 | Linux"
             v: "3.8"
             mode: "NOTEBOOK"
-        - test:
+        - Linux:
             name: "Notebook | v3.9 | Linux"
             v: "3.9"
             mode: "NOTEBOOK"
-        - test:
+        - Linux:
             name: "Notebook | v3.10 | Linux"
             v: "3.10"
             mode: "NOTEBOOK"
         ### LINTER
-        - test:
+        - Linux:
             name: "Linter | Linux"
             v: "3.10"
             mode: "LINTER"
         ### RAY
-        - test:
+        - Linux:
             name: "Test | Ray | v3.10 | Linux"
             v: "3.10"
             mode: "RAY"
@@ -56,12 +56,12 @@ workflows:
             name: "Windows | v3.10"
         - MacOS:
             name: "MacOS | v3.8"
-        #- test:
+        #- Linux:
         #    name: "Linux -  v3.11"  # missing Torchvision
         #    v: "3.11"
 
 jobs:
-  test:
+  Linux:
     parameters:
       v:
         type: string
