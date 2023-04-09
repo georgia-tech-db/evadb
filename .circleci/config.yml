@@ -79,6 +79,7 @@ jobs:
       - run:
           name: Install EVA package from GitHub repo with all dependencies
           command: |
+            "python<< parameters.v >>" -m pip install --upgrade pip
             "python<< parameters.v >>" -m venv test_evadb
             source test_evadb/bin/activate
             pip install ".[dev]"
