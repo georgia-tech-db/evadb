@@ -108,8 +108,11 @@ jobs:
             choco install python --version=3.8.10 -y
             python --version
             pip --version
-            pip install -r requirements.txt
-            python -m pytest
+            pip install virtualenv
+            virtualenv test_evadb
+            test_evadb\Scripts\activate
+            pip install ".[dev]"
+            bash script\test\test.sh
 
   test-macos:
       macos:
@@ -123,12 +126,9 @@ jobs:
             brew update
             brew install pyenv
             eval "$(pyenv init -)"
-            pyenv install $(pyenv install --list | grep "^\s*3\.[7-9]\.\d+$" | tail -1)
-            pyenv global $(pyenv versions --bare | grep "^\s*3\.[7-9]\.\d+$" | sort -r | tr '\n' ' ')
             python --version
             pip --version
             pip install -r requirements.txt
-            bash script\test\test.sh
 
   Windows:
     executor: win/default
