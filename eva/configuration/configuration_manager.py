@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
 from pathlib import Path
 from typing import Any
 
@@ -36,20 +37,19 @@ class ConfigurationManager(object):
         return cls._instance
 
     @classmethod
+    def suffix_pytest_xdist_worker_id_to_dir(cls, path: Path):
+        try:
+            worker_id = os.environ["PYTEST_XDIST_WORKER"]
+            path = path / str(worker_id)
+        except KeyError:
+            pass
+        return path
+
+    @classmethod
     def _create_if_not_exists(cls):
-        def suffix_pytest_xdist_worker_id_to_dir(path: Path):
-            try:
-                import os
-
-                worker_id = os.environ["PYTEST_XDIST_WORKER"]
-                path = path / str(worker_id)
-            except KeyError:
-                pass
-            return path
-
         if not cls._yml_path.exists():
             initial_eva_config_dir = Path(EVA_DEFAULT_DIR)
-            updated_eva_config_dir = suffix_pytest_xdist_worker_id_to_dir(
+            updated_eva_config_dir = cls.suffix_pytest_xdist_worker_id_to_dir(
                 initial_eva_config_dir
             )
             cls._yml_path = updated_eva_config_dir / EVA_CONFIG_FILE

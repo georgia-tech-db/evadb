@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
 
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -51,8 +52,6 @@ class SQLConfig:
         # parallelize using xdist
         def prefix_worker_id(uri: str):
             try:
-                import os
-
                 worker_id = os.environ["PYTEST_XDIST_WORKER"]
                 base = "eva_catalog.db"
                 uri = uri.replace(base, "test_" + str(worker_id) + "_" + base)
@@ -60,9 +59,9 @@ class SQLConfig:
                 pass
             return uri
 
-        worker_uri = prefix_worker_id(str(uri))
+        self.worker_uri = prefix_worker_id(str(uri))
         # set echo=True to log SQL
-        self.engine = create_engine(worker_uri, isolation_level="SERIALIZABLE")
+        self.engine = create_engine(self.worker_uri, isolation_level="SERIALIZABLE")
 
         if self.engine.url.get_backend_name() == "sqlite":
             # enforce foreign key constraint and wal logging for sqlite
