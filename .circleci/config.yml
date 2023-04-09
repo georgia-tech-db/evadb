@@ -124,6 +124,7 @@ jobs:
             brew install pyenv git
             pyenv install --list
             pyenv install 3.8.10
+            pyenv global 3.8.10
             eval "$(pyenv init -)"
             python --version
             pip --version
