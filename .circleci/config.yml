@@ -104,7 +104,9 @@ jobs:
       executor: win/default
       steps:
         - checkout
-        - run: |
+        - run: 
+          name: Install EVA package from GitHub repo and run tests
+          command: |
             choco install python --version=3.10.8 -y
             python --version
             pip --version
@@ -118,7 +120,9 @@ jobs:
       macos:
         xcode: "14.2.0"
       steps:
-        - run: |
+        - run:           
+          name: Setup Python
+          command: |
             brew update
             brew install pyenv git
             pyenv install 3.9.13
@@ -127,7 +131,9 @@ jobs:
             python --version
             pip --version
         - checkout
-        - run: |
+        - run:           
+          name: Install EVA package from GitHub repo and run tests
+          command: |
             python -m venv test_evadb
             source test_evadb/bin/activate
             pip install --upgrade pip
