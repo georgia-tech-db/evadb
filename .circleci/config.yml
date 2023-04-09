@@ -105,41 +105,41 @@ jobs:
       steps:
         - checkout
         - run: 
-          name: Install EVA package from GitHub repo and run tests
-          command: |
-            choco install python --version=3.10.8 -y
-            python --version
-            pip --version
-            pip install virtualenv
-            virtualenv test_evadb
-            test_evadb\Scripts\activate
-            pip install ".[dev]"
-            bash script\test\test.sh
+            name: Install EVA package from GitHub repo and run tests
+            command: |
+              choco install python --version=3.10.8 -y
+              python --version
+              pip --version
+              pip install virtualenv
+              virtualenv test_evadb
+              test_evadb\Scripts\activate
+              pip install ".[dev]"
+              bash script\test\test.sh
 
   MacOS:
       macos:
         xcode: "14.2.0"
       steps:
         - run:           
-          name: Setup Python
-          command: |
-            brew update
-            brew install pyenv git
-            pyenv install 3.9.13
-            pyenv global 3.9.13
-            eval "$(pyenv init -)"
-            python --version
-            pip --version
+            name: Setup Python
+            command: |
+              brew update
+              brew install pyenv git
+              pyenv install 3.9.13
+              pyenv global 3.9.13
+              eval "$(pyenv init -)"
+              python --version
+              pip --version
         - checkout
         - run:           
-          name: Install EVA package from GitHub repo and run tests
-          command: |
-            python -m venv test_evadb
-            source test_evadb/bin/activate
-            pip install --upgrade pip
-            pip install ".[dev]"
-            source test_evadb/bin/activate
-            bash script/test/test.sh 
+            name: Install EVA package from GitHub repo and run tests
+            command: |
+              python -m venv test_evadb
+              source test_evadb/bin/activate
+              pip install --upgrade pip
+              pip install ".[dev]"
+              source test_evadb/bin/activate
+              bash script/test/test.sh 
 
   Pip:
     resource_class: large
