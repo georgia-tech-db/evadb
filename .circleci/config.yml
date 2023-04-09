@@ -104,7 +104,7 @@ jobs:
       steps:
         - checkout
         - run: |
-            choco install python --version=3.8.12 --params "/InstallDir:C:\Python38" -y
+            choco install python --version=3.8.10 -y
             python --version
             pip --version
             pip install -r requirements.txt
@@ -127,7 +127,7 @@ jobs:
             python --version
             pip --version
             pip install -r requirements.txt
-            pytest
+            bash script\test\test.sh
 
   Windows:
     executor: win/default
