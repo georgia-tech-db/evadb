@@ -152,19 +152,19 @@ class DecordLoaderTest(unittest.TestCase):
             self.assertEqual(batches, expected)
 
     def test_should_throw_error_for_audioless_video(self):
-        try:
+        with self.assertRaises(AssertionError) as error_context:
             video_loader = DecordReader(
                 file_url=self.video_file_url,
                 read_audio=True,
                 read_video=True,
             )
             list(video_loader.read())
-            self.fail("Didn't raise AssertionError")
-        except AssertionError as e:
-            self.assertIn("Can't find audio stream", e.args[0].args[0])
+        self.assertIn(
+            "Can't find audio stream", error_context.exception.args[0].args[0]
+        )
 
     def test_should_throw_error_when_sampling_iframes_for_audio(self):
-        try:
+        with self.assertRaises(AssertionError) as error_context:
             video_loader = DecordReader(
                 file_url=self.video_with_audio_file_url,
                 sampling_type=IFRAMES,
@@ -172,12 +172,12 @@ class DecordLoaderTest(unittest.TestCase):
                 read_video=False,
             )
             list(video_loader.read())
-            self.fail("Didn't raise AssertionError")
-        except AssertionError as e:
-            self.assertEquals("Cannot use IFRAMES with audio streams", e.args[0])
+        self.assertEquals(
+            "Cannot use IFRAMES with audio streams", error_context.exception.args[0]
+        )
 
     def test_should_throw_error_when_sampling_audio_for_video(self):
-        try:
+        with self.assertRaises(AssertionError) as error_context:
             video_loader = DecordReader(
                 file_url=self.video_file_url,
                 sampling_type=AUDIORATE,
@@ -185,9 +185,9 @@ class DecordLoaderTest(unittest.TestCase):
                 read_video=True,
             )
             list(video_loader.read())
-            self.fail("Didn't raise AssertionError")
-        except AssertionError as e:
-            self.assertEquals("Cannot use AUDIORATE with video streams", e.args[0])
+        self.assertEquals(
+            "Cannot use AUDIORATE with video streams", error_context.exception.args[0]
+        )
 
     def test_should_return_audio_frames(self):
         video_loader = DecordReader(
