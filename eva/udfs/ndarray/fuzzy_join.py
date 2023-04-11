@@ -31,7 +31,7 @@ class FuzzDistance(AbstractUDF):
         Find the distance between two dataframes using <> distance metric.
 
         Returns:
-            ret (pd.DataFrame): DF containing the distance. 
+            ret (pd.DataFrame): DF containing the distance.
         """
         ret = pd.DataFrame()
         ret["distance"] = df.apply(lambda row: fuzz.ratio(row[0], row[1]), axis=1)

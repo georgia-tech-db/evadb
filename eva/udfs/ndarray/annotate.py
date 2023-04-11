@@ -32,21 +32,20 @@ class Annotate(AbstractUDF):
 
     def forward(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Crop the frame given the bbox - Crop(frame, bbox)
-        If one of the side of the crop box is 0, it automatically sets it to 1 pixel
+        Modify the frame to annotate the bbox on it.
 
-        Returns:
-            ret (pd.DataFrame): The cropped frame.
+         Returns:
+             ret (pd.DataFrame): The modified frame.
         """
 
         def annotate(row: pd.Series) -> np.ndarray:
             row = row.to_list()
             frame = row[0]
+
             labels = row[1]
             bboxes = row[2]
 
-            for bbox in bboxes: 
-
+            for bbox, label in bboxes, labels:
                 x1, y1, x2, y2 = np.asarray(bbox, dtype="int")
 
                 # TODO: make sure the bbox is valid. Do we need to though?
@@ -55,10 +54,18 @@ class Annotate(AbstractUDF):
 
                 frame = cv2.rectangle(frame, (x1, y1), (x2, y2), color, thickness)
 
-                # cv2.putText(frame, label, (x1, y1-10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, color, thickness)
+                cv2.putText(
+                    frame,
+                    label,
+                    (x1, y1 - 10),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.9,
+                    color,
+                    thickness,
+                )
 
             return frame
-        
+
         ret = pd.DataFrame()
         ret["annotated_frame_array"] = df.apply(annotate, axis=1)
         return ret
