@@ -115,6 +115,10 @@ class PlanExecutor:
         elif plan_opr_type == PlanOprType.NESTED_LOOP_JOIN:
             executor_node = NestedLoopJoinExecutor(node=plan)
         elif plan_opr_type == PlanOprType.LATERAL_JOIN:
+            logger.warn(
+                "LateralJoin Executor should not be part of the execution plan."
+                "Please raise an issue with the current query. Thanks!"
+            )
             executor_node = LateralJoinExecutor(node=plan)
         elif plan_opr_type == PlanOprType.HASH_JOIN:
             executor_node = HashJoinExecutor(node=plan)
