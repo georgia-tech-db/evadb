@@ -92,7 +92,7 @@ then
     fi
 # Windows -- no need for coverage report
 else
-    PYTHONPATH=./ pytest -p no:cov test/ -m "not benchmark"
+    PYTHONPATH=./ python -m pytest -p no:cov test/ -m "not benchmark"
     test_code=$?
     if [ "$test_code" != "0" ];
     then

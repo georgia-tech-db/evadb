@@ -179,6 +179,8 @@ test_evadb/
 tutorials/*.py
 *.pth
 *.pt
+tutorials/bddtest.zip
+bddtest/
 
 # benchmark
 .benchmarks

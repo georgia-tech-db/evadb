@@ -15,9 +15,11 @@
 import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
+from eva.configuration.constants import EVA_DEFAULT_DIR
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.create_udf_plan import CreateUDFPlan
+from eva.third_party.huggingface.create import gen_hf_io_catalog_entries
 from eva.udfs.decorators.utils import load_io_from_udf_decorators
 from eva.utils.errors import UDFIODefinitionError
 from eva.utils.generic_utils import load_udf_class_from_file
@@ -28,24 +30,27 @@ class CreateUDFExecutor(AbstractExecutor):
     def __init__(self, node: CreateUDFPlan):
         super().__init__(node)
 
-    def exec(self, *args, **kwargs):
-        """Create udf executor
+    def handle_huggingface_udf(self):
+        """Handle HuggingFace UDFs
 
-        Calls the catalog to insert a udf catalog entry.
+        HuggingFace UDFs are special UDFs that are not loaded from a file.
+        So we do not need to call the setup method on them like we do for other UDFs.
         """
-        catalog_manager = CatalogManager()
-        # check catalog if it already has this udf entry
-        if catalog_manager.get_udf_catalog_entry_by_name(self.node.name):
-            if self.node.if_not_exists:
-                msg = f"UDF {self.node.name} already exists, nothing added."
-                logger.warn(msg)
-                yield Batch(pd.DataFrame([msg]))
-                return
-            else:
-                msg = f"UDF {self.node.name} already exists."
-                logger.error(msg)
-                raise RuntimeError(msg)
+        impl_path = f"{EVA_DEFAULT_DIR}/udfs/abstract/hf_abstract_udf.py"
+        io_list = gen_hf_io_catalog_entries(self.node.name, self.node.metadata)
+        return (
+            self.node.name,
+            impl_path,
+            self.node.udf_type,
+            io_list,
+            self.node.metadata,
+        )
 
+    def handle_generic_udf(self):
+        """Handle generic UDFs
+
+        Generic UDFs are loaded from a file. We check for inputs passed by the user during CREATE or try to load io from decorators.
+        """
         # load the udf class from the file
         impl_path = self.node.impl_path.absolute().as_posix()
         try:
@@ -75,9 +80,40 @@ class CreateUDFExecutor(AbstractExecutor):
             err_msg = f"Error creating UDF, input/output definition incorrect: {str(e)}"
             logger.error(err_msg)
             raise RuntimeError(err_msg)
+        return (
+            self.node.name,
+            impl_path,
+            self.node.udf_type,
+            io_list,
+            self.node.metadata,
+        )
+
+    def exec(self, *args, **kwargs):
+        """Create udf executor
+
+        Calls the catalog to insert a udf catalog entry.
+        """
+        catalog_manager = CatalogManager()
+        # check catalog if it already has this udf entry
+        if catalog_manager.get_udf_catalog_entry_by_name(self.node.name):
+            if self.node.if_not_exists:
+                msg = f"UDF {self.node.name} already exists, nothing added."
+                logger.warn(msg)
+                yield Batch(pd.DataFrame([msg]))
+                return
+            else:
+                msg = f"UDF {self.node.name} already exists."
+                logger.error(msg)
+                raise RuntimeError(msg)
+
+        # if it's a type of HuggingFaceModel, override the impl_path
+        if self.node.udf_type == "HuggingFace":
+            name, impl_path, udf_type, io_list, metadata = self.handle_huggingface_udf()
+        else:
+            name, impl_path, udf_type, io_list, metadata = self.handle_generic_udf()
 
         catalog_manager.insert_udf_catalog_entry(
-            self.node.name, impl_path, self.node.udf_type, io_list, self.node.metadata
+            name, impl_path, udf_type, io_list, metadata
         )
         yield Batch(
             pd.DataFrame([f"UDF {self.node.name} successfully added to the database."])
