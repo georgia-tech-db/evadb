@@ -42,13 +42,6 @@ class OverwriteExecutor(AbstractExecutor):
         if table_obj.table_type == TableType.VIDEO_DATA:
             batches = storage_engine.read(table_obj, batch_mem_size)
 
-            # storage_engine.drop(table_obj)
-            # self.catalog.delete_table_catalog_entry(table_obj)
-            #new_table_obj = (
-                #self.catalog.create_and_insert_multimedia_table_catalog_entry(
-                    #table_name, FileFormatType.VIDEO
-                #)
-            #)
             for batch in batches:
                 video_paths = list(set(batch.frames['name']))
 
