@@ -48,9 +48,7 @@ from eva.optimizer.rules.rules import (
     LogicalFilterToPhysical,
     LogicalFunctionScanToPhysical,
 )
-from eva.optimizer.rules.rules import (
-    LogicalGetToSeqScan as DistributedLogicalGetToSeqScan,
-)
+from eva.optimizer.rules.rules import DistributedLogicalGetToSeqScan
 from eva.optimizer.rules.rules import (
     LogicalGetToSeqScan as SequentialLogicalGetToSeqScan,
 )
@@ -65,9 +63,7 @@ from eva.optimizer.rules.rules import (
     LogicalLoadToPhysical,
     LogicalOrderByToPhysical,
 )
-from eva.optimizer.rules.rules import (
-    LogicalProjectToPhysical as DistributedLogicalProjectToPhysical,
-)
+from eva.optimizer.rules.rules import DistributedLogicalProjectToPhysical
 from eva.optimizer.rules.rules import (
     LogicalProjectToPhysical as SequentialLogicalProjectToPhysical,
 )
@@ -246,6 +242,7 @@ class RulesTest(unittest.TestCase):
         )
 
         for rule in supported_implementation_rules:
+            print(rule)
             self.assertTrue(
                 any(
                     isinstance(rule, type(x))
