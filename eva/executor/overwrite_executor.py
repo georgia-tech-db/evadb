@@ -16,11 +16,12 @@ import cv2
 import numpy as np
 import os
 import pandas as pd
+from collections import defaultdict
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import TableType
 from eva.executor.abstract_executor import AbstractExecutor
+from eva.expression.function_expression import FunctionExpression
 from eva.models.storage.batch import Batch
-from eva.parser.types import FileFormatType
 from eva.plan_nodes.overwrite_plan import OverwritePlan
 from eva.storage.storage_engine import StorageEngine
 
@@ -29,75 +30,92 @@ class OverwriteExecutor(AbstractExecutor):
     def __init__(self, node: OverwritePlan):
         super().__init__(node)
         self.catalog = CatalogManager()
+        self.table_ref = self.node.table_ref
+        self.operation = self.node.operation
+
+    def make_new_path(self, video_path: str):
+        dirs = video_path.split('/')
+        dirs.append(dirs[-1])
+        dirs[-2] = 'modified'
+        modified_dir = '/'.join(dirs[:-1])
+        if not os.path.exists(modified_dir):
+            os.mkdir(modified_dir)
+        new_video_path = '/'.join(dirs)
+        return new_video_path
 
     def exec(self, *args, **kwargs):
-        table_info = self.node.table_info
-        database_name = table_info.database_name
-        table_name = table_info.table_name
-        table_obj = self.catalog.get_table_catalog_entry(table_name, database_name)
+        assert(type(self.operation) == FunctionExpression)
+
+        table_obj = self.table_ref.table.table_obj
         storage_engine = StorageEngine.factory(table_obj)
         batch_mem_size = 30000000
-        operation = self.node.operation
 
         if table_obj.table_type == TableType.VIDEO_DATA:
             batches = storage_engine.read(table_obj, batch_mem_size)
+            modified_paths = dict()
+            all_video_paths = set()
+            all_videos = dict()
 
             for batch in batches:
+                original_fc = batch.frames.shape[0]
+                video_fc = defaultdict(lambda: 0)
+                all_video_paths = all_video_paths.union(set(batch.frames['name']))
                 video_paths = list(set(batch.frames['name']))
+                for i in range(original_fc):
+                    video_fc[batch.frames['name'][i]] += 1
 
-                new_video_paths = []
+                batch.modify_column_alias(self.table_ref.alias)
+                res = self.operation.evaluate(batch)
+                modified_frames = res.frames.iloc[:, 0].to_numpy()
+                fc = modified_frames.shape[0]
+                fh = modified_frames[0].shape[0]
+                fw = modified_frames[0].shape[1]
+                batch.drop_column_alias()
+
+                assert(original_fc == fc)
+
+                videos = dict()
+                next_index = defaultdict(lambda: 0)
+
                 for video_path in video_paths:
-                    cap = cv2.VideoCapture(video_path)
-                    fc = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-                    fw = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-                    fh = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-                    video = np.empty((fc, fh, fw, 3), np.dtype('uint8'))
+                    videos[video_path] = np.empty((video_fc[video_path], fh, fw, 3), np.dtype('uint8'))
+                    modified_paths[video_path] = self.make_new_path(video_path)
 
-                    has_next = True
-                    fn = 0
-                    while has_next:
-                        has_next, img = cap.read()
-                        if has_next:
-                            video[fn] = img
-                        fn += 1
+                for i in range(fc):
+                    video_path = batch.frames['name'][i]
+                    index = next_index[video_path]
+                    videos[video_path][index] = modified_frames[i]
+                    next_index[video_path] += 1
 
-                    modified = None
+                for original_video_path in video_paths:
+                    if original_video_path not in all_videos.keys():
+                        all_videos[original_video_path] = videos[original_video_path]
+                    else:
+                        all_videos[original_video_path] = np.vstack((all_videos[original_video_path], videos[original_video_path]))
 
-                    # a MUX for operations
-                    if operation == "flip-horizontal":
-                        modified = np.flip(video, axis=2)
-                    elif operation == "flip-vertical":
-                        modified = np.flip(video, axis=1)
+            storage_engine.clear(table_obj, list(all_video_paths))
+            all_modified_video_paths = []
+            for original_video_path in list(all_video_paths):
+                fc, fh, fw, _ = all_videos[original_video_path].shape
+                out = cv2.VideoWriter(modified_paths[original_video_path], cv2.VideoWriter_fourcc(*'mp4v'), fc, (fw, fh))
+                all_modified_video_paths.append(modified_paths[original_video_path])
+                for fn in range(fc):
+                    frame = all_videos[original_video_path][fn]
+                    out.write(frame)
+                out.release()
 
-                    if modified is not None:
-                        dirs = video_path.split('/')
-                        dirs.append(dirs[-1])
-                        dirs[-2] = 'modified'
-                        modified_dir = '/'.join(dirs[:-1])
-                        if not os.path.exists(modified_dir):
-                            os.mkdir(modified_dir)
-                        new_video_path = '/'.join(dirs)
-                        new_video_paths.append(new_video_path)
-
-                        out = cv2.VideoWriter(new_video_path, cv2.VideoWriter_fourcc(*'mp4v'), fc, (fw, fh))
-                        for fn in range(fc):
-                            out.write(modified[fn])
-                        out.release()
-                    cap.release()
-
-                storage_engine.clear(table_obj, video_paths)
-                storage_engine.write(table_obj, Batch(pd.DataFrame({"file_path": new_video_paths})))
+            storage_engine.write(table_obj, Batch(pd.DataFrame({"file_path": all_modified_video_paths})))
 
             yield Batch(
                 pd.DataFrame(
-                    {"Table successfully overwritten by: {}".format(operation)},
+                    {"Table successfully overwritten by: {}".format(self.operation.name)},
                     index=[0],
                 )
             )
         else:
             yield Batch(
                 pd.DataFrame(
-                    {"Overwrite only supports video data for : {}".format(operation)},
+                    {"Overwrite only supports video data for : {}".format(self.operation.name)},
                     index=[0],
                 )
             )

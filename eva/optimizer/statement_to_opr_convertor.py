@@ -328,7 +328,7 @@ class StatementToPlanConvertor:
 
     def visit_overwrite(self, statement: OverwriteStatement):
         overwrite_opr = LogicalOverwrite(
-            statement.table_info,
+            statement.table_ref,
             statement.operation,
         )
         self._plan = overwrite_opr

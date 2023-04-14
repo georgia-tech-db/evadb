@@ -33,6 +33,7 @@ from eva.parser.create_index_statement import CreateIndexStatement
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
 from eva.parser.delete_statement import DeleteTableStatement
 from eva.parser.explain_statement import ExplainStatement
+from eva.parser.overwrite_statement import OverwriteStatement
 from eva.parser.rename_statement import RenameTableStatement
 from eva.parser.select_statement import SelectStatement
 from eva.parser.statement import AbstractStatement
@@ -174,6 +175,12 @@ class StatementBinder:
         assert (
             node.old_table_ref.table.table_obj.table_type != TableType.STRUCTURED_DATA
         ), "Rename not yet supported on structured data"
+
+    @bind.register(OverwriteStatement)
+    def _bind_delete_statement(self, node: OverwriteStatement):
+        self.bind(node.table_ref)
+        if node.operation:
+            self.bind(node.operation)
 
     @bind.register(TableRef)
     def _bind_tableref(self, node: TableRef):

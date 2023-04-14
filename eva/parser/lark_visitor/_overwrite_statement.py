@@ -15,19 +15,21 @@
 from lark.tree import Tree
 
 from eva.parser.overwrite_statement import OverwriteStatement
+from eva.parser.table_ref import TableRef
 
 
 class Overwrite:
     def overwrite_statement(self, tree):
-        table_info = None
+        table_ref = None
         operation = None
 
         for child in tree.children:
             if isinstance(child, Tree):
                 if child.data == "table_name":
-                    table_info = self.visit(child)
+                    table_name = self.visit(child)
+                    table_ref = TableRef(table_name)
                 elif child.data == "operation":
-                    operation = self.visit(child).value
+                    operation = self.visit(child)
 
-        stmt = OverwriteStatement(table_info, operation)
+        stmt = OverwriteStatement(table_ref, operation)
         return stmt
