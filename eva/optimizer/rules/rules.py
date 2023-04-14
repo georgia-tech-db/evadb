@@ -21,7 +21,7 @@ from eva.catalog.catalog_type import TableType
 from eva.catalog.catalog_utils import is_video_table
 from eva.constants import CACHEABLE_UDFS
 from eva.executor.execution_context import Context
-from eva.experimental.ray.planner.exchange_plan import ExchangePlan
+from eva.plan_nodes.exchange_plan import ExchangePlan
 from eva.expression.expression_utils import (
     conjunction_list_to_expression_tree,
     to_conjunction_list,

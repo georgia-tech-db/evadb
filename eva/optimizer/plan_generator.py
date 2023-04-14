@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.experimental.ray.planner.exchange_plan import ExchangePlan
+from eva.plan_nodes.exchange_plan import ExchangePlan
 from eva.optimizer.cost_model import CostModel
 from eva.optimizer.operators import Operator
 from eva.optimizer.optimizer_context import OptimizerContext
