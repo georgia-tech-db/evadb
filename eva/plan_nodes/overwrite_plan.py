@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import List
 
 from eva.expression.abstract_expression import AbstractExpression
-from eva.parser.table_ref import TableInfo
+from eva.parser.table_ref import TableInfo, TableRef
 from eva.plan_nodes.abstract_plan import AbstractPlan
 from eva.plan_nodes.types import PlanOprType
 
@@ -27,22 +27,22 @@ class OverwritePlan(AbstractPlan):
     operations.
 
     Arguments:
-        table_info(TableRef): table to overwrite data
-        operation(str): overwrite the data with the result of operation
+        table_ref(TableRef): table to overwrite data
+        operation(AbstractExpression): overwrite the data with the result of operation
     """
 
     def __init__(
         self,
-        table_info: TableInfo,
-        operation: str,
+        table_ref: TableRef,
+        operation: AbstractExpression
     ):
         super().__init__(PlanOprType.OVERWRITE)
-        self._table_info = table_info
+        self._table_ref = table_ref
         self._operation = operation
 
     @property
-    def table_info(self):
-        return self._table_info
+    def table_ref(self):
+        return self._table_ref
 
     @property
     def operation(self):
@@ -50,15 +50,15 @@ class OverwritePlan(AbstractPlan):
     
     def __str__(self):
         return "OverwritePlan(table_id={}, operation={})".format(
-            self.table_info,
-            self.operation,
+            self._table_ref,
+            self._operation,
         )
 
     def __hash__(self) -> int:
         return hash(
             (
                 super().__hash__(),
-                self.table_info,
-                self.operation,
+                self._table_ref,
+                self._operation,
             )
         )

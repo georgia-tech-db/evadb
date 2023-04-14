@@ -83,8 +83,8 @@ def main():
 
     # Start server
     if args.start:
-        # mode = ConfigurationManager().get_value("core", "mode")
-        # init_builtin_udfs(mode=mode)
+        mode = ConfigurationManager().get_value("core", "mode")
+        init_builtin_udfs(mode=mode)
 
         asyncio.run(start_eva_server())
 

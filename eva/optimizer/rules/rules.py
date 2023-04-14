@@ -1141,7 +1141,7 @@ class LogicalOverwriteToPhysical(Rule):
 
     def apply(self, before: LogicalOverwrite, context: OptimizerContext):
         after = OverwritePlan(
-            before.table_info,
+            before.table_ref,
             before.operation,
         )
         yield after

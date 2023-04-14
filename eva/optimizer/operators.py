@@ -1273,23 +1273,23 @@ class LogicalOverwrite(Operator):
     """Overwrite node for overwrite data operation
 
     Arguments:
-        table_info(TableRef): table to overwrite data 
-        operation(str): overwrite the data with the result of operation
+        table_ref(TableRef): table to overwrite data
+        operation(AbstractExpression): overwrite the data with the result of operation
     """
 
     def __init__(
         self,
-        table_info: TableInfo,
-        operation: str,
+        table_ref: TableRef,
+        operation: AbstractExpression,
         children: List = None,
     ):
         super().__init__(OperatorType.LOGICALOVERWRITE, children)
-        self._table_info = table_info
+        self._table_ref = table_ref
         self._operation = operation
 
     @property
-    def table_info(self):
-        return self._table_info
+    def table_ref(self):
+        return self._table_ref
 
     @property
     def operation(self):
@@ -1297,7 +1297,7 @@ class LogicalOverwrite(Operator):
 
     def __str__(self):
         return "LogicalOverwrite(table: {}, operation: {})".format(
-            self.table_info, self.operation
+            self._table_ref, self._operation
         )
 
     def __eq__(self, other):
@@ -1306,15 +1306,15 @@ class LogicalOverwrite(Operator):
             return False
         return (
             is_subtree_equal
-            and self.table_info == other.table_info
-            and self.operation == other.operation
+            and self._table_ref == other._table_ref
+            and self._operation == other._operation
         )
 
     def __hash__(self) -> int:
         return hash(
             (
                 super().__hash__(),
-                self.table_info,
-                self.operation,
+                self._table_ref,
+                self._operation,
             )
         )
