@@ -44,6 +44,7 @@ from eva.plan_nodes.nested_loop_join_plan import NestedLoopJoinPlan
 from eva.plan_nodes.predicate_plan import PredicatePlan
 from eva.plan_nodes.project_plan import ProjectPlan
 from eva.plan_nodes.show_info_plan import ShowInfoPlan
+from eva.plan_nodes.tune_plan import TunePlan
 
 if TYPE_CHECKING:
     from eva.optimizer.optimizer_context import OptimizerContext
@@ -74,6 +75,7 @@ from eva.optimizer.operators import (
     LogicalRename,
     LogicalSample,
     LogicalShow,
+    LogicalTune,
     LogicalUnion,
     Operator,
     OperatorType,
@@ -1056,17 +1058,41 @@ class LogicalShowToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICAL_SHOW)
         super().__init__(RuleType.LOGICAL_SHOW_TO_PHYSICAL, pattern)
+        # print("pattern: ", pattern)
 
     def promise(self):
+        # print("promise: ", Promise.LOGICAL_SHOW_TO_PHYSICAL)
         return Promise.LOGICAL_SHOW_TO_PHYSICAL
 
     def check(self, grp_id: int, context: OptimizerContext):
         return True
 
     def apply(self, before: LogicalShow, context: OptimizerContext):
+        # print("before: ", before)
         after = ShowInfoPlan(before.show_type)
         yield after
 
+class LogicalTuneToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALTUNE)
+        super().__init__(RuleType.LOGICAL_TUNE_TO_PHYSICAL, pattern)
+        # print("pattern: ", pattern)
+
+    def promise(self):
+        # print("promise: ", Promise.LOGICAL_TUNE_TO_PHYSICAL)
+        return Promise.LOGICAL_TUNE_TO_PHYSICAL
+
+    def check(self, grp_id: int, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalTune, context: OptimizerContext):
+        # print("before: ", before)
+        after = TunePlan(
+            before.file_name,
+            before.batch_size,
+            before.epochs_size,
+        )
+        yield after
 
 class LogicalExplainToPhysical(Rule):
     def __init__(self):

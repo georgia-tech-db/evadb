@@ -50,6 +50,7 @@ from eva.models.storage.batch import Batch
 from eva.plan_nodes.abstract_plan import AbstractPlan
 from eva.plan_nodes.types import PlanOprType
 from eva.utils.logging_manager import logger
+from eva.executor.tune_executor import TuneExecutor
 
 
 class PlanExecutor:
@@ -145,6 +146,8 @@ class PlanExecutor:
             executor_node = FaissIndexScanExecutor(node=plan)
         elif plan_opr_type == PlanOprType.DELETE:
             executor_node = DeleteExecutor(node=plan)
+        elif plan_opr_type == PlanOprType.TUNE:
+            executor_node = TuneExecutor(node=plan)
 
         # EXPLAIN does not need to build execution tree for its children
         if plan_opr_type != PlanOprType.EXPLAIN:

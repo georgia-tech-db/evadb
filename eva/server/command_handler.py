@@ -26,6 +26,8 @@ from eva.parser.parser import Parser
 from eva.utils.logging_manager import logger
 from eva.utils.stats import Timer
 
+import traceback
+
 
 def execute_query(query, report_time: bool = False, **kwargs) -> Iterator[Batch]:
     """
@@ -71,9 +73,12 @@ def handle_request(client_writer, request_message):
         try:
             output_batch = execute_query_fetch_all(request_message)
         except Exception as e:
-            error_msg = str(e)
+            error_msg = traceback.format_exc()
             logger.warn(error_msg)
             error = True
+            # error_msg = str(e)
+            # logger.warn(error_msg)
+            # error = True
 
     if not error:
         response = Response(

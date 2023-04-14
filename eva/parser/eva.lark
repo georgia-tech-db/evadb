@@ -8,7 +8,7 @@ ddl_statement: create_database | create_table | create_index | create_udf | crea
     | drop_database | drop_table | drop_udf | drop_index | rename_table
     
 dml_statement: select_statement | insert_statement | update_statement
-    | delete_statement | load_statement
+    | delete_statement | load_statement | tune_statement
     
 utility_statement: describe_statement | show_statement | help_statement | explain_statement
 
@@ -92,8 +92,16 @@ file_format: CSV | VIDEO | IMAGE
 file_options: FORMAT file_format
     
 file_name: string_literal
+
+// Fine tuning statement
+
+tune_statement: TUNE file_name BATCH batch_size EPOCHS epochs_size
+
+batch_size: decimal_literal
+
+epochs_size: decimal_literal
         
-// details
+// detailsTUNE
 
 insert_statement_value: select_statement
     | (VALUES | VALUE) "(" expressions_with_defaults ")" ("," "(" expressions_with_defaults ")")*
@@ -369,6 +377,7 @@ USING:                               "USING"
 VALUES:                              "VALUES"
 WHERE:                               "WHERE"
 XOR:                                 "XOR"
+TUNE:                                "TUNE"
 
 // File Formats
 WITH:                 "WITH"
@@ -384,6 +393,8 @@ HNSW:                                "HNSW"
 
 OBJECT_DETECTION:                    "OBJECT_DETECTION"
 ACTION_CLASSICATION:                 "ACTION_CLASSICATION"
+BATCH:                               "BATCH"
+EPOCHS:                              "EPOCHS"
 
 // DATA TYPE Keywords
 

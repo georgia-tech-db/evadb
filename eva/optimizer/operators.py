@@ -58,6 +58,7 @@ class OperatorType(IntEnum):
     LOGICALFUNCTIONSCAN = auto()
     LOGICAL_CREATE_MATERIALIZED_VIEW = auto()
     LOGICAL_SHOW = auto()
+    LOGICALTUNE = auto()
     LOGICALDROPUDF = auto()
     LOGICALEXPLAIN = auto()
     LOGICALCREATEINDEX = auto()
@@ -839,12 +840,12 @@ class LogicalLoadData(Operator):
     def file_options(self):
         return self._file_options
 
-    def __str__(self):
-        return "LogicalLoadData(table: {}, path: {}, \
-                column_list: {}, \
-                file_options: {})".format(
-            self.table_info, self.path, self.column_list, self.file_options
-        )
+    # def __str__(self):
+    #     return "LogicalLoadData(table: {}, path: {}, \
+    #             column_list: {}, \
+    #             file_options: {})".format(
+    #         self.table_info, self.path, self.column_list, self.file_options
+    #     )
 
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
@@ -1054,6 +1055,7 @@ class LogicalShow(Operator):
     def __init__(self, show_type: ShowType, children: List = None):
         super().__init__(OperatorType.LOGICAL_SHOW, children)
         self._show_type = show_type
+        # print("init: ", OperatorType.LOGICAL_SHOW)
 
     @property
     def show_type(self):
@@ -1264,5 +1266,58 @@ class LogicalFaissIndexScan(Operator):
                 self.index_name,
                 self.limit_count,
                 self.search_query_expr,
+            )
+        )
+
+class LogicalTune(Operator):
+    """Logical node for Tune operation
+
+    Arguments:
+        batch: batch size
+        epochs: number of epochs
+    """
+
+    def __init__(
+        self,
+        file_name: str,
+        batch_size: ConstantValueExpression,
+        epochs_size: ConstantValueExpression,
+        children: List = None,
+    ):
+        super().__init__(OperatorType.LOGICALTUNE, children)
+        self._file_name = file_name
+        self._batch_size = batch_size
+        self._epochs_size = epochs_size
+
+    @property
+    def file_name(self):
+        return self._file_name
+    
+    @property
+    def batch_size(self):
+        return self._batch_size
+
+    @property
+    def epochs_size(self):
+        return self._epochs_size
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalTune):
+            return False
+        return (
+            is_subtree_equal
+            and self.file_name == other.file_name
+            and self.batch_size == other.batch_size
+            and self.epochs_size == other.epochs_size
+        )
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                super().__hash__(),
+                self.file_name,
+                self.batch_size,
+                self.epochs_size,
             )
         )

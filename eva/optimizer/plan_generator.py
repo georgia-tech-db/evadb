@@ -46,7 +46,10 @@ class PlanGenerator:
     ):
         physical_plan = None
         root_grp = optimizer_context.memo.groups[root_grp_id]
+        # print("root_group: ", root_grp)
+        # print("optimizer context: ", optimizer_context)
         best_grp_expr = root_grp.get_best_expr(PropertyType.DEFAULT)
+        # print("best_grp: ", best_grp_expr)
         physical_plan = best_grp_expr.opr
 
         for child_grp_id in best_grp_expr.children:
@@ -58,6 +61,7 @@ class PlanGenerator:
         return physical_plan
 
     def optimize(self, logical_plan: Operator):
+        # print("logical plan: ", logical_plan)
         optimizer_context = OptimizerContext(self.cost_model, self.rules_manager)
         memo = optimizer_context.memo
         grp_expr = optimizer_context.add_opr_to_group(opr=logical_plan)
@@ -133,7 +137,9 @@ class PlanGenerator:
 
     def build(self, logical_plan: Operator):
         # apply optimizations
+        # print("logical plan: ", logical_plan)
         plan = self.optimize(logical_plan)
+        # print("After: ", plan)
 
         # Only run post-processing if Ray is enabled.
         if ConfigurationManager().get_value("experimental", "ray"):

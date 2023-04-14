@@ -37,6 +37,7 @@ from eva.optimizer.operators import (
     LogicalSample,
     LogicalShow,
     LogicalUnion,
+    LogicalTune,
 )
 from eva.optimizer.optimizer_utils import (
     column_definition_to_udf_io,
@@ -58,6 +59,7 @@ from eva.parser.show_statement import ShowStatement
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
 from eva.utils.logging_manager import logger
+from eva.parser.tune_statement import TuneStatement
 
 
 class StatementToPlanConvertor:
@@ -289,6 +291,14 @@ class StatementToPlanConvertor:
             statement.file_options,
         )
         self._plan = load_data_opr
+    
+    def visit_tune(self, statement: TuneStatement):
+        tune_opr = LogicalTune(
+            statement.file_name,
+            statement.batch_size,
+            statement.epochs_size,
+        )
+        self._plan = tune_opr
 
     def visit_materialized_view(self, statement: CreateMaterializedViewStatement):
         mat_view_opr = LogicalCreateMaterializedView(
@@ -358,6 +368,8 @@ class StatementToPlanConvertor:
             self.visit_create_index(statement)
         elif isinstance(statement, DeleteTableStatement):
             self.visit_delete(statement)
+        elif isinstance(statement, TuneStatement):
+            self.visit_tune(statement)
         return self._plan
 
     @property
