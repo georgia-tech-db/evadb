@@ -37,7 +37,7 @@ from eva.utils.stats import Timer
 
 @pytest.mark.notparallel
 @pytest.mark.skipif(
-    ConfigurationManager().get_value("experimental", "ray"),
+    ConfigurationManager().get_value("executor", "ray"),
     reason="Not necessary for Ray",
 )
 class OptimizerRulesTest(unittest.TestCase):

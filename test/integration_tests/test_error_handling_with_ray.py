@@ -31,7 +31,7 @@ from eva.server.command_handler import execute_query_fetch_all
 
 
 @pytest.mark.skipif(
-    not ConfigurationManager().get_value("experimental", "ray"),
+    not ConfigurationManager().get_value("executor", "ray"),
     reason="Only test for ray execution.",
 )
 class ErrorHandlingRayTests(unittest.TestCase):

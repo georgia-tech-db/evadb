@@ -137,7 +137,7 @@ class PlanGenerator:
         plan = self.optimize(logical_plan)
 
         # Only run post-processing if Ray is enabled.
-        if ConfigurationManager().get_value("experimental", "ray"):
+        if ConfigurationManager().get_value("executor", "ray"):
             plan = self.post_process(plan)
 
         return plan

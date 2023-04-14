@@ -122,7 +122,7 @@ class TestOptimizerTask(unittest.TestCase):
                 opt_cxt, root_grp_id = self.bottom_up_rewrite(root_grp_id, opt_cxt)
                 opt_cxt, root_grp_id = self.implement_group(root_grp_id, opt_cxt)
 
-                if not ConfigurationManager().get_value("experimental", "ray"):
+                if not ConfigurationManager().get_value("executor", "ray"):
                     expected_expr_order = [
                         ProjectPlan,
                         PredicatePlan,

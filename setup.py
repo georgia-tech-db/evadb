@@ -102,9 +102,6 @@ udf_libs = [
     "transformers==4.27.4"    # HUGGINGFACE
 ]
 
-### NEEDED FOR EXPERIMENTAL FEATURES
-experimental_libs = []
-
 INSTALL_REQUIRES = minimal_requirement + integration_test_libs + udf_libs
 DEV_REQUIRES = (
     INSTALL_REQUIRES
@@ -115,7 +112,6 @@ DEV_REQUIRES = (
     + doc_libs
     + database_libs
     + dist_libs
-    + experimental_libs
 )
 
 EXTRA_REQUIRES = {"dev": DEV_REQUIRES}

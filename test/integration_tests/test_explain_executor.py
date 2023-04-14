@@ -47,7 +47,7 @@ class ExplainExecutorTest(unittest.TestCase):
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
 
     def test_explain_simple_select(self):
-        ray_enabled = ConfigurationManager().get_value("experimental", "ray")
+        ray_enabled = ConfigurationManager().get_value("executor", "ray")
         select_query = "EXPLAIN SELECT id, data FROM MyVideo"
         batch = execute_query_fetch_all(select_query)
         expected_output = (

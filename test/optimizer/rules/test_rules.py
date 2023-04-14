@@ -198,7 +198,7 @@ class RulesTest(unittest.TestCase):
                 any(isinstance(rule, type(x)) for x in RulesManager().logical_rules)
             )
 
-        ray_enabled = ConfigurationManager().get_value("experimental", "ray")
+        ray_enabled = ConfigurationManager().get_value("executor", "ray")
 
         # For the current version, we choose either the distributed or the
         # sequential rule, because we do not have a logic to choose one over

@@ -14,6 +14,7 @@ executor:
   gpu_batch_size: 1
 
   gpu_ids: [0, 1]
+  ray: True
 
 storage:
   tmp_dir: ""
@@ -25,6 +26,3 @@ server:
   host: "0.0.0.0"
   port: 5432
   socket_timeout: 60
-
-experimental:
-  ray: True

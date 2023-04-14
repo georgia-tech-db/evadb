@@ -90,7 +90,7 @@ class RulesManager:
             ReorderPredicates(),
         ]
 
-        ray_enabled = ConfigurationManager().get_value("experimental", "ray")
+        ray_enabled = ConfigurationManager().get_value("executor", "ray")
 
         self._implementation_rules = [
             LogicalCreateToPhysical(),

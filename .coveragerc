@@ -2,7 +2,6 @@
 omit = 
     eva/udfs/abstract/*
     eva/udfs/emotion_detector.py
-    eva/experimental/*
 
 [report]
 exclude_lines =

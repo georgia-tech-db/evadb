@@ -55,7 +55,7 @@ def is_ray_stage_running():
 
 
 def shutdown_ray():
-    if ConfigurationManager().get_value("experimental", "ray"):
+    if ConfigurationManager().get_value("executor", "ray"):
         ray.shutdown()
 
 
