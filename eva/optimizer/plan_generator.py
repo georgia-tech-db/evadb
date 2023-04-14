@@ -12,7 +12,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from asyncio import wait_for
+import asyncio
+import nest_asyncio
+nest_asyncio.apply()
 
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.experimental.ray.planner.exchange_plan import ExchangePlan
@@ -136,7 +138,7 @@ class PlanGenerator:
     async def build(self, logical_plan: Operator):
         # apply optimizations
         try:
-            plan = await wait_for(self.optimize(logical_plan), timeout=60.0)
+            plan = await asyncio.wait_for(self.optimize(logical_plan), timeout=60.0)
         except TimeoutError:
             print("Optimizer timed out!")
 
