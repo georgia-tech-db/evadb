@@ -31,6 +31,8 @@ from eva.optimizer.operators import (
 from eva.optimizer.rules.rules import (
     CacheFunctionExpressionInApply,
     CombineSimilarityOrderByAndLimitToFaissIndexScan,
+    DistributedLogicalGetToSeqScan,
+    DistributedLogicalProjectToPhysical,
     EmbedFilterIntoGet,
     EmbedSampleIntoGet,
     LogicalApplyAndMergeToPhysical,
@@ -48,7 +50,6 @@ from eva.optimizer.rules.rules import (
     LogicalFilterToPhysical,
     LogicalFunctionScanToPhysical,
 )
-from eva.optimizer.rules.rules import DistributedLogicalGetToSeqScan
 from eva.optimizer.rules.rules import (
     LogicalGetToSeqScan as SequentialLogicalGetToSeqScan,
 )
@@ -63,7 +64,6 @@ from eva.optimizer.rules.rules import (
     LogicalLoadToPhysical,
     LogicalOrderByToPhysical,
 )
-from eva.optimizer.rules.rules import DistributedLogicalProjectToPhysical
 from eva.optimizer.rules.rules import (
     LogicalProjectToPhysical as SequentialLogicalProjectToPhysical,
 )
