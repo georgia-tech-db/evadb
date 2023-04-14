@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.plan_nodes.exchange_plan import ExchangePlan
 from eva.optimizer.cost_model import CostModel
 from eva.optimizer.operators import Operator
 from eva.optimizer.optimizer_context import OptimizerContext
@@ -23,6 +22,7 @@ from eva.optimizer.property import PropertyType
 from eva.optimizer.rules.rules_manager import RulesManager
 from eva.plan_nodes.abstract_plan import AbstractPlan
 from eva.plan_nodes.create_mat_view_plan import CreateMaterializedViewPlan
+from eva.plan_nodes.exchange_plan import ExchangePlan
 
 
 class PlanGenerator:

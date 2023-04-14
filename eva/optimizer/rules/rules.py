@@ -21,7 +21,6 @@ from eva.catalog.catalog_type import TableType
 from eva.catalog.catalog_utils import is_video_table
 from eva.constants import CACHEABLE_UDFS
 from eva.executor.execution_context import Context
-from eva.plan_nodes.exchange_plan import ExchangePlan
 from eva.expression.expression_utils import (
     conjunction_list_to_expression_tree,
     to_conjunction_list,
@@ -40,6 +39,7 @@ from eva.optimizer.rules.rules_base import Promise, Rule, RuleType
 from eva.parser.types import JoinType, ParserOrderBySortType
 from eva.plan_nodes.apply_and_merge_plan import ApplyAndMergePlan
 from eva.plan_nodes.create_mat_view_plan import CreateMaterializedViewPlan
+from eva.plan_nodes.exchange_plan import ExchangePlan
 from eva.plan_nodes.explain_plan import ExplainPlan
 from eva.plan_nodes.hash_join_build_plan import HashJoinBuildPlan
 from eva.plan_nodes.nested_loop_join_plan import NestedLoopJoinPlan

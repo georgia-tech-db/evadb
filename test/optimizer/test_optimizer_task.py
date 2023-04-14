@@ -18,7 +18,6 @@ from unittest.mock import patch
 from mock import MagicMock
 
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.plan_nodes.exchange_plan import ExchangePlan
 from eva.optimizer.cost_model import CostModel
 from eva.optimizer.operators import (
     LogicalFilter,
@@ -35,6 +34,7 @@ from eva.optimizer.optimizer_tasks import (
 )
 from eva.optimizer.property import PropertyType
 from eva.optimizer.rules.rules_manager import RulesManager
+from eva.plan_nodes.exchange_plan import ExchangePlan
 from eva.plan_nodes.predicate_plan import PredicatePlan
 from eva.plan_nodes.project_plan import ProjectPlan
 from eva.plan_nodes.seq_scan_plan import SeqScanPlan

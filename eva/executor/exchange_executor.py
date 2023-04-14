@@ -23,8 +23,8 @@ from eva.executor.helpers.ray_stage import (
     ray_stage,
     ray_stage_wait_and_alert,
 )
-from eva.plan_nodes.exchange_plan import ExchangePlan
 from eva.models.storage.batch import Batch
+from eva.plan_nodes.exchange_plan import ExchangePlan
 
 
 class QueueReaderExecutor(AbstractExecutor):
