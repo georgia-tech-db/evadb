@@ -60,6 +60,7 @@ class PlanGenerator:
     def optimize(self, logical_plan: Operator):
         optimizer_context = OptimizerContext(self.cost_model, self.rules_manager)
         memo = optimizer_context.memo
+        memo = optimizer_context.memo
         grp_expr = optimizer_context.add_opr_to_group(opr=logical_plan)
         root_grp_id = grp_expr.group_id
         root_expr = memo.groups[root_grp_id].logical_exprs[0]
