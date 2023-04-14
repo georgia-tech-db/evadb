@@ -60,6 +60,7 @@ from eva.optimizer.operators import (
     LogicalDelete,
     LogicalDrop,
     LogicalDropUDF,
+    LogicalExchange,
     LogicalExplain,
     LogicalFaissIndexScan,
     LogicalFilter,
@@ -68,7 +69,6 @@ from eva.optimizer.operators import (
     LogicalGroupBy,
     LogicalInsert,
     LogicalJoin,
-    LogicalExchange,
     LogicalLimit,
     LogicalLoadData,
     LogicalOrderBy,
@@ -482,6 +482,7 @@ class CombineSimilarityOrderByAndLimitToFaissIndexScan(Rule):
             faiss_index_scan_node.append_child(child)
         yield faiss_index_scan_node
 
+
 class LogicalExchangeToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALEXCHANGE)
@@ -501,7 +502,7 @@ class LogicalExchangeToPhysical(Rule):
         yield after
 
 
-class LogicalProjectToPhysical(Rule):
+class DistributedLogicalProjectToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALPROJECT)
         pattern.append_child(Pattern(OperatorType.DUMMY))
@@ -525,7 +526,7 @@ class LogicalProjectToPhysical(Rule):
         yield upper
 
 
-class LogicalGetToSeqScan(Rule):
+class DistributedLogicalGetToSeqScan(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALGET)
         super().__init__(RuleType.LOGICAL_GET_TO_SEQSCAN, pattern)
