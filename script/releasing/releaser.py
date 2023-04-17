@@ -29,11 +29,13 @@ import pkg_resources
 
 background_loop = asyncio.new_event_loop()
 
+
 def background(f):
     def wrapped(*args, **kwargs):
         return background_loop.run_in_executor(None, f, *args, **kwargs)
 
     return wrapped
+
 
 # ==============================================
 # CONFIGURATION
@@ -49,9 +51,6 @@ EVA_DIR = functools.reduce(
 
 # other directory paths used are relative to peloton_dir
 EVA_SRC_DIR = os.path.join(EVA_DIR, "eva")
-
-NEXT_RELEASE = "v0.1.5"
-PREV_RELEASE_DATE = datetime.datetime(2023, 1, 29, 23, 55, 59, 342380).replace(tzinfo=pytz.UTC)
 
 # ==============================================
 # LOGGING CONFIGURATION
@@ -71,16 +70,21 @@ LOG.setLevel(logging.INFO)
 # UTILITY FUNCTION DEFINITIONS
 # ==============================================
 
+
 def run_command(command_str: str):
     output = subprocess.check_output(
-            command_str, 
-            shell=True, 
-            universal_newlines=True
+        command_str, shell=True, universal_newlines=True
     ).rstrip()
 
     pprint(output)
+    return output
 
-def get_changelog():
+
+def get_changelog(LAST_RELEASE_COMMIT):
+    unix_timestamp = int(run_command(f"git show -s --format=%ct {LAST_RELEASE_COMMIT}"))
+    PREV_RELEASE_DATE = datetime.datetime.utcfromtimestamp(unix_timestamp).replace(
+        tzinfo=pytz.UTC
+    )
 
     # GO TO ROOT DIR
     os.chdir(EVA_DIR)
@@ -88,16 +92,17 @@ def get_changelog():
     # PULL CHANGES
     run_command("git pull origin master")
 
-    pprint(output)
-
     # GET GIT HISTORY
     # Create the repository, raises an error if it isn't one.
     repo = git.Repo(".git")
 
-    regexp = re.compile(r'\#[0-9]*')
+    regexp = re.compile(r"\#[0-9]*")
 
     # Iterate through every commit for the given branch in the repository
     for commit in repo.iter_commits("master"):
+        if commit.authored_datetime < PREV_RELEASE_DATE:
+            break
+
         output = regexp.search(commit.message)
 
         if "[BUMP]" in commit.message:
@@ -105,6 +110,7 @@ def get_changelog():
 
         if output is None:
             continue
+
         else:
             pr_number = output.group(0)
             key_message = commit.message.split("\n")[0]
@@ -112,16 +118,16 @@ def get_changelog():
             pr_number = pr_number.split("#")[1]
             print("* PR #" + str(pr_number) + ": " + key_message)
 
-        if commit.authored_datetime < PREV_RELEASE_DATE:
-            break    
 
 def read_file(path, encoding="utf-8"):
     path = os.path.join(os.path.dirname(__file__), path)
     import io
+
     with io.open(path, encoding=encoding) as fp:
         return fp.read()
 
-def release_version():
+
+def release_version(NEXT_RELEASE):
     version_path = os.path.join(os.path.join(EVA_DIR, "eva"), "version.py")
     with open(version_path, "r") as version_file:
         output = version_file.read()
@@ -132,42 +138,35 @@ def release_version():
 
     run_command("git checkout -b release-" + NEXT_RELEASE)
     run_command("git add . -u")
-    run_command("git commit -m '[RELEASE]: "+ NEXT_RELEASE + "'")
+    run_command("git commit -m '[RELEASE]: " + NEXT_RELEASE + "'")
     run_command("git push --set-upstream origin release-" + NEXT_RELEASE)
+
 
 # ==============================================
 # Main Function
 # ==============================================
 
 if __name__ == "__main__":
-
-    parser = argparse.ArgumentParser(
-        description="Release eva"
-    )
+    parser = argparse.ArgumentParser(description="Release eva")
 
     parser.add_argument(
         "-c",
         "--get-changelog",
-        help="get changelog",
-        action="store_true",
-        default=False,
+        help="Retrieve the changelog by utilizing the last release commit provided.",
+        default="48ccb80237a456dd37834a7cba0b6fb4d2a8a7d8",
     )
 
     parser.add_argument(
         "-r",
         "--release-version",
-        help="release version",
-        action="store_true",
-        default=False,
+        help="Publish a new version of EVA using the provided tag.",
+        default="v0.2.0",
     )
 
     args = parser.parse_args()
 
     if args.get_changelog:
-        get_changelog()
+        get_changelog(args.get_changelog)
 
     if args.release_version:
-        release_version()
-
-
-
+        release_version(args.release_version)
