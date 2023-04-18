@@ -137,7 +137,7 @@ EVA is a powerful system for optimizing queries and achieving lightning-fast per
 
 
 To showcase the benefits of EVA's caching and predicate reordering, we ran experiments on a dataset of dogs using the following queries:
-<img align="right" style="display:inline;" height="280" width="300" src="https://github.com/georgia-tech-db/eva/blob/master/data/assets/eva_performance_comparison.png?raw=true"></a>
+<img align="right" style="display:inline;" height="280" width="320" src="https://github.com/georgia-tech-db/eva/blob/master/data/assets/eva_performance_comparison.png?raw=true"></a>
 
 ```mysql
   -- Find all black dogs
