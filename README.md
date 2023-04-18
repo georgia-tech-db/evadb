@@ -127,7 +127,7 @@ IMPL  'eva/udfs/fastrcnn_object_detector.py';
    WHERE id < 15;
 ```
 
-## Boosting Query Performance with EVA's Advanced Query Optimization
+## Boosting Query Performance with EVA's Advanced Query Optimizations
 EVA is a powerful system for optimizing queries and achieving lightning-fast performance. Two of its most advanced features are:
 
 
@@ -137,22 +137,24 @@ EVA is a powerful system for optimizing queries and achieving lightning-fast per
 
 
 To showcase the benefits of EVA's caching and predicate reordering, we ran experiments on a dataset of dogs using the following queries:
-```mysql
-  -- Find all black dogs
-  SELECT id, bbox FROM dogs 
-  JOIN LATERAL UNNEST(YoloV5(data)) AS Object(label, bbox, score) 
-  WHERE Object.label = 'dog' 
-    AND Color(Crop(data, bbox)) = 'black'; 
+<div>
+  <center><img src="https://github.com/georgia-tech-db/eva/blob/master/data/assets/eva_performance_comparison.png" align="right" width="350px"></center>
 
-  -- Find all Great Danes that are black
-  SELECT id, bbox FROM dogs 
-  JOIN LATERAL UNNEST(YoloV5(data)) AS Object(label, bbox, score) 
-  WHERE Object.label = 'dog' 
-    AND DogBreedClassifier(Crop(data, bbox)) = 'great dane' 
-    AND Color(Crop(data, bbox)) = 'black';
-```
+  ```mysql
+    -- Find all black dogs
+    SELECT id, bbox FROM dogs 
+    JOIN LATERAL UNNEST(YoloV5(data)) AS Obj(label, bbox, score) 
+    WHERE Obj.label = 'dog' 
+      AND Color(Crop(data, bbox)) = 'black'; 
 
-![EVA Performance Comparison](https://github.com/georgia-tech-db/eva/blob/master/data/assets/eva_performance_comparison.png)
+    -- Find all Great Danes that are black
+    SELECT id, bbox FROM dogs 
+    JOIN LATERAL UNNEST(YoloV5(data)) AS Obj(label, bbox, score) 
+    WHERE Obj.label = 'dog' 
+      AND DogBreedClassifier(Crop(data, bbox)) = 'great dane' 
+      AND Color(Crop(data, bbox)) = 'black';
+  ```
+</div>
 
 The results speak for themselves: EVA's caching and predicate reordering features led to significant improvements in query execution time, as shown in the bar plot above.
 
