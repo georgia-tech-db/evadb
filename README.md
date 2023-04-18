@@ -137,24 +137,22 @@ EVA is a powerful system for optimizing queries and achieving lightning-fast per
 
 
 To showcase the benefits of EVA's caching and predicate reordering, we ran experiments on a dataset of dogs using the following queries:
-<div>
-  <center><img src="https://github.com/georgia-tech-db/eva/blob/master/data/assets/eva_performance_comparison.png" align="right" width="350px"></center>
+<img align="right" style="display:inline;" height="280" width="300" src="https://github.com/georgia-tech-db/eva/blob/master/data/assets/eva_performance_comparison.png?raw=true"></a>
 
-  ```mysql
-    -- Find all black dogs
-    SELECT id, bbox FROM dogs 
-    JOIN LATERAL UNNEST(YoloV5(data)) AS Obj(label, bbox, score) 
-    WHERE Obj.label = 'dog' 
-      AND Color(Crop(data, bbox)) = 'black'; 
+```mysql
+  -- Find all black dogs
+  SELECT id, bbox FROM dogs 
+  JOIN LATERAL UNNEST(YoloV5(data)) AS Obj(label, bbox, score) 
+  WHERE Obj.label = 'dog' 
+    AND Color(Crop(data, bbox)) = 'black'; 
 
-    -- Find all Great Danes that are black
-    SELECT id, bbox FROM dogs 
-    JOIN LATERAL UNNEST(YoloV5(data)) AS Obj(label, bbox, score) 
-    WHERE Obj.label = 'dog' 
-      AND DogBreedClassifier(Crop(data, bbox)) = 'great dane' 
-      AND Color(Crop(data, bbox)) = 'black';
-  ```
-</div>
+  -- Find all Great Danes that are black
+  SELECT id, bbox FROM dogs 
+  JOIN LATERAL UNNEST(YoloV5(data)) AS Obj(label, bbox, score) 
+  WHERE Obj.label = 'dog' 
+    AND DogBreedClassifier(Crop(data, bbox)) = 'great dane' 
+    AND Color(Crop(data, bbox)) = 'black';
+```
 
 The results speak for themselves: EVA's caching and predicate reordering features led to significant improvements in query execution time, as shown in the bar plot above.
 
