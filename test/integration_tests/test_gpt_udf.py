@@ -17,14 +17,18 @@
 import unittest
 
 from eva.server.command_handler import execute_query_fetch_all
-
+from mock import patch
+from unittest.mock import MagicMock
 
 class GPTUDFsTest(unittest.TestCase):
-    @unittest.skip("Skip as it requires api key")
-    def test_gpt_udf(self):
+    
+    
+    #@unittest.skip("Skip as it requires api key")
+    @patch("eva.udfs.gpt_udf.openai.ChatCompletion.create")
+    def test_gpt_udf(self, mock_req):
         udf_name = "GPTUdf"
 
-        response = execute_query_fetch_all(f"DROP UDF IF EXISTS {udf_name};")
+        execute_query_fetch_all(f"DROP UDF IF EXISTS {udf_name};")
 
         self.csv_file_path = "test/data/queries.csv"
 
@@ -42,8 +46,14 @@ class GPTUDFsTest(unittest.TestCase):
 
         csv_query = f"""LOAD CSV '{self.csv_file_path}' INTO MyTextCSV;"""
         execute_query_fetch_all(csv_query)
+        
+        mock_response_obj = MagicMock()
+        mock_response_obj.message.content= "mock message"        
+        mock_req.return_value.choices=[mock_response_obj]
+        
 
         gpt_query = f"SELECT {udf_name}(query) FROM MyTextCSV;"
         output_batch = execute_query_fetch_all(gpt_query)
         self.assertEqual(len(output_batch), 2)
         self.assertEqual(len(list(output_batch.columns)), 2)
+        
