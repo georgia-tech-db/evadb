@@ -144,7 +144,7 @@ IMPL  'eva/udfs/fastrcnn_object_detector.py';
    🎯 **Predicate Reordering**: EVA optimizes the order in which the query predicates are evaluated (e.g., runs the faster, more selective model first) leading to faster queries and lower inference cost.
 
 To illustrate the benefits of these two optimizations, consider these two exploratory queries on a dataset of dog images:
-<img align="right" style="display:inline;" height="280" src="https://github.com/georgia-tech-db/eva/blob/master/data/assets/eva_performance_comparison.png?raw=true"></a>
+<img align="right" style="display:inline;" width="40%" src="https://github.com/georgia-tech-db/eva/blob/master/data/assets/eva_performance_comparison.png?raw=true"></a>
 
 ```mysql
   -- Query 1: Find all images of black-colored dogs
@@ -161,7 +161,7 @@ To illustrate the benefits of these two optimizations, consider these two explor
     AND Color(Crop(data, bbox)) = 'black';
 ```
 
-By reusing the results of the first query and reordering the predicates based on available cached results, EVA runs the second query **nearly 10 times faster**.
+By reusing the results of the first query and reordering the predicates based on available cached results, EVA runs the second query **nearly 10 times faster** on an NVIDIA A40 GPU.
 
 ## Illustrative EVA Applications 
 
