@@ -28,8 +28,8 @@ class NestedLoopJoinExecutor(AbstractExecutor):
     def exec(self, *args, **kwargs) -> Iterator[Batch]:
         outer = self.children[0]
         inner = self.children[1]
-        for row1 in outer.exec():
-            for row2 in inner.exec():
+        for row1 in outer.exec(**kwargs):
+            for row2 in inner.exec(**kwargs):
                 result_batch = Batch.join(row1, row2)
                 result_batch.reset_index()
                 result_batch = apply_predicate(result_batch, self.predicate)

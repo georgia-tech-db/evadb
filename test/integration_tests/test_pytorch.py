@@ -15,7 +15,7 @@
 import os
 import unittest
 from test.markers import windows_skip_marker
-from test.util import file_remove, load_udfs_for_testing
+from test.util import file_remove, load_udfs_for_testing, shutdown_ray
 
 import cv2
 import numpy as np
@@ -25,11 +25,7 @@ from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.configuration.constants import EVA_ROOT_DIR
 from eva.server.command_handler import execute_query_fetch_all
-from eva.udfs.udf_bootstrap_queries import (
-    Asl_udf_query,
-    Mvit_udf_query,
-    Timestamp_udf_query,
-)
+from eva.udfs.udf_bootstrap_queries import Asl_udf_query, Mvit_udf_query
 
 
 @pytest.mark.notparallel
@@ -54,6 +50,8 @@ class PytorchTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        shutdown_ray()
+
         file_remove("ua_detrac.mp4")
         file_remove("mnist.mp4")
         file_remove("actions.mp4")
@@ -278,24 +276,27 @@ class PytorchTest(unittest.TestCase):
         """
         execute_query_fetch_all(create_udf_query)
 
-        select_query = """SELECT OCRExtractor(data).labels,
+        select_query = """SELECT name, OCRExtractor(data).labels,
                                  ToxicityClassifier(OCRExtractor(data).labels)
                         FROM MemeImages;"""
         actual_batch = execute_query_fetch_all(select_query)
 
         # non-trivial test case for Detoxify
         res = actual_batch.frames
-        self.assertTrue(res["toxicityclassifier.labels"][0] == "toxic")
-        self.assertTrue(res["toxicityclassifier.labels"][1] == "not toxic")
+        for i in range(2):
+            # Image can be reordered.
+            if "meme1" in res["memeimages.name"][i]:
+                self.assertTrue(res["toxicityclassifier.labels"][i] == "toxic")
+            else:
+                self.assertTrue(res["toxicityclassifier.labels"][i] == "not toxic")
 
-    def test_timestamp_udf(self):
-        execute_query_fetch_all(Timestamp_udf_query)
+    def test_check_unnest_with_predicate_on_yolo(self):
+        query = """SELECT id, yolov5.label, yolov5.bbox, yolov5.score
+                  FROM MyVideo
+                  JOIN LATERAL UNNEST(YoloV5(data)) AS yolov5(label, bbox, score)
+                  WHERE yolov5.label = 'car' AND id < 10;"""
 
-        select_query = """SELECT id, seconds, Timestamp(seconds)
-                          FROM MyVideo
-                          WHERE Timestamp(seconds) <= "00:00:01"; """
-        # TODO: Check why this does not work
-        #                  AND Timestamp(seconds) < "00:00:03"; """
-        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch = execute_query_fetch_all(query)
 
-        self.assertEqual(len(actual_batch), 60)
+        # due to unnest the number of returned tuples should be atleast > 10
+        self.assertTrue(len(actual_batch) > 10)

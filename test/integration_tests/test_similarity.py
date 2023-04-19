@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import create_sample_image, load_udfs_for_testing
+from test.util import create_sample_image, load_udfs_for_testing, shutdown_ray
 
 import numpy as np
 import pandas as pd
@@ -94,6 +94,8 @@ class SimilarityTests(unittest.TestCase):
             base_img -= 1
 
     def tearDown(self):
+        shutdown_ray()
+
         drop_table_query = "DROP TABLE testSimilarityTable;"
         execute_query_fetch_all(drop_table_query)
         drop_table_query = "DROP TABLE testSimilarityFeatureTable;"

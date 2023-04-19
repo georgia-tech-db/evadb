@@ -19,6 +19,7 @@ from test.util import (
     create_dummy_batches,
     create_sample_video,
     file_remove,
+    shutdown_ray,
 )
 
 import numpy as np
@@ -52,6 +53,7 @@ class UDFExecutorTest(unittest.TestCase):
         execute_query_fetch_all(create_udf_query)
 
     def tearDown(self):
+        shutdown_ray()
         file_remove("dummy.avi")
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
 

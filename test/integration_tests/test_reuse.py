@@ -15,7 +15,8 @@
 import os
 import unittest
 from pathlib import Path
-from test.util import get_logical_query_plan, load_udfs_for_testing
+from test.markers import windows_skip_marker
+from test.util import get_logical_query_plan, load_udfs_for_testing, shutdown_ray
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
@@ -36,6 +37,7 @@ class ReuseTest(unittest.TestCase):
         load_udfs_for_testing()
 
     def tearDown(self):
+        shutdown_ray()
         execute_query_fetch_all("DROP TABLE IF EXISTS DETRAC;")
 
     def _verify_reuse_correctness(self, query, reuse_batch):
@@ -115,6 +117,7 @@ class ReuseTest(unittest.TestCase):
 
         self.assertFalse(yolo_expr.has_cache())
 
+    @windows_skip_marker
     def test_reuse_after_server_shutdown(self):
         select_query = """SELECT id, label FROM DETRAC JOIN
             LATERAL YoloV5(data) AS Obj(label, bbox, conf) WHERE id < 10;"""

@@ -58,7 +58,7 @@ class CreateUDFStatement(AbstractStatement):
         self._if_not_exists = if_not_exists
         self._inputs = inputs
         self._outputs = outputs
-        self._impl_path = Path(impl_path)
+        self._impl_path = Path(impl_path) if impl_path else None
         self._udf_type = udf_type
         self._metadata = metadata
 

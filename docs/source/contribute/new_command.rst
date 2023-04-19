@@ -53,7 +53,7 @@ parser/eva
 
 The second part of parser is implemented as **parser visitor**.
 
-parser/parser_visitor
+parser/lark_visitor
 ~~~~~~~~~~~~~~~~~~~~~
 
 -  ``_[cmd]_statement.py`` - eg. class CreateTable(evaql_parserVisitor)
@@ -159,7 +159,7 @@ Optimizer
 The part transformed logical plan to physical plan. The modified files
 are stored under **Optimizer** and **Planner** folders.
 
-planner/
+plan_nodes/
 ~~~~~~~~
 
 -  ``[cmd]_plan.py`` - class [cmd]Plan, which stored information
@@ -206,6 +206,16 @@ optimizer/rules
       def apply(self, before: LogicalCreate, context: OptimizerContext):
           after = CreatePlan(before.video, before.column_list, before.if_not_exists)
           return after
+
+-  ``rules_base.py``-
+
+   -  Register new ruletype to **RuleType** and **Promise** (place it
+      **before IMPLEMENTATION_DELIMETER** !!)
+
+-  ``rules_manager.py``-
+
+   -  Import rules created in ``rules.py``
+   -  Add imported logical to physical rules to ``self._implementation_rules``
 
 .. _4-planexcutor:
 

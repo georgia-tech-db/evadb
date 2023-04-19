@@ -21,6 +21,7 @@ from test.util import (  # file_remove,
     file_remove,
     get_logical_query_plan,
     load_udfs_for_testing,
+    shutdown_ray,
 )
 
 import numpy as np
@@ -31,7 +32,7 @@ from eva.binder.binder_utils import BinderError
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
 from eva.models.storage.batch import Batch
-from eva.readers.opencv_reader import OpenCVReader
+from eva.readers.decord_reader import DecordReader
 from eva.server.command_handler import execute_query_fetch_all
 
 NUM_FRAMES = 10
@@ -55,6 +56,8 @@ class SelectExecutorTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        shutdown_ray()
+
         file_remove("dummy.avi")
         drop_query = """DROP TABLE table1;"""
         execute_query_fetch_all(drop_query)
@@ -84,9 +87,7 @@ class SelectExecutorTest(unittest.TestCase):
         expected_rows = [
             {
                 "myvideo.id": i,
-                "myvideo.data": np.array(
-                    np.ones((2, 2, 3)) * float(i + 1) * 25, dtype=np.uint8
-                ),
+                "myvideo.data": np.array(np.ones((32, 32, 3)) * i, dtype=np.uint8),
             }
             for i in range(NUM_FRAMES)
         ]
@@ -154,7 +155,7 @@ class SelectExecutorTest(unittest.TestCase):
         select_query = "SELECT id, data FROM MNIST;"
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort("mnist.id")
-        video_reader = OpenCVReader("data/mnist/mnist.mp4")
+        video_reader = DecordReader("data/mnist/mnist.mp4")
         expected_batch = Batch(frames=pd.DataFrame())
         for batch in video_reader.read():
             batch.frames["name"] = "mnist.mp4"
@@ -162,6 +163,37 @@ class SelectExecutorTest(unittest.TestCase):
         expected_batch.modify_column_alias("mnist")
         expected_batch = expected_batch.project(["mnist.id", "mnist.data"])
         self.assertEqual(actual_batch, expected_batch)
+
+    def test_should_load_and_select_real_audio_in_table(self):
+        query = """LOAD VIDEO 'data/sample_videos/touchdown.mp4'
+                   INTO TOUCHDOWN;"""
+        execute_query_fetch_all(query)
+
+        select_query = "SELECT id, audio FROM TOUCHDOWN;"
+        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch.sort("touchdown.id")
+        video_reader = DecordReader("data/sample_videos/touchdown.mp4", read_audio=True)
+        expected_batch = Batch(frames=pd.DataFrame())
+        for batch in video_reader.read():
+            batch.frames["name"] = "touchdown.mp4"
+            expected_batch += batch
+        expected_batch.modify_column_alias("touchdown")
+        expected_batch = expected_batch.project(["touchdown.id", "touchdown.audio"])
+        self.assertEqual(actual_batch, expected_batch)
+
+    def test_should_throw_error_when_both_audio_and_video_selected(self):
+        query = """LOAD VIDEO 'data/sample_videos/touchdown.mp4'
+                   INTO TOUCHDOWN1;"""
+        execute_query_fetch_all(query)
+
+        select_query = "SELECT id, audio, data FROM TOUCHDOWN1;"
+        try:
+            execute_query_fetch_all(select_query)
+            self.fail("Didn't raise AssertionError")
+        except AssertionError as e:
+            self.assertEquals(
+                "Cannot query over both audio and video streams", e.args[0]
+            )
 
     def test_select_and_where_video_in_table(self):
         select_query = "SELECT * FROM MyVideo WHERE id = 5;"
@@ -171,15 +203,7 @@ class SelectExecutorTest(unittest.TestCase):
 
         select_query = "SELECT data FROM MyVideo WHERE id = 5;"
         actual_batch = execute_query_fetch_all(select_query)
-        expected_rows = [
-            {
-                "myvideo.data": np.array(
-                    np.ones((2, 2, 3)) * float(5 + 1) * 25, dtype=np.uint8
-                )
-            }
-        ]
-        expected_batch = Batch(frames=pd.DataFrame(expected_rows))
-        self.assertEqual(actual_batch, expected_batch)
+        self.assertEqual(actual_batch, expected_batch.project(["myvideo.data"]))
 
         select_query = "SELECT id, data FROM MyVideo WHERE id >= 2;"
         actual_batch = execute_query_fetch_all(select_query)
@@ -502,6 +526,22 @@ class SelectExecutorTest(unittest.TestCase):
                 {
                     "myvideo.id": np.array([0, 0, 1, 1], np.intp),
                     "T.label": np.array(["person", "person", "bicycle", "bicycle"]),
+                }
+            )
+        )
+        self.assertEqual(unnest_batch, expected)
+
+        # unnest with predicate on function expression
+        query = """SELECT id, label
+                FROM MyVideo JOIN LATERAL
+                UNNEST(DummyMultiObjectDetector(data).labels) AS T(label)
+                WHERE id < 2 AND T.label = "person" ORDER BY id;"""
+        unnest_batch = execute_query_fetch_all(query)
+        expected = Batch(
+            pd.DataFrame(
+                {
+                    "myvideo.id": np.array([0, 0], np.intp),
+                    "T.label": np.array(["person", "person"]),
                 }
             )
         )

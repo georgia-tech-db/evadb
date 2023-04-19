@@ -1,21 +1,83 @@
-x# Changelog
+# Changelog
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ##  [Unreleased]
-### [Breaking Changes]
+### [Added]
+### [Changed]
+### [Deprecated]
+### [Removed]
+
+##  [0.2.0] - 2023-04-16
 ### [Added]
 
-* PR #580: Added features to load videos from S3.
-* PR #568: feat: added support for INSERT and DELETE operators for structured data
+* PR #647: feat: LOAD CSV Notebook 
+* PR #626: docs: Documentation for creating UDFs using Decorators. 
+* PR #599: feat: EVA x HuggingFace 
+* PR #621: feat: Ray integration
+
+### [Changed]
+
+* PR #649: fix: Expr bugs 
+* PR #628: test: adding support for pytest-xdist 
+* PR #633: fix: Install Decord from EVA-Fork 
+* PR #646: update doc for extending eva 
+* PR #642: Build fix 
+* PR #641: fix: Unnest bug  
+
+##  [0.1.6] - 2023-04-05
+### [Added]
+
+### [Changed]
+
+* PR #636: fix: Timeout Error #636 
+* PR #635: fix: updates to restore build
+* PR #634: fix: Pandas deprecated append call
+* PR #632: fix: Minor code refactor
+
+##  [0.1.5] - 2023-04-03
+### [Added]
+
+* PR #623: feat: Adding support for AudioStorageEngine 
+* PR #550: feat: support key-value cache for function expressions 
+* PR #604: feat: LIKE operator  
+* PR #622: feat: sqlalchemy tests 
+* PR #618: feat: Predicate UDF Reordering Optimization 
+* PR #617: feat: Add UDF Cost Catalog 
+* PR #616: feat: Add support for iframe based video sampling 
+* PR #606: feat: Add metadata to UDFs in catalog 
+* PR #589: feat: Fuzzy Join support in EVA 
+* PR #601: feat: Decorators for UDF 
+* PR #619: chore: reducing coverage loss 
+* PR #595: doc: Adding CatalogManager, INSERT and DELETE documentation 
+* PR #605: feat: verify udf consistency by matching the file checksum 
+* PR #600: feat: allow UDF's to be created with any name 
+* PR #583: feat: Add symlinks to data files instead of copying 
+* PR #580: feat: enable loading videos from s3 
+* PR #587: feat: Delete and Insert operators for structured data 
+* PR #582: server: asyncio refactoring 
+* PR #579: fix: directory of eva-arch 
+* PR #578: docs: update project name 
 
 ### [Changed]
 
 * PR #581: fix: debugging issuse in yolov5
+* PR #625: Bug: Reader fixes 
+* PR #611: fix: insert and delete executor 
+* PR #615: fix: dropbox links fixed  
+* PR #614: Fix: updated dropbox links 
+* PR #602: fix: EVA on Ray bugs 
+* PR #596: fix: Raise Error on Missing Files during Load 
+* PR #593: fix: Windows path error in S3 testcases 
+* PR #584: Rename Array_Count to ArrayCount 
+* PR #581: fix: debugging issue in yolov5 
 
 ### [Deprecated]
+
+* PR #609: refactor: removing upload code and bug fixes 
+
 ### [Removed]
 
 ##  [0.1.4] - 2023-01-28

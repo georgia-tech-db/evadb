@@ -12,9 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import math
 from typing import Dict, Iterator
 
+import numpy as np
+
+from eva.catalog.catalog_type import VideoColumnName
 from eva.constants import IFRAMES
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.expression_utils import extract_range_list_from_predicate
@@ -41,7 +43,9 @@ class DecordReader(AbstractReader):
         predicate: AbstractExpression = None,
         sampling_rate: int = None,
         sampling_type: str = None,
-        **kwargs
+        read_audio: bool = False,
+        read_video: bool = True,
+        **kwargs,
     ):
         """Read frames from the disk
 
@@ -52,16 +56,21 @@ class DecordReader(AbstractReader):
             sampling_rate (int, optional): Set if the caller wants one frame
             every `sampling_rate` number of frames. For example, if `sampling_rate = 10`, it returns every 10th frame. If both `predicate` and `sampling_rate` are specified, `sampling_rate` is given precedence.
             sampling_type (str, optional): Set as IFRAMES if caller want to sample on top on iframes only. e.g if the IFRAME frame numbers are [10,20,30,40,50] then'SAMPLE IFRAMES 2' will return [10,30,50]
+            read_audio (bool, optional): Whether to read audio stream from the video. Defaults to False
+            read_video (bool, optional): Whether to read video stream from the video. Defaults to True
         """
         self._predicate = predicate
         self._sampling_rate = sampling_rate or 1
         self._sampling_type = sampling_type
+        self._read_audio = read_audio
+        self._read_video = read_video
+        self._reader = None
+        self._get_frame = None
         super().__init__(*args, **kwargs)
+        self.initialize_reader()
 
     def _read(self) -> Iterator[Dict]:
-        decord = _lazy_import_decord()
-        video = decord.VideoReader(self.file_url)
-        num_frames = int(len(video))
+        num_frames = int(len(self._reader))
         if self._predicate:
             range_list = extract_range_list_from_predicate(
                 self._predicate, 0, num_frames - 1
@@ -71,7 +80,8 @@ class DecordReader(AbstractReader):
         logger.debug("Reading frames")
 
         if self._sampling_type == IFRAMES:
-            iframes = video.get_key_indices()
+            assert not self._read_audio, "Cannot use IFRAMES with audio streams"
+            iframes = self._reader.get_key_indices()
             idx = 0
             for begin, end in range_list:
                 while idx < len(iframes) and iframes[idx] < begin:
@@ -79,33 +89,14 @@ class DecordReader(AbstractReader):
 
                 while idx < len(iframes) and iframes[idx] <= end:
                     frame_id = iframes[idx]
-                    frame = video[frame_id]
                     idx += self._sampling_rate
-                    if frame is not None:
-                        yield {
-                            "id": frame_id,
-                            "data": frame,
-                            "seconds": math.floor(
-                                video.get_frame_timestamp(frame_id)[0]
-                            ),
-                        }
-                    else:
-                        break
+                    yield self._get_frame(frame_id)
+
         elif self._sampling_rate == 1:
             for begin, end in range_list:
                 frame_id = begin
                 while frame_id <= end:
-                    frame = video[frame_id]
-                    if frame is not None:
-                        yield {
-                            "id": frame_id,
-                            "data": frame,
-                            "seconds": math.floor(
-                                video.get_frame_timestamp(frame_id)[0]
-                            ),
-                        }
-                    else:
-                        break
+                    yield self._get_frame(frame_id)
                     frame_id += 1
         else:
             for begin, end in range_list:
@@ -113,14 +104,40 @@ class DecordReader(AbstractReader):
                 if begin % self._sampling_rate:
                     begin += self._sampling_rate - (begin % self._sampling_rate)
                 for frame_id in range(begin, end + 1, self._sampling_rate):
-                    frame = video[frame_id]
-                    if frame is not None:
-                        yield {
-                            "id": frame_id,
-                            "data": frame,
-                            "seconds": math.floor(
-                                video.get_frame_timestamp(frame_id)[0]
-                            ),
-                        }
-                    else:
-                        break
+                    yield self._get_frame(frame_id)
+
+    def initialize_reader(self):
+        decord = _lazy_import_decord()
+        if self._read_audio:
+            try:
+                self._reader = decord.AVReader(
+                    self.file_url, mono=True, sample_rate=16000
+                )
+                self._get_frame = self.__get_audio_frame
+            except decord._ffi.base.DECORDError as error_msg:
+                assert "Can't find audio stream" not in str(error_msg), error_msg
+        else:
+            self._reader = decord.VideoReader(self.file_url)
+            self._get_frame = self.__get_video_frame
+
+    def __get_video_frame(self, frame_id):
+        frame_video = self._reader[frame_id]
+        frame_video = frame_video.asnumpy()
+        timestamp = self._reader.get_frame_timestamp(frame_id)[0]
+
+        return {
+            VideoColumnName.id.name: frame_id,
+            VideoColumnName.data.name: frame_video,
+            VideoColumnName.seconds.name: round(timestamp, 2),
+        }
+
+    def __get_audio_frame(self, frame_id):
+        frame_audio, _ = self._reader[frame_id]
+        frame_audio = frame_audio.asnumpy()
+
+        return {
+            VideoColumnName.id.name: frame_id,
+            VideoColumnName.data.name: np.empty(0),
+            VideoColumnName.seconds.name: 0.0,
+            VideoColumnName.audio.name: frame_audio,
+        }

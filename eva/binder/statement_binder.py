@@ -21,14 +21,14 @@ from eva.binder.binder_utils import (
     check_groupby_pattern,
     check_table_object_is_video,
     extend_star,
+    resolve_alias_table_value_expression,
 )
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.catalog_type import IndexType, NdArrayType, TableType
+from eva.catalog.catalog_type import IndexType, NdArrayType, TableType, VideoColumnName
 from eva.expression.abstract_expression import AbstractExpression, ExpressionType
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.parser.alias import Alias
 from eva.parser.create_index_statement import CreateIndexStatement
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
 from eva.parser.delete_statement import DeleteTableStatement
@@ -37,6 +37,7 @@ from eva.parser.rename_statement import RenameTableStatement
 from eva.parser.select_statement import SelectStatement
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
+from eva.third_party.huggingface.binder import assign_hf_udf
 from eva.utils.generic_utils import get_file_checksum, load_udf_class_from_file
 from eva.utils.logging_manager import logger
 
@@ -147,6 +148,15 @@ class StatementBinder:
             self.bind(node.union_link)
             self._binder_context = current_context
 
+        assert not (
+            self._binder_context.is_retrieve_audio()
+            and self._binder_context.is_retrieve_video()
+        ), "Cannot query over both audio and video streams"
+        if self._binder_context.is_retrieve_audio():
+            node.from_table.get_audio = True
+        if self._binder_context.is_retrieve_video():
+            node.from_table.get_video = True
+
     @bind.register(DeleteTableStatement)
     def _bind_delete_statement(self, node: DeleteTableStatement):
         self.bind(node.table_ref)
@@ -212,6 +222,10 @@ class StatementBinder:
             node.col_name, node.table_alias
         )
         node.table_alias = table_alias
+        if node.col_name == VideoColumnName.audio:
+            self._binder_context.enable_audio_retrieval()
+        if node.col_name == VideoColumnName.data:
+            self._binder_context.enable_video_retrieval()
         node.col_alias = "{}.{}".format(table_alias, node.col_name.lower())
         node.col_object = col_obj
 
@@ -230,25 +244,28 @@ class StatementBinder:
             logger.error(err_msg)
             raise BinderError(err_msg)
 
-        # Verify the consistency of the UDF. If the checksum of the UDF does not match
-        # the one stored in the catalog, an error will be thrown and the user will be
-        # asked to register the UDF again.
-        assert (
-            get_file_checksum(udf_obj.impl_file_path) == udf_obj.checksum
-        ), f"""UDF file {udf_obj.impl_file_path} has been modified from the
-            registration. Please create a new UDF using the CREATE UDF command or UPDATE the existing one."""
+        if udf_obj.type == "HuggingFace":
+            node.function = assign_hf_udf(udf_obj)
+        else:
+            # Verify the consistency of the UDF. If the checksum of the UDF does not match
+            # the one stored in the catalog, an error will be thrown and the user will be
+            # asked to register the UDF again.
+            assert (
+                get_file_checksum(udf_obj.impl_file_path) == udf_obj.checksum
+            ), f"""UDF file {udf_obj.impl_file_path} has been modified from the
+                registration. Please create a new UDF using the CREATE UDF command or UPDATE the existing one."""
 
-        try:
-            node.function = load_udf_class_from_file(
-                udf_obj.impl_file_path, udf_obj.name
-            )
-        except Exception as e:
-            err_msg = (
-                f"{str(e)}. Please verify that the UDF class name in the"
-                "implementation file matches the UDF name."
-            )
-            logger.error(err_msg)
-            raise BinderError(err_msg)
+            try:
+                node.function = load_udf_class_from_file(
+                    udf_obj.impl_file_path, udf_obj.name
+                )
+            except Exception as e:
+                err_msg = (
+                    f"{str(e)}. Please verify that the UDF class name in the"
+                    "implementation file matches the UDF name."
+                )
+                logger.error(err_msg)
+                raise BinderError(err_msg)
 
         node.udf_obj = udf_obj
         output_objs = self._catalog.get_udf_io_catalog_output_entries(udf_obj)
@@ -265,19 +282,4 @@ class StatementBinder:
             node.output_objs = output_objs
             node.projection_columns = [obj.name.lower() for obj in output_objs]
 
-        default_alias_name = node.name.lower()
-        default_output_col_aliases = [str(obj.name.lower()) for obj in node.output_objs]
-        if not node.alias:
-            node.alias = Alias(default_alias_name, default_output_col_aliases)
-        else:
-            if not len(node.alias.col_names):
-                node.alias = Alias(node.alias.alias_name, default_output_col_aliases)
-            else:
-                output_aliases = [
-                    str(col_name.lower()) for col_name in node.alias.col_names
-                ]
-                node.alias = Alias(node.alias.alias_name, output_aliases)
-
-        assert len(node.alias.col_names) == len(
-            node.output_objs
-        ), f"""Expected {len(node.output_objs)} output columns for {node.alias.alias_name}, got {len(node.alias.col_names)}."""
+        resolve_alias_table_value_expression(node)

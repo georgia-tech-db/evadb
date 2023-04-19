@@ -75,7 +75,7 @@ class OrderByExecutor(AbstractExecutor):
         aggregated_batch_list = []
 
         # aggregates the batches into one large batch
-        for batch in child_executor.exec():
+        for batch in child_executor.exec(**kwargs):
             self.batch_sizes.append(len(batch))
             aggregated_batch_list.append(batch)
         aggregated_batch = Batch.concat(aggregated_batch_list, copy=False)
