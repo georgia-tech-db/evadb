@@ -21,16 +21,16 @@
 
 # EVA AI-Relational Database System
 
-EVA is an open-source **AI-relational database with first-class support for deep learning models**. It aims to support AI-powered database applications that operate on both structured (tables) and unstructured data (videos, text, podcasts, PDFs, etc.) with deep learning models.
+EVA is an open-source **AI-relational database with first-class support for deep learning models**. Our goal to support next-generation AI-powered database applications that operate on both structured (tables) and unstructured data (videos, text, podcasts, PDFs, etc.) with deep learning models.
 
-EVA accelerates AI pipelines using a collection of optimizations inspired by relational database systems including function caching, sampling, and cost-based operator reordering. It comes with a wide range of models for analyzing unstructured data including image classification, object detection, OCR, face detection, etc. It is fully implemented in Python, and licensed under the Apache license.
+EVA accelerates AI pipelines using a collection of optimizations inspired by relational database systems including function caching, sampling, and cost-based predicate reordering. It comes with a wide range of models for analyzing unstructured data including models for image classification, object detection, OCR, text sentiment classification, face detection, etc. It is fully implemented in Python, and licensed under the Apache license.
 
-EVA supports a AI-oriented query language for analysing unstructured data. Here are some illustrative applications:
+EVA supports a AI-oriented query language tailored for analysing unstructured data. Here are some illustrative applications supported in EVA:
 
  * <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/03-emotion-analysis.html">Examining the emotion palette of actors in a movie</a>
  * <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/02-object-detection.html">Analysing traffic flow at an intersection </a>
  * <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/01-mnist.html">Classifying images based on their content</a>
- * <a href="https://github.com/georgia-tech-db/license-plate-recognition">Recogizing license plates </a>
+ * <a href="https://github.com/georgia-tech-db/license-plate-recognition">Recognizing license plates </a>
  * <a href="https://github.com/georgia-tech-db/toxicity-classification">Analysing toxicity of social media memes </a>
  
 If you are wondering why you might need a AI-relational database system, start with the page on <a href="https://evadb.readthedocs.io/en/stable/source/overview/video.html#">Video Database Systems</a>. It describes how EVA lets you easily make use of deep learning models and you can save money spent on inference on large image or video datasets.
