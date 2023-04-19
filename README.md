@@ -81,12 +81,12 @@ The <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/index.html"
 pip install evadb
 ```
 
-- EVA works well in Jupyter notebook. Check out the illustrative notebooks in the [Tutorials](https://github.com/georgia-tech-db/eva/blob/master/tutorials/) folder.
+- To start and connect to an EVA server in a Jupyter notebook, check out this [illustrative emotion analysis notebook](https://github.com/georgia-tech-db/eva/blob/master/tutorials/03-emotion-analysis.ipynb):
 ```shell
 cursor = connect_to_server()
 ```
 
-- After starting the server, load a video onto the EVA server (we use [ua_detrac.mp4](data/ua_detrac/ua_detrac.mp4) for illustration):
+- Load a video onto the EVA server (we use [ua_detrac.mp4](data/ua_detrac/ua_detrac.mp4) for illustration):
 
 ```mysql
 LOAD VIDEO "data/ua_detrac/ua_detrac.mp4" INTO UADETRAC;
@@ -137,13 +137,13 @@ IMPL  'eva/udfs/fastrcnn_object_detector.py';
    WHERE id < 15;
 ```
 
-- **Usability + Computational Efficiency:** Besides making it easy to write queries for complex AI pipelines, EVA speeds up query execution using its AI-centric query optimizer. Two illustrative in-built optimizations are:
+- Besides making it easy to write queries for complex AI pipelines, EVA **speeds up query execution using its AI-centric query optimizer**. Two illustrative  optimizations are:
 
    💾 **Caching**: EVA automatically caches and reuses previous query results (especially model inference results), eliminating redundant computation and reducing query processing time.
 
    🎯 **Predicate Reordering**: EVA optimizes the order in which the query predicates are evaluated (e.g., runs the faster, more selective model first) leading to faster queries and lower inference cost.
 
-To illustrate the benefits of these two optimizations, consider these two exploratory queries on a dataset of dog images:
+Consider these two exploratory queries on a dataset of dog images:
 <img align="right" style="display:inline;" width="40%" src="https://github.com/georgia-tech-db/eva/blob/master/data/assets/eva_performance_comparison.png?raw=true"></a>
 
 ```mysql
@@ -161,7 +161,7 @@ To illustrate the benefits of these two optimizations, consider these two explor
     AND Color(Crop(data, bbox)) = 'black';
 ```
 
-By reusing the results of the first query and reordering the predicates based on available cached results, EVA runs the second query **nearly 10 times faster** on an NVIDIA A40 GPU.
+By reusing the results of the first query and reordering the predicates based on available cached results, EVA runs up the second query **10x faster**!
 
 ## Illustrative EVA Applications 
 
