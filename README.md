@@ -36,7 +36,7 @@ EVA is an open-source **AI-relational database with first-class support for deep
 
 EVA accelerates AI pipelines by 10-100x using a collection of optimizations inspired by relational database systems including function caching, sampling, and cost-based predicate reordering. It comes with a wide range of models for analyzing unstructured data including models for image classification, object detection, OCR, text sentiment classification, face detection, etc. It is fully implemented in Python, and licensed under the Apache license.
 
-EVA supports a AI-oriented query language tailored for analysing unstructured data. Here are some illustrative applications supported in EVA:
+EVA supports a AI-oriented query language tailored for analysing unstructured data. Here are some illustrative applications:
 
  * <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/03-emotion-analysis.html">Examining the emotion palette of actors in a movie</a>
  * <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/02-object-detection.html">Analysing traffic flow at an intersection </a>
