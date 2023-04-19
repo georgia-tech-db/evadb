@@ -53,7 +53,7 @@ The <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/index.html"
 
 <details>
   <summary><b>Extensible by design to support custom deep learning models </b></summary>
-  EVA has first-class support for user-defined functions that wrap around your deep learning models in PyTorch.
+  EVA has first-class support for user-defined functions that wrap around your deep learning models in PyTorch and HuggingFace.
 </details>
 
 ## Links
@@ -91,7 +91,7 @@ SELECT id, data FROM MyVideo WHERE id < 5;
 5. Search for frames in the video that contain a car
 
 ```mysql
-SELECT id, data FROM MyVideo WHERE ['car'] <@ FastRCNNObjectDetector(data).labels;
+SELECT id, data FROM MyVideo WHERE ['car'] <@ YoloV5(data).labels;
 ```
 | Source Video  | Query Result |
 |---------------|--------------|
@@ -100,16 +100,16 @@ SELECT id, data FROM MyVideo WHERE ['car'] <@ FastRCNNObjectDetector(data).label
 6. Search for frames in the video that contain a pedestrian and a car
 
 ```mysql
-SELECT id, data FROM MyVideo WHERE ['pedestrian', 'car'] <@ FastRCNNObjectDetector(data).labels;
+SELECT id, data FROM MyVideo WHERE ['pedestrian', 'car'] <@ YoloV5(data).labels;
 ```
 
 7. Search for frames in the video with more than 3 cars
 
 ```mysql
-SELECT id, data FROM MyVideo WHERE ArrayCount(FastRCNNObjectDetector(data).labels, 'car') > 3;
+SELECT id, data FROM MyVideo WHERE ArrayCount(YoloV5(data).labels, 'car') > 3;
 ```
 
-8. You can create a new user-defined function (UDF) that wraps around your custom vision model or an off-the-shelf model like FastRCNN:
+8. You can create a custom **User-Defined Function** (UDF) that wraps around a vision model or an off-the-shelf model like FastRCNN:
 ```mysql
 CREATE UDF IF NOT EXISTS MyUDF
 INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
@@ -119,7 +119,7 @@ TYPE  Classification
 IMPL  'eva/udfs/fastrcnn_object_detector.py';
 ```
 
-9. You can combine multiple user-defined functions in a single query to accomplish more complicated tasks.
+9. You can **Compose Multiple User-Defined Functions in a Single Query** to accomplish more complicated tasks.
 ```mysql
    -- Analyse emotions of faces in a video
    SELECT id, bbox, EmotionDetector(Crop(data, bbox)) 
@@ -127,26 +127,23 @@ IMPL  'eva/udfs/fastrcnn_object_detector.py';
    WHERE id < 15;
 ```
 
-## Boosting Query Performance with EVA's Advanced Query Optimizations
-EVA is a powerful system for optimizing queries and achieving lightning-fast performance. Two of its most advanced features are:
+10. Besides making it easy to write queries based on complex AI pipelines, EVA also speeds up query execution using its AI-centric query optimizer. Two key optimizations are:
 
+- 💾 **Caching**: EVA automatically reuses previous query results (especially inference results), eliminating redundant computation and reducing processing time.
 
-- 💾 **Caching**: EVA's caching feature allows you to reuse previous query results, eliminating redundant computations and reducing processing time.
+- 🎯 **Predicate Reordering**: EVA optimizes the order in which query predicates are evaluated (e.g., runs the faster, more selective model first) leading to faster queries and less dollar cost.
 
-- 🎯 **Predicate Reordering**: EVA's predicate reordering feature optimizes the order in which query predicates are evaluated, resulting in faster query execution times and more efficient resource usage.
-
-
-To showcase the benefits of EVA's caching and predicate reordering, we ran experiments on a dataset of dogs using the following queries:
+To illustrate the benefits of these two optimizations, consider these two exploratory queries on a dataset of dog images:
 <img align="right" style="display:inline;" height="280" width="320" src="https://github.com/georgia-tech-db/eva/blob/master/data/assets/eva_performance_comparison.png?raw=true"></a>
 
 ```mysql
-  -- Find all black dogs
+  -- Query 1: Find all images of black-colored dogs
   SELECT id, bbox FROM dogs 
   JOIN LATERAL UNNEST(YoloV5(data)) AS Obj(label, bbox, score) 
   WHERE Obj.label = 'dog' 
     AND Color(Crop(data, bbox)) = 'black'; 
 
-  -- Find all Great Danes that are black
+  -- Query 2: Find all Great Danes that are black-colored
   SELECT id, bbox FROM dogs 
   JOIN LATERAL UNNEST(YoloV5(data)) AS Obj(label, bbox, score) 
   WHERE Obj.label = 'dog' 
@@ -154,8 +151,7 @@ To showcase the benefits of EVA's caching and predicate reordering, we ran exper
     AND Color(Crop(data, bbox)) = 'black';
 ```
 
-The results speak for themselves: EVA's caching and predicate reordering features led to significant improvements in query execution time, as shown in the bar plot above.
-
+By reusing the results of the first query and reordering the predicates based on available cached results, EVA runs the second query **nearly 10 times faster**.
 
 ## Illustrative EVA Applications 
 
