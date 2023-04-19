@@ -127,6 +127,36 @@ IMPL  'eva/udfs/fastrcnn_object_detector.py';
    WHERE id < 15;
 ```
 
+## Boosting Query Performance with EVA's Advanced Query Optimizations
+EVA is a powerful system for optimizing queries and achieving lightning-fast performance. Two of its most advanced features are:
+
+
+- 💾 **Caching**: EVA's caching feature allows you to reuse previous query results, eliminating redundant computations and reducing processing time.
+
+- 🎯 **Predicate Reordering**: EVA's predicate reordering feature optimizes the order in which query predicates are evaluated, resulting in faster query execution times and more efficient resource usage.
+
+
+To showcase the benefits of EVA's caching and predicate reordering, we ran experiments on a dataset of dogs using the following queries:
+<img align="right" style="display:inline;" height="280" width="320" src="https://github.com/georgia-tech-db/eva/blob/master/data/assets/eva_performance_comparison.png?raw=true"></a>
+
+```mysql
+  -- Find all black dogs
+  SELECT id, bbox FROM dogs 
+  JOIN LATERAL UNNEST(YoloV5(data)) AS Obj(label, bbox, score) 
+  WHERE Obj.label = 'dog' 
+    AND Color(Crop(data, bbox)) = 'black'; 
+
+  -- Find all Great Danes that are black
+  SELECT id, bbox FROM dogs 
+  JOIN LATERAL UNNEST(YoloV5(data)) AS Obj(label, bbox, score) 
+  WHERE Obj.label = 'dog' 
+    AND DogBreedClassifier(Crop(data, bbox)) = 'great dane' 
+    AND Color(Crop(data, bbox)) = 'black';
+```
+
+The results speak for themselves: EVA's caching and predicate reordering features led to significant improvements in query execution time, as shown in the bar plot above.
+
+
 ## Illustrative EVA Applications 
 
 ### Traffic Analysis (Object Detection Model)
