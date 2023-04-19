@@ -26,7 +26,7 @@
 
 - ⚡️ 10-100x faster AI pipelines 
 - 💰 Reduce money spent on GPU-driven inference
-- 📦 Built-in caching to avoid re-running deep learning models
+- 📦 Built-in caching to avoid re-running deep learning models across queries
 - 📏 Over 20 AI-centric query optimization rules
 - ⌨️ First-party integrations for PyTorch and HuggingFace models
 - 🐍 Installable via pip
