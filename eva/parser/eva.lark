@@ -43,7 +43,7 @@ udf_metadata: udf_metadata_key udf_metadata_value
 
 udf_metadata_key: string_literal
 
-udf_metadata_value: string_literal
+udf_metadata_value: string_literal | decimal_literal
 
 index_type: USING HNSW
 

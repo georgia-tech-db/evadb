@@ -14,6 +14,7 @@
 # limitations under the License.
 from typing import Any
 
+import decord
 import numpy as np
 from PIL import Image
 
@@ -48,3 +49,30 @@ class ImageHFModel(AbstractHFUdf):
         frames = np.vstack(frames_list)
         images = [Image.fromarray(row) for row in frames]
         return images
+
+
+class AudioHFModel(AbstractHFUdf):
+    """
+    Base Model for all HF Models that take in audio as input
+    """
+
+    def input_formatter(self, inputs: Any):
+        audio = np.empty((0, 0))
+        files = set(inputs.iloc[:, 0].tolist())
+        for file in files:
+            reader = decord.AudioReader(file, mono=True, sample_rate=16000)
+            audio = np.append(audio, reader[0:].asnumpy()[0])
+        return audio
+
+
+class ASRHFModel(AudioHFModel):
+    """
+    Specific model for Automatic Speech Recognition that extends AudioHFModel
+    """
+
+    @property
+    def default_pipeline_args(self) -> dict:
+        # https://huggingface.co/blog/asr-chunking
+        return {
+            "chunk_length_s": 30,
+        }

@@ -43,11 +43,20 @@ class AbstractHFUdf(AbstractUDF, GPUCompatible):
 
     def __init__(self, udf_obj: UdfCatalogEntry, device: int = -1, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        pipeline_args = {entry.key: entry.value for entry in udf_obj.metadata}
+        pipeline_args = self.default_pipeline_args
+        for entry in udf_obj.metadata:
+            if entry.value.isnumeric():
+                pipeline_args[entry.key] = int(entry.value)
+            else:
+                pipeline_args[entry.key] = entry.value
         self.hf_udf_obj = pipeline(**pipeline_args, device=device)
 
     def setup(self, *args, **kwargs) -> None:
         super().setup(*args, **kwargs)
+
+    @property
+    def default_pipeline_args(self) -> dict:
+        return {}
 
     def input_formatter(self, inputs: Any):
         """
@@ -59,6 +68,8 @@ class AbstractHFUdf(AbstractUDF, GPUCompatible):
         """
         Function that formats output from HuggingFace format to EVA format (pandas dataframe)
         """
+        if isinstance(outputs, dict):
+            return pd.DataFrame(outputs, index=[0])
         # PERF: Can improve performance by avoiding redundant list creation
         result_list = []
         for row_output in outputs:
@@ -69,7 +80,7 @@ class AbstractHFUdf(AbstractUDF, GPUCompatible):
         result_df = pd.DataFrame(result_list)
         return result_df
 
-    def forward(self, inputs, *args, **kwargs) -> None:
+    def forward(self, inputs, *args, **kwargs) -> pd.DataFrame:
         hf_input = self.input_formatter(inputs)
         hf_output = self.hf_udf_obj(hf_input, *args, **kwargs)
         eva_output = self.output_formatter(hf_output)
