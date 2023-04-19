@@ -44,7 +44,7 @@ EVA supports a AI-oriented query language tailored for analysing unstructured da
  * <a href="https://github.com/georgia-tech-db/license-plate-recognition">Recognizing license plates </a>
  * <a href="https://github.com/georgia-tech-db/toxicity-classification">Analysing toxicity of social media memes </a>
  
-If you are wondering why you might need a AI-relational database system, start with the page on <a href="https://evadb.readthedocs.io/en/stable/source/overview/video.html#">Video Database Systems</a>. It describes how EVA lets you easily make use of deep learning models and you can save money spent on inference on large image or video datasets.
+If you are wondering why you might need a AI-relational database system, start with the page on <a href="https://evadb.readthedocs.io/en/stable/source/overview/video.html#">Video Database Systems</a>. It describes how EVA lets you easily make use of deep learning models and save money spent on GPU-driven inference on large image or video datasets.
 
 The <a href="https://evadb.readthedocs.io/en/stable/source/overview/installation.html">Getting Started</a> page shows how you can use EVA for different computer vision tasks: image classification, object detection, action recognition, and how you can easily extend EVA to support your custom deep learning model in the form of user-defined functions.
 
