@@ -24,9 +24,17 @@
 
 # EVA AI-Relational Database System
 
-EVA is an open-source **AI-relational database with first-class support for deep learning models**. Our goal to support next-generation AI-powered database applications that operate on both structured (tables) and unstructured data (videos, text, podcasts, PDFs, etc.) with deep learning models.
+- ⚡️ 10-100x faster AI pipelines 
+- 💰 Reduce money spent on GPU-driven inference
+- 📦 Built-in caching to avoid re-running deep learning models
+- 📏 Over 20 AI-centric query optimization rules
+- ⌨️ First-party integrations for PyTorch and HuggingFace models
+- 🐍 Installable via pip
+- 🤝 Fully implemented in Python
 
-EVA accelerates AI pipelines using a collection of optimizations inspired by relational database systems including function caching, sampling, and cost-based predicate reordering. It comes with a wide range of models for analyzing unstructured data including models for image classification, object detection, OCR, text sentiment classification, face detection, etc. It is fully implemented in Python, and licensed under the Apache license.
+EVA is an open-source **AI-relational database with first-class support for deep learning models**. It supports next-generation AI-powered database applications that operate on both structured (tables) and unstructured data (videos, text, podcasts, PDFs, etc.) with deep learning models.
+
+EVA accelerates AI pipelines by 10-100x using a collection of optimizations inspired by relational database systems including function caching, sampling, and cost-based predicate reordering. It comes with a wide range of models for analyzing unstructured data including models for image classification, object detection, OCR, text sentiment classification, face detection, etc. It is fully implemented in Python, and licensed under the Apache license.
 
 EVA supports a AI-oriented query language tailored for analysing unstructured data. Here are some illustrative applications supported in EVA:
 
@@ -67,52 +75,51 @@ The <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/index.html"
 
 ## Quick Start
 
-1. To install EVA, we recommend using the pip package manager (EVA supports Python versions 3.7+).
+- Install EVA using the pip package manager. EVA supports Python versions 3.7+.
 
 ```shell
 pip install evadb
 ```
 
-2. EVA is based on a client-server architecture. It works in Jupyter notebooks (illustrative notebooks are available in the [Tutorials](https://github.com/georgia-tech-db/eva/blob/master/tutorials/03-emotion-analysis.ipynb) folder) and also supports a terminal-based client. To start the EVA server and a terminal-based client, use the following commands:
+- EVA works well in Jupyter notebook. Check out the illustrative notebooks in the [Tutorials](https://github.com/georgia-tech-db/eva/blob/master/tutorials/) folder.
 ```shell
-eva_server &   # launch server
-eva_client     # launch client
+cursor = connect_to_server()
 ```
 
-3. Load a video onto the EVA server from the client (we use [ua_detrac.mp4](data/ua_detrac/ua_detrac.mp4) video as an example):
+- After starting the server, load a video onto the EVA server (we use [ua_detrac.mp4](data/ua_detrac/ua_detrac.mp4) for illustration):
 
 ```mysql
-LOAD VIDEO "data/ua_detrac/ua_detrac.mp4" INTO MyVideo;
+LOAD VIDEO "data/ua_detrac/ua_detrac.mp4" INTO UADETRAC;
 ```
 
-4. That's it! You can now run queries over the loaded video:
+- That's it! You can now run queries over the loaded video:
 
 ```mysql
-SELECT id, data FROM MyVideo WHERE id < 5;
+SELECT id, data FROM UADETRAC WHERE id < 5;
 ```
 
-5. Search for frames in the video that contain a car
+- Search for frames in the video that contain a car
 
 ```mysql
-SELECT id, data FROM MyVideo WHERE ['car'] <@ YoloV5(data).labels;
+SELECT id, data FROM UADETRAC WHERE ['car'] <@ YoloV5(data).labels;
 ```
 | Source Video  | Query Result |
 |---------------|--------------|
 |<img alt="Source Video" src="https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/traffic-input.webp" width="300"> |<img alt="Query Result" src="https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/traffic-output.webp" width="300"> |
 
-6. Search for frames in the video that contain a pedestrian and a car
+- Search for frames in the video that contain a pedestrian and a car
 
 ```mysql
-SELECT id, data FROM MyVideo WHERE ['pedestrian', 'car'] <@ YoloV5(data).labels;
+SELECT id, data FROM UADETRAC WHERE ['pedestrian', 'car'] <@ YoloV5(data).labels;
 ```
 
-7. Search for frames in the video with more than 3 cars
+- Search for frames with more than 3 cars
 
 ```mysql
-SELECT id, data FROM MyVideo WHERE ArrayCount(YoloV5(data).labels, 'car') > 3;
+SELECT id, data FROM UADETRAC WHERE ArrayCount(YoloV5(data).labels, 'car') > 3;
 ```
 
-8. **Create a Custom User-Defined Function (UDF)** that wraps around a vision model or an off-the-shelf model like FastRCNN:
+- You can **create a custom user-defined function (UDF)** that wraps around a fine-tuned or off-the-shelf deep learning model:
 ```mysql
 CREATE UDF IF NOT EXISTS MyUDF
 INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
@@ -122,7 +129,7 @@ TYPE  Classification
 IMPL  'eva/udfs/fastrcnn_object_detector.py';
 ```
 
-9. **Compose Multiple User-Defined Functions in a Single Query** to accomplish more complicated tasks.
+- **Compose multiple user-defined functions in a single query** to accomplish complicated AI pipelines.
 ```mysql
    -- Analyse emotions of faces in a video
    SELECT id, bbox, EmotionDetector(Crop(data, bbox)) 
@@ -130,14 +137,14 @@ IMPL  'eva/udfs/fastrcnn_object_detector.py';
    WHERE id < 15;
 ```
 
-10. **Usability + Computational Efficiency:** Besides making it easy to write queries based on complex AI pipelines, EVA speeds up query execution using its AI-centric query optimizer. Two key optimizations are:
+- **Usability + Computational Efficiency:** Besides making it easy to write queries for complex AI pipelines, EVA speeds up query execution using its AI-centric query optimizer. Two illustrative in-built optimizations are:
 
-- 💾 **Caching**: EVA automatically reuses previous query results (especially inference results), eliminating redundant computation and reducing processing time.
+   💾 **Caching**: EVA automatically caches and reuses previous query results (especially model inference results), eliminating redundant computation and reducing query processing time.
 
-- 🎯 **Predicate Reordering**: EVA optimizes the order in which query predicates are evaluated (e.g., runs the faster, more selective model first) leading to faster queries and less dollar cost.
+   🎯 **Predicate Reordering**: EVA optimizes the order in which the query predicates are evaluated (e.g., runs the faster, more selective model first) leading to faster queries and lower inference cost.
 
 To illustrate the benefits of these two optimizations, consider these two exploratory queries on a dataset of dog images:
-<img align="right" style="display:inline;" height="280" width="320" src="https://github.com/georgia-tech-db/eva/blob/master/data/assets/eva_performance_comparison.png?raw=true"></a>
+<img align="right" style="display:inline;" height="280" src="https://github.com/georgia-tech-db/eva/blob/master/data/assets/eva_performance_comparison.png?raw=true"></a>
 
 ```mysql
   -- Query 1: Find all images of black-colored dogs
@@ -205,12 +212,11 @@ Join the EVA community on [Slack](https://join.slack.com/t/eva-db/shared_invite/
 [![Coverage Status](https://coveralls.io/repos/github/georgia-tech-db/eva/badge.svg?branch=master)](https://coveralls.io/github/georgia-tech-db/eva?branch=master)
 [![Documentation Status](https://readthedocs.org/projects/evadb/badge/?version=stable)](https://evadb.readthedocs.io/en/stable/index.html)
 
-We welcome all kinds of contributions to EVA.
-To file a bug or request a feature, please use <a href="https://github.com/georgia-tech-db/eva/issues">GitHub issues</a>. <a href="https://github.com/georgia-tech-db/eva/pulls">Pull requests</a> are welcome.
+EVA is the beneficiary of a large number of [contributors](https://github.com/georgia-tech-db/eva/graphs/contributors). All kinds of contributions to EVA are appreciated. To file a bug or to request a feature, please use <a href="https://github.com/georgia-tech-db/eva/issues">GitHub issues</a>. <a href="https://github.com/georgia-tech-db/eva/pulls">Pull requests</a> are welcome.
 
-For more information on contributing to EVA, see our
+For more information, see our
 [contribution guide](https://evadb.readthedocs.io/en/stable/source/contribute/index.html).
 
 ## License
-Copyright (c) 2018-2023 [Georgia Tech Database Group](http://db.cc.gatech.edu/)
+Copyright (c) 2018-2023 [Georgia Tech Database Group](http://db.cc.gatech.edu/).
 Licensed under [Apache License](LICENSE).
