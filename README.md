@@ -4,6 +4,9 @@
   </a>
   <div>
         <h3>Try It Out!</h3>
+        <a href="https://github.com/georgia-tech-db/eva">
+            <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/images/eva/v1.json" alt="Logo"/>
+        </a>
         <a href="https://colab.research.google.com/github/georgia-tech-db/eva/blob/master/tutorials/03-emotion-analysis.ipynb">
             <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open EVA on Colab"/>
         </a>
