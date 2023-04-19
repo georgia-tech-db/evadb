@@ -57,11 +57,11 @@ class AudioHFModel(AbstractHFUdf):
     """
 
     def input_formatter(self, inputs: Any):
-        audio = np.empty((0, 0))
-        files = set(inputs.iloc[:, 0].tolist())
+        audio = []
+        files = inputs.iloc[:, 0].tolist()
         for file in files:
             reader = decord.AudioReader(file, mono=True, sample_rate=16000)
-            audio = np.append(audio, reader[0:].asnumpy()[0])
+            audio.append(reader[0:].asnumpy()[0])
         return audio
 
 
