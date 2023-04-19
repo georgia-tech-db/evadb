@@ -109,7 +109,7 @@ SELECT id, data FROM MyVideo WHERE ['pedestrian', 'car'] <@ YoloV5(data).labels;
 SELECT id, data FROM MyVideo WHERE ArrayCount(YoloV5(data).labels, 'car') > 3;
 ```
 
-8. You can create a custom **User-Defined Function** (UDF) that wraps around a vision model or an off-the-shelf model like FastRCNN:
+8. **Create a Custom User-Defined Function (UDF)** that wraps around a vision model or an off-the-shelf model like FastRCNN:
 ```mysql
 CREATE UDF IF NOT EXISTS MyUDF
 INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
@@ -119,7 +119,7 @@ TYPE  Classification
 IMPL  'eva/udfs/fastrcnn_object_detector.py';
 ```
 
-9. You can **Compose Multiple User-Defined Functions in a Single Query** to accomplish more complicated tasks.
+9. **Compose Multiple User-Defined Functions in a Single Query** to accomplish more complicated tasks.
 ```mysql
    -- Analyse emotions of faces in a video
    SELECT id, bbox, EmotionDetector(Crop(data, bbox)) 
@@ -127,7 +127,7 @@ IMPL  'eva/udfs/fastrcnn_object_detector.py';
    WHERE id < 15;
 ```
 
-10. Besides making it easy to write queries based on complex AI pipelines, EVA also speeds up query execution using its AI-centric query optimizer. Two key optimizations are:
+10. **Usability + Computational Efficiency:** Besides making it easy to write queries based on complex AI pipelines, EVA speeds up query execution using its AI-centric query optimizer. Two key optimizations are:
 
 - 💾 **Caching**: EVA automatically reuses previous query results (especially inference results), eliminating redundant computation and reducing processing time.
 
