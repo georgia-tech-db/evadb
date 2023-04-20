@@ -55,8 +55,8 @@ workflows:
         - Windows:
             name: "Windows | v3.10"
         # eva-decord does not work on Intel Macs
-        #- MacOS:
-        #    name: "MacOS | v3.10"
+        - MacOS:
+           name: "MacOS | v3.10"
         # missing Torchvision
         #- Linux:
         #    name: "Linux -  v3.11"  

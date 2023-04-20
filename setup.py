@@ -49,7 +49,7 @@ minimal_requirement = [
     "ray>=1.13.0",
     "aenum>=2.2.0",
     "diskcache>=5.4.0",
-    "eva-decord==0.6.0"
+    "eva-decord==0.6.1"
 ]
 
 formatter_libs = ["black>=23.1.0", "isort>=5.10.1"]
