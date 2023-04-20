@@ -21,6 +21,7 @@ from eva.optimizer.rules.pattern import Pattern
 if TYPE_CHECKING:
     from eva.optimizer.optimizer_context import OptimizerContext
 
+from eva.executor.execution_context import Context
 from eva.experimental.ray.planner.exchange_plan import ExchangePlan
 from eva.expression.function_expression import FunctionExpression
 from eva.optimizer.operators import (
@@ -70,7 +71,10 @@ class LogicalProjectToPhysical(Rule):
         after = ProjectPlan(before.target_list)
         for child in before.children:
             after.append_child(child)
-        upper = ExchangePlan(parallelism=1)
+        upper = ExchangePlan(
+            parallelism=1,
+            ray_conf={"num_gpus": 1} if Context().gpus else {"num_cpus": 1},
+        )
         upper.append_child(after)
         yield upper
 
@@ -105,7 +109,13 @@ class LogicalGetToSeqScan(Rule):
         if before.target_list is None or not any(
             [isinstance(expr, FunctionExpression) for expr in before.target_list]
         ):
-            return scan
-        upper = ExchangePlan(parallelism=2)
-        upper.append_child(scan)
-        yield upper
+            yield scan
+        else:
+            upper = ExchangePlan(
+                parallelism=2,
+                ray_conf={"num_gpus": 1}
+                if len(Context().gpus) >= 2
+                else {"num_cpus": 1},
+            )
+            upper.append_child(scan)
+            yield upper

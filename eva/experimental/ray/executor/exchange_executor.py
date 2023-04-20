@@ -17,6 +17,7 @@ from typing import Iterator
 from ray.util.queue import Queue
 
 from eva.executor.abstract_executor import AbstractExecutor
+from eva.executor.executor_utils import ExecutorError
 from eva.experimental.ray.executor.ray_stage import (
     StageCompleteSignal,
     ray_stage,
@@ -43,6 +44,9 @@ class QueueReaderExecutor(AbstractExecutor):
             if next_item is StageCompleteSignal:
                 iq.put(StageCompleteSignal)
                 break
+            elif isinstance(next_item, ExecutorError):
+                iq.put(next_item)
+                raise next_item
             else:
                 yield next_item
 
@@ -93,6 +97,8 @@ class ExchangeExecutor(AbstractExecutor):
             res = output_queue.get(block=True)
             if res is StageCompleteSignal:
                 break
+            elif isinstance(res, ExecutorError):
+                raise res
             else:
                 yield res
         else:

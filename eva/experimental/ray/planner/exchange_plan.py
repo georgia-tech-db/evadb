@@ -29,7 +29,7 @@ class ExchangePlan(AbstractPlan):
     """
 
     def __init__(
-        self, parallelism: int = 1, ray_conf: Dict[str, Any] = {"num_gpus": 1}
+        self, parallelism: int = 1, ray_conf: Dict[str, Any] = {"num_cpus": 1}
     ):
         self.parallelism = parallelism
         self.ray_conf = ray_conf

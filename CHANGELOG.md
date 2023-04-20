@@ -10,6 +10,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### [Deprecated]
 ### [Removed]
 
+##  [0.2.0] - 2023-04-16
+### [Added]
+
+* PR #647: feat: LOAD CSV Notebook 
+* PR #626: docs: Documentation for creating UDFs using Decorators. 
+* PR #599: feat: EVA x HuggingFace 
+* PR #621: feat: Ray integration
+
+### [Changed]
+
+* PR #649: fix: Expr bugs 
+* PR #628: test: adding support for pytest-xdist 
+* PR #633: fix: Install Decord from EVA-Fork 
+* PR #646: update doc for extending eva 
+* PR #642: Build fix 
+* PR #641: fix: Unnest bug  
+
+##  [0.1.6] - 2023-04-05
+### [Added]
+
+### [Changed]
+
+* PR #636: fix: Timeout Error #636 
+* PR #635: fix: updates to restore build
+* PR #634: fix: Pandas deprecated append call
+* PR #632: fix: Minor code refactor
+
 ##  [0.1.5] - 2023-04-03
 ### [Added]
 
