@@ -54,8 +54,8 @@ workflows:
         - Pip
         - Windows:
             name: "Windows | v3.10"
-        # eva-decord does not work on Intel Macs
-        #- MacOS:
+        # test_create_index_doesn't work on MacOS
+        # - MacOS:
         #    name: "MacOS | v3.10"
         # missing Torchvision
         #- Linux:
@@ -142,7 +142,6 @@ jobs:
               source test_evadb/bin/activate
               pip install --upgrade pip
               pip debug --verbose
-              pip install eva-decord -vvv
               pip install ".[dev]"
               source test_evadb/bin/activate
               bash script/test/test.sh 
