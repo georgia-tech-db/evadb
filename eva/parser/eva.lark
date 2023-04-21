@@ -401,6 +401,8 @@ OBJECT_DETECTION:                    "OBJECT_DETECTION"
 ACTION_CLASSICATION:                 "ACTION_CLASSICATION"
 BATCH:                               "BATCH"
 EPOCHS:                              "EPOCHS"
+FREEZE:                              "FREEZE"
+LEARN:                               "LEARN"
 
 // DATA TYPE Keywords
 

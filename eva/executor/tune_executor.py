@@ -27,10 +27,10 @@ class TuneExecutor(AbstractExecutor):
 
     def exec(self, *args, **kwargs):
         file_name = self.node.file_name
-        batch_size = self.node.batch_size
-        epochs_size = self.node.epochs_size
-        freeze_layer = self.node.freeze_layer
-        learning_rate = self.node.learning_rate
+        batch_size = int(self.node.batch_size)
+        epochs_size = int(self.node.epochs_size)
+        freeze_layer = int(self.node.freeze_layer)
+        learning_rate = int(self.node.learning_rate) / 10
         show_train_progress = self.node.show_train_progress
 
         file_path = os.path.join('data', file_name[0].strip("'\""))

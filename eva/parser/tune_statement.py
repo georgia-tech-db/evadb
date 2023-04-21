@@ -24,6 +24,9 @@ class TuneStatement(AbstractStatement):
     Arguments:
     batch: batch size
     epochs: number of epochs
+    # freeze_layer: number of freeze layer
+    # learning_rate: learning rate
+    # show_train_progress: whether to show whole train progress
     """
 
     def __init__(
