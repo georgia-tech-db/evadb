@@ -32,10 +32,16 @@ class TunePlan(AbstractPlan):
         file_name: str,
         batch_size: ConstantValueExpression,
         epochs_size: ConstantValueExpression,
+        freeze_layer: ConstantValueExpression,
+        learning_rate: ConstantValueExpression,
+        show_train_progress: bool,
     ):
         self._file_name = file_name
         self._batch_size = batch_size
         self._epochs_size = epochs_size
+        self._freeze_layer = freeze_layer
+        self._learning_rate = learning_rate
+        self._show_train_progress = show_train_progress
         super().__init__(PlanOprType.TUNE)
 
     @property
@@ -49,12 +55,27 @@ class TunePlan(AbstractPlan):
     @property
     def epochs_size(self):
         return self._epochs_size
+    
+    @property
+    def freeze_layer(self):
+        return self._freeze_layer
+    
+    @property
+    def learning_rate(self):
+        return self._learning_rate
+    
+    @property
+    def show_train_progress(self):
+        return self._show_train_progress
 
     def __str__(self):
-        return "TunePlan(file_name={}, batch_size={}, epochs_size={})".format(
+        return "TunePlan(file_name={}, batch_size={}, epochs_size={}, freeze_layer={}, learning_rate={}, show_train_progress={})".format(
             self.file_name,
             self.batch_size,
             self.epochs_size,
+            self.freeze_layer,
+            self.learning_rate,
+            self.show_train_progress,
         )
 
     def __hash__(self) -> int:
@@ -64,5 +85,8 @@ class TunePlan(AbstractPlan):
                 self.file_name,
                 self.batch_size,
                 self.epochs_size,
+                self.freeze_layer,
+                self.learning_rate,
+                self.show_train_progress,
             )
         )

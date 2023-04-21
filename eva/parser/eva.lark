@@ -95,11 +95,17 @@ file_name: string_literal
 
 // Fine tuning statement
 
-tune_statement: TUNE file_name BATCH batch_size EPOCHS epochs_size
+tune_statement: TUNE file_name BATCH batch_size EPOCHS epochs_size FREEZE freeze_layer LEARN learning_rate SHOW show_train_progress
 
 batch_size: decimal_literal
 
 epochs_size: decimal_literal
+
+freeze_layer: decimal_literal
+
+learning_rate: decimal_literal
+
+show_train_progress: boolean_literal
         
 // detailsTUNE
 

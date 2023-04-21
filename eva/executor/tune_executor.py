@@ -29,6 +29,9 @@ class TuneExecutor(AbstractExecutor):
         file_name = self.node.file_name
         batch_size = self.node.batch_size
         epochs_size = self.node.epochs_size
+        freeze_layer = self.node.freeze_layer
+        learning_rate = self.node.learning_rate
+        show_train_progress = self.node.show_train_progress
 
         file_path = os.path.join('data', file_name[0].strip("'\""))
 
@@ -94,6 +97,7 @@ class TuneExecutor(AbstractExecutor):
                 shutil.copy(os.path.join(dataset_path, image_file[:-4] + ".txt"), target_label_folder)
 
         testing = {"dataset": [file_path], "batch_size": [batch_size], "epochs_size": [epochs_size], 
+                   "freeze_layer": [freeze_layer], "learning_rate": [learning_rate], "show_train_progress": [show_train_progress],
                     "num_images": [num_images], "num_train": [num_train], "num_val": [num_val], "num_test": [num_test]}
 
         yield Batch(pd.DataFrame(testing))

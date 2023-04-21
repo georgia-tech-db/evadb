@@ -297,6 +297,9 @@ class StatementToPlanConvertor:
             statement.file_name,
             statement.batch_size,
             statement.epochs_size,
+            statement.freeze_layer,
+            statement.learning_rate,
+            statement.show_train_progress,
         )
         self._plan = tune_opr
 
