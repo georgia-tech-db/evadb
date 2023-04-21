@@ -20,19 +20,22 @@ from test.util import (
     get_logical_query_plan,
     get_physical_query_plan,
     load_udfs_for_testing,
+    remove_udf_cache,
     shutdown_ray,
 )
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
 from eva.expression.function_expression import FunctionExpression
-from eva.optimizer.operators import LogicalFilter, LogicalFunctionScan
+from eva.optimizer.operators import LogicalFunctionScan
 from eva.optimizer.plan_generator import PlanGenerator
 from eva.optimizer.rules.rules import (
     CacheFunctionExpressionInApply,
     CacheFunctionExpressionInFilter,
+    CacheFunctionExpressionInProject,
 )
 from eva.optimizer.rules.rules_manager import disable_rules
+from eva.plan_nodes.predicate_plan import PredicatePlan
 from eva.server.command_handler import execute_query_fetch_all
 from eva.utils.stats import Timer
 
@@ -50,7 +53,11 @@ class ReuseTest(unittest.TestCase):
 
     def _verify_reuse_correctness(self, query, reuse_batch):
         with disable_rules(
-            [CacheFunctionExpressionInApply(), CacheFunctionExpressionInFilter()]
+            [
+                CacheFunctionExpressionInApply(),
+                CacheFunctionExpressionInFilter(),
+                CacheFunctionExpressionInProject(),
+            ]
         ) as rules_manager:
             custom_plan_generator = PlanGenerator(rules_manager)
             without_reuse_batch = execute_query_fetch_all(
@@ -100,36 +107,29 @@ class ReuseTest(unittest.TestCase):
         reuse_batch = execute_query_fetch_all(select_query)
         self._verify_reuse_correctness(select_query, reuse_batch)
 
-        # enable these test cases when we increase the support of caching
-        if False:
-            # different query format
-            select_query = (
-                """SELECT id, YoloV5(data).labels FROM DETRAC WHERE id < 25;"""
-            )
-            reuse_batch = execute_query_fetch_all(select_query)
-            self._verify_reuse_correctness(select_query, reuse_batch)
+        # different query format
+        select_query = """SELECT id, YoloV5(data).labels FROM DETRAC WHERE id < 25;"""
+        reuse_batch = execute_query_fetch_all(select_query)
+        self._verify_reuse_correctness(select_query, reuse_batch)
 
-            # different query format
-            select_query = """SELECT id, YoloV5(data).scores FROM DETRAC WHERE ['car'] <@ YoloV5(data).labels AND id < 20"""
-            reuse_batch = execute_query_fetch_all(select_query)
-            self._verify_reuse_correctness(select_query, reuse_batch)
+        # different query format
+        select_query = """SELECT id, YoloV5(data).scores FROM DETRAC WHERE ['car'] <@ YoloV5(data).labels AND id < 20"""
+        reuse_batch = execute_query_fetch_all(select_query)
+        self._verify_reuse_correctness(select_query, reuse_batch)
 
-    def test_reuse_does_not_work_when_expression_in_where_clause(self):
+    def test_reuse_should_work_when_expression_in_where_clause(self):
         # add with subsequent PR
         select_query = """
             SELECT id FROM DETRAC
             WHERE ArrayCount(YoloV5(data).labels, 'car') > 3 AND id < 5;"""
 
-        execute_query_fetch_all(select_query)
-        execute_query_fetch_all(select_query)
-
-        plan = next(get_logical_query_plan(select_query).find_all(LogicalFilter))
+        plan = next(get_physical_query_plan(select_query).find_all(PredicatePlan))
         yolo_expr = None
         for expr in plan.predicate.find_all(FunctionExpression):
             if expr.name == "YoloV5":
                 yolo_expr = expr
 
-        self.assertFalse(yolo_expr.has_cache())
+        self.assertTrue(yolo_expr.has_cache())
 
     def test_reuse_logical_filter_with_duplicate_query(self):
         select_query = """
@@ -146,7 +146,55 @@ class ReuseTest(unittest.TestCase):
         self._verify_reuse_correctness(select_query, reuse_batch)
 
         # reuse should be faster than no reuse
-        print(no_reuse_timer.total_elapsed_time, reuse_timer.total_elapsed_time)
+        self.assertTrue(
+            no_reuse_timer.total_elapsed_time > reuse_timer.total_elapsed_time
+        )
+
+    def test_reuse_logical_project_with_duplicate_query(self):
+        project_query = """SELECT id, YoloV5(data).labels FROM DETRAC WHERE id < 25;"""
+        no_reuse_timer = Timer()
+        reuse_timer = Timer()
+
+        with no_reuse_timer:
+            execute_query_fetch_all(project_query)
+        with reuse_timer:
+            reuse_batch = execute_query_fetch_all(project_query)
+
+        self._verify_reuse_correctness(project_query, reuse_batch)
+
+        # reuse should be faster than no reuse
+        self.assertTrue(
+            no_reuse_timer.total_elapsed_time > reuse_timer.total_elapsed_time
+        )
+
+    def test_reuse_filter_with_project(self):
+        select_query = """
+            SELECT id FROM DETRAC
+            WHERE ArrayCount(YoloV5(data).labels, 'car') > 3 AND id < 10;"""
+
+        project_query = """
+            SELECT id, YoloV5(data).labels FROM DETRAC WHERE id < 25;"""
+
+        no_reuse_timer = Timer()
+        reuse_timer = Timer()
+
+        # execute select query with an empty cache
+        with no_reuse_timer:
+            execute_query_fetch_all(select_query)
+
+        # remove the cached resuts from prev query
+        remove_udf_cache(select_query)
+
+        # execute fetch query to cache the results
+        execute_query_fetch_all(project_query)
+
+        # execute the same select again. This should reuse the result cached by project query
+        with reuse_timer:
+            reuse_batch = execute_query_fetch_all(select_query)
+
+        self._verify_reuse_correctness(select_query, reuse_batch)
+
+        # reuse should be faster than no reuse
         self.assertTrue(
             no_reuse_timer.total_elapsed_time > reuse_timer.total_elapsed_time
         )
