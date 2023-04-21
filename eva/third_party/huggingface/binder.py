@@ -14,6 +14,7 @@
 # limitations under the License.
 from eva.catalog.models.udf_catalog import UdfCatalogEntry
 from eva.third_party.huggingface.create import MODEL_FOR_TASK
+from eva.third_party.huggingface.utils import get_metadata_entry
 
 
 def assign_hf_udf(udf_obj: UdfCatalogEntry):
@@ -27,13 +28,7 @@ def assign_hf_udf(udf_obj: UdfCatalogEntry):
     # NOTE: Currently, we only support models that require a single input.
     assert len(inputs) == 1, "Only single input models are supported."
 
-    task = None
-    for metadata in udf_obj.metadata:
-        if metadata.key == "task":
-            task = metadata.value
-            break
-
-    assert task is not None, f"Task is not defined for {udf_obj.name}"
+    task = get_metadata_entry(udf_obj, "task")[1]
     model_class = MODEL_FOR_TASK[task]
 
     return lambda: model_class(udf_obj)

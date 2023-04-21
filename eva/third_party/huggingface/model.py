@@ -57,9 +57,15 @@ class AudioHFModel(AbstractHFUdf):
     """
 
     def input_formatter(self, inputs: Any):
+        # if audio is being passed using decord reader, we already have the audio as numpy arrays,
+        # merge into single array and return
+        if inputs.columns.str.contains("audio").any():
+            return np.concatenate(inputs.iloc[:, 0].values)
+        # else expect that the user passed an array of video file paths, get audio as numpy array
         audio = []
         files = inputs.iloc[:, 0].tolist()
         for file in files:
+            # must read audio at 16000Hz because most models were trained at this sampling rate
             reader = decord.AudioReader(file, mono=True, sample_rate=16000)
             audio.append(reader[0:].asnumpy()[0])
         return audio

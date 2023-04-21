@@ -133,7 +133,7 @@ class DecordReader(AbstractReader):
 
     def __get_audio_frame(self, frame_id):
         frame_audio, _ = self._reader[frame_id]
-        frame_audio = frame_audio.asnumpy()
+        frame_audio = frame_audio.asnumpy()[0]
 
         return {
             VideoColumnName.id.name: frame_id,

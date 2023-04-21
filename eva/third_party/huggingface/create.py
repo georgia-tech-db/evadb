@@ -33,22 +33,7 @@ from eva.third_party.huggingface.model import (
 We currently support the following tasks from HuggingFace.
 Each task is mapped to the type of input it expects.
 """
-SUPPORTED_TASKS = [
-    "audio-classification",
-    "automatic-speech-recognition",
-    "text-classification",
-    "summarization",
-    "translation",
-    "text2text-generation",
-    "text-generation",
-    "image-classification",
-    "image-segmentation",
-    "image-to-text",
-    "object-detection",
-    "depth-estimation",
-]
-
-INPUT_TYPE_FOR_TASK = {
+INPUT_TYPE_FOR_SUPPORTED_TASKS = {
     "audio-classification": HFInputTypes.AUDIO,
     "automatic-speech-recognition": HFInputTypes.AUDIO,
     "text-classification": HFInputTypes.TEXT,
@@ -123,13 +108,15 @@ def infer_output_name_and_type(**pipeline_args):
     """
     assert "task" in pipeline_args, "Task Not Found In Model Definition"
     task = pipeline_args["task"]
-    assert task in SUPPORTED_TASKS, f"Task {task} not supported in EVA currently"
+    assert (
+        task in INPUT_TYPE_FOR_SUPPORTED_TASKS
+    ), f"Task {task} not supported in EVA currently"
 
     # Construct the pipeline
     pipe = pipeline(**pipeline_args)
 
     # Run the pipeline through a dummy input to get a sample output
-    input_type = INPUT_TYPE_FOR_TASK[task]
+    input_type = INPUT_TYPE_FOR_SUPPORTED_TASKS[task]
     model_input = gen_sample_input(input_type)
     model_output = pipe(model_input)
 

@@ -35,12 +35,8 @@ class HuggingFaceTests(unittest.TestCase):
         query = """LOAD VIDEO 'data/ua_detrac/ua_detrac.mp4' INTO DETRAC;"""
         execute_query_fetch_all(query)
 
-        create_table = """CREATE TABLE IF NOT EXISTS VIDEOS (path TEXT(1000));"""
-        execute_query_fetch_all(create_table)
-        insert_query = (
-            """INSERT INTO VIDEOS (path) VALUES ("data/sample_videos/touchdown.mp4");"""
-        )
-        execute_query_fetch_all(insert_query)
+        query = """LOAD VIDEO 'data/sample_videos/touchdown.mp4' INTO VIDEOS"""
+        execute_query_fetch_all(query)
 
         # Text CSV for testing HF Text Based Models
         self.csv_file_path = create_text_csv()
@@ -214,7 +210,8 @@ class HuggingFaceTests(unittest.TestCase):
         )
         execute_query_fetch_all(create_udf)
 
-        select_query = f"SELECT {udf_name}(path) FROM VIDEOS;"
+        # TODO: use with SAMPLE AUDIORATE 16000
+        select_query = f"SELECT {udf_name}(audio) FROM VIDEOS;"
         output = execute_query_fetch_all(select_query)
 
         # verify that output has one row and one column only
@@ -240,7 +237,8 @@ class HuggingFaceTests(unittest.TestCase):
         )
         execute_query_fetch_all(create_udf)
 
-        select_query = f"SELECT {summary_udf}({asr_udf}(path)) FROM VIDEOS;"
+        # TODO: use with SAMPLE AUDIORATE 16000
+        select_query = f"SELECT {summary_udf}({asr_udf}(audio)) FROM VIDEOS;"
         output = execute_query_fetch_all(select_query)
 
         # verify that output has one row and one column only

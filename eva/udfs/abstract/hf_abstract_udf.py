@@ -67,6 +67,9 @@ class AbstractHFUdf(AbstractUDF, GPUCompatible):
     def output_formatter(self, outputs: Any):
         """
         Function that formats output from HuggingFace format to EVA format (pandas dataframe)
+        The output can be in various formats, depending on the model. For example:
+            {'text' : 'transcript from video'}
+            [[{'score': 0.25, 'label': 'bridge'}, {'score': 0.50, 'label': 'car'}]]
         """
         if isinstance(outputs, dict):
             return pd.DataFrame(outputs, index=[0])
