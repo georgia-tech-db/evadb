@@ -56,6 +56,10 @@ class AbstractHFUdf(AbstractUDF, GPUCompatible):
 
     @property
     def default_pipeline_args(self) -> dict:
+        """
+        Arguments that will be passed to the pipeline by default.
+        User provided arguments override the default arguments
+        """
         return {}
 
     def input_formatter(self, inputs: Any):
