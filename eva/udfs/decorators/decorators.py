@@ -45,7 +45,10 @@ def setup(cachable: bool = False, udf_type: str = "Abstract", batchable: bool = 
     return inner_fn
 
 
-def forward(input_signatures: List[IOArgument], output_signatures: List[IOArgument], check_input: bool = True, check_output: bool = True):
+def forward(input_signatures: List[IOArgument], 
+            output_signatures: List[IOArgument], 
+            check_input: bool = True, 
+            check_output: bool = True):
     """decorator for the forward function. It will be used to set the input and output.
 
     Args:
@@ -58,22 +61,23 @@ def forward(input_signatures: List[IOArgument], output_signatures: List[IOArgume
 
             # checking the user constraints
             if check_input:
-                if len(input_signatures) > 0:
-                    args_lst = []
-                    if len(args) > 0:
-                        args_lst.append(args[0])
+                
+                args_lst = []
+                
+                #appending the self object
+                args_lst.append(args[0])
 
-                    for i, input_signature in enumerate(input_signatures):
-                        try:
-                            args_lst.append(
-                                # the first object in the forward function is self so we start from the second object
-                                input_signature.validate_object(args[i + 1], True)
-                            )
-                        except UDFIODefinitionError as e:
-                            raise UDFIODefinitionError(str(e))
+                for i, input_signature in enumerate(input_signatures):
+                    try:
+                        args_lst.append(
+                            # the first object in the forward function is self so we start from the second object
+                            input_signature.validate_object(args[i + 1], True)
+                        )
+                    except UDFIODefinitionError as e:
+                        raise UDFIODefinitionError(str(e))
 
-                    if len(args_lst) > 0:
-                        args = tuple(args_lst)
+                    
+                    args = tuple(args_lst)
 
             # calling the forward function defined by the user inside the udf implementation
             output = arg_fn(*args)
