@@ -59,19 +59,16 @@ class GPTUdf(AbstractUDF):
 
         result = []
         queries = text_df[text_df.columns[0]]
-        cache = {}
 
         for query in queries:
-            if query in cache:
-                result.append(cache[query])
-
-            else:
-                response = openai.ChatCompletion.create(
-                    model="gpt-3.5-turbo", messages=[{"role": "user", "content": query}]
-                )
-                for choice in response.choices:
-                    result.append(choice.message.content)
-                    cache[query] = choice.message.content
+              
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo", messages=[{"role": "user", "content": query}]
+            )
+            
+            for choice in response.choices:
+                result.append(choice.message.content)
+                
 
         df = pd.DataFrame({"input_query": queries, "responses": result})
 
