@@ -533,6 +533,24 @@ class ParserTests(unittest.TestCase):
         # sample_freq
         self.assertEqual(select_stmt.from_table.sample_freq, ConstantValueExpression(5))
 
+    def test_select_statement_semantic_search(self):
+        parser = Parser()
+
+        semantic_text = 'Find all cars in the video'
+        semantic_search_query = 'SEMANTIC "{text}";'.format(text=semantic_text)
+
+        eva_statement_list = parser.parse(semantic_search_query)
+        self.assertIsInstance(eva_statement_list, list)
+        self.assertEqual(len(eva_statement_list), 1)
+        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.SEMANTIC)
+
+        semantic_stmt = eva_statement_list[0]
+
+        # semantic text
+        self.assertEqual(semantic_stmt._semantic_text, semantic_text)
+
+        # TDOO: test for select statement
+
     def test_table_ref(self):
         """Testing table info in TableRef
         Class: TableInfo
