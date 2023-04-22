@@ -18,30 +18,31 @@ import pandas as pd
 
 from eva.udfs.abstract.abstract_udf import AbstractUDF
 
-class GaussianBlur(AbstractUDF):
+class ToGrayscale(AbstractUDF):
     def setup(self):
         pass
 
     @property
     def name(self):
-        return "GaussianBlur"
+        return "ToGrayscale"
 
     def forward(self, frame: pd.DataFrame) -> pd.DataFrame:
         """
-        Apply Gaussian Blur to the frame
+        Convert the frame from BGR to grayscale
 
          Returns:
              ret (pd.DataFrame): The modified frame.
         """
 
-        def gaussianBlur(row: pd.Series) -> np.ndarray:
+        def toGrayscale(row: pd.Series) -> np.ndarray:
             row = row.to_list()
             frame = row[0]
 
-            frame = cv2.GaussianBlur(frame, (5, 5), cv2.BORDER_DEFAULT)
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
 
             return frame
 
         ret = pd.DataFrame()
-        ret["blurred_frame_array"] = frame.apply(gaussianBlur, axis=1)
+        ret["grayscale_frame_array"] = frame.apply(toGrayscale, axis=1)
         return ret
