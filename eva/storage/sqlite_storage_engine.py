@@ -207,5 +207,23 @@ class SQLStorageEngine(AbstractStorageEngine):
             logger.exception(err_msg)
             raise Exception(err_msg)
 
+    def clear(self, table: TableCatalogEntry):
+        """Delete an entire table.
+
+        Argument:
+            table: table metadata object of the table
+        """
+        try:
+            table_to_delete_from = self._try_loading_table_via_reflection(table.name)
+            d = table_to_delete_from.delete()
+            self._sql_engine.execute(d)
+            self._sql_session.commit()
+        except Exception as e:
+            err_msg = (
+                f"Failed to clear the table {table.name} with exception {str(e)}"
+            )
+            logger.exception(err_msg)
+            raise Exception(err_msg)
+
     def rename(self, old_table: TableCatalogEntry, new_name: TableInfo):
         raise Exception("Rename not supported for structured data table")

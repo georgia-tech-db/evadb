@@ -12,27 +12,36 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import cv2
+import numpy as np
 import pandas as pd
-from thefuzz import fuzz
 
 from eva.udfs.abstract.abstract_udf import AbstractUDF
 
-
-class FuzzDistance(AbstractUDF):
+class GaussianBlur(AbstractUDF):
     def setup(self):
         pass
 
     @property
     def name(self):
-        return "FuzzDistance"
+        return "GaussianBlur"
 
-    def forward(self, df: pd.DataFrame) -> pd.DataFrame:
+    def forward(self, frame: pd.DataFrame) -> pd.DataFrame:
         """
-        Find the distance between two dataframes using <> distance metric.
+        Applu Gaussian Blur to the frame
 
-        Returns:
-            ret (pd.DataFrame): DF containing the distance.
+         Returns:
+             ret (pd.DataFrame): The modified frame.
         """
+
+        def gaussianBlur(row: pd.Series) -> np.ndarray:
+            row = row.to_list()
+            frame = row[0]
+
+            frame = cv2.GaussianBlur(frame, (5, 5), cv2.BORDER_DEFAULT)
+
+            return frame
+
         ret = pd.DataFrame()
-        ret["distance"] = df.apply(lambda row: fuzz.ratio(row[0], row[1]), axis=1)
+        ret["blurred_frame_array"] = frame.apply(gaussianBlur, axis=1)
         return ret

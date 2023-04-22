@@ -88,6 +88,15 @@ Similarity_udf_query = """CREATE UDF IF NOT EXISTS Similarity
     EVA_INSTALLATION_DIR, NDARRAY_DIR
 )
 
+Annotate_udf_query = """CREATE UDF IF NOT EXISTS Annotate
+                INPUT  (Frame_Array NDARRAY UINT8(3, ANYDIM, ANYDIM))
+                OUTPUT (Annotated_Frame_Array NDARRAY UINT8(3, ANYDIM, ANYDIM))
+                TYPE  NdarrayUDF
+                IMPL  "{}/udfs/{}/annotate.py";
+        """.format(
+    EVA_INSTALLATION_DIR, NDARRAY_DIR
+)
+
 Unnest_udf_query = """CREATE UDF IF NOT EXISTS Unnest
                 INPUT  (inp NDARRAY ANYTYPE)
                 OUTPUT (out ANYTYPE)
@@ -169,7 +178,8 @@ def init_builtin_udfs(mode="debug"):
         ArrayCount_udf_query,
         Crop_udf_query,
         Open_udf_query,
-        Similarity_udf_query
+        Similarity_udf_query,
+        Annotate_udf_query,
         # Disabled because required packages (eg., easy_ocr might not be preinstalled)
         # face_detection_udf_query,
         # ocr_udf_query,

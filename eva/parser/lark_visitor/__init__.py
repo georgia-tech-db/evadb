@@ -29,6 +29,7 @@ from eva.parser.lark_visitor._rename_statement import RenameTable
 from eva.parser.lark_visitor._select_statement import Select
 from eva.parser.lark_visitor._show_statements import Show
 from eva.parser.lark_visitor._table_sources import TableSources
+from eva.parser.lark_visitor._overwrite_statement import Overwrite
 
 # To add new functionality to the parser, create a new file under
 # the lark_visitor directory, and implement a new class which
@@ -69,6 +70,7 @@ class LarkInterpreter(
     Show,
     Explain,
     Delete,
+    Overwrite,
 ):
     def __init__(self, query):
         super().__init__()
