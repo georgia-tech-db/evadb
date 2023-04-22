@@ -26,7 +26,7 @@ class TunePlan(AbstractPlan):
         batch: batch size
         epochs: number of epochs
         freeze_layer: number of freeze_layer
-        learning_rate: learning_rate
+        multi-scale: whether to enable multi-scale
         show_train_progress: whether to show whole train progress
     """
 
@@ -36,14 +36,14 @@ class TunePlan(AbstractPlan):
         batch_size: ConstantValueExpression,
         epochs_size: ConstantValueExpression,
         freeze_layer: ConstantValueExpression,
-        learning_rate: ConstantValueExpression,
+        multi_scale: bool,
         show_train_progress: bool,
     ):
         self._file_name = file_name
         self._batch_size = batch_size
         self._epochs_size = epochs_size
         self._freeze_layer = freeze_layer
-        self._learning_rate = learning_rate
+        self._multi_scale = multi_scale
         self._show_train_progress = show_train_progress
         super().__init__(PlanOprType.TUNE)
 
@@ -64,20 +64,20 @@ class TunePlan(AbstractPlan):
         return self._freeze_layer
     
     @property
-    def learning_rate(self):
-        return self._learning_rate
+    def multi_scale(self):
+        return self._multi_scale
     
     @property
     def show_train_progress(self):
         return self._show_train_progress
 
     def __str__(self):
-        return "TunePlan(file_name={}, batch_size={}, epochs_size={}, freeze_layer={}, learning_rate={}, show_train_progress={})".format(
+        return "TunePlan(file_name={}, batch_size={}, epochs_size={}, freeze_layer={}, multi_scale={}, show_train_progress={})".format(
             self.file_name,
             self.batch_size,
             self.epochs_size,
             self.freeze_layer,
-            self.learning_rate,
+            self.multi_scale,
             self.show_train_progress,
         )
 
@@ -89,7 +89,7 @@ class TunePlan(AbstractPlan):
                 self.batch_size,
                 self.epochs_size,
                 self.freeze_layer,
-                self.learning_rate,
+                self.multi_scale,
                 self.show_train_progress,
             )
         )

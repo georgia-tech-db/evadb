@@ -87,7 +87,7 @@ update_statement: UPDATE table_name (AS? uid)? SET updated_element ("," updated_
     
 load_statement: LOAD file_format file_name INTO table_name (("(" uid_list ")"))?
     
-file_format: CSV | VIDEO | IMAGE
+file_format: CSV | VIDEO | IMAGE | ZIP
 
 file_options: FORMAT file_format
     
@@ -95,7 +95,7 @@ file_name: string_literal
 
 // Fine tuning statement
 
-tune_statement: TUNE file_name BATCH batch_size EPOCHS epochs_size FREEZE freeze_layer LEARN learning_rate SHOW show_train_progress
+tune_statement: TUNE file_name BATCH batch_size EPOCHS epochs_size FREEZE freeze_layer MULTI multi_scale SHOW show_train_progress
 
 batch_size: decimal_literal
 
@@ -103,7 +103,7 @@ epochs_size: decimal_literal
 
 freeze_layer: decimal_literal
 
-learning_rate: decimal_literal
+multi_scale: boolean_literal
 
 show_train_progress: boolean_literal
         
@@ -391,6 +391,7 @@ FORMAT:               "FORMAT"
 CSV:                  "CSV"
 VIDEO:                "VIDEO"
 IMAGE:                "IMAGE"
+ZIP:                  "ZIP"
 
 // Index types
 HNSW:                                "HNSW"
@@ -403,6 +404,7 @@ BATCH:                               "BATCH"
 EPOCHS:                              "EPOCHS"
 FREEZE:                              "FREEZE"
 LEARN:                               "LEARN"
+MULTI:                               "MULTI"
 
 // DATA TYPE Keywords
 

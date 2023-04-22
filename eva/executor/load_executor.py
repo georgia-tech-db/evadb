@@ -15,6 +15,7 @@
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.load_csv_executor import LoadCSVExecutor
 from eva.executor.load_multimedia_executor import LoadMultimediaExecutor
+from eva.executor.load_zip_executor import LoadZIPExecutor
 from eva.parser.types import FileFormatType
 from eva.plan_nodes.load_data_plan import LoadDataPlan
 
@@ -36,6 +37,8 @@ class LoadDataExecutor(AbstractExecutor):
             executor = LoadMultimediaExecutor(self.node)
         elif self.node.file_options["file_format"] == FileFormatType.CSV:
             executor = LoadCSVExecutor(self.node)
+        elif self.node.file_options["file_format"] == FileFormatType.ZIP:
+            executor = LoadZIPExecutor(self.node)
 
         # for each batch, exec the executor
         for batch in executor.exec():

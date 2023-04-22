@@ -1276,7 +1276,7 @@ class LogicalTune(Operator):
         batch: batch size
         epochs: number of epochs
         freeze_layer: number of freeze layer
-        learning_rate: learing rate
+        multi_scale: whether to enable multi scale
         show_train_progress: whether to show whole train progress
     """
 
@@ -1286,7 +1286,7 @@ class LogicalTune(Operator):
         batch_size: ConstantValueExpression,
         epochs_size: ConstantValueExpression,
         freeze_layer: ConstantValueExpression,
-        learning_rate: ConstantValueExpression,
+        multi_scale: bool,
         show_train_progress: bool,
         children: List = None,
     ):
@@ -1295,7 +1295,7 @@ class LogicalTune(Operator):
         self._batch_size = batch_size
         self._epochs_size = epochs_size
         self._freeze_layer = freeze_layer
-        self._learning_rate = learning_rate
+        self._multi_scale = multi_scale
         self._show_train_progress = show_train_progress
 
     @property
@@ -1313,10 +1313,10 @@ class LogicalTune(Operator):
     @property
     def freeze_layer(self):
         return self._freeze_layer
-    
+
     @property
-    def learning_rate(self):
-        return self._learning_rate
+    def multi_scale(self):
+        return self._multi_scale
     
     @property
     def show_train_progress(self):
@@ -1332,7 +1332,7 @@ class LogicalTune(Operator):
             and self.batch_size == other.batch_size
             and self.epochs_size == other.epochs_size
             and self.freeze_layer == other.freeze_layer
-            and self.learning_rate == other.learning_rate
+            and self.multi_scale == other.multi_scale
             and self.show_train_progress == other.show_train_progress
         )
 
@@ -1344,7 +1344,7 @@ class LogicalTune(Operator):
                 self.batch_size,
                 self.epochs_size,
                 self.freeze_layer,
-                self.learning_rate,
+                self.multi_scale,
                 self.show_train_progress,
             )
         )

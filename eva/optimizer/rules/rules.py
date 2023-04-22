@@ -1092,7 +1092,7 @@ class LogicalTuneToPhysical(Rule):
             before.batch_size,
             before.epochs_size,
             before.freeze_layer,
-            before.learning_rate,
+            before.multi_scale,
             before.show_train_progress,
         )
         yield after

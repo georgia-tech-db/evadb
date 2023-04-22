@@ -26,9 +26,9 @@ class Tune:
         batch_size = tree.children[3].children[0].children[0].value
         epochs_size = tree.children[5].children[0].children[0].value
         freeze_layer = tree.children[7].children[0].children[0].value
-        learning_rate = tree.children[9].children[0].children[0].value
+        multi_scale = tree.children[9].children[0].children[0].value
         show_train_progress = tree.children[11].children[0].children[0].value
-        stmt = TuneStatement(file_name, batch_size, epochs_size, freeze_layer, learning_rate, show_train_progress)
+        stmt = TuneStatement(file_name, batch_size, epochs_size, freeze_layer, multi_scale, show_train_progress)
         return stmt
 
     def file_name(self, tree):
@@ -47,9 +47,9 @@ class Tune:
         freeze_layer = tree.children[7].children[0].children[0].value
         return freeze_layer
     
-    def learning_rate(self, tree):
-        learning_rate = tree.children[9].children[0].children[0].value
-        return learning_rate
+    def multi_scale(self, tree):
+        multi_scale = tree.children[9].children[0].children[0].value
+        return multi_scale
     
     def show_train_progress(self, tree):
         show_train_progress = tree.children[11].children[0].children[0].value

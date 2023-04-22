@@ -63,6 +63,7 @@ class FileFormatType(EVAEnum):
     VIDEO  # noqa: F821
     CSV  # noqa: F821
     IMAGE  # noqa: F821
+    ZIP  #noqa: F821
 
 
 class ShowType(EVAEnum):
