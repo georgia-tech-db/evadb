@@ -39,7 +39,8 @@ class VerticalFlip(AbstractUDF):
             frame = row[0]
 
             frame = cv2.flip(frame, 0)
-
+            # since cv2 by default reads an image in BGR
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             return frame
 
         ret = pd.DataFrame()
