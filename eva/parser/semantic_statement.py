@@ -45,6 +45,10 @@ class SemanticStatement(AbstractStatement):
     @property
     def select_statement(self):
         return self._select_statement
+    
+    @select_statement.setter
+    def select_statement(self, stmt):
+        self.select_statement = stmt
 
     def __eq__(self, other):
         if not isinstance(other, SemanticStatement):

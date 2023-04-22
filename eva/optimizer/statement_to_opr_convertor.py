@@ -53,11 +53,13 @@ from eva.parser.explain_statement import ExplainStatement
 from eva.parser.insert_statement import InsertTableStatement
 from eva.parser.load_statement import LoadDataStatement
 from eva.parser.rename_statement import RenameTableStatement
+from eva.parser.semantic_statement import SemanticStatement
 from eva.parser.select_statement import SelectStatement
 from eva.parser.show_statement import ShowStatement
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
 from eva.utils.logging_manager import logger
+from eva.parser.parser import Parser
 
 
 class StatementToPlanConvertor:
@@ -324,6 +326,15 @@ class StatementToPlanConvertor:
         )
         self._plan = delete_opr
 
+    def visit_semantic(self, statement: SemanticStatement):
+        """
+        TODO: Add semantic to select converter
+        """
+        parser = Parser()
+        statement._select_statement = parser.parse('SELECT CLASS, REDNESS FROM TAIPAI SAMPLE 5;')[0]
+
+        self.visit_select(statement.select_statement)
+
     def visit(self, statement: AbstractStatement):
         """Based on the instance of the statement the corresponding
            visit is called.
@@ -358,6 +369,8 @@ class StatementToPlanConvertor:
             self.visit_create_index(statement)
         elif isinstance(statement, DeleteTableStatement):
             self.visit_delete(statement)
+        elif isinstance(statement, SemanticStatement):
+            self.visit_semantic(statement)
         return self._plan
 
     @property
