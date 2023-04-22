@@ -146,7 +146,7 @@ class LogicalExpressionsTest(unittest.TestCase):
         self.assertEqual(
             [True, False, False, False], logical_exp.evaluate(tuples).frames[0].tolist()
         )
-        comp_exp_r.evaluate.assert_called_once_with(tuples, mask=[0, 1])
+        comp_exp_r.evaluate.assert_called_once_with(tuples[[0, 1]])
 
     def test_short_circuiting_or_partial(self):
         # tests whether right-hand side is partially executed with or
@@ -169,4 +169,84 @@ class LogicalExpressionsTest(unittest.TestCase):
         self.assertEqual(
             [True, False, True, True], logical_exp.evaluate(tuples).frames[0].tolist()
         )
-        comp_exp_r.evaluate.assert_called_once_with(tuples, mask=[0, 1])
+        comp_exp_r.evaluate.assert_called_once_with(tuples[[0, 1]])
+
+    def test_multiple_logical(self):
+        batch = Batch(pd.DataFrame({"col": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}))
+
+        # col > 1
+        comp_left = ComparisonExpression(
+            ExpressionType.COMPARE_GREATER,
+            TupleValueExpression(col_alias="col"),
+            ConstantValueExpression(1),
+        )
+
+        batch_copy = Batch(pd.DataFrame({"col": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}))
+        expected = batch[list(range(2, 10))]
+        batch_copy.drop_zero(comp_left.evaluate(batch))
+        self.assertEqual(batch_copy, expected)
+
+        # col < 8
+        comp_right = ComparisonExpression(
+            ExpressionType.COMPARE_LESSER,
+            TupleValueExpression(col_alias="col"),
+            ConstantValueExpression(8),
+        )
+
+        batch_copy = Batch(pd.DataFrame({"col": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}))
+        expected = batch[list(range(0, 8))]
+        batch_copy.drop_zero(comp_right.evaluate(batch))
+        self.assertEqual(batch_copy, expected)
+
+        # col >= 5
+        comp_expr = ComparisonExpression(
+            ExpressionType.COMPARE_GEQ,
+            TupleValueExpression(col_alias="col"),
+            ConstantValueExpression(5),
+        )
+        batch_copy = Batch(pd.DataFrame({"col": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}))
+        expected = batch[list(range(5, 10))]
+        batch_copy.drop_zero(comp_expr.evaluate(batch))
+        self.assertEqual(batch_copy, expected)
+
+        # (col >= 5)  AND (col > 1 AND col < 8)
+        l_expr = LogicalExpression(ExpressionType.LOGICAL_AND, comp_left, comp_right)
+        root_l_expr = LogicalExpression(ExpressionType.LOGICAL_AND, comp_expr, l_expr)
+        batch_copy = Batch(pd.DataFrame({"col": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}))
+        expected = batch[[5, 6, 7]]
+        batch_copy.drop_zero(root_l_expr.evaluate(batch))
+        self.assertEqual(batch_copy, expected)
+
+        # (col > 1 AND col < 8) AND (col >= 5)
+        root_l_expr = LogicalExpression(ExpressionType.LOGICAL_AND, l_expr, comp_expr)
+        batch_copy = Batch(pd.DataFrame({"col": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}))
+        expected = batch[[5, 6, 7]]
+        batch_copy.drop_zero(root_l_expr.evaluate(batch))
+        self.assertEqual(batch_copy, expected)
+
+        # (col >=4 AND col <= 7) AND (col > 1 AND col < 8)
+        between_4_7 = LogicalExpression(
+            ExpressionType.LOGICAL_AND,
+            ComparisonExpression(
+                ExpressionType.COMPARE_GEQ,
+                TupleValueExpression(col_alias="col"),
+                ConstantValueExpression(4),
+            ),
+            ComparisonExpression(
+                ExpressionType.COMPARE_LEQ,
+                TupleValueExpression(col_alias="col"),
+                ConstantValueExpression(7),
+            ),
+        )
+        test_expr = LogicalExpression(ExpressionType.LOGICAL_AND, between_4_7, l_expr)
+        batch_copy = Batch(pd.DataFrame({"col": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}))
+        expected = batch[[4, 5, 6, 7]]
+        batch_copy.drop_zero(test_expr.evaluate(batch))
+        self.assertEqual(batch_copy, expected)
+
+        # (col >=4 AND col <= 7) OR (col > 1 AND col < 8)
+        test_expr = LogicalExpression(ExpressionType.LOGICAL_OR, between_4_7, l_expr)
+        batch_copy = Batch(pd.DataFrame({"col": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}))
+        expected = batch[[2, 3, 4, 5, 6, 7]]
+        batch_copy.drop_zero(test_expr.evaluate(batch))
+        self.assertEqual(batch_copy, expected)
