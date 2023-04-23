@@ -111,6 +111,85 @@ class LoadZIPExecutor(AbstractExecutor):
                 if not os.path.exists(target_label_file):
                     shutil.copy(os.path.join(dataset_path, image_file[:-4] + ".txt"), target_label_folder)
 
+        table_info = self.node.table_info
+        database_name = table_info.database_name
+        table_name = table_info.table_name
+        do_create = False
+        table_obj = self.catalog.get_table_catalog_entry(table_name,database_name)
+
+        # files_path = os.path.join(extract_path, "obj_train_data")
+        # images = [f for f in os.listdir(files_path) if f.lower().endswith((".png", ".jpg", ".jpeg"))]
+        # labels = [f for f in os.listdir(files_path) if f.lower().endswith((".txt"))]
+        
+        # image_path = []
+        # class_id = []
+        # x_center = []
+        # y_center = []
+        # width = []
+        # height = []
+
+        # columns = [
+        #     ColumnDefinition("image_path", ColumnType.TEXT, None, None),
+        #     ColumnDefinition("class_id", ColumnType.INTEGER, None, None),
+        #     ColumnDefinition("x_center", ColumnType.FLOAT, None, None),
+        #     ColumnDefinition("y_center", ColumnType.FLOAT, None, None),
+        #     ColumnDefinition("width", ColumnType.FLOAT, None, None),
+        #     ColumnDefinition("height", ColumnType.FLOAT, None, None),
+        # ]
+
+        # for image in images:
+        #     label_file = os.path.splitext(image)[0] + '.txt'
+        #     label_file_path = os.path.join(files_path, label_file)
+        #     if label_file in labels:
+        #         with open(label_file_path, 'r') as f:
+        #             lines = f.readlines()
+
+        #         for line in lines:
+        #             class_id_v, x_center_v, y_center_v, width_v, height_v = map(float, line.strip().split())
+        #             image_path.append(image)
+        #             class_id.append(class_id_v)
+        #             x_center.append(x_center_v)
+        #             y_center.append(y_center_v)
+        #             width.append(width_v)
+        #             height.append(height_v)
+
+        
+        # if table_obj:
+        #     error = f"{table_name} already exist."
+        #     logger.error(error)
+        #     raise ExecutorError(error)
+        
+        # else:
+        #     table_obj = self.catalog.create_and_insert_table_catalog_entry(
+        #         TableInfo(table_name),
+        #         columns,
+        #         identifier_column=None,
+        #         table_type=TableType.STRUCTURED_DATA,
+        #     )
+        #     do_create = True
+
+        # storage_engine = StorageEngine.factory(table_obj)
+        # if do_create:
+        #     storage_engine.create(table_obj)
+
+        # storage_engine.write(
+        #     table_obj, 
+        #     Batch(pd.DataFrame({"image_path": image_path,
+        #                         "class_id": class_id,
+        #                         "x_center": x_center,
+        #                         "y_center": y_center,
+        #                         "width": width,
+        #                         "height": height})),)
+
+        # yield Batch(
+        #         pd.DataFrame(
+        #             [
+        #                 f"Number of loaded imgae: {str(len(image_path))}"
+        #             ]
+        #         )
+        #     )
+
+
         train_path = os.path.join(extract_path, "images", "train")
         val_path = os.path.join(extract_path, "images", "valid")
         nc_path = os.path.join(extract_path, "obj.names")
@@ -129,12 +208,7 @@ class LoadZIPExecutor(AbstractExecutor):
         }
 
         df = pd.DataFrame(data)
-        
-        table_info = self.node.table_info
-        database_name = table_info.database_name
-        table_name = table_info.table_name
-        do_create = False
-        table_obj = self.catalog.get_table_catalog_entry(table_name,database_name)
+    
 
         columns = [
             ColumnDefinition("train_path", ColumnType.TEXT, None, None),

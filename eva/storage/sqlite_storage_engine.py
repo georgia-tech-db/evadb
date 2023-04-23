@@ -31,6 +31,8 @@ from eva.storage.abstract_storage_engine import AbstractStorageEngine
 from eva.utils.generic_utils import PickleSerializer, get_size
 from eva.utils.logging_manager import logger
 
+import traceback
+
 # Leveraging Dynamic schema in SQLAlchemy
 # https://sparrigan.github.io/sql/sqla/2016/01/03/dynamic-tables.html
 
@@ -145,6 +147,8 @@ class SQLStorageEngine(AbstractStorageEngine):
             self._sql_session.commit()
         except Exception as e:
             err_msg = f"Failed to update the table {table.name} with exception {str(e)}"
+            traceback_msg = traceback.format_exc()
+            logger.warn(f"{traceback_msg}")
             logger.exception(err_msg)
             raise Exception(err_msg)
 
