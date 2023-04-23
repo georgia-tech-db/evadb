@@ -536,7 +536,7 @@ class ParserTests(unittest.TestCase):
     def test_select_statement_semantic_search(self):
         parser = Parser()
 
-        semantic_text = 'Find all cars in the video'
+        semantic_text = 'Search for frames with more than 3 cars'
         semantic_search_query = 'SEMANTIC "{text}";'.format(text=semantic_text)
 
         eva_statement_list = parser.parse(semantic_search_query)
@@ -548,8 +548,6 @@ class ParserTests(unittest.TestCase):
 
         # semantic text
         self.assertEqual(semantic_stmt._semantic_text, semantic_text)
-
-        # TDOO: test for select statement
 
     def test_table_ref(self):
         """Testing table info in TableRef

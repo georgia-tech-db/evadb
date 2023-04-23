@@ -103,7 +103,9 @@ udf_libs = [
 ]
 
 ### NEEDED FOR EXPERIMENTAL FEATURES
-experimental_libs = []
+experimental_libs = [
+    "openai"
+]
 
 INSTALL_REQUIRES = minimal_requirement + integration_test_libs + udf_libs
 DEV_REQUIRES = (

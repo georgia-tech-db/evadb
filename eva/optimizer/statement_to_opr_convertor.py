@@ -42,6 +42,7 @@ from eva.optimizer.optimizer_utils import (
     column_definition_to_udf_io,
     metadata_definition_to_udf_metadata,
 )
+from eva.optimizer.semantic_rewriter import (QueryProcessor, SemanticRewriter)
 from eva.parser.create_index_statement import CreateIndexStatement
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
 from eva.parser.create_statement import CreateTableStatement
@@ -330,8 +331,17 @@ class StatementToPlanConvertor:
         """
         TODO: Add semantic to select converter
         """
+        rows = [['1', 'some-data', 'Mary Rose', 'nan', 'nan', 'nan'],['2', 'some-data', 'Big Jack', 'nan', 'nan', 'nan'],['3', 'some-data', 'John Doe', 'nan', 'nan', 'nan']]
+        header = ['id', 'data', 'uploader', 'frame', 'car', 'pedestrian']
+        header_types = ['numeric', 'video', 'text', 'frame', 'YoloV5-label', 'YoloV5-label']
+        rewriter = SemanticRewriter(statement.semantic_text)
+        prompt = rewriter.rewrite()
+        qp = QueryProcessor(rows, header, header_types, prompt)
+        final_sql = qp.query_processor(False)
         parser = Parser()
-        statement._select_statement = parser.parse('SELECT CLASS, REDNESS FROM TAIPAI SAMPLE 5;')[0]
+        statement._select_statement = parser.parse(final_sql)[0]
+        
+        print(final_sql)
 
         self.visit_select(statement.select_statement)
 

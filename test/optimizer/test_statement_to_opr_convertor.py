@@ -126,8 +126,7 @@ class StatementToOprTest(unittest.TestCase):
     def test_visit_semantic_should_call_select_visit_methods(self):
         converter = StatementToPlanConvertor()
         converter.visit_select = MagicMock()
-
-        statement = SemanticStatement('Find all cars in the video', SelectStatement())
+        statement = SemanticStatement('Search for frames with more than 3 cars in VIDEO', SelectStatement())
         converter.visit_semantic(statement)
 
         converter.visit_select.assert_called_with(statement.select_statement)
