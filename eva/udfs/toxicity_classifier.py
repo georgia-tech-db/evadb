@@ -15,16 +15,19 @@
 from typing import List
 
 import pandas as pd
+import torch
+from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
 from eva.udfs.abstract.abstract_udf import AbstractClassifierUDF
 
-try:
-    import detoxify
-except ImportError as e:
-    raise ImportError(
-        f"Failed to import with error {e}, \
-        please try `pip install detoxify`"
-    )
+DOWNLOAD_URL = "https://github.com/unitaryai/detoxify/releases/download/"
+MODEL_URLS = {
+    "original": DOWNLOAD_URL + "v0.1-alpha/toxic_original-c1212f89.ckpt",
+    "unbiased": DOWNLOAD_URL + "v0.3-alpha/toxic_debiased-c7548aa0.ckpt",
+    "multilingual": DOWNLOAD_URL + "v0.4-alpha/multilingual_debiased-0b549669.ckpt",
+    "original-small": DOWNLOAD_URL + "v0.1.2/original-albert-0e1d6498.ckpt",
+    "unbiased-small": DOWNLOAD_URL + "v0.1.2/unbiased-albert-c8519128.ckpt",
+}
 
 
 class ToxicityClassifier(AbstractClassifierUDF):
@@ -37,10 +40,20 @@ class ToxicityClassifier(AbstractClassifierUDF):
     def name(self) -> str:
         return "ToxicityClassifier"
 
-    def setup(self, threshold=0.2):
+    def setup(self, threshold=0.3):
         self.threshold = threshold
-        self.model = detoxify.Detoxify("original")
+        self.model_type2id = {
+            "original": "unitary/toxic-bert",
+            "unbiased": "unitary/unbiased-toxic-roberta",
+            "multilingual": "unitary/multilingual-toxic-xlm-roberta",
+        }
+        self.change_names = {
+            "toxic": "toxicity",
+            "identity_hate": "identity_attack",
+            "severe_toxic": "severe_toxicity",
+        }
 
+    # create udf -> search for query
     @property
     def labels(self) -> List[str]:
         return ["toxic", "not toxic"]
@@ -65,9 +78,38 @@ class ToxicityClassifier(AbstractClassifierUDF):
 
         for i in range(0, dataframe_size):
             text = text_dataframe.iat[i, 0]
-            single_result = self.model.predict(text)
-            toxicity_score = single_result["toxicity"][0]
-            if toxicity_score >= self.threshold:
+            sum_toxicity_score = 0
+            for model_type in self.model_type2id:
+                model_id = self.model_type2id[model_type]
+                tokenizer = AutoTokenizer.from_pretrained(model_id)
+                model = AutoModelForSequenceClassification.from_pretrained(model_id)
+                checkpoint_path = MODEL_URLS[model_type]
+                loaded = torch.hub.load_state_dict_from_url(checkpoint_path)
+                class_names = loaded["config"]["dataset"]["args"]["classes"]
+                class_names = [self.change_names.get(cl, cl) for cl in class_names]
+
+                input = tokenizer(
+                    text, return_tensors="pt", truncation=True, padding=True
+                )
+                out = model(**input)[0]
+                scores = torch.sigmoid(out).cpu().detach().numpy()
+                single_result = {}
+                if model_type == "multilingual":
+                    class_names = ["toxicity"]
+                for i, cla in enumerate(class_names):
+                    single_result[cla] = (
+                        scores[0][i]
+                        if isinstance(text, str)
+                        else [scores[ex_i][i].tolist() for ex_i in range(len(scores))]
+                    )
+
+                toxicity_score = single_result["toxicity"][0]
+                print("\nModel: ", model_type, " toxicity_score: ", toxicity_score)
+                sum_toxicity_score += toxicity_score
+
+            avg_toxicity_score = sum_toxicity_score / len(self.model_type2id)
+            print("\n final average toxicity score: ", avg_toxicity_score)
+            if avg_toxicity_score >= self.threshold:
                 outcome = pd.concat(
                     [outcome, pd.DataFrame({"labels": ["toxic"]})], ignore_index=True
                 )
@@ -76,5 +118,5 @@ class ToxicityClassifier(AbstractClassifierUDF):
                     [outcome, pd.DataFrame({"labels": ["not toxic"]})],
                     ignore_index=True,
                 )
-
+        print("final outcome: ", outcome)
         return outcome

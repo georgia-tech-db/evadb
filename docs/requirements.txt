@@ -22,3 +22,5 @@ sphinxemoji>=0.2.0
 # MyST
 myst-parser>=0.15.2
 myst-nb>=0.13.1
+
+protobuf==3.20.*

@@ -39,6 +39,7 @@ class PytorchTest(unittest.TestCase):
         asl_actions = f"{EVA_ROOT_DIR}/data/actions/computer_asl.mp4"
         meme1 = f"{EVA_ROOT_DIR}/data/detoxify/meme1.jpg"
         meme2 = f"{EVA_ROOT_DIR}/data/detoxify/meme2.jpg"
+        meme3 = f"{EVA_ROOT_DIR}/data/detoxify/meme3.jpg"
 
         execute_query_fetch_all(f"LOAD VIDEO '{ua_detrac}' INTO MyVideo;")
         execute_query_fetch_all(f"LOAD VIDEO '{mnist}' INTO MNIST;")
@@ -46,6 +47,7 @@ class PytorchTest(unittest.TestCase):
         execute_query_fetch_all(f"LOAD VIDEO '{asl_actions}' INTO Asl_actions;")
         execute_query_fetch_all(f"LOAD IMAGE '{meme1}' INTO MemeImages;")
         execute_query_fetch_all(f"LOAD IMAGE '{meme2}' INTO MemeImages;")
+        execute_query_fetch_all(f"LOAD IMAGE '{meme3}' INTO MemeImages;")
         load_udfs_for_testing()
 
     @classmethod
@@ -283,12 +285,14 @@ class PytorchTest(unittest.TestCase):
 
         # non-trivial test case for Detoxify
         res = actual_batch.frames
-        for i in range(2):
+        for i in range(3):
             # Image can be reordered.
             if "meme1" in res["memeimages.name"][i]:
                 self.assertTrue(res["toxicityclassifier.labels"][i] == "toxic")
-            else:
+            elif "meme2" in res["memeimages.name"][i]:
                 self.assertTrue(res["toxicityclassifier.labels"][i] == "not toxic")
+            else:
+                self.assertTrue(res["toxicityclassifier.labels"][i] == "toxic")
 
     def test_check_unnest_with_predicate_on_yolo(self):
         query = """SELECT id, yolov5.label, yolov5.bbox, yolov5.score
