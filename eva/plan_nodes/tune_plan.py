@@ -16,6 +16,7 @@
 from eva.plan_nodes.abstract_plan import AbstractPlan
 from eva.plan_nodes.types import PlanOprType
 from eva.expression.constant_value_expression import ConstantValueExpression
+from eva.parser.table_ref import TableInfo
 
 class TunePlan(AbstractPlan):
     """
@@ -32,14 +33,14 @@ class TunePlan(AbstractPlan):
 
     def __init__(
         self,
-        file_name: str,
+        table_info: TableInfo,
         batch_size: ConstantValueExpression,
         epochs_size: ConstantValueExpression,
         freeze_layer: ConstantValueExpression,
         multi_scale: bool,
         show_train_progress: bool,
     ):
-        self._file_name = file_name
+        self._table_info = table_info
         self._batch_size = batch_size
         self._epochs_size = epochs_size
         self._freeze_layer = freeze_layer
@@ -48,8 +49,8 @@ class TunePlan(AbstractPlan):
         super().__init__(PlanOprType.TUNE)
 
     @property
-    def file_name(self):
-        return self._file_name
+    def table_info(self):
+        return self._table_info
     
     @property
     def batch_size(self):
@@ -72,8 +73,8 @@ class TunePlan(AbstractPlan):
         return self._show_train_progress
 
     def __str__(self):
-        return "TunePlan(file_name={}, batch_size={}, epochs_size={}, freeze_layer={}, multi_scale={}, show_train_progress={})".format(
-            self.file_name,
+        return "TunePlan(table={}, batch_size={}, epochs_size={}, freeze_layer={}, multi_scale={}, show_train_progress={})".format(
+            self.table_info,
             self.batch_size,
             self.epochs_size,
             self.freeze_layer,
@@ -85,7 +86,7 @@ class TunePlan(AbstractPlan):
         return hash(
             (
                 super().__hash__(),
-                self.file_name,
+                self.table_info,
                 self.batch_size,
                 self.epochs_size,
                 self.freeze_layer,

@@ -95,7 +95,9 @@ file_name: string_literal
 
 // Fine tuning statement
 
-tune_statement: TUNE file_name BATCH batch_size EPOCHS epochs_size FREEZE freeze_layer MULTI multi_scale SHOW show_train_progress
+tune_statement: TUNE table_name BATCH batch_size EPOCHS epochs_size FREEZE freeze_layer MULTI multi_scale SHOW show_train_progress
+
+// zip_name: string_literal
 
 batch_size: decimal_literal
 
@@ -112,7 +114,6 @@ show_train_progress: boolean_literal
 insert_statement_value: select_statement
     | (VALUES | VALUE) "(" expressions_with_defaults ")" ("," "(" expressions_with_defaults ")")*
     
-
 updated_element: full_column_name "=" (expression | DEFAULT)
  
 order_by_clause: ORDER BY order_by_expression ("," order_by_expression)*
@@ -129,7 +130,6 @@ table_source: table_source_item_with_sample join_part*
 table_source_item_with_sample: table_source_item alias_clause? (sample_clause | sample_clause_with_type)?
 
 table_source_item: table_name | subquery_table_source_item   
-    
 
 table_valued_function: function_call                                
     | UNNEST LR_BRACKET function_call RR_BRACKET   

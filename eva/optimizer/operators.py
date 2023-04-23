@@ -1282,7 +1282,7 @@ class LogicalTune(Operator):
 
     def __init__(
         self,
-        file_name: str,
+        table_info: TableInfo,
         batch_size: ConstantValueExpression,
         epochs_size: ConstantValueExpression,
         freeze_layer: ConstantValueExpression,
@@ -1291,7 +1291,7 @@ class LogicalTune(Operator):
         children: List = None,
     ):
         super().__init__(OperatorType.LOGICALTUNE, children)
-        self._file_name = file_name
+        self._table_info = table_info
         self._batch_size = batch_size
         self._epochs_size = epochs_size
         self._freeze_layer = freeze_layer
@@ -1299,8 +1299,8 @@ class LogicalTune(Operator):
         self._show_train_progress = show_train_progress
 
     @property
-    def file_name(self):
-        return self._file_name
+    def table_info(self):
+        return self._table_info
     
     @property
     def batch_size(self):
@@ -1328,7 +1328,7 @@ class LogicalTune(Operator):
             return False
         return (
             is_subtree_equal
-            and self.file_name == other.file_name
+            and self.table_info == other.table_info
             and self.batch_size == other.batch_size
             and self.epochs_size == other.epochs_size
             and self.freeze_layer == other.freeze_layer
@@ -1340,7 +1340,7 @@ class LogicalTune(Operator):
         return hash(
             (
                 super().__hash__(),
-                self.file_name,
+                self.table_info,
                 self.batch_size,
                 self.epochs_size,
                 self.freeze_layer,

@@ -16,12 +16,14 @@
 from eva.expression.abstract_expression import AbstractExpression
 from eva.parser.statement import AbstractStatement
 from eva.parser.types import StatementType
+from eva.parser.table_ref import TableInfo
 
 class TuneStatement(AbstractStatement):
     """
     Tune Statement constructed after parsing the input query
 
     Arguments:
+    table: table to load from
     batch: batch size
     epochs: number of epochs
     freeze_layer: number of freeze layer
@@ -31,7 +33,7 @@ class TuneStatement(AbstractStatement):
 
     def __init__(
         self,
-        file_name: str,
+        table_info: TableInfo,
         batch_size: int,
         epochs_size: int,
         freeze_layer: int,
@@ -39,7 +41,7 @@ class TuneStatement(AbstractStatement):
         show_train_progress: bool,
     ):
         super().__init__(StatementType.TUNE)
-        self._file_name = file_name,
+        self._table_info = table_info,
         self._batch_size = batch_size
         self._epochs_size = epochs_size
         self._freeze_layer = freeze_layer
@@ -47,8 +49,8 @@ class TuneStatement(AbstractStatement):
         self._show_train_progress = show_train_progress
 
     @property
-    def file_name(self):
-        return self._file_name
+    def table_info(self) -> TableInfo:
+        return self._table_info
     
     @property
     def batch_size(self):
@@ -71,7 +73,7 @@ class TuneStatement(AbstractStatement):
         return self._show_train_progress
 
     def __str__(self) -> str:
-        return "TUNE {} BATCH {} EPOCHS {} FREEZE {} MULTI {} SHOW {}".format(self._file_name, self._batch_size, 
+        return "TUNE {} BATCH {} EPOCHS {} FREEZE {} MULTI {} SHOW {}".format(self._table_info, self._batch_size, 
                                                                               self._epochs_size, self._freeze_layer,
                                                                               self._multi_scale, self._show_train_progress)
 
@@ -80,7 +82,7 @@ class TuneStatement(AbstractStatement):
         if not isinstance(other, TuneStatement):
             return False
         return (
-            self.file_name == other.file_name
+            self.table_info == other.table_info
             and self.batch_size == other.batch_size
             and self.epochs_size == other.epochs_size
             and self.freeze_layer == other.freeze_layer
@@ -92,7 +94,7 @@ class TuneStatement(AbstractStatement):
         return hash(
             (
                 super().__hash__(),
-                self.file_name,
+                self.table_info,
                 self.batch_size,
                 self.epochs_size,
                 self.freeze_layer,

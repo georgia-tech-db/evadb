@@ -36,8 +36,14 @@ from yolov5.utils.general import intersect_dicts, check_img_size, colorstr, labe
 from yolov5.utils.torch_utils import smart_optimizer, de_parallel, EarlyStopping, ModelEMA
 import yolov5.val as validate
 from yolov5.utils.metrics import fitness
+from eva.catalog.catalog_manager import CatalogManager
+from eva.catalog.services.table_catalog_service import TableCatalogService
+from eva.catalog.services.column_catalog_service import ColumnCatalogService
+from eva.utils.logging_manager import logger
+from eva.executor.executor_utils import ExecutorError
+from eva.storage.sqlite_storage_engine import SQLStorageEngine
 
-def train_yolov5(batch_size, epochs, freeze_layers, multi_scale, dataset_path):
+def train_yolov5(batch_size, epochs, freeze_layers, multi_scale, train_path, val_path, nc):
     device = torch.device("cpu")
     start_epoch = 0
     best_fitness = 0.0
@@ -52,10 +58,15 @@ def train_yolov5(batch_size, epochs, freeze_layers, multi_scale, dataset_path):
         'perspective': 0.0,'flipud': 0.0,'fliplr': 0.5,'mosaic': 1.0,'mixup': 0.0,'copy_paste': 0.0
     }
 
-    train_path = os.path.join(dataset_path, "images", "train")
-    val_path = os.path.join(dataset_path, "images", "valid")
-    nc = 7
-    names = {i: name for i, name in enumerate(['car', 'person', 'bus', 'truck'])}
+    # train_path = os.path.join(dataset_path, "images", "train")
+    # val_path = os.path.join(dataset_path, "images", "valid")
+    # nc = 7
+    dataset_path = os.path.dirname(os.path.dirname(train_path))
+    obj_names_file = os.path.join(dataset_path, "obj.names")
+
+    with open(obj_names_file, 'r') as f:
+        names = {i: name.strip() for i, name in enumerate(f)}
+
     last = os.path.join(dataset_path, "last.pt")
     best = os.path.join(dataset_path, "best.pt")
     save_weights = os.path.split(dataset_path)[-1] + '.pt'
@@ -63,7 +74,7 @@ def train_yolov5(batch_size, epochs, freeze_layers, multi_scale, dataset_path):
 
 
     # ckpt = torch.hub.load('ultralytics/yolov5', 'yolov5x', device='cpu')
-    cfg = 'yolov5/models/yolov5s.yaml'
+    # cfg = 'yolov5/models/yolov5s.yaml'
     ckpt = torch.load('yolov5s.pt', map_location='cpu')
     model = Model(ckpt['model'].yaml, ch=3, nc=nc, anchors=hyp.get('anchors')).to(device)
     exclude = ['anchor'] if (hyp.get('anchors')) else []
@@ -236,82 +247,43 @@ def train_yolov5(batch_size, epochs, freeze_layers, multi_scale, dataset_path):
 class TuneExecutor(AbstractExecutor):
     def __init__(self, node: TunePlan):
         super().__init__(node)
+        self.catalog = CatalogManager()
+        self.table = TableCatalogService()
+        self.batch = SQLStorageEngine()
 
     def exec(self, *args, **kwargs):
-        file_name = self.node.file_name
+        table = self.node.table_info
+        table_info = table[0]
+
+        table_name = table_info.table_name
+        database_name = table_info.database_name
         batch_size = int(self.node.batch_size)
         epochs_size = int(self.node.epochs_size)
         freeze_layer = int(self.node.freeze_layer)
         multi_scale = self.node.multi_scale
         show_train_progress = self.node.show_train_progress
 
-        file_path = os.path.join('data', file_name[0].strip("'\""))
+        check_table = self.catalog.check_table_exists(table_name, database_name)
 
-        extract_path = os.path.join('data', 'dataset', file_name[0].strip("'\"")[:-4])
+        if check_table == False:
+            error = f"{table_name} does not exist."
+            logger.error(error)
+            raise ExecutorError(error)
+        else:
+            table_obj = self.table.get_entry_by_name(database_name, table_name)
+            table_col = self.batch.read(table_obj)
 
-        if not os.path.exists(extract_path):
-            os.makedirs(extract_path)
-            with zipfile.ZipFile(file_path, 'r') as zip_ref:
-                zip_ref.extractall(extract_path)
-
-            dataset_path = os.path.join(extract_path, 'obj_train_data')
-
-            train_ratio = 0.8
-            val_ratio = 0.1
-            train_folder = "train"
-            val_folder = "valid"
-            test_folder = "test"
-            image_folder = "images"
-            label_folder = "labels"
-
-            folders_to_create = [
-                os.path.join(extract_path, image_folder, train_folder),
-                os.path.join(extract_path, label_folder, train_folder),
-                os.path.join(extract_path, image_folder, val_folder),
-                os.path.join(extract_path, label_folder, val_folder),
-                os.path.join(extract_path, image_folder, test_folder),
-                os.path.join(extract_path, label_folder, test_folder),
-            ]
-
-            for folder in folders_to_create:
-                if not os.path.exists(folder):
-                    os.makedirs(folder)
-            
-            image_files = [f for f in os.listdir(dataset_path) if f.lower().endswith((".png", ".jpg", ".jpeg"))]
-
-            num_images = len(image_files)
-            num_train = int(num_images * train_ratio)
-            num_val = int(num_images * val_ratio)
-            num_test = num_images - num_train - num_val
-
-            random.shuffle(image_files)
-            for i, image_file in enumerate(image_files):
-                if i < num_train:
-                    target_image_folder = os.path.join(extract_path, image_folder, train_folder)
-                    target_label_folder = os.path.join(extract_path, label_folder, train_folder)
-                elif i < num_train + num_val:
-                    target_image_folder = os.path.join(extract_path, image_folder, val_folder)
-                    target_label_folder = os.path.join(extract_path, label_folder, val_folder)
-                else:
-                    target_image_folder = os.path.join(extract_path, image_folder, test_folder)
-                    target_label_folder = os.path.join(extract_path, label_folder, test_folder)
-
-                target_image_file = os.path.join(target_image_folder, image_file)
-                target_label_file = os.path.join(target_label_folder, image_file[:-4] + ".txt")
-
-                if not os.path.exists(target_image_file):
-                    shutil.copy(os.path.join(dataset_path, image_file), target_image_folder)
-
-                if not os.path.exists(target_label_file):
-                    shutil.copy(os.path.join(dataset_path, image_file[:-4] + ".txt"), target_label_folder)
+            for df in table_col:
+                for _, row in df.iterrows():
+                    train_path = row['train_path']
+                    val_path = row['val_path']
+                    num_classes = row['num_classes']
         
-        training_results = train_yolov5(batch_size, epochs_size, freeze_layer, multi_scale, extract_path)
+        training_results = train_yolov5(batch_size, epochs_size, freeze_layer, multi_scale, train_path, val_path, num_classes)
 
         yield Batch(pd.DataFrame(training_results))
 
-        # if show_train_progress:
-        #     for key, value in training_results.items():
-        #         yield Batch(pd.DataFrame({key: [value]}))
-        # else:
-        #     final_result_key = f"epoch_{epochs_size}_loss"
-        #     yield Batch(pd.DataFrame({final_result_key: [training_results[final_result_key]]}))
+        if show_train_progress:
+            yield Batch(pd.DataFrame(training_results))
+        else:
+            yield Batch(pd.DataFrame(training_results).iloc[-1])

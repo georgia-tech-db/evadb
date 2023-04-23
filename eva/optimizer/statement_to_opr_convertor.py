@@ -294,7 +294,7 @@ class StatementToPlanConvertor:
     
     def visit_tune(self, statement: TuneStatement):
         tune_opr = LogicalTune(
-            statement.file_name,
+            statement.table_info,
             statement.batch_size,
             statement.epochs_size,
             statement.freeze_layer,

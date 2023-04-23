@@ -22,18 +22,19 @@ from eva.parser.tune_statement import TuneStatement
 ##################################################################
 class Tune:
     def tune_statement(self, tree):
-        file_name = tree.children[1].children[0].children[0].value
+        # table = tree.children[1].children[0].children[0].value
+        table = self.visit(tree.children[1])
         batch_size = tree.children[3].children[0].children[0].value
         epochs_size = tree.children[5].children[0].children[0].value
         freeze_layer = tree.children[7].children[0].children[0].value
         multi_scale = tree.children[9].children[0].children[0].value
         show_train_progress = tree.children[11].children[0].children[0].value
-        stmt = TuneStatement(file_name, batch_size, epochs_size, freeze_layer, multi_scale, show_train_progress)
+        stmt = TuneStatement(table, batch_size, epochs_size, freeze_layer, multi_scale, show_train_progress)
         return stmt
 
-    def file_name(self, tree):
-        file_name = tree.children[1].children[0].children[0].value
-        return file_name
+    def table(self, tree):
+        table = tree.children[1].children[0].children[0].value
+        return table
 
     def batch_size(self, tree):
         batch_size = tree.children[3].children[0].children[0].value

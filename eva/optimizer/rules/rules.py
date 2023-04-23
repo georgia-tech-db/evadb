@@ -1088,7 +1088,7 @@ class LogicalTuneToPhysical(Rule):
     def apply(self, before: LogicalTune, context: OptimizerContext):
         # print("before: ", before)
         after = TunePlan(
-            before.file_name,
+            before.table_info,
             before.batch_size,
             before.epochs_size,
             before.freeze_layer,
