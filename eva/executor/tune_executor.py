@@ -63,8 +63,6 @@ class TuneExecutor(AbstractExecutor):
         
         training_results = train_yolov5(batch_size, epochs_size, freeze_layer, multi_scale, train_path, val_path, num_classes)
 
-        yield Batch(pd.DataFrame(training_results))
-
         if show_train_progress:
             yield Batch(pd.DataFrame(training_results))
         else:
