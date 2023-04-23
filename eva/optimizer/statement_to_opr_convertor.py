@@ -331,11 +331,12 @@ class StatementToPlanConvertor:
         """
         TODO: Add semantic to select converter
         """
-        rows = [['1', 'some-data', 'Mary Rose', 'nan', 'nan', 'nan'],['2', 'some-data', 'Big Jack', 'nan', 'nan', 'nan'],['3', 'some-data', 'John Doe', 'nan', 'nan', 'nan']]
-        header = ['id', 'data', 'uploader', 'frame', 'car', 'pedestrian']
-        header_types = ['numeric', 'video', 'text', 'frame', 'YoloV5-label', 'YoloV5-label']
-        rewriter = SemanticRewriter(statement.semantic_text)
+        table_name = 'UADETRAC'
+        rewriter = SemanticRewriter(statement.semantic_text, table_name)
         prompt = rewriter.rewrite()
+        rows = rewriter.rows
+        header = rewriter.header
+        header_types = rewriter.header_type
         qp = QueryProcessor(rows, header, header_types, prompt)
         final_sql = qp.query_processor(False)
         parser = Parser()

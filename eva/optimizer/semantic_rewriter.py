@@ -8,8 +8,11 @@ import numpy as np
 import os
 import openai
 from transformers import AutoTokenizer, AutoModel
-
+# from eva.parser.table_ref import TableInfo
+from eva.catalog.catalog_manager import CatalogManager
+from eva.catalog.catalog_type import TableType
 from eva.udfs.yolo_object_detector import YoloV5
+from eva.catalog.catalog_type import ColumnType
 
 encoding_model_name = 'shahrukhx01/paraphrase-mpnet-base-v2-fuzzy-matcher'
 encoding_model = AutoModel.from_pretrained(encoding_model_name).to(torch_device)
@@ -23,12 +26,52 @@ UDFSupport = [
 ]
 
 class SemanticRewriter:
-    def __init__(self, text):
+    def __init__(self, text, table_name):
         self.text = text
         self.prompt = ''
+        self.table_name = table_name
+        self.rows = []
+        self.header = []
+        self.header_types = []
 
     def generate_tables(self):
-       return "VIDEO(id, data, uploader, frame, car, pedestrian)"
+      catalog = CatalogManager()
+      table_name = self.table_name
+      database_name = "database"
+
+      table_catalog = catalog.get_table_catalog_entry(
+          table_name,
+          database_name,
+      )
+
+      table_type = getattr(table_catalog, 'table_type')
+      accessory_name = []
+      accessory_type = []
+      accessory_row = []
+      
+      if table_type == TableType.VIDEO_DATA:
+        yolo = YoloV5()
+        accessory_name = yolo.label()
+        accessory_type = ['YoloV5-label' for name in accessory_name]
+        accessory_row = ['nan' for name in accessory_name]
+        accessory_name += ['frame', 'scores']
+        accessory_type += ['frame', ColumnType.FLOAT]
+        accessory_row += ['nan', 'nan']
+        
+
+      columns = getattr(table_catalog, 'columns')
+      rows = [['id', 'some-data'] for col in columns]
+      col_name = [getattr(column, 'name') for column in columns] + accessory_name
+
+      col_type = ['text' if (getattr(column, 'type') == ColumnType.TEXT or getattr(column, 'type') == ColumnType.BOOLEAN) else 'numeric' if (getattr(column, 'type') == ColumnType.INTEGER or getattr(column, 'type') == ColumnType.FLOAT) else 'other' for column in columns] + accessory_type
+      
+      rows = [row + accessory_row for row in rows]
+
+      self.rows = rows
+      self.header = col_name
+      self.header_type = col_type
+
+      return f"{table_name}(" + ", ".join(col_name) + ")"
     
     def rewrite(self, header=None, header_types=None):
         self.prompt = "### Postgres SQL tables, with their properties:\n#\n#{tables}\n#\n### {text}\nSELECT".format(tables=self.generate_tables(), text=self.text)
