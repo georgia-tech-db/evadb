@@ -19,6 +19,7 @@ from eva.executor.abstract_executor import AbstractExecutor
 from eva.plan_nodes.tune_plan import TunePlan
 from eva.models.storage.batch import Batch
 from eva.catalog.catalog_manager import CatalogManager
+from eva.catalog.services.table_catalog_service import TableCatalogService
 from eva.utils.logging_manager import logger
 from eva.executor.executor_utils import ExecutorError
 from eva.storage.sqlite_storage_engine import SQLStorageEngine
@@ -29,6 +30,7 @@ class TuneExecutor(AbstractExecutor):
     def __init__(self, node: TunePlan):
         super().__init__(node)
         self.catalog = CatalogManager()
+        self.table = TableCatalogService()
         self.batch = SQLStorageEngine()
 
     def exec(self, *args, **kwargs):
@@ -50,7 +52,7 @@ class TuneExecutor(AbstractExecutor):
             logger.error(error)
             raise ExecutorError(error)
         else:
-            table_obj = self.catalog.get_table_catalog_entry(database_name, table_name)
+            table_obj = self.table.get_entry_by_name(database_name, table_name)
             table_col = self.batch.read(table_obj)
 
             for df in table_col:

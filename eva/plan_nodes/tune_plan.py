@@ -24,6 +24,7 @@ class TunePlan(AbstractPlan):
     operations.
 
     Arguments:
+        table: table to load from
         batch: batch size
         epochs: number of epochs
         freeze_layer: number of freeze_layer
