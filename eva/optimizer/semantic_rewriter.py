@@ -61,7 +61,7 @@ class SemanticRewriter:
         
 
       columns = getattr(table_catalog, 'columns')
-      select_query = """SELECT * FROM MyVideo;"""
+      select_query = f"""SELECT * FROM {table_name};"""
       batch = execute_query_fetch_all(select_query)
       rows = batch.frames().values.tolist()
       col_name = [getattr(column, 'name') for column in columns] + accessory_name
