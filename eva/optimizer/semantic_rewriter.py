@@ -60,7 +60,7 @@ class SemanticRewriter:
         
 
       columns = getattr(table_catalog, 'columns')
-      rows = [['id', 'some-data'] for col in columns]
+      rows = [['id'] for col in columns]
       col_name = [getattr(column, 'name') for column in columns] + accessory_name
 
       col_type = ['text' if (getattr(column, 'type') == ColumnType.TEXT or getattr(column, 'type') == ColumnType.BOOLEAN) else 'numeric' if (getattr(column, 'type') == ColumnType.INTEGER or getattr(column, 'type') == ColumnType.FLOAT) else 'other' for column in columns] + accessory_type
