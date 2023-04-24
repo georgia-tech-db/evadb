@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import traceback
 from typing import Iterator, List
 
 import numpy as np
@@ -30,8 +31,6 @@ from eva.parser.table_ref import TableInfo
 from eva.storage.abstract_storage_engine import AbstractStorageEngine
 from eva.utils.generic_utils import PickleSerializer, get_size
 from eva.utils.logging_manager import logger
-
-import traceback
 
 # Leveraging Dynamic schema in SQLAlchemy
 # https://sparrigan.github.io/sql/sqla/2016/01/03/dynamic-tables.html

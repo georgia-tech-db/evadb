@@ -12,10 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from lark.tree import Tree
 
 # from eva.expression.constant_value_expression import ConstantValueExpression
 from eva.parser.tune_statement import TuneStatement
+
 
 ##################################################################
 # TUNE STATEMENT
@@ -29,7 +29,14 @@ class Tune:
         freeze_layer = tree.children[7].children[0].children[0].value
         multi_scale = tree.children[9].children[0].children[0].value
         show_train_progress = tree.children[11].children[0].children[0].value
-        stmt = TuneStatement(table, batch_size, epochs_size, freeze_layer, multi_scale, show_train_progress)
+        stmt = TuneStatement(
+            table,
+            batch_size,
+            epochs_size,
+            freeze_layer,
+            multi_scale,
+            show_train_progress,
+        )
         return stmt
 
     def table(self, tree):
@@ -43,15 +50,15 @@ class Tune:
     def epochs_size(self, tree):
         epochs_size = tree.children[5].children[0].children[0].value
         return epochs_size
-    
+
     def freeze_layer(self, tree):
         freeze_layer = tree.children[7].children[0].children[0].value
         return freeze_layer
-    
+
     def multi_scale(self, tree):
         multi_scale = tree.children[9].children[0].children[0].value
         return multi_scale
-    
+
     def show_train_progress(self, tree):
         show_train_progress = tree.children[11].children[0].children[0].value
         return show_train_progress

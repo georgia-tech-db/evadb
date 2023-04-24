@@ -44,13 +44,13 @@ from eva.executor.sample_executor import SampleExecutor
 from eva.executor.seq_scan_executor import SequentialScanExecutor
 from eva.executor.show_info_executor import ShowInfoExecutor
 from eva.executor.storage_executor import StorageExecutor
+from eva.executor.tune_executor import TuneExecutor
 from eva.executor.union_executor import UnionExecutor
 from eva.experimental.ray.executor.exchange_executor import ExchangeExecutor
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.abstract_plan import AbstractPlan
 from eva.plan_nodes.types import PlanOprType
 from eva.utils.logging_manager import logger
-from eva.executor.tune_executor import TuneExecutor
 
 
 class PlanExecutor:

@@ -13,10 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from eva.plan_nodes.abstract_plan import AbstractPlan
-from eva.plan_nodes.types import PlanOprType
 from eva.expression.constant_value_expression import ConstantValueExpression
 from eva.parser.table_ref import TableInfo
+from eva.plan_nodes.abstract_plan import AbstractPlan
+from eva.plan_nodes.types import PlanOprType
+
 
 class TunePlan(AbstractPlan):
     """
@@ -52,7 +53,7 @@ class TunePlan(AbstractPlan):
     @property
     def table_info(self):
         return self._table_info
-    
+
     @property
     def batch_size(self):
         return self._batch_size
@@ -60,15 +61,15 @@ class TunePlan(AbstractPlan):
     @property
     def epochs_size(self):
         return self._epochs_size
-    
+
     @property
     def freeze_layer(self):
         return self._freeze_layer
-    
+
     @property
     def multi_scale(self):
         return self._multi_scale
-    
+
     @property
     def show_train_progress(self):
         return self._show_train_progress

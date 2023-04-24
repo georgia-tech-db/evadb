@@ -37,10 +37,10 @@ from eva.parser.rename_statement import RenameTableStatement
 from eva.parser.select_statement import SelectStatement
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
+from eva.parser.tune_statement import TuneStatement
 from eva.third_party.huggingface.binder import assign_hf_udf
 from eva.utils.generic_utils import get_file_checksum, load_udf_class_from_file
 from eva.utils.logging_manager import logger
-from eva.parser.tune_statement import TuneStatement
 
 if sys.version_info >= (3, 8):
     from functools import singledispatchmethod

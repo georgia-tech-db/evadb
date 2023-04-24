@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import asyncio
+import traceback
 from typing import Iterator, Optional
 
 from eva.binder.statement_binder import StatementBinder
@@ -25,8 +26,6 @@ from eva.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
 from eva.parser.parser import Parser
 from eva.utils.logging_manager import logger
 from eva.utils.stats import Timer
-
-import traceback
 
 
 def execute_query(query, report_time: bool = False, **kwargs) -> Iterator[Batch]:

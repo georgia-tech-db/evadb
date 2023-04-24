@@ -15,15 +15,15 @@
 
 import pandas as pd
 
-from eva.executor.abstract_executor import AbstractExecutor
-from eva.plan_nodes.tune_plan import TunePlan
-from eva.models.storage.batch import Batch
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.services.table_catalog_service import TableCatalogService
-from eva.utils.logging_manager import logger
+from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError
+from eva.models.storage.batch import Batch
+from eva.plan_nodes.tune_plan import TunePlan
 from eva.storage.sqlite_storage_engine import SQLStorageEngine
 from eva.third_party.yolo_train import train_yolov5
+from eva.utils.logging_manager import logger
 
 
 class TuneExecutor(AbstractExecutor):
@@ -47,7 +47,7 @@ class TuneExecutor(AbstractExecutor):
 
         check_table = self.catalog.check_table_exists(table_name, database_name)
 
-        if check_table == False:
+        if not check_table:
             error = f"{table_name} does not exist."
             logger.error(error)
             raise ExecutorError(error)
@@ -57,11 +57,19 @@ class TuneExecutor(AbstractExecutor):
 
             for df in table_col:
                 for _, row in df.iterrows():
-                    train_path = row['train_path']
-                    val_path = row['val_path']
-                    num_classes = row['num_classes']
-        
-        training_results = train_yolov5(batch_size, epochs_size, freeze_layer, multi_scale, train_path, val_path, num_classes)
+                    train_path = row["train_path"]
+                    val_path = row["val_path"]
+                    num_classes = row["num_classes"]
+
+        training_results = train_yolov5(
+            batch_size,
+            epochs_size,
+            freeze_layer,
+            multi_scale,
+            train_path,
+            val_path,
+            num_classes,
+        )
 
         if show_train_progress:
             yield Batch(pd.DataFrame(training_results))

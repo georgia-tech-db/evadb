@@ -36,8 +36,8 @@ from eva.optimizer.operators import (
     LogicalRename,
     LogicalSample,
     LogicalShow,
-    LogicalUnion,
     LogicalTune,
+    LogicalUnion,
 )
 from eva.optimizer.optimizer_utils import (
     column_definition_to_udf_io,
@@ -58,8 +58,8 @@ from eva.parser.select_statement import SelectStatement
 from eva.parser.show_statement import ShowStatement
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
-from eva.utils.logging_manager import logger
 from eva.parser.tune_statement import TuneStatement
+from eva.utils.logging_manager import logger
 
 
 class StatementToPlanConvertor:
@@ -291,7 +291,7 @@ class StatementToPlanConvertor:
             statement.file_options,
         )
         self._plan = load_data_opr
-    
+
     def visit_tune(self, statement: TuneStatement):
         tune_opr = LogicalTune(
             statement.table_info,

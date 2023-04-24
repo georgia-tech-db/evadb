@@ -43,7 +43,6 @@ from eva.optimizer.rules.rules import (
     LogicalFaissIndexScanToPhysical,
     LogicalFilterToPhysical,
     LogicalFunctionScanToPhysical,
-    LogicalTuneToPhysical,
 )
 from eva.optimizer.rules.rules import (
     LogicalGetToSeqScan as SequentialLogicalGetToSeqScan,
@@ -65,6 +64,7 @@ from eva.optimizer.rules.rules import (
 from eva.optimizer.rules.rules import (
     LogicalRenameToPhysical,
     LogicalShowToPhysical,
+    LogicalTuneToPhysical,
     LogicalUnionToPhysical,
     PushDownFilterThroughApplyAndMerge,
     PushDownFilterThroughJoin,

@@ -13,10 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from eva.expression.abstract_expression import AbstractExpression
 from eva.parser.statement import AbstractStatement
-from eva.parser.types import StatementType
 from eva.parser.table_ref import TableInfo
+from eva.parser.types import StatementType
+
 
 class TuneStatement(AbstractStatement):
     """
@@ -41,7 +41,7 @@ class TuneStatement(AbstractStatement):
         show_train_progress: bool,
     ):
         super().__init__(StatementType.TUNE)
-        self._table_info = table_info,
+        self._table_info = (table_info,)
         self._batch_size = batch_size
         self._epochs_size = epochs_size
         self._freeze_layer = freeze_layer
@@ -51,7 +51,7 @@ class TuneStatement(AbstractStatement):
     @property
     def table_info(self) -> TableInfo:
         return self._table_info
-    
+
     @property
     def batch_size(self):
         return self._batch_size
@@ -59,24 +59,28 @@ class TuneStatement(AbstractStatement):
     @property
     def epochs_size(self):
         return self._epochs_size
-    
+
     @property
     def freeze_layer(self):
         return self._freeze_layer
-    
+
     @property
     def multi_scale(self):
         return self._multi_scale
-    
+
     @property
     def show_train_progress(self):
         return self._show_train_progress
 
     def __str__(self) -> str:
-        return "TUNE {} BATCH {} EPOCHS {} FREEZE {} MULTI {} SHOW {}".format(self._table_info, self._batch_size, 
-                                                                              self._epochs_size, self._freeze_layer,
-                                                                              self._multi_scale, self._show_train_progress)
-
+        return "TUNE {} BATCH {} EPOCHS {} FREEZE {} MULTI {} SHOW {}".format(
+            self._table_info,
+            self._batch_size,
+            self._epochs_size,
+            self._freeze_layer,
+            self._multi_scale,
+            self._show_train_progress,
+        )
 
     def __eq__(self, other):
         if not isinstance(other, TuneStatement):

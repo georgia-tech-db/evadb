@@ -1072,6 +1072,7 @@ class LogicalShowToPhysical(Rule):
         after = ShowInfoPlan(before.show_type)
         yield after
 
+
 class LogicalTuneToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALTUNE)
@@ -1096,6 +1097,7 @@ class LogicalTuneToPhysical(Rule):
             before.show_train_progress,
         )
         yield after
+
 
 class LogicalExplainToPhysical(Rule):
     def __init__(self):
