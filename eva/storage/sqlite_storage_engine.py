@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import traceback
 from typing import Iterator, List
 
 import numpy as np
@@ -146,8 +145,6 @@ class SQLStorageEngine(AbstractStorageEngine):
             self._sql_session.commit()
         except Exception as e:
             err_msg = f"Failed to update the table {table.name} with exception {str(e)}"
-            traceback_msg = traceback.format_exc()
-            logger.warn(f"{traceback_msg}")
             logger.exception(err_msg)
             raise Exception(err_msg)
 

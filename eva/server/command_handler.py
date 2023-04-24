@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import asyncio
-import traceback
 from typing import Iterator, Optional
 
 from eva.binder.statement_binder import StatementBinder
@@ -73,13 +72,13 @@ def handle_request(client_writer, request_message):
             output_batch = execute_query_fetch_all(request_message)
         except Exception as e:
             error_msg = str(e)
-            traceback_msg = traceback.format_exc()
-            logger.warn(f"{traceback_msg}")
-            # logger.warn(error_msg)
-            error = True
-            # error_msg = str(e)
-            # logger.warn(error_msg)
+            # traceback_msg = traceback.format_exc()
+            # logger.warn(f"{traceback_msg}")
+            # # logger.warn(error_msg)
             # error = True
+            error_msg = str(e)
+            logger.warn(error_msg)
+            error = True
 
     if not error:
         response = Response(
