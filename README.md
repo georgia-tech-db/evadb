@@ -24,7 +24,7 @@
 
 # EVA AI-Relational Database System
 
-- ⚡️ 10-100x faster AI pipelines 
+- ⚡️ 10-100x faster AI pipelines using SQL-like queries 
 - 💰 Save money spent on GPU-driven inference
 - 📦 Built-in caching to avoid re-running deep learning models across queries
 - 📏 Over 20 AI-centric query optimization rules
