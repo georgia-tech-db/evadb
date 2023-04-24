@@ -13,6 +13,7 @@ from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import TableType
 from eva.udfs.yolo_object_detector import YoloV5
 from eva.catalog.catalog_type import ColumnType
+from eva.server.command_handler import execute_query_fetch_all
 
 encoding_model_name = 'shahrukhx01/paraphrase-mpnet-base-v2-fuzzy-matcher'
 encoding_model = AutoModel.from_pretrained(encoding_model_name).to(torch_device)
@@ -60,7 +61,9 @@ class SemanticRewriter:
         
 
       columns = getattr(table_catalog, 'columns')
-      rows = [['id'] for col in columns]
+      select_query = """SELECT * FROM MyVideo;"""
+      batch = execute_query_fetch_all(select_query)
+      rows = batch.frames().values.tolist()
       col_name = [getattr(column, 'name') for column in columns] + accessory_name
 
       col_type = ['text' if (getattr(column, 'type') == ColumnType.TEXT or getattr(column, 'type') == ColumnType.BOOLEAN) else 'numeric' if (getattr(column, 'type') == ColumnType.INTEGER or getattr(column, 'type') == ColumnType.FLOAT) else 'other' for column in columns] + accessory_type
