@@ -152,15 +152,13 @@ if __name__ == "__main__":
     parser.add_argument(
         "-c",
         "--get-changelog",
-        help="Retrieve the changelog by utilizing the last release commit provided.",
-        default="48ccb80237a456dd37834a7cba0b6fb4d2a8a7d8",
+        help="Retrieve the changelog by utilizing the last release commit provided. eg, 48ccb80237a456dd37834a7cba0b6fb4d2a8a7d8",
     )
 
     parser.add_argument(
         "-r",
         "--release-version",
-        help="Publish a new version of EVA using the provided tag.",
-        default="v0.2.0",
+        help="Publish a new version of EVA using the provided tag. eg, v0.2.0",
     )
 
     args = parser.parse_args()
