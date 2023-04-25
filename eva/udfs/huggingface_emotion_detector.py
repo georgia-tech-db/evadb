@@ -12,17 +12,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import os
 from typing import List
 
-from transformers import AutoFeatureExtractor, AutoModelForImageClassification
-from transformers import DetrImageProcessor, DetrForObjectDetection
-
-import pandas as pd
 import numpy as np
-from PIL import Image
+import pandas as pd
 import torch
-
+from PIL import Image
+from transformers import (
+    AutoFeatureExtractor,
+    AutoModelForImageClassification,
+    DetrForObjectDetection,
+    DetrImageProcessor,
+)
 
 from eva.udfs.abstract.abstract_udf import AbstractClassifierUDF
 
@@ -58,15 +59,25 @@ class HuggingFaceEmotionDetector(AbstractClassifierUDF):
     @staticmethod
     def nms(boxes, scores, iou_threshold):
         # Sort the bounding boxes by their scores in descending order
-        sorted_indices = sorted(range(len(scores)), key=lambda i: scores[i], reverse=True)
+        sorted_indices = sorted(
+            range(len(scores)), key=lambda i: scores[i], reverse=True
+        )
         selected_indices = []
-        overlaps = {i: {j: HuggingFaceEmotionDetector.compute_iou(boxes[i], boxes[j]) for j in sorted_indices} for i in sorted_indices}
+        overlaps = {
+            i: {
+                j: HuggingFaceEmotionDetector.compute_iou(boxes[i], boxes[j])
+                for j in sorted_indices
+            }
+            for i in sorted_indices
+        }
         while sorted_indices:
             # Select the bounding box with the highest score
             i = sorted_indices[0]
             selected_indices.append(i)
             # Remove all the bounding boxes that have an IoU overlap greater than the threshold
-            sorted_indices = [j for j in sorted_indices[1:] if overlaps[i][j] < iou_threshold]
+            sorted_indices = [
+                j for j in sorted_indices[1:] if overlaps[i][j] < iou_threshold
+            ]
         # Return the selected bounding boxes
         return [boxes[i] for i in selected_indices]
 
@@ -86,9 +97,13 @@ class HuggingFaceEmotionDetector(AbstractClassifierUDF):
         inputs = self.proc1(images=img, return_tensors="pt")
         outputs = self.model1(**inputs)
         target_sizes = torch.tensor([img.size[::-1]])
-        faces = self.proc1.post_process_object_detection(outputs, target_sizes=target_sizes, threshold=self.threshold)[0]
+        faces = self.proc1.post_process_object_detection(
+            outputs, target_sizes=target_sizes, threshold=self.threshold
+        )[0]
 
-        unique_faces = HuggingFaceEmotionDetector.nms(faces["boxes"], faces["scores"], 1 - self.threshold)
+        unique_faces = HuggingFaceEmotionDetector.nms(
+            faces["boxes"], faces["scores"], 1 - self.threshold
+        )
         emotions = []
         confidences = []
 
@@ -108,12 +123,7 @@ class HuggingFaceEmotionDetector(AbstractClassifierUDF):
 
     @property
     def labels(self) -> List[str]:
-        return [
-            "angry",
-            "happy",
-            "neutral",
-            "sad"
-        ]
+        return ["angry", "happy", "neutral", "sad"]
 
     def forward(self, frames: pd.DataFrame) -> pd.DataFrame:
         """
@@ -133,7 +143,5 @@ class HuggingFaceEmotionDetector(AbstractClassifierUDF):
         outcome = []
         for frame in frames:
             bboxs, emotions, confidences = self.predict(frame)
-            outcome.append(
-                {"labels": emotions, "scores": confidences, "bboxes": bboxs}
-            )
+            outcome.append({"labels": emotions, "scores": confidences, "bboxes": bboxs})
         return pd.DataFrame(outcome, columns=["labels", "scores", "bboxes"])

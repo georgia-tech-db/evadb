@@ -18,7 +18,6 @@ sphinx_multiversion>=0.2.4
 sphinx_design>=0.3.0
 furo>=2022.4.7
 sphinxemoji>=0.2.0
-transformers>=4.9.0
 
 # MyST
 myst-parser>=0.15.2

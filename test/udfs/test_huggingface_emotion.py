@@ -16,14 +16,11 @@ import unittest
 from pathlib import Path
 from test.markers import windows_skip_marker
 from test.util import EVA_TEST_DATA_DIR
-from unittest.mock import patch
 
 import cv2
 import pandas as pd
 
 from eva.models.storage.batch import Batch
-
-NUM_FRAMES = 10
 
 
 class HuggingFaceEmotionTest(unittest.TestCase):
@@ -62,4 +59,3 @@ class HuggingFaceEmotionTest(unittest.TestCase):
         result = detector(frame_batch.project(["data"]).frames)
         self.assertEqual(5, len(result.iloc[0]["bboxes"]))
         self.assertEqual("neutral", len(result.iloc[0]["labels"][0]))
-
