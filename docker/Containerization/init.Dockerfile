@@ -20,20 +20,9 @@ RUN python3 -m venv /opt/venv
 # Enable venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-# create a virtual environment
-# RUN python3 -m venv test_eva_db
-
-# activate the virtual environment, using "." instead of "source" to specify from bash.
-# RUN . test_eva_db/bin/activate   
-
+# Get the repo and install the dev portion.
 RUN git clone https://github.com/georgia-tech-db/eva.git
-RUN cd eva && pip install -e ".[dev]"
-
-# upgrade pip
-# RUN pip install --upgrade pip         
-
-# build and install the EVA package
-# RUN pip install -e ".[dev]"           
+RUN cd eva && pip install -e ".[dev]"         
 
 # run the eva EVA suite
 # RUN cd eva && bash script/test/test.sh
