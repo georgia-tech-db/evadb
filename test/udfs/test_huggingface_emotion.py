@@ -37,7 +37,7 @@ class HuggingFaceEmotionTest(unittest.TestCase):
         return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
     @windows_skip_marker
-    def test_should_return_batches_equivalent_to_number_of_frames(self):
+    def test_should_return_correct_number_of_faces(self):
         from eva.udfs.huggingface_emotion_detector import HuggingFaceEmotionDetector
 
         happy_faces = self.base_path / "happy.jpg"
@@ -55,9 +55,11 @@ class HuggingFaceEmotionTest(unittest.TestCase):
         result = detector(frame_batch.project(["data"]).frames)
         self.assertEqual(8, len(result.iloc[0]["bboxes"]))
         self.assertEqual(8, len(result.iloc[1]["bboxes"]))
+        self.assertEqual("happy", len(result.iloc[1]["labels"][0]))
 
         frame_batch = Batch(pd.DataFrame([frame_sad_faces]))
         detector = HuggingFaceEmotionDetector()
         result = detector(frame_batch.project(["data"]).frames)
         self.assertEqual(5, len(result.iloc[0]["bboxes"]))
+        self.assertEqual("neutral", len(result.iloc[0]["labels"][0]))
 
