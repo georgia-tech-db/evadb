@@ -18,7 +18,7 @@ encoding_model_name = 'shahrukhx01/paraphrase-mpnet-base-v2-fuzzy-matcher'
 encoding_model = AutoModel.from_pretrained(encoding_model_name).to(torch_device)
 encoding_tokenizer = AutoTokenizer.from_pretrained(encoding_model_name)
 
-os.environ["OPENAI_API_KEY"] = "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"
+os.environ["OPENAI_API_KEY"] = "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"
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 UDFSupport = [
