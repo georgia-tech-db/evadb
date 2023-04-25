@@ -18,7 +18,8 @@ encoding_model_name = 'shahrukhx01/paraphrase-mpnet-base-v2-fuzzy-matcher'
 encoding_model = AutoModel.from_pretrained(encoding_model_name).to(torch_device)
 encoding_tokenizer = AutoTokenizer.from_pretrained(encoding_model_name)
 
-os.environ["OPENAI_API_KEY"] = "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"
+# An openai api key is expected here
+# os.environ["OPENAI_API_KEY"] = "OPENAI_API_KEY"
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 UDFSupport = [
@@ -44,8 +45,6 @@ class SemanticRewriter:
           database_name,
       )
 
-      print(table_catalog)
-
       if table_catalog is None:
          return "InvalidTableName{\}"
 
@@ -65,16 +64,18 @@ class SemanticRewriter:
         
 
       columns = getattr(table_catalog, 'columns')
+      col_name = [getattr(column, 'name') for column in columns] + accessory_name
+      col_type = ['text' if (getattr(column, 'type') == ColumnType.TEXT or getattr(column, 'type') == ColumnType.BOOLEAN) else 'numeric' if (getattr(column, 'type') == ColumnType.INTEGER or getattr(column, 'type') == ColumnType.FLOAT) else 'other' for column in columns] + accessory_type
+      
+      # Here we was thinking to pull out all entries in a table to compare with the semantic query for fine-granulized adjustment
+      # But decided not to since the effiency would be badly affected
+      # 
       # select_query = f"""SELECT * FROM {table_name};"""
       # batch = execute_query_fetch_all(select_query)
       # rows = batch.frames().values.tolist()
-      col_name = [getattr(column, 'name') for column in columns] + accessory_name
+      # rows = [row + accessory_row for row in rows]
+      # self.rows = rows
 
-      col_type = ['text' if (getattr(column, 'type') == ColumnType.TEXT or getattr(column, 'type') == ColumnType.BOOLEAN) else 'numeric' if (getattr(column, 'type') == ColumnType.INTEGER or getattr(column, 'type') == ColumnType.FLOAT) else 'other' for column in columns] + accessory_type
-      
-      #rows = [row + accessory_row for row in rows]
-
-      #self.rows = rows
       self.header = col_name
       self.header_types = col_type
 
@@ -119,7 +120,8 @@ class QueryProcessor():
         h = np.array(self.header)
         t = np.array(self.header_types)
 
-        r = np.delete(r, idx, axis=1)
+        if len(r) > 0:
+          r = np.delete(r, idx, axis=1)
         h = np.delete(h, idx, axis=0)
         t = np.delete(t, idx, axis=0) 
 

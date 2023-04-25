@@ -60,7 +60,6 @@ from eva.parser.show_statement import ShowStatement
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
 from eva.utils.logging_manager import logger
-from eva.parser.parser import Parser
 
 
 class StatementToPlanConvertor:
@@ -339,12 +338,12 @@ class StatementToPlanConvertor:
         header_types = rewriter.header_types
         qp = QueryProcessor(rows, header, header_types, prompt)
         final_sql = qp.query_processor(False)
-        parser = Parser()
-        statement._select_statement = parser.parse(final_sql)[0]
-        
         print(final_sql)
-
-        self.visit_select(statement.select_statement)
+        
+        # For now we won't execute the transformed sql query as it's likely to be syntactically incorrect
+        # parser = Parser()
+        # statement._select_statement = parser.parse(final_sql)[0]
+        # self.visit_select(statement.select_statement)
 
     def visit(self, statement: AbstractStatement):
         """Based on the instance of the statement the corresponding
