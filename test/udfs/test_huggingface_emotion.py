@@ -52,10 +52,10 @@ class HuggingFaceEmotionTest(unittest.TestCase):
         result = detector(frame_batch.project(["data"]).frames)
         self.assertEqual(8, len(result.iloc[0]["bboxes"]))
         self.assertEqual(8, len(result.iloc[1]["bboxes"]))
-        self.assertEqual("happy", len(result.iloc[1]["labels"][0]))
+        self.assertEqual("happy", result.iloc[1]["labels"][0])
 
         frame_batch = Batch(pd.DataFrame([frame_sad_faces]))
         detector = HuggingFaceEmotionDetector()
         result = detector(frame_batch.project(["data"]).frames)
         self.assertEqual(5, len(result.iloc[0]["bboxes"]))
-        self.assertEqual("neutral", len(result.iloc[0]["labels"][0]))
+        self.assertEqual("neutral", result.iloc[0]["labels"][0])
