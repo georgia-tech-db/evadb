@@ -13,7 +13,6 @@ from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import TableType
 from eva.udfs.yolo_object_detector import YoloV5
 from eva.catalog.catalog_type import ColumnType
-from eva.server.command_handler import execute_query_fetch_all
 
 encoding_model_name = 'shahrukhx01/paraphrase-mpnet-base-v2-fuzzy-matcher'
 encoding_model = AutoModel.from_pretrained(encoding_model_name).to(torch_device)
@@ -45,6 +44,11 @@ class SemanticRewriter:
           database_name,
       )
 
+      print(table_catalog)
+
+      if table_catalog is None:
+         return "InvalidTableName{\}"
+
       table_type = getattr(table_catalog, 'table_type')
       accessory_name = []
       accessory_type = []
@@ -52,7 +56,7 @@ class SemanticRewriter:
       
       if table_type == TableType.VIDEO_DATA:
         yolo = YoloV5()
-        accessory_name = yolo.label()
+        accessory_name = yolo.labels
         accessory_type = ['YoloV5-label' for name in accessory_name]
         accessory_row = ['nan' for name in accessory_name]
         accessory_name += ['frame', 'scores']
@@ -61,18 +65,18 @@ class SemanticRewriter:
         
 
       columns = getattr(table_catalog, 'columns')
-      select_query = f"""SELECT * FROM {table_name};"""
-      batch = execute_query_fetch_all(select_query)
-      rows = batch.frames().values.tolist()
+      # select_query = f"""SELECT * FROM {table_name};"""
+      # batch = execute_query_fetch_all(select_query)
+      # rows = batch.frames().values.tolist()
       col_name = [getattr(column, 'name') for column in columns] + accessory_name
 
       col_type = ['text' if (getattr(column, 'type') == ColumnType.TEXT or getattr(column, 'type') == ColumnType.BOOLEAN) else 'numeric' if (getattr(column, 'type') == ColumnType.INTEGER or getattr(column, 'type') == ColumnType.FLOAT) else 'other' for column in columns] + accessory_type
       
-      rows = [row + accessory_row for row in rows]
+      #rows = [row + accessory_row for row in rows]
 
-      self.rows = rows
+      #self.rows = rows
       self.header = col_name
-      self.header_type = col_type
+      self.header_types = col_type
 
       return f"{table_name}(" + ", ".join(col_name) + ")"
     

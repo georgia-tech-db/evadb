@@ -328,15 +328,15 @@ class StatementToPlanConvertor:
         self._plan = delete_opr
 
     def visit_semantic(self, statement: SemanticStatement):
-        """
-        TODO: Add semantic to select converter
-        """
-        table_name = 'UADETRAC'
+        words = statement.semantic_text.split(' ')
+        last_word = words[-1]
+        table_name = last_word[:-1] if last_word[-1] == '.' else last_word
+
         rewriter = SemanticRewriter(statement.semantic_text, table_name)
         prompt = rewriter.rewrite()
         rows = rewriter.rows
         header = rewriter.header
-        header_types = rewriter.header_type
+        header_types = rewriter.header_types
         qp = QueryProcessor(rows, header, header_types, prompt)
         final_sql = qp.query_processor(False)
         parser = Parser()
