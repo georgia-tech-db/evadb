@@ -16,9 +16,6 @@ RUN apt-get install python3-venv -y
 RUN apt-get install python3-pytest -y
 
 # Get the eva db and run it's test, then run the server.
-RUN git clone https://github.com/georgia-tech-db/eva.git
-RUN cd eva
-
 RUN python3 -m venv /opt/venv
 # Enable venv
 ENV PATH="/opt/venv/bin:$PATH"
@@ -29,11 +26,14 @@ ENV PATH="/opt/venv/bin:$PATH"
 # activate the virtual environment, using "." instead of "source" to specify from bash.
 # RUN . test_eva_db/bin/activate   
 
+RUN git clone https://github.com/georgia-tech-db/eva.git
+RUN cd eva && pip install -e ".[dev]"
+
 # upgrade pip
-RUN pip install --upgrade pip         
+# RUN pip install --upgrade pip         
 
 # build and install the EVA package
 # RUN pip install -e ".[dev]"           
 
 # run the eva EVA suite
-# RUN bash script/test/test.sh
+# RUN cd eva && bash script/test/test.sh
