@@ -82,6 +82,8 @@ integration_test_libs = [
 
 benchmark_libs = [
     "pytest-benchmark",
+    "memray",
+    "pytest-memray",
 ]
 
 doc_libs = []

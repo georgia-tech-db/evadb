@@ -14,9 +14,8 @@
 # limitations under the License.
 
 import pytest
-
+import sys
 from eva.server.command_handler import execute_query_fetch_all
-
 
 @pytest.mark.torchtest
 @pytest.mark.benchmark(
@@ -96,3 +95,69 @@ def test_lateral_join(benchmark, setup_pytorch_tests):
     actual_batch = benchmark(execute_query_fetch_all, select_query)
     assert len(actual_batch) == 5
     assert list(actual_batch.columns) == ["myvideo.id", "T.a"]
+
+
+# benchmarking project related tests
+
+@pytest.mark.torchtest
+@pytest.mark.limit_memory("8 GB")
+def test_memory_load_whole_video(setup_pytorch_tests):
+    select_query = """SELECT data FROM MyVideo;"""
+    all_batches = []
+    # to roughly load < 8 GB Data, any regressions furthur can be caugh in the assertion mention in the marker
+    for i in range(20):
+        all_batches.append(execute_query_fetch_all(select_query))
+
+
+@pytest.mark.torchtest
+@pytest.mark.limit_memory("8 GB")
+def test_memory_load_join_reults(setup_pytorch_tests):
+    select_query = """SELECT * FROM MyVideo JOIN LATERAL
+                    YoloV5(data) AS T(a,b,c);"""
+    
+    all_batches = []
+    # to roughly load < 8 GB Data, any regressions furthur can be caugh in the assertion mention in the marker
+    for i in range(19):
+        all_batches.append(execute_query_fetch_all(select_query))
+
+
+@pytest.mark.torchtest
+@pytest.mark.benchmark(
+    warmup=False,
+    warmup_iterations=1,
+    min_rounds=1,
+)
+def test_memory_profiler(benchmark):
+    pass
+
+
+@pytest.mark.torchtest
+@pytest.mark.benchmark(
+    warmup=False,
+    warmup_iterations=1,
+    min_rounds=1,
+)
+def test_should_run_pytorch_and_facenet_accuracy(benchmark):
+    pass
+
+
+@pytest.mark.torchtest
+@pytest.mark.benchmark(
+    warmup=False,
+    warmup_iterations=1,
+    min_rounds=1,
+)
+def test_should_run_pytorch_and_yolo_accuracy(benchmark):
+    pass
+
+
+@pytest.mark.torchtest
+@pytest.mark.benchmark(
+    warmup=False,
+    warmup_iterations=1,
+    min_rounds=1,
+)
+def test_should_run_pytorch_and_resnet50_accuracy(benchmark):
+    pass
+
+
