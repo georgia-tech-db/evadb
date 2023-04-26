@@ -25,7 +25,7 @@ import torch.nn as nn
 from torch.optim import lr_scheduler  # noqa: E731
 
 # import yolov5.val as validate
-import eva.third_party.yolo_val as validate
+import yolov5.val as validate
 from yolov5.models.yolo import Model
 from yolov5.utils.dataloaders import create_dataloader
 from yolov5.utils.general import (
