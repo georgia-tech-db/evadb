@@ -67,7 +67,6 @@ from eva.optimizer.rules.rules import (
     LogicalLimitToPhysical,
     LogicalLoadToPhysical,
     LogicalOrderByToPhysical,
-    LogicalTuneToPhysical,
 )
 from eva.optimizer.rules.rules import (
     LogicalProjectToPhysical as SequentialLogicalProjectToPhysical,
@@ -75,6 +74,7 @@ from eva.optimizer.rules.rules import (
 from eva.optimizer.rules.rules import (
     LogicalRenameToPhysical,
     LogicalShowToPhysical,
+    LogicalTuneToPhysical,
     LogicalUnionToPhysical,
     Promise,
     PushDownFilterThroughApplyAndMerge,

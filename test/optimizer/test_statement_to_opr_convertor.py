@@ -38,16 +38,16 @@ from eva.optimizer.operators import (  # LogicalLoadData,
     LogicalInsert,
     LogicalJoin,
     LogicalLimit,
+    LogicalLoadData,
     LogicalOrderBy,
     LogicalProject,
     LogicalQueryDerivedGet,
     LogicalRename,
     LogicalSample,
     LogicalShow,
+    LogicalTune,
     LogicalUnion,
     Operator,
-    LogicalTune,
-    LogicalLoadData,
 )
 from eva.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
 from eva.parser.create_index_statement import CreateIndexStatement
@@ -294,7 +294,9 @@ statement_to_opr_convertor.column_definition_to_udf_io"
         join_plan = LogicalJoin(MagicMock(), MagicMock(), MagicMock(), MagicMock())
         project_plan = LogicalProject(MagicMock(), MagicMock())
         apply_and_merge_plan = LogicalApplyAndMerge(MagicMock(), MagicMock())
-        tune_plan = LogicalTune(MagicMock(), MagicMock(), MagicMock(), MagicMock(), MagicMock(), MagicMock())
+        tune_plan = LogicalTune(
+            MagicMock(), MagicMock(), MagicMock(), MagicMock(), MagicMock(), MagicMock()
+        )
 
         create_plan.append_child(create_udf_plan)
 
