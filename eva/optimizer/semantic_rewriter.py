@@ -40,10 +40,7 @@ class SemanticRewriter:
       table_name = self.table_name
       database_name = "database"
 
-      table_catalog = catalog.get_table_catalog_entry(
-          table_name,
-          database_name,
-      )
+      table_catalog = catalog.get_table_catalog_entry(table_name)
 
       if table_catalog is None:
          return "InvalidTableName{\}"
