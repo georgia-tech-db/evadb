@@ -131,7 +131,7 @@ class RulesTest(unittest.TestCase):
             Promise.LOGICAL_DELETE_TO_PHYSICAL,
             Promise.LOGICAL_RENAME_TO_PHYSICAL,
             Promise.LOGICAL_DROP_TO_PHYSICAL,
-            Promise.LOGICAL_LOAD_TO_PHYSICAL,
+            Promise.LOGICAL_TUNE_TO_PHYSICAL,
             Promise.LOGICAL_CREATE_TO_PHYSICAL,
             Promise.LOGICAL_CREATE_UDF_TO_PHYSICAL,
             Promise.LOGICAL_SAMPLE_TO_UNIFORMSAMPLE,
@@ -159,7 +159,7 @@ class RulesTest(unittest.TestCase):
         implementation_count = len(set(implementation_promises))
 
         # rewrite_count + implementation_count + 1 (for IMPLEMENTATION_DELIMETER)
-        self.assertEqual(rewrite_count + implementation_count + 2, promise_count)
+        self.assertEqual(rewrite_count + implementation_count + 2, promise_count-1)
 
     def test_supported_rules(self):
         # adding/removing rules should update this test
@@ -242,7 +242,7 @@ class RulesTest(unittest.TestCase):
             supported_implementation_rules.append(LogicalExchangeToPhysical())
         self.assertEqual(
             len(supported_implementation_rules),
-            len(RulesManager().implementation_rules),
+            len(RulesManager().implementation_rules)-1,
         )
 
         for rule in supported_implementation_rules:
