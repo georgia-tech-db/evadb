@@ -134,107 +134,44 @@ class LoadZIPExecutor(AbstractExecutor):
         do_create = False
         table_obj = self.catalog.get_table_catalog_entry(table_name, database_name)
 
-        # files_path = os.path.join(extract_path, "obj_train_data")
-        # images = [f for f in os.listdir(files_path) if f.lower().endswith((".png", ".jpg", ".jpeg"))]
-        # labels = [f for f in os.listdir(files_path) if f.lower().endswith((".txt"))]
+        files_path = os.path.join(extract_path, "obj_train_data")
+        images = [f for f in os.listdir(files_path) if f.lower().endswith((".png", ".jpg", ".jpeg"))]
+        labels = [f for f in os.listdir(files_path) if f.lower().endswith((".txt"))]
 
-        # image_path = []
-        # class_id = []
-        # x_center = []
-        # y_center = []
-        # width = []
-        # height = []
-
-        # columns = [
-        #     ColumnDefinition("image_path", ColumnType.TEXT, None, None),
-        #     ColumnDefinition("class_id", ColumnType.INTEGER, None, None),
-        #     ColumnDefinition("x_center", ColumnType.FLOAT, None, None),
-        #     ColumnDefinition("y_center", ColumnType.FLOAT, None, None),
-        #     ColumnDefinition("width", ColumnType.FLOAT, None, None),
-        #     ColumnDefinition("height", ColumnType.FLOAT, None, None),
-        # ]
-
-        # for image in images:
-        #     label_file = os.path.splitext(image)[0] + '.txt'
-        #     label_file_path = os.path.join(files_path, label_file)
-        #     if label_file in labels:
-        #         with open(label_file_path, 'r') as f:
-        #             lines = f.readlines()
-
-        #         for line in lines:
-        #             class_id_v, x_center_v, y_center_v, width_v, height_v = map(float, line.strip().split())
-        #             image_path.append(image)
-        #             class_id.append(class_id_v)
-        #             x_center.append(x_center_v)
-        #             y_center.append(y_center_v)
-        #             width.append(width_v)
-        #             height.append(height_v)
-
-        # if table_obj:
-        #     error = f"{table_name} already exist."
-        #     logger.error(error)
-        #     raise ExecutorError(error)
-
-        # else:
-        #     table_obj = self.catalog.create_and_insert_table_catalog_entry(
-        #         TableInfo(table_name),
-        #         columns,
-        #         identifier_column=None,
-        #         table_type=TableType.STRUCTURED_DATA,
-        #     )
-        #     do_create = True
-
-        # storage_engine = StorageEngine.factory(table_obj)
-        # if do_create:
-        #     storage_engine.create(table_obj)
-
-        # storage_engine.write(
-        #     table_obj,
-        #     Batch(pd.DataFrame({"image_path": image_path,
-        #                         "class_id": class_id,
-        #                         "x_center": x_center,
-        #                         "y_center": y_center,
-        #                         "width": width,
-        #                         "height": height})),)
-
-        # yield Batch(
-        #         pd.DataFrame(
-        #             [
-        #                 f"Number of loaded imgae: {str(len(image_path))}"
-        #             ]
-        #         )
-        #     )
-
-        train_path = os.path.join(extract_path, "images", "train")
-        val_path = os.path.join(extract_path, "images", "valid")
-        nc_path = os.path.join(extract_path, "obj.names")
-        with open(nc_path, "r") as f:
-            num_classes = len(f.readlines())
-
-        num_train = sum(
-            os.path.isfile(os.path.join(train_path, f)) for f in os.listdir(train_path)
-        )
-        num_val = sum(
-            os.path.isfile(os.path.join(val_path, f)) for f in os.listdir(val_path)
-        )
-
-        data = {
-            "train_path": [train_path],
-            "num_train": [num_train],
-            "val_path": [val_path],
-            "num_val": [num_val],
-            "num_classes": [num_classes],
-        }
-
-        df = pd.DataFrame(data)
+        image_path = []
+        class_id = []
+        x_center = []
+        y_center = []
+        width = []
+        height = []
+        dir_path = []
 
         columns = [
-            ColumnDefinition("train_path", ColumnType.TEXT, None, None),
-            ColumnDefinition("num_train", ColumnType.INTEGER, None, None),
-            ColumnDefinition("val_path", ColumnType.TEXT, None, None),
-            ColumnDefinition("num_val", ColumnType.INTEGER, None, None),
-            ColumnDefinition("num_classes", ColumnType.INTEGER, None, None),
+            ColumnDefinition("image_path", ColumnType.TEXT, None, None),
+            ColumnDefinition("class_id", ColumnType.INTEGER, None, None),
+            ColumnDefinition("x_center", ColumnType.FLOAT, None, None),
+            ColumnDefinition("y_center", ColumnType.FLOAT, None, None),
+            ColumnDefinition("width", ColumnType.FLOAT, None, None),
+            ColumnDefinition("height", ColumnType.FLOAT, None, None),
+            ColumnDefinition("dir_path", ColumnType.TEXT, None, None),
         ]
+
+        for image in images:
+            label_file = os.path.splitext(image)[0] + '.txt'
+            label_file_path = os.path.join(files_path, label_file)
+            if label_file in labels:
+                with open(label_file_path, 'r') as f:
+                    lines = f.readlines()
+
+                for line in lines:
+                    class_id_v, x_center_v, y_center_v, width_v, height_v = map(float, line.strip().split())
+                    image_path.append(image)
+                    class_id.append(class_id_v)
+                    x_center.append(x_center_v)
+                    y_center.append(y_center_v)
+                    width.append(width_v)
+                    height.append(height_v)
+                    dir_path.append(extract_path)
 
         if table_obj:
             error = f"{table_name} already exist."
@@ -256,19 +193,18 @@ class LoadZIPExecutor(AbstractExecutor):
 
         storage_engine.write(
             table_obj,
-            Batch(df),
-        )
+            Batch(pd.DataFrame({"image_path": image_path,
+                                "class_id": class_id,
+                                "x_center": x_center,
+                                "y_center": y_center,
+                                "width": width,
+                                "height": height,
+                                "dir_path": dir_path})),)
 
         yield Batch(
-            pd.DataFrame(
-                {
-                    "file_path": [file_path],
-                    "extract_path": [extract_path],
-                    "train_path": [train_path],
-                    "num_train": [num_train],
-                    "val_path": [val_path],
-                    "num_val": [num_val],
-                    "nc": [num_classes],
-                }
+                pd.DataFrame(
+                    [
+                        f"Number of loaded imgae: {str(len(image_path))}"
+                    ]
+                )
             )
-        )

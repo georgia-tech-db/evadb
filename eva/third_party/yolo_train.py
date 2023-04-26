@@ -24,7 +24,8 @@ import torch
 import torch.nn as nn
 from torch.optim import lr_scheduler  # noqa: E731
 
-import yolov5.val as validate
+# import yolov5.val as validate
+import eva.third_party.yolo_val as validate
 from yolov5.models.yolo import Model
 from yolov5.utils.dataloaders import create_dataloader
 from yolov5.utils.general import (
@@ -264,6 +265,7 @@ def train_yolov5(
         final_epoch = (epoch + 1 == epochs) or stopper.possible_stop
         data_paths = {"train": train_path, "val": val_path, "nc": nc}
         save_dir = dataset_path
+        # save_dir = Path(save_dir)
         if not final_epoch:
             results, maps, _ = validate.run(
                 data_paths,
@@ -273,7 +275,7 @@ def train_yolov5(
                 model=ema.ema,
                 single_cls=False,
                 dataloader=val_loader,
-                save_dir=save_dir,
+                # save_dir=save_dir,
                 plots=False,
                 compute_loss=compute_loss,
             )
