@@ -133,4 +133,3 @@ then
     coveralls
     exit 0 # Success     
 fi
-
