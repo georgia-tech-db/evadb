@@ -13,8 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pandas as pd
 import os
+
+import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.services.table_catalog_service import TableCatalogService
@@ -58,14 +59,13 @@ class TuneExecutor(AbstractExecutor):
 
             for df in table_col:
                 for _, row in df.iterrows():
-                    train_path = os.path.join(row['dir_path'], "images", "train")
-                    val_path = os.path.join(row['dir_path'], "images", "valid")
-            
-            dir_path = os.path.dirname(os.path.dirname(train_path))  
-            nc_path = os.path.join(dir_path, "obj.names")
-            with open(nc_path, "r") as f:            
-                num_classes = len(f.readlines())
+                    train_path = os.path.join(row["dir_path"], "images", "train")
+                    val_path = os.path.join(row["dir_path"], "images", "valid")
 
+            dir_path = os.path.dirname(os.path.dirname(train_path))
+            nc_path = os.path.join(dir_path, "obj.names")
+            with open(nc_path, "r") as f:
+                num_classes = len(f.readlines())
 
         training_results = train_yolov5(
             batch_size,

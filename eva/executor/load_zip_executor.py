@@ -135,7 +135,11 @@ class LoadZIPExecutor(AbstractExecutor):
         table_obj = self.catalog.get_table_catalog_entry(table_name, database_name)
 
         files_path = os.path.join(extract_path, "obj_train_data")
-        images = [f for f in os.listdir(files_path) if f.lower().endswith((".png", ".jpg", ".jpeg"))]
+        images = [
+            f
+            for f in os.listdir(files_path)
+            if f.lower().endswith((".png", ".jpg", ".jpeg"))
+        ]
         labels = [f for f in os.listdir(files_path) if f.lower().endswith((".txt"))]
 
         image_path = []
@@ -157,14 +161,16 @@ class LoadZIPExecutor(AbstractExecutor):
         ]
 
         for image in images:
-            label_file = os.path.splitext(image)[0] + '.txt'
+            label_file = os.path.splitext(image)[0] + ".txt"
             label_file_path = os.path.join(files_path, label_file)
             if label_file in labels:
-                with open(label_file_path, 'r') as f:
+                with open(label_file_path, "r") as f:
                     lines = f.readlines()
 
                 for line in lines:
-                    class_id_v, x_center_v, y_center_v, width_v, height_v = map(float, line.strip().split())
+                    class_id_v, x_center_v, y_center_v, width_v, height_v = map(
+                        float, line.strip().split()
+                    )
                     image_path.append(image)
                     class_id.append(class_id_v)
                     x_center.append(x_center_v)
@@ -193,18 +199,19 @@ class LoadZIPExecutor(AbstractExecutor):
 
         storage_engine.write(
             table_obj,
-            Batch(pd.DataFrame({"image_path": image_path,
-                                "class_id": class_id,
-                                "x_center": x_center,
-                                "y_center": y_center,
-                                "width": width,
-                                "height": height,
-                                "dir_path": dir_path})),)
-
-        yield Batch(
+            Batch(
                 pd.DataFrame(
-                    [
-                        f"Number of loaded imgae: {str(len(image_path))}"
-                    ]
+                    {
+                        "image_path": image_path,
+                        "class_id": class_id,
+                        "x_center": x_center,
+                        "y_center": y_center,
+                        "width": width,
+                        "height": height,
+                        "dir_path": dir_path,
+                    }
                 )
-            )
+            ),
+        )
+
+        yield Batch(pd.DataFrame([f"Number of loaded imgae: {str(len(image_path))}"]))

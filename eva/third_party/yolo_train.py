@@ -265,7 +265,6 @@ def train_yolov5(
         final_epoch = (epoch + 1 == epochs) or stopper.possible_stop
         data_paths = {"train": train_path, "val": val_path, "nc": nc}
         save_dir = dataset_path
-        # save_dir = Path(save_dir)
         if not final_epoch:
             results, maps, _ = validate.run(
                 data_paths,
@@ -275,7 +274,7 @@ def train_yolov5(
                 model=ema.ema,
                 single_cls=False,
                 dataloader=val_loader,
-                # save_dir=save_dir,
+                save_dir=save_dir,
                 plots=False,
                 compute_loss=compute_loss,
             )
