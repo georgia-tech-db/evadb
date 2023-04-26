@@ -67,6 +67,7 @@ from eva.optimizer.rules.rules import (
     LogicalLimitToPhysical,
     LogicalLoadToPhysical,
     LogicalOrderByToPhysical,
+    LogicalTuneToPhysical,
 )
 from eva.optimizer.rules.rules import (
     LogicalProjectToPhysical as SequentialLogicalProjectToPhysical,
@@ -131,7 +132,6 @@ class RulesTest(unittest.TestCase):
             Promise.LOGICAL_DELETE_TO_PHYSICAL,
             Promise.LOGICAL_RENAME_TO_PHYSICAL,
             Promise.LOGICAL_DROP_TO_PHYSICAL,
-            Promise.LOGICAL_TUNE_TO_PHYSICAL,
             Promise.LOGICAL_CREATE_TO_PHYSICAL,
             Promise.LOGICAL_CREATE_UDF_TO_PHYSICAL,
             Promise.LOGICAL_SAMPLE_TO_UNIFORMSAMPLE,
@@ -149,6 +149,8 @@ class RulesTest(unittest.TestCase):
             Promise.LOGICAL_CREATE_INDEX_TO_FAISS,
             Promise.LOGICAL_APPLY_AND_MERGE_TO_PHYSICAL,
             Promise.LOGICAL_FAISS_INDEX_SCAN_TO_PHYSICAL,
+            Promise.LOGICAL_TUNE_TO_PHYSICAL,
+            Promise.LOGICAL_LOAD_TO_PHYSICAL,
         ]
 
         for promise in implementation_promises:
@@ -159,7 +161,7 @@ class RulesTest(unittest.TestCase):
         implementation_count = len(set(implementation_promises))
 
         # rewrite_count + implementation_count + 1 (for IMPLEMENTATION_DELIMETER)
-        self.assertEqual(rewrite_count + implementation_count + 2, promise_count-1)
+        self.assertEqual(rewrite_count + implementation_count + 2, promise_count)
 
     def test_supported_rules(self):
         # adding/removing rules should update this test
@@ -236,13 +238,14 @@ class RulesTest(unittest.TestCase):
             LogicalCreateIndexToFaiss(),
             LogicalApplyAndMergeToPhysical(),
             LogicalFaissIndexScanToPhysical(),
+            LogicalTuneToPhysical(),
         ]
 
         if ray_enabled:
             supported_implementation_rules.append(LogicalExchangeToPhysical())
         self.assertEqual(
             len(supported_implementation_rules),
-            len(RulesManager().implementation_rules)-1,
+            len(RulesManager().implementation_rules),
         )
 
         for rule in supported_implementation_rules:
