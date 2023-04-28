@@ -136,7 +136,7 @@ class StatementToOprTest(unittest.TestCase):
         query = f"""LOAD VIDEO '{video_file_path}' INTO MyVideo;"""
         execute_query_fetch_all(query)
         
-        os.environ["OPENAI_API_KEY"] = "MOCK_API_KEY"
+        os.environ["OPENAI_API_KEY"] = "MOCK_API_KEY" ## openai api key is provided by user; local test passed with our own api key
         converter = StatementToPlanConvertor()
         converter.visit_select = MagicMock()
         statement = SemanticStatement('Search for frames with more than 3 cars in MyVideo', SelectStatement())
