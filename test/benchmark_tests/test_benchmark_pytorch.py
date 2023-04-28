@@ -26,7 +26,7 @@ from eva.server.command_handler import execute_query_fetch_all
 )
 @pytest.mark.notparallel
 def test_should_run_pytorch_and_yolo(benchmark, setup_pytorch_tests):
-    select_query = """SELECT YoloV5(data) FROM MyVideo
+    select_query = """SELECT Yolo(data) FROM MyVideo
                     WHERE id < 5;"""
     actual_batch = benchmark(execute_query_fetch_all, select_query)
     assert len(actual_batch) == 5
@@ -92,7 +92,7 @@ def test_should_run_pytorch_and_resnet50(benchmark, setup_pytorch_tests):
 @pytest.mark.notparallel
 def test_lateral_join(benchmark, setup_pytorch_tests):
     select_query = """SELECT id, a FROM MyVideo JOIN LATERAL
-                    YoloV5(data) AS T(a,b,c) WHERE id < 5;"""
+                    Yolo(data) AS T(a,b,c) WHERE id < 5;"""
     actual_batch = benchmark(execute_query_fetch_all, select_query)
     assert len(actual_batch) == 5
     assert list(actual_batch.columns) == ["myvideo.id", "T.a"]

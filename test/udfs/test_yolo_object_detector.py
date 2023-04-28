@@ -36,7 +36,7 @@ def numpy_to_yolo_format(numpy_image):
     return rgb
 
 
-class YoloV5Test(unittest.TestCase):
+class YoloTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.base_path = os.path.dirname(os.path.abspath(__file__))
@@ -48,13 +48,13 @@ class YoloV5Test(unittest.TestCase):
     def test_should_raise_import_error_with_missing_torch(self):
         with self.assertRaises(ImportError):
             with mock.patch.dict(sys.modules, {"torch": None}):
-                from eva.udfs.yolo_object_detector import YoloV5  # noqa: F401
+                from eva.udfs.yolo_object_detector import Yolo  # noqa: F401
 
                 pass
 
     @unittest.skip("disable test due to model downloading time")
     def test_should_return_batches_equivalent_to_number_of_frames(self):
-        from eva.udfs.yolo_object_detector import YoloV5
+        from eva.udfs.yolo_object_detector import Yolo
 
         frame_dog = {
             "id": 1,
@@ -70,7 +70,7 @@ class YoloV5Test(unittest.TestCase):
         test_df_cat = pd.DataFrame([frame_dog_cat])
         frame_dog = numpy_to_yolo_format(test_df_dog["data"].values[0])
         frame_cat = numpy_to_yolo_format(test_df_cat["data"].values[0])
-        detector = YoloV5()
+        detector = Yolo()
         result = []
         result.append(detector.forward(frame_dog))
         result.append(detector.forward(frame_cat))

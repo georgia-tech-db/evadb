@@ -107,7 +107,7 @@ Fastrcnn_udf_query = """CREATE UDF IF NOT EXISTS FastRCNNObjectDetector
     EVA_INSTALLATION_DIR
 )
 
-YoloV5_udf_query = """CREATE UDF IF NOT EXISTS YoloV5
+Yolo_udf_query = """CREATE UDF IF NOT EXISTS Yolo
       INPUT  (Frame_Array NDARRAY UINT8(3, ANYDIM, ANYDIM))
       OUTPUT (labels NDARRAY STR(ANYDIM), bboxes NDARRAY FLOAT32(ANYDIM, 4),
                 scores NDARRAY FLOAT32(ANYDIM))
@@ -186,7 +186,7 @@ def init_builtin_udfs(mode="debug"):
         )
 
     if mode != "minimal":
-        queries.extend([YoloV5_udf_query])
+        queries.extend([Yolo_udf_query])
 
     for query in queries:
         execute_query_fetch_all(query)

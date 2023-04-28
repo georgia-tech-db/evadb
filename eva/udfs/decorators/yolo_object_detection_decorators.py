@@ -46,7 +46,7 @@ class YoloDecorators(PytorchAbstractClassifierUDF):
     @setup(cachable=True, udf_type="object_detection", batchable=True)
     def setup(self, threshold=0.85):
         self.threshold = threshold
-        self.model = torch.hub.load("ultralytics/yolov5", "yolov5s", verbose=False)
+        self.model = torch.hub.load("ultralytics/Yolo", "Yolos", verbose=False)
 
     @property
     def labels(self) -> List[str]:
@@ -179,12 +179,12 @@ class YoloDecorators(PytorchAbstractClassifierUDF):
 
         """
         # Stacking all frames, and changing to numpy
-        # because of yolov5 error with Tensors
+        # because of Yolo error with Tensors
 
         outcome = []
 
         # Convert to HWC
-        # https://github.com/ultralytics/yolov5/blob/3e55763d45f9c5f8217e4dad5ba1e6c1f42e3bf8/models/common.py#L658
+        # https://github.com/ultralytics/Yolo/blob/3e55763d45f9c5f8217e4dad5ba1e6c1f42e3bf8/models/common.py#L658
         frames = torch.permute(frames, (0, 2, 3, 1))
         predictions = self.model([its.cpu().detach().numpy() * 255 for its in frames])
 

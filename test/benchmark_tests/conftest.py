@@ -26,7 +26,7 @@ def setup_pytorch_tests():
     execute_query_fetch_all("LOAD VIDEO 'data/ua_detrac/ua_detrac.mp4' INTO MyVideo;")
     execute_query_fetch_all("LOAD VIDEO 'data/mnist/mnist.mp4' INTO MNIST;")
     load_udfs_for_testing()
-    from eva.udfs.udf_bootstrap_queries import YoloV5_udf_query
+    from eva.udfs.udf_bootstrap_queries import Yolo_udf_query
 
-    execute_query_fetch_all(YoloV5_udf_query)
+    execute_query_fetch_all(Yolo_udf_query)
     yield None
