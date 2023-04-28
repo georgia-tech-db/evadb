@@ -47,7 +47,7 @@ class YoloV5(PytorchAbstractClassifierUDF):
     def setup(self, threshold=0.30):
         logging.getLogger("yolov5").setLevel(logging.CRITICAL)  # yolov5
         self.threshold = threshold
-        self.predict_func = YOLO("yolov8s.pt")
+        self.predict_func = YOLO("yolov8m.pt")
         self.model = self.predict_func.model
         
         # self.model2 = torch.hub.load("ultralytics/yolov5", "yolov5s", verbose=False)
