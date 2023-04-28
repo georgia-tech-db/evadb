@@ -18,6 +18,8 @@ from typing import List
 import pandas as pd
 
 from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
+from eva.udfs.abstract.abstract_udf import AbstractClassifierUDF
+from eva.udfs.gpu_compatible import GPUCompatible
 
 try:
     import torch
@@ -42,10 +44,14 @@ class YoloV5(PytorchAbstractClassifierUDF):
     def name(self) -> str:
         return "yolo"
 
-    def setup(self, threshold=0.85):
+    def setup(self, threshold=0.60):
         logging.getLogger("yolov5").setLevel(logging.CRITICAL)  # yolov5
         self.threshold = threshold
-        self.model = YOLO("yolov8.pt")
+        self.predict_func = YOLO("yolov8s.pt")
+        self.model = self.predict_func.model
+        
+        # self.model2 = torch.hub.load("ultralytics/yolov5", "yolov5s", verbose=False)
+        # print("Highfi")
 
     @property
     def labels(self) -> List[str]:
@@ -163,21 +169,22 @@ class YoloV5(PytorchAbstractClassifierUDF):
         # Convert to HWC
         # https://github.com/ultralytics/yolov5/blob/3e55763d45f9c5f8217e4dad5ba1e6c1f42e3bf8/models/common.py#L658
         frames = torch.permute(frames, (0, 2, 3, 1))
-        predictions = self.model([its.cpu().detach().numpy() * 255 for its in frames])
+        list_of_numpy_images = [its.cpu().detach().numpy() * 255 for its in frames]
+        predictions = self.predict_func(list_of_numpy_images)
 
-        for i in range(frames.shape[0]):
-            single_result = predictions.pandas().xyxy[i]
-            pred_class = single_result["name"].tolist()
-            pred_score = single_result["confidence"].tolist()
-            pred_boxes = single_result[["xmin", "ymin", "xmax", "ymax"]].apply(
-                lambda x: list(x), axis=1
-            )
+        for pred in predictions:
+            single_result = pred.boxes
+            pred_class = [self.predict_func.names[i] for i in single_result.cls.tolist()]
+            pred_score = single_result.conf.tolist()
+            pred_boxes = single_result.xyxy.tolist()
+
+            t = list(map(lambda i: i< self.threshold, pred_score)).index(True)
 
             outcome.append(
                 {
-                    "labels": pred_class,
-                    "bboxes": pred_boxes,
-                    "scores": pred_score,
+                    "labels": pred_class[:t],
+                    "bboxes": pred_boxes[:t],
+                    "scores": pred_score[:t],
                 },
             )
         return pd.DataFrame(
