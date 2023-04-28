@@ -64,11 +64,20 @@ def bootstrap_environment(eva_config_dir: Path, eva_installation_dir: Path):
     s3_dir = eva_config_dir / S3_DOWNLOAD_DIR
     tmp_dir = eva_config_dir / TMP_DIR
 
-    eva_config_dir.mkdir(parents=True, exist_ok=True)
-    index_dir.mkdir(parents=True, exist_ok=True)
-    cache_dir.mkdir(parents=True, exist_ok=True)
-    s3_dir.mkdir(parents=True, exist_ok=True)
-    tmp_dir.mkdir(parents=True, exist_ok=True)
+    if not eva_config_dir.exists():
+        eva_config_dir.mkdir(parents=True, exist_ok=True)
+    
+    if not index_dir.exists():
+        index_dir.mkdir(parents=True, exist_ok=True)
+    
+    if not cache_dir.exists():
+        cache_dir.mkdir(parents=True, exist_ok=True)
+    
+    if not s3_dir.exists():
+        s3_dir.mkdir(parents=True, exist_ok=True)
+    
+    if not tmp_dir.exists():
+        tmp_dir.mkdir(parents=True, exist_ok=True)
 
     # copy eva.yml into config path
     if not config_file_path.exists():
