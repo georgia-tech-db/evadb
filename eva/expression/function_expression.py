@@ -190,7 +190,7 @@ class FunctionExpression(AbstractExpression):
         if not self._cache:
             return func_args.apply_function_expression(func)
 
-        output_cols = [obj.name for obj in self.output_objs]
+        output_cols = [obj.name for obj in self.udf_obj.outputs]
 
         # 1. check cache
         # We are required to iterate over the batch row by row and check the cache.
@@ -210,7 +210,7 @@ class FunctionExpression(AbstractExpression):
         cache_miss = np.full(len(batch), True)
         for idx, key in cache_keys.iterrows():
             val = self._cache.store.get(key.to_numpy())
-            results[idx] = val[output_cols].to_numpy() if val is not None else val
+            results[idx] = val
             cache_miss[idx] = val is None
 
         # log the cache misses
@@ -226,12 +226,10 @@ class FunctionExpression(AbstractExpression):
             for key, value in zip(
                 missing_keys.iterrows(), cache_miss_results.iterrows()
             ):
-                self._cache.store.set(key[1].to_numpy(), value[1])
+                self._cache.store.set(key[1].to_numpy(), value[1].to_numpy())
 
             # 4. merge the cache results
-            results[cache_miss] = cache_miss_results.get_columns_as_numpy_array(
-                output_cols
-            )
+            results[cache_miss] = cache_miss_results.to_numpy()
 
         # 5. return the correct batch
         return Batch(pd.DataFrame(results, columns=output_cols))

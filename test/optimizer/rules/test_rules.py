@@ -37,6 +37,8 @@ from eva.optimizer.operators import (
 )
 from eva.optimizer.rules.rules import (
     CacheFunctionExpressionInApply,
+    CacheFunctionExpressionInFilter,
+    CacheFunctionExpressionInProject,
     CombineSimilarityOrderByAndLimitToFaissIndexScan,
     EmbedFilterIntoGet,
     EmbedSampleIntoGet,
@@ -159,7 +161,7 @@ class RulesTest(unittest.TestCase):
         implementation_count = len(set(implementation_promises))
 
         # rewrite_count + implementation_count + 1 (for IMPLEMENTATION_DELIMETER)
-        self.assertEqual(rewrite_count + implementation_count + 2, promise_count)
+        self.assertEqual(rewrite_count + implementation_count + 4, promise_count)
 
     def test_supported_rules(self):
         # adding/removing rules should update this test
@@ -188,6 +190,8 @@ class RulesTest(unittest.TestCase):
         supported_logical_rules = [
             LogicalInnerJoinCommutativity(),
             CacheFunctionExpressionInApply(),
+            CacheFunctionExpressionInFilter(),
+            CacheFunctionExpressionInProject(),
         ]
         self.assertEqual(
             len(supported_logical_rules), len(RulesManager().logical_rules)
