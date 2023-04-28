@@ -19,7 +19,7 @@ from eva.catalog.catalog_utils import get_table_primary_columns
 from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 from eva.catalog.models.udf_metadata_catalog import UdfMetadataCatalogEntry
-from eva.constants import DEFAULT_FUNCTION_EXPRESSION_COST
+from eva.constants import CACHEABLE_UDFS, DEFAULT_FUNCTION_EXPRESSION_COST
 from eva.expression.abstract_expression import AbstractExpression, ExpressionType
 from eva.expression.expression_utils import (
     conjunction_list_to_expression_tree,
@@ -227,18 +227,7 @@ def optimize_cache_key(expr: FunctionExpression):
     return keys
 
 
-def enable_cache(func_expr: FunctionExpression) -> FunctionExpression:
-    """Enables cache for a function expression.
-
-    The cache key is optimized by replacing it with logical equivalent expressions.
-    A cache entry is inserted in the catalog corresponding to the expression.
-
-    Args:
-        func_expr (FunctionExpression): The function expression to enable cache for.
-
-    Returns:
-        FunctionExpression: The function expression with cache enabled.
-    """
+def enable_cache_init(func_expr: FunctionExpression) -> FunctionExpressionCache:
     optimized_key = optimize_cache_key(func_expr)
     if optimized_key == func_expr.children:
         optimized_key = [None]
@@ -251,7 +240,42 @@ def enable_cache(func_expr: FunctionExpression) -> FunctionExpression:
     cache = FunctionExpressionCache(
         key=tuple(optimized_key), store=DiskKVCache(cache_entry.cache_path)
     )
+    return cache
+
+
+def enable_cache(func_expr: FunctionExpression) -> FunctionExpression:
+    """Enables cache for a function expression.
+
+    The cache key is optimized by replacing it with logical equivalent expressions.
+    A cache entry is inserted in the catalog corresponding to the expression.
+
+    Args:
+        func_expr (FunctionExpression): The function expression to enable cache for.
+
+    Returns:
+        FunctionExpression: The function expression with cache enabled.
+    """
+    cache = enable_cache_init(func_expr)
     return func_expr.copy().enable_cache(cache)
+
+
+def enable_cache_on_expression_tree(expr_tree: AbstractExpression):
+    func_exprs = list(expr_tree.find_all(FunctionExpression))
+    func_exprs = list(
+        filter(lambda expr: check_expr_validity_for_cache(expr), func_exprs)
+    )
+    for expr in func_exprs:
+        cache = enable_cache_init(expr)
+        expr.enable_cache(cache)
+
+
+def check_expr_validity_for_cache(expr: FunctionExpression):
+    return (
+        expr.name in CACHEABLE_UDFS
+        and not expr.has_cache()
+        and len(expr.children) <= 1
+        and isinstance(expr.children[0], TupleValueExpression)
+    )
 
 
 def get_expression_execution_cost(expr: AbstractExpression) -> float:
