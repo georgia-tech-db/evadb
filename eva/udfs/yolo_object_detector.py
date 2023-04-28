@@ -17,8 +17,8 @@ from typing import List
 
 import pandas as pd
 
-from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
 from eva.udfs.abstract.abstract_udf import AbstractClassifierUDF
+from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
 from eva.udfs.gpu_compatible import GPUCompatible
 
 try:
@@ -170,18 +170,20 @@ class YoloV5(PytorchAbstractClassifierUDF):
 
         for pred in predictions:
             single_result = pred.boxes
-            pred_class = [self.predict_func.names[i] for i in single_result.cls.tolist()]
+            pred_class = [
+                self.predict_func.names[i] for i in single_result.cls.tolist()
+            ]
             pred_score = single_result.conf.tolist()
             pred_boxes = single_result.xyxy.tolist()
 
-            sorted_list = list(map(lambda i: i< self.threshold, pred_score))
+            sorted_list = list(map(lambda i: i < self.threshold, pred_score))
             t = sorted_list.index(True) if True in sorted_list else len(sorted_list)
 
             outcome.append(
                 {
                     "labels": pred_class[:t],
                     "bboxes": pred_boxes[:t],
-                    "scores": pred_score[:t]
+                    "scores": pred_score[:t],
                 },
             )
         return pd.DataFrame(
