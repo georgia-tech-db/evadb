@@ -226,7 +226,7 @@ class FunctionExpression(AbstractExpression):
             for key, value in zip(
                 missing_keys.iterrows(), cache_miss_results.iterrows()
             ):
-                self._cache.store.set(key[1], value[1])
+                self._cache.store.set(key[1].to_numpy(), value[1].to_numpy())
 
             # 4. merge the cache results
             results[cache_miss] = cache_miss_results.to_numpy()
