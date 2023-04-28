@@ -44,7 +44,7 @@ class YoloV5(PytorchAbstractClassifierUDF):
     def name(self) -> str:
         return "yolo"
 
-    def setup(self, threshold=0.60):
+    def setup(self, threshold=0.30):
         logging.getLogger("yolov5").setLevel(logging.CRITICAL)  # yolov5
         self.threshold = threshold
         self.predict_func = YOLO("yolov8s.pt")
@@ -178,13 +178,14 @@ class YoloV5(PytorchAbstractClassifierUDF):
             pred_score = single_result.conf.tolist()
             pred_boxes = single_result.xyxy.tolist()
 
-            t = list(map(lambda i: i< self.threshold, pred_score)).index(True)
+            sorted_list = list(map(lambda i: i< self.threshold, pred_score))
+            t = sorted_list.index(True) if True in sorted_list else len(sorted_list)
 
             outcome.append(
                 {
                     "labels": pred_class[:t],
                     "bboxes": pred_boxes[:t],
-                    "scores": pred_score[:t],
+                    "scores": pred_score[:t]
                 },
             )
         return pd.DataFrame(
