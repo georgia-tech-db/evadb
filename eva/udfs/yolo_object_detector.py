@@ -31,7 +31,7 @@ except ImportError as e:
     )
 
 
-class YoloV5(PytorchAbstractClassifierUDF):
+class Yolo(PytorchAbstractClassifierUDF):
     """
     Arguments:
         threshold (float): Threshold for classifier confidence score
