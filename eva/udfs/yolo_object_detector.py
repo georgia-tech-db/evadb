@@ -17,9 +17,7 @@ from typing import List
 
 import pandas as pd
 
-from eva.udfs.abstract.abstract_udf import AbstractClassifierUDF
 from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
-from eva.udfs.gpu_compatible import GPUCompatible
 
 try:
     import torch
