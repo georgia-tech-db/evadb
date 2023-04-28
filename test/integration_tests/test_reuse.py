@@ -16,12 +16,7 @@ import os
 import unittest
 from pathlib import Path
 from test.markers import windows_skip_marker
-from test.util import (
-    get_logical_query_plan,
-    get_physical_query_plan,
-    load_udfs_for_testing,
-    shutdown_ray,
-)
+from test.util import get_logical_query_plan, load_udfs_for_testing, shutdown_ray
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
