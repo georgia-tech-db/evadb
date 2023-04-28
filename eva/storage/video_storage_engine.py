@@ -37,7 +37,7 @@ class DecordStorageEngine(AbstractMediaStorageEngine):
         sampling_type: str = None,
     ) -> Iterator[Batch]:
         for video_files in self._rdb_handler.read(self._get_metadata_table(table), 12):
-            for video_file_name in video_files.frames["file_url"]:
+            for _, (row_id, video_file_name) in video_files.iterrows():
                 system_file_name = self._xform_file_url_to_file_name(video_file_name)
                 video_file = Path(table.file_url) / system_file_name
                 # increase batch size when reading audio so that
@@ -52,8 +52,8 @@ class DecordStorageEngine(AbstractMediaStorageEngine):
                     sampling_type=sampling_type,
                 )
                 for batch in reader.read():
-                    column_name = table.columns[1].name
-                    batch.frames[column_name] = str(video_file_name)
+                    batch.frames[table.columns[0].name] = row_id
+                    batch.frames[table.columns[1].name] = str(video_file_name)
                     yield batch
 
     def clear(self, table: TableCatalogEntry, media_file_paths: List[Path]):
