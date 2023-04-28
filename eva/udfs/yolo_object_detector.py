@@ -49,9 +49,6 @@ class YoloV5(PytorchAbstractClassifierUDF):
         self.threshold = threshold
         self.predict_func = YOLO("yolov8m.pt")
         self.model = self.predict_func.model
-        
-        # self.model2 = torch.hub.load("ultralytics/yolov5", "yolov5s", verbose=False)
-        # print("Highfi")
 
     @property
     def labels(self) -> List[str]:
@@ -164,7 +161,6 @@ class YoloV5(PytorchAbstractClassifierUDF):
         """
         # Stacking all frames, and changing to numpy
         # because of yolov5 error with Tensors
-
         outcome = []
         # Convert to HWC
         # https://github.com/ultralytics/yolov5/blob/3e55763d45f9c5f8217e4dad5ba1e6c1f42e3bf8/models/common.py#L658
