@@ -146,7 +146,7 @@ class ReuseTest(unittest.TestCase):
         batches, exec_times = self._reuse_experiment([project_query, select_query])
         self._verify_reuse_correctness(select_query, batches[1])
         # reuse should be faster than no reuse
-        self.assertEqual(exec_times[0], 2 * exec_times[1])
+        self.assertGreater(exec_times[0], 2 * exec_times[1])
 
     @windows_skip_marker
     def test_reuse_after_server_shutdown(self):
