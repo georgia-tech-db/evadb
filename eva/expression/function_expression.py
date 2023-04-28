@@ -190,7 +190,7 @@ class FunctionExpression(AbstractExpression):
         if not self._cache:
             return func_args.apply_function_expression(func)
 
-        output_cols = [obj.name for obj in self.output_objs]
+        output_cols = [obj.name for obj in self.udf_obj.outputs]
 
         # 1. check cache
         # We are required to iterate over the batch row by row and check the cache.

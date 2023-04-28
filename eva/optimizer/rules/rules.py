@@ -27,7 +27,9 @@ from eva.expression.expression_utils import (
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.optimizer.optimizer_utils import (
+    check_expr_validity_for_cache,
     enable_cache,
+    enable_cache_on_expression_tree,
     extract_equi_join_keys,
     extract_pushdown_predicate,
     extract_pushdown_predicate_for_alias,
@@ -186,6 +188,38 @@ class EmbedSampleIntoGet(Rule):
             children=lget.children,
         )
         yield new_get_opr
+
+
+class CacheFunctionExpressionInFilter(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALFILTER)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.CACHE_FUNCTION_EXPRESISON_IN_FILTER, pattern)
+
+    def promise(self):
+        return Promise.CACHE_FUNCTION_EXPRESISON_IN_FILTER
+
+    def check(self, before: LogicalFilter, context: OptimizerContext):
+        func_exprs = list(before.predicate.find_all(FunctionExpression))
+
+        valid_exprs = list(
+            filter(lambda expr: check_expr_validity_for_cache(expr), func_exprs)
+        )
+
+        if len(valid_exprs) > 0:
+            return True
+        return False
+
+    def apply(self, before: LogicalFilter, context: OptimizerContext):
+        # there could be 2^n different combinations with enable and disable option
+        # cache for n functionExpressions. Currently considering only the case where
+        # cache is enabled for all eligible function expressions
+        after_predicate = before.predicate.copy()
+        enable_cache_on_expression_tree(after_predicate)
+        after_operator = LogicalFilter(
+            predicate=after_predicate, children=before.children
+        )
+        yield after_operator
 
 
 class CacheFunctionExpressionInApply(Rule):
