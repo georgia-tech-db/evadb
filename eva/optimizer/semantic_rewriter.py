@@ -88,6 +88,7 @@ class QueryProcessor():
         self.header = header
         self.header_types = header_types
         self.prompt = prompt
+        openai.api_key = os.getenv("OPENAI_API_KEY")
         self.response = openai.Completion.create(
             model="text-davinci-003",
             prompt=prompt,
