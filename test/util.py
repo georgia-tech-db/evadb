@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import os
+import shutil
 import socket
 from contextlib import closing
 from pathlib import Path
@@ -26,10 +27,12 @@ from mock import MagicMock
 
 from eva.binder.statement_binder import StatementBinder
 from eva.binder.statement_binder_context import StatementBinderContext
+from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import NdArrayType
 from eva.configuration.configuration_manager import ConfigurationManager
+from eva.expression.function_expression import FunctionExpression
 from eva.models.storage.batch import Batch
-from eva.optimizer.operators import Operator
+from eva.optimizer.operators import LogicalFilter, Operator
 from eva.optimizer.plan_generator import PlanGenerator
 from eva.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
 from eva.parser.parser import Parser
@@ -202,6 +205,19 @@ def get_physical_query_plan(
     l_plan = get_logical_query_plan(query)
     p_plan = PlanGenerator(rule_manager, cost_model).build(l_plan)
     return p_plan
+
+
+def remove_udf_cache(query):
+    plan = next(get_logical_query_plan(query).find_all(LogicalFilter))
+    catalog_manager = CatalogManager()
+    func_exprs = plan.predicate.find_all(FunctionExpression)
+    for expr in func_exprs:
+        cache_name = expr.signature()
+        udf_cache = catalog_manager.get_udf_cache_catalog_entry_by_name(cache_name)
+        if udf_cache is not None:
+            cache_dir = Path(udf_cache.cache_path)
+            if cache_dir.exists():
+                shutil.rmtree(cache_dir)
 
 
 def create_dataframe(num_frames=1) -> pd.DataFrame:
