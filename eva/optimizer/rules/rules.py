@@ -20,7 +20,6 @@ from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import TableType
 from eva.catalog.catalog_utils import is_video_table
 from eva.constants import CACHEABLE_UDFS
-from eva.expression.abstract_expression import ExpressionType
 from eva.expression.expression_utils import (
     conjunction_list_to_expression_tree,
     to_conjunction_list,
@@ -201,7 +200,7 @@ class CacheFunctionExpressionInProject(Rule):
     def check(self, before: LogicalProject, context: OptimizerContext):
         valid_exprs = []
         for expr in before.target_list:
-            if expr.etype == ExpressionType.FUNCTION_EXPRESSION:
+            if isinstance(expr, FunctionExpression):
                 func_exprs = list(expr.find_all(FunctionExpression))
                 valid_exprs.extend(
                     filter(lambda expr: check_expr_validity_for_cache(expr), func_exprs)
