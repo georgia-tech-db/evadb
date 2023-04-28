@@ -22,6 +22,7 @@ from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
 try:
     import torch
     from torch import Tensor
+    from ultralytics import YOLO
 
 except ImportError as e:
     raise ImportError(
@@ -44,7 +45,7 @@ class YoloV5(PytorchAbstractClassifierUDF):
     def setup(self, threshold=0.85):
         logging.getLogger("yolov5").setLevel(logging.CRITICAL)  # yolov5
         self.threshold = threshold
-        self.model = torch.hub.load("ultralytics/yolov5", "yolov5s", verbose=False)
+        self.model = YOLO("yolov8.pt")
 
     @property
     def labels(self) -> List[str]:
