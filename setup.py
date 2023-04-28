@@ -49,7 +49,7 @@ minimal_requirement = [
     "ray>=1.13.0",
     "aenum>=2.2.0",
     "diskcache>=5.4.0",
-    "decord>=0.6.0",
+    "eva-decord==0.6.1"
 ]
 
 formatter_libs = ["black>=23.1.0", "isort>=5.10.1"]
@@ -97,7 +97,6 @@ udf_libs = [
     "easyocr>=1.5.0",  # OCR EXTRACTION
     "ipython",
     "yolov5<=7.0.6",          # OBJECT DETECTION
-    "detoxify",               # TEXT TOXICITY CLASSIFICATION
     "thefuzz",                # FUZZY STRING MATCHINGz
     "transformers==4.27.4"    # HUGGINGFACE
 ]

@@ -18,6 +18,7 @@ import pytest
 from mock import MagicMock, patch
 from sqlalchemy.orm.exc import NoResultFound
 
+from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import ColumnType, IndexType
 from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.catalog.services.index_catalog_service import IndexCatalogService
@@ -98,6 +99,7 @@ class IndexCatalogServiceTest(TestCase):
         self.assertEqual(service.get_all_entries(), [])
 
     def test_index_get_all_entries(self):
+        CatalogManager().reset()
         INDEX_NAME = "name"
         INDEX_URL = "file1"
         INDEX_TYPE = IndexType.HNSW
