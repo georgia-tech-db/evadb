@@ -66,16 +66,12 @@ def bootstrap_environment(eva_config_dir: Path, eva_installation_dir: Path):
 
     if not eva_config_dir.exists():
         eva_config_dir.mkdir(parents=True, exist_ok=True)
-    
     if not index_dir.exists():
         index_dir.mkdir(parents=True, exist_ok=True)
-    
     if not cache_dir.exists():
         cache_dir.mkdir(parents=True, exist_ok=True)
-    
     if not s3_dir.exists():
         s3_dir.mkdir(parents=True, exist_ok=True)
-    
     if not tmp_dir.exists():
         tmp_dir.mkdir(parents=True, exist_ok=True)
 
