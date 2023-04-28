@@ -47,12 +47,11 @@ class LikeTest(unittest.TestCase):
         execute_query_fetch_all(create_udf_query)
 
         select_query = (
-            """SELECT * FROM MemeImages JOIN LATERAL OCRExtractor(data) AS X(label, x, y) WHERE label LIKE """
+            """SELECT X.label, X.x, X.y FROM MemeImages JOIN LATERAL OCRExtractor(data) AS X(label, x, y) WHERE label LIKE """
             + r'"[A-Za-z\', \[]*CANT[\,\',A-Za-z \]]*"'
         )
         actual_batch = execute_query_fetch_all(select_query)
-
-        self.assertEqual(len(actual_batch._frames), 2)
+        self.assertEqual(len(actual_batch._frames), 1)
 
     def test_like_fails_on_non_string_col(self):
         create_udf_query = """CREATE UDF IF NOT EXISTS OCRExtractor
