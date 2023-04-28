@@ -47,21 +47,21 @@ class ConfigurationManager(object):
 
     @classmethod
     def _create_if_not_exists(cls):
-        if not cls._yml_path.exists():
-            initial_eva_config_dir = Path(EVA_DEFAULT_DIR)
+        # if not cls._yml_path.exists():
+        initial_eva_config_dir = Path(EVA_DEFAULT_DIR)
 
-            # parallelize tests using pytest-xdist
-            # activated only under pytest-xdist
-            # Changes config dir From EVA_DEFAULT_DIR To EVA_DEFAULT_DIR / gw1
-            # (where gw1 is worker id)
-            updated_eva_config_dir = cls.suffix_pytest_xdist_worker_id_to_dir(
-                initial_eva_config_dir
-            )
-            cls._yml_path = updated_eva_config_dir / EVA_CONFIG_FILE
-            bootstrap_environment(
-                eva_config_dir=updated_eva_config_dir,
-                eva_installation_dir=EVA_INSTALLATION_DIR,
-            )
+        # parallelize tests using pytest-xdist
+        # activated only under pytest-xdist
+        # Changes config dir From EVA_DEFAULT_DIR To EVA_DEFAULT_DIR / gw1
+        # (where gw1 is worker id)
+        updated_eva_config_dir = cls.suffix_pytest_xdist_worker_id_to_dir(
+            initial_eva_config_dir
+        )
+        cls._yml_path = updated_eva_config_dir / EVA_CONFIG_FILE
+        bootstrap_environment(
+            eva_config_dir=updated_eva_config_dir,
+            eva_installation_dir=EVA_INSTALLATION_DIR,
+        )
 
     @classmethod
     def _get(cls, category: str, key: str) -> Any:

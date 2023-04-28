@@ -12,12 +12,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-DISCRETE = 0
-CONTINUOUS = 1
-NO_GPU = -1
-UNDEFINED_GROUP_ID = -1
-# remove this when we implement the cacheable logic in the UDF itself
-CACHEABLE_UDFS = ["YoloV5", "FaceDetector", "OCRExtractor"]
-IFRAMES = "IFRAMES"
-AUDIORATE = "AUDIORATE"
-DEFAULT_FUNCTION_EXPRESSION_COST = 100
+from eva.catalog.models.udf_catalog import UdfCatalogEntry
+
+
+def get_metadata_entry(udf_obj: UdfCatalogEntry, key: str) -> (str, str):
+    entry_found = False
+    for metadata in udf_obj.metadata:
+        if metadata.key == key:
+            entry_found = True
+            return key, metadata.value
+    assert entry_found, f"{key} is not defined for {udf_obj.name}"

@@ -25,7 +25,7 @@ import numpy as np
 import pytest
 
 from eva.configuration.constants import EVA_ROOT_DIR
-from eva.constants import IFRAMES
+from eva.constants import AUDIORATE, IFRAMES
 from eva.expression.abstract_expression import ExpressionType
 from eva.expression.comparison_expression import ComparisonExpression
 from eva.expression.constant_value_expression import ConstantValueExpression
@@ -152,44 +152,67 @@ class DecordLoaderTest(unittest.TestCase):
             self.assertEqual(batches, expected)
 
     def test_should_throw_error_for_audioless_video(self):
-        try:
+        with self.assertRaises(AssertionError) as error_context:
             video_loader = DecordReader(
                 file_url=self.video_file_url,
                 read_audio=True,
                 read_video=True,
             )
             list(video_loader.read())
-            self.fail("Didn't raise AssertionError")
-        except AssertionError as e:
-            self.assertIn("Can't find audio stream", e.args[0].args[0])
+        self.assertIn(
+            "Can't find audio stream", error_context.exception.args[0].args[0]
+        )
 
     def test_should_throw_error_when_sampling_iframes_for_audio(self):
-        video_loader = DecordReader(
-            file_url=self.video_with_audio_file_url,
-            sampling_type=IFRAMES,
-            read_audio=True,
-            read_video=False,
-        )
-        try:
+        with self.assertRaises(AssertionError) as error_context:
+            video_loader = DecordReader(
+                file_url=self.video_with_audio_file_url,
+                sampling_type=IFRAMES,
+                read_audio=True,
+                read_video=False,
+            )
             list(video_loader.read())
-            self.fail("Didn't raise AssertionError")
-        except AssertionError as e:
-            self.assertEquals("Cannot use IFRAMES with audio streams", e.args[0])
+        self.assertEquals(
+            "Cannot use IFRAMES with audio streams", error_context.exception.args[0]
+        )
+
+    def test_should_throw_error_when_sampling_audio_for_video(self):
+        with self.assertRaises(AssertionError) as error_context:
+            video_loader = DecordReader(
+                file_url=self.video_file_url,
+                sampling_type=AUDIORATE,
+                read_audio=False,
+                read_video=True,
+            )
+            list(video_loader.read())
+        self.assertEquals(
+            "Cannot use AUDIORATE with video streams", error_context.exception.args[0]
+        )
 
     def test_should_return_audio_frames(self):
-        # running test with sampling rate so that fewer frames are
-        # returned and verified, this helps keep the stored frame data size small
         video_loader = DecordReader(
             file_url=self.video_with_audio_file_url,
-            sampling_rate=100,
+            sampling_type=AUDIORATE,
+            sampling_rate=16000,
             read_audio=True,
             read_video=False,
         )
         batches = list(video_loader.read())
+        # running test on select frame ids so that fewer frames are
+        # returned and verified, this helps keep the stored frame data size small
+        batches = (
+            batches[0]
+            .frames[
+                batches[0].frames.index.isin(
+                    [0, 100, 200, 300, 400, 500, 600, 700, 800, 900]
+                )
+            ]
+            .reset_index()
+        )
 
         for i, frame in enumerate(self.audio_frames):
             self.assertTrue(
-                np.array_equiv(self.audio_frames[i], batches[0].frames.iloc[i]["audio"])
+                np.array_equiv(self.audio_frames[i], batches.iloc[i]["audio"])
             )
         # verify that no video frame was read
-        self.assertEqual(batches[0].frames.loc[0]["data"].shape, (0,))
+        self.assertEqual(batches.iloc[0]["data"].shape, (0,))

@@ -56,15 +56,17 @@ class ErrorHandlingRayTests(unittest.TestCase):
         execute_query_fetch_all(drop_table_query)
 
     def test_ray_error_populate_to_all_stages(self):
-        create_udf_query = """CREATE UDF IF NOT EXISTS ToxicityClassifier
-                  INPUT  (text NDARRAY STR(100))
-                  OUTPUT (labels NDARRAY STR(10))
-                  TYPE  Classification
-                  IMPL  'eva/udfs/toxicity_classifier.py';
+        create_udf_query = """CREATE UDF IF NOT EXISTS OCRExtractor
+                  INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
+                  OUTPUT (labels NDARRAY STR(10),
+                          bboxes NDARRAY FLOAT32(ANYDIM, 4),
+                          scores NDARRAY FLOAT32(ANYDIM))
+                  TYPE  OCRExtraction
+                  IMPL  'eva/udfs/ocr_extractor.py';
         """
         execute_query_fetch_all(create_udf_query)
 
-        select_query = """SELECT ToxicityClassifier(data) FROM testRayErrorHandling;"""
+        select_query = """SELECT OCRExtractor(data) FROM testRayErrorHandling;"""
 
         with self.assertRaises(ExecutorError):
             _ = execute_query_fetch_all(select_query)
