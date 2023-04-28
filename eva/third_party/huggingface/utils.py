@@ -12,10 +12,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from eva.catalog.models.udf_catalog import UdfCatalogEntry
 
-_MAJOR = "0"
-_MINOR = "2"
-_REVISION = "2+dev"
 
-VERSION_SHORT = f"{_MAJOR}.{_MINOR}"
-VERSION = f"{_MAJOR}.{_MINOR}.{_REVISION}"
+def get_metadata_entry(udf_obj: UdfCatalogEntry, key: str) -> (str, str):
+    entry_found = False
+    for metadata in udf_obj.metadata:
+        if metadata.key == key:
+            entry_found = True
+            return key, metadata.value
+    assert entry_found, f"{key} is not defined for {udf_obj.name}"
