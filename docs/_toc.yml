@@ -39,6 +39,9 @@ parts:
       - file: source/reference/udf
         title: User-Defined Functions
 
+      - file: source/reference/hf
+        title: HuggingFace
+
       - file: source/reference/gpu
         title: Configure GPU
 

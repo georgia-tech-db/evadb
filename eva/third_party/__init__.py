@@ -12,10 +12,4 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-_MAJOR = "0"
-_MINOR = "2"
-_REVISION = "2+dev"
-
-VERSION_SHORT = f"{_MAJOR}.{_MINOR}"
-VERSION = f"{_MAJOR}.{_MINOR}.{_REVISION}"
+"""third party"""

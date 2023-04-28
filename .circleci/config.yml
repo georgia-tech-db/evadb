@@ -2,61 +2,68 @@ version: 2.1
 
 orbs:
   win: circleci/windows@2.2.0
+  macos: circleci/macos@2.3.4
 
 workflows:
   main:
     jobs:
-        - test:
+        #### UNIT TESTS
+        - Linux:
             name: "Test | v3.7 | Linux"
             v: "3.7"
             mode: "TEST"
-        - test:
+        - Linux:
             name: "Test | v3.8 | Linux"
             v: "3.8"
             mode: "TEST"
-        - test:
+        - Linux:
             name: "Test | v3.9 | Linux"
             v: "3.9"
             mode: "TEST"
-        - test:
+        - Linux:
             name: "Test | v3.10 | Linux"
             v: "3.10"
             mode: "TEST"
         ### NOTEBOOKS
-        - test:
+        - Linux:
             name: "Notebook | v3.7 | Linux"
             v: "3.7"
             mode: "NOTEBOOK"
-        - test:
+        - Linux:
             name: "Notebook | v3.8 | Linux"
             v: "3.8"
             mode: "NOTEBOOK"
-        - test:
+        - Linux:
             name: "Notebook | v3.9 | Linux"
             v: "3.9"
             mode: "NOTEBOOK"
-        - test:
+        - Linux:
             name: "Notebook | v3.10 | Linux"
             v: "3.10"
             mode: "NOTEBOOK"
         ### LINTER
-        - test:
+        - Linux:
             name: "Linter | Linux"
             v: "3.10"
             mode: "LINTER"
         ### RAY
-        - test:
+        - Linux:
             name: "Test | Ray | v3.10 | Linux"
             v: "3.10"
             mode: "RAY"
         - Pip
-        - Windows
-        #- test:
-        #    name: "Linux -  v3.11"  # missing Torchvision
+        - Windows:
+            name: "Windows | v3.10"
+        # test_create_index_doesn't work on MacOS
+        # - MacOS:
+        #    name: "MacOS | v3.10"
+        # missing Torchvision
+        #- Linux:
+        #    name: "Linux -  v3.11"  
         #    v: "3.11"
 
 jobs:
-  test:
+  Linux:
     parameters:
       v:
         type: string
@@ -76,6 +83,7 @@ jobs:
           name: Install EVA package from GitHub repo with all dependencies
           command: |
             "python<< parameters.v >>" -m venv test_evadb
+            pip install --upgrade pip
             source test_evadb/bin/activate
             pip install ".[dev]"
 
@@ -97,35 +105,55 @@ jobs:
             bash script/test/test.sh -m "<< parameters.mode >>"
 
   Windows:
-    executor: win/default
-    parameters:
-      v:
-        type: string
-        default: "3.10"
-    steps:
-      - checkout
+      executor: win/default
+      steps:
+        - checkout
+        - run: 
+            name: Install EVA package from GitHub repo and run tests
+            command: |
+              choco install python --version=3.10.8 -y
+              python --version
+              pip --version
+              pip install virtualenv
+              virtualenv test_evadb
+              test_evadb\Scripts\activate
+              pip install ".[dev]"
+              bash script\test\test.sh
 
-      - run:
-          name: Test windows
-          command: |
-            Set-StrictMode -Version Latest
-            $ErrorActionPreference = 'Continue'
-            pip install virtualenv
-            virtualenv test_evadb
-            test_evadb\Scripts\activate
-            pip install ".[dev]"
-            bash script\test\test.sh
+  MacOS:
+      macos:
+        xcode: "14.2.0"
+      steps:
+        - run:           
+            name: Setup Python
+            command: |
+              brew update
+              brew install pyenv git
+              pyenv install 3.10.8
+              pyenv global 3.10.8
+              eval "$(pyenv init -)"
+              python --version
+              pip --version
+        - checkout
+        - run:           
+            name: Install EVA package from GitHub repo and run tests
+            command: |
+              python -m venv test_evadb
+              source test_evadb/bin/activate
+              pip install --upgrade pip
+              pip debug --verbose
+              pip install ".[dev]"
+              source test_evadb/bin/activate
+              bash script/test/test.sh 
 
   Pip:
     resource_class: large
     docker:
       - image: "cimg/python:3.10"
     steps:
-
       - checkout
-
       - run:
-          name: Install EVA package from pip and start server
+          name: Install EVA package from PIP and start server
           command: |
             pip install --upgrade pip
             pip install evadb
