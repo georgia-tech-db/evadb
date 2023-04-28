@@ -28,9 +28,9 @@ from eva.expression.expression_utils import (
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.optimizer.optimizer_utils import (
-    check_expr_validity,
+    check_expr_validity_for_cache,
     enable_cache,
-    enable_cache_on_tree,
+    enable_cache_on_expression_tree,
     extract_equi_join_keys,
     extract_pushdown_predicate,
     extract_pushdown_predicate_for_alias,
@@ -204,7 +204,7 @@ class CacheFunctionExpressionInProject(Rule):
             if expr.etype == ExpressionType.FUNCTION_EXPRESSION:
                 func_exprs = list(expr.find_all(FunctionExpression))
                 valid_exprs.extend(
-                    filter(lambda expr: check_expr_validity(expr), func_exprs)
+                    filter(lambda expr: check_expr_validity_for_cache(expr), func_exprs)
                 )
 
         if len(valid_exprs) > 0:
@@ -214,7 +214,7 @@ class CacheFunctionExpressionInProject(Rule):
     def apply(self, before: LogicalProject, context: OptimizerContext):
         new_target_list = [expr.copy() for expr in before.target_list]
         for expr in new_target_list:
-            enable_cache_on_tree(expr)
+            enable_cache_on_expression_tree(expr)
         after = LogicalProject(target_list=new_target_list, children=before.children)
         yield after
 
@@ -230,17 +230,21 @@ class CacheFunctionExpressionInFilter(Rule):
 
     def check(self, before: LogicalFilter, context: OptimizerContext):
         func_exprs = list(before.predicate.find_all(FunctionExpression))
-        valid_exprs = list(filter(lambda expr: check_expr_validity(expr), func_exprs))
+
+        valid_exprs = list(
+            filter(lambda expr: check_expr_validity_for_cache(expr), func_exprs)
+        )
 
         if len(valid_exprs) > 0:
             return True
         return False
 
     def apply(self, before: LogicalFilter, context: OptimizerContext):
-        # there could be 2^n different combinations with enable and disable option cache for n functionExpressions
-        # currently considering only the case where cache is enabled for all eligible function expressions
+        # there could be 2^n different combinations with enable and disable option
+        # cache for n functionExpressions. Currently considering only the case where
+        # cache is enabled for all eligible function expressions
         after_predicate = before.predicate.copy()
-        enable_cache_on_tree(after_predicate)
+        enable_cache_on_expression_tree(after_predicate)
         after_operator = LogicalFilter(
             predicate=after_predicate, children=before.children
         )

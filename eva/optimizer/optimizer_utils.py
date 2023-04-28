@@ -259,15 +259,17 @@ def enable_cache(func_expr: FunctionExpression) -> FunctionExpression:
     return func_expr.copy().enable_cache(cache)
 
 
-def enable_cache_on_tree(expr_tree: AbstractExpression):
+def enable_cache_on_expression_tree(expr_tree: AbstractExpression):
     func_exprs = list(expr_tree.find_all(FunctionExpression))
-    func_exprs = list(filter(lambda expr: check_expr_validity(expr), func_exprs))
+    func_exprs = list(
+        filter(lambda expr: check_expr_validity_for_cache(expr), func_exprs)
+    )
     for expr in func_exprs:
         cache = enable_cache_init(expr)
         expr.enable_cache(cache)
 
 
-def check_expr_validity(expr: FunctionExpression):
+def check_expr_validity_for_cache(expr: FunctionExpression):
     return (
         expr.name in CACHEABLE_UDFS
         and not expr.has_cache()

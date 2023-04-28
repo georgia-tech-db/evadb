@@ -24,7 +24,7 @@
 
 # EVA AI-Relational Database System
 
-- ⚡️ 10-100x faster AI pipelines 
+- ⚡️ 10-100x faster AI pipelines using SQL-like queries 
 - 💰 Save money spent on GPU-driven inference
 - 📦 Built-in caching to avoid re-running deep learning models across queries
 - 📏 Over 20 AI-centric query optimization rules
@@ -32,11 +32,11 @@
 - 🐍 Installable via pip
 - 🤝 Fully implemented in Python
 
-EVA is an open-source **AI-relational database with first-class support for deep learning models**. It supports next-generation AI-powered database applications that operate on both structured (tables) and unstructured data (videos, text, podcasts, PDFs, etc.) with deep learning models.
+EVA is an open-source **AI-relational database with first-class support for deep learning models**. It supports next-generation AI-powered database applications that operate on structured (tables) and unstructured data (videos, text, podcasts, PDFs, etc.) with deep learning models.
 
-EVA accelerates AI pipelines by 10-100x using a collection of optimizations inspired by relational database systems including function caching, sampling, and cost-based predicate reordering. It comes with a wide range of models for analyzing unstructured data including models for image classification, object detection, OCR, text sentiment classification, face detection, etc. It is fully implemented in Python, and licensed under the Apache license.
+EVA accelerates AI pipelines by 10-100x using a collection of optimizations inspired by relational database systems, including function caching, sampling, and cost-based predicate reordering. It comes with a wide range of models for analyzing unstructured data, including models for image classification, object detection, OCR, text sentiment classification, face detection, etc. It is fully implemented in Python and licensed under the Apache license.
 
-EVA supports a AI-oriented query language tailored for analysing unstructured data. Here are some illustrative applications:
+EVA supports an AI-oriented query language tailored for analyzing unstructured data. Here are some illustrative applications:
 
  * <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/03-emotion-analysis.html">Examining the emotion palette of actors in a movie</a>
  * <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/02-object-detection.html">Analysing traffic flow at an intersection </a>
@@ -44,11 +44,11 @@ EVA supports a AI-oriented query language tailored for analysing unstructured da
  * <a href="https://github.com/georgia-tech-db/license-plate-recognition">Recognizing license plates </a>
  * <a href="https://github.com/georgia-tech-db/toxicity-classification">Analysing toxicity of social media memes </a>
  
-If you are wondering why you might need a AI-relational database system, start with the page on <a href="https://evadb.readthedocs.io/en/stable/source/overview/video.html#">Video Database Systems</a>. It describes how EVA lets you easily make use of deep learning models and save money spent on GPU-driven inference on large image or video datasets.
+If you are wondering why you might need an AI-relational database system, start with the page on <a href="https://evadb.readthedocs.io/en/stable/source/overview/video.html#">Video Database Systems</a>. It describes how EVA lets you easily use deep learning models and save money spent on GPU-driven inference on large image or video datasets.
 
 The <a href="https://evadb.readthedocs.io/en/stable/source/overview/installation.html">Getting Started</a> page shows how you can use EVA for different computer vision tasks: image classification, object detection, action recognition, and how you can easily extend EVA to support your custom deep learning model in the form of user-defined functions.
 
-The <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/index.html">User Guides</a> section contains Jupyter Notebooks that demonstrate how to use various features of EVA. Each notebook includes a link to Google Colab, where you can run the code by yourself.
+The <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/index.html">User Guides</a> section contains Jupyter Notebooks that demonstrate how to use various features of EVA. Each notebook includes a link to Google Colab to run the code.
 
 ## Why EVA? ##
 
@@ -59,7 +59,7 @@ The <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/index.html"
 
 <details>
   <summary><b>Speed up queries and save money spent on model inference</b></summary>
-  EVA comes with a collection of built-in sampling, caching, and filtering optimizations inspired by time-tested relational database systems.
+  EVA has built-in sampling, caching, and filtering optimizations inspired by time-tested relational database systems.
 </details>
 
 <details>
@@ -113,7 +113,7 @@ SELECT id, data FROM UADETRAC WHERE ['car'] <@ YoloV5(data).labels;
 SELECT id, data FROM UADETRAC WHERE ['pedestrian', 'car'] <@ YoloV5(data).labels;
 ```
 
-- Search for frames with more than 3 cars
+- Search for frames with more than three cars
 
 ```mysql
 SELECT id, data FROM UADETRAC WHERE ArrayCount(YoloV5(data).labels, 'car') > 3;
@@ -141,7 +141,7 @@ IMPL  'eva/udfs/fastrcnn_object_detector.py';
 
    💾 **Caching**: EVA automatically caches and reuses previous query results (especially model inference results), eliminating redundant computation and reducing query processing time.
 
-   🎯 **Predicate Reordering**: EVA optimizes the order in which the query predicates are evaluated (e.g., runs the faster, more selective model first) leading to faster queries and lower inference cost.
+   🎯 **Predicate Reordering**: EVA optimizes the order in which the query predicates are evaluated (e.g., runs the faster, more selective model first), leading to faster queries and lower inference costs.
 
 Consider these two exploratory queries on a dataset of dog images:
 <img align="right" style="display:inline;" width="40%" src="https://github.com/georgia-tech-db/eva/blob/master/data/assets/eva_performance_comparison.png?raw=true"></a>
@@ -212,7 +212,7 @@ Join the EVA community on [Slack](https://join.slack.com/t/eva-db/shared_invite/
 [![Coverage Status](https://coveralls.io/repos/github/georgia-tech-db/eva/badge.svg?branch=master)](https://coveralls.io/github/georgia-tech-db/eva?branch=master)
 [![Documentation Status](https://readthedocs.org/projects/evadb/badge/?version=stable)](https://evadb.readthedocs.io/en/stable/index.html)
 
-EVA is the beneficiary of a large number of [contributors](https://github.com/georgia-tech-db/eva/graphs/contributors). All kinds of contributions to EVA are appreciated. To file a bug or to request a feature, please use <a href="https://github.com/georgia-tech-db/eva/issues">GitHub issues</a>. <a href="https://github.com/georgia-tech-db/eva/pulls">Pull requests</a> are welcome.
+EVA is the beneficiary of many [contributors](https://github.com/georgia-tech-db/eva/graphs/contributors). All kinds of contributions to EVA are appreciated. To file a bug or to request a feature, please use <a href="https://github.com/georgia-tech-db/eva/issues">GitHub issues</a>. <a href="https://github.com/georgia-tech-db/eva/pulls">Pull requests</a> are welcome.
 
 For more information, see our
 [contribution guide](https://evadb.readthedocs.io/en/stable/source/contribute/index.html).
