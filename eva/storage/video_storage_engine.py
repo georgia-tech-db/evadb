@@ -12,8 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import os
-import pandas as pd
+import sys
 from pathlib import Path
 from typing import Iterator, List
 
@@ -41,6 +40,10 @@ class DecordStorageEngine(AbstractMediaStorageEngine):
             for video_file_name in video_files.frames["file_url"]:
                 system_file_name = self._xform_file_url_to_file_name(video_file_name)
                 video_file = Path(table.file_url) / system_file_name
+                # increase batch size when reading audio so that
+                # the audio for the file is returned in one single batch
+                if read_audio:
+                    batch_mem_size = sys.maxsize
                 reader = DecordReader(
                     str(video_file),
                     batch_mem_size=batch_mem_size,
