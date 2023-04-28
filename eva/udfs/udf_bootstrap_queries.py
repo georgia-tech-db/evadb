@@ -112,7 +112,7 @@ Yolo_udf_query = """CREATE UDF IF NOT EXISTS Yolo
       OUTPUT (labels NDARRAY STR(ANYDIM), bboxes NDARRAY FLOAT32(ANYDIM, 4),
                 scores NDARRAY FLOAT32(ANYDIM))
       TYPE  Classification
-      IMPL  '{}/udfs/yolo_object_detector.py';
+      IMPL  '{}/udfs/decorators/yolo_object_detector.py';
       """.format(
     EVA_INSTALLATION_DIR
 )
