@@ -54,18 +54,22 @@ class SelectExecutorTest(unittest.TestCase):
         cls.table2 = create_table("table2", 500, 3)
         cls.table3 = create_table("table3", 1000, 3)
 
+        cls.meme1 = f"{EVA_ROOT_DIR}/data/detoxify/meme1.jpg"
+        cls.meme2 = f"{EVA_ROOT_DIR}/data/detoxify/meme2.jpg"
+
+        execute_query_fetch_all(f"LOAD IMAGE '{cls.meme1}' INTO MemeImages;")
+        execute_query_fetch_all(f"LOAD IMAGE '{cls.meme2}' INTO MemeImages;")
+
     @classmethod
     def tearDownClass(cls):
         shutdown_ray()
 
         file_remove("dummy.avi")
-        drop_query = """DROP TABLE table1;"""
-        execute_query_fetch_all(drop_query)
-        drop_query = """DROP TABLE table2;"""
-        execute_query_fetch_all(drop_query)
-        drop_query = """DROP TABLE table3;"""
-        execute_query_fetch_all(drop_query)
+        execute_query_fetch_all("""DROP TABLE IF EXISTS table1;""")
+        execute_query_fetch_all("""DROP TABLE IF EXISTS table2;""")
+        execute_query_fetch_all("""DROP TABLE IF EXISTS table3;""")
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
+        execute_query_fetch_all("DROP TABLE IF EXISTS MemeImages;")
 
     def test_sort_on_nonprojected_column(self):
         """This tests doing an order by on a column
@@ -702,3 +706,48 @@ class SelectExecutorTest(unittest.TestCase):
 
         expected = execute_query_fetch_all(query_and)
         self.assertEqual(len(expected), 0)
+
+    def test_project_identifier_column(self):
+        # test for video table
+        batch = execute_query_fetch_all("SELECT _row_id, id FROM MyVideo;")
+        expected = Batch(
+            pd.DataFrame(
+                {
+                    "myvideo._row_id": [1] * NUM_FRAMES,
+                    "myvideo.id": range(NUM_FRAMES),
+                }
+            )
+        )
+        self.assertEqual(batch, expected)
+
+        batch = execute_query_fetch_all("SELECT * FROM MyVideo;")
+        self.assertTrue("myvideo._row_id" in batch.columns)
+
+        # test for image table
+        batch = execute_query_fetch_all("SELECT _row_id, name FROM MemeImages;")
+        expected = Batch(
+            pd.DataFrame(
+                {
+                    "memeimages._row_id": [1, 2],
+                    "memeimages.name": [self.meme1, self.meme2],
+                }
+            )
+        )
+        self.assertEqual(batch, expected)
+
+        batch = execute_query_fetch_all("SELECT * FROM MemeImages;")
+        self.assertTrue("memeimages._row_id" in batch.columns)
+
+        # test for structural table
+        batch = execute_query_fetch_all("SELECT _row_id FROM table1;")
+        expected = Batch(
+            pd.DataFrame(
+                {
+                    "table1._row_id": range(1, 101),
+                }
+            )
+        )
+        self.assertEqual(batch, expected)
+
+        batch = execute_query_fetch_all("SELECT * FROM table1;")
+        self.assertTrue("table1._row_id" in batch.columns)
