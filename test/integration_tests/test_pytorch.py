@@ -259,7 +259,7 @@ class PytorchTest(unittest.TestCase):
 
     @pytest.mark.torchtest
     @windows_skip_marker
-    def test_should_run_detoxify_on_text(self):
+    def test_should_run_toxicity_on_text(self):
         create_udf_query = """CREATE UDF IF NOT EXISTS OCRExtractor
                   INPUT  (text NDARRAY STR(100))
                   OUTPUT (labels NDARRAY STR(10),

@@ -16,19 +16,9 @@ from typing import List
 
 import pandas as pd
 import torch
-from transformers import AutoModelForSequenceClassification, AutoTokenizer
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, TextClassificationPipeline
 
 from eva.udfs.abstract.abstract_udf import AbstractClassifierUDF
-
-DOWNLOAD_URL = "https://github.com/unitaryai/detoxify/releases/download/"
-MODEL_URLS = {
-    "original": DOWNLOAD_URL + "v0.1-alpha/toxic_original-c1212f89.ckpt",
-    "unbiased": DOWNLOAD_URL + "v0.3-alpha/toxic_debiased-c7548aa0.ckpt",
-    "multilingual": DOWNLOAD_URL + "v0.4-alpha/multilingual_debiased-0b549669.ckpt",
-    "original-small": DOWNLOAD_URL + "v0.1.2/original-albert-0e1d6498.ckpt",
-    "unbiased-small": DOWNLOAD_URL + "v0.1.2/unbiased-albert-c8519128.ckpt",
-}
-
 
 class ToxicityClassifier(AbstractClassifierUDF):
     """
@@ -42,18 +32,15 @@ class ToxicityClassifier(AbstractClassifierUDF):
 
     def setup(self, threshold=0.3):
         self.threshold = threshold
-        self.model_type2id = {
-            "original": "unitary/toxic-bert",
-            "unbiased": "unitary/unbiased-toxic-roberta",
-            "multilingual": "unitary/multilingual-toxic-xlm-roberta",
-        }
-        self.change_names = {
-            "toxic": "toxicity",
-            "identity_hate": "identity_attack",
-            "severe_toxic": "severe_toxicity",
-        }
+        model_path = "s-nlp/roberta_toxicity_classifier"
+        self.tokenizer = AutoTokenizer.from_pretrained(model_path)
+        self.model = AutoModelForSequenceClassification.from_pretrained(model_path)
+        mult_model_path = "EIStakovskii/xlm_roberta_base_multilingual_toxicity_classifier_plus"
+        self.mult_tokenizer = AutoTokenizer.from_pretrained(mult_model_path)
+        self.mult_model = AutoModelForSequenceClassification.from_pretrained(mult_model_path)
 
-    # create udf -> search for query
+
+
     @property
     def labels(self) -> List[str]:
         return ["toxic", "not toxic"]
@@ -78,38 +65,17 @@ class ToxicityClassifier(AbstractClassifierUDF):
 
         for i in range(0, dataframe_size):
             text = text_dataframe.iat[i, 0]
-            sum_toxicity_score = 0
-            for model_type in self.model_type2id:
-                model_id = self.model_type2id[model_type]
-                tokenizer = AutoTokenizer.from_pretrained(model_id)
-                model = AutoModelForSequenceClassification.from_pretrained(model_id)
-                checkpoint_path = MODEL_URLS[model_type]
-                loaded = torch.hub.load_state_dict_from_url(checkpoint_path)
-                class_names = loaded["config"]["dataset"]["args"]["classes"]
-                class_names = [self.change_names.get(cl, cl) for cl in class_names]
+            text = ' '.join(text)
+            pipeline = TextClassificationPipeline(model = self.model, tokenizer = self.tokenizer)
+            out = pipeline(text)
 
-                input = tokenizer(
-                    text, return_tensors="pt", truncation=True, padding=True
-                )
-                out = model(**input)[0]
-                scores = torch.sigmoid(out).cpu().detach().numpy()
-                single_result = {}
-                if model_type == "multilingual":
-                    class_names = ["toxicity"]
-                for i, cla in enumerate(class_names):
-                    single_result[cla] = (
-                        scores[0][i]
-                        if isinstance(text, str)
-                        else [scores[ex_i][i].tolist() for ex_i in range(len(scores))]
-                    )
+            multi_pipeline = TextClassificationPipeline(model=self.mult_model, tokenizer=self.mult_tokenizer)
+            multi_out = multi_pipeline(text)
 
-                toxicity_score = single_result["toxicity"][0]
-                print("\nModel: ", model_type, " toxicity_score: ", toxicity_score)
-                sum_toxicity_score += toxicity_score
-
-            avg_toxicity_score = sum_toxicity_score / len(self.model_type2id)
-            print("\n final average toxicity score: ", avg_toxicity_score)
-            if avg_toxicity_score >= self.threshold:
+            out_label = out[0]['label']
+            multi_out_label = multi_out[0]['label']
+            multi_out_score = multi_out[0]['score']
+            if out_label == 'toxic' or (multi_out_label == 'LABEL_1' and multi_out_score > self.threshold):
                 outcome = pd.concat(
                     [outcome, pd.DataFrame({"labels": ["toxic"]})], ignore_index=True
                 )
@@ -118,5 +84,4 @@ class ToxicityClassifier(AbstractClassifierUDF):
                     [outcome, pd.DataFrame({"labels": ["not toxic"]})],
                     ignore_index=True,
                 )
-        print("final outcome: ", outcome)
         return outcome
