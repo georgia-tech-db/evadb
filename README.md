@@ -98,7 +98,8 @@ SELECT id, data FROM TrafficVideo WHERE ['pedestrian', 'car'] <@ YoloV5(data).la
 SELECT id, data FROM TrafficVideo WHERE ArrayCount(YoloV5(data).labels, 'car') > 3;
 ```
 
-- You can **create a custom user-defined function (UDF)** that wraps around a fine-tuned or off-the-shelf deep learning model:
+- **Use your custom deep learning model in queries** with a user-defined function (UDF):
+
 ```mysql
 CREATE UDF IF NOT EXISTS MyUDF
 INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
@@ -108,7 +109,8 @@ TYPE  Classification
 IMPL  'eva/udfs/fastrcnn_object_detector.py';
 ```
 
-- **Compose multiple user-defined functions in a single query** to accomplish complicated AI pipelines.
+- **Compose multiple models in a single query** to set up useful AI pipelines.
+
 ```mysql
    -- Analyse emotions of faces in a video
    SELECT id, bbox, EmotionDetector(Crop(data, bbox)) 
@@ -116,7 +118,7 @@ IMPL  'eva/udfs/fastrcnn_object_detector.py';
    WHERE id < 15;
 ```
 
-- Besides making it easy to write queries for complex AI pipelines, EVA **speeds up query execution using its AI-centric query optimizer**. Two key optimizations are:
+- **EVA runs queries faster using its AI-centric query optimizer**. Two key optimizations are:
 
    💾 **Caching**: EVA automatically caches and reuses previous query results (especially model inference results), eliminating redundant computation and reducing query processing time.
 
@@ -140,7 +142,7 @@ Consider these two exploratory queries on a dataset of 🐕 images:
     AND Color(Crop(data, bbox)) = 'black';
 ```
 
-By reusing the results of the first query and reordering the predicates based on available cached results, EVA runs the second query **10x faster**!
+By reusing the results of the first query and reordering the predicates based on the available cached inference results, EVA runs the second query **10x faster**!
 
 ## Illustrative Applications 
 
