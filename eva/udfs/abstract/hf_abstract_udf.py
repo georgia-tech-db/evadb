@@ -49,6 +49,7 @@ class AbstractHFUdf(AbstractUDF, GPUCompatible):
                 pipeline_args[entry.key] = int(entry.value)
             else:
                 pipeline_args[entry.key] = entry.value
+        self.pipeline_args = pipeline_args
         self.hf_udf_obj = pipeline(**pipeline_args, device=device)
 
     def setup(self, *args, **kwargs) -> None:
@@ -94,4 +95,5 @@ class AbstractHFUdf(AbstractUDF, GPUCompatible):
         return eva_output
 
     def to_device(self, device: str) -> GPUCompatible:
-        pass
+        self.hf_udf_obj = pipeline(**self.pipeline_args, device=device)
+        return self
