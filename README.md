@@ -80,7 +80,7 @@ SELECT id, data FROM TrafficVideo WHERE id < 5;
 - Search for frames in the video that contain a car
 
 ```mysql
-SELECT id, data FROM UADETRAC WHERE ['car'] <@ Yolo(data).labels;
+SELECT id, data FROM TrafficVideo WHERE ['car'] <@ Yolo(data).labels;
 ```
 | Source Video  | Query Result |
 |---------------|--------------|
@@ -89,13 +89,13 @@ SELECT id, data FROM UADETRAC WHERE ['car'] <@ Yolo(data).labels;
 - Search for frames in the video that contain a pedestrian and a car
 
 ```mysql
-SELECT id, data FROM UADETRAC WHERE ['pedestrian', 'car'] <@ Yolo(data).labels;
+SELECT id, data FROM TrafficVideo WHERE ['pedestrian', 'car'] <@ Yolo(data).labels;
 ```
 
 - Search for frames with more than three cars
 
 ```mysql
-SELECT id, data FROM UADETRAC WHERE ArrayCount(Yolo(data).labels, 'car') > 3;
+SELECT id, data FROM TrafficVideo WHERE ArrayCount(Yolo(data).labels, 'car') > 3;
 ```
 
 - **Use your custom deep learning model in queries** with a user-defined function (UDF):
