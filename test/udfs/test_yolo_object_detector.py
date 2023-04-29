@@ -48,7 +48,9 @@ class YoloTest(unittest.TestCase):
     def test_should_raise_import_error_with_missing_torch(self):
         with self.assertRaises(ImportError):
             with mock.patch.dict(sys.modules, {"torch": None}):
-                from eva.udfs.decorators.yolo_object_detection_decorators import Yolo  # noqa: F401
+                from eva.udfs.decorators.yolo_object_detection_decorators import (  # noqa: F401
+                    Yolo,
+                )
 
                 pass
 
