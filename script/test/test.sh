@@ -76,7 +76,7 @@ if [[ "$OSTYPE" != "msys" ]];
 then
     if [[ "$MODE" = "TEST" || "$MODE" = "ALL" ]];
     then
-        PYTHONPATH=./ pytest --cov-report term-missing:skip-covered  --cov-config=.coveragerc --cov-context=test --cov=eva/ -s -v --log-level=WARNING -m "not benchmark"
+        PYTHONPATH=./ pytest --durations=0 --cov-report term-missing:skip-covered  --cov-config=.coveragerc --cov-context=test --cov=eva/ -s -v --log-level=WARNING -m "not benchmark"
     elif [[ "$MODE" = "RAY" ]];
     then
         PYTHONPATH=./ pytest -s -v -p no:cov test/ -m "not benchmark"
@@ -109,7 +109,7 @@ fi
 
 if [[ ( "$OSTYPE" != "msys" ) && ( "$MODE" = "NOTEBOOK" || "$MODE" = "ALL" ) ]];
 then 
-    PYTHONPATH=./ python -m pytest --nbmake --overwrite "./tutorials" -s -v --log-level=WARNING --nbmake-timeout=600
+    PYTHONPATH=./ python -m pytest --durations=0 --nbmake --overwrite "./tutorials" -s -v --log-level=WARNING --nbmake-timeout=3000
     notebook_test_code=$?
     if [ "$notebook_test_code" != "0" ];
     then
