@@ -81,7 +81,7 @@ jobs:
 
       - restore_cache:
           keys:
-            - v2-model_cache-{{ checksum "setup.py" }}
+            - v3-model_cache-{{ checksum "setup.py" }}
       
       - run:
           name: Install EVA package from GitHub repo with all dependencies
@@ -108,11 +108,16 @@ jobs:
             source test_evadb/bin/activate
             bash script/test/test.sh -m "<< parameters.mode >>"
 
-      - save_cache:
-          key: v2-model_cache-{{ checksum "setup.py" }}
-          paths:
-            - /home/circleci/.cache/huggingface/
-            - /home/circleci/.cache/torch/
+      # Enable cache save conditionally (to avoid empty cache in Notebooks)
+      - when:
+          condition: 
+            equal: [ TEST, << parameters.mode >> ]
+          steps:
+            - save_cache:
+                key: v3-model_cache-{{ checksum "setup.py" }}
+                paths:
+                  - /home/circleci/.cache/huggingface/
+                  - /home/circleci/.cache/torch/
 
   Windows:
       executor: win/default
