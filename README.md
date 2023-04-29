@@ -19,7 +19,7 @@
         <img alt="Coverage Status" src="https://coveralls.io/repos/github/georgia-tech-db/eva/badge.svg?branch=master"/>            
 </div>
 
-<p align="center"> <b><h3>EVA is an AI-Relational database system for building simpler and faster AI-powered applications.</b></h3> </p>
+<p align="center"> <b><h3>EVA is a database system for building simpler and faster AI-powered applications.</b></h3> </p>
 
 EVA is designed for supporting database applications that operate on both structured (tables, feature vectors) and unstructured data (videos, podcasts, PDFs, etc.) using deep learning models. It accelerates AI pipelines by 10-100x using a collection of optimizations inspired by time-tested relational database systems, including function caching, sampling, and cost-based predicate reordering. EVA supports an AI-oriented SQL-like query language tailored for analyzing unstructured data. It comes with a wide range of models for analyzing unstructured data, including models for image classification, object detection, OCR, text sentiment classification, face detection, etc. It is fully implemented in Python and licensed under the Apache license.
 
