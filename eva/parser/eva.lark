@@ -27,7 +27,7 @@ create_table: CREATE TABLE if_not_exists? table_name create_definitions
 rename_table: RENAME TABLE table_name TO table_name
     
 // Create UDFs
-create_udf: CREATE UDF if_not_exists? udf_name INPUT create_definitions OUTPUT create_definitions TYPE udf_type IMPL udf_impl udf_metadata* | CREATE UDF if_not_exists? udf_name IMPL udf_impl udf_metadata*
+create_udf: CREATE UDF if_not_exists? udf_name INPUT create_definitions OUTPUT create_definitions TYPE udf_type IMPL udf_impl udf_metadata* | CREATE UDF if_not_exists? udf_name IMPL udf_impl udf_metadata* | CREATE UDF if_not_exists? udf_name TYPE udf_type udf_metadata*
 
 // Create Materialized View
 create_materialized_view: CREATE MATERIALIZED VIEW if_not_exists? table_name ("(" uid_list ")") AS select_statement 
@@ -43,7 +43,7 @@ udf_metadata: udf_metadata_key udf_metadata_value
 
 udf_metadata_key: string_literal
 
-udf_metadata_value: string_literal
+udf_metadata_value: string_literal | decimal_literal
 
 index_type: USING HNSW
 
@@ -124,7 +124,9 @@ subquery_table_source_item: (select_statement | LR_BRACKET select_statement RR_B
     
 sample_clause: SAMPLE decimal_literal
 
-sample_clause_with_type: SAMPLE IFRAMES decimal_literal*
+sample_clause_with_type: SAMPLE sample_type decimal_literal*
+
+sample_type: IFRAMES | AUDIORATE
 
 join_part: JOIN table_source_item_with_sample (ON expression | USING LR_BRACKET uid_list RR_BRACKET)?  ->inner_join
          | JOIN LATERAL table_valued_function alias_clause? ->lateral_join
@@ -348,6 +350,7 @@ REFERENCES:                          "REFERENCES"
 RENAME:                              "RENAME"
 SAMPLE:                              "SAMPLE"
 IFRAMES:                             "IFRAMES"
+AUDIORATE:                           "AUDIORATE"
 SELECT:                             "SELECT"
 SET:                                 "SET"
 SHUTDOWN:                            "SHUTDOWN"

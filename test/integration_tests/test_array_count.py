@@ -18,6 +18,7 @@ from test.util import (
     create_sample_video,
     file_remove,
     load_udfs_for_testing,
+    shutdown_ray,
 )
 
 import pandas as pd
@@ -40,6 +41,7 @@ class ArrayCountTests(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        shutdown_ray()
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
         file_remove("dummy.avi")
 

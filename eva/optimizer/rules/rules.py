@@ -27,7 +27,9 @@ from eva.expression.expression_utils import (
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.optimizer.optimizer_utils import (
+    check_expr_validity_for_cache,
     enable_cache,
+    enable_cache_on_expression_tree,
     extract_equi_join_keys,
     extract_pushdown_predicate,
     extract_pushdown_predicate_for_alias,
@@ -186,34 +188,66 @@ class EmbedSampleIntoGet(Rule):
         yield new_get_opr
 
 
-class EmbedProjectIntoGet(Rule):
+class CacheFunctionExpressionInProject(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALPROJECT)
-        pattern.append_child(Pattern(OperatorType.LOGICALGET))
-        super().__init__(RuleType.EMBED_PROJECT_INTO_GET, pattern)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.CACHE_FUNCTION_EXPRESISON_IN_PROJECT, pattern)
 
     def promise(self):
-        return Promise.EMBED_PROJECT_INTO_GET
+        return Promise.CACHE_FUNCTION_EXPRESISON_IN_PROJECT
 
-    def check(self, before: Operator, context: OptimizerContext):
-        # nothing else to check if logical match found return true
-        return True
+    def check(self, before: LogicalProject, context: OptimizerContext):
+        valid_exprs = []
+        for expr in before.target_list:
+            if isinstance(expr, FunctionExpression):
+                func_exprs = list(expr.find_all(FunctionExpression))
+                valid_exprs.extend(
+                    filter(lambda expr: check_expr_validity_for_cache(expr), func_exprs)
+                )
+
+        if len(valid_exprs) > 0:
+            return True
+        return False
 
     def apply(self, before: LogicalProject, context: OptimizerContext):
-        target_list = before.target_list
-        lget = before.children[0]
-        new_get_opr = LogicalGet(
-            lget.video,
-            lget.table_obj,
-            alias=lget.alias,
-            predicate=lget.predicate,
-            target_list=target_list,
-            sampling_rate=lget.sampling_rate,
-            sampling_type=lget.sampling_type,
-            children=lget.children,
+        new_target_list = [expr.copy() for expr in before.target_list]
+        for expr in new_target_list:
+            enable_cache_on_expression_tree(expr)
+        after = LogicalProject(target_list=new_target_list, children=before.children)
+        yield after
+
+
+class CacheFunctionExpressionInFilter(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALFILTER)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.CACHE_FUNCTION_EXPRESISON_IN_FILTER, pattern)
+
+    def promise(self):
+        return Promise.CACHE_FUNCTION_EXPRESISON_IN_FILTER
+
+    def check(self, before: LogicalFilter, context: OptimizerContext):
+        func_exprs = list(before.predicate.find_all(FunctionExpression))
+
+        valid_exprs = list(
+            filter(lambda expr: check_expr_validity_for_cache(expr), func_exprs)
         )
 
-        yield new_get_opr
+        if len(valid_exprs) > 0:
+            return True
+        return False
+
+    def apply(self, before: LogicalFilter, context: OptimizerContext):
+        # there could be 2^n different combinations with enable and disable option
+        # cache for n functionExpressions. Currently considering only the case where
+        # cache is enabled for all eligible function expressions
+        after_predicate = before.predicate.copy()
+        enable_cache_on_expression_tree(after_predicate)
+        after_operator = LogicalFilter(
+            predicate=after_predicate, children=before.children
+        )
+        yield after_operator
 
 
 class CacheFunctionExpressionInApply(Rule):
@@ -387,6 +421,11 @@ class PushDownFilterThroughApplyAndMerge(Rule):
             predicate, aliases
         )
 
+        # we do not return a new plan if nothing can be pushed
+        # this ensures we do not keep applying this optimization
+        if pushdown_pred is None:
+            return
+
         # if we find a feasible pushdown predicate, add a new filter node between
         # ApplyAndMerge and Dummy
         if pushdown_pred:
@@ -396,10 +435,9 @@ class PushDownFilterThroughApplyAndMerge(Rule):
 
         # If we have partial predicate make it the root
         root_node = apply_and_merge
-        assert rem_pred is None
-        # if rem_pred:
-        #    root_node = LogicalFilter(predicate=rem_pred)
-        #    root_node.append_child(apply_and_merge)
+        if rem_pred:
+            root_node = LogicalFilter(predicate=rem_pred)
+            root_node.append_child(apply_and_merge)
 
         yield root_node
 

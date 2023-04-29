@@ -53,7 +53,7 @@ class Batch:
 
     @property
     def columns(self):
-        return self._frames.columns
+        return list(self._frames.columns)
 
     def column_as_numpy_array(self, column_name: str) -> np.ndarray:
         """Return a column as numpy array

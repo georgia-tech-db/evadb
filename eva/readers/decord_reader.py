@@ -17,7 +17,7 @@ from typing import Dict, Iterator
 import numpy as np
 
 from eva.catalog.catalog_type import VideoColumnName
-from eva.constants import IFRAMES
+from eva.constants import AUDIORATE, IFRAMES
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.expression_utils import extract_range_list_from_predicate
 from eva.readers.abstract_reader import AbstractReader
@@ -80,7 +80,6 @@ class DecordReader(AbstractReader):
         logger.debug("Reading frames")
 
         if self._sampling_type == IFRAMES:
-            assert not self._read_audio, "Cannot use IFRAMES with audio streams"
             iframes = self._reader.get_key_indices()
             idx = 0
             for begin, end in range_list:
@@ -92,7 +91,7 @@ class DecordReader(AbstractReader):
                     idx += self._sampling_rate
                     yield self._get_frame(frame_id)
 
-        elif self._sampling_rate == 1:
+        elif self._sampling_rate == 1 or self._read_audio:
             for begin, end in range_list:
                 frame_id = begin
                 while frame_id <= end:
@@ -109,14 +108,23 @@ class DecordReader(AbstractReader):
     def initialize_reader(self):
         decord = _lazy_import_decord()
         if self._read_audio:
+            assert (
+                self._sampling_type != IFRAMES
+            ), "Cannot use IFRAMES with audio streams"
+            sample_rate = 16000
+            if self._sampling_type == AUDIORATE and self._sampling_rate != 1:
+                sample_rate = self._sampling_rate
             try:
                 self._reader = decord.AVReader(
-                    self.file_url, mono=True, sample_rate=16000
+                    self.file_url, mono=True, sample_rate=sample_rate
                 )
                 self._get_frame = self.__get_audio_frame
             except decord._ffi.base.DECORDError as error_msg:
                 assert "Can't find audio stream" not in str(error_msg), error_msg
         else:
+            assert (
+                self._sampling_type != AUDIORATE
+            ), "Cannot use AUDIORATE with video streams"
             self._reader = decord.VideoReader(self.file_url)
             self._get_frame = self.__get_video_frame
 
@@ -133,7 +141,7 @@ class DecordReader(AbstractReader):
 
     def __get_audio_frame(self, frame_id):
         frame_audio, _ = self._reader[frame_id]
-        frame_audio = frame_audio.asnumpy()
+        frame_audio = frame_audio.asnumpy()[0]
 
         return {
             VideoColumnName.id.name: frame_id,

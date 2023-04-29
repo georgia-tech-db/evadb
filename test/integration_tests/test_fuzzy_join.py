@@ -14,7 +14,7 @@
 # limitations under the License.
 import unittest
 from pathlib import Path
-from test.util import create_sample_csv, create_sample_video, file_remove
+from test.util import create_sample_csv, create_sample_video, file_remove, shutdown_ray
 
 import pytest
 
@@ -60,6 +60,8 @@ class FuzzyJoinTests(unittest.TestCase):
         execute_query_fetch_all(query)
 
     def tearDown(self):
+        shutdown_ray()
+
         file_remove("dummy.avi")
         file_remove("dummy.csv")
         # clean up

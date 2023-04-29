@@ -18,6 +18,7 @@ from test.util import (
     create_sample_video,
     file_remove,
     load_udfs_for_testing,
+    shutdown_ray,
 )
 
 import pandas as pd
@@ -46,6 +47,7 @@ class MaterializedViewTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        shutdown_ray()
         file_remove("dummy.avi")
         file_remove("ua_detrac.mp4")
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")

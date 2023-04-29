@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import os
+import shutil
 import socket
 from contextlib import closing
 from pathlib import Path
@@ -20,14 +21,18 @@ from pathlib import Path
 import cv2
 import numpy as np
 import pandas as pd
+import psutil
+import ray
 from mock import MagicMock
 
 from eva.binder.statement_binder import StatementBinder
 from eva.binder.statement_binder_context import StatementBinderContext
+from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import NdArrayType
 from eva.configuration.configuration_manager import ConfigurationManager
+from eva.expression.function_expression import FunctionExpression
 from eva.models.storage.batch import Batch
-from eva.optimizer.operators import Operator
+from eva.optimizer.operators import LogicalFilter, Operator
 from eva.optimizer.plan_generator import PlanGenerator
 from eva.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
 from eva.parser.parser import Parser
@@ -46,6 +51,15 @@ s3_dir_from_config = config.get_value("storage", "s3_download_dir")
 
 
 EVA_TEST_DATA_DIR = Path(config.get_value("core", "eva_installation_dir")).parent
+
+
+def is_ray_stage_running():
+    return "ray::ray_stage" in (p.name() for p in psutil.process_iter())
+
+
+def shutdown_ray():
+    if ConfigurationManager().get_value("experimental", "ray"):
+        ray.shutdown()
 
 
 def prefix_worker_id(base: str):
@@ -193,6 +207,19 @@ def get_physical_query_plan(
     return p_plan
 
 
+def remove_udf_cache(query):
+    plan = next(get_logical_query_plan(query).find_all(LogicalFilter))
+    catalog_manager = CatalogManager()
+    func_exprs = plan.predicate.find_all(FunctionExpression)
+    for expr in func_exprs:
+        cache_name = expr.signature()
+        udf_cache = catalog_manager.get_udf_cache_catalog_entry_by_name(cache_name)
+        if udf_cache is not None:
+            cache_dir = Path(udf_cache.cache_path)
+            if cache_dir.exists():
+                shutil.rmtree(cache_dir)
+
+
 def create_dataframe(num_frames=1) -> pd.DataFrame:
     frames = []
     for i in range(1, num_frames + 1):
@@ -287,6 +314,23 @@ def create_csv(num_rows, columns):
     return df, csv_path
 
 
+def create_text_csv(num_rows=30):
+    """
+    Creates a csv with 2 columns: id and comment
+    The comment column has 2 values: "I like this" and "I don't like this" that are alternated
+    """
+    csv_path = os.path.join(tmp_dir_from_config, "dummy.csv")
+    try:
+        os.remove(csv_path)
+    except FileNotFoundError:
+        pass
+    df = pd.DataFrame(columns=["id", "comment"])
+    df["id"] = np.arange(num_rows)
+    df["comment"] = np.where(df["id"] % 2 == 0, "I like this", "I don't like this")
+    df.to_csv(csv_path, index=False)
+    return csv_path
+
+
 def create_table(table_name, num_rows, num_columns):
     # creates a table with num_rows tuples and columns = [a1, a2, a3, ...]
     columns = "".join("a{} INTEGER, ".format(i) for i in range(num_columns - 1))
@@ -358,6 +402,7 @@ def create_dummy_batches(
     for i in filters:
         data.append(
             {
+                "myvideo._row_id": 1,
                 "myvideo.name": os.path.join(video_dir, "dummy.avi"),
                 "myvideo.id": i + start_id,
                 "myvideo.data": np.array(

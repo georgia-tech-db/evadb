@@ -13,7 +13,7 @@ executor:
   # batch size used for gpu_operations
   gpu_batch_size: 1
 
-  gpus: { "127.0.0.1": [0] }
+  gpu_ids: [0]
 
 storage:
   tmp_dir: ""

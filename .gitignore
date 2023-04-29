@@ -55,6 +55,7 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 *.pyc
+MagicMock/
 # Translations
 *.mo
 *.pot
@@ -178,6 +179,8 @@ test_evadb/
 tutorials/*.py
 *.pth
 *.pt
+tutorials/bddtest.zip
+bddtest/
 
 # benchmark
 .benchmarks
