@@ -12,28 +12,26 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import List
-
+import numpy as np
 import pandas as pd
 
 from eva.catalog.catalog_type import NdArrayType
-from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
+from eva.udfs.abstract.abstract_udf import AbstractUDF
 from eva.udfs.decorators.decorators import forward, setup
-from eva.udfs.decorators.io_descriptors.data_types import PandasDataframe, PyTorchTensor
+from eva.udfs.decorators.io_descriptors.data_types import PandasDataframe
+from eva.udfs.gpu_compatible import GPUCompatible
 
 try:
-    import torch
-    from torch import Tensor
     from ultralytics import YOLO
 
 except ImportError as e:
     raise ImportError(
         f"Failed to import with error {e}, \
-        please try `pip install torch`"
+        please try `pip install ultralytics`"
     )
 
 
-class Yolo(PytorchAbstractClassifierUDF):
+class Yolo(AbstractUDF, GPUCompatible):
     """
     Arguments:
         threshold (float): Threshold for classifier confidence score
@@ -45,114 +43,17 @@ class Yolo(PytorchAbstractClassifierUDF):
         return "yolo"
 
     @setup(cachable=True, udf_type="object_detection", batchable=True)
-    def setup(self, threshold=0.85):
+    def setup(self, threshold=0.3):
         self.threshold = threshold
-        self.predict_func = YOLO("yolov8m.pt")
-        self.model = self.predict_func.model
-
-    @property
-    def labels(self) -> List[str]:
-        return [
-            "__background__",
-            "person",
-            "bicycle",
-            "car",
-            "motorcycle",
-            "airplane",
-            "bus",
-            "train",
-            "truck",
-            "boat",
-            "traffic light",
-            "fire hydrant",
-            "N/A",
-            "stop sign",
-            "parking meter",
-            "bench",
-            "bird",
-            "cat",
-            "dog",
-            "horse",
-            "sheep",
-            "cow",
-            "elephant",
-            "bear",
-            "zebra",
-            "giraffe",
-            "N/A",
-            "backpack",
-            "umbrella",
-            "N/A",
-            "N/A",
-            "handbag",
-            "tie",
-            "suitcase",
-            "frisbee",
-            "skis",
-            "snowboard",
-            "sports ball",
-            "kite",
-            "baseball bat",
-            "baseball glove",
-            "skateboard",
-            "surfboard",
-            "tennis racket",
-            "bottle",
-            "N/A",
-            "wine glass",
-            "cup",
-            "fork",
-            "knife",
-            "spoon",
-            "bowl",
-            "banana",
-            "apple",
-            "sandwich",
-            "orange",
-            "broccoli",
-            "carrot",
-            "hot dog",
-            "pizza",
-            "donut",
-            "cake",
-            "chair",
-            "couch",
-            "potted plant",
-            "bed",
-            "N/A",
-            "dining table",
-            "N/A",
-            "N/A",
-            "toilet",
-            "N/A",
-            "tv",
-            "laptop",
-            "mouse",
-            "remote",
-            "keyboard",
-            "cell phone",
-            "microwave",
-            "oven",
-            "toaster",
-            "sink",
-            "refrigerator",
-            "N/A",
-            "book",
-            "clock",
-            "vase",
-            "scissors",
-            "teddy bear",
-            "hair drier",
-            "toothbrush",
-        ]
+        self.model = YOLO("yolov8m.pt")
+        self.device = "cpu"
 
     @forward(
         input_signatures=[
-            PyTorchTensor(
-                name="input_col",
-                is_nullable=False,
-                type=NdArrayType.FLOAT32,
-                dimensions=(1, 3, 540, 960),
+            PandasDataframe(
+                columns=["data"],
+                column_types=[NdArrayType.FLOAT32],
+                column_shapes=[(None, None, 3)],
             )
         ],
         output_signatures=[
@@ -167,7 +68,7 @@ class Yolo(PytorchAbstractClassifierUDF):
             )
         ],
     )
-    def forward(self, frames: Tensor) -> pd.DataFrame:
+    def forward(self, frames: pd.DataFrame) -> pd.DataFrame:
         """
         Performs predictions on input frames
         Arguments:
@@ -180,21 +81,21 @@ class Yolo(PytorchAbstractClassifierUDF):
             predicted_scores (List[List[float]])
 
         """
-        # Stacking all frames, and changing to numpy
-        # because of Yolo error with Tensors
 
         outcome = []
-        # Convert to HWC
-        frames = torch.permute(frames, (0, 2, 3, 1))
-        list_of_numpy_images = [its.cpu().detach().numpy() * 255 for its in frames]
-        predictions = self.predict_func(list_of_numpy_images)
+
+        # Fix me: this should be taken care by decorators
+        frames = np.ravel(frames.to_numpy())
+        list_of_numpy_images = [its for its in frames]
+        predictions = self.model.predict(
+            list_of_numpy_images, device=self.device, conf=self.threshold, verbose=False
+        )
 
         for pred in predictions:
             single_result = pred.boxes
-            pred_class = [
-                self.predict_func.names[i] for i in single_result.cls.tolist()
-            ]
+            pred_class = [self.model.names[i] for i in single_result.cls.tolist()]
             pred_score = single_result.conf.tolist()
+            pred_score = [round(conf, 2) for conf in single_result.conf.tolist()]
             pred_boxes = single_result.xyxy.tolist()
 
             sorted_list = list(map(lambda i: i < self.threshold, pred_score))
@@ -215,3 +116,7 @@ class Yolo(PytorchAbstractClassifierUDF):
                 "scores",
             ],
         )
+
+    def to_device(self, device: str):
+        self.device = device
+        return self
