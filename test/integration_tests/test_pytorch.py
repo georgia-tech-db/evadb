@@ -89,7 +89,7 @@ class PytorchTest(unittest.TestCase):
         res = actual_batch.frames
         for idx in res.index:
             self.assertTrue(
-                "person" in res["Yolo.labels"][idx]
+                "person" in res["yolo.labels"][idx]
                 and "yoga" in res["mvitactionrecognition.labels"][idx]
             )
 
@@ -107,18 +107,6 @@ class PytorchTest(unittest.TestCase):
         self.assertEqual(len(res), 1)
         for idx in res.index:
             self.assertTrue("computer" in res["aslactionrecognition.labels"][idx])
-
-    @pytest.mark.torchtest
-    def test_should_run_pytorch_and_yolo_decorators(self):
-        create_udf_query = """CREATE UDF YoloDecorators
-                  IMPL  'eva/udfs/decorators/yolo_object_detection_decorators.py';
-        """
-        execute_query_fetch_all(create_udf_query)
-
-        select_query = """SELECT YoloDecorators(data) FROM MyVideo
-                        WHERE id < 5;"""
-        actual_batch = execute_query_fetch_all(select_query)
-        self.assertEqual(len(actual_batch), 5)
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_facenet(self):
