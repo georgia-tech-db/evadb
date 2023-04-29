@@ -140,7 +140,7 @@ Consider these two exploratory queries on a dataset of 🐕 images:
     AND Color(Crop(data, bbox)) = 'black';
 ```
 
-By reusing the results of the first query and reordering the predicates based on available cached results, EVA runs up the second query **10x faster**!
+By reusing the results of the first query and reordering the predicates based on available cached results, EVA runs the second query **10x faster**!
 
 ## Illustrative Applications 
 
