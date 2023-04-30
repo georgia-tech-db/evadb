@@ -13,22 +13,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from eva.catalog.models.udf_catalog import UdfCatalogEntry
-from eva.third_party.huggingface.create import MODEL_FOR_TASK
 from eva.third_party.utils import get_metadata_entry
+from eva.udfs.yolo_object_detector import Yolo
 
 
-def assign_hf_udf(udf_obj: UdfCatalogEntry):
+def assign_yolo_udf(udf_obj: UdfCatalogEntry):
     """
-    Assigns the correct HF Model to the UDF. The model assigned depends on
-    the task type for the UDF. This is done so that we can
-    process the input correctly before passing it to the HF model.
+    Assigns the correct yolo model to the UDF. The model is provided as part of the metadata
     """
-    inputs = udf_obj.args
+    try:
+        model = get_metadata_entry(udf_obj, "model")[1]
+    except Exception:
+        model = "yolov8m.pt"
 
-    # NOTE: Currently, we only support models that require a single input.
-    assert len(inputs) == 1, "Only single input models are supported."
-
-    task = get_metadata_entry(udf_obj, "task")[1]
-    model_class = MODEL_FOR_TASK[task]
-
-    return lambda: model_class(udf_obj)
+    return lambda: Yolo(model)

@@ -12,6 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from pathlib import Path
+
 import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
@@ -45,6 +47,12 @@ class CreateUDFExecutor(AbstractExecutor):
             io_list,
             self.node.metadata,
         )
+
+    def handle_ultralytics_udf(self):
+        """Handle Ultralytics UDFs"""
+        # manually set the impl_path for yolo udfs
+        self.node._impl_path = Path(f"{EVA_DEFAULT_DIR}/udfs/yolo_object_detector.py")
+        return self.handle_generic_udf()
 
     def handle_generic_udf(self):
         """Handle generic UDFs
@@ -109,6 +117,8 @@ class CreateUDFExecutor(AbstractExecutor):
         # if it's a type of HuggingFaceModel, override the impl_path
         if self.node.udf_type == "HuggingFace":
             name, impl_path, udf_type, io_list, metadata = self.handle_huggingface_udf()
+        elif self.node.udf_type == "ultralytics":
+            name, impl_path, udf_type, io_list, metadata = self.handle_ultralytics_udf()
         else:
             name, impl_path, udf_type, io_list, metadata = self.handle_generic_udf()
 

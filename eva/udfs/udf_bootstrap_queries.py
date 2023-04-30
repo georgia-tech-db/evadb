@@ -108,14 +108,10 @@ Fastrcnn_udf_query = """CREATE UDF IF NOT EXISTS FastRCNNObjectDetector
 )
 
 Yolo_udf_query = """CREATE UDF IF NOT EXISTS Yolo
-      INPUT  (Frame_Array NDARRAY UINT8(3, ANYDIM, ANYDIM))
-      OUTPUT (labels NDARRAY STR(ANYDIM), bboxes NDARRAY FLOAT32(ANYDIM, 4),
-                scores NDARRAY FLOAT32(ANYDIM))
-      TYPE  Classification
-      IMPL  '{}/udfs/decorators/yolo_object_detector.py';
-      """.format(
-    EVA_INSTALLATION_DIR
-)
+      TYPE  ultralytics
+      'model' 'yolov8m.pt';
+      """
+
 
 ocr_udf_query = """CREATE UDF IF NOT EXISTS OCRExtractor
       INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
