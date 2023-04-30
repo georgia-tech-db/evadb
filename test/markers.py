@@ -32,4 +32,3 @@ linux_skip_marker = pytest.mark.skipif(
 memory_skip_marker = pytest.mark.skipif(
     sys.platform == "linux", reason="Test case consumes too much memory"
 )
-
