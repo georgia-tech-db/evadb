@@ -66,7 +66,7 @@ class ReuseTest(unittest.TestCase):
                 batches.append(execute_query_fetch_all(query))
             exec_times.append(timer.total_elapsed_time)
         return batches, exec_times
-    
+
     @memory_skip_marker
     def test_reuse_when_query_is_duplicate(self):
         select_query = """SELECT id, label FROM DETRAC JOIN
