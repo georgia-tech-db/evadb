@@ -24,3 +24,7 @@ asyncio_skip_marker = pytest.mark.skipif(
 windows_skip_marker = pytest.mark.skipif(
     sys.platform == "win32", reason="Test case not supported on Windows"
 )
+
+linux_skip_marker = pytest.mark.skipif(
+    sys.platform == "linux", reason="Test case not supported on Linux"
+)
