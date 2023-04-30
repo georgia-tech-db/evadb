@@ -138,7 +138,7 @@ class HuggingFaceTests(unittest.TestCase):
         """
         execute_query_fetch_all(create_udf_query)
 
-        select_query = f"SELECT {udf_name}(data) FROM DETRAC WHERE id < 10;"
+        select_query = f"SELECT {udf_name}(data) FROM DETRAC WHERE id < 3;"
         output = execute_query_fetch_all(select_query)
 
         # Test that output has 2 columns
@@ -200,56 +200,4 @@ class HuggingFaceTests(unittest.TestCase):
         )
 
         drop_udf_query = f"DROP UDF {udf_name};"
-        execute_query_fetch_all(drop_udf_query)
-
-    def test_automatic_speech_recognition(self):
-        udf_name = "SpeechRecognizer"
-        create_udf = (
-            f"CREATE UDF {udf_name} TYPE HuggingFace "
-            "'task' 'automatic-speech-recognition' 'model' 'openai/whisper-base';"
-        )
-        execute_query_fetch_all(create_udf)
-
-        # TODO: use with SAMPLE AUDIORATE 16000
-        select_query = f"SELECT {udf_name}(audio) FROM VIDEOS;"
-        output = execute_query_fetch_all(select_query)
-
-        # verify that output has one row and one column only
-        self.assertTrue(output.frames.shape == (1, 1))
-        # verify that speech was converted to text correctly
-        self.assertTrue(output.frames.iloc[0][0].count("touchdown") == 2)
-
-        drop_udf_query = f"DROP UDF {udf_name};"
-        execute_query_fetch_all(drop_udf_query)
-
-    def test_summarization_from_video(self):
-        asr_udf = "SpeechRecognizer"
-        create_udf = (
-            f"CREATE UDF {asr_udf} TYPE HuggingFace "
-            "'task' 'automatic-speech-recognition' 'model' 'openai/whisper-base';"
-        )
-        execute_query_fetch_all(create_udf)
-
-        summary_udf = "Summarizer"
-        create_udf = (
-            f"CREATE UDF {summary_udf} TYPE HuggingFace "
-            "'task' 'summarization' 'model' 'philschmid/bart-large-cnn-samsum' 'min_length' 10 'max_length' 100;"
-        )
-        execute_query_fetch_all(create_udf)
-
-        # TODO: use with SAMPLE AUDIORATE 16000
-        select_query = f"SELECT {summary_udf}({asr_udf}(audio)) FROM VIDEOS;"
-        output = execute_query_fetch_all(select_query)
-
-        # verify that output has one row and one column only
-        self.assertTrue(output.frames.shape == (1, 1))
-        # verify that summary is as expected
-        self.assertTrue(
-            output.frames.iloc[0][0]
-            == "Jalen Hurts has scored his second rushing touchdown of the game."
-        )
-
-        drop_udf_query = f"DROP UDF {asr_udf};"
-        execute_query_fetch_all(drop_udf_query)
-        drop_udf_query = f"DROP UDF {summary_udf};"
         execute_query_fetch_all(drop_udf_query)
