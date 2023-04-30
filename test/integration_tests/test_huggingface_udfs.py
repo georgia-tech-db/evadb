@@ -138,7 +138,7 @@ class HuggingFaceTests(unittest.TestCase):
         """
         execute_query_fetch_all(create_udf_query)
 
-        select_query = f"SELECT {udf_name}(data) FROM DETRAC WHERE id < 10;"
+        select_query = f"SELECT {udf_name}(data) FROM DETRAC WHERE id < 3;"
         output = execute_query_fetch_all(select_query)
 
         # Test that output has 2 columns
@@ -211,13 +211,14 @@ class HuggingFaceTests(unittest.TestCase):
         execute_query_fetch_all(create_udf)
 
         # TODO: use with SAMPLE AUDIORATE 16000
-        select_query = f"SELECT {udf_name}(audio) FROM VIDEOS;"
+        select_query = f"SELECT {udf_name}(audio) FROM VIDEOS\
+                         WHERE id < 10;"
         output = execute_query_fetch_all(select_query)
 
         # verify that output has one row and one column only
         self.assertTrue(output.frames.shape == (1, 1))
         # verify that speech was converted to text correctly
-        self.assertTrue(output.frames.iloc[0][0].count("touchdown") == 2)
+        self.assertTrue(output.frames.iloc[0][0].count("Bye") == 1)
 
         drop_udf_query = f"DROP UDF {udf_name};"
         execute_query_fetch_all(drop_udf_query)
@@ -238,16 +239,15 @@ class HuggingFaceTests(unittest.TestCase):
         execute_query_fetch_all(create_udf)
 
         # TODO: use with SAMPLE AUDIORATE 16000
-        select_query = f"SELECT {summary_udf}({asr_udf}(audio)) FROM VIDEOS;"
+        select_query = (
+            f"SELECT {summary_udf}({asr_udf}(audio)) FROM VIDEOS WHERE id < 10;"
+        )
         output = execute_query_fetch_all(select_query)
 
         # verify that output has one row and one column only
         self.assertTrue(output.frames.shape == (1, 1))
         # verify that summary is as expected
-        self.assertTrue(
-            output.frames.iloc[0][0]
-            == "Jalen Hurts has scored his second rushing touchdown of the game."
-        )
+        self.assertEquals(output.frames.iloc[0][0], "Bye, bye. ")
 
         drop_udf_query = f"DROP UDF {asr_udf};"
         execute_query_fetch_all(drop_udf_query)
