@@ -96,7 +96,7 @@ udf_libs = [
     "facenet-pytorch>=2.5.2",  # FACE DETECTION
     "easyocr>=1.5.0",          # OCR EXTRACTION
     "ipython<8.13.0",          # NOTEBOOKS
-    "yolov5<=7.0.6",           # OBJECT DETECTION
+    "yolov5<=7.0.9",           # OBJECT DETECTION
     "thefuzz",                 # FUZZY STRING MATCHING
     "transformers==4.27.4"     # HUGGINGFACE
 ]
