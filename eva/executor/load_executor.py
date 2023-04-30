@@ -17,6 +17,7 @@ from eva.executor.load_csv_executor import LoadCSVExecutor
 from eva.executor.load_multimedia_executor import LoadMultimediaExecutor
 from eva.parser.types import FileFormatType
 from eva.plan_nodes.load_data_plan import LoadDataPlan
+from eva.storage.transaction_manager import TransactionManager
 
 
 class LoadDataExecutor(AbstractExecutor):
@@ -27,6 +28,7 @@ class LoadDataExecutor(AbstractExecutor):
         """
         Use TYPE to determine the type of data to load.
         """
+        TransactionManager().create_table(self.node.table_info)
 
         # invoke the appropriate executor
         if self.node.file_options["file_format"] in [

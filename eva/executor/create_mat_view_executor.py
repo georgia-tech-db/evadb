@@ -20,6 +20,7 @@ from eva.parser.create_statement import ColumnDefinition
 from eva.plan_nodes.create_mat_view_plan import CreateMaterializedViewPlan
 from eva.plan_nodes.types import PlanOprType
 from eva.storage.storage_engine import StorageEngine
+from eva.storage.transaction_manager import TransactionManager
 from eva.utils.logging_manager import logger
 
 
@@ -30,6 +31,7 @@ class CreateMaterializedViewExecutor(AbstractExecutor):
 
     def exec(self, *args, **kwargs):
         """Create materialized view executor"""
+        TransactionManager().create_table(self.node.view)
         if not handle_if_not_exists(self.node.view, self.node.if_not_exists):
             child = self.children[0]
             project_cols = None

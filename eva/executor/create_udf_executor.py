@@ -15,10 +15,11 @@
 import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.configuration.constants import EVA_DEFAULT_DIR
+from eva.configuration.configuration_manager import ConfigurationManager
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.create_udf_plan import CreateUDFPlan
+from eva.storage.transaction_manager import TransactionManager
 from eva.third_party.huggingface.create import gen_hf_io_catalog_entries
 from eva.udfs.decorators.utils import load_io_from_udf_decorators
 from eva.utils.errors import UDFIODefinitionError
@@ -36,7 +37,9 @@ class CreateUDFExecutor(AbstractExecutor):
         HuggingFace UDFs are special UDFs that are not loaded from a file.
         So we do not need to call the setup method on them like we do for other UDFs.
         """
-        impl_path = f"{EVA_DEFAULT_DIR}/udfs/abstract/hf_abstract_udf.py"
+        config = ConfigurationManager()
+        udfs_dir = config.get_value("storage", "udfs_dir")
+        impl_path = f"{udfs_dir}/abstract/hf_abstract_udf.py"
         io_list = gen_hf_io_catalog_entries(self.node.name, self.node.metadata)
         return (
             self.node.name,
@@ -93,6 +96,9 @@ class CreateUDFExecutor(AbstractExecutor):
 
         Calls the catalog to insert a udf catalog entry.
         """
+
+        TransactionManager().create_udf(self.node.name)
+
         catalog_manager = CatalogManager()
         # check catalog if it already has this udf entry
         if catalog_manager.get_udf_catalog_entry_by_name(self.node.name):

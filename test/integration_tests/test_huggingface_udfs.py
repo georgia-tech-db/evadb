@@ -29,8 +29,6 @@ class HuggingFaceTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        CatalogManager().reset()
-
         # Use DETRAC for HF Tests to test variety of models
         query = """LOAD VIDEO 'data/ua_detrac/ua_detrac.mp4' INTO DETRAC;"""
         execute_query_fetch_all(query)

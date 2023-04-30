@@ -17,14 +17,12 @@ from test.util import create_sample_image
 
 import numpy as np
 import pandas as pd
-import pytest
 from mock import patch
 
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.udfs.ndarray.open import Open
 
 
-@pytest.mark.notparallel
 class OpenTests(unittest.TestCase):
     def setUp(self):
         self.open_instance = Open()

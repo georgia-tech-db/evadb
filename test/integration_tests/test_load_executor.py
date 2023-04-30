@@ -29,7 +29,6 @@ from test.util import (
 
 import numpy as np
 import pandas as pd
-import pytest
 
 from eva.binder.binder_utils import BinderError
 from eva.catalog.catalog_manager import CatalogManager
@@ -40,11 +39,8 @@ from eva.parser.types import FileFormatType
 from eva.server.command_handler import execute_query_fetch_all
 
 
-@pytest.mark.notparallel
 class LoadExecutorTest(unittest.TestCase):
     def setUp(self):
-        # reset the catalog manager before running each test
-        CatalogManager().reset()
         self.video_file_path = create_sample_video()
         self.image_files_path = Path(
             f"{EVA_ROOT_DIR}/test/data/uadetrac/small-data/MVI_20011/*.jpg"

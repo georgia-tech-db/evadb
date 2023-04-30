@@ -15,17 +15,12 @@
 import unittest
 from test.util import create_sample_csv, create_sample_video, file_remove
 
-import pytest
-
 from eva.catalog.catalog_manager import CatalogManager
 from eva.server.command_handler import execute_query_fetch_all
 
 
-@pytest.mark.notparallel
 class RenameExecutorTest(unittest.TestCase):
     def setUp(self):
-        # reset the catalog manager before running each test
-        CatalogManager().reset()
         self.video_file_path = create_sample_video()
         self.csv_file_path = create_sample_csv()
 

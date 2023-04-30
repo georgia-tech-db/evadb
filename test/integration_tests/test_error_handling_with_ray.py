@@ -24,7 +24,6 @@ from test.util import (
 
 import pytest
 
-from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.executor.executor_utils import ExecutorError
 from eva.server.command_handler import execute_query_fetch_all
@@ -36,7 +35,6 @@ from eva.server.command_handler import execute_query_fetch_all
 )
 class ErrorHandlingRayTests(unittest.TestCase):
     def setUp(self):
-        CatalogManager().reset()
         ConfigurationManager()
         # Load built-in UDFs.
         load_udfs_for_testing(mode="minimal")

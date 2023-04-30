@@ -22,25 +22,19 @@ from test.util import (
 )
 
 import pandas as pd
-import pytest
 
-from eva.catalog.catalog_manager import CatalogManager
 from eva.models.storage.batch import Batch
 from eva.server.command_handler import execute_query_fetch_all
 
 
-@pytest.mark.notparallel
 class ArrayCountTests(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        CatalogManager().reset()
+    def setUp(self):
         video_file_path = create_sample_video(NUM_FRAMES)
         load_query = f"LOAD VIDEO '{video_file_path}' INTO MyVideo;"
         execute_query_fetch_all(load_query)
         load_udfs_for_testing(mode="minimal")
 
-    @classmethod
-    def tearDownClass(cls):
+    def tearDown(self):
         shutdown_ray()
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
         file_remove("dummy.avi")

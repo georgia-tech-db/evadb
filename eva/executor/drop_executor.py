@@ -14,6 +14,8 @@
 # limitations under the License.
 
 
+from pathlib import Path
+
 import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
@@ -23,6 +25,7 @@ from eva.models.storage.batch import Batch
 from eva.parser.table_ref import TableInfo
 from eva.plan_nodes.drop_plan import DropPlan
 from eva.storage.storage_engine import StorageEngine
+from eva.storage.transaction_manager import TransactionManager
 from eva.utils.logging_manager import logger
 
 
@@ -38,6 +41,8 @@ class DropExecutor(AbstractExecutor):
 
         table_info: TableInfo = self.node.table_infos[0]
 
+        TransactionManager().drop_table(table_info.table_name)
+
         if not catalog_manager.check_table_exists(
             table_info.table_name, table_info.database_name
         ):
@@ -52,6 +57,8 @@ class DropExecutor(AbstractExecutor):
         table_obj = catalog_manager.get_table_catalog_entry(
             table_info.table_name, table_info.database_name
         )
+        TransactionManager().lock_multimedia_file(Path(table_obj.file_url).stem)
+
         storage_engine = StorageEngine.factory(table_obj)
 
         storage_engine.drop(table=table_obj)

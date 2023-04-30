@@ -26,6 +26,7 @@ from eva.configuration.constants import (
     EVA_DATASET_DIR,
     EVA_DEFAULT_DIR,
     INDEX_DIR,
+    LOCKS_DIR,
     S3_DOWNLOAD_DIR,
     TMP_DIR,
     UDF_DIR,
@@ -63,6 +64,7 @@ def bootstrap_environment(eva_config_dir: Path, eva_installation_dir: Path):
     cache_dir = eva_config_dir / CACHE_DIR
     s3_dir = eva_config_dir / S3_DOWNLOAD_DIR
     tmp_dir = eva_config_dir / TMP_DIR
+    locks_dir = EVA_DEFAULT_DIR / LOCKS_DIR
 
     if not eva_config_dir.exists():
         eva_config_dir.mkdir(parents=True, exist_ok=True)
@@ -105,6 +107,8 @@ def bootstrap_environment(eva_config_dir: Path, eva_installation_dir: Path):
         config_obj["storage"]["cache_dir"] = str(cache_dir.resolve())
         config_obj["storage"]["s3_download_dir"] = str(s3_dir.resolve())
         config_obj["storage"]["tmp_dir"] = str(tmp_dir.resolve())
+        config_obj["storage"]["udfs_dir"] = str(udfs_path.resolve())
+        config_obj["storage"]["locks_dir"] = str(locks_dir.resolve())
 
         yml_file.seek(0)
         yml_file.write(yaml.dump(config_obj))

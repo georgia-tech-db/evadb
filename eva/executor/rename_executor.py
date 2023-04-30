@@ -15,6 +15,7 @@
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.plan_nodes.rename_plan import RenamePlan
 from eva.storage.storage_engine import StorageEngine
+from eva.storage.transaction_manager import TransactionManager
 
 
 class RenameExecutor(AbstractExecutor):
@@ -27,5 +28,8 @@ class RenameExecutor(AbstractExecutor):
         Calls the catalog to modified catalog entry corresponding to the table.
         """
         obj = self.node.old_table.table.table_obj
+        TransactionManager().rename_table(
+            self.node.old_table.table.table_name, self.node.new_name.table_name
+        )
         storage_engine = StorageEngine.factory(obj)
         storage_engine.rename(obj, self.node.new_name)

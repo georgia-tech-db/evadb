@@ -168,3 +168,4 @@ def cleanup_storage():
     remove_directory_contents(config.get_value("storage", "index_dir"))
     remove_directory_contents(config.get_value("storage", "cache_dir"))
     remove_directory_contents(config.get_value("core", "datasets_dir"))
+    remove_directory_contents(config.get_value("storage", "locks_dir"))

@@ -12,8 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import os
-
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import scoped_session, sessionmaker
 
@@ -40,6 +38,7 @@ class SQLConfig:
         """
         if not hasattr(cls, "_instance"):
             cls._instance = super(SQLConfig, cls).__new__(cls)
+            cls._instance._initialized = False
         return cls._instance
 
     def __init__(self):
@@ -47,28 +46,20 @@ class SQLConfig:
 
         Retrieves the database uri for connection from ConfigurationManager.
         """
+        if self._initialized:
+            return
+        self._initialized = True
+
         uri = ConfigurationManager().get_value("core", "catalog_database_uri")
 
-        # to parallelize tests using pytest-xdist
-        def prefix_worker_id_to_uri(uri: str):
-            try:
-                worker_id = os.environ["PYTEST_XDIST_WORKER"]
-                base = "eva_catalog.db"
-                # eva_catalog.db -> test_gw1_eva_catalog.db
-                uri = uri.replace(base, "test_" + str(worker_id) + "_" + base)
-            except KeyError:
-                pass
-            return uri
-
-        self.worker_uri = prefix_worker_id_to_uri(str(uri))
-        # set echo=True to log SQL
-        self.engine = create_engine(self.worker_uri, isolation_level="SERIALIZABLE")
+        self.engine = create_engine(uri)
 
         if self.engine.url.get_backend_name() == "sqlite":
             # enforce foreign key constraint and wal logging for sqlite
             # https://docs.sqlalchemy.org/en/20/dialects/sqlite.html#foreign-key-support
 
             def _enable_sqlite_pragma(dbapi_con, con_record):
+                dbapi_con.isolation_level = None
                 dbapi_con.execute("pragma foreign_keys=ON")
                 dbapi_con.execute("pragma synchronous=NORMAL")
                 dbapi_con.execute("pragma journal_mode=WAL")

@@ -22,21 +22,16 @@ from test.util import (
 
 import numpy as np
 import pandas as pd
-import pytest
 
-from eva.catalog.catalog_manager import CatalogManager
 from eva.server.command_handler import execute_query_fetch_all
 from eva.utils.logging_manager import logger
 
 
-@pytest.mark.notparallel
 class InsertExecutorTest(unittest.TestCase):
     def setUp(self):
-        # reset the catalog manager before running each test
-        CatalogManager().reset()
         self.video_file_path = create_sample_video()
 
-        query = """CREATE TABLE IF NOT EXISTS CSVTable
+        query = """CREATE TABLE CSVTable
             (
                 name TEXT(100)
             );

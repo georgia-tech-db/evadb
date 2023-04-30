@@ -27,7 +27,6 @@ from eva.models.storage.batch import Batch
 from eva.storage.storage_engine import StorageEngine
 
 
-@pytest.mark.notparallel
 class VideoStorageEngineTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

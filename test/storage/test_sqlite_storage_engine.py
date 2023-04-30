@@ -22,9 +22,9 @@ from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
 from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.storage.sqlite_storage_engine import SQLStorageEngine
+from eva.storage.transaction_manager import TransactionManager
 
 
-@pytest.mark.notparallel
 class SQLStorageEngineTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -45,6 +45,7 @@ class SQLStorageEngineTest(unittest.TestCase):
         return table_info
 
     def setUp(self):
+        TransactionManager().begin_transaction()
         self.table = self.create_sample_table()
 
     def tearDown(self):
@@ -52,6 +53,7 @@ class SQLStorageEngineTest(unittest.TestCase):
             shutil.rmtree(prefix_worker_id("dataset"), ignore_errors=True)
         except ValueError:
             pass
+        TransactionManager().rollback_transaction()
 
     def test_should_create_empty_table(self):
         sqlengine = SQLStorageEngine()

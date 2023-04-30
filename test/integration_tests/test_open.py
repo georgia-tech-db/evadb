@@ -22,7 +22,6 @@ from test.util import (
 
 import numpy as np
 import pandas as pd
-import pytest
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.configuration_manager import ConfigurationManager
@@ -31,10 +30,8 @@ from eva.server.command_handler import execute_query_fetch_all
 from eva.storage.storage_engine import StorageEngine
 
 
-@pytest.mark.notparallel
 class OpenTests(unittest.TestCase):
     def setUp(self):
-        CatalogManager().reset()
         ConfigurationManager()
         # Load built-in UDFs.
         load_udfs_for_testing(mode="minimal")

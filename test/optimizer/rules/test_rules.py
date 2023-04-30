@@ -15,10 +15,8 @@
 import unittest
 from test.util import create_sample_video, load_udfs_for_testing
 
-import pytest
 from mock import MagicMock, patch
 
-from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import TableType
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.configuration.configuration_manager import ConfigurationManager
@@ -88,14 +86,13 @@ from eva.optimizer.rules.rules import (
 from eva.optimizer.rules.rules_manager import RulesManager, disable_rules
 from eva.parser.types import JoinType
 from eva.server.command_handler import execute_query_fetch_all
+from eva.storage.transaction_manager import TransactionManager
 
 
-@pytest.mark.notparallel
 class RulesTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        # reset the catalog manager before running each test
-        CatalogManager().reset()
+        TransactionManager().begin_transaction()
         video_file_path = create_sample_video()
         load_query = f"LOAD VIDEO '{video_file_path}' INTO MyVideo;"
         execute_query_fetch_all(load_query)
@@ -103,7 +100,7 @@ class RulesTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
+        TransactionManager().rollback_transaction()
 
     def test_rules_promises_order(self):
         # Promise of all rewrite should be greater than implementation

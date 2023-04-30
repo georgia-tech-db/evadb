@@ -20,9 +20,6 @@ from test.markers import windows_skip_marker
 from test.util import create_sample_video, file_remove
 from unittest.mock import MagicMock
 
-import pytest
-
-from eva.catalog.catalog_manager import CatalogManager
 from eva.server.command_handler import handle_request
 from eva.utils.stats import Timer
 
@@ -42,9 +39,7 @@ class TimerTests(unittest.TestCase):
         self.assertTrue(sleep_time.total_elapsed_time < 5.2)
         self.assertTrue(sleep_time.total_elapsed_time > 4.9)
 
-    @pytest.mark.notparallel
     def test_timer_with_query(self):
-        CatalogManager().reset()
         video_file_path = create_sample_video(NUM_FRAMES)
         load_query = f"LOAD VIDEO '{video_file_path}' INTO MyVideo;"
         transport = MagicMock()

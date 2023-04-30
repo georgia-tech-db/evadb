@@ -16,9 +16,7 @@ import unittest
 from test.util import NUM_FRAMES, create_sample_video, file_remove, shutdown_ray
 
 import pandas as pd
-import pytest
 
-from eva.catalog.catalog_manager import CatalogManager
 from eva.experimental.ray.planner.exchange_plan import ExchangePlan
 from eva.models.storage.batch import Batch
 from eva.optimizer.plan_generator import PlanGenerator
@@ -26,17 +24,18 @@ from eva.plan_nodes.nested_loop_join_plan import NestedLoopJoinPlan
 from eva.plan_nodes.project_plan import ProjectPlan
 from eva.plan_nodes.storage_plan import StoragePlan
 from eva.server.command_handler import execute_query_fetch_all
+from eva.storage.transaction_manager import TransactionManager
 
 
-@pytest.mark.notparallel
 class CascadeOptimizer(unittest.TestCase):
     def setUp(self):
-        CatalogManager().reset()
         self.video_file_path = create_sample_video(NUM_FRAMES)
+        TransactionManager().begin_transaction()
 
     def tearDown(self):
         shutdown_ray()
         file_remove("dummy.avi")
+        TransactionManager().rollback_transaction()
 
     def test_logical_to_physical_udf(self):
         load_query = f"LOAD VIDEO '{self.video_file_path}' INTO MyVideo;"

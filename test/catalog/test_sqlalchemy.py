@@ -15,14 +15,19 @@
 import unittest
 from test.util import get_all_subclasses
 
+import pytest
 from sqlalchemy import inspect
 
+from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.services.base_service import BaseService
 from eva.catalog.sql_config import SQLConfig
 
 
+@pytest.mark.notparallel
 class SQLAlchemyTests(unittest.TestCase):
     def test_sqlalchemy_verify_catalog_tables(self):
+        CatalogManager().reset()
+
         sql_session = SQLConfig().session
         engine = sql_session.get_bind()
         insp = inspect(engine)

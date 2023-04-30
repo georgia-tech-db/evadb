@@ -16,22 +16,17 @@ import unittest
 from test.util import file_remove, load_udfs_for_testing, shutdown_ray
 
 import numpy as np
-import pytest
 
-from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.configuration.constants import EVA_ROOT_DIR
 from eva.server.command_handler import execute_query_fetch_all
 
 
-@pytest.mark.notparallel
 class DeleteExecutorTest(unittest.TestCase):
     def setUp(self):
         # Bootstrap configuration manager.
         ConfigurationManager()
 
-        # Reset catalog.
-        CatalogManager().reset()
         load_udfs_for_testing(mode="minimal")
 
         create_table_query = """
@@ -72,6 +67,7 @@ class DeleteExecutorTest(unittest.TestCase):
     def tearDown(self):
         shutdown_ray()
         file_remove("dummy.avi")
+        execute_query_fetch_all("DROP TABLE IF EXISTS testDeleteOne;")
 
     # integration test
     @unittest.skip("Not supported in current version")

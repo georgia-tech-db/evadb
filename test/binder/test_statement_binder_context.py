@@ -15,15 +15,12 @@
 import unittest
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 from eva.binder.binder_utils import BinderError
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
 
 
-@pytest.mark.notparallel
 class StatementBinderTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

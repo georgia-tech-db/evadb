@@ -77,6 +77,9 @@ then
     if [[ "$MODE" = "TEST" || "$MODE" = "ALL" ]];
     then
         PYTHONPATH=./ pytest --cov-report term-missing:skip-covered  --cov-config=.coveragerc --cov-context=test --cov=eva/ -s -v --log-level=WARNING -m "not benchmark"
+    elif [[ "$MODE" = "PARALLEL_TEST" ]];
+    then
+        PYTHONPATH=./ pytest --cov-report term-missing:skip-covered  --cov-config=.coveragerc --cov-context=test --cov=eva/ -s -v --log-level=WARNING -m "not benchmark and not notparallel" --dist loadscope -n auto
     elif [[ "$MODE" = "RAY" ]];
     then
         PYTHONPATH=./ pytest -s -v -p no:cov test/ -m "not benchmark"

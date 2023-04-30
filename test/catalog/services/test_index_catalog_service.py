@@ -27,7 +27,6 @@ INDEX_NAME = "name"
 INDEX_ID = 123
 
 
-@pytest.mark.notparallel
 class IndexCatalogServiceTest(TestCase):
     @patch("eva.catalog.services.index_catalog_service.IndexCatalog")
     def test_index_by_name_should_query_model_with_name(self, mocked):
@@ -98,6 +97,7 @@ class IndexCatalogServiceTest(TestCase):
 
         self.assertEqual(service.get_all_entries(), [])
 
+    @pytest.mark.notparallel
     def test_index_get_all_entries(self):
         CatalogManager().reset()
         INDEX_NAME = "name"

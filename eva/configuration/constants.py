@@ -34,3 +34,4 @@ DATASET_DATAFRAME_NAME = "dataset"
 DB_DEFAULT_URI = "sqlite:///{}/eva_catalog.db".format(EVA_DEFAULT_DIR.resolve())
 S3_DOWNLOAD_DIR = "s3_downloads"
 TMP_DIR = "tmp"
+LOCKS_DIR = "locks"
