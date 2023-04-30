@@ -104,6 +104,7 @@ jobs:
 
       - run:
           name: Test and upload coverage report to coveralls
+          no_output_timeout: 30m # 30 minute timeout
           command: |
             source test_evadb/bin/activate
             bash script/test/test.sh -m "<< parameters.mode >>"
