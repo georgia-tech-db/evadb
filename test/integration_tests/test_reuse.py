@@ -127,6 +127,7 @@ class ReuseTest(unittest.TestCase):
         # reuse should be faster than no reuse
         self.assertTrue(exec_times[0] > exec_times[1])
 
+    @memory_skip_marker
     def test_reuse_across_different_predicate_using_same_udf(self):
         query1 = (
             """SELECT id FROM DETRAC WHERE ['car'] <@ YoloV5(data).labels AND id < 5"""
