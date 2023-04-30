@@ -11,7 +11,7 @@ from transformers import AutoTokenizer, AutoModel
 # from eva.parser.table_ref import TableInfo
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import TableType
-from eva.udfs.yolo_object_detector import YoloV5
+# from eva.udfs.yolo_object_detector import YoloV5
 from eva.catalog.catalog_type import ColumnType
 
 encoding_model_name = 'shahrukhx01/paraphrase-mpnet-base-v2-fuzzy-matcher'
@@ -22,9 +22,9 @@ encoding_tokenizer = AutoTokenizer.from_pretrained(encoding_model_name)
 # os.environ["OPENAI_API_KEY"] = "OPENAI_API_KEY"
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-UDFSupport = [
-   YoloV5
-]
+# UDFSupport = [
+#    YoloV5
+# ]
 
 class SemanticRewriter:
     def __init__(self, text, table_name):
