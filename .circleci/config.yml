@@ -81,7 +81,7 @@ jobs:
 
       - restore_cache:
           keys:
-            - v3-model_cache-{{ checksum "setup.py" }}
+            - v4-model_and_pip_cache-{{ checksum "setup.py" }}
       
       - run:
           name: Install EVA package from GitHub repo with all dependencies
@@ -114,10 +114,11 @@ jobs:
             equal: [ TEST, << parameters.mode >> ]
           steps:
             - save_cache:
-                key: v3-model_cache-{{ checksum "setup.py" }}
+                key: v4-model_and_pip_cache-{{ checksum "setup.py" }}
                 paths:
                   - /home/circleci/.cache/huggingface/
                   - /home/circleci/.cache/torch/
+                  - ./test_evadb
 
   Windows:
       executor: win/default
