@@ -71,7 +71,7 @@ jobs:
       mode:
         type: string
         default: "ALL"
-    resource_class: large
+    resource_class: xlarge
     docker:
       # https://circleci.com/docs/circleci-images#language-image-variants
       - image: "cimg/python:<< parameters.v >>"
