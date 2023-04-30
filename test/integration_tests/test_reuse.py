@@ -16,7 +16,7 @@ import os
 import unittest
 from pathlib import Path
 from test.markers import windows_skip_marker
-from test.util import get_logical_query_plan, load_udfs_for_testing, shutdown_ray
+from test.util import get_logical_query_plan, load_udfs_for_testing, shutdown_ray, memory_skip_marker
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
@@ -84,6 +84,7 @@ class ReuseTest(unittest.TestCase):
         batches, exec_times = self._reuse_experiment([select_query1, select_query2])
         self._verify_reuse_correctness(select_query2, batches[1])
 
+    @memory_skip_marker
     def test_reuse_in_with_multiple_occurences(self):
         select_query1 = """SELECT id, label FROM DETRAC JOIN
             LATERAL YoloV5(data) AS Obj(label, bbox, conf) WHERE id < 2;"""
@@ -113,6 +114,7 @@ class ReuseTest(unittest.TestCase):
         # reuse should be faster than no reuse
         self.assertTrue(exec_times[0] > exec_times[1])
 
+    @memory_skip_marker
     def test_reuse_with_udf_in_predicate(self):
         select_query = (
             """SELECT id FROM DETRAC WHERE ['car'] <@ YoloV5(data).labels AND id < 4"""
@@ -149,6 +151,7 @@ class ReuseTest(unittest.TestCase):
         self.assertGreater(exec_times[0], 2 * exec_times[1])
 
     @windows_skip_marker
+    @memory_skip_marker
     def test_reuse_after_server_shutdown(self):
         select_query = """SELECT id, label FROM DETRAC JOIN
             LATERAL YoloV5(data) AS Obj(label, bbox, conf) WHERE id < 2;"""
