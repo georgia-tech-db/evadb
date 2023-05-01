@@ -4,7 +4,6 @@ core:
   catalog_database_uri: ""
   application: "eva"
   mode: "release" #release or debug
-  openai_api_key: ""
 
 executor:
   # batch_mem_size configures the number of rows processed by the execution engine in one iteration
@@ -29,3 +28,6 @@ server:
 
 experimental:
   ray: False
+
+third_party:
+  openai_api_key: ""

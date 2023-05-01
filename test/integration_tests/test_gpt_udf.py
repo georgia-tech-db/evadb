@@ -18,6 +18,8 @@ import unittest
 from unittest.mock import MagicMock
 
 from mock import patch
+import pandas as pd
+from eva.models.storage.batch import Batch
 
 from eva.server.command_handler import execute_query_fetch_all
 
@@ -25,7 +27,7 @@ from eva.server.command_handler import execute_query_fetch_all
 class GPTUDFsTest(unittest.TestCase):
     @patch("eva.udfs.gpt_udf.openai.ChatCompletion.create")
     def test_gpt_udf(self, mock_req):
-        udf_name = "GPTUdf"
+        udf_name = "ChatGPT"
 
         execute_query_fetch_all(f"DROP UDF IF EXISTS {udf_name};")
 
@@ -53,5 +55,7 @@ class GPTUDFsTest(unittest.TestCase):
 
         gpt_query = f"SELECT {udf_name}(prompt, query) FROM MyTextCSV;"
         output_batch = execute_query_fetch_all(gpt_query)
+        expected_output = Batch(pd.DataFrame(["mock message"], columns=["response"]))
         self.assertEqual(len(output_batch), 1)
         self.assertEqual(len(list(output_batch.columns)), 1)
+        self.assertEqual(output_batch, expected_output)

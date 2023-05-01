@@ -24,14 +24,16 @@ from eva.udfs.decorators.decorators import forward, setup
 from eva.udfs.decorators.io_descriptors.data_types import PandasDataframe
 
 
-class GPTUdf(AbstractUDF):
+class ChatGPT(AbstractUDF):
     @property
     def name(self) -> str:
         return "chatgpt"
 
     @setup(cachable=True, udf_type="=text-completion", batchable=True)
     def setup(self) -> None:
-        openai.api_key = ConfigurationManager().get_value("core", "openai_api_key")
+        openai.api_key = ConfigurationManager().get_value(
+            "third_party", "openai_api_key"
+        )
         assert (
             len(openai.api_key) != 0
         ), "Please set your openai api key in eva.yml file"
@@ -39,27 +41,25 @@ class GPTUdf(AbstractUDF):
     @forward(
         input_signatures=[
             PandasDataframe(
-                columns=["id", "prompt", "query"],
+                columns=["prompt", "query"],
                 column_types=[
-                    NdArrayType.ANYTYPE,
-                    NdArrayType.ANYTYPE,
-                    NdArrayType.ANYTYPE,
+                    NdArrayType.STR,
+                    NdArrayType.STR,
                 ],
-                column_shapes=[(None,), (None,), (None,)],
+                column_shapes=[(1,), (1,)],
             )
         ],
         output_signatures=[
             PandasDataframe(
-                columns=["responses"],
+                columns=["response"],
                 column_types=[
-                    NdArrayType.ANYTYPE,
+                    NdArrayType.STR,
                 ],
-                column_shapes=[(None,)],
+                column_shapes=[(1,)],
             )
         ],
     )
     def forward(self, text_df):
-
         prompts = text_df[text_df.columns[0]]
         queries = text_df[text_df.columns[1]]
 
@@ -68,17 +68,16 @@ class GPTUdf(AbstractUDF):
 
         results = []
 
-        for i in range(len(queries)):
-            if prompts[i] != "None":
-                query = prompts[i] + ": " + queries[i]
-            else:
-                query = queries[i]
+        for prompt, query in zip(prompts, queries):
+            if prompt != "None":
+                query = prompt + ": " + query
+
             response = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo", messages=[{"role": "user", "content": query}]
             )
 
             results.append(response.choices[0].message.content)
 
-        df = pd.DataFrame({"responses": results})
+        df = pd.DataFrame({"response": results})
 
         return df
