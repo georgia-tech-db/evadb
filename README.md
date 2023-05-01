@@ -15,9 +15,11 @@
         </a>          
         <img alt="PyPI" src="https://img.shields.io/pypi/v/evadb.svg"/>
         <img alt="License" src="https://img.shields.io/badge/license-Apache%202-brightgreen.svg?logo=apache"/>
-        <img alt="Python Versions" src="https://img.shields.io/badge/Python--versions-3.7%20|%203.8%20|%203.9%20|%203.10-brightgreen"/>
         <img alt="Coverage Status" src="https://coveralls.io/repos/github/georgia-tech-db/eva/badge.svg?branch=master"/>     
-        <img alt="Downloads" src="https://static.pepy.tech/badge/evadb/month"/>
+        <a href="https://pepy.tech/project/evadb">
+          <img alt="Downloads" src="https://static.pepy.tech/badge/evadb/month"/>
+        </a>
+        <img alt="Python Versions" src="https://img.shields.io/badge/Python--versions-3.7%20|%203.8%20|%203.9%20|%203.10-brightgreen"/>d        
 </div>
 
 <p align="center"> <b><h3>EVA is a database system for building simpler and faster AI-powered applications.</b></h3> </p>
