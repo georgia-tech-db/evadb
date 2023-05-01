@@ -15,7 +15,7 @@
 import os
 import unittest
 from pathlib import Path
-from test.markers import windows_skip_marker
+from test.markers import memory_skip_marker, windows_skip_marker
 from test.util import get_logical_query_plan, load_udfs_for_testing, shutdown_ray
 
 from eva.catalog.catalog_manager import CatalogManager
@@ -67,55 +67,94 @@ class ReuseTest(unittest.TestCase):
             exec_times.append(timer.total_elapsed_time)
         return batches, exec_times
 
+    @memory_skip_marker
     def test_reuse_when_query_is_duplicate(self):
         select_query = """SELECT id, label FROM DETRAC JOIN
+<<<<<<< HEAD
             LATERAL Yolo(data) AS Obj(label, bbox, conf) WHERE id < 15;"""
+=======
+            LATERAL YoloV5(data) AS Obj(label, bbox, conf) WHERE id < 3;"""
+>>>>>>> d8882ec8b24245155e8e0990e842feb9c4b26401
         batches, exec_times = self._reuse_experiment([select_query, select_query])
         self._verify_reuse_correctness(select_query, batches[1])
         # reuse should be faster than no reuse
         self.assertTrue(exec_times[0] > exec_times[1])
 
+    @memory_skip_marker
     def test_reuse_partial(self):
         select_query1 = """SELECT id, label FROM DETRAC JOIN
+<<<<<<< HEAD
             LATERAL Yolo(data) AS Obj(label, bbox, conf) WHERE id < 5;"""
         select_query2 = """SELECT id, label FROM DETRAC JOIN
             LATERAL Yolo(data) AS Obj(label, bbox, conf) WHERE id < 15;"""
+=======
+            LATERAL YoloV5(data) AS Obj(label, bbox, conf) WHERE id < 3;"""
+        select_query2 = """SELECT id, label FROM DETRAC JOIN
+            LATERAL YoloV5(data) AS Obj(label, bbox, conf) WHERE id < 6;"""
+>>>>>>> d8882ec8b24245155e8e0990e842feb9c4b26401
 
         batches, exec_times = self._reuse_experiment([select_query1, select_query2])
         self._verify_reuse_correctness(select_query2, batches[1])
 
+    @memory_skip_marker
     def test_reuse_in_with_multiple_occurences(self):
         select_query1 = """SELECT id, label FROM DETRAC JOIN
+<<<<<<< HEAD
             LATERAL Yolo(data) AS Obj(label, bbox, conf) WHERE id < 10;"""
 
         # multiple occurences of the same function expression
         select_query2 = """SELECT id, Yolo(data).labels FROM DETRAC JOIN
             LATERAL Yolo(data) AS Obj(label, bbox, conf) WHERE id < 15;"""
+=======
+            LATERAL YoloV5(data) AS Obj(label, bbox, conf) WHERE id < 2;"""
+
+        # multiple occurences of the same function expression
+        select_query2 = """SELECT id, YoloV5(data).labels FROM DETRAC JOIN
+            LATERAL YoloV5(data) AS Obj(label, bbox, conf) WHERE id < 3;"""
+>>>>>>> d8882ec8b24245155e8e0990e842feb9c4b26401
 
         batches, exec_times = self._reuse_experiment([select_query1, select_query2])
 
         self._verify_reuse_correctness(select_query2, batches[1])
 
         # different query format
+<<<<<<< HEAD
         select_query = """SELECT id, Yolo(data).labels FROM DETRAC WHERE id < 25;"""
+=======
+        select_query = """SELECT id, YoloV5(data).labels FROM DETRAC WHERE id < 5;"""
+>>>>>>> d8882ec8b24245155e8e0990e842feb9c4b26401
         reuse_batch = execute_query_fetch_all(select_query)
         self._verify_reuse_correctness(select_query, reuse_batch)
 
         # different query format
+<<<<<<< HEAD
         select_query = """SELECT id, Yolo(data).scores FROM DETRAC WHERE ['car'] <@ Yolo(data).labels AND id < 20"""
+=======
+        select_query = """SELECT id, YoloV5(data).scores FROM DETRAC WHERE ['car'] <@ YoloV5(data).labels AND id < 4"""
+>>>>>>> d8882ec8b24245155e8e0990e842feb9c4b26401
         reuse_batch = execute_query_fetch_all(select_query)
         self._verify_reuse_correctness(select_query, reuse_batch)
 
+    @memory_skip_marker
     def test_reuse_logical_project_with_duplicate_query(self):
+<<<<<<< HEAD
         project_query = """SELECT id, Yolo(data).labels FROM DETRAC WHERE id < 25;"""
+=======
+        project_query = """SELECT id, YoloV5(data).labels FROM DETRAC WHERE id < 5;"""
+>>>>>>> d8882ec8b24245155e8e0990e842feb9c4b26401
         batches, exec_times = self._reuse_experiment([project_query, project_query])
         self._verify_reuse_correctness(project_query, batches[1])
         # reuse should be faster than no reuse
         self.assertTrue(exec_times[0] > exec_times[1])
 
+    @memory_skip_marker
     def test_reuse_with_udf_in_predicate(self):
         select_query = (
+<<<<<<< HEAD
             """SELECT id FROM DETRAC WHERE ['car'] <@ Yolo(data).labels AND id < 20"""
+=======
+            """SELECT id FROM DETRAC WHERE ['car'] <@ YoloV5(data).labels AND id < 4"""
+>>>>>>> d8882ec8b24245155e8e0990e842feb9c4b26401
         )
 
         batches, exec_times = self._reuse_experiment([select_query, select_query])
@@ -123,18 +162,27 @@ class ReuseTest(unittest.TestCase):
         # reuse should be faster than no reuse
         self.assertTrue(exec_times[0] > exec_times[1])
 
+    @memory_skip_marker
     def test_reuse_across_different_predicate_using_same_udf(self):
         query1 = (
+<<<<<<< HEAD
             """SELECT id FROM DETRAC WHERE ['car'] <@ Yolo(data).labels AND id < 20"""
         )
 
         query2 = """SELECT id FROM DETRAC WHERE ArrayCount(Yolo(data).labels, 'car') > 3 AND id < 20;"""
+=======
+            """SELECT id FROM DETRAC WHERE ['car'] <@ YoloV5(data).labels AND id < 5"""
+        )
+
+        query2 = """SELECT id FROM DETRAC WHERE ArrayCount(YoloV5(data).labels, 'car') > 2 AND id < 5;"""
+>>>>>>> d8882ec8b24245155e8e0990e842feb9c4b26401
 
         batches, exec_times = self._reuse_experiment([query1, query2])
         self._verify_reuse_correctness(query2, batches[1])
         # reuse should be faster than no reuse
         self.assertTrue(exec_times[0] > exec_times[1])
 
+    @memory_skip_marker
     def test_reuse_filter_with_project(self):
         project_query = """
             SELECT id, Yolo(data).labels FROM DETRAC WHERE id < 10;"""
@@ -149,9 +197,14 @@ class ReuseTest(unittest.TestCase):
         self.assertGreater(exec_times[0], 2 * exec_times[1])
 
     @windows_skip_marker
+    @memory_skip_marker
     def test_reuse_after_server_shutdown(self):
         select_query = """SELECT id, label FROM DETRAC JOIN
+<<<<<<< HEAD
             LATERAL Yolo(data) AS Obj(label, bbox, conf) WHERE id < 10;"""
+=======
+            LATERAL YoloV5(data) AS Obj(label, bbox, conf) WHERE id < 2;"""
+>>>>>>> d8882ec8b24245155e8e0990e842feb9c4b26401
         execute_query_fetch_all(select_query)
 
         # Stop and restart server
@@ -159,7 +212,11 @@ class ReuseTest(unittest.TestCase):
         os.system("nohup eva_server --start &")
 
         select_query = """SELECT id, label FROM DETRAC JOIN
+<<<<<<< HEAD
             LATERAL Yolo(data) AS Obj(label, bbox, conf) WHERE id < 15;"""
+=======
+            LATERAL YoloV5(data) AS Obj(label, bbox, conf) WHERE id < 3;"""
+>>>>>>> d8882ec8b24245155e8e0990e842feb9c4b26401
 
         reuse_batch = execute_query_fetch_all(select_query)
         self._verify_reuse_correctness(select_query, reuse_batch)

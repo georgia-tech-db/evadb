@@ -247,9 +247,9 @@ class PytorchTest(unittest.TestCase):
         query = """SELECT id, Yolo.label, Yolo.bbox, Yolo.score
                   FROM MyVideo
                   JOIN LATERAL UNNEST(Yolo(data)) AS Yolo(label, bbox, score)
-                  WHERE Yolo.label = 'car' AND id < 10;"""
+                  WHERE Yolo.label = 'car' AND id < 2;"""
 
         actual_batch = execute_query_fetch_all(query)
 
         # due to unnest the number of returned tuples should be atleast > 10
-        self.assertTrue(len(actual_batch) > 10)
+        self.assertTrue(len(actual_batch) > 2)

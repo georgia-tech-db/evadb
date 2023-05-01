@@ -15,8 +15,11 @@
         </a>          
         <img alt="PyPI" src="https://img.shields.io/pypi/v/evadb.svg"/>
         <img alt="License" src="https://img.shields.io/badge/license-Apache%202-brightgreen.svg?logo=apache"/>
-        <img alt="Python Versions" src="https://img.shields.io/badge/Python--versions-3.7%20|%203.8%20|%203.9%20|%203.10-brightgreen"/>
-        <img alt="Coverage Status" src="https://coveralls.io/repos/github/georgia-tech-db/eva/badge.svg?branch=master"/>            
+        <img alt="Coverage Status" src="https://coveralls.io/repos/github/georgia-tech-db/eva/badge.svg?branch=master"/>     
+        <a href="https://pepy.tech/project/evadb">
+          <img alt="Downloads" src="https://static.pepy.tech/badge/evadb/month"/>
+        </a>
+        <img alt="Python Versions" src="https://img.shields.io/badge/Python--versions-3.7%20|%203.8%20|%203.9%20|%203.10-brightgreen"/>       
 </div>
 
 <p align="center"> <b><h3>EVA is a database system for building simpler and faster AI-powered applications.</b></h3> </p>
@@ -28,6 +31,7 @@ EVA is designed for supporting database applications that operate on both struct
 - [Features](#features)
 - [Quick Start](#quick-start)
 - [Documentation](#documentation)
+- [Demo](#demo)
 - [Illustrative Applications](#illustrative-applications)
 - [Community and Support](#community-and-support)
 - [Contributing](#contributing)
@@ -43,6 +47,17 @@ EVA is designed for supporting database applications that operate on both struct
 - ⌨️ First-class support for PyTorch and HuggingFace models
 - 🐍 Installable via pip and fully implemented in Python
 
+## Demo
+
+Here are some illustrative EVA-backed applications (all of them are Jupyter notebooks that can be opened in Google Colab):
+
+ * 🔮 <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/02-object-detection.html">Analysing traffic flow at an intersection </a>
+ * 🔮 <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/03-emotion-analysis.html">Examining the emotion palette of actors in a movie</a>
+ * 🔮 <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/01-mnist.html">Classifying images based on their content</a>
+ * 🔮 <a href="https://evadb.readthedocs.io/en/latest/source/tutorials/07-object-segmentation-huggingface.html">Image Segmentation using Hugging Face</a>
+ * 🔮 <a href="https://github.com/georgia-tech-db/license-plate-recognition">Recognizing license plates </a>
+ * 🔮 <a href="https://github.com/georgia-tech-db/toxicity-classification">Analysing toxicity of social media memes </a>
+
 ## Documentation
 
 * [Detailed Documentation](https://evadb.readthedocs.io/)
@@ -51,6 +66,7 @@ EVA is designed for supporting database applications that operate on both struct
   - The <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/index.html">User Guides</a> section contains Jupyter Notebooks that demonstrate how to use various features of EVA. Each notebook includes a link to Google Colab to run the code.
 * [Tutorials](https://github.com/georgia-tech-db/eva/blob/master/tutorials/03-emotion-analysis.ipynb)
 * [Join Slack](https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg)
+* [Demo](https://github.com/georgia-tech-db/eva/blob/master/tutorials/03-emotion-analysis.ipynb)
 
 ## Quick Start
 

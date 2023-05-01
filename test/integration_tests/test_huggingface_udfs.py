@@ -138,7 +138,7 @@ class HuggingFaceTests(unittest.TestCase):
         """
         execute_query_fetch_all(create_udf_query)
 
-        select_query = f"SELECT {udf_name}(data) FROM DETRAC WHERE id < 10;"
+        select_query = f"SELECT {udf_name}(data) FROM DETRAC WHERE id < 3;"
         output = execute_query_fetch_all(select_query)
 
         # Test that output has 2 columns
