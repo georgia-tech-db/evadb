@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import gc
 import os
 import unittest
 from pathlib import Path
@@ -44,6 +45,7 @@ class ReuseTest(unittest.TestCase):
         execute_query_fetch_all("DROP TABLE IF EXISTS DETRAC;")
 
     def _verify_reuse_correctness(self, query, reuse_batch):
+        gc.collect()
         with disable_rules(
             [
                 CacheFunctionExpressionInApply(),
@@ -111,7 +113,7 @@ class ReuseTest(unittest.TestCase):
         batches, exec_times = self._reuse_experiment([project_query, project_query])
         self._verify_reuse_correctness(project_query, batches[1])
         # reuse should be faster than no reuse
-        self.assertTrue(exec_times[0] > exec_times[1])
+        self.assertGreater(exec_times[0], exec_times[1])
 
     def test_reuse_with_udf_in_predicate(self):
         select_query = (
@@ -121,7 +123,7 @@ class ReuseTest(unittest.TestCase):
         batches, exec_times = self._reuse_experiment([select_query, select_query])
         self._verify_reuse_correctness(select_query, batches[1])
         # reuse should be faster than no reuse
-        self.assertTrue(exec_times[0] > exec_times[1])
+        self.assertGreater(exec_times[0], exec_times[1])
 
     def test_reuse_across_different_predicate_using_same_udf(self):
         query1 = (
@@ -133,7 +135,7 @@ class ReuseTest(unittest.TestCase):
         batches, exec_times = self._reuse_experiment([query1, query2])
         self._verify_reuse_correctness(query2, batches[1])
         # reuse should be faster than no reuse
-        self.assertTrue(exec_times[0] > exec_times[1])
+        self.assertGreater(exec_times[0], exec_times[1])
 
     def test_reuse_filter_with_project(self):
         project_query = """
