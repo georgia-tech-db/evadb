@@ -22,8 +22,6 @@ from unittest.mock import MagicMock
 
 class GPTUDFsTest(unittest.TestCase):
     
-    
-    #@unittest.skip("Skip as it requires api key")
     @patch("eva.udfs.gpt_udf.openai.ChatCompletion.create")
     def test_gpt_udf(self, mock_req):
         udf_name = "GPTUdf"
@@ -40,6 +38,7 @@ class GPTUDFsTest(unittest.TestCase):
         execute_query_fetch_all(f"DROP TABLE MyTextCSV;")
         create_table_query = """CREATE TABLE IF NOT EXISTS MyTextCSV (
                 id INTEGER UNIQUE,
+                prompt TEXT (100),
                 query TEXT (100)
             );"""
         execute_query_fetch_all(create_table_query)
@@ -52,8 +51,13 @@ class GPTUDFsTest(unittest.TestCase):
         mock_req.return_value.choices=[mock_response_obj]
         
 
-        gpt_query = f"SELECT {udf_name}(query) FROM MyTextCSV;"
+        gpt_query = f"SELECT {udf_name}(prompt, query) FROM MyTextCSV;"
         output_batch = execute_query_fetch_all(gpt_query)
-        self.assertEqual(len(output_batch), 2)
-        self.assertEqual(len(list(output_batch.columns)), 2)
-        
+        self.assertEqual(len(output_batch), 1)
+        self.assertEqual(len(list(output_batch.columns)), 1)
+
+
+
+
+
+

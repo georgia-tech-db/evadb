@@ -39,37 +39,45 @@ class GPTUdf(AbstractUDF):
     @forward(
         input_signatures=[
             PandasDataframe(
-                columns=["id", "query"],
-                column_types=[NdArrayType.ANYTYPE, NdArrayType.ANYTYPE],
-                column_shapes=[(None,), (None,)],
+                columns=["id", "prompt", "query"],
+                column_types=[NdArrayType.ANYTYPE, NdArrayType.ANYTYPE, NdArrayType.ANYTYPE],
+                column_shapes=[(None,), (None,), (None,)],
             )
         ],
         output_signatures=[
             PandasDataframe(
-                columns=["input_query", "responses"],
+                columns=["responses"],
                 column_types=[
                     NdArrayType.ANYTYPE,
-                    NdArrayType.ANYTYPE,
                 ],
-                column_shapes=[(None,), (None,)],
+                column_shapes=[(None,)],
             )
         ],
     )
     def forward(self, text_df):
 
         result = []
-        queries = text_df[text_df.columns[0]]
-
-        for query in queries:
-              
+        prompts = text_df[text_df.columns[0]]
+        queries = text_df[text_df.columns[1]]
+        
+        #chatgpt api currently supports answers to a single prompt only
+        #so this udf is designed such that 
+        
+        results = []
+        
+        for i in range(len(queries)):
+            if prompts[i]!= "None":
+                query = prompts[i]+": "+queries[i]
+            else:
+                query = queries[i]
             response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo", messages=[{"role": "user", "content": query}]
+                model="gpt-3.5-turbo", 
+                messages=[{"role": "user", "content":query}]
             )
             
-            for choice in response.choices:
-                result.append(choice.message.content)
-                
-
-        df = pd.DataFrame({"input_query": queries, "responses": result})
+            results.append(response.choices[0].message.content)
+            
+        
+        df = pd.DataFrame({"responses": results})
 
         return df

@@ -1,3 +1,2 @@
-id,query
-0,who is the world's fastest athlete?
-1,what's the sentiment of this review: the food was not good but the ambience and service was good.
+id,prompt,query
+0,summarize,"There are times when the night sky glows with bands of color. The bands may begin as cloud shapes and then spread into a great arc across the entire sky. They may fall in folds like a curtain drawn across the heavens. The lights usually grow brighter, then suddenly dim. During this time the sky glows with pale yellow, pink, green, violet, blue, and red. These lights are called the Aurora Borealis. Some people call them the Northern Lights. Scientists have been watching them for hundreds of years. They are not quite sure what causes them"
