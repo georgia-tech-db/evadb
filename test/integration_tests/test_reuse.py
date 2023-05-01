@@ -120,7 +120,7 @@ class ReuseTest(unittest.TestCase):
 
     def test_reuse_with_udf_in_predicate(self):
         select_query = (
-            """SELECT id FROM DETRAC WHERE ['car'] <@ YoloV5(data).labels AND id < 4"""
+            """SELECT id FROM DETRAC WHERE ['car'] <@ Yolo(data).labels AND id < 4"""
         )
 
         batches, exec_times = self._reuse_experiment([select_query, select_query])
