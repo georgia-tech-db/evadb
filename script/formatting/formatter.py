@@ -195,7 +195,7 @@ def format_file(file_path, add_header, strip_header, format_code):
             os.system(black_command)
 
             # AUTOFLAKE
-            autoflake_command = f"{FLAKE_BINARY} --config={FLAKE8_CONFIG} {file_path}"
+            autoflake_command = f"{FLAKE_BINARY} --config='{FLAKE8_CONFIG}' {file_path}"
             ret_val = os.system(autoflake_command)
             if ret_val:
                 sys.exit(1)
