@@ -112,7 +112,6 @@ Yolo_udf_query = """CREATE UDF IF NOT EXISTS Yolo
       'model' 'yolov8m.pt';
       """
 
-
 ocr_udf_query = """CREATE UDF IF NOT EXISTS OCRExtractor
       INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
       OUTPUT (labels NDARRAY STR(10), bboxes NDARRAY FLOAT32(ANYDIM, 4),
@@ -165,14 +164,17 @@ def init_builtin_udfs(mode="debug"):
         ArrayCount_udf_query,
         Crop_udf_query,
         Open_udf_query,
-        Similarity_udf_query
+        Similarity_udf_query,
         # Disabled because required packages (eg., easy_ocr might not be preinstalled)
         # face_detection_udf_query,
         # ocr_udf_query,
         # Disabled as it requires specific pytorch package
         # Mvit_udf_query,
     ]
-    if mode != "release":
+    if mode == "release":
+        queries.append(Yolo_udf_query)
+
+    else:
         queries.extend(
             [
                 DummyObjectDetector_udf_query,
@@ -181,8 +183,12 @@ def init_builtin_udfs(mode="debug"):
             ]
         )
 
-    if mode != "minimal":
-        queries.extend([Yolo_udf_query])
+        if mode == "debug":
+            yolo8n = """CREATE UDF IF NOT EXISTS Yolo
+                TYPE  ultralytics
+                'model' 'yolov8n.pt';
+            """
+            queries.append(yolo8n)
 
     for query in queries:
         execute_query_fetch_all(query)

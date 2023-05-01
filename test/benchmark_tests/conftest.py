@@ -12,12 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from test.util import load_udfs_for_testing
-
 import pytest
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.server.command_handler import execute_query_fetch_all
+from eva.udfs.udf_bootstrap_queries import init_builtin_udfs
 
 
 @pytest.fixture(autouse=False)
@@ -25,8 +24,7 @@ def setup_pytorch_tests():
     CatalogManager().reset()
     execute_query_fetch_all("LOAD VIDEO 'data/ua_detrac/ua_detrac.mp4' INTO MyVideo;")
     execute_query_fetch_all("LOAD VIDEO 'data/mnist/mnist.mp4' INTO MNIST;")
-    load_udfs_for_testing()
-    from eva.udfs.udf_bootstrap_queries import Yolo_udf_query
-
-    execute_query_fetch_all(Yolo_udf_query)
+    # Load all the release UDFs
+    # We want to use accurate yolo model
+    init_builtin_udfs(mode="release")
     yield None
