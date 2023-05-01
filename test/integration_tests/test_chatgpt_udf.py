@@ -15,6 +15,7 @@
 
 
 import unittest
+from test.markers import ray_skip_marker
 from unittest.mock import MagicMock
 
 import pandas as pd
@@ -43,6 +44,7 @@ class ChatGPTTest(unittest.TestCase):
     def tearDown(self) -> None:
         execute_query_fetch_all("DROP TABLE IF EXISTS MyTextCSV;")
 
+    @ray_skip_marker
     @patch("eva.udfs.gpt_udf.openai.ChatCompletion.create")
     def test_gpt_udf(self, mock_req):
         # set dummy api key
