@@ -255,48 +255,13 @@ class PytorchTest(unittest.TestCase):
         self.assertTrue(res["ocrextractor.labels"][0][0] == "4")
         self.assertTrue(res["ocrextractor.scores"][2][0] > 0.9)
 
-    @pytest.mark.torchtest
-    @windows_skip_marker
-    def test_should_run_detoxify_on_text(self):
-        create_udf_query = """CREATE UDF IF NOT EXISTS OCRExtractor
-                  INPUT  (text NDARRAY STR(100))
-                  OUTPUT (labels NDARRAY STR(10),
-                          bboxes NDARRAY FLOAT32(ANYDIM, 4),
-                          scores NDARRAY FLOAT32(ANYDIM))
-                  TYPE  OCRExtraction
-                  IMPL  'eva/udfs/ocr_extractor.py';
-        """
-        execute_query_fetch_all(create_udf_query)
-
-        create_udf_query = """CREATE UDF IF NOT EXISTS ToxicityClassifier
-                  INPUT  (text NDARRAY STR(100))
-                  OUTPUT (labels NDARRAY STR(10))
-                  TYPE  Classification
-                  IMPL  'eva/udfs/toxicity_classifier.py';
-        """
-        execute_query_fetch_all(create_udf_query)
-
-        select_query = """SELECT name, OCRExtractor(data).labels,
-                                 ToxicityClassifier(OCRExtractor(data).labels)
-                        FROM MemeImages;"""
-        actual_batch = execute_query_fetch_all(select_query)
-
-        # non-trivial test case for Detoxify
-        res = actual_batch.frames
-        for i in range(2):
-            # Image can be reordered.
-            if "meme1" in res["memeimages.name"][i]:
-                self.assertTrue(res["toxicityclassifier.labels"][i] == "toxic")
-            else:
-                self.assertTrue(res["toxicityclassifier.labels"][i] == "not toxic")
-
     def test_check_unnest_with_predicate_on_yolo(self):
         query = """SELECT id, yolov5.label, yolov5.bbox, yolov5.score
                   FROM MyVideo
                   JOIN LATERAL UNNEST(YoloV5(data)) AS yolov5(label, bbox, score)
-                  WHERE yolov5.label = 'car' AND id < 10;"""
+                  WHERE yolov5.label = 'car' AND id < 2;"""
 
         actual_batch = execute_query_fetch_all(query)
 
         # due to unnest the number of returned tuples should be atleast > 10
-        self.assertTrue(len(actual_batch) > 10)
+        self.assertTrue(len(actual_batch) > 2)

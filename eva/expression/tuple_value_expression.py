@@ -75,8 +75,6 @@ class TupleValueExpression(AbstractExpression):
         self._col_alias = value
 
     def evaluate(self, batch: Batch, *args, **kwargs):
-        if "mask" in kwargs:
-            batch = batch[kwargs["mask"]]
         return batch.project([self.col_alias])
 
     def signature(self):

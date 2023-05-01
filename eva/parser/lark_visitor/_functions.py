@@ -17,6 +17,7 @@ from lark import Token, Tree
 
 from eva.expression.abstract_expression import ExpressionType
 from eva.expression.aggregation_expression import AggregationExpression
+from eva.expression.constant_value_expression import ConstantValueExpression
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.create_udf_statement import CreateUDFStatement
@@ -101,7 +102,11 @@ class Functions:
                 elif child.data == "udf_metadata":
                     # Each UDF metadata is a key value pair
                     key_value_pair = self.visit(child)
-                    metadata.append((key_value_pair[0].value, key_value_pair[1].value)),
+                    # value can be an integer or string
+                    value = key_value_pair[1]
+                    if isinstance(value, ConstantValueExpression):
+                        value = value.value
+                    metadata.append((key_value_pair[0].value, value)),
 
         return CreateUDFStatement(
             udf_name,

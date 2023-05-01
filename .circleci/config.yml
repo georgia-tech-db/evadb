@@ -54,8 +54,8 @@ workflows:
         - Pip
         - Windows:
             name: "Windows | v3.10"
-        # eva-decord does not work on Intel Macs
-        #- MacOS:
+        # test_create_index_doesn't work on MacOS
+        # - MacOS:
         #    name: "MacOS | v3.10"
         # missing Torchvision
         #- Linux:
@@ -79,6 +79,10 @@ jobs:
 
       - checkout
 
+      - restore_cache:
+          keys:
+            - v5-model_cache-{{ checksum "setup.py" }}
+      
       - run:
           name: Install EVA package from GitHub repo with all dependencies
           command: |
@@ -100,9 +104,21 @@ jobs:
 
       - run:
           name: Test and upload coverage report to coveralls
+          no_output_timeout: 30m # 30 minute timeout
           command: |
             source test_evadb/bin/activate
             bash script/test/test.sh -m "<< parameters.mode >>"
+
+      # Enable cache save conditionally (to avoid empty cache in Notebooks)
+      - when:
+          condition: 
+            equal: [ TEST, << parameters.mode >> ]
+          steps:
+            - save_cache:
+                key: v5-model_cache-{{ checksum "setup.py" }}
+                paths:
+                  - /home/circleci/.cache/huggingface/
+                  - /home/circleci/.cache/torch/
 
   Windows:
       executor: win/default
@@ -142,7 +158,6 @@ jobs:
               source test_evadb/bin/activate
               pip install --upgrade pip
               pip debug --verbose
-              pip install eva-decord -vvv
               pip install ".[dev]"
               source test_evadb/bin/activate
               bash script/test/test.sh 

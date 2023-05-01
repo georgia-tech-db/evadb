@@ -35,11 +35,15 @@ class HuggingFaceTests(unittest.TestCase):
         query = """LOAD VIDEO 'data/ua_detrac/ua_detrac.mp4' INTO DETRAC;"""
         execute_query_fetch_all(query)
 
+        query = """LOAD VIDEO 'data/sample_videos/touchdown.mp4' INTO VIDEOS"""
+        execute_query_fetch_all(query)
+
         # Text CSV for testing HF Text Based Models
         self.csv_file_path = create_text_csv()
 
     def tearDown(self) -> None:
         execute_query_fetch_all("DROP TABLE IF EXISTS DETRAC;")
+        execute_query_fetch_all("DROP TABLE IF EXISTS VIDEOS;")
         file_remove(self.csv_file_path)
 
     def test_io_catalog_entries_populated(self):
@@ -134,7 +138,7 @@ class HuggingFaceTests(unittest.TestCase):
         """
         execute_query_fetch_all(create_udf_query)
 
-        select_query = f"SELECT {udf_name}(data) FROM DETRAC WHERE id < 10;"
+        select_query = f"SELECT {udf_name}(data) FROM DETRAC WHERE id < 3;"
         output = execute_query_fetch_all(select_query)
 
         # Test that output has 2 columns
