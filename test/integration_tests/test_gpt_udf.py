@@ -15,13 +15,14 @@
 
 
 import unittest
-
-from eva.server.command_handler import execute_query_fetch_all
-from mock import patch
 from unittest.mock import MagicMock
 
+from mock import patch
+
+from eva.server.command_handler import execute_query_fetch_all
+
+
 class GPTUDFsTest(unittest.TestCase):
-    
     @patch("eva.udfs.gpt_udf.openai.ChatCompletion.create")
     def test_gpt_udf(self, mock_req):
         udf_name = "GPTUdf"
@@ -35,7 +36,7 @@ class GPTUDFsTest(unittest.TestCase):
         """
         execute_query_fetch_all(create_udf_query)
 
-        execute_query_fetch_all(f"DROP TABLE MyTextCSV;")
+        execute_query_fetch_all("DROP TABLE MyTextCSV;")
         create_table_query = """CREATE TABLE IF NOT EXISTS MyTextCSV (
                 id INTEGER UNIQUE,
                 prompt TEXT (100),
@@ -45,19 +46,12 @@ class GPTUDFsTest(unittest.TestCase):
 
         csv_query = f"""LOAD CSV '{self.csv_file_path}' INTO MyTextCSV;"""
         execute_query_fetch_all(csv_query)
-        
+
         mock_response_obj = MagicMock()
-        mock_response_obj.message.content= "mock message"        
-        mock_req.return_value.choices=[mock_response_obj]
-        
+        mock_response_obj.message.content = "mock message"
+        mock_req.return_value.choices = [mock_response_obj]
 
         gpt_query = f"SELECT {udf_name}(prompt, query) FROM MyTextCSV;"
         output_batch = execute_query_fetch_all(gpt_query)
         self.assertEqual(len(output_batch), 1)
         self.assertEqual(len(list(output_batch.columns)), 1)
-
-
-
-
-
-

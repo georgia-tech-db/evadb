@@ -40,7 +40,11 @@ class GPTUdf(AbstractUDF):
         input_signatures=[
             PandasDataframe(
                 columns=["id", "prompt", "query"],
-                column_types=[NdArrayType.ANYTYPE, NdArrayType.ANYTYPE, NdArrayType.ANYTYPE],
+                column_types=[
+                    NdArrayType.ANYTYPE,
+                    NdArrayType.ANYTYPE,
+                    NdArrayType.ANYTYPE,
+                ],
                 column_shapes=[(None,), (None,), (None,)],
             )
         ],
@@ -56,28 +60,25 @@ class GPTUdf(AbstractUDF):
     )
     def forward(self, text_df):
 
-        result = []
         prompts = text_df[text_df.columns[0]]
         queries = text_df[text_df.columns[1]]
-        
-        #chatgpt api currently supports answers to a single prompt only
-        #so this udf is designed such that 
-        
+
+        # chatgpt api currently supports answers to a single prompt only
+        # so this udf is designed such that
+
         results = []
-        
+
         for i in range(len(queries)):
-            if prompts[i]!= "None":
-                query = prompts[i]+": "+queries[i]
+            if prompts[i] != "None":
+                query = prompts[i] + ": " + queries[i]
             else:
                 query = queries[i]
             response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo", 
-                messages=[{"role": "user", "content":query}]
+                model="gpt-3.5-turbo", messages=[{"role": "user", "content": query}]
             )
-            
+
             results.append(response.choices[0].message.content)
-            
-        
+
         df = pd.DataFrame({"responses": results})
 
         return df
