@@ -45,6 +45,9 @@ class ReuseTest(unittest.TestCase):
         execute_query_fetch_all("DROP TABLE IF EXISTS DETRAC;")
 
     def _verify_reuse_correctness(self, query, reuse_batch):
+        # Fix memory failures on CI when running reuse test cases. An issue with yolo
+        # surfaces when the system is running on low memory. Explicitly calling garbage
+        # collection to reduce the memory usage.
         gc.collect()
         with disable_rules(
             [
