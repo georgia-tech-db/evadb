@@ -103,7 +103,7 @@ def test_lateral_join(benchmark, setup_pytorch_tests):
     warmup_iterations=1,
     min_rounds=1,
 )
-def test_automatic_speech_recognition(self):
+def test_automatic_speech_recognition(benchmark, setup_pytorch_tests):
     udf_name = "SpeechRecognizer"
     create_udf = (
         f"CREATE UDF {udf_name} TYPE HuggingFace "
@@ -113,12 +113,12 @@ def test_automatic_speech_recognition(self):
 
     # TODO: use with SAMPLE AUDIORATE 16000
     select_query = f"SELECT {udf_name}(audio) FROM VIDEOS;"
-    output = execute_query_fetch_all(select_query)
+    output = benchmark(execute_query_fetch_all(select_query))
 
     # verify that output has one row and one column only
-    self.assertTrue(output.frames.shape == (1, 1))
+    assert output.frames.shape == (1, 1)
     # verify that speech was converted to text correctly
-    self.assertTrue(output.frames.iloc[0][0].count("touchdown") == 2)
+    assert output.frames.iloc[0][0].count("touchdown") == 2
 
     drop_udf_query = f"DROP UDF {udf_name};"
     execute_query_fetch_all(drop_udf_query)
@@ -129,7 +129,7 @@ def test_automatic_speech_recognition(self):
     warmup_iterations=1,
     min_rounds=1,
 )
-def test_summarization_from_video(self):
+def test_summarization_from_video(benchmark, setup_pytorch_tests):
     asr_udf = "SpeechRecognizer"
     create_udf = (
         f"CREATE UDF {asr_udf} TYPE HuggingFace "
@@ -146,12 +146,12 @@ def test_summarization_from_video(self):
 
     # TODO: use with SAMPLE AUDIORATE 16000
     select_query = f"SELECT {summary_udf}({asr_udf}(audio)) FROM VIDEOS;"
-    output = execute_query_fetch_all(select_query)
+    output = benchmark(execute_query_fetch_all(select_query))
 
     # verify that output has one row and one column only
-    self.assertTrue(output.frames.shape == (1, 1))
+    assert output.frames.shape == (1, 1)
     # verify that summary is as expected
-    self.assertTrue(
+    assert (
         output.frames.iloc[0][0]
         == "Jalen Hurts has scored his second rushing touchdown of the game."
     )
