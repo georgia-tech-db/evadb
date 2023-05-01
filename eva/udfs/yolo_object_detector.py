@@ -42,9 +42,9 @@ class YoloV5(PytorchAbstractClassifierUDF):
         return "yolo"
 
     def setup(self, threshold=0.85):
-        logging.getLogger("yolovn").setLevel(logging.CRITICAL)  # yolov5
+        logging.getLogger("yolovs").setLevel(logging.CRITICAL)  # yolov5
         self.threshold = threshold
-        self.model = torch.hub.load("ultralytics/yolov5", "yolov5n", verbose=False)
+        self.model = torch.hub.load("ultralytics/yolov5", "yolov5s", verbose=False)
 
     @property
     def labels(self) -> List[str]:
