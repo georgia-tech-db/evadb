@@ -20,7 +20,9 @@ parts:
         title: Emotion Analysis
       - file: source/tutorials/04-custom-model.ipynb
         title: Using a Custom Model
-
+      - file: source/tutorials/07-object-segmentation-huggingface.ipynb
+        title: Using HuggingFace Models
+        
   - caption: User Reference
     chapters:
       - file: source/reference/evaql
