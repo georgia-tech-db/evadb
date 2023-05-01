@@ -12,7 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import List
+
 from eva.catalog.models.udf_catalog import UdfCatalogEntry
+from eva.catalog.models.udf_metadata_catalog import UdfMetadataCatalogEntry
 from eva.third_party.utils import get_metadata_entry
 from eva.udfs.yolo_object_detector import Yolo
 
@@ -27,3 +30,15 @@ def assign_yolo_udf(udf_obj: UdfCatalogEntry):
         model = "yolov8m.pt"
 
     return lambda: Yolo(model)
+
+
+def parse_yolo_args(metadata_list: List[UdfMetadataCatalogEntry]):
+    """
+    Parse the metadata information associated with yolo and it as dictionary
+    """
+    model = "yolov8m.pt"
+    for metadata in metadata_list:
+        if metadata.key == "model":
+            model = metadata.value
+
+    return {"model_name": model}
