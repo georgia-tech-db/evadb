@@ -26,10 +26,12 @@ class DiskKVCache:
         `max_cache_size` (int, optional): an integer representing the maximum size of
             the cache. The system will make its best effort to enforce this limit, but it may slightly exceed it. The default value is 2**30.
         `shards` (int, optional): an integer representing the number of shards to use.
-            This can improve concurrent writes. The default value is 6.
+            This can improve concurrent writes. The default value is 3. size limit of
+            individual cache shards is the `max_cache_size` divided by the number of
+            shards.
     """
 
-    def __init__(self, path: str, max_cache_size: int = 2**30, shards: int = 6):
+    def __init__(self, path: str, max_cache_size: int = 2**30, shards: int = 3):
         # For details, see: http://www.grantjenks.com/docs/diskcache/tutorial.html#settings
         default_settings = {
             "size_limit": max_cache_size,
