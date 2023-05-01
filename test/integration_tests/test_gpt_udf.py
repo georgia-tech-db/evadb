@@ -24,7 +24,9 @@ from eva.server.command_handler import execute_query_fetch_all
 
 class GPTUDFsTest(unittest.TestCase):
     @patch("eva.udfs.gpt_udf.openai.ChatCompletion.create")
-    def test_gpt_udf(self, mock_req):
+    @patch("eva.udfs.gpt_udf.ConfigurationManager")
+    def test_gpt_udf(self, mock_req, mock_config):
+        
         udf_name = "GPTUdf"
 
         execute_query_fetch_all(f"DROP UDF IF EXISTS {udf_name};")
@@ -34,7 +36,14 @@ class GPTUDFsTest(unittest.TestCase):
         create_udf_query = f"""CREATE UDF {udf_name}
             IMPL 'eva/udfs/gpt_udf.py'
         """
+        
+        mock_obj = MagicMock()
+        mock_config.return_value= mock_obj
+        mock_obj.get_value.return_value = "api"
+        
         execute_query_fetch_all(create_udf_query)
+        
+        mock_obj.assert_called_with("core", "openai_api_key")
 
         execute_query_fetch_all("DROP TABLE MyTextCSV;")
         create_table_query = """CREATE TABLE IF NOT EXISTS MyTextCSV (
