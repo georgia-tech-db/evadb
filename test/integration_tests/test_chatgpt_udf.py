@@ -17,28 +17,18 @@
 import unittest
 from unittest.mock import MagicMock
 
-from mock import patch
 import pandas as pd
-from eva.models.storage.batch import Batch
+from mock import patch
 
+from eva.catalog.catalog_manager import CatalogManager
+from eva.configuration.configuration_manager import ConfigurationManager
+from eva.models.storage.batch import Batch
 from eva.server.command_handler import execute_query_fetch_all
 
 
-class GPTUDFsTest(unittest.TestCase):
-    @patch("eva.udfs.gpt_udf.openai.ChatCompletion.create")
-    def test_gpt_udf(self, mock_req):
-        udf_name = "ChatGPT"
-
-        execute_query_fetch_all(f"DROP UDF IF EXISTS {udf_name};")
-
-        self.csv_file_path = "test/data/queries.csv"
-
-        create_udf_query = f"""CREATE UDF {udf_name}
-            IMPL 'eva/udfs/gpt_udf.py'
-        """
-        execute_query_fetch_all(create_udf_query)
-
-        execute_query_fetch_all("DROP TABLE MyTextCSV;")
+class ChatGPTTest(unittest.TestCase):
+    def setUp(self) -> None:
+        CatalogManager().reset()
         create_table_query = """CREATE TABLE IF NOT EXISTS MyTextCSV (
                 id INTEGER UNIQUE,
                 prompt TEXT (100),
@@ -46,8 +36,25 @@ class GPTUDFsTest(unittest.TestCase):
             );"""
         execute_query_fetch_all(create_table_query)
 
+        self.csv_file_path = "test/data/queries.csv"
         csv_query = f"""LOAD CSV '{self.csv_file_path}' INTO MyTextCSV;"""
         execute_query_fetch_all(csv_query)
+
+    def tearDown(self) -> None:
+        execute_query_fetch_all("DROP TABLE IF EXISTS MyTextCSV;")
+
+    @patch("eva.udfs.gpt_udf.openai.ChatCompletion.create")
+    def test_gpt_udf(self, mock_req):
+        # set dummy api key
+        ConfigurationManager().update_value("third_party", "openai_api_key", "my_key")
+
+        udf_name = "ChatGPT"
+        execute_query_fetch_all(f"DROP UDF IF EXISTS {udf_name};")
+
+        create_udf_query = f"""CREATE UDF {udf_name}
+            IMPL 'eva/udfs/gpt_udf.py'
+        """
+        execute_query_fetch_all(create_udf_query)
 
         mock_response_obj = MagicMock()
         mock_response_obj.message.content = "mock message"
@@ -55,7 +62,10 @@ class GPTUDFsTest(unittest.TestCase):
 
         gpt_query = f"SELECT {udf_name}(prompt, query) FROM MyTextCSV;"
         output_batch = execute_query_fetch_all(gpt_query)
-        expected_output = Batch(pd.DataFrame(["mock message"], columns=["response"]))
+        expected_output = Batch(
+            pd.DataFrame(["mock message"], columns=["chatgpt.response"])
+        )
+
         self.assertEqual(len(output_batch), 1)
         self.assertEqual(len(list(output_batch.columns)), 1)
         self.assertEqual(output_batch, expected_output)
