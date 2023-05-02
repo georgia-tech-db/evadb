@@ -87,6 +87,8 @@ class ParserStatementTests(unittest.TestCase):
                                         FeatureExtractor(data))
                     LIMIT 1;""",
         ]
+        # The queries below are the result of randomly changing the case of the
+        # characters in the above queries.
         randomized_cases = [
             "Create index TestIndex on MyVideo (featCol) using HNSW;",
             """create table if not exists Persons (
