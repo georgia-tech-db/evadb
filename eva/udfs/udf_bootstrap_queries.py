@@ -150,6 +150,15 @@ Asl_udf_query = """CREATE UDF IF NOT EXISTS ASLActionRecognition
     EVA_INSTALLATION_DIR
 )
 
+Sift_udf_query = """CREATE UDF IF NOT EXISTS SiftFeatureExtractor
+        INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
+        OUTPUT (features NDARRAY FLOAT32(1, ANYDIM))
+        TYPE  Classification
+        IMPL  '{}/udfs/sift_feature_extractor.py';
+        """.format(
+    EVA_INSTALLATION_DIR
+)
+
 
 def init_builtin_udfs(mode: str = "debug") -> None:
     """Load the built-in UDFs into the system during system bootstrapping.
