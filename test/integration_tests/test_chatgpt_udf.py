@@ -23,6 +23,7 @@ from mock import patch
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.configuration_manager import ConfigurationManager
+from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
 from eva.server.command_handler import execute_query_fetch_all
 
@@ -71,3 +72,14 @@ class ChatGPTTest(unittest.TestCase):
         self.assertEqual(len(output_batch), 1)
         self.assertEqual(len(list(output_batch.columns)), 1)
         self.assertEqual(output_batch, expected_output)
+
+    def test_gpt_udf_no_key(self):
+        ConfigurationManager().update_value("third_party", "openai_api_key", "")
+        udf_name = "ChatGPT"
+        execute_query_fetch_all(f"DROP UDF IF EXISTS {udf_name};")
+
+        with self.assertRaises(ExecutorError):
+            create_udf_query = f"""CREATE UDF {udf_name}
+            IMPL 'eva/udfs/gpt_udf.py'
+            """
+            execute_query_fetch_all(create_udf_query)
