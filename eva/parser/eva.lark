@@ -302,153 +302,151 @@ bit_operator: "<<" | ">>" | "&" | "^" | "|"
 math_operator: STAR | DIVIDE | MODULUS | DIV | MOD | PLUS | MINUS | MINUSMINUS
 
 // KEYWORDS
-
-ALL:                                 "ALL"
-ALTER:                               "ALTER"
-AND:                                 "AND"
-ANY:                                 "ANY"
-ANYDIM:                              "ANYDIM"
-AS:                                  "AS"
-ASC:                                 "ASC"
-BLOB:                                "BLOB"
-BY:                                  "BY"
-COLUMN:                              "COLUMN"
-CREATE:                              "CREATE"
-DATABASE:                            "DATABASE"
-DEFAULT:                             "DEFAULT"
-DELETE:                              "DELETE"
-DESC:                                "DESC"
-DESCRIBE:                            "DESCRIBE"
-DISTINCT:                            "DISTINCT"
-DROP:                                "DROP"
-EXIT:                                "EXIT"
-EXISTS:                              "EXISTS"
-EXPLAIN:                             "EXPLAIN"
-FALSE:                               "FALSE"
-FROM:                                "FROM"
-GROUP:                               "GROUP"
-HAVING:                              "HAVING"
-IF:                                  "IF"
-IN:                                  "IN"
-FILE:                                "FILE"
-INDIR:                               "INDIR"
-INTO:                                "INTO"
-INDEX:                               "INDEX"
-INSERT:                              "INSERT"
-IS:                                  "IS"
-JOIN:                                "JOIN"
-KEY:                                 "KEY"
-LATERAL:                             "LATERAL"
-LIKE:                                "LIKE"
-LIMIT:                               "LIMIT"
-LOAD:                                "LOAD"
-NO:                                  "NO"
-NOT:                                 "NOT"
-NULL_LITERAL:                        "NULL"
-OFFSET:                              "OFFSET"
-ON:                                  "ON"
-OR:                                  "OR"
-ORDER:                               "ORDER"
-OVERWRITE:                           "OVERWRITE"  
-PATH:                                "PATH"
-PRIMARY:                             "PRIMARY"
-REFERENCES:                          "REFERENCES"
-RENAME:                              "RENAME"
-SAMPLE:                              "SAMPLE"
-IFRAMES:                             "IFRAMES"
-AUDIORATE:                           "AUDIORATE"
-SELECT:                             "SELECT"
-SET:                                 "SET"
-SHUTDOWN:                            "SHUTDOWN"
-SHOW:                                "SHOW"
-SOME:                                "SOME"
-TABLE:                               "TABLE"
-TABLES:                              "TABLES"
-TO:                                  "TO"
-TRUE:                                "TRUE"
-UDFS:                                "UDFS"
-UNION:                               "UNION"
-UNIQUE:                              "UNIQUE"
-UNKNOWN:                             "UNKNOWN"
-UNLOCK:                              "UNLOCK"
-UNNEST:                              "UNNEST"
-UNSIGNED:                            "UNSIGNED"
-UPDATE:                              "UPDATE"
-USING:                               "USING"
-VALUES:                              "VALUES"
-WHERE:                               "WHERE"
-XOR:                                 "XOR"
+ALL:                                 "ALL"i
+ALTER:                               "ALTER"i
+AND:                                 "AND"i
+ANY:                                 "ANY"i
+ANYDIM:                              "ANYDIM"i
+AS:                                  "AS"i
+ASC:                                 "ASC"i
+BLOB:                                "BLOB"i
+BY:                                  "BY"i
+COLUMN:                              "COLUMN"i
+CREATE:                              "CREATE"i
+DATABASE:                            "DATABASE"i
+DEFAULT:                             "DEFAULT"i
+DELETE:                              "DELETE"i
+DESC:                                "DESC"i
+DESCRIBE:                            "DESCRIBE"i
+DISTINCT:                            "DISTINCT"i
+DROP:                                "DROP"i
+EXIT:                                "EXIT"i
+EXISTS:                              "EXISTS"i
+EXPLAIN:                             "EXPLAIN"i
+FALSE:                               "FALSE"i
+FROM:                                "FROM"i
+GROUP:                               "GROUP"i
+HAVING:                              "HAVING"i
+IF:                                  "IF"i
+IN:                                  "IN"i
+FILE:                                "FILE"i
+INDIR:                               "INDIR"i
+INTO:                                "INTO"i
+INDEX:                               "INDEX"i
+INSERT:                              "INSERT"i
+IS:                                  "IS"i
+JOIN:                                "JOIN"i
+KEY:                                 "KEY"i
+LATERAL:                             "LATERAL"i
+LIKE:                                "LIKE"i
+LIMIT:                               "LIMIT"i
+LOAD:                                "LOAD"i
+NO:                                  "NO"i
+NOT:                                 "NOT"i
+NULL_LITERAL:                        "NULL"i
+OFFSET:                              "OFFSET"i
+ON:                                  "ON"i
+OR:                                  "OR"i
+ORDER:                               "ORDER"i
+PATH:                                "PATH"i
+PRIMARY:                             "PRIMARY"i
+REFERENCES:                          "REFERENCES"i
+RENAME:                              "RENAME"i
+SAMPLE:                              "SAMPLE"i
+IFRAMES:                             "IFRAMES"i
+AUDIORATE:                           "AUDIORATE"i
+SELECT:                             "SELECT"i
+SET:                                 "SET"i
+SHUTDOWN:                            "SHUTDOWN"i
+SHOW:                                "SHOW"i
+SOME:                                "SOME"i
+TABLE:                               "TABLE"i
+TABLES:                              "TABLES"i
+TO:                                  "TO"i
+TRUE:                                "TRUE"i
+UDFS:                                "UDFS"i
+UNION:                               "UNION"i
+UNIQUE:                              "UNIQUE"i
+UNKNOWN:                             "UNKNOWN"i
+UNLOCK:                              "UNLOCK"i
+UNNEST:                              "UNNEST"i
+UNSIGNED:                            "UNSIGNED"i
+UPDATE:                              "UPDATE"i
+USING:                               "USING"i
+VALUES:                              "VALUES"i
+WHERE:                               "WHERE"i
+XOR:                                 "XOR"i
 
 // File Formats
-WITH:                 "WITH"
-FORMAT:               "FORMAT"
-CSV:                  "CSV"
-VIDEO:                "VIDEO"
-IMAGE:                "IMAGE"
+WITH:                 "WITH"i
+FORMAT:               "FORMAT"i
+CSV:                  "CSV"i
+VIDEO:                "VIDEO"i
+IMAGE:                "IMAGE"i
 
 // Index types
-HNSW:                                "HNSW"
+HNSW:                                "HNSW"i
 
 // Computer vision tasks
 
-OBJECT_DETECTION:                    "OBJECT_DETECTION"
-ACTION_CLASSICATION:                 "ACTION_CLASSICATION"
+OBJECT_DETECTION:                    "OBJECT_DETECTION"i
+ACTION_CLASSICATION:                 "ACTION_CLASSICATION"i
 
 // DATA TYPE Keywords
 
-BOOLEAN:                             "BOOLEAN"
-INTEGER:                             "INTEGER"
-FLOAT:                               "FLOAT"
-TEXT:                                "TEXT"
-NDARRAY:                             "NDARRAY"
-INT8:                                "INT8"
-UINT8:                               "UINT8"
-INT16:                               "INT16"
-INT32:                               "INT32"
-INT64:                               "INT64"
-UNICODE:                             "UNICODE"
-FLOAT32:                             "FLOAT32"
-FLOAT64:                             "FLOAT64"
-DECIMAL:                             "DECIMAL"
-STR:                                 "STR"
-DATETIME:                            "DATETIME"
-ANYTYPE:                             "ANYTYPE"
+BOOLEAN:                             "BOOLEAN"i
+INTEGER:                             "INTEGER"i
+FLOAT:                               "FLOAT"i
+TEXT:                                "TEXT"i
+NDARRAY:                             "NDARRAY"i
+INT8:                                "INT8"i
+UINT8:                               "UINT8"i
+INT16:                               "INT16"i
+INT32:                               "INT32"i
+INT64:                               "INT64"i
+UNICODE:                             "UNICODE"i
+FLOAT32:                             "FLOAT32"i
+FLOAT64:                             "FLOAT64"i
+DECIMAL:                             "DECIMAL"i
+STR:                                 "STR"i
+DATETIME:                            "DATETIME"i
+ANYTYPE:                             "ANYTYPE"i
 
 // Group function Keywords
 
-AVG:                                 "AVG"
-COUNT:                               "COUNT"
-MAX:                                 "MAX"
-MIN:                                 "MIN"
-STD:                                 "STD"
-SUM:                                 "SUM"
-FCOUNT: 						     "FCOUNT"
-FIRST:                               "FIRST"
-LAST:                                "LAST"
-SEGMENT:                             "SEGMENT"
+AVG:                                 "AVG"i
+COUNT:                               "COUNT"i
+MAX:                                 "MAX"i
+MIN:                                 "MIN"i
+STD:                                 "STD"i
+SUM:                                 "SUM"i
+FCOUNT: 						     "FCOUNT"i
+FIRST:                               "FIRST"i
+LAST:                                "LAST"i
+SEGMENT:                             "SEGMENT"i
 
 // Keywords, but can be ID
 // Common Keywords, but can be ID
 
-AUTO_INCREMENT:                      "AUTO_INCREMENT"
-HELP:                                "HELP"
-TEMPTABLE:                           "TEMPTABLE"
-VALUE:                               "VALUE"
+AUTO_INCREMENT:                      "AUTO_INCREMENT"i
+HELP:                                "HELP"i
+TEMPTABLE:                           "TEMPTABLE"i
+VALUE:                               "VALUE"i
 
 // UDF
-UDF:						                "UDF"
-INPUT:                          "INPUT"
-OUTPUT:                         "OUTPUT"
-TYPE:                           "TYPE"
-IMPL:                           "IMPL"
+UDF:						         "UDF"i
+INPUT:                               "INPUT"i
+OUTPUT:                              "OUTPUT"i
+TYPE:                                "TYPE"i
+IMPL:                                "IMPL"i
 
 // MATERIALIZED
-MATERIALIZED:                   "MATERIALIZED"
-VIEW:                           "VIEW"
+MATERIALIZED:                        "MATERIALIZED"i
+VIEW:                                "VIEW"i
 
 // Common function names
 
-ABS:                                 "ABS"
+ABS:                                 "ABS"i
 
 // Operators
 // Operators. Assigns
