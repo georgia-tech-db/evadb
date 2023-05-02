@@ -321,7 +321,6 @@ class SimilarityTests(unittest.TestCase):
         # create_index_query = """CREATE INDEX reddit_sift_image_index
         #                           ON reddit_dataset (SiftFeatureExtractor(Crop(data, bbox)))
         #                           USING HNSW;"""
-
         create_index_query = """CREATE INDEX reddit_sift_object_index
                                   ON reddit_dataset_object (SiftFeatureExtractor(Crop(data, bboxes)))
                                   USING HNSW;"""
@@ -332,7 +331,6 @@ class SimilarityTests(unittest.TestCase):
                               SiftFeatureExtractor(Open("/data/jiashenc/workspace/motif-mining/redditdata/query.jpg")),
                               SiftFeatureExtractor(Crop(data, bboxes))
                             ) LIMIT 10;"""
-
         res_batch = execute_query_fetch_all(select_query)
         for i in range(10):
             print(res_batch.frames["reddit_dataset_object.name"][i])
