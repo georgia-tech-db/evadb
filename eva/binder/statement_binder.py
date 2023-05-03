@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from pathlib import Path
 import sys
 
 from eva.binder.binder_utils import (
@@ -26,6 +27,7 @@ from eva.binder.binder_utils import (
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import IndexType, NdArrayType, TableType, VideoColumnName
+from eva.configuration.constants import EVA_DEFAULT_DIR
 from eva.expression.abstract_expression import AbstractExpression, ExpressionType
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
@@ -247,12 +249,19 @@ class StatementBinder:
 
         if udf_obj.type == "HuggingFace":
             node.function = assign_hf_udf(udf_obj)
-        elif udf_obj.type == "ultralytics":
-            node.function = assign_yolo_udf(udf_obj)
         else:
-            # Verify the consistency of the UDF. If the checksum of the UDF does not match
-            # the one stored in the catalog, an error will be thrown and the user will be
-            # asked to register the UDF again.
+            if udf_obj.type == "ultralytics":
+                # manually set the impl_path for yolo udfs we only handle object
+                # detection for now, hopefully this can be generelized
+                udf_obj.impl_file_path = (
+                    Path(f"{EVA_DEFAULT_DIR}/udfs/yolo_object_detector.py")
+                    .absolute()
+                    .as_posix()
+                )
+
+            # Verify the consistency of the UDF. If the checksum of the UDF does not
+            # match the one stored in the catalog, an error will be thrown and the user
+            # will be asked to register the UDF again.
             assert (
                 get_file_checksum(udf_obj.impl_file_path) == udf_obj.checksum
             ), f"""UDF file {udf_obj.impl_file_path} has been modified from the

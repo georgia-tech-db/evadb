@@ -51,7 +51,7 @@ class CreateIndexTest(unittest.TestCase):
 
         # Reset catalog.
         CatalogManager().reset()
-        load_udfs_for_testing(mode="minimal")
+        load_udfs_for_testing(mode="debug")
 
         # Create feature vector table and raw input table.
         feat1 = np.array([[0, 0, 0]]).astype(np.float32)

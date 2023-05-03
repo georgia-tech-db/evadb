@@ -99,7 +99,6 @@ class RulesTest(unittest.TestCase):
         video_file_path = create_sample_video()
         load_query = f"LOAD VIDEO '{video_file_path}' INTO MyVideo;"
         execute_query_fetch_all(load_query)
-        load_udfs_for_testing(mode="minimal")
 
     @classmethod
     def tearDownClass(cls):

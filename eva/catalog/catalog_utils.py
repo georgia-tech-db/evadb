@@ -14,7 +14,7 @@
 # limitations under the License.
 import uuid
 from pathlib import Path
-from typing import List
+from typing import Any, List
 
 from eva.catalog.catalog_type import (
     ColumnType,
@@ -168,3 +168,25 @@ def cleanup_storage():
     remove_directory_contents(config.get_value("storage", "index_dir"))
     remove_directory_contents(config.get_value("storage", "cache_dir"))
     remove_directory_contents(config.get_value("core", "datasets_dir"))
+
+
+def get_metadata_entry_or_val(
+    udf_obj: "UdfCatalogEntry", key: str, default_val: Any
+) -> str:
+    """
+    Return the metadata value for the given key, or the default value if the
+    key is not found.
+
+    Args:
+        udf_obj (UdfCatalogEntry): An object of type `UdfCatalogEntry` which is
+        used to extract metadata information.
+        key (str): The metadata key for which the corresponding value needs to be retrieved.
+        default_val (Any): The default value to be returned if the metadata key is not found.
+
+    Returns:
+        str: metadata value
+    """
+    for metadata in udf_obj.metadata:
+        if metadata.key == key:
+            return metadata.value
+    return default_val

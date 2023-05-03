@@ -14,7 +14,7 @@
 # limitations under the License.
 import shutil
 from pathlib import Path
-from typing import List
+from typing import Any, List
 
 from eva.catalog.catalog_type import ColumnType, IndexType, TableType, VideoColumnName
 from eva.catalog.catalog_utils import (

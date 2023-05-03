@@ -16,7 +16,7 @@ from typing import List
 
 from eva.catalog.models.udf_catalog import UdfCatalogEntry
 from eva.catalog.models.udf_metadata_catalog import UdfMetadataCatalogEntry
-from eva.third_party.utils import get_metadata_entry
+from eva.catalog.catalog_utils import get_metadata_entry_or_val
 from eva.udfs.yolo_object_detector import Yolo
 
 
@@ -24,11 +24,8 @@ def assign_yolo_udf(udf_obj: UdfCatalogEntry):
     """
     Assigns the correct yolo model to the UDF. The model is provided as part of the metadata
     """
-    try:
-        model = get_metadata_entry(udf_obj, "model")[1]
-    except Exception:
-        model = "yolov8m.pt"
 
+    model = get_metadata_entry_or_val(udf_obj, "model", "yolov8m.pt")[1]
     return lambda: Yolo(model)
 
 
@@ -38,7 +35,6 @@ def parse_yolo_args(metadata_list: List[UdfMetadataCatalogEntry]):
     """
     model = "yolov8m.pt"
     for metadata in metadata_list:
-        if metadata.key == "model":
-            model = metadata.value
+        model = get_metadata_entry_or_val(metadata, "model", "yolov8m.pt")
 
     return {"model_name": model}

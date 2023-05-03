@@ -24,7 +24,5 @@ def setup_pytorch_tests():
     CatalogManager().reset()
     execute_query_fetch_all("LOAD VIDEO 'data/ua_detrac/ua_detrac.mp4' INTO MyVideo;")
     execute_query_fetch_all("LOAD VIDEO 'data/mnist/mnist.mp4' INTO MNIST;")
-    # Load all the release UDFs
-    # We want to use accurate yolo model
     init_builtin_udfs(mode="release")
     yield None

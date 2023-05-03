@@ -98,7 +98,7 @@ udf_libs = [
     "ipython<8.13.0",
     "ultralytics",          # OBJECT DETECTION
     "thefuzz",                # FUZZY STRING MATCHINGz
-    "transformers==4.27.4",    # HUGGINGFACE
+    "transformers>=4.27.4",    # HUGGINGFACE
 ]
 
 ### NEEDED FOR EXPERIMENTAL FEATURES

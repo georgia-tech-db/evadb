@@ -54,9 +54,6 @@ class CreateUDFExecutor(AbstractExecutor):
 
     def handle_ultralytics_udf(self):
         """Handle Ultralytics UDFs"""
-        # manually set the impl_path for yolo udfs
-        # we only handle object detection for now
-        # hopefully this can be generelized
         impl_path = (
             Path(f"{EVA_DEFAULT_DIR}/udfs/yolo_object_detector.py")
             .absolute()
@@ -141,6 +138,8 @@ class CreateUDFExecutor(AbstractExecutor):
         Raises:
             RuntimeError: If an error occurs while initializing the UDF.
         """
+        
+        print(self.node.name, udf_args)
         # load the udf class from the file
         try:
             # loading the udf class from the file
