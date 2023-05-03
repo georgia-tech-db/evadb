@@ -60,7 +60,7 @@ class CreateUDFExecutor(AbstractExecutor):
             .as_posix()
         )
         udf = self._try_initializing_udf(
-            impl_path, udf_args=parse_yolo_args(self.node.metadata)
+            impl_path, udf_args=parse_yolo_args(self.node)
         )
         io_list = self._resolve_udf_io(udf)
         return (
@@ -138,7 +138,7 @@ class CreateUDFExecutor(AbstractExecutor):
         Raises:
             RuntimeError: If an error occurs while initializing the UDF.
         """
-        
+
         print(self.node.name, udf_args)
         # load the udf class from the file
         try:

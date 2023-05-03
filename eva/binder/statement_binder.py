@@ -12,8 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from pathlib import Path
 import sys
+from pathlib import Path
 
 from eva.binder.binder_utils import (
     BinderError,
@@ -27,6 +27,7 @@ from eva.binder.binder_utils import (
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import IndexType, NdArrayType, TableType, VideoColumnName
+from eva.catalog.catalog_utils import get_metadata_properties
 from eva.configuration.constants import EVA_DEFAULT_DIR
 from eva.expression.abstract_expression import AbstractExpression, ExpressionType
 from eva.expression.function_expression import FunctionExpression
@@ -249,6 +250,7 @@ class StatementBinder:
 
         if udf_obj.type == "HuggingFace":
             node.function = assign_hf_udf(udf_obj)
+
         else:
             if udf_obj.type == "ultralytics":
                 # manually set the impl_path for yolo udfs we only handle object
@@ -269,8 +271,12 @@ class StatementBinder:
 
             try:
                 node.function = load_udf_class_from_file(
-                    udf_obj.impl_file_path, udf_obj.name
+                    udf_obj.impl_file_path,
+                    udf_obj.name,
+                    get_metadata_properties(udf_obj),
                 )
+                print(node.function, get_metadata_properties(udf_obj))
+                print(node.function())
             except Exception as e:
                 err_msg = (
                     f"{str(e)}. Please verify that the UDF class name in the"
