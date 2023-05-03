@@ -16,7 +16,7 @@
         <img alt="PyPI" src="https://img.shields.io/pypi/v/evadb.svg"/>
         <img alt="License" src="https://img.shields.io/badge/license-Apache%202-brightgreen.svg?logo=apache"/>
         <img alt="Coverage Status" src="https://coveralls.io/repos/github/georgia-tech-db/eva/badge.svg?branch=master"/>     
-        <a href="https://github.com/orgs/typesense/projects/1">
+        <a href="https://github.com/orgs/georgia-tech-db/projects/3">
             <img src="https://img.shields.io/badge/eva-roadmap-ff3423" alt="Roadmap"/>
         </a>
         <a href="https://pepy.tech/project/evadb">
