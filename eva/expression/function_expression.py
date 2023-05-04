@@ -190,7 +190,7 @@ class FunctionExpression(AbstractExpression):
         if not self._cache:
             return func_args.apply_function_expression(func)
 
-        output_cols = [obj.name for obj in self.output_objs]
+        output_cols = [obj.name for obj in self.udf_obj.outputs]
 
         # 1. check cache
         # We are required to iterate over the batch row by row and check the cache.
@@ -208,7 +208,7 @@ class FunctionExpression(AbstractExpression):
             assert len(cache_keys) == len(batch), "Not all rows have the cache key"
 
         cache_miss = np.full(len(batch), True)
-        for idx, key in cache_keys.iterrows():
+        for idx, (_, key) in enumerate(cache_keys.iterrows()):
             val = self._cache.store.get(key.to_numpy())
             results[idx] = val
             cache_miss[idx] = val is None

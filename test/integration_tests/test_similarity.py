@@ -31,7 +31,7 @@ class SimilarityTests(unittest.TestCase):
         CatalogManager().reset()
 
         # Prepare needed UDFs and data_col.
-        load_udfs_for_testing(mode="minimal")
+        load_udfs_for_testing(mode="debug")
         self.img_path = create_sample_image()
 
         # Create base comparison table.

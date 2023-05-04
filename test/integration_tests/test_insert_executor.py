@@ -42,7 +42,7 @@ class InsertExecutorTest(unittest.TestCase):
             );
         """
         execute_query_fetch_all(query)
-        load_udfs_for_testing(mode="minimal")
+        load_udfs_for_testing(mode="debug")
 
     def tearDown(self):
         shutdown_ray()

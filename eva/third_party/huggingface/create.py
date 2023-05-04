@@ -21,13 +21,19 @@ from transformers import pipeline
 from eva.catalog.catalog_type import ColumnType, NdArrayType
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 from eva.catalog.models.udf_metadata_catalog import UdfMetadataCatalogEntry
-from eva.third_party.huggingface.model import HFInputTypes
+from eva.third_party.huggingface.model import (
+    ASRHFModel,
+    AudioHFModel,
+    HFInputTypes,
+    ImageHFModel,
+    TextHFModel,
+)
 
 """
 We currently support the following tasks from HuggingFace.
 Each task is mapped to the type of input it expects.
 """
-SUPPORTED_TASKS = {
+INPUT_TYPE_FOR_SUPPORTED_TASKS = {
     "audio-classification": HFInputTypes.AUDIO,
     "automatic-speech-recognition": HFInputTypes.AUDIO,
     "text-classification": HFInputTypes.TEXT,
@@ -40,6 +46,21 @@ SUPPORTED_TASKS = {
     "image-to-text": HFInputTypes.IMAGE,
     "object-detection": HFInputTypes.IMAGE,
     "depth-estimation": HFInputTypes.IMAGE,
+}
+
+MODEL_FOR_TASK = {
+    "audio-classification": AudioHFModel,
+    "automatic-speech-recognition": ASRHFModel,
+    "text-classification": TextHFModel,
+    "summarization": TextHFModel,
+    "translation": TextHFModel,
+    "text2text-generation": TextHFModel,
+    "text-generation": TextHFModel,
+    "image-classification": ImageHFModel,
+    "image-segmentation": ImageHFModel,
+    "image-to-text": ImageHFModel,
+    "object-detection": ImageHFModel,
+    "depth-estimation": ImageHFModel,
 }
 
 
@@ -87,13 +108,15 @@ def infer_output_name_and_type(**pipeline_args):
     """
     assert "task" in pipeline_args, "Task Not Found In Model Definition"
     task = pipeline_args["task"]
-    assert task in SUPPORTED_TASKS, f"Task {task} not supported in EVA currently"
+    assert (
+        task in INPUT_TYPE_FOR_SUPPORTED_TASKS
+    ), f"Task {task} not supported in EVA currently"
 
     # Construct the pipeline
     pipe = pipeline(**pipeline_args)
 
     # Run the pipeline through a dummy input to get a sample output
-    input_type = SUPPORTED_TASKS[task]
+    input_type = INPUT_TYPE_FOR_SUPPORTED_TASKS[task]
     model_input = gen_sample_input(input_type)
     model_output = pipe(model_input)
 
