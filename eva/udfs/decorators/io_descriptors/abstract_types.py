@@ -51,14 +51,10 @@ class IOArgument(ABC):
         pass
 
     def is_array_type_defined(self):
-        if self.array_type is None:
-            return False
-        return True
+        return self.array_type is not None
 
     def is_shape_defined(self):
-        if self.array_dimensions is None:
-            return False
-        return True
+        return self.array_dimensions is not None
 
     def validate_object(self, object, input_flag=True):
         if self.is_array_type_defined:
