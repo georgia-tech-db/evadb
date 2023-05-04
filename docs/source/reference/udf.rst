@@ -1,8 +1,7 @@
 User-Defined Functions
 ======================
 
-This section provides an overview of how you can create and use a custom user-defined function (UDF) in your queries. For example, you could write an UDF that wraps around a PyTorch model.
-
+This section provides an overview of how you can create and use a custom user-defined function (UDF) in your queries. For example, you could write an UDF that wraps around your custom PyTorch model.
 
 Part 1: Writing a custom UDF
 ------------------------------
@@ -38,9 +37,9 @@ An abstract method that must be implemented in your child class. The setup funct
   - True: Batching should be enabled
   - False: Batching is disabled.
 
-The custom setup operations for the udf can be written inside the function in the child class. If there is no custom logic required, then you can just mention pass in the function definition.
+The custom setup operations for the UDF can be written inside the function in the child class. If there is no need for any custom logic, then you can just simply write "pass" in the function definition.
 
-Example of the setup function
+Example of a Setup function
 
 .. code-block:: python
 
@@ -53,9 +52,7 @@ Example of the setup function
 Forward
 --------
 
-An abstract method that must be implemented in your child class.
-The forward function receives the frames and runs the Deep Learning model on the frames. 
-The logic for transforming the frames and running the models must be provided by you.
+An abstract method that must be implemented in your UDF. The forward function receives the frames and runs the deep learning model on the data. The logic for transforming the frames and running the models must be provided by you.
 The arguments that need to be passed are
 
 - input_signatures: List[IOColumnArgument] 
@@ -114,10 +111,10 @@ A sample forward function is given below
 
 ----------
 
-Part 2: Registering and using the UDF in queries
+Part 2: Registering and using the UDF in EVA Queries
 ------------------------------------------------------
 
-Now that you have implemented your UDF we need to register it in EVA. You can then use the function in any query.
+Now that you have implemented your UDF, we need to register it as a UDF in EVA. You can then use the UDF in any query.
 
 1. Register the UDF with a query that follows this template:
 
