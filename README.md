@@ -16,6 +16,9 @@
         <img alt="PyPI" src="https://img.shields.io/pypi/v/evadb.svg"/>
         <img alt="License" src="https://img.shields.io/badge/license-Apache%202-brightgreen.svg?logo=apache"/>
         <img alt="Coverage Status" src="https://coveralls.io/repos/github/georgia-tech-db/eva/badge.svg?branch=master"/>     
+        <a href="https://github.com/orgs/georgia-tech-db/projects/3">
+            <img src="https://img.shields.io/badge/eva-roadmap-ff3423" alt="Roadmap"/>
+        </a>
         <a href="https://pepy.tech/project/evadb">
           <img alt="Downloads" src="https://static.pepy.tech/badge/evadb/month"/>
         </a>
@@ -31,6 +34,7 @@ EVA is designed for supporting database applications that operate on both struct
 - [Features](#features)
 - [Quick Start](#quick-start)
 - [Documentation](#documentation)
+- [Roadmap](https://github.com/orgs/georgia-tech-db/projects/3)
 - [Demo](#demo)
 - [Illustrative Applications](#illustrative-applications)
 - [Community and Support](#community-and-support)
@@ -65,7 +69,8 @@ Here are some illustrative EVA-backed applications (all of them are Jupyter note
   - The <a href="https://evadb.readthedocs.io/en/stable/source/overview/installation.html">Getting Started</a> page shows how you can use EVA for different AI pipelines, and how you can easily extend EVA by defining an user-defined function that wraps around your custom deep learning model.
   - The <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/index.html">User Guides</a> section contains Jupyter Notebooks that demonstrate how to use various features of EVA. Each notebook includes a link to Google Colab to run the code.
 * [Tutorials](https://github.com/georgia-tech-db/eva/blob/master/tutorials/03-emotion-analysis.ipynb)
-* [Join Slack](https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg)
+* [Join us on Slack!](https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg)
+* [Medium-Term Roadmap](https://github.com/orgs/georgia-tech-db/projects/3)
 * [Demo](https://github.com/georgia-tech-db/eva/blob/master/tutorials/03-emotion-analysis.ipynb)
 
 ## Quick Start

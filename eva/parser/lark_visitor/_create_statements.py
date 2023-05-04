@@ -128,7 +128,7 @@ class CreateTable:
         dimensions = []
 
         token = tree.children[0]
-        if token == "BOOLEAN":
+        if str.upper(token) == "BOOLEAN":
             data_type = ColumnType.BOOLEAN
 
         return data_type, array_type, dimensions
@@ -139,7 +139,7 @@ class CreateTable:
         dimensions = []
 
         token = tree.children[0]
-        if token == "INTEGER":
+        if str.upper(token) == "INTEGER":
             data_type = ColumnType.INTEGER
 
         return data_type, array_type, dimensions
@@ -150,10 +150,10 @@ class CreateTable:
         dimensions = []
 
         token = tree.children[0]
-        if token == "FLOAT":
+        if str.upper(token) == "FLOAT":
             data_type = ColumnType.FLOAT
             dimensions = self.visit(tree.children[1])
-        elif token == "TEXT":
+        elif str.upper(token) == "TEXT":
             data_type = ColumnType.TEXT
             dimensions = self.visit(tree.children[1])
 
@@ -180,31 +180,31 @@ class CreateTable:
         array_type = None
 
         token = tree.children[0]
-        if token == "INT8":
+        if str.upper(token) == "INT8":
             array_type = NdArrayType.INT8
-        elif token == "UINT8":
+        elif str.upper(token) == "UINT8":
             array_type = NdArrayType.UINT8
-        elif token == "INT16":
+        elif str.upper(token) == "INT16":
             array_type = NdArrayType.INT16
-        elif token == "INT32":
+        elif str.upper(token) == "INT32":
             array_type = NdArrayType.INT32
-        elif token == "INT64":
+        elif str.upper(token) == "INT64":
             array_type = NdArrayType.INT64
-        elif token == "UNICODE":
+        elif str.upper(token) == "UNICODE":
             array_type = NdArrayType.UNICODE
-        elif token == "BOOLEAN":
+        elif str.upper(token) == "BOOLEAN":
             array_type = NdArrayType.BOOL
-        elif token == "FLOAT32":
+        elif str.upper(token) == "FLOAT32":
             array_type = NdArrayType.FLOAT32
-        elif token == "FLOAT64":
+        elif str.upper(token) == "FLOAT64":
             array_type = NdArrayType.FLOAT64
-        elif token == "DECIMAL":
+        elif str.upper(token) == "DECIMAL":
             array_type = NdArrayType.DECIMAL
-        elif token == "STR":
+        elif str.upper(token) == "STR":
             array_type = NdArrayType.STR
-        elif token == "DATETIME":
+        elif str.upper(token) == "DATETIME":
             array_type = NdArrayType.DATETIME
-        elif token == "ANYTYPE":
+        elif str.upper(token) == "ANYTYPE":
             array_type = NdArrayType.ANYTYPE
         return array_type
 
@@ -259,7 +259,7 @@ class CreateTable:
         index_type = None
         token = tree.children[1]
 
-        if token == "HNSW":
+        if str.upper(token) == "HNSW":
             index_type = IndexType.HNSW
         return index_type
 
