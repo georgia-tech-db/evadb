@@ -15,7 +15,7 @@ parts:
       - file: source/tutorials/01-mnist.ipynb
         title: MNIST Image Classification
       - file: source/tutorials/02-object-detection.ipynb
-        title: Object Detection
+        title: Object Detection with YOLO
       - file: source/tutorials/03-emotion-analysis.ipynb
         title: Emotion Analysis
       - file: source/tutorials/07-object-segmentation-huggingface.ipynb
@@ -38,6 +38,9 @@ parts:
 
       - file: source/reference/udf
         title: User-Defined Functions
+
+      - file: source/reference/io
+        title: IO Descriptors
 
       - file: source/reference/hf
         title: HuggingFace
