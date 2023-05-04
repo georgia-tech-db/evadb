@@ -97,7 +97,7 @@ class OpenAIChatCompletionTest(unittest.TestCase):
         """
         execute_query_fetch_all(create_udf_query)
 
-        gpt_query = f"SELECT {udf_name}(prompt, query) FROM MyTextCSV;"
+        gpt_query = f"SELECT {udf_name}(prompt, content) FROM MyTextCSV;"
         output_batch = execute_query_fetch_all(gpt_query)
         self.assertEqual(output_batch, expected_output)
 
@@ -108,6 +108,6 @@ class OpenAIChatCompletionTest(unittest.TestCase):
 
         with self.assertRaises(ExecutorError):
             create_udf_query = f"""CREATE UDF {udf_name}
-            IMPL 'eva/udfs/gpt_udf.py'
+            IMPL 'eva/udfs/openai_chat_completion_udf.py'
             """
             execute_query_fetch_all(create_udf_query)
