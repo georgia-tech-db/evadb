@@ -28,3 +28,6 @@ server:
 
 experimental:
   ray: False
+
+third_party:
+  openai_api_key: ""
