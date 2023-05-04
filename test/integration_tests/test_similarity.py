@@ -289,19 +289,18 @@ class SimilarityTests(unittest.TestCase):
         # Cleanup
         CatalogManager().drop_index_catalog_entry("testFaissIndexScanRewrite")
 
-
     def test_reddit_data(self):
-        # load_query = """LOAD IMAGE 
+        # load_query = """LOAD IMAGE
         #                 "/data/jiashenc/workspace/motif-mining/redditdata/_You_Catch_Your_Roommate_With_His_Pants_Down/*.jpg"
         #                 INTO reddit_dataset;"""
-        # load_query = """LOAD IMAGE 
+        # load_query = """LOAD IMAGE
         #                 "/data/jiashenc/workspace/motif-mining/redditdata/_2_month_old_baby_with_pretty_hair/*.jpg"
         #                 INTO reddit_dataset;"""
-        # load_query = """LOAD IMAGE 
+        # load_query = """LOAD IMAGE
         #                 "/data/jiashenc/workspace/motif-mining/redditdata/_2016_Olympic_Ping_Pong/*.jpg"
         #                 INTO reddit_dataset;"""
 
-        load_query = """LOAD IMAGE 
+        load_query = """LOAD IMAGE
                         "/data/jiashenc/workspace/motif-mining/redditdata/**/*.jpg"
                         INTO reddit_dataset;"""
         execute_query_fetch_all(load_query)
@@ -322,6 +321,7 @@ class SimilarityTests(unittest.TestCase):
         # create_index_query = """CREATE INDEX reddit_sift_image_index
         #                           ON reddit_dataset (SiftFeatureExtractor(Crop(data, bbox)))
         #                           USING HNSW;"""
+
         create_index_query = """CREATE INDEX reddit_sift_object_index
                                   ON reddit_dataset_object (SiftFeatureExtractor(Crop(data, bboxes)))
                                   USING HNSW;"""
@@ -332,6 +332,7 @@ class SimilarityTests(unittest.TestCase):
                               SiftFeatureExtractor(Open("/data/jiashenc/workspace/motif-mining/redditdata/query.jpg")),
                               SiftFeatureExtractor(Crop(data, bboxes))
                             ) LIMIT 10;"""
+
         res_batch = execute_query_fetch_all(select_query)
         for i in range(10):
             print(res_batch.frames["reddit_dataset_object.name"][i])
