@@ -27,7 +27,7 @@ from eva.models.storage.batch import Batch
 from eva.server.command_handler import execute_query_fetch_all
 
 
-class ChatGPTTest(unittest.TestCase):
+class OpenAIChatCompletionTest(unittest.TestCase):
     def setUp(self) -> None:
         CatalogManager().reset()
         create_table_query = """CREATE TABLE IF NOT EXISTS MyTextCSV (
@@ -45,16 +45,17 @@ class ChatGPTTest(unittest.TestCase):
         execute_query_fetch_all("DROP TABLE IF EXISTS MyTextCSV;")
 
     @ray_skip_marker
-    @patch("eva.udfs.gpt_udf.openai.ChatCompletion.create")
-    def test_gpt_udf(self, mock_req):
+    @patch("eva.udfs.openai_chat_completion_udf.openai.ChatCompletion.create")
+    def test_openai_chat_completion_udf(self, mock_req):
         # set dummy api key
         ConfigurationManager().update_value("third_party", "openai_api_key", "my_key")
 
-        udf_name = "ChatGPT"
+        udf_name = "OpenAIChatCompletion"
         execute_query_fetch_all(f"DROP UDF IF EXISTS {udf_name};")
 
         create_udf_query = f"""CREATE UDF {udf_name}
-            IMPL 'eva/udfs/gpt_udf.py'
+            IMPL 'eva/udfs/openai_chat_completion_udf.py'
+            'model' 'gpt-3.5-turbo'
         """
         execute_query_fetch_all(create_udf_query)
 
@@ -65,9 +66,17 @@ class ChatGPTTest(unittest.TestCase):
         gpt_query = f"SELECT {udf_name}(prompt, query) FROM MyTextCSV;"
         output_batch = execute_query_fetch_all(gpt_query)
         expected_output = Batch(
-            pd.DataFrame(["mock message"], columns=["chatgpt.response"])
+            pd.DataFrame(["mock message"], columns=["openaichatcompletion.response"])
         )
+        self.assertEqual(output_batch, expected_output)
 
-        self.assertEqual(len(output_batch), 1)
-        self.assertEqual(len(list(output_batch.columns)), 1)
+        # test without providing model name
+        execute_query_fetch_all(f"DROP UDF IF EXISTS {udf_name};")
+        create_udf_query = f"""CREATE UDF {udf_name}
+            IMPL 'eva/udfs/openai_chat_completion_udf.py'
+        """
+        execute_query_fetch_all(create_udf_query)
+
+        gpt_query = f"SELECT {udf_name}(prompt, query) FROM MyTextCSV;"
+        output_batch = execute_query_fetch_all(gpt_query)
         self.assertEqual(output_batch, expected_output)
