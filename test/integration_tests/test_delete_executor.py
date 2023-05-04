@@ -32,7 +32,7 @@ class DeleteExecutorTest(unittest.TestCase):
 
         # Reset catalog.
         CatalogManager().reset()
-        load_udfs_for_testing(mode="minimal")
+        load_udfs_for_testing(mode="debug")
 
         create_table_query = """
                 CREATE TABLE IF NOT EXISTS testDeleteOne

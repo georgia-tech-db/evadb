@@ -39,7 +39,7 @@ class ErrorHandlingRayTests(unittest.TestCase):
         CatalogManager().reset()
         ConfigurationManager()
         # Load built-in UDFs.
-        load_udfs_for_testing(mode="minimal")
+        load_udfs_for_testing(mode="debug")
 
         # Deliberately create a faulty path.
         img_path = create_sample_image()

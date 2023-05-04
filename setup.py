@@ -98,6 +98,7 @@ udf_libs = [
     "ipython<8.13.0",  # NOTEBOOKS
     "yolov5<=7.0.9",  # OBJECT DETECTION
     "thefuzz",  # FUZZY STRING MATCHING
+    "ultralytics",  # OBJECT DETECTION
     "transformers==4.27.4",  # HUGGINGFACE
     "openai>=0.27.4",  # CHATGPT
 ]
