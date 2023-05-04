@@ -154,12 +154,14 @@ Asl_udf_query = """CREATE UDF IF NOT EXISTS ASLActionRecognition
 def init_builtin_udfs(mode: str = "debug") -> None:
     """Load the built-in UDFs into the system during system bootstrapping.
 
-    The function loads a set of pre-defined UDF queries based on the `mode` argument. In 'debug' mode, the function loads debug UDFs along with release UDFs.
+    The function loads a set of pre-defined UDF queries based on the `mode` argument.
+    In 'debug' mode, the function loads debug UDFs along with release UDFs.
     In 'release' mode, only release UDFs are loaded. In addition, in 'debug' mode,
     the function loads a smaller model to accelerate the test suite time.
 
     Args:
-        mode (str, optional): The mode for loading UDFs, either 'debug' or 'release'. Defaults to 'debug'.
+        mode (str, optional): The mode for loading UDFs, either 'debug' or 'release'.
+        Defaults to 'debug'.
 
     """
     # list of UDF queries to load
@@ -169,8 +171,9 @@ def init_builtin_udfs(mode: str = "debug") -> None:
         Crop_udf_query,
         Open_udf_query,
         Similarity_udf_query,
-        # face_detection_udf_query, - Disabled because required packages might not be preinstalled
-        # ocr_udf_query, - Disabled because required packages might not be preinstalled
+        # Disabled because required packages might not be preinstalled
+        # face_detection_udf_query,
+        # ocr_udf_query,
         # Mvit_udf_query, - Disabled as it requires specific pytorch package
     ]
 

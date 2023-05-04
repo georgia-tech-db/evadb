@@ -452,7 +452,6 @@ def create_dummy_4d_batches(
 
 def load_udfs_for_testing(mode="debug"):
     # DEBUG MODE: ALL UDFs
-    # MINIMAL MODE: NO YOLO
     init_builtin_udfs(mode=mode)
 
 

@@ -273,6 +273,8 @@ class StatementBinder:
                     udf_obj.impl_file_path,
                     udf_obj.name,
                 )
+                # certain udfs take additional inputs like yolo needs the model_name
+                # these arguments are passed by the user as part of metadata
                 node.function = lambda: udf_class(**get_metadata_properties(udf_obj))
             except Exception as e:
                 err_msg = (
