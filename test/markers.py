@@ -17,6 +17,8 @@ import sys
 
 import pytest
 
+from eva.configuration.configuration_manager import ConfigurationManager
+
 asyncio_skip_marker = pytest.mark.skipif(
     sys.version_info < (3, 8), reason="Test case requires asyncio support"
 )
@@ -31,4 +33,9 @@ linux_skip_marker = pytest.mark.skipif(
 
 memory_skip_marker = pytest.mark.skipif(
     sys.platform == "linux", reason="Test case consumes too much memory"
+)
+
+ray_skip_marker = pytest.mark.skipif(
+    ConfigurationManager().get_value("experimental", "ray"),
+    reason="Only test for ray execution.",
 )

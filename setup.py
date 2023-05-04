@@ -49,7 +49,7 @@ minimal_requirement = [
     "ray>=1.13.0",
     "aenum>=2.2.0",
     "diskcache>=5.4.0",
-    "eva-decord==0.6.1"
+    "eva-decord==0.6.1",
 ]
 
 formatter_libs = ["black>=23.1.0", "isort>=5.10.1"]
@@ -95,10 +95,11 @@ database_libs = ["pymysql>=0.10.1"]
 udf_libs = [
     "facenet-pytorch>=2.5.2",  # FACE DETECTION
     "easyocr>=1.5.0",  # OCR EXTRACTION
-    "ipython<8.13.0",
-    "ultralytics",          # OBJECT DETECTION
-    "thefuzz",                # FUZZY STRING MATCHING
-    "transformers>=4.27.4",    # HUGGINGFACE
+    "ipython<8.13.0",  # NOTEBOOKS
+    "thefuzz",  # FUZZY STRING MATCHING
+    "ultralytics",  # OBJECT DETECTION
+    "transformers==4.27.4",  # HUGGINGFACE
+    "openai>=0.27.4",  # CHATGPT
 ]
 
 ### NEEDED FOR EXPERIMENTAL FEATURES
