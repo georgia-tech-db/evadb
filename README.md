@@ -101,7 +101,7 @@ SELECT id, data FROM TrafficVideo WHERE id < 5;
 - Search for frames in the video that contain a car
 
 ```mysql
-SELECT id, data FROM TrafficVideo WHERE ['car'] <@ YoloV5(data).labels;
+SELECT id, data FROM TrafficVideo WHERE ['car'] <@ Yolo(data).labels;
 ```
 | Source Video  | Query Result |
 |---------------|--------------|
@@ -110,13 +110,13 @@ SELECT id, data FROM TrafficVideo WHERE ['car'] <@ YoloV5(data).labels;
 - Search for frames in the video that contain a pedestrian and a car
 
 ```mysql
-SELECT id, data FROM TrafficVideo WHERE ['pedestrian', 'car'] <@ YoloV5(data).labels;
+SELECT id, data FROM TrafficVideo WHERE ['pedestrian', 'car'] <@ Yolo(data).labels;
 ```
 
 - Search for frames with more than three cars
 
 ```mysql
-SELECT id, data FROM TrafficVideo WHERE ArrayCount(YoloV5(data).labels, 'car') > 3;
+SELECT id, data FROM TrafficVideo WHERE ArrayCount(Yolo(data).labels, 'car') > 3;
 ```
 
 - **Use your custom deep learning model in queries** with a user-defined function (UDF):
@@ -151,13 +151,13 @@ Consider these two exploratory queries on a dataset of 🐕 images:
 ```mysql
   -- Query 1: Find all images of black-colored dogs
   SELECT id, bbox FROM dogs 
-  JOIN LATERAL UNNEST(YoloV5(data)) AS Obj(label, bbox, score) 
+  JOIN LATERAL UNNEST(Yolo(data)) AS Obj(label, bbox, score) 
   WHERE Obj.label = 'dog' 
     AND Color(Crop(data, bbox)) = 'black'; 
 
   -- Query 2: Find all Great Danes that are black-colored
   SELECT id, bbox FROM dogs 
-  JOIN LATERAL UNNEST(YoloV5(data)) AS Obj(label, bbox, score) 
+  JOIN LATERAL UNNEST(Yolo(data)) AS Obj(label, bbox, score) 
   WHERE Obj.label = 'dog' 
     AND DogBreedClassifier(Crop(data, bbox)) = 'great dane' 
     AND Color(Crop(data, bbox)) = 'black';

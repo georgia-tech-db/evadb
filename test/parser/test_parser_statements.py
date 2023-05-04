@@ -63,7 +63,7 @@ class ParserStatementTests(unittest.TestCase):
                           WHERE Is_suspicious(bbox) = 1 AND
                                 Licence_plate(bbox) = '12345';""",
             """CREATE MATERIALIZED VIEW uadtrac_fastRCNN (id, labels) AS
-               SELECT id, YoloV5(frame).labels FROM MyVideo
+               SELECT id, Yolo(frame).labels FROM MyVideo
                         WHERE id<5; """,
             """SELECT table1.a FROM table1 JOIN table2
             ON table1.a = table2.a WHERE table1.a <= 5""",

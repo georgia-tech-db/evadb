@@ -147,7 +147,7 @@ class SelectExecutorTest(unittest.TestCase):
     @unittest.skip("Not supported in current version")
     def test_select_star_in_lateral_join(self):
         select_query = """SELECT * FROM MyVideo JOIN LATERAL
-                          YoloV5(data);"""
+                          Yolo(data);"""
         actual_batch = execute_query_fetch_all(select_query)
         self.assertEqual(actual_batch.frames.columns, ["myvideo.id"])
 
@@ -441,7 +441,7 @@ class SelectExecutorTest(unittest.TestCase):
     @pytest.mark.torchtest
     def test_lateral_join(self):
         select_query = """SELECT id, a FROM DETRAC JOIN LATERAL
-                        YoloV5(data) AS T(a,b,c) WHERE id < 5;"""
+                        Yolo(data) AS T(a,b,c) WHERE id < 5;"""
         actual_batch = execute_query_fetch_all(select_query)
         self.assertEqual(list(actual_batch.columns), ["detrac.id", "T.a"])
         self.assertEqual(len(actual_batch), 5)
@@ -449,7 +449,7 @@ class SelectExecutorTest(unittest.TestCase):
     @pytest.mark.torchtest
     def test_lateral_join_with_multiple_projects(self):
         select_query = """SELECT id, T.labels FROM DETRAC JOIN LATERAL
-                        YoloV5(data) AS T WHERE id < 5;"""
+                        Yolo(data) AS T WHERE id < 5;"""
         actual_batch = execute_query_fetch_all(select_query)
         self.assertTrue(all(actual_batch.frames.columns == ["detrac.id", "T.labels"]))
         self.assertEqual(len(actual_batch), 5)
