@@ -208,7 +208,7 @@ class FunctionExpression(AbstractExpression):
             assert len(cache_keys) == len(batch), "Not all rows have the cache key"
 
         cache_miss = np.full(len(batch), True)
-        for idx, key in cache_keys.iterrows():
+        for idx, (_, key) in enumerate(cache_keys.iterrows()):
             val = self._cache.store.get(key.to_numpy())
             results[idx] = val
             cache_miss[idx] = val is None
