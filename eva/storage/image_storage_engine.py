@@ -15,7 +15,6 @@
 from pathlib import Path
 from typing import Iterator
 
-from eva.catalog.sql_config import IDENTIFIER_COLUMN
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.catalog.sql_config import IDENTIFIER_COLUMN
 from eva.models.storage.batch import Batch
