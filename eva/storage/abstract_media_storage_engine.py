@@ -47,7 +47,9 @@ class AbstractMediaStorageEngine(AbstractStorageEngine):
         # This is done to support duplicate media_names with different complete paths. Without conversion, we cannot copy files with same name but different paths. Eg., a/b/my.mp4 and a/b/c/my.mp4
         # deterministic hashing
         utf8_file_url_str = str(file_url).encode("utf-8")
-        xfromed_file_name = (zlib.adler32(utf8_file_url_str) + zlib.crc32(utf8_file_url_str) << 32) & 0xFFFFFFFFFFFFFFFF
+        xfromed_file_name = (
+            zlib.adler32(utf8_file_url_str) + zlib.crc32(utf8_file_url_str) << 32
+        ) & 0xFFFFFFFFFFFFFFFF
         return str(xfromed_file_name)
 
     def create(self, table: TableCatalogEntry, if_not_exists=True):
