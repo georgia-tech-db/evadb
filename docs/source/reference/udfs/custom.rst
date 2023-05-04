@@ -129,11 +129,11 @@ Now that you have implemented your UDF we need to register it in EVA. You can th
         * <name> - specifies the unique identifier for the UDF.
         * <path_to_implementation> - specifies the path to the implementation class for the UDF
 
-  Here, is an example query that registers a UDF that wraps around the 'YoloObjectDetection' model that performs Object Detection.
+  Here, is an example query that registers a UDF that wraps around the 'ObjectDetector' model that performs Object Detection.
 
   .. code-block:: sql
 
-    CREATE UDF YoloDecorators
+    CREATE UDF ObjectDetector
     IMPL  'eva/udfs/decorators/yolo_object_detection_decorators.py';
     
 
@@ -143,10 +143,10 @@ Now that you have implemented your UDF we need to register it in EVA. You can th
 
   .. code-block:: sql
 
-      SELECT YoloDecorators(data) FROM MyVideo WHERE id < 5;
+      SELECT ObjectDetector(data) FROM MyVideo WHERE id < 5;
 
 3. You can drop the UDF when you no longer need it.
 
   .. code-block:: sql
 
-      DROP UDF IF EXISTS YoloDecorators;
+      DROP UDF IF EXISTS ObjectDetector;

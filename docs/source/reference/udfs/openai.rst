@@ -1,4 +1,4 @@
-OpenAI Models in EVA
+OpenAI Models
 =====================
 
 This section provides an overview of how you can use OpenAI models in EVA.
