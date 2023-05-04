@@ -16,7 +16,6 @@ import cv2
 import numpy as np
 import pandas as pd
 
-from eva.executor.executor_utils import ExecutorError
 from eva.udfs.abstract.abstract_udf import AbstractUDF
 
 
@@ -42,11 +41,8 @@ class Open(AbstractUDF):
             if path_str in self._data_cache:
                 data = self._data_cache[path_str]
             else:
-                try:
-                    data = cv2.imread(path_str)
-                except Exception as e:
-                    raise ExecutorError(str(e))
-
+                data = cv2.imread(path_str)
+                assert data is not None, f"Failed to open file {path_str}"
             self._data_cache[path_str] = data
 
             return data

@@ -14,12 +14,11 @@
 # limitations under the License.
 
 import unittest
-from pathlib import Path
 from test.markers import windows_skip_marker
 
 from mock import MagicMock, patch
 
-from eva.readers.opencv_reader import OpenCVReader
+from eva.readers.decord_reader import DecordReader
 from eva.utils.generic_utils import (
     generate_file_path,
     is_gpu_available,
@@ -35,19 +34,19 @@ class ModulePathTest(unittest.TestCase):
             validate_kwargs({"a": 1, "b": 2}, ["a"], "Invalid keyword argument:")
 
     def test_should_return_correct_class_for_string(self):
-        vl = str_to_class("eva.readers.opencv_reader.OpenCVReader")
-        self.assertEqual(vl, OpenCVReader)
+        vl = str_to_class("eva.readers.decord_reader.DecordReader")
+        self.assertEqual(vl, DecordReader)
 
     def test_should_return_correct_class_for_path(self):
-        vl = load_udf_class_from_file("eva/readers/opencv_reader.py", "OpenCVReader")
-        # Can't check that v1 = OpenCVReader because the above function returns opencv_reader.OpenCVReader instead of eva.readers.opencv_reader.OpenCVReader
+        vl = load_udf_class_from_file("eva/readers/decord_reader.py", "DecordReader")
+        # Can't check that v1 = DecordReader because the above function returns decord_reader.DecordReader instead of eva.readers.decord_reader.DecordReader
         # So we check the qualname instead, qualname is the path to the class including the module name
         # Ref: https://peps.python.org/pep-3155/#rationale
-        assert vl.__qualname__ == OpenCVReader.__qualname__
+        assert vl.__qualname__ == DecordReader.__qualname__
 
     def test_should_return_correct_class_for_path_without_classname(self):
-        vl = load_udf_class_from_file("eva/readers/opencv_reader.py")
-        assert vl.__qualname__ == OpenCVReader.__qualname__
+        vl = load_udf_class_from_file("eva/readers/decord_reader.py")
+        assert vl.__qualname__ == DecordReader.__qualname__
 
     def test_should_raise_on_missing_file(self):
         with self.assertRaises(RuntimeError):
@@ -92,11 +91,10 @@ class ModulePathTest(unittest.TestCase):
         mock_conf_inst = MagicMock()
         mock_conf.return_value = mock_conf_inst
         mock_conf_inst.get_value.return_value = "eva_datasets"
-        expected = Path("eva_datasets").resolve()
         actual = generate_file_path("test")
         self.assertTrue(actual.is_absolute())
         # Root directory must be the same, filename is random
-        self.assertTrue(expected.match(str(actual.parent)))
+        self.assertTrue("eva_datasets" in str(actual.parent))
 
         mock_conf_inst.get_value.return_value = None
         self.assertRaises(KeyError, generate_file_path)

@@ -26,9 +26,11 @@ from eva.experimental.ray.optimizer.rules.rules import (
     LogicalProjectToPhysical as DistributedLogicalProjectToPhysical,
 )
 from eva.optimizer.rules.rules import (
+    CacheFunctionExpressionInApply,
+    CacheFunctionExpressionInFilter,
+    CacheFunctionExpressionInProject,
     CombineSimilarityOrderByAndLimitToFaissIndexScan,
     EmbedFilterIntoGet,
-    EmbedProjectIntoGet,
     EmbedSampleIntoGet,
     LogicalApplyAndMergeToPhysical,
     LogicalCreateIndexToFaiss,
@@ -77,17 +79,21 @@ class RulesManager:
     def __init__(self):
         self._logical_rules = [
             LogicalInnerJoinCommutativity(),
+            CacheFunctionExpressionInApply(),
+            CacheFunctionExpressionInFilter(),
+            CacheFunctionExpressionInProject(),
         ]
 
-        self._rewrite_rules = [
+        self._stage_one_rewrite_rules = [
+            XformLateralJoinToLinearFlow(),
+        ]
+
+        self._stage_two_rewrite_rules = [
             EmbedFilterIntoGet(),
             # EmbedFilterIntoDerivedGet(),
-            EmbedProjectIntoGet(),
-            # EmbedProjectIntoDerivedGet(),
             EmbedSampleIntoGet(),
             PushDownFilterThroughJoin(),
             PushDownFilterThroughApplyAndMerge(),
-            XformLateralJoinToLinearFlow(),
             CombineSimilarityOrderByAndLimitToFaissIndexScan(),
             ReorderPredicates(),
         ]
@@ -130,12 +136,19 @@ class RulesManager:
         if ray_enabled:
             self._implementation_rules.append(LogicalExchangeToPhysical())
         self._all_rules = (
-            self._rewrite_rules + self._logical_rules + self._implementation_rules
+            self._stage_one_rewrite_rules
+            + self._stage_two_rewrite_rules
+            + self._logical_rules
+            + self._implementation_rules
         )
 
     @property
-    def rewrite_rules(self):
-        return self._rewrite_rules
+    def stage_one_rewrite_rules(self):
+        return self._stage_one_rewrite_rules
+
+    @property
+    def stage_two_rewrite_rules(self):
+        return self._stage_two_rewrite_rules
 
     @property
     def implementation_rules(self):
@@ -154,14 +167,17 @@ class RulesManager:
         for rule in rules:
             assert (
                 rule.is_implementation_rule()
-                or rule.is_rewrite_rule()
+                or rule.is_stage_one_rewrite_rules()
+                or rule.is_stage_two_rewrite_rules()
                 or rule.is_logical_rule()
             ), f"Provided Invalid rule {rule}"
 
             if rule.is_implementation_rule():
                 _remove_from_list(self.implementation_rules, rule)
-            elif rule.is_rewrite_rule():
-                _remove_from_list(self.rewrite_rules, rule)
+            elif rule.is_stage_one_rewrite_rules():
+                _remove_from_list(self.stage_one_rewrite_rules, rule)
+            elif rule.is_stage_two_rewrite_rules():
+                _remove_from_list(self.stage_two_rewrite_rules, rule)
             elif rule.is_logical_rule():
                 _remove_from_list(self.logical_rules, rule)
 
@@ -173,14 +189,17 @@ class RulesManager:
         for rule in rules:
             assert (
                 rule.is_implementation_rule()
-                or rule.is_rewrite_rule()
+                or rule.is_stage_one_rewrite_rules()
+                or rule.is_stage_two_rewrite_rules()
                 or rule.is_logical_rule()
             ), f"Provided Invalid rule {rule}"
 
             if rule.is_implementation_rule():
                 _add_to_list(self.implementation_rules, rule)
-            elif rule.is_rewrite_rule():
-                _add_to_list(self.rewrite_rules, rule)
+            elif rule.is_stage_one_rewrite_rules():
+                _add_to_list(self.stage_one_rewrite_rules, rule)
+            elif rule.is_stage_two_rewrite_rules():
+                _add_to_list(self.stage_two_rewrite_rules, rule)
             elif rule.is_logical_rule():
                 _add_to_list(self.logical_rules, rule)
 

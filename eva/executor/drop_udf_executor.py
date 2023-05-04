@@ -12,6 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+
 import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
@@ -40,6 +42,9 @@ class DropUDFExecutor(AbstractExecutor):
                 logger.exception(err_msg)
                 raise RuntimeError(err_msg)
         else:
+            udf_entry = catalog_manager.get_udf_catalog_entry_by_name(self.node.name)
+            for cache in udf_entry.dep_caches:
+                catalog_manager.drop_udf_cache_catalog_entry(cache)
             catalog_manager.delete_udf_catalog_entry_by_name(self.node.name)
             yield Batch(
                 pd.DataFrame(

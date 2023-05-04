@@ -41,20 +41,18 @@ minimal_requirement = [
     "opencv-python>=4.5.4.60,<4.6.0.66",  # bug in easyocr
     "pandas>=1.1.5",
     "Pillow>=8.4.0",
-    "sqlalchemy>=1.4.0,<2.0.0", # major changes in 2.0.0
+    "sqlalchemy>=1.4.0,<2.0.0",  # major changes in 2.0.0
     "sqlalchemy-utils>=0.36.6",
     "lark>=1.0.0",
     "pyyaml>=5.1",
     "importlib-metadata<5.0",
     "ray>=1.13.0",
     "aenum>=2.2.0",
-    "decord>=0.6.0"
+    "diskcache>=5.4.0",
+    "eva-decord==0.6.1"
 ]
 
-formatter_libs = [
-    "black>=23.1.0",
-    "isort>=5.10.1"
-]
+formatter_libs = ["black>=23.1.0", "isort>=5.10.1"]
 
 test_libs = [
     "pytest>=6.1.2",
@@ -64,55 +62,47 @@ test_libs = [
     "pytest-asyncio",
     "pytest-xdist",
     "coveralls>=3.0.1",
-    "mock>=4.0.3",
     "flake8>=3.9.1",
-    "moto[s3]>=4.1.1"
+    "moto[s3]>=4.1.1",
 ]
 
 notebook_libs = [
     "ipywidgets>=7.7.2",
     "matplotlib>=3.3.4",
     "nbmake>=1.2.1",
-    "nest-asyncio>=1.5.6"
+    "nest-asyncio>=1.5.6",
 ]
 
 ### NEEDED FOR INTEGRATION TESTS ONLY
 integration_test_libs = [
     "torch>=1.10.0",
     "torchvision>=0.11.1",
-    "faiss-cpu" # faiss-gpu does not work on mac
+    "faiss-cpu",  # faiss-gpu does not work on mac
 ]
 
 benchmark_libs = [
     "pytest-benchmark",
 ]
 
-doc_libs = [
-]
+doc_libs = []
 
-dist_libs = [
-    "wheel>=0.37.1",
-    "scriv>=0.16.0"
-]
+dist_libs = ["wheel>=0.37.1", "scriv>=0.16.0"]
 
 ### NEEDED FOR AN ALTERNATE DATA SYSTEM OTHER THAN SQLITE
-database_libs = [
-    "pymysql>=0.10.1"
-]
+database_libs = ["pymysql>=0.10.1"]
 
 ### NEEDED FOR A BATTERIES-LOADED EXPERIENCE
 udf_libs = [
-    "facenet-pytorch>=2.5.2", # FACE DETECTION
-    "easyocr>=1.5.0",         # OCR EXTRACTION
-    "ipython",
-    "yolov5<=7.0.6",          # OBJECT DETECTION
-    "detoxify",               # TEXT TOXICITY CLASSIFICATION
-    "thefuzz"                 # FUZZY STRING MATCHINGz
+    "facenet-pytorch>=2.5.2",  # FACE DETECTION
+    "easyocr>=1.5.0",          # OCR EXTRACTION
+    "ipython<8.13.0",          # NOTEBOOKS
+    "yolov5<=7.0.9",           # OBJECT DETECTION
+    "thefuzz",                 # FUZZY STRING MATCHING
+    "transformers==4.27.4"     # HUGGINGFACE
 ]
 
 ### NEEDED FOR EXPERIMENTAL FEATURES
-experimental_libs = [
-]
+experimental_libs = []
 
 INSTALL_REQUIRES = minimal_requirement + integration_test_libs + udf_libs
 DEV_REQUIRES = (
@@ -127,9 +117,7 @@ DEV_REQUIRES = (
     + experimental_libs
 )
 
-EXTRA_REQUIRES = {
-    "dev": DEV_REQUIRES
-}
+EXTRA_REQUIRES = {"dev": DEV_REQUIRES}
 
 setup(
     name=NAME,
@@ -148,22 +136,19 @@ setup(
         "License :: OSI Approved :: Apache Software License",
         "Programming Language :: Python :: 3",
         "Development Status :: 3 - Alpha",
-        "Operating System :: OS Independent"
+        "Operating System :: OS Independent",
     ],
-    packages=find_packages(exclude=[
-        "tests",
-        "tests.*"
-    ]),
+    packages=find_packages(exclude=["tests", "tests.*"]),
     # https://python-packaging.readthedocs.io/en/latest/command-line-scripts.html#the-console-scripts-entry-point
-    entry_points={"console_scripts": [
-        "eva_server=eva.eva_server:main",
-        "eva_client=eva.eva_cmd_client:main"
-    ]},
+    entry_points={
+        "console_scripts": [
+            "eva_server=eva.eva_server:main",
+            "eva_client=eva.eva_cmd_client:main",
+        ]
+    },
     python_requires=">=3.7",
     install_requires=INSTALL_REQUIRES,
     extras_require=EXTRA_REQUIRES,
     include_package_data=True,
-    package_data={
-        "eva": ["eva.yml", "parser/eva.lark"]
-    }
+    package_data={"eva": ["eva.yml", "parser/eva.lark"]},
 )

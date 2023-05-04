@@ -12,8 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import base64
 import os
+import shutil
 import socket
 from contextlib import closing
 from pathlib import Path
@@ -21,14 +21,18 @@ from pathlib import Path
 import cv2
 import numpy as np
 import pandas as pd
+import psutil
+import ray
 from mock import MagicMock
 
 from eva.binder.statement_binder import StatementBinder
 from eva.binder.statement_binder_context import StatementBinderContext
+from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import NdArrayType
 from eva.configuration.configuration_manager import ConfigurationManager
+from eva.expression.function_expression import FunctionExpression
 from eva.models.storage.batch import Batch
-from eva.optimizer.operators import Operator
+from eva.optimizer.operators import LogicalFilter, Operator
 from eva.optimizer.plan_generator import PlanGenerator
 from eva.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
 from eva.parser.parser import Parser
@@ -40,13 +44,22 @@ from eva.udfs.decorators.io_descriptors.data_types import NumpyArray, PandasData
 from eva.udfs.udf_bootstrap_queries import init_builtin_udfs
 
 NUM_FRAMES = 10
-FRAME_SIZE = 2 * 2 * 3
+FRAME_SIZE = (32, 32)
 config = ConfigurationManager()
 tmp_dir_from_config = config.get_value("storage", "tmp_dir")
 s3_dir_from_config = config.get_value("storage", "s3_download_dir")
 
 
 EVA_TEST_DATA_DIR = Path(config.get_value("core", "eva_installation_dir")).parent
+
+
+def is_ray_stage_running():
+    return "ray::ray_stage" in (p.name() for p in psutil.process_iter())
+
+
+def shutdown_ray():
+    if ConfigurationManager().get_value("experimental", "ray"):
+        ray.shutdown()
 
 
 def prefix_worker_id(base: str):
@@ -138,6 +151,20 @@ def get_mock_object(class_type, number_of_args):
             MagicMock(),
             MagicMock(),
         )
+    elif number_of_args == 12:
+        return class_type(
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+        )
     else:
         raise Exception("Too many args")
 
@@ -180,6 +207,19 @@ def get_physical_query_plan(
     return p_plan
 
 
+def remove_udf_cache(query):
+    plan = next(get_logical_query_plan(query).find_all(LogicalFilter))
+    catalog_manager = CatalogManager()
+    func_exprs = plan.predicate.find_all(FunctionExpression)
+    for expr in func_exprs:
+        cache_name = expr.signature()
+        udf_cache = catalog_manager.get_udf_cache_catalog_entry_by_name(cache_name)
+        if udf_cache is not None:
+            cache_dir = Path(udf_cache.cache_path)
+            if cache_dir.exists():
+                shutil.rmtree(cache_dir)
+
+
 def create_dataframe(num_frames=1) -> pd.DataFrame:
     frames = []
     for i in range(1, num_frames + 1):
@@ -190,7 +230,7 @@ def create_dataframe(num_frames=1) -> pd.DataFrame:
 def create_dataframe_same(times=1):
     base_df = create_dataframe()
     for i in range(1, times):
-        base_df = base_df.append(create_dataframe(), ignore_index=True)
+        base_df = pd.concat([base_df, create_dataframe()], ignore_index=True)
     return base_df
 
 
@@ -258,7 +298,7 @@ def create_dummy_csv_batches(target_columns=None):
             converters={"bbox": convert_bbox},
         )
 
-    return Batch(df)
+    yield Batch(df)
 
 
 def create_csv(num_rows, columns):
@@ -272,6 +312,23 @@ def create_csv(num_rows, columns):
         df[col] = np.random.randint(1, 100, num_rows)
     df.to_csv(csv_path, index=False)
     return df, csv_path
+
+
+def create_text_csv(num_rows=30):
+    """
+    Creates a csv with 2 columns: id and comment
+    The comment column has 2 values: "I like this" and "I don't like this" that are alternated
+    """
+    csv_path = os.path.join(tmp_dir_from_config, "dummy.csv")
+    try:
+        os.remove(csv_path)
+    except FileNotFoundError:
+        pass
+    df = pd.DataFrame(columns=["id", "comment"])
+    df["id"] = np.arange(num_rows)
+    df["comment"] = np.where(df["id"] % 2 == 0, "I like this", "I don't like this")
+    df.to_csv(csv_path, index=False)
+    return csv_path
 
 
 def create_table(table_name, num_rows, num_columns):
@@ -306,47 +363,23 @@ def create_sample_image():
 
 
 def create_sample_video(num_frames=NUM_FRAMES):
+    file_name = os.path.join(tmp_dir_from_config, "dummy.avi")
     try:
-        os.remove(os.path.join(tmp_dir_from_config, "dummy.avi"))
+        os.remove(file_name)
     except FileNotFoundError:
         pass
 
+    duration = 1
+    fps = NUM_FRAMES
     out = cv2.VideoWriter(
-        os.path.join(tmp_dir_from_config, "dummy.avi"),
-        cv2.VideoWriter_fourcc("M", "J", "P", "G"),
-        10,
-        (2, 2),
+        file_name, cv2.VideoWriter_fourcc("M", "J", "P", "G"), fps, (32, 32), False
     )
-    for i in range(num_frames):
-        frame = np.array(np.ones((2, 2, 3)) * float(i + 1) * 25, dtype=np.uint8)
-        out.write(frame)
-
-    out.release()
-    return os.path.join(tmp_dir_from_config, "dummy.avi")
-
-
-def create_sample_video_as_blob(num_frames=NUM_FRAMES):
-    try:
-        os.remove(os.path.join(tmp_dir_from_config, "dummy.avi"))
-    except FileNotFoundError:
-        pass
-
-    out = cv2.VideoWriter(
-        os.path.join(tmp_dir_from_config, "dummy.avi"),
-        cv2.VideoWriter_fourcc("M", "J", "P", "G"),
-        10,
-        (2, 2),
-    )
-    for i in range(num_frames):
-        frame = np.array(np.ones((2, 2, 3)) * float(i + 1) * 25, dtype=np.uint8)
-        out.write(frame)
-
+    for i in range(fps * duration):
+        data = np.array(np.ones((FRAME_SIZE[1], FRAME_SIZE[0])) * i, dtype=np.uint8)
+        out.write(data)
     out.release()
 
-    with open(os.path.join(tmp_dir_from_config, "dummy.avi"), "rb") as f:
-        bytes_read = f.read()
-        b64_string = str(base64.b64encode(bytes_read))
-    return b64_string
+    return os.path.join(tmp_dir_from_config, file_name)
 
 
 def file_remove(path, parent_dir=tmp_dir_from_config):
@@ -369,12 +402,13 @@ def create_dummy_batches(
     for i in filters:
         data.append(
             {
+                "myvideo._row_id": 1,
                 "myvideo.name": os.path.join(video_dir, "dummy.avi"),
                 "myvideo.id": i + start_id,
                 "myvideo.data": np.array(
-                    np.ones((2, 2, 3)) * float(i + 1) * 25, dtype=np.uint8
+                    np.ones((FRAME_SIZE[1], FRAME_SIZE[0], 3)) * i, dtype=np.uint8
                 ),
-                "myvideo.seconds": 0.0,
+                "myvideo.seconds": np.float32(i / num_frames),
             }
         )
 
@@ -394,14 +428,14 @@ def create_dummy_4d_batches(
     for segment in filters:
         segment_data = []
         for i in segment:
-            segment_data.append(np.ones((2, 2, 3)) * float(i + 1) * 25)
+            segment_data.append(np.ones((FRAME_SIZE[1], FRAME_SIZE[0], 3)) * i)
         segment_data = np.stack(np.array(segment_data, dtype=np.uint8))
         data.append(
             {
                 "myvideo.name": "dummy.avi",
                 "myvideo.id": segment[0] + start_id,
                 "myvideo.data": segment_data,
-                "myvideo.seconds": 0.0,
+                "myvideo.seconds": np.float32(i / num_frames),
             }
         )
 
@@ -441,7 +475,7 @@ class DummyObjectDetector(AbstractClassifierUDF):
 
     def classify_one(self, frames: np.ndarray):
         # odd are labeled bicycle and even person
-        i = int(frames[0][0][0][0] * 25) - 1
+        i = int(frames[0][0][0][0])
         label = self.labels[i % 2 + 1]
         return np.array([label])
 
@@ -468,8 +502,7 @@ class DummyMultiObjectDetector(AbstractClassifierUDF):
         return ret
 
     def classify_one(self, frames: np.ndarray):
-        # odd are labeled bicycle and even person
-        i = int(frames[0][0][0][0] * 25) - 1
+        i = int(frames[0][0][0][0])
         label = self.labels[i % 3 + 1]
         return np.array([label, label])
 
@@ -539,6 +572,6 @@ class DummyObjectDetectorDecorators(AbstractClassifierUDF):
 
     def classify_one(self, frames: np.ndarray):
         # odd are labeled bicycle and even person
-        i = int(frames[0][0][0][0] * 25) - 1
+        i = int(frames[0][0][0][0]) - 1
         label = self.labels[i % 2 + 1]
         return np.array([label])

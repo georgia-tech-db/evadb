@@ -13,7 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import create_sample_video, file_remove, load_udfs_for_testing
+from test.util import (
+    create_sample_video,
+    file_remove,
+    load_udfs_for_testing,
+    shutdown_ray,
+)
 
 import numpy as np
 import pandas as pd
@@ -40,6 +45,7 @@ class InsertExecutorTest(unittest.TestCase):
         load_udfs_for_testing(mode="minimal")
 
     def tearDown(self):
+        shutdown_ray()
         file_remove("dummy.avi")
 
     # integration test

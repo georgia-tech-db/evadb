@@ -15,7 +15,9 @@
 import hashlib
 import importlib
 import inspect
+import os
 import pickle
+import shutil
 import sys
 import uuid
 from pathlib import Path
@@ -104,6 +106,29 @@ def is_gpu_available() -> bool:
         return False
 
 
+def prefix_worker_id_to_path(path: str):
+    try:
+        worker_id = os.environ["PYTEST_XDIST_WORKER"]
+        base = "eva_datasets"
+        path = "build/" + str(worker_id) + "_" + base
+    except KeyError:
+        # Single threaded mode
+        pass
+    return path
+
+
+def get_gpu_count() -> int:
+    """
+    Check number of GPUs through Torch.
+    """
+    try:
+        import torch
+
+        return torch.cuda.device_count()
+    except ImportError:
+        return 0
+
+
 def generate_file_path(name: str = "") -> Path:
     """Generates a arbitrary file_path(md5 hash) based on the a random salt
     and name
@@ -120,6 +145,7 @@ def generate_file_path(name: str = "") -> Path:
         logger.error("Missing dataset location key in eva.yml")
         raise KeyError("Missing datasets_dir key in eva.yml")
 
+    dataset_location = prefix_worker_id_to_path(dataset_location)
     dataset_location = Path(dataset_location)
     dataset_location.mkdir(parents=True, exist_ok=True)
 
@@ -152,6 +178,10 @@ def get_size(obj, seen=None):
     return size
 
 
+def get_str_hash(s: str) -> str:
+    return hashlib.md5(s.encode("utf-8")).hexdigest()
+
+
 def get_file_checksum(fname: str) -> str:
     """Compute checksum of the file contents
 
@@ -182,3 +212,16 @@ class PickleSerializer(object):
 class EVAEnum(AutoEnum):
     def __str__(self):
         return self.name
+
+
+def remove_directory_contents(dir_path):
+    if os.path.exists(dir_path):
+        for filename in os.listdir(dir_path):
+            file_path = os.path.join(dir_path, filename)
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+            except Exception as e:
+                logger.warning(f"Failed to delete {file_path}. Reason: {str(e)}")

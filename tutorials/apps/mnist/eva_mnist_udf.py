@@ -9,10 +9,9 @@ from PIL import Image
 
 
 class MnistCNN(PytorchAbstractClassifierUDF):
-
     @property
     def name(self) -> str:
-        return 'MnistCNN'
+        return "MnistCNN"
 
     def setup(self):
         self.model = mnist(pretrained=True)
@@ -23,23 +22,24 @@ class MnistCNN(PytorchAbstractClassifierUDF):
         return list([str(num) for num in range(10)])
 
     def transform(self, images) -> Compose:
-        composed = Compose([
-            Grayscale(num_output_channels=1),
-            ToTensor(),
-            Normalize((0.1307,), (0.3081,))
-        ])
+        composed = Compose(
+            [
+                Grayscale(num_output_channels=1),
+                ToTensor(),
+                Normalize((0.1307,), (0.3081,)),
+            ]
+        )
         # reverse the channels from opencv
         return composed(Image.fromarray(images[:, :, ::-1])).unsqueeze(0)
 
     def forward(self, frames: Tensor) -> pd.DataFrame:
-        outcome = pd.DataFrame()
+        outcome = []
         predictions = self.model(frames)
         for prediction in predictions:
             label = self.as_numpy(prediction.data.argmax())
-            outcome = outcome.append({"label" : str(label)}, ignore_index=True)
-        
-        return outcome
+            outcome.append({"label": str(label)})
 
+        return pd.DataFrame(outcome, columns=["label"])
 
 
 import torch.nn as nn
@@ -47,7 +47,7 @@ from collections import OrderedDict
 import torch.utils.model_zoo as model_zoo
 
 model_urls = {
-    'mnist': 'http://ml.cs.tsinghua.edu.cn/~chenxi/pytorch-models/mnist-b07bb66b.pth'  # noqa
+    "mnist": "http://ml.cs.tsinghua.edu.cn/~chenxi/pytorch-models/mnist-b07bb66b.pth"  # noqa
 }
 
 
@@ -55,7 +55,7 @@ model_urls = {
 class MLP(nn.Module):
     def __init__(self, input_dims, n_hiddens, n_class):
         super(MLP, self).__init__()
-        assert isinstance(input_dims, int), 'Please provide int for input_dims'
+        assert isinstance(input_dims, int), "Please provide int for input_dims"
         self.input_dims = input_dims
         current_dims = input_dims
         layers = OrderedDict()
@@ -65,11 +65,11 @@ class MLP(nn.Module):
         else:
             n_hiddens = list(n_hiddens)
         for i, n_hidden in enumerate(n_hiddens):
-            layers['fc{}'.format(i + 1)] = nn.Linear(current_dims, n_hidden)
-            layers['relu{}'.format(i + 1)] = nn.ReLU()
-            layers['drop{}'.format(i + 1)] = nn.Dropout(0.2)
+            layers["fc{}".format(i + 1)] = nn.Linear(current_dims, n_hidden)
+            layers["relu{}".format(i + 1)] = nn.ReLU()
+            layers["drop{}".format(i + 1)] = nn.Dropout(0.2)
             current_dims = n_hidden
-        layers['out'] = nn.Linear(current_dims, n_class)
+        layers["out"] = nn.Linear(current_dims, n_class)
 
         self.model = nn.Sequential(layers)
 
@@ -82,7 +82,7 @@ class MLP(nn.Module):
 def mnist(input_dims=784, n_hiddens=[256, 256], n_class=10, pretrained=None):
     model = MLP(input_dims, n_hiddens, n_class)
     if pretrained is not None:
-        m = model_zoo.load_url(model_urls['mnist'], map_location=torch.device('cpu'))
+        m = model_zoo.load_url(model_urls["mnist"], map_location=torch.device("cpu"))
         state_dict = m.state_dict() if isinstance(m, nn.Module) else m
         assert isinstance(state_dict, (dict, OrderedDict)), type(state_dict)
         model.load_state_dict(state_dict)

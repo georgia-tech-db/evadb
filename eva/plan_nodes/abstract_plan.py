@@ -92,19 +92,27 @@ class AbstractPlan(ABC):
                 setattr(result, k, v)
         return result
 
-    def bfs(self):
-        """Returns a generator which visits all nodes in plan tree in
-        breadth-first search (BFS) traversal order.
-
-        Returns:
-            the generator object.
+    def walk(self, bfs=True):
         """
+        Returns a generator which visits all nodes in physical plan tree.
+        """
+        if bfs:
+            yield from self.bfs()
+        else:
+            yield from self.dfs()
+
+    def bfs(self):
         queue = deque([self])
         while queue:
             node = queue.popleft()
             yield node
             for child in node.children:
                 queue.append(child)
+
+    def dfs(self):
+        yield self
+        for child in self.children:
+            yield from child.dfs()
 
     def find_all(self, plan_type: Any):
         """Returns a generator which visits all the nodes in plan tree and yields one

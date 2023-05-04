@@ -19,7 +19,8 @@ from typing import TYPE_CHECKING, List
 
 from eva.catalog.catalog_type import TableType
 from eva.catalog.catalog_utils import is_string_col, is_video_table
-from eva.catalog.sql_config import IDENTIFIER_COLUMN
+from eva.expression.function_expression import FunctionExpression
+from eva.parser.alias import Alias
 
 if TYPE_CHECKING:
     from eva.binder.statement_binder_context import StatementBinderContext
@@ -83,7 +84,6 @@ def extend_star(
         [
             TupleValueExpression(col_name=col_name, table_alias=alias)
             for alias, col_name in col_objs
-            if col_name != IDENTIFIER_COLUMN
         ]
     )
     return target_list
@@ -113,3 +113,22 @@ def check_column_name_is_string(col_ref) -> None:
     if not is_string_col(col_ref.col_object):
         err_msg = "LIKE only supported for string columns"
         raise BinderError(err_msg)
+
+
+def resolve_alias_table_value_expression(node: FunctionExpression):
+    default_alias_name = node.name.lower()
+    default_output_col_aliases = [str(obj.name.lower()) for obj in node.output_objs]
+    if not node.alias:
+        node.alias = Alias(default_alias_name, default_output_col_aliases)
+    else:
+        if not len(node.alias.col_names):
+            node.alias = Alias(node.alias.alias_name, default_output_col_aliases)
+        else:
+            output_aliases = [
+                str(col_name.lower()) for col_name in node.alias.col_names
+            ]
+            node.alias = Alias(node.alias.alias_name, output_aliases)
+
+    assert len(node.alias.col_names) == len(
+        node.output_objs
+    ), f"""Expected {len(node.output_objs)} output columns for {node.alias.alias_name}, got {len(node.alias.col_names)}."""

@@ -53,10 +53,18 @@ class Batch:
 
     @property
     def columns(self):
-        return self._frames.columns
+        return list(self._frames.columns)
 
-    def column_as_numpy_array(self, column_name="data"):
-        return np.array(self._frames[column_name])
+    def column_as_numpy_array(self, column_name: str) -> np.ndarray:
+        """Return a column as numpy array
+
+        Args:
+            column_name (str): the name of the required column
+
+        Returns:
+            numpy.ndarray: the column data as a numpy array
+        """
+        return self._frames[column_name].to_numpy()
 
     def serialize(self):
         obj = {"frames": self._frames, "batch_size": len(self)}
@@ -69,48 +77,34 @@ class Batch:
 
     @classmethod
     def from_eq(cls, batch1: Batch, batch2: Batch) -> Batch:
-        return Batch(
-            pd.DataFrame(batch1._frames.to_numpy() == batch2._frames.to_numpy())
-        )
+        return Batch(pd.DataFrame(batch1.to_numpy() == batch2.to_numpy()))
 
     @classmethod
     def from_greater(cls, batch1: Batch, batch2: Batch) -> Batch:
-        return Batch(
-            pd.DataFrame(batch1._frames.to_numpy() > batch2._frames.to_numpy())
-        )
+        return Batch(pd.DataFrame(batch1.to_numpy() > batch2.to_numpy()))
 
     @classmethod
     def from_lesser(cls, batch1: Batch, batch2: Batch) -> Batch:
-        return Batch(
-            pd.DataFrame(batch1._frames.to_numpy() < batch2._frames.to_numpy())
-        )
+        return Batch(pd.DataFrame(batch1.to_numpy() < batch2.to_numpy()))
 
     @classmethod
     def from_greater_eq(cls, batch1: Batch, batch2: Batch) -> Batch:
-        return Batch(
-            pd.DataFrame(batch1._frames.to_numpy() >= batch2._frames.to_numpy())
-        )
+        return Batch(pd.DataFrame(batch1.to_numpy() >= batch2.to_numpy()))
 
     @classmethod
     def from_lesser_eq(cls, batch1: Batch, batch2: Batch) -> Batch:
-        return Batch(
-            pd.DataFrame(batch1._frames.to_numpy() <= batch2._frames.to_numpy())
-        )
+        return Batch(pd.DataFrame(batch1.to_numpy() <= batch2.to_numpy()))
 
     @classmethod
     def from_not_eq(cls, batch1: Batch, batch2: Batch) -> Batch:
-        return Batch(
-            pd.DataFrame(batch1._frames.to_numpy() != batch2._frames.to_numpy())
-        )
+        return Batch(pd.DataFrame(batch1.to_numpy() != batch2.to_numpy()))
 
     @classmethod
     def compare_contains(cls, batch1: Batch, batch2: Batch) -> None:
         return cls(
             pd.DataFrame(
                 [all(x in p for x in q) for p, q in zip(left, right)]
-                for left, right in zip(
-                    batch1._frames.to_numpy(), batch2._frames.to_numpy()
-                )
+                for left, right in zip(batch1.to_numpy(), batch2.to_numpy())
             )
         )
 
@@ -119,9 +113,7 @@ class Batch:
         return cls(
             pd.DataFrame(
                 [all(x in q for x in p) for p, q in zip(left, right)]
-                for left, right in zip(
-                    batch1._frames.to_numpy(), batch2._frames.to_numpy()
-                )
+                for left, right in zip(batch1.to_numpy(), batch2.to_numpy())
             )
         )
 
@@ -138,6 +130,8 @@ class Batch:
             return f"{self._frames}"
 
     def __eq__(self, other: Batch):
+        # this function does not work if a column is a nested numpy arrays
+        # (eg, bboxes from yolo).
         return self._frames[sorted(self.columns)].equals(
             other.frames[sorted(other.columns)]
         )
@@ -171,11 +165,14 @@ class Batch:
         new_batch = Batch(new_frames)
         return new_batch
 
-    def apply_function_expression(self, expr: Callable) -> None:
+    def apply_function_expression(self, expr: Callable) -> Batch:
         """
         Execute function expression on frames.
         """
-        self._frames = expr(self._frames)
+        return Batch(expr(self._frames))
+
+    def iterrows(self):
+        return self._frames.iterrows()
 
     def sort(self, by=None) -> None:
         """
@@ -287,14 +284,11 @@ class Batch:
         if other.empty():
             return self
 
-        new_frames = self._frames.append(other.frames, ignore_index=True)
-
-        return Batch(new_frames)
+        return Batch.concat([self, other], copy=False)
 
     @classmethod
     def concat(cls, batch_list: Iterable[Batch], copy=True) -> Batch:
-        """Concat a list of batches. Avoid the extra copying overhead by
-        the append operation in __add__.
+        """Concat a list of batches.
         Notice: only frames are considered.
         """
 
@@ -373,11 +367,13 @@ class Batch:
         """
         return len(self) == 0
 
-    def unnest(self) -> None:
+    def unnest(self, cols: List[str] = None) -> None:
         """
         Unnest columns and drop columns with no data
         """
-        self._frames = self._frames.explode(list(self._frames.columns))
+        if cols is None:
+            cols = list(self.columns)
+        self._frames = self._frames.explode(cols)
         self._frames.dropna(inplace=True)
 
     def reverse(self) -> None:
@@ -431,6 +427,9 @@ class Batch:
                 new_col_names.append(col_name)
 
         self._frames.columns = new_col_names
+
+    def to_numpy(self):
+        return self._frames.to_numpy()
 
     def rename(self, columns) -> None:
         "Rename column names"

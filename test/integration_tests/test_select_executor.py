@@ -21,6 +21,7 @@ from test.util import (  # file_remove,
     file_remove,
     get_logical_query_plan,
     load_udfs_for_testing,
+    shutdown_ray,
 )
 
 import numpy as np
@@ -31,7 +32,7 @@ from eva.binder.binder_utils import BinderError
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
 from eva.models.storage.batch import Batch
-from eva.readers.opencv_reader import OpenCVReader
+from eva.readers.decord_reader import DecordReader
 from eva.server.command_handler import execute_query_fetch_all
 
 NUM_FRAMES = 10
@@ -53,16 +54,22 @@ class SelectExecutorTest(unittest.TestCase):
         cls.table2 = create_table("table2", 500, 3)
         cls.table3 = create_table("table3", 1000, 3)
 
+        cls.meme1 = f"{EVA_ROOT_DIR}/data/detoxify/meme1.jpg"
+        cls.meme2 = f"{EVA_ROOT_DIR}/data/detoxify/meme2.jpg"
+
+        execute_query_fetch_all(f"LOAD IMAGE '{cls.meme1}' INTO MemeImages;")
+        execute_query_fetch_all(f"LOAD IMAGE '{cls.meme2}' INTO MemeImages;")
+
     @classmethod
     def tearDownClass(cls):
+        shutdown_ray()
+
         file_remove("dummy.avi")
-        drop_query = """DROP TABLE table1;"""
-        execute_query_fetch_all(drop_query)
-        drop_query = """DROP TABLE table2;"""
-        execute_query_fetch_all(drop_query)
-        drop_query = """DROP TABLE table3;"""
-        execute_query_fetch_all(drop_query)
+        execute_query_fetch_all("""DROP TABLE IF EXISTS table1;""")
+        execute_query_fetch_all("""DROP TABLE IF EXISTS table2;""")
+        execute_query_fetch_all("""DROP TABLE IF EXISTS table3;""")
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
+        execute_query_fetch_all("DROP TABLE IF EXISTS MemeImages;")
 
     def test_sort_on_nonprojected_column(self):
         """This tests doing an order by on a column
@@ -84,9 +91,7 @@ class SelectExecutorTest(unittest.TestCase):
         expected_rows = [
             {
                 "myvideo.id": i,
-                "myvideo.data": np.array(
-                    np.ones((2, 2, 3)) * float(i + 1) * 25, dtype=np.uint8
-                ),
+                "myvideo.data": np.array(np.ones((32, 32, 3)) * i, dtype=np.uint8),
             }
             for i in range(NUM_FRAMES)
         ]
@@ -154,7 +159,7 @@ class SelectExecutorTest(unittest.TestCase):
         select_query = "SELECT id, data FROM MNIST;"
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort("mnist.id")
-        video_reader = OpenCVReader("data/mnist/mnist.mp4")
+        video_reader = DecordReader("data/mnist/mnist.mp4")
         expected_batch = Batch(frames=pd.DataFrame())
         for batch in video_reader.read():
             batch.frames["name"] = "mnist.mp4"
@@ -162,6 +167,37 @@ class SelectExecutorTest(unittest.TestCase):
         expected_batch.modify_column_alias("mnist")
         expected_batch = expected_batch.project(["mnist.id", "mnist.data"])
         self.assertEqual(actual_batch, expected_batch)
+
+    def test_should_load_and_select_real_audio_in_table(self):
+        query = """LOAD VIDEO 'data/sample_videos/touchdown.mp4'
+                   INTO TOUCHDOWN;"""
+        execute_query_fetch_all(query)
+
+        select_query = "SELECT id, audio FROM TOUCHDOWN;"
+        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch.sort("touchdown.id")
+        video_reader = DecordReader("data/sample_videos/touchdown.mp4", read_audio=True)
+        expected_batch = Batch(frames=pd.DataFrame())
+        for batch in video_reader.read():
+            batch.frames["name"] = "touchdown.mp4"
+            expected_batch += batch
+        expected_batch.modify_column_alias("touchdown")
+        expected_batch = expected_batch.project(["touchdown.id", "touchdown.audio"])
+        self.assertEqual(actual_batch, expected_batch)
+
+    def test_should_throw_error_when_both_audio_and_video_selected(self):
+        query = """LOAD VIDEO 'data/sample_videos/touchdown.mp4'
+                   INTO TOUCHDOWN1;"""
+        execute_query_fetch_all(query)
+
+        select_query = "SELECT id, audio, data FROM TOUCHDOWN1;"
+        try:
+            execute_query_fetch_all(select_query)
+            self.fail("Didn't raise AssertionError")
+        except AssertionError as e:
+            self.assertEquals(
+                "Cannot query over both audio and video streams", e.args[0]
+            )
 
     def test_select_and_where_video_in_table(self):
         select_query = "SELECT * FROM MyVideo WHERE id = 5;"
@@ -171,15 +207,7 @@ class SelectExecutorTest(unittest.TestCase):
 
         select_query = "SELECT data FROM MyVideo WHERE id = 5;"
         actual_batch = execute_query_fetch_all(select_query)
-        expected_rows = [
-            {
-                "myvideo.data": np.array(
-                    np.ones((2, 2, 3)) * float(5 + 1) * 25, dtype=np.uint8
-                )
-            }
-        ]
-        expected_batch = Batch(frames=pd.DataFrame(expected_rows))
-        self.assertEqual(actual_batch, expected_batch)
+        self.assertEqual(actual_batch, expected_batch.project(["myvideo.data"]))
 
         select_query = "SELECT id, data FROM MyVideo WHERE id >= 2;"
         actual_batch = execute_query_fetch_all(select_query)
@@ -507,6 +535,22 @@ class SelectExecutorTest(unittest.TestCase):
         )
         self.assertEqual(unnest_batch, expected)
 
+        # unnest with predicate on function expression
+        query = """SELECT id, label
+                FROM MyVideo JOIN LATERAL
+                UNNEST(DummyMultiObjectDetector(data).labels) AS T(label)
+                WHERE id < 2 AND T.label = "person" ORDER BY id;"""
+        unnest_batch = execute_query_fetch_all(query)
+        expected = Batch(
+            pd.DataFrame(
+                {
+                    "myvideo.id": np.array([0, 0], np.intp),
+                    "T.label": np.array(["person", "person"]),
+                }
+            )
+        )
+        self.assertEqual(unnest_batch, expected)
+
     def test_should_raise_error_with_missing_alias_in_lateral_join(self):
         udf_name = "DummyMultiObjectDetector"
         query = """SELECT id, labels
@@ -627,7 +671,16 @@ class SelectExecutorTest(unittest.TestCase):
             "SELECT DummyMultiObjectDetector(data).labels FROM MyVideo"
         )
         signature = plan.target_list[0].signature()
-        self.assertEqual(signature, "DummyMultiObjectDetector(MyVideo.data)")
+        udf_id = (
+            CatalogManager()
+            .get_udf_catalog_entry_by_name("DummyMultiObjectDetector")
+            .row_id
+        )
+        table_entry = CatalogManager().get_table_catalog_entry("MyVideo")
+        col_id = CatalogManager().get_column_catalog_entry(table_entry, "data").row_id
+        self.assertEqual(
+            signature, f"DummyMultiObjectDetector[{udf_id}](MyVideo.data[{col_id}])"
+        )
 
     def test_complex_logical_expressions(self):
         query = """SELECT id FROM MyVideo
@@ -653,3 +706,48 @@ class SelectExecutorTest(unittest.TestCase):
 
         expected = execute_query_fetch_all(query_and)
         self.assertEqual(len(expected), 0)
+
+    def test_project_identifier_column(self):
+        # test for video table
+        batch = execute_query_fetch_all("SELECT _row_id, id FROM MyVideo;")
+        expected = Batch(
+            pd.DataFrame(
+                {
+                    "myvideo._row_id": [1] * NUM_FRAMES,
+                    "myvideo.id": range(NUM_FRAMES),
+                }
+            )
+        )
+        self.assertEqual(batch, expected)
+
+        batch = execute_query_fetch_all("SELECT * FROM MyVideo;")
+        self.assertTrue("myvideo._row_id" in batch.columns)
+
+        # test for image table
+        batch = execute_query_fetch_all("SELECT _row_id, name FROM MemeImages;")
+        expected = Batch(
+            pd.DataFrame(
+                {
+                    "memeimages._row_id": [1, 2],
+                    "memeimages.name": [self.meme1, self.meme2],
+                }
+            )
+        )
+        self.assertEqual(batch, expected)
+
+        batch = execute_query_fetch_all("SELECT * FROM MemeImages;")
+        self.assertTrue("memeimages._row_id" in batch.columns)
+
+        # test for structural table
+        batch = execute_query_fetch_all("SELECT _row_id FROM table1;")
+        expected = Batch(
+            pd.DataFrame(
+                {
+                    "table1._row_id": range(1, 101),
+                }
+            )
+        )
+        self.assertEqual(batch, expected)
+
+        batch = execute_query_fetch_all("SELECT * FROM table1;")
+        self.assertTrue("table1._row_id" in batch.columns)

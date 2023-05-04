@@ -32,14 +32,14 @@ class RuleType(Flag):
     # Don't move this enum, else will break rule exploration logic
     INVALID_RULE = 0
 
-    # REWRITE RULES(LOGICAL -> LOGICAL)
-    EMBED_FILTER_INTO_GET = auto()
-    EMBED_FILTER_INTO_DERIVED_GET = auto()
-    EMBED_SAMPLE_INTO_GET = auto()
-    EMBED_PROJECT_INTO_DERIVED_GET = auto()
-    EMBED_PROJECT_INTO_GET = auto()
-    PUSHDOWN_FILTER_THROUGH_JOIN = auto()
+    # REWRITE RULES TOP DOWN APPLY FIRST (LOGICAL -> LOGICAL)
     XFORM_LATERAL_JOIN_TO_LINEAR_FLOW = auto()
+    TOP_DOWN_DELIMETER = auto()
+
+    # REWRITE RULES BOTTOM UP APPLY SECOND (LOGICAL -> LOGICAL)
+    EMBED_FILTER_INTO_GET = auto()
+    EMBED_SAMPLE_INTO_GET = auto()
+    PUSHDOWN_FILTER_THROUGH_JOIN = auto()
     PUSHDOWN_FILTER_THROUGH_APPLY_AND_MERGE = auto()
     COMBINE_SIMILARITY_ORDERBY_AND_LIMIT_TO_FAISS_INDEX_SCAN = auto()
     REORDER_PREDICATES = auto()
@@ -48,8 +48,10 @@ class RuleType(Flag):
 
     # TRANSFORMATION RULES (LOGICAL -> LOGICAL)
     LOGICAL_INNER_JOIN_COMMUTATIVITY = auto()
-
-    TRANSFORMATION_DELIMETER = auto()
+    CACHE_FUNCTION_EXPRESISON_IN_APPLY = auto()
+    CACHE_FUNCTION_EXPRESISON_IN_FILTER = auto()
+    CACHE_FUNCTION_EXPRESISON_IN_PROJECT = auto()
+    TRANSFORMATION_DELIMETER = auto()  # do not reposition
 
     # IMPLEMENTATION RULES (LOGICAL -> PHYSICAL)
     LOGICAL_EXCHANGE_TO_PHYSICAL = auto()
@@ -130,10 +132,12 @@ class Promise(IntEnum):
 
     # TRANSFORMATION RULES (LOGICAL -> LOGICAL)
     LOGICAL_INNER_JOIN_COMMUTATIVITY = auto()
+    CACHE_FUNCTION_EXPRESISON_IN_APPLY = auto()
+    CACHE_FUNCTION_EXPRESISON_IN_FILTER = auto()
+    CACHE_FUNCTION_EXPRESISON_IN_PROJECT = auto()
 
     # REWRITE RULES
     EMBED_FILTER_INTO_GET = auto()
-    EMBED_PROJECT_INTO_GET = auto()
     EMBED_SAMPLE_INTO_GET = auto()
     XFORM_LATERAL_JOIN_TO_LINEAR_FLOW = auto()
     PUSHDOWN_FILTER_THROUGH_JOIN = auto()
@@ -175,8 +179,14 @@ class Rule(ABC):
             and self.rule_type.value < RuleType.TRANSFORMATION_DELIMETER.value
         )
 
-    def is_rewrite_rule(self):
-        return self.rule_type.value < RuleType.REWRITE_DELIMETER.value
+    def is_stage_two_rewrite_rules(self):
+        return (
+            self.rule_type.value > RuleType.TOP_DOWN_DELIMETER.value
+            and self.rule_type.value < RuleType.REWRITE_DELIMETER.value
+        )
+
+    def is_stage_one_rewrite_rules(self):
+        return self.rule_type.value < RuleType.TOP_DOWN_DELIMETER.value
 
     @abstractmethod
     def promise(self) -> int:

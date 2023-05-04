@@ -15,9 +15,11 @@
 from typing import List, Tuple
 
 from eva.catalog.catalog_manager import CatalogManager
+from eva.catalog.catalog_utils import get_table_primary_columns
+from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 from eva.catalog.models.udf_metadata_catalog import UdfMetadataCatalogEntry
-from eva.constants import DEFAULT_FUNCTION_EXPRESSION_COST
+from eva.constants import CACHEABLE_UDFS, DEFAULT_FUNCTION_EXPRESSION_COST
 from eva.expression.abstract_expression import AbstractExpression, ExpressionType
 from eva.expression.expression_utils import (
     conjunction_list_to_expression_tree,
@@ -26,9 +28,14 @@ from eva.expression.expression_utils import (
     is_simple_predicate,
     to_conjunction_list,
 )
-from eva.expression.function_expression import FunctionExpression
+from eva.expression.function_expression import (
+    FunctionExpression,
+    FunctionExpressionCache,
+)
+from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.alias import Alias
 from eva.parser.create_statement import ColumnDefinition
+from eva.utils.kv_cache import DiskKVCache
 
 
 def column_definition_to_udf_io(col_list: List[ColumnDefinition], is_input: bool):
@@ -177,6 +184,97 @@ def extract_pushdown_predicate_for_alias(
     return (
         conjunction_list_to_expression_tree(pushdown_preds),
         conjunction_list_to_expression_tree(rem_pred),
+    )
+
+
+def optimize_cache_key(expr: FunctionExpression):
+    """Optimize the cache key
+
+    It tries to reduce the caching overhead by replacing the caching key with logically equivalent key. For instance, frame data can be replaced with frame id.
+
+    Args:
+        expr (FunctionExpression): expression to optimize the caching key for.
+
+    Example:
+        Yolo(data) -> return id
+
+    Todo: Optimize complex expression
+        FaceDet(Crop(data, bbox)) -> return
+
+    """
+    keys = expr.children
+    # handle simple one column inputs
+    if len(keys) == 1 and isinstance(keys[0], TupleValueExpression):
+        child = keys[0]
+        col_catalog_obj = child.col_object
+        if isinstance(col_catalog_obj, ColumnCatalogEntry):
+            new_keys = []
+            table_obj = CatalogManager().get_table_catalog_entry(
+                col_catalog_obj.table_name
+            )
+            for col in get_table_primary_columns(table_obj):
+                new_obj = CatalogManager().get_column_catalog_entry(table_obj, col.name)
+                new_keys.append(
+                    TupleValueExpression(
+                        col_name=col.name,
+                        table_alias=child.table_alias,
+                        col_object=new_obj,
+                        col_alias=f"{child.table_alias}.{col.name}",
+                    )
+                )
+
+            return new_keys
+    return keys
+
+
+def enable_cache_init(func_expr: FunctionExpression) -> FunctionExpressionCache:
+    optimized_key = optimize_cache_key(func_expr)
+    if optimized_key == func_expr.children:
+        optimized_key = [None]
+
+    name = func_expr.signature()
+    cache_entry = CatalogManager().get_udf_cache_catalog_entry_by_name(name)
+    if not cache_entry:
+        cache_entry = CatalogManager().insert_udf_cache_catalog_entry(func_expr)
+
+    cache = FunctionExpressionCache(
+        key=tuple(optimized_key), store=DiskKVCache(cache_entry.cache_path)
+    )
+    return cache
+
+
+def enable_cache(func_expr: FunctionExpression) -> FunctionExpression:
+    """Enables cache for a function expression.
+
+    The cache key is optimized by replacing it with logical equivalent expressions.
+    A cache entry is inserted in the catalog corresponding to the expression.
+
+    Args:
+        func_expr (FunctionExpression): The function expression to enable cache for.
+
+    Returns:
+        FunctionExpression: The function expression with cache enabled.
+    """
+    cache = enable_cache_init(func_expr)
+    return func_expr.copy().enable_cache(cache)
+
+
+def enable_cache_on_expression_tree(expr_tree: AbstractExpression):
+    func_exprs = list(expr_tree.find_all(FunctionExpression))
+    func_exprs = list(
+        filter(lambda expr: check_expr_validity_for_cache(expr), func_exprs)
+    )
+    for expr in func_exprs:
+        cache = enable_cache_init(expr)
+        expr.enable_cache(cache)
+
+
+def check_expr_validity_for_cache(expr: FunctionExpression):
+    return (
+        expr.name in CACHEABLE_UDFS
+        and not expr.has_cache()
+        and len(expr.children) <= 1
+        and isinstance(expr.children[0], TupleValueExpression)
     )
 
 

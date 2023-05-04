@@ -14,6 +14,7 @@
 # limitations under the License.
 from abc import ABC, abstractmethod
 from collections import deque
+from copy import deepcopy
 from enum import IntEnum, auto, unique
 from typing import Any
 
@@ -125,6 +126,18 @@ class AbstractExpression(ABC):
 
     def __hash__(self) -> int:
         return hash((self.etype, self.rtype, tuple(self.children)))
+
+    def __deepcopy__(self, memo):
+        cls = self.__class__
+        result = cls.__new__(cls)
+        memo[id(self)] = result
+        for k, v in self.__dict__.items():
+            setattr(result, k, deepcopy(v, memo))
+        return result
+
+    def copy(self):
+        """Returns a deepcopy of the expression tree."""
+        return deepcopy(self)
 
     def walk(self, bfs=True):
         """

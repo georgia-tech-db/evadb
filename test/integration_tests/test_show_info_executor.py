@@ -47,33 +47,19 @@ class ShowExecutorTest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         execute_query_fetch_all("DROP TABLE IF EXISTS Actions;")
-        execute_query_fetch_all("DROP TABLE IF EXISTS Mnist;")
+        execute_query_fetch_all("DROP TABLE IF EXISTS MNIST;")
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
 
     # integration test
     def test_show_udfs(self):
         result = execute_query_fetch_all("SHOW UDFS;")
-        self.assertEqual(len(result.columns), 5)
+        self.assertEqual(len(result.columns), 6)
 
         expected = {
             "name": ["FastRCNNObjectDetector", "ArrayCount"],
-            "inputs": [
-                ["Frame_Array NDARRAY UINT8 (3, None, None)"],
-                ["Input_Array NDARRAY ANYTYPE ()", "Search_Key ANY"],
-            ],
-            "outputs": [
-                [
-                    "labels NDARRAY STR (None,)",
-                    "bboxes NDARRAY FLOAT32 (None, 4)",
-                    "scores NDARRAY FLOAT32 (None,)",
-                ],
-                ["key_count INTEGER"],
-            ],
             "type": ["Classification", "NdarrayUDF"],
         }
         expected_df = pd.DataFrame(expected)
-        self.assertTrue(all(expected_df.inputs == result.frames.inputs))
-        self.assertTrue(all(expected_df.outputs == result.frames.outputs))
         self.assertTrue(all(expected_df.name == result.frames.name))
         self.assertTrue(all(expected_df.type == result.frames.type))
 

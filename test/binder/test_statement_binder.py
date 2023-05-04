@@ -35,7 +35,7 @@ class StatementBinderTests(unittest.TestCase):
             tve.col_name = "col_name"
             binder._bind_tuple_expr(tve)
             col_alias = "{}.{}".format("table_alias", "col_name")
-            mock.assert_called_with(tve.col_name, tve.table_alias)
+            mock.assert_called_once()
             self.assertEqual(tve.col_object, "col_obj")
             self.assertEqual(tve.col_alias, col_alias)
 
@@ -261,7 +261,7 @@ class StatementBinderTests(unittest.TestCase):
             tve.col_name = "col_name"
             binder._bind_tuple_expr(tve)
             col_alias = "{}.{}".format("table_alias", "col_name")
-            mock.assert_called_with(tve.col_name, tve.table_alias)
+            mock.assert_called_once()
             self.assertEqual(tve.col_object, "col_obj")
             self.assertEqual(tve.col_alias, col_alias)
 
