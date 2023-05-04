@@ -33,10 +33,10 @@ _VALID_CHAT_COMPLETION_MODEL = [
 ]
 
 
-class OpenAIChatCompletion(AbstractUDF):
+class ChatGPT(AbstractUDF):
     @property
     def name(self) -> str:
-        return "OpenAIChatCompletion"
+        return "ChatGPT"
 
     @setup(cachable=False, udf_type="chat-completion", batchable=True)
     def setup(
@@ -49,11 +49,11 @@ class OpenAIChatCompletion(AbstractUDF):
         )
         assert (
             len(openai.api_key) != 0
-        ), "Please set your openai api key in eva.yml file"
+        ), "Please set your OpenAI API key in eva.yml file (third_party, open_api_key)"
 
         assert (
             model in _VALID_CHAT_COMPLETION_MODEL
-        ), f"Unsupported OpenAIChatCompletion {model}"
+        ), f"Unsupported ChatGPT {model}"
 
         self.model = model
         self.temperature = temperature

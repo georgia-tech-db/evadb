@@ -46,7 +46,7 @@ def create_dummy_csv_file() -> str:
     return dummy_file_path
 
 
-class OpenAIChatCompletionTest(unittest.TestCase):
+class ChatGPTTest(unittest.TestCase):
     def setUp(self) -> None:
         CatalogManager().reset()
         create_table_query = """CREATE TABLE IF NOT EXISTS MyTextCSV (
@@ -65,7 +65,7 @@ class OpenAIChatCompletionTest(unittest.TestCase):
         execute_query_fetch_all("DROP TABLE IF EXISTS MyTextCSV;")
 
     @ray_skip_marker
-    @patch("eva.udfs.openai_chat_completion_udf.openai.ChatCompletion.create")
+    @patch("eva.udfs.chatgpt.openai.ChatCompletion.create")
     def test_openai_chat_completion_udf(self, mock_req):
         # set dummy api key
         ConfigurationManager().update_value("third_party", "openai_api_key", "my_key")
@@ -74,7 +74,7 @@ class OpenAIChatCompletionTest(unittest.TestCase):
         execute_query_fetch_all(f"DROP UDF IF EXISTS {udf_name};")
 
         create_udf_query = f"""CREATE UDF {udf_name}
-            IMPL 'eva/udfs/openai_chat_completion_udf.py'
+            IMPL 'eva/udfs/chatgpt.py'
             'model' 'gpt-3.5-turbo'
         """
         execute_query_fetch_all(create_udf_query)
@@ -93,7 +93,7 @@ class OpenAIChatCompletionTest(unittest.TestCase):
         # test without providing model name
         execute_query_fetch_all(f"DROP UDF IF EXISTS {udf_name};")
         create_udf_query = f"""CREATE UDF {udf_name}
-            IMPL 'eva/udfs/openai_chat_completion_udf.py'
+            IMPL 'eva/udfs/chatgpt.py'
         """
         execute_query_fetch_all(create_udf_query)
 
@@ -108,6 +108,6 @@ class OpenAIChatCompletionTest(unittest.TestCase):
 
         with self.assertRaises(ExecutorError):
             create_udf_query = f"""CREATE UDF {udf_name}
-            IMPL 'eva/udfs/openai_chat_completion_udf.py'
+            IMPL 'eva/udfs/chatgpt.py'
             """
             execute_query_fetch_all(create_udf_query)
