@@ -12,14 +12,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import cv2
-import torch
-import kornia
-import numpy as np
-
 from typing import List
 
+import cv2
+import kornia
+import numpy as np
 import pandas as pd
+import torch
 
 from eva.udfs.abstract.abstract_udf import AbstractClassifierUDF
 
@@ -37,12 +36,13 @@ class SiftFeatureExtractor(AbstractClassifierUDF):
         return []
 
     def forward(self, df: pd.DataFrame) -> pd.DataFrame:
-
         def _forward(row: pd.Series) -> np.ndarray:
             # Prepare gray image to batched gray image within size.
             rgb_img = row[0]
             gray_img = cv2.cvtColor(rgb_img, cv2.COLOR_RGB2GRAY)
-            resized_gray_img = cv2.resize(gray_img, (100, 100), interpolation=cv2.INTER_AREA)
+            resized_gray_img = cv2.resize(
+                gray_img, (100, 100), interpolation=cv2.INTER_AREA
+            )
             resized_gray_img = np.moveaxis(resized_gray_img, -1, 0)
             batch_resized_gray_img = np.expand_dims(resized_gray_img, axis=0)
             batch_resized_gray_img = np.expand_dims(batch_resized_gray_img, axis=0)
