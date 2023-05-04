@@ -78,7 +78,7 @@ class PytorchTest(unittest.TestCase):
         execute_query_fetch_all(Mvit_udf_query)
 
         select_query = """SELECT FIRST(id),
-                            YoloV5(FIRST(data)),
+                            Yolo(FIRST(data)),
                             MVITActionRecognition(SEGMENT(data))
                             FROM Actions
                             WHERE id < 32
@@ -89,7 +89,7 @@ class PytorchTest(unittest.TestCase):
         res = actual_batch.frames
         for idx in res.index:
             self.assertTrue(
-                "person" in res["yolov5.labels"][idx]
+                "person" in res["yolo.labels"][idx]
                 and "yoga" in res["mvitactionrecognition.labels"][idx]
             )
 
@@ -107,18 +107,6 @@ class PytorchTest(unittest.TestCase):
         self.assertEqual(len(res), 1)
         for idx in res.index:
             self.assertTrue("computer" in res["aslactionrecognition.labels"][idx])
-
-    @pytest.mark.torchtest
-    def test_should_run_pytorch_and_yolo_decorators(self):
-        create_udf_query = """CREATE UDF YoloDecorators
-                  IMPL  'eva/udfs/decorators/yolo_object_detection_decorators.py';
-        """
-        execute_query_fetch_all(create_udf_query)
-
-        select_query = """SELECT YoloDecorators(data) FROM MyVideo
-                        WHERE id < 5;"""
-        actual_batch = execute_query_fetch_all(select_query)
-        self.assertEqual(len(actual_batch), 5)
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_facenet(self):
@@ -256,10 +244,10 @@ class PytorchTest(unittest.TestCase):
         self.assertTrue(res["ocrextractor.scores"][2][0] > 0.9)
 
     def test_check_unnest_with_predicate_on_yolo(self):
-        query = """SELECT id, yolov5.label, yolov5.bbox, yolov5.score
+        query = """SELECT id, Yolo.label, Yolo.bbox, Yolo.score
                   FROM MyVideo
-                  JOIN LATERAL UNNEST(YoloV5(data)) AS yolov5(label, bbox, score)
-                  WHERE yolov5.label = 'car' AND id < 2;"""
+                  JOIN LATERAL UNNEST(Yolo(data)) AS Yolo(label, bbox, score)
+                  WHERE Yolo.label = 'car' AND id < 2;"""
 
         actual_batch = execute_query_fetch_all(query)
 
