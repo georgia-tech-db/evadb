@@ -67,7 +67,7 @@ def validate_image(image_path: Path) -> bool:
         return data is not None
     except Exception as e:
         logger.warning(
-            f"Unexpected Exception {e} occured while reading image file {image_path}"
+            f"Unexpected Exception {e} occurred while reading image file {image_path}"
         )
         return False
 
@@ -84,7 +84,7 @@ def validate_video(video_path: Path) -> bool:
         return True
     except Exception as e:
         logger.warning(
-            f"Unexpected Exception {e} occured while reading video file {video_path}"
+            f"Unexpected Exception {e} occurred while reading video file {video_path}"
         )
 
 
