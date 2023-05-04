@@ -122,12 +122,9 @@ SELECT id, data FROM TrafficVideo WHERE ArrayCount(Yolo(data).labels, 'car') > 3
 - **Use your custom deep learning model in queries** with a user-defined function (UDF):
 
 ```mysql
-CREATE UDF IF NOT EXISTS MyUDF
-INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
-OUTPUT (labels NDARRAY STR(ANYDIM), bboxes NDARRAY FLOAT32(ANYDIM, 4),
-        scores NDARRAY FLOAT32(ANYDIM))
-TYPE  Classification
-IMPL  'eva/udfs/fastrcnn_object_detector.py';
+CREATE UDF IF NOT EXISTS Yolo
+TYPE  ultralytics
+'model' 'yolov8m.pt';
 ```
 
 - **Compose multiple models in a single query** to set up useful AI pipelines.
