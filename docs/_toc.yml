@@ -39,6 +39,9 @@ parts:
       - file: source/reference/udf
         title: User-Defined Functions
 
+      - file: source/reference/io
+        title: IO Descriptors
+
       - file: source/reference/hf
         title: HuggingFace
 
