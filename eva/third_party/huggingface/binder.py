@@ -28,7 +28,8 @@ def assign_hf_udf(udf_obj: UdfCatalogEntry):
     # NOTE: Currently, we only support models that require a single input.
     assert len(inputs) == 1, "Only single input models are supported."
 
-    task = get_metadata_entry_or_val(udf_obj, "task")[1]
+    task = get_metadata_entry_or_val(udf_obj, "task", None)
+    assert task is not None, "task not specified in Hugging Face UDF"
     model_class = MODEL_FOR_TASK[task]
 
     return lambda: model_class(udf_obj)

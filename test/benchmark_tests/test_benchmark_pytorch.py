@@ -113,7 +113,7 @@ def test_automatic_speech_recognition(benchmark, setup_pytorch_tests):
 
     # TODO: use with SAMPLE AUDIORATE 16000
     select_query = f"SELECT {udf_name}(audio) FROM VIDEOS;"
-    output = benchmark(execute_query_fetch_all(select_query))
+    output = benchmark(execute_query_fetch_all, select_query)
 
     # verify that output has one row and one column only
     assert output.frames.shape == (1, 1)
@@ -146,7 +146,7 @@ def test_summarization_from_video(benchmark, setup_pytorch_tests):
 
     # TODO: use with SAMPLE AUDIORATE 16000
     select_query = f"SELECT {summary_udf}({asr_udf}(audio)) FROM VIDEOS;"
-    output = benchmark(execute_query_fetch_all(select_query))
+    output = benchmark(execute_query_fetch_all, select_query)
 
     # verify that output has one row and one column only
     assert output.frames.shape == (1, 1)

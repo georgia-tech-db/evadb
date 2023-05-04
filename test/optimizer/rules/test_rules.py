@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import create_sample_video, load_udfs_for_testing
+from test.util import create_sample_video
 
 import pytest
 from mock import MagicMock, patch

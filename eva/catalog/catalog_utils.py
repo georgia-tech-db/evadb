@@ -172,7 +172,7 @@ def cleanup_storage():
 
 
 def get_metadata_entry_or_val(
-    udf_obj: UdfCatalogEntry, key: str, default_val: Any
+    udf_obj: UdfCatalogEntry, key: str, default_val: Any = None
 ) -> str:
     """
     Return the metadata value for the given key, or the default value if the

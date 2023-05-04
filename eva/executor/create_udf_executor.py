@@ -18,6 +18,7 @@ from typing import Dict, List
 import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
+from eva.catalog.catalog_utils import get_metadata_properties
 from eva.catalog.models.udf_catalog import UdfCatalogEntry
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 from eva.configuration.constants import EVA_DEFAULT_DIR
@@ -25,7 +26,6 @@ from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.create_udf_plan import CreateUDFPlan
 from eva.third_party.huggingface.create import gen_hf_io_catalog_entries
-from eva.third_party.ultralytics.binder import parse_yolo_args
 from eva.udfs.decorators.utils import load_io_from_udf_decorators
 from eva.utils.errors import UDFIODefinitionError
 from eva.utils.generic_utils import load_udf_class_from_file
@@ -60,7 +60,7 @@ class CreateUDFExecutor(AbstractExecutor):
             .as_posix()
         )
         udf = self._try_initializing_udf(
-            impl_path, udf_args=parse_yolo_args(self.node)
+            impl_path, udf_args=get_metadata_properties(self.node)
         )
         io_list = self._resolve_udf_io(udf)
         return (
@@ -139,7 +139,6 @@ class CreateUDFExecutor(AbstractExecutor):
             RuntimeError: If an error occurs while initializing the UDF.
         """
 
-        print(self.node.name, udf_args)
         # load the udf class from the file
         try:
             # loading the udf class from the file

@@ -41,7 +41,6 @@ from eva.parser.select_statement import SelectStatement
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
 from eva.third_party.huggingface.binder import assign_hf_udf
-from eva.third_party.ultralytics.binder import assign_yolo_udf
 from eva.utils.generic_utils import get_file_checksum, load_udf_class_from_file
 from eva.utils.logging_manager import logger
 
@@ -270,13 +269,11 @@ class StatementBinder:
                 registration. Please create a new UDF using the CREATE UDF command or UPDATE the existing one."""
 
             try:
-                node.function = load_udf_class_from_file(
+                udf_class = load_udf_class_from_file(
                     udf_obj.impl_file_path,
                     udf_obj.name,
-                    get_metadata_properties(udf_obj),
                 )
-                print(node.function, get_metadata_properties(udf_obj))
-                print(node.function())
+                node.function = lambda: udf_class(**get_metadata_properties(udf_obj))
             except Exception as e:
                 err_msg = (
                     f"{str(e)}. Please verify that the UDF class name in the"

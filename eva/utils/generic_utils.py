@@ -19,7 +19,6 @@ import os
 import pickle
 import shutil
 import sys
-from typing import Dict
 import uuid
 from pathlib import Path
 
@@ -53,14 +52,13 @@ def str_to_class(class_path: str):
     return getattr(module, class_name)
 
 
-def load_udf_class_from_file(filepath, classname=None, udf_args: Dict = None):
+def load_udf_class_from_file(filepath, classname=None):
     """
     Load a class from a Python file. If the classname is not specified, the function will check if there is only one class in the file and load that. If there are multiple classes, it will raise an error.
 
     Args:
         filepath (str): The path to the Python file.
         classname (str, optional): The name of the class to load. If not specified, the function will try to load a class with the same name as the file. Defaults to None.
-        udf_args (Dict, optional): arguments to be passed to udf_class
 
     Returns:
         The class instance.
@@ -91,7 +89,7 @@ def load_udf_class_from_file(filepath, classname=None, udf_args: Dict = None):
         raise RuntimeError(
             f"{filepath} contains {len(classes)} classes, please specify the correct class to load by naming the UDF with the same name in the CREATE query."
         )
-    return lambda: classes[0](udf_args)
+    return classes[0]
 
 
 def is_gpu_available() -> bool:

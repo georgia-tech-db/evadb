@@ -24,5 +24,6 @@ def setup_pytorch_tests():
     CatalogManager().reset()
     execute_query_fetch_all("LOAD VIDEO 'data/ua_detrac/ua_detrac.mp4' INTO MyVideo;")
     execute_query_fetch_all("LOAD VIDEO 'data/mnist/mnist.mp4' INTO MNIST;")
+    execute_query_fetch_all("LOAD VIDEO 'data/sample_videos/touchdown.mp4' INTO VIDEOS")
     init_builtin_udfs(mode="release")
     yield None
