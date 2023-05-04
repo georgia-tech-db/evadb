@@ -18,6 +18,9 @@ import numpy as np
 import pandas as pd
 
 from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
+from eva.udfs.decorators.decorators import forward, setup
+from eva.udfs.decorators.io_descriptors.data_types import PandasDataframe, PyTorchTensor
+from eva.catalog.catalog_type import NdArrayType
 
 try:
     from torch import Tensor
@@ -47,6 +50,7 @@ class FastRCNNObjectDetector(PytorchAbstractClassifierUDF):
     def name(self) -> str:
         return "fastrcnn"
 
+    @setup(cachable=True, udf_type="object_detection", batchable=True)
     def setup(self, threshold=0.85):
         self.threshold = threshold
         self.model = torchvision.models.detection.fasterrcnn_resnet50_fpn(
@@ -150,6 +154,27 @@ class FastRCNNObjectDetector(PytorchAbstractClassifierUDF):
             "toothbrush",
         ]
 
+    @forward(
+        input_signatures=[
+            PyTorchTensor(
+                name="input_col",
+                is_nullable=False,
+                type=NdArrayType.FLOAT32,
+                dimensions=(1, 3, 540, 960),
+            )
+        ],
+        output_signatures=[
+            PandasDataframe(
+                columns=["labels", "bboxes", "scores"],
+                column_types=[
+                    NdArrayType.STR,
+                    NdArrayType.FLOAT32,
+                    NdArrayType.FLOAT32,
+                ],
+                column_shapes=[(None,), (None,), (None,)],
+            )
+        ],
+    )
     def forward(self, frames: Tensor) -> pd.DataFrame:
         """
         Performs predictions on input frames
