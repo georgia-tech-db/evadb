@@ -24,7 +24,4 @@ EVA supports the following models for chat completion task:
 - "gpt-3.5-turbo"
 - "gpt-3.5-turbo-0301"
 
-The chat completion UDF can be composed in interesting ways with other UDFs. Please refer to the following notebook <add link to notebook> for an example of combining chat completion task with caption extraction and video summarization models from Hugging Face and feeding it to chat completion to ask questions about the results.
-
-<Add Image>
-<Add Queries>
+The chat completion UDF can be composed in interesting ways with other UDFs. Please refer to the  `ChatGPT notebook <https://github.com/georgia-tech-db/eva/blob/master/tutorials/08-chatgpt.ipynb>`_ for an example of combining chat completion task with caption extraction and video summarization models from Hugging Face and feeding it to chat completion to ask questions about the results.

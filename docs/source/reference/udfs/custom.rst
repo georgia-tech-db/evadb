@@ -1,46 +1,47 @@
 User-Defined Functions
 ======================
 
-This section provides an overview of how you can create and use a custom user-defined function (UDF) in your queries. For example, you could write an UDF that wraps around a PyTorch model.
+This section provides an overview of how you can create and use a custom user-defined function (UDF) in your queries. For example, you could write a UDF that wraps around a PyTorch model.
 
 
-Part 1: Writing a custom UDF
+Part 1: Writing a Custom UDF
 ------------------------------
 
-During each step, use the `UDF implementation <https://github.com/georgia-tech-db/eva/blob/master/eva/udfs/fastrcnn_object_detector.py>`_  as a reference.
+During each step, use the [UDF implementation](https://github.com/georgia-tech-db/eva/blob/master/eva/udfs/fastrcnn_object_detector.py) as a reference.
 
-1. Create a new file under `udfs/` folder and give it a descriptive name. eg: `fastrcnn_object_detector.py`. 
+1. Create a new file under `udfs/` folder and give it a descriptive name, e.g., `fastrcnn_object_detector.py`.
 
-  .. note::
+   .. note::
 
-      UDFs packaged along with EVA are located inside the `udfs <https://github.com/georgia-tech-db/eva/tree/master/eva/udfs>`_ folder.
+      UDFs packaged along with EVA are located inside the [udfs](https://github.com/georgia-tech-db/eva/tree/master/eva/udfs) folder.
 
 2. Create a Python class that inherits from `PytorchClassifierAbstractUDF`.
 
-* The `PytorchClassifierAbstractUDF` is a parent class that defines and implements standard methods for model inference.
-
-* The functions setup and forward should be implemented in your child class. These functions can be implemented with the help of Decorators.
+   - The `PytorchClassifierAbstractUDF` is a parent class that defines and implements standard methods for model inference.
+   - Implement the `setup` and `forward` functions in your child class. These functions can be implemented with the help of decorators.
 
 Setup
 -----
 
-An abstract method that must be implemented in your child class. The setup function can be used to initialize the parameters for executing the UDF. The parameters that need to be set are 
+An abstract method that must be implemented in your child class. The `setup` function can be used to initialize the parameters for executing the UDF. The following parameters must be set:
 
-- cacheable: bool
- 
-  - True: Cache should be enabled. Cache will be automatically invalidated when the UDF changes.
-  - False: cache should not be enabled.
-- udf_type: str
-  
-  - object_detection: UDFs for object detection.
-- batchable: bool
-  
-  - True: Batching should be enabled
-  - False: Batching is disabled.
+- `cacheable`: bool
 
-The custom setup operations for the udf can be written inside the function in the child class. If there is no custom logic required, then you can just mention pass in the function definition.
+  - `True`: Cache should be enabled. The cache will be automatically invalidated when the UDF changes.
+  - `False`: Cache should not be enabled.
 
-Example of the setup function
+- `udf_type`: str
+
+  - `object_detection`: UDFs for object detection.
+
+- `batchable`: bool
+
+  - `True`: Batching should be enabled.
+  - `False`: Batching is disabled.
+
+The custom setup operations for the UDF can be written inside the function in the child class. If no custom logic is required, then you can just write `pass` in the function definition.
+
+Example of the `setup` function:
 
 .. code-block:: python
 
@@ -55,20 +56,17 @@ Example of the setup function
 Forward
 --------
 
-An abstract method that must be implemented in your child class.
-The forward function receives the frames and runs the Deep Learning model on the frames. 
-The logic for transforming the frames and running the models must be provided by you.
-The arguments that need to be passed are
+An abstract method that must be implemented in your child class. The `forward` function receives the frames and runs the Deep Learning model on the frames. The logic for transforming the frames and running the models must be provided by you. The arguments that need to be passed are:
 
-- input_signatures: List[IOColumnArgument] 
-   
-  Data types of the inputs to the forward function must be specified. If no constraints are given, then no validation is done for the inputs.
+- `input_signatures`: List[IOColumnArgument]
 
-- output_signatures: List[IOColumnArgument]
+  Data types of the inputs to the `forward` function must be specified. If no constraints are given, then no validation is done for the inputs.
 
-  Data types of the outputs to the forward function must be specified. If no constraints are given, then no validation is done for the inputs.
+- `output_signatures`: List[IOColumnArgument]
 
-A sample forward function is given below
+  Data types of the outputs to the `forward` function must be specified. If no constraints are given, then no validation is done for the inputs.
+
+A sample `forward` function is given below:
 
 .. code-block:: python
     
@@ -105,7 +103,6 @@ A sample forward function is given below
                 for i in list(self.as_numpy(prediction["boxes"]))
             ]
 
-----------
 
 Part 2: Registering and using the UDF in queries
 ------------------------------------------------------
