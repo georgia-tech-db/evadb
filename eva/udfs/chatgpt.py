@@ -92,7 +92,7 @@ class ChatGPT(AbstractUDF):
 
             params = {
                 "model": self.model,
-                "temperatue": self.temperature,
+                "temperature": self.temperature,
                 "messages": [
                     {
                         "role": "user",
