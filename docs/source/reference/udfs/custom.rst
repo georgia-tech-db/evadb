@@ -7,9 +7,9 @@ This section provides an overview of how you can create and use a custom user-de
 Part 1: Writing a custom UDF
 ------------------------------
 
-During each step, use `this UDF implementation <https://github.com/georgia-tech-db/eva/blob/master/eva/udfs/decorators/yolo_object_detection_decorators.py>`_  as a reference.
+During each step, use the `UDF implementation <https://github.com/georgia-tech-db/eva/blob/master/eva/udfs/fastrcnn_object_detector.py>`_  as a reference.
 
-1. Create a new file under `udfs/` folder and give it a descriptive name. eg: `yolo_object_detection.py`. 
+1. Create a new file under `udfs/` folder and give it a descriptive name. eg: `fastrcnn_object_detector.py`. 
 
   .. note::
 
@@ -44,11 +44,13 @@ Example of the setup function
 
 .. code-block:: python
 
-  @setup(cachable=True, udf_type="object_detection", batchable=True)
-  def setup(self, threshold=0.85):
-      #custom setup function that is specific for the UDF
-      self.threshold = threshold 
-      self.model = torch.hub.load("ultralytics/yolov5", "yolov5s", verbose=False)
+    @setup(cachable=True, udf_type="object_detection", batchable=True)
+    def setup(self, threshold=0.85):
+        self.threshold = threshold
+        self.model = torchvision.models.detection.fasterrcnn_resnet50_fpn(
+            weights="COCO_V1", progress=False
+        )
+        self.model.eval()
 
 Forward
 --------
@@ -71,46 +73,37 @@ A sample forward function is given below
 .. code-block:: python
     
     @forward(
-          input_signatures=[
-              PyTorchTensor(
-                  name="input_col",
-                  is_nullable=False,
-                  type=NdArrayType.FLOAT32,
-                  dimensions=(1, 3, 540, 960),
-              )
-          ],
-          output_signatures=[
-              PandasDataframe(
-                  columns=["labels", "bboxes", "scores"],
-                  column_types=[
-                      NdArrayType.STR,
-                      NdArrayType.FLOAT32,
-                      NdArrayType.FLOAT32,
-                  ],
-                  column_shapes=[(None,), (None,), (None,)],
-              )
-          ],
-      )
-      def forward(self, frames: Tensor) -> pd.DataFrame:
-        #the custom logic for the UDF
+        input_signatures=[
+            PyTorchTensor(
+                name="input_col",
+                is_nullable=False,
+                type=NdArrayType.FLOAT32,
+                dimensions=(1, 3, 540, 960),
+            )
+        ],
+        output_signatures=[
+            PandasDataframe(
+                columns=["labels", "bboxes", "scores"],
+                column_types=[
+                    NdArrayType.STR,
+                    NdArrayType.FLOAT32,
+                    NdArrayType.FLOAT32,
+                ],
+                column_shapes=[(None,), (None,), (None,)],
+            )
+        ],
+    )
+    def forward(self, frames: Tensor) -> pd.DataFrame:
+        predictions = self.model(frames)
         outcome = []
-
-        frames = torch.permute(frames, (0, 2, 3, 1))
-        predictions = self.model([its.cpu().detach().numpy() * 255 for its in frames])
-        
-        for i in range(frames.shape[0]):
-            single_result = predictions.pandas().xyxy[i]
-            pred_class = single_result["name"].tolist()
-            pred_score = single_result["confidence"].tolist()
-            pred_boxes = single_result[["xmin", "ymin", "xmax", "ymax"]].apply(
-                lambda x: list(x), axis=1
-            )
-
-            outcome.append(
-                {"labels": pred_class, "bboxes": pred_boxes, "scores": pred_score}
-            )
-
-        return pd.DataFrame(outcome, columns=["labels", "bboxes", "scores"])
+        for prediction in predictions:
+            pred_class = [
+                str(self.labels[i]) for i in list(self.as_numpy(prediction["labels"]))
+            ]
+            pred_boxes = [
+                [i[0], i[1], i[2], i[3]]
+                for i in list(self.as_numpy(prediction["boxes"]))
+            ]
 
 ----------
 
@@ -133,8 +126,8 @@ Now that you have implemented your UDF we need to register it in EVA. You can th
 
   .. code-block:: sql
 
-    CREATE UDF ObjectDetector
-    IMPL  'eva/udfs/decorators/yolo_object_detection_decorators.py';
+    CREATE UDF FastrcnnObjectDetector
+    IMPL  'eva/udfs/fastrcnn_object_detector.py';
     
 
   A status of 0 in the response denotes the successful registration of this UDF.
@@ -143,10 +136,10 @@ Now that you have implemented your UDF we need to register it in EVA. You can th
 
   .. code-block:: sql
 
-      SELECT ObjectDetector(data) FROM MyVideo WHERE id < 5;
+      SELECT FastrcnnObjectDetector(data) FROM MyVideo WHERE id < 5;
 
 3. You can drop the UDF when you no longer need it.
 
   .. code-block:: sql
 
-      DROP UDF IF EXISTS ObjectDetector;
+      DROP UDF IF EXISTS FastrcnnObjectDetector;
