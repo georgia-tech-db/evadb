@@ -1,12 +1,12 @@
-Video Database System
+EVA AI-Relational Database System
 ====
 
-Over the last decade, deep learning models have radically changed the world of computer vision. They are accurate on a variety of tasks ranging from image classification to emotion detection. However, there are two challenges that prevent a lot of users from benefiting from these models.
+Over the last decade, deep learning models have radically changed the world of computer vision and natural languague processing. They are accurate on a variety of tasks ranging from image classification to question answering. However, there are two challenges that prevent a lot of users from benefiting from these models.
 
 Usability and Application Maintainability
 ^^^^
 
-To use a vision model, the user must do a lot of imperative programming across low-level libraries, like OpenCV and PyTorch. This is a tedious process that often leads to a complex program or Jupyter Notebook that glues together these libraries to accomplish the given task. This programming complexity **prevents a lot of people who are experts in other domains from benefiting from these models**.
+To use a vision or language model, the user must do a lot of imperative programming across low-level libraries, like OpenCV, PyTorch, and Hugging Face. This is a tedious process that often leads to a complex program or Jupyter Notebook that glues together these libraries to accomplish the given task. This programming complexity **prevents a lot of people who are experts in other domains from benefiting from these models**.
 
 Historically, database systems have been successful because the **query language is simple enough** in its basic structure that users without prior experience are able to learn a usable subset of the language on their first sitting. EVA supports a declarative SQL-like query language, called EVAQL, that is designed to make it easier for users to leverage these models. With this query language, the user may **compose multiple models in a single query** to accomplish complicated tasks with **minimal programming**. 
 
