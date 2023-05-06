@@ -7,34 +7,34 @@ This section provides an overview of how you can create and use a custom user-de
 Part 1: Writing a Custom UDF
 ------------------------------
 
-During each step, use the [UDF implementation](https://github.com/georgia-tech-db/eva/blob/master/eva/udfs/fastrcnn_object_detector.py) as a reference.
+During each step, use the `UDF implementation <https://github.com/georgia-tech-db/eva/blob/master/eva/udfs/fastrcnn_object_detector.py>`_ as a reference.
 
 1. Create a new file under `udfs/` folder and give it a descriptive name, e.g., `fastrcnn_object_detector.py`.
 
    .. note::
 
-      UDFs packaged along with EVA are located inside the [udfs](https://github.com/georgia-tech-db/eva/tree/master/eva/udfs) folder.
+      UDFs packaged along with EVA are located inside the `udfs <https://github.com/georgia-tech-db/eva/tree/master/eva/udfs>`_ folder.
 
 2. Create a Python class that inherits from `PytorchClassifierAbstractUDF`.
 
-   - The `PytorchClassifierAbstractUDF` is a parent class that defines and implements standard methods for model inference.
-   - Implement the `setup` and `forward` functions in your child class. These functions can be implemented with the help of decorators.
+   - The ``PytorchClassifierAbstractUDF`` is a parent class that defines and implements standard methods for model inference.
+   - Implement the ``setup`` and ``forward`` functions in your child class. These functions can be implemented with the help of decorators.
 
 Setup
 -----
 
 An abstract method that must be implemented in your child class. The `setup` function can be used to initialize the parameters for executing the UDF. The following parameters must be set:
 
-- `cacheable`: bool
+- ``cacheable``: bool
 
   - `True`: Cache should be enabled. The cache will be automatically invalidated when the UDF changes.
   - `False`: Cache should not be enabled.
 
-- `udf_type`: str
+- ``udf_type``: str
 
   - `object_detection`: UDFs for object detection.
 
-- `batchable`: bool
+- ``batchable``: bool
 
   - `True`: Batching should be enabled.
   - `False`: Batching is disabled.
@@ -53,20 +53,22 @@ Example of the `setup` function:
         )
         self.model.eval()
 
+In this instance, we have configured the `cachable` and `batchable` attributes to `True`. As a result, EVA will cache the UDF outputs and utilize batch processing for increased efficiency.
+
 Forward
 --------
 
 An abstract method that must be implemented in your child class. The `forward` function receives the frames and runs the Deep Learning model on the frames. The logic for transforming the frames and running the models must be provided by you. The arguments that need to be passed are:
 
-- `input_signatures`: List[IOColumnArgument]
+- ``input_signatures``: List[IOColumnArgument]
 
-  Data types of the inputs to the `forward` function must be specified. If no constraints are given, then no validation is done for the inputs.
+  Data types of the inputs to the `forward` function must be specified. If no constraints are given, no validation is done for the inputs.
 
-- `output_signatures`: List[IOColumnArgument]
+- ``output_signatures``: List[IOColumnArgument]
 
-  Data types of the outputs to the `forward` function must be specified. If no constraints are given, then no validation is done for the inputs.
+  Data types of the outputs from the `forward` function must be specified. If no constraints are given, no validation is done for the inputs.
 
-A sample `forward` function is given below:
+A sample ``forward`` function is given below:
 
 .. code-block:: python
     
@@ -103,40 +105,46 @@ A sample `forward` function is given below:
                 for i in list(self.as_numpy(prediction["boxes"]))
             ]
 
+In this instance, the forward function takes a PyTorch tensor of Float32 type with a shape of (1, 3, 540, 960) as input. The resulting output is a pandas dataframe with 3 columns, namely "labels", "bboxes", and "scores", and of string, float32, and float32 types respectively.
+
 
 Part 2: Registering and using the UDF in queries
 ------------------------------------------------------
 
 Now that you have implemented your UDF we need to register it in EVA. You can then use the function in any query.
 
-1. Register the UDF with a query that follows this template:
+Register the UDF in EVA
+~~~~~~~~~~~~~~~~~~~~~~~~
 
-    `CREATE UDF [ IF NOT EXISTS ] <name>
-    IMPL <path_to_implementation>;`
+.. code-block:: sql
 
-  where,
+  CREATE UDF [ IF NOT EXISTS ] <name>
+  IMPL <implementation_path>;
 
-        * <name> - specifies the unique identifier for the UDF.
-        * <path_to_implementation> - specifies the path to the implementation class for the UDF
 
-  Here, is an example query that registers a UDF that wraps around the 'ObjectDetector' model that performs Object Detection.
+``name`` - specifies the unique identifier for the UDF.
 
-  .. code-block:: sql
+``implementation_path`` - specifies the path to the implementation class for the UDF
 
-    CREATE UDF FastrcnnObjectDetector
-    IMPL  'eva/udfs/fastrcnn_object_detector.py';
+Here, is an example query that registers a UDF that wraps around the ``fasterrcnn_resnet50_fpn`` model that performs Object Detection.
+
+.. code-block:: sql
+
+  CREATE UDF FastrcnnObjectDetector
+  IMPL  'eva/udfs/fastrcnn_object_detector.py';
     
 
-  A status of 0 in the response denotes the successful registration of this UDF.
 
-2. Now you can execute your UDF on any video:
+Call registered UDF in a query
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  .. code-block:: sql
+.. code-block:: sql
 
-      SELECT FastrcnnObjectDetector(data) FROM MyVideo WHERE id < 5;
+  SELECT FastrcnnObjectDetector(data) FROM MyVideo WHERE id < 5;
 
-3. You can drop the UDF when you no longer need it.
+Drop the UDF
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  .. code-block:: sql
+.. code-block:: sql
 
-      DROP UDF IF EXISTS FastrcnnObjectDetector;
+  DROP UDF IF EXISTS FastrcnnObjectDetector;
