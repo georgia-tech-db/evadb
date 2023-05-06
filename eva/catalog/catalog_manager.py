@@ -74,12 +74,10 @@ class CatalogManager(object):
     def reset(self):
         """
         This method resets the state of the singleton instance.
-        It should drop the catalog table and reinitialize all the member
-        variables and services.
+        It should clear the contents of the catalog tables and any storage data
+        Used by testcases to reset the db state before
         """
-        self._shutdown_catalog()
-        self._bootstrap_catalog()
-        self.__init__()
+        self._clear_catalog_contents()
 
     def _bootstrap_catalog(self):
         """Bootstraps catalog.
