@@ -21,10 +21,9 @@ from eva.parser.types import ShowType
 ##################################################################
 class Show:
     def show_statement(self, tree):
-
         token = tree.children[1]
 
-        if token == "UDFS":
+        if str.upper(token) == "UDFS":
             return ShowStatement(show_type=ShowType.UDFS)
-        elif token == "TABLES":
+        elif str.upper(token) == "TABLES":
             return ShowStatement(show_type=ShowType.TABLES)

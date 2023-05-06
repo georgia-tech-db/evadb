@@ -13,7 +13,7 @@ executor:
   # batch size used for gpu_operations
   gpu_batch_size: 1
 
-  gpu_ids: [0, 1]
+  gpu_ids: [0]
 
 storage:
   tmp_dir: ""
@@ -28,3 +28,6 @@ server:
 
 experimental:
   ray: False
+
+third_party:
+  openai_api_key: ""
