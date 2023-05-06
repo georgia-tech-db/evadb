@@ -40,12 +40,15 @@ parts:
 
       - file: source/reference/udf
         title: User-Defined Functions
+        sections:
+          - file: source/reference/udfs/yolo
+          - file: source/reference/udfs/hf
+          - file: source/reference/udfs/openai
+          - file: source/reference/udfs/custom
+
 
       - file: source/reference/io
         title: IO Descriptors
-
-      - file: source/reference/hf
-        title: HuggingFace
 
       - file: source/reference/gpu
         title: Configure GPU

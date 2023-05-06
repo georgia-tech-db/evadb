@@ -1,11 +1,12 @@
-HuggingFace Models in EVA
+HuggingFace Models
 ======================
 
 This section provides an overview of how you can use out-of-the-box HuggingFace models in EVA.
 
 
 Creating UDF from HuggingFace
------
+------------------------------
+
 EVA supports UDFS similar to `Pipelines <https://huggingface.co/docs/transformers/main_classes/pipelines>`_  in HuggingFace. 
 
 .. code-block:: sql
