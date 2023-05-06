@@ -21,6 +21,7 @@ from unittest.mock import patch
 
 import eva
 from eva.udfs.abstract.abstract_udf import AbstractUDF
+from eva.udfs.yolo_object_detector import Yolo
 
 
 class AbstractUDFTest(unittest.TestCase):
@@ -30,6 +31,9 @@ class AbstractUDFTest(unittest.TestCase):
         derived_udf_classes = list(get_all_subclasses(AbstractUDF))
         # Go over each derived class of AbstractUDF
         for derived_udf_class in derived_udf_classes:
+            # skip yolo to avoid downloading model
+            if derived_udf_class == Yolo:
+                continue
             if isabstract(derived_udf_class) is False:
                 class_type = derived_udf_class
                 # Check class init signature

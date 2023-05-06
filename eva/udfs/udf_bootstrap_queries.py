@@ -107,15 +107,10 @@ Fastrcnn_udf_query = """CREATE UDF IF NOT EXISTS FastRCNNObjectDetector
     EVA_INSTALLATION_DIR
 )
 
-YoloV5_udf_query = """CREATE UDF IF NOT EXISTS YoloV5
-      INPUT  (Frame_Array NDARRAY UINT8(3, ANYDIM, ANYDIM))
-      OUTPUT (labels NDARRAY STR(ANYDIM), bboxes NDARRAY FLOAT32(ANYDIM, 4),
-                scores NDARRAY FLOAT32(ANYDIM))
-      TYPE  Classification
-      IMPL  '{}/udfs/yolo_object_detector.py';
-      """.format(
-    EVA_INSTALLATION_DIR
-)
+Yolo_udf_query = """CREATE UDF IF NOT EXISTS Yolo
+      TYPE  ultralytics
+      'model' 'yolov8m.pt';
+      """
 
 ocr_udf_query = """CREATE UDF IF NOT EXISTS OCRExtractor
       INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
@@ -162,14 +157,20 @@ norfair_obj_tracker_query = """CREATE UDF IF NOT EXISTS NorFairTracker
 )
 
 
-def init_builtin_udfs(mode="debug"):
+def init_builtin_udfs(mode: str = "debug") -> None:
+    """Load the built-in UDFs into the system during system bootstrapping.
+
+    The function loads a set of pre-defined UDF queries based on the `mode` argument.
+    In 'debug' mode, the function loads debug UDFs along with release UDFs.
+    In 'release' mode, only release UDFs are loaded. In addition, in 'debug' mode,
+    the function loads a smaller model to accelerate the test suite time.
+
+    Args:
+        mode (str, optional): The mode for loading UDFs, either 'debug' or 'release'.
+        Defaults to 'debug'.
+
     """
-    Loads the builtin udfs into the system.
-    This should be called when the system bootstraps.
-    In debug mode, it also loads udfs used in the test suite.
-    Arguments:
-        mode (str): 'debug' or 'release'
-    """
+    # list of UDF queries to load
     queries = [
         Fastrcnn_udf_query,
         ArrayCount_udf_query,
@@ -180,10 +181,14 @@ def init_builtin_udfs(mode="debug"):
         # Disabled because required packages (eg., easy_ocr might not be preinstalled)
         # face_detection_udf_query,
         # ocr_udf_query,
-        # Disabled as it requires specific pytorch package
-        # Mvit_udf_query,
+        # Mvit_udf_query, - Disabled as it requires specific pytorch package
     ]
-    if mode != "release":
+
+    if mode == "release":
+        # if mode is 'release', add the Yolo query to the list
+        queries.append(Yolo_udf_query)
+    else:
+        # if mode is 'debug', add debug UDFs and a smaller Yolo model
         queries.extend(
             [
                 DummyObjectDetector_udf_query,
@@ -192,8 +197,12 @@ def init_builtin_udfs(mode="debug"):
             ]
         )
 
-    if mode != "minimal":
-        queries.extend([YoloV5_udf_query])
+        yolo8n = """CREATE UDF IF NOT EXISTS Yolo
+            TYPE  ultralytics
+            'model' 'yolov8n.pt';
+        """
+        queries.append(yolo8n)
 
+    # execute each query in the list of UDF queries
     for query in queries:
         execute_query_fetch_all(query)

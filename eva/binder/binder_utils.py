@@ -23,7 +23,6 @@ from eva.catalog.catalog_utils import (
     is_string_col,
     is_video_table,
 )
-from eva.catalog.sql_config import IDENTIFIER_COLUMN
 from eva.expression.function_expression import FunctionExpression
 from eva.parser.alias import Alias
 
@@ -89,7 +88,6 @@ def extend_star(
         [
             TupleValueExpression(col_name=col_name, table_alias=alias)
             for alias, col_name in col_objs
-            if col_name != IDENTIFIER_COLUMN
         ]
     )
     return target_list

@@ -1,140 +1,149 @@
 User-Defined Functions
 ======================
 
-This section provides an overview of how you can create and use a custom user-defined function (UDF) in your queries. For example, you could write an UDF that wraps around a PyTorch model.
-
+This section provides an overview of how you can create and use a custom user-defined function (UDF) in your queries. For example, you could write an UDF that wraps around your custom PyTorch model.
 
 Part 1: Writing a custom UDF
------
+------------------------------
 
-.. admonition:: Illustrative UDF implementation
+During each step, use `this UDF implementation <https://github.com/georgia-tech-db/eva/blob/master/eva/udfs/decorators/yolo_object_detection_decorators.py>`_  as a reference.
 
-    During each step, use `this UDF implementation <https://github.com/georgia-tech-db/eva/blob/master/eva/udfs/fastrcnn_object_detector.py>`_  as a reference.
+1. Create a new file under `udfs/` folder and give it a descriptive name. eg: `yolo_object_detection.py`. 
 
-1. Create a new file under `udfs/` folder and give it a descriptive name. eg: `fastrcnn_object_detector.py`, `midas_depth_estimator.py`. 
+  .. note::
 
-.. note::
-
-    UDFs packaged along with EVA are located inside the `udfs <https://github.com/georgia-tech-db/eva/tree/master/eva/udfs>`_ folder.
+      UDFs packaged along with EVA are located inside the `udfs <https://github.com/georgia-tech-db/eva/tree/master/eva/udfs>`_ folder.
 
 2. Create a Python class that inherits from `PytorchClassifierAbstractUDF`.
 
 * The `PytorchClassifierAbstractUDF` is a parent class that defines and implements standard methods for model inference.
 
-* `_get_predictions()` - an abstract method that needs to be implemented in your child class.
+* The functions setup and forward should be implemented in your child class. These functions can be implemented with the help of Decorators.
 
-* `classify()` - A  method that receives the frames and calls the `_get_predictions()` implemented in your child class. Based on GPU batch size, it also decides whether to split frames into chunks and performs the accumulation.
+Setup
+-----
 
-* Additionally, it contains methods that help in:
+An abstract method that must be implemented in your child class. The setup function can be used to initialize the parameters for executing the UDF. The parameters that need to be set are 
 
-    * Moving tensors to GPU
-    * Converting tensors to numpy arrays.
-    * Defining the `forward()` function that gets called when the model is invoked.
-    * Basic transformations.
+- cacheable: bool
+ 
+  - True: Cache should be enabled. Cache will be automatically invalidated when the UDF changes.
+  - False: cache should not be enabled.
+- udf_type: str
+  
+  - object_detection: UDFs for object detection.
+- batchable: bool
+  
+  - True: Batching should be enabled
+  - False: Batching is disabled.
 
+The custom setup operations for the UDF can be written inside the function in the child class. If there is no need for any custom logic, then you can just simply write "pass" in the function definition.
 
-You can however **choose to override** these methods depending on your requirements.
+Example of a Setup function
 
-3.  A typical UDF class has the following components:
+.. code-block:: python
 
-* `__init__()` constructor:
+  @setup(cachable=True, udf_type="object_detection", batchable=True)
+  def setup(self, threshold=0.85):
+      #custom setup function that is specific for the UDF
+      self.threshold = threshold 
+      self.model = torch.hub.load("ultralytics/yolov5", "yolov5s", verbose=False)
 
-    * Define variables here that will be required across all methods.
-    * Model loading happens here. You can choose to load custom models or models from torch.
+Forward
+--------
 
-        * Example of loading a custom model:
-            .. code-block:: python
+An abstract method that must be implemented in your UDF. The forward function receives the frames and runs the deep learning model on the data. The logic for transforming the frames and running the models must be provided by you.
+The arguments that need to be passed are
 
-                custom_model_path = os.path.join(EVA_DIR, "data", "models", "vehicle_make_predictor", "car_recognition.pt")
-                self.car_make_model = CarRecognitionModel()
-                self.car_make_model.load_state_dict(torch.load(custom_model_path))
-                self.car_make_model.eval()
+- input_signatures: List[IOColumnArgument] 
+   
+  Data types of the inputs to the forward function must be specified. If no constraints are given, then no validation is done for the inputs.
 
-        * Example of loading a torch model:
-            .. code-block:: python
+- output_signatures: List[IOColumnArgument]
 
-                self.model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=True)
-                self.model.eval()
+  Data types of the outputs to the forward function must be specified. If no constraints are given, then no validation is done for the inputs.
 
-* `labels()` method:
+A sample forward function is given below
 
-    * This should return a list of strings that your model aims to target.
-    * The index of the list is the value predicted by your model.
+.. code-block:: python
+    
+    @forward(
+          input_signatures=[
+              PyTorchTensor(
+                  name="input_col",
+                  is_nullable=False,
+                  type=NdArrayType.FLOAT32,
+                  dimensions=(1, 3, 540, 960),
+              )
+          ],
+          output_signatures=[
+              PandasDataframe(
+                  columns=["labels", "bboxes", "scores"],
+                  column_types=[
+                      NdArrayType.STR,
+                      NdArrayType.FLOAT32,
+                      NdArrayType.FLOAT32,
+                  ],
+                  column_shapes=[(None,), (None,), (None,)],
+              )
+          ],
+      )
+      def forward(self, frames: Tensor) -> pd.DataFrame:
+        #the custom logic for the UDF
+        outcome = []
 
-* `_get_predictions()` method:
+        frames = torch.permute(frames, (0, 2, 3, 1))
+        predictions = self.model([its.cpu().detach().numpy() * 255 for its in frames])
+        
+        for i in range(frames.shape[0]):
+            single_result = predictions.pandas().xyxy[i]
+            pred_class = single_result["name"].tolist()
+            pred_score = single_result["confidence"].tolist()
+            pred_boxes = single_result[["xmin", "ymin", "xmax", "ymax"]].apply(
+                lambda x: list(x), axis=1
+            )
 
-    * This is where all your model inference logic goes.
-    * While doing the computations, keep in mind that each call of this method is with a batch of frames.
-    * Output from each invoke of the model needs to be appended to a dataframe and returned as follows:
-        .. code-block:: python
+            outcome.append(
+                {"labels": pred_class, "bboxes": pred_boxes, "scores": pred_score}
+            )
 
-            predictions = self.model(frames)
-            outcome = pd.DataFrame()
-            for prediction in predictions:
-
-                ## YOUR INFERENCE LOGIC
-
-                # column names depend on your implementation
-                outcome = outcome.append(
-                    {
-                        "labels": pred_class,
-                        "scores": pred_score,
-                        "boxes": pred_boxes
-                    },
-                    ignore_index=True)
-
-In case you have any other functional requirements (defining custom transformations etc.) you can choose to add more methods. Make sure each method you write is clear, concise and well-documented.
+        return pd.DataFrame(outcome, columns=["labels", "bboxes", "scores"])
 
 ----------
 
-Part 2: Registering and using the UDF in queries
--------
+Part 2: Registering and using the UDF in EVA Queries
+------------------------------------------------------
 
-Now that you have implemented your UDF we need to register it in EVA. You can then use the function in any query.
+Now that you have implemented your UDF, we need to register it as a UDF in EVA. You can then use the UDF in any query.
 
 1. Register the UDF with a query that follows this template:
 
     `CREATE UDF [ IF NOT EXISTS ] <name>
-     INPUT  ( [ <arg_name> <arg_data_type> ] [ , ... ] )
-     OUTPUT ( [ <result_name> <result_data_type> ] [ , ... ] )
-     TYPE  <udf_type_name>
-     IMPL  '<path_to_implementation>'`
+    IMPL <path_to_implementation>;`
 
-    where,
+  where,
 
-        * **<name>** - specifies the unique identifier for the UDF.
-        * **[ <arg_name> <arg_data_type> ] [ , ... ]** - specifies the name and data type of the udf input arguments. Name is kept for consistency (ignored by eva right now), arguments data type is required. ANYDIM means the shape is inferred at runtime.
-        * **[ <result_name> <result_data_type> ] [ , ... ]** - specifies the name and data type of the udf output arguments. Users can access a specific output of the UDF similar to access a column of a table. Eg. <name>.<result_name>
-        * **<udf_type_name>** - specifies the identifier for the type of the UDF. UDFs of the same type are assumed to be interchangeable. They should all have identical input and output arguments. For example, object classification can be one type.
-        * **<path_to_implementation>** - specifies the path to the implementation class for the UDF
+        * <name> - specifies the unique identifier for the UDF.
+        * <path_to_implementation> - specifies the path to the implementation class for the UDF
 
-    Here, is an example query that registers a UDF that wraps around the 'FastRCNNObjectDetector' model that performs Object Detection.
+  Here, is an example query that registers a UDF that wraps around the 'YoloObjectDetection' model that performs Object Detection.
 
-        .. code-block:: sql
+  .. code-block:: sql
 
-            CREATE UDF IF NOT EXISTS FastRCNNObjectDetector
-            INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
-            OUTPUT (labels NDARRAY STR(ANYDIM), bboxes NDARRAY FLOAT32(ANYDIM, 4),
-                    scores NDARRAY FLOAT32(ANYDIM))
-            TYPE  Classification
-            IMPL  'eva/udfs/fastrcnn_object_detector.py';
+    CREATE UDF YoloDecorators
+    IMPL  'eva/udfs/decorators/yolo_object_detection_decorators.py';
+    
 
-    * Input is a frame of type NDARRAY with shape (3, ANYDIM, ANYDIM). 3 channels and any width or height.
-    * We return 3 variables for this UDF:
-        * `labels`: Predicted label
-        * `bboxes`: Bounding box of this object (rectangle coordinates)
-        * `scores`: Confidence scores for this prediction
+  A status of 0 in the response denotes the successful registration of this UDF.
 
-    A status of 0 in the response denotes the successful registration of this UDF.
+2. Now you can execute your UDF on any video:
 
-3. Now you can execute your UDF on any video:
+  .. code-block:: sql
 
-.. code-block:: sql
+      SELECT YoloDecorators(data) FROM MyVideo WHERE id < 5;
 
-    SELECT id, Unnest(FastRCNNObjectDetector(data)) FROM MyVideo;
+3. You can drop the UDF when you no longer need it.
 
-4. You can drop the UDF when you no longer need it.
+  .. code-block:: sql
 
-.. code-block:: sql
-
-    DROP UDF IF EXISTS FastRCNNObjectDetector;
+      DROP UDF IF EXISTS YoloDecorators;

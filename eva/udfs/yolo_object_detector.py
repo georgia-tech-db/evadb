@@ -12,171 +12,91 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import logging
-from typing import List
-
+import numpy as np
 import pandas as pd
 
-from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
+from eva.catalog.catalog_type import NdArrayType
+from eva.udfs.abstract.abstract_udf import AbstractUDF
+from eva.udfs.decorators.decorators import forward, setup
+from eva.udfs.decorators.io_descriptors.data_types import PandasDataframe
+from eva.udfs.gpu_compatible import GPUCompatible
 
 try:
-    import torch
-    from torch import Tensor
-
+    from ultralytics import YOLO
 except ImportError as e:
     raise ImportError(
         f"Failed to import with error {e}, \
-        please try `pip install torch`"
+        please try `pip install ultralytics`"
     )
 
 
-class YoloV5(PytorchAbstractClassifierUDF):
+class Yolo(AbstractUDF, GPUCompatible):
     """
     Arguments:
         threshold (float): Threshold for classifier confidence score
-
     """
 
     @property
     def name(self) -> str:
         return "yolo"
 
-    def setup(self, threshold=0.85):
-        logging.getLogger("yolov5").setLevel(logging.CRITICAL)  # yolov5
+    @setup(cachable=True, udf_type="object_detection", batchable=True)
+    def setup(self, model: str, threshold=0.3):
         self.threshold = threshold
-        self.model = torch.hub.load("ultralytics/yolov5", "yolov5s", verbose=False)
+        self.model = YOLO(model)
+        self.device = "cpu"
 
-    @property
-    def labels(self) -> List[str]:
-        return [
-            "__background__",
-            "person",
-            "bicycle",
-            "car",
-            "motorcycle",
-            "airplane",
-            "bus",
-            "train",
-            "truck",
-            "boat",
-            "traffic light",
-            "fire hydrant",
-            "N/A",
-            "stop sign",
-            "parking meter",
-            "bench",
-            "bird",
-            "cat",
-            "dog",
-            "horse",
-            "sheep",
-            "cow",
-            "elephant",
-            "bear",
-            "zebra",
-            "giraffe",
-            "N/A",
-            "backpack",
-            "umbrella",
-            "N/A",
-            "N/A",
-            "handbag",
-            "tie",
-            "suitcase",
-            "frisbee",
-            "skis",
-            "snowboard",
-            "sports ball",
-            "kite",
-            "baseball bat",
-            "baseball glove",
-            "skateboard",
-            "surfboard",
-            "tennis racket",
-            "bottle",
-            "N/A",
-            "wine glass",
-            "cup",
-            "fork",
-            "knife",
-            "spoon",
-            "bowl",
-            "banana",
-            "apple",
-            "sandwich",
-            "orange",
-            "broccoli",
-            "carrot",
-            "hot dog",
-            "pizza",
-            "donut",
-            "cake",
-            "chair",
-            "couch",
-            "potted plant",
-            "bed",
-            "N/A",
-            "dining table",
-            "N/A",
-            "N/A",
-            "toilet",
-            "N/A",
-            "tv",
-            "laptop",
-            "mouse",
-            "remote",
-            "keyboard",
-            "cell phone",
-            "microwave",
-            "oven",
-            "toaster",
-            "sink",
-            "refrigerator",
-            "N/A",
-            "book",
-            "clock",
-            "vase",
-            "scissors",
-            "teddy bear",
-            "hair drier",
-            "toothbrush",
-        ]
-
-    def forward(self, frames: Tensor) -> pd.DataFrame:
+    @forward(
+        input_signatures=[
+            PandasDataframe(
+                columns=["data"],
+                column_types=[NdArrayType.FLOAT32],
+                column_shapes=[(None, None, 3)],
+            )
+        ],
+        output_signatures=[
+            PandasDataframe(
+                columns=["labels", "bboxes", "scores"],
+                column_types=[
+                    NdArrayType.STR,
+                    NdArrayType.FLOAT32,
+                    NdArrayType.FLOAT32,
+                ],
+                column_shapes=[(None,), (None,), (None,)],
+            )
+        ],
+    )
+    def forward(self, frames: pd.DataFrame) -> pd.DataFrame:
         """
         Performs predictions on input frames
         Arguments:
             frames (np.ndarray): Frames on which predictions need
             to be performed
-
         Returns:
             tuple containing predicted_classes (List[List[str]]),
             predicted_boxes (List[List[BoundingBox]]),
             predicted_scores (List[List[float]])
-
         """
-        # Stacking all frames, and changing to numpy
-        # because of yolov5 error with Tensors
-
         outcome = []
-        # Convert to HWC
-        # https://github.com/ultralytics/yolov5/blob/3e55763d45f9c5f8217e4dad5ba1e6c1f42e3bf8/models/common.py#L658
-        frames = torch.permute(frames, (0, 2, 3, 1))
-        predictions = self.model([its.cpu().detach().numpy() * 255 for its in frames])
-
-        for i in range(frames.shape[0]):
-            single_result = predictions.pandas().xyxy[i]
-            pred_class = single_result["name"].tolist()
-            pred_score = single_result["confidence"].tolist()
-            pred_boxes = single_result[["xmin", "ymin", "xmax", "ymax"]].apply(
-                lambda x: list(x), axis=1
-            )
-
+        # Fix me: this should be taken care by decorators
+        frames = np.ravel(frames.to_numpy())
+        list_of_numpy_images = [its for its in frames]
+        predictions = self.model.predict(
+            list_of_numpy_images, device=self.device, conf=self.threshold, verbose=False
+        )
+        for pred in predictions:
+            single_result = pred.boxes
+            pred_class = [self.model.names[i] for i in single_result.cls.tolist()]
+            pred_score = single_result.conf.tolist()
+            pred_score = [round(conf, 2) for conf in single_result.conf.tolist()]
+            pred_boxes = single_result.xyxy.tolist()
+            sorted_list = list(map(lambda i: i < self.threshold, pred_score))
+            t = sorted_list.index(True) if True in sorted_list else len(sorted_list)
             outcome.append(
                 {
-                    "labels": pred_class,
-                    "bboxes": pred_boxes,
-                    "scores": pred_score,
+                    "labels": pred_class[:t],
+                    "bboxes": pred_boxes[:t],
+                    "scores": pred_score[:t],
                 },
             )
         return pd.DataFrame(
@@ -187,3 +107,7 @@ class YoloV5(PytorchAbstractClassifierUDF):
                 "scores",
             ],
         )
+
+    def to_device(self, device: str):
+        self.device = device
+        return self

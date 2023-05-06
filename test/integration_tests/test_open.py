@@ -37,7 +37,7 @@ class OpenTests(unittest.TestCase):
         CatalogManager().reset()
         ConfigurationManager()
         # Load built-in UDFs.
-        load_udfs_for_testing(mode="minimal")
+        load_udfs_for_testing(mode="debug")
 
         # Insert image path.
         self.img_path = create_sample_image()

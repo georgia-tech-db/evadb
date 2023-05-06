@@ -54,18 +54,22 @@ class SelectExecutorTest(unittest.TestCase):
         cls.table2 = create_table("table2", 500, 3)
         cls.table3 = create_table("table3", 1000, 3)
 
+        cls.meme1 = f"{EVA_ROOT_DIR}/data/detoxify/meme1.jpg"
+        cls.meme2 = f"{EVA_ROOT_DIR}/data/detoxify/meme2.jpg"
+
+        execute_query_fetch_all(f"LOAD IMAGE '{cls.meme1}' INTO MemeImages;")
+        execute_query_fetch_all(f"LOAD IMAGE '{cls.meme2}' INTO MemeImages;")
+
     @classmethod
     def tearDownClass(cls):
         shutdown_ray()
 
         file_remove("dummy.avi")
-        drop_query = """DROP TABLE table1;"""
-        execute_query_fetch_all(drop_query)
-        drop_query = """DROP TABLE table2;"""
-        execute_query_fetch_all(drop_query)
-        drop_query = """DROP TABLE table3;"""
-        execute_query_fetch_all(drop_query)
+        execute_query_fetch_all("""DROP TABLE IF EXISTS table1;""")
+        execute_query_fetch_all("""DROP TABLE IF EXISTS table2;""")
+        execute_query_fetch_all("""DROP TABLE IF EXISTS table3;""")
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
+        execute_query_fetch_all("DROP TABLE IF EXISTS MemeImages;")
 
     def test_sort_on_nonprojected_column(self):
         """This tests doing an order by on a column
@@ -143,7 +147,7 @@ class SelectExecutorTest(unittest.TestCase):
     @unittest.skip("Not supported in current version")
     def test_select_star_in_lateral_join(self):
         select_query = """SELECT * FROM MyVideo JOIN LATERAL
-                          YoloV5(data);"""
+                          Yolo(data);"""
         actual_batch = execute_query_fetch_all(select_query)
         self.assertEqual(actual_batch.frames.columns, ["myvideo.id"])
 
@@ -437,7 +441,7 @@ class SelectExecutorTest(unittest.TestCase):
     @pytest.mark.torchtest
     def test_lateral_join(self):
         select_query = """SELECT id, a FROM DETRAC JOIN LATERAL
-                        YoloV5(data) AS T(a,b,c) WHERE id < 5;"""
+                        Yolo(data) AS T(a,b,c) WHERE id < 5;"""
         actual_batch = execute_query_fetch_all(select_query)
         self.assertEqual(list(actual_batch.columns), ["detrac.id", "T.a"])
         self.assertEqual(len(actual_batch), 5)
@@ -445,7 +449,7 @@ class SelectExecutorTest(unittest.TestCase):
     @pytest.mark.torchtest
     def test_lateral_join_with_multiple_projects(self):
         select_query = """SELECT id, T.labels FROM DETRAC JOIN LATERAL
-                        YoloV5(data) AS T WHERE id < 5;"""
+                        Yolo(data) AS T WHERE id < 5;"""
         actual_batch = execute_query_fetch_all(select_query)
         self.assertTrue(all(actual_batch.frames.columns == ["detrac.id", "T.labels"]))
         self.assertEqual(len(actual_batch), 5)
@@ -702,3 +706,48 @@ class SelectExecutorTest(unittest.TestCase):
 
         expected = execute_query_fetch_all(query_and)
         self.assertEqual(len(expected), 0)
+
+    def test_project_identifier_column(self):
+        # test for video table
+        batch = execute_query_fetch_all("SELECT _row_id, id FROM MyVideo;")
+        expected = Batch(
+            pd.DataFrame(
+                {
+                    "myvideo._row_id": [1] * NUM_FRAMES,
+                    "myvideo.id": range(NUM_FRAMES),
+                }
+            )
+        )
+        self.assertEqual(batch, expected)
+
+        batch = execute_query_fetch_all("SELECT * FROM MyVideo;")
+        self.assertTrue("myvideo._row_id" in batch.columns)
+
+        # test for image table
+        batch = execute_query_fetch_all("SELECT _row_id, name FROM MemeImages;")
+        expected = Batch(
+            pd.DataFrame(
+                {
+                    "memeimages._row_id": [1, 2],
+                    "memeimages.name": [self.meme1, self.meme2],
+                }
+            )
+        )
+        self.assertEqual(batch, expected)
+
+        batch = execute_query_fetch_all("SELECT * FROM MemeImages;")
+        self.assertTrue("memeimages._row_id" in batch.columns)
+
+        # test for structural table
+        batch = execute_query_fetch_all("SELECT _row_id FROM table1;")
+        expected = Batch(
+            pd.DataFrame(
+                {
+                    "table1._row_id": range(1, 101),
+                }
+            )
+        )
+        self.assertEqual(batch, expected)
+
+        batch = execute_query_fetch_all("SELECT * FROM table1;")
+        self.assertTrue("table1._row_id" in batch.columns)

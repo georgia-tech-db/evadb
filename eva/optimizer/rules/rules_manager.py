@@ -27,6 +27,8 @@ from eva.experimental.ray.optimizer.rules.rules import (
 )
 from eva.optimizer.rules.rules import (
     CacheFunctionExpressionInApply,
+    CacheFunctionExpressionInFilter,
+    CacheFunctionExpressionInProject,
     CombineSimilarityOrderByAndLimitToFaissIndexScan,
     EmbedFilterIntoGet,
     EmbedSampleIntoGet,
@@ -79,6 +81,8 @@ class RulesManager:
         self._logical_rules = [
             LogicalInnerJoinCommutativity(),
             CacheFunctionExpressionInApply(),
+            CacheFunctionExpressionInFilter(),
+            CacheFunctionExpressionInProject(),
         ]
 
         self._stage_one_rewrite_rules = [
