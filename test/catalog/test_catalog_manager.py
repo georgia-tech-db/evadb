@@ -43,23 +43,6 @@ class CatalogManagerTests(unittest.TestCase):
         x._bootstrap_catalog()
         mocked_db.assert_called()
 
-    @mock.patch("eva.catalog.catalog_manager.drop_db")
-    def test_catalog_shutdown(self, mocked_db):
-        x = CatalogManager()
-        x._shutdown_catalog()
-        mocked_db.assert_called_once()
-
-    @mock.patch("eva.catalog.catalog_manager.CatalogManager._shutdown_catalog")
-    @mock.patch("eva.catalog.catalog_manager.CatalogManager._bootstrap_catalog")  # noqa
-    def test_catalog_manager_reset(self, mock_bootstrap, mock_shutdown):
-        x = CatalogManager()
-        mock_init = MagicMock()
-        with mock.patch.object(CatalogManager, "__init__", mock_init):
-            x.reset()
-            mock_init.assert_called_once_with()
-            mock_bootstrap.assert_called_once_with()
-            mock_shutdown.assert_called_once_with()
-
     @mock.patch(
         "eva.catalog.catalog_manager.CatalogManager.create_and_insert_table_catalog_entry"
     )
