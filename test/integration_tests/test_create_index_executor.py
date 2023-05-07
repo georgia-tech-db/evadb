@@ -63,35 +63,16 @@ class CreateIndexTest(unittest.TestCase):
         input3 = np.array([[200, 200, 200]]).astype(np.uint8)
 
         # Create table.
-        feat_col_list = [
-            ColumnDefinition("feat", ColumnType.NDARRAY, NdArrayType.FLOAT32, (1, 3)),
-        ]
-        feat_col_entries = xform_column_definitions_to_catalog_entries(feat_col_list)
-
-        input_col_list = [
-            ColumnDefinition("input", ColumnType.NDARRAY, NdArrayType.UINT8, (1, 3)),
-        ]
-        input_col_entries = xform_column_definitions_to_catalog_entries(input_col_list)
-
-        feat_tb_entry = CatalogManager().insert_table_catalog_entry(
-            "testCreateIndexFeatTable",
-            str(generate_file_path("testCreateIndexFeatTable")),
-            feat_col_entries,
-            identifier_column=IDENTIFIER_COLUMN,
-            table_type=TableType.STRUCTURED_DATA,
+        execute_query_fetch_all(
+            """create table if not exists testCreateIndexFeatTable (
+                feat NDARRAY FLOAT32(1,3)
+            );"""
         )
-        storage_engine = StorageEngine.factory(feat_tb_entry)
-        storage_engine.create(feat_tb_entry)
-
-        input_tb_entry = CatalogManager().insert_table_catalog_entry(
-            "testCreateIndexInputTable",
-            str(generate_file_path("testCreateIndexInputTable")),
-            input_col_entries,
-            identifier_column=IDENTIFIER_COLUMN,
-            table_type=TableType.STRUCTURED_DATA,
+        execute_query_fetch_all(
+            """create table if not exists testCreateIndexInputTable (
+                input NDARRAY UINT8(1,3)
+            );"""
         )
-        storage_engine = StorageEngine.factory(input_tb_entry)
-        storage_engine.create(input_tb_entry)
 
         # Create pandas dataframe.
         feat_batch_data = Batch(
@@ -101,6 +82,10 @@ class CreateIndexTest(unittest.TestCase):
                 }
             )
         )
+        feat_tb_entry = CatalogManager().get_table_catalog_entry(
+            "testCreateIndexFeatTable"
+        )
+        storage_engine = StorageEngine.factory(feat_tb_entry)
         storage_engine.write(feat_tb_entry, feat_batch_data)
 
         input_batch_data = Batch(
@@ -109,6 +94,9 @@ class CreateIndexTest(unittest.TestCase):
                     "input": [input1, input2, input3],
                 }
             )
+        )
+        input_tb_entry = CatalogManager().get_table_catalog_entry(
+            "testCreateIndexInputTable"
         )
         storage_engine.write(input_tb_entry, input_batch_data)
 

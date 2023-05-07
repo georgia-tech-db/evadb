@@ -33,6 +33,19 @@ from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
 from eva.utils.generic_utils import get_str_hash, remove_directory_contents
 
+CATALOG_TABLES = [
+    "column_catalog",
+    "table_catalog",
+    "depend_column_and_udf_cache",
+    "udf_cache",
+    "udf_catalog",
+    "depend_udf_and_udf_cache",
+    "index_catalog",
+    "udfio_catalog",
+    "udf_cost_catalog",
+    "udf_metadata_catalog",
+]
+
 
 def is_video_table(table: TableCatalogEntry):
     return table.table_type == TableType.VIDEO_DATA

@@ -27,6 +27,8 @@ from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.create_index_plan import CreateIndexPlan
 from eva.storage.storage_engine import StorageEngine
+from eva.third_party.vector_stores.faiss import FaissVectorStore
+from eva.third_party.vector_stores.types import FeaturePayload
 from eva.utils.logging_manager import logger
 
 
@@ -114,18 +116,18 @@ class CreateIndexExecutor(AbstractExecutor):
                     feat = input_batch.column_as_numpy_array(feat_col_name)[0]
 
                 # Transform to 2-D.
-                feat = feat.reshape(1, -1)
+                # feat = feat.reshape(1, -1)
 
                 if index is None:
-                    input_dim = feat.shape[-1]
-                    index = create_faiss_index(self.node.index_type, input_dim)
+                    input_dim = feat.shape[1]
+                    index = FaissVectorStore(self.node.name, input_dim)
 
                 # Row ID for mapping back to the row.
                 row_id = input_batch.column_as_numpy_array(IDENTIFIER_COLUMN)[0]
-                index.add_with_ids(feat, np.array([row_id]))
+                index.add([FeaturePayload(row_id, feat)])
 
             # Persist index.
-            faiss.write_index(index, self._get_index_save_path())
+            index.persist(self._get_index_save_path())
 
             # Save to catalog.
             catalog_manager.insert_index_catalog_entry(
