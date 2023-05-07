@@ -52,9 +52,9 @@ class Select:
         token = tree.children[0]
         sort_order = None
 
-        if token == "ASC":
+        if str.upper(token) == "ASC":
             sort_order = ParserOrderBySortType.ASC
-        elif token == "DESC":
+        elif str.upper(token) == "DESC":
             sort_order = ParserOrderBySortType.DESC
         return sort_order
 

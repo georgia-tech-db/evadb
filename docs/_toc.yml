@@ -15,12 +15,14 @@ parts:
       - file: source/tutorials/01-mnist.ipynb
         title: MNIST Image Classification
       - file: source/tutorials/02-object-detection.ipynb
-        title: Object Detection
+        title: Object Detection with YOLO
       - file: source/tutorials/03-emotion-analysis.ipynb
-        title: Emotion Analysis
-      - file: source/tutorials/04-custom-model.ipynb
-        title: Using a Custom Model
-
+        title: Emotion Analysis with PyTorch
+      - file: source/tutorials/07-object-segmentation-huggingface.ipynb
+        title: Image Segmentation with HuggingFace 
+      - file: source/tutorials/08-chatgpt.ipynb
+        title: ChatGPT + Whisper [OpenAI + HuggingFace]
+        
   - caption: User Reference
     chapters:
       - file: source/reference/evaql
@@ -38,9 +40,15 @@ parts:
 
       - file: source/reference/udf
         title: User-Defined Functions
+        sections:
+          - file: source/reference/udfs/yolo
+          - file: source/reference/udfs/hf
+          - file: source/reference/udfs/openai
+          - file: source/reference/udfs/custom
 
-      - file: source/reference/hf
-        title: HuggingFace
+
+      - file: source/reference/io
+        title: IO Descriptors
 
       - file: source/reference/gpu
         title: Configure GPU

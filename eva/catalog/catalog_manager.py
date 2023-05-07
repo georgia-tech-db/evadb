@@ -24,7 +24,7 @@ from eva.catalog.catalog_utils import (
     get_video_table_column_definitions,
     xform_column_definitions_to_catalog_entries,
 )
-from eva.catalog.models.base_model import drop_db, init_db
+from eva.catalog.models.base_model import clear_db_contents, init_db
 from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.catalog.models.index_catalog import IndexCatalogEntry
 from eva.catalog.models.table_catalog import TableCatalogEntry
@@ -74,12 +74,10 @@ class CatalogManager(object):
     def reset(self):
         """
         This method resets the state of the singleton instance.
-        It should drop the catalog table and reinitialize all the member
-        variables and services.
+        It should clear the contents of the catalog tables and any storage data
+        Used by testcases to reset the db state before
         """
-        self._shutdown_catalog()
-        self._bootstrap_catalog()
-        self.__init__()
+        self._clear_catalog_contents()
 
     def _bootstrap_catalog(self):
         """Bootstraps catalog.
@@ -90,13 +88,13 @@ class CatalogManager(object):
         logger.info("Bootstrapping catalog")
         init_db()
 
-    def _shutdown_catalog(self):
+    def _clear_catalog_contents(self):
         """
-        This method is responsible for gracefully shutting the
-        catalog manager.
+        This method is responsible for clearing the contents of the
+        catalog. It clears the tuples in the catalog tables, indexes, and cached data.
         """
-        logger.info("Shutting catalog")
-        drop_db()
+        logger.info("Clearing catalog")
+        clear_db_contents()
         # clean up the dataset, index, and cache directories
         cleanup_storage()
 

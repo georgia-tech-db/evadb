@@ -14,7 +14,7 @@
 # limitations under the License.
 import uuid
 from pathlib import Path
-from typing import List
+from typing import Any, Dict, List
 
 from eva.catalog.catalog_type import (
     ColumnType,
@@ -26,6 +26,7 @@ from eva.catalog.catalog_type import (
 from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.catalog.models.udf_cache_catalog import UdfCacheCatalogEntry
+from eva.catalog.models.udf_catalog import UdfCatalogEntry
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
@@ -168,3 +169,41 @@ def cleanup_storage():
     remove_directory_contents(config.get_value("storage", "index_dir"))
     remove_directory_contents(config.get_value("storage", "cache_dir"))
     remove_directory_contents(config.get_value("core", "datasets_dir"))
+
+
+def get_metadata_entry_or_val(
+    udf_obj: UdfCatalogEntry, key: str, default_val: Any = None
+) -> str:
+    """
+    Return the metadata value for the given key, or the default value if the
+    key is not found.
+
+    Args:
+        udf_obj (UdfCatalogEntry): An object of type `UdfCatalogEntry` which is
+        used to extract metadata information.
+        key (str): The metadata key for which the corresponding value needs to be retrieved.
+        default_val (Any): The default value to be returned if the metadata key is not found.
+
+    Returns:
+        str: metadata value
+    """
+    for metadata in udf_obj.metadata:
+        if metadata.key == key:
+            return metadata.value
+    return default_val
+
+
+def get_metadata_properties(udf_obj: UdfCatalogEntry) -> Dict:
+    """
+    Return all the metadata properties as key value pair
+
+    Args:
+        udf_obj (UdfCatalogEntry): An object of type `UdfCatalogEntry` which is
+        used to extract metadata information.
+    Returns:
+        Dict: key-value for each metadata entry
+    """
+    properties = {}
+    for metadata in udf_obj.metadata:
+        properties[metadata.key] = metadata.value
+    return properties

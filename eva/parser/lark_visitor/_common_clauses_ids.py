@@ -56,7 +56,7 @@ class CommonClauses:
     def decimal_literal(self, tree):
         decimal = None
         token = tree.children[0]
-        if token == "ANYDIM":
+        if str.upper(token) == "ANYDIM":
             decimal = Dimension.ANYDIM
         else:
             decimal = int(str(token))
