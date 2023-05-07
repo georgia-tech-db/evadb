@@ -101,6 +101,7 @@ udf_libs = [
     "transformers>=4.27.4",  # HUGGINGFACE
     "openai>=0.27.4",  # CHATGPT
     "timm>=0.6.13",  # HUGGINGFACE VISION TASKS
+    "kornia",   # SIFT
 ]
 
 ### NEEDED FOR EXPERIMENTAL FEATURES
