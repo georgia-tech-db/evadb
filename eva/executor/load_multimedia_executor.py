@@ -62,8 +62,7 @@ class LoadMultimediaExecutor(AbstractExecutor):
                 else:
                     err_msg = f"Load {self.media_type.name} failed due to invalid file {str(file_path)}"
                     logger.error(err_msg)
-                    # raise ValueError(file_path)
-                    continue
+                    raise ValueError(file_path)
 
             if not valid_files:
                 raise DatasetFileNotFoundError(
