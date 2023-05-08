@@ -17,7 +17,6 @@ from pathlib import Path
 import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.catalog_type import IndexType
 from eva.catalog.sql_config import IDENTIFIER_COLUMN
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.executor.abstract_executor import AbstractExecutor
@@ -25,8 +24,8 @@ from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.create_index_plan import CreateIndexPlan
 from eva.storage.storage_engine import StorageEngine
-from eva.third_party.vector_stores.faiss import FaissVectorStore
 from eva.third_party.vector_stores.types import FeaturePayload
+from eva.third_party.vector_stores.utils import VectorStoreFactory
 from eva.utils.logging_manager import logger
 
 
@@ -40,13 +39,6 @@ class CreateIndexExecutor(AbstractExecutor):
             msg = f"Index {self.node.name} already exists."
             logger.error(msg)
             raise ExecutorError(msg)
-
-        # Get the index type.
-        index_type = self.node.index_type
-
-        assert IndexType.is_faiss_index_type(
-            index_type
-        ), "Index type {} is not supported.".format(index_type)
 
         self._create_index()
 
@@ -66,8 +58,6 @@ class CreateIndexExecutor(AbstractExecutor):
 
     def _create_index(self):
         try:
-            catalog_manager = CatalogManager()
-
             # Get feature tables.
             feat_catalog_entry = self.node.table_ref.table.table_obj
 
@@ -77,16 +67,13 @@ class CreateIndexExecutor(AbstractExecutor):
                 col for col in feat_catalog_entry.columns if col.name == feat_col_name
             ][0]
 
-            # Get udf function.
-            udf_func = self.node.udf_func
-
             # Add features to index.
             # TODO: batch size is hardcoded for now.
             index = None
             input_dim = -1
             storage_engine = StorageEngine.factory(feat_catalog_entry)
             for input_batch in storage_engine.read(feat_catalog_entry, 1):
-                if udf_func:
+                if self.node.udf_func:
                     # Create index through UDF expression.
                     # UDF(input column) -> 2 dimension feature vector.
                     input_batch.modify_column_alias(feat_catalog_entry.name.lower())
@@ -102,7 +89,9 @@ class CreateIndexExecutor(AbstractExecutor):
 
                 if index is None:
                     input_dim = feat.shape[1]
-                    index = FaissVectorStore(self.node.name, input_dim)
+                    index = VectorStoreFactory.create_vector_store(
+                        self.node.index_type, self.node.name, input_dim
+                    )
 
                 # Row ID for mapping back to the row.
                 row_id = input_batch.column_as_numpy_array(IDENTIFIER_COLUMN)[0]
@@ -112,12 +101,12 @@ class CreateIndexExecutor(AbstractExecutor):
             index.persist(self._get_index_save_path())
 
             # Save to catalog.
-            catalog_manager.insert_index_catalog_entry(
+            CatalogManager().insert_index_catalog_entry(
                 self.node.name,
                 self._get_index_save_path(),
                 self.node.index_type,
                 feat_column,
-                udf_func.signature() if udf_func else None,
+                self.node.udf_func.signature() if self.node.udf_func else None,
             )
         except Exception as e:
             # Roll back in reverse order.

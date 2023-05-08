@@ -102,7 +102,7 @@ class IndexCatalogServiceTest(TestCase):
         CatalogManager().reset()
         INDEX_NAME = "name"
         INDEX_URL = "file1"
-        INDEX_TYPE = IndexType.HNSW
+        INDEX_TYPE = IndexType.FAISS
         FEAT_COLUMN = ColumnCatalogEntry("abc", ColumnType.INTEGER)
 
         service = IndexCatalogService()

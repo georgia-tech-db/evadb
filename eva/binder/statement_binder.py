@@ -95,10 +95,6 @@ class StatementBinder:
         # TODO: create index currently only works on TableInfo, but will extend later.
         assert node.table_ref.is_table_atom(), "Index can only be created on Tableinfo"
 
-        assert IndexType.is_faiss_index_type(
-            node.index_type
-        ), "Index type {} is not supported.".format(node.index_type)
-
         if not node.udf_func:
             # Feature table type needs to be float32 numpy array.
             col_def = node.col_list[0]

@@ -259,8 +259,8 @@ class CreateTable:
         index_type = None
         token = tree.children[1]
 
-        if str.upper(token) == "HNSW":
-            index_type = IndexType.HNSW
+        if str.upper(token) == "FAISS":
+            index_type = IndexType.FAISS
         return index_type
 
     # INDEX CREATION
