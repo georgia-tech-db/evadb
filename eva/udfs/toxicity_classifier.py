@@ -15,10 +15,14 @@
 from typing import List
 
 import pandas as pd
-import torch
-from transformers import AutoTokenizer, AutoModelForSequenceClassification, TextClassificationPipeline
+from transformers import (
+    AutoModelForSequenceClassification,
+    AutoTokenizer,
+    TextClassificationPipeline,
+)
 
 from eva.udfs.abstract.abstract_udf import AbstractClassifierUDF
+
 
 class ToxicityClassifier(AbstractClassifierUDF):
     """
@@ -35,11 +39,13 @@ class ToxicityClassifier(AbstractClassifierUDF):
         model_path = "s-nlp/roberta_toxicity_classifier"
         self.tokenizer = AutoTokenizer.from_pretrained(model_path)
         self.model = AutoModelForSequenceClassification.from_pretrained(model_path)
-        mult_model_path = "EIStakovskii/xlm_roberta_base_multilingual_toxicity_classifier_plus"
+        mult_model_path = (
+            "EIStakovskii/xlm_roberta_base_multilingual_toxicity_classifier_plus"
+        )
         self.mult_tokenizer = AutoTokenizer.from_pretrained(mult_model_path)
-        self.mult_model = AutoModelForSequenceClassification.from_pretrained(mult_model_path)
-
-
+        self.mult_model = AutoModelForSequenceClassification.from_pretrained(
+            mult_model_path
+        )
 
     @property
     def labels(self) -> List[str]:
@@ -65,17 +71,23 @@ class ToxicityClassifier(AbstractClassifierUDF):
 
         for i in range(0, dataframe_size):
             text = text_dataframe.iat[i, 0]
-            text = ' '.join(text)
-            pipeline = TextClassificationPipeline(model = self.model, tokenizer = self.tokenizer)
+            text = " ".join(text)
+            pipeline = TextClassificationPipeline(
+                model=self.model, tokenizer=self.tokenizer
+            )
             out = pipeline(text)
 
-            multi_pipeline = TextClassificationPipeline(model=self.mult_model, tokenizer=self.mult_tokenizer)
+            multi_pipeline = TextClassificationPipeline(
+                model=self.mult_model, tokenizer=self.mult_tokenizer
+            )
             multi_out = multi_pipeline(text)
 
-            out_label = out[0]['label']
-            multi_out_label = multi_out[0]['label']
-            multi_out_score = multi_out[0]['score']
-            if out_label == 'toxic' or (multi_out_label == 'LABEL_1' and multi_out_score > self.threshold):
+            out_label = out[0]["label"]
+            multi_out_label = multi_out[0]["label"]
+            multi_out_score = multi_out[0]["score"]
+            if out_label == "toxic" or (
+                multi_out_label == "LABEL_1" and multi_out_score > self.threshold
+            ):
                 outcome = pd.concat(
                     [outcome, pd.DataFrame({"labels": ["toxic"]})], ignore_index=True
                 )

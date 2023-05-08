@@ -276,7 +276,7 @@ class HuggingFaceTests(unittest.TestCase):
 
         load_table_query = f"""LOAD CSV '{self.csv_file_path}' INTO MyCSV;"""
         execute_query_fetch_all(load_table_query)
-        
+
         select_query = f"SELECT {udf_name}(comment) FROM MyCSV;"
         output = execute_query_fetch_all(select_query)
 
@@ -292,7 +292,7 @@ class HuggingFaceTests(unittest.TestCase):
             )
         )
 
-        # Test that there exists a column with udf_name.score 
+        # Test that there exists a column with udf_name.score
         # and each entry is a float
         self.assertTrue(udf_name.lower() + ".score" in output.frames.columns)
         self.assertTrue(
@@ -304,7 +304,6 @@ class HuggingFaceTests(unittest.TestCase):
         drop_udf_query = f"DROP UDF {udf_name};"
         execute_query_fetch_all(drop_udf_query)
 
-    
     def test_multilingual_toxicity_classification(self):
         udf_name = "HFMultToxicityClassifier"
         create_udf_query = f"""CREATE UDF {udf_name}
@@ -325,7 +324,7 @@ class HuggingFaceTests(unittest.TestCase):
 
         load_table_query = f"""LOAD CSV '{self.csv_file_path}' INTO MyCSV;"""
         execute_query_fetch_all(load_table_query)
-        
+
         select_query = f"SELECT {udf_name}(comment) FROM MyCSV;"
         output = execute_query_fetch_all(select_query)
 
