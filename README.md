@@ -76,7 +76,7 @@ Here are some illustrative EVA-backed applications (all of them are Jupyter note
 
 ## Quick Start
 
-- Install EVA using the pip package manager. EVA supports Python versions >= 3.7.
+- Install EVA using the pip package manager. EVA supports Python versions >= 3.7:
 
 ```shell
 pip install evadb
@@ -99,7 +99,7 @@ LOAD VIDEO "data/ua_detrac/ua_detrac.mp4" INTO TrafficVideo;
 SELECT id, data FROM TrafficVideo WHERE id < 5;
 ```
 
-- Search for frames in the video that contain a car
+- Search for frames in the video that contain a car:
 
 ```mysql
 SELECT id, data FROM TrafficVideo WHERE ['car'] <@ Yolo(data).labels;
@@ -108,13 +108,13 @@ SELECT id, data FROM TrafficVideo WHERE ['car'] <@ Yolo(data).labels;
 |---------------|--------------|
 |<img alt="Source Video" src="https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/traffic-input.webp" width="300"> |<img alt="Query Result" src="https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/traffic-output.webp" width="300"> |
 
-- Search for frames in the video that contain a pedestrian and a car
+- Search for frames in the video that contain a pedestrian and a car:
 
 ```mysql
 SELECT id, data FROM TrafficVideo WHERE ['pedestrian', 'car'] <@ Yolo(data).labels;
 ```
 
-- Search for frames with more than three cars
+- Search for frames with more than three cars:
 
 ```mysql
 SELECT id, data FROM TrafficVideo WHERE ArrayCount(Yolo(data).labels, 'car') > 3;
