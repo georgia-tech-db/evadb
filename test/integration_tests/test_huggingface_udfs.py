@@ -140,6 +140,7 @@ class HuggingFaceTests(unittest.TestCase):
 
         select_query = f"SELECT {udf_name}(data) FROM DETRAC WHERE id < 3;"
         output = execute_query_fetch_all(select_query)
+        print("output: ", output)
 
         # Test that output has 2 columns
         self.assertEqual(len(output.frames.columns), 2)
@@ -253,4 +254,94 @@ class HuggingFaceTests(unittest.TestCase):
         drop_udf_query = f"DROP UDF {asr_udf};"
         execute_query_fetch_all(drop_udf_query)
         drop_udf_query = f"DROP UDF {summary_udf};"
+        execute_query_fetch_all(drop_udf_query)
+
+    def test_toxicity_classification(self):
+        udf_name = "HFToxicityClassifier"
+        create_udf_query = f"""CREATE UDF {udf_name}
+            TYPE HuggingFace
+            'task' 'text-classification'
+            'model' 'martin-ha/toxic-comment-model'
+        """
+        execute_query_fetch_all(create_udf_query)
+        
+        create_table_query = """CREATE TABLE IF NOT EXISTS MyCSV (
+                id INTEGER UNIQUE,
+                comment TEXT(30)
+            );"""
+        execute_query_fetch_all(create_table_query)
+
+        load_table_query = f"""LOAD CSV '{self.csv_file_path}' INTO MyCSV;"""
+        execute_query_fetch_all(load_table_query)
+        
+        select_query = f"SELECT {udf_name}(comment) FROM MyCSV;"
+        output = execute_query_fetch_all(select_query)
+
+        # Test that output has 2 columns
+        self.assertEqual(len(output.frames.columns), 2)
+
+        # Test that there exists a column with udf_name.label and each entry is either "POSITIVE" or "NEGATIVE"
+        self.assertTrue(udf_name.lower() + ".label" in output.frames.columns)
+        self.assertTrue(
+            all(
+                x in ["non-toxic", "toxic"]
+                for x in output.frames[udf_name.lower() + ".label"]
+            )
+        )
+
+        # Test that there exists a column with udf_name.score 
+        # and each entry is a float
+        self.assertTrue(udf_name.lower() + ".score" in output.frames.columns)
+        self.assertTrue(
+            all(
+                isinstance(x, float) for x in output.frames[udf_name.lower() + ".score"]
+            )
+        )
+
+        drop_udf_query = f"DROP UDF {udf_name};"
+        execute_query_fetch_all(drop_udf_query)
+
+    
+    def test_multilingual_toxicity_classification(self):
+        udf_name = "HFMultToxicityClassifier"
+        create_udf_query = f"""CREATE UDF {udf_name}
+            TYPE HuggingFace
+            'task' 'text-classification'
+            'model' 'EIStakovskii/xlm_roberta_base_multilingual_toxicity_classifier_plus'
+        """
+        execute_query_fetch_all(create_udf_query)
+        
+        create_table_query = """CREATE TABLE IF NOT EXISTS MyCSV (
+                id INTEGER UNIQUE,
+                comment TEXT(30)
+            );"""
+        execute_query_fetch_all(create_table_query)
+
+        load_table_query = f"""LOAD CSV '{self.csv_file_path}' INTO MyCSV;"""
+        execute_query_fetch_all(load_table_query)
+        
+        select_query = f"SELECT {udf_name}(comment) FROM MyCSV;"
+        output = execute_query_fetch_all(select_query)
+
+        # Test that output has 2 columns
+        self.assertEqual(len(output.frames.columns), 2)
+
+        # Test that there exists a column with udf_name.label and each entry is either "POSITIVE" or "NEGATIVE"
+        self.assertTrue(udf_name.lower() + ".label" in output.frames.columns)
+        self.assertTrue(
+            all(
+                x in ["LABEL_1", "LABEL_0"]
+                for x in output.frames[udf_name.lower() + ".label"]
+            )
+        )
+
+        # Test that there exists a column with udf_name.score and each entry is a float
+        self.assertTrue(udf_name.lower() + ".score" in output.frames.columns)
+        self.assertTrue(
+            all(
+                isinstance(x, float) for x in output.frames[udf_name.lower() + ".score"]
+            )
+        )
+
+        drop_udf_query = f"DROP UDF {udf_name};"
         execute_query_fetch_all(drop_udf_query)

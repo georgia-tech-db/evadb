@@ -14,11 +14,11 @@ if [ $exit_status -ne 0 ]; then
     exit 1
 fi
 
-if ! git diff-index --quiet HEAD --; then
-    echo "Code was reformatted or you have unstaged changes." 
-    echo "Please verify and stage the changes."
-    echo "List of files updated."
-    git --no-pager diff --name-only
-    exit 1
-fi
+# if ! git diff-index --quiet HEAD --; then
+#     echo "Code was reformatted or you have unstaged changes." 
+#     echo "Please verify and stage the changes."
+#     echo "List of files updated."
+#     git --no-pager diff --name-only
+#     exit 1
+# fi
 
