@@ -180,6 +180,8 @@ tutorials/*.py
 *.pth
 *.pt
 tutorials/bddtest.zip
+tutorials/license.zip
+license/
 bddtest/
 
 # benchmark
