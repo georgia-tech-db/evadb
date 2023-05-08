@@ -264,7 +264,10 @@ class HuggingFaceTests(unittest.TestCase):
             'model' 'martin-ha/toxic-comment-model'
         """
         execute_query_fetch_all(create_udf_query)
-        
+
+        drop_table_query = """DROP TABLE IF EXISTS MyCSV;"""
+        execute_query_fetch_all(drop_table_query)
+
         create_table_query = """CREATE TABLE IF NOT EXISTS MyCSV (
                 id INTEGER UNIQUE,
                 comment TEXT(30)
@@ -310,8 +313,11 @@ class HuggingFaceTests(unittest.TestCase):
             'model' 'EIStakovskii/xlm_roberta_base_multilingual_toxicity_classifier_plus'
         """
         execute_query_fetch_all(create_udf_query)
-        
-        create_table_query = """CREATE TABLE IF NOT EXISTS MyCSV (
+
+        drop_table_query = """DROP TABLE IF EXISTS MyCSV;"""
+        execute_query_fetch_all(drop_table_query)
+
+        create_table_query = """CREATE TABLE MyCSV (
                 id INTEGER UNIQUE,
                 comment TEXT(30)
             );"""
