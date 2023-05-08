@@ -14,8 +14,6 @@
 # limitations under the License.
 from pathlib import Path
 
-import faiss
-import numpy as np
 import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
@@ -30,18 +28,6 @@ from eva.storage.storage_engine import StorageEngine
 from eva.third_party.vector_stores.faiss import FaissVectorStore
 from eva.third_party.vector_stores.types import FeaturePayload
 from eva.utils.logging_manager import logger
-
-
-def create_faiss_index(index_type: IndexType, input_dim: int):
-    # Refernce to Faiss documentation.
-    # IDMap: https://github.com/facebookresearch/faiss/wiki/Pre--and-post-processing#faiss-id-mapping
-    # Other index types: https://github.com/facebookresearch/faiss/wiki/The-index-factory
-
-    if index_type == IndexType.HNSW:
-        # HSNW is the actual index. Faiss also provides
-        # a secondary mapping (IDMap) to map from ID inside index to
-        # our given ID.
-        return faiss.IndexIDMap2(faiss.IndexHNSWFlat(input_dim, 32))
 
 
 class CreateIndexExecutor(AbstractExecutor):
@@ -62,8 +48,7 @@ class CreateIndexExecutor(AbstractExecutor):
             index_type
         ), "Index type {} is not supported.".format(index_type)
 
-        if IndexType.is_faiss_index_type(index_type):
-            self._create_faiss_index()
+        self._create_index()
 
         yield Batch(
             pd.DataFrame(
@@ -79,7 +64,7 @@ class CreateIndexExecutor(AbstractExecutor):
             index_dir / Path("{}_{}.index".format(self.node.index_type, self.node.name))
         )
 
-    def _create_faiss_index(self):
+    def _create_index(self):
         try:
             catalog_manager = CatalogManager()
 
@@ -114,9 +99,6 @@ class CreateIndexExecutor(AbstractExecutor):
                     # Pandas wraps numpy array as an object inside a numpy
                     # array. Use zero index to get the actual numpy array.
                     feat = input_batch.column_as_numpy_array(feat_col_name)[0]
-
-                # Transform to 2-D.
-                # feat = feat.reshape(1, -1)
 
                 if index is None:
                     input_dim = feat.shape[1]

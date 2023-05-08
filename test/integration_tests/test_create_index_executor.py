@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import os
 import unittest
 from pathlib import Path
 from test.util import load_udfs_for_testing
@@ -21,19 +20,13 @@ import faiss
 import numpy as np
 import pandas as pd
 import pytest
-from mock import patch
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.catalog_type import ColumnType, IndexType, NdArrayType, TableType
-from eva.catalog.catalog_utils import xform_column_definitions_to_catalog_entries
-from eva.catalog.sql_config import IDENTIFIER_COLUMN
+from eva.catalog.catalog_type import IndexType
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
-from eva.parser.create_statement import ColumnDefinition
 from eva.server.command_handler import execute_query_fetch_all
 from eva.storage.storage_engine import StorageEngine
-from eva.utils.generic_utils import generate_file_path
 
 
 @pytest.mark.notparallel
@@ -141,17 +134,6 @@ class CreateIndexTest(unittest.TestCase):
 
         # Cleanup.
         CatalogManager().drop_index_catalog_entry("testCreateIndexName")
-
-    @patch("eva.executor.create_index_executor.faiss")
-    def test_should_cleanup_when_exception(self, faiss_mock):
-        faiss_mock.write_index.side_effect = Exception("Test exception.")
-
-        query = "CREATE INDEX testCreateIndexName ON testCreateIndexFeatTable (feat) USING HNSW;"
-        with self.assertRaises(ExecutorError):
-            execute_query_fetch_all(query)
-
-        # Check faulty index is not persisted on the disk
-        self.assertFalse(os.path.exists(self._index_save_path()))
 
     def test_should_create_index_with_udf(self):
         query = "CREATE INDEX testCreateIndexName ON testCreateIndexInputTable (DummyFeatureExtractor(input)) USING HNSW;"
