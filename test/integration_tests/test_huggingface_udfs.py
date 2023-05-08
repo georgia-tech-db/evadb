@@ -268,7 +268,7 @@ class HuggingFaceTests(unittest.TestCase):
         drop_table_query = """DROP TABLE IF EXISTS MyCSV;"""
         execute_query_fetch_all(drop_table_query)
 
-        create_table_query = """CREATE TABLE IF NOT EXISTS MyCSV (
+        create_table_query = """CREATE TABLE MyCSV (
                 id INTEGER UNIQUE,
                 comment TEXT(30)
             );"""
