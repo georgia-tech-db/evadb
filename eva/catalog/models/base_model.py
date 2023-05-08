@@ -12,12 +12,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import contextlib
+
 from sqlalchemy import Column, Integer
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy_utils import create_database, database_exists, drop_database
+from sqlalchemy_utils import create_database, database_exists
 
-from eva.catalog.sql_config import SQLConfig
+from eva.catalog.sql_config import CATALOG_TABLES, SQLConfig
 from eva.utils.logging_manager import logger
 
 db_session = SQLConfig().session
@@ -111,11 +113,31 @@ def init_db():
         BaseModel.metadata.create_all()
 
 
-def drop_db():
-    """Drop all of the record from tables and the tables themselves. Drop the
-    database as well."""
+def truncate_catalog_tables():
+    """Truncate all the catalog tables"""
+    # https://stackoverflow.com/questions/4763472/sqlalchemy-clear-database-content-but-dont-drop-the-schema/5003705#5003705 #noqa
     engine = SQLConfig().engine
+    # reflect to refresh the metadata
+    BaseModel.metadata.reflect(bind=engine)
     if database_exists(engine.url):
-        db_session.commit()
-        BaseModel.metadata.drop_all()
-        drop_database(engine.url)
+        with contextlib.closing(engine.connect()) as con:
+            trans = con.begin()
+            for table in reversed(BaseModel.metadata.sorted_tables):
+                if table.exists(con):
+                    con.execute(table.delete())
+            trans.commit()
+
+
+def drop_all_tables_except_catalog():
+    """drop all the tables except the catalog"""
+    engine = SQLConfig().engine
+    # reflect to refresh the metadata
+    BaseModel.metadata.reflect(bind=engine)
+    if database_exists(engine.url):
+        with contextlib.closing(engine.connect()) as con:
+            trans = con.begin()
+            for table in reversed(BaseModel.metadata.sorted_tables):
+                if table.name not in CATALOG_TABLES:
+                    if table.exists(con):
+                        table.drop(con)
+            trans.commit()
