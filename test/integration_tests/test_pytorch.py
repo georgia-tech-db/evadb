@@ -247,7 +247,7 @@ class PytorchTest(unittest.TestCase):
     def test_should_run_extract_object(self):
         select_query = """
             SELECT id, T.iids, T.bboxes, T.scores, T.labels
-            FROM MyVideo JOIN LATERAL EXTRACT_OBJECT(data, YoloV5, NorFairTracker)
+            FROM MyVideo JOIN LATERAL EXTRACT_OBJECT(data, Yolo, NorFairTracker)
                 AS T(iids, labels, bboxes, scores)
             WHERE id < 30;
             """
@@ -257,7 +257,7 @@ class PytorchTest(unittest.TestCase):
         select_query = """
             SELECT id, T.iid, T.bbox, T.score, T.label
             FROM MyVideo JOIN LATERAL
-                UNNEST(EXTRACT_OBJECT(data, YoloV5, NorFairTracker)) AS T(iid, label, bbox, score)
+                UNNEST(EXTRACT_OBJECT(data, Yolo, NorFairTracker)) AS T(iid, label, bbox, score)
             WHERE id < 30;
             """
         actual_batch = execute_query_fetch_all(select_query)
