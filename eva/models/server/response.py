@@ -16,6 +16,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Optional
 
+from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
 from eva.utils.generic_utils import PickleSerializer
 
@@ -45,7 +46,10 @@ class Response:
         return obj
 
     def as_df(self):
-        assert self.batch is not None, "Response is empty"
+        if self.error is not None:
+            raise ExecutorError(self.error)
+        if self.batch is None:
+            raise ExecutorError("Empty batch")
         return self.batch.frames
 
     def __str__(self):
