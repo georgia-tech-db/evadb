@@ -24,7 +24,11 @@ from eva.catalog.catalog_utils import (
     get_video_table_column_definitions,
     xform_column_definitions_to_catalog_entries,
 )
-from eva.catalog.models.base_model import clear_db_contents, init_db
+from eva.catalog.models.base_model import (
+    drop_all_tables_except_catalog,
+    init_db,
+    truncate_catalog_tables,
+)
 from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.catalog.models.index_catalog import IndexCatalogEntry
 from eva.catalog.models.table_catalog import TableCatalogEntry
@@ -94,7 +98,10 @@ class CatalogManager(object):
         catalog. It clears the tuples in the catalog tables, indexes, and cached data.
         """
         logger.info("Clearing catalog")
-        clear_db_contents()
+        # drop tables which are not part of catalog
+        drop_all_tables_except_catalog()
+        # truncate the catalog tables
+        truncate_catalog_tables()
         # clean up the dataset, index, and cache directories
         cleanup_storage()
 
