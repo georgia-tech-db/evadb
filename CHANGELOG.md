@@ -10,6 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### [Deprecated]
 ### [Removed]
 
+##  [0.2.1] - 2023-04-25
+### [Added]
+
+* PR #664: Add Tutorial Notebook for HuggingFace 
+* PR #668: fix: Remove detoxify to fix pip install evadb 
+* PR #660: Bump Eva-Decord to Not Need ffmpeg 
+* PR #657: docs: benefit of caching and predicate reordering 
+
 ##  [0.2.0] - 2023-04-16
 ### [Added]
 

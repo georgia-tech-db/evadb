@@ -24,6 +24,7 @@ from eva.configuration.constants import (
     EVA_DEFAULT_DIR,
     EVA_INSTALLATION_DIR,
 )
+from eva.utils.logging_manager import logger
 
 
 class ConfigurationManager(object):
@@ -47,21 +48,21 @@ class ConfigurationManager(object):
 
     @classmethod
     def _create_if_not_exists(cls):
-        if not cls._yml_path.exists():
-            initial_eva_config_dir = Path(EVA_DEFAULT_DIR)
+        # if not cls._yml_path.exists():
+        initial_eva_config_dir = Path(EVA_DEFAULT_DIR)
 
-            # parallelize tests using pytest-xdist
-            # activated only under pytest-xdist
-            # Changes config dir From EVA_DEFAULT_DIR To EVA_DEFAULT_DIR / gw1
-            # (where gw1 is worker id)
-            updated_eva_config_dir = cls.suffix_pytest_xdist_worker_id_to_dir(
-                initial_eva_config_dir
-            )
-            cls._yml_path = updated_eva_config_dir / EVA_CONFIG_FILE
-            bootstrap_environment(
-                eva_config_dir=updated_eva_config_dir,
-                eva_installation_dir=EVA_INSTALLATION_DIR,
-            )
+        # parallelize tests using pytest-xdist
+        # activated only under pytest-xdist
+        # Changes config dir From EVA_DEFAULT_DIR To EVA_DEFAULT_DIR / gw1
+        # (where gw1 is worker id)
+        updated_eva_config_dir = cls.suffix_pytest_xdist_worker_id_to_dir(
+            initial_eva_config_dir
+        )
+        cls._yml_path = updated_eva_config_dir / EVA_CONFIG_FILE
+        bootstrap_environment(
+            eva_config_dir=updated_eva_config_dir,
+            eva_installation_dir=EVA_INSTALLATION_DIR,
+        )
 
     @classmethod
     def _get(cls, category: str, key: str) -> Any:
@@ -69,19 +70,16 @@ class ConfigurationManager(object):
             config_obj = yaml.load(yml_file, Loader=yaml.FullLoader)
             if config_obj is None:
                 raise ValueError(f"Invalid yaml file at {cls._yml_path}")
-            key_error = (
+            key_warning = (
                 f"Add the entry '{category}: {key}' to the yaml file. Or, if "
                 f"you did not modify the yaml file, remove it (rm {cls._yml_path}),"
                 f"and the system will auto-generate one."
             )
-            if category not in config_obj:
-                raise KeyError(
-                    f"Missing category '{category}' in the yaml file at {cls._yml_path}. {key_error}"
-                )
-            if key not in config_obj[category]:
-                raise KeyError(
-                    f"Missing key {key} for the category {category} in the yaml file at {cls._yml_path}. {key_error}"
-                )
+            if category not in config_obj or key not in config_obj[category]:
+                # log a warning and return None
+                logger.warn(key_warning)
+                return None
+
             return config_obj[category][key]
 
     @classmethod
@@ -92,16 +90,17 @@ class ConfigurationManager(object):
             if config_obj is None:
                 raise ValueError(f"Invalid yml file at {cls._yml_path}")
 
-            key_error = (
+            key_warning = (
                 f"Cannot update the key {key} for the missing category {category}."
                 f"Add the entry '{category}' to the yaml file. Or, if "
                 f"you did not modify the yaml file, remove it (rm {cls._yml_path}),"
                 f"and the system will auto-generate one."
             )
             if category not in config_obj:
-                raise KeyError(
-                    f"Missing category '{category}' in the yaml file at {cls._yml_path}. {key_error}"
-                )
+                # log a warning and create the category
+                logger.warn(key_warning)
+                config_obj[category] = {}
+
             config_obj[category][key] = value
             yml_file.seek(0)
             yml_file.write(yaml.dump(config_obj))

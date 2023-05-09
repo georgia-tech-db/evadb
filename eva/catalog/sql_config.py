@@ -21,6 +21,19 @@ from eva.configuration.configuration_manager import ConfigurationManager
 
 IDENTIFIER_COLUMN = "_row_id"
 
+CATALOG_TABLES = [
+    "column_catalog",
+    "table_catalog",
+    "depend_column_and_udf_cache",
+    "udf_cache",
+    "udf_catalog",
+    "depend_udf_and_udf_cache",
+    "index_catalog",
+    "udfio_catalog",
+    "udf_cost_catalog",
+    "udf_metadata_catalog",
+]
+
 
 class SQLConfig:
     """Singleton class for configuring connection to the database.

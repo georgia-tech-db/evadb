@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import sys
+from pathlib import Path
 
 from eva.binder.binder_utils import (
     BinderError,
@@ -26,6 +27,8 @@ from eva.binder.binder_utils import (
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import IndexType, NdArrayType, TableType, VideoColumnName
+from eva.catalog.catalog_utils import get_metadata_properties
+from eva.configuration.constants import EVA_DEFAULT_DIR
 from eva.expression.abstract_expression import AbstractExpression, ExpressionType
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
@@ -246,19 +249,33 @@ class StatementBinder:
 
         if udf_obj.type == "HuggingFace":
             node.function = assign_hf_udf(udf_obj)
+
         else:
-            # Verify the consistency of the UDF. If the checksum of the UDF does not match
-            # the one stored in the catalog, an error will be thrown and the user will be
-            # asked to register the UDF again.
+            if udf_obj.type == "ultralytics":
+                # manually set the impl_path for yolo udfs we only handle object
+                # detection for now, hopefully this can be generelized
+                udf_obj.impl_file_path = (
+                    Path(f"{EVA_DEFAULT_DIR}/udfs/yolo_object_detector.py")
+                    .absolute()
+                    .as_posix()
+                )
+
+            # Verify the consistency of the UDF. If the checksum of the UDF does not
+            # match the one stored in the catalog, an error will be thrown and the user
+            # will be asked to register the UDF again.
             assert (
                 get_file_checksum(udf_obj.impl_file_path) == udf_obj.checksum
             ), f"""UDF file {udf_obj.impl_file_path} has been modified from the
                 registration. Please create a new UDF using the CREATE UDF command or UPDATE the existing one."""
 
             try:
-                node.function = load_udf_class_from_file(
-                    udf_obj.impl_file_path, udf_obj.name
+                udf_class = load_udf_class_from_file(
+                    udf_obj.impl_file_path,
+                    udf_obj.name,
                 )
+                # certain udfs take additional inputs like yolo needs the model_name
+                # these arguments are passed by the user as part of metadata
+                node.function = lambda: udf_class(**get_metadata_properties(udf_obj))
             except Exception as e:
                 err_msg = (
                     f"{str(e)}. Please verify that the UDF class name in the"

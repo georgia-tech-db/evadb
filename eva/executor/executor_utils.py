@@ -46,6 +46,7 @@ def apply_predicate(batch: Batch, predicate: AbstractExpression) -> Batch:
 
 
 def handle_if_not_exists(table_info: TableInfo, if_not_exist=False):
+    # Table exists
     if CatalogManager().check_table_exists(
         table_info.table_name,
         table_info.database_name,
@@ -57,6 +58,7 @@ def handle_if_not_exists(table_info: TableInfo, if_not_exist=False):
         else:
             logger.error(err_msg)
             raise ExecutorError(err_msg)
+    # Table does not exist
     else:
         return False
 
@@ -67,7 +69,7 @@ def validate_image(image_path: Path) -> bool:
         return data is not None
     except Exception as e:
         logger.warning(
-            f"Unexpected Exception {e} occured while reading image file {image_path}"
+            f"Unexpected Exception {e} occurred while reading image file {image_path}"
         )
         return False
 
@@ -84,7 +86,7 @@ def validate_video(video_path: Path) -> bool:
         return True
     except Exception as e:
         logger.warning(
-            f"Unexpected Exception {e} occured while reading video file {video_path}"
+            f"Unexpected Exception {e} occurred while reading video file {video_path}"
         )
 
 
