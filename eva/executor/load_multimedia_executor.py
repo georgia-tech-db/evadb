@@ -12,7 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import multiprocessing as mp
+
 from pathlib import Path
+from multiprocessing import Pool
 
 import pandas as pd
 
@@ -53,17 +56,17 @@ class LoadMultimediaExecutor(AbstractExecutor):
                 video_files = download_from_s3(self.node.file_path, dst_path)
             else:
                 # Local Storage
-                video_files = iter_path_regex(self.node.file_path)
+                video_files = list(iter_path_regex(self.node.file_path))
 
-            for file_path in video_files:
-                file_path = Path(file_path)
-                if validate_media(file_path, self.media_type):
-                    valid_files.append(str(file_path))
-                else:
-                    err_msg = f"Load {self.media_type.name} failed due to invalid file {str(file_path)}"
-                    # If image is corrupted, do not abord the entire loading process.
-                    logger.critical(err_msg)
-                    # raise ValueError(file_path)
+            # Use parallel validation if there are many files. Otherwise, use single-thread
+            # validation version.
+            if len(video_files) < mp.cpu_count() * 2:
+                valid_files = [path for path in video_files if self._is_media_valid(path)]
+            else:
+                pool = Pool(mp.cpu_count())
+                valid_files = [
+                    path for path, is_valid in zip(video_files, pool.map(self._is_media_valid, video_files)) if is_valid
+                ]
 
             if not valid_files:
                 raise DatasetFileNotFoundError(
@@ -123,3 +126,17 @@ class LoadMultimediaExecutor(AbstractExecutor):
     ):
         if do_create:
             storage_engine.drop(table_obj)
+
+    def _is_media_valid(
+        self,
+        file_path: Path,
+    ):
+        file_path = Path(file_path)
+        if validate_media(file_path, self.media_type):
+            return True
+        else:
+            err_msg = f"Load {self.media_type.name} failed due to invalid file {str(file_path)}"
+            # If image is corrupted, do not abord the entire loading process.
+            logger.critical(err_msg)
+            # raise ValueError(file_path)
+            return False

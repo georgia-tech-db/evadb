@@ -364,19 +364,13 @@ def create_sample_image():
 
 
 def create_large_scale_image_dataset():
-    image_dir = os.path.join(tmp_dir_from_config, "large_scale_image_dataset")
-
-    # Check if dataset already exists.
-    if os.path.exists(image_dir):
-        if len(os.listdir(image_dir)) == 1000000:
-            return
-    else:
-        os.mkdir(image_dir)
+    img_dir = os.path.join(tmp_dir_from_config, "large_scale_image_dataset")
+    os.mkdir(img_dir)
 
     # Generate images.
     for i in range(1000000):
-        img = np.random.random_sample([5, 5, 3]).astype(np.uint8)
-        cv2.imwrite(os.path.join(image_dir, f"img{i}.jpg"), img)
+        img = np.random.random_sample([400, 400, 3]).astype(np.uint8)
+        cv2.imwrite(os.path.join(img_dir, f"img{i}.jpg"), img)
 
 
 def create_sample_video(num_frames=NUM_FRAMES):

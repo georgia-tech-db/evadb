@@ -171,15 +171,27 @@ def test_summarization_from_video(benchmark, setup_pytorch_tests):
     min_rounds=1,
 )
 def test_load_large_scale_image_dataset(benchmark, setup_pytorch_tests):
-    create_large_scale_image_dataset()
 
     tmp_dir = ConfigurationManager().get_value("storage", "tmp_dir")
-    image_dir = os.path.join(tmp_dir, "large_scale_image_dataset")
+
+    # Check directory's mounted disk available space.
+    statvfs = os.statvfs(tmp_dir)
+    available_gb = statvfs.f_frsize * statvfs.f_bavail / (1024**3)
+
+    img_dir = os.path.join(tmp_dir, "large_scale_image_dataset")
+
+    # Check if dataset already exists. 
+    if not os.path.exists(img_dir):
+        # Only run this large-scale test when the system 
+        # has more than 5GB disk space. 
+        if available_gb < 10:
+            return 
+        create_large_scale_image_dataset()
 
     def _execute_query_list(query_list):
         for query in query_list:
             execute_query_fetch_all(query)
 
-    load_query = f"LOAD IMAGE '{image_dir}/*.jpg' INTO benchmarkImageDataset;"
-    drop_query = "DROP TABLE benchmarkImageDataset;"
-    benchmark(_execute_query_list, [load_query, drop_query])
+    drop_query = "DROP TABLE IF EXISTS benchmarkImageDataset;"
+    load_query = f"LOAD IMAGE '{img_dir}/*.jpg' INTO benchmarkImageDataset;"
+    benchmark(_execute_query_list, [drop_query, load_query])
