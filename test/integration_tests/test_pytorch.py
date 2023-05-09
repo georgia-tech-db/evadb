@@ -254,6 +254,8 @@ class PytorchTest(unittest.TestCase):
         actual_batch = execute_query_fetch_all(select_query)
         self.assertEqual(len(actual_batch), 30)
 
+        num_of_entries = actual_batch.frames["T.iids"].apply(lambda x: len(x)).sum()
+
         select_query = """
             SELECT id, T.iid, T.bbox, T.score, T.label
             FROM MyVideo JOIN LATERAL
@@ -262,7 +264,7 @@ class PytorchTest(unittest.TestCase):
             """
         actual_batch = execute_query_fetch_all(select_query)
         # do some more meaningful check
-        self.assertEqual(len(actual_batch), 685)
+        self.assertEqual(len(actual_batch), num_of_entries)
 
     def test_check_unnest_with_predicate_on_yolo(self):
         query = """SELECT id, Yolo.label, Yolo.bbox, Yolo.score
