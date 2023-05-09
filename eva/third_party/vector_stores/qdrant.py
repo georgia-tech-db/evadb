@@ -38,16 +38,20 @@ def get_qdrant_client():
 
 
 class QdrantVectorStore:
-    def __init__(self, index_name: str, vector_dim: int) -> None:
+    def __init__(
+        self,
+        index_name: str,
+    ) -> None:
         self._client = get_qdrant_client()
+        self._index_name = index_name
 
+    def create(self, vector_dim: int):
         from qdrant_client.models import Distance, VectorParams
 
         self._client.recreate_collection(
-            collection_name=index_name,
+            collection_name=self._index_name,
             vectors_config=VectorParams(size=vector_dim, distance=Distance.COSINE),
         )
-        self._index_name = index_name
 
     def add(self, payload: List[FeaturePayload]):
         from qdrant_client.models import Batch
