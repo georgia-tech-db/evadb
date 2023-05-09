@@ -183,6 +183,7 @@ tutorials/bddtest.zip
 tutorials/license.zip
 license/
 bddtest/
+tutorials/*.jpg
 
 # benchmark
 .benchmarks
