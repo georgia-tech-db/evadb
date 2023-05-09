@@ -39,7 +39,6 @@ class PytorchTest(unittest.TestCase):
         asl_actions = f"{EVA_ROOT_DIR}/data/actions/computer_asl.mp4"
         meme1 = f"{EVA_ROOT_DIR}/data/detoxify/meme1.jpg"
         meme2 = f"{EVA_ROOT_DIR}/data/detoxify/meme2.jpg"
-        meme3 = f"{EVA_ROOT_DIR}/data/detoxify/meme3.jpg"
 
         execute_query_fetch_all(f"LOAD VIDEO '{ua_detrac}' INTO MyVideo;")
         execute_query_fetch_all(f"LOAD VIDEO '{mnist}' INTO MNIST;")
@@ -47,7 +46,6 @@ class PytorchTest(unittest.TestCase):
         execute_query_fetch_all(f"LOAD VIDEO '{asl_actions}' INTO Asl_actions;")
         execute_query_fetch_all(f"LOAD IMAGE '{meme1}' INTO MemeImages;")
         execute_query_fetch_all(f"LOAD IMAGE '{meme2}' INTO MemeImages;")
-        execute_query_fetch_all(f"LOAD IMAGE '{meme3}' INTO MemeImages;")
         load_udfs_for_testing()
 
     @classmethod

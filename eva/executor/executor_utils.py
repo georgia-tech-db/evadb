@@ -60,12 +60,7 @@ def handle_if_not_exists(table_info: TableInfo, if_not_exist=False):
             raise ExecutorError(err_msg)
     # Table does not exist
     else:
-        err_msg = "Table: {} does not exist".format(table_info)
-        if if_not_exist:
-            logger.warn(err_msg)
-            return False
-        else:
-            return False
+        return False
 
 
 def validate_image(image_path: Path) -> bool:
