@@ -14,7 +14,6 @@
 # limitations under the License.
 import os
 import shutil
-import subprocess as subp
 from pathlib import Path
 
 import pandas as pd
