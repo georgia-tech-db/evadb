@@ -14,7 +14,7 @@
 # limitations under the License.
 import os
 import shutil
-import zlib
+import subprocess as subp
 from pathlib import Path
 
 import pandas as pd
@@ -43,11 +43,19 @@ class AbstractMediaStorageEngine(AbstractStorageEngine):
         )
 
     def _xform_file_url_to_file_name(self, file_url: Path) -> str:
-        # convert media_path to file name
-        # This is done to support duplicate media_names with different complete paths. Without conversion, we cannot copy files with same name but different paths. Eg., a/b/my.mp4 and a/b/c/my.mp4
-        # deterministic hashing
-        xfromed_file_name = zlib.adler32(str(file_url).encode("utf-8")) & 0xFFFFFFFF
-        return str(xfromed_file_name)
+        # Convert media_path to file name. This is done to support duplicate media_names with 
+        # different complete paths. Without conversion, we cannot copy files with same name but 
+        # different paths. Eg., a/b/my.mp4 and a/b/c/my.mp4.
+        # xfromed_file_name = zlib.crc32(str(file_url).encode("utf-8")) & 0xFFFFFFFF
+        # return str(xfromed_file_name)
+
+        # Previous approach with hashing is commented out above. Since we now use symbolic link, the only
+        # thing we need to worry about is the same file name under different directory. This motivates us
+        # to just breakdown directory also as part of file name. Additionaly, it does not use hashing,
+        # whcih avoids computation overhead.
+        file_path_str = str(file_url)
+        file_path = file_path_str.replace("/", "_")
+        return file_path
 
     def create(self, table: TableCatalogEntry, if_not_exists=True):
         """
