@@ -12,10 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import os
 import pytest
 
 from eva.server.command_handler import execute_query_fetch_all
+from eva.configuration.configuration_manager import ConfigurationManager
+from test.util import create_large_scale_image_dataset
 
 
 @pytest.mark.torchtest
@@ -160,3 +162,23 @@ def test_summarization_from_video(benchmark, setup_pytorch_tests):
     execute_query_fetch_all(drop_udf_query)
     drop_udf_query = f"DROP UDF {summary_udf};"
     execute_query_fetch_all(drop_udf_query)
+
+
+@pytest.mark.benchmark(
+    warmup=False,
+    warmup_iterations=1,
+    min_rounds=1,
+)
+def test_load_large_scale_image_dataset(benchmark, setup_pytorch_tests):
+    create_large_scale_image_dataset()
+
+    tmp_dir = ConfigurationManager().get_value("storage", "tmp_dir")
+    image_dir = os.path.join(tmp_dir, "large_scale_image_dataset")
+
+    def _execute_query_list(query_list):
+        for query in query_list:
+            execute_query_fetch_all(query)
+
+    load_query = f"LOAD IMAGE '{image_dir}/*.jpg' INTO benchmarkImageDataset;"
+    drop_query = "DROP TABLE benchmarkImageDataset;"
+    benchmark(_execute_query_list, [load_query, drop_query])
