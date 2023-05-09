@@ -44,6 +44,7 @@ class HuggingFaceTests(unittest.TestCase):
     def tearDown(self) -> None:
         execute_query_fetch_all("DROP TABLE IF EXISTS DETRAC;")
         execute_query_fetch_all("DROP TABLE IF EXISTS VIDEOS;")
+        execute_query_fetch_all("DROP TABLE IF EXISTS MyCSV;")
         file_remove(self.csv_file_path)
 
     def test_io_catalog_entries_populated(self):
@@ -268,7 +269,7 @@ class HuggingFaceTests(unittest.TestCase):
         drop_table_query = """DROP TABLE IF EXISTS MyCSV;"""
         execute_query_fetch_all(drop_table_query)
 
-        create_table_query = """CREATE TABLE MyCSV (
+        create_table_query = """CREATE TABLE IF NOT EXISTS MyCSV (
                 id INTEGER UNIQUE,
                 comment TEXT(30)
             );"""
