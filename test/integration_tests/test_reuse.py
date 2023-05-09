@@ -149,6 +149,14 @@ class ReuseTest(unittest.TestCase):
     def test_reuse_filter_with_project(self):
         project_query = """
             SELECT id, Yolo(data).labels FROM DETRAC WHERE id < 10;"""
+        select_query = """
+            SELECT id FROM DETRAC
+            WHERE ArrayCount(Yolo(data).labels, 'car') > 3 AND id < 10;"""
+
+        batches, exec_times = self._reuse_experiment([project_query, select_query])
+        self._verify_reuse_correctness(select_query, batches[1])
+        # reuse should be faster than no reuse
+        self.assertGreater(exec_times[0], exec_times[1])
 
     def test_reuse_in_extract_object(self):
         select_query = """
@@ -160,17 +168,6 @@ class ReuseTest(unittest.TestCase):
         execute_query_fetch_all(select_query)
         reuse_batch = execute_query_fetch_all(select_query)
         self._verify_reuse_correctness(select_query, reuse_batch)
-
-    def test_reuse_does_not_work_when_expression_in_where_clause(self):
-        # add with subsequent PR
-        select_query = """
-            SELECT id FROM DETRAC
-            WHERE ArrayCount(Yolo(data).labels, 'car') > 3 AND id < 10;"""
-
-        batches, exec_times = self._reuse_experiment([project_query, select_query])
-        self._verify_reuse_correctness(select_query, batches[1])
-        # reuse should be faster than no reuse
-        self.assertGreater(exec_times[0], exec_times[1])
 
     @windows_skip_marker
     def test_reuse_after_server_shutdown(self):
