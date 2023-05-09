@@ -76,7 +76,7 @@ if [[ "$OSTYPE" != "msys" ]];
 then
     if [[ "$MODE" = "TEST" || "$MODE" = "ALL" ]];
     then
-        PYTHONPATH=./ pytest --durations=20 --cov-report term-missing:skip-covered  --cov-config=.coveragerc --cov-context=test --cov=eva/ --capture=sys --tb=short -v --log-level=WARNING -m "not benchmark"
+        PYTHONPATH=./ pytest --durations=20 -n 4 --cov-report term-missing:skip-covered  --cov-config=.coveragerc --cov-context=test --cov=eva/ --capture=sys --tb=short -v --log-level=WARNING -m "not benchmark"
     elif [[ "$MODE" = "RAY" ]];
     then
         PYTHONPATH=./ pytest -s -v -p no:cov test/ -m "not benchmark"
