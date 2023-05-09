@@ -161,7 +161,7 @@ class ReuseTest(unittest.TestCase):
     def test_reuse_in_extract_object(self):
         select_query = """
             SELECT id, T.iids, T.bboxes, T.scores, T.labels
-            FROM DETRAC JOIN LATERAL EXTRACT_OBJECT(data, YoloV5, NorFairTracker)
+            FROM DETRAC JOIN LATERAL EXTRACT_OBJECT(data, Yolo, NorFairTracker)
                 AS T(iids, labels, bboxes, scores)
             WHERE id < 30;
             """
