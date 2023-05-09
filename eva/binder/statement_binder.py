@@ -177,7 +177,7 @@ class StatementBinder:
         ), "Rename not yet supported on structured data"
 
     @bind.register(OverwriteStatement)
-    def _bind_delete_statement(self, node: OverwriteStatement):
+    def _bind_overwrite_statement(self, node: OverwriteStatement):
         self.bind(node.table_ref)
         if node.operation:
             self.bind(node.operation)
