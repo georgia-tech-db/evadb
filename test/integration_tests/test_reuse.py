@@ -60,7 +60,13 @@ class ReuseTest(unittest.TestCase):
             without_reuse_batch = execute_query_fetch_all(
                 query, plan_generator=custom_plan_generator
             )
-        self.assertEqual(without_reuse_batch, reuse_batch)
+
+        # printing the batches so that we can see the mismatch in the logs
+        self.assertEqual(
+            without_reuse_batch,
+            reuse_batch,
+            msg=f"Without reuse {without_reuse_batch} \n With reuse{reuse_batch}",
+        )
 
     def _reuse_experiment(self, queries):
         exec_times = []
