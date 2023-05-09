@@ -1,4 +1,3 @@
-<!--
 👋 Thanks for submitting a Pull Request to EVA DB!
 
 🙌 We want to make contributing to EVA DB as easy and transparent as possible. Here are a few tips to get you started:
@@ -9,7 +8,3 @@
 
 👉 Please see our ✅ [Contributing Guide](https://evadb.readthedocs.io/en/stable/source/contribute/index.html) for more details.
 
-🚨 Note that Copilot will summarize this PR below, do not modify the 'copilot:all' line.
--->
-
-copilot:all
