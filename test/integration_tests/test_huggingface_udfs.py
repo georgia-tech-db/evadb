@@ -15,6 +15,8 @@
 import unittest
 from test.util import create_text_csv, file_remove
 
+import pytest
+
 from eva.catalog.catalog_manager import CatalogManager
 from eva.executor.executor_utils import ExecutorError
 from eva.server.command_handler import execute_query_fetch_all
@@ -161,6 +163,7 @@ class HuggingFaceTests(unittest.TestCase):
         drop_udf_query = f"DROP UDF {udf_name};"
         execute_query_fetch_all(drop_udf_query)
 
+    @pytest.mark.benchmark
     def test_text_classification(self):
         create_table_query = """CREATE TABLE IF NOT EXISTS MyCSV (
                 id INTEGER UNIQUE,
@@ -205,6 +208,7 @@ class HuggingFaceTests(unittest.TestCase):
         execute_query_fetch_all(drop_udf_query)
         execute_query_fetch_all("DROP TABLE MyCSV;")
 
+    @pytest.mark.benchmark
     def test_automatic_speech_recognition(self):
         udf_name = "SpeechRecognizer"
         create_udf = (
@@ -225,6 +229,7 @@ class HuggingFaceTests(unittest.TestCase):
         drop_udf_query = f"DROP UDF {udf_name};"
         execute_query_fetch_all(drop_udf_query)
 
+    @pytest.mark.benchmark
     def test_summarization_from_video(self):
         asr_udf = "SpeechRecognizer"
         create_udf = (
@@ -257,6 +262,7 @@ class HuggingFaceTests(unittest.TestCase):
         drop_udf_query = f"DROP UDF {summary_udf};"
         execute_query_fetch_all(drop_udf_query)
 
+    @pytest.mark.benchmark
     def test_toxicity_classification(self):
         udf_name = "HFToxicityClassifier"
         create_udf_query = f"""CREATE UDF {udf_name}
@@ -305,6 +311,7 @@ class HuggingFaceTests(unittest.TestCase):
         drop_udf_query = f"DROP UDF {udf_name};"
         execute_query_fetch_all(drop_udf_query)
 
+    @pytest.mark.benchmark
     def test_multilingual_toxicity_classification(self):
         udf_name = "HFMultToxicityClassifier"
         create_udf_query = f"""CREATE UDF {udf_name}
