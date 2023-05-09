@@ -17,7 +17,12 @@ import os
 import unittest
 from pathlib import Path
 from test.markers import windows_skip_marker
-from test.util import get_logical_query_plan, load_udfs_for_testing, shutdown_ray
+from test.util import (
+    get_logical_query_plan,
+    load_udfs_for_testing,
+    requires_library,
+    shutdown_ray,
+)
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
@@ -34,11 +39,22 @@ from eva.utils.stats import Timer
 
 
 class ReuseTest(unittest.TestCase):
+    @requires_library("timm")
+    def _load_hf_model(self):
+        udf_name = "HFObjectDetector"
+        create_udf_query = f"""CREATE UDF {udf_name}
+            TYPE HuggingFace
+            'task' 'object-detection'
+            'model' 'facebook/detr-resnet-50';
+        """
+        execute_query_fetch_all(create_udf_query)
+
     def setUp(self):
         CatalogManager().reset()
         ua_detrac = f"{EVA_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
         execute_query_fetch_all(f"LOAD VIDEO '{ua_detrac}' INTO DETRAC;")
         load_udfs_for_testing()
+        self._load_hf_model()
 
     def tearDown(self):
         shutdown_ray()
@@ -80,7 +96,7 @@ class ReuseTest(unittest.TestCase):
 
     def test_reuse_when_query_is_duplicate(self):
         select_query = """SELECT id, label FROM DETRAC JOIN
-            LATERAL Yolo(data) AS Obj(label, bbox, conf) WHERE id < 15;"""
+            LATERAL HFObjectDetector(data) AS Obj(score, label, bbox) WHERE id < 15;"""
         batches, exec_times = self._reuse_experiment([select_query, select_query])
         self._verify_reuse_correctness(select_query, batches[1])
         # reuse should be faster than no reuse
@@ -88,46 +104,48 @@ class ReuseTest(unittest.TestCase):
 
     def test_reuse_partial(self):
         select_query1 = """SELECT id, label FROM DETRAC JOIN
-            LATERAL Yolo(data) AS Obj(label, bbox, conf) WHERE id < 5;"""
+            LATERAL HFObjectDetector(data) AS Obj(score, label, bbox) WHERE id < 5;"""
         select_query2 = """SELECT id, label FROM DETRAC JOIN
-            LATERAL Yolo(data) AS Obj(label, bbox, conf) WHERE id < 15;"""
+            LATERAL HFObjectDetector(data) AS Obj(score, label, bbox) WHERE id < 15;"""
 
         batches, exec_times = self._reuse_experiment([select_query1, select_query2])
         self._verify_reuse_correctness(select_query2, batches[1])
 
     def test_reuse_in_with_multiple_occurences(self):
         select_query1 = """SELECT id, label FROM DETRAC JOIN
-            LATERAL Yolo(data) AS Obj(label, bbox, conf) WHERE id < 10;"""
+            LATERAL HFObjectDetector(data) AS Obj(score, label, bbox) WHERE id < 10;"""
 
         # multiple occurences of the same function expression
-        select_query2 = """SELECT id, Yolo(data).labels FROM DETRAC JOIN
-            LATERAL Yolo(data) AS Obj(label, bbox, conf) WHERE id < 15;"""
+        select_query2 = """SELECT id, HFObjectDetector(data).label FROM DETRAC JOIN
+            LATERAL HFObjectDetector(data) AS Obj(score, label, bbox) WHERE id < 15;"""
 
         batches, exec_times = self._reuse_experiment([select_query1, select_query2])
 
         self._verify_reuse_correctness(select_query2, batches[1])
 
         # different query format
-        select_query = """SELECT id, Yolo(data).labels FROM DETRAC WHERE id < 25;"""
+        select_query = (
+            """SELECT id, HFObjectDetector(data).label FROM DETRAC WHERE id < 25;"""
+        )
         reuse_batch = execute_query_fetch_all(select_query)
         self._verify_reuse_correctness(select_query, reuse_batch)
 
         # different query format
-        select_query = """SELECT id, Yolo(data).scores FROM DETRAC WHERE ['car'] <@ Yolo(data).labels AND id < 20"""
+        select_query = """SELECT id, HFObjectDetector(data).score FROM DETRAC WHERE ['car'] <@ HFObjectDetector(data).label AND id < 20"""
         reuse_batch = execute_query_fetch_all(select_query)
         self._verify_reuse_correctness(select_query, reuse_batch)
 
     def test_reuse_logical_project_with_duplicate_query(self):
-        project_query = """SELECT id, Yolo(data).labels FROM DETRAC WHERE id < 25;"""
+        project_query = (
+            """SELECT id, HFObjectDetector(data).label FROM DETRAC WHERE id < 25;"""
+        )
         batches, exec_times = self._reuse_experiment([project_query, project_query])
         self._verify_reuse_correctness(project_query, batches[1])
         # reuse should be faster than no reuse
         self.assertGreater(exec_times[0], exec_times[1])
 
     def test_reuse_with_udf_in_predicate(self):
-        select_query = (
-            """SELECT id FROM DETRAC WHERE ['car'] <@ Yolo(data).labels AND id < 4"""
-        )
+        select_query = """SELECT id FROM DETRAC WHERE ['car'] <@ HFObjectDetector(data).label AND id < 4"""
 
         batches, exec_times = self._reuse_experiment([select_query, select_query])
         self._verify_reuse_correctness(select_query, batches[1])
@@ -135,11 +153,9 @@ class ReuseTest(unittest.TestCase):
         self.assertGreater(exec_times[0], exec_times[1])
 
     def test_reuse_across_different_predicate_using_same_udf(self):
-        query1 = (
-            """SELECT id FROM DETRAC WHERE ['car'] <@ Yolo(data).labels AND id < 20"""
-        )
+        query1 = """SELECT id FROM DETRAC WHERE ['car'] <@ HFObjectDetector(data).label AND id < 20"""
 
-        query2 = """SELECT id FROM DETRAC WHERE ArrayCount(Yolo(data).labels, 'car') > 3 AND id < 20;"""
+        query2 = """SELECT id FROM DETRAC WHERE ArrayCount(HFObjectDetector(data).label, 'car') > 3 AND id < 20;"""
 
         batches, exec_times = self._reuse_experiment([query1, query2])
         self._verify_reuse_correctness(query2, batches[1])

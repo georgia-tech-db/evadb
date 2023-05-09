@@ -13,7 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import create_text_csv, file_remove
+from test.util import (
+    create_text_csv,
+    file_remove,
+    load_udfs_for_testing,
+    requires_library,
+)
 
 import pytest
 
@@ -42,6 +47,8 @@ class HuggingFaceTests(unittest.TestCase):
 
         # Text CSV for testing HF Text Based Models
         self.csv_file_path = create_text_csv()
+
+        load_udfs_for_testing()
 
     def tearDown(self) -> None:
         execute_query_fetch_all("DROP TABLE IF EXISTS DETRAC;")
@@ -87,12 +94,13 @@ class HuggingFaceTests(unittest.TestCase):
             f"Task {task} not supported in EVA currently", str(exc_info.exception)
         )
 
-    @unittest.skip("Skip as it requires external library timm")
+    @requires_library("timm")
     def test_object_detection(self):
         udf_name = "HFObjectDetector"
         create_udf_query = f"""CREATE UDF {udf_name}
             TYPE HuggingFace
             'task' 'object-detection'
+            'model' 'facebook/detr-resnet-50';
         """
         execute_query_fetch_all(create_udf_query)
 
