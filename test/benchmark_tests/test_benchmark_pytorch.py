@@ -171,7 +171,6 @@ def test_summarization_from_video(benchmark, setup_pytorch_tests):
     min_rounds=1,
 )
 def test_load_large_scale_image_dataset(benchmark, setup_pytorch_tests):
-
     tmp_dir = ConfigurationManager().get_value("storage", "tmp_dir")
 
     # Check directory's mounted disk available space.
@@ -180,12 +179,12 @@ def test_load_large_scale_image_dataset(benchmark, setup_pytorch_tests):
 
     img_dir = os.path.join(tmp_dir, "large_scale_image_dataset")
 
-    # Check if dataset already exists. 
+    # Check if dataset already exists.
     if not os.path.exists(img_dir):
-        # Only run this large-scale test when the system 
-        # has more than 5GB disk space. 
+        # Only run this large-scale test when the system
+        # has more than 5GB disk space.
         if available_gb < 10:
-            return 
+            return
         create_large_scale_image_dataset()
 
     def _execute_query_list(query_list):

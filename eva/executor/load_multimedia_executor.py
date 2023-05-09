@@ -13,9 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import multiprocessing as mp
-
-from pathlib import Path
 from multiprocessing import Pool
+from pathlib import Path
 
 import pandas as pd
 
@@ -61,11 +60,17 @@ class LoadMultimediaExecutor(AbstractExecutor):
             # Use parallel validation if there are many files. Otherwise, use single-thread
             # validation version.
             if len(video_files) < mp.cpu_count() * 2:
-                valid_files = [path for path in video_files if self._is_media_valid(path)]
+                valid_files = [
+                    path for path in video_files if self._is_media_valid(path)
+                ]
             else:
                 pool = Pool(mp.cpu_count())
                 valid_files = [
-                    path for path, is_valid in zip(video_files, pool.map(self._is_media_valid, video_files)) if is_valid
+                    path
+                    for path, is_valid in zip(
+                        video_files, pool.map(self._is_media_valid, video_files)
+                    )
+                    if is_valid
                 ]
 
             if not valid_files:
