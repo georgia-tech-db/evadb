@@ -13,11 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import os
+from test.util import create_large_scale_image_dataset
+
 import pytest
 
-from eva.server.command_handler import execute_query_fetch_all
 from eva.configuration.configuration_manager import ConfigurationManager
-from test.util import create_large_scale_image_dataset
+from eva.server.command_handler import execute_query_fetch_all
 
 
 @pytest.mark.torchtest

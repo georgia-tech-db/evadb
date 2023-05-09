@@ -43,8 +43,8 @@ class AbstractMediaStorageEngine(AbstractStorageEngine):
         )
 
     def _xform_file_url_to_file_name(self, file_url: Path) -> str:
-        # Convert media_path to file name. This is done to support duplicate media_names with 
-        # different complete paths. Without conversion, we cannot copy files with same name but 
+        # Convert media_path to file name. This is done to support duplicate media_names with
+        # different complete paths. Without conversion, we cannot copy files with same name but
         # different paths. Eg., a/b/my.mp4 and a/b/c/my.mp4.
         # xfromed_file_name = zlib.crc32(str(file_url).encode("utf-8")) & 0xFFFFFFFF
         # return str(xfromed_file_name)
