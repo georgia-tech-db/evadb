@@ -157,9 +157,7 @@ norfair_obj_tracker_query = """CREATE UDF IF NOT EXISTS NorFairTracker
 )
 
 Sift_udf_query = """CREATE UDF IF NOT EXISTS SiftFeatureExtractor
-        INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
-        OUTPUT (features NDARRAY FLOAT32(1, ANYDIM))
-        TYPE  Classification
+        TYPE  FeatureExtraction 
         IMPL  '{}/udfs/sift_feature_extractor.py';
         """.format(
     EVA_INSTALLATION_DIR
