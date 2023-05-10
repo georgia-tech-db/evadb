@@ -13,12 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import (
-    create_text_csv,
-    file_remove,
-    load_udfs_for_testing,
-    requires_library,
-)
+from test.util import create_text_csv, file_remove, load_udfs_for_testing
 
 import pytest
 
@@ -94,7 +89,6 @@ class HuggingFaceTests(unittest.TestCase):
             f"Task {task} not supported in EVA currently", str(exc_info.exception)
         )
 
-    @requires_library("timm")
     def test_object_detection(self):
         udf_name = "HFObjectDetector"
         create_udf_query = f"""CREATE UDF {udf_name}

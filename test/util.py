@@ -16,7 +16,6 @@ import asyncio
 import os
 import shutil
 import socket
-import subprocess
 from contextlib import closing
 from pathlib import Path
 
@@ -576,32 +575,3 @@ class DummyObjectDetectorDecorators(AbstractClassifierUDF):
         i = int(frames[0][0][0][0]) - 1
         label = self.labels[i % 2 + 1]
         return np.array([label])
-
-
-def requires_library(library_name):
-    """
-    A decorator that installs a required library before executing a test function.
-    """
-
-    def decorator(test_func):
-        def wrapper(*args, **kwargs):
-            # Check if the required library is installed
-            try:
-                __import__(library_name)
-            except ImportError:
-                # If the library is not installed, install it
-                subprocess.check_call(["pip", "install", library_name])
-
-                # Check if the installation was successful
-                try:
-                    __import__(library_name)
-                except ImportError:
-                    raise ImportError(
-                        f"{library_name} was installed but could not be imported"
-                    )
-            # Run the test case
-            return test_func(*args, **kwargs)
-
-        return wrapper
-
-    return decorator

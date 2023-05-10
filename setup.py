@@ -100,6 +100,7 @@ udf_libs = [
     "ultralytics",  # OBJECT DETECTION
     "transformers>=4.27.4",  # HUGGINGFACE
     "openai>=0.27.4",  # CHATGPT
+    "timm>=0.6.13",  # HUGGINGFACE VISION TASKS
 ]
 
 ### NEEDED FOR EXPERIMENTAL FEATURES

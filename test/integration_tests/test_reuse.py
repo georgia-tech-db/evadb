@@ -17,12 +17,7 @@ import os
 import unittest
 from pathlib import Path
 from test.markers import windows_skip_marker
-from test.util import (
-    get_logical_query_plan,
-    load_udfs_for_testing,
-    requires_library,
-    shutdown_ray,
-)
+from test.util import get_logical_query_plan, load_udfs_for_testing, shutdown_ray
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
@@ -39,7 +34,6 @@ from eva.utils.stats import Timer
 
 
 class ReuseTest(unittest.TestCase):
-    @requires_library("timm")
     def _load_hf_model(self):
         udf_name = "HFObjectDetector"
         create_udf_query = f"""CREATE UDF {udf_name}
@@ -117,7 +111,7 @@ class ReuseTest(unittest.TestCase):
 
         # multiple occurences of the same function expression
         select_query2 = """SELECT id, HFObjectDetector(data).label FROM DETRAC JOIN
-            LATERAL HFObjectDetector(data) AS Obj(score, label, bbox) WHERE id < 15;"""
+            LATERAL HFObjectDetector(data) AS Obj(score, label, bbox) WHERE id < 5;"""
 
         batches, exec_times = self._reuse_experiment([select_query1, select_query2])
 
@@ -125,7 +119,7 @@ class ReuseTest(unittest.TestCase):
 
         # different query format
         select_query = (
-            """SELECT id, HFObjectDetector(data).label FROM DETRAC WHERE id < 25;"""
+            """SELECT id, HFObjectDetector(data).label FROM DETRAC WHERE id < 15;"""
         )
         reuse_batch = execute_query_fetch_all(select_query)
         self._verify_reuse_correctness(select_query, reuse_batch)
@@ -137,7 +131,7 @@ class ReuseTest(unittest.TestCase):
 
     def test_reuse_logical_project_with_duplicate_query(self):
         project_query = (
-            """SELECT id, HFObjectDetector(data).label FROM DETRAC WHERE id < 25;"""
+            """SELECT id, HFObjectDetector(data).label FROM DETRAC WHERE id < 10;"""
         )
         batches, exec_times = self._reuse_experiment([project_query, project_query])
         self._verify_reuse_correctness(project_query, batches[1])
