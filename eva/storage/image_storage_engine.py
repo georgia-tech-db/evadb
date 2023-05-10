@@ -16,7 +16,6 @@ from pathlib import Path
 from typing import Iterator
 
 from eva.catalog.models.table_catalog import TableCatalogEntry
-from eva.catalog.sql_config import IDENTIFIER_COLUMN
 from eva.models.storage.batch import Batch
 from eva.readers.image.opencv_image_reader import CVImageReader
 from eva.storage.abstract_media_storage_engine import AbstractMediaStorageEngine
