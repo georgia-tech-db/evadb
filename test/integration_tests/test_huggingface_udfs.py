@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import create_text_csv, file_remove, load_udfs_for_testing
+from test.util import create_text_csv, file_remove
 
 import pytest
 
@@ -42,8 +42,6 @@ class HuggingFaceTests(unittest.TestCase):
 
         # Text CSV for testing HF Text Based Models
         self.csv_file_path = create_text_csv()
-
-        load_udfs_for_testing()
 
     def tearDown(self) -> None:
         execute_query_fetch_all("DROP TABLE IF EXISTS DETRAC;")
