@@ -15,22 +15,11 @@
 from typing import Any
 
 import pandas as pd
+from transformers import pipeline
 
 from eva.catalog.models.udf_catalog import UdfCatalogEntry
 from eva.udfs.abstract.abstract_udf import AbstractUDF
 from eva.udfs.gpu_compatible import GPUCompatible
-
-# Lazy import to avoid torch init failures
-_pipeline = None
-
-
-def _lazy_import_pipeline():
-    global _pipeline
-    if _pipeline is None:
-        from transformers import pipeline
-
-        _pipeline = pipeline
-    return _pipeline
 
 
 class AbstractHFUdf(AbstractUDF, GPUCompatible):
@@ -53,7 +42,6 @@ class AbstractHFUdf(AbstractUDF, GPUCompatible):
         return "GenericHuggingfaceModel"
 
     def __init__(self, udf_obj: UdfCatalogEntry, device: int = -1, *args, **kwargs):
-        pipeline = _lazy_import_pipeline()
         super().__init__(*args, **kwargs)
         pipeline_args = self.default_pipeline_args
         for entry in udf_obj.metadata:
@@ -107,6 +95,5 @@ class AbstractHFUdf(AbstractUDF, GPUCompatible):
         return eva_output
 
     def to_device(self, device: str) -> GPUCompatible:
-        pipeline = _lazy_import_pipeline()
         self.hf_udf_obj = pipeline(**self.pipeline_args, device=device)
         return self

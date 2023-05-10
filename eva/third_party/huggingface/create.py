@@ -16,6 +16,7 @@ from typing import Dict, List, Type, Union
 
 import numpy as np
 from PIL import Image, ImageDraw
+from transformers import pipeline
 
 from eva.catalog.catalog_type import ColumnType, NdArrayType
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
@@ -27,18 +28,6 @@ from eva.third_party.huggingface.model import (
     ImageHFModel,
     TextHFModel,
 )
-
-_pipeline = None
-
-
-def _lazy_import_pipeline():
-    global _pipeline
-    if _pipeline is None:
-        from transformers import pipeline
-
-        _pipeline = pipeline
-    return _pipeline
-
 
 """
 We currently support the following tasks from HuggingFace.
@@ -117,7 +106,6 @@ def infer_output_name_and_type(**pipeline_args):
     """
     Infer the name and type for each output of the HuggingFace UDF
     """
-    pipeline = _lazy_import_pipeline()
     assert "task" in pipeline_args, "Task Not Found In Model Definition"
     task = pipeline_args["task"]
     assert (
