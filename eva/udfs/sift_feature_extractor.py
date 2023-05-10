@@ -20,10 +20,15 @@ import numpy as np
 import pandas as pd
 import torch
 
-from eva.udfs.abstract.abstract_udf import AbstractClassifierUDF
+from eva.catalog.catalog_type import NdArrayType
+from eva.udfs.abstract.abstract_udf import AbstractUDF
+from eva.udfs.gpu_compatible import GPUCompatible
+from eva.udfs.decorators.decorators import forward, setup
+from eva.udfs.decorators.io_descriptors.data_types import PandasDataframe
 
 
-class SiftFeatureExtractor(AbstractClassifierUDF):
+class SiftFeatureExtractor(AbstractUDF):
+    @setup(cachable=False, udf_type="sift-feature-extractor", batchable=False)
     def setup(self):
         self.model = kornia.feature.SIFTDescriptor(100)
 
@@ -31,10 +36,22 @@ class SiftFeatureExtractor(AbstractClassifierUDF):
     def name(self) -> str:
         return "SiftFeatureExtractor"
 
-    @property
-    def labels(self) -> List[str]:
-        return []
-
+    @forward(
+        input_signatures=[
+            PandasDataframe(
+                columns=["data"],
+                column_types=[NdArrayType.UINT8],
+                column_shapes=[(None, None, 3)],
+            )
+        ],
+        output_signatures=[
+            PandasDataframe(
+                columns=["features"],
+                column_types=[NdArrayType.FLOAT32],
+                column_shapes=[(1, 128)],
+            )
+        ],
+    )
     def forward(self, df: pd.DataFrame) -> pd.DataFrame:
         def _forward(row: pd.Series) -> np.ndarray:
             # Prepare gray image to batched gray image within size.
