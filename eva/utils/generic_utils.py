@@ -117,15 +117,6 @@ def prefix_xdist_worker_id_to_path(path: str):
     return path
 
 
-def suffix_pytest_xdist_worker_id_to_dir(path: Path):
-    try:
-        worker_id = os.environ["PYTEST_XDIST_WORKER"]
-        path = path / str(worker_id)
-    except KeyError:
-        pass
-    return path
-
-
 def get_gpu_count() -> int:
     """
     Check number of GPUs through Torch.
