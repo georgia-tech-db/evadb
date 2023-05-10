@@ -15,6 +15,8 @@
 import unittest
 from test.util import create_text_csv, file_remove
 
+import pytest
+
 from eva.catalog.catalog_manager import CatalogManager
 from eva.executor.executor_utils import ExecutorError
 from eva.server.command_handler import execute_query_fetch_all
@@ -44,6 +46,7 @@ class HuggingFaceTests(unittest.TestCase):
     def tearDown(self) -> None:
         execute_query_fetch_all("DROP TABLE IF EXISTS DETRAC;")
         execute_query_fetch_all("DROP TABLE IF EXISTS VIDEOS;")
+        execute_query_fetch_all("DROP TABLE IF EXISTS MyCSV;")
         file_remove(self.csv_file_path)
 
     def test_io_catalog_entries_populated(self):
@@ -84,12 +87,12 @@ class HuggingFaceTests(unittest.TestCase):
             f"Task {task} not supported in EVA currently", str(exc_info.exception)
         )
 
-    # @unittest.skip("Skip as it requires external library timm")
     def test_object_detection(self):
         udf_name = "HFObjectDetector"
         create_udf_query = f"""CREATE UDF {udf_name}
             TYPE HuggingFace
             'task' 'object-detection'
+            'model' 'facebook/detr-resnet-50';
         """
         execute_query_fetch_all(create_udf_query)
 
@@ -140,6 +143,7 @@ class HuggingFaceTests(unittest.TestCase):
 
         select_query = f"SELECT {udf_name}(data) FROM DETRAC WHERE id < 3;"
         output = execute_query_fetch_all(select_query)
+        print("output: ", output)
 
         # Test that output has 2 columns
         self.assertEqual(len(output.frames.columns), 2)
@@ -159,6 +163,7 @@ class HuggingFaceTests(unittest.TestCase):
         drop_udf_query = f"DROP UDF {udf_name};"
         execute_query_fetch_all(drop_udf_query)
 
+    @pytest.mark.benchmark
     def test_text_classification(self):
         create_table_query = """CREATE TABLE IF NOT EXISTS MyCSV (
                 id INTEGER UNIQUE,
@@ -203,6 +208,7 @@ class HuggingFaceTests(unittest.TestCase):
         execute_query_fetch_all(drop_udf_query)
         execute_query_fetch_all("DROP TABLE MyCSV;")
 
+    @pytest.mark.benchmark
     def test_automatic_speech_recognition(self):
         udf_name = "SpeechRecognizer"
         create_udf = (
@@ -223,6 +229,7 @@ class HuggingFaceTests(unittest.TestCase):
         drop_udf_query = f"DROP UDF {udf_name};"
         execute_query_fetch_all(drop_udf_query)
 
+    @pytest.mark.benchmark
     def test_summarization_from_video(self):
         asr_udf = "SpeechRecognizer"
         create_udf = (
@@ -253,4 +260,101 @@ class HuggingFaceTests(unittest.TestCase):
         drop_udf_query = f"DROP UDF {asr_udf};"
         execute_query_fetch_all(drop_udf_query)
         drop_udf_query = f"DROP UDF {summary_udf};"
+        execute_query_fetch_all(drop_udf_query)
+
+    @pytest.mark.benchmark
+    def test_toxicity_classification(self):
+        udf_name = "HFToxicityClassifier"
+        create_udf_query = f"""CREATE UDF {udf_name}
+            TYPE HuggingFace
+            'task' 'text-classification'
+            'model' 'martin-ha/toxic-comment-model'
+        """
+        execute_query_fetch_all(create_udf_query)
+
+        drop_table_query = """DROP TABLE IF EXISTS MyCSV;"""
+        execute_query_fetch_all(drop_table_query)
+
+        create_table_query = """CREATE TABLE IF NOT EXISTS MyCSV (
+                id INTEGER UNIQUE,
+                comment TEXT(30)
+            );"""
+        execute_query_fetch_all(create_table_query)
+
+        load_table_query = f"""LOAD CSV '{self.csv_file_path}' INTO MyCSV;"""
+        execute_query_fetch_all(load_table_query)
+
+        select_query = f"SELECT {udf_name}(comment) FROM MyCSV;"
+        output = execute_query_fetch_all(select_query)
+
+        # Test that output has 2 columns
+        self.assertEqual(len(output.frames.columns), 2)
+
+        # Test that there exists a column with udf_name.label and each entry is either "POSITIVE" or "NEGATIVE"
+        self.assertTrue(udf_name.lower() + ".label" in output.frames.columns)
+        self.assertTrue(
+            all(
+                x in ["non-toxic", "toxic"]
+                for x in output.frames[udf_name.lower() + ".label"]
+            )
+        )
+
+        # Test that there exists a column with udf_name.score
+        # and each entry is a float
+        self.assertTrue(udf_name.lower() + ".score" in output.frames.columns)
+        self.assertTrue(
+            all(
+                isinstance(x, float) for x in output.frames[udf_name.lower() + ".score"]
+            )
+        )
+
+        drop_udf_query = f"DROP UDF {udf_name};"
+        execute_query_fetch_all(drop_udf_query)
+
+    @pytest.mark.benchmark
+    def test_multilingual_toxicity_classification(self):
+        udf_name = "HFMultToxicityClassifier"
+        create_udf_query = f"""CREATE UDF {udf_name}
+            TYPE HuggingFace
+            'task' 'text-classification'
+            'model' 'EIStakovskii/xlm_roberta_base_multilingual_toxicity_classifier_plus'
+        """
+        execute_query_fetch_all(create_udf_query)
+
+        drop_table_query = """DROP TABLE IF EXISTS MyCSV;"""
+        execute_query_fetch_all(drop_table_query)
+
+        create_table_query = """CREATE TABLE MyCSV (
+                id INTEGER UNIQUE,
+                comment TEXT(30)
+            );"""
+        execute_query_fetch_all(create_table_query)
+
+        load_table_query = f"""LOAD CSV '{self.csv_file_path}' INTO MyCSV;"""
+        execute_query_fetch_all(load_table_query)
+
+        select_query = f"SELECT {udf_name}(comment) FROM MyCSV;"
+        output = execute_query_fetch_all(select_query)
+
+        # Test that output has 2 columns
+        self.assertEqual(len(output.frames.columns), 2)
+
+        # Test that there exists a column with udf_name.label and each entry is either "POSITIVE" or "NEGATIVE"
+        self.assertTrue(udf_name.lower() + ".label" in output.frames.columns)
+        self.assertTrue(
+            all(
+                x in ["LABEL_1", "LABEL_0"]
+                for x in output.frames[udf_name.lower() + ".label"]
+            )
+        )
+
+        # Test that there exists a column with udf_name.score and each entry is a float
+        self.assertTrue(udf_name.lower() + ".score" in output.frames.columns)
+        self.assertTrue(
+            all(
+                isinstance(x, float) for x in output.frames[udf_name.lower() + ".score"]
+            )
+        )
+
+        drop_udf_query = f"DROP UDF {udf_name};"
         execute_query_fetch_all(drop_udf_query)
