@@ -97,7 +97,7 @@ udf_libs = [
     "easyocr>=1.5.0",  # OCR EXTRACTION
     "ipython<8.13.0",  # NOTEBOOKS
     "thefuzz",  # FUZZY STRING MATCHING
-    "ultralytics",  # OBJECT DETECTION
+    "ultralytics>=8.0.96",  # OBJECT DETECTION
     "transformers>=4.27.4",  # HUGGINGFACE
     "openai>=0.27.4",  # CHATGPT
     "timm>=0.6.13",  # HUGGINGFACE VISION TASKS
