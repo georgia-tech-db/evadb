@@ -106,7 +106,7 @@ def is_gpu_available() -> bool:
         return False
 
 
-def prefix_worker_id_to_path(path: str):
+def prefix_xdist_worker_id_to_path(path: str):
     try:
         worker_id = os.environ["PYTEST_XDIST_WORKER"]
         base = "eva_datasets"
@@ -145,7 +145,7 @@ def generate_file_path(name: str = "") -> Path:
         logger.error("Missing dataset location key in eva.yml")
         raise KeyError("Missing datasets_dir key in eva.yml")
 
-    dataset_location = prefix_worker_id_to_path(dataset_location)
+    dataset_location = prefix_xdist_worker_id_to_path(dataset_location)
     dataset_location = Path(dataset_location)
     dataset_location.mkdir(parents=True, exist_ok=True)
 
