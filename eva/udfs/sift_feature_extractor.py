@@ -20,14 +20,18 @@ import torch
 
 from eva.catalog.catalog_type import NdArrayType
 from eva.udfs.abstract.abstract_udf import AbstractUDF
+from eva.udfs.gpu_compatible import GPUCompatible
 from eva.udfs.decorators.decorators import forward, setup
 from eva.udfs.decorators.io_descriptors.data_types import PandasDataframe
 
 
-class SiftFeatureExtractor(AbstractUDF):
-    @setup(cachable=False, udf_type="sift-feature-extractor", batchable=False)
+class SiftFeatureExtractor(AbstractUDF, GPUCompatible):
+    @setup(cachable=False, udf_type="FeatureExtraction", batchable=False)
     def setup(self):
         self.model = kornia.feature.SIFTDescriptor(100)
+
+    def to_device(self, device: str) -> GPUCompatible:
+        return self.model.to("cuda:0")
 
     @property
     def name(self) -> str:
