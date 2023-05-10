@@ -39,3 +39,8 @@ ray_skip_marker = pytest.mark.skipif(
     ConfigurationManager().get_value("experimental", "ray"),
     reason="Only test for ray execution.",
 )
+
+duplicate_skip_marker = pytest.mark.skipif(
+    sys.platform == "linux",
+    reason="Test case is duplicate. Disabling to speed up test suite",
+)

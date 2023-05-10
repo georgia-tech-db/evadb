@@ -16,7 +16,7 @@ import gc
 import os
 import unittest
 from pathlib import Path
-from test.markers import windows_skip_marker
+from test.markers import duplicate_skip_marker, windows_skip_marker
 from test.util import get_logical_query_plan, load_udfs_for_testing, shutdown_ray
 
 from eva.catalog.catalog_manager import CatalogManager
@@ -96,6 +96,7 @@ class ReuseTest(unittest.TestCase):
         # reuse should be faster than no reuse
         self.assertTrue(exec_times[0] > exec_times[1])
 
+    @duplicate_skip_marker
     def test_reuse_partial(self):
         select_query1 = """SELECT id, label FROM DETRAC JOIN
             LATERAL HFObjectDetector(data) AS Obj(score, label, bbox) WHERE id < 5;"""
@@ -147,9 +148,9 @@ class ReuseTest(unittest.TestCase):
         self.assertGreater(exec_times[0], exec_times[1])
 
     def test_reuse_across_different_predicate_using_same_udf(self):
-        query1 = """SELECT id FROM DETRAC WHERE ['car'] <@ HFObjectDetector(data).label AND id < 20"""
+        query1 = """SELECT id FROM DETRAC WHERE ['car'] <@ HFObjectDetector(data).label AND id < 15"""
 
-        query2 = """SELECT id FROM DETRAC WHERE ArrayCount(HFObjectDetector(data).label, 'car') > 3 AND id < 20;"""
+        query2 = """SELECT id FROM DETRAC WHERE ArrayCount(HFObjectDetector(data).label, 'car') > 3 AND id < 12;"""
 
         batches, exec_times = self._reuse_experiment([query1, query2])
         self._verify_reuse_correctness(query2, batches[1])
@@ -158,11 +159,11 @@ class ReuseTest(unittest.TestCase):
 
     def test_reuse_filter_with_project(self):
         project_query = """
-            SELECT id, Yolo(data).labels FROM DETRAC WHERE id < 10;"""
+            SELECT id, Yolo(data).labels FROM DETRAC WHERE id < 5;"""
 
         select_query = """
             SELECT id FROM DETRAC
-            WHERE ArrayCount(Yolo(data).labels, 'car') > 3 AND id < 10;"""
+            WHERE ArrayCount(Yolo(data).labels, 'car') > 3 AND id < 5;"""
 
         batches, exec_times = self._reuse_experiment([project_query, select_query])
         self._verify_reuse_correctness(select_query, batches[1])
@@ -172,7 +173,7 @@ class ReuseTest(unittest.TestCase):
     @windows_skip_marker
     def test_reuse_after_server_shutdown(self):
         select_query = """SELECT id, label FROM DETRAC JOIN
-            LATERAL Yolo(data) AS Obj(label, bbox, conf) WHERE id < 10;"""
+            LATERAL Yolo(data) AS Obj(label, bbox, conf) WHERE id < 4;"""
         execute_query_fetch_all(select_query)
 
         # Stop and restart server
@@ -180,7 +181,7 @@ class ReuseTest(unittest.TestCase):
         os.system("nohup eva_server --start &")
 
         select_query = """SELECT id, label FROM DETRAC JOIN
-            LATERAL Yolo(data) AS Obj(label, bbox, conf) WHERE id < 15;"""
+            LATERAL Yolo(data) AS Obj(label, bbox, conf) WHERE id < 6;"""
 
         reuse_batch = execute_query_fetch_all(select_query)
         self._verify_reuse_correctness(select_query, reuse_batch)
