@@ -59,19 +59,22 @@ class LoadMultimediaExecutor(AbstractExecutor):
 
             # Use parallel validation if there are many files. Otherwise, use single-thread
             # validation version.
+            valid_files, invalid_files = [], []
             if len(video_files) < mp.cpu_count() * 2:
-                valid_files = [
-                    path for path in video_files if self._is_media_valid(path)
-                ]
+                valid_bitmap = [self._is_media_valid(path) for path in video_files]
             else:
+                # TODO: move this to configuration file later.
                 pool = Pool(mp.cpu_count())
-                valid_files = [
-                    path
-                    for path, is_valid in zip(
-                        video_files, pool.map(self._is_media_valid, video_files)
-                    )
-                    if is_valid
-                ]
+                valid_bitmap = pool.map(self._is_media_valid, video_files)
+
+            # Raise error if any file is invalid.
+            if False in valid_bitmap:
+                invalid_files = [path for path, is_valid in zip(video_files, valid_bitmap) if not is_valid]
+
+                invalid_files_str = "\n".join(invalid_files)
+                err_msg = f"Load {self.media_type.name} failed due to invalid files: \n{invalid_files_str}"
+                logger.error(err_msg)
+                raise ValueError("Load failed due to invalid files")
 
             if not valid_files:
                 raise DatasetFileNotFoundError(
@@ -139,9 +142,4 @@ class LoadMultimediaExecutor(AbstractExecutor):
         file_path = Path(file_path)
         if validate_media(file_path, self.media_type):
             return True
-        else:
-            err_msg = f"Load {self.media_type.name} failed due to invalid file {str(file_path)}"
-            # If image is corrupted, do not abord the entire loading process.
-            logger.critical(err_msg)
-            # raise ValueError(file_path)
-            return False
+        return False
