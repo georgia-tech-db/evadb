@@ -17,7 +17,7 @@ CONTINUOUS = 1
 NO_GPU = -1
 UNDEFINED_GROUP_ID = -1
 # remove this when we implement the cacheable logic in the UDF itself
-CACHEABLE_UDFS = ["Yolo", "FaceDetector", "OCRExtractor"]
+CACHEABLE_UDFS = ["Yolo", "FaceDetector", "OCRExtractor", "HFObjectDetector"]
 IFRAMES = "IFRAMES"
 AUDIORATE = "AUDIORATE"
 DEFAULT_FUNCTION_EXPRESSION_COST = 100

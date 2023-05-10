@@ -87,12 +87,12 @@ class HuggingFaceTests(unittest.TestCase):
             f"Task {task} not supported in EVA currently", str(exc_info.exception)
         )
 
-    @unittest.skip("Skip as it requires external library timm")
     def test_object_detection(self):
         udf_name = "HFObjectDetector"
         create_udf_query = f"""CREATE UDF {udf_name}
             TYPE HuggingFace
             'task' 'object-detection'
+            'model' 'facebook/detr-resnet-50';
         """
         execute_query_fetch_all(create_udf_query)
 

@@ -17,22 +17,20 @@ import unittest
 from enum import Enum
 from inspect import isabstract
 from test.util import get_all_subclasses, get_mock_object
-from unittest.mock import patch
 
 import eva
 from eva.udfs.abstract.abstract_udf import AbstractUDF
+from eva.udfs.abstract.hf_abstract_udf import AbstractHFUdf
 from eva.udfs.yolo_object_detector import Yolo
 
 
 class AbstractUDFTest(unittest.TestCase):
-    # Need to mock the HF pipeline function to avoid downloading a model
-    @patch("eva.udfs.abstract.hf_abstract_udf.pipeline")
-    def test_udf_abstract_functions(self, mock_pipeline):
+    def test_udf_abstract_functions(self):
         derived_udf_classes = list(get_all_subclasses(AbstractUDF))
         # Go over each derived class of AbstractUDF
         for derived_udf_class in derived_udf_classes:
-            # skip yolo to avoid downloading model
-            if derived_udf_class == Yolo:
+            # skip yolo and HF to avoid downloading model
+            if issubclass(derived_udf_class, (Yolo, AbstractHFUdf)):
                 continue
             if isabstract(derived_udf_class) is False:
                 class_type = derived_udf_class
