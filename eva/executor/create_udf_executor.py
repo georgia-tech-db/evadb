@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
 from pathlib import Path
 from typing import Dict, List
 
@@ -52,10 +53,22 @@ class CreateUDFExecutor(AbstractExecutor):
             self.node.metadata,
         )
 
+    def suffix_pytest_xdist_worker_id_to_dir(self, path: Path):
+        try:
+            worker_id = os.environ["PYTEST_XDIST_WORKER"]
+            path = path / str(worker_id)
+        except KeyError:
+            pass
+        return path
+
     def handle_ultralytics_udf(self):
         """Handle Ultralytics UDFs"""
+        initial_eva_config_dir = Path(EVA_DEFAULT_DIR)
+        updated_eva_config_dir = self.suffix_pytest_xdist_worker_id_to_dir(
+            initial_eva_config_dir
+        )
         impl_path = (
-            Path(f"{EVA_DEFAULT_DIR}/udfs/yolo_object_detector.py")
+            Path(f"{updated_eva_config_dir}/udfs/yolo_object_detector.py")
             .absolute()
             .as_posix()
         )
