@@ -76,6 +76,9 @@ class LoadMultimediaExecutor(AbstractExecutor):
                 logger.error(err_msg)
                 raise ValueError("Load failed due to invalid files")
 
+            # Get valid files.
+            valid_files = [path for path, is_valid in zip(video_files, valid_bitmap) if is_valid]
+
             if not valid_files:
                 raise DatasetFileNotFoundError(
                     f"Load {self.media_type.name} failed due to no valid files found on path {str(self.node.file_path)}"

@@ -16,8 +16,12 @@ import asyncio
 import os
 import shutil
 import socket
+import multiprocessing as mp
+
 from contextlib import closing
 from pathlib import Path
+from itertools import repeat
+from multiprocessing import Pool
 
 import cv2
 import numpy as np
@@ -363,14 +367,20 @@ def create_sample_image():
     return img_path
 
 
-def create_large_scale_image_dataset():
-    img_dir = os.path.join(tmp_dir_from_config, "large_scale_image_dataset")
-    os.mkdir(img_dir)
+def create_random_image(i, path):
+    img = np.random.random_sample([400, 400, 3]).astype(np.uint8)
+    cv2.imwrite(os.path.join(path, f"img{i}.jpg"), img)
 
-    # Generate images.
-    for i in range(1000000):
-        img = np.random.random_sample([400, 400, 3]).astype(np.uint8)
-        cv2.imwrite(os.path.join(img_dir, f"img{i}.jpg"), img)
+
+def create_large_scale_image_dataset(num=1000000):
+    img_dir = os.path.join(tmp_dir_from_config, f"large_scale_image_dataset_{num}")
+    Path(img_dir).mkdir(parents=True, exist_ok=True)
+
+    # Generate images in parallel.
+    image_idx_list = list(range(num))
+    Pool(mp.cpu_count()).starmap(create_random_image, zip(image_idx_list, repeat(img_dir)))
+
+    return img_dir
 
 
 def create_sample_video(num_frames=NUM_FRAMES):

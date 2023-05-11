@@ -171,13 +171,14 @@ def test_summarization_from_video(benchmark, setup_pytorch_tests):
     min_rounds=1,
 )
 def test_load_large_scale_image_dataset(benchmark, setup_pytorch_tests):
+    # Test load 1M images.
     tmp_dir = ConfigurationManager().get_value("storage", "tmp_dir")
 
     # Check directory's mounted disk available space.
     statvfs = os.statvfs(tmp_dir)
     available_gb = statvfs.f_frsize * statvfs.f_bavail / (1024**3)
 
-    img_dir = os.path.join(tmp_dir, "large_scale_image_dataset")
+    img_dir = os.path.join(tmp_dir, "large_scale_image_dataset_1000000")
 
     # Check if dataset already exists.
     if not os.path.exists(img_dir):

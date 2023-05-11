@@ -17,12 +17,14 @@ import os
 import shutil
 import tempfile
 import unittest
+import multiprocessing as mp
 from pathlib import Path
 from test.util import (
     create_dummy_batches,
     create_dummy_csv_batches,
     create_sample_csv,
     create_sample_video,
+    create_large_scale_image_dataset,
     file_remove,
     shutdown_ray,
 )
@@ -458,6 +460,37 @@ class LoadExecutorTest(unittest.TestCase):
         # clean up
         drop_query = "DROP TABLE IF EXISTS MyVideoCSV;"
         execute_query_fetch_all(drop_query)
+
+    def test_should_use_parallel_load(self):
+        # Create images.
+        large_scale_image_files_path = create_large_scale_image_dataset(mp.cpu_count() * 10)
+
+        load_query = f"LOAD IMAGE '{large_scale_image_files_path}/**/*.jpg' INTO MyLargeScaleImages;"
+        execute_query_fetch_all(load_query)
+
+        drop_query = "DROP TABLE IF EXISTS MyLargeScaleImages;"
+        execute_query_fetch_all(drop_query)
+
+        # Clean up large scale image directory.
+        shutil.rmtree(large_scale_image_files_path)
+
+    def test_parallel_load_should_raise_exeception(self):
+        # Create images.
+        large_scale_image_files_path = create_large_scale_image_dataset(mp.cpu_count() * 10)
+
+        # Corrupt an image.
+        with open(os.path.join(large_scale_image_files_path, "img0.jpg"), "w") as f:
+            f.write("aa")
+
+        with self.assertRaises(ExecutorError):
+            load_query = f"LOAD IMAGE '{large_scale_image_files_path}/**/*.jpg' INTO MyLargeScaleImages;"
+            execute_query_fetch_all(load_query)
+
+        drop_query = "DROP TABLE IF EXISTS MyLargeScaleImages;"
+        execute_query_fetch_all(drop_query)
+
+        # Clean up large scale image directory.
+        shutil.rmtree(large_scale_image_files_path)
 
 
 if __name__ == "__main__":
