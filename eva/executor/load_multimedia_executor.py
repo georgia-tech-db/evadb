@@ -70,7 +70,7 @@ class LoadMultimediaExecutor(AbstractExecutor):
             # Raise error if any file is invalid.
             if False in valid_bitmap:
                 invalid_files = [
-                    path
+                    str(path)
                     for path, is_valid in zip(video_files, valid_bitmap)
                     if not is_valid
                 ]
@@ -82,7 +82,7 @@ class LoadMultimediaExecutor(AbstractExecutor):
 
             # Get valid files.
             valid_files = [
-                path for path, is_valid in zip(video_files, valid_bitmap) if is_valid
+                str(path) for path, is_valid in zip(video_files, valid_bitmap) if is_valid
             ]
 
             if not valid_files:

@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import re
 import os
 import shutil
 from pathlib import Path
@@ -53,7 +54,7 @@ class AbstractMediaStorageEngine(AbstractStorageEngine):
         # to just breakdown directory also as part of file name. Additionaly, it does not use hashing,
         # whcih avoids computation overhead.
         file_path_str = str(file_url)
-        file_path = file_path_str.replace("/", "_")
+        file_path = re.sub("[^a-zA-Z0-9 \n\.]", "_", file_path_str)
         return file_path
 
     def create(self, table: TableCatalogEntry, if_not_exists=True):
