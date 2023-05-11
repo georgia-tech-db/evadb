@@ -71,6 +71,7 @@ from eva.optimizer.operators import (
     LogicalLimit,
     LogicalLoadData,
     LogicalOrderBy,
+    LogicalOverwrite,
     LogicalProject,
     LogicalQueryDerivedGet,
     LogicalRename,
@@ -79,7 +80,6 @@ from eva.optimizer.operators import (
     LogicalUnion,
     Operator,
     OperatorType,
-    LogicalOverwrite,
 )
 from eva.plan_nodes.create_index_plan import CreateIndexPlan
 from eva.plan_nodes.create_plan import CreatePlan
@@ -96,11 +96,11 @@ from eva.plan_nodes.lateral_join_plan import LateralJoinPlan
 from eva.plan_nodes.limit_plan import LimitPlan
 from eva.plan_nodes.load_data_plan import LoadDataPlan
 from eva.plan_nodes.orderby_plan import OrderByPlan
+from eva.plan_nodes.overwrite_plan import OverwritePlan
 from eva.plan_nodes.rename_plan import RenamePlan
 from eva.plan_nodes.seq_scan_plan import SeqScanPlan
 from eva.plan_nodes.storage_plan import StoragePlan
 from eva.plan_nodes.union_plan import UnionPlan
-from eva.plan_nodes.overwrite_plan import OverwritePlan
 
 ##############################################
 # REWRITE RULES START
@@ -1191,6 +1191,7 @@ class LogicalFaissIndexScanToPhysical(Rule):
         for child in before.children:
             after.append_child(child)
         yield after
+
 
 class LogicalOverwriteToPhysical(Rule):
     def __init__(self):

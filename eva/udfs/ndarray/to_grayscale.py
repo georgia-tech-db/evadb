@@ -18,6 +18,7 @@ import pandas as pd
 
 from eva.udfs.abstract.abstract_udf import AbstractUDF
 
+
 class ToGrayscale(AbstractUDF):
     def setup(self):
         pass
