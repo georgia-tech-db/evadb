@@ -94,7 +94,9 @@ class SimilarityTests(unittest.TestCase):
             base_img -= 1
 
         # Create an actual image dataset.
-        load_image_query = f"LOAD IMAGE '{self.img_path}' INTO testSimilarityImageDataset;"
+        load_image_query = (
+            f"LOAD IMAGE '{self.img_path}' INTO testSimilarityImageDataset;"
+        )
         execute_query_fetch_all(load_image_query)
 
     def tearDown(self):
