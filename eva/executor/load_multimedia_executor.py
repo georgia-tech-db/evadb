@@ -82,7 +82,9 @@ class LoadMultimediaExecutor(AbstractExecutor):
 
             # Get valid files.
             valid_files = [
-                str(path) for path, is_valid in zip(video_files, valid_bitmap) if is_valid
+                str(path)
+                for path, is_valid in zip(video_files, valid_bitmap)
+                if is_valid
             ]
 
             if not valid_files:
