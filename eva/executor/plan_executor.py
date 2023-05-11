@@ -36,6 +36,7 @@ from eva.executor.limit_executor import LimitExecutor
 from eva.executor.load_executor import LoadDataExecutor
 from eva.executor.nested_loop_join_executor import NestedLoopJoinExecutor
 from eva.executor.orderby_executor import OrderByExecutor
+from eva.executor.overwrite_executor import OverwriteExecutor
 from eva.executor.pp_executor import PPExecutor
 from eva.executor.predicate_executor import PredicateExecutor
 from eva.executor.project_executor import ProjectExecutor
@@ -45,7 +46,6 @@ from eva.executor.seq_scan_executor import SequentialScanExecutor
 from eva.executor.show_info_executor import ShowInfoExecutor
 from eva.executor.storage_executor import StorageExecutor
 from eva.executor.union_executor import UnionExecutor
-from eva.executor.overwrite_executor import OverwriteExecutor
 from eva.experimental.ray.executor.exchange_executor import ExchangeExecutor
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.abstract_plan import AbstractPlan

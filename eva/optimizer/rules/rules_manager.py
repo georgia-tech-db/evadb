@@ -45,7 +45,6 @@ from eva.optimizer.rules.rules import (
     LogicalFaissIndexScanToPhysical,
     LogicalFilterToPhysical,
     LogicalFunctionScanToPhysical,
-    LogicalOverwriteToPhysical
 )
 from eva.optimizer.rules.rules import (
     LogicalGetToSeqScan as SequentialLogicalGetToSeqScan,
@@ -60,6 +59,7 @@ from eva.optimizer.rules.rules import (
     LogicalLimitToPhysical,
     LogicalLoadToPhysical,
     LogicalOrderByToPhysical,
+    LogicalOverwriteToPhysical,
 )
 from eva.optimizer.rules.rules import (
     LogicalProjectToPhysical as SequentialLogicalProjectToPhysical,
@@ -132,7 +132,7 @@ class RulesManager:
             LogicalCreateIndexToFaiss(),
             LogicalApplyAndMergeToPhysical(),
             LogicalFaissIndexScanToPhysical(),
-            LogicalOverwriteToPhysical()
+            LogicalOverwriteToPhysical(),
         ]
 
         if ray_enabled:

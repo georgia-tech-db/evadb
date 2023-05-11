@@ -31,13 +31,13 @@ from eva.optimizer.operators import (
     LogicalLimit,
     LogicalLoadData,
     LogicalOrderBy,
+    LogicalOverwrite,
     LogicalProject,
     LogicalQueryDerivedGet,
     LogicalRename,
     LogicalSample,
     LogicalShow,
     LogicalUnion,
-    LogicalOverwrite,
 )
 from eva.optimizer.optimizer_utils import (
     column_definition_to_udf_io,
@@ -53,13 +53,13 @@ from eva.parser.drop_udf_statement import DropUDFStatement
 from eva.parser.explain_statement import ExplainStatement
 from eva.parser.insert_statement import InsertTableStatement
 from eva.parser.load_statement import LoadDataStatement
+from eva.parser.overwrite_statement import OverwriteStatement
 from eva.parser.rename_statement import RenameTableStatement
 from eva.parser.select_statement import SelectStatement
 from eva.parser.show_statement import ShowStatement
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
 from eva.utils.logging_manager import logger
-from eva.parser.overwrite_statement import OverwriteStatement
 
 
 class StatementToPlanConvertor:

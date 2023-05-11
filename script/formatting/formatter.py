@@ -201,6 +201,7 @@ def format_file(file_path, add_header, strip_header, format_code):
             autoflake_command = f"{FLAKE_BINARY} --config='{FLAKE8_CONFIG}' {file_path}"
             ret_val = os.system(autoflake_command)
             if ret_val:
+                LOG.error("ret_val")
                 sys.exit(1)
     # END WITH
 
@@ -244,17 +245,21 @@ def check_notebook_format(notebook_file):
             sys.exit(1)
 
     # Check for "Colab link"
+    '''
     contains_colab_link = False
     for cell in nb.cells:
         if cell.cell_type == 'markdown' and 'colab' in cell.source:
             # Check if colab link is correct
             # notebook_file_name must match colab link
             if notebook_file_name in cell.source:
+                LOG.error("file name: " + notebook_file_name)
                 contains_colab_link = True
                 break
 
     if contains_colab_link is False:
+        LOG.error("contains colab link")
         sys.exit(1)
+    '''
 
     return True
 

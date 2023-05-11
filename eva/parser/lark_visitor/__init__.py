@@ -25,11 +25,11 @@ from eva.parser.lark_visitor._expressions import Expressions
 from eva.parser.lark_visitor._functions import Functions
 from eva.parser.lark_visitor._insert_statements import Insert
 from eva.parser.lark_visitor._load_statement import Load
+from eva.parser.lark_visitor._overwrite_statement import Overwrite
 from eva.parser.lark_visitor._rename_statement import RenameTable
 from eva.parser.lark_visitor._select_statement import Select
 from eva.parser.lark_visitor._show_statements import Show
 from eva.parser.lark_visitor._table_sources import TableSources
-from eva.parser.lark_visitor._overwrite_statement import Overwrite
 
 # To add new functionality to the parser, create a new file under
 # the lark_visitor directory, and implement a new class which

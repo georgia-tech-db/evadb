@@ -219,9 +219,7 @@ class SQLStorageEngine(AbstractStorageEngine):
             self._sql_engine.execute(d)
             self._sql_session.commit()
         except Exception as e:
-            err_msg = (
-                f"Failed to clear the table {table.name} with exception {str(e)}"
-            )
+            err_msg = f"Failed to clear the table {table.name} with exception {str(e)}"
             logger.exception(err_msg)
             raise Exception(err_msg)
 
