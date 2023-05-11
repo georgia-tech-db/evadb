@@ -69,7 +69,11 @@ class LoadMultimediaExecutor(AbstractExecutor):
 
             # Raise error if any file is invalid.
             if False in valid_bitmap:
-                invalid_files = [path for path, is_valid in zip(video_files, valid_bitmap) if not is_valid]
+                invalid_files = [
+                    path
+                    for path, is_valid in zip(video_files, valid_bitmap)
+                    if not is_valid
+                ]
 
                 invalid_files_str = "\n".join(invalid_files)
                 err_msg = f"Load {self.media_type.name} failed due to invalid files: \n{invalid_files_str}"
@@ -77,7 +81,9 @@ class LoadMultimediaExecutor(AbstractExecutor):
                 raise ValueError("Load failed due to invalid files")
 
             # Get valid files.
-            valid_files = [path for path, is_valid in zip(video_files, valid_bitmap) if is_valid]
+            valid_files = [
+                path for path, is_valid in zip(video_files, valid_bitmap) if is_valid
+            ]
 
             if not valid_files:
                 raise DatasetFileNotFoundError(

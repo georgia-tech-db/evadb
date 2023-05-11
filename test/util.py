@@ -13,15 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import asyncio
+import multiprocessing as mp
 import os
 import shutil
 import socket
-import multiprocessing as mp
-
 from contextlib import closing
-from pathlib import Path
 from itertools import repeat
 from multiprocessing import Pool
+from pathlib import Path
 
 import cv2
 import numpy as np
@@ -378,7 +377,9 @@ def create_large_scale_image_dataset(num=1000000):
 
     # Generate images in parallel.
     image_idx_list = list(range(num))
-    Pool(mp.cpu_count()).starmap(create_random_image, zip(image_idx_list, repeat(img_dir)))
+    Pool(mp.cpu_count()).starmap(
+        create_random_image, zip(image_idx_list, repeat(img_dir))
+    )
 
     return img_dir
 
