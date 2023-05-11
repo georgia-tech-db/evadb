@@ -39,10 +39,13 @@ class IndexCatalog(BaseModel):
     _name = Column("name", String(100), unique=True)
     _save_file_path = Column("save_file_path", String(128))
     _type = Column("type", Enum(IndexType), default=Enum)
-    _feat_column_id = Column("column_id", Integer, ForeignKey("column_catalog._row_id"))
+    _feat_column_id = Column("column_id", Integer, ForeignKey("column_catalog._row_id", ondelete="CASCADE"))
     _udf_signature = Column("udf", String, default=None)
 
-    _feat_column = relationship("ColumnCatalog")
+    _feat_column = relationship(
+        "ColumnCatalog",
+        back_populates="_index_column",
+    )
 
     def __init__(
         self,

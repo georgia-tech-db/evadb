@@ -98,7 +98,7 @@ class CreateIndexExecutor(AbstractExecutor):
             index = None
             input_dim = -1
             storage_engine = StorageEngine.factory(feat_catalog_entry)
-            for input_batch in storage_engine.read(feat_catalog_entry, 1):
+            for input_batch in storage_engine.read(feat_catalog_entry):
                 if udf_func:
                     # Create index through UDF expression.
                     # UDF(input column) -> 2 dimension feature vector.

@@ -93,12 +93,18 @@ class SimilarityTests(unittest.TestCase):
             )
             base_img -= 1
 
+        # Create an actual image dataset.
+        load_image_query = f"LOAD IMAGE '{self.img_path}' INTO testSimilarityImageDataset;"
+        execute_query_fetch_all(load_image_query)
+
     def tearDown(self):
         shutdown_ray()
 
         drop_table_query = "DROP TABLE testSimilarityTable;"
         execute_query_fetch_all(drop_table_query)
         drop_table_query = "DROP TABLE testSimilarityFeatureTable;"
+        execute_query_fetch_all(drop_table_query)
+        drop_table_query = "DROP TABLE IF EXISTS testSimilarityImageDataset;"
         execute_query_fetch_all(drop_table_query)
 
     def test_similarity_should_work_in_order(self):
@@ -288,3 +294,15 @@ class SimilarityTests(unittest.TestCase):
 
         # Cleanup
         CatalogManager().drop_index_catalog_entry("testFaissIndexScanRewrite")
+
+    def test_end_to_end_index_scan_should_work_correctly_on_image_dataset(self):
+        create_index_query = """CREATE INDEX testFaissIndexImageDataset
+                                    ON testSimilarityImageDataset (DummyFeatureExtractor(data))
+                                    USING HNSW;"""
+        execute_query_fetch_all(create_index_query)
+        select_query = """SELECT data FROM testSimilarityImageDataset
+                            ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data))
+                            LIMIT 1;""".format(
+            self.img_path
+        )
+        execute_query_fetch_all(select_query)
