@@ -15,8 +15,6 @@
 from typing import List, Tuple
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.catalog_utils import get_table_primary_columns
-from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 from eva.catalog.models.udf_metadata_catalog import UdfMetadataCatalogEntry
 from eva.constants import CACHEABLE_UDFS, DEFAULT_FUNCTION_EXPRESSION_COST
@@ -28,14 +26,9 @@ from eva.expression.expression_utils import (
     is_simple_predicate,
     to_conjunction_list,
 )
-from eva.expression.function_expression import (
-    FunctionExpression,
-    FunctionExpressionCache,
-)
-from eva.expression.tuple_value_expression import TupleValueExpression
+from eva.expression.function_expression import FunctionExpression
 from eva.parser.alias import Alias
 from eva.parser.create_statement import ColumnDefinition
-from eva.utils.kv_cache import DiskKVCache
 
 
 def column_definition_to_udf_io(col_list: List[ColumnDefinition], is_input: bool):

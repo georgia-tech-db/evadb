@@ -55,7 +55,6 @@ class ComparisonExpression(AbstractExpression):
             ExpressionType.COMPARE_NEQ,
             ExpressionType.COMPARE_CONTAINS,
             ExpressionType.COMPARE_IS_CONTAINED,
-            ExpressionType.COMPARE_LIKE,
         ], f"Expression type not supported {self.etype}"
 
         if self.etype == ExpressionType.COMPARE_EQUAL:
@@ -74,8 +73,6 @@ class ComparisonExpression(AbstractExpression):
             return Batch.compare_contains(lbatch, rbatch)
         elif self.etype == ExpressionType.COMPARE_IS_CONTAINED:
             return Batch.compare_is_contained(lbatch, rbatch)
-        elif self.etype == ExpressionType.COMPARE_LIKE:
-            return Batch.compare_like(lbatch, rbatch)
 
     def get_symbol(self) -> str:
         if self.etype == ExpressionType.COMPARE_EQUAL:

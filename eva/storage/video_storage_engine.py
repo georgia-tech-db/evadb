@@ -20,11 +20,12 @@ from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.expression.abstract_expression import AbstractExpression
 from eva.models.storage.batch import Batch
 from eva.readers.decord_reader import DecordReader
+from eva.readers.opencv_reader import OpenCVReader
 from eva.storage.abstract_media_storage_engine import AbstractMediaStorageEngine
 from eva.utils.logging_manager import logger
 
 
-class DecordStorageEngine(AbstractMediaStorageEngine):
+class OpenCVStorageEngine(AbstractMediaStorageEngine):
     def __init__(self) -> None:
         super().__init__()
 
@@ -51,6 +52,15 @@ class DecordStorageEngine(AbstractMediaStorageEngine):
                     sampling_rate=sampling_rate,
                     sampling_type=sampling_type,
                 )
+
+                if sampling_type is not None:
+                    reader = DecordReader(
+                        str(video_file),
+                        batch_mem_size=batch_mem_size,
+                        predicate=predicate,
+                        sampling_rate=sampling_rate,
+                        sampling_type=sampling_type,
+                    )
                 for batch in reader.read():
                     batch.frames[table.columns[0].name] = row_id
                     batch.frames[table.columns[1].name] = str(video_file_name)

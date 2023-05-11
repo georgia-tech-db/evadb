@@ -12,10 +12,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from collections import deque
 from enum import IntEnum, auto
 from pathlib import Path
-from typing import Any, List
+from typing import List
 
 from eva.catalog.catalog_type import IndexType
 from eva.catalog.models.column_catalog import ColumnCatalogEntry
@@ -129,34 +128,6 @@ class Operator:
             else:
                 setattr(result, k, v)
         return result
-
-    def bfs(self):
-        """Returns a generator which visits all nodes in operator tree in
-        breadth-first search (BFS) traversal order.
-
-        Returns:
-            the generator object.
-        """
-        queue = deque([self])
-        while queue:
-            node = queue.popleft()
-            yield node
-            for child in node.children:
-                queue.append(child)
-
-    def find_all(self, operator_type: Any):
-        """Returns a generator which visits all the nodes in operator tree and yields one that matches the passed `operator_type`.
-
-        Args:
-            operator_type (Any): operator type to match with
-
-        Returns:
-            the generator object.
-        """
-
-        for node in self.bfs():
-            if isinstance(node, operator_type):
-                yield node
 
 
 class Dummy(Operator):

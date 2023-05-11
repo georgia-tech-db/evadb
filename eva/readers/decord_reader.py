@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import math
 from typing import Dict, Iterator
 
 import numpy as np
@@ -43,9 +44,7 @@ class DecordReader(AbstractReader):
         predicate: AbstractExpression = None,
         sampling_rate: int = None,
         sampling_type: str = None,
-        read_audio: bool = False,
-        read_video: bool = True,
-        **kwargs,
+        **kwargs
     ):
         """Read frames from the disk
 
@@ -56,21 +55,16 @@ class DecordReader(AbstractReader):
             sampling_rate (int, optional): Set if the caller wants one frame
             every `sampling_rate` number of frames. For example, if `sampling_rate = 10`, it returns every 10th frame. If both `predicate` and `sampling_rate` are specified, `sampling_rate` is given precedence.
             sampling_type (str, optional): Set as IFRAMES if caller want to sample on top on iframes only. e.g if the IFRAME frame numbers are [10,20,30,40,50] then'SAMPLE IFRAMES 2' will return [10,30,50]
-            read_audio (bool, optional): Whether to read audio stream from the video. Defaults to False
-            read_video (bool, optional): Whether to read video stream from the video. Defaults to True
         """
         self._predicate = predicate
         self._sampling_rate = sampling_rate or 1
         self._sampling_type = sampling_type
-        self._read_audio = read_audio
-        self._read_video = read_video
-        self._reader = None
-        self._get_frame = None
         super().__init__(*args, **kwargs)
-        self.initialize_reader()
 
     def _read(self) -> Iterator[Dict]:
-        num_frames = int(len(self._reader))
+        decord = _lazy_import_decord()
+        video = decord.VideoReader(self.file_url)
+        num_frames = int(len(video))
         if self._predicate:
             range_list = extract_range_list_from_predicate(
                 self._predicate, 0, num_frames - 1
@@ -88,6 +82,7 @@ class DecordReader(AbstractReader):
 
                 while idx < len(iframes) and iframes[idx] <= end:
                     frame_id = iframes[idx]
+                    frame = video[frame_id]
                     idx += self._sampling_rate
                     yield self._get_frame(frame_id)
 
@@ -95,7 +90,17 @@ class DecordReader(AbstractReader):
             for begin, end in range_list:
                 frame_id = begin
                 while frame_id <= end:
-                    yield self._get_frame(frame_id)
+                    frame = video[frame_id]
+                    if frame is not None:
+                        yield {
+                            "id": frame_id,
+                            "data": frame,
+                            "seconds": math.floor(
+                                video.get_frame_timestamp(frame_id)[0]
+                            ),
+                        }
+                    else:
+                        break
                     frame_id += 1
         else:
             for begin, end in range_list:

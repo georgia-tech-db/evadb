@@ -12,15 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from __future__ import annotations
-
 from dataclasses import dataclass, field
 from typing import List
 
 from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
 
-from eva.catalog.models.association_models import depend_udf_and_udf_cache
 from eva.catalog.models.base_model import BaseModel
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 from eva.catalog.models.udf_metadata_catalog import UdfMetadataCatalogEntry
@@ -48,13 +45,6 @@ class UdfCatalog(BaseModel):
         "UdfMetadataCatalog",
         back_populates="_udf",
         cascade="all, delete, delete-orphan",
-    )
-
-    _dep_caches = relationship(
-        "UdfCacheCatalog",
-        secondary=depend_udf_and_udf_cache,
-        back_populates="_udf_depends",
-        cascade="all, delete",
     )
 
     def __init__(self, name: str, impl_file_path: str, type: str, checksum: str):

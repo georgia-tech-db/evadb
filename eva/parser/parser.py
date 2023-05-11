@@ -35,6 +35,5 @@ class Parser(object):
         self._initialized = True
 
     def parse(self, query_string: str) -> list:
-
         lark_output = self._lark_parser.parse(query_string)
         return lark_output
