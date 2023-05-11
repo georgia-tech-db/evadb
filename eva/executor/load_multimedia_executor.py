@@ -12,6 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import multiprocessing as mp
+from multiprocessing import Pool
 from pathlib import Path
 
 import pandas as pd
@@ -53,16 +55,37 @@ class LoadMultimediaExecutor(AbstractExecutor):
                 video_files = download_from_s3(self.node.file_path, dst_path)
             else:
                 # Local Storage
-                video_files = iter_path_regex(self.node.file_path)
+                video_files = list(iter_path_regex(self.node.file_path))
 
-            for file_path in video_files:
-                file_path = Path(file_path)
-                if validate_media(file_path, self.media_type):
-                    valid_files.append(str(file_path))
-                else:
-                    err_msg = f"Load {self.media_type.name} failed due to invalid file {str(file_path)}"
-                    logger.error(err_msg)
-                    raise ValueError(file_path)
+            # Use parallel validation if there are many files. Otherwise, use single-thread
+            # validation version.
+            valid_files, invalid_files = [], []
+            if len(video_files) < mp.cpu_count() * 2:
+                valid_bitmap = [self._is_media_valid(path) for path in video_files]
+            else:
+                # TODO: move this to configuration file later.
+                pool = Pool(mp.cpu_count())
+                valid_bitmap = pool.map(self._is_media_valid, video_files)
+
+            # Raise error if any file is invalid.
+            if False in valid_bitmap:
+                invalid_files = [
+                    str(path)
+                    for path, is_valid in zip(video_files, valid_bitmap)
+                    if not is_valid
+                ]
+
+                invalid_files_str = "\n".join(invalid_files)
+                err_msg = f"Load {self.media_type.name} failed due to invalid files: \n{invalid_files_str}"
+                logger.error(err_msg)
+                raise ValueError("Load failed due to invalid files")
+
+            # Get valid files.
+            valid_files = [
+                str(path)
+                for path, is_valid in zip(video_files, valid_bitmap)
+                if is_valid
+            ]
 
             if not valid_files:
                 raise DatasetFileNotFoundError(
@@ -122,3 +145,12 @@ class LoadMultimediaExecutor(AbstractExecutor):
     ):
         if do_create:
             storage_engine.drop(table_obj)
+
+    def _is_media_valid(
+        self,
+        file_path: Path,
+    ):
+        file_path = Path(file_path)
+        if validate_media(file_path, self.media_type):
+            return True
+        return False
