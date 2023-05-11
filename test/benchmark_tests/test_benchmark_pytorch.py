@@ -12,9 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
+from test.util import create_large_scale_image_dataset
 
 import pytest
 
+from eva.configuration.configuration_manager import ConfigurationManager
 from eva.server.command_handler import execute_query_fetch_all
 
 
@@ -160,3 +163,35 @@ def test_summarization_from_video(benchmark, setup_pytorch_tests):
     execute_query_fetch_all(drop_udf_query)
     drop_udf_query = f"DROP UDF {summary_udf};"
     execute_query_fetch_all(drop_udf_query)
+
+
+@pytest.mark.benchmark(
+    warmup=False,
+    warmup_iterations=1,
+    min_rounds=1,
+)
+def test_load_large_scale_image_dataset(benchmark, setup_pytorch_tests):
+    # Test load 1M images.
+    tmp_dir = ConfigurationManager().get_value("storage", "tmp_dir")
+
+    # Check directory's mounted disk available space.
+    statvfs = os.statvfs(tmp_dir)
+    available_gb = statvfs.f_frsize * statvfs.f_bavail / (1024**3)
+
+    img_dir = os.path.join(tmp_dir, "large_scale_image_dataset_1000000")
+
+    # Check if dataset already exists.
+    if not os.path.exists(img_dir):
+        # Only run this large-scale test when the system
+        # has more than 5GB disk space.
+        if available_gb < 10:
+            return
+        create_large_scale_image_dataset()
+
+    def _execute_query_list(query_list):
+        for query in query_list:
+            execute_query_fetch_all(query)
+
+    drop_query = "DROP TABLE IF EXISTS benchmarkImageDataset;"
+    load_query = f"LOAD IMAGE '{img_dir}/*.jpg' INTO benchmarkImageDataset;"
+    benchmark(_execute_query_list, [drop_query, load_query])
