@@ -16,6 +16,7 @@ import cv2
 import numpy as np
 import os
 import pandas as pd
+from PIL import Image as im
 from collections import defaultdict
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import TableType
@@ -33,7 +34,7 @@ class OverwriteExecutor(AbstractExecutor):
         self.table_ref = self.node.table_ref
         self.operation = self.node.operation
 
-    def make_new_path(self, video_path: str):
+    def make_new_video_path(self, video_path: str):
         dirs = video_path.split('/')
         dirs.append(dirs[-1])
         dirs[-2] = 'modified'
@@ -42,6 +43,13 @@ class OverwriteExecutor(AbstractExecutor):
             os.mkdir(modified_dir)
         new_video_path = '/'.join(dirs)
         return new_video_path
+
+    def make_new_image_path(self, image_path: str):
+        dirs = image_path.split('/')
+        dirs[-1] = 'modified_' + dirs[-1]
+
+        new_image_path = '/'.join(dirs)
+        return new_image_path
 
     def exec(self, *args, **kwargs):
         assert(type(self.operation) == FunctionExpression)
@@ -79,7 +87,7 @@ class OverwriteExecutor(AbstractExecutor):
 
                 for video_path in video_paths:
                     videos[video_path] = np.empty((video_fc[video_path], fh, fw, 3), np.dtype('uint8'))
-                    modified_paths[video_path] = self.make_new_path(video_path)
+                    modified_paths[video_path] = self.make_new_video_path(video_path)
 
                 for i in range(fc):
                     video_path = batch.frames['name'][i]
@@ -105,6 +113,33 @@ class OverwriteExecutor(AbstractExecutor):
                 out.release()
 
             storage_engine.write(table_obj, Batch(pd.DataFrame({"file_path": all_modified_video_paths})))
+
+            yield Batch(
+                pd.DataFrame(
+                    {"Table successfully overwritten by: {}".format(self.operation.name)},
+                    index=[0],
+                )
+            )
+        elif table_obj.table_type == TableType.IMAGE_DATA:
+            batches = storage_engine.read(table_obj)
+            modified_image_paths = []
+            for batch in batches:
+                image_paths = list(batch.frames['name'])
+
+                batch.modify_column_alias(self.table_ref.alias)
+                res = self.operation.evaluate(batch)
+                modified_images = res.frames.iloc[:, 0].to_numpy()
+                batch.drop_column_alias()
+
+                for i in range(len(modified_images)):
+                    image_path = image_paths[i]
+                    modified_image_path = self.make_new_image_path(image_path)
+                    modified_image_paths.append(modified_image_path)
+                    data = im.fromarray(modified_images[i])
+                    data.save(modified_image_path)
+
+            storage_engine.clear(table_obj, image_paths)
+            storage_engine.write(table_obj, Batch(pd.DataFrame({"file_path": modified_image_paths})))
 
             yield Batch(
                 pd.DataFrame(
