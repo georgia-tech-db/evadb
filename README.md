@@ -163,6 +163,15 @@ Consider these two exploratory queries on a dataset of 🐕 images:
 
 By reusing the results of the first query and reordering the predicates based on the available cached inference results, EVA runs the second query **10x faster**!
 
+## Architecture Diagram
+
+The following architecture diagram presents the critical components of the EVA database system. EVA's AI-centric Query Optimizer takes a parsed query as input and generates a query plan that is then executed by the Query Engine. The Query Engine hits multiple storage engines to retrieve the data required for efficiently running the query:
+1. Structured data (relational database system connected via `sqlalchemy`).
+2. Unstructured media data (on cloud buckets or local filesystem).
+3. Vector data (vector database system).
+
+<img width="700" alt="Architecture Diagram" src="https://github.com/georgia-tech-db/eva/assets/5521975/01452ec9-87d9-4d27-90b2-c0b1ab29b16c">
+
 ## Illustrative Applications 
 
 ### 🔮 [Traffic Analysis](https://evadb.readthedocs.io/en/stable/source/tutorials/02-object-detection.html) (Object Detection Model)
