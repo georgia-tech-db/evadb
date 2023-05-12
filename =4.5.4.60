@@ -1,0 +1,2 @@
+Requirement already satisfied: opencv-python in ./env_eva/lib/python3.8/site-packages (4.5.5.64)
+Requirement already satisfied: numpy>=1.14.5 in ./env_eva/lib/python3.8/site-packages (from opencv-python) (1.23.5)
