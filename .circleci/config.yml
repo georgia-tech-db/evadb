@@ -9,10 +9,6 @@ workflows:
     jobs:
         #### UNIT TESTS
         - Linux:
-            name: "Test | v3.7 | Linux"
-            v: "3.7"
-            mode: "TEST"
-        - Linux:
             name: "Test | v3.8 | Linux"
             v: "3.8"
             mode: "TEST"
@@ -24,11 +20,11 @@ workflows:
             name: "Test | v3.10 | Linux"
             v: "3.10"
             mode: "TEST"
-        ### NOTEBOOKS
         - Linux:
-            name: "Notebook | v3.7 | Linux"
-            v: "3.7"
-            mode: "NOTEBOOK"
+            name: "Test | v3.11 | Linux"
+            v: "3.11"
+            mode: "TEST"
+        ### NOTEBOOKS
         - Linux:
             name: "Notebook | v3.8 | Linux"
             v: "3.8"
@@ -40,6 +36,10 @@ workflows:
         - Linux:
             name: "Notebook | v3.10 | Linux"
             v: "3.10"
+            mode: "NOTEBOOK"
+        - Linux:
+            name: "Notebook | v3.11 | Linux"
+            v: "3.11"
             mode: "NOTEBOOK"
         ### LINTER
         - Linux:
@@ -67,7 +67,7 @@ jobs:
     parameters:
       v:
         type: string
-        default: "3.7"
+        default: "3.10"
       mode:
         type: string
         default: "ALL"
