@@ -20,10 +20,8 @@ from typing import List
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.experimental.ray.optimizer.rules.rules import LogicalExchangeToPhysical
 from eva.experimental.ray.optimizer.rules.rules import (
-    LogicalGetToSeqScan as DistributedLogicalGetToSeqScan,
-)
-from eva.experimental.ray.optimizer.rules.rules import (
-    LogicalProjectToPhysical as DistributedLogicalProjectToPhysical,
+    LogicalGetToSeqScan as ParallelLogicalGetToSeqScan,
+    LogicalApplyAndMergeToPhysical as ParallelLogicalApplyAndMerge,
 )
 from eva.optimizer.rules.rules import (
     CacheFunctionExpressionInApply,
@@ -47,6 +45,7 @@ from eva.optimizer.rules.rules import (
 )
 from eva.optimizer.rules.rules import (
     LogicalGetToSeqScan as SequentialLogicalGetToSeqScan,
+    LogicalApplyAndMergeToPhysical as SequentialLogicalApplyAndMergeToPhysical,
 )
 from eva.optimizer.rules.rules import (
     LogicalGroupByToPhysical,
@@ -111,7 +110,7 @@ class RulesManager:
             LogicalInsertToPhysical(),
             LogicalDeleteToPhysical(),
             LogicalLoadToPhysical(),
-            DistributedLogicalGetToSeqScan()
+            ParallelLogicalGetToSeqScan()
             if ray_enabled
             else SequentialLogicalGetToSeqScan(),
             LogicalDerivedGetToPhysical(),
@@ -125,14 +124,14 @@ class RulesManager:
             LogicalFunctionScanToPhysical(),
             LogicalCreateMaterializedViewToPhysical(),
             LogicalFilterToPhysical(),
-            DistributedLogicalProjectToPhysical()
-            if ray_enabled
-            else SequentialLogicalProjectToPhysical(),
+            SequentialLogicalProjectToPhysical(),
             LogicalShowToPhysical(),
             LogicalExplainToPhysical(),
             LogicalCreateIndexToVectorIndex(),
-            LogicalApplyAndMergeToPhysical(),
             LogicalVectorIndexScanToPhysical(),
+            ParallelLogicalApplyAndMerge()
+            if ray_enabled
+            else SequentialLogicalApplyAndMergeToPhysical(),
         ]
 
         if ray_enabled:

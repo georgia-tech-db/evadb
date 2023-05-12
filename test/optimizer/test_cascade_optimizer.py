@@ -19,7 +19,7 @@ import pandas as pd
 import pytest
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.experimental.ray.planner.exchange_plan import ExchangePlan
+from eva.experimental.ray.plan_nodes.exchange_plan import ExchangePlan
 from eva.models.storage.batch import Batch
 from eva.optimizer.plan_generator import PlanGenerator
 from eva.plan_nodes.nested_loop_join_plan import NestedLoopJoinPlan

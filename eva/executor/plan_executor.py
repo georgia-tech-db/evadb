@@ -129,6 +129,8 @@ class PlanExecutor:
             executor_node = CreateMaterializedViewExecutor(node=plan)
         elif plan_opr_type == PlanOprType.EXCHANGE:
             executor_node = ExchangeExecutor(node=plan)
+            inner_executor = self._build_execution_tree(plan.inner_plan)
+            executor_node.build_inner_executor(inner_executor)
         elif plan_opr_type == PlanOprType.PROJECT:
             executor_node = ProjectExecutor(node=plan)
         elif plan_opr_type == PlanOprType.PREDICATE_FILTER:
