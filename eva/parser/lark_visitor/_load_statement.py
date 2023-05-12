@@ -51,6 +51,8 @@ class Load:
             file_format = FileFormatType.CSV
         elif file_format_string == "IMAGE":
             file_format = FileFormatType.IMAGE
+        elif file_format_string == "PDF":
+            file_format = FileFormatType.PDF
 
         return file_format
 

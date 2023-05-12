@@ -37,6 +37,12 @@ class LoadDataExecutor(AbstractExecutor):
         elif self.node.file_options["file_format"] == FileFormatType.CSV:
             executor = LoadCSVExecutor(self.node)
 
+        elif self.node.file_options["file_format"] == FileFormatType.PDF:
+            """
+                Executor for extractor from pdf
+            """
+            pass
+
         # for each batch, exec the executor
         for batch in executor.exec():
             yield batch

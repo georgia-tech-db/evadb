@@ -87,7 +87,7 @@ update_statement: UPDATE table_name (AS? uid)? SET updated_element ("," updated_
     
 load_statement: LOAD file_format file_name INTO table_name (("(" uid_list ")"))?
     
-file_format: CSV | VIDEO | IMAGE
+file_format: CSV | VIDEO | IMAGE | PDF
 
 file_options: FORMAT file_format
     
@@ -379,6 +379,7 @@ FORMAT:               "FORMAT"i
 CSV:                  "CSV"i
 VIDEO:                "VIDEO"i
 IMAGE:                "IMAGE"i
+PDF:                "PDF"i
 
 // Index types
 HNSW:                                "HNSW"i

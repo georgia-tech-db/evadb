@@ -22,6 +22,7 @@ from eva.catalog.catalog_type import (
     NdArrayType,
     TableType,
     VideoColumnName,
+    PDFColumnName
 )
 from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.catalog.models.table_catalog import TableCatalogEntry
@@ -91,12 +92,29 @@ def get_image_table_column_definitions() -> List[ColumnDefinition]:
     ]
     return columns
 
+def get_pdf_table_column_definitions() -> List[ColumnDefinition]:
+    """
+    id: pdf id
+    data: pdf data
+    """
+    columns = [
+        ColumnDefinition(PDFColumnName.id.name, ColumnType.INTEGER, None, None),
+        ColumnDefinition(
+            PDFColumnName.data.name,
+            ColumnType.NDARRAY,
+            NdArrayType.UINT8,
+            (None, None, None),
+        ),
+    ]
+    return columns
 
 def get_table_primary_columns(table_catalog_obj: TableCatalogEntry):
     if table_catalog_obj.table_type == TableType.VIDEO_DATA:
         return get_video_table_column_definitions()[:2]
     elif table_catalog_obj.table_type == TableType.IMAGE_DATA:
         return get_image_table_column_definitions()[:1]
+    elif table_catalog_obj.table_type == TableType.PDF_DATA:
+        return get_pdf_table_column_definitions()[:1]
     else:
         raise Exception(f"Unexpected table type {table_catalog_obj.table_type}")
 
