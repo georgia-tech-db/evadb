@@ -17,10 +17,30 @@ import sys
 
 import pytest
 
+from eva.configuration.configuration_manager import ConfigurationManager
+
 asyncio_skip_marker = pytest.mark.skipif(
     sys.version_info < (3, 8), reason="Test case requires asyncio support"
 )
 
 windows_skip_marker = pytest.mark.skipif(
     sys.platform == "win32", reason="Test case not supported on Windows"
+)
+
+linux_skip_marker = pytest.mark.skipif(
+    sys.platform == "linux", reason="Test case not supported on Linux"
+)
+
+memory_skip_marker = pytest.mark.skipif(
+    sys.platform == "linux", reason="Test case consumes too much memory"
+)
+
+ray_skip_marker = pytest.mark.skipif(
+    ConfigurationManager().get_value("experimental", "ray"),
+    reason="Only test for ray execution.",
+)
+
+duplicate_skip_marker = pytest.mark.skipif(
+    sys.platform == "linux",
+    reason="Test case is duplicate. Disabling to speed up test suite",
 )

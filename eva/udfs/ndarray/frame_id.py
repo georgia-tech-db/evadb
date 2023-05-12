@@ -17,8 +17,11 @@ import numpy as np
 import pandas as pd
 
 from eva.udfs.abstract.abstract_udf import AbstractUDF
+
 color = (207, 248, 64)
 thickness = 4
+
+
 class FrameId(AbstractUDF):
     def setup(self):
         pass
@@ -40,7 +43,15 @@ class FrameId(AbstractUDF):
             frame = row[0]
             frame_id = row[1]
 
-            frame = cv2.putText(frame, str(frame_id), (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.9, color, thickness)
+            frame = cv2.putText(
+                frame,
+                str(frame_id),
+                (10, 25),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.9,
+                color,
+                thickness,
+            )
             # since cv2 by default reads an image in BGR
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 

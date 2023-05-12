@@ -21,6 +21,8 @@ import subprocess
 import sys
 from pathlib import Path
 import asyncio
+import nbformat
+from nbformat.v4 import new_notebook, new_markdown_cell, new_code_cell
 
 import pkg_resources
 
@@ -48,6 +50,7 @@ EVA_DIR = functools.reduce(
 EVA_SRC_DIR = os.path.join(EVA_DIR, "eva")
 EVA_TEST_DIR = os.path.join(EVA_DIR, "test")
 EVA_SCRIPT_DIR = os.path.join(EVA_DIR, "script")
+EVA_NOTEBOOKS_DIR = os.path.join(EVA_DIR, "tutorials")
 
 FORMATTING_DIR = os.path.join(EVA_SCRIPT_DIR, "formatting")
 PYLINTRC = os.path.join(FORMATTING_DIR, "pylintrc")
@@ -195,9 +198,10 @@ def format_file(file_path, add_header, strip_header, format_code):
             os.system(black_command)
 
             # AUTOFLAKE
-            autoflake_command = f"{FLAKE_BINARY} --config={FLAKE8_CONFIG} {file_path}"
+            autoflake_command = f"{FLAKE_BINARY} --config='{FLAKE8_CONFIG}' {file_path}"
             ret_val = os.system(autoflake_command)
             if ret_val:
+                LOG.error("ret_val")
                 sys.exit(1)
     # END WITH
 
@@ -206,6 +210,58 @@ def format_file(file_path, add_header, strip_header, format_code):
 
 # END FORMAT__FILE(FILE_NAME)
 
+# check the notebooks
+def check_notebook_format(notebook_file):
+    notebook_file_name = os.path.basename(notebook_file)
+
+    # Ignore this notebook
+    if notebook_file_name == "ignore_tag.ipynb":
+        return True
+
+    with open(notebook_file) as f:
+        nb = nbformat.read(f, as_version=4)
+
+    # Check that the notebook contains at least one cell
+    if not nb.cells:
+        LOG.error(f"ERROR: Notebook {notebook_file} has no cells")
+        sys.exit(1)
+
+    # Check that all cells have a valid cell type (code, markdown, or raw)
+    for cell in nb.cells:
+        if cell.cell_type not in ['code', 'markdown', 'raw']:
+            LOG.error(f"ERROR: Notebook {notebook_file} contains an invalid cell type: {cell.cell_type}")
+            sys.exit(1)
+
+    # Check that all code cells have a non-empty source code
+    for cell in nb.cells:
+        if cell.cell_type == 'code' and not cell.source.strip():
+            LOG.error(f"ERROR: Notebook {notebook_file} contains an empty code cell")
+            sys.exit(1)
+    
+    # Check for "print(response)"
+    for cell in nb.cells:
+        if cell.cell_type == 'code' and 'print(response)' in cell.source:
+            LOG.error(f"ERROR: Notebook {notebook_file} contains an a cell with this content: {cell.source}")
+            sys.exit(1)
+
+    # Check for "Colab link"
+    '''
+    contains_colab_link = False
+    for cell in nb.cells:
+        if cell.cell_type == 'markdown' and 'colab' in cell.source:
+            # Check if colab link is correct
+            # notebook_file_name must match colab link
+            if notebook_file_name in cell.source:
+                LOG.error("file name: " + notebook_file_name)
+                contains_colab_link = True
+                break
+
+    if contains_colab_link is False:
+        LOG.error("contains colab link")
+        sys.exit(1)
+    '''
+
+    return True
 
 # format all the files in the dir passed as argument
 def format_dir(dir_path, add_header, strip_header, format_code):
@@ -326,3 +382,12 @@ if __name__ == "__main__":
 
         for file in files:
             check_file(file)
+
+    # CHECK ALL THE NOTEBOOKS
+
+    # Iterate over all files in the directory 
+    # and check if they are Jupyter notebooks
+    for file in os.listdir(EVA_NOTEBOOKS_DIR):
+        if file.endswith(".ipynb"):
+            notebook_file = os.path.join(EVA_NOTEBOOKS_DIR, file)
+            check_notebook_format(notebook_file)

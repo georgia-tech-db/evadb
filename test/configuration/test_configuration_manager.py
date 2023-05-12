@@ -14,8 +14,6 @@
 # limitations under the License.
 import unittest
 
-import pytest
-
 from eva.configuration.configuration_manager import ConfigurationManager
 
 
@@ -26,15 +24,13 @@ class ConfigurationManagerTests(unittest.TestCase):
 
     def test_configuration_manager_read_valid_key(self):
         value = self.config.get_value("core", "datasets_dir")
-        self.assertNotEqual(value, None)
+        self.assertIsNotNone(value)
 
     def test_configuration_manager_read_invalid_category(self):
-        with pytest.raises(KeyError):
-            _ = self.config.get_value("invalid", "")
+        self.assertIsNone(self.config.get_value("invalid", ""))
 
     def test_configuration_manager_read_invalid_key(self):
-        with pytest.raises(KeyError):
-            _ = self.config.get_value("core", "invalid")
+        self.assertIsNone(self.config.get_value("core", "invalid"))
 
     def test_configuration_manager_update_valid_key(self):
         value = self.config.get_value("core", "mode")

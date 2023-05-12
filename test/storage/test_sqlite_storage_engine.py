@@ -63,7 +63,8 @@ class SQLStorageEngineTest(unittest.TestCase):
 
     def test_should_write_rows_to_table(self):
         dummy_batches = list(create_dummy_batches())
-
+        # drop the _row_id
+        dummy_batches = [batch.project(batch.columns[1:]) for batch in dummy_batches]
         sqlengine = SQLStorageEngine()
         sqlengine.create(self.table)
         for batch in dummy_batches:

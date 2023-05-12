@@ -27,6 +27,8 @@ from eva.experimental.ray.optimizer.rules.rules import (
 )
 from eva.optimizer.rules.rules import (
     CacheFunctionExpressionInApply,
+    CacheFunctionExpressionInFilter,
+    CacheFunctionExpressionInProject,
     CombineSimilarityOrderByAndLimitToFaissIndexScan,
     EmbedFilterIntoGet,
     EmbedSampleIntoGet,
@@ -43,7 +45,6 @@ from eva.optimizer.rules.rules import (
     LogicalFaissIndexScanToPhysical,
     LogicalFilterToPhysical,
     LogicalFunctionScanToPhysical,
-    LogicalOverwriteToPhysical
 )
 from eva.optimizer.rules.rules import (
     LogicalGetToSeqScan as SequentialLogicalGetToSeqScan,
@@ -58,6 +59,7 @@ from eva.optimizer.rules.rules import (
     LogicalLimitToPhysical,
     LogicalLoadToPhysical,
     LogicalOrderByToPhysical,
+    LogicalOverwriteToPhysical,
 )
 from eva.optimizer.rules.rules import (
     LogicalProjectToPhysical as SequentialLogicalProjectToPhysical,
@@ -79,6 +81,8 @@ class RulesManager:
         self._logical_rules = [
             LogicalInnerJoinCommutativity(),
             CacheFunctionExpressionInApply(),
+            CacheFunctionExpressionInFilter(),
+            CacheFunctionExpressionInProject(),
         ]
 
         self._stage_one_rewrite_rules = [
@@ -128,7 +132,7 @@ class RulesManager:
             LogicalCreateIndexToFaiss(),
             LogicalApplyAndMergeToPhysical(),
             LogicalFaissIndexScanToPhysical(),
-            LogicalOverwriteToPhysical()
+            LogicalOverwriteToPhysical(),
         ]
 
         if ray_enabled:

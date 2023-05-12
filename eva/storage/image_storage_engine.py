@@ -27,16 +27,15 @@ class ImageStorageEngine(AbstractMediaStorageEngine):
         super().__init__()
 
     def read(self, table: TableCatalogEntry) -> Iterator[Batch]:
-
         for image_files in self._rdb_handler.read(self._get_metadata_table(table), 12):
-            for file_name in image_files.frames["file_url"]:
+            for _, (row_id, file_name) in image_files.iterrows():
                 system_file_name = self._xform_file_url_to_file_name(file_name)
                 image_file = Path(table.file_url) / system_file_name
                 # setting batch_mem_size = 1, we need fix it
                 reader = CVImageReader(str(image_file), batch_mem_size=1)
                 for batch in reader.read():
-                    column_name = table.columns[1].name
-                    batch.frames[column_name] = str(file_name)
+                    batch.frames[table.columns[0].name] = row_id
+                    batch.frames[table.columns[1].name] = str(file_name)
                     yield batch
 
     def clear(self, table: TableCatalogEntry, image_paths: List[Path]):

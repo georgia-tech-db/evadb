@@ -1,0 +1,29 @@
+name: Greetings
+
+on:
+  pull_request_target:
+    types: [opened]
+  issues:
+    types: [opened]
+
+jobs:
+  greeting:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/first-interaction@v1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          pr-message: |
+            👋 Hello @${{ github.actor }}, thanks for submitting a EVA DB PR 🙏 To allow your work to be integrated as seamlessly as possible, we advise you to:
+
+            - ✅ Verify that your PR is **up-to-date** with `georgia-tech-db/eva` `master` branch. If your PR is behind you can update your code by clicking the 'Update branch' button or by running `git pull` and `git merge master` locally.
+            - ✅ Verify that all EVA DB Continuous Integration (CI) **checks are passing**.
+            - ✅ Reduce changes to the absolute **minimum** required for your bug fix or feature addition.
+
+          issue-message: |
+            👋 Hello @${{ github.actor }}, thanks for your interest in EVA DB 🙏 Please visit our 🔮 [Tutorials](https://evadb.readthedocs.io/en/stable/source/tutorials/index.html) to get started, where you can find quickstart guides for simple tasks like [Image Classification](https://evadb.readthedocs.io/en/stable/source/tutorials/01-mnist.html) all the way to more interesting tasks like [Emotion Analysis](https://evadb.readthedocs.io/en/stable/source/tutorials/03-emotion-analysis.html).
+
+            If this is a 🐞 Bug Report, please provide a **minimum reproducible example** to help us debug it.
+
+            If this is a ❓ Question, please provide as much information as possible, including dataset examples and query results.
+

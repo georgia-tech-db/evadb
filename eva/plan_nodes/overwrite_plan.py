@@ -12,11 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from pathlib import Path
-from typing import List
-
 from eva.expression.abstract_expression import AbstractExpression
-from eva.parser.table_ref import TableInfo, TableRef
+from eva.parser.table_ref import TableRef
 from eva.plan_nodes.abstract_plan import AbstractPlan
 from eva.plan_nodes.types import PlanOprType
 
@@ -31,11 +28,7 @@ class OverwritePlan(AbstractPlan):
         operation(AbstractExpression): overwrite the data with the result of operation
     """
 
-    def __init__(
-        self,
-        table_ref: TableRef,
-        operation: AbstractExpression
-    ):
+    def __init__(self, table_ref: TableRef, operation: AbstractExpression):
         super().__init__(PlanOprType.OVERWRITE)
         self._table_ref = table_ref
         self._operation = operation
@@ -47,7 +40,7 @@ class OverwritePlan(AbstractPlan):
     @property
     def operation(self):
         return self._operation
-    
+
     def __str__(self):
         return "OverwritePlan(table_id={}, operation={})".format(
             self._table_ref,
