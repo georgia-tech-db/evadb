@@ -25,6 +25,7 @@ import pandas as pd
 import pytest
 
 from eva.catalog.catalog_manager import CatalogManager
+from eva.configuration.constants import EVA_ROOT_DIR
 from eva.models.storage.batch import Batch
 from eva.server.command_handler import execute_query_fetch_all
 
@@ -71,6 +72,18 @@ class ArrayCountTests(unittest.TestCase):
         expected = [{"myvideo.id": i} for i in range(0, NUM_FRAMES, 3)]
         expected_batch = Batch(frames=pd.DataFrame(expected))
         self.assertEqual(actual_batch, expected_batch)
+
+    def test_func_expr_ray(self):
+        ua_detrac = f"{EVA_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
+        execute_query_fetch_all(f"LOAD VIDEO '{ua_detrac}' INTO DETRAC;")
+
+        print("Loaded UA-DETRAC")
+        select_query = """SELECT id
+        FROM DETRAC
+        WHERE ArrayCount(FastRCNNObjectDetector(data).labels, 'car') > 3
+        ORDER BY id;
+        """
+        execute_query_fetch_all(select_query)
 
     def test_array_count_integration_test(self):
         select_query = """SELECT id FROM MyVideo WHERE

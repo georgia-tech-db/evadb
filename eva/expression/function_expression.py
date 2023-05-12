@@ -30,7 +30,11 @@ from eva.udfs.gpu_compatible import GPUCompatible
 from eva.utils.kv_cache import DiskKVCache
 from eva.utils.logging_manager import logger
 from eva.utils.stats import UDFStats
+from typing import Callable, List
 
+@ray.remote
+def apply_function_expression_remote(func_args, expr: Callable) -> Batch:
+    return func_args.apply_function_expression(expr)
 
 class FunctionExpression(AbstractExpression):
     """
@@ -174,10 +178,6 @@ class FunctionExpression(AbstractExpression):
                     self._function_instance = self._function_instance.to_device(device)
         return self._function_instance
 
-    @ray.remote
-    def apply_function_expression_remote(self, func_args, expr: Callable) -> Batch:
-        return Batch(func_args.apply_function_expression(expr))
-
     def _apply_function_expression(self, func: Callable, batch: Batch, **kwargs):
         """
         If cache is not enabled, call the func on the batch and return.
@@ -193,17 +193,16 @@ class FunctionExpression(AbstractExpression):
         )
 
         use_ray_parallelism = (
-            False  # Cannot support action queries yet and cannot support caching yet
+            True  # Cannot support action queries yet and cannot support caching yet
         )
+
         if use_ray_parallelism:
-            parallelism = 4
             tasks = []
-            for _ in range(parallelism):
-                tasks.append(
-                    self.apply_function_expression_remote.options(num_gpus=1).remote(
-                        func_args, func
-                    )
+            tasks.append(
+                apply_function_expression_remote.options(num_gpus=1).remote(
+                    func_args, func
                 )
+            )
             output_batches = ray.get(tasks)
             return Batch.merge_column_wise(output_batches)
 
