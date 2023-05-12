@@ -17,6 +17,7 @@ from typing import Callable, List, Tuple
 
 import numpy as np
 import pandas as pd
+import ray
 
 from eva.catalog.models.udf_catalog import UdfCatalogEntry
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
@@ -173,6 +174,10 @@ class FunctionExpression(AbstractExpression):
                     self._function_instance = self._function_instance.to_device(device)
         return self._function_instance
 
+    @ray.remote
+    def apply_function_expression_remote (self, func_args, expr: Callable) -> Batch:
+        pass
+
     def _apply_function_expression(self, func: Callable, batch: Batch, **kwargs):
         """
         If cache is not enabled, call the func on the batch and return.
@@ -186,6 +191,10 @@ class FunctionExpression(AbstractExpression):
         func_args = Batch.merge_column_wise(
             [child.evaluate(batch, **kwargs) for child in self.children]
         )
+
+        parallelism = 1
+        ray_config = {"num_gpus": 1} if Context().gpus else {"num_cpus": 1},
+        self.apply_function_expression_remote.options(parallelism, ray_config).remote(func_args, func)
 
         if not self._cache:
             return func_args.apply_function_expression(func)
