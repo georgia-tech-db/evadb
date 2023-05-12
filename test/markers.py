@@ -44,3 +44,7 @@ duplicate_skip_marker = pytest.mark.skipif(
     sys.platform == "linux",
     reason="Test case is duplicate. Disabling to speed up test suite",
 )
+
+python37_skip_marker = pytest.mark.skipif(
+    sys.version_info < (3, 8), reason="Test case requires python >=3.7"
+)
