@@ -176,7 +176,7 @@ class FunctionExpression(AbstractExpression):
 
     @ray.remote
     def apply_function_expression_remote (self, func_args, expr: Callable) -> Batch:
-        pass
+        func_args.apply_function_expression(expr)
 
     def _apply_function_expression(self, func: Callable, batch: Batch, **kwargs):
         """
