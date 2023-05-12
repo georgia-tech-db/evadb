@@ -192,7 +192,9 @@ class FunctionExpression(AbstractExpression):
             [child.evaluate(batch, **kwargs) for child in self.children]
         )
 
-        use_ray_parallelism = False  # Cannot support action queries yet and cannot support caching yet
+        use_ray_parallelism = (
+            False  # Cannot support action queries yet and cannot support caching yet
+        )
         if use_ray_parallelism:
             parallelism = 4
             tasks = []
