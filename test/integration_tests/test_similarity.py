@@ -18,11 +18,14 @@ from test.util import create_sample_image, load_udfs_for_testing, shutdown_ray
 import numpy as np
 import pandas as pd
 import pytest
+import cv2
+import os
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.models.storage.batch import Batch
 from eva.server.command_handler import execute_query_fetch_all
 from eva.storage.storage_engine import StorageEngine
+from eva.configuration.configuration_manager import ConfigurationManager
 
 
 @pytest.mark.notparallel
@@ -91,13 +94,19 @@ class SimilarityTests(unittest.TestCase):
                     )
                 ),
             )
-            base_img -= 1
 
-        # Create an actual image dataset.
-        load_image_query = (
-            f"LOAD IMAGE '{self.img_path}' INTO testSimilarityImageDataset;"
-        )
-        execute_query_fetch_all(load_image_query)
+            # Create an actual image dataset.
+            img_save_path = os.path.join(ConfigurationManager().get_value("storage", "tmp_dir"), f"test_similar_img{i}.jpg") 
+            cv2.imwrite(
+                img_save_path,
+                base_img
+            )
+            load_image_query = (
+                f"LOAD IMAGE '{img_save_path}' INTO testSimilarityImageDataset;"
+            )
+            execute_query_fetch_all(load_image_query)
+
+            base_img -= 1
 
     def tearDown(self):
         shutdown_ray()
@@ -302,9 +311,10 @@ class SimilarityTests(unittest.TestCase):
                                     ON testSimilarityImageDataset (DummyFeatureExtractor(data))
                                     USING HNSW;"""
         execute_query_fetch_all(create_index_query)
-        select_query = """SELECT data FROM testSimilarityImageDataset
+        select_query = """SELECT _row_id FROM testSimilarityImageDataset
                             ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data))
                             LIMIT 1;""".format(
             self.img_path
         )
-        execute_query_fetch_all(select_query)
+        res_batch = execute_query_fetch_all(select_query)
+        self.assertEqual(res_batch.frames["testsimilarityimagedataset._row_id"][0], 5)
