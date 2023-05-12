@@ -175,8 +175,8 @@ class FunctionExpression(AbstractExpression):
         return self._function_instance
 
     @ray.remote
-    def apply_function_expression_remote (self, func_args, expr: Callable) -> Batch:
-        func_args.apply_function_expression(expr)
+    def apply_function_expression_remote(self, func_args, expr: Callable) -> Batch:
+        return Batch(func_args.apply_function_expression(expr))
 
     def _apply_function_expression(self, func: Callable, batch: Batch, **kwargs):
         """
@@ -192,9 +192,18 @@ class FunctionExpression(AbstractExpression):
             [child.evaluate(batch, **kwargs) for child in self.children]
         )
 
-        parallelism = 1
-        ray_config = {"num_gpus": 1} if Context().gpus else {"num_cpus": 1},
-        self.apply_function_expression_remote.options(parallelism, ray_config).remote(func_args, func)
+        use_ray_parallelism = False  ## Cannot support action queries yet
+        if use_ray_parallelism:
+            parallelism = 4
+            tasks = []
+            for _ in range(parallelism):
+                tasks.append(
+                    self.apply_function_expression_remote.options(num_gpus=1).remote(
+                        func_args, func
+                    )
+                )
+            output_batches = ray.get(tasks)
+            return Batch.merge_column_wise(output_batches)
 
         if not self._cache:
             return func_args.apply_function_expression(func)
