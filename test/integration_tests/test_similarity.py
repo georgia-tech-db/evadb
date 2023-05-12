@@ -12,20 +12,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
 import unittest
 from test.util import create_sample_image, load_udfs_for_testing, shutdown_ray
 
+import cv2
 import numpy as np
 import pandas as pd
 import pytest
-import cv2
-import os
 
 from eva.catalog.catalog_manager import CatalogManager
+from eva.configuration.configuration_manager import ConfigurationManager
 from eva.models.storage.batch import Batch
 from eva.server.command_handler import execute_query_fetch_all
 from eva.storage.storage_engine import StorageEngine
-from eva.configuration.configuration_manager import ConfigurationManager
 
 
 @pytest.mark.notparallel
@@ -96,11 +96,11 @@ class SimilarityTests(unittest.TestCase):
             )
 
             # Create an actual image dataset.
-            img_save_path = os.path.join(ConfigurationManager().get_value("storage", "tmp_dir"), f"test_similar_img{i}.jpg") 
-            cv2.imwrite(
-                img_save_path,
-                base_img
+            img_save_path = os.path.join(
+                ConfigurationManager().get_value("storage", "tmp_dir"),
+                f"test_similar_img{i}.jpg",
             )
+            cv2.imwrite(img_save_path, base_img)
             load_image_query = (
                 f"LOAD IMAGE '{img_save_path}' INTO testSimilarityImageDataset;"
             )
