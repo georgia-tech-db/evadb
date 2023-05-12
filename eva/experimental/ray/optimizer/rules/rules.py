@@ -25,15 +25,15 @@ from eva.executor.execution_context import Context
 from eva.experimental.ray.plan_nodes.exchange_plan import ExchangePlan
 from eva.expression.function_expression import FunctionExpression
 from eva.optimizer.operators import (
+    LogicalApplyAndMerge,
     LogicalExchange,
     LogicalGet,
-    LogicalApplyAndMerge,
     OperatorType,
 )
 from eva.optimizer.rules.rules_base import Promise, Rule, RuleType
+from eva.plan_nodes.apply_and_merge_plan import ApplyAndMergePlan
 from eva.plan_nodes.seq_scan_plan import SeqScanPlan
 from eva.plan_nodes.storage_plan import StoragePlan
-from eva.plan_nodes.apply_and_merge_plan import ApplyAndMergePlan
 
 
 class LogicalExchangeToPhysical(Rule):
@@ -71,7 +71,9 @@ class LogicalApplyAndMergeToPhysical(Rule):
         apply_plan = ApplyAndMergePlan(before.func_expr, before.alias, before.do_unnest)
 
         parallelism = 2 if len(Context().gpus) > 1 else 1
-        ray_parallel_env_conf_dict = [{"CUDA_VISIBLE_DEVICES": str(i)} for i in range(parallelism)]
+        ray_parallel_env_conf_dict = [
+            {"CUDA_VISIBLE_DEVICES": str(i)} for i in range(parallelism)
+        ]
 
         exchange_plan = ExchangePlan(
             inner_plan=apply_plan,
@@ -115,7 +117,9 @@ class LogicalGetToSeqScan(Rule):
             yield scan_plan
         else:
             parallelism = 2 if len(Context().gpus) > 1 else 1
-            ray_parallel_env_conf_dict = [{"CUDA_VISIBLE_DEVICES": str(i)} for i in range(parallelism)]
+            ray_parallel_env_conf_dict = [
+                {"CUDA_VISIBLE_DEVICES": str(i)} for i in range(parallelism)
+            ]
 
             exchange_plan = ExchangePlan(
                 inner_plan=scan_plan,

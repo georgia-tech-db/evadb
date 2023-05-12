@@ -29,9 +29,9 @@ class ExchangePlan(AbstractPlan):
     """
 
     def __init__(
-        self, 
-        inner_plan: AbstractPlan, 
-        parallelism: int = 1, 
+        self,
+        inner_plan: AbstractPlan,
+        parallelism: int = 1,
         ray_pull_env_conf_dict: Dict[str, Any] = {},
         ray_parallel_env_conf_dict: List[Dict[str, Any]] = [{}],
     ):
@@ -51,8 +51,8 @@ class ExchangePlan(AbstractPlan):
     def __hash__(self) -> int:
         return hash(
             (
-                super().__hash__(), 
-                self.inner_plan, 
-                self.parallelism, 
+                super().__hash__(),
+                self.inner_plan,
+                self.parallelism,
             )
         )

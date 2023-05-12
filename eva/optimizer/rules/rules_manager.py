@@ -18,10 +18,12 @@ from contextlib import contextmanager
 from typing import List
 
 from eva.configuration.configuration_manager import ConfigurationManager
+from eva.experimental.ray.optimizer.rules.rules import (
+    LogicalApplyAndMergeToPhysical as ParallelLogicalApplyAndMerge,
+)
 from eva.experimental.ray.optimizer.rules.rules import LogicalExchangeToPhysical
 from eva.experimental.ray.optimizer.rules.rules import (
     LogicalGetToSeqScan as ParallelLogicalGetToSeqScan,
-    LogicalApplyAndMergeToPhysical as ParallelLogicalApplyAndMerge,
 )
 from eva.optimizer.rules.rules import (
     CacheFunctionExpressionInApply,
@@ -30,8 +32,12 @@ from eva.optimizer.rules.rules import (
     CombineSimilarityOrderByAndLimitToVectorIndexScan,
     EmbedFilterIntoGet,
     EmbedSampleIntoGet,
-    LogicalApplyAndMergeToPhysical,
     LogicalCreateIndexToVectorIndex,
+)
+from eva.optimizer.rules.rules import (
+    LogicalApplyAndMergeToPhysical as SequentialLogicalApplyAndMergeToPhysical,
+)
+from eva.optimizer.rules.rules import (
     LogicalCreateMaterializedViewToPhysical,
     LogicalCreateToPhysical,
     LogicalCreateUDFToPhysical,
@@ -45,7 +51,6 @@ from eva.optimizer.rules.rules import (
 )
 from eva.optimizer.rules.rules import (
     LogicalGetToSeqScan as SequentialLogicalGetToSeqScan,
-    LogicalApplyAndMergeToPhysical as SequentialLogicalApplyAndMergeToPhysical,
 )
 from eva.optimizer.rules.rules import (
     LogicalGroupByToPhysical,

@@ -16,7 +16,6 @@ import asyncio
 
 import nest_asyncio
 
-from eva.configuration.configuration_manager import ConfigurationManager
 from eva.experimental.ray.plan_nodes.exchange_plan import ExchangePlan
 from eva.optimizer.cost_model import CostModel
 from eva.optimizer.operators import Operator

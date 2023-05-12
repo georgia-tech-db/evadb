@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import os
-
 from typing import Callable, Dict, List
 
 import ray
@@ -40,7 +39,10 @@ def ray_wait_and_alert(tasks: List[ray.ObjectRef], queue: Queue):
 
 @ray.remote(max_calls=1)
 def ray_parallel(
-    conf_dict: Dict[str, str], executor: Callable, input_queue: Queue, output_queue: Queue
+    conf_dict: Dict[str, str],
+    executor: Callable,
+    input_queue: Queue,
+    output_queue: Queue,
 ):
     for k, v in conf_dict.items():
         os.environ[k] = v
@@ -49,10 +51,9 @@ def ray_parallel(
     for next_item in gen:
         output_queue.put(next_item)
 
+
 @ray.remote(max_calls=1)
-def ray_pull(
-    conf_dict: Dict[str, str], executor: Callable, input_queue: Queue
-):
+def ray_pull(conf_dict: Dict[str, str], executor: Callable, input_queue: Queue):
     for k, v in conf_dict.items():
         os.environ[k] = v
 
