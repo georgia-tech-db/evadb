@@ -31,7 +31,7 @@ EVA supports a AI-oriented query language for analysing unstructured data. Here 
  * `Examining the emotion palette of actors in a movie <https://evadb.readthedocs.io/en/stable/source/tutorials/03-emotion-analysis.html>`_
  * `Classifying images based on their content <https://evadb.readthedocs.io/en/stable/source/tutorials/01-mnist.html>`_
  * `Image Segmentation using Hugging Face <https://evadb.readthedocs.io/en/stable/source/tutorials/07-object-segmentation-huggingface.html>`_
- * `Recogizing license plates <https://github.com/georgia-tech-db/license-plate-recognition>`_
+ * `Recognizing license plates <https://github.com/georgia-tech-db/license-plate-recognition>`_
  * `Analysing toxicity of social media memes <https://github.com/georgia-tech-db/toxicity-classification>`_
 
 
