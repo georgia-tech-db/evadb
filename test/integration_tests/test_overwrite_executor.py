@@ -56,10 +56,10 @@ class OverwriteExecutorTest(unittest.TestCase):
         query = f"LOAD VIDEO '{self.video_file_path}' INTO MyVideo;"
         execute_query_fetch_all(query)
 
-        overwrite_query = f"OVERWRITE MyVideo BY GaussianBlur(data);"
+        overwrite_query = "OVERWRITE MyVideo BY GaussianBlur(data);"
         execute_query_fetch_all(overwrite_query)
 
-        select_query = f"SELECT * FROM MyVideo;"
+        select_query = "SELECT * FROM MyVideo;"
         actual_batch = execute_query_fetch_all(select_query)
         modified_dir = actual_batch.column_as_numpy_array(actual_batch.columns[1])[0]
         self.assertTrue("tmp/modified/dummy.avi" in modified_dir)
@@ -68,10 +68,10 @@ class OverwriteExecutorTest(unittest.TestCase):
         query = f"LOAD IMAGE '{self.image_file_path}' INTO MyImage;"
         execute_query_fetch_all(query)
 
-        overwrite_query = f"OVERWRITE MyImage BY GaussianBlur(data);"
+        overwrite_query = "OVERWRITE MyImage BY GaussianBlur(data);"
         execute_query_fetch_all(overwrite_query)
 
-        select_query = f"SELECT * FROM MyImage;"
+        select_query = "SELECT * FROM MyImage;"
         actual_batch = execute_query_fetch_all(select_query)
         modified_dir = actual_batch.column_as_numpy_array(actual_batch.columns[1])[0]
         self.assertTrue("modified_img00001.jpg" in modified_dir)
