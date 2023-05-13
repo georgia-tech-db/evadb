@@ -1211,5 +1211,6 @@ class LogicalOverwriteToPhysical(Rule):
         )
         yield after
 
+
 # IMPLEMENTATION RULES END
 ##############################################
