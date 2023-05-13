@@ -14,11 +14,7 @@
 # limitations under the License.
 import unittest
 from pathlib import Path
-from test.util import (
-    create_sample_video,
-    file_remove,
-    shutdown_ray,
-)
+from test.util import create_sample_video, file_remove, shutdown_ray
 
 import pytest
 
@@ -43,13 +39,11 @@ class OverwriteExecutorTest(unittest.TestCase):
 
         query = f"LOAD VIDEO '{video_file_path}' INTO MyVideo;"
         execute_query_fetch_all(query)
-
         overwrite_query = "OVERWRITE MyVideo BY GaussianBlur(data);"
         execute_query_fetch_all(overwrite_query)
 
         query = f"LOAD IMAGE '{image_file_path}' INTO MyImage;"
         execute_query_fetch_all(query)
-
         overwrite_query = "OVERWRITE MyImage BY GaussianBlur(data);"
         execute_query_fetch_all(overwrite_query)
 
@@ -57,9 +51,11 @@ class OverwriteExecutorTest(unittest.TestCase):
     def tearDownClass(cls):
         shutdown_ray()
         file_remove("dummy.avi")
-        file_remove(Path(
-            f"{EVA_ROOT_DIR}/test/data/uadetrac/small-data/MVI_20011/modified_img00001.jpg"
-        ))
+        file_remove(
+            Path(
+                f"{EVA_ROOT_DIR}/test/data/uadetrac/small-data/MVI_20011/modified_img00001.jpg"
+            )
+        )
         # clean up
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
         execute_query_fetch_all("DROP TABLE IF EXISTS MyImage;")
