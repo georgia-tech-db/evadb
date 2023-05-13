@@ -54,8 +54,7 @@ def execute_query_fetch_all(query, **kwargs) -> Optional[Batch]:
         return Batch.concat(batch_list, copy=False)
 
 
-@asyncio.coroutine
-def handle_request(client_writer, request_message):
+async def handle_request(client_writer, request_message):
     """
     Reads a request from a client and processes it
 
