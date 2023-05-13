@@ -51,6 +51,7 @@ minimal_requirement = [
     "diskcache>=5.4.0",
     "eva-decord>=0.6.1",
     "boto3",
+    "nest_asyncio"
 ]
 
 formatter_libs = ["black>=23.1.0", "isort>=5.10.1"]
