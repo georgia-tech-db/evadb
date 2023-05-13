@@ -75,7 +75,3 @@ class OverwriteExecutorTest(unittest.TestCase):
         actual_batch = execute_query_fetch_all(select_query)
         modified_dir = actual_batch.column_as_numpy_array(actual_batch.columns[1])[0]
         self.assertTrue("modified_img00001.jpg" in modified_dir)
-
-
-if __name__ == "__main__":
-    unittest.main()
