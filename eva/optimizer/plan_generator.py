@@ -12,6 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import asyncio
+
+import nest_asyncio
+
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.experimental.ray.planner.exchange_plan import ExchangePlan
 from eva.optimizer.cost_model import CostModel
@@ -23,6 +27,8 @@ from eva.optimizer.property import PropertyType
 from eva.optimizer.rules.rules_manager import RulesManager
 from eva.plan_nodes.abstract_plan import AbstractPlan
 from eva.plan_nodes.create_mat_view_plan import CreateMaterializedViewPlan
+
+nest_asyncio.apply()
 
 
 class PlanGenerator:
@@ -57,7 +63,7 @@ class PlanGenerator:
 
         return physical_plan
 
-    def optimize(self, logical_plan: Operator):
+    async def optimize(self, logical_plan: Operator):
         optimizer_context = OptimizerContext(self.cost_model, self.rules_manager)
         memo = optimizer_context.memo
         grp_expr = optimizer_context.add_opr_to_group(opr=logical_plan)
@@ -131,9 +137,12 @@ class PlanGenerator:
         else:
             return physical_plan
 
-    def build(self, logical_plan: Operator):
+    async def build(self, logical_plan: Operator):
         # apply optimizations
-        plan = self.optimize(logical_plan)
+        try:
+            plan = await asyncio.wait_for(self.optimize(logical_plan), timeout=60.0)
+        except TimeoutError:
+            print("Optimizer timed out!")
 
         # Only run post-processing if Ray is enabled.
         if ConfigurationManager().get_value("experimental", "ray"):

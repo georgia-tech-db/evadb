@@ -35,25 +35,24 @@ class LogicalExpression(AbstractExpression):
             exp_type, rtype=ExpressionReturnType.BOOLEAN, children=children
         )
 
-    def evaluate(self, *args, **kwargs):
+    def evaluate(self, batch, **kwargs):
         if self.get_children_count() == 2:
-
-            left_batch = self.get_child(0).evaluate(*args, **kwargs)
+            left_batch = self.get_child(0).evaluate(batch, **kwargs)
             if self.etype == ExpressionType.LOGICAL_AND:
-
                 if left_batch.all_false():  # check if all are false
                     return left_batch
-                kwargs["mask"] = left_batch.create_mask()
+                mask = left_batch.create_mask()
             elif self.etype == ExpressionType.LOGICAL_OR:
                 if left_batch.all_true():  # check if all are true
                     return left_batch
-                kwargs["mask"] = left_batch.create_inverted_mask()
-            right_batch = self.get_child(1).evaluate(*args, **kwargs)
-            left_batch.update_indices(kwargs["mask"], right_batch)
+                mask = left_batch.create_inverted_mask()
+
+            right_batch = self.get_child(1).evaluate(batch[mask], **kwargs)
+            left_batch.update_indices(mask, right_batch)
 
             return left_batch
         else:
-            batch = self.get_child(0).evaluate(*args, **kwargs)
+            batch = self.get_child(0).evaluate(batch, **kwargs)
             if self.etype == ExpressionType.LOGICAL_NOT:
                 batch.invert()
                 return batch
@@ -65,7 +64,6 @@ class LogicalExpression(AbstractExpression):
         return is_subtree_equal and self.etype == other.etype
 
     def get_symbol(self) -> str:
-
         if self.etype == ExpressionType.LOGICAL_AND:
             return "AND"
         elif self.etype == ExpressionType.LOGICAL_OR:

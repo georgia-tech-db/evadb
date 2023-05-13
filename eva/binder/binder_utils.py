@@ -89,7 +89,6 @@ def extend_star(
         [
             TupleValueExpression(col_name=col_name, table_alias=alias)
             for alias, col_name in col_objs
-            if col_name != IDENTIFIER_COLUMN
         ]
     )
     return target_list

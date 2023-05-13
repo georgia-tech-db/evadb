@@ -10,6 +10,74 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### [Deprecated]
 ### [Removed]
 
+##  [0.2.2] - 2023-05-11
+### [Added]
+
+* PR #708: tutorial: toxicity classifier
+* PR #694: tutorials: ChatGPT + Whisper + Hugging Face tutorial notebook  
+* PR #690: feat: make keywords case insensitive in parser 
+* PR #679: feat: support for Yolov8 pipelines 
+* PR #676: fix: Enable image and video tables to project Identifier column 
+* PR #663: feat: add caching support for udfs in projection 
+* PR #659: feat: Add support for audio based hf models 
+* PR #655: feat: LLM-based remote UDFs -- support for OpenAI Chat Completion 
+* PR #651: tutorial: license plate detection notebook to demonstrate fuzzy join  
+* PR #645: feat: logical filter cache 
+* PR #644: chore: Add optimizer timeout 
+* PR #643: feat: Add audio sampling rate
+
+### [Changed]
+
+* PR #712: fix: image loading 
+* PR #719: fix: speed up testcases 
+* PR #717: ci: updates to ci pipeline 
+* PR #718: bug: move from yolo to HF for reuse testcases 
+* PR #711: docs: Update README.md / typo fix 
+* PR #706: bug: catalog reset  
+* PR #704: test: add message to help debug an issue 
+* PR #701: bug: modify the catalog reset method  
+* PR #702: fix: stop raising error if category or key missing in config. 
+* PR #698: docs: improve UDF creation documentation 
+* PR #699: chore: rename ChatGPT UDF 
+* PR #696: docs: updated UDF documentation based on decorators 
+* PR #697: misc: add github templates 
+* PR #695: docs: typo in executor_utils.py 
+* PR #691: fix: cache indices after filtering 
+* PR #689: style: removing gender detection nb 
+* PR #686: ci: reduce number of cache shards 
+* PR #687: docs: Add link to HuggingFace demo application -- image segmentation pipeline 
+* PR #684: ci: upgrades to ci pipeline 
+* PR #681: ci: add model cache for linux builds 
+* PR #678: fix: HF GPU support 
+* PR #675: bug: opencv now returns rgb 
+* PR #674: fix: ray ci fix 
+
+
+##  [0.2.1] - 2023-04-25
+### [Added]
+
+* PR #664: Add Tutorial Notebook for HuggingFace 
+* PR #668: fix: Remove detoxify to fix pip install evadb 
+* PR #660: Bump Eva-Decord to Not Need ffmpeg 
+* PR #657: docs: benefit of caching and predicate reordering 
+
+##  [0.2.0] - 2023-04-16
+### [Added]
+
+* PR #647: feat: LOAD CSV Notebook 
+* PR #626: docs: Documentation for creating UDFs using Decorators. 
+* PR #599: feat: EVA x HuggingFace 
+* PR #621: feat: Ray integration
+
+### [Changed]
+
+* PR #649: fix: Expr bugs 
+* PR #628: test: adding support for pytest-xdist 
+* PR #633: fix: Install Decord from EVA-Fork 
+* PR #646: update doc for extending eva 
+* PR #642: Build fix 
+* PR #641: fix: Unnest bug  
+
 ##  [0.1.6] - 2023-04-05
 ### [Added]
 

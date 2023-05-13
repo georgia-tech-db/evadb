@@ -54,6 +54,7 @@ class DropExecutor(AbstractExecutor):
         )
         storage_engine = StorageEngine.factory(table_obj)
 
+        logger.debug(f"Dropping table {table_info}")
         storage_engine.drop(table=table_obj)
 
         for col_obj in table_obj.columns:

@@ -14,10 +14,10 @@ from setuptools import find_packages, setup
 this_directory = Path(__file__).parent
 LONG_DESCRIPTION = (this_directory / "README.md").read_text()
 
-DESCRIPTION = "EVA Video Database System (Think MySQL for videos)."
+DESCRIPTION = "EVA AI-Relational Database System"
 NAME = "evadb"
 AUTHOR = "Georgia Tech Database Group"
-AUTHOR_EMAIL = "georgia.tech.db@gmail.com"
+AUTHOR_EMAIL = "arulraj@gatech.edu"
 URL = "https://github.com/georgia-tech-db/eva"
 
 
@@ -37,9 +37,9 @@ LICENSE = "Apache License 2.0"
 VERSION = VERSION_DICT["VERSION"]
 
 minimal_requirement = [
-    "numpy>=1.19.5,<=1.23.5",
-    "opencv-python>=4.5.4.60,<4.6.0.66",  # bug in easyocr
+    "numpy>=1.19.5",
     "pandas>=1.1.5",
+    "opencv-python>=4.6.0.66",
     "Pillow>=8.4.0",
     "sqlalchemy>=1.4.0,<2.0.0",  # major changes in 2.0.0
     "sqlalchemy-utils>=0.36.6",
@@ -49,8 +49,8 @@ minimal_requirement = [
     "ray>=1.13.0",
     "aenum>=2.2.0",
     "diskcache>=5.4.0",
-    "norfair>=2.2.0",
-    "eva-decord==0.6.0"
+    "eva-decord==0.6.0" "eva-decord>=0.6.1",
+    "boto3",
 ]
 
 formatter_libs = ["black>=23.1.0", "isort>=5.10.1"]
@@ -95,12 +95,13 @@ database_libs = ["pymysql>=0.10.1"]
 ### NEEDED FOR A BATTERIES-LOADED EXPERIENCE
 udf_libs = [
     "facenet-pytorch>=2.5.2",  # FACE DETECTION
-    "easyocr>=1.5.0",  # OCR EXTRACTION
-    "ipython",
-    "yolov5<=7.0.6",          # OBJECT DETECTION
-    "detoxify",               # TEXT TOXICITY CLASSIFICATION
-    "thefuzz",                # FUZZY STRING MATCHINGz
-    "transformers==4.27.4"    # HUGGINGFACE
+    "ipython<8.13.0",  # NOTEBOOKS
+    "thefuzz",  # FUZZY STRING MATCHING
+    "ultralytics>=8.0.93",  # OBJECT DETECTION
+    "transformers>=4.27.4",  # HUGGINGFACE
+    "openai>=0.27.4",  # CHATGPT
+    "timm>=0.6.13",  # HUGGINGFACE VISION TASKS
+    "norfair>=2.2.0",  # OBJECT TRACKING
 ]
 
 ### NEEDED FOR EXPERIMENTAL FEATURES
@@ -133,12 +134,12 @@ setup(
     download_url=DOWNLOAD_URL,
     license=LICENSE,
     classifiers=[
-        "Intended Audience :: Science/Research",
-        "Topic :: Scientific/Engineering :: Information Analysis",
+        "Development Status :: 5 - Production/Stable",
         "License :: OSI Approved :: Apache Software License",
-        "Programming Language :: Python :: 3",
-        "Development Status :: 3 - Alpha",
-        "Operating System :: OS Independent",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        # "Programming Language :: Python :: 3.11",
     ],
     packages=find_packages(exclude=["tests", "tests.*"]),
     # https://python-packaging.readthedocs.io/en/latest/command-line-scripts.html#the-console-scripts-entry-point
@@ -148,7 +149,7 @@ setup(
             "eva_client=eva.eva_cmd_client:main",
         ]
     },
-    python_requires=">=3.7",
+    python_requires=">=3.8",
     install_requires=INSTALL_REQUIRES,
     extras_require=EXTRA_REQUIRES,
     include_package_data=True,

@@ -17,6 +17,7 @@ from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import handle_if_not_exists
 from eva.plan_nodes.create_plan import CreatePlan
 from eva.storage.storage_engine import StorageEngine
+from eva.utils.logging_manager import logger
 
 
 class CreateExecutor(AbstractExecutor):
@@ -26,6 +27,7 @@ class CreateExecutor(AbstractExecutor):
 
     def exec(self, *args, **kwargs):
         if not handle_if_not_exists(self.node.table_info, self.node.if_not_exists):
+            logger.debug(f"Creating table {self.node.table_info}")
             catalog_entry = self.catalog.create_and_insert_table_catalog_entry(
                 self.node.table_info, self.node.column_list
             )

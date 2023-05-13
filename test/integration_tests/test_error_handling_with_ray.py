@@ -39,7 +39,7 @@ class ErrorHandlingRayTests(unittest.TestCase):
         CatalogManager().reset()
         ConfigurationManager()
         # Load built-in UDFs.
-        load_udfs_for_testing(mode="minimal")
+        load_udfs_for_testing(mode="debug")
 
         # Deliberately create a faulty path.
         img_path = create_sample_image()
@@ -56,15 +56,15 @@ class ErrorHandlingRayTests(unittest.TestCase):
         execute_query_fetch_all(drop_table_query)
 
     def test_ray_error_populate_to_all_stages(self):
-        create_udf_query = """CREATE UDF IF NOT EXISTS ToxicityClassifier
-                  INPUT  (text NDARRAY STR(100))
-                  OUTPUT (labels NDARRAY STR(10))
-                  TYPE  Classification
-                  IMPL  'eva/udfs/toxicity_classifier.py';
+        udf_name, task = "HFObjectDetector", "image-classification"
+        create_udf_query = f"""CREATE UDF {udf_name}
+            TYPE HuggingFace
+            'task' '{task}'
         """
+
         execute_query_fetch_all(create_udf_query)
 
-        select_query = """SELECT ToxicityClassifier(data) FROM testRayErrorHandling;"""
+        select_query = """SELECT HFObjectDetector(data) FROM testRayErrorHandling;"""
 
         with self.assertRaises(ExecutorError):
             _ = execute_query_fetch_all(select_query)

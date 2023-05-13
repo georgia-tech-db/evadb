@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+from test.markers import ocr_skip_marker
 from test.util import shutdown_ray
 
 from eva.catalog.catalog_manager import CatalogManager
@@ -35,6 +36,7 @@ class LikeTest(unittest.TestCase):
         # clean up
         execute_query_fetch_all("DROP TABLE IF EXISTS MemeImages;")
 
+    @ocr_skip_marker
     def test_like_with_ocr(self):
         create_udf_query = """CREATE UDF IF NOT EXISTS OCRExtractor
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
@@ -45,15 +47,13 @@ class LikeTest(unittest.TestCase):
                   IMPL  'eva/udfs/ocr_extractor.py';
         """
         execute_query_fetch_all(create_udf_query)
-
-        select_query = (
-            """SELECT * FROM MemeImages JOIN LATERAL OCRExtractor(data) AS X(label, x, y) WHERE label LIKE """
-            + r'"[A-Za-z\', \[]*CANT[\,\',A-Za-z \]]*"'
+        select_query = """SELECT X.label, X.x, X.y FROM MemeImages JOIN LATERAL UNNEST(OCRExtractor(data)) AS X(label, x, y) WHERE label LIKE {};""".format(
+            r"""'.*SWAG.*'"""
         )
         actual_batch = execute_query_fetch_all(select_query)
+        self.assertEqual(len(actual_batch), 1)
 
-        self.assertEqual(len(actual_batch._frames), 2)
-
+    @ocr_skip_marker
     def test_like_fails_on_non_string_col(self):
         create_udf_query = """CREATE UDF IF NOT EXISTS OCRExtractor
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
@@ -65,10 +65,6 @@ class LikeTest(unittest.TestCase):
         """
         execute_query_fetch_all(create_udf_query)
 
-        select_query = """SELECT * FROM MemeImages JOIN LATERAL OCRExtractor(data) AS X(label, x, y) WHERE x LIKE "[A-Za-z]*CANT";"""
+        select_query = """SELECT * FROM MemeImages JOIN LATERAL UNNEST(OCRExtractor(data)) AS X(label, x, y) WHERE x LIKE "[A-Za-z]*CANT";"""
         with self.assertRaises(Exception):
             execute_query_fetch_all(select_query)
-
-
-if __name__ == "__main__":
-    unittest.main()

@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import create_sample_video, load_udfs_for_testing
+from test.util import create_sample_video
 
 import pytest
 from mock import MagicMock, patch
@@ -37,6 +37,8 @@ from eva.optimizer.operators import (
 )
 from eva.optimizer.rules.rules import (
     CacheFunctionExpressionInApply,
+    CacheFunctionExpressionInFilter,
+    CacheFunctionExpressionInProject,
     CombineSimilarityOrderByAndLimitToFaissIndexScan,
     EmbedFilterIntoGet,
     EmbedSampleIntoGet,
@@ -98,7 +100,6 @@ class RulesTest(unittest.TestCase):
         video_file_path = create_sample_video()
         load_query = f"LOAD VIDEO '{video_file_path}' INTO MyVideo;"
         execute_query_fetch_all(load_query)
-        load_udfs_for_testing(mode="minimal")
 
     @classmethod
     def tearDownClass(cls):
@@ -161,7 +162,7 @@ class RulesTest(unittest.TestCase):
         implementation_count = len(set(implementation_promises))
 
         # rewrite_count + implementation_count + 1 (for IMPLEMENTATION_DELIMETER)
-        self.assertEqual(rewrite_count + implementation_count + 2, promise_count)
+        self.assertEqual(rewrite_count + implementation_count + 4, promise_count)
 
     def test_supported_rules(self):
         # adding/removing rules should update this test
@@ -191,6 +192,8 @@ class RulesTest(unittest.TestCase):
         supported_logical_rules = [
             LogicalInnerJoinCommutativity(),
             CacheFunctionExpressionInApply(),
+            CacheFunctionExpressionInFilter(),
+            CacheFunctionExpressionInProject(),
         ]
         self.assertEqual(
             len(supported_logical_rules), len(RulesManager().logical_rules)

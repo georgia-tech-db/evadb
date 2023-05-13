@@ -179,6 +179,11 @@ test_evadb/
 tutorials/*.py
 *.pth
 *.pt
+tutorials/bddtest.zip
+tutorials/license.zip
+license/
+bddtest/
+tutorials/*.jpg
 
 # benchmark
 .benchmarks
@@ -186,3 +191,4 @@ eva.txt
 prof/
 output.txt
 MagicMock/
+queries.txt

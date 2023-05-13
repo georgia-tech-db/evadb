@@ -50,7 +50,7 @@ class OptimizerRulesTest(unittest.TestCase):
         ua_detrac = f"{EVA_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
         execute_query_fetch_all(f"LOAD VIDEO '{ua_detrac}' INTO MyVideo;")
         execute_query_fetch_all(f"LOAD VIDEO '{ua_detrac}' INTO MyVideo2;")
-        load_udfs_for_testing(mode="minimal")
+        load_udfs_for_testing(mode="debug")
 
     @classmethod
     def tearDownClass(cls):

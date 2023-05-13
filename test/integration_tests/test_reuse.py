@@ -12,102 +12,166 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import gc
 import os
 import unittest
 from pathlib import Path
-from test.markers import windows_skip_marker
+from test.markers import duplicate_skip_marker, windows_skip_marker
 from test.util import get_logical_query_plan, load_udfs_for_testing, shutdown_ray
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
-from eva.expression.function_expression import FunctionExpression
-from eva.optimizer.operators import LogicalFilter, LogicalFunctionScan
+from eva.optimizer.operators import LogicalFunctionScan
 from eva.optimizer.plan_generator import PlanGenerator
-from eva.optimizer.rules.rules import CacheFunctionExpressionInApply
+from eva.optimizer.rules.rules import (
+    CacheFunctionExpressionInApply,
+    CacheFunctionExpressionInFilter,
+    CacheFunctionExpressionInProject,
+)
 from eva.optimizer.rules.rules_manager import disable_rules
 from eva.server.command_handler import execute_query_fetch_all
 from eva.utils.stats import Timer
 
 
 class ReuseTest(unittest.TestCase):
+    def _load_hf_model(self):
+        udf_name = "HFObjectDetector"
+        create_udf_query = f"""CREATE UDF {udf_name}
+            TYPE HuggingFace
+            'task' 'object-detection'
+            'model' 'facebook/detr-resnet-50';
+        """
+        execute_query_fetch_all(create_udf_query)
+
     def setUp(self):
         CatalogManager().reset()
         ua_detrac = f"{EVA_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
         execute_query_fetch_all(f"LOAD VIDEO '{ua_detrac}' INTO DETRAC;")
         load_udfs_for_testing()
+        self._load_hf_model()
 
     def tearDown(self):
         shutdown_ray()
         execute_query_fetch_all("DROP TABLE IF EXISTS DETRAC;")
 
     def _verify_reuse_correctness(self, query, reuse_batch):
-        with disable_rules([CacheFunctionExpressionInApply()]) as rules_manager:
+        # Fix memory failures on CI when running reuse test cases. An issue with yolo
+        # surfaces when the system is running on low memory. Explicitly calling garbage
+        # collection to reduce the memory usage.
+        gc.collect()
+        with disable_rules(
+            [
+                CacheFunctionExpressionInApply(),
+                CacheFunctionExpressionInFilter(),
+                CacheFunctionExpressionInProject(),
+            ]
+        ) as rules_manager:
             custom_plan_generator = PlanGenerator(rules_manager)
             without_reuse_batch = execute_query_fetch_all(
                 query, plan_generator=custom_plan_generator
             )
-        self.assertEqual(without_reuse_batch, reuse_batch)
+
+        # printing the batches so that we can see the mismatch in the logs
+        self.assertEqual(
+            without_reuse_batch,
+            reuse_batch,
+            msg=f"Without reuse {without_reuse_batch} \n With reuse{reuse_batch}",
+        )
+
+    def _reuse_experiment(self, queries):
+        exec_times = []
+        batches = []
+        for query in queries:
+            timer = Timer()
+            with timer:
+                batches.append(execute_query_fetch_all(query))
+            exec_times.append(timer.total_elapsed_time)
+        return batches, exec_times
 
     def test_reuse_when_query_is_duplicate(self):
         select_query = """SELECT id, label FROM DETRAC JOIN
-            LATERAL YoloV5(data) AS Obj(label, bbox, conf) WHERE id < 15;"""
-        no_reuse_timer = Timer()
-        reuse_timer = Timer()
-
-        with no_reuse_timer:
-            execute_query_fetch_all(select_query)
-        with reuse_timer:
-            reuse_batch = execute_query_fetch_all(select_query)
-
-        self._verify_reuse_correctness(select_query, reuse_batch)
-
+            LATERAL HFObjectDetector(data) AS Obj(score, label, bbox) WHERE id < 15;"""
+        batches, exec_times = self._reuse_experiment([select_query, select_query])
+        self._verify_reuse_correctness(select_query, batches[1])
         # reuse should be faster than no reuse
-        self.assertTrue(
-            no_reuse_timer.total_elapsed_time > reuse_timer.total_elapsed_time
-        )
+        self.assertTrue(exec_times[0] > exec_times[1])
 
+    @duplicate_skip_marker
     def test_reuse_partial(self):
-        select_query = """SELECT id, label FROM DETRAC JOIN
-            LATERAL YoloV5(data) AS Obj(label, bbox, conf) WHERE id < 5;"""
+        select_query1 = """SELECT id, label FROM DETRAC JOIN
+            LATERAL HFObjectDetector(data) AS Obj(score, label, bbox) WHERE id < 5;"""
+        select_query2 = """SELECT id, label FROM DETRAC JOIN
+            LATERAL HFObjectDetector(data) AS Obj(score, label, bbox) WHERE id < 15;"""
 
-        execute_query_fetch_all(select_query)
-        select_query = """SELECT id, label FROM DETRAC JOIN
-            LATERAL YoloV5(data) AS Obj(label, bbox, conf) WHERE id < 15;"""
-
-        reuse_batch = execute_query_fetch_all(select_query)
-        self._verify_reuse_correctness(select_query, reuse_batch)
+        batches, exec_times = self._reuse_experiment([select_query1, select_query2])
+        self._verify_reuse_correctness(select_query2, batches[1])
 
     def test_reuse_in_with_multiple_occurences(self):
-        select_query = """SELECT id, label FROM DETRAC JOIN
-            LATERAL YoloV5(data) AS Obj(label, bbox, conf) WHERE id < 10;"""
-
-        execute_query_fetch_all(select_query)
+        select_query1 = """SELECT id, label FROM DETRAC JOIN
+            LATERAL HFObjectDetector(data) AS Obj(score, label, bbox) WHERE id < 10;"""
 
         # multiple occurences of the same function expression
-        select_query = """SELECT id, YoloV5(data).labels FROM DETRAC JOIN
-            LATERAL YoloV5(data) AS Obj(label, bbox, conf) WHERE id < 15;"""
+        select_query2 = """SELECT id, HFObjectDetector(data).label FROM DETRAC JOIN
+            LATERAL HFObjectDetector(data) AS Obj(score, label, bbox) WHERE id < 5;"""
 
+        batches, exec_times = self._reuse_experiment([select_query1, select_query2])
+
+        self._verify_reuse_correctness(select_query2, batches[1])
+
+        # different query format
+        select_query = (
+            """SELECT id, HFObjectDetector(data).label FROM DETRAC WHERE id < 15;"""
+        )
         reuse_batch = execute_query_fetch_all(select_query)
         self._verify_reuse_correctness(select_query, reuse_batch)
 
-        # enable these test cases when we increase the support of caching
-        if False:
-            # different query format
-            select_query = (
-                """SELECT id, YoloV5(data).labels FROM DETRAC WHERE id < 25;"""
-            )
-            reuse_batch = execute_query_fetch_all(select_query)
-            self._verify_reuse_correctness(select_query, reuse_batch)
+        # different query format
+        select_query = """SELECT id, HFObjectDetector(data).score FROM DETRAC WHERE ['car'] <@ HFObjectDetector(data).label AND id < 20"""
+        reuse_batch = execute_query_fetch_all(select_query)
+        self._verify_reuse_correctness(select_query, reuse_batch)
 
-            # different query format
-            select_query = """SELECT id, YoloV5(data).scores FROM DETRAC WHERE ['car'] <@ YoloV5(data).labels AND id < 20"""
-            reuse_batch = execute_query_fetch_all(select_query)
-            self._verify_reuse_correctness(select_query, reuse_batch)
+    def test_reuse_logical_project_with_duplicate_query(self):
+        project_query = (
+            """SELECT id, HFObjectDetector(data).label FROM DETRAC WHERE id < 10;"""
+        )
+        batches, exec_times = self._reuse_experiment([project_query, project_query])
+        self._verify_reuse_correctness(project_query, batches[1])
+        # reuse should be faster than no reuse
+        self.assertGreater(exec_times[0], exec_times[1])
+
+    def test_reuse_with_udf_in_predicate(self):
+        select_query = """SELECT id FROM DETRAC WHERE ['car'] <@ HFObjectDetector(data).label AND id < 4"""
+
+        batches, exec_times = self._reuse_experiment([select_query, select_query])
+        self._verify_reuse_correctness(select_query, batches[1])
+        # reuse should be faster than no reuse
+        self.assertGreater(exec_times[0], exec_times[1])
+
+    def test_reuse_across_different_predicate_using_same_udf(self):
+        query1 = """SELECT id FROM DETRAC WHERE ['car'] <@ HFObjectDetector(data).label AND id < 15"""
+
+        query2 = """SELECT id FROM DETRAC WHERE ArrayCount(HFObjectDetector(data).label, 'car') > 3 AND id < 12;"""
+
+        batches, exec_times = self._reuse_experiment([query1, query2])
+        self._verify_reuse_correctness(query2, batches[1])
+        # reuse should be faster than no reuse
+        self.assertGreater(exec_times[0], exec_times[1])
+
+    def test_reuse_filter_with_project(self):
+        project_query = """
+            SELECT id, Yolo(data).labels FROM DETRAC WHERE id < 5;"""
+        select_query = """
+            SELECT id FROM DETRAC
+            WHERE ArrayCount(Yolo(data).labels, 'car') > 3 AND id < 5;"""
+        batches, exec_times = self._reuse_experiment([project_query, select_query])
+        self._verify_reuse_correctness(select_query, batches[1])
+        # reuse should be faster than no reuse
+        self.assertGreater(exec_times[0], exec_times[1])
 
     def test_reuse_in_extract_object(self):
         select_query = """
             SELECT id, T.iids, T.bboxes, T.scores, T.labels
-            FROM DETRAC JOIN LATERAL EXTRACT_OBJECT(data, YoloV5, NorFairTracker)
+            FROM DETRAC JOIN LATERAL EXTRACT_OBJECT(data, Yolo, NorFairTracker)
                 AS T(iids, labels, bboxes, scores)
             WHERE id < 30;
             """
@@ -115,23 +179,10 @@ class ReuseTest(unittest.TestCase):
         reuse_batch = execute_query_fetch_all(select_query)
         self._verify_reuse_correctness(select_query, reuse_batch)
 
-    def test_reuse_does_not_work_when_expression_in_where_clause(self):
-        # add with subsequent PR
-        select_query = """
-            SELECT id FROM DETRAC
-            WHERE ArrayCount(YoloV5(data).labels, 'car') > 3 AND id < 5;"""
-        plan = next(get_logical_query_plan(select_query).find_all(LogicalFilter))
-        yolo_expr = None
-        for expr in plan.predicate.find_all(FunctionExpression):
-            if expr.name == "YoloV5":
-                yolo_expr = expr
-
-        self.assertFalse(yolo_expr.has_cache())
-
     @windows_skip_marker
     def test_reuse_after_server_shutdown(self):
         select_query = """SELECT id, label FROM DETRAC JOIN
-            LATERAL YoloV5(data) AS Obj(label, bbox, conf) WHERE id < 10;"""
+            LATERAL Yolo(data) AS Obj(label, bbox, conf) WHERE id < 4;"""
         execute_query_fetch_all(select_query)
 
         # Stop and restart server
@@ -139,7 +190,7 @@ class ReuseTest(unittest.TestCase):
         os.system("nohup eva_server --start &")
 
         select_query = """SELECT id, label FROM DETRAC JOIN
-            LATERAL YoloV5(data) AS Obj(label, bbox, conf) WHERE id < 15;"""
+            LATERAL Yolo(data) AS Obj(label, bbox, conf) WHERE id < 6;"""
 
         reuse_batch = execute_query_fetch_all(select_query)
         self._verify_reuse_correctness(select_query, reuse_batch)
@@ -149,7 +200,7 @@ class ReuseTest(unittest.TestCase):
 
     def test_drop_udf_should_remove_cache(self):
         select_query = """SELECT id, label FROM DETRAC JOIN
-            LATERAL YoloV5(data) AS Obj(label, bbox, conf) WHERE id < 5;"""
+            LATERAL Yolo(data) AS Obj(label, bbox, conf) WHERE id < 5;"""
         execute_query_fetch_all(select_query)
 
         plan = next(get_logical_query_plan(select_query).find_all(LogicalFunctionScan))
@@ -163,14 +214,14 @@ class ReuseTest(unittest.TestCase):
         self.assertTrue(cache_dir.exists())
 
         # cache should be removed if the UDF is removed
-        execute_query_fetch_all("DROP UDF YoloV5;")
+        execute_query_fetch_all("DROP UDF Yolo;")
         udf_cache = catalog_manager.get_udf_cache_catalog_entry_by_name(cache_name)
         self.assertIsNone(udf_cache)
         self.assertFalse(cache_dir.exists())
 
     def test_drop_table_should_remove_cache(self):
         select_query = """SELECT id, label FROM DETRAC JOIN
-            LATERAL YoloV5(data) AS Obj(label, bbox, conf) WHERE id < 5;"""
+            LATERAL Yolo(data) AS Obj(label, bbox, conf) WHERE id < 5;"""
         execute_query_fetch_all(select_query)
 
         plan = next(get_logical_query_plan(select_query).find_all(LogicalFunctionScan))

@@ -101,8 +101,8 @@ class MaterializedViewTest(unittest.TestCase):
     @pytest.mark.torchtest
     def test_should_mat_view_with_yolo(self):
         select_query = (
-            "SELECT id, YoloV5(data).labels, "
-            "YoloV5(data).bboxes "
+            "SELECT id, Yolo(data).labels, "
+            "Yolo(data).bboxes "
             "FROM UATRAC WHERE id < 5;"
         )
         query = (
@@ -125,7 +125,7 @@ class MaterializedViewTest(unittest.TestCase):
     def test_should_mat_view_with_fastrcnn_lateral_join(self):
         select_query = (
             "SELECT id, label, bbox FROM UATRAC JOIN LATERAL "
-            "YoloV5(data) AS T(label, bbox, score) WHERE id < 5;"
+            "Yolo(data) AS T(label, bbox, score) WHERE id < 5;"
         )
         query = (
             "CREATE MATERIALIZED VIEW IF NOT EXISTS "

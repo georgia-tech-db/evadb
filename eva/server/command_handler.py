@@ -37,7 +37,7 @@ def execute_query(query, report_time: bool = False, **kwargs) -> Iterator[Batch]
         stmt = Parser().parse(query)[0]
         StatementBinder(StatementBinderContext()).bind(stmt)
         l_plan = StatementToPlanConvertor().visit(stmt)
-        p_plan = plan_generator.build(l_plan)
+        p_plan = asyncio.run(plan_generator.build(l_plan))
         output = PlanExecutor(p_plan).execute_plan()
 
     query_compile_time.log_elapsed_time("Query Compile Time")
@@ -54,8 +54,7 @@ def execute_query_fetch_all(query, **kwargs) -> Optional[Batch]:
         return Batch.concat(batch_list, copy=False)
 
 
-@asyncio.coroutine
-def handle_request(client_writer, request_message):
+async def handle_request(client_writer, request_message):
     """
     Reads a request from a client and processes it
 
