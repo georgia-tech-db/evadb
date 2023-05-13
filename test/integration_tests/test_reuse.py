@@ -177,9 +177,9 @@ class ReuseTest(unittest.TestCase):
                 AS T(iids, labels, bboxes, scores)
             WHERE id < 30;
             """
-        execute_query_fetch_all(select_query)
-        reuse_batch = execute_query_fetch_all(select_query)
-        self._verify_reuse_correctness(select_query, reuse_batch)
+        batches, exec_times = self._reuse_experiment([select_query, select_query])
+        self._verify_reuse_correctness(select_query, batches[1])
+        self.assertGreater(exec_times[0], exec_times[1])
 
     @windows_skip_marker
     def test_reuse_after_server_shutdown(self):
