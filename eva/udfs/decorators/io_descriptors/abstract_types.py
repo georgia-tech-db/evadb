@@ -44,7 +44,7 @@ class IOArgument(ABC):
 
 class IOColumnArgument(IOArgument):
     """
-    Base class for IO arguments that are represented indvidually as columns in the catalog.
+    Base class for IO arguments that are represented individually as columns in the catalog.
     """
 
     @abstractmethod
