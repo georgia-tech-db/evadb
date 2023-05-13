@@ -53,7 +53,8 @@ workflows:
             name: "Test | Ray | v3.10 | Linux"
             v: "3.10"
             mode: "RAY"
-        - Pip
+        - Pip-PyPI
+        - Pip-Local
         - Windows:
             name: "Windows | v3.10"
         # test_create_index_doesn't work on MacOS
