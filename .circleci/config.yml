@@ -7,6 +7,8 @@ orbs:
 workflows:
   main:
     jobs:
+        - Pip-PyPI
+        - Pip-Local
         #### UNIT TESTS
         - Linux:
             name: "Test | v3.8 | Linux"
@@ -53,8 +55,6 @@ workflows:
             name: "Test | Ray | v3.10 | Linux"
             v: "3.10"
             mode: "RAY"
-        - Pip-PyPI
-        - Pip-Local
         - Windows:
             name: "Windows | v3.10"
         # test_create_index_doesn't work on MacOS
