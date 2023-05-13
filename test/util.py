@@ -13,10 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import asyncio
+import multiprocessing as mp
 import os
 import shutil
 import socket
 from contextlib import closing
+from itertools import repeat
+from multiprocessing import Pool
 from pathlib import Path
 
 import cv2
@@ -361,6 +364,24 @@ def create_sample_image():
     img[2] += 1
     cv2.imwrite(img_path, img)
     return img_path
+
+
+def create_random_image(i, path):
+    img = np.random.random_sample([400, 400, 3]).astype(np.uint8)
+    cv2.imwrite(os.path.join(path, f"img{i}.jpg"), img)
+
+
+def create_large_scale_image_dataset(num=1000000):
+    img_dir = os.path.join(tmp_dir_from_config, f"large_scale_image_dataset_{num}")
+    Path(img_dir).mkdir(parents=True, exist_ok=True)
+
+    # Generate images in parallel.
+    image_idx_list = list(range(num))
+    Pool(mp.cpu_count()).starmap(
+        create_random_image, zip(image_idx_list, repeat(img_dir))
+    )
+
+    return img_dir
 
 
 def create_sample_video(num_frames=NUM_FRAMES):

@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+from test.markers import ocr_skip_marker
 from test.util import shutdown_ray
 
 from eva.catalog.catalog_manager import CatalogManager
@@ -35,6 +36,7 @@ class LikeTest(unittest.TestCase):
         # clean up
         execute_query_fetch_all("DROP TABLE IF EXISTS MemeImages;")
 
+    @ocr_skip_marker
     def test_like_with_ocr(self):
         create_udf_query = """CREATE UDF IF NOT EXISTS OCRExtractor
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
@@ -51,6 +53,7 @@ class LikeTest(unittest.TestCase):
         actual_batch = execute_query_fetch_all(select_query)
         self.assertEqual(len(actual_batch), 1)
 
+    @ocr_skip_marker
     def test_like_fails_on_non_string_col(self):
         create_udf_query = """CREATE UDF IF NOT EXISTS OCRExtractor
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
