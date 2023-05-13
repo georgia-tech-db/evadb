@@ -68,10 +68,12 @@ ISORT_VERSION_REQUIRED = "5.10.1"
 
 BLACK_BINARY = "black"
 FLAKE_BINARY = "flake8"
-PYLINT_BINARY = "pylint"
 ISORT_BINARY = "isort"
+PYLINT_BINARY = "pylint"
 
 FLAKE8_CONFIG = Path(os.path.join(EVA_DIR, ".flake8")).resolve()
+PYLINT_CONFIG = Path(os.path.join(EVA_DIR, ".pylintrc")).resolve()
+
 # ==============================================
 # HEADER CONFIGURATION
 # ==============================================
@@ -202,12 +204,23 @@ def format_file(file_path, add_header, strip_header, format_code):
             ret_val = os.system(autoflake_command)
             if ret_val:
                 sys.exit(1)
+
+            # PYLINT
+            pylint_command = f"{PYLINT_BINARY} --rcfile={PYLINT_CONFIG}  {file_path}"
+            ret_val = os.system(pylint_command)
+            if ret_val:
+                sys.exit(1)
+
     # END WITH
 
     fd.close()
 
-
 # END FORMAT__FILE(FILE_NAME)
+
+def format_file(file_path):
+    abs_path = os.path.abspath(file_path)
+    with open(abs_path, "r+") as fd:
+        file_data = fd.read()
 
 # check the notebooks
 def check_notebook_format(notebook_file):
