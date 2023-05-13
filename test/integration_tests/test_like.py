@@ -53,6 +53,7 @@ class LikeTest(unittest.TestCase):
         actual_batch = execute_query_fetch_all(select_query)
         self.assertEqual(len(actual_batch), 1)
 
+    @ocr_skip_marker
     def test_like_fails_on_non_string_col(self):
         create_udf_query = """CREATE UDF IF NOT EXISTS OCRExtractor
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
