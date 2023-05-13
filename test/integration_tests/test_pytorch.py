@@ -253,5 +253,5 @@ class PytorchTest(unittest.TestCase):
 
         actual_batch = execute_query_fetch_all(query)
 
-        # due to unnest the number of returned tuples should be atleast > 10
+        # due to unnest the number of returned tuples should be at least > 10
         self.assertTrue(len(actual_batch) > 2)

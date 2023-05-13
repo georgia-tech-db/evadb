@@ -13,3 +13,13 @@ enable=
 spelling-dict=en_US
 # A path to a file that contains private dictionary; one word per line.
 spelling-private-dict-file=spelling.txt
+
+[REPORTS]
+
+output-format=colorized
+
+# Tells whether to display a full report or only the messages.
+reports=no
+
+# Activate the evaluation score.
+score=no

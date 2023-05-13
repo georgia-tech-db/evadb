@@ -190,7 +190,7 @@ def format_file(file_path, add_header, strip_header, format_code):
             fd.write(new_file_data)
 
         elif format_code:
-            #LOG.info("Formatting File : " + file_path)
+            LOG.info("Formatting File : " + file_path)
             # ISORT
             isort_command = f"{ISORT_BINARY} --profile  black  {file_path}"
             os.system(isort_command)
@@ -207,6 +207,7 @@ def format_file(file_path, add_header, strip_header, format_code):
 
             # PYLINT
             pylint_command = f"{PYLINT_BINARY} --rcfile={PYLINT_CONFIG}  {file_path}"
+            print(pylint_command)
             ret_val = os.system(pylint_command)
             if ret_val:
                 sys.exit(1)
@@ -216,11 +217,6 @@ def format_file(file_path, add_header, strip_header, format_code):
     fd.close()
 
 # END FORMAT__FILE(FILE_NAME)
-
-def format_file(file_path):
-    abs_path = os.path.abspath(file_path)
-    with open(abs_path, "r+") as fd:
-        file_data = fd.read()
 
 # check the notebooks
 def check_notebook_format(notebook_file):
