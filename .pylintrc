@@ -1,0 +1,15 @@
+[MASTER]
+
+[MESSAGES CONTROL]
+disable=
+    all
+
+enable=
+    wrong-spelling-in-docstring,
+    wrong-spelling-in-comment
+
+[SPELLING]
+# Spelling dictionary name
+spelling-dict=en_US
+# A path to a file that contains private dictionary; one word per line.
+spelling-private-dict-file=spelling.txt
