@@ -40,6 +40,7 @@ from eva.optimizer.operators import (
     LogicalLimit,
     LogicalLoadData,
     LogicalOrderBy,
+    LogicalOverwrite,
     LogicalProject,
     LogicalQueryDerivedGet,
     LogicalRename,
@@ -293,6 +294,7 @@ statement_to_opr_convertor.column_definition_to_udf_io"
         join_plan = LogicalJoin(MagicMock(), MagicMock(), MagicMock(), MagicMock())
         project_plan = LogicalProject(MagicMock(), MagicMock())
         apply_and_merge_plan = LogicalApplyAndMerge(MagicMock(), MagicMock())
+        overwrite_plan = LogicalOverwrite(MagicMock(), MagicMock())
 
         create_plan.append_child(create_udf_plan)
 
@@ -323,6 +325,7 @@ statement_to_opr_convertor.column_definition_to_udf_io"
         plans.append(exchange_plan)
         plans.append(faiss_plan)
         plans.append(project_plan)
+        plans.append(overwrite_plan)
 
         derived_operators = list(get_all_subclasses(Operator))
 

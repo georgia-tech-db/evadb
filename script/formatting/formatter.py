@@ -245,7 +245,6 @@ def check_notebook_format(notebook_file):
             sys.exit(1)
 
     # Check for "Colab link"
-    '''
     contains_colab_link = False
     for cell in nb.cells:
         if cell.cell_type == 'markdown' and 'colab' in cell.source:
@@ -259,7 +258,6 @@ def check_notebook_format(notebook_file):
     if contains_colab_link is False:
         LOG.error("contains colab link")
         sys.exit(1)
-    '''
 
     return True
 

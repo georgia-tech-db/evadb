@@ -69,6 +69,7 @@ from eva.optimizer.rules.rules import (
     LogicalLimitToPhysical,
     LogicalLoadToPhysical,
     LogicalOrderByToPhysical,
+    LogicalOverwriteToPhysical,
 )
 from eva.optimizer.rules.rules import (
     LogicalProjectToPhysical as SequentialLogicalProjectToPhysical,
@@ -150,6 +151,7 @@ class RulesTest(unittest.TestCase):
             Promise.LOGICAL_CREATE_INDEX_TO_FAISS,
             Promise.LOGICAL_APPLY_AND_MERGE_TO_PHYSICAL,
             Promise.LOGICAL_FAISS_INDEX_SCAN_TO_PHYSICAL,
+            Promise.LOGICAL_OVERWRITE_TO_PHYSICAL,
         ]
 
         for promise in implementation_promises:
@@ -239,6 +241,7 @@ class RulesTest(unittest.TestCase):
             LogicalCreateIndexToFaiss(),
             LogicalApplyAndMergeToPhysical(),
             LogicalFaissIndexScanToPhysical(),
+            LogicalOverwriteToPhysical(),
         ]
 
         if ray_enabled:
