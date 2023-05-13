@@ -29,7 +29,10 @@ class PredicateExecutor(AbstractExecutor):
 
     def exec(self, *args, **kwargs) -> Iterator[Batch]:
         child_executor = self.children[0]
+        i = 0
         for batch in child_executor.exec(**kwargs):
+            print("Batch #", i)
             batch = apply_predicate(batch, self.predicate)
             if not batch.empty():
                 yield batch
+            i += 1

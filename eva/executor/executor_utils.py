@@ -40,8 +40,11 @@ def apply_project(batch: Batch, project_list: List[AbstractExpression]):
 
 def apply_predicate(batch: Batch, predicate: AbstractExpression) -> Batch:
     if not batch.empty() and predicate is not None:
+        print("There 1", type(predicate))
         outcomes = predicate.evaluate(batch)
+        print("There 2")
         batch.drop_zero(outcomes)
+        print("There 3")
     return batch
 
 

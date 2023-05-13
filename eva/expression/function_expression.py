@@ -32,7 +32,18 @@ from eva.utils.logging_manager import logger
 from eva.utils.stats import UDFStats
 from typing import Callable, List
 
-@ray.remote
+# ray.init(num_cpus=1, num_gpus=0)
+
+def split_dataframe(df, num_chunks):
+    # TODO df is a Batch, process as id and frames separately
+    chunks = list()
+    chunk_size = len(df) // num_chunks
+    for i in range(num_chunks - 1):
+        chunks.append(df[i*chunk_size:(i+1)*chunk_size])
+    chunks.append(df[(num_chunks - 1) * chunk_size:])
+    return chunks
+
+@ray.remote(num_gpus= 1)
 def apply_function_expression_remote(func_args, expr: Callable) -> Batch:
     return func_args.apply_function_expression(expr)
 
@@ -132,14 +143,19 @@ class FunctionExpression(AbstractExpression):
             self._stats.prev_cost = cost_per_func_call
 
     def evaluate(self, batch: Batch, **kwargs) -> Batch:
+        print("Here -0")
         func = self._gpu_enabled_function()
         # record the time taken for the udf execution
         # note the udf might be using cache
         with self._stats.timer:
             # apply the function and project the required columns
+            print("Here -1")
             outcomes = self._apply_function_expression(func, batch, **kwargs)
+            print("Here -2")
             outcomes = outcomes.project(self.projection_columns)
+            print("Here -3")
             outcomes.modify_column_alias(self.alias)
+            print("Here -4")
 
         # record the number of function calls
         self._stats.num_calls += len(batch)
@@ -198,13 +214,21 @@ class FunctionExpression(AbstractExpression):
 
         if use_ray_parallelism:
             tasks = []
-            tasks.append(
-                apply_function_expression_remote.options(num_gpus=1).remote(
-                    func_args, func
+            parallelism = 2
+            # print("Reached here 0")
+            chunked_batches = split_dataframe(func_args, parallelism)
+            # print("Reached here 1", len(chunked_batches))
+            for batch_chunk in chunked_batches:
+                print("Reached here 2 ", type(batch_chunk), len(batch_chunk))
+                tasks.append(
+                    apply_function_expression_remote.options(num_gpus= 1/parallelism).remote(
+                        batch_chunk, func
+                    )
                 )
-            )
+            # print("Reached here 3")
             output_batches = ray.get(tasks)
-            return Batch.merge_column_wise(output_batches)
+            # print("Reached here 4")
+            return Batch.concat(output_batches)
 
         if not self._cache:
             return func_args.apply_function_expression(func)

@@ -39,8 +39,11 @@ class ComparisonExpression(AbstractExpression):
 
     def evaluate(self, *args, **kwargs):
         # cast in to numpy array
+        print("HTHTHTH 1", type(self.get_child(0)))
         lbatch = self.get_child(0).evaluate(*args, **kwargs)
+        print("HTHTHTH 2")
         rbatch = self.get_child(1).evaluate(*args, **kwargs)
+        print("HTHTHTH 3")
 
         assert len(lbatch) == len(
             rbatch
