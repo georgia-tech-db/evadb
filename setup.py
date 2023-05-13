@@ -28,6 +28,7 @@ def read(path, encoding="utf-8"):
     with io.open(path, encoding=encoding) as fp:
         return fp.read()
 
+
 # version.py defines the VERSION and VERSION_SHORT variables
 VERSION_DICT: Dict[str, str] = {}
 with open("eva/version.py", "r") as version_file:
@@ -40,6 +41,7 @@ VERSION = VERSION_DICT["VERSION"]
 minimal_requirement = [
     "numpy>=1.19.5",
     "pandas>=1.1.5",
+    "opencv-python>=4.6.0.66",
     "Pillow>=8.4.0",
     "sqlalchemy>=1.4.0,<2.0.0",  # major changes in 2.0.0
     "sqlalchemy-utils>=0.36.6",
@@ -50,7 +52,7 @@ minimal_requirement = [
     "aenum>=2.2.0",
     "diskcache>=5.4.0",
     "eva-decord>=0.6.1",
-    "boto3"
+    "boto3",
 ]
 
 formatter_libs = ["black>=23.1.0", "isort>=5.10.1"]
@@ -97,7 +99,7 @@ udf_libs = [
     "facenet-pytorch>=2.5.2",  # FACE DETECTION
     "ipython<8.13.0",  # NOTEBOOKS
     "thefuzz",  # FUZZY STRING MATCHING
-    "ultralytics<=8.0.93",  # OBJECT DETECTION 
+    "ultralytics>=8.0.93",  # OBJECT DETECTION
     "transformers>=4.27.4",  # HUGGINGFACE
     "openai>=0.27.4",  # CHATGPT
     "timm>=0.6.13",  # HUGGINGFACE VISION TASKS
