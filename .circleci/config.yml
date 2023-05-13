@@ -20,7 +20,8 @@ workflows:
             name: "Test | v3.10 | Linux"
             v: "3.10"
             mode: "TEST"
-        # ray does not work on 3.11
+        # Ray does not work on 3.11
+        # https://github.com/ray-project/ray/issues/33232
         # - Linux:
         #     name: "Test | v3.11 | Linux"
         #     v: "3.11"
@@ -163,7 +164,7 @@ jobs:
               source test_evadb/bin/activate
               bash script/test/test.sh 
 
-  Pip:
+  Pip-PyPI:
     resource_class: large
     docker:
       - image: "cimg/python:3.10"
@@ -174,4 +175,17 @@ jobs:
           command: |
             pip install --upgrade pip
             pip install evadb
+            bash script/test/package.sh
+
+  Pip-Local:
+    resource_class: large
+    docker:
+      - image: "cimg/python:3.10"
+    steps:
+      - checkout
+      - run:
+          name: Install EVA package locally and start server
+          command: |
+            pip install --upgrade pip
+            pip install "."
             bash script/test/package.sh
