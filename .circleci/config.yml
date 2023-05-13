@@ -20,10 +20,11 @@ workflows:
             name: "Test | v3.10 | Linux"
             v: "3.10"
             mode: "TEST"
-        - Linux:
-            name: "Test | v3.11 | Linux"
-            v: "3.11"
-            mode: "TEST"
+        # ray does not work on 3.11
+        # - Linux:
+        #     name: "Test | v3.11 | Linux"
+        #     v: "3.11"
+        #     mode: "TEST"
         ### NOTEBOOKS
         - Linux:
             name: "Notebook | v3.8 | Linux"
@@ -37,10 +38,10 @@ workflows:
             name: "Notebook | v3.10 | Linux"
             v: "3.10"
             mode: "NOTEBOOK"
-        - Linux:
-            name: "Notebook | v3.11 | Linux"
-            v: "3.11"
-            mode: "NOTEBOOK"
+        # - Linux:
+        #     name: "Notebook | v3.11 | Linux"
+        #     v: "3.11"
+        #     mode: "NOTEBOOK"
         ### LINTER
         - Linux:
             name: "Linter | Linux"

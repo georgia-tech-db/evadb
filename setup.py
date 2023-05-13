@@ -10,8 +10,6 @@ from pathlib import Path
 from typing import Dict
 
 from setuptools import find_packages, setup
-from setuptools.command.install import install
-from subprocess import check_call
 
 this_directory = Path(__file__).parent
 LONG_DESCRIPTION = (this_directory / "README.md").read_text()
@@ -140,7 +138,7 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
-        "Programming Language :: Python :: 3.11",
+        # "Programming Language :: Python :: 3.11",
     ],
     packages=find_packages(exclude=["tests", "tests.*"]),
     # https://python-packaging.readthedocs.io/en/latest/command-line-scripts.html#the-console-scripts-entry-point
@@ -150,7 +148,7 @@ setup(
             "eva_client=eva.eva_cmd_client:main",
         ]
     },
-    python_requires=">=3.7",
+    python_requires=">=3.8",
     install_requires=INSTALL_REQUIRES,
     extras_require=EXTRA_REQUIRES,
     include_package_data=True,
