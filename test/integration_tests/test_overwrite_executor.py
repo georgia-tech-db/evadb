@@ -29,18 +29,32 @@ from eva.server.command_handler import execute_query_fetch_all
 
 @pytest.mark.notparallel
 class OverwriteExecutorTest(unittest.TestCase):
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         # reset the catalog manager before running each test
         CatalogManager().reset()
-        self.video_file_path = create_sample_video()
-        self.image_file_path = Path(
+        video_file_path = create_sample_video()
+        image_file_path = Path(
             f"{EVA_ROOT_DIR}/test/data/uadetrac/small-data/MVI_20011/img00001.jpg"
         )
-        self.udf_path = Path(f"{EVA_ROOT_DIR}/eva/udfs/ndarray/gaussian_blur.py")
-        create_udf_query = f"CREATE UDF IF NOT EXISTS GaussianBlur INPUT (frame NDARRAY UINT8(3, ANYDIM, ANYDIM)) OUTPUT (blurred_frame_array NDARRAY UINT8(3, ANYDIM, ANYDIM)) TYPE ndarray IMPL '{self.udf_path}';"
+        udf_path = Path(f"{EVA_ROOT_DIR}/eva/udfs/ndarray/gaussian_blur.py")
+        create_udf_query = f"CREATE UDF IF NOT EXISTS GaussianBlur INPUT (frame NDARRAY UINT8(3, ANYDIM, ANYDIM)) OUTPUT (blurred_frame_array NDARRAY UINT8(3, ANYDIM, ANYDIM)) TYPE ndarray IMPL '{udf_path}';"
         execute_query_fetch_all(create_udf_query)
 
-    def tearDown(self):
+        query = f"LOAD VIDEO '{video_file_path}' INTO MyVideo;"
+        execute_query_fetch_all(query)
+
+        overwrite_query = "OVERWRITE MyVideo BY GaussianBlur(data);"
+        execute_query_fetch_all(overwrite_query)
+
+        query = f"LOAD IMAGE '{image_file_path}' INTO MyImage;"
+        execute_query_fetch_all(query)
+
+        overwrite_query = "OVERWRITE MyImage BY GaussianBlur(data);"
+        execute_query_fetch_all(overwrite_query)
+
+    @classmethod
+    def tearDownClass(cls):
         shutdown_ray()
         file_remove("dummy.avi")
         file_remove(Path(
@@ -53,24 +67,12 @@ class OverwriteExecutorTest(unittest.TestCase):
 
     # integration test for overwrite
     def test_should_overwrite_video(self):
-        query = f"LOAD VIDEO '{self.video_file_path}' INTO MyVideo;"
-        execute_query_fetch_all(query)
-
-        overwrite_query = "OVERWRITE MyVideo BY GaussianBlur(data);"
-        execute_query_fetch_all(overwrite_query)
-
         select_query = "SELECT * FROM MyVideo;"
         actual_batch = execute_query_fetch_all(select_query)
         modified_dir = actual_batch.column_as_numpy_array(actual_batch.columns[1])[0]
         self.assertTrue("tmp/modified/dummy.avi" in modified_dir)
 
     def test_should_overwrite_image(self):
-        query = f"LOAD IMAGE '{self.image_file_path}' INTO MyImage;"
-        execute_query_fetch_all(query)
-
-        overwrite_query = "OVERWRITE MyImage BY GaussianBlur(data);"
-        execute_query_fetch_all(overwrite_query)
-
         select_query = "SELECT * FROM MyImage;"
         actual_batch = execute_query_fetch_all(select_query)
         modified_dir = actual_batch.column_as_numpy_array(actual_batch.columns[1])[0]
