@@ -427,13 +427,9 @@ if __name__ == "__main__":
     #LOG.info("ASPELL")
     for elem in Path(EVA_DOCS_DIR).rglob('*.*'):
         if elem.suffix == ".rst":
-            subprocess.check_output(f"aspell --lang=en --personal='{ignored_words_file}' check {elem}", 
-            shell=True, 
-            universal_newlines=True)
+            os.system(f"aspell --lang=en --personal='{ignored_words_file}' check {elem}")
 
-    subprocess.check_output(f"aspell --lang=en --personal='{ignored_words_file}' check 'README.md'", 
-            shell=True, 
-            universal_newlines=True)
+    os.system(f"aspell --lang=en --personal='{ignored_words_file}' check 'README.md'")
 
     # CHECK ALL THE NOTEBOOKS
 

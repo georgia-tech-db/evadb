@@ -1,4 +1,4 @@
-personal_ws-1.1 en 384 
+personal_ws-1.1 en 383 
 ANYDIM
 ASC
 AST
@@ -230,7 +230,6 @@ filepath
 filesystem
 fname
 folderstructure
-foofah
 formatter
 fpn
 framebatch
