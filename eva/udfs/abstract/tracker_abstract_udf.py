@@ -20,7 +20,7 @@ import pandas as pd
 from eva.catalog.catalog_type import NdArrayType
 from eva.udfs.abstract.abstract_udf import AbstractUDF
 from eva.udfs.decorators.decorators import forward, setup
-from eva.udfs.decorators.io_descriptors.data_types import NumpyArray
+from eva.udfs.decorators.io_descriptors.data_types import PandasDataframe
 
 
 class EVATrackerAbstractUDF(AbstractUDF):
@@ -37,17 +37,18 @@ class EVATrackerAbstractUDF(AbstractUDF):
 
     @forward(
         input_signatures=[
-            NumpyArray("frame_id", type=NdArrayType.INT32, dimensions=(1,)),
-            NumpyArray("frame", type=NdArrayType.FLOAT32, dimensions=(None, None, 3)),
-            NumpyArray("bboxes", type=NdArrayType.FLOAT32, dimensions=(None, 4)),
-            NumpyArray("scores", type=NdArrayType.FLOAT32, dimensions=(None,)),
-            NumpyArray("labels", type=NdArrayType.INT32, dimensions=(None,)),
+            PandasDataframe(
+                columns=["frame_id", "frame", "bboxes", "scores", "labels"],
+                column_types = [NdArrayType.INT32, NdArrayType.FLOAT32, NdArrayType.FLOAT32, NdArrayType.FLOAT32, NdArrayType.STR],
+                column_shapes = [(1,), (None, None, 3), (None, 4), (None, ), (None, )]
+            )
         ],
         output_signatures=[
-            NumpyArray("track_ids", type=NdArrayType.INT32, dimensions=(None,)),
-            NumpyArray("track_labels", type=NdArrayType.INT32, dimensions=(None,)),
-            NumpyArray("track_bboxes", type=NdArrayType.FLOAT32, dimensions=(None, 4)),
-            NumpyArray("track_scores", type=NdArrayType.FLOAT32, dimensions=(None,)),
+            PandasDataframe(
+                columns=["track_ids", "track_labels", "track_bboxes", "track_scores"],
+                column_types = [NdArrayType.INT32, NdArrayType.INT32, NdArrayType.FLOAT32, NdArrayType.FLOAT32],
+                column_shapes = [(None,), (None,), (None, 4), (None,)]
+            )
         ],
     )
     def forward(
