@@ -23,11 +23,13 @@ storage:
   image_engine: "eva.storage.image_storage_engine.ImageStorageEngine"
 server:
   host: "0.0.0.0"
-  port: 5432
+  port: 7213
   socket_timeout: 60
 
 experimental:
   ray: False
+  ray_predicate: True
+  ray_parallelism: 8
 
 third_party:
   openai_api_key: ""

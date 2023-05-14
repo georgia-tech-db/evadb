@@ -14,12 +14,15 @@
 # limitations under the License.
 import glob
 import os
+import ray
 from pathlib import Path
 from typing import Generator, List
 
 import cv2
 
 from eva.catalog.catalog_manager import CatalogManager
+from eva.configuration.configuration_manager import ConfigurationManager
+from eva.executor.execution_context import Context
 from eva.expression.abstract_expression import AbstractExpression
 from eva.models.storage.batch import Batch
 from eva.parser.table_ref import TableInfo
@@ -37,12 +40,29 @@ def apply_project(batch: Batch, project_list: List[AbstractExpression]):
         batch = Batch.merge_column_wise(batches)
     return batch
 
+@ray.remote
+def apply_predicate_remote(batch: Batch, predicate: AbstractExpression) -> Batch:
+    if not batch.empty() and predicate is not None:
+        outcomes = predicate.evaluate(batch)
+        batch.drop_zero(outcomes)
+    return batch
+
 
 def apply_predicate(batch: Batch, predicate: AbstractExpression) -> Batch:
     if not batch.empty() and predicate is not None:
         outcomes = predicate.evaluate(batch)
         batch.drop_zero(outcomes)
     return batch
+
+
+def apply_predicate_distributed(batches: List[Batch], predicate: AbstractExpression, ray_parallelism: int) -> List[Batch]:
+    output_batches = []
+    ray_tasks = []
+    ray_config = {"num_gpus": len(Context().gpus)/ray_parallelism} if Context().gpus else {"num_cpus": 1/ray_parallelism}
+    for batch in batches:
+        ray_tasks.append(apply_predicate_remote.options(**ray_config).remote(batch, predicate))
+    output_batches = ray.get(ray_tasks)
+    return output_batches
 
 
 def handle_if_not_exists(table_info: TableInfo, if_not_exist=False):

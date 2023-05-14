@@ -13,13 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import asyncio
+import ray
 import string
 from asyncio import StreamReader, StreamWriter
 
 from eva.server.command_handler import handle_request
 from eva.utils.logging_manager import logger
 
-
+ray.init(num_cpus=8, num_gpus=8)
 class EvaServer:
     """
     Receives messages and offloads them to another task for processing them.
