@@ -200,7 +200,7 @@ def format_file(file_path, add_header, strip_header, format_code):
             fd.write(new_file_data)
 
         elif format_code:
-            LOG.info("Formatting File : " + file_path)
+            #LOG.info("Formatting File : " + file_path)
             # ISORT
             isort_command = f"{ISORT_BINARY} --profile  black  {file_path}"
             os.system(isort_command)
@@ -281,7 +281,7 @@ def check_notebook_format(notebook_file):
         chkr.set_text(cell.source)
         for err in chkr:
             if err.word not in ignored_words:
-                LOG.warn(f"WARNING: Notebook {notebook_file} contains the misspelled word: {err.word}")
+                LOG.warning(f"WARNING: Notebook {notebook_file} contains the misspelled word: {err.word}")
 
     return True
 
@@ -415,7 +415,7 @@ if __name__ == "__main__":
             check_notebook_format(notebook_file)
 
     # CODESPELL
-    LOG.info("Codespell")
+    #LOG.info("Codespell")
     os.system("codespell eva/")
     os.system("codespell docs/source/*/*.rst")
     os.system("codespell docs/source/*.rst")
@@ -423,9 +423,9 @@ if __name__ == "__main__":
     os.system("codespell eva/*.md")
 
     # GO OVER ALL DOCS
-    LOG.info("aspell")
+    #LOG.info("ASPELL")
     for elem in Path(EVA_DOCS_DIR).rglob('*.*'):
         if elem.suffix == ".rst":
-            os.system(f"aspell --lang=en --personal=spelling.txt check {elem}")
+            os.system(f"aspell --lang=en --personal='{ignored_words_file}' check {elem}")
 
-    os.system(f"aspell --lang=en --personal=spelling.txt check 'README.md'")
+    os.system(f"aspell --lang=en --personal='{ignored_words_file}' check 'README.md'")
