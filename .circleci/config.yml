@@ -90,7 +90,7 @@ jobs:
           name: Install EVA package from GitHub repo with all dependencies
           command: |
             sudo apt-get update
-            sudo apt-get install -y enchant-2
+            sudo apt-get install -y enchant-2 aspell
             "python<< parameters.v >>" -m venv test_evadb
             pip install --upgrade pip
             source test_evadb/bin/activate

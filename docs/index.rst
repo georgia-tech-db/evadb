@@ -46,7 +46,7 @@ Key Features
 
 1. With EVA, you can **easily combine SQL and deep learning models to build next-generation database applications**. EVA treats deep learning models as  functions similar to traditional SQL functions like SUM().
 
-2. EVA is **extensible by design**. You can write an **user-defined function** (UDF) that wraps arounds your custom deep learning model. In fact, all the built-in models that are included in EVA are written as user-defined functions.
+2. EVA is **extensible by design**. You can write an **user-defined function** (UDF) that wraps around your custom deep learning model. In fact, all the built-in models that are included in EVA are written as user-defined functions.
 
 3. EVA comes with a collection of **built-in sampling, caching, and filtering optimizations** inspired by relational database systems. These optimizations help **speed up queries on large datasets and save money spent on model inference**.
 
@@ -107,7 +107,7 @@ Illustrative EVA Applications
 
 |pic3| |pic4|
 
-|:desert_island:| Movie Analysis Application using Face Detection + Emotion Classfication Models
+|:desert_island:| Movie Analysis Application using Face Detection + Emotion Classification Models
 ~~~~
 
 ..  |pic5| image:: https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/gangubai-input.webp

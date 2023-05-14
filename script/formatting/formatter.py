@@ -25,7 +25,8 @@ import nbformat
 from nbformat.v4 import new_notebook, new_markdown_cell, new_code_cell
 import enchant
 from enchant.checker import SpellChecker
-
+from pathlib import Path
+    
 chkr = SpellChecker("en_US")
 
 import pkg_resources
@@ -55,6 +56,7 @@ EVA_SRC_DIR = os.path.join(EVA_DIR, "eva")
 EVA_TEST_DIR = os.path.join(EVA_DIR, "test")
 EVA_SCRIPT_DIR = os.path.join(EVA_DIR, "script")
 EVA_NOTEBOOKS_DIR = os.path.join(EVA_DIR, "tutorials")
+EVA_DOCS_DIR = os.path.join(EVA_DIR, "docs")
 
 FORMATTING_DIR = os.path.join(EVA_SCRIPT_DIR, "formatting")
 PYLINTRC = os.path.join(FORMATTING_DIR, "pylintrc")
@@ -419,3 +421,11 @@ if __name__ == "__main__":
     os.system("codespell docs/source/*.rst")
     os.system("codespell *.md")
     os.system("codespell eva/*.md")
+
+    # GO OVER ALL DOCS
+    LOG.info("aspell")
+    for elem in Path(EVA_DOCS_DIR).rglob('*.*'):
+        if elem.suffix == ".rst":
+            os.system(f"aspell --lang=en --personal=spelling.txt check {elem}")
+
+    os.system(f"aspell --lang=en --personal=spelling.txt check 'README.md'")

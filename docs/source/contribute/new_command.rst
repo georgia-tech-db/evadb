@@ -31,7 +31,7 @@ We discuss each part separately.
 ---------
 
 The parser firstly generate **syntax tree** from the input string, and
-then tansform syntax tree into **statement**.
+then transform syntax tree into **statement**.
 
 The first part of Parser is build from a LARK grammar file.
 
@@ -68,7 +68,7 @@ parser/lark_visitor
 
 .. code:: python
 
-   from src.parser.parser_visitor._create_statement import CenameTable
+   from src.parser.parser_visitor._create_statement import CreateTable
    class ParserVisitor(CommonClauses, CreateTable, Expressions,
                        Functions, Insert, Select, TableSources,
                        Load, Upload):
@@ -186,9 +186,9 @@ optimizer/rules
 
    -  Import operators
    -  Register new ruletype to **RuleType** and **Promise** (place it
-      **before IMPLEMENTATION_DELIMETER** !!)
+      **before IMPLEMENTATION_DELIMITER** !!)
    -  implement class ``Logical[cmd]ToPhysical``, its member function
-      apply() will construct a corresbonding\ ``[cmd]Plan`` object.
+      apply() will construct a corresponding\ ``[cmd]Plan`` object.
 
    .. code:: python
 
@@ -210,14 +210,14 @@ optimizer/rules
 -  ``rules_base.py``-
 
    -  Register new ruletype to **RuleType** and **Promise** (place it
-      **before IMPLEMENTATION_DELIMETER** !!)
+      **before IMPLEMENTATION_DELIMITER** !!)
 
 -  ``rules_manager.py``-
 
    -  Import rules created in ``rules.py``
    -  Add imported logical to physical rules to ``self._implementation_rules``
 
-.. _4-planexcutor:
+.. _4-PlanExecutor:
 
 4. Plan Executor
 --------------
