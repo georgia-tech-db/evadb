@@ -16,7 +16,6 @@ from typing import List, TypeVar
 
 from lark import Tree, visitors
 
-from build.lib.eva.parser.lark_visitor._overwrite_statement import Overwrite
 from eva.parser.lark_visitor._common_clauses_ids import CommonClauses
 from eva.parser.lark_visitor._create_statements import CreateTable
 from eva.parser.lark_visitor._delete_statement import Delete
@@ -26,6 +25,7 @@ from eva.parser.lark_visitor._expressions import Expressions
 from eva.parser.lark_visitor._functions import Functions
 from eva.parser.lark_visitor._insert_statements import Insert
 from eva.parser.lark_visitor._load_statement import Load
+from eva.parser.lark_visitor._overwrite_statement import Overwrite
 from eva.parser.lark_visitor._rename_statement import RenameTable
 from eva.parser.lark_visitor._select_statement import Select
 from eva.parser.lark_visitor._show_statements import Show
