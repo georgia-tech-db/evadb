@@ -36,6 +36,7 @@ from eva.executor.limit_executor import LimitExecutor
 from eva.executor.load_executor import LoadDataExecutor
 from eva.executor.nested_loop_join_executor import NestedLoopJoinExecutor
 from eva.executor.orderby_executor import OrderByExecutor
+from eva.executor.overwrite_executor import OverwriteExecutor
 from eva.executor.pp_executor import PPExecutor
 from eva.executor.predicate_executor import PredicateExecutor
 from eva.executor.project_executor import ProjectExecutor
@@ -145,6 +146,8 @@ class PlanExecutor:
             executor_node = FaissIndexScanExecutor(node=plan)
         elif plan_opr_type == PlanOprType.DELETE:
             executor_node = DeleteExecutor(node=plan)
+        elif plan_opr_type == PlanOprType.OVERWRITE:
+            executor_node = OverwriteExecutor(node=plan)
 
         # EXPLAIN does not need to build execution tree for its children
         if plan_opr_type != PlanOprType.EXPLAIN:

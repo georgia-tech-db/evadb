@@ -14,7 +14,7 @@
 # limitations under the License.
 import sys
 from pathlib import Path
-from typing import Iterator
+from typing import Iterator, List
 
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.expression.abstract_expression import AbstractExpression
@@ -58,3 +58,15 @@ class DecordStorageEngine(AbstractMediaStorageEngine):
                     batch.frames[table.columns[0].name] = row_id
                     batch.frames[table.columns[1].name] = str(video_file_name)
                     yield batch
+
+    def clear(self, table: TableCatalogEntry, video_paths: List[Path]):
+        try:
+            media_metadata_table = self._get_metadata_table(table)
+            for video_path in video_paths:
+                dst_file_name = self._xform_file_url_to_file_name(Path(video_path))
+                image_file = Path(table.file_url) / dst_file_name
+                self._rdb_handler.clear(media_metadata_table)
+                image_file.unlink()
+        except Exception as e:
+            error = f"Deleting file path {video_paths} failed with exception {e}"
+            raise RuntimeError(error)

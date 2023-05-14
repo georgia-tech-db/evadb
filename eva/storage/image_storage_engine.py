@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from pathlib import Path
-from typing import Iterator
+from typing import Iterator, List
 
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.models.storage.batch import Batch
@@ -36,3 +36,15 @@ class ImageStorageEngine(AbstractMediaStorageEngine):
                     batch.frames[table.columns[0].name] = row_id
                     batch.frames[table.columns[1].name] = str(file_name)
                     yield batch
+
+    def clear(self, table: TableCatalogEntry, image_paths: List[Path]):
+        try:
+            media_metadata_table = self._get_metadata_table(table)
+            for image_path in image_paths:
+                dst_file_name = self._xform_file_url_to_file_name(Path(image_path))
+                image_file = Path(table.file_url) / dst_file_name
+                self._rdb_handler.clear(media_metadata_table)
+                image_file.unlink()
+        except Exception as e:
+            error = f"Deleting file path {image_paths} failed with exception {e}"
+            raise RuntimeError(error)

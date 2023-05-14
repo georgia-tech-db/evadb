@@ -16,6 +16,7 @@ from typing import List, TypeVar
 
 from lark import Tree, visitors
 
+from build.lib.eva.parser.lark_visitor._overwrite_statement import Overwrite
 from eva.parser.lark_visitor._common_clauses_ids import CommonClauses
 from eva.parser.lark_visitor._create_statements import CreateTable
 from eva.parser.lark_visitor._delete_statement import Delete
@@ -69,6 +70,7 @@ class LarkInterpreter(
     Show,
     Explain,
     Delete,
+    Overwrite,
 ):
     def __init__(self, query):
         super().__init__()

@@ -8,7 +8,7 @@ ddl_statement: create_database | create_table | create_index | create_udf | crea
     | drop_database | drop_table | drop_udf | drop_index | rename_table
     
 dml_statement: select_statement | insert_statement | update_statement
-    | delete_statement | load_statement
+    | delete_statement | load_statement | overwrite_statement
     
 utility_statement: describe_statement | show_statement | help_statement | explain_statement
 
@@ -84,6 +84,10 @@ select_statement: query_specification                          ->simple_select
                | select_statement UNION ALL? select_statement  ->union_select
     
 update_statement: UPDATE table_name (AS? uid)? SET updated_element ("," updated_element)* (WHERE expression)? order_by_clause? limit_clause?
+
+overwrite_statement: OVERWRITE table_name BY operation
+
+operation: expression
     
 load_statement: LOAD file_format file_name INTO table_name (("(" uid_list ")"))?
     
@@ -344,6 +348,7 @@ OFFSET:                              "OFFSET"i
 ON:                                  "ON"i
 OR:                                  "OR"i
 ORDER:                               "ORDER"i
+OVERWRITE:                           "OVERWRITE"i
 PATH:                                "PATH"i
 PRIMARY:                             "PRIMARY"i
 REFERENCES:                          "REFERENCES"i
