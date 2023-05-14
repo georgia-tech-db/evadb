@@ -82,8 +82,6 @@ ignored_words_file = Path(os.path.join(EVA_DIR, "spelling.txt")).resolve()
 with open(ignored_words_file) as f:
     ignored_words = [word.strip() for word in f]
 
-print(ignored_words)
-
 # ==============================================
 # HEADER CONFIGURATION
 # ==============================================
