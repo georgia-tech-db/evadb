@@ -39,15 +39,26 @@ class EVATrackerAbstractUDF(AbstractUDF):
         input_signatures=[
             PandasDataframe(
                 columns=["frame_id", "frame", "bboxes", "scores", "labels"],
-                column_types = [NdArrayType.INT32, NdArrayType.FLOAT32, NdArrayType.FLOAT32, NdArrayType.FLOAT32, NdArrayType.STR],
-                column_shapes = [(1,), (None, None, 3), (None, 4), (None, ), (None, )]
+                column_types=[
+                    NdArrayType.INT32,
+                    NdArrayType.FLOAT32,
+                    NdArrayType.FLOAT32,
+                    NdArrayType.FLOAT32,
+                    NdArrayType.STR,
+                ],
+                column_shapes=[(1,), (None, None, 3), (None, 4), (None,), (None,)],
             )
         ],
         output_signatures=[
             PandasDataframe(
                 columns=["track_ids", "track_labels", "track_bboxes", "track_scores"],
-                column_types = [NdArrayType.INT32, NdArrayType.INT32, NdArrayType.FLOAT32, NdArrayType.FLOAT32],
-                column_shapes = [(None,), (None,), (None, 4), (None,)]
+                column_types=[
+                    NdArrayType.INT32,
+                    NdArrayType.INT32,
+                    NdArrayType.FLOAT32,
+                    NdArrayType.FLOAT32,
+                ],
+                column_shapes=[(None,), (None,), (None, 4), (None,)],
             )
         ],
     )
