@@ -20,14 +20,14 @@ from eva.optimizer.operators import OperatorType
 class Pattern:
     def __init__(self, opr_type: OperatorType):
         self._opr_type = opr_type
-        self._chilren = []
+        self._children = []
 
     def append_child(self, child: Pattern):
-        self._chilren.append(child)
+        self._children.append(child)
 
     @property
     def children(self):
-        return self._chilren
+        return self._children
 
     @property
     def opr_type(self):

@@ -239,10 +239,10 @@ class Batch:
         We do a copy for now.
         """
         cols = cols or []
-        verfied_cols = [c for c in cols if c in self._frames]
-        unknown_cols = list(set(cols) - set(verfied_cols))
+        verified_cols = [c for c in cols if c in self._frames]
+        unknown_cols = list(set(cols) - set(verified_cols))
         assert len(unknown_cols) == 0, unknown_cols
-        return Batch(self._frames[verfied_cols])
+        return Batch(self._frames[verified_cols])
 
     @classmethod
     def merge_column_wise(cls, batches: List[Batch], auto_renaming=False) -> Batch:

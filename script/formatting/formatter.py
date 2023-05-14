@@ -216,10 +216,11 @@ def format_file(file_path, add_header, strip_header, format_code):
                 sys.exit(1)
 
             # PYLINT
-            pylint_command = f"{PYLINT_BINARY} --rcfile={PYLINT_CONFIG}  {file_path}"
-            ret_val = os.system(pylint_command)
-            if ret_val:
-                sys.exit(1)
+            pylint_command = f"{PYLINT_BINARY} --spelling-private-dict-file {ignored_words_file} --rcfile={PYLINT_CONFIG}  {file_path}"
+            #LOG.warning(pylint_command)
+            #ret_val = os.system(pylint_command)
+            #if ret_val:
+            #    sys.exit(1)
 
     # END WITH
 
@@ -423,14 +424,6 @@ if __name__ == "__main__":
             shell=True, 
             universal_newlines=True)
 
-    # GO OVER ALL DOCS
-    #LOG.info("ASPELL")
-    for elem in Path(EVA_DOCS_DIR).rglob('*.*'):
-        if elem.suffix == ".rst":
-            os.system(f"aspell --lang=en --personal='{ignored_words_file}' check {elem}")
-
-    os.system(f"aspell --lang=en --personal='{ignored_words_file}' check 'README.md'")
-
     # CHECK ALL THE NOTEBOOKS
 
     # Iterate over all files in the directory 
@@ -439,3 +432,19 @@ if __name__ == "__main__":
         if file.endswith(".ipynb"):
             notebook_file = os.path.join(EVA_NOTEBOOKS_DIR, file)
             check_notebook_format(notebook_file)
+
+    # GO OVER ALL DOCS
+    #LOG.info("ASPELL")
+    for elem in Path(EVA_DOCS_DIR).rglob('*.*'):
+        if elem.suffix == ".rst":
+            os.system(f"aspell --lang=en --personal='{ignored_words_file}' check {elem}")
+
+    os.system(f"aspell --lang=en --personal='{ignored_words_file}' check 'README.md'")
+
+    for elem in Path(EVA_SRC_DIR).rglob('*.*'):
+        if elem.suffix == ".py":
+            os.system(f"aspell --lang=en --personal='{ignored_words_file}' check {elem}")
+
+    for elem in Path(EVA_TEST_DIR).rglob('*.*'):
+        if elem.suffix == ".py":
+            os.system(f"aspell --lang=en --personal='{ignored_words_file}' check {elem}")

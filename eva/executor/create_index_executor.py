@@ -36,7 +36,7 @@ def create_faiss_index(index_type: IndexType, input_dim: int):
     # Other index types: https://github.com/facebookresearch/faiss/wiki/The-index-factory
 
     if index_type == IndexType.HNSW:
-        # HSNW is the actual index. Faiss also provides
+        # HNSW is the actual index. Faiss also provides
         # a secondary mapping (IDMap) to map from ID inside index to
         # our given ID.
         return faiss.IndexIDMap2(faiss.IndexHNSWFlat(input_dim, 32))

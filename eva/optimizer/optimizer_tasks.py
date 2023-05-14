@@ -159,7 +159,7 @@ class BottomUpRewrite(OptimizerTask):
                     new_expr = self.optimizer_context.replace_expression(
                         plan, self.root_expr.group_id
                     )
-                    logger.info("After rewiting {}".format(self.root_expr))
+                    logger.info("After rewriting {}".format(self.root_expr))
                     self.optimizer_context.task_stack.push(
                         BottomUpRewrite(new_expr, self.rule_set, self.optimizer_context)
                     )

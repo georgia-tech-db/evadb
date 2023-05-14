@@ -46,8 +46,8 @@ class AbstractMediaStorageEngine(AbstractStorageEngine):
         # Convert media_path to file name. This is done to support duplicate media_names with
         # different complete paths. Without conversion, we cannot copy files with same name but
         # different paths. Eg., a/b/my.mp4 and a/b/c/my.mp4.
-        # xfromed_file_name = zlib.crc32(str(file_url).encode("utf-8")) & 0xFFFFFFFF
-        # return str(xfromed_file_name)
+        # xformed_file_name = zlib.crc32(str(file_url).encode("utf-8")) & 0xFFFFFFFF
+        # return str(xformed_file_name)
 
         # Previous approach with hashing is commented out above. Since we now use symbolic link, the only
         # thing we need to worry about is the same file name under different directory. This motivates us

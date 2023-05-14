@@ -210,13 +210,13 @@ class OptimizerRulesTest(unittest.TestCase):
 
         mock.side_effect = side_effect_func
 
-        chepeast_pred = "id<10"
+        cheapest_pred = "id<10"
         cheap_pred = "DummyObjectDetector(data).label = ['person']"
         costly_pred = "DummyMultiObjectDetector(data).labels @> ['person']"
 
         query = (
             f"SELECT id FROM MyVideo WHERE {costly_pred} AND {cheap_pred} AND "
-            f"{chepeast_pred};"
+            f"{cheapest_pred};"
         )
 
         plan = get_physical_query_plan(query)

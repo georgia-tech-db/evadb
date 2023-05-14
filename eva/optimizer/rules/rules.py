@@ -240,7 +240,7 @@ class CacheFunctionExpressionInFilter(Rule):
 
     def apply(self, before: LogicalFilter, context: OptimizerContext):
         # there could be 2^n different combinations with enable and disable option
-        # cache for n functionExpressions. Currently considering only the case where
+        # cache for n function Expressions. Currently considering only the case where
         # cache is enabled for all eligible function expressions
         after_predicate = before.predicate.copy()
         enable_cache_on_expression_tree(after_predicate)
@@ -819,7 +819,7 @@ class LogicalGetToSeqScan(Rule):
     def apply(self, before: LogicalGet, context: OptimizerContext):
         # Configure the batch_mem_size. It decides the number of rows
         # read in a batch from storage engine.
-        # ToDO: Experiment heuristics.
+        # Todo: Experiment heuristics.
         after = SeqScanPlan(None, before.target_list, before.alias)
         after.append_child(
             StoragePlan(

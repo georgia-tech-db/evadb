@@ -50,7 +50,7 @@ class SQLStorageEngine(AbstractStorageEngine):
             if col.type == ColumnType.NDARRAY:
                 dict_row[col.name] = self._serializer.serialize(dict_row[col.name])
             elif isinstance(dict_row[col.name], (np.generic,)):
-                # SqlAlchemy does not consume numpy generic data types
+                # Sqlalchemy does not consume numpy generic data types
                 # convert numpy datatype to python generic datatype using tolist()
                 # eg. np.int64 -> int
                 # https://stackoverflow.com/a/53067954
@@ -137,7 +137,7 @@ class SQLStorageEngine(AbstractStorageEngine):
                 col for col in table.columns if col.name != IDENTIFIER_COLUMN
             ]
 
-            # ToDo: validate the data type before inserting into the table
+            # Todo: validate the data type before inserting into the table
             for record in rows.frames.values:
                 row_data = {col: record[idx] for idx, col in enumerate(columns)}
                 data.append(self._dict_to_sql_row(row_data, table_columns))
