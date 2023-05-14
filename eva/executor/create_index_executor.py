@@ -40,6 +40,8 @@ class CreateIndexExecutor(AbstractExecutor):
             logger.error(msg)
             raise ExecutorError(msg)
 
+        self.index_path = self._get_index_save_path()
+        self.index = None
         self._create_index()
 
         yield Batch(
@@ -69,11 +71,10 @@ class CreateIndexExecutor(AbstractExecutor):
 
             # Add features to index.
             # TODO: batch size is hardcoded for now.
-            index = None
             input_dim = -1
             storage_engine = StorageEngine.factory(feat_catalog_entry)
             for input_batch in storage_engine.read(feat_catalog_entry):
-                if udf_func:
+                if self.node.udf_func:
                     # Create index through UDF expression.
                     # UDF(input column) -> 2 dimension feature vector.
                     input_batch.modify_column_alias(feat_catalog_entry.name.lower())
@@ -92,32 +93,33 @@ class CreateIndexExecutor(AbstractExecutor):
                 for i in range(len(input_batch)):
                     # Transform to 2-D.
                     row_feat = feat[i].reshape(1, -1)
-
-                    if index is None:
-                        input_dim = row_feat.shape[-1]
-                        index = create_faiss_index(self.node.index_type, input_dim)
+                    if self.index is None:
+                        input_dim = row_feat.shape[1]
+                        self.index = VectorStoreFactory.init_vector_store(
+                            self.node.index_type,
+                            self.node.name,
+                            index_path=self.index_path,
+                        )
+                        self.index.create(input_dim)
 
                     # Row ID for mapping back to the row.
-                    per_row_id = row_id[i]
-                    index.add_with_ids(row_feat, np.array([per_row_id]))
+                    self.index.add([FeaturePayload(row_id[i], row_feat)])
 
             # Persist index.
-            index.persist(self._get_index_save_path())
+            self.index.persist()
 
             # Save to catalog.
             CatalogManager().insert_index_catalog_entry(
                 self.node.name,
-                self._get_index_save_path(),
+                self.index_path,
                 self.node.index_type,
                 feat_column,
                 self.node.udf_func.signature() if self.node.udf_func else None,
             )
         except Exception as e:
-            # Roll back in reverse order.
-            # Delete on-disk index.
-            index_path = Path(self._get_index_save_path())
-            if index_path.exists():
-                index_path.unlink()
+            # Delete index.
+            if self.index:
+                self.index.delete()
 
             # Throw exception back to user.
             raise ExecutorError(str(e))

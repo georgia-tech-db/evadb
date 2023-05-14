@@ -26,7 +26,7 @@ from eva.binder.binder_utils import (
 )
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.catalog_type import IndexType, NdArrayType, TableType, VideoColumnName
+from eva.catalog.catalog_type import NdArrayType, TableType, VideoColumnName
 from eva.catalog.catalog_utils import get_metadata_properties
 from eva.configuration.constants import EVA_DEFAULT_DIR
 from eva.expression.abstract_expression import AbstractExpression, ExpressionType

@@ -86,7 +86,7 @@ from eva.plan_nodes.create_udf_plan import CreateUDFPlan
 from eva.plan_nodes.delete_plan import DeletePlan
 from eva.plan_nodes.drop_plan import DropPlan
 from eva.plan_nodes.drop_udf_plan import DropUDFPlan
-from eva.plan_nodes.faiss_index_scan_plan import FaissIndexScanPlan
+from eva.plan_nodes.faiss_index_scan_plan import VectorIndexScanPlan
 from eva.plan_nodes.function_scan_plan import FunctionScanPlan
 from eva.plan_nodes.groupby_plan import GroupByPlan
 from eva.plan_nodes.hash_join_probe_plan import HashJoinProbePlan
@@ -1183,7 +1183,7 @@ class LogicalFaissIndexScanToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalFaissIndexScan, context: OptimizerContext):
-        after = FaissIndexScanPlan(
+        after = VectorIndexScanPlan(
             before.index_name, before.limit_count, before.search_query_expr
         )
         for child in before.children:

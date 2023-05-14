@@ -39,6 +39,9 @@ def _lazy_load_faiss():
     return _faiss
 
 
+required_params = ["index_path"]
+
+
 class FaissVectorStore(VectorStore):
     def __init__(self, index_name: str, index_path: str) -> None:
         # Refernce to Faiss documentation.
@@ -80,3 +83,7 @@ class FaissVectorStore(VectorStore):
             distances.append(dis)
             ids.append(idx)
         return VectorIndexQueryResult(distances, ids)
+
+    def delete(self):
+        if self._index_path.exists():
+            self._index_path.unlink()

@@ -14,14 +14,16 @@
 # limitations under the License.
 from typing import Iterator
 
-import faiss
 import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
+from eva.catalog.catalog_type import IndexType
 from eva.catalog.sql_config import IDENTIFIER_COLUMN
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
-from eva.plan_nodes.faiss_index_scan_plan import FaissIndexScanPlan
+from eva.plan_nodes.faiss_index_scan_plan import VectorIndexScanPlan
+from eva.third_party.vector_stores.types import VectorIndexQuery
+from eva.third_party.vector_stores.utils import VectorStoreFactory
 
 
 # Helper function for getting row_id column alias.
@@ -32,8 +34,8 @@ def get_row_id_column_alias(column_list):
             return alias
 
 
-class FaissIndexScanExecutor(AbstractExecutor):
-    def __init__(self, node: FaissIndexScanPlan):
+class VectorIndexScanExecutor(AbstractExecutor):
+    def __init__(self, node: VectorIndexScanPlan):
         super().__init__(node)
         self.index_name = node.index_name
         self.limit_count = node.limit_count
@@ -46,7 +48,11 @@ class FaissIndexScanExecutor(AbstractExecutor):
         index_catalog_entry = catalog_manager.get_index_catalog_entry_by_name(
             self.index_name
         )
-        index = faiss.read_index(index_catalog_entry.save_file_path)
+        self.index = VectorStoreFactory.init_vector_store(
+            IndexType.FAISS,
+            self.index_name,
+            index_path=index_catalog_entry.save_file_path,
+        )
 
         # Get the query feature vector. Create a dummy
         # batch to retreat a single file path.
@@ -62,10 +68,13 @@ class FaissIndexScanExecutor(AbstractExecutor):
         search_batch.drop_column_alias()
         search_feat = search_batch.column_as_numpy_array(feature_col_name)[0]
         search_feat = search_feat.reshape(1, -1)
-        dis_np, row_id_np = index.search(search_feat, self.limit_count.value)
-
+        index_result = self.index.query(
+            VectorIndexQuery(search_feat, self.limit_count.value)
+        )
+        dis_np = index_result.similarities
+        row_id_np = index_result.ids
         distance_list, row_id_list = [], []
-        for dis, row_id in zip(dis_np[0], row_id_np[0]):
+        for dis, row_id in zip(dis_np, row_id_np):
             distance_list.append(dis)
             row_id_list.append(row_id)
 

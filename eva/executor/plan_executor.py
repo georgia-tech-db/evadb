@@ -25,7 +25,6 @@ from eva.executor.drop_executor import DropExecutor
 from eva.executor.drop_udf_executor import DropUDFExecutor
 from eva.executor.executor_utils import ExecutorError
 from eva.executor.explain_executor import ExplainExecutor
-from eva.executor.faiss_index_scan_executor import FaissIndexScanExecutor
 from eva.executor.function_scan_executor import FunctionScanExecutor
 from eva.executor.groupby_executor import GroupByExecutor
 from eva.executor.hash_join_executor import HashJoinExecutor
@@ -45,6 +44,7 @@ from eva.executor.seq_scan_executor import SequentialScanExecutor
 from eva.executor.show_info_executor import ShowInfoExecutor
 from eva.executor.storage_executor import StorageExecutor
 from eva.executor.union_executor import UnionExecutor
+from eva.executor.vector_index_scan_executor import VectorIndexScanExecutor
 from eva.experimental.ray.executor.exchange_executor import ExchangeExecutor
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.abstract_plan import AbstractPlan
@@ -142,7 +142,7 @@ class PlanExecutor:
         elif plan_opr_type == PlanOprType.APPLY_AND_MERGE:
             executor_node = ApplyAndMergeExecutor(node=plan)
         elif plan_opr_type == PlanOprType.FAISS_INDEX_SCAN:
-            executor_node = FaissIndexScanExecutor(node=plan)
+            executor_node = VectorIndexScanExecutor(node=plan)
         elif plan_opr_type == PlanOprType.DELETE:
             executor_node = DeleteExecutor(node=plan)
 

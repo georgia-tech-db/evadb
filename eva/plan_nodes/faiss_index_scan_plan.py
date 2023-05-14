@@ -18,7 +18,7 @@ from eva.plan_nodes.abstract_plan import AbstractPlan
 from eva.plan_nodes.types import PlanOprType
 
 
-class FaissIndexScanPlan(AbstractPlan):
+class VectorIndexScanPlan(AbstractPlan):
     """
     The plan first evaluates the `search_query_expr` expression and searches the output
     in the Faiss index. The plan finally projects `limit_count` number of results.

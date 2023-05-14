@@ -34,7 +34,7 @@ class CreateIndexTest(unittest.TestCase):
     def _index_save_path(self):
         return str(
             Path(ConfigurationManager().get_value("storage", "index_dir"))
-            / Path("{}_{}.index".format("HNSW", "testCreateIndexName"))
+            / Path("{}_{}.index".format("FAISS", "testCreateIndexName"))
         )
 
     @classmethod
@@ -103,7 +103,7 @@ class CreateIndexTest(unittest.TestCase):
     def test_should_create_index(self):
         query = "CREATE INDEX testCreateIndexName ON testCreateIndexFeatTable (feat) USING FAISS;"
         execute_query_fetch_all(query)
-        
+
         # Test index catalog.
         index_catalog_entry = CatalogManager().get_index_catalog_entry_by_name(
             "testCreateIndexName"
@@ -143,7 +143,7 @@ class CreateIndexTest(unittest.TestCase):
         index_catalog_entry = CatalogManager().get_index_catalog_entry_by_name(
             "testCreateIndexName"
         )
-        self.assertEqual(index_catalog_entry.type, IndexType.HNSW)
+        self.assertEqual(index_catalog_entry.type, IndexType.FAISS)
         self.assertEqual(
             index_catalog_entry.save_file_path,
             self._index_save_path(),

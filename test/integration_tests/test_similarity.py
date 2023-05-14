@@ -218,7 +218,7 @@ class SimilarityTests(unittest.TestCase):
         # Execution with index scan.
         create_index_query = """CREATE INDEX testFaissIndexScanRewrite1
                                     ON testSimilarityFeatureTable (feature_col)
-                                    USING HNSW;"""
+                                    USING FAISS;"""
         execute_query_fetch_all(create_index_query)
         select_query = """SELECT feature_col FROM testSimilarityFeatureTable
                             ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), feature_col)
@@ -227,7 +227,7 @@ class SimilarityTests(unittest.TestCase):
         )
         explain_query = """EXPLAIN {}""".format(select_query)
         explain_batch = execute_query_fetch_all(explain_query)
-        self.assertTrue("FaissIndexScan" in explain_batch.frames[0][0])
+        self.assertTrue("VectorIndexScan" in explain_batch.frames[0][0])
         actual_batch = execute_query_fetch_all(select_query)
 
         self.assertEqual(len(actual_batch), 3)
@@ -258,7 +258,7 @@ class SimilarityTests(unittest.TestCase):
         # Execution with index scan.
         create_index_query = """CREATE INDEX testFaissIndexScanRewrite2
                                     ON testSimilarityTable (DummyFeatureExtractor(data_col))
-                                    USING HNSW;"""
+                                    USING FAISS;"""
         execute_query_fetch_all(create_index_query)
         select_query = """SELECT data_col FROM testSimilarityTable
                             ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data_col))
@@ -267,7 +267,7 @@ class SimilarityTests(unittest.TestCase):
         )
         explain_query = """EXPLAIN {}""".format(select_query)
         explain_batch = execute_query_fetch_all(explain_query)
-        self.assertTrue("FaissIndexScan" in explain_batch.frames[0][0])
+        self.assertTrue("VectorIndexScan" in explain_batch.frames[0][0])
         actual_batch = execute_query_fetch_all(select_query)
 
         self.assertEqual(len(actual_batch), 3)
@@ -287,7 +287,7 @@ class SimilarityTests(unittest.TestCase):
         # Execution with index scan.
         create_index_query = """CREATE INDEX testFaissIndexScanRewrite
                                     ON testSimilarityTable (DummyFeatureExtractor(data_col))
-                                    USING HNSW;"""
+                                    USING FAISS;"""
         execute_query_fetch_all(create_index_query)
 
         explain_query = """
@@ -309,7 +309,7 @@ class SimilarityTests(unittest.TestCase):
     def test_end_to_end_index_scan_should_work_correctly_on_image_dataset(self):
         create_index_query = """CREATE INDEX testFaissIndexImageDataset
                                     ON testSimilarityImageDataset (DummyFeatureExtractor(data))
-                                    USING HNSW;"""
+                                    USING FAISS;"""
         execute_query_fetch_all(create_index_query)
         select_query = """SELECT _row_id FROM testSimilarityImageDataset
                             ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data))

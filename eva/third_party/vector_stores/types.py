@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from dataclasses import dataclass
-from typing import Any, List
+from typing import List
 
 
 @dataclass
@@ -22,11 +22,13 @@ class FeaturePayload:
     embedding: List[float]
 
 
+@dataclass
 class VectorIndexQuery:
     embedding: List[float]
     top_k: int
 
 
+@dataclass
 class VectorIndexQueryResult:
     similarities: List[float]
     ids: List[int]
@@ -47,4 +49,8 @@ class VectorStore:
 
     def query(self, query: VectorIndexQuery) -> VectorIndexQueryResult:
         """Query index"""
+        ...
+
+    def delete(self):
+        """delete an index"""
         ...
