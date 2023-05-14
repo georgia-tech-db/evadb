@@ -405,15 +405,6 @@ if __name__ == "__main__":
         for file in files:
             check_file(file)
 
-    # CHECK ALL THE NOTEBOOKS
-
-    # Iterate over all files in the directory 
-    # and check if they are Jupyter notebooks
-    for file in os.listdir(EVA_NOTEBOOKS_DIR):
-        if file.endswith(".ipynb"):
-            notebook_file = os.path.join(EVA_NOTEBOOKS_DIR, file)
-            check_notebook_format(notebook_file)
-
     # CODESPELL
     #LOG.info("Codespell")
     os.system("codespell eva/")
@@ -429,3 +420,12 @@ if __name__ == "__main__":
             os.system(f"aspell --lang=en --personal='{ignored_words_file}' check {elem}")
 
     os.system(f"aspell --lang=en --personal='{ignored_words_file}' check 'README.md'")
+
+    # CHECK ALL THE NOTEBOOKS
+
+    # Iterate over all files in the directory 
+    # and check if they are Jupyter notebooks
+    for file in os.listdir(EVA_NOTEBOOKS_DIR):
+        if file.endswith(".ipynb"):
+            notebook_file = os.path.join(EVA_NOTEBOOKS_DIR, file)
+            check_notebook_format(notebook_file)
