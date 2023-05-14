@@ -47,11 +47,13 @@ class FaissVectorStore(VectorStore):
         self.faiss = _lazy_load_faiss()
         self._index_name = index_name
         self._index_path = index_path
+        self._index = None
 
     def create(self, vector_dim: int):
         self._index = self.faiss.IndexIDMap2(self.faiss.IndexHNSWFlat(vector_dim, 32))
 
     def add(self, payload: List[FeaturePayload]):
+        assert self._index is not None, "Please create an index before adding features."
         for row in payload:
             embedding = np.array(row.embedding, dtype="float32")
             if len(embedding.shape) != 2:
@@ -59,10 +61,15 @@ class FaissVectorStore(VectorStore):
             self._index.add_with_ids(embedding, np.array([row.id]))
 
     def persist(self):
+        assert self._index is not None, "Please create an index before calling persist."
         faiss = _lazy_load_faiss()
         faiss.write_index(self._index, self._index_path)
 
     def query(self, query: VectorIndexQuery) -> VectorIndexQueryResult:
+        faiss = _lazy_load_faiss()
+        if self._index is None:
+            self._index = faiss.read_index(self._index_path)
+        assert self._index is not None, "Cannot query as index does not exists."
         embedding = np.array(query.embedding, dtype="float32")
         if len(embedding.shape) != 2:
             embedding = embedding.reshape(1, -1)

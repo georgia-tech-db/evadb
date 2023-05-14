@@ -33,6 +33,10 @@ class VectorIndexQueryResult:
 
 
 class VectorStore:
+    def create(self, vector_dim: int):
+        """Create an index"""
+        ...
+
     def add(self, payload: List[FeaturePayload]) -> None:
         """Add embeddings to the vector store"""
         ...
@@ -43,7 +47,4 @@ class VectorStore:
 
     def query(self, query: VectorIndexQuery) -> VectorIndexQueryResult:
         """Query index"""
-        ...
-
-    def client(self) -> Any:
         ...
