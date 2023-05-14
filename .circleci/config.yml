@@ -7,6 +7,8 @@ orbs:
 workflows:
   main:
     jobs:
+        - Pip-PyPI
+        - Pip-Local
         #### UNIT TESTS
         - Linux:
             name: "Test | v3.8 | Linux"
@@ -20,10 +22,12 @@ workflows:
             name: "Test | v3.10 | Linux"
             v: "3.10"
             mode: "TEST"
-        - Linux:
-            name: "Test | v3.11 | Linux"
-            v: "3.11"
-            mode: "TEST"
+        # Ray does not work on 3.11
+        # https://github.com/ray-project/ray/issues/33232
+        # - Linux:
+        #     name: "Test | v3.11 | Linux"
+        #     v: "3.11"
+        #     mode: "TEST"
         ### NOTEBOOKS
         - Linux:
             name: "Notebook | v3.8 | Linux"
@@ -37,10 +41,10 @@ workflows:
             name: "Notebook | v3.10 | Linux"
             v: "3.10"
             mode: "NOTEBOOK"
-        - Linux:
-            name: "Notebook | v3.11 | Linux"
-            v: "3.11"
-            mode: "NOTEBOOK"
+        # - Linux:
+        #     name: "Notebook | v3.11 | Linux"
+        #     v: "3.11"
+        #     mode: "NOTEBOOK"
         ### LINTER
         - Linux:
             name: "Linter | Linux"
@@ -51,7 +55,6 @@ workflows:
             name: "Test | Ray | v3.10 | Linux"
             v: "3.10"
             mode: "RAY"
-        - Pip
         - Windows:
             name: "Windows | v3.10"
         # test_create_index_doesn't work on MacOS
@@ -162,7 +165,7 @@ jobs:
               source test_evadb/bin/activate
               bash script/test/test.sh 
 
-  Pip:
+  Pip-PyPI:
     resource_class: large
     docker:
       - image: "cimg/python:3.10"
@@ -173,4 +176,17 @@ jobs:
           command: |
             pip install --upgrade pip
             pip install evadb
+            bash script/test/package.sh
+
+  Pip-Local:
+    resource_class: large
+    docker:
+      - image: "cimg/python:3.10"
+    steps:
+      - checkout
+      - run:
+          name: Install EVA package locally and start server
+          command: |
+            pip install --upgrade pip
+            pip install "."
             bash script/test/package.sh

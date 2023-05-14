@@ -72,30 +72,34 @@ class CreateIndexExecutor(AbstractExecutor):
             index = None
             input_dim = -1
             storage_engine = StorageEngine.factory(feat_catalog_entry)
-            for input_batch in storage_engine.read(feat_catalog_entry, 1):
-                if self.node.udf_func:
+            for input_batch in storage_engine.read(feat_catalog_entry):
+                if udf_func:
                     # Create index through UDF expression.
                     # UDF(input column) -> 2 dimension feature vector.
                     input_batch.modify_column_alias(feat_catalog_entry.name.lower())
                     feat_batch = self.node.udf_func.evaluate(input_batch)
                     feat_batch.drop_column_alias()
                     input_batch.drop_column_alias()
-                    feat = feat_batch.column_as_numpy_array("features")[0]
+                    feat = feat_batch.column_as_numpy_array("features")
                 else:
                     # Create index on the feature table direclty.
                     # Pandas wraps numpy array as an object inside a numpy
                     # array. Use zero index to get the actual numpy array.
-                    feat = input_batch.column_as_numpy_array(feat_col_name)[0]
+                    feat = input_batch.column_as_numpy_array(feat_col_name)
 
-                if index is None:
-                    input_dim = feat.shape[1]
-                    index = VectorStoreFactory.create_vector_store(
-                        self.node.index_type, self.node.name, input_dim
-                    )
+                row_id = input_batch.column_as_numpy_array(IDENTIFIER_COLUMN)
 
-                # Row ID for mapping back to the row.
-                row_id = input_batch.column_as_numpy_array(IDENTIFIER_COLUMN)[0]
-                index.add([FeaturePayload(row_id, feat)])
+                for i in range(len(input_batch)):
+                    # Transform to 2-D.
+                    row_feat = feat[i].reshape(1, -1)
+
+                    if index is None:
+                        input_dim = row_feat.shape[-1]
+                        index = create_faiss_index(self.node.index_type, input_dim)
+
+                    # Row ID for mapping back to the row.
+                    per_row_id = row_id[i]
+                    index.add_with_ids(row_feat, np.array([per_row_id]))
 
             # Persist index.
             index.persist(self._get_index_save_path())
