@@ -9,6 +9,7 @@ python script/formatting/formatter.py
 exit_status=$?
 if [ $exit_status -ne 0 ]; then
     echo " ${Red}Oops! linting failed."
+    echo " exit_status: ${exit_status}"
     echo "Please make sure 'python script/formatting/formatter.py' executes without error before committing."
     echo "In case you want to force push, use the '--no-verify' flag while commiting.${NC}"
     exit 1
