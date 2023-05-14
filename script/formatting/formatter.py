@@ -78,9 +78,9 @@ ISORT_BINARY = "isort"
 PYLINT_BINARY = "pylint"
 
 FLAKE8_CONFIG = Path(os.path.join(EVA_DIR, ".flake8")).resolve()
-PYLINT_CONFIG = Path(os.path.join(EVA_DIR, ".pylintrc")).resolve()
 
-ignored_words_file = Path(os.path.join(EVA_DIR, "spelling.txt")).resolve()
+# IGNORED WORDS -- script/formatting/spelling.txt
+ignored_words_file = Path(os.path.join(FORMATTING_DIR, "spelling.txt")).resolve()
 with open(ignored_words_file) as f:
     ignored_words = [word.strip() for word in f]
 
@@ -216,7 +216,7 @@ def format_file(file_path, add_header, strip_header, format_code):
                 sys.exit(1)
 
             # PYLINT
-            pylint_command = f"{PYLINT_BINARY} --spelling-private-dict-file {ignored_words_file} --rcfile={PYLINT_CONFIG}  {file_path}"
+            pylint_command = f"{PYLINT_BINARY} --spelling-private-dict-file {ignored_words_file} --rcfile={PYLINTRC}  {file_path}"
             #LOG.warning(pylint_command)
             #ret_val = os.system(pylint_command)
             #if ret_val:
