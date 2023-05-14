@@ -1,3 +1,4 @@
+# coding=utf-8
 # Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,11 +16,10 @@ import unittest
 
 import numpy as np
 import pandas as pd
-
-from PIL import Image
-from eva.configuration.constants import EVA_ROOT_DIR
 from numpy import asarray
+from PIL import Image
 
+from eva.configuration.constants import EVA_ROOT_DIR
 from eva.udfs.ndarray.horizontal_flip import HorizontalFlip
 from eva.udfs.ndarray.vertical_flip import VerticalFlip
 
@@ -42,7 +42,9 @@ class FlipTests(unittest.TestCase):
         self.assertEqual(np.sum(arr[:, 0] - np.flip(flipped_arr[0][:, -1], 1)), 0)
 
     def test_should_flip_vertically(self):
-        img = Image.open(f"{EVA_ROOT_DIR}/test/data/uadetrac/small-data/MVI_20011/img00001.jpg")
+        img = Image.open(
+            f"{EVA_ROOT_DIR}/test/data/uadetrac/small-data/MVI_20011/img00001.jpg"
+        )
         arr = asarray(img)
         df = pd.DataFrame([[arr]])
         flipped_arr = self.vertical_flip_instance(df)["vertically_flipped_frame_array"]
