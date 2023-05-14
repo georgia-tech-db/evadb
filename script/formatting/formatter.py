@@ -78,9 +78,11 @@ PYLINT_BINARY = "pylint"
 FLAKE8_CONFIG = Path(os.path.join(EVA_DIR, ".flake8")).resolve()
 PYLINT_CONFIG = Path(os.path.join(EVA_DIR, ".pylintrc")).resolve()
 
-ignored_words_file = Path(os.path.join(EVA_DIR, ".ignored_words.txt")).resolve()
+ignored_words_file = Path(os.path.join(EVA_DIR, "spelling.txt")).resolve()
 with open(ignored_words_file) as f:
     ignored_words = [word.strip() for word in f]
+
+print(ignored_words)
 
 # ==============================================
 # HEADER CONFIGURATION

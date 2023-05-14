@@ -12,7 +12,7 @@ enable=
 # Spelling dictionary name
 spelling-dict=en_US
 # A path to a file that contains private dictionary; one word per line.
-spelling-private-dict-file=.ignored_words.txt
+spelling-private-dict-file=spelling.txt
 
 [REPORTS]
 
