@@ -12,14 +12,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
 import unittest
 from test.util import create_sample_image, load_udfs_for_testing, shutdown_ray
 
+import cv2
 import numpy as np
 import pandas as pd
 import pytest
 
 from eva.catalog.catalog_manager import CatalogManager
+from eva.configuration.configuration_manager import ConfigurationManager
 from eva.models.storage.batch import Batch
 from eva.server.command_handler import execute_query_fetch_all
 from eva.storage.storage_engine import StorageEngine
@@ -91,6 +94,18 @@ class SimilarityTests(unittest.TestCase):
                     )
                 ),
             )
+
+            # Create an actual image dataset.
+            img_save_path = os.path.join(
+                ConfigurationManager().get_value("storage", "tmp_dir"),
+                f"test_similar_img{i}.jpg",
+            )
+            cv2.imwrite(img_save_path, base_img)
+            load_image_query = (
+                f"LOAD IMAGE '{img_save_path}' INTO testSimilarityImageDataset;"
+            )
+            execute_query_fetch_all(load_image_query)
+
             base_img -= 1
 
     def tearDown(self):
@@ -99,6 +114,8 @@ class SimilarityTests(unittest.TestCase):
         drop_table_query = "DROP TABLE testSimilarityTable;"
         execute_query_fetch_all(drop_table_query)
         drop_table_query = "DROP TABLE testSimilarityFeatureTable;"
+        execute_query_fetch_all(drop_table_query)
+        drop_table_query = "DROP TABLE IF EXISTS testSimilarityImageDataset;"
         execute_query_fetch_all(drop_table_query)
 
     def test_similarity_should_work_in_order(self):
@@ -288,3 +305,16 @@ class SimilarityTests(unittest.TestCase):
 
         # Cleanup
         CatalogManager().drop_index_catalog_entry("testFaissIndexScanRewrite")
+
+    def test_end_to_end_index_scan_should_work_correctly_on_image_dataset(self):
+        create_index_query = """CREATE INDEX testFaissIndexImageDataset
+                                    ON testSimilarityImageDataset (DummyFeatureExtractor(data))
+                                    USING HNSW;"""
+        execute_query_fetch_all(create_index_query)
+        select_query = """SELECT _row_id FROM testSimilarityImageDataset
+                            ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data))
+                            LIMIT 1;""".format(
+            self.img_path
+        )
+        res_batch = execute_query_fetch_all(select_query)
+        self.assertEqual(res_batch.frames["testsimilarityimagedataset._row_id"][0], 5)
