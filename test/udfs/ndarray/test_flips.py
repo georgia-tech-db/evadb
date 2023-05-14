@@ -34,10 +34,14 @@ class FlipTests(unittest.TestCase):
         assert hasattr(self.vertical_flip_instance, "name")
 
     def test_should_flip_horizontally(self):
-        img = Image.open(f"{EVA_ROOT_DIR}/test/data/uadetrac/small-data/MVI_20011/img00001.jpg")
+        img = Image.open(
+            f"{EVA_ROOT_DIR}/test/data/uadetrac/small-data/MVI_20011/img00001.jpg"
+        )
         arr = asarray(img)
         df = pd.DataFrame([[arr]])
-        flipped_arr = self.horizontal_flip_instance(df)["horizontally_flipped_frame_array"]
+        flipped_arr = self.horizontal_flip_instance(df)[
+            "horizontally_flipped_frame_array"
+        ]
 
         self.assertEqual(np.sum(arr[:, 0] - np.flip(flipped_arr[0][:, -1], 1)), 0)
 

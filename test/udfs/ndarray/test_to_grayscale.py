@@ -16,11 +16,10 @@ import unittest
 
 import numpy as np
 import pandas as pd
-
-from PIL import Image
-from eva.configuration.constants import EVA_ROOT_DIR
 from numpy import asarray
+from PIL import Image
 
+from eva.configuration.constants import EVA_ROOT_DIR
 from eva.udfs.ndarray.to_grayscale import ToGrayscale
 
 
@@ -32,7 +31,9 @@ class ToGrayscaleTests(unittest.TestCase):
         assert hasattr(self.to_grayscale_instance, "name")
 
     def test_should_flip_horizontally(self):
-        img = Image.open(f"{EVA_ROOT_DIR}/test/data/uadetrac/small-data/MVI_20011/img00001.jpg")
+        img = Image.open(
+            f"{EVA_ROOT_DIR}/test/data/uadetrac/small-data/MVI_20011/img00001.jpg"
+        )
         arr = asarray(img)
         df = pd.DataFrame([[arr]])
         modified_arr = self.to_grayscale_instance(df)["grayscale_frame_array"]
