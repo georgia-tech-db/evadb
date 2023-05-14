@@ -256,7 +256,6 @@ def check_notebook_format(notebook_file):
                 break
 
     if contains_colab_link is False:
-        LOG.error(notebook_file)
         LOG.error("contains colab link")
         sys.exit(1)
 
