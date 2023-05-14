@@ -27,6 +27,7 @@ class EVATrackerAbstractUDF(AbstractUDF):
     """
     An abstract class for all EVA object trackers.
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

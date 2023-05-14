@@ -22,7 +22,6 @@ DISTANCE_THRESHOLD_CENTROID: int = 30
 
 
 class NorFairTracker(EVATrackerAbstractUDF):
-
     @property
     def name(self) -> str:
         return "NorFairTracker"
