@@ -23,6 +23,10 @@ from pathlib import Path
 import asyncio
 import nbformat
 from nbformat.v4 import new_notebook, new_markdown_cell, new_code_cell
+import enchant
+from enchant.checker import SpellChecker
+
+chkr = SpellChecker("en_US")
 
 import pkg_resources
 
@@ -73,6 +77,10 @@ PYLINT_BINARY = "pylint"
 
 FLAKE8_CONFIG = Path(os.path.join(EVA_DIR, ".flake8")).resolve()
 PYLINT_CONFIG = Path(os.path.join(EVA_DIR, ".pylintrc")).resolve()
+
+ignored_words_file = Path(os.path.join(EVA_DIR, ".ignored_words.txt")).resolve()
+with open(ignored_words_file) as f:
+    ignored_words = [word.strip() for word in f]
 
 # ==============================================
 # HEADER CONFIGURATION
@@ -207,7 +215,6 @@ def format_file(file_path, add_header, strip_header, format_code):
 
             # PYLINT
             pylint_command = f"{PYLINT_BINARY} --rcfile={PYLINT_CONFIG}  {file_path}"
-            print(pylint_command)
             ret_val = os.system(pylint_command)
             if ret_val:
                 sys.exit(1)
@@ -264,6 +271,15 @@ def check_notebook_format(notebook_file):
 
     if contains_colab_link is False:
         sys.exit(1)
+
+    # Check spelling
+    for cell in nb.cells:
+        if cell.cell_type == "code":
+            continue  # Skip code cells
+        chkr.set_text(cell.source)
+        for err in chkr:
+            if err.word not in ignored_words:
+                LOG.warn(f"WARNING: Notebook {notebook_file} contains the misspelled word: {err.word}")
 
     return True
 
@@ -395,3 +411,11 @@ if __name__ == "__main__":
         if file.endswith(".ipynb"):
             notebook_file = os.path.join(EVA_NOTEBOOKS_DIR, file)
             check_notebook_format(notebook_file)
+
+    # CODESPELL
+    LOG.info("Codespell")
+    os.system("codespell eva/")
+    os.system("codespell docs/source/*/*.rst")
+    os.system("codespell docs/source/*.rst")
+    os.system("codespell *.md")
+    os.system("codespell eva/*.md")

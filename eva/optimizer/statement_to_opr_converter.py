@@ -60,7 +60,7 @@ from eva.parser.table_ref import TableRef
 from eva.utils.logging_manager import logger
 
 
-class StatementToPlanConvertor:
+class StatementToPlanConverter:
     def __init__(self):
         self._plan = None
 
@@ -222,7 +222,7 @@ class StatementToPlanConvertor:
         """
 
     def visit_create(self, statement: AbstractStatement):
-        """Convertor for parsed insert Statement
+        """Converter for parsed insert Statement
 
         Arguments:
             statement {AbstractStatement} - - [Create statement]
@@ -237,7 +237,7 @@ class StatementToPlanConvertor:
         self._plan = create_opr
 
     def visit_rename(self, statement: RenameTableStatement):
-        """Convertor for parsed rename statement
+        """Converter for parsed rename statement
         Arguments:
             statement(RenameTableStatement): [Rename statement]
         """
@@ -249,7 +249,7 @@ class StatementToPlanConvertor:
         self._plan = drop_opr
 
     def visit_create_udf(self, statement: CreateUDFStatement):
-        """Convertor for parsed create udf statement
+        """Converter for parsed create udf statement
 
         Arguments:
             statement {CreateUDFStatement} - - Create UDF Statement
@@ -270,7 +270,7 @@ class StatementToPlanConvertor:
         self._plan = create_udf_opr
 
     def visit_drop_udf(self, statement: DropUDFStatement):
-        """Convertor for parsed DROP UDF statement
+        """Converter for parsed DROP UDF statement
 
         Arguments:
             statement {DropUDFStatement} - Drop UDF Statement
@@ -278,7 +278,7 @@ class StatementToPlanConvertor:
         self._plan = LogicalDropUDF(statement.name, statement.if_exists)
 
     def visit_load_data(self, statement: LoadDataStatement):
-        """Convertor for parsed load data statement
+        """Converter for parsed load data statement
         Arguments:
             statement(LoadDataStatement): [Load data statement]
         """

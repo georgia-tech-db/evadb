@@ -253,7 +253,7 @@ class StatementBinder:
         else:
             if udf_obj.type == "ultralytics":
                 # manually set the impl_path for yolo udfs we only handle object
-                # detection for now, hopefully this can be generelized
+                # detection for now, hopefully this can be generalized
                 udf_obj.impl_file_path = (
                     Path(f"{EVA_DEFAULT_DIR}/udfs/yolo_object_detector.py")
                     .absolute()

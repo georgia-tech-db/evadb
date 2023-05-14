@@ -181,7 +181,7 @@ class AbstractExpression(ABC):
             yield from child.dfs()
 
     def find_all(self, expresison_type: Any):
-        """Returns a generator which visits all the nodes in expresison tree and yields one that matches the passed `expression_type`.
+        """Returns a generator which visits all the nodes in expression tree and yields one that matches the passed `expression_type`.
 
         Args:
             expresison_type (Any): expression type to match with

@@ -45,7 +45,7 @@ Example of the `setup` function:
 
 .. code-block:: python
 
-    @setup(cachable=True, udf_type="object_detection", batchable=True)
+    @setup(cacheable=True, udf_type="object_detection", batchable=True)
     def setup(self, threshold=0.85):
         self.threshold = threshold
         self.model = torchvision.models.detection.fasterrcnn_resnet50_fpn(

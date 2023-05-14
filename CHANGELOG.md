@@ -256,7 +256,7 @@ Thanks to @gaurav274, @jarulraj, @xzdandy, @LordDarkula, @eloyekunle, and @devsh
 ### [Added]
 
 * PR #295: Improve Error Messages and Query responses 
-* PR #292: Upating read the docs + website
+* PR #292: Updating read the docs + website
 * PR #288: Update README.md
 
 

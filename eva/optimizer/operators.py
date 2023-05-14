@@ -67,7 +67,7 @@ class OperatorType(IntEnum):
 
 
 class Operator:
-    """Base class for logital plan of operators
+    """Base class for logical plan of operators
     Arguments:
         op_type: {OperatorType} -- {the opr type held by this node}
         children: {List} -- {the list of operator children for this node}
@@ -997,7 +997,7 @@ class LogicalJoin(Operator):
 
 
 class LogicalCreateMaterializedView(Operator):
-    """Logical node for create materiaziled view operations
+    """Logical node for create materialized view operations
     Arguments:
         view {TableRef}: [view table that is to be created]
         col_list{List[ColumnDefinition]} -- column names in the view

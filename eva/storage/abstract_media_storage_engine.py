@@ -51,8 +51,8 @@ class AbstractMediaStorageEngine(AbstractStorageEngine):
 
         # Previous approach with hashing is commented out above. Since we now use symbolic link, the only
         # thing we need to worry about is the same file name under different directory. This motivates us
-        # to just breakdown directory also as part of file name. Additionaly, it does not use hashing,
-        # whcih avoids computation overhead.
+        # to just breakdown directory also as part of file name. Additionally, it does not use hashing,
+        # which avoids computation overhead.
         file_path_str = str(file_url)
         file_path = re.sub(r"[^a-zA-Z0-9 \.\n]", "_", file_path_str)
         return file_path

@@ -34,9 +34,9 @@ class QueueReaderExecutor(AbstractExecutor):
     def exec(self, **kwargs) -> Iterator[Batch]:
         assert (
             "input_queues" in kwargs
-        ), "Invalid ray exectuion stage. No input_queue found"
+        ), "Invalid Ray execution stage. No input_queue found"
         input_queues = kwargs["input_queues"]
-        assert len(input_queues) == 1, "Not support mulitple input queues yet"
+        assert len(input_queues) == 1, "Not support multiple input queues yet"
         iq = input_queues[0]
 
         while True:
@@ -69,7 +69,7 @@ class ExchangeExecutor(AbstractExecutor):
             len(self.children) == 1
         ), "Exchange executor does not support children != 1"
 
-        # Find the exchange exector below the tree
+        # Find the exchange executor below the tree
         curr_exec = self
         input_queues = []
         while len(curr_exec.children) > 0 and not isinstance(

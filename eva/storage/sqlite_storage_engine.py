@@ -167,7 +167,7 @@ class SQLStorageEngine(AbstractStorageEngine):
             data_batch = []
             row_size = None
             for row in result:
-                # Todo: Verfiy the order of columns in row matches the table.columns
+                # Todo: Verify the order of columns in row matches the table.columns
                 # For table read, we provide row_id so that user can also retrieve
                 # row_id from the table.
                 data_batch.append(self._sql_row_to_dict(row, table.columns))

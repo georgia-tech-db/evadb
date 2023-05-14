@@ -186,7 +186,7 @@ class Batch:
 
     def sort_orderby(self, by, sort_type=None) -> None:
         """
-        in_place sort for orderby
+        in_place sort for order_by
 
         Args:
             by: list of column names
@@ -249,7 +249,7 @@ class Batch:
         """
         Merge list of batch frames column_wise and return a new batch frame
         Arguments:
-            batches: List[Batch]: lsit of batch objects to be merged
+            batches: List[Batch]: list of batch objects to be merged
             auto_renaming: if true rename column names if required
 
         Returns:

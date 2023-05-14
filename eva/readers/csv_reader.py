@@ -35,11 +35,10 @@ class CSVReader(AbstractReader):
         super().__init__(*args, **kwargs)
 
     def _read(self) -> Iterator[Dict]:
-
         # TODO: What is a good location to put this code?
         def convert_csv_string_to_ndarray(row_string):
             """
-            Conver a string of comma seperated values to a numpy
+            Convert a string of comma separated values to a numpy
             float array
             """
             return np.array([np.float32(val) for val in row_string.split(",")])
@@ -58,16 +57,13 @@ class CSVReader(AbstractReader):
 
         col_map = {col.col_name: col for col in self._column_list}
         for chunk in pd.read_csv(self.file_url, chunksize=512, usecols=col_list_names):
-
             # apply the required conversions
             for col in chunk.columns:
-
                 # TODO: Is there a better way to do this?
                 if (
                     isinstance(chunk[col].iloc[0], str)
                     and col_map[col].col_object.type.name == "NDARRAY"
                 ):
-
                     # convert the string to a numpy array
                     chunk[col] = chunk[col].apply(convert_csv_string_to_ndarray)
 

@@ -86,7 +86,11 @@ benchmark_libs = [
     "pytest-benchmark",
 ]
 
-doc_libs = []
+doc_libs = [
+    "pyenchant",
+    "codespell",
+    "pylint"
+]
 
 dist_libs = ["wheel>=0.37.1", "scriv>=0.16.0"]
 

@@ -31,7 +31,7 @@ from eva.utils.logging_manager import logger
 
 
 def create_faiss_index(index_type: IndexType, input_dim: int):
-    # Refernce to Faiss documentation.
+    # Reference to Faiss documentation.
     # IDMap: https://github.com/facebookresearch/faiss/wiki/Pre--and-post-processing#faiss-id-mapping
     # Other index types: https://github.com/facebookresearch/faiss/wiki/The-index-factory
 
@@ -108,7 +108,7 @@ class CreateIndexExecutor(AbstractExecutor):
                     input_batch.drop_column_alias()
                     feat = feat_batch.column_as_numpy_array("features")[0]
                 else:
-                    # Create index on the feature table direclty.
+                    # Create index on the feature table directly.
                     # Pandas wraps numpy array as an object inside a numpy
                     # array. Use zero index to get the actual numpy array.
                     feat = input_batch.column_as_numpy_array(feat_col_name)[0]

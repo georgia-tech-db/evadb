@@ -273,7 +273,7 @@ class CacheFunctionExpressionInApply(Rule):
         return True
 
     def apply(self, before: LogicalApplyAndMerge, context: OptimizerContext):
-        # todo: this will create a ctaalog entry even in the case of explain command
+        # todo: this will create a catalog entry even in the case of explain command
         # We should run this code conditionally
         new_func_expr = enable_cache(before.func_expr)
         after = LogicalApplyAndMerge(
@@ -467,7 +467,7 @@ class CombineSimilarityOrderByAndLimitToFaissIndexScan(Rule):
             RuleType.COMBINE_SIMILARITY_ORDERBY_AND_LIMIT_TO_FAISS_INDEX_SCAN, pattern
         )
 
-        # Entries populate after rule egibility validation.
+        # Entries populate after rule eligibility validation.
         self._index_catalog_entry = None
         self._query_func_expr = None
 
@@ -594,7 +594,7 @@ class ReorderPredicates(Rule):
         return Promise.REORDER_PREDICATES
 
     def check(self, before: LogicalFilter, context: OptimizerContext):
-        # there exists atleast one Function Expression
+        # there exists at least one Function Expression
         return len(list(before.predicate.find_all(FunctionExpression))) > 0
 
     def apply(self, before: LogicalFilter, context: OptimizerContext):
