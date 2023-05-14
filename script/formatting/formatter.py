@@ -407,19 +407,33 @@ if __name__ == "__main__":
 
     # CODESPELL
     #LOG.info("Codespell")
-    os.system("codespell eva/")
-    os.system("codespell docs/source/*/*.rst")
-    os.system("codespell docs/source/*.rst")
-    os.system("codespell *.md")
-    os.system("codespell eva/*.md")
+    subprocess.check_output("codespell eva/", 
+            shell=True, 
+            universal_newlines=True)
+    subprocess.check_output("codespell docs/source/*/*.rst", 
+            shell=True, 
+            universal_newlines=True)
+    subprocess.check_output("codespell docs/source/*.rst", 
+            shell=True, 
+            universal_newlines=True)
+    subprocess.check_output("codespell *.md", 
+            shell=True, 
+            universal_newlines=True)
+    subprocess.check_output("codespell eva/*.md", 
+            shell=True, 
+            universal_newlines=True)
 
     # GO OVER ALL DOCS
     #LOG.info("ASPELL")
     for elem in Path(EVA_DOCS_DIR).rglob('*.*'):
         if elem.suffix == ".rst":
-            os.system(f"aspell --lang=en --personal='{ignored_words_file}' check {elem}")
+            subprocess.check_output(f"aspell --lang=en --personal='{ignored_words_file}' check {elem}", 
+            shell=True, 
+            universal_newlines=True)
 
-    os.system(f"aspell --lang=en --personal='{ignored_words_file}' check 'README.md'")
+    subprocess.check_output(f"aspell --lang=en --personal='{ignored_words_file}' check 'README.md'", 
+            shell=True, 
+            universal_newlines=True)
 
     # CHECK ALL THE NOTEBOOKS
 
