@@ -23,16 +23,16 @@ from eva.udfs.decorators.decorators import forward, setup
 from eva.udfs.decorators.io_descriptors.data_types import NumpyArray
 
 
-class EVATracker(AbstractUDF):
-    def __init__(self) -> None:
-        pass
-
-    def name(self):
-        return "EVATracker"
+class EVATrackerAbstractUDF(AbstractUDF):
+    """
+    An abstract class for all EVA object trackers.
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
     @setup(cachable=False, udf_type="object_tracker", batchable=False)
-    def setup(self):
-        pass
+    def setup(self, *args, **kwargs):
+        super().setup(*args, **kwargs)
 
     @forward(
         input_signatures=[

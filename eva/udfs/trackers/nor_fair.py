@@ -15,14 +15,19 @@
 import numpy as np
 from norfair import Detection, Tracker
 
-from eva.udfs.trackers.tracker import EVATracker
+from eva.udfs.abstract.tracker_abstract_udf import EVATrackerAbstractUDF
 from eva.utils.math_utils import get_centroid
 
 DISTANCE_THRESHOLD_CENTROID: int = 30
 
 
-class NorFairTracker(EVATracker):
-    def __init__(self, distance_threshold=DISTANCE_THRESHOLD_CENTROID) -> None:
+class NorFairTracker(EVATrackerAbstractUDF):
+
+    @property
+    def name(self) -> str:
+        return "NorFairTracker"
+
+    def setup(self, distance_threshold=DISTANCE_THRESHOLD_CENTROID) -> None:
         # https://github.com/tryolabs/norfair/blob/74b11edde83941dd6e32bcccd5fa849e16bf8564/norfair/tracker.py#L18
         self.tracker = Tracker(
             distance_function="euclidean",

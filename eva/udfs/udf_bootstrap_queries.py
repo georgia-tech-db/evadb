@@ -151,7 +151,7 @@ Asl_udf_query = """CREATE UDF IF NOT EXISTS ASLActionRecognition
 )
 
 norfair_obj_tracker_query = """CREATE UDF IF NOT EXISTS NorFairTracker
-                  IMPL  '{}/udfs/trackers/nor_fair/nor_fair.py';
+                  IMPL  '{}/udfs/trackers/nor_fair.py';
         """.format(
     EVA_INSTALLATION_DIR
 )
