@@ -160,11 +160,9 @@ class ReuseTest(unittest.TestCase):
     def test_reuse_filter_with_project(self):
         project_query = """
             SELECT id, Yolo(data).labels FROM DETRAC WHERE id < 5;"""
-
         select_query = """
             SELECT id FROM DETRAC
             WHERE ArrayCount(Yolo(data).labels, 'car') > 3 AND id < 5;"""
-
         batches, exec_times = self._reuse_experiment([project_query, select_query])
         self._verify_reuse_correctness(select_query, batches[1])
         # reuse should be faster than no reuse

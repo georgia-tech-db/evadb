@@ -44,3 +44,8 @@ duplicate_skip_marker = pytest.mark.skipif(
     sys.platform == "linux",
     reason="Test case is duplicate. Disabling to speed up test suite",
 )
+
+ocr_skip_marker = pytest.mark.skipif(
+    sys.platform == "linux",
+    reason="We do not have built-in support for OCR",
+)

@@ -14,7 +14,7 @@
 # limitations under the License.
 import os
 import unittest
-from test.markers import windows_skip_marker
+from test.markers import ocr_skip_marker, windows_skip_marker
 from test.util import file_remove, load_udfs_for_testing, shutdown_ray
 
 import cv2
@@ -126,6 +126,7 @@ class PytorchTest(unittest.TestCase):
 
     @pytest.mark.torchtest
     @windows_skip_marker
+    @ocr_skip_marker
     def test_should_run_pytorch_and_ocr(self):
         create_udf_query = """CREATE UDF IF NOT EXISTS OCRExtractor
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
@@ -222,6 +223,7 @@ class PytorchTest(unittest.TestCase):
 
     @pytest.mark.torchtest
     @windows_skip_marker
+    @ocr_skip_marker
     def test_should_run_ocr_on_cropped_data(self):
         create_udf_query = """CREATE UDF IF NOT EXISTS OCRExtractor
                   INPUT  (text NDARRAY STR(100))
