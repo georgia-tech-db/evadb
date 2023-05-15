@@ -26,7 +26,7 @@ from eva.udfs.decorators.io_descriptors.data_types import PandasDataframe
 
 
 class SiftFeatureExtractor(AbstractUDF, GPUCompatible):
-    @setup(cachable=False, udf_type="FeatureExtraction", batchable=False)
+    @setup(cacheable=False, udf_type="FeatureExtraction", batchable=False)
     def setup(self):
         self.model = kornia.feature.SIFTDescriptor(100)
 
