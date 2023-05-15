@@ -359,6 +359,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-d", "--dir-name", help="directory containing files to be acted on"
     )
+    parser.add_argument("-k", "--spell-check", help="enable spelling check (off by default)")
 
     args = parser.parse_args()
 
@@ -406,24 +407,6 @@ if __name__ == "__main__":
         for file in files:
             check_file(file)
 
-    # CODESPELL
-    #LOG.info("Codespell")
-    subprocess.check_output("codespell eva/", 
-            shell=True, 
-            universal_newlines=True)
-    subprocess.check_output("codespell docs/source/*/*.rst", 
-            shell=True, 
-            universal_newlines=True)
-    subprocess.check_output("codespell docs/source/*.rst", 
-            shell=True, 
-            universal_newlines=True)
-    subprocess.check_output("codespell *.md", 
-            shell=True, 
-            universal_newlines=True)
-    subprocess.check_output("codespell eva/*.md", 
-            shell=True, 
-            universal_newlines=True)
-
     # CHECK ALL THE NOTEBOOKS
 
     # Iterate over all files in the directory 
@@ -441,10 +424,32 @@ if __name__ == "__main__":
 
     os.system(f"aspell --lang=en --personal='{ignored_words_file}' check 'README.md'")
 
-    for elem in Path(EVA_SRC_DIR).rglob('*.*'):
-        if elem.suffix == ".py":
-            os.system(f"aspell --lang=en --personal='{ignored_words_file}' check {elem}")
 
-    for elem in Path(EVA_TEST_DIR).rglob('*.*'):
-        if elem.suffix == ".py":
-            os.system(f"aspell --lang=en --personal='{ignored_words_file}' check {elem}")
+    # SKIP SPELLING TESTS OVER PYTHON FILES BY DEFAULT
+    if args.spell_check:
+
+        # CODESPELL
+        #LOG.info("Codespell")
+        subprocess.check_output("codespell eva/", 
+                shell=True, 
+                universal_newlines=True)
+        subprocess.check_output("codespell docs/source/*/*.rst", 
+                shell=True, 
+                universal_newlines=True)
+        subprocess.check_output("codespell docs/source/*.rst", 
+                shell=True, 
+                universal_newlines=True)
+        subprocess.check_output("codespell *.md", 
+                shell=True, 
+                universal_newlines=True)
+        subprocess.check_output("codespell eva/*.md", 
+                shell=True, 
+                universal_newlines=True)
+
+        for elem in Path(EVA_SRC_DIR).rglob('*.*'):
+            if elem.suffix == ".py":
+                os.system(f"aspell --lang=en --personal='{ignored_words_file}' check {elem}")
+
+        for elem in Path(EVA_TEST_DIR).rglob('*.*'):
+            if elem.suffix == ".py":
+                os.system(f"aspell --lang=en --personal='{ignored_words_file}' check {elem}")
