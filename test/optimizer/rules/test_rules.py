@@ -83,6 +83,7 @@ from eva.optimizer.rules.rules import (
     ReorderPredicates,
     Rule,
     RuleType,
+    XformExtractObjectToLinearFlow,
     XformLateralJoinToLinearFlow,
 )
 from eva.optimizer.rules.rules_manager import RulesManager, disable_rules
@@ -115,6 +116,7 @@ class RulesTest(unittest.TestCase):
             Promise.PUSHDOWN_FILTER_THROUGH_APPLY_AND_MERGE,
             Promise.COMBINE_SIMILARITY_ORDERBY_AND_LIMIT_TO_FAISS_INDEX_SCAN,
             Promise.REORDER_PREDICATES,
+            Promise.XFORM_EXTRACT_OBJECT_TO_LINEAR_FLOW,
         ]
 
         for promise in rewrite_promises:
@@ -173,6 +175,7 @@ class RulesTest(unittest.TestCase):
             PushDownFilterThroughJoin(),
             CombineSimilarityOrderByAndLimitToFaissIndexScan(),
             ReorderPredicates(),
+            XformExtractObjectToLinearFlow(),
         ]
         rewrite_rules = (
             RulesManager().stage_one_rewrite_rules

@@ -91,6 +91,10 @@ class AbstractExpression(ABC):
     def children(self):
         return self._children
 
+    @children.setter
+    def children(self, children):
+        self._children = children
+
     def append_child(self, child):
         self._children.append(child)
 

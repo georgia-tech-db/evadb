@@ -66,6 +66,11 @@ class ColumnCatalog(BaseModel):
         cascade="all, delete",
     )
 
+    # Column that index is built on.
+    _index_column = relationship(
+        "IndexCatalog", back_populates="_feat_column", cascade="all, delete"
+    )
+
     def __init__(
         self,
         name: str,

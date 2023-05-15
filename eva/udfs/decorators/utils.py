@@ -31,7 +31,22 @@ def load_io_from_udf_decorators(
         Type[UdfIOCatalogEntry]: UdfIOCatalogEntry object created from the input decorator in setup
     """
     tag_key = "input" if is_input else "output"
-    io_signature = udf.forward.tags[tag_key]
+    io_signature = None
+    if hasattr(udf.forward, "tags") and tag_key in udf.forward.tags:
+        io_signature = udf.forward.tags[tag_key]
+    else:
+        # Attempt to populate from the parent class and stop at the first parent class
+        # where the required tags are found.
+        for base_class in udf.__bases__:
+            if hasattr(base_class, "forward") and hasattr(base_class.forward, "tags"):
+                if tag_key in base_class.forward.tags:
+                    io_signature = base_class.forward.tags[tag_key]
+                    break
+
+    assert (
+        io_signature is not None
+    ), f"Cannot infer io signature from the decorator for {udf}."
+
     result_list = []
     for io in io_signature:
         result_list.extend(io.generate_catalog_entries(is_input))
