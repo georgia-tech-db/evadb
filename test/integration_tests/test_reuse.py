@@ -106,11 +106,11 @@ class ReuseTest(unittest.TestCase):
         batches, exec_times = self._reuse_experiment([select_query1, select_query2])
         self._verify_reuse_correctness(select_query2, batches[1])
 
-    def test_reuse_in_with_multiple_occurences(self):
+    def test_reuse_in_with_multiple_occurrences(self):
         select_query1 = """SELECT id, label FROM DETRAC JOIN
             LATERAL HFObjectDetector(data) AS Obj(score, label, bbox) WHERE id < 10;"""
 
-        # multiple occurences of the same function expression
+        # multiple occurrences of the same function expression
         select_query2 = """SELECT id, HFObjectDetector(data).label FROM DETRAC JOIN
             LATERAL HFObjectDetector(data) AS Obj(score, label, bbox) WHERE id < 5;"""
 

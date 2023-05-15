@@ -211,7 +211,7 @@ def disable_rules(rules: List[Rule]):
     """Use this function to temporarily drop rules.
         Useful for testing and debugging purposes.
     Args:
-        rules (List[Rule]): List of rules to temporirly drop
+        rules (List[Rule]): List of rules to temporarily drop
     """
     try:
         rules_manager = RulesManager()

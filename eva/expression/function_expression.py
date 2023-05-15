@@ -35,8 +35,8 @@ class FunctionExpression(AbstractExpression):
     """
     Consider FunctionExpression: ObjDetector -> (labels, boxes)
 
-    `output`: If the user wants only subset of ouputs. Eg,
-    ObjDetector.lables the parser with set output to 'labels'
+    `output`: If the user wants only subset of outputs. Eg,
+    ObjDetector.labels the parser with set output to 'labels'
 
     `output_objs`: It is populated by the binder. In case the
     output is None, the binder sets output_objs to list of all

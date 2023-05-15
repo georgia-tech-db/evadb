@@ -56,7 +56,7 @@ class AbstractStorageEngine(metaclass=ABCMeta):
         predicate: AbstractExpression = None,
     ) -> Iterator[Batch]:
         """Interface responsible for yielding row/rows to the client.
-        This should be implemeneted as an interator over of table. Helpful
+        This should be implemented as an iterator over of table. Helpful
         while doing full table scan. `pos` parameter is used if user wants
         to fetch specific rows.
 

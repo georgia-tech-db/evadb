@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import sys
+from functools import singledispatchmethod
 from pathlib import Path
 
 from eva.binder.binder_utils import (
@@ -45,22 +45,6 @@ from eva.parser.types import UDFType
 from eva.third_party.huggingface.binder import assign_hf_udf
 from eva.utils.generic_utils import get_file_checksum, load_udf_class_from_file
 from eva.utils.logging_manager import logger
-
-if sys.version_info >= (3, 8):
-    from functools import singledispatchmethod
-else:
-    # https://stackoverflow.com/questions/24601722/how-can-i-use-functools-singledispatch-with-instance-methods
-    from functools import singledispatch, update_wrapper
-
-    def singledispatchmethod(func):
-        dispatcher = singledispatch(func)
-
-        def wrapper(*args, **kw):
-            return dispatcher.dispatch(args[1].__class__)(*args, **kw)
-
-        wrapper.register = dispatcher.register
-        update_wrapper(wrapper, func)
-        return wrapper
 
 
 class StatementBinder:
@@ -259,7 +243,7 @@ class StatementBinder:
         else:
             if udf_obj.type == "ultralytics":
                 # manually set the impl_path for yolo udfs we only handle object
-                # detection for now, hopefully this can be generelized
+                # detection for now, hopefully this can be generalized
                 udf_obj.impl_file_path = (
                     Path(f"{EVA_DEFAULT_DIR}/udfs/yolo_object_detector.py")
                     .absolute()

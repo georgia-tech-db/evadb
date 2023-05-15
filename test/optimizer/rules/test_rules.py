@@ -120,7 +120,7 @@ class RulesTest(unittest.TestCase):
         ]
 
         for promise in rewrite_promises:
-            self.assertTrue(promise > Promise.IMPLEMENTATION_DELIMETER)
+            self.assertTrue(promise > Promise.IMPLEMENTATION_DELIMITER)
 
         # Promise of implementation rules should be lesser than rewrite rules
         implementation_promises = [
@@ -155,13 +155,13 @@ class RulesTest(unittest.TestCase):
         ]
 
         for promise in implementation_promises:
-            self.assertTrue(promise < Promise.IMPLEMENTATION_DELIMETER)
+            self.assertTrue(promise < Promise.IMPLEMENTATION_DELIMITER)
 
         promise_count = len(Promise)
         rewrite_count = len(set(rewrite_promises))
         implementation_count = len(set(implementation_promises))
 
-        # rewrite_count + implementation_count + 1 (for IMPLEMENTATION_DELIMETER)
+        # rewrite_count + implementation_count + 1 (for IMPLEMENTATION_DELIMITER)
         self.assertEqual(rewrite_count + implementation_count + 4, promise_count)
 
     def test_supported_rules(self):

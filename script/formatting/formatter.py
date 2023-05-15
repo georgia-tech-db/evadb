@@ -23,6 +23,11 @@ from pathlib import Path
 import asyncio
 import nbformat
 from nbformat.v4 import new_notebook, new_markdown_cell, new_code_cell
+import enchant
+from enchant.checker import SpellChecker
+from pathlib import Path
+    
+chkr = SpellChecker("en_US")
 
 import pkg_resources
 
@@ -51,6 +56,7 @@ EVA_SRC_DIR = os.path.join(EVA_DIR, "eva")
 EVA_TEST_DIR = os.path.join(EVA_DIR, "test")
 EVA_SCRIPT_DIR = os.path.join(EVA_DIR, "script")
 EVA_NOTEBOOKS_DIR = os.path.join(EVA_DIR, "tutorials")
+EVA_DOCS_DIR = os.path.join(EVA_DIR, "docs")
 
 FORMATTING_DIR = os.path.join(EVA_SCRIPT_DIR, "formatting")
 PYLINTRC = os.path.join(FORMATTING_DIR, "pylintrc")
@@ -68,10 +74,16 @@ ISORT_VERSION_REQUIRED = "5.10.1"
 
 BLACK_BINARY = "black"
 FLAKE_BINARY = "flake8"
-PYLINT_BINARY = "pylint"
 ISORT_BINARY = "isort"
+PYLINT_BINARY = "pylint"
 
 FLAKE8_CONFIG = Path(os.path.join(EVA_DIR, ".flake8")).resolve()
+
+# IGNORED WORDS -- script/formatting/spelling.txt
+ignored_words_file = Path(os.path.join(FORMATTING_DIR, "spelling.txt")).resolve()
+with open(ignored_words_file) as f:
+    ignored_words = [word.strip() for word in f]
+
 # ==============================================
 # HEADER CONFIGURATION
 # ==============================================
@@ -202,10 +214,17 @@ def format_file(file_path, add_header, strip_header, format_code):
             ret_val = os.system(autoflake_command)
             if ret_val:
                 sys.exit(1)
+
+            # PYLINT
+            pylint_command = f"{PYLINT_BINARY} --spelling-private-dict-file {ignored_words_file} --rcfile={PYLINTRC}  {file_path}"
+            #LOG.warning(pylint_command)
+            #ret_val = os.system(pylint_command)
+            #if ret_val:
+            #    sys.exit(1)
+
     # END WITH
 
     fd.close()
-
 
 # END FORMAT__FILE(FILE_NAME)
 
@@ -255,6 +274,15 @@ def check_notebook_format(notebook_file):
 
     if contains_colab_link is False:
         sys.exit(1)
+
+    # Check spelling
+    for cell in nb.cells:
+        if cell.cell_type == "code":
+            continue  # Skip code cells
+        chkr.set_text(cell.source)
+        for err in chkr:
+            if err.word not in ignored_words:
+                LOG.warning(f"WARNING: Notebook {notebook_file} contains the misspelled word: {err.word}")
 
     return True
 
@@ -331,6 +359,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-d", "--dir-name", help="directory containing files to be acted on"
     )
+    parser.add_argument("-k", "--spell-check", help="enable spelling check (off by default)")
 
     args = parser.parse_args()
 
@@ -386,3 +415,41 @@ if __name__ == "__main__":
         if file.endswith(".ipynb"):
             notebook_file = os.path.join(EVA_NOTEBOOKS_DIR, file)
             check_notebook_format(notebook_file)
+
+    # GO OVER ALL DOCS
+    #LOG.info("ASPELL")
+    for elem in Path(EVA_DOCS_DIR).rglob('*.*'):
+        if elem.suffix == ".rst":
+            os.system(f"aspell --lang=en --personal='{ignored_words_file}' check {elem}")
+
+    os.system(f"aspell --lang=en --personal='{ignored_words_file}' check 'README.md'")
+
+
+    # SKIP SPELLING TESTS OVER PYTHON FILES BY DEFAULT
+    if args.spell_check:
+
+        # CODESPELL
+        #LOG.info("Codespell")
+        subprocess.check_output("codespell eva/", 
+                shell=True, 
+                universal_newlines=True)
+        subprocess.check_output("codespell docs/source/*/*.rst", 
+                shell=True, 
+                universal_newlines=True)
+        subprocess.check_output("codespell docs/source/*.rst", 
+                shell=True, 
+                universal_newlines=True)
+        subprocess.check_output("codespell *.md", 
+                shell=True, 
+                universal_newlines=True)
+        subprocess.check_output("codespell eva/*.md", 
+                shell=True, 
+                universal_newlines=True)
+
+        for elem in Path(EVA_SRC_DIR).rglob('*.*'):
+            if elem.suffix == ".py":
+                os.system(f"aspell --lang=en --personal='{ignored_words_file}' check {elem}")
+
+        for elem in Path(EVA_TEST_DIR).rglob('*.*'):
+            if elem.suffix == ".py":
+                os.system(f"aspell --lang=en --personal='{ignored_words_file}' check {elem}")

@@ -241,7 +241,7 @@ class CacheFunctionExpressionInFilter(Rule):
 
     def apply(self, before: LogicalFilter, context: OptimizerContext):
         # there could be 2^n different combinations with enable and disable option
-        # cache for n functionExpressions. Currently considering only the case where
+        # cache for n function Expressions. Currently considering only the case where
         # cache is enabled for all eligible function expressions
         after_predicate = before.predicate.copy()
         enable_cache_on_expression_tree(after_predicate)
@@ -274,7 +274,7 @@ class CacheFunctionExpressionInApply(Rule):
         return True
 
     def apply(self, before: LogicalApplyAndMerge, context: OptimizerContext):
-        # todo: this will create a ctaalog entry even in the case of explain command
+        # todo: this will create a catalog entry even in the case of explain command
         # We should run this code conditionally
         new_func_expr = enable_cache(before.func_expr)
         after = LogicalApplyAndMerge(
@@ -512,7 +512,7 @@ class CombineSimilarityOrderByAndLimitToFaissIndexScan(Rule):
             RuleType.COMBINE_SIMILARITY_ORDERBY_AND_LIMIT_TO_FAISS_INDEX_SCAN, pattern
         )
 
-        # Entries populate after rule egibility validation.
+        # Entries populate after rule eligibility validation.
         self._index_catalog_entry = None
         self._query_func_expr = None
 
@@ -639,7 +639,7 @@ class ReorderPredicates(Rule):
         return Promise.REORDER_PREDICATES
 
     def check(self, before: LogicalFilter, context: OptimizerContext):
-        # there exists atleast one Function Expression
+        # there exists at least one Function Expression
         return len(list(before.predicate.find_all(FunctionExpression))) > 0
 
     def apply(self, before: LogicalFilter, context: OptimizerContext):
@@ -864,7 +864,7 @@ class LogicalGetToSeqScan(Rule):
     def apply(self, before: LogicalGet, context: OptimizerContext):
         # Configure the batch_mem_size. It decides the number of rows
         # read in a batch from storage engine.
-        # ToDO: Experiment heuristics.
+        # Todo: Experiment heuristics.
         after = SeqScanPlan(None, before.target_list, before.alias)
         after.append_child(
             StoragePlan(

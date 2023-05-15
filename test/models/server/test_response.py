@@ -20,7 +20,7 @@ from eva.models.storage.batch import Batch
 
 
 class ResponseTest(unittest.TestCase):
-    def test_server_reponse_serialize_deserialize(self):
+    def test_server_response_serialize_deserialize(self):
         batch = Batch(frames=create_dataframe())
         response = Response(status=ResponseStatus.SUCCESS, batch=batch)
         response2 = Response.deserialize(response.serialize())

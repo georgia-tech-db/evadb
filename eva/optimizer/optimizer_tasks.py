@@ -87,7 +87,7 @@ class TopDownRewrite(OptimizerTask):
                 plans = list(after)
                 assert (
                     len(plans) <= 1
-                ), "Rewrite rule cannot generate more than oen alternate plan."
+                ), "Rewrite rule cannot generate more than open alternate plan."
                 for plan in plans:
                     new_expr = self.optimizer_context.replace_expression(
                         plan, self.root_expr.group_id
@@ -154,12 +154,12 @@ class BottomUpRewrite(OptimizerTask):
                 plans = list(after)
                 assert (
                     len(plans) <= 1
-                ), "Rewrite rule cannot generate more than oen alternate plan."
+                ), "Rewrite rule cannot generate more than open alternate plan."
                 for plan in plans:
                     new_expr = self.optimizer_context.replace_expression(
                         plan, self.root_expr.group_id
                     )
-                    logger.info("After rewiting {}".format(self.root_expr))
+                    logger.info("After rewriting {}".format(self.root_expr))
                     self.optimizer_context.task_stack.push(
                         BottomUpRewrite(new_expr, self.rule_set, self.optimizer_context)
                     )
