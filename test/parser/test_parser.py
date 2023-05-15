@@ -50,7 +50,7 @@ class ParserTests(unittest.TestCase):
     def test_create_index_statement(self):
         parser = Parser()
 
-        create_index_query = "CREATE INDEX testindex ON MyVideo (featCol) USING HNSW;"
+        create_index_query = "CREATE INDEX testindex ON MyVideo (featCol) USING FAISS;"
         eva_stmt_list = parser.parse(create_index_query)
 
         # check stmt itself
@@ -64,14 +64,14 @@ class ParserTests(unittest.TestCase):
             [
                 ColumnDefinition("featCol", None, None, None),
             ],
-            IndexType.HNSW,
+            IndexType.FAISS,
         )
         actual_stmt = eva_stmt_list[0]
         self.assertEqual(actual_stmt, expected_stmt)
 
         # create index on UDF expression
         create_index_query = (
-            "CREATE INDEX testindex ON MyVideo (FeatureExtractor(featCol)) USING HNSW;"
+            "CREATE INDEX testindex ON MyVideo (FeatureExtractor(featCol)) USING FAISS;"
         )
         eva_stmt_list = parser.parse(create_index_query)
 
@@ -88,7 +88,7 @@ class ParserTests(unittest.TestCase):
             [
                 ColumnDefinition("featCol", None, None, None),
             ],
-            IndexType.HNSW,
+            IndexType.FAISS,
             func_expr,
         )
         actual_stmt = eva_stmt_list[0]
@@ -99,7 +99,7 @@ class ParserTests(unittest.TestCase):
         parser = Parser()
 
         create_index_query = (
-            "CREATE INDEX testindex USING HNSW ON MyVideo (featCol1, featCol2);"
+            "CREATE INDEX testindex USING FAISS ON MyVideo (featCol1, featCol2);"
         )
 
         with self.assertRaises(Exception):
