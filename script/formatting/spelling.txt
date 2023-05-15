@@ -1,4 +1,4 @@
-personal_ws-1.1 en 1247 
+personal_ws-1.1 en 1267 
 ABCD
 ABCMeta
 ANYDIM
@@ -65,6 +65,7 @@ BottomUp
 BottomUpRewrite
 BoundingBox
 BuildJoinExecutor
+ByteTracker
 CMDClientTest
 CSV
 CSVLoaderTest
@@ -127,6 +128,7 @@ CustomModel
 DATETIME
 DBAPITests
 DDL
+DELIMETER
 DESC
 DETRACVideo
 DFS
@@ -176,6 +178,7 @@ EVAEnum
 EVAEnums
 EVAImportTest
 EVAServerTest
+EVATrackerAbstractUDF
 EXPRESISON
 EmbedFilterIntoDerivedGet
 EmbedFilterIntoGet
@@ -354,6 +357,7 @@ LogicalExplain
 LogicalExplainToPhysical
 LogicalExpression
 LogicalExpressionsTest
+LogicalExtractObject
 LogicalFaissIndexScan
 LogicalFaissIndexScanToPhysical
 LogicalFilter
@@ -423,6 +427,7 @@ NestedLoopJoinExecutor
 NestedLoopJoinPlan
 NestedQuery
 NoResultFound
+NorFairTracker
 NotImplementedError
 NumPy
 NumpyArray
@@ -608,6 +613,7 @@ UDFExecutorTest
 UDFIODefinitionError
 UDFIODescriptorsTests
 UDFStats
+UDFType
 UDFs
 UINT
 UNIFORMSAMPLE
@@ -650,6 +656,7 @@ VideoStorageEngineTest
 VideoWriter
 WMV
 XdistTests
+XformExtractObjectToLinearFlow
 XformLateralJoinToLinearFlow
 YOLO
 YoloDecorators
@@ -729,6 +736,8 @@ cacheable
 cci
 cd
 centric
+centroid
+centroids
 cfg
 cfm
 changelog
@@ -797,6 +806,7 @@ del
 dep
 deque
 deserialize
+det
 detections
 detr
 detrac
@@ -912,6 +922,7 @@ hexdigest
 horovod
 hostname
 href
+hstack
 html
 https
 huggingface
@@ -919,6 +930,8 @@ idx
 ie
 iframe
 iframes
+iid
+iids
 iloc
 im
 imarray
@@ -1019,6 +1032,7 @@ nn
 nohup
 nonprojected
 noqa
+norfair
 np
 nullable
 num
@@ -1164,10 +1178,12 @@ testCreateIndexFeatTable
 testCreateIndexInputTable
 testCreateIndexName
 testDeleteOne
+testFaissIndexImageDataset
 testFaissIndexScanRewrite
 testOpenTable
 testRayErrorHandling
 testSimilarityFeatureTable
+testSimilarityImageDataset
 testSimilarityTable
 testcase
 testcases
@@ -1175,6 +1191,7 @@ testdeleteone
 testindex
 testopentable
 testsimilarityfeaturetable
+testsimilarityimagedataset
 testsimilaritytable
 th
 thefuzz
@@ -1232,14 +1249,17 @@ workspaceRoot
 www
 xC
 xFFFFFFFF
+xc
 xdist
 xform
 xformed
 xlm
 xmax
 xmin
+xyxy
 xzdandy
 yaml
+yc
 ymax
 ymin
 yml

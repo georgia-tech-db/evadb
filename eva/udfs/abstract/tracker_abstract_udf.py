@@ -31,7 +31,7 @@ class EVATrackerAbstractUDF(AbstractUDF):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    @setup(cachable=False, udf_type="object_tracker", batchable=False)
+    @setup(cacheable=False, udf_type="object_tracker", batchable=False)
     def setup(self, *args, **kwargs):
         super().setup(*args, **kwargs)
 
