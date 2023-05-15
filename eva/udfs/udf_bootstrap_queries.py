@@ -151,7 +151,7 @@ Asl_udf_query = """CREATE UDF IF NOT EXISTS ASLActionRecognition
 )
 
 Sift_udf_query = """CREATE UDF IF NOT EXISTS SiftFeatureExtractor
-        TYPE  FeatureExtraction 
+        TYPE  FeatureExtraction
         IMPL  '{}/udfs/sift_feature_extractor.py';
         """.format(
     EVA_INSTALLATION_DIR
