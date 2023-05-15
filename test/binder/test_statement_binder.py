@@ -19,7 +19,7 @@ from eva.binder.binder_utils import BinderError
 from eva.binder.statement_binder import StatementBinder
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.catalog_type import IndexType, NdArrayType
+from eva.catalog.catalog_type import NdArrayType
 from eva.parser.alias import Alias
 
 
