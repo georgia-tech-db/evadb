@@ -23,9 +23,11 @@ from eva.catalog.catalog_type import TableType
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.experimental.ray.optimizer.rules.rules import (
-    LogicalExchangeToPhysical,
-    LogicalGetToSeqScan as ParallelLogicalGetToSeqScan,
     LogicalApplyAndMergeToPhysical as ParalleLogicallApplyAndMergeToPhysical,
+)
+from eva.experimental.ray.optimizer.rules.rules import LogicalExchangeToPhysical
+from eva.experimental.ray.optimizer.rules.rules import (
+    LogicalGetToSeqScan as ParallelLogicalGetToSeqScan,
 )
 from eva.optimizer.operators import (
     LogicalFilter,
@@ -41,6 +43,11 @@ from eva.optimizer.rules.rules import (
     EmbedFilterIntoGet,
     EmbedSampleIntoGet,
     LogicalCreateIndexToVectorIndex,
+)
+from eva.optimizer.rules.rules import (
+    LogicalApplyAndMergeToPhysical as SequentialApplyAndMergeToPhysical,
+)
+from eva.optimizer.rules.rules import (
     LogicalCreateMaterializedViewToPhysical,
     LogicalCreateToPhysical,
     LogicalCreateUDFToPhysical,
@@ -54,7 +61,6 @@ from eva.optimizer.rules.rules import (
 )
 from eva.optimizer.rules.rules import (
     LogicalGetToSeqScan as SequentialLogicalGetToSeqScan,
-    LogicalApplyAndMergeToPhysical as SequentialApplyAndMergeToPhysical,
 )
 from eva.optimizer.rules.rules import (
     LogicalGroupByToPhysical,
@@ -67,8 +73,6 @@ from eva.optimizer.rules.rules import (
     LogicalLoadToPhysical,
     LogicalOrderByToPhysical,
     LogicalProjectToPhysical,
-)
-from eva.optimizer.rules.rules import (
     LogicalRenameToPhysical,
     LogicalShowToPhysical,
     LogicalUnionToPhysical,

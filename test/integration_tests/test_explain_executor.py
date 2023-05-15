@@ -48,7 +48,9 @@ class ExplainExecutorTest(unittest.TestCase):
     def test_explain_simple_select(self):
         select_query = "EXPLAIN SELECT id, data FROM MyVideo"
         batch = execute_query_fetch_all(select_query)
-        expected_output = """|__ ProjectPlan\n    |__ SeqScanPlan\n        |__ StoragePlan\n"""
+        expected_output = (
+            """|__ ProjectPlan\n    |__ SeqScanPlan\n        |__ StoragePlan\n"""
+        )
         self.assertEqual(batch.frames[0][0], expected_output)
 
         with disable_rules([XformLateralJoinToLinearFlow()]) as rules_manager:
@@ -57,9 +59,7 @@ class ExplainExecutorTest(unittest.TestCase):
             batch = execute_query_fetch_all(
                 select_query, plan_generator=custom_plan_generator
             )
-            expected_output = (
-                """|__ ProjectPlan\n    |__ LateralJoinPlan\n        |__ SeqScanPlan\n            |__ StoragePlan\n        |__ FunctionScanPlan\n"""
-            )
+            expected_output = """|__ ProjectPlan\n    |__ LateralJoinPlan\n        |__ SeqScanPlan\n            |__ StoragePlan\n        |__ FunctionScanPlan\n"""
             self.assertEqual(batch.frames[0][0], expected_output)
 
         # Disable more rules
@@ -75,8 +75,6 @@ class ExplainExecutorTest(unittest.TestCase):
             batch = execute_query_fetch_all(
                 select_query, plan_generator=custom_plan_generator
             )
-            expected_output = (
-                """|__ ProjectPlan\n    |__ LateralJoinPlan\n        |__ SeqScanPlan\n            |__ StoragePlan\n        |__ FunctionScanPlan\n"""
-            )
+            expected_output = """|__ ProjectPlan\n    |__ LateralJoinPlan\n        |__ SeqScanPlan\n            |__ StoragePlan\n        |__ FunctionScanPlan\n"""
             print(batch.frames[0][0])
             self.assertEqual(batch.frames[0][0], expected_output)

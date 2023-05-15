@@ -19,9 +19,11 @@ from typing import List
 
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.experimental.ray.optimizer.rules.rules import (
-    LogicalExchangeToPhysical,
-    LogicalGetToSeqScan as ParallelLogicalGetToSeqScan,
     LogicalApplyAndMergeToPhysical as ParallelLogicalApplyAndMergeToPhysical,
+)
+from eva.experimental.ray.optimizer.rules.rules import LogicalExchangeToPhysical
+from eva.experimental.ray.optimizer.rules.rules import (
+    LogicalGetToSeqScan as ParallelLogicalGetToSeqScan,
 )
 from eva.optimizer.rules.rules import (
     CacheFunctionExpressionInApply,
@@ -33,7 +35,6 @@ from eva.optimizer.rules.rules import (
     LogicalCreateIndexToVectorIndex,
 )
 from eva.optimizer.rules.rules import (
-    LogicalGetToSeqScan as SequentialLogicalGetToSeqScan,
     LogicalApplyAndMergeToPhysical as SequentialLogicalApplyAndMergeToPhysical,
 )
 from eva.optimizer.rules.rules import (
@@ -47,7 +48,9 @@ from eva.optimizer.rules.rules import (
     LogicalExplainToPhysical,
     LogicalFilterToPhysical,
     LogicalFunctionScanToPhysical,
-    LogicalProjectToPhysical,
+)
+from eva.optimizer.rules.rules import (
+    LogicalGetToSeqScan as SequentialLogicalGetToSeqScan,
 )
 from eva.optimizer.rules.rules import (
     LogicalGroupByToPhysical,
@@ -59,8 +62,7 @@ from eva.optimizer.rules.rules import (
     LogicalLimitToPhysical,
     LogicalLoadToPhysical,
     LogicalOrderByToPhysical,
-)
-from eva.optimizer.rules.rules import (
+    LogicalProjectToPhysical,
     LogicalRenameToPhysical,
     LogicalShowToPhysical,
     LogicalUnionToPhysical,
