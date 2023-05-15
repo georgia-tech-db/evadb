@@ -4,7 +4,7 @@
 
 function is_server_up () {
     # check if server started
-    netstat -an | grep 0.0.0.0:5432
+    netstat -an | grep 0.0.0.0:8803
     return $?
 }
 
