@@ -18,7 +18,6 @@ from test.util import create_sample_video, file_remove, load_udfs_for_testing
 import pytest
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.configuration.configuration_manager import ConfigurationManager
 from eva.optimizer.plan_generator import PlanGenerator
 from eva.optimizer.rules.rules import (
     EmbedFilterIntoGet,
