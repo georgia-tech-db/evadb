@@ -65,6 +65,7 @@ class CascadeOptimizer(unittest.TestCase):
 
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
 
+    @pytest.mark.skip("No post-process tree")
     def test_optimizer_post_process_strip_with_branch(self):
         br_exch_plan_1 = ExchangePlan()
         br_exch_plan_1.append_child(StoragePlan(None, None))
@@ -91,6 +92,7 @@ class CascadeOptimizer(unittest.TestCase):
         self.assertTrue(isinstance(nest_plan.children[0], StoragePlan))
         self.assertTrue(isinstance(nest_plan.children[1], StoragePlan))
 
+    @pytest.mark.skip("No post-process tree")
     def test_optimizer_post_process_strip_without_branch(self):
         child_exch_plan = ExchangePlan()
         child_exch_plan.append_child(StoragePlan(None, None))

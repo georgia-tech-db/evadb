@@ -19,11 +19,9 @@ from typing import List
 
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.experimental.ray.optimizer.rules.rules import (
-    LogicalApplyAndMergeToPhysical as ParallelLogicalApplyAndMerge,
-)
-from eva.experimental.ray.optimizer.rules.rules import LogicalExchangeToPhysical
-from eva.experimental.ray.optimizer.rules.rules import (
+    LogicalExchangeToPhysical,
     LogicalGetToSeqScan as ParallelLogicalGetToSeqScan,
+    LogicalApplyAndMergeToPhysical as ParallelLogicalApplyAndMergeToPhysical,
 )
 from eva.optimizer.rules.rules import (
     CacheFunctionExpressionInApply,
@@ -35,6 +33,7 @@ from eva.optimizer.rules.rules import (
     LogicalCreateIndexToVectorIndex,
 )
 from eva.optimizer.rules.rules import (
+    LogicalGetToSeqScan as SequentialLogicalGetToSeqScan,
     LogicalApplyAndMergeToPhysical as SequentialLogicalApplyAndMergeToPhysical,
 )
 from eva.optimizer.rules.rules import (
@@ -48,9 +47,7 @@ from eva.optimizer.rules.rules import (
     LogicalExplainToPhysical,
     LogicalFilterToPhysical,
     LogicalFunctionScanToPhysical,
-)
-from eva.optimizer.rules.rules import (
-    LogicalGetToSeqScan as SequentialLogicalGetToSeqScan,
+    LogicalProjectToPhysical,
 )
 from eva.optimizer.rules.rules import (
     LogicalGroupByToPhysical,
@@ -62,9 +59,6 @@ from eva.optimizer.rules.rules import (
     LogicalLimitToPhysical,
     LogicalLoadToPhysical,
     LogicalOrderByToPhysical,
-)
-from eva.optimizer.rules.rules import (
-    LogicalProjectToPhysical as SequentialLogicalProjectToPhysical,
 )
 from eva.optimizer.rules.rules import (
     LogicalRenameToPhysical,
@@ -129,14 +123,14 @@ class RulesManager:
             LogicalFunctionScanToPhysical(),
             LogicalCreateMaterializedViewToPhysical(),
             LogicalFilterToPhysical(),
-            SequentialLogicalProjectToPhysical(),
+            LogicalProjectToPhysical(),
+            ParallelLogicalApplyAndMergeToPhysical()
+            if ray_enabled
+            else SequentialLogicalApplyAndMergeToPhysical(),
             LogicalShowToPhysical(),
             LogicalExplainToPhysical(),
             LogicalCreateIndexToVectorIndex(),
             LogicalVectorIndexScanToPhysical(),
-            ParallelLogicalApplyAndMerge()
-            if ray_enabled
-            else SequentialLogicalApplyAndMergeToPhysical(),
         ]
 
         if ray_enabled:

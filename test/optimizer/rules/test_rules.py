@@ -22,12 +22,10 @@ from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import TableType
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.experimental.ray.optimizer.rules.rules import LogicalExchangeToPhysical
 from eva.experimental.ray.optimizer.rules.rules import (
-    LogicalGetToSeqScan as DistributedLogicalGetToSeqScan,
-)
-from eva.experimental.ray.optimizer.rules.rules import (
-    LogicalProjectToPhysical as DistributedLogicalProjectToPhysical,
+    LogicalExchangeToPhysical,
+    LogicalGetToSeqScan as ParallelLogicalGetToSeqScan,
+    LogicalApplyAndMergeToPhysical as ParalleLogicallApplyAndMergeToPhysical,
 )
 from eva.optimizer.operators import (
     LogicalFilter,
@@ -42,7 +40,6 @@ from eva.optimizer.rules.rules import (
     CombineSimilarityOrderByAndLimitToVectorIndexScan,
     EmbedFilterIntoGet,
     EmbedSampleIntoGet,
-    LogicalApplyAndMergeToPhysical,
     LogicalCreateIndexToVectorIndex,
     LogicalCreateMaterializedViewToPhysical,
     LogicalCreateToPhysical,
@@ -57,6 +54,7 @@ from eva.optimizer.rules.rules import (
 )
 from eva.optimizer.rules.rules import (
     LogicalGetToSeqScan as SequentialLogicalGetToSeqScan,
+    LogicalApplyAndMergeToPhysical as SequentialApplyAndMergeToPhysical,
 )
 from eva.optimizer.rules.rules import (
     LogicalGroupByToPhysical,
@@ -68,9 +66,7 @@ from eva.optimizer.rules.rules import (
     LogicalLimitToPhysical,
     LogicalLoadToPhysical,
     LogicalOrderByToPhysical,
-)
-from eva.optimizer.rules.rules import (
-    LogicalProjectToPhysical as SequentialLogicalProjectToPhysical,
+    LogicalProjectToPhysical,
 )
 from eva.optimizer.rules.rules import (
     LogicalRenameToPhysical,
@@ -220,7 +216,7 @@ class RulesTest(unittest.TestCase):
             LogicalInsertToPhysical(),
             LogicalDeleteToPhysical(),
             LogicalLoadToPhysical(),
-            DistributedLogicalGetToSeqScan()
+            ParallelLogicalGetToSeqScan()
             if ray_enabled
             else SequentialLogicalGetToSeqScan(),
             LogicalDerivedGetToPhysical(),
@@ -234,13 +230,13 @@ class RulesTest(unittest.TestCase):
             LogicalJoinToPhysicalHashJoin(),
             LogicalCreateMaterializedViewToPhysical(),
             LogicalFilterToPhysical(),
-            DistributedLogicalProjectToPhysical()
+            LogicalProjectToPhysical(),
+            ParalleLogicallApplyAndMergeToPhysical()
             if ray_enabled
-            else SequentialLogicalProjectToPhysical(),
+            else SequentialApplyAndMergeToPhysical(),
             LogicalShowToPhysical(),
             LogicalExplainToPhysical(),
             LogicalCreateIndexToVectorIndex(),
-            LogicalApplyAndMergeToPhysical(),
             LogicalVectorIndexScanToPhysical(),
         ]
 
