@@ -39,7 +39,7 @@ VERSION = VERSION_DICT["VERSION"]
 minimal_requirement = [
     "numpy>=1.19.5",
     "pandas>=1.1.5",
-    "opencv-python>=4.6.0.66",
+    "opencv-contrib-python-headless>=4.6.0.66",
     "Pillow>=8.4.0",
     "sqlalchemy>=1.4.0,<2.0.0",  # major changes in 2.0.0
     "sqlalchemy-utils>=0.36.6",
@@ -102,6 +102,7 @@ udf_libs = [
     "transformers>=4.27.4",  # HUGGINGFACE
     "openai>=0.27.4",  # CHATGPT
     "timm>=0.6.13",  # HUGGINGFACE VISION TASKS
+    "norfair>=2.2.0",  # OBJECT TRACKING
 ]
 
 ### NEEDED FOR EXPERIMENTAL FEATURES

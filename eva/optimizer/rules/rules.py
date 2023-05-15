@@ -61,6 +61,7 @@ from eva.optimizer.operators import (
     LogicalDrop,
     LogicalDropUDF,
     LogicalExplain,
+    LogicalExtractObject,
     LogicalFaissIndexScan,
     LogicalFilter,
     LogicalFunctionScan,
@@ -346,7 +347,7 @@ class PushDownFilterThroughJoin(Rule):
 class XformLateralJoinToLinearFlow(Rule):
     """If the inner node of a lateral join is a function-valued expression, we
     eliminate the join node and make the inner node the parent of the outer node. This
-    produces a linear #data flow path. Because this scenario is common in our system,
+    produces a linear data flow path. Because this scenario is common in our system,
     we chose to explicitly convert it to a linear flow, which simplifies the
     implementation of other optimizations such as UDF reuse and parallelized plans by
     removing the join."""
@@ -440,6 +441,50 @@ class PushDownFilterThroughApplyAndMerge(Rule):
             root_node.append_child(apply_and_merge)
 
         yield root_node
+
+
+class XformExtractObjectToLinearFlow(Rule):
+    """If the inner node of a lateral join is a Extract_Object function-valued
+    expression, we eliminate the join node and make the inner node the parent of the
+    outer node. This produces a linear data flow path.
+    TODO: We need to add a sorting operation after detector to ensure we always provide tracker data in order.
+    """
+
+    #                                          LogicalApplyAndMerge(tracker)
+    #     LogicalJoin(Lateral)                         |
+    #     /           \                 ->    LogicalApplyAndMerge(detector)
+    #    A        LogicalExtractObject                 |
+    #                                                  A
+
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALJOIN)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        pattern.append_child(Pattern(OperatorType.LOGICAL_EXTRACT_OBJECT))
+        super().__init__(RuleType.XFORM_EXTRACT_OBJECT_TO_LINEAR_FLOW, pattern)
+
+    def promise(self):
+        return Promise.XFORM_EXTRACT_OBJECT_TO_LINEAR_FLOW
+
+    def check(self, before: LogicalJoin, context: OptimizerContext):
+        if before.join_type == JoinType.LATERAL_JOIN:
+            return True
+        return False
+
+    def apply(self, before: LogicalJoin, context: OptimizerContext):
+        A: Dummy = before.children[0]
+        logical_extract_obj: LogicalExtractObject = before.children[1]
+
+        detector = LogicalApplyAndMerge(
+            logical_extract_obj.detector, alias=logical_extract_obj.detector.alias
+        )
+        tracker = LogicalApplyAndMerge(
+            logical_extract_obj.tracker,
+            alias=logical_extract_obj.alias,
+            do_unnest=logical_extract_obj.do_unnest,
+        )
+        detector.append_child(A)
+        tracker.append_child(detector)
+        yield tracker
 
 
 class CombineSimilarityOrderByAndLimitToFaissIndexScan(Rule):

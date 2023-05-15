@@ -22,6 +22,7 @@ from eva.binder.binder_utils import (
     check_groupby_pattern,
     check_table_object_is_video,
     extend_star,
+    handle_bind_extract_object_function,
     resolve_alias_table_value_expression,
 )
 from eva.binder.statement_binder_context import StatementBinderContext
@@ -40,6 +41,7 @@ from eva.parser.rename_statement import RenameTableStatement
 from eva.parser.select_statement import SelectStatement
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
+from eva.parser.types import UDFType
 from eva.third_party.huggingface.binder import assign_hf_udf
 from eva.utils.generic_utils import get_file_checksum, load_udf_class_from_file
 from eva.utils.logging_manager import logger
@@ -234,6 +236,10 @@ class StatementBinder:
 
     @bind.register(FunctionExpression)
     def _bind_func_expr(self, node: FunctionExpression):
+        # handle the special case of "extract_object"
+        if node.name.upper() == str(UDFType.EXTRACT_OBJECT):
+            handle_bind_extract_object_function(node, self)
+            return
         # bind all the children
         for child in node.children:
             self.bind(child)

@@ -70,6 +70,7 @@ from eva.optimizer.rules.rules import (
     PushDownFilterThroughApplyAndMerge,
     PushDownFilterThroughJoin,
     ReorderPredicates,
+    XformExtractObjectToLinearFlow,
     XformLateralJoinToLinearFlow,
 )
 from eva.optimizer.rules.rules_base import Rule
@@ -86,6 +87,7 @@ class RulesManager:
 
         self._stage_one_rewrite_rules = [
             XformLateralJoinToLinearFlow(),
+            XformExtractObjectToLinearFlow(),
         ]
 
         self._stage_two_rewrite_rules = [
