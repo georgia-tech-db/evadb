@@ -17,6 +17,7 @@ from typing import Iterator
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import apply_predicate, apply_predicate_distributed
+from eva.expression.function_expression import FunctionExpression
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.predicate_plan import PredicatePlan
 from itertools import islice
@@ -42,9 +43,14 @@ class PredicateExecutor(AbstractExecutor):
         super().__init__(node)
         self.predicate = node.predicate
 
+    def has_function_expr_child (self, expr):
+        if (isinstance(expr, FunctionExpression)):
+            return True
+        return any(self.has_function_expr_child(child) for child in expr.children)
+
     def exec(self, *args, **kwargs) -> Iterator[Batch]:
         child_executor = self.children[0]
-        ray_enabled = ConfigurationManager().get_value("experimental", "ray_predicate")
+        ray_enabled = ConfigurationManager().get_value("experimental", "ray_predicate") and self.has_function_expr_child(self.predicate)
         batches = child_executor.exec(**kwargs)
         if (ray_enabled):
             ray_parallelism = ConfigurationManager().get_value("experimental", "ray_parallelism")

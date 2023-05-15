@@ -45,6 +45,7 @@ class EvaServer:
         async with self._server:
             await self._server.serve_forever()
 
+        ray.shutdown()
         logger.info("Successfully shutdown server")
 
     async def stop_eva_server(self):

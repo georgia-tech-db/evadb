@@ -21,7 +21,6 @@ from typing import Generator, List
 import cv2
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.configuration.configuration_manager import ConfigurationManager
 from eva.executor.execution_context import Context
 from eva.expression.abstract_expression import AbstractExpression
 from eva.models.storage.batch import Batch
