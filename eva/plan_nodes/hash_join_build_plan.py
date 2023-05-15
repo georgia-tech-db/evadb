@@ -27,7 +27,7 @@ class HashJoinBuildPlan(AbstractPlan):
     which is used by the probe side to find relevant rows.
     Arguments:
         build_keys (List[ColumnCatalogEntry]) : list of equi-key columns.
-                        If empty, then Cartitian product.
+                        If empty, then Cartesian product.
     """
 
     def __init__(self, join_type: JoinType, build_keys: List[ColumnCatalogEntry]):

@@ -21,12 +21,12 @@ from eva.udfs.decorators.io_descriptors.data_types import NumpyArray, PandasData
 
 class DecoratorTests(unittest.TestCase):
     def test_setup_flags_are_updated(self):
-        @setup(cachable=True, udf_type="classification", batchable=True)
+        @setup(cacheable=True, udf_type="classification", batchable=True)
         def setup_func():
             pass
 
         setup_func()
-        self.assertTrue(setup_func.tags["cachable"])
+        self.assertTrue(setup_func.tags["cacheable"])
         self.assertTrue(setup_func.tags["batchable"])
         self.assertEqual(setup_func.tags["udf_type"], "classification")
 
@@ -36,7 +36,7 @@ class DecoratorTests(unittest.TestCase):
             pass
 
         setup_func()
-        self.assertFalse(setup_func.tags["cachable"])
+        self.assertFalse(setup_func.tags["cacheable"])
         self.assertTrue(setup_func.tags["batchable"])
         self.assertEqual(setup_func.tags["udf_type"], "Abstract")
 

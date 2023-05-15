@@ -40,7 +40,7 @@ VERSION = VERSION_DICT["VERSION"]
 minimal_requirement = [
     "numpy>=1.19.5",
     "pandas>=1.1.5",
-    "opencv-python>=4.6.0.66",
+    "opencv-contrib-python-headless>=4.6.0.66",
     "Pillow>=8.4.0",
     "sqlalchemy>=1.4.0,<2.0.0",  # major changes in 2.0.0
     "sqlalchemy-utils>=0.36.6",
@@ -52,7 +52,7 @@ minimal_requirement = [
     "diskcache>=5.4.0",
     "eva-decord>=0.6.1",
     "boto3",
-    "nest_asyncio"
+    "nest_asyncio",
 ]
 
 formatter_libs = ["black>=23.1.0", "isort>=5.10.1"]
@@ -87,7 +87,11 @@ benchmark_libs = [
     "pytest-benchmark",
 ]
 
-doc_libs = []
+doc_libs = [
+    "pyenchant",
+    "codespell",
+    "pylint"
+]
 
 dist_libs = ["wheel>=0.37.1", "scriv>=0.16.0"]
 
@@ -103,6 +107,7 @@ udf_libs = [
     "transformers>=4.27.4",  # HUGGINGFACE
     "openai>=0.27.4",  # CHATGPT
     "timm>=0.6.13",  # HUGGINGFACE VISION TASKS
+    "norfair>=2.2.0",  # OBJECT TRACKING
 ]
 
 ### NEEDED FOR EXPERIMENTAL FEATURES

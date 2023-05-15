@@ -44,8 +44,8 @@ class Context:
     def _populate_gpu_from_config(self) -> List:
         # Populate GPU IDs from yaml config file.
         gpu_conf = self._config_manager.get_value("executor", "gpu_ids")
-        availble_gpus = [i for i in range(get_gpu_count())]
-        return list(set(availble_gpus) & set(gpu_conf))
+        available_gpus = [i for i in range(get_gpu_count())]
+        return list(set(available_gpus) & set(gpu_conf))
 
     def _populate_gpu_from_env(self) -> List:
         # Populate GPU IDs from env variable.
@@ -55,8 +55,8 @@ class Context:
         )
         gpu_conf = list(filter(lambda x: x, gpu_conf))
         gpu_conf = [int(gpu_id) for gpu_id in gpu_conf]
-        availble_gpus = [i for i in range(get_gpu_count())]
-        return list(set(availble_gpus) & set(gpu_conf))
+        available_gpus = [i for i in range(get_gpu_count())]
+        return list(set(available_gpus) & set(gpu_conf))
 
     def _populate_gpu_ids(self) -> List:
         # Populate available GPU IDs from Torch library. Then, select subset of GPUs

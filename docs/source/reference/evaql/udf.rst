@@ -19,7 +19,7 @@ Here is a list of built-in user-defined functions in EVA.
 
 FastRCNNObjectDetector is a model for detecting objects. MVITActionRecognition is a model for recognizing actions. 
 
-ArrayCount and Crop are utility functions for counting the number of objects in an array and cropping a bounding box from an image, resepectively.
+ArrayCount and Crop are utility functions for counting the number of objects in an array and cropping a bounding box from an image, respectively.
 
 SELECT WITH MULTIPLE UDFS
 ----

@@ -40,7 +40,7 @@ class Yolo(AbstractUDF, GPUCompatible):
     def name(self) -> str:
         return "yolo"
 
-    @setup(cachable=True, udf_type="object_detection", batchable=True)
+    @setup(cacheable=True, udf_type="object_detection", batchable=True)
     def setup(self, model: str, threshold=0.3):
         self.threshold = threshold
         self.model = YOLO(model)

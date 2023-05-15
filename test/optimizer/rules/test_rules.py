@@ -83,6 +83,7 @@ from eva.optimizer.rules.rules import (
     ReorderPredicates,
     Rule,
     RuleType,
+    XformExtractObjectToLinearFlow,
     XformLateralJoinToLinearFlow,
 )
 from eva.optimizer.rules.rules_manager import RulesManager, disable_rules
@@ -115,10 +116,11 @@ class RulesTest(unittest.TestCase):
             Promise.PUSHDOWN_FILTER_THROUGH_APPLY_AND_MERGE,
             Promise.COMBINE_SIMILARITY_ORDERBY_AND_LIMIT_TO_FAISS_INDEX_SCAN,
             Promise.REORDER_PREDICATES,
+            Promise.XFORM_EXTRACT_OBJECT_TO_LINEAR_FLOW,
         ]
 
         for promise in rewrite_promises:
-            self.assertTrue(promise > Promise.IMPLEMENTATION_DELIMETER)
+            self.assertTrue(promise > Promise.IMPLEMENTATION_DELIMITER)
 
         # Promise of implementation rules should be lesser than rewrite rules
         implementation_promises = [
@@ -153,13 +155,13 @@ class RulesTest(unittest.TestCase):
         ]
 
         for promise in implementation_promises:
-            self.assertTrue(promise < Promise.IMPLEMENTATION_DELIMETER)
+            self.assertTrue(promise < Promise.IMPLEMENTATION_DELIMITER)
 
         promise_count = len(Promise)
         rewrite_count = len(set(rewrite_promises))
         implementation_count = len(set(implementation_promises))
 
-        # rewrite_count + implementation_count + 1 (for IMPLEMENTATION_DELIMETER)
+        # rewrite_count + implementation_count + 1 (for IMPLEMENTATION_DELIMITER)
         self.assertEqual(rewrite_count + implementation_count + 4, promise_count)
 
     def test_supported_rules(self):
@@ -173,6 +175,7 @@ class RulesTest(unittest.TestCase):
             PushDownFilterThroughJoin(),
             CombineSimilarityOrderByAndLimitToFaissIndexScan(),
             ReorderPredicates(),
+            XformExtractObjectToLinearFlow(),
         ]
         rewrite_rules = (
             RulesManager().stage_one_rewrite_rules

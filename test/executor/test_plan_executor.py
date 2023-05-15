@@ -43,7 +43,7 @@ from eva.plan_nodes.storage_plan import StoragePlan
 class PlanExecutorTest(unittest.TestCase):
     def test_tree_structure_for_build_execution_tree(self):
         """
-            Build an Abastract Plan with nodes:
+            Build an Abstract Plan with nodes:
          ß               root
                       /  |  \
                     c1   c2 c3
@@ -242,10 +242,10 @@ class PlanExecutorTest(unittest.TestCase):
         mock_clean.assert_called_once()
         self.assertEqual(actual, [])
 
-    @unittest.skip("disk_based_storage_depricated")
+    @unittest.skip("disk_based_storage_deprecated")
     @patch("eva.executor.disk_based_storage_executor.Loader")
     def test_should_return_the_new_path_after_execution(self, mock_class):
-        class_instatnce = mock_class.return_value
+        class_instance = mock_class.return_value
 
         dummy_expr = type(
             "dummy_expr", (), {"evaluate": lambda x=None: [True, False, True]}
@@ -255,7 +255,7 @@ class PlanExecutorTest(unittest.TestCase):
         video = TableCatalogEntry("dataset", "dummy.avi", table_type=TableType.VIDEO)
         batch_1 = Batch(pd.DataFrame({"data": [1, 2, 3]}))
         batch_2 = Batch(pd.DataFrame({"data": [4, 5, 6]}))
-        class_instatnce.load.return_value = map(lambda x: x, [batch_1, batch_2])
+        class_instance.load.return_value = map(lambda x: x, [batch_1, batch_2])
 
         storage_plan = StoragePlan(video, batch_mem_size=3000)
         seq_scan = SeqScanPlan(predicate=dummy_expr, column_ids=[])

@@ -83,7 +83,7 @@ class CreateIndexExecutor(AbstractExecutor):
                     input_batch.drop_column_alias()
                     feat = feat_batch.column_as_numpy_array("features")
                 else:
-                    # Create index on the feature table direclty.
+                    # Create index on the feature table directly.
                     # Pandas wraps numpy array as an object inside a numpy
                     # array. Use zero index to get the actual numpy array.
                     feat = input_batch.column_as_numpy_array(feat_col_name)
