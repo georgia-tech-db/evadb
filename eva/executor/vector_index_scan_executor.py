@@ -17,7 +17,7 @@ from typing import Iterator
 import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.catalog_type import IndexType
+from eva.catalog.catalog_type import VectorStoreType
 from eva.catalog.sql_config import IDENTIFIER_COLUMN
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
@@ -49,7 +49,7 @@ class VectorIndexScanExecutor(AbstractExecutor):
             self.index_name
         )
         self.index = VectorStoreFactory.init_vector_store(
-            IndexType.FAISS,
+            VectorStoreType.FAISS,
             self.index_name,
             index_path=index_catalog_entry.save_file_path,
         )

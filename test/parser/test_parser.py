@@ -15,7 +15,7 @@
 import unittest
 from pathlib import Path
 
-from eva.catalog.catalog_type import ColumnType, IndexType, NdArrayType
+from eva.catalog.catalog_type import ColumnType, NdArrayType, VectorStoreType
 from eva.expression.abstract_expression import ExpressionType
 from eva.expression.comparison_expression import ComparisonExpression
 from eva.expression.constant_value_expression import ConstantValueExpression
@@ -64,7 +64,7 @@ class ParserTests(unittest.TestCase):
             [
                 ColumnDefinition("featCol", None, None, None),
             ],
-            IndexType.FAISS,
+            VectorStoreType.FAISS,
         )
         actual_stmt = eva_stmt_list[0]
         self.assertEqual(actual_stmt, expected_stmt)
@@ -88,7 +88,7 @@ class ParserTests(unittest.TestCase):
             [
                 ColumnDefinition("featCol", None, None, None),
             ],
-            IndexType.FAISS,
+            VectorStoreType.FAISS,
             func_expr,
         )
         actual_stmt = eva_stmt_list[0]

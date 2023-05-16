@@ -45,7 +45,7 @@ udf_metadata_key: string_literal
 
 udf_metadata_value: string_literal | decimal_literal
 
-index_type: USING FAISS
+index_type: USING (FAISS | QDRANT)
 
 index_elem: ("(" uid_list ")"
           | "(" function_call ")")
@@ -383,6 +383,7 @@ IMAGE:                "IMAGE"i
 // Index types
 HNSW:                                "HNSW"i
 FAISS:                               "FAISS"i
+QDRANT:                              "QDRANT"i
 
 // Computer vision tasks
 

@@ -43,7 +43,7 @@ class VectorStore:
         """Add embeddings to the vector store"""
         ...
 
-    def persist(self, path: str) -> None:
+    def persist(self) -> None:
         """Persist index to disk"""
         return None
 

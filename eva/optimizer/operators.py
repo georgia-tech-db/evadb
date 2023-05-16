@@ -17,7 +17,7 @@ from enum import IntEnum, auto
 from pathlib import Path
 from typing import Any, List
 
-from eva.catalog.catalog_type import IndexType
+from eva.catalog.catalog_type import VectorStoreType
 from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
@@ -1146,7 +1146,7 @@ class LogicalCreateIndex(Operator):
         name: str,
         table_ref: TableRef,
         col_list: List[ColumnDefinition],
-        index_type: IndexType,
+        index_type: VectorStoreType,
         udf_func: FunctionExpression = None,
         children: List = None,
     ):

@@ -51,7 +51,7 @@ Fields:
 ```
 name: str  
 save_file_path: str  
-type: IndexType  
+type: VectorStoreType  
 row_id: int 
 feat_column_id: int
 udf_signature: str 

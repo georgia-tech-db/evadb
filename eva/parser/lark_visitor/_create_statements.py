@@ -15,7 +15,7 @@
 
 from lark import Tree
 
-from eva.catalog.catalog_type import ColumnType, IndexType, NdArrayType
+from eva.catalog.catalog_type import ColumnType, NdArrayType, VectorStoreType
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.create_index_statement import CreateIndexStatement
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
@@ -260,7 +260,9 @@ class CreateTable:
         token = tree.children[1]
 
         if str.upper(token) == "FAISS":
-            index_type = IndexType.FAISS
+            index_type = VectorStoreType.FAISS
+        elif str.upper(token) == "QDRANT":
+            index_type = VectorStoreType.QDRANT
         return index_type
 
     # INDEX CREATION

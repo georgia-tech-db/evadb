@@ -14,7 +14,7 @@
 # limitations under the License.
 from typing import List
 
-from eva.catalog.catalog_type import IndexType
+from eva.catalog.catalog_type import VectorStoreType
 from eva.expression.function_expression import FunctionExpression
 from eva.parser.create_statement import ColumnDefinition
 from eva.parser.table_ref import TableRef
@@ -28,7 +28,7 @@ class CreateIndexPlan(AbstractPlan):
         name: str,
         table_ref: TableRef,
         col_list: List[ColumnDefinition],
-        index_type: IndexType,
+        index_type: VectorStoreType,
         udf_func: FunctionExpression = None,
     ):
         super().__init__(PlanOprType.CREATE_INDEX)

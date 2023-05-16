@@ -17,6 +17,7 @@ from pathlib import Path
 import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
+from eva.catalog.catalog_type import VectorStoreType
 from eva.catalog.sql_config import IDENTIFIER_COLUMN
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.executor.abstract_executor import AbstractExecutor
@@ -69,6 +70,7 @@ class CreateIndexExecutor(AbstractExecutor):
                 col for col in feat_catalog_entry.columns if col.name == feat_col_name
             ][0]
 
+            params = self._handle_addtional_params()
             # Add features to index.
             # TODO: batch size is hardcoded for now.
             input_dim = -1
@@ -91,14 +93,11 @@ class CreateIndexExecutor(AbstractExecutor):
                 row_id = input_batch.column_as_numpy_array(IDENTIFIER_COLUMN)
 
                 for i in range(len(input_batch)):
-                    # Transform to 2-D.
                     row_feat = feat[i].reshape(1, -1)
                     if self.index is None:
                         input_dim = row_feat.shape[1]
                         self.index = VectorStoreFactory.init_vector_store(
-                            self.node.index_type,
-                            self.node.name,
-                            index_path=self.index_path,
+                            self.node.index_type, self.node.name, **params
                         )
                         self.index.create(input_dim)
 
@@ -123,3 +122,9 @@ class CreateIndexExecutor(AbstractExecutor):
 
             # Throw exception back to user.
             raise ExecutorError(str(e))
+
+    def _handle_addtional_params(self):
+        if self.node.index_type == VectorStoreType.FAISS:
+            return {"index_path": self.index_path}
+        elif self.node.index_type == VectorStoreType.QDRANT:
+            return {"index_db": str(Path(self.index_path).stem)}

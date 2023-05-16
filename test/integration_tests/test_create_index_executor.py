@@ -22,7 +22,7 @@ import pandas as pd
 import pytest
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.catalog_type import IndexType
+from eva.catalog.catalog_type import VectorStoreType
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.models.storage.batch import Batch
 from eva.server.command_handler import execute_query_fetch_all
@@ -100,7 +100,7 @@ class CreateIndexTest(unittest.TestCase):
         query = "DROP TABLE testCreateIndexInputTable;"
         execute_query_fetch_all(query)
 
-    def test_should_create_index(self):
+    def test_should_create_index_faiss(self):
         query = "CREATE INDEX testCreateIndexName ON testCreateIndexFeatTable (feat) USING FAISS;"
         execute_query_fetch_all(query)
 
@@ -108,7 +108,7 @@ class CreateIndexTest(unittest.TestCase):
         index_catalog_entry = CatalogManager().get_index_catalog_entry_by_name(
             "testCreateIndexName"
         )
-        self.assertEqual(index_catalog_entry.type, IndexType.FAISS)
+        self.assertEqual(index_catalog_entry.type, VectorStoreType.FAISS)
         self.assertEqual(
             index_catalog_entry.save_file_path,
             self._index_save_path(),
@@ -143,7 +143,7 @@ class CreateIndexTest(unittest.TestCase):
         index_catalog_entry = CatalogManager().get_index_catalog_entry_by_name(
             "testCreateIndexName"
         )
-        self.assertEqual(index_catalog_entry.type, IndexType.FAISS)
+        self.assertEqual(index_catalog_entry.type, VectorStoreType.FAISS)
         self.assertEqual(
             index_catalog_entry.save_file_path,
             self._index_save_path(),

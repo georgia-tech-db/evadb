@@ -92,7 +92,7 @@ class NdArrayType(EVAEnum):
         return np_type
 
 
-class IndexType(EVAEnum):
+class VectorStoreType(EVAEnum):
     FAISS  # noqa: F821
     QDRANT  # noqa: F821
 
