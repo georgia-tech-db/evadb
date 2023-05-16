@@ -1,9 +1,9 @@
 .. meta::
    :description:
-       EVA DB
+       EVA AI-Relational Database System
    :keywords: database, deep learning, video analytics
 
-EVA DATABASE SYSTEM
+EVA DB
 =====
 
 ..  rubric:: AI-Relational Database System
