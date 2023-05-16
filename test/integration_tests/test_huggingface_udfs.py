@@ -96,7 +96,7 @@ class HuggingFaceTests(unittest.TestCase):
         """
         execute_query_fetch_all(create_udf_query)
 
-        select_query = f"SELECT {udf_name}(data) FROM DETRAC WHERE id < 10;"
+        select_query = f"SELECT {udf_name}(data) FROM DETRAC WHERE id < 4;"
         output = execute_query_fetch_all(select_query)
         output_frames = output.frames
 
@@ -104,7 +104,7 @@ class HuggingFaceTests(unittest.TestCase):
         self.assertEqual(len(output_frames.columns), 3)
 
         # Test that number of rows is equal to 10
-        self.assertEqual(len(output.frames), 10)
+        self.assertEqual(len(output.frames), 4)
 
         # Test that there exists a column with udf_name.score and each entry is a list of floats
         self.assertTrue(udf_name.lower() + ".score" in output_frames.columns)

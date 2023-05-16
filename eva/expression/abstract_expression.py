@@ -91,6 +91,10 @@ class AbstractExpression(ABC):
     def children(self):
         return self._children
 
+    @children.setter
+    def children(self, children):
+        self._children = children
+
     def append_child(self, child):
         self._children.append(child)
 
@@ -180,16 +184,16 @@ class AbstractExpression(ABC):
         for child in self.children:
             yield from child.dfs()
 
-    def find_all(self, expresison_type: Any):
-        """Returns a generator which visits all the nodes in expresison tree and yields one that matches the passed `expression_type`.
+    def find_all(self, expression_type: Any):
+        """Returns a generator which visits all the nodes in expression tree and yields one that matches the passed `expression_type`.
 
         Args:
-            expresison_type (Any): expression type to match with
+            expression_type (Any): expression type to match with
 
         Returns:
             the generator object.
         """
 
         for node in self.bfs():
-            if isinstance(node, expresison_type):
+            if isinstance(node, expression_type):
                 yield node

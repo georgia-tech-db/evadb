@@ -45,7 +45,7 @@ Example of the `setup` function:
 
 .. code-block:: python
 
-    @setup(cachable=True, udf_type="object_detection", batchable=True)
+    @setup(cacheable=True, udf_type="object_detection", batchable=True)
     def setup(self, threshold=0.85):
         self.threshold = threshold
         self.model = torchvision.models.detection.fasterrcnn_resnet50_fpn(
@@ -53,7 +53,7 @@ Example of the `setup` function:
         )
         self.model.eval()
 
-In this instance, we have configured the `cachable` and `batchable` attributes to `True`. As a result, EVA will cache the UDF outputs and utilize batch processing for increased efficiency.
+In this instance, we have configured the `cacheable` and `batchable` attributes to `True`. As a result, EVA will cache the UDF outputs and utilize batch processing for increased efficiency.
 
 Forward
 --------
@@ -130,7 +130,7 @@ Here, is an example query that registers a UDF that wraps around the ``fasterrcn
 
 .. code-block:: sql
 
-  CREATE UDF FastrcnnObjectDetector
+  CREATE UDF FastRCNNObjectDetector
   IMPL  'eva/udfs/fastrcnn_object_detector.py';
     
 
@@ -140,11 +140,11 @@ Call registered UDF in a query
 
 .. code-block:: sql
 
-  SELECT FastrcnnObjectDetector(data) FROM MyVideo WHERE id < 5;
+  SELECT FastRCNNObjectDetector(data) FROM MyVideo WHERE id < 5;
 
 Drop the UDF
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: sql
 
-  DROP UDF IF EXISTS FastrcnnObjectDetector;
+  DROP UDF IF EXISTS FastRCNNObjectDetector;

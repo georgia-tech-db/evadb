@@ -21,7 +21,7 @@ from eva.executor.plan_executor import PlanExecutor
 from eva.models.server.response import Response, ResponseStatus
 from eva.models.storage.batch import Batch
 from eva.optimizer.plan_generator import PlanGenerator
-from eva.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
+from eva.optimizer.statement_to_opr_converter import StatementToPlanConverter
 from eva.parser.parser import Parser
 from eva.utils.logging_manager import logger
 from eva.utils.stats import Timer
@@ -36,7 +36,7 @@ def execute_query(query, report_time: bool = False, **kwargs) -> Iterator[Batch]
     with query_compile_time:
         stmt = Parser().parse(query)[0]
         StatementBinder(StatementBinderContext()).bind(stmt)
-        l_plan = StatementToPlanConvertor().visit(stmt)
+        l_plan = StatementToPlanConverter().visit(stmt)
         p_plan = asyncio.run(plan_generator.build(l_plan))
         output = PlanExecutor(p_plan).execute_plan()
 
@@ -54,8 +54,7 @@ def execute_query_fetch_all(query, **kwargs) -> Optional[Batch]:
         return Batch.concat(batch_list, copy=False)
 
 
-@asyncio.coroutine
-def handle_request(client_writer, request_message):
+async def handle_request(client_writer, request_message):
     """
     Reads a request from a client and processes it
 

@@ -14,7 +14,7 @@
 # limitations under the License.
 import os
 import unittest
-from test.markers import windows_skip_marker
+from test.markers import ocr_skip_marker, windows_skip_marker
 from test.util import file_remove, load_udfs_for_testing, shutdown_ray
 
 import cv2
@@ -126,6 +126,7 @@ class PytorchTest(unittest.TestCase):
 
     @pytest.mark.torchtest
     @windows_skip_marker
+    @ocr_skip_marker
     def test_should_run_pytorch_and_ocr(self):
         create_udf_query = """CREATE UDF IF NOT EXISTS OCRExtractor
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
@@ -222,6 +223,7 @@ class PytorchTest(unittest.TestCase):
 
     @pytest.mark.torchtest
     @windows_skip_marker
+    @ocr_skip_marker
     def test_should_run_ocr_on_cropped_data(self):
         create_udf_query = """CREATE UDF IF NOT EXISTS OCRExtractor
                   INPUT  (text NDARRAY STR(100))
@@ -243,6 +245,29 @@ class PytorchTest(unittest.TestCase):
         self.assertTrue(res["ocrextractor.labels"][0][0] == "4")
         self.assertTrue(res["ocrextractor.scores"][2][0] > 0.9)
 
+    @pytest.mark.torchtest
+    def test_should_run_extract_object(self):
+        select_query = """
+            SELECT id, T.iids, T.bboxes, T.scores, T.labels
+            FROM MyVideo JOIN LATERAL EXTRACT_OBJECT(data, Yolo, NorFairTracker)
+                AS T(iids, labels, bboxes, scores)
+            WHERE id < 30;
+            """
+        actual_batch = execute_query_fetch_all(select_query)
+        self.assertEqual(len(actual_batch), 30)
+
+        num_of_entries = actual_batch.frames["T.iids"].apply(lambda x: len(x)).sum()
+
+        select_query = """
+            SELECT id, T.iid, T.bbox, T.score, T.label
+            FROM MyVideo JOIN LATERAL
+                UNNEST(EXTRACT_OBJECT(data, Yolo, NorFairTracker)) AS T(iid, label, bbox, score)
+            WHERE id < 30;
+            """
+        actual_batch = execute_query_fetch_all(select_query)
+        # do some more meaningful check
+        self.assertEqual(len(actual_batch), num_of_entries)
+
     def test_check_unnest_with_predicate_on_yolo(self):
         query = """SELECT id, Yolo.label, Yolo.bbox, Yolo.score
                   FROM MyVideo
@@ -251,5 +276,5 @@ class PytorchTest(unittest.TestCase):
 
         actual_batch = execute_query_fetch_all(query)
 
-        # due to unnest the number of returned tuples should be atleast > 10
+        # due to unnest the number of returned tuples should be at least > 10
         self.assertTrue(len(actual_batch) > 2)

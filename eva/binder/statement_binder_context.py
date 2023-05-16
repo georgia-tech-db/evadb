@@ -87,7 +87,7 @@ class StatementBinderContext:
         Add a alias -> derived table column mapping
         Arguments:
             alias (str): name of alias
-            target_list: list of Tuplevalue Expression or FunctionExpression or UdfIOCatalogEntry
+            target_list: list of TupleValueExpression or FunctionExpression or UdfIOCatalogEntry
         """
         self._check_duplicate_alias(alias)
         col_alias_map = {}
@@ -108,7 +108,7 @@ class StatementBinderContext:
         """
         Find the binded column object
         Arguments:
-            col_name (str): columna name
+            col_name (str): column name
             alias (str): alias name
 
         Returns:
@@ -123,7 +123,7 @@ class StatementBinderContext:
         if not alias:
             alias, col_obj = self._search_all_alias_maps(col_name)
         else:
-            # serach in all alias maps
+            # search in all alias maps
             col_obj = self._check_table_alias_map(alias, col_name)
             if not col_obj:
                 col_obj = self._check_derived_table_alias_map(alias, col_name)
@@ -137,7 +137,7 @@ class StatementBinderContext:
         """
         Find the column object in table alias map
         Arguments:
-            col_name (str): columna name
+            col_name (str): column name
             alias (str): alias name
 
         Returns:
