@@ -312,12 +312,12 @@ class CatalogManager(object):
         self,
         name: str,
         save_file_path: str,
-        index_type: VectorStoreType,
+        vector_store_type: VectorStoreType,
         feat_column: ColumnCatalogEntry,
         udf_signature: str,
     ) -> IndexCatalogEntry:
         index_catalog_entry = self._index_service.insert_entry(
-            name, save_file_path, index_type, feat_column, udf_signature
+            name, save_file_path, vector_store_type, feat_column, udf_signature
         )
         return index_catalog_entry
 

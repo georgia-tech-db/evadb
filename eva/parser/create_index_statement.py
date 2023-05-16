@@ -28,14 +28,14 @@ class CreateIndexStatement(AbstractStatement):
         name: str,
         table_ref: TableRef,
         col_list: List[ColumnDefinition],
-        index_type: VectorStoreType,
+        vector_store_type: VectorStoreType,
         udf_func: FunctionExpression = None,
     ):
         super().__init__(StatementType.CREATE_INDEX)
         self._name = name
         self._table_ref = table_ref
         self._col_list = col_list
-        self._index_type = index_type
+        self._vector_store_type = vector_store_type
         self._udf_func = udf_func
 
     def __str__(self) -> str:
@@ -60,8 +60,8 @@ class CreateIndexStatement(AbstractStatement):
         return self._col_list
 
     @property
-    def index_type(self):
-        return self._index_type
+    def vector_store_type(self):
+        return self._vector_store_type
 
     @property
     def udf_func(self):
@@ -74,7 +74,7 @@ class CreateIndexStatement(AbstractStatement):
             self._name == other.name
             and self._table_ref == other.table_ref
             and self.col_list == other.col_list
-            and self._index_type == other.index_type
+            and self._vector_store_type == other.vector_store_type
             and self._udf_func == other.udf_func
         )
 
@@ -85,7 +85,7 @@ class CreateIndexStatement(AbstractStatement):
                 self._name,
                 self._table_ref,
                 tuple(self.col_list),
-                self._index_type,
+                self._vector_store_type,
                 self._udf_func,
             )
         )

@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from eva.catalog.catalog_type import VectorStoreType
 from eva.expression.constant_value_expression import ConstantValueExpression
 from eva.expression.function_expression import FunctionExpression
 from eva.plan_nodes.abstract_plan import AbstractPlan
@@ -21,29 +22,35 @@ from eva.plan_nodes.types import PlanOprType
 class VectorIndexScanPlan(AbstractPlan):
     """
     The plan first evaluates the `search_query_expr` expression and searches the output
-    in the Faiss index. The plan finally projects `limit_count` number of results.
+    in the vector index. The plan finally projects `limit_count` number of results.
 
     Arguments:
-        index_name (str): The Faiss index name.
+        index_name (str): The vector index name.
         limit_count (ConstantValueExpression): Number of top results to project.
         search_query_expr (FunctionExpression): function expression to evaluate, whose
-        results will be searched in the Faiss index.
+        results will be searched in the vector index.
     """
 
     def __init__(
         self,
         index_name: str,
+        vector_store_type: VectorStoreType,
         limit_count: ConstantValueExpression,
         search_query_expr: FunctionExpression,
     ):
-        super().__init__(PlanOprType.FAISS_INDEX_SCAN)
+        super().__init__(PlanOprType.VECTOR_INDEX_SCAN)
         self._index_name = index_name
+        self._vector_store_type = vector_store_type
         self._limit_count = limit_count
         self._search_query_expr = search_query_expr
 
     @property
     def index_name(self):
         return self._index_name
+
+    @property
+    def vector_store_type(self):
+        return self._vector_store_type
 
     @property
     def limit_count(self):
@@ -54,8 +61,11 @@ class VectorIndexScanPlan(AbstractPlan):
         return self._search_query_expr
 
     def __str__(self):
-        return "FaissIndexScan(index_name={}, limit_count={}, search_query_expr={})".format(
-            self._index_name, self._limit_count, self._search_query_expr
+        return "VectorIndexScan(index_name={}, vector_store_type={}, limit_count={}, search_query_expr={})".format(
+            self._index_name,
+            self.vector_store_type,
+            self._limit_count,
+            self._search_query_expr,
         )
 
     def __hash__(self) -> int:
@@ -63,6 +73,7 @@ class VectorIndexScanPlan(AbstractPlan):
             (
                 super().__hash__(),
                 self.index_name,
+                self.vector_store_type,
                 self.limit_count,
                 self.search_query_expr,
             )

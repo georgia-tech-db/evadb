@@ -141,7 +141,7 @@ class PlanExecutor:
             executor_node = CreateIndexExecutor(node=plan)
         elif plan_opr_type == PlanOprType.APPLY_AND_MERGE:
             executor_node = ApplyAndMergeExecutor(node=plan)
-        elif plan_opr_type == PlanOprType.FAISS_INDEX_SCAN:
+        elif plan_opr_type == PlanOprType.VECTOR_INDEX_SCAN:
             executor_node = VectorIndexScanExecutor(node=plan)
         elif plan_opr_type == PlanOprType.DELETE:
             executor_node = DeleteExecutor(node=plan)

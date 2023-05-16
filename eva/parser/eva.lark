@@ -18,7 +18,7 @@ utility_statement: describe_statement | show_statement | help_statement | explai
 
 create_database: CREATE DATABASE if_not_exists? uid
 
-create_index: CREATE INDEX uid ON table_name index_elem index_type?
+create_index: CREATE INDEX uid ON table_name index_elem vector_store_type?
 
 create_table: CREATE TABLE if_not_exists? table_name create_definitions 
     
@@ -45,7 +45,7 @@ udf_metadata_key: string_literal
 
 udf_metadata_value: string_literal | decimal_literal
 
-index_type: USING (FAISS | QDRANT)
+vector_store_type: USING (FAISS | QDRANT)
 
 index_elem: ("(" uid_list ")"
           | "(" function_call ")")

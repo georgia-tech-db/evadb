@@ -255,21 +255,21 @@ class CreateTable:
             view_info, col_list, if_not_exists, query
         )
 
-    def index_type(self, tree):
-        index_type = None
+    def vector_store_type(self, tree):
+        vector_store_type = None
         token = tree.children[1]
 
         if str.upper(token) == "FAISS":
-            index_type = VectorStoreType.FAISS
+            vector_store_type = VectorStoreType.FAISS
         elif str.upper(token) == "QDRANT":
-            index_type = VectorStoreType.QDRANT
-        return index_type
+            vector_store_type = VectorStoreType.QDRANT
+        return vector_store_type
 
     # INDEX CREATION
     def create_index(self, tree):
         index_name = None
         table_name = None
-        index_type = None
+        vector_store_type = None
         index_elem = None
 
         for child in tree.children:
@@ -279,8 +279,8 @@ class CreateTable:
                 elif child.data == "table_name":
                     table_name = self.visit(child)
                     table_ref = TableRef(table_name)
-                elif child.data == "index_type":
-                    index_type = self.visit(child)
+                elif child.data == "vector_store_type":
+                    vector_store_type = self.visit(child)
                 elif child.data == "index_elem":
                     index_elem = self.visit(child)
 
@@ -300,5 +300,5 @@ class CreateTable:
         ]
 
         return CreateIndexStatement(
-            index_name, table_ref, col_list, index_type, udf_func
+            index_name, table_ref, col_list, vector_store_type, udf_func
         )

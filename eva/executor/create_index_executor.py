@@ -56,7 +56,8 @@ class CreateIndexExecutor(AbstractExecutor):
         if not index_dir.exists():
             index_dir.mkdir(parents=True, exist_ok=True)
         return str(
-            index_dir / Path("{}_{}.index".format(self.node.index_type, self.node.name))
+            index_dir
+            / Path("{}_{}.index".format(self.node.vector_store_type, self.node.name))
         )
 
     def _create_index(self):
@@ -97,7 +98,7 @@ class CreateIndexExecutor(AbstractExecutor):
                     if self.index is None:
                         input_dim = row_feat.shape[1]
                         self.index = VectorStoreFactory.init_vector_store(
-                            self.node.index_type, self.node.name, **params
+                            self.node.vector_store_type, self.node.name, **params
                         )
                         self.index.create(input_dim)
 
@@ -111,7 +112,7 @@ class CreateIndexExecutor(AbstractExecutor):
             CatalogManager().insert_index_catalog_entry(
                 self.node.name,
                 self.index_path,
-                self.node.index_type,
+                self.node.vector_store_type,
                 feat_column,
                 self.node.udf_func.signature() if self.node.udf_func else None,
             )
@@ -124,7 +125,7 @@ class CreateIndexExecutor(AbstractExecutor):
             raise ExecutorError(str(e))
 
     def _handle_addtional_params(self):
-        if self.node.index_type == VectorStoreType.FAISS:
+        if self.node.vector_store_type == VectorStoreType.FAISS:
             return {"index_path": self.index_path}
-        elif self.node.index_type == VectorStoreType.QDRANT:
-            return {"index_db": str(Path(self.index_path).stem)}
+        elif self.node.vector_store_type == VectorStoreType.QDRANT:
+            return {"index_db": str(Path(self.index_path).parent)}

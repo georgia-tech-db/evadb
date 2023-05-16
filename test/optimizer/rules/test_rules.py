@@ -39,11 +39,11 @@ from eva.optimizer.rules.rules import (
     CacheFunctionExpressionInApply,
     CacheFunctionExpressionInFilter,
     CacheFunctionExpressionInProject,
-    CombineSimilarityOrderByAndLimitToFaissIndexScan,
+    CombineSimilarityOrderByAndLimitToVectorIndexScan,
     EmbedFilterIntoGet,
     EmbedSampleIntoGet,
     LogicalApplyAndMergeToPhysical,
-    LogicalCreateIndexToFaiss,
+    LogicalCreateIndexToVectorIndex,
     LogicalCreateMaterializedViewToPhysical,
     LogicalCreateToPhysical,
     LogicalCreateUDFToPhysical,
@@ -52,7 +52,6 @@ from eva.optimizer.rules.rules import (
     LogicalDropToPhysical,
     LogicalDropUDFToPhysical,
     LogicalExplainToPhysical,
-    LogicalFaissIndexScanToPhysical,
     LogicalFilterToPhysical,
     LogicalFunctionScanToPhysical,
 )
@@ -77,6 +76,7 @@ from eva.optimizer.rules.rules import (
     LogicalRenameToPhysical,
     LogicalShowToPhysical,
     LogicalUnionToPhysical,
+    LogicalVectorIndexScanToPhysical,
     Promise,
     PushDownFilterThroughApplyAndMerge,
     PushDownFilterThroughJoin,
@@ -114,7 +114,7 @@ class RulesTest(unittest.TestCase):
             Promise.XFORM_LATERAL_JOIN_TO_LINEAR_FLOW,
             Promise.PUSHDOWN_FILTER_THROUGH_JOIN,
             Promise.PUSHDOWN_FILTER_THROUGH_APPLY_AND_MERGE,
-            Promise.COMBINE_SIMILARITY_ORDERBY_AND_LIMIT_TO_FAISS_INDEX_SCAN,
+            Promise.COMBINE_SIMILARITY_ORDERBY_AND_LIMIT_TO_VECTOR_INDEX_SCAN,
             Promise.REORDER_PREDICATES,
             Promise.XFORM_EXTRACT_OBJECT_TO_LINEAR_FLOW,
         ]
@@ -149,9 +149,9 @@ class RulesTest(unittest.TestCase):
             Promise.LOGICAL_SHOW_TO_PHYSICAL,
             Promise.LOGICAL_DROP_UDF_TO_PHYSICAL,
             Promise.LOGICAL_EXPLAIN_TO_PHYSICAL,
-            Promise.LOGICAL_CREATE_INDEX_TO_FAISS,
+            Promise.LOGICAL_CREATE_INDEX_TO_VECOR_INDEX,
             Promise.LOGICAL_APPLY_AND_MERGE_TO_PHYSICAL,
-            Promise.LOGICAL_FAISS_INDEX_SCAN_TO_PHYSICAL,
+            Promise.LOGICAL_VECTOR_INDEX_SCAN_TO_PHYSICAL,
         ]
 
         for promise in implementation_promises:
@@ -173,7 +173,7 @@ class RulesTest(unittest.TestCase):
             XformLateralJoinToLinearFlow(),
             PushDownFilterThroughApplyAndMerge(),
             PushDownFilterThroughJoin(),
-            CombineSimilarityOrderByAndLimitToFaissIndexScan(),
+            CombineSimilarityOrderByAndLimitToVectorIndexScan(),
             ReorderPredicates(),
             XformExtractObjectToLinearFlow(),
         ]
@@ -239,9 +239,9 @@ class RulesTest(unittest.TestCase):
             else SequentialLogicalProjectToPhysical(),
             LogicalShowToPhysical(),
             LogicalExplainToPhysical(),
-            LogicalCreateIndexToFaiss(),
+            LogicalCreateIndexToVectorIndex(),
             LogicalApplyAndMergeToPhysical(),
-            LogicalFaissIndexScanToPhysical(),
+            LogicalVectorIndexScanToPhysical(),
         ]
 
         if ray_enabled:

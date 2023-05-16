@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from pathlib import Path
 from typing import Iterator
 
 import pandas as pd
@@ -21,7 +22,7 @@ from eva.catalog.catalog_type import VectorStoreType
 from eva.catalog.sql_config import IDENTIFIER_COLUMN
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
-from eva.plan_nodes.faiss_index_scan_plan import VectorIndexScanPlan
+from eva.plan_nodes.vector_index_scan_plan import VectorIndexScanPlan
 from eva.third_party.vector_stores.types import VectorIndexQuery
 from eva.third_party.vector_stores.utils import VectorStoreFactory
 
@@ -37,6 +38,7 @@ def get_row_id_column_alias(column_list):
 class VectorIndexScanExecutor(AbstractExecutor):
     def __init__(self, node: VectorIndexScanPlan):
         super().__init__(node)
+
         self.index_name = node.index_name
         self.limit_count = node.limit_count
         self.search_query_expr = node.search_query_expr
@@ -48,10 +50,11 @@ class VectorIndexScanExecutor(AbstractExecutor):
         index_catalog_entry = catalog_manager.get_index_catalog_entry_by_name(
             self.index_name
         )
+        self.index_path = index_catalog_entry.save_file_path
         self.index = VectorStoreFactory.init_vector_store(
-            VectorStoreType.FAISS,
+            self.node.vector_store_type,
             self.index_name,
-            index_path=index_catalog_entry.save_file_path,
+            **self._handle_addtional_params()
         )
 
         # Get the query feature vector. Create a dummy
@@ -97,3 +100,9 @@ class VectorIndexScanExecutor(AbstractExecutor):
                         res_row_list[idx] = res_row
 
         yield Batch(pd.DataFrame(res_row_list))
+
+    def _handle_addtional_params(self):
+        if self.node.vector_store_type == VectorStoreType.FAISS:
+            return {"index_path": self.index_path}
+        elif self.node.vector_store_type == VectorStoreType.QDRANT:
+            return {"index_db": str(Path(self.index_path).parent)}

@@ -102,12 +102,14 @@ class IndexCatalogServiceTest(TestCase):
         CatalogManager().reset()
         INDEX_NAME = "name"
         INDEX_URL = "file1"
-        INDEX_TYPE = VectorStoreType.FAISS
+        VECTOR_STORE_TYPE = VectorStoreType.FAISS
         FEAT_COLUMN = ColumnCatalogEntry("abc", ColumnType.INTEGER)
 
         service = IndexCatalogService()
 
-        service.insert_entry(INDEX_NAME, INDEX_URL, INDEX_TYPE, FEAT_COLUMN, "sig")
+        service.insert_entry(
+            INDEX_NAME, INDEX_URL, VECTOR_STORE_TYPE, FEAT_COLUMN, "sig"
+        )
 
         output = service.get_all_entries()
         self.assertEqual(len(output), 1)

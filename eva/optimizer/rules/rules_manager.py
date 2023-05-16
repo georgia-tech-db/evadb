@@ -29,11 +29,11 @@ from eva.optimizer.rules.rules import (
     CacheFunctionExpressionInApply,
     CacheFunctionExpressionInFilter,
     CacheFunctionExpressionInProject,
-    CombineSimilarityOrderByAndLimitToFaissIndexScan,
+    CombineSimilarityOrderByAndLimitToVectorIndexScan,
     EmbedFilterIntoGet,
     EmbedSampleIntoGet,
     LogicalApplyAndMergeToPhysical,
-    LogicalCreateIndexToFaiss,
+    LogicalCreateIndexToVectorIndex,
     LogicalCreateMaterializedViewToPhysical,
     LogicalCreateToPhysical,
     LogicalCreateUDFToPhysical,
@@ -42,7 +42,6 @@ from eva.optimizer.rules.rules import (
     LogicalDropToPhysical,
     LogicalDropUDFToPhysical,
     LogicalExplainToPhysical,
-    LogicalFaissIndexScanToPhysical,
     LogicalFilterToPhysical,
     LogicalFunctionScanToPhysical,
 )
@@ -67,6 +66,7 @@ from eva.optimizer.rules.rules import (
     LogicalRenameToPhysical,
     LogicalShowToPhysical,
     LogicalUnionToPhysical,
+    LogicalVectorIndexScanToPhysical,
     PushDownFilterThroughApplyAndMerge,
     PushDownFilterThroughJoin,
     ReorderPredicates,
@@ -96,7 +96,7 @@ class RulesManager:
             EmbedSampleIntoGet(),
             PushDownFilterThroughJoin(),
             PushDownFilterThroughApplyAndMerge(),
-            CombineSimilarityOrderByAndLimitToFaissIndexScan(),
+            CombineSimilarityOrderByAndLimitToVectorIndexScan(),
             ReorderPredicates(),
         ]
 
@@ -130,9 +130,9 @@ class RulesManager:
             else SequentialLogicalProjectToPhysical(),
             LogicalShowToPhysical(),
             LogicalExplainToPhysical(),
-            LogicalCreateIndexToFaiss(),
+            LogicalCreateIndexToVectorIndex(),
             LogicalApplyAndMergeToPhysical(),
-            LogicalFaissIndexScanToPhysical(),
+            LogicalVectorIndexScanToPhysical(),
         ]
 
         if ray_enabled:

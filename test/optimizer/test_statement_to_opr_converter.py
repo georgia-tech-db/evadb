@@ -31,7 +31,6 @@ from eva.optimizer.operators import (
     LogicalExchange,
     LogicalExplain,
     LogicalExtractObject,
-    LogicalFaissIndexScan,
     LogicalFilter,
     LogicalFunctionScan,
     LogicalGet,
@@ -47,6 +46,7 @@ from eva.optimizer.operators import (
     LogicalSample,
     LogicalShow,
     LogicalUnion,
+    LogicalVectorIndexScan,
     Operator,
 )
 from eva.optimizer.statement_to_opr_converter import StatementToPlanConverter
@@ -286,7 +286,9 @@ statement_to_opr_converter.column_definition_to_udf_io"
         get_plan = LogicalGet(MagicMock(), MagicMock(), MagicMock())
         sample_plan = LogicalSample(MagicMock(), MagicMock())
         filter_plan = LogicalFilter(MagicMock())
-        faiss_plan = LogicalFaissIndexScan(MagicMock(), MagicMock(), MagicMock())
+        faiss_plan = LogicalVectorIndexScan(
+            MagicMock(), MagicMock(), MagicMock(), MagicMock()
+        )
         groupby_plan = LogicalGroupBy(MagicMock())
         order_by_plan = LogicalOrderBy(MagicMock())
         union_plan = LogicalUnion(MagicMock())
