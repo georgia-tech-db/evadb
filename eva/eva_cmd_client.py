@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import argparse
 import asyncio
 import sys
 from os.path import abspath, dirname, join
@@ -29,15 +30,10 @@ from eva.configuration.configuration_manager import ConfigurationManager  # noqa
 from eva.server.interpreter import start_cmd_client  # noqa: E402
 
 
-async def eva_client():
+async def eva_client(host: str, port: int):
     """
-    Start the eva system
+    Start the eva client
     """
-
-    # Get the hostname and port information from the configuration file
-    config = ConfigurationManager()
-    host = config.get_value("server", "host")
-    port = config.get_value("server", "port")
 
     # Launch client
     try:
@@ -50,7 +46,29 @@ async def eva_client():
 
 
 def main():
-    asyncio.run(eva_client())
+    parser = argparse.ArgumentParser(description="EVA Client")
+
+    parser.add_argument(
+        "--host",
+        help="Specify the host address of the server you want to connect to.",
+    )
+
+    parser.add_argument(
+        "--port",
+        help="Specify the port number of the server you want to connect to.",
+    )
+
+    ## PARSE ARGS
+    args, unknown = parser.parse_known_args()
+
+    host = (
+        args.host if args.host else ConfigurationManager().get_value("server", "host")
+    )
+
+    port = (
+        args.port if args.port else ConfigurationManager().get_value("server", "port")
+    )
+    asyncio.run(eva_client(host, port))
 
 
 if __name__ == "__main__":

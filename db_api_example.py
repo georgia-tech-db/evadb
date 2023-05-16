@@ -6,7 +6,7 @@ from eva.server.db_api import connect, connect_async
 
 async def run_async(query: List[str]):
     hostname = '0.0.0.0'
-    port = 5432
+    port = 8803
 
     connection = await connect_async(hostname, port)
     cursor = connection.cursor()
@@ -18,7 +18,7 @@ async def run_async(query: List[str]):
 
 def run(query: List[str]):
     hostname = '0.0.0.0'
-    port = 5432
+    port = 8803
 
     connection = connect(hostname, port)
     cursor = connection.cursor()

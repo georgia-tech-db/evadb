@@ -10,6 +10,8 @@ from pathlib import Path
 from typing import Dict
 
 from setuptools import find_packages, setup
+from setuptools.command.install import install
+from subprocess import check_call
 
 this_directory = Path(__file__).parent
 LONG_DESCRIPTION = (this_directory / "README.md").read_text()
@@ -86,11 +88,7 @@ benchmark_libs = [
     "pytest-benchmark",
 ]
 
-doc_libs = [
-    "pyenchant",
-    "codespell",
-    "pylint"
-]
+doc_libs = ["pyenchant", "codespell", "pylint"]
 
 dist_libs = ["wheel>=0.37.1", "scriv>=0.16.0"]
 
@@ -111,6 +109,9 @@ udf_libs = [
 ]
 
 ### NEEDED FOR EXPERIMENTAL FEATURES
+third_party_libs = ["qdrant-client>=1.1.7"]  # Qdrant vector store
+
+### NEEDED FOR EXPERIMENTAL FEATURES
 experimental_libs = []
 
 INSTALL_REQUIRES = minimal_requirement + integration_test_libs + udf_libs
@@ -124,6 +125,7 @@ DEV_REQUIRES = (
     + database_libs
     + dist_libs
     + experimental_libs
+    + third_party_libs
 )
 
 EXTRA_REQUIRES = {"dev": DEV_REQUIRES}
