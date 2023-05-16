@@ -148,7 +148,7 @@ class UDFIODescriptorsTests(unittest.TestCase):
         self.assertEqual(catalog_entry.is_input, False)
 
     def test_raises_error_on_incorrect_pandas_definition(self):
-        # the dataframe should have multipole columns but column_types should be defined for only one
+        # the dataframe should have multiple columns but column_types should be defined for only one
         pandas_dataframe = PandasDataframe(
             columns=["Frame_Array", "Frame_Array_2"],
             column_types=[NdArrayType.UINT8],

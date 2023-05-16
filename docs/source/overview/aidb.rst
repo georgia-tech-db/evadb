@@ -1,7 +1,7 @@
 EVA AI-Relational Database System
 ====
 
-Over the last decade, deep learning models have radically changed the world of computer vision and natural languague processing. They are accurate on a variety of tasks ranging from image classification to question answering. However, there are two challenges that prevent a lot of users from benefiting from these models.
+Over the last decade, deep learning models have radically changed the world of computer vision and natural language processing. They are accurate on a variety of tasks ranging from image classification to question answering. However, there are two challenges that prevent a lot of users from benefiting from these models.
 
 Usability and Application Maintainability
 ^^^^

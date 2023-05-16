@@ -92,10 +92,10 @@ class CreateUdfExecutorTest(unittest.TestCase):
 
         create_udf_executor = CreateUDFExecutor(plan)
         # check a string in the error message
-        with self.assertRaises(RuntimeError) as ce:
+        with self.assertRaises(RuntimeError) as exc:
             next(create_udf_executor.exec())
         self.assertIn(
-            "Error creating UDF, input/output definition incorrect:", str(ce.exception)
+            "Error creating UDF, input/output definition incorrect:", str(exc.exception)
         )
 
         catalog_instance.insert_udf_catalog_entry.assert_not_called()

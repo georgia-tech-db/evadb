@@ -23,7 +23,7 @@ from eva.models.storage.batch import Batch
 
 
 class ConstantValueExpression(AbstractExpression):
-    # ToDo Implement generic value class
+    # Todo Implement generic value class
     # for now we don't assign any class to value
     # it can have types like string, int etc
     # return type not set, handle that based on value
@@ -47,7 +47,7 @@ class ConstantValueExpression(AbstractExpression):
     def v_type(self):
         return self._v_type
 
-    # ToDo implement other functionalities like maintaining hash
+    # Todo implement other functionalities like maintaining hash
     # comparing two objects of this class(==)
 
     def __eq__(self, other):

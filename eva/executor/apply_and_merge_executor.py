@@ -39,16 +39,11 @@ class ApplyAndMergeExecutor(AbstractExecutor):
     def exec(self, *args, **kwargs) -> Iterator[Batch]:
         child_executor = self.children[0]
         for batch in child_executor.exec(**kwargs):
-            res = self.func_expr.evaluate(batch)
-            if not res.empty():
-                if self.do_unnest:
-                    res.unnest()
+            func_result = self.func_expr.evaluate(batch)
+            output = Batch.merge_column_wise([batch, func_result])
+            if self.do_unnest:
+                output.unnest(func_result.columns)
+                # we reset the index as after unnest there can be duplicate index
+                output.reset_index()
 
-                # Merge the results to the input.
-                # This assumes that the batch index is preserved by the function
-                # call. Since both the batch and the results are sorted, we could
-                # perform a sorted merge, though the typical small size of the
-                # batch and results should not significantly impact performance.
-                merged_batch = Batch.join(batch, res)
-                merged_batch.reset_index()
-                yield merged_batch
+            yield output

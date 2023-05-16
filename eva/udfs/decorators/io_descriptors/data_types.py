@@ -79,7 +79,7 @@ class PandasDataframe(IOArgument):
         if not self.column_shapes:
             self.column_shapes = [Dimension.ANYDIM] * len(self.columns)
 
-        # check that columns, column_types and column_shpes are of same length
+        # check that columns, column_types and column_shapes are of same length
         if len(self.columns) != len(self.column_types) or len(self.columns) != len(
             self.column_shapes
         ):

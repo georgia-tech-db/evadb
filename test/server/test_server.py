@@ -31,7 +31,7 @@ if sys.version_info >= (3, 8):
         async def test_server_functions(self, mock_start):
             eva_server = EvaServer()
             host = "localhost"
-            port = 5432
+            port = 8803
 
             await eva_server.start_eva_server(host, port)
 

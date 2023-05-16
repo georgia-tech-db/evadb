@@ -40,7 +40,7 @@ To connect to the EVA server in the notebook, use the following Python code:
     from eva.server.db_api import connect
 
     # hostname and port of the server where EVA is running
-    connection = connect(host = '0.0.0.0', port = 5432)
+    connection = connect(host = '0.0.0.0', port = 8803)
 
     # cursor allows the notebook client to send queries to the server
     cursor = connection.cursor()

@@ -13,12 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import (
-    create_sample_video,
-    file_remove,
-    load_udfs_for_testing,
-    shutdown_ray,
-)
+from test.util import create_sample_video, file_remove, shutdown_ray
 
 import numpy as np
 import pandas as pd
@@ -42,7 +37,6 @@ class InsertExecutorTest(unittest.TestCase):
             );
         """
         execute_query_fetch_all(query)
-        load_udfs_for_testing(mode="debug")
 
     def tearDown(self):
         shutdown_ray()

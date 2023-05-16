@@ -445,7 +445,7 @@ VIEW:                                "VIEW"i
 ABS:                                 "ABS"i
 
 // Operators
-// Operators. Assigns
+// Operators. Assignment
 
 VAR_ASSIGN:                          ":="
 PLUS_ASSIGN:                         "+="
@@ -458,7 +458,7 @@ XOR_ASSIGN:                          "^="
 OR_ASSIGN:                           "|="
 
 
-// Operators. Arithmetics
+// Operators. Arithmetic
 
 STAR:                                "*"
 DIVIDE:                              "/"
@@ -470,7 +470,7 @@ DIV:                                 "DIV"
 MOD:                                 "MOD"
 
 
-// Operators. Comparation
+// Operators. Comparison
 
 EQUAL_SYMBOL:                        "="
 GREATER_SYMBOL:                      ">"

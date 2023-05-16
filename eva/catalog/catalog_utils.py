@@ -134,8 +134,7 @@ def construct_udf_cache_catalog_entry(
     expression tree. The cache name is represented by the signature of the function
     expression.
     Args:
-        func_expr (FunctionExpression): the function expression with which the cache is
-        assoicated
+        func_expr (FunctionExpression): the function expression with which the cache is associated
     Returns:
         UdfCacheCatalogEntry: the udf cache catalog entry
     """

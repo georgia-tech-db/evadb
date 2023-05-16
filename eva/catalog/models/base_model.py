@@ -30,7 +30,7 @@ class CustomModel:
 
     It skips the attributes that are not present for the model, thus if a
     dict is passed with some unknown attributes for the model on creation,
-    it won't complain for `unkwnown field`s.
+    it won't complain for `unknown field`s.
     Declares and int `_row_id` field for all tables
     """
 

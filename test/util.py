@@ -13,10 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import asyncio
+import multiprocessing as mp
 import os
 import shutil
 import socket
 from contextlib import closing
+from itertools import repeat
+from multiprocessing import Pool
 from pathlib import Path
 
 import cv2
@@ -35,7 +38,7 @@ from eva.expression.function_expression import FunctionExpression
 from eva.models.storage.batch import Batch
 from eva.optimizer.operators import LogicalFilter, Operator
 from eva.optimizer.plan_generator import PlanGenerator
-from eva.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
+from eva.optimizer.statement_to_opr_converter import StatementToPlanConverter
 from eva.parser.parser import Parser
 from eva.plan_nodes.abstract_plan import AbstractPlan
 from eva.server.command_handler import execute_query_fetch_all
@@ -188,7 +191,7 @@ def get_logical_query_plan(query: str) -> Operator:
     """
     stmt = Parser().parse(query)[0]
     StatementBinder(StatementBinderContext()).bind(stmt)
-    l_plan = StatementToPlanConvertor().visit(stmt)
+    l_plan = StatementToPlanConverter().visit(stmt)
     return l_plan
 
 
@@ -361,6 +364,24 @@ def create_sample_image():
     img[2] += 1
     cv2.imwrite(img_path, img)
     return img_path
+
+
+def create_random_image(i, path):
+    img = np.random.random_sample([400, 400, 3]).astype(np.uint8)
+    cv2.imwrite(os.path.join(path, f"img{i}.jpg"), img)
+
+
+def create_large_scale_image_dataset(num=1000000):
+    img_dir = os.path.join(tmp_dir_from_config, f"large_scale_image_dataset_{num}")
+    Path(img_dir).mkdir(parents=True, exist_ok=True)
+
+    # Generate images in parallel.
+    image_idx_list = list(range(num))
+    Pool(mp.cpu_count()).starmap(
+        create_random_image, zip(image_idx_list, repeat(img_dir))
+    )
+
+    return img_dir
 
 
 def create_sample_video(num_frames=NUM_FRAMES):
@@ -538,7 +559,7 @@ class DummyFeatureExtractor(AbstractClassifierUDF):
 
 
 class DummyObjectDetectorDecorators(AbstractClassifierUDF):
-    @decorators.setup(cachable=True, udf_type="object_detection", batchable=True)
+    @decorators.setup(cacheable=True, udf_type="object_detection", batchable=True)
     def setup(self, *args, **kwargs):
         pass
 
