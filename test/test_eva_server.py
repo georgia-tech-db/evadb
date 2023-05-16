@@ -42,5 +42,5 @@ if sys.version_info >= (3, 8):
         @patch("eva.eva_server.start_eva_server")
         @patch("asyncio.start_server")
         async def test_start_eva_server(self, mock_start_eva_server, mock_start):
-            await start_eva_server()
+            await start_eva_server("0.0.0.0", 8803)
             mock_start_eva_server.assert_called_once()

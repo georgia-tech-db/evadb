@@ -1,10 +1,18 @@
 #!/bin/bash
 
+## backward compatibility
+EVA_VERSION=$(pip show evadb | grep Version | awk '{print $2}')
+if [[ "$EVA_VERSION" < "0.2.4" ]]; then
+    PORT=5432
+else
+    PORT=8803
+fi
+
 ## Test package installation
 
 function is_server_up () {
     # check if server started
-    netstat -an | grep 0.0.0.0:5432
+    netstat -an | grep 0.0.0.0:${PORT}
     return $?
 }
 
