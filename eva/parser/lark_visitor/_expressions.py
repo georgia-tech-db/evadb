@@ -66,7 +66,7 @@ class Expressions:
         return ComparisonExpression(op, left, right)
 
     def nested_expression_atom(self, tree):
-        # ToDo Can there be >1 expression in this case
+        # Todo Can there be >1 expression in this case
         expr = tree.children[0]
         return self.visit(expr)
 

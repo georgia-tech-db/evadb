@@ -62,13 +62,14 @@ class OperatorType(IntEnum):
     LOGICALEXPLAIN = auto()
     LOGICALCREATEINDEX = auto()
     LOGICAL_APPLY_AND_MERGE = auto()
+    LOGICAL_EXTRACT_OBJECT = auto()
     LOGICALFAISSINDEXSCAN = auto()
     LOGICALOVERWRITE = auto()
     LOGICALDELIMITER = auto()
 
 
 class Operator:
-    """Base class for logital plan of operators
+    """Base class for logical plan of operators
     Arguments:
         op_type: {OperatorType} -- {the opr type held by this node}
         children: {List} -- {the list of operator children for this node}
@@ -919,6 +920,45 @@ class LogicalFunctionScan(Operator):
         return hash((super().__hash__(), self.func_expr, self.do_unnest, self.alias))
 
 
+class LogicalExtractObject(Operator):
+    def __init__(
+        self,
+        detector: FunctionExpression,
+        tracker: FunctionExpression,
+        alias: Alias,
+        do_unnest: bool = False,
+        children: List = None,
+    ):
+        super().__init__(OperatorType.LOGICAL_EXTRACT_OBJECT, children)
+        self.detector = detector
+        self.tracker = tracker
+        self.do_unnest = do_unnest
+        self.alias = alias
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalExtractObject):
+            return False
+        return (
+            is_subtree_equal
+            and self.detector == other.detector
+            and self.tracker == other.tracker
+            and self.do_unnest == other.do_unnest
+            and self.alias == other.alias
+        )
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                super().__hash__(),
+                self.detector,
+                self.tracker,
+                self.do_unnest,
+                self.alias,
+            )
+        )
+
+
 class LogicalJoin(Operator):
     """
     Logical node for join operators
@@ -998,7 +1038,7 @@ class LogicalJoin(Operator):
 
 
 class LogicalCreateMaterializedView(Operator):
-    """Logical node for create materiaziled view operations
+    """Logical node for create materialized view operations
     Arguments:
         view {TableRef}: [view table that is to be created]
         col_list{List[ColumnDefinition]} -- column names in the view

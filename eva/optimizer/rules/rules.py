@@ -61,6 +61,7 @@ from eva.optimizer.operators import (
     LogicalDrop,
     LogicalDropUDF,
     LogicalExplain,
+    LogicalExtractObject,
     LogicalFaissIndexScan,
     LogicalFilter,
     LogicalFunctionScan,
@@ -242,7 +243,7 @@ class CacheFunctionExpressionInFilter(Rule):
 
     def apply(self, before: LogicalFilter, context: OptimizerContext):
         # there could be 2^n different combinations with enable and disable option
-        # cache for n functionExpressions. Currently considering only the case where
+        # cache for n function Expressions. Currently considering only the case where
         # cache is enabled for all eligible function expressions
         after_predicate = before.predicate.copy()
         enable_cache_on_expression_tree(after_predicate)
@@ -275,7 +276,7 @@ class CacheFunctionExpressionInApply(Rule):
         return True
 
     def apply(self, before: LogicalApplyAndMerge, context: OptimizerContext):
-        # todo: this will create a ctaalog entry even in the case of explain command
+        # todo: this will create a catalog entry even in the case of explain command
         # We should run this code conditionally
         new_func_expr = enable_cache(before.func_expr)
         after = LogicalApplyAndMerge(
@@ -348,7 +349,7 @@ class PushDownFilterThroughJoin(Rule):
 class XformLateralJoinToLinearFlow(Rule):
     """If the inner node of a lateral join is a function-valued expression, we
     eliminate the join node and make the inner node the parent of the outer node. This
-    produces a linear #data flow path. Because this scenario is common in our system,
+    produces a linear data flow path. Because this scenario is common in our system,
     we chose to explicitly convert it to a linear flow, which simplifies the
     implementation of other optimizations such as UDF reuse and parallelized plans by
     removing the join."""
@@ -444,6 +445,50 @@ class PushDownFilterThroughApplyAndMerge(Rule):
         yield root_node
 
 
+class XformExtractObjectToLinearFlow(Rule):
+    """If the inner node of a lateral join is a Extract_Object function-valued
+    expression, we eliminate the join node and make the inner node the parent of the
+    outer node. This produces a linear data flow path.
+    TODO: We need to add a sorting operation after detector to ensure we always provide tracker data in order.
+    """
+
+    #                                          LogicalApplyAndMerge(tracker)
+    #     LogicalJoin(Lateral)                         |
+    #     /           \                 ->    LogicalApplyAndMerge(detector)
+    #    A        LogicalExtractObject                 |
+    #                                                  A
+
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALJOIN)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        pattern.append_child(Pattern(OperatorType.LOGICAL_EXTRACT_OBJECT))
+        super().__init__(RuleType.XFORM_EXTRACT_OBJECT_TO_LINEAR_FLOW, pattern)
+
+    def promise(self):
+        return Promise.XFORM_EXTRACT_OBJECT_TO_LINEAR_FLOW
+
+    def check(self, before: LogicalJoin, context: OptimizerContext):
+        if before.join_type == JoinType.LATERAL_JOIN:
+            return True
+        return False
+
+    def apply(self, before: LogicalJoin, context: OptimizerContext):
+        A: Dummy = before.children[0]
+        logical_extract_obj: LogicalExtractObject = before.children[1]
+
+        detector = LogicalApplyAndMerge(
+            logical_extract_obj.detector, alias=logical_extract_obj.detector.alias
+        )
+        tracker = LogicalApplyAndMerge(
+            logical_extract_obj.tracker,
+            alias=logical_extract_obj.alias,
+            do_unnest=logical_extract_obj.do_unnest,
+        )
+        detector.append_child(A)
+        tracker.append_child(detector)
+        yield tracker
+
+
 class CombineSimilarityOrderByAndLimitToFaissIndexScan(Rule):
     """
     This rule currently rewrites Order By + Limit to a Faiss index scan.
@@ -469,7 +514,7 @@ class CombineSimilarityOrderByAndLimitToFaissIndexScan(Rule):
             RuleType.COMBINE_SIMILARITY_ORDERBY_AND_LIMIT_TO_FAISS_INDEX_SCAN, pattern
         )
 
-        # Entries populate after rule egibility validation.
+        # Entries populate after rule eligibility validation.
         self._index_catalog_entry = None
         self._query_func_expr = None
 
@@ -596,7 +641,7 @@ class ReorderPredicates(Rule):
         return Promise.REORDER_PREDICATES
 
     def check(self, before: LogicalFilter, context: OptimizerContext):
-        # there exists atleast one Function Expression
+        # there exists at least one Function Expression
         return len(list(before.predicate.find_all(FunctionExpression))) > 0
 
     def apply(self, before: LogicalFilter, context: OptimizerContext):
@@ -821,7 +866,7 @@ class LogicalGetToSeqScan(Rule):
     def apply(self, before: LogicalGet, context: OptimizerContext):
         # Configure the batch_mem_size. It decides the number of rows
         # read in a batch from storage engine.
-        # ToDO: Experiment heuristics.
+        # Todo: Experiment heuristics.
         after = SeqScanPlan(None, before.target_list, before.alias)
         after.append_child(
             StoragePlan(

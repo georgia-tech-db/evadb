@@ -43,7 +43,7 @@ Example of a Setup function
 
 .. code-block:: python
 
-  @setup(cachable=True, udf_type="object_detection", batchable=True)
+  @setup(cacheable=True, udf_type="object_detection", batchable=True)
   def setup(self, threshold=0.85):
       #custom setup function that is specific for the UDF
       self.threshold = threshold 

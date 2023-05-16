@@ -34,7 +34,7 @@ class AbstractExecutor(ABC):
 
     def append_child(self, child: AbstractExecutor):
         """
-        appends a child exector node
+        appends a child executor node
 
         Arguments:
             child {AbstractExecutor} -- child node
@@ -63,7 +63,7 @@ class AbstractExecutor(ABC):
         """
         This method is implemented by every executor.
         Contains logic for that executor;
-        For retrival based executor : It fetchs frame batches from
+        For retrieval based executor : It fetches frame batches from
         child nodes and emits it to parent node.
         """
 

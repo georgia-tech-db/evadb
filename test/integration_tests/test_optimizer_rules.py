@@ -15,6 +15,8 @@
 import unittest
 from test.util import get_physical_query_plan, load_udfs_for_testing, shutdown_ray
 
+import numpy as np
+import pandas as pd
 import pytest
 from mock import MagicMock, patch
 
@@ -22,6 +24,7 @@ from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.configuration.constants import EVA_ROOT_DIR
 from eva.expression.comparison_expression import ComparisonExpression
+from eva.models.storage.batch import Batch
 from eva.optimizer.plan_generator import PlanGenerator
 from eva.optimizer.rules.rules import (
     PushDownFilterThroughApplyAndMerge,
@@ -55,7 +58,18 @@ class OptimizerRulesTest(unittest.TestCase):
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
 
     @patch("eva.expression.function_expression.FunctionExpression.evaluate")
-    def test_should_benefit_from_pushdown(self, evaluate_mock):
+    @patch("eva.models.storage.batch.Batch.merge_column_wise")
+    def test_should_benefit_from_pushdown(self, merge_mock, evaluate_mock):
+        # added to mock away the
+        evaluate_mock.return_value = Batch(
+            pd.DataFrame(
+                {
+                    "obj.labels": ["car"],
+                    "obj.bboxes": [np.array([1, 2, 3, 4])],
+                    "obj.scores": [0.8],
+                }
+            )
+        )
         query = """SELECT id, obj.labels
                   FROM MyVideo JOIN LATERAL
                     FastRCNNObjectDetector(data) AS obj(labels, bboxes, scores)
@@ -210,13 +224,13 @@ class OptimizerRulesTest(unittest.TestCase):
 
         mock.side_effect = side_effect_func
 
-        chepeast_pred = "id<10"
+        cheapest_pred = "id<10"
         cheap_pred = "DummyObjectDetector(data).label = ['person']"
         costly_pred = "DummyMultiObjectDetector(data).labels @> ['person']"
 
         query = (
             f"SELECT id FROM MyVideo WHERE {costly_pred} AND {cheap_pred} AND "
-            f"{chepeast_pred};"
+            f"{cheapest_pred};"
         )
 
         plan = get_physical_query_plan(query)

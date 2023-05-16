@@ -15,7 +15,7 @@
 * __8250 vehicles__ that are manually annotated
 * Vehicle categories are __Car, Bus, Van,__ and __Other__
 * Weather categories are __Night, Sunny, Rainy,__ and __Cloudy__
-* Other annotations include __Scale of Vehicle, Occulsion Ratio,__ and __Truncation Ratio__. 
+* Other annotations include __Scale of Vehicle, Occlusion Ratio,__ and __Truncation Ratio__. 
 
 
 
@@ -52,7 +52,7 @@ __Position information of target trajectories out of the general background, whi
 
 __Unzipping the dataset__
 
-You can use your own method for unzipping .zip files or for conveniency
+You can use your own method for unzipping .zip files or for convenience
 
 `sudo apt-get install unzip`
 

@@ -163,7 +163,7 @@ class PlanExecutor:
         Arguments:
             tree_root {AbstractExecutor} -- root of execution tree to delete
         """
-        # ToDo
+        # Todo
         # clear all the nodes from the execution tree
 
     def execute_plan(self) -> Iterator[Batch]:

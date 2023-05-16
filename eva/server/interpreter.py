@@ -56,9 +56,8 @@ async def read_from_client_and_send_to_server(
     stdin_reader: StreamReader, writer: StreamWriter, server_reader: StreamReader
 ):
     VERSION = VERSION_DICT["VERSION"]
-    intro = "eva (v " + VERSION + ')\nType "EXIT;" to exit the client' + "\n"
-    sys.stdout.write(intro)
-    sys.stdout.flush()
+    intro = f"eva (v{VERSION})\nType 'EXIT;' to exit the client \n"
+    print(intro, flush=True)
 
     prompt = "eva=#"
 
@@ -73,7 +72,7 @@ async def read_from_client_and_send_to_server(
 
         query = query.lstrip()
         query = query.rstrip()
-        if query in ["EXIT", "QUIT"]:
+        if query.upper() in ["EXIT", "QUIT"]:
             return
 
         await cursor.execute_async(query)

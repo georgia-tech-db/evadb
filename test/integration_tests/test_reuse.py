@@ -106,11 +106,11 @@ class ReuseTest(unittest.TestCase):
         batches, exec_times = self._reuse_experiment([select_query1, select_query2])
         self._verify_reuse_correctness(select_query2, batches[1])
 
-    def test_reuse_in_with_multiple_occurences(self):
+    def test_reuse_in_with_multiple_occurrences(self):
         select_query1 = """SELECT id, label FROM DETRAC JOIN
             LATERAL HFObjectDetector(data) AS Obj(score, label, bbox) WHERE id < 10;"""
 
-        # multiple occurences of the same function expression
+        # multiple occurrences of the same function expression
         select_query2 = """SELECT id, HFObjectDetector(data).label FROM DETRAC JOIN
             LATERAL HFObjectDetector(data) AS Obj(score, label, bbox) WHERE id < 5;"""
 
@@ -160,14 +160,23 @@ class ReuseTest(unittest.TestCase):
     def test_reuse_filter_with_project(self):
         project_query = """
             SELECT id, Yolo(data).labels FROM DETRAC WHERE id < 5;"""
-
         select_query = """
             SELECT id FROM DETRAC
             WHERE ArrayCount(Yolo(data).labels, 'car') > 3 AND id < 5;"""
-
         batches, exec_times = self._reuse_experiment([project_query, select_query])
         self._verify_reuse_correctness(select_query, batches[1])
         # reuse should be faster than no reuse
+        self.assertGreater(exec_times[0], exec_times[1])
+
+    def test_reuse_in_extract_object(self):
+        select_query = """
+            SELECT id, T.iids, T.bboxes, T.scores, T.labels
+            FROM DETRAC JOIN LATERAL EXTRACT_OBJECT(data, Yolo, NorFairTracker)
+                AS T(iids, labels, bboxes, scores)
+            WHERE id < 30;
+            """
+        batches, exec_times = self._reuse_experiment([select_query, select_query])
+        self._verify_reuse_correctness(select_query, batches[1])
         self.assertGreater(exec_times[0], exec_times[1])
 
     @windows_skip_marker

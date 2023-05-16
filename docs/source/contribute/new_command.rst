@@ -7,7 +7,7 @@ Command Handler
 ----
 
 An input query string is handled by **Parser**,
-**StatementTOPlanConvertor**, **PlanGenerator**, and **PlanExecutor**. 
+**StatementTOPlanConverter**, **PlanGenerator**, and **PlanExecutor**. 
 We discuss each part separately.
 
 .. code:: python
@@ -19,7 +19,7 @@ We discuss each part separately.
        #1. parser
        stmt = Parser().parse(query)[0]
        #2. statement to logical plan
-       l_plan = StatementToPlanConvertor().visit(stmt)
+       l_plan = StatementToPlanConverter().visit(stmt)
        #3. logical to physical plan
        p_plan = PlanGenerator().build(l_plan)
        #4. parser
@@ -31,7 +31,7 @@ We discuss each part separately.
 ---------
 
 The parser firstly generate **syntax tree** from the input string, and
-then tansform syntax tree into **statement**.
+then transform syntax tree into **statement**.
 
 The first part of Parser is build from a LARK grammar file.
 
@@ -68,7 +68,7 @@ parser/lark_visitor
 
 .. code:: python
 
-   from src.parser.parser_visitor._create_statement import CenameTable
+   from src.parser.parser_visitor._create_statement import CreateTable
    class ParserVisitor(CommonClauses, CreateTable, Expressions,
                        Functions, Insert, Select, TableSources,
                        Load, Upload):
@@ -80,9 +80,9 @@ parser/
    called in ``_[cmd]_statement.py``
 -  ``types.py`` - register new StatementType
 
-.. _2-statementtoplanconvertor:
+.. _2-statementtoplanconverter:
 
-2. Statement To Plan Convertor
+2. Statement To Plan Converter
 ---------------------------
 
 The part transforms the statement into corresponding logical plan.
@@ -123,7 +123,7 @@ Optimizer
    .. code:: python
 
       # May need to convert the statement into another data type.
-      # The new data type is usable for excuting command.
+      # The new data type is usable for executing command.
       # For example, column_list -> column_metadata_list
 
       def visit_create(self, statement: AbstractStatement):
@@ -139,7 +139,7 @@ Optimizer
               video_ref, column_metadata_list, if_not_exists)
           self._plan = create_opr
 
-   -  modify visit function to call the right visit_[cmd] funciton
+   -  modify visit function to call the right visit_[cmd] function
 
    .. code:: python
 
@@ -186,9 +186,9 @@ optimizer/rules
 
    -  Import operators
    -  Register new ruletype to **RuleType** and **Promise** (place it
-      **before IMPLEMENTATION_DELIMETER** !!)
-   -  implement class ``Logical[cmd]ToPhysical``, its memeber function
-      apply() will construct a corresbonding\ ``[cmd]Plan`` object.
+      **before IMPLEMENTATION_DELIMITER** !!)
+   -  implement class ``Logical[cmd]ToPhysical``, its member function
+      apply() will construct a corresponding\ ``[cmd]Plan`` object.
 
    .. code:: python
 
@@ -210,14 +210,14 @@ optimizer/rules
 -  ``rules_base.py``-
 
    -  Register new ruletype to **RuleType** and **Promise** (place it
-      **before IMPLEMENTATION_DELIMETER** !!)
+      **before IMPLEMENTATION_DELIMITER** !!)
 
 -  ``rules_manager.py``-
 
    -  Import rules created in ``rules.py``
    -  Add imported logical to physical rules to ``self._implementation_rules``
 
-.. _4-planexcutor:
+.. _4-PlanExecutor:
 
 4. Plan Executor
 --------------
@@ -259,7 +259,7 @@ Key data structures in EVA:
 
       -  ``file_url`` - used to access the real table in storage engine.
 
-   -  For the ``RENAME`` table command, we use the ``old_table_name`` to access the corresponing entry in metadata table, and the ``modified name`` of the table.
+   -  For the ``RENAME`` table command, we use the ``old_table_name`` to access the corresponding entry in metadata table, and the ``modified name`` of the table.
 
 -  **Storage Engine**:
 

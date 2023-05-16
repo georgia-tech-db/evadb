@@ -97,7 +97,7 @@ class OptimizerContext:
 
     def add_opr_to_group(self, opr: Operator, group_id: int = UNDEFINED_GROUP_ID):
         """
-        Convert opertator to group_expression and add to the group
+        Convert operator to group_expression and add to the group
         """
         grp_expr = self._xform_opr_to_group_expr(opr)
         grp_expr = self.memo.add_group_expr(grp_expr, group_id)

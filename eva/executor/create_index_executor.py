@@ -31,12 +31,12 @@ from eva.utils.logging_manager import logger
 
 
 def create_faiss_index(index_type: IndexType, input_dim: int):
-    # Refernce to Faiss documentation.
+    # Reference to Faiss documentation.
     # IDMap: https://github.com/facebookresearch/faiss/wiki/Pre--and-post-processing#faiss-id-mapping
     # Other index types: https://github.com/facebookresearch/faiss/wiki/The-index-factory
 
     if index_type == IndexType.HNSW:
-        # HSNW is the actual index. Faiss also provides
+        # HNSW is the actual index. Faiss also provides
         # a secondary mapping (IDMap) to map from ID inside index to
         # our given ID.
         return faiss.IndexIDMap2(faiss.IndexHNSWFlat(input_dim, 32))
@@ -98,7 +98,7 @@ class CreateIndexExecutor(AbstractExecutor):
             index = None
             input_dim = -1
             storage_engine = StorageEngine.factory(feat_catalog_entry)
-            for input_batch in storage_engine.read(feat_catalog_entry, 1):
+            for input_batch in storage_engine.read(feat_catalog_entry):
                 if udf_func:
                     # Create index through UDF expression.
                     # UDF(input column) -> 2 dimension feature vector.
@@ -106,23 +106,26 @@ class CreateIndexExecutor(AbstractExecutor):
                     feat_batch = self.node.udf_func.evaluate(input_batch)
                     feat_batch.drop_column_alias()
                     input_batch.drop_column_alias()
-                    feat = feat_batch.column_as_numpy_array("features")[0]
+                    feat = feat_batch.column_as_numpy_array("features")
                 else:
-                    # Create index on the feature table direclty.
+                    # Create index on the feature table directly.
                     # Pandas wraps numpy array as an object inside a numpy
                     # array. Use zero index to get the actual numpy array.
-                    feat = input_batch.column_as_numpy_array(feat_col_name)[0]
+                    feat = input_batch.column_as_numpy_array(feat_col_name)
 
-                # Transform to 2-D.
-                feat = feat.reshape(1, -1)
+                row_id = input_batch.column_as_numpy_array(IDENTIFIER_COLUMN)
 
-                if index is None:
-                    input_dim = feat.shape[-1]
-                    index = create_faiss_index(self.node.index_type, input_dim)
+                for i in range(len(input_batch)):
+                    # Transform to 2-D.
+                    row_feat = feat[i].reshape(1, -1)
 
-                # Row ID for mapping back to the row.
-                row_id = input_batch.column_as_numpy_array(IDENTIFIER_COLUMN)[0]
-                index.add_with_ids(feat, np.array([row_id]))
+                    if index is None:
+                        input_dim = row_feat.shape[-1]
+                        index = create_faiss_index(self.node.index_type, input_dim)
+
+                    # Row ID for mapping back to the row.
+                    per_row_id = row_id[i]
+                    index.add_with_ids(row_feat, np.array([per_row_id]))
 
             # Persist index.
             faiss.write_index(index, self._get_index_save_path())
