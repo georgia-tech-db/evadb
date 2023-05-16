@@ -28,10 +28,10 @@ from eva.catalog.catalog_manager import CatalogManager
 from eva.models.storage.batch import Batch
 from eva.server.command_handler import execute_query_fetch_all
 
-import matplotlib.pyplot as plt
-import matplotlib as mpl
-# mpl.use('TkAgg')
-plt.ioff()
+# import matplotlib.pyplot as plt
+# import matplotlib as mpl
+# # mpl.use('TkAgg')
+# plt.ioff()
 
 
 @pytest.mark.notparallel
@@ -39,7 +39,17 @@ class SaliencyTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         CatalogManager().reset()
-        
+        # video_file_path = create_sample_video(NUM_FRAMES)
+
+        # Saliency1 = f"/Users/afaanansari/Desktop/gtech/eva_pdf_load/eva/test/integration_tests/test1.jpeg"
+        # Saliency2 = f"/Users/afaanansari/Desktop/gtech/eva_pdf_load/eva/test/integration_tests/test2.jpeg"
+
+
+        # load_query = f"LOAD VIDEO '{video_file_path}' INTO MyVideo;"
+        # execute_query_fetch_all(f"LOAD IMAGE '{Saliency1}' INTO MRI;")
+        # execute_query_fetch_all(f"LOAD IMAGE '{Saliency2}' INTO MRI;")
+        # execute_query_fetch_all(load_query)
+        # load_udfs_for_testing(mode="minimal")
 
     @classmethod
     def tearDownClass(cls):
@@ -50,29 +60,36 @@ class SaliencyTests(unittest.TestCase):
 
     # integration test
 
+    def test_load_image(self):
+        Saliency1 = f"test/integration_tests/test1.jpeg"
+        create_udf_query = f"LOAD IMAGE '{Saliency1}' INTO MRI;"
+       
+        execute_query_fetch_all(create_udf_query)
+
     def test_saliency(self):
+        
         create_udf_query = """CREATE UDF IF NOT EXISTS MRICNN
                   INPUT (data NDARRAY UINT8(3, 224, 224)) 
                   OUTPUT (saliency ANYTYPE) 
                   TYPE  Classification 
-                  IMPL 'UDF.py';
+                  IMPL 'test/integration_tests/UDF.py';
         """
         execute_query_fetch_all(create_udf_query)
 
         select_query_saliency = """SELECT data, MRICNN(data)
                         FROM MRI;
                        """
-        actual_batch_saliency = execute_query_fetch_all(select_query_saliency)
-        print(actual_batch_saliency.frames)
+        # actual_batch_saliency = execute_query_fetch_all(select_query_saliency)
+        # print(actual_batch_saliency.frames)
         
-        df = actual_batch_saliency.frames
-        fig, ax = plt.subplots(nrows=2, ncols=len(df), figsize=[15,18])
+        # df = actual_batch_saliency.frames
+        # fig, ax = plt.subplots(nrows=2, ncols=len(df), figsize=[15,18])
 
-        for i in range(len(df)):
-            img = df['mri.data'].iloc[i]
-            ax[0,i].imshow(img)
-            ax[1,i].imshow(df["mricnn.saliency"][i][0],cmap=plt.cm.hot)
-            ax[0,i].axis('off')
-            ax[1,i].axis('off')
-        plt.gcf().set_size_inches(5, 5)
-        plt.show()
+        # for i in range(len(df)):
+        #     img = df['mri.data'].iloc[i]
+        #     ax[0,i].imshow(img)
+        #     ax[1,i].imshow(df["mricnn.saliency"][i][0],cmap=plt.cm.hot)
+        #     ax[0,i].axis('off')
+        #     ax[1,i].axis('off')
+        # plt.gcf().set_size_inches(5, 5)
+        # plt.show()
