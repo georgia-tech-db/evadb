@@ -1218,7 +1218,7 @@ class LogicalApplyAndMergeToPhysical(Rule):
 
 class LogicalVectorIndexScanToPhysical(Rule):
     def __init__(self):
-        pattern = Pattern(OperatorType.LOGICALVECTORINDEXSCAN)
+        pattern = Pattern(OperatorType.LOGICAL_VECTOR_INDEX_SCAN)
         pattern.append_child(Pattern(OperatorType.DUMMY))
         super().__init__(RuleType.LOGICAL_VECTOR_INDEX_SCAN_TO_PHYSICAL, pattern)
 

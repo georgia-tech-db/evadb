@@ -74,12 +74,9 @@ class VectorIndexScanExecutor(AbstractExecutor):
         index_result = self.index.query(
             VectorIndexQuery(search_feat, self.limit_count.value)
         )
-        dis_np = index_result.similarities
+        # todo support queries over distance as well
+        # distance_list = index_result.similarities
         row_id_np = index_result.ids
-        distance_list, row_id_list = [], []
-        for dis, row_id in zip(dis_np, row_id_np):
-            distance_list.append(dis)
-            row_id_list.append(row_id)
 
         # Load projected columns from disk and join with search results.
         row_id_col_name = None
@@ -92,7 +89,7 @@ class VectorIndexScanExecutor(AbstractExecutor):
 
             # Nested join.
             for _, row in batch.frames.iterrows():
-                for idx, rid in enumerate(row_id_list):
+                for idx, rid in enumerate(row_id_np):
                     if rid == row[row_id_col_name]:
                         res_row = dict()
                         for col_name in column_list:

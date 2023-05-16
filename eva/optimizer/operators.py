@@ -63,7 +63,7 @@ class OperatorType(IntEnum):
     LOGICALCREATEINDEX = auto()
     LOGICAL_APPLY_AND_MERGE = auto()
     LOGICAL_EXTRACT_OBJECT = auto()
-    LOGICALVECTORINDEXSCAN = auto()
+    LOGICAL_VECTOR_INDEX_SCAN = auto()
     LOGICALDELIMITER = auto()
 
 
@@ -1270,7 +1270,7 @@ class LogicalVectorIndexScan(Operator):
         search_query_expr: FunctionExpression,
         children: List = None,
     ):
-        super().__init__(OperatorType.LOGICALVECTORINDEXSCAN, children)
+        super().__init__(OperatorType.LOGICAL_VECTOR_INDEX_SCAN, children)
         self._index_name = index_name
         self._vector_store_type = vector_store_type
         self._limit_count = limit_count

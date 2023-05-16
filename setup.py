@@ -28,6 +28,7 @@ def read(path, encoding="utf-8"):
     with io.open(path, encoding=encoding) as fp:
         return fp.read()
 
+
 # version.py defines the VERSION and VERSION_SHORT variables
 VERSION_DICT: Dict[str, str] = {}
 with open("eva/version.py", "r") as version_file:
@@ -87,11 +88,7 @@ benchmark_libs = [
     "pytest-benchmark",
 ]
 
-doc_libs = [
-    "pyenchant",
-    "codespell",
-    "pylint"
-]
+doc_libs = ["pyenchant", "codespell", "pylint"]
 
 dist_libs = ["wheel>=0.37.1", "scriv>=0.16.0"]
 
@@ -111,6 +108,9 @@ udf_libs = [
 ]
 
 ### NEEDED FOR EXPERIMENTAL FEATURES
+third_party_libs = ["qrant-client>=1.1.7"]  # Qdrant vector store
+
+### NEEDED FOR EXPERIMENTAL FEATURES
 experimental_libs = []
 
 INSTALL_REQUIRES = minimal_requirement + integration_test_libs + udf_libs
@@ -124,6 +124,7 @@ DEV_REQUIRES = (
     + database_libs
     + dist_libs
     + experimental_libs
+    + third_party_libs
 )
 
 EXTRA_REQUIRES = {"dev": DEV_REQUIRES}
