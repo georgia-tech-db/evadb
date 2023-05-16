@@ -26,7 +26,7 @@ thickness = 4
 
 
 class Annotate(AbstractUDF):
-    @setup(cachable=False, udf_type="cv2-transformation", batchable=True)
+    @setup(cacheable=False, udf_type="cv2-transformation", batchable=True)
     def setup(self):
         pass
 
