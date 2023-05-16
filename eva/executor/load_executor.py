@@ -39,7 +39,7 @@ class LoadDataExecutor(AbstractExecutor):
 
         elif self.node.file_options["file_format"] == FileFormatType.PDF:
             """
-                Executor for extractor from pdf
+            Executor for extractor from pdf
             """
             pass
 

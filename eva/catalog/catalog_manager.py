@@ -21,8 +21,8 @@ from eva.catalog.catalog_utils import (
     cleanup_storage,
     construct_udf_cache_catalog_entry,
     get_image_table_column_definitions,
-    get_video_table_column_definitions,
     get_pdf_table_column_definitions,
+    get_video_table_column_definitions,
     xform_column_definitions_to_catalog_entries,
 )
 from eva.catalog.models.base_model import (
@@ -420,7 +420,7 @@ class CatalogManager(object):
         assert format_type in [
             FileFormatType.VIDEO,
             FileFormatType.IMAGE,
-            FileFormatType.PDF
+            FileFormatType.PDF,
         ], f"Format Type {format_type} is not supported"
 
         if format_type is FileFormatType.VIDEO:

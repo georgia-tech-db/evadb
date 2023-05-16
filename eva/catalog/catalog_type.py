@@ -122,6 +122,7 @@ class ImageColumnName(EVAEnum):
     name  # noqa: F821
     data  # noqa: F821
 
+
 class PDFColumnName(EVAEnum):
     id  # noqa: F821
     data  # noqa: F821

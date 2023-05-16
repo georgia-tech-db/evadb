@@ -20,9 +20,9 @@ from eva.catalog.catalog_type import (
     ColumnType,
     ImageColumnName,
     NdArrayType,
+    PDFColumnName,
     TableType,
     VideoColumnName,
-    PDFColumnName
 )
 from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.catalog.models.table_catalog import TableCatalogEntry
@@ -92,6 +92,7 @@ def get_image_table_column_definitions() -> List[ColumnDefinition]:
     ]
     return columns
 
+
 def get_pdf_table_column_definitions() -> List[ColumnDefinition]:
     """
     id: pdf id
@@ -107,6 +108,7 @@ def get_pdf_table_column_definitions() -> List[ColumnDefinition]:
         ),
     ]
     return columns
+
 
 def get_table_primary_columns(table_catalog_obj: TableCatalogEntry):
     if table_catalog_obj.table_type == TableType.VIDEO_DATA:
