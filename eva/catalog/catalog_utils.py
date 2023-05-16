@@ -102,7 +102,7 @@ def get_pdf_table_column_definitions() -> List[ColumnDefinition]:
         ColumnDefinition(
             PDFColumnName.data.name,
             ColumnType.NDARRAY,
-            NdArrayType.UINT8,
+            NdArrayType.STR,
             (None, None, None),
         ),
     ]
