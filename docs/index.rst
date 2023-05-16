@@ -6,7 +6,7 @@
 EVA DATABASE SYSTEM
 =====
 
-..  rubric:: AI-Relational Database System | SQL meets Deep Learning
+..  rubric:: AI-Relational Database System
 
 ..  figure:: https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/images/eva/eva-banner.png
     :target: https://github.com/georgia-tech-db/eva
