@@ -1205,10 +1205,7 @@ class LogicalOverwriteToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalOverwrite, context: OptimizerContext):
-        after = OverwritePlan(
-            before.table_ref,
-            before.operation,
-        )
+        after = OverwritePlan(before.table_ref, before.operation, before.batch_mem_size)
         yield after
 
 

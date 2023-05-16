@@ -181,7 +181,6 @@ class StatementBinder:
 
     @bind.register(OverwriteStatement)
     def _bind_overwrite_statement(self, node: OverwriteStatement):
-        print("node: ", node)
         self.bind(node.table_ref)
         if node.operation:
             self.bind(node.operation)

@@ -35,6 +35,7 @@ class OverwriteExecutor(AbstractExecutor):
         self.catalog = CatalogManager()
         self.table_ref = self.node.table_ref
         self.operation = self.node.operation
+        self.batch_mem_size = self.node.batch_mem_size
 
     def make_new_video_path(self, video_path: str):
         dirs = video_path.split("/")
@@ -58,10 +59,9 @@ class OverwriteExecutor(AbstractExecutor):
 
         table_obj = self.table_ref.table.table_obj
         storage_engine = StorageEngine.factory(table_obj)
-        batch_mem_size = 30000000
 
         if table_obj.table_type == TableType.VIDEO_DATA:
-            batches = storage_engine.read(table_obj, batch_mem_size)
+            batches = storage_engine.read(table_obj, self.batch_mem_size)
             modified_paths = dict()
             all_video_paths = set()
             all_videos = dict()

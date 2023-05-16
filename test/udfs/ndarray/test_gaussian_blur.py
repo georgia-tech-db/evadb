@@ -20,26 +20,26 @@ from numpy import asarray
 from PIL import Image
 
 from eva.configuration.constants import EVA_ROOT_DIR
-from eva.udfs.ndarray.annotate import Annotate
+from eva.udfs.ndarray.gaussian_blur import GaussianBlur
 
 
-class AnnotateTests(unittest.TestCase):
+class GaussianBlurTests(unittest.TestCase):
     def setUp(self):
-        self.annotate_instance = Annotate()
+        self.gb_instance = GaussianBlur()
 
     def test_flip_name_exists(self):
-        assert hasattr(self.annotate_instance, "name")
+        assert hasattr(self.gb_instance, "name")
 
-    def test_should_flip_horizontally(self):
-        img = Image.open(
-            f"{EVA_ROOT_DIR}/test/data/uadetrac/small-data/MVI_20011/img00001.jpg"
-        )
-        arr = asarray(img)
-        arr_copy = 0 + arr
-        object_type = np.array(["object"])
-        bbox = np.array([[50, 50, 70, 70]])
-        df = pd.DataFrame([[arr, object_type, bbox]])
-        modified_arr = self.annotate_instance(df)["annotated_frame_array"]
+    def test_should_blur_image(self):
+        arr = asarray(Image.open(f"{EVA_ROOT_DIR}/test/udfs/data/dog.jpeg"))
+        df = pd.DataFrame([[arr]])
+        modified_arr = self.gb_instance(df)["blurred_frame_array"]
 
-        self.assertNotEqual(np.sum(arr_copy - modified_arr[0]), 0)
-        self.assertEqual(np.sum(modified_arr[0][50][50] - np.array([207, 248, 64])), 0)
+        data = Image.fromarray(modified_arr[0])
+        data.save(f"{EVA_ROOT_DIR}/test/udfs/data/tmp.jpeg")
+
+        actual_array = asarray(Image.open(f"{EVA_ROOT_DIR}/test/udfs/data/tmp.jpeg"))
+
+        expected_array = asarray(Image.open(f"{EVA_ROOT_DIR}/test/udfs/data/tmp.jpeg"))
+
+        self.assertEqual(np.sum(actual_array - expected_array), 0)

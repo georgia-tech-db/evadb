@@ -1275,17 +1275,20 @@ class LogicalOverwrite(Operator):
     Arguments:
         table_ref(TableRef): table to overwrite data
         operation(AbstractExpression): overwrite the data with the result of operation
+        batch_mem_size(int): memory size of the batch loaded from disk
     """
 
     def __init__(
         self,
         table_ref: TableRef,
         operation: AbstractExpression,
+        batch_mem_size: int = 30000000,
         children: List = None,
     ):
         super().__init__(OperatorType.LOGICALOVERWRITE, children)
         self._table_ref = table_ref
         self._operation = operation
+        self._batch_mem_size = batch_mem_size
 
     @property
     def table_ref(self):
@@ -1294,6 +1297,10 @@ class LogicalOverwrite(Operator):
     @property
     def operation(self):
         return self._operation
+
+    @property
+    def batch_mem_size(self):
+        return self._batch_mem_size
 
     def __str__(self):
         return "LogicalOverwrite(table: {}, operation: {})".format(
@@ -1312,9 +1319,5 @@ class LogicalOverwrite(Operator):
 
     def __hash__(self) -> int:
         return hash(
-            (
-                super().__hash__(),
-                self._table_ref,
-                self._operation,
-            )
+            (super().__hash__(), self._table_ref, self._operation, self._batch_mem_size)
         )

@@ -16,10 +16,14 @@ import cv2
 import numpy as np
 import pandas as pd
 
+from eva.catalog.catalog_type import NdArrayType
 from eva.udfs.abstract.abstract_udf import AbstractUDF
+from eva.udfs.decorators.decorators import forward, setup
+from eva.udfs.decorators.io_descriptors.data_types import PandasDataframe
 
 
 class HorizontalFlip(AbstractUDF):
+    @setup(cachable=False, udf_type="cv2-transformation", batchable=True)
     def setup(self):
         pass
 
@@ -27,6 +31,22 @@ class HorizontalFlip(AbstractUDF):
     def name(self):
         return "HorizontalFlip"
 
+    @forward(
+        input_signatures=[
+            PandasDataframe(
+                columns=["data"],
+                column_types=[NdArrayType.FLOAT32],
+                column_shapes=[(None, None, 3)],
+            )
+        ],
+        output_signatures=[
+            PandasDataframe(
+                columns=["horizontally_flipped_frame_array"],
+                column_types=[NdArrayType.FLOAT32],
+                column_shapes=[(None, None, 3)],
+            )
+        ],
+    )
     def forward(self, frame: pd.DataFrame) -> pd.DataFrame:
         """
         Apply horizontal flip to the frame

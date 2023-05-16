@@ -64,9 +64,9 @@ class DecordStorageEngine(AbstractMediaStorageEngine):
             media_metadata_table = self._get_metadata_table(table)
             for video_path in video_paths:
                 dst_file_name = self._xform_file_url_to_file_name(Path(video_path))
-                image_file = Path(table.file_url) / dst_file_name
+                video_file = Path(table.file_url) / dst_file_name
                 self._rdb_handler.clear(media_metadata_table)
-                image_file.unlink()
+                video_file.unlink()
         except Exception as e:
             error = f"Deleting file path {video_paths} failed with exception {e}"
             raise RuntimeError(error)

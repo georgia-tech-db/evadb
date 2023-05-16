@@ -16,13 +16,17 @@ import cv2
 import numpy as np
 import pandas as pd
 
+from eva.catalog.catalog_type import NdArrayType
 from eva.udfs.abstract.abstract_udf import AbstractUDF
+from eva.udfs.decorators.decorators import forward, setup
+from eva.udfs.decorators.io_descriptors.data_types import PandasDataframe
 
 color = (207, 248, 64)
 thickness = 4
 
 
 class Annotate(AbstractUDF):
+    @setup(cachable=False, udf_type="cv2-transformation", batchable=True)
     def setup(self):
         pass
 
@@ -30,6 +34,26 @@ class Annotate(AbstractUDF):
     def name(self):
         return "Annotate"
 
+    @forward(
+        input_signatures=[
+            PandasDataframe(
+                columns=["data", "labels", "bboxes"],
+                column_types=[
+                    NdArrayType.FLOAT32,
+                    NdArrayType.STR,
+                    NdArrayType.FLOAT32,
+                ],
+                column_shapes=[(None, None, 3), (None,), (None,)],
+            )
+        ],
+        output_signatures=[
+            PandasDataframe(
+                columns=["annotated_frame_array"],
+                column_types=[NdArrayType.FLOAT32],
+                column_shapes=[(None, None, 3)],
+            )
+        ],
+    )
     def forward(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Modify the frame to annotate the bbox on it.
@@ -41,26 +65,12 @@ class Annotate(AbstractUDF):
         def annotate(row: pd.Series) -> np.ndarray:
             row = row.to_list()
             frame = row[0]
-
             bboxes = row[2]
 
             for bbox in bboxes:
                 x1, y1, x2, y2 = np.asarray(bbox, dtype="int")
-
                 x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
-
                 frame = cv2.rectangle(frame, (x1, y1), (x2, y2), color, thickness)
-
-                # cv2.putText(
-                #     frame,
-                #     label,
-                #     (x1, y1 - 10),
-                #     cv2.FONT_HERSHEY_SIMPLEX,
-                #     0.9,
-                #     color,
-                #     thickness,
-                # )
-
             return frame
 
         ret = pd.DataFrame()
