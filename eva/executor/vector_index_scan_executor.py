@@ -12,15 +12,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from pathlib import Path
 from typing import Iterator
 
 import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.catalog_type import VectorStoreType
 from eva.catalog.sql_config import IDENTIFIER_COLUMN
 from eva.executor.abstract_executor import AbstractExecutor
+from eva.executor.executor_utils import handle_vector_store_params
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.vector_index_scan_plan import VectorIndexScanPlan
 from eva.third_party.vector_stores.types import VectorIndexQuery
@@ -54,7 +53,7 @@ class VectorIndexScanExecutor(AbstractExecutor):
         self.index = VectorStoreFactory.init_vector_store(
             self.node.vector_store_type,
             self.index_name,
-            **self._handle_addtional_params()
+            **handle_vector_store_params(self.node.vector_store_type, self.index_path)
         )
 
         # Get the query feature vector. Create a dummy
@@ -97,9 +96,3 @@ class VectorIndexScanExecutor(AbstractExecutor):
                         res_row_list[idx] = res_row
 
         yield Batch(pd.DataFrame(res_row_list))
-
-    def _handle_addtional_params(self):
-        if self.node.vector_store_type == VectorStoreType.FAISS:
-            return {"index_path": self.index_path}
-        elif self.node.vector_store_type == VectorStoreType.QDRANT:
-            return {"index_db": str(Path(self.index_path).parent)}

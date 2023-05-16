@@ -17,11 +17,10 @@ from pathlib import Path
 import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.catalog_type import VectorStoreType
 from eva.catalog.sql_config import IDENTIFIER_COLUMN
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.executor.abstract_executor import AbstractExecutor
-from eva.executor.executor_utils import ExecutorError
+from eva.executor.executor_utils import ExecutorError, handle_vector_store_params
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.create_index_plan import CreateIndexPlan
 from eva.storage.storage_engine import StorageEngine
@@ -71,7 +70,6 @@ class CreateIndexExecutor(AbstractExecutor):
                 col for col in feat_catalog_entry.columns if col.name == feat_col_name
             ][0]
 
-            params = self._handle_addtional_params()
             # Add features to index.
             # TODO: batch size is hardcoded for now.
             input_dim = -1
@@ -98,7 +96,11 @@ class CreateIndexExecutor(AbstractExecutor):
                     if self.index is None:
                         input_dim = row_feat.shape[1]
                         self.index = VectorStoreFactory.init_vector_store(
-                            self.node.vector_store_type, self.node.name, **params
+                            self.node.vector_store_type,
+                            self.node.name,
+                            **handle_vector_store_params(
+                                self.node.vector_store_type, self.index_path
+                            ),
                         )
                         self.index.create(input_dim)
 
@@ -123,9 +125,3 @@ class CreateIndexExecutor(AbstractExecutor):
 
             # Throw exception back to user.
             raise ExecutorError(str(e))
-
-    def _handle_addtional_params(self):
-        if self.node.vector_store_type == VectorStoreType.FAISS:
-            return {"index_path": self.index_path}
-        elif self.node.vector_store_type == VectorStoreType.QDRANT:
-            return {"index_db": str(Path(self.index_path).parent)}
