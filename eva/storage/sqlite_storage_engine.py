@@ -98,8 +98,10 @@ class SQLStorageEngine(AbstractStorageEngine):
         attr_dict.update(sqlalchemy_schema)
         # dynamic schema generation
         # https://sparrigan.github.io/sql/sqla/2016/01/03/dynamic-tables.html
-        new_table = type("__placeholder_class_name", (BaseModel,), attr_dict)()
-        BaseModel.metadata.tables[table.name].create(self._sql_engine)
+        new_table = type("__placeholder_class_name__", (BaseModel,), attr_dict)()
+        table = BaseModel.metadata.tables[table.name]
+        if not table.exists():
+            BaseModel.metadata.tables[table.name].create(self._sql_engine)
         self._sql_session.commit()
         return new_table
 

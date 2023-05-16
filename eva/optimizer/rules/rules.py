@@ -62,7 +62,6 @@ from eva.optimizer.operators import (
     LogicalDropUDF,
     LogicalExplain,
     LogicalExtractObject,
-    LogicalFaissIndexScan,
     LogicalFilter,
     LogicalFunctionScan,
     LogicalGet,
@@ -78,6 +77,7 @@ from eva.optimizer.operators import (
     LogicalSample,
     LogicalShow,
     LogicalUnion,
+    LogicalVectorIndexScan,
     Operator,
     OperatorType,
 )
@@ -87,7 +87,6 @@ from eva.plan_nodes.create_udf_plan import CreateUDFPlan
 from eva.plan_nodes.delete_plan import DeletePlan
 from eva.plan_nodes.drop_plan import DropPlan
 from eva.plan_nodes.drop_udf_plan import DropUDFPlan
-from eva.plan_nodes.faiss_index_scan_plan import FaissIndexScanPlan
 from eva.plan_nodes.function_scan_plan import FunctionScanPlan
 from eva.plan_nodes.groupby_plan import GroupByPlan
 from eva.plan_nodes.hash_join_probe_plan import HashJoinProbePlan
@@ -100,6 +99,7 @@ from eva.plan_nodes.rename_plan import RenamePlan
 from eva.plan_nodes.seq_scan_plan import SeqScanPlan
 from eva.plan_nodes.storage_plan import StoragePlan
 from eva.plan_nodes.union_plan import UnionPlan
+from eva.plan_nodes.vector_index_scan_plan import VectorIndexScanPlan
 
 ##############################################
 # REWRITE RULES START
@@ -487,10 +487,10 @@ class XformExtractObjectToLinearFlow(Rule):
         yield tracker
 
 
-class CombineSimilarityOrderByAndLimitToFaissIndexScan(Rule):
+class CombineSimilarityOrderByAndLimitToVectorIndexScan(Rule):
     """
-    This rule currently rewrites Order By + Limit to a Faiss index scan.
-    Because Faiss index only works for similarity search, the rule will
+    This rule currently rewrites Order By + Limit to a vector index scan.
+    Because vector index only works for similarity search, the rule will
     only be applied when the Order By is on Similarity expression. For
     simplicity, we also only enable this rule when the Similarity expression
     applies to the full table. Predicated query will yield incorrect results
@@ -509,7 +509,7 @@ class CombineSimilarityOrderByAndLimitToFaissIndexScan(Rule):
         orderby_pattern.append_child(Pattern(OperatorType.DUMMY))
         pattern.append_child(orderby_pattern)
         super().__init__(
-            RuleType.COMBINE_SIMILARITY_ORDERBY_AND_LIMIT_TO_FAISS_INDEX_SCAN, pattern
+            RuleType.COMBINE_SIMILARITY_ORDERBY_AND_LIMIT_TO_VECTOR_INDEX_SCAN, pattern
         )
 
         # Entries populate after rule eligibility validation.
@@ -517,7 +517,7 @@ class CombineSimilarityOrderByAndLimitToFaissIndexScan(Rule):
         self._query_func_expr = None
 
     def promise(self):
-        return Promise.COMBINE_SIMILARITY_ORDERBY_AND_LIMIT_TO_FAISS_INDEX_SCAN
+        return Promise.COMBINE_SIMILARITY_ORDERBY_AND_LIMIT_TO_VECTOR_INDEX_SCAN
 
     def check(self, before: LogicalLimit, context: OptimizerContext):
         return True
@@ -578,15 +578,16 @@ class CombineSimilarityOrderByAndLimitToFaissIndexScan(Rule):
         if not index_catalog_entry:
             return
 
-        # Construct the Faiss index scan plan.
-        faiss_index_scan_node = LogicalFaissIndexScan(
+        # Construct the Vector index scan plan.
+        vector_index_scan_node = LogicalVectorIndexScan(
             index_catalog_entry.name,
+            index_catalog_entry.type,
             limit_node.limit_count,
             query_func_expr,
         )
         for child in orderby_node.children:
-            faiss_index_scan_node.append_child(child)
-        yield faiss_index_scan_node
+            vector_index_scan_node.append_child(child)
+        yield vector_index_scan_node
 
 
 # REWRITE RULES END
@@ -759,13 +760,13 @@ class LogicalCreateUDFToPhysical(Rule):
         yield after
 
 
-class LogicalCreateIndexToFaiss(Rule):
+class LogicalCreateIndexToVectorIndex(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALCREATEINDEX)
-        super().__init__(RuleType.LOGICAL_CREATE_INDEX_TO_FAISS, pattern)
+        super().__init__(RuleType.LOGICAL_CREATE_INDEX_TO_VECOR_INDEX, pattern)
 
     def promise(self):
-        return Promise.LOGICAL_CREATE_INDEX_TO_FAISS
+        return Promise.LOGICAL_CREATE_INDEX_TO_VECOR_INDEX
 
     def check(self, before: Operator, context: OptimizerContext):
         return True
@@ -775,7 +776,7 @@ class LogicalCreateIndexToFaiss(Rule):
             before.name,
             before.table_ref,
             before.col_list,
-            before.index_type,
+            before.vector_store_type,
             before.udf_func,
         )
         yield after
@@ -1215,21 +1216,24 @@ class LogicalApplyAndMergeToPhysical(Rule):
         yield after
 
 
-class LogicalFaissIndexScanToPhysical(Rule):
+class LogicalVectorIndexScanToPhysical(Rule):
     def __init__(self):
-        pattern = Pattern(OperatorType.LOGICALFAISSINDEXSCAN)
+        pattern = Pattern(OperatorType.LOGICAL_VECTOR_INDEX_SCAN)
         pattern.append_child(Pattern(OperatorType.DUMMY))
-        super().__init__(RuleType.LOGICAL_FAISS_INDEX_SCAN_TO_PHYSICAL, pattern)
+        super().__init__(RuleType.LOGICAL_VECTOR_INDEX_SCAN_TO_PHYSICAL, pattern)
 
     def promise(self):
-        return Promise.LOGICAL_FAISS_INDEX_SCAN_TO_PHYSICAL
+        return Promise.LOGICAL_VECTOR_INDEX_SCAN_TO_PHYSICAL
 
     def check(self, grp_id: int, context: OptimizerContext):
         return True
 
-    def apply(self, before: LogicalFaissIndexScan, context: OptimizerContext):
-        after = FaissIndexScanPlan(
-            before.index_name, before.limit_count, before.search_query_expr
+    def apply(self, before: LogicalVectorIndexScan, context: OptimizerContext):
+        after = VectorIndexScanPlan(
+            before.index_name,
+            before.vector_store_type,
+            before.limit_count,
+            before.search_query_expr,
         )
         for child in before.children:
             after.append_child(child)

@@ -14,6 +14,7 @@
 # limitations under the License.
 import os
 import unittest
+from test.markers import ray_skip_marker
 from test.util import create_sample_image, load_udfs_for_testing, shutdown_ray
 
 import cv2
@@ -202,7 +203,7 @@ class SimilarityTests(unittest.TestCase):
         # actual_distance = actual_batch.frames["similarity.distance"].to_numpy()[1]
         # self.assertEqual(actual_distance, 27)
 
-    def test_should_do_faiss_index_scan(self):
+    def test_should_do_vector_index_scan(self):
         ###########################################
         # Test case runs on feature vector table. #
         ###########################################
@@ -218,7 +219,7 @@ class SimilarityTests(unittest.TestCase):
         # Execution with index scan.
         create_index_query = """CREATE INDEX testFaissIndexScanRewrite1
                                     ON testSimilarityFeatureTable (feature_col)
-                                    USING HNSW;"""
+                                    USING FAISS;"""
         execute_query_fetch_all(create_index_query)
         select_query = """SELECT feature_col FROM testSimilarityFeatureTable
                             ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), feature_col)
@@ -227,7 +228,7 @@ class SimilarityTests(unittest.TestCase):
         )
         explain_query = """EXPLAIN {}""".format(select_query)
         explain_batch = execute_query_fetch_all(explain_query)
-        self.assertTrue("FaissIndexScan" in explain_batch.frames[0][0])
+        self.assertTrue("VectorIndexScan" in explain_batch.frames[0][0])
         actual_batch = execute_query_fetch_all(select_query)
 
         self.assertEqual(len(actual_batch), 3)
@@ -258,7 +259,7 @@ class SimilarityTests(unittest.TestCase):
         # Execution with index scan.
         create_index_query = """CREATE INDEX testFaissIndexScanRewrite2
                                     ON testSimilarityTable (DummyFeatureExtractor(data_col))
-                                    USING HNSW;"""
+                                    USING FAISS;"""
         execute_query_fetch_all(create_index_query)
         select_query = """SELECT data_col FROM testSimilarityTable
                             ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data_col))
@@ -267,7 +268,7 @@ class SimilarityTests(unittest.TestCase):
         )
         explain_query = """EXPLAIN {}""".format(select_query)
         explain_batch = execute_query_fetch_all(explain_query)
-        self.assertTrue("FaissIndexScan" in explain_batch.frames[0][0])
+        self.assertTrue("VectorIndexScan" in explain_batch.frames[0][0])
         actual_batch = execute_query_fetch_all(select_query)
 
         self.assertEqual(len(actual_batch), 3)
@@ -283,11 +284,11 @@ class SimilarityTests(unittest.TestCase):
         CatalogManager().drop_index_catalog_entry("testFaissIndexScanRewrite1")
         CatalogManager().drop_index_catalog_entry("testFaissIndexScanRewrite2")
 
-    def test_should_not_do_faiss_index_scan_with_predicate(self):
+    def test_should_not_do_vector_index_scan_with_predicate(self):
         # Execution with index scan.
         create_index_query = """CREATE INDEX testFaissIndexScanRewrite
                                     ON testSimilarityTable (DummyFeatureExtractor(data_col))
-                                    USING HNSW;"""
+                                    USING FAISS;"""
         execute_query_fetch_all(create_index_query)
 
         explain_query = """
@@ -309,12 +310,32 @@ class SimilarityTests(unittest.TestCase):
     def test_end_to_end_index_scan_should_work_correctly_on_image_dataset(self):
         create_index_query = """CREATE INDEX testFaissIndexImageDataset
                                     ON testSimilarityImageDataset (DummyFeatureExtractor(data))
-                                    USING HNSW;"""
+                                    USING FAISS;"""
         execute_query_fetch_all(create_index_query)
         select_query = """SELECT _row_id FROM testSimilarityImageDataset
                             ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data))
                             LIMIT 1;""".format(
             self.img_path
         )
+        res_batch = execute_query_fetch_all(select_query)
+        self.assertEqual(res_batch.frames["testsimilarityimagedataset._row_id"][0], 5)
+
+    @ray_skip_marker
+    def test_end_to_end_index_scan_should_work_correctly_on_image_dataset_qdrant(self):
+        create_index_query = """CREATE INDEX testFaissIndexImageDataset
+                                    ON testSimilarityImageDataset (DummyFeatureExtractor(data))
+                                    USING QDRANT;"""
+        execute_query_fetch_all(create_index_query)
+        select_query = """SELECT _row_id FROM testSimilarityImageDataset
+                            ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data))
+                            LIMIT 1;""".format(
+            self.img_path
+        )
+
+        """|__ ProjectPlan
+            |__ VectorIndexScanPlan
+                |__ SeqScanPlan
+                    |__ StoragePlan"""
+
         res_batch = execute_query_fetch_all(select_query)
         self.assertEqual(res_batch.frames["testsimilarityimagedataset._row_id"][0], 5)
