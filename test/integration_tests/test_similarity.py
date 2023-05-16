@@ -329,5 +329,11 @@ class SimilarityTests(unittest.TestCase):
                             LIMIT 1;""".format(
             self.img_path
         )
+
+        """|__ ProjectPlan
+            |__ VectorIndexScanPlan
+                |__ SeqScanPlan
+                    |__ StoragePlan"""
+
         res_batch = execute_query_fetch_all(select_query)
         self.assertEqual(res_batch.frames["testsimilarityimagedataset._row_id"][0], 5)
