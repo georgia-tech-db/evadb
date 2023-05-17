@@ -104,7 +104,7 @@ def get_pdf_table_column_definitions() -> List[ColumnDefinition]:
             PDFColumnName.data.name,
             ColumnType.NDARRAY,
             NdArrayType.STR,
-            (None, None, None),
+            None,
         ),
     ]
     return columns
