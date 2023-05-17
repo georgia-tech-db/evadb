@@ -47,5 +47,5 @@ class PlanOprType(Enum):
     EXPLAIN = auto()
     CREATE_INDEX = auto()
     APPLY_AND_MERGE = auto()
-    FAISS_INDEX_SCAN = auto()
+    VECTOR_INDEX_SCAN = auto()
     # add other types

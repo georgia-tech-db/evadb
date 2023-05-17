@@ -121,6 +121,8 @@ class MaterializedViewTest(unittest.TestCase):
         for idx in res.index:
             self.assertTrue("car" in res["uadtrac_fastrcnn.labels"][idx])
 
+        execute_query_fetch_all("DROP TABLE IF EXISTS uadtrac_fastRCNN;")
+
     @pytest.mark.torchtest
     def test_should_mat_view_with_fastrcnn_lateral_join(self):
         select_query = (
@@ -142,3 +144,5 @@ class MaterializedViewTest(unittest.TestCase):
         res = actual_batch.frames
         for idx in res.index:
             self.assertTrue("car" in res["uadtrac_fastrcnn_new.label"][idx])
+
+        execute_query_fetch_all("DROP TABLE IF EXISTS uadtrac_fastRCNN;")

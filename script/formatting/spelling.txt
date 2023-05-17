@@ -96,7 +96,7 @@ ColumnElement
 ColumnList
 ColumnType
 ColumnTypeTests
-CombineSimilarityOrderByAndLimitToFaissIndexScan
+CombineSimilarityOrderByAndLimitToVectorIndexScan
 CommandHandlerTests
 CommonClauses
 ComparisonExpression
@@ -274,7 +274,7 @@ IndexCatalogEntry
 IndexCatalogService
 IndexCatalogServiceTest
 IndexScan
-IndexType
+VectorStoreType
 InputType
 InsertExecutor
 InsertExecutorTest
@@ -301,7 +301,7 @@ LOGICALDELIMITER
 LOGICALDROP
 LOGICALDROPUDF
 LOGICALEXPLAIN
-LOGICALFAISSINDEXSCAN
+LOGICAL_VECTOR_INDEX_SCAN
 LOGICALFILTER
 LOGICALFUNCTIONSCAN
 LOGICALGROUPBY
@@ -337,7 +337,7 @@ LogicalApplyAndMerge
 LogicalApplyAndMergeToPhysical
 LogicalCreate
 LogicalCreateIndex
-LogicalCreateIndexToFaiss
+LogicalCreateIndexToVectorIndex
 LogicalCreateMaterializedView
 LogicalCreateMaterializedViewToPhysical
 LogicalCreateToPhysical
@@ -357,8 +357,8 @@ LogicalExplainToPhysical
 LogicalExpression
 LogicalExpressionsTest
 LogicalExtractObject
-LogicalFaissIndexScan
-LogicalFaissIndexScanToPhysical
+LogicalVectorIndexScan
+LogicalVectorIndexScanToPhysical
 LogicalFilter
 LogicalFilterToPhysical
 LogicalFunctionScan

@@ -322,7 +322,7 @@ class StatementToPlanConverter:
             statement.name,
             statement.table_ref,
             statement.col_list,
-            statement.index_type,
+            statement.vector_store_type,
             statement.udf_func,
         )
         self._plan = create_index_opr

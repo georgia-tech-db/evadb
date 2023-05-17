@@ -20,6 +20,7 @@ from typing import Generator, List
 import cv2
 
 from eva.catalog.catalog_manager import CatalogManager
+from eva.catalog.catalog_type import VectorStoreType
 from eva.expression.abstract_expression import AbstractExpression
 from eva.models.storage.batch import Batch
 from eva.parser.table_ref import TableInfo
@@ -97,3 +98,27 @@ def validate_media(file_path: Path, media_type: FileFormatType) -> bool:
         return validate_image(file_path)
     else:
         raise ValueError(f"Unsupported Media type {str(media_type)}")
+
+
+def handle_vector_store_params(
+    vector_store_type: VectorStoreType, index_path: str
+) -> dict:
+    """Handle vector store parameters based on the vector store type and index path.
+
+    Args:
+        vector_store_type (VectorStoreType): The type of vector store.
+        index_path (str): The path to store the index.
+
+    Returns:
+        dict: Dictionary containing the appropriate vector store parameters.
+
+
+    Raises:
+        ValueError: If the vector store type in the node is not supported.
+    """
+    if vector_store_type == VectorStoreType.FAISS:
+        return {"index_path": index_path}
+    elif vector_store_type == VectorStoreType.QDRANT:
+        return {"index_db": str(Path(index_path).parent)}
+    else:
+        raise ValueError("Unsupported vector store type: {}".format(vector_store_type))

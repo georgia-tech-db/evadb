@@ -72,9 +72,9 @@ source_suffix = [".rst", ".md"]
 master_doc = "index"
 
 # General information about the project.
-project = "EVA AI-Relational Database System"
-copyright = str(date.today().year) + ", Georgia Tech Database Group."
-author = u"Georgia Tech Database Group"
+project = "EVA DB"
+copyright = str(date.today().year) + ", EVA DB."
+author = u"EVA DB"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.

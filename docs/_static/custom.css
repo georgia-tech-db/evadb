@@ -1,3 +1,7 @@
+/******************************/
+/****  CUSTOM CSS FOR EVA  ****/
+/******************************/
+
 @import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital@0;1&family=Source+Serif+Pro:ital,wght@0,400;0,600;1,400&display=swap');
 
 :root {
@@ -8,23 +12,14 @@ body {font-family: 'Source Serif Pro', serif;}
 aside, table {font-family: 'Source Sans Pro', sans-serif;}
 
 
-/*aside.sidebar-drawer {background: #ABC;}
-aside.sidebar-drawer div.sidebar-container {background: #acb;}
-div.content {background: #bca;}
-div.article-container {background: #bac;}
-aside.toc-drawer {background: #bbb};}
-aside.toc-drawer {background: #cba}
-article aside.sidebar {background: #ccc;}
-*/
-
 /* --------- left and right TOCs --------- */
 
-.sidebar-drawer {
-    width: calc(50% - 28em);
-    min-width: 13em;
+.sidebar-tree .caption {
+    font-size: 120%;
 }
-.sidebar-container, .toc-drawer {
-    width: 12em;
+
+.sidebar-logo {
+    max-width: 80%;
 }
 
 /* --------- asides --------- */
@@ -126,11 +121,7 @@ blockquote.epigraph {
     border-left: none;
     padding: 1em 0 1em 3em;
 }
-blockquote p.attribution {padding-left: 3em; font-style: normal;
-
-/*    margin: 0 3em;
-    padding-bottom: 2em;
-*/}
+blockquote p.attribution {padding-left: 3em; font-style: normal;}
 
 figcaption {text-align: right; font-style: italic;}
 
@@ -184,6 +175,10 @@ input.sidebar-search {border: none;}
 .nav-overlay-icon .icon svg, .toc-overlay-icon .icon svg, .theme-toggle svg {color: var(--orange);}
 
 .toc-tree li.scroll-current>.reference {color: var(--orange);}
+
+.toc-tree{
+    font-size: 80%;
+}
 
 /* --------- tables --------- */
 

@@ -26,7 +26,7 @@ class ParserStatementTests(unittest.TestCase):
         parser = Parser()
 
         queries = [
-            "CREATE INDEX testindex ON MyVideo (featCol) USING HNSW;",
+            "CREATE INDEX testindex ON MyVideo (featCol) USING FAISS;",
             """CREATE TABLE IF NOT EXISTS Persons (
                   Frame_ID INTEGER UNIQUE,
                   Frame_Data TEXT(10),
@@ -90,7 +90,7 @@ class ParserStatementTests(unittest.TestCase):
         # The queries below are the result of randomly changing the case of the
         # characters in the above queries.
         randomized_cases = [
-            "Create index TestIndex on MyVideo (featCol) using HNSW;",
+            "Create index TestIndex on MyVideo (featCol) using FAISS;",
             """create table if not exists Persons (
                     Frame_ID integer unique,
                     Frame_Data text(10),
