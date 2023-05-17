@@ -64,6 +64,8 @@ def bootstrap_environment(eva_config_dir: Path, eva_installation_dir: Path):
     s3_dir = eva_config_dir / S3_DOWNLOAD_DIR
     tmp_dir = eva_config_dir / TMP_DIR
 
+    if not dataset_location.exists():
+        dataset_location.mkdir(parents=True, exist_ok=True)
     if not eva_config_dir.exists():
         eva_config_dir.mkdir(parents=True, exist_ok=True)
     if not index_dir.exists():
