@@ -12,24 +12,7 @@ body {font-family: 'Source Serif Pro', serif;}
 aside, table {font-family: 'Source Sans Pro', sans-serif;}
 
 
-/*aside.sidebar-drawer {background: #ABC;}
-aside.sidebar-drawer div.sidebar-container {background: #acb;}
-div.content {background: #bca;}
-div.article-container {background: #bac;}
-aside.toc-drawer {background: #bbb};}
-aside.toc-drawer {background: #cba}
-article aside.sidebar {background: #ccc;}
-*/
-
 /* --------- left and right TOCs --------- */
-
-.sidebar-drawer {
-    width: calc(50% - 28em);
-    min-width: 13em;
-}
-.sidebar-container, .toc-drawer {
-    width: 18em;
-}
 
 .sidebar-tree .caption {
     font-size: 120%;
@@ -134,11 +117,7 @@ blockquote.epigraph {
     border-left: none;
     padding: 1em 0 1em 3em;
 }
-blockquote p.attribution {padding-left: 3em; font-style: normal;
-
-/*    margin: 0 3em;
-    padding-bottom: 2em;
-*/}
+blockquote p.attribution {padding-left: 3em; font-style: normal;}
 
 figcaption {text-align: right; font-style: italic;}
 
