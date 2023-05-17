@@ -6,7 +6,7 @@
 EVA DB
 =====
 
-..  rubric:: AI-Relational Database System
+..  rubric:: Database system for building simpler and faster AI-powered applications.
 
 ..  figure:: https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/images/eva/eva-banner.png
     :target: https://github.com/georgia-tech-db/eva
