@@ -121,7 +121,7 @@ Illustrative EVA Applications
 ----------
 
 Community
-----
+--------
 
 Join the EVA community on `Slack <https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg>`_ to ask questions and to share your ideas for improving EVA.
 
@@ -129,8 +129,6 @@ Join the EVA community on `Slack <https://join.slack.com/t/eva-db/shared_invite/
     :target: https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg
     :width: 100%
     :alt: EVA Slack Channel
-
-.. spelling::
 
 .. |pypi_status| image:: https://img.shields.io/pypi/v/evadb.svg
    :target: https://pypi.org/project/evadb
