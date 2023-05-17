@@ -158,7 +158,6 @@ norfair_obj_tracker_query = """CREATE UDF IF NOT EXISTS NorFairTracker
 )
 
 Sift_udf_query = """CREATE UDF IF NOT EXISTS SiftFeatureExtractor
-        TYPE  FeatureExtraction 
         IMPL  '{}/udfs/sift_feature_extractor.py';
         """.format(
     EVA_INSTALLATION_DIR
@@ -185,11 +184,12 @@ def init_builtin_udfs(mode: str = "debug") -> None:
         Crop_udf_query,
         Open_udf_query,
         Similarity_udf_query,
-        norfair_obj_tracker_query
+        norfair_obj_tracker_query,
         # Disabled because required packages (eg., easy_ocr might not be preinstalled)
         # face_detection_udf_query,
         # ocr_udf_query,
         # Mvit_udf_query, - Disabled as it requires specific pytorch package
+        # Sift_udf_query, - requires package kornia
     ]
 
     if mode == "release":

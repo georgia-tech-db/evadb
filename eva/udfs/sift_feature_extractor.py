@@ -26,12 +26,13 @@ from eva.udfs.gpu_compatible import GPUCompatible
 
 
 class SiftFeatureExtractor(AbstractUDF, GPUCompatible):
-    @setup(cachable=False, udf_type="FeatureExtraction", batchable=False)
+    @setup(cacheable=False, udf_type="FeatureExtraction", batchable=False)
     def setup(self):
         self.model = kornia.feature.SIFTDescriptor(100)
 
     def to_device(self, device: str) -> GPUCompatible:
-        return self.model.to(device)
+        self.model = self.model.to(device)
+        return self
 
     @property
     def name(self) -> str:
@@ -73,7 +74,6 @@ class SiftFeatureExtractor(AbstractUDF, GPUCompatible):
 
             # Feature reshape.
             feat = feat.reshape(1, -1)
-
             return feat
 
         ret = pd.DataFrame()
