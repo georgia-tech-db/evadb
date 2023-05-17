@@ -1,3 +1,7 @@
+/******************************/
+/****  CUSTOM CSS FOR EVA  ****/
+/******************************/
+
 @import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital@0;1&family=Source+Serif+Pro:ital,wght@0,400;0,600;1,400&display=swap');
 
 :root {
@@ -24,7 +28,11 @@ article aside.sidebar {background: #ccc;}
     min-width: 13em;
 }
 .sidebar-container, .toc-drawer {
-    width: 12em;
+    width: 18em;
+}
+
+.sidebar-tree .caption {
+    font-size: 120%;
 }
 
 /* --------- asides --------- */
@@ -184,6 +192,10 @@ input.sidebar-search {border: none;}
 .nav-overlay-icon .icon svg, .toc-overlay-icon .icon svg, .theme-toggle svg {color: var(--orange);}
 
 .toc-tree li.scroll-current>.reference {color: var(--orange);}
+
+.toc-tree{
+    font-size: 80%;
+}
 
 /* --------- tables --------- */
 
