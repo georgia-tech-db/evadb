@@ -114,10 +114,6 @@ html_theme_options = {
     "dark_css_variables": {
         "color-background-secondary": "#000",
     },
-    "launch_buttons": {
-        "notebook_interface": "jupyterlab",
-        "colab_url": "https://colab.research.google.com",
-    },
     "navigation_with_keys": True,
     # Add important announcement here
     #"announcement": "<em>Important</em> announcement!"
