@@ -4,7 +4,7 @@ parts:
 
   - caption: Overview
     chapters:
-      - file: source/overview/video
+      - file: source/overview/aidb
       - file: source/overview/installation
 
   - caption: User Guides
@@ -75,7 +75,3 @@ parts:
 
       - file: source/contribute/packaging
         title: Packaging Models
-
-  - caption: Documentation
-    chapters:
-      - file: source/version

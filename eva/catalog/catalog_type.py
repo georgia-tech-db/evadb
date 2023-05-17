@@ -93,12 +93,9 @@ class NdArrayType(EVAEnum):
         return np_type
 
 
-class IndexType(EVAEnum):
-    HNSW  # noqa: F821
-
-    @classmethod
-    def is_faiss_index_type(cls, t):
-        return t in [cls.HNSW]
+class VectorStoreType(EVAEnum):
+    FAISS  # noqa: F821
+    QDRANT  # noqa: F821
 
 
 class VideoColumnName(EVAEnum):

@@ -25,7 +25,7 @@ from eva.expression.tuple_value_expression import TupleValueExpression
 def to_conjunction_list(
     expression_tree: AbstractExpression,
 ) -> List[AbstractExpression]:
-    """Convert expression tree to list of conjuntives
+    """Convert expression tree to list of conjunctives
 
     Note: It does not normalize the expression tree before extracting the conjunctives.
 
@@ -53,7 +53,7 @@ def to_conjunction_list(
 def conjunction_list_to_expression_tree(
     expression_list: List[AbstractExpression],
 ) -> AbstractExpression:
-    """Convert expression list to expression tree using conjuction connector
+    """Convert expression list to expression tree using conjunction connector
 
     [a, b, c] -> AND( AND(a, b), c)
     Args:
@@ -99,7 +99,7 @@ def extract_range_list_from_comparison_expr(
     """
 
     if not isinstance(expr, ComparisonExpression):
-        raise RuntimeError(f"Expected Comparision Expression, got {type(expr)}")
+        raise RuntimeError(f"Expected Comparison Expression, got {type(expr)}")
     left = expr.children[0]
     right = expr.children[1]
     expr_type = expr.etype
@@ -116,7 +116,7 @@ def extract_range_list_from_comparison_expr(
         const_first = True
     else:
         raise RuntimeError(
-            f"Only supports extracting range from Comparision Expression \
+            f"Only supports extracting range from Comparison Expression \
                 with two children TupleValueExpression and \
                 ConstantValueExpression, got {left} and {right}"
         )
@@ -157,8 +157,7 @@ def extract_range_list_from_predicate(
         `predicate` to a list of [(start_1, end_1), ... ] pairs.
 
         It assumes the predicate contains conditions on only one column.
-        It is the responsibilty of the caller that `predicate` does not contains
-        conditions on multiple columns.
+        It is the responsibility of the caller that `predicate` does not contains conditions on multiple columns.
 
     Args:
         predicate (AbstractExpression): Input predicate to extract
@@ -280,7 +279,7 @@ def is_simple_predicate(predicate: AbstractExpression) -> bool:
         predicate (AbstractExpression): predicate expression to check
 
     Returns:
-        bool: True, if it is a simple predicate, lese False
+        bool: True, if it is a simple predicate, else False
     """
 
     def _has_simple_expressions(expr):

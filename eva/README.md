@@ -4,7 +4,7 @@
 
 * `server` - Code for launching server that sends client commands to command handler.
 * `parser` - Converts SQL queries to statements (e.g., CREATE, SELECT, INSERT, and LOAD statements).
-* In a SELECT statement, some tokens are direclty mapped to expressions (`expression`). For instance, an user-defined function is mapped to function expression.
+* In a SELECT statement, some tokens are directly mapped to expressions (`expression`). For instance, an user-defined function is mapped to function expression.
 * `optimizer / statement_to_opr_convertor.py` - Optimizer transforms every statement to a tree-structured query plan (`optimizer / operators.py`).
 * For statements other than complex SELECT queries, it is mostly one-to-one mapping from statement to operator tree.
 * SELECT statements are expanded to different operators PROJECT and FILTER, etc.

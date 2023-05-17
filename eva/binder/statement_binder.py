@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import sys
+from functools import singledispatchmethod
 from pathlib import Path
 
 from eva.binder.binder_utils import (
@@ -22,11 +22,12 @@ from eva.binder.binder_utils import (
     check_groupby_pattern,
     check_table_object_is_video,
     extend_star,
+    handle_bind_extract_object_function,
     resolve_alias_table_value_expression,
 )
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.catalog_type import IndexType, NdArrayType, TableType, VideoColumnName
+from eva.catalog.catalog_type import NdArrayType, TableType, VideoColumnName
 from eva.catalog.catalog_utils import get_metadata_properties
 from eva.configuration.constants import EVA_DEFAULT_DIR
 from eva.expression.abstract_expression import AbstractExpression, ExpressionType
@@ -40,25 +41,10 @@ from eva.parser.rename_statement import RenameTableStatement
 from eva.parser.select_statement import SelectStatement
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
+from eva.parser.types import UDFType
 from eva.third_party.huggingface.binder import assign_hf_udf
 from eva.utils.generic_utils import get_file_checksum, load_udf_class_from_file
 from eva.utils.logging_manager import logger
-
-if sys.version_info >= (3, 8):
-    from functools import singledispatchmethod
-else:
-    # https://stackoverflow.com/questions/24601722/how-can-i-use-functools-singledispatch-with-instance-methods
-    from functools import singledispatch, update_wrapper
-
-    def singledispatchmethod(func):
-        dispatcher = singledispatch(func)
-
-        def wrapper(*args, **kw):
-            return dispatcher.dispatch(args[1].__class__)(*args, **kw)
-
-        wrapper.register = dispatcher.register
-        update_wrapper(wrapper, func)
-        return wrapper
 
 
 class StatementBinder:
@@ -94,10 +80,6 @@ class StatementBinder:
 
         # TODO: create index currently only works on TableInfo, but will extend later.
         assert node.table_ref.is_table_atom(), "Index can only be created on Tableinfo"
-
-        assert IndexType.is_faiss_index_type(
-            node.index_type
-        ), "Index type {} is not supported.".format(node.index_type)
 
         if not node.udf_func:
             # Feature table type needs to be float32 numpy array.
@@ -234,6 +216,10 @@ class StatementBinder:
 
     @bind.register(FunctionExpression)
     def _bind_func_expr(self, node: FunctionExpression):
+        # handle the special case of "extract_object"
+        if node.name.upper() == str(UDFType.EXTRACT_OBJECT):
+            handle_bind_extract_object_function(node, self)
+            return
         # bind all the children
         for child in node.children:
             self.bind(child)
@@ -253,7 +239,7 @@ class StatementBinder:
         else:
             if udf_obj.type == "ultralytics":
                 # manually set the impl_path for yolo udfs we only handle object
-                # detection for now, hopefully this can be generelized
+                # detection for now, hopefully this can be generalized
                 udf_obj.impl_file_path = (
                     Path(f"{EVA_DEFAULT_DIR}/udfs/yolo_object_detector.py")
                     .absolute()

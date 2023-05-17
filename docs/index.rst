@@ -1,19 +1,17 @@
 .. meta::
-   :description:
-       EVA AI-Relational Database System | SQL meets Deep Learning
-   :keywords: database, deep learning, video analytics
+   :keywords: database, deep learning, video analytics, language models
 
-EVA DATABASE SYSTEM
+EVA DB
 =====
 
-..  rubric:: AI-Relational Database System | SQL meets Deep Learning
+..  rubric:: Database system for building simpler and faster AI-powered applications.
 
 ..  figure:: https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/images/eva/eva-banner.png
     :target: https://github.com/georgia-tech-db/eva
     :width: 100%
     :alt: EVA Banner
 
-|pypi_status| |License| |Discuss| |Python Versions|
+|pypi_status| |License|
 
 ----------
 
@@ -26,14 +24,16 @@ EVA accelerates AI pipelines using a collection of optimizations inspired by rel
 
 EVA supports a AI-oriented query language for analysing unstructured data. Here are some illustrative applications:
 
- * `Examining the emotion palette of actors in a movie <https://evadb.readthedocs.io/en/stable/source/tutorials/03-emotion-analysis.html>`_
+ * `Using ChatGPT to ask questions based on videos <https://evadb.readthedocs.io/en/stable/source/tutorials/08-chatgpt.html>`_
  * `Analysing traffic flow at an intersection <https://evadb.readthedocs.io/en/stable/source/tutorials/02-object-detection.html>`_
+ * `Examining the emotion palette of actors in a movie <https://evadb.readthedocs.io/en/stable/source/tutorials/03-emotion-analysis.html>`_
  * `Classifying images based on their content <https://evadb.readthedocs.io/en/stable/source/tutorials/01-mnist.html>`_
- * `Recogizing license plates <https://github.com/georgia-tech-db/license-plate-recognition>`_
+ * `Image Segmentation using Hugging Face <https://evadb.readthedocs.io/en/stable/source/tutorials/07-object-segmentation-huggingface.html>`_
+ * `Recognizing license plates <https://github.com/georgia-tech-db/license-plate-recognition>`_
  * `Analysing toxicity of social media memes <https://github.com/georgia-tech-db/toxicity-classification>`_
 
 
-If you are wondering why you might need a video database system, start with page on `Video Database Systems <source/overview/video.html>`_. It describes how EVA lets users easily make use of deep learning models and how they can reduce money spent on inference on large image or video datasets.
+If you are wondering why you might need a AI-Relational database system, start with page on `AI-Relational Database Systems <source/overview/aidb.html>`_. It describes how EVA lets users easily make use of deep learning models and how they can reduce money spent on inference on large image or video datasets.
 
 The `Getting Started <source/overview/installation.html>`_ page shows how you can use EVA for different computer vision tasks, and how you can easily extend EVA to support your custom deep learning model in the form of user-defined functions.
 
@@ -44,7 +44,7 @@ Key Features
 
 1. With EVA, you can **easily combine SQL and deep learning models to build next-generation database applications**. EVA treats deep learning models as  functions similar to traditional SQL functions like SUM().
 
-2. EVA is **extensible by design**. You can write an **user-defined function** (UDF) that wraps arounds your custom deep learning model. In fact, all the built-in models that are included in EVA are written as user-defined functions.
+2. EVA is **extensible by design**. You can write an **user-defined function** (UDF) that wraps around your custom deep learning model. In fact, all the built-in models that are included in EVA are written as user-defined functions.
 
 3. EVA comes with a collection of **built-in sampling, caching, and filtering optimizations** inspired by relational database systems. These optimizations help **speed up queries on large datasets and save money spent on model inference**.
 
@@ -105,7 +105,7 @@ Illustrative EVA Applications
 
 |pic3| |pic4|
 
-|:desert_island:| Movie Analysis Application using Face Detection + Emotion Classfication Models
+|:desert_island:| Movie Analysis Application using Face Detection + Emotion Classification Models
 ~~~~
 
 ..  |pic5| image:: https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/gangubai-input.webp
@@ -136,8 +136,3 @@ Join the EVA community on `Slack <https://join.slack.com/t/eva-db/shared_invite/
    :target: https://pypi.org/project/evadb
 .. |License| image:: https://img.shields.io/badge/license-Apache%202-brightgreen.svg?logo=apache
    :target: https://github.com/georgia-tech-db/eva/blob/master/LICENSE.txt
-.. |Discuss| image:: https://img.shields.io/badge/-Discuss!-blueviolet
-   :target: https://github.com/georgia-tech-db/eva/discussions
-.. |Python Versions| image:: https://img.shields.io/badge/Python--versions-3.7+-brightgreen
-   :target: https://github.com/georgia-tech-db/eva
-

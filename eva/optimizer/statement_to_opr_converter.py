@@ -22,6 +22,7 @@ from eva.optimizer.operators import (
     LogicalDrop,
     LogicalDropUDF,
     LogicalExplain,
+    LogicalExtractObject,
     LogicalFilter,
     LogicalFunctionScan,
     LogicalGet,
@@ -57,10 +58,11 @@ from eva.parser.select_statement import SelectStatement
 from eva.parser.show_statement import ShowStatement
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
+from eva.parser.types import UDFType
 from eva.utils.logging_manager import logger
 
 
-class StatementToPlanConvertor:
+class StatementToPlanConverter:
     def __init__(self):
         self._plan = None
 
@@ -78,11 +80,19 @@ class StatementToPlanConvertor:
 
         elif table_ref.is_table_valued_expr():
             tve = table_ref.table_valued_expr
-            self._plan = LogicalFunctionScan(
-                func_expr=tve.func_expr,
-                alias=table_ref.alias,
-                do_unnest=tve.do_unnest,
-            )
+            if tve.func_expr.name.lower() == str(UDFType.EXTRACT_OBJECT).lower():
+                self._plan = LogicalExtractObject(
+                    detector=tve.func_expr.children[1],
+                    tracker=tve.func_expr.children[2],
+                    alias=table_ref.alias,
+                    do_unnest=tve.do_unnest,
+                )
+            else:
+                self._plan = LogicalFunctionScan(
+                    func_expr=tve.func_expr,
+                    alias=table_ref.alias,
+                    do_unnest=tve.do_unnest,
+                )
 
         elif table_ref.is_select():
             # NestedQuery
@@ -222,7 +232,7 @@ class StatementToPlanConvertor:
         """
 
     def visit_create(self, statement: AbstractStatement):
-        """Convertor for parsed insert Statement
+        """Converter for parsed insert Statement
 
         Arguments:
             statement {AbstractStatement} - - [Create statement]
@@ -237,7 +247,7 @@ class StatementToPlanConvertor:
         self._plan = create_opr
 
     def visit_rename(self, statement: RenameTableStatement):
-        """Convertor for parsed rename statement
+        """Converter for parsed rename statement
         Arguments:
             statement(RenameTableStatement): [Rename statement]
         """
@@ -249,7 +259,7 @@ class StatementToPlanConvertor:
         self._plan = drop_opr
 
     def visit_create_udf(self, statement: CreateUDFStatement):
-        """Convertor for parsed create udf statement
+        """Converter for parsed create udf statement
 
         Arguments:
             statement {CreateUDFStatement} - - Create UDF Statement
@@ -270,7 +280,7 @@ class StatementToPlanConvertor:
         self._plan = create_udf_opr
 
     def visit_drop_udf(self, statement: DropUDFStatement):
-        """Convertor for parsed DROP UDF statement
+        """Converter for parsed DROP UDF statement
 
         Arguments:
             statement {DropUDFStatement} - Drop UDF Statement
@@ -278,7 +288,7 @@ class StatementToPlanConvertor:
         self._plan = LogicalDropUDF(statement.name, statement.if_exists)
 
     def visit_load_data(self, statement: LoadDataStatement):
-        """Convertor for parsed load data statement
+        """Converter for parsed load data statement
         Arguments:
             statement(LoadDataStatement): [Load data statement]
         """
@@ -312,7 +322,7 @@ class StatementToPlanConvertor:
             statement.name,
             statement.table_ref,
             statement.col_list,
-            statement.index_type,
+            statement.vector_store_type,
             statement.udf_func,
         )
         self._plan = create_index_opr

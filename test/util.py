@@ -38,7 +38,7 @@ from eva.expression.function_expression import FunctionExpression
 from eva.models.storage.batch import Batch
 from eva.optimizer.operators import LogicalFilter, Operator
 from eva.optimizer.plan_generator import PlanGenerator
-from eva.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
+from eva.optimizer.statement_to_opr_converter import StatementToPlanConverter
 from eva.parser.parser import Parser
 from eva.plan_nodes.abstract_plan import AbstractPlan
 from eva.server.command_handler import execute_query_fetch_all
@@ -191,7 +191,7 @@ def get_logical_query_plan(query: str) -> Operator:
     """
     stmt = Parser().parse(query)[0]
     StatementBinder(StatementBinderContext()).bind(stmt)
-    l_plan = StatementToPlanConvertor().visit(stmt)
+    l_plan = StatementToPlanConverter().visit(stmt)
     return l_plan
 
 
@@ -559,7 +559,7 @@ class DummyFeatureExtractor(AbstractClassifierUDF):
 
 
 class DummyObjectDetectorDecorators(AbstractClassifierUDF):
-    @decorators.setup(cachable=True, udf_type="object_detection", batchable=True)
+    @decorators.setup(cacheable=True, udf_type="object_detection", batchable=True)
     def setup(self, *args, **kwargs):
         pass
 

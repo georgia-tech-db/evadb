@@ -476,7 +476,7 @@ class LoadExecutorTest(unittest.TestCase):
         # Clean up large scale image directory.
         shutil.rmtree(large_scale_image_files_path)
 
-    def test_parallel_load_should_raise_exeception(self):
+    def test_parallel_load_should_raise_exception(self):
         # Create images.
         large_scale_image_files_path = create_large_scale_image_dataset(
             mp.cpu_count() * 10

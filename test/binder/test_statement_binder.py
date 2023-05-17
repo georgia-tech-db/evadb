@@ -19,7 +19,7 @@ from eva.binder.binder_utils import BinderError
 from eva.binder.statement_binder import StatementBinder
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.catalog_type import IndexType, NdArrayType
+from eva.catalog.catalog_type import NdArrayType
 from eva.parser.alias import Alias
 
 
@@ -40,7 +40,7 @@ class StatementBinderTests(unittest.TestCase):
             self.assertEqual(tve.col_alias, col_alias)
 
     @patch("eva.binder.statement_binder.bind_table_info")
-    def test_bind_tableref(self, mock_bind_tabe_info):
+    def test_bind_tableref(self, mock_bind_table_info):
         with patch.object(StatementBinderContext, "add_table_alias") as mock:
             binder = StatementBinder(StatementBinderContext())
             tableref = MagicMock()
@@ -49,7 +49,7 @@ class StatementBinderTests(unittest.TestCase):
             mock.assert_called_with(
                 tableref.alias.alias_name, tableref.table.table_name
             )
-            mock_bind_tabe_info.assert_called_once_with(tableref.table)
+            mock_bind_table_info.assert_called_once_with(tableref.table)
 
         with patch.object(StatementBinder, "bind") as mock_binder:
             with patch.object(
@@ -138,7 +138,7 @@ class StatementBinderTests(unittest.TestCase):
         obj1.name.lower.return_value = "out1"
         obj2 = MagicMock()
         obj2.name.lower.return_value = "out2"
-        func_ouput_objs = [obj1, obj2]
+        func_output_objs = [obj1, obj2]
         udf_obj = MagicMock()
         mock_get_name = mock_catalog().get_udf_catalog_entry_by_name = MagicMock()
         mock_get_name.return_value = udf_obj
@@ -146,7 +146,7 @@ class StatementBinderTests(unittest.TestCase):
         mock_get_udf_outputs = (
             mock_catalog().get_udf_io_catalog_output_entries
         ) = MagicMock()
-        mock_get_udf_outputs.return_value = func_ouput_objs
+        mock_get_udf_outputs.return_value = func_output_objs
         mock_load_udf_class_from_file.return_value.return_value = (
             "load_udf_class_from_file"
         )
@@ -183,7 +183,7 @@ class StatementBinderTests(unittest.TestCase):
         mock_load_udf_class_from_file.assert_called_with(
             udf_obj.impl_file_path, udf_obj.name
         )
-        self.assertEqual(func_expr.output_objs, func_ouput_objs)
+        self.assertEqual(func_expr.output_objs, func_output_objs)
         self.assertEqual(
             func_expr.alias,
             Alias(
@@ -251,20 +251,6 @@ class StatementBinderTests(unittest.TestCase):
             binder = StatementBinder(StatementBinderContext())
             binder.bind(UnknownType())
 
-    @patch("eva.binder.statement_binder.sys")
-    def test_bind_with_python37(self, mock_sys):
-        mock_sys.version_info = (3, 8)
-        with patch.object(StatementBinderContext, "get_binded_column") as mock:
-            mock.return_value = ["table_alias", "col_obj"]
-            binder = StatementBinder(StatementBinderContext())
-            tve = MagicMock()
-            tve.col_name = "col_name"
-            binder._bind_tuple_expr(tve)
-            col_alias = "{}.{}".format("table_alias", "col_name")
-            mock.assert_called_once()
-            self.assertEqual(tve.col_object, "col_obj")
-            self.assertEqual(tve.col_alias, col_alias)
-
     def test_bind_create_index(self):
         with patch.object(StatementBinder, "bind"):
             binder = StatementBinder(StatementBinderContext())
@@ -274,10 +260,6 @@ class StatementBinderTests(unittest.TestCase):
                 binder._bind_create_index_statement(create_index_statement)
 
             create_index_statement.col_list = ["foo"]
-            create_index_statement.index_type = "bar"
-            with self.assertRaises(AssertionError):
-                binder._bind_create_index_statement(create_index_statement)
-
             udf_obj = MagicMock()
             output = MagicMock()
             udf_obj.outputs = [output]
@@ -285,7 +267,6 @@ class StatementBinderTests(unittest.TestCase):
             with patch.object(
                 CatalogManager, "get_udf_catalog_entry_by_name", return_value=udf_obj
             ):
-                create_index_statement.index_type = IndexType.HNSW
                 with self.assertRaises(AssertionError):
                     binder._bind_create_index_statement(create_index_statement)
                 output.array_type = NdArrayType.FLOAT32

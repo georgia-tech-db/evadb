@@ -16,7 +16,12 @@ import shutil
 from pathlib import Path
 from typing import List
 
-from eva.catalog.catalog_type import ColumnType, IndexType, TableType, VideoColumnName
+from eva.catalog.catalog_type import (
+    ColumnType,
+    TableType,
+    VectorStoreType,
+    VideoColumnName,
+)
 from eva.catalog.catalog_utils import (
     cleanup_storage,
     construct_udf_cache_catalog_entry,
@@ -308,12 +313,12 @@ class CatalogManager(object):
         self,
         name: str,
         save_file_path: str,
-        index_type: IndexType,
+        vector_store_type: VectorStoreType,
         feat_column: ColumnCatalogEntry,
         udf_signature: str,
     ) -> IndexCatalogEntry:
         index_catalog_entry = self._index_service.insert_entry(
-            name, save_file_path, index_type, feat_column, udf_signature
+            name, save_file_path, vector_store_type, feat_column, udf_signature
         )
         return index_catalog_entry
 

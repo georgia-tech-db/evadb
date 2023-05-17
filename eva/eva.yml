@@ -23,7 +23,7 @@ storage:
   image_engine: "eva.storage.image_storage_engine.ImageStorageEngine"
 server:
   host: "0.0.0.0"
-  port: 5432
+  port: 8803
   socket_timeout: 60
 
 experimental:
