@@ -16,7 +16,6 @@ import asyncio
 
 import nest_asyncio
 
-from eva.experimental.ray.plan_nodes.exchange_plan import ExchangePlan
 from eva.optimizer.cost_model import CostModel
 from eva.optimizer.operators import Operator
 from eva.optimizer.optimizer_context import OptimizerContext
@@ -24,8 +23,6 @@ from eva.optimizer.optimizer_task_stack import OptimizerTaskStack
 from eva.optimizer.optimizer_tasks import BottomUpRewrite, OptimizeGroup, TopDownRewrite
 from eva.optimizer.property import PropertyType
 from eva.optimizer.rules.rules_manager import RulesManager
-from eva.plan_nodes.abstract_plan import AbstractPlan
-from eva.plan_nodes.create_mat_view_plan import CreateMaterializedViewPlan
 
 nest_asyncio.apply()
 

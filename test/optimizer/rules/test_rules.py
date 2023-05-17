@@ -42,12 +42,12 @@ from eva.optimizer.rules.rules import (
     CombineSimilarityOrderByAndLimitToVectorIndexScan,
     EmbedFilterIntoGet,
     EmbedSampleIntoGet,
-    LogicalCreateIndexToVectorIndex,
 )
 from eva.optimizer.rules.rules import (
     LogicalApplyAndMergeToPhysical as SequentialApplyAndMergeToPhysical,
 )
 from eva.optimizer.rules.rules import (
+    LogicalCreateIndexToVectorIndex,
     LogicalCreateMaterializedViewToPhysical,
     LogicalCreateToPhysical,
     LogicalCreateUDFToPhysical,
