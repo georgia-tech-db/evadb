@@ -51,6 +51,7 @@ class QueueReaderExecutor(AbstractExecutor):
                 yield next_item
 
 
+# Design idea: https://www.dropbox.com/s/nej0d7ouknpnrr2/ray-design.jpg?dl=0
 class ExchangeExecutor(AbstractExecutor):
     def __init__(self, node: ExchangePlan):
         self.inner_plan = node.inner_plan
