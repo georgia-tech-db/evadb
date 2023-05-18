@@ -22,7 +22,9 @@ parts:
         title: Image Segmentation with HuggingFace 
       - file: source/tutorials/08-chatgpt.ipynb
         title: ChatGPT + Whisper [OpenAI + HuggingFace]
-        
+      - file: source/tutorials/11-similarity-search-for-motif-mining.ipynb
+        title: Motif Mining using Similarity Search [FAISS + Qdrant]
+
   - caption: User Reference
     chapters:
       - file: source/reference/evaql
