@@ -27,10 +27,10 @@ class AnnotateTests(unittest.TestCase):
     def setUp(self):
         self.annotate_instance = Annotate()
 
-    def test_flip_name_exists(self):
+    def test_annotate_name_exists(self):
         assert hasattr(self.annotate_instance, "name")
 
-    def test_should_flip_horizontally(self):
+    def test_should_annote(self):
         img = Image.open(
             f"{EVA_ROOT_DIR}/test/data/uadetrac/small-data/MVI_20011/img00001.jpg"
         )
