@@ -9,7 +9,6 @@ parts:
 
   - caption: User Guides
     chapters:
-      - file: source/tutorials/index
       - file: source/tutorials/00-start-eva-server.ipynb
         title: Starting EVA Server
       - file: source/tutorials/01-mnist.ipynb
