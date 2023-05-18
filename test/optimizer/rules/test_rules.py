@@ -149,7 +149,7 @@ class RulesTest(unittest.TestCase):
             Promise.LOGICAL_SHOW_TO_PHYSICAL,
             Promise.LOGICAL_DROP_UDF_TO_PHYSICAL,
             Promise.LOGICAL_EXPLAIN_TO_PHYSICAL,
-            Promise.LOGICAL_CREATE_INDEX_TO_VECOR_INDEX,
+            Promise.LOGICAL_CREATE_INDEX_TO_VECTOR_INDEX,
             Promise.LOGICAL_APPLY_AND_MERGE_TO_PHYSICAL,
             Promise.LOGICAL_VECTOR_INDEX_SCAN_TO_PHYSICAL,
         ]

@@ -44,7 +44,7 @@ required_params = ["index_path"]
 
 class FaissVectorStore(VectorStore):
     def __init__(self, index_name: str, index_path: str) -> None:
-        # Refernce to Faiss documentation.
+        # Reference to Faiss documentation.
         # IDMap: https://github.com/facebookresearch/faiss/wiki/Pre--and-post-processing#faiss-id-mapping
         # Other index types: https://github.com/facebookresearch/faiss/wiki/The-index-factory
         self.faiss = _lazy_load_faiss()
