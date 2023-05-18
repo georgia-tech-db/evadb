@@ -9,7 +9,6 @@ parts:
 
   - caption: User Guides
     chapters:
-      - file: source/tutorials/index
       - file: source/tutorials/00-start-eva-server.ipynb
         title: Starting EVA Server
       - file: source/tutorials/01-mnist.ipynb
@@ -22,7 +21,9 @@ parts:
         title: Image Segmentation with HuggingFace 
       - file: source/tutorials/08-chatgpt.ipynb
         title: ChatGPT + Whisper [OpenAI + HuggingFace]
-        
+      - file: source/tutorials/11-similarity-search-for-motif-mining.ipynb
+        title: Image Similarity Search on Reddit [FAISS + Qdrant]
+
   - caption: User Reference
     chapters:
       - file: source/reference/evaql

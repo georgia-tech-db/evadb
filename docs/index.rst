@@ -27,6 +27,7 @@ EVA supports a AI-oriented query language for analysing unstructured data. Here 
  * `Using ChatGPT to ask questions based on videos <https://evadb.readthedocs.io/en/stable/source/tutorials/08-chatgpt.html>`_
  * `Analysing traffic flow at an intersection <https://evadb.readthedocs.io/en/stable/source/tutorials/02-object-detection.html>`_
  * `Examining the emotion palette of actors in a movie <https://evadb.readthedocs.io/en/stable/source/tutorials/03-emotion-analysis.html>`_
+ * `Finding similar images on Reddit <https://evadb.readthedocs.io/en/stable/source/tutorials/11-similarity-search-for-motif-mining.html>`_
  * `Classifying images based on their content <https://evadb.readthedocs.io/en/stable/source/tutorials/01-mnist.html>`_
  * `Image Segmentation using Hugging Face <https://evadb.readthedocs.io/en/stable/source/tutorials/07-object-segmentation-huggingface.html>`_
  * `Recognizing license plates <https://github.com/georgia-tech-db/license-plate-recognition>`_
@@ -121,7 +122,7 @@ Illustrative EVA Applications
 ----------
 
 Community
-----
+--------
 
 Join the EVA community on `Slack <https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg>`_ to ask questions and to share your ideas for improving EVA.
 
@@ -129,8 +130,6 @@ Join the EVA community on `Slack <https://join.slack.com/t/eva-db/shared_invite/
     :target: https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg
     :width: 100%
     :alt: EVA Slack Channel
-
-.. spelling::
 
 .. |pypi_status| image:: https://img.shields.io/pypi/v/evadb.svg
    :target: https://pypi.org/project/evadb

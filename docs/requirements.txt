@@ -14,7 +14,6 @@ sphinx-inline-tabs
 sphinx-thebe==0.2.1
 sphinx-remove-toctrees==0.0.3
 sphinx_design==0.4.1
-sphinx-jsonschema>=1.17.2
 sphinx_multiversion>=0.2.4
 sphinx-sitemap==2.2.0
 sphinxcontrib-redoc==1.6.0
@@ -26,7 +25,6 @@ docutils>=0.15
 mock>=1.0.1
 pillow>=9.0.1
 readthedocs-sphinx-ext>1.1
-sphinx-book-theme>=0.3.3
 autodoc_pydantic==1.6.1
 
 # MyST
