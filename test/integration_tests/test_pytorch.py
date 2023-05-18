@@ -93,8 +93,15 @@ class PytorchTest(unittest.TestCase):
 
         self.assertEqual(len(par_batch), len(seq_batch))
         for i in range(len(par_batch)):
-            self.assertEqual(par_batch.frames["myvideo.id"][i], seq_batch.frames["myvideo.id"][i])
-            self.assertTrue((par_batch.frames["obj.labels"][i] == seq_batch.frames["obj.labels"][i]).all())
+            self.assertEqual(
+                par_batch.frames["myvideo.id"][i], seq_batch.frames["myvideo.id"][i]
+            )
+            self.assertTrue(
+                (
+                    par_batch.frames["obj.labels"][i]
+                    == seq_batch.frames["obj.labels"][i]
+                ).all()
+            )
 
         # Recover configuration back.
         ConfigurationManager().update_value("experimental", "ray", True)
