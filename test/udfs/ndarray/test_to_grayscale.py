@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+from pathlib import Path
+from test.util import file_remove
 
 import cv2
 import numpy as np
@@ -27,7 +29,7 @@ class ToGrayscaleTests(unittest.TestCase):
         self.to_grayscale_instance = ToGrayscale()
 
     def tearDown(self):
-        pass
+        file_remove(Path(f"{EVA_ROOT_DIR}/test/udfs/data/tmp.jpeg"))
 
     def test_gray_scale_name_exists(self):
         assert hasattr(self.to_grayscale_instance, "name")
@@ -36,5 +38,7 @@ class ToGrayscaleTests(unittest.TestCase):
         arr = cv2.imread(f"{EVA_ROOT_DIR}/test/udfs/data/dog.jpeg")
         df = pd.DataFrame([[arr]])
         modified_arr = self.to_grayscale_instance(df)["grayscale_frame_array"]
+        cv2.imwrite(f"{EVA_ROOT_DIR}/test/udfs/data/tmp.jpeg", modified_arr[0])
+        actual_array = cv2.imread(f"{EVA_ROOT_DIR}/test/udfs/data/tmp.jpeg")
         expected_arr = cv2.imread(f"{EVA_ROOT_DIR}/test/udfs/data/grayscale_dog.jpeg")
-        self.assertNotEqual(np.sum(modified_arr[0] - expected_arr), 0)
+        self.assertEqual(np.sum(actual_array - expected_arr), 0)
