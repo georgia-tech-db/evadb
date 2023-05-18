@@ -763,10 +763,10 @@ class LogicalCreateUDFToPhysical(Rule):
 class LogicalCreateIndexToVectorIndex(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALCREATEINDEX)
-        super().__init__(RuleType.LOGICAL_CREATE_INDEX_TO_VECOR_INDEX, pattern)
+        super().__init__(RuleType.LOGICAL_CREATE_INDEX_TO_VECTOR_INDEX, pattern)
 
     def promise(self):
-        return Promise.LOGICAL_CREATE_INDEX_TO_VECOR_INDEX
+        return Promise.LOGICAL_CREATE_INDEX_TO_VECTOR_INDEX
 
     def check(self, before: Operator, context: OptimizerContext):
         return True
