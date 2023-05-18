@@ -1,4 +1,4 @@
-personal_ws-1.1 en 1266 
+personal_ws-1.1 en 1265 
 ABCD
 ABCMeta
 ANYDIM
@@ -274,7 +274,6 @@ IndexCatalogEntry
 IndexCatalogService
 IndexCatalogServiceTest
 IndexScan
-VectorStoreType
 InputType
 InsertExecutor
 InsertExecutorTest
@@ -301,7 +300,6 @@ LOGICALDELIMITER
 LOGICALDROP
 LOGICALDROPUDF
 LOGICALEXPLAIN
-LOGICAL_VECTOR_INDEX_SCAN
 LOGICALFILTER
 LOGICALFUNCTIONSCAN
 LOGICALGROUPBY
@@ -357,8 +355,6 @@ LogicalExplainToPhysical
 LogicalExpression
 LogicalExpressionsTest
 LogicalExtractObject
-LogicalVectorIndexScan
-LogicalVectorIndexScanToPhysical
 LogicalFilter
 LogicalFilterToPhysical
 LogicalFunctionScan
@@ -390,6 +386,8 @@ LogicalShow
 LogicalShowToPhysical
 LogicalUnion
 LogicalUnionToPhysical
+LogicalVectorIndexScan
+LogicalVectorIndexScanToPhysical
 LordDarkula
 MNIST
 MNISTVid
@@ -648,6 +646,7 @@ VARCHAR
 VGG
 ValueError
 ValueList
+VectorStoreType
 VideoCapture
 VideoColumnName
 VideoFormat

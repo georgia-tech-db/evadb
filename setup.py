@@ -108,7 +108,10 @@ udf_libs = [
 ]
 
 ### NEEDED FOR EXPERIMENTAL FEATURES
-third_party_libs = ["qdrant-client>=1.1.7"]  # Qdrant vector store
+third_party_libs = [
+    "qdrant-client>=1.1.7",  # Qdrant vector store client
+    "kornia",  # SIFT features
+]
 
 ### NEEDED FOR EXPERIMENTAL FEATURES
 experimental_libs = []
