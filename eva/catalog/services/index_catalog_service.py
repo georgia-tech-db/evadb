@@ -16,7 +16,7 @@ import os
 
 from sqlalchemy.orm.exc import NoResultFound
 
-from eva.catalog.catalog_type import IndexType
+from eva.catalog.catalog_type import VectorStoreType
 from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.catalog.models.index_catalog import IndexCatalog, IndexCatalogEntry
 from eva.catalog.services.base_service import BaseService
@@ -31,7 +31,7 @@ class IndexCatalogService(BaseService):
         self,
         name: str,
         save_file_path: str,
-        type: IndexType,
+        type: VectorStoreType,
         feat_column: ColumnCatalogEntry,
         udf_signature: str,
     ) -> IndexCatalogEntry:

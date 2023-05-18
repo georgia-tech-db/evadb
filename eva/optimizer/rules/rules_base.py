@@ -34,24 +34,25 @@ class RuleType(Flag):
 
     # REWRITE RULES TOP DOWN APPLY FIRST (LOGICAL -> LOGICAL)
     XFORM_LATERAL_JOIN_TO_LINEAR_FLOW = auto()
-    TOP_DOWN_DELIMETER = auto()
+    XFORM_EXTRACT_OBJECT_TO_LINEAR_FLOW = auto()
+    TOP_DOWN_DELIMITER = auto()
 
     # REWRITE RULES BOTTOM UP APPLY SECOND (LOGICAL -> LOGICAL)
     EMBED_FILTER_INTO_GET = auto()
     EMBED_SAMPLE_INTO_GET = auto()
     PUSHDOWN_FILTER_THROUGH_JOIN = auto()
     PUSHDOWN_FILTER_THROUGH_APPLY_AND_MERGE = auto()
-    COMBINE_SIMILARITY_ORDERBY_AND_LIMIT_TO_FAISS_INDEX_SCAN = auto()
+    COMBINE_SIMILARITY_ORDERBY_AND_LIMIT_TO_VECTOR_INDEX_SCAN = auto()
     REORDER_PREDICATES = auto()
 
-    REWRITE_DELIMETER = auto()
+    REWRITE_DELIMITER = auto()
 
     # TRANSFORMATION RULES (LOGICAL -> LOGICAL)
     LOGICAL_INNER_JOIN_COMMUTATIVITY = auto()
     CACHE_FUNCTION_EXPRESISON_IN_APPLY = auto()
     CACHE_FUNCTION_EXPRESISON_IN_FILTER = auto()
     CACHE_FUNCTION_EXPRESISON_IN_PROJECT = auto()
-    TRANSFORMATION_DELIMETER = auto()  # do not reposition
+    TRANSFORMATION_DELIMITER = auto()  # do not reposition
 
     # IMPLEMENTATION RULES (LOGICAL -> PHYSICAL)
     LOGICAL_EXCHANGE_TO_PHYSICAL = auto()
@@ -79,11 +80,10 @@ class RuleType(Flag):
     LOGICAL_SHOW_TO_PHYSICAL = auto()
     LOGICAL_DROP_UDF_TO_PHYSICAL = auto()
     LOGICAL_EXPLAIN_TO_PHYSICAL = auto()
-    LOGICAL_CREATE_INDEX_TO_FAISS = auto()
+    LOGICAL_CREATE_INDEX_TO_VECOR_INDEX = auto()
     LOGICAL_APPLY_AND_MERGE_TO_PHYSICAL = auto()
-    LOGICAL_FAISS_INDEX_SCAN_TO_PHYSICAL = auto()
-
-    IMPLEMENTATION_DELIMETER = auto()
+    LOGICAL_VECTOR_INDEX_SCAN_TO_PHYSICAL = auto()
+    IMPLEMENTATION_DELIMITER = auto()
 
     NUM_RULES = auto()
 
@@ -123,12 +123,12 @@ class Promise(IntEnum):
     LOGICAL_SHOW_TO_PHYSICAL = auto()
     LOGICAL_DROP_UDF_TO_PHYSICAL = auto()
     LOGICAL_EXPLAIN_TO_PHYSICAL = auto()
-    LOGICAL_CREATE_INDEX_TO_FAISS = auto()
+    LOGICAL_CREATE_INDEX_TO_VECOR_INDEX = auto()
     LOGICAL_APPLY_AND_MERGE_TO_PHYSICAL = auto()
-    LOGICAL_FAISS_INDEX_SCAN_TO_PHYSICAL = auto()
+    LOGICAL_VECTOR_INDEX_SCAN_TO_PHYSICAL = auto()
 
     # IMPLEMENTATION DELIMITER
-    IMPLEMENTATION_DELIMETER = auto()
+    IMPLEMENTATION_DELIMITER = auto()
 
     # TRANSFORMATION RULES (LOGICAL -> LOGICAL)
     LOGICAL_INNER_JOIN_COMMUTATIVITY = auto()
@@ -139,10 +139,11 @@ class Promise(IntEnum):
     # REWRITE RULES
     EMBED_FILTER_INTO_GET = auto()
     EMBED_SAMPLE_INTO_GET = auto()
+    XFORM_EXTRACT_OBJECT_TO_LINEAR_FLOW = auto()
     XFORM_LATERAL_JOIN_TO_LINEAR_FLOW = auto()
     PUSHDOWN_FILTER_THROUGH_JOIN = auto()
     PUSHDOWN_FILTER_THROUGH_APPLY_AND_MERGE = auto()
-    COMBINE_SIMILARITY_ORDERBY_AND_LIMIT_TO_FAISS_INDEX_SCAN = auto()
+    COMBINE_SIMILARITY_ORDERBY_AND_LIMIT_TO_VECTOR_INDEX_SCAN = auto()
     REORDER_PREDICATES = auto()
 
 
@@ -171,22 +172,22 @@ class Rule(ABC):
         return opr.opr_type == self.pattern.opr_type
 
     def is_implementation_rule(self):
-        return self.rule_type.value > RuleType.TRANSFORMATION_DELIMETER.value
+        return self.rule_type.value > RuleType.TRANSFORMATION_DELIMITER.value
 
     def is_logical_rule(self):
         return (
-            self.rule_type.value > RuleType.REWRITE_DELIMETER.value
-            and self.rule_type.value < RuleType.TRANSFORMATION_DELIMETER.value
+            self.rule_type.value > RuleType.REWRITE_DELIMITER.value
+            and self.rule_type.value < RuleType.TRANSFORMATION_DELIMITER.value
         )
 
     def is_stage_two_rewrite_rules(self):
         return (
-            self.rule_type.value > RuleType.TOP_DOWN_DELIMETER.value
-            and self.rule_type.value < RuleType.REWRITE_DELIMETER.value
+            self.rule_type.value > RuleType.TOP_DOWN_DELIMITER.value
+            and self.rule_type.value < RuleType.REWRITE_DELIMITER.value
         )
 
     def is_stage_one_rewrite_rules(self):
-        return self.rule_type.value < RuleType.TOP_DOWN_DELIMETER.value
+        return self.rule_type.value < RuleType.TOP_DOWN_DELIMITER.value
 
     @abstractmethod
     def promise(self) -> int:

@@ -78,7 +78,7 @@ class LoadMultimediaExecutor(AbstractExecutor):
                 invalid_files_str = "\n".join(invalid_files)
                 err_msg = f"Load {self.media_type.name} failed due to invalid files: \n{invalid_files_str}"
                 logger.error(err_msg)
-                raise ValueError("Load failed due to invalid files")
+                raise ValueError(err_msg)
 
             # Get valid files.
             valid_files = [

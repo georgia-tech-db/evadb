@@ -6,7 +6,7 @@ This section provides an overview of how you can create and use a custom user-de
 Part 1: Writing a custom UDF
 ------------------------------
 
-During each step, use `this UDF implementation <https://github.com/georgia-tech-db/eva/blob/master/eva/udfs/decorators/yolo_object_detection_decorators.py>`_  as a reference.
+During each step, use `this UDF implementation <https://github.com/georgia-tech-db/eva/blob/master/eva/udfs/yolo_object_detector.py>`_  as a reference.
 
 1. Create a new file under `udfs/` folder and give it a descriptive name. eg: `yolo_object_detection.py`. 
 
@@ -43,7 +43,7 @@ Example of a Setup function
 
 .. code-block:: python
 
-  @setup(cachable=True, udf_type="object_detection", batchable=True)
+  @setup(cacheable=True, udf_type="object_detection", batchable=True)
   def setup(self, threshold=0.85):
       #custom setup function that is specific for the UDF
       self.threshold = threshold 

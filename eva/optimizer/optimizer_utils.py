@@ -39,7 +39,7 @@ from eva.utils.kv_cache import DiskKVCache
 
 
 def column_definition_to_udf_io(col_list: List[ColumnDefinition], is_input: bool):
-    """Create the UdfIOCatalogEntry object fro each column definition provided
+    """Create the UdfIOCatalogEntry object for each column definition provided
 
     Arguments:
         col_list(List[ColumnDefinition]): parsed input/output definitions

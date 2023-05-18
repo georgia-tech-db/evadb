@@ -18,7 +18,7 @@ utility_statement: describe_statement | show_statement | help_statement | explai
 
 create_database: CREATE DATABASE if_not_exists? uid
 
-create_index: CREATE INDEX uid ON table_name index_elem index_type?
+create_index: CREATE INDEX uid ON table_name index_elem vector_store_type?
 
 create_table: CREATE TABLE if_not_exists? table_name create_definitions 
     
@@ -45,7 +45,7 @@ udf_metadata_key: string_literal
 
 udf_metadata_value: string_literal | decimal_literal
 
-index_type: USING HNSW
+vector_store_type: USING (FAISS | QDRANT)
 
 index_elem: ("(" uid_list ")"
           | "(" function_call ")")
@@ -382,6 +382,8 @@ IMAGE:                "IMAGE"i
 
 // Index types
 HNSW:                                "HNSW"i
+FAISS:                               "FAISS"i
+QDRANT:                              "QDRANT"i
 
 // Computer vision tasks
 
@@ -445,7 +447,7 @@ VIEW:                                "VIEW"i
 ABS:                                 "ABS"i
 
 // Operators
-// Operators. Assigns
+// Operators. Assignment
 
 VAR_ASSIGN:                          ":="
 PLUS_ASSIGN:                         "+="
@@ -458,7 +460,7 @@ XOR_ASSIGN:                          "^="
 OR_ASSIGN:                           "|="
 
 
-// Operators. Arithmetics
+// Operators. Arithmetic
 
 STAR:                                "*"
 DIVIDE:                              "/"
@@ -470,7 +472,7 @@ DIV:                                 "DIV"
 MOD:                                 "MOD"
 
 
-// Operators. Comparation
+// Operators. Comparison
 
 EQUAL_SYMBOL:                        "="
 GREATER_SYMBOL:                      ">"

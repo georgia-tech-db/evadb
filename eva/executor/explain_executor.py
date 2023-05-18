@@ -26,7 +26,7 @@ class ExplainExecutor(AbstractExecutor):
 
     def exec(self, *args, **kwargs):
         # Traverse optimized physical plan, which is commonly supported.
-        # Logical plan can be also printted by passing explainable_opr
+        # Logical plan can be also printed by passing explainable_opr
         # attribute of the node, but is not done for now.
         plan_str = self._exec(self._node.children[0], 0)
         yield Batch(pd.DataFrame([plan_str]))

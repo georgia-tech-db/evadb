@@ -17,7 +17,7 @@ from enum import IntEnum, auto
 from pathlib import Path
 from typing import Any, List
 
-from eva.catalog.catalog_type import IndexType
+from eva.catalog.catalog_type import VectorStoreType
 from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
@@ -62,12 +62,13 @@ class OperatorType(IntEnum):
     LOGICALEXPLAIN = auto()
     LOGICALCREATEINDEX = auto()
     LOGICAL_APPLY_AND_MERGE = auto()
-    LOGICALFAISSINDEXSCAN = auto()
+    LOGICAL_EXTRACT_OBJECT = auto()
+    LOGICAL_VECTOR_INDEX_SCAN = auto()
     LOGICALDELIMITER = auto()
 
 
 class Operator:
-    """Base class for logital plan of operators
+    """Base class for logical plan of operators
     Arguments:
         op_type: {OperatorType} -- {the opr type held by this node}
         children: {List} -- {the list of operator children for this node}
@@ -918,6 +919,45 @@ class LogicalFunctionScan(Operator):
         return hash((super().__hash__(), self.func_expr, self.do_unnest, self.alias))
 
 
+class LogicalExtractObject(Operator):
+    def __init__(
+        self,
+        detector: FunctionExpression,
+        tracker: FunctionExpression,
+        alias: Alias,
+        do_unnest: bool = False,
+        children: List = None,
+    ):
+        super().__init__(OperatorType.LOGICAL_EXTRACT_OBJECT, children)
+        self.detector = detector
+        self.tracker = tracker
+        self.do_unnest = do_unnest
+        self.alias = alias
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalExtractObject):
+            return False
+        return (
+            is_subtree_equal
+            and self.detector == other.detector
+            and self.tracker == other.tracker
+            and self.do_unnest == other.do_unnest
+            and self.alias == other.alias
+        )
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                super().__hash__(),
+                self.detector,
+                self.tracker,
+                self.do_unnest,
+                self.alias,
+            )
+        )
+
+
 class LogicalJoin(Operator):
     """
     Logical node for join operators
@@ -997,7 +1037,7 @@ class LogicalJoin(Operator):
 
 
 class LogicalCreateMaterializedView(Operator):
-    """Logical node for create materiaziled view operations
+    """Logical node for create materialized view operations
     Arguments:
         view {TableRef}: [view table that is to be created]
         col_list{List[ColumnDefinition]} -- column names in the view
@@ -1106,7 +1146,7 @@ class LogicalCreateIndex(Operator):
         name: str,
         table_ref: TableRef,
         col_list: List[ColumnDefinition],
-        index_type: IndexType,
+        vector_store_type: VectorStoreType,
         udf_func: FunctionExpression = None,
         children: List = None,
     ):
@@ -1114,7 +1154,7 @@ class LogicalCreateIndex(Operator):
         self._name = name
         self._table_ref = table_ref
         self._col_list = col_list
-        self._index_type = index_type
+        self._vector_store_type = vector_store_type
         self._udf_func = udf_func
 
     @property
@@ -1130,8 +1170,8 @@ class LogicalCreateIndex(Operator):
         return self._col_list
 
     @property
-    def index_type(self):
-        return self._index_type
+    def vector_store_type(self):
+        return self._vector_store_type
 
     @property
     def udf_func(self):
@@ -1146,7 +1186,7 @@ class LogicalCreateIndex(Operator):
             and self.name == other.name
             and self.table_ref == other.table_ref
             and self.col_list == other.col_list
-            and self.index_type == other.index_type
+            and self.vector_store_type == other.vector_store_type
             and self.udf_func == other.udf_func
         )
 
@@ -1157,7 +1197,7 @@ class LogicalCreateIndex(Operator):
                 self.name,
                 self.table_ref,
                 tuple(self.col_list),
-                self.index_type,
+                self.vector_store_type,
                 self.udf_func,
             )
         )
@@ -1221,22 +1261,28 @@ class LogicalApplyAndMerge(Operator):
         )
 
 
-class LogicalFaissIndexScan(Operator):
+class LogicalVectorIndexScan(Operator):
     def __init__(
         self,
         index_name: str,
+        vector_store_type: VectorStoreType,
         limit_count: ConstantValueExpression,
         search_query_expr: FunctionExpression,
         children: List = None,
     ):
-        super().__init__(OperatorType.LOGICALFAISSINDEXSCAN, children)
+        super().__init__(OperatorType.LOGICAL_VECTOR_INDEX_SCAN, children)
         self._index_name = index_name
+        self._vector_store_type = vector_store_type
         self._limit_count = limit_count
         self._search_query_expr = search_query_expr
 
     @property
     def index_name(self):
         return self._index_name
+
+    @property
+    def vector_store_type(self):
+        return self._vector_store_type
 
     @property
     def limit_count(self):
@@ -1248,11 +1294,12 @@ class LogicalFaissIndexScan(Operator):
 
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
-        if not isinstance(other, LogicalFaissIndexScan):
+        if not isinstance(other, LogicalVectorIndexScan):
             return False
         return (
             is_subtree_equal
             and self.index_name == other.index_name
+            and self.vector_store_type == other.vector_store_type
             and self.limit_count == other.limit_count
             and self.search_query_expr == other.search_query_expr
         )
@@ -1262,6 +1309,7 @@ class LogicalFaissIndexScan(Operator):
             (
                 super().__hash__(),
                 self.index_name,
+                self.vector_store_type,
                 self.limit_count,
                 self.search_query_expr,
             )

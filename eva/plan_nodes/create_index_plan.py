@@ -14,7 +14,7 @@
 # limitations under the License.
 from typing import List
 
-from eva.catalog.catalog_type import IndexType
+from eva.catalog.catalog_type import VectorStoreType
 from eva.expression.function_expression import FunctionExpression
 from eva.parser.create_statement import ColumnDefinition
 from eva.parser.table_ref import TableRef
@@ -28,14 +28,14 @@ class CreateIndexPlan(AbstractPlan):
         name: str,
         table_ref: TableRef,
         col_list: List[ColumnDefinition],
-        index_type: IndexType,
+        vector_store_type: VectorStoreType,
         udf_func: FunctionExpression = None,
     ):
         super().__init__(PlanOprType.CREATE_INDEX)
         self._name = name
         self._table_ref = table_ref
         self._col_list = col_list
-        self._index_type = index_type
+        self._vector_store_type = vector_store_type
         self._udf_func = udf_func
 
     @property
@@ -51,8 +51,8 @@ class CreateIndexPlan(AbstractPlan):
         return self._col_list
 
     @property
-    def index_type(self):
-        return self._index_type
+    def vector_store_type(self):
+        return self._vector_store_type
 
     @property
     def udf_func(self):
@@ -62,12 +62,12 @@ class CreateIndexPlan(AbstractPlan):
         return "CreateIndexPlan(name={}, \
             table_ref={}, \
             col_list={}, \
-            index_type={}, \
+            vector_store_type={}, \
             {})".format(
             self._name,
             self._table_ref,
             tuple(self._col_list),
-            self._index_type,
+            self._vector_store_type,
             "" if not self._udf_func else "udf_func={}".format(self._udf_func),
         )
 
@@ -78,7 +78,7 @@ class CreateIndexPlan(AbstractPlan):
                 self.name,
                 self.table_ref,
                 tuple(self.col_list),
-                self.index_type,
+                self.vector_store_type,
                 self.udf_func,
             )
         )

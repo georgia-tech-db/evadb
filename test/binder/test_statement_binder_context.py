@@ -126,7 +126,7 @@ class StatementBinderTests(unittest.TestCase):
         mock_get_column_object.assert_called_once_with("table_obj", "col_name")
         self.assertEqual(result, "catalog_value")
 
-        # key does not exixt
+        # key does not exist
         mock_get_column_object.reset_mock()
         ctx = StatementBinderContext()
         result = ctx._check_table_alias_map("alias", "col_name")
@@ -144,7 +144,8 @@ class StatementBinderTests(unittest.TestCase):
         self.assertEqual(result, obj1)
         result = ctx._check_derived_table_alias_map("alias", "col2")
         self.assertEqual(result, obj2)
-        # key does not exixt
+
+        # key does not exist
         ctx = StatementBinderContext()
         result = ctx._check_derived_table_alias_map("alias", "col3")
         self.assertEqual(result, None)

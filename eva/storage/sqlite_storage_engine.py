@@ -50,7 +50,7 @@ class SQLStorageEngine(AbstractStorageEngine):
             if col.type == ColumnType.NDARRAY:
                 dict_row[col.name] = self._serializer.serialize(dict_row[col.name])
             elif isinstance(dict_row[col.name], (np.generic,)):
-                # SqlAlchemy does not consume numpy generic data types
+                # Sqlalchemy does not consume numpy generic data types
                 # convert numpy datatype to python generic datatype using tolist()
                 # eg. np.int64 -> int
                 # https://stackoverflow.com/a/53067954
@@ -98,8 +98,10 @@ class SQLStorageEngine(AbstractStorageEngine):
         attr_dict.update(sqlalchemy_schema)
         # dynamic schema generation
         # https://sparrigan.github.io/sql/sqla/2016/01/03/dynamic-tables.html
-        new_table = type("__placeholder_class_name", (BaseModel,), attr_dict)()
-        BaseModel.metadata.tables[table.name].create(self._sql_engine)
+        new_table = type("__placeholder_class_name__", (BaseModel,), attr_dict)()
+        table = BaseModel.metadata.tables[table.name]
+        if not table.exists():
+            BaseModel.metadata.tables[table.name].create(self._sql_engine)
         self._sql_session.commit()
         return new_table
 
@@ -137,7 +139,7 @@ class SQLStorageEngine(AbstractStorageEngine):
                 col for col in table.columns if col.name != IDENTIFIER_COLUMN
             ]
 
-            # ToDo: validate the data type before inserting into the table
+            # Todo: validate the data type before inserting into the table
             for record in rows.frames.values:
                 row_data = {col: record[idx] for idx, col in enumerate(columns)}
                 data.append(self._dict_to_sql_row(row_data, table_columns))
@@ -167,7 +169,7 @@ class SQLStorageEngine(AbstractStorageEngine):
             data_batch = []
             row_size = None
             for row in result:
-                # Todo: Verfiy the order of columns in row matches the table.columns
+                # Todo: Verify the order of columns in row matches the table.columns
                 # For table read, we provide row_id so that user can also retrieve
                 # row_id from the table.
                 data_batch.append(self._sql_row_to_dict(row, table.columns))

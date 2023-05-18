@@ -181,6 +181,8 @@ tutorials/*.py
 *.pt
 tutorials/bddtest.zip
 tutorials/license.zip
+tutorials/reddit-images.zip
+tutorials/reddit-images
 license/
 bddtest/
 tutorials/*.jpg
@@ -191,3 +193,8 @@ eva.txt
 prof/
 output.txt
 MagicMock/
+queries.txt
+dep.txt
+
+*.bak
+\<Magic*

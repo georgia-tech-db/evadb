@@ -43,7 +43,7 @@ class AbstractUDF(metaclass=ABCMeta):
     @abstractmethod
     def setup(self, *args, **kwargs) -> None:
         """
-        Do necessary setup in here. Gets called automatically on intialization.
+        Do necessary setup in here. Gets called automatically on initialization.
         """
         pass
 

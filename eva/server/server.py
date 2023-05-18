@@ -38,6 +38,7 @@ class EvaServer:
         port: port of the server
         """
         logger.info("Start Server")
+        print(f"EVA Server started at host {host} and port {port}", flush=True)
 
         self._server = await asyncio.start_server(self.accept_client, host, port)
 
@@ -77,7 +78,7 @@ class EvaServer:
                 message = data.decode().rstrip()
                 logger.debug("Received --|%s|--", message)
 
-                if message in ["EXIT;", "QUIT;"]:
+                if message.upper() in ["EXIT;", "QUIT;"]:
                     logger.info("Close client")
                     return
 

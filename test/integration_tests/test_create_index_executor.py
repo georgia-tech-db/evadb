@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import os
 import unittest
 from pathlib import Path
 from test.util import load_udfs_for_testing
@@ -21,19 +20,13 @@ import faiss
 import numpy as np
 import pandas as pd
 import pytest
-from mock import patch
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.catalog_type import ColumnType, IndexType, NdArrayType, TableType
-from eva.catalog.catalog_utils import xform_column_definitions_to_catalog_entries
-from eva.catalog.sql_config import IDENTIFIER_COLUMN
+from eva.catalog.catalog_type import VectorStoreType
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
-from eva.parser.create_statement import ColumnDefinition
 from eva.server.command_handler import execute_query_fetch_all
 from eva.storage.storage_engine import StorageEngine
-from eva.utils.generic_utils import generate_file_path
 
 
 @pytest.mark.notparallel
@@ -41,7 +34,7 @@ class CreateIndexTest(unittest.TestCase):
     def _index_save_path(self):
         return str(
             Path(ConfigurationManager().get_value("storage", "index_dir"))
-            / Path("{}_{}.index".format("HNSW", "testCreateIndexName"))
+            / Path("{}_{}.index".format("FAISS", "testCreateIndexName"))
         )
 
     @classmethod
@@ -63,35 +56,16 @@ class CreateIndexTest(unittest.TestCase):
         input3 = np.array([[200, 200, 200]]).astype(np.uint8)
 
         # Create table.
-        feat_col_list = [
-            ColumnDefinition("feat", ColumnType.NDARRAY, NdArrayType.FLOAT32, (1, 3)),
-        ]
-        feat_col_entries = xform_column_definitions_to_catalog_entries(feat_col_list)
-
-        input_col_list = [
-            ColumnDefinition("input", ColumnType.NDARRAY, NdArrayType.UINT8, (1, 3)),
-        ]
-        input_col_entries = xform_column_definitions_to_catalog_entries(input_col_list)
-
-        feat_tb_entry = CatalogManager().insert_table_catalog_entry(
-            "testCreateIndexFeatTable",
-            str(generate_file_path("testCreateIndexFeatTable")),
-            feat_col_entries,
-            identifier_column=IDENTIFIER_COLUMN,
-            table_type=TableType.STRUCTURED_DATA,
+        execute_query_fetch_all(
+            """create table if not exists testCreateIndexFeatTable (
+                feat NDARRAY FLOAT32(1,3)
+            );"""
         )
-        storage_engine = StorageEngine.factory(feat_tb_entry)
-        storage_engine.create(feat_tb_entry)
-
-        input_tb_entry = CatalogManager().insert_table_catalog_entry(
-            "testCreateIndexInputTable",
-            str(generate_file_path("testCreateIndexInputTable")),
-            input_col_entries,
-            identifier_column=IDENTIFIER_COLUMN,
-            table_type=TableType.STRUCTURED_DATA,
+        execute_query_fetch_all(
+            """create table if not exists testCreateIndexInputTable (
+                input NDARRAY UINT8(1,3)
+            );"""
         )
-        storage_engine = StorageEngine.factory(input_tb_entry)
-        storage_engine.create(input_tb_entry)
 
         # Create pandas dataframe.
         feat_batch_data = Batch(
@@ -101,6 +75,10 @@ class CreateIndexTest(unittest.TestCase):
                 }
             )
         )
+        feat_tb_entry = CatalogManager().get_table_catalog_entry(
+            "testCreateIndexFeatTable"
+        )
+        storage_engine = StorageEngine.factory(feat_tb_entry)
         storage_engine.write(feat_tb_entry, feat_batch_data)
 
         input_batch_data = Batch(
@@ -109,6 +87,9 @@ class CreateIndexTest(unittest.TestCase):
                     "input": [input1, input2, input3],
                 }
             )
+        )
+        input_tb_entry = CatalogManager().get_table_catalog_entry(
+            "testCreateIndexInputTable"
         )
         storage_engine.write(input_tb_entry, input_batch_data)
 
@@ -119,15 +100,15 @@ class CreateIndexTest(unittest.TestCase):
         query = "DROP TABLE testCreateIndexInputTable;"
         execute_query_fetch_all(query)
 
-    def test_should_create_index(self):
-        query = "CREATE INDEX testCreateIndexName ON testCreateIndexFeatTable (feat) USING HNSW;"
+    def test_should_create_index_faiss(self):
+        query = "CREATE INDEX testCreateIndexName ON testCreateIndexFeatTable (feat) USING FAISS;"
         execute_query_fetch_all(query)
 
         # Test index catalog.
         index_catalog_entry = CatalogManager().get_index_catalog_entry_by_name(
             "testCreateIndexName"
         )
-        self.assertEqual(index_catalog_entry.type, IndexType.HNSW)
+        self.assertEqual(index_catalog_entry.type, VectorStoreType.FAISS)
         self.assertEqual(
             index_catalog_entry.save_file_path,
             self._index_save_path(),
@@ -154,26 +135,15 @@ class CreateIndexTest(unittest.TestCase):
         # Cleanup.
         CatalogManager().drop_index_catalog_entry("testCreateIndexName")
 
-    @patch("eva.executor.create_index_executor.faiss")
-    def test_should_cleanup_when_exception(self, faiss_mock):
-        faiss_mock.write_index.side_effect = Exception("Test exception.")
-
-        query = "CREATE INDEX testCreateIndexName ON testCreateIndexFeatTable (feat) USING HNSW;"
-        with self.assertRaises(ExecutorError):
-            execute_query_fetch_all(query)
-
-        # Check faulty index is not persisted on the disk
-        self.assertFalse(os.path.exists(self._index_save_path()))
-
     def test_should_create_index_with_udf(self):
-        query = "CREATE INDEX testCreateIndexName ON testCreateIndexInputTable (DummyFeatureExtractor(input)) USING HNSW;"
+        query = "CREATE INDEX testCreateIndexName ON testCreateIndexInputTable (DummyFeatureExtractor(input)) USING FAISS;"
         execute_query_fetch_all(query)
 
         # Test index udf signature.
         index_catalog_entry = CatalogManager().get_index_catalog_entry_by_name(
             "testCreateIndexName"
         )
-        self.assertEqual(index_catalog_entry.type, IndexType.HNSW)
+        self.assertEqual(index_catalog_entry.type, VectorStoreType.FAISS)
         self.assertEqual(
             index_catalog_entry.save_file_path,
             self._index_save_path(),

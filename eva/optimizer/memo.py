@@ -84,7 +84,7 @@ class Memo:
 
     def _insert_expr(self, expr: GroupExpression, group_id: int):
         """
-        Insert a group expressoin into a particular group
+        Insert a group expression into a particular group
         """
         assert group_id < len(self.groups), "Group Id out of the bound"
 
@@ -118,7 +118,7 @@ class Memo:
         if duplicate_expr is not None:
             return duplicate_expr
 
-        # did not find a dulpicate expression
+        # did not find a duplicate expression
         expr.group_id = group_id
 
         if expr.group_id == UNDEFINED_GROUP_ID:
