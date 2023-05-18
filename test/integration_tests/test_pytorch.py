@@ -71,17 +71,47 @@ class PytorchTest(unittest.TestCase):
 
     @pytest.mark.skipif(
         not ConfigurationManager().get_value("experimental", "ray"),
+        reason="Only test for parallel execution",
+    )
+    def test_should_parallel_match_sequential(self):
+        # Parallel execution
+        select_query = """SELECT id, obj.labels
+                          FROM MyVideo JOIN LATERAL
+                          FastRCNNObjectDetector(data)
+                          AS obj(labels, bboxes, scores)
+                         WHERE id < 20;"""
+        par_batch = execute_query_fetch_all(select_query)
+
+        # Sequential execution.
+        ConfigurationManager().update_value("experimental", "ray", False)
+        select_query = """SELECT id, obj.labels
+                          FROM MyVideo JOIN LATERAL
+                          FastRCNNObjectDetector(data)
+                          AS obj(labels, bboxes, scores)
+                         WHERE id < 20;"""
+        seq_batch = execute_query_fetch_all(select_query)
+
+        self.assertEqual(len(par_batch), len(seq_batch))
+        for i in range(len(par_batch)):
+            self.assertEqual(par_batch.frames["myvideo.id"][i], seq_batch.frames["myvideo.id"][i])
+            self.assertTrue((par_batch.frames["obj.labels"][i] == seq_batch.frames["obj.labels"][i]).all())
+
+        # Recover configuration back.
+        ConfigurationManager().update_value("experimental", "ray", True)
+
+    @pytest.mark.skipif(
+        not ConfigurationManager().get_value("experimental", "ray"),
         reason="Only test for Ray",
     )
-    def test_should_raise_exception_with_ray(self):
+    def test_should_raise_exception_with_parallel(self):
         # Deliberately cause error.
         video_path = create_sample_video(100)
-        load_query = f"LOAD VIDEO '{video_path}' INTO rayErrorVideo;"
+        load_query = f"LOAD VIDEO '{video_path}' INTO parallelErrorVideo;"
         execute_query_fetch_all(load_query)
         file_remove("dummy.avi")
 
         select_query = """SELECT id, obj.labels
-                          FROM rayErrorVideo JOIN LATERAL
+                          FROM parallelErrorVideo JOIN LATERAL
                           FastRCNNObjectDetector(data)
                           AS obj(labels, bboxes, scores)
                          WHERE id < 2;"""
