@@ -15,7 +15,12 @@
 import os
 import unittest
 from test.markers import ocr_skip_marker, windows_skip_marker
-from test.util import file_remove, load_udfs_for_testing, shutdown_ray, create_sample_video
+from test.util import (
+    create_sample_video,
+    file_remove,
+    load_udfs_for_testing,
+    shutdown_ray,
+)
 
 import cv2
 import numpy as np
@@ -24,9 +29,9 @@ import pytest
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.configuration.constants import EVA_ROOT_DIR
+from eva.executor.executor_utils import ExecutorError
 from eva.server.command_handler import execute_query_fetch_all
 from eva.udfs.udf_bootstrap_queries import Asl_udf_query, Mvit_udf_query
-from eva.executor.executor_utils import ExecutorError
 
 
 @pytest.mark.notparallel
@@ -64,7 +69,10 @@ class PytorchTest(unittest.TestCase):
         execute_query_fetch_all("DROP TABLE IF EXISTS Asl_actions;")
         execute_query_fetch_all("DROP TABLE IF EXISTS MemeImages;")
 
-    @pytest.mark.skipif(not ConfigurationManager().get_value("experimental", "ray"), reason="Only test for Ray")
+    @pytest.mark.skipif(
+        not ConfigurationManager().get_value("experimental", "ray"),
+        reason="Only test for Ray",
+    )
     def test_should_raise_exception_with_ray(self):
         # Deliberately cause error.
         video_path = create_sample_video(100)
