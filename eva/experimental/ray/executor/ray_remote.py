@@ -33,10 +33,16 @@ def ray_wait_and_alert(tasks: List[ray.ObjectRef], queue: Queue):
         ray.get(tasks)
         queue.put(StageCompleteSignal)
     except RayTaskError as e:
-        logger.error(e)
         queue.put(ExecutorError(e.cause))
 
 
+# Max calls set to 1 to forcefully release GPU resource when the job is 
+# complete. We choose to bypass resource management of Ray, but instead 
+# control GPU resource ourselves by configuring the environmental variables 
+# when the job enters the Ray process. Due to that, resource release is not 
+# cleanly done on the Ray side, we need to set this to prevent memory leak. 
+# More detailed explaination can be found in 
+# https://github.com/georgia-tech-db/eva/pull/731
 @ray.remote(max_calls=1)
 def ray_parallel(
     conf_dict: Dict[str, str],

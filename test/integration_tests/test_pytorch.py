@@ -15,7 +15,7 @@
 import os
 import unittest
 from test.markers import ocr_skip_marker, windows_skip_marker
-from test.util import file_remove, load_udfs_for_testing, shutdown_ray
+from test.util import file_remove, load_udfs_for_testing, shutdown_ray, create_sample_video
 
 import cv2
 import numpy as np
@@ -26,6 +26,7 @@ from eva.configuration.configuration_manager import ConfigurationManager
 from eva.configuration.constants import EVA_ROOT_DIR
 from eva.server.command_handler import execute_query_fetch_all
 from eva.udfs.udf_bootstrap_queries import Asl_udf_query, Mvit_udf_query
+from eva.executor.executor_utils import ExecutorError
 
 
 @pytest.mark.notparallel
@@ -62,6 +63,22 @@ class PytorchTest(unittest.TestCase):
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
         execute_query_fetch_all("DROP TABLE IF EXISTS Asl_actions;")
         execute_query_fetch_all("DROP TABLE IF EXISTS MemeImages;")
+
+    @pytest.mark.skipif(not ConfigurationManager().get_value("experimental", "ray"), reason="Only test for Ray")
+    def test_should_raise_exception_with_ray(self):
+        # Deliberately cause error.
+        video_path = create_sample_video(100)
+        load_query = f"LOAD VIDEO '{video_path}' INTO rayErrorVideo;"
+        execute_query_fetch_all(load_query)
+        file_remove("dummy.avi")
+
+        select_query = """SELECT id, obj.labels
+                          FROM rayErrorVideo JOIN LATERAL
+                          FastRCNNObjectDetector(data)
+                          AS obj(labels, bboxes, scores)
+                         WHERE id < 2;"""
+        with self.assertRaises(ExecutorError):
+            execute_query_fetch_all(select_query)
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_fastrcnn_with_lateral_join(self):
