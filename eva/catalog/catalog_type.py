@@ -117,3 +117,9 @@ class VideoColumnName(EVAEnum):
 class ImageColumnName(EVAEnum):
     name  # noqa: F821
     data  # noqa: F821
+
+
+class DocumentColumnName(EVAEnum):
+    name  # noqa: F821
+    data  # noqa: F821
+    metadata  # noqa: F821
