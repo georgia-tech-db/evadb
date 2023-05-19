@@ -22,11 +22,11 @@ from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import TableType
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.experimental.ray.optimizer.rules.rules import (
+from eva.experimental.parallel.optimizer.rules.rules import (
     LogicalApplyAndMergeToPhysical as ParalleLogicallApplyAndMergeToPhysical,
 )
-from eva.experimental.ray.optimizer.rules.rules import LogicalExchangeToPhysical
-from eva.experimental.ray.optimizer.rules.rules import (
+from eva.experimental.parallel.optimizer.rules.rules import LogicalExchangeToPhysical
+from eva.experimental.parallel.optimizer.rules.rules import (
     LogicalGetToSeqScan as ParallelLogicalGetToSeqScan,
 )
 from eva.optimizer.operators import (

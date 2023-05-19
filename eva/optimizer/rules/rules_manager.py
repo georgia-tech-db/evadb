@@ -18,11 +18,11 @@ from contextlib import contextmanager
 from typing import List
 
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.experimental.ray.optimizer.rules.rules import (
+from eva.experimental.parallel.optimizer.rules.rules import (
     LogicalApplyAndMergeToPhysical as ParallelLogicalApplyAndMergeToPhysical,
 )
-from eva.experimental.ray.optimizer.rules.rules import LogicalExchangeToPhysical
-from eva.experimental.ray.optimizer.rules.rules import (
+from eva.experimental.parallel.optimizer.rules.rules import LogicalExchangeToPhysical
+from eva.experimental.parallel.optimizer.rules.rules import (
     LogicalGetToSeqScan as ParallelLogicalGetToSeqScan,
 )
 from eva.optimizer.rules.rules import (

@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     from eva.optimizer.optimizer_context import OptimizerContext
 
 from eva.executor.execution_context import Context
-from eva.experimental.ray.plan_nodes.exchange_plan import ExchangePlan
+from eva.experimental.parallel.plan_nodes.exchange_plan import ExchangePlan
 from eva.expression.function_expression import FunctionExpression
 from eva.optimizer.operators import (
     LogicalApplyAndMerge,

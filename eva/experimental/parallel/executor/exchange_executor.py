@@ -18,13 +18,13 @@ from ray.util.queue import Queue
 
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError
-from eva.experimental.ray.executor.ray_remote import (
+from eva.experimental.parallel.executor.ray_remote import (
     StageCompleteSignal,
     ray_parallel,
     ray_pull,
     ray_wait_and_alert,
 )
-from eva.experimental.ray.plan_nodes.exchange_plan import ExchangePlan
+from eva.experimental.parallel.plan_nodes.exchange_plan import ExchangePlan
 from eva.models.storage.batch import Batch
 
 
@@ -51,7 +51,6 @@ class QueueReaderExecutor(AbstractExecutor):
                 yield next_item
 
 
-# Design idea: https://www.dropbox.com/s/nej0d7ouknpnrr2/ray-design.jpg?dl=0
 class ExchangeExecutor(AbstractExecutor):
     def __init__(self, node: ExchangePlan):
         self.inner_plan = node.inner_plan
