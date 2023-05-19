@@ -379,6 +379,7 @@ FORMAT:               "FORMAT"i
 CSV:                  "CSV"i
 VIDEO:                "VIDEO"i
 IMAGE:                "IMAGE"i
+DOCUMENT:             "DOCUMENT"i
 
 // Index types
 HNSW:                                "HNSW"i

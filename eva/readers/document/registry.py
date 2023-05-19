@@ -14,7 +14,7 @@
 # limitations under the License.
 from langchain.document_loaders import (
     EverNoteLoader,
-    PyPDFLoader,
+    PDFMinerLoader,
     TextLoader,
     UnstructuredEmailLoader,
     UnstructuredEPubLoader,
@@ -25,7 +25,6 @@ from langchain.document_loaders import (
 )
 
 LOADER_MAPPING = {
-    # ".docx": (Docx2txtLoader, {}),
     ".doc": (UnstructuredWordDocumentLoader, {}),
     ".docx": (UnstructuredWordDocumentLoader, {}),
     ".enex": (EverNoteLoader, {}),
@@ -33,7 +32,7 @@ LOADER_MAPPING = {
     ".epub": (UnstructuredEPubLoader, {}),
     ".html": (UnstructuredHTMLLoader, {}),
     ".md": (UnstructuredMarkdownLoader, {}),
-    ".pdf": (PyPDFLoader, {}),
+    ".pdf": (PDFMinerLoader, {}),
     ".ppt": (UnstructuredPowerPointLoader, {}),
     ".pptx": (UnstructuredPowerPointLoader, {}),
     ".txt": (TextLoader, {"encoding": "utf8"}),

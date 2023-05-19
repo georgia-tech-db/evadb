@@ -28,5 +28,6 @@ class DocumentReader(AbstractReader):
         assert ext in LOADER_MAPPING, f"File Format {ext} not supported"
         loader_class, loader_args = LOADER_MAPPING[ext]
         loader = loader_class(self.file_url, **loader_args)
+        # load entire document as one entry
         for data in loader.load():
-            yield {"data": data.page_content, "metadata": data.metadata}
+            yield {"data": data.page_content}

@@ -24,6 +24,7 @@ class TableType(EVAEnum):
     STRUCTURED_DATA  # noqa: F821
     VIDEO_DATA  # noqa: F821
     IMAGE_DATA  # noqa: F821
+    DOCUMENT_DATA  # noqa: F821
 
     # reserved for system generated tables
     # cannot be accessed/modified directly by user

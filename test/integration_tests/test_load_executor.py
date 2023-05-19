@@ -496,6 +496,14 @@ class LoadExecutorTest(unittest.TestCase):
         # Clean up large scale image directory.
         shutil.rmtree(large_scale_image_files_path)
 
+    def test_load_pdfs(self):
+        execute_query_fetch_all(
+            f"""LOAD DOCUMENT '{EVA_ROOT_DIR}/data/documents/*.pdf' INTO pdfs;"""
+        )
+        result = execute_query_fetch_all("SELECT * from pdfs;")
+        self.assertEqual(len(result.columns), 3)
+        self.assertEqual(len(result), 2)
+
 
 if __name__ == "__main__":
     unittest.main()
