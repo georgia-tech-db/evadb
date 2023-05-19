@@ -24,11 +24,22 @@ import asyncio
 from pprint import pprint
 import git
 import datetime
+from datetime import date
 import pytz
 import pkg_resources
+from datetime import datetime
+import linecache
+from semantic_version import Version
+from typing import Dict
+from github import Github
 
 background_loop = asyncio.new_event_loop()
 
+class SemanticVersionTypeEnum:
+    PRERELEASE = 'prerelease' # 0.2.4+dev -> 0.2.4.alpha.1
+    PATCH = 'patch' # 0.2.4+dev -> 0.2.5
+    MINOR = 'minor' # 0.2.4+dev -> 0.3.0
+    MAJOR = 'major' # 0.2.4+dev -> 1.0.0
 
 def background(f):
     def wrapped(*args, **kwargs):
@@ -36,6 +47,9 @@ def background(f):
 
     return wrapped
 
+def get_string_in_line(file_path, line_number):
+    line = linecache.getline(file_path, line_number)
+    return line.strip()
 
 # ==============================================
 # CONFIGURATION
@@ -51,6 +65,7 @@ EVA_DIR = functools.reduce(
 
 # other directory paths used are relative to peloton_dir
 EVA_SRC_DIR = os.path.join(EVA_DIR, "eva")
+EVA_CHANGELOG_PATH = os.path.join(EVA_DIR, "CHANGELOG.md")
 
 # ==============================================
 # LOGGING CONFIGURATION
@@ -76,15 +91,19 @@ def run_command(command_str: str):
         command_str, shell=True, universal_newlines=True
     ).rstrip()
 
-    pprint(output)
+
+    pprint(command_str)
+
+    if 'version' in command_str:
+        pprint(output)
     return output
 
 
-def get_changelog(LAST_RELEASE_COMMIT):
-    unix_timestamp = int(run_command(f"git show -s --format=%ct {LAST_RELEASE_COMMIT}"))
-    PREV_RELEASE_DATE = datetime.datetime.utcfromtimestamp(unix_timestamp).replace(
-        tzinfo=pytz.UTC
-    )
+def get_changelog(github_timestamp):
+
+    release_date = datetime.fromisoformat(github_timestamp[:-1])
+    utc_timezone = pytz.timezone('UTC')
+    release_date = utc_timezone.localize(release_date)
 
     # GO TO ROOT DIR
     os.chdir(EVA_DIR)
@@ -97,10 +116,11 @@ def get_changelog(LAST_RELEASE_COMMIT):
     repo = git.Repo(".git")
 
     regexp = re.compile(r"\#[0-9]*")
+    changelog = ""
 
     # Iterate through every commit for the given branch in the repository
     for commit in repo.iter_commits("master"):
-        if commit.authored_datetime < PREV_RELEASE_DATE:
+        if commit.authored_datetime < release_date:
             break
 
         output = regexp.search(commit.message)
@@ -110,13 +130,18 @@ def get_changelog(LAST_RELEASE_COMMIT):
 
         if output is None:
             continue
-
         else:
             pr_number = output.group(0)
             key_message = commit.message.split("\n")[0]
             key_message = key_message.split("(")[0]
             pr_number = pr_number.split("#")[1]
-            print("* PR #" + str(pr_number) + ": " + key_message)
+
+            if "[RELEASE]" in key_message:
+                continue
+
+            changelog += f"* PR #{pr_number}: {key_message}\n"
+
+    return changelog
 
 
 def read_file(path, encoding="utf-8"):
@@ -127,7 +152,7 @@ def read_file(path, encoding="utf-8"):
         return fp.read()
 
 
-def release_version(NEXT_RELEASE):
+def release_version(current_version):
     version_path = os.path.join(os.path.join(EVA_DIR, "eva"), "version.py")
     with open(version_path, "r") as version_file:
         output = version_file.read()
@@ -136,11 +161,140 @@ def release_version(NEXT_RELEASE):
     with open(version_path, "w") as version_file:
         version_file.write(output)
 
+    NEXT_RELEASE = current_version # without dev part
+
+    return
+
     run_command("git checkout -b release-" + NEXT_RELEASE)
     run_command("git add . -u")
     run_command("git commit -m '[RELEASE]: " + NEXT_RELEASE + "'")
     run_command("git push --set-upstream origin release-" + NEXT_RELEASE)
+    run_command("git push --set-upstream origin release-" + NEXT_RELEASE)
 
+    run_command(f"git tag -a {NEXT_RELEASE} -m '{NEXT_RELEASE} release'")
+    run_command(f"git push origin {NEXT_RELEASE}")
+
+def get_commit_id_of_latest_release():
+    import requests
+
+    repo = 'georgia-tech-db/eva'
+    url = f'https://api.github.com/repos/{repo}/releases'
+    response = requests.get(url)
+    data = response.json()
+
+    latest_release = data[1]
+    release_date = latest_release['created_at']
+
+    return release_date
+
+def append_changelog(insert_changelog: str, version: str):
+    with open(EVA_CHANGELOG_PATH, 'r') as file:
+        file_contents = file.read()
+
+    # Location after ### [Removed] in file
+    position = 327
+
+    # Get rid of dev
+    version = version.split("+")[0]
+
+    today_date = date.today()
+    header= f"##  [{version}] - {today_date}\n\n"
+
+    modified_content = file_contents[:position] + header + insert_changelog +  "\n" + file_contents[position:]
+
+    with open(EVA_CHANGELOG_PATH, 'w') as file:
+        file.write(modified_content)
+
+def publish_wheels(tag):
+    run_command("rm -rf dist build")
+    run_command("python3 setup.py sdist")
+    run_command("python3 setup.py bdist_wheel")
+
+    run_command(f"python3 -m pip install dist/evadb-{tag}-py3-none-any.whl")
+    run_command("""python3 -c "import eva; print(eva.__version__)" """)
+
+    run_command("twine upload dist/* -r pypi")
+
+
+def upload_assets(changelog, tag):
+    # Authentication token
+    access_token = 'xxxxxxxxxxxxxxxxxxxxxxxxxxx'
+
+    # Repository information
+    repo_owner = 'georgia-tech-db'
+    repo_name = 'eva'
+
+    # Release information
+    tag_name = 'v' + tag
+    assert 'vv' not in tag
+    asset_filepaths = [
+        f'dist/evadb-{tag}-py3-none-any.whl', 
+        f'dist/evadb-{tag}.tar.gz'
+    ]
+
+    # Create a PyGithub instance
+    g = Github(access_token)
+
+    # Get the repository
+    repo = g.get_repo(f'{repo_owner}/{repo_name}')
+
+    return
+
+    # Create the release
+    release_name = tag_name
+    release_body = f'{tag_name}\n\n {changelog}' 
+
+    release = repo.create_git_release(
+        tag=tag_name, 
+        name=release_name, 
+        body=release_body, 
+        draft=False, 
+        prerelease=False
+    )
+
+    # Retrieve the release by tag name
+    release = repo.get_release(tag_name)
+
+    # Upload assets to the release
+    for filepath in asset_filepaths:
+        asset_name = filepath.split('/')[-1]
+        with open(filepath, 'rb') as file:
+            release.upload_asset(file, asset_name)
+
+    # Publish the release
+    release.update_release(draft=False)
+
+    print('Release created and published successfully.')
+
+def bump_up_version(next_version):
+    version_path = os.path.join(os.path.join(EVA_DIR, "eva"), "version.py")
+
+    major_str = get_string_in_line(version_path, 1)
+    minor_str = get_string_in_line(version_path, 2)
+    patch_str = get_string_in_line(version_path, 3)
+
+    assert "dev" not in patch_str
+
+    major_str = f"""_MAJOR = "{str(next_version.major)}"\n"""
+    minor_str = f"""_MINOR = "{str(next_version.minor)}"\n"""
+    patch_str = f"""_REVISION = "{str(next_version.patch)}+dev"\n\n"""
+
+    footer = """VERSION_SHORT = f\"{_MAJOR}.{_MINOR}\"\nVERSION = f\"{_MAJOR}.{_MINOR}.{_REVISION}\""""
+    output = major_str + minor_str + patch_str + footer
+
+    with open(version_path, "w") as version_file:
+        version_file.write(output)
+
+    NEXT_RELEASE = f"v{str(next_version)}+dev"
+
+    print(NEXT_RELEASE)
+
+    return
+
+    run_command("git checkout -b bump-" + NEXT_RELEASE)
+    run_command("git add . -u")
+    run_command("git commit -m '[BUMP]: " + NEXT_RELEASE + "'")
+    run_command("git push --set-upstream origin bump-" + NEXT_RELEASE)
 
 # ==============================================
 # Main Function
@@ -149,22 +303,140 @@ def release_version(NEXT_RELEASE):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Release eva")
 
+    # version.py defines the VERSION and VERSION_SHORT variables
+    VERSION_DICT: Dict[str, str] = {}
+    with open("eva/version.py", "r") as version_file:
+        exec(version_file.read(), VERSION_DICT)
+
+    VERSION = VERSION_DICT["VERSION"]
+
+    parser.add_argument(
+        "-n",
+        "--next-release-type", 
+        type=str, 
+        choices=[
+            SemanticVersionTypeEnum.PRERELEASE, 
+            SemanticVersionTypeEnum.PATCH, 
+            SemanticVersionTypeEnum.MINOR,
+            SemanticVersionTypeEnum.MAJOR
+        ],
+        help="Next version type.",
+        required=True
+    )
+
     parser.add_argument(
         "-c",
         "--get-changelog",
-        help="Retrieve the changelog by utilizing the last release commit provided. eg, 48ccb80237a456dd37834a7cba0b6fb4d2a8a7d8",
+        action='store_true',
+        help="Retrieve the changelog since last release",
+    )
+
+    parser.add_argument(
+        "-u",
+        "--update-changelog",
+        action='store_true',
+        help="Update changelog.",
     )
 
     parser.add_argument(
         "-r",
         "--release-version",
-        help="Publish a new version of EVA using the provided tag. eg, v0.2.0",
+        action='store_true',
+        help="Publish a new version of EVA.",
+    )
+
+    parser.add_argument(
+        "-p",
+        "--publish-to-pypi",
+        action='store_true',
+        help="Create wheels and upload to PyPI.",
+    )
+
+    parser.add_argument(
+        "-a",
+        "--upload-assets",
+        action='store_true',
+        help="Upload assets on Github.",
+    )
+
+    parser.add_argument(
+        "-b",
+        "--bump-up-version",
+        action='store_true',
+        help="Bump up version.",
     )
 
     args = parser.parse_args()
 
+    # FIGURE OUT NEXT VERSION
+
+    current_version = VERSION
+    version = Version(current_version)
+    print("CURRENT VERSION: " + current_version)
+
+    selected_release_type = args.next_release_type
+
+    # Get the string representation of the next version
+    if selected_release_type == SemanticVersionTypeEnum.PRERELEASE:
+        next_version = version.next_patch()
+        next_version_str = "v" + str(next_version) + ".alpha"
+    elif selected_release_type == SemanticVersionTypeEnum.PATCH:
+        next_version = version.next_patch()
+        next_version_str = "v" + str(next_version)
+    elif selected_release_type == SemanticVersionTypeEnum.MINOR:
+        next_version = version.next_minor()
+        next_version_str = "v" + str(next_version)
+    elif selected_release_type == SemanticVersionTypeEnum.MAJOR:
+        next_version = version.next_major()    
+        next_version_str = "v" + str(next_version)
+
+    current_version_str_without_dev = str(version)
+    print("CURRENT VERSION WITHOUT DEV: " + current_version_str_without_dev)
+    print("NEXT    VERSION : " + next_version_str)
+
     if args.get_changelog:
-        get_changelog(args.get_changelog)
+        release_date = get_commit_id_of_latest_release()
+        changelog = get_changelog(release_date)
+        print(changelog)
+
+    if args.update_changelog:
+        release_date = get_commit_id_of_latest_release()
+        changelog = get_changelog(release_date)
+        append_changelog(changelog, current_version_str_without_dev)
 
     if args.release_version:
-        release_version(args.release_version)
+        release_version(current_version_str_without_dev)
+
+    if args.publish_to_pypi:
+        publish_wheels(current_version_str_without_dev)
+
+    if args.upload_assets:
+        release_date = get_commit_id_of_latest_release()
+        changelog = get_changelog(release_date)
+        upload_assets(changelog, current_version_str_without_dev)
+
+    if args.bump_up_version:
+        bump_up_version(next_version)
+
+    ## DO EVERYTHING BY DEFAULT
+
+    # GET CHANGELOG 
+    release_date = get_commit_id_of_latest_release()
+    changelog = get_changelog(release_date)
+    print(changelog)
+
+    # UPDATE CHANGELOG
+    append_changelog(changelog, current_version_str_without_dev)
+
+    # RELEASE VERSION
+    release_version(current_version_str_without_dev)
+
+    # PUBLISH WHEELS ON PYPI
+    publish_wheels(current_version_str_without_dev)
+
+    # UPLOAD ASSETS ON GITHUB
+    upload_assets(changelog, current_version_str_without_dev)
+
+    # BUMP UP VERSION
+    bump_up_version(next_version)
+
