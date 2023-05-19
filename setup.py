@@ -88,9 +88,16 @@ benchmark_libs = [
     "pytest-benchmark",
 ]
 
-doc_libs = ["codespell", "pylint"]
+doc_libs = [
+    "codespell", 
+    "pylint"
+]
 
-dist_libs = ["wheel>=0.37.1", "scriv>=0.16.0"]
+dist_libs = [
+    "wheel>=0.37.1", 
+    "semantic_version",
+    "PyGithub"
+]
 
 ### NEEDED FOR AN ALTERNATE DATA SYSTEM OTHER THAN SQLITE
 database_libs = ["pymysql>=0.10.1"]
