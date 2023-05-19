@@ -23,11 +23,7 @@ from pathlib import Path
 import asyncio
 import nbformat
 from nbformat.v4 import new_notebook, new_markdown_cell, new_code_cell
-import enchant
-from enchant.checker import SpellChecker
 from pathlib import Path
-    
-chkr = SpellChecker("en_US")
 
 import pkg_resources
 
@@ -66,7 +62,7 @@ DEFAULT_DIRS = []
 DEFAULT_DIRS.append(EVA_SRC_DIR)
 DEFAULT_DIRS.append(EVA_TEST_DIR)
 
-IGNORE_FILES = []
+IGNORE_FILES = ["version.py"]
 
 FLAKE8_VERSION_REQUIRED = "3.9.1"
 BLACK_VERSION_REQUIRED = "22.6.0"
@@ -275,6 +271,14 @@ def check_notebook_format(notebook_file):
     if contains_colab_link is False:
         sys.exit(1)
 
+    return True
+
+    # SKIP SPELL CHECK BY DEFAULT DUE TO PACKAGE DEPENDENCY
+
+    import enchant
+    from enchant.checker import SpellChecker
+    chkr = SpellChecker("en_US")
+
     # Check spelling
     for cell in nb.cells:
         if cell.cell_type == "code":
@@ -284,7 +288,6 @@ def check_notebook_format(notebook_file):
             if err.word not in ignored_words:
                 LOG.warning(f"WARNING: Notebook {notebook_file} contains the misspelled word: {err.word}")
 
-    return True
 
 # format all the files in the dir passed as argument
 def format_dir(dir_path, add_header, strip_header, format_code):

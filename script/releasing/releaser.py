@@ -31,6 +31,7 @@ from datetime import datetime
 import linecache
 from semantic_version import Version
 from typing import Dict
+from github import Github
 
 background_loop = asyncio.new_event_loop()
 
@@ -90,7 +91,11 @@ def run_command(command_str: str):
         command_str, shell=True, universal_newlines=True
     ).rstrip()
 
-    pprint(output)
+
+    pprint(command_str)
+
+    if 'version' in command_str:
+        pprint(output)
     return output
 
 
@@ -99,7 +104,6 @@ def get_changelog(github_timestamp):
     release_date = datetime.fromisoformat(github_timestamp[:-1])
     utc_timezone = pytz.timezone('UTC')
     release_date = utc_timezone.localize(release_date)
-    print(release_date)
 
     # GO TO ROOT DIR
     os.chdir(EVA_DIR)
@@ -148,7 +152,7 @@ def read_file(path, encoding="utf-8"):
         return fp.read()
 
 
-def release_version(NEXT_RELEASE):
+def release_version(current_version):
     version_path = os.path.join(os.path.join(EVA_DIR, "eva"), "version.py")
     with open(version_path, "r") as version_file:
         output = version_file.read()
@@ -156,6 +160,8 @@ def release_version(NEXT_RELEASE):
 
     with open(version_path, "w") as version_file:
         version_file.write(output)
+
+    NEXT_RELEASE = current_version # without dev part
 
     return
 
@@ -188,11 +194,13 @@ def append_changelog(insert_changelog: str, version: str):
     # Location after ### [Removed] in file
     position = 327
 
-    version = version[1:]
+    # Get rid of dev
+    version = version.split("+")[0]
+
     today_date = date.today()
     header= f"##  [{version}] - {today_date}\n\n"
 
-    modified_content = file_contents[:position] + header + insert_changelog +  "\n\n" + file_contents[position:]
+    modified_content = file_contents[:position] + header + insert_changelog +  "\n" + file_contents[position:]
 
     with open(EVA_CHANGELOG_PATH, 'w') as file:
         file.write(modified_content)
@@ -202,34 +210,86 @@ def publish_wheels(tag):
     run_command("python3 setup.py sdist")
     run_command("python3 setup.py bdist_wheel")
 
-    #run_command("source test_evadb/bin/activate")
     run_command(f"python3 -m pip install dist/evadb-{tag}-py3-none-any.whl")
     run_command("""python3 -c "import eva; print(eva.__version__)" """)
 
-    #run_command("twine upload dist/* -r pypi")
+    run_command("twine upload dist/* -r pypi")
 
-    print("Don't forget to upload the assets on Github")
 
-def bump_up_version():
+def upload_assets(changelog, tag):
+    # Authentication token
+    access_token = 'xxxxxxxxxxxxxxxxxxxxxxxxxxx'
+
+    # Repository information
+    repo_owner = 'georgia-tech-db'
+    repo_name = 'eva'
+
+    # Release information
+    tag_name = 'v' + tag
+    assert 'vv' not in tag
+    asset_filepaths = [
+        f'dist/evadb-{tag}-py3-none-any.whl', 
+        f'dist/evadb-{tag}.tar.gz'
+    ]
+
+    # Create a PyGithub instance
+    g = Github(access_token)
+
+    # Get the repository
+    repo = g.get_repo(f'{repo_owner}/{repo_name}')
+
+    return
+
+    # Create the release
+    release_name = tag_name
+    release_body = f'{tag_name}\n\n {changelog}' 
+
+    release = repo.create_git_release(
+        tag=tag_name, 
+        name=release_name, 
+        body=release_body, 
+        draft=False, 
+        prerelease=False
+    )
+
+    # Retrieve the release by tag name
+    release = repo.get_release(tag_name)
+
+    # Upload assets to the release
+    for filepath in asset_filepaths:
+        asset_name = filepath.split('/')[-1]
+        with open(filepath, 'rb') as file:
+            release.upload_asset(file, asset_name)
+
+    # Publish the release
+    release.update_release(draft=False)
+
+    print('Release created and published successfully.')
+
+def bump_up_version(next_version):
     version_path = os.path.join(os.path.join(EVA_DIR, "eva"), "version.py")
-    with open(version_path, "r") as version_file:
-        output = version_file.read()
-        # _REVISION = ..
-        v1 = get_string_in_line(version_path, 18)
-        # Remove last "
-        v2 = v1[:-1]
-        print(v2)
-        if v2[-1].isdigit():
-            v2 += "+dev\""
-        else:
-            # already on dev version
-            return
-        output = output.replace(v1, v2)
+
+    major_str = get_string_in_line(version_path, 1)
+    minor_str = get_string_in_line(version_path, 2)
+    patch_str = get_string_in_line(version_path, 3)
+
+    assert "dev" not in patch_str
+
+    major_str = f"""_MAJOR = "{str(next_version.major)}"\n"""
+    minor_str = f"""_MINOR = "{str(next_version.minor)}"\n"""
+    patch_str = f"""_REVISION = "{str(next_version.patch)}+dev"\n\n"""
+
+    footer = """VERSION_SHORT = f\"{_MAJOR}.{_MINOR}\"\nVERSION = f\"{_MAJOR}.{_MINOR}.{_REVISION}\""""
+    output = major_str + minor_str + patch_str + footer
 
     with open(version_path, "w") as version_file:
         version_file.write(output)
 
-    NEXT_RELEASE = "v" + v2
+    NEXT_RELEASE = f"v{str(next_version)}+dev"
+
+    print(NEXT_RELEASE)
+
+    return
 
     run_command("git checkout -b bump-" + NEXT_RELEASE)
     run_command("git add . -u")
@@ -242,8 +302,6 @@ def bump_up_version():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Release eva")
-
-    release_date = get_commit_id_of_latest_release()
 
     # version.py defines the VERSION and VERSION_SHORT variables
     VERSION_DICT: Dict[str, str] = {}
@@ -295,6 +353,13 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
+        "-a",
+        "--upload-assets",
+        action='store_true',
+        help="Upload assets on Github.",
+    )
+
+    parser.add_argument(
         "-b",
         "--bump-up-version",
         action='store_true',
@@ -306,8 +371,8 @@ if __name__ == "__main__":
     # FIGURE OUT NEXT VERSION
 
     current_version = VERSION
-    print(current_version)
     version = Version(current_version)
+    print("CURRENT VERSION: " + current_version)
 
     selected_release_type = args.next_release_type
 
@@ -325,21 +390,53 @@ if __name__ == "__main__":
         next_version = version.next_major()    
         next_version_str = "v" + str(next_version)
 
-    print(next_version_str)
+    current_version_str_without_dev = str(version)
+    print("CURRENT VERSION WITHOUT DEV: " + current_version_str_without_dev)
+    print("NEXT    VERSION : " + next_version_str)
 
     if args.get_changelog:
+        release_date = get_commit_id_of_latest_release()
         changelog = get_changelog(release_date)
         print(changelog)
 
     if args.update_changelog:
+        release_date = get_commit_id_of_latest_release()
         changelog = get_changelog(release_date)
-        append_changelog(changelog, next_version_str)
+        append_changelog(changelog, current_version_str_without_dev)
 
     if args.release_version:
-        release_version(next_version_str)
+        release_version(current_version_str_without_dev)
 
     if args.publish_to_pypi:
-        publish_wheels(current_version)
+        publish_wheels(current_version_str_without_dev)
+
+    if args.upload_assets:
+        release_date = get_commit_id_of_latest_release()
+        changelog = get_changelog(release_date)
+        upload_assets(changelog, current_version_str_without_dev)
 
     if args.bump_up_version:
-        bump_up_version()
+        bump_up_version(next_version)
+
+    ## DO EVERYTHING BY DEFAULT
+
+    # GET CHANGELOG 
+    release_date = get_commit_id_of_latest_release()
+    changelog = get_changelog(release_date)
+    print(changelog)
+
+    # UPDATE CHANGELOG
+    append_changelog(changelog, current_version_str_without_dev)
+
+    # RELEASE VERSION
+    release_version(current_version_str_without_dev)
+
+    # PUBLISH WHEELS ON PYPI
+    publish_wheels(current_version_str_without_dev)
+
+    # UPLOAD ASSETS ON GITHUB
+    upload_assets(changelog, current_version_str_without_dev)
+
+    # BUMP UP VERSION
+    bump_up_version(next_version)
+
