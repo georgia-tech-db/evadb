@@ -170,6 +170,11 @@ def check_header(file_path):
 
 def format_file(file_path, add_header, strip_header, format_code):
 
+    # Do not add a header here
+    # Releaser assumes the lines in the file to be related to version
+    if file_path.ends_with("version.py"):
+        return
+
     abs_path = os.path.abspath(file_path)
     with open(abs_path, "r+") as fd:
         file_data = fd.read()
