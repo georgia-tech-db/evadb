@@ -18,7 +18,6 @@ from test.util import create_sample_video, file_remove, load_udfs_for_testing
 import pytest
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.configuration.configuration_manager import ConfigurationManager
 from eva.optimizer.plan_generator import PlanGenerator
 from eva.optimizer.rules.rules import (
     EmbedFilterIntoGet,
@@ -47,13 +46,10 @@ class ExplainExecutorTest(unittest.TestCase):
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
 
     def test_explain_simple_select(self):
-        ray_enabled = ConfigurationManager().get_value("experimental", "ray")
         select_query = "EXPLAIN SELECT id, data FROM MyVideo"
         batch = execute_query_fetch_all(select_query)
         expected_output = (
-            """|__ ExchangePlan\n    |__ ProjectPlan\n        |__ SeqScanPlan\n            |__ ExchangePlan\n                |__ StoragePlan\n"""
-            if ray_enabled
-            else """|__ ProjectPlan\n    |__ SeqScanPlan\n        |__ StoragePlan\n"""
+            """|__ ProjectPlan\n    |__ SeqScanPlan\n        |__ StoragePlan\n"""
         )
         self.assertEqual(batch.frames[0][0], expected_output)
 
@@ -63,11 +59,7 @@ class ExplainExecutorTest(unittest.TestCase):
             batch = execute_query_fetch_all(
                 select_query, plan_generator=custom_plan_generator
             )
-            expected_output = (
-                """|__ ProjectPlan\n    |__ LateralJoinPlan\n        |__ SeqScanPlan\n            |__ StoragePlan\n        |__ FunctionScanPlan\n"""
-                if ray_enabled
-                else """|__ ProjectPlan\n    |__ LateralJoinPlan\n        |__ SeqScanPlan\n            |__ StoragePlan\n        |__ FunctionScanPlan\n"""
-            )
+            expected_output = """|__ ProjectPlan\n    |__ LateralJoinPlan\n        |__ SeqScanPlan\n            |__ StoragePlan\n        |__ FunctionScanPlan\n"""
             self.assertEqual(batch.frames[0][0], expected_output)
 
         # Disable more rules
@@ -83,9 +75,6 @@ class ExplainExecutorTest(unittest.TestCase):
             batch = execute_query_fetch_all(
                 select_query, plan_generator=custom_plan_generator
             )
-            expected_output = (
-                """|__ ProjectPlan\n    |__ LateralJoinPlan\n        |__ SeqScanPlan\n            |__ StoragePlan\n        |__ FunctionScanPlan\n"""
-                if ray_enabled
-                else """|__ ProjectPlan\n    |__ LateralJoinPlan\n        |__ SeqScanPlan\n            |__ StoragePlan\n        |__ FunctionScanPlan\n"""
-            )
+            expected_output = """|__ ProjectPlan\n    |__ LateralJoinPlan\n        |__ SeqScanPlan\n            |__ StoragePlan\n        |__ FunctionScanPlan\n"""
+            print(batch.frames[0][0])
             self.assertEqual(batch.frames[0][0], expected_output)

@@ -18,12 +18,12 @@ from contextlib import contextmanager
 from typing import List
 
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.experimental.ray.optimizer.rules.rules import LogicalExchangeToPhysical
-from eva.experimental.ray.optimizer.rules.rules import (
-    LogicalGetToSeqScan as DistributedLogicalGetToSeqScan,
+from eva.experimental.parallel.optimizer.rules.rules import (
+    LogicalApplyAndMergeToPhysical as ParallelLogicalApplyAndMergeToPhysical,
 )
-from eva.experimental.ray.optimizer.rules.rules import (
-    LogicalProjectToPhysical as DistributedLogicalProjectToPhysical,
+from eva.experimental.parallel.optimizer.rules.rules import LogicalExchangeToPhysical
+from eva.experimental.parallel.optimizer.rules.rules import (
+    LogicalGetToSeqScan as ParallelLogicalGetToSeqScan,
 )
 from eva.optimizer.rules.rules import (
     CacheFunctionExpressionInApply,
@@ -32,7 +32,11 @@ from eva.optimizer.rules.rules import (
     CombineSimilarityOrderByAndLimitToVectorIndexScan,
     EmbedFilterIntoGet,
     EmbedSampleIntoGet,
-    LogicalApplyAndMergeToPhysical,
+)
+from eva.optimizer.rules.rules import (
+    LogicalApplyAndMergeToPhysical as SequentialLogicalApplyAndMergeToPhysical,
+)
+from eva.optimizer.rules.rules import (
     LogicalCreateIndexToVectorIndex,
     LogicalCreateMaterializedViewToPhysical,
     LogicalCreateToPhysical,
@@ -58,11 +62,7 @@ from eva.optimizer.rules.rules import (
     LogicalLimitToPhysical,
     LogicalLoadToPhysical,
     LogicalOrderByToPhysical,
-)
-from eva.optimizer.rules.rules import (
-    LogicalProjectToPhysical as SequentialLogicalProjectToPhysical,
-)
-from eva.optimizer.rules.rules import (
+    LogicalProjectToPhysical,
     LogicalRenameToPhysical,
     LogicalShowToPhysical,
     LogicalUnionToPhysical,
@@ -111,7 +111,7 @@ class RulesManager:
             LogicalInsertToPhysical(),
             LogicalDeleteToPhysical(),
             LogicalLoadToPhysical(),
-            DistributedLogicalGetToSeqScan()
+            ParallelLogicalGetToSeqScan()
             if ray_enabled
             else SequentialLogicalGetToSeqScan(),
             LogicalDerivedGetToPhysical(),
@@ -125,13 +125,13 @@ class RulesManager:
             LogicalFunctionScanToPhysical(),
             LogicalCreateMaterializedViewToPhysical(),
             LogicalFilterToPhysical(),
-            DistributedLogicalProjectToPhysical()
+            LogicalProjectToPhysical(),
+            ParallelLogicalApplyAndMergeToPhysical()
             if ray_enabled
-            else SequentialLogicalProjectToPhysical(),
+            else SequentialLogicalApplyAndMergeToPhysical(),
             LogicalShowToPhysical(),
             LogicalExplainToPhysical(),
             LogicalCreateIndexToVectorIndex(),
-            LogicalApplyAndMergeToPhysical(),
             LogicalVectorIndexScanToPhysical(),
         ]
 
