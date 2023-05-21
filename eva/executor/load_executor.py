@@ -14,6 +14,7 @@
 # limitations under the License.
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.load_csv_executor import LoadCSVExecutor
+from eva.executor.load_pdf_executor import LoadPDFExecutor
 from eva.executor.load_multimedia_executor import LoadMultimediaExecutor
 from eva.parser.types import FileFormatType
 from eva.plan_nodes.load_data_plan import LoadDataPlan
@@ -41,7 +42,7 @@ class LoadDataExecutor(AbstractExecutor):
             """
             Executor for extractor from pdf
             """
-            pass
+            executor = LoadPDFExecutor(self.node)
 
         # for each batch, exec the executor
         for batch in executor.exec():
