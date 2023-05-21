@@ -15,7 +15,12 @@
 import os
 import unittest
 from test.markers import ocr_skip_marker, windows_skip_marker
-from test.util import file_remove, load_udfs_for_testing, shutdown_ray
+from test.util import (
+    create_sample_video,
+    file_remove,
+    load_udfs_for_testing,
+    shutdown_ray,
+)
 
 import cv2
 import numpy as np
@@ -24,6 +29,7 @@ import pytest
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.configuration.constants import EVA_ROOT_DIR
+from eva.executor.executor_utils import ExecutorError
 from eva.server.command_handler import execute_query_fetch_all
 from eva.udfs.udf_bootstrap_queries import Asl_udf_query, Mvit_udf_query
 
@@ -62,6 +68,62 @@ class PytorchTest(unittest.TestCase):
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
         execute_query_fetch_all("DROP TABLE IF EXISTS Asl_actions;")
         execute_query_fetch_all("DROP TABLE IF EXISTS MemeImages;")
+
+    @pytest.mark.skipif(
+        not ConfigurationManager().get_value("experimental", "ray"),
+        reason="Only test for parallel execution",
+    )
+    def test_should_parallel_match_sequential(self):
+        # Parallel execution
+        select_query = """SELECT id, obj.labels
+                          FROM MyVideo JOIN LATERAL
+                          FastRCNNObjectDetector(data)
+                          AS obj(labels, bboxes, scores)
+                         WHERE id < 20;"""
+        par_batch = execute_query_fetch_all(select_query)
+
+        # Sequential execution.
+        ConfigurationManager().update_value("experimental", "ray", False)
+        select_query = """SELECT id, obj.labels
+                          FROM MyVideo JOIN LATERAL
+                          FastRCNNObjectDetector(data)
+                          AS obj(labels, bboxes, scores)
+                         WHERE id < 20;"""
+        seq_batch = execute_query_fetch_all(select_query)
+
+        self.assertEqual(len(par_batch), len(seq_batch))
+        for i in range(len(par_batch)):
+            self.assertEqual(
+                par_batch.frames["myvideo.id"][i], seq_batch.frames["myvideo.id"][i]
+            )
+            self.assertTrue(
+                (
+                    par_batch.frames["obj.labels"][i]
+                    == seq_batch.frames["obj.labels"][i]
+                ).all()
+            )
+
+        # Recover configuration back.
+        ConfigurationManager().update_value("experimental", "ray", True)
+
+    @pytest.mark.skipif(
+        not ConfigurationManager().get_value("experimental", "ray"),
+        reason="Only test for Ray",
+    )
+    def test_should_raise_exception_with_parallel(self):
+        # Deliberately cause error.
+        video_path = create_sample_video(100)
+        load_query = f"LOAD VIDEO '{video_path}' INTO parallelErrorVideo;"
+        execute_query_fetch_all(load_query)
+        file_remove("dummy.avi")
+
+        select_query = """SELECT id, obj.labels
+                          FROM parallelErrorVideo JOIN LATERAL
+                          FastRCNNObjectDetector(data)
+                          AS obj(labels, bboxes, scores)
+                         WHERE id < 2;"""
+        with self.assertRaises(ExecutorError):
+            execute_query_fetch_all(select_query)
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_fastrcnn_with_lateral_join(self):
