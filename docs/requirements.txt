@@ -8,7 +8,7 @@ sphinx-copybutton==0.4.0
 sphinxemoji==0.2.0
 sphinx-jsonschema==1.17.2
 sphinx-version-warning==1.1.2
-sphinx-book-theme==0.3.3
+sphinx-book-theme==1.0.1
 sphinx-external-toc>=0.3.0
 sphinx-inline-tabs
 sphinx-thebe==0.2.1
