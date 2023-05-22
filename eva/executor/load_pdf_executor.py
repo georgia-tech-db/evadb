@@ -45,6 +45,7 @@ class LoadPDFExecutor(AbstractExecutor):
             table_name,
             database_name,
         )
+        do_create = False
         if table_obj:
             msg = f"Adding to an existing table {table_name}."
             logger.info(msg)
@@ -89,9 +90,10 @@ class LoadPDFExecutor(AbstractExecutor):
         num_loaded_frames = 0
         storage_engine.write(
             table_obj,
-            Batch(pd.DataFrame({'_row_id': 1,
+            Batch(pd.DataFrame([{'_row_id': 1,
                                 'id': 1,
-                                'data': "1"})),
+                                 'data': "1",
+                                 "file_path": str(self.node.file_path)}]))
         )
         # for batch in csv_reader.read():
         #     storage_engine.write(table_obj, batch)

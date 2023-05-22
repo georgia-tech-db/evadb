@@ -21,6 +21,8 @@ storage:
   structured_data_engine: "eva.storage.sqlite_storage_engine.SQLStorageEngine"
   video_engine: "eva.storage.video_storage_engine.DecordStorageEngine"
   image_engine: "eva.storage.image_storage_engine.ImageStorageEngine"
+  pdf_engine: "eva.storage.pdf_storage_engine.PDFStorageEngine"
+
 server:
   host: "0.0.0.0"
   port: 8803

@@ -23,7 +23,7 @@ from eva.utils.logging_manager import logger
 
 
 class PDFReader(AbstractReader):
-    def __init__(self, *args, column_list, **kwargs):
+    def __init__(self, *args, **kwargs):
         """
         Reads a CSV file and yields frame data.
         Args:
@@ -31,15 +31,15 @@ class PDFReader(AbstractReader):
             to read from the CSV file
         """
 
-        self._column_list = column_list
+        # self._column_list = column_list
         super().__init__(*args, **kwargs)
 
     def _read(self) -> Iterator[Dict]:
         # TODO: What is a good location to put this code?
 
-        return pd.DataFrame({'_row_id': 1,
-                                   'id': 1,
-                                   'data': "1"})
+        data = pd.DataFrame([{'data': "1"}])
+        for chunk_index, chunk_row in data.iterrows():
+            yield chunk_row
         # def convert_csv_string_to_ndarray(row_string):
         #     """
         #     Convert a string of comma separated values to a numpy
