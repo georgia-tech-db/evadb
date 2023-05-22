@@ -77,27 +77,26 @@ class LoadPDFExecutor(AbstractExecutor):
         # Read the CSV file
         # converters is a dictionary of functions that convert the values
         # in the column to the desired type
-        # csv_reader = PDFReader(
-        #     self.node.file_path,
-        #     column_list=column_list,
-        #     batch_mem_size=self.node.batch_mem_size,
-        # )
+        pdf_reader = PDFReader(
+            self.node.file_path,
+            # column_list=column_list,
+            batch_mem_size=self.node.batch_mem_size,
+        )
 
         storage_engine = StorageEngine.factory(table_obj)
         if do_create:
             storage_engine.create(table_obj)
         # write with storage engine in batches
         num_loaded_frames = 0
-        storage_engine.write(
-            table_obj,
-            Batch(pd.DataFrame([{'_row_id': 1,
-                                'id': 1,
-                                 'data': "1",
-                                 "file_path": str(self.node.file_path)}]))
-        )
-        # for batch in csv_reader.read():
-        #     storage_engine.write(table_obj, batch)
-        #     num_loaded_frames += len(batch)
+        # storage_engine.write(
+        #     table_obj,
+        #     Batch(pd.DataFrame([{'data': "121",
+        #                          "file_path": str(self.node.file_path)}]))
+        # )
+        for batch in pdf_reader.read():
+            storage_engine.write(table_obj, batch)
+            num_loaded_frames += len(batch)
+            break
 
         # yield result
         df_yield_result = Batch(

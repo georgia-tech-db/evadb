@@ -20,7 +20,7 @@ import pandas as pd
 from eva.catalog.sql_config import IDENTIFIER_COLUMN
 from eva.readers.abstract_reader import AbstractReader
 from eva.utils.logging_manager import logger
-
+from langchain.document_loaders import PyPDFLoader
 
 class PDFReader(AbstractReader):
     def __init__(self, *args, **kwargs):
@@ -33,13 +33,19 @@ class PDFReader(AbstractReader):
 
         # self._column_list = column_list
         super().__init__(*args, **kwargs)
+        self.table_df = pd.DataFrame(columns=['data',"file_path"])
 
     def _read(self) -> Iterator[Dict]:
         # TODO: What is a good location to put this code?
 
-        data = pd.DataFrame([{'data': "1"}])
-        for chunk_index, chunk_row in data.iterrows():
+        loader = PyPDFLoader(self.file_url)
+        pages = loader.load_and_split()
+        for i in pages:
+            self.table_df.loc[len(self.table_df.index)]=[i.page_content,str(self.file_url)]
+
+        for chunk_index, chunk_row in self.table_df.iterrows():
             yield chunk_row
+
         # def convert_csv_string_to_ndarray(row_string):
         #     """
         #     Convert a string of comma separated values to a numpy
