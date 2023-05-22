@@ -18,13 +18,13 @@ Launch EVA server
 
 EVA is based on a `client-server architecture <https://www.postgresql.org/docs/15/tutorial-arch.html>`_. 
 
-To launch the EVA server natively, run the following command on the terminal:
+To launch the EVA server using the pip package, run the following command on the terminal:
 
 .. code-block:: bash
 
     eva_server &
 
-You can also launch the EVA server using Docker either locally or on a server with GPU's:
+You can also launch the EVA server using Docker either locally or on a server with GPUs:
 
 .. code-block:: bash
 
