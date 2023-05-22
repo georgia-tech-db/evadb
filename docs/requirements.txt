@@ -4,7 +4,7 @@ Pygments==2.15.1
 # Sphinx
 sphinx>=4.4.0
 sphinx-click==4.4.0
-sphinx-copybutton==0.4.0
+sphinx-copybutton==0.5.2
 sphinxemoji==0.2.0
 sphinx-jsonschema==1.17.2
 sphinx-version-warning==1.1.2
