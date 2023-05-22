@@ -3,7 +3,7 @@ Pygments==2.13.0
 
 # Sphinx
 sphinx>=4.4.0
-sphinx-click==3.0.2
+sphinx-click==4.4.0
 sphinx-copybutton==0.4.0
 sphinxemoji==0.2.0
 sphinx-jsonschema==1.17.2
