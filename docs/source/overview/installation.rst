@@ -28,7 +28,7 @@ You can also launch the EVA server using Docker either locally or on a server wi
 
 .. code-block:: bash
 
-    docker run --name eva_server --gpus all -p 8803:8803 evadb/evaserver:latest
+    docker run --name eva_server --gpus all -p 8803:8803 evadbai/evaserver
 
 Part 2: Start a Jupyter Notebook Client
 ----
