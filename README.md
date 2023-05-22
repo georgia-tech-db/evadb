@@ -13,6 +13,9 @@
         <a href="https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg">
             <img alt="Slack" src="https://img.shields.io/badge/slack-eva-ff69b4.svg?logo=slack">
         </a>          
+        <a href="https://twitter.com/evadb_ai">
+            <img alt="Twitter" src="https://img.shields.io/badge/twitter-eva-C04000.svg?logo=twitter">
+        </a>  
         <img alt="PyPI" src="https://img.shields.io/pypi/v/evadb.svg"/>
         <img alt="License" src="https://img.shields.io/badge/license-Apache%202-brightgreen.svg?logo=apache"/>
         <img alt="Coverage Status" src="https://coveralls.io/repos/github/georgia-tech-db/eva/badge.svg?branch=master"/>     
@@ -39,6 +42,7 @@ EVA is designed for supporting database applications that operate on both struct
 - [Demo](#demo)
 - [Illustrative Applications](#illustrative-applications)
 - [Community and Support](#community-and-support)
+- [Twitter](https://twitter.com/evadb_ai)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -59,7 +63,7 @@ Here are some illustrative EVA-backed applications (all of them are Jupyter note
  * 🔮 <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/08-chatgpt.html">Using ChatGPT to ask questions based on videos</a>
  * 🔮 <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/02-object-detection.html">Analysing traffic flow at an intersection</a>
  * 🔮 <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/03-emotion-analysis.html">Examining the emotion palette of actors in a movie</a>
- * 🔮 <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/11-similarity-search-for-motif-mining.html">Motif mining using similarity search</a>
+ * 🔮 <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/11-similarity-search-for-motif-mining.html">Image Similarity Search on Reddit [FAISS + Qdrant]</a>
  * 🔮 <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/01-mnist.html">Classifying images based on their content</a>
  * 🔮 <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/07-object-segmentation-huggingface.html">Image Segmentation using Hugging Face</a>
  * 🔮 <a href="https://github.com/georgia-tech-db/license-plate-recognition">Recognizing license plates </a>
@@ -68,13 +72,14 @@ Here are some illustrative EVA-backed applications (all of them are Jupyter note
 ## Documentation
 
 * [Detailed Documentation](https://evadb.readthedocs.io/)
-  - If you are wondering why you might need an AI-relational database system, start with the page on <a href="https://evadb.readthedocs.io/en/stable/source/overview/aidb.html">Video Database Systems</a>.
+  - If you are wondering why you might need an AI-relational Database System, start with the page on <a href="https://evadb.readthedocs.io/en/stable/source/overview/aidb.html">AI-Relational Database Systems</a>.
   - The <a href="https://evadb.readthedocs.io/en/stable/source/overview/installation.html">Getting Started</a> page shows how you can use EVA for different AI pipelines, and how you can easily extend EVA by defining an user-defined function that wraps around your custom deep learning model.
   - The <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/index.html">User Guides</a> section contains Jupyter Notebooks that demonstrate how to use various features of EVA. Each notebook includes a link to Google Colab to run the code.
 * [Tutorials](https://github.com/georgia-tech-db/eva/blob/master/tutorials/03-emotion-analysis.ipynb)
-* [Join us on Slack!](https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg)
+* [Join us on Slack](https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg)
+* [Follow us on Twitter](https://twitter.com/evadb_ai)
 * [Medium-Term Roadmap](https://github.com/orgs/georgia-tech-db/projects/3)
-* [Demo](https://github.com/georgia-tech-db/eva/blob/master/tutorials/03-emotion-analysis.ipynb)
+* [Demo](https://evadb.readthedocs.io/en/stable/source/tutorials/08-chatgpt.html)
 
 ## Quick Start
 
@@ -206,7 +211,7 @@ The following architecture diagram presents the critical components of the EVA d
 
 ## Community and Support
 
-👋 If you have general questions about EVA, want to say hello or just follow along, we'd like to invite you to join our [Slack Community](https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg).
+👋 If you have general questions about EVA, want to say hello or just follow along, we'd like to invite you to join our [Slack Community](https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg)and to [follow us on Twitter](https://twitter.com/evadb_ai).
 
 <a href="https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg">              
     <img src="https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/images/eva/eva-slack.png" alt="EVA Slack Channel" width="500">

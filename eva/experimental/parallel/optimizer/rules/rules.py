@@ -22,16 +22,16 @@ if TYPE_CHECKING:
     from eva.optimizer.optimizer_context import OptimizerContext
 
 from eva.executor.execution_context import Context
-from eva.experimental.ray.planner.exchange_plan import ExchangePlan
+from eva.experimental.parallel.plan_nodes.exchange_plan import ExchangePlan
 from eva.expression.function_expression import FunctionExpression
 from eva.optimizer.operators import (
+    LogicalApplyAndMerge,
     LogicalExchange,
     LogicalGet,
-    LogicalProject,
     OperatorType,
 )
 from eva.optimizer.rules.rules_base import Promise, Rule, RuleType
-from eva.plan_nodes.project_plan import ProjectPlan
+from eva.plan_nodes.apply_and_merge_plan import ApplyAndMergePlan
 from eva.plan_nodes.seq_scan_plan import SeqScanPlan
 from eva.plan_nodes.storage_plan import StoragePlan
 
@@ -55,28 +55,36 @@ class LogicalExchangeToPhysical(Rule):
         yield after
 
 
-class LogicalProjectToPhysical(Rule):
+class LogicalApplyAndMergeToPhysical(Rule):
     def __init__(self):
-        pattern = Pattern(OperatorType.LOGICALPROJECT)
+        pattern = Pattern(OperatorType.LOGICAL_APPLY_AND_MERGE)
         pattern.append_child(Pattern(OperatorType.DUMMY))
-        super().__init__(RuleType.LOGICAL_PROJECT_TO_PHYSICAL, pattern)
+        super().__init__(RuleType.LOGICAL_APPLY_AND_MERGE_TO_PHYSICAL, pattern)
 
     def promise(self):
-        return Promise.LOGICAL_PROJECT_TO_PHYSICAL
+        return Promise.LOGICAL_APPLY_AND_MERGE_TO_PHYSICAL
 
     def check(self, grp_id: int, context: OptimizerContext):
         return True
 
-    def apply(self, before: LogicalProject, context: OptimizerContext):
-        after = ProjectPlan(before.target_list)
-        for child in before.children:
-            after.append_child(child)
-        upper = ExchangePlan(
-            parallelism=1,
-            ray_conf={"num_gpus": 1} if Context().gpus else {"num_cpus": 1},
+    def apply(self, before: LogicalApplyAndMerge, context: OptimizerContext):
+        apply_plan = ApplyAndMergePlan(before.func_expr, before.alias, before.do_unnest)
+
+        parallelism = 2 if len(Context().gpus) > 1 else 1
+        ray_parallel_env_conf_dict = [
+            {"CUDA_VISIBLE_DEVICES": str(i)} for i in range(parallelism)
+        ]
+
+        exchange_plan = ExchangePlan(
+            inner_plan=apply_plan,
+            parallelism=parallelism,
+            ray_pull_env_conf_dict={"CUDA_VISIBLE_DEVICES": "0"},
+            ray_parallel_env_conf_dict=ray_parallel_env_conf_dict,
         )
-        upper.append_child(after)
-        yield upper
+        for child in before.children:
+            exchange_plan.append_child(child)
+
+        yield exchange_plan
 
 
 class LogicalGetToSeqScan(Rule):
@@ -93,29 +101,31 @@ class LogicalGetToSeqScan(Rule):
     def apply(self, before: LogicalGet, context: OptimizerContext):
         # Configure the batch_mem_size. It decides the number of rows
         # read in a batch from storage engine.
-        # Todo: Experiment heuristics.
-        scan = SeqScanPlan(None, before.target_list, before.alias)
-        lower = ExchangePlan(parallelism=1)
-        lower.append_child(
-            StoragePlan(
-                before.table_obj,
-                before.video,
-                predicate=before.predicate,
-                sampling_rate=before.sampling_rate,
-            )
+        # ToDO: Experiment heuristics.
+        scan_plan = SeqScanPlan(None, before.target_list, before.alias)
+        storage_plan = StoragePlan(
+            before.table_obj,
+            before.video,
+            predicate=before.predicate,
+            sampling_rate=before.sampling_rate,
         )
-        scan.append_child(lower)
         # Check whether the projection contains a UDF
         if before.target_list is None or not any(
             [isinstance(expr, FunctionExpression) for expr in before.target_list]
         ):
-            yield scan
+            scan_plan.append_child(storage_plan)
+            yield scan_plan
         else:
-            upper = ExchangePlan(
-                parallelism=2,
-                ray_conf={"num_gpus": 1}
-                if len(Context().gpus) >= 2
-                else {"num_cpus": 1},
+            parallelism = 2 if len(Context().gpus) > 1 else 1
+            ray_parallel_env_conf_dict = [
+                {"CUDA_VISIBLE_DEVICES": str(i)} for i in range(parallelism)
+            ]
+
+            exchange_plan = ExchangePlan(
+                inner_plan=scan_plan,
+                parallelism=parallelism,
+                ray_pull_env_conf_dict={"CUDA_VISIBLE_DEVICES": "0"},
+                ray_parallel_env_conf_dict=ray_parallel_env_conf_dict,
             )
-            upper.append_child(scan)
-            yield upper
+            exchange_plan.append_child(storage_plan)
+            yield exchange_plan

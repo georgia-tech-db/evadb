@@ -1,5 +1,5 @@
 # Syntax highlighting
-Pygments==2.13.0
+Pygments==2.15.1
 
 # Sphinx
 sphinx>=4.4.0

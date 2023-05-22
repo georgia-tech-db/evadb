@@ -10,7 +10,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### [Deprecated]
 ### [Removed]
 
-##  [0.2.2] - 2023-05-11
+
+##  [0.2.4] - 2023-05-17
+### [Added]
+
+* PR #700: docs: similarity search tutorial 
+* PR #741: docs: test links in documentation with linkcheck 
+* PR #707: feat: add support for third party vector stores 
+* PR #738: feat: allow users to specify host and port while launching server 
+* PR #733: docs: enable spellcheck on all python files, notebooks, and docs  
+* PR #566: feat: object tracking 
+* PR #720: fix: similarity test 
+* PR #726: ci: bump up oldest python version from 3.7 to 3.8 
+
+### [Changed]
+
+* PR #740: docs: minor updates to read-the-docs 
+* PR #727: docs: "recogizing" in index.rst 
+* PR #729: docs: update notebooks on landing page
+
+##  [0.2.3] - 2023-05-11
 ### [Added]
 
 * PR #708: tutorial: toxicity classifier
