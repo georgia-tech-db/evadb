@@ -28,7 +28,7 @@ readthedocs-sphinx-ext>1.1
 autodoc_pydantic==1.6.1
 
 # MyST
-myst-parser==0.15.2
+myst-parser==1.0.0
 myst-nb==0.17.2
 
 # Jupyter conversion
