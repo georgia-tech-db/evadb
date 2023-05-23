@@ -50,7 +50,3 @@ ocr_skip_marker = pytest.mark.skipif(
     sys.platform == "linux",
     reason="We do not have built-in support for OCR",
 )
-
-qdrant_client_skip_marker = pytest.mark.skipif(
-    sys.version_info < (3, 10), reason="Test case requires qdrant_client fix"
-)
