@@ -16,17 +16,29 @@ from pathlib import Path
 from typing import Dict, Iterator
 
 from eva.readers.abstract_reader import AbstractReader
-from eva.readers.document.registry import LOADER_MAPPING
+
+
+_LOADER_MAPPING = None
+
+
+def _lazy_import_LOADER_MAPPING():
+    global _LOADER_MAPPING
+    if _LOADER_MAPPING is None:
+        from eva.readers.document.registry import LOADER_MAPPING
+
+        _LOADER_MAPPING = LOADER_MAPPING
+    return _LOADER_MAPPING
 
 
 class DocumentReader(AbstractReader):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._LOADER_MAPPING = _lazy_import_LOADER_MAPPING()
 
     def _read(self) -> Iterator[Dict]:
         ext = Path(self.file_url).suffix
-        assert ext in LOADER_MAPPING, f"File Format {ext} not supported"
-        loader_class, loader_args = LOADER_MAPPING[ext]
+        assert ext in self._LOADER_MAPPING, f"File Format {ext} not supported"
+        loader_class, loader_args = self._LOADER_MAPPING[ext]
         loader = loader_class(self.file_url, **loader_args)
         # load entire document as one entry
         # https://github.com/hwchase17/langchain/blob/d4fd58963885465fba70a5cea9554a7b043b02a1/langchain/schema.py#L269

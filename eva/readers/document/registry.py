@@ -12,6 +12,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+# Lazy import to avoid torch init failures
+# _langchain = None
+
+
+# def _lazy_import_langchain():
+#     global _langchain
+#     if _langchain is None:
+#         import langchain
+
+#         _langchain = langchain
+#     return _langchain
+
+
 from langchain.document_loaders import (
     EverNoteLoader,
     PDFMinerLoader,
