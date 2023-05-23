@@ -24,6 +24,7 @@ class TableType(EVAEnum):
     STRUCTURED_DATA  # noqa: F821
     VIDEO_DATA  # noqa: F821
     IMAGE_DATA  # noqa: F821
+    DOCUMENT_DATA  # noqa: F821
     PDF_DATA  # noqa: F821
 
     # reserved for system generated tables
@@ -118,6 +119,12 @@ class VideoColumnName(EVAEnum):
 class ImageColumnName(EVAEnum):
     name  # noqa: F821
     data  # noqa: F821
+
+
+class DocumentColumnName(EVAEnum):
+    name  # noqa: F821
+    data  # noqa: F821
+    metadata  # noqa: F821
 
 
 class PDFColumnName(EVAEnum):
