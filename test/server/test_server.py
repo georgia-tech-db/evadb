@@ -27,8 +27,7 @@ if sys.version_info >= (3, 8):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
 
-        @patch("asyncio.start_server")
-        async def test_server_functions(self, mock_start):
+        async def test_server_functions(self):
             eva_server = EvaServer()
             host = "localhost"
             port = 8803
