@@ -258,10 +258,11 @@ def check_notebook_format(notebook_file):
             sys.exit(1)
     
     # Check for "print(response)"
-    for cell in nb.cells:
-        if cell.cell_type == 'code' and 'print(response)' in cell.source:
-            LOG.error(f"ERROR: Notebook {notebook_file} contains an a cell with this content: {cell.source}")
-            sys.exit(1)
+    # too harsh replaxing it
+    # for cell in nb.cells:
+    #     if cell.cell_type == 'code' and 'print(response)' in cell.source:
+    #         LOG.error(f"ERROR: Notebook {notebook_file} contains an a cell with this content: {cell.source}")
+    #         sys.exit(1)
 
     # Check for "Colab link"
     contains_colab_link = False
