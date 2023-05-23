@@ -29,8 +29,8 @@ ENV PATH="/home/evauser/.local/bin:${PATH}"
 # Install EVA
 RUN python3.9 -m pip install evadb 
 
-# EVA runs on port 8083 by default
-EXPOSE 8083
+# Expose the default port EVA runs on 
+EXPOSE 8803
 
 # Start EVA
 CMD ["eva_server"]

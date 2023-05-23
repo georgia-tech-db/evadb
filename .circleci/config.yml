@@ -194,9 +194,6 @@ jobs:
 
   Docker:
     resource_class: large
-    docker:
-      - image: "cimg/python:3.10"  
-
     steps:
       - setup_remote_docker
       - checkout
