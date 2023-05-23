@@ -21,6 +21,7 @@ import yaml
 from eva.configuration.bootstrap_environment import bootstrap_environment
 from eva.utils.logging_manager import logger
 
+
 class ConfigurationManager(object):
     _yml_path = None
 

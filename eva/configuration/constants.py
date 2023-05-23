@@ -15,7 +15,6 @@
 from pathlib import Path
 
 import eva
-from eva.version import VERSION
 
 EVA_INSTALLATION_DIR = Path(eva.__file__).parent
 EVA_ROOT_DIR = Path(eva.__file__).parent.parent
