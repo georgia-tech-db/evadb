@@ -40,8 +40,12 @@ class PDFReader(AbstractReader):
 
         loader = PyPDFLoader(self.file_url)
         # pages = loader.load_and_split()
+        document_data=""
         for data in loader.load():
-            yield {"data": data.page_content,"file_path":str(self.file_url)}
+            document_data+=data.page_content+"\n\n\n"
+        yield {"data": document_data,"file_path":str(self.file_url)}
+        # for data in loader.load():
+        #     yield {"data": data.page_content,"file_path":str(self.file_url)}
         # for idx,val in enumerate(pages):
         #     self.table_df.loc[len(self.table_df.index)]=[val.page_content,str(self.file_url)+"_"+str(idx)]
 
