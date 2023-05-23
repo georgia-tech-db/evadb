@@ -16,7 +16,6 @@ import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.executor.abstract_executor import AbstractExecutor
-from eva.executor.executor_utils import ExecutorError
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.load_data_plan import LoadDataPlan
@@ -58,11 +57,6 @@ class LoadPDFExecutor(AbstractExecutor):
             )
             do_create = True
 
-        # if table_obj is None:
-        #     error = f"{table_name} does not exist."
-        #     logger.error(error)
-        #     raise ExecutorError(error)
-
         # Get the column information
         column_list = []
         for column in table_obj.columns:
@@ -74,8 +68,7 @@ class LoadPDFExecutor(AbstractExecutor):
                 )
             )
 
-        # Read the CSV file
-        # converters is a dictionary of functions that convert the values
+        # Read the PDF file
         # in the column to the desired type
         pdf_reader = PDFReader(
             self.node.file_path,
@@ -88,11 +81,6 @@ class LoadPDFExecutor(AbstractExecutor):
             storage_engine.create(table_obj)
         # write with storage engine in batches
         num_loaded_frames = 0
-        # storage_engine.write(
-        #     table_obj,
-        #     Batch(pd.DataFrame([{'data': "121",
-        #                          "file_path": str(self.node.file_path)}]))
-        # )
         for batch in pdf_reader.read():
             storage_engine.write(table_obj, batch)
             num_loaded_frames += len(batch)
