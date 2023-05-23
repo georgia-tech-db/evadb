@@ -200,6 +200,7 @@ jobs:
       - image: "cimg/python:3.10"  
 
     steps:
+      - setup_remote_docker
       - checkout
       - run:
           name: Build Docker image and start server
