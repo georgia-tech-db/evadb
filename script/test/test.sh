@@ -107,9 +107,18 @@ fi
 ## with nbmake pytest plugin
 ##################################################
 
+# Qdrant_hot_fix
+# https://github.com/qdrant/qdrant-client/issues/175
+if [[ ${python_version} < (3, 10) ]]; then
+    ignore_str='--ignore="tutorials/11-similarity-search-for-motif-mining.ipynb"'
+else
+    ignore_str=''
+fi
+
 if [[ ( "$OSTYPE" != "msys" ) && ( "$MODE" = "NOTEBOOK" || "$MODE" = "ALL" ) ]];
 then 
-    PYTHONPATH=./ python -m pytest --durations=5 --nbmake --overwrite "./tutorials" --capture=sys --tb=short -v --log-level=WARNING --nbmake-timeout=3000 --ignore="tutorials/08-chatgpt.ipynb" --ignore="tutorials/09-license-plate-fuzzy-join.ipynb" --ignore="tutorials/10-toxicity-classifier-huggingface.ipynb"  
+    PYTHONPATH=./ python -m pytest --durations=5 --nbmake --overwrite "./tutorials" --capture=sys --tb=short -v --log-level=WARNING --nbmake-timeout=3000 --ignore="tutorials/08-chatgpt.ipynb" --ignore="tutorials/09-license-plate-fuzzy-join.ipynb" --ignore="tutorials/10-toxicity-classifier-huggingface.ipynb" ${ignore_str}
+    
     notebook_test_code=$?
     if [ "$notebook_test_code" != "0" ];
     then
