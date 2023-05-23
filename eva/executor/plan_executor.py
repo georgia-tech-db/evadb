@@ -45,7 +45,7 @@ from eva.executor.show_info_executor import ShowInfoExecutor
 from eva.executor.storage_executor import StorageExecutor
 from eva.executor.union_executor import UnionExecutor
 from eva.executor.vector_index_scan_executor import VectorIndexScanExecutor
-from eva.experimental.ray.executor.exchange_executor import ExchangeExecutor
+from eva.experimental.parallel.executor.exchange_executor import ExchangeExecutor
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.abstract_plan import AbstractPlan
 from eva.plan_nodes.types import PlanOprType
@@ -129,6 +129,8 @@ class PlanExecutor:
             executor_node = CreateMaterializedViewExecutor(node=plan)
         elif plan_opr_type == PlanOprType.EXCHANGE:
             executor_node = ExchangeExecutor(node=plan)
+            inner_executor = self._build_execution_tree(plan.inner_plan)
+            executor_node.build_inner_executor(inner_executor)
         elif plan_opr_type == PlanOprType.PROJECT:
             executor_node = ProjectExecutor(node=plan)
         elif plan_opr_type == PlanOprType.PREDICATE_FILTER:

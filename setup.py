@@ -54,6 +54,7 @@ minimal_requirement = [
     "eva-decord>=0.6.1",
     "boto3",
     "nest_asyncio",
+    "typing_extensions==4.5.0",  # https://github.com/hwchase17/langchain/issues/5113
 ]
 
 formatter_libs = ["black>=23.1.0", "isort>=5.10.1"]
@@ -88,9 +89,9 @@ benchmark_libs = [
     "pytest-benchmark",
 ]
 
-doc_libs = ["pyenchant", "codespell", "pylint"]
+doc_libs = ["codespell", "pylint"]
 
-dist_libs = ["wheel>=0.37.1", "scriv>=0.16.0"]
+dist_libs = ["wheel>=0.37.1", "semantic_version", "PyGithub"]
 
 ### NEEDED FOR AN ALTERNATE DATA SYSTEM OTHER THAN SQLITE
 database_libs = ["pymysql>=0.10.1"]

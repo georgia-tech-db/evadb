@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from eva.plan_nodes.abstract_plan import AbstractPlan
 from eva.plan_nodes.types import PlanOprType
@@ -29,10 +29,20 @@ class ExchangePlan(AbstractPlan):
     """
 
     def __init__(
-        self, parallelism: int = 1, ray_conf: Dict[str, Any] = {"num_cpus": 1}
+        self,
+        inner_plan: AbstractPlan,
+        parallelism: int = 1,
+        ray_pull_env_conf_dict: Dict[str, Any] = {},
+        ray_parallel_env_conf_dict: List[Dict[str, Any]] = [{}],
     ):
+        self.inner_plan = inner_plan
         self.parallelism = parallelism
-        self.ray_conf = ray_conf
+        # Environment variables to configure in the remote process. The problem of Ray remote function
+        # is that we cannot control which GPU to spawn the job. Second, Ray does not offer anything
+        # extra when specify GPU job. Just by giving environment variables like CUDA_VISIBLE_DEIVECS,
+        # our system can have more control over the behavior of Ray.
+        self.ray_parallel_env_conf_dict = ray_parallel_env_conf_dict
+        self.ray_pull_env_conf_dict = ray_pull_env_conf_dict
         super().__init__(PlanOprType.EXCHANGE)
 
     def __str__(self) -> str:
@@ -40,5 +50,9 @@ class ExchangePlan(AbstractPlan):
 
     def __hash__(self) -> int:
         return hash(
-            (super().__hash__(), self.parallelism, frozenset(self.ray_conf.items()))
+            (
+                super().__hash__(),
+                self.inner_plan,
+                self.parallelism,
+            )
         )
