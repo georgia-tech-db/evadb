@@ -29,8 +29,8 @@ sys.path.append(EVA_CODE_DIR)
 
 from eva.configuration.configuration_manager import ConfigurationManager  # noqa: E402
 from eva.server.server import EvaServer  # noqa: E402
-from eva.udfs.udf_bootstrap_queries import init_builtin_udfs  # noqa: E402
-
+import eva.configuration.constants
+from eva.utils.logging_manager import logger
 
 async def start_eva_server(host: str, port: int):
     """Start the eva server"""
@@ -64,6 +64,11 @@ def main():
     )
 
     parser.add_argument(
+        "--database",
+        help="Specify the database folder which the server should access."
+    )
+
+    parser.add_argument(
         "--start",
         help="start server",
         action="store_true",
@@ -83,6 +88,19 @@ def main():
     # Stop server
     if args.stop:
         return stop_server()
+    
+    # Update database_folder first before launching Configuration Manager
+    if args.database:
+        from pathlib import Path
+        eva.configuration.constants.EVA_DATABASE_FOLDER_STRING = args.database 
+        eva.configuration.constants.EVA_DEFAULT_DIR = Path( eva.configuration.constants.EVA_DATABASE_FOLDER_STRING)
+        eva.configuration.constants.DB_DEFAULT_URI = f"sqlite:///{eva.configuration.constants.EVA_DEFAULT_DIR}/eva_catalog.db"
+
+
+    logger.warn("Installation dir: " + str(eva.configuration.constants.EVA_DATABASE_FOLDER_STRING))
+
+    logger.warn("Installation dir: " + 
+    str(ConfigurationManager().get_value("core", "datasets_dir")))
 
     host = (
         args.host if args.host else ConfigurationManager().get_value("server", "host")
@@ -95,6 +113,7 @@ def main():
     # Start server
     if args.start:
         mode = ConfigurationManager().get_value("core", "mode")
+        from eva.udfs.udf_bootstrap_queries import init_builtin_udfs  # noqa: E402
         init_builtin_udfs(mode=mode)
 
         asyncio.run(start_eva_server(host=host, port=int(port)))

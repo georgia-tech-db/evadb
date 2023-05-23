@@ -19,18 +19,20 @@ from typing import Any
 import yaml
 
 from eva.configuration.bootstrap_environment import bootstrap_environment
-from eva.configuration.constants import (
-    EVA_CONFIG_FILE,
-    EVA_DEFAULT_DIR,
-    EVA_INSTALLATION_DIR,
-)
 from eva.utils.logging_manager import logger
-
+import traceback
 
 class ConfigurationManager(object):
-    _yml_path = EVA_DEFAULT_DIR / EVA_CONFIG_FILE
+    _yml_path = None
 
     def __new__(cls):
+        from eva.configuration.constants import (
+            EVA_CONFIG_FILE,
+            EVA_DEFAULT_DIR,
+            EVA_INSTALLATION_DIR,
+        )
+        cls._yml_path = EVA_DEFAULT_DIR / EVA_CONFIG_FILE
+        logger.warn("EVA_DEFAULT_DIR: " + str(EVA_DEFAULT_DIR))
         if not hasattr(cls, "_instance"):
             cls._instance = super(ConfigurationManager, cls).__new__(cls)
             cls._create_if_not_exists()
@@ -48,6 +50,12 @@ class ConfigurationManager(object):
 
     @classmethod
     def _create_if_not_exists(cls):
+        from eva.configuration.constants import (
+            EVA_CONFIG_FILE,
+            EVA_DEFAULT_DIR,
+            EVA_INSTALLATION_DIR,
+        )
+
         # if not cls._yml_path.exists():
         initial_eva_config_dir = Path(EVA_DEFAULT_DIR)
 

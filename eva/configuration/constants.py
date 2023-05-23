@@ -23,7 +23,8 @@ EVA_ROOT_DIR = Path(eva.__file__).parent.parent
 # This means we won't support backward compatibility as each version will maintain its own copy of database.
 # Ideally, if the new release is not breaking backward compatibility, we can keep using the same copy.
 # We can revisit it later
-EVA_DEFAULT_DIR = Path.home() / ".eva" / str(VERSION)
+EVA_DATABASE_FOLDER_STRING = "eva_data"
+EVA_DEFAULT_DIR = Path(EVA_DATABASE_FOLDER_STRING)
 EVA_DATASET_DIR = "eva_datasets"
 EVA_CONFIG_FILE = "eva.yml"
 UDF_DIR = "udfs"
@@ -31,6 +32,6 @@ CATALOG_DIR = "catalog"
 INDEX_DIR = "index"
 CACHE_DIR = "cache"
 DATASET_DATAFRAME_NAME = "dataset"
-DB_DEFAULT_URI = "sqlite:///{}/eva_catalog.db".format(EVA_DEFAULT_DIR.resolve())
+DB_DEFAULT_URI = f"sqlite:///{EVA_DEFAULT_DIR}/eva_catalog.db"
 S3_DOWNLOAD_DIR = "s3_downloads"
 TMP_DIR = "tmp"
