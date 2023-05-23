@@ -13,33 +13,51 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import_err_msg = "`langchain` package not found, please run `pip install langchain`"
-try:
-    from langchain.document_loaders import (
-        EverNoteLoader,
-        PDFMinerLoader,
-        TextLoader,
-        UnstructuredEmailLoader,
-        UnstructuredEPubLoader,
-        UnstructuredHTMLLoader,
-        UnstructuredMarkdownLoader,
-        UnstructuredPowerPointLoader,
-        UnstructuredWordDocumentLoader,
-    )
-except ImportError:
-    raise ImportError(import_err_msg)
 
-LOADER_MAPPING = {
-    ".doc": (UnstructuredWordDocumentLoader, {}),
-    ".docx": (UnstructuredWordDocumentLoader, {}),
-    ".enex": (EverNoteLoader, {}),
-    ".eml": (UnstructuredEmailLoader, {}),
-    ".epub": (UnstructuredEPubLoader, {}),
-    ".html": (UnstructuredHTMLLoader, {}),
-    ".md": (UnstructuredMarkdownLoader, {}),
-    ".pdf": (PDFMinerLoader, {}),
-    ".ppt": (UnstructuredPowerPointLoader, {}),
-    ".pptx": (UnstructuredPowerPointLoader, {}),
-    ".txt": (TextLoader, {"encoding": "utf8"}),
-    # Add more mappings for other file extensions and loaders as needed
-}
+def _lazy_import_loader():
+    import_err_msg = "`langchain` package not found, please run `pip install langchain`"
+    try:
+        from langchain.document_loaders import (
+            EverNoteLoader,
+            PDFMinerLoader,
+            TextLoader,
+            UnstructuredEmailLoader,
+            UnstructuredEPubLoader,
+            UnstructuredHTMLLoader,
+            UnstructuredMarkdownLoader,
+            UnstructuredPowerPointLoader,
+            UnstructuredWordDocumentLoader,
+        )
+    except ImportError:
+        raise ImportError(import_err_msg)
+
+    LOADER_MAPPING = {
+        ".doc": (UnstructuredWordDocumentLoader, {}),
+        ".docx": (UnstructuredWordDocumentLoader, {}),
+        ".enex": (EverNoteLoader, {}),
+        ".eml": (UnstructuredEmailLoader, {}),
+        ".epub": (UnstructuredEPubLoader, {}),
+        ".html": (UnstructuredHTMLLoader, {}),
+        ".md": (UnstructuredMarkdownLoader, {}),
+        ".pdf": (PDFMinerLoader, {}),
+        ".ppt": (UnstructuredPowerPointLoader, {}),
+        ".pptx": (UnstructuredPowerPointLoader, {}),
+        ".txt": (TextLoader, {"encoding": "utf8"}),
+        # Add more mappings for other file extensions and loaders as needed
+    }
+    return LOADER_MAPPING
+
+
+SUPPORTED_TYPES = [
+    ".doc",
+    ".docx",
+    ".enex",
+    ".eml",
+    ".epub",
+    ".html",
+    ".md",
+    ".pdf",
+    ".ppt",
+    ".pptx",
+    ".txt",
+]

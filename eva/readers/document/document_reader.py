@@ -16,24 +16,13 @@ from pathlib import Path
 from typing import Dict, Iterator
 
 from eva.readers.abstract_reader import AbstractReader
-
-
-_LOADER_MAPPING = None
-
-
-def _lazy_import_LOADER_MAPPING():
-    global _LOADER_MAPPING
-    if _LOADER_MAPPING is None:
-        from eva.readers.document.registry import LOADER_MAPPING
-
-        _LOADER_MAPPING = LOADER_MAPPING
-    return _LOADER_MAPPING
+from eva.readers.document.registry import _lazy_import_loader
 
 
 class DocumentReader(AbstractReader):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._LOADER_MAPPING = _lazy_import_LOADER_MAPPING()
+        self._LOADER_MAPPING = _lazy_import_loader()
 
     def _read(self) -> Iterator[Dict]:
         ext = Path(self.file_url).suffix
