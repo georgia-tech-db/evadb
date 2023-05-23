@@ -35,5 +35,5 @@ class PDFReader(AbstractReader):
         loader = PyPDFLoader(self.file_url)
         document_data = ""
         for data in loader.load():
-            document_data += data.page_content+"\n\n\n"
+            document_data += data.page_content + "\n\n\n"
         yield {"data": document_data, "file_path": str(self.file_url)}
