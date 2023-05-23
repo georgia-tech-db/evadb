@@ -204,4 +204,4 @@ jobs:
           name: Build Docker image and start server
           command: |
             docker build -t evadb docker
-            docker run evadb || true
+            timeout 30 docker run evadb || true
