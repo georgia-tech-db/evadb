@@ -9,6 +9,7 @@ workflows:
     jobs:
         - Pip-PyPI
         - Pip-Local
+        - Docker
         #### UNIT TESTS
         - Linux:
             name: "Test | v3.8 | Linux"
@@ -192,3 +193,16 @@ jobs:
             pip install --upgrade pip
             pip install "."
             bash script/test/package.sh
+
+  Docker:
+    executor: docker-executor
+    docker:
+      - image: "cimg/python:3.10"  
+
+    steps:
+      - checkout
+      - run:
+          name: Build Docker image and start server
+          command: |
+            docker build -t evadb docker/Dockerfile
+            docker run evadb eva_server
