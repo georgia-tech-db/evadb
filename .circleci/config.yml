@@ -195,7 +195,7 @@ jobs:
             bash script/test/package.sh
 
   Docker:
-    executor: docker-executor
+    resource_class: large
     docker:
       - image: "cimg/python:3.10"  
 
