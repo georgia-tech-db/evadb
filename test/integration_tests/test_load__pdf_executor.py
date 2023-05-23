@@ -12,33 +12,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import glob
-import multiprocessing as mp
-import os
-import shutil
-import tempfile
 import unittest
-from pathlib import Path
 from test.util import (
-    create_dummy_batches,
-    create_dummy_csv_batches,
-    create_large_scale_image_dataset,
-    create_sample_csv,
-    create_sample_video,
-    file_remove,
     shutdown_ray,
 )
 
-import numpy as np
-import pandas as pd
 import pytest
 
-from eva.binder.binder_utils import BinderError
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
-from eva.executor.executor_utils import ExecutorError
-from eva.models.storage.batch import Batch
-from eva.parser.types import FileFormatType
 from eva.server.command_handler import execute_query_fetch_all
 
 
