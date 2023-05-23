@@ -34,7 +34,7 @@ class XdistTests(unittest.TestCase):
 
     def test_suffix_pytest_xdist_worker_id_to_dir(self):
         os.environ["PYTEST_XDIST_WORKER"] = "gw1"
-        foo_path = Path("foo")
+        foo_path = "foo"
         configuration_manager = ConfigurationManager()
         updated_path = configuration_manager.suffix_pytest_xdist_worker_id_to_dir(
             foo_path

@@ -18,19 +18,25 @@ from typing import Any
 
 import yaml
 
-from eva.configuration.bootstrap_environment import bootstrap_environment
+from eva.configuration.bootstrap_environment import (
+    bootstrap_environment,
+    get_default_config_values,
+)
 from eva.utils.logging_manager import logger
+from eva.configuration.constants import (
+    EVA_CONFIG_FILE,
+    EVA_DATABASE_DIR,
+    EVA_INSTALLATION_DIR,
+)
 
 
 class ConfigurationManager(object):
     _yml_path = None
 
-    def __new__(cls):
-        from eva.configuration.constants import (
-            EVA_CONFIG_FILE,
-            EVA_DEFAULT_DIR
-        )
-        cls._yml_path = EVA_DEFAULT_DIR / EVA_CONFIG_FILE
+    def __new__(cls, *args, **kwargs):
+        eva_db_dir = kwargs.get("EVA_DATABASE_DIR", EVA_DATABASE_DIR)
+        cls._eva_db_dir = eva_db_dir
+        cls._yml_path = Path(eva_db_dir) / EVA_CONFIG_FILE
         if not hasattr(cls, "_instance"):
             cls._instance = super(ConfigurationManager, cls).__new__(cls)
             cls._create_if_not_exists()
@@ -38,35 +44,30 @@ class ConfigurationManager(object):
         return cls._instance
 
     @classmethod
-    def suffix_pytest_xdist_worker_id_to_dir(cls, path: Path):
+    def suffix_pytest_xdist_worker_id_to_dir(cls, path: str):
         try:
             worker_id = os.environ["PYTEST_XDIST_WORKER"]
-            path = path / str(worker_id)
+            path = Path(path) / str(worker_id)
         except KeyError:
             pass
         return path
 
     @classmethod
     def _create_if_not_exists(cls):
-        from eva.configuration.constants import (
-            EVA_CONFIG_FILE,
-            EVA_DEFAULT_DIR,
-            EVA_INSTALLATION_DIR,
-        )
-
         # if not cls._yml_path.exists():
-        initial_eva_config_dir = Path(EVA_DEFAULT_DIR)
+        initial_eva_db_dir = cls._eva_db_dir
 
         # parallelize tests using pytest-xdist
         # activated only under pytest-xdist
-        # Changes config dir From EVA_DEFAULT_DIR To EVA_DEFAULT_DIR / gw1
+        # Changes db dir From EVA_DB_DIR To EVA_DB_DIR / gw1
         # (where gw1 is worker id)
         updated_eva_config_dir = cls.suffix_pytest_xdist_worker_id_to_dir(
-            initial_eva_config_dir
+            initial_eva_db_dir
         )
-        cls._yml_path = updated_eva_config_dir / EVA_CONFIG_FILE
+        cls._eva_db_dir = updated_eva_config_dir
+        cls._yml_path = Path(updated_eva_config_dir) / EVA_CONFIG_FILE
         bootstrap_environment(
-            eva_config_dir=updated_eva_config_dir,
+            eva_db_dir=Path(updated_eva_config_dir),
             eva_installation_dir=EVA_INSTALLATION_DIR,
         )
 
@@ -82,9 +83,11 @@ class ConfigurationManager(object):
                 f"and the system will auto-generate one."
             )
             if category not in config_obj or key not in config_obj[category]:
-                # log a warning and return None
+                # log a warning and return default value
                 logger.warn(key_warning)
-                return None
+                return get_default_config_values(
+                    Path(cls._eva_db_dir), Path(EVA_INSTALLATION_DIR), category, key
+                )
 
             return config_obj[category][key]
 
