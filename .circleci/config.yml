@@ -204,4 +204,4 @@ jobs:
           name: Build Docker image and start server
           command: |
             docker build -t evadb docker
-            timeout 30 docker run evadb
+            docker run evadb sh -c "sleep 10 && pkill -9 eva_server"
