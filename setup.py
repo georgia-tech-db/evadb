@@ -112,6 +112,8 @@ udf_libs = [
 third_party_libs = [
     "qdrant-client>=1.1.7",  # Qdrant vector store client
     "kornia",  # SIFT features
+    "langchain>=0.0.177",  # langchain document loaders
+    "pdfminer.six",  # for reading pdfs
 ]
 
 ### NEEDED FOR EXPERIMENTAL FEATURES

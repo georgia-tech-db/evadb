@@ -51,7 +51,8 @@ class Load:
             file_format = FileFormatType.CSV
         elif file_format_string == "IMAGE":
             file_format = FileFormatType.IMAGE
-
+        elif file_format_string == "DOCUMENT":
+            file_format = FileFormatType.DOCUMENT
         return file_format
 
     def file_options(self, tree):

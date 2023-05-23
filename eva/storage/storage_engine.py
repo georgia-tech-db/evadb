@@ -16,6 +16,7 @@ from eva.catalog.catalog_type import TableType
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.storage.abstract_storage_engine import AbstractStorageEngine
+from eva.storage.document_storage_engine import DocumentStorageEngine
 from eva.utils.generic_utils import str_to_class
 
 
@@ -30,6 +31,7 @@ class StorageEngine:
         TableType.IMAGE_DATA: str_to_class(
             ConfigurationManager().get_value("storage", "image_engine")
         )(),
+        TableType.DOCUMENT_DATA: DocumentStorageEngine(),
     }
 
     @classmethod
