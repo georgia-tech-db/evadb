@@ -219,4 +219,4 @@ jobs:
           command: |
             aws --version
             docker pull evadbai/evaserver
-            timeout 30 docker run evaserver || true
+            timeout 30 docker run evadbai/evaserver || true
