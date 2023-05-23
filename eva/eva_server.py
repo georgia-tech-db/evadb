@@ -30,8 +30,8 @@ sys.path.append(EVA_CODE_DIR)
 
 from eva.configuration.configuration_manager import ConfigurationManager  # noqa: E402
 from eva.server.server import EvaServer  # noqa: E402
-import eva.configuration.constants # noqa: E402
-from eva.utils.logging_manager import logger # noqa: E402
+import eva.configuration.constants  # noqa: E402
+from eva.utils.logging_manager import logger  # noqa: E402
 
 
 async def start_eva_server(host: str, port: int):
@@ -93,10 +93,9 @@ def main():
 
     # Update database_folder first before launching Configuration Manager
     if args.database:
-        eva.configuration.constants.EVA_DATABASE_FOLDER_STRING = args.database 
-        eva.configuration.constants.EVA_DEFAULT_DIR = Path( eva.configuration.constants.EVA_DATABASE_FOLDER_STRING)
+        eva.configuration.constants.EVA_DATABASE_FOLDER_STRING = args.database
+        eva.configuration.constants.EVA_DEFAULT_DIR = Path(eva.configuration.constants.EVA_DATABASE_FOLDER_STRING)
         eva.configuration.constants.DB_DEFAULT_URI = f"sqlite:///{eva.configuration.constants.EVA_DEFAULT_DIR}/eva_catalog.db"
-
 
     logger.warn("Installation dir: " + str(eva.configuration.constants.EVA_DATABASE_FOLDER_STRING))
 
