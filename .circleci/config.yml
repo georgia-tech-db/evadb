@@ -202,7 +202,7 @@ jobs:
       - setup_remote_docker
       - checkout
       - run:
-          name: Build Docker image and start server
+          name: Build EVA Docker image and start server
           command: |
             docker build -t evadb docker
             timeout 30 docker run evadb || true
@@ -213,10 +213,10 @@ jobs:
       - image: cimg/aws:2023.05
 
     steps:
-      - checkout
-      - run: aws --version
+      - setup_remote_docker
       - run:
-          name: Pull Docker image and start server
+          name: Pull EVA Docker image and start server
           command: |
+            aws --version
             docker pull evadbai/evaserver
             timeout 30 docker run evaserver || true
