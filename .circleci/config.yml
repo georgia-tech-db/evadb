@@ -204,5 +204,5 @@ jobs:
       - run:
           name: Build Docker image and start server
           command: |
-            docker build -t evadb docker/Dockerfile
+            docker build -t evadb docker
             docker run evadb eva_server
