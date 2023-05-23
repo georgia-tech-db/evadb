@@ -13,30 +13,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Lazy import to avoid torch init failures
-# _langchain = None
-
-
-# def _lazy_import_langchain():
-#     global _langchain
-#     if _langchain is None:
-#         import langchain
-
-#         _langchain = langchain
-#     return _langchain
-
-
-from langchain.document_loaders import (
-    EverNoteLoader,
-    PDFMinerLoader,
-    TextLoader,
-    UnstructuredEmailLoader,
-    UnstructuredEPubLoader,
-    UnstructuredHTMLLoader,
-    UnstructuredMarkdownLoader,
-    UnstructuredPowerPointLoader,
-    UnstructuredWordDocumentLoader,
-)
+import_err_msg = "`langchain` package not found, please run `pip install langchain`"
+try:
+    from langchain.document_loaders import (
+        EverNoteLoader,
+        PDFMinerLoader,
+        TextLoader,
+        UnstructuredEmailLoader,
+        UnstructuredEPubLoader,
+        UnstructuredHTMLLoader,
+        UnstructuredMarkdownLoader,
+        UnstructuredPowerPointLoader,
+        UnstructuredWordDocumentLoader,
+    )
+except ImportError:
+    raise ImportError(import_err_msg)
 
 LOADER_MAPPING = {
     ".doc": (UnstructuredWordDocumentLoader, {}),
