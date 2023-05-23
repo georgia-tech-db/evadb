@@ -126,7 +126,7 @@ class ReuseTest(unittest.TestCase):
         self._verify_reuse_correctness(select_query, reuse_batch)
 
         # different query format
-        select_query = """SELECT id, HFObjectDetector(data).score FROM DETRAC WHERE ['car'] <@ HFObjectDetector(data).label AND id < 20"""
+        select_query = """SELECT id, HFObjectDetector(data).label FROM DETRAC WHERE ['car'] <@ HFObjectDetector(data).label AND id < 20"""
         reuse_batch = execute_query_fetch_all(select_query)
         self._verify_reuse_correctness(select_query, reuse_batch)
 
