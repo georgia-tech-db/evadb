@@ -30,8 +30,9 @@ sys.path.append(EVA_CODE_DIR)
 
 from eva.configuration.configuration_manager import ConfigurationManager  # noqa: E402
 from eva.server.server import EvaServer  # noqa: E402
-import eva.configuration.constants
-from eva.utils.logging_manager import logger
+import eva.configuration.constants # noqa: E402
+from eva.utils.logging_manager import logger # noqa: E402
+
 
 async def start_eva_server(host: str, port: int):
     """Start the eva server"""
@@ -89,7 +90,7 @@ def main():
     # Stop server
     if args.stop:
         return stop_server()
-    
+
     # Update database_folder first before launching Configuration Manager
     if args.database:
         eva.configuration.constants.EVA_DATABASE_FOLDER_STRING = args.database 
