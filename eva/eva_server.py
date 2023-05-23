@@ -19,6 +19,7 @@ from os.path import abspath, dirname, join
 from signal import SIGTERM
 
 from psutil import process_iter
+from pathlib import Path
 
 """
 To allow running eva_server from any location
@@ -91,7 +92,6 @@ def main():
     
     # Update database_folder first before launching Configuration Manager
     if args.database:
-        from pathlib import Path
         eva.configuration.constants.EVA_DATABASE_FOLDER_STRING = args.database 
         eva.configuration.constants.EVA_DEFAULT_DIR = Path( eva.configuration.constants.EVA_DATABASE_FOLDER_STRING)
         eva.configuration.constants.DB_DEFAULT_URI = f"sqlite:///{eva.configuration.constants.EVA_DEFAULT_DIR}/eva_catalog.db"
