@@ -16,7 +16,7 @@ import asyncio
 import sys
 import unittest
 
-from mock import MagicMock
+from mock import MagicMock, patch
 
 from eva.server.server import EvaServer
 
@@ -27,7 +27,8 @@ if sys.version_info >= (3, 8):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
 
-        async def test_server_functions(self):
+        @patch("asyncio.start_server")
+        async def test_server_functions(self, mock_start):
             eva_server = EvaServer()
             host = "localhost"
             port = 8803
