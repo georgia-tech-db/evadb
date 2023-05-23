@@ -16,7 +16,7 @@ import asyncio
 import sys
 import unittest
 
-from mock import MagicMock, patch
+from mock import MagicMock
 
 from eva.server.server import EvaServer
 
