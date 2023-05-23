@@ -15,8 +15,8 @@
 from typing import Dict, Iterator
 
 from eva.readers.abstract_reader import AbstractReader
-from eva.utils.logging_manager import logger
 from langchain.document_loaders import PyPDFLoader
+
 
 class PDFReader(AbstractReader):
     def __init__(self, *args, **kwargs):
