@@ -9,7 +9,7 @@ workflows:
     jobs:
         - Pip-PyPI
         - Pip-Local
-        - Docker
+        - Docker-Local
         - AWS
         #### UNIT TESTS
         - Linux:
@@ -193,7 +193,7 @@ jobs:
             pip install "."
             bash script/test/package.sh
 
-  Docker:
+  Docker-Local:
     resource_class: large
     docker:
       - image: cimg/base:2023.05
