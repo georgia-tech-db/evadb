@@ -33,50 +33,19 @@ class PDFReader(AbstractReader):
 
         # self._column_list = column_list
         super().__init__(*args, **kwargs)
-        self.table_df = pd.DataFrame(columns=['data',"file_path"])
+        # self.table_df = pd.DataFrame(columns=['data',"file_path"])
 
     def _read(self) -> Iterator[Dict]:
         # TODO: What is a good location to put this code?
 
         loader = PyPDFLoader(self.file_url)
-        pages = loader.load_and_split()
-        for i in pages:
-            self.table_df.loc[len(self.table_df.index)]=[i.page_content,str(self.file_url)]
+        # pages = loader.load_and_split()
+        for data in loader.load():
+            yield {"data": data.page_content,"file_path":str(self.file_url)}
+        # for idx,val in enumerate(pages):
+        #     self.table_df.loc[len(self.table_df.index)]=[val.page_content,str(self.file_url)+"_"+str(idx)]
 
-        for chunk_index, chunk_row in self.table_df.iterrows():
-            yield chunk_row
+        # for chunk_index, chunk_row in self.table_df.iterrows():
+        #     yield chunk_row
 
-        # def convert_csv_string_to_ndarray(row_string):
-        #     """
-        #     Convert a string of comma separated values to a numpy
-        #     float array
-        #     """
-        #     return np.array([np.float32(val) for val in row_string.split(",")])
-
-        # logger.info("Reading CSV frames")
-
-        # # TODO: Need to add strong sanity checks on the columns.
-
-        # # Read the csv in chunks, and only keep the columns we need.
-        # # Ignore _row_id that we don't need to take care of.
-        # col_list_names = [
-        #     col.col_name
-        #     for col in self._column_list
-        #     if col.col_name != IDENTIFIER_COLUMN
-        # ]
-
-        # col_map = {col.col_name: col for col in self._column_list}
-        # for chunk in pd.read_csv(self.file_url, chunksize=512, usecols=col_list_names):
-        #     # apply the required conversions
-        #     for col in chunk.columns:
-        #         # TODO: Is there a better way to do this?
-        #         if (
-        #             isinstance(chunk[col].iloc[0], str)
-        #             and col_map[col].col_object.type.name == "NDARRAY"
-        #         ):
-        #             # convert the string to a numpy array
-        #             chunk[col] = chunk[col].apply(convert_csv_string_to_ndarray)
-
-        #     # yield the chunk
-        #     for chunk_index, chunk_row in chunk.iterrows():
-        #         yield chunk_row
+        
