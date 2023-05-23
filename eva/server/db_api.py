@@ -17,6 +17,7 @@ import asyncio
 from eva.models.server.response import Response
 from eva.utils.logging_manager import logger
 
+
 class EVAConnection:
     def __init__(self, reader, writer):
         self._reader = reader
