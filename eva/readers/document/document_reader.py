@@ -29,5 +29,6 @@ class DocumentReader(AbstractReader):
         loader_class, loader_args = LOADER_MAPPING[ext]
         loader = loader_class(self.file_url, **loader_args)
         # load entire document as one entry
+        # https://github.com/hwchase17/langchain/blob/d4fd58963885465fba70a5cea9554a7b043b02a1/langchain/schema.py#L269
         for data in loader.load():
             yield {"data": data.page_content}
