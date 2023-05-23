@@ -10,6 +10,7 @@ workflows:
         - Pip-PyPI
         - Pip-Local
         - Docker
+        - AWS
         #### UNIT TESTS
         - Linux:
             name: "Test | v3.8 | Linux"
@@ -194,6 +195,9 @@ jobs:
 
   Docker:
     resource_class: large
+    docker:
+      - image: cimg/base:2023.05
+
     steps:
       - setup_remote_docker
       - checkout
@@ -202,3 +206,17 @@ jobs:
           command: |
             docker build -t evadb docker
             timeout 30 docker run evadb || true
+
+  AWS:
+    resource_class: large
+    docker:
+      - image: cimg/aws:2023.05
+
+    steps:
+      - checkout
+      - run: aws --version
+      - run:
+          name: Pull Docker image and start server
+          command: |
+            docker pull evadbai/evaserver
+            timeout 30 docker run evaserver || true
