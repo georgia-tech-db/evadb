@@ -43,6 +43,8 @@ class StorageExecutor(AbstractExecutor):
                 )
             elif self.node.table.table_type == TableType.IMAGE_DATA:
                 return storage_engine.read(self.node.table)
+            elif self.node.table.table_type == TableType.DOCUMENT_DATA:
+                return storage_engine.read(self.node.table)
             elif self.node.table.table_type == TableType.STRUCTURED_DATA:
                 return storage_engine.read(self.node.table, self.node.batch_mem_size)
             else:

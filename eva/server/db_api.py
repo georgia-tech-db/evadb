@@ -49,6 +49,7 @@ class EVACursor(object):
         self._connection._writer.write((query + "\n").encode())
         await self._connection._writer.drain()
         self._pending_query = True
+        return self
 
     async def fetch_one_async(self) -> Response:
         """

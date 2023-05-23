@@ -19,12 +19,7 @@ import pandas as pd
 import pytest
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.experimental.ray.planner.exchange_plan import ExchangePlan
 from eva.models.storage.batch import Batch
-from eva.optimizer.plan_generator import PlanGenerator
-from eva.plan_nodes.nested_loop_join_plan import NestedLoopJoinPlan
-from eva.plan_nodes.project_plan import ProjectPlan
-from eva.plan_nodes.storage_plan import StoragePlan
 from eva.server.command_handler import execute_query_fetch_all
 
 
@@ -64,49 +59,3 @@ class CascadeOptimizer(unittest.TestCase):
         self.assertEqual(actual_batch, expected_batch)
 
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
-
-    def test_optimizer_post_process_strip_with_branch(self):
-        br_exch_plan_1 = ExchangePlan()
-        br_exch_plan_1.append_child(StoragePlan(None, None))
-
-        br_exch_plan_2 = ExchangePlan()
-        br_exch_plan_2.append_child(StoragePlan(None, None))
-
-        nest_plan = NestedLoopJoinPlan(None)
-        nest_plan.append_child(br_exch_plan_1)
-        nest_plan.append_child(br_exch_plan_2)
-
-        proj_plan = ProjectPlan(None)
-        proj_plan.append_child(nest_plan)
-
-        root_exch_plan = ExchangePlan()
-        root_exch_plan.append_child(proj_plan)
-
-        plan = PlanGenerator().post_process(root_exch_plan)
-
-        self.assertTrue(isinstance(plan, ProjectPlan))
-        self.assertEqual(len(plan.children), 1)
-        self.assertTrue(isinstance(plan.children[0], NestedLoopJoinPlan))
-        self.assertEqual(len(nest_plan.children), 2)
-        self.assertTrue(isinstance(nest_plan.children[0], StoragePlan))
-        self.assertTrue(isinstance(nest_plan.children[1], StoragePlan))
-
-    def test_optimizer_post_process_strip_without_branch(self):
-        child_exch_plan = ExchangePlan()
-        child_exch_plan.append_child(StoragePlan(None, None))
-
-        proj_plan = ProjectPlan(None)
-        proj_plan.append_child(child_exch_plan)
-
-        root_exch_plan = ExchangePlan()
-        root_exch_plan.append_child(proj_plan)
-
-        plan = PlanGenerator().post_process(root_exch_plan)
-
-        self.assertTrue(isinstance(plan, ExchangePlan))
-        self.assertEqual(len(plan.children), 1)
-        self.assertTrue(isinstance(plan.children[0], ProjectPlan))
-        self.assertEqual(len(proj_plan.children), 1)
-        self.assertTrue(isinstance(proj_plan.children[0], ExchangePlan))
-        self.assertEqual(len(child_exch_plan.children), 1)
-        self.assertTrue(isinstance(child_exch_plan.children[0], StoragePlan))

@@ -21,16 +21,49 @@ LATEST_VERSION = VERSION_DICT["VERSION"]
 
 # Add any Sphinx extension module names here, as strings.
 extensions = [
+    "sphinxemoji.sphinxemoji",
+    "sphinx_external_toc",
+    "sphinx_design",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.napoleon",
+    "sphinx_click.ext",
+    "sphinx-jsonschema",
+    "sphinx_copybutton",
+    "sphinx_sitemap",
+    "sphinx.ext.doctest",
+    "sphinx.ext.coverage",
+    "sphinx.ext.autosectionlabel",
+    "sphinx.ext.autosummary",
     "sphinx.ext.autodoc",
     "sphinx.ext.todo",
     "sphinx.ext.mathjax",
     "sphinx.ext.githubpages",
-    "sphinxemoji.sphinxemoji",
-    "sphinx_external_toc",
-    "sphinx.ext.autosectionlabel",
-    "sphinx_design",
-    "myst_nb"
+    "sphinx_thebe",
+    "sphinxcontrib.autodoc_pydantic",
+    "sphinxcontrib.redoc",
+    "sphinxcontrib.youtube",
+    "sphinx_inline_tabs",
+    "myst_nb",
+    "versionwarning.extension"
 ]
+
+myst_enable_extensions = [
+    "dollarmath",
+    "amsmath",
+    "deflist",
+    "html_admonition",
+    "html_image",
+    "colon_fence",
+    "smartquotes",
+    "replacements",
+]
+
+# Thebe configuration for launching notebook cells within the docs.
+thebe_config = {
+    "selector": "div.highlight",
+    "repository_url": "https://github.com/georgia-tech-db/eva",
+    "repository_branch": "master",
+}
 
 # The suffix(es) of source filenames.
 source_suffix = [".rst", ".md"]
@@ -39,16 +72,16 @@ source_suffix = [".rst", ".md"]
 master_doc = "index"
 
 # General information about the project.
-project = "EVA AI-Relational Database System"
-copyright = str(date.today().year) + ", Georgia Tech Database Group."
-author = u"Georgia Tech Database Group"
+project = "EVA DB"
+copyright = str(date.today().year) + ", EVA DB."
+author = u"EVA DB"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # The name of the Pygments (syntax highlighting) style to use.
-#pygments_style = "sphinx"
+#pygments_style = "lovelace"
 
 # List of substitutions
 rst_prolog = """
@@ -80,7 +113,10 @@ html_theme_options = {
     },
     "dark_css_variables": {
         "color-background-secondary": "#000",
-    }
+    },
+    "navigation_with_keys": True,
+    # Add important announcement here
+    #"announcement": "<em>Important</em> announcement!"
 }
 
 external_toc_path = "_toc.yml"  # optional, default: _toc.yml

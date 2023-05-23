@@ -19,7 +19,7 @@ from eva.binder.binder_utils import BinderError
 from eva.binder.statement_binder import StatementBinder
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.catalog_type import IndexType, NdArrayType
+from eva.catalog.catalog_type import NdArrayType
 from eva.parser.alias import Alias
 
 
@@ -260,10 +260,6 @@ class StatementBinderTests(unittest.TestCase):
                 binder._bind_create_index_statement(create_index_statement)
 
             create_index_statement.col_list = ["foo"]
-            create_index_statement.index_type = "bar"
-            with self.assertRaises(AssertionError):
-                binder._bind_create_index_statement(create_index_statement)
-
             udf_obj = MagicMock()
             output = MagicMock()
             udf_obj.outputs = [output]
@@ -271,7 +267,6 @@ class StatementBinderTests(unittest.TestCase):
             with patch.object(
                 CatalogManager, "get_udf_catalog_entry_by_name", return_value=udf_obj
             ):
-                create_index_statement.index_type = IndexType.HNSW
                 with self.assertRaises(AssertionError):
                     binder._bind_create_index_statement(create_index_statement)
                 output.array_type = NdArrayType.FLOAT32

@@ -10,6 +10,8 @@ from pathlib import Path
 from typing import Dict
 
 from setuptools import find_packages, setup
+from setuptools.command.install import install
+from subprocess import check_call
 
 this_directory = Path(__file__).parent
 LONG_DESCRIPTION = (this_directory / "README.md").read_text()
@@ -52,6 +54,7 @@ minimal_requirement = [
     "eva-decord>=0.6.1",
     "boto3",
     "nest_asyncio",
+    "typing_extensions==4.5.0",  # https://github.com/hwchase17/langchain/issues/5113
 ]
 
 formatter_libs = ["black>=23.1.0", "isort>=5.10.1"]
@@ -86,13 +89,9 @@ benchmark_libs = [
     "pytest-benchmark",
 ]
 
-doc_libs = [
-    "pyenchant",
-    "codespell",
-    "pylint"
-]
+doc_libs = ["codespell", "pylint"]
 
-dist_libs = ["wheel>=0.37.1", "scriv>=0.16.0"]
+dist_libs = ["wheel>=0.37.1", "semantic_version", "PyGithub"]
 
 ### NEEDED FOR AN ALTERNATE DATA SYSTEM OTHER THAN SQLITE
 database_libs = ["pymysql>=0.10.1"]
@@ -110,6 +109,14 @@ udf_libs = [
 ]
 
 ### NEEDED FOR EXPERIMENTAL FEATURES
+third_party_libs = [
+    "qdrant-client>=1.1.7",  # Qdrant vector store client
+    "kornia",  # SIFT features
+    "langchain>=0.0.177",  # langchain document loaders
+    "pdfminer.six",  # for reading pdfs
+]
+
+### NEEDED FOR EXPERIMENTAL FEATURES
 experimental_libs = []
 
 INSTALL_REQUIRES = minimal_requirement + integration_test_libs + udf_libs
@@ -123,6 +130,7 @@ DEV_REQUIRES = (
     + database_libs
     + dist_libs
     + experimental_libs
+    + third_party_libs
 )
 
 EXTRA_REQUIRES = {"dev": DEV_REQUIRES}

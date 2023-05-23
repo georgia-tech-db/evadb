@@ -1,4 +1,4 @@
-personal_ws-1.1 en 1266 
+personal_ws-1.1 en 1293 
 ABCD
 ABCMeta
 ANYDIM
@@ -96,12 +96,13 @@ ColumnElement
 ColumnList
 ColumnType
 ColumnTypeTests
-CombineSimilarityOrderByAndLimitToFaissIndexScan
+CombineSimilarityOrderByAndLimitToVectorIndexScan
 CommandHandlerTests
 CommonClauses
 ComparisonExpression
 ComparisonExpressionsTest
 ConfigurationManager
+ConfigurationManager's
 ConfigurationManagerTests
 ConstantValueExpression
 Conv
@@ -201,6 +202,7 @@ ExpressionEvaluationTest
 ExpressionReturnType
 ExpressionType
 ExpressionUtilsTest
+FAISS
 FLV
 FaceDet
 FaceDetection
@@ -211,12 +213,15 @@ FaissIndexScan
 FaissIndexScanExecutor
 FaissIndexScanPlan
 FaissSavePath
+FaissVectorStore
 FakeDummyObjectDetector
 FanoutCache
 FastRCNN
 FastRCNNObjectDetector
 FastRCNNObjectDetectorTest
+FeatureExtraction
 FeatureExtractor
+FeaturePayload
 FileExistsError
 FileFormatType
 FileNotFoundError
@@ -274,7 +279,6 @@ IndexCatalogEntry
 IndexCatalogService
 IndexCatalogServiceTest
 IndexScan
-IndexType
 InputType
 InsertExecutor
 InsertExecutorTest
@@ -301,7 +305,6 @@ LOGICALDELIMITER
 LOGICALDROP
 LOGICALDROPUDF
 LOGICALEXPLAIN
-LOGICALFAISSINDEXSCAN
 LOGICALFILTER
 LOGICALFUNCTIONSCAN
 LOGICALGROUPBY
@@ -337,7 +340,7 @@ LogicalApplyAndMerge
 LogicalApplyAndMergeToPhysical
 LogicalCreate
 LogicalCreateIndex
-LogicalCreateIndexToFaiss
+LogicalCreateIndexToVectorIndex
 LogicalCreateMaterializedView
 LogicalCreateMaterializedViewToPhysical
 LogicalCreateToPhysical
@@ -357,8 +360,6 @@ LogicalExplainToPhysical
 LogicalExpression
 LogicalExpressionsTest
 LogicalExtractObject
-LogicalFaissIndexScan
-LogicalFaissIndexScanToPhysical
 LogicalFilter
 LogicalFilterToPhysical
 LogicalFunctionScan
@@ -390,6 +391,8 @@ LogicalShow
 LogicalShowToPhysical
 LogicalUnion
 LogicalUnionToPhysical
+LogicalVectorIndexScan
+LogicalVectorIndexScanToPhysical
 LordDarkula
 MNIST
 MNISTVid
@@ -420,6 +423,7 @@ NLP
 NOTNULL
 NaN
 NamedTemporaryFile
+Namespace
 NdArrayType
 NdarrayUDF
 NestedLoopJoinExecutor
@@ -492,7 +496,11 @@ PytorchAbstractClassifierUDF
 PytorchAbstractTransformationUDF
 PytorchClassifierAbstractUDF
 PytorchTest
+QDRANT
 QL
+Qdrant
+QdrantClient
+QdrantVectorStore
 QuerySpecification
 QueueReaderExecutor
 REUSEADDR
@@ -500,6 +508,7 @@ Rajoria
 RayError
 ReLU
 ReadTheDocs
+Reddit
 RenameExecutor
 RenameExecutorTest
 RenamePlan
@@ -546,6 +555,7 @@ ShowStatement
 ShowTablePlan
 ShowType
 ShowUDFPlan
+SiftFeatureExtractor
 SimilarityTests
 SpeechRecognizer
 StageCompleteSignal
@@ -648,6 +658,15 @@ VARCHAR
 VGG
 ValueError
 ValueList
+VectorIndexQuery
+VectorIndexQueryResult
+VectorIndexScan
+VectorIndexScanExecutor
+VectorIndexScanPlan
+VectorParams
+VectorStore
+VectorStoreFactory
+VectorStoreType
 VideoCapture
 VideoColumnName
 VideoFormat
@@ -658,6 +677,7 @@ XdistTests
 XformExtractObjectToLinearFlow
 XformLateralJoinToLinearFlow
 YOLO
+Yolo
 YoloDecorators
 YoloObjectDetection
 YoloTest
@@ -675,6 +695,7 @@ addHandler
 aenum
 agg
 aggr
+aidb
 amongst
 analytics
 anydim
@@ -818,6 +839,7 @@ dicts
 dir
 dirname
 diskcache
+dists
 distutils
 dml
 docstring
@@ -837,6 +859,7 @@ easyocr
 eg
 elif
 eloyekunle
+embeddings
 endswith
 enum
 enums
@@ -972,6 +995,7 @@ jpg
 json
 kaushikravichandran
 klass
+kornia
 kwarg
 kwargs
 lalr
@@ -1006,6 +1030,7 @@ mnistvid
 mnt
 moto
 mov
+moveaxis
 msg
 mtcnn
 multiface
@@ -1092,6 +1117,7 @@ pypirc
 pypitest
 pytest
 pytorch
+qdrant
 qualname
 randomUDF
 rb
@@ -1101,6 +1127,7 @@ readlines
 readme
 realimport
 recurse
+reddit
 repr
 req
 resnet

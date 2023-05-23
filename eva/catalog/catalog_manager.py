@@ -16,10 +16,16 @@ import shutil
 from pathlib import Path
 from typing import List
 
-from eva.catalog.catalog_type import ColumnType, IndexType, TableType, VideoColumnName
+from eva.catalog.catalog_type import (
+    ColumnType,
+    TableType,
+    VectorStoreType,
+    VideoColumnName,
+)
 from eva.catalog.catalog_utils import (
     cleanup_storage,
     construct_udf_cache_catalog_entry,
+    get_document_table_column_definitions,
     get_image_table_column_definitions,
     get_video_table_column_definitions,
     xform_column_definitions_to_catalog_entries,
@@ -307,12 +313,12 @@ class CatalogManager(object):
         self,
         name: str,
         save_file_path: str,
-        index_type: IndexType,
+        vector_store_type: VectorStoreType,
         feat_column: ColumnCatalogEntry,
         udf_signature: str,
     ) -> IndexCatalogEntry:
         index_catalog_entry = self._index_service.insert_entry(
-            name, save_file_path, index_type, feat_column, udf_signature
+            name, save_file_path, vector_store_type, feat_column, udf_signature
         )
         return index_catalog_entry
 
@@ -419,6 +425,7 @@ class CatalogManager(object):
         assert format_type in [
             FileFormatType.VIDEO,
             FileFormatType.IMAGE,
+            FileFormatType.DOCUMENT,
         ], f"Format Type {format_type} is not supported"
 
         if format_type is FileFormatType.VIDEO:
@@ -427,7 +434,9 @@ class CatalogManager(object):
         elif format_type is FileFormatType.IMAGE:
             columns = get_image_table_column_definitions()
             table_type = TableType.IMAGE_DATA
-
+        elif format_type is FileFormatType.DOCUMENT:
+            columns = get_document_table_column_definitions()
+            table_type = TableType.DOCUMENT_DATA
         return self.create_and_insert_table_catalog_entry(
             TableInfo(name), columns, table_type=table_type
         )

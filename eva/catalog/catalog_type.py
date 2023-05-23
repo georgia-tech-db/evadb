@@ -24,6 +24,7 @@ class TableType(EVAEnum):
     STRUCTURED_DATA  # noqa: F821
     VIDEO_DATA  # noqa: F821
     IMAGE_DATA  # noqa: F821
+    DOCUMENT_DATA  # noqa: F821
 
     # reserved for system generated tables
     # cannot be accessed/modified directly by user
@@ -92,12 +93,9 @@ class NdArrayType(EVAEnum):
         return np_type
 
 
-class IndexType(EVAEnum):
-    HNSW  # noqa: F821
-
-    @classmethod
-    def is_faiss_index_type(cls, t):
-        return t in [cls.HNSW]
+class VectorStoreType(EVAEnum):
+    FAISS  # noqa: F821
+    QDRANT  # noqa: F821
 
 
 class VideoColumnName(EVAEnum):
@@ -120,3 +118,9 @@ class VideoColumnName(EVAEnum):
 class ImageColumnName(EVAEnum):
     name  # noqa: F821
     data  # noqa: F821
+
+
+class DocumentColumnName(EVAEnum):
+    name  # noqa: F821
+    data  # noqa: F821
+    metadata  # noqa: F821
