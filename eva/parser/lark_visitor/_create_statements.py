@@ -234,6 +234,7 @@ class CreateTable:
         view_info = None
         if_not_exists = False
         query = None
+        uid_list = []
 
         for child in tree.children:
             if isinstance(child, Tree):
@@ -248,9 +249,17 @@ class CreateTable:
 
         # setting all other column definition attributes as None,
         # need to figure from query
-        col_list = [
-            ColumnDefinition(uid.col_name, None, None, None) for uid in uid_list
-        ]
+        if uid_list == []:
+            assert (query is not None)
+            for uid in query.target_list:
+                uid_list.append(uid)
+
+        col_list = []
+        for uid in uid_list:
+            if hasattr(uid, "col_name"):
+                col_list.append(ColumnDefinition(uid.col_name, None, None, None))
+            elif hasattr(uid, "output"):
+                col_list.append(ColumnDefinition(uid.output, None, None, None))
         return CreateMaterializedViewStatement(
             view_info, col_list, if_not_exists, query
         )
