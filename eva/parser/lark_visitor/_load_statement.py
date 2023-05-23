@@ -52,7 +52,7 @@ class Load:
         elif file_format_string == "IMAGE":
             file_format = FileFormatType.IMAGE
         elif file_format_string == "DOCUMENT":
-            file_format = FileFormatType.DOCUMENT        
+            file_format = FileFormatType.DOCUMENT      
         elif file_format_string == "PDF":
             file_format = FileFormatType.PDF
 

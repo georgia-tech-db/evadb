@@ -438,7 +438,7 @@ class CatalogManager(object):
             table_type = TableType.IMAGE_DATA
         elif format_type is FileFormatType.DOCUMENT:
             columns = get_document_table_column_definitions()
-            table_type = TableType.DOCUMENT_DATA        
+            table_type = TableType.DOCUMENT_DATA
         elif format_type is FileFormatType.PDF:
             columns = get_pdf_table_column_definitions()
             table_type = TableType.PDF_DATA
