@@ -97,10 +97,7 @@ def main():
         eva.configuration.constants.EVA_DEFAULT_DIR = Path(eva.configuration.constants.EVA_DATABASE_FOLDER_STRING)
         eva.configuration.constants.DB_DEFAULT_URI = f"sqlite:///{eva.configuration.constants.EVA_DEFAULT_DIR}/eva_catalog.db"
 
-    logger.warn("Installation dir: " + str(eva.configuration.constants.EVA_DATABASE_FOLDER_STRING))
-
-    logger.warn("Installation dir: " + 
-    str(ConfigurationManager().get_value("core", "datasets_dir")))
+    logger.debug("Database dir: " + str(eva.configuration.constants.EVA_DATABASE_FOLDER_STRING))
 
     host = (
         args.host if args.host else ConfigurationManager().get_value("server", "host")
