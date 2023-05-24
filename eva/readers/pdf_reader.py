@@ -30,16 +30,24 @@ class PDFReader(AbstractReader):
         super().__init__(*args, **kwargs)
 
     def _read(self) -> Iterator[Dict]:
-        # TODO: What is a good location to put this code?
         doc = fitz.open(self.file_url)
 
+        # PAGE ID, PARAGRAPH ID, STRING
         for page_no, page in enumerate(doc):
             blocks = page.get_text("dict")["blocks"]
-            for paragraph_no, b in enumerate(blocks):  # iterate through the text blocks
-                if b['type'] == 0:  # this block contains text
-                    block_string = ""  # text found in block
-                    for lines in b["lines"]:  # iterate through the text lines
-                        for span in lines["spans"]:  # iterate through the text spans
-                            if span['text'].strip():  # removing whitespaces:
+            # iterate through the text blocks
+            for paragraph_no, b in enumerate(blocks):
+                # this block contains text
+                if b['type'] == 0:  
+                    # text found in block
+                    block_string = "" 
+                    # iterate through the text lines
+                    for lines in b["lines"]:
+                        # iterate through the text spans
+                        for span in lines["spans"]:
+                            # removing whitespaces:
+                            if span['text'].strip():
                                 block_string += span['text']
-                    yield {"page": page_no + 1, "paragraph": paragraph_no + 1, "data": block_string}
+                    yield {"page": page_no + 1, 
+                           "paragraph": paragraph_no + 1, 
+                           "data": block_string}

@@ -43,12 +43,12 @@ class LoadExecutorTest(unittest.TestCase):
         number_of_paragraphs = 0
         for page in doc:
             blocks = page.get_text("dict")["blocks"]
-            for b in blocks:  # iterate through the text blocks
-                if b['type'] == 0:  # this block contains text
-                    block_string = ""  # text found in block
-                    for lines in b["lines"]:  # iterate through the text lines
-                        for span in lines["spans"]:  # iterate through the text spans
-                            if span['text'].strip():  # removing whitespaces:
+            for b in blocks:
+                if b['type'] == 0:
+                    block_string = ""
+                    for lines in b["lines"]:
+                        for span in lines["spans"]:
+                            if span['text'].strip():
                                 block_string += span['text']
                     number_of_paragraphs += 1
 
