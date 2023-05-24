@@ -15,8 +15,7 @@
 from typing import Dict, Iterator
 
 from eva.readers.abstract_reader import AbstractReader
-from langchain.document_loaders import PyPDFLoader
-
+import fitz
 
 class PDFReader(AbstractReader):
     def __init__(self, *args, **kwargs):
@@ -31,7 +30,15 @@ class PDFReader(AbstractReader):
 
     def _read(self) -> Iterator[Dict]:
         # TODO: What is a good location to put this code?
+        doc = fitz.open(self.file_url)
 
-        loader = PyPDFLoader(self.file_url)
-        for index, data in enumerate(loader.load()):
-            yield {"page": index + 1, "data": data.page_content}
+        for page_no,page in enumerate(doc):
+            blocks = page.get_text("dict")["blocks"]
+            for paragraph_no,b in enumerate(blocks):  # iterate through the text blocks
+                if b['type'] == 0:  # this block contains text
+                    block_string = ""  # text found in block
+                    for l in b["lines"]:  # iterate through the text lines
+                        for s in l["spans"]:  # iterate through the text spans
+                            if s['text'].strip():  # removing whitespaces:
+                                    block_string += s['text']
+                    yield {"page": page_no + 1,"paragraph":paragraph_no + 1 ,"data": block_string}

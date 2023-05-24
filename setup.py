@@ -56,7 +56,7 @@ minimal_requirement = [
     "nest_asyncio",
     "pypdf",
     "langchain",
-    "typing_extensions==4.5.0",
+    "pymupdf",
 ]
 
 formatter_libs = ["black>=23.1.0", "isort>=5.10.1"]

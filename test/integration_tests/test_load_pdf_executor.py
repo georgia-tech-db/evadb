@@ -22,8 +22,7 @@ import pytest
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
 from eva.server.command_handler import execute_query_fetch_all
-from langchain.document_loaders import PyPDFLoader
-
+import fitz
 
 @pytest.mark.notparallel
 class LoadExecutorTest(unittest.TestCase):
@@ -38,14 +37,26 @@ class LoadExecutorTest(unittest.TestCase):
 
     def test_load_pdfs(self):
         pdf_path = f"{EVA_ROOT_DIR}/data/documents/pdf_sample1.pdf"
-        loader = PyPDFLoader(pdf_path)
-        num_pages = len(loader.load())
+        
+        doc = fitz.open(pdf_path)
+        number_of_paragraphs=0
+        for page in doc:
+            blocks = page.get_text("dict")["blocks"]
+            for b in blocks:  # iterate through the text blocks
+                if b['type'] == 0:  # this block contains text
+                    block_string = ""  # text found in block
+                    for l in b["lines"]:  # iterate through the text lines
+                        for s in l["spans"]:  # iterate through the text spans
+                            if s['text'].strip():  # removing whitespaces:
+                                    block_string += s['text']
+                    number_of_paragraphs += 1
+
         execute_query_fetch_all(
             f"""LOAD PDF '{pdf_path}' INTO pdfs;"""
         )
         result = execute_query_fetch_all("SELECT * from pdfs;")
-        self.assertEqual(len(result.columns), 4)
-        self.assertEqual(len(result), num_pages)
+        self.assertEqual(len(result.columns), 5)
+        self.assertEqual(len(result), number_of_paragraphs)
 
 
 if __name__ == "__main__":
