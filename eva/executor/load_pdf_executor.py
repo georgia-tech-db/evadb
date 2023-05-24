@@ -82,7 +82,7 @@ class LoadPDFExecutor(AbstractExecutor):
         # write with storage engine in batches
         num_loaded_frames = 0
         for batch in pdf_reader.read():
-            storage_engine.write(table_obj,batch)
+            storage_engine.write(table_obj, batch)
             num_loaded_frames += len(batch)
         # yield result
         df_yield_result = Batch(
