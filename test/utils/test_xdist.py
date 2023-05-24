@@ -18,6 +18,7 @@ import unittest
 
 from eva.configuration.configuration_manager import ConfigurationManager
 
+
 class XdistTests(unittest.TestCase):
 
     def test_suffix_pytest_xdist_worker_id_to_dir(self):
@@ -34,4 +35,3 @@ class XdistTests(unittest.TestCase):
             foo_path
         )
         self.assertFalse("gw1" in str(updated_path))
-
