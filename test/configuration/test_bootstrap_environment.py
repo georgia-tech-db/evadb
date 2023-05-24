@@ -16,8 +16,6 @@ import tempfile
 import unittest
 from pathlib import Path
 
-import pytest
-
 from eva.configuration.bootstrap_environment import bootstrap_environment
 from eva.configuration.constants import EVA_CONFIG_FILE, EVA_INSTALLATION_DIR, UDF_DIR
 
