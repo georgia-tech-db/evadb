@@ -36,11 +36,12 @@ class LoadExecutorTest(unittest.TestCase):
         execute_query_fetch_all("DROP TABLE IF EXISTS pdfs;")
 
     def test_load_pdfs(self):
+        pdf_path = f"{EVA_ROOT_DIR}/data/documents/pdf_sample1.pdf"
         execute_query_fetch_all(
-            f"""LOAD PDF '{EVA_ROOT_DIR}/data/documents/pdf_sample1.pdf' INTO pdfs;"""
+            f"""LOAD PDF '{pdf_path}' INTO pdfs;"""
         )
         result = execute_query_fetch_all("SELECT * from pdfs;")
-        self.assertEqual(len(result.columns), 3)
+        self.assertEqual(len(result.columns), 4)
         self.assertEqual(len(result), 1)
 
 

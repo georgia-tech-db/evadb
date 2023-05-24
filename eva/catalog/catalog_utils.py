@@ -132,15 +132,27 @@ def get_document_table_column_definitions() -> List[ColumnDefinition]:
 
 def get_pdf_table_column_definitions() -> List[ColumnDefinition]:
     """
-    id: pdf id
+    name: pdf name
+    page: page no
     data: pdf data
     """
     columns = [
-        ColumnDefinition(PDFColumnName.id.name, ColumnType.INTEGER, None, None),
+        ColumnDefinition(
+            PDFColumnName.name.name, 
+            ColumnType.TEXT, 
+            None, 
+            None
+        ),
+        ColumnDefinition(
+            PDFColumnName.page.name, 
+            ColumnType.INTEGER, 
+            None, 
+            None
+        ),
         ColumnDefinition(
             PDFColumnName.data.name,
-            ColumnType.NDARRAY,
-            NdArrayType.STR,
+            ColumnType.TEXT,
+            None,
             None,
         ),
     ]
@@ -155,7 +167,7 @@ def get_table_primary_columns(table_catalog_obj: TableCatalogEntry):
     elif table_catalog_obj.table_type == TableType.DOCUMENT_DATA:
         return get_document_table_column_definitions()[:1]
     elif table_catalog_obj.table_type == TableType.PDF_DATA:
-        return get_pdf_table_column_definitions()[:1]
+        return get_pdf_table_column_definitions()[:2]
     else:
         raise Exception(f"Unexpected table type {table_catalog_obj.table_type}")
 

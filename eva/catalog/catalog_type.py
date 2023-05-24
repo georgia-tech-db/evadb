@@ -128,5 +128,6 @@ class DocumentColumnName(EVAEnum):
 
 
 class PDFColumnName(EVAEnum):
-    id  # noqa: F821
+    name  # noqa: F821
+    page  # noqa: F821
     data  # noqa: F821

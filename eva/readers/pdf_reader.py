@@ -33,7 +33,5 @@ class PDFReader(AbstractReader):
         # TODO: What is a good location to put this code?
 
         loader = PyPDFLoader(self.file_url)
-        document_data = ""
-        for data in loader.load():
-            document_data += data.page_content + "\n\n\n"
-        yield {"data": document_data, "file_path": str(self.file_url)}
+        for index,data in enumerate(loader.load()):
+            yield {"page": index+1, "data": data.page_content}
