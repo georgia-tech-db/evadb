@@ -38,7 +38,7 @@ class LoadExecutorTest(unittest.TestCase):
 
     def test_load_pdfs(self):
         pdf_path = f"{EVA_ROOT_DIR}/data/documents/pdf_sample1.pdf"
-        
+
         doc = fitz.open(pdf_path)
         number_of_paragraphs=0
         for page in doc:
@@ -46,10 +46,10 @@ class LoadExecutorTest(unittest.TestCase):
             for b in blocks:  # iterate through the text blocks
                 if b['type'] == 0:  # this block contains text
                     block_string = ""  # text found in block
-                    for l in b["lines"]:  # iterate through the text lines
-                        for s in l["spans"]:  # iterate through the text spans
-                            if s['text'].strip():  # removing whitespaces:
-                                    block_string += s['text']
+                    for lines in b["lines"]:  # iterate through the text lines
+                        for span in lines["spans"]:  # iterate through the text spans
+                            if span['text'].strip():  # removing whitespaces:
+                                block_string += span['text']
                     number_of_paragraphs += 1
 
         execute_query_fetch_all(
