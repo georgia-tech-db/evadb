@@ -70,22 +70,20 @@ class LoadPDFExecutor(AbstractExecutor):
 
         # Read the PDF file
         # in the column to the desired type
-        # pdf_reader = PDFReader(
-        #     self.node.file_path,
-        #     # column_list=column_list,
-        #     batch_mem_size=self.node.batch_mem_size,
-        # )
+        pdf_reader = PDFReader(
+            self.node.file_path,
+            # column_list=column_list,
+            batch_mem_size=self.node.batch_mem_size,
+        )
 
         storage_engine = StorageEngine.factory(table_obj)
         if do_create:
             storage_engine.create(table_obj)
         # write with storage engine in batches
         num_loaded_frames = 0
-        # for batch in pdf_reader.read():
-        storage_engine.write(table_obj,                
-        Batch(pd.DataFrame([{"file_path": str(self.node.file_path)}])),
-        )
-            # num_loaded_frames += len(batch)
+        for batch in pdf_reader.read():
+            storage_engine.write(table_obj,batch)
+            num_loaded_frames += len(batch)
         # yield result
         df_yield_result = Batch(
             pd.DataFrame(
