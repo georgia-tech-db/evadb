@@ -18,20 +18,18 @@ from torchvision.transforms import Compose, ToTensor, Resize
 from PIL import Image
 
 
-class MRICNN(PytorchAbstractClassifierUDF):
+class SaliencyMaps(PytorchAbstractClassifierUDF):
 
     @property
     def name(self) -> str:
-        return "MRICNN"
+        return "SaliencyMaps"
 
     def setup(self):
-        # !wget -nc "https://www.dropbox.com/s/cnsgyitrtw40lgs/model.pth?dl=0" 
-        # to get the model from the dropbox
         self.model = torchvision.models.resnet18(pretrained=True)
         num_features = self.model.fc.in_features
         self.model.fc = nn.Linear(num_features, 2) # binary classification (num_of_class == 2)
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        model_state = torch.load("model.pth", map_location=device)
+        model_state = torch.load("data/saliency/model.pth", map_location=device)
         self.model.load_state_dict(model_state)
         self.model.eval()
 
@@ -63,7 +61,7 @@ class MRICNN(PytorchAbstractClassifierUDF):
             Returns:
                 tuple containing predicted_classes (List[str])
             """
-            outcome = pd.DataFrame()
+            outcome = pd.DataFrame(columns=["saliency"])
             frames.requires_grad_()
             outputs = self.model(frames)
             score_max_index = outputs.argmax()
@@ -71,6 +69,6 @@ class MRICNN(PytorchAbstractClassifierUDF):
             score_max.backward()
             saliency, _ = torch.max(frames.grad.data.abs(),dim=1)
 
-            outcome = outcome.append({"saliency" : saliency}, ignore_index=True)        
-
+            # outcome = outcome.append({"saliency" : saliency}, ignore_index=True)        
+            outcome.loc[len(outcome.index)] = [saliency]
             return outcome
