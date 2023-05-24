@@ -35,10 +35,10 @@ class ConfigurationManager(object):
 
     def __new__(cls, *args, **kwargs):
         eva_db_dir = kwargs.get("EVA_DATABASE_DIR", EVA_DATABASE_DIR)
-        cls._eva_db_dir = eva_db_dir
-        cls._yml_path = Path(eva_db_dir) / EVA_CONFIG_FILE
         if not hasattr(cls, "_instance"):
             cls._instance = super(ConfigurationManager, cls).__new__(cls)
+            cls._eva_db_dir = eva_db_dir
+            cls._yml_path = Path(eva_db_dir) / EVA_CONFIG_FILE
             cls._create_if_not_exists()
 
         return cls._instance

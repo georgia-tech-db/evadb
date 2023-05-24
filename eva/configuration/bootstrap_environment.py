@@ -48,7 +48,7 @@ def get_base_config(eva_installation_dir: Path) -> Path:
 
 
 def get_default_db_uri(eva_db_dir: Path):
-    return f"sqlite:///{eva_db_dir}/{DB_DEFAULT_NAME}"
+    return f"sqlite:///{eva_db_dir.resolve()}/{DB_DEFAULT_NAME}"
 
 
 def bootstrap_environment(eva_db_dir: Path, eva_installation_dir: Path):
