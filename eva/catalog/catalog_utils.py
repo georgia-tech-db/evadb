@@ -166,7 +166,7 @@ def get_table_primary_columns(table_catalog_obj: TableCatalogEntry):
         TableType.IMAGE_DATA,
         TableType.DOCUMENT_DATA,
         TableType.PDF_DATA
-        ], f"Table Type {table_catalog_obj.table_type} is not supported"
+                                            ], f"Table Type {table_catalog_obj.table_type} is not supported"
 
     if table_catalog_obj.table_type == TableType.VIDEO_DATA:
         return get_video_table_column_definitions()[:2]
