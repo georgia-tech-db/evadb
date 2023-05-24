@@ -138,15 +138,15 @@ def get_pdf_table_column_definitions() -> List[ColumnDefinition]:
     """
     columns = [
         ColumnDefinition(
-            PDFColumnName.name.name, 
-            ColumnType.TEXT, 
-            None, 
+            PDFColumnName.name.name,
+            ColumnType.TEXT,
+            None,
             None
         ),
         ColumnDefinition(
-            PDFColumnName.page.name, 
-            ColumnType.INTEGER, 
-            None, 
+            PDFColumnName.page.name,
+            ColumnType.INTEGER,
+            None,
             None
         ),
         ColumnDefinition(
