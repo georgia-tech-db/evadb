@@ -17,7 +17,6 @@ import os
 import unittest
 from pathlib import Path
 
-from eva.catalog.sql_config import SQLConfig
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.utils.generic_utils import prefix_xdist_worker_id_to_path
 
