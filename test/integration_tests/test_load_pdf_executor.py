@@ -40,7 +40,7 @@ class LoadExecutorTest(unittest.TestCase):
         pdf_path = f"{EVA_ROOT_DIR}/data/documents/pdf_sample1.pdf"
 
         doc = fitz.open(pdf_path)
-        number_of_paragraphs=0
+        number_of_paragraphs = 0
         for page in doc:
             blocks = page.get_text("dict")["blocks"]
             for b in blocks:  # iterate through the text blocks
