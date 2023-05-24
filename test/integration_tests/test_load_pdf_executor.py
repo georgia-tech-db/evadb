@@ -22,7 +22,7 @@ import pytest
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
 from eva.server.command_handler import execute_query_fetch_all
-
+from langchain.document_loaders import PyPDFLoader
 
 @pytest.mark.notparallel
 class LoadExecutorTest(unittest.TestCase):
@@ -37,12 +37,14 @@ class LoadExecutorTest(unittest.TestCase):
 
     def test_load_pdfs(self):
         pdf_path = f"{EVA_ROOT_DIR}/data/documents/pdf_sample1.pdf"
+        loader = PyPDFLoader(pdf_path)
+        num_pages = len(loader.load())
         execute_query_fetch_all(
             f"""LOAD PDF '{pdf_path}' INTO pdfs;"""
         )
         result = execute_query_fetch_all("SELECT * from pdfs;")
         self.assertEqual(len(result.columns), 4)
-        self.assertEqual(len(result), 1)
+        self.assertEqual(len(result), num_pages)
 
 
 if __name__ == "__main__":
