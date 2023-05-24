@@ -95,6 +95,7 @@ def validate_video(video_path: Path) -> bool:
 def validate_document(doc_path: Path) -> bool:
     return doc_path.suffix in SUPPORTED_TYPES
 
+
 def validate_pdf(doc_path: Path) -> bool:
     return doc_path.suffix == ".pdf"
 
