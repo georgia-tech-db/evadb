@@ -38,9 +38,9 @@ class PDFReader(AbstractReader):
             # iterate through the text blocks
             for paragraph_no, b in enumerate(blocks):
                 # this block contains text
-                if b['type'] == 0:  
+                if b['type'] == 0:
                     # text found in block
-                    block_string = "" 
+                    block_string = ""
                     # iterate through the text lines
                     for lines in b["lines"]:
                         # iterate through the text spans
@@ -48,6 +48,6 @@ class PDFReader(AbstractReader):
                             # removing whitespaces:
                             if span['text'].strip():
                                 block_string += span['text']
-                    yield {"page": page_no + 1, 
-                           "paragraph": paragraph_no + 1, 
+                    yield {"page": page_no + 1,
+                           "paragraph": paragraph_no + 1,
                            "data": block_string}
