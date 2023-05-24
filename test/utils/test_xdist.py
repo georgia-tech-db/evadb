@@ -35,3 +35,4 @@ class XdistTests(unittest.TestCase):
             foo_path
         )
         self.assertFalse("gw1" in str(updated_path))
+        
