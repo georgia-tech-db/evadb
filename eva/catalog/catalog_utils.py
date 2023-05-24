@@ -162,10 +162,10 @@ def get_pdf_table_column_definitions() -> List[ColumnDefinition]:
 def get_table_primary_columns(table_catalog_obj: TableCatalogEntry):
 
     assert table_catalog_obj.table_type in [
-            TableType.VIDEO_DATA,
-            TableType.IMAGE_DATA,
-            TableType.DOCUMENT_DATA,
-            TableType.PDF_DATA
+        TableType.VIDEO_DATA,
+        TableType.IMAGE_DATA,
+        TableType.DOCUMENT_DATA,
+        TableType.PDF_DATA
         ], f"Table Type {table_catalog_obj.table_type} is not supported"
 
     if table_catalog_obj.table_type == TableType.VIDEO_DATA:
