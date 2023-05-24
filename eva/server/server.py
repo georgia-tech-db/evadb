@@ -16,7 +16,6 @@ import asyncio
 import string
 from asyncio import StreamReader, StreamWriter
 
-from eva.server.command_handler import handle_request
 from eva.utils.logging_manager import logger
 
 
@@ -83,6 +82,7 @@ class EvaServer:
                     return
 
                 logger.debug("Handle request")
+                from eva.server.command_handler import handle_request
                 asyncio.create_task(handle_request(client_writer, message))
 
         except Exception as e:
