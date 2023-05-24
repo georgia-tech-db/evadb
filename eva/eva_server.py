@@ -29,7 +29,8 @@ sys.path.append(EVA_CODE_DIR)
 
 from eva.configuration.configuration_manager import ConfigurationManager  # noqa: E402
 from eva.server.server import EvaServer  # noqa: E402
-from eva.udfs.udf_bootstrap_queries import init_builtin_udfs  # noqa: E402
+from eva.configuration.constants import EVA_DATABASE_DIR  # noqa: E402
+from eva.utils.logging_manager import logger  # noqa: E402
 
 
 async def start_eva_server(host: str, port: int):
@@ -64,6 +65,10 @@ def main():
     )
 
     parser.add_argument(
+        "--database", help="Specify the database folder which the server should access."
+    )
+
+    parser.add_argument(
         "--start",
         help="start server",
         action="store_true",
@@ -84,17 +89,23 @@ def main():
     if args.stop:
         return stop_server()
 
-    host = (
-        args.host if args.host else ConfigurationManager().get_value("server", "host")
-    )
+    eva_db_dir = args.database if args.database else EVA_DATABASE_DIR
 
-    port = (
-        args.port if args.port else ConfigurationManager().get_value("server", "port")
-    )
+    logger.debug(f"Database dir: {eva_db_dir}")
+
+    # Instantiate a Configuration Manager object with the appropriate database directory
+    # Subsequent calls will utilize the specified database directory
+    config_manager = ConfigurationManager(EVA_DATABASE_DIR=eva_db_dir)
+
+    host = args.host if args.host else config_manager.get_value("server", "host")
+
+    port = args.port if args.port else config_manager.get_value("server", "port")
 
     # Start server
     if args.start:
-        mode = ConfigurationManager().get_value("core", "mode")
+        mode = config_manager.get_value("core", "mode")
+        from eva.udfs.udf_bootstrap_queries import init_builtin_udfs  # noqa: E402
+
         init_builtin_udfs(mode=mode)
 
         asyncio.run(start_eva_server(host=host, port=int(port)))

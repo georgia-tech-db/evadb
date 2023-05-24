@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import os
 from pathlib import Path
 from typing import Dict, List
 
@@ -22,7 +21,7 @@ from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_utils import get_metadata_properties
 from eva.catalog.models.udf_catalog import UdfCatalogEntry
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
-from eva.configuration.constants import EVA_DEFAULT_DIR
+from eva.configuration.configuration_manager import ConfigurationManager
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.create_udf_plan import CreateUDFPlan
@@ -36,6 +35,10 @@ from eva.utils.logging_manager import logger
 class CreateUDFExecutor(AbstractExecutor):
     def __init__(self, node: CreateUDFPlan):
         super().__init__(node)
+        self.udf_dir = (
+            Path(ConfigurationManager().get_value("core", "eva_installation_dir"))
+            / "udfs"
+        )
 
     def handle_huggingface_udf(self):
         """Handle HuggingFace UDFs
@@ -43,7 +46,7 @@ class CreateUDFExecutor(AbstractExecutor):
         HuggingFace UDFs are special UDFs that are not loaded from a file.
         So we do not need to call the setup method on them like we do for other UDFs.
         """
-        impl_path = f"{EVA_DEFAULT_DIR}/udfs/abstract/hf_abstract_udf.py"
+        impl_path = f"{self.udf_dir}/abstract/hf_abstract_udf.py"
         io_list = gen_hf_io_catalog_entries(self.node.name, self.node.metadata)
         return (
             self.node.name,
@@ -53,24 +56,11 @@ class CreateUDFExecutor(AbstractExecutor):
             self.node.metadata,
         )
 
-    def suffix_pytest_xdist_worker_id_to_dir(self, path: Path):
-        try:
-            worker_id = os.environ["PYTEST_XDIST_WORKER"]
-            path = path / str(worker_id)
-        except KeyError:
-            pass
-        return path
-
     def handle_ultralytics_udf(self):
         """Handle Ultralytics UDFs"""
-        initial_eva_config_dir = Path(EVA_DEFAULT_DIR)
-        updated_eva_config_dir = self.suffix_pytest_xdist_worker_id_to_dir(
-            initial_eva_config_dir
-        )
+
         impl_path = (
-            Path(f"{updated_eva_config_dir}/udfs/yolo_object_detector.py")
-            .absolute()
-            .as_posix()
+            Path(f"{self.udf_dir}/yolo_object_detector.py").absolute().as_posix()
         )
         udf = self._try_initializing_udf(
             impl_path, udf_args=get_metadata_properties(self.node)

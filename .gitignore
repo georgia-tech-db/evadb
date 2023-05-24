@@ -198,3 +198,6 @@ dep.txt
 
 *.bak
 \<Magic*
+
+# data
+*eva_data/
