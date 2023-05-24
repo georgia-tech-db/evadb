@@ -24,6 +24,7 @@ from eva.configuration.constants import EVA_ROOT_DIR
 from eva.server.command_handler import execute_query_fetch_all
 import fitz
 
+
 @pytest.mark.notparallel
 class LoadExecutorTest(unittest.TestCase):
     def setUp(self):

@@ -41,5 +41,5 @@ class PDFReader(AbstractReader):
                     for lines in b["lines"]:  # iterate through the text lines
                         for span in lines["spans"]:  # iterate through the text spans
                             if span['text'].strip():  # removing whitespaces:
-                                    block_string += span['text']
-                    yield {"page": page_no + 1, "paragraph":paragraph_no + 1, "data": block_string}
+                                block_string += span['text']
+                    yield {"page": page_no + 1, "paragraph": paragraph_no + 1, "data": block_string}
