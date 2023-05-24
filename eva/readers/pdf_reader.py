@@ -21,10 +21,10 @@ from langchain.document_loaders import PyPDFLoader
 class PDFReader(AbstractReader):
     def __init__(self, *args, **kwargs):
         """
-        Reads a CSV file and yields frame data.
+        Reads a PDF file and yields frame data.
         Args:
             column_list: list of columns (TupleValueExpression)
-            to read from the CSV file
+            to read from the PDF file
         """
 
         super().__init__(*args, **kwargs)
