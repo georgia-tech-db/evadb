@@ -60,13 +60,15 @@ def bootstrap_environment(eva_db_dir: Path, eva_installation_dir: Path):
         eva_installation_dir: path to eva module
     """
 
-    assert eva_db_dir.exists(), f"{eva_db_dir} does not exist"
-    assert eva_installation_dir.exists(), f"{eva_installation_dir} does not exist"
-
     config_file_path = eva_db_dir / EVA_CONFIG_FILE
-    config_default_dict = get_default_config_values(
+
+    # creates necessary directories
+    config_default_dict = create_directories_and_get_default_config_values(
         Path(eva_db_dir), Path(eva_installation_dir)
     )
+
+    assert eva_db_dir.exists(), f"{eva_db_dir} does not exist"
+    assert eva_installation_dir.exists(), f"{eva_installation_dir} does not exist"
 
     # copy eva.yml into config path
     if not config_file_path.exists():
@@ -92,7 +94,7 @@ def bootstrap_environment(eva_db_dir: Path, eva_installation_dir: Path):
     eva_logger.debug(f"Setting logging level to: {str(level)}")
 
 
-def get_default_config_values(
+def create_directories_and_get_default_config_values(
     eva_db_dir: Path, eva_installation_dir: Path, category: str = None, key: str = None
 ) -> Union[dict, str]:
     default_install_dir = eva_installation_dir

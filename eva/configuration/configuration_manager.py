@@ -20,7 +20,7 @@ import yaml
 
 from eva.configuration.bootstrap_environment import (
     bootstrap_environment,
-    get_default_config_values,
+    create_directories_and_get_default_config_values,
 )
 from eva.utils.logging_manager import logger
 from eva.configuration.constants import (
@@ -85,7 +85,7 @@ class ConfigurationManager(object):
             if category not in config_obj or key not in config_obj[category]:
                 # log a warning and return default value
                 logger.warn(key_warning)
-                return get_default_config_values(
+                return create_directories_and_get_default_config_values(
                     Path(cls._eva_db_dir), Path(EVA_INSTALLATION_DIR), category, key
                 )
 

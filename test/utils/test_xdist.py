@@ -17,6 +17,7 @@ import os
 import unittest
 from pathlib import Path
 
+from eva.catalog.sql_config import SQLConfig
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.utils.generic_utils import prefix_xdist_worker_id_to_path
 
@@ -24,12 +25,13 @@ from eva.utils.generic_utils import prefix_xdist_worker_id_to_path
 class XdistTests(unittest.TestCase):
     def test_prefix_worker_id_to_uri_in_sql_config(self):
         os.environ["PYTEST_XDIST_WORKER"] = "gw1"
-        # sql_config = SQLConfig()
-        # self.assertTrue("gw1" in sql_config.worker_uri)
+        sql_config = SQLConfig()
+        print(sql_config.worker_uri)
+        self.assertTrue("gw1" in sql_config.worker_uri)
 
         os.environ["PYTEST_XDIST_WORKER"] = ""
-        # sql_config = SQLConfig()
-        # self.assertFalse("gw1" in sql_config.worker_uri)
+        sql_config = SQLConfig()
+        self.assertFalse("gw1" in sql_config.worker_uri)
 
     def test_suffix_pytest_xdist_worker_id_to_dir(self):
         os.environ["PYTEST_XDIST_WORKER"] = "gw1"
