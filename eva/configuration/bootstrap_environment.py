@@ -59,6 +59,10 @@ def bootstrap_environment(eva_db_dir: Path, eva_installation_dir: Path):
         eva_db_dir: path to eva database directory
         eva_installation_dir: path to eva module
     """
+
+    assert eva_db_dir.exists(), f"{eva_db_dir} does not exist"
+    assert eva_installation_dir.exists(), f"{eva_installation_dir} does not exist"
+
     config_file_path = eva_db_dir / EVA_CONFIG_FILE
     config_default_dict = get_default_config_values(
         Path(eva_db_dir), Path(eva_installation_dir)

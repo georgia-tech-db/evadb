@@ -101,9 +101,9 @@ class ConfigurationManager(object):
 
             key_warning = (
                 f"Cannot update the key {key} for the missing category {category}."
-                f"Add the entry '{category}' to the yaml file. Or, if "
+                f"Add the entry '{category}' to the yaml file. If "
                 f"you did not modify the yaml file, remove it (rm {cls._yml_path}),"
-                f"and the system will auto-generate one."
+                f" and EVA will auto-generate a new yaml file."
             )
             if category not in config_obj:
                 # log a warning and create the category
