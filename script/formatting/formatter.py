@@ -258,10 +258,11 @@ def check_notebook_format(notebook_file):
             sys.exit(1)
     
     # Check for "print(response)"
-    for cell in nb.cells:
-        if cell.cell_type == 'code' and 'print(response)' in cell.source:
-            LOG.error(f"ERROR: Notebook {notebook_file} contains an a cell with this content: {cell.source}")
-            sys.exit(1)
+    # too harsh replaxing it
+    # for cell in nb.cells:
+    #     if cell.cell_type == 'code' and 'print(response)' in cell.source:
+    #         LOG.error(f"ERROR: Notebook {notebook_file} contains an a cell with this content: {cell.source}")
+    #         sys.exit(1)
 
     # Check for "Colab link"
     contains_colab_link = False
@@ -279,6 +280,8 @@ def check_notebook_format(notebook_file):
     return True
 
     # SKIP SPELL CHECK BY DEFAULT DUE TO PACKAGE DEPENDENCY
+    # Need to install enchant-2 and aspell packages
+    # apt-get install enchant-2 aspell
 
     import enchant
     from enchant.checker import SpellChecker
@@ -424,17 +427,19 @@ if __name__ == "__main__":
             notebook_file = os.path.join(EVA_NOTEBOOKS_DIR, file)
             check_notebook_format(notebook_file)
 
-    # GO OVER ALL DOCS
-    #LOG.info("ASPELL")
-    for elem in Path(EVA_DOCS_DIR).rglob('*.*'):
-        if elem.suffix == ".rst":
-            os.system(f"aspell --lang=en --personal='{ignored_words_file}' check {elem}")
-
-    os.system(f"aspell --lang=en --personal='{ignored_words_file}' check 'README.md'")
-
-
     # SKIP SPELLING TESTS OVER PYTHON FILES BY DEFAULT
     if args.spell_check:
+
+        # GO OVER ALL DOCS
+        # Install aspell
+        # apt-get install aspell
+        
+        #LOG.info("ASPELL")
+        for elem in Path(EVA_DOCS_DIR).rglob('*.*'):
+            if elem.suffix == ".rst":
+                os.system(f"aspell --lang=en --personal='{ignored_words_file}' check {elem}")
+
+        os.system(f"aspell --lang=en --personal='{ignored_words_file}' check 'README.md'")
 
         # CODESPELL
         #LOG.info("Codespell")

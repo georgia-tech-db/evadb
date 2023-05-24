@@ -18,6 +18,7 @@ from typing import Any, Dict, List
 
 from eva.catalog.catalog_type import (
     ColumnType,
+    DocumentColumnName,
     ImageColumnName,
     NdArrayType,
     TableType,
@@ -105,11 +106,36 @@ def get_image_table_column_definitions() -> List[ColumnDefinition]:
     return columns
 
 
+def get_document_table_column_definitions() -> List[ColumnDefinition]:
+    """
+    name: file path
+    data: file extracted data
+    """
+    columns = [
+        ColumnDefinition(
+            DocumentColumnName.name.name,
+            ColumnType.TEXT,
+            None,
+            None,
+            ColConstraintInfo(unique=True),
+        ),
+        ColumnDefinition(
+            DocumentColumnName.data.name,
+            ColumnType.TEXT,
+            None,
+            None,
+        ),
+    ]
+    return columns
+
+
 def get_table_primary_columns(table_catalog_obj: TableCatalogEntry):
     if table_catalog_obj.table_type == TableType.VIDEO_DATA:
         return get_video_table_column_definitions()[:2]
     elif table_catalog_obj.table_type == TableType.IMAGE_DATA:
         return get_image_table_column_definitions()[:1]
+    elif table_catalog_obj.table_type == TableType.DOCUMENT_DATA:
+        return get_document_table_column_definitions()[:1]
     else:
         raise Exception(f"Unexpected table type {table_catalog_obj.table_type}")
 
