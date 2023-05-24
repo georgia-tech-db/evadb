@@ -15,7 +15,6 @@
 from typing import Dict, Iterator
 
 from eva.readers.abstract_reader import AbstractReader
-import fitz
 
 
 class PDFReader(AbstractReader):
@@ -30,6 +29,7 @@ class PDFReader(AbstractReader):
         super().__init__(*args, **kwargs)
 
     def _read(self) -> Iterator[Dict]:
+        import fitz
         doc = fitz.open(self.file_url)
 
         # PAGE ID, PARAGRAPH ID, STRING

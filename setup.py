@@ -54,9 +54,9 @@ minimal_requirement = [
     "eva-decord>=0.6.1",
     "boto3",
     "nest_asyncio",
-    "pypdf",
     "langchain",
     "pymupdf",
+    "pdfminer.six"
 ]
 
 formatter_libs = ["black>=23.1.0", "isort>=5.10.1"]
