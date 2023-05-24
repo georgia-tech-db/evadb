@@ -17,6 +17,7 @@ from typing import Dict, Iterator
 from eva.readers.abstract_reader import AbstractReader
 import fitz
 
+
 class PDFReader(AbstractReader):
     def __init__(self, *args, **kwargs):
         """
@@ -32,13 +33,13 @@ class PDFReader(AbstractReader):
         # TODO: What is a good location to put this code?
         doc = fitz.open(self.file_url)
 
-        for page_no,page in enumerate(doc):
+        for page_no, page in enumerate(doc):
             blocks = page.get_text("dict")["blocks"]
-            for paragraph_no,b in enumerate(blocks):  # iterate through the text blocks
+            for paragraph_no, b in enumerate(blocks):  # iterate through the text blocks
                 if b['type'] == 0:  # this block contains text
                     block_string = ""  # text found in block
                     for l in b["lines"]:  # iterate through the text lines
                         for s in l["spans"]:  # iterate through the text spans
                             if s['text'].strip():  # removing whitespaces:
                                     block_string += s['text']
-                    yield {"page": page_no + 1,"paragraph":paragraph_no + 1 ,"data": block_string}
+                    yield {"page": page_no + 1, "paragraph":paragraph_no + 1, "data": block_string}
