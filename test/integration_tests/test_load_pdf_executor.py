@@ -22,7 +22,6 @@ import pytest
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
 from eva.server.command_handler import execute_query_fetch_all
-import fitz
 
 
 @pytest.mark.notparallel
@@ -32,13 +31,12 @@ class LoadExecutorTest(unittest.TestCase):
         CatalogManager().reset()
 
     def tearDown(self):
-        shutdown_ray()
-
-        execute_query_fetch_all("DROP TABLE IF EXISTS pdfs;")
+        execute_query_fetch_all("DROP TABLE IF EXISTS MyPDFs;")
 
     def test_load_pdfs(self):
         pdf_path = f"{EVA_ROOT_DIR}/data/documents/pdf_sample1.pdf"
 
+        import fitz
         doc = fitz.open(pdf_path)
         number_of_paragraphs = 0
         for page in doc:
@@ -53,8 +51,8 @@ class LoadExecutorTest(unittest.TestCase):
                     number_of_paragraphs += 1
 
         execute_query_fetch_all(
-            f"""LOAD PDF '{pdf_path}' INTO pdfs;"""
+            f"""LOAD PDF '{pdf_path}' INTO MyPDFs;"""
         )
-        result = execute_query_fetch_all("SELECT * from pdfs;")
+        result = execute_query_fetch_all("SELECT * from MyPDFs;")
         self.assertEqual(len(result.columns), 5)
         self.assertEqual(len(result), number_of_paragraphs)
