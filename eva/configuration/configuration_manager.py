@@ -47,7 +47,7 @@ class ConfigurationManager(object):
     def suffix_pytest_xdist_worker_id_to_dir(cls, path: str):
         try:
             worker_id = os.environ["PYTEST_XDIST_WORKER"]
-            path = Path(path) / str(worker_id)
+            path = Path(str(worker_id) + "_" + path)
         except KeyError:
             pass
         return path
@@ -59,7 +59,7 @@ class ConfigurationManager(object):
 
         # parallelize tests using pytest-xdist
         # activated only under pytest-xdist
-        # Changes db dir From EVA_DB_DIR To EVA_DB_DIR / gw1
+        # Changes db dir From EVA_DB_DIR To gw1_EVA_DB_DIR
         # (where gw1 is worker id)
         updated_eva_config_dir = cls.suffix_pytest_xdist_worker_id_to_dir(
             initial_eva_db_dir
