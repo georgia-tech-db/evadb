@@ -58,4 +58,3 @@ class LoadExecutorTest(unittest.TestCase):
         result = execute_query_fetch_all("SELECT * from pdfs;")
         self.assertEqual(len(result.columns), 5)
         self.assertEqual(len(result), number_of_paragraphs)
-        
