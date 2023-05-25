@@ -71,7 +71,7 @@ async def handle_request(client_writer, request_message):
             output_batch = execute_query_fetch_all(request_message)
         except Exception as e:
             error_msg = str(e)
-            logger.warn(error_msg)
+            logger.exception(error_msg)
             error = True
 
     if not error:
