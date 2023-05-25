@@ -39,7 +39,6 @@ class DropUDFExecutor(AbstractExecutor):
             if self.node.if_exists:
                 logger.warn(err_msg)
             else:
-                logger.exception(err_msg)
                 raise RuntimeError(err_msg)
         else:
             udf_entry = catalog_manager.get_udf_catalog_entry_by_name(self.node.name)

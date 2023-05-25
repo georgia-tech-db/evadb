@@ -46,7 +46,6 @@ class DropExecutor(AbstractExecutor):
                 logger.warn(err_msg)
                 return Batch(pd.DataFrame([err_msg]))
             else:
-                logger.exception(err_msg)
                 raise ExecutorError(err_msg)
 
         table_obj = catalog_manager.get_table_catalog_entry(
