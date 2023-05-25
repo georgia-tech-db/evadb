@@ -28,9 +28,11 @@
         <img alt="Python Versions" src="https://img.shields.io/badge/Python--versions-3.8%20|%203.9%20|%203.10-brightgreen"/>       
 </div>
 
-<p align="center"> <b><h3>EVA is a database system for building simpler and faster AI-powered applications.</b></h3> </p>
+<p align="center"> <b><h3>EVA DB is a database system for building simpler and faster AI-powered applications.</b></h3> </p>
 
-EVA is designed for supporting database applications that operate on both structured (tables, feature vectors) and unstructured data (videos, podcasts, PDFs, etc.) using deep learning models. It accelerates AI pipelines by 10-100x using a collection of optimizations inspired by time-tested SQL database systems, including function caching, sampling, and cost-based predicate reordering. EVA supports an AI-oriented SQL-like query language tailored for analyzing unstructured data. It comes with a wide range of models for analyzing unstructured data, including models for object detection, question answering, OCR, text sentiment classification, face detection, etc. It is fully implemented in Python and licensed under the Apache license.
+EVA DB is an AI-SQL database system for developing applications powered by AI models. We aim to simplify the development and deployment of AI-powered applications that operate on structured (tables, feature stores) and unstructured data (videos, text, podcasts, PDFs, etc.).
+
+EVA DB accelerates AI pipelines by 10-100x using a collection of optimizations inspired by time-tested SQL database systems, including data-parallel query execution, function caching, sampling, and cost-based predicate reordering. EVA supports an AI-oriented SQL-like query language tailored for analyzing both structured and unstructured data. It already contains integrations with widely-used AI pipelines based on Hugging Face, PyTorch, and Open AI. The high-level SQL API allows even beginners to use EVA in a few lines of code. Advanced users can define custom user-defined functions that wrap around any AI model or Python library. EVA DB is fully implemented in Python and licensed under the Apache license.
 
 ## Quick Links
 
@@ -72,9 +74,8 @@ Here are some illustrative EVA-backed applications (all of them are Jupyter note
 ## Documentation
 
 * [Detailed Documentation](https://evadb.readthedocs.io/)
-  - If you are wondering why you might need an AI-SQL Database System, start with the page on <a href="https://evadb.readthedocs.io/en/stable/source/overview/aidb.html">AI-SQL Database Systems</a>.
-  - The <a href="https://evadb.readthedocs.io/en/stable/source/overview/installation.html">Getting Started</a> page shows how you can use EVA for different AI pipelines, and how you can easily extend EVA by defining an user-defined function that wraps around your custom deep learning model.
-  - The <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/index.html">User Guides</a> section contains Jupyter Notebooks that demonstrate how to use various features of EVA. Each notebook includes a link to Google Colab to run the code.
+  - The <a href="https://evadb.readthedocs.io/en/stable/source/overview/installation.html">Getting Started</a> page shows how you can use EVA for different AI tasks and how you can easily extend EVA to support your custom deep learning model through user-defined functions.
+  - The <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/index.html">User Guides</a> section contains Jupyter Notebooks that demonstrate how to use various features of EVA. Each notebook includes a link to Google Colab, where you can run the code yourself.
 * [Tutorials](https://github.com/georgia-tech-db/eva/blob/master/tutorials/03-emotion-analysis.ipynb)
 * [Join us on Slack](https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg)
 * [Follow us on Twitter](https://twitter.com/evadb_ai)
@@ -83,7 +84,7 @@ Here are some illustrative EVA-backed applications (all of them are Jupyter note
 
 ## Quick Start
 
-- Install EVA using the pip package manager. EVA supports Python versions >= 3.7:
+- Install EVA using the pip package manager. EVA supports Python versions >= 3.8:
 
 ```shell
 pip install evadb
@@ -135,7 +136,7 @@ TYPE  ultralytics
 'model' 'yolov8m.pt';
 ```
 
-- **Compose multiple models in a single query** to set up useful AI pipelines.
+- **Chain multiple models in a single query** to set up useful AI pipelines.
 
 ```mysql
    -- Analyse emotions of faces in a video
@@ -150,7 +151,7 @@ TYPE  ultralytics
 
    🎯 **Predicate Reordering**: EVA optimizes the order in which the query predicates are evaluated (e.g., runs the faster, more selective model first), leading to faster queries and lower inference costs.
 
-Consider these two exploratory queries on a dataset of 🐕 images:
+Consider these two exploratory queries on a dataset of dog images:
 <img align="right" style="display:inline;" width="40%" src="https://github.com/georgia-tech-db/eva/blob/master/data/assets/eva_performance_comparison.png?raw=true"></a>
 
 ```mysql
@@ -213,7 +214,7 @@ The following architecture diagram presents the critical components of the EVA d
 
 If you run into any problems or issues, please create a Github issue and we'll try our best to help.
 
-Don't see a feature in the list? Search our issue tracker if someone has already requested it and add a comment to it explaining your use-case, or open a new issue if not. We prioritize our roadmap based on user feedback, so we'd love to hear from you.
+Don't see a feature in the list? Search our issue tracker if someone has already requested it and add a comment to it explaining your use-case, or open a new issue if not. We prioritize our [roadmap](https://github.com/orgs/georgia-tech-db/projects/3) based on user feedback, so we'd love to hear from you.
 
 ## Contributing
 
