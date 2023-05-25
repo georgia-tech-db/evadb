@@ -6,6 +6,7 @@ parts:
     chapters:
       - file: source/overview/aidb
       - file: source/overview/installation
+      - file: source/overview/command-line
 
   - caption: User Guides
     chapters:
@@ -46,6 +47,7 @@ parts:
           - file: source/reference/udfs/hf
           - file: source/reference/udfs/openai
           - file: source/reference/udfs/custom
+            title: Custom User-Defined Function
 
 
       - file: source/reference/io
