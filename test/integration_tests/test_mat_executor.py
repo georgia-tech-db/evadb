@@ -61,7 +61,6 @@ class MaterializedViewTest(unittest.TestCase):
         execute_query_fetch_all("DROP TABLE IF EXISTS dummy_view;")
         execute_query_fetch_all("DROP TABLE IF EXISTS uadtrac_fastRCNN;")
 
-
     def test_should_mat_view_with_dummy(self):
         materialized_query = """CREATE MATERIALIZED VIEW dummy_view (id, label)
             AS SELECT id, DummyObjectDetector(data).label FROM MyVideo;
@@ -169,7 +168,6 @@ class MaterializedViewTest(unittest.TestCase):
         res = actual_batch.frames
         for idx in res.index:
             self.assertTrue("car" in res["uadtrac_fastrcnn.label"][idx])
-
 
     @pytest.mark.torchtest
     def test_should_infer_mat_view_column_names_with_fastrcnn_lateral_join(self):
