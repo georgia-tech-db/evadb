@@ -4,7 +4,7 @@
   </a>
 </div>
 
-# EVA AI-Relational Database System
+# EVA AI-SQL Database System
 
 <div>
         <a href="https://colab.research.google.com/github/georgia-tech-db/eva/blob/master/tutorials/03-emotion-analysis.ipynb">
@@ -30,7 +30,7 @@
 
 <p align="center"> <b><h3>EVA is a database system for building simpler and faster AI-powered applications.</b></h3> </p>
 
-EVA is designed for supporting database applications that operate on both structured (tables, feature vectors) and unstructured data (videos, podcasts, PDFs, etc.) using deep learning models. It accelerates AI pipelines by 10-100x using a collection of optimizations inspired by time-tested relational database systems, including function caching, sampling, and cost-based predicate reordering. EVA supports an AI-oriented SQL-like query language tailored for analyzing unstructured data. It comes with a wide range of models for analyzing unstructured data, including models for object detection, question answering, OCR, text sentiment classification, face detection, etc. It is fully implemented in Python and licensed under the Apache license.
+EVA is designed for supporting database applications that operate on both structured (tables, feature vectors) and unstructured data (videos, podcasts, PDFs, etc.) using deep learning models. It accelerates AI pipelines by 10-100x using a collection of optimizations inspired by time-tested SQL database systems, including function caching, sampling, and cost-based predicate reordering. EVA supports an AI-oriented SQL-like query language tailored for analyzing unstructured data. It comes with a wide range of models for analyzing unstructured data, including models for object detection, question answering, OCR, text sentiment classification, face detection, etc. It is fully implemented in Python and licensed under the Apache license.
 
 ## Quick Links
 
@@ -72,7 +72,7 @@ Here are some illustrative EVA-backed applications (all of them are Jupyter note
 ## Documentation
 
 * [Detailed Documentation](https://evadb.readthedocs.io/)
-  - If you are wondering why you might need an AI-relational Database System, start with the page on <a href="https://evadb.readthedocs.io/en/stable/source/overview/aidb.html">AI-Relational Database Systems</a>.
+  - If you are wondering why you might need an AI-SQL Database System, start with the page on <a href="https://evadb.readthedocs.io/en/stable/source/overview/aidb.html">AI-SQL Database Systems</a>.
   - The <a href="https://evadb.readthedocs.io/en/stable/source/overview/installation.html">Getting Started</a> page shows how you can use EVA for different AI pipelines, and how you can easily extend EVA by defining an user-defined function that wraps around your custom deep learning model.
   - The <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/index.html">User Guides</a> section contains Jupyter Notebooks that demonstrate how to use various features of EVA. Each notebook includes a link to Google Colab to run the code.
 * [Tutorials](https://github.com/georgia-tech-db/eva/blob/master/tutorials/03-emotion-analysis.ipynb)
@@ -173,7 +173,7 @@ By reusing the results of the first query and reordering the predicates based on
 ## Architecture Diagram
 
 The following architecture diagram presents the critical components of the EVA database system. EVA's AI-centric Query Optimizer takes a parsed query as input and generates a query plan that is then executed by the Query Engine. The Query Engine hits multiple storage engines to retrieve the data required for efficiently running the query:
-1. Structured data (relational database system connected via `sqlalchemy`).
+1. Structured data (SQL database system connected via `sqlalchemy`).
 2. Unstructured media data (on cloud buckets or local filesystem).
 3. Vector data (vector database system).
 
