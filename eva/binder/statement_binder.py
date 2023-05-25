@@ -168,11 +168,11 @@ class StatementBinder:
         binded_col_list = []
         idx = 0
         for expr in node.query.target_list:
-            output_objs = [expr.col_object] if expr.etype == ExpressionType.TUPLE_VALUE else expr.output_objs
-            for output_obj in output_objs:
+            output_objs = [(expr.col_name, expr.col_object)] if expr.etype == ExpressionType.TUPLE_VALUE else zip(expr.projection_columns, expr.output_objs)
+            for col_name, output_obj in output_objs:
                 binded_col_list.append(
                     ColumnDefinition(
-                        output_obj.name if len(node.col_list) == 0 else node.col_list[idx].name,
+                        col_name if len(node.col_list) == 0 else node.col_list[idx].name,
                         output_obj.type,
                         output_obj.array_type,
                         output_obj.array_dimensions,

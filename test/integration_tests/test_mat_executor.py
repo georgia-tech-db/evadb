@@ -79,24 +79,6 @@ class MaterializedViewTest(unittest.TestCase):
         expected_batch = Batch(frames=pd.DataFrame(expected))
         self.assertEqual(actual_batch, expected_batch)
 
-    def test_should_infer_mat_view_column_names_with_dummy(self):
-        materialized_query = """CREATE MATERIALIZED VIEW dummy_view
-            AS SELECT id, DummyObjectDetector(data).label FROM MyVideo;
-        """
-        execute_query_fetch_all(materialized_query)
-
-        select_query = "SELECT id, label FROM dummy_view;"
-        actual_batch = execute_query_fetch_all(select_query)
-        actual_batch.sort()
-
-        labels = DummyObjectDetector().labels
-        expected = [
-            {"dummy_view.id": i, "dummy_view.label": [labels[1 + i % 2]]}
-            for i in range(NUM_FRAMES)
-        ]
-        expected_batch = Batch(frames=pd.DataFrame(expected))
-        self.assertEqual(actual_batch, expected_batch)
-
     def test_should_mat_view_to_the_same_table(self):
         materialized_query = """CREATE MATERIALIZED VIEW IF NOT EXISTS
             dummy_view (id, label)
@@ -120,6 +102,25 @@ class MaterializedViewTest(unittest.TestCase):
         expected = [
             {"dummy_view.id": i, "dummy_view.label": [labels[1 + i % 2]]}
             for i in range(5)
+        ]
+        expected_batch = Batch(frames=pd.DataFrame(expected))
+        self.assertEqual(actual_batch, expected_batch)
+
+    def test_should_infer_mat_view_column_names_with_dummy(self):
+        execute_query_fetch_all("DROP TABLE IF EXISTS dummy_view;")
+        materialized_query = """CREATE MATERIALIZED VIEW dummy_view
+            AS SELECT id, DummyObjectDetector(data).label FROM MyVideo;
+        """
+        execute_query_fetch_all(materialized_query)
+
+        select_query = "SELECT id, label FROM dummy_view;"
+        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch.sort()
+
+        labels = DummyObjectDetector().labels
+        expected = [
+            {"dummy_view.id": i, "dummy_view.label": [labels[1 + i % 2]]}
+            for i in range(NUM_FRAMES)
         ]
         expected_batch = Batch(frames=pd.DataFrame(expected))
         self.assertEqual(actual_batch, expected_batch)
@@ -171,6 +172,7 @@ class MaterializedViewTest(unittest.TestCase):
 
     @pytest.mark.torchtest
     def test_should_infer_mat_view_column_names_with_fastrcnn_lateral_join(self):
+        execute_query_fetch_all("DROP TABLE IF EXISTS uadtrac_fastRCNN;")
         select_query = (
             "SELECT id, label, bbox FROM UATRAC JOIN LATERAL "
             "Yolo(data) AS T(label, bbox, score) WHERE id < 5;"
