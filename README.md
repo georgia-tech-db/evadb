@@ -14,14 +14,14 @@
             <img alt="Slack" src="https://img.shields.io/badge/slack-eva-ff69b4.svg?logo=slack">
         </a>          
         <a href="https://twitter.com/evadb_ai">
-            <img alt="Twitter" src="https://img.shields.io/badge/twitter-eva-C04000.svg?logo=twitter">
+            <img alt="Twitter" src="https://img.shields.io/badge/twitter-eva-bde1ee.svg?logo=twitter">
         </a>  
+        <a href="https://github.com/orgs/georgia-tech-db/projects/3">
+            <img src="https://img.shields.io/badge/eva-roadmap-a6c096" alt="Roadmap"/>
+        </a>
         <img alt="PyPI" src="https://img.shields.io/pypi/v/evadb.svg"/>
         <img alt="License" src="https://img.shields.io/badge/license-Apache%202-brightgreen.svg?logo=apache"/>
         <img alt="Coverage Status" src="https://coveralls.io/repos/github/georgia-tech-db/eva/badge.svg?branch=master"/>     
-        <a href="https://github.com/orgs/georgia-tech-db/projects/3">
-            <img src="https://img.shields.io/badge/eva-roadmap-ff3423" alt="Roadmap"/>
-        </a>
         <a href="https://pepy.tech/project/evadb">
           <img alt="Downloads" src="https://static.pepy.tech/badge/evadb/month"/>
         </a>
@@ -32,7 +32,9 @@
 
 EVA DB is an AI-SQL database system for developing applications powered by AI models. We aim to simplify the development and deployment of AI-powered applications that operate on structured (tables, feature stores) and unstructured data (videos, text, podcasts, PDFs, etc.).
 
-EVA DB accelerates AI pipelines by 10-100x using a collection of optimizations inspired by time-tested SQL database systems, including data-parallel query execution, function caching, sampling, and cost-based predicate reordering. EVA supports an AI-oriented SQL-like query language tailored for analyzing both structured and unstructured data. It already contains integrations with widely-used AI pipelines based on Hugging Face, PyTorch, and Open AI. The high-level SQL API allows even beginners to use EVA in a few lines of code. Advanced users can define custom user-defined functions that wrap around any AI model or Python library. EVA DB is fully implemented in Python and licensed under the Apache license.
+EVA DB accelerates AI pipelines by 10-100x using a collection of performance optimizations inspired by time-tested SQL database systems, including data-parallel query execution, function caching, sampling, and cost-based predicate reordering. EVA supports an AI-oriented SQL-like query language tailored for analyzing both structured and unstructured data. It has first-class support for PyTorch, Hugging Face, YOLO, and Open AI models.
+
+The high-level SQL API allows even beginners to use EVA in a few lines of code. Advanced users can define custom user-defined functions that wrap around any AI model or Python library. EVA DB is fully implemented in Python and licensed under the Apache license.
 
 ## Quick Links
 
@@ -41,8 +43,8 @@ EVA DB accelerates AI pipelines by 10-100x using a collection of optimizations i
 - [Documentation](#documentation)
 - [Roadmap](https://github.com/orgs/georgia-tech-db/projects/3)
 - [Architecture Diagram](#architecture-diagram)
-- [Demo](#demo)
 - [Illustrative Applications](#illustrative-applications)
+- [Screenshots](#screenshots)
 - [Community and Support](#community-and-support)
 - [Twitter](https://twitter.com/evadb_ai)
 - [Contributing](#contributing)
@@ -52,15 +54,15 @@ EVA DB accelerates AI pipelines by 10-100x using a collection of optimizations i
 
 - 🔮 Build simpler AI-powered applications using short SQL-like queries
 - ⚡️ 10-100x faster AI pipelines using AI-centric query optimization  
-- 💰 Save money spent on GPU-driven inference
+- 💰 Save money spent on GPUs
 - 🚀 First-class support for your custom deep learning models through user-defined functions
 - 📦 Built-in caching to eliminate redundant model invocations across queries
-- ⌨️ First-class support for PyTorch and HuggingFace models
+- ⌨️ First-class support for PyTorch, Hugging Face, YOLO, and Open AI models
 - 🐍 Installable via pip and fully implemented in Python
 
-## Demo
+## Illustrative Applications
 
-Here are some illustrative EVA-backed applications (all of them are Jupyter notebooks that can be opened in Google Colab):
+Here are some illustrative EVA-powered applications (each Jupyter notebook can be opened on Google Colab):
 
  * 🔮 <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/08-chatgpt.html">Using ChatGPT to ask questions based on videos</a>
  * 🔮 <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/02-object-detection.html">Analysing traffic flow at an intersection</a>
@@ -173,14 +175,14 @@ By reusing the results of the first query and reordering the predicates based on
 
 ## Architecture Diagram
 
-The following architecture diagram presents the critical components of the EVA database system. EVA's AI-centric Query Optimizer takes a parsed query as input and generates a query plan that is then executed by the Query Engine. The Query Engine hits multiple storage engines to retrieve the data required for efficiently running the query:
+This diagram presents the key components of EVA DB. EVA's AI-centric Query Optimizer takes a parsed query as input and generates a query plan that is then executed by the Query Engine. The Query Engine hits multiple storage engines to retrieve the data required for efficiently running the query:
 1. Structured data (SQL database system connected via `sqlalchemy`).
 2. Unstructured media data (on cloud buckets or local filesystem).
 3. Vector data (vector database system).
 
 <img width="700" alt="Architecture Diagram" src="https://github.com/georgia-tech-db/eva/assets/5521975/01452ec9-87d9-4d27-90b2-c0b1ab29b16c">
 
-## Illustrative Applications 
+## Screenshots
 
 ### 🔮 [Traffic Analysis](https://evadb.readthedocs.io/en/stable/source/tutorials/02-object-detection.html) (Object Detection Model)
 | Source Video  | Query Result |
