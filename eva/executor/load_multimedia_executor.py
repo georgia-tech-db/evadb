@@ -55,7 +55,7 @@ class LoadMultimediaExecutor(AbstractExecutor):
                 video_files = download_from_s3(self.node.file_path, dst_path)
             else:
                 # Local Storage
-                video_files = list(iter_path_regex(self.node.file_path[0]))
+                video_files = list(iter_path_regex(self.node.file_path))
 
             # Use parallel validation if there are many files. Otherwise, use single-thread
             # validation version.
