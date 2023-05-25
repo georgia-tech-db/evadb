@@ -186,6 +186,7 @@ tutorials/reddit-images
 license/
 bddtest/
 tutorials/*.jpg
+tutorials/*.pdf
 
 # benchmark
 .benchmarks

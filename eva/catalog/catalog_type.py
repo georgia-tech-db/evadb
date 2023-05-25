@@ -25,6 +25,7 @@ class TableType(EVAEnum):
     VIDEO_DATA  # noqa: F821
     IMAGE_DATA  # noqa: F821
     DOCUMENT_DATA  # noqa: F821
+    PDF_DATA  # noqa: F821
 
     # reserved for system generated tables
     # cannot be accessed/modified directly by user
@@ -124,3 +125,10 @@ class DocumentColumnName(EVAEnum):
     name  # noqa: F821
     data  # noqa: F821
     metadata  # noqa: F821
+
+
+class PDFColumnName(EVAEnum):
+    name  # noqa: F821
+    page  # noqa: F821
+    paragraph   # noqa: F821
+    data  # noqa: F821

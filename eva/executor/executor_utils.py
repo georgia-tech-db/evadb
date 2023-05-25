@@ -96,6 +96,10 @@ def validate_document(doc_path: Path) -> bool:
     return doc_path.suffix in SUPPORTED_TYPES
 
 
+def validate_pdf(doc_path: Path) -> bool:
+    return doc_path.suffix == ".pdf"
+
+
 def validate_media(file_path: Path, media_type: FileFormatType) -> bool:
     if media_type == FileFormatType.VIDEO:
         return validate_video(file_path)
@@ -103,6 +107,8 @@ def validate_media(file_path: Path, media_type: FileFormatType) -> bool:
         return validate_image(file_path)
     elif media_type == FileFormatType.DOCUMENT:
         return validate_document(file_path)
+    elif media_type == FileFormatType.PDF:
+        return validate_pdf(file_path)
     else:
         raise ValueError(f"Unsupported Media type {str(media_type)}")
 

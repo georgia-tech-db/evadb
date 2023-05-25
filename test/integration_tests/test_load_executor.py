@@ -502,7 +502,7 @@ class LoadExecutorTest(unittest.TestCase):
         )
         result = execute_query_fetch_all("SELECT * from pdfs;")
         self.assertEqual(len(result.columns), 3)
-        self.assertEqual(len(result), 2)
+        self.assertEqual(len(result), 3)
 
 
 if __name__ == "__main__":

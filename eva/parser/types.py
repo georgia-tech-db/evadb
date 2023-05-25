@@ -63,6 +63,7 @@ class FileFormatType(EVAEnum):
     CSV  # noqa: F821
     IMAGE  # noqa: F821
     DOCUMENT  # noqa: F821
+    PDF  # noqa: F821
 
 
 class ShowType(EVAEnum):

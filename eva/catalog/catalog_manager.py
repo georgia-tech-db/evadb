@@ -27,6 +27,7 @@ from eva.catalog.catalog_utils import (
     construct_udf_cache_catalog_entry,
     get_document_table_column_definitions,
     get_image_table_column_definitions,
+    get_pdf_table_column_definitions,
     get_video_table_column_definitions,
     xform_column_definitions_to_catalog_entries,
 )
@@ -426,6 +427,7 @@ class CatalogManager(object):
             FileFormatType.VIDEO,
             FileFormatType.IMAGE,
             FileFormatType.DOCUMENT,
+            FileFormatType.PDF,
         ], f"Format Type {format_type} is not supported"
 
         if format_type is FileFormatType.VIDEO:
@@ -437,6 +439,10 @@ class CatalogManager(object):
         elif format_type is FileFormatType.DOCUMENT:
             columns = get_document_table_column_definitions()
             table_type = TableType.DOCUMENT_DATA
+        elif format_type is FileFormatType.PDF:
+            columns = get_pdf_table_column_definitions()
+            table_type = TableType.PDF_DATA
+
         return self.create_and_insert_table_catalog_entry(
             TableInfo(name), columns, table_type=table_type
         )
