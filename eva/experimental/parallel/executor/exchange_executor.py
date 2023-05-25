@@ -33,14 +33,14 @@ class QueueReaderExecutor(AbstractExecutor):
         super().__init__(None)
 
     def exec(self, **kwargs) -> Iterator[Batch]:
-        assert "input_queue" in kwargs, "Invalid ray exectuion. No input_queue found"
+        assert "input_queue" in kwargs, "Invalid ray execution. No input_queue found"
         input_queue = kwargs["input_queue"]
 
         while True:
             next_item = input_queue.get(block=True)
             if next_item is StageCompleteSignal:
                 # Stop signal is put back to input queue again
-                # to ensure it is propogated to all ray parallel
+                # to ensure it is propagated to all ray parallel
                 # actors.
                 input_queue.put(StageCompleteSignal)
                 break

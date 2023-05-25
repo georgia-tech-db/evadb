@@ -15,14 +15,60 @@ EVA DB
 
 ----------
 
-What is EVA?
-------------
+Welcome to EVA DB
+=================
 
-EVA is an **open-source AI-relational database with first-class support for deep learning models**. It aims to support AI-powered database applications that operate on both structured (tables) and unstructured data (videos, text, podcasts, PDFs, etc.) with deep learning models.
+EVA DB is an AI-SQL database for developing applications powered by AI models. We aim to simplify the development and deployment of AI-powered applications that operate on structured (tables, feature stores) and unstructured data (videos, text, podcasts, PDFs, etc.).
 
-EVA accelerates AI pipelines using a collection of optimizations inspired by relational database systems including function caching, sampling, and cost-based operator reordering. It comes with a wide range of models for analyzing unstructured data including image classification, object detection, OCR, face detection, etc. It is fully implemented in Python, and `licensed under the Apache license <https://github.com/georgia-tech-db/eva>`__.
+- Github: https://github.com/georgia-tech-db/eva
+- PyPI: https://pypi.org/project/evadb/
+- Twitter: https://twitter.com/evadb_ai
+- Slack: `Invite link <https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg>`_
 
-EVA supports a AI-oriented query language for analysing unstructured data. Here are some illustrative applications:
+
+Why EVA?
+----------
+
+Over the last decade, AI models have radically changed the world of natural language processing and computer vision. They are accurate on various tasks ranging from question answering to object tracking in videos. However, two challenges prevent many users from benefiting from these models.
+
+- *Usability*: To use an AI model, the user needs to program against multiple low-level libraries, like OpenCV, PyTorch, and Hugging Face. This tedious process often leads to a complex application that glues together these libraries to accomplish the given task. This programming complexity **prevents people who are experts in other domains from benefiting from these models**.
+
+- *Money and Time*: Running these deep learning models on large video or document datasets is costly and time-consuming. For example, the state-of-the-art object detection model takes multiple GPU years to process just a week's videos from a single traffic monitoring camera. Besides the money spent on hardware, these models also increase the time that you spend waiting for the model inference to finish.
+
+Proposed Solution
+----------
+
+That's where EVA DB comes in.
+
+1. Quickly build AI-Powered Applications
+^^^^
+
+Historically, SQL database systems have been successful because the **query language is simple enough** in its basic structure that users without prior experience can learn a usable subset of the language on their first sitting. EVA supports a simple SQL-like query language designed to make it easier for users to leverage AI models. With this query language, the user may **chain multiple models in a single query** to accomplish complicated tasks with **minimal programming**.
+
+Here is an illustrative query that examines the emotions of actors in a movie by leveraging multiple deep-learning models that take care of detecting faces and analyzing the emotions of the detected bounding boxes:
+
+.. code:: sql
+
+   --- Analyze the emotions of actors in a movie scene
+   SELECT id, bbox, EmotionDetector(Crop(data, bbox)) 
+   FROM Interstellar 
+      JOIN LATERAL UNNEST(FaceDetector(data)) AS Face(bbox, conf)  
+   WHERE id < 15;
+
+EVA's declarative query language reduces the complexity of the application, leading to **more maintainable code** that allows users to build on top of each other's queries.
+
+EVA comes with a wide range of models for analyzing unstructured data including image classification, object detection, OCR, face detection, etc. It is fully implemented in Python, and `licensed under the Apache license <https://github.com/georgia-tech-db/eva>`__. It already contains integrations with widely-used AI pipelines based on Hugging Face, PyTorch, and Open AI. 
+
+The high-level SQL API allows even beginners to use EVA in a few lines of code. Advanced users can define custom user-defined functions that wrap around any AI model or Python library.
+
+2. Save time and money
+^^^^
+
+EVA DB **automatically** optimizes the queries to **save inference cost and query execution time** using its Cascades-style extensible query optimizer. EVA's optimizer is tailored for AI pipelines. The Cascades query optimization framework has worked well in SQL database systems for several decades. Query optimization in EVA is the bridge that connects the declarative query language to efficient execution.
+
+EVA accelerates AI pipelines using a collection of optimizations inspired by SQL database systems including function caching, sampling, and cost-based operator reordering.
+
+EVA supports an AI-oriented query language for analysing both structured and unstructured data. Here are some illustrative applications:
 
  * `Using ChatGPT to ask questions based on videos <https://evadb.readthedocs.io/en/stable/source/tutorials/08-chatgpt.html>`_
  * `Analysing traffic flow at an intersection <https://evadb.readthedocs.io/en/stable/source/tutorials/02-object-detection.html>`_
@@ -33,12 +79,9 @@ EVA supports a AI-oriented query language for analysing unstructured data. Here 
  * `Recognizing license plates <https://github.com/georgia-tech-db/license-plate-recognition>`_
  * `Analysing toxicity of social media memes <https://github.com/georgia-tech-db/toxicity-classification>`_
 
+The `Getting Started <source/overview/installation.html>`_ page shows how you can use EVA for different AI tasks and how you can easily extend EVA to support your custom deep learning model through user-defined functions.
 
-If you are wondering why you might need a AI-Relational database system, start with page on `AI-Relational Database Systems <source/overview/aidb.html>`_. It describes how EVA lets users easily make use of deep learning models and how they can reduce money spent on inference on large image or video datasets.
-
-The `Getting Started <source/overview/installation.html>`_ page shows how you can use EVA for different computer vision tasks, and how you can easily extend EVA to support your custom deep learning model in the form of user-defined functions.
-
-The `User Guides <source/tutorials/index.html>`_ section contains Jupyter Notebooks that demonstrate how to use various features of EVA. Each notebook includes a link to Google Colab, where you can run the code by yourself.
+The `User Guides <source/tutorials/index.html>`_ section contains Jupyter Notebooks that demonstrate how to use various features of EVA. Each notebook includes a link to Google Colab, where you can run the code yourself.
 
 Key Features
 ------------
