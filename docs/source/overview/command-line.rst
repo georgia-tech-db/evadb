@@ -1,9 +1,9 @@
 .. _guide-getstarted:
 
-Start a Command Line Client
+Command Line Client
 ====
 
-Besides the notebook interface, EVA also exports a command line interface for querying the server. This interface allows for quick querying from the terminal:
+Besides the Jupyter notebook interface, EVA also exports a command line interface for querying the server. This interface allows for quick querying from the terminal:
 
 .. code-block:: bash
 
