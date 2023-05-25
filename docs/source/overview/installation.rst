@@ -6,7 +6,7 @@ Getting Started
 Part 1: Install EVA
 ----
 
-EVA supports Python (versions >= 3.7). To install EVA, we recommend using the pip package manager:
+EVA supports Python (versions >= 3.8). To install EVA, we recommend using the pip package manager:
 
 .. code-block:: bash
 
