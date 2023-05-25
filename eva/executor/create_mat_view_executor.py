@@ -32,54 +32,17 @@ class CreateMaterializedViewExecutor(AbstractExecutor):
         """Create materialized view executor"""
         if not handle_if_not_exists(self.node.view, self.node.if_not_exists):
             child = self.children[0]
-            project_cols = None
             # only support seq scan based materialization
-            if child.node.opr_type == PlanOprType.SEQUENTIAL_SCAN:
-                project_cols = child.project_expr
-            elif child.node.opr_type == PlanOprType.PROJECT:
-                project_cols = child.target_list
-            else:
+            if child.node.opr_type not in {PlanOprType.SEQUENTIAL_SCAN, PlanOprType.PROJECT}:
                 err_msg = "Invalid query {}, expected {} or {}".format(
                     child.node.opr_type,
                     PlanOprType.SEQUENTIAL_SCAN,
                     PlanOprType.PROJECT,
                 )
-
-                logger.error(err_msg)
                 raise ExecutorError(err_msg)
-
-            # gather child projected column objects
-            child_objs = []
-            for child_col in project_cols:
-                if child_col.etype == ExpressionType.TUPLE_VALUE:
-                    child_objs.append(child_col.col_object)
-                elif child_col.etype == ExpressionType.FUNCTION_EXPRESSION:
-                    child_objs.extend(child_col.output_objs)
-
-            # Number of projected columns should be equal to mat view columns
-            if len(self.node.columns) != len(child_objs):
-                err_msg = "# projected columns mismatch, expected {} found {}\
-                ".format(
-                    len(self.node.columns), len(child_objs)
-                )
-                logger.error(err_msg)
-                raise ExecutorError(err_msg)
-
-            col_defs = []
-            # Copy column type info from child columns
-            for idx, child_col_obj in enumerate(child_objs):
-                col = self.node.columns[idx]
-                col_defs.append(
-                    ColumnDefinition(
-                        col.name,
-                        child_col_obj.type,
-                        child_col_obj.array_type,
-                        child_col_obj.array_dimensions,
-                    )
-                )
 
             view_catalog_entry = self.catalog.create_and_insert_table_catalog_entry(
-                self.node.view, col_defs
+                self.node.view, self.node.columns
             )
             storage_engine = StorageEngine.factory(view_catalog_entry)
             storage_engine.create(table=view_catalog_entry)
