@@ -41,6 +41,10 @@ class ConfigurationManager(object):
             cls._yml_path = Path(eva_db_dir) / EVA_CONFIG_FILE
             cls._create_if_not_exists()
 
+            default_yml_file = Path(EVA_INSTALLATION_DIR) / "eva.yml"
+            with default_yml_file.open("r") as yml_file:
+                cls._default_config_obj = yaml.load(yml_file, yaml.FullLoader)
+
         return cls._instance
 
     @classmethod
@@ -73,23 +77,42 @@ class ConfigurationManager(object):
 
     @classmethod
     def _get(cls, category: str, key: str) -> Any:
+        """Retrieve a configuration value based on the category and key.
+
+        Args:
+            category (str): The category of the configuration.
+            key (str): The key of the configuration within the category.
+
+        Returns:
+            Any: The retrieved configuration value.
+
+        Raises:
+            ValueError: If the YAML file is invalid or cannot be loaded.
+        """
+        config_obj = {}
         with cls._yml_path.open("r") as yml_file:
             config_obj = yaml.load(yml_file, Loader=yaml.FullLoader)
-            if config_obj is None:
-                raise ValueError(f"Invalid yaml file at {cls._yml_path}")
-            key_warning = (
-                f"Add the entry '{category}: {key}' to the yaml file. Or, if "
-                f"you did not modify the yaml file, remove it (rm {cls._yml_path}),"
-                f"and the system will auto-generate one."
-            )
-            if category not in config_obj or key not in config_obj[category]:
-                # log a warning and return default value
-                logger.warn(key_warning)
-                return create_directories_and_get_default_config_values(
-                    Path(cls._eva_db_dir), Path(EVA_INSTALLATION_DIR), category, key
-                )
+        if config_obj is None:
+            raise ValueError(f"Invalid YAML file at {cls._yml_path}")
 
-            return config_obj[category][key]
+        # Get value from the user-provided config file
+        value = config_obj.get(category, {}).get(key)
+
+        # Try default config values
+        if value is None:
+            value = create_directories_and_get_default_config_values(
+                Path(cls._eva_db_dir), Path(EVA_INSTALLATION_DIR), category, key
+            )
+
+        # Try config value in the system default config YAML file
+        if value is None:
+            value = cls._default_config_obj.get(category, {}).get(key)
+
+        # cannot find the value, report invalid category, key combination
+        if value is None:
+            logger.exception(f"Invalid category and key combination {category}:{key}")
+
+        return value
 
     @classmethod
     def _update(cls, category: str, key: str, value: str):
@@ -99,15 +122,7 @@ class ConfigurationManager(object):
             if config_obj is None:
                 raise ValueError(f"Invalid yml file at {cls._yml_path}")
 
-            key_warning = (
-                f"Cannot update the key {key} for the missing category {category}."
-                f"Add the entry '{category}' to the yaml file. If "
-                f"you did not modify the yaml file, remove it (rm {cls._yml_path}),"
-                f" and EVA will auto-generate a new yaml file."
-            )
             if category not in config_obj:
-                # log a warning and create the category
-                logger.warn(key_warning)
                 config_obj[category] = {}
 
             config_obj[category][key] = value
