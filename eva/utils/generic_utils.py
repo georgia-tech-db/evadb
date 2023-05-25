@@ -56,6 +56,7 @@ def str_to_class(class_path: str):
     Returns:
         type: A Class for given path
     """
+    assert class_path is not None, "Class path is not found"
     module_path, class_name = class_path.rsplit(".", 1)
     module = importlib.import_module(module_path)
     return getattr(module, class_name)
@@ -115,17 +116,6 @@ def is_gpu_available() -> bool:
         return False
 
 
-def prefix_xdist_worker_id_to_path(path: str):
-    try:
-        worker_id = os.environ["PYTEST_XDIST_WORKER"]
-        base = "eva_datasets"
-        path = "build/" + str(worker_id) + "_" + base
-    except KeyError:
-        # Single threaded mode
-        pass
-    return path
-
-
 def get_gpu_count() -> int:
     """
     Check number of GPUs through Torch.
@@ -154,7 +144,6 @@ def generate_file_path(name: str = "") -> Path:
         logger.error("Missing dataset location key in eva.yml")
         raise KeyError("Missing datasets_dir key in eva.yml")
 
-    dataset_location = prefix_xdist_worker_id_to_path(dataset_location)
     dataset_location = Path(dataset_location)
     dataset_location.mkdir(parents=True, exist_ok=True)
 

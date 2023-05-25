@@ -30,7 +30,7 @@ rename_table: RENAME TABLE table_name TO table_name
 create_udf: CREATE UDF if_not_exists? udf_name INPUT create_definitions OUTPUT create_definitions TYPE udf_type IMPL udf_impl udf_metadata* | CREATE UDF if_not_exists? udf_name IMPL udf_impl udf_metadata* | CREATE UDF if_not_exists? udf_name TYPE udf_type udf_metadata*
 
 // Create Materialized View
-create_materialized_view: CREATE MATERIALIZED VIEW if_not_exists? table_name ("(" uid_list ")") AS select_statement 
+create_materialized_view: CREATE MATERIALIZED VIEW if_not_exists? table_name ("(" uid_list ")") AS select_statement | CREATE MATERIALIZED VIEW if_not_exists? table_name AS select_statement
 
 // Details
 udf_name: uid
@@ -87,7 +87,7 @@ update_statement: UPDATE table_name (AS? uid)? SET updated_element ("," updated_
     
 load_statement: LOAD file_format file_name INTO table_name (("(" uid_list ")"))?
     
-file_format: CSV | VIDEO | IMAGE | DOCUMENT
+file_format: CSV | VIDEO | IMAGE | DOCUMENT | PDF
 
 file_options: FORMAT file_format
     
@@ -380,6 +380,7 @@ CSV:                  "CSV"i
 VIDEO:                "VIDEO"i
 IMAGE:                "IMAGE"i
 DOCUMENT:             "DOCUMENT"i
+PDF:                  "PDF"i
 
 // Index types
 HNSW:                                "HNSW"i

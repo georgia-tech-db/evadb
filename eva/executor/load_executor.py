@@ -33,6 +33,7 @@ class LoadDataExecutor(AbstractExecutor):
             FileFormatType.VIDEO,
             FileFormatType.IMAGE,
             FileFormatType.DOCUMENT,
+            FileFormatType.PDF
         ]:
             executor = LoadMultimediaExecutor(self.node)
         elif self.node.file_options["file_format"] == FileFormatType.CSV:

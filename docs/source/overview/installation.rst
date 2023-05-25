@@ -16,11 +16,19 @@ EVA supports Python (versions >= 3.7). To install EVA, we recommend using the pi
 Launch EVA server
 ----
 
-EVA is based on a `client-server architecture <https://www.postgresql.org/docs/15/tutorial-arch.html>`_. To launch the EVA server, run the following command on the terminal:
+EVA is based on a `client-server architecture <https://www.postgresql.org/docs/15/tutorial-arch.html>`_. 
+
+To launch the EVA server using the pip package, run the following command on the terminal:
 
 .. code-block:: bash
 
     eva_server &
+
+You can also launch the EVA server using Docker either locally or on a server with GPUs:
+
+.. code-block:: bash
+
+    docker run --name eva_server --gpus all -p 8803:8803 evadbai/evaserver
 
 Part 2: Start a Jupyter Notebook Client
 ----
@@ -99,35 +107,3 @@ Visualize the output
 
 The output of the query is `visualized in the notebook <https://evadb.readthedocs.io/en/stable/source/tutorials/01-mnist.html#visualize-output-of-query-on-the-video>`_.
 
-
-Part 5: Start a Command Line Client
-----
-
-Besides the notebook interface, EVA also exports a command line interface for querying the server. This interface allows for quick querying from the terminal:
-
-.. code-block:: bash
-
-    >>> eva_client
-    eva=# LOAD VIDEO "mnist.mp4" INTO MNISTVid;
-    @status: ResponseStatus.SUCCESS
-    @batch:
-
-    0 Video successfully added at location: mnist.p4
-    @query_time: 0.045
-
-    eva=# SELECT id, data FROM MNISTVid WHERE id < 1000;
-    @status: ResponseStatus.SUCCESS
-    @batch:
-                mnistvid.id     mnistvid.data 
-        0          0             [[[ 0 2 0]\n [0 0 0]\n...         
-        1          1             [[[ 2 2 0]\n [1 1 0]\n...         
-        2          2             [[[ 2 2 0]\n [1 2 2]\n...         
-        ..       ...
-        997        997           [[[ 0 2 0]\n [0 0 0]\n...         
-        998        998           [[[ 0 2 0]\n [0 0 0]\n...         
-        999        999           [[[ 2 2 0]\n [1 1 0]\n...         
-
-    [1000 rows x 2 columns]
-    @query_time: 0.216  
-
-    eva=# exit

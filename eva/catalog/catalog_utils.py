@@ -21,6 +21,7 @@ from eva.catalog.catalog_type import (
     DocumentColumnName,
     ImageColumnName,
     NdArrayType,
+    PDFColumnName,
     TableType,
     VideoColumnName,
 )
@@ -129,6 +130,42 @@ def get_document_table_column_definitions() -> List[ColumnDefinition]:
     return columns
 
 
+def get_pdf_table_column_definitions() -> List[ColumnDefinition]:
+    """
+    name: pdf name
+    page: page no
+    paragrph: paragraph no
+    data: pdf paragraph data
+    """
+    columns = [
+        ColumnDefinition(
+            PDFColumnName.name.name,
+            ColumnType.TEXT,
+            None,
+            None
+        ),
+        ColumnDefinition(
+            PDFColumnName.page.name,
+            ColumnType.INTEGER,
+            None,
+            None
+        ),
+        ColumnDefinition(
+            PDFColumnName.paragraph.name,
+            ColumnType.INTEGER,
+            None,
+            None
+        ),
+        ColumnDefinition(
+            PDFColumnName.data.name,
+            ColumnType.TEXT,
+            None,
+            None,
+        ),
+    ]
+    return columns
+
+
 def get_table_primary_columns(table_catalog_obj: TableCatalogEntry):
     if table_catalog_obj.table_type == TableType.VIDEO_DATA:
         return get_video_table_column_definitions()[:2]
@@ -136,6 +173,8 @@ def get_table_primary_columns(table_catalog_obj: TableCatalogEntry):
         return get_image_table_column_definitions()[:1]
     elif table_catalog_obj.table_type == TableType.DOCUMENT_DATA:
         return get_document_table_column_definitions()[:1]
+    elif table_catalog_obj.table_type == TableType.PDF_DATA:
+        return get_pdf_table_column_definitions()[:3]
     else:
         raise Exception(f"Unexpected table type {table_catalog_obj.table_type}")
 

@@ -32,6 +32,9 @@ class StorageEngine:
             ConfigurationManager().get_value("storage", "image_engine")
         )(),
         TableType.DOCUMENT_DATA: DocumentStorageEngine(),
+        TableType.PDF_DATA: str_to_class(
+            ConfigurationManager().get_value("storage", "pdf_engine")
+        )(),
     }
 
     @classmethod

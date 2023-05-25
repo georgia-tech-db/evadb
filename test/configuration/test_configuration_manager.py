@@ -27,7 +27,7 @@ class ConfigurationManagerTests(unittest.TestCase):
         self.assertIsNotNone(value)
 
     def test_configuration_manager_read_invalid_category(self):
-        self.assertIsNone(self.config.get_value("invalid", ""))
+        self.assertEquals(self.config.get_value("invalid", ""), {})
 
     def test_configuration_manager_read_invalid_key(self):
         self.assertIsNone(self.config.get_value("core", "invalid"))

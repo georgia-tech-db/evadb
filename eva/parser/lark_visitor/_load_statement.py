@@ -53,6 +53,9 @@ class Load:
             file_format = FileFormatType.IMAGE
         elif file_format_string == "DOCUMENT":
             file_format = FileFormatType.DOCUMENT
+        elif file_format_string == "PDF":
+            file_format = FileFormatType.PDF
+
         return file_format
 
     def file_options(self, tree):
