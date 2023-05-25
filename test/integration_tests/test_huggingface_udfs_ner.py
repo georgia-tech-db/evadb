@@ -13,12 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import create_text_csv, file_remove
 
 import pytest
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.executor.executor_utils import ExecutorError
 from eva.server.command_handler import execute_query_fetch_all
 
 NUM_FRAMES = 10
@@ -35,7 +33,6 @@ class HuggingFaceNERTests(unittest.TestCase):
 
         query = """LOAD PDF 'data/documents/pdf_sample1.pdf' INTO MyPDFs;"""
         execute_query_fetch_all(query)
-
 
     def tearDown(self) -> None:
         execute_query_fetch_all("DROP TABLE IF EXISTS MyPDFs;")
