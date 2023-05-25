@@ -126,9 +126,6 @@ def infer_output_name_and_type(**pipeline_args):
     output_types = {}
     if isinstance(model_output, list) and model_output != []:
         sample_out = model_output[0]
-    elif model_output == []:
-        # sample_out={"entity":"","score":0,'index':0, 'end':0, 'word':0, 'start':0}
-        pass
     else:
         sample_out = model_output
 
