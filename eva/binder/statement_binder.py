@@ -179,7 +179,7 @@ class StatementBinder:
                     )
                 )
                 idx += 1
-        node.col_list = binded_col_list 
+        node.col_list = binded_col_list
 
     @bind.register(RenameTableStatement)
     def _bind_rename_table_statement(self, node: RenameTableStatement):

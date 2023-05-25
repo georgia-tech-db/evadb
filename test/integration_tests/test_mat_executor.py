@@ -123,6 +123,7 @@ class MaterializedViewTest(unittest.TestCase):
             for i in range(5)
         ]
         expected_batch = Batch(frames=pd.DataFrame(expected))
+        self.assertEqual(actual_batch, expected_batch)
 
     @pytest.mark.torchtest
     def test_should_mat_view_with_yolo(self):
@@ -191,4 +192,3 @@ class MaterializedViewTest(unittest.TestCase):
         res = actual_batch.frames
         for idx in res.index:
             self.assertTrue("car" in res["uadtrac_fastrcnn.label"][idx])
-

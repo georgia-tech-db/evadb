@@ -251,7 +251,6 @@ class CreateTable:
         col_list = [
             ColumnDefinition(uid.col_name, None, None, None) for uid in uid_list
         ]
-        
         return CreateMaterializedViewStatement(
             view_info, col_list, if_not_exists, query
         )
