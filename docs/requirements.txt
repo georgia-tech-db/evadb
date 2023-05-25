@@ -25,11 +25,11 @@ docutils>=0.15
 mock>=1.0.1
 pillow>=9.0.1
 readthedocs-sphinx-ext>1.1
-autodoc_pydantic==1.8.0
+autodoc_pydantic
 
 # MyST
-myst-parser==1.0.0
-myst-nb==0.17.2
+myst-parser
+myst-nb
 
 # Jupyter conversion
 jupytext==1.14.5
