@@ -80,11 +80,14 @@ class AbstractHFUdf(AbstractUDF, GPUCompatible):
             return pd.DataFrame(outputs, index=[0])
         # PERF: Can improve performance by avoiding redundant list creation
         result_list = []
-        for row_output in outputs:
-            # account for the case where we have more than one prediction for an input
-            if isinstance(row_output, list):
-                row_output = {k: [dic[k] for dic in row_output] for k in row_output[0]}
-            result_list.append(row_output)
+        if outputs != [[]]:
+            for row_output in outputs:
+                # account for the case where we have more than one prediction for an input
+                if isinstance(row_output, list):
+                    row_output = {k: [dic[k] for dic in row_output] for k in row_output[0]}
+                result_list.append(row_output)
+        elif self.pipeline_args["task"] == "ner":
+            result_list.append({"entity":"","score":0,'index':0, 'end':0, 'word':0, 'start':0})
         result_df = pd.DataFrame(result_list)
         return result_df
 

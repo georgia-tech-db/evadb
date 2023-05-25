@@ -46,6 +46,7 @@ INPUT_TYPE_FOR_SUPPORTED_TASKS = {
     "image-to-text": HFInputTypes.IMAGE,
     "object-detection": HFInputTypes.IMAGE,
     "depth-estimation": HFInputTypes.IMAGE,
+    "ner": HFInputTypes.TEXT,
 }
 
 MODEL_FOR_TASK = {
@@ -61,11 +62,12 @@ MODEL_FOR_TASK = {
     "image-to-text": ImageHFModel,
     "object-detection": ImageHFModel,
     "depth-estimation": ImageHFModel,
+    "ner": TextHFModel,
 }
 
 
 def sample_text():
-    return "The cat is on the mat"
+    return "My name is Sarah and I live in London"
 
 
 def sample_image():
@@ -122,8 +124,11 @@ def infer_output_name_and_type(**pipeline_args):
 
     # Get a dictionary of output names and types from the output
     output_types = {}
-    if isinstance(model_output, list):
+    if isinstance(model_output, list) and model_output != []:
         sample_out = model_output[0]
+    elif model_output == []:
+        # sample_out={"entity":"","score":0,'index':0, 'end':0, 'word':0, 'start':0}
+        pass
     else:
         sample_out = model_output
 
