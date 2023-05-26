@@ -8,4 +8,4 @@ Experimental approach to enable operator-level parallelization. During paralleli
 
 We provide an example here to demonstrate how parallelization is done. 
 
-![parallel-design-plot](./../../assets/parallel-design.jpg)
+![parallel-design-plot](./../../docs/images/reference/parallel-design.jpg)

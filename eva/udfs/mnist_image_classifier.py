@@ -2,16 +2,18 @@ import pandas as pd
 from torch import Tensor
 import torch
 from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
-from eva.models.catalog.frame_info import FrameInfo
-from eva.models.catalog.properties import ColorSpace
 from torchvision.transforms import Compose, ToTensor, Normalize, Grayscale
 from PIL import Image
 
+import torch.nn as nn
+from collections import OrderedDict
+import torch.utils.model_zoo as model_zoo
 
-class MnistCNN(PytorchAbstractClassifierUDF):
+
+class MnistImageClassifier(PytorchAbstractClassifierUDF):
     @property
     def name(self) -> str:
-        return "MnistCNN"
+        return "MnistImageClassifier"
 
     def setup(self):
         self.model = mnist(pretrained=True)
@@ -41,10 +43,6 @@ class MnistCNN(PytorchAbstractClassifierUDF):
 
         return pd.DataFrame(outcome, columns=["label"])
 
-
-import torch.nn as nn
-from collections import OrderedDict
-import torch.utils.model_zoo as model_zoo
 
 model_urls = {
     "mnist": "http://ml.cs.tsinghua.edu.cn/~chenxi/pytorch-models/mnist-b07bb66b.pth"  # noqa
