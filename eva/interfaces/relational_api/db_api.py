@@ -13,8 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import asyncio
+from eva.expression.tuple_value_expression import TupleValueExpression
+from eva.interfaces.relational_api.relation import EVARelation
 
 from eva.models.server.response import Response
+from eva.parser.select_statement import SelectStatement
+from eva.parser.utils import parse_load, parse_table_clause
 from eva.utils.logging_manager import logger
 
 
@@ -29,6 +33,14 @@ class EVAConnection:
         if self._cursor is None:
             self._cursor = EVACursor(self)
         return self._cursor
+
+    def table(self, table_name: str) -> EVARelation:
+        return self.cursor().table(table_name)
+
+    def load(
+        self, file_regex: str, table_name: str, format: str, **kwargs
+    ) -> EVARelation:
+        return self.cursor().load(file_regex, table_name, format, **kwargs)
 
 
 class EVACursor(object):
@@ -98,6 +110,21 @@ class EVACursor(object):
 
         return func_sync
 
+    def table(self, table_name: str) -> EVARelation:
+        table = parse_table_clause(table_name)
+        # SELECT * FROM table
+        select_stmt = SelectStatement(
+            target_list=[TupleValueExpression(col_name="*")], from_table=table
+        )
+        return EVARelation(select_stmt)
+
+    def load(
+        self, file_regex: str, table_name: str, format: str, **kwargs
+    ) -> EVARelation:
+        # LOAD {FORMAT} file_regex INTO table_name
+        stmt = parse_load(table_name, file_regex, format, **kwargs)
+        return EVARelation(stmt)
+
 
 async def get_connection(host: str, port: int) -> EVAConnection:
     reader, writer = await asyncio.open_connection(host, port)
@@ -105,6 +132,6 @@ async def get_connection(host: str, port: int) -> EVAConnection:
     return connection
 
 
-def connect(host: str, port: int) -> EVAConnection:
+def connect(host: str = "0.0.0.0", port: int = 8803) -> EVAConnection:
     connection = asyncio.run(get_connection(host, port))
     return connection

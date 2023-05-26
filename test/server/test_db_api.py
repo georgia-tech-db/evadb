@@ -21,7 +21,7 @@ from test.util import prefix_worker_id
 from mock import MagicMock, patch
 
 from eva.models.server.response import Response
-from eva.server.db_api import EVACursor, connect
+from eva.interfaces.relational_api.db_api import EVACursor, connect
 
 # Check for Python 3.8+ for IsolatedAsyncioTestCase support
 if sys.version_info >= (3, 8):
