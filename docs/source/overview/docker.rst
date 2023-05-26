@@ -1,5 +1,3 @@
-.. _guide-getstarted:
-
 Docker
 ====
 
