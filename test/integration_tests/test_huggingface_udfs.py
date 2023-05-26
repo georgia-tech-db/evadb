@@ -425,4 +425,3 @@ class HuggingFaceTests(unittest.TestCase):
         )
         drop_udf_query = f"DROP UDF {udf_name};"
         execute_query_fetch_all(drop_udf_query)
-        
