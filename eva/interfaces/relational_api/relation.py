@@ -3,10 +3,13 @@ from eva.expression.expression_utils import conjunction_list_to_expression_tree
 from eva.interfaces.relational_api.utils import (
     execute_statement,
     string_list_to_expression_list,
+    string_to_lateral_join,
 )
 from eva.parser.select_statement import SelectStatement
 
 from eva.parser.statement import AbstractStatement
+from eva.parser.table_ref import JoinNode
+from eva.parser.types import JoinType
 
 
 class EVARelation:
@@ -44,3 +47,13 @@ class EVARelation:
 
     def show(self):
         return self.execute()
+
+    def apply(self, expr: str, alias: str, merge=True):
+        assert isinstance(self._eva_statement, SelectStatement)
+        assert self._eva_statement.from_table is not None
+
+        table_ref = string_to_lateral_join(expr, alias=alias)
+        self._eva_statement.from_table = JoinNode(
+            self._eva_statement.from_table, table_ref, JoinType.LATERAL_JOIN
+        )
+        return self

@@ -7,8 +7,10 @@ from eva.models.storage.batch import Batch
 from eva.optimizer.plan_generator import PlanGenerator
 from eva.optimizer.statement_to_opr_converter import StatementToPlanConverter
 from eva.parser.statement import AbstractStatement
+from eva.parser.table_ref import JoinNode, TableRef, TableValuedExpression
+from eva.parser.types import JoinType
 
-from eva.parser.utils import parse_expression
+from eva.parser.utils import parse_expression, parse_lateral_join
 
 
 def string_list_to_expression_list(exprs: List[str]):
@@ -23,3 +25,7 @@ def execute_statement(statement: AbstractStatement) -> Batch:
     if output:
         batch_list = list(output)
         return Batch.concat(batch_list, copy=False)
+
+
+def string_to_lateral_join(expr: str, alias: str):
+    return parse_lateral_join(expr, alias)
