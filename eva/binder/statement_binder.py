@@ -164,11 +164,13 @@ class StatementBinder:
 
         assert (
             len(node.col_list) == 0 or len(node.col_list) == num_projected_columns
-        ), "Projected columns mismatch, expected {} found {}".format(len(node.col_list), num_projected_columns)
+        ), "Projected columns mismatch, expected {} found {}.".format(len(node.col_list), num_projected_columns)
         binded_col_list = []
         idx = 0
         for expr in node.query.target_list:
-            output_objs = [(expr.col_name, expr.col_object)] if expr.etype == ExpressionType.TUPLE_VALUE else zip(expr.projection_columns, expr.output_objs)
+            output_objs = [(expr.col_name, expr.col_object)] \
+                    if expr.etype == ExpressionType.TUPLE_VALUE \
+                    else zip(expr.projection_columns, expr.output_objs)
             for col_name, output_obj in output_objs:
                 binded_col_list.append(
                     ColumnDefinition(

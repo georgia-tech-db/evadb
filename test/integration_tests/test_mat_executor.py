@@ -172,7 +172,6 @@ class MaterializedViewTest(unittest.TestCase):
 
     @pytest.mark.torchtest
     def test_should_infer_mat_view_column_names_with_fastrcnn_lateral_join(self):
-        execute_query_fetch_all("DROP TABLE IF EXISTS uadtrac_fastRCNN;")
         select_query = (
             "SELECT id, label, bbox FROM UATRAC JOIN LATERAL "
             "Yolo(data) AS T(label, bbox, score) WHERE id < 5;"
