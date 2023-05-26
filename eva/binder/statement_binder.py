@@ -169,8 +169,8 @@ class StatementBinder:
         idx = 0
         for expr in node.query.target_list:
             output_objs = [(expr.col_name, expr.col_object)] \
-                    if expr.etype == ExpressionType.TUPLE_VALUE \
-                    else zip(expr.projection_columns, expr.output_objs)
+                if expr.etype == ExpressionType.TUPLE_VALUE \
+                else zip(expr.projection_columns, expr.output_objs)
             for col_name, output_obj in output_objs:
                 binded_col_list.append(
                     ColumnDefinition(

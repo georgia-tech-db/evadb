@@ -119,7 +119,7 @@ class StatementBinderTests(unittest.TestCase):
             mock_binder.assert_called_with(mat_statement.query)
 
     def test_raises_mismatch_columns_create_mat_statement(self):
-        with patch.object(StatementBinder, "bind") as mock_binder:
+        with patch.object(StatementBinder, "bind"):
             binder = StatementBinder(StatementBinderContext())
             mat_statement = MagicMock()
             mat_statement.col_list = [ColumnDefinition('id', None, None, None)]
