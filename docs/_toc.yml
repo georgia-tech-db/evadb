@@ -4,9 +4,10 @@ parts:
 
   - caption: Overview
     chapters:
-      - file: source/overview/aidb
       - file: source/overview/installation
       - file: source/overview/command-line
+      - file: source/overview/udf
+      - file: source/overview/docker
 
   - caption: User Guides
     chapters:

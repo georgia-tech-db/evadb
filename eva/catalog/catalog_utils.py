@@ -134,7 +134,7 @@ def get_pdf_table_column_definitions() -> List[ColumnDefinition]:
     """
     name: pdf name
     page: page no
-    paragrph: paragraph no
+    paragraph: paragraph no
     data: pdf paragraph data
     """
     columns = [

@@ -1,4 +1,4 @@
-personal_ws-1.1 en 1295 
+personal_ws-1.1 en 1342 
 ABCD
 ABCMeta
 ANYDIM
@@ -30,6 +30,7 @@ AbstractUDFTest
 AggregationExpression
 AggregationExpressionsTest
 Anirudh
+AnnotateTests
 ApplyAndMerge
 ApplyAndMergeExecutor
 ApplyAndMergePlan
@@ -153,6 +154,9 @@ DiskKVCache
 DistributedLogicalGetToSeqScan
 DistributedLogicalProjectToPhysical
 Dockerfile
+DocumentColumnName
+DocumentReader
+DocumentStorageEngine
 DogBreedClassifier
 DropExecutor
 DropExecutorTest
@@ -188,6 +192,7 @@ EnumInt
 ErrorHandlingRayTests
 EvaArgument
 EvaServer
+EverNoteLoader
 ExchangeExecutor
 ExchangePlan
 ExecutionContextTest
@@ -225,6 +230,7 @@ FeaturePayload
 FileExistsError
 FileFormatType
 FileNotFoundError
+FlipTests
 ForeignKey
 FrameInfo
 FrameInfoTest
@@ -241,6 +247,8 @@ FuzzyJoinTests
 GEQ
 GPUCompatible
 GPUs
+GaussianBlur
+GaussianBlurTests
 GenericHuggingfaceModel
 GroupBy
 GroupByExecutor
@@ -260,6 +268,7 @@ HashJoinBuildPlan
 HashJoinExecutor
 HashJoinPlan
 HashJoinProbePlan
+HorizontalFlip
 HuggingFace
 HuggingFaceModel
 HuggingFaceTests
@@ -406,13 +415,14 @@ MaterializedViewTest
 MaxPool
 MemeImages
 MemoTest
-MnistCNN
+MnistImageClassifier
 ModulePathTest
 MyCSV
 MyImage
 MyImages
 MyLargeScaleImages
 MyMeta
+MyPDFs
 MyTextCSV
 MyUDF
 MyVideo
@@ -462,6 +472,10 @@ OrderBy
 OrderByExecutor
 OrderByExecutorTest
 OrderByPlan
+PDFColumnName
+PDFMinerLoader
+PDFReader
+PDFStorageEngine
 PDFs
 PERF
 PIL
@@ -471,6 +485,8 @@ PPScanPlan
 PRs
 PYTHONPATH
 PandasDataframe
+ParallelLogicalApplyAndMergeToPhysical
+ParallelLogicalGetToSeqScan
 ParserOrderBySortType
 ParserStatementTests
 ParserTests
@@ -506,6 +522,7 @@ QueueReaderExecutor
 REUSEADDR
 Rajoria
 RayError
+RayTaskError
 ReLU
 ReadTheDocs
 Reddit
@@ -543,6 +560,8 @@ SelectExecutorTest
 SelectStatement
 SeqScanExecutorTest
 SeqScanPlan
+SequentialApplyAndMergeToPhysical
+SequentialLogicalApplyAndMergeToPhysical
 SequentialLogicalGetToSeqScan
 SequentialLogicalProjectToPhysical
 SequentialScanExecutor
@@ -603,8 +622,11 @@ TestOptimizerContext
 TestOptimizerTask
 TestUDF
 TextHFModel
+TextLoader
 TimeoutError
 TimerTests
+ToGrayscale
+ToGrayscaleTests
 ToPhysical
 ToTensor
 Todo
@@ -653,6 +675,12 @@ UniqueConstraint
 UnknownType
 UnnestApplyAndMergePlan
 UnnestFunctionScanPlan
+UnstructuredEPubLoader
+UnstructuredEmailLoader
+UnstructuredHTMLLoader
+UnstructuredMarkdownLoader
+UnstructuredPowerPointLoader
+UnstructuredWordDocumentLoader
 Upserts
 VARCHAR
 VGG
@@ -667,6 +695,7 @@ VectorParams
 VectorStore
 VectorStoreFactory
 VectorStoreType
+VerticalFlip
 VideoCapture
 VideoColumnName
 VideoFormat
@@ -844,6 +873,7 @@ distutils
 dml
 docstring
 docstrings
+docx
 doesnot
 donut
 dottedid
@@ -860,12 +890,15 @@ eg
 elif
 eloyekunle
 embeddings
+eml
 endswith
+enex
 enum
 enums
 env
 environ
 eof
+epub
 eq
 equi
 etype
@@ -894,6 +927,7 @@ ffmpeg
 filepath
 filesystem
 fillna
+fitz
 fmt
 fn
 fname
@@ -912,6 +946,7 @@ funcName
 functools
 fuzzyjoin
 gaurav
+gaussianBlur
 gb
 gc
 georgia
@@ -943,6 +978,7 @@ hasattr
 hashjoin
 hashlib
 hexdigest
+horizontalFlip
 horovod
 hostname
 href
@@ -973,6 +1009,7 @@ inplace
 insp
 insrt
 integratedTerminal
+integrations
 intp
 io
 ipynb
@@ -1001,6 +1038,7 @@ kornia
 kwarg
 kwargs
 lalr
+langchain
 lbatch
 len
 leq
@@ -1078,6 +1116,8 @@ oq
 orderby
 orm
 os
+parallelErrorVideo
+parallelization
 parallelize
 parallelized
 param
@@ -1085,6 +1125,8 @@ params
 pardir
 parserVisitor
 pathlib
+pdf
+pdfs
 perf
 petastorm
 philschmid
@@ -1098,6 +1140,8 @@ posix
 postgres
 pple
 pprint
+ppt
+pptx
 pragma
 pre
 pred
@@ -1224,6 +1268,7 @@ testsimilaritytable
 th
 thefuzz
 tmp
+toGrayscale
 todo
 tolist
 torchvision
@@ -1262,6 +1307,7 @@ util
 utils
 uuid
 venv
+verticalFlip
 vgg
 vid
 virtualenv
@@ -1272,6 +1318,7 @@ wal
 warmup
 wb
 wget
+whitespaces
 workspaceFolder
 workspaceRoot
 www
