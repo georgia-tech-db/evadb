@@ -83,7 +83,7 @@ Download the user-defined function for classifying MNIST images.
 
 .. code-block:: python
 
-    cursor.execute("""CREATE UDF IF NOT EXISTS MnistCNN
+    cursor.execute("""CREATE UDF IF NOT EXISTS MnistImageClassifier
                       INPUT  (data NDARRAY (3, 28, 28))
                       OUTPUT (label TEXT(2))
                       TYPE  Classification
@@ -97,7 +97,7 @@ Run a query using the newly registered UDF!
 
 .. code-block:: python
 
-    cursor.execute("""SELECT data, MnistCNN(data).label 
+    cursor.execute("""SELECT data, MnistImageClassifier(data).label 
                       FROM MNISTVideoTable
                       WHERE id = 30;""")
     response = cursor.fetch_all()

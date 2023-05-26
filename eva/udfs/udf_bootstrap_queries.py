@@ -163,13 +163,13 @@ Sift_udf_query = """CREATE UDF IF NOT EXISTS SiftFeatureExtractor
     EVA_INSTALLATION_DIR
 )
 
-mnistcnn_udf_query = """CREATE UDF IF NOT EXISTS MnistCNN
+mnistcnn_udf_query = """CREATE UDF IF NOT EXISTS MnistImageClassifier
         INPUT  (data NDARRAY (3, 28, 28))
         OUTPUT (label TEXT(2))
         TYPE  Classification
-        IMPL  '{}/udfs/{}/eva_mnist_udf.py';
+        IMPL  '{}/udfs/mnist_image_classifier.py';
         """.format(
-    EVA_INSTALLATION_DIR, TUTORIALS_DIR
+    EVA_INSTALLATION_DIR
 )
 
 
