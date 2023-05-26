@@ -6,6 +6,7 @@ parts:
     chapters:
       - file: source/overview/installation
       - file: source/overview/command-line
+      - file: source/overview/docker
 
   - caption: User Guides
     chapters:
