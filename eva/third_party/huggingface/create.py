@@ -41,12 +41,12 @@ INPUT_TYPE_FOR_SUPPORTED_TASKS = {
     "translation": HFInputTypes.TEXT,
     "text2text-generation": HFInputTypes.TEXT,
     "text-generation": HFInputTypes.TEXT,
+    "ner": HFInputTypes.TEXT,
     "image-classification": HFInputTypes.IMAGE,
     "image-segmentation": HFInputTypes.IMAGE,
     "image-to-text": HFInputTypes.IMAGE,
     "object-detection": HFInputTypes.IMAGE,
     "depth-estimation": HFInputTypes.IMAGE,
-    "ner": HFInputTypes.TEXT,
 }
 
 MODEL_FOR_TASK = {
@@ -57,12 +57,12 @@ MODEL_FOR_TASK = {
     "translation": TextHFModel,
     "text2text-generation": TextHFModel,
     "text-generation": TextHFModel,
+    "ner": TextHFModel,
     "image-classification": ImageHFModel,
     "image-segmentation": ImageHFModel,
     "image-to-text": ImageHFModel,
     "object-detection": ImageHFModel,
     "depth-estimation": ImageHFModel,
-    "ner": TextHFModel,
 }
 
 
@@ -124,7 +124,7 @@ def infer_output_name_and_type(**pipeline_args):
 
     # Get a dictionary of output names and types from the output
     output_types = {}
-    if isinstance(model_output, list) and model_output != []:
+    if isinstance(model_output, list):
         sample_out = model_output[0]
     else:
         sample_out = model_output
