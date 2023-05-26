@@ -370,7 +370,7 @@ class HuggingFaceTests(unittest.TestCase):
             'task' 'ner'
         """
         execute_query_fetch_all(create_udf_query)
-         
+
         # running test case on all the pdf data
         select_query = f"SELECT data, {udf_name}(data) FROM MyPDFs;"
         output = execute_query_fetch_all(select_query)
@@ -395,7 +395,7 @@ class HuggingFaceTests(unittest.TestCase):
             'task' 'ner'
         """
         execute_query_fetch_all(create_udf_query)
-         
+
         # running test case where ner gives no data
         select_query = f"""SELECT data, {udf_name}(data)
                   FROM MyPDFs
@@ -405,7 +405,7 @@ class HuggingFaceTests(unittest.TestCase):
 
         # Test that output has 7 columns
         self.assertEqual(len(output.frames.columns), 7)
-        
+
         # Test that there exists a column with udf_name.entity
         self.assertTrue(udf_name.lower() + ".entity" in output.frames.columns)
         # Test to check all the udf_name.entity is ""
@@ -425,3 +425,4 @@ class HuggingFaceTests(unittest.TestCase):
         )
         drop_udf_query = f"DROP UDF {udf_name};"
         execute_query_fetch_all(drop_udf_query)
+        
