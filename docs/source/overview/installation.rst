@@ -1,7 +1,7 @@
 Getting Started
 ====
 
-Part 1: Install EVA
+Step 1: Install EVA
 ----
 
 EVA supports Python (versions >= 3.8). To install EVA, we recommend using the pip package manager:
@@ -20,7 +20,7 @@ EVA is based on a `client-server architecture <https://www.postgresql.org/docs/1
 
     eva_server &
 
-Part 2: Start a Jupyter Notebook Client
+Step 2: Start a Jupyter Notebook Client
 ----
 
 Here is an `illustrative Jupyter notebook <https://evadb.readthedocs.io/en/stable/source/tutorials/01-mnist.html>`_ focusing on MNIST image classification using EVA. The notebook works on `Google Colab <https://colab.research.google.com/github/georgia-tech-db/eva/blob/master/tutorials/01-mnist.ipynb>`_. 
@@ -60,7 +60,7 @@ Use the LOAD statement to load a video onto a table in EVA server.
     response = cursor.fetch_all()
     print(response)
 
-Part 3: Run an AI Query on the loaded video
+Step 3: Run an AI Query on the loaded video
 ----
 
 User-defined functions (UDFs) allow us to combine SQL with AI models. These functions wrap around AI models. In this query, we use the `MnistImageClassifier` UDF that wraps around a model trained for classifying `MNIST` images.
