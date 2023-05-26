@@ -43,10 +43,10 @@ class EvaServer:
         async with self._server:
             await self._server.serve_forever()
 
-        logger.warn(f"EVA server stopped")
+        logger.warn("EVA server stopped")
 
     async def stop_eva_server(self):
-        logger.warn(f"EVA server stopped")
+        logger.warn("EVA server stopped")
         if self._server is not None:
             await self._server.close()
 
