@@ -101,7 +101,7 @@ class LogicalGetToSeqScan(Rule):
     def apply(self, before: LogicalGet, context: OptimizerContext):
         # Configure the batch_mem_size. It decides the number of rows
         # read in a batch from storage engine.
-        # ToDO: Experiment heuristics.
+        # Todo: Experiment heuristics.
         scan_plan = SeqScanPlan(None, before.target_list, before.alias)
         storage_plan = StoragePlan(
             before.table_obj,

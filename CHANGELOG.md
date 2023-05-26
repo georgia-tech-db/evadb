@@ -26,7 +26,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### [Changed]
 
 * PR #740: docs: minor updates to read-the-docs 
-* PR #727: docs: "recogizing" in index.rst 
 * PR #729: docs: update notebooks on landing page
 
 ##  [0.2.3] - 2023-05-11

@@ -23,7 +23,7 @@ from eva.catalog.catalog_type import TableType
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.experimental.parallel.optimizer.rules.rules import (
-    LogicalApplyAndMergeToPhysical as ParalleLogicallApplyAndMergeToPhysical,
+    LogicalApplyAndMergeToPhysical as ParallelLogicalApplyAndMergeToPhysical,
 )
 from eva.experimental.parallel.optimizer.rules.rules import LogicalExchangeToPhysical
 from eva.experimental.parallel.optimizer.rules.rules import (
@@ -235,7 +235,7 @@ class RulesTest(unittest.TestCase):
             LogicalCreateMaterializedViewToPhysical(),
             LogicalFilterToPhysical(),
             LogicalProjectToPhysical(),
-            ParalleLogicallApplyAndMergeToPhysical()
+            ParallelLogicalApplyAndMergeToPhysical()
             if ray_enabled
             else SequentialApplyAndMergeToPhysical(),
             LogicalShowToPhysical(),
