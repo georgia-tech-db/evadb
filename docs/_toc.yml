@@ -4,7 +4,6 @@ parts:
 
   - caption: Overview
     chapters:
-      - file: index
       - file: source/overview/installation
       - file: source/overview/command-line
 
