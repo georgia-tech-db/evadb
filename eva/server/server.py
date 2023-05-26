@@ -36,18 +36,17 @@ class EvaServer:
         hostname: hostname of the server
         port: port of the server
         """
-        logger.info("Start Server")
-        print(f"EVA Server started at host {host} and port {port}", flush=True)
+        logger.warn(f"EVA server started at host {host} and port {port}")
 
         self._server = await asyncio.start_server(self.accept_client, host, port)
 
         async with self._server:
             await self._server.serve_forever()
 
-        logger.info("Successfully shutdown server")
+        logger.warn("EVA server stopped")
 
     async def stop_eva_server(self):
-        logger.info("Stop server")
+        logger.warn("EVA server stopped")
         if self._server is not None:
             await self._server.close()
 

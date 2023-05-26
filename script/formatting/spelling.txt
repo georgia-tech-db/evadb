@@ -415,7 +415,7 @@ MaterializedViewTest
 MaxPool
 MemeImages
 MemoTest
-MnistCNN
+MnistImageClassifier
 ModulePathTest
 MyCSV
 MyImage

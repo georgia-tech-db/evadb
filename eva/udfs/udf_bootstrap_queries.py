@@ -18,6 +18,7 @@ from eva.server.command_handler import execute_query_fetch_all
 
 EVA_INSTALLATION_DIR = ConfigurationManager().get_value("core", "eva_installation_dir")
 NDARRAY_DIR = "ndarray"
+TUTORIALS_DIR = "tutorials"
 
 DummyObjectDetector_udf_query = """CREATE UDF IF NOT EXISTS DummyObjectDetector
                   INPUT  (Frame_Array NDARRAY INT8(3, ANYDIM, ANYDIM))
@@ -150,7 +151,6 @@ Asl_udf_query = """CREATE UDF IF NOT EXISTS ASLActionRecognition
     EVA_INSTALLATION_DIR
 )
 
-
 norfair_obj_tracker_query = """CREATE UDF IF NOT EXISTS NorFairTracker
                   IMPL  '{}/udfs/trackers/nor_fair.py';
         """.format(
@@ -159,6 +159,15 @@ norfair_obj_tracker_query = """CREATE UDF IF NOT EXISTS NorFairTracker
 
 Sift_udf_query = """CREATE UDF IF NOT EXISTS SiftFeatureExtractor
         IMPL  '{}/udfs/sift_feature_extractor.py';
+        """.format(
+    EVA_INSTALLATION_DIR
+)
+
+mnistcnn_udf_query = """CREATE UDF IF NOT EXISTS MnistImageClassifier
+        INPUT  (data NDARRAY (3, 28, 28))
+        OUTPUT (label TEXT(2))
+        TYPE  Classification
+        IMPL  '{}/udfs/mnist_image_classifier.py';
         """.format(
     EVA_INSTALLATION_DIR
 )
@@ -185,6 +194,7 @@ def init_builtin_udfs(mode: str = "debug") -> None:
         Open_udf_query,
         Similarity_udf_query,
         norfair_obj_tracker_query,
+        mnistcnn_udf_query
         # Disabled because required packages (eg., easy_ocr might not be preinstalled)
         # face_detection_udf_query,
         # ocr_udf_query,
