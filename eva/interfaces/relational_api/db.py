@@ -18,7 +18,7 @@ from eva.interfaces.relational_api.relation import EVARelation
 
 from eva.models.server.response import Response
 from eva.parser.select_statement import SelectStatement
-from eva.parser.utils import parse_load, parse_table_clause
+from eva.parser.utils import parse_load, parse_query, parse_table_clause
 from eva.utils.logging_manager import logger
 
 
@@ -41,6 +41,9 @@ class EVAConnection:
         self, file_regex: str, table_name: str, format: str, **kwargs
     ) -> EVARelation:
         return self.cursor().load(file_regex, table_name, format, **kwargs)
+
+    def query(self, sql_query: str) -> EVARelation:
+        return self.cursor().query(sql_query)
 
 
 class EVACursor(object):
@@ -123,6 +126,10 @@ class EVACursor(object):
     ) -> EVARelation:
         # LOAD {FORMAT} file_regex INTO table_name
         stmt = parse_load(table_name, file_regex, format, **kwargs)
+        return EVARelation(stmt)
+
+    def query(self, sql_query: str) -> EVARelation:
+        stmt = parse_query(sql_query)
         return EVARelation(stmt)
 
 
