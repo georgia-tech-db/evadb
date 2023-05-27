@@ -1,6 +1,6 @@
 import pandas
 from eva.expression.expression_utils import conjunction_list_to_expression_tree
-from eva.interfaces.relational_api.utils import (
+from eva.interfaces.relational.utils import (
     execute_statement,
     sql_predicate_to_expresssion_tree,
     sql_string_to_expresssion_list,
@@ -18,36 +18,59 @@ class EVARelation:
     def __init__(self, stmt: AbstractStatement):
         self._eva_statement: AbstractStatement = stmt
 
-    def select(self, expr: str) -> "EVARelation":
-        """
-        Projects a set of expressions and returns a new EVARelation.
+    def cross_apply(self, expr: str, alias: str) -> "EVARelation":
+        """Execute a expr on all the rows of the relation
 
-        Parameters:
-            exprs (Union[str, List[str]]): The expression(s) to be selected.
-            If `*` is provided, it expands to all columns in the current EVARelation.
+        Args:
+            expr (str): sql expression
+            alias (str): alias of the output of the expr
 
         Returns:
-            EVARelation: A EVARelation with subset (or all) of columns.
+            `EVARelation`: relation
 
         Examples:
-            >>> relation = conn.table("sample_table")
 
-            Select all columns in the EVARelation.
+            Runs Yolo on all the frames of the input table
 
-            >>> relation.select("*")
+            >>> relation = conn.table("videos")
+            >>> relation.cross_apply("Yolo(data)", "objs(labels, bboxes, scores)")
 
-            Select all subset of columns in the EVARelation.
-
-            >>> relation.select("col1")
-            >>> relation.select("col1, col2")
+            Runs Yolo on all the frames of the input table and unnest each object as separate row.
+            
+            >>> relation.cross_apply("unnest(Yolo(data))", "obj(label, bbox, score)")
         """
         assert isinstance(self._eva_statement, SelectStatement)
+        assert self._eva_statement.from_table is not None
 
-        parsed_exprs = sql_string_to_expresssion_list(expr)
-
-        self._eva_statement.target_list = parsed_exprs
-
+        table_ref = string_to_lateral_join(expr, alias=alias)
+        self._eva_statement.from_table = TableRef(
+            JoinNode(
+                self._eva_statement.from_table,
+                table_ref,
+                join_type=JoinType.LATERAL_JOIN,
+            )
+        )
         return self
+
+    def df(self) -> pandas.DataFrame:
+        """Execute and fetch all rows as a pandas DataFrame
+
+        Returns:
+            pandas.DataFrame:
+        """
+        batch = self.execute()
+        assert batch is not None, "relation execute failed"
+        return batch.frames
+
+    def execute(self) -> Batch:
+        """Transform the relation into a result set
+
+        Returns:
+            Batch: result as eva Batch
+        """
+        result = execute_statement(self._eva_statement)
+        assert result.frames is not None
+        return result
 
     def filter(self, expr: str) -> "EVARelation":
         """
@@ -83,55 +106,32 @@ class EVARelation:
 
         return self
 
-    def execute(self) -> Batch:
-        """Transform the relation into a result set
-
-        Returns:
-            Batch: result as eva Batch
+    def select(self, expr: str) -> "EVARelation":
         """
-        result = execute_statement(self._eva_statement)
-        assert result.frames is not None
-        return result
+        Projects a set of expressions and returns a new EVARelation.
 
-    def df(self) -> pandas.DataFrame:
-        """Execute and fetch all rows as a pandas DataFrame
+        Parameters:
+            exprs (Union[str, List[str]]): The expression(s) to be selected. If '*' is provided, it expands to all columns in the current EVARelation.
 
         Returns:
-            pandas.DataFrame:
-        """
-        batch = self.execute()
-        assert batch is not None, "relation execute failed"
-        return batch.frames
-
-    def cross_apply(self, expr: str, alias: str) -> "EVARelation":
-        """Execute a expr on all the rows of the relation
-
-        Args:
-            expr (str): sql expression
-            alias (str): alias of the output of the expr
-
-        Returns:
-            EVARelation: relation
+            EVARelation: A EVARelation with subset (or all) of columns.
 
         Examples:
+            >>> relation = conn.table("sample_table")
 
-            Runs Yolo on all the frames of the input table
+            Select all columns in the EVARelation.
 
-            >>> relation = conn.table("videos")
-            >>> relation.cross_apply("Yolo(data)", "objs(labels, bboxes, scores)")
+            >>> relation.select("*")
 
-            Runs Yolo on all the frames of the input table and unnest each object as separate row.
-            >>> relation.cross_apply("unnest(Yolo(data))", "obj(label, bbox, score)")
+            Select all subset of columns in the EVARelation.
+
+            >>> relation.select("col1")
+            >>> relation.select("col1, col2")
         """
         assert isinstance(self._eva_statement, SelectStatement)
-        assert self._eva_statement.from_table is not None
 
-        table_ref = string_to_lateral_join(expr, alias=alias)
-        self._eva_statement.from_table = TableRef(
-            JoinNode(
-                self._eva_statement.from_table,
-                table_ref,
-                join_type=JoinType.LATERAL_JOIN,
-            )
-        )
+        parsed_exprs = sql_string_to_expresssion_list(expr)
+
+        self._eva_statement.target_list = parsed_exprs
+
         return self

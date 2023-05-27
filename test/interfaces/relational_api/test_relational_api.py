@@ -3,7 +3,7 @@ import unittest
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
 
-from eva.interfaces.relational_api.db import connect
+from eva.interfaces.relational.db import connect
 from eva.server.command_handler import execute_query_fetch_all
 from test.util import load_udfs_for_testing, shutdown_ray
 from pandas.testing import assert_frame_equal

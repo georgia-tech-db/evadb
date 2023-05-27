@@ -14,7 +14,7 @@
 # limitations under the License.
 import asyncio
 from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.interfaces.relational_api.relation import EVARelation
+from eva.interfaces.relational.relation import EVARelation
 
 from eva.models.server.response import Response
 from eva.parser.select_statement import SelectStatement
@@ -34,13 +34,13 @@ class EVAConnection:
             self._cursor = EVACursor(self)
         return self._cursor
 
-    def table(self, table_name: str) -> EVARelation:
-        return self.cursor().table(table_name)
-
     def load(
         self, file_regex: str, table_name: str, format: str, **kwargs
     ) -> EVARelation:
         return self.cursor().load(file_regex, table_name, format, **kwargs)
+
+    def table(self, table_name: str) -> EVARelation:
+        return self.cursor().table(table_name)
 
     def query(self, sql_query: str) -> EVARelation:
         return self.cursor().query(sql_query)

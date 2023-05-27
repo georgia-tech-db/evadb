@@ -41,6 +41,9 @@ parts:
           - file: source/reference/evaql/delete
           - file: source/reference/evaql/rename
 
+      - file: source/reference/python/api
+        title: Python APIs
+
       - file: source/reference/udf
         title: User-Defined Functions
         sections:
@@ -57,6 +60,7 @@ parts:
       - file: source/reference/gpu
         title: Configure GPU
 
+      
 
   - caption: Developer Guide
     chapters:
