@@ -29,7 +29,7 @@ server:
   socket_timeout: 60
 
 experimental:
-  ray: False
+  ray: True
 
 third_party:
   openai_api_key: ""
