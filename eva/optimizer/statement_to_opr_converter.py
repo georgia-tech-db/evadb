@@ -244,6 +244,10 @@ class StatementToPlanConverter:
         create_opr = LogicalCreate(
             table_info, statement.column_list, statement.if_not_exists
         )
+
+        if statement.query is not None:
+            self.visit_select(statement.query)
+            create_opr.append_child(self._plan)
         self._plan = create_opr
 
     def visit_rename(self, statement: RenameTableStatement):
