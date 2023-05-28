@@ -247,19 +247,10 @@ class CreateTable:
                 elif child.data == "simple_select":
                     query = self.visit(child)
 
-        # setting all other column definition attributes as None,
-        # need to figure from query
-        if uid_list == []:
-            assert (query is not None)
-            for uid in query.target_list:
-                uid_list.append(uid)
-
-        col_list = []
-        for uid in uid_list:
-            if hasattr(uid, "col_name"):
-                col_list.append(ColumnDefinition(uid.col_name, None, None, None))
-            elif hasattr(uid, "output"):
-                col_list.append(ColumnDefinition(uid.output, None, None, None))
+        # When uid_list is empty, the column information is inferred from the subquery in the binder.
+        col_list = [
+            ColumnDefinition(uid.col_name, None, None, None) for uid in uid_list
+        ]
         return CreateMaterializedViewStatement(
             view_info, col_list, if_not_exists, query
         )

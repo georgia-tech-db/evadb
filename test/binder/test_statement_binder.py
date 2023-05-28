@@ -20,7 +20,9 @@ from eva.binder.statement_binder import StatementBinder
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import NdArrayType
+from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.alias import Alias
+from eva.parser.create_statement import ColumnDefinition
 
 
 class StatementBinderTests(unittest.TestCase):
@@ -115,6 +117,15 @@ class StatementBinderTests(unittest.TestCase):
             mat_statement = MagicMock()
             binder._bind_create_mat_statement(mat_statement)
             mock_binder.assert_called_with(mat_statement.query)
+
+    def test_raises_mismatch_columns_create_mat_statement(self):
+        with patch.object(StatementBinder, "bind"):
+            binder = StatementBinder(StatementBinderContext())
+            mat_statement = MagicMock()
+            mat_statement.col_list = [ColumnDefinition('id', None, None, None)]
+            mat_statement.query.target_list = [TupleValueExpression(col_name='id'), TupleValueExpression(col_name='label')]
+            with self.assertRaises(Exception, msg='Projected columns mismatch, expected 1 found 2.'):
+                binder._bind_create_mat_statement(mat_statement)
 
     def test_bind_explain_statement(self):
         with patch.object(StatementBinder, "bind") as mock_binder:

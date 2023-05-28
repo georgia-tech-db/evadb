@@ -1,9 +1,3 @@
-<div >
-  <a href="https://evadb.readthedocs.io/">
-    <img src="https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/images/eva/eva-banner.png" alt="EVA" width="1000px" margin-left="-5px">
-  </a>
-</div>
-
 # EVA AI-SQL Database System
 
 <div>
