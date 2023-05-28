@@ -1,10 +1,14 @@
+from typing import Union
 import pandas
 from eva.expression.expression_utils import conjunction_list_to_expression_tree
 from eva.interfaces.relational.utils import (
+    create_limit_expression,
+    create_star_expression,
     execute_statement,
     sql_predicate_to_expresssion_tree,
     sql_string_to_expresssion_list,
     string_to_lateral_join,
+    try_binding,
 )
 from eva.models.storage.batch import Batch
 from eva.parser.select_statement import SelectStatement
@@ -12,11 +16,29 @@ from eva.parser.select_statement import SelectStatement
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import JoinNode, TableRef
 from eva.parser.types import JoinType
+from eva.parser.utils import parse_sql_orderby_expr
 
 
 class EVARelation:
-    def __init__(self, stmt: AbstractStatement):
-        self._eva_statement: AbstractStatement = stmt
+    def __init__(self, query_node: Union[AbstractStatement, TableRef]):
+        self._query_node = query_node
+        self._alias = None
+        self._columns = None
+
+    def alias(self, alias: str) -> "EVARelation":
+        """Returns a new Relation with an alias set.
+
+        Args:
+            alias (str): an alias name to be set for the Relation.
+
+        Returns:
+            EVARelation: Aliased Relation.
+
+        Examples:
+            >>> relation = conn.table("sample_table")
+            >>> relation.alias('table')
+        """
+        self._alias = alias
 
     def cross_apply(self, expr: str, alias: str) -> "EVARelation":
         """Execute a expr on all the rows of the relation
@@ -36,20 +58,24 @@ class EVARelation:
             >>> relation.cross_apply("Yolo(data)", "objs(labels, bboxes, scores)")
 
             Runs Yolo on all the frames of the input table and unnest each object as separate row.
-            
+
             >>> relation.cross_apply("unnest(Yolo(data))", "obj(label, bbox, score)")
         """
         assert isinstance(self._eva_statement, SelectStatement)
         assert self._eva_statement.from_table is not None
 
         table_ref = string_to_lateral_join(expr, alias=alias)
-        self._eva_statement.from_table = TableRef(
+        join_table = TableRef(
             JoinNode(
-                self._eva_statement.from_table,
+                TableRef(self._query_node, alias=self._alias),
                 table_ref,
                 join_type=JoinType.LATERAL_JOIN,
             )
         )
+        self._query_node = SelectStatement(
+            target_list=create_star_expression(), from_table=join_table
+        )
+        try_binding(self._query_node)
         return self
 
     def df(self) -> pandas.DataFrame:
@@ -68,7 +94,7 @@ class EVARelation:
         Returns:
             Batch: result as eva Batch
         """
-        result = execute_statement(self._eva_statement)
+        result = execute_statement(self._query_node)
         assert result.frames is not None
         return result
 
@@ -89,20 +115,63 @@ class EVARelation:
 
             >>> relation.filter("col1 > 10 AND col1 < 20")
 
-            Multiple filters is equivalent to `AND`
-
-            >>> relation.filter("col1 > 10").filter("col1 <20")
         """
-        assert isinstance(self._eva_statement, SelectStatement)
         parsed_expr = sql_predicate_to_expresssion_tree(expr)
 
-        if self._eva_statement.where_clause is None:
-            self._eva_statement.where_clause = parsed_expr
-        else:
-            # AND the clause with the existing expression
-            self._eva_statement.where_clause = conjunction_list_to_expression_tree(
-                [self._eva_statement.where_clause, parsed_expr]
-            )
+        self._query_node = SelectStatement(
+            target_list=create_star_expression(),
+            from_table=TableRef(self._query_node, alias=self._alias),
+            where_clause=parsed_expr,
+        )
+
+        try_binding(self._query_node)
+
+        return self
+
+    def limit(self, num: int) -> "EVARelation":
+        """Limits the result count to the number specified.
+
+        Args:
+            num (int): Number of records to return. Will return num records or all records if the Relation contains fewer records.
+
+        Returns:
+            EVARelation: Relation with subset of records
+
+        Examples:
+            >>> relation = conn.table("sample_table")
+            >>> relation.limit(10)
+
+        """
+
+        limit_expr = create_limit_expression(num)
+        self._query_node = SelectStatement(
+            target_list=create_star_expression(),
+            from_table=TableRef(self._query_node, alias=self._alias),
+            limit_count=limit_expr,
+        )
+
+        try_binding(self._query_node)
+
+        return self
+
+    def order(self, order_expr: str) -> "EVARelation":
+        """Reorder the relation based on the order_expr
+
+        Args:
+            order_expr (str): sql expression to order the relation
+
+        Returns:
+            EVARelation: A EVARelation ordered based on the order_expr.
+        """
+
+        parsed_expr = parse_sql_orderby_expr(order_expr)
+        self._query_node = SelectStatement(
+            target_list=create_star_expression(),
+            from_table=TableRef(self._query_node, alias=self._alias),
+            orderby_clause_list=parsed_expr,
+        )
+
+        try_binding(self._query_node)
 
         return self
 
@@ -128,10 +197,26 @@ class EVARelation:
             >>> relation.select("col1")
             >>> relation.select("col1, col2")
         """
-        assert isinstance(self._eva_statement, SelectStatement)
 
         parsed_exprs = sql_string_to_expresssion_list(expr)
 
-        self._eva_statement.target_list = parsed_exprs
+        self._query_node = SelectStatement(
+            target_list=parsed_exprs,
+            from_table=TableRef(self._query_node, alias=self._alias),
+        )
+        try_binding(self._query_node)
 
         return self
+
+    def sql_query(self) -> str:
+        """Get the SQL query that is equivalent to the relation
+
+        Returns:
+            str: the sql query
+
+        Examples:
+            >>> relation = conn.table("sample_table").project('i')
+            >>> relation.sql_query()
+        """
+
+        return str(self._query_node)

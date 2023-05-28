@@ -4,6 +4,8 @@ from eva.binder.statement_binder import StatementBinder
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.executor.plan_executor import PlanExecutor
 from eva.expression.abstract_expression import AbstractExpression
+from eva.expression.constant_value_expression import ConstantValueExpression
+from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.models.storage.batch import Batch
 from eva.optimizer.plan_generator import PlanGenerator
 from eva.optimizer.statement_to_opr_converter import StatementToPlanConverter
@@ -45,3 +47,15 @@ def execute_statement(statement: AbstractStatement) -> Batch:
 
 def string_to_lateral_join(expr: str, alias: str):
     return parse_lateral_join(expr, alias)
+
+
+def create_star_expression():
+    return [TupleValueExpression(col_name="*")]
+
+
+def create_limit_expression(num: int):
+    return ConstantValueExpression(num)
+
+
+def try_binding(stmt: AbstractStatement):
+    StatementBinder(StatementBinderContext()).bind(stmt)

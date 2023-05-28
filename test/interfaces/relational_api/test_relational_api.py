@@ -14,7 +14,7 @@ class RelationalAPI(unittest.TestCase):
         super().__init__(*args, **kwargs)
 
     def setUp(self):
-        os.system("nohup eva_server --port 8888 --start")
+        os.system("python eva/eva_server.py --port 8888 --start")
         CatalogManager().reset()
         self.mnist_path = f"{EVA_ROOT_DIR}/data/mnist/mnist.mp4"
         load_udfs_for_testing()
@@ -97,3 +97,35 @@ class RelationalAPI(unittest.TestCase):
                 "select id, data from mnist_video where id > 10 AND id < 20;"
             ).df(),
         )
+
+    def test_create_index(self):
+        conn = connect(port=8888)
+
+        # load some images
+        rel = conn.load(
+            self.images,
+            table_name="meme_images",
+            format="image",
+        )
+        rel.execute()
+
+        # create a vector index using FAISS
+        conn.create_vector_index("faiss_index", "DummyFeatureExtractor(data)", "FAISS")
+
+        # do similarity search
+        base_image = f"{EVA_ROOT_DIR}/data/detoxify/meme1.jpg"
+        rel = (
+            conn.table("meme_images")
+            .orderby(
+                f"Similarity(DummyFeatureExtractor(Open({base_image})), DummyFeatureExtractor(data))"
+            )
+            .limit(1)
+            .select("name")
+        )
+        similarity_sql = """SELECT name FROM meme_images
+                            ORDER BY
+                                Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data_col))
+                            LIMIT 1;""".format(
+            base_image
+        )
+        assert_frame_equal(rel.df(), conn.query(similarity_sql).df())

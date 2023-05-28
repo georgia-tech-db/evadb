@@ -13,12 +13,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import asyncio
+
+import pandas
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.interfaces.relational.relation import EVARelation
+from eva.interfaces.relational.utils import execute_statement
 
 from eva.models.server.response import Response
+from eva.models.storage.batch import Batch
 from eva.parser.select_statement import SelectStatement
-from eva.parser.utils import parse_load, parse_query, parse_table_clause
+from eva.parser.utils import (
+    parse_create_vector_index,
+    parse_load,
+    parse_query,
+    parse_table_clause,
+)
 from eva.utils.logging_manager import logger
 
 
@@ -27,6 +36,7 @@ class EVAConnection:
         self._reader = reader
         self._writer = writer
         self._cursor = None
+        self._result: Batch = None
 
     def cursor(self):
         # One unique cursor for one connection
@@ -45,11 +55,20 @@ class EVAConnection:
     def query(self, sql_query: str) -> EVARelation:
         return self.cursor().query(sql_query)
 
+    def df(self) -> pandas.DataFrame:
+        return self.cursor().df()
+
+    def create_vector_index(self, index_name: str, on: str, using: str) -> "EVACursor":
+        stmt = parse_create_vector_index(index_name, on, using)
+        self._result = execute_statement(stmt)
+        return self
+
 
 class EVACursor(object):
     def __init__(self, connection):
         self._connection = connection
         self._pending_query = False
+        self._result = None
 
     async def execute_async(self, query: str):
         """
@@ -120,6 +139,16 @@ class EVACursor(object):
             target_list=[TupleValueExpression(col_name="*")], from_table=table
         )
         return EVARelation(select_stmt)
+
+    def df(self) -> pandas.DataFrame:
+        if not self.result:
+            raise Exception("No valid result with the current connection")
+        return self.result.frames
+
+    def create_vector_index(self, index_name: str, on: str, using: str) -> "EVACursor":
+        stmt = parse_create_vector_index(index_name, on, using)
+        self._result = execute_statement(stmt)
+        return self
 
     def load(
         self, file_regex: str, table_name: str, format: str, **kwargs

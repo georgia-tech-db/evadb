@@ -46,3 +46,16 @@ def parse_lateral_join(expr: str, alias: str):
     assert isinstance(stmt, SelectStatement), "Expected a select statement"
     assert stmt.from_table.is_join()
     return stmt.from_table.join_node.right
+
+
+def parse_create_vector_index(index_name: str, on: str, using: str):
+    mock_query = f"CREATE INDEX {index_name} ON {on} USING {using};"
+    stmt = Parser().parse(mock_query)[0]
+    return stmt
+
+
+def parse_sql_orderby_expr(expr: str):
+    mock_query = f"SELECT * FROM DUMMY ORDER BY {expr};"
+    stmt = Parser().parse(mock_query)[0]
+    assert isinstance(stmt, SelectStatement), "Expected a select statement"
+    return stmt.orderby_list
