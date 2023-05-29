@@ -12,9 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import List
-
 import numpy as np
+
+from typing import List
+from pathlib import Path
 
 from eva.third_party.vector_stores.types import (
     FeaturePayload,
@@ -43,7 +44,7 @@ required_params = ["index_path"]
 
 
 class FaissVectorStore(VectorStore):
-    def __init__(self, index_name: str, index_path: str) -> None:
+    def __init__(self, index_name: str, index_path: Path) -> None:
         # Reference to Faiss documentation.
         # IDMap: https://github.com/facebookresearch/faiss/wiki/Pre--and-post-processing#faiss-id-mapping
         # Other index types: https://github.com/facebookresearch/faiss/wiki/The-index-factory
@@ -66,12 +67,12 @@ class FaissVectorStore(VectorStore):
     def persist(self):
         assert self._index is not None, "Please create an index before calling persist."
         faiss = _lazy_load_faiss()
-        faiss.write_index(self._index, self._index_path)
+        faiss.write_index(self._index, str(self._index_path))
 
     def query(self, query: VectorIndexQuery) -> VectorIndexQueryResult:
         faiss = _lazy_load_faiss()
         if self._index is None:
-            self._index = faiss.read_index(self._index_path)
+            self._index = faiss.read_index(str(self._index_path))
         assert self._index is not None, "Cannot query as index does not exists."
         embedding = np.array(query.embedding, dtype="float32")
         if len(embedding.shape) != 2:

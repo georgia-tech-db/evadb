@@ -130,7 +130,7 @@ def handle_vector_store_params(
         ValueError: If the vector store type in the node is not supported.
     """
     if vector_store_type == VectorStoreType.FAISS:
-        return {"index_path": index_path}
+        return {"index_path": Path(index_path)}
     elif vector_store_type == VectorStoreType.QDRANT:
         return {"index_db": str(Path(index_path).parent)}
     else:
