@@ -90,7 +90,7 @@ class EVARelation:
         batch = self.execute()
         assert batch is not None, "relation execute failed"
         return batch.frames
-    
+
     def execute(self) -> Batch:
         """Transform the relation into a result set
 
@@ -214,7 +214,7 @@ class EVARelation:
         batch = self.execute()
         assert batch is not None, "relation execute failed"
         return batch.frames
-    
+
     def sql_query(self) -> str:
         """Get the SQL query that is equivalent to the relation
 
