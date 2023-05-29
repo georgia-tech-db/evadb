@@ -20,7 +20,7 @@ create_database: CREATE DATABASE if_not_exists? uid
 
 create_index: CREATE INDEX uid ON table_name index_elem vector_store_type?
 
-create_table: CREATE TABLE if_not_exists? table_name (create_definitions | (AS select_statement)?)
+create_table: CREATE TABLE if_not_exists? table_name (create_definitions | (AS select_statement))
     
 // Rename statements
 

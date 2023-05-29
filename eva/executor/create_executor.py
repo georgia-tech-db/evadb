@@ -30,23 +30,24 @@ class CreateExecutor(AbstractExecutor):
         if not handle_if_not_exists(self.node.table_info, self.node.if_not_exists):
             logger.debug(f"Creating table {self.node.table_info}")
 
-            child = self.children[0]
-            # only support seq scan based materialization
-            if child.node.opr_type not in {PlanOprType.SEQUENTIAL_SCAN, PlanOprType.PROJECT}:
-                err_msg = "Invalid query {}, expected {} or {}".format(
-                    child.node.opr_type,
-                    PlanOprType.SEQUENTIAL_SCAN,
-                    PlanOprType.PROJECT,
-                )
-                raise ExecutorError(err_msg)
-
             catalog_entry = self.catalog.create_and_insert_table_catalog_entry(
                 self.node.table_info, self.node.column_list
             )
             storage_engine = StorageEngine.factory(catalog_entry)
             storage_engine.create(table=catalog_entry)
 
-            # Populate the table
-            for batch in child.exec():
-                batch.drop_column_alias()
-                storage_engine.write(catalog_entry, batch)
+            if self.children != []:
+                child = self.children[0]
+                # only support seq scan based materialization
+                if child.node.opr_type not in {PlanOprType.SEQUENTIAL_SCAN, PlanOprType.PROJECT}:
+                    err_msg = "Invalid query {}, expected {} or {}".format(
+                        child.node.opr_type,
+                        PlanOprType.SEQUENTIAL_SCAN,
+                        PlanOprType.PROJECT,
+                    )
+                    raise ExecutorError(err_msg)
+
+                # Populate the table
+                for batch in child.exec():
+                    batch.drop_column_alias()
+                    storage_engine.write(catalog_entry, batch)
