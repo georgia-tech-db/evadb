@@ -403,25 +403,11 @@ class HuggingFaceTests(unittest.TestCase):
                   AND paragraph >= 1 AND paragraph <= 3;"""
         output = execute_query_fetch_all(select_query)
 
-        # Test that output has 7 columns
-        self.assertEqual(len(output.frames.columns), 7)
+        # Test that output only has 1 column (data)
+        self.assertEqual(len(output.frames.columns), 1)
 
-        # Test that there exists a column with udf_name.entity
-        self.assertTrue(udf_name.lower() + ".entity" in output.frames.columns)
-        # Test to check all the udf_name.entity is ""
-        self.assertTrue(
-            all(
-                x == "" for x in output.frames[udf_name.lower() + ".entity"]
-            )
-        )
+        # Test that there does not exist a column with udf_name.entity
+        self.assertFalse(udf_name.lower() + ".entity" in output.frames.columns)
 
-        # Test that there exists a column with udf_name.score
-        self.assertTrue(udf_name.lower() + ".score" in output.frames.columns)
-        # Test to check all the udf_name.score is 0
-        self.assertTrue(
-            all(
-                x == 0 for x in output.frames[udf_name.lower() + ".score"]
-            )
-        )
         drop_udf_query = f"DROP UDF {udf_name};"
         execute_query_fetch_all(drop_udf_query)
