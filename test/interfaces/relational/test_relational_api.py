@@ -1,4 +1,3 @@
-import os
 import unittest
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
@@ -14,7 +13,7 @@ class RelationalAPI(unittest.TestCase):
         super().__init__(*args, **kwargs)
 
     def setUp(self):
-        os.system("python eva/eva_server.py --port 8888 --start")
+        # os.system("nohup eva_server --port 8886 --start")
         CatalogManager().reset()
         self.mnist_path = f"{EVA_ROOT_DIR}/data/mnist/mnist.mp4"
         load_udfs_for_testing()
@@ -26,10 +25,10 @@ class RelationalAPI(unittest.TestCase):
         # todo: move these to relational apis as well
         execute_query_fetch_all("""DROP TABLE IF EXISTS mnist_video;""")
         execute_query_fetch_all("""DROP TABLE IF EXISTS meme_images;""")
-        os.system("nohup eva_server --stop")
+        # os.system("nohup eva_server --stop")
 
     def test_relation_apis(self):
-        conn = connect(port=8888)
+        conn = connect(port=8886)
         rel = conn.load(
             self.mnist_path,
             table_name="mnist_video",
@@ -37,25 +36,31 @@ class RelationalAPI(unittest.TestCase):
         )
         rel.execute()
 
-        rel = conn.table("mnist_video").select("_row_id, id")
+        rel = conn.table("mnist_video")
+        assert_frame_equal(rel.df(), conn.query("select * from mnist_video;").df())
+
+        rel = rel.select("_row_id, id, data")
         assert_frame_equal(
-            rel.df(), conn.query("select _row_id, id from mnist_video;").df()
+            rel.df(),
+            conn.query("select _row_id, id, data from mnist_video;").df(),
         )
 
         rel = rel.filter("id < 10")
         assert_frame_equal(
             rel.df(),
-            conn.query("select _row_id, id from mnist_video where id < 10;").df(),
+            conn.query("select _row_id, id, data from mnist_video where id < 10;").df(),
         )
 
-        rel = rel.cross_apply(
-            "unnest(MnistImageClassifier(data))", "mnist(label)"
-        ).filter("mnist.label = 1")
+        rel = (
+            rel.cross_apply("unnest(MnistImageClassifier(data))", "mnist(label)")
+            .filter("mnist.label = 1")
+            .select("_row_id, id")
+        )
+
         query = """ select _row_id, id
                     from mnist_video
-                        join lateral unnest(MnistImageClassifier(data)) AS mnist(label) 
+                        join lateral unnest(MnistImageClassifier(data)) AS mnist(label)
                     where id < 10 AND mnist.label = 1;"""
-        print(rel.df())
         assert_frame_equal(rel.df(), conn.query(query).df())
 
         rel = conn.load(
@@ -77,7 +82,7 @@ class RelationalAPI(unittest.TestCase):
         )
 
     def test_relation_api_chaining(self):
-        conn = connect(port=8888)
+        conn = connect(port=8886)
         rel = conn.load(
             self.mnist_path,
             table_name="mnist_video",
@@ -109,22 +114,33 @@ class RelationalAPI(unittest.TestCase):
         )
         rel.execute()
 
-        # create a vector index using FAISS
-        conn.create_vector_index("faiss_index", "DummyFeatureExtractor(data)", "FAISS")
+        # todo support register udf
+        conn.query(
+            f"""CREATE UDF IF NOT EXISTS SiftFeatureExtractor
+                IMPL  '{EVA_ROOT_DIR}/eva/udfs/sift_feature_extractor.py'"""
+        ).df()
+
+        # create a vector index using QDRANT
+        conn.create_vector_index(
+            "faiss_index",
+            table_name="meme_images",
+            expr="SiftFeatureExtractor(data)",
+            using="QDRANT",
+        ).df()
 
         # do similarity search
         base_image = f"{EVA_ROOT_DIR}/data/detoxify/meme1.jpg"
         rel = (
             conn.table("meme_images")
-            .orderby(
-                f"Similarity(DummyFeatureExtractor(Open({base_image})), DummyFeatureExtractor(data))"
+            .order(
+                f"Similarity(SiftFeatureExtractor(Open('{base_image}')), SiftFeatureExtractor(data))"
             )
             .limit(1)
             .select("name")
         )
         similarity_sql = """SELECT name FROM meme_images
                             ORDER BY
-                                Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data_col))
+                                Similarity(SiftFeatureExtractor(Open("{}")), SiftFeatureExtractor(data))
                             LIMIT 1;""".format(
             base_image
         )

@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from copy import deepcopy
 from eva.parser.types import StatementType
 
 
@@ -34,3 +35,15 @@ class AbstractStatement:
 
     def __hash__(self) -> int:
         return hash(self.stmt_type)
+
+    def __deepcopy__(self, memo):
+        cls = self.__class__
+        result = cls.__new__(cls)
+        memo[id(self)] = result
+        for k, v in self.__dict__.items():
+            setattr(result, k, deepcopy(v, memo))
+        return result
+
+    def copy(self):
+        """Returns a deepcopy of the statement."""
+        return deepcopy(self)

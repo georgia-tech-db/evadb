@@ -1,53 +1,106 @@
+from typing import Union
 import pandas
-from eva.expression.expression_utils import conjunction_list_to_expression_tree
 from eva.interfaces.relational.utils import (
+    create_limit_expression,
+    create_star_expression,
     execute_statement,
+    handle_select_clause,
     sql_predicate_to_expresssion_tree,
     sql_string_to_expresssion_list,
     string_to_lateral_join,
+    try_binding,
 )
 from eva.models.storage.batch import Batch
+from eva.parser.alias import Alias
 from eva.parser.select_statement import SelectStatement
 
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import JoinNode, TableRef
 from eva.parser.types import JoinType
+from eva.parser.utils import parse_sql_orderby_expr
 
 
 class EVARelation:
-    def __init__(self, stmt: AbstractStatement):
-        self._eva_statement: AbstractStatement = stmt
+    def __init__(
+        self, query_node: Union[AbstractStatement, TableRef], alias: Alias = None
+    ):
+        self._query_node = query_node
+        self._alias = alias
+        self._dummy_alias = Alias("relation")
 
-    def select(self, expr: str) -> "EVARelation":
-        """
-        Projects a set of expressions and returns a new EVARelation.
+    def alias(self, alias: str) -> "EVARelation":
+        """Returns a new Relation with an alias set.
 
-        Parameters:
-            exprs (Union[str, List[str]]): The expression(s) to be selected.
-            If `*` is provided, it expands to all columns in the current EVARelation.
+        Args:
+            alias (str): an alias name to be set for the Relation.
 
         Returns:
-            EVARelation: A EVARelation with subset (or all) of columns.
+            EVARelation: Aliased Relation.
 
         Examples:
             >>> relation = conn.table("sample_table")
-
-            Select all columns in the EVARelation.
-
-            >>> relation.select("*")
-
-            Select all subset of columns in the EVARelation.
-
-            >>> relation.select("col1")
-            >>> relation.select("col1, col2")
+            >>> relation.alias('table')
         """
-        assert isinstance(self._eva_statement, SelectStatement)
+        self._alias = Alias(alias)
 
-        parsed_exprs = sql_string_to_expresssion_list(expr)
+    def cross_apply(self, expr: str, alias: str) -> "EVARelation":
+        """Execute a expr on all the rows of the relation
 
-        self._eva_statement.target_list = parsed_exprs
+        Args:
+            expr (str): sql expression
+            alias (str): alias of the output of the expr
 
+        Returns:
+            `EVARelation`: relation
+
+        Examples:
+
+            Runs Yolo on all the frames of the input table
+
+            >>> relation = conn.table("videos")
+            >>> relation.cross_apply("Yolo(data)", "objs(labels, bboxes, scores)")
+
+            Runs Yolo on all the frames of the input table and unnest each object as separate row.
+
+            >>> relation.cross_apply("unnest(Yolo(data))", "obj(label, bbox, score)")
+        """
+        assert self._query_node.from_table is not None
+
+        table_ref = string_to_lateral_join(expr, alias=alias)
+        join_table = TableRef(
+            JoinNode(
+                TableRef(self._query_node, alias=self._alias),
+                table_ref,
+                join_type=JoinType.LATERAL_JOIN,
+            )
+        )
+        self._query_node = SelectStatement(
+            target_list=create_star_expression(), from_table=join_table
+        )
+        # reset the alias as after join there isn't a single alias
+        self._alias = Alias("Relation")
+        try_binding(self._query_node)
         return self
+
+    def df(self) -> pandas.DataFrame:
+        """Execute and fetch all rows as a pandas DataFrame
+
+        Returns:
+            pandas.DataFrame:
+        """
+        batch = self.execute()
+        assert batch is not None, "relation execute failed"
+        return batch.frames
+
+    def execute(self) -> Batch:
+        """Transform the relation into a result set
+
+        Returns:
+            Batch: result as eva Batch
+        """
+        result = execute_statement(self._query_node.copy())
+        assert result.frames is not None
+        return result
 
     def filter(self, expr: str) -> "EVARelation":
         """
@@ -66,72 +119,102 @@ class EVARelation:
 
             >>> relation.filter("col1 > 10 AND col1 < 20")
 
-            Multiple filters is equivalent to `AND`
-
-            >>> relation.filter("col1 > 10").filter("col1 <20")
         """
-        assert isinstance(self._eva_statement, SelectStatement)
         parsed_expr = sql_predicate_to_expresssion_tree(expr)
 
-        if self._eva_statement.where_clause is None:
-            self._eva_statement.where_clause = parsed_expr
-        else:
-            # AND the clause with the existing expression
-            self._eva_statement.where_clause = conjunction_list_to_expression_tree(
-                [self._eva_statement.where_clause, parsed_expr]
-            )
+        self._query_node = handle_select_clause(
+            self._query_node, self._alias, "where_clause", parsed_expr
+        )
+
+        try_binding(self._query_node)
 
         return self
 
-    def execute(self) -> Batch:
-        """Transform the relation into a result set
-
-        Returns:
-            Batch: result as eva Batch
-        """
-        result = execute_statement(self._eva_statement)
-        assert result.frames is not None
-        return result
-
-    def df(self) -> pandas.DataFrame:
-        """Execute and fetch all rows as a pandas DataFrame
-
-        Returns:
-            pandas.DataFrame:
-        """
-        batch = self.execute()
-        assert batch is not None, "relation execute failed"
-        return batch.frames
-
-    def cross_apply(self, expr: str, alias: str) -> "EVARelation":
-        """Execute a expr on all the rows of the relation
+    def limit(self, num: int) -> "EVARelation":
+        """Limits the result count to the number specified.
 
         Args:
-            expr (str): sql expression
-            alias (str): alias of the output of the expr
+            num (int): Number of records to return. Will return num records or all records if the Relation contains fewer records.
 
         Returns:
-            EVARelation: relation
+            EVARelation: Relation with subset of records
 
         Examples:
+            >>> relation = conn.table("sample_table")
+            >>> relation.limit(10)
 
-            Runs Yolo on all the frames of the input table
-
-            >>> relation = conn.table("videos")
-            >>> relation.cross_apply("Yolo(data)", "objs(labels, bboxes, scores)")
-
-            Runs Yolo on all the frames of the input table and unnest each object as separate row.
-            >>> relation.cross_apply("unnest(Yolo(data))", "obj(label, bbox, score)")
         """
-        assert isinstance(self._eva_statement, SelectStatement)
-        assert self._eva_statement.from_table is not None
 
-        table_ref = string_to_lateral_join(expr, alias=alias)
-        self._eva_statement.from_table = TableRef(
-            JoinNode(
-                self._eva_statement.from_table,
-                table_ref,
-                join_type=JoinType.LATERAL_JOIN,
-            )
+        limit_expr = create_limit_expression(num)
+        self._query_node = handle_select_clause(
+            self._query_node, self._alias, "limit_count", limit_expr
         )
+
+        try_binding(self._query_node)
+
         return self
+
+    def order(self, order_expr: str) -> "EVARelation":
+        """Reorder the relation based on the order_expr
+
+        Args:
+            order_expr (str): sql expression to order the relation
+
+        Returns:
+            EVARelation: A EVARelation ordered based on the order_expr.
+        """
+
+        parsed_expr = parse_sql_orderby_expr(order_expr)
+        self._query_node = handle_select_clause(
+            self._query_node, self._alias, "orderby_list", parsed_expr
+        )
+
+        try_binding(self._query_node)
+
+        return self
+
+    def select(self, expr: str) -> "EVARelation":
+        """
+        Projects a set of expressions and returns a new EVARelation.
+
+        Parameters:
+            exprs (Union[str, List[str]]): The expression(s) to be selected. If '*' is provided, it expands to all columns in the current EVARelation.
+
+        Returns:
+            EVARelation: A EVARelation with subset (or all) of columns.
+
+        Examples:
+            >>> relation = conn.table("sample_table")
+
+            Select all columns in the EVARelation.
+
+            >>> relation.select("*")
+
+            Select all subset of columns in the EVARelation.
+
+            >>> relation.select("col1")
+            >>> relation.select("col1, col2")
+        """
+
+        parsed_exprs = sql_string_to_expresssion_list(expr)
+
+        self._query_node = handle_select_clause(
+            self._query_node, self._alias, "target_list", parsed_exprs
+        )
+
+        try_binding(self._query_node)
+
+        return self
+
+    def sql_query(self) -> str:
+        """Get the SQL query that is equivalent to the relation
+
+        Returns:
+            str: the sql query
+
+        Examples:
+            >>> relation = conn.table("sample_table").project('i')
+            >>> relation.sql_query()
+        """
+
+        return str(self._query_node)

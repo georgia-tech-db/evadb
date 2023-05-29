@@ -127,7 +127,7 @@ class TableSources:
             from_clause,
             where_clause,
             groupby_clause=groupby_clause,
-            orderby_clause_list=orderby_clause,
+            orderby_list=orderby_clause,
             limit_count=limit_count,
         )
 

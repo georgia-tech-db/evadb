@@ -1,5 +1,5 @@
 import asyncio
-from typing import List
+from typing import List, Union
 from eva.binder.statement_binder import StatementBinder
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.executor.plan_executor import PlanExecutor
@@ -9,7 +9,9 @@ from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.models.storage.batch import Batch
 from eva.optimizer.plan_generator import PlanGenerator
 from eva.optimizer.statement_to_opr_converter import StatementToPlanConverter
+from eva.parser.select_statement import SelectStatement
 from eva.parser.statement import AbstractStatement
+from eva.parser.table_ref import TableRef
 
 from eva.parser.utils import (
     parse_expression,
@@ -58,4 +60,58 @@ def create_limit_expression(num: int):
 
 
 def try_binding(stmt: AbstractStatement):
-    StatementBinder(StatementBinderContext()).bind(stmt)
+    # To avoid complications in subsequent binder calls, we attempt to bind a copy of
+    # the statement since the binder modifies the statement in place and can cause
+    # issues if statement is partially bound.
+    StatementBinder(StatementBinderContext()).bind(stmt.copy())
+
+
+def handle_select_clause(
+    query: SelectStatement, alias: str, clause: str, value: Union[str, int, list]
+) -> SelectStatement:
+    """
+    Modifies a SELECT statement object by adding or modifying a specific clause.
+
+    Args:
+        query (SelectStatement): The SELECT statement object.
+        alias (str): Alias for the table reference.
+        clause (str): The clause to be handled.
+        value (str, int, list): The value to be set for the clause.
+
+    Returns:
+        SelectStatement: The modified SELECT statement object.
+
+    Raises:
+        AssertionError: If the query is not an instance of SelectStatement class.
+        AssertionError: If the clause is not in the accepted clauses list.
+    """
+
+    assert isinstance(
+        query, SelectStatement
+    ), "query must be an instance of SelectStatement"
+
+    accepted_clauses = [
+        "where_clause",
+        "target_list",
+        "groupby_clause",
+        "orderby_list",
+        "limit_count",
+    ]
+
+    assert clause in accepted_clauses, f"Unknown clause: {clause}"
+
+    # If the clause being set is "target_list" and the value is equal to
+    # "*", the "SELECT *" portion is reset.
+    if clause == "target_list" and getattr(query, clause) == create_star_expression():
+        setattr(query, clause, None)
+
+    if getattr(query, clause) is None:
+        setattr(query, clause, value)
+    else:
+        query = SelectStatement(
+            target_list=create_star_expression(),
+            from_table=TableRef(query, alias=alias),
+        )
+        setattr(query, clause, value)
+
+    return query

@@ -17,10 +17,11 @@ import asyncio
 import pandas
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.interfaces.relational.relation import EVARelation
-from eva.interfaces.relational.utils import execute_statement
+from eva.interfaces.relational.utils import execute_statement, try_binding
 
 from eva.models.server.response import Response
 from eva.models.storage.batch import Batch
+from eva.parser.alias import Alias
 from eva.parser.select_statement import SelectStatement
 from eva.parser.utils import (
     parse_create_vector_index,
@@ -56,10 +57,14 @@ class EVAConnection:
         return self.cursor().query(sql_query)
 
     def df(self) -> pandas.DataFrame:
-        return self.cursor().df()
+        if not self._result:
+            raise Exception("No valid result with the current connection")
+        return self._result.frames
 
-    def create_vector_index(self, index_name: str, on: str, using: str) -> "EVACursor":
-        stmt = parse_create_vector_index(index_name, on, using)
+    def create_vector_index(
+        self, index_name: str, table_name: str, expr: str, using: str
+    ) -> "EVACursor":
+        stmt = parse_create_vector_index(index_name, table_name, expr, using)
         self._result = execute_statement(stmt)
         return self
 
@@ -138,15 +143,18 @@ class EVACursor(object):
         select_stmt = SelectStatement(
             target_list=[TupleValueExpression(col_name="*")], from_table=table
         )
-        return EVARelation(select_stmt)
+        try_binding(select_stmt)
+        return EVARelation(select_stmt, alias=Alias(table_name.lower()))
 
     def df(self) -> pandas.DataFrame:
-        if not self.result:
+        if not self._result:
             raise Exception("No valid result with the current connection")
-        return self.result.frames
+        return self._result.frames
 
-    def create_vector_index(self, index_name: str, on: str, using: str) -> "EVACursor":
-        stmt = parse_create_vector_index(index_name, on, using)
+    def create_vector_index(
+        self, index_name: str, table_name: str, expr: str, using: str
+    ) -> "EVACursor":
+        stmt = parse_create_vector_index(index_name, table_name, expr, using)
         self._result = execute_statement(stmt)
         return self
 

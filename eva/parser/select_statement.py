@@ -56,7 +56,7 @@ class SelectStatement(AbstractStatement):
         self._union_link = None
         self._union_all = False
         self._groupby_clause = kwargs.get("groupby_clause", None)
-        self._orderby_list = kwargs.get("orderby_clause_list", None)
+        self._orderby_list = kwargs.get("orderby_list", None)
         self._limit_count = kwargs.get("limit_count", None)
 
     @property
@@ -103,13 +103,25 @@ class SelectStatement(AbstractStatement):
     def groupby_clause(self):
         return self._groupby_clause
 
+    @groupby_clause.setter
+    def groupby_clause(self, groupby_clause):
+        self._groupby_clause = groupby_clause
+
     @property
     def orderby_list(self):
         return self._orderby_list
 
+    @orderby_list.setter
+    def orderby_list(self, orderby_list):
+        self._orderby_list = orderby_list
+
     @property
     def limit_count(self):
         return self._limit_count
+
+    @limit_count.setter
+    def limit_count(self, limit_count):
+        self._limit_count = limit_count
 
     def __str__(self) -> str:
         target_list_str = ""
@@ -130,7 +142,6 @@ class SelectStatement(AbstractStatement):
             orderby_list_str = orderby_list_str.rstrip(", ")
 
         select_str = f"SELECT {target_list_str} FROM {str(self._from_table)}"
-
         if self._where_clause is not None:
             select_str += " WHERE " + str(self._where_clause)
 

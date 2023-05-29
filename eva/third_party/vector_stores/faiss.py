@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from pathlib import Path
 from typing import List
 
 import numpy as np
@@ -85,5 +86,6 @@ class FaissVectorStore(VectorStore):
         return VectorIndexQueryResult(distances, ids)
 
     def delete(self):
-        if self._index_path.exists():
-            self._index_path.unlink()
+        index_path = Path(self._index_path)
+        if index_path.exists():
+            index_path.unlink()
