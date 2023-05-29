@@ -105,6 +105,29 @@ class RelationalAPI(unittest.TestCase):
             ).df(),
         )
 
+    def test_interleaving_calls(self):
+        conn = connect(port=8886)
+
+        rel = conn.load(
+            self.mnist_path,
+            table_name="mnist_video",
+            format="video",
+        )
+        rel.execute()
+
+        rel = conn.table("mnist_video")
+        filtered_rel = rel.filter("id > 10")
+
+        assert_frame_equal(
+            rel.filter("id > 10").df(),
+            conn.query("select * from mnist_video where id > 10;").df(),
+        )
+
+        assert_frame_equal(
+            filtered_rel.select("_row_id, id").df(),
+            conn.query("select _row_id, id from mnist_video where id > 10;").df(),
+        )
+
     def test_create_index(self):
         conn = connect(port=8886)
 

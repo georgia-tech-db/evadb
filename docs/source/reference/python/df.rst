@@ -18,4 +18,5 @@ DataFrame Interface
     ~relation.EVARelation.limit
     ~relation.EVARelation.order
     ~relation.EVARelation.select
+    ~relation.EVARelation.show
     ~relation.EVARelation.sql_query

@@ -101,7 +101,7 @@ def handle_select_clause(
     assert clause in accepted_clauses, f"Unknown clause: {clause}"
 
     # If the clause being set is "target_list" and the value is equal to
-    # "*", the "SELECT *" portion is reset.
+    # "*", the "SELECT *" portion is replaced by SELECT <value>.
     if clause == "target_list" and getattr(query, clause) == create_star_expression():
         setattr(query, clause, None)
 
