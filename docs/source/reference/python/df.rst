@@ -9,7 +9,8 @@ DataFrame Interface
 
 .. autosummary::
     :toctree: ./doc
-    alias
+    
+    ~relation.EVARelation.alias
     ~relation.EVARelation.cross_apply
     ~relation.EVARelation.df
     ~relation.EVARelation.execute

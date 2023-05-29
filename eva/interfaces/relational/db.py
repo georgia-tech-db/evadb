@@ -39,7 +39,14 @@ class EVAConnection:
         self._cursor = None
         self._result: Batch = None
 
-    def cursor(self):
+    def cursor(self) -> "EVACursor":
+        """
+        Get a cursor for executing database operations.
+
+        Returns:
+            EVACursor: The cursor object for executing operations on the database.
+        """
+
         # One unique cursor for one connection
         if self._cursor is None:
             self._cursor = EVACursor(self)
@@ -48,22 +55,74 @@ class EVAConnection:
     def load(
         self, file_regex: str, table_name: str, format: str, **kwargs
     ) -> EVARelation:
+        """
+        Load data from files into a table in the database.
+
+        Args:
+            file_regex (str): Regular expression pattern for matching input files.
+            table_name (str): Name of the table to be created.
+            format (str): File format of the input files.
+            **kwargs: Additional keyword arguments for configuring the load operation.
+
+        Returns:
+            EVARelation: The EVARelation object representing the loaded table.
+        """
         return self.cursor().load(file_regex, table_name, format, **kwargs)
 
     def table(self, table_name: str) -> EVARelation:
+        """
+        Get a EVARelation object representing a table in the database.
+
+        Args:
+            table_name (str): Name of the table.
+
+        Returns:
+            EVARelation: The EVARelation object representing the table.
+        """
         return self.cursor().table(table_name)
 
     def query(self, sql_query: str) -> EVARelation:
+        """
+        Execute a SQL query.
+
+        Args:
+            sql_query (str): The SQL query to execute.
+
+        Returns:
+            EVARelation: The EVARelation object representing the result of the query.
+        """
         return self.cursor().query(sql_query)
 
     def df(self) -> pandas.DataFrame:
+        """
+        Get the result of the last executed query on the connection as a pandas
+        DataFrame.
+
+        Returns:
+            pandas.DataFrame: The result of the query as a DataFrame.
+
+        Raises:
+            Exception: If there is no valid result with the current connection.
+        """
         if not self._result:
             raise Exception("No valid result with the current connection")
         return self._result.frames
 
     def create_vector_index(
         self, index_name: str, table_name: str, expr: str, using: str
-    ) -> "EVACursor":
+    ) -> "EVAConnection":
+        """
+        Create a vector index on a table in the database.
+
+        Args:
+            index_name (str): Name of the index to be created.
+            table_name (str): Name of the table on which to build the index.
+            expr (str): Expression defining the indexed vector column.
+            using (str): Name of the vector indexing method to use.
+
+        Returns:
+            EVAConnection: The connection object for executing further operations.
+        """
         stmt = parse_create_vector_index(index_name, table_name, expr, using)
         self._result = execute_statement(stmt)
         return self
@@ -138,6 +197,15 @@ class EVACursor(object):
         return func_sync
 
     def table(self, table_name: str) -> EVARelation:
+        """
+        Get a EVARelation object representing a table in the database.
+
+        Args:
+            table_name (str): Name of the table.
+
+        Returns:
+            EVARelation: The EVARelation object representing the table.
+        """
         table = parse_table_clause(table_name)
         # SELECT * FROM table
         select_stmt = SelectStatement(
@@ -147,6 +215,16 @@ class EVACursor(object):
         return EVARelation(select_stmt, alias=Alias(table_name.lower()))
 
     def df(self) -> pandas.DataFrame:
+        """
+        Get the result of the last executed query on the cursor as a pandas
+        DataFrame.
+
+        Returns:
+            pandas.DataFrame: The result of the query as a DataFrame.
+
+        Raises:
+            Exception: If there is no valid result with the current cursor.
+        """
         if not self._result:
             raise Exception("No valid result with the current connection")
         return self._result.frames
@@ -154,6 +232,18 @@ class EVACursor(object):
     def create_vector_index(
         self, index_name: str, table_name: str, expr: str, using: str
     ) -> "EVACursor":
+        """
+        Create a vector index on a table in the database.
+
+        Args:
+            index_name (str): Name of the index to be created.
+            table_name (str): Name of the table on which to build the index.
+            expr (str): Expression defining the indexed vector column.
+            using (str): Name of the vector indexing method to use.
+
+        Returns:
+            EVACursor: The cursor object for executing further operations.
+        """
         stmt = parse_create_vector_index(index_name, table_name, expr, using)
         self._result = execute_statement(stmt)
         return self
@@ -161,11 +251,32 @@ class EVACursor(object):
     def load(
         self, file_regex: str, table_name: str, format: str, **kwargs
     ) -> EVARelation:
+        """
+        Load data from files into a table in the database.
+
+        Args:
+            file_regex (str): Regular expression pattern for matching input files.
+            table_name (str): Name of the table to be created.
+            format (str): File format of the input files.
+            **kwargs: Additional keyword arguments for configuring the load operation.
+
+        Returns:
+            EVARelation: The EVARelation object representing the loaded table.
+        """
         # LOAD {FORMAT} file_regex INTO table_name
         stmt = parse_load(table_name, file_regex, format, **kwargs)
         return EVARelation(stmt)
 
     def query(self, sql_query: str) -> EVARelation:
+        """
+        Execute a SQL query.
+
+        Args:
+            sql_query (str): The SQL query to execute.
+
+        Returns:
+            EVARelation: The EVARelation object representing the result of the query.
+        """
         stmt = parse_query(sql_query)
         return EVARelation(stmt)
 
@@ -177,5 +288,15 @@ async def get_connection(host: str, port: int) -> EVAConnection:
 
 
 def connect(host: str = "0.0.0.0", port: int = 8803) -> EVAConnection:
+    """
+    Connect to the EVA server and return a connection object.
+
+    Args:
+        host (str): The hostname or IP address of the EVA server. Default is "0.0.0.0".
+        port (int): The port number of the EVA server. Default is 8803.
+
+    Returns:
+        EVAConnection: A connection object representing the connection to the EVA server.
+    """
     connection = asyncio.run(get_connection(host, port))
     return connection

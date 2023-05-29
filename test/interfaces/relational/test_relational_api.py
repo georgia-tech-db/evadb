@@ -1,3 +1,4 @@
+import os
 import unittest
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
@@ -13,7 +14,8 @@ class RelationalAPI(unittest.TestCase):
         super().__init__(*args, **kwargs)
 
     def setUp(self):
-        # os.system("nohup eva_server --port 8886 --start")
+        os.system("nohup eva_server --stop")
+        os.system("nohup eva_server --port 8886 --start")
         CatalogManager().reset()
         self.mnist_path = f"{EVA_ROOT_DIR}/data/mnist/mnist.mp4"
         load_udfs_for_testing()
@@ -25,7 +27,7 @@ class RelationalAPI(unittest.TestCase):
         # todo: move these to relational apis as well
         execute_query_fetch_all("""DROP TABLE IF EXISTS mnist_video;""")
         execute_query_fetch_all("""DROP TABLE IF EXISTS meme_images;""")
-        # os.system("nohup eva_server --stop")
+        os.system("nohup eva_server --stop")
 
     def test_relation_apis(self):
         conn = connect(port=8886)
@@ -104,7 +106,7 @@ class RelationalAPI(unittest.TestCase):
         )
 
     def test_create_index(self):
-        conn = connect(port=8888)
+        conn = connect(port=8886)
 
         # load some images
         rel = conn.load(
