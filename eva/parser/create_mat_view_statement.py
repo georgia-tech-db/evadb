@@ -66,6 +66,10 @@ class CreateMaterializedViewStatement(AbstractStatement):
     def col_list(self):
         return self._col_list
 
+    @col_list.setter
+    def col_list(self, value):
+        self._col_list = value
+
     def __eq__(self, other):
         if not isinstance(other, CreateMaterializedViewStatement):
             return False

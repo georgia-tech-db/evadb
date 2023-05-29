@@ -35,6 +35,7 @@ from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.create_index_statement import CreateIndexStatement
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
+from eva.parser.create_statement import ColumnDefinition
 from eva.parser.delete_statement import DeleteTableStatement
 from eva.parser.explain_statement import ExplainStatement
 from eva.parser.rename_statement import RenameTableStatement
@@ -151,7 +152,36 @@ class StatementBinder:
     @bind.register(CreateMaterializedViewStatement)
     def _bind_create_mat_statement(self, node: CreateMaterializedViewStatement):
         self.bind(node.query)
-        # Todo Verify if the number projected columns matches table
+        num_projected_columns = 0
+        # TODO we should fix the binder. All binded object should have the same interface.
+        for expr in node.query.target_list:
+            if expr.etype == ExpressionType.TUPLE_VALUE:
+                num_projected_columns += 1
+            elif expr.etype == ExpressionType.FUNCTION_EXPRESSION:
+                num_projected_columns += len(expr.output_objs)
+            else:
+                raise BinderError("Unsupported expression type {}.".format(expr.etype))
+
+        assert (
+            len(node.col_list) == 0 or len(node.col_list) == num_projected_columns
+        ), "Projected columns mismatch, expected {} found {}.".format(len(node.col_list), num_projected_columns)
+        binded_col_list = []
+        idx = 0
+        for expr in node.query.target_list:
+            output_objs = [(expr.col_name, expr.col_object)] \
+                if expr.etype == ExpressionType.TUPLE_VALUE \
+                else zip(expr.projection_columns, expr.output_objs)
+            for col_name, output_obj in output_objs:
+                binded_col_list.append(
+                    ColumnDefinition(
+                        col_name if len(node.col_list) == 0 else node.col_list[idx].name,
+                        output_obj.type,
+                        output_obj.array_type,
+                        output_obj.array_dimensions,
+                    )
+                )
+                idx += 1
+        node.col_list = binded_col_list
 
     @bind.register(RenameTableStatement)
     def _bind_rename_table_statement(self, node: RenameTableStatement):
