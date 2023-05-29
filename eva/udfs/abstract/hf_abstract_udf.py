@@ -86,7 +86,7 @@ class AbstractHFUdf(AbstractUDF, GPUCompatible):
                 if isinstance(row_output, list):
                     row_output = {k: [dic[k] for dic in row_output] for k in row_output[0]}
                 result_list.append(row_output)
-                
+
         result_df = pd.DataFrame(result_list)
         return result_df
 
