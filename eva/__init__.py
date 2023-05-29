@@ -13,3 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from .version import VERSION as __version__  # noqa: F401
+
+# from eva.interfaces.relational.db import connect
+import eva.server.global_state  # noqa: F401
+
+from eva.server.global_state import (
+    connect,
+    shutdown,
+    get_running_servers,
+    state,
+)  # noqa: F401
+
+__all__ = ["connect", "shutdown", "get_runnning_servers", "state"]

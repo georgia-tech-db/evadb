@@ -46,15 +46,23 @@ from eva.udfs.abstract.abstract_udf import AbstractClassifierUDF
 from eva.udfs.decorators import decorators
 from eva.udfs.decorators.io_descriptors.data_types import NumpyArray, PandasDataframe
 from eva.udfs.udf_bootstrap_queries import init_builtin_udfs
+from eva.configuration.constants import EVA_INSTALLATION_DIR
 
 NUM_FRAMES = 10
 FRAME_SIZE = (32, 32)
-config = ConfigurationManager()
-tmp_dir_from_config = config.get_value("storage", "tmp_dir")
-s3_dir_from_config = config.get_value("storage", "s3_download_dir")
 
 
-EVA_TEST_DATA_DIR = Path(config.get_value("core", "eva_installation_dir")).parent
+def get_tmp_dir():
+    config = ConfigurationManager()
+    return config.get_value("storage", "tmp_dir")
+
+
+def s3_dir():
+    config = ConfigurationManager()
+    return config.get_value("storage", "s3_download_dir")
+
+
+EVA_TEST_DATA_DIR = Path(EVA_INSTALLATION_DIR).parent
 
 
 def is_ray_stage_running():
@@ -260,7 +268,7 @@ def convert_bbox(bbox):
 
 def create_sample_csv(num_frames=NUM_FRAMES):
     try:
-        os.remove(os.path.join(tmp_dir_from_config, "dummy.csv"))
+        os.remove(os.path.join(get_tmp_dir(), "dummy.csv"))
     except FileNotFoundError:
         pass
 
@@ -285,20 +293,20 @@ def create_sample_csv(num_frames=NUM_FRAMES):
             index += 1
 
     df_sample_meta = pd.DataFrame.from_dict(sample_meta, "index")
-    df_sample_meta.to_csv(os.path.join(tmp_dir_from_config, "dummy.csv"), index=False)
-    return os.path.join(tmp_dir_from_config, "dummy.csv")
+    df_sample_meta.to_csv(os.path.join(get_tmp_dir(), "dummy.csv"), index=False)
+    return os.path.join(get_tmp_dir(), "dummy.csv")
 
 
 def create_dummy_csv_batches(target_columns=None):
     if target_columns:
         df = pd.read_csv(
-            os.path.join(tmp_dir_from_config, "dummy.csv"),
+            os.path.join(get_tmp_dir(), "dummy.csv"),
             converters={"bbox": convert_bbox},
             usecols=target_columns,
         )
     else:
         df = pd.read_csv(
-            os.path.join(tmp_dir_from_config, "dummy.csv"),
+            os.path.join(get_tmp_dir(), "dummy.csv"),
             converters={"bbox": convert_bbox},
         )
 
@@ -306,7 +314,7 @@ def create_dummy_csv_batches(target_columns=None):
 
 
 def create_csv(num_rows, columns):
-    csv_path = os.path.join(tmp_dir_from_config, "dummy.csv")
+    csv_path = os.path.join(get_tmp_dir(), "dummy.csv")
     try:
         os.remove(csv_path)
     except FileNotFoundError:
@@ -323,7 +331,7 @@ def create_text_csv(num_rows=30):
     Creates a csv with 2 columns: id and comment
     The comment column has 2 values: "I like this" and "I don't like this" that are alternated
     """
-    csv_path = os.path.join(tmp_dir_from_config, "dummy.csv")
+    csv_path = os.path.join(get_tmp_dir(), "dummy.csv")
     try:
         os.remove(csv_path)
     except FileNotFoundError:
@@ -353,7 +361,7 @@ def create_table(table_name, num_rows, num_columns):
 
 
 def create_sample_image():
-    img_path = os.path.join(tmp_dir_from_config, "dummy.jpg")
+    img_path = os.path.join(get_tmp_dir(), "dummy.jpg")
     try:
         os.remove(img_path)
     except FileNotFoundError:
@@ -372,7 +380,7 @@ def create_random_image(i, path):
 
 
 def create_large_scale_image_dataset(num=1000000):
-    img_dir = os.path.join(tmp_dir_from_config, f"large_scale_image_dataset_{num}")
+    img_dir = os.path.join(get_tmp_dir(), f"large_scale_image_dataset_{num}")
     Path(img_dir).mkdir(parents=True, exist_ok=True)
 
     # Generate images in parallel.
@@ -385,7 +393,7 @@ def create_large_scale_image_dataset(num=1000000):
 
 
 def create_sample_video(num_frames=NUM_FRAMES):
-    file_name = os.path.join(tmp_dir_from_config, "dummy.avi")
+    file_name = os.path.join(get_tmp_dir(), "dummy.avi")
     try:
         os.remove(file_name)
     except FileNotFoundError:
@@ -401,10 +409,11 @@ def create_sample_video(num_frames=NUM_FRAMES):
         out.write(data)
     out.release()
 
-    return os.path.join(tmp_dir_from_config, file_name)
+    return os.path.join(get_tmp_dir(), file_name)
 
 
-def file_remove(path, parent_dir=tmp_dir_from_config):
+def file_remove(path):
+    parent_dir = get_tmp_dir()
     try:
         os.remove(os.path.join(parent_dir, path))
     except FileNotFoundError:
@@ -416,8 +425,10 @@ def create_dummy_batches(
     filters=[],
     batch_size=10,
     start_id=0,
-    video_dir=tmp_dir_from_config,
+    video_dir=None,
 ):
+    video_dir = video_dir or get_tmp_dir()
+    
     if not filters:
         filters = range(num_frames)
     data = []

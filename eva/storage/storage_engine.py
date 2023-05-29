@@ -14,31 +14,29 @@
 # limitations under the License.
 from eva.catalog.catalog_type import TableType
 from eva.catalog.models.table_catalog import TableCatalogEntry
-from eva.configuration.configuration_manager import ConfigurationManager
 from eva.storage.abstract_storage_engine import AbstractStorageEngine
 from eva.storage.document_storage_engine import DocumentStorageEngine
-from eva.utils.generic_utils import str_to_class
+from eva.storage.image_storage_engine import ImageStorageEngine
+from eva.storage.pdf_storage_engine import PDFStorageEngine
+from eva.storage.sqlite_storage_engine import SQLStorageEngine
+from eva.storage.video_storage_engine import DecordStorageEngine
 
 
 class StorageEngine:
-    storages = {
-        TableType.STRUCTURED_DATA: str_to_class(
-            ConfigurationManager().get_value("storage", "structured_data_engine")
-        )(),
-        TableType.VIDEO_DATA: str_to_class(
-            ConfigurationManager().get_value("storage", "video_engine")
-        )(),
-        TableType.IMAGE_DATA: str_to_class(
-            ConfigurationManager().get_value("storage", "image_engine")
-        )(),
-        TableType.DOCUMENT_DATA: DocumentStorageEngine(),
-        TableType.PDF_DATA: str_to_class(
-            ConfigurationManager().get_value("storage", "pdf_engine")
-        )(),
-    }
+    @classmethod
+    def _lazy_initialize_storages(cls):
+        if not cls.storages:
+            cls.storages = {
+                TableType.STRUCTURED_DATA: SQLStorageEngine(),
+                TableType.VIDEO_DATA: DecordStorageEngine(),
+                TableType.IMAGE_DATA: ImageStorageEngine(),
+                TableType.DOCUMENT_DATA: DocumentStorageEngine(),
+                TableType.PDF_DATA: PDFStorageEngine(),
+            }
 
     @classmethod
     def factory(cls, table: TableCatalogEntry) -> AbstractStorageEngine:
+        cls._lazy_initialize_storages()
         if table is None:
             raise ValueError("Expected TableCatalogEntry, got None")
         if table.table_type in cls.storages:

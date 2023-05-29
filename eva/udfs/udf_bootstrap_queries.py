@@ -13,10 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from eva.configuration.configuration_manager import ConfigurationManager
 from eva.server.command_handler import execute_query_fetch_all
+from eva.configuration.constants  import EVA_INSTALLATION_DIR
 
-EVA_INSTALLATION_DIR = ConfigurationManager().get_value("core", "eva_installation_dir")
 NDARRAY_DIR = "ndarray"
 TUTORIALS_DIR = "tutorials"
 

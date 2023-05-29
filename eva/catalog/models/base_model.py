@@ -22,8 +22,6 @@ from sqlalchemy_utils import create_database, database_exists
 from eva.catalog.sql_config import CATALOG_TABLES, SQLConfig
 from eva.utils.logging_manager import logger
 
-db_session = SQLConfig().session
-
 
 class CustomModel:
     """This overrides the default `_declarative_constructor` constructor.
@@ -34,10 +32,12 @@ class CustomModel:
     Declares and int `_row_id` field for all tables
     """
 
-    query = db_session.query_property()
     _row_id = Column("_row_id", Integer, primary_key=True)
 
     def __init__(self, **kwargs):
+        self.db_session = SQLConfig().session
+        self.query = self.db_session.query_property()
+
         cls_ = type(self)
         for k in kwargs:
             if hasattr(cls_, k):
@@ -52,10 +52,10 @@ class CustomModel:
 
         """
         try:
-            db_session.add(self)
+            self.db_session.add(self)
             self._commit()
         except Exception as e:
-            db_session.rollback()
+            self.db_session.rollback()
             logger.error(f"Database save failed : {str(e)}")
             raise e
         return self
@@ -75,32 +75,32 @@ class CustomModel:
                     setattr(self, attr, value)
             return self.save()
         except Exception as e:
-            db_session.rollback()
+            self.db_session.rollback()
             logger.error(f"Database update failed : {str(e)}")
             raise e
 
     def delete(self):
         """Delete and commit"""
         try:
-            db_session.delete(self)
+            self.db_session.delete(self)
             self._commit()
         except Exception as e:
-            db_session.rollback()
+            self.db_session.rollback()
             logger.error(f"Database delete failed : {str(e)}")
             raise e
 
     def _commit(self):
         """Try to commit. If an error is raised, the session is rollbacked."""
         try:
-            db_session.commit()
+            self.db_session.commit()
         except SQLAlchemyError as e:
-            db_session.rollback()
+            self.db_session.rollback()
             logger.error(f"Database commit failed : {str(e)}")
             raise e
 
 
 # Custom Base Model to be inherited by all models
-BaseModel = declarative_base(cls=CustomModel, constructor=None, bind=SQLConfig().engine)
+BaseModel = declarative_base(cls=CustomModel, constructor=None)
 
 
 def init_db():
@@ -110,7 +110,7 @@ def init_db():
         logger.info("Database does not exist, creating database.")
         create_database(engine.url)
         logger.info("Creating tables")
-        BaseModel.metadata.create_all()
+        BaseModel.metadata.create_all(bind=engine)
 
 
 def truncate_catalog_tables():

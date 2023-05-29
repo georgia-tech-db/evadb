@@ -40,6 +40,16 @@ async def start_eva_server(host: str, port: int):
     await eva_server.start_eva_server(host, port)
 
 
+def start_server(db_dir, host, port):
+    config_manager = ConfigurationManager()
+    mode = config_manager.get_value("core", "mode")
+    from eva.udfs.udf_bootstrap_queries import init_builtin_udfs  # noqa: E402
+
+    init_builtin_udfs(mode=mode)
+
+    asyncio.run(start_eva_server(host=host, port=int(port)))
+
+
 def stop_server():
     """
     Stop the eva server
@@ -103,12 +113,7 @@ def main():
 
     # Start server
     if args.start:
-        mode = config_manager.get_value("core", "mode")
-        from eva.udfs.udf_bootstrap_queries import init_builtin_udfs  # noqa: E402
-
-        init_builtin_udfs(mode=mode)
-
-        asyncio.run(start_eva_server(host=host, port=int(port)))
+        start_server(eva_db_dir, host, port)
 
 
 if __name__ == "__main__":

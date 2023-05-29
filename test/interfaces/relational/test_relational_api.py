@@ -2,7 +2,6 @@ import unittest
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
 
-from eva.interfaces.relational.db import connect
 from eva.server.command_handler import execute_query_fetch_all
 from test.util import load_udfs_for_testing, shutdown_ray
 from pandas.testing import assert_frame_equal
@@ -13,7 +12,9 @@ class RelationalAPI(unittest.TestCase):
         super().__init__(*args, **kwargs)
 
     def setUp(self):
-        # os.system("nohup eva_server --port 8886 --start")
+        import eva
+        self.conn = eva.connect(port=8886, db="gg")
+        
         CatalogManager().reset()
         self.mnist_path = f"{EVA_ROOT_DIR}/data/mnist/mnist.mp4"
         load_udfs_for_testing()
@@ -28,7 +29,7 @@ class RelationalAPI(unittest.TestCase):
         # os.system("nohup eva_server --stop")
 
     def test_relation_apis(self):
-        conn = connect(port=8886)
+        conn = self.conn
         rel = conn.load(
             self.mnist_path,
             table_name="mnist_video",
@@ -82,7 +83,9 @@ class RelationalAPI(unittest.TestCase):
         )
 
     def test_relation_api_chaining(self):
-        conn = connect(port=8886)
+        import eva
+
+        conn = eva.connect(port=8886)
         rel = conn.load(
             self.mnist_path,
             table_name="mnist_video",
@@ -104,7 +107,9 @@ class RelationalAPI(unittest.TestCase):
         )
 
     def test_create_index(self):
-        conn = connect(port=8888)
+        import eva
+
+        conn = eva.connect(port=8888)
 
         # load some images
         rel = conn.load(
