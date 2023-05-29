@@ -35,3 +35,6 @@ jupytext==1.14.5
 
 # Pin urllib to avoid downstream issues
 urllib3 < 2
+
+# eva
+evadb
