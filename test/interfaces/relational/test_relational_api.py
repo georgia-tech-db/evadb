@@ -15,7 +15,7 @@ class RelationalAPI(unittest.TestCase):
 
     def setUp(self):
         os.system("nohup eva_server --stop")
-        os.system("nohup eva_server --port 8886 --start")
+        os.system("nohup eva_server --port 8886 --start &")
         CatalogManager().reset()
         self.mnist_path = f"{EVA_ROOT_DIR}/data/mnist/mnist.mp4"
         load_udfs_for_testing()
