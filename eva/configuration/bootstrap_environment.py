@@ -48,7 +48,8 @@ def get_base_config(eva_installation_dir: Path) -> Path:
 
 
 def get_default_db_uri(eva_db_dir: Path):
-    return f"sqlite:///{eva_db_dir.resolve()}/{DB_DEFAULT_NAME}"
+    return "postgresql://postgres:postgres@localhost:5432/postgres"
+    # return f"sqlite:///{eva_db_dir.resolve()}/{DB_DEFAULT_NAME}"
 
 
 def bootstrap_environment(eva_db_dir: Path, eva_installation_dir: Path):
@@ -82,7 +83,7 @@ def bootstrap_environment(eva_db_dir: Path, eva_installation_dir: Path):
         if config_obj is None:
             raise ValueError(f"Invalid yml file at {config_file_path}")
 
-        config_obj = merge_dict_of_dicts(config_obj, config_default_dict)
+        config_obj = merge_dict_of_dicts(config_default_dict, config_obj)
         mode = config_obj["core"]["mode"]
         yml_file.seek(0)
         yml_file.write(yaml.dump(config_obj))
