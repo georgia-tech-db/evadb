@@ -18,7 +18,11 @@ class RelationalAPI(unittest.TestCase):
     def setUpClass(cls):
         os.system("nohup eva_server --stop")
         os.system("nohup eva_server --port 8886 --start &")
-        time.sleep(5)
+        for _ in range(10):
+            try:
+                connect(port=8886)
+            except Exception:
+                time.sleep(5)
 
     @classmethod
     def tearDownClass(cls):
