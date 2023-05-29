@@ -85,7 +85,7 @@ with open(ignored_words_file) as f:
 # ==============================================
 
 header = """# coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -172,7 +172,7 @@ def format_file(file_path, add_header, strip_header, format_code):
 
     # Do not add a header here
     # Releaser assumes the lines in the file to be related to version
-    if file_path.ends_with("version.py"):
+    if file_path.endswith("version.py"):
         return
 
     abs_path = os.path.abspath(file_path)

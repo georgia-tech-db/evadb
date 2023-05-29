@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -164,17 +164,23 @@ class StatementBinder:
 
         assert (
             len(node.col_list) == 0 or len(node.col_list) == num_projected_columns
-        ), "Projected columns mismatch, expected {} found {}.".format(len(node.col_list), num_projected_columns)
+        ), "Projected columns mismatch, expected {} found {}.".format(
+            len(node.col_list), num_projected_columns
+        )
         binded_col_list = []
         idx = 0
         for expr in node.query.target_list:
-            output_objs = [(expr.col_name, expr.col_object)] \
-                if expr.etype == ExpressionType.TUPLE_VALUE \
+            output_objs = (
+                [(expr.col_name, expr.col_object)]
+                if expr.etype == ExpressionType.TUPLE_VALUE
                 else zip(expr.projection_columns, expr.output_objs)
+            )
             for col_name, output_obj in output_objs:
                 binded_col_list.append(
                     ColumnDefinition(
-                        col_name if len(node.col_list) == 0 else node.col_list[idx].name,
+                        col_name
+                        if len(node.col_list) == 0
+                        else node.col_list[idx].name,
                         output_obj.type,
                         output_obj.array_type,
                         output_obj.array_dimensions,
