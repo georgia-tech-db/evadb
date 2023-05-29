@@ -170,4 +170,20 @@ class EVACursor(object):
         return EVARelation(stmt)
 
 
+async def get_connection(host: str, port: int) -> EVAConnection:
+    reader, writer = await asyncio.open_connection(host, port)
+    connection = EVAConnection(reader, writer)
+    return connection
 
+
+def connect(host: str = "0.0.0.0", port: int = 8803) -> EVAConnection:
+    """
+    Connect to the EVA server and return a connection object.
+    Args:
+        host (str): The hostname or IP address of the EVA server. Default is "0.0.0.0".
+        port (int): The port number of the EVA server. Default is 8803.
+    Returns:
+        EVAConnection: A connection object representing the connection to the EVA server.
+    """
+    connection = asyncio.run(get_connection(host, port))
+    return connection
