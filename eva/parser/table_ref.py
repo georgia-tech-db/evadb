@@ -129,7 +129,9 @@ class TableValuedExpression:
         return self._do_unnest
 
     def __str__(self) -> str:
-        return "{}".format(self._func_expr)
+        if self.do_unnest:
+            return f"unnest({self._func_expr})"
+        return f"{self._func_expr}"
 
     def __eq__(self, other):
         if not isinstance(other, TableValuedExpression):
@@ -258,15 +260,15 @@ class TableRef:
             return Alias(self._ref_handle.table_name.lower())
 
     def __str__(self):
-        table_ref_str = f"{str(self._ref_handle)}"
+        if self.is_select():
+            table_ref_str = f"( {str(self._ref_handle)} ) AS {self.alias}"
+        else:
+            table_ref_str = f"{str(self._ref_handle)}"
+
         if self.sample_freq is not None:
             table_ref_str += f" {str(self.sample_freq)}"
         if self.sample_type is not None:
             table_ref_str += f" {str(self.sample_type)}"
-        if self._get_video is not None:
-            table_ref_str += f" {str(self._get_video)}"
-        if self._get_audio is not None:
-            table_ref_str += f" {str(self._get_audio)}"
         return table_ref_str
 
     def __eq__(self, other):

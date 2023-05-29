@@ -127,7 +127,7 @@ class TableSources:
             from_clause,
             where_clause,
             groupby_clause=groupby_clause,
-            orderby_clause_list=orderby_clause,
+            orderby_list=orderby_clause,
             limit_count=limit_count,
         )
 
@@ -202,7 +202,7 @@ class TableSources:
             if isinstance(child, Tree):
                 if child.data.endswith("function_call"):
                     func_expr = self.visit(child)
-            elif child == "UNNEST":
+            elif child.lower() == "unnest":
                 has_unnest = True
 
         return TableValuedExpression(func_expr, do_unnest=has_unnest)
