@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,7 +30,10 @@ class CreateMaterializedViewExecutor(AbstractExecutor):
         if not handle_if_not_exists(self.node.view, self.node.if_not_exists):
             child = self.children[0]
             # only support seq scan based materialization
-            if child.node.opr_type not in {PlanOprType.SEQUENTIAL_SCAN, PlanOprType.PROJECT}:
+            if child.node.opr_type not in {
+                PlanOprType.SEQUENTIAL_SCAN,
+                PlanOprType.PROJECT,
+            }:
                 err_msg = "Invalid query {}, expected {} or {}".format(
                     child.node.opr_type,
                     PlanOprType.SEQUENTIAL_SCAN,

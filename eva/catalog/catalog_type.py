@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -130,5 +130,5 @@ class DocumentColumnName(EVAEnum):
 class PDFColumnName(EVAEnum):
     name  # noqa: F821
     page  # noqa: F821
-    paragraph   # noqa: F821
+    paragraph  # noqa: F821
     data  # noqa: F821

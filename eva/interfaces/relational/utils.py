@@ -1,5 +1,20 @@
+# coding=utf-8
+# Copyright 2018-2023 EVA
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 import asyncio
 from typing import List, Union
+
 from eva.binder.statement_binder import StatementBinder
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.executor.plan_executor import PlanExecutor
@@ -12,7 +27,6 @@ from eva.optimizer.statement_to_opr_converter import StatementToPlanConverter
 from eva.parser.select_statement import SelectStatement
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
-
 from eva.parser.utils import (
     parse_expression,
     parse_lateral_join,
