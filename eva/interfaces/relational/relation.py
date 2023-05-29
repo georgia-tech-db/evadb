@@ -26,7 +26,6 @@ class EVARelation:
     ):
         self._query_node = query_node
         self._alias = alias
-        self._dummy_alias = Alias("relation")
 
     def alias(self, alias: str) -> "EVARelation":
         """Returns a new Relation with an alias set.
