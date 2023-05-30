@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,19 +13,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import create_sample_csv, create_sample_video, file_remove
+from test.util import (
+    create_sample_csv,
+    create_sample_video,
+    file_remove,
+    get_evadb_for_testing,
+)
 
 import pytest
 
-from eva.catalog.catalog_manager import CatalogManager
 from eva.server.command_handler import execute_query_fetch_all
 
 
 @pytest.mark.notparallel
 class RenameExecutorTest(unittest.TestCase):
     def setUp(self):
+        self.evadb = get_evadb_for_testing()
         # reset the catalog manager before running each test
-        CatalogManager().reset()
+        self.evadb.catalog.reset()
         self.video_file_path = create_sample_video()
         self.csv_file_path = create_sample_csv()
 
@@ -35,19 +40,19 @@ class RenameExecutorTest(unittest.TestCase):
 
     # integration test
     def test_should_rename_table(self):
-        catalog_manager = CatalogManager()
+        catalog_manager = self.evadb.catalog
         query = f"""LOAD VIDEO '{self.video_file_path}' INTO MyVideo;"""
-        execute_query_fetch_all(query)
+        execute_query_fetch_all(self.evadb, query)
 
         self.assertTrue(catalog_manager.get_table_catalog_entry("MyVideo") is not None)
         self.assertTrue(catalog_manager.get_table_catalog_entry("MyVideo1") is None)
 
         rename_query = """RENAME TABLE MyVideo TO MyVideo1;"""
-        execute_query_fetch_all(rename_query)
+        execute_query_fetch_all(self.evadb, rename_query)
 
         self.assertTrue(catalog_manager.get_table_catalog_entry("MyVideo") is None)
         self.assertTrue(catalog_manager.get_table_catalog_entry("MyVideo1") is not None)
-        execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
+        execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS MyVideo;")
 
     # integration test
     def test_should_fail_on_rename_structured_table(self):
@@ -61,17 +66,17 @@ class RenameExecutorTest(unittest.TestCase):
                 dataset_name TEXT(30) NOT NULL
             );
             """
-        execute_query_fetch_all(create_table_query)
+        execute_query_fetch_all(self.evadb, create_table_query)
 
         # load the CSV
         load_query = f"""LOAD CSV '{self.csv_file_path}' INTO MyVideoCSV (id, frame_id, video_id, dataset_name);"""
-        execute_query_fetch_all(load_query)
+        execute_query_fetch_all(self.evadb, load_query)
 
         with self.assertRaises(Exception) as cm:
             rename_query = """RENAME TABLE MyVideoCSV TO MyVideoCSV1;"""
-            execute_query_fetch_all(rename_query)
+            execute_query_fetch_all(self.evadb, rename_query)
 
         self.assertEqual(
             str(cm.exception), "Rename not yet supported on structured data"
         )
-        execute_query_fetch_all("DROP TABLE IF EXISTS MyVideoCSV;")
+        execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS MyVideoCSV;")

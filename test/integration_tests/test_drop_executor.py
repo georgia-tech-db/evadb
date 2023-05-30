@@ -28,7 +28,7 @@ class DropExecutorTest(unittest.TestCase):
     def setUp(self):
         self.evadb = get_evadb_for_testing()
         # reset the catalog manager before running each test
-        self.evadb.reset()
+        self.evadb.catalog.reset()
         self.video_file_path = create_sample_video()
 
     def tearDown(self):

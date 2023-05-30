@@ -54,13 +54,13 @@ class MaterializedViewTest(unittest.TestCase):
         execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS MyVideo;")
         execute_query_fetch_all(cls.evadb, "DROP TABLE UATRAC;")
 
-    def setUp(self):
-        execute_query_fetch_all("DROP TABLE IF EXISTS dummy_view;")
-        execute_query_fetch_all("DROP TABLE IF EXISTS uadtrac_fastRCNN;")
+    # def setUp(self):
+    #     execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS dummy_view;")
+    #     execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS uadtrac_fastRCNN;")
 
     def tearDown(self):
-        execute_query_fetch_all("DROP TABLE IF EXISTS dummy_view;")
-        execute_query_fetch_all("DROP TABLE IF EXISTS uadtrac_fastRCNN;")
+        execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS dummy_view;")
+        execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS uadtrac_fastRCNN;")
 
     def test_should_mat_view_with_dummy(self):
         materialized_query = """CREATE MATERIALIZED VIEW dummy_view (id, label)
@@ -69,7 +69,7 @@ class MaterializedViewTest(unittest.TestCase):
         execute_query_fetch_all(self.evadb, materialized_query)
 
         select_query = "SELECT id, label FROM dummy_view;"
-        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch = execute_query_fetch_all(self.evadb, select_query)
         actual_batch.sort()
 
         labels = DummyObjectDetector().labels
@@ -108,14 +108,14 @@ class MaterializedViewTest(unittest.TestCase):
         self.assertEqual(actual_batch, expected_batch)
 
     def test_should_infer_mat_view_column_names_with_dummy(self):
-        execute_query_fetch_all("DROP TABLE IF EXISTS dummy_view;")
+        execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS dummy_view;")
         materialized_query = """CREATE MATERIALIZED VIEW dummy_view
             AS SELECT id, DummyObjectDetector(data).label FROM MyVideo;
         """
-        execute_query_fetch_all(materialized_query)
+        execute_query_fetch_all(self.evadb, materialized_query)
 
         select_query = "SELECT id, label FROM dummy_view;"
-        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch = execute_query_fetch_all(self.evadb, select_query)
         actual_batch.sort()
 
         labels = DummyObjectDetector().labels

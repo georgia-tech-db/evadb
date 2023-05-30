@@ -14,7 +14,6 @@
 # limitations under the License.
 import pandas as pd
 
-from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import TableType
 from eva.database import EVADB
 from eva.executor.abstract_executor import AbstractExecutor

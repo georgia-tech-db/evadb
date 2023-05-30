@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import create_text_csv, file_remove
+from test.util import create_text_csv, file_remove, get_evadb_for_testing
 
 import pytest
 
@@ -30,6 +30,7 @@ class HuggingFaceTests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
+        self.evadb = get_evadb_for_testing()
         self.evadb.catalog.reset()
 
         # Use DETRAC for HF Tests to test variety of models

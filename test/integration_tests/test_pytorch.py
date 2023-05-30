@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ from test.markers import ocr_skip_marker, windows_skip_marker
 from test.util import (
     create_sample_video,
     file_remove,
+    get_evadb_for_testing,
     load_udfs_for_testing,
     shutdown_ray,
 )
@@ -26,7 +27,6 @@ import cv2
 import numpy as np
 import pytest
 
-from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.configuration.constants import EVA_ROOT_DIR
 from eva.executor.executor_utils import ExecutorError
@@ -38,7 +38,8 @@ from eva.udfs.udf_bootstrap_queries import Asl_udf_query, Mvit_udf_query
 class PytorchTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        CatalogManager().reset()
+        cls.evadb = get_evadb_for_testing()
+        cls.evadb.catalog.reset()
         ua_detrac = f"{EVA_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
         mnist = f"{EVA_ROOT_DIR}/data/mnist/mnist.mp4"
         actions = f"{EVA_ROOT_DIR}/data/actions/actions.mp4"
@@ -46,13 +47,15 @@ class PytorchTest(unittest.TestCase):
         meme1 = f"{EVA_ROOT_DIR}/data/detoxify/meme1.jpg"
         meme2 = f"{EVA_ROOT_DIR}/data/detoxify/meme2.jpg"
 
-        execute_query_fetch_all(f"LOAD VIDEO '{ua_detrac}' INTO MyVideo;")
-        execute_query_fetch_all(f"LOAD VIDEO '{mnist}' INTO MNIST;")
-        execute_query_fetch_all(f"LOAD VIDEO '{actions}' INTO Actions;")
-        execute_query_fetch_all(f"LOAD VIDEO '{asl_actions}' INTO Asl_actions;")
-        execute_query_fetch_all(f"LOAD IMAGE '{meme1}' INTO MemeImages;")
-        execute_query_fetch_all(f"LOAD IMAGE '{meme2}' INTO MemeImages;")
-        load_udfs_for_testing()
+        execute_query_fetch_all(cls.evadb, f"LOAD VIDEO '{ua_detrac}' INTO MyVideo;")
+        execute_query_fetch_all(cls.evadb, f"LOAD VIDEO '{mnist}' INTO MNIST;")
+        execute_query_fetch_all(cls.evadb, f"LOAD VIDEO '{actions}' INTO Actions;")
+        execute_query_fetch_all(
+            cls.evadb, f"LOAD VIDEO '{asl_actions}' INTO Asl_actions;"
+        )
+        execute_query_fetch_all(cls.evadb, f"LOAD IMAGE '{meme1}' INTO MemeImages;")
+        execute_query_fetch_all(cls.evadb, f"LOAD IMAGE '{meme2}' INTO MemeImages;")
+        load_udfs_for_testing(cls.evadb)
 
     @classmethod
     def tearDownClass(cls):
@@ -63,11 +66,11 @@ class PytorchTest(unittest.TestCase):
         file_remove("actions.mp4")
         file_remove("computer_asl.mp4")
 
-        execute_query_fetch_all("DROP TABLE IF EXISTS Actions;")
-        execute_query_fetch_all("DROP TABLE IF EXISTS MNIST;")
-        execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
-        execute_query_fetch_all("DROP TABLE IF EXISTS Asl_actions;")
-        execute_query_fetch_all("DROP TABLE IF EXISTS MemeImages;")
+        execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS Actions;")
+        execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS MNIST;")
+        execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS MyVideo;")
+        execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS Asl_actions;")
+        execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS MemeImages;")
 
     @pytest.mark.skipif(
         not ConfigurationManager().get_value("experimental", "ray"),
@@ -80,16 +83,16 @@ class PytorchTest(unittest.TestCase):
                           FastRCNNObjectDetector(data)
                           AS obj(labels, bboxes, scores)
                          WHERE id < 20;"""
-        par_batch = execute_query_fetch_all(select_query)
+        par_batch = execute_query_fetch_all(self.evadb, select_query)
 
         # Sequential execution.
-        ConfigurationManager().update_value("experimental", "ray", False)
+        self.evadb.config.update_value("experimental", "ray", False)
         select_query = """SELECT id, obj.labels
                           FROM MyVideo JOIN LATERAL
                           FastRCNNObjectDetector(data)
                           AS obj(labels, bboxes, scores)
                          WHERE id < 20;"""
-        seq_batch = execute_query_fetch_all(select_query)
+        seq_batch = execute_query_fetch_all(self.evadb, select_query)
 
         self.assertEqual(len(par_batch), len(seq_batch))
         for i in range(len(par_batch)):
@@ -104,7 +107,7 @@ class PytorchTest(unittest.TestCase):
             )
 
         # Recover configuration back.
-        ConfigurationManager().update_value("experimental", "ray", True)
+        self.evadb.config.update_value("experimental", "ray", True)
 
     @pytest.mark.skipif(
         not ConfigurationManager().get_value("experimental", "ray"),
@@ -114,7 +117,7 @@ class PytorchTest(unittest.TestCase):
         # Deliberately cause error.
         video_path = create_sample_video(100)
         load_query = f"LOAD VIDEO '{video_path}' INTO parallelErrorVideo;"
-        execute_query_fetch_all(load_query)
+        execute_query_fetch_all(self.evadb, load_query)
         file_remove("dummy.avi")
 
         select_query = """SELECT id, obj.labels
@@ -123,7 +126,7 @@ class PytorchTest(unittest.TestCase):
                           AS obj(labels, bboxes, scores)
                          WHERE id < 2;"""
         with self.assertRaises(ExecutorError):
-            execute_query_fetch_all(select_query)
+            execute_query_fetch_all(self.evadb, select_query)
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_fastrcnn_with_lateral_join(self):
@@ -132,12 +135,12 @@ class PytorchTest(unittest.TestCase):
                           FastRCNNObjectDetector(data)
                           AS obj(labels, bboxes, scores)
                          WHERE id < 2;"""
-        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch = execute_query_fetch_all(self.evadb, select_query)
         self.assertEqual(len(actual_batch), 2)
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_yolo_and_mvit(self):
-        execute_query_fetch_all(Mvit_udf_query)
+        execute_query_fetch_all(self.evadb, Mvit_udf_query)
 
         select_query = """SELECT FIRST(id),
                             Yolo(FIRST(data)),
@@ -145,7 +148,7 @@ class PytorchTest(unittest.TestCase):
                             FROM Actions
                             WHERE id < 32
                             GROUP BY '16f'; """
-        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch = execute_query_fetch_all(self.evadb, select_query)
         self.assertEqual(len(actual_batch), 2)
 
         res = actual_batch.frames
@@ -157,12 +160,12 @@ class PytorchTest(unittest.TestCase):
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_asl(self):
-        execute_query_fetch_all(Asl_udf_query)
+        execute_query_fetch_all(self.evadb, Asl_udf_query)
         select_query = """SELECT FIRST(id), ASLActionRecognition(SEGMENT(data))
                         FROM Asl_actions
                         SAMPLE 5
                         GROUP BY '16f';"""
-        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch = execute_query_fetch_all(self.evadb, select_query)
 
         res = actual_batch.frames
 
@@ -179,11 +182,11 @@ class PytorchTest(unittest.TestCase):
                   TYPE  FaceDetection
                   IMPL  'eva/udfs/face_detector.py';
         """
-        execute_query_fetch_all(create_udf_query)
+        execute_query_fetch_all(self.evadb, create_udf_query)
 
         select_query = """SELECT FaceDetector(data) FROM MyVideo
                         WHERE id < 5;"""
-        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch = execute_query_fetch_all(self.evadb, select_query)
         self.assertEqual(len(actual_batch), 5)
 
     @pytest.mark.torchtest
@@ -198,11 +201,11 @@ class PytorchTest(unittest.TestCase):
                   TYPE  OCRExtraction
                   IMPL  'eva/udfs/ocr_extractor.py';
         """
-        execute_query_fetch_all(create_udf_query)
+        execute_query_fetch_all(self.evadb, create_udf_query)
 
         select_query = """SELECT OCRExtractor(data) FROM MNIST
                         WHERE id >= 150 AND id < 155;"""
-        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch = execute_query_fetch_all(self.evadb, select_query)
         self.assertEqual(len(actual_batch), 5)
 
         # non-trivial test case for MNIST
@@ -218,11 +221,11 @@ class PytorchTest(unittest.TestCase):
                   TYPE  Classification
                   IMPL  'eva/udfs/feature_extractor.py';
         """
-        execute_query_fetch_all(create_udf_query)
+        execute_query_fetch_all(self.evadb, create_udf_query)
 
         select_query = """SELECT FeatureExtractor(data) FROM MyVideo
                         WHERE id < 5;"""
-        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch = execute_query_fetch_all(self.evadb, select_query)
         self.assertEqual(len(actual_batch), 5)
 
         # non-trivial test case for Resnet50
@@ -238,7 +241,7 @@ class PytorchTest(unittest.TestCase):
                 TYPE NdarrayUDF
                 IMPL "eva/udfs/ndarray/open.py";
         """
-        execute_query_fetch_all(create_open_udf_query)
+        execute_query_fetch_all(self.evadb, create_open_udf_query)
 
         create_similarity_udf_query = """CREATE UDF IF NOT EXISTS Similarity
                     INPUT (Frame_Array_Open NDARRAY UINT8(3, ANYDIM, ANYDIM),
@@ -248,7 +251,7 @@ class PytorchTest(unittest.TestCase):
                     TYPE NdarrayUDF
                     IMPL "eva/udfs/ndarray/similarity.py";
         """
-        execute_query_fetch_all(create_similarity_udf_query)
+        execute_query_fetch_all(self.evadb, create_similarity_udf_query)
 
         create_feat_udf_query = """CREATE UDF IF NOT EXISTS FeatureExtractor
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
@@ -256,10 +259,10 @@ class PytorchTest(unittest.TestCase):
                   TYPE  Classification
                   IMPL  "eva/udfs/feature_extractor.py";
         """
-        execute_query_fetch_all(create_feat_udf_query)
+        execute_query_fetch_all(self.evadb, create_feat_udf_query)
 
         select_query = """SELECT data FROM MyVideo WHERE id = 1;"""
-        batch_res = execute_query_fetch_all(select_query)
+        batch_res = execute_query_fetch_all(self.evadb, select_query)
         img = batch_res.frames["myvideo.data"][0]
 
         config = ConfigurationManager()
@@ -278,7 +281,7 @@ class PytorchTest(unittest.TestCase):
                     LIMIT 1;""".format(
             img_save_path
         )
-        actual_batch = execute_query_fetch_all(similarity_query)
+        actual_batch = execute_query_fetch_all(self.evadb, similarity_query)
 
         similar_data = actual_batch.frames["myvideo.data"][0]
         self.assertTrue(np.array_equal(img, similar_data))
@@ -295,11 +298,11 @@ class PytorchTest(unittest.TestCase):
                   TYPE  OCRExtraction
                   IMPL  'eva/udfs/ocr_extractor.py';
         """
-        execute_query_fetch_all(create_udf_query)
+        execute_query_fetch_all(self.evadb, create_udf_query)
 
         select_query = """SELECT OCRExtractor(Crop(data, [2, 2, 24, 24])) FROM MNIST
                         WHERE id >= 150 AND id < 155;"""
-        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch = execute_query_fetch_all(self.evadb, select_query)
         self.assertEqual(len(actual_batch), 5)
 
         # non-trivial test case for MNIST
@@ -315,7 +318,7 @@ class PytorchTest(unittest.TestCase):
                 AS T(iids, labels, bboxes, scores)
             WHERE id < 30;
             """
-        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch = execute_query_fetch_all(self.evadb, select_query)
         self.assertEqual(len(actual_batch), 30)
 
         num_of_entries = actual_batch.frames["T.iids"].apply(lambda x: len(x)).sum()
@@ -326,7 +329,7 @@ class PytorchTest(unittest.TestCase):
                 UNNEST(EXTRACT_OBJECT(data, Yolo, NorFairTracker)) AS T(iid, label, bbox, score)
             WHERE id < 30;
             """
-        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch = execute_query_fetch_all(self.evadb, select_query)
         # do some more meaningful check
         self.assertEqual(len(actual_batch), num_of_entries)
 
@@ -336,7 +339,7 @@ class PytorchTest(unittest.TestCase):
                   JOIN LATERAL UNNEST(Yolo(data)) AS Yolo(label, bbox, score)
                   WHERE Yolo.label = 'car' AND id < 2;"""
 
-        actual_batch = execute_query_fetch_all(query)
+        actual_batch = execute_query_fetch_all(self.evadb, query)
 
         # due to unnest the number of returned tuples should be at least > 10
         self.assertTrue(len(actual_batch) > 2)

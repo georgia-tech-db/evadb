@@ -16,7 +16,6 @@ import asyncio
 import string
 from asyncio import StreamReader, StreamWriter
 
-from eva.configuration.configuration_manager import ConfigurationManager
 from eva.utils.logging_manager import logger
 
 

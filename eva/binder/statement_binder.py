@@ -128,7 +128,7 @@ class StatementBinder:
                 self.bind(expr[0])
         if node.union_link:
             current_context = self._binder_context
-            self._binder_context = StatementBinderContext()
+            self._binder_context = StatementBinderContext(self._catalog)
             self.bind(node.union_link)
             self._binder_context = current_context
 
@@ -204,7 +204,7 @@ class StatementBinder:
             bind_table_info(self._catalog, node.table)
         elif node.is_select():
             current_context = self._binder_context
-            self._binder_context = StatementBinderContext()
+            self._binder_context = StatementBinderContext(self._catalog)
             self.bind(node.select_statement)
             self._binder_context = current_context
             self._binder_context.add_derived_table_alias(

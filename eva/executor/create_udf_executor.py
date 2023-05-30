@@ -17,7 +17,6 @@ from typing import Dict, List
 
 import pandas as pd
 
-from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_utils import get_metadata_properties
 from eva.catalog.models.udf_catalog import UdfCatalogEntry
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry

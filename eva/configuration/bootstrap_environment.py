@@ -14,7 +14,6 @@
 # limitations under the License.
 import importlib.resources as importlib_resources
 import logging
-import shutil
 from pathlib import Path
 from typing import Union
 

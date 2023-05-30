@@ -16,7 +16,6 @@ from typing import Iterator
 
 import pandas as pd
 
-from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.sql_config import IDENTIFIER_COLUMN
 from eva.database import EVADB
 from eva.executor.abstract_executor import AbstractExecutor
@@ -45,7 +44,7 @@ class VectorIndexScanExecutor(AbstractExecutor):
 
     def exec(self, *args, **kwargs) -> Iterator[Batch]:
         # Fetch the index from disk.
-        index_catalog_entry = catalog_manager.get_index_catalog_entry_by_name(
+        index_catalog_entry = self.catalog.get_index_catalog_entry_by_name(
             self.index_name
         )
         self.index_path = index_catalog_entry.save_file_path

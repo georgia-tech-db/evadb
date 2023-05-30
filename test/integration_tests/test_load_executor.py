@@ -422,7 +422,7 @@ class LoadExecutorTest(unittest.TestCase):
 
         # load the CSV
         load_query = f"LOAD CSV '{self.csv_file_path}' INTO MyVideoCSV;"
-        execute_query_fetch_all(load_query)
+        execute_query_fetch_all(self.evadb, load_query)
 
         # execute a select query
         select_query = """SELECT id, frame_id, video_id,

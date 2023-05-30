@@ -22,11 +22,11 @@ from eva.server.command_handler import execute_query_fetch_all
 class CreateTableTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        cls.evadb = get_evadb_for_testing()
         pass
 
     @classmethod
     def tearDownClass(cls):
-        cls.evadb = get_evadb_for_testing()
         pass
 
     def test_currently_cannot_create_boolean_table(self):

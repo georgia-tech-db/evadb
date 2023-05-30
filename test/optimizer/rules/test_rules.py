@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,12 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import create_sample_video
+from test.util import create_sample_video, get_evadb_for_testing
 
 import pytest
 from mock import MagicMock, patch
 
-from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import TableType
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.configuration.configuration_manager import ConfigurationManager
@@ -95,15 +94,16 @@ from eva.server.command_handler import execute_query_fetch_all
 class RulesTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        cls.evadb = get_evadb_for_testing()
         # reset the catalog manager before running each test
-        CatalogManager().reset()
+        cls.evadb.catalog.reset()
         video_file_path = create_sample_video()
         load_query = f"LOAD VIDEO '{video_file_path}' INTO MyVideo;"
-        execute_query_fetch_all(load_query)
+        execute_query_fetch_all(cls.evadb, load_query)
 
     @classmethod
     def tearDownClass(cls):
-        execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
+        execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS MyVideo;")
 
     def test_rules_promises_order(self):
         # Promise of all rewrite should be greater than implementation

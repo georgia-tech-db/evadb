@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ from test.util import (
     create_dummy_batches,
     create_sample_video,
     file_remove,
+    get_evadb_for_testing,
     shutdown_ray,
 )
 
@@ -27,7 +28,6 @@ import pandas as pd
 import pytest
 
 from eva.binder.binder_utils import BinderError
-from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import ColumnType, NdArrayType
 from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
@@ -39,10 +39,11 @@ NUM_FRAMES = 10
 @pytest.mark.notparallel
 class UDFExecutorTest(unittest.TestCase):
     def setUp(self):
-        CatalogManager().reset()
+        self.evadb = get_evadb_for_testing()
+        self.evadb.catalog.reset()
         video_file_path = create_sample_video(NUM_FRAMES)
         load_query = f"LOAD VIDEO '{video_file_path}' INTO MyVideo;"
-        execute_query_fetch_all(load_query)
+        execute_query_fetch_all(self.evadb, load_query)
 
         create_udf_query = """CREATE UDF DummyObjectDetector
                   INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
@@ -50,19 +51,19 @@ class UDFExecutorTest(unittest.TestCase):
                   TYPE  Classification
                   IMPL  'test/util.py';
         """
-        execute_query_fetch_all(create_udf_query)
+        execute_query_fetch_all(self.evadb, create_udf_query)
 
     def tearDown(self):
         shutdown_ray()
         file_remove("dummy.avi")
-        execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
+        execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS MyVideo;")
 
     # integration test
 
     def test_should_load_and_select_using_udf_video_in_table(self):
         select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo \
             ORDER BY id;"
-        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch = execute_query_fetch_all(self.evadb, select_query)
         labels = DummyObjectDetector().labels
         expected = [
             {
@@ -78,7 +79,7 @@ class UDFExecutorTest(unittest.TestCase):
         # Equality test
         select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo \
             WHERE DummyObjectDetector(data).label = ['person'] ORDER BY id;"
-        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch = execute_query_fetch_all(self.evadb, select_query)
         expected = [
             {
                 "myvideo.id": i * 2,
@@ -92,7 +93,7 @@ class UDFExecutorTest(unittest.TestCase):
         # Contain test
         select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo \
             WHERE DummyObjectDetector(data).label @> ['person'] ORDER BY id;"
-        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch = execute_query_fetch_all(self.evadb, select_query)
         self.assertEqual(actual_batch, expected_batch)
 
         # Multi element contain test
@@ -100,7 +101,7 @@ class UDFExecutorTest(unittest.TestCase):
         select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo \
             WHERE DummyObjectDetector(data).label <@ ['person', 'bicycle'] \
             ORDER BY id;"
-        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch = execute_query_fetch_all(self.evadb, select_query)
         expected = [
             {
                 "myvideo.id": i * 2,
@@ -126,7 +127,7 @@ class UDFExecutorTest(unittest.TestCase):
             ) AS T
             WHERE ['person'] <@ label;
             """
-        actual_batch = execute_query_fetch_all(nested_select_query)
+        actual_batch = execute_query_fetch_all(self.evadb, nested_select_query)
         actual_batch.sort()
         expected_batch = list(
             create_dummy_batches(
@@ -149,13 +150,15 @@ class UDFExecutorTest(unittest.TestCase):
         """
         # Try to create duplicate UDF
         with self.assertRaises(ExecutorError):
-            actual = execute_query_fetch_all(create_udf_query.format(udf_name))
+            actual = execute_query_fetch_all(
+                self.evadb, create_udf_query.format(udf_name)
+            )
             expected = Batch(pd.DataFrame([f"UDF {udf_name} already exists."]))
             self.assertEqual(actual, expected)
 
         # Try to create UDF if not exists
         actual = execute_query_fetch_all(
-            create_udf_query.format("IF NOT EXISTS " + udf_name)
+            self.evadb, create_udf_query.format("IF NOT EXISTS " + udf_name)
         )
         expected = Batch(
             pd.DataFrame([f"UDF {udf_name} already exists, nothing added."])
@@ -164,7 +167,7 @@ class UDFExecutorTest(unittest.TestCase):
 
     def test_should_create_udf_with_metadata(self):
         udf_name = "DummyObjectDetector"
-        execute_query_fetch_all(f"DROP UDF {udf_name};")
+        execute_query_fetch_all(self.evadb, f"DROP UDF {udf_name};")
         create_udf_query = """CREATE UDF {}
                   INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
                   OUTPUT (label NDARRAY STR(10))
@@ -173,10 +176,10 @@ class UDFExecutorTest(unittest.TestCase):
                   'CACHE' 'TRUE'
                   'BATCH' 'FALSE';
         """
-        execute_query_fetch_all(create_udf_query.format(udf_name))
+        execute_query_fetch_all(self.evadb, create_udf_query.format(udf_name))
 
         # try fetching the metadata values
-        entries = CatalogManager().get_udf_metadata_entries_by_udf_name(udf_name)
+        entries = self.evadb.catalog.get_udf_metadata_entries_by_udf_name(udf_name)
         self.assertEqual(len(entries), 2)
         metadata = [(entry.key, entry.value) for entry in entries]
 
@@ -185,12 +188,12 @@ class UDFExecutorTest(unittest.TestCase):
 
     def test_should_return_empty_metadata_list_for_missing_udf(self):
         # missing udf should return empty list
-        entries = CatalogManager().get_udf_metadata_entries_by_udf_name("randomUDF")
+        entries = self.evadb.catalog.get_udf_metadata_entries_by_udf_name("randomUDF")
         self.assertEqual(len(entries), 0)
 
     def test_should_return_empty_metadata_list_if_udf_is_removed(self):
         udf_name = "DummyObjectDetector"
-        execute_query_fetch_all(f"DROP UDF {udf_name};")
+        execute_query_fetch_all(self.evadb, f"DROP UDF {udf_name};")
         create_udf_query = """CREATE UDF {}
                   INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
                   OUTPUT (label NDARRAY STR(10))
@@ -199,23 +202,23 @@ class UDFExecutorTest(unittest.TestCase):
                   'CACHE' 'TRUE'
                   'BATCH' 'FALSE';
         """
-        execute_query_fetch_all(create_udf_query.format(udf_name))
+        execute_query_fetch_all(self.evadb, create_udf_query.format(udf_name))
 
         # try fetching the metadata values
-        entries = CatalogManager().get_udf_metadata_entries_by_udf_name(udf_name)
+        entries = self.evadb.catalog.get_udf_metadata_entries_by_udf_name(udf_name)
         self.assertEqual(len(entries), 2)
 
         # remove the udf
-        execute_query_fetch_all(f"DROP UDF {udf_name};")
+        execute_query_fetch_all(self.evadb, f"DROP UDF {udf_name};")
         # try fetching the metadata values
-        entries = CatalogManager().get_udf_metadata_entries_by_udf_name(udf_name)
+        entries = self.evadb.catalog.get_udf_metadata_entries_by_udf_name(udf_name)
         self.assertEqual(len(entries), 0)
 
     def test_should_raise_using_missing_udf(self):
         select_query = "SELECT id,DummyObjectDetector1(data) FROM MyVideo \
             ORDER BY id;"
         with self.assertRaises(BinderError) as cm:
-            execute_query_fetch_all(select_query)
+            execute_query_fetch_all(self.evadb, select_query)
 
         err_msg = (
             "UDF with name DummyObjectDetector1 does not exist in the catalog. "
@@ -231,13 +234,13 @@ class UDFExecutorTest(unittest.TestCase):
                   IMPL  'test/util.py';
         """
         with self.assertRaises(ExecutorError):
-            execute_query_fetch_all(create_udf_query)
+            execute_query_fetch_all(self.evadb, create_udf_query)
 
     def test_should_raise_if_udf_file_is_modified(self):
-        execute_query_fetch_all("DROP UDF DummyObjectDetector;")
+        execute_query_fetch_all(self.evadb, "DROP UDF DummyObjectDetector;")
 
         # Test IF EXISTS
-        execute_query_fetch_all("DROP UDF IF EXISTS DummyObjectDetector;")
+        execute_query_fetch_all(self.evadb, "DROP UDF IF EXISTS DummyObjectDetector;")
 
         with tempfile.NamedTemporaryFile(mode="w", suffix=".py") as tmp_file:
             with open("test/util.py", "r") as file:
@@ -252,7 +255,9 @@ class UDFExecutorTest(unittest.TestCase):
                     TYPE  Classification
                     IMPL  '{}';
             """
-            execute_query_fetch_all(create_udf_query.format(udf_name, tmp_file.name))
+            execute_query_fetch_all(
+                self.evadb, create_udf_query.format(udf_name, tmp_file.name)
+            )
 
             # Modify the udf file by appending
             tmp_file.seek(0, 2)
@@ -264,16 +269,18 @@ class UDFExecutorTest(unittest.TestCase):
             )
 
             with self.assertRaises(AssertionError):
-                execute_query_fetch_all(select_query)
+                execute_query_fetch_all(self.evadb, select_query)
 
     def test_create_udf_with_decorators(self):
-        execute_query_fetch_all("DROP UDF IF EXISTS DummyObjectDetectorDecorators;")
+        execute_query_fetch_all(
+            self.evadb, "DROP UDF IF EXISTS DummyObjectDetectorDecorators;"
+        )
         create_udf_query = """CREATE UDF DummyObjectDetectorDecorators
                   IMPL  'test/util.py';
         """
-        execute_query_fetch_all(create_udf_query)
+        execute_query_fetch_all(self.evadb, create_udf_query)
 
-        catalog_manager = CatalogManager()
+        catalog_manager = self.evadb.catalog
         udf_obj = catalog_manager.get_udf_catalog_entry_by_name(
             "DummyObjectDetectorDecorators"
         )
@@ -313,6 +320,8 @@ class UDFExecutorTest(unittest.TestCase):
             )
 
     def test_udf_cost_entry_created(self):
-        execute_query_fetch_all("SELECT DummyObjectDetector(data) FROM MyVideo")
-        entry = CatalogManager().get_udf_cost_catalog_entry("DummyObjectDetector")
+        execute_query_fetch_all(
+            self.evadb, "SELECT DummyObjectDetector(data) FROM MyVideo"
+        )
+        entry = self.evadb.catalog.get_udf_cost_catalog_entry("DummyObjectDetector")
         self.assertIsNotNone(entry)

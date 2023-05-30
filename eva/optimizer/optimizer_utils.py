@@ -12,7 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import typing
 from typing import List, Tuple
+
+if typing.TYPE_CHECKING:
+    from eva.optimizer.optimizer_context import OptimizerContext
 
 from eva.catalog.catalog_utils import get_table_primary_columns
 from eva.catalog.models.column_catalog import ColumnCatalogEntry
@@ -228,7 +232,7 @@ def optimize_cache_key(context: "OptimizerContext", expr: FunctionExpression):
 def enable_cache_init(
     context: "OptimizerContext", func_expr: FunctionExpression
 ) -> FunctionExpressionCache:
-    optimized_key = optimize_cache_key(func_expr)
+    optimized_key = optimize_cache_key(context, func_expr)
     if optimized_key == func_expr.children:
         optimized_key = [None]
 

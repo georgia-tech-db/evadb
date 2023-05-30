@@ -14,8 +14,6 @@
 # limitations under the License.
 from typing import Iterator
 
-from eva.catalog.catalog_manager import CatalogManager
-from eva.configuration.configuration_manager import ConfigurationManager
 from eva.database import EVADB
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.apply_and_merge_executor import ApplyAndMergeExecutor

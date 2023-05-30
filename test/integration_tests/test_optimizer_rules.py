@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,14 +13,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import get_physical_query_plan, load_udfs_for_testing, shutdown_ray
+from test.util import (
+    get_evadb_for_testing,
+    get_physical_query_plan,
+    load_udfs_for_testing,
+    shutdown_ray,
+)
 
 import numpy as np
 import pandas as pd
 import pytest
 from mock import MagicMock, patch
 
-from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.configuration.constants import EVA_ROOT_DIR
 from eva.expression.comparison_expression import ComparisonExpression
@@ -46,16 +50,17 @@ from eva.utils.stats import Timer
 class OptimizerRulesTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        CatalogManager().reset()
+        cls.evadb = get_evadb_for_testing()
+        cls.evadb.catalog.reset()
         ua_detrac = f"{EVA_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
-        execute_query_fetch_all(f"LOAD VIDEO '{ua_detrac}' INTO MyVideo;")
-        execute_query_fetch_all(f"LOAD VIDEO '{ua_detrac}' INTO MyVideo2;")
-        load_udfs_for_testing(mode="debug")
+        execute_query_fetch_all(cls.evadb, f"LOAD VIDEO '{ua_detrac}' INTO MyVideo;")
+        execute_query_fetch_all(cls.evadb, f"LOAD VIDEO '{ua_detrac}' INTO MyVideo2;")
+        load_udfs_for_testing(cls.evadb, mode="debug")
 
     @classmethod
     def tearDownClass(cls):
         shutdown_ray()
-        execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
+        execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS MyVideo;")
 
     @patch("eva.expression.function_expression.FunctionExpression.evaluate")
     @patch("eva.models.storage.batch.Batch.merge_column_wise")
@@ -78,7 +83,7 @@ class OptimizerRulesTest(unittest.TestCase):
         time_with_rule = Timer()
         result_with_rule = None
         with time_with_rule:
-            result_with_rule = execute_query_fetch_all(query)
+            result_with_rule = execute_query_fetch_all(self.evadb, query)
 
         evaluate_count_with_rule = evaluate_mock.call_count
 
@@ -90,7 +95,7 @@ class OptimizerRulesTest(unittest.TestCase):
             ) as rules_manager:
                 custom_plan_generator = PlanGenerator(rules_manager)
                 result_without_pushdown_rules = execute_query_fetch_all(
-                    query, plan_generator=custom_plan_generator
+                    self.evadb, query, plan_generator=custom_plan_generator
                 )
 
         self.assertEqual(result_without_pushdown_rules, result_with_rule)
@@ -107,7 +112,7 @@ class OptimizerRulesTest(unittest.TestCase):
         with disable_rules([XformLateralJoinToLinearFlow()]) as rules_manager:
             custom_plan_generator = PlanGenerator(rules_manager)
             result_without_xform_rule = execute_query_fetch_all(
-                query, plan_generator=custom_plan_generator
+                self.evadb, query, plan_generator=custom_plan_generator
             )
 
         self.assertEqual(result_without_xform_rule, result_with_rule)
@@ -121,8 +126,8 @@ class OptimizerRulesTest(unittest.TestCase):
         time_with_rule = Timer()
         result_with_rule = None
         with time_with_rule:
-            result_with_rule = execute_query_fetch_all(query)
-            query_plan = execute_query_fetch_all(f"EXPLAIN {query}")
+            result_with_rule = execute_query_fetch_all(self.evadb, query)
+            query_plan = execute_query_fetch_all(self.evadb, f"EXPLAIN {query}")
         time_without_rule = Timer()
         result_without_pushdown_join_rule = None
         with time_without_rule:
@@ -130,10 +135,10 @@ class OptimizerRulesTest(unittest.TestCase):
                 # should use PushDownFilterThroughApplyAndMerge()
                 custom_plan_generator = PlanGenerator(rules_manager)
                 result_without_pushdown_join_rule = execute_query_fetch_all(
-                    query, plan_generator=custom_plan_generator
+                    self.evadb, query, plan_generator=custom_plan_generator
                 )
                 query_plan_without_pushdown_join_rule = execute_query_fetch_all(
-                    f"EXPLAIN {query}", plan_generator=custom_plan_generator
+                    self.evadb, f"EXPLAIN {query}", plan_generator=custom_plan_generator
                 )
 
         self.assertEqual(result_without_pushdown_join_rule, result_with_rule)
@@ -149,7 +154,7 @@ class OptimizerRulesTest(unittest.TestCase):
 
             query = f"SELECT id FROM MyVideo WHERE {pred_2} AND {pred_1};"
 
-            plan = get_physical_query_plan(query)
+            plan = get_physical_query_plan(self.evadb, query)
             predicate_plans = list(plan.find_all(PredicatePlan))
             self.assertEqual(len(predicate_plans), 1)
 
@@ -180,7 +185,7 @@ class OptimizerRulesTest(unittest.TestCase):
             costly_pred = "DummyMultiObjectDetector(data).labels @> ['person']"
 
             query = f"SELECT id FROM MyVideo WHERE {cheap_pred} AND {costly_pred};"
-            plan = get_physical_query_plan(query)
+            plan = get_physical_query_plan(self.evadb, query)
 
             predicate_plans = list(plan.find_all(PredicatePlan))
             self.assertEqual(len(predicate_plans), 1)
@@ -233,7 +238,7 @@ class OptimizerRulesTest(unittest.TestCase):
             f"{cheapest_pred};"
         )
 
-        plan = get_physical_query_plan(query)
+        plan = get_physical_query_plan(self.evadb, query)
         predicate_plans = list(plan.find_all(PredicatePlan))
         self.assertEqual(len(predicate_plans), 1)
 
@@ -249,11 +254,11 @@ class OptimizerRulesTest(unittest.TestCase):
 
     def test_reorder_rule_should_not_have_side_effects(self):
         query = "SELECT id FROM MyVideo WHERE id < 20 AND id > 10;"
-        result = execute_query_fetch_all(query)
+        result = execute_query_fetch_all(self.evadb, query)
 
         with disable_rules([ReorderPredicates()]) as rules_manager:
             custom_plan_generator = PlanGenerator(rules_manager)
             expected = execute_query_fetch_all(
-                query, plan_generator=custom_plan_generator
+                self.evadb, query, plan_generator=custom_plan_generator
             )
             self.assertEqual(result, expected)

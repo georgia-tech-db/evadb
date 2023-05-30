@@ -18,7 +18,6 @@ from pathlib import Path
 
 import pandas as pd
 
-from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.database import EVADB

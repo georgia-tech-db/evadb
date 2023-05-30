@@ -15,11 +15,10 @@
 import os
 import time
 import unittest
-from test.util import load_udfs_for_testing, shutdown_ray
+from test.util import get_evadb_for_testing, load_udfs_for_testing, shutdown_ray
 
 from pandas.testing import assert_frame_equal
 
-from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
 from eva.interfaces.relational.db import connect
 from eva.server.command_handler import execute_query_fetch_all
@@ -31,6 +30,7 @@ class RelationalAPI(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        cls.evadb = get_evadb_for_testing()
         os.system("nohup eva_server --stop")
         os.system("nohup eva_server --port 8886 --start &")
         for _ in range(10):
@@ -44,16 +44,18 @@ class RelationalAPI(unittest.TestCase):
         os.system("nohup eva_server --stop")
 
     def setUp(self):
-        CatalogManager().reset()
+        self.evadb.catalog.reset()
         self.mnist_path = f"{EVA_ROOT_DIR}/data/mnist/mnist.mp4"
-        load_udfs_for_testing()
+        load_udfs_for_testing(
+            self.evadb,
+        )
         self.images = f"{EVA_ROOT_DIR}/data/detoxify/*.jpg"
 
     def tearDown(self):
         shutdown_ray()
         # todo: move these to relational apis as well
-        execute_query_fetch_all("""DROP TABLE IF EXISTS mnist_video;""")
-        execute_query_fetch_all("""DROP TABLE IF EXISTS meme_images;""")
+        execute_query_fetch_all(self.evadb, """DROP TABLE IF EXISTS mnist_video;""")
+        execute_query_fetch_all(self.evadb, """DROP TABLE IF EXISTS meme_images;""")
 
     def test_relation_apis(self):
         conn = connect(port=8886)
