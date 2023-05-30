@@ -34,6 +34,7 @@ from eva.optimizer.rules.rules_base import Promise, Rule, RuleType
 from eva.plan_nodes.apply_and_merge_plan import ApplyAndMergePlan
 from eva.plan_nodes.seq_scan_plan import SeqScanPlan
 from eva.plan_nodes.storage_plan import StoragePlan
+from eva.plan_nodes.project_plan import ProjectPlan
 
 
 class LogicalExchangeToPhysical(Rule):
@@ -87,34 +88,27 @@ class LogicalApplyAndMergeToPhysical(Rule):
         yield exchange_plan
 
 
-class LogicalGetToSeqScan(Rule):
+class LogicalProjectToPhysical(Rule):
     def __init__(self):
-        pattern = Pattern(OperatorType.LOGICALGET)
-        super().__init__(RuleType.LOGICAL_GET_TO_SEQSCAN, pattern)
+        pattern = Pattern(OperatorType.LOGICALPROJECT)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_PROJECT_TO_PHYSICAL, pattern)
 
     def promise(self):
-        return Promise.LOGICAL_GET_TO_SEQSCAN
+        return Promise.LOGICAL_PROJECT_TO_PHYSICAL
 
-    def check(self, before: LogicalGet, context: OptimizerContext):
+    def check(self, before: LogicalProject, context: OptimizerContext):
         return True
 
-    def apply(self, before: LogicalGet, context: OptimizerContext):
-        # Configure the batch_mem_size. It decides the number of rows
-        # read in a batch from storage engine.
-        # Todo: Experiment heuristics.
-        scan_plan = SeqScanPlan(None, before.target_list, before.alias)
-        storage_plan = StoragePlan(
-            before.table_obj,
-            before.video,
-            predicate=before.predicate,
-            sampling_rate=before.sampling_rate,
-        )
+    def apply(self, before: LogicalProject, context: OptimizerContext):
+        project_plan = ProjectPlan(before.target_list)
         # Check whether the projection contains a UDF
         if before.target_list is None or not any(
             [isinstance(expr, FunctionExpression) for expr in before.target_list]
         ):
-            scan_plan.append_child(storage_plan)
-            yield scan_plan
+            for child in before.children:
+                project_plan.append_child(child)
+            yield project_plan
         else:
             parallelism = 2 if len(Context().gpus) > 1 else 1
             ray_parallel_env_conf_dict = [
@@ -122,10 +116,11 @@ class LogicalGetToSeqScan(Rule):
             ]
 
             exchange_plan = ExchangePlan(
-                inner_plan=scan_plan,
+                inner_plan=project_plan,
                 parallelism=parallelism,
                 ray_pull_env_conf_dict={"CUDA_VISIBLE_DEVICES": "0"},
                 ray_parallel_env_conf_dict=ray_parallel_env_conf_dict,
             )
-            exchange_plan.append_child(storage_plan)
+            for child in before.children:
+                exchange_plan.append_child(child)
             yield exchange_plan

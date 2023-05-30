@@ -23,7 +23,7 @@ from eva.experimental.parallel.optimizer.rules.rules import (
 )
 from eva.experimental.parallel.optimizer.rules.rules import LogicalExchangeToPhysical
 from eva.experimental.parallel.optimizer.rules.rules import (
-    LogicalGetToSeqScan as ParallelLogicalGetToSeqScan,
+    LogicalProjectToPhysical as ParallelProjectToPhysical,
 )
 from eva.optimizer.rules.rules import (
     CacheFunctionExpressionInApply,
@@ -50,7 +50,7 @@ from eva.optimizer.rules.rules import (
     LogicalFunctionScanToPhysical,
 )
 from eva.optimizer.rules.rules import (
-    LogicalGetToSeqScan as SequentialLogicalGetToSeqScan,
+    LogicalProjectToPhysical as SequentialLogicalProjectToPhysical,
 )
 from eva.optimizer.rules.rules import (
     LogicalGroupByToPhysical,
@@ -62,7 +62,7 @@ from eva.optimizer.rules.rules import (
     LogicalLimitToPhysical,
     LogicalLoadToPhysical,
     LogicalOrderByToPhysical,
-    LogicalProjectToPhysical,
+    LogicalGetToSeqScan,
     LogicalRenameToPhysical,
     LogicalShowToPhysical,
     LogicalUnionToPhysical,
@@ -111,9 +111,7 @@ class RulesManager:
             LogicalInsertToPhysical(),
             LogicalDeleteToPhysical(),
             LogicalLoadToPhysical(),
-            ParallelLogicalGetToSeqScan()
-            if ray_enabled
-            else SequentialLogicalGetToSeqScan(),
+            LogicalGetToSeqScan(),
             LogicalDerivedGetToPhysical(),
             LogicalUnionToPhysical(),
             LogicalGroupByToPhysical(),
@@ -125,7 +123,9 @@ class RulesManager:
             LogicalFunctionScanToPhysical(),
             LogicalCreateMaterializedViewToPhysical(),
             LogicalFilterToPhysical(),
-            LogicalProjectToPhysical(),
+            ParallelProjectToPhysical()
+            if ray_enabled
+            else SequentialLogicalProjectToPhysical(),
             ParallelLogicalApplyAndMergeToPhysical()
             if ray_enabled
             else SequentialLogicalApplyAndMergeToPhysical(),
