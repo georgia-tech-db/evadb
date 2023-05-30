@@ -16,7 +16,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import TableType
 from eva.catalog.catalog_utils import is_video_table
 from eva.constants import CACHEABLE_UDFS

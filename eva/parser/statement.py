@@ -14,10 +14,6 @@
 # limitations under the License.
 from copy import deepcopy
 
-<<<<<<< HEAD
-=======
-
->>>>>>> e26c36dd71242de005e57baa3c4a6c2ab818d2d2
 from eva.parser.types import StatementType
 
 

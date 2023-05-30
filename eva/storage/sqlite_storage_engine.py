@@ -24,7 +24,7 @@ from eva.catalog.models.base_model import BaseModel
 from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.catalog.schema_utils import SchemaUtils
-from eva.catalog.sql_config import IDENTIFIER_COLUMN, SQLConfig
+from eva.catalog.sql_config import IDENTIFIER_COLUMN
 from eva.database import EVADB
 from eva.models.storage.batch import Batch
 from eva.parser.table_ref import TableInfo

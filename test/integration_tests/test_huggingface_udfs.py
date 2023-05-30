@@ -17,7 +17,6 @@ from test.util import create_text_csv, file_remove
 
 import pytest
 
-from eva.catalog.catalog_manager import CatalogManager
 from eva.executor.executor_utils import ExecutorError
 from eva.server.command_handler import execute_query_fetch_all
 

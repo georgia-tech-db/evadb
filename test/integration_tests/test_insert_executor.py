@@ -24,7 +24,6 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from eva.catalog.catalog_manager import CatalogManager
 from eva.server.command_handler import execute_query_fetch_all
 from eva.utils.logging_manager import logger
 

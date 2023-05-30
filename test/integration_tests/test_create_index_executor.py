@@ -21,7 +21,6 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import VectorStoreType
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.models.storage.batch import Batch

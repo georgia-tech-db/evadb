@@ -17,7 +17,6 @@ from typing import Iterator
 import pandas as pd
 from sqlalchemy import and_, or_
 
-from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import TableType
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.database import EVADB

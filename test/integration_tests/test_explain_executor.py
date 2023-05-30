@@ -22,7 +22,6 @@ from test.util import (
 
 import pytest
 
-from eva.catalog.catalog_manager import CatalogManager
 from eva.optimizer.plan_generator import PlanGenerator
 from eva.optimizer.rules.rules import (
     EmbedFilterIntoGet,

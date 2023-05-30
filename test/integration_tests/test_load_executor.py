@@ -35,7 +35,6 @@ import pandas as pd
 import pytest
 
 from eva.binder.binder_utils import BinderError
-from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
 from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch

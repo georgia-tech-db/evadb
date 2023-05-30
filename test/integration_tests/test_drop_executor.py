@@ -18,7 +18,6 @@ from test.util import create_sample_video, file_remove, get_evadb_for_testing
 
 import pytest
 
-from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_utils import get_video_table_column_definitions
 from eva.executor.executor_utils import ExecutorError
 from eva.server.command_handler import execute_query_fetch_all
@@ -38,7 +37,7 @@ class DropExecutorTest(unittest.TestCase):
     # integration test
     def test_should_drop_table(self):
         query = f"""LOAD VIDEO '{self.video_file_path}' INTO MyVideo;"""
-        execute_query_fetch_all(self.evadbquery)
+        execute_query_fetch_all(self.evadb, query)
 
         # catalog should contain video table and the metadata table
         table_catalog_entry = self.evadb.catalog.get_table_catalog_entry("MyVideo")

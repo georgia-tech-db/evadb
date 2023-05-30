@@ -16,7 +16,6 @@ import unittest
 from test.markers import ocr_skip_marker
 from test.util import get_evadb_for_testing, shutdown_ray
 
-from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
 from eva.server.command_handler import execute_query_fetch_all
 

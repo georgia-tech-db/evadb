@@ -20,7 +20,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy_utils import create_database, database_exists
 
-from eva.catalog.sql_config import CATALOG_TABLES, SQLConfig
+from eva.catalog.sql_config import CATALOG_TABLES
 from eva.utils.logging_manager import logger
 
 

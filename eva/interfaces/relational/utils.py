@@ -12,29 +12,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-<<<<<<< HEAD
 import asyncio
 from typing import List, Union
 
-=======
-# coding=utf-8
-# Copyright 2018-2023 EVA
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-import asyncio
-from typing import List, Union
-
->>>>>>> e26c36dd71242de005e57baa3c4a6c2ab818d2d2
 from eva.binder.statement_binder import StatementBinder
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.executor.plan_executor import PlanExecutor
@@ -47,11 +27,6 @@ from eva.optimizer.statement_to_opr_converter import StatementToPlanConverter
 from eva.parser.select_statement import SelectStatement
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
-
-<<<<<<< HEAD
-
-=======
->>>>>>> e26c36dd71242de005e57baa3c4a6c2ab818d2d2
 from eva.parser.utils import (
     parse_expression,
     parse_lateral_join,
@@ -140,11 +115,7 @@ def handle_select_clause(
     assert clause in accepted_clauses, f"Unknown clause: {clause}"
 
     # If the clause being set is "target_list" and the value is equal to
-<<<<<<< HEAD
-    # "*", the "SELECT *" portion is reset.
-=======
     # "*", the "SELECT *" portion is replaced by SELECT <value>.
->>>>>>> e26c36dd71242de005e57baa3c4a6c2ab818d2d2
     if clause == "target_list" and getattr(query, clause) == create_star_expression():
         setattr(query, clause, None)
 
