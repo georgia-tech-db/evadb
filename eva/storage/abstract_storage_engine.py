@@ -16,6 +16,7 @@ from abc import ABCMeta, abstractmethod
 from typing import Iterator
 
 from eva.catalog.models.table_catalog import TableCatalogEntry
+from eva.database import EVADB
 from eva.expression.abstract_expression import AbstractExpression
 from eva.models.storage.batch import Batch
 
@@ -27,6 +28,9 @@ class AbstractStorageEngine(metaclass=ABCMeta):
     This contains a minimal set of APIs that each engine should implement
 
     """
+
+    def __init__(self, db: EVADB):
+        self.db = db
 
     @abstractmethod
     def create(self, table: TableCatalogEntry):

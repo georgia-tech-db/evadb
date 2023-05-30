@@ -25,6 +25,7 @@ from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.catalog.schema_utils import SchemaUtils
 from eva.catalog.sql_config import IDENTIFIER_COLUMN, SQLConfig
+from eva.database import EVADB
 from eva.models.storage.batch import Batch
 from eva.parser.table_ref import TableInfo
 from eva.storage.abstract_storage_engine import AbstractStorageEngine
@@ -36,12 +37,13 @@ from eva.utils.logging_manager import logger
 
 
 class SQLStorageEngine(AbstractStorageEngine):
-    def __init__(self):
+    def __init__(self, db: EVADB):
         """
         Grab the existing sql session
         """
-        self._sql_session = SQLConfig().session
-        self._sql_engine = SQLConfig().engine
+        super().__init__(db)
+        self._sql_session = db.catalog.sql_config.session
+        self._sql_engine = db.catalog.sql_config.engine
         self._serializer = PickleSerializer
 
     def _dict_to_sql_row(self, dict_row: dict, columns: List[ColumnCatalogEntry]):
@@ -100,7 +102,9 @@ class SQLStorageEngine(AbstractStorageEngine):
         # https://sparrigan.github.io/sql/sqla/2016/01/03/dynamic-tables.html
         new_table = type("__placeholder_class_name__", (BaseModel,), attr_dict)()
         table = BaseModel.metadata.tables[table.name]
-        if not table.exists():
+        insp = inspect(self._sql_engine)
+        
+        if not insp.has_table(table.name):
             BaseModel.metadata.tables[table.name].create(self._sql_engine)
         self._sql_session.commit()
         return new_table
@@ -108,7 +112,7 @@ class SQLStorageEngine(AbstractStorageEngine):
     def drop(self, table: TableCatalogEntry):
         try:
             table_to_remove = self._try_loading_table_via_reflection(table.name)
-            table_to_remove.drop()
+            table_to_remove.drop(self._sql_engine)
             # In-memory metadata does not automatically sync with the database
             # therefore manually removing the table from the in-memory metadata
             # https://github.com/sqlalchemy/sqlalchemy/issues/5112

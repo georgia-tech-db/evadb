@@ -19,12 +19,13 @@ from eva.catalog.services.base_service import BaseService
 from eva.catalog.services.column_catalog_service import ColumnCatalogService
 from eva.utils.errors import CatalogError
 from eva.utils.logging_manager import logger
+from sqlalchemy.orm import Session
 
 
 class TableCatalogService(BaseService):
-    def __init__(self):
-        super().__init__(TableCatalog)
-        self._column_service: ColumnCatalogService = ColumnCatalogService()
+    def __init__(self, db_session: Session):
+        super().__init__(TableCatalog, db_session)
+        self._column_service: ColumnCatalogService = ColumnCatalogService(db_session)
 
     def insert_entry(
         self,
@@ -49,7 +50,7 @@ class TableCatalogService(BaseService):
                 identifier_column=identifier_column,
                 table_type=table_type,
             )
-            table_catalog_obj = table_catalog_obj.save()
+            table_catalog_obj = table_catalog_obj.save(self.session)
 
             # populate the table_id for all the columns
             for column in column_list:
@@ -73,7 +74,7 @@ class TableCatalogService(BaseService):
         Returns:
            TableCatalogEntry
         """
-        entry = self.model.query.filter(self.model._row_id == table_id).one()
+        entry = self.query.filter(self.model._row_id == table_id).one()
         return entry if return_alchemy else entry.as_dataclass()
 
     def get_entry_by_name(
@@ -88,7 +89,7 @@ class TableCatalogService(BaseService):
         Returns:
             TableCatalogEntry - catalog entry for given table_name
         """
-        entry = self.model.query.filter(self.model._name == table_name).one_or_none()
+        entry = self.query.filter(self.model._name == table_name).one_or_none()
         if entry:
             return entry if return_alchemy else entry.as_dataclass()
         return entry
@@ -101,10 +102,10 @@ class TableCatalogService(BaseService):
             True if successfully removed else false
         """
         try:
-            table_obj = self.model.query.filter(
+            table_obj = self.query.filter(
                 self.model._row_id == table.row_id
             ).one()
-            table_obj.delete()
+            table_obj.delete(self.session)
             return True
         except Exception as e:
             err_msg = f"Delete table failed for {table} with error {str(e)}."
@@ -113,10 +114,10 @@ class TableCatalogService(BaseService):
 
     def rename_entry(self, table: TableCatalogEntry, new_name: str):
         try:
-            table_obj = self.model.query.filter(
+            table_obj = self.query.filter(
                 self.model._row_id == table.row_id
             ).one()
-            table_obj.update(_name=new_name)
+            table_obj.update(self.session, _name=new_name)
         except Exception as e:
             err_msg = "Update table name failed for {} with error {}".format(
                 table.name, str(e)

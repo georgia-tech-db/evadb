@@ -14,7 +14,7 @@
 # limitations under the License.
 import unittest
 from pathlib import Path
-from test.util import load_udfs_for_testing
+from test.util import get_evadb_for_testing, load_udfs_for_testing
 
 import faiss
 import numpy as np
@@ -39,12 +39,8 @@ class CreateIndexTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        # Bootstrap configuration manager.
-        ConfigurationManager()
-
-        # Reset catalog.
-        CatalogManager().reset()
-        load_udfs_for_testing(mode="debug")
+        cls.evadb = get_evadb_for_testing()
+        load_udfs_for_testing(cls.evadb, mode="debug")
 
         # Create feature vector table and raw input table.
         feat1 = np.array([[0, 0, 0]]).astype(np.float32)
@@ -57,14 +53,16 @@ class CreateIndexTest(unittest.TestCase):
 
         # Create table.
         execute_query_fetch_all(
+            cls.evadb,
             """create table if not exists testCreateIndexFeatTable (
                 feat NDARRAY FLOAT32(1,3)
-            );"""
+            );""",
         )
         execute_query_fetch_all(
+            cls.evadb,
             """create table if not exists testCreateIndexInputTable (
                 input NDARRAY UINT8(1,3)
-            );"""
+            );""",
         )
 
         # Create pandas dataframe.
@@ -75,10 +73,10 @@ class CreateIndexTest(unittest.TestCase):
                 }
             )
         )
-        feat_tb_entry = CatalogManager().get_table_catalog_entry(
+        feat_tb_entry = cls.evadb.catalog.get_table_catalog_entry(
             "testCreateIndexFeatTable"
         )
-        storage_engine = StorageEngine.factory(feat_tb_entry)
+        storage_engine = StorageEngine.factory(cls.evadb, feat_tb_entry)
         storage_engine.write(feat_tb_entry, feat_batch_data)
 
         input_batch_data = Batch(
@@ -88,7 +86,7 @@ class CreateIndexTest(unittest.TestCase):
                 }
             )
         )
-        input_tb_entry = CatalogManager().get_table_catalog_entry(
+        input_tb_entry = cls.evadb.catalog.get_table_catalog_entry(
             "testCreateIndexInputTable"
         )
         storage_engine.write(input_tb_entry, input_batch_data)

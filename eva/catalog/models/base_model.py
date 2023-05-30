@@ -21,6 +21,7 @@ from sqlalchemy_utils import create_database, database_exists
 
 from eva.catalog.sql_config import CATALOG_TABLES, SQLConfig
 from eva.utils.logging_manager import logger
+from sqlalchemy.engine import Engine
 
 
 class CustomModel:
@@ -35,9 +36,6 @@ class CustomModel:
     _row_id = Column("_row_id", Integer, primary_key=True)
 
     def __init__(self, **kwargs):
-        self.db_session = SQLConfig().session
-        self.query = self.db_session.query_property()
-
         cls_ = type(self)
         for k in kwargs:
             if hasattr(cls_, k):
@@ -45,22 +43,22 @@ class CustomModel:
             else:
                 continue
 
-    def save(self):
+    def save(self, db_session):
         """Add and commit
 
         Returns: saved object
 
         """
         try:
-            self.db_session.add(self)
-            self._commit()
+            db_session.add(self)
+            self._commit(db_session)
         except Exception as e:
-            self.db_session.rollback()
+            db_session.rollback()
             logger.error(f"Database save failed : {str(e)}")
             raise e
         return self
 
-    def update(self, **kwargs):
+    def update(self, db_session, **kwargs):
         """Update and commit
 
         Args:
@@ -73,28 +71,28 @@ class CustomModel:
             for attr, value in kwargs.items():
                 if hasattr(self, attr):
                     setattr(self, attr, value)
-            return self.save()
+            return self.save(db_session)
         except Exception as e:
-            self.db_session.rollback()
+            db_session.rollback()
             logger.error(f"Database update failed : {str(e)}")
             raise e
 
-    def delete(self):
+    def delete(self, db_session):
         """Delete and commit"""
         try:
-            self.db_session.delete(self)
-            self._commit()
+            db_session.delete(self)
+            self._commit(db_session)
         except Exception as e:
-            self.db_session.rollback()
+            db_session.rollback()
             logger.error(f"Database delete failed : {str(e)}")
             raise e
 
-    def _commit(self):
+    def _commit(self, db_session):
         """Try to commit. If an error is raised, the session is rollbacked."""
         try:
-            self.db_session.commit()
+            db_session.commit()
         except SQLAlchemyError as e:
-            self.db_session.rollback()
+            db_session.rollback()
             logger.error(f"Database commit failed : {str(e)}")
             raise e
 
@@ -103,9 +101,8 @@ class CustomModel:
 BaseModel = declarative_base(cls=CustomModel, constructor=None)
 
 
-def init_db():
+def init_db(engine: Engine):
     """Create database if doesn't exist and create all tables."""
-    engine = SQLConfig().engine
     if not database_exists(engine.url):
         logger.info("Database does not exist, creating database.")
         create_database(engine.url)
@@ -113,10 +110,9 @@ def init_db():
         BaseModel.metadata.create_all(bind=engine)
 
 
-def truncate_catalog_tables():
+def truncate_catalog_tables(engine: Engine):
     """Truncate all the catalog tables"""
     # https://stackoverflow.com/questions/4763472/sqlalchemy-clear-database-content-but-dont-drop-the-schema/5003705#5003705 #noqa
-    engine = SQLConfig().engine
     # reflect to refresh the metadata
     BaseModel.metadata.reflect(bind=engine)
     if database_exists(engine.url):
@@ -128,9 +124,8 @@ def truncate_catalog_tables():
             trans.commit()
 
 
-def drop_all_tables_except_catalog():
+def drop_all_tables_except_catalog(engine: Engine):
     """drop all the tables except the catalog"""
-    engine = SQLConfig().engine
     # reflect to refresh the metadata
     BaseModel.metadata.reflect(bind=engine)
     if database_exists(engine.url):

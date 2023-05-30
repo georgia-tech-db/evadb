@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import Iterator
+from eva.database import EVADB
 
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
@@ -30,8 +31,8 @@ class ApplyAndMergeExecutor(AbstractExecutor):
 
     """
 
-    def __init__(self, node: ApplyAndMergePlan):
-        super().__init__(node)
+    def __init__(self, db: EVADB, node: ApplyAndMergePlan):
+        super().__init__(db, node)
         self.func_expr = node.func_expr
         self.do_unnest = node.do_unnest
         self.alias = node.alias

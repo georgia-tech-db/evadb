@@ -16,11 +16,12 @@
 from eva.catalog.models.udf_cost_catalog import UdfCostCatalog, UdfCostCatalogEntry
 from eva.catalog.services.base_service import BaseService
 from eva.utils.errors import CatalogError
+from sqlalchemy.orm import Session
 
 
 class UdfCostCatalogService(BaseService):
-    def __init__(self):
-        super().__init__(UdfCostCatalog)
+    def __init__(self, db_session: Session):
+        super().__init__(UdfCostCatalog, db_session)
 
     def insert_entry(self, udf_id: int, name: str, cost: int) -> UdfCostCatalogEntry:
         """Insert a new udf cost entry
@@ -35,7 +36,7 @@ class UdfCostCatalogService(BaseService):
         """
         try:
             udf_obj = self.model(udf_id, name, cost)
-            udf_obj.save()
+            udf_obj.save(self.session)
         except Exception as e:
             raise CatalogError(
                 f"Error while inserting entry to UdfCostCatalog: {str(e)}"
@@ -50,11 +51,11 @@ class UdfCostCatalogService(BaseService):
             cost(int)  : cost of the udf
         """
         try:
-            udf_obj = self.model.query.filter(
+            udf_obj = self.query.filter(
                 self.model._udf_id == udf_id
             ).one_or_none()
             if udf_obj:
-                udf_obj.update(cost=new_cost)
+                udf_obj.update(self.session, cost=new_cost)
             else:
                 self.insert_entry(udf_id, name, new_cost)
         except Exception as e:
@@ -71,7 +72,7 @@ class UdfCostCatalogService(BaseService):
         """
 
         try:
-            udf_obj = self.model.query.filter(
+            udf_obj = self.query.filter(
                 self.model._udf_name == name
             ).one_or_none()
             if udf_obj:

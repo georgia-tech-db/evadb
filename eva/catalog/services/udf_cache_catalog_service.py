@@ -21,13 +21,14 @@ from eva.catalog.services.column_catalog_service import ColumnCatalogService
 from eva.catalog.services.udf_catalog_service import UdfCatalogService
 from eva.utils.errors import CatalogError
 from eva.utils.logging_manager import logger
+from sqlalchemy.orm import Session
 
 
 class UdfCacheCatalogService(BaseService):
-    def __init__(self):
-        super().__init__(UdfCacheCatalog)
-        self._column_service: ColumnCatalogService = ColumnCatalogService()
-        self._udf_service: UdfCatalogService = UdfCatalogService()
+    def __init__(self, db_session: Session):
+        super().__init__(UdfCacheCatalog, db_session)
+        self._column_service: ColumnCatalogService = ColumnCatalogService(db_session)
+        self._udf_service: UdfCatalogService = UdfCatalogService(db_session)
 
     def insert_entry(self, entry: UdfCacheCatalogEntry) -> UdfCacheCatalogEntry:
         """Insert a new udf cache entry into udf cache catalog.
@@ -57,7 +58,7 @@ class UdfCacheCatalogService(BaseService):
                 self._column_service.get_entry_by_id(col_id, return_alchemy=True)
                 for col_id in entry.col_depends
             ]
-            cache_obj = cache_obj.save()
+            cache_obj = cache_obj.save(self.session)
 
         except Exception as e:
             err_msg = (
@@ -70,7 +71,7 @@ class UdfCacheCatalogService(BaseService):
 
     def get_entry_by_name(self, name: str) -> UdfCacheCatalogEntry:
         try:
-            entry = self.model.query.filter(self.model._name == name).one()
+            entry = self.query.filter(self.model._name == name).one()
             return entry.as_dataclass()
         except NoResultFound:
             return None
@@ -83,8 +84,8 @@ class UdfCacheCatalogService(BaseService):
             True if successfully removed else false
         """
         try:
-            obj = self.model.query.filter(self.model._row_id == cache.row_id).one()
-            obj.delete()
+            obj = self.query.filter(self.model._row_id == cache.row_id).one()
+            obj.delete(self.session)
             return True
         except Exception as e:
             err_msg = f"Delete cache failed for {cache} with error {str(e)}."

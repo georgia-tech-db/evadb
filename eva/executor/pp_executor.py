@@ -17,6 +17,7 @@ from typing import Iterator
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.pp_plan import PPScanPlan
+from eva.database import EVADB
 
 
 class PPExecutor(AbstractExecutor):
@@ -30,8 +31,8 @@ class PPExecutor(AbstractExecutor):
     sequential scan evolves.
     """
 
-    def __init__(self, node: PPScanPlan):
-        super().__init__(node)
+    def __init__(self, db: EVADB, node: PPScanPlan):
+        super().__init__(db, node)
         self.predicate = node.predicate
 
     def exec(self, *args, **kwargs) -> Iterator[Batch]:

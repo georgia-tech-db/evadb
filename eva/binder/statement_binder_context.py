@@ -44,10 +44,10 @@ class StatementBinderContext:
             `{T: {a: func.obj1, b:func.obj2}}`
     """
 
-    def __init__(self):
+    def __init__(self, catalog: CatalogManager):
+        self._catalog = catalog
         self._table_alias_map: Dict[str, TableCatalogEntry] = dict()
         self._derived_table_alias_map: Dict[str, Dict[str, CatalogColumnType]] = dict()
-        self._catalog = CatalogManager()
         self._retrieve_audio = False
         self._retrieve_video = False
 

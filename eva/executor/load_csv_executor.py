@@ -23,12 +23,12 @@ from eva.plan_nodes.load_data_plan import LoadDataPlan
 from eva.readers.csv_reader import CSVReader
 from eva.storage.storage_engine import StorageEngine
 from eva.utils.logging_manager import logger
+from eva.database import EVADB
 
 
 class LoadCSVExecutor(AbstractExecutor):
-    def __init__(self, node: LoadDataPlan):
-        super().__init__(node)
-        self.catalog = CatalogManager()
+    def __init__(self, db: EVADB, node: LoadDataPlan):
+        super().__init__(db, node)
 
     def exec(self, *args, **kwargs):
         """
@@ -69,7 +69,7 @@ class LoadCSVExecutor(AbstractExecutor):
             batch_mem_size=self.node.batch_mem_size,
         )
 
-        storage_engine = StorageEngine.factory(table_obj)
+        storage_engine = StorageEngine.factory(self.db, table_obj)
         # write with storage engine in batches
         num_loaded_frames = 0
         for batch in csv_reader.read():

@@ -17,6 +17,7 @@ from typing import Iterator, Optional
 
 from eva.binder.statement_binder import StatementBinder
 from eva.binder.statement_binder_context import StatementBinderContext
+from eva.database import EVADB
 from eva.executor.plan_executor import PlanExecutor
 from eva.models.server.response import Response, ResponseStatus
 from eva.models.storage.batch import Batch
@@ -27,28 +28,30 @@ from eva.utils.logging_manager import logger
 from eva.utils.stats import Timer
 
 
-def execute_query(query, report_time: bool = False, **kwargs) -> Iterator[Batch]:
+def execute_query(
+    evadb: EVADB, query, report_time: bool = False, **kwargs
+) -> Iterator[Batch]:
     """
     Execute the query and return a result generator.
     """
     query_compile_time = Timer()
-    plan_generator = kwargs.pop("plan_generator", PlanGenerator())
+    plan_generator = kwargs.pop("plan_generator", PlanGenerator(evadb))
     with query_compile_time:
         stmt = Parser().parse(query)[0]
-        StatementBinder(StatementBinderContext()).bind(stmt)
+        StatementBinder(StatementBinderContext(evadb.catalog)).bind(stmt)
         l_plan = StatementToPlanConverter().visit(stmt)
         p_plan = asyncio.run(plan_generator.build(l_plan))
-        output = PlanExecutor(p_plan).execute_plan()
+        output = PlanExecutor(p_plan, evadb).execute_plan()
 
     query_compile_time.log_elapsed_time("Query Compile Time")
     return output
 
 
-def execute_query_fetch_all(query, **kwargs) -> Optional[Batch]:
+def execute_query_fetch_all(evadb: EVADB, query=None, **kwargs) -> Optional[Batch]:
     """
     Execute the query and fetch all results into one Batch object.
     """
-    output = execute_query(query, report_time=True, **kwargs)
+    output = execute_query(evadb, query, report_time=True, **kwargs)
     if output:
         batch_list = list(output)
         return Batch.concat(batch_list, copy=False)

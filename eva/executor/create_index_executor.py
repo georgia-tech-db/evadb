@@ -19,6 +19,7 @@ import pandas as pd
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.sql_config import IDENTIFIER_COLUMN
 from eva.configuration.configuration_manager import ConfigurationManager
+from eva.database import EVADB
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError, handle_vector_store_params
 from eva.models.storage.batch import Batch
@@ -30,12 +31,11 @@ from eva.utils.logging_manager import logger
 
 
 class CreateIndexExecutor(AbstractExecutor):
-    def __init__(self, node: CreateIndexPlan):
-        super().__init__(node)
+    def __init__(self, db: EVADB, node: CreateIndexPlan):
+        super().__init__(db, node)
 
     def exec(self, *args, **kwargs):
-        catalog_manager = CatalogManager()
-        if catalog_manager.get_index_catalog_entry_by_name(self.node.name):
+        if self.catalog.get_index_catalog_entry_by_name(self.node.name):
             msg = f"Index {self.node.name} already exists."
             logger.error(msg)
             raise ExecutorError(msg)
@@ -73,7 +73,7 @@ class CreateIndexExecutor(AbstractExecutor):
             # Add features to index.
             # TODO: batch size is hardcoded for now.
             input_dim = -1
-            storage_engine = StorageEngine.factory(feat_catalog_entry)
+            storage_engine = StorageEngine.factory(self.db, feat_catalog_entry)
             for input_batch in storage_engine.read(feat_catalog_entry):
                 if self.node.udf_func:
                     # Create index through UDF expression.
@@ -111,7 +111,7 @@ class CreateIndexExecutor(AbstractExecutor):
             self.index.persist()
 
             # Save to catalog.
-            CatalogManager().insert_index_catalog_entry(
+            self.catalog.insert_index_catalog_entry(
                 self.node.name,
                 self.index_path,
                 self.node.vector_store_type,

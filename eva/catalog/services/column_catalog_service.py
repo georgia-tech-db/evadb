@@ -19,16 +19,17 @@ from sqlalchemy.orm.exc import NoResultFound
 from eva.catalog.models.column_catalog import ColumnCatalog, ColumnCatalogEntry
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.catalog.services.base_service import BaseService
+from sqlalchemy.orm import Session
 
 
 class ColumnCatalogService(BaseService):
-    def __init__(self):
-        super().__init__(ColumnCatalog)
+    def __init__(self, db_session: Session):
+        super().__init__(ColumnCatalog, db_session)
 
     def filter_entry_by_table_id_and_name(
         self, table_id, column_name
     ) -> ColumnCatalogEntry:
-        entry = self.model.query.filter(
+        entry = self.query.filter(
             self.model._table_id == table_id,
             self.model._name == column_name,
         ).one_or_none()
@@ -38,13 +39,13 @@ class ColumnCatalogService(BaseService):
 
     def filter_entries_by_table_id(self, table_id: int) -> List[ColumnCatalogEntry]:
         """return all the columns for table table_id"""
-        entries = self.model.query.filter(self.model._table_id == table_id).all()
+        entries = self.query.filter(self.model._table_id == table_id).all()
         return [entry.as_dataclass() for entry in entries]
 
     def get_entry_by_id(
         self, col_id: int, return_alchemy=False
     ) -> List[ColumnCatalogEntry]:
-        entry = self.model.query.filter(self.model._row_id == col_id).one_or_none()
+        entry = self.query.filter(self.model._row_id == col_id).one_or_none()
         if entry:
             return entry if return_alchemy else entry.as_dataclass()
         return entry
@@ -63,14 +64,14 @@ class ColumnCatalogService(BaseService):
         ]
         saved_column_objs = []
         for column in catalog_column_objs:
-            saved_column_objs.append(column.save())
+            saved_column_objs.append(column.save(self.session))
         return [obj.as_dataclass() for obj in saved_column_objs]
 
     def filter_entries_by_table(
         self, table: TableCatalogEntry
     ) -> List[ColumnCatalogEntry]:
         try:
-            entries = self.model.query.filter(
+            entries = self.query.filter(
                 self.model._table_id == table.row_id
             ).all()
             return [entry.as_dataclass() for entry in entries]

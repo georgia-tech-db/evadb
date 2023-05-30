@@ -19,6 +19,7 @@ import pandas as pd
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.groupby_plan import GroupByPlan
+from eva.database import EVADB
 
 
 class GroupByExecutor(AbstractExecutor):
@@ -31,8 +32,8 @@ class GroupByExecutor(AbstractExecutor):
 
     """
 
-    def __init__(self, node: GroupByPlan):
-        super().__init__(node)
+    def __init__(self, db: EVADB, node: GroupByPlan):
+        super().__init__(db, node)
         self._segment_length = int(node.groupby_clause.value[:-1])
 
     def exec(self, *args, **kwargs) -> Iterator[Batch]:

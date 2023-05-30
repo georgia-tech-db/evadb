@@ -18,11 +18,12 @@ from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import apply_predicate, apply_project
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.hash_join_probe_plan import HashJoinProbePlan
+from eva.database import EVADB
 
 
 class HashJoinExecutor(AbstractExecutor):
-    def __init__(self, node: HashJoinProbePlan):
-        super().__init__(node)
+    def __init__(self, db: EVADB, node: HashJoinProbePlan):
+        super().__init__(db, node)
         self.predicate = node.join_predicate
         self.join_type = node.join_type
         self.probe_keys = node.probe_keys

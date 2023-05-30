@@ -13,6 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import Iterator
+from eva.catalog.catalog_manager import CatalogManager
+from eva.configuration.configuration_manager import ConfigurationManager
+from eva.database import EVADB
 
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.apply_and_merge_executor import ApplyAndMergeExecutor
@@ -59,11 +62,12 @@ class PlanExecutor:
 
     Arguments:
         plan (AbstractPlan): Physical plan tree which needs to be executed
-
+        evadb (EVADB): database to execute the query on
     """
 
-    def __init__(self, plan: AbstractPlan):
+    def __init__(self, plan: AbstractPlan, evadb: EVADB):
         self._plan = plan
+        self._db = evadb
 
     def _build_execution_tree(self, plan: AbstractPlan) -> AbstractExecutor:
         """build the execution tree from plan tree
@@ -82,71 +86,71 @@ class PlanExecutor:
         plan_opr_type = plan.opr_type
 
         if plan_opr_type == PlanOprType.SEQUENTIAL_SCAN:
-            executor_node = SequentialScanExecutor(node=plan)
+            executor_node = SequentialScanExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.UNION:
-            executor_node = UnionExecutor(node=plan)
+            executor_node = UnionExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.STORAGE_PLAN:
-            executor_node = StorageExecutor(node=plan)
+            executor_node = StorageExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.PP_FILTER:
-            executor_node = PPExecutor(node=plan)
+            executor_node = PPExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.CREATE:
-            executor_node = CreateExecutor(node=plan)
+            executor_node = CreateExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.RENAME:
-            executor_node = RenameExecutor(node=plan)
+            executor_node = RenameExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.DROP:
-            executor_node = DropExecutor(node=plan)
+            executor_node = DropExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.INSERT:
-            executor_node = InsertExecutor(node=plan)
+            executor_node = InsertExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.CREATE_UDF:
-            executor_node = CreateUDFExecutor(node=plan)
+            executor_node = CreateUDFExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.DROP_UDF:
-            executor_node = DropUDFExecutor(node=plan)
+            executor_node = DropUDFExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.LOAD_DATA:
-            executor_node = LoadDataExecutor(node=plan)
+            executor_node = LoadDataExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.GROUP_BY:
-            executor_node = GroupByExecutor(node=plan)
+            executor_node = GroupByExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.ORDER_BY:
-            executor_node = OrderByExecutor(node=plan)
+            executor_node = OrderByExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.LIMIT:
-            executor_node = LimitExecutor(node=plan)
+            executor_node = LimitExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.SAMPLE:
-            executor_node = SampleExecutor(node=plan)
+            executor_node = SampleExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.NESTED_LOOP_JOIN:
-            executor_node = NestedLoopJoinExecutor(node=plan)
+            executor_node = NestedLoopJoinExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.LATERAL_JOIN:
             logger.warn(
                 "LateralJoin Executor should not be part of the execution plan."
                 "Please raise an issue with the current query. Thanks!"
             )
-            executor_node = LateralJoinExecutor(node=plan)
+            executor_node = LateralJoinExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.HASH_JOIN:
-            executor_node = HashJoinExecutor(node=plan)
+            executor_node = HashJoinExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.HASH_BUILD:
-            executor_node = BuildJoinExecutor(node=plan)
+            executor_node = BuildJoinExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.FUNCTION_SCAN:
-            executor_node = FunctionScanExecutor(node=plan)
+            executor_node = FunctionScanExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.CREATE_MATERIALIZED_VIEW:
-            executor_node = CreateMaterializedViewExecutor(node=plan)
+            executor_node = CreateMaterializedViewExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.EXCHANGE:
-            executor_node = ExchangeExecutor(node=plan)
+            executor_node = ExchangeExecutor(db=self._db, node=plan)
             inner_executor = self._build_execution_tree(plan.inner_plan)
             executor_node.build_inner_executor(inner_executor)
         elif plan_opr_type == PlanOprType.PROJECT:
-            executor_node = ProjectExecutor(node=plan)
+            executor_node = ProjectExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.PREDICATE_FILTER:
-            executor_node = PredicateExecutor(node=plan)
+            executor_node = PredicateExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.SHOW_INFO:
-            executor_node = ShowInfoExecutor(node=plan)
+            executor_node = ShowInfoExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.EXPLAIN:
-            executor_node = ExplainExecutor(node=plan)
+            executor_node = ExplainExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.CREATE_INDEX:
-            executor_node = CreateIndexExecutor(node=plan)
+            executor_node = CreateIndexExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.APPLY_AND_MERGE:
-            executor_node = ApplyAndMergeExecutor(node=plan)
+            executor_node = ApplyAndMergeExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.VECTOR_INDEX_SCAN:
-            executor_node = VectorIndexScanExecutor(node=plan)
+            executor_node = VectorIndexScanExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.DELETE:
-            executor_node = DeleteExecutor(node=plan)
+            executor_node = DeleteExecutor(db=self._db, node=plan)
 
         # EXPLAIN does not need to build execution tree for its children
         if plan_opr_type != PlanOprType.EXPLAIN:

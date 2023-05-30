@@ -21,15 +21,16 @@ from eva.models.storage.batch import Batch
 from eva.plan_nodes.storage_plan import StoragePlan
 from eva.storage.storage_engine import StorageEngine
 from eva.utils.logging_manager import logger
+from eva.database import EVADB
 
 
 class StorageExecutor(AbstractExecutor):
-    def __init__(self, node: StoragePlan):
-        super().__init__(node)
+    def __init__(self, db: EVADB, node: StoragePlan):
+        super().__init__(db, node)
 
     def exec(self, *args, **kwargs) -> Iterator[Batch]:
         try:
-            storage_engine = StorageEngine.factory(self.node.table)
+            storage_engine = StorageEngine.factory(self.db, self.node.table)
 
             if self.node.table.table_type == TableType.VIDEO_DATA:
                 return storage_engine.read(

@@ -17,11 +17,12 @@ from sqlalchemy.orm.exc import NoResultFound
 from eva.catalog.models.udf_catalog import UdfCatalog, UdfCatalogEntry
 from eva.catalog.services.base_service import BaseService
 from eva.utils.logging_manager import logger
+from sqlalchemy.orm import Session
 
 
 class UdfCatalogService(BaseService):
-    def __init__(self):
-        super().__init__(UdfCatalog)
+    def __init__(self, db_session: Session):
+        super().__init__(UdfCatalog, db_session)
 
     def insert_entry(
         self, name: str, impl_path: str, type: str, checksum: str
@@ -38,7 +39,7 @@ class UdfCatalogService(BaseService):
             UdfCatalogEntry: Returns the new entry created
         """
         udf_obj = self.model(name, impl_path, type, checksum)
-        udf_obj = udf_obj.save()
+        udf_obj = udf_obj.save(self.session)
         return udf_obj.as_dataclass()
 
     def get_entry_by_name(self, name: str) -> UdfCatalogEntry:
@@ -50,7 +51,7 @@ class UdfCatalogService(BaseService):
         """
 
         try:
-            udf_obj = self.model.query.filter(self.model._name == name).one()
+            udf_obj = self.query.filter(self.model._name == name).one()
             return udf_obj.as_dataclass()
         except NoResultFound:
             return None
@@ -64,7 +65,7 @@ class UdfCatalogService(BaseService):
         """
 
         try:
-            udf_obj = self.model.query.filter(self.model._row_id == id).one()
+            udf_obj = self.query.filter(self.model._row_id == id).one()
             if udf_obj:
                 return udf_obj if return_alchemy else udf_obj.as_dataclass()
             return udf_obj
@@ -81,8 +82,8 @@ class UdfCatalogService(BaseService):
             True if successfully deleted else True
         """
         try:
-            udf_obj = self.model.query.filter(self.model._name == name).one()
-            udf_obj.delete()
+            udf_obj = self.query.filter(self.model._name == name).one()
+            udf_obj.delete(self.session)
         except Exception as e:
             logger.exception(f"Delete udf failed for name {name} with error {str(e)}")
             return False

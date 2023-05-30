@@ -16,14 +16,15 @@ from pathlib import Path
 from typing import Iterator
 
 from eva.catalog.models.table_catalog import TableCatalogEntry
+from eva.database import EVADB
 from eva.models.storage.batch import Batch
 from eva.readers.image.opencv_image_reader import CVImageReader
 from eva.storage.abstract_media_storage_engine import AbstractMediaStorageEngine
 
 
 class ImageStorageEngine(AbstractMediaStorageEngine):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, db: EVADB):
+        super().__init__(db)
 
     def read(self, table: TableCatalogEntry) -> Iterator[Batch]:
         for image_files in self._rdb_handler.read(self._get_metadata_table(table), 12):

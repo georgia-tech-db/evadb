@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from eva.catalog.catalog_manager import CatalogManager
+from eva.database import EVADB
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError, handle_if_not_exists
 from eva.expression.abstract_expression import ExpressionType
@@ -24,13 +25,12 @@ from eva.utils.logging_manager import logger
 
 
 class CreateMaterializedViewExecutor(AbstractExecutor):
-    def __init__(self, node: CreateMaterializedViewPlan):
-        super().__init__(node)
-        self.catalog = CatalogManager()
+    def __init__(self, db: EVADB, node: CreateMaterializedViewPlan):
+        super().__init__(db, node)
 
     def exec(self, *args, **kwargs):
         """Create materialized view executor"""
-        if not handle_if_not_exists(self.node.view, self.node.if_not_exists):
+        if not handle_if_not_exists(self.catalog, self.node.view, self.node.if_not_exists):
             child = self.children[0]
             project_cols = None
             # only support seq scan based materialization
@@ -81,7 +81,7 @@ class CreateMaterializedViewExecutor(AbstractExecutor):
             view_catalog_entry = self.catalog.create_and_insert_table_catalog_entry(
                 self.node.view, col_defs
             )
-            storage_engine = StorageEngine.factory(view_catalog_entry)
+            storage_engine = StorageEngine.factory(self.db, view_catalog_entry)
             storage_engine.create(table=view_catalog_entry)
 
             # Populate the view

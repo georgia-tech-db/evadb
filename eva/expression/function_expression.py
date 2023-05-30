@@ -121,9 +121,9 @@ class FunctionExpression(AbstractExpression):
         # persist stats to catalog only if it differ by greater than 10% from
         # the previous value
         if abs(self._stats.prev_cost - cost_per_func_call) > cost_per_func_call / 10:
-            CatalogManager().upsert_udf_cost_catalog_entry(
-                udf_id, self.udf_obj.name, cost_per_func_call
-            )
+            # CatalogManager().upsert_udf_cost_catalog_entry(
+            #     udf_id, self.udf_obj.name, cost_per_func_call
+            # )
             self._stats.prev_cost = cost_per_func_call
 
     def evaluate(self, batch: Batch, **kwargs) -> Batch:

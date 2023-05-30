@@ -17,6 +17,7 @@ from typing import Iterator
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.sample_plan import SamplePlan
+from eva.database import EVADB
 
 
 class SampleExecutor(AbstractExecutor):
@@ -28,8 +29,8 @@ class SampleExecutor(AbstractExecutor):
 
     """
 
-    def __init__(self, node: SamplePlan):
-        super().__init__(node)
+    def __init__(self, db: EVADB, node: SamplePlan):
+        super().__init__(db, node)
         self._sample_freq = node.sample_freq.value
 
     def exec(self, *args, **kwargs) -> Iterator[Batch]:

@@ -21,11 +21,12 @@ from eva.catalog.models.udf_metadata_catalog import (
 from eva.catalog.services.base_service import BaseService
 from eva.utils.errors import CatalogError
 from eva.utils.logging_manager import logger
+from sqlalchemy.orm import Session
 
 
 class UdfMetadataCatalogService(BaseService):
-    def __init__(self):
-        super().__init__(UdfMetadataCatalog)
+    def __init__(self, db_session: Session):
+        super().__init__(UdfMetadataCatalog, db_session)
 
     def insert_entries(self, entries: List[UdfMetadataCatalogEntry]):
         try:
@@ -33,7 +34,7 @@ class UdfMetadataCatalogService(BaseService):
                 metadata_obj = UdfMetadataCatalog(
                     key=entry.key, value=entry.value, udf_id=entry.udf_id
                 )
-                metadata_obj.save()
+                metadata_obj.save(self.session)
         except Exception as e:
             logger.exception(
                 f"Failed to insert entry {entry} into udf metadata catalog with exception {str(e)}"
@@ -42,7 +43,7 @@ class UdfMetadataCatalogService(BaseService):
 
     def get_entries_by_udf_id(self, udf_id: int) -> List[UdfMetadataCatalogEntry]:
         try:
-            result = self.model.query.filter(
+            result = self.query.filter(
                 self.model._udf_id == udf_id,
             ).all()
             return [obj.as_dataclass() for obj in result]

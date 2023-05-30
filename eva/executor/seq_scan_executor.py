@@ -18,6 +18,7 @@ from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import apply_predicate, apply_project
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.seq_scan_plan import SeqScanPlan
+from eva.database import EVADB
 
 
 class SequentialScanExecutor(AbstractExecutor):
@@ -28,8 +29,8 @@ class SequentialScanExecutor(AbstractExecutor):
 
     """
 
-    def __init__(self, node: SeqScanPlan):
-        super().__init__(node)
+    def __init__(self, db: EVADB, node: SeqScanPlan):
+        super().__init__(db, node)
         self.predicate = node.predicate
         self.project_expr = node.columns
         self.alias = node.alias

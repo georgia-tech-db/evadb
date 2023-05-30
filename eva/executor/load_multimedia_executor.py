@@ -17,7 +17,7 @@ from multiprocessing import Pool
 from pathlib import Path
 
 import pandas as pd
-
+from eva.database import EVADB
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.configuration.configuration_manager import ConfigurationManager
@@ -33,9 +33,8 @@ from eva.utils.s3_utils import download_from_s3
 
 
 class LoadMultimediaExecutor(AbstractExecutor):
-    def __init__(self, node: LoadDataPlan):
-        super().__init__(node)
-        self.catalog = CatalogManager()
+    def __init__(self, db: EVADB, node: LoadDataPlan):
+        super().__init__(db, node)
         self.media_type = self.node.file_options["file_format"]
 
     def exec(self, *args, **kwargs):
@@ -111,7 +110,7 @@ class LoadMultimediaExecutor(AbstractExecutor):
                 )
                 do_create = True
 
-            storage_engine = StorageEngine.factory(table_obj)
+            storage_engine = StorageEngine.factory(self.db, table_obj)
             if do_create:
                 storage_engine.create(table_obj)
 

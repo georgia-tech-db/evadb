@@ -15,8 +15,6 @@
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import scoped_session, sessionmaker
 
-from eva.configuration.configuration_manager import ConfigurationManager
-
 IDENTIFIER_COLUMN = "_row_id"
 
 CATALOG_TABLES = [
@@ -34,31 +32,11 @@ CATALOG_TABLES = [
 
 
 class SQLConfig:
-    """Singleton class for configuring connection to the database.
-
-    Attributes:
-        _instance: stores the singleton instance of the class.
-    """
-
-    def __new__(cls):
-        """Overrides the default __new__ method.
-
-        Returns the existing instance or creates a new one if an instance
-        does not exist.
-
-        Returns:
-            An instance of the class.
-        """
-        if not hasattr(cls, "_instance"):
-            cls._instance = super(SQLConfig, cls).__new__(cls)
-        return cls._instance
-
-    def __init__(self):
+    def __init__(self, uri: str):
         """Initializes the engine and session for database operations
 
         Retrieves the database uri for connection from ConfigurationManager.
         """
-        uri = ConfigurationManager().get_value("core", "catalog_database_uri")
 
         self.worker_uri = str(uri)
         # set echo=True to log SQL

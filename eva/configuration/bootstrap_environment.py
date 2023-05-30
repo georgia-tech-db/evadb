@@ -60,7 +60,7 @@ def bootstrap_environment(eva_db_dir: Path, eva_installation_dir: Path):
         eva_installation_dir: path to eva module
     """
 
-    config_file_path = eva_db_dir / EVA_CONFIG_FILE
+    default_config_path = get_base_config(eva_installation_dir).resolve()
 
     # creates necessary directories
     config_default_dict = create_directories_and_get_default_config_values(
@@ -69,29 +69,18 @@ def bootstrap_environment(eva_db_dir: Path, eva_installation_dir: Path):
 
     assert eva_db_dir.exists(), f"{eva_db_dir} does not exist"
     assert eva_installation_dir.exists(), f"{eva_installation_dir} does not exist"
-
-    # copy eva.yml into config path
-    if not config_file_path.exists():
-        default_config_path = get_base_config(eva_installation_dir).resolve()
-        shutil.copy(str(default_config_path.resolve()), str(eva_db_dir.resolve()))
-
-    # Update eva.yml with user specific paths
-    with config_file_path.open("r+") as yml_file:
+    config_obj = {}
+    with default_config_path.open("r") as yml_file:
         config_obj = yaml.load(yml_file, Loader=yaml.FullLoader)
-
-        if config_obj is None:
-            raise ValueError(f"Invalid yml file at {config_file_path}")
-
-        config_obj = merge_dict_of_dicts(config_obj, config_default_dict)
-        mode = config_obj["core"]["mode"]
-        yml_file.seek(0)
-        yml_file.write(yaml.dump(config_obj))
-        yml_file.truncate()
+    config_obj = merge_dict_of_dicts(config_obj, config_default_dict)
+    mode = config_obj["core"]["mode"]
 
     # set logger to appropriate level (debug or release)
     level = logging.WARN if mode == "release" else logging.DEBUG
     eva_logger.setLevel(level)
     eva_logger.debug(f"Setting logging level to: {str(level)}")
+
+    return config_obj
 
 
 def create_directories_and_get_default_config_values(

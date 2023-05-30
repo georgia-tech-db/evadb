@@ -13,8 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from eva.database import EVADB
 from eva.server.command_handler import execute_query_fetch_all
-from eva.configuration.constants  import EVA_INSTALLATION_DIR
+from eva.configuration.constants import EVA_INSTALLATION_DIR
 
 NDARRAY_DIR = "ndarray"
 TUTORIALS_DIR = "tutorials"
@@ -172,7 +173,7 @@ mnistcnn_udf_query = """CREATE UDF IF NOT EXISTS MnistImageClassifier
 )
 
 
-def init_builtin_udfs(mode: str = "debug") -> None:
+def init_builtin_udfs(db: EVADB, mode: str = "debug") -> None:
     """Load the built-in UDFs into the system during system bootstrapping.
 
     The function loads a set of pre-defined UDF queries based on the `mode` argument.
@@ -222,4 +223,4 @@ def init_builtin_udfs(mode: str = "debug") -> None:
 
     # execute each query in the list of UDF queries
     for query in queries:
-        execute_query_fetch_all(query)
+        execute_query_fetch_all(db, query)

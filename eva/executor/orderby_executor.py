@@ -21,6 +21,7 @@ from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.models.storage.batch import Batch
 from eva.parser.types import ParserOrderBySortType
 from eva.plan_nodes.orderby_plan import OrderByPlan
+from eva.database import EVADB
 
 
 class OrderByExecutor(AbstractExecutor):
@@ -32,8 +33,8 @@ class OrderByExecutor(AbstractExecutor):
 
     """
 
-    def __init__(self, node: OrderByPlan):
-        super().__init__(node)
+    def __init__(self, db: EVADB, node: OrderByPlan):
+        super().__init__(db, node)
         self._orderby_list = node.orderby_list
         self._columns = node.columns
         self._sort_types = node.sort_types

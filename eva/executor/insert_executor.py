@@ -20,12 +20,12 @@ from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.insert_plan import InsertPlan
 from eva.storage.storage_engine import StorageEngine
+from eva.database import EVADB
 
 
 class InsertExecutor(AbstractExecutor):
-    def __init__(self, node: InsertPlan):
-        super().__init__(node)
-        self.catalog = CatalogManager()
+    def __init__(self, db: EVADB, node: InsertPlan):
+        super().__init__(db, node)
 
     def exec(self, *args, **kwargs):
         storage_engine = None
@@ -51,7 +51,7 @@ class InsertExecutor(AbstractExecutor):
         dataframe = pd.DataFrame([tuple_to_insert], columns=columns_to_insert)
         batch = Batch(dataframe)
 
-        storage_engine = StorageEngine.factory(table_catalog_entry)
+        storage_engine = StorageEngine.factory(self.db, table_catalog_entry)
         storage_engine.write(table_catalog_entry, batch)
 
         yield Batch(

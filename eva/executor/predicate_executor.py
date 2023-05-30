@@ -18,13 +18,14 @@ from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import apply_predicate
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.predicate_plan import PredicatePlan
+from eva.database import EVADB
 
 
 class PredicateExecutor(AbstractExecutor):
     """ """
 
-    def __init__(self, node: PredicatePlan):
-        super().__init__(node)
+    def __init__(self, db: EVADB, node: PredicatePlan):
+        super().__init__(db, node)
         self.predicate = node.predicate
 
     def exec(self, *args, **kwargs) -> Iterator[Batch]:

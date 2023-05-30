@@ -14,6 +14,9 @@
 # limitations under the License.
 from abc import ABC, abstractmethod
 from typing import Generator, Iterable, List, TypeVar
+from eva.catalog.catalog_manager import CatalogManager
+from eva.configuration.configuration_manager import ConfigurationManager
+from eva.database import EVADB
 
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.abstract_plan import AbstractPlan
@@ -28,8 +31,11 @@ class AbstractExecutor(ABC):
         node (AbstractPlan): Plan node corresponding to this executor
     """
 
-    def __init__(self, node: AbstractPlan):
+    def __init__(self, db: EVADB, node: AbstractPlan):
+        self._db = db
         self._node = node
+        self._catalog: CatalogManager = db.catalog
+        self._config: ConfigurationManager = db.config
         self._children = []
 
     def append_child(self, child: AbstractExecutor):
@@ -57,6 +63,18 @@ class AbstractExecutor(ABC):
     @property
     def node(self) -> AbstractPlan:
         return self._node
+
+    @property
+    def db(self) -> EVADB:
+        return self._db
+
+    @property
+    def config(self) -> ConfigurationManager:
+        return self._config
+
+    @property
+    def catalog(self) -> CatalogManager:
+        return self._catalog
 
     @abstractmethod
     def exec(self, *args, **kwargs) -> Iterable[Batch]:

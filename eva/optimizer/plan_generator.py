@@ -15,6 +15,7 @@
 import asyncio
 
 import nest_asyncio
+from eva.database import EVADB
 
 from eva.optimizer.cost_model import CostModel
 from eva.optimizer.operators import Operator
@@ -33,8 +34,12 @@ class PlanGenerator:
     """
 
     def __init__(
-        self, rules_manager: RulesManager = None, cost_model: CostModel = None
+        self,
+        db: EVADB,
+        rules_manager: RulesManager = None,
+        cost_model: CostModel = None,
     ) -> None:
+        self.db = db
         self.rules_manager = rules_manager or RulesManager()
         self.cost_model = cost_model or CostModel()
 
@@ -60,7 +65,9 @@ class PlanGenerator:
         return physical_plan
 
     async def optimize(self, logical_plan: Operator):
-        optimizer_context = OptimizerContext(self.cost_model, self.rules_manager)
+        optimizer_context = OptimizerContext(
+            self.db, self.cost_model, self.rules_manager
+        )
         memo = optimizer_context.memo
         grp_expr = optimizer_context.add_opr_to_group(opr=logical_plan)
         root_grp_id = grp_expr.group_id

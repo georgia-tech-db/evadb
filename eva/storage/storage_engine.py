@@ -14,6 +14,7 @@
 # limitations under the License.
 from eva.catalog.catalog_type import TableType
 from eva.catalog.models.table_catalog import TableCatalogEntry
+from eva.database import EVADB
 from eva.storage.abstract_storage_engine import AbstractStorageEngine
 from eva.storage.document_storage_engine import DocumentStorageEngine
 from eva.storage.image_storage_engine import ImageStorageEngine
@@ -23,20 +24,22 @@ from eva.storage.video_storage_engine import DecordStorageEngine
 
 
 class StorageEngine:
+    storages = None
+
     @classmethod
-    def _lazy_initialize_storages(cls):
+    def _lazy_initialize_storages(cls, db: EVADB):
         if not cls.storages:
             cls.storages = {
-                TableType.STRUCTURED_DATA: SQLStorageEngine(),
-                TableType.VIDEO_DATA: DecordStorageEngine(),
-                TableType.IMAGE_DATA: ImageStorageEngine(),
-                TableType.DOCUMENT_DATA: DocumentStorageEngine(),
-                TableType.PDF_DATA: PDFStorageEngine(),
+                TableType.STRUCTURED_DATA: SQLStorageEngine(db),
+                TableType.VIDEO_DATA: DecordStorageEngine(db),
+                TableType.IMAGE_DATA: ImageStorageEngine(db),
+                TableType.DOCUMENT_DATA: DocumentStorageEngine(db),
+                TableType.PDF_DATA: PDFStorageEngine(db),
             }
 
     @classmethod
-    def factory(cls, table: TableCatalogEntry) -> AbstractStorageEngine:
-        cls._lazy_initialize_storages()
+    def factory(cls, db: EVADB, table: TableCatalogEntry) -> AbstractStorageEngine:
+        cls._lazy_initialize_storages(db)
         if table is None:
             raise ValueError("Expected TableCatalogEntry, got None")
         if table.table_type in cls.storages:

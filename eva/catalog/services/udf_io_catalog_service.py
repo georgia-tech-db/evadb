@@ -17,15 +17,16 @@ from typing import List
 from eva.catalog.models.udf_io_catalog import UdfIOCatalog, UdfIOCatalogEntry
 from eva.catalog.services.base_service import BaseService
 from eva.utils.logging_manager import logger
+from sqlalchemy.orm import Session
 
 
 class UdfIOCatalogService(BaseService):
-    def __init__(self):
-        super().__init__(UdfIOCatalog)
+    def __init__(self, db_session: Session):
+        super().__init__(UdfIOCatalog, db_session)
 
     def get_input_entries_by_udf_id(self, udf_id: int) -> List[UdfIOCatalogEntry]:
         try:
-            result = self.model.query.filter(
+            result = self.query.filter(
                 self.model._udf_id == udf_id,
                 self.model._is_input == True,  # noqa
             ).all()
@@ -37,7 +38,7 @@ class UdfIOCatalogService(BaseService):
 
     def get_output_entries_by_udf_id(self, udf_id: int) -> List[UdfIOCatalogEntry]:
         try:
-            result = self.model.query.filter(
+            result = self.query.filter(
                 self.model._udf_id == udf_id,
                 self.model._is_input == False,  # noqa
             ).all()
@@ -64,4 +65,4 @@ class UdfIOCatalogService(BaseService):
                 is_input=io.is_input,
                 udf_id=io.udf_id,
             )
-            io_obj.save()
+            io_obj.save(self.session)

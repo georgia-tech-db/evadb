@@ -47,9 +47,11 @@ def apply_predicate(batch: Batch, predicate: AbstractExpression) -> Batch:
     return batch
 
 
-def handle_if_not_exists(table_info: TableInfo, if_not_exist=False):
+def handle_if_not_exists(
+    catalog: CatalogManager, table_info: TableInfo, if_not_exist=False
+):
     # Table exists
-    if CatalogManager().check_table_exists(
+    if catalog.check_table_exists(
         table_info.table_name,
         table_info.database_name,
     ):

@@ -18,6 +18,8 @@ from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.function_scan_plan import FunctionScanPlan
 
+from eva.database import EVADB
+
 
 class FunctionScanExecutor(AbstractExecutor):
     """
@@ -27,8 +29,8 @@ class FunctionScanExecutor(AbstractExecutor):
 
     """
 
-    def __init__(self, node: FunctionScanPlan):
-        super().__init__(node)
+    def __init__(self, db: EVADB, node: FunctionScanPlan):
+        super().__init__(db, node)
         self.func_expr = node.func_expr
         self.do_unnest = node.do_unnest
 

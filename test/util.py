@@ -33,7 +33,9 @@ from eva.binder.statement_binder import StatementBinder
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import NdArrayType
+from eva.configuration.bootstrap_environment import get_default_db_uri
 from eva.configuration.configuration_manager import ConfigurationManager
+from eva.database import EVADB
 from eva.expression.function_expression import FunctionExpression
 from eva.models.storage.batch import Batch
 from eva.optimizer.operators import LogicalFilter, Operator
@@ -46,14 +48,22 @@ from eva.udfs.abstract.abstract_udf import AbstractClassifierUDF
 from eva.udfs.decorators import decorators
 from eva.udfs.decorators.io_descriptors.data_types import NumpyArray, PandasDataframe
 from eva.udfs.udf_bootstrap_queries import init_builtin_udfs
-from eva.configuration.constants import EVA_INSTALLATION_DIR
+from eva.configuration.constants import EVA_INSTALLATION_DIR, EVA_DATABASE_DIR
 
 NUM_FRAMES = 10
 FRAME_SIZE = (32, 32)
 
 
+def get_evadb_for_testing(uri: str = None):
+    uri = uri or get_default_db_uri(Path(EVA_DATABASE_DIR))
+    config = ConfigurationManager(Path(EVA_DATABASE_DIR))
+    return EVADB(uri, config)
+
+
 def get_tmp_dir():
-    config = ConfigurationManager()
+    # shortcut
+    # uri = get_default_db_uri(Path(EVA_DATABASE_DIR))
+    config = ConfigurationManager(Path(EVA_DATABASE_DIR))
     return config.get_value("storage", "tmp_dir")
 
 
@@ -428,7 +438,7 @@ def create_dummy_batches(
     video_dir=None,
 ):
     video_dir = video_dir or get_tmp_dir()
-    
+
     if not filters:
         filters = range(num_frames)
     data = []
@@ -483,9 +493,9 @@ def create_dummy_4d_batches(
         yield Batch(df)
 
 
-def load_udfs_for_testing(mode="debug"):
+def load_udfs_for_testing(db, mode="debug"):
     # DEBUG MODE: ALL UDFs
-    init_builtin_udfs(mode=mode)
+    init_builtin_udfs(db, mode=mode)
 
 
 class DummyObjectDetector(AbstractClassifierUDF):

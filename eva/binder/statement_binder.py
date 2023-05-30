@@ -50,7 +50,7 @@ from eva.utils.logging_manager import logger
 class StatementBinder:
     def __init__(self, binder_context: StatementBinderContext):
         self._binder_context = binder_context
-        self._catalog = CatalogManager()
+        self._catalog = binder_context._catalog
 
     @singledispatchmethod
     def bind(self, node):
@@ -92,8 +92,7 @@ class StatementBinder:
             assert len(col.array_dimensions) == 2
         else:
             # Output of the UDF should be 2 dimension and float32 type.
-            catalog_manager = CatalogManager()
-            udf_obj = catalog_manager.get_udf_catalog_entry_by_name(node.udf_func.name)
+            udf_obj = self._catalog.get_udf_catalog_entry_by_name(node.udf_func.name)
             for output in udf_obj.outputs:
                 assert (
                     output.array_type == NdArrayType.FLOAT32
@@ -167,7 +166,7 @@ class StatementBinder:
             self._binder_context.add_table_alias(
                 node.alias.alias_name, node.table.table_name
             )
-            bind_table_info(node.table)
+            bind_table_info(self._catalog, node.table)
         elif node.is_select():
             current_context = self._binder_context
             self._binder_context = StatementBinderContext()

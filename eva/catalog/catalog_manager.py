@@ -52,7 +52,7 @@ from eva.catalog.services.udf_catalog_service import UdfCatalogService
 from eva.catalog.services.udf_cost_catalog_service import UdfCostCatalogService
 from eva.catalog.services.udf_io_catalog_service import UdfIOCatalogService
 from eva.catalog.services.udf_metadata_catalog_service import UdfMetadataCatalogService
-from eva.catalog.sql_config import IDENTIFIER_COLUMN
+from eva.catalog.sql_config import IDENTIFIER_COLUMN, SQLConfig
 from eva.expression.function_expression import FunctionExpression
 from eva.parser.create_statement import ColumnDefinition
 from eva.parser.table_ref import TableInfo
@@ -62,25 +62,22 @@ from eva.utils.logging_manager import logger
 
 
 class CatalogManager(object):
-    def __new__(cls):
-        if not hasattr(cls, "_instance"):
-            cls._instance = super(CatalogManager, cls).__new__(cls)
+    def __init__(self, db_uri: str):
+        self._db_uri = db_uri
+        self._sql_config = SQLConfig(db_uri)
+        self._bootstrap_catalog()
+        self._table_catalog_service = TableCatalogService(self._sql_config.session)
+        self._column_service = ColumnCatalogService(self._sql_config.session)
+        self._udf_service = UdfCatalogService(self._sql_config.session)
+        self._udf_cost_catalog_service = UdfCostCatalogService(self._sql_config.session)
+        self._udf_io_service = UdfIOCatalogService(self._sql_config.session)
+        self._udf_metadata_service = UdfMetadataCatalogService(self._sql_config.session)
+        self._index_service = IndexCatalogService(self._sql_config.session)
+        self._udf_cache_service = UdfCacheCatalogService(self._sql_config.session)
 
-            cls._instance._bootstrap_catalog()
-
-        return cls._instance
-
-    def __init__(self):
-        self._table_catalog_service: TableCatalogService = TableCatalogService()
-        self._column_service: ColumnCatalogService = ColumnCatalogService()
-        self._udf_service: UdfCatalogService = UdfCatalogService()
-        self._udf_cost_catalog_service: UdfCostCatalogService = UdfCostCatalogService()
-        self._udf_io_service: UdfIOCatalogService = UdfIOCatalogService()
-        self._udf_metadata_service: UdfMetadataCatalogService = (
-            UdfMetadataCatalogService()
-        )
-        self._index_service: IndexCatalogService = IndexCatalogService()
-        self._udf_cache_service: UdfCacheCatalogService = UdfCacheCatalogService()
+    @property
+    def sql_config(self):
+        return self._sql_config
 
     def reset(self):
         """
@@ -97,7 +94,7 @@ class CatalogManager(object):
         catalog database and tables if they do not exist.
         """
         logger.info("Bootstrapping catalog")
-        init_db()
+        init_db(self._sql_config.engine)
 
     def _clear_catalog_contents(self):
         """
@@ -106,11 +103,11 @@ class CatalogManager(object):
         """
         logger.info("Clearing catalog")
         # drop tables which are not part of catalog
-        drop_all_tables_except_catalog()
+        drop_all_tables_except_catalog(self._sql_config.engine)
         # truncate the catalog tables
-        truncate_catalog_tables()
+        truncate_catalog_tables(self._sql_config.engine)
         # clean up the dataset, index, and cache directories
-        cleanup_storage()
+        cleanup_storage(self._sql_config.engine)
 
     "Table catalog services"
 

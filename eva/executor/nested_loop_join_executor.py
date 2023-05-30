@@ -19,10 +19,12 @@ from eva.executor.executor_utils import apply_predicate
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.nested_loop_join_plan import NestedLoopJoinPlan
 
+from eva.database import EVADB
+
 
 class NestedLoopJoinExecutor(AbstractExecutor):
-    def __init__(self, node: NestedLoopJoinPlan):
-        super().__init__(node)
+    def __init__(self, db: EVADB, node: NestedLoopJoinPlan):
+        super().__init__(db, node)
         self.predicate = node.join_predicate
 
     def exec(self, *args, **kwargs) -> Iterator[Batch]:
