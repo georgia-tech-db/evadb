@@ -50,14 +50,13 @@ class PlanGenerator:
         root_grp = optimizer_context.memo.groups[root_grp_id]
         best_grp_expr = root_grp.get_best_expr(PropertyType.DEFAULT)
 
-        if best_grp_expr is not None:
-            physical_plan = best_grp_expr.opr
+        physical_plan = best_grp_expr.opr
 
-            for child_grp_id in best_grp_expr.children:
-                child_plan = self.build_optimal_physical_plan(
-                    child_grp_id, optimizer_context
-                )
-                physical_plan.append_child(child_plan)
+        for child_grp_id in best_grp_expr.children:
+            child_plan = self.build_optimal_physical_plan(
+                child_grp_id, optimizer_context
+            )
+            physical_plan.append_child(child_plan)
 
         return physical_plan
 

@@ -547,7 +547,6 @@ class LogicalCreate(Operator):
         video {TableRef}: [video table that is to be created]
         column_list {List[ColumnDefinition]}:
         if_not_exists {bool}: [create table if exists]
-        query {SelectStatement}: Optional, only if new table is created by a query output
 
     """
 
