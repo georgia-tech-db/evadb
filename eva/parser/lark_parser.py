@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -39,7 +39,6 @@ class LarkParser(object):
         self._parser = Lark(sql_grammar, parser="lalr")
 
     def parse(self, query_string: str) -> list:
-
         # remove trailing white space
         query_string = query_string.rstrip()
 
