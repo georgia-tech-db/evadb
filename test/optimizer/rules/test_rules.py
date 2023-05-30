@@ -27,7 +27,7 @@ from eva.experimental.parallel.optimizer.rules.rules import (
 )
 from eva.experimental.parallel.optimizer.rules.rules import LogicalExchangeToPhysical
 from eva.experimental.parallel.optimizer.rules.rules import (
-    LogicalProjectToPhysical as ParallelProjectToPhysical,
+    LogicalProjectToPhysical as ParallelLogicalProjectToPhysical,
 )
 from eva.optimizer.operators import (
     LogicalFilter,
