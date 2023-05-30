@@ -84,7 +84,9 @@ class AbstractHFUdf(AbstractUDF, GPUCompatible):
             for row_output in outputs:
                 # account for the case where we have more than one prediction for an input
                 if isinstance(row_output, list):
-                    row_output = {k: [dic[k] for dic in row_output] for k in row_output[0]}
+                    row_output = {
+                        k: [dic[k] for dic in row_output] for k in row_output[0]
+                    }
                 result_list.append(row_output)
 
         result_df = pd.DataFrame(result_list)
