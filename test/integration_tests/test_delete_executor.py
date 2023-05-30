@@ -13,7 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import file_remove, load_udfs_for_testing, shutdown_ray
+from test.util import (
+    file_remove,
+    get_evadb_for_testing,
+    load_udfs_for_testing,
+    shutdown_ray,
+)
 
 import numpy as np
 import pytest
@@ -27,12 +32,9 @@ from eva.server.command_handler import execute_query_fetch_all
 @pytest.mark.notparallel
 class DeleteExecutorTest(unittest.TestCase):
     def setUp(self):
-        # Bootstrap configuration manager.
-        ConfigurationManager()
-
-        # Reset catalog.
-        CatalogManager().reset()
-        load_udfs_for_testing(mode="debug")
+        self.evadb = get_evadb_for_testing()
+        self.evadb.catalog.reset()
+        load_udfs_for_testing(self.evadb, mode="debug")
 
         create_table_query = """
                 CREATE TABLE IF NOT EXISTS testDeleteOne
@@ -43,23 +45,23 @@ class DeleteExecutorTest(unittest.TestCase):
                  input  NDARRAY UINT8(1, 3)
                  );
                 """
-        execute_query_fetch_all(create_table_query)
+        execute_query_fetch_all(self.evadb, create_table_query)
 
         insert_query1 = """
                 INSERT INTO testDeleteOne (id, dummyfloat, feat, input)
                 VALUES (5, 1.5, [[0, 0, 0]], [[0, 0, 0]]);
         """
-        execute_query_fetch_all(insert_query1)
+        execute_query_fetch_all(self.evadb, insert_query1)
         insert_query2 = """
                 INSERT INTO testDeleteOne (id, dummyfloat,feat, input)
                 VALUES (15, 2.5, [[100, 100, 100]], [[100, 100, 100]]);
         """
-        execute_query_fetch_all(insert_query2)
+        execute_query_fetch_all(self.evadb, insert_query2)
         insert_query3 = """
                 INSERT INTO testDeleteOne (id, dummyfloat,feat, input)
                 VALUES (25, 3.5, [[200, 200, 200]], [[200, 200, 200]]);
         """
-        execute_query_fetch_all(insert_query3)
+        execute_query_fetch_all(self.evadb, insert_query3)
 
         ####################################################
         # Create a table for testing Delete with Video Data#
@@ -67,7 +69,7 @@ class DeleteExecutorTest(unittest.TestCase):
 
         path = f"{EVA_ROOT_DIR}/data/sample_videos/1/*.mp4"
         query = f'LOAD VIDEO "{path}" INTO TestDeleteVideos;'
-        _ = execute_query_fetch_all(query)
+        _ = execute_query_fetch_all(self.evadb, query)
 
     def tearDown(self):
         shutdown_ray()
@@ -78,10 +80,10 @@ class DeleteExecutorTest(unittest.TestCase):
     def test_should_delete_single_video_in_table(self):
         path = f"{EVA_ROOT_DIR}/data/sample_videos/1/2.mp4"
         delete_query = f"""DELETE FROM TestDeleteVideos WHERE name="{path}";"""
-        batch = execute_query_fetch_all(delete_query)
+        batch = execute_query_fetch_all(self.evadb, delete_query)
 
         query = "SELECT name FROM MyVideo"
-        batch = execute_query_fetch_all(query)
+        batch = execute_query_fetch_all(self.evadb, query)
         self.assertIsNone(
             np.testing.assert_array_equal(
                 batch.frames["data"][0],
@@ -90,7 +92,7 @@ class DeleteExecutorTest(unittest.TestCase):
         )
 
         query = "SELECT id, data FROM MyVideo WHERE id = 41;"
-        batch = execute_query_fetch_all(query)
+        batch = execute_query_fetch_all(self.evadb, query)
         self.assertIsNone(
             np.testing.assert_array_equal(
                 batch.frames["data"][0],
@@ -102,10 +104,10 @@ class DeleteExecutorTest(unittest.TestCase):
     def test_should_delete_single_image_in_table(self):
         path = f"{EVA_ROOT_DIR}/data/sample_videos/1/2.mp4"
         delete_query = f"""DELETE FROM TestDeleteVideos WHERE name="{path}";"""
-        batch = execute_query_fetch_all(delete_query)
+        batch = execute_query_fetch_all(self.evadb, delete_query)
 
         query = "SELECT name FROM MyVideo"
-        batch = execute_query_fetch_all(query)
+        batch = execute_query_fetch_all(self.evadb, query)
         self.assertIsNone(
             np.testing.assert_array_equal(
                 batch.frames["data"][0],
@@ -114,7 +116,7 @@ class DeleteExecutorTest(unittest.TestCase):
         )
 
         query = "SELECT id, data FROM MyVideo WHERE id = 41;"
-        batch = execute_query_fetch_all(query)
+        batch = execute_query_fetch_all(self.evadb, query)
         self.assertIsNone(
             np.testing.assert_array_equal(
                 batch.frames["data"][0],
@@ -126,10 +128,10 @@ class DeleteExecutorTest(unittest.TestCase):
         delete_query = """DELETE FROM testDeleteOne WHERE
                id < 20 OR dummyfloat < 2 AND id < 5 AND 20 > id
                AND id <= 20 AND id >= 5 OR id != 15 OR id = 15;"""
-        batch = execute_query_fetch_all(delete_query)
+        batch = execute_query_fetch_all(self.evadb, delete_query)
 
         query = "SELECT * FROM testDeleteOne;"
-        batch = execute_query_fetch_all(query)
+        batch = execute_query_fetch_all(self.evadb, query)
 
         np.testing.assert_array_equal(
             batch.frames["testdeleteone.id"].array,

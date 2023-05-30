@@ -241,8 +241,7 @@ def construct_udf_cache_catalog_entry(
     return entry
 
 
-def cleanup_storage():
-    config = ConfigurationManager()
+def cleanup_storage(config):
     remove_directory_contents(config.get_value("storage", "index_dir"))
     remove_directory_contents(config.get_value("storage", "cache_dir"))
     remove_directory_contents(config.get_value("core", "datasets_dir"))

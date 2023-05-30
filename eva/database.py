@@ -8,7 +8,7 @@ class EVADB:
         self._config = config
 
         # intialize catalog manager
-        self._catalog = CatalogManager(db_uri)
+        self._catalog = CatalogManager(db_uri, config)
 
     @property
     def catalog(self):

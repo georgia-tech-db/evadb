@@ -53,6 +53,7 @@ from eva.catalog.services.udf_cost_catalog_service import UdfCostCatalogService
 from eva.catalog.services.udf_io_catalog_service import UdfIOCatalogService
 from eva.catalog.services.udf_metadata_catalog_service import UdfMetadataCatalogService
 from eva.catalog.sql_config import IDENTIFIER_COLUMN, SQLConfig
+from eva.configuration.configuration_manager import ConfigurationManager
 from eva.expression.function_expression import FunctionExpression
 from eva.parser.create_statement import ColumnDefinition
 from eva.parser.table_ref import TableInfo
@@ -62,9 +63,10 @@ from eva.utils.logging_manager import logger
 
 
 class CatalogManager(object):
-    def __init__(self, db_uri: str):
+    def __init__(self, db_uri: str, config: ConfigurationManager):
         self._db_uri = db_uri
         self._sql_config = SQLConfig(db_uri)
+        self._config = config
         self._bootstrap_catalog()
         self._table_catalog_service = TableCatalogService(self._sql_config.session)
         self._column_service = ColumnCatalogService(self._sql_config.session)
@@ -107,7 +109,7 @@ class CatalogManager(object):
         # truncate the catalog tables
         truncate_catalog_tables(self._sql_config.engine)
         # clean up the dataset, index, and cache directories
-        cleanup_storage(self._sql_config.engine)
+        cleanup_storage(self._config)
 
     "Table catalog services"
 

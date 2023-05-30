@@ -16,6 +16,7 @@ import unittest
 
 from eva.executor.executor_utils import ExecutorError
 from eva.server.command_handler import execute_query_fetch_all
+from test.util import get_evadb_for_testing
 
 
 class CreateTableTest(unittest.TestCase):
@@ -25,10 +26,11 @@ class CreateTableTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        cls.evadb = get_evadb_for_testing()
         pass
 
     def test_currently_cannot_create_boolean_table(self):
         query = """ CREATE TABLE BooleanTable( A BOOLEAN);"""
 
         with self.assertRaises(ExecutorError):
-            execute_query_fetch_all(query)
+            execute_query_fetch_all(self.evadb, query)
