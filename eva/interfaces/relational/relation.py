@@ -12,12 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-<<<<<<< HEAD
-from typing import Union
-
-import pandas
-
-=======
 # coding=utf-8
 # Copyright 2018-2023 EVA
 #
@@ -36,7 +30,6 @@ from typing import Union
 
 import pandas
 
->>>>>>> e26c36dd71242de005e57baa3c4a6c2ab818d2d2
 from eva.interfaces.relational.utils import (
     create_limit_expression,
     create_star_expression,
@@ -51,10 +44,6 @@ from eva.models.storage.batch import Batch
 from eva.parser.alias import Alias
 from eva.parser.select_statement import SelectStatement
 
-<<<<<<< HEAD
-
-=======
->>>>>>> e26c36dd71242de005e57baa3c4a6c2ab818d2d2
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import JoinNode, TableRef
 from eva.parser.types import JoinType
@@ -67,10 +56,6 @@ class EVARelation:
     ):
         self._query_node = query_node
         self._alias = alias
-<<<<<<< HEAD
-        self._dummy_alias = Alias("relation")
-=======
->>>>>>> e26c36dd71242de005e57baa3c4a6c2ab818d2d2
 
     def alias(self, alias: str) -> "EVARelation":
         """Returns a new Relation with an alias set.
@@ -250,8 +235,6 @@ class EVARelation:
 
         return self
 
-<<<<<<< HEAD
-=======
     def show(self) -> pandas.DataFrame:
         """Execute and fetch all rows as a pandas DataFrame
 
@@ -262,7 +245,6 @@ class EVARelation:
         assert batch is not None, "relation execute failed"
         return batch.frames
 
->>>>>>> e26c36dd71242de005e57baa3c4a6c2ab818d2d2
     def sql_query(self) -> str:
         """Get the SQL query that is equivalent to the relation
 

@@ -12,22 +12,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-<<<<<<< HEAD
-=======
 import os
 import time
 
->>>>>>> e26c36dd71242de005e57baa3c4a6c2ab818d2d2
 import unittest
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
 
-<<<<<<< HEAD
-=======
 from eva.interfaces.relational.db import connect
 
->>>>>>> e26c36dd71242de005e57baa3c4a6c2ab818d2d2
 from test.util import load_udfs_for_testing, shutdown_ray
 
 from pandas.testing import assert_frame_equal
@@ -39,16 +33,6 @@ class RelationalAPI(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-<<<<<<< HEAD
-    def setUp(self):
-        import eva
-        self.conn = eva.connect(port=8886, db="gg")
-        
-        CatalogManager().reset()
-        self.mnist_path = f"{EVA_ROOT_DIR}/data/mnist/mnist.mp4"
-        load_udfs_for_testing()
-
-=======
     @classmethod
     def setUpClass(cls):
         os.system("nohup eva_server --stop")
@@ -67,7 +51,6 @@ class RelationalAPI(unittest.TestCase):
         CatalogManager().reset()
         self.mnist_path = f"{EVA_ROOT_DIR}/data/mnist/mnist.mp4"
         load_udfs_for_testing()
->>>>>>> e26c36dd71242de005e57baa3c4a6c2ab818d2d2
         self.images = f"{EVA_ROOT_DIR}/data/detoxify/*.jpg"
 
     def tearDown(self):
@@ -75,16 +58,9 @@ class RelationalAPI(unittest.TestCase):
         # todo: move these to relational apis as well
         execute_query_fetch_all("""DROP TABLE IF EXISTS mnist_video;""")
         execute_query_fetch_all("""DROP TABLE IF EXISTS meme_images;""")
-<<<<<<< HEAD
-        # os.system("nohup eva_server --stop")
-
-    def test_relation_apis(self):
-        conn = self.conn
-=======
 
     def test_relation_apis(self):
         conn = connect(port=8886)
->>>>>>> e26c36dd71242de005e57baa3c4a6c2ab818d2d2
         rel = conn.load(
             self.mnist_path,
             table_name="mnist_video",
@@ -138,13 +114,7 @@ class RelationalAPI(unittest.TestCase):
         )
 
     def test_relation_api_chaining(self):
-<<<<<<< HEAD
-        import eva
-
-        conn = eva.connect(port=8886)
-=======
         conn = connect(port=8886)
->>>>>>> e26c36dd71242de005e57baa3c4a6c2ab818d2d2
         rel = conn.load(
             self.mnist_path,
             table_name="mnist_video",
@@ -165,12 +135,6 @@ class RelationalAPI(unittest.TestCase):
             ).df(),
         )
 
-<<<<<<< HEAD
-    def test_create_index(self):
-        import eva
-
-        conn = eva.connect(port=8888)
-=======
     def test_interleaving_calls(self):
         conn = connect(port=8886)
 
@@ -196,7 +160,6 @@ class RelationalAPI(unittest.TestCase):
 
     def test_create_index(self):
         conn = connect(port=8886)
->>>>>>> e26c36dd71242de005e57baa3c4a6c2ab818d2d2
 
         # load some images
         rel = conn.load(

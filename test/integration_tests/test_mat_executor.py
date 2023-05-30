@@ -55,21 +55,9 @@ class MaterializedViewTest(unittest.TestCase):
         execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS MyVideo;")
         execute_query_fetch_all(cls.evadb, "DROP TABLE UATRAC;")
 
-<<<<<<< HEAD
-    def test_should_mat_view_with_dummy(self):
-        materialized_query = """CREATE MATERIALIZED VIEW dummy_view0 (id, label)
-            AS SELECT id, DummyObjectDetector(data).label FROM MyVideo;
-        """
-        execute_query_fetch_all(self.evadb, materialized_query)
-
-        select_query = "SELECT id, label FROM dummy_view0;"
-        actual_batch = execute_query_fetch_all(self.evadb, select_query)
-        actual_batch.sort()
-=======
     def setUp(self):
         execute_query_fetch_all("DROP TABLE IF EXISTS dummy_view;")
         execute_query_fetch_all("DROP TABLE IF EXISTS uadtrac_fastRCNN;")
->>>>>>> e26c36dd71242de005e57baa3c4a6c2ab818d2d2
 
     def tearDown(self):
         execute_query_fetch_all("DROP TABLE IF EXISTS dummy_view;")
@@ -81,13 +69,8 @@ class MaterializedViewTest(unittest.TestCase):
         """
         execute_query_fetch_all(self.evadb, materialized_query)
 
-<<<<<<< HEAD
-        select_query = "SELECT id, label FROM dummy_view1;"
-        actual_batch = execute_query_fetch_all(self.evadb, select_query)
-=======
         select_query = "SELECT id, label FROM dummy_view;"
         actual_batch = execute_query_fetch_all(select_query)
->>>>>>> e26c36dd71242de005e57baa3c4a6c2ab818d2d2
         actual_batch.sort()
 
         labels = DummyObjectDetector().labels
@@ -113,13 +96,8 @@ class MaterializedViewTest(unittest.TestCase):
         """
         execute_query_fetch_all(self.evadb, materialized_query)
 
-<<<<<<< HEAD
-        select_query = "SELECT id, label FROM dummy_view2;"
-        actual_batch = execute_query_fetch_all(self.evadb, select_query)
-=======
         select_query = "SELECT id, label FROM dummy_view;"
         actual_batch = execute_query_fetch_all(select_query)
->>>>>>> e26c36dd71242de005e57baa3c4a6c2ab818d2d2
         actual_batch.sort()
 
         labels = DummyObjectDetector().labels
@@ -172,11 +150,6 @@ class MaterializedViewTest(unittest.TestCase):
         for idx in res.index:
             self.assertTrue("car" in res["uadtrac_fastrcnn.labels"][idx])
 
-<<<<<<< HEAD
-        execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS uadtrac_fastRCNN;")
-
-=======
->>>>>>> e26c36dd71242de005e57baa3c4a6c2ab818d2d2
     @pytest.mark.torchtest
     def test_should_mat_view_with_fastrcnn_lateral_join(self):
         select_query = (
@@ -189,26 +162,17 @@ class MaterializedViewTest(unittest.TestCase):
         )
         execute_query_fetch_all(self.evadb, query)
 
-<<<<<<< HEAD
         select_view_query = "SELECT id, label, bbox FROM uadtrac_fastRCNN_new0"
         actual_batch = execute_query_fetch_all(self.evadb, select_view_query)
-=======
-        select_view_query = "SELECT id, label, bbox FROM uadtrac_fastRCNN"
-        actual_batch = execute_query_fetch_all(select_view_query)
->>>>>>> e26c36dd71242de005e57baa3c4a6c2ab818d2d2
         actual_batch.sort()
 
         self.assertEqual(len(actual_batch), 5)
         # non-trivial test case
         res = actual_batch.frames
         for idx in res.index:
-<<<<<<< HEAD
             self.assertTrue("car" in res["uadtrac_fastrcnn_new0.label"][idx])
 
         execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS uadtrac_fastRCNN;")
-=======
-            self.assertTrue("car" in res["uadtrac_fastrcnn.label"][idx])
->>>>>>> e26c36dd71242de005e57baa3c4a6c2ab818d2d2
 
     @pytest.mark.torchtest
     def test_should_infer_mat_view_column_names_with_fastrcnn_lateral_join(self):
@@ -222,23 +186,14 @@ class MaterializedViewTest(unittest.TestCase):
         )
         execute_query_fetch_all(self.evadb, query)
 
-<<<<<<< HEAD
         select_view_query = "SELECT id, label, bbox FROM uadtrac_fastRCNN_new1"
         actual_batch = execute_query_fetch_all(self.evadb, select_view_query)
-=======
-        select_view_query = "SELECT id, label, bbox FROM uadtrac_fastRCNN"
-        actual_batch = execute_query_fetch_all(select_view_query)
->>>>>>> e26c36dd71242de005e57baa3c4a6c2ab818d2d2
         actual_batch.sort()
 
         self.assertEqual(len(actual_batch), 5)
         # non-trivial test case
         res = actual_batch.frames
         for idx in res.index:
-<<<<<<< HEAD
             self.assertTrue("car" in res["uadtrac_fastrcnn_new1.label"][idx])
 
         execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS uadtrac_fastRCNN;")
-=======
-            self.assertTrue("car" in res["uadtrac_fastrcnn.label"][idx])
->>>>>>> e26c36dd71242de005e57baa3c4a6c2ab818d2d2
