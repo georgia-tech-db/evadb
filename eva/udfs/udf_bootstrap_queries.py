@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,9 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from eva.configuration.constants import EVA_INSTALLATION_DIR
 from eva.database import EVADB
 from eva.server.command_handler import execute_query_fetch_all
-from eva.configuration.constants import EVA_INSTALLATION_DIR
 
 NDARRAY_DIR = "ndarray"
 TUTORIALS_DIR = "tutorials"

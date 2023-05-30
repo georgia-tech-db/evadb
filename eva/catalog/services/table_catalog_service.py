@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,13 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from sqlalchemy.orm import Session
+
 from eva.catalog.catalog_type import TableType
 from eva.catalog.models.table_catalog import TableCatalog, TableCatalogEntry
 from eva.catalog.services.base_service import BaseService
 from eva.catalog.services.column_catalog_service import ColumnCatalogService
 from eva.utils.errors import CatalogError
 from eva.utils.logging_manager import logger
-from sqlalchemy.orm import Session
 
 
 class TableCatalogService(BaseService):
@@ -102,9 +103,7 @@ class TableCatalogService(BaseService):
             True if successfully removed else false
         """
         try:
-            table_obj = self.query.filter(
-                self.model._row_id == table.row_id
-            ).one()
+            table_obj = self.query.filter(self.model._row_id == table.row_id).one()
             table_obj.delete(self.session)
             return True
         except Exception as e:
@@ -114,9 +113,7 @@ class TableCatalogService(BaseService):
 
     def rename_entry(self, table: TableCatalogEntry, new_name: str):
         try:
-            table_obj = self.query.filter(
-                self.model._row_id == table.row_id
-            ).one()
+            table_obj = self.query.filter(self.model._row_id == table.row_id).one()
             table_obj.update(self.session, _name=new_name)
         except Exception as e:
             err_msg = "Update table name failed for {} with error {}".format(

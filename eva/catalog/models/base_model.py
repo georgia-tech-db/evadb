@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,13 +15,13 @@
 import contextlib
 
 from sqlalchemy import Column, Integer
+from sqlalchemy.engine import Engine
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy_utils import create_database, database_exists
 
 from eva.catalog.sql_config import CATALOG_TABLES, SQLConfig
 from eva.utils.logging_manager import logger
-from sqlalchemy.engine import Engine
 
 
 class CustomModel:

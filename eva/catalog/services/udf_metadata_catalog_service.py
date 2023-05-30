@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,6 +14,8 @@
 # limitations under the License.
 from typing import List
 
+from sqlalchemy.orm import Session
+
 from eva.catalog.models.udf_metadata_catalog import (
     UdfMetadataCatalog,
     UdfMetadataCatalogEntry,
@@ -21,7 +23,6 @@ from eva.catalog.models.udf_metadata_catalog import (
 from eva.catalog.services.base_service import BaseService
 from eva.utils.errors import CatalogError
 from eva.utils.logging_manager import logger
-from sqlalchemy.orm import Session
 
 
 class UdfMetadataCatalogService(BaseService):

@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -103,7 +103,7 @@ class SQLStorageEngine(AbstractStorageEngine):
         new_table = type("__placeholder_class_name__", (BaseModel,), attr_dict)()
         table = BaseModel.metadata.tables[table.name]
         insp = inspect(self._sql_engine)
-        
+
         if not insp.has_table(table.name):
             BaseModel.metadata.tables[table.name].create(self._sql_engine)
         self._sql_session.commit()

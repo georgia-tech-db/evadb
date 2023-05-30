@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,12 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from sqlalchemy.orm import Session
 from sqlalchemy.orm.exc import NoResultFound
 
 from eva.catalog.models.udf_catalog import UdfCatalog, UdfCatalogEntry
 from eva.catalog.services.base_service import BaseService
 from eva.utils.logging_manager import logger
-from sqlalchemy.orm import Session
 
 
 class UdfCatalogService(BaseService):

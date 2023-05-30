@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,14 +16,9 @@ import os
 from pathlib import Path
 from typing import Any
 
-from eva.configuration.bootstrap_environment import (
-    bootstrap_environment,
-)
+from eva.configuration.bootstrap_environment import bootstrap_environment
+from eva.configuration.constants import EVA_DATABASE_DIR, EVA_INSTALLATION_DIR
 from eva.utils.logging_manager import logger
-from eva.configuration.constants import (
-    EVA_DATABASE_DIR,
-    EVA_INSTALLATION_DIR,
-)
 
 
 class ConfigurationManager(object):
@@ -52,7 +47,7 @@ class ConfigurationManager(object):
             ValueError: If the YAML file is invalid or cannot be loaded.
         """
         config_obj = self._config_obj
-        
+
         # Get value from the user-provided config file
         value = config_obj.get(category, {}).get(key)
 

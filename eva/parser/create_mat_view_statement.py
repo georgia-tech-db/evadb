@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -65,6 +65,10 @@ class CreateMaterializedViewStatement(AbstractStatement):
     @property
     def col_list(self):
         return self._col_list
+
+    @col_list.setter
+    def col_list(self, value):
+        self._col_list = value
 
     def __eq__(self, other):
         if not isinstance(other, CreateMaterializedViewStatement):

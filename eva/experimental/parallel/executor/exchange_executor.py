@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
 from typing import Iterator
 
 from ray.util.queue import Queue
-from eva.database import EVADB
 
+from eva.database import EVADB
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError
 from eva.experimental.parallel.executor.ray_remote import (

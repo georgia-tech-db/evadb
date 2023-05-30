@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,10 +16,11 @@ from typing import Iterator
 
 import pandas as pd
 from sqlalchemy import and_, or_
-from eva.database import EVADB
+
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import TableType
 from eva.catalog.models.table_catalog import TableCatalogEntry
+from eva.database import EVADB
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.expression.abstract_expression import ExpressionType
 from eva.expression.comparison_expression import ComparisonExpression

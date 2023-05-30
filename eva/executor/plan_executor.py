@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,10 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import Iterator
+
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.database import EVADB
-
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.apply_and_merge_executor import ApplyAndMergeExecutor
 from eva.executor.create_executor import CreateExecutor

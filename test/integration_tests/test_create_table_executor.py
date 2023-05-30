@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,10 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+from test.util import get_evadb_for_testing
 
 from eva.executor.executor_utils import ExecutorError
 from eva.server.command_handler import execute_query_fetch_all
-from test.util import get_evadb_for_testing
 
 
 class CreateTableTest(unittest.TestCase):

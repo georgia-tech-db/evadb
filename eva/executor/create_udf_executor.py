@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,12 +16,13 @@ from pathlib import Path
 from typing import Dict, List
 
 import pandas as pd
-from eva.database import EVADB
+
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_utils import get_metadata_properties
 from eva.catalog.models.udf_catalog import UdfCatalogEntry
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 from eva.configuration.configuration_manager import ConfigurationManager
+from eva.database import EVADB
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.create_udf_plan import CreateUDFPlan

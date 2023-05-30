@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@ import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import TableType
+from eva.database import EVADB
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.insert_plan import InsertPlan
 from eva.storage.storage_engine import StorageEngine
-from eva.database import EVADB
 
 
 class InsertExecutor(AbstractExecutor):

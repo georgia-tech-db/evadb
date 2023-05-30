@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,6 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from copy import deepcopy
+
+<<<<<<< HEAD
+=======
+
+>>>>>>> e26c36dd71242de005e57baa3c4a6c2ab818d2d2
 from eva.parser.types import StatementType
 
 

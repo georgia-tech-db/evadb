@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,9 +15,10 @@
 from typing import Iterator
 
 import pandas as pd
-from eva.database import EVADB
+
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.sql_config import IDENTIFIER_COLUMN
+from eva.database import EVADB
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import handle_vector_store_params
 from eva.models.storage.batch import Batch
@@ -43,7 +44,6 @@ class VectorIndexScanExecutor(AbstractExecutor):
         self.search_query_expr = node.search_query_expr
 
     def exec(self, *args, **kwargs) -> Iterator[Batch]:
-
         # Fetch the index from disk.
         index_catalog_entry = catalog_manager.get_index_catalog_entry_by_name(
             self.index_name

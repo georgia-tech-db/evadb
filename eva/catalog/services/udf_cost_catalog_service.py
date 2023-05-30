@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,10 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from sqlalchemy.orm import Session
+
 from eva.catalog.models.udf_cost_catalog import UdfCostCatalog, UdfCostCatalogEntry
 from eva.catalog.services.base_service import BaseService
 from eva.utils.errors import CatalogError
-from sqlalchemy.orm import Session
 
 
 class UdfCostCatalogService(BaseService):
@@ -51,9 +52,7 @@ class UdfCostCatalogService(BaseService):
             cost(int)  : cost of the udf
         """
         try:
-            udf_obj = self.query.filter(
-                self.model._udf_id == udf_id
-            ).one_or_none()
+            udf_obj = self.query.filter(self.model._udf_id == udf_id).one_or_none()
             if udf_obj:
                 udf_obj.update(self.session, cost=new_cost)
             else:
@@ -72,9 +71,7 @@ class UdfCostCatalogService(BaseService):
         """
 
         try:
-            udf_obj = self.query.filter(
-                self.model._udf_name == name
-            ).one_or_none()
+            udf_obj = self.query.filter(self.model._udf_name == name).one_or_none()
             if udf_obj:
                 return udf_obj.as_dataclass()
             return None

@@ -1,13 +1,28 @@
-import pandas as pd
-from torch import Tensor
-import torch
-from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
-from torchvision.transforms import Compose, ToTensor, Normalize, Grayscale
-from PIL import Image
-
-import torch.nn as nn
+# coding=utf-8
+# Copyright 2018-2023 EVA
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 from collections import OrderedDict
+
+import pandas as pd
+import torch
+import torch.nn as nn
 import torch.utils.model_zoo as model_zoo
+from PIL import Image
+from torch import Tensor
+from torchvision.transforms import Compose, Grayscale, Normalize, ToTensor
+
+from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
 
 
 class MnistImageClassifier(PytorchAbstractClassifierUDF):

@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,12 +14,12 @@
 # limitations under the License.
 from typing import List
 
+from sqlalchemy.orm import Session
 from sqlalchemy.orm.exc import NoResultFound
 
 from eva.catalog.models.column_catalog import ColumnCatalog, ColumnCatalogEntry
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.catalog.services.base_service import BaseService
-from sqlalchemy.orm import Session
 
 
 class ColumnCatalogService(BaseService):
@@ -71,9 +71,7 @@ class ColumnCatalogService(BaseService):
         self, table: TableCatalogEntry
     ) -> List[ColumnCatalogEntry]:
         try:
-            entries = self.query.filter(
-                self.model._table_id == table.row_id
-            ).all()
+            entries = self.query.filter(self.model._table_id == table.row_id).all()
             return [entry.as_dataclass() for entry in entries]
 
         except NoResultFound:

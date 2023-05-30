@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,7 +26,9 @@ class CreateExecutor(AbstractExecutor):
         super().__init__(db, node)
 
     def exec(self, *args, **kwargs):
-        if not handle_if_not_exists(self.catalog, self.node.table_info, self.node.if_not_exists):
+        if not handle_if_not_exists(
+            self.catalog, self.node.table_info, self.node.if_not_exists
+        ):
             logger.debug(f"Creating table {self.node.table_info}")
             catalog_entry = self.catalog.create_and_insert_table_catalog_entry(
                 self.node.table_info, self.node.column_list

@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import NdArrayType
 from eva.configuration.bootstrap_environment import get_default_db_uri
 from eva.configuration.configuration_manager import ConfigurationManager
+from eva.configuration.constants import EVA_DATABASE_DIR, EVA_INSTALLATION_DIR
 from eva.database import EVADB
 from eva.expression.function_expression import FunctionExpression
 from eva.models.storage.batch import Batch
@@ -48,7 +49,6 @@ from eva.udfs.abstract.abstract_udf import AbstractClassifierUDF
 from eva.udfs.decorators import decorators
 from eva.udfs.decorators.io_descriptors.data_types import NumpyArray, PandasDataframe
 from eva.udfs.udf_bootstrap_queries import init_builtin_udfs
-from eva.configuration.constants import EVA_INSTALLATION_DIR, EVA_DATABASE_DIR
 
 NUM_FRAMES = 10
 FRAME_SIZE = (32, 32)

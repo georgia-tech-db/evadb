@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
 import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
+from eva.database import EVADB
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError
 from eva.expression.tuple_value_expression import TupleValueExpression
@@ -23,7 +24,6 @@ from eva.plan_nodes.load_data_plan import LoadDataPlan
 from eva.readers.csv_reader import CSVReader
 from eva.storage.storage_engine import StorageEngine
 from eva.utils.logging_manager import logger
-from eva.database import EVADB
 
 
 class LoadCSVExecutor(AbstractExecutor):

@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
 # limitations under the License.
 import os
 
+from sqlalchemy.orm import Session
 from sqlalchemy.orm.exc import NoResultFound
 
 from eva.catalog.catalog_type import VectorStoreType
@@ -21,7 +22,6 @@ from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.catalog.models.index_catalog import IndexCatalog, IndexCatalogEntry
 from eva.catalog.services.base_service import BaseService
 from eva.utils.logging_manager import logger
-from sqlalchemy.orm import Session
 
 
 class IndexCatalogService(BaseService):

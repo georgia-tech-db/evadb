@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ EVA_CODE_DIR = abspath(join(THIS_DIR, ".."))
 sys.path.append(EVA_CODE_DIR)
 
 from eva.configuration.configuration_manager import ConfigurationManager  # noqa: E402
-from eva.server.server import EvaServer  # noqa: E402
 from eva.configuration.constants import EVA_DATABASE_DIR  # noqa: E402
+from eva.server.server import EvaServer  # noqa: E402
 from eva.utils.logging_manager import logger  # noqa: E402
 
 

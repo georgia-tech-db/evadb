@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,10 +17,11 @@ from multiprocessing import Pool
 from pathlib import Path
 
 import pandas as pd
-from eva.database import EVADB
+
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.configuration.configuration_manager import ConfigurationManager
+from eva.database import EVADB
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError, iter_path_regex, validate_media
 from eva.models.storage.batch import Batch

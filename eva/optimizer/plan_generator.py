@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
 import asyncio
 
 import nest_asyncio
-from eva.database import EVADB
 
+from eva.database import EVADB
 from eva.optimizer.cost_model import CostModel
 from eva.optimizer.operators import Operator
 from eva.optimizer.optimizer_context import OptimizerContext
