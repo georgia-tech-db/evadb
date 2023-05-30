@@ -27,13 +27,11 @@ from eva.expression.function_expression import FunctionExpression
 from eva.optimizer.operators import (
     LogicalApplyAndMerge,
     LogicalExchange,
-    LogicalGet,
+    LogicalProject,
     OperatorType,
 )
 from eva.optimizer.rules.rules_base import Promise, Rule, RuleType
 from eva.plan_nodes.apply_and_merge_plan import ApplyAndMergePlan
-from eva.plan_nodes.seq_scan_plan import SeqScanPlan
-from eva.plan_nodes.storage_plan import StoragePlan
 from eva.plan_nodes.project_plan import ProjectPlan
 
 
