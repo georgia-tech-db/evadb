@@ -20,7 +20,7 @@ create_database: CREATE DATABASE if_not_exists? uid
 
 create_index: CREATE INDEX uid ON table_name index_elem vector_store_type?
 
-create_table: CREATE TABLE if_not_exists? table_name create_definitions 
+create_table: CREATE TABLE if_not_exists? table_name (create_definitions | (AS select_statement))
     
 // Rename statements
 
@@ -30,7 +30,7 @@ rename_table: RENAME TABLE table_name TO table_name
 create_udf: CREATE UDF if_not_exists? udf_name INPUT create_definitions OUTPUT create_definitions TYPE udf_type IMPL udf_impl udf_metadata* | CREATE UDF if_not_exists? udf_name IMPL udf_impl udf_metadata* | CREATE UDF if_not_exists? udf_name TYPE udf_type udf_metadata*
 
 // Create Materialized View
-create_materialized_view: CREATE MATERIALIZED VIEW if_not_exists? table_name ("(" uid_list ")") AS select_statement | CREATE MATERIALIZED VIEW if_not_exists? table_name AS select_statement
+create_materialized_view: CREATE MATERIALIZED VIEW if_not_exists? table_name ("(" uid_list ")")? AS select_statement
 
 // Details
 udf_name: uid

@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
 from typing import List, Tuple
 
 from eva.catalog.catalog_type import ColumnType, NdArrayType
+from eva.parser.select_statement import SelectStatement
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableInfo
 from eva.parser.types import StatementType
@@ -121,16 +122,23 @@ class CreateTableStatement(AbstractStatement):
         table_info: TableInfo,
         if_not_exists: bool,
         column_list: List[ColumnDefinition] = None,
+        query: SelectStatement = None,
     ):
         super().__init__(StatementType.CREATE)
         self._table_info = table_info
         self._if_not_exists = if_not_exists
         self._column_list = column_list
+        self._query = query
 
     def __str__(self) -> str:
         print_str = "CREATE TABLE {} ({}) \n".format(
             self._table_info, self._if_not_exists
         )
+
+        if self._query is not None:
+            print_str = "CREATE TABLE {} AS {}\n".format(
+                self._table_info, self._query
+            )
 
         for column in self.column_list:
             print_str += str(column) + "\n"
@@ -149,6 +157,14 @@ class CreateTableStatement(AbstractStatement):
     def column_list(self):
         return self._column_list
 
+    @property
+    def query(self):
+        return self._query
+
+    @column_list.setter
+    def column_list(self, value):
+        self._column_list = value
+
     def __eq__(self, other):
         if not isinstance(other, CreateTableStatement):
             return False
@@ -156,6 +172,7 @@ class CreateTableStatement(AbstractStatement):
             self.table_info == other.table_info
             and self.if_not_exists == other.if_not_exists
             and self.column_list == other.column_list
+            and self.query == other.query
         )
 
     def __hash__(self) -> int:
@@ -165,5 +182,6 @@ class CreateTableStatement(AbstractStatement):
                 self.table_info,
                 self.if_not_exists,
                 tuple(self.column_list or []),
+                self.query
             )
         )

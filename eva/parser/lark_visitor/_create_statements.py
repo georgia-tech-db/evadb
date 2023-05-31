@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ class CreateTable:
         table_info = None
         if_not_exists = False
         create_definitions = []
+        query = None
 
         for child in tree.children:
             if isinstance(child, Tree):
@@ -45,9 +46,11 @@ class CreateTable:
                     table_info = self.visit(child)
                 elif child.data == "create_definitions":
                     create_definitions = self.visit(child)
+                elif child.data == "simple_select":
+                    query = self.visit(child)
 
         create_stmt = CreateTableStatement(
-            table_info, if_not_exists, create_definitions
+            table_info, if_not_exists, create_definitions, query=query
         )
         return create_stmt
 

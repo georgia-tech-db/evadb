@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -235,7 +235,8 @@ class FunctionExpression(AbstractExpression):
         return Batch(pd.DataFrame(results, columns=output_cols))
 
     def __str__(self) -> str:
-        expr_str = f"{self.name}()"
+        args = [str(child) for child in self.children]
+        expr_str = f"{self.name}({','.join(args)})"
         return expr_str
 
     def __eq__(self, other):
