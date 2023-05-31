@@ -70,8 +70,9 @@ class SaliencyFeatureExtractor(AbstractUDF, GPUCompatible):
     )
     def forward(self, df: pd.DataFrame) -> pd.DataFrame:
         def _forward(row: pd.Series) -> np.ndarray:
-
-            return row
+            columns=row.axes[0]
+            res = row.loc[columns[1]]
+            return res
 
         ret = pd.DataFrame()
         ret["saliency"] = df.apply(_forward, axis=1)
