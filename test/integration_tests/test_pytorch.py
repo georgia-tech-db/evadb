@@ -26,7 +26,6 @@ import cv2
 import numpy as np
 import pytest
 import pandas.testing as pd_testing
-import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.configuration_manager import ConfigurationManager
@@ -122,7 +121,6 @@ class PytorchTest(unittest.TestCase):
         """
         execute_query_fetch_all(create_udf_query)
 
-        
         select_query = """SELECT FaceDetector(data) FROM MyVideo
                         WHERE id < 5;"""
         # Parallel execution
