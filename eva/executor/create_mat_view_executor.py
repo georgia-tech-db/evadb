@@ -14,9 +14,8 @@
 # limitations under the License.
 from eva.catalog.catalog_manager import CatalogManager
 from eva.executor.abstract_executor import AbstractExecutor
-from eva.executor.executor_utils import ExecutorError, handle_if_not_exists
+from eva.executor.executor_utils import handle_if_not_exists
 from eva.plan_nodes.create_mat_view_plan import CreateMaterializedViewPlan
-from eva.plan_nodes.types import PlanOprType
 from eva.storage.storage_engine import StorageEngine
 
 
