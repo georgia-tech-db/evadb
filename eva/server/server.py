@@ -15,6 +15,7 @@
 import asyncio
 import string
 from asyncio import StreamReader, StreamWriter
+from eva.database import EVADB
 
 from eva.utils.logging_manager import logger
 
@@ -28,7 +29,7 @@ class EvaServer:
         self._server = None
         self._clients = {}  # client -> (reader, writer)
 
-    async def start_eva_server(self, host: string, port: int):
+    async def start_eva_server(self, db_uri: str, host: string, port: int):
         """
         Start the server
         Server objects are asynchronous context managers.
@@ -36,8 +37,8 @@ class EvaServer:
         hostname: hostname of the server
         port: port of the server
         """
-        logger.warn(f"EVA server started at host {host} and port {port}")
-
+        print(f"EVA server started at host {host} and port {port}")
+        self._evadb = EVADB()
         self._server = await asyncio.start_server(self.accept_client, host, port)
 
         async with self._server:

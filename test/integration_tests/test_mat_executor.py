@@ -96,7 +96,7 @@ class MaterializedViewTest(unittest.TestCase):
         execute_query_fetch_all(self.evadb, materialized_query)
 
         select_query = "SELECT id, label FROM dummy_view;"
-        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch = execute_query_fetch_all(self.evadb, select_query)
         actual_batch.sort()
 
         labels = DummyObjectDetector().labels
@@ -161,7 +161,7 @@ class MaterializedViewTest(unittest.TestCase):
         )
         execute_query_fetch_all(self.evadb, query)
 
-        select_view_query = "SELECT id, label, bbox FROM uadtrac_fastRCNN_new0"
+        select_view_query = "SELECT id, label, bbox FROM uadtrac_fastRCNN"
         actual_batch = execute_query_fetch_all(self.evadb, select_view_query)
         actual_batch.sort()
 
@@ -169,7 +169,7 @@ class MaterializedViewTest(unittest.TestCase):
         # non-trivial test case
         res = actual_batch.frames
         for idx in res.index:
-            self.assertTrue("car" in res["uadtrac_fastrcnn_new0.label"][idx])
+            self.assertTrue("car" in res["uadtrac_fastrcnn.label"][idx])
 
         execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS uadtrac_fastRCNN;")
 
@@ -185,7 +185,7 @@ class MaterializedViewTest(unittest.TestCase):
         )
         execute_query_fetch_all(self.evadb, query)
 
-        select_view_query = "SELECT id, label, bbox FROM uadtrac_fastRCNN_new1"
+        select_view_query = "SELECT id, label, bbox FROM uadtrac_fastRCNN"
         actual_batch = execute_query_fetch_all(self.evadb, select_view_query)
         actual_batch.sort()
 
@@ -193,6 +193,6 @@ class MaterializedViewTest(unittest.TestCase):
         # non-trivial test case
         res = actual_batch.frames
         for idx in res.index:
-            self.assertTrue("car" in res["uadtrac_fastrcnn_new1.label"][idx])
+            self.assertTrue("car" in res["uadtrac_fastrcnn.label"][idx])
 
         execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS uadtrac_fastRCNN;")

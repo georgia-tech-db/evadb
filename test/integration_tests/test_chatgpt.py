@@ -14,6 +14,7 @@
 # limitations under the License.
 
 
+import os
 import unittest
 from test.markers import ray_skip_marker
 from test.util import get_evadb_for_testing
@@ -67,7 +68,7 @@ class ChatGPTTest(unittest.TestCase):
     @patch("eva.udfs.chatgpt.openai.ChatCompletion.create")
     def test_openai_chat_completion_udf(self, mock_req):
         # set dummy api key
-        self.evadb.config.update_value("third_party", "openai_api_key", "my_key")
+        os.environ["openai_api_key"] = "my_key"
 
         udf_name = "OpenAIChatCompletion"
         execute_query_fetch_all(self.evadb, f"DROP UDF IF EXISTS {udf_name};")
@@ -101,7 +102,6 @@ class ChatGPTTest(unittest.TestCase):
         self.assertEqual(output_batch, expected_output)
 
     def test_gpt_udf_no_key(self):
-        self.evadb.config.update_value("third_party", "openai_api_key", "")
         udf_name = "ChatGPT"
         execute_query_fetch_all(self.evadb, f"DROP UDF IF EXISTS {udf_name};")
 

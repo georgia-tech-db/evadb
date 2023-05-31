@@ -14,6 +14,7 @@
 # limitations under the License.
 
 
+import os
 import openai
 import pandas as pd
 
@@ -44,9 +45,7 @@ class ChatGPT(AbstractUDF):
         model="gpt-3.5-turbo",
         temperature: float = 0,
     ) -> None:
-        openai.api_key = ConfigurationManager().get_value(
-            "third_party", "openai_api_key"
-        )
+        openai.api_key = os.environ.get("openai_api_key")
         assert (
             len(openai.api_key) != 0
         ), "Please set your OpenAI API key in eva.yml file (third_party, open_api_key)"

@@ -32,4 +32,4 @@ def setup_pytorch_tests():
         evadb, "LOAD VIDEO 'data/sample_videos/touchdown.mp4' INTO VIDEOS"
     )
     init_builtin_udfs(evadb, mode="release")
-    yield None
+    return evadb
