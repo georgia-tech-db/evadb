@@ -27,8 +27,11 @@ class CreateMaterializedViewExecutor(AbstractExecutor):
     def exec(self, *args, **kwargs):
         """Create materialized view executor"""
         if not handle_if_not_exists(self.node.view, self.node.if_not_exists):
-            assert len(self.children) == 1, \
-                'Create materialized view expects 1 child, finds {}'.format(len(self.children))
+            assert (
+                len(self.children) == 1
+            ), "Create materialized view expects 1 child, finds {}".format(
+                len(self.children)
+            )
             child = self.children[0]
 
             view_catalog_entry = self.catalog.create_and_insert_table_catalog_entry(
