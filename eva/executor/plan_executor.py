@@ -63,9 +63,9 @@ class PlanExecutor:
         evadb (EVADB): database to execute the query on
     """
 
-    def __init__(self, plan: AbstractPlan, evadb: EVADB):
-        self._plan = plan
+    def __init__(self, evadb: EVADB, plan: AbstractPlan):
         self._db = evadb
+        self._plan = plan
 
     def _build_execution_tree(self, plan: AbstractPlan) -> AbstractExecutor:
         """build the execution tree from plan tree

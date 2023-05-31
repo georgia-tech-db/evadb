@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@ import unittest
 from test.executor.utils import DummyExecutor
 from test.util import create_dataframe
 
+from mock import MagicMock
+
 from eva.executor.pp_executor import PPExecutor
 from eva.models.storage.batch import Batch
 
@@ -29,7 +31,7 @@ class PPScanExecutorTest(unittest.TestCase):
         )
 
         plan = type("PPScanPlan", (), {"predicate": expression})
-        predicate_executor = PPExecutor(plan)
+        predicate_executor = PPExecutor(MagicMock(), plan)
         predicate_executor.append_child(DummyExecutor([batch]))
 
         expected = batch[[2]]

@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ class TestBinder(unittest.TestCase):
         root_ptn.append_child(child1_ptn)
         root_ptn.append_child(child2_ptn)
 
-        opt_ctxt = OptimizerContext(CostModel())
+        opt_ctxt = OptimizerContext(MagicMock(), CostModel())
         root_grp_expr = opt_ctxt.add_opr_to_group(root_opr)
 
         binder = Binder(root_grp_expr, root_ptn, opt_ctxt.memo)
@@ -90,7 +90,7 @@ class TestBinder(unittest.TestCase):
         root_ptn.append_child(child_ptn)
         root_ptn.append_child(Pattern(OperatorType.DUMMY))
 
-        opt_ctxt = OptimizerContext(CostModel())
+        opt_ctxt = OptimizerContext(MagicMock(), CostModel())
         root_grp_expr = opt_ctxt.add_opr_to_group(root_opr)
         binder = Binder(root_grp_expr, root_ptn, opt_ctxt.memo)
         expected_match = copy.copy(root_opr)
@@ -98,7 +98,7 @@ class TestBinder(unittest.TestCase):
         for match in iter(binder):
             self.helper_pre_order_match(expected_match, match)
 
-        opt_ctxt = OptimizerContext(CostModel())
+        opt_ctxt = OptimizerContext(MagicMock(), CostModel())
         sub_root_grp_expr = opt_ctxt.add_opr_to_group(sub_root_opr)
         expected_match = copy.copy(sub_root_opr)
         expected_match.children = [sub_child_opr, Dummy(1, None)]

@@ -41,7 +41,7 @@ def execute_query(
         StatementBinder(StatementBinderContext(evadb.catalog)).bind(stmt)
         l_plan = StatementToPlanConverter().visit(stmt)
         p_plan = asyncio.run(plan_generator.build(l_plan))
-        output = PlanExecutor(p_plan, evadb).execute_plan()
+        output = PlanExecutor(evadb, p_plan).execute_plan()
 
     query_compile_time.log_elapsed_time("Query Compile Time")
     return output

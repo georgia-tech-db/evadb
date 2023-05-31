@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 # limitations under the License.
 import shutil
 import unittest
-from test.util import create_dummy_batches, prefix_worker_id
+from test.util import create_dummy_batches, suffix_pytest_xdist_worker_id_to_dir
 
 import pytest
 
@@ -32,8 +32,8 @@ class SQLStorageEngineTest(unittest.TestCase):
 
     def create_sample_table(self):
         table_info = TableCatalogEntry(
-            prefix_worker_id("dataset"),
-            prefix_worker_id("dataset"),
+            suffix_pytest_xdist_worker_id_to_dir("dataset"),
+            suffix_pytest_xdist_worker_id_to_dir("dataset"),
             table_type=TableType.VIDEO_DATA,
         )
         column_0 = ColumnCatalogEntry("name", ColumnType.TEXT, is_nullable=False)
@@ -49,7 +49,9 @@ class SQLStorageEngineTest(unittest.TestCase):
 
     def tearDown(self):
         try:
-            shutil.rmtree(prefix_worker_id("dataset"), ignore_errors=True)
+            shutil.rmtree(
+                suffix_pytest_xdist_worker_id_to_dir("dataset"), ignore_errors=True
+            )
         except ValueError:
             pass
 

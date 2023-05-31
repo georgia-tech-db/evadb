@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ from test.executor.utils import DummyExecutor
 from test.util import create_dataframe
 
 import pandas as pd
+from mock import MagicMock
 
 from eva.executor.seq_scan_executor import SequentialScanExecutor
 from eva.models.storage.batch import Batch
@@ -35,7 +36,7 @@ class SeqScanExecutorTest(unittest.TestCase):
         plan = type(
             "ScanPlan", (), {"predicate": expression, "columns": None, "alias": None}
         )
-        predicate_executor = SequentialScanExecutor(plan)
+        predicate_executor = SequentialScanExecutor(MagicMock(), plan)
         predicate_executor.append_child(DummyExecutor([batch]))
 
         expected = Batch(batch[[2]].frames)
@@ -48,7 +49,7 @@ class SeqScanExecutorTest(unittest.TestCase):
         batch = Batch(frames=dataframe)
 
         plan = type("ScanPlan", (), {"predicate": None, "columns": None, "alias": None})
-        predicate_executor = SequentialScanExecutor(plan)
+        predicate_executor = SequentialScanExecutor(MagicMock(), plan)
         predicate_executor.append_child(DummyExecutor([batch]))
 
         filtered = list(predicate_executor.exec())[0]
@@ -70,7 +71,7 @@ class SeqScanExecutorTest(unittest.TestCase):
         plan = type(
             "ScanPlan", (), {"predicate": None, "columns": expression, "alias": None}
         )
-        proj_executor = SequentialScanExecutor(plan)
+        proj_executor = SequentialScanExecutor(MagicMock(), plan)
         proj_executor.append_child(DummyExecutor([batch]))
 
         actual = list(proj_executor.exec())[0]

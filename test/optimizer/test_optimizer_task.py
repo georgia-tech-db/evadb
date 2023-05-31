@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ class TestOptimizerTask(unittest.TestCase):
             task.execute()
 
     def top_down_rewrite(self, opr):
-        opt_cxt = OptimizerContext(CostModel())
+        opt_cxt = OptimizerContext(MagicMock(), CostModel())
         grp_expr = opt_cxt.add_opr_to_group(opr)
         root_grp_id = grp_expr.group_id
         opt_cxt.task_stack.push(

@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,10 +22,9 @@ from eva.udfs.decorators.io_descriptors.data_types import PandasDataframe
 
 
 class CreateUdfExecutorTest(unittest.TestCase):
-    @patch("eva.executor.create_udf_executor.CatalogManager")
     @patch("eva.executor.create_udf_executor.load_udf_class_from_file")
-    def test_should_create_udf(self, load_udf_class_from_file_mock, mock):
-        catalog_instance = mock.return_value
+    def test_should_create_udf(self, load_udf_class_from_file_mock):
+        catalog_instance = MagicMock()
         catalog_instance.get_udf_catalog_entry_by_name.return_value = None
         catalog_instance.insert_udf_catalog_entry.return_value = "udf"
         impl_path = MagicMock()
@@ -45,8 +44,10 @@ class CreateUdfExecutorTest(unittest.TestCase):
                 "metadata": {"key1": "value1", "key2": "value2"},
             },
         )
-
-        create_udf_executor = CreateUDFExecutor(plan)
+        evadb = MagicMock
+        evadb.catalog = catalog_instance
+        evadb.config = MagicMock()
+        create_udf_executor = CreateUDFExecutor(evadb, plan)
         next(create_udf_executor.exec())
         catalog_instance.insert_udf_catalog_entry.assert_called_with(
             "udf",
@@ -56,12 +57,11 @@ class CreateUdfExecutorTest(unittest.TestCase):
             {"key1": "value1", "key2": "value2"},
         )
 
-    @patch("eva.executor.create_udf_executor.CatalogManager")
     @patch("eva.executor.create_udf_executor.load_udf_class_from_file")
     def test_should_raise_error_on_incorrect_io_definition(
-        self, load_udf_class_from_file_mock, mock
+        self, load_udf_class_from_file_mock
     ):
-        catalog_instance = mock.return_value
+        catalog_instance = MagicMock()
         catalog_instance.get_udf_catalog_entry_by_name.return_value = None
         catalog_instance.insert_udf_catalog_entry.return_value = "udf"
         impl_path = MagicMock()
@@ -89,8 +89,10 @@ class CreateUdfExecutorTest(unittest.TestCase):
                 "udf_type": "classification",
             },
         )
-
-        create_udf_executor = CreateUDFExecutor(plan)
+        evadb = MagicMock
+        evadb.catalog = catalog_instance
+        evadb.config = MagicMock()
+        create_udf_executor = CreateUDFExecutor(evadb, plan)
         # check a string in the error message
         with self.assertRaises(RuntimeError) as exc:
             next(create_udf_executor.exec())
