@@ -49,6 +49,7 @@ from eva.optimizer.rules.rules import (
     LogicalCreateIndexToVectorIndex,
     LogicalCreateMaterializedViewToPhysical,
     LogicalCreateToPhysical,
+    LogicalCreateFromSelectToPhysical,
     LogicalCreateUDFToPhysical,
     LogicalDeleteToPhysical,
     LogicalDerivedGetToPhysical,
@@ -136,6 +137,7 @@ class RulesTest(unittest.TestCase):
             Promise.LOGICAL_DROP_TO_PHYSICAL,
             Promise.LOGICAL_LOAD_TO_PHYSICAL,
             Promise.LOGICAL_CREATE_TO_PHYSICAL,
+            Promise.LOGICAL_CREATE_FROM_SELECT_TO_PHYSICAL,
             Promise.LOGICAL_CREATE_UDF_TO_PHYSICAL,
             Promise.LOGICAL_SAMPLE_TO_UNIFORMSAMPLE,
             Promise.LOGICAL_GET_TO_SEQSCAN,
@@ -213,6 +215,7 @@ class RulesTest(unittest.TestCase):
         # has some simple heuristics to choose one over the other.
         supported_implementation_rules = [
             LogicalCreateToPhysical(),
+            LogicalCreateFromSelectToPhysical(),
             LogicalRenameToPhysical(),
             LogicalDropToPhysical(),
             LogicalCreateUDFToPhysical(),

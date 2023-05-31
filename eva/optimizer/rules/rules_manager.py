@@ -40,6 +40,7 @@ from eva.optimizer.rules.rules import (
     LogicalCreateIndexToVectorIndex,
     LogicalCreateMaterializedViewToPhysical,
     LogicalCreateToPhysical,
+    LogicalCreateFromSelectToPhysical,
     LogicalCreateUDFToPhysical,
     LogicalDeleteToPhysical,
     LogicalDerivedGetToPhysical,
@@ -104,6 +105,7 @@ class RulesManager:
 
         self._implementation_rules = [
             LogicalCreateToPhysical(),
+            LogicalCreateFromSelectToPhysical(),
             LogicalRenameToPhysical(),
             LogicalDropToPhysical(),
             LogicalCreateUDFToPhysical(),

@@ -34,7 +34,7 @@ from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.create_index_statement import CreateIndexStatement
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
-from eva.parser.create_statement import ColumnDefinition
+from eva.parser.create_statement import ColumnDefinition, CreateTableStatement
 from eva.parser.delete_statement import DeleteTableStatement
 from eva.parser.explain_statement import ExplainStatement
 from eva.parser.rename_statement import RenameTableStatement
@@ -146,6 +146,37 @@ class StatementBinder:
         self.bind(node.table_ref)
         if node.where_clause:
             self.bind(node.where_clause)
+
+    @bind.register(CreateTableStatement)
+    def _bind_create_statement(self, node: CreateTableStatement):
+        if node.query is not None:
+            self.bind(node.query)
+            num_projected_columns = 0
+            for expr in node.query.target_list:
+                if expr.etype == ExpressionType.TUPLE_VALUE:
+                    num_projected_columns += 1
+                elif expr.etype == ExpressionType.FUNCTION_EXPRESSION:
+                    num_projected_columns += len(expr.output_objs)
+                else:
+                    raise BinderError("Unsupported expression type {}.".format(expr.etype))
+
+            binded_col_list = []
+            idx = 0
+            for expr in node.query.target_list:
+                output_objs = [(expr.col_name, expr.col_object)] \
+                    if expr.etype == ExpressionType.TUPLE_VALUE \
+                    else zip(expr.projection_columns, expr.output_objs)
+                for col_name, output_obj in output_objs:
+                    binded_col_list.append(
+                        ColumnDefinition(
+                            col_name,
+                            output_obj.type,
+                            output_obj.array_type,
+                            output_obj.array_dimensions,
+                        )
+                    )
+                    idx += 1
+            node.column_list = binded_col_list
 
     @bind.register(CreateMaterializedViewStatement)
     def _bind_create_mat_statement(self, node: CreateMaterializedViewStatement):
