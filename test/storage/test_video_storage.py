@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import create_sample_video, suffix_pytest_xdist_worker_id_to_dir
+from test.util import create_sample_video, get_evadb_for_testing, suffix_pytest_xdist_worker_id_to_dir
 from unittest.mock import MagicMock
 
 import mock
@@ -35,8 +35,8 @@ class VideoStorageEngineTest(unittest.TestCase):
 
     def create_sample_table(self):
         table_info = TableCatalogEntry(
-            suffix_pytest_xdist_worker_id_to_dir("dataset"),
-            suffix_pytest_xdist_worker_id_to_dir("dataset"),
+            str(suffix_pytest_xdist_worker_id_to_dir("dataset")),
+            str(suffix_pytest_xdist_worker_id_to_dir("dataset")),
             table_type=TableType.VIDEO_DATA,
         )
         column_1 = ColumnCatalogEntry("id", ColumnType.INTEGER, False)
@@ -47,9 +47,9 @@ class VideoStorageEngineTest(unittest.TestCase):
         return table_info
 
     def setUp(self):
-        mock = MagicMock()
+        evadb = get_evadb_for_testing()
         mock.table_type = TableType.VIDEO_DATA
-        self.video_engine = StorageEngine.factory(mock)
+        self.video_engine = StorageEngine.factory(evadb, mock)
         self.table = self.create_sample_table()
 
     def tearDown(self):

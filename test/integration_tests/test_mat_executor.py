@@ -54,9 +54,9 @@ class MaterializedViewTest(unittest.TestCase):
         execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS MyVideo;")
         execute_query_fetch_all(cls.evadb, "DROP TABLE UATRAC;")
 
-    # def setUp(self):
-    #     execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS dummy_view;")
-    #     execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS uadtrac_fastRCNN;")
+    def setUp(self):
+        execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS dummy_view;")
+        execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS uadtrac_fastRCNN;")
 
     def tearDown(self):
         execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS dummy_view;")
