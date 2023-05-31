@@ -39,23 +39,29 @@ class EVAAPITests(unittest.TestCase):
         drop.execute()
 
     def test_udf_eva_api(self):
-        pdf_path = f"{EVA_ROOT_DIR}/data/documents/pdf_sample1.pdf"
+        pdf_path = f"{EVA_ROOT_DIR}/data/documents/state_of_the_union.pdf"
         
-        # reader, writer = get_connection_async()
         connection = connect(host="127.0.0.1", port=8803)
         cursor = connection.cursor()
 
         load_pdf =cursor.load(file_regex=pdf_path,format="PDF",table_name="PDFss")
         load_pdf.execute()
 
-        udf_check = cursor.query("DROP UDF IF  EXISTS SaliencyFeatureExtractor")
+        udf_check = cursor.query("DROP UDF IF  EXISTS SimilarityFeatureExtractor")
         udf_check.execute()
-        udf = cursor.query(f"""CREATE UDF IF NOT EXISTS SaliencyFeatureExtractor
-                            IMPL  '{EVA_ROOT_DIR}/eva/udfs/tfidf_feature_extractor.py'""")
+        udf = cursor.query(f"""CREATE UDF IF NOT EXISTS SimilarityFeatureExtractor
+                            IMPL  '{EVA_ROOT_DIR}/eva/udfs/similarity_feature_extractor.py'""")
         udf.execute()
 
         table = cursor.table("PDFss")
-        table_udf = table.cross_apply("SaliencyFeatureExtractor(data,'BLOOD')","objs(simiarity)")
-        table_udf.df()
-        a=0
-        
+        table_udf = table.cross_apply("SimilarityFeatureExtractor(data,'BLOOD')","objs(simiarity)")
+        table_udf_data = table_udf.df()        
+        self.assertEqual(len(table_udf_data.columns), 6)
+        self.assertTrue("objs.simiarity" in table_udf_data.columns)
+        self.assertTrue("pdfss.data" in table_udf_data.columns)
+        self.assertTrue(
+            all(
+                isinstance(x, float) for x in table_udf_data["objs.simiarity"]
+            )
+        )
+

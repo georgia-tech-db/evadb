@@ -57,8 +57,7 @@ minimal_requirement = [
     "langchain",
     "pymupdf",
     "pdfminer.six",
-    "scikit-learn",
-    "nltk"
+    "spacy",
 
 ]
 

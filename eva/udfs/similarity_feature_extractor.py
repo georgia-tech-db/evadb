@@ -30,24 +30,18 @@ from eva.udfs.gpu_compatible import GPUCompatible
 from torchvision.transforms import Compose, ToTensor, Resize
 from PIL import Image
 
-import nltk
-import string
-from nltk.corpus import stopwords
-from sklearn.feature_extraction.text import TfidfVectorizer
-nltk.download('stopwords')
-nltk.download('punkt')
+import spacy
+try:
+    nlp = spacy.load("en_core_web_lg")
+except:
+    import spacy.cli
+    spacy.cli.download("en_core_web_lg")
+    nlp = spacy.load("en_core_web_lg")
 
-class SaliencyFeatureExtractor(AbstractUDF, GPUCompatible):
+
+class SimilarityFeatureExtractor(AbstractUDF, GPUCompatible):
     @setup(cacheable=False, udf_type="FeatureExtraction", batchable=False)
     def setup(self):
-        # # self.model = kornia.feature.SIFTDescriptor(100)
-        # self.model = torchvision.models.resnet18(pretrained=True)
-        # num_features = self.model.fc.in_features
-        # self.model.fc = nn.Linear(num_features, 2) # binary classification (num_of_class == 2)
-        # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        # model_state = torch.load("data/saliency/model.pth", map_location=device)
-        # self.model.load_state_dict(model_state)
-        # self.model.eval()
         pass
 
     def to_device(self, device: str) -> GPUCompatible:
@@ -56,7 +50,7 @@ class SaliencyFeatureExtractor(AbstractUDF, GPUCompatible):
 
     @property
     def name(self) -> str:
-        return "SaliencyFeatureExtractor"
+        return "SimilarityFeatureExtractor"
 
     @forward(
         input_signatures=[
@@ -75,23 +69,17 @@ class SaliencyFeatureExtractor(AbstractUDF, GPUCompatible):
         ],
     )
     def forward(self, df: pd.DataFrame) -> pd.DataFrame:
-        stopwords_en = stopwords.words('english')
-        def preprocess(text):
-            remove_punctuation_map = dict((ord(char), None) for char in string.punctuation)
-            return nltk.word_tokenize(text.lower().translate(remove_punctuation_map))
-
-        def compute_similarity(vectorizer,a, b):
-            tfidf = vectorizer.fit_transform([a, b])
-            return ((tfidf * tfidf.T).toarray())[0,1]
 
         def _forward(row: pd.Series) -> np.ndarray:
             columns=row.axes[0]
             data = row.loc[columns[0]]
             filter_keyword = row.loc[columns[1]]
-            vectorizer = TfidfVectorizer(tokenizer=preprocess, stop_words=stopwords_en)
-
-            similarity = compute_similarity(vectorizer,data,filter_keyword)
-            return similarity
+            if data.strip()!="":
+                doc1 = nlp(data)
+                doc2 = nlp(filter_keyword)
+                return doc1.similarity(doc2)
+            else:
+                return 0
 
         ret = pd.DataFrame()
         ret["simiarity"] = df.apply(_forward, axis=1)
