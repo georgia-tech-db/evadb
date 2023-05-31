@@ -30,6 +30,12 @@ from eva.udfs.gpu_compatible import GPUCompatible
 from torchvision.transforms import Compose, ToTensor, Resize
 from PIL import Image
 
+import nltk
+import string
+from nltk.corpus import stopwords
+from sklearn.feature_extraction.text import TfidfVectorizer
+nltk.download('stopwords')
+nltk.download('punkt')
 
 class SaliencyFeatureExtractor(AbstractUDF, GPUCompatible):
     @setup(cacheable=False, udf_type="FeatureExtraction", batchable=False)
@@ -62,18 +68,31 @@ class SaliencyFeatureExtractor(AbstractUDF, GPUCompatible):
         ],
         output_signatures=[
             PandasDataframe(
-                columns=["saliency"],
+                columns=["simiarity"],
                 column_types=[NdArrayType.FLOAT32],
-                column_shapes=[(1, 224,224)],
+                column_shapes=[(1)],
             )
         ],
     )
     def forward(self, df: pd.DataFrame) -> pd.DataFrame:
+        stopwords_en = stopwords.words('english')
+        def preprocess(text):
+            remove_punctuation_map = dict((ord(char), None) for char in string.punctuation)
+            return nltk.word_tokenize(text.lower().translate(remove_punctuation_map))
+
+        def compute_similarity(vectorizer,a, b):
+            tfidf = vectorizer.fit_transform([a, b])
+            return ((tfidf * tfidf.T).toarray())[0,1]
+
         def _forward(row: pd.Series) -> np.ndarray:
             columns=row.axes[0]
-            res = row.loc[columns[1]]
-            return res
+            data = row.loc[columns[0]]
+            filter_keyword = row.loc[columns[1]]
+            vectorizer = TfidfVectorizer(tokenizer=preprocess, stop_words=stopwords_en)
+
+            similarity = compute_similarity(vectorizer,data,filter_keyword)
+            return similarity
 
         ret = pd.DataFrame()
-        ret["saliency"] = df.apply(_forward, axis=1)
+        ret["simiarity"] = df.apply(_forward, axis=1)
         return ret

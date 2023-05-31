@@ -55,7 +55,7 @@ class EVAAPITests(unittest.TestCase):
         udf.execute()
 
         table = cursor.table("PDFss")
-        table_udf = table.cross_apply("SaliencyFeatureExtractor(data,'aaa')","objs(saliency)")
+        table_udf = table.cross_apply("SaliencyFeatureExtractor(data,'BLOOD')","objs(simiarity)")
         table_udf.df()
         a=0
         
