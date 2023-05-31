@@ -133,8 +133,11 @@ class FunctionExpression(AbstractExpression):
         with self._stats.timer:
             # apply the function and project the required columns
             outcomes = self._apply_function_expression(func, batch, **kwargs)
-            outcomes = outcomes.project(self.projection_columns)
-            outcomes.modify_column_alias(self.alias)
+
+            # process outcomes only if output is not empty
+            if outcomes.frames.empty is False:
+                outcomes = outcomes.project(self.projection_columns)
+                outcomes.modify_column_alias(self.alias)
 
         # record the number of function calls
         self._stats.num_calls += len(batch)
