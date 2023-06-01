@@ -108,7 +108,8 @@ class LogicalProjectToPhysical(Rule):
                 project_plan.append_child(child)
             yield project_plan
         else:
-            parallelism = 2 if len(Context().gpus) > 1 else 1
+            parallelism = 4
+            print("Optimizer DOP", parallelism)
             ray_parallel_env_conf_dict = [
                 {"CUDA_VISIBLE_DEVICES": str(i)} for i in range(parallelism)
             ]

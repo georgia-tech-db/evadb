@@ -79,6 +79,7 @@ class ExchangeExecutor(AbstractExecutor):
 
         # Parallel the inner executor.
         ray_parallel_task_list = []
+        print("Executor DOP", self.parallelism)
         for i in range(self.parallelism):
             ray_parallel_task_list.append(
                 ray_parallel.remote(
