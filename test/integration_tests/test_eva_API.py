@@ -28,17 +28,6 @@ class EVAAPITests(unittest.TestCase):
         # reset the catalog manager before running each test
         CatalogManager().reset()
 
-    # async def get_connection_async(self):
-    #     reader, writer = await asyncio.open_connection(host="127.0.0.1", port=8803)
-    #     return reader, writer
-
-    def tearDown(self):
-        # reader, writer = get_connection_async()
-        connection = AsyncMock()
-        cursor = EVACursor(connection)
-        drop = cursor.query("DROP TABLE IF  EXISTS PDFss")
-        drop.execute()
-
     def test_udf_eva_api(self):
         pdf_path = f"{EVA_ROOT_DIR}/data/documents/state_of_the_union.pdf"
 
