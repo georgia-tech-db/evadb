@@ -40,6 +40,8 @@ class HuggingFaceTests(unittest.TestCase):
         query = """LOAD VIDEO 'data/sample_videos/touchdown.mp4' INTO VIDEOS"""
         execute_query_fetch_all(self.evadb, query)
 
+        query = """LOAD PDF 'data/documents/pdf_sample1.pdf' INTO MyPDFs;"""
+        execute_query_fetch_all(query)
         # Text CSV for testing HF Text Based Models
         self.csv_file_path = create_text_csv()
 
@@ -355,6 +357,56 @@ class HuggingFaceTests(unittest.TestCase):
                 isinstance(x, float) for x in output.frames[udf_name.lower() + ".score"]
             )
         )
+
+        drop_udf_query = f"DROP UDF {udf_name};"
+        execute_query_fetch_all(self.evadb, drop_udf_query)
+
+    @pytest.mark.benchmark
+    def test_named_entity_recognition_model_all_pdf_data(self):
+        udf_name = "HFNERModel"
+        create_udf_query = f"""CREATE UDF {udf_name}
+            TYPE HuggingFace
+            'task' 'ner'
+        """
+        execute_query_fetch_all(self.evadb, create_udf_query)
+
+        # running test case on all the pdf data
+        select_query = f"SELECT data, {udf_name}(data) FROM MyPDFs;"
+        output = execute_query_fetch_all(self.evadb, select_query)
+
+        # Test that output has 7 columns
+        self.assertEqual(len(output.frames.columns), 7)
+
+        # Test that there exists a column with udf_name.entity
+        self.assertTrue(udf_name.lower() + ".entity" in output.frames.columns)
+
+        # Test that there exists a column with udf_name.score
+        self.assertTrue(udf_name.lower() + ".score" in output.frames.columns)
+
+        drop_udf_query = f"DROP UDF {udf_name};"
+        execute_query_fetch_all(self.evadb, drop_udf_query)
+
+    @pytest.mark.benchmark
+    def test_named_entity_recognition_model_no_ner_data_exists(self):
+        udf_name = "HFNERModel"
+        create_udf_query = f"""CREATE UDF {udf_name}
+            TYPE HuggingFace
+            'task' 'ner'
+        """
+        execute_query_fetch_all(self.evadb, create_udf_query)
+
+        # running test case where ner gives no data
+        select_query = f"""SELECT data, {udf_name}(data)
+                  FROM MyPDFs
+                  WHERE page = 3
+                  AND paragraph >= 1 AND paragraph <= 3;"""
+        output = execute_query_fetch_all(select_query)
+
+        # Test that output only has 1 column (data)
+        self.assertEqual(len(output.frames.columns), 1)
+
+        # Test that there does not exist a column with udf_name.entity
+        self.assertFalse(udf_name.lower() + ".entity" in output.frames.columns)
 
         drop_udf_query = f"DROP UDF {udf_name};"
         execute_query_fetch_all(self.evadb, drop_udf_query)
