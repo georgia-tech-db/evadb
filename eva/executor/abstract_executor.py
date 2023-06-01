@@ -35,8 +35,8 @@ class AbstractExecutor(ABC):
     def __init__(self, db: EVADB, node: AbstractPlan):
         self._db = db
         self._node = node
-        self._catalog: CatalogManager = db.catalog
-        self._config: ConfigurationManager = db.config
+        self._catalog: CatalogManager = db.catalog if db else None
+        self._config: ConfigurationManager = db.config if db else None
         self._children = []
 
     def append_child(self, child: AbstractExecutor):
