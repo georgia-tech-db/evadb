@@ -39,7 +39,8 @@ from eva.udfs.gpu_compatible import GPUCompatible
 
 try:
     nlp = spacy.load("en_core_web_lg")
-except :
+except Exception as e:
+    print(e)
     import spacy.cli
 
     spacy.cli.download("en_core_web_lg")
