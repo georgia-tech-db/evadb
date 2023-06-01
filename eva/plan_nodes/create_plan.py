@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import List
-
 from eva.catalog.models.column_catalog import ColumnCatalogEntry
+
 from eva.parser.table_ref import TableInfo
 from eva.plan_nodes.abstract_plan import AbstractPlan
 from eva.plan_nodes.types import PlanOprType

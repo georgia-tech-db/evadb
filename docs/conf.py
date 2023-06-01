@@ -29,7 +29,6 @@ extensions = [
     "sphinx_click.ext",
     "sphinx-jsonschema",
     "sphinx_copybutton",
-    "sphinx_sitemap",
     "sphinx.ext.doctest",
     "sphinx.ext.coverage",
     "sphinx.ext.autosectionlabel",

@@ -1,12 +1,10 @@
-.. _guide-getstarted:
-
 Getting Started
 ====
 
-Part 1: Install EVA
+Step 1: Install EVA
 ----
 
-EVA supports Python (versions >= 3.7). To install EVA, we recommend using the pip package manager:
+EVA supports Python (versions >= 3.8). To install EVA, we recommend using the pip package manager:
 
 .. code-block:: bash
 
@@ -16,21 +14,13 @@ EVA supports Python (versions >= 3.7). To install EVA, we recommend using the pi
 Launch EVA server
 ----
 
-EVA is based on a `client-server architecture <https://www.postgresql.org/docs/15/tutorial-arch.html>`_. 
-
-To launch the EVA server using the pip package, run the following command on the terminal:
+EVA is based on a `client-server architecture <https://www.postgresql.org/docs/15/tutorial-arch.html>`_. To launch the EVA server using the pip package, run the following command on the terminal:
 
 .. code-block:: bash
 
     eva_server &
 
-You can also launch the EVA server using Docker either locally or on a server with GPUs:
-
-.. code-block:: bash
-
-    docker run --name eva_server --gpus all -p 8803:8803 evadbai/evaserver
-
-Part 2: Start a Jupyter Notebook Client
+Step 2: Start a Jupyter Notebook Client
 ----
 
 Here is an `illustrative Jupyter notebook <https://evadb.readthedocs.io/en/stable/source/tutorials/01-mnist.html>`_ focusing on MNIST image classification using EVA. The notebook works on `Google Colab <https://colab.research.google.com/github/georgia-tech-db/eva/blob/master/tutorials/01-mnist.ipynb>`_. 
@@ -38,7 +28,7 @@ Here is an `illustrative Jupyter notebook <https://evadb.readthedocs.io/en/stabl
 Connect to the EVA server
 ~~~~
 
-To connect to the EVA server in the notebook, use the following Python code:
+Connect to the EVA server in the notebook using the following code:
 
 .. code-block:: python
 
@@ -62,7 +52,7 @@ Download the MNIST video for analysis.
 
     !wget -nc https://www.dropbox.com/s/yxljxz6zxoqu54v/mnist.mp4
 
-Use the LOAD statement is used to load a video onto a table in EVA server. 
+Use the LOAD statement to load a video onto a table in EVA server. 
 
 .. code-block:: python
 
@@ -70,34 +60,14 @@ Use the LOAD statement is used to load a video onto a table in EVA server.
     response = cursor.fetch_all()
     print(response)
 
-Part 3: Register an user-defined function (UDF)
+Step 3: Run an AI Query on the loaded video
 ----
 
-User-defined functions allow us to combine SQL with deep learning models. These functions wrap around deep learning models.
-
-Download the user-defined function for classifying MNIST images.
-
-.. code-block:: bash
-
-    !wget -nc https://raw.githubusercontent.com/georgia-tech-db/eva/master/tutorials/apps/mnist/eva_mnist_udf.py
+User-defined functions (UDFs) allow us to combine SQL with AI models. These functions wrap around AI models. In this query, we use the `MnistImageClassifier` UDF that wraps around a model trained for classifying `MNIST` images.
 
 .. code-block:: python
 
-    cursor.execute("""CREATE UDF IF NOT EXISTS MnistCNN
-                      INPUT  (data NDARRAY (3, 28, 28))
-                      OUTPUT (label TEXT(2))
-                      TYPE  Classification
-                      IMPL  'eva_mnist_udf.py';
-                    """)
-    response = cursor.fetch_all()
-    print(response)
-
-Run a query using the newly registered UDF!
-~~~~
-
-.. code-block:: python
-
-    cursor.execute("""SELECT data, MnistCNN(data).label 
+    cursor.execute("""SELECT data, MnistImageClassifier(data).label 
                       FROM MNISTVideoTable
                       WHERE id = 30;""")
     response = cursor.fetch_all()
@@ -107,3 +77,4 @@ Visualize the output
 
 The output of the query is `visualized in the notebook <https://evadb.readthedocs.io/en/stable/source/tutorials/01-mnist.html#visualize-output-of-query-on-the-video>`_.
 
+.. image:: https://evadb.readthedocs.io/en/stable/_images/01-mnist_15_0.png

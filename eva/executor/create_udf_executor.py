@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -101,7 +101,6 @@ class CreateUDFExecutor(AbstractExecutor):
         if catalog_manager.get_udf_catalog_entry_by_name(self.node.name):
             if self.node.if_not_exists:
                 msg = f"UDF {self.node.name} already exists, nothing added."
-                logger.warn(msg)
                 yield Batch(pd.DataFrame([msg]))
                 return
             else:

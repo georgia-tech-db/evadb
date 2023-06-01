@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ class PDFReader(AbstractReader):
 
     def _read(self) -> Iterator[Dict]:
         import fitz
+
         doc = fitz.open(self.file_url)
 
         # PAGE ID, PARAGRAPH ID, STRING
@@ -38,7 +39,7 @@ class PDFReader(AbstractReader):
             # iterate through the text blocks
             for paragraph_no, b in enumerate(blocks):
                 # this block contains text
-                if b['type'] == 0:
+                if b["type"] == 0:
                     # text found in block
                     block_string = ""
                     # iterate through the text lines
@@ -46,8 +47,10 @@ class PDFReader(AbstractReader):
                         # iterate through the text spans
                         for span in lines["spans"]:
                             # removing whitespaces:
-                            if span['text'].strip():
-                                block_string += span['text']
-                    yield {"page": page_no + 1,
-                           "paragraph": paragraph_no + 1,
-                           "data": block_string}
+                            if span["text"].strip():
+                                block_string += span["text"]
+                    yield {
+                        "page": page_no + 1,
+                        "paragraph": paragraph_no + 1,
+                        "data": block_string,
+                    }

@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ class CreateTable:
         table_info = None
         if_not_exists = False
         create_definitions = []
+        query = None
 
         for child in tree.children:
             if isinstance(child, Tree):
@@ -45,9 +46,11 @@ class CreateTable:
                     table_info = self.visit(child)
                 elif child.data == "create_definitions":
                     create_definitions = self.visit(child)
+                elif child.data == "simple_select":
+                    query = self.visit(child)
 
         create_stmt = CreateTableStatement(
-            table_info, if_not_exists, create_definitions
+            table_info, if_not_exists, create_definitions, query=query
         )
         return create_stmt
 
@@ -247,19 +250,10 @@ class CreateTable:
                 elif child.data == "simple_select":
                     query = self.visit(child)
 
-        # setting all other column definition attributes as None,
-        # need to figure from query
-        if uid_list == []:
-            assert (query is not None)
-            for uid in query.target_list:
-                uid_list.append(uid)
-
-        col_list = []
-        for uid in uid_list:
-            if hasattr(uid, "col_name"):
-                col_list.append(ColumnDefinition(uid.col_name, None, None, None))
-            elif hasattr(uid, "output"):
-                col_list.append(ColumnDefinition(uid.output, None, None, None))
+        # When uid_list is empty, the column information is inferred from the subquery in the binder.
+        col_list = [
+            ColumnDefinition(uid.col_name, None, None, None) for uid in uid_list
+        ]
         return CreateMaterializedViewStatement(
             view_info, col_list, if_not_exists, query
         )

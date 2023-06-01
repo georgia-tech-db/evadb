@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -134,28 +134,13 @@ def get_pdf_table_column_definitions() -> List[ColumnDefinition]:
     """
     name: pdf name
     page: page no
-    paragrph: paragraph no
+    paragraph: paragraph no
     data: pdf paragraph data
     """
     columns = [
-        ColumnDefinition(
-            PDFColumnName.name.name,
-            ColumnType.TEXT,
-            None,
-            None
-        ),
-        ColumnDefinition(
-            PDFColumnName.page.name,
-            ColumnType.INTEGER,
-            None,
-            None
-        ),
-        ColumnDefinition(
-            PDFColumnName.paragraph.name,
-            ColumnType.INTEGER,
-            None,
-            None
-        ),
+        ColumnDefinition(PDFColumnName.name.name, ColumnType.TEXT, None, None),
+        ColumnDefinition(PDFColumnName.page.name, ColumnType.INTEGER, None, None),
+        ColumnDefinition(PDFColumnName.paragraph.name, ColumnType.INTEGER, None, None),
         ColumnDefinition(
             PDFColumnName.data.name,
             ColumnType.TEXT,

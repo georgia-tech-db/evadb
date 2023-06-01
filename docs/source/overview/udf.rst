@@ -1,23 +1,25 @@
-.. _guide-getstarted:
-
-User-Defined Functions (UDF)
+User-Defined Function
 ====
 
-User-defined functions allow us to combine SQL with deep learning models. These functions wrap around deep learning models.
+User-defined functions (UDFs) allow us to combine SQL with deep learning models. These functions wrap around deep learning models.
 
-Download an illustrative user-defined function for classifying MNIST images.
+Here is an illustrative UDF for classifying MNIST images.
 
 .. code-block:: bash
 
-    !wget -nc https://raw.githubusercontent.com/georgia-tech-db/eva/master/tutorials/apps/mnist/eva_mnist_udf.py
+    !wget -nc https://raw.githubusercontent.com/georgia-tech-db/eva/master/eva/udfs/mnist_image_classifier.py
 
 .. code-block:: python
 
-    cursor.execute("""CREATE UDF IF NOT EXISTS MnistCNN
+    cursor.execute("""DROP UDF IF EXISTS MnistImageClassifier;""")
+    response = cursor.fetch_all()
+    print(response)
+
+    cursor.execute("""CREATE UDF IF NOT EXISTS MnistImageClassifier
                       INPUT  (data NDARRAY (3, 28, 28))
                       OUTPUT (label TEXT(2))
                       TYPE  Classification
-                      IMPL  'eva_mnist_udf.py';
+                      IMPL  'mnist_image_classifier.py';
                     """)
     response = cursor.fetch_all()
     print(response)
@@ -27,7 +29,7 @@ Run a query using the newly registered UDF!
 
 .. code-block:: python
 
-    cursor.execute("""SELECT data, MnistCNN(data).label 
+    cursor.execute("""SELECT data, MnistImageClassifier(data).label 
                       FROM MNISTVideoTable
                       WHERE id = 30;""")
     response = cursor.fetch_all()

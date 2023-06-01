@@ -1,17 +1,34 @@
+# coding=utf-8
+# Copyright 2018-2023 EVA
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+from collections import OrderedDict
+
 import pandas as pd
-from torch import Tensor
 import torch
-from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
-from eva.models.catalog.frame_info import FrameInfo
-from eva.models.catalog.properties import ColorSpace
-from torchvision.transforms import Compose, ToTensor, Normalize, Grayscale
+import torch.nn as nn
+import torch.utils.model_zoo as model_zoo
 from PIL import Image
+from torch import Tensor
+from torchvision.transforms import Compose, Grayscale, Normalize, ToTensor
+
+from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
 
 
-class MnistCNN(PytorchAbstractClassifierUDF):
+class MnistImageClassifier(PytorchAbstractClassifierUDF):
     @property
     def name(self) -> str:
-        return "MnistCNN"
+        return "MnistImageClassifier"
 
     def setup(self):
         self.model = mnist(pretrained=True)
@@ -41,10 +58,6 @@ class MnistCNN(PytorchAbstractClassifierUDF):
 
         return pd.DataFrame(outcome, columns=["label"])
 
-
-import torch.nn as nn
-from collections import OrderedDict
-import torch.utils.model_zoo as model_zoo
 
 model_urls = {
     "mnist": "http://ml.cs.tsinghua.edu.cn/~chenxi/pytorch-models/mnist-b07bb66b.pth"  # noqa

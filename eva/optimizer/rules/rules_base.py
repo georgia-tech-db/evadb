@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -64,6 +64,7 @@ class RuleType(Flag):
     LOGICAL_DELETE_TO_PHYSICAL = auto()
     LOGICAL_LOAD_TO_PHYSICAL = auto()
     LOGICAL_CREATE_TO_PHYSICAL = auto()
+    LOGICAL_CREATE_FROM_SELECT_TO_PHYSICAL = auto()
     LOGICAL_RENAME_TO_PHYSICAL = auto()
     LOGICAL_DROP_TO_PHYSICAL = auto()
     LOGICAL_CREATE_UDF_TO_PHYSICAL = auto()
@@ -108,6 +109,7 @@ class Promise(IntEnum):
     LOGICAL_DROP_TO_PHYSICAL = auto()
     LOGICAL_LOAD_TO_PHYSICAL = auto()
     LOGICAL_CREATE_TO_PHYSICAL = auto()
+    LOGICAL_CREATE_FROM_SELECT_TO_PHYSICAL = auto()
     LOGICAL_CREATE_UDF_TO_PHYSICAL = auto()
     LOGICAL_SAMPLE_TO_UNIFORMSAMPLE = auto()
     LOGICAL_GET_TO_SEQSCAN = auto()

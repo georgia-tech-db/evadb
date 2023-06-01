@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ def ray_wait_and_alert(tasks: List[ray.ObjectRef], queue: Queue):
 # control GPU resource ourselves by configuring the environmental variables
 # when the job enters the Ray process. Due to that, resource release is not
 # cleanly done on the Ray side, we need to set this to prevent memory leak.
-# More detailed explaination can be found in
+# More detailed explanation can be found in
 # https://github.com/georgia-tech-db/eva/pull/731
 @ray.remote(max_calls=1)
 def ray_parallel(

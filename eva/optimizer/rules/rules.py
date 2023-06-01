@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -701,6 +701,25 @@ class LogicalCreateToPhysical(Rule):
 
     def apply(self, before: LogicalCreate, context: OptimizerContext):
         after = CreatePlan(before.video, before.column_list, before.if_not_exists)
+        yield after
+
+
+class LogicalCreateFromSelectToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALCREATE)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_CREATE_FROM_SELECT_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_CREATE_FROM_SELECT_TO_PHYSICAL
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalCreate, context: OptimizerContext):
+        after = CreatePlan(before.video, before.column_list, before.if_not_exists)
+        for child in before.children:
+            after.append_child(child)
         yield after
 
 

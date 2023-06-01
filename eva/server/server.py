@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -36,18 +36,17 @@ class EvaServer:
         hostname: hostname of the server
         port: port of the server
         """
-        logger.info("Start Server")
-        print(f"EVA Server started at host {host} and port {port}", flush=True)
+        logger.warn(f"EVA server started at host {host} and port {port}")
 
         self._server = await asyncio.start_server(self.accept_client, host, port)
 
         async with self._server:
             await self._server.serve_forever()
 
-        logger.info("Successfully shutdown server")
+        logger.warn("EVA server stopped")
 
     async def stop_eva_server(self):
-        logger.info("Stop server")
+        logger.warn("EVA server stopped")
         if self._server is not None:
             await self._server.close()
 
@@ -83,6 +82,7 @@ class EvaServer:
 
                 logger.debug("Handle request")
                 from eva.server.command_handler import handle_request
+
                 asyncio.create_task(handle_request(client_writer, message))
 
         except Exception as e:
