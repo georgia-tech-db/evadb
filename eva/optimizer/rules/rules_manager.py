@@ -119,9 +119,17 @@ class RulesManager:
 
         ray_enabled = ConfigurationManager().get_value("experimental", "ray")
         if ray_enabled:
-            self._implementation_rules.extend([LogicalExchangeToPhysical(), LogicalApplyAndMergeToRayPhysical(), LogicalProjectToRayPhysical()])
+            self._implementation_rules.extend(
+                [
+                    LogicalExchangeToPhysical(),
+                    LogicalApplyAndMergeToRayPhysical(),
+                    LogicalProjectToRayPhysical(),
+                ]
+            )
         else:
-            self._implementation_rules.extend([LogicalApplyAndMergeToPhysical(), LogicalProjectToPhysical()])
+            self._implementation_rules.extend(
+                [LogicalApplyAndMergeToPhysical(), LogicalProjectToPhysical()]
+            )
         self._all_rules = (
             self._stage_one_rewrite_rules
             + self._stage_two_rewrite_rules

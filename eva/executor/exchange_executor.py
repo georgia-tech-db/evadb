@@ -24,8 +24,8 @@ from eva.executor.ray_utils import (
     ray_pull,
     ray_wait_and_alert,
 )
-from eva.plan_nodes.exchange_plan import ExchangePlan
 from eva.models.storage.batch import Batch
+from eva.plan_nodes.exchange_plan import ExchangePlan
 
 
 class QueueReaderExecutor(AbstractExecutor):
