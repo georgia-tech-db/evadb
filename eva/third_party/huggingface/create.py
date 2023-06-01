@@ -87,6 +87,7 @@ def sample_image():
     draw.ellipse(circle_bbox, fill="yellow")
     return pd.DataFrame({"data": [np.array(image)]})
 
+
 def sample_audio():
     duration_ms, sample_rate = 1000, 16000
     num_samples = int(duration_ms * sample_rate / 1000)
@@ -121,7 +122,7 @@ def infer_output_name_and_type(udf_metadata: List[UdfMetadataCatalogEntry]):
     model_input = gen_sample_input(input_type)
 
     # Create anomymous class to initialize udf
-    udf_object = type('', (object,), {'metadata': udf_metadata})()
+    udf_object = type("", (object,), {"metadata": udf_metadata})()
 
     # Get the model and run the model on the input
     udf = MODEL_FOR_TASK[task](udf_object)
@@ -194,7 +195,10 @@ def io_entry_for_outputs(udf_outputs: Dict[str, Type]):
         )
     return outputs
 
-def gen_hf_io_catalog_entries(udf_name: str, udf_metadata: List[UdfMetadataCatalogEntry]):
+
+def gen_hf_io_catalog_entries(
+    udf_name: str, udf_metadata: List[UdfMetadataCatalogEntry]
+):
     """
     Generates IO Catalog Entries for a HuggingFace UDF.
     The attributes of the huggingface model can be extracted from metadata.

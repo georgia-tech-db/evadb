@@ -185,7 +185,6 @@ class HuggingFaceTests(unittest.TestCase):
         self.assertEqual(output.frames.columns[0], udf_name.lower() + ".timestamp")
         self.assertEqual(output.frames.columns[1], udf_name.lower() + ".text")
 
-
     @pytest.mark.benchmark
     def test_text_classification(self):
         create_table_query = """CREATE TABLE IF NOT EXISTS MyCSV (

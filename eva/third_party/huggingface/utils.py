@@ -18,6 +18,7 @@ from typing import List
 
 from eva.catalog.models.udf_metadata_catalog import UdfMetadataCatalogEntry
 
+
 def literal_eval_with_default(value: str):
     """
     Helper function to evaluate a string as a python literal.
@@ -27,7 +28,8 @@ def literal_eval_with_default(value: str):
         return ast.literal_eval(value)
     except (ValueError, SyntaxError):
         return value
-    
+
+
 def split_args_from_metadata(metadata: List[UdfMetadataCatalogEntry]):
     """
     Split the metadata into udf definition args and udf inference args.
