@@ -15,8 +15,8 @@
 from typing import Dict, List, Type, Union
 
 import numpy as np
+import pandas as pd
 from PIL import Image, ImageDraw
-from transformers import pipeline
 
 from eva.catalog.catalog_type import ColumnType, NdArrayType
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
@@ -28,6 +28,7 @@ from eva.third_party.huggingface.model import (
     ImageHFModel,
     TextHFModel,
 )
+from eva.third_party.huggingface.utils import split_args_from_metadata
 
 """
 We currently support the following tasks from HuggingFace.
@@ -67,7 +68,7 @@ MODEL_FOR_TASK = {
 
 
 def sample_text():
-    return "My name is Sarah and I live in London"
+    return pd.DataFrame({"text": ["My name is Sarah and I live in London"]})
 
 
 def sample_image():
@@ -84,14 +85,13 @@ def sample_image():
         circle_center[1] + circle_radius,
     )
     draw.ellipse(circle_bbox, fill="yellow")
-    return image
-
+    return pd.DataFrame({"data": [np.array(image)]})
 
 def sample_audio():
     duration_ms, sample_rate = 1000, 16000
     num_samples = int(duration_ms * sample_rate / 1000)
     audio_data = np.random.rand(num_samples)
-    return audio_data
+    return pd.DataFrame({"audio": [audio_data]})
 
 
 def gen_sample_input(input_type: HFInputTypes):
@@ -104,23 +104,28 @@ def gen_sample_input(input_type: HFInputTypes):
     assert False, "Invalid Input Type for UDF"
 
 
-def infer_output_name_and_type(**pipeline_args):
+def infer_output_name_and_type(udf_metadata: List[UdfMetadataCatalogEntry]):
     """
     Infer the name and type for each output of the HuggingFace UDF
     """
-    assert "task" in pipeline_args, "Task Not Found In Model Definition"
-    task = pipeline_args["task"]
+    udf_def_args, _ = split_args_from_metadata(udf_metadata)
+
+    assert "task" in udf_def_args, "Task Not Found In Model Definition"
+    task = udf_def_args["task"]
     assert (
         task in INPUT_TYPE_FOR_SUPPORTED_TASKS
     ), f"Task {task} not supported in EVA currently"
 
-    # Construct the pipeline
-    pipe = pipeline(**pipeline_args)
-
-    # Run the pipeline through a dummy input to get a sample output
+    # Get a dummy input
     input_type = INPUT_TYPE_FOR_SUPPORTED_TASKS[task]
     model_input = gen_sample_input(input_type)
-    model_output = pipe(model_input)
+
+    # Create anomymous class to initialize udf
+    udf_object = type('', (object,), {'metadata': udf_metadata})()
+
+    # Get the model and run the model on the input
+    udf = MODEL_FOR_TASK[task](udf_object)
+    model_output = udf(model_input)
 
     # Get a dictionary of output names and types from the output
     output_types = {}
@@ -189,14 +194,12 @@ def io_entry_for_outputs(udf_outputs: Dict[str, Type]):
         )
     return outputs
 
-
-def gen_hf_io_catalog_entries(udf_name: str, metadata: List[UdfMetadataCatalogEntry]):
+def gen_hf_io_catalog_entries(udf_name: str, udf_metadata: List[UdfMetadataCatalogEntry]):
     """
     Generates IO Catalog Entries for a HuggingFace UDF.
     The attributes of the huggingface model can be extracted from metadata.
     """
-    pipeline_args = {arg.key: arg.value for arg in metadata}
-    udf_input, udf_output = infer_output_name_and_type(**pipeline_args)
+    udf_input, udf_output = infer_output_name_and_type(udf_metadata)
     annotated_inputs = io_entry_for_inputs(udf_name, udf_input)
     annotated_outputs = io_entry_for_outputs(udf_output)
     return annotated_inputs + annotated_outputs

@@ -166,6 +166,26 @@ class HuggingFaceTests(unittest.TestCase):
         drop_udf_query = f"DROP UDF {udf_name};"
         execute_query_fetch_all(drop_udf_query)
 
+    def test_inference_parameters(self):
+        udf_name = "SpeechRecognizer"
+        create_udf = (
+            f"CREATE UDF {udf_name} TYPE HuggingFace "
+            "'task' 'automatic-speech-recognition'"
+            "'model' 'openai/whisper-base'"
+            "'INFERENCE_return_timestamps' 'True';"
+        )
+        execute_query_fetch_all(create_udf)
+
+        select_query = f"SELECT {udf_name}(audio) FROM VIDEOS;"
+        output = execute_query_fetch_all(select_query)
+
+        # Test that output returned two columns, one is the text and the other is the timestamps
+        # Verify names of columns as well
+        self.assertEqual(len(output.frames.columns), 2)
+        self.assertEqual(output.frames.columns[0], udf_name.lower() + ".timestamp")
+        self.assertEqual(output.frames.columns[1], udf_name.lower() + ".text")
+
+
     @pytest.mark.benchmark
     def test_text_classification(self):
         create_table_query = """CREATE TABLE IF NOT EXISTS MyCSV (

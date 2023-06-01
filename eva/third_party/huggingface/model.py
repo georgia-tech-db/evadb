@@ -82,3 +82,9 @@ class ASRHFModel(AudioHFModel):
         return {
             "chunk_length_s": 30,
         }
+
+    def output_formatter(self, outputs: Any):
+        # If the model is run with return_timestamps=True, the data is stored in a key called "chunks"
+        if "chunks" in outputs:
+            return super().output_formatter(outputs["chunks"])
+        return super().output_formatter(outputs)

@@ -18,6 +18,7 @@ import pandas as pd
 from transformers import pipeline
 
 from eva.catalog.models.udf_catalog import UdfCatalogEntry
+from eva.third_party.huggingface.utils import split_args_from_metadata
 from eva.udfs.abstract.abstract_udf import AbstractUDF
 from eva.udfs.gpu_compatible import GPUCompatible
 
@@ -43,14 +44,11 @@ class AbstractHFUdf(AbstractUDF, GPUCompatible):
 
     def __init__(self, udf_obj: UdfCatalogEntry, device: int = -1, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        pipeline_args = self.default_pipeline_args
-        for entry in udf_obj.metadata:
-            if entry.value.isnumeric():
-                pipeline_args[entry.key] = int(entry.value)
-            else:
-                pipeline_args[entry.key] = entry.value
+        udf_def_args, udf_inf_args = split_args_from_metadata(udf_obj.metadata)
+        pipeline_args = {**self.default_pipeline_args, **udf_def_args}
         self.pipeline_args = pipeline_args
-        self.hf_udf_obj = pipeline(**pipeline_args, device=device)
+        self.forward_args = udf_inf_args
+        self.hf_udf_obj = pipeline(**self.pipeline_args, device=device)
 
     def setup(self, *args, **kwargs) -> None:
         super().setup(*args, **kwargs)
@@ -94,7 +92,7 @@ class AbstractHFUdf(AbstractUDF, GPUCompatible):
 
     def forward(self, inputs, *args, **kwargs) -> pd.DataFrame:
         hf_input = self.input_formatter(inputs)
-        hf_output = self.hf_udf_obj(hf_input, *args, **kwargs)
+        hf_output = self.hf_udf_obj(hf_input, *args, **self.forward_args, **kwargs)
         eva_output = self.output_formatter(hf_output)
         return eva_output
 
