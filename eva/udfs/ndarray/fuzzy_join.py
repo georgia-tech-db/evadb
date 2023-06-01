@@ -19,7 +19,6 @@ from eva.udfs.abstract.abstract_udf import AbstractUDF
 
 
 class FuzzDistance(AbstractUDF):
-    @setup(parallelizable=True)
     def setup(self):
         pass
 

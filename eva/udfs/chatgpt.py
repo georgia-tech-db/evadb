@@ -38,7 +38,7 @@ class ChatGPT(AbstractUDF):
     def name(self) -> str:
         return "ChatGPT"
 
-    @setup(cacheable=False, udf_type="chat-completion", batchable=True, parallelizable=False)
+    @setup(cacheable=False, udf_type="chat-completion", batchable=True)
     def setup(
         self,
         model="gpt-3.5-turbo",

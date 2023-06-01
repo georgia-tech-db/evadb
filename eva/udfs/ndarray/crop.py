@@ -16,11 +16,9 @@ import numpy as np
 import pandas as pd
 
 from eva.udfs.abstract.abstract_udf import AbstractUDF
-from eva.udfs.decorators.decorators import forward, setup
 
 
 class Crop(AbstractUDF):
-    @setup(parallelizable=False)
     def setup(self):
         pass
 

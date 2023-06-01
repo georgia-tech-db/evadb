@@ -22,7 +22,6 @@ class Similarity(AbstractUDF):
     def _get_distance(self, numpy_distance):
         return numpy_distance[0][0]
 
-    @setup(parallelizable=True)
     def setup(self):
         pass
 

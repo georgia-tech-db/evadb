@@ -17,11 +17,9 @@ import numpy as np
 import pandas as pd
 
 from eva.udfs.abstract.abstract_udf import AbstractUDF
-from eva.udfs.decorators.decorators import forward, setup
 
 
 class Open(AbstractUDF):
-    @setup(parallelizable=True)
     def setup(self):
         # cache data to avoid expensive open files on disk
         self._data_cache = dict()
