@@ -53,10 +53,10 @@ workflows:
             v: "3.10"
             mode: "LINTER"
         ### RAY
-        #- Linux:
-        #    name: "Test | Ray | v3.10 | Linux"
-        #    v: "3.10"
-        #    mode: "RAY"
+        - Linux:
+            name: "Test | Coverage | v3.10 | Linux"
+            v: "3.10"
+            mode: "COV"
         - Windows:
             name: "Windows | v3.10"
         # test_create_index_doesn't work on MacOS
@@ -96,16 +96,16 @@ jobs:
             source test_evadb/bin/activate
             pip install ".[dev]"
 
-      # Enable Ray conditionally
-      #- when:
-      #    condition: 
-      #      equal: [ RAY, << parameters.mode >> ]
-      #    steps:
-      #      - run:
-      #          name: Enable Ray setting in the config.yml file
-      #          command: |
-      #            source test_evadb/bin/activate
-      #            python -c "import yaml;f = open('eva/eva.yml', 'r+');config_obj = yaml.load(f, Loader=yaml.FullLoader);config_obj['experimental']['ray'] = True;f.seek(0);f.write(yaml.dump(config_obj));f.truncate();"
+      # Disable Ray for Coverage
+      - when:
+          condition:
+            equal: [ COV, << parameters.mode >> ]
+          steps:
+            - run:
+                name: Disable Ray setting in the config.yml file
+                command: |
+                  source test_evadb/bin/activate
+                  python -c "import yaml;f = open('eva/eva.yml', 'r+');config_obj = yaml.load(f, Loader=yaml.FullLoader);config_obj['experimental']['ray'] = False;f.seek(0);f.write(yaml.dump(config_obj));f.truncate();"
 
       - run:
           name: Test and upload coverage report to coveralls
