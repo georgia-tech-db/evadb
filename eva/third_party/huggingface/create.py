@@ -41,6 +41,7 @@ INPUT_TYPE_FOR_SUPPORTED_TASKS = {
     "translation": HFInputTypes.TEXT,
     "text2text-generation": HFInputTypes.TEXT,
     "text-generation": HFInputTypes.TEXT,
+    "ner": HFInputTypes.TEXT,
     "image-classification": HFInputTypes.IMAGE,
     "image-segmentation": HFInputTypes.IMAGE,
     "image-to-text": HFInputTypes.IMAGE,
@@ -56,6 +57,7 @@ MODEL_FOR_TASK = {
     "translation": TextHFModel,
     "text2text-generation": TextHFModel,
     "text-generation": TextHFModel,
+    "ner": TextHFModel,
     "image-classification": ImageHFModel,
     "image-segmentation": ImageHFModel,
     "image-to-text": ImageHFModel,
@@ -65,7 +67,7 @@ MODEL_FOR_TASK = {
 
 
 def sample_text():
-    return "The cat is on the mat"
+    return "My name is Sarah and I live in London"
 
 
 def sample_image():
