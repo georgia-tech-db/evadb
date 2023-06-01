@@ -39,7 +39,7 @@ LOAD IMAGE FROM FILESYSTEM
    LOAD IMAGE 'test_image.jpg' INTO MyImage;
 
 Images are loaded similarity to videos, each tuple in an image table represents an image. EVA automatically generates 
-the following schema with two columns: ``id`` and ``data``, that correspond to the image's assigned id and the image data.
+the following schema with two columns: ``name`` and ``data``, that correspond to the image name and the image data.
 
 .. _4-load-the-csv-file:
 
