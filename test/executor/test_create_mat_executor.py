@@ -19,20 +19,21 @@ from mock import patch
 
 from eva.executor.create_mat_view_executor import CreateMaterializedViewExecutor
 from eva.executor.executor_utils import ExecutorError
-from eva.parser.table_ref import TableInfo, TableRef
+from eva.parser.table_ref import TableInfo
+from eva.parser.create_statement import ColumnDefinition
 from eva.plan_nodes.create_mat_view_plan import CreateMaterializedViewPlan
 from eva.plan_nodes.types import PlanOprType
 
 
 class CreateMaterializedExecutorTest(unittest.TestCase):
     @patch("eva.executor.create_mat_view_executor.handle_if_not_exists")
-    def test_support_only_seq_scan(self, mock_check):
+    def test_support_only_seq_scan_and_project(self, mock_check):
         mock_check.return_value = False
-        dummy_view = TableRef(TableInfo("dummy"))
-        columns = ["id", "id2"]
+        dummy_view = TableInfo("dummy")
+        columns = [ColumnDefinition("id", None, None, None)]
         plan = CreateMaterializedViewPlan(dummy_view, columns)
         for child_opr_type in PlanOprType:
-            if child_opr_type is PlanOprType.SEQUENTIAL_SCAN:
+            if child_opr_type in {PlanOprType.SEQUENTIAL_SCAN, PlanOprType.PROJECT}:
                 continue
             child = MagicMock()
             child.node.opr_type = child_opr_type
@@ -40,17 +41,3 @@ class CreateMaterializedExecutorTest(unittest.TestCase):
                 create_udf_executor = CreateMaterializedViewExecutor(plan)
                 create_udf_executor.append_child(child)
                 create_udf_executor.exec()
-
-    @patch("eva.executor.create_mat_view_executor.handle_if_not_exists")
-    def test_raises_mismatch_columns(self, mock_check):
-        mock_check.return_value = False
-        dummy_view = TableRef(TableInfo("dummy"))
-        columns = ["id", "id2"]
-        plan = CreateMaterializedViewPlan(dummy_view, columns)
-        child = MagicMock()
-        child.node.opr_type = PlanOprType.SEQUENTIAL_SCAN
-        child.project_expr.__len__.return_value = 3
-        with self.assertRaises(ExecutorError):
-            create_udf_executor = CreateMaterializedViewExecutor(plan)
-            create_udf_executor.append_child(child)
-            create_udf_executor.exec()

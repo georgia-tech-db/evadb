@@ -30,7 +30,7 @@ class AnnotateTests(unittest.TestCase):
     def test_annotate_name_exists(self):
         assert hasattr(self.annotate_instance, "name")
 
-    def test_should_annote(self):
+    def test_should_annotate(self):
         img = Image.open(
             f"{EVA_ROOT_DIR}/test/data/uadetrac/small-data/MVI_20011/img00001.jpg"
         )

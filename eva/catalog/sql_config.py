@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,8 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import os
-
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import scoped_session, sessionmaker
 
@@ -62,18 +60,7 @@ class SQLConfig:
         """
         uri = ConfigurationManager().get_value("core", "catalog_database_uri")
 
-        # to parallelize tests using pytest-xdist
-        def prefix_worker_id_to_uri(uri: str):
-            try:
-                worker_id = os.environ["PYTEST_XDIST_WORKER"]
-                base = "eva_catalog.db"
-                # eva_catalog.db -> test_gw1_eva_catalog.db
-                uri = uri.replace(base, "test_" + str(worker_id) + "_" + base)
-            except KeyError:
-                pass
-            return uri
-
-        self.worker_uri = prefix_worker_id_to_uri(str(uri))
+        self.worker_uri = str(uri)
         # set echo=True to log SQL
         self.engine = create_engine(self.worker_uri, isolation_level="SERIALIZABLE")
 

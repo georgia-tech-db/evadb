@@ -9,6 +9,8 @@ workflows:
     jobs:
         - Pip-PyPI
         - Pip-Local
+        - Docker-Local
+        - AWS
         #### UNIT TESTS
         - Linux:
             name: "Test | v3.8 | Linux"
@@ -89,8 +91,6 @@ jobs:
       - run:
           name: Install EVA package from GitHub repo with all dependencies
           command: |
-            sudo apt-get update
-            sudo apt-get install -y enchant-2 aspell
             "python<< parameters.v >>" -m venv test_evadb
             pip install --upgrade pip
             source test_evadb/bin/activate
@@ -192,3 +192,31 @@ jobs:
             pip install --upgrade pip
             pip install "."
             bash script/test/package.sh
+
+  Docker-Local:
+    resource_class: large
+    docker:
+      - image: cimg/base:2023.05
+
+    steps:
+      - setup_remote_docker
+      - checkout
+      - run:
+          name: Build EVA Docker image and start server
+          command: |
+            docker build -t evadb docker
+            timeout 30 docker run evadb || true
+
+  AWS:
+    resource_class: large
+    docker:
+      - image: cimg/aws:2023.05
+
+    steps:
+      - setup_remote_docker
+      - run:
+          name: Pull EVA Docker image and start server
+          command: |
+            aws --version
+            docker pull evadbai/evaserver
+            timeout 30 docker run evadbai/evaserver || true

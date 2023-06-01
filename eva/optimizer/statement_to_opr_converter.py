@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -244,6 +244,10 @@ class StatementToPlanConverter:
         create_opr = LogicalCreate(
             table_info, statement.column_list, statement.if_not_exists
         )
+
+        if statement.query is not None:
+            self.visit_select(statement.query)
+            create_opr.append_child(self._plan)
         self._plan = create_opr
 
     def visit_rename(self, statement: RenameTableStatement):

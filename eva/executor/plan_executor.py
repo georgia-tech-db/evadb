@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -174,5 +174,5 @@ class PlanExecutor:
                 yield from output
             self._clean_execution_tree(execution_tree)
         except Exception as e:
-            logger.error(str(e))
+            logger.exception(str(e))
             raise ExecutorError(e)

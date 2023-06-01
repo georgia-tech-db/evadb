@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -47,6 +47,8 @@ class StorageExecutor(AbstractExecutor):
                 return storage_engine.read(self.node.table)
             elif self.node.table.table_type == TableType.STRUCTURED_DATA:
                 return storage_engine.read(self.node.table, self.node.batch_mem_size)
+            elif self.node.table.table_type == TableType.PDF_DATA:
+                return storage_engine.read(self.node.table)
             else:
                 raise ExecutorError(
                     f"Unsupported TableType  {self.node.table.table_type} encountered"

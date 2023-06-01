@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ class ExchangePlan(AbstractPlan):
         self.parallelism = parallelism
         # Environment variables to configure in the remote process. The problem of Ray remote function
         # is that we cannot control which GPU to spawn the job. Second, Ray does not offer anything
-        # extra when specify GPU job. Just by giving environment variables like CUDA_VISIBLE_DEIVECS,
+        # extra when specify GPU job. Just by giving environment variables like CUDA_VISIBLE_DEVICES,
         # our system can have more control over the behavior of Ray.
         self.ray_parallel_env_conf_dict = ray_parallel_env_conf_dict
         self.ray_pull_env_conf_dict = ray_pull_env_conf_dict

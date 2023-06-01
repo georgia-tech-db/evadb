@@ -4,8 +4,10 @@ parts:
 
   - caption: Overview
     chapters:
-      - file: source/overview/aidb
       - file: source/overview/installation
+      - file: source/overview/command-line
+      - file: source/overview/udf
+      - file: source/overview/docker
 
   - caption: User Guides
     chapters:
@@ -39,6 +41,9 @@ parts:
           - file: source/reference/evaql/delete
           - file: source/reference/evaql/rename
 
+      - file: source/reference/python/api
+        title: Python APIs
+
       - file: source/reference/udf
         title: User-Defined Functions
         sections:
@@ -46,6 +51,7 @@ parts:
           - file: source/reference/udfs/hf
           - file: source/reference/udfs/openai
           - file: source/reference/udfs/custom
+            title: Custom User-Defined Function
 
 
       - file: source/reference/io
@@ -54,6 +60,7 @@ parts:
       - file: source/reference/gpu
         title: Configure GPU
 
+      
 
   - caption: Developer Guide
     chapters:

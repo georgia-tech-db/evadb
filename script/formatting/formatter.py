@@ -85,7 +85,7 @@ with open(ignored_words_file) as f:
 # ==============================================
 
 header = """# coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -172,7 +172,7 @@ def format_file(file_path, add_header, strip_header, format_code):
 
     # Do not add a header here
     # Releaser assumes the lines in the file to be related to version
-    if file_path.ends_with("version.py"):
+    if file_path.endswith("version.py"):
         return
 
     abs_path = os.path.abspath(file_path)
@@ -280,6 +280,8 @@ def check_notebook_format(notebook_file):
     return True
 
     # SKIP SPELL CHECK BY DEFAULT DUE TO PACKAGE DEPENDENCY
+    # Need to install enchant-2 and aspell packages
+    # apt-get install enchant-2 aspell
 
     import enchant
     from enchant.checker import SpellChecker
@@ -425,17 +427,19 @@ if __name__ == "__main__":
             notebook_file = os.path.join(EVA_NOTEBOOKS_DIR, file)
             check_notebook_format(notebook_file)
 
-    # GO OVER ALL DOCS
-    #LOG.info("ASPELL")
-    for elem in Path(EVA_DOCS_DIR).rglob('*.*'):
-        if elem.suffix == ".rst":
-            os.system(f"aspell --lang=en --personal='{ignored_words_file}' check {elem}")
-
-    os.system(f"aspell --lang=en --personal='{ignored_words_file}' check 'README.md'")
-
-
     # SKIP SPELLING TESTS OVER PYTHON FILES BY DEFAULT
     if args.spell_check:
+
+        # GO OVER ALL DOCS
+        # Install aspell
+        # apt-get install aspell
+        
+        #LOG.info("ASPELL")
+        for elem in Path(EVA_DOCS_DIR).rglob('*.*'):
+            if elem.suffix == ".rst":
+                os.system(f"aspell --lang=en --personal='{ignored_words_file}' check {elem}")
+
+        os.system(f"aspell --lang=en --personal='{ignored_words_file}' check 'README.md'")
 
         # CODESPELL
         #LOG.info("Codespell")

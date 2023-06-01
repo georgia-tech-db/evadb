@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -46,7 +46,6 @@ class DropExecutor(AbstractExecutor):
                 logger.warn(err_msg)
                 return Batch(pd.DataFrame([err_msg]))
             else:
-                logger.exception(err_msg)
                 raise ExecutorError(err_msg)
 
         table_obj = catalog_manager.get_table_catalog_entry(

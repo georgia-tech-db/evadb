@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -71,7 +71,7 @@ async def handle_request(client_writer, request_message):
             output_batch = execute_query_fetch_all(request_message)
         except Exception as e:
             error_msg = str(e)
-            logger.warn(error_msg)
+            logger.exception(error_msg)
             error = True
 
     if not error:

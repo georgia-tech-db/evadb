@@ -72,8 +72,9 @@ instance/
 # Scrapy stuff:
 .scrapy
 
-# Sphinx documentation
-api-docs/_build/
+# generated documenation files
+/docs/_build
+/docs/source/**/doc/
 
 # PyBuilder
 target/
@@ -186,6 +187,7 @@ tutorials/reddit-images
 license/
 bddtest/
 tutorials/*.jpg
+tutorials/*.pdf
 
 # benchmark
 .benchmarks
@@ -198,3 +200,6 @@ dep.txt
 
 *.bak
 \<Magic*
+
+# data
+*eva_data*/

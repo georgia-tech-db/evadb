@@ -15,7 +15,6 @@ sphinx-thebe==0.2.1
 sphinx-remove-toctrees==0.0.3
 sphinx_design==0.4.1
 sphinx_multiversion>=0.2.4
-sphinx-sitemap==2.5.0
 sphinxcontrib-redoc==1.6.0
 sphinxcontrib-youtube==1.2.0
 furo>=2022.4.7
@@ -25,14 +24,17 @@ docutils>=0.15
 mock>=1.0.1
 pillow>=9.0.1
 readthedocs-sphinx-ext>1.1
-autodoc_pydantic==1.8.0
+autodoc_pydantic
 
 # MyST
-myst-parser==1.0.0
-myst-nb==0.17.2
+myst-parser
+myst-nb
 
 # Jupyter conversion
 jupytext==1.14.5
 
 # Pin urllib to avoid downstream issues
 urllib3 < 2
+
+# eva
+git+https://github.com/georgia-tech-db/eva.git@master

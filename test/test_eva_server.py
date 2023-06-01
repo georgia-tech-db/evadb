@@ -26,7 +26,7 @@ if sys.version_info >= (3, 8):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
 
-        @patch("eva.eva_server.init_builtin_udfs")
+        @patch("eva.udfs.udf_bootstrap_queries.init_builtin_udfs")
         @patch("eva.eva_server.start_eva_server")
         @patch("eva.eva_server.ConfigurationManager")
         @patch("asyncio.run")

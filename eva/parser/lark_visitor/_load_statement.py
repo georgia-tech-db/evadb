@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -53,6 +53,9 @@ class Load:
             file_format = FileFormatType.IMAGE
         elif file_format_string == "DOCUMENT":
             file_format = FileFormatType.DOCUMENT
+        elif file_format_string == "PDF":
+            file_format = FileFormatType.PDF
+
         return file_format
 
     def file_options(self, tree):

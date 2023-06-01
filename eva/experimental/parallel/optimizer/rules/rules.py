@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -101,7 +101,7 @@ class LogicalGetToSeqScan(Rule):
     def apply(self, before: LogicalGet, context: OptimizerContext):
         # Configure the batch_mem_size. It decides the number of rows
         # read in a batch from storage engine.
-        # ToDO: Experiment heuristics.
+        # Todo: Experiment heuristics.
         scan_plan = SeqScanPlan(None, before.target_list, before.alias)
         storage_plan = StoragePlan(
             before.table_obj,

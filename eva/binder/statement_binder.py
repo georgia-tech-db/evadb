@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,12 +29,13 @@ from eva.binder.statement_binder_context import StatementBinderContext
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import NdArrayType, TableType, VideoColumnName
 from eva.catalog.catalog_utils import get_metadata_properties
-from eva.configuration.constants import EVA_DEFAULT_DIR
+from eva.configuration.configuration_manager import ConfigurationManager
 from eva.expression.abstract_expression import AbstractExpression, ExpressionType
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.create_index_statement import CreateIndexStatement
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
+from eva.parser.create_statement import ColumnDefinition, CreateTableStatement
 from eva.parser.delete_statement import DeleteTableStatement
 from eva.parser.explain_statement import ExplainStatement
 from eva.parser.rename_statement import RenameTableStatement
@@ -148,10 +149,76 @@ class StatementBinder:
         if node.where_clause:
             self.bind(node.where_clause)
 
+    @bind.register(CreateTableStatement)
+    def _bind_create_statement(self, node: CreateTableStatement):
+        if node.query is not None:
+            self.bind(node.query)
+            num_projected_columns = 0
+            for expr in node.query.target_list:
+                if expr.etype == ExpressionType.TUPLE_VALUE:
+                    num_projected_columns += 1
+                elif expr.etype == ExpressionType.FUNCTION_EXPRESSION:
+                    num_projected_columns += len(expr.output_objs)
+                else:
+                    raise BinderError("Unsupported expression type {}.".format(expr.etype))
+
+            binded_col_list = []
+            idx = 0
+            for expr in node.query.target_list:
+                output_objs = [(expr.col_name, expr.col_object)] \
+                    if expr.etype == ExpressionType.TUPLE_VALUE \
+                    else zip(expr.projection_columns, expr.output_objs)
+                for col_name, output_obj in output_objs:
+                    binded_col_list.append(
+                        ColumnDefinition(
+                            col_name,
+                            output_obj.type,
+                            output_obj.array_type,
+                            output_obj.array_dimensions,
+                        )
+                    )
+                    idx += 1
+            node.column_list = binded_col_list
+
     @bind.register(CreateMaterializedViewStatement)
     def _bind_create_mat_statement(self, node: CreateMaterializedViewStatement):
         self.bind(node.query)
-        # Todo Verify if the number projected columns matches table
+        num_projected_columns = 0
+        # TODO we should fix the binder. All binded object should have the same interface.
+        for expr in node.query.target_list:
+            if expr.etype == ExpressionType.TUPLE_VALUE:
+                num_projected_columns += 1
+            elif expr.etype == ExpressionType.FUNCTION_EXPRESSION:
+                num_projected_columns += len(expr.output_objs)
+            else:
+                raise BinderError("Unsupported expression type {}.".format(expr.etype))
+
+        assert (
+            len(node.col_list) == 0 or len(node.col_list) == num_projected_columns
+        ), "Projected columns mismatch, expected {} found {}.".format(
+            len(node.col_list), num_projected_columns
+        )
+        binded_col_list = []
+        idx = 0
+        for expr in node.query.target_list:
+            output_objs = (
+                [(expr.col_name, expr.col_object)]
+                if expr.etype == ExpressionType.TUPLE_VALUE
+                else zip(expr.projection_columns, expr.output_objs)
+            )
+            for col_name, output_obj in output_objs:
+                binded_col_list.append(
+                    ColumnDefinition(
+                        col_name
+                        if len(node.col_list) == 0
+                        else node.col_list[idx].name,
+                        output_obj.type,
+                        output_obj.array_type,
+                        output_obj.array_dimensions,
+                    )
+                )
+                idx += 1
+        node.col_list = binded_col_list
 
     @bind.register(RenameTableStatement)
     def _bind_rename_table_statement(self, node: RenameTableStatement):
@@ -240,10 +307,14 @@ class StatementBinder:
             if udf_obj.type == "ultralytics":
                 # manually set the impl_path for yolo udfs we only handle object
                 # detection for now, hopefully this can be generalized
+                udf_dir = (
+                    Path(
+                        ConfigurationManager().get_value("core", "eva_installation_dir")
+                    )
+                    / "udfs"
+                )
                 udf_obj.impl_file_path = (
-                    Path(f"{EVA_DEFAULT_DIR}/udfs/yolo_object_detector.py")
-                    .absolute()
-                    .as_posix()
+                    Path(f"{udf_dir}/yolo_object_detector.py").absolute().as_posix()
                 )
 
             # Verify the consistency of the UDF. If the checksum of the UDF does not

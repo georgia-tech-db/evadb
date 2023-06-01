@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ from asyncio import StreamReader, StreamWriter
 from collections import deque
 from typing import Dict
 
-from eva.server.db_api import EVAConnection
+from eva.interfaces.relational.db import EVAConnection
 from eva.utils.logging_manager import logger
 
 # version.py defines the VERSION and VERSION_SHORT variables
