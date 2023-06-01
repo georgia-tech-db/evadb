@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,12 +21,7 @@ from eva.udfs.decorators.io_descriptors.data_types import NumpyArray, PandasData
 
 class DecoratorTests(unittest.TestCase):
     def test_setup_flags_are_updated(self):
-        @setup(
-            cacheable=True,
-            udf_type="classification",
-            batchable=True,
-            parallelizable=False,
-        )
+        @setup(cacheable=True, udf_type="classification", batchable=True, parallelizable=False)
         def setup_func():
             pass
 

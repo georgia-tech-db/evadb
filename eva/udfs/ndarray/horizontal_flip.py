@@ -23,12 +23,7 @@ from eva.udfs.decorators.io_descriptors.data_types import PandasDataframe
 
 
 class HorizontalFlip(AbstractUDF):
-    @setup(
-        cacheable=False,
-        udf_type="cv2-transformation",
-        batchable=True,
-        parallelizable=True,
-    )
+    @setup(cacheable=False, udf_type="cv2-transformation", batchable=True, parallelizable=True)
     def setup(self):
         pass
 
