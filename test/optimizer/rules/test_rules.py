@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,13 +22,6 @@ from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import TableType
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.experimental.parallel.optimizer.rules.rules import (
-    LogicalApplyAndMergeToPhysical as ParallelLogicalApplyAndMergeToPhysical,
-)
-from eva.experimental.parallel.optimizer.rules.rules import LogicalExchangeToPhysical
-from eva.experimental.parallel.optimizer.rules.rules import (
-    LogicalGetToSeqScan as ParallelLogicalGetToSeqScan,
-)
 from eva.optimizer.operators import (
     LogicalFilter,
     LogicalGet,
@@ -42,28 +35,22 @@ from eva.optimizer.rules.rules import (
     CombineSimilarityOrderByAndLimitToVectorIndexScan,
     EmbedFilterIntoGet,
     EmbedSampleIntoGet,
-)
-from eva.optimizer.rules.rules import (
-    LogicalApplyAndMergeToPhysical as SequentialApplyAndMergeToPhysical,
-)
-from eva.optimizer.rules.rules import (
+    LogicalApplyAndMergeToPhysical,
+    LogicalApplyAndMergeToRayPhysical,
+    LogicalCreateFromSelectToPhysical,
     LogicalCreateIndexToVectorIndex,
     LogicalCreateMaterializedViewToPhysical,
     LogicalCreateToPhysical,
-    LogicalCreateFromSelectToPhysical,
     LogicalCreateUDFToPhysical,
     LogicalDeleteToPhysical,
     LogicalDerivedGetToPhysical,
     LogicalDropToPhysical,
     LogicalDropUDFToPhysical,
+    LogicalExchangeToPhysical,
     LogicalExplainToPhysical,
     LogicalFilterToPhysical,
     LogicalFunctionScanToPhysical,
-)
-from eva.optimizer.rules.rules import (
-    LogicalGetToSeqScan as SequentialLogicalGetToSeqScan,
-)
-from eva.optimizer.rules.rules import (
+    LogicalGetToSeqScan,
     LogicalGroupByToPhysical,
     LogicalInnerJoinCommutativity,
     LogicalInsertToPhysical,
@@ -74,6 +61,7 @@ from eva.optimizer.rules.rules import (
     LogicalLoadToPhysical,
     LogicalOrderByToPhysical,
     LogicalProjectToPhysical,
+    LogicalProjectToRayPhysical,
     LogicalRenameToPhysical,
     LogicalShowToPhysical,
     LogicalUnionToPhysical,
@@ -223,9 +211,10 @@ class RulesTest(unittest.TestCase):
             LogicalInsertToPhysical(),
             LogicalDeleteToPhysical(),
             LogicalLoadToPhysical(),
-            ParallelLogicalGetToSeqScan()
+            LogicalGetToSeqScan(),
+            LogicalProjectToRayPhysical()
             if ray_enabled
-            else SequentialLogicalGetToSeqScan(),
+            else LogicalProjectToPhysical(),
             LogicalDerivedGetToPhysical(),
             LogicalUnionToPhysical(),
             LogicalGroupByToPhysical(),
@@ -237,10 +226,9 @@ class RulesTest(unittest.TestCase):
             LogicalJoinToPhysicalHashJoin(),
             LogicalCreateMaterializedViewToPhysical(),
             LogicalFilterToPhysical(),
-            LogicalProjectToPhysical(),
-            ParallelLogicalApplyAndMergeToPhysical()
+            LogicalApplyAndMergeToRayPhysical()
             if ray_enabled
-            else SequentialApplyAndMergeToPhysical(),
+            else LogicalApplyAndMergeToPhysical(),
             LogicalShowToPhysical(),
             LogicalExplainToPhysical(),
             LogicalCreateIndexToVectorIndex(),
