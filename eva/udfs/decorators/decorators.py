@@ -19,7 +19,12 @@ from typing import List
 from eva.udfs.decorators.io_descriptors.abstract_types import IOArgument
 
 
-def setup(cacheable: bool = False, udf_type: str = "Abstract", batchable: bool = True, parallelizable: bool = True):
+def setup(
+    cacheable: bool = False,
+    udf_type: str = "Abstract",
+    batchable: bool = True,
+    parallelizable: bool = True,
+):
     """decorator for the setup function. It will be used to set the cache, batching and
     udf_type parameters in the catalog
 

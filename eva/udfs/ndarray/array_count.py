@@ -16,7 +16,8 @@ import numpy as np
 import pandas as pd
 
 from eva.udfs.abstract.abstract_udf import AbstractUDF
-from eva.udfs.decorators.decorators import forward, setup
+from eva.udfs.decorators.decorators import setup
+
 
 class ArrayCount(AbstractUDF):
     @property
