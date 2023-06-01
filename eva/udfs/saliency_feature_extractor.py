@@ -33,13 +33,7 @@ from PIL import Image
 class SaliencyFeatureExtractor(AbstractUDF, GPUCompatible):
     @setup(cacheable=False, udf_type="FeatureExtraction", batchable=False)
     def setup(self):
-        # self.model = kornia.feature.SIFTDescriptor(100)
         self.model = torchvision.models.resnet18(pretrained=True)
-        num_features = self.model.fc.in_features
-        self.model.fc = nn.Linear(num_features, 2) # binary classification (num_of_class == 2)
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        model_state = torch.load("data/saliency/model.pth", map_location=device)
-        self.model.load_state_dict(model_state)
         self.model.eval()
 
     def to_device(self, device: str) -> GPUCompatible:
