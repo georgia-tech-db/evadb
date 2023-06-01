@@ -36,7 +36,7 @@ class DropUDFExecutor(AbstractExecutor):
                 f"UDF {self.node.name} does not exist, therefore cannot be dropped."
             )
             if self.node.if_exists:
-                logger.warn(err_msg)
+                logger.warning(err_msg)
             else:
                 raise RuntimeError(err_msg)
         else:

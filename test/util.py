@@ -47,6 +47,7 @@ from eva.udfs.abstract.abstract_udf import AbstractClassifierUDF
 from eva.udfs.decorators import decorators
 from eva.udfs.decorators.io_descriptors.data_types import NumpyArray, PandasDataframe
 from eva.udfs.udf_bootstrap_queries import init_builtin_udfs
+from eva.utils.generic_utils import remove_directory_contents
 
 NUM_FRAMES = 10
 FRAME_SIZE = (32, 32)
@@ -63,6 +64,7 @@ def suffix_pytest_xdist_worker_id_to_dir(path: str):
 
 def get_evadb_for_testing(uri: str = None):
     db_dir = suffix_pytest_xdist_worker_id_to_dir(EVA_DATABASE_DIR)
+    remove_directory_contents(db_dir)
     return init_eva_db_instance(db_dir, custom_db_uri=uri)
 
 

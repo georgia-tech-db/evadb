@@ -122,16 +122,16 @@ class PytorchTest(unittest.TestCase):
                   TYPE  FaceDetection
                   IMPL  'eva/udfs/face_detector.py';
         """
-        execute_query_fetch_all(create_udf_query)
+        execute_query_fetch_all(self.evadb, create_udf_query)
 
         select_query = """SELECT FaceDetector(data) FROM MyVideo
                         WHERE id < 5;"""
         # Parallel execution
-        par_batch = execute_query_fetch_all(select_query)
+        par_batch = execute_query_fetch_all(self.evadb, select_query)
 
         # Sequential execution.
         ConfigurationManager().update_value("experimental", "ray", False)
-        seq_batch = execute_query_fetch_all(select_query)
+        seq_batch = execute_query_fetch_all(self.evadb, select_query)
         # Recover configuration back.
         self.evadb.config.update_value("experimental", "ray", True)
 
