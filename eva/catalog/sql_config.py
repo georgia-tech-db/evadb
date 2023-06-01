@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from sqlalchemy import create_engine, event
-from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.orm import session
 
 IDENTIFIER_COLUMN = "_row_id"
 
@@ -54,4 +54,4 @@ class SQLConfig:
             event.listen(self.engine, "connect", _enable_sqlite_pragma)
 
         # statements
-        self.session = scoped_session(sessionmaker(bind=self.engine))
+        self.session = session.Session(bind=self.engine, autocommit=False)
