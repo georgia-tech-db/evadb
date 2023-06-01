@@ -70,6 +70,29 @@ class SelectExecutorTest(unittest.TestCase):
         execute_query_fetch_all("""DROP TABLE IF EXISTS table3;""")
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
         execute_query_fetch_all("DROP TABLE IF EXISTS MemeImages;")
+        execute_query_fetch_all("""DROP TABLE IF EXISTS qatable;""")
+
+    def test_llm(self):
+        create_table = "CREATE TABLE IF NOT EXISTS qatable (id INTEGER, question TEXT(100));"
+        execute_query_fetch_all(create_table)
+
+        insert_query = "INSERT INTO qatable (id, question) VALUES (1, 'Who is queen?');"
+        execute_query_fetch_all(insert_query)
+        insert_query = "INSERT INTO qatable (id, question) VALUES (2, 'What is this news about?');"
+        execute_query_fetch_all(insert_query)
+        insert_query = "INSERT INTO qatable (id, question) VALUES (3, 'How old is queen?');"
+        execute_query_fetch_all(insert_query)
+
+        from eva.udfs.udf_bootstrap_queries import LLM_udf_query
+        execute_query_fetch_all(LLM_udf_query)
+
+        select_query = "SELECT LangChainLLM(question) FROM qatable;"
+        print(execute_query_fetch_all("EXPLAIN " + select_query).frames[0][0])
+
+        from time import perf_counter
+        st = perf_counter()
+        execute_query_fetch_all(select_query)
+        print(perf_counter() - st)
 
     def test_sort_on_nonprojected_column(self):
         """This tests doing an order by on a column
