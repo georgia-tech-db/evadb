@@ -45,7 +45,7 @@ from eva.executor.show_info_executor import ShowInfoExecutor
 from eva.executor.storage_executor import StorageExecutor
 from eva.executor.union_executor import UnionExecutor
 from eva.executor.vector_index_scan_executor import VectorIndexScanExecutor
-from eva.experimental.parallel.executor.exchange_executor import ExchangeExecutor
+from eva.executor.exchange_executor import ExchangeExecutor
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.abstract_plan import AbstractPlan
 from eva.plan_nodes.types import PlanOprType

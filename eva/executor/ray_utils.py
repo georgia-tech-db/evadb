@@ -13,9 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import os
+import ray
 from typing import Callable, Dict, List
 
-import ray
 from ray.exceptions import RayTaskError
 from ray.util.queue import Queue
 

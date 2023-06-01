@@ -14,10 +14,10 @@
 # limitations under the License.
 import glob
 import os
+import cv2
+
 from pathlib import Path
 from typing import Generator, List
-
-import cv2
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import VectorStoreType

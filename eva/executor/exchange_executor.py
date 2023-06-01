@@ -18,13 +18,13 @@ from ray.util.queue import Queue
 
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError
-from eva.experimental.parallel.executor.ray_remote import (
+from eva.executor.ray_utils import (
     StageCompleteSignal,
     ray_parallel,
     ray_pull,
     ray_wait_and_alert,
 )
-from eva.experimental.parallel.plan_nodes.exchange_plan import ExchangePlan
+from eva.plan_nodes.exchange_plan import ExchangePlan
 from eva.models.storage.batch import Batch
 
 
