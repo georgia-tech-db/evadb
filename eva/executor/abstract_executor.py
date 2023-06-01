@@ -35,9 +35,13 @@ class AbstractExecutor(ABC):
     def __init__(self, db: EVADB, node: AbstractPlan):
         self._db = db
         self._node = node
-        self._catalog: CatalogManager = db.catalog if db else None
         self._config: ConfigurationManager = db.config if db else None
         self._children = []
+
+    @property
+    def catalog(self) -> CatalogManager:
+        """The object is intentionally generated on demand to prevent serialization issues. Having a SQLAlchemy object as a member variable can cause problems with multiprocessing. See get_catalog_instance()"""
+        return self._db.catalog if self._db else None
 
     def append_child(self, child: AbstractExecutor):
         """
@@ -72,10 +76,6 @@ class AbstractExecutor(ABC):
     @property
     def config(self) -> ConfigurationManager:
         return self._config
-
-    @property
-    def catalog(self) -> CatalogManager:
-        return self._catalog
 
     @abstractmethod
     def exec(self, *args, **kwargs) -> Iterable[Batch]:

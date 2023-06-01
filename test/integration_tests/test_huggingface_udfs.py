@@ -41,7 +41,7 @@ class HuggingFaceTests(unittest.TestCase):
         execute_query_fetch_all(self.evadb, query)
 
         query = """LOAD PDF 'data/documents/pdf_sample1.pdf' INTO MyPDFs;"""
-        execute_query_fetch_all(query)
+        execute_query_fetch_all(self.evadb, query)
         # Text CSV for testing HF Text Based Models
         self.csv_file_path = create_text_csv()
 
@@ -400,7 +400,7 @@ class HuggingFaceTests(unittest.TestCase):
                   FROM MyPDFs
                   WHERE page = 3
                   AND paragraph >= 1 AND paragraph <= 3;"""
-        output = execute_query_fetch_all(select_query)
+        output = execute_query_fetch_all(self.evadb, select_query)
 
         # Test that output only has 1 column (data)
         self.assertEqual(len(output.frames.columns), 1)

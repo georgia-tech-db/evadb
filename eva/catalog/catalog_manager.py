@@ -494,3 +494,15 @@ class CatalogManager(object):
             table_type=TableType.SYSTEM_STRUCTURED_DATA,
         )
         return obj
+
+
+#### get catalog instance
+# This function plays a crucial role in ensuring that different threads do
+# not share the same catalog object, as it can result in serialization issues and
+# incorrect behavior with SQLAlchemy. Therefore, whenever a catalog instance is
+# required, we create a new one. One possible optimization is to share the catalog
+# instance across all objects within the same thread. It is worth investigating whether
+# SQLAlchemy already handles this optimization for us, which will be explored at a
+# later time.
+def get_catalog_instance(db_uri: str, config: ConfigurationManager):
+    return CatalogManager(db_uri, config)

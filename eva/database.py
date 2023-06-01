@@ -14,8 +14,9 @@
 # limitations under the License.
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Callable
 
-from eva.catalog.catalog_manager import CatalogManager
+from eva.catalog.catalog_manager import CatalogManager, get_catalog_instance
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.configuration.constants import DB_DEFAULT_NAME, EVA_DATABASE_DIR
 
@@ -24,7 +25,15 @@ from eva.configuration.constants import DB_DEFAULT_NAME, EVA_DATABASE_DIR
 class EVADB:
     db_uri: str
     config: ConfigurationManager
-    catalog: CatalogManager
+    catalog_uri: str
+    catalog_func: Callable
+
+    @property
+    def catalog(self) -> CatalogManager:
+        """
+        Note: Generating an object on demand plays a crucial role in ensuring that different threads do not share the same catalog object, as it can result in serialization issues and incorrect behavior with SQLAlchemy. Refer to get_catalog_instance()
+        """
+        return self.catalog_func(self.catalog_uri, self.config)
 
 
 def get_default_db_uri(eva_db_dir: Path):
@@ -38,10 +47,6 @@ def init_eva_db_instance(
         db_dir = EVA_DATABASE_DIR
     config = ConfigurationManager(db_dir)
 
-    catalog = None
-    if custom_db_uri:
-        catalog = CatalogManager(custom_db_uri, config)
-    else:
-        catalog = CatalogManager(get_default_db_uri(Path(db_dir)), config)
+    catalog_uri = custom_db_uri or get_default_db_uri(Path(db_dir))
 
-    return EVADB(db_dir, config, catalog)
+    return EVADB(db_dir, config, catalog_uri, get_catalog_instance)

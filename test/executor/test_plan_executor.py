@@ -122,7 +122,7 @@ class PlanExecutorTest(unittest.TestCase):
         self.assertIsInstance(executor, LoadDataExecutor)
 
     @patch("eva.executor.plan_executor.PlanExecutor._build_execution_tree")
-    def test_execute_plan_for_seq_scan_plan(self, mock_clean, mock_build):
+    def test_execute_plan_for_seq_scan_plan(self, mock_build):
         batch_list = [
             Batch(pd.DataFrame([1])),
             Batch(pd.DataFrame([2])),
@@ -136,12 +136,12 @@ class PlanExecutorTest(unittest.TestCase):
 
         actual = list(PlanExecutor(MagicMock(), None).execute_plan())
         mock_build.assert_called_once_with(None)
-        mock_clean.assert_called_once()
+
         tree.exec.assert_called_once()
         self.assertEqual(actual, batch_list)
 
     @patch("eva.executor.plan_executor.PlanExecutor._build_execution_tree")
-    def test_execute_plan_for_pp_scan_plan(self, mock_clean, mock_build):
+    def test_execute_plan_for_pp_scan_plan(self, mock_build):
         batch_list = [
             Batch(pd.DataFrame([1])),
             Batch(pd.DataFrame([2])),
@@ -154,87 +154,85 @@ class PlanExecutorTest(unittest.TestCase):
 
         actual = list(PlanExecutor(MagicMock(), None).execute_plan())
         mock_build.assert_called_once_with(None)
-        mock_clean.assert_called_once()
+
         tree.exec.assert_called_once()
         self.assertEqual(actual, batch_list)
 
     @patch("eva.executor.plan_executor.PlanExecutor._build_execution_tree")
-    def test_execute_plan_for_create_insert_load_upload_plans(
-        self, mock_clean, mock_build
-    ):
+    def test_execute_plan_for_create_insert_load_upload_plans(self, mock_build):
         # CreateExecutor
         tree = MagicMock(node=CreatePlan(None, [], False))
         mock_build.return_value = tree
         actual = list(PlanExecutor(MagicMock(), None).execute_plan())
         tree.exec.assert_called_once()
         mock_build.assert_called_once_with(None)
-        mock_clean.assert_called_once()
+
         self.assertEqual(actual, [])
 
         # InsertExecutor
         mock_build.reset_mock()
-        mock_clean.reset_mock()
+
         tree = MagicMock(node=InsertPlan(0, [], []))
         mock_build.return_value = tree
         actual = list(PlanExecutor(MagicMock(), None).execute_plan())
         tree.exec.assert_called_once()
         mock_build.assert_called_once_with(None)
-        mock_clean.assert_called_once()
+
         self.assertEqual(actual, [])
 
         # CreateUDFExecutor
         mock_build.reset_mock()
-        mock_clean.reset_mock()
+
         tree = MagicMock(node=CreateUDFPlan(None, False, [], [], None))
         mock_build.return_value = tree
         actual = list(PlanExecutor(MagicMock(), None).execute_plan())
         tree.exec.assert_called_once()
         mock_build.assert_called_once_with(None)
-        mock_clean.assert_called_once()
+
         self.assertEqual(actual, [])
 
         # LoadDataExecutor
         mock_build.reset_mock()
-        mock_clean.reset_mock()
+
         tree = MagicMock(node=LoadDataPlan(None, None, None, None, None))
         mock_build.return_value = tree
         actual = list(PlanExecutor(MagicMock(), None).execute_plan())
         tree.exec.assert_called_once()
         mock_build.assert_called_once_with(None)
-        mock_clean.assert_called_once()
+
         self.assertEqual(actual, [])
 
     @patch("eva.executor.plan_executor.PlanExecutor._build_execution_tree")
-    def test_execute_plan_for_rename_plans(self, mock_clean, mock_build):
+    def test_execute_plan_for_rename_plans(self, mock_build):
         # RenameExecutor
         tree = MagicMock(node=RenamePlan(None, None))
         mock_build.return_value = tree
         actual = list(PlanExecutor(MagicMock(), None).execute_plan())
         tree.exec.assert_called_once()
         mock_build.assert_called_once_with(None)
-        mock_clean.assert_called_once()
+
         self.assertEqual(actual, [])
 
     @patch("eva.executor.plan_executor.PlanExecutor._build_execution_tree")
-    def test_execute_plan_for_drop_plans(self, mock_clean, mock_build):
+    def test_execute_plan_for_drop_plans(self, mock_build):
         # DropExecutor
         tree = MagicMock(node=DropPlan(None, None))
         mock_build.return_value = tree
         actual = list(PlanExecutor(MagicMock(), None).execute_plan())
         tree.exec.assert_called_once()
         mock_build.assert_called_once_with(None)
-        mock_clean.assert_called_once()
+
         self.assertEqual(actual, [])
 
         # DropUDFExecutor
         mock_build.reset_mock()
-        mock_clean.reset_mock()
+
         tree = MagicMock(node=DropUDFPlan(None, False))
         mock_build.return_value = tree
         actual = list(PlanExecutor(MagicMock(), None).execute_plan())
         tree.exec.assert_called_once()
         mock_build.assert_called_once_with(None)
-        mock_clean.assert_called_once()
+
         self.assertEqual(actual, [])
 
     @unittest.skip("disk_based_storage_deprecated")
