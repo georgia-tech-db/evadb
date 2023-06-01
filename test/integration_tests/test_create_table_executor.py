@@ -13,18 +13,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import get_evadb_for_testing
-
-import pytest
 from test.util import (
     DummyObjectDetector,
     create_sample_video,
     file_remove,
+    get_evadb_for_testing,
     load_udfs_for_testing,
     shutdown_ray,
 )
 
 import pandas as pd
+import pytest
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
@@ -94,10 +93,7 @@ class CreateTableTest(unittest.TestCase):
             "SELECT id, label, bbox FROM UATRAC JOIN LATERAL "
             "Yolo(data) AS T(label, bbox, score) WHERE id < 5;"
         )
-        query = (
-            "CREATE TABLE IF NOT EXISTS "
-            f"uadtrac_fastRCNN AS {select_query};"
-        )
+        query = "CREATE TABLE IF NOT EXISTS " f"uadtrac_fastRCNN AS {select_query};"
         execute_query_fetch_all(self.evadb, query)
 
         select_view_query = "SELECT id, label, bbox FROM uadtrac_fastRCNN"

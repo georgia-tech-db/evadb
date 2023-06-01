@@ -158,14 +158,18 @@ class StatementBinder:
                 elif expr.etype == ExpressionType.FUNCTION_EXPRESSION:
                     num_projected_columns += len(expr.output_objs)
                 else:
-                    raise BinderError("Unsupported expression type {}.".format(expr.etype))
+                    raise BinderError(
+                        "Unsupported expression type {}.".format(expr.etype)
+                    )
 
             binded_col_list = []
             idx = 0
             for expr in node.query.target_list:
-                output_objs = [(expr.col_name, expr.col_object)] \
-                    if expr.etype == ExpressionType.TUPLE_VALUE \
+                output_objs = (
+                    [(expr.col_name, expr.col_object)]
+                    if expr.etype == ExpressionType.TUPLE_VALUE
                     else zip(expr.projection_columns, expr.output_objs)
+                )
                 for col_name, output_obj in output_objs:
                     binded_col_list.append(
                         ColumnDefinition(

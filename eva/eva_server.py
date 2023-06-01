@@ -27,27 +27,15 @@ THIS_DIR = dirname(__file__)
 EVA_CODE_DIR = abspath(join(THIS_DIR, ".."))
 sys.path.append(EVA_CODE_DIR)
 
-from eva.configuration.configuration_manager import ConfigurationManager  # noqa: E402
-from eva.configuration.constants import EVA_DATABASE_DIR  # noqa: E402
 from eva.server.server import EvaServer  # noqa: E402
-from eva.utils.logging_manager import logger  # noqa: E402
 
 
-async def start_eva_server(host: str, port: int):
+async def start_eva_server(
+    db_dir: str, host: str, port: str, custom_db_uri: str = None
+):
     """Start the eva server"""
     eva_server = EvaServer()
-
-    await eva_server.start_eva_server(host, port)
-
-
-def start_server(db_dir, host, port):
-    config_manager = ConfigurationManager()
-    mode = config_manager.get_value("core", "mode")
-    from eva.udfs.udf_bootstrap_queries import init_builtin_udfs  # noqa: E402
-
-    init_builtin_udfs(mode=mode)
-
-    asyncio.run(start_eva_server(host=host, port=int(port)))
+    await eva_server.start_eva_server(db_dir, host, port, custom_db_uri)
 
 
 def stop_server():
@@ -75,7 +63,12 @@ def main():
     )
 
     parser.add_argument(
-        "--database", help="Specify the database folder which the server should access."
+        "--db_dir", help="Specify the eva directory which the server should access."
+    )
+
+    parser.add_argument(
+        "--sql_backend",
+        help="Specify the custom sql database to use for structured data.",
     )
 
     parser.add_argument(
@@ -95,25 +88,17 @@ def main():
     ## PARSE ARGS
     args, unknown = parser.parse_known_args()
 
+    args.host = args.host or "0.0.0.0"
+    args.port = args.port or "8803"
     # Stop server
     if args.stop:
         return stop_server()
 
-    eva_db_dir = args.database if args.database else EVA_DATABASE_DIR
-
-    logger.debug(f"Database dir: {eva_db_dir}")
-
-    # Instantiate a Configuration Manager object with the appropriate database directory
-    # Subsequent calls will utilize the specified database directory
-    config_manager = ConfigurationManager(EVA_DATABASE_DIR=eva_db_dir)
-
-    host = args.host if args.host else config_manager.get_value("server", "host")
-
-    port = args.port if args.port else config_manager.get_value("server", "port")
-
     # Start server
     if args.start:
-        start_server(eva_db_dir, host, port)
+        asyncio.run(
+            start_eva_server(args.db_dir, args.host, args.port, args.sql_backend)
+        )
 
 
 if __name__ == "__main__":

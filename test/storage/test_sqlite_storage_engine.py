@@ -14,8 +14,6 @@
 # limitations under the License.
 import shutil
 import unittest
-
-from mock import MagicMock
 from test.util import (
     create_dummy_batches,
     get_evadb_for_testing,
@@ -23,6 +21,7 @@ from test.util import (
 )
 
 import pytest
+from mock import MagicMock
 
 from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
 from eva.catalog.models.column_catalog import ColumnCatalogEntry

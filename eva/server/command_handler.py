@@ -57,7 +57,7 @@ def execute_query_fetch_all(evadb: EVADB, query=None, **kwargs) -> Optional[Batc
         return Batch.concat(batch_list, copy=False)
 
 
-async def handle_request(client_writer, request_message):
+async def handle_request(evadb: EVADB, client_writer, request_message):
     """
     Reads a request from a client and processes it
 
@@ -71,7 +71,7 @@ async def handle_request(client_writer, request_message):
     query_runtime = Timer()
     with query_runtime:
         try:
-            output_batch = execute_query_fetch_all(request_message)
+            output_batch = execute_query_fetch_all(evadb, request_message)
         except Exception as e:
             error_msg = str(e)
             logger.exception(error_msg)

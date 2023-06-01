@@ -12,14 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import os
-import time
 import unittest
-from test.util import get_evadb_for_testing, load_udfs_for_testing, shutdown_ray
+from test.util import get_evadb_for_testing, load_udfs_for_testing, shutdown_ray, suffix_pytest_xdist_worker_id_to_dir
 
 from pandas.testing import assert_frame_equal
 
-from eva.configuration.constants import EVA_ROOT_DIR
+from eva.configuration.constants import EVA_DATABASE_DIR, EVA_ROOT_DIR
 from eva.interfaces.relational.db import connect
 from eva.server.command_handler import execute_query_fetch_all
 
@@ -30,18 +28,9 @@ class RelationalAPI(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.evadb = get_evadb_for_testing()
-        os.system("nohup eva_server --stop")
-        os.system("nohup eva_server --port 8886 --start &")
-        for _ in range(10):
-            try:
-                connect(port=8886)
-            except Exception:
-                time.sleep(5)
-
-    @classmethod
-    def tearDownClass(cls):
-        os.system("nohup eva_server --stop")
+        cls.db_dir = suffix_pytest_xdist_worker_id_to_dir(EVA_DATABASE_DIR)
+        cls.conn = connect(cls.db_dir)
+        cls.evadb = cls.conn._evadb
 
     def setUp(self):
         self.evadb.catalog.reset()
@@ -58,7 +47,7 @@ class RelationalAPI(unittest.TestCase):
         execute_query_fetch_all(self.evadb, """DROP TABLE IF EXISTS meme_images;""")
 
     def test_relation_apis(self):
-        conn = connect(port=8886)
+        conn = connect(self.db_dir)
         rel = conn.load(
             self.mnist_path,
             table_name="mnist_video",
@@ -112,7 +101,8 @@ class RelationalAPI(unittest.TestCase):
         )
 
     def test_relation_api_chaining(self):
-        conn = connect(port=8886)
+        conn = connect(self.db_dir)
+        
         rel = conn.load(
             self.mnist_path,
             table_name="mnist_video",
@@ -134,7 +124,7 @@ class RelationalAPI(unittest.TestCase):
         )
 
     def test_interleaving_calls(self):
-        conn = connect(port=8886)
+        conn = connect(self.db_dir)
 
         rel = conn.load(
             self.mnist_path,
@@ -157,7 +147,8 @@ class RelationalAPI(unittest.TestCase):
         )
 
     def test_create_index(self):
-        conn = connect(port=8886)
+        conn = connect(self.db_dir)
+        
 
         # load some images
         rel = conn.load(

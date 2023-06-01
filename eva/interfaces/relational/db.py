@@ -15,6 +15,8 @@
 import asyncio
 
 import pandas
+from eva.configuration.constants import EVA_DATABASE_DIR
+from eva.database import EVADB, init_eva_db_instance
 
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.interfaces.relational.relation import EVARelation
@@ -33,11 +35,12 @@ from eva.utils.logging_manager import logger
 
 
 class EVAConnection:
-    def __init__(self, reader, writer):
+    def __init__(self, evadb: EVADB, reader, writer):
         self._reader = reader
         self._writer = writer
         self._cursor = None
         self._result: Batch = None
+        self._evadb = evadb
 
     def cursor(self):
         # One unique cursor for one connection
@@ -65,13 +68,14 @@ class EVAConnection:
         self, index_name: str, table_name: str, expr: str, using: str
     ) -> "EVACursor":
         stmt = parse_create_vector_index(index_name, table_name, expr, using)
-        self._result = execute_statement(stmt)
+        self._result = execute_statement(self._evadb, stmt)
         return self
 
 
 class EVACursor(object):
     def __init__(self, connection):
         self._connection = connection
+        self._evadb = connection._evadb
         self._pending_query = False
         self._result = None
 
@@ -143,8 +147,10 @@ class EVACursor(object):
         select_stmt = SelectStatement(
             target_list=[TupleValueExpression(col_name="*")], from_table=table
         )
-        try_binding(select_stmt)
-        return EVARelation(select_stmt, alias=Alias(table_name.lower()))
+        try_binding(self._evadb.catalog, select_stmt)
+        return EVARelation(
+            self._evadb, select_stmt, alias=Alias(table_name.lower())
+        )
 
     def df(self) -> pandas.DataFrame:
         if not self._result:
@@ -155,7 +161,7 @@ class EVACursor(object):
         self, index_name: str, table_name: str, expr: str, using: str
     ) -> "EVACursor":
         stmt = parse_create_vector_index(index_name, table_name, expr, using)
-        self._result = execute_statement(stmt)
+        self._result = execute_statement(self._evadb, stmt)
         return self
 
     def load(
@@ -163,27 +169,28 @@ class EVACursor(object):
     ) -> EVARelation:
         # LOAD {FORMAT} file_regex INTO table_name
         stmt = parse_load(table_name, file_regex, format, **kwargs)
-        return EVARelation(stmt)
+        return EVARelation(self._evadb, stmt)
 
     def query(self, sql_query: str) -> EVARelation:
         stmt = parse_query(sql_query)
-        return EVARelation(stmt)
+        return EVARelation(self._evadb, stmt)
 
 
-async def get_connection(host: str, port: int) -> EVAConnection:
-    reader, writer = await asyncio.open_connection(host, port)
-    connection = EVAConnection(reader, writer)
-    return connection
-
-
-def connect(host: str = "0.0.0.0", port: int = 8803) -> EVAConnection:
+def connect(eva_dir: str = EVA_DATABASE_DIR, sql_backend: str = None) -> EVAConnection:
     """
-    Connect to the EVA server and return a connection object.
+    Connects to the EVA server and returns a connection object.
+
     Args:
-        host (str): The hostname or IP address of the EVA server. Default is "0.0.0.0".
-        port (int): The port number of the EVA server. Default is 8803.
+        eva_dir (str): The directory used by EVA to store database-related content. Default is "eva_db".
+        sql_backend (str): Custom database URI to be used. We follow the SQLAlchemy database URL format.
+            Default is SQLite in the EVA directory. See https://docs.sqlalchemy.org/en/20/core/engines.html#database-urls.
+
     Returns:
-        EVAConnection: A connection object representing the connection to the EVA server.
+        EVAConnection: A connection object representing the connection to the EVA database.
     """
-    connection = asyncio.run(get_connection(host, port))
-    return connection
+
+    # As we are not employing a client-server approach for the Pythonic interface, the
+    # host and port parameters are irrelevant. Additionally, for the EVAConnection, the
+    # reader and writer parameters are not relevant in the serverless approach.
+    evadb = init_eva_db_instance(eva_dir, custom_db_uri=sql_backend)
+    return EVAConnection(evadb, None, None)

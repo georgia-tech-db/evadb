@@ -35,7 +35,7 @@ from eva.catalog.catalog_type import NdArrayType
 from eva.configuration.bootstrap_environment import get_default_db_uri
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.configuration.constants import EVA_DATABASE_DIR, EVA_INSTALLATION_DIR
-from eva.database import EVADB
+from eva.database import EVADB, init_eva_db_instance
 from eva.expression.function_expression import FunctionExpression
 from eva.models.storage.batch import Batch
 from eva.optimizer.operators import LogicalFilter, Operator
@@ -64,9 +64,7 @@ def suffix_pytest_xdist_worker_id_to_dir(path: str):
 
 def get_evadb_for_testing(uri: str = None):
     db_dir = suffix_pytest_xdist_worker_id_to_dir(EVA_DATABASE_DIR)
-    uri = uri or get_default_db_uri(Path(db_dir))
-    config = ConfigurationManager(Path(db_dir))
-    return EVADB(uri, config)
+    return init_eva_db_instance(db_dir, custom_db_uri=uri)
 
 
 def get_tmp_dir():

@@ -40,7 +40,10 @@ class CreateExecutor(AbstractExecutor):
             if self.children != []:
                 child = self.children[0]
                 # only support seq scan based materialization
-                if child.node.opr_type not in {PlanOprType.SEQUENTIAL_SCAN, PlanOprType.PROJECT}:
+                if child.node.opr_type not in {
+                    PlanOprType.SEQUENTIAL_SCAN,
+                    PlanOprType.PROJECT,
+                }:
                     err_msg = "Invalid query {}, expected {} or {}".format(
                         child.node.opr_type,
                         PlanOprType.SEQUENTIAL_SCAN,

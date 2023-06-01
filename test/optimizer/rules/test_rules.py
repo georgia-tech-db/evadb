@@ -46,10 +46,10 @@ from eva.optimizer.rules.rules import (
     LogicalApplyAndMergeToPhysical as SequentialApplyAndMergeToPhysical,
 )
 from eva.optimizer.rules.rules import (
+    LogicalCreateFromSelectToPhysical,
     LogicalCreateIndexToVectorIndex,
     LogicalCreateMaterializedViewToPhysical,
     LogicalCreateToPhysical,
-    LogicalCreateFromSelectToPhysical,
     LogicalCreateUDFToPhysical,
     LogicalDeleteToPhysical,
     LogicalDerivedGetToPhysical,

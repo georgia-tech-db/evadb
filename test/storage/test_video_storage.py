@@ -13,7 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import create_sample_video, get_evadb_for_testing, suffix_pytest_xdist_worker_id_to_dir
+from test.util import (
+    create_sample_video,
+    get_evadb_for_testing,
+    suffix_pytest_xdist_worker_id_to_dir,
+)
 from unittest.mock import MagicMock
 
 import mock

@@ -12,22 +12,35 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from dataclasses import dataclass
+from pathlib import Path
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.configuration_manager import ConfigurationManager
+from eva.configuration.constants import DB_DEFAULT_NAME, EVA_DATABASE_DIR
 
 
+@dataclass
 class EVADB:
-    def __init__(self, db_uri: str, config: ConfigurationManager) -> None:
-        self._db_uri = db_uri
-        self._config = config
+    db_uri: str
+    config: ConfigurationManager
+    catalog: CatalogManager
 
-        # intialize catalog manager
-        self._catalog = CatalogManager(db_uri, config)
 
-    @property
-    def catalog(self):
-        return self._catalog
+def get_default_db_uri(eva_db_dir: Path):
+    return f"sqlite:///{eva_db_dir.resolve()}/{DB_DEFAULT_NAME}"
 
-    @property
-    def config(self):
-        return self._config
+
+def init_eva_db_instance(
+    db_dir: str, host: str = None, port: int = None, custom_db_uri: str = None
+):
+    if db_dir is None:
+        db_dir = EVA_DATABASE_DIR
+    config = ConfigurationManager(db_dir)
+
+    catalog = None
+    if custom_db_uri:
+        catalog = CatalogManager(custom_db_uri, config)
+    else:
+        catalog = CatalogManager(get_default_db_uri(Path(db_dir)), config)
+
+    return EVADB(db_dir, config, catalog)

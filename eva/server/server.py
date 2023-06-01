@@ -15,8 +15,9 @@
 import asyncio
 import string
 from asyncio import StreamReader, StreamWriter
-from eva.database import EVADB
 
+from eva.database import init_eva_db_instance
+from eva.udfs.udf_bootstrap_queries import init_builtin_udfs
 from eva.utils.logging_manager import logger
 
 
@@ -28,8 +29,11 @@ class EvaServer:
     def __init__(self):
         self._server = None
         self._clients = {}  # client -> (reader, writer)
+        self._evadb = None
 
-    async def start_eva_server(self, db_uri: str, host: string, port: int):
+    async def start_eva_server(
+        self, db_dir: str, host: string, port: int, custom_db_uri: str = None
+    ):
         """
         Start the server
         Server objects are asynchronous context managers.
@@ -38,8 +42,13 @@ class EvaServer:
         port: port of the server
         """
         print(f"EVA server started at host {host} and port {port}")
-        self._evadb = EVADB()
+        self._evadb = init_eva_db_instance(db_dir, host, port, custom_db_uri)
+
         self._server = await asyncio.start_server(self.accept_client, host, port)
+
+        # load built-in udfs
+        mode = self._evadb.config.get_value("core", "mode")
+        init_builtin_udfs(self._evadb, mode=mode)
 
         async with self._server:
             await self._server.serve_forever()
@@ -84,7 +93,7 @@ class EvaServer:
                 logger.debug("Handle request")
                 from eva.server.command_handler import handle_request
 
-                asyncio.create_task(handle_request(client_writer, message))
+                asyncio.create_task(handle_request(self._evadb, client_writer, message))
 
         except Exception as e:
             logger.critical("Error reading from client.", exc_info=e)

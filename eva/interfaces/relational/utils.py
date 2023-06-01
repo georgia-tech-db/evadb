@@ -17,6 +17,8 @@ from typing import List, Union
 
 from eva.binder.statement_binder import StatementBinder
 from eva.binder.statement_binder_context import StatementBinderContext
+from eva.catalog.catalog_manager import CatalogManager
+from eva.database import EVADB
 from eva.executor.plan_executor import PlanExecutor
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.constant_value_expression import ConstantValueExpression
@@ -51,11 +53,11 @@ def sql_predicate_to_expresssion_tree(expr: str) -> AbstractExpression:
     return parse_predicate_expression(expr)
 
 
-def execute_statement(statement: AbstractStatement) -> Batch:
-    StatementBinder(StatementBinderContext()).bind(statement)
+def execute_statement(evadb: EVADB, statement: AbstractStatement) -> Batch:
+    StatementBinder(StatementBinderContext(evadb.catalog)).bind(statement)
     l_plan = StatementToPlanConverter().visit(statement)
-    p_plan = asyncio.run(PlanGenerator().build(l_plan))
-    output = PlanExecutor(p_plan).execute_plan()
+    p_plan = asyncio.run(PlanGenerator(evadb).build(l_plan))
+    output = PlanExecutor(evadb, p_plan).execute_plan()
     if output:
         batch_list = list(output)
         return Batch.concat(batch_list, copy=False)
@@ -73,11 +75,11 @@ def create_limit_expression(num: int):
     return ConstantValueExpression(num)
 
 
-def try_binding(stmt: AbstractStatement):
+def try_binding(catalog: CatalogManager, stmt: AbstractStatement):
     # To avoid complications in subsequent binder calls, we attempt to bind a copy of
     # the statement since the binder modifies the statement in place and can cause
     # issues if statement is partially bound.
-    StatementBinder(StatementBinderContext()).bind(stmt.copy())
+    StatementBinder(StatementBinderContext(catalog)).bind(stmt.copy())
 
 
 def handle_select_clause(
