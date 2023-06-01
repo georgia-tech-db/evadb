@@ -44,9 +44,9 @@ class SequentialScanExecutor(AbstractExecutor):
                 batch.modify_column_alias(self.alias)
 
             # We do the predicate first
-            batch = apply_predicate(batch, self.predicate)
+            batch = apply_predicate(batch, self.predicate, self.catalog)
             # Then do project
-            batch = apply_project(batch, self.project_expr)
+            batch = apply_project(batch, self.project_expr, self.catalog)
 
             if not batch.empty():
                 yield batch

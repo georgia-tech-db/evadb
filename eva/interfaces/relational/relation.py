@@ -15,8 +15,8 @@
 from typing import Union
 
 import pandas
-from eva.database import EVADB
 
+from eva.database import EVADB
 from eva.interfaces.relational.utils import (
     create_limit_expression,
     create_star_expression,

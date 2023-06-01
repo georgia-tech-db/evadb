@@ -122,7 +122,6 @@ class PlanExecutorTest(unittest.TestCase):
         self.assertIsInstance(executor, LoadDataExecutor)
 
     @patch("eva.executor.plan_executor.PlanExecutor._build_execution_tree")
-    @patch("eva.executor.plan_executor.PlanExecutor._clean_execution_tree")
     def test_execute_plan_for_seq_scan_plan(self, mock_clean, mock_build):
         batch_list = [
             Batch(pd.DataFrame([1])),
@@ -142,7 +141,6 @@ class PlanExecutorTest(unittest.TestCase):
         self.assertEqual(actual, batch_list)
 
     @patch("eva.executor.plan_executor.PlanExecutor._build_execution_tree")
-    @patch("eva.executor.plan_executor.PlanExecutor._clean_execution_tree")
     def test_execute_plan_for_pp_scan_plan(self, mock_clean, mock_build):
         batch_list = [
             Batch(pd.DataFrame([1])),
@@ -161,7 +159,6 @@ class PlanExecutorTest(unittest.TestCase):
         self.assertEqual(actual, batch_list)
 
     @patch("eva.executor.plan_executor.PlanExecutor._build_execution_tree")
-    @patch("eva.executor.plan_executor.PlanExecutor._clean_execution_tree")
     def test_execute_plan_for_create_insert_load_upload_plans(
         self, mock_clean, mock_build
     ):
@@ -208,7 +205,6 @@ class PlanExecutorTest(unittest.TestCase):
         self.assertEqual(actual, [])
 
     @patch("eva.executor.plan_executor.PlanExecutor._build_execution_tree")
-    @patch("eva.executor.plan_executor.PlanExecutor._clean_execution_tree")
     def test_execute_plan_for_rename_plans(self, mock_clean, mock_build):
         # RenameExecutor
         tree = MagicMock(node=RenamePlan(None, None))
@@ -220,7 +216,6 @@ class PlanExecutorTest(unittest.TestCase):
         self.assertEqual(actual, [])
 
     @patch("eva.executor.plan_executor.PlanExecutor._build_execution_tree")
-    @patch("eva.executor.plan_executor.PlanExecutor._clean_execution_tree")
     def test_execute_plan_for_drop_plans(self, mock_clean, mock_build):
         # DropExecutor
         tree = MagicMock(node=DropPlan(None, None))

@@ -22,6 +22,7 @@ import cv2
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import VectorStoreType
 from eva.expression.abstract_expression import AbstractExpression
+from eva.expression.function_expression import FunctionExpression
 from eva.models.storage.batch import Batch
 from eva.parser.table_ref import TableInfo
 from eva.parser.types import FileFormatType
@@ -33,17 +34,38 @@ class ExecutorError(Exception):
     pass
 
 
-def apply_project(batch: Batch, project_list: List[AbstractExpression]):
+def apply_project(
+    batch: Batch, project_list: List[AbstractExpression], catalog: CatalogManager
+):
     if not batch.empty() and project_list:
         batches = [expr.evaluate(batch) for expr in project_list]
         batch = Batch.merge_column_wise(batches)
+
+        # persist stats of function expression
+        for expr in project_list:
+            for func_expr in expr.find_all(FunctionExpression):
+                if func_expr.udf_obj and func_expr._stats:
+                    udf_id = func_expr.udf_obj.row_id
+                    catalog.upsert_udf_cost_catalog_entry(
+                        udf_id, func_expr.udf_obj.name, func_expr._stats.prev_cost
+                    )
     return batch
 
 
-def apply_predicate(batch: Batch, predicate: AbstractExpression) -> Batch:
+def apply_predicate(
+    batch: Batch, predicate: AbstractExpression, catalog: CatalogManager
+) -> Batch:
     if not batch.empty() and predicate is not None:
         outcomes = predicate.evaluate(batch)
         batch.drop_zero(outcomes)
+
+        # persist stats of function expression
+        for func_expr in predicate.find_all(FunctionExpression):
+            if func_expr.udf_obj and func_expr._stats:
+                udf_id = func_expr.udf_obj.row_id
+                catalog.upsert_udf_cost_catalog_entry(
+                    udf_id, func_expr.udf_obj.name, func_expr._stats.prev_cost
+                )
     return batch
 
 

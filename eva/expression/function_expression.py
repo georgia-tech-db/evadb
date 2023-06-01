@@ -101,10 +101,9 @@ class FunctionExpression(AbstractExpression):
     def has_cache(self):
         return self._cache is not None
 
-    def persist_stats(self):
+    def consolidate_stats(self):
         if self.udf_obj is None:
             return
-        udf_id = self.udf_obj.row_id
 
         # if the function expression support cache only approximate using cache_miss entries.
         if self.has_cache() and self._stats.cache_misses > 0:
@@ -116,12 +115,7 @@ class FunctionExpression(AbstractExpression):
                 self._stats.num_calls
             )
 
-        # persist stats to catalog only if it differ by greater than 10% from
-        # the previous value
         if abs(self._stats.prev_cost - cost_per_func_call) > cost_per_func_call / 10:
-            # CatalogManager().upsert_udf_cost_catalog_entry(
-            #     udf_id, self.udf_obj.name, cost_per_func_call
-            # )
             self._stats.prev_cost = cost_per_func_call
 
     def evaluate(self, batch: Batch, **kwargs) -> Batch:
@@ -139,7 +133,7 @@ class FunctionExpression(AbstractExpression):
 
         # try persisting the stats to catalog and do not crash if we fail in doing so
         try:
-            self.persist_stats()
+            self.consolidate_stats()
         except Exception as e:
             logger.warn(
                 f"Persisting Function Expression {str(self)} stats failed with {str(e)}"

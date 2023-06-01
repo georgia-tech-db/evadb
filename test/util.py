@@ -32,10 +32,9 @@ from mock import MagicMock
 from eva.binder.statement_binder import StatementBinder
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.catalog.catalog_type import NdArrayType
-from eva.configuration.bootstrap_environment import get_default_db_uri
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.configuration.constants import EVA_DATABASE_DIR, EVA_INSTALLATION_DIR
-from eva.database import EVADB, init_eva_db_instance
+from eva.database import init_eva_db_instance
 from eva.expression.function_expression import FunctionExpression
 from eva.models.storage.batch import Batch
 from eva.optimizer.operators import LogicalFilter, Operator

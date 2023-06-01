@@ -158,15 +158,6 @@ class PlanExecutor:
 
         return executor_node
 
-    def _clean_execution_tree(self, tree_root: AbstractExecutor):
-        """clean the execution tree from memory
-
-        Arguments:
-            tree_root {AbstractExecutor} -- root of execution tree to delete
-        """
-        # Todo
-        # clear all the nodes from the execution tree
-
     def execute_plan(self) -> Iterator[Batch]:
         """execute the plan tree"""
         try:
@@ -174,7 +165,6 @@ class PlanExecutor:
             output = execution_tree.exec()
             if output is not None:
                 yield from output
-            self._clean_execution_tree(execution_tree)
         except Exception as e:
             logger.exception(str(e))
             raise ExecutorError(e)

@@ -13,7 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from abc import ABC, abstractmethod
-from typing import Generator, Iterable, List, TypeVar
+from collections import deque
+from typing import Any, Generator, Iterable, List, TypeVar
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.configuration_manager import ConfigurationManager
@@ -87,3 +88,31 @@ class AbstractExecutor(ABC):
 
     def __call__(self, *args, **kwargs) -> Generator[Batch, None, None]:
         yield from self.exec(*args, **kwargs)
+
+    def bfs(self):
+        """Returns a generator which visits all nodes in execution tree in
+        breadth-first search (BFS) traversal order.
+
+        Returns:
+            the generator object.
+        """
+        queue = deque([self])
+        while queue:
+            node = queue.popleft()
+            yield node
+            for child in node.children:
+                queue.append(child)
+
+    def find_all(self, exceution_type: Any):
+        """Returns a generator which visits all the nodes in execution tree and yields one that matches the passed `exceution_type`.
+
+        Args:
+            exceution_type (Any): execution type to match with
+
+        Returns:
+            the generator object.
+        """
+
+        for node in self.bfs():
+            if isinstance(node, exceution_type):
+                yield node

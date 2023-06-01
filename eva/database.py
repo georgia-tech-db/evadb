@@ -14,6 +14,7 @@
 # limitations under the License.
 from dataclasses import dataclass
 from pathlib import Path
+
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.configuration.constants import DB_DEFAULT_NAME, EVA_DATABASE_DIR

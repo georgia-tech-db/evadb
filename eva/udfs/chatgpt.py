@@ -20,7 +20,6 @@ import openai
 import pandas as pd
 
 from eva.catalog.catalog_type import NdArrayType
-from eva.configuration.configuration_manager import ConfigurationManager
 from eva.udfs.abstract.abstract_udf import AbstractUDF
 from eva.udfs.decorators.decorators import forward, setup
 from eva.udfs.decorators.io_descriptors.data_types import PandasDataframe

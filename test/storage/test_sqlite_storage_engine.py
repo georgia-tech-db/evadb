@@ -21,7 +21,6 @@ from test.util import (
 )
 
 import pytest
-from mock import MagicMock
 
 from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
 from eva.catalog.models.column_catalog import ColumnCatalogEntry

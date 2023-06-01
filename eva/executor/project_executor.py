@@ -31,7 +31,7 @@ class ProjectExecutor(AbstractExecutor):
     def exec(self, *args, **kwargs) -> Iterator[Batch]:
         child_executor = self.children[0]
         for batch in child_executor.exec(**kwargs):
-            batch = apply_project(batch, self.target_list)
+            batch = apply_project(batch, self.target_list, self.catalog)
 
             if not batch.empty():
                 yield batch

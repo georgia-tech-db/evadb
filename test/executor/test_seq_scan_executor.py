@@ -30,7 +30,10 @@ class SeqScanExecutorTest(unittest.TestCase):
         expression = type(
             "AbstractExpression",
             (),
-            {"evaluate": lambda x: Batch(pd.DataFrame([False, False, True]))},
+            {
+                "evaluate": lambda x: Batch(pd.DataFrame([False, False, True])),
+                "find_all": lambda expr: [],
+            },
         )
 
         plan = type(
@@ -64,7 +67,10 @@ class SeqScanExecutorTest(unittest.TestCase):
             type(
                 "AbstractExpression",
                 (),
-                {"evaluate": lambda x: Batch(pd.DataFrame(x.frames["data"]))},
+                {
+                    "evaluate": lambda x: Batch(pd.DataFrame(x.frames["data"])),
+                    "find_all": lambda expr: [],
+                },
             )
         ]
 
@@ -76,3 +82,7 @@ class SeqScanExecutorTest(unittest.TestCase):
 
         actual = list(proj_executor.exec())[0]
         self.assertEqual(proj_batch, actual)
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -40,6 +40,14 @@ class FunctionScanExecutor(AbstractExecutor):
         lateral_input = kwargs.get("lateral_input")
         if not lateral_input.empty():
             res = self.func_expr.evaluate(lateral_input)
+
+            # persist stats of function expression
+            if self.func_expr.udf_obj and self.func_expr._stats:
+                udf_id = self.func_expr.udf_obj.row_id
+                self.catalog.upsert_udf_cost_catalog_entry(
+                    udf_id, self.func_expr.udf_obj.name, self.func_expr._stats.prev_cost
+                )
+
             if not res.empty():
                 if self.do_unnest:
                     res.unnest(res.columns)

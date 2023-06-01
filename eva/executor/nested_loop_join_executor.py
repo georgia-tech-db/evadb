@@ -33,6 +33,8 @@ class NestedLoopJoinExecutor(AbstractExecutor):
             for row2 in inner.exec(**kwargs):
                 result_batch = Batch.join(row1, row2)
                 result_batch.reset_index()
-                result_batch = apply_predicate(result_batch, self.predicate)
+                result_batch = apply_predicate(
+                    result_batch, self.predicate, self.catalog
+                )
                 if not result_batch.empty():
                     yield result_batch

@@ -13,7 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import get_evadb_for_testing, load_udfs_for_testing, shutdown_ray, suffix_pytest_xdist_worker_id_to_dir
+from test.util import (
+    load_udfs_for_testing,
+    shutdown_ray,
+    suffix_pytest_xdist_worker_id_to_dir,
+)
 
 from pandas.testing import assert_frame_equal
 
@@ -102,7 +106,7 @@ class RelationalAPI(unittest.TestCase):
 
     def test_relation_api_chaining(self):
         conn = connect(self.db_dir)
-        
+
         rel = conn.load(
             self.mnist_path,
             table_name="mnist_video",
@@ -148,7 +152,6 @@ class RelationalAPI(unittest.TestCase):
 
     def test_create_index(self):
         conn = connect(self.db_dir)
-        
 
         # load some images
         rel = conn.load(
