@@ -19,8 +19,8 @@ import asyncio
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
-from eva.interfaces.relational.db import connect
-
+from eva.interfaces.relational.db import connect, EVACursor
+from unittest.mock import AsyncMock
 @pytest.mark.asyncio
 class EVAAPITests(unittest.TestCase):
     def setUp(self):
@@ -33,16 +33,16 @@ class EVAAPITests(unittest.TestCase):
 
     def tearDown(self):
         # reader, writer = get_connection_async()
-        connection = connect()
-        cursor = connection.cursor()
+        connection = AsyncMock()
+        cursor = EVACursor(connection)
         drop = cursor.query("DROP TABLE IF  EXISTS PDFss")
         drop.execute()
 
     def test_udf_eva_api(self):
         pdf_path = f"{EVA_ROOT_DIR}/data/documents/state_of_the_union.pdf"
         
-        connection = connect()
-        cursor = connection.cursor()
+        connection = AsyncMock()
+        cursor = EVACursor(connection)
 
         load_pdf =cursor.load(file_regex=pdf_path,format="PDF",table_name="PDFss")
         load_pdf.execute()
