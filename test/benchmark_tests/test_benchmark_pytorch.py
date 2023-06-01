@@ -172,7 +172,7 @@ def test_summarization_from_video(benchmark, setup_pytorch_tests):
 )
 def test_load_large_scale_image_dataset(benchmark, setup_pytorch_tests):
     # Test load 1M images.
-    tmp_dir = ConfigurationManager().get_value("storage", "tmp_dir")
+    tmp_dir = setup_pytorch_tests.config.get_value("storage", "tmp_dir")
 
     # Check directory's mounted disk available space.
     statvfs = os.statvfs(tmp_dir)

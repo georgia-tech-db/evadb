@@ -93,7 +93,7 @@ class OptimizerRulesTest(unittest.TestCase):
             with disable_rules(
                 [PushDownFilterThroughApplyAndMerge(), PushDownFilterThroughJoin()]
             ) as rules_manager:
-                custom_plan_generator = PlanGenerator(rules_manager)
+                custom_plan_generator = PlanGenerator(self.evadb, rules_manager)
                 result_without_pushdown_rules = execute_query_fetch_all(
                     self.evadb, query, plan_generator=custom_plan_generator
                 )
@@ -110,7 +110,7 @@ class OptimizerRulesTest(unittest.TestCase):
 
         result_without_xform_rule = None
         with disable_rules([XformLateralJoinToLinearFlow()]) as rules_manager:
-            custom_plan_generator = PlanGenerator(rules_manager)
+            custom_plan_generator = PlanGenerator(self.evadb, rules_manager)
             result_without_xform_rule = execute_query_fetch_all(
                 self.evadb, query, plan_generator=custom_plan_generator
             )
@@ -133,7 +133,7 @@ class OptimizerRulesTest(unittest.TestCase):
         with time_without_rule:
             with disable_rules([PushDownFilterThroughJoin()]) as rules_manager:
                 # should use PushDownFilterThroughApplyAndMerge()
-                custom_plan_generator = PlanGenerator(rules_manager)
+                custom_plan_generator = PlanGenerator(self.evadb, rules_manager)
                 result_without_pushdown_join_rule = execute_query_fetch_all(
                     self.evadb, query, plan_generator=custom_plan_generator
                 )
@@ -257,7 +257,7 @@ class OptimizerRulesTest(unittest.TestCase):
         result = execute_query_fetch_all(self.evadb, query)
 
         with disable_rules([ReorderPredicates()]) as rules_manager:
-            custom_plan_generator = PlanGenerator(rules_manager)
+            custom_plan_generator = PlanGenerator(self.evadb, rules_manager)
             expected = execute_query_fetch_all(
                 self.evadb, query, plan_generator=custom_plan_generator
             )

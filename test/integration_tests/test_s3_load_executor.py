@@ -124,6 +124,8 @@ class S3LoadExecutorTest(unittest.TestCase):
 
         select_query = """SELECT * FROM MyVideos;"""
         result = execute_query_fetch_all(self.evadb, select_query)
+        print(result.frames["myvideos.name"].unique())
+        
         result_videos = [
             Path(video).as_posix() for video in result.frames["myvideos.name"].unique()
         ]

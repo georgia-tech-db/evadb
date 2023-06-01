@@ -148,9 +148,7 @@ class EVACursor(object):
             target_list=[TupleValueExpression(col_name="*")], from_table=table
         )
         try_binding(self._evadb.catalog, select_stmt)
-        return EVARelation(
-            self._evadb, select_stmt, alias=Alias(table_name.lower())
-        )
+        return EVARelation(self._evadb, select_stmt, alias=Alias(table_name.lower()))
 
     def df(self) -> pandas.DataFrame:
         if not self._result:
@@ -194,3 +192,19 @@ def connect(eva_dir: str = EVA_DATABASE_DIR, sql_backend: str = None) -> EVAConn
     # reader and writer parameters are not relevant in the serverless approach.
     evadb = init_eva_db_instance(eva_dir, custom_db_uri=sql_backend)
     return EVAConnection(evadb, None, None)
+
+
+# WIP
+# support remote connections from pythonic APIs
+
+
+async def get_connection(host: str, port: int) -> EVAConnection:
+    reader, writer = await asyncio.open_connection(host, port)
+    # no db required for remote connection
+    connection = EVAConnection(None, reader, writer)
+    return connection
+
+
+def connect_remote(host: str, port: int) -> EVAConnection:
+    connection = asyncio.run(get_connection(host, port))
+    return connection

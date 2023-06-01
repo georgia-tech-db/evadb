@@ -59,7 +59,7 @@ class ExplainExecutorTest(unittest.TestCase):
         self.assertEqual(batch.frames[0][0], expected_output)
 
         with disable_rules([XformLateralJoinToLinearFlow()]) as rules_manager:
-            custom_plan_generator = PlanGenerator(rules_manager)
+            custom_plan_generator = PlanGenerator(self.evadb, rules_manager)
             select_query = "EXPLAIN SELECT id, data FROM MyVideo JOIN LATERAL DummyObjectDetector(data) AS T ;"
             batch = execute_query_fetch_all(
                 self.evadb, select_query, plan_generator=custom_plan_generator
@@ -75,7 +75,7 @@ class ExplainExecutorTest(unittest.TestCase):
                 LogicalInnerJoinCommutativity(),
             ]
         ) as rules_manager:
-            custom_plan_generator = PlanGenerator(rules_manager)
+            custom_plan_generator = PlanGenerator(self.evadb, rules_manager)
             select_query = "EXPLAIN SELECT id, data FROM MyVideo JOIN LATERAL DummyObjectDetector(data) AS T ;"
             batch = execute_query_fetch_all(
                 self.evadb, select_query, plan_generator=custom_plan_generator
@@ -83,3 +83,7 @@ class ExplainExecutorTest(unittest.TestCase):
             expected_output = """|__ ProjectPlan\n    |__ LateralJoinPlan\n        |__ SeqScanPlan\n            |__ StoragePlan\n        |__ FunctionScanPlan\n"""
             print(batch.frames[0][0])
             self.assertEqual(batch.frames[0][0], expected_output)
+
+
+if __name__ == "__main__":
+    unittest.main()

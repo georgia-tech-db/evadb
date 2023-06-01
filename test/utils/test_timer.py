@@ -17,7 +17,7 @@ import asyncio
 import time
 import unittest
 from test.markers import windows_skip_marker
-from test.util import create_sample_video, file_remove
+from test.util import create_sample_video, file_remove, get_evadb_for_testing
 from unittest.mock import MagicMock
 
 import pytest
@@ -44,12 +44,13 @@ class TimerTests(unittest.TestCase):
 
     @pytest.mark.notparallel
     def test_timer_with_query(self):
-        CatalogManager().reset()
+        evadb = get_evadb_for_testing()
+        evadb.catalog.reset()
         video_file_path = create_sample_video(NUM_FRAMES)
         load_query = f"LOAD VIDEO '{video_file_path}' INTO MyVideo;"
         transport = MagicMock()
         transport.write = MagicMock(return_value="response_message")
-        response = asyncio.run(handle_request(transport, load_query))
+        response = asyncio.run(handle_request(evadb, transport, load_query))
         self.assertTrue(response.error is None)
         self.assertTrue(response.query_time is not None)
 
@@ -57,7 +58,7 @@ class TimerTests(unittest.TestCase):
         load_query = """LOAD INFILE 'dummy.avi' INTO MyVideo;"""
         transport = MagicMock()
         transport.write = MagicMock(return_value="response_message")
-        response = asyncio.run(handle_request(transport, load_query))
+        response = asyncio.run(handle_request(evadb, transport, load_query))
         self.assertTrue(response.error is not None)
         self.assertTrue(response.query_time is None)
 

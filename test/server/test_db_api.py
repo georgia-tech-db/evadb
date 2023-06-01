@@ -20,7 +20,7 @@ from test.util import suffix_pytest_xdist_worker_id_to_dir
 
 from mock import MagicMock, patch
 
-from eva.interfaces.relational.db import EVACursor, connect
+from eva.interfaces.relational.db import EVACursor, connect_remote
 from eva.models.server.response import Response
 
 # Check for Python 3.8+ for IsolatedAsyncioTestCase support
@@ -98,7 +98,7 @@ if sys.version_info >= (3, 8):
 
             # test connection error with incorrect port
             with self.assertRaises(OSError):
-                connect(hostname, port=1)
+                connect_remote(hostname, port=1)
 
         async def test_eva_signal(self):
             loop = asyncio.new_event_loop()
@@ -134,6 +134,6 @@ if sys.version_info >= (3, 8):
             server_writer = MagicMock()
             mock_open.return_value = (server_reader, server_writer)
 
-            connection = connect("localhost", port=1)
+            connection = connect_remote("localhost", port=1)
 
             self.assertNotEqual(connection, None)

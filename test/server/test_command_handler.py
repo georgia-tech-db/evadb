@@ -35,4 +35,4 @@ class CommandHandlerTests(unittest.TestCase):
         transport.write = MagicMock(return_value="response_message")
         request_message = "SELECT id FROM foo;"
 
-        asyncio.run(handle_request(transport, request_message))
+        asyncio.run(handle_request(None, transport, request_message))

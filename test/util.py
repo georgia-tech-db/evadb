@@ -401,7 +401,7 @@ def create_sample_video(num_frames=NUM_FRAMES):
         out.write(data)
     out.release()
 
-    return os.path.join(get_tmp_dir(), file_name)
+    return file_name
 
 
 def file_remove(path, parent_dir=None):

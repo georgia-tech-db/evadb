@@ -33,7 +33,7 @@ if sys.version_info >= (3, 8):
             host = "localhost"
             port = 8803
 
-            await eva_server.start_eva_server(host, port)
+            await eva_server.start_eva_server("eva_db", host, port)
 
             # connection made
             client_reader1 = asyncio.StreamReader()
