@@ -58,7 +58,7 @@ def analyze_vieo(api_key: str) -> EVAConnection:
         """
     conn.query(speech_analyzer_udf_query).execute()
 
-    chatgpt_udf_query = """CREATE UDF IF NOT EXISTS ChatGPT IMPL '../../eva/udfs/chatgpt.py';"""
+    chatgpt_udf_query = """CREATE UDF IF NOT EXISTS ChatGPT IMPL 'eva/udfs/chatgpt.py';"""
     conn.query(chatgpt_udf_query).execute()
 
     # load youtube video into an evadb table
@@ -70,7 +70,6 @@ def analyze_vieo(api_key: str) -> EVAConnection:
 
     print("Video Analysis Completes!")
     return conn
-
 
 def cleanup():
     """Removes any temporary file / directory created by EVA.
