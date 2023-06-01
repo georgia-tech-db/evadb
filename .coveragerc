@@ -3,7 +3,8 @@ omit =
     eva/udfs/abstract/*
     eva/udfs/emotion_detector.py
     eva/udfs/yolo_object_detector.py
-    eva/experimental/*
+    eva/executor/exchange_executor.py
+    eva/executor/ray_utils.py
 
 [report]
 exclude_lines =
