@@ -14,9 +14,8 @@
 # limitations under the License.
 from eva.database import EVADB
 from eva.executor.abstract_executor import AbstractExecutor
-from eva.executor.executor_utils import ExecutorError, handle_if_not_exists
+from eva.executor.executor_utils import handle_if_not_exists
 from eva.plan_nodes.create_plan import CreatePlan
-from eva.plan_nodes.types import PlanOprType
 from eva.storage.storage_engine import StorageEngine
 from eva.utils.logging_manager import logger
 
@@ -38,18 +37,12 @@ class CreateExecutor(AbstractExecutor):
             storage_engine.create(table=catalog_entry)
 
             if self.children != []:
+                assert (
+                    len(self.children) == 1
+                ), "Create materialized view expects 1 child, finds {}".format(
+                    len(self.children)
+                )
                 child = self.children[0]
-                # only support seq scan based materialization
-                if child.node.opr_type not in {
-                    PlanOprType.SEQUENTIAL_SCAN,
-                    PlanOprType.PROJECT,
-                }:
-                    err_msg = "Invalid query {}, expected {} or {}".format(
-                        child.node.opr_type,
-                        PlanOprType.SEQUENTIAL_SCAN,
-                        PlanOprType.PROJECT,
-                    )
-                    raise ExecutorError(err_msg)
 
                 # Populate the table
                 for batch in child.exec():
