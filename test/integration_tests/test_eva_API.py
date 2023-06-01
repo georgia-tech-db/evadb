@@ -33,7 +33,7 @@ class EVAAPITests(unittest.TestCase):
 
     def tearDown(self):
         # reader, writer = get_connection_async()
-        connection = connect(host="127.0.0.1", port=8803)
+        connection = connect()
         cursor = connection.cursor()
         drop = cursor.query("DROP TABLE IF  EXISTS PDFss")
         drop.execute()
@@ -41,7 +41,7 @@ class EVAAPITests(unittest.TestCase):
     def test_udf_eva_api(self):
         pdf_path = f"{EVA_ROOT_DIR}/data/documents/state_of_the_union.pdf"
         
-        connection = connect(host="127.0.0.1", port=8803)
+        connection = connect()
         cursor = connection.cursor()
 
         load_pdf =cursor.load(file_regex=pdf_path,format="PDF",table_name="PDFss")
