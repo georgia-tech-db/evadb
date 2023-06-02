@@ -29,7 +29,19 @@ LOAD VIDEO FROM S3
 
 The videos are downloaded to a directory that can be configured in the EVA configuration file under `storage:s3_download_dir`. The default directory is ``~/.eva/s3_downloads``.
 
-.. _3-load-the-csv-file:
+.. _3-load-image-from-file:
+
+LOAD IMAGE FROM FILESYSTEM
+----
+
+.. code:: mysql
+
+   LOAD IMAGE 'test_image.jpg' INTO MyImage;
+
+Images are loaded similarity to videos, each tuple in an image table represents an image. EVA automatically generates 
+the following schema with two columns: ``name`` and ``data``, that correspond to the image name and the image data.
+
+.. _4-load-the-csv-file:
 
 LOAD CSV 
 ----
