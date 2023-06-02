@@ -12,14 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import cv2
-import kornia
 import numpy as np
 import pandas as pd
 import torch
 import torchvision
-import torch.nn as nn
-import torch.nn.functional as F
 
 from eva.catalog.catalog_type import NdArrayType
 from eva.udfs.abstract.abstract_udf import AbstractUDF

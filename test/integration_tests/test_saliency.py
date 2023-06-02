@@ -14,18 +14,12 @@
 # limitations under the License.
 import unittest
 from test.util import (
-    NUM_FRAMES,
-    create_sample_video,
-    file_remove,
-    load_udfs_for_testing,
     shutdown_ray,
 )
 
-import pandas as pd
 import pytest
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.models.storage.batch import Batch
 from eva.server.command_handler import execute_query_fetch_all
 
 
