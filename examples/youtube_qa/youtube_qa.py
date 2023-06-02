@@ -31,10 +31,10 @@ def download_youtube_video_from_link(video_link: str):
         yt.download(filename='online_video.mp4')
     except:
         print("An error has occurred")
-    print("Video download succeeded")
+    print("Video downloaded successfully")
 
 
-def analyze_vieo(api_key: str) -> EVAConnection:
+def analyze_video(api_key: str) -> EVAConnection:
     """Extracts speech from video for llm processing.
 
     Args:
@@ -68,7 +68,7 @@ def analyze_vieo(api_key: str) -> EVAConnection:
     # extract speech texts from videos
     conn.query("CREATE TABLE IF NOT EXISTS youtube_video_text AS SELECT SpeechRecognizer(audio) FROM youtube_video;").execute()
 
-    print("Video Analysis Completes!")
+    print("Video analysis completed!")
     return conn
 
 def cleanup():
@@ -81,20 +81,20 @@ def cleanup():
 
 
 if __name__ == "__main__":
-    print("Welcome! This is a bot powered by EVADB and chatgpt that tells you everything about a youtube video. All you need to do is to enter your video link and openai api key below.")
-    video_link = str(input("Enter the url of your YouTube video: "))
-    api_key = str(input("Enter your openai api key: "))
+    print("Welcome! This app lets you ask questions about any YouTube video. You will only need to supply a Youtube URL and an OpenAI API key.")
+    video_link = str(input("Enter the URL of the YouTube video: "))
+    api_key = str(input("Enter your OpenAI API key: "))
 
     download_youtube_video_from_link(video_link)
 
     try:
-        conn = analyze_vieo(api_key)
+        conn = analyze_video(api_key)
 
         print("===========================================")
-        print("Ask us anything about the video (i.e. summarize the video)")
+        print("Ask anything about the video:")
         ready = True
         while ready:
-            question = str(input("Ask about the video (enter \'exit\' to exit): "))
+            question = str(input("Question (enter \'exit\' to exit): "))
             if question.lower() == 'exit':
                 ready = False
             else:
@@ -104,9 +104,9 @@ if __name__ == "__main__":
                 print(response, "\n")
         
         cleanup()
-        print("session ended.")
+        print("Session ended.")
         print("===========================================")
     except:
         cleanup()
-        print("session ended with some error.")
+        print("Session ended with an error.")
         print("===========================================")

@@ -20,10 +20,10 @@ parts:
   - caption: User Reference
     chapters:
       - file: source/reference/python/df
-        title: EVARelation API [Dataframe]
+        title: Python API
 
       - file: source/reference/python/db
-        title: EVAConnection API [SQL]
+        title: SQL API
 
       - file: source/reference/udf
         title: User-Defined Functions
