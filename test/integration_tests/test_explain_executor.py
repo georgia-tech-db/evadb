@@ -28,7 +28,7 @@ from eva.optimizer.rules.rules import (
     LogicalInnerJoinCommutativity,
     XformLateralJoinToLinearFlow,
 )
-from eva.optimizer.rules.rules_manager import disable_rules
+from eva.optimizer.rules.rules_manager import RulesManager, disable_rules
 from eva.server.command_handler import execute_query_fetch_all
 
 NUM_FRAMES = 10
@@ -57,8 +57,8 @@ class ExplainExecutorTest(unittest.TestCase):
             """|__ ProjectPlan\n    |__ SeqScanPlan\n        |__ StoragePlan\n"""
         )
         self.assertEqual(batch.frames[0][0], expected_output)
-
-        with disable_rules([XformLateralJoinToLinearFlow()]) as rules_manager:
+        rules_manager = RulesManager(self.evadb.config)
+        with disable_rules(rules_manager, [XformLateralJoinToLinearFlow()]):
             custom_plan_generator = PlanGenerator(self.evadb, rules_manager)
             select_query = "EXPLAIN SELECT id, data FROM MyVideo JOIN LATERAL DummyObjectDetector(data) AS T ;"
             batch = execute_query_fetch_all(
@@ -68,13 +68,15 @@ class ExplainExecutorTest(unittest.TestCase):
             self.assertEqual(batch.frames[0][0], expected_output)
 
         # Disable more rules
+        rules_manager = RulesManager(self.evadb.config)
         with disable_rules(
+            rules_manager,
             [
                 XformLateralJoinToLinearFlow(),
                 EmbedFilterIntoGet(),
                 LogicalInnerJoinCommutativity(),
-            ]
-        ) as rules_manager:
+            ],
+        ):
             custom_plan_generator = PlanGenerator(self.evadb, rules_manager)
             select_query = "EXPLAIN SELECT id, data FROM MyVideo JOIN LATERAL DummyObjectDetector(data) AS T ;"
             batch = execute_query_fetch_all(

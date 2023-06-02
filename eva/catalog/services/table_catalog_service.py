@@ -120,8 +120,11 @@ class TableCatalogService(BaseService):
 
     def rename_entry(self, table: TableCatalogEntry, new_name: str):
         try:
-            table_obj = self.query.filter(self.model._row_id == table.row_id).one()
-            table_obj.update(self.session, _name=new_name)
+            table_obj = self.session.execute(
+                select(self.model).filter(self.model._row_id == table.row_id)
+            ).scalar_one_or_none()
+            if table_obj:
+                table_obj.update(self.session, _name=new_name)
         except Exception as e:
             err_msg = "Update table name failed for {} with error {}".format(
                 table.name, str(e)

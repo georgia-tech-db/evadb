@@ -275,7 +275,8 @@ class RulesTest(unittest.TestCase):
         self.assertFalse(rule.check(logi_sample, MagicMock()))
 
     def test_disable_rules(self):
-        with disable_rules([PushDownFilterThroughApplyAndMerge()]) as rules_manager:
+        rules_manager = RulesManager(self.evadb.config)
+        with disable_rules(rules_manager, [PushDownFilterThroughApplyAndMerge()]):
             self.assertFalse(
                 any(
                     isinstance(PushDownFilterThroughApplyAndMerge, type(x))

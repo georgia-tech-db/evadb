@@ -36,7 +36,7 @@ from eva.optimizer.rules.rules import (
     ReorderPredicates,
     XformLateralJoinToLinearFlow,
 )
-from eva.optimizer.rules.rules_manager import disable_rules
+from eva.optimizer.rules.rules_manager import RulesManager, disable_rules
 from eva.plan_nodes.predicate_plan import PredicatePlan
 from eva.server.command_handler import execute_query_fetch_all
 from eva.utils.stats import Timer
@@ -89,10 +89,13 @@ class OptimizerRulesTest(unittest.TestCase):
 
         time_without_rule = Timer()
         result_without_pushdown_rules = None
+
         with time_without_rule:
+            rules_manager = RulesManager(self.evadb.config)
             with disable_rules(
-                [PushDownFilterThroughApplyAndMerge(), PushDownFilterThroughJoin()]
-            ) as rules_manager:
+                rules_manager,
+                [PushDownFilterThroughApplyAndMerge(), PushDownFilterThroughJoin()],
+            ):
                 custom_plan_generator = PlanGenerator(self.evadb, rules_manager)
                 result_without_pushdown_rules = execute_query_fetch_all(
                     self.evadb, query, plan_generator=custom_plan_generator
@@ -109,7 +112,8 @@ class OptimizerRulesTest(unittest.TestCase):
         self.assertGreater(evaluate_count_without_rule, 3 * evaluate_count_with_rule)
 
         result_without_xform_rule = None
-        with disable_rules([XformLateralJoinToLinearFlow()]) as rules_manager:
+        rules_manager = RulesManager(self.evadb.config)
+        with disable_rules(rules_manager, [XformLateralJoinToLinearFlow()]):
             custom_plan_generator = PlanGenerator(self.evadb, rules_manager)
             result_without_xform_rule = execute_query_fetch_all(
                 self.evadb, query, plan_generator=custom_plan_generator
@@ -131,7 +135,8 @@ class OptimizerRulesTest(unittest.TestCase):
         time_without_rule = Timer()
         result_without_pushdown_join_rule = None
         with time_without_rule:
-            with disable_rules([PushDownFilterThroughJoin()]) as rules_manager:
+            rules_manager = RulesManager(self.evadb.config)
+            with disable_rules(rules_manager, [PushDownFilterThroughJoin()]):
                 # should use PushDownFilterThroughApplyAndMerge()
                 custom_plan_generator = PlanGenerator(self.evadb, rules_manager)
                 result_without_pushdown_join_rule = execute_query_fetch_all(
@@ -256,7 +261,8 @@ class OptimizerRulesTest(unittest.TestCase):
         query = "SELECT id FROM MyVideo WHERE id < 20 AND id > 10;"
         result = execute_query_fetch_all(self.evadb, query)
 
-        with disable_rules([ReorderPredicates()]) as rules_manager:
+        rules_manager = RulesManager(self.evadb.config)
+        with disable_rules(rules_manager, [ReorderPredicates()]):
             custom_plan_generator = PlanGenerator(self.evadb, rules_manager)
             expected = execute_query_fetch_all(
                 self.evadb, query, plan_generator=custom_plan_generator

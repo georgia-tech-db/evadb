@@ -66,7 +66,7 @@ from eva.optimizer.rules.rules_base import Rule
 
 
 class RulesManager:
-    def __init__(self):
+    def __init__(self, config: ConfigurationManager):
         self._logical_rules = [
             LogicalInnerJoinCommutativity(),
             CacheFunctionExpressionInApply(),
@@ -117,7 +117,7 @@ class RulesManager:
             LogicalVectorIndexScanToPhysical(),
         ]
 
-        ray_enabled = ConfigurationManager().get_value("experimental", "ray")
+        ray_enabled = config.get_value("experimental", "ray")
         if ray_enabled:
             self._implementation_rules.extend(
                 [
@@ -200,15 +200,14 @@ class RulesManager:
 
 
 @contextmanager
-def disable_rules(rules: List[Rule]):
+def disable_rules(rules_manager: RulesManager, rules: List[Rule]):
     """Use this function to temporarily drop rules.
         Useful for testing and debugging purposes.
     Args:
+        rules_manager (RulesManager)
         rules (List[Rule]): List of rules to temporarily drop
     """
     try:
-        rules_manager = RulesManager()
         rules_manager.disable_rules(rules)
-        yield rules_manager
     finally:
         rules_manager.add_rules(rules)

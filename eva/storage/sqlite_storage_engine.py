@@ -155,7 +155,7 @@ class SQLStorageEngine(AbstractStorageEngine):
             for record in rows.frames.values:
                 row_data = {col: record[idx] for idx, col in enumerate(columns)}
                 data.append(self._dict_to_sql_row(row_data, table_columns))
-            self._sql_engine.execute(table_to_update.insert(), data)
+            self._sql_session.execute(table_to_update.insert(), data)
             self._sql_session.commit()
         except Exception as e:
             err_msg = f"Failed to update the table {table.name} with exception {str(e)}"

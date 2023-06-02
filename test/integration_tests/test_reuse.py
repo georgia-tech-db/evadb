@@ -32,7 +32,7 @@ from eva.optimizer.rules.rules import (
     CacheFunctionExpressionInFilter,
     CacheFunctionExpressionInProject,
 )
-from eva.optimizer.rules.rules_manager import disable_rules
+from eva.optimizer.rules.rules_manager import RulesManager, disable_rules
 from eva.server.command_handler import execute_query_fetch_all
 from eva.utils.stats import Timer
 
@@ -64,13 +64,15 @@ class ReuseTest(unittest.TestCase):
         # surfaces when the system is running on low memory. Explicitly calling garbage
         # collection to reduce the memory usage.
         gc.collect()
+        rules_manager = RulesManager(self.evadb.config)
         with disable_rules(
+            rules_manager,
             [
                 CacheFunctionExpressionInApply(),
                 CacheFunctionExpressionInFilter(),
                 CacheFunctionExpressionInProject(),
-            ]
-        ) as rules_manager:
+            ],
+        ):
             custom_plan_generator = PlanGenerator(self.evadb, rules_manager)
             without_reuse_batch = execute_query_fetch_all(
                 self.evadb, query, plan_generator=custom_plan_generator

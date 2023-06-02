@@ -40,7 +40,7 @@ class OptimizerContext:
         self._task_stack = OptimizerTaskStack()
         self._memo = Memo()
         self._cost_model = cost_model
-        self._rules_manager = rules_manager or RulesManager()
+        self._rules_manager = rules_manager or RulesManager(db.config)
 
     @property
     def db(self):

@@ -40,7 +40,7 @@ class PlanGenerator:
         cost_model: CostModel = None,
     ) -> None:
         self.db = db
-        self.rules_manager = rules_manager or RulesManager()
+        self.rules_manager = rules_manager or RulesManager(db.config)
         self.cost_model = cost_model or CostModel()
 
     def execute_task_stack(self, task_stack: OptimizerTaskStack):
