@@ -1,11 +1,26 @@
-Python Client API
+Python API
 =================
 
-DataFrame Interface
-------------------------
+Database Interface
+------------
 
 .. currentmodule:: eva.interfaces.relational
 
+.. autosummary::
+    :toctree: ./doc
+
+    ~db.EVAConnection.create_vector_index
+    ~db.EVAConnection.cursor
+    ~db.EVAConnection.df
+    ~db.EVAConnection.load
+    ~db.EVAConnection.sql
+    ~db.EVAConnection.table
+    ~db.EVAConnection.query
+
+Table Interface
+------------
+
+.. currentmodule:: eva.interfaces.relational
 
 .. autosummary::
     :toctree: ./doc

@@ -19,11 +19,8 @@ parts:
 
   - caption: User Reference
     chapters:
-      - file: source/reference/python/df
-        title: Python API
-
-      - file: source/reference/python/db
-        title: SQL API
+      - file: source/reference/api
+        title: API
 
       - file: source/reference/udf
         title: User-Defined Functions
