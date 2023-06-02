@@ -206,7 +206,7 @@ def optimize_cache_key(context: "OptimizerContext", expr: FunctionExpression):
 
     """
     keys = expr.children
-    catalog = context.db.catalog
+    catalog = context.db.catalog()
     # handle simple one column inputs
     if len(keys) == 1 and isinstance(keys[0], TupleValueExpression):
         child = keys[0]
@@ -236,7 +236,7 @@ def enable_cache_init(
     if optimized_key == func_expr.children:
         optimized_key = [None]
 
-    catalog = context.db.catalog
+    catalog = context.db.catalog()
     name = func_expr.signature()
     cache_entry = catalog.get_udf_cache_catalog_entry_by_name(name)
     if not cache_entry:
@@ -306,11 +306,10 @@ def get_expression_execution_cost(
     Returns:
         float: The estimated cost of executing the function expression.
     """
-    catalog = context.db.catalog
     total_cost = 0
     # iterate over all the function expression and accumulate the cost
     for child_expr in expr.find_all(FunctionExpression):
-        cost_entry = catalog.get_udf_cost_catalog_entry(child_expr.name)
+        cost_entry = context.db.catalog().get_udf_cost_catalog_entry(child_expr.name)
         if cost_entry:
             total_cost += cost_entry.cost
         else:

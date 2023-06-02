@@ -97,7 +97,7 @@ class CreateUDFExecutor(AbstractExecutor):
         Calls the catalog to insert a udf catalog entry.
         """
         # check catalog if it already has this udf entry
-        if self.catalog.get_udf_catalog_entry_by_name(self.node.name):
+        if self.catalog().get_udf_catalog_entry_by_name(self.node.name):
             if self.node.if_not_exists:
                 msg = f"UDF {self.node.name} already exists, nothing added."
                 yield Batch(pd.DataFrame([msg]))
@@ -115,7 +115,7 @@ class CreateUDFExecutor(AbstractExecutor):
         else:
             name, impl_path, udf_type, io_list, metadata = self.handle_generic_udf()
 
-        self.catalog.insert_udf_catalog_entry(
+        self.catalog().insert_udf_catalog_entry(
             name, impl_path, udf_type, io_list, metadata
         )
         yield Batch(

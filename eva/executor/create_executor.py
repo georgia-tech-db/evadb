@@ -26,11 +26,11 @@ class CreateExecutor(AbstractExecutor):
 
     def exec(self, *args, **kwargs):
         if not handle_if_not_exists(
-            self.catalog, self.node.table_info, self.node.if_not_exists
+            self.catalog(), self.node.table_info, self.node.if_not_exists
         ):
             logger.debug(f"Creating table {self.node.table_info}")
 
-            catalog_entry = self.catalog.create_and_insert_table_catalog_entry(
+            catalog_entry = self.catalog().create_and_insert_table_catalog_entry(
                 self.node.table_info, self.node.column_list
             )
             storage_engine = StorageEngine.factory(self.db, catalog_entry)

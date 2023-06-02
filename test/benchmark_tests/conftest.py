@@ -23,7 +23,7 @@ from eva.udfs.udf_bootstrap_queries import init_builtin_udfs
 @pytest.fixture(autouse=False)
 def setup_pytorch_tests():
     evadb = get_evadb_for_testing()
-    evadb.catalog.reset()
+    evadb.catalog().reset()
     execute_query_fetch_all(
         evadb, "LOAD VIDEO 'data/ua_detrac/ua_detrac.mp4' INTO MyVideo;"
     )

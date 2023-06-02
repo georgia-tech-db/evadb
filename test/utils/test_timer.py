@@ -44,7 +44,7 @@ class TimerTests(unittest.TestCase):
     @pytest.mark.notparallel
     def test_timer_with_query(self):
         evadb = get_evadb_for_testing()
-        evadb.catalog.reset()
+        evadb.catalog().reset()
         video_file_path = create_sample_video(NUM_FRAMES)
         load_query = f"LOAD VIDEO '{video_file_path}' INTO MyVideo;"
         transport = MagicMock()

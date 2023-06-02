@@ -12,10 +12,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Dict, List, Tuple, Union
+from typing import Callable, Dict, List, Tuple, Union
 
 from eva.binder.binder_utils import BinderError
-from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
@@ -44,7 +43,7 @@ class StatementBinderContext:
             `{T: {a: func.obj1, b:func.obj2}}`
     """
 
-    def __init__(self, catalog: CatalogManager):
+    def __init__(self, catalog: Callable):
         self._catalog = catalog
         self._table_alias_map: Dict[str, TableCatalogEntry] = dict()
         self._derived_table_alias_map: Dict[str, Dict[str, CatalogColumnType]] = dict()
@@ -73,7 +72,7 @@ class StatementBinderContext:
             table_name (str): name of the table
         """
         self._check_duplicate_alias(alias)
-        table_obj = self._catalog.get_table_catalog_entry(table_name)
+        table_obj = self._catalog().get_table_catalog_entry(table_name)
         self._table_alias_map[alias] = table_obj
 
     def add_derived_table_alias(
@@ -145,7 +144,7 @@ class StatementBinderContext:
         """
         table_obj = self._table_alias_map.get(alias, None)
         if table_obj:
-            return self._catalog.get_column_catalog_entry(table_obj, col_name)
+            return self._catalog().get_column_catalog_entry(table_obj, col_name)
 
     def _check_derived_table_alias_map(self, alias, col_name) -> CatalogColumnType:
         """

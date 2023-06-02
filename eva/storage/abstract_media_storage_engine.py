@@ -34,11 +34,11 @@ class AbstractMediaStorageEngine(AbstractStorageEngine):
         self._rdb_handler: SQLStorageEngine = SQLStorageEngine(db)
 
     def _get_metadata_table(self, table: TableCatalogEntry):
-        return self.db.catalog.get_multimedia_metadata_table_catalog_entry(table)
+        return self.db.catalog().get_multimedia_metadata_table_catalog_entry(table)
 
     def _create_metadata_table(self, table: TableCatalogEntry):
         return (
-            self.db.catalog.create_and_insert_multimedia_metadata_table_catalog_entry(
+            self.db.catalog().create_and_insert_multimedia_metadata_table_catalog_entry(
                 table
             )
         )
@@ -86,7 +86,7 @@ class AbstractMediaStorageEngine(AbstractStorageEngine):
             metadata_table = self._get_metadata_table(table)
             self._rdb_handler.drop(metadata_table)
             # remove the metadata table from the catalog
-            self.db.catalog.delete_table_catalog_entry(metadata_table)
+            self.db.catalog().delete_table_catalog_entry(metadata_table)
         except Exception as e:
             err_msg = f"Failed to drop the image table {e}"
             logger.exception(err_msg)
@@ -144,6 +144,6 @@ class AbstractMediaStorageEngine(AbstractStorageEngine):
 
     def rename(self, old_table: TableCatalogEntry, new_name: TableInfo):
         try:
-            self.db.catalog.rename_table_catalog_entry(old_table, new_name)
+            self.db.catalog().rename_table_catalog_entry(old_table, new_name)
         except Exception as e:
             raise Exception(f"Failed to rename table {new_name} with exception {e}")

@@ -147,7 +147,7 @@ class EVACursor(object):
         select_stmt = SelectStatement(
             target_list=[TupleValueExpression(col_name="*")], from_table=table
         )
-        try_binding(self._evadb.catalog, select_stmt)
+        try_binding(self._evadb.catalog(), select_stmt)
         return EVARelation(self._evadb, select_stmt, alias=Alias(table_name.lower()))
 
     def df(self) -> pandas.DataFrame:

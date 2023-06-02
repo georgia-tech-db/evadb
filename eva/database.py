@@ -28,7 +28,6 @@ class EVADB:
     catalog_uri: str
     catalog_func: Callable
 
-    @property
     def catalog(self) -> CatalogManager:
         """
         Note: Generating an object on demand plays a crucial role in ensuring that different threads do not share the same catalog object, as it can result in serialization issues and incorrect behavior with SQLAlchemy. Refer to get_catalog_instance()

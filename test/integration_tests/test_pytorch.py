@@ -14,7 +14,7 @@
 # limitations under the License.
 import os
 import unittest
-from test.markers import ocr_skip_marker, windows_skip_marker
+from test.markers import ocr_skip_marker, ray_only_marker, windows_skip_marker
 from test.util import (
     create_sample_video,
     file_remove,
@@ -28,7 +28,6 @@ import numpy as np
 import pandas.testing as pd_testing
 import pytest
 
-from eva.configuration.configuration_manager import ConfigurationManager
 from eva.configuration.constants import EVA_ROOT_DIR
 from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
@@ -41,7 +40,9 @@ class PytorchTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.evadb = get_evadb_for_testing()
-        cls.evadb.catalog.reset()
+        cls.evadb.catalog().reset()
+        os.environ["ray"] = str(cls.evadb.config.get_value("experimental", "ray"))
+
         ua_detrac = f"{EVA_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
         mnist = f"{EVA_ROOT_DIR}/data/mnist/mnist.mp4"
         actions = f"{EVA_ROOT_DIR}/data/actions/actions.mp4"
@@ -68,11 +69,11 @@ class PytorchTest(unittest.TestCase):
         file_remove("actions.mp4")
         file_remove("computer_asl.mp4")
 
-        execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS Actions;")
-        execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS MNIST;")
-        execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS MyVideo;")
-        execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS Asl_actions;")
-        execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS MemeImages;")
+        # execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS Actions;")
+        # execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS MNIST;")
+        # execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS MyVideo;")
+        # execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS Asl_actions;")
+        # execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS MemeImages;")
 
     def assertBatchEqual(self, a: Batch, b: Batch, msg: str):
         try:
@@ -83,10 +84,7 @@ class PytorchTest(unittest.TestCase):
     def setUp(self):
         self.addTypeEqualityFunc(Batch, self.assertBatchEqual)
 
-    @pytest.mark.skipif(
-        not ConfigurationManager().get_value("experimental", "ray"),
-        reason="Only test for parallel execution",
-    )
+    @ray_only_marker
     def test_should_apply_parallel_match_sequential(self):
         # Parallel execution
         select_query = """SELECT id, obj.labels
@@ -110,10 +108,7 @@ class PytorchTest(unittest.TestCase):
         self.assertEqual(len(par_batch), len(seq_batch))
         self.assertEqual(par_batch, seq_batch)
 
-    @pytest.mark.skipif(
-        not ConfigurationManager().get_value("experimental", "ray"),
-        reason="Only test for Ray",
-    )
+    @ray_only_marker
     def test_should_project_parallel_match_sequential(self):
         create_udf_query = """CREATE UDF FaceDetector
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
@@ -130,7 +125,7 @@ class PytorchTest(unittest.TestCase):
         par_batch = execute_query_fetch_all(self.evadb, select_query)
 
         # Sequential execution.
-        ConfigurationManager().update_value("experimental", "ray", False)
+        self.evadb.config.update_value("experimental", "ray", False)
         seq_batch = execute_query_fetch_all(self.evadb, select_query)
         # Recover configuration back.
         self.evadb.config.update_value("experimental", "ray", True)
@@ -138,10 +133,7 @@ class PytorchTest(unittest.TestCase):
         self.assertEqual(len(par_batch), len(seq_batch))
         self.assertEqual(par_batch, seq_batch)
 
-    @pytest.mark.skipif(
-        not ConfigurationManager().get_value("experimental", "ray"),
-        reason="Only test for Ray",
-    )
+    @ray_only_marker
     def test_should_raise_exception_with_parallel(self):
         # Deliberately cause error.
         video_path = create_sample_video(100)
@@ -294,8 +286,7 @@ class PytorchTest(unittest.TestCase):
         batch_res = execute_query_fetch_all(self.evadb, select_query)
         img = batch_res.frames["myvideo.data"][0]
 
-        config = ConfigurationManager()
-        tmp_dir_from_config = config.get_value("storage", "tmp_dir")
+        tmp_dir_from_config = self.evadb.config.get_value("storage", "tmp_dir")
 
         img_save_path = os.path.join(tmp_dir_from_config, "dummy.jpg")
         try:
@@ -372,3 +363,7 @@ class PytorchTest(unittest.TestCase):
 
         # due to unnest the number of returned tuples should be at least > 10
         self.assertTrue(len(actual_batch) > 2)
+
+
+if __name__ == "__main__":
+    unittest.main()

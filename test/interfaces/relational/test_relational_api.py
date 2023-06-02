@@ -37,7 +37,7 @@ class RelationalAPI(unittest.TestCase):
         cls.evadb = cls.conn._evadb
 
     def setUp(self):
-        self.evadb.catalog.reset()
+        self.evadb.catalog().reset()
         self.mnist_path = f"{EVA_ROOT_DIR}/data/mnist/mnist.mp4"
         load_udfs_for_testing(
             self.evadb,

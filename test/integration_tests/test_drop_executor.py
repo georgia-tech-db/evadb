@@ -28,7 +28,7 @@ class DropExecutorTest(unittest.TestCase):
     def setUp(self):
         self.evadb = get_evadb_for_testing()
         # reset the catalog manager before running each test
-        self.evadb.catalog.reset()
+        self.evadb.catalog().reset()
         self.video_file_path = create_sample_video()
 
     def tearDown(self):
@@ -40,10 +40,10 @@ class DropExecutorTest(unittest.TestCase):
         execute_query_fetch_all(self.evadb, query)
 
         # catalog should contain video table and the metadata table
-        table_catalog_entry = self.evadb.catalog.get_table_catalog_entry("MyVideo")
+        table_catalog_entry = self.evadb.catalog().get_table_catalog_entry("MyVideo")
         video_dir = table_catalog_entry.file_url
         self.assertFalse(table_catalog_entry is None)
-        column_objects = self.evadb.catalog.get_column_catalog_entries_by_table(
+        column_objects = self.evadb.catalog().get_column_catalog_entries_by_table(
             table_catalog_entry
         )
         # no of column objects should equal what we have defined plus one for row_id
@@ -52,7 +52,7 @@ class DropExecutorTest(unittest.TestCase):
         )
         self.assertTrue(Path(video_dir).exists())
         video_metadata_table = (
-            self.evadb.catalog.get_multimedia_metadata_table_catalog_entry(
+            self.evadb.catalog().get_multimedia_metadata_table_catalog_entry(
                 table_catalog_entry
             )
         )
@@ -60,8 +60,8 @@ class DropExecutorTest(unittest.TestCase):
 
         drop_query = """DROP TABLE IF EXISTS MyVideo;"""
         execute_query_fetch_all(self.evadb, drop_query)
-        self.assertTrue(self.evadb.catalog.get_table_catalog_entry("MyVideo") is None)
-        column_objects = self.evadb.catalog.get_column_catalog_entries_by_table(
+        self.assertTrue(self.evadb.catalog().get_table_catalog_entry("MyVideo") is None)
+        column_objects = self.evadb.catalog().get_column_catalog_entries_by_table(
             table_catalog_entry
         )
         self.assertEqual(len(column_objects), 0)
@@ -77,7 +77,7 @@ class DropExecutorTest(unittest.TestCase):
 class DropUDFExecutorTest(unittest.TestCase):
     def setUp(self):
         self.evadb = get_evadb_for_testing()
-        self.evadb.catalog.reset()
+        self.evadb.catalog().reset()
 
     def tearDown(self):
         pass
@@ -93,20 +93,20 @@ class DropUDFExecutorTest(unittest.TestCase):
     def test_should_drop_udf(self):
         self.run_create_udf_query()
         udf_name = "DummyObjectDetector"
-        udf = self.evadb.catalog.get_udf_catalog_entry_by_name(udf_name)
+        udf = self.evadb.catalog().get_udf_catalog_entry_by_name(udf_name)
         self.assertTrue(udf is not None)
 
         # Test that dropping the UDF reflects in the catalog
         drop_query = "DROP UDF IF EXISTS {};".format(udf_name)
         execute_query_fetch_all(self.evadb, drop_query)
-        udf = self.evadb.catalog.get_udf_catalog_entry_by_name(udf_name)
+        udf = self.evadb.catalog().get_udf_catalog_entry_by_name(udf_name)
         self.assertTrue(udf is None)
 
     def test_drop_wrong_udf_name(self):
         self.run_create_udf_query()
         right_udf_name = "DummyObjectDetector"
         wrong_udf_name = "FakeDummyObjectDetector"
-        udf = self.evadb.catalog.get_udf_catalog_entry_by_name(right_udf_name)
+        udf = self.evadb.catalog().get_udf_catalog_entry_by_name(right_udf_name)
         self.assertTrue(udf is not None)
 
         # Test that dropping the wrong UDF:
@@ -120,5 +120,5 @@ class DropUDFExecutorTest(unittest.TestCase):
                 wrong_udf_name
             )
             self.assertTrue(str(e) == err_msg)
-        udf = self.evadb.catalog.get_udf_catalog_entry_by_name(right_udf_name)
+        udf = self.evadb.catalog().get_udf_catalog_entry_by_name(right_udf_name)
         self.assertTrue(udf is not None)

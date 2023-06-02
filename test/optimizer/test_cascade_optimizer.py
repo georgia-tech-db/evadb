@@ -32,7 +32,7 @@ from eva.server.command_handler import execute_query_fetch_all
 class CascadeOptimizer(unittest.TestCase):
     def setUp(self):
         self.evadb = get_evadb_for_testing()
-        self.evadb.catalog.reset()
+        self.evadb.catalog().reset()
         self.video_file_path = create_sample_video(NUM_FRAMES)
 
     def tearDown(self):

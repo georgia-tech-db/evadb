@@ -30,7 +30,7 @@ class RenameExecutorTest(unittest.TestCase):
     def setUp(self):
         self.evadb = get_evadb_for_testing()
         # reset the catalog manager before running each test
-        self.evadb.catalog.reset()
+        self.evadb.catalog().reset()
         self.video_file_path = create_sample_video()
         self.csv_file_path = create_sample_csv()
 
@@ -40,7 +40,7 @@ class RenameExecutorTest(unittest.TestCase):
 
     # integration test
     def test_should_rename_table(self):
-        catalog_manager = self.evadb.catalog
+        catalog_manager = self.evadb.catalog()
         query = f"""LOAD VIDEO '{self.video_file_path}' INTO MyVideo;"""
         execute_query_fetch_all(self.evadb, query)
 

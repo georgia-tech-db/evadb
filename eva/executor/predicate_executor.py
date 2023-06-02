@@ -31,6 +31,6 @@ class PredicateExecutor(AbstractExecutor):
     def exec(self, *args, **kwargs) -> Iterator[Batch]:
         child_executor = self.children[0]
         for batch in child_executor.exec(**kwargs):
-            batch = apply_predicate(batch, self.predicate, self.catalog)
+            batch = apply_predicate(batch, self.predicate, self.catalog())
             if not batch.empty():
                 yield batch

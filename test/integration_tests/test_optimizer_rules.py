@@ -51,7 +51,7 @@ class OptimizerRulesTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.evadb = get_evadb_for_testing()
-        cls.evadb.catalog.reset()
+        cls.evadb.catalog().reset()
         ua_detrac = f"{EVA_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
         execute_query_fetch_all(cls.evadb, f"LOAD VIDEO '{ua_detrac}' INTO MyVideo;")
         execute_query_fetch_all(cls.evadb, f"LOAD VIDEO '{ua_detrac}' INTO MyVideo2;")

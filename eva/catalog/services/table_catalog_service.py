@@ -14,6 +14,7 @@
 # limitations under the License.
 
 from sqlalchemy.orm import Session
+from sqlalchemy.sql.expression import select
 
 from eva.catalog.catalog_type import TableType
 from eva.catalog.models.table_catalog import TableCatalog, TableCatalogEntry
@@ -75,7 +76,9 @@ class TableCatalogService(BaseService):
         Returns:
            TableCatalogEntry
         """
-        entry = self.query.filter(self.model._row_id == table_id).one()
+        entry = self.session.execute(
+            select(self.model).filter(self.model._row_id == table_id)
+        ).scalar_one()
         return entry if return_alchemy else entry.as_dataclass()
 
     def get_entry_by_name(
@@ -90,7 +93,9 @@ class TableCatalogService(BaseService):
         Returns:
             TableCatalogEntry - catalog entry for given table_name
         """
-        entry = self.query.filter(self.model._name == table_name).one_or_none()
+        entry = self.session.execute(
+            select(self.model).filter(self.model._name == table_name)
+        ).scalar_one_or_none()
         if entry:
             return entry if return_alchemy else entry.as_dataclass()
         return entry
@@ -103,7 +108,9 @@ class TableCatalogService(BaseService):
             True if successfully removed else false
         """
         try:
-            table_obj = self.query.filter(self.model._row_id == table.row_id).one()
+            table_obj = self.session.execute(
+                select(self.model).filter(self.model._row_id == table.row_id)
+            ).scalar_one_or_none()
             table_obj.delete(self.session)
             return True
         except Exception as e:

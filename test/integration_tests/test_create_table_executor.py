@@ -39,7 +39,7 @@ class CreateTableTest(unittest.TestCase):
     def setUpClass(cls):
         cls.evadb = get_evadb_for_testing()
         # reset the catalog manager before running each test
-        cls.evadb.catalog.reset()
+        cls.evadb.catalog().reset()
         video_file_path = create_sample_video()
         load_query = f"LOAD VIDEO '{video_file_path}' INTO MyVideo;"
         execute_query_fetch_all(cls.evadb, load_query)

@@ -31,7 +31,7 @@ from eva.server.command_handler import execute_query_fetch_all
 class DeleteExecutorTest(unittest.TestCase):
     def setUp(self):
         self.evadb = get_evadb_for_testing()
-        self.evadb.catalog.reset()
+        self.evadb.catalog().reset()
         load_udfs_for_testing(self.evadb, mode="debug")
 
         create_table_query = """

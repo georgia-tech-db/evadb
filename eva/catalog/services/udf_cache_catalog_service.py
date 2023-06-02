@@ -12,9 +12,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.sql.expression import select
 
 from eva.catalog.models.udf_cache_catalog import UdfCacheCatalog, UdfCacheCatalogEntry
 from eva.catalog.services.base_service import BaseService
@@ -71,7 +71,9 @@ class UdfCacheCatalogService(BaseService):
 
     def get_entry_by_name(self, name: str) -> UdfCacheCatalogEntry:
         try:
-            entry = self.query.filter(self.model._name == name).one()
+            entry = self.session.execute(
+                select(self.model).filter(self.model._name == name)
+            ).scalar_one()
             return entry.as_dataclass()
         except NoResultFound:
             return None
@@ -84,7 +86,9 @@ class UdfCacheCatalogService(BaseService):
             True if successfully removed else false
         """
         try:
-            obj = self.query.filter(self.model._row_id == cache.row_id).one()
+            obj = self.session.execute(
+                select(self.model).filter(self.model._row_id == cache.row_id)
+            ).scalar_one()
             obj.delete(self.session)
             return True
         except Exception as e:

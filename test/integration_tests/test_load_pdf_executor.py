@@ -26,7 +26,7 @@ class LoadExecutorTest(unittest.TestCase):
     def setUp(self):
         self.evadb = get_evadb_for_testing()
         # reset the catalog manager before running each test
-        self.evadb.catalog.reset()
+        self.evadb.catalog().reset()
 
     def tearDown(self):
         execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS MyPDFs;")

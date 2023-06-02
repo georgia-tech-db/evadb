@@ -14,6 +14,7 @@
 # limitations under the License.
 from functools import singledispatchmethod
 from pathlib import Path
+from typing import Callable
 
 from eva.binder.binder_utils import (
     BinderError,
@@ -50,7 +51,7 @@ from eva.utils.logging_manager import logger
 class StatementBinder:
     def __init__(self, binder_context: StatementBinderContext):
         self._binder_context = binder_context
-        self._catalog = binder_context._catalog
+        self._catalog: Callable = binder_context._catalog
 
     @singledispatchmethod
     def bind(self, node):
@@ -92,7 +93,7 @@ class StatementBinder:
             assert len(col.array_dimensions) == 2
         else:
             # Output of the UDF should be 2 dimension and float32 type.
-            udf_obj = self._catalog.get_udf_catalog_entry_by_name(node.udf_func.name)
+            udf_obj = self._catalog().get_udf_catalog_entry_by_name(node.udf_func.name)
             for output in udf_obj.outputs:
                 assert (
                     output.array_type == NdArrayType.FLOAT32
@@ -128,7 +129,7 @@ class StatementBinder:
                 self.bind(expr[0])
         if node.union_link:
             current_context = self._binder_context
-            self._binder_context = StatementBinderContext(self._catalog)
+            self._binder_context = StatementBinderContext(self._catalog())
             self.bind(node.union_link)
             self._binder_context = current_context
 
@@ -236,10 +237,10 @@ class StatementBinder:
             self._binder_context.add_table_alias(
                 node.alias.alias_name, node.table.table_name
             )
-            bind_table_info(self._catalog, node.table)
+            bind_table_info(self._catalog(), node.table)
         elif node.is_select():
             current_context = self._binder_context
-            self._binder_context = StatementBinderContext(self._catalog)
+            self._binder_context = StatementBinderContext(self._catalog())
             self.bind(node.select_statement)
             self._binder_context = current_context
             self._binder_context.add_derived_table_alias(
@@ -293,7 +294,7 @@ class StatementBinder:
         for child in node.children:
             self.bind(child)
 
-        udf_obj = self._catalog.get_udf_catalog_entry_by_name(node.name)
+        udf_obj = self._catalog().get_udf_catalog_entry_by_name(node.name)
         if udf_obj is None:
             err_msg = (
                 f"UDF with name {node.name} does not exist in the catalog. "
@@ -344,7 +345,7 @@ class StatementBinder:
                 raise BinderError(err_msg)
 
         node.udf_obj = udf_obj
-        output_objs = self._catalog.get_udf_io_catalog_output_entries(udf_obj)
+        output_objs = self._catalog().get_udf_io_catalog_output_entries(udf_obj)
         if node.output:
             for obj in output_objs:
                 if obj.name.lower() == node.output:

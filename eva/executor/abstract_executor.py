@@ -38,10 +38,9 @@ class AbstractExecutor(ABC):
         self._config: ConfigurationManager = db.config if db else None
         self._children = []
 
-    @property
     def catalog(self) -> CatalogManager:
         """The object is intentionally generated on demand to prevent serialization issues. Having a SQLAlchemy object as a member variable can cause problems with multiprocessing. See get_catalog_instance()"""
-        return self._db.catalog if self._db else None
+        return self._db.catalog() if self._db else None
 
     def append_child(self, child: AbstractExecutor):
         """

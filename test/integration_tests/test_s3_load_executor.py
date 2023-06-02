@@ -41,7 +41,7 @@ class S3LoadExecutorTest(unittest.TestCase):
     def setUp(self):
         self.evadb = get_evadb_for_testing()
         # reset the catalog manager before running each test
-        self.evadb.catalog.reset()
+        self.evadb.catalog().reset()
         self.video_file_path = create_sample_video()
         self.multiple_video_file_path = f"{EVA_ROOT_DIR}/data/sample_videos/1"
         self.s3_download_dir = self.evadb.config.get_value("storage", "s3_download_dir")

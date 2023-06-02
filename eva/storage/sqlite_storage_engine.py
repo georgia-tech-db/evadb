@@ -42,8 +42,8 @@ class SQLStorageEngine(AbstractStorageEngine):
         Grab the existing sql session
         """
         super().__init__(db)
-        self._sql_session = db.catalog.sql_config.session
-        self._sql_engine = db.catalog.sql_config.engine
+        self._sql_session = db.catalog().sql_config.session
+        self._sql_engine = db.catalog().sql_config.engine
         self._serializer = PickleSerializer
 
     def _dict_to_sql_row(self, dict_row: dict, columns: List[ColumnCatalogEntry]):
@@ -112,11 +112,13 @@ class SQLStorageEngine(AbstractStorageEngine):
     def drop(self, table: TableCatalogEntry):
         try:
             table_to_remove = self._try_loading_table_via_reflection(table.name)
-            table_to_remove.drop(self._sql_engine)
-            # In-memory metadata does not automatically sync with the database
-            # therefore manually removing the table from the in-memory metadata
-            # https://github.com/sqlalchemy/sqlalchemy/issues/5112
-            BaseModel.metadata.remove(table_to_remove)
+            insp = inspect(self._sql_engine)
+            if not insp.has_table(table_to_remove.name):
+                table_to_remove.drop(self._sql_engine)
+                # In-memory metadata does not automatically sync with the database
+                # therefore manually removing the table from the in-memory metadata
+                # https://github.com/sqlalchemy/sqlalchemy/issues/5112
+                BaseModel.metadata.remove(table_to_remove)
             self._sql_session.commit()
         except Exception as e:
             err_msg = f"Failed to drop the table {table.name} with Exception {str(e)}"

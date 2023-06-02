@@ -38,6 +38,8 @@ class HashJoinExecutor(AbstractExecutor):
                 probe_batch.reassign_indices_to_hash(hash_keys)
                 join_batch = Batch.join(probe_batch, build_batch)
                 join_batch.reset_index()
-                join_batch = apply_predicate(join_batch, self.predicate, self.catalog)
-                join_batch = apply_project(join_batch, self.join_project, self.catalog)
+                join_batch = apply_predicate(join_batch, self.predicate, self.catalog())
+                join_batch = apply_project(
+                    join_batch, self.join_project, self.catalog()
+                )
                 yield join_batch

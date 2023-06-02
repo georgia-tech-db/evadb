@@ -35,10 +35,10 @@ class LateralJoinExecutor(AbstractExecutor):
                 result_batch = Batch.join(outer_batch, result_batch)
                 result_batch.reset_index()
                 result_batch = apply_predicate(
-                    result_batch, self.predicate, self.catalog
+                    result_batch, self.predicate, self.catalog()
                 )
                 result_batch = apply_project(
-                    result_batch, self.join_project, self.catalog
+                    result_batch, self.join_project, self.catalog()
                 )
                 if not result_batch.empty():
                     yield result_batch

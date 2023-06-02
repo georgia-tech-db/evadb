@@ -33,7 +33,7 @@ class InsertExecutorTest(unittest.TestCase):
     def setUp(self):
         self.evadb = get_evadb_for_testing()
         # reset the catalog manager before running each test
-        self.evadb.catalog.reset()
+        self.evadb.catalog().reset()
         self.video_file_path = create_sample_video()
 
         query = """CREATE TABLE IF NOT EXISTS CSVTable

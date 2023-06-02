@@ -37,7 +37,7 @@ class DropExecutor(AbstractExecutor):
 
         table_info: TableInfo = self.node.table_infos[0]
 
-        if not self.catalog.check_table_exists(
+        if not self.catalog().check_table_exists(
             table_info.table_name, table_info.database_name
         ):
             err_msg = "Table: {} does not exist".format(table_info)
@@ -47,7 +47,7 @@ class DropExecutor(AbstractExecutor):
             else:
                 raise ExecutorError(err_msg)
 
-        table_obj = self.catalog.get_table_catalog_entry(
+        table_obj = self.catalog().get_table_catalog_entry(
             table_info.table_name, table_info.database_name
         )
         storage_engine = StorageEngine.factory(self.db, table_obj)
@@ -57,9 +57,9 @@ class DropExecutor(AbstractExecutor):
 
         for col_obj in table_obj.columns:
             for cache in col_obj.dep_caches:
-                self.catalog.drop_udf_cache_catalog_entry(cache)
+                self.catalog().drop_udf_cache_catalog_entry(cache)
 
-        assert self.catalog.delete_table_catalog_entry(
+        assert self.catalog().delete_table_catalog_entry(
             table_obj
         ), "Failed to drop {}".format(table_info)
 

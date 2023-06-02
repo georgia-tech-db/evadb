@@ -14,6 +14,7 @@
 # limitations under the License.
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.sql.expression import select
 
 from eva.catalog.models.udf_catalog import UdfCatalog, UdfCatalogEntry
 from eva.catalog.services.base_service import BaseService
@@ -51,7 +52,9 @@ class UdfCatalogService(BaseService):
         """
 
         try:
-            udf_obj = self.query.filter(self.model._name == name).one()
+            udf_obj = self.session.execute(
+                select(self.model).filter(self.model._name == name)
+            ).scalar_one()
             return udf_obj.as_dataclass()
         except NoResultFound:
             return None
@@ -65,7 +68,9 @@ class UdfCatalogService(BaseService):
         """
 
         try:
-            udf_obj = self.query.filter(self.model._row_id == id).one()
+            udf_obj = self.session.execute(
+                select(self.model).filter(self.model._row_id == id)
+            ).scalar_one()
             if udf_obj:
                 return udf_obj if return_alchemy else udf_obj.as_dataclass()
             return udf_obj
@@ -82,7 +87,9 @@ class UdfCatalogService(BaseService):
             True if successfully deleted else True
         """
         try:
-            udf_obj = self.query.filter(self.model._name == name).one()
+            udf_obj = self.session.execute(
+                select(self.model).filter(self.model._name == name)
+            ).scalar_one()
             udf_obj.delete(self.session)
         except Exception as e:
             logger.exception(f"Delete udf failed for name {name} with error {str(e)}")

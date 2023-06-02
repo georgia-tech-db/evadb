@@ -35,7 +35,7 @@ from eva.storage.storage_engine import StorageEngine
 class OpenTests(unittest.TestCase):
     def setUp(self):
         self.evadb = get_evadb_for_testing()
-        self.evadb.catalog.reset()
+        self.evadb.catalog().reset()
         ConfigurationManager()
         # Load built-in UDFs.
         load_udfs_for_testing(self.evadb, mode="debug")
@@ -46,7 +46,7 @@ class OpenTests(unittest.TestCase):
         execute_query_fetch_all(self.evadb, create_table_query)
 
         # Insert dummy data into table.
-        table_catalog_entry = self.evadb.catalog.get_table_catalog_entry(
+        table_catalog_entry = self.evadb.catalog().get_table_catalog_entry(
             "testOpenTable"
         )
         storage_engine = StorageEngine.factory(self.evadb, table_catalog_entry)

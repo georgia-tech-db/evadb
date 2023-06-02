@@ -37,7 +37,7 @@ from eva.server.command_handler import execute_query_fetch_all
 class ErrorHandlingRayTests(unittest.TestCase):
     def setUp(self):
         self.evadb = get_evadb_for_testing()
-        self.evadb.catalog.reset()
+        self.evadb.catalog().reset()
         # Load built-in UDFs.
         load_udfs_for_testing(self.evadb, mode="debug")
 

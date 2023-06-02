@@ -44,7 +44,7 @@ class VectorIndexScanExecutor(AbstractExecutor):
 
     def exec(self, *args, **kwargs) -> Iterator[Batch]:
         # Fetch the index from disk.
-        index_catalog_entry = self.catalog.get_index_catalog_entry_by_name(
+        index_catalog_entry = self.catalog().get_index_catalog_entry_by_name(
             self.index_name
         )
         self.index_path = index_catalog_entry.save_file_path

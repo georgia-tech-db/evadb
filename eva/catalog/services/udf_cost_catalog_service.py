@@ -14,6 +14,7 @@
 # limitations under the License.
 
 from sqlalchemy.orm import Session
+from sqlalchemy.sql.expression import select
 
 from eva.catalog.models.udf_cost_catalog import UdfCostCatalog, UdfCostCatalogEntry
 from eva.catalog.services.base_service import BaseService
@@ -52,7 +53,9 @@ class UdfCostCatalogService(BaseService):
             cost(int)  : cost of the udf
         """
         try:
-            udf_obj = self.query.filter(self.model._udf_id == udf_id).one_or_none()
+            udf_obj = self.session.execute(
+                select(self.model).filter(self.model._udf_id == udf_id)
+            ).scalar_one_or_none()
             if udf_obj:
                 udf_obj.update(self.session, cost=new_cost)
             else:
@@ -71,7 +74,9 @@ class UdfCostCatalogService(BaseService):
         """
 
         try:
-            udf_obj = self.query.filter(self.model._udf_name == name).one_or_none()
+            udf_obj = self.session.execute(
+                select(self.model).filter(self.model._udf_name == name)
+            ).scalar_one_or_none()
             if udf_obj:
                 return udf_obj.as_dataclass()
             return None

@@ -34,7 +34,7 @@ class CreateIndexExecutor(AbstractExecutor):
         super().__init__(db, node)
 
     def exec(self, *args, **kwargs):
-        if self.catalog.get_index_catalog_entry_by_name(self.node.name):
+        if self.catalog().get_index_catalog_entry_by_name(self.node.name):
             msg = f"Index {self.node.name} already exists."
             logger.error(msg)
             raise ExecutorError(msg)
@@ -110,7 +110,7 @@ class CreateIndexExecutor(AbstractExecutor):
             self.index.persist()
 
             # Save to catalog.
-            self.catalog.insert_index_catalog_entry(
+            self.catalog().insert_index_catalog_entry(
                 self.node.name,
                 self.index_path,
                 self.node.vector_store_type,

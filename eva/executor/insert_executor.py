@@ -33,7 +33,7 @@ class InsertExecutor(AbstractExecutor):
         # Get catalog entry
         table_name = self.node.table_ref.table.table_name
         database_name = self.node.table_ref.table.database_name
-        table_catalog_entry = self.catalog.get_table_catalog_entry(
+        table_catalog_entry = self.catalog().get_table_catalog_entry(
             table_name, database_name
         )
 

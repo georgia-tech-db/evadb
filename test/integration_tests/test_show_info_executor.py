@@ -33,7 +33,7 @@ class ShowExecutorTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.evadb = get_evadb_for_testing()
-        cls.evadb.catalog.reset()
+        cls.evadb.catalog().reset()
         queries = [Fastrcnn_udf_query, ArrayCount_udf_query]
         for query in queries:
             execute_query_fetch_all(cls.evadb, query)

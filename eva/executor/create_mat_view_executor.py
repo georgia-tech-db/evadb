@@ -26,7 +26,7 @@ class CreateMaterializedViewExecutor(AbstractExecutor):
     def exec(self, *args, **kwargs):
         """Create materialized view executor"""
         if not handle_if_not_exists(
-            self.catalog, self.node.view, self.node.if_not_exists
+            self.catalog(), self.node.view, self.node.if_not_exists
         ):
             assert (
                 len(self.children) == 1
@@ -35,7 +35,7 @@ class CreateMaterializedViewExecutor(AbstractExecutor):
             )
             child = self.children[0]
 
-            view_catalog_entry = self.catalog.create_and_insert_table_catalog_entry(
+            view_catalog_entry = self.catalog().create_and_insert_table_catalog_entry(
                 self.node.view, self.node.columns
             )
             storage_engine = StorageEngine.factory(self.db, view_catalog_entry)

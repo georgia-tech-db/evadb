@@ -48,7 +48,7 @@ def create_dummy_csv_file(config) -> str:
 class ChatGPTTest(unittest.TestCase):
     def setUp(self) -> None:
         self.evadb = get_evadb_for_testing()
-        self.evadb.catalog.reset()
+        self.evadb.catalog().reset()
         create_table_query = """CREATE TABLE IF NOT EXISTS MyTextCSV (
                 id INTEGER UNIQUE,
                 prompt TEXT (100),

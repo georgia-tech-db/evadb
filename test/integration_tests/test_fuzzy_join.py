@@ -35,7 +35,7 @@ EVA_INSTALLATION_DIR = ConfigurationManager().get_value("core", "eva_installatio
 class FuzzyJoinTests(unittest.TestCase):
     def setUp(self):
         self.evadb = get_evadb_for_testing()
-        self.evadb.catalog.reset()
+        self.evadb.catalog().reset()
         self.video_file_path = create_sample_video()
         self.image_files_path = Path(
             f"{EVA_ROOT_DIR}/test/data/uadetrac/small-data/MVI_20011/*.jpg"

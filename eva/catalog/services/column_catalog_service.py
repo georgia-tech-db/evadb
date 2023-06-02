@@ -16,6 +16,7 @@ from typing import List
 
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.sql.expression import select
 
 from eva.catalog.models.column_catalog import ColumnCatalog, ColumnCatalogEntry
 from eva.catalog.models.table_catalog import TableCatalogEntry
@@ -29,23 +30,35 @@ class ColumnCatalogService(BaseService):
     def filter_entry_by_table_id_and_name(
         self, table_id, column_name
     ) -> ColumnCatalogEntry:
-        entry = self.query.filter(
-            self.model._table_id == table_id,
-            self.model._name == column_name,
-        ).one_or_none()
+        entry = self.session.execute(
+            select(self.model).filter(
+                self.model._table_id == table_id,
+                self.model._name == column_name,
+            )
+        ).scalar_one_or_none()
         if entry:
             return entry.as_dataclass()
         return entry
 
     def filter_entries_by_table_id(self, table_id: int) -> List[ColumnCatalogEntry]:
         """return all the columns for table table_id"""
-        entries = self.query.filter(self.model._table_id == table_id).all()
+        entries = (
+            self.session.execute(
+                select(self.model).filter(
+                    self.model._table_id == table_id,
+                )
+            )
+            .scalars()
+            .all()
+        )
         return [entry.as_dataclass() for entry in entries]
 
     def get_entry_by_id(
         self, col_id: int, return_alchemy=False
     ) -> List[ColumnCatalogEntry]:
-        entry = self.query.filter(self.model._row_id == col_id).one_or_none()
+        entry = self.session.execute(
+            select(self.model).filter(self.model._row_id == col_id)
+        ).scalar_one_or_none()
         if entry:
             return entry if return_alchemy else entry.as_dataclass()
         return entry
@@ -71,7 +84,13 @@ class ColumnCatalogService(BaseService):
         self, table: TableCatalogEntry
     ) -> List[ColumnCatalogEntry]:
         try:
-            entries = self.query.filter(self.model._table_id == table.row_id).all()
+            entries = (
+                self.session.execute(
+                    select(self.model).filter(self.model._table_id == table.row_id)
+                )
+                .scalars()
+                .all()
+            )
             return [entry.as_dataclass() for entry in entries]
 
         except NoResultFound:

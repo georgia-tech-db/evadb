@@ -36,7 +36,7 @@ from eva.storage.storage_engine import StorageEngine
 class SimilarityTests(unittest.TestCase):
     def setUp(self):
         self.evadb = get_evadb_for_testing()
-        self.evadb.catalog.reset()
+        self.evadb.catalog().reset()
 
         # Prepare needed UDFs and data_col.
         load_udfs_for_testing(self.evadb, mode="debug")
@@ -63,10 +63,10 @@ class SimilarityTests(unittest.TestCase):
         base_img += 4
 
         # Inject data_col.
-        base_table_catalog_entry = self.evadb.catalog.get_table_catalog_entry(
+        base_table_catalog_entry = self.evadb.catalog().get_table_catalog_entry(
             "testSimilarityTable"
         )
-        feature_table_catalog_entry = self.evadb.catalog.get_table_catalog_entry(
+        feature_table_catalog_entry = self.evadb.catalog().get_table_catalog_entry(
             "testSimilarityFeatureTable"
         )
         storage_engine = StorageEngine.factory(self.evadb, base_table_catalog_entry)
@@ -285,8 +285,8 @@ class SimilarityTests(unittest.TestCase):
             )
 
         # Cleanup
-        self.evadb.catalog.drop_index_catalog_entry("testFaissIndexScanRewrite1")
-        self.evadb.catalog.drop_index_catalog_entry("testFaissIndexScanRewrite2")
+        self.evadb.catalog().drop_index_catalog_entry("testFaissIndexScanRewrite1")
+        self.evadb.catalog().drop_index_catalog_entry("testFaissIndexScanRewrite2")
 
     def test_should_not_do_vector_index_scan_with_predicate(self):
         # Execution with index scan.
@@ -309,7 +309,7 @@ class SimilarityTests(unittest.TestCase):
         self.assertFalse("FaissIndexScan" in batch.frames[0][0])
 
         # Cleanup
-        self.evadb.catalog.drop_index_catalog_entry("testFaissIndexScanRewrite")
+        self.evadb.catalog().drop_index_catalog_entry("testFaissIndexScanRewrite")
 
     def test_end_to_end_index_scan_should_work_correctly_on_image_dataset(self):
         create_index_query = """CREATE INDEX testFaissIndexImageDataset
