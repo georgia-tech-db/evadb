@@ -214,6 +214,14 @@ class RelationalAPI(unittest.TestCase):
         rel = conn.create_udf("DummyObjectDetector", "test/util.py")
         rel.execute()
 
+        args = {"task": "automatic-speech-recognition", "model": "openai/whisper-base"}
+        rel2 = conn.create_udf("SpeechRecognizer", type="HuggingFace", **args)
+        query = rel2.sql_query()
+        self.assertEqual(
+            query,
+            "CREATE UDF SpeechRecognizer INPUT (INPUT ()) OUTPUT (OUTPUT ()) TYPE HuggingFace (task=automatic-speech-recognition, model=openai/whisper-base))",
+        )
+
         select_query = (
             "SELECT id, DummyObjectDetector(data) FROM dummy_video ORDER BY id;"
         )

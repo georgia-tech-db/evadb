@@ -93,7 +93,10 @@ class CreateUDFStatement(AbstractStatement):
                 metadata_str += f"{key}={value}, "
             metadata_str = metadata_str.rstrip(", ")
 
-        return f"CREATE UDF {self._name} INPUT ({input_str}) OUTPUT ({output_str}) TYPE {self._udf_type} IMPL {self._impl_path.name} ({metadata_str}))"
+        if self._impl_path:
+            return f"CREATE UDF {self._name} INPUT ({input_str}) OUTPUT ({output_str}) TYPE {self._udf_type} IMPL {self._impl_path.name} ({metadata_str}))"
+
+        return f"CREATE UDF {self._name} INPUT ({input_str}) OUTPUT ({output_str}) TYPE {self._udf_type} ({metadata_str}))"
 
     @property
     def name(self):
