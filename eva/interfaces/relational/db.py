@@ -28,6 +28,7 @@ from eva.parser.utils import (
     parse_load,
     parse_query,
     parse_table_clause,
+    parse_drop,
 )
 from eva.utils.logging_manager import logger
 
@@ -102,6 +103,22 @@ class EVAConnection:
             EVARelation: The EVARelation object representing the loaded table.
         """
         return self.cursor().load(file_regex, table_name, format, **kwargs)
+    
+    def drop(
+        self, item_name: str, item_type: str, **kwargs
+    ) -> EVARelation:
+        """
+        Drop a table or UDF from the database.
+
+        Args:
+            item_name (str): Name of the table or UDF to be dropped.
+            item_type (str): Type of item either: table or udf.
+            **kwargs: Additional keyword arguments for configuring the load operation.
+
+        Returns:
+            EVARelation: The EVARelation object representing the loaded table.
+        """
+        return self.cursor().drop(item_name, item_type, **kwargs)
 
     def sql(self, sql_query: str) -> EVARelation:
         """
@@ -277,6 +294,24 @@ class EVACursor(object):
         """
         # LOAD {FORMAT} file_regex INTO table_name
         stmt = parse_load(table_name, file_regex, format, **kwargs)
+        return EVARelation(stmt)
+
+    def drop(
+        self, item_name: str, item_type: str, **kwargs
+    ) -> EVARelation:
+        """
+        Drop a table or UDF from the database.
+
+        Args:
+            item_name (str): Name of the table or UDF to be dropped.
+            item_type (str): Type of item either: table or udf.
+            **kwargs: Additional keyword arguments for configuring the load operation.
+
+        Returns:
+            EVARelation: The EVARelation object representing the loaded table.
+        """
+        # DROP {item_type} item_name
+        stmt = parse_drop(item_name, item_type, **kwargs)
         return EVARelation(stmt)
 
     def query(self, sql_query: str) -> EVARelation:
