@@ -18,13 +18,6 @@ from contextlib import contextmanager
 from typing import List
 
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.experimental.parallel.optimizer.rules.rules import (
-    LogicalApplyAndMergeToPhysical as ParallelLogicalApplyAndMergeToPhysical,
-)
-from eva.experimental.parallel.optimizer.rules.rules import LogicalExchangeToPhysical
-from eva.experimental.parallel.optimizer.rules.rules import (
-    LogicalGetToSeqScan as ParallelLogicalGetToSeqScan,
-)
 from eva.optimizer.rules.rules import (
     CacheFunctionExpressionInApply,
     CacheFunctionExpressionInFilter,
@@ -32,28 +25,22 @@ from eva.optimizer.rules.rules import (
     CombineSimilarityOrderByAndLimitToVectorIndexScan,
     EmbedFilterIntoGet,
     EmbedSampleIntoGet,
-)
-from eva.optimizer.rules.rules import (
-    LogicalApplyAndMergeToPhysical as SequentialLogicalApplyAndMergeToPhysical,
-)
-from eva.optimizer.rules.rules import (
+    LogicalApplyAndMergeToPhysical,
+    LogicalApplyAndMergeToRayPhysical,
+    LogicalCreateFromSelectToPhysical,
     LogicalCreateIndexToVectorIndex,
     LogicalCreateMaterializedViewToPhysical,
     LogicalCreateToPhysical,
-    LogicalCreateFromSelectToPhysical,
     LogicalCreateUDFToPhysical,
     LogicalDeleteToPhysical,
     LogicalDerivedGetToPhysical,
     LogicalDropToPhysical,
     LogicalDropUDFToPhysical,
+    LogicalExchangeToPhysical,
     LogicalExplainToPhysical,
     LogicalFilterToPhysical,
     LogicalFunctionScanToPhysical,
-)
-from eva.optimizer.rules.rules import (
-    LogicalGetToSeqScan as SequentialLogicalGetToSeqScan,
-)
-from eva.optimizer.rules.rules import (
+    LogicalGetToSeqScan,
     LogicalGroupByToPhysical,
     LogicalInnerJoinCommutativity,
     LogicalInsertToPhysical,
@@ -64,6 +51,7 @@ from eva.optimizer.rules.rules import (
     LogicalLoadToPhysical,
     LogicalOrderByToPhysical,
     LogicalProjectToPhysical,
+    LogicalProjectToRayPhysical,
     LogicalRenameToPhysical,
     LogicalShowToPhysical,
     LogicalUnionToPhysical,
@@ -101,8 +89,6 @@ class RulesManager:
             ReorderPredicates(),
         ]
 
-        ray_enabled = ConfigurationManager().get_value("experimental", "ray")
-
         self._implementation_rules = [
             LogicalCreateToPhysical(),
             LogicalCreateFromSelectToPhysical(),
@@ -113,9 +99,7 @@ class RulesManager:
             LogicalInsertToPhysical(),
             LogicalDeleteToPhysical(),
             LogicalLoadToPhysical(),
-            ParallelLogicalGetToSeqScan()
-            if ray_enabled
-            else SequentialLogicalGetToSeqScan(),
+            LogicalGetToSeqScan(),
             LogicalDerivedGetToPhysical(),
             LogicalUnionToPhysical(),
             LogicalGroupByToPhysical(),
@@ -127,18 +111,25 @@ class RulesManager:
             LogicalFunctionScanToPhysical(),
             LogicalCreateMaterializedViewToPhysical(),
             LogicalFilterToPhysical(),
-            LogicalProjectToPhysical(),
-            ParallelLogicalApplyAndMergeToPhysical()
-            if ray_enabled
-            else SequentialLogicalApplyAndMergeToPhysical(),
             LogicalShowToPhysical(),
             LogicalExplainToPhysical(),
             LogicalCreateIndexToVectorIndex(),
             LogicalVectorIndexScanToPhysical(),
         ]
 
+        ray_enabled = ConfigurationManager().get_value("experimental", "ray")
         if ray_enabled:
-            self._implementation_rules.append(LogicalExchangeToPhysical())
+            self._implementation_rules.extend(
+                [
+                    LogicalExchangeToPhysical(),
+                    LogicalApplyAndMergeToRayPhysical(),
+                    LogicalProjectToRayPhysical(),
+                ]
+            )
+        else:
+            self._implementation_rules.extend(
+                [LogicalApplyAndMergeToPhysical(), LogicalProjectToPhysical()]
+            )
         self._all_rules = (
             self._stage_one_rewrite_rules
             + self._stage_two_rewrite_rules

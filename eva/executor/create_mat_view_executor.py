@@ -14,9 +14,8 @@
 # limitations under the License.
 from eva.catalog.catalog_manager import CatalogManager
 from eva.executor.abstract_executor import AbstractExecutor
-from eva.executor.executor_utils import ExecutorError, handle_if_not_exists
+from eva.executor.executor_utils import handle_if_not_exists
 from eva.plan_nodes.create_mat_view_plan import CreateMaterializedViewPlan
-from eva.plan_nodes.types import PlanOprType
 from eva.storage.storage_engine import StorageEngine
 
 
@@ -28,18 +27,12 @@ class CreateMaterializedViewExecutor(AbstractExecutor):
     def exec(self, *args, **kwargs):
         """Create materialized view executor"""
         if not handle_if_not_exists(self.node.view, self.node.if_not_exists):
+            assert (
+                len(self.children) == 1
+            ), "Create materialized view expects 1 child, finds {}".format(
+                len(self.children)
+            )
             child = self.children[0]
-            # only support seq scan based materialization
-            if child.node.opr_type not in {
-                PlanOprType.SEQUENTIAL_SCAN,
-                PlanOprType.PROJECT,
-            }:
-                err_msg = "Invalid query {}, expected {} or {}".format(
-                    child.node.opr_type,
-                    PlanOprType.SEQUENTIAL_SCAN,
-                    PlanOprType.PROJECT,
-                )
-                raise ExecutorError(err_msg)
 
             view_catalog_entry = self.catalog.create_and_insert_table_catalog_entry(
                 self.node.view, self.node.columns
