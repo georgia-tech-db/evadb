@@ -44,7 +44,6 @@ def analyze_video(api_key: str) -> EVAConnection:
         EVAConnection: evadb api connection.
     """
     print("Analyzing video. This may take a while...")
-    ConfigurationManager().update_value("third_party", "openai_api_key", api_key) # configure api key
     
     # establish evadb api connection
     conn = connect()
@@ -79,11 +78,18 @@ def cleanup():
     if os.path.exists('eva_data'):
         shutil.rmtree('eva_data')
 
-
 if __name__ == "__main__":
     print("Welcome! This app lets you ask questions about any YouTube video. You will only need to supply a Youtube URL and an OpenAI API key.")
+
+    # Get Youtube video url
     video_link = str(input("Enter the URL of the YouTube video: "))
-    api_key = str(input("Enter your OpenAI API key: "))
+
+    # Get OpenAI key if needed
+    try:
+        api_key = os.environ["openai_api_key"]
+    except KeyError:
+        api_key = str(input("Enter your OpenAI API key: "))
+        os.environ["openai_api_key"] = api_key
 
     download_youtube_video_from_link(video_link)
 
