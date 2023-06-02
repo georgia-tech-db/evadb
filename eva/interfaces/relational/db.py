@@ -24,6 +24,7 @@ from eva.models.storage.batch import Batch
 from eva.parser.alias import Alias
 from eva.parser.select_statement import SelectStatement
 from eva.parser.utils import (
+    parse_create_udf,
     parse_create_vector_index,
     parse_load,
     parse_query,
@@ -85,6 +86,24 @@ class EVAConnection:
         if not self._result:
             raise Exception("No valid result with the current connection")
         return self._result.frames
+
+    def create_udf(
+            self, udf_name: str, implementation: str, type: str=None, task: str=None, model: str=None
+    ) -> "EVARelation":
+        """
+        Create a udf in the database.
+
+        Args:
+            udf_name (str): Name of the udf to be created.
+            implementation (str): Path string to udf's implementation
+            type (str): Type of the udf (e.g. HuggingFace).
+            task (str): ML task (only applicable if loading an ML model).
+            model (str): ML model (only applicable if loading an ML model).
+
+        Returns 
+            EVARelation: The EVARelation object representing the UDF created.
+        """
+        return self.cursor().create_udf(udf_name, implementation, type=type, task=task, model=model)
 
     def load(
         self, file_regex: str, table_name: str, format: str, **kwargs
@@ -277,6 +296,26 @@ class EVACursor(object):
         """
         # LOAD {FORMAT} file_regex INTO table_name
         stmt = parse_load(table_name, file_regex, format, **kwargs)
+        return EVARelation(stmt)
+        
+    def create_udf(
+            self, udf_name: str, implementation: str, type: str=None, task: str=None, model: str=None, **kwargs
+    ) -> "EVARelation":
+        """
+        Create a udf in the database.
+
+        Args:
+            udf_name (str): Name of the udf to be created.
+            implementation (str): Path string to udf's implementation
+            type (str): Type of the udf (e.g. HuggingFace).
+            task (str): ML task (only applicable if loading an ML model).
+            model (str): ML model.
+            **kwargs: Additional keyword arguments for configuring the load operation.
+
+        Returns 
+            EVARelation: The EVARelation object representing the UDF created.
+        """
+        stmt = parse_create_udf(udf_name, implementation, type, task, model, **kwargs)
         return EVARelation(stmt)
 
     def query(self, sql_query: str) -> EVARelation:

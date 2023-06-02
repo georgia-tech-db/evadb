@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from eva.parser.create_udf_statement import CreateUDFStatement
 from eva.parser.load_statement import LoadDataStatement
 from eva.parser.parser import Parser
 from eva.parser.select_statement import SelectStatement
@@ -37,6 +38,21 @@ def parse_table_clause(expr: str):
     assert isinstance(stmt, SelectStatement), "Expected a select statement"
     assert stmt.from_table.is_table_atom
     return stmt.from_table
+
+
+def parse_create_udf(udf_name: str, implementation: str, type: str, task: str, model: str, **kwargs):
+    mock_query = f"CREATE UDF IF NOT EXISTS {udf_name}"
+    if type is not None:
+        mock_query += f" TYPE {type}"
+        if task is not None and model is not None:
+            mock_query += f" 'task' '{task}' 'model' '{model}'"
+    else: 
+        mock_query += f" IMPL '{implementation}'"
+    mock_query += f";"
+
+    stmt = Parser().parse(mock_query)[0]
+    assert isinstance(stmt, CreateUDFStatement), "Expected a create udf statement"
+    return stmt
 
 
 def parse_load(table_name: str, file_regex: str, format: str, **kwargs):
