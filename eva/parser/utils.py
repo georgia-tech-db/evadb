@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from eva.parser.load_statement import LoadDataStatement
+from eva.parser.drop_statement import DropTableStatement
+from eva.parser.drop_udf_statement import DropUDFStatement
 from eva.parser.parser import Parser
 from eva.parser.select_statement import SelectStatement
 
@@ -43,6 +45,15 @@ def parse_load(table_name: str, file_regex: str, format: str, **kwargs):
     mock_query = f"LOAD {format.upper()} '{file_regex}' INTO {table_name};"
     stmt = Parser().parse(mock_query)[0]
     assert isinstance(stmt, LoadDataStatement), "Expected a load statement"
+    return stmt
+
+def parse_drop(item_name: str, item_type: str, **kwargs):
+    mock_query = f"DROP {item_type} {item_name}"
+    stmt = Parser().parse(mock_query)[0]
+    if item_type.upper()=="TABLE":
+        assert isinstance(stmt, DropTableStatement), "Expected a drop table statement"
+    else:
+        assert isinstance(stmt, DropUDFStatement), "Expected a drop UDF statement"
     return stmt
 
 
