@@ -34,6 +34,7 @@ extensions = [
     "sphinx.ext.autosectionlabel",
     "sphinx.ext.autosummary",
     "sphinx.ext.autodoc",
+    "sphinx.ext.autodoc.typehints",
     "sphinx.ext.todo",
     "sphinx.ext.mathjax",
     "sphinx.ext.githubpages",
@@ -43,7 +44,8 @@ extensions = [
     "sphinxcontrib.youtube",
     "sphinx_inline_tabs",
     "myst_nb",
-    "versionwarning.extension"
+    "versionwarning.extension",
+    "IPython.sphinxext.ipython_console_highlighting"
 ]
 
 myst_enable_extensions = [
