@@ -119,8 +119,7 @@ class PytorchTest(unittest.TestCase):
         """
         execute_query_fetch_all(self.evadb, create_udf_query)
 
-        select_query = """SELECT FaceDetector(data) FROM MyVideo
-                        WHERE id < 5;"""
+        select_query = "SELECT FaceDetector(data) FROM MyVideo WHERE id < 5;"
         # Parallel execution
         par_batch = execute_query_fetch_all(self.evadb, select_query)
 
@@ -133,7 +132,6 @@ class PytorchTest(unittest.TestCase):
         self.assertEqual(len(par_batch), len(seq_batch))
         self.assertEqual(par_batch, seq_batch)
 
-    @ray_only_marker
     def test_should_raise_exception_with_parallel(self):
         # Deliberately cause error.
         video_path = create_sample_video(100)

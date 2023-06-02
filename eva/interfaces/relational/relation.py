@@ -98,7 +98,7 @@ class EVARelation:
         )
         # reset the alias as after join there isn't a single alias
         self._alias = Alias("Relation")
-        try_binding(self._evadb.catalog(), self._query_node)
+        try_binding(self._evadb.catalog, self._query_node)
         return self
 
     def df(self) -> pandas.DataFrame:
@@ -145,7 +145,7 @@ class EVARelation:
             self._query_node, self._alias, "where_clause", parsed_expr
         )
 
-        try_binding(self._evadb.catalog(), self._query_node)
+        try_binding(self._evadb.catalog, self._query_node)
 
         return self
 
@@ -169,7 +169,7 @@ class EVARelation:
             self._query_node, self._alias, "limit_count", limit_expr
         )
 
-        try_binding(self._evadb.catalog(), self._query_node)
+        try_binding(self._evadb.catalog, self._query_node)
 
         return self
 
@@ -188,7 +188,7 @@ class EVARelation:
             self._query_node, self._alias, "orderby_list", parsed_expr
         )
 
-        try_binding(self._evadb.catalog(), self._query_node)
+        try_binding(self._evadb.catalog, self._query_node)
 
         return self
 
@@ -221,7 +221,7 @@ class EVARelation:
             self._query_node, self._alias, "target_list", parsed_exprs
         )
 
-        try_binding(self._evadb.catalog(), self._query_node)
+        try_binding(self._evadb.catalog, self._query_node)
 
         return self
 

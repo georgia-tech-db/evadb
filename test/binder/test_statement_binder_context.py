@@ -45,7 +45,7 @@ class StatementBinderTests(unittest.TestCase):
 
     def test_add_table_alias(self):
         mock_catalog = MagicMock()
-        mock_get = mock_catalog.get_table_catalog_entry = MagicMock()
+        mock_get = mock_catalog().get_table_catalog_entry = MagicMock()
         mock_get.return_value = "table_obj"
         ctx = StatementBinderContext(mock_catalog)
 
@@ -117,7 +117,7 @@ class StatementBinderTests(unittest.TestCase):
 
     def test_check_table_alias_map(self):
         mock_catalog = MagicMock()
-        mock_get_column_object = mock_catalog.get_column_catalog_entry = MagicMock()
+        mock_get_column_object = mock_catalog().get_column_catalog_entry = MagicMock()
         mock_get_column_object.return_value = "catalog_value"
         # key exists
         ctx = StatementBinderContext(mock_catalog)

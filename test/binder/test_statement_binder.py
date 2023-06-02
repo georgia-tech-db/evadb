@@ -51,7 +51,7 @@ class StatementBinderTests(unittest.TestCase):
             mock.assert_called_with(
                 tableref.alias.alias_name, tableref.table.table_name
             )
-            mock_bind_table_info.assert_called_once_with(catalog, tableref.table)
+            mock_bind_table_info.assert_called_once_with(catalog(), tableref.table)
 
         with patch.object(StatementBinder, "bind") as mock_binder:
             with patch.object(
@@ -157,11 +157,11 @@ class StatementBinderTests(unittest.TestCase):
         udf_obj = MagicMock()
 
         mock_catalog = MagicMock()
-        mock_get_name = mock_catalog.get_udf_catalog_entry_by_name = MagicMock()
+        mock_get_name = mock_catalog().get_udf_catalog_entry_by_name = MagicMock()
         mock_get_name.return_value = udf_obj
 
         mock_get_udf_outputs = (
-            mock_catalog.get_udf_io_catalog_output_entries
+            mock_catalog().get_udf_io_catalog_output_entries
         ) = MagicMock()
         mock_get_udf_outputs.return_value = func_output_objs
         mock_load_udf_class_from_file.return_value.return_value = (
@@ -283,7 +283,7 @@ class StatementBinderTests(unittest.TestCase):
             udf_obj.outputs = [output]
 
             with patch.object(
-                catalog, "get_udf_catalog_entry_by_name", return_value=udf_obj
+                catalog(), "get_udf_catalog_entry_by_name", return_value=udf_obj
             ):
                 with self.assertRaises(AssertionError):
                     binder._bind_create_index_statement(create_index_statement)

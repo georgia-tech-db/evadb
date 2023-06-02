@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from sqlalchemy.orm import Session
-from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql.expression import select
 
 from eva.catalog.models.udf_catalog import UdfCatalog, UdfCatalogEntry
@@ -51,13 +50,12 @@ class UdfCatalogService(BaseService):
             name (str): name to be searched
         """
 
-        try:
-            udf_obj = self.session.execute(
-                select(self.model).filter(self.model._name == name)
-            ).scalar_one()
+        udf_obj = self.session.execute(
+            select(self.model).filter(self.model._name == name)
+        ).scalar_one_or_none()
+        if udf_obj:
             return udf_obj.as_dataclass()
-        except NoResultFound:
-            return None
+        return None
 
     def get_entry_by_id(self, id: int, return_alchemy=False) -> UdfCatalogEntry:
         """return the udf entry that matches the id provided.
@@ -67,15 +65,12 @@ class UdfCatalogService(BaseService):
             id (int): id to be searched
         """
 
-        try:
-            udf_obj = self.session.execute(
-                select(self.model).filter(self.model._row_id == id)
-            ).scalar_one()
-            if udf_obj:
-                return udf_obj if return_alchemy else udf_obj.as_dataclass()
-            return udf_obj
-        except NoResultFound:
-            return None
+        udf_obj = self.session.execute(
+            select(self.model).filter(self.model._row_id == id)
+        ).scalar_one_or_none()
+        if udf_obj:
+            return udf_obj if return_alchemy else udf_obj.as_dataclass()
+        return udf_obj
 
     def delete_entry_by_name(self, name: str):
         """Delete a udf entry from the catalog UdfCatalog

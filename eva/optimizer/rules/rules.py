@@ -573,7 +573,7 @@ class CombineSimilarityOrderByAndLimitToVectorIndexScan(Rule):
         # Get index catalog. Check if an index exists for matching
         # udf signature and table columns.
         index_catalog_entry = (
-            catalog_manager.get_index_catalog_entry_by_column_and_udf_signature(
+            catalog_manager().get_index_catalog_entry_by_column_and_udf_signature(
                 column_catalog_entry, udf_signature
             )
         )

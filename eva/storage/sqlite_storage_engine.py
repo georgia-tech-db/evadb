@@ -96,13 +96,19 @@ class SQLStorageEngine(AbstractStorageEngine):
         # the sqlalchemy engine.
         table_columns = [col for col in table.columns if col.name != IDENTIFIER_COLUMN]
         sqlalchemy_schema = SchemaUtils.xform_to_sqlalchemy_schema(table_columns)
-
         attr_dict.update(sqlalchemy_schema)
+
+        insp = inspect(self._sql_engine)
+        if insp.has_table(table.name):
+            logger.warning("Trying to create an exsiting table {table.name}")
+            return BaseModel.metadata.tables[table.name]
+
         # dynamic schema generation
         # https://sparrigan.github.io/sql/sqla/2016/01/03/dynamic-tables.html
-        new_table = type("__placeholder_class_name__", (BaseModel,), attr_dict)()
+        new_table = type(
+            f"__placeholder_class_name__{table.name}", (BaseModel,), attr_dict
+        )()
         table = BaseModel.metadata.tables[table.name]
-        insp = inspect(self._sql_engine)
 
         if not insp.has_table(table.name):
             BaseModel.metadata.tables[table.name].create(self._sql_engine)
@@ -113,7 +119,7 @@ class SQLStorageEngine(AbstractStorageEngine):
         try:
             table_to_remove = self._try_loading_table_via_reflection(table.name)
             insp = inspect(self._sql_engine)
-            if not insp.has_table(table_to_remove.name):
+            if insp.has_table(table_to_remove.name):
                 table_to_remove.drop(self._sql_engine)
                 # In-memory metadata does not automatically sync with the database
                 # therefore manually removing the table from the in-memory metadata

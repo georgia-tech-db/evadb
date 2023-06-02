@@ -196,3 +196,7 @@ class MaterializedViewTest(unittest.TestCase):
             self.assertTrue("car" in res["uadtrac_fastrcnn.label"][idx])
 
         execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS uadtrac_fastRCNN;")
+
+
+if __name__ == "__main__":
+    unittest.main()
