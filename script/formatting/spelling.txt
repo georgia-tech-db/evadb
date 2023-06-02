@@ -1,4 +1,4 @@
-personal_ws-1.1 en 1359 
+personal_ws-1.1 en 1371 
 ABCD
 ABCMeta
 ANYDIM
@@ -192,6 +192,7 @@ EmotionDetector
 EnumInt
 ErrorHandlingRayTests
 EvaArgument
+EvaDB
 EvaServer
 EverNoteLoader
 ExchangeExecutor
@@ -259,6 +260,7 @@ Groupby
 HFImageClassifier
 HFInputTypes
 HFMultToxicityClassifier
+HFNERModel
 HFObjectDetector
 HFTextClassifier
 HFToxicityClassifier
@@ -349,6 +351,7 @@ LoggingManager
 LogicalApplyAndMerge
 LogicalApplyAndMergeToPhysical
 LogicalCreate
+LogicalCreateFromSelectToPhysical
 LogicalCreateIndex
 LogicalCreateIndexToVectorIndex
 LogicalCreateMaterializedView
@@ -579,6 +582,7 @@ ShowTablePlan
 ShowType
 ShowUDFPlan
 SiftFeatureExtractor
+SimilarityFeatureExtractor
 SimilarityTests
 SpeechRecognizer
 StageCompleteSignal
@@ -1060,10 +1064,12 @@ lhs
 lineno
 linux
 listdir
+loc
 localhost
 logi
 loopback
 lproject
+lsof
 lstrip
 macos
 makedirs
@@ -1105,6 +1111,8 @@ ndarray
 ndarrays
 ndim
 neq
+ner
+nlp
 nn
 nohup
 nonprojected
@@ -1142,6 +1150,7 @@ pdf
 pdfs
 perf
 petastorm
+pgrep
 philschmid
 pkill
 pkl
@@ -1223,10 +1232,12 @@ sharded
 shutil
 sig
 sigs
+simiarity
 singledispatch
 singledispatchmethod
 smi
 softmax
+spacy
 sql
 sqlaclchemy
 sqlalchemy
@@ -1249,6 +1260,7 @@ subqueries
 subquery
 subset
 subtree
+sudo
 summarization
 symlink
 symlinked

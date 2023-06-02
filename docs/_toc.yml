@@ -5,22 +5,13 @@ parts:
   - caption: Overview
     chapters:
       - file: source/overview/installation
-      - file: source/overview/command-line
       - file: source/overview/udf
-      - file: source/overview/docker
+      - file: source/reference/faq
 
-  - caption: User Guides
+  - caption: Tutorials
     chapters:
-      - file: source/tutorials/00-start-eva-server.ipynb
-        title: Starting EVA Server
-      - file: source/tutorials/01-mnist.ipynb
-        title: MNIST Image Classification
-      - file: source/tutorials/02-object-detection.ipynb
-        title: Object Detection with YOLO
       - file: source/tutorials/03-emotion-analysis.ipynb
         title: Emotion Analysis with PyTorch
-      - file: source/tutorials/07-object-segmentation-huggingface.ipynb
-        title: Image Segmentation with HuggingFace 
       - file: source/tutorials/08-chatgpt.ipynb
         title: ChatGPT + Whisper [OpenAI + HuggingFace]
       - file: source/tutorials/11-similarity-search-for-motif-mining.ipynb
@@ -28,6 +19,21 @@ parts:
 
   - caption: User Reference
     chapters:
+      - file: source/reference/python/df
+        title: Python API
+
+      - file: source/reference/python/db
+        title: SQL API
+
+      - file: source/reference/udf
+        title: User-Defined Functions
+        sections:
+          - file: source/reference/udfs/yolo
+          - file: source/reference/udfs/hf
+          - file: source/reference/udfs/openai
+          - file: source/reference/udfs/custom
+            title: Custom User-Defined Function
+
       - file: source/reference/evaql
         title: Query Language 
         sections:
@@ -41,26 +47,23 @@ parts:
           - file: source/reference/evaql/delete
           - file: source/reference/evaql/rename
 
-      - file: source/reference/python/api
-        title: Python APIs
-
-      - file: source/reference/udf
-        title: User-Defined Functions
-        sections:
-          - file: source/reference/udfs/yolo
-          - file: source/reference/udfs/hf
-          - file: source/reference/udfs/openai
-          - file: source/reference/udfs/custom
-            title: Custom User-Defined Function
-
-
       - file: source/reference/io
         title: IO Descriptors
 
       - file: source/reference/gpu
         title: Configure GPU
 
-      
+      - file: source/overview/docker
+        title: Docker
+
+  - caption: More Tutorials
+    chapters:
+      - file: source/tutorials/01-mnist.ipynb
+        title: MNIST Image Classification
+      - file: source/tutorials/02-object-detection.ipynb
+        title: Object Detection with YOLO
+      - file: source/tutorials/07-object-segmentation-huggingface.ipynb
+        title: Image Segmentation with HuggingFace 
 
   - caption: Developer Guide
     chapters:
