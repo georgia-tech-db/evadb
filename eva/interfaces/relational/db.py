@@ -88,7 +88,12 @@ class EVAConnection:
         return self._result.frames
 
     def create_udf(
-            self, udf_name: str, implementation: str, type: str=None, task: str=None, model: str=None
+        self,
+        udf_name: str,
+        implementation: str,
+        type: str = None,
+        task: str = None,
+        model: str = None,
     ) -> "EVARelation":
         """
         Create a udf in the database.
@@ -100,10 +105,12 @@ class EVAConnection:
             task (str): ML task (only applicable if loading an ML model).
             model (str): ML model (only applicable if loading an ML model).
 
-        Returns 
+        Returns
             EVARelation: The EVARelation object representing the UDF created.
         """
-        return self.cursor().create_udf(udf_name, implementation, type=type, task=task, model=model)
+        return self.cursor().create_udf(
+            udf_name, implementation, type=type, task=task, model=model
+        )
 
     def load(
         self, file_regex: str, table_name: str, format: str, **kwargs
@@ -297,9 +304,15 @@ class EVACursor(object):
         # LOAD {FORMAT} file_regex INTO table_name
         stmt = parse_load(table_name, file_regex, format, **kwargs)
         return EVARelation(stmt)
-        
+
     def create_udf(
-            self, udf_name: str, implementation: str, type: str=None, task: str=None, model: str=None, **kwargs
+        self,
+        udf_name: str,
+        implementation: str,
+        type: str = None,
+        task: str = None,
+        model: str = None,
+        **kwargs
     ) -> "EVARelation":
         """
         Create a udf in the database.
@@ -312,7 +325,7 @@ class EVACursor(object):
             model (str): ML model.
             **kwargs: Additional keyword arguments for configuring the load operation.
 
-        Returns 
+        Returns
             EVARelation: The EVARelation object representing the UDF created.
         """
         stmt = parse_create_udf(udf_name, implementation, type, task, model, **kwargs)

@@ -1,17 +1,36 @@
+# coding=utf-8
+# Copyright 2018-2023 EVA
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 import os
 import time
 import unittest
-import numpy as np
+from test.util import (
+    DummyObjectDetector,
+    create_sample_video,
+    load_udfs_for_testing,
+    shutdown_ray,
+)
 
+import numpy as np
 import pandas as pd
+from pandas.testing import assert_frame_equal
+
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
-
 from eva.interfaces.relational.db import connect
 from eva.models.storage.batch import Batch
 from eva.server.command_handler import execute_query_fetch_all
-from test.util import DummyObjectDetector, create_sample_video, load_udfs_for_testing, shutdown_ray
-from pandas.testing import assert_frame_equal
 
 
 class RelationalAPI(unittest.TestCase):
@@ -190,12 +209,14 @@ class RelationalAPI(unittest.TestCase):
     def test_create_udf(self):
         video_file_path = create_sample_video(10)
         execute_query_fetch_all(f"LOAD VIDEO '{video_file_path}' INTO dummy_video;")
-        
+
         conn = connect(port=8886)
         rel = conn.create_udf("DummyObjectDetector", "test/util.py")
         rel.execute()
 
-        select_query = "SELECT id, DummyObjectDetector(data) FROM dummy_video ORDER BY id;"
+        select_query = (
+            "SELECT id, DummyObjectDetector(data) FROM dummy_video ORDER BY id;"
+        )
         actual_batch = execute_query_fetch_all(select_query)
         labels = DummyObjectDetector().labels
         expected = [
