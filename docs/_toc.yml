@@ -10,8 +10,6 @@ parts:
 
   - caption: Tutorials
     chapters:
-      - file: source/tutorials/03-emotion-analysis.ipynb
-        title: Emotion Analysis with PyTorch
       - file: source/tutorials/08-chatgpt.ipynb
         title: ChatGPT + Whisper [OpenAI + HuggingFace]
       - file: source/tutorials/11-similarity-search-for-motif-mining.ipynb
@@ -55,6 +53,8 @@ parts:
 
   - caption: More Tutorials
     chapters:
+      - file: source/tutorials/03-emotion-analysis.ipynb
+        title: Emotion Analysis with PyTorch
       - file: source/tutorials/01-mnist.ipynb
         title: MNIST Image Classification
       - file: source/tutorials/02-object-detection.ipynb
@@ -64,11 +64,6 @@ parts:
 
   - caption: Developer Guide
     chapters:
-      - file: source/contribute/internals
-        title: EVA internals
-        sections:
-          - file: source/contribute/internals/catalog
-
       - file: source/contribute/index
         title: Contributing to EVA
 
@@ -81,5 +76,7 @@ parts:
       - file: source/contribute/release
         title: Releasing 
 
-      - file: source/contribute/packaging
-        title: Packaging Models
+      - file: source/contribute/internals
+        title: EVA Internals
+        sections:
+          - file: source/contribute/internals/catalog
