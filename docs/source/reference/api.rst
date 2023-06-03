@@ -35,6 +35,7 @@ EVAConnection Interface
     
     ~db.EVAConnection.connect
     ~db.EVAConnection.load
+    ~db.EVAConnection.create_udf
     ~db.EVAConnection.query
     ~db.EVAConnection.table
 
