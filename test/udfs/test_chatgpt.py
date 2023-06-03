@@ -13,7 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
+import os
+import openai
 import unittest
 from test.markers import ray_skip_marker
 from unittest.mock import MagicMock
@@ -101,13 +102,26 @@ class ChatGPTTest(unittest.TestCase):
         output_batch = execute_query_fetch_all(gpt_query)
         self.assertEqual(output_batch, expected_output)
 
-    def test_gpt_udf_no_key(self):
+    @patch.dict(os.environ, {"OPENAI_KEY": "dummy_openai_key"}, clear=True)
+    def test_gpt_udf_no_key_in_yml_should_read_env(self):
         ConfigurationManager().update_value("third_party", "openai_api_key", "")
         udf_name = "ChatGPT"
         execute_query_fetch_all(f"DROP UDF IF EXISTS {udf_name};")
 
-        with self.assertRaises(ExecutorError):
-            create_udf_query = f"""CREATE UDF {udf_name}
+        create_udf_query = f"""CREATE UDF {udf_name}
             IMPL 'eva/udfs/chatgpt.py'
             """
+        execute_query_fetch_all(create_udf_query)
+        self.assertEqual(openai.api_key, "dummy_openai_key")
+
+    @patch.dict(os.environ, {}, clear=True)
+    def test_gpt_udf_no_key_in_yml_and_env_should_raise(self):
+        ConfigurationManager().update_value("third_party", "openai_api_key", "")
+        udf_name = "ChatGPT"
+        execute_query_fetch_all(f"DROP UDF IF EXISTS {udf_name};")
+
+        with self.assertRaises(Exception, msg="Please set your OpenAI API key in eva.yml file (third_party, open_api_key) or environment variable (OPENAI_KEY)"):
+            create_udf_query = f"""CREATE UDF {udf_name}
+                IMPL 'eva/udfs/chatgpt.py'
+                """
             execute_query_fetch_all(create_udf_query)
