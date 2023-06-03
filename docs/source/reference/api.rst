@@ -22,6 +22,7 @@ EVAConnection Interface
 -----------------------
 
 .. currentmodule:: eva.interfaces.relational
+    :toctree: ./doc
 
 .. autosummary::
 
@@ -34,6 +35,7 @@ EVARelation Interface
 ---------------------
 
 .. currentmodule:: eva.interfaces.relational
+    :toctree: ./doc
 
 .. autosummary::
     
@@ -50,6 +52,7 @@ EVAConnection Interface
 -----------------------
 
 .. currentmodule:: eva.interfaces.relational
+    :toctree: ./doc
 
 .. autosummary::
 
@@ -60,6 +63,7 @@ EVARelation Interface
 ---------------------
 
 .. currentmodule:: eva.interfaces.relational
+    :toctree: ./doc
 
 .. autosummary::
 
