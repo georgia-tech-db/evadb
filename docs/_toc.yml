@@ -6,7 +6,7 @@ parts:
     chapters:
       - file: source/overview/installation
       - file: source/overview/udf
-      - file: source/reference/faq
+      - file: source/overview/faq
 
   - caption: Tutorials
     chapters:
@@ -20,16 +20,18 @@ parts:
       - file: source/reference/api
         title: API
 
+      - file: source/reference/udfs/hf
+        title: Hugging Face UDFs
+      - file: source/reference/udfs/openai
+        title: OpenAI UDFs
+      - file: source/reference/udfs/yolo
+        title: YOLO UDFs
       - file: source/reference/udf
         title: User-Defined Functions
-        sections:
-          - file: source/reference/udfs/yolo
-          - file: source/reference/udfs/hf
-          - file: source/reference/udfs/openai
-          - file: source/reference/udfs/custom
-            title: Custom User-Defined Function
-
-      - file: source/reference/evaql
+      - file: source/reference/udfs/custom
+        title: Custom User-Defined Function
+        
+      - file: source/reference/evaql      
         title: Query Language 
         sections:
           - file: source/reference/evaql/load
