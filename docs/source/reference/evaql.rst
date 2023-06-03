@@ -1,7 +1,7 @@
 EVA Query Language Reference
 ============================
 
-EVA Query Language (EVAQL) is derived from SQL. It is tailored for video analytics. EVAQL allows users to invoke deep learning models in the form
+EVA Query Language (EVAQL) is derived from SQL. It is tailored for AI-driven analytics. EVAQL allows users to invoke deep learning models in the form
 of user-defined functions (UDFs).
 
 Here is an example where we first define a UDF wrapping around the FastRCNN object detection model. We then issue a query with this function to detect objects.
