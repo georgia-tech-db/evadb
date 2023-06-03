@@ -218,7 +218,7 @@ def publish_wheels(tag):
 
 def upload_assets(changelog, tag):
     # Authentication token
-    access_token = 'xxxxxxxxxxxxxxxxxxxxxxxxxxx'
+    access_token = os.environ["GITHUB_KEY"]
 
     # Repository information
     repo_owner = 'georgia-tech-db'
@@ -238,16 +238,15 @@ def upload_assets(changelog, tag):
     # Get the repository
     repo = g.get_repo(f'{repo_owner}/{repo_name}')
 
-    return
-
     # Create the release
     release_name = tag_name
-    release_body = f'{tag_name}\n\n {changelog}' 
+    release_message = f'{tag_name}\n\n {changelog}' 
 
+    # Publish the release
     release = repo.create_git_release(
         tag=tag_name, 
         name=release_name, 
-        body=release_body, 
+        message=release_message, 
         draft=False, 
         prerelease=False
     )
@@ -258,11 +257,9 @@ def upload_assets(changelog, tag):
     # Upload assets to the release
     for filepath in asset_filepaths:
         asset_name = filepath.split('/')[-1]
-        with open(filepath, 'rb') as file:
-            release.upload_asset(file, asset_name)
-
-    # Publish the release
-    release.update_release(draft=False)
+        asset_path = Path(f"{EVA_DIR}/{filepath}")
+        print("path: " + str(asset_path))
+        release.upload_asset(str(asset_path), asset_name)
 
     print('Release created and published successfully.')
 
@@ -288,8 +285,6 @@ def bump_up_version(next_version):
     NEXT_RELEASE = f"v{str(next_version)}+dev"
 
     print(NEXT_RELEASE)
-
-    return
 
     run_command("git checkout -b bump-" + NEXT_RELEASE)
     run_command("git add . -u")
@@ -411,12 +406,15 @@ if __name__ == "__main__":
         publish_wheels(current_version_str_without_dev)
 
     if args.upload_assets:
+        print("upload assets")
         release_date = get_commit_id_of_latest_release()
         changelog = get_changelog(release_date)
         upload_assets(changelog, current_version_str_without_dev)
 
     if args.bump_up_version:
         bump_up_version(next_version)
+
+    exit(0)
 
     ## DO EVERYTHING BY DEFAULT
 
