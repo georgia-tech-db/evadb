@@ -28,10 +28,11 @@ EVAConnection Interface
 -----------------------
 
 .. currentmodule:: eva.interfaces.relational
-    :toctree: ./doc
+
 
 .. autosummary::
-
+    :toctree: ./doc
+    
     ~db.EVAConnection.connect
     ~db.EVAConnection.load
     ~db.EVAConnection.query
@@ -41,10 +42,10 @@ EVARelation Interface
 ---------------------
 
 .. currentmodule:: eva.interfaces.relational
-    :toctree: ./doc
 
 .. autosummary::
-    
+    :toctree: ./doc
+
     ~relation.EVARelation.select
     ~relation.EVARelation.execute
     ~relation.EVARelation.cross_apply
@@ -58,9 +59,9 @@ EVAConnection Interface
 -----------------------
 
 .. currentmodule:: eva.interfaces.relational
-    :toctree: ./doc
 
 .. autosummary::
+    :toctree: ./doc
 
     ~db.EVAConnection.create_vector_index
     ~db.EVAConnection.df
@@ -69,9 +70,9 @@ EVARelation Interface
 ---------------------
 
 .. currentmodule:: eva.interfaces.relational
-    :toctree: ./doc
 
 .. autosummary::
+    :toctree: ./doc
 
     ~relation.EVARelation.alias
     ~relation.EVARelation.limit
