@@ -4,6 +4,8 @@ Python API
 Database Interface
 ------------
 
+.. currentmodule:: eva.interfaces.relational
+
 .. autosummary::
     :toctree: ./doc
 
@@ -17,6 +19,8 @@ Database Interface
 
 Table Interface
 ------------
+
+.. currentmodule:: eva.interfaces.relational
 
 .. autosummary::
     :toctree: ./doc
