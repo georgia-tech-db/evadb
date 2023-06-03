@@ -14,9 +14,10 @@
 # limitations under the License.
 import os
 import shutil
+import time
 
-from eva.interfaces.relational.db import EVAConnection, connect
-from eva.configuration.configuration_manager import ConfigurationManager
+
+from eva.interfaces.relational.db import connect
 from pytube import YouTube
 
 def download_youtube_video_from_link(video_link: str):
@@ -28,14 +29,17 @@ def download_youtube_video_from_link(video_link: str):
     yt = YouTube(video_link).streams.first()
     try:
         print("Video download in progress...")
+        start_time = time.time()
         yt.download(filename='online_video.mp4')
+        end_time = time.time()
+        execution_time = end_time - start_time
+        print(f"Video downloaded successfully in: {execution_time} seconds")
     except:
-        print("An error has occurred")
-    print("Video downloaded successfully")
+        print("An error has occurred during downloading")
 
 
-def analyze_video(api_key: str) -> EVAConnection:
-    """Extracts speech from video for llm processing.
+def analyze_video(cursor, api_key: str):
+    """Extracts speech from video for passing it to ChatGPT
 
     Args:
         api_key (str): openai api key.
@@ -44,10 +48,8 @@ def analyze_video(api_key: str) -> EVAConnection:
         EVAConnection: evadb api connection.
     """
     print("Analyzing video. This may take a while...")
+    start_time = time.time()
     
-    # establish evadb api connection
-    conn = connect()
-
     # bootstrap speech analyzer udf and chatgpt udf for analysis
     speech_analyzer_udf_query = """
         CREATE UDF IF NOT EXISTS SpeechRecognizer 
@@ -55,20 +57,23 @@ def analyze_video(api_key: str) -> EVAConnection:
         'task' 'automatic-speech-recognition' 
         'model' 'openai/whisper-base';
         """
-    conn.query(speech_analyzer_udf_query).execute()
+    cursor.query(speech_analyzer_udf_query).execute()
 
     chatgpt_udf_query = """CREATE UDF IF NOT EXISTS ChatGPT IMPL 'eva/udfs/chatgpt.py';"""
-    conn.query(chatgpt_udf_query).execute()
+    cursor.query(chatgpt_udf_query).execute()
 
     # load youtube video into an evadb table
-    conn.query("""DROP TABLE IF EXISTS youtube_video;""").execute()
-    conn.load("online_video.mp4", "youtube_video", "video").execute()
+    cursor.query("""DROP TABLE IF EXISTS youtube_video;""").execute()
+    cursor.load("online_video.mp4", "youtube_video", "video").execute()
 
     # extract speech texts from videos
-    conn.query("CREATE TABLE IF NOT EXISTS youtube_video_text AS SELECT SpeechRecognizer(audio) FROM youtube_video;").execute()
+    cursor.query("CREATE TABLE IF NOT EXISTS youtube_video_text AS SELECT SpeechRecognizer(audio) FROM youtube_video;").execute()
 
-    print("Video analysis completed!")
-    return conn
+    print(cursor.query("SELECT * FROM youtube_video_text").df())
+
+    end_time = time.time()
+    execution_time = end_time - start_time
+    print(f"Video analysis completed in: {execution_time} seconds")
 
 def cleanup():
     """Removes any temporary file / directory created by EVA.
@@ -82,19 +87,25 @@ if __name__ == "__main__":
     print("Welcome! This app lets you ask questions about any YouTube video. You will only need to supply a Youtube URL and an OpenAI API key.")
 
     # Get Youtube video url
-    video_link = str(input("Enter the URL of the YouTube video: "))
+    video_link = str(input("Enter the URL of your YouTube video (enter nothing to pick the default video):"))
+
+    if video_link == "":
+        video_link = "https://www.youtube.com/watch?v=FM7Z-Xq8Drc"
 
     # Get OpenAI key if needed
     try:
-        api_key = os.environ["openai_api_key"]
+        api_key = os.environ["OPENAI_KEY"]
     except KeyError:
-        api_key = str(input("Enter your OpenAI API key: "))
-        os.environ["openai_api_key"] = api_key
+        api_key = str(input("Enter your OpenAI key: "))
+        os.environ["OPENAI_KEY"] = api_key
 
     download_youtube_video_from_link(video_link)
 
+    # establish connection with local EvaDB server
+    cursor = connect().cursor()
+
     try:
-        conn = analyze_video(api_key)
+        analyze_video(cursor, api_key)
 
         print("===========================================")
         print("Ask anything about the video:")
@@ -104,8 +115,8 @@ if __name__ == "__main__":
             if question.lower() == 'exit':
                 ready = False
             else:
-                rel = conn.table("youtube_video_text").select(f"ChatGPT('{question}', text)")
-                response = rel.df()['chatgpt.response'][0]
+                query = cursor.table("youtube_video_text").select(f"ChatGPT('{question}', text)")
+                response = query.df()['chatgpt.response'][0]
                 print("Answer:")
                 print(response, "\n")
         
