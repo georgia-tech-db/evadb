@@ -6,10 +6,11 @@ EVA DB
 
 ..  rubric:: Database system for building simpler and faster AI-powered applications.
 
-..  figure:: https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/images/eva/eva-banner.png
-    :target: https://github.com/georgia-tech-db/eva
-    :width: 100%
-    :alt: EVA Banner
+..
+    ..  figure:: https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/images/eva/eva-banner.png
+        :target: https://github.com/georgia-tech-db/eva
+        :width: 100%
+        :alt: EVA Banner
 
 |pypi_status| |License|
 
