@@ -17,6 +17,7 @@ EVAConnection APIs
     ~db.EVAConnection.cursor
     ~db.EVAConnection.df
     ~db.EVAConnection.load
+    ~db.EVAConnection.create_udf
     ~db.EVAConnection.sql
     ~db.EVAConnection.table
     ~db.EVAConnection.query
@@ -34,4 +35,5 @@ EVACursor APIs
     ~db.EVACursor.load
     ~db.EVACursor.sql
     ~db.EVACursor.table
+    ~db.EVACursor.create_udf
     ~db.EVACursor.query
