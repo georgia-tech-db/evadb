@@ -10,6 +10,528 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### [Deprecated]
 ### [Removed]
 
+##  [0.2.5] - 2023-06-02
+
+* PR #801: feat / doc: example app that summarizes any youtube video with eva api 
+* PR #796: docs: Updating Docs based on feedback 
+* PR #787: feat: enable ray by default 
+* PR #777: feat: Hugging face entity extraction 
+* PR #789: feat: create table from select query 
+* PR #794: docs: bump python for docs 
+* PR #793: refactor: Create .git-blame-ignore-revs  
+* PR #792: refactor: updated eva license 
+* PR #784: feat: support relational apis 
+* PR #774: Improve create mat 
+* PR #785: fix: update mnist notebook 
+* PR #781: docs: minor updates 
+* PR #780: feat: add mnistCNN as builtin udf 
+* PR #779: docs: many minor updates 
+* PR #776: docs: update getting started page 
+* PR #775: docs: style updates 
+* PR #773: fix: gracefully handle missing config values 
+* PR #771: chore: improve logging of error messages  
+* PR #768: feat: create materialized view infers column name 
+* PR #770: tutorials: hugging face text summarizer, text classifier, + pdf loader 
+* PR #769: feat: load pdf 
+* PR #766: feat: change default dir to "eva_data" and make it configurable 
+* PR #767: ci: improve docker support 
+* PR #751: feat: integration with langchain 
+* PR #764: feat: db apis made more pythonic 
+* PR #765: test: fix test case 
+* PR #754: chore
+* PR #755: chore
+* PR #756: chore
+* PR #757: chore
+* PR #759: chore
+* PR #760: chore
+* PR #758: chore
+* PR #761: chore
+* PR #762: chore
+* PR #752: fix: restart eva_server process for every tutorial 
+* PR #753: chore
+* PR #748: feat: common image transformation UDFs 
+* PR #731: feat: extensible parallel execution 
+* PR #750: release: automating the release script 
+* PR #745: fix docs build 
+* PR #744: docs: fix links 
+* PR #743: fix: hot fix for similarity notebook 
+* PR #700: docs: similarity search tutorial 
+* PR #741: docs: test links in documentation with linkcheck 
+* PR #740: docs: minor updates to read-the-docs 
+* PR #707: feat: add support for third party vector stores 
+* PR #738: feat: allow users to specify host and port while launching server 
+* PR #733: docs: enable spellcheck on all python files, notebooks, and docs  
+* PR #566: feat: object tracking 
+* PR #720: fix: similarity test 
+* PR #726: ci: bump up oldest python version from 3.7 to 3.8 
+* PR #727: docs: "recogizing" in index.rst 
+* PR #729: docs: update notebooks on landing page 
+* PR #724: release: Bump v0.2.3+dev 
+
+##  [0.2.5] - 2023-06-02
+
+* PR #801: feat / doc: example app that summarizes any youtube video with eva api 
+* PR #796: docs: Updating Docs based on feedback 
+* PR #787: feat: enable ray by default 
+* PR #777: feat: Hugging face entity extraction 
+* PR #789: feat: create table from select query 
+* PR #794: docs: bump python for docs 
+* PR #793: refactor: Create .git-blame-ignore-revs  
+* PR #792: refactor: updated eva license 
+* PR #784: feat: support relational apis 
+* PR #774: Improve create mat 
+* PR #785: fix: update mnist notebook 
+* PR #781: docs: minor updates 
+* PR #780: feat: add mnistCNN as builtin udf 
+* PR #779: docs: many minor updates 
+* PR #776: docs: update getting started page 
+* PR #775: docs: style updates 
+* PR #773: fix: gracefully handle missing config values 
+* PR #771: chore: improve logging of error messages  
+* PR #768: feat: create materialized view infers column name 
+* PR #770: tutorials: hugging face text summarizer, text classifier, + pdf loader 
+* PR #769: feat: load pdf 
+* PR #766: feat: change default dir to "eva_data" and make it configurable 
+* PR #767: ci: improve docker support 
+* PR #751: feat: integration with langchain 
+* PR #764: feat: db apis made more pythonic 
+* PR #765: test: fix test case 
+* PR #754: chore
+* PR #755: chore
+* PR #756: chore
+* PR #757: chore
+* PR #759: chore
+* PR #760: chore
+* PR #758: chore
+* PR #761: chore
+* PR #762: chore
+* PR #752: fix: restart eva_server process for every tutorial 
+* PR #753: chore
+* PR #748: feat: common image transformation UDFs 
+* PR #731: feat: extensible parallel execution 
+* PR #750: release: automating the release script 
+* PR #745: fix docs build 
+* PR #744: docs: fix links 
+* PR #743: fix: hot fix for similarity notebook 
+* PR #700: docs: similarity search tutorial 
+* PR #741: docs: test links in documentation with linkcheck 
+* PR #740: docs: minor updates to read-the-docs 
+* PR #707: feat: add support for third party vector stores 
+* PR #738: feat: allow users to specify host and port while launching server 
+* PR #733: docs: enable spellcheck on all python files, notebooks, and docs  
+* PR #566: feat: object tracking 
+* PR #720: fix: similarity test 
+* PR #726: ci: bump up oldest python version from 3.7 to 3.8 
+* PR #727: docs: "recogizing" in index.rst 
+* PR #729: docs: update notebooks on landing page 
+* PR #724: release: Bump v0.2.3+dev 
+
+##  [0.2.5] - 2023-06-02
+
+* PR #801: feat / doc: example app that summarizes any youtube video with eva api 
+* PR #796: docs: Updating Docs based on feedback 
+* PR #787: feat: enable ray by default 
+* PR #777: feat: Hugging face entity extraction 
+* PR #789: feat: create table from select query 
+* PR #794: docs: bump python for docs 
+* PR #793: refactor: Create .git-blame-ignore-revs  
+* PR #792: refactor: updated eva license 
+* PR #784: feat: support relational apis 
+* PR #774: Improve create mat 
+* PR #785: fix: update mnist notebook 
+* PR #781: docs: minor updates 
+* PR #780: feat: add mnistCNN as builtin udf 
+* PR #779: docs: many minor updates 
+* PR #776: docs: update getting started page 
+* PR #775: docs: style updates 
+* PR #773: fix: gracefully handle missing config values 
+* PR #771: chore: improve logging of error messages  
+* PR #768: feat: create materialized view infers column name 
+* PR #770: tutorials: hugging face text summarizer, text classifier, + pdf loader 
+* PR #769: feat: load pdf 
+* PR #766: feat: change default dir to "eva_data" and make it configurable 
+* PR #767: ci: improve docker support 
+* PR #751: feat: integration with langchain 
+* PR #764: feat: db apis made more pythonic 
+* PR #765: test: fix test case 
+* PR #754: chore
+* PR #755: chore
+* PR #756: chore
+* PR #757: chore
+* PR #759: chore
+* PR #760: chore
+* PR #758: chore
+* PR #761: chore
+* PR #762: chore
+* PR #752: fix: restart eva_server process for every tutorial 
+* PR #753: chore
+* PR #748: feat: common image transformation UDFs 
+* PR #731: feat: extensible parallel execution 
+* PR #750: release: automating the release script 
+* PR #745: fix docs build 
+* PR #744: docs: fix links 
+* PR #743: fix: hot fix for similarity notebook 
+* PR #700: docs: similarity search tutorial 
+* PR #741: docs: test links in documentation with linkcheck 
+* PR #740: docs: minor updates to read-the-docs 
+* PR #707: feat: add support for third party vector stores 
+* PR #738: feat: allow users to specify host and port while launching server 
+* PR #733: docs: enable spellcheck on all python files, notebooks, and docs  
+* PR #566: feat: object tracking 
+* PR #720: fix: similarity test 
+* PR #726: ci: bump up oldest python version from 3.7 to 3.8 
+* PR #727: docs: "recogizing" in index.rst 
+* PR #729: docs: update notebooks on landing page 
+* PR #724: release: Bump v0.2.3+dev 
+
+##  [0.2.5] - 2023-06-02
+
+* PR #801: feat / doc: example app that summarizes any youtube video with eva api 
+* PR #796: docs: Updating Docs based on feedback 
+* PR #787: feat: enable ray by default 
+* PR #777: feat: Hugging face entity extraction 
+* PR #789: feat: create table from select query 
+* PR #794: docs: bump python for docs 
+* PR #793: refactor: Create .git-blame-ignore-revs  
+* PR #792: refactor: updated eva license 
+* PR #784: feat: support relational apis 
+* PR #774: Improve create mat 
+* PR #785: fix: update mnist notebook 
+* PR #781: docs: minor updates 
+* PR #780: feat: add mnistCNN as builtin udf 
+* PR #779: docs: many minor updates 
+* PR #776: docs: update getting started page 
+* PR #775: docs: style updates 
+* PR #773: fix: gracefully handle missing config values 
+* PR #771: chore: improve logging of error messages  
+* PR #768: feat: create materialized view infers column name 
+* PR #770: tutorials: hugging face text summarizer, text classifier, + pdf loader 
+* PR #769: feat: load pdf 
+* PR #766: feat: change default dir to "eva_data" and make it configurable 
+* PR #767: ci: improve docker support 
+* PR #751: feat: integration with langchain 
+* PR #764: feat: db apis made more pythonic 
+* PR #765: test: fix test case 
+* PR #754: chore
+* PR #755: chore
+* PR #756: chore
+* PR #757: chore
+* PR #759: chore
+* PR #760: chore
+* PR #758: chore
+* PR #761: chore
+* PR #762: chore
+* PR #752: fix: restart eva_server process for every tutorial 
+* PR #753: chore
+* PR #748: feat: common image transformation UDFs 
+* PR #731: feat: extensible parallel execution 
+* PR #750: release: automating the release script 
+* PR #745: fix docs build 
+* PR #744: docs: fix links 
+* PR #743: fix: hot fix for similarity notebook 
+* PR #700: docs: similarity search tutorial 
+* PR #741: docs: test links in documentation with linkcheck 
+* PR #740: docs: minor updates to read-the-docs 
+* PR #707: feat: add support for third party vector stores 
+* PR #738: feat: allow users to specify host and port while launching server 
+* PR #733: docs: enable spellcheck on all python files, notebooks, and docs  
+* PR #566: feat: object tracking 
+* PR #720: fix: similarity test 
+* PR #726: ci: bump up oldest python version from 3.7 to 3.8 
+* PR #727: docs: "recogizing" in index.rst 
+* PR #729: docs: update notebooks on landing page 
+* PR #724: release: Bump v0.2.3+dev 
+
+##  [0.2.5] - 2023-06-02
+
+* PR #801: feat / doc: example app that summarizes any youtube video with eva api 
+* PR #796: docs: Updating Docs based on feedback 
+* PR #787: feat: enable ray by default 
+* PR #777: feat: Hugging face entity extraction 
+* PR #789: feat: create table from select query 
+* PR #794: docs: bump python for docs 
+* PR #793: refactor: Create .git-blame-ignore-revs  
+* PR #792: refactor: updated eva license 
+* PR #784: feat: support relational apis 
+* PR #774: Improve create mat 
+* PR #785: fix: update mnist notebook 
+* PR #781: docs: minor updates 
+* PR #780: feat: add mnistCNN as builtin udf 
+* PR #779: docs: many minor updates 
+* PR #776: docs: update getting started page 
+* PR #775: docs: style updates 
+* PR #773: fix: gracefully handle missing config values 
+* PR #771: chore: improve logging of error messages  
+* PR #768: feat: create materialized view infers column name 
+* PR #770: tutorials: hugging face text summarizer, text classifier, + pdf loader 
+* PR #769: feat: load pdf 
+* PR #766: feat: change default dir to "eva_data" and make it configurable 
+* PR #767: ci: improve docker support 
+* PR #751: feat: integration with langchain 
+* PR #764: feat: db apis made more pythonic 
+* PR #765: test: fix test case 
+* PR #754: chore
+* PR #755: chore
+* PR #756: chore
+* PR #757: chore
+* PR #759: chore
+* PR #760: chore
+* PR #758: chore
+* PR #761: chore
+* PR #762: chore
+* PR #752: fix: restart eva_server process for every tutorial 
+* PR #753: chore
+* PR #748: feat: common image transformation UDFs 
+* PR #731: feat: extensible parallel execution 
+* PR #750: release: automating the release script 
+* PR #745: fix docs build 
+* PR #744: docs: fix links 
+* PR #743: fix: hot fix for similarity notebook 
+* PR #700: docs: similarity search tutorial 
+* PR #741: docs: test links in documentation with linkcheck 
+* PR #740: docs: minor updates to read-the-docs 
+* PR #707: feat: add support for third party vector stores 
+* PR #738: feat: allow users to specify host and port while launching server 
+* PR #733: docs: enable spellcheck on all python files, notebooks, and docs  
+* PR #566: feat: object tracking 
+* PR #720: fix: similarity test 
+* PR #726: ci: bump up oldest python version from 3.7 to 3.8 
+* PR #727: docs: "recogizing" in index.rst 
+* PR #729: docs: update notebooks on landing page 
+* PR #724: release: Bump v0.2.3+dev 
+
+##  [0.2.5] - 2023-06-02
+
+* PR #801: feat / doc: example app that summarizes any youtube video with eva api 
+* PR #796: docs: Updating Docs based on feedback 
+* PR #787: feat: enable ray by default 
+* PR #777: feat: Hugging face entity extraction 
+* PR #789: feat: create table from select query 
+* PR #794: docs: bump python for docs 
+* PR #793: refactor: Create .git-blame-ignore-revs  
+* PR #792: refactor: updated eva license 
+* PR #784: feat: support relational apis 
+* PR #774: Improve create mat 
+* PR #785: fix: update mnist notebook 
+* PR #781: docs: minor updates 
+* PR #780: feat: add mnistCNN as builtin udf 
+* PR #779: docs: many minor updates 
+* PR #776: docs: update getting started page 
+* PR #775: docs: style updates 
+* PR #773: fix: gracefully handle missing config values 
+* PR #771: chore: improve logging of error messages  
+* PR #768: feat: create materialized view infers column name 
+* PR #770: tutorials: hugging face text summarizer, text classifier, + pdf loader 
+* PR #769: feat: load pdf 
+* PR #766: feat: change default dir to "eva_data" and make it configurable 
+* PR #767: ci: improve docker support 
+* PR #751: feat: integration with langchain 
+* PR #764: feat: db apis made more pythonic 
+* PR #765: test: fix test case 
+* PR #754: chore
+* PR #755: chore
+* PR #756: chore
+* PR #757: chore
+* PR #759: chore
+* PR #760: chore
+* PR #758: chore
+* PR #761: chore
+* PR #762: chore
+* PR #752: fix: restart eva_server process for every tutorial 
+* PR #753: chore
+* PR #748: feat: common image transformation UDFs 
+* PR #731: feat: extensible parallel execution 
+* PR #750: release: automating the release script 
+* PR #745: fix docs build 
+* PR #744: docs: fix links 
+* PR #743: fix: hot fix for similarity notebook 
+* PR #700: docs: similarity search tutorial 
+* PR #741: docs: test links in documentation with linkcheck 
+* PR #740: docs: minor updates to read-the-docs 
+* PR #707: feat: add support for third party vector stores 
+* PR #738: feat: allow users to specify host and port while launching server 
+* PR #733: docs: enable spellcheck on all python files, notebooks, and docs  
+* PR #566: feat: object tracking 
+* PR #720: fix: similarity test 
+* PR #726: ci: bump up oldest python version from 3.7 to 3.8 
+* PR #727: docs: "recogizing" in index.rst 
+* PR #729: docs: update notebooks on landing page 
+* PR #724: release: Bump v0.2.3+dev 
+
+##  [0.2.5] - 2023-06-02
+
+* PR #801: feat / doc: example app that summarizes any youtube video with eva api 
+* PR #796: docs: Updating Docs based on feedback 
+* PR #787: feat: enable ray by default 
+* PR #777: feat: Hugging face entity extraction 
+* PR #789: feat: create table from select query 
+* PR #794: docs: bump python for docs 
+* PR #793: refactor: Create .git-blame-ignore-revs  
+* PR #792: refactor: updated eva license 
+* PR #784: feat: support relational apis 
+* PR #774: Improve create mat 
+* PR #785: fix: update mnist notebook 
+* PR #781: docs: minor updates 
+* PR #780: feat: add mnistCNN as builtin udf 
+* PR #779: docs: many minor updates 
+* PR #776: docs: update getting started page 
+* PR #775: docs: style updates 
+* PR #773: fix: gracefully handle missing config values 
+* PR #771: chore: improve logging of error messages  
+* PR #768: feat: create materialized view infers column name 
+* PR #770: tutorials: hugging face text summarizer, text classifier, + pdf loader 
+* PR #769: feat: load pdf 
+* PR #766: feat: change default dir to "eva_data" and make it configurable 
+* PR #767: ci: improve docker support 
+* PR #751: feat: integration with langchain 
+* PR #764: feat: db apis made more pythonic 
+* PR #765: test: fix test case 
+* PR #754: chore
+* PR #755: chore
+* PR #756: chore
+* PR #757: chore
+* PR #759: chore
+* PR #760: chore
+* PR #758: chore
+* PR #761: chore
+* PR #762: chore
+* PR #752: fix: restart eva_server process for every tutorial 
+* PR #753: chore
+* PR #748: feat: common image transformation UDFs 
+* PR #731: feat: extensible parallel execution 
+* PR #750: release: automating the release script 
+* PR #745: fix docs build 
+* PR #744: docs: fix links 
+* PR #743: fix: hot fix for similarity notebook 
+* PR #700: docs: similarity search tutorial 
+* PR #741: docs: test links in documentation with linkcheck 
+* PR #740: docs: minor updates to read-the-docs 
+* PR #707: feat: add support for third party vector stores 
+* PR #738: feat: allow users to specify host and port while launching server 
+* PR #733: docs: enable spellcheck on all python files, notebooks, and docs  
+* PR #566: feat: object tracking 
+* PR #720: fix: similarity test 
+* PR #726: ci: bump up oldest python version from 3.7 to 3.8 
+* PR #727: docs: "recogizing" in index.rst 
+* PR #729: docs: update notebooks on landing page 
+* PR #724: release: Bump v0.2.3+dev 
+
+##  [0.2.5] - 2023-06-02
+
+* PR #801: feat / doc: example app that summarizes any youtube video with eva api 
+* PR #796: docs: Updating Docs based on feedback 
+* PR #787: feat: enable ray by default 
+* PR #777: feat: Hugging face entity extraction 
+* PR #789: feat: create table from select query 
+* PR #794: docs: bump python for docs 
+* PR #793: refactor: Create .git-blame-ignore-revs  
+* PR #792: refactor: updated eva license 
+* PR #784: feat: support relational apis 
+* PR #774: Improve create mat 
+* PR #785: fix: update mnist notebook 
+* PR #781: docs: minor updates 
+* PR #780: feat: add mnistCNN as builtin udf 
+* PR #779: docs: many minor updates 
+* PR #776: docs: update getting started page 
+* PR #775: docs: style updates 
+* PR #773: fix: gracefully handle missing config values 
+* PR #771: chore: improve logging of error messages  
+* PR #768: feat: create materialized view infers column name 
+* PR #770: tutorials: hugging face text summarizer, text classifier, + pdf loader 
+* PR #769: feat: load pdf 
+* PR #766: feat: change default dir to "eva_data" and make it configurable 
+* PR #767: ci: improve docker support 
+* PR #751: feat: integration with langchain 
+* PR #764: feat: db apis made more pythonic 
+* PR #765: test: fix test case 
+* PR #754: chore
+* PR #755: chore
+* PR #756: chore
+* PR #757: chore
+* PR #759: chore
+* PR #760: chore
+* PR #758: chore
+* PR #761: chore
+* PR #762: chore
+* PR #752: fix: restart eva_server process for every tutorial 
+* PR #753: chore
+* PR #748: feat: common image transformation UDFs 
+* PR #731: feat: extensible parallel execution 
+* PR #750: release: automating the release script 
+* PR #745: fix docs build 
+* PR #744: docs: fix links 
+* PR #743: fix: hot fix for similarity notebook 
+* PR #700: docs: similarity search tutorial 
+* PR #741: docs: test links in documentation with linkcheck 
+* PR #740: docs: minor updates to read-the-docs 
+* PR #707: feat: add support for third party vector stores 
+* PR #738: feat: allow users to specify host and port while launching server 
+* PR #733: docs: enable spellcheck on all python files, notebooks, and docs  
+* PR #566: feat: object tracking 
+* PR #720: fix: similarity test 
+* PR #726: ci: bump up oldest python version from 3.7 to 3.8 
+* PR #727: docs: "recogizing" in index.rst 
+* PR #729: docs: update notebooks on landing page 
+* PR #724: release: Bump v0.2.3+dev 
+
+##  [0.2.5] - 2023-06-02
+
+* PR #801: feat / doc: example app that summarizes any youtube video with eva api 
+* PR #796: docs: Updating Docs based on feedback 
+* PR #787: feat: enable ray by default 
+* PR #777: feat: Hugging face entity extraction 
+* PR #789: feat: create table from select query 
+* PR #794: docs: bump python for docs 
+* PR #793: refactor: Create .git-blame-ignore-revs  
+* PR #792: refactor: updated eva license 
+* PR #784: feat: support relational apis 
+* PR #774: Improve create mat 
+* PR #785: fix: update mnist notebook 
+* PR #781: docs: minor updates 
+* PR #780: feat: add mnistCNN as builtin udf 
+* PR #779: docs: many minor updates 
+* PR #776: docs: update getting started page 
+* PR #775: docs: style updates 
+* PR #773: fix: gracefully handle missing config values 
+* PR #771: chore: improve logging of error messages  
+* PR #768: feat: create materialized view infers column name 
+* PR #770: tutorials: hugging face text summarizer, text classifier, + pdf loader 
+* PR #769: feat: load pdf 
+* PR #766: feat: change default dir to "eva_data" and make it configurable 
+* PR #767: ci: improve docker support 
+* PR #751: feat: integration with langchain 
+* PR #764: feat: db apis made more pythonic 
+* PR #765: test: fix test case 
+* PR #754: chore
+* PR #755: chore
+* PR #756: chore
+* PR #757: chore
+* PR #759: chore
+* PR #760: chore
+* PR #758: chore
+* PR #761: chore
+* PR #762: chore
+* PR #752: fix: restart eva_server process for every tutorial 
+* PR #753: chore
+* PR #748: feat: common image transformation UDFs 
+* PR #731: feat: extensible parallel execution 
+* PR #750: release: automating the release script 
+* PR #745: fix docs build 
+* PR #744: docs: fix links 
+* PR #743: fix: hot fix for similarity notebook 
+* PR #700: docs: similarity search tutorial 
+* PR #741: docs: test links in documentation with linkcheck 
+* PR #740: docs: minor updates to read-the-docs 
+* PR #707: feat: add support for third party vector stores 
+* PR #738: feat: allow users to specify host and port while launching server 
+* PR #733: docs: enable spellcheck on all python files, notebooks, and docs  
+* PR #566: feat: object tracking 
+* PR #720: fix: similarity test 
+* PR #726: ci: bump up oldest python version from 3.7 to 3.8 
+* PR #727: docs: "recogizing" in index.rst 
+* PR #729: docs: update notebooks on landing page 
+* PR #724: release: Bump v0.2.3+dev 
+
 
 ##  [0.2.4] - 2023-05-17
 ### [Added]
