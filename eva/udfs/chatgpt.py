@@ -50,7 +50,7 @@ class ChatGPT(AbstractUDF):
         openai.api_key = ConfigurationManager().get_value(
             "third_party", "openai_api_key"
         )
-        # If not found, try OS Enviroment Variable
+        # If not found, try OS Environment Variable
         if len(openai.api_key) == 0:
             openai.api_key = os.environ["openai_api_key"]
         assert (
