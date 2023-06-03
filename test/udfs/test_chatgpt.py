@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,17 +14,16 @@
 # limitations under the License.
 
 import os
-import openai
 import unittest
 from test.markers import ray_skip_marker
 from unittest.mock import MagicMock
 
+import openai
 import pandas as pd
 from mock import patch
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
 from eva.server.command_handler import execute_query_fetch_all
 
@@ -120,7 +119,10 @@ class ChatGPTTest(unittest.TestCase):
         udf_name = "ChatGPT"
         execute_query_fetch_all(f"DROP UDF IF EXISTS {udf_name};")
 
-        with self.assertRaises(Exception, msg="Please set your OpenAI API key in eva.yml file (third_party, open_api_key) or environment variable (OPENAI_KEY)"):
+        with self.assertRaises(
+            Exception,
+            msg="Please set your OpenAI API key in eva.yml file (third_party, open_api_key) or environment variable (OPENAI_KEY)",
+        ):
             create_udf_query = f"""CREATE UDF {udf_name}
                 IMPL 'eva/udfs/chatgpt.py'
                 """
