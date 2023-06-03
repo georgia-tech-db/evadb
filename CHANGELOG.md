@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### [Deprecated]
 ### [Removed]
 
+##  [0.2.6] - 2023-06-02
+
+* PR #807: Bump v0.2.6+dev 
+
 ##  [0.2.5] - 2023-06-02
 
 * PR #801: feat / doc: example app that summarizes any youtube video with eva api 

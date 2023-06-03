@@ -167,10 +167,9 @@ def release_version(current_version):
     run_command("git add . -u")
     run_command("git commit -m '[RELEASE]: " + NEXT_RELEASE + "'")
     run_command("git push --set-upstream origin release-" + NEXT_RELEASE)
-    run_command("git push --set-upstream origin release-" + NEXT_RELEASE)
 
     #run_command(f"git tag -a {NEXT_RELEASE} -m '{NEXT_RELEASE} release'")
-    run_command(f"git push origin {NEXT_RELEASE}")
+    run_command(f"git push origin release-{NEXT_RELEASE}")
 
 def get_commit_id_of_latest_release():
     import requests
@@ -368,6 +367,10 @@ if __name__ == "__main__":
     current_version = VERSION
     version = Version(current_version)
     print("CURRENT VERSION: " + current_version)
+    current_version_str_without_dev = current_version
+    if "dev" in current_version:
+        current_version_str_without_dev = current_version.split('+')[0]
+    print("CURRENT VERSION WITHOUT DEV: " + current_version_str_without_dev)
 
     selected_release_type = args.next_release_type
 
@@ -385,8 +388,6 @@ if __name__ == "__main__":
         next_version = version.next_major()    
         next_version_str = "v" + str(next_version)
 
-    current_version_str_without_dev = str(version)
-    print("CURRENT VERSION WITHOUT DEV: " + current_version_str_without_dev)
     print("NEXT    VERSION : " + next_version_str)
 
     if args.get_changelog:
@@ -413,8 +414,6 @@ if __name__ == "__main__":
 
     if args.bump_up_version:
         bump_up_version(next_version)
-
-    exit(0)
 
     ## DO EVERYTHING BY DEFAULT
 
