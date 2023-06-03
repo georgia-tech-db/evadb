@@ -163,15 +163,13 @@ def release_version(current_version):
 
     NEXT_RELEASE = current_version # without dev part
 
-    return
-
     run_command("git checkout -b release-" + NEXT_RELEASE)
     run_command("git add . -u")
     run_command("git commit -m '[RELEASE]: " + NEXT_RELEASE + "'")
     run_command("git push --set-upstream origin release-" + NEXT_RELEASE)
     run_command("git push --set-upstream origin release-" + NEXT_RELEASE)
 
-    run_command(f"git tag -a {NEXT_RELEASE} -m '{NEXT_RELEASE} release'")
+    #run_command(f"git tag -a {NEXT_RELEASE} -m '{NEXT_RELEASE} release'")
     run_command(f"git push origin {NEXT_RELEASE}")
 
 def get_commit_id_of_latest_release():
@@ -182,7 +180,7 @@ def get_commit_id_of_latest_release():
     response = requests.get(url)
     data = response.json()
 
-    latest_release = data[1]
+    latest_release = data[0]
     release_date = latest_release['created_at']
 
     return release_date
@@ -213,6 +211,8 @@ def publish_wheels(tag):
     run_command(f"python3 -m pip install dist/evadb-{tag}-py3-none-any.whl")
     run_command("""python3 -c "import eva; print(eva.__version__)" """)
 
+    print("Running twine to upload wheels")
+    print("Ensure that you have .pypirc file in your $HOME folder")
     run_command("twine upload dist/* -r pypi")
 
 
