@@ -180,7 +180,7 @@ def get_commit_id_of_latest_release():
     response = requests.get(url)
     data = response.json()
 
-    latest_release = data[1]
+    latest_release = data[0]
     release_date = latest_release['created_at']
 
     return release_date
