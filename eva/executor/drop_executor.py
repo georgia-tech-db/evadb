@@ -43,7 +43,6 @@ class DropExecutor(AbstractExecutor):
         ):
             err_msg = "Table: {} does not exist".format(table_info)
             if self.node.if_exists:
-                logger.warn(err_msg)
                 return Batch(pd.DataFrame([err_msg]))
             else:
                 raise ExecutorError(err_msg)

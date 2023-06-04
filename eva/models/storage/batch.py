@@ -313,9 +313,8 @@ class Batch:
             raise ValueError("Stack can only be called on single-column batches")
         frame_data_col = batch.columns[0]
 
-        stacked_array = np.array(batch.frames[frame_data_col].values.tolist())
+        stacked_array = np.hstack(batch.frames[frame_data_col].values)
         stacked_frame = pd.DataFrame([{frame_data_col: stacked_array}])
-
         return Batch(stacked_frame)
 
     @classmethod

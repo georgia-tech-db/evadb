@@ -20,7 +20,7 @@ from eva.binder.binder_utils import (
     bind_table_info,
     check_column_name_is_string,
     check_groupby_pattern,
-    check_table_object_is_video,
+    check_table_object_is_groupable,
     extend_star,
     handle_bind_extract_object_function,
     resolve_alias_table_value_expression,
@@ -123,8 +123,8 @@ class StatementBinder:
                 self.bind(expr)
         if node.groupby_clause:
             self.bind(node.groupby_clause)
-            check_groupby_pattern(node.groupby_clause.value)
-            check_table_object_is_video(node.from_table)
+            check_table_object_is_groupable(node.from_table)
+            check_groupby_pattern(node.from_table, node.groupby_clause.value)
         if node.orderby_list:
             for expr in node.orderby_list:
                 self.bind(expr[0])
@@ -160,14 +160,18 @@ class StatementBinder:
                 elif expr.etype == ExpressionType.FUNCTION_EXPRESSION:
                     num_projected_columns += len(expr.output_objs)
                 else:
-                    raise BinderError("Unsupported expression type {}.".format(expr.etype))
+                    raise BinderError(
+                        "Unsupported expression type {}.".format(expr.etype)
+                    )
 
             binded_col_list = []
             idx = 0
             for expr in node.query.target_list:
-                output_objs = [(expr.col_name, expr.col_object)] \
-                    if expr.etype == ExpressionType.TUPLE_VALUE \
+                output_objs = (
+                    [(expr.col_name, expr.col_object)]
+                    if expr.etype == ExpressionType.TUPLE_VALUE
                     else zip(expr.projection_columns, expr.output_objs)
+                )
                 for col_name, output_obj in output_objs:
                     binded_col_list.append(
                         ColumnDefinition(

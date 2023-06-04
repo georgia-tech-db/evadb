@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -122,9 +122,14 @@ class StatementBinderTests(unittest.TestCase):
         with patch.object(StatementBinder, "bind"):
             binder = StatementBinder(StatementBinderContext())
             mat_statement = MagicMock()
-            mat_statement.col_list = [ColumnDefinition('id', None, None, None)]
-            mat_statement.query.target_list = [TupleValueExpression(col_name='id'), TupleValueExpression(col_name='label')]
-            with self.assertRaises(Exception, msg='Projected columns mismatch, expected 1 found 2.'):
+            mat_statement.col_list = [ColumnDefinition("id", None, None, None)]
+            mat_statement.query.target_list = [
+                TupleValueExpression(col_name="id"),
+                TupleValueExpression(col_name="label"),
+            ]
+            with self.assertRaises(
+                Exception, msg="Projected columns mismatch, expected 1 found 2."
+            ):
                 binder._bind_create_mat_statement(mat_statement)
 
     def test_bind_explain_statement(self):
@@ -219,8 +224,8 @@ class StatementBinderTests(unittest.TestCase):
         )
         self.assertEqual(str(cm.exception), err_msg)
 
-    @patch("eva.binder.statement_binder.check_table_object_is_video")
-    def test_bind_select_statement(self, is_video_mock):
+    @patch("eva.binder.statement_binder.check_table_object_is_groupable")
+    def test_bind_select_statement(self, is_groupable_mock):
         with patch.object(StatementBinder, "bind") as mock_binder:
             binder = StatementBinder(StatementBinderContext())
             select_statement = MagicMock()
@@ -234,7 +239,7 @@ class StatementBinderTests(unittest.TestCase):
             mock_binder.assert_any_call(select_statement.where_clause)
             mock_binder.assert_any_call(select_statement.groupby_clause)
             mock_binder.assert_any_call(select_statement.union_link)
-            is_video_mock.assert_called()
+            is_groupable_mock.assert_called()
             for mock in mocks:
                 mock_binder.assert_any_call(mock)
 

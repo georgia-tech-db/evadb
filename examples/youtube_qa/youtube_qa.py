@@ -67,9 +67,7 @@ def analyze_video(cursor, api_key: str):
     cursor.load("online_video.mp4", "youtube_video", "video").execute()
 
     # extract speech texts from videos
-    cursor.query("CREATE TABLE IF NOT EXISTS youtube_video_text AS SELECT SpeechRecognizer(audio) FROM youtube_video;").execute()
-
-    print(cursor.query("SELECT * FROM youtube_video_text").df())
+    cursor.query("CREATE TABLE IF NOT EXISTS youtube_video_text AS SELECT SpeechRecognizer(SEGMENT(audio)) FROM youtube_video GROUP BY '300 samples';").df()
 
     end_time = time.time()
     execution_time = end_time - start_time
@@ -87,7 +85,7 @@ if __name__ == "__main__":
     print("Welcome! This app lets you ask questions about any YouTube video. You will only need to supply a Youtube URL and an OpenAI API key.")
 
     # Get Youtube video url
-    video_link = str(input("Enter the URL of your YouTube video (enter nothing to pick the default video):"))
+    video_link = str(input("Enter the URL of your YouTube video (or Press 'Enter' to go with the default video):"))
 
     if video_link == "":
         video_link = "https://www.youtube.com/watch?v=FM7Z-Xq8Drc"
@@ -107,6 +105,8 @@ if __name__ == "__main__":
     try:
         analyze_video(cursor, api_key)
 
+        exit(0)
+
         print("===========================================")
         print("Ask anything about the video:")
         ready = True
@@ -123,7 +123,8 @@ if __name__ == "__main__":
         cleanup()
         print("Session ended.")
         print("===========================================")
-    except:
+    except Exception as e:
+        print(e)
         cleanup()
         print("Session ended with an error.")
         print("===========================================")

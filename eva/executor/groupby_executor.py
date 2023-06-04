@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import re
 from typing import Iterator
 
 import pandas as pd
@@ -33,7 +34,8 @@ class GroupByExecutor(AbstractExecutor):
 
     def __init__(self, node: GroupByPlan):
         super().__init__(node)
-        self._segment_length = int(node.groupby_clause.value[:-1])
+        numbers_only = re.sub(r"\D", "", node.groupby_clause.value)
+        self._segment_length = int(numbers_only)
 
     def exec(self, *args, **kwargs) -> Iterator[Batch]:
         child_executor = self.children[0]
