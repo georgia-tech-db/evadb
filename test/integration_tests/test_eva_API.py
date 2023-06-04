@@ -20,6 +20,7 @@ import pytest
 from eva.configuration.constants import EVA_ROOT_DIR
 from eva.interfaces.relational.db import connect
 
+
 @pytest.mark.asyncio
 class EVAAPITests(unittest.TestCase):
     def setUp(self):
