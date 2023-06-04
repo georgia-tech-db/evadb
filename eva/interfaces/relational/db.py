@@ -213,7 +213,7 @@ class EVACursor(object):
             EVARelation: The EVARelation object representing the UDF created.
         """
         stmt = parse_create_udf(udf_name, udf_file_path, type, **kwargs)
-        return EVARelation(stmt)
+        return EVARelation(self._evadb, stmt)
 
     def query(self, sql_query: str) -> EVARelation:
         stmt = parse_query(sql_query)
