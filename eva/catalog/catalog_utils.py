@@ -25,10 +25,13 @@ from eva.catalog.catalog_type import (
     TableType,
     VideoColumnName,
 )
-from eva.catalog.models.column_catalog import ColumnCatalogEntry
-from eva.catalog.models.table_catalog import TableCatalogEntry
-from eva.catalog.models.udf_cache_catalog import UdfCacheCatalogEntry
-from eva.catalog.models.udf_catalog import UdfCatalogEntry
+from eva.catalog.models.utils import (
+    ColumnCatalogEntry,
+    TableCatalogEntry,
+    UdfCacheCatalogEntry,
+    UdfCatalogEntry,
+)
+from eva.configuration.configuration_manager import ConfigurationManager
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
@@ -267,3 +270,17 @@ def get_metadata_properties(udf_obj: UdfCatalogEntry) -> Dict:
     for metadata in udf_obj.metadata:
         properties[metadata.key] = metadata.value
     return properties
+
+
+#### get catalog instance
+# This function plays a crucial role in ensuring that different threads do
+# not share the same catalog object, as it can result in serialization issues and
+# incorrect behavior with SQLAlchemy. Therefore, whenever a catalog instance is
+# required, we create a new one. One possible optimization is to share the catalog
+# instance across all objects within the same thread. It is worth investigating whether
+# SQLAlchemy already handles this optimization for us, which will be explored at a
+# later time.
+def get_catalog_instance(db_uri: str, config: ConfigurationManager):
+    from eva.catalog.catalog_manager import CatalogManager
+
+    return CatalogManager(db_uri, config)

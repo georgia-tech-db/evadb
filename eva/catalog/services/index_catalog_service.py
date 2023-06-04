@@ -18,8 +18,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy.orm.exc import NoResultFound
 
 from eva.catalog.catalog_type import VectorStoreType
-from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.catalog.models.index_catalog import IndexCatalog, IndexCatalogEntry
+from eva.catalog.models.utils import ColumnCatalogEntry
 from eva.catalog.services.base_service import BaseService
 from eva.utils.logging_manager import logger
 

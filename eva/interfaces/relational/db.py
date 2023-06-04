@@ -31,6 +31,7 @@ from eva.parser.utils import (
     parse_query,
     parse_table_clause,
 )
+from eva.udfs.udf_bootstrap_queries import init_builtin_udfs
 from eva.utils.logging_manager import logger
 
 
@@ -191,6 +192,7 @@ def connect(eva_dir: str = EVA_DATABASE_DIR, sql_backend: str = None) -> EVAConn
     # host and port parameters are irrelevant. Additionally, for the EVAConnection, the
     # reader and writer parameters are not relevant in the serverless approach.
     evadb = init_eva_db_instance(eva_dir, custom_db_uri=sql_backend)
+    init_builtin_udfs(evadb, mode="release")
     return EVAConnection(evadb, None, None)
 
 

@@ -28,8 +28,7 @@ from eva.parser.alias import Alias
 
 if TYPE_CHECKING:
     from eva.binder.statement_binder_context import StatementBinderContext
-
-from eva.catalog.catalog_manager import CatalogManager
+    from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.table_ref import TableInfo, TableRef

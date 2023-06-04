@@ -14,11 +14,14 @@
 # limitations under the License.
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable
+from typing import TYPE_CHECKING, Callable
 
-from eva.catalog.catalog_manager import CatalogManager, get_catalog_instance
+from eva.catalog.catalog_utils import get_catalog_instance
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.configuration.constants import DB_DEFAULT_NAME, EVA_DATABASE_DIR
+
+if TYPE_CHECKING:
+    from eva.catalog.catalog_manager import CatalogManager
 
 
 @dataclass
@@ -28,7 +31,7 @@ class EVADatabase:
     catalog_uri: str
     catalog_func: Callable
 
-    def catalog(self) -> CatalogManager:
+    def catalog(self) -> "CatalogManager":
         """
         Note: Generating an object on demand plays a crucial role in ensuring that different threads do not share the same catalog object, as it can result in serialization issues and incorrect behavior with SQLAlchemy. Refer to get_catalog_instance()
         """
