@@ -25,7 +25,6 @@ from typing import List
 
 from aenum import AutoEnum, unique
 
-from eva.configuration.configuration_manager import ConfigurationManager
 from eva.utils.logging_manager import logger
 
 
@@ -128,22 +127,18 @@ def get_gpu_count() -> int:
         return 0
 
 
-def generate_file_path(name: str = "") -> Path:
+def generate_file_path(dataset_location: str, name: str = "") -> Path:
     """Generates a arbitrary file_path(md5 hash) based on the a random salt
     and name
 
     Arguments:
+        dataset_location(str): parent directory where a file needs to be created
         name (str): Input file_name.
 
     Returns:
         Path: pathlib.Path object
 
     """
-    dataset_location = ConfigurationManager().get_value("core", "datasets_dir")
-    if dataset_location is None:
-        logger.error("Missing dataset location key in eva.yml")
-        raise KeyError("Missing datasets_dir key in eva.yml")
-
     dataset_location = Path(dataset_location)
     dataset_location.mkdir(parents=True, exist_ok=True)
 

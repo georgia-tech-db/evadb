@@ -19,7 +19,6 @@ from pathlib import Path
 import pandas as pd
 
 from eva.catalog.models.table_catalog import TableCatalogEntry
-from eva.configuration.configuration_manager import ConfigurationManager
 from eva.database import EVADB
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError, iter_path_regex, validate_media
@@ -46,9 +45,7 @@ class LoadMultimediaExecutor(AbstractExecutor):
 
             # If it is a s3 path, download the file to local
             if self.node.file_path.as_posix().startswith("s3:/"):
-                s3_dir = Path(
-                    ConfigurationManager().get_value("storage", "s3_download_dir")
-                )
+                s3_dir = Path(self.config.get_value("storage", "s3_download_dir"))
                 dst_path = s3_dir / self.node.table_info.table_name
                 dst_path.mkdir(parents=True, exist_ok=True)
                 video_files = download_from_s3(self.node.file_path, dst_path)

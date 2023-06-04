@@ -20,7 +20,6 @@ from mock import MagicMock, patch
 
 from eva.catalog.catalog_type import TableType
 from eva.catalog.models.table_catalog import TableCatalogEntry
-from eva.configuration.configuration_manager import ConfigurationManager
 from eva.optimizer.operators import (
     LogicalFilter,
     LogicalGet,
@@ -168,8 +167,8 @@ class RulesTest(unittest.TestCase):
             XformExtractObjectToLinearFlow(),
         ]
         rewrite_rules = (
-            RulesManager().stage_one_rewrite_rules
-            + RulesManager().stage_two_rewrite_rules
+            RulesManager(self.evadb.config).stage_one_rewrite_rules
+            + RulesManager(self.evadb.config).stage_two_rewrite_rules
         )
         self.assertEqual(
             len(supported_rewrite_rules),
@@ -186,15 +185,19 @@ class RulesTest(unittest.TestCase):
             CacheFunctionExpressionInProject(),
         ]
         self.assertEqual(
-            len(supported_logical_rules), len(RulesManager().logical_rules)
+            len(supported_logical_rules),
+            len(RulesManager(self.evadb.config).logical_rules),
         )
 
         for rule in supported_logical_rules:
             self.assertTrue(
-                any(isinstance(rule, type(x)) for x in RulesManager().logical_rules)
+                any(
+                    isinstance(rule, type(x))
+                    for x in RulesManager(self.evadb.config).logical_rules
+                )
             )
 
-        ray_enabled = ConfigurationManager().get_value("experimental", "ray")
+        ray_enabled = self.evadb.config.get_value("experimental", "ray")
 
         # For the current version, we choose either the distributed or the
         # sequential rule, because we do not have a logic to choose one over
@@ -239,14 +242,14 @@ class RulesTest(unittest.TestCase):
             supported_implementation_rules.append(LogicalExchangeToPhysical())
         self.assertEqual(
             len(supported_implementation_rules),
-            len(RulesManager().implementation_rules),
+            len(RulesManager(self.evadb.config).implementation_rules),
         )
 
         for rule in supported_implementation_rules:
             self.assertTrue(
                 any(
                     isinstance(rule, type(x))
-                    for x in RulesManager().implementation_rules
+                    for x in RulesManager(self.evadb.config).implementation_rules
                 )
             )
 

@@ -12,9 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
 import time
 import unittest
 from pathlib import Path
+from test.markers import ray_only_marker
 from test.util import (
     create_sample_image,
     get_evadb_for_testing,
@@ -23,20 +25,14 @@ from test.util import (
     shutdown_ray,
 )
 
-import pytest
-
-from eva.configuration.configuration_manager import ConfigurationManager
 from eva.executor.executor_utils import ExecutorError
 from eva.server.command_handler import execute_query_fetch_all
 
 
-@pytest.mark.skipif(
-    not ConfigurationManager().get_value("experimental", "ray"),
-    reason="Only test for ray execution.",
-)
 class ErrorHandlingRayTests(unittest.TestCase):
     def setUp(self):
         self.evadb = get_evadb_for_testing()
+        os.environ["ray"] = str(self.evadb.config.get_value("experimental", "ray"))
         self.evadb.catalog().reset()
         # Load built-in UDFs.
         load_udfs_for_testing(self.evadb, mode="debug")
@@ -57,6 +53,7 @@ class ErrorHandlingRayTests(unittest.TestCase):
         drop_table_query = "DROP TABLE testRayErrorHandling;"
         execute_query_fetch_all(self.evadb, drop_table_query)
 
+    @ray_only_marker
     def test_ray_error_populate_to_all_stages(self):
         udf_name, task = "HFObjectDetector", "image-classification"
         create_udf_query = f"""CREATE UDF {udf_name}

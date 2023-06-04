@@ -82,8 +82,7 @@ class CreateTableTest(unittest.TestCase):
         self.assertEqual(actual_batch, expected_batch)
 
     @pytest.mark.torchtest
-    # @ray_skip_marker
-    def test_ashould_create_table_from_select_lateral_join(self):
+    def test_should_create_table_from_select_lateral_join(self):
         select_query = (
             "SELECT id, label, bbox FROM UATRAC JOIN LATERAL "
             "Yolo(data) AS T(label, bbox, score) WHERE id < 5;"

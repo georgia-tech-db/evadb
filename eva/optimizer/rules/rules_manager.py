@@ -209,5 +209,6 @@ def disable_rules(rules_manager: RulesManager, rules: List[Rule]):
     """
     try:
         rules_manager.disable_rules(rules)
+        yield
     finally:
         rules_manager.add_rules(rules)

@@ -55,7 +55,9 @@ class TestOptimizerTask(unittest.TestCase):
         grp_expr = opt_cxt.add_opr_to_group(opr)
         root_grp_id = grp_expr.group_id
         opt_cxt.task_stack.push(
-            TopDownRewrite(grp_expr, RulesManager().stage_one_rewrite_rules, opt_cxt)
+            TopDownRewrite(
+                grp_expr, RulesManager(None).stage_one_rewrite_rules, opt_cxt
+            )
         )
         self.execute_task_stack(opt_cxt.task_stack)
         return opt_cxt, root_grp_id
@@ -63,7 +65,9 @@ class TestOptimizerTask(unittest.TestCase):
     def bottom_up_rewrite(self, root_grp_id, opt_cxt):
         grp_expr = opt_cxt.memo.groups[root_grp_id].logical_exprs[0]
         opt_cxt.task_stack.push(
-            BottomUpRewrite(grp_expr, RulesManager().stage_two_rewrite_rules, opt_cxt)
+            BottomUpRewrite(
+                grp_expr, RulesManager(None).stage_two_rewrite_rules, opt_cxt
+            )
         )
         self.execute_task_stack(opt_cxt.task_stack)
         return opt_cxt, root_grp_id

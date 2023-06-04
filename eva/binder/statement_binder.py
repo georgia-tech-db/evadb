@@ -29,7 +29,7 @@ from eva.binder.binder_utils import (
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.catalog.catalog_type import NdArrayType, TableType, VideoColumnName
 from eva.catalog.catalog_utils import get_metadata_properties
-from eva.configuration.configuration_manager import ConfigurationManager
+from eva.configuration.constants import EVA_INSTALLATION_DIR
 from eva.expression.abstract_expression import AbstractExpression, ExpressionType
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
@@ -310,12 +310,7 @@ class StatementBinder:
             if udf_obj.type == "ultralytics":
                 # manually set the impl_path for yolo udfs we only handle object
                 # detection for now, hopefully this can be generalized
-                udf_dir = (
-                    Path(
-                        ConfigurationManager().get_value("core", "eva_installation_dir")
-                    )
-                    / "udfs"
-                )
+                udf_dir = Path(EVA_INSTALLATION_DIR) / "udfs"
                 udf_obj.impl_file_path = (
                     Path(f"{udf_dir}/yolo_object_detector.py").absolute().as_posix()
                 )

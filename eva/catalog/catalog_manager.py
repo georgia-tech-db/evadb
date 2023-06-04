@@ -341,7 +341,8 @@ class CatalogManager(object):
     """ Udf Cache related"""
 
     def insert_udf_cache_catalog_entry(self, func_expr: FunctionExpression):
-        entry = construct_udf_cache_catalog_entry(func_expr)
+        cache_dir = self._config.get_value("storage", "cache_dir")
+        entry = construct_udf_cache_catalog_entry(func_expr, cache_dir=cache_dir)
         return self._udf_cache_service.insert_entry(entry)
 
     def get_udf_cache_catalog_entry_by_name(self, name: str) -> UdfCacheCatalogEntry:
@@ -396,7 +397,9 @@ class CatalogManager(object):
         """
         table_name = table_info.table_name
         column_catalog_entries = xform_column_definitions_to_catalog_entries(columns)
-        file_url = str(generate_file_path(table_name))
+
+        dataset_location = self._config.get_value("core", "datasets_dir")
+        file_url = str(generate_file_path(dataset_location, table_name))
         table_catalog_entry = self.insert_table_catalog_entry(
             table_name,
             file_url,

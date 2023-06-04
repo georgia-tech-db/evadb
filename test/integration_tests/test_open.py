@@ -25,7 +25,6 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from eva.configuration.configuration_manager import ConfigurationManager
 from eva.models.storage.batch import Batch
 from eva.server.command_handler import execute_query_fetch_all
 from eva.storage.storage_engine import StorageEngine
@@ -36,7 +35,6 @@ class OpenTests(unittest.TestCase):
     def setUp(self):
         self.evadb = get_evadb_for_testing()
         self.evadb.catalog().reset()
-        ConfigurationManager()
         # Load built-in UDFs.
         load_udfs_for_testing(self.evadb, mode="debug")
 

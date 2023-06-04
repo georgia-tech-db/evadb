@@ -17,7 +17,6 @@ from pathlib import Path
 import pandas as pd
 
 from eva.catalog.sql_config import IDENTIFIER_COLUMN
-from eva.configuration.configuration_manager import ConfigurationManager
 from eva.database import EVADB
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError, handle_vector_store_params
@@ -50,7 +49,7 @@ class CreateIndexExecutor(AbstractExecutor):
         )
 
     def _get_index_save_path(self) -> Path:
-        index_dir = Path(ConfigurationManager().get_value("storage", "index_dir"))
+        index_dir = Path(self.config.get_value("storage", "index_dir"))
         if not index_dir.exists():
             index_dir.mkdir(parents=True, exist_ok=True)
         return str(

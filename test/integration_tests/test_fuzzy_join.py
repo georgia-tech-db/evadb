@@ -24,11 +24,8 @@ from test.util import (
 
 import pytest
 
-from eva.configuration.configuration_manager import ConfigurationManager
 from eva.configuration.constants import EVA_ROOT_DIR
 from eva.server.command_handler import execute_query_fetch_all
-
-EVA_INSTALLATION_DIR = ConfigurationManager().get_value("core", "eva_installation_dir")
 
 
 @pytest.mark.notparallel
@@ -75,6 +72,9 @@ class FuzzyJoinTests(unittest.TestCase):
         execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS MyVideoCSV;")
 
     def test_fuzzyjoin(self):
+        EVA_INSTALLATION_DIR = self.evadb.config.get_value(
+            "core", "eva_installation_dir"
+        )
         fuzzy_udf = """CREATE UDF IF NOT EXISTS FuzzDistance
                     INPUT (Input_Array1 NDARRAY ANYTYPE, Input_Array2 NDARRAY ANYTYPE)
                     OUTPUT (distance FLOAT(32, 7))

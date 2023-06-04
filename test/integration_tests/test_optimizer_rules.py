@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+from test.markers import ray_skip_marker
 from test.util import (
     get_evadb_for_testing,
     get_physical_query_plan,
@@ -25,7 +26,6 @@ import pandas as pd
 import pytest
 from mock import MagicMock, patch
 
-from eva.configuration.configuration_manager import ConfigurationManager
 from eva.configuration.constants import EVA_ROOT_DIR
 from eva.expression.comparison_expression import ComparisonExpression
 from eva.models.storage.batch import Batch
@@ -43,10 +43,7 @@ from eva.utils.stats import Timer
 
 
 @pytest.mark.notparallel
-@pytest.mark.skipif(
-    ConfigurationManager().get_value("experimental", "ray"),
-    reason="Not necessary for Ray",
-)
+@ray_skip_marker
 class OptimizerRulesTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

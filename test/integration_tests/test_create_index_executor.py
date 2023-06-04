@@ -22,7 +22,6 @@ import pandas as pd
 import pytest
 
 from eva.catalog.catalog_type import VectorStoreType
-from eva.configuration.configuration_manager import ConfigurationManager
 from eva.models.storage.batch import Batch
 from eva.server.command_handler import execute_query_fetch_all
 from eva.storage.storage_engine import StorageEngine
@@ -32,7 +31,7 @@ from eva.storage.storage_engine import StorageEngine
 class CreateIndexTest(unittest.TestCase):
     def _index_save_path(self):
         return str(
-            Path(ConfigurationManager().get_value("storage", "index_dir"))
+            Path(self.evadb.config.get_value("storage", "index_dir"))
             / Path("{}_{}.index".format("FAISS", "testCreateIndexName"))
         )
 
