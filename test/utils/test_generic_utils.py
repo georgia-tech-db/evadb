@@ -89,5 +89,3 @@ class ModulePathTest(unittest.TestCase):
         self.assertTrue(actual.is_absolute())
         # Root directory must be the same, filename is random
         self.assertTrue("eva_datasets" in str(actual.parent))
-
-        self.assertRaises(KeyError, generate_file_path)

@@ -195,7 +195,7 @@ class PytorchTest(unittest.TestCase):
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_facenet(self):
-        create_udf_query = """CREATE UDF FaceDetector
+        create_udf_query = """CREATE UDF IF NOT EXISTS FaceDetector
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
                   OUTPUT (bboxes NDARRAY FLOAT32(ANYDIM, 4),
                           scores NDARRAY FLOAT32(ANYDIM))

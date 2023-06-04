@@ -51,12 +51,12 @@ class TestOptimizerTask(unittest.TestCase):
             task.execute()
 
     def top_down_rewrite(self, opr):
-        opt_cxt = OptimizerContext(MagicMock(), CostModel())
+        opt_cxt = OptimizerContext(MagicMock(), CostModel(), RulesManager(MagicMock()))
         grp_expr = opt_cxt.add_opr_to_group(opr)
         root_grp_id = grp_expr.group_id
         opt_cxt.task_stack.push(
             TopDownRewrite(
-                grp_expr, RulesManager(None).stage_one_rewrite_rules, opt_cxt
+                grp_expr, RulesManager(MagicMock()).stage_one_rewrite_rules, opt_cxt
             )
         )
         self.execute_task_stack(opt_cxt.task_stack)
@@ -66,7 +66,7 @@ class TestOptimizerTask(unittest.TestCase):
         grp_expr = opt_cxt.memo.groups[root_grp_id].logical_exprs[0]
         opt_cxt.task_stack.push(
             BottomUpRewrite(
-                grp_expr, RulesManager(None).stage_two_rewrite_rules, opt_cxt
+                grp_expr, RulesManager(MagicMock()).stage_two_rewrite_rules, opt_cxt
             )
         )
         self.execute_task_stack(opt_cxt.task_stack)
