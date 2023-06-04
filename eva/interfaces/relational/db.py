@@ -211,9 +211,9 @@ class EVACursor(object):
         Returns:
             EVARelation: The EVARelation object representing the loaded table.
         """
-        # LOAD {FORMAT} file_regex INTO table_name
-        stmt = parse_load(table_name, file_regex, format, **kwargs)
-        return EVARelation(self._evadb, stmt)
+        # DROP {item_type} item_name
+        stmt = parse_drop(item_name, item_type, **kwargs)
+        return EVARelation(stmt)
 
     def create(self, item_type: str, item_name: str, **kwargs) -> EVARelation:
         """
@@ -229,8 +229,9 @@ class EVACursor(object):
         Returns:
             EVARelation: The EVARelation object representing the loaded table.
         """
-        stmt = parse_query(sql_query)
-        return EVARelation(self._evadb, stmt)
+        # DROP {item_type} item_name
+        stmt = parse_create(item_type, item_name, **kwargs)
+        return EVARelation(stmt)
 
     def query(self, sql_query: str) -> EVARelation:
         stmt = parse_query(sql_query)
