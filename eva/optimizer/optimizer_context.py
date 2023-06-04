@@ -15,6 +15,7 @@
 import copy
 
 from eva.constants import UNDEFINED_GROUP_ID
+from eva.database import EVADatabase
 from eva.optimizer.cost_model import CostModel
 from eva.optimizer.group_expression import GroupExpression
 from eva.optimizer.memo import Memo
@@ -32,11 +33,18 @@ class OptimizerContext:
             stack to keep track outstanding tasks
     """
 
-    def __init__(self, cost_model: CostModel, rules_manager: RulesManager = None):
+    def __init__(
+        self, db: EVADatabase, cost_model: CostModel, rules_manager: RulesManager = None
+    ):
+        self._db = db
         self._task_stack = OptimizerTaskStack()
         self._memo = Memo()
         self._cost_model = cost_model
-        self._rules_manager = rules_manager or RulesManager()
+        self._rules_manager = rules_manager or RulesManager(db.config)
+
+    @property
+    def db(self):
+        return self._db
 
     @property
     def rules_manager(self):

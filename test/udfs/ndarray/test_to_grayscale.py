@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,9 +28,6 @@ class ToGrayscaleTests(unittest.TestCase):
     def setUp(self):
         self.to_grayscale_instance = ToGrayscale()
 
-    def tearDown(self):
-        file_remove(Path(f"{EVA_ROOT_DIR}/test/udfs/data/tmp.jpeg"))
-
     def test_gray_scale_name_exists(self):
         assert hasattr(self.to_grayscale_instance, "name")
 
@@ -42,3 +39,4 @@ class ToGrayscaleTests(unittest.TestCase):
         actual_array = cv2.imread(f"{EVA_ROOT_DIR}/test/udfs/data/tmp.jpeg")
         expected_arr = cv2.imread(f"{EVA_ROOT_DIR}/test/udfs/data/grayscale_dog.jpeg")
         self.assertEqual(np.sum(actual_array - expected_arr), 0)
+        file_remove(Path(f"{EVA_ROOT_DIR}/test/udfs/data/tmp.jpeg"))

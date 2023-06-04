@@ -18,9 +18,8 @@ from pathlib import Path
 
 import pandas as pd
 
-from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.models.table_catalog import TableCatalogEntry
-from eva.configuration.configuration_manager import ConfigurationManager
+from eva.database import EVADatabase
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError, iter_path_regex, validate_media
 from eva.models.storage.batch import Batch
@@ -33,9 +32,8 @@ from eva.utils.s3_utils import download_from_s3
 
 
 class LoadMultimediaExecutor(AbstractExecutor):
-    def __init__(self, node: LoadDataPlan):
-        super().__init__(node)
-        self.catalog = CatalogManager()
+    def __init__(self, db: EVADatabase, node: LoadDataPlan):
+        super().__init__(db, node)
         self.media_type = self.node.file_options["file_format"]
 
     def exec(self, *args, **kwargs):
@@ -47,9 +45,7 @@ class LoadMultimediaExecutor(AbstractExecutor):
 
             # If it is a s3 path, download the file to local
             if self.node.file_path.as_posix().startswith("s3:/"):
-                s3_dir = Path(
-                    ConfigurationManager().get_value("storage", "s3_download_dir")
-                )
+                s3_dir = Path(self.config.get_value("storage", "s3_download_dir"))
                 dst_path = s3_dir / self.node.table_info.table_name
                 dst_path.mkdir(parents=True, exist_ok=True)
                 video_files = download_from_s3(self.node.file_path, dst_path)
@@ -98,20 +94,22 @@ class LoadMultimediaExecutor(AbstractExecutor):
             table_name = table_info.table_name
             # Sanity check to make sure there is no existing table with same name
             do_create = False
-            table_obj = self.catalog.get_table_catalog_entry(table_name, database_name)
+            table_obj = self.catalog().get_table_catalog_entry(
+                table_name, database_name
+            )
             if table_obj:
                 msg = f"Adding to an existing table {table_name}."
                 logger.info(msg)
             # Create the catalog entry
             else:
                 table_obj = (
-                    self.catalog.create_and_insert_multimedia_table_catalog_entry(
+                    self.catalog().create_and_insert_multimedia_table_catalog_entry(
                         table_name, self.media_type
                     )
                 )
                 do_create = True
 
-            storage_engine = StorageEngine.factory(table_obj)
+            storage_engine = StorageEngine.factory(self.db, table_obj)
             if do_create:
                 storage_engine.create(table_obj)
 
