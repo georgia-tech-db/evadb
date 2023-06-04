@@ -15,6 +15,8 @@
 from eva.parser.load_statement import LoadDataStatement
 from eva.parser.drop_statement import DropTableStatement
 from eva.parser.drop_udf_statement import DropUDFStatement
+from eva.parser.create_statement import CreateTableStatement
+from eva.parser.create_udf_statement import CreateUDFStatement
 from eva.parser.parser import Parser
 from eva.parser.select_statement import SelectStatement
 
@@ -55,6 +57,21 @@ def parse_drop(item_name: str, item_type: str, **kwargs):
     else:
         assert isinstance(stmt, DropUDFStatement), "Expected a drop UDF statement"
     return stmt
+
+def parse_create(item_type: str, item_name: str, model_type: str, model: str, **kwargs):
+    if item_type.upper()=="TABLE":
+        assert isinstance(stmt, CreateTableStatement), "Expected a drop table statement"
+    else:
+        mock_query = f"""
+            CREATE {item_type} IF NOT EXISTS {item_name}
+            TYPE  {model_type}
+            'model' '{model}';
+        """
+        stmt = Parser().parse(mock_query)[0]
+        assert isinstance(stmt, CreateUDFStatement), "Expected a drop UDF statement"
+    return stmt
+    
+    
 
 
 def parse_query(query):
