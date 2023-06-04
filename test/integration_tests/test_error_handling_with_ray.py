@@ -25,15 +25,16 @@ from test.util import (
     shutdown_ray,
 )
 
-from evaexecutor.executor_utils import ExecutorError
 from evaserver.command_handler import execute_query_fetch_all
+
+from eva.executor.executor_utils import ExecutorError
 
 
 class ErrorHandlingRayTests(unittest.TestCase):
     def setUp(self):
         self.evadb = get_evadb_for_testing()
         os.environ["ray"] = str(self.evaconfig.get_value("experimental", "ray"))
-        self.evacatalog().reset()
+        self.eva.catalog().reset()
         # Load built-in UDFs.
         load_udfs_for_testing(self.evadb, mode="debug")
 

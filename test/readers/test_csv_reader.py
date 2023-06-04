@@ -15,8 +15,9 @@
 import unittest
 from test.util import create_dummy_csv_batches, create_sample_csv, file_remove
 
-from evaexpression.tuple_value_expression import TupleValueExpression
 from evareaders.csv_reader import CSVReader
+
+from eva.expression.tuple_value_expression import TupleValueExpression
 
 
 class CSVLoaderTest(unittest.TestCase):

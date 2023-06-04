@@ -14,10 +14,9 @@
 # limitations under the License.
 import unittest
 
-from mock import MagicMock
-
 from evaconstants import UNDEFINED_GROUP_ID
 from evaoptimizer.memo import Memo
+from mock import MagicMock
 
 
 class MemoTest(unittest.TestCase):

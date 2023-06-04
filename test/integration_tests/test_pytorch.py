@@ -27,12 +27,12 @@ import cv2
 import numpy as np
 import pandas.testing as pd_testing
 import pytest
-
 from evaconfiguration.constants import EVA_ROOT_DIR
-from evaexecutor.executor_utils import ExecutorError
-from evamodels.storage.batch import Batch
 from evaserver.command_handler import execute_query_fetch_all
 from evaudfs.udf_bootstrap_queries import Asl_udf_query, Mvit_udf_query
+
+from eva.executor.executor_utils import ExecutorError
+from eva.models.storage.batch import Batch
 
 
 @pytest.mark.notparallel
@@ -40,7 +40,7 @@ class PytorchTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.evadb = get_evadb_for_testing()
-        cls.evacatalog().reset()
+        cls.eva.catalog().reset()
         os.environ["ray"] = str(cls.evaconfig.get_value("experimental", "ray"))
 
         ua_detrac = f"{EVA_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"

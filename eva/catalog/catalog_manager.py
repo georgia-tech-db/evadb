@@ -51,9 +51,7 @@ from eva.catalog.services.udf_cache_catalog_service import UdfCacheCatalogServic
 from eva.catalog.services.udf_catalog_service import UdfCatalogService
 from eva.catalog.services.udf_cost_catalog_service import UdfCostCatalogService
 from eva.catalog.services.udf_io_catalog_service import UdfIOCatalogService
-from eva.catalog.services.udf_metadata_catalog_service import (
-    UdfMetadataCatalogService,
-)
+from eva.catalog.services.udf_metadata_catalog_service import UdfMetadataCatalogService
 from eva.catalog.sql_config import IDENTIFIER_COLUMN, SQLConfig
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.expression.function_expression import FunctionExpression

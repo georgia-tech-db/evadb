@@ -16,11 +16,11 @@ import unittest
 
 import pandas as pd
 
-from evacatalog.catalog_type import ColumnType
-from evaexpression.abstract_expression import ExpressionType
-from evaexpression.comparison_expression import ComparisonExpression
-from evaexpression.constant_value_expression import ConstantValueExpression
-from evamodels.storage.batch import Batch
+from eva.catalog.catalog_type import ColumnType
+from eva.expression.abstract_expression import ExpressionType
+from eva.expression.comparison_expression import ComparisonExpression
+from eva.expression.constant_value_expression import ConstantValueExpression
+from eva.models.storage.batch import Batch
 
 
 class ComparisonExpressionsTest(unittest.TestCase):

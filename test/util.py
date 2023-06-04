@@ -28,27 +28,27 @@ import numpy as np
 import pandas as pd
 import psutil
 import ray
-from mock import MagicMock
-
 from evabinder.statement_binder import StatementBinder
 from evabinder.statement_binder_context import StatementBinderContext
-from evacatalog.catalog_type import NdArrayType
 from evaconfiguration.configuration_manager import ConfigurationManager
 from evaconfiguration.constants import EVA_DATABASE_DIR, EVA_INSTALLATION_DIR
 from evadatabase import init_eva_db_instance
-from evaexpression.function_expression import FunctionExpression
-from evamodels.storage.batch import Batch
 from evaoptimizer.operators import LogicalFilter, Operator
 from evaoptimizer.plan_generator import PlanGenerator
 from evaoptimizer.statement_to_opr_converter import StatementToPlanConverter
-from evaparser.parser import Parser
-from evaplan_nodes.abstract_plan import AbstractPlan
 from evaserver.command_handler import execute_query_fetch_all
 from evaudfs.abstract.abstract_udf import AbstractClassifierUDF
 from evaudfs.decorators import decorators
 from evaudfs.decorators.io_descriptors.data_types import NumpyArray, PandasDataframe
 from evaudfs.udf_bootstrap_queries import init_builtin_udfs
 from evautils.generic_utils import remove_directory_contents
+from mock import MagicMock
+
+from eva.catalog.catalog_type import NdArrayType
+from eva.expression.function_expression import FunctionExpression
+from eva.models.storage.batch import Batch
+from eva.parser.parser import Parser
+from eva.plan_nodes.abstract_plan import AbstractPlan
 
 NUM_FRAMES = 10
 FRAME_SIZE = (32, 32)

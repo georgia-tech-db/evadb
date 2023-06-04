@@ -15,8 +15,6 @@
 import unittest
 from unittest.mock import patch
 
-from mock import MagicMock
-
 from evaoptimizer.cost_model import CostModel
 from evaoptimizer.operators import (
     LogicalFilter,
@@ -33,9 +31,11 @@ from evaoptimizer.optimizer_tasks import (
 )
 from evaoptimizer.property import PropertyType
 from evaoptimizer.rules.rules_manager import RulesManager
-from evaplan_nodes.predicate_plan import PredicatePlan
-from evaplan_nodes.project_plan import ProjectPlan
-from evaplan_nodes.seq_scan_plan import SeqScanPlan
+from mock import MagicMock
+
+from eva.plan_nodes.predicate_plan import PredicatePlan
+from eva.plan_nodes.project_plan import ProjectPlan
+from eva.plan_nodes.seq_scan_plan import SeqScanPlan
 
 
 class TestOptimizerTask(unittest.TestCase):

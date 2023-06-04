@@ -33,13 +33,13 @@ from test.util import (
 import numpy as np
 import pandas as pd
 import pytest
-
 from evabinder.binder_utils import BinderError
 from evaconfiguration.constants import EVA_ROOT_DIR
-from evaexecutor.executor_utils import ExecutorError
-from evamodels.storage.batch import Batch
-from evaparser.types import FileFormatType
 from evaserver.command_handler import execute_query_fetch_all
+
+from eva.executor.executor_utils import ExecutorError
+from eva.models.storage.batch import Batch
+from eva.parser.types import FileFormatType
 
 
 @pytest.mark.notparallel
@@ -47,7 +47,7 @@ class LoadExecutorTest(unittest.TestCase):
     def setUp(self):
         self.evadb = get_evadb_for_testing()
         # reset the catalog manager before running each test
-        self.evacatalog().reset()
+        self.eva.catalog().reset()
         self.video_file_path = create_sample_video()
         self.image_files_path = Path(
             f"{EVA_ROOT_DIR}/test/data/uadetrac/small-data/MVI_20011/*.jpg"
@@ -76,7 +76,7 @@ class LoadExecutorTest(unittest.TestCase):
         execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS MyVideo;")
 
     def test_should_form_symlink_to_individual_video(self):
-        catalog_manager = self.evacatalog()
+        catalog_manager = self.eva.catalog()
         query = f"LOAD VIDEO '{self.video_file_path}' INTO MyVideo;"
         execute_query_fetch_all(self.evadb, query)
 
@@ -127,7 +127,7 @@ class LoadExecutorTest(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_should_form_symlink_to_multiple_videos(self):
-        catalog_manager = self.evacatalog()
+        catalog_manager = self.eva.catalog()
         path = f"{EVA_ROOT_DIR}/data/sample_videos/1/*.mp4"
         query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
         execute_query_fetch_all(self.evadb, query)

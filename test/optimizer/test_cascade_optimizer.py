@@ -23,16 +23,16 @@ from test.util import (
 
 import pandas as pd
 import pytest
-
-from evamodels.storage.batch import Batch
 from evaserver.command_handler import execute_query_fetch_all
+
+from eva.models.storage.batch import Batch
 
 
 @pytest.mark.notparallel
 class CascadeOptimizer(unittest.TestCase):
     def setUp(self):
         self.evadb = get_evadb_for_testing()
-        self.evacatalog().reset()
+        self.eva.catalog().reset()
         self.video_file_path = create_sample_video(NUM_FRAMES)
 
     def tearDown(self):

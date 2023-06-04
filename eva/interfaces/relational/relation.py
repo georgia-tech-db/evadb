@@ -39,11 +39,11 @@ from eva.parser.utils import parse_sql_orderby_expr
 class EVARelation:
     def __init__(
         self,
-        evadb: EVADatabase,
+        db: EVADatabase,
         query_node: Union[AbstractStatement, TableRef],
         alias: Alias = None,
     ):
-        self._evadb = evadb
+        self._db = db
         self._query_node = query_node
         self._alias = alias
 
@@ -117,7 +117,7 @@ class EVARelation:
         Returns:
             Batch: result as eva Batch
         """
-        result = execute_statement(self._evadb, self._query_node.copy())
+        result = execute_statement(self._db, self._query_node.copy())
         assert result.frames is not None
         return result
 

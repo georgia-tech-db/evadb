@@ -14,10 +14,9 @@
 # limitations under the License.
 import unittest
 
-from mock import MagicMock
-
 from evaoptimizer.cost_model import CostModel
 from evaoptimizer.optimizer_context import OptimizerContext
+from mock import MagicMock
 
 
 class TestOptimizerContext(unittest.TestCase):

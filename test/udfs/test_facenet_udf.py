@@ -21,7 +21,7 @@ from unittest.mock import patch
 import cv2
 import pandas as pd
 
-from evamodels.storage.batch import Batch
+from eva.models.storage.batch import Batch
 
 NUM_FRAMES = 10
 

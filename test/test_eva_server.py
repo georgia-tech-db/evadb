@@ -14,9 +14,8 @@
 # limitations under the License.
 import unittest
 
-from mock import patch
-
 from evaeva_server import main, start_eva_server
+from mock import patch
 
 
 class EVAServerTest(unittest.IsolatedAsyncioTestCase):

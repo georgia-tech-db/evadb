@@ -19,7 +19,6 @@ from test.util import file_remove
 import cv2
 import numpy as np
 import pandas as pd
-
 from evaconfiguration.constants import EVA_ROOT_DIR
 from evaudfs.ndarray.to_grayscale import ToGrayscale
 

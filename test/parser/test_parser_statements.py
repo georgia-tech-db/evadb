@@ -15,7 +15,7 @@
 import unittest
 from pprint import pprint
 
-from evaparser.parser import Parser
+from eva.parser.parser import Parser
 
 
 class ParserStatementTests(unittest.TestCase):

@@ -49,7 +49,7 @@ class ReuseTest(unittest.TestCase):
 
     def setUp(self):
         self.evadb = get_evadb_for_testing()
-        self.evacatalog().reset()
+        self.eva.catalog().reset()
         ua_detrac = f"{EVA_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
         execute_query_fetch_all(self.evadb, f"LOAD VIDEO '{ua_detrac}' INTO DETRAC;")
         load_udfs_for_testing(self.evadb)
@@ -218,14 +218,14 @@ class ReuseTest(unittest.TestCase):
         cache_name = plan.func_expr.signature()
 
         # cache exists
-        udf_cache = self.evacatalog().get_udf_cache_catalog_entry_by_name(cache_name)
+        udf_cache = self.eva.catalog().get_udf_cache_catalog_entry_by_name(cache_name)
         cache_dir = Path(udf_cache.cache_path)
         self.assertIsNotNone(udf_cache)
         self.assertTrue(cache_dir.exists())
 
         # cache should be removed if the UDF is removed
         execute_query_fetch_all(self.evadb, "DROP UDF Yolo;")
-        udf_cache = self.evacatalog().get_udf_cache_catalog_entry_by_name(cache_name)
+        udf_cache = self.eva.catalog().get_udf_cache_catalog_entry_by_name(cache_name)
         self.assertIsNone(udf_cache)
         self.assertFalse(cache_dir.exists())
 
@@ -242,13 +242,13 @@ class ReuseTest(unittest.TestCase):
         cache_name = plan.func_expr.signature()
 
         # cache exists
-        udf_cache = self.evacatalog().get_udf_cache_catalog_entry_by_name(cache_name)
+        udf_cache = self.eva.catalog().get_udf_cache_catalog_entry_by_name(cache_name)
         cache_dir = Path(udf_cache.cache_path)
         self.assertIsNotNone(udf_cache)
         self.assertTrue(cache_dir.exists())
 
         # cache should be removed if the Table is removed
         execute_query_fetch_all(self.evadb, "DROP TABLE DETRAC;")
-        udf_cache = self.evacatalog().get_udf_cache_catalog_entry_by_name(cache_name)
+        udf_cache = self.eva.catalog().get_udf_cache_catalog_entry_by_name(cache_name)
         self.assertIsNone(udf_cache)
         self.assertFalse(cache_dir.exists())

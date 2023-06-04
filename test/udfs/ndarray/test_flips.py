@@ -16,12 +16,11 @@ import unittest
 
 import numpy as np
 import pandas as pd
-from numpy import asarray
-from PIL import Image
-
 from evaconfiguration.constants import EVA_ROOT_DIR
 from evaudfs.ndarray.horizontal_flip import HorizontalFlip
 from evaudfs.ndarray.vertical_flip import VerticalFlip
+from numpy import asarray
+from PIL import Image
 
 
 class FlipTests(unittest.TestCase):

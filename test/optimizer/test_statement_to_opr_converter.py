@@ -16,8 +16,6 @@ import unittest
 from inspect import signature
 from test.util import get_all_subclasses
 
-from mock import MagicMock, patch
-
 from evaoptimizer.operators import (
     Dummy,
     LogicalApplyAndMerge,
@@ -50,16 +48,18 @@ from evaoptimizer.operators import (
     Operator,
 )
 from evaoptimizer.statement_to_opr_converter import StatementToPlanConverter
-from evaparser.create_index_statement import CreateIndexStatement
-from evaparser.create_statement import CreateTableStatement
-from evaparser.create_udf_statement import CreateUDFStatement
-from evaparser.drop_statement import DropTableStatement
-from evaparser.drop_udf_statement import DropUDFStatement
-from evaparser.explain_statement import ExplainStatement
-from evaparser.insert_statement import InsertTableStatement
-from evaparser.rename_statement import RenameTableStatement
-from evaparser.select_statement import SelectStatement
-from evaparser.table_ref import TableRef
+from mock import MagicMock, patch
+
+from eva.parser.create_index_statement import CreateIndexStatement
+from eva.parser.create_statement import CreateTableStatement
+from eva.parser.create_udf_statement import CreateUDFStatement
+from eva.parser.drop_statement import DropTableStatement
+from eva.parser.drop_udf_statement import DropUDFStatement
+from eva.parser.explain_statement import ExplainStatement
+from eva.parser.insert_statement import InsertTableStatement
+from eva.parser.rename_statement import RenameTableStatement
+from eva.parser.select_statement import SelectStatement
+from eva.parser.table_ref import TableRef
 
 
 class StatementToOprTest(unittest.TestCase):

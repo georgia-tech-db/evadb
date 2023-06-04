@@ -16,9 +16,8 @@ import asyncio
 import sys
 import unittest
 
-from mock import MagicMock, patch
-
 from evaserver.server import EvaServer
+from mock import MagicMock, patch
 
 # Check for Python 3.8+ for IsolatedAsyncioTestCase support
 if sys.version_info >= (3, 8):

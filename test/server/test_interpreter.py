@@ -17,9 +17,8 @@ import sys
 import unittest
 from test.util import find_free_port
 
-from mock import MagicMock, patch
-
 from evaserver.interpreter import create_stdin_reader, start_cmd_client
+from mock import MagicMock, patch
 
 # Check for Python 3.8+ for IsolatedAsyncioTestCase support
 if sys.version_info >= (3, 8):

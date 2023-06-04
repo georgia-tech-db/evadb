@@ -18,9 +18,8 @@ from test.util import create_sample_image
 import numpy as np
 import pandas as pd
 import pytest
-from mock import patch
-
 from evaudfs.ndarray.open import Open
+from mock import patch
 
 
 @pytest.mark.notparallel

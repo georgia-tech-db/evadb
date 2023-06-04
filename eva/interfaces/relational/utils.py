@@ -52,11 +52,11 @@ def sql_predicate_to_expresssion_tree(expr: str) -> AbstractExpression:
     return parse_predicate_expression(expr)
 
 
-def execute_statement(evadb: EVADatabase, statement: AbstractStatement) -> Batch:
-    StatementBinder(StatementBinderContext(eva.catalog)).bind(statement)
+def execute_statement(db: EVADatabase, statement: AbstractStatement) -> Batch:
+    StatementBinder(StatementBinderContext(db.catalog)).bind(statement)
     l_plan = StatementToPlanConverter().visit(statement)
-    p_plan = asyncio.run(PlanGenerator(evadb).build(l_plan))
-    output = PlanExecutor(evadb, p_plan).execute_plan()
+    p_plan = asyncio.run(PlanGenerator(db).build(l_plan))
+    output = PlanExecutor(db, p_plan).execute_plan()
     if output:
         batch_list = list(output)
         return Batch.concat(batch_list, copy=False)

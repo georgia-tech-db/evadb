@@ -15,32 +15,32 @@
 import unittest
 from pathlib import Path
 
-from evacatalog.catalog_type import ColumnType, NdArrayType, VectorStoreType
-from evaexpression.abstract_expression import ExpressionType
-from evaexpression.comparison_expression import ComparisonExpression
-from evaexpression.constant_value_expression import ConstantValueExpression
-from evaexpression.function_expression import FunctionExpression
-from evaexpression.tuple_value_expression import TupleValueExpression
-from evaparser.alias import Alias
-from evaparser.create_index_statement import CreateIndexStatement
-from evaparser.create_mat_view_statement import CreateMaterializedViewStatement
-from evaparser.create_statement import (
+from eva.catalog.catalog_type import ColumnType, NdArrayType, VectorStoreType
+from eva.expression.abstract_expression import ExpressionType
+from eva.expression.comparison_expression import ComparisonExpression
+from eva.expression.constant_value_expression import ConstantValueExpression
+from eva.expression.function_expression import FunctionExpression
+from eva.expression.tuple_value_expression import TupleValueExpression
+from eva.parser.alias import Alias
+from eva.parser.create_index_statement import CreateIndexStatement
+from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
+from eva.parser.create_statement import (
     ColConstraintInfo,
     ColumnDefinition,
     CreateTableStatement,
 )
-from evaparser.create_udf_statement import CreateUDFStatement
-from evaparser.delete_statement import DeleteTableStatement
-from evaparser.drop_statement import DropTableStatement
-from evaparser.drop_udf_statement import DropUDFStatement
-from evaparser.insert_statement import InsertTableStatement
-from evaparser.load_statement import LoadDataStatement
-from evaparser.parser import Parser
-from evaparser.rename_statement import RenameTableStatement
-from evaparser.select_statement import SelectStatement
-from evaparser.statement import AbstractStatement, StatementType
-from evaparser.table_ref import JoinNode, TableInfo, TableRef, TableValuedExpression
-from evaparser.types import FileFormatType, JoinType, ParserOrderBySortType
+from eva.parser.create_udf_statement import CreateUDFStatement
+from eva.parser.delete_statement import DeleteTableStatement
+from eva.parser.drop_statement import DropTableStatement
+from eva.parser.drop_udf_statement import DropUDFStatement
+from eva.parser.insert_statement import InsertTableStatement
+from eva.parser.load_statement import LoadDataStatement
+from eva.parser.parser import Parser
+from eva.parser.rename_statement import RenameTableStatement
+from eva.parser.select_statement import SelectStatement
+from eva.parser.statement import AbstractStatement, StatementType
+from eva.parser.table_ref import JoinNode, TableInfo, TableRef, TableValuedExpression
+from eva.parser.types import FileFormatType, JoinType, ParserOrderBySortType
 
 
 class ParserTests(unittest.TestCase):

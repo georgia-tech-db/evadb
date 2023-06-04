@@ -16,16 +16,7 @@ import unittest
 from test.util import create_sample_video, get_evadb_for_testing
 
 import pytest
-from mock import MagicMock, patch
-
-from evacatalog.catalog_type import TableType
-from evacatalog.models.table_catalog import TableCatalogEntry
-from evaoptimizer.operators import (
-    LogicalFilter,
-    LogicalGet,
-    LogicalJoin,
-    LogicalSample,
-)
+from evaoptimizer.operators import LogicalFilter, LogicalGet, LogicalJoin, LogicalSample
 from evaoptimizer.rules.rules import (
     CacheFunctionExpressionInApply,
     CacheFunctionExpressionInFilter,
@@ -74,8 +65,12 @@ from evaoptimizer.rules.rules import (
     XformLateralJoinToLinearFlow,
 )
 from evaoptimizer.rules.rules_manager import RulesManager, disable_rules
-from evaparser.types import JoinType
 from evaserver.command_handler import execute_query_fetch_all
+from mock import MagicMock, patch
+
+from eva.catalog.catalog_type import TableType
+from eva.catalog.models.table_catalog import TableCatalogEntry
+from eva.parser.types import JoinType
 
 
 @pytest.mark.notparallel
@@ -84,7 +79,7 @@ class RulesTest(unittest.TestCase):
     def setUpClass(cls):
         cls.evadb = get_evadb_for_testing()
         # reset the catalog manager before running each test
-        cls.evacatalog().reset()
+        cls.eva.catalog().reset()
         video_file_path = create_sample_video()
         load_query = f"LOAD VIDEO '{video_file_path}' INTO MyVideo;"
         execute_query_fetch_all(cls.evadb, load_query)

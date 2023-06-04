@@ -14,11 +14,10 @@
 # limitations under the License.
 import unittest
 
-from mock import MagicMock
-
 from evaoptimizer.group import Group
 from evaoptimizer.group_expression import GroupExpression
 from evaoptimizer.property import Property, PropertyType
+from mock import MagicMock
 
 
 class TestGroup(unittest.TestCase):

@@ -23,7 +23,6 @@ from test.util import (
 import numpy as np
 import pandas as pd
 import pytest
-
 from evaserver.command_handler import execute_query_fetch_all
 from evautils.logging_manager import logger
 
@@ -33,7 +32,7 @@ class InsertExecutorTest(unittest.TestCase):
     def setUp(self):
         self.evadb = get_evadb_for_testing()
         # reset the catalog manager before running each test
-        self.evacatalog().reset()
+        self.eva.catalog().reset()
         self.video_file_path = create_sample_video()
 
         query = """CREATE TABLE IF NOT EXISTS CSVTable

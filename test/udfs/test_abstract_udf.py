@@ -18,10 +18,11 @@ from enum import Enum
 from inspect import isabstract
 from test.util import get_all_subclasses, get_mock_object
 
-import eva
 from evaudfs.abstract.abstract_udf import AbstractUDF
 from evaudfs.abstract.hf_abstract_udf import AbstractHFUdf
 from evaudfs.yolo_object_detector import Yolo
+
+import eva
 
 
 class AbstractUDFTest(unittest.TestCase):

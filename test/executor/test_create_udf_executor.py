@@ -16,13 +16,13 @@ import unittest
 
 from mock import MagicMock, patch
 
-from evacatalog.catalog_type import NdArrayType
-from evaexecutor.create_udf_executor import CreateUDFExecutor
-from evaudfs.decorators.io_descriptors.data_types import PandasDataframe
+from eva.catalog.catalog_type import NdArrayType
+from eva.executor.create_udf_executor import CreateUDFExecutor
+from eva.udfs.decorators.io_descriptors.data_types import PandasDataframe
 
 
 class CreateUdfExecutorTest(unittest.TestCase):
-    @patch("evaexecutor.create_udf_executor.load_udf_class_from_file")
+    @patch("eva.executor.create_udf_executor.load_udf_class_from_file")
     def test_should_create_udf(self, load_udf_class_from_file_mock):
         catalog_instance = MagicMock()
         catalog_instance().get_udf_catalog_entry_by_name.return_value = None
@@ -44,10 +44,10 @@ class CreateUdfExecutorTest(unittest.TestCase):
                 "metadata": {"key1": "value1", "key2": "value2"},
             },
         )
-        evadb = MagicMock
-        evacatalog = catalog_instance
-        evaconfig = MagicMock()
-        create_udf_executor = CreateUDFExecutor(evadb, plan)
+        db = MagicMock()
+        db.catalog = catalog_instance
+        db.config = MagicMock()
+        create_udf_executor = CreateUDFExecutor(db, plan)
         next(create_udf_executor.exec())
         catalog_instance().insert_udf_catalog_entry.assert_called_with(
             "udf",
@@ -57,7 +57,7 @@ class CreateUdfExecutorTest(unittest.TestCase):
             {"key1": "value1", "key2": "value2"},
         )
 
-    @patch("evaexecutor.create_udf_executor.load_udf_class_from_file")
+    @patch("eva.executor.create_udf_executor.load_udf_class_from_file")
     def test_should_raise_error_on_incorrect_io_definition(
         self, load_udf_class_from_file_mock
     ):
@@ -89,10 +89,10 @@ class CreateUdfExecutorTest(unittest.TestCase):
                 "udf_type": "classification",
             },
         )
-        evadb = MagicMock
-        evacatalog = catalog_instance
-        evaconfig = MagicMock()
-        create_udf_executor = CreateUDFExecutor(evadb, plan)
+        db = MagicMock()
+        db.catalog = catalog_instance
+        db.config = MagicMock()
+        create_udf_executor = CreateUDFExecutor(db, plan)
         # check a string in the error message
         with self.assertRaises(RuntimeError) as exc:
             next(create_udf_executor.exec())

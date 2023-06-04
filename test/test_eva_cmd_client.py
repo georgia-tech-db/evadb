@@ -16,10 +16,9 @@ import argparse
 import asyncio
 import unittest
 
-from mock import call, patch
-
 from evaconfiguration.configuration_manager import ConfigurationManager
 from evaeva_cmd_client import eva_client, main
+from mock import call, patch
 
 
 class CMDClientTest(unittest.TestCase):

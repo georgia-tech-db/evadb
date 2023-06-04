@@ -18,8 +18,8 @@ from test.util import create_dataframe, create_dataframe_same
 import numpy as np
 import pandas as pd
 
-from evamodels.storage.batch import Batch
-from evaparser.alias import Alias
+from eva.models.storage.batch import Batch
+from eva.parser.alias import Alias
 
 
 class BatchTest(unittest.TestCase):

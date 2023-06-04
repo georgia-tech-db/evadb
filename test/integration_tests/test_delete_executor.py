@@ -22,7 +22,6 @@ from test.util import (
 
 import numpy as np
 import pytest
-
 from evaconfiguration.constants import EVA_ROOT_DIR
 from evaserver.command_handler import execute_query_fetch_all
 
@@ -31,7 +30,7 @@ from evaserver.command_handler import execute_query_fetch_all
 class DeleteExecutorTest(unittest.TestCase):
     def setUp(self):
         self.evadb = get_evadb_for_testing()
-        self.evacatalog().reset()
+        self.eva.catalog().reset()
         load_udfs_for_testing(self.evadb, mode="debug")
 
         create_table_query = """

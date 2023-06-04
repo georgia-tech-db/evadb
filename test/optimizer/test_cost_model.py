@@ -15,14 +15,13 @@
 import unittest
 from copy import copy
 
-from mock import MagicMock
-
 from evaoptimizer.group_expression import GroupExpression
 from evaoptimizer.operators import Operator
 from evaoptimizer.optimizer_context import OptimizerContext
 from evaoptimizer.optimizer_tasks import OptimizeGroup
 from evaoptimizer.plan_generator import PlanGenerator
 from evaoptimizer.property import PropertyType
+from mock import MagicMock
 
 
 class CostModel(unittest.TestCase):

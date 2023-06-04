@@ -26,12 +26,12 @@ from test.util import (
 import numpy as np
 import pandas as pd
 import pytest
-
 from evabinder.binder_utils import BinderError
-from evacatalog.catalog_type import ColumnType, NdArrayType
-from evaexecutor.executor_utils import ExecutorError
-from evamodels.storage.batch import Batch
 from evaserver.command_handler import execute_query_fetch_all
+
+from eva.catalog.catalog_type import ColumnType, NdArrayType
+from eva.executor.executor_utils import ExecutorError
+from eva.models.storage.batch import Batch
 
 NUM_FRAMES = 10
 
@@ -40,7 +40,7 @@ NUM_FRAMES = 10
 class UDFExecutorTest(unittest.TestCase):
     def setUp(self):
         self.evadb = get_evadb_for_testing()
-        self.evacatalog().reset()
+        self.eva.catalog().reset()
         video_file_path = create_sample_video(NUM_FRAMES)
         load_query = f"LOAD VIDEO '{video_file_path}' INTO MyVideo;"
         execute_query_fetch_all(self.evadb, load_query)
@@ -179,7 +179,7 @@ class UDFExecutorTest(unittest.TestCase):
         execute_query_fetch_all(self.evadb, create_udf_query.format(udf_name))
 
         # try fetching the metadata values
-        entries = self.evacatalog().get_udf_metadata_entries_by_udf_name(udf_name)
+        entries = self.eva.catalog().get_udf_metadata_entries_by_udf_name(udf_name)
         self.assertEqual(len(entries), 2)
         metadata = [(entry.key, entry.value) for entry in entries]
 
@@ -188,7 +188,7 @@ class UDFExecutorTest(unittest.TestCase):
 
     def test_should_return_empty_metadata_list_for_missing_udf(self):
         # missing udf should return empty list
-        entries = self.evacatalog().get_udf_metadata_entries_by_udf_name("randomUDF")
+        entries = self.eva.catalog().get_udf_metadata_entries_by_udf_name("randomUDF")
         self.assertEqual(len(entries), 0)
 
     def test_should_return_empty_metadata_list_if_udf_is_removed(self):
@@ -205,13 +205,13 @@ class UDFExecutorTest(unittest.TestCase):
         execute_query_fetch_all(self.evadb, create_udf_query.format(udf_name))
 
         # try fetching the metadata values
-        entries = self.evacatalog().get_udf_metadata_entries_by_udf_name(udf_name)
+        entries = self.eva.catalog().get_udf_metadata_entries_by_udf_name(udf_name)
         self.assertEqual(len(entries), 2)
 
         # remove the udf
         execute_query_fetch_all(self.evadb, f"DROP UDF {udf_name};")
         # try fetching the metadata values
-        entries = self.evacatalog().get_udf_metadata_entries_by_udf_name(udf_name)
+        entries = self.eva.catalog().get_udf_metadata_entries_by_udf_name(udf_name)
         self.assertEqual(len(entries), 0)
 
     def test_should_raise_using_missing_udf(self):
@@ -280,7 +280,7 @@ class UDFExecutorTest(unittest.TestCase):
         """
         execute_query_fetch_all(self.evadb, create_udf_query)
 
-        catalog_manager = self.evacatalog()
+        catalog_manager = self.eva.catalog()
         udf_obj = catalog_manager.get_udf_catalog_entry_by_name(
             "DummyObjectDetectorDecorators"
         )
@@ -323,5 +323,5 @@ class UDFExecutorTest(unittest.TestCase):
         execute_query_fetch_all(
             self.evadb, "SELECT DummyObjectDetector(data) FROM MyVideo"
         )
-        entry = self.evacatalog().get_udf_cost_catalog_entry("DummyObjectDetector")
+        entry = self.eva.catalog().get_udf_cost_catalog_entry("DummyObjectDetector")
         self.assertIsNotNone(entry)

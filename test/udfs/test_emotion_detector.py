@@ -20,7 +20,7 @@ from test.util import EVA_TEST_DATA_DIR
 import cv2
 import pandas as pd
 
-from evamodels.storage.batch import Batch
+from eva.models.storage.batch import Batch
 
 
 class EmotionDetector(unittest.TestCase):

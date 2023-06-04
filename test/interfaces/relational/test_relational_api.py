@@ -19,11 +19,10 @@ from test.util import (
     suffix_pytest_xdist_worker_id_to_dir,
 )
 
-from pandas.testing import assert_frame_equal
-
 from evaconfiguration.constants import EVA_DATABASE_DIR, EVA_ROOT_DIR
 from evainterfaces.relational.db import connect
 from evaserver.command_handler import execute_query_fetch_all
+from pandas.testing import assert_frame_equal
 
 
 class RelationalAPI(unittest.TestCase):
@@ -37,7 +36,7 @@ class RelationalAPI(unittest.TestCase):
         cls.evadb = cls.conn._evadb
 
     def setUp(self):
-        self.evacatalog().reset()
+        self.eva.catalog().reset()
         self.mnist_path = f"{EVA_ROOT_DIR}/data/mnist/mnist.mp4"
         load_udfs_for_testing(
             self.evadb,

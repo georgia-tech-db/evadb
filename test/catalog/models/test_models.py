@@ -14,12 +14,12 @@
 # limitations under the License.
 import unittest
 
-from evacatalog.catalog_type import ColumnType, NdArrayType, TableType
-from evacatalog.models.column_catalog import ColumnCatalogEntry
-from evacatalog.models.index_catalog import IndexCatalogEntry
-from evacatalog.models.table_catalog import TableCatalogEntry
-from evacatalog.models.udf_catalog import UdfCatalogEntry
-from evacatalog.models.udf_io_catalog import UdfIOCatalogEntry
+from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
+from eva.catalog.models.column_catalog import ColumnCatalogEntry
+from eva.catalog.models.index_catalog import IndexCatalogEntry
+from eva.catalog.models.table_catalog import TableCatalogEntry
+from eva.catalog.models.udf_catalog import UdfCatalogEntry
+from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 
 
 class CatalogModelsTest(unittest.TestCase):

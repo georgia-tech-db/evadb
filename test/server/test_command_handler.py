@@ -17,7 +17,6 @@ import unittest
 from unittest.mock import MagicMock
 
 import mock
-
 from evaserver.command_handler import handle_request
 
 

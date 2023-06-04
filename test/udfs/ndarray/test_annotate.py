@@ -16,11 +16,10 @@ import unittest
 
 import numpy as np
 import pandas as pd
-from numpy import asarray
-from PIL import Image
-
 from evaconfiguration.constants import EVA_ROOT_DIR
 from evaudfs.ndarray.annotate import Annotate
+from numpy import asarray
+from PIL import Image
 
 
 class AnnotateTests(unittest.TestCase):

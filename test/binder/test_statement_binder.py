@@ -18,10 +18,11 @@ from unittest.mock import MagicMock, patch
 from evabinder.binder_utils import BinderError
 from evabinder.statement_binder import StatementBinder
 from evabinder.statement_binder_context import StatementBinderContext
-from evacatalog.catalog_type import NdArrayType
-from evaexpression.tuple_value_expression import TupleValueExpression
-from evaparser.alias import Alias
-from evaparser.create_statement import ColumnDefinition
+
+from eva.catalog.catalog_type import NdArrayType
+from eva.expression.tuple_value_expression import TupleValueExpression
+from eva.parser.alias import Alias
+from eva.parser.create_statement import ColumnDefinition
 
 
 class StatementBinderTests(unittest.TestCase):

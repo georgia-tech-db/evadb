@@ -21,11 +21,11 @@ from test.util import get_evadb_for_testing
 from unittest.mock import MagicMock
 
 import pandas as pd
+from evaserver.command_handler import execute_query_fetch_all
 from mock import patch
 
-from evaexecutor.executor_utils import ExecutorError
-from evamodels.storage.batch import Batch
-from evaserver.command_handler import execute_query_fetch_all
+from eva.executor.executor_utils import ExecutorError
+from eva.models.storage.batch import Batch
 
 
 def create_dummy_csv_file(config) -> str:
@@ -48,7 +48,7 @@ def create_dummy_csv_file(config) -> str:
 class ChatGPTTest(unittest.TestCase):
     def setUp(self) -> None:
         self.evadb = get_evadb_for_testing()
-        self.evacatalog().reset()
+        self.eva.catalog().reset()
         create_table_query = """CREATE TABLE IF NOT EXISTS MyTextCSV (
                 id INTEGER UNIQUE,
                 prompt TEXT (100),

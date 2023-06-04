@@ -16,11 +16,11 @@ import unittest
 
 from mock import patch
 
-from evaexpression.abstract_expression import AbstractExpression, ExpressionType
-from evaexpression.comparison_expression import ComparisonExpression
-from evaexpression.constant_value_expression import ConstantValueExpression
-from evaexpression.logical_expression import LogicalExpression
-from evaexpression.tuple_value_expression import TupleValueExpression
+from eva.expression.abstract_expression import AbstractExpression, ExpressionType
+from eva.expression.comparison_expression import ComparisonExpression
+from eva.expression.constant_value_expression import ConstantValueExpression
+from eva.expression.logical_expression import LogicalExpression
+from eva.expression.tuple_value_expression import TupleValueExpression
 
 
 class AbstractExpressionsTest(unittest.TestCase):

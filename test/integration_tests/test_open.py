@@ -24,17 +24,17 @@ from test.util import (
 import numpy as np
 import pandas as pd
 import pytest
-
-from evamodels.storage.batch import Batch
 from evaserver.command_handler import execute_query_fetch_all
 from evastorage.storage_engine import StorageEngine
+
+from eva.models.storage.batch import Batch
 
 
 @pytest.mark.notparallel
 class OpenTests(unittest.TestCase):
     def setUp(self):
         self.evadb = get_evadb_for_testing()
-        self.evacatalog().reset()
+        self.eva.catalog().reset()
         # Load built-in UDFs.
         load_udfs_for_testing(self.evadb, mode="debug")
 
@@ -44,7 +44,7 @@ class OpenTests(unittest.TestCase):
         execute_query_fetch_all(self.evadb, create_table_query)
 
         # Insert dummy data into table.
-        table_catalog_entry = self.evacatalog().get_table_catalog_entry(
+        table_catalog_entry = self.eva.catalog().get_table_catalog_entry(
             "testOpenTable"
         )
         storage_engine = StorageEngine.factory(self.evadb, table_catalog_entry)

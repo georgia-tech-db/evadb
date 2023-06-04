@@ -24,9 +24,9 @@ from test.util import (
 
 import pandas as pd
 import pytest
-
-from evamodels.storage.batch import Batch
 from evaserver.command_handler import execute_query_fetch_all
+
+from eva.models.storage.batch import Batch
 
 
 @pytest.mark.notparallel
@@ -34,7 +34,7 @@ class ArrayCountTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.evadb = get_evadb_for_testing()
-        cls.evacatalog().reset()
+        cls.eva.catalog().reset()
         video_file_path = create_sample_video(NUM_FRAMES)
         load_query = f"LOAD VIDEO '{video_file_path}' INTO MyVideo;"
         execute_query_fetch_all(cls.evadb, load_query)

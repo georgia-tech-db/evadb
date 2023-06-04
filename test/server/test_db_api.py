@@ -18,10 +18,10 @@ import sys
 import unittest
 from test.util import suffix_pytest_xdist_worker_id_to_dir
 
+from evainterfaces.relational.db import EVACursor, connect_remote
 from mock import MagicMock, patch
 
-from evainterfaces.relational.db import EVACursor, connect_remote
-from evamodels.server.response import Response
+from eva.models.server.response import Response
 
 # Check for Python 3.8+ for IsolatedAsyncioTestCase support
 if sys.version_info >= (3, 8):

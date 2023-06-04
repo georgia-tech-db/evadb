@@ -20,7 +20,7 @@ import cv2
 import mock
 import pandas as pd
 
-from evamodels.storage.batch import Batch
+from eva.models.storage.batch import Batch
 
 NUM_FRAMES = 10
 

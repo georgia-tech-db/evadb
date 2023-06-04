@@ -23,15 +23,15 @@ from test.util import (
 
 import numpy as np
 import pytest
-
 from evaconfiguration.constants import EVA_ROOT_DIR
 from evaconstants import AUDIORATE, IFRAMES
-from evaexpression.abstract_expression import ExpressionType
-from evaexpression.comparison_expression import ComparisonExpression
-from evaexpression.constant_value_expression import ConstantValueExpression
-from evaexpression.logical_expression import LogicalExpression
-from evaexpression.tuple_value_expression import TupleValueExpression
 from evareaders.decord_reader import DecordReader
+
+from eva.expression.abstract_expression import ExpressionType
+from eva.expression.comparison_expression import ComparisonExpression
+from eva.expression.constant_value_expression import ConstantValueExpression
+from eva.expression.logical_expression import LogicalExpression
+from eva.expression.tuple_value_expression import TupleValueExpression
 
 
 @pytest.mark.notparallel

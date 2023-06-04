@@ -26,12 +26,12 @@ from test.util import (
 import boto3
 import pandas as pd
 import pytest
+from evaconfiguration.constants import EVA_ROOT_DIR
+from evaserver.command_handler import execute_query_fetch_all
 from moto import mock_s3
 
-from evaconfiguration.constants import EVA_ROOT_DIR
-from evamodels.storage.batch import Batch
-from evaparser.types import FileFormatType
-from evaserver.command_handler import execute_query_fetch_all
+from eva.models.storage.batch import Batch
+from eva.parser.types import FileFormatType
 
 
 @pytest.mark.notparallel
@@ -41,7 +41,7 @@ class S3LoadExecutorTest(unittest.TestCase):
     def setUp(self):
         self.evadb = get_evadb_for_testing()
         # reset the catalog manager before running each test
-        self.evacatalog().reset()
+        self.eva.catalog().reset()
         self.video_file_path = create_sample_video()
         self.multiple_video_file_path = f"{EVA_ROOT_DIR}/data/sample_videos/1"
         self.s3_download_dir = self.evaconfig.get_value("storage", "s3_download_dir")

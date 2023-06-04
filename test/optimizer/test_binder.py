@@ -15,13 +15,12 @@
 import copy
 import unittest
 
-from mock import MagicMock
-
 from evaoptimizer.binder import Binder
 from evaoptimizer.cost_model import CostModel
 from evaoptimizer.operators import Dummy, LogicalFilter, LogicalGet, OperatorType
 from evaoptimizer.optimizer_context import OptimizerContext
 from evaoptimizer.rules.pattern import Pattern
+from mock import MagicMock
 
 
 class TestBinder(unittest.TestCase):

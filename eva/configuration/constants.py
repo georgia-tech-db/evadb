@@ -14,7 +14,7 @@
 # limitations under the License.
 from pathlib import Path
 
-import evadb
+import eva
 
 EVA_INSTALLATION_DIR = Path(eva.__file__).parent
 EVA_ROOT_DIR = Path(eva.__file__).parent.parent

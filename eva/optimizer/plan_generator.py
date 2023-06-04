@@ -21,11 +21,7 @@ from eva.optimizer.cost_model import CostModel
 from eva.optimizer.operators import Operator
 from eva.optimizer.optimizer_context import OptimizerContext
 from eva.optimizer.optimizer_task_stack import OptimizerTaskStack
-from eva.optimizer.optimizer_tasks import (
-    BottomUpRewrite,
-    OptimizeGroup,
-    TopDownRewrite,
-)
+from eva.optimizer.optimizer_tasks import BottomUpRewrite, OptimizeGroup, TopDownRewrite
 from eva.optimizer.property import PropertyType
 from eva.optimizer.rules.rules_manager import RulesManager
 

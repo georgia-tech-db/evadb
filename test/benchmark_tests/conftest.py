@@ -16,20 +16,20 @@ from test.util import get_evadb_for_testing
 
 import pytest
 
-from evaserver.command_handler import execute_query_fetch_all
-from evaudfs.udf_bootstrap_queries import init_builtin_udfs
+from eva.server.command_handler import execute_query_fetch_all
+from eva.udfs.udf_bootstrap_queries import init_builtin_udfs
 
 
 @pytest.fixture(autouse=False)
 def setup_pytorch_tests():
-    evadb = get_evadb_for_testing()
-    evacatalog().reset()
+    db = get_evadb_for_testing()
+    db.catalog().reset()
     execute_query_fetch_all(
-        evadb, "LOAD VIDEO 'data/ua_detrac/ua_detrac.mp4' INTO MyVideo;"
+        db, "LOAD VIDEO 'data/ua_detrac/ua_detrac.mp4' INTO MyVideo;"
     )
-    execute_query_fetch_all(evadb, "LOAD VIDEO 'data/mnist/mnist.mp4' INTO MNIST;")
+    execute_query_fetch_all(db, "LOAD VIDEO 'data/mnist/mnist.mp4' INTO MNIST;")
     execute_query_fetch_all(
-        evadb, "LOAD VIDEO 'data/sample_videos/touchdown.mp4' INTO VIDEOS"
+        db, "LOAD VIDEO 'data/sample_videos/touchdown.mp4' INTO VIDEOS"
     )
-    init_builtin_udfs(evadb, mode="release")
-    return evadb
+    init_builtin_udfs(db, mode="release")
+    return db
