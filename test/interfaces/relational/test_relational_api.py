@@ -13,21 +13,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import (
-    DummyObjectDetector,
-    create_sample_video,
-    load_udfs_for_testing,
-    shutdown_ray,
-)
-
 import numpy as np
 import pandas as pd
+from test.util import (
+    DummyObjectDetector,
+    load_udfs_for_testing,
+    shutdown_ray,
+    suffix_pytest_xdist_worker_id_to_dir,
+    create_sample_video
+)
+
 from pandas.testing import assert_frame_equal
 
-from eva.configuration.constants import EVA_ROOT_DIR
+from eva.configuration.constants import EVA_DATABASE_DIR, EVA_ROOT_DIR
 from eva.interfaces.relational.db import connect
-from eva.models.storage.batch import Batch
 from eva.server.command_handler import execute_query_fetch_all
+from eva.models.storage.batch import Batch
 
 
 class RelationalAPI(unittest.TestCase):
@@ -36,7 +37,9 @@ class RelationalAPI(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        pass
+        cls.db_dir = suffix_pytest_xdist_worker_id_to_dir(EVA_DATABASE_DIR)
+        cls.conn = connect(cls.db_dir)
+        cls.evadb = cls.conn._evadb
 
     def setUp(self):
         self.evadb.catalog().reset()
@@ -49,9 +52,8 @@ class RelationalAPI(unittest.TestCase):
     def tearDown(self):
         shutdown_ray()
         # todo: move these to relational apis as well
-        execute_query_fetch_all("""DROP TABLE IF EXISTS mnist_video;""")
-        execute_query_fetch_all("""DROP TABLE IF EXISTS meme_images;""")
-        execute_query_fetch_all("""DROP TABLE IF EXISTS dummy_video;""")
+        execute_query_fetch_all(self.evadb, """DROP TABLE IF EXISTS mnist_video;""")
+        execute_query_fetch_all(self.evadb, """DROP TABLE IF EXISTS meme_images;""")
 
     def test_relation_apis(self):
         conn = connect(self.db_dir)
@@ -196,11 +198,18 @@ class RelationalAPI(unittest.TestCase):
         )
         assert_frame_equal(rel.df(), conn.query(similarity_sql).df())
 
-    def test_create_udf(self):
+    def test_create_udf(self):        
         video_file_path = create_sample_video(10)
-        execute_query_fetch_all(f"LOAD VIDEO '{video_file_path}' INTO dummy_video;")
 
-        conn = connect(port=8886)
+        conn = connect(self.db_dir)
+        # load video
+        rel = conn.load(
+            video_file_path,
+            table_name="dummy_video",
+            format="video",
+        )
+        rel.execute()
+
         rel = conn.create_udf("DummyObjectDetector", "test/util.py")
         rel.execute()
 
