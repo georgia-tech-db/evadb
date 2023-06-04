@@ -95,8 +95,8 @@ class TestOptimizerTask(unittest.TestCase):
     def test_nested_implementation(self):
         child_predicate = MagicMock()
         root_predicate = MagicMock()
-        with patch("eva.optimizer.rules.rules.extract_pushdown_predicate") as mock:
-            with patch("eva.optimizer.rules.rules.is_video_table") as mock_vid:
+        with patch("evadb.optimizer.rules.rules.extract_pushdown_predicate") as mock:
+            with patch("evadb.optimizer.rules.rules.is_video_table") as mock_vid:
                 mock_vid.return_value = True
                 mock.side_effect = [
                     (child_predicate, None),

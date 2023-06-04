@@ -65,7 +65,7 @@ class ChatGPTTest(unittest.TestCase):
         execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS MyTextCSV;")
 
     @ray_skip_marker
-    @patch("eva.udfs.chatgpt.openai.ChatCompletion.create")
+    @patch("evadb.udfs.chatgpt.openai.ChatCompletion.create")
     def test_openai_chat_completion_udf(self, mock_req):
         # set dummy api key
         os.environ["openai_api_key"] = "my_key"

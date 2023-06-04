@@ -114,7 +114,7 @@ then
     notebook_test_code=$?
     if [ "$notebook_test_code" != "0" ];
     then
-        cat tutorials/eva.log
+        cat tutorials/evadb.log
         echo "NOTEBOOK CODE: --|${notebook_test_code}|-- FAILURE"
         exit $notebook_test_code
     else

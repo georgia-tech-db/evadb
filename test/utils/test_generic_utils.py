@@ -32,12 +32,12 @@ class ModulePathTest(unittest.TestCase):
             validate_kwargs({"a": 1, "b": 2}, ["a"], "Invalid keyword argument:")
 
     def test_should_return_correct_class_for_string(self):
-        vl = str_to_class("eva.readers.decord_reader.DecordReader")
+        vl = str_to_class("evadb.readers.decord_reader.DecordReader")
         self.assertEqual(vl, DecordReader)
 
     def test_should_return_correct_class_for_path(self):
         vl = load_udf_class_from_file("eva/readers/decord_reader.py", "DecordReader")
-        # Can't check that v1 = DecordReader because the above function returns decord_reader.DecordReader instead of eva.readers.decord_reader.DecordReader
+        # Can't check that v1 = DecordReader because the above function returns decord_reader.DecordReader instead of evadb.readers.decord_reader.DecordReader
         # So we check the qualname instead, qualname is the path to the class including the module name
         # Ref: https://peps.python.org/pep-3155/#rationale
         assert vl.__qualname__ == DecordReader.__qualname__
