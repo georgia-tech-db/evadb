@@ -14,7 +14,7 @@
 # limitations under the License.
 from typing import Iterator
 
-from eva.database import EVADB
+from eva.database import EVADatabase
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import apply_predicate, apply_project
 from eva.models.storage.batch import Batch
@@ -29,7 +29,7 @@ class SequentialScanExecutor(AbstractExecutor):
 
     """
 
-    def __init__(self, db: EVADB, node: SeqScanPlan):
+    def __init__(self, db: EVADatabase, node: SeqScanPlan):
         super().__init__(db, node)
         self.predicate = node.predicate
         self.project_expr = node.columns

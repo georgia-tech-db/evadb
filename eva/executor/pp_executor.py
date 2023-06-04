@@ -14,7 +14,7 @@
 # limitations under the License.
 from typing import Iterator
 
-from eva.database import EVADB
+from eva.database import EVADatabase
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.pp_plan import PPScanPlan
@@ -31,7 +31,7 @@ class PPExecutor(AbstractExecutor):
     sequential scan evolves.
     """
 
-    def __init__(self, db: EVADB, node: PPScanPlan):
+    def __init__(self, db: EVADatabase, node: PPScanPlan):
         super().__init__(db, node)
         self.predicate = node.predicate
 

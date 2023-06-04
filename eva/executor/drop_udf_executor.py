@@ -16,7 +16,7 @@
 
 import pandas as pd
 
-from eva.database import EVADB
+from eva.database import EVADatabase
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.drop_udf_plan import DropUDFPlan
@@ -24,7 +24,7 @@ from eva.utils.logging_manager import logger
 
 
 class DropUDFExecutor(AbstractExecutor):
-    def __init__(self, db: EVADB, node: DropUDFPlan):
+    def __init__(self, db: EVADatabase, node: DropUDFPlan):
         super().__init__(db, node)
 
     def exec(self, *args, **kwargs):

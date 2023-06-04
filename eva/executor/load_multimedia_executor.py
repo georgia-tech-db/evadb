@@ -19,7 +19,7 @@ from pathlib import Path
 import pandas as pd
 
 from eva.catalog.models.table_catalog import TableCatalogEntry
-from eva.database import EVADB
+from eva.database import EVADatabase
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError, iter_path_regex, validate_media
 from eva.models.storage.batch import Batch
@@ -32,7 +32,7 @@ from eva.utils.s3_utils import download_from_s3
 
 
 class LoadMultimediaExecutor(AbstractExecutor):
-    def __init__(self, db: EVADB, node: LoadDataPlan):
+    def __init__(self, db: EVADatabase, node: LoadDataPlan):
         super().__init__(db, node)
         self.media_type = self.node.file_options["file_format"]
 

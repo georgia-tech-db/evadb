@@ -14,7 +14,7 @@
 # limitations under the License.
 from typing import Iterator
 
-from eva.database import EVADB
+from eva.database import EVADatabase
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.apply_and_merge_executor import ApplyAndMergeExecutor
 from eva.executor.create_executor import CreateExecutor
@@ -60,10 +60,10 @@ class PlanExecutor:
 
     Arguments:
         plan (AbstractPlan): Physical plan tree which needs to be executed
-        evadb (EVADB): database to execute the query on
+        evadb (EVADatabase): database to execute the query on
     """
 
-    def __init__(self, evadb: EVADB, plan: AbstractPlan):
+    def __init__(self, evadb: EVADatabase, plan: AbstractPlan):
         self._db = evadb
         self._plan = plan
 

@@ -15,7 +15,7 @@
 import pandas as pd
 
 from eva.catalog.catalog_type import TableType
-from eva.database import EVADB
+from eva.database import EVADatabase
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.parser.types import ShowType
@@ -23,7 +23,7 @@ from eva.plan_nodes.show_info_plan import ShowInfoPlan
 
 
 class ShowInfoExecutor(AbstractExecutor):
-    def __init__(self, db: EVADB, node: ShowInfoPlan):
+    def __init__(self, db: EVADatabase, node: ShowInfoPlan):
         super().__init__(db, node)
 
     def exec(self, *args, **kwargs):

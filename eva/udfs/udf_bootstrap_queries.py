@@ -14,7 +14,7 @@
 # limitations under the License.
 
 from eva.configuration.constants import EVA_INSTALLATION_DIR
-from eva.database import EVADB
+from eva.database import EVADatabase
 from eva.server.command_handler import execute_query_fetch_all
 
 NDARRAY_DIR = "ndarray"
@@ -173,7 +173,7 @@ mnistcnn_udf_query = """CREATE UDF IF NOT EXISTS MnistImageClassifier
 )
 
 
-def init_builtin_udfs(db: EVADB, mode: str = "debug") -> None:
+def init_builtin_udfs(db: EVADatabase, mode: str = "debug") -> None:
     """Load the built-in UDFs into the system during system bootstrapping.
 
     The function loads a set of pre-defined UDF queries based on the `mode` argument.

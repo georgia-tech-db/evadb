@@ -15,7 +15,7 @@
 import pandas as pd
 
 from eva.catalog.catalog_type import TableType
-from eva.database import EVADB
+from eva.database import EVADatabase
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.insert_plan import InsertPlan
@@ -23,7 +23,7 @@ from eva.storage.storage_engine import StorageEngine
 
 
 class InsertExecutor(AbstractExecutor):
-    def __init__(self, db: EVADB, node: InsertPlan):
+    def __init__(self, db: EVADatabase, node: InsertPlan):
         super().__init__(db, node)
 
     def exec(self, *args, **kwargs):

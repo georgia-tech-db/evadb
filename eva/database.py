@@ -22,7 +22,7 @@ from eva.configuration.constants import DB_DEFAULT_NAME, EVA_DATABASE_DIR
 
 
 @dataclass
-class EVADB:
+class EVADatabase:
     db_uri: str
     config: ConfigurationManager
     catalog_uri: str
@@ -48,4 +48,4 @@ def init_eva_db_instance(
 
     catalog_uri = custom_db_uri or get_default_db_uri(Path(db_dir))
 
-    return EVADB(db_dir, config, catalog_uri, get_catalog_instance)
+    return EVADatabase(db_dir, config, catalog_uri, get_catalog_instance)

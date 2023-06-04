@@ -19,7 +19,7 @@ from sqlalchemy import and_, or_
 
 from eva.catalog.catalog_type import TableType
 from eva.catalog.models.table_catalog import TableCatalogEntry
-from eva.database import EVADB
+from eva.database import EVADatabase
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.expression.abstract_expression import ExpressionType
 from eva.expression.comparison_expression import ComparisonExpression
@@ -34,7 +34,7 @@ from eva.storage.storage_engine import StorageEngine
 class DeleteExecutor(AbstractExecutor):
     """ """
 
-    def __init__(self, db: EVADB, node: ProjectPlan):
+    def __init__(self, db: EVADatabase, node: ProjectPlan):
         super().__init__(db, node)
         self.predicate = node.where_clause
 

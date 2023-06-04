@@ -17,7 +17,7 @@ from typing import Iterator
 import pandas as pd
 
 from eva.catalog.sql_config import IDENTIFIER_COLUMN
-from eva.database import EVADB
+from eva.database import EVADatabase
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import handle_vector_store_params
 from eva.models.storage.batch import Batch
@@ -35,7 +35,7 @@ def get_row_id_column_alias(column_list):
 
 
 class VectorIndexScanExecutor(AbstractExecutor):
-    def __init__(self, db: EVADB, node: VectorIndexScanPlan):
+    def __init__(self, db: EVADatabase, node: VectorIndexScanPlan):
         super().__init__(db, node)
 
         self.index_name = node.index_name

@@ -17,7 +17,7 @@ from typing import Iterator, Optional
 
 from eva.binder.statement_binder import StatementBinder
 from eva.binder.statement_binder_context import StatementBinderContext
-from eva.database import EVADB
+from eva.database import EVADatabase
 from eva.executor.plan_executor import PlanExecutor
 from eva.models.server.response import Response, ResponseStatus
 from eva.models.storage.batch import Batch
@@ -29,7 +29,7 @@ from eva.utils.stats import Timer
 
 
 def execute_query(
-    evadb: EVADB, query, report_time: bool = False, **kwargs
+    evadb: EVADatabase, query, report_time: bool = False, **kwargs
 ) -> Iterator[Batch]:
     """
     Execute the query and return a result generator.
@@ -47,7 +47,9 @@ def execute_query(
     return output
 
 
-def execute_query_fetch_all(evadb: EVADB, query=None, **kwargs) -> Optional[Batch]:
+def execute_query_fetch_all(
+    evadb: EVADatabase, query=None, **kwargs
+) -> Optional[Batch]:
     """
     Execute the query and fetch all results into one Batch object.
     """
@@ -57,7 +59,7 @@ def execute_query_fetch_all(evadb: EVADB, query=None, **kwargs) -> Optional[Batc
         return Batch.concat(batch_list, copy=False)
 
 
-async def handle_request(evadb: EVADB, client_writer, request_message):
+async def handle_request(evadb: EVADatabase, client_writer, request_message):
     """
     Reads a request from a client and processes it
 

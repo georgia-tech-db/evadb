@@ -14,7 +14,7 @@
 # limitations under the License.
 import pandas as pd
 
-from eva.database import EVADB
+from eva.database import EVADatabase
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError
 from eva.expression.tuple_value_expression import TupleValueExpression
@@ -26,7 +26,7 @@ from eva.utils.logging_manager import logger
 
 
 class LoadCSVExecutor(AbstractExecutor):
-    def __init__(self, db: EVADB, node: LoadDataPlan):
+    def __init__(self, db: EVADatabase, node: LoadDataPlan):
         super().__init__(db, node)
 
     def exec(self, *args, **kwargs):

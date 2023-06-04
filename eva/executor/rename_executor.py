@@ -12,14 +12,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from eva.database import EVADB
+from eva.database import EVADatabase
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.plan_nodes.rename_plan import RenamePlan
 from eva.storage.storage_engine import StorageEngine
 
 
 class RenameExecutor(AbstractExecutor):
-    def __init__(self, db: EVADB, node: RenamePlan):
+    def __init__(self, db: EVADatabase, node: RenamePlan):
         super().__init__(db, node)
 
     def exec(self, *args, **kwargs):

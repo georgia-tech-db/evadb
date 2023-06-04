@@ -61,10 +61,10 @@ async def read_from_client_and_send_to_server(
 
     prompt = "eva=#"
 
-    # The EVADB object is not passed from the command line client.
+    # The EVADatabase object is not passed from the command line client.
     # The concept is to always send a SQL query to the server, which is responsible for
     # executing it and returning the results. However, in the Pythonic interface, we
-    # adopt a serverless approach and don't rely on the EVADB object.
+    # adopt a serverless approach and don't rely on the EVADatabase object.
     connection = EVAConnection(None, server_reader, writer)
     cursor = connection.cursor()
 

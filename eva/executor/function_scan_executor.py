@@ -14,7 +14,7 @@
 # limitations under the License.
 from typing import Iterator
 
-from eva.database import EVADB
+from eva.database import EVADatabase
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.function_scan_plan import FunctionScanPlan
@@ -28,7 +28,7 @@ class FunctionScanExecutor(AbstractExecutor):
 
     """
 
-    def __init__(self, db: EVADB, node: FunctionScanPlan):
+    def __init__(self, db: EVADatabase, node: FunctionScanPlan):
         super().__init__(db, node)
         self.func_expr = node.func_expr
         self.do_unnest = node.do_unnest

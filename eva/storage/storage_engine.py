@@ -14,7 +14,7 @@
 # limitations under the License.
 from eva.catalog.catalog_type import TableType
 from eva.catalog.models.table_catalog import TableCatalogEntry
-from eva.database import EVADB
+from eva.database import EVADatabase
 from eva.storage.abstract_storage_engine import AbstractStorageEngine
 from eva.storage.document_storage_engine import DocumentStorageEngine
 from eva.storage.image_storage_engine import ImageStorageEngine
@@ -27,7 +27,7 @@ class StorageEngine:
     storages = None
 
     @classmethod
-    def _lazy_initialize_storages(cls, db: EVADB):
+    def _lazy_initialize_storages(cls, db: EVADatabase):
         if not cls.storages:
             cls.storages = {
                 TableType.STRUCTURED_DATA: SQLStorageEngine,
@@ -38,7 +38,9 @@ class StorageEngine:
             }
 
     @classmethod
-    def factory(cls, db: EVADB, table: TableCatalogEntry) -> AbstractStorageEngine:
+    def factory(
+        cls, db: EVADatabase, table: TableCatalogEntry
+    ) -> AbstractStorageEngine:
         cls._lazy_initialize_storages(db)
         if table is None:
             raise ValueError("Expected TableCatalogEntry, got None")

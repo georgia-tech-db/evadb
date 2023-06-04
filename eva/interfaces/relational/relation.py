@@ -16,7 +16,7 @@ from typing import Union
 
 import pandas
 
-from eva.database import EVADB
+from eva.database import EVADatabase
 from eva.interfaces.relational.utils import (
     create_limit_expression,
     create_star_expression,
@@ -39,7 +39,7 @@ from eva.parser.utils import parse_sql_orderby_expr
 class EVARelation:
     def __init__(
         self,
-        evadb: EVADB,
+        evadb: EVADatabase,
         query_node: Union[AbstractStatement, TableRef],
         alias: Alias = None,
     ):

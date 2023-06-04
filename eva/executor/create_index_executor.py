@@ -17,7 +17,7 @@ from pathlib import Path
 import pandas as pd
 
 from eva.catalog.sql_config import IDENTIFIER_COLUMN
-from eva.database import EVADB
+from eva.database import EVADatabase
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError, handle_vector_store_params
 from eva.models.storage.batch import Batch
@@ -29,7 +29,7 @@ from eva.utils.logging_manager import logger
 
 
 class CreateIndexExecutor(AbstractExecutor):
-    def __init__(self, db: EVADB, node: CreateIndexPlan):
+    def __init__(self, db: EVADatabase, node: CreateIndexPlan):
         super().__init__(db, node)
 
     def exec(self, *args, **kwargs):

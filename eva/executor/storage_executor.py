@@ -15,7 +15,7 @@
 from typing import Iterator
 
 from eva.catalog.catalog_type import TableType
-from eva.database import EVADB
+from eva.database import EVADatabase
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
@@ -25,7 +25,7 @@ from eva.utils.logging_manager import logger
 
 
 class StorageExecutor(AbstractExecutor):
-    def __init__(self, db: EVADB, node: StoragePlan):
+    def __init__(self, db: EVADatabase, node: StoragePlan):
         super().__init__(db, node)
 
     def exec(self, *args, **kwargs) -> Iterator[Batch]:

@@ -14,7 +14,7 @@
 # limitations under the License.
 from typing import Iterator
 
-from eva.database import EVADB
+from eva.database import EVADatabase
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import apply_predicate
 from eva.models.storage.batch import Batch
@@ -22,7 +22,7 @@ from eva.plan_nodes.nested_loop_join_plan import NestedLoopJoinPlan
 
 
 class NestedLoopJoinExecutor(AbstractExecutor):
-    def __init__(self, db: EVADB, node: NestedLoopJoinPlan):
+    def __init__(self, db: EVADatabase, node: NestedLoopJoinPlan):
         super().__init__(db, node)
         self.predicate = node.join_predicate
 

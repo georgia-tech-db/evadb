@@ -18,7 +18,7 @@ from typing import Any, Generator, Iterable, List, TypeVar
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.database import EVADB
+from eva.database import EVADatabase
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.abstract_plan import AbstractPlan
 
@@ -32,7 +32,7 @@ class AbstractExecutor(ABC):
         node (AbstractPlan): Plan node corresponding to this executor
     """
 
-    def __init__(self, db: EVADB, node: AbstractPlan):
+    def __init__(self, db: EVADatabase, node: AbstractPlan):
         self._db = db
         self._node = node
         self._config: ConfigurationManager = db.config if db else None
@@ -69,7 +69,7 @@ class AbstractExecutor(ABC):
         return self._node
 
     @property
-    def db(self) -> EVADB:
+    def db(self) -> EVADatabase:
         return self._db
 
     @property

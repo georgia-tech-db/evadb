@@ -16,7 +16,7 @@ from typing import Iterator
 
 from ray.util.queue import Queue
 
-from eva.database import EVADB
+from eva.database import EVADatabase
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError
 from eva.executor.ray_utils import (
@@ -53,7 +53,7 @@ class QueueReaderExecutor(AbstractExecutor):
 
 
 class ExchangeExecutor(AbstractExecutor):
-    def __init__(self, db: EVADB, node: ExchangePlan):
+    def __init__(self, db: EVADatabase, node: ExchangePlan):
         self.inner_plan = node.inner_plan
         self.parallelism = node.parallelism
         self.ray_pull_env_conf_dict = node.ray_pull_env_conf_dict

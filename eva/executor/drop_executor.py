@@ -16,7 +16,7 @@
 
 import pandas as pd
 
-from eva.database import EVADB
+from eva.database import EVADatabase
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
@@ -27,7 +27,7 @@ from eva.utils.logging_manager import logger
 
 
 class DropExecutor(AbstractExecutor):
-    def __init__(self, db: EVADB, node: DropPlan):
+    def __init__(self, db: EVADatabase, node: DropPlan):
         super().__init__(db, node)
 
     def exec(self, *args, **kwargs):

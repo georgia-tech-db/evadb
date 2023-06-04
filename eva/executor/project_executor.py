@@ -14,7 +14,7 @@
 # limitations under the License.
 from typing import Iterator
 
-from eva.database import EVADB
+from eva.database import EVADatabase
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import apply_project
 from eva.models.storage.batch import Batch
@@ -24,7 +24,7 @@ from eva.plan_nodes.project_plan import ProjectPlan
 class ProjectExecutor(AbstractExecutor):
     """ """
 
-    def __init__(self, db: EVADB, node: ProjectPlan):
+    def __init__(self, db: EVADatabase, node: ProjectPlan):
         super().__init__(db, node)
         self.target_list = node.target_list
 

@@ -16,14 +16,14 @@ from pathlib import Path
 from typing import Iterator
 
 from eva.catalog.models.table_catalog import TableCatalogEntry
-from eva.database import EVADB
+from eva.database import EVADatabase
 from eva.models.storage.batch import Batch
 from eva.readers.document.document_reader import DocumentReader
 from eva.storage.abstract_media_storage_engine import AbstractMediaStorageEngine
 
 
 class DocumentStorageEngine(AbstractMediaStorageEngine):
-    def __init__(self, db: EVADB):
+    def __init__(self, db: EVADatabase):
         super().__init__(db)
 
     def read(self, table: TableCatalogEntry) -> Iterator[Batch]:

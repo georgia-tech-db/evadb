@@ -20,7 +20,7 @@ from pathlib import Path
 import pandas as pd
 
 from eva.catalog.models.table_catalog import TableCatalogEntry
-from eva.database import EVADB
+from eva.database import EVADatabase
 from eva.models.storage.batch import Batch
 from eva.parser.table_ref import TableInfo
 from eva.storage.abstract_storage_engine import AbstractStorageEngine
@@ -29,7 +29,7 @@ from eva.utils.logging_manager import logger
 
 
 class AbstractMediaStorageEngine(AbstractStorageEngine):
-    def __init__(self, db: EVADB):
+    def __init__(self, db: EVADatabase):
         super().__init__(db)
         self._rdb_handler: SQLStorageEngine = SQLStorageEngine(db)
 

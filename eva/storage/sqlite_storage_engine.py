@@ -25,7 +25,7 @@ from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.catalog.schema_utils import SchemaUtils
 from eva.catalog.sql_config import IDENTIFIER_COLUMN
-from eva.database import EVADB
+from eva.database import EVADatabase
 from eva.models.storage.batch import Batch
 from eva.parser.table_ref import TableInfo
 from eva.storage.abstract_storage_engine import AbstractStorageEngine
@@ -37,7 +37,7 @@ from eva.utils.logging_manager import logger
 
 
 class SQLStorageEngine(AbstractStorageEngine):
-    def __init__(self, db: EVADB):
+    def __init__(self, db: EVADatabase):
         """
         Grab the existing sql session
         """

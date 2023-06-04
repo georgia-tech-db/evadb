@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from eva.database import EVADB
+from eva.database import EVADatabase
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import handle_if_not_exists
 from eva.plan_nodes.create_plan import CreatePlan
@@ -21,7 +21,7 @@ from eva.utils.logging_manager import logger
 
 
 class CreateExecutor(AbstractExecutor):
-    def __init__(self, db: EVADB, node: CreatePlan):
+    def __init__(self, db: EVADatabase, node: CreatePlan):
         super().__init__(db, node)
 
     def exec(self, *args, **kwargs):

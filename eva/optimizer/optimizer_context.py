@@ -15,7 +15,7 @@
 import copy
 
 from eva.constants import UNDEFINED_GROUP_ID
-from eva.database import EVADB
+from eva.database import EVADatabase
 from eva.optimizer.cost_model import CostModel
 from eva.optimizer.group_expression import GroupExpression
 from eva.optimizer.memo import Memo
@@ -34,7 +34,7 @@ class OptimizerContext:
     """
 
     def __init__(
-        self, db: EVADB, cost_model: CostModel, rules_manager: RulesManager = None
+        self, db: EVADatabase, cost_model: CostModel, rules_manager: RulesManager = None
     ):
         self._db = db
         self._task_stack = OptimizerTaskStack()

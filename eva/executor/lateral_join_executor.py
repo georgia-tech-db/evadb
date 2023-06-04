@@ -14,7 +14,7 @@
 # limitations under the License.
 from typing import Iterator
 
-from eva.database import EVADB
+from eva.database import EVADatabase
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import apply_predicate, apply_project
 from eva.models.storage.batch import Batch
@@ -22,7 +22,7 @@ from eva.plan_nodes.lateral_join_plan import LateralJoinPlan
 
 
 class LateralJoinExecutor(AbstractExecutor):
-    def __init__(self, db: EVADB, node: LateralJoinPlan):
+    def __init__(self, db: EVADatabase, node: LateralJoinPlan):
         super().__init__(db, node)
         self.predicate = node.join_predicate
         self.join_project = node.join_project

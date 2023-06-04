@@ -177,7 +177,7 @@ EIStakovskii
 EVA's
 EVAConnection
 EVACursor
-EVADB
+EVADatabase
 EVAEnum
 EVAEnums
 EVAImportTest

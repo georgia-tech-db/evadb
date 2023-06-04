@@ -14,7 +14,7 @@
 # limitations under the License.
 from typing import Iterator
 
-from eva.database import EVADB
+from eva.database import EVADatabase
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.limit_plan import LimitPlan
@@ -29,7 +29,7 @@ class LimitExecutor(AbstractExecutor):
 
     """
 
-    def __init__(self, db: EVADB, node: LimitPlan):
+    def __init__(self, db: EVADatabase, node: LimitPlan):
         super().__init__(db, node)
         self._limit_count = node.limit_value
 

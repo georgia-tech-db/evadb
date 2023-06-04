@@ -20,7 +20,7 @@ import pandas as pd
 from eva.catalog.catalog_utils import get_metadata_properties
 from eva.catalog.models.udf_catalog import UdfCatalogEntry
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
-from eva.database import EVADB
+from eva.database import EVADatabase
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.create_udf_plan import CreateUDFPlan
@@ -32,7 +32,7 @@ from eva.utils.logging_manager import logger
 
 
 class CreateUDFExecutor(AbstractExecutor):
-    def __init__(self, db: EVADB, node: CreateUDFPlan):
+    def __init__(self, db: EVADatabase, node: CreateUDFPlan):
         super().__init__(db, node)
         self.udf_dir = (
             Path(self.config.get_value("core", "eva_installation_dir")) / "udfs"
