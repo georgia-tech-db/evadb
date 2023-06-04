@@ -225,7 +225,8 @@ class StatementBinderTests(unittest.TestCase):
         self.assertEqual(str(cm.exception), err_msg)
 
     @patch("eva.binder.statement_binder.check_table_object_is_groupable")
-    def test_bind_select_statement(self, is_groupable_mock):
+    @patch("eva.binder.statement_binder.check_groupby_pattern")
+    def test_bind_select_statement(self, is_groupable_mock, groupby_mock):
         with patch.object(StatementBinder, "bind") as mock_binder:
             binder = StatementBinder(StatementBinderContext())
             select_statement = MagicMock()
@@ -233,7 +234,7 @@ class StatementBinderTests(unittest.TestCase):
             select_statement.target_list = mocks[:2]
             select_statement.orderby_list = [(mocks[2], 0), (mocks[3], 0)]
             select_statement.groupby_clause = mocks[4]
-            select_statement.groupby_clause.value = "8f"
+            select_statement.groupby_clause.value = "8 frames"
             binder._bind_select_statement(select_statement)
             mock_binder.assert_any_call(select_statement.from_table)
             mock_binder.assert_any_call(select_statement.where_clause)

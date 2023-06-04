@@ -95,7 +95,7 @@ def extend_star(
 
 
 def check_groupby_pattern(table_ref: TableRef, groupby_string: str) -> None:
-    # match the pattern of group by clause (e.g., 16f or 8s)
+    # match the pattern of group by clause (e.g., 16 frames or 8 samples)
     pattern = re.search(r"^\d+\s*(?:frames|samples|paragraphs)$", groupby_string)
     # if valid pattern
     if not pattern:

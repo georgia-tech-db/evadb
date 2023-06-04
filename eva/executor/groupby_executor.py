@@ -25,7 +25,7 @@ from eva.plan_nodes.groupby_plan import GroupByPlan
 class GroupByExecutor(AbstractExecutor):
     """
     Group inputs into 4d segments of length provided in the query
-    E.g., "GROUP BY '8f'" groups every 8 frames into one segment
+    E.g., "GROUP BY '8 frames'" groups every 8 frames into one segment
 
     Arguments:
         node (AbstractPlan): The GroupBy Plan

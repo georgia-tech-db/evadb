@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -395,7 +395,7 @@ class ParserTests(unittest.TestCase):
 
         parser = Parser()
 
-        select_query = "SELECT FIRST(id) FROM TAIPAI GROUP BY '8f';"
+        select_query = "SELECT FIRST(id) FROM TAIPAI GROUP BY '8 frames';"
 
         eva_statement_list = parser.parse(select_query)
         self.assertIsInstance(eva_statement_list, list)
