@@ -14,12 +14,13 @@
 # limitations under the License.
 import os
 import unittest
-from test.markers import ocr_skip_marker, windows_skip_marker
+from test.markers import ocr_skip_marker, ray_only_marker, windows_skip_marker
 from test.util import (
     create_sample_video,
     file_remove,
     get_evadb_for_testing,
     load_udfs_for_testing,
+    shutdown_ray,
 )
 
 import cv2
@@ -27,7 +28,6 @@ import numpy as np
 import pandas.testing as pd_testing
 import pytest
 
-from eva.configuration.configuration_manager import ConfigurationManager
 from eva.configuration.constants import EVA_ROOT_DIR
 from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
@@ -67,11 +67,11 @@ class PytorchTest(unittest.TestCase):
         file_remove("actions.mp4")
         file_remove("computer_asl.mp4")
 
-        execute_query_fetch_all("DROP TABLE IF EXISTS Actions;")
-        execute_query_fetch_all("DROP TABLE IF EXISTS MNIST;")
-        execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
-        execute_query_fetch_all("DROP TABLE IF EXISTS Asl_actions;")
-        execute_query_fetch_all("DROP TABLE IF EXISTS MemeImages;")
+        execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS Actions;")
+        execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS MNIST;")
+        execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS MyVideo;")
+        execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS Asl_actions;")
+        execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS MemeImages;")
 
     def assertBatchEqual(self, a: Batch, b: Batch, msg: str):
         try:
@@ -82,10 +82,10 @@ class PytorchTest(unittest.TestCase):
     def setUp(self):
         self.addTypeEqualityFunc(Batch, self.assertBatchEqual)
 
-    @pytest.mark.skipif(
-        not ConfigurationManager().get_value("experimental", "ray"),
-        reason="Only test for parallel execution",
-    )
+    def tearDown(self) -> None:
+        shutdown_ray()
+
+    @ray_only_marker
     def test_should_apply_parallel_match_sequential(self):
         # Parallel execution
         select_query = """SELECT id, obj.labels
@@ -102,48 +102,37 @@ class PytorchTest(unittest.TestCase):
                           FastRCNNObjectDetector(data)
                           AS obj(labels, bboxes, scores)
                          WHERE id < 20;"""
-        seq_batch = execute_query_fetch_all(select_query)
-        # Recover configuration back.
-        ConfigurationManager().update_value("experimental", "ray", True)
-
-        self.assertEqual(len(par_batch), len(seq_batch))
-        self.assertEqual(par_batch, seq_batch)
-
-    @pytest.mark.skipif(
-        not ConfigurationManager().get_value("experimental", "ray"),
-        reason="Only test for Ray",
-    )
-    def test_should_project_parallel_match_sequential(self):
-        create_udf_query = """CREATE UDF FaceDetector
-                  INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
-                  OUTPUT (bboxes NDARRAY FLOAT32(ANYDIM, 4),
-                          scores NDARRAY FLOAT32(ANYDIM))
-                  TYPE  FaceDetection
-                  IMPL  'eva/udfs/face_detector.py';
-        """
-        execute_query_fetch_all(create_udf_query)
-
-        select_query = """SELECT FaceDetector(data) FROM MyVideo
-                        WHERE id < 5;"""
-        # Parallel execution
-        par_batch = execute_query_fetch_all(select_query)
-
-        # Sequential execution.
-        ConfigurationManager().update_value("experimental", "ray", False)
-        seq_batch = execute_query_fetch_all(select_query)
+        seq_batch = execute_query_fetch_all(self.evadb, select_query)
         # Recover configuration back.
         self.evadb.config.update_value("experimental", "ray", True)
 
         self.assertEqual(len(par_batch), len(seq_batch))
         self.assertEqual(par_batch, seq_batch)
 
+    @ray_only_marker
+    def test_should_project_parallel_match_sequential(self):
+        create_udf_query = """CREATE UDF IF NOT EXISTS FaceDetector
+                  INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
+                  OUTPUT (bboxes NDARRAY FLOAT32(ANYDIM, 4),
+                          scores NDARRAY FLOAT32(ANYDIM))
+                  TYPE  FaceDetection
+                  IMPL  'eva/udfs/face_detector.py';
+        """
+        execute_query_fetch_all(self.evadb, create_udf_query)
+
+        select_query = "SELECT FaceDetector(data) FROM MyVideo WHERE id < 5;"
+        # Parallel execution
+        par_batch = execute_query_fetch_all(self.evadb, select_query)
+
+        # Sequential execution.
+        self.evadb.config.update_value("experimental", "ray", False)
+        seq_batch = execute_query_fetch_all(self.evadb, select_query)
+        # Recover configuration back.
+        self.evadb.config.update_value("experimental", "ray", True)
+
         self.assertEqual(len(par_batch), len(seq_batch))
         self.assertEqual(par_batch, seq_batch)
 
-    @pytest.mark.skipif(
-        not ConfigurationManager().get_value("experimental", "ray"),
-        reason="Only test for Ray",
-    )
     def test_should_raise_exception_with_parallel(self):
         # Deliberately cause error.
         video_path = create_sample_video(100)
@@ -203,6 +192,22 @@ class PytorchTest(unittest.TestCase):
         self.assertEqual(len(res), 1)
         for idx in res.index:
             self.assertTrue("computer" in res["aslactionrecognition.labels"][idx])
+
+    @pytest.mark.torchtest
+    def test_should_run_pytorch_and_facenet(self):
+        create_udf_query = """CREATE UDF IF NOT EXISTS FaceDetector
+                  INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
+                  OUTPUT (bboxes NDARRAY FLOAT32(ANYDIM, 4),
+                          scores NDARRAY FLOAT32(ANYDIM))
+                  TYPE  FaceDetection
+                  IMPL  'eva/udfs/face_detector.py';
+        """
+        execute_query_fetch_all(self.evadb, create_udf_query)
+
+        select_query = """SELECT FaceDetector(data) FROM MyVideo
+                        WHERE id < 5;"""
+        actual_batch = execute_query_fetch_all(self.evadb, select_query)
+        self.assertEqual(len(actual_batch), 5)
 
     @pytest.mark.torchtest
     @windows_skip_marker
