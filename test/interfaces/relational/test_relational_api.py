@@ -1,13 +1,29 @@
-import os
-import time
+# coding=utf-8
+# Copyright 2018-2023 EVA
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 import unittest
-from eva.catalog.catalog_manager import CatalogManager
-from eva.configuration.constants import EVA_ROOT_DIR
+from test.util import (
+    load_udfs_for_testing,
+    shutdown_ray,
+    suffix_pytest_xdist_worker_id_to_dir,
+)
 
+from pandas.testing import assert_frame_equal
+
+from eva.configuration.constants import EVA_DATABASE_DIR, EVA_ROOT_DIR
 from eva.interfaces.relational.db import connect
 from eva.server.command_handler import execute_query_fetch_all
-from test.util import load_udfs_for_testing, shutdown_ray
-from pandas.testing import assert_frame_equal
 
 
 class RelationalAPI(unittest.TestCase):
@@ -16,32 +32,26 @@ class RelationalAPI(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        os.system("nohup eva_server --stop")
-        os.system("nohup eva_server --port 8886 --start &")
-        for _ in range(10):
-            try:
-                connect(port=8886)
-            except Exception:
-                time.sleep(5)
-
-    @classmethod
-    def tearDownClass(cls):
-        os.system("nohup eva_server --stop")
+        cls.db_dir = suffix_pytest_xdist_worker_id_to_dir(EVA_DATABASE_DIR)
+        cls.conn = connect(cls.db_dir)
+        cls.evadb = cls.conn._evadb
 
     def setUp(self):
-        CatalogManager().reset()
+        self.evadb.catalog().reset()
         self.mnist_path = f"{EVA_ROOT_DIR}/data/mnist/mnist.mp4"
-        load_udfs_for_testing()
+        load_udfs_for_testing(
+            self.evadb,
+        )
         self.images = f"{EVA_ROOT_DIR}/data/detoxify/*.jpg"
 
     def tearDown(self):
         shutdown_ray()
         # todo: move these to relational apis as well
-        execute_query_fetch_all("""DROP TABLE IF EXISTS mnist_video;""")
-        execute_query_fetch_all("""DROP TABLE IF EXISTS meme_images;""")
+        execute_query_fetch_all(self.evadb, """DROP TABLE IF EXISTS mnist_video;""")
+        execute_query_fetch_all(self.evadb, """DROP TABLE IF EXISTS meme_images;""")
 
     def test_relation_apis(self):
-        conn = connect(port=8886)
+        conn = connect(self.db_dir)
         rel = conn.load(
             self.mnist_path,
             table_name="mnist_video",
@@ -95,7 +105,8 @@ class RelationalAPI(unittest.TestCase):
         )
 
     def test_relation_api_chaining(self):
-        conn = connect(port=8886)
+        conn = connect(self.db_dir)
+
         rel = conn.load(
             self.mnist_path,
             table_name="mnist_video",
@@ -117,7 +128,7 @@ class RelationalAPI(unittest.TestCase):
         )
 
     def test_interleaving_calls(self):
-        conn = connect(port=8886)
+        conn = connect(self.db_dir)
 
         rel = conn.load(
             self.mnist_path,
@@ -140,7 +151,7 @@ class RelationalAPI(unittest.TestCase):
         )
 
     def test_create_index(self):
-        conn = connect(port=8886)
+        conn = connect(self.db_dir)
 
         # load some images
         rel = conn.load(

@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -30,24 +30,24 @@ class StatementBinderTests(unittest.TestCase):
 
     def test_check_duplicate_alias(self):
         with self.assertRaises(BinderError):
-            ctx = StatementBinderContext()
+            ctx = StatementBinderContext(MagicMock())
             ctx._derived_table_alias_map["alias"] = MagicMock()
             ctx._check_duplicate_alias("alias")
 
         with self.assertRaises(BinderError):
-            ctx = StatementBinderContext()
+            ctx = StatementBinderContext(MagicMock())
             ctx._table_alias_map["alias"] = MagicMock()
             ctx._check_duplicate_alias("alias")
 
         # no duplicate
-        ctx = StatementBinderContext()
+        ctx = StatementBinderContext(MagicMock())
         ctx._check_duplicate_alias("alias")
 
-    @patch("eva.binder.statement_binder_context.CatalogManager")
-    def test_add_table_alias(self, mock_catalog):
+    def test_add_table_alias(self):
+        mock_catalog = MagicMock()
         mock_get = mock_catalog().get_table_catalog_entry = MagicMock()
         mock_get.return_value = "table_obj"
-        ctx = StatementBinderContext()
+        ctx = StatementBinderContext(mock_catalog)
 
         mock_check = ctx._check_duplicate_alias = MagicMock()
         ctx.add_table_alias("alias", "table_name")
@@ -61,7 +61,7 @@ class StatementBinderTests(unittest.TestCase):
             MagicMock(spec=TupleValueExpression, col_name="A", col_object="A_obj"),
             MagicMock(spec=FunctionExpression, output_objs=objs),
         ]
-        ctx = StatementBinderContext()
+        ctx = StatementBinderContext(MagicMock())
 
         mock_check = ctx._check_duplicate_alias = MagicMock()
         ctx.add_derived_table_alias("alias", exprs)
@@ -71,7 +71,7 @@ class StatementBinderTests(unittest.TestCase):
         self.assertEqual(ctx._derived_table_alias_map["alias"], col_map)
 
     def test_get_binded_column_should_search_all(self):
-        ctx = StatementBinderContext()
+        ctx = StatementBinderContext(MagicMock())
         mock_search_all = ctx._search_all_alias_maps = MagicMock()
         mock_search_all.return_value = ("alias", "col_obj")
 
@@ -80,7 +80,7 @@ class StatementBinderTests(unittest.TestCase):
         self.assertEqual(result, ("alias", "col_obj"))
 
     def test_get_binded_column_check_table_alias_map(self):
-        ctx = StatementBinderContext()
+        ctx = StatementBinderContext(MagicMock())
         mock_table_map = ctx._check_table_alias_map = MagicMock()
         mock_table_map.return_value = "col_obj"
         result = ctx.get_binded_column("col_name", "alias")
@@ -88,7 +88,7 @@ class StatementBinderTests(unittest.TestCase):
         self.assertEqual(result, ("alias", "col_obj"))
 
     def test_get_binded_column_check_derived_table_alias_map(self):
-        ctx = StatementBinderContext()
+        ctx = StatementBinderContext(MagicMock())
         mock_table_map = ctx._check_table_alias_map = MagicMock()
         mock_table_map.return_value = None
         mock_derived_map = ctx._check_derived_table_alias_map = MagicMock()
@@ -102,25 +102,25 @@ class StatementBinderTests(unittest.TestCase):
     def test_get_binded_column_raise_error(self):
         # no alias
         with self.assertRaises(BinderError):
-            ctx = StatementBinderContext()
+            ctx = StatementBinderContext(MagicMock())
             mock_search_all = ctx._search_all_alias_maps = MagicMock()
             mock_search_all.return_value = (None, None)
             ctx.get_binded_column("col_name")
         # with alias
         with self.assertRaises(BinderError):
-            ctx = StatementBinderContext()
+            ctx = StatementBinderContext(MagicMock())
             mock_table_map = ctx._check_table_alias_map = MagicMock()
             mock_table_map.return_value = None
             mock_derived_map = ctx._check_derived_table_alias_map = MagicMock()
             mock_derived_map.return_value = None
             ctx.get_binded_column("col_name", "alias")
 
-    @patch("eva.binder.statement_binder_context.CatalogManager")
-    def test_check_table_alias_map(self, mock_catalog):
+    def test_check_table_alias_map(self):
+        mock_catalog = MagicMock()
         mock_get_column_object = mock_catalog().get_column_catalog_entry = MagicMock()
         mock_get_column_object.return_value = "catalog_value"
         # key exists
-        ctx = StatementBinderContext()
+        ctx = StatementBinderContext(mock_catalog)
         ctx._table_alias_map["alias"] = "table_obj"
         result = ctx._check_table_alias_map("alias", "col_name")
         mock_get_column_object.assert_called_once_with("table_obj", "col_name")
@@ -128,14 +128,14 @@ class StatementBinderTests(unittest.TestCase):
 
         # key does not exist
         mock_get_column_object.reset_mock()
-        ctx = StatementBinderContext()
+        ctx = StatementBinderContext(mock_catalog)
         result = ctx._check_table_alias_map("alias", "col_name")
         mock_get_column_object.assert_not_called()
         self.assertEqual(result, None)
 
     def test_check_derived_table_alias_map(self):
         # key exists
-        ctx = StatementBinderContext()
+        ctx = StatementBinderContext(MagicMock())
         obj1 = MagicMock()
         obj2 = MagicMock()
         col_map = {"col1": obj1, "col2": obj2}
@@ -146,12 +146,12 @@ class StatementBinderTests(unittest.TestCase):
         self.assertEqual(result, obj2)
 
         # key does not exist
-        ctx = StatementBinderContext()
+        ctx = StatementBinderContext(MagicMock())
         result = ctx._check_derived_table_alias_map("alias", "col3")
         self.assertEqual(result, None)
 
     def test_search_all_alias_maps(self):
-        ctx = StatementBinderContext()
+        ctx = StatementBinderContext(MagicMock())
         check_table_map = ctx._check_table_alias_map = MagicMock()
         check_derived_map = ctx._check_derived_table_alias_map = MagicMock()
 
@@ -175,7 +175,7 @@ class StatementBinderTests(unittest.TestCase):
 
     def test_search_all_alias_raise_duplicate_error(self):
         with self.assertRaises(BinderError):
-            ctx = StatementBinderContext()
+            ctx = StatementBinderContext(MagicMock())
             ctx._check_table_alias_map = MagicMock()
             ctx._check_derived_table_alias_map = MagicMock()
             # duplicate

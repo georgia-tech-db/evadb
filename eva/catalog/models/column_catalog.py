@@ -14,13 +14,8 @@
 # limitations under the License.
 from __future__ import annotations
 
-import typing
 from ast import literal_eval
-from dataclasses import dataclass, field
-from typing import List, Tuple
-
-if typing.TYPE_CHECKING:
-    from eva.catalog.models.udf_cache_catalog import UdfCacheCatalogEntry
+from typing import Tuple
 
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import relationship
@@ -29,6 +24,7 @@ from sqlalchemy.types import Enum
 from eva.catalog.catalog_type import ColumnType, Dimension, NdArrayType
 from eva.catalog.models.association_models import depend_column_and_udf_cache
 from eva.catalog.models.base_model import BaseModel
+from eva.catalog.models.utils import ColumnCatalogEntry
 
 
 class ColumnCatalog(BaseModel):
@@ -118,20 +114,3 @@ class ColumnCatalog(BaseModel):
             table_name=self._table_catalog._name,
             dep_caches=[cache.as_dataclass() for cache in self._dep_caches],
         )
-
-
-@dataclass(unsafe_hash=True)
-class ColumnCatalogEntry:
-    """Class decouples the ColumnCatalog from the sqlalchemy.
-    This is done to ensure we don't expose the sqlalchemy dependencies beyond catalog service. Further, sqlalchemy does not allow sharing of objects across threads.
-    """
-
-    name: str
-    type: ColumnType
-    is_nullable: bool = False
-    array_type: NdArrayType = None
-    array_dimensions: Tuple[int] = field(default_factory=tuple)
-    table_id: int = None
-    table_name: str = None
-    row_id: int = None
-    dep_caches: List[UdfCacheCatalogEntry] = field(compare=False, default_factory=list)

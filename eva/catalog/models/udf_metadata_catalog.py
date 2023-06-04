@@ -12,12 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from dataclasses import dataclass
 
 from sqlalchemy import Column, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import relationship
 
 from eva.catalog.models.base_model import BaseModel
+from eva.catalog.models.utils import UdfMetadataCatalogEntry
 
 
 class UdfMetadataCatalog(BaseModel):
@@ -55,19 +55,3 @@ class UdfMetadataCatalog(BaseModel):
             udf_id=self._udf_id,
             udf_name=self._udf._name,
         )
-
-
-@dataclass(unsafe_hash=True)
-class UdfMetadataCatalogEntry:
-    """Class decouples the `UdfMetadataCatalog` from the sqlalchemy.
-    This is done to ensure we don't expose the sqlalchemy dependencies beyond catalog service. Further, sqlalchemy does not allow sharing of objects across threads.
-    """
-
-    key: str
-    value: str
-    udf_id: int = None
-    udf_name: str = None
-    row_id: int = None
-
-    def display_format(self):
-        return f"{self.udf_name} - {self.key}: {self.value}"

@@ -76,10 +76,11 @@ if [[ "$OSTYPE" != "msys" ]];
 then
     if [[ "$MODE" = "TEST" || "$MODE" = "ALL" ]];
     then
-        PYTHONPATH=./ pytest --durations=20 --cov-report term-missing:skip-covered  --cov-config=.coveragerc --cov-context=test --cov=eva/ --capture=sys --tb=short -v --log-level=WARNING -m "not benchmark"
-    elif [[ "$MODE" = "RAY" ]];
+        PYTHONPATH=./ pytest --durations=20 --capture=sys --tb=short -v --log-level=WARNING -rsf -p no:cov test/ -m "not benchmark"
+    elif [[ "$MODE" = "COV" ]];
     then
-        PYTHONPATH=./ pytest -s -v -p no:cov test/ -m "not benchmark"
+	# As a workaround, ray needs to be disabled for COV.
+        PYTHONPATH=./ pytest --durations=20 --cov-report term-missing:skip-covered  --cov-config=.coveragerc --cov-context=test --cov=eva/ --capture=sys --tb=short -v -rsf --log-level=WARNING -m "not benchmark"
     fi
 
     test_code=$?
@@ -127,10 +128,9 @@ fi
 ##################################################
 
 if [[ ( "$PYTHON_VERSION" = "3.10" )  && 
-      ( "$MODE" = "TEST" || "$MODE" = "ALL" ) ]];
+      ( "$MODE" = "COV" ) ]];
 then 
     echo "UPLOADING COVERAGE REPORT"
     coveralls
     exit 0 # Success     
 fi
-

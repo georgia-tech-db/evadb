@@ -14,6 +14,7 @@
 # limitations under the License.
 from functools import singledispatchmethod
 from pathlib import Path
+from typing import Callable
 
 from eva.binder.binder_utils import (
     BinderError,
@@ -26,10 +27,9 @@ from eva.binder.binder_utils import (
     resolve_alias_table_value_expression,
 )
 from eva.binder.statement_binder_context import StatementBinderContext
-from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import NdArrayType, TableType, VideoColumnName
 from eva.catalog.catalog_utils import get_metadata_properties
-from eva.configuration.configuration_manager import ConfigurationManager
+from eva.configuration.constants import EVA_INSTALLATION_DIR
 from eva.expression.abstract_expression import AbstractExpression, ExpressionType
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
@@ -51,7 +51,7 @@ from eva.utils.logging_manager import logger
 class StatementBinder:
     def __init__(self, binder_context: StatementBinderContext):
         self._binder_context = binder_context
-        self._catalog = CatalogManager()
+        self._catalog: Callable = binder_context._catalog
 
     @singledispatchmethod
     def bind(self, node):
@@ -93,8 +93,7 @@ class StatementBinder:
             assert len(col.array_dimensions) == 2
         else:
             # Output of the UDF should be 2 dimension and float32 type.
-            catalog_manager = CatalogManager()
-            udf_obj = catalog_manager.get_udf_catalog_entry_by_name(node.udf_func.name)
+            udf_obj = self._catalog().get_udf_catalog_entry_by_name(node.udf_func.name)
             for output in udf_obj.outputs:
                 assert (
                     output.array_type == NdArrayType.FLOAT32
@@ -130,7 +129,7 @@ class StatementBinder:
                 self.bind(expr[0])
         if node.union_link:
             current_context = self._binder_context
-            self._binder_context = StatementBinderContext()
+            self._binder_context = StatementBinderContext(self._catalog)
             self.bind(node.union_link)
             self._binder_context = current_context
 
@@ -160,14 +159,18 @@ class StatementBinder:
                 elif expr.etype == ExpressionType.FUNCTION_EXPRESSION:
                     num_projected_columns += len(expr.output_objs)
                 else:
-                    raise BinderError("Unsupported expression type {}.".format(expr.etype))
+                    raise BinderError(
+                        "Unsupported expression type {}.".format(expr.etype)
+                    )
 
             binded_col_list = []
             idx = 0
             for expr in node.query.target_list:
-                output_objs = [(expr.col_name, expr.col_object)] \
-                    if expr.etype == ExpressionType.TUPLE_VALUE \
+                output_objs = (
+                    [(expr.col_name, expr.col_object)]
+                    if expr.etype == ExpressionType.TUPLE_VALUE
                     else zip(expr.projection_columns, expr.output_objs)
+                )
                 for col_name, output_obj in output_objs:
                     binded_col_list.append(
                         ColumnDefinition(
@@ -234,10 +237,10 @@ class StatementBinder:
             self._binder_context.add_table_alias(
                 node.alias.alias_name, node.table.table_name
             )
-            bind_table_info(node.table)
+            bind_table_info(self._catalog(), node.table)
         elif node.is_select():
             current_context = self._binder_context
-            self._binder_context = StatementBinderContext()
+            self._binder_context = StatementBinderContext(self._catalog)
             self.bind(node.select_statement)
             self._binder_context = current_context
             self._binder_context.add_derived_table_alias(
@@ -291,7 +294,7 @@ class StatementBinder:
         for child in node.children:
             self.bind(child)
 
-        udf_obj = self._catalog.get_udf_catalog_entry_by_name(node.name)
+        udf_obj = self._catalog().get_udf_catalog_entry_by_name(node.name)
         if udf_obj is None:
             err_msg = (
                 f"UDF with name {node.name} does not exist in the catalog. "
@@ -307,12 +310,7 @@ class StatementBinder:
             if udf_obj.type == "ultralytics":
                 # manually set the impl_path for yolo udfs we only handle object
                 # detection for now, hopefully this can be generalized
-                udf_dir = (
-                    Path(
-                        ConfigurationManager().get_value("core", "eva_installation_dir")
-                    )
-                    / "udfs"
-                )
+                udf_dir = Path(EVA_INSTALLATION_DIR) / "udfs"
                 udf_obj.impl_file_path = (
                     Path(f"{udf_dir}/yolo_object_detector.py").absolute().as_posix()
                 )
@@ -342,7 +340,7 @@ class StatementBinder:
                 raise BinderError(err_msg)
 
         node.udf_obj = udf_obj
-        output_objs = self._catalog.get_udf_io_catalog_output_entries(udf_obj)
+        output_objs = self._catalog().get_udf_io_catalog_output_entries(udf_obj)
         if node.output:
             for obj in output_objs:
                 if obj.name.lower() == node.output:

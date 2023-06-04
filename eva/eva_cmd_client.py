@@ -58,7 +58,7 @@ def main():
         help="Specify the port number of the server you want to connect to.",
     )
 
-    ## PARSE ARGS
+    # PARSE ARGS
     args, unknown = parser.parse_known_args()
 
     host = (

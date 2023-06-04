@@ -95,7 +95,12 @@ benchmark_libs = [
 
 doc_libs = ["codespell", "pylint"]
 
-dist_libs = ["wheel>=0.37.1", "semantic_version", "PyGithub"]
+dist_libs = [
+    "wheel>=0.37.1", 
+    "semantic_version", 
+    "PyGithub", 
+    "twine"
+]
 
 ### NEEDED FOR AN ALTERNATE DATA SYSTEM OTHER THAN SQLITE
 database_libs = ["pymysql>=0.10.1"]

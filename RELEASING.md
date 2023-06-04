@@ -3,16 +3,17 @@
 ## Before You Start
 
 Make sure you have [PyPI](https://pypi.org) account with maintainer access to the EVA project. 
-Create a .pypirc in your home directory.
-It should look like this:
+Create a .pypirc in your `$HOME` directory.
+
+It should look like this (contain your PyPI credentials):
 
 ```
 [distutils]
 index-servers =
   pypi
-  pypitest
 
 [pypi]
+repository = https://upload.pypi.org/legacy/
 username=YOUR_USERNAME
 password=YOUR_PASSWORD
 ```

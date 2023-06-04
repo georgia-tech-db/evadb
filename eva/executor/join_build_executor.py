@@ -14,14 +14,15 @@
 # limitations under the License.
 from typing import Iterator
 
+from eva.database import EVADatabase
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.hash_join_build_plan import HashJoinBuildPlan
 
 
 class BuildJoinExecutor(AbstractExecutor):
-    def __init__(self, node: HashJoinBuildPlan):
-        super().__init__(node)
+    def __init__(self, db: EVADatabase, node: HashJoinBuildPlan):
+        super().__init__(db, node)
         self.predicate = None  # node.join_predicate
         self.join_type = node.join_type
         self.build_keys = node.build_keys
