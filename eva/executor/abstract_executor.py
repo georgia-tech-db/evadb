@@ -13,8 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from abc import ABC, abstractmethod
-from typing import Generator, Iterable, List, TypeVar
+from collections import deque
+from typing import Any, Generator, Iterable, List, TypeVar
 
+from eva.catalog.catalog_manager import CatalogManager
+from eva.configuration.configuration_manager import ConfigurationManager
+from eva.database import EVADatabase
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.abstract_plan import AbstractPlan
 
@@ -28,9 +32,15 @@ class AbstractExecutor(ABC):
         node (AbstractPlan): Plan node corresponding to this executor
     """
 
-    def __init__(self, node: AbstractPlan):
+    def __init__(self, db: EVADatabase, node: AbstractPlan):
+        self._db = db
         self._node = node
+        self._config: ConfigurationManager = db.config if db else None
         self._children = []
+
+    def catalog(self) -> CatalogManager:
+        """The object is intentionally generated on demand to prevent serialization issues. Having a SQLAlchemy object as a member variable can cause problems with multiprocessing. See get_catalog_instance()"""
+        return self._db.catalog() if self._db else None
 
     def append_child(self, child: AbstractExecutor):
         """
@@ -58,6 +68,14 @@ class AbstractExecutor(ABC):
     def node(self) -> AbstractPlan:
         return self._node
 
+    @property
+    def db(self) -> EVADatabase:
+        return self._db
+
+    @property
+    def config(self) -> ConfigurationManager:
+        return self._config
+
     @abstractmethod
     def exec(self, *args, **kwargs) -> Iterable[Batch]:
         """
@@ -69,3 +87,31 @@ class AbstractExecutor(ABC):
 
     def __call__(self, *args, **kwargs) -> Generator[Batch, None, None]:
         yield from self.exec(*args, **kwargs)
+
+    def bfs(self):
+        """Returns a generator which visits all nodes in execution tree in
+        breadth-first search (BFS) traversal order.
+
+        Returns:
+            the generator object.
+        """
+        queue = deque([self])
+        while queue:
+            node = queue.popleft()
+            yield node
+            for child in node.children:
+                queue.append(child)
+
+    def find_all(self, exceution_type: Any):
+        """Returns a generator which visits all the nodes in execution tree and yields one that matches the passed `exceution_type`.
+
+        Args:
+            exceution_type (Any): execution type to match with
+
+        Returns:
+            the generator object.
+        """
+
+        for node in self.bfs():
+            if isinstance(node, exceution_type):
+                yield node

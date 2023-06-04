@@ -12,9 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import typing
 from typing import List, Tuple
 
-from eva.catalog.catalog_manager import CatalogManager
+if typing.TYPE_CHECKING:
+    from eva.optimizer.optimizer_context import OptimizerContext
+
 from eva.catalog.catalog_utils import get_table_primary_columns
 from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
@@ -187,7 +190,7 @@ def extract_pushdown_predicate_for_alias(
     )
 
 
-def optimize_cache_key(expr: FunctionExpression):
+def optimize_cache_key(context: "OptimizerContext", expr: FunctionExpression):
     """Optimize the cache key
 
     It tries to reduce the caching overhead by replacing the caching key with logically equivalent key. For instance, frame data can be replaced with frame id.
@@ -203,17 +206,16 @@ def optimize_cache_key(expr: FunctionExpression):
 
     """
     keys = expr.children
+    catalog = context.db.catalog()
     # handle simple one column inputs
     if len(keys) == 1 and isinstance(keys[0], TupleValueExpression):
         child = keys[0]
         col_catalog_obj = child.col_object
         if isinstance(col_catalog_obj, ColumnCatalogEntry):
             new_keys = []
-            table_obj = CatalogManager().get_table_catalog_entry(
-                col_catalog_obj.table_name
-            )
+            table_obj = catalog.get_table_catalog_entry(col_catalog_obj.table_name)
             for col in get_table_primary_columns(table_obj):
-                new_obj = CatalogManager().get_column_catalog_entry(table_obj, col.name)
+                new_obj = catalog.get_column_catalog_entry(table_obj, col.name)
                 new_keys.append(
                     TupleValueExpression(
                         col_name=col.name,
@@ -227,15 +229,18 @@ def optimize_cache_key(expr: FunctionExpression):
     return keys
 
 
-def enable_cache_init(func_expr: FunctionExpression) -> FunctionExpressionCache:
-    optimized_key = optimize_cache_key(func_expr)
+def enable_cache_init(
+    context: "OptimizerContext", func_expr: FunctionExpression
+) -> FunctionExpressionCache:
+    optimized_key = optimize_cache_key(context, func_expr)
     if optimized_key == func_expr.children:
         optimized_key = [None]
 
+    catalog = context.db.catalog()
     name = func_expr.signature()
-    cache_entry = CatalogManager().get_udf_cache_catalog_entry_by_name(name)
+    cache_entry = catalog.get_udf_cache_catalog_entry_by_name(name)
     if not cache_entry:
-        cache_entry = CatalogManager().insert_udf_cache_catalog_entry(func_expr)
+        cache_entry = catalog.insert_udf_cache_catalog_entry(func_expr)
 
     cache = FunctionExpressionCache(
         key=tuple(optimized_key), store=DiskKVCache(cache_entry.cache_path)
@@ -243,29 +248,34 @@ def enable_cache_init(func_expr: FunctionExpression) -> FunctionExpressionCache:
     return cache
 
 
-def enable_cache(func_expr: FunctionExpression) -> FunctionExpression:
+def enable_cache(
+    context: "OptimizerContext", func_expr: FunctionExpression
+) -> FunctionExpression:
     """Enables cache for a function expression.
 
     The cache key is optimized by replacing it with logical equivalent expressions.
     A cache entry is inserted in the catalog corresponding to the expression.
 
     Args:
+        context (OptimizerContext): associated optimizer context
         func_expr (FunctionExpression): The function expression to enable cache for.
 
     Returns:
         FunctionExpression: The function expression with cache enabled.
     """
-    cache = enable_cache_init(func_expr)
+    cache = enable_cache_init(context, func_expr)
     return func_expr.copy().enable_cache(cache)
 
 
-def enable_cache_on_expression_tree(expr_tree: AbstractExpression):
+def enable_cache_on_expression_tree(
+    context: "OptimizerContext", expr_tree: AbstractExpression
+):
     func_exprs = list(expr_tree.find_all(FunctionExpression))
     func_exprs = list(
         filter(lambda expr: check_expr_validity_for_cache(expr), func_exprs)
     )
     for expr in func_exprs:
-        cache = enable_cache_init(expr)
+        cache = enable_cache_init(context, expr)
         expr.enable_cache(cache)
 
 
@@ -278,7 +288,9 @@ def check_expr_validity_for_cache(expr: FunctionExpression):
     )
 
 
-def get_expression_execution_cost(expr: AbstractExpression) -> float:
+def get_expression_execution_cost(
+    context: "OptimizerContext", expr: AbstractExpression
+) -> float:
     """
     This function computes the estimated cost of executing the given abstract expression
     based on the statistics in the catalog. The function assumes that all the
@@ -287,6 +299,7 @@ def get_expression_execution_cost(expr: AbstractExpression) -> float:
     available, it uses a default cost of DEFAULT_FUNCTION_EXPRESSION_COST.
 
     Args:
+        context (OptimizerContext): the associated optimizer context
         expr (AbstractExpression): The AbstractExpression object whose cost
         needs to be computed.
 
@@ -296,7 +309,7 @@ def get_expression_execution_cost(expr: AbstractExpression) -> float:
     total_cost = 0
     # iterate over all the function expression and accumulate the cost
     for child_expr in expr.find_all(FunctionExpression):
-        cost_entry = CatalogManager().get_udf_cost_catalog_entry(child_expr.name)
+        cost_entry = context.db.catalog().get_udf_cost_catalog_entry(child_expr.name)
         if cost_entry:
             total_cost += cost_entry.cost
         else:

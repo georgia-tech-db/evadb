@@ -14,6 +14,7 @@
 # limitations under the License.
 import pandas as pd
 
+from eva.database import EVADatabase
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.abstract_plan import AbstractPlan
@@ -21,8 +22,8 @@ from eva.plan_nodes.explain_plan import ExplainPlan
 
 
 class ExplainExecutor(AbstractExecutor):
-    def __init__(self, node: ExplainPlan):
-        super().__init__(node)
+    def __init__(self, db: EVADatabase, node: ExplainPlan):
+        super().__init__(db, node)
 
     def exec(self, *args, **kwargs):
         # Traverse optimized physical plan, which is commonly supported.

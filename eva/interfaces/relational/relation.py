@@ -16,6 +16,7 @@ from typing import Union
 
 import pandas
 
+from eva.database import EVADatabase
 from eva.interfaces.relational.utils import (
     create_limit_expression,
     create_star_expression,
@@ -37,8 +38,12 @@ from eva.parser.utils import parse_sql_orderby_expr
 
 class EVARelation:
     def __init__(
-        self, query_node: Union[AbstractStatement, TableRef], alias: Alias = None
+        self,
+        evadb: EVADatabase,
+        query_node: Union[AbstractStatement, TableRef],
+        alias: Alias = None,
     ):
+        self._evadb = evadb
         self._query_node = query_node
         self._alias = alias
 
@@ -93,7 +98,7 @@ class EVARelation:
         )
         # reset the alias as after join there isn't a single alias
         self._alias = Alias("Relation")
-        try_binding(self._query_node)
+        try_binding(self._evadb.catalog, self._query_node)
         return self
 
     def df(self) -> pandas.DataFrame:
@@ -112,7 +117,7 @@ class EVARelation:
         Returns:
             Batch: result as eva Batch
         """
-        result = execute_statement(self._query_node.copy())
+        result = execute_statement(self._evadb, self._query_node.copy())
         assert result.frames is not None
         return result
 
@@ -140,7 +145,7 @@ class EVARelation:
             self._query_node, self._alias, "where_clause", parsed_expr
         )
 
-        try_binding(self._query_node)
+        try_binding(self._evadb.catalog, self._query_node)
 
         return self
 
@@ -164,7 +169,7 @@ class EVARelation:
             self._query_node, self._alias, "limit_count", limit_expr
         )
 
-        try_binding(self._query_node)
+        try_binding(self._evadb.catalog, self._query_node)
 
         return self
 
@@ -183,7 +188,7 @@ class EVARelation:
             self._query_node, self._alias, "orderby_list", parsed_expr
         )
 
-        try_binding(self._query_node)
+        try_binding(self._evadb.catalog, self._query_node)
 
         return self
 
@@ -216,7 +221,7 @@ class EVARelation:
             self._query_node, self._alias, "target_list", parsed_exprs
         )
 
-        try_binding(self._query_node)
+        try_binding(self._evadb.catalog, self._query_node)
 
         return self
 

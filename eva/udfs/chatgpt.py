@@ -20,7 +20,6 @@ import openai
 import pandas as pd
 
 from eva.catalog.catalog_type import NdArrayType
-from eva.configuration.configuration_manager import ConfigurationManager
 from eva.udfs.abstract.abstract_udf import AbstractUDF
 from eva.udfs.decorators.decorators import forward, setup
 from eva.udfs.decorators.io_descriptors.data_types import PandasDataframe
@@ -46,13 +45,7 @@ class ChatGPT(AbstractUDF):
         model="gpt-3.5-turbo",
         temperature: float = 0,
     ) -> None:
-        # Try Configuration Manager
-        openai.api_key = ConfigurationManager().get_value(
-            "third_party", "openai_api_key"
-        )
-        # If not found, try OS Enviroment Variable
-        if len(openai.api_key) == 0:
-            openai.api_key = os.environ["openai_api_key"]
+        openai.api_key = os.environ.get("openai_api_key")
         assert (
             len(openai.api_key) != 0
         ), "Please set your OpenAI API key in eva.yml file (third_party, open_api_key)"

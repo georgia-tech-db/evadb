@@ -16,8 +16,8 @@ from typing import Iterator
 
 import pandas as pd
 
-from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.sql_config import IDENTIFIER_COLUMN
+from eva.database import EVADatabase
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import handle_vector_store_params
 from eva.models.storage.batch import Batch
@@ -35,18 +35,16 @@ def get_row_id_column_alias(column_list):
 
 
 class VectorIndexScanExecutor(AbstractExecutor):
-    def __init__(self, node: VectorIndexScanPlan):
-        super().__init__(node)
+    def __init__(self, db: EVADatabase, node: VectorIndexScanPlan):
+        super().__init__(db, node)
 
         self.index_name = node.index_name
         self.limit_count = node.limit_count
         self.search_query_expr = node.search_query_expr
 
     def exec(self, *args, **kwargs) -> Iterator[Batch]:
-        catalog_manager = CatalogManager()
-
         # Fetch the index from disk.
-        index_catalog_entry = catalog_manager.get_index_catalog_entry_by_name(
+        index_catalog_entry = self.catalog().get_index_catalog_entry_by_name(
             self.index_name
         )
         self.index_path = index_catalog_entry.save_file_path
