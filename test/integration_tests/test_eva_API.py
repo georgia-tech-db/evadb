@@ -20,6 +20,7 @@ import pytest
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
 from eva.interfaces.relational.db import EVACursor
+from eva.server.command_handler import execute_query_fetch_all
 
 
 @pytest.mark.asyncio
@@ -45,14 +46,25 @@ class EVAAPITests(unittest.TestCase):
         )
         udf.execute()
 
-        table = cursor.table("PDFss")
-        table_udf = table.cross_apply(
-            "SimilarityFeatureExtractor(data,'BLOOD')", "objs(simiarity)"
-        )
-        table_udf_data = table_udf.df()
+        execute_query_fetch_all("""CREATE INDEX reddit_sift_image_index 
+                    ON PDFss (SimilarityFeatureExtractor(data)) 
+                    USING FAISS""")
+
+        result = execute_query_fetch_all("""SELECT * FROM PDFss ORDER BY
+                    Similarity(
+                      SimilarityFeatureExtractor('BLOOD'),
+                      SimilarityFeatureExtractor(data)
+                    )
+                    LIMIT 5""")
+                    
+        # table = cursor.table("PDFss")
+        # table_udf = table.cross_apply(
+        #     "SimilarityFeatureExtractor('BLOOD')", "objs(features)"
+        # )
+        # table_udf_data = table_udf.df()
         self.assertEqual(len(table_udf_data.columns), 6)
-        self.assertTrue("objs.simiarity" in table_udf_data.columns)
+        self.assertTrue("objs.features" in table_udf_data.columns)
         self.assertTrue("pdfss.data" in table_udf_data.columns)
-        self.assertTrue(
-            all(isinstance(x, float) for x in table_udf_data["objs.simiarity"])
-        )
+        # self.assertTrue(
+        #     all(isinstance(x, float) for x in table_udf_data["objs.simiarity"])
+        # )

@@ -63,16 +63,16 @@ class SimilarityFeatureExtractor(AbstractUDF, GPUCompatible):
     @forward(
         input_signatures=[
             PandasDataframe(
-                columns=["data", "filter"],
-                column_types=[NdArrayType.STR, NdArrayType.STR],
-                column_shapes=[(1), (1)],
+                columns=["data"],
+                column_types=[NdArrayType.STR],
+                column_shapes=[(1)],
             )
         ],
         output_signatures=[
             PandasDataframe(
-                columns=["simiarity"],
+                columns=["features"],
                 column_types=[NdArrayType.FLOAT32],
-                column_shapes=[(1)],
+                column_shapes=[(1, 128)],
             )
         ],
     )
@@ -80,14 +80,11 @@ class SimilarityFeatureExtractor(AbstractUDF, GPUCompatible):
         def _forward(row: pd.Series) -> np.ndarray:
             columns = row.axes[0]
             data = row.loc[columns[0]]
-            filter_keyword = row.loc[columns[1]]
-            if data.strip() != "":
-                doc1 = nlp(data)
-                doc2 = nlp(filter_keyword)
-                return doc1.similarity(doc2)
-            else:
-                return 0
+            doc1 = nlp(data)
+            feat = doc1.vector
+            feat = feat.reshape(1, -1)
+            return feat
 
         ret = pd.DataFrame()
-        ret["simiarity"] = df.apply(_forward, axis=1)
+        ret["features"] = df.apply(_forward, axis=1)
         return ret
