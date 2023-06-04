@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from eva.database import EVADatabase
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.load_csv_executor import LoadCSVExecutor
 from eva.executor.load_multimedia_executor import LoadMultimediaExecutor
@@ -20,8 +21,8 @@ from eva.plan_nodes.load_data_plan import LoadDataPlan
 
 
 class LoadDataExecutor(AbstractExecutor):
-    def __init__(self, node: LoadDataPlan):
-        super().__init__(node)
+    def __init__(self, db: EVADatabase, node: LoadDataPlan):
+        super().__init__(db, node)
 
     def exec(self, *args, **kwargs):
         """
@@ -35,9 +36,9 @@ class LoadDataExecutor(AbstractExecutor):
             FileFormatType.DOCUMENT,
             FileFormatType.PDF,
         ]:
-            executor = LoadMultimediaExecutor(self.node)
+            executor = LoadMultimediaExecutor(self.db, self.node)
         elif self.node.file_options["file_format"] == FileFormatType.CSV:
-            executor = LoadCSVExecutor(self.node)
+            executor = LoadCSVExecutor(self.db, self.node)
 
         # for each batch, exec the executor
         for batch in executor.exec():

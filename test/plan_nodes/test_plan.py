@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ from test.util import get_all_subclasses, get_mock_object
 
 import pytest
 
-from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import ColumnType
 from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.parser.table_ref import TableInfo, TableRef
@@ -44,7 +43,6 @@ class PlanNodeTests(unittest.TestCase):
     def test_create_plan(self):
         dummy_info = TableInfo("dummy")
 
-        CatalogManager().reset()
         columns = [
             ColumnCatalogEntry("id", ColumnType.INTEGER),
             ColumnCatalogEntry("name", ColumnType.TEXT, array_dimensions=[50]),
@@ -61,7 +59,6 @@ class PlanNodeTests(unittest.TestCase):
         dummy_old = TableRef(dummy_info)
         dummy_new = TableInfo("new")
 
-        CatalogManager().reset()
         dummy_plan_node = RenamePlan(dummy_old, dummy_new)
         self.assertEqual(dummy_plan_node.opr_type, PlanOprType.RENAME)
         self.assertEqual(dummy_plan_node.old_table.table.table_name, "old")
@@ -70,7 +67,6 @@ class PlanNodeTests(unittest.TestCase):
     def test_drop_plan(self):
         dummy_info = TableInfo("dummy")
 
-        CatalogManager().reset()
         dummy_plan_node = DropPlan([dummy_info], False)
 
         self.assertEqual(dummy_plan_node.opr_type, PlanOprType.DROP)

@@ -14,6 +14,7 @@
 # limitations under the License.
 from typing import Iterator
 
+from eva.database import EVADatabase
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import apply_predicate
 from eva.models.storage.batch import Batch
@@ -23,13 +24,13 @@ from eva.plan_nodes.predicate_plan import PredicatePlan
 class PredicateExecutor(AbstractExecutor):
     """ """
 
-    def __init__(self, node: PredicatePlan):
-        super().__init__(node)
+    def __init__(self, db: EVADatabase, node: PredicatePlan):
+        super().__init__(db, node)
         self.predicate = node.predicate
 
     def exec(self, *args, **kwargs) -> Iterator[Batch]:
         child_executor = self.children[0]
         for batch in child_executor.exec(**kwargs):
-            batch = apply_predicate(batch, self.predicate)
+            batch = apply_predicate(batch, self.predicate, self.catalog())
             if not batch.empty():
                 yield batch

@@ -14,6 +14,7 @@
 # limitations under the License.
 from typing import Iterator
 
+from eva.database import EVADatabase
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import apply_predicate
 from eva.models.storage.batch import Batch
@@ -21,8 +22,8 @@ from eva.plan_nodes.nested_loop_join_plan import NestedLoopJoinPlan
 
 
 class NestedLoopJoinExecutor(AbstractExecutor):
-    def __init__(self, node: NestedLoopJoinPlan):
-        super().__init__(node)
+    def __init__(self, db: EVADatabase, node: NestedLoopJoinPlan):
+        super().__init__(db, node)
         self.predicate = node.join_predicate
 
     def exec(self, *args, **kwargs) -> Iterator[Batch]:
@@ -32,6 +33,8 @@ class NestedLoopJoinExecutor(AbstractExecutor):
             for row2 in inner.exec(**kwargs):
                 result_batch = Batch.join(row1, row2)
                 result_batch.reset_index()
-                result_batch = apply_predicate(result_batch, self.predicate)
+                result_batch = apply_predicate(
+                    result_batch, self.predicate, self.catalog()
+                )
                 if not result_batch.empty():
                     yield result_batch

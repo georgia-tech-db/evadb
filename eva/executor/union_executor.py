@@ -14,6 +14,7 @@
 # limitations under the License.
 from typing import Iterator
 
+from eva.database import EVADatabase
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.union_plan import UnionPlan
@@ -27,8 +28,8 @@ class UnionExecutor(AbstractExecutor):
 
     """
 
-    def __init__(self, node: UnionPlan):
-        super().__init__(node)
+    def __init__(self, db: EVADatabase, node: UnionPlan):
+        super().__init__(db, node)
 
     def exec(self, *args, **kwargs) -> Iterator[Batch]:
         assert self.node.all is True, "Only UNION ALL is supported now."
