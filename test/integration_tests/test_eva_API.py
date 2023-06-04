@@ -13,17 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from unittest.mock import AsyncMock
 from test.util import get_evadb_for_testing
-
 
 import pytest
 
-from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
-from eva.interfaces.relational.db import EVAConnection, connect
-from eva.server.command_handler import execute_query_fetch_all
-
+from eva.interfaces.relational.db import connect
 
 @pytest.mark.asyncio
 class EVAAPITests(unittest.TestCase):
