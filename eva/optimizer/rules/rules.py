@@ -16,7 +16,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import TableType
 from eva.catalog.catalog_utils import is_video_table
 from eva.constants import CACHEABLE_UDFS
@@ -217,7 +216,7 @@ class CacheFunctionExpressionInProject(Rule):
     def apply(self, before: LogicalProject, context: OptimizerContext):
         new_target_list = [expr.copy() for expr in before.target_list]
         for expr in new_target_list:
-            enable_cache_on_expression_tree(expr)
+            enable_cache_on_expression_tree(context, expr)
         after = LogicalProject(target_list=new_target_list, children=before.children)
         yield after
 
@@ -247,7 +246,7 @@ class CacheFunctionExpressionInFilter(Rule):
         # cache for n function Expressions. Currently considering only the case where
         # cache is enabled for all eligible function expressions
         after_predicate = before.predicate.copy()
-        enable_cache_on_expression_tree(after_predicate)
+        enable_cache_on_expression_tree(context, after_predicate)
         after_operator = LogicalFilter(
             predicate=after_predicate, children=before.children
         )
@@ -279,7 +278,7 @@ class CacheFunctionExpressionInApply(Rule):
     def apply(self, before: LogicalApplyAndMerge, context: OptimizerContext):
         # todo: this will create a catalog entry even in the case of explain command
         # We should run this code conditionally
-        new_func_expr = enable_cache(before.func_expr)
+        new_func_expr = enable_cache(context, before.func_expr)
         after = LogicalApplyAndMerge(
             func_expr=new_func_expr, alias=before.alias, do_unnest=before.do_unnest
         )
@@ -526,7 +525,7 @@ class CombineSimilarityOrderByAndLimitToVectorIndexScan(Rule):
         return True
 
     def apply(self, before: LogicalLimit, context: OptimizerContext):
-        catalog_manager = CatalogManager()
+        catalog_manager = context.db.catalog
 
         # Get corresponding nodes.
         limit_node = before
@@ -574,7 +573,7 @@ class CombineSimilarityOrderByAndLimitToVectorIndexScan(Rule):
         # Get index catalog. Check if an index exists for matching
         # udf signature and table columns.
         index_catalog_entry = (
-            catalog_manager.get_index_catalog_entry_by_column_and_udf_signature(
+            catalog_manager().get_index_catalog_entry_by_column_and_udf_signature(
                 column_catalog_entry, udf_signature
             )
         )
@@ -662,7 +661,8 @@ class ReorderPredicates(Rule):
         # Compute the cost of every function expression and sort them in
         # ascending order of cost
         function_expr_cost_tuples = [
-            (expr, get_expression_execution_cost(expr)) for expr in contains_func_exprs
+            (expr, get_expression_execution_cost(context, expr))
+            for expr in contains_func_exprs
         ]
         function_expr_cost_tuples = sorted(
             function_expr_cost_tuples, key=lambda x: x[1]

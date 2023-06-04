@@ -12,11 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from dataclasses import dataclass
 
 from sqlalchemy import Column, Float, ForeignKey, Integer, String
 
 from eva.catalog.models.base_model import BaseModel
+from eva.catalog.models.utils import UdfCostCatalogEntry
 
 
 class UdfCostCatalog(BaseModel):
@@ -49,5 +49,3 @@ class UdfCostCatalog(BaseModel):
             cost=self._cost,
             row_id=self._row_id,
         )
-
-

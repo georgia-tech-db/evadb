@@ -14,16 +14,12 @@
 # limitations under the License.
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import List
-
 from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
 
 from eva.catalog.models.association_models import depend_udf_and_udf_cache
 from eva.catalog.models.base_model import BaseModel
-from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
-from eva.catalog.models.udf_metadata_catalog import UdfMetadataCatalogEntry
+from eva.catalog.models.utils import UdfCatalogEntry
 
 
 class UdfCatalog(BaseModel):

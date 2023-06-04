@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ from test.util import (
     create_dummy_batches,
     create_sample_video,
     file_remove,
+    get_evadb_for_testing,
     shutdown_ray,
 )
 
@@ -27,8 +28,6 @@ import pandas as pd
 import pytest
 from moto import mock_s3
 
-from eva.catalog.catalog_manager import CatalogManager
-from eva.configuration.configuration_manager import ConfigurationManager
 from eva.configuration.constants import EVA_ROOT_DIR
 from eva.models.storage.batch import Batch
 from eva.parser.types import FileFormatType
@@ -40,13 +39,12 @@ class S3LoadExecutorTest(unittest.TestCase):
     mock_s3 = mock_s3()
 
     def setUp(self):
+        self.evadb = get_evadb_for_testing()
         # reset the catalog manager before running each test
-        CatalogManager().reset()
+        self.evadb.catalog().reset()
         self.video_file_path = create_sample_video()
         self.multiple_video_file_path = f"{EVA_ROOT_DIR}/data/sample_videos/1"
-        self.s3_download_dir = ConfigurationManager().get_value(
-            "storage", "s3_download_dir"
-        )
+        self.s3_download_dir = self.evadb.config.get_value("storage", "s3_download_dir")
 
         """Mocked AWS Credentials for moto."""
         os.environ["AWS_ACCESS_KEY_ID"] = "testing"
@@ -85,11 +83,11 @@ class S3LoadExecutorTest(unittest.TestCase):
         self.upload_single_file(bucket_name)
 
         query = f"LOAD VIDEO 's3://{bucket_name}/dummy.avi' INTO MyVideo;"
-        execute_query_fetch_all(query)
+        execute_query_fetch_all(self.evadb, query)
 
         select_query = """SELECT * FROM MyVideo;"""
 
-        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch = execute_query_fetch_all(self.evadb, select_query)
         actual_batch.sort()
         expected_batch = list(
             create_dummy_batches(
@@ -97,20 +95,20 @@ class S3LoadExecutorTest(unittest.TestCase):
             )
         )[0]
         self.assertEqual(actual_batch, expected_batch)
-        execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
+        execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS MyVideo;")
 
     def test_s3_multiple_file_load_executor(self):
         bucket_name = "multiple-file-bucket"
         self.upload_multiple_files(bucket_name)
 
         query = f"""LOAD VIDEO "s3://{bucket_name}/*.mp4" INTO MyVideos;"""
-        result = execute_query_fetch_all(query)
+        result = execute_query_fetch_all(self.evadb, query)
         expected = Batch(
             pd.DataFrame([f"Number of loaded {FileFormatType.VIDEO.name}: 2"])
         )
         self.assertEqual(result, expected)
 
-        execute_query_fetch_all("DROP TABLE IF EXISTS MyVideos;")
+        execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS MyVideos;")
 
     def test_s3_multiple_file_multiple_load_executor(self):
         bucket_name = "multiple-file-multiple-load-bucket"
@@ -118,14 +116,16 @@ class S3LoadExecutorTest(unittest.TestCase):
         self.upload_multiple_files(bucket_name)
 
         insert_query_one = f"""LOAD VIDEO "s3://{bucket_name}/1.mp4" INTO MyVideos;"""
-        execute_query_fetch_all(insert_query_one)
+        execute_query_fetch_all(self.evadb, insert_query_one)
         insert_query_two = f"""LOAD VIDEO "s3://{bucket_name}/2.mp4" INTO MyVideos;"""
-        execute_query_fetch_all(insert_query_two)
+        execute_query_fetch_all(self.evadb, insert_query_two)
         insert_query_three = f"LOAD VIDEO '{self.video_file_path}' INTO MyVideos;"
-        execute_query_fetch_all(insert_query_three)
+        execute_query_fetch_all(self.evadb, insert_query_three)
 
         select_query = """SELECT * FROM MyVideos;"""
-        result = execute_query_fetch_all(select_query)
+        result = execute_query_fetch_all(self.evadb, select_query)
+        print(result.frames["myvideos.name"].unique())
+
         result_videos = [
             Path(video).as_posix() for video in result.frames["myvideos.name"].unique()
         ]
@@ -139,4 +139,4 @@ class S3LoadExecutorTest(unittest.TestCase):
 
         self.assertEqual(result_videos, expected_videos)
 
-        execute_query_fetch_all("DROP TABLE IF EXISTS MyVideos;")
+        execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS MyVideos;")

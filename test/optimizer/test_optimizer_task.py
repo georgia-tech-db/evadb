@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -51,11 +51,13 @@ class TestOptimizerTask(unittest.TestCase):
             task.execute()
 
     def top_down_rewrite(self, opr):
-        opt_cxt = OptimizerContext(CostModel())
+        opt_cxt = OptimizerContext(MagicMock(), CostModel(), RulesManager(MagicMock()))
         grp_expr = opt_cxt.add_opr_to_group(opr)
         root_grp_id = grp_expr.group_id
         opt_cxt.task_stack.push(
-            TopDownRewrite(grp_expr, RulesManager().stage_one_rewrite_rules, opt_cxt)
+            TopDownRewrite(
+                grp_expr, RulesManager(MagicMock()).stage_one_rewrite_rules, opt_cxt
+            )
         )
         self.execute_task_stack(opt_cxt.task_stack)
         return opt_cxt, root_grp_id
@@ -63,7 +65,9 @@ class TestOptimizerTask(unittest.TestCase):
     def bottom_up_rewrite(self, root_grp_id, opt_cxt):
         grp_expr = opt_cxt.memo.groups[root_grp_id].logical_exprs[0]
         opt_cxt.task_stack.push(
-            BottomUpRewrite(grp_expr, RulesManager().stage_two_rewrite_rules, opt_cxt)
+            BottomUpRewrite(
+                grp_expr, RulesManager(MagicMock()).stage_two_rewrite_rules, opt_cxt
+            )
         )
         self.execute_task_stack(opt_cxt.task_stack)
         return opt_cxt, root_grp_id

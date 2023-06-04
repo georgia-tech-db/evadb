@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from ast import literal_eval
-from dataclasses import dataclass, field
 from typing import Tuple
 
 from sqlalchemy import Column, ForeignKey, Integer, String, UniqueConstraint
@@ -24,7 +23,6 @@ from eva.catalog.models.association_models import (
     depend_udf_and_udf_cache,
 )
 from eva.catalog.models.base_model import BaseModel
-
 from eva.catalog.models.utils import UdfCacheCatalogEntry
 
 

@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from ast import literal_eval
-from dataclasses import dataclass
 from typing import Tuple
 
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, UniqueConstraint
@@ -22,6 +21,7 @@ from sqlalchemy.types import Enum
 
 from eva.catalog.catalog_type import ColumnType, Dimension, NdArrayType
 from eva.catalog.models.base_model import BaseModel
+from eva.catalog.models.utils import UdfIOCatalogEntry
 
 
 class UdfIOCatalog(BaseModel):

@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ from test.executor.utils import DummyExecutor
 
 import numpy as np
 import pandas as pd
+from mock import MagicMock
 
 from eva.executor.limit_executor import LimitExecutor
 from eva.executor.orderby_executor import OrderByExecutor
@@ -41,7 +42,7 @@ class LimitExecutorTest(unittest.TestCase):
 
         plan = LimitPlan(ConstantValueExpression(limit_value))
 
-        limit_executor = LimitExecutor(plan)
+        limit_executor = LimitExecutor(MagicMock(), plan)
         limit_executor.append_child(DummyExecutor(batches))
         reduced_batches = list(limit_executor.exec())
 
@@ -71,7 +72,7 @@ class LimitExecutorTest(unittest.TestCase):
 
         plan = LimitPlan(ConstantValueExpression(limit_value))
 
-        limit_executor = LimitExecutor(plan)
+        limit_executor = LimitExecutor(MagicMock(), plan)
         limit_executor.append_child(DummyExecutor(batches))
         reduced_batches = list(limit_executor.exec())
 
@@ -115,14 +116,14 @@ class LimitExecutorTest(unittest.TestCase):
             ]
         )
 
-        orderby_executor = OrderByExecutor(plan)
+        orderby_executor = OrderByExecutor(MagicMock(), plan)
         orderby_executor.append_child(DummyExecutor(batches))
 
         sorted_batches = list(orderby_executor.exec())
 
         limit_value = 2
         plan = LimitPlan(ConstantValueExpression(limit_value))
-        limit_executor = LimitExecutor(plan)
+        limit_executor = LimitExecutor(MagicMock(), plan)
         limit_executor.append_child(DummyExecutor(sorted_batches))
         reduced_batches = list(limit_executor.exec())
 

@@ -19,8 +19,7 @@ from sqlalchemy.types import Enum
 
 from eva.catalog.catalog_type import VectorStoreType
 from eva.catalog.models.base_model import BaseModel
-
-from eva.catalog.models.utils  import IndexCatalogEntry
+from eva.catalog.models.utils import IndexCatalogEntry
 
 
 class IndexCatalog(BaseModel):
@@ -74,6 +73,3 @@ class IndexCatalog(BaseModel):
             udf_signature=self._udf_signature,
             feat_column=feat_column,
         )
-
-
-

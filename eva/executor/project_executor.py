@@ -14,6 +14,7 @@
 # limitations under the License.
 from typing import Iterator
 
+from eva.database import EVADatabase
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import apply_project
 from eva.models.storage.batch import Batch
@@ -23,14 +24,14 @@ from eva.plan_nodes.project_plan import ProjectPlan
 class ProjectExecutor(AbstractExecutor):
     """ """
 
-    def __init__(self, node: ProjectPlan):
-        super().__init__(node)
+    def __init__(self, db: EVADatabase, node: ProjectPlan):
+        super().__init__(db, node)
         self.target_list = node.target_list
 
     def exec(self, *args, **kwargs) -> Iterator[Batch]:
         child_executor = self.children[0]
         for batch in child_executor.exec(**kwargs):
-            batch = apply_project(batch, self.target_list)
+            batch = apply_project(batch, self.target_list, self.catalog())
 
             if not batch.empty():
                 yield batch

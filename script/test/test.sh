@@ -76,11 +76,11 @@ if [[ "$OSTYPE" != "msys" ]];
 then
     if [[ "$MODE" = "TEST" || "$MODE" = "ALL" ]];
     then
-        PYTHONPATH=./ pytest --durations=20 --capture=sys --tb=short -v --log-level=WARNING -rs -p no:cov test/ -m "not benchmark"
+        PYTHONPATH=./ pytest --durations=20 --capture=sys --tb=short -v --log-level=WARNING -rsf -p no:cov test/ -m "not benchmark"
     elif [[ "$MODE" = "COV" ]];
     then
 	# As a workaround, ray needs to be disabled for COV.
-        PYTHONPATH=./ pytest --durations=20 --cov-report term-missing:skip-covered  --cov-config=.coveragerc --cov-context=test --cov=eva/ --capture=sys --tb=short -v -rs --log-level=WARNING -m "not benchmark"
+        PYTHONPATH=./ pytest --durations=20 --cov-report term-missing:skip-covered  --cov-config=.coveragerc --cov-context=test --cov=eva/ --capture=sys --tb=short -v -rsf --log-level=WARNING -m "not benchmark"
     fi
 
     test_code=$?

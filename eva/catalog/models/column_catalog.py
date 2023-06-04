@@ -15,7 +15,6 @@
 from __future__ import annotations
 
 from ast import literal_eval
-
 from typing import Tuple
 
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, UniqueConstraint

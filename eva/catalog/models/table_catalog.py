@@ -12,15 +12,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from dataclasses import dataclass, field
-from typing import List
 
 from sqlalchemy import Column, Enum, String
 from sqlalchemy.orm import relationship
 
 from eva.catalog.catalog_type import TableType
 from eva.catalog.models.base_model import BaseModel
-from eva.catalog.models.column_catalog import ColumnCatalogEntry
+from eva.catalog.models.utils import TableCatalogEntry
 
 
 class TableCatalog(BaseModel):

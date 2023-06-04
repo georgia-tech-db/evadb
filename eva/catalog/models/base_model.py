@@ -14,15 +14,15 @@
 # limitations under the License.
 import contextlib
 
+import sqlalchemy
 from sqlalchemy import Column, Integer
+from sqlalchemy.engine import Engine
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy_utils import create_database, database_exists
 
-from eva.catalog.sql_config import CATALOG_TABLES, SQLConfig
+from eva.catalog.sql_config import CATALOG_TABLES
 from eva.utils.logging_manager import logger
-
-db_session = SQLConfig().session
 
 
 class CustomModel:
@@ -34,7 +34,6 @@ class CustomModel:
     Declares and int `_row_id` field for all tables
     """
 
-    query = db_session.query_property()
     _row_id = Column("_row_id", Integer, primary_key=True)
 
     def __init__(self, **kwargs):
@@ -45,7 +44,7 @@ class CustomModel:
             else:
                 continue
 
-    def save(self):
+    def save(self, db_session):
         """Add and commit
 
         Returns: saved object
@@ -53,14 +52,14 @@ class CustomModel:
         """
         try:
             db_session.add(self)
-            self._commit()
+            self._commit(db_session)
         except Exception as e:
             db_session.rollback()
             logger.error(f"Database save failed : {str(e)}")
             raise e
         return self
 
-    def update(self, **kwargs):
+    def update(self, db_session, **kwargs):
         """Update and commit
 
         Args:
@@ -73,23 +72,23 @@ class CustomModel:
             for attr, value in kwargs.items():
                 if hasattr(self, attr):
                     setattr(self, attr, value)
-            return self.save()
+            return self.save(db_session)
         except Exception as e:
             db_session.rollback()
             logger.error(f"Database update failed : {str(e)}")
             raise e
 
-    def delete(self):
+    def delete(self, db_session):
         """Delete and commit"""
         try:
             db_session.delete(self)
-            self._commit()
+            self._commit(db_session)
         except Exception as e:
             db_session.rollback()
             logger.error(f"Database delete failed : {str(e)}")
             raise e
 
-    def _commit(self):
+    def _commit(self, db_session):
         """Try to commit. If an error is raised, the session is rollbacked."""
         try:
             db_session.commit()
@@ -100,44 +99,43 @@ class CustomModel:
 
 
 # Custom Base Model to be inherited by all models
-BaseModel = declarative_base(cls=CustomModel, constructor=None, bind=SQLConfig().engine)
+BaseModel = declarative_base(cls=CustomModel, constructor=None)
 
 
-def init_db():
+def init_db(engine: Engine):
     """Create database if doesn't exist and create all tables."""
-    engine = SQLConfig().engine
     if not database_exists(engine.url):
         logger.info("Database does not exist, creating database.")
         create_database(engine.url)
         logger.info("Creating tables")
-        BaseModel.metadata.create_all()
+        BaseModel.metadata.create_all(bind=engine)
 
 
-def truncate_catalog_tables():
+def truncate_catalog_tables(engine: Engine):
     """Truncate all the catalog tables"""
     # https://stackoverflow.com/questions/4763472/sqlalchemy-clear-database-content-but-dont-drop-the-schema/5003705#5003705 #noqa
-    engine = SQLConfig().engine
     # reflect to refresh the metadata
     BaseModel.metadata.reflect(bind=engine)
+    insp = sqlalchemy.inspect(engine)
     if database_exists(engine.url):
         with contextlib.closing(engine.connect()) as con:
             trans = con.begin()
             for table in reversed(BaseModel.metadata.sorted_tables):
-                if table.exists(con):
+                if insp.has_table(table.name):
                     con.execute(table.delete())
             trans.commit()
 
 
-def drop_all_tables_except_catalog():
+def drop_all_tables_except_catalog(engine: Engine):
     """drop all the tables except the catalog"""
-    engine = SQLConfig().engine
     # reflect to refresh the metadata
     BaseModel.metadata.reflect(bind=engine)
+    insp = sqlalchemy.inspect(engine)
     if database_exists(engine.url):
         with contextlib.closing(engine.connect()) as con:
             trans = con.begin()
             for table in reversed(BaseModel.metadata.sorted_tables):
                 if table.name not in CATALOG_TABLES:
-                    if table.exists(con):
+                    if insp.has_table(table.name):
                         table.drop(con)
             trans.commit()
