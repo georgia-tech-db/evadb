@@ -163,16 +163,13 @@ def release_version(current_version):
 
     NEXT_RELEASE = current_version # without dev part
 
-    return
-
     run_command("git checkout -b release-" + NEXT_RELEASE)
     run_command("git add . -u")
     run_command("git commit -m '[RELEASE]: " + NEXT_RELEASE + "'")
     run_command("git push --set-upstream origin release-" + NEXT_RELEASE)
-    run_command("git push --set-upstream origin release-" + NEXT_RELEASE)
 
-    run_command(f"git tag -a {NEXT_RELEASE} -m '{NEXT_RELEASE} release'")
-    run_command(f"git push origin {NEXT_RELEASE}")
+    #run_command(f"git tag -a {NEXT_RELEASE} -m '{NEXT_RELEASE} release'")
+    run_command(f"git push origin release-{NEXT_RELEASE}")
 
 def get_commit_id_of_latest_release():
     import requests
@@ -182,7 +179,7 @@ def get_commit_id_of_latest_release():
     response = requests.get(url)
     data = response.json()
 
-    latest_release = data[1]
+    latest_release = data[0]
     release_date = latest_release['created_at']
 
     return release_date
@@ -213,12 +210,14 @@ def publish_wheels(tag):
     run_command(f"python3 -m pip install dist/evadb-{tag}-py3-none-any.whl")
     run_command("""python3 -c "import eva; print(eva.__version__)" """)
 
+    print("Running twine to upload wheels")
+    print("Ensure that you have .pypirc file in your $HOME folder")
     run_command("twine upload dist/* -r pypi")
 
 
 def upload_assets(changelog, tag):
     # Authentication token
-    access_token = 'xxxxxxxxxxxxxxxxxxxxxxxxxxx'
+    access_token = os.environ["GITHUB_KEY"]
 
     # Repository information
     repo_owner = 'georgia-tech-db'
@@ -238,16 +237,15 @@ def upload_assets(changelog, tag):
     # Get the repository
     repo = g.get_repo(f'{repo_owner}/{repo_name}')
 
-    return
-
     # Create the release
     release_name = tag_name
-    release_body = f'{tag_name}\n\n {changelog}' 
+    release_message = f'{tag_name}\n\n {changelog}' 
 
+    # Publish the release
     release = repo.create_git_release(
         tag=tag_name, 
         name=release_name, 
-        body=release_body, 
+        message=release_message, 
         draft=False, 
         prerelease=False
     )
@@ -258,11 +256,9 @@ def upload_assets(changelog, tag):
     # Upload assets to the release
     for filepath in asset_filepaths:
         asset_name = filepath.split('/')[-1]
-        with open(filepath, 'rb') as file:
-            release.upload_asset(file, asset_name)
-
-    # Publish the release
-    release.update_release(draft=False)
+        asset_path = Path(f"{EVA_DIR}/{filepath}")
+        print("path: " + str(asset_path))
+        release.upload_asset(str(asset_path), asset_name)
 
     print('Release created and published successfully.')
 
@@ -288,8 +284,6 @@ def bump_up_version(next_version):
     NEXT_RELEASE = f"v{str(next_version)}+dev"
 
     print(NEXT_RELEASE)
-
-    return
 
     run_command("git checkout -b bump-" + NEXT_RELEASE)
     run_command("git add . -u")
@@ -373,6 +367,10 @@ if __name__ == "__main__":
     current_version = VERSION
     version = Version(current_version)
     print("CURRENT VERSION: " + current_version)
+    current_version_str_without_dev = current_version
+    if "dev" in current_version:
+        current_version_str_without_dev = current_version.split('+')[0]
+    print("CURRENT VERSION WITHOUT DEV: " + current_version_str_without_dev)
 
     selected_release_type = args.next_release_type
 
@@ -390,8 +388,6 @@ if __name__ == "__main__":
         next_version = version.next_major()    
         next_version_str = "v" + str(next_version)
 
-    current_version_str_without_dev = str(version)
-    print("CURRENT VERSION WITHOUT DEV: " + current_version_str_without_dev)
     print("NEXT    VERSION : " + next_version_str)
 
     if args.get_changelog:
@@ -411,6 +407,7 @@ if __name__ == "__main__":
         publish_wheels(current_version_str_without_dev)
 
     if args.upload_assets:
+        print("upload assets")
         release_date = get_commit_id_of_latest_release()
         changelog = get_changelog(release_date)
         upload_assets(changelog, current_version_str_without_dev)

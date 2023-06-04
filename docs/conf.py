@@ -34,6 +34,7 @@ extensions = [
     "sphinx.ext.autosectionlabel",
     "sphinx.ext.autosummary",
     "sphinx.ext.autodoc",
+    "sphinx.ext.autodoc.typehints",
     "sphinx.ext.todo",
     "sphinx.ext.mathjax",
     "sphinx.ext.githubpages",
@@ -43,8 +44,19 @@ extensions = [
     "sphinxcontrib.youtube",
     "sphinx_inline_tabs",
     "myst_nb",
-    "versionwarning.extension"
+    "versionwarning.extension",
+    "IPython.sphinxext.ipython_console_highlighting"
 ]
+source_suffix = [".ipynb", ".html", ".md", ".rst"]
+
+autodoc_pydantic_model_show_json = False
+autodoc_pydantic_field_list_validators = False
+autodoc_pydantic_config_members = False
+autodoc_pydantic_model_show_config_summary = False
+autodoc_pydantic_model_show_validator_members = False
+autodoc_pydantic_model_show_field_summary = False
+autodoc_pydantic_model_members = False
+autodoc_pydantic_model_undoc_members = False
 
 myst_enable_extensions = [
     "dollarmath",
@@ -121,7 +133,7 @@ html_theme_options = {
 external_toc_path = "_toc.yml"  # optional, default: _toc.yml
 external_toc_exclude_missing = False  # optional, default: False
 
-html_logo = "images/eva/eva-logo.png"
+#html_logo = "images/eva/eva-logo.png"
 
 html_sidebars = {
     "**": [
