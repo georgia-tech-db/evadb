@@ -24,12 +24,12 @@ from eva.models.storage.batch import Batch
 from eva.parser.alias import Alias
 from eva.parser.select_statement import SelectStatement
 from eva.parser.utils import (
+    parse_create,
     parse_create_vector_index,
+    parse_drop,
     parse_load,
     parse_query,
     parse_table_clause,
-    parse_drop,
-    parse_create,
 )
 from eva.utils.logging_manager import logger
 
@@ -104,10 +104,8 @@ class EVAConnection:
             EVARelation: The EVARelation object representing the loaded table.
         """
         return self.cursor().load(file_regex, table_name, format, **kwargs)
-    
-    def drop(
-        self, item_type: str, item_name: str, **kwargs
-    ) -> EVARelation:
+
+    def drop(self, item_type: str, item_name: str, **kwargs) -> EVARelation:
         """
         Drop a table or UDF from the database.
 
@@ -121,9 +119,7 @@ class EVAConnection:
         """
         return self.cursor().drop(item_type, item_name, **kwargs)
 
-    def create(
-        self, item_type: str, item_name: str, **kwargs
-    ) -> EVARelation:
+    def create(self, item_type: str, item_name: str, **kwargs) -> EVARelation:
         """
         Drop a table or UDF from the database.
 
@@ -313,9 +309,7 @@ class EVACursor(object):
         stmt = parse_load(table_name, file_regex, format, **kwargs)
         return EVARelation(stmt)
 
-    def drop(
-        self, item_name: str, item_type: str, **kwargs
-    ) -> EVARelation:
+    def drop(self, item_name: str, item_type: str, **kwargs) -> EVARelation:
         """
         Drop a table or UDF from the database.
 
@@ -331,9 +325,7 @@ class EVACursor(object):
         stmt = parse_drop(item_name, item_type, **kwargs)
         return EVARelation(stmt)
 
-    def create(
-        self, item_type: str, item_name: str, **kwargs
-    ) -> EVARelation:
+    def create(self, item_type: str, item_name: str, **kwargs) -> EVARelation:
         """
         Create a table or UDF and add it to the database.
 
@@ -396,6 +388,7 @@ def connect(host: str = "0.0.0.0", port: int = 8803) -> EVAConnection:
     """
     connection = asyncio.run(get_connection(host, port))
     return connection
+
 
 def connect_without_server() -> EVAConnection:
     connection = EVAConnection(None, None)
