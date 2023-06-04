@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -207,10 +207,12 @@ def test_question_answer_from_text(benchmark, setup_pytorch_tests):
     execute_query_fetch_all(Text_feat_udf_query)
 
     # Create table to store stories.
-    load_query = "CREATE TABLE IF NOT EXISTS hotPotatoStoryTable (id INTEGER, data TEXT(1000));"
+    load_query = (
+        "CREATE TABLE IF NOT EXISTS hotPotatoStoryTable (id INTEGER, data TEXT(1000));"
+    )
     execute_query_fetch_all(load_query)
 
-    whitelist = set('abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ')
+    whitelist = set("abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
     sentence_id = 1
     with open("./data/question_answering/hot_potatos.txt", "r") as f:
@@ -218,7 +220,7 @@ def test_question_answer_from_text(benchmark, setup_pytorch_tests):
             if line == "\n" or len(line) == 0:
                 continue
             for i in range(0, len(line), 1000):
-                cut_line = line[i:min(i + 1000, len(line))]
+                cut_line = line[i : min(i + 1000, len(line))]
                 cut_line = "".join(filter(whitelist.__contains__, cut_line))
 
                 insert_query = f"""INSERT INTO hotPotatoStoryTable (id, data) VALUES ({sentence_id}, '{cut_line}');"""
@@ -228,10 +230,11 @@ def test_question_answer_from_text(benchmark, setup_pytorch_tests):
 
     # Feature extraction.
     def _create_feature_table():
-        feature_extract_query = """CREATE TABLE IF NOT EXISTS hotPotatoStoryFeatTable AS 
+        feature_extract_query = """CREATE TABLE IF NOT EXISTS hotPotatoStoryFeatTable AS
             SELECT SentenceFeatureExtractor(data) FROM hotPotatoStoryTable;"""
         execute_query_fetch_all(feature_extract_query)
         execute_query_fetch_all("DROP TABLE IF EXISTS hotPotatoStoryFeatTable;")
+
     benchmark(_create_feature_table)
 
     drop_table = "DROP TABLE IF EXISTS hotPotatoStoryTable;"
