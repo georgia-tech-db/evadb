@@ -31,19 +31,19 @@ from eva.catalog.catalog_utils import (
     get_video_table_column_definitions,
     xform_column_definitions_to_catalog_entries,
 )
-from eva.catalog.models.base_model import (
+from eva.catalog.models.utils import (
+    ColumnCatalogEntry,
+    IndexCatalogEntry,
+    TableCatalogEntry,
+    UdfCacheCatalogEntry,
+    UdfCatalogEntry,
+    UdfCostCatalogEntry,
+    UdfIOCatalogEntry,
+    UdfMetadataCatalogEntry,
     drop_all_tables_except_catalog,
     init_db,
     truncate_catalog_tables,
 )
-from eva.catalog.models.column_catalog import ColumnCatalogEntry
-from eva.catalog.models.index_catalog import IndexCatalogEntry
-from eva.catalog.models.table_catalog import TableCatalogEntry
-from eva.catalog.models.udf_cache_catalog import UdfCacheCatalogEntry
-from eva.catalog.models.udf_catalog import UdfCatalogEntry
-from eva.catalog.models.udf_cost_catalog import UdfCostCatalogEntry
-from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
-from eva.catalog.models.udf_metadata_catalog import UdfMetadataCatalogEntry
 from eva.catalog.services.column_catalog_service import ColumnCatalogService
 from eva.catalog.services.index_catalog_service import IndexCatalogService
 from eva.catalog.services.table_catalog_service import TableCatalogService
@@ -51,8 +51,11 @@ from eva.catalog.services.udf_cache_catalog_service import UdfCacheCatalogServic
 from eva.catalog.services.udf_catalog_service import UdfCatalogService
 from eva.catalog.services.udf_cost_catalog_service import UdfCostCatalogService
 from eva.catalog.services.udf_io_catalog_service import UdfIOCatalogService
-from eva.catalog.services.udf_metadata_catalog_service import UdfMetadataCatalogService
-from eva.catalog.sql_config import IDENTIFIER_COLUMN
+from eva.catalog.services.udf_metadata_catalog_service import (
+    UdfMetadataCatalogService,
+)
+from eva.catalog.sql_config import IDENTIFIER_COLUMN, SQLConfig
+from eva.configuration.configuration_manager import ConfigurationManager
 from eva.expression.function_expression import FunctionExpression
 from eva.parser.create_statement import ColumnDefinition
 from eva.parser.table_ref import TableInfo
@@ -62,25 +65,23 @@ from eva.utils.logging_manager import logger
 
 
 class CatalogManager(object):
-    def __new__(cls):
-        if not hasattr(cls, "_instance"):
-            cls._instance = super(CatalogManager, cls).__new__(cls)
+    def __init__(self, db_uri: str, config: ConfigurationManager):
+        self._db_uri = db_uri
+        self._sql_config = SQLConfig(db_uri)
+        self._config = config
+        self._bootstrap_catalog()
+        self._table_catalog_service = TableCatalogService(self._sql_config.session)
+        self._column_service = ColumnCatalogService(self._sql_config.session)
+        self._udf_service = UdfCatalogService(self._sql_config.session)
+        self._udf_cost_catalog_service = UdfCostCatalogService(self._sql_config.session)
+        self._udf_io_service = UdfIOCatalogService(self._sql_config.session)
+        self._udf_metadata_service = UdfMetadataCatalogService(self._sql_config.session)
+        self._index_service = IndexCatalogService(self._sql_config.session)
+        self._udf_cache_service = UdfCacheCatalogService(self._sql_config.session)
 
-            cls._instance._bootstrap_catalog()
-
-        return cls._instance
-
-    def __init__(self):
-        self._table_catalog_service: TableCatalogService = TableCatalogService()
-        self._column_service: ColumnCatalogService = ColumnCatalogService()
-        self._udf_service: UdfCatalogService = UdfCatalogService()
-        self._udf_cost_catalog_service: UdfCostCatalogService = UdfCostCatalogService()
-        self._udf_io_service: UdfIOCatalogService = UdfIOCatalogService()
-        self._udf_metadata_service: UdfMetadataCatalogService = (
-            UdfMetadataCatalogService()
-        )
-        self._index_service: IndexCatalogService = IndexCatalogService()
-        self._udf_cache_service: UdfCacheCatalogService = UdfCacheCatalogService()
+    @property
+    def sql_config(self):
+        return self._sql_config
 
     def reset(self):
         """
@@ -97,7 +98,7 @@ class CatalogManager(object):
         catalog database and tables if they do not exist.
         """
         logger.info("Bootstrapping catalog")
-        init_db()
+        init_db(self._sql_config.engine)
 
     def _clear_catalog_contents(self):
         """
@@ -106,11 +107,11 @@ class CatalogManager(object):
         """
         logger.info("Clearing catalog")
         # drop tables which are not part of catalog
-        drop_all_tables_except_catalog()
+        drop_all_tables_except_catalog(self._sql_config.engine)
         # truncate the catalog tables
-        truncate_catalog_tables()
+        truncate_catalog_tables(self._sql_config.engine)
         # clean up the dataset, index, and cache directories
-        cleanup_storage()
+        cleanup_storage(self._config)
 
     "Table catalog services"
 
@@ -342,7 +343,8 @@ class CatalogManager(object):
     """ Udf Cache related"""
 
     def insert_udf_cache_catalog_entry(self, func_expr: FunctionExpression):
-        entry = construct_udf_cache_catalog_entry(func_expr)
+        cache_dir = self._config.get_value("storage", "cache_dir")
+        entry = construct_udf_cache_catalog_entry(func_expr, cache_dir=cache_dir)
         return self._udf_cache_service.insert_entry(entry)
 
     def get_udf_cache_catalog_entry_by_name(self, name: str) -> UdfCacheCatalogEntry:
@@ -397,7 +399,9 @@ class CatalogManager(object):
         """
         table_name = table_info.table_name
         column_catalog_entries = xform_column_definitions_to_catalog_entries(columns)
-        file_url = str(generate_file_path(table_name))
+
+        dataset_location = self._config.get_value("core", "datasets_dir")
+        file_url = str(generate_file_path(dataset_location, table_name))
         table_catalog_entry = self.insert_table_catalog_entry(
             table_name,
             file_url,

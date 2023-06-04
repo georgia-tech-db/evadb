@@ -63,17 +63,3 @@ class TableCatalog(BaseModel):
             table_type=self._table_type,
             columns=column_entries,
         )
-
-
-@dataclass(unsafe_hash=True)
-class TableCatalogEntry:
-    """Dataclass representing an entry in the ColumnCatalog.
-    This is done to ensure we don't expose the sqlalchemy dependencies beyond catalog service. Further, sqlalchemy does not allow sharing of objects across threads.
-    """
-
-    name: str
-    file_url: str
-    table_type: TableType
-    identifier_column: str = "id"
-    columns: List[ColumnCatalogEntry] = field(compare=False, default_factory=list)
-    row_id: int = None

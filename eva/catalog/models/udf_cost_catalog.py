@@ -51,16 +51,3 @@ class UdfCostCatalog(BaseModel):
         )
 
 
-@dataclass(unsafe_hash=True)
-class UdfCostCatalogEntry:
-    """Dataclass representing an entry in the `UdfCostCatalog`.
-    This is done to ensure we don't expose the sqlalchemy dependencies beyond catalog service. Further, sqlalchemy does not allow sharing of objects across threads.
-    """
-
-    name: str
-    cost: float = None
-    udf_id: int = None
-    row_id: int = None
-
-    def display_format(self):
-        return {"udf_id": self.udf_id, "name": self.name, "cost": self.cost}
