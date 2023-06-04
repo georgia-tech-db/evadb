@@ -35,7 +35,6 @@ EVAConnection Interface
     
     ~db.EVAConnection.connect
     ~db.EVAConnection.load
-    ~db.EVAConnection.create_udf
     ~db.EVAConnection.query
     ~db.EVAConnection.table
 
@@ -64,6 +63,7 @@ EVAConnection Interface
 .. autosummary::
     :toctree: ./doc
 
+    ~db.EVAConnection.create_udf
     ~db.EVAConnection.create_vector_index
     ~db.EVAConnection.df
 

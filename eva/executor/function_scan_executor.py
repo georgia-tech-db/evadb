@@ -14,6 +14,7 @@
 # limitations under the License.
 from typing import Iterator
 
+from eva.database import EVADatabase
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.function_scan_plan import FunctionScanPlan
@@ -27,8 +28,8 @@ class FunctionScanExecutor(AbstractExecutor):
 
     """
 
-    def __init__(self, node: FunctionScanPlan):
-        super().__init__(node)
+    def __init__(self, db: EVADatabase, node: FunctionScanPlan):
+        super().__init__(db, node)
         self.func_expr = node.func_expr
         self.do_unnest = node.do_unnest
 
@@ -39,6 +40,14 @@ class FunctionScanExecutor(AbstractExecutor):
         lateral_input = kwargs.get("lateral_input")
         if not lateral_input.empty():
             res = self.func_expr.evaluate(lateral_input)
+
+            # persist stats of function expression
+            if self.func_expr.udf_obj and self.func_expr._stats:
+                udf_id = self.func_expr.udf_obj.row_id
+                self.catalog().upsert_udf_cost_catalog_entry(
+                    udf_id, self.func_expr.udf_obj.name, self.func_expr._stats.prev_cost
+                )
+
             if not res.empty():
                 if self.do_unnest:
                     res.unnest(res.columns)
