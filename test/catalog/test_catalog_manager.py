@@ -18,13 +18,13 @@ import mock
 import pytest
 from mock import ANY, MagicMock
 
-from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.catalog_type import ColumnType, TableType
-from eva.catalog.catalog_utils import get_video_table_column_definitions
-from eva.catalog.models.column_catalog import ColumnCatalogEntry
-from eva.catalog.models.udf_catalog import UdfCatalogEntry
-from eva.parser.table_ref import TableInfo
-from eva.parser.types import FileFormatType
+from evadb.catalog.catalog_manager import CatalogManager
+from evadb.catalog.catalog_type import ColumnType, TableType
+from evadb.catalog.catalog_utils import get_video_table_column_definitions
+from evadb.catalog.models.column_catalog import ColumnCatalogEntry
+from evadb.catalog.models.udf_catalog import UdfCatalogEntry
+from evadb.parser.table_ref import TableInfo
+from evadb.parser.types import FileFormatType
 
 
 @pytest.mark.notparallel

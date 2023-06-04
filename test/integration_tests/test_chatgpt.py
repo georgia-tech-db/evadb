@@ -23,9 +23,9 @@ from unittest.mock import MagicMock
 import pandas as pd
 from mock import patch
 
-from eva.executor.executor_utils import ExecutorError
-from eva.models.storage.batch import Batch
-from eva.server.command_handler import execute_query_fetch_all
+from evadb.executor.executor_utils import ExecutorError
+from evadb.models.storage.batch import Batch
+from evadb.server.command_handler import execute_query_fetch_all
 
 
 def create_dummy_csv_file(config) -> str:

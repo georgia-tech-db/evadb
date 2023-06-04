@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,11 +17,11 @@ import unittest
 import pandas as pd
 from mock import MagicMock, Mock, patch
 
-from eva.constants import NO_GPU
-from eva.expression.function_expression import FunctionExpression
-from eva.models.storage.batch import Batch
-from eva.parser.alias import Alias
-from eva.udfs.gpu_compatible import GPUCompatible
+from evadb.constants import NO_GPU
+from evadb.expression.function_expression import FunctionExpression
+from evadb.models.storage.batch import Batch
+from evadb.parser.alias import Alias
+from evadb.udfs.gpu_compatible import GPUCompatible
 
 
 class FunctionExpressionTest(unittest.TestCase):

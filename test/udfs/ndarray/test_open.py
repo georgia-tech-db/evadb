@@ -20,7 +20,7 @@ import pandas as pd
 import pytest
 from mock import patch
 
-from eva.udfs.ndarray.open import Open
+from evadb.udfs.ndarray.open import Open
 
 
 @pytest.mark.notparallel

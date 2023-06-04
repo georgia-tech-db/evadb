@@ -7,7 +7,7 @@ To begin your querying session, get a connection to the EvaDB using ``connect``:
 
     import evadb
 
-    from eva.interfaces.relational.db import EVAConnection, connect
+    from evadb.interfaces.relational.db import EVAConnection, connect
     conn = connect()
 
 You can then use this connection to run queries:

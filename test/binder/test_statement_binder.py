@@ -15,13 +15,13 @@
 import unittest
 from unittest.mock import MagicMock, patch
 
-from eva.binder.binder_utils import BinderError
-from eva.binder.statement_binder import StatementBinder
-from eva.binder.statement_binder_context import StatementBinderContext
-from eva.catalog.catalog_type import NdArrayType
-from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.parser.alias import Alias
-from eva.parser.create_statement import ColumnDefinition
+from evadb.binder.binder_utils import BinderError
+from evadb.binder.statement_binder import StatementBinder
+from evadb.binder.statement_binder_context import StatementBinderContext
+from evadb.catalog.catalog_type import NdArrayType
+from evadb.expression.tuple_value_expression import TupleValueExpression
+from evadb.parser.alias import Alias
+from evadb.parser.create_statement import ColumnDefinition
 
 
 class StatementBinderTests(unittest.TestCase):

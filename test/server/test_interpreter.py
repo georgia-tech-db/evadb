@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ from test.util import find_free_port
 
 from mock import MagicMock, patch
 
-from eva.server.interpreter import create_stdin_reader, start_cmd_client
+from evadb.server.interpreter import create_stdin_reader, start_cmd_client
 
 # Check for Python 3.8+ for IsolatedAsyncioTestCase support
 if sys.version_info >= (3, 8):

@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ from inspect import isabstract
 from test.util import get_all_subclasses, get_mock_object
 
 import eva
-from eva.udfs.abstract.abstract_udf import AbstractUDF
-from eva.udfs.abstract.hf_abstract_udf import AbstractHFUdf
-from eva.udfs.yolo_object_detector import Yolo
+from evadb.udfs.abstract.abstract_udf import AbstractUDF
+from evadb.udfs.abstract.hf_abstract_udf import AbstractHFUdf
+from evadb.udfs.yolo_object_detector import Yolo
 
 
 class AbstractUDFTest(unittest.TestCase):

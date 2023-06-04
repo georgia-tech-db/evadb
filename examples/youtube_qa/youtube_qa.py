@@ -15,8 +15,8 @@
 import os
 import shutil
 
-from eva.interfaces.relational.db import EVAConnection, connect
-from eva.configuration.configuration_manager import ConfigurationManager
+from evadb.interfaces.relational.db import EVAConnection, connect
+from evadb.configuration.configuration_manager import ConfigurationManager
 from pytube import YouTube
 
 def download_youtube_video_from_link(video_link: str):

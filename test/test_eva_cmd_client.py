@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ import unittest
 
 from mock import call, patch
 
-from eva.configuration.configuration_manager import ConfigurationManager
-from eva.eva_cmd_client import eva_client, main
+from evadb.configuration.configuration_manager import ConfigurationManager
+from evadb.eva_cmd_client import eva_client, main
 
 
 class CMDClientTest(unittest.TestCase):

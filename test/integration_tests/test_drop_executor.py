@@ -18,9 +18,9 @@ from test.util import create_sample_video, file_remove, get_evadb_for_testing
 
 import pytest
 
-from eva.catalog.catalog_utils import get_video_table_column_definitions
-from eva.executor.executor_utils import ExecutorError
-from eva.server.command_handler import execute_query_fetch_all
+from evadb.catalog.catalog_utils import get_video_table_column_definitions
+from evadb.executor.executor_utils import ExecutorError
+from evadb.server.command_handler import execute_query_fetch_all
 
 
 @pytest.mark.notparallel

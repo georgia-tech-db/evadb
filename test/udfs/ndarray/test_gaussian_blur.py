@@ -20,8 +20,8 @@ import cv2
 import numpy as np
 import pandas as pd
 
-from eva.configuration.constants import EVA_ROOT_DIR
-from eva.udfs.ndarray.gaussian_blur import GaussianBlur
+from evadb.configuration.constants import EVA_ROOT_DIR
+from evadb.udfs.ndarray.gaussian_blur import GaussianBlur
 
 
 class GaussianBlurTests(unittest.TestCase):

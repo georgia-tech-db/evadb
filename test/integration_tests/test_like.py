@@ -16,8 +16,8 @@ import unittest
 from test.markers import ocr_skip_marker
 from test.util import get_evadb_for_testing, shutdown_ray
 
-from eva.configuration.constants import EVA_ROOT_DIR
-from eva.server.command_handler import execute_query_fetch_all
+from evadb.configuration.constants import EVA_ROOT_DIR
+from evadb.server.command_handler import execute_query_fetch_all
 
 
 class LikeTest(unittest.TestCase):

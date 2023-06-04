@@ -29,11 +29,11 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from eva.binder.binder_utils import BinderError
-from eva.configuration.constants import EVA_ROOT_DIR
-from eva.models.storage.batch import Batch
-from eva.readers.decord_reader import DecordReader
-from eva.server.command_handler import execute_query_fetch_all
+from evadb.binder.binder_utils import BinderError
+from evadb.configuration.constants import EVA_ROOT_DIR
+from evadb.models.storage.batch import Batch
+from evadb.readers.decord_reader import DecordReader
+from evadb.server.command_handler import execute_query_fetch_all
 
 NUM_FRAMES = 10
 

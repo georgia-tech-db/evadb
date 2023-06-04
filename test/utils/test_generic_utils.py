@@ -16,8 +16,8 @@
 import unittest
 from test.markers import windows_skip_marker
 
-from eva.readers.decord_reader import DecordReader
-from eva.utils.generic_utils import (
+from evadb.readers.decord_reader import DecordReader
+from evadb.utils.generic_utils import (
     generate_file_path,
     is_gpu_available,
     load_udf_class_from_file,
