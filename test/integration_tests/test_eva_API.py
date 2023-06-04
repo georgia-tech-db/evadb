@@ -14,57 +14,55 @@
 # limitations under the License.
 import unittest
 from unittest.mock import AsyncMock
+from test.util import get_evadb_for_testing
+
 
 import pytest
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
-from eva.interfaces.relational.db import EVACursor
+from eva.interfaces.relational.db import EVAConnection, connect
 from eva.server.command_handler import execute_query_fetch_all
 
 
 @pytest.mark.asyncio
 class EVAAPITests(unittest.TestCase):
     def setUp(self):
+        self.evadb = get_evadb_for_testing()
         # reset the catalog manager before running each test
-        CatalogManager().reset()
+        self.evadb.catalog().reset()
 
     def test_udf_eva_api(self):
         pdf_path = f"{EVA_ROOT_DIR}/data/documents/state_of_the_union.pdf"
 
-        connection = AsyncMock()
-        cursor = EVACursor(connection)
+        conn = connect()
 
-        load_pdf = cursor.load(file_regex=pdf_path, format="PDF", table_name="PDFss")
+        load_pdf = conn.load(file_regex=pdf_path, format="PDF", table_name="PDFss")
         load_pdf.execute()
 
-        udf_check = cursor.query("DROP UDF IF  EXISTS SimilarityFeatureExtractor")
+        udf_check = conn.query("DROP UDF IF  EXISTS SimilarityFeatureExtractor")
         udf_check.execute()
-        udf = cursor.query(
+
+        udf = conn.query(
             f"""CREATE UDF IF NOT EXISTS SimilarityFeatureExtractor
                             IMPL  '{EVA_ROOT_DIR}/eva/udfs/similarity_feature_extractor.py'"""
         )
         udf.execute()
 
-        execute_query_fetch_all("""CREATE INDEX reddit_sift_image_index 
-                    ON PDFss (SimilarityFeatureExtractor(data)) 
-                    USING FAISS""")
+        conn.create_vector_index(
+            "faiss_index",
+            table_name="PDFss",
+            expr="SimilarityFeatureExtractor(data)",
+            using="QDRANT",
+        ).df()
 
-        result = execute_query_fetch_all("""SELECT * FROM PDFss ORDER BY
-                    Similarity(
-                      SimilarityFeatureExtractor('BLOOD'),
-                      SimilarityFeatureExtractor(data)
-                    )
-                    LIMIT 5""")
-                    
-        # table = cursor.table("PDFss")
-        # table_udf = table.cross_apply(
-        #     "SimilarityFeatureExtractor('BLOOD')", "objs(features)"
-        # )
-        # table_udf_data = table_udf.df()
-        self.assertEqual(len(table_udf_data.columns), 6)
-        self.assertTrue("objs.features" in table_udf_data.columns)
-        self.assertTrue("pdfss.data" in table_udf_data.columns)
-        # self.assertTrue(
-        #     all(isinstance(x, float) for x in table_udf_data["objs.simiarity"])
-        # )
+        rel = (
+            conn.table("PDFss")
+            .order(
+                "Similarity(SimilarityFeatureExtractor('When was the NATO created?'), SimilarityFeatureExtractor(data))"
+            )
+            .limit(1)
+            .select("data")
+        ).df()
+        self.assertEqual(len(rel), 1)
+        self.assertTrue("pdfss.data" in rel.columns)
