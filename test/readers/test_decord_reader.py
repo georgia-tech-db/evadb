@@ -24,14 +24,14 @@ from test.util import (
 import numpy as np
 import pytest
 
-from evadb.configuration.constants import EVA_ROOT_DIR
-from evadb.constants import AUDIORATE, IFRAMES
-from evadb.expression.abstract_expression import ExpressionType
-from evadb.expression.comparison_expression import ComparisonExpression
-from evadb.expression.constant_value_expression import ConstantValueExpression
-from evadb.expression.logical_expression import LogicalExpression
-from evadb.expression.tuple_value_expression import TupleValueExpression
-from evadb.readers.decord_reader import DecordReader
+from evaconfiguration.constants import EVA_ROOT_DIR
+from evaconstants import AUDIORATE, IFRAMES
+from evaexpression.abstract_expression import ExpressionType
+from evaexpression.comparison_expression import ComparisonExpression
+from evaexpression.constant_value_expression import ConstantValueExpression
+from evaexpression.logical_expression import LogicalExpression
+from evaexpression.tuple_value_expression import TupleValueExpression
+from evareaders.decord_reader import DecordReader
 
 
 @pytest.mark.notparallel

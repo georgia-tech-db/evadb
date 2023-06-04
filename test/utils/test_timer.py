@@ -22,8 +22,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from evadb.server.command_handler import handle_request
-from evadb.utils.stats import Timer
+from evaserver.command_handler import handle_request
+from evautils.stats import Timer
 
 NUM_FRAMES = 10
 
@@ -44,7 +44,7 @@ class TimerTests(unittest.TestCase):
     @pytest.mark.notparallel
     def test_timer_with_query(self):
         evadb = get_evadb_for_testing()
-        evadb.catalog().reset()
+        evacatalog().reset()
         video_file_path = create_sample_video(NUM_FRAMES)
         load_query = f"LOAD VIDEO '{video_file_path}' INTO MyVideo;"
         transport = MagicMock()

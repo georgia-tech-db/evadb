@@ -18,9 +18,10 @@ import numpy as np
 from PIL import Image, ImageDraw
 from transformers import pipeline
 
-from evadb.catalog.catalog_type import ColumnType, NdArrayType
-from evadb.catalog.models.utils import UdfIOCatalogEntry, UdfMetadataCatalogEntry
-from evadb.third_party.huggingface.model import (
+from eva.catalog.catalog_type import ColumnType, NdArrayType
+from eva.catalog.models.utils import UdfIOCatalogEntry
+from eva.catalog.models.utils import UdfMetadataCatalogEntry
+from eva.third_party.huggingface.model import (
     ASRHFModel,
     AudioHFModel,
     HFInputTypes,

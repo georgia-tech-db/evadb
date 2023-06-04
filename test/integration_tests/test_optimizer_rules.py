@@ -26,20 +26,20 @@ import pandas as pd
 import pytest
 from mock import MagicMock, patch
 
-from evadb.configuration.constants import EVA_ROOT_DIR
-from evadb.expression.comparison_expression import ComparisonExpression
-from evadb.models.storage.batch import Batch
-from evadb.optimizer.plan_generator import PlanGenerator
-from evadb.optimizer.rules.rules import (
+from evaconfiguration.constants import EVA_ROOT_DIR
+from evaexpression.comparison_expression import ComparisonExpression
+from evamodels.storage.batch import Batch
+from evaoptimizer.plan_generator import PlanGenerator
+from evaoptimizer.rules.rules import (
     PushDownFilterThroughApplyAndMerge,
     PushDownFilterThroughJoin,
     ReorderPredicates,
     XformLateralJoinToLinearFlow,
 )
-from evadb.optimizer.rules.rules_manager import RulesManager, disable_rules
-from evadb.plan_nodes.predicate_plan import PredicatePlan
-from evadb.server.command_handler import execute_query_fetch_all
-from evadb.utils.stats import Timer
+from evaoptimizer.rules.rules_manager import RulesManager, disable_rules
+from evaplan_nodes.predicate_plan import PredicatePlan
+from evaserver.command_handler import execute_query_fetch_all
+from evautils.stats import Timer
 
 
 @pytest.mark.notparallel
@@ -48,7 +48,7 @@ class OptimizerRulesTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.evadb = get_evadb_for_testing()
-        cls.evadb.catalog().reset()
+        cls.evacatalog().reset()
         ua_detrac = f"{EVA_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
         execute_query_fetch_all(cls.evadb, f"LOAD VIDEO '{ua_detrac}' INTO MyVideo;")
         execute_query_fetch_all(cls.evadb, f"LOAD VIDEO '{ua_detrac}' INTO MyVideo2;")
@@ -59,8 +59,8 @@ class OptimizerRulesTest(unittest.TestCase):
         shutdown_ray()
         execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS MyVideo;")
 
-    @patch("evadb.expression.function_expression.FunctionExpression.evaluate")
-    @patch("evadb.models.storage.batch.Batch.merge_column_wise")
+    @patch("evaexpression.function_expression.FunctionExpression.evaluate")
+    @patch("evamodels.storage.batch.Batch.merge_column_wise")
     def test_should_benefit_from_pushdown(self, merge_mock, evaluate_mock):
         # added to mock away the
         evaluate_mock.return_value = Batch(
@@ -88,7 +88,7 @@ class OptimizerRulesTest(unittest.TestCase):
         result_without_pushdown_rules = None
 
         with time_without_rule:
-            rules_manager = RulesManager(self.evadb.config)
+            rules_manager = RulesManager(self.evaconfig)
             with disable_rules(
                 rules_manager,
                 [PushDownFilterThroughApplyAndMerge(), PushDownFilterThroughJoin()],
@@ -109,7 +109,7 @@ class OptimizerRulesTest(unittest.TestCase):
         self.assertGreater(evaluate_count_without_rule, 3 * evaluate_count_with_rule)
 
         result_without_xform_rule = None
-        rules_manager = RulesManager(self.evadb.config)
+        rules_manager = RulesManager(self.evaconfig)
         with disable_rules(rules_manager, [XformLateralJoinToLinearFlow()]):
             custom_plan_generator = PlanGenerator(self.evadb, rules_manager)
             result_without_xform_rule = execute_query_fetch_all(
@@ -132,7 +132,7 @@ class OptimizerRulesTest(unittest.TestCase):
         time_without_rule = Timer()
         result_without_pushdown_join_rule = None
         with time_without_rule:
-            rules_manager = RulesManager(self.evadb.config)
+            rules_manager = RulesManager(self.evaconfig)
             with disable_rules(rules_manager, [PushDownFilterThroughJoin()]):
                 # should use PushDownFilterThroughApplyAndMerge()
                 custom_plan_generator = PlanGenerator(self.evadb, rules_manager)
@@ -146,7 +146,7 @@ class OptimizerRulesTest(unittest.TestCase):
         self.assertEqual(result_without_pushdown_join_rule, result_with_rule)
         self.assertEqual(query_plan, query_plan_without_pushdown_join_rule)
 
-    @patch("evadb.catalog.catalog_manager.CatalogManager.get_udf_cost_catalog_entry")
+    @patch("evacatalog.catalog_manager.CatalogManager.get_udf_cost_catalog_entry")
     def test_should_reorder_predicates(self, mock):
         def _check_reorder(cost_func):
             mock.side_effect = cost_func
@@ -179,7 +179,7 @@ class OptimizerRulesTest(unittest.TestCase):
             lambda name: MagicMock(cost=5) if name == "DummyObjectDetector" else None
         )
 
-    @patch("evadb.catalog.catalog_manager.CatalogManager.get_udf_cost_catalog_entry")
+    @patch("evacatalog.catalog_manager.CatalogManager.get_udf_cost_catalog_entry")
     def test_should_not_reorder_predicates(self, mock):
         def _check_no_reorder(cost_func):
             mock.side_effect = cost_func
@@ -221,7 +221,7 @@ class OptimizerRulesTest(unittest.TestCase):
         # no reordering if default cost is used for both UDF
         _check_no_reorder(lambda name: None)
 
-    @patch("evadb.catalog.catalog_manager.CatalogManager.get_udf_cost_catalog_entry")
+    @patch("evacatalog.catalog_manager.CatalogManager.get_udf_cost_catalog_entry")
     def test_should_reorder_multiple_predicates(self, mock):
         def side_effect_func(name):
             if name == "DummyMultiObjectDetector":
@@ -258,7 +258,7 @@ class OptimizerRulesTest(unittest.TestCase):
         query = "SELECT id FROM MyVideo WHERE id < 20 AND id > 10;"
         result = execute_query_fetch_all(self.evadb, query)
 
-        rules_manager = RulesManager(self.evadb.config)
+        rules_manager = RulesManager(self.evaconfig)
         with disable_rules(rules_manager, [ReorderPredicates()]):
             custom_plan_generator = PlanGenerator(self.evadb, rules_manager)
             expected = execute_query_fetch_all(

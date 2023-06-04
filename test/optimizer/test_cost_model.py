@@ -17,12 +17,12 @@ from copy import copy
 
 from mock import MagicMock
 
-from evadb.optimizer.group_expression import GroupExpression
-from evadb.optimizer.operators import Operator
-from evadb.optimizer.optimizer_context import OptimizerContext
-from evadb.optimizer.optimizer_tasks import OptimizeGroup
-from evadb.optimizer.plan_generator import PlanGenerator
-from evadb.optimizer.property import PropertyType
+from evaoptimizer.group_expression import GroupExpression
+from evaoptimizer.operators import Operator
+from evaoptimizer.optimizer_context import OptimizerContext
+from evaoptimizer.optimizer_tasks import OptimizeGroup
+from evaoptimizer.plan_generator import PlanGenerator
+from evaoptimizer.property import PropertyType
 
 
 class CostModel(unittest.TestCase):

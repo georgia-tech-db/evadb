@@ -16,15 +16,15 @@ import unittest
 from test.markers import ocr_skip_marker
 from test.util import get_evadb_for_testing, shutdown_ray
 
-from evadb.configuration.constants import EVA_ROOT_DIR
-from evadb.server.command_handler import execute_query_fetch_all
+from evaconfiguration.constants import EVA_ROOT_DIR
+from evaserver.command_handler import execute_query_fetch_all
 
 
 class LikeTest(unittest.TestCase):
     def setUp(self):
         self.evadb = get_evadb_for_testing()
         # reset the catalog manager before running each test
-        self.evadb.catalog().reset()
+        self.evacatalog().reset()
         meme1 = f"{EVA_ROOT_DIR}/data/detoxify/meme1.jpg"
         meme2 = f"{EVA_ROOT_DIR}/data/detoxify/meme2.jpg"
 

@@ -16,13 +16,13 @@ import unittest
 
 from mock import MagicMock, patch
 
-from evadb.catalog.catalog_type import NdArrayType
-from evadb.executor.create_udf_executor import CreateUDFExecutor
-from evadb.udfs.decorators.io_descriptors.data_types import PandasDataframe
+from evacatalog.catalog_type import NdArrayType
+from evaexecutor.create_udf_executor import CreateUDFExecutor
+from evaudfs.decorators.io_descriptors.data_types import PandasDataframe
 
 
 class CreateUdfExecutorTest(unittest.TestCase):
-    @patch("evadb.executor.create_udf_executor.load_udf_class_from_file")
+    @patch("evaexecutor.create_udf_executor.load_udf_class_from_file")
     def test_should_create_udf(self, load_udf_class_from_file_mock):
         catalog_instance = MagicMock()
         catalog_instance().get_udf_catalog_entry_by_name.return_value = None
@@ -45,8 +45,8 @@ class CreateUdfExecutorTest(unittest.TestCase):
             },
         )
         evadb = MagicMock
-        evadb.catalog = catalog_instance
-        evadb.config = MagicMock()
+        evacatalog = catalog_instance
+        evaconfig = MagicMock()
         create_udf_executor = CreateUDFExecutor(evadb, plan)
         next(create_udf_executor.exec())
         catalog_instance().insert_udf_catalog_entry.assert_called_with(
@@ -57,7 +57,7 @@ class CreateUdfExecutorTest(unittest.TestCase):
             {"key1": "value1", "key2": "value2"},
         )
 
-    @patch("evadb.executor.create_udf_executor.load_udf_class_from_file")
+    @patch("evaexecutor.create_udf_executor.load_udf_class_from_file")
     def test_should_raise_error_on_incorrect_io_definition(
         self, load_udf_class_from_file_mock
     ):
@@ -90,8 +90,8 @@ class CreateUdfExecutorTest(unittest.TestCase):
             },
         )
         evadb = MagicMock
-        evadb.catalog = catalog_instance
-        evadb.config = MagicMock()
+        evacatalog = catalog_instance
+        evaconfig = MagicMock()
         create_udf_executor = CreateUDFExecutor(evadb, plan)
         # check a string in the error message
         with self.assertRaises(RuntimeError) as exc:

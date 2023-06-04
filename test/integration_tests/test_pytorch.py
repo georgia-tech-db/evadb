@@ -28,11 +28,11 @@ import numpy as np
 import pandas.testing as pd_testing
 import pytest
 
-from evadb.configuration.constants import EVA_ROOT_DIR
-from evadb.executor.executor_utils import ExecutorError
-from evadb.models.storage.batch import Batch
-from evadb.server.command_handler import execute_query_fetch_all
-from evadb.udfs.udf_bootstrap_queries import Asl_udf_query, Mvit_udf_query
+from evaconfiguration.constants import EVA_ROOT_DIR
+from evaexecutor.executor_utils import ExecutorError
+from evamodels.storage.batch import Batch
+from evaserver.command_handler import execute_query_fetch_all
+from evaudfs.udf_bootstrap_queries import Asl_udf_query, Mvit_udf_query
 
 
 @pytest.mark.notparallel
@@ -40,8 +40,8 @@ class PytorchTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.evadb = get_evadb_for_testing()
-        cls.evadb.catalog().reset()
-        os.environ["ray"] = str(cls.evadb.config.get_value("experimental", "ray"))
+        cls.evacatalog().reset()
+        os.environ["ray"] = str(cls.evaconfig.get_value("experimental", "ray"))
 
         ua_detrac = f"{EVA_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
         mnist = f"{EVA_ROOT_DIR}/data/mnist/mnist.mp4"
@@ -96,7 +96,7 @@ class PytorchTest(unittest.TestCase):
         par_batch = execute_query_fetch_all(self.evadb, select_query)
 
         # Sequential execution.
-        self.evadb.config.update_value("experimental", "ray", False)
+        self.evaconfig.update_value("experimental", "ray", False)
         select_query = """SELECT id, obj.labels
                           FROM MyVideo JOIN LATERAL
                           FastRCNNObjectDetector(data)
@@ -104,7 +104,7 @@ class PytorchTest(unittest.TestCase):
                          WHERE id < 20;"""
         seq_batch = execute_query_fetch_all(self.evadb, select_query)
         # Recover configuration back.
-        self.evadb.config.update_value("experimental", "ray", True)
+        self.evaconfig.update_value("experimental", "ray", True)
 
         self.assertEqual(len(par_batch), len(seq_batch))
         self.assertEqual(par_batch, seq_batch)
@@ -125,10 +125,10 @@ class PytorchTest(unittest.TestCase):
         par_batch = execute_query_fetch_all(self.evadb, select_query)
 
         # Sequential execution.
-        self.evadb.config.update_value("experimental", "ray", False)
+        self.evaconfig.update_value("experimental", "ray", False)
         seq_batch = execute_query_fetch_all(self.evadb, select_query)
         # Recover configuration back.
-        self.evadb.config.update_value("experimental", "ray", True)
+        self.evaconfig.update_value("experimental", "ray", True)
 
         self.assertEqual(len(par_batch), len(seq_batch))
         self.assertEqual(par_batch, seq_batch)
@@ -285,7 +285,7 @@ class PytorchTest(unittest.TestCase):
         batch_res = execute_query_fetch_all(self.evadb, select_query)
         img = batch_res.frames["myvideo.data"][0]
 
-        tmp_dir_from_config = self.evadb.config.get_value("storage", "tmp_dir")
+        tmp_dir_from_config = self.evaconfig.get_value("storage", "tmp_dir")
 
         img_save_path = os.path.join(tmp_dir_from_config, "dummy.jpg")
         try:

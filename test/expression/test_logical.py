@@ -17,12 +17,12 @@ import unittest
 import pandas as pd
 from mock import Mock
 
-from evadb.expression.abstract_expression import ExpressionType
-from evadb.expression.comparison_expression import ComparisonExpression
-from evadb.expression.constant_value_expression import ConstantValueExpression
-from evadb.expression.logical_expression import LogicalExpression
-from evadb.expression.tuple_value_expression import TupleValueExpression
-from evadb.models.storage.batch import Batch
+from evaexpression.abstract_expression import ExpressionType
+from evaexpression.comparison_expression import ComparisonExpression
+from evaexpression.constant_value_expression import ConstantValueExpression
+from evaexpression.logical_expression import LogicalExpression
+from evaexpression.tuple_value_expression import TupleValueExpression
+from evamodels.storage.batch import Batch
 
 
 class LogicalExpressionsTest(unittest.TestCase):

@@ -17,10 +17,10 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from evadb.binder.binder_utils import BinderError
-from evadb.binder.statement_binder_context import StatementBinderContext
-from evadb.expression.function_expression import FunctionExpression
-from evadb.expression.tuple_value_expression import TupleValueExpression
+from evabinder.binder_utils import BinderError
+from evabinder.statement_binder_context import StatementBinderContext
+from evaexpression.function_expression import FunctionExpression
+from evaexpression.tuple_value_expression import TupleValueExpression
 
 
 @pytest.mark.notparallel

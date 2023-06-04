@@ -17,8 +17,8 @@ from test.util import create_text_csv, file_remove, get_evadb_for_testing
 
 import pytest
 
-from evadb.executor.executor_utils import ExecutorError
-from evadb.server.command_handler import execute_query_fetch_all
+from evaexecutor.executor_utils import ExecutorError
+from evaserver.command_handler import execute_query_fetch_all
 
 NUM_FRAMES = 10
 
@@ -31,7 +31,7 @@ class HuggingFaceTests(unittest.TestCase):
 
     def setUp(self) -> None:
         self.evadb = get_evadb_for_testing()
-        self.evadb.catalog().reset()
+        self.evacatalog().reset()
 
         # Use DETRAC for HF Tests to test variety of models
         query = """LOAD VIDEO 'data/ua_detrac/ua_detrac.mp4' INTO DETRAC;"""
@@ -60,7 +60,7 @@ class HuggingFaceTests(unittest.TestCase):
 
         execute_query_fetch_all(self.evadb, create_udf_query)
 
-        catalog = self.evadb.catalog()
+        catalog = self.evacatalog()
         udf = catalog.get_udf_catalog_entry_by_name(udf_name)
         input_entries = catalog.get_udf_io_catalog_input_entries(udf)
         output_entries = catalog.get_udf_io_catalog_output_entries(udf)

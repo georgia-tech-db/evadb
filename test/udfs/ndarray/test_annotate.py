@@ -19,8 +19,8 @@ import pandas as pd
 from numpy import asarray
 from PIL import Image
 
-from evadb.configuration.constants import EVA_ROOT_DIR
-from evadb.udfs.ndarray.annotate import Annotate
+from evaconfiguration.constants import EVA_ROOT_DIR
+from evaudfs.ndarray.annotate import Annotate
 
 
 class AnnotateTests(unittest.TestCase):

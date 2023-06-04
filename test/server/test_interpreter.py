@@ -19,7 +19,7 @@ from test.util import find_free_port
 
 from mock import MagicMock, patch
 
-from evadb.server.interpreter import create_stdin_reader, start_cmd_client
+from evaserver.interpreter import create_stdin_reader, start_cmd_client
 
 # Check for Python 3.8+ for IsolatedAsyncioTestCase support
 if sys.version_info >= (3, 8):
@@ -29,9 +29,9 @@ if sys.version_info >= (3, 8):
             super().__init__(*args, **kwargs)
 
         @patch("asyncio.open_connection")
-        @patch("evadb.server.interpreter.create_stdin_reader")
-        @patch("evadb.interfaces.relational.db.EVACursor.execute_async")
-        @patch("evadb.interfaces.relational.db.EVACursor.fetch_all_async")
+        @patch("evaserver.interpreter.create_stdin_reader")
+        @patch("evainterfaces.relational.db.EVACursor.execute_async")
+        @patch("evainterfaces.relational.db.EVACursor.fetch_all_async")
         async def test_start_cmd_client(
             self, mock_fetch, mock_execute, mock_stdin_reader, mock_open
         ):

@@ -18,8 +18,8 @@ import unittest
 
 from mock import call, patch
 
-from evadb.configuration.configuration_manager import ConfigurationManager
-from evadb.eva_cmd_client import eva_client, main
+from evaconfiguration.configuration_manager import ConfigurationManager
+from evaeva_cmd_client import eva_client, main
 
 
 class CMDClientTest(unittest.TestCase):
@@ -32,8 +32,8 @@ class CMDClientTest(unittest.TestCase):
         stdin_reader.feed_eof()
         return stdin_reader
 
-    @patch("evadb.eva_cmd_client.start_cmd_client")
-    @patch("evadb.server.interpreter.create_stdin_reader")
+    @patch("evaeva_cmd_client.start_cmd_client")
+    @patch("evaserver.interpreter.create_stdin_reader")
     def test_eva_client(self, mock_stdin_reader, mock_client):
         mock_stdin_reader.return_value = self.get_mock_stdin_reader()
         mock_client.side_effect = Exception("Test")
@@ -54,7 +54,7 @@ class CMDClientTest(unittest.TestCase):
         asyncio.run(test2())
 
     @patch("argparse.ArgumentParser.parse_known_args")
-    @patch("evadb.eva_cmd_client.start_cmd_client")
+    @patch("evaeva_cmd_client.start_cmd_client")
     def test_eva_client_with_cmd_arguments(
         self, mock_start_cmd_client, mock_parse_known_args
     ):
@@ -69,7 +69,7 @@ class CMDClientTest(unittest.TestCase):
         mock_start_cmd_client.assert_called_once_with("127.0.0.1", "8800")
 
     @patch("argparse.ArgumentParser.parse_known_args")
-    @patch("evadb.eva_cmd_client.start_cmd_client")
+    @patch("evaeva_cmd_client.start_cmd_client")
     def test_main_without_cmd_arguments(
         self, mock_start_cmd_client, mock_parse_known_args
     ):

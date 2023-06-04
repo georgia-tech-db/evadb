@@ -29,11 +29,11 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from evadb.binder.binder_utils import BinderError
-from evadb.configuration.constants import EVA_ROOT_DIR
-from evadb.models.storage.batch import Batch
-from evadb.readers.decord_reader import DecordReader
-from evadb.server.command_handler import execute_query_fetch_all
+from evabinder.binder_utils import BinderError
+from evaconfiguration.constants import EVA_ROOT_DIR
+from evamodels.storage.batch import Batch
+from evareaders.decord_reader import DecordReader
+from evaserver.command_handler import execute_query_fetch_all
 
 NUM_FRAMES = 10
 
@@ -43,7 +43,7 @@ class SelectExecutorTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.evadb = get_evadb_for_testing()
-        cls.evadb.catalog().reset()
+        cls.evacatalog().reset()
         video_file_path = create_sample_video(NUM_FRAMES)
         load_query = f"LOAD VIDEO '{video_file_path}' INTO MyVideo;"
         execute_query_fetch_all(cls.evadb, load_query)
@@ -679,13 +679,13 @@ class SelectExecutorTest(unittest.TestCase):
         )
         signature = plan.target_list[0].signature()
         udf_id = (
-            self.evadb.catalog()
+            self.evacatalog()
             .get_udf_catalog_entry_by_name("DummyMultiObjectDetector")
             .row_id
         )
-        table_entry = self.evadb.catalog().get_table_catalog_entry("MyVideo")
+        table_entry = self.evacatalog().get_table_catalog_entry("MyVideo")
         col_id = (
-            self.evadb.catalog().get_column_catalog_entry(table_entry, "data").row_id
+            self.evacatalog().get_column_catalog_entry(table_entry, "data").row_id
         )
         self.assertEqual(
             signature, f"DummyMultiObjectDetector[{udf_id}](MyVideo.data[{col_id}])"

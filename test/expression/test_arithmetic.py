@@ -16,10 +16,10 @@ import unittest
 
 import pandas as pd
 
-from evadb.expression.abstract_expression import ExpressionType
-from evadb.expression.arithmetic_expression import ArithmeticExpression
-from evadb.expression.constant_value_expression import ConstantValueExpression
-from evadb.models.storage.batch import Batch
+from evaexpression.abstract_expression import ExpressionType
+from evaexpression.arithmetic_expression import ArithmeticExpression
+from evaexpression.constant_value_expression import ConstantValueExpression
+from evamodels.storage.batch import Batch
 
 
 class ArithmeticExpressionsTest(unittest.TestCase):

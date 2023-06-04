@@ -14,13 +14,13 @@
 # limitations under the License.
 import unittest
 
-from evadb.catalog.catalog_type import ColumnType, Dimension, NdArrayType
-from evadb.udfs.decorators.io_descriptors.data_types import (
+from evacatalog.catalog_type import ColumnType, Dimension, NdArrayType
+from evaudfs.decorators.io_descriptors.data_types import (
     NumpyArray,
     PandasDataframe,
     PyTorchTensor,
 )
-from evadb.utils.errors import UDFIODefinitionError
+from evautils.errors import UDFIODefinitionError
 
 
 class UDFIODescriptorsTests(unittest.TestCase):

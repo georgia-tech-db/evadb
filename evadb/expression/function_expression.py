@@ -18,16 +18,17 @@ from typing import Callable, List, Tuple
 import numpy as np
 import pandas as pd
 
-from evadb.catalog.models.utils import UdfCatalogEntry, UdfIOCatalogEntry
-from evadb.constants import NO_GPU
-from evadb.executor.execution_context import Context
-from evadb.expression.abstract_expression import AbstractExpression, ExpressionType
-from evadb.models.storage.batch import Batch
-from evadb.parser.alias import Alias
-from evadb.udfs.gpu_compatible import GPUCompatible
-from evadb.utils.kv_cache import DiskKVCache
-from evadb.utils.logging_manager import logger
-from evadb.utils.stats import UDFStats
+from eva.catalog.models.utils import UdfCatalogEntry
+from eva.catalog.models.utils import UdfIOCatalogEntry
+from eva.constants import NO_GPU
+from eva.executor.execution_context import Context
+from eva.expression.abstract_expression import AbstractExpression, ExpressionType
+from eva.models.storage.batch import Batch
+from eva.parser.alias import Alias
+from eva.udfs.gpu_compatible import GPUCompatible
+from eva.utils.kv_cache import DiskKVCache
+from eva.utils.logging_manager import logger
+from eva.utils.stats import UDFStats
 
 
 class FunctionExpression(AbstractExpression):

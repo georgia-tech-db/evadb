@@ -23,15 +23,15 @@ from test.util import (
 import numpy as np
 import pytest
 
-from evadb.configuration.constants import EVA_ROOT_DIR
-from evadb.server.command_handler import execute_query_fetch_all
+from evaconfiguration.constants import EVA_ROOT_DIR
+from evaserver.command_handler import execute_query_fetch_all
 
 
 @pytest.mark.notparallel
 class DeleteExecutorTest(unittest.TestCase):
     def setUp(self):
         self.evadb = get_evadb_for_testing()
-        self.evadb.catalog().reset()
+        self.evacatalog().reset()
         load_udfs_for_testing(self.evadb, mode="debug")
 
         create_table_query = """

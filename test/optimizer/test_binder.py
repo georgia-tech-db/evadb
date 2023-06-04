@@ -17,11 +17,11 @@ import unittest
 
 from mock import MagicMock
 
-from evadb.optimizer.binder import Binder
-from evadb.optimizer.cost_model import CostModel
-from evadb.optimizer.operators import Dummy, LogicalFilter, LogicalGet, OperatorType
-from evadb.optimizer.optimizer_context import OptimizerContext
-from evadb.optimizer.rules.pattern import Pattern
+from evaoptimizer.binder import Binder
+from evaoptimizer.cost_model import CostModel
+from evaoptimizer.operators import Dummy, LogicalFilter, LogicalGet, OperatorType
+from evaoptimizer.optimizer_context import OptimizerContext
+from evaoptimizer.rules.pattern import Pattern
 
 
 class TestBinder(unittest.TestCase):

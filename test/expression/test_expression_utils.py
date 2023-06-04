@@ -15,19 +15,19 @@
 import unittest
 from unittest.mock import Mock
 
-from evadb.expression.abstract_expression import ExpressionType
-from evadb.expression.arithmetic_expression import ArithmeticExpression
-from evadb.expression.comparison_expression import ComparisonExpression
-from evadb.expression.constant_value_expression import ConstantValueExpression
-from evadb.expression.expression_utils import (
+from evaexpression.abstract_expression import ExpressionType
+from evaexpression.arithmetic_expression import ArithmeticExpression
+from evaexpression.comparison_expression import ComparisonExpression
+from evaexpression.constant_value_expression import ConstantValueExpression
+from evaexpression.expression_utils import (
     conjunction_list_to_expression_tree,
     contains_single_column,
     extract_range_list_from_comparison_expr,
     extract_range_list_from_predicate,
     is_simple_predicate,
 )
-from evadb.expression.logical_expression import LogicalExpression
-from evadb.expression.tuple_value_expression import TupleValueExpression
+from evaexpression.logical_expression import LogicalExpression
+from evaexpression.tuple_value_expression import TupleValueExpression
 
 
 class ExpressionUtilsTest(unittest.TestCase):

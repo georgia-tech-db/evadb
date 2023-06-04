@@ -17,15 +17,15 @@ import unittest
 import pandas as pd
 from mock import MagicMock, Mock, patch
 
-from evadb.constants import NO_GPU
-from evadb.expression.function_expression import FunctionExpression
-from evadb.models.storage.batch import Batch
-from evadb.parser.alias import Alias
-from evadb.udfs.gpu_compatible import GPUCompatible
+from evaconstants import NO_GPU
+from evaexpression.function_expression import FunctionExpression
+from evamodels.storage.batch import Batch
+from evaparser.alias import Alias
+from evaudfs.gpu_compatible import GPUCompatible
 
 
 class FunctionExpressionTest(unittest.TestCase):
-    @patch("evadb.expression.function_expression.Context")
+    @patch("evaexpression.function_expression.Context")
     def test_function_move_the_device_to_gpu_if_compatible(self, context):
         context_instance = context.return_value
         mock_function = MagicMock(spec=GPUCompatible)
@@ -53,7 +53,7 @@ class FunctionExpressionTest(unittest.TestCase):
         expression.evaluate(input_batch)
         mock_function.assert_called()
 
-    @patch("evadb.expression.function_expression.Context")
+    @patch("evaexpression.function_expression.Context")
     def test_should_execute_same_function_if_no_gpu(self, context):
         context_instance = context.return_value
         mock_function = MagicMock(spec=GPUCompatible, return_value=pd.DataFrame())

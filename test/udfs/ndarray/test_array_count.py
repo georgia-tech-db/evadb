@@ -14,7 +14,7 @@
 # limitations under the License.
 import unittest
 
-from evadb.udfs.ndarray.array_count import ArrayCount
+from evaudfs.ndarray.array_count import ArrayCount
 
 
 class CropTests(unittest.TestCase):

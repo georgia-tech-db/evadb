@@ -24,17 +24,17 @@ from test.util import (
     shutdown_ray,
 )
 
-from evadb.configuration.constants import EVA_ROOT_DIR
-from evadb.optimizer.operators import LogicalFunctionScan
-from evadb.optimizer.plan_generator import PlanGenerator
-from evadb.optimizer.rules.rules import (
+from evaconfiguration.constants import EVA_ROOT_DIR
+from evaoptimizer.operators import LogicalFunctionScan
+from evaoptimizer.plan_generator import PlanGenerator
+from evaoptimizer.rules.rules import (
     CacheFunctionExpressionInApply,
     CacheFunctionExpressionInFilter,
     CacheFunctionExpressionInProject,
 )
-from evadb.optimizer.rules.rules_manager import RulesManager, disable_rules
-from evadb.server.command_handler import execute_query_fetch_all
-from evadb.utils.stats import Timer
+from evaoptimizer.rules.rules_manager import RulesManager, disable_rules
+from evaserver.command_handler import execute_query_fetch_all
+from evautils.stats import Timer
 
 
 class ReuseTest(unittest.TestCase):
@@ -49,7 +49,7 @@ class ReuseTest(unittest.TestCase):
 
     def setUp(self):
         self.evadb = get_evadb_for_testing()
-        self.evadb.catalog().reset()
+        self.evacatalog().reset()
         ua_detrac = f"{EVA_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
         execute_query_fetch_all(self.evadb, f"LOAD VIDEO '{ua_detrac}' INTO DETRAC;")
         load_udfs_for_testing(self.evadb)
@@ -64,7 +64,7 @@ class ReuseTest(unittest.TestCase):
         # surfaces when the system is running on low memory. Explicitly calling garbage
         # collection to reduce the memory usage.
         gc.collect()
-        rules_manager = RulesManager(self.evadb.config)
+        rules_manager = RulesManager(self.evaconfig)
         with disable_rules(
             rules_manager,
             [
@@ -218,14 +218,14 @@ class ReuseTest(unittest.TestCase):
         cache_name = plan.func_expr.signature()
 
         # cache exists
-        udf_cache = self.evadb.catalog().get_udf_cache_catalog_entry_by_name(cache_name)
+        udf_cache = self.evacatalog().get_udf_cache_catalog_entry_by_name(cache_name)
         cache_dir = Path(udf_cache.cache_path)
         self.assertIsNotNone(udf_cache)
         self.assertTrue(cache_dir.exists())
 
         # cache should be removed if the UDF is removed
         execute_query_fetch_all(self.evadb, "DROP UDF Yolo;")
-        udf_cache = self.evadb.catalog().get_udf_cache_catalog_entry_by_name(cache_name)
+        udf_cache = self.evacatalog().get_udf_cache_catalog_entry_by_name(cache_name)
         self.assertIsNone(udf_cache)
         self.assertFalse(cache_dir.exists())
 
@@ -242,13 +242,13 @@ class ReuseTest(unittest.TestCase):
         cache_name = plan.func_expr.signature()
 
         # cache exists
-        udf_cache = self.evadb.catalog().get_udf_cache_catalog_entry_by_name(cache_name)
+        udf_cache = self.evacatalog().get_udf_cache_catalog_entry_by_name(cache_name)
         cache_dir = Path(udf_cache.cache_path)
         self.assertIsNotNone(udf_cache)
         self.assertTrue(cache_dir.exists())
 
         # cache should be removed if the Table is removed
         execute_query_fetch_all(self.evadb, "DROP TABLE DETRAC;")
-        udf_cache = self.evadb.catalog().get_udf_cache_catalog_entry_by_name(cache_name)
+        udf_cache = self.evacatalog().get_udf_cache_catalog_entry_by_name(cache_name)
         self.assertIsNone(udf_cache)
         self.assertFalse(cache_dir.exists())

@@ -16,14 +16,14 @@ from test.util import get_evadb_for_testing
 
 import pytest
 
-from evadb.server.command_handler import execute_query_fetch_all
-from evadb.udfs.udf_bootstrap_queries import init_builtin_udfs
+from evaserver.command_handler import execute_query_fetch_all
+from evaudfs.udf_bootstrap_queries import init_builtin_udfs
 
 
 @pytest.fixture(autouse=False)
 def setup_pytorch_tests():
     evadb = get_evadb_for_testing()
-    evadb.catalog().reset()
+    evacatalog().reset()
     execute_query_fetch_all(
         evadb, "LOAD VIDEO 'data/ua_detrac/ua_detrac.mp4' INTO MyVideo;"
     )

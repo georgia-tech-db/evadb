@@ -19,9 +19,9 @@ import pandas as pd
 from numpy import asarray
 from PIL import Image
 
-from evadb.configuration.constants import EVA_ROOT_DIR
-from evadb.udfs.ndarray.horizontal_flip import HorizontalFlip
-from evadb.udfs.ndarray.vertical_flip import VerticalFlip
+from evaconfiguration.constants import EVA_ROOT_DIR
+from evaudfs.ndarray.horizontal_flip import HorizontalFlip
+from evaudfs.ndarray.vertical_flip import VerticalFlip
 
 
 class FlipTests(unittest.TestCase):

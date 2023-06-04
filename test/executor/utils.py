@@ -14,7 +14,7 @@
 # limitations under the License.
 from typing import List
 
-from evadb.models.storage.batch import Batch
+from evamodels.storage.batch import Batch
 
 
 class DummyExecutor:

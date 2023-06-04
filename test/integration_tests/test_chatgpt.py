@@ -23,9 +23,9 @@ from unittest.mock import MagicMock
 import pandas as pd
 from mock import patch
 
-from evadb.executor.executor_utils import ExecutorError
-from evadb.models.storage.batch import Batch
-from evadb.server.command_handler import execute_query_fetch_all
+from evaexecutor.executor_utils import ExecutorError
+from evamodels.storage.batch import Batch
+from evaserver.command_handler import execute_query_fetch_all
 
 
 def create_dummy_csv_file(config) -> str:
@@ -48,7 +48,7 @@ def create_dummy_csv_file(config) -> str:
 class ChatGPTTest(unittest.TestCase):
     def setUp(self) -> None:
         self.evadb = get_evadb_for_testing()
-        self.evadb.catalog().reset()
+        self.evacatalog().reset()
         create_table_query = """CREATE TABLE IF NOT EXISTS MyTextCSV (
                 id INTEGER UNIQUE,
                 prompt TEXT (100),
@@ -56,7 +56,7 @@ class ChatGPTTest(unittest.TestCase):
             );"""
         execute_query_fetch_all(self.evadb, create_table_query)
 
-        self.csv_file_path = create_dummy_csv_file(self.evadb.config)
+        self.csv_file_path = create_dummy_csv_file(self.evaconfig)
 
         csv_query = f"""LOAD CSV '{self.csv_file_path}' INTO MyTextCSV;"""
         execute_query_fetch_all(self.evadb, csv_query)
@@ -65,7 +65,7 @@ class ChatGPTTest(unittest.TestCase):
         execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS MyTextCSV;")
 
     @ray_skip_marker
-    @patch("evadb.udfs.chatgpt.openai.ChatCompletion.create")
+    @patch("evaudfs.chatgpt.openai.ChatCompletion.create")
     def test_openai_chat_completion_udf(self, mock_req):
         # set dummy api key
         os.environ["openai_api_key"] = "my_key"

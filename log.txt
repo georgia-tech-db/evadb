@@ -1,0 +1,10 @@
+============================= test session starts ==============================
+platform linux -- Python 3.10.11, pytest-7.3.1, pluggy-1.0.0 -- /home/gkakkar7/VDBMS/eva/test_eva_db/bin/python3
+cachedir: .pytest_cache
+Test order randomisation NOT enabled. Enable with --random-order or --random-order-bucket=<bucket_type>
+benchmark: 4.0.0 (defaults: timer=time.perf_counter disable_gc=False min_rounds=5 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)
+rootdir: /home/gkakkar7/VDBMS/eva
+configfile: pytest.ini
+plugins: random-order-1.1.0, benchmark-4.0.0, virtualenv-1.7.0, shutil-1.7.0, nbmake-1.4.1, xdist-3.3.1, asyncio-0.21.0, anyio-3.6.2, cov-4.0.0
+asyncio: mode=strict
+collecting ... 

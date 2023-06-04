@@ -24,11 +24,11 @@ import mock
 import pandas as pd
 import pytest
 
-from evadb.catalog.catalog_type import ColumnType, NdArrayType, TableType
-from evadb.catalog.models.column_catalog import ColumnCatalogEntry
-from evadb.catalog.models.table_catalog import TableCatalogEntry
-from evadb.models.storage.batch import Batch
-from evadb.storage.storage_engine import StorageEngine
+from evacatalog.catalog_type import ColumnType, NdArrayType, TableType
+from evacatalog.models.column_catalog import ColumnCatalogEntry
+from evacatalog.models.table_catalog import TableCatalogEntry
+from evamodels.storage.batch import Batch
+from evastorage.storage_engine import StorageEngine
 
 
 @pytest.mark.notparallel

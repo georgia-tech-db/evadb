@@ -21,17 +21,17 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from evadb.catalog.catalog_type import VectorStoreType
-from evadb.models.storage.batch import Batch
-from evadb.server.command_handler import execute_query_fetch_all
-from evadb.storage.storage_engine import StorageEngine
+from evacatalog.catalog_type import VectorStoreType
+from evamodels.storage.batch import Batch
+from evaserver.command_handler import execute_query_fetch_all
+from evastorage.storage_engine import StorageEngine
 
 
 @pytest.mark.notparallel
 class CreateIndexTest(unittest.TestCase):
     def _index_save_path(self):
         return str(
-            Path(self.evadb.config.get_value("storage", "index_dir"))
+            Path(self.evaconfig.get_value("storage", "index_dir"))
             / Path("{}_{}.index".format("FAISS", "testCreateIndexName"))
         )
 
@@ -71,7 +71,7 @@ class CreateIndexTest(unittest.TestCase):
                 }
             )
         )
-        feat_tb_entry = cls.evadb.catalog().get_table_catalog_entry(
+        feat_tb_entry = cls.evacatalog().get_table_catalog_entry(
             "testCreateIndexFeatTable"
         )
         storage_engine = StorageEngine.factory(cls.evadb, feat_tb_entry)
@@ -84,7 +84,7 @@ class CreateIndexTest(unittest.TestCase):
                 }
             )
         )
-        input_tb_entry = cls.evadb.catalog().get_table_catalog_entry(
+        input_tb_entry = cls.evacatalog().get_table_catalog_entry(
             "testCreateIndexInputTable"
         )
         storage_engine.write(input_tb_entry, input_batch_data)
@@ -101,7 +101,7 @@ class CreateIndexTest(unittest.TestCase):
         execute_query_fetch_all(self.evadb, query)
 
         # Test index catalog.
-        index_catalog_entry = self.evadb.catalog().get_index_catalog_entry_by_name(
+        index_catalog_entry = self.evacatalog().get_index_catalog_entry_by_name(
             "testCreateIndexName"
         )
         self.assertEqual(index_catalog_entry.type, VectorStoreType.FAISS)
@@ -115,7 +115,7 @@ class CreateIndexTest(unittest.TestCase):
         )
 
         # Test referenced column.
-        feat_table_entry = self.evadb.catalog().get_table_catalog_entry(
+        feat_table_entry = self.evacatalog().get_table_catalog_entry(
             "testCreateIndexFeatTable"
         )
         feat_column = [col for col in feat_table_entry.columns if col.name == "feat"][0]
@@ -129,14 +129,14 @@ class CreateIndexTest(unittest.TestCase):
         self.assertEqual(row_id[0][0], 1)
 
         # Cleanup.
-        self.evadb.catalog().drop_index_catalog_entry("testCreateIndexName")
+        self.evacatalog().drop_index_catalog_entry("testCreateIndexName")
 
     def test_should_create_index_with_udf(self):
         query = "CREATE INDEX testCreateIndexName ON testCreateIndexInputTable (DummyFeatureExtractor(input)) USING FAISS;"
         execute_query_fetch_all(self.evadb, query)
 
         # Test index udf signature.
-        index_catalog_entry = self.evadb.catalog().get_index_catalog_entry_by_name(
+        index_catalog_entry = self.evacatalog().get_index_catalog_entry_by_name(
             "testCreateIndexName"
         )
         self.assertEqual(index_catalog_entry.type, VectorStoreType.FAISS)
@@ -146,7 +146,7 @@ class CreateIndexTest(unittest.TestCase):
         )
 
         # Test referenced column.
-        input_table_entry = self.evadb.catalog().get_table_catalog_entry(
+        input_table_entry = self.evacatalog().get_table_catalog_entry(
             "testCreateIndexInputTable"
         )
         input_column = [
@@ -162,4 +162,4 @@ class CreateIndexTest(unittest.TestCase):
         self.assertEqual(row_id[0][0], 1)
 
         # Cleanup.
-        self.evadb.catalog().drop_index_catalog_entry("testCreateIndexName")
+        self.evacatalog().drop_index_catalog_entry("testCreateIndexName")

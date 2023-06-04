@@ -15,8 +15,8 @@
 import unittest
 from test.util import create_dataframe
 
-from evadb.models.server.response import Response, ResponseStatus
-from evadb.models.storage.batch import Batch
+from evamodels.server.response import Response, ResponseStatus
+from evamodels.storage.batch import Batch
 
 
 class ResponseTest(unittest.TestCase):

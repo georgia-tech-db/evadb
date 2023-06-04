@@ -22,14 +22,14 @@ from test.util import (
 
 import pytest
 
-from evadb.optimizer.plan_generator import PlanGenerator
-from evadb.optimizer.rules.rules import (
+from evaoptimizer.plan_generator import PlanGenerator
+from evaoptimizer.rules.rules import (
     EmbedFilterIntoGet,
     LogicalInnerJoinCommutativity,
     XformLateralJoinToLinearFlow,
 )
-from evadb.optimizer.rules.rules_manager import RulesManager, disable_rules
-from evadb.server.command_handler import execute_query_fetch_all
+from evaoptimizer.rules.rules_manager import RulesManager, disable_rules
+from evaserver.command_handler import execute_query_fetch_all
 
 NUM_FRAMES = 10
 
@@ -39,7 +39,7 @@ class ExplainExecutorTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.evadb = get_evadb_for_testing()
-        cls.evadb.catalog().reset()
+        cls.evacatalog().reset()
         video_file_path = create_sample_video(NUM_FRAMES)
         load_query = f"LOAD VIDEO '{video_file_path}' INTO MyVideo;"
         execute_query_fetch_all(cls.evadb, load_query)
@@ -57,7 +57,7 @@ class ExplainExecutorTest(unittest.TestCase):
             """|__ ProjectPlan\n    |__ SeqScanPlan\n        |__ StoragePlan\n"""
         )
         self.assertEqual(batch.frames[0][0], expected_output)
-        rules_manager = RulesManager(self.evadb.config)
+        rules_manager = RulesManager(self.evaconfig)
         with disable_rules(rules_manager, [XformLateralJoinToLinearFlow()]):
             custom_plan_generator = PlanGenerator(self.evadb, rules_manager)
             select_query = "EXPLAIN SELECT id, data FROM MyVideo JOIN LATERAL DummyObjectDetector(data) AS T ;"
@@ -68,7 +68,7 @@ class ExplainExecutorTest(unittest.TestCase):
             self.assertEqual(batch.frames[0][0], expected_output)
 
         # Disable more rules
-        rules_manager = RulesManager(self.evadb.config)
+        rules_manager = RulesManager(self.evaconfig)
         with disable_rules(
             rules_manager,
             [

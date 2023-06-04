@@ -21,7 +21,7 @@ from unittest.mock import patch
 import cv2
 import pandas as pd
 
-from evadb.models.storage.batch import Batch
+from evamodels.storage.batch import Batch
 
 NUM_FRAMES = 10
 
@@ -38,7 +38,7 @@ class FaceNet(unittest.TestCase):
 
     @windows_skip_marker
     def test_should_return_batches_equivalent_to_number_of_frames(self):
-        from evadb.udfs.face_detector import FaceDetector
+        from evaudfs.face_detector import FaceDetector
 
         single_face_img = Path("data/facenet/one.jpg")
         multi_face_img = Path("data/facenet/multiface.jpg")
@@ -63,7 +63,7 @@ class FaceNet(unittest.TestCase):
 
     @unittest.skip("Needs GPU")
     def test_should_run_on_gpu(self):
-        from evadb.udfs.face_detector import FaceDetector
+        from evaudfs.face_detector import FaceDetector
 
         single_face_img = Path("data/facenet/one.jpg")
         frame_single_face = {
@@ -79,10 +79,10 @@ class FaceNet(unittest.TestCase):
 
     def test_mock_to_device(self):
         device = 10
-        from evadb.udfs.face_detector import FaceDetector
+        from evaudfs.face_detector import FaceDetector
 
-        with patch("evadb.udfs.face_detector.MTCNN") as mock_mtcnn:
-            with patch("evadb.udfs.face_detector.torch") as mock_torch:
+        with patch("evaudfs.face_detector.MTCNN") as mock_mtcnn:
+            with patch("evaudfs.face_detector.torch") as mock_torch:
                 mock_torch.device.return_value = "cuda:10"
                 detector = FaceDetector()
                 detector = detector.to_device(device)

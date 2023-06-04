@@ -19,9 +19,9 @@ from inspect import isabstract
 from test.util import get_all_subclasses, get_mock_object
 
 import eva
-from evadb.udfs.abstract.abstract_udf import AbstractUDF
-from evadb.udfs.abstract.hf_abstract_udf import AbstractHFUdf
-from evadb.udfs.yolo_object_detector import Yolo
+from evaudfs.abstract.abstract_udf import AbstractUDF
+from evaudfs.abstract.hf_abstract_udf import AbstractHFUdf
+from evaudfs.yolo_object_detector import Yolo
 
 
 class AbstractUDFTest(unittest.TestCase):

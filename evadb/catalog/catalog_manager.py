@@ -16,13 +16,13 @@ import shutil
 from pathlib import Path
 from typing import List
 
-from evadb.catalog.catalog_type import (
+from eva.catalog.catalog_type import (
     ColumnType,
     TableType,
     VectorStoreType,
     VideoColumnName,
 )
-from evadb.catalog.catalog_utils import (
+from eva.catalog.catalog_utils import (
     cleanup_storage,
     construct_udf_cache_catalog_entry,
     get_document_table_column_definitions,
@@ -31,37 +31,37 @@ from evadb.catalog.catalog_utils import (
     get_video_table_column_definitions,
     xform_column_definitions_to_catalog_entries,
 )
-from evadb.catalog.models.utils import (
-    ColumnCatalogEntry,
-    IndexCatalogEntry,
-    TableCatalogEntry,
-    UdfCacheCatalogEntry,
-    UdfCatalogEntry,
-    UdfCostCatalogEntry,
-    UdfIOCatalogEntry,
-    UdfMetadataCatalogEntry,
+from eva.catalog.models.utils import (
     drop_all_tables_except_catalog,
     init_db,
     truncate_catalog_tables,
 )
-from evadb.catalog.services.column_catalog_service import ColumnCatalogService
-from evadb.catalog.services.index_catalog_service import IndexCatalogService
-from evadb.catalog.services.table_catalog_service import TableCatalogService
-from evadb.catalog.services.udf_cache_catalog_service import UdfCacheCatalogService
-from evadb.catalog.services.udf_catalog_service import UdfCatalogService
-from evadb.catalog.services.udf_cost_catalog_service import UdfCostCatalogService
-from evadb.catalog.services.udf_io_catalog_service import UdfIOCatalogService
-from evadb.catalog.services.udf_metadata_catalog_service import (
+from eva.catalog.models.utils import ColumnCatalogEntry
+from eva.catalog.models.utils import IndexCatalogEntry
+from eva.catalog.models.utils import TableCatalogEntry
+from eva.catalog.models.utils import UdfCacheCatalogEntry
+from eva.catalog.models.utils import UdfCatalogEntry
+from eva.catalog.models.utils import UdfCostCatalogEntry
+from eva.catalog.models.utils import UdfIOCatalogEntry
+from eva.catalog.models.utils import UdfMetadataCatalogEntry
+from eva.catalog.services.column_catalog_service import ColumnCatalogService
+from eva.catalog.services.index_catalog_service import IndexCatalogService
+from eva.catalog.services.table_catalog_service import TableCatalogService
+from eva.catalog.services.udf_cache_catalog_service import UdfCacheCatalogService
+from eva.catalog.services.udf_catalog_service import UdfCatalogService
+from eva.catalog.services.udf_cost_catalog_service import UdfCostCatalogService
+from eva.catalog.services.udf_io_catalog_service import UdfIOCatalogService
+from eva.catalog.services.udf_metadata_catalog_service import (
     UdfMetadataCatalogService,
 )
-from evadb.catalog.sql_config import IDENTIFIER_COLUMN, SQLConfig
-from evadb.configuration.configuration_manager import ConfigurationManager
-from evadb.expression.function_expression import FunctionExpression
-from evadb.parser.create_statement import ColumnDefinition
-from evadb.parser.table_ref import TableInfo
-from evadb.parser.types import FileFormatType
-from evadb.utils.generic_utils import generate_file_path, get_file_checksum
-from evadb.utils.logging_manager import logger
+from eva.catalog.sql_config import IDENTIFIER_COLUMN, SQLConfig
+from eva.configuration.configuration_manager import ConfigurationManager
+from eva.expression.function_expression import FunctionExpression
+from eva.parser.create_statement import ColumnDefinition
+from eva.parser.table_ref import TableInfo
+from eva.parser.types import FileFormatType
+from eva.utils.generic_utils import generate_file_path, get_file_checksum
+from eva.utils.logging_manager import logger
 
 
 class CatalogManager(object):

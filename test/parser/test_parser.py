@@ -15,32 +15,32 @@
 import unittest
 from pathlib import Path
 
-from evadb.catalog.catalog_type import ColumnType, NdArrayType, VectorStoreType
-from evadb.expression.abstract_expression import ExpressionType
-from evadb.expression.comparison_expression import ComparisonExpression
-from evadb.expression.constant_value_expression import ConstantValueExpression
-from evadb.expression.function_expression import FunctionExpression
-from evadb.expression.tuple_value_expression import TupleValueExpression
-from evadb.parser.alias import Alias
-from evadb.parser.create_index_statement import CreateIndexStatement
-from evadb.parser.create_mat_view_statement import CreateMaterializedViewStatement
-from evadb.parser.create_statement import (
+from evacatalog.catalog_type import ColumnType, NdArrayType, VectorStoreType
+from evaexpression.abstract_expression import ExpressionType
+from evaexpression.comparison_expression import ComparisonExpression
+from evaexpression.constant_value_expression import ConstantValueExpression
+from evaexpression.function_expression import FunctionExpression
+from evaexpression.tuple_value_expression import TupleValueExpression
+from evaparser.alias import Alias
+from evaparser.create_index_statement import CreateIndexStatement
+from evaparser.create_mat_view_statement import CreateMaterializedViewStatement
+from evaparser.create_statement import (
     ColConstraintInfo,
     ColumnDefinition,
     CreateTableStatement,
 )
-from evadb.parser.create_udf_statement import CreateUDFStatement
-from evadb.parser.delete_statement import DeleteTableStatement
-from evadb.parser.drop_statement import DropTableStatement
-from evadb.parser.drop_udf_statement import DropUDFStatement
-from evadb.parser.insert_statement import InsertTableStatement
-from evadb.parser.load_statement import LoadDataStatement
-from evadb.parser.parser import Parser
-from evadb.parser.rename_statement import RenameTableStatement
-from evadb.parser.select_statement import SelectStatement
-from evadb.parser.statement import AbstractStatement, StatementType
-from evadb.parser.table_ref import JoinNode, TableInfo, TableRef, TableValuedExpression
-from evadb.parser.types import FileFormatType, JoinType, ParserOrderBySortType
+from evaparser.create_udf_statement import CreateUDFStatement
+from evaparser.delete_statement import DeleteTableStatement
+from evaparser.drop_statement import DropTableStatement
+from evaparser.drop_udf_statement import DropUDFStatement
+from evaparser.insert_statement import InsertTableStatement
+from evaparser.load_statement import LoadDataStatement
+from evaparser.parser import Parser
+from evaparser.rename_statement import RenameTableStatement
+from evaparser.select_statement import SelectStatement
+from evaparser.statement import AbstractStatement, StatementType
+from evaparser.table_ref import JoinNode, TableInfo, TableRef, TableValuedExpression
+from evaparser.types import FileFormatType, JoinType, ParserOrderBySortType
 
 
 class ParserTests(unittest.TestCase):

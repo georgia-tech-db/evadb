@@ -24,8 +24,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from evadb.server.command_handler import execute_query_fetch_all
-from evadb.utils.logging_manager import logger
+from evaserver.command_handler import execute_query_fetch_all
+from evautils.logging_manager import logger
 
 
 @pytest.mark.notparallel
@@ -33,7 +33,7 @@ class InsertExecutorTest(unittest.TestCase):
     def setUp(self):
         self.evadb = get_evadb_for_testing()
         # reset the catalog manager before running each test
-        self.evadb.catalog().reset()
+        self.evacatalog().reset()
         self.video_file_path = create_sample_video()
 
         query = """CREATE TABLE IF NOT EXISTS CSVTable

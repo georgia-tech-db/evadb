@@ -32,7 +32,7 @@ class EVAImportTest(unittest.TestCase):
         if not os.path.exists(new_dir):
             os.makedirs(new_dir)
         os.chdir(new_dir)
-        _ = importlib.import_module("evadb.eva_cmd_client")
-        _ = importlib.import_module("evadb.eva_server")
+        _ = importlib.import_module("evaeva_cmd_client")
+        _ = importlib.import_module("evaeva_server")
         os.chdir(cur_dir)
         shutil.rmtree(new_dir)

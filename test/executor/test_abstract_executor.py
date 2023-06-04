@@ -16,7 +16,7 @@ import unittest
 from inspect import signature
 from test.util import get_all_subclasses
 
-from evadb.executor.abstract_executor import AbstractExecutor
+from evaexecutor.abstract_executor import AbstractExecutor
 
 
 class AbstractExecutorTest(unittest.TestCase):

@@ -20,10 +20,10 @@ from test.util import get_evadb_for_testing
 import pandas as pd
 import pytest
 
-from evadb.configuration.constants import EVA_ROOT_DIR
-from evadb.models.storage.batch import Batch
-from evadb.server.command_handler import execute_query_fetch_all
-from evadb.udfs.udf_bootstrap_queries import ArrayCount_udf_query, Fastrcnn_udf_query
+from evaconfiguration.constants import EVA_ROOT_DIR
+from evamodels.storage.batch import Batch
+from evaserver.command_handler import execute_query_fetch_all
+from evaudfs.udf_bootstrap_queries import ArrayCount_udf_query, Fastrcnn_udf_query
 
 NUM_FRAMES = 10
 
@@ -33,7 +33,7 @@ class ShowExecutorTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.evadb = get_evadb_for_testing()
-        cls.evadb.catalog().reset()
+        cls.evacatalog().reset()
         queries = [Fastrcnn_udf_query, ArrayCount_udf_query]
         for query in queries:
             execute_query_fetch_all(cls.evadb, query)

@@ -16,7 +16,7 @@ function is_server_up () {
     return $?
 }
 
-eva_server &> evadb.log &
+eva_server &> evalog &
 SERVER_PID=$!
 i=0
 while [ $i -lt 5 ];
@@ -32,7 +32,7 @@ do
 done
 
 echo "Contents of server log"
-cat evadb.log
+cat evalog
 
 if [ "$test_code" -ne 0 ];
 then

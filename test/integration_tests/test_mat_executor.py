@@ -25,9 +25,9 @@ from test.util import (
 import pandas as pd
 import pytest
 
-from evadb.configuration.constants import EVA_ROOT_DIR
-from evadb.models.storage.batch import Batch
-from evadb.server.command_handler import execute_query_fetch_all
+from evaconfiguration.constants import EVA_ROOT_DIR
+from evamodels.storage.batch import Batch
+from evaserver.command_handler import execute_query_fetch_all
 
 NUM_FRAMES = 10
 
@@ -41,7 +41,7 @@ class MaterializedViewTest(unittest.TestCase):
         ray.init(num_cpus=1)
         cls.evadb = get_evadb_for_testing()
         # reset the catalog manager before running each test
-        cls.evadb.catalog().reset()
+        cls.evacatalog().reset()
         video_file_path = create_sample_video()
         load_query = f"LOAD VIDEO '{video_file_path}' INTO MyVideo;"
         execute_query_fetch_all(cls.evadb, load_query)

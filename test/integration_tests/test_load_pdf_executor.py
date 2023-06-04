@@ -17,8 +17,8 @@ from test.util import get_evadb_for_testing
 
 import pytest
 
-from evadb.configuration.constants import EVA_ROOT_DIR
-from evadb.server.command_handler import execute_query_fetch_all
+from evaconfiguration.constants import EVA_ROOT_DIR
+from evaserver.command_handler import execute_query_fetch_all
 
 
 @pytest.mark.notparallel
@@ -26,7 +26,7 @@ class LoadExecutorTest(unittest.TestCase):
     def setUp(self):
         self.evadb = get_evadb_for_testing()
         # reset the catalog manager before running each test
-        self.evadb.catalog().reset()
+        self.evacatalog().reset()
 
     def tearDown(self):
         execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS MyPDFs;")

@@ -30,25 +30,25 @@ import psutil
 import ray
 from mock import MagicMock
 
-from evadb.binder.statement_binder import StatementBinder
-from evadb.binder.statement_binder_context import StatementBinderContext
-from evadb.catalog.catalog_type import NdArrayType
-from evadb.configuration.configuration_manager import ConfigurationManager
-from evadb.configuration.constants import EVA_DATABASE_DIR, EVA_INSTALLATION_DIR
-from evadb.database import init_eva_db_instance
-from evadb.expression.function_expression import FunctionExpression
-from evadb.models.storage.batch import Batch
-from evadb.optimizer.operators import LogicalFilter, Operator
-from evadb.optimizer.plan_generator import PlanGenerator
-from evadb.optimizer.statement_to_opr_converter import StatementToPlanConverter
-from evadb.parser.parser import Parser
-from evadb.plan_nodes.abstract_plan import AbstractPlan
-from evadb.server.command_handler import execute_query_fetch_all
-from evadb.udfs.abstract.abstract_udf import AbstractClassifierUDF
-from evadb.udfs.decorators import decorators
-from evadb.udfs.decorators.io_descriptors.data_types import NumpyArray, PandasDataframe
-from evadb.udfs.udf_bootstrap_queries import init_builtin_udfs
-from evadb.utils.generic_utils import remove_directory_contents
+from evabinder.statement_binder import StatementBinder
+from evabinder.statement_binder_context import StatementBinderContext
+from evacatalog.catalog_type import NdArrayType
+from evaconfiguration.configuration_manager import ConfigurationManager
+from evaconfiguration.constants import EVA_DATABASE_DIR, EVA_INSTALLATION_DIR
+from evadatabase import init_eva_db_instance
+from evaexpression.function_expression import FunctionExpression
+from evamodels.storage.batch import Batch
+from evaoptimizer.operators import LogicalFilter, Operator
+from evaoptimizer.plan_generator import PlanGenerator
+from evaoptimizer.statement_to_opr_converter import StatementToPlanConverter
+from evaparser.parser import Parser
+from evaplan_nodes.abstract_plan import AbstractPlan
+from evaserver.command_handler import execute_query_fetch_all
+from evaudfs.abstract.abstract_udf import AbstractClassifierUDF
+from evaudfs.decorators import decorators
+from evaudfs.decorators.io_descriptors.data_types import NumpyArray, PandasDataframe
+from evaudfs.udf_bootstrap_queries import init_builtin_udfs
+from evautils.generic_utils import remove_directory_contents
 
 NUM_FRAMES = 10
 FRAME_SIZE = (32, 32)

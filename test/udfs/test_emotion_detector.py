@@ -20,7 +20,7 @@ from test.util import EVA_TEST_DATA_DIR
 import cv2
 import pandas as pd
 
-from evadb.models.storage.batch import Batch
+from evamodels.storage.batch import Batch
 
 
 class EmotionDetector(unittest.TestCase):
@@ -35,7 +35,7 @@ class EmotionDetector(unittest.TestCase):
 
     @unittest.skip("disable test due to model downloading time")
     def test_should_return_correct_emotion(self):
-        from evadb.udfs.emotion_detector import EmotionDetector
+        from evaudfs.emotion_detector import EmotionDetector
 
         happy_img = self.base_path / "happy.jpg"
         sad_img = self.base_path / "sad.jpg"

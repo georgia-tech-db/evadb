@@ -19,10 +19,10 @@ import numpy as np
 import pandas as pd
 from mock import MagicMock
 
-from evadb.executor.sample_executor import SampleExecutor
-from evadb.expression.constant_value_expression import ConstantValueExpression
-from evadb.models.storage.batch import Batch
-from evadb.plan_nodes.sample_plan import SamplePlan
+from evaexecutor.sample_executor import SampleExecutor
+from evaexpression.constant_value_expression import ConstantValueExpression
+from evamodels.storage.batch import Batch
+from evaplan_nodes.sample_plan import SamplePlan
 
 
 class SampleExecutorTest(unittest.TestCase):

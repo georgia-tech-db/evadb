@@ -14,9 +14,9 @@
 # limitations under the License.
 import unittest
 
-from evadb.catalog.catalog_type import ColumnType, NdArrayType
-from evadb.optimizer.optimizer_utils import column_definition_to_udf_io
-from evadb.parser.create_statement import ColumnDefinition
+from evacatalog.catalog_type import ColumnType, NdArrayType
+from evaoptimizer.optimizer_utils import column_definition_to_udf_io
+from evaparser.create_statement import ColumnDefinition
 
 
 class OptimizerUtilsTest(unittest.TestCase):

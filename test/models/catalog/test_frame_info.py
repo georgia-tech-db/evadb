@@ -14,8 +14,8 @@
 # limitations under the License.
 import unittest
 
-from evadb.models.catalog.frame_info import FrameInfo
-from evadb.models.catalog.properties import ColorSpace
+from evamodels.catalog.frame_info import FrameInfo
+from evamodels.catalog.properties import ColorSpace
 
 
 class FrameInfoTest(unittest.TestCase):

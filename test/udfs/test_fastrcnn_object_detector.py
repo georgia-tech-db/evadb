@@ -20,7 +20,7 @@ import cv2
 import mock
 import pandas as pd
 
-from evadb.models.storage.batch import Batch
+from evamodels.storage.batch import Batch
 
 NUM_FRAMES = 10
 
@@ -37,7 +37,7 @@ class FastRCNNObjectDetectorTest(unittest.TestCase):
     def test_should_raise_import_error_with_missing_torch(self):
         with self.assertRaises(ImportError):
             with mock.patch.dict(sys.modules, {"torch": None}):
-                from evadb.udfs.fastrcnn_object_detector import (  # noqa: F401
+                from evaudfs.fastrcnn_object_detector import (  # noqa: F401
                     FastRCNNObjectDetector,
                 )
 
@@ -46,7 +46,7 @@ class FastRCNNObjectDetectorTest(unittest.TestCase):
     def test_should_raise_import_error_with_missing_torchvision(self):
         with self.assertRaises(ImportError):
             with mock.patch.dict(sys.modules, {"torchvision": None}):
-                from evadb.udfs.fastrcnn_object_detector import (  # noqa: F401
+                from evaudfs.fastrcnn_object_detector import (  # noqa: F401
                     FastRCNNObjectDetector,
                 )
 
@@ -54,7 +54,7 @@ class FastRCNNObjectDetectorTest(unittest.TestCase):
 
     @unittest.skip("disable test due to model downloading time")
     def test_should_return_batches_equivalent_to_number_of_frames(self):
-        from evadb.udfs.fastrcnn_object_detector import FastRCNNObjectDetector
+        from evaudfs.fastrcnn_object_detector import FastRCNNObjectDetector
 
         frame_dog = {
             "id": 1,

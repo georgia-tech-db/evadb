@@ -19,14 +19,14 @@ import numpy as np
 import pandas as pd
 from mock import MagicMock
 
-from evadb.executor.limit_executor import LimitExecutor
-from evadb.executor.orderby_executor import OrderByExecutor
-from evadb.expression.constant_value_expression import ConstantValueExpression
-from evadb.expression.tuple_value_expression import TupleValueExpression
-from evadb.models.storage.batch import Batch
-from evadb.parser.types import ParserOrderBySortType
-from evadb.plan_nodes.limit_plan import LimitPlan
-from evadb.plan_nodes.orderby_plan import OrderByPlan
+from evaexecutor.limit_executor import LimitExecutor
+from evaexecutor.orderby_executor import OrderByExecutor
+from evaexpression.constant_value_expression import ConstantValueExpression
+from evaexpression.tuple_value_expression import TupleValueExpression
+from evamodels.storage.batch import Batch
+from evaparser.types import ParserOrderBySortType
+from evaplan_nodes.limit_plan import LimitPlan
+from evaplan_nodes.orderby_plan import OrderByPlan
 
 
 class LimitExecutorTest(unittest.TestCase):

@@ -14,14 +14,15 @@
 # limitations under the License.
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable
+from typing import Callable
 
-from evadb.catalog.catalog_utils import get_catalog_instance
-from evadb.configuration.configuration_manager import ConfigurationManager
-from evadb.configuration.constants import DB_DEFAULT_NAME, EVA_DATABASE_DIR
+from eva.catalog.catalog_utils import get_catalog_instance
+from eva.configuration.configuration_manager import ConfigurationManager
+from eva.configuration.constants import DB_DEFAULT_NAME, EVA_DATABASE_DIR
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from evadb.catalog.catalog_manager import CatalogManager
+    from eva.catalog.catalog_manager import CatalogManager
 
 
 @dataclass

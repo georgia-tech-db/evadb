@@ -18,15 +18,15 @@ from test.util import create_sample_video, get_evadb_for_testing
 import pytest
 from mock import MagicMock, patch
 
-from evadb.catalog.catalog_type import TableType
-from evadb.catalog.models.table_catalog import TableCatalogEntry
-from evadb.optimizer.operators import (
+from evacatalog.catalog_type import TableType
+from evacatalog.models.table_catalog import TableCatalogEntry
+from evaoptimizer.operators import (
     LogicalFilter,
     LogicalGet,
     LogicalJoin,
     LogicalSample,
 )
-from evadb.optimizer.rules.rules import (
+from evaoptimizer.rules.rules import (
     CacheFunctionExpressionInApply,
     CacheFunctionExpressionInFilter,
     CacheFunctionExpressionInProject,
@@ -73,9 +73,9 @@ from evadb.optimizer.rules.rules import (
     XformExtractObjectToLinearFlow,
     XformLateralJoinToLinearFlow,
 )
-from evadb.optimizer.rules.rules_manager import RulesManager, disable_rules
-from evadb.parser.types import JoinType
-from evadb.server.command_handler import execute_query_fetch_all
+from evaoptimizer.rules.rules_manager import RulesManager, disable_rules
+from evaparser.types import JoinType
+from evaserver.command_handler import execute_query_fetch_all
 
 
 @pytest.mark.notparallel
@@ -84,7 +84,7 @@ class RulesTest(unittest.TestCase):
     def setUpClass(cls):
         cls.evadb = get_evadb_for_testing()
         # reset the catalog manager before running each test
-        cls.evadb.catalog().reset()
+        cls.evacatalog().reset()
         video_file_path = create_sample_video()
         load_query = f"LOAD VIDEO '{video_file_path}' INTO MyVideo;"
         execute_query_fetch_all(cls.evadb, load_query)
@@ -167,8 +167,8 @@ class RulesTest(unittest.TestCase):
             XformExtractObjectToLinearFlow(),
         ]
         rewrite_rules = (
-            RulesManager(self.evadb.config).stage_one_rewrite_rules
-            + RulesManager(self.evadb.config).stage_two_rewrite_rules
+            RulesManager(self.evaconfig).stage_one_rewrite_rules
+            + RulesManager(self.evaconfig).stage_two_rewrite_rules
         )
         self.assertEqual(
             len(supported_rewrite_rules),
@@ -186,18 +186,18 @@ class RulesTest(unittest.TestCase):
         ]
         self.assertEqual(
             len(supported_logical_rules),
-            len(RulesManager(self.evadb.config).logical_rules),
+            len(RulesManager(self.evaconfig).logical_rules),
         )
 
         for rule in supported_logical_rules:
             self.assertTrue(
                 any(
                     isinstance(rule, type(x))
-                    for x in RulesManager(self.evadb.config).logical_rules
+                    for x in RulesManager(self.evaconfig).logical_rules
                 )
             )
 
-        ray_enabled = self.evadb.config.get_value("experimental", "ray")
+        ray_enabled = self.evaconfig.get_value("experimental", "ray")
 
         # For the current version, we choose either the distributed or the
         # sequential rule, because we do not have a logic to choose one over
@@ -242,14 +242,14 @@ class RulesTest(unittest.TestCase):
             supported_implementation_rules.append(LogicalExchangeToPhysical())
         self.assertEqual(
             len(supported_implementation_rules),
-            len(RulesManager(self.evadb.config).implementation_rules),
+            len(RulesManager(self.evaconfig).implementation_rules),
         )
 
         for rule in supported_implementation_rules:
             self.assertTrue(
                 any(
                     isinstance(rule, type(x))
-                    for x in RulesManager(self.evadb.config).implementation_rules
+                    for x in RulesManager(self.evaconfig).implementation_rules
                 )
             )
 
@@ -278,7 +278,7 @@ class RulesTest(unittest.TestCase):
         self.assertFalse(rule.check(logi_sample, MagicMock()))
 
     def test_disable_rules(self):
-        rules_manager = RulesManager(self.evadb.config)
+        rules_manager = RulesManager(self.evaconfig)
         with disable_rules(rules_manager, [PushDownFilterThroughApplyAndMerge()]):
             self.assertFalse(
                 any(
