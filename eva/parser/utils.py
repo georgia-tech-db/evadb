@@ -40,8 +40,14 @@ def parse_table_clause(expr: str):
     return stmt.from_table
 
 
-def parse_create_udf(udf_name: str, udf_file_path: str, type: str, **kwargs):
-    mock_query = f"CREATE UDF IF NOT EXISTS {udf_name}"
+def parse_create_udf(
+    udf_name: str, if_not_exists: bool, udf_file_path: str, type: str, **kwargs
+):
+    mock_query = (
+        f"CREATE UDF IF NOT EXISTS {udf_name}"
+        if if_not_exists
+        else f"CREATE UDF {udf_name}"
+    )
     if type is not None:
         mock_query += f" TYPE {type}"
         task, model = kwargs["task"], kwargs["model"]

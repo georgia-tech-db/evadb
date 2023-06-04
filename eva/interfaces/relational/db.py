@@ -65,21 +65,27 @@ class EVAConnection:
         return self._result.frames
 
     def create_udf(
-        self, udf_name: str, udf_file_path: str = None, type: str = None, **kwargs
+        self,
+        udf_name: str,
+        if_not_exists: bool = False,
+        impl_path: str = None,
+        type: str = None,
+        **kwargs
     ) -> "EVARelation":
         """
         Create a udf in the database.
 
         Args:
             udf_name (str): Name of the udf to be created.
-            udf_file_path (str): Location of UDF file as string
+            if_not_exists (bool): Whether the query contains IF NOT EXISTS clause.
+            impl_path (str): Path string to udf's implementation.
             type (str): Type of the udf (e.g. HuggingFace).
             **kwargs: Additional keyword arguments for configuring the create udf operation.
 
         Returns
             EVARelation: The EVARelation object representing the UDF created.
         """
-        return self.cursor().create_udf(udf_name, udf_file_path, type=type, **kwargs)
+        return self.cursor().create_udf(udf_name, impl_path, type=type, **kwargs)
 
     def load(
         self, file_regex: str, table_name: str, format: str, **kwargs
@@ -198,21 +204,27 @@ class EVACursor(object):
         return EVARelation(self._evadb, stmt)
 
     def create_udf(
-        self, udf_name: str, udf_file_path: str, type: str = None, **kwargs
+        self,
+        udf_name: str,
+        if_not_exists: bool = False,
+        impl_path: str = None,
+        type: str = None,
+        **kwargs
     ) -> "EVARelation":
         """
         Create a udf in the database.
 
         Args:
             udf_name (str): Name of the udf to be created.
-            udf_file_path (str): Path string to udf's implementation
+            if_not_exists (bool): Whether the query contains IF NOT EXISTS clause.
+            impl_path (str): Path string to udf's implementation.
             type (str): Type of the udf (e.g. HuggingFace).
             **kwargs: Additional keyword arguments for configuring the create udf operation.
 
         Returns
             EVARelation: The EVARelation object representing the UDF created.
         """
-        stmt = parse_create_udf(udf_name, udf_file_path, type, **kwargs)
+        stmt = parse_create_udf(udf_name, if_not_exists, impl_path, type, **kwargs)
         return EVARelation(self._evadb, stmt)
 
     def query(self, sql_query: str) -> EVARelation:

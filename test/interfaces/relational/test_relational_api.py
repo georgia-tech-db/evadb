@@ -26,6 +26,7 @@ import pandas as pd
 from pandas.testing import assert_frame_equal
 
 from eva.configuration.constants import EVA_DATABASE_DIR, EVA_ROOT_DIR
+from eva.executor.executor_utils import ExecutorError
 from eva.interfaces.relational.db import connect
 from eva.models.storage.batch import Batch
 from eva.server.command_handler import execute_query_fetch_all
@@ -210,16 +211,35 @@ class RelationalAPI(unittest.TestCase):
         )
         rel.execute()
 
-        rel = conn.create_udf("DummyObjectDetector", "test/util.py")
-        rel.execute()
+        create_dummy_object_detector_udf = conn.create_udf(
+            "DummyObjectDetector", impl_path="test/util.py"
+        )
+        create_dummy_object_detector_udf.execute()
 
         args = {"task": "automatic-speech-recognition", "model": "openai/whisper-base"}
-        rel2 = conn.create_udf("SpeechRecognizer", type="HuggingFace", **args)
-        query = rel2.sql_query()
+
+        create_speech_recognizer_udf_if_not_exists = conn.create_udf(
+            "SpeechRecognizer", if_not_exists=True, type="HuggingFace", **args
+        )
+        query = create_speech_recognizer_udf_if_not_exists.sql_query()
         self.assertEqual(
             query,
-            "CREATE UDF SpeechRecognizer INPUT (INPUT ()) OUTPUT (OUTPUT ()) TYPE HuggingFace (task=automatic-speech-recognition, model=openai/whisper-base))",
+            "CREATE UDF SpeechRecognizer TYPE HuggingFace (task=automatic-speech-recognition, model=openai/whisper-base))",
         )
+        create_speech_recognizer_udf_if_not_exists.execute()
+
+        create_speech_recognizer_udf = conn.create_udf(
+            "SpeechRecognizer", type="HuggingFace", **args
+        )
+        query = create_speech_recognizer_udf.sql_query()
+        self.assertEqual(
+            query,
+            "CREATE UDF SpeechRecognizer TYPE HuggingFace (task=automatic-speech-recognition, model=openai/whisper-base))",
+        )
+        try:
+            create_speech_recognizer_udf.execute()
+        except Exception as e:
+            isinstance(e, ExecutorError)
 
         select_query_sql = (
             "SELECT id, DummyObjectDetector(data) FROM dummy_video ORDER BY id;"
