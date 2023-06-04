@@ -13,22 +13,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-import numpy as np
-import pandas as pd
 from test.util import (
     DummyObjectDetector,
+    create_sample_video,
     load_udfs_for_testing,
     shutdown_ray,
     suffix_pytest_xdist_worker_id_to_dir,
-    create_sample_video
 )
 
+import numpy as np
+import pandas as pd
 from pandas.testing import assert_frame_equal
 
 from eva.configuration.constants import EVA_DATABASE_DIR, EVA_ROOT_DIR
 from eva.interfaces.relational.db import connect
-from eva.server.command_handler import execute_query_fetch_all
 from eva.models.storage.batch import Batch
+from eva.server.command_handler import execute_query_fetch_all
 
 
 class RelationalAPI(unittest.TestCase):
@@ -198,7 +198,7 @@ class RelationalAPI(unittest.TestCase):
         )
         assert_frame_equal(rel.df(), conn.query(similarity_sql).df())
 
-    def test_create_udf(self):        
+    def test_create_udf(self):
         video_file_path = create_sample_video(10)
 
         conn = connect(self.db_dir)
