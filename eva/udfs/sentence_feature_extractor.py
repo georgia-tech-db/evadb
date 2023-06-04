@@ -14,23 +14,23 @@
 # limitations under the License.
 import numpy as np
 import pandas as pd
-
-from transformers import AutoTokenizer, AutoModel
-
 import torch
 import torch.nn.functional as F
+from transformers import AutoModel, AutoTokenizer
 
 from eva.catalog.catalog_type import NdArrayType
-from eva.udfs.gpu_compatible import GPUCompatible
 from eva.udfs.abstract.abstract_udf import AbstractUDF
 from eva.udfs.decorators.decorators import forward, setup
 from eva.udfs.decorators.io_descriptors.data_types import PandasDataframe
+from eva.udfs.gpu_compatible import GPUCompatible
 
 
 class SentenceFeatureExtractor(AbstractUDF, GPUCompatible):
     @setup(cacheable=False, udf_type="FeatureExtraction", batchable=False)
     def setup(self):
-        self.tokenizer = AutoTokenizer.from_pretrained("sentence-transformers/all-MiniLM-L6-v2")
+        self.tokenizer = AutoTokenizer.from_pretrained(
+            "sentence-transformers/all-MiniLM-L6-v2"
+        )
         self.model = AutoModel.from_pretrained("sentence-transformers/all-MiniLM-L6-v2")
 
     def to_device(self, device: str) -> GPUCompatible:
@@ -57,23 +57,29 @@ class SentenceFeatureExtractor(AbstractUDF, GPUCompatible):
                 column_types=[NdArrayType.FLOAT32],
                 column_shapes=[(1, 384)],
             )
-        ]
+        ],
     )
     def forward(self, df: pd.DataFrame) -> pd.DataFrame:
         def _forward(row: pd.Series) -> np.ndarray:
             sentence = row[0]
 
-            encoded_input = self.tokenizer([sentence], padding=True, truncation=True, return_tensors="pt")
+            encoded_input = self.tokenizer(
+                [sentence], padding=True, truncation=True, return_tensors="pt"
+            )
             encoded_input.to(self.model_device)
             with torch.no_grad():
                 model_output = self.model(**encoded_input)
 
             attention_mask = encoded_input["attention_mask"]
             token_embedding = model_output[0]
-            input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embedding.size()).float()
-            sentence_embedding = torch.sum(token_embedding * input_mask_expanded, 1) / torch.clamp(input_mask_expanded.sum(1), min=1e-9)
+            input_mask_expanded = (
+                attention_mask.unsqueeze(-1).expand(token_embedding.size()).float()
+            )
+            sentence_embedding = torch.sum(
+                token_embedding * input_mask_expanded, 1
+            ) / torch.clamp(input_mask_expanded.sum(1), min=1e-9)
             sentence_embedding = F.normalize(sentence_embedding, p=2, dim=1)
-            
+
             sentence_embedding_np = sentence_embedding.cpu().numpy()
             return sentence_embedding_np
 
