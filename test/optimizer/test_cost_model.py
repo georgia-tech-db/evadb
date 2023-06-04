@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ class CostModel(unittest.TestCase):
 
         cm = CostModel()
         cm.calculate_cost = MagicMock(side_effect=side_effect_func)
-        opt_cxt = OptimizerContext(cm)
+        opt_cxt = OptimizerContext(MagicMock(), cm)
 
         grp_expr1 = GroupExpression(MagicMock())
         grp_expr1.opr.is_logical = lambda: False
@@ -53,7 +53,9 @@ class CostModel(unittest.TestCase):
         grp = opt_cxt.memo.get_group_by_id(grp_expr1.group_id)
         opt_cxt.task_stack.push(OptimizeGroup(grp, opt_cxt))
         self.execute_task_stack(opt_cxt.task_stack)
-        plan = PlanGenerator().build_optimal_physical_plan(grp_expr1.group_id, opt_cxt)
+        plan = PlanGenerator(MagicMock()).build_optimal_physical_plan(
+            grp_expr1.group_id, opt_cxt
+        )
         self.assertEqual(plan, grp_expr1.opr)
         self.assertEqual(grp.get_best_expr_cost(PropertyType.DEFAULT), 1)
 
@@ -73,7 +75,7 @@ class CostModel(unittest.TestCase):
 
         cm = CostModel()
         cm.calculate_cost = MagicMock(side_effect=side_effect_func)
-        opt_cxt = OptimizerContext(cm)
+        opt_cxt = OptimizerContext(MagicMock(), cm)
 
         # group 0
         grp_expr00 = GroupExpression(Operator(MagicMock()))
@@ -104,7 +106,9 @@ class CostModel(unittest.TestCase):
 
         opt_cxt.task_stack.push(OptimizeGroup(grp, opt_cxt))
         self.execute_task_stack(opt_cxt.task_stack)
-        plan = PlanGenerator().build_optimal_physical_plan(grp_expr20.group_id, opt_cxt)
+        plan = PlanGenerator(MagicMock()).build_optimal_physical_plan(
+            grp_expr20.group_id, opt_cxt
+        )
         subplan = copy(grp_expr11.opr)
         subplan.children = [copy(grp_expr01.opr)]
         expected_plan = copy(grp_expr20.opr)

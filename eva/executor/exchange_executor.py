@@ -16,6 +16,7 @@ from typing import Iterator
 
 from ray.util.queue import Queue
 
+from eva.database import EVADatabase
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError
 from eva.executor.ray_utils import (
@@ -30,7 +31,7 @@ from eva.plan_nodes.exchange_plan import ExchangePlan
 
 class QueueReaderExecutor(AbstractExecutor):
     def __init__(self):
-        super().__init__(None)
+        super().__init__(None, None)
 
     def exec(self, **kwargs) -> Iterator[Batch]:
         assert "input_queue" in kwargs, "Invalid ray execution. No input_queue found"
@@ -52,12 +53,12 @@ class QueueReaderExecutor(AbstractExecutor):
 
 
 class ExchangeExecutor(AbstractExecutor):
-    def __init__(self, node: ExchangePlan):
+    def __init__(self, db: EVADatabase, node: ExchangePlan):
         self.inner_plan = node.inner_plan
         self.parallelism = node.parallelism
         self.ray_pull_env_conf_dict = node.ray_pull_env_conf_dict
         self.ray_parallel_env_conf_dict = node.ray_parallel_env_conf_dict
-        super().__init__(node)
+        super().__init__(db, node)
 
     def build_inner_executor(self, inner_executor):
         self.inner_executor = inner_executor

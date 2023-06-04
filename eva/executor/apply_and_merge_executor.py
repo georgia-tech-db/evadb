@@ -14,6 +14,7 @@
 # limitations under the License.
 from typing import Iterator
 
+from eva.database import EVADatabase
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.apply_and_merge_plan import ApplyAndMergePlan
@@ -30,8 +31,8 @@ class ApplyAndMergeExecutor(AbstractExecutor):
 
     """
 
-    def __init__(self, node: ApplyAndMergePlan):
-        super().__init__(node)
+    def __init__(self, db: EVADatabase, node: ApplyAndMergePlan):
+        super().__init__(db, node)
         self.func_expr = node.func_expr
         self.do_unnest = node.do_unnest
         self.alias = node.alias
@@ -40,6 +41,14 @@ class ApplyAndMergeExecutor(AbstractExecutor):
         child_executor = self.children[0]
         for batch in child_executor.exec(**kwargs):
             func_result = self.func_expr.evaluate(batch)
+
+            # persist stats of function expression
+            if self.func_expr.udf_obj and self.func_expr._stats:
+                udf_id = self.func_expr.udf_obj.row_id
+                self.catalog().upsert_udf_cost_catalog_entry(
+                    udf_id, self.func_expr.udf_obj.name, self.func_expr._stats.prev_cost
+                )
+
             output = Batch.merge_column_wise([batch, func_result])
             if self.do_unnest:
                 output.unnest(func_result.columns)
