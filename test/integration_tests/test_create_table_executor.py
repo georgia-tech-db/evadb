@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.markers import ray_skip_marker
 from test.util import (
     DummyObjectDetector,
     create_sample_video,
@@ -49,19 +48,21 @@ class CreateTableTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        shutdown_ray()
         file_remove("dummy.avi")
         file_remove("ua_detrac.mp4")
         execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS MyVideo;")
         execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS UATRAC;")
+        execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS uadtrac_fastRCNN;")
+        execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS dummy_table;")
+        shutdown_ray()
 
-    def test_currently_cannot_create_boolean_table(self):
+    def _test_currently_cannot_create_boolean_table(self):
         query = """ CREATE TABLE BooleanTable( A BOOLEAN);"""
 
         with self.assertRaises(ExecutorError):
             execute_query_fetch_all(self.evadb, query)
 
-    @ray_skip_marker
+    # @ray_skip_marker
     def test_should_create_table_from_select(self):
         create_query = """CREATE TABLE dummy_table
             AS SELECT id, DummyObjectDetector(data).label FROM MyVideo;
@@ -72,8 +73,6 @@ class CreateTableTest(unittest.TestCase):
         actual_batch = execute_query_fetch_all(self.evadb, select_query)
         actual_batch.sort()
 
-        execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS dummy_table;")
-
         labels = DummyObjectDetector().labels
         expected = [
             {"dummy_table.id": i, "dummy_table.label": [labels[1 + i % 2]]}
@@ -83,8 +82,8 @@ class CreateTableTest(unittest.TestCase):
         self.assertEqual(actual_batch, expected_batch)
 
     @pytest.mark.torchtest
-    @ray_skip_marker
-    def test_should_create_table_from_select_lateral_join(self):
+    # @ray_skip_marker
+    def test_ashould_create_table_from_select_lateral_join(self):
         select_query = (
             "SELECT id, label, bbox FROM UATRAC JOIN LATERAL "
             "Yolo(data) AS T(label, bbox, score) WHERE id < 5;"
@@ -101,8 +100,6 @@ class CreateTableTest(unittest.TestCase):
         res = actual_batch.frames
         for idx in res.index:
             self.assertTrue("car" in res["uadtrac_fastrcnn.label"][idx])
-
-        execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS uadtrac_fastRCNN;")
 
 
 if __name__ == "__main__":

@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import asyncio
+import gc
 import multiprocessing as mp
 import os
 import shutil
@@ -65,6 +66,7 @@ def suffix_pytest_xdist_worker_id_to_dir(path: str):
 def get_evadb_for_testing(uri: str = None):
     db_dir = suffix_pytest_xdist_worker_id_to_dir(EVA_DATABASE_DIR)
     remove_directory_contents(db_dir)
+    gc.collect()
     return init_eva_db_instance(db_dir, custom_db_uri=uri)
 
 

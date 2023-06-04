@@ -62,18 +62,16 @@ class PytorchTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        shutdown_ray()
-
         file_remove("ua_detrac.mp4")
         file_remove("mnist.mp4")
         file_remove("actions.mp4")
         file_remove("computer_asl.mp4")
 
-        # execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS Actions;")
-        # execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS MNIST;")
-        # execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS MyVideo;")
-        # execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS Asl_actions;")
-        # execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS MemeImages;")
+        execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS Actions;")
+        execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS MNIST;")
+        execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS MyVideo;")
+        execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS Asl_actions;")
+        execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS MemeImages;")
 
     def assertBatchEqual(self, a: Batch, b: Batch, msg: str):
         try:
@@ -83,6 +81,9 @@ class PytorchTest(unittest.TestCase):
 
     def setUp(self):
         self.addTypeEqualityFunc(Batch, self.assertBatchEqual)
+
+    def tearDown(self) -> None:
+        shutdown_ray()
 
     @ray_only_marker
     def test_should_apply_parallel_match_sequential(self):
@@ -110,7 +111,7 @@ class PytorchTest(unittest.TestCase):
 
     @ray_only_marker
     def test_should_project_parallel_match_sequential(self):
-        create_udf_query = """CREATE UDF FaceDetector
+        create_udf_query = """CREATE UDF IF NOT EXISTS FaceDetector
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
                   OUTPUT (bboxes NDARRAY FLOAT32(ANYDIM, 4),
                           scores NDARRAY FLOAT32(ANYDIM))

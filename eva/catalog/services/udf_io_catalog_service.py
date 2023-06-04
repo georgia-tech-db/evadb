@@ -15,6 +15,7 @@
 from typing import List
 
 from sqlalchemy.orm import Session
+from sqlalchemy.sql.expression import select
 
 from eva.catalog.models.udf_io_catalog import UdfIOCatalog, UdfIOCatalogEntry
 from eva.catalog.services.base_service import BaseService
@@ -27,10 +28,16 @@ class UdfIOCatalogService(BaseService):
 
     def get_input_entries_by_udf_id(self, udf_id: int) -> List[UdfIOCatalogEntry]:
         try:
-            result = self.query.filter(
-                self.model._udf_id == udf_id,
-                self.model._is_input == True,  # noqa
-            ).all()
+            result = (
+                self.session.execute(
+                    select(self.model).filter(
+                        self.model._udf_id == udf_id,
+                        self.model._is_input == True,  # noqa
+                    )
+                )
+                .scalars()
+                .all()
+            )
             return [obj.as_dataclass() for obj in result]
         except Exception as e:
             error = f"Getting inputs for UDF id {udf_id} raised {e}"
@@ -39,10 +46,16 @@ class UdfIOCatalogService(BaseService):
 
     def get_output_entries_by_udf_id(self, udf_id: int) -> List[UdfIOCatalogEntry]:
         try:
-            result = self.query.filter(
-                self.model._udf_id == udf_id,
-                self.model._is_input == False,  # noqa
-            ).all()
+            result = (
+                self.session.execute(
+                    select(self.model).filter(
+                        self.model._udf_id == udf_id,
+                        self.model._is_input == False,  # noqa
+                    )
+                )
+                .scalars()
+                .all()
+            )
             return [obj.as_dataclass() for obj in result]
         except Exception as e:
             error = f"Getting outputs for UDF id {udf_id} raised {e}"

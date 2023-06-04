@@ -30,11 +30,11 @@ class StorageEngine:
     def _lazy_initialize_storages(cls, db: EVADB):
         if not cls.storages:
             cls.storages = {
-                TableType.STRUCTURED_DATA: SQLStorageEngine(db),
-                TableType.VIDEO_DATA: DecordStorageEngine(db),
-                TableType.IMAGE_DATA: ImageStorageEngine(db),
-                TableType.DOCUMENT_DATA: DocumentStorageEngine(db),
-                TableType.PDF_DATA: PDFStorageEngine(db),
+                TableType.STRUCTURED_DATA: SQLStorageEngine,
+                TableType.VIDEO_DATA: DecordStorageEngine,
+                TableType.IMAGE_DATA: ImageStorageEngine,
+                TableType.DOCUMENT_DATA: DocumentStorageEngine,
+                TableType.PDF_DATA: PDFStorageEngine,
             }
 
     @classmethod
@@ -43,6 +43,6 @@ class StorageEngine:
         if table is None:
             raise ValueError("Expected TableCatalogEntry, got None")
         if table.table_type in cls.storages:
-            return cls.storages[table.table_type]
+            return cls.storages[table.table_type](db)
 
         raise RuntimeError(f"Invalid table type {table.table_type}")

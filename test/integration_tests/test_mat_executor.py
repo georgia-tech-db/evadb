@@ -36,6 +36,9 @@ NUM_FRAMES = 10
 class MaterializedViewTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        import ray
+
+        ray.init(num_cpus=1)
         cls.evadb = get_evadb_for_testing()
         # reset the catalog manager before running each test
         cls.evadb.catalog().reset()
