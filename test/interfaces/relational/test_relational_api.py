@@ -221,10 +221,10 @@ class RelationalAPI(unittest.TestCase):
             "CREATE UDF SpeechRecognizer INPUT (INPUT ()) OUTPUT (OUTPUT ()) TYPE HuggingFace (task=automatic-speech-recognition, model=openai/whisper-base))",
         )
 
-        select_query = (
+        select_query_sql = (
             "SELECT id, DummyObjectDetector(data) FROM dummy_video ORDER BY id;"
         )
-        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch = conn.query(select_query_sql).execute()
         labels = DummyObjectDetector().labels
         expected = [
             {
