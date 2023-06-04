@@ -13,15 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from typing import TYPE_CHECKING
 
 import mock
 import pytest
 from mock import ANY, MagicMock
 
-if TYPE_CHECKING:
-    from eva.catalog.catalog_manager import CatalogManager
-
+from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import ColumnType, TableType
 from eva.catalog.catalog_utils import get_video_table_column_definitions
 from eva.catalog.models.column_catalog import ColumnCatalogEntry
