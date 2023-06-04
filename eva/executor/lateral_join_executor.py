@@ -14,6 +14,7 @@
 # limitations under the License.
 from typing import Iterator
 
+from eva.database import EVADatabase
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import apply_predicate, apply_project
 from eva.models.storage.batch import Batch
@@ -21,8 +22,8 @@ from eva.plan_nodes.lateral_join_plan import LateralJoinPlan
 
 
 class LateralJoinExecutor(AbstractExecutor):
-    def __init__(self, node: LateralJoinPlan):
-        super().__init__(node)
+    def __init__(self, db: EVADatabase, node: LateralJoinPlan):
+        super().__init__(db, node)
         self.predicate = node.join_predicate
         self.join_project = node.join_project
 
@@ -33,7 +34,11 @@ class LateralJoinExecutor(AbstractExecutor):
             for result_batch in inner.exec(lateral_input=outer_batch):
                 result_batch = Batch.join(outer_batch, result_batch)
                 result_batch.reset_index()
-                result_batch = apply_predicate(result_batch, self.predicate)
-                result_batch = apply_project(result_batch, self.join_project)
+                result_batch = apply_predicate(
+                    result_batch, self.predicate, self.catalog()
+                )
+                result_batch = apply_project(
+                    result_batch, self.join_project, self.catalog()
+                )
                 if not result_batch.empty():
                     yield result_batch

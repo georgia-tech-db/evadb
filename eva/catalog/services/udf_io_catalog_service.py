@@ -14,21 +14,30 @@
 # limitations under the License.
 from typing import List
 
+from sqlalchemy.orm import Session
+from sqlalchemy.sql.expression import select
+
 from eva.catalog.models.udf_io_catalog import UdfIOCatalog, UdfIOCatalogEntry
 from eva.catalog.services.base_service import BaseService
 from eva.utils.logging_manager import logger
 
 
 class UdfIOCatalogService(BaseService):
-    def __init__(self):
-        super().__init__(UdfIOCatalog)
+    def __init__(self, db_session: Session):
+        super().__init__(UdfIOCatalog, db_session)
 
     def get_input_entries_by_udf_id(self, udf_id: int) -> List[UdfIOCatalogEntry]:
         try:
-            result = self.model.query.filter(
-                self.model._udf_id == udf_id,
-                self.model._is_input == True,  # noqa
-            ).all()
+            result = (
+                self.session.execute(
+                    select(self.model).filter(
+                        self.model._udf_id == udf_id,
+                        self.model._is_input == True,  # noqa
+                    )
+                )
+                .scalars()
+                .all()
+            )
             return [obj.as_dataclass() for obj in result]
         except Exception as e:
             error = f"Getting inputs for UDF id {udf_id} raised {e}"
@@ -37,10 +46,16 @@ class UdfIOCatalogService(BaseService):
 
     def get_output_entries_by_udf_id(self, udf_id: int) -> List[UdfIOCatalogEntry]:
         try:
-            result = self.model.query.filter(
-                self.model._udf_id == udf_id,
-                self.model._is_input == False,  # noqa
-            ).all()
+            result = (
+                self.session.execute(
+                    select(self.model).filter(
+                        self.model._udf_id == udf_id,
+                        self.model._is_input == False,  # noqa
+                    )
+                )
+                .scalars()
+                .all()
+            )
             return [obj.as_dataclass() for obj in result]
         except Exception as e:
             error = f"Getting outputs for UDF id {udf_id} raised {e}"
@@ -64,4 +79,4 @@ class UdfIOCatalogService(BaseService):
                 is_input=io.is_input,
                 udf_id=io.udf_id,
             )
-            io_obj.save()
+            io_obj.save(self.session)
