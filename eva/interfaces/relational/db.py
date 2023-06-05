@@ -85,7 +85,9 @@ class EVAConnection:
         Returns
             EVARelation: The EVARelation object representing the UDF created.
         """
-        return self.cursor().create_udf(udf_name, impl_path, type=type, **kwargs)
+        return self.cursor().create_udf(
+            udf_name, if_not_exists, impl_path, type=type, **kwargs
+        )
 
     def load(
         self, file_regex: str, table_name: str, format: str, **kwargs

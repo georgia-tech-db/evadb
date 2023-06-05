@@ -199,7 +199,7 @@ class RelationalAPI(unittest.TestCase):
         )
         assert_frame_equal(rel.df(), conn.query(similarity_sql).df())
 
-    def test_create_udf(self):
+    def test_create_udf_with_relational_api(self):
         video_file_path = create_sample_video(10)
 
         conn = connect(self.db_dir)
@@ -212,7 +212,7 @@ class RelationalAPI(unittest.TestCase):
         rel.execute()
 
         create_dummy_object_detector_udf = conn.create_udf(
-            "DummyObjectDetector", impl_path="test/util.py"
+            "DummyObjectDetector", if_not_exists=True, impl_path="test/util.py"
         )
         create_dummy_object_detector_udf.execute()
 
@@ -222,24 +222,25 @@ class RelationalAPI(unittest.TestCase):
             "SpeechRecognizer", if_not_exists=True, type="HuggingFace", **args
         )
         query = create_speech_recognizer_udf_if_not_exists.sql_query()
+        print(query)
         self.assertEqual(
             query,
-            "CREATE UDF SpeechRecognizer TYPE HuggingFace (task=automatic-speech-recognition, model=openai/whisper-base))",
+            """CREATE UDF SpeechRecognizer IF NOT EXISTS TYPE HuggingFace 'task' 'automatic-speech-recognition' 'model' 'openai/whisper-base'""",
         )
         create_speech_recognizer_udf_if_not_exists.execute()
 
+        # check if next create call of same UDF raises error
         create_speech_recognizer_udf = conn.create_udf(
-            "SpeechRecognizer", type="HuggingFace", **args
+            "SpeechRecognizer", if_not_exists=False, type="HuggingFace", **args
         )
+        print(query)
         query = create_speech_recognizer_udf.sql_query()
         self.assertEqual(
             query,
-            "CREATE UDF SpeechRecognizer TYPE HuggingFace (task=automatic-speech-recognition, model=openai/whisper-base))",
+            "CREATE UDF SpeechRecognizer TYPE HuggingFace 'task' 'automatic-speech-recognition' 'model' 'openai/whisper-base'",
         )
-        try:
+        with self.assertRaises(ExecutorError):
             create_speech_recognizer_udf.execute()
-        except Exception as e:
-            isinstance(e, ExecutorError)
 
         select_query_sql = (
             "SELECT id, DummyObjectDetector(data) FROM dummy_video ORDER BY id;"
