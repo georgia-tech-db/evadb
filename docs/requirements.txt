@@ -17,7 +17,7 @@ sphinx_design==0.4.1
 sphinx_multiversion>=0.2.4
 sphinxcontrib-redoc==1.6.0
 sphinxcontrib-youtube==1.2.0
-furo
+furo>=2022.4.7
 
 setuptools>=41.0.1
 docutils>=0.15
