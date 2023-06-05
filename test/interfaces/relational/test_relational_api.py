@@ -261,25 +261,26 @@ class RelationalAPI(unittest.TestCase):
 
     def test_pdf_similarity_search(self):
         conn = connect()
+        cursor = conn.cursor()
         pdf_path1 = f"{EVA_ROOT_DIR}/data/documents/state_of_the_union.pdf"
         pdf_path2 = f"{EVA_ROOT_DIR}/data/documents/layout-parser-paper.pdf"
 
-        load_pdf = conn.load(file_regex=pdf_path1, format="PDF", table_name="PDFss")
+        load_pdf = cursor.load(file_regex=pdf_path1, format="PDF", table_name="PDFss")
         load_pdf.execute()
 
-        load_pdf = conn.load(file_regex=pdf_path2, format="PDF", table_name="PDFss")
+        load_pdf = cursor.load(file_regex=pdf_path2, format="PDF", table_name="PDFss")
         load_pdf.execute()
 
-        udf_check = conn.query("DROP UDF IF  EXISTS SentencTransformerFeatureExtractor")
+        udf_check = cursor.query("DROP UDF IF  EXISTS SentencTransformerFeatureExtractor")
         udf_check.execute()
-        udf = conn.create_udf(
+        udf = cursor.create_udf(
             "SentencTransformerFeatureExtractor",
             True,
             f"{EVA_ROOT_DIR}/eva/udfs/sentence_transformer_feature_extractor.py",
         )
         udf.execute()
 
-        conn.create_vector_index(
+        cursor.create_vector_index(
             "faiss_index",
             table_name="PDFss",
             expr="SentencTransformerFeatureExtractor(data)",
@@ -287,7 +288,7 @@ class RelationalAPI(unittest.TestCase):
         ).df()
 
         query = (
-            conn.table("PDFss")
+            cursor.table("PDFss")
             .order(
                 """Similarity(
                     SentencTransformerFeatureExtractor('When was the NATO created?'), SentencTransformerFeatureExtractor(data)
