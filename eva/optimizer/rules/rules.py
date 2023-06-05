@@ -1262,6 +1262,20 @@ class LogicalVectorIndexScanToPhysical(Rule):
         yield after
 
 
+"""
+Rules to optimize Ray.
+"""
+
+
+def get_ray_env_dict():
+    # Get the highest GPU id and expose all GPUs that have id lower than
+    # the max id.
+    max_gpu_id = max(Context().gpus) + 1
+    return {
+        "CUDA_VISIBLE_DEVICES": ",".join([str(n) for n in range(max_gpu_id)])
+    }
+
+
 class LogicalExchangeToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALEXCHANGE)
@@ -1296,15 +1310,15 @@ class LogicalApplyAndMergeToRayPhysical(Rule):
     def apply(self, before: LogicalApplyAndMerge, context: OptimizerContext):
         apply_plan = ApplyAndMergePlan(before.func_expr, before.alias, before.do_unnest)
 
-        parallelism = 2 if len(Context().gpus) > 1 else 1
-        ray_parallel_env_conf_dict = [
-            {"CUDA_VISIBLE_DEVICES": str(i)} for i in range(parallelism)
-        ]
+        parallelism = 2
+
+        ray_process_env_dict = get_ray_env_dict()
+        ray_parallel_env_conf_dict = [ray_process_env_dict for _ in range(parallelism)]
 
         exchange_plan = ExchangePlan(
             inner_plan=apply_plan,
             parallelism=parallelism,
-            ray_pull_env_conf_dict={"CUDA_VISIBLE_DEVICES": "0"},
+            ray_pull_env_conf_dict=ray_process_env_dict,
             ray_parallel_env_conf_dict=ray_parallel_env_conf_dict,
         )
         for child in before.children:
@@ -1335,15 +1349,15 @@ class LogicalProjectToRayPhysical(Rule):
                 project_plan.append_child(child)
             yield project_plan
         else:
-            parallelism = 2 if len(Context().gpus) > 1 else 1
-            ray_parallel_env_conf_dict = [
-                {"CUDA_VISIBLE_DEVICES": str(i)} for i in range(parallelism)
-            ]
+            parallelism = 2
+
+            ray_process_env_dict = get_ray_env_dict()
+            ray_parallel_env_conf_dict = [ray_process_env_dict for _ in range(parallelism)]
 
             exchange_plan = ExchangePlan(
                 inner_plan=project_plan,
                 parallelism=parallelism,
-                ray_pull_env_conf_dict={"CUDA_VISIBLE_DEVICES": "0"},
+                ray_pull_env_conf_dict=ray_process_env_dict,
                 ray_parallel_env_conf_dict=ray_parallel_env_conf_dict,
             )
             for child in before.children:
