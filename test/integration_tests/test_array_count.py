@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ from test.util import (
     NUM_FRAMES,
     create_sample_video,
     file_remove,
+    get_evadb_for_testing,
     load_udfs_for_testing,
     shutdown_ray,
 )
@@ -24,7 +25,6 @@ from test.util import (
 import pandas as pd
 import pytest
 
-from eva.catalog.catalog_manager import CatalogManager
 from eva.models.storage.batch import Batch
 from eva.server.command_handler import execute_query_fetch_all
 
@@ -33,16 +33,17 @@ from eva.server.command_handler import execute_query_fetch_all
 class ArrayCountTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        CatalogManager().reset()
+        cls.evadb = get_evadb_for_testing()
+        cls.evadb.catalog().reset()
         video_file_path = create_sample_video(NUM_FRAMES)
         load_query = f"LOAD VIDEO '{video_file_path}' INTO MyVideo;"
-        execute_query_fetch_all(load_query)
-        load_udfs_for_testing(mode="debug")
+        execute_query_fetch_all(cls.evadb, load_query)
+        load_udfs_for_testing(cls.evadb, mode="debug")
 
     @classmethod
     def tearDownClass(cls):
         shutdown_ray()
-        execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
+        execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS MyVideo;")
         file_remove("dummy.avi")
 
     # integration test
@@ -51,7 +52,7 @@ class ArrayCountTests(unittest.TestCase):
         # Equality test
         select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo \
             WHERE DummyObjectDetector(data).label = ['person'] ORDER BY id;"
-        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch = execute_query_fetch_all(self.evadb, select_query)
         expected = [
             {"myvideo.id": i * 2, "dummyobjectdetector.label": ["person"]}
             for i in range(NUM_FRAMES // 2)
@@ -62,12 +63,12 @@ class ArrayCountTests(unittest.TestCase):
         # Contain test
         select_query = "SELECT id, DummyObjectDetector(data) FROM MyVideo \
             WHERE DummyObjectDetector(data).label <@ ['person'] ORDER BY id;"
-        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch = execute_query_fetch_all(self.evadb, select_query)
         self.assertEqual(actual_batch, expected_batch)
 
         select_query = "SELECT id FROM MyVideo WHERE \
             DummyMultiObjectDetector(data).labels @> ['person'] ORDER BY id;"
-        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch = execute_query_fetch_all(self.evadb, select_query)
         expected = [{"myvideo.id": i} for i in range(0, NUM_FRAMES, 3)]
         expected_batch = Batch(frames=pd.DataFrame(expected))
         self.assertEqual(actual_batch, expected_batch)
@@ -76,7 +77,7 @@ class ArrayCountTests(unittest.TestCase):
         select_query = """SELECT id FROM MyVideo WHERE
             ArrayCount(DummyMultiObjectDetector(data).labels, 'person') = 2
             ORDER BY id;"""
-        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch = execute_query_fetch_all(self.evadb, select_query)
         expected = [{"myvideo.id": i} for i in range(0, NUM_FRAMES, 3)]
         expected_batch = Batch(frames=pd.DataFrame(expected))
         self.assertEqual(actual_batch, expected_batch)
@@ -84,7 +85,7 @@ class ArrayCountTests(unittest.TestCase):
         select_query = """SELECT id FROM MyVideo
             WHERE ArrayCount(DummyObjectDetector(data).label, 'bicycle') = 1
             ORDER BY id;"""
-        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch = execute_query_fetch_all(self.evadb, select_query)
         expected = [{"myvideo.id": i} for i in range(1, NUM_FRAMES, 2)]
         expected_batch = Batch(frames=pd.DataFrame(expected))
         self.assertEqual(actual_batch, expected_batch)

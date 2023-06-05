@@ -14,6 +14,7 @@
 # limitations under the License.
 from typing import Iterator
 
+from eva.database import EVADatabase
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import apply_predicate, apply_project
 from eva.models.storage.batch import Batch
@@ -28,8 +29,8 @@ class SequentialScanExecutor(AbstractExecutor):
 
     """
 
-    def __init__(self, node: SeqScanPlan):
-        super().__init__(node)
+    def __init__(self, db: EVADatabase, node: SeqScanPlan):
+        super().__init__(db, node)
         self.predicate = node.predicate
         self.project_expr = node.columns
         self.alias = node.alias
@@ -43,9 +44,9 @@ class SequentialScanExecutor(AbstractExecutor):
                 batch.modify_column_alias(self.alias)
 
             # We do the predicate first
-            batch = apply_predicate(batch, self.predicate)
+            batch = apply_predicate(batch, self.predicate, self.catalog())
             # Then do project
-            batch = apply_project(batch, self.project_expr)
+            batch = apply_project(batch, self.project_expr, self.catalog())
 
             if not batch.empty():
                 yield batch

@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
 
 import unittest
 from test.markers import windows_skip_marker
-
-from mock import MagicMock, patch
 
 from eva.readers.decord_reader import DecordReader
 from eva.utils.generic_utils import (
@@ -86,15 +84,8 @@ class ModulePathTest(unittest.TestCase):
         is_gpu_available()
 
     @windows_skip_marker
-    @patch("eva.utils.generic_utils.ConfigurationManager")
-    def test_should_return_a_random_full_path(self, mock_conf):
-        mock_conf_inst = MagicMock()
-        mock_conf.return_value = mock_conf_inst
-        mock_conf_inst.get_value.return_value = "eva_datasets"
-        actual = generate_file_path("test")
+    def test_should_return_a_random_full_path(self):
+        actual = generate_file_path("eva_datasets", "test")
         self.assertTrue(actual.is_absolute())
         # Root directory must be the same, filename is random
         self.assertTrue("eva_datasets" in str(actual.parent))
-
-        mock_conf_inst.get_value.return_value = None
-        self.assertRaises(KeyError, generate_file_path)

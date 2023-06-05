@@ -17,11 +17,10 @@ from typing import Dict, List
 
 import pandas as pd
 
-from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_utils import get_metadata_properties
 from eva.catalog.models.udf_catalog import UdfCatalogEntry
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
-from eva.configuration.configuration_manager import ConfigurationManager
+from eva.database import EVADatabase
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.create_udf_plan import CreateUDFPlan
@@ -33,11 +32,10 @@ from eva.utils.logging_manager import logger
 
 
 class CreateUDFExecutor(AbstractExecutor):
-    def __init__(self, node: CreateUDFPlan):
-        super().__init__(node)
+    def __init__(self, db: EVADatabase, node: CreateUDFPlan):
+        super().__init__(db, node)
         self.udf_dir = (
-            Path(ConfigurationManager().get_value("core", "eva_installation_dir"))
-            / "udfs"
+            Path(self.config.get_value("core", "eva_installation_dir")) / "udfs"
         )
 
     def handle_huggingface_udf(self):
@@ -96,9 +94,8 @@ class CreateUDFExecutor(AbstractExecutor):
 
         Calls the catalog to insert a udf catalog entry.
         """
-        catalog_manager = CatalogManager()
         # check catalog if it already has this udf entry
-        if catalog_manager.get_udf_catalog_entry_by_name(self.node.name):
+        if self.catalog().get_udf_catalog_entry_by_name(self.node.name):
             if self.node.if_not_exists:
                 msg = f"UDF {self.node.name} already exists, nothing added."
                 yield Batch(pd.DataFrame([msg]))
@@ -116,7 +113,7 @@ class CreateUDFExecutor(AbstractExecutor):
         else:
             name, impl_path, udf_type, io_list, metadata = self.handle_generic_udf()
 
-        catalog_manager.insert_udf_catalog_entry(
+        self.catalog().insert_udf_catalog_entry(
             name, impl_path, udf_type, io_list, metadata
         )
         yield Batch(

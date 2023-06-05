@@ -12,10 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import weakref
+from threading import Lock
+
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import scoped_session, sessionmaker
-
-from eva.configuration.configuration_manager import ConfigurationManager
 
 IDENTIFIER_COLUMN = "_row_id"
 
@@ -33,36 +34,34 @@ CATALOG_TABLES = [
 ]
 
 
-class SQLConfig:
-    """Singleton class for configuring connection to the database.
-
-    Attributes:
-        _instance: stores the singleton instance of the class.
+class SingletonMeta(type):
+    """
+    This is a thread-safe implementation of Singleton.
     """
 
-    def __new__(cls):
-        """Overrides the default __new__ method.
+    _instances = weakref.WeakValueDictionary()
 
-        Returns the existing instance or creates a new one if an instance
-        does not exist.
+    _lock: Lock = Lock()
 
-        Returns:
-            An instance of the class.
-        """
-        if not hasattr(cls, "_instance"):
-            cls._instance = super(SQLConfig, cls).__new__(cls)
-        return cls._instance
+    def __call__(cls, uri):
+        key = (cls, uri)
+        with cls._lock:
+            if key not in cls._instances:
+                instance = super().__call__(uri)
+                cls._instances[key] = instance
+        return cls._instances[key]
 
-    def __init__(self):
+
+class SQLConfig(metaclass=SingletonMeta):
+    def __init__(self, uri):
         """Initializes the engine and session for database operations
 
         Retrieves the database uri for connection from ConfigurationManager.
         """
-        uri = ConfigurationManager().get_value("core", "catalog_database_uri")
 
         self.worker_uri = str(uri)
         # set echo=True to log SQL
-        self.engine = create_engine(self.worker_uri, isolation_level="SERIALIZABLE")
+        self.engine = create_engine(self.worker_uri)
 
         if self.engine.url.get_backend_name() == "sqlite":
             # enforce foreign key constraint and wal logging for sqlite
@@ -71,9 +70,13 @@ class SQLConfig:
             def _enable_sqlite_pragma(dbapi_con, con_record):
                 dbapi_con.execute("pragma foreign_keys=ON")
                 dbapi_con.execute("pragma synchronous=NORMAL")
-                dbapi_con.execute("pragma journal_mode=WAL")
+
+                # disabling WAL for now, we need to fix the catalog operations.
+                # Currently, there are too many connections being made, which is not an
+                # optimal design. Ideally, we should implement a connection pool for
+                # better management.
+                # dbapi_con.execute("pragma journal_mode=WAL")
 
             event.listen(self.engine, "connect", _enable_sqlite_pragma)
-
         # statements
         self.session = scoped_session(sessionmaker(bind=self.engine))
