@@ -254,3 +254,47 @@ class RelationalAPI(unittest.TestCase):
         ]
         expected_batch = Batch(frames=pd.DataFrame(expected))
         self.assertEqual(actual_batch, expected_batch)
+
+    def test_pdf_similarity_search(self):
+        pdf_path = f"{EVA_ROOT_DIR}/data/documents/state_of_the_union.pdf"
+
+        conn = connect()
+
+        load_pdf = conn.load(file_regex=pdf_path, format="PDF", table_name="PDFss")
+        load_pdf.execute()
+
+        udf_check = conn.query("DROP UDF IF  EXISTS SpacyFeatureExtractor")
+        udf_check.execute()
+
+        udf = conn.create_udf(
+            "SpacyFeatureExtractor",
+            True,
+            f"{EVA_ROOT_DIR}/eva/udfs/spacy_feature_extractor.py",
+        )
+
+        udf.execute()
+
+        conn.create_vector_index(
+            "faiss_index",
+            table_name="PDFss",
+            expr="SpacyFeatureExtractor(data)",
+            using="QDRANT",
+        ).df()
+
+        query = (
+            conn.table("PDFss")
+            .order(
+                """Similarity(
+                    SpacyFeatureExtractor('When was the NATO created?'), SpacyFeatureExtractor(data)
+                ) DESC"""
+            )
+            .limit(3)
+            .select("data")
+        )
+        print(query.sql_query())
+        output = query.df()
+        from pprint import pprint
+
+        pprint(output)
+        self.assertEqual(len(output), 3)
+        self.assertTrue("pdfss.data" in output.columns)
