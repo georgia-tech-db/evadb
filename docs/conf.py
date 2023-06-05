@@ -43,9 +43,10 @@ extensions = [
     "sphinxcontrib.redoc",
     "sphinxcontrib.youtube",
     "sphinx_inline_tabs",
+    "sphinx.ext.intersphinx",
     "myst_nb",
     "versionwarning.extension",
-    "IPython.sphinxext.ipython_console_highlighting"
+    "IPython.sphinxext.ipython_console_highlighting",
 ]
 source_suffix = [".ipynb", ".html", ".md", ".rst"]
 
@@ -68,6 +69,7 @@ myst_enable_extensions = [
     "smartquotes",
     "replacements",
 ]
+
 
 # Thebe configuration for launching notebook cells within the docs.
 thebe_config = {
@@ -92,7 +94,7 @@ author = u"EVA DB"
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # The name of the Pygments (syntax highlighting) style to use.
-#pygments_style = "lovelace"
+# pygments_style = "lovelace"
 
 # List of substitutions
 rst_prolog = """
@@ -127,13 +129,13 @@ html_theme_options = {
     },
     "navigation_with_keys": True,
     # Add important announcement here
-    #"announcement": "<em>Important</em> announcement!"
+    # "announcement": "<em>Important</em> announcement!"
 }
 
 external_toc_path = "_toc.yml"  # optional, default: _toc.yml
 external_toc_exclude_missing = False  # optional, default: False
 
-#html_logo = "images/eva/eva-logo.png"
+# html_logo = "images/eva/eva-logo.png"
 
 html_sidebars = {
     "**": [
@@ -141,21 +143,27 @@ html_sidebars = {
         "sidebar/brand.html",
         "sidebar/search.html",
         "sidebar/navigation.html",
-        "sidebar/scroll-end.html"
+        "sidebar/scroll-end.html",
     ]
 }
 
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3", (None, "python-inv.txt"))
+}
+
+
 # Adding custom css file
-html_static_path = ['_static']
-html_css_files = ['custom.css']
+html_static_path = ["_static"]
+html_css_files = ["custom.css"]
 
 # Adding the Tutorial notebooks to ./docs/source/tutorials/
 
-for i in os.listdir('../tutorials'):
-    if i.endswith('.ipynb'):
-        shutil.copy(f'../tutorials/{i}', './source/tutorials/')
+for i in os.listdir("../tutorials"):
+    if i.endswith(".ipynb"):
+        shutil.copy(f"../tutorials/{i}", "./source/tutorials/")
 
 jupyter_execute_notebooks = "off"
+
 
 # -- Initialize Sphinx ----------------------------------------------
 def setup(sphinx):
