@@ -63,37 +63,25 @@ class CreateUDFStatement(AbstractStatement):
         self._metadata = metadata
 
     def __str__(self) -> str:
-        exists_str = ""
+        exists_str = " "
         if self._if_not_exists:
-            exists_str += "IF NOT EXISTS "
-
-        input_str = ""
-        if self._inputs is not None:
-            input_str += "INPUT ("
-            for expr in self._inputs:
-                input_str += str(expr) + ", "
-            input_str = input_str.rstrip(", ")
-            input_str += ")"
-
-        output_str = ""
-        if self._outputs is not None:
-            output_str += "OUTPUT ("
-            for expr in self._outputs:
-                output_str += str(expr) + ", "
-            output_str = output_str.rstrip(", ")
-            output_str += ")"
+            exists_str = " IF NOT EXISTS "
 
         type_str = ""
         if self._udf_type is not None:
-            type_str += "TYPE " + self._udf_type
+            type_str += "TYPE " + str(self._udf_type)
+
+        impl_str = ""
+        if self._impl_path:
+            impl_str = f" IMPL {self._impl_path.name} "
 
         metadata_str = ""
         if self._metadata is not None:
             for key, value in self._metadata:
-                metadata_str += f"{key}={value}, "
-            metadata_str = metadata_str.rstrip(", ")
+                metadata_str += f"'{key}' '{value}' "
+            metadata_str = metadata_str.rstrip(" ")
 
-        return f"CREATE UDF {self._name} INPUT ({input_str}) OUTPUT ({output_str}) TYPE {self._udf_type} IMPL {self._impl_path.name} ({metadata_str}))"
+        return f"""CREATE UDF {self._name}{exists_str}TYPE {self._udf_type}{impl_str} {metadata_str}"""
 
     @property
     def name(self):

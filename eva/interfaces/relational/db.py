@@ -26,6 +26,7 @@ from eva.models.storage.batch import Batch
 from eva.parser.alias import Alias
 from eva.parser.select_statement import SelectStatement
 from eva.parser.utils import (
+    parse_create_udf,
     parse_create_vector_index,
     parse_load,
     parse_query,
@@ -49,6 +50,46 @@ class EVAConnection:
             self._cursor = EVACursor(self)
         return self._cursor
 
+    def df(self) -> pandas.DataFrame:
+        """
+        Get the result of the last executed query on the connection as a pandas
+        DataFrame.
+
+        Returns:
+            pandas.DataFrame: The result of the query as a DataFrame.
+
+        Raises:
+            Exception: If there is no valid result with the current connection.
+        """
+        if not self._result:
+            raise Exception("No valid result with the current connection")
+        return self._result.frames
+
+    def create_udf(
+        self,
+        udf_name: str,
+        if_not_exists: bool = False,
+        impl_path: str = None,
+        type: str = None,
+        **kwargs
+    ) -> "EVARelation":
+        """
+        Create a udf in the database.
+
+        Args:
+            udf_name (str): Name of the udf to be created.
+            if_not_exists (bool): Whether the query contains IF NOT EXISTS clause.
+            impl_path (str): Path string to udf's implementation.
+            type (str): Type of the udf (e.g. HuggingFace).
+            **kwargs: Additional keyword arguments for configuring the create udf operation.
+
+        Returns
+            EVARelation: The EVARelation object representing the UDF created.
+        """
+        return self.cursor().create_udf(
+            udf_name, if_not_exists, impl_path, type=type, **kwargs
+        )
+
     def load(
         self, file_regex: str, table_name: str, format: str, **kwargs
     ) -> EVARelation:
@@ -59,11 +100,6 @@ class EVAConnection:
 
     def query(self, sql_query: str) -> EVARelation:
         return self.cursor().query(sql_query)
-
-    def df(self) -> pandas.DataFrame:
-        if not self._result:
-            raise Exception("No valid result with the current connection")
-        return self._result.frames
 
     def create_vector_index(
         self, index_name: str, table_name: str, expr: str, using: str
@@ -168,6 +204,30 @@ class EVACursor(object):
     ) -> EVARelation:
         # LOAD {FORMAT} file_regex INTO table_name
         stmt = parse_load(table_name, file_regex, format, **kwargs)
+        return EVARelation(self._evadb, stmt)
+
+    def create_udf(
+        self,
+        udf_name: str,
+        if_not_exists: bool = False,
+        impl_path: str = None,
+        type: str = None,
+        **kwargs
+    ) -> "EVARelation":
+        """
+        Create a udf in the database.
+
+        Args:
+            udf_name (str): Name of the udf to be created.
+            if_not_exists (bool): Whether the query contains IF NOT EXISTS clause.
+            impl_path (str): Path string to udf's implementation.
+            type (str): Type of the udf (e.g. HuggingFace).
+            **kwargs: Additional keyword arguments for configuring the create udf operation.
+
+        Returns
+            EVARelation: The EVARelation object representing the UDF created.
+        """
+        stmt = parse_create_udf(udf_name, if_not_exists, impl_path, type, **kwargs)
         return EVARelation(self._evadb, stmt)
 
     def query(self, sql_query: str) -> EVARelation:
