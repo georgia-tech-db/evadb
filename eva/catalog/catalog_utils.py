@@ -25,10 +25,12 @@ from eva.catalog.catalog_type import (
     TableType,
     VideoColumnName,
 )
-from eva.catalog.models.column_catalog import ColumnCatalogEntry
-from eva.catalog.models.table_catalog import TableCatalogEntry
-from eva.catalog.models.udf_cache_catalog import UdfCacheCatalogEntry
-from eva.catalog.models.udf_catalog import UdfCatalogEntry
+from eva.catalog.models.utils import (
+    ColumnCatalogEntry,
+    TableCatalogEntry,
+    UdfCacheCatalogEntry,
+    UdfCatalogEntry,
+)
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
@@ -196,7 +198,7 @@ def xform_column_definitions_to_catalog_entries(
 
 
 def construct_udf_cache_catalog_entry(
-    func_expr: FunctionExpression,
+    func_expr: FunctionExpression, cache_dir: str
 ) -> UdfCacheCatalogEntry:
     """Constructs a udf cache catalog entry from a given function expression.
     It is assumed that the function expression has already been bound using the binder.
@@ -205,6 +207,7 @@ def construct_udf_cache_catalog_entry(
     expression.
     Args:
         func_expr (FunctionExpression): the function expression with which the cache is associated
+        cache_dir (str): path to store the cache
     Returns:
         UdfCacheCatalogEntry: the udf cache catalog entry
     """
@@ -218,7 +221,6 @@ def construct_udf_cache_catalog_entry(
 
     # add salt to the cache_name so that we generate unique name
     path = str(get_str_hash(cache_name + uuid.uuid4().hex))
-    cache_dir = ConfigurationManager().get_value("storage", "cache_dir")
     cache_path = str(Path(cache_dir) / Path(f"{path}_{func_expr.name}"))
     args = tuple([arg.signature() for arg in func_expr.children])
     entry = UdfCacheCatalogEntry(
@@ -233,8 +235,7 @@ def construct_udf_cache_catalog_entry(
     return entry
 
 
-def cleanup_storage():
-    config = ConfigurationManager()
+def cleanup_storage(config):
     remove_directory_contents(config.get_value("storage", "index_dir"))
     remove_directory_contents(config.get_value("storage", "cache_dir"))
     remove_directory_contents(config.get_value("core", "datasets_dir"))
@@ -276,3 +277,17 @@ def get_metadata_properties(udf_obj: UdfCatalogEntry) -> Dict:
     for metadata in udf_obj.metadata:
         properties[metadata.key] = metadata.value
     return properties
+
+
+#### get catalog instance
+# This function plays a crucial role in ensuring that different threads do
+# not share the same catalog object, as it can result in serialization issues and
+# incorrect behavior with SQLAlchemy. Therefore, whenever a catalog instance is
+# required, we create a new one. One possible optimization is to share the catalog
+# instance across all objects within the same thread. It is worth investigating whether
+# SQLAlchemy already handles this optimization for us, which will be explored at a
+# later time.
+def get_catalog_instance(db_uri: str, config: ConfigurationManager):
+    from eva.catalog.catalog_manager import CatalogManager
+
+    return CatalogManager(db_uri, config)

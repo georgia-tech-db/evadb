@@ -212,3 +212,4 @@ test.py
 
 # faiss
 *.faiss
+eva_db/*

@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from ast import literal_eval
-from dataclasses import dataclass, field
 from typing import Tuple
 
 from sqlalchemy import Column, ForeignKey, Integer, String, UniqueConstraint
@@ -24,6 +23,7 @@ from eva.catalog.models.association_models import (
     depend_udf_and_udf_cache,
 )
 from eva.catalog.models.base_model import BaseModel
+from eva.catalog.models.utils import UdfCacheCatalogEntry
 
 
 class UdfCacheCatalog(BaseModel):
@@ -81,18 +81,3 @@ class UdfCacheCatalog(BaseModel):
             udf_depends=udf_depends,
             col_depends=col_depends,
         )
-
-
-@dataclass(unsafe_hash=True)
-class UdfCacheCatalogEntry:
-    """Dataclass representing an entry in the `UdfCatalog`.
-    This is done to ensure we don't expose the sqlalchemy dependencies beyond catalog service. Further, sqlalchemy does not allow sharing of objects across threads.
-    """
-
-    name: str
-    udf_id: int
-    cache_path: str
-    args: Tuple[str]
-    row_id: int = None
-    udf_depends: Tuple[int] = field(compare=False, default_factory=tuple)
-    col_depends: Tuple[int] = field(compare=False, default_factory=tuple)

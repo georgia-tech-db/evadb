@@ -14,6 +14,7 @@
 # limitations under the License.
 from typing import Iterator
 
+from eva.database import EVADatabase
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError
 from eva.expression.function_expression import FunctionExpression
@@ -32,8 +33,8 @@ class OrderByExecutor(AbstractExecutor):
 
     """
 
-    def __init__(self, node: OrderByPlan):
-        super().__init__(node)
+    def __init__(self, db: EVADatabase, node: OrderByPlan):
+        super().__init__(db, node)
         self._orderby_list = node.orderby_list
         self._columns = node.columns
         self._sort_types = node.sort_types

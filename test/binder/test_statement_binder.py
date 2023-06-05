@@ -18,7 +18,6 @@ from unittest.mock import MagicMock, patch
 from eva.binder.binder_utils import BinderError
 from eva.binder.statement_binder import StatementBinder
 from eva.binder.statement_binder_context import StatementBinderContext
-from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import NdArrayType
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.alias import Alias
@@ -32,7 +31,7 @@ class StatementBinderTests(unittest.TestCase):
     def test_bind_tuple_value_expression(self):
         with patch.object(StatementBinderContext, "get_binded_column") as mock:
             mock.return_value = ["table_alias", "col_obj"]
-            binder = StatementBinder(StatementBinderContext())
+            binder = StatementBinder(StatementBinderContext(MagicMock()))
             tve = MagicMock()
             tve.col_name = "col_name"
             binder._bind_tuple_expr(tve)
@@ -44,20 +43,21 @@ class StatementBinderTests(unittest.TestCase):
     @patch("eva.binder.statement_binder.bind_table_info")
     def test_bind_tableref(self, mock_bind_table_info):
         with patch.object(StatementBinderContext, "add_table_alias") as mock:
-            binder = StatementBinder(StatementBinderContext())
+            catalog = MagicMock()
+            binder = StatementBinder(StatementBinderContext(catalog))
             tableref = MagicMock()
             tableref.is_table_atom.return_value = True
             binder._bind_tableref(tableref)
             mock.assert_called_with(
                 tableref.alias.alias_name, tableref.table.table_name
             )
-            mock_bind_table_info.assert_called_once_with(tableref.table)
+            mock_bind_table_info.assert_called_once_with(catalog(), tableref.table)
 
         with patch.object(StatementBinder, "bind") as mock_binder:
             with patch.object(
                 StatementBinderContext, "add_derived_table_alias"
             ) as mock_context:
-                binder = StatementBinder(StatementBinderContext())
+                binder = StatementBinder(StatementBinderContext(MagicMock()))
                 tableref = MagicMock()
                 tableref.is_table_atom.return_value = False
                 tableref.is_select.return_value = True
@@ -70,7 +70,7 @@ class StatementBinderTests(unittest.TestCase):
 
     def test_bind_tableref_with_func_expr(self):
         with patch.object(StatementBinder, "bind") as mock_binder:
-            binder = StatementBinder(StatementBinderContext())
+            binder = StatementBinder(StatementBinderContext(MagicMock()))
             tableref = MagicMock()
             tableref.is_table_atom.return_value = False
             tableref.is_select.return_value = False
@@ -80,7 +80,7 @@ class StatementBinderTests(unittest.TestCase):
 
     def test_bind_tableref_with_join(self):
         with patch.object(StatementBinder, "bind") as mock_binder:
-            binder = StatementBinder(StatementBinderContext())
+            binder = StatementBinder(StatementBinderContext(MagicMock()))
             tableref = MagicMock()
             tableref.is_table_atom.return_value = False
             tableref.is_select.return_value = False
@@ -92,7 +92,7 @@ class StatementBinderTests(unittest.TestCase):
     def test_bind_tableref_should_raise(self):
         with patch.object(StatementBinder, "bind"):
             with self.assertRaises(BinderError):
-                binder = StatementBinder(StatementBinderContext())
+                binder = StatementBinder(StatementBinderContext(MagicMock()))
                 tableref = MagicMock()
                 tableref.is_select.return_value = False
                 tableref.is_table_valued_expr.return_value = False
@@ -103,7 +103,7 @@ class StatementBinderTests(unittest.TestCase):
     @patch("eva.binder.statement_binder.StatementBinderContext")
     def test_bind_tableref_starts_new_context(self, mock_ctx):
         with patch.object(StatementBinder, "bind"):
-            binder = StatementBinder(StatementBinderContext())
+            binder = StatementBinder(StatementBinderContext(MagicMock()))
             tableref = MagicMock()
             tableref.is_table_atom.return_value = False
             tableref.is_join.return_value = False
@@ -113,14 +113,14 @@ class StatementBinderTests(unittest.TestCase):
 
     def test_bind_create_mat_statement(self):
         with patch.object(StatementBinder, "bind") as mock_binder:
-            binder = StatementBinder(StatementBinderContext())
+            binder = StatementBinder(StatementBinderContext(MagicMock()))
             mat_statement = MagicMock()
             binder._bind_create_mat_statement(mat_statement)
             mock_binder.assert_called_with(mat_statement.query)
 
     def test_raises_mismatch_columns_create_mat_statement(self):
         with patch.object(StatementBinder, "bind"):
-            binder = StatementBinder(StatementBinderContext())
+            binder = StatementBinder(StatementBinderContext(MagicMock()))
             mat_statement = MagicMock()
             mat_statement.col_list = [ColumnDefinition("id", None, None, None)]
             mat_statement.query.target_list = [
@@ -134,16 +134,15 @@ class StatementBinderTests(unittest.TestCase):
 
     def test_bind_explain_statement(self):
         with patch.object(StatementBinder, "bind") as mock_binder:
-            binder = StatementBinder(StatementBinderContext())
+            binder = StatementBinder(StatementBinderContext(MagicMock()))
             stmt = MagicMock()
             binder._bind_explain_statement(stmt)
             mock_binder.assert_called_with(stmt.explainable_stmt)
 
-    @patch("eva.binder.statement_binder.CatalogManager")
     @patch("eva.binder.statement_binder.load_udf_class_from_file")
     @patch("eva.binder.statement_binder.get_file_checksum")
     def test_bind_func_expr(
-        self, mock_get_file_checksum, mock_load_udf_class_from_file, mock_catalog
+        self, mock_get_file_checksum, mock_load_udf_class_from_file
     ):
         # setup
         func_expr = MagicMock(
@@ -156,6 +155,8 @@ class StatementBinderTests(unittest.TestCase):
         obj2.name.lower.return_value = "out2"
         func_output_objs = [obj1, obj2]
         udf_obj = MagicMock()
+
+        mock_catalog = MagicMock()
         mock_get_name = mock_catalog().get_udf_catalog_entry_by_name = MagicMock()
         mock_get_name.return_value = udf_obj
 
@@ -170,7 +171,7 @@ class StatementBinderTests(unittest.TestCase):
 
         # Case 1 set output
         func_expr.output = "out1"
-        binder = StatementBinder(StatementBinderContext())
+        binder = StatementBinder(StatementBinderContext(mock_catalog))
         binder._bind_func_expr(func_expr)
 
         mock_get_file_checksum.assert_called_with(udf_obj.impl_file_path)
@@ -190,7 +191,7 @@ class StatementBinderTests(unittest.TestCase):
         # Case 2 output not set
         func_expr.output = None
         func_expr.alias = Alias("func_expr")
-        binder = StatementBinder(StatementBinderContext())
+        binder = StatementBinder(StatementBinderContext(mock_catalog))
         binder._bind_func_expr(func_expr)
 
         mock_get_file_checksum.assert_called_with(udf_obj.impl_file_path)
@@ -215,7 +216,7 @@ class StatementBinderTests(unittest.TestCase):
         mock_load_udf_class_from_file.side_effect = MagicMock(
             side_effect=RuntimeError(mock_error_msg)
         )
-        binder = StatementBinder(StatementBinderContext())
+        binder = StatementBinder(StatementBinderContext(mock_catalog))
         with self.assertRaises(BinderError) as cm:
             binder._bind_func_expr(func_expr)
         err_msg = (
@@ -228,7 +229,7 @@ class StatementBinderTests(unittest.TestCase):
     @patch("eva.binder.statement_binder.check_groupby_pattern")
     def test_bind_select_statement(self, is_groupable_mock, groupby_mock):
         with patch.object(StatementBinder, "bind") as mock_binder:
-            binder = StatementBinder(StatementBinderContext())
+            binder = StatementBinder(StatementBinderContext(MagicMock()))
             select_statement = MagicMock()
             mocks = [MagicMock(), MagicMock(), MagicMock(), MagicMock(), MagicMock()]
             select_statement.target_list = mocks[:2]
@@ -247,14 +248,14 @@ class StatementBinderTests(unittest.TestCase):
     @patch("eva.binder.statement_binder.StatementBinderContext")
     def test_bind_select_statement_union_starts_new_context(self, mock_ctx):
         with patch.object(StatementBinder, "bind"):
-            binder = StatementBinder(StatementBinderContext())
+            binder = StatementBinder(StatementBinderContext(MagicMock()))
             select_statement = MagicMock()
             select_statement.union_link = None
             select_statement.groupby_clause = None
             binder._bind_select_statement(select_statement)
             self.assertEqual(mock_ctx.call_count, 0)
 
-            binder = StatementBinder(StatementBinderContext())
+            binder = StatementBinder(StatementBinderContext(MagicMock()))
             select_statement = MagicMock()
             select_statement.groupby_clause = None
             binder._bind_select_statement(select_statement)
@@ -265,12 +266,13 @@ class StatementBinderTests(unittest.TestCase):
             pass
 
         with self.assertRaises(NotImplementedError):
-            binder = StatementBinder(StatementBinderContext())
+            binder = StatementBinder(StatementBinderContext(MagicMock()))
             binder.bind(UnknownType())
 
     def test_bind_create_index(self):
         with patch.object(StatementBinder, "bind"):
-            binder = StatementBinder(StatementBinderContext())
+            catalog = MagicMock()
+            binder = StatementBinder(StatementBinderContext(catalog))
             create_index_statement = MagicMock()
 
             with self.assertRaises(AssertionError):
@@ -282,7 +284,7 @@ class StatementBinderTests(unittest.TestCase):
             udf_obj.outputs = [output]
 
             with patch.object(
-                CatalogManager, "get_udf_catalog_entry_by_name", return_value=udf_obj
+                catalog(), "get_udf_catalog_entry_by_name", return_value=udf_obj
             ):
                 with self.assertRaises(AssertionError):
                     binder._bind_create_index_statement(create_index_statement)

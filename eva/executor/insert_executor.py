@@ -14,8 +14,8 @@
 # limitations under the License.
 import pandas as pd
 
-from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import TableType
+from eva.database import EVADatabase
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.insert_plan import InsertPlan
@@ -23,9 +23,8 @@ from eva.storage.storage_engine import StorageEngine
 
 
 class InsertExecutor(AbstractExecutor):
-    def __init__(self, node: InsertPlan):
-        super().__init__(node)
-        self.catalog = CatalogManager()
+    def __init__(self, db: EVADatabase, node: InsertPlan):
+        super().__init__(db, node)
 
     def exec(self, *args, **kwargs):
         storage_engine = None
@@ -34,7 +33,7 @@ class InsertExecutor(AbstractExecutor):
         # Get catalog entry
         table_name = self.node.table_ref.table.table_name
         database_name = self.node.table_ref.table.database_name
-        table_catalog_entry = self.catalog.get_table_catalog_entry(
+        table_catalog_entry = self.catalog().get_table_catalog_entry(
             table_name, database_name
         )
 
@@ -51,7 +50,7 @@ class InsertExecutor(AbstractExecutor):
         dataframe = pd.DataFrame([tuple_to_insert], columns=columns_to_insert)
         batch = Batch(dataframe)
 
-        storage_engine = StorageEngine.factory(table_catalog_entry)
+        storage_engine = StorageEngine.factory(self.db, table_catalog_entry)
         storage_engine.write(table_catalog_entry, batch)
 
         yield Batch(

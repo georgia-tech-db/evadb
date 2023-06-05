@@ -16,6 +16,7 @@ from typing import Union
 
 import pandas
 
+from eva.database import EVADatabase
 from eva.interfaces.relational.utils import (
     create_limit_expression,
     create_star_expression,
@@ -35,21 +36,25 @@ from eva.parser.types import JoinType
 from eva.parser.utils import parse_sql_orderby_expr
 
 
-class EVARelation:
+class EVADBQuery:
     def __init__(
-        self, query_node: Union[AbstractStatement, TableRef], alias: Alias = None
+        self,
+        evadb: EVADatabase,
+        query_node: Union[AbstractStatement, TableRef],
+        alias: Alias = None,
     ):
+        self._evadb = evadb
         self._query_node = query_node
         self._alias = alias
 
-    def alias(self, alias: str) -> "EVARelation":
+    def alias(self, alias: str) -> "EVADBQuery":
         """Returns a new Relation with an alias set.
 
         Args:
             alias (str): an alias name to be set for the Relation.
 
         Returns:
-            EVARelation: Aliased Relation.
+            EVADBQuery: Aliased Relation.
 
         Examples:
             >>> relation = conn.table("sample_table")
@@ -57,7 +62,7 @@ class EVARelation:
         """
         self._alias = Alias(alias)
 
-    def cross_apply(self, expr: str, alias: str) -> "EVARelation":
+    def cross_apply(self, expr: str, alias: str) -> "EVADBQuery":
         """Execute a expr on all the rows of the relation
 
         Args:
@@ -65,7 +70,7 @@ class EVARelation:
             alias (str): alias of the output of the expr
 
         Returns:
-            `EVARelation`: relation
+            `EVADBQuery`: relation
 
         Examples:
 
@@ -93,7 +98,7 @@ class EVARelation:
         )
         # reset the alias as after join there isn't a single alias
         self._alias = Alias("Relation")
-        try_binding(self._query_node)
+        try_binding(self._evadb.catalog, self._query_node)
         return self
 
     def df(self) -> pandas.DataFrame:
@@ -112,11 +117,11 @@ class EVARelation:
         Returns:
             Batch: result as eva Batch
         """
-        result = execute_statement(self._query_node.copy())
+        result = execute_statement(self._evadb, self._query_node.copy())
         assert result.frames is not None
         return result
 
-    def filter(self, expr: str) -> "EVARelation":
+    def filter(self, expr: str) -> "EVADBQuery":
         """
         Filters rows using the given condition. Multiple chained filters results in `AND`
 
@@ -124,7 +129,7 @@ class EVARelation:
             expr (str): The filter expression.
 
         Returns:
-            EVARelation : Filtered EVARelation.
+            EVADBQuery : Filtered EVADBQuery.
         Examples:
             >>> relation = conn.table("sample_table")
             >>> relation.filter("col1 > 10")
@@ -140,18 +145,18 @@ class EVARelation:
             self._query_node, self._alias, "where_clause", parsed_expr
         )
 
-        try_binding(self._query_node)
+        try_binding(self._evadb.catalog, self._query_node)
 
         return self
 
-    def limit(self, num: int) -> "EVARelation":
+    def limit(self, num: int) -> "EVADBQuery":
         """Limits the result count to the number specified.
 
         Args:
             num (int): Number of records to return. Will return num records or all records if the Relation contains fewer records.
 
         Returns:
-            EVARelation: Relation with subset of records
+            EVADBQuery: Relation with subset of records
 
         Examples:
             >>> relation = conn.table("sample_table")
@@ -164,18 +169,18 @@ class EVARelation:
             self._query_node, self._alias, "limit_count", limit_expr
         )
 
-        try_binding(self._query_node)
+        try_binding(self._evadb.catalog, self._query_node)
 
         return self
 
-    def order(self, order_expr: str) -> "EVARelation":
+    def order(self, order_expr: str) -> "EVADBQuery":
         """Reorder the relation based on the order_expr
 
         Args:
             order_expr (str): sql expression to order the relation
 
         Returns:
-            EVARelation: A EVARelation ordered based on the order_expr.
+            EVADBQuery: A EVADBQuery ordered based on the order_expr.
         """
 
         parsed_expr = parse_sql_orderby_expr(order_expr)
@@ -183,28 +188,28 @@ class EVARelation:
             self._query_node, self._alias, "orderby_list", parsed_expr
         )
 
-        try_binding(self._query_node)
+        try_binding(self._evadb.catalog, self._query_node)
 
         return self
 
-    def select(self, expr: str) -> "EVARelation":
+    def select(self, expr: str) -> "EVADBQuery":
         """
-        Projects a set of expressions and returns a new EVARelation.
+        Projects a set of expressions and returns a new EVADBQuery.
 
         Parameters:
-            exprs (Union[str, List[str]]): The expression(s) to be selected. If '*' is provided, it expands to all columns in the current EVARelation.
+            exprs (Union[str, List[str]]): The expression(s) to be selected. If '*' is provided, it expands to all columns in the current EVADBQuery.
 
         Returns:
-            EVARelation: A EVARelation with subset (or all) of columns.
+            EVADBQuery: A EVADBQuery with subset (or all) of columns.
 
         Examples:
             >>> relation = conn.table("sample_table")
 
-            Select all columns in the EVARelation.
+            Select all columns in the EVADBQuery.
 
             >>> relation.select("*")
 
-            Select all subset of columns in the EVARelation.
+            Select all subset of columns in the EVADBQuery.
 
             >>> relation.select("col1")
             >>> relation.select("col1, col2")
@@ -216,7 +221,7 @@ class EVARelation:
             self._query_node, self._alias, "target_list", parsed_exprs
         )
 
-        try_binding(self._query_node)
+        try_binding(self._evadb.catalog, self._query_node)
 
         return self
 
