@@ -160,6 +160,7 @@ jobs:
         - checkout
         - run:           
             name: Install EVA package from GitHub repo and run tests
+            no_output_timeout: 30m
             command: |
               python -m venv test_evadb
               source test_evadb/bin/activate
