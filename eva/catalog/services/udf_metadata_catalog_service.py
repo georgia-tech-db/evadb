@@ -14,6 +14,9 @@
 # limitations under the License.
 from typing import List
 
+from sqlalchemy.orm import Session
+from sqlalchemy.sql.expression import select
+
 from eva.catalog.models.udf_metadata_catalog import (
     UdfMetadataCatalog,
     UdfMetadataCatalogEntry,
@@ -24,8 +27,8 @@ from eva.utils.logging_manager import logger
 
 
 class UdfMetadataCatalogService(BaseService):
-    def __init__(self):
-        super().__init__(UdfMetadataCatalog)
+    def __init__(self, db_session: Session):
+        super().__init__(UdfMetadataCatalog, db_session)
 
     def insert_entries(self, entries: List[UdfMetadataCatalogEntry]):
         try:
@@ -33,7 +36,7 @@ class UdfMetadataCatalogService(BaseService):
                 metadata_obj = UdfMetadataCatalog(
                     key=entry.key, value=entry.value, udf_id=entry.udf_id
                 )
-                metadata_obj.save()
+                metadata_obj.save(self.session)
         except Exception as e:
             logger.exception(
                 f"Failed to insert entry {entry} into udf metadata catalog with exception {str(e)}"
@@ -42,9 +45,15 @@ class UdfMetadataCatalogService(BaseService):
 
     def get_entries_by_udf_id(self, udf_id: int) -> List[UdfMetadataCatalogEntry]:
         try:
-            result = self.model.query.filter(
-                self.model._udf_id == udf_id,
-            ).all()
+            result = (
+                self.session.execute(
+                    select(self.model).filter(
+                        self.model._udf_id == udf_id,
+                    )
+                )
+                .scalars()
+                .all()
+            )
             return [obj.as_dataclass() for obj in result]
         except Exception as e:
             error = f"Getting metadata entries for UDF id {udf_id} raised {e}"

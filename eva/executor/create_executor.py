@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from eva.catalog.catalog_manager import CatalogManager
+from eva.database import EVADatabase
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import handle_if_not_exists
 from eva.plan_nodes.create_plan import CreatePlan
@@ -21,18 +21,19 @@ from eva.utils.logging_manager import logger
 
 
 class CreateExecutor(AbstractExecutor):
-    def __init__(self, node: CreatePlan):
-        super().__init__(node)
-        self.catalog = CatalogManager()
+    def __init__(self, db: EVADatabase, node: CreatePlan):
+        super().__init__(db, node)
 
     def exec(self, *args, **kwargs):
-        if not handle_if_not_exists(self.node.table_info, self.node.if_not_exists):
+        if not handle_if_not_exists(
+            self.catalog(), self.node.table_info, self.node.if_not_exists
+        ):
             logger.debug(f"Creating table {self.node.table_info}")
 
-            catalog_entry = self.catalog.create_and_insert_table_catalog_entry(
+            catalog_entry = self.catalog().create_and_insert_table_catalog_entry(
                 self.node.table_info, self.node.column_list
             )
-            storage_engine = StorageEngine.factory(catalog_entry)
+            storage_engine = StorageEngine.factory(self.db, catalog_entry)
             storage_engine.create(table=catalog_entry)
 
             if self.children != []:

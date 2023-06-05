@@ -17,9 +17,9 @@ from typing import Iterator
 import pandas as pd
 from sqlalchemy import and_, or_
 
-from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import TableType
 from eva.catalog.models.table_catalog import TableCatalogEntry
+from eva.database import EVADatabase
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.expression.abstract_expression import ExpressionType
 from eva.expression.comparison_expression import ComparisonExpression
@@ -34,10 +34,9 @@ from eva.storage.storage_engine import StorageEngine
 class DeleteExecutor(AbstractExecutor):
     """ """
 
-    def __init__(self, node: ProjectPlan):
-        super().__init__(node)
+    def __init__(self, db: EVADatabase, node: ProjectPlan):
+        super().__init__(db, node)
         self.predicate = node.where_clause
-        self.catalog = CatalogManager()
 
     def predicate_node_to_filter_clause(
         self, table: TableCatalogEntry, predicate_node: ComparisonExpression
@@ -93,7 +92,7 @@ class DeleteExecutor(AbstractExecutor):
 
     def exec(self, *args, **kwargs) -> Iterator[Batch]:
         table_catalog = self.node.table_ref.table.table_obj
-        storage_engine = StorageEngine.factory(table_catalog)
+        storage_engine = StorageEngine.factory(self.db, table_catalog)
 
         assert (
             table_catalog.table_type == TableType.STRUCTURED_DATA

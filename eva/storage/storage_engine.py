@@ -14,34 +14,37 @@
 # limitations under the License.
 from eva.catalog.catalog_type import TableType
 from eva.catalog.models.table_catalog import TableCatalogEntry
-from eva.configuration.configuration_manager import ConfigurationManager
+from eva.database import EVADatabase
 from eva.storage.abstract_storage_engine import AbstractStorageEngine
 from eva.storage.document_storage_engine import DocumentStorageEngine
-from eva.utils.generic_utils import str_to_class
+from eva.storage.image_storage_engine import ImageStorageEngine
+from eva.storage.pdf_storage_engine import PDFStorageEngine
+from eva.storage.sqlite_storage_engine import SQLStorageEngine
+from eva.storage.video_storage_engine import DecordStorageEngine
 
 
 class StorageEngine:
-    storages = {
-        TableType.STRUCTURED_DATA: str_to_class(
-            ConfigurationManager().get_value("storage", "structured_data_engine")
-        )(),
-        TableType.VIDEO_DATA: str_to_class(
-            ConfigurationManager().get_value("storage", "video_engine")
-        )(),
-        TableType.IMAGE_DATA: str_to_class(
-            ConfigurationManager().get_value("storage", "image_engine")
-        )(),
-        TableType.DOCUMENT_DATA: DocumentStorageEngine(),
-        TableType.PDF_DATA: str_to_class(
-            ConfigurationManager().get_value("storage", "pdf_engine")
-        )(),
-    }
+    storages = None
 
     @classmethod
-    def factory(cls, table: TableCatalogEntry) -> AbstractStorageEngine:
+    def _lazy_initialize_storages(cls, db: EVADatabase):
+        if not cls.storages:
+            cls.storages = {
+                TableType.STRUCTURED_DATA: SQLStorageEngine,
+                TableType.VIDEO_DATA: DecordStorageEngine,
+                TableType.IMAGE_DATA: ImageStorageEngine,
+                TableType.DOCUMENT_DATA: DocumentStorageEngine,
+                TableType.PDF_DATA: PDFStorageEngine,
+            }
+
+    @classmethod
+    def factory(
+        cls, db: EVADatabase, table: TableCatalogEntry
+    ) -> AbstractStorageEngine:
+        cls._lazy_initialize_storages(db)
         if table is None:
             raise ValueError("Expected TableCatalogEntry, got None")
         if table.table_type in cls.storages:
-            return cls.storages[table.table_type]
+            return cls.storages[table.table_type](db)
 
         raise RuntimeError(f"Invalid table type {table.table_type}")

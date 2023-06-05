@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,6 +25,6 @@ class TestOptimizerContext(unittest.TestCase):
         fake_opr = MagicMock()
         fake_opr.children = []
 
-        opt_ctxt = OptimizerContext(CostModel())
+        opt_ctxt = OptimizerContext(MagicMock(), CostModel())
         opt_ctxt.add_opr_to_group(fake_opr)
         self.assertEqual(len(opt_ctxt.memo.group_exprs), 1)

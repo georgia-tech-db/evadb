@@ -14,7 +14,7 @@
 # limitations under the License.
 import pandas as pd
 
-from eva.catalog.catalog_manager import CatalogManager
+from eva.database import EVADatabase
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError
 from eva.expression.tuple_value_expression import TupleValueExpression
@@ -26,9 +26,8 @@ from eva.utils.logging_manager import logger
 
 
 class LoadCSVExecutor(AbstractExecutor):
-    def __init__(self, node: LoadDataPlan):
-        super().__init__(node)
-        self.catalog = CatalogManager()
+    def __init__(self, db: EVADatabase, node: LoadDataPlan):
+        super().__init__(db, node)
 
     def exec(self, *args, **kwargs):
         """
@@ -40,7 +39,7 @@ class LoadCSVExecutor(AbstractExecutor):
         table_info = self.node.table_info
         database_name = table_info.database_name
         table_name = table_info.table_name
-        table_obj = self.catalog.get_table_catalog_entry(
+        table_obj = self.catalog().get_table_catalog_entry(
             table_name,
             database_name,
         )
@@ -69,7 +68,7 @@ class LoadCSVExecutor(AbstractExecutor):
             batch_mem_size=self.node.batch_mem_size,
         )
 
-        storage_engine = StorageEngine.factory(table_obj)
+        storage_engine = StorageEngine.factory(self.db, table_obj)
         # write with storage engine in batches
         num_loaded_frames = 0
         for batch in csv_reader.read():
