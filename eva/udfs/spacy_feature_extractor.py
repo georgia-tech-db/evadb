@@ -35,13 +35,13 @@ from eva.catalog.catalog_type import NdArrayType
 from eva.udfs.abstract.abstract_udf import AbstractUDF
 from eva.udfs.decorators.decorators import forward, setup
 from eva.udfs.decorators.io_descriptors.data_types import PandasDataframe
-from eva.udfs.gpu_compatible import GPUCompatible
 
 try:
     nlp = spacy.load("en_core_web_lg")
 except Exception as e:
     print(e)
     import spacy.cli
+
     spacy.cli.download("en_core_web_lg")
     nlp = spacy.load("en_core_web_lg")
 
