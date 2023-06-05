@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,8 +19,6 @@ from test.util import (
 )
 
 import pytest
-
-from eva.catalog.catalog_manager import CatalogManager
 from eva.server.command_handler import execute_query_fetch_all
 from eva.configuration.constants import EVA_DATABASE_DIR, EVA_ROOT_DIR
 from eva.interfaces.relational.db import connect
