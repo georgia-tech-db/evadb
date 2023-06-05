@@ -18,8 +18,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql.expression import select
 
-from eva.catalog.models.column_catalog import ColumnCatalog, ColumnCatalogEntry
-from eva.catalog.models.table_catalog import TableCatalogEntry
+from eva.catalog.models.column_catalog import ColumnCatalog
+from eva.catalog.models.utils import ColumnCatalogEntry, TableCatalogEntry
 from eva.catalog.services.base_service import BaseService
 
 

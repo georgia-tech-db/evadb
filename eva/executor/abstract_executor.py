@@ -14,9 +14,10 @@
 # limitations under the License.
 from abc import ABC, abstractmethod
 from collections import deque
-from typing import Any, Generator, Iterable, List, TypeVar
+from typing import TYPE_CHECKING, Any, Generator, Iterable, List, TypeVar
 
-from eva.catalog.catalog_manager import CatalogManager
+if TYPE_CHECKING:
+    from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.database import EVADatabase
 from eva.models.storage.batch import Batch
@@ -38,7 +39,7 @@ class AbstractExecutor(ABC):
         self._config: ConfigurationManager = db.config if db else None
         self._children = []
 
-    def catalog(self) -> CatalogManager:
+    def catalog(self) -> "CatalogManager":
         """The object is intentionally generated on demand to prevent serialization issues. Having a SQLAlchemy object as a member variable can cause problems with multiprocessing. See get_catalog_instance()"""
         return self._db.catalog() if self._db else None
 

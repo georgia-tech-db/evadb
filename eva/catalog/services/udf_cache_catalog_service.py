@@ -16,7 +16,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql.expression import select
 
-from eva.catalog.models.udf_cache_catalog import UdfCacheCatalog, UdfCacheCatalogEntry
+from eva.catalog.models.udf_cache_catalog import UdfCacheCatalog
+from eva.catalog.models.utils import UdfCacheCatalogEntry
 from eva.catalog.services.base_service import BaseService
 from eva.catalog.services.column_catalog_service import ColumnCatalogService
 from eva.catalog.services.udf_catalog_service import UdfCatalogService

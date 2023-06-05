@@ -31,19 +31,19 @@ from eva.catalog.catalog_utils import (
     get_video_table_column_definitions,
     xform_column_definitions_to_catalog_entries,
 )
-from eva.catalog.models.base_model import (
+from eva.catalog.models.utils import (
+    ColumnCatalogEntry,
+    IndexCatalogEntry,
+    TableCatalogEntry,
+    UdfCacheCatalogEntry,
+    UdfCatalogEntry,
+    UdfCostCatalogEntry,
+    UdfIOCatalogEntry,
+    UdfMetadataCatalogEntry,
     drop_all_tables_except_catalog,
     init_db,
     truncate_catalog_tables,
 )
-from eva.catalog.models.column_catalog import ColumnCatalogEntry
-from eva.catalog.models.index_catalog import IndexCatalogEntry
-from eva.catalog.models.table_catalog import TableCatalogEntry
-from eva.catalog.models.udf_cache_catalog import UdfCacheCatalogEntry
-from eva.catalog.models.udf_catalog import UdfCatalogEntry
-from eva.catalog.models.udf_cost_catalog import UdfCostCatalogEntry
-from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
-from eva.catalog.models.udf_metadata_catalog import UdfMetadataCatalogEntry
 from eva.catalog.services.column_catalog_service import ColumnCatalogService
 from eva.catalog.services.index_catalog_service import IndexCatalogService
 from eva.catalog.services.table_catalog_service import TableCatalogService

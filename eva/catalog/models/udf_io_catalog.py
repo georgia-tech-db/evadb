@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from ast import literal_eval
-from dataclasses import dataclass
 from typing import Tuple
 
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, UniqueConstraint
@@ -22,6 +21,7 @@ from sqlalchemy.types import Enum
 
 from eva.catalog.catalog_type import ColumnType, Dimension, NdArrayType
 from eva.catalog.models.base_model import BaseModel
+from eva.catalog.models.utils import UdfIOCatalogEntry
 
 
 class UdfIOCatalog(BaseModel):
@@ -100,29 +100,3 @@ class UdfIOCatalog(BaseModel):
             udf_id=self._udf_id,
             udf_name=self._udf._name,
         )
-
-
-@dataclass(unsafe_hash=True)
-class UdfIOCatalogEntry:
-    """Class decouples the `UdfIOCatalog` from the sqlalchemy.
-    This is done to ensure we don't expose the sqlalchemy dependencies beyond catalog service. Further, sqlalchemy does not allow sharing of objects across threads.
-    """
-
-    name: str
-    type: ColumnType
-    is_nullable: bool = False
-    array_type: NdArrayType = None
-    array_dimensions: Tuple[int] = None
-    is_input: bool = True
-    udf_id: int = None
-    udf_name: str = None
-    row_id: int = None
-
-    def display_format(self):
-        data_type = self.type.name
-        if self.type == ColumnType.NDARRAY:
-            data_type = "{} {} {}".format(
-                data_type, self.array_type.name, self.array_dimensions
-            )
-
-        return {"name": self.name, "data_type": data_type}

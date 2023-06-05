@@ -15,11 +15,13 @@
 import glob
 import os
 from pathlib import Path
-from typing import Generator, List
+from typing import TYPE_CHECKING, Generator, List
 
 import cv2
 
-from eva.catalog.catalog_manager import CatalogManager
+if TYPE_CHECKING:
+    from eva.catalog.catalog_manager import CatalogManager
+
 from eva.catalog.catalog_type import VectorStoreType
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.function_expression import FunctionExpression
@@ -35,7 +37,7 @@ class ExecutorError(Exception):
 
 
 def apply_project(
-    batch: Batch, project_list: List[AbstractExpression], catalog: CatalogManager
+    batch: Batch, project_list: List[AbstractExpression], catalog: "CatalogManager"
 ):
     if not batch.empty() and project_list:
         batches = [expr.evaluate(batch) for expr in project_list]
@@ -53,7 +55,7 @@ def apply_project(
 
 
 def apply_predicate(
-    batch: Batch, predicate: AbstractExpression, catalog: CatalogManager
+    batch: Batch, predicate: AbstractExpression, catalog: "CatalogManager"
 ) -> Batch:
     if not batch.empty() and predicate is not None:
         outcomes = predicate.evaluate(batch)
@@ -70,7 +72,7 @@ def apply_predicate(
 
 
 def handle_if_not_exists(
-    catalog: CatalogManager, table_info: TableInfo, if_not_exist=False
+    catalog: "CatalogManager", table_info: TableInfo, if_not_exist=False
 ):
     # Table exists
     if catalog.check_table_exists(

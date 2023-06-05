@@ -4,46 +4,73 @@
 
 :root {
     --orange: #FF9300;
-  }
-  
-  /* --------- left and right TOCs --------- */
-  
-  .sidebar-tree .caption {
-      font-size: 100%;
-  }
-  
-  .sidebar-logo {
-      max-width: 80%;
-  }
-  
-  /* --------- misc --------- */
-  
-  p.rubric {
-      text-transform: none;
-      font-style: italic;
-      font-weight: 400;
-      font-size: 110%;
-  }
-  
-  hr.docutils {background-color: var(--orange);}
-  
-  figcaption {text-align: right; font-style: italic;}
-  
-  div.lined div.sd-col:nth-child(2n) {border-bottom: 1px solid var(--orange);}
-  
-  a:link, a:visited {color: var(--orange);}
-  
-  /* --------- TOC sidebar --------- */
-  
-  div.sidebar-tree .toctree-l1>.reference {color: #666;}
-  div.sidebar-tree .toctree-l1>.reference:hover {color: var(--orange);}
-  
-  div.sidebar-tree ul {
-      border-bottom: 1px solid var(--orange);
-  }
-  
-  /* --------- furniture --------- */
-  
-  .nav-overlay-icon .icon svg, .toc-overlay-icon .icon svg, .theme-toggle svg {color: var(--orange);}
-  
-  .toc-tree li.scroll-current>.reference {color: var(--orange);}  
+}
+
+/* --------- left and right TOCs --------- */
+
+.sidebar-tree .caption {
+    font-size: 100%;
+}
+
+.sidebar-logo {
+    max-width: 80%;
+}
+
+/* --------- misc --------- */
+
+p.rubric {
+    text-transform: none;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 100%;
+}
+
+
+hr.docutils {
+    background-color: var(--orange);
+}
+
+figcaption {
+    text-align: right;
+    font-style: italic;
+}
+
+div.lined div.sd-col:nth-child(2n) {
+    border-bottom: 1px solid var(--orange);
+}
+
+a:link,
+a:visited {
+    color: var(--orange);
+}
+
+/* --------- TOC sidebar --------- */
+
+div.sidebar-tree .toctree-l1>.reference {
+    color: #666;
+}
+
+div.sidebar-tree .toctree-l1>.reference:hover {
+    color: var(--orange);
+}
+
+div.sidebar-tree ul {
+    border-bottom: 1px solid var(--orange);
+}
+
+/* --------- furniture --------- */
+
+.nav-overlay-icon .icon svg,
+.toc-overlay-icon .icon svg,
+.theme-toggle svg {
+    color: var(--orange);
+}
+
+.toc-tree li.scroll-current>.reference {
+    color: var(--orange);
+}
+
+
+.toc li {
+    padding-left: 20px; /* Adjust the indentation value as needed */
+ }
