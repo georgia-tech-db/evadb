@@ -16,14 +16,14 @@ import numpy as np
 import pandas as pd
 import torch
 import torchvision
+from PIL import Image
+from torchvision.transforms import Compose, Resize, ToTensor
 
 from eva.catalog.catalog_type import NdArrayType
 from eva.udfs.abstract.abstract_udf import AbstractUDF
 from eva.udfs.decorators.decorators import forward, setup
 from eva.udfs.decorators.io_descriptors.data_types import PandasDataframe
 from eva.udfs.gpu_compatible import GPUCompatible
-from torchvision.transforms import Compose, ToTensor, Resize
-from PIL import Image
 
 
 class SaliencyFeatureExtractor(AbstractUDF, GPUCompatible):
@@ -52,7 +52,7 @@ class SaliencyFeatureExtractor(AbstractUDF, GPUCompatible):
             PandasDataframe(
                 columns=["saliency"],
                 column_types=[NdArrayType.FLOAT32],
-                column_shapes=[(1, 224,224)],
+                column_shapes=[(1, 224, 224)],
             )
         ],
     )
@@ -60,17 +60,16 @@ class SaliencyFeatureExtractor(AbstractUDF, GPUCompatible):
         def _forward(row: pd.Series) -> np.ndarray:
             rgb_img = row[0]
 
-            composed = Compose([
-            Resize((224, 224)),            
-            ToTensor()
-            ])
-            transfromed_img = composed(Image.fromarray(rgb_img[:, :, ::-1])).unsqueeze(0)
+            composed = Compose([Resize((224, 224)), ToTensor()])
+            transfromed_img = composed(Image.fromarray(rgb_img[:, :, ::-1])).unsqueeze(
+                0
+            )
             transfromed_img.requires_grad_()
             outputs = self.model(transfromed_img)
             score_max_index = outputs.argmax()
-            score_max = outputs[0,score_max_index]
+            score_max = outputs[0, score_max_index]
             score_max.backward()
-            saliency, _ = torch.max(transfromed_img.grad.data.abs(),dim=1)
+            saliency, _ = torch.max(transfromed_img.grad.data.abs(), dim=1)
 
             return saliency
 
