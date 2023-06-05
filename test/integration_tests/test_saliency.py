@@ -44,7 +44,9 @@ class SaliencyTests(unittest.TestCase):
         execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS SALIENCY;")
 
         execute_query_fetch_all(self.evadb, create_udf_query)
-        execute_query_fetch_all(self.evadb, "DROP UDF IF EXISTS SaliencyFeatureExtractor")
+        execute_query_fetch_all(
+            self.evadb, "DROP UDF IF EXISTS SaliencyFeatureExtractor"
+        )
 
         create_udf_query = f"""CREATE UDF IF NOT EXISTS SaliencyFeatureExtractor
                     IMPL  '{EVA_ROOT_DIR}/eva/udfs/saliency_feature_extractor.py';
