@@ -29,31 +29,27 @@
 # limitations under the License.
 import numpy as np
 import pandas as pd
-import spacy
 
 from eva.catalog.catalog_type import NdArrayType
 from eva.udfs.abstract.abstract_udf import AbstractUDF
 from eva.udfs.decorators.decorators import forward, setup
 from eva.udfs.decorators.io_descriptors.data_types import PandasDataframe
-
-try:
-    nlp = spacy.load("en_core_web_lg")
-except Exception as e:
-    print(e)
-    import spacy.cli
-
-    spacy.cli.download("en_core_web_lg")
-    nlp = spacy.load("en_core_web_lg")
+from sentence_transformers import SentenceTransformer
+from eva.udfs.gpu_compatible import GPUCompatible
 
 
-class SpacyFeatureExtractor(AbstractUDF):
+class SentencTransformerFeatureExtractor(AbstractUDF,GPUCompatible):
     @setup(cacheable=False, udf_type="FeatureExtraction", batchable=False)
     def setup(self):
-        pass
+        self.model = SentenceTransformer('all-MiniLM-L6-v2')
+
+    def to_device(self, device: str) -> GPUCompatible:
+        self.modle = self.model.to(device)
+        return self
 
     @property
     def name(self) -> str:
-        return "SpacyFeatureExtractor"
+        return "SentencTransformerFeatureExtractor"
 
     @forward(
         input_signatures=[
@@ -67,18 +63,16 @@ class SpacyFeatureExtractor(AbstractUDF):
             PandasDataframe(
                 columns=["features"],
                 column_types=[NdArrayType.FLOAT32],
-                column_shapes=[(1, 128)],
+                column_shapes=[(1, 384)],
             )
         ],
     )
     def forward(self, df: pd.DataFrame) -> pd.DataFrame:
         def _forward(row: pd.Series) -> np.ndarray:
-            columns = row.axes[0]
-            data = row.loc[columns[0]]
-            doc1 = nlp(data)
-            feat = doc1.vector
-            feat = feat.reshape(1, -1)
-            return feat
+
+            data = row
+            embedded_list = self.model.encode(data)
+            return embedded_list
 
         ret = pd.DataFrame()
         ret["features"] = df.apply(_forward, axis=1)

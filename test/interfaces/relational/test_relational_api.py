@@ -256,28 +256,31 @@ class RelationalAPI(unittest.TestCase):
         self.assertEqual(actual_batch, expected_batch)
 
     def test_pdf_similarity_search(self):
-        pdf_path = f"{EVA_ROOT_DIR}/data/documents/state_of_the_union.pdf"
-
+        
         conn = connect()
+        pdf_path1 = f"{EVA_ROOT_DIR}/data/documents/state_of_the_union.pdf"
+        pdf_path2 = f"{EVA_ROOT_DIR}/data/documents/layout-parser-paper.pdf"
 
-        load_pdf = conn.load(file_regex=pdf_path, format="PDF", table_name="PDFss")
+
+        load_pdf = conn.load(file_regex=pdf_path1, format="PDF", table_name="PDFss")
         load_pdf.execute()
 
-        udf_check = conn.query("DROP UDF IF  EXISTS SpacyFeatureExtractor")
+        load_pdf = conn.load(file_regex=pdf_path2, format="PDF", table_name="PDFss")
+        load_pdf.execute()
+
+        udf_check = conn.query("DROP UDF IF  EXISTS SentencTransformerFeatureExtractor")
         udf_check.execute()
-
         udf = conn.create_udf(
-            "SpacyFeatureExtractor",
+            "SentencTransformerFeatureExtractor",
             True,
-            f"{EVA_ROOT_DIR}/eva/udfs/spacy_feature_extractor.py",
+            f"{EVA_ROOT_DIR}/eva/udfs/sentence_transformer_feature_extractor.py",
         )
-
         udf.execute()
 
         conn.create_vector_index(
             "faiss_index",
             table_name="PDFss",
-            expr="SpacyFeatureExtractor(data)",
+            expr="SentencTransformerFeatureExtractor(data)",
             using="QDRANT",
         ).df()
 
@@ -285,16 +288,13 @@ class RelationalAPI(unittest.TestCase):
             conn.table("PDFss")
             .order(
                 """Similarity(
-                    SpacyFeatureExtractor('When was the NATO created?'), SpacyFeatureExtractor(data)
+                    SentencTransformerFeatureExtractor('When was the NATO created?'), SentencTransformerFeatureExtractor(data)
                 ) DESC"""
             )
             .limit(3)
             .select("data")
-        )
-        print(query.sql_query())
+        )        
         output = query.df()
-        from pprint import pprint
-
-        pprint(output)
+        print(output)
         self.assertEqual(len(output), 3)
         self.assertTrue("pdfss.data" in output.columns)

@@ -57,7 +57,7 @@ minimal_requirement = [
     "langchain",
     "pymupdf",
     "pdfminer.six",
-    "spacy",
+    "sentence-transformers"
 
 ]
 
