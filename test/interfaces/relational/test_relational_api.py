@@ -14,15 +14,21 @@
 # limitations under the License.
 import unittest
 from test.util import (
+    DummyObjectDetector,
+    create_sample_video,
     load_udfs_for_testing,
     shutdown_ray,
     suffix_pytest_xdist_worker_id_to_dir,
 )
 
+import numpy as np
+import pandas as pd
 from pandas.testing import assert_frame_equal
 
 from eva.configuration.constants import EVA_DATABASE_DIR, EVA_ROOT_DIR
+from eva.executor.executor_utils import ExecutorError
 from eva.interfaces.relational.db import connect
+from eva.models.storage.batch import Batch
 from eva.server.command_handler import execute_query_fetch_all
 
 
@@ -192,3 +198,59 @@ class RelationalAPI(unittest.TestCase):
             base_image
         )
         assert_frame_equal(rel.df(), conn.query(similarity_sql).df())
+
+    def test_create_udf_with_relational_api(self):
+        video_file_path = create_sample_video(10)
+
+        conn = connect(self.db_dir)
+        # load video
+        rel = conn.load(
+            video_file_path,
+            table_name="dummy_video",
+            format="video",
+        )
+        rel.execute()
+
+        create_dummy_object_detector_udf = conn.create_udf(
+            "DummyObjectDetector", if_not_exists=True, impl_path="test/util.py"
+        )
+        create_dummy_object_detector_udf.execute()
+
+        args = {"task": "automatic-speech-recognition", "model": "openai/whisper-base"}
+
+        create_speech_recognizer_udf_if_not_exists = conn.create_udf(
+            "SpeechRecognizer", if_not_exists=True, type="HuggingFace", **args
+        )
+        query = create_speech_recognizer_udf_if_not_exists.sql_query()
+        self.assertEqual(
+            query,
+            """CREATE UDF SpeechRecognizer IF NOT EXISTS TYPE HuggingFace 'task' 'automatic-speech-recognition' 'model' 'openai/whisper-base'""",
+        )
+        create_speech_recognizer_udf_if_not_exists.execute()
+
+        # check if next create call of same UDF raises error
+        create_speech_recognizer_udf = conn.create_udf(
+            "SpeechRecognizer", if_not_exists=False, type="HuggingFace", **args
+        )
+        query = create_speech_recognizer_udf.sql_query()
+        self.assertEqual(
+            query,
+            "CREATE UDF SpeechRecognizer TYPE HuggingFace 'task' 'automatic-speech-recognition' 'model' 'openai/whisper-base'",
+        )
+        with self.assertRaises(ExecutorError):
+            create_speech_recognizer_udf.execute()
+
+        select_query_sql = (
+            "SELECT id, DummyObjectDetector(data) FROM dummy_video ORDER BY id;"
+        )
+        actual_batch = conn.query(select_query_sql).execute()
+        labels = DummyObjectDetector().labels
+        expected = [
+            {
+                "dummy_video.id": i,
+                "dummyobjectdetector.label": np.array([labels[1 + i % 2]]),
+            }
+            for i in range(10)
+        ]
+        expected_batch = Batch(frames=pd.DataFrame(expected))
+        self.assertEqual(actual_batch, expected_batch)
