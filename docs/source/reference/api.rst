@@ -3,80 +3,69 @@ Basic API
 
 To begin your querying session, get a connection to the EvaDB using ``connect``:
 
+.. autosummary:: 
+    :toctree: ./doc
+    
+    ~eva.connect
+
 .. code-block:: python
 
-    import evadb
-
-    from eva.interfaces.relational.db import EVAConnection, connect
+    from eva import connect
     conn = connect()
 
 You can then use this connection to run queries:
 
 .. code-block:: python
 
-    conn.load("online_video.mp4", "youtube_video", "video").execute()
-    conn.query("CREATE TABLE IF NOT EXISTS youtube_video_text AS SELECT SpeechRecognizer(audio) FROM youtube_video;").execute()
+    conn.load("online_video.mp4", "youtube_video", "video").df()
+    conn.query("CREATE TABLE IF NOT EXISTS youtube_video_text AS SELECT SpeechRecognizer(audio) FROM youtube_video;").df()
 
 .. warning::
 
-    It is important to call ``execute`` to run the actual query. 
+    It is important to call ``df`` to run the actual query. 
     
     EvaDB uses a lazy query execution technique to improve performance.
-    Calling ``conn.query("...")`` will only construct and not run the query. Calling ``conn.query("...").execute()`` will both construct and run the query.
+    Calling ``conn.query("...")`` will only construct and not run the query. Calling ``conn.query("...").df()`` will both construct and run the query.
 
-EVAConnection Interface
------------------------
 
-.. currentmodule:: eva.interfaces.relational
 
+
+
+EVADBConnection Interface
+-------------------------
 
 .. autosummary::
     :toctree: ./doc
     
-    ~db.EVAConnection.connect
-    ~db.EVAConnection.load
-    ~db.EVAConnection.query
-    ~db.EVAConnection.table
+    ~eva.EVADBConnection.cursor
 
-EVARelation Interface
+
+EVADBCursor Interface
 ---------------------
 
-.. currentmodule:: eva.interfaces.relational
-
 .. autosummary::
     :toctree: ./doc
 
-    ~relation.EVARelation.select
-    ~relation.EVARelation.execute
-    ~relation.EVARelation.cross_apply
-    ~relation.EVARelation.filter
-    ~relation.EVARelation.df
+    ~eva.EVADBCursor.connect
+    ~eva.EVADBCursor.load
+    ~eva.EVADBCursor.query
+    ~eva.EVADBCursor.table
+    ~eva.EVADBCursor.create_udf
+    ~eva.EVADBCursor.create_vector_index
+    ~eva.EVADBCursor.df
 
-Advanced API
-=============
-
-EVAConnection Interface
------------------------
-
-.. currentmodule:: eva.interfaces.relational
-
-.. autosummary::
-    :toctree: ./doc
-
-    ~db.EVAConnection.create_udf
-    ~db.EVAConnection.create_vector_index
-    ~db.EVAConnection.df
-
-EVARelation Interface
+EVADBQuery Interface
 ---------------------
 
-.. currentmodule:: eva.interfaces.relational
-
 .. autosummary::
     :toctree: ./doc
 
-    ~relation.EVARelation.alias
-    ~relation.EVARelation.limit
-    ~relation.EVARelation.order
-    ~relation.EVARelation.show
-    ~relation.EVARelation.sql_query
+    ~eva.EVADBQuery.select
+    ~eva.EVADBQuery.cross_apply
+    ~eva.EVADBQuery.filter
+    ~eva.EVADBQuery.df
+    ~eva.EVADBQuery.alias
+    ~eva.EVADBQuery.limit
+    ~eva.EVADBQuery.order
+    ~eva.EVADBQuery.show
+    ~eva.EVADBQuery.sql_query
