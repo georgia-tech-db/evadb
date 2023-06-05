@@ -12,7 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from eva.interfaces.relational.db import connect  # noqa: E402,F401
+from eva.interfaces.relational.db import (  # noqa: E402,F401
+    EVADBConnection,
+    EVADBCursor,
+    connect,
+)
+from eva.interfaces.relational.relation import EVADBQuery  # noqa: E402,F401
 
 from .version import VERSION as __version__  # noqa: E402,F401
 
