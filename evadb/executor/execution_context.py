@@ -39,6 +39,7 @@ class Context:
 
     @property
     def gpus(self):
+        print("GPU Devices", self._gpus)
         return self._gpus
 
     def _populate_gpu_from_config(self) -> List:
