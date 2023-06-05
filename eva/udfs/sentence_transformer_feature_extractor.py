@@ -29,19 +29,19 @@
 # limitations under the License.
 import numpy as np
 import pandas as pd
+from sentence_transformers import SentenceTransformer
 
 from eva.catalog.catalog_type import NdArrayType
 from eva.udfs.abstract.abstract_udf import AbstractUDF
 from eva.udfs.decorators.decorators import forward, setup
 from eva.udfs.decorators.io_descriptors.data_types import PandasDataframe
-from sentence_transformers import SentenceTransformer
 from eva.udfs.gpu_compatible import GPUCompatible
 
 
-class SentencTransformerFeatureExtractor(AbstractUDF,GPUCompatible):
+class SentencTransformerFeatureExtractor(AbstractUDF, GPUCompatible):
     @setup(cacheable=False, udf_type="FeatureExtraction", batchable=False)
     def setup(self):
-        self.model = SentenceTransformer('all-MiniLM-L6-v2')
+        self.model = SentenceTransformer("all-MiniLM-L6-v2")
 
     def to_device(self, device: str) -> GPUCompatible:
         self.modle = self.model.to(device)
@@ -69,7 +69,6 @@ class SentencTransformerFeatureExtractor(AbstractUDF,GPUCompatible):
     )
     def forward(self, df: pd.DataFrame) -> pd.DataFrame:
         def _forward(row: pd.Series) -> np.ndarray:
-
             data = row
             embedded_list = self.model.encode(data)
             return embedded_list

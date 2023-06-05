@@ -260,11 +260,9 @@ class RelationalAPI(unittest.TestCase):
         self.assertEqual(actual_batch, expected_batch)
 
     def test_pdf_similarity_search(self):
-        
         conn = connect()
         pdf_path1 = f"{EVA_ROOT_DIR}/data/documents/state_of_the_union.pdf"
         pdf_path2 = f"{EVA_ROOT_DIR}/data/documents/layout-parser-paper.pdf"
-
 
         load_pdf = conn.load(file_regex=pdf_path1, format="PDF", table_name="PDFss")
         load_pdf.execute()
@@ -297,7 +295,7 @@ class RelationalAPI(unittest.TestCase):
             )
             .limit(3)
             .select("data")
-        )        
+        )
         output = query.df()
         print(output)
         self.assertEqual(len(output), 3)
