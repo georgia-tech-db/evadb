@@ -172,6 +172,7 @@ mnistcnn_udf_query = """CREATE UDF IF NOT EXISTS MnistImageClassifier
     EVA_INSTALLATION_DIR
 )
 
+
 def init_builtin_udfs(db: EVADatabase, mode: str = "debug") -> None:
     """Load the built-in UDFs into the system during system bootstrapping.
 
