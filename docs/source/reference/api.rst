@@ -63,6 +63,7 @@ EVAConnection Interface
 .. autosummary::
     :toctree: ./doc
 
+    ~db.EVAConnection.create_udf
     ~db.EVAConnection.create_vector_index
     ~db.EVAConnection.df
 
