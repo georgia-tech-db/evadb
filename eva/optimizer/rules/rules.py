@@ -16,10 +16,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import TableType
 from eva.catalog.catalog_utils import is_video_table
 from eva.constants import CACHEABLE_UDFS
+from eva.executor.execution_context import Context
 from eva.expression.expression_utils import (
     conjunction_list_to_expression_tree,
     to_conjunction_list,
@@ -40,6 +40,7 @@ from eva.optimizer.rules.rules_base import Promise, Rule, RuleType
 from eva.parser.types import JoinType, ParserOrderBySortType
 from eva.plan_nodes.apply_and_merge_plan import ApplyAndMergePlan
 from eva.plan_nodes.create_mat_view_plan import CreateMaterializedViewPlan
+from eva.plan_nodes.exchange_plan import ExchangePlan
 from eva.plan_nodes.explain_plan import ExplainPlan
 from eva.plan_nodes.hash_join_build_plan import HashJoinBuildPlan
 from eva.plan_nodes.nested_loop_join_plan import NestedLoopJoinPlan
@@ -60,6 +61,7 @@ from eva.optimizer.operators import (
     LogicalDelete,
     LogicalDrop,
     LogicalDropUDF,
+    LogicalExchange,
     LogicalExplain,
     LogicalExtractObject,
     LogicalFilter,
@@ -214,7 +216,7 @@ class CacheFunctionExpressionInProject(Rule):
     def apply(self, before: LogicalProject, context: OptimizerContext):
         new_target_list = [expr.copy() for expr in before.target_list]
         for expr in new_target_list:
-            enable_cache_on_expression_tree(expr)
+            enable_cache_on_expression_tree(context, expr)
         after = LogicalProject(target_list=new_target_list, children=before.children)
         yield after
 
@@ -244,7 +246,7 @@ class CacheFunctionExpressionInFilter(Rule):
         # cache for n function Expressions. Currently considering only the case where
         # cache is enabled for all eligible function expressions
         after_predicate = before.predicate.copy()
-        enable_cache_on_expression_tree(after_predicate)
+        enable_cache_on_expression_tree(context, after_predicate)
         after_operator = LogicalFilter(
             predicate=after_predicate, children=before.children
         )
@@ -276,7 +278,7 @@ class CacheFunctionExpressionInApply(Rule):
     def apply(self, before: LogicalApplyAndMerge, context: OptimizerContext):
         # todo: this will create a catalog entry even in the case of explain command
         # We should run this code conditionally
-        new_func_expr = enable_cache(before.func_expr)
+        new_func_expr = enable_cache(context, before.func_expr)
         after = LogicalApplyAndMerge(
             func_expr=new_func_expr, alias=before.alias, do_unnest=before.do_unnest
         )
@@ -523,7 +525,7 @@ class CombineSimilarityOrderByAndLimitToVectorIndexScan(Rule):
         return True
 
     def apply(self, before: LogicalLimit, context: OptimizerContext):
-        catalog_manager = CatalogManager()
+        catalog_manager = context.db.catalog
 
         # Get corresponding nodes.
         limit_node = before
@@ -571,7 +573,7 @@ class CombineSimilarityOrderByAndLimitToVectorIndexScan(Rule):
         # Get index catalog. Check if an index exists for matching
         # udf signature and table columns.
         index_catalog_entry = (
-            catalog_manager.get_index_catalog_entry_by_column_and_udf_signature(
+            catalog_manager().get_index_catalog_entry_by_column_and_udf_signature(
                 column_catalog_entry, udf_signature
             )
         )
@@ -659,7 +661,8 @@ class ReorderPredicates(Rule):
         # Compute the cost of every function expression and sort them in
         # ascending order of cost
         function_expr_cost_tuples = [
-            (expr, get_expression_execution_cost(expr)) for expr in contains_func_exprs
+            (expr, get_expression_execution_cost(context, expr))
+            for expr in contains_func_exprs
         ]
         function_expr_cost_tuples = sorted(
             function_expr_cost_tuples, key=lambda x: x[1]
@@ -1257,6 +1260,95 @@ class LogicalVectorIndexScanToPhysical(Rule):
         for child in before.children:
             after.append_child(child)
         yield after
+
+
+class LogicalExchangeToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALEXCHANGE)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_EXCHANGE_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_EXCHANGE_TO_PHYSICAL
+
+    def check(self, grp_id: int, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalExchange, context: OptimizerContext):
+        after = ExchangePlan(before.view)
+        for child in before.children:
+            after.append_child(child)
+        yield after
+
+
+class LogicalApplyAndMergeToRayPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICAL_APPLY_AND_MERGE)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_APPLY_AND_MERGE_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_APPLY_AND_MERGE_TO_PHYSICAL
+
+    def check(self, grp_id: int, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalApplyAndMerge, context: OptimizerContext):
+        apply_plan = ApplyAndMergePlan(before.func_expr, before.alias, before.do_unnest)
+
+        parallelism = 2 if len(Context().gpus) > 1 else 1
+        ray_parallel_env_conf_dict = [
+            {"CUDA_VISIBLE_DEVICES": str(i)} for i in range(parallelism)
+        ]
+
+        exchange_plan = ExchangePlan(
+            inner_plan=apply_plan,
+            parallelism=parallelism,
+            ray_pull_env_conf_dict={"CUDA_VISIBLE_DEVICES": "0"},
+            ray_parallel_env_conf_dict=ray_parallel_env_conf_dict,
+        )
+        for child in before.children:
+            exchange_plan.append_child(child)
+
+        yield exchange_plan
+
+
+class LogicalProjectToRayPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALPROJECT)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_PROJECT_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_PROJECT_TO_PHYSICAL
+
+    def check(self, before: LogicalProject, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalProject, context: OptimizerContext):
+        project_plan = ProjectPlan(before.target_list)
+        # Check whether the projection contains a UDF
+        if before.target_list is None or not any(
+            [isinstance(expr, FunctionExpression) for expr in before.target_list]
+        ):
+            for child in before.children:
+                project_plan.append_child(child)
+            yield project_plan
+        else:
+            parallelism = 2 if len(Context().gpus) > 1 else 1
+            ray_parallel_env_conf_dict = [
+                {"CUDA_VISIBLE_DEVICES": str(i)} for i in range(parallelism)
+            ]
+
+            exchange_plan = ExchangePlan(
+                inner_plan=project_plan,
+                parallelism=parallelism,
+                ray_pull_env_conf_dict={"CUDA_VISIBLE_DEVICES": "0"},
+                ray_parallel_env_conf_dict=ray_parallel_env_conf_dict,
+            )
+            for child in before.children:
+                exchange_plan.append_child(child)
+            yield exchange_plan
 
 
 # IMPLEMENTATION RULES END

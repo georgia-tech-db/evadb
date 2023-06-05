@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -35,4 +35,4 @@ class CommandHandlerTests(unittest.TestCase):
         transport.write = MagicMock(return_value="response_message")
         request_message = "SELECT id FROM foo;"
 
-        asyncio.run(handle_request(transport, request_message))
+        asyncio.run(handle_request(None, transport, request_message))

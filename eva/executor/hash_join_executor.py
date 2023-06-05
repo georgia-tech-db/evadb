@@ -14,6 +14,7 @@
 # limitations under the License.
 from typing import Iterator
 
+from eva.database import EVADatabase
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import apply_predicate, apply_project
 from eva.models.storage.batch import Batch
@@ -21,8 +22,8 @@ from eva.plan_nodes.hash_join_probe_plan import HashJoinProbePlan
 
 
 class HashJoinExecutor(AbstractExecutor):
-    def __init__(self, node: HashJoinProbePlan):
-        super().__init__(node)
+    def __init__(self, db: EVADatabase, node: HashJoinProbePlan):
+        super().__init__(db, node)
         self.predicate = node.join_predicate
         self.join_type = node.join_type
         self.probe_keys = node.probe_keys
@@ -37,6 +38,8 @@ class HashJoinExecutor(AbstractExecutor):
                 probe_batch.reassign_indices_to_hash(hash_keys)
                 join_batch = Batch.join(probe_batch, build_batch)
                 join_batch.reset_index()
-                join_batch = apply_predicate(join_batch, self.predicate)
-                join_batch = apply_project(join_batch, self.join_project)
+                join_batch = apply_predicate(join_batch, self.predicate, self.catalog())
+                join_batch = apply_project(
+                    join_batch, self.join_project, self.catalog()
+                )
                 yield join_batch

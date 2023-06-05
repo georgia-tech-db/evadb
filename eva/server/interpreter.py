@@ -19,7 +19,7 @@ from asyncio import StreamReader, StreamWriter
 from collections import deque
 from typing import Dict
 
-from eva.interfaces.relational.db import EVAConnection
+from eva.interfaces.relational.db import EVADBConnection
 from eva.utils.logging_manager import logger
 
 # version.py defines the VERSION and VERSION_SHORT variables
@@ -61,7 +61,11 @@ async def read_from_client_and_send_to_server(
 
     prompt = "eva=#"
 
-    connection = EVAConnection(server_reader, writer)
+    # The EVADatabase object is not passed from the command line client.
+    # The concept is to always send a SQL query to the server, which is responsible for
+    # executing it and returning the results. However, in the Pythonic interface, we
+    # adopt a serverless approach and don't rely on the EVADatabase object.
+    connection = EVADBConnection(None, server_reader, writer)
     cursor = connection.cursor()
 
     while True:

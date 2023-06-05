@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from dataclasses import dataclass
 
 from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
@@ -20,7 +19,7 @@ from sqlalchemy.types import Enum
 
 from eva.catalog.catalog_type import VectorStoreType
 from eva.catalog.models.base_model import BaseModel
-from eva.catalog.models.column_catalog import ColumnCatalogEntry
+from eva.catalog.models.utils import IndexCatalogEntry
 
 
 class IndexCatalog(BaseModel):
@@ -74,18 +73,3 @@ class IndexCatalog(BaseModel):
             udf_signature=self._udf_signature,
             feat_column=feat_column,
         )
-
-
-@dataclass(unsafe_hash=True)
-class IndexCatalogEntry:
-    """Dataclass representing an entry in the IndexCatalogEntry.
-    This is done to ensure we don't expose the sqlalchemy dependencies beyond catalog service. Further, sqlalchemy does not allow sharing of objects across threads.
-    """
-
-    name: str
-    save_file_path: str
-    type: VectorStoreType
-    row_id: int = None
-    feat_column_id: int = None
-    udf_signature: str = None
-    feat_column: ColumnCatalogEntry = None

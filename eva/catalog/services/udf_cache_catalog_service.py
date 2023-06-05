@@ -12,10 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+from sqlalchemy.orm import Session
 from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.sql.expression import select
 
-from eva.catalog.models.udf_cache_catalog import UdfCacheCatalog, UdfCacheCatalogEntry
+from eva.catalog.models.udf_cache_catalog import UdfCacheCatalog
+from eva.catalog.models.utils import UdfCacheCatalogEntry
 from eva.catalog.services.base_service import BaseService
 from eva.catalog.services.column_catalog_service import ColumnCatalogService
 from eva.catalog.services.udf_catalog_service import UdfCatalogService
@@ -24,10 +26,10 @@ from eva.utils.logging_manager import logger
 
 
 class UdfCacheCatalogService(BaseService):
-    def __init__(self):
-        super().__init__(UdfCacheCatalog)
-        self._column_service: ColumnCatalogService = ColumnCatalogService()
-        self._udf_service: UdfCatalogService = UdfCatalogService()
+    def __init__(self, db_session: Session):
+        super().__init__(UdfCacheCatalog, db_session)
+        self._column_service: ColumnCatalogService = ColumnCatalogService(db_session)
+        self._udf_service: UdfCatalogService = UdfCatalogService(db_session)
 
     def insert_entry(self, entry: UdfCacheCatalogEntry) -> UdfCacheCatalogEntry:
         """Insert a new udf cache entry into udf cache catalog.
@@ -57,7 +59,7 @@ class UdfCacheCatalogService(BaseService):
                 self._column_service.get_entry_by_id(col_id, return_alchemy=True)
                 for col_id in entry.col_depends
             ]
-            cache_obj = cache_obj.save()
+            cache_obj = cache_obj.save(self.session)
 
         except Exception as e:
             err_msg = (
@@ -70,7 +72,9 @@ class UdfCacheCatalogService(BaseService):
 
     def get_entry_by_name(self, name: str) -> UdfCacheCatalogEntry:
         try:
-            entry = self.model.query.filter(self.model._name == name).one()
+            entry = self.session.execute(
+                select(self.model).filter(self.model._name == name)
+            ).scalar_one()
             return entry.as_dataclass()
         except NoResultFound:
             return None
@@ -83,8 +87,10 @@ class UdfCacheCatalogService(BaseService):
             True if successfully removed else false
         """
         try:
-            obj = self.model.query.filter(self.model._row_id == cache.row_id).one()
-            obj.delete()
+            obj = self.session.execute(
+                select(self.model).filter(self.model._row_id == cache.row_id)
+            ).scalar_one()
+            obj.delete(self.session)
             return True
         except Exception as e:
             err_msg = f"Delete cache failed for {cache} with error {str(e)}."

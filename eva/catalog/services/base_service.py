@@ -14,6 +14,7 @@
 # limitations under the License.
 from typing import List
 
+from sqlalchemy.orm import Session
 from sqlalchemy.orm.exc import NoResultFound
 
 from eva.catalog.models.base_model import BaseModel
@@ -25,12 +26,14 @@ class BaseService:
     The services perform business logic using the model provided
     """
 
-    def __init__(self, model: BaseModel):
+    def __init__(self, model: BaseModel, session: Session):
         self.model = model
+        self.session = session
+        self.query = session.query(model)
 
     def get_all_entries(self) -> List:
         try:
-            entries = self.model.query.all()
+            entries = self.query.all()
             return [entry.as_dataclass() for entry in entries]
         except NoResultFound:
             return []
