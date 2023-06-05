@@ -28,8 +28,7 @@ workflows:
         # test_create_index_doesn't work on MacOS
         - MacOS:
            name: "MacOS | v3.10"
-           v: "3.10"
-           mode: "TEST"
+
         # Ray does not work on 3.11
         # https://github.com/ray-project/ray/issues/33232
         # - Linux:
