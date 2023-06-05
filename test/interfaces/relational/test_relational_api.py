@@ -271,7 +271,9 @@ class RelationalAPI(unittest.TestCase):
         load_pdf = cursor.load(file_regex=pdf_path2, format="PDF", table_name="PDFss")
         load_pdf.execute()
 
-        udf_check = cursor.query("DROP UDF IF  EXISTS SentencTransformerFeatureExtractor")
+        udf_check = cursor.query(
+            "DROP UDF IF  EXISTS SentencTransformerFeatureExtractor"
+        )
         udf_check.execute()
         udf = cursor.create_udf(
             "SentencTransformerFeatureExtractor",
