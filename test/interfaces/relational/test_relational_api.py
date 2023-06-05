@@ -272,11 +272,11 @@ class RelationalAPI(unittest.TestCase):
         load_pdf.execute()
 
         udf_check = cursor.query(
-            "DROP UDF IF  EXISTS SentencTransformerFeatureExtractor"
+            "DROP UDF IF  EXISTS SentenceTransformerFeatureExtractor"
         )
         udf_check.execute()
         udf = cursor.create_udf(
-            "SentencTransformerFeatureExtractor",
+            "SentenceTransformerFeatureExtractor",
             True,
             f"{EVA_ROOT_DIR}/eva/udfs/sentence_transformer_feature_extractor.py",
         )
@@ -285,7 +285,7 @@ class RelationalAPI(unittest.TestCase):
         cursor.create_vector_index(
             "faiss_index",
             table_name="PDFss",
-            expr="SentencTransformerFeatureExtractor(data)",
+            expr="SentenceTransformerFeatureExtractor(data)",
             using="QDRANT",
         ).df()
 
@@ -293,7 +293,7 @@ class RelationalAPI(unittest.TestCase):
             cursor.table("PDFss")
             .order(
                 """Similarity(
-                    SentencTransformerFeatureExtractor('When was the NATO created?'), SentencTransformerFeatureExtractor(data)
+                    SentenceTransformerFeatureExtractor('When was the NATO created?'), SentenceTransformerFeatureExtractor(data)
                 ) DESC"""
             )
             .limit(3)

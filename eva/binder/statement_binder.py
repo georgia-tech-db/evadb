@@ -321,7 +321,7 @@ class StatementBinder:
             assert (
                 get_file_checksum(udf_obj.impl_file_path) == udf_obj.checksum
             ), f"""UDF file {udf_obj.impl_file_path} has been modified from the
-                registration. Please create a new UDF using the CREATE UDF command or UPDATE the existing one."""
+                registration. Please use DROP UDF to drop it and re-create it using CREATE UDF."""
 
             try:
                 udf_class = load_udf_class_from_file(

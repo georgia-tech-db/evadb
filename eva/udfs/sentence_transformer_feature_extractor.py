@@ -38,7 +38,7 @@ from eva.udfs.decorators.io_descriptors.data_types import PandasDataframe
 from eva.udfs.gpu_compatible import GPUCompatible
 
 
-class SentencTransformerFeatureExtractor(AbstractUDF, GPUCompatible):
+class SentenceTransformerFeatureExtractor(AbstractUDF, GPUCompatible):
     @setup(cacheable=False, udf_type="FeatureExtraction", batchable=False)
     def setup(self):
         self.model = SentenceTransformer("all-MiniLM-L6-v2")
@@ -49,7 +49,7 @@ class SentencTransformerFeatureExtractor(AbstractUDF, GPUCompatible):
 
     @property
     def name(self) -> str:
-        return "SentencTransformerFeatureExtractor"
+        return "SentenceTransformerFeatureExtractor"
 
     @forward(
         input_signatures=[
