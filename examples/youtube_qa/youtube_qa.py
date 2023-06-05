@@ -15,7 +15,7 @@
 import os
 import shutil
 
-from eva.interfaces.relational.db import EVAConnection, connect
+from eva.interfaces.relational.db import EVADBConnection, connect
 from eva.configuration.configuration_manager import ConfigurationManager
 from pytube import YouTube
 
@@ -34,14 +34,14 @@ def download_youtube_video_from_link(video_link: str):
     print("Video downloaded successfully")
 
 
-def analyze_video(api_key: str) -> EVAConnection:
+def analyze_video(api_key: str) -> EVADBConnection:
     """Extracts speech from video for llm processing.
 
     Args:
         api_key (str): openai api key.
 
     Returns:
-        EVAConnection: evadb api connection.
+        EVADBConnection: evadb api connection.
     """
     print("Analyzing video. This may take a while...")
     

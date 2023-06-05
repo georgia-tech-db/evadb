@@ -175,13 +175,13 @@ DummyObjectDetectorDecorators
 EDGAhab
 EIStakovskii
 EVA's
-EVAConnection
-EVACursor
+EVADBConnection
+EVADBCursor
 EVADatabase
 EVAEnum
 EVAEnums
 EVAImportTest
-EVARelation
+EVADBQuery
 EVAServerTest
 EVATrackerAbstractUDF
 EXPRESISON
