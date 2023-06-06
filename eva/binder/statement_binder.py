@@ -21,7 +21,7 @@ from eva.binder.binder_utils import (
     bind_table_info,
     check_column_name_is_string,
     check_groupby_pattern,
-    check_table_object_is_video,
+    check_table_object_is_groupable,
     extend_star,
     handle_bind_extract_object_function,
     resolve_alias_table_value_expression,
@@ -122,8 +122,8 @@ class StatementBinder:
                 self.bind(expr)
         if node.groupby_clause:
             self.bind(node.groupby_clause)
-            check_groupby_pattern(node.groupby_clause.value)
-            check_table_object_is_video(node.from_table)
+            check_table_object_is_groupable(node.from_table)
+            check_groupby_pattern(node.from_table, node.groupby_clause.value)
         if node.orderby_list:
             for expr in node.orderby_list:
                 self.bind(expr[0])
@@ -321,7 +321,7 @@ class StatementBinder:
             assert (
                 get_file_checksum(udf_obj.impl_file_path) == udf_obj.checksum
             ), f"""UDF file {udf_obj.impl_file_path} has been modified from the
-                registration. Please create a new UDF using the CREATE UDF command or UPDATE the existing one."""
+                registration. Please use DROP UDF to drop it and re-create it using CREATE UDF."""
 
             try:
                 udf_class = load_udf_class_from_file(

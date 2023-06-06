@@ -55,6 +55,13 @@ def is_video_table(table: TableCatalogEntry):
     return table.table_type == TableType.VIDEO_DATA
 
 
+def is_document_table(table: TableCatalogEntry):
+    return (
+        table.table_type == TableType.DOCUMENT_DATA
+        or table.table_type == TableType.PDF_DATA
+    )
+
+
 def is_string_col(col: ColumnCatalogEntry):
     return col.type == ColumnType.TEXT or col.array_type == NdArrayType.STR
 

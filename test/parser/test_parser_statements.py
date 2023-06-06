@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ class ParserStatementTests(unittest.TestCase):
             UNION ALL SELECT CLASS, REDNESS FROM SHANGHAI;",
             "SELECT CLASS, REDNESS FROM TAIPAI \
             UNION SELECT CLASS, REDNESS FROM SHANGHAI;",
-            "SELECT FIRST(id) FROM TAIPAI GROUP BY '8f';",
+            "SELECT FIRST(id) FROM TAIPAI GROUP BY '8 frames';",
             "SELECT CLASS, REDNESS FROM TAIPAI \
                     WHERE (CLASS = 'VAN' AND REDNESS < 400 ) OR REDNESS > 700 \
                     ORDER BY CLASS, REDNESS DESC;",

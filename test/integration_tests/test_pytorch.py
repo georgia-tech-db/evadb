@@ -167,7 +167,7 @@ class PytorchTest(unittest.TestCase):
                             MVITActionRecognition(SEGMENT(data))
                             FROM Actions
                             WHERE id < 32
-                            GROUP BY '16f'; """
+                            GROUP BY '16 frames'; """
         actual_batch = execute_query_fetch_all(self.evadb, select_query)
         self.assertEqual(len(actual_batch), 2)
 
@@ -184,7 +184,7 @@ class PytorchTest(unittest.TestCase):
         select_query = """SELECT FIRST(id), ASLActionRecognition(SEGMENT(data))
                         FROM Asl_actions
                         SAMPLE 5
-                        GROUP BY '16f';"""
+                        GROUP BY '16 frames';"""
         actual_batch = execute_query_fetch_all(self.evadb, select_query)
 
         res = actual_batch.frames
