@@ -219,6 +219,7 @@ class HuggingFaceTests(unittest.TestCase):
         )
         execute_query_fetch_all(self.evadb, create_udf)
 
+        self.evadb.config.update_value("experimental", "ray", False)
         # TODO: use with SAMPLE AUDIORATE 16000
         select_query = f"SELECT {udf_name}(audio) FROM VIDEOS;"
         output = execute_query_fetch_all(self.evadb, select_query)
@@ -231,7 +232,8 @@ class HuggingFaceTests(unittest.TestCase):
         select_query_with_group_by = (
             f"SELECT {udf_name}(SEGMENT(audio)) FROM VIDEOS GROUP BY '240 samples';"
         )
-        output = execute_query_fetch_all(select_query_with_group_by)
+        self.evadb.config.update_value("experimental", "ray", False)
+        output = execute_query_fetch_all(self.evadb, select_query_with_group_by)
 
         # verify that output has one row and one column only
         self.assertEquals(output.frames.shape, (4, 1))
@@ -253,7 +255,7 @@ class HuggingFaceTests(unittest.TestCase):
         summary_udf = "Summarizer"
         create_udf = (
             f"CREATE UDF {summary_udf} TYPE HuggingFace "
-            "'task' 'summarization' 'model' 'philschmid/bart-large-cnn-samsum' 'min_length' 10 'max_length' 100;"
+            "'task' 'summarization' 'model' 'philschmid/bart-large-cnn-samsum' 'min_length' 10 'max_new_tokens' 100;"
         )
         execute_query_fetch_all(self.evadb, create_udf)
 
@@ -403,7 +405,7 @@ class HuggingFaceTests(unittest.TestCase):
                 segment_size
             )
         )
-        output = execute_query_fetch_all(select_query)
+        output = execute_query_fetch_all(self.evadb, select_query)
         self.assertEqual(len(output.frames), 3)
 
     @pytest.mark.benchmark
@@ -430,3 +432,10 @@ class HuggingFaceTests(unittest.TestCase):
 
         drop_udf_query = f"DROP UDF {udf_name};"
         execute_query_fetch_all(self.evadb, drop_udf_query)
+
+
+if __name__ == "__main__":
+    suite = unittest.TestSuite()
+    suite.addTest(HuggingFaceTests("test_automatic_speech_recognition"))
+    runner = unittest.TextTestRunner()
+    runner.run(suite)

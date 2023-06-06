@@ -168,7 +168,7 @@ class PytorchTest(unittest.TestCase):
                             FROM Actions
                             WHERE id < 32
                             GROUP BY '16 frames'; """
-        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch = execute_query_fetch_all(self.evadb, select_query)
         self.assertEqual(len(actual_batch), 2)
 
         res = actual_batch.frames
@@ -185,7 +185,7 @@ class PytorchTest(unittest.TestCase):
                         FROM Asl_actions
                         SAMPLE 5
                         GROUP BY '16 frames';"""
-        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch = execute_query_fetch_all(self.evadb, select_query)
 
         res = actual_batch.frames
 

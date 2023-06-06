@@ -312,8 +312,17 @@ class Batch:
         if len(batch.columns) > 1:
             raise ValueError("Stack can only be called on single-column batches")
         frame_data_col = batch.columns[0]
+        data_to_stack = batch.frames[frame_data_col].values.tolist()
 
-        stacked_array = np.hstack(batch.frames[frame_data_col].values)
+        if isinstance(data_to_stack[0], np.ndarray) and len(data_to_stack[0].shape) > 1:
+            # if data_to_stack has more than 1 axis, we add a new axis
+            # [(3, 224, 224) * 10] -> (10, 3, 224, 224)
+            stacked_array = np.array(batch.frames[frame_data_col].values.tolist())
+        else:
+            # we concatenate along the zeroth axis
+            # this makes sense for audio and text
+            stacked_array = np.hstack(batch.frames[frame_data_col].values)
+
         stacked_frame = pd.DataFrame([{frame_data_col: stacked_array}])
         return Batch(stacked_frame)
 

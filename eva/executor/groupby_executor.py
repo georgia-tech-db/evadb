@@ -33,8 +33,8 @@ class GroupByExecutor(AbstractExecutor):
 
     """
 
-    def __init__(self, node: GroupByPlan):
-        super().__init__(node)
+    def __init__(self, db: EVADatabase, node: GroupByPlan):
+        super().__init__(db, node)
         numbers_only = re.sub(r"\D", "", node.groupby_clause.value)
         self._segment_length = int(numbers_only)
 

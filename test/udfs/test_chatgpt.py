@@ -110,14 +110,14 @@ class ChatGPTTest(unittest.TestCase):
         create_udf_query = f"""CREATE UDF {udf_name}
             IMPL 'eva/udfs/chatgpt.py'
             """
-        execute_query_fetch_all(self.evadb,create_udf_query)
+        execute_query_fetch_all(self.evadb, create_udf_query)
         self.assertEqual(openai.api_key, "dummy_openai_key")
 
     @patch.dict(os.environ, {}, clear=True)
     def test_gpt_udf_no_key_in_yml_and_env_should_raise(self):
         ConfigurationManager().update_value("third_party", "openai_api_key", "")
         udf_name = "ChatGPT"
-        execute_query_fetch_all(self.evadb,f"DROP UDF IF EXISTS {udf_name};")
+        execute_query_fetch_all(self.evadb, f"DROP UDF IF EXISTS {udf_name};")
 
         with self.assertRaises(
             Exception,
