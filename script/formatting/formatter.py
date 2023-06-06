@@ -53,6 +53,7 @@ EVA_TEST_DIR = os.path.join(EVA_DIR, "test")
 EVA_SCRIPT_DIR = os.path.join(EVA_DIR, "script")
 EVA_NOTEBOOKS_DIR = os.path.join(EVA_DIR, "tutorials")
 EVA_DOCS_DIR = os.path.join(EVA_DIR, "docs")
+EVA_EXAMPLES_DIR = os.path.join(EVA_DIR, "examples")
 
 FORMATTING_DIR = os.path.join(EVA_SCRIPT_DIR, "formatting")
 PYLINTRC = os.path.join(FORMATTING_DIR, "pylintrc")
@@ -61,6 +62,7 @@ PYLINTRC = os.path.join(FORMATTING_DIR, "pylintrc")
 DEFAULT_DIRS = []
 DEFAULT_DIRS.append(EVA_SRC_DIR)
 DEFAULT_DIRS.append(EVA_TEST_DIR)
+DEFAULT_DIRS.append(EVA_EXAMPLES_DIR)
 
 IGNORE_FILES = ["version.py"]
 
@@ -458,6 +460,10 @@ if __name__ == "__main__":
         subprocess.check_output("codespell eva/*.md", 
                 shell=True, 
                 universal_newlines=True)
+        
+        for elem in Path(EVA_EXAMPLES_DIR).rglob('*.*'):
+            if elem.suffix == ".py":
+                os.system(f"aspell --lang=en --personal='{ignored_words_file}' check {elem}")
 
         for elem in Path(EVA_SRC_DIR).rglob('*.*'):
             if elem.suffix == ".py":
