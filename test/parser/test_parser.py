@@ -419,7 +419,7 @@ class ParserTests(unittest.TestCase):
         # sample_freq
         self.assertEqual(
             select_stmt.groupby_clause,
-            ConstantValueExpression("8f", v_type=ColumnType.TEXT),
+            ConstantValueExpression("8 frames", v_type=ColumnType.TEXT),
         )
 
     def test_select_statement_orderby_class(self):
