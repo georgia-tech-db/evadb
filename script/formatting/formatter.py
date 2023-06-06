@@ -275,6 +275,7 @@ def check_notebook_format(notebook_file):
                 break
 
     if contains_colab_link is False:
+        LOG.error(f"ERROR: Notebook {notebook_file} does not contain correct Colab link -- update the link.")
         sys.exit(1)
 
     return True

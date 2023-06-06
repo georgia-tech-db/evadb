@@ -56,7 +56,9 @@ minimal_requirement = [
     "nest_asyncio",
     "langchain",
     "pymupdf",
-    "pdfminer.six"
+    "pdfminer.six",
+    "sentence-transformers"
+
 ]
 
 formatter_libs = ["black>=23.1.0", "isort>=5.10.1"]
