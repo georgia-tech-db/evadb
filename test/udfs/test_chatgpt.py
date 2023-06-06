@@ -23,9 +23,9 @@ import openai
 import pandas as pd
 from mock import patch
 
-from eva.configuration.configuration_manager import ConfigurationManager
-from eva.models.storage.batch import Batch
-from eva.server.command_handler import execute_query_fetch_all
+from evadb.configuration.configuration_manager import ConfigurationManager
+from evadb.models.storage.batch import Batch
+from evadb.server.command_handler import execute_query_fetch_all
 
 
 def create_dummy_csv_file(config) -> str:

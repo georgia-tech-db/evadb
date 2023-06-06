@@ -17,11 +17,11 @@ from collections import deque
 from typing import TYPE_CHECKING, Any, Generator, Iterable, List, TypeVar
 
 if TYPE_CHECKING:
-    from eva.catalog.catalog_manager import CatalogManager
-from eva.configuration.configuration_manager import ConfigurationManager
-from eva.database import EVADatabase
-from eva.models.storage.batch import Batch
-from eva.plan_nodes.abstract_plan import AbstractPlan
+    from evadb.catalog.catalog_manager import CatalogManager
+from evadb.configuration.configuration_manager import ConfigurationManager
+from evadb.database import EVADatabase
+from evadb.models.storage.batch import Batch
+from evadb.plan_nodes.abstract_plan import AbstractPlan
 
 AbstractExecutor = TypeVar("AbstractExecutor")
 

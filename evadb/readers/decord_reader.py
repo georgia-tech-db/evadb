@@ -16,12 +16,12 @@ from typing import Dict, Iterator
 
 import numpy as np
 
-from eva.catalog.catalog_type import VideoColumnName
-from eva.constants import AUDIORATE, IFRAMES
-from eva.expression.abstract_expression import AbstractExpression
-from eva.expression.expression_utils import extract_range_list_from_predicate
-from eva.readers.abstract_reader import AbstractReader
-from eva.utils.logging_manager import logger
+from evadb.catalog.catalog_type import VideoColumnName
+from evadb.constants import AUDIORATE, IFRAMES
+from evadb.expression.abstract_expression import AbstractExpression
+from evadb.expression.expression_utils import extract_range_list_from_predicate
+from evadb.readers.abstract_reader import AbstractReader
+from evadb.utils.logging_manager import logger
 
 # Lazy import to avoid torch init failures
 _decord = None

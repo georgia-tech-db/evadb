@@ -27,7 +27,7 @@ THIS_DIR = dirname(__file__)
 EVA_CODE_DIR = abspath(join(THIS_DIR, ".."))
 sys.path.append(EVA_CODE_DIR)
 
-from eva.server.server import EvaServer  # noqa: E402
+from evadb.server.server import EvaServer  # noqa: E402
 
 
 async def start_eva_server(

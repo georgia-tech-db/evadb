@@ -16,7 +16,7 @@ import unittest
 
 from mock import patch
 
-from eva.eva_server import main, start_eva_server
+from evadb.eva_server import main, start_eva_server
 
 
 class EVAServerTest(unittest.IsolatedAsyncioTestCase):

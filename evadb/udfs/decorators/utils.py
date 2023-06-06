@@ -14,8 +14,8 @@
 # limitations under the License.
 from typing import List, Type
 
-from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
-from eva.udfs.abstract.abstract_udf import AbstractUDF
+from evadb.catalog.models.udf_io_catalog import UdfIOCatalogEntry
+from evadb.udfs.abstract.abstract_udf import AbstractUDF
 
 
 def load_io_from_udf_decorators(

@@ -17,7 +17,7 @@ from typing import List
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.exc import NoResultFound
 
-from eva.catalog.models.base_model import BaseModel
+from evadb.catalog.models.base_model import BaseModel
 
 
 class BaseService:

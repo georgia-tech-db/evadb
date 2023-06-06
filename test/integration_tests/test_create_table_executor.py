@@ -25,10 +25,10 @@ from test.util import (
 import pandas as pd
 import pytest
 
-from eva.configuration.constants import EVA_ROOT_DIR
-from eva.executor.executor_utils import ExecutorError
-from eva.models.storage.batch import Batch
-from eva.server.command_handler import execute_query_fetch_all
+from evadb.configuration.constants import EVA_ROOT_DIR
+from evadb.executor.executor_utils import ExecutorError
+from evadb.models.storage.batch import Batch
+from evadb.server.command_handler import execute_query_fetch_all
 
 NUM_FRAMES = 10
 

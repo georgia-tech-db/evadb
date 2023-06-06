@@ -15,17 +15,17 @@
 import asyncio
 from typing import Iterator, Optional
 
-from eva.binder.statement_binder import StatementBinder
-from eva.binder.statement_binder_context import StatementBinderContext
-from eva.database import EVADatabase
-from eva.executor.plan_executor import PlanExecutor
-from eva.models.server.response import Response, ResponseStatus
-from eva.models.storage.batch import Batch
-from eva.optimizer.plan_generator import PlanGenerator
-from eva.optimizer.statement_to_opr_converter import StatementToPlanConverter
-from eva.parser.parser import Parser
-from eva.utils.logging_manager import logger
-from eva.utils.stats import Timer
+from evadb.binder.statement_binder import StatementBinder
+from evadb.binder.statement_binder_context import StatementBinderContext
+from evadb.database import EVADatabase
+from evadb.executor.plan_executor import PlanExecutor
+from evadb.models.server.response import Response, ResponseStatus
+from evadb.models.storage.batch import Batch
+from evadb.optimizer.plan_generator import PlanGenerator
+from evadb.optimizer.statement_to_opr_converter import StatementToPlanConverter
+from evadb.parser.parser import Parser
+from evadb.utils.logging_manager import logger
+from evadb.utils.stats import Timer
 
 
 def execute_query(

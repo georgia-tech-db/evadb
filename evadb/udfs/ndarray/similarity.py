@@ -15,7 +15,7 @@
 import faiss
 import pandas as pd
 
-from eva.udfs.abstract.abstract_udf import AbstractUDF
+from evadb.udfs.abstract.abstract_udf import AbstractUDF
 
 
 class Similarity(AbstractUDF):

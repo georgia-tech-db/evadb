@@ -26,20 +26,20 @@ import pandas as pd
 import pytest
 from mock import MagicMock, patch
 
-from eva.configuration.constants import EVA_ROOT_DIR
-from eva.expression.comparison_expression import ComparisonExpression
-from eva.models.storage.batch import Batch
-from eva.optimizer.plan_generator import PlanGenerator
-from eva.optimizer.rules.rules import (
+from evadb.configuration.constants import EVA_ROOT_DIR
+from evadb.expression.comparison_expression import ComparisonExpression
+from evadb.models.storage.batch import Batch
+from evadb.optimizer.plan_generator import PlanGenerator
+from evadb.optimizer.rules.rules import (
     PushDownFilterThroughApplyAndMerge,
     PushDownFilterThroughJoin,
     ReorderPredicates,
     XformLateralJoinToLinearFlow,
 )
-from eva.optimizer.rules.rules_manager import RulesManager, disable_rules
-from eva.plan_nodes.predicate_plan import PredicatePlan
-from eva.server.command_handler import execute_query_fetch_all
-from eva.utils.stats import Timer
+from evadb.optimizer.rules.rules_manager import RulesManager, disable_rules
+from evadb.plan_nodes.predicate_plan import PredicatePlan
+from evadb.server.command_handler import execute_query_fetch_all
+from evadb.utils.stats import Timer
 
 
 @pytest.mark.notparallel

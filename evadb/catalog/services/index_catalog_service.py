@@ -17,11 +17,11 @@ import os
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.exc import NoResultFound
 
-from eva.catalog.catalog_type import VectorStoreType
-from eva.catalog.models.index_catalog import IndexCatalog, IndexCatalogEntry
-from eva.catalog.models.utils import ColumnCatalogEntry
-from eva.catalog.services.base_service import BaseService
-from eva.utils.logging_manager import logger
+from evadb.catalog.catalog_type import VectorStoreType
+from evadb.catalog.models.index_catalog import IndexCatalog, IndexCatalogEntry
+from evadb.catalog.models.utils import ColumnCatalogEntry
+from evadb.catalog.services.base_service import BaseService
+from evadb.utils.logging_manager import logger
 
 
 class IndexCatalogService(BaseService):

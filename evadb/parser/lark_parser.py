@@ -16,7 +16,7 @@ import os
 
 from lark import Lark
 
-from eva.parser.lark_visitor import LarkInterpreter
+from evadb.parser.lark_visitor import LarkInterpreter
 
 
 class LarkParser(object):

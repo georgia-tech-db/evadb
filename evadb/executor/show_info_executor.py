@@ -14,12 +14,12 @@
 # limitations under the License.
 import pandas as pd
 
-from eva.catalog.catalog_type import TableType
-from eva.database import EVADatabase
-from eva.executor.abstract_executor import AbstractExecutor
-from eva.models.storage.batch import Batch
-from eva.parser.types import ShowType
-from eva.plan_nodes.show_info_plan import ShowInfoPlan
+from evadb.catalog.catalog_type import TableType
+from evadb.database import EVADatabase
+from evadb.executor.abstract_executor import AbstractExecutor
+from evadb.models.storage.batch import Batch
+from evadb.parser.types import ShowType
+from evadb.plan_nodes.show_info_plan import ShowInfoPlan
 
 
 class ShowInfoExecutor(AbstractExecutor):

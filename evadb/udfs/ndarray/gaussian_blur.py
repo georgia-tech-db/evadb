@@ -16,10 +16,10 @@ import cv2
 import numpy as np
 import pandas as pd
 
-from eva.catalog.catalog_type import NdArrayType
-from eva.udfs.abstract.abstract_udf import AbstractUDF
-from eva.udfs.decorators.decorators import forward, setup
-from eva.udfs.decorators.io_descriptors.data_types import PandasDataframe
+from evadb.catalog.catalog_type import NdArrayType
+from evadb.udfs.abstract.abstract_udf import AbstractUDF
+from evadb.udfs.decorators.decorators import forward, setup
+from evadb.udfs.decorators.io_descriptors.data_types import PandasDataframe
 
 
 class GaussianBlur(AbstractUDF):

@@ -14,13 +14,13 @@
 # limitations under the License.
 from typing import Callable, Dict, List, Tuple, Union
 
-from eva.binder.binder_utils import BinderError
-from eva.catalog.models.column_catalog import ColumnCatalogEntry
-from eva.catalog.models.table_catalog import TableCatalogEntry
-from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
-from eva.expression.function_expression import FunctionExpression
-from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.utils.logging_manager import logger
+from evadb.binder.binder_utils import BinderError
+from evadb.catalog.models.column_catalog import ColumnCatalogEntry
+from evadb.catalog.models.table_catalog import TableCatalogEntry
+from evadb.catalog.models.udf_io_catalog import UdfIOCatalogEntry
+from evadb.expression.function_expression import FunctionExpression
+from evadb.expression.tuple_value_expression import TupleValueExpression
+from evadb.utils.logging_manager import logger
 
 CatalogColumnType = Union[ColumnCatalogEntry, UdfIOCatalogEntry]
 

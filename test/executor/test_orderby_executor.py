@@ -19,11 +19,11 @@ import numpy as np
 import pandas as pd
 from mock import MagicMock
 
-from eva.executor.orderby_executor import OrderByExecutor
-from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.models.storage.batch import Batch
-from eva.parser.types import ParserOrderBySortType
-from eva.plan_nodes.orderby_plan import OrderByPlan
+from evadb.executor.orderby_executor import OrderByExecutor
+from evadb.expression.tuple_value_expression import TupleValueExpression
+from evadb.models.storage.batch import Batch
+from evadb.parser.types import ParserOrderBySortType
+from evadb.plan_nodes.orderby_plan import OrderByPlan
 
 
 class OrderByExecutorTest(unittest.TestCase):

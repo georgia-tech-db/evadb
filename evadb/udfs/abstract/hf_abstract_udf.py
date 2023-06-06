@@ -17,9 +17,9 @@ from typing import Any
 import pandas as pd
 from transformers import pipeline
 
-from eva.catalog.models.udf_catalog import UdfCatalogEntry
-from eva.udfs.abstract.abstract_udf import AbstractUDF
-from eva.udfs.gpu_compatible import GPUCompatible
+from evadb.catalog.models.udf_catalog import UdfCatalogEntry
+from evadb.udfs.abstract.abstract_udf import AbstractUDF
+from evadb.udfs.gpu_compatible import GPUCompatible
 
 
 class AbstractHFUdf(AbstractUDF, GPUCompatible):

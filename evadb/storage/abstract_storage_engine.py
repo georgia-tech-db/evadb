@@ -15,10 +15,10 @@
 from abc import ABCMeta, abstractmethod
 from typing import Iterator
 
-from eva.catalog.models.table_catalog import TableCatalogEntry
-from eva.database import EVADatabase
-from eva.expression.abstract_expression import AbstractExpression
-from eva.models.storage.batch import Batch
+from evadb.catalog.models.table_catalog import TableCatalogEntry
+from evadb.database import EVADatabase
+from evadb.expression.abstract_expression import AbstractExpression
+from evadb.models.storage.batch import Batch
 
 
 class AbstractStorageEngine(metaclass=ABCMeta):

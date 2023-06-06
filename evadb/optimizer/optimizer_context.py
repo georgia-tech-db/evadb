@@ -14,14 +14,14 @@
 # limitations under the License.
 import copy
 
-from eva.constants import UNDEFINED_GROUP_ID
-from eva.database import EVADatabase
-from eva.optimizer.cost_model import CostModel
-from eva.optimizer.group_expression import GroupExpression
-from eva.optimizer.memo import Memo
-from eva.optimizer.operators import Dummy, Operator
-from eva.optimizer.optimizer_task_stack import OptimizerTaskStack
-from eva.optimizer.rules.rules_manager import RulesManager
+from evadb.constants import UNDEFINED_GROUP_ID
+from evadb.database import EVADatabase
+from evadb.optimizer.cost_model import CostModel
+from evadb.optimizer.group_expression import GroupExpression
+from evadb.optimizer.memo import Memo
+from evadb.optimizer.operators import Dummy, Operator
+from evadb.optimizer.optimizer_task_stack import OptimizerTaskStack
+from evadb.optimizer.rules.rules_manager import RulesManager
 
 
 class OptimizerContext:

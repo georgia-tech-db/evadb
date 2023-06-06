@@ -16,24 +16,24 @@ import asyncio
 
 import pandas
 
-from eva.configuration.constants import EVA_DATABASE_DIR
-from eva.database import EVADatabase, init_eva_db_instance
-from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.interfaces.relational.relation import EVADBQuery
-from eva.interfaces.relational.utils import execute_statement, try_binding
-from eva.models.server.response import Response
-from eva.models.storage.batch import Batch
-from eva.parser.alias import Alias
-from eva.parser.select_statement import SelectStatement
-from eva.parser.utils import (
+from evadb.configuration.constants import EVA_DATABASE_DIR
+from evadb.database import EVADatabase, init_eva_db_instance
+from evadb.expression.tuple_value_expression import TupleValueExpression
+from evadb.interfaces.relational.relation import EVADBQuery
+from evadb.interfaces.relational.utils import execute_statement, try_binding
+from evadb.models.server.response import Response
+from evadb.models.storage.batch import Batch
+from evadb.parser.alias import Alias
+from evadb.parser.select_statement import SelectStatement
+from evadb.parser.utils import (
     parse_create_udf,
     parse_create_vector_index,
     parse_load,
     parse_query,
     parse_table_clause,
 )
-from eva.udfs.udf_bootstrap_queries import init_builtin_udfs
-from eva.utils.logging_manager import logger
+from evadb.udfs.udf_bootstrap_queries import init_builtin_udfs
+from evadb.utils.logging_manager import logger
 
 
 class EVADBConnection:

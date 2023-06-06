@@ -20,9 +20,9 @@ import pandas as pd
 import torch
 from facenet_pytorch import MTCNN
 
-from eva.udfs.abstract.abstract_udf import AbstractClassifierUDF
-from eva.udfs.gpu_compatible import GPUCompatible
-from eva.utils.logging_manager import logger
+from evadb.udfs.abstract.abstract_udf import AbstractClassifierUDF
+from evadb.udfs.gpu_compatible import GPUCompatible
+from evadb.utils.logging_manager import logger
 
 
 class FaceDetector(AbstractClassifierUDF, GPUCompatible):

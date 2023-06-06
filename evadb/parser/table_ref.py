@@ -16,11 +16,11 @@ from __future__ import annotations
 
 from typing import Union
 
-from eva.expression.abstract_expression import AbstractExpression
-from eva.expression.function_expression import FunctionExpression
-from eva.parser.alias import Alias
-from eva.parser.select_statement import SelectStatement
-from eva.parser.types import JoinType
+from evadb.expression.abstract_expression import AbstractExpression
+from evadb.expression.function_expression import FunctionExpression
+from evadb.parser.alias import Alias
+from evadb.parser.select_statement import SelectStatement
+from evadb.parser.types import JoinType
 
 
 class TableInfo:

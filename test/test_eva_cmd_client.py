@@ -18,8 +18,8 @@ import unittest
 
 from mock import call, patch
 
-from eva.configuration.configuration_manager import ConfigurationManager
-from eva.eva_cmd_client import eva_client, main
+from evadb.configuration.configuration_manager import ConfigurationManager
+from evadb.eva_cmd_client import eva_client, main
 
 
 class CMDClientTest(unittest.TestCase):

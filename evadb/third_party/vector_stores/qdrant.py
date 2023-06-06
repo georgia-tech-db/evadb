@@ -14,7 +14,7 @@
 # limitations under the License.
 from typing import List
 
-from eva.third_party.vector_stores.types import (
+from evadb.third_party.vector_stores.types import (
     FeaturePayload,
     VectorIndexQuery,
     VectorIndexQueryResult,

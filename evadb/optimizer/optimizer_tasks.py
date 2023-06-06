@@ -18,15 +18,15 @@ from abc import abstractmethod
 from enum import IntEnum, auto
 from typing import TYPE_CHECKING, List
 
-from eva.optimizer.binder import Binder
-from eva.optimizer.group import Group
-from eva.optimizer.group_expression import GroupExpression
-from eva.optimizer.property import PropertyType
-from eva.optimizer.rules.rules_base import Rule
-from eva.utils.logging_manager import logger
+from evadb.optimizer.binder import Binder
+from evadb.optimizer.group import Group
+from evadb.optimizer.group_expression import GroupExpression
+from evadb.optimizer.property import PropertyType
+from evadb.optimizer.rules.rules_base import Rule
+from evadb.utils.logging_manager import logger
 
 if TYPE_CHECKING:
-    from eva.optimizer.optimizer_context import OptimizerContext
+    from evadb.optimizer.optimizer_context import OptimizerContext
 
 
 class OptimizerTaskType(IntEnum):

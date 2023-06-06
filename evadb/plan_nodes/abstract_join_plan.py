@@ -14,10 +14,10 @@
 # limitations under the License.
 """Abstract class for all the join planners
 """
-from eva.expression.abstract_expression import AbstractExpression
-from eva.parser.types import JoinType
-from eva.plan_nodes.abstract_plan import AbstractPlan
-from eva.plan_nodes.types import PlanOprType
+from evadb.expression.abstract_expression import AbstractExpression
+from evadb.parser.types import JoinType
+from evadb.plan_nodes.abstract_plan import AbstractPlan
+from evadb.plan_nodes.types import PlanOprType
 
 
 class AbstractJoin(AbstractPlan):

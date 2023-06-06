@@ -15,8 +15,8 @@
 
 from lark.tree import Tree
 
-from eva.expression.constant_value_expression import ConstantValueExpression
-from eva.parser.types import ParserOrderBySortType
+from evadb.expression.constant_value_expression import ConstantValueExpression
+from evadb.parser.types import ParserOrderBySortType
 
 
 ##################################################################

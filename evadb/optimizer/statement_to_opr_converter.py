@@ -12,8 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from eva.expression.abstract_expression import AbstractExpression
-from eva.optimizer.operators import (
+from evadb.expression.abstract_expression import AbstractExpression
+from evadb.optimizer.operators import (
     LogicalCreate,
     LogicalCreateIndex,
     LogicalCreateMaterializedView,
@@ -39,27 +39,27 @@ from eva.optimizer.operators import (
     LogicalShow,
     LogicalUnion,
 )
-from eva.optimizer.optimizer_utils import (
+from evadb.optimizer.optimizer_utils import (
     column_definition_to_udf_io,
     metadata_definition_to_udf_metadata,
 )
-from eva.parser.create_index_statement import CreateIndexStatement
-from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
-from eva.parser.create_statement import CreateTableStatement
-from eva.parser.create_udf_statement import CreateUDFStatement
-from eva.parser.delete_statement import DeleteTableStatement
-from eva.parser.drop_statement import DropTableStatement
-from eva.parser.drop_udf_statement import DropUDFStatement
-from eva.parser.explain_statement import ExplainStatement
-from eva.parser.insert_statement import InsertTableStatement
-from eva.parser.load_statement import LoadDataStatement
-from eva.parser.rename_statement import RenameTableStatement
-from eva.parser.select_statement import SelectStatement
-from eva.parser.show_statement import ShowStatement
-from eva.parser.statement import AbstractStatement
-from eva.parser.table_ref import TableRef
-from eva.parser.types import UDFType
-from eva.utils.logging_manager import logger
+from evadb.parser.create_index_statement import CreateIndexStatement
+from evadb.parser.create_mat_view_statement import CreateMaterializedViewStatement
+from evadb.parser.create_statement import CreateTableStatement
+from evadb.parser.create_udf_statement import CreateUDFStatement
+from evadb.parser.delete_statement import DeleteTableStatement
+from evadb.parser.drop_statement import DropTableStatement
+from evadb.parser.drop_udf_statement import DropUDFStatement
+from evadb.parser.explain_statement import ExplainStatement
+from evadb.parser.insert_statement import InsertTableStatement
+from evadb.parser.load_statement import LoadDataStatement
+from evadb.parser.rename_statement import RenameTableStatement
+from evadb.parser.select_statement import SelectStatement
+from evadb.parser.show_statement import ShowStatement
+from evadb.parser.statement import AbstractStatement
+from evadb.parser.table_ref import TableRef
+from evadb.parser.types import UDFType
+from evadb.utils.logging_manager import logger
 
 
 class StatementToPlanConverter:

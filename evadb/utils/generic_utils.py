@@ -25,7 +25,7 @@ from typing import List
 
 from aenum import AutoEnum, unique
 
-from eva.utils.logging_manager import logger
+from evadb.utils.logging_manager import logger
 
 
 def validate_kwargs(

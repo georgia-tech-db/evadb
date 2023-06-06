@@ -14,11 +14,11 @@
 # limitations under the License.
 from typing import Iterator
 
-from eva.database import EVADatabase
-from eva.executor.abstract_executor import AbstractExecutor
-from eva.executor.executor_utils import apply_predicate
-from eva.models.storage.batch import Batch
-from eva.plan_nodes.predicate_plan import PredicatePlan
+from evadb.database import EVADatabase
+from evadb.executor.abstract_executor import AbstractExecutor
+from evadb.executor.executor_utils import apply_predicate
+from evadb.models.storage.batch import Batch
+from evadb.plan_nodes.predicate_plan import PredicatePlan
 
 
 class PredicateExecutor(AbstractExecutor):

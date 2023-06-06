@@ -12,15 +12,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from eva.catalog.catalog_type import TableType
-from eva.catalog.models.table_catalog import TableCatalogEntry
-from eva.database import EVADatabase
-from eva.storage.abstract_storage_engine import AbstractStorageEngine
-from eva.storage.document_storage_engine import DocumentStorageEngine
-from eva.storage.image_storage_engine import ImageStorageEngine
-from eva.storage.pdf_storage_engine import PDFStorageEngine
-from eva.storage.sqlite_storage_engine import SQLStorageEngine
-from eva.storage.video_storage_engine import DecordStorageEngine
+from evadb.catalog.catalog_type import TableType
+from evadb.catalog.models.table_catalog import TableCatalogEntry
+from evadb.database import EVADatabase
+from evadb.storage.abstract_storage_engine import AbstractStorageEngine
+from evadb.storage.document_storage_engine import DocumentStorageEngine
+from evadb.storage.image_storage_engine import ImageStorageEngine
+from evadb.storage.pdf_storage_engine import PDFStorageEngine
+from evadb.storage.sqlite_storage_engine import SQLStorageEngine
+from evadb.storage.video_storage_engine import DecordStorageEngine
 
 
 class StorageEngine:

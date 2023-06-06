@@ -14,8 +14,8 @@
 # limitations under the License.
 from __future__ import annotations
 
-from eva.parser.statement import AbstractStatement
-from eva.parser.types import ShowType, StatementType
+from evadb.parser.statement import AbstractStatement
+from evadb.parser.types import ShowType, StatementType
 
 
 class ShowStatement(AbstractStatement):

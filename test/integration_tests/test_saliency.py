@@ -17,9 +17,9 @@ from test.util import shutdown_ray, suffix_pytest_xdist_worker_id_to_dir
 
 import pytest
 
-from eva.configuration.constants import EVA_DATABASE_DIR, EVA_ROOT_DIR
-from eva.interfaces.relational.db import connect
-from eva.server.command_handler import execute_query_fetch_all
+from evadb.configuration.constants import EVA_DATABASE_DIR, EVA_ROOT_DIR
+from evadb.interfaces.relational.db import connect
+from evadb.server.command_handler import execute_query_fetch_all
 
 
 @pytest.mark.notparallel

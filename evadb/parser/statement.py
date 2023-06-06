@@ -14,7 +14,7 @@
 # limitations under the License.
 from copy import deepcopy
 
-from eva.parser.types import StatementType
+from evadb.parser.types import StatementType
 
 
 class AbstractStatement:

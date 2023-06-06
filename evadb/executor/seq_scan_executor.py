@@ -14,11 +14,11 @@
 # limitations under the License.
 from typing import Iterator
 
-from eva.database import EVADatabase
-from eva.executor.abstract_executor import AbstractExecutor
-from eva.executor.executor_utils import apply_predicate, apply_project
-from eva.models.storage.batch import Batch
-from eva.plan_nodes.seq_scan_plan import SeqScanPlan
+from evadb.database import EVADatabase
+from evadb.executor.abstract_executor import AbstractExecutor
+from evadb.executor.executor_utils import apply_predicate, apply_project
+from evadb.models.storage.batch import Batch
+from evadb.plan_nodes.seq_scan_plan import SeqScanPlan
 
 
 class SequentialScanExecutor(AbstractExecutor):

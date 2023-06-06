@@ -15,7 +15,7 @@
 import pandas as pd
 from thefuzz import fuzz
 
-from eva.udfs.abstract.abstract_udf import AbstractUDF
+from evadb.udfs.abstract.abstract_udf import AbstractUDF
 
 
 class FuzzDistance(AbstractUDF):

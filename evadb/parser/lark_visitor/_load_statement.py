@@ -14,8 +14,8 @@
 # limitations under the License.
 from lark.tree import Tree
 
-from eva.parser.load_statement import LoadDataStatement
-from eva.parser.types import FileFormatType
+from evadb.parser.load_statement import LoadDataStatement
+from evadb.parser.types import FileFormatType
 
 
 class Load:

@@ -19,11 +19,11 @@ import os
 import openai
 import pandas as pd
 
-from eva.catalog.catalog_type import NdArrayType
-from eva.configuration.configuration_manager import ConfigurationManager
-from eva.udfs.abstract.abstract_udf import AbstractUDF
-from eva.udfs.decorators.decorators import forward, setup
-from eva.udfs.decorators.io_descriptors.data_types import PandasDataframe
+from evadb.catalog.catalog_type import NdArrayType
+from evadb.configuration.configuration_manager import ConfigurationManager
+from evadb.udfs.abstract.abstract_udf import AbstractUDF
+from evadb.udfs.decorators.decorators import forward, setup
+from evadb.udfs.decorators.io_descriptors.data_types import PandasDataframe
 
 _VALID_CHAT_COMPLETION_MODEL = [
     "gpt-4",

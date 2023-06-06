@@ -31,7 +31,7 @@ except ImportError:
 import torch.nn as nn
 import torchvision
 
-from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
+from evadb.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
 
 
 class ASLActionRecognition(PytorchAbstractClassifierUDF):

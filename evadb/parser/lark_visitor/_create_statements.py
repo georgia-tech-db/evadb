@@ -15,17 +15,17 @@
 
 from lark import Tree
 
-from eva.catalog.catalog_type import ColumnType, NdArrayType, VectorStoreType
-from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.parser.create_index_statement import CreateIndexStatement
-from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
-from eva.parser.create_statement import (
+from evadb.catalog.catalog_type import ColumnType, NdArrayType, VectorStoreType
+from evadb.expression.tuple_value_expression import TupleValueExpression
+from evadb.parser.create_index_statement import CreateIndexStatement
+from evadb.parser.create_mat_view_statement import CreateMaterializedViewStatement
+from evadb.parser.create_statement import (
     ColConstraintInfo,
     ColumnDefinition,
     CreateTableStatement,
 )
-from eva.parser.table_ref import TableRef
-from eva.parser.types import ColumnConstraintEnum
+from evadb.parser.table_ref import TableRef
+from evadb.parser.types import ColumnConstraintEnum
 
 
 ##################################################################

@@ -16,7 +16,7 @@ from typing import Dict, Iterator
 
 import cv2
 
-from eva.readers.abstract_reader import AbstractReader
+from evadb.readers.abstract_reader import AbstractReader
 
 
 class CVImageReader(AbstractReader):

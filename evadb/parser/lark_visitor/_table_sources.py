@@ -15,11 +15,11 @@
 
 from lark import Token, Tree
 
-from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.parser.select_statement import SelectStatement
-from eva.parser.table_ref import Alias, JoinNode, TableRef, TableValuedExpression
-from eva.parser.types import JoinType
-from eva.utils.logging_manager import logger
+from evadb.expression.tuple_value_expression import TupleValueExpression
+from evadb.parser.select_statement import SelectStatement
+from evadb.parser.table_ref import Alias, JoinNode, TableRef, TableValuedExpression
+from evadb.parser.types import JoinType
+from evadb.utils.logging_manager import logger
 
 ##################################################################
 # TABLE SOURCES

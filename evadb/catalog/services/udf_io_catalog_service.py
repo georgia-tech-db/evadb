@@ -17,9 +17,9 @@ from typing import List
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import select
 
-from eva.catalog.models.udf_io_catalog import UdfIOCatalog, UdfIOCatalogEntry
-from eva.catalog.services.base_service import BaseService
-from eva.utils.logging_manager import logger
+from evadb.catalog.models.udf_io_catalog import UdfIOCatalog, UdfIOCatalogEntry
+from evadb.catalog.services.base_service import BaseService
+from evadb.utils.logging_manager import logger
 
 
 class UdfIOCatalogService(BaseService):

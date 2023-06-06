@@ -17,18 +17,18 @@ from enum import IntEnum, auto
 from pathlib import Path
 from typing import Any, List
 
-from eva.catalog.catalog_type import VectorStoreType
-from eva.catalog.models.column_catalog import ColumnCatalogEntry
-from eva.catalog.models.table_catalog import TableCatalogEntry
-from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
-from eva.catalog.models.udf_metadata_catalog import UdfMetadataCatalogEntry
-from eva.expression.abstract_expression import AbstractExpression
-from eva.expression.constant_value_expression import ConstantValueExpression
-from eva.expression.function_expression import FunctionExpression
-from eva.parser.alias import Alias
-from eva.parser.create_statement import ColumnDefinition
-from eva.parser.table_ref import TableInfo, TableRef
-from eva.parser.types import JoinType, ShowType
+from evadb.catalog.catalog_type import VectorStoreType
+from evadb.catalog.models.column_catalog import ColumnCatalogEntry
+from evadb.catalog.models.table_catalog import TableCatalogEntry
+from evadb.catalog.models.udf_io_catalog import UdfIOCatalogEntry
+from evadb.catalog.models.udf_metadata_catalog import UdfMetadataCatalogEntry
+from evadb.expression.abstract_expression import AbstractExpression
+from evadb.expression.constant_value_expression import ConstantValueExpression
+from evadb.expression.function_expression import FunctionExpression
+from evadb.parser.alias import Alias
+from evadb.parser.create_statement import ColumnDefinition
+from evadb.parser.table_ref import TableInfo, TableRef
+from evadb.parser.types import JoinType, ShowType
 
 
 class OperatorType(IntEnum):

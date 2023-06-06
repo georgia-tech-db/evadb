@@ -14,10 +14,10 @@
 # limitations under the License.
 from typing import List
 
-from eva.expression.abstract_expression import AbstractExpression
-from eva.parser.statement import AbstractStatement
-from eva.parser.table_ref import TableRef
-from eva.parser.types import StatementType
+from evadb.expression.abstract_expression import AbstractExpression
+from evadb.parser.statement import AbstractStatement
+from evadb.parser.table_ref import TableRef
+from evadb.parser.types import StatementType
 
 
 class InsertTableStatement(AbstractStatement):

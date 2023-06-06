@@ -14,11 +14,11 @@
 # limitations under the License.
 from typing import Dict, List
 
-from eva.constants import UNDEFINED_GROUP_ID
-from eva.optimizer.group import Group
-from eva.optimizer.group_expression import GroupExpression
-from eva.optimizer.operators import OperatorType
-from eva.utils.logging_manager import logger
+from evadb.constants import UNDEFINED_GROUP_ID
+from evadb.optimizer.group import Group
+from evadb.optimizer.group_expression import GroupExpression
+from evadb.optimizer.operators import OperatorType
+from evadb.utils.logging_manager import logger
 
 
 class Memo:

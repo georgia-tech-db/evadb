@@ -16,14 +16,14 @@ from typing import Iterator
 
 import pandas as pd
 
-from eva.catalog.sql_config import IDENTIFIER_COLUMN
-from eva.database import EVADatabase
-from eva.executor.abstract_executor import AbstractExecutor
-from eva.executor.executor_utils import handle_vector_store_params
-from eva.models.storage.batch import Batch
-from eva.plan_nodes.vector_index_scan_plan import VectorIndexScanPlan
-from eva.third_party.vector_stores.types import VectorIndexQuery
-from eva.third_party.vector_stores.utils import VectorStoreFactory
+from evadb.catalog.sql_config import IDENTIFIER_COLUMN
+from evadb.database import EVADatabase
+from evadb.executor.abstract_executor import AbstractExecutor
+from evadb.executor.executor_utils import handle_vector_store_params
+from evadb.models.storage.batch import Batch
+from evadb.plan_nodes.vector_index_scan_plan import VectorIndexScanPlan
+from evadb.third_party.vector_stores.types import VectorIndexQuery
+from evadb.third_party.vector_stores.utils import VectorStoreFactory
 
 
 # Helper function for getting row_id column alias.

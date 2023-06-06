@@ -14,9 +14,9 @@
 # limitations under the License.
 from typing import Union
 
-from eva.catalog.models.column_catalog import ColumnCatalogEntry
-from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
-from eva.models.storage.batch import Batch
+from evadb.catalog.models.column_catalog import ColumnCatalogEntry
+from evadb.catalog.models.udf_io_catalog import UdfIOCatalogEntry
+from evadb.models.storage.batch import Batch
 
 from .abstract_expression import (
     AbstractExpression,

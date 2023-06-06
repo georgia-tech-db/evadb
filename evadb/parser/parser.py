@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from eva.parser.lark_parser import LarkParser
+from evadb.parser.lark_parser import LarkParser
 
 
 class Parser(object):

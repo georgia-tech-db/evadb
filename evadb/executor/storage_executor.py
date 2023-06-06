@@ -14,14 +14,14 @@
 # limitations under the License.
 from typing import Iterator
 
-from eva.catalog.catalog_type import TableType
-from eva.database import EVADatabase
-from eva.executor.abstract_executor import AbstractExecutor
-from eva.executor.executor_utils import ExecutorError
-from eva.models.storage.batch import Batch
-from eva.plan_nodes.storage_plan import StoragePlan
-from eva.storage.storage_engine import StorageEngine
-from eva.utils.logging_manager import logger
+from evadb.catalog.catalog_type import TableType
+from evadb.database import EVADatabase
+from evadb.executor.abstract_executor import AbstractExecutor
+from evadb.executor.executor_utils import ExecutorError
+from evadb.models.storage.batch import Batch
+from evadb.plan_nodes.storage_plan import StoragePlan
+from evadb.storage.storage_engine import StorageEngine
+from evadb.utils.logging_manager import logger
 
 
 class StorageExecutor(AbstractExecutor):

@@ -16,14 +16,14 @@ import asyncio
 
 import nest_asyncio
 
-from eva.database import EVADatabase
-from eva.optimizer.cost_model import CostModel
-from eva.optimizer.operators import Operator
-from eva.optimizer.optimizer_context import OptimizerContext
-from eva.optimizer.optimizer_task_stack import OptimizerTaskStack
-from eva.optimizer.optimizer_tasks import BottomUpRewrite, OptimizeGroup, TopDownRewrite
-from eva.optimizer.property import PropertyType
-from eva.optimizer.rules.rules_manager import RulesManager
+from evadb.database import EVADatabase
+from evadb.optimizer.cost_model import CostModel
+from evadb.optimizer.operators import Operator
+from evadb.optimizer.optimizer_context import OptimizerContext
+from evadb.optimizer.optimizer_task_stack import OptimizerTaskStack
+from evadb.optimizer.optimizer_tasks import BottomUpRewrite, OptimizeGroup, TopDownRewrite
+from evadb.optimizer.property import PropertyType
+from evadb.optimizer.rules.rules_manager import RulesManager
 
 nest_asyncio.apply()
 

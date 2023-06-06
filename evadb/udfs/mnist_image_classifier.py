@@ -22,7 +22,7 @@ from PIL import Image
 from torch import Tensor
 from torchvision.transforms import Compose, Grayscale, Normalize, ToTensor
 
-from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
+from evadb.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
 
 
 class MnistImageClassifier(PytorchAbstractClassifierUDF):

@@ -17,10 +17,10 @@ from typing import List
 import numpy as np
 import pandas as pd
 
-from eva.catalog.catalog_type import NdArrayType
-from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
-from eva.udfs.decorators.decorators import forward, setup
-from eva.udfs.decorators.io_descriptors.data_types import PandasDataframe, PyTorchTensor
+from evadb.catalog.catalog_type import NdArrayType
+from evadb.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
+from evadb.udfs.decorators.decorators import forward, setup
+from evadb.udfs.decorators.io_descriptors.data_types import PandasDataframe, PyTorchTensor
 
 try:
     from torch import Tensor

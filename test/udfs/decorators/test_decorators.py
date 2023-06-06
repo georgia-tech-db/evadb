@@ -14,9 +14,9 @@
 # limitations under the License.
 import unittest
 
-from eva.catalog.catalog_type import NdArrayType
-from eva.udfs.decorators.decorators import forward, setup
-from eva.udfs.decorators.io_descriptors.data_types import NumpyArray, PandasDataframe
+from evadb.catalog.catalog_type import NdArrayType
+from evadb.udfs.decorators.decorators import forward, setup
+from evadb.udfs.decorators.io_descriptors.data_types import NumpyArray, PandasDataframe
 
 
 class DecoratorTests(unittest.TestCase):

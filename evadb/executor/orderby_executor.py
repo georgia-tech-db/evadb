@@ -14,14 +14,14 @@
 # limitations under the License.
 from typing import Iterator
 
-from eva.database import EVADatabase
-from eva.executor.abstract_executor import AbstractExecutor
-from eva.executor.executor_utils import ExecutorError
-from eva.expression.function_expression import FunctionExpression
-from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.models.storage.batch import Batch
-from eva.parser.types import ParserOrderBySortType
-from eva.plan_nodes.orderby_plan import OrderByPlan
+from evadb.database import EVADatabase
+from evadb.executor.abstract_executor import AbstractExecutor
+from evadb.executor.executor_utils import ExecutorError
+from evadb.expression.function_expression import FunctionExpression
+from evadb.expression.tuple_value_expression import TupleValueExpression
+from evadb.models.storage.batch import Batch
+from evadb.parser.types import ParserOrderBySortType
+from evadb.plan_nodes.orderby_plan import OrderByPlan
 
 
 class OrderByExecutor(AbstractExecutor):

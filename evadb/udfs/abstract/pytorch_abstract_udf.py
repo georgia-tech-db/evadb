@@ -21,12 +21,12 @@ from PIL import Image
 from torch import Tensor, nn
 from torchvision.transforms import Compose, transforms
 
-from eva.configuration.configuration_manager import ConfigurationManager
-from eva.udfs.abstract.abstract_udf import (
+from evadb.configuration.configuration_manager import ConfigurationManager
+from evadb.udfs.abstract.abstract_udf import (
     AbstractClassifierUDF,
     AbstractTransformationUDF,
 )
-from eva.udfs.gpu_compatible import GPUCompatible
+from evadb.udfs.gpu_compatible import GPUCompatible
 
 
 class PytorchAbstractClassifierUDF(AbstractClassifierUDF, nn.Module, GPUCompatible):

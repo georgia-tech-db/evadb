@@ -14,9 +14,9 @@
 # limitations under the License.
 from lark.tree import Tree
 
-from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.parser.insert_statement import InsertTableStatement
-from eva.parser.table_ref import TableRef
+from evadb.expression.tuple_value_expression import TupleValueExpression
+from evadb.parser.insert_statement import InsertTableStatement
+from evadb.parser.table_ref import TableRef
 
 
 ##################################################################

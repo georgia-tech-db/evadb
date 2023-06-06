@@ -14,10 +14,10 @@
 # limitations under the License.
 from typing import Iterator
 
-from eva.database import EVADatabase
-from eva.executor.abstract_executor import AbstractExecutor
-from eva.models.storage.batch import Batch
-from eva.plan_nodes.pp_plan import PPScanPlan
+from evadb.database import EVADatabase
+from evadb.executor.abstract_executor import AbstractExecutor
+from evadb.models.storage.batch import Batch
+from evadb.plan_nodes.pp_plan import PPScanPlan
 
 
 class PPExecutor(AbstractExecutor):

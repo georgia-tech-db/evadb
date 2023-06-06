@@ -24,7 +24,7 @@ except ImportError:
     raise ImportError(
         f"torchvision>=0.14.0 is required to use MVITActionRecognition, found {torchvision.__version__}"
     )
-from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
+from evadb.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
 
 
 class MVITActionRecognition(PytorchAbstractClassifierUDF):

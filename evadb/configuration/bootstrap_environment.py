@@ -19,7 +19,7 @@ from typing import Union
 
 import yaml
 
-from eva.configuration.constants import (
+from evadb.configuration.constants import (
     CACHE_DIR,
     DB_DEFAULT_NAME,
     EVA_CONFIG_FILE,
@@ -29,7 +29,7 @@ from eva.configuration.constants import (
     TMP_DIR,
     UDF_DIR,
 )
-from eva.utils.logging_manager import logger as eva_logger
+from evadb.utils.logging_manager import logger as eva_logger
 
 
 def get_base_config(eva_installation_dir: Path) -> Path:

@@ -14,7 +14,7 @@
 # limitations under the License.
 from lark import Tree
 
-from eva.parser.explain_statement import ExplainStatement
+from evadb.parser.explain_statement import ExplainStatement
 
 
 class Explain:

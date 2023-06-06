@@ -16,7 +16,7 @@
 import time
 from dataclasses import dataclass
 
-from eva.utils.logging_manager import logger
+from evadb.utils.logging_manager import logger
 
 
 class Timer:

@@ -16,9 +16,9 @@ import os
 import random
 from typing import List
 
-from eva.configuration.configuration_manager import ConfigurationManager
-from eva.constants import NO_GPU
-from eva.utils.generic_utils import get_gpu_count, is_gpu_available
+from evadb.configuration.configuration_manager import ConfigurationManager
+from evadb.constants import NO_GPU
+from evadb.utils.generic_utils import get_gpu_count, is_gpu_available
 
 
 class Context:

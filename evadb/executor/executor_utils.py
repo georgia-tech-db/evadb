@@ -20,16 +20,16 @@ from typing import TYPE_CHECKING, Generator, List
 import cv2
 
 if TYPE_CHECKING:
-    from eva.catalog.catalog_manager import CatalogManager
+    from evadb.catalog.catalog_manager import CatalogManager
 
-from eva.catalog.catalog_type import VectorStoreType
-from eva.expression.abstract_expression import AbstractExpression
-from eva.expression.function_expression import FunctionExpression
-from eva.models.storage.batch import Batch
-from eva.parser.table_ref import TableInfo
-from eva.parser.types import FileFormatType
-from eva.readers.document.registry import SUPPORTED_TYPES
-from eva.utils.logging_manager import logger
+from evadb.catalog.catalog_type import VectorStoreType
+from evadb.expression.abstract_expression import AbstractExpression
+from evadb.expression.function_expression import FunctionExpression
+from evadb.models.storage.batch import Batch
+from evadb.parser.table_ref import TableInfo
+from evadb.parser.types import FileFormatType
+from evadb.readers.document.registry import SUPPORTED_TYPES
+from evadb.utils.logging_manager import logger
 
 
 class ExecutorError(Exception):

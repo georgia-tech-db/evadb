@@ -12,9 +12,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from eva.catalog.catalog_utils import get_metadata_entry_or_val
-from eva.catalog.models.udf_catalog import UdfCatalogEntry
-from eva.third_party.huggingface.create import MODEL_FOR_TASK
+from evadb.catalog.catalog_utils import get_metadata_entry_or_val
+from evadb.catalog.models.udf_catalog import UdfCatalogEntry
+from evadb.third_party.huggingface.create import MODEL_FOR_TASK
 
 
 def assign_hf_udf(udf_obj: UdfCatalogEntry):

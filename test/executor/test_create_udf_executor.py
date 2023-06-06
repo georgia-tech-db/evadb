@@ -16,9 +16,9 @@ import unittest
 
 from mock import MagicMock, patch
 
-from eva.catalog.catalog_type import NdArrayType
-from eva.executor.create_udf_executor import CreateUDFExecutor
-from eva.udfs.decorators.io_descriptors.data_types import PandasDataframe
+from evadb.catalog.catalog_type import NdArrayType
+from evadb.executor.create_udf_executor import CreateUDFExecutor
+from evadb.udfs.decorators.io_descriptors.data_types import PandasDataframe
 
 
 class CreateUdfExecutorTest(unittest.TestCase):

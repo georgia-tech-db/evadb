@@ -12,11 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from eva.catalog.models.table_catalog import TableCatalogEntry
-from eva.expression.abstract_expression import AbstractExpression
-from eva.parser.table_ref import TableRef
-from eva.plan_nodes.abstract_plan import AbstractPlan
-from eva.plan_nodes.types import PlanOprType
+from evadb.catalog.models.table_catalog import TableCatalogEntry
+from evadb.expression.abstract_expression import AbstractExpression
+from evadb.parser.table_ref import TableRef
+from evadb.plan_nodes.abstract_plan import AbstractPlan
+from evadb.plan_nodes.types import PlanOprType
 
 
 class StoragePlan(AbstractPlan):

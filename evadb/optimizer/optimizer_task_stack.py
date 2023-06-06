@@ -14,7 +14,7 @@
 # limitations under the License.
 from collections import deque
 
-from eva.optimizer.optimizer_tasks import OptimizerTask
+from evadb.optimizer.optimizer_tasks import OptimizerTask
 
 
 class OptimizerTaskStack:

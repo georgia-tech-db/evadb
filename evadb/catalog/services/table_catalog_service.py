@@ -16,12 +16,12 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import select
 
-from eva.catalog.catalog_type import TableType
-from eva.catalog.models.table_catalog import TableCatalog, TableCatalogEntry
-from eva.catalog.services.base_service import BaseService
-from eva.catalog.services.column_catalog_service import ColumnCatalogService
-from eva.utils.errors import CatalogError
-from eva.utils.logging_manager import logger
+from evadb.catalog.catalog_type import TableType
+from evadb.catalog.models.table_catalog import TableCatalog, TableCatalogEntry
+from evadb.catalog.services.base_service import BaseService
+from evadb.catalog.services.column_catalog_service import ColumnCatalogService
+from evadb.utils.errors import CatalogError
+from evadb.utils.logging_manager import logger
 
 
 class TableCatalogService(BaseService):

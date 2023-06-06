@@ -15,10 +15,10 @@
 from pathlib import Path
 from typing import List
 
-from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
-from eva.catalog.models.udf_metadata_catalog import UdfMetadataCatalogEntry
-from eva.plan_nodes.abstract_plan import AbstractPlan
-from eva.plan_nodes.types import PlanOprType
+from evadb.catalog.models.udf_io_catalog import UdfIOCatalogEntry
+from evadb.catalog.models.udf_metadata_catalog import UdfMetadataCatalogEntry
+from evadb.plan_nodes.abstract_plan import AbstractPlan
+from evadb.plan_nodes.types import PlanOprType
 
 
 class CreateUDFPlan(AbstractPlan):

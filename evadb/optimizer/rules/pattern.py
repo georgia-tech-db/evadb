@@ -14,7 +14,7 @@
 # limitations under the License.
 from __future__ import annotations
 
-from eva.optimizer.operators import OperatorType
+from evadb.optimizer.operators import OperatorType
 
 
 class Pattern:

@@ -14,7 +14,7 @@
 # limitations under the License.
 from typing import Dict, Iterator
 
-from eva.readers.abstract_reader import AbstractReader
+from evadb.readers.abstract_reader import AbstractReader
 
 
 class PDFReader(AbstractReader):

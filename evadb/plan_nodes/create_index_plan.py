@@ -14,12 +14,12 @@
 # limitations under the License.
 from typing import List
 
-from eva.catalog.catalog_type import VectorStoreType
-from eva.expression.function_expression import FunctionExpression
-from eva.parser.create_statement import ColumnDefinition
-from eva.parser.table_ref import TableRef
-from eva.plan_nodes.abstract_plan import AbstractPlan
-from eva.plan_nodes.types import PlanOprType
+from evadb.catalog.catalog_type import VectorStoreType
+from evadb.expression.function_expression import FunctionExpression
+from evadb.parser.create_statement import ColumnDefinition
+from evadb.parser.table_ref import TableRef
+from evadb.plan_nodes.abstract_plan import AbstractPlan
+from evadb.plan_nodes.types import PlanOprType
 
 
 class CreateIndexPlan(AbstractPlan):

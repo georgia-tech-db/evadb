@@ -16,9 +16,9 @@ from typing import Dict, List
 
 from sqlalchemy import TEXT, Column, Float, Integer, LargeBinary
 
-from eva.catalog.catalog_type import ColumnType
-from eva.catalog.models.utils import ColumnCatalogEntry
-from eva.utils.logging_manager import logger
+from evadb.catalog.catalog_type import ColumnType
+from evadb.catalog.models.utils import ColumnCatalogEntry
+from evadb.utils.logging_manager import logger
 
 
 class SchemaUtils(object):

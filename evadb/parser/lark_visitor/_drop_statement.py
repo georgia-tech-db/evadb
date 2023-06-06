@@ -14,7 +14,7 @@
 # limitations under the License.
 from lark import Tree
 
-from eva.parser.drop_statement import DropTableStatement
+from evadb.parser.drop_statement import DropTableStatement
 
 
 class DropTable:

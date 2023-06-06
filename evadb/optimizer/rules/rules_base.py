@@ -19,9 +19,9 @@ from enum import Flag, IntEnum, auto
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from eva.optimizer.optimizer_context import OptimizerContext
+    from evadb.optimizer.optimizer_context import OptimizerContext
 
-from eva.optimizer.operators import Operator
+from evadb.optimizer.operators import Operator
 
 
 class RuleType(Flag):

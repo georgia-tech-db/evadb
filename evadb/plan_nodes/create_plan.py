@@ -14,10 +14,10 @@
 # limitations under the License.
 from typing import List
 
-from eva.catalog.models.column_catalog import ColumnCatalogEntry
-from eva.parser.table_ref import TableInfo
-from eva.plan_nodes.abstract_plan import AbstractPlan
-from eva.plan_nodes.types import PlanOprType
+from evadb.catalog.models.column_catalog import ColumnCatalogEntry
+from evadb.parser.table_ref import TableInfo
+from evadb.plan_nodes.abstract_plan import AbstractPlan
+from evadb.plan_nodes.types import PlanOprType
 
 
 class CreatePlan(AbstractPlan):

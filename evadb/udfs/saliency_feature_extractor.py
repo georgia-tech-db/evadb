@@ -19,11 +19,11 @@ import torchvision
 from PIL import Image
 from torchvision.transforms import Compose, Resize, ToTensor
 
-from eva.catalog.catalog_type import NdArrayType
-from eva.udfs.abstract.abstract_udf import AbstractUDF
-from eva.udfs.decorators.decorators import forward, setup
-from eva.udfs.decorators.io_descriptors.data_types import PandasDataframe
-from eva.udfs.gpu_compatible import GPUCompatible
+from evadb.catalog.catalog_type import NdArrayType
+from evadb.udfs.abstract.abstract_udf import AbstractUDF
+from evadb.udfs.decorators.decorators import forward, setup
+from evadb.udfs.decorators.io_descriptors.data_types import PandasDataframe
+from evadb.udfs.gpu_compatible import GPUCompatible
 
 
 class SaliencyFeatureExtractor(AbstractUDF, GPUCompatible):

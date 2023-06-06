@@ -17,9 +17,9 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from eva.catalog.catalog_type import ColumnType
-from eva.expression.abstract_expression import AbstractExpression, ExpressionType
-from eva.models.storage.batch import Batch
+from evadb.catalog.catalog_type import ColumnType
+from evadb.expression.abstract_expression import AbstractExpression, ExpressionType
+from evadb.models.storage.batch import Batch
 
 
 class ConstantValueExpression(AbstractExpression):

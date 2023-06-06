@@ -16,16 +16,16 @@ from pathlib import Path
 
 import pandas as pd
 
-from eva.catalog.sql_config import IDENTIFIER_COLUMN
-from eva.database import EVADatabase
-from eva.executor.abstract_executor import AbstractExecutor
-from eva.executor.executor_utils import ExecutorError, handle_vector_store_params
-from eva.models.storage.batch import Batch
-from eva.plan_nodes.create_index_plan import CreateIndexPlan
-from eva.storage.storage_engine import StorageEngine
-from eva.third_party.vector_stores.types import FeaturePayload
-from eva.third_party.vector_stores.utils import VectorStoreFactory
-from eva.utils.logging_manager import logger
+from evadb.catalog.sql_config import IDENTIFIER_COLUMN
+from evadb.database import EVADatabase
+from evadb.executor.abstract_executor import AbstractExecutor
+from evadb.executor.executor_utils import ExecutorError, handle_vector_store_params
+from evadb.models.storage.batch import Batch
+from evadb.plan_nodes.create_index_plan import CreateIndexPlan
+from evadb.storage.storage_engine import StorageEngine
+from evadb.third_party.vector_stores.types import FeaturePayload
+from evadb.third_party.vector_stores.utils import VectorStoreFactory
+from evadb.utils.logging_manager import logger
 
 
 class CreateIndexExecutor(AbstractExecutor):

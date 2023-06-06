@@ -12,12 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from eva.database import EVADatabase
-from eva.executor.abstract_executor import AbstractExecutor
-from eva.executor.executor_utils import handle_if_not_exists
-from eva.plan_nodes.create_plan import CreatePlan
-from eva.storage.storage_engine import StorageEngine
-from eva.utils.logging_manager import logger
+from evadb.database import EVADatabase
+from evadb.executor.abstract_executor import AbstractExecutor
+from evadb.executor.executor_utils import handle_if_not_exists
+from evadb.plan_nodes.create_plan import CreatePlan
+from evadb.storage.storage_engine import StorageEngine
+from evadb.utils.logging_manager import logger
 
 
 class CreateExecutor(AbstractExecutor):

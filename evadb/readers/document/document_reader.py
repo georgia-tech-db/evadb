@@ -15,8 +15,8 @@
 from pathlib import Path
 from typing import Dict, Iterator
 
-from eva.readers.abstract_reader import AbstractReader
-from eva.readers.document.registry import _lazy_import_loader
+from evadb.readers.abstract_reader import AbstractReader
+from evadb.readers.document.registry import _lazy_import_loader
 
 
 class DocumentReader(AbstractReader):

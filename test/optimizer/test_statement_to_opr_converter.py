@@ -18,7 +18,7 @@ from test.util import get_all_subclasses
 
 from mock import MagicMock, patch
 
-from eva.optimizer.operators import (
+from evadb.optimizer.operators import (
     Dummy,
     LogicalApplyAndMerge,
     LogicalCreate,
@@ -49,17 +49,17 @@ from eva.optimizer.operators import (
     LogicalVectorIndexScan,
     Operator,
 )
-from eva.optimizer.statement_to_opr_converter import StatementToPlanConverter
-from eva.parser.create_index_statement import CreateIndexStatement
-from eva.parser.create_statement import CreateTableStatement
-from eva.parser.create_udf_statement import CreateUDFStatement
-from eva.parser.drop_statement import DropTableStatement
-from eva.parser.drop_udf_statement import DropUDFStatement
-from eva.parser.explain_statement import ExplainStatement
-from eva.parser.insert_statement import InsertTableStatement
-from eva.parser.rename_statement import RenameTableStatement
-from eva.parser.select_statement import SelectStatement
-from eva.parser.table_ref import TableRef
+from evadb.optimizer.statement_to_opr_converter import StatementToPlanConverter
+from evadb.parser.create_index_statement import CreateIndexStatement
+from evadb.parser.create_statement import CreateTableStatement
+from evadb.parser.create_udf_statement import CreateUDFStatement
+from evadb.parser.drop_statement import DropTableStatement
+from evadb.parser.drop_udf_statement import DropUDFStatement
+from evadb.parser.explain_statement import ExplainStatement
+from evadb.parser.insert_statement import InsertTableStatement
+from evadb.parser.rename_statement import RenameTableStatement
+from evadb.parser.select_statement import SelectStatement
+from evadb.parser.table_ref import TableRef
 
 
 class StatementToOprTest(unittest.TestCase):

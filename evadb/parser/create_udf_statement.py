@@ -15,9 +15,9 @@
 from pathlib import Path
 from typing import List, Tuple
 
-from eva.parser.create_statement import ColumnDefinition
-from eva.parser.statement import AbstractStatement
-from eva.parser.types import StatementType
+from evadb.parser.create_statement import ColumnDefinition
+from evadb.parser.statement import AbstractStatement
+from evadb.parser.types import StatementType
 
 
 class CreateUDFStatement(AbstractStatement):

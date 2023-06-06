@@ -15,11 +15,11 @@
 import numpy as np
 from lark import Tree
 
-from eva.catalog.catalog_type import ColumnType
-from eva.expression.abstract_expression import ExpressionType
-from eva.expression.comparison_expression import ComparisonExpression
-from eva.expression.constant_value_expression import ConstantValueExpression
-from eva.expression.logical_expression import LogicalExpression
+from evadb.catalog.catalog_type import ColumnType
+from evadb.expression.abstract_expression import ExpressionType
+from evadb.expression.comparison_expression import ComparisonExpression
+from evadb.expression.constant_value_expression import ConstantValueExpression
+from evadb.expression.logical_expression import LogicalExpression
 
 
 ##################################################################

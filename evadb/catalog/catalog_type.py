@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from eva.utils.generic_utils import EVAEnum
+from evadb.utils.generic_utils import EVAEnum
 
 
 class Dimension(EVAEnum):

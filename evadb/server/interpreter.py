@@ -19,8 +19,8 @@ from asyncio import StreamReader, StreamWriter
 from collections import deque
 from typing import Dict
 
-from eva.interfaces.relational.db import EVADBConnection
-from eva.utils.logging_manager import logger
+from evadb.interfaces.relational.db import EVADBConnection
+from evadb.utils.logging_manager import logger
 
 # version.py defines the VERSION and VERSION_SHORT variables
 VERSION_DICT: Dict[str, str] = {}

@@ -12,10 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from eva.parser.create_udf_statement import CreateUDFStatement
-from eva.parser.load_statement import LoadDataStatement
-from eva.parser.parser import Parser
-from eva.parser.select_statement import SelectStatement
+from evadb.parser.create_udf_statement import CreateUDFStatement
+from evadb.parser.load_statement import LoadDataStatement
+from evadb.parser.parser import Parser
+from evadb.parser.select_statement import SelectStatement
 
 
 def parse_expression(expr: str):

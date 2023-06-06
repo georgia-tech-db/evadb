@@ -16,9 +16,9 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import select
 
-from eva.catalog.models.udf_cost_catalog import UdfCostCatalog, UdfCostCatalogEntry
-from eva.catalog.services.base_service import BaseService
-from eva.utils.errors import CatalogError
+from evadb.catalog.models.udf_cost_catalog import UdfCostCatalog, UdfCostCatalogEntry
+from evadb.catalog.services.base_service import BaseService
+from evadb.utils.errors import CatalogError
 
 
 class UdfCostCatalogService(BaseService):

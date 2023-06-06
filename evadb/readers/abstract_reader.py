@@ -18,9 +18,9 @@ from typing import Dict, Iterator
 
 import pandas as pd
 
-from eva.models.storage.batch import Batch
-from eva.utils.errors import DatasetFileNotFoundError
-from eva.utils.generic_utils import get_size
+from evadb.models.storage.batch import Batch
+from evadb.utils.errors import DatasetFileNotFoundError
+from evadb.utils.generic_utils import get_size
 
 
 class AbstractReader(metaclass=ABCMeta):

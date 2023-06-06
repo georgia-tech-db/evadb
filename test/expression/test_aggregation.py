@@ -18,10 +18,10 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from eva.expression.abstract_expression import ExpressionType
-from eva.expression.aggregation_expression import AggregationExpression
-from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.models.storage.batch import Batch
+from evadb.expression.abstract_expression import ExpressionType
+from evadb.expression.aggregation_expression import AggregationExpression
+from evadb.expression.tuple_value_expression import TupleValueExpression
+from evadb.models.storage.batch import Batch
 
 
 class AggregationExpressionsTest(unittest.TestCase):

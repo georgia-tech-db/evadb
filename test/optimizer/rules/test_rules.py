@@ -18,15 +18,15 @@ from test.util import create_sample_video, get_evadb_for_testing
 import pytest
 from mock import MagicMock, patch
 
-from eva.catalog.catalog_type import TableType
-from eva.catalog.models.table_catalog import TableCatalogEntry
-from eva.optimizer.operators import (
+from evadb.catalog.catalog_type import TableType
+from evadb.catalog.models.table_catalog import TableCatalogEntry
+from evadb.optimizer.operators import (
     LogicalFilter,
     LogicalGet,
     LogicalJoin,
     LogicalSample,
 )
-from eva.optimizer.rules.rules import (
+from evadb.optimizer.rules.rules import (
     CacheFunctionExpressionInApply,
     CacheFunctionExpressionInFilter,
     CacheFunctionExpressionInProject,
@@ -73,9 +73,9 @@ from eva.optimizer.rules.rules import (
     XformExtractObjectToLinearFlow,
     XformLateralJoinToLinearFlow,
 )
-from eva.optimizer.rules.rules_manager import RulesManager, disable_rules
-from eva.parser.types import JoinType
-from eva.server.command_handler import execute_query_fetch_all
+from evadb.optimizer.rules.rules_manager import RulesManager, disable_rules
+from evadb.parser.types import JoinType
+from evadb.server.command_handler import execute_query_fetch_all
 
 
 @pytest.mark.notparallel

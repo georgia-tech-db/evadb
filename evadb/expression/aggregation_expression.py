@@ -12,12 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from eva.expression.abstract_expression import (
+from evadb.expression.abstract_expression import (
     AbstractExpression,
     ExpressionReturnType,
     ExpressionType,
 )
-from eva.models.storage.batch import Batch
+from evadb.models.storage.batch import Batch
 
 
 class AggregationExpression(AbstractExpression):

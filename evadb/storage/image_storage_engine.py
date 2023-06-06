@@ -15,11 +15,11 @@
 from pathlib import Path
 from typing import Iterator
 
-from eva.catalog.models.table_catalog import TableCatalogEntry
-from eva.database import EVADatabase
-from eva.models.storage.batch import Batch
-from eva.readers.image.opencv_image_reader import CVImageReader
-from eva.storage.abstract_media_storage_engine import AbstractMediaStorageEngine
+from evadb.catalog.models.table_catalog import TableCatalogEntry
+from evadb.database import EVADatabase
+from evadb.models.storage.batch import Batch
+from evadb.readers.image.opencv_image_reader import CVImageReader
+from evadb.storage.abstract_media_storage_engine import AbstractMediaStorageEngine
 
 
 class ImageStorageEngine(AbstractMediaStorageEngine):

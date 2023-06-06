@@ -17,7 +17,7 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from eva.udfs.ndarray.crop import Crop
+from evadb.udfs.ndarray.crop import Crop
 
 
 class CropTests(unittest.TestCase):

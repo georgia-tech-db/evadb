@@ -14,13 +14,13 @@
 # limitations under the License.
 from typing import List, Tuple, Type
 
-from eva.catalog.catalog_type import ColumnType, Dimension, NdArrayType
-from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
-from eva.udfs.decorators.io_descriptors.abstract_types import (
+from evadb.catalog.catalog_type import ColumnType, Dimension, NdArrayType
+from evadb.catalog.models.udf_io_catalog import UdfIOCatalogEntry
+from evadb.udfs.decorators.io_descriptors.abstract_types import (
     IOArgument,
     IOColumnArgument,
 )
-from eva.utils.errors import UDFIODefinitionError
+from evadb.utils.errors import UDFIODefinitionError
 
 
 class NumpyArray(IOColumnArgument):

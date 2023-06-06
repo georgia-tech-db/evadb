@@ -14,9 +14,9 @@
 # limitations under the License.
 from typing import List
 
-from eva.expression.abstract_expression import AbstractExpression
-from eva.plan_nodes.abstract_scan_plan import AbstractScan
-from eva.plan_nodes.types import PlanOprType
+from evadb.expression.abstract_expression import AbstractExpression
+from evadb.plan_nodes.abstract_scan_plan import AbstractScan
+from evadb.plan_nodes.types import PlanOprType
 
 
 class SeqScanPlan(AbstractScan):

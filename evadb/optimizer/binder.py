@@ -15,10 +15,10 @@
 import copy
 import itertools
 
-from eva.optimizer.group_expression import GroupExpression
-from eva.optimizer.memo import Memo
-from eva.optimizer.operators import Dummy, Operator, OperatorType
-from eva.optimizer.rules.pattern import Pattern
+from evadb.optimizer.group_expression import GroupExpression
+from evadb.optimizer.memo import Memo
+from evadb.optimizer.operators import Dummy, Operator, OperatorType
+from evadb.optimizer.rules.pattern import Pattern
 
 
 class Binder:

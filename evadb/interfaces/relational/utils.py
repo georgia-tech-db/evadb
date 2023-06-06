@@ -15,20 +15,20 @@
 import asyncio
 from typing import Callable, List, Union
 
-from eva.binder.statement_binder import StatementBinder
-from eva.binder.statement_binder_context import StatementBinderContext
-from eva.database import EVADatabase
-from eva.executor.plan_executor import PlanExecutor
-from eva.expression.abstract_expression import AbstractExpression
-from eva.expression.constant_value_expression import ConstantValueExpression
-from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.models.storage.batch import Batch
-from eva.optimizer.plan_generator import PlanGenerator
-from eva.optimizer.statement_to_opr_converter import StatementToPlanConverter
-from eva.parser.select_statement import SelectStatement
-from eva.parser.statement import AbstractStatement
-from eva.parser.table_ref import TableRef
-from eva.parser.utils import (
+from evadb.binder.statement_binder import StatementBinder
+from evadb.binder.statement_binder_context import StatementBinderContext
+from evadb.database import EVADatabase
+from evadb.executor.plan_executor import PlanExecutor
+from evadb.expression.abstract_expression import AbstractExpression
+from evadb.expression.constant_value_expression import ConstantValueExpression
+from evadb.expression.tuple_value_expression import TupleValueExpression
+from evadb.models.storage.batch import Batch
+from evadb.optimizer.plan_generator import PlanGenerator
+from evadb.optimizer.statement_to_opr_converter import StatementToPlanConverter
+from evadb.parser.select_statement import SelectStatement
+from evadb.parser.statement import AbstractStatement
+from evadb.parser.table_ref import TableRef
+from evadb.parser.utils import (
     parse_expression,
     parse_lateral_join,
     parse_predicate_expression,

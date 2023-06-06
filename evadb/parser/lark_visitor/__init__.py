@@ -16,19 +16,19 @@ from typing import List, TypeVar
 
 from lark import Tree, visitors
 
-from eva.parser.lark_visitor._common_clauses_ids import CommonClauses
-from eva.parser.lark_visitor._create_statements import CreateTable
-from eva.parser.lark_visitor._delete_statement import Delete
-from eva.parser.lark_visitor._drop_statement import DropTable
-from eva.parser.lark_visitor._explain_statement import Explain
-from eva.parser.lark_visitor._expressions import Expressions
-from eva.parser.lark_visitor._functions import Functions
-from eva.parser.lark_visitor._insert_statements import Insert
-from eva.parser.lark_visitor._load_statement import Load
-from eva.parser.lark_visitor._rename_statement import RenameTable
-from eva.parser.lark_visitor._select_statement import Select
-from eva.parser.lark_visitor._show_statements import Show
-from eva.parser.lark_visitor._table_sources import TableSources
+from evadb.parser.lark_visitor._common_clauses_ids import CommonClauses
+from evadb.parser.lark_visitor._create_statements import CreateTable
+from evadb.parser.lark_visitor._delete_statement import Delete
+from evadb.parser.lark_visitor._drop_statement import DropTable
+from evadb.parser.lark_visitor._explain_statement import Explain
+from evadb.parser.lark_visitor._expressions import Expressions
+from evadb.parser.lark_visitor._functions import Functions
+from evadb.parser.lark_visitor._insert_statements import Insert
+from evadb.parser.lark_visitor._load_statement import Load
+from evadb.parser.lark_visitor._rename_statement import RenameTable
+from evadb.parser.lark_visitor._select_statement import Select
+from evadb.parser.lark_visitor._show_statements import Show
+from evadb.parser.lark_visitor._table_sources import TableSources
 
 # To add new functionality to the parser, create a new file under
 # the lark_visitor directory, and implement a new class which

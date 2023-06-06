@@ -14,15 +14,15 @@
 # limitations under the License.
 import pandas as pd
 
-from eva.database import EVADatabase
-from eva.executor.abstract_executor import AbstractExecutor
-from eva.executor.executor_utils import ExecutorError
-from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.models.storage.batch import Batch
-from eva.plan_nodes.load_data_plan import LoadDataPlan
-from eva.readers.csv_reader import CSVReader
-from eva.storage.storage_engine import StorageEngine
-from eva.utils.logging_manager import logger
+from evadb.database import EVADatabase
+from evadb.executor.abstract_executor import AbstractExecutor
+from evadb.executor.executor_utils import ExecutorError
+from evadb.expression.tuple_value_expression import TupleValueExpression
+from evadb.models.storage.batch import Batch
+from evadb.plan_nodes.load_data_plan import LoadDataPlan
+from evadb.readers.csv_reader import CSVReader
+from evadb.storage.storage_engine import StorageEngine
+from evadb.utils.logging_manager import logger
 
 
 class LoadCSVExecutor(AbstractExecutor):

@@ -16,10 +16,10 @@ from __future__ import annotations
 
 from typing import Dict, List
 
-from eva.constants import UNDEFINED_GROUP_ID
-from eva.optimizer.group_expression import GroupExpression
-from eva.optimizer.property import Property
-from eva.utils.logging_manager import logger
+from evadb.constants import UNDEFINED_GROUP_ID
+from evadb.optimizer.group_expression import GroupExpression
+from evadb.optimizer.property import Property
+from evadb.utils.logging_manager import logger
 
 
 class Winner:

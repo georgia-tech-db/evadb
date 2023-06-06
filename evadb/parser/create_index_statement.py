@@ -14,12 +14,12 @@
 # limitations under the License.
 from typing import List
 
-from eva.catalog.catalog_type import VectorStoreType
-from eva.expression.function_expression import FunctionExpression
-from eva.parser.create_statement import ColumnDefinition
-from eva.parser.statement import AbstractStatement
-from eva.parser.table_ref import TableRef
-from eva.parser.types import StatementType
+from evadb.catalog.catalog_type import VectorStoreType
+from evadb.expression.function_expression import FunctionExpression
+from evadb.parser.create_statement import ColumnDefinition
+from evadb.parser.statement import AbstractStatement
+from evadb.parser.table_ref import TableRef
+from evadb.parser.types import StatementType
 
 
 class CreateIndexStatement(AbstractStatement):

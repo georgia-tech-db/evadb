@@ -17,23 +17,23 @@ from __future__ import annotations
 import re
 from typing import TYPE_CHECKING, List
 
-from eva.catalog.catalog_type import TableType
-from eva.catalog.catalog_utils import (
+from evadb.catalog.catalog_type import TableType
+from evadb.catalog.catalog_utils import (
     get_video_table_column_definitions,
     is_document_table,
     is_string_col,
     is_video_table,
 )
-from eva.expression.function_expression import FunctionExpression
-from eva.parser.alias import Alias
+from evadb.expression.function_expression import FunctionExpression
+from evadb.parser.alias import Alias
 
 if TYPE_CHECKING:
-    from eva.binder.statement_binder_context import StatementBinderContext
-    from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.models.table_catalog import TableCatalogEntry
-from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.parser.table_ref import TableInfo, TableRef
-from eva.utils.logging_manager import logger
+    from evadb.binder.statement_binder_context import StatementBinderContext
+    from evadb.catalog.catalog_manager import CatalogManager
+from evadb.catalog.models.table_catalog import TableCatalogEntry
+from evadb.expression.tuple_value_expression import TupleValueExpression
+from evadb.parser.table_ref import TableInfo, TableRef
+from evadb.utils.logging_manager import logger
 
 
 class BinderError(Exception):

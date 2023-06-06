@@ -14,11 +14,11 @@
 # limitations under the License.
 from typing import List, Tuple
 
-from eva.catalog.catalog_type import ColumnType, NdArrayType
-from eva.parser.select_statement import SelectStatement
-from eva.parser.statement import AbstractStatement
-from eva.parser.table_ref import TableInfo
-from eva.parser.types import StatementType
+from evadb.catalog.catalog_type import ColumnType, NdArrayType
+from evadb.parser.select_statement import SelectStatement
+from evadb.parser.statement import AbstractStatement
+from evadb.parser.table_ref import TableInfo
+from evadb.parser.types import StatementType
 
 
 class ColConstraintInfo:

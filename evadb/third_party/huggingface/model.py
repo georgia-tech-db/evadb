@@ -18,8 +18,8 @@ import decord
 import numpy as np
 from PIL import Image
 
-from eva.udfs.abstract.hf_abstract_udf import AbstractHFUdf
-from eva.utils.generic_utils import EVAEnum
+from evadb.udfs.abstract.hf_abstract_udf import AbstractHFUdf
+from evadb.utils.generic_utils import EVAEnum
 
 
 class HFInputTypes(EVAEnum):

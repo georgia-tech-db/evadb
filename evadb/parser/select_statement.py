@@ -18,11 +18,11 @@ import typing
 from typing import List, Union
 
 if typing.TYPE_CHECKING:
-    from eva.parser.table_ref import TableRef
+    from evadb.parser.table_ref import TableRef
 
-from eva.expression.abstract_expression import AbstractExpression
-from eva.parser.statement import AbstractStatement
-from eva.parser.types import ParserOrderBySortType, StatementType
+from evadb.expression.abstract_expression import AbstractExpression
+from evadb.parser.statement import AbstractStatement
+from evadb.parser.types import ParserOrderBySortType, StatementType
 
 
 class SelectStatement(AbstractStatement):

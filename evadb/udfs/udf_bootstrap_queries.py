@@ -13,9 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from eva.configuration.constants import EVA_INSTALLATION_DIR
-from eva.database import EVADatabase
-from eva.server.command_handler import execute_query_fetch_all
+from evadb.configuration.constants import EVA_INSTALLATION_DIR
+from evadb.database import EVADatabase
+from evadb.server.command_handler import execute_query_fetch_all
 
 NDARRAY_DIR = "ndarray"
 TUTORIALS_DIR = "tutorials"

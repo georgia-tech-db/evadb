@@ -15,8 +15,8 @@
 from abc import ABC, abstractmethod
 from typing import List, Tuple, Type
 
-from eva.catalog.catalog_type import ColumnType, NdArrayType
-from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
+from evadb.catalog.catalog_type import ColumnType, NdArrayType
+from evadb.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 
 
 class IOArgument(ABC):

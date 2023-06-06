@@ -16,9 +16,9 @@ import asyncio
 import string
 from asyncio import StreamReader, StreamWriter
 
-from eva.database import init_eva_db_instance
-from eva.udfs.udf_bootstrap_queries import init_builtin_udfs
-from eva.utils.logging_manager import logger
+from evadb.database import init_eva_db_instance
+from evadb.udfs.udf_bootstrap_queries import init_builtin_udfs
+from evadb.utils.logging_manager import logger
 
 
 class EvaServer:
@@ -91,7 +91,7 @@ class EvaServer:
                     return
 
                 logger.debug("Handle request")
-                from eva.server.command_handler import handle_request
+                from evadb.server.command_handler import handle_request
 
                 asyncio.create_task(handle_request(self._evadb, client_writer, message))
 

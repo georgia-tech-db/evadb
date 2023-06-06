@@ -14,8 +14,8 @@
 # limitations under the License.
 from lark.tree import Tree
 
-from eva.parser.delete_statement import DeleteTableStatement
-from eva.parser.table_ref import TableRef
+from evadb.parser.delete_statement import DeleteTableStatement
+from evadb.parser.table_ref import TableRef
 
 
 ##################################################################

@@ -16,14 +16,14 @@
 
 import pandas as pd
 
-from eva.database import EVADatabase
-from eva.executor.abstract_executor import AbstractExecutor
-from eva.executor.executor_utils import ExecutorError
-from eva.models.storage.batch import Batch
-from eva.parser.table_ref import TableInfo
-from eva.plan_nodes.drop_plan import DropPlan
-from eva.storage.storage_engine import StorageEngine
-from eva.utils.logging_manager import logger
+from evadb.database import EVADatabase
+from evadb.executor.abstract_executor import AbstractExecutor
+from evadb.executor.executor_utils import ExecutorError
+from evadb.models.storage.batch import Batch
+from evadb.parser.table_ref import TableInfo
+from evadb.plan_nodes.drop_plan import DropPlan
+from evadb.storage.storage_engine import StorageEngine
+from evadb.utils.logging_manager import logger
 
 
 class DropExecutor(AbstractExecutor):

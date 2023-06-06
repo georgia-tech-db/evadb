@@ -16,17 +16,17 @@ from typing import Iterator
 
 from ray.util.queue import Queue
 
-from eva.database import EVADatabase
-from eva.executor.abstract_executor import AbstractExecutor
-from eva.executor.executor_utils import ExecutorError
-from eva.executor.ray_utils import (
+from evadb.database import EVADatabase
+from evadb.executor.abstract_executor import AbstractExecutor
+from evadb.executor.executor_utils import ExecutorError
+from evadb.executor.ray_utils import (
     StageCompleteSignal,
     ray_parallel,
     ray_pull,
     ray_wait_and_alert,
 )
-from eva.models.storage.batch import Batch
-from eva.plan_nodes.exchange_plan import ExchangePlan
+from evadb.models.storage.batch import Batch
+from evadb.plan_nodes.exchange_plan import ExchangePlan
 
 
 class QueueReaderExecutor(AbstractExecutor):

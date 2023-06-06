@@ -16,17 +16,17 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from eva.catalog.catalog_type import TableType
-from eva.catalog.catalog_utils import is_video_table
-from eva.constants import CACHEABLE_UDFS
-from eva.executor.execution_context import Context
-from eva.expression.expression_utils import (
+from evadb.catalog.catalog_type import TableType
+from evadb.catalog.catalog_utils import is_video_table
+from evadb.constants import CACHEABLE_UDFS
+from evadb.executor.execution_context import Context
+from evadb.expression.expression_utils import (
     conjunction_list_to_expression_tree,
     to_conjunction_list,
 )
-from eva.expression.function_expression import FunctionExpression
-from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.optimizer.optimizer_utils import (
+from evadb.expression.function_expression import FunctionExpression
+from evadb.expression.tuple_value_expression import TupleValueExpression
+from evadb.optimizer.optimizer_utils import (
     check_expr_validity_for_cache,
     enable_cache,
     enable_cache_on_expression_tree,
@@ -35,23 +35,23 @@ from eva.optimizer.optimizer_utils import (
     extract_pushdown_predicate_for_alias,
     get_expression_execution_cost,
 )
-from eva.optimizer.rules.pattern import Pattern
-from eva.optimizer.rules.rules_base import Promise, Rule, RuleType
-from eva.parser.types import JoinType, ParserOrderBySortType
-from eva.plan_nodes.apply_and_merge_plan import ApplyAndMergePlan
-from eva.plan_nodes.create_mat_view_plan import CreateMaterializedViewPlan
-from eva.plan_nodes.exchange_plan import ExchangePlan
-from eva.plan_nodes.explain_plan import ExplainPlan
-from eva.plan_nodes.hash_join_build_plan import HashJoinBuildPlan
-from eva.plan_nodes.nested_loop_join_plan import NestedLoopJoinPlan
-from eva.plan_nodes.predicate_plan import PredicatePlan
-from eva.plan_nodes.project_plan import ProjectPlan
-from eva.plan_nodes.show_info_plan import ShowInfoPlan
+from evadb.optimizer.rules.pattern import Pattern
+from evadb.optimizer.rules.rules_base import Promise, Rule, RuleType
+from evadb.parser.types import JoinType, ParserOrderBySortType
+from evadb.plan_nodes.apply_and_merge_plan import ApplyAndMergePlan
+from evadb.plan_nodes.create_mat_view_plan import CreateMaterializedViewPlan
+from evadb.plan_nodes.exchange_plan import ExchangePlan
+from evadb.plan_nodes.explain_plan import ExplainPlan
+from evadb.plan_nodes.hash_join_build_plan import HashJoinBuildPlan
+from evadb.plan_nodes.nested_loop_join_plan import NestedLoopJoinPlan
+from evadb.plan_nodes.predicate_plan import PredicatePlan
+from evadb.plan_nodes.project_plan import ProjectPlan
+from evadb.plan_nodes.show_info_plan import ShowInfoPlan
 
 if TYPE_CHECKING:
-    from eva.optimizer.optimizer_context import OptimizerContext
+    from evadb.optimizer.optimizer_context import OptimizerContext
 
-from eva.optimizer.operators import (
+from evadb.optimizer.operators import (
     Dummy,
     LogicalApplyAndMerge,
     LogicalCreate,
@@ -83,25 +83,25 @@ from eva.optimizer.operators import (
     Operator,
     OperatorType,
 )
-from eva.plan_nodes.create_index_plan import CreateIndexPlan
-from eva.plan_nodes.create_plan import CreatePlan
-from eva.plan_nodes.create_udf_plan import CreateUDFPlan
-from eva.plan_nodes.delete_plan import DeletePlan
-from eva.plan_nodes.drop_plan import DropPlan
-from eva.plan_nodes.drop_udf_plan import DropUDFPlan
-from eva.plan_nodes.function_scan_plan import FunctionScanPlan
-from eva.plan_nodes.groupby_plan import GroupByPlan
-from eva.plan_nodes.hash_join_probe_plan import HashJoinProbePlan
-from eva.plan_nodes.insert_plan import InsertPlan
-from eva.plan_nodes.lateral_join_plan import LateralJoinPlan
-from eva.plan_nodes.limit_plan import LimitPlan
-from eva.plan_nodes.load_data_plan import LoadDataPlan
-from eva.plan_nodes.orderby_plan import OrderByPlan
-from eva.plan_nodes.rename_plan import RenamePlan
-from eva.plan_nodes.seq_scan_plan import SeqScanPlan
-from eva.plan_nodes.storage_plan import StoragePlan
-from eva.plan_nodes.union_plan import UnionPlan
-from eva.plan_nodes.vector_index_scan_plan import VectorIndexScanPlan
+from evadb.plan_nodes.create_index_plan import CreateIndexPlan
+from evadb.plan_nodes.create_plan import CreatePlan
+from evadb.plan_nodes.create_udf_plan import CreateUDFPlan
+from evadb.plan_nodes.delete_plan import DeletePlan
+from evadb.plan_nodes.drop_plan import DropPlan
+from evadb.plan_nodes.drop_udf_plan import DropUDFPlan
+from evadb.plan_nodes.function_scan_plan import FunctionScanPlan
+from evadb.plan_nodes.groupby_plan import GroupByPlan
+from evadb.plan_nodes.hash_join_probe_plan import HashJoinProbePlan
+from evadb.plan_nodes.insert_plan import InsertPlan
+from evadb.plan_nodes.lateral_join_plan import LateralJoinPlan
+from evadb.plan_nodes.limit_plan import LimitPlan
+from evadb.plan_nodes.load_data_plan import LoadDataPlan
+from evadb.plan_nodes.orderby_plan import OrderByPlan
+from evadb.plan_nodes.rename_plan import RenamePlan
+from evadb.plan_nodes.seq_scan_plan import SeqScanPlan
+from evadb.plan_nodes.storage_plan import StoragePlan
+from evadb.plan_nodes.union_plan import UnionPlan
+from evadb.plan_nodes.vector_index_scan_plan import VectorIndexScanPlan
 
 ##############################################
 # REWRITE RULES START

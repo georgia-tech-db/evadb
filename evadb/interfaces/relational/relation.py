@@ -16,8 +16,8 @@ from typing import Union
 
 import pandas
 
-from eva.database import EVADatabase
-from eva.interfaces.relational.utils import (
+from evadb.database import EVADatabase
+from evadb.interfaces.relational.utils import (
     create_limit_expression,
     create_star_expression,
     execute_statement,
@@ -27,13 +27,13 @@ from eva.interfaces.relational.utils import (
     string_to_lateral_join,
     try_binding,
 )
-from eva.models.storage.batch import Batch
-from eva.parser.alias import Alias
-from eva.parser.select_statement import SelectStatement
-from eva.parser.statement import AbstractStatement
-from eva.parser.table_ref import JoinNode, TableRef
-from eva.parser.types import JoinType
-from eva.parser.utils import parse_sql_orderby_expr
+from evadb.models.storage.batch import Batch
+from evadb.parser.alias import Alias
+from evadb.parser.select_statement import SelectStatement
+from evadb.parser.statement import AbstractStatement
+from evadb.parser.table_ref import JoinNode, TableRef
+from evadb.parser.types import JoinType
+from evadb.parser.utils import parse_sql_orderby_expr
 
 
 class EVADBQuery:

@@ -16,7 +16,7 @@ import uuid
 from pathlib import Path
 from typing import Any, Dict, List
 
-from eva.catalog.catalog_type import (
+from evadb.catalog.catalog_type import (
     ColumnType,
     DocumentColumnName,
     ImageColumnName,
@@ -25,17 +25,17 @@ from eva.catalog.catalog_type import (
     TableType,
     VideoColumnName,
 )
-from eva.catalog.models.utils import (
+from evadb.catalog.models.utils import (
     ColumnCatalogEntry,
     TableCatalogEntry,
     UdfCacheCatalogEntry,
     UdfCatalogEntry,
 )
-from eva.configuration.configuration_manager import ConfigurationManager
-from eva.expression.function_expression import FunctionExpression
-from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
-from eva.utils.generic_utils import get_str_hash, remove_directory_contents
+from evadb.configuration.configuration_manager import ConfigurationManager
+from evadb.expression.function_expression import FunctionExpression
+from evadb.expression.tuple_value_expression import TupleValueExpression
+from evadb.parser.create_statement import ColConstraintInfo, ColumnDefinition
+from evadb.utils.generic_utils import get_str_hash, remove_directory_contents
 
 CATALOG_TABLES = [
     "column_catalog",
@@ -288,6 +288,6 @@ def get_metadata_properties(udf_obj: UdfCatalogEntry) -> Dict:
 # SQLAlchemy already handles this optimization for us, which will be explored at a
 # later time.
 def get_catalog_instance(db_uri: str, config: ConfigurationManager):
-    from eva.catalog.catalog_manager import CatalogManager
+    from evadb.catalog.catalog_manager import CatalogManager
 
     return CatalogManager(db_uri, config)

@@ -17,18 +17,18 @@ from typing import Iterator
 import pandas as pd
 from sqlalchemy import and_, or_
 
-from eva.catalog.catalog_type import TableType
-from eva.catalog.models.table_catalog import TableCatalogEntry
-from eva.database import EVADatabase
-from eva.executor.abstract_executor import AbstractExecutor
-from eva.expression.abstract_expression import ExpressionType
-from eva.expression.comparison_expression import ComparisonExpression
-from eva.expression.constant_value_expression import ConstantValueExpression
-from eva.expression.logical_expression import LogicalExpression
-from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.models.storage.batch import Batch
-from eva.plan_nodes.project_plan import ProjectPlan
-from eva.storage.storage_engine import StorageEngine
+from evadb.catalog.catalog_type import TableType
+from evadb.catalog.models.table_catalog import TableCatalogEntry
+from evadb.database import EVADatabase
+from evadb.executor.abstract_executor import AbstractExecutor
+from evadb.expression.abstract_expression import ExpressionType
+from evadb.expression.comparison_expression import ComparisonExpression
+from evadb.expression.constant_value_expression import ConstantValueExpression
+from evadb.expression.logical_expression import LogicalExpression
+from evadb.expression.tuple_value_expression import TupleValueExpression
+from evadb.models.storage.batch import Batch
+from evadb.plan_nodes.project_plan import ProjectPlan
+from evadb.storage.storage_engine import StorageEngine
 
 
 class DeleteExecutor(AbstractExecutor):

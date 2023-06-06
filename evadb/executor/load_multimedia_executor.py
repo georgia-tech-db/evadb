@@ -18,17 +18,17 @@ from pathlib import Path
 
 import pandas as pd
 
-from eva.catalog.models.table_catalog import TableCatalogEntry
-from eva.database import EVADatabase
-from eva.executor.abstract_executor import AbstractExecutor
-from eva.executor.executor_utils import ExecutorError, iter_path_regex, validate_media
-from eva.models.storage.batch import Batch
-from eva.plan_nodes.load_data_plan import LoadDataPlan
-from eva.storage.abstract_storage_engine import AbstractStorageEngine
-from eva.storage.storage_engine import StorageEngine
-from eva.utils.errors import DatasetFileNotFoundError
-from eva.utils.logging_manager import logger
-from eva.utils.s3_utils import download_from_s3
+from evadb.catalog.models.table_catalog import TableCatalogEntry
+from evadb.database import EVADatabase
+from evadb.executor.abstract_executor import AbstractExecutor
+from evadb.executor.executor_utils import ExecutorError, iter_path_regex, validate_media
+from evadb.models.storage.batch import Batch
+from evadb.plan_nodes.load_data_plan import LoadDataPlan
+from evadb.storage.abstract_storage_engine import AbstractStorageEngine
+from evadb.storage.storage_engine import StorageEngine
+from evadb.utils.errors import DatasetFileNotFoundError
+from evadb.utils.logging_manager import logger
+from evadb.utils.s3_utils import download_from_s3
 
 
 class LoadMultimediaExecutor(AbstractExecutor):

@@ -15,8 +15,8 @@
 import numpy as np
 from norfair import Detection, Tracker
 
-from eva.udfs.abstract.tracker_abstract_udf import EVATrackerAbstractUDF
-from eva.utils.math_utils import get_centroid
+from evadb.udfs.abstract.tracker_abstract_udf import EVATrackerAbstractUDF
+from evadb.utils.math_utils import get_centroid
 
 DISTANCE_THRESHOLD_CENTROID: int = 30
 

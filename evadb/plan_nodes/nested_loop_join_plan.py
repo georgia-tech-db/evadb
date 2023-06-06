@@ -13,10 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from eva.expression.abstract_expression import AbstractExpression
-from eva.parser.types import JoinType
-from eva.plan_nodes.abstract_join_plan import AbstractJoin
-from eva.plan_nodes.types import PlanOprType
+from evadb.expression.abstract_expression import AbstractExpression
+from evadb.parser.types import JoinType
+from evadb.plan_nodes.abstract_join_plan import AbstractJoin
+from evadb.plan_nodes.types import PlanOprType
 
 
 class NestedLoopJoinPlan(AbstractJoin):

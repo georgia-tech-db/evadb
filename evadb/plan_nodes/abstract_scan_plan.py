@@ -16,9 +16,9 @@
 https://www.postgresql.org/docs/9.1/using-explain.html
 https://www.postgresql.org/docs/9.5/runtime-config-query.html
 """
-from eva.expression.abstract_expression import AbstractExpression
-from eva.plan_nodes.abstract_plan import AbstractPlan
-from eva.plan_nodes.types import PlanOprType
+from evadb.expression.abstract_expression import AbstractExpression
+from evadb.plan_nodes.abstract_plan import AbstractPlan
+from evadb.plan_nodes.types import PlanOprType
 
 
 class AbstractScan(AbstractPlan):

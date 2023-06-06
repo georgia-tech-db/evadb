@@ -16,29 +16,29 @@ import typing
 from typing import List, Tuple
 
 if typing.TYPE_CHECKING:
-    from eva.optimizer.optimizer_context import OptimizerContext
+    from evadb.optimizer.optimizer_context import OptimizerContext
 
-from eva.catalog.catalog_utils import get_table_primary_columns
-from eva.catalog.models.column_catalog import ColumnCatalogEntry
-from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
-from eva.catalog.models.udf_metadata_catalog import UdfMetadataCatalogEntry
-from eva.constants import CACHEABLE_UDFS, DEFAULT_FUNCTION_EXPRESSION_COST
-from eva.expression.abstract_expression import AbstractExpression, ExpressionType
-from eva.expression.expression_utils import (
+from evadb.catalog.catalog_utils import get_table_primary_columns
+from evadb.catalog.models.column_catalog import ColumnCatalogEntry
+from evadb.catalog.models.udf_io_catalog import UdfIOCatalogEntry
+from evadb.catalog.models.udf_metadata_catalog import UdfMetadataCatalogEntry
+from evadb.constants import CACHEABLE_UDFS, DEFAULT_FUNCTION_EXPRESSION_COST
+from evadb.expression.abstract_expression import AbstractExpression, ExpressionType
+from evadb.expression.expression_utils import (
     conjunction_list_to_expression_tree,
     contains_single_column,
     get_columns_in_predicate,
     is_simple_predicate,
     to_conjunction_list,
 )
-from eva.expression.function_expression import (
+from evadb.expression.function_expression import (
     FunctionExpression,
     FunctionExpressionCache,
 )
-from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.parser.alias import Alias
-from eva.parser.create_statement import ColumnDefinition
-from eva.utils.kv_cache import DiskKVCache
+from evadb.expression.tuple_value_expression import TupleValueExpression
+from evadb.parser.alias import Alias
+from evadb.parser.create_statement import ColumnDefinition
+from evadb.utils.kv_cache import DiskKVCache
 
 
 def column_definition_to_udf_io(col_list: List[ColumnDefinition], is_input: bool):

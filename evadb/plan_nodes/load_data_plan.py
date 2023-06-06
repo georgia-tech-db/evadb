@@ -15,10 +15,10 @@
 from pathlib import Path
 from typing import List
 
-from eva.expression.abstract_expression import AbstractExpression
-from eva.parser.table_ref import TableInfo
-from eva.plan_nodes.abstract_plan import AbstractPlan
-from eva.plan_nodes.types import PlanOprType
+from evadb.expression.abstract_expression import AbstractExpression
+from evadb.parser.table_ref import TableInfo
+from evadb.plan_nodes.abstract_plan import AbstractPlan
+from evadb.plan_nodes.types import PlanOprType
 
 
 class LoadDataPlan(AbstractPlan):

@@ -13,10 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from eva.catalog.catalog_type import Dimension
-from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.parser.table_ref import TableInfo
-from eva.utils.logging_manager import logger
+from evadb.catalog.catalog_type import Dimension
+from evadb.expression.tuple_value_expression import TupleValueExpression
+from evadb.parser.table_ref import TableInfo
+from evadb.utils.logging_manager import logger
 
 
 class CommonClauses:

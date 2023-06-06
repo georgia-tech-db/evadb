@@ -16,7 +16,7 @@
 
 from typing import List
 
-from eva.udfs.decorators.io_descriptors.abstract_types import IOArgument
+from evadb.udfs.decorators.io_descriptors.abstract_types import IOArgument
 
 
 def setup(cacheable: bool = False, udf_type: str = "Abstract", batchable: bool = True):

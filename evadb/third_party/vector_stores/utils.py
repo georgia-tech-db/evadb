@@ -12,10 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from eva.catalog.catalog_type import VectorStoreType
-from eva.third_party.vector_stores.faiss import FaissVectorStore
-from eva.third_party.vector_stores.qdrant import QdrantVectorStore
-from eva.utils.generic_utils import validate_kwargs
+from evadb.catalog.catalog_type import VectorStoreType
+from evadb.third_party.vector_stores.faiss import FaissVectorStore
+from evadb.third_party.vector_stores.qdrant import QdrantVectorStore
+from evadb.utils.generic_utils import validate_kwargs
 
 
 class VectorStoreFactory:
@@ -24,13 +24,13 @@ class VectorStoreFactory:
         vector_store_type: VectorStoreType, index_name: str, **kwargs
     ):
         if vector_store_type == VectorStoreType.FAISS:
-            from eva.third_party.vector_stores.faiss import required_params
+            from evadb.third_party.vector_stores.faiss import required_params
 
             validate_kwargs(kwargs, required_params, required_params)
             return FaissVectorStore(index_name, **kwargs)
 
         elif vector_store_type == VectorStoreType.QDRANT:
-            from eva.third_party.vector_stores.qdrant import required_params
+            from evadb.third_party.vector_stores.qdrant import required_params
 
             validate_kwargs(kwargs, required_params, required_params)
             return QdrantVectorStore(index_name, **kwargs)

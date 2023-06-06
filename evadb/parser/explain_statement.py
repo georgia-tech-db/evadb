@@ -12,8 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from eva.parser.statement import AbstractStatement
-from eva.parser.types import StatementType
+from evadb.parser.statement import AbstractStatement
+from evadb.parser.types import StatementType
 
 
 class ExplainStatement(AbstractStatement):

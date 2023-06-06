@@ -15,9 +15,9 @@
 from pathlib import Path
 from typing import Any
 
-from eva.configuration.bootstrap_environment import bootstrap_environment
-from eva.configuration.constants import EVA_DATABASE_DIR, EVA_INSTALLATION_DIR
-from eva.utils.logging_manager import logger
+from evadb.configuration.bootstrap_environment import bootstrap_environment
+from evadb.configuration.constants import EVA_DATABASE_DIR, EVA_INSTALLATION_DIR
+from evadb.utils.logging_manager import logger
 
 
 class ConfigurationManager(object):

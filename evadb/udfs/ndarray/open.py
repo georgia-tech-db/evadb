@@ -16,7 +16,7 @@ import cv2
 import numpy as np
 import pandas as pd
 
-from eva.udfs.abstract.abstract_udf import AbstractUDF
+from evadb.udfs.abstract.abstract_udf import AbstractUDF
 
 
 class Open(AbstractUDF):

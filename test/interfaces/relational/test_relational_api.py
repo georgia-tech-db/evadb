@@ -25,11 +25,11 @@ import numpy as np
 import pandas as pd
 from pandas.testing import assert_frame_equal
 
-from eva.configuration.constants import EVA_DATABASE_DIR, EVA_ROOT_DIR
-from eva.executor.executor_utils import ExecutorError
-from eva.interfaces.relational.db import connect
-from eva.models.storage.batch import Batch
-from eva.server.command_handler import execute_query_fetch_all
+from evadb.configuration.constants import EVA_DATABASE_DIR, EVA_ROOT_DIR
+from evadb.executor.executor_utils import ExecutorError
+from evadb.interfaces.relational.db import connect
+from evadb.models.storage.batch import Batch
+from evadb.server.command_handler import execute_query_fetch_all
 
 
 class RelationalAPI(unittest.TestCase):

@@ -15,8 +15,8 @@
 
 from typing import Any, Dict, List
 
-from eva.plan_nodes.abstract_plan import AbstractPlan
-from eva.plan_nodes.types import PlanOprType
+from evadb.plan_nodes.abstract_plan import AbstractPlan
+from evadb.plan_nodes.types import PlanOprType
 
 
 class ExchangePlan(AbstractPlan):

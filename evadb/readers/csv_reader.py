@@ -17,9 +17,9 @@ from typing import Dict, Iterator
 import numpy as np
 import pandas as pd
 
-from eva.catalog.sql_config import IDENTIFIER_COLUMN
-from eva.readers.abstract_reader import AbstractReader
-from eva.utils.logging_manager import logger
+from evadb.catalog.sql_config import IDENTIFIER_COLUMN
+from evadb.readers.abstract_reader import AbstractReader
+from evadb.utils.logging_manager import logger
 
 
 class CSVReader(AbstractReader):

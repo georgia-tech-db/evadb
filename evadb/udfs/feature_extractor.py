@@ -20,7 +20,7 @@ import torch
 from torch import Tensor
 from torchvision import models
 
-from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
+from evadb.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
 
 
 class FeatureExtractor(PytorchAbstractClassifierUDF):

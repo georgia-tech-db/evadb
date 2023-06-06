@@ -16,7 +16,7 @@ from functools import singledispatchmethod
 from pathlib import Path
 from typing import Callable
 
-from eva.binder.binder_utils import (
+from evadb.binder.binder_utils import (
     BinderError,
     bind_table_info,
     check_column_name_is_string,
@@ -26,26 +26,26 @@ from eva.binder.binder_utils import (
     handle_bind_extract_object_function,
     resolve_alias_table_value_expression,
 )
-from eva.binder.statement_binder_context import StatementBinderContext
-from eva.catalog.catalog_type import NdArrayType, TableType, VideoColumnName
-from eva.catalog.catalog_utils import get_metadata_properties
-from eva.configuration.constants import EVA_INSTALLATION_DIR
-from eva.expression.abstract_expression import AbstractExpression, ExpressionType
-from eva.expression.function_expression import FunctionExpression
-from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.parser.create_index_statement import CreateIndexStatement
-from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
-from eva.parser.create_statement import ColumnDefinition, CreateTableStatement
-from eva.parser.delete_statement import DeleteTableStatement
-from eva.parser.explain_statement import ExplainStatement
-from eva.parser.rename_statement import RenameTableStatement
-from eva.parser.select_statement import SelectStatement
-from eva.parser.statement import AbstractStatement
-from eva.parser.table_ref import TableRef
-from eva.parser.types import UDFType
-from eva.third_party.huggingface.binder import assign_hf_udf
-from eva.utils.generic_utils import get_file_checksum, load_udf_class_from_file
-from eva.utils.logging_manager import logger
+from evadb.binder.statement_binder_context import StatementBinderContext
+from evadb.catalog.catalog_type import NdArrayType, TableType, VideoColumnName
+from evadb.catalog.catalog_utils import get_metadata_properties
+from evadb.configuration.constants import EVA_INSTALLATION_DIR
+from evadb.expression.abstract_expression import AbstractExpression, ExpressionType
+from evadb.expression.function_expression import FunctionExpression
+from evadb.expression.tuple_value_expression import TupleValueExpression
+from evadb.parser.create_index_statement import CreateIndexStatement
+from evadb.parser.create_mat_view_statement import CreateMaterializedViewStatement
+from evadb.parser.create_statement import ColumnDefinition, CreateTableStatement
+from evadb.parser.delete_statement import DeleteTableStatement
+from evadb.parser.explain_statement import ExplainStatement
+from evadb.parser.rename_statement import RenameTableStatement
+from evadb.parser.select_statement import SelectStatement
+from evadb.parser.statement import AbstractStatement
+from evadb.parser.table_ref import TableRef
+from evadb.parser.types import UDFType
+from evadb.third_party.huggingface.binder import assign_hf_udf
+from evadb.utils.generic_utils import get_file_checksum, load_udf_class_from_file
+from evadb.utils.logging_manager import logger
 
 
 class StatementBinder:

@@ -14,11 +14,11 @@
 # limitations under the License.
 from typing import List
 
-from eva.catalog.models.column_catalog import ColumnCatalogEntry
-from eva.expression.abstract_expression import AbstractExpression
-from eva.parser.types import JoinType
-from eva.plan_nodes.abstract_join_plan import AbstractJoin
-from eva.plan_nodes.types import PlanOprType
+from evadb.catalog.models.column_catalog import ColumnCatalogEntry
+from evadb.expression.abstract_expression import AbstractExpression
+from evadb.parser.types import JoinType
+from evadb.plan_nodes.abstract_join_plan import AbstractJoin
+from evadb.plan_nodes.types import PlanOprType
 
 
 class HashJoinProbePlan(AbstractJoin):

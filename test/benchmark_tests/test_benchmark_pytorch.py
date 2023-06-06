@@ -17,7 +17,7 @@ from test.util import create_large_scale_image_dataset
 
 import pytest
 
-from eva.server.command_handler import execute_query_fetch_all
+from evadb.server.command_handler import execute_query_fetch_all
 
 
 @pytest.mark.torchtest

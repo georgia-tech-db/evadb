@@ -17,7 +17,7 @@ from typing import List
 
 import numpy as np
 
-from eva.third_party.vector_stores.types import (
+from evadb.third_party.vector_stores.types import (
     FeaturePayload,
     VectorIndexQuery,
     VectorIndexQueryResult,

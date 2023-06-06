@@ -19,7 +19,7 @@ import ray
 from ray.exceptions import RayTaskError
 from ray.util.queue import Queue
 
-from eva.executor.executor_utils import ExecutorError
+from evadb.executor.executor_utils import ExecutorError
 
 
 class StageCompleteSignal:

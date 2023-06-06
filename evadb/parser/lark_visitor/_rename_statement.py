@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from eva.parser.rename_statement import RenameTableStatement
-from eva.parser.table_ref import TableRef
+from evadb.parser.rename_statement import RenameTableStatement
+from evadb.parser.table_ref import TableRef
 
 
 class RenameTable:

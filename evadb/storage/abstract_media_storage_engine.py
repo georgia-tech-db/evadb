@@ -19,13 +19,13 @@ from pathlib import Path
 
 import pandas as pd
 
-from eva.catalog.models.table_catalog import TableCatalogEntry
-from eva.database import EVADatabase
-from eva.models.storage.batch import Batch
-from eva.parser.table_ref import TableInfo
-from eva.storage.abstract_storage_engine import AbstractStorageEngine
-from eva.storage.sqlite_storage_engine import SQLStorageEngine
-from eva.utils.logging_manager import logger
+from evadb.catalog.models.table_catalog import TableCatalogEntry
+from evadb.database import EVADatabase
+from evadb.models.storage.batch import Batch
+from evadb.parser.table_ref import TableInfo
+from evadb.storage.abstract_storage_engine import AbstractStorageEngine
+from evadb.storage.sqlite_storage_engine import SQLStorageEngine
+from evadb.utils.logging_manager import logger
 
 
 class AbstractMediaStorageEngine(AbstractStorageEngine):

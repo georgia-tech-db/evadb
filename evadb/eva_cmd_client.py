@@ -17,7 +17,7 @@ import asyncio
 import sys
 from os.path import abspath, dirname, join
 
-from eva.utils.logging_manager import logger
+from evadb.utils.logging_manager import logger
 
 """
 To allow running eva_server from any location
@@ -26,8 +26,8 @@ THIS_DIR = dirname(__file__)
 EVA_CODE_DIR = abspath(join(THIS_DIR, ".."))
 sys.path.append(EVA_CODE_DIR)
 
-from eva.configuration.configuration_manager import ConfigurationManager  # noqa: E402
-from eva.server.interpreter import start_cmd_client  # noqa: E402
+from evadb.configuration.configuration_manager import ConfigurationManager  # noqa: E402
+from evadb.server.interpreter import start_cmd_client  # noqa: E402
 
 
 async def eva_client(host: str, port: int):

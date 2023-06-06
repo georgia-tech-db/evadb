@@ -19,18 +19,18 @@ import pandas as pd
 from sqlalchemy import Table, inspect
 from sqlalchemy.sql.expression import ColumnElement
 
-from eva.catalog.catalog_type import ColumnType
-from eva.catalog.models.base_model import BaseModel
-from eva.catalog.models.column_catalog import ColumnCatalogEntry
-from eva.catalog.models.table_catalog import TableCatalogEntry
-from eva.catalog.schema_utils import SchemaUtils
-from eva.catalog.sql_config import IDENTIFIER_COLUMN
-from eva.database import EVADatabase
-from eva.models.storage.batch import Batch
-from eva.parser.table_ref import TableInfo
-from eva.storage.abstract_storage_engine import AbstractStorageEngine
-from eva.utils.generic_utils import PickleSerializer, get_size
-from eva.utils.logging_manager import logger
+from evadb.catalog.catalog_type import ColumnType
+from evadb.catalog.models.base_model import BaseModel
+from evadb.catalog.models.column_catalog import ColumnCatalogEntry
+from evadb.catalog.models.table_catalog import TableCatalogEntry
+from evadb.catalog.schema_utils import SchemaUtils
+from evadb.catalog.sql_config import IDENTIFIER_COLUMN
+from evadb.database import EVADatabase
+from evadb.models.storage.batch import Batch
+from evadb.parser.table_ref import TableInfo
+from evadb.storage.abstract_storage_engine import AbstractStorageEngine
+from evadb.utils.generic_utils import PickleSerializer, get_size
+from evadb.utils.logging_manager import logger
 
 # Leveraging Dynamic schema in SQLAlchemy
 # https://sparrigan.github.io/sql/sqla/2016/01/03/dynamic-tables.html

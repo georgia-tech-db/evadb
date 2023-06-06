@@ -17,10 +17,10 @@ from typing import Iterator
 
 import pandas as pd
 
-from eva.database import EVADatabase
-from eva.executor.abstract_executor import AbstractExecutor
-from eva.models.storage.batch import Batch
-from eva.plan_nodes.groupby_plan import GroupByPlan
+from evadb.database import EVADatabase
+from evadb.executor.abstract_executor import AbstractExecutor
+from evadb.models.storage.batch import Batch
+from evadb.plan_nodes.groupby_plan import GroupByPlan
 
 
 class GroupByExecutor(AbstractExecutor):

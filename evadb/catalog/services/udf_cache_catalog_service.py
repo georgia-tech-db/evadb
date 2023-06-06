@@ -16,13 +16,13 @@ from sqlalchemy.orm import Session
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql.expression import select
 
-from eva.catalog.models.udf_cache_catalog import UdfCacheCatalog
-from eva.catalog.models.utils import UdfCacheCatalogEntry
-from eva.catalog.services.base_service import BaseService
-from eva.catalog.services.column_catalog_service import ColumnCatalogService
-from eva.catalog.services.udf_catalog_service import UdfCatalogService
-from eva.utils.errors import CatalogError
-from eva.utils.logging_manager import logger
+from evadb.catalog.models.udf_cache_catalog import UdfCacheCatalog
+from evadb.catalog.models.utils import UdfCacheCatalogEntry
+from evadb.catalog.services.base_service import BaseService
+from evadb.catalog.services.column_catalog_service import ColumnCatalogService
+from evadb.catalog.services.udf_catalog_service import UdfCatalogService
+from evadb.utils.errors import CatalogError
+from evadb.utils.logging_manager import logger
 
 
 class UdfCacheCatalogService(BaseService):

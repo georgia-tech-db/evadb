@@ -19,8 +19,8 @@ import easyocr
 import numpy as np
 import pandas as pd
 
-from eva.udfs.abstract.abstract_udf import AbstractClassifierUDF
-from eva.udfs.gpu_compatible import GPUCompatible
+from evadb.udfs.abstract.abstract_udf import AbstractClassifierUDF
+from evadb.udfs.gpu_compatible import GPUCompatible
 
 
 class OCRExtractor(AbstractClassifierUDF, GPUCompatible):

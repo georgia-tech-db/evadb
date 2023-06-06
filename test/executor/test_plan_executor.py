@@ -17,27 +17,27 @@ from unittest.mock import MagicMock, patch
 
 import pandas as pd
 
-from eva.catalog.catalog_type import TableType
-from eva.catalog.models.table_catalog import TableCatalogEntry
-from eva.executor.create_executor import CreateExecutor
-from eva.executor.create_udf_executor import CreateUDFExecutor
-from eva.executor.drop_udf_executor import DropUDFExecutor
-from eva.executor.insert_executor import InsertExecutor
-from eva.executor.load_executor import LoadDataExecutor
-from eva.executor.plan_executor import PlanExecutor
-from eva.executor.pp_executor import PPExecutor
-from eva.executor.seq_scan_executor import SequentialScanExecutor
-from eva.models.storage.batch import Batch
-from eva.plan_nodes.create_plan import CreatePlan
-from eva.plan_nodes.create_udf_plan import CreateUDFPlan
-from eva.plan_nodes.drop_plan import DropPlan
-from eva.plan_nodes.drop_udf_plan import DropUDFPlan
-from eva.plan_nodes.insert_plan import InsertPlan
-from eva.plan_nodes.load_data_plan import LoadDataPlan
-from eva.plan_nodes.pp_plan import PPScanPlan
-from eva.plan_nodes.rename_plan import RenamePlan
-from eva.plan_nodes.seq_scan_plan import SeqScanPlan
-from eva.plan_nodes.storage_plan import StoragePlan
+from evadb.catalog.catalog_type import TableType
+from evadb.catalog.models.table_catalog import TableCatalogEntry
+from evadb.executor.create_executor import CreateExecutor
+from evadb.executor.create_udf_executor import CreateUDFExecutor
+from evadb.executor.drop_udf_executor import DropUDFExecutor
+from evadb.executor.insert_executor import InsertExecutor
+from evadb.executor.load_executor import LoadDataExecutor
+from evadb.executor.plan_executor import PlanExecutor
+from evadb.executor.pp_executor import PPExecutor
+from evadb.executor.seq_scan_executor import SequentialScanExecutor
+from evadb.models.storage.batch import Batch
+from evadb.plan_nodes.create_plan import CreatePlan
+from evadb.plan_nodes.create_udf_plan import CreateUDFPlan
+from evadb.plan_nodes.drop_plan import DropPlan
+from evadb.plan_nodes.drop_udf_plan import DropUDFPlan
+from evadb.plan_nodes.insert_plan import InsertPlan
+from evadb.plan_nodes.load_data_plan import LoadDataPlan
+from evadb.plan_nodes.pp_plan import PPScanPlan
+from evadb.plan_nodes.rename_plan import RenamePlan
+from evadb.plan_nodes.seq_scan_plan import SeqScanPlan
+from evadb.plan_nodes.storage_plan import StoragePlan
 
 
 class PlanExecutorTest(unittest.TestCase):

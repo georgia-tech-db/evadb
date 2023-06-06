@@ -17,18 +17,18 @@ from typing import Dict, List
 
 import pandas as pd
 
-from eva.catalog.catalog_utils import get_metadata_properties
-from eva.catalog.models.udf_catalog import UdfCatalogEntry
-from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
-from eva.database import EVADatabase
-from eva.executor.abstract_executor import AbstractExecutor
-from eva.models.storage.batch import Batch
-from eva.plan_nodes.create_udf_plan import CreateUDFPlan
-from eva.third_party.huggingface.create import gen_hf_io_catalog_entries
-from eva.udfs.decorators.utils import load_io_from_udf_decorators
-from eva.utils.errors import UDFIODefinitionError
-from eva.utils.generic_utils import load_udf_class_from_file
-from eva.utils.logging_manager import logger
+from evadb.catalog.catalog_utils import get_metadata_properties
+from evadb.catalog.models.udf_catalog import UdfCatalogEntry
+from evadb.catalog.models.udf_io_catalog import UdfIOCatalogEntry
+from evadb.database import EVADatabase
+from evadb.executor.abstract_executor import AbstractExecutor
+from evadb.models.storage.batch import Batch
+from evadb.plan_nodes.create_udf_plan import CreateUDFPlan
+from evadb.third_party.huggingface.create import gen_hf_io_catalog_entries
+from evadb.udfs.decorators.utils import load_io_from_udf_decorators
+from evadb.utils.errors import UDFIODefinitionError
+from evadb.utils.generic_utils import load_udf_class_from_file
+from evadb.utils.logging_manager import logger
 
 
 class CreateUDFExecutor(AbstractExecutor):

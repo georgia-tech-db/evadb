@@ -15,13 +15,13 @@
 
 from lark import Token, Tree
 
-from eva.expression.abstract_expression import ExpressionType
-from eva.expression.aggregation_expression import AggregationExpression
-from eva.expression.constant_value_expression import ConstantValueExpression
-from eva.expression.function_expression import FunctionExpression
-from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.parser.create_udf_statement import CreateUDFStatement
-from eva.parser.drop_udf_statement import DropUDFStatement
+from evadb.expression.abstract_expression import ExpressionType
+from evadb.expression.aggregation_expression import AggregationExpression
+from evadb.expression.constant_value_expression import ConstantValueExpression
+from evadb.expression.function_expression import FunctionExpression
+from evadb.expression.tuple_value_expression import TupleValueExpression
+from evadb.parser.create_udf_statement import CreateUDFStatement
+from evadb.parser.drop_udf_statement import DropUDFStatement
 
 
 ##################################################################
