@@ -17,25 +17,25 @@ from unittest.mock import patch
 
 from mock import MagicMock
 
-from eva.optimizer.cost_model import CostModel
-from eva.optimizer.operators import (
+from evadb.optimizer.cost_model import CostModel
+from evadb.optimizer.operators import (
     LogicalFilter,
     LogicalGet,
     LogicalProject,
     LogicalQueryDerivedGet,
 )
-from eva.optimizer.optimizer_context import OptimizerContext
-from eva.optimizer.optimizer_tasks import (
+from evadb.optimizer.optimizer_context import OptimizerContext
+from evadb.optimizer.optimizer_tasks import (
     BottomUpRewrite,
     OptimizeGroup,
     OptimizerTask,
     TopDownRewrite,
 )
-from eva.optimizer.property import PropertyType
-from eva.optimizer.rules.rules_manager import RulesManager
-from eva.plan_nodes.predicate_plan import PredicatePlan
-from eva.plan_nodes.project_plan import ProjectPlan
-from eva.plan_nodes.seq_scan_plan import SeqScanPlan
+from evadb.optimizer.property import PropertyType
+from evadb.optimizer.rules.rules_manager import RulesManager
+from evadb.plan_nodes.predicate_plan import PredicatePlan
+from evadb.plan_nodes.project_plan import ProjectPlan
+from evadb.plan_nodes.seq_scan_plan import SeqScanPlan
 
 
 class TestOptimizerTask(unittest.TestCase):
@@ -95,8 +95,8 @@ class TestOptimizerTask(unittest.TestCase):
     def test_nested_implementation(self):
         child_predicate = MagicMock()
         root_predicate = MagicMock()
-        with patch("eva.optimizer.rules.rules.extract_pushdown_predicate") as mock:
-            with patch("eva.optimizer.rules.rules.is_video_table") as mock_vid:
+        with patch("evadb.optimizer.rules.rules.extract_pushdown_predicate") as mock:
+            with patch("evadb.optimizer.rules.rules.is_video_table") as mock_vid:
                 mock_vid.return_value = True
                 mock.side_effect = [
                     (child_predicate, None),

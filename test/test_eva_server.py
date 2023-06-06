@@ -16,21 +16,21 @@ import unittest
 
 from mock import patch
 
-from eva.eva_server import main, start_eva_server
+from evadb.eva_server import main, start_eva_server
 
 
 class EVAServerTest(unittest.IsolatedAsyncioTestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    @patch("eva.eva_server.start_eva_server")
+    @patch("evadb.eva_server.start_eva_server")
     @patch("asyncio.run")
     def test_main(self, mock_run, mock_start_eva_server):
         main()
         mock_start_eva_server.assert_called_once()
         mock_run.assert_called_once()
 
-    @patch("eva.eva_server.start_eva_server")
+    @patch("evadb.eva_server.start_eva_server")
     @patch("asyncio.start_server")
     async def test_start_eva_server(self, mock_start_eva_server, mock_start):
         await start_eva_server("eva_data", "0.0.0.0", 8803)

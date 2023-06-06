@@ -20,7 +20,7 @@ import pandas as pd
 import pytest
 from mock import patch
 
-from eva.udfs.ndarray.open import Open
+from evadb.udfs.ndarray.open import Open
 
 
 @pytest.mark.notparallel
@@ -47,12 +47,12 @@ class OpenTests(unittest.TestCase):
 
     def test_open_same_path_should_use_cache(self):
         # un-cached open
-        with patch("eva.udfs.ndarray.open.cv2") as mock_cv2:
+        with patch("evadb.udfs.ndarray.open.cv2") as mock_cv2:
             self.open_instance(pd.DataFrame([self.image_file_path]))
             mock_cv2.imread.assert_called_once_with(self.image_file_path)
 
         # cached open
-        with patch("eva.udfs.ndarray.open.cv2") as mock_cv2:
+        with patch("evadb.udfs.ndarray.open.cv2") as mock_cv2:
             self.open_instance(pd.DataFrame([self.image_file_path]))
             mock_cv2.imread.assert_not_called()
 

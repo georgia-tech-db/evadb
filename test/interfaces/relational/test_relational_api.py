@@ -25,11 +25,11 @@ import numpy as np
 import pandas as pd
 from pandas.testing import assert_frame_equal
 
-from eva.configuration.constants import EVA_DATABASE_DIR, EVA_ROOT_DIR
-from eva.executor.executor_utils import ExecutorError
-from eva.interfaces.relational.db import connect
-from eva.models.storage.batch import Batch
-from eva.server.command_handler import execute_query_fetch_all
+from evadb.configuration.constants import EVA_DATABASE_DIR, EVA_ROOT_DIR
+from evadb.executor.executor_utils import ExecutorError
+from evadb.interfaces.relational.db import connect
+from evadb.models.storage.batch import Batch
+from evadb.server.command_handler import execute_query_fetch_all
 
 
 class RelationalAPI(unittest.TestCase):
@@ -174,7 +174,7 @@ class RelationalAPI(unittest.TestCase):
         # todo support register udf
         cursor.query(
             f"""CREATE UDF IF NOT EXISTS SiftFeatureExtractor
-                IMPL  '{EVA_ROOT_DIR}/eva/udfs/sift_feature_extractor.py'"""
+                IMPL  '{EVA_ROOT_DIR}/evadb/udfs/sift_feature_extractor.py'"""
         ).df()
 
         # create a vector index using QDRANT
@@ -278,7 +278,7 @@ class RelationalAPI(unittest.TestCase):
         udf = cursor.create_udf(
             "SentenceTransformerFeatureExtractor",
             True,
-            f"{EVA_ROOT_DIR}/eva/udfs/sentence_transformer_feature_extractor.py",
+            f"{EVA_ROOT_DIR}/evadb/udfs/sentence_transformer_feature_extractor.py",
         )
         udf.execute()
 

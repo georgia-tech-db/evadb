@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ from test.util import create_dataframe, create_dataframe_same
 import numpy as np
 import pandas as pd
 
-from eva.models.storage.batch import Batch
-from eva.parser.alias import Alias
+from evadb.models.storage.batch import Batch
+from evadb.parser.alias import Alias
 
 
 class BatchTest(unittest.TestCase):

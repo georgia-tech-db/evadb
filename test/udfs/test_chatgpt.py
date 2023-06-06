@@ -23,9 +23,9 @@ import openai
 import pandas as pd
 from mock import patch
 
-from eva.configuration.configuration_manager import ConfigurationManager
-from eva.models.storage.batch import Batch
-from eva.server.command_handler import execute_query_fetch_all
+from evadb.configuration.configuration_manager import ConfigurationManager
+from evadb.models.storage.batch import Batch
+from evadb.server.command_handler import execute_query_fetch_all
 
 
 def create_dummy_csv_file(config) -> str:
@@ -65,7 +65,7 @@ class ChatGPTTest(unittest.TestCase):
         execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS MyTextCSV;")
 
     @ray_skip_marker
-    @patch("eva.udfs.chatgpt.openai.ChatCompletion.create")
+    @patch("evadb.udfs.chatgpt.openai.ChatCompletion.create")
     def test_openai_chat_completion_udf(self, mock_req):
         # set dummy api key
         os.environ["openai_api_key"] = "my_key"
@@ -74,7 +74,7 @@ class ChatGPTTest(unittest.TestCase):
         execute_query_fetch_all(self.evadb, f"DROP UDF IF EXISTS {udf_name};")
 
         create_udf_query = f"""CREATE UDF {udf_name}
-            IMPL 'eva/udfs/chatgpt.py'
+            IMPL 'evadb/udfs/chatgpt.py'
             'model' 'gpt-3.5-turbo'
         """
         execute_query_fetch_all(self.evadb, create_udf_query)
@@ -93,7 +93,7 @@ class ChatGPTTest(unittest.TestCase):
         # test without providing model name
         execute_query_fetch_all(self.evadb, f"DROP UDF IF EXISTS {udf_name};")
         create_udf_query = f"""CREATE UDF {udf_name}
-            IMPL 'eva/udfs/chatgpt.py'
+            IMPL 'evadb/udfs/chatgpt.py'
         """
         execute_query_fetch_all(self.evadb, create_udf_query)
 
@@ -108,7 +108,7 @@ class ChatGPTTest(unittest.TestCase):
         execute_query_fetch_all(self.evadb, f"DROP UDF IF EXISTS {udf_name};")
 
         create_udf_query = f"""CREATE UDF {udf_name}
-            IMPL 'eva/udfs/chatgpt.py'
+            IMPL 'evadb/udfs/chatgpt.py'
             """
         execute_query_fetch_all(self.evadb, create_udf_query)
         self.assertEqual(openai.api_key, "dummy_openai_key")
@@ -121,9 +121,9 @@ class ChatGPTTest(unittest.TestCase):
 
         with self.assertRaises(
             Exception,
-            msg="Please set your OpenAI API key in eva.yml file (third_party, open_api_key) or environment variable (OPENAI_KEY)",
+            msg="Please set your OpenAI API key in evadb.yml file (third_party, open_api_key) or environment variable (OPENAI_KEY)",
         ):
             create_udf_query = f"""CREATE UDF {udf_name}
-                IMPL 'eva/udfs/chatgpt.py'
+                IMPL 'evadb/udfs/chatgpt.py'
                 """
             execute_query_fetch_all(self.evadb, create_udf_query)

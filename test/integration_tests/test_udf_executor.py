@@ -27,11 +27,11 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from eva.binder.binder_utils import BinderError
-from eva.catalog.catalog_type import ColumnType, NdArrayType
-from eva.executor.executor_utils import ExecutorError
-from eva.models.storage.batch import Batch
-from eva.server.command_handler import execute_query_fetch_all
+from evadb.binder.binder_utils import BinderError
+from evadb.catalog.catalog_type import ColumnType, NdArrayType
+from evadb.executor.executor_utils import ExecutorError
+from evadb.models.storage.batch import Batch
+from evadb.server.command_handler import execute_query_fetch_all
 
 NUM_FRAMES = 10
 

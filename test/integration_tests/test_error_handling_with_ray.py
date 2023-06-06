@@ -25,8 +25,8 @@ from test.util import (
     shutdown_ray,
 )
 
-from eva.executor.executor_utils import ExecutorError
-from eva.server.command_handler import execute_query_fetch_all
+from evadb.executor.executor_utils import ExecutorError
+from evadb.server.command_handler import execute_query_fetch_all
 
 
 class ErrorHandlingRayTests(unittest.TestCase):

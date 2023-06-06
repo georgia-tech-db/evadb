@@ -7,7 +7,7 @@ Here is an illustrative UDF for classifying MNIST images.
 
 .. code-block:: bash
 
-    !wget -nc https://raw.githubusercontent.com/georgia-tech-db/eva/master/eva/udfs/mnist_image_classifier.py
+    !wget -nc https://raw.githubusercontent.com/georgia-tech-db/eva/master/evadb/udfs/mnist_image_classifier.py
 
 .. code-block:: python
 

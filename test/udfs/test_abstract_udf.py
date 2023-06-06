@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,10 +18,10 @@ from enum import Enum
 from inspect import isabstract
 from test.util import get_all_subclasses, get_mock_object
 
-import eva
-from eva.udfs.abstract.abstract_udf import AbstractUDF
-from eva.udfs.abstract.hf_abstract_udf import AbstractHFUdf
-from eva.udfs.yolo_object_detector import Yolo
+import evadb
+from evadb.udfs.abstract.abstract_udf import AbstractUDF
+from evadb.udfs.abstract.hf_abstract_udf import AbstractHFUdf
+from evadb.udfs.yolo_object_detector import Yolo
 
 
 class AbstractUDFTest(unittest.TestCase):
@@ -79,7 +79,7 @@ class AbstractUDFTest(unittest.TestCase):
             flat_class_list = [item for sublist in class_list for item in sublist]
             return set(flat_class_list)
 
-        class_list = get_all_classes(eva, 1)
+        class_list = get_all_classes(evadb, 1)
 
         base_id = 0
         ref_object = None
