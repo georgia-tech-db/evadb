@@ -209,9 +209,9 @@ class EVADBCursor(object):
         Drop a table in the database.
 
         Args:
-            table_name (str): Name of the udf to be created.
+            table_name (str): Name of the table to be dropped.
             if_exists (bool): If True, do not raise an error if the Tabel does not already exist. If False, raise an error.
-            **kwargs: Additional keyword arguments for configuring the create udf operation.
+            **kwargs: Additional keyword arguments for configuring the drop operation.
 
         Returns
             EVADBQuery: The EVADBQuery object representing the UDF created.
@@ -224,9 +224,9 @@ class EVADBCursor(object):
         Drop a udf in the database.
 
         Args:
-            udf_name (str): Name of the udf to be created.
+            udf_name (str): Name of the udf to be dropped.
             if_exists (bool): If True, do not raise an error if the UDF does not already exist. If False, raise an error.
-            **kwargs: Additional keyword arguments for configuring the create udf operation.
+            **kwargs: Additional keyword arguments for configuring the drop_udf operation.
 
         Returns
             EVADBQuery: The EVADBQuery object representing the UDF created.
