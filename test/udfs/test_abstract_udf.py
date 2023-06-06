@@ -79,7 +79,7 @@ class AbstractUDFTest(unittest.TestCase):
             flat_class_list = [item for sublist in class_list for item in sublist]
             return set(flat_class_list)
 
-        class_list = get_all_classes(eva, 1)
+        class_list = get_all_classes(evadb, 1)
 
         base_id = 0
         ref_object = None
