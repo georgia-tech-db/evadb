@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ class YoloTest(unittest.TestCase):
     def test_should_raise_import_error_with_missing_torch(self):
         with self.assertRaises(ImportError):
             with mock.patch.dict(sys.modules, {"torch": None}):
-                from eva.udfs.decorators.yolo_object_detection_decorators import (  # noqa: F401
+                from evadb.udfs.decorators.yolo_object_detection_decorators import (  # noqa: F401
                     Yolo,
                 )
 
@@ -56,7 +56,7 @@ class YoloTest(unittest.TestCase):
 
     @unittest.skip("disable test due to model downloading time")
     def test_should_return_batches_equivalent_to_number_of_frames(self):
-        from eva.udfs.decorators.yolo_object_detection_decorators import Yolo
+        from evadb.udfs.decorators.yolo_object_detection_decorators import Yolo
 
         frame_dog = {
             "id": 1,

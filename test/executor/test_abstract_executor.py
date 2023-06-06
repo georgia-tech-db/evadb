@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ import unittest
 from inspect import signature
 from test.util import get_all_subclasses
 
-from eva.executor.abstract_executor import AbstractExecutor
+from evadb.executor.abstract_executor import AbstractExecutor
 
 
 class AbstractExecutorTest(unittest.TestCase):

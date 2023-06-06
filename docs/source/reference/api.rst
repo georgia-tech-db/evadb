@@ -6,11 +6,11 @@ To begin your querying session, get a connection to the EvaDB using ``connect``:
 .. autosummary:: 
     :toctree: ./doc
     
-    ~eva.connect
+    ~evadb.connect
 
 .. code-block:: python
 
-    from eva import connect
+    from evadb import connect
     conn = connect()
 
 You can then use this connection to run queries:
@@ -37,7 +37,7 @@ EVADBConnection Interface
 .. autosummary::
     :toctree: ./doc
     
-    ~eva.EVADBConnection.cursor
+    ~evadb.EVADBConnection.cursor
 
 
 EVADBCursor Interface
@@ -46,13 +46,13 @@ EVADBCursor Interface
 .. autosummary::
     :toctree: ./doc
 
-    ~eva.EVADBCursor.connect
-    ~eva.EVADBCursor.load
-    ~eva.EVADBCursor.query
-    ~eva.EVADBCursor.table
-    ~eva.EVADBCursor.create_udf
-    ~eva.EVADBCursor.create_vector_index
-    ~eva.EVADBCursor.df
+    ~evadb.EVADBCursor.connect
+    ~evadb.EVADBCursor.load
+    ~evadb.EVADBCursor.query
+    ~evadb.EVADBCursor.table
+    ~evadb.EVADBCursor.create_udf
+    ~evadb.EVADBCursor.create_vector_index
+    ~evadb.EVADBCursor.df
 
 EVADBQuery Interface
 ---------------------
@@ -60,12 +60,12 @@ EVADBQuery Interface
 .. autosummary::
     :toctree: ./doc
 
-    ~eva.EVADBQuery.select
-    ~eva.EVADBQuery.cross_apply
-    ~eva.EVADBQuery.filter
-    ~eva.EVADBQuery.df
-    ~eva.EVADBQuery.alias
-    ~eva.EVADBQuery.limit
-    ~eva.EVADBQuery.order
-    ~eva.EVADBQuery.show
-    ~eva.EVADBQuery.sql_query
+    ~evadb.EVADBQuery.select
+    ~evadb.EVADBQuery.cross_apply
+    ~evadb.EVADBQuery.filter
+    ~evadb.EVADBQuery.df
+    ~evadb.EVADBQuery.alias
+    ~evadb.EVADBQuery.limit
+    ~evadb.EVADBQuery.order
+    ~evadb.EVADBQuery.show
+    ~evadb.EVADBQuery.sql_query

@@ -18,21 +18,21 @@ from test.util import get_all_subclasses, get_mock_object
 
 import pytest
 
-from eva.catalog.catalog_type import ColumnType
-from eva.catalog.models.column_catalog import ColumnCatalogEntry
-from eva.parser.table_ref import TableInfo, TableRef
-from eva.parser.types import FileFormatType
-from eva.plan_nodes.abstract_plan import AbstractPlan
-from eva.plan_nodes.create_mat_view_plan import CreateMaterializedViewPlan
-from eva.plan_nodes.create_plan import CreatePlan
-from eva.plan_nodes.create_udf_plan import CreateUDFPlan
-from eva.plan_nodes.drop_plan import DropPlan
-from eva.plan_nodes.drop_udf_plan import DropUDFPlan
-from eva.plan_nodes.insert_plan import InsertPlan
-from eva.plan_nodes.load_data_plan import LoadDataPlan
-from eva.plan_nodes.rename_plan import RenamePlan
-from eva.plan_nodes.types import PlanOprType
-from eva.plan_nodes.union_plan import UnionPlan
+from evadb.catalog.catalog_type import ColumnType
+from evadb.catalog.models.column_catalog import ColumnCatalogEntry
+from evadb.parser.table_ref import TableInfo, TableRef
+from evadb.parser.types import FileFormatType
+from evadb.plan_nodes.abstract_plan import AbstractPlan
+from evadb.plan_nodes.create_mat_view_plan import CreateMaterializedViewPlan
+from evadb.plan_nodes.create_plan import CreatePlan
+from evadb.plan_nodes.create_udf_plan import CreateUDFPlan
+from evadb.plan_nodes.drop_plan import DropPlan
+from evadb.plan_nodes.drop_udf_plan import DropUDFPlan
+from evadb.plan_nodes.insert_plan import InsertPlan
+from evadb.plan_nodes.load_data_plan import LoadDataPlan
+from evadb.plan_nodes.rename_plan import RenamePlan
+from evadb.plan_nodes.types import PlanOprType
+from evadb.plan_nodes.union_plan import UnionPlan
 
 
 @pytest.mark.notparallel

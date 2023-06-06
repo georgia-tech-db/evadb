@@ -25,11 +25,12 @@ import numpy as np
 import pandas as pd
 from pandas.testing import assert_frame_equal
 
-from eva.configuration.constants import EVA_DATABASE_DIR, EVA_ROOT_DIR
-from eva.executor.executor_utils import ExecutorError
-from eva.interfaces.relational.db import connect
-from eva.models.storage.batch import Batch
-from eva.server.command_handler import execute_query_fetch_all
+from evadb.binder.binder_utils import BinderError
+from evadb.configuration.constants import EVA_DATABASE_DIR, EVA_ROOT_DIR
+from evadb.executor.executor_utils import ExecutorError
+from evadb.interfaces.relational.db import connect
+from evadb.models.storage.batch import Batch
+from evadb.server.command_handler import execute_query_fetch_all
 
 
 class RelationalAPI(unittest.TestCase):
@@ -174,7 +175,7 @@ class RelationalAPI(unittest.TestCase):
         # todo support register udf
         cursor.query(
             f"""CREATE UDF IF NOT EXISTS SiftFeatureExtractor
-                IMPL  '{EVA_ROOT_DIR}/eva/udfs/sift_feature_extractor.py'"""
+                IMPL  '{EVA_ROOT_DIR}/evadb/udfs/sift_feature_extractor.py'"""
         ).df()
 
         # create a vector index using QDRANT
@@ -259,6 +260,68 @@ class RelationalAPI(unittest.TestCase):
         expected_batch = Batch(frames=pd.DataFrame(expected))
         self.assertEqual(actual_batch, expected_batch)
 
+    def test_drop_with_relational_api(self):
+        video_file_path = create_sample_video(10)
+
+        cursor = self.conn.cursor()
+        # load video
+        rel = cursor.load(
+            video_file_path,
+            table_name="dummy_video",
+            format="video",
+        )
+        rel.execute()
+
+        # Create dummy udf
+        create_dummy_object_detector_udf = cursor.create_udf(
+            "DummyObjectDetector", if_not_exists=True, impl_path="test/util.py"
+        )
+        create_dummy_object_detector_udf.execute()
+
+        # drop dummy udf
+        drop_dummy_object_detector_udf = cursor.drop_udf(
+            "DummyObjectDetector", if_exists=True
+        )
+        drop_dummy_object_detector_udf.execute()
+
+        # Check if deleted successfully
+        select_query_sql = (
+            "SELECT id, DummyObjectDetector(data) FROM dummy_video ORDER BY id;"
+        )
+        with self.assertRaises(BinderError):
+            cursor.query(select_query_sql).execute()
+
+        # drop non existing udf with if_exists=True should not raise error
+        drop_dummy_object_detector_udf = cursor.drop_udf(
+            "DummyObjectDetector", if_exists=True
+        )
+        drop_dummy_object_detector_udf.execute()
+
+        # if_exists=False should raise error
+        drop_dummy_object_detector_udf = cursor.drop_udf(
+            "DummyObjectDetector", if_exists=False
+        )
+        with self.assertRaises(ExecutorError):
+            drop_dummy_object_detector_udf.execute()
+
+        # drop existing table
+        drop_table = cursor.drop_table("dummy_video", if_exists=True)
+        drop_table.execute()
+
+        # Check if deleted successfully
+        select_query_sql = "SELECT id, data FROM dummy_video ORDER BY id;"
+        with self.assertRaises(BinderError):
+            cursor.query(select_query_sql).execute()
+
+        # drop non existing table with if_exists=True should not raise error
+        drop_table = cursor.drop_table("dummy_video", if_exists=True)
+        drop_table.execute()
+
+        # if_exists=False should raise error
+        drop_table = cursor.drop_table("dummy_video", if_exists=False)
+        with self.assertRaises(ExecutorError):
+            drop_table.execute()
+
     def test_pdf_similarity_search(self):
         conn = connect()
         cursor = conn.cursor()
@@ -278,7 +341,7 @@ class RelationalAPI(unittest.TestCase):
         udf = cursor.create_udf(
             "SentenceTransformerFeatureExtractor",
             True,
-            f"{EVA_ROOT_DIR}/eva/udfs/sentence_transformer_feature_extractor.py",
+            f"{EVA_ROOT_DIR}/evadb/udfs/sentence_transformer_feature_extractor.py",
         )
         udf.execute()
 

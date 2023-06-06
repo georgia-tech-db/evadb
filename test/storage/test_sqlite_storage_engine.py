@@ -22,10 +22,10 @@ from test.util import (
 
 import pytest
 
-from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
-from eva.catalog.models.column_catalog import ColumnCatalogEntry
-from eva.catalog.models.table_catalog import TableCatalogEntry
-from eva.storage.sqlite_storage_engine import SQLStorageEngine
+from evadb.catalog.catalog_type import ColumnType, NdArrayType, TableType
+from evadb.catalog.models.column_catalog import ColumnCatalogEntry
+from evadb.catalog.models.table_catalog import TableCatalogEntry
+from evadb.storage.sqlite_storage_engine import SQLStorageEngine
 
 
 @pytest.mark.notparallel

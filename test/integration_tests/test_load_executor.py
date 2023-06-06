@@ -34,12 +34,12 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from eva.binder.binder_utils import BinderError
-from eva.configuration.constants import EVA_ROOT_DIR
-from eva.executor.executor_utils import ExecutorError
-from eva.models.storage.batch import Batch
-from eva.parser.types import FileFormatType
-from eva.server.command_handler import execute_query_fetch_all
+from evadb.binder.binder_utils import BinderError
+from evadb.configuration.constants import EVA_ROOT_DIR
+from evadb.executor.executor_utils import ExecutorError
+from evadb.models.storage.batch import Batch
+from evadb.parser.types import FileFormatType
+from evadb.server.command_handler import execute_query_fetch_all
 
 
 @pytest.mark.notparallel

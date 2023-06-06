@@ -23,7 +23,7 @@ A valid output from the command indicates that your GPU is configured and ready 
 
 Output of `cuda:0` indicates the presence of a GPU. 0 indicates the index of the GPU in system. If you have multiple GPUs on your workstation, the index must be updated accordingly.
 
-3. Now configure the executor section in eva.yml as follows:
+3. Now configure the executor section in evadb.yml as follows:
 
 .. code-block:: yaml
 

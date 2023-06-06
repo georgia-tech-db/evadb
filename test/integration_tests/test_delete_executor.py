@@ -23,8 +23,8 @@ from test.util import (
 import numpy as np
 import pytest
 
-from eva.configuration.constants import EVA_ROOT_DIR
-from eva.server.command_handler import execute_query_fetch_all
+from evadb.configuration.constants import EVA_ROOT_DIR
+from evadb.server.command_handler import execute_query_fetch_all
 
 
 @pytest.mark.notparallel

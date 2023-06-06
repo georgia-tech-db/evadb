@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,32 +15,32 @@
 import unittest
 from pathlib import Path
 
-from eva.catalog.catalog_type import ColumnType, NdArrayType, VectorStoreType
-from eva.expression.abstract_expression import ExpressionType
-from eva.expression.comparison_expression import ComparisonExpression
-from eva.expression.constant_value_expression import ConstantValueExpression
-from eva.expression.function_expression import FunctionExpression
-from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.parser.alias import Alias
-from eva.parser.create_index_statement import CreateIndexStatement
-from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
-from eva.parser.create_statement import (
+from evadb.catalog.catalog_type import ColumnType, NdArrayType, VectorStoreType
+from evadb.expression.abstract_expression import ExpressionType
+from evadb.expression.comparison_expression import ComparisonExpression
+from evadb.expression.constant_value_expression import ConstantValueExpression
+from evadb.expression.function_expression import FunctionExpression
+from evadb.expression.tuple_value_expression import TupleValueExpression
+from evadb.parser.alias import Alias
+from evadb.parser.create_index_statement import CreateIndexStatement
+from evadb.parser.create_mat_view_statement import CreateMaterializedViewStatement
+from evadb.parser.create_statement import (
     ColConstraintInfo,
     ColumnDefinition,
     CreateTableStatement,
 )
-from eva.parser.create_udf_statement import CreateUDFStatement
-from eva.parser.delete_statement import DeleteTableStatement
-from eva.parser.drop_statement import DropTableStatement
-from eva.parser.drop_udf_statement import DropUDFStatement
-from eva.parser.insert_statement import InsertTableStatement
-from eva.parser.load_statement import LoadDataStatement
-from eva.parser.parser import Parser
-from eva.parser.rename_statement import RenameTableStatement
-from eva.parser.select_statement import SelectStatement
-from eva.parser.statement import AbstractStatement, StatementType
-from eva.parser.table_ref import JoinNode, TableInfo, TableRef, TableValuedExpression
-from eva.parser.types import FileFormatType, JoinType, ParserOrderBySortType
+from evadb.parser.create_udf_statement import CreateUDFStatement
+from evadb.parser.delete_statement import DeleteTableStatement
+from evadb.parser.drop_statement import DropTableStatement
+from evadb.parser.drop_udf_statement import DropUDFStatement
+from evadb.parser.insert_statement import InsertTableStatement
+from evadb.parser.load_statement import LoadDataStatement
+from evadb.parser.parser import Parser
+from evadb.parser.rename_statement import RenameTableStatement
+from evadb.parser.select_statement import SelectStatement
+from evadb.parser.statement import AbstractStatement, StatementType
+from evadb.parser.table_ref import JoinNode, TableInfo, TableRef, TableValuedExpression
+from evadb.parser.types import FileFormatType, JoinType, ParserOrderBySortType
 
 
 class ParserTests(unittest.TestCase):
@@ -395,7 +395,7 @@ class ParserTests(unittest.TestCase):
 
         parser = Parser()
 
-        select_query = "SELECT FIRST(id) FROM TAIPAI GROUP BY '8f';"
+        select_query = "SELECT FIRST(id) FROM TAIPAI GROUP BY '8 frames';"
 
         eva_statement_list = parser.parse(select_query)
         self.assertIsInstance(eva_statement_list, list)
@@ -419,7 +419,7 @@ class ParserTests(unittest.TestCase):
         # sample_freq
         self.assertEqual(
             select_stmt.groupby_clause,
-            ConstantValueExpression("8f", v_type=ColumnType.TEXT),
+            ConstantValueExpression("8 frames", v_type=ColumnType.TEXT),
         )
 
     def test_select_statement_orderby_class(self):
@@ -894,7 +894,7 @@ class ParserTests(unittest.TestCase):
                   OUTPUT (bboxes NDARRAY FLOAT32(ANYDIM, 4),
                           scores NDARRAY FLOAT32(ANYDIM))
                   TYPE  FaceDetection
-                  IMPL  'eva/udfs/face_detector.py';
+                  IMPL  'evadb/udfs/face_detector.py';
                   """
         parser = Parser()
         parser.parse(query)
