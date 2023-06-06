@@ -18,7 +18,7 @@ from enum import Enum
 from inspect import isabstract
 from test.util import get_all_subclasses, get_mock_object
 
-import eva
+import evadb
 from evadb.udfs.abstract.abstract_udf import AbstractUDF
 from evadb.udfs.abstract.hf_abstract_udf import AbstractHFUdf
 from evadb.udfs.yolo_object_detector import Yolo
