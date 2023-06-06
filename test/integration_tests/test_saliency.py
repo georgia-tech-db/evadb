@@ -49,7 +49,7 @@ class SaliencyTests(unittest.TestCase):
         )
 
         create_udf_query = f"""CREATE UDF IF NOT EXISTS SaliencyFeatureExtractor
-                    IMPL  '{EVA_ROOT_DIR}/eva/udfs/saliency_feature_extractor.py';
+                    IMPL  '{EVA_ROOT_DIR}/evadb/udfs/saliency_feature_extractor.py';
         """
         execute_query_fetch_all(self.evadb, create_udf_query)
 

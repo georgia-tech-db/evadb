@@ -81,8 +81,8 @@ class FaceNet(unittest.TestCase):
         device = 10
         from evadb.udfs.face_detector import FaceDetector
 
-        with patch("eva.udfs.face_detector.MTCNN") as mock_mtcnn:
-            with patch("eva.udfs.face_detector.torch") as mock_torch:
+        with patch("evadb.udfs.face_detector.MTCNN") as mock_mtcnn:
+            with patch("evadb.udfs.face_detector.torch") as mock_torch:
                 mock_torch.device.return_value = "cuda:10"
                 detector = FaceDetector()
                 detector = detector.to_device(device)

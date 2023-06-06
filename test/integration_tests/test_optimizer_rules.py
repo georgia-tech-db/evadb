@@ -59,8 +59,8 @@ class OptimizerRulesTest(unittest.TestCase):
         shutdown_ray()
         execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS MyVideo;")
 
-    @patch("eva.expression.function_expression.FunctionExpression.evaluate")
-    @patch("eva.models.storage.batch.Batch.merge_column_wise")
+    @patch("evadb.expression.function_expression.FunctionExpression.evaluate")
+    @patch("evadb.models.storage.batch.Batch.merge_column_wise")
     def test_should_benefit_from_pushdown(self, merge_mock, evaluate_mock):
         # added to mock away the
         evaluate_mock.return_value = Batch(
@@ -146,7 +146,7 @@ class OptimizerRulesTest(unittest.TestCase):
         self.assertEqual(result_without_pushdown_join_rule, result_with_rule)
         self.assertEqual(query_plan, query_plan_without_pushdown_join_rule)
 
-    @patch("eva.catalog.catalog_manager.CatalogManager.get_udf_cost_catalog_entry")
+    @patch("evadb.catalog.catalog_manager.CatalogManager.get_udf_cost_catalog_entry")
     def test_should_reorder_predicates(self, mock):
         def _check_reorder(cost_func):
             mock.side_effect = cost_func
@@ -179,7 +179,7 @@ class OptimizerRulesTest(unittest.TestCase):
             lambda name: MagicMock(cost=5) if name == "DummyObjectDetector" else None
         )
 
-    @patch("eva.catalog.catalog_manager.CatalogManager.get_udf_cost_catalog_entry")
+    @patch("evadb.catalog.catalog_manager.CatalogManager.get_udf_cost_catalog_entry")
     def test_should_not_reorder_predicates(self, mock):
         def _check_no_reorder(cost_func):
             mock.side_effect = cost_func
@@ -221,7 +221,7 @@ class OptimizerRulesTest(unittest.TestCase):
         # no reordering if default cost is used for both UDF
         _check_no_reorder(lambda name: None)
 
-    @patch("eva.catalog.catalog_manager.CatalogManager.get_udf_cost_catalog_entry")
+    @patch("evadb.catalog.catalog_manager.CatalogManager.get_udf_cost_catalog_entry")
     def test_should_reorder_multiple_predicates(self, mock):
         def side_effect_func(name):
             if name == "DummyMultiObjectDetector":

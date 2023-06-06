@@ -894,7 +894,7 @@ class ParserTests(unittest.TestCase):
                   OUTPUT (bboxes NDARRAY FLOAT32(ANYDIM, 4),
                           scores NDARRAY FLOAT32(ANYDIM))
                   TYPE  FaceDetection
-                  IMPL  'eva/udfs/face_detector.py';
+                  IMPL  'evadb/udfs/face_detector.py';
                   """
         parser = Parser()
         parser.parse(query)

@@ -44,7 +44,7 @@ class LikeTest(unittest.TestCase):
                           bboxes NDARRAY FLOAT32(ANYDIM, 4),
                           scores NDARRAY FLOAT32(ANYDIM))
                   TYPE  OCRExtraction
-                  IMPL  'eva/udfs/ocr_extractor.py';
+                  IMPL  'evadb/udfs/ocr_extractor.py';
         """
         execute_query_fetch_all(self.evadb, create_udf_query)
         select_query = """SELECT X.label, X.x, X.y FROM MemeImages JOIN LATERAL UNNEST(OCRExtractor(data)) AS X(label, x, y) WHERE label LIKE {};""".format(
@@ -61,7 +61,7 @@ class LikeTest(unittest.TestCase):
                           bboxes NDARRAY FLOAT32(ANYDIM, 4),
                           scores NDARRAY FLOAT32(ANYDIM))
                   TYPE  OCRExtraction
-                  IMPL  'eva/udfs/ocr_extractor.py';
+                  IMPL  'evadb/udfs/ocr_extractor.py';
         """
         execute_query_fetch_all(self.evadb, create_udf_query)
 

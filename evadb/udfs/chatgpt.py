@@ -53,7 +53,7 @@ class ChatGPT(AbstractUDF):
             openai.api_key = os.environ.get("OPENAI_KEY", "")
         assert (
             len(openai.api_key) != 0
-        ), "Please set your OpenAI API key in eva.yml file (third_party, open_api_key) or environment variable (OPENAI_KEY)"
+        ), "Please set your OpenAI API key in evadb.yml file (third_party, open_api_key) or environment variable (OPENAI_KEY)"
 
         assert model in _VALID_CHAT_COMPLETION_MODEL, f"Unsupported ChatGPT {model}"
 

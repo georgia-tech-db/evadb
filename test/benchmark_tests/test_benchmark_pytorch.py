@@ -47,7 +47,7 @@ def test_should_run_pytorch_and_facenet(benchmark, setup_pytorch_tests):
                 OUTPUT (bboxes NDARRAY FLOAT32(ANYDIM, 4),
                         scores NDARRAY FLOAT32(ANYDIM))
                 TYPE  FaceDetection
-                IMPL  'eva/udfs/face_detector.py';
+                IMPL  'evadb/udfs/face_detector.py';
     """
     execute_query_fetch_all(setup_pytorch_tests, create_udf_query)
 
@@ -70,7 +70,7 @@ def test_should_run_pytorch_and_resnet50(benchmark, setup_pytorch_tests):
                 INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
                 OUTPUT (features NDARRAY FLOAT32(ANYDIM))
                 TYPE  Classification
-                IMPL  'eva/udfs/feature_extractor.py';
+                IMPL  'evadb/udfs/feature_extractor.py';
     """
     execute_query_fetch_all(setup_pytorch_tests, create_udf_query)
 

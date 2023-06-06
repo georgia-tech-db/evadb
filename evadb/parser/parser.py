@@ -17,7 +17,7 @@ from evadb.parser.lark_parser import LarkParser
 
 class Parser(object):
     """
-    Parser based on EVAQL grammar: eva.lark
+    Parser based on EVAQL grammar: evadb.lark
     """
 
     _lark_parser = None

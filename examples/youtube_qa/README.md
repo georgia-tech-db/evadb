@@ -17,7 +17,7 @@ pip install evadb pytube
 
 ```bat
 wget -nc https://github.com/georgia-tech-db/eva/tree/master/examples/youtube_qa/youtube_qa.py
-wget -nc https://raw.githubusercontent.com/georgia-tech-db/eva/master/eva/udfs/chatgpt.py
+wget -nc https://raw.githubusercontent.com/georgia-tech-db/eva/master/evadb/udfs/chatgpt.py
 ``` 
 
 2. Run script: 

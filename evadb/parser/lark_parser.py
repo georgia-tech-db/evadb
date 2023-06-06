@@ -33,7 +33,7 @@ class LarkParser(object):
 
     def __init__(self):
         dir_path = os.path.dirname(os.path.realpath(__file__))
-        lark_path = os.path.join(dir_path, "eva.lark")
+        lark_path = os.path.join(dir_path, "evadb.lark")
         with open(lark_path) as f:
             sql_grammar = f.read()
         self._parser = Lark(sql_grammar, parser="lalr")

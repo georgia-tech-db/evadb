@@ -31,7 +31,7 @@ class UdfCatalogService(BaseService):
 
         Arguments:
             name (str): name of the udf
-            impl_path (str): path to the udf implementation relative to eva/udf
+            impl_path (str): path to the udf implementation relative to evadb/udf
             type (str): udf operator kind, classification or detection or etc
             checksum(str): checksum of the udf file content, used for consistency
 

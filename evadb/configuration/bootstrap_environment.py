@@ -34,12 +34,12 @@ from evadb.utils.logging_manager import logger as eva_logger
 
 def get_base_config(eva_installation_dir: Path) -> Path:
     """
-    Get path to .eva.yml source path.
+    Get path to .evadb.yml source path.
     This file will be copied to user's .eva directory.
     """
     # if eva package is installed into environment
-    if importlib_resources.is_resource("eva", EVA_CONFIG_FILE):
-        with importlib_resources.path("eva", EVA_CONFIG_FILE) as yml_path:
+    if importlib_resources.is_resource("evadb", EVA_CONFIG_FILE):
+        with importlib_resources.path("evadb", EVA_CONFIG_FILE) as yml_path:
             return yml_path
     else:
         # For local dev environments without package installed

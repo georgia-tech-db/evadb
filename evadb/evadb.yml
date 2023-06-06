@@ -2,7 +2,7 @@ core:
   eva_installation_dir: ""
   datasets_dir: ""
   catalog_database_uri: ""
-  application: "eva"
+  application: "evadb"
   mode: "release" #release or debug
 
 executor:

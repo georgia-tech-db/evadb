@@ -116,7 +116,7 @@ class PytorchTest(unittest.TestCase):
                   OUTPUT (bboxes NDARRAY FLOAT32(ANYDIM, 4),
                           scores NDARRAY FLOAT32(ANYDIM))
                   TYPE  FaceDetection
-                  IMPL  'eva/udfs/face_detector.py';
+                  IMPL  'evadb/udfs/face_detector.py';
         """
         execute_query_fetch_all(self.evadb, create_udf_query)
 
@@ -200,7 +200,7 @@ class PytorchTest(unittest.TestCase):
                   OUTPUT (bboxes NDARRAY FLOAT32(ANYDIM, 4),
                           scores NDARRAY FLOAT32(ANYDIM))
                   TYPE  FaceDetection
-                  IMPL  'eva/udfs/face_detector.py';
+                  IMPL  'evadb/udfs/face_detector.py';
         """
         execute_query_fetch_all(self.evadb, create_udf_query)
 
@@ -219,7 +219,7 @@ class PytorchTest(unittest.TestCase):
                           bboxes NDARRAY FLOAT32(ANYDIM, 4),
                           scores NDARRAY FLOAT32(ANYDIM))
                   TYPE  OCRExtraction
-                  IMPL  'eva/udfs/ocr_extractor.py';
+                  IMPL  'evadb/udfs/ocr_extractor.py';
         """
         execute_query_fetch_all(self.evadb, create_udf_query)
 
@@ -239,7 +239,7 @@ class PytorchTest(unittest.TestCase):
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
                   OUTPUT (features NDARRAY FLOAT32(ANYDIM))
                   TYPE  Classification
-                  IMPL  'eva/udfs/feature_extractor.py';
+                  IMPL  'evadb/udfs/feature_extractor.py';
         """
         execute_query_fetch_all(self.evadb, create_udf_query)
 
@@ -259,7 +259,7 @@ class PytorchTest(unittest.TestCase):
                 INPUT (img_path TEXT(1000))
                 OUTPUT (data NDARRAY UINT8(3, ANYDIM, ANYDIM))
                 TYPE NdarrayUDF
-                IMPL "eva/udfs/ndarray/open.py";
+                IMPL "evadb/udfs/ndarray/open.py";
         """
         execute_query_fetch_all(self.evadb, create_open_udf_query)
 
@@ -269,7 +269,7 @@ class PytorchTest(unittest.TestCase):
                            Feature_Extractor_Name TEXT(100))
                     OUTPUT (distance FLOAT(32, 7))
                     TYPE NdarrayUDF
-                    IMPL "eva/udfs/ndarray/similarity.py";
+                    IMPL "evadb/udfs/ndarray/similarity.py";
         """
         execute_query_fetch_all(self.evadb, create_similarity_udf_query)
 
@@ -277,7 +277,7 @@ class PytorchTest(unittest.TestCase):
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
                   OUTPUT (features NDARRAY FLOAT32(ANYDIM))
                   TYPE  Classification
-                  IMPL  "eva/udfs/feature_extractor.py";
+                  IMPL  "evadb/udfs/feature_extractor.py";
         """
         execute_query_fetch_all(self.evadb, create_feat_udf_query)
 
@@ -315,7 +315,7 @@ class PytorchTest(unittest.TestCase):
                           bboxes NDARRAY FLOAT32(ANYDIM, 4),
                           scores NDARRAY FLOAT32(ANYDIM))
                   TYPE  OCRExtraction
-                  IMPL  'eva/udfs/ocr_extractor.py';
+                  IMPL  'evadb/udfs/ocr_extractor.py';
         """
         execute_query_fetch_all(self.evadb, create_udf_query)
 

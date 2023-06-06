@@ -22,7 +22,7 @@ from evadb.udfs.decorators.io_descriptors.data_types import PandasDataframe
 
 
 class CreateUdfExecutorTest(unittest.TestCase):
-    @patch("eva.executor.create_udf_executor.load_udf_class_from_file")
+    @patch("evadb.executor.create_udf_executor.load_udf_class_from_file")
     def test_should_create_udf(self, load_udf_class_from_file_mock):
         catalog_instance = MagicMock()
         catalog_instance().get_udf_catalog_entry_by_name.return_value = None
@@ -57,7 +57,7 @@ class CreateUdfExecutorTest(unittest.TestCase):
             {"key1": "value1", "key2": "value2"},
         )
 
-    @patch("eva.executor.create_udf_executor.load_udf_class_from_file")
+    @patch("evadb.executor.create_udf_executor.load_udf_class_from_file")
     def test_should_raise_error_on_incorrect_io_definition(
         self, load_udf_class_from_file_mock
     ):

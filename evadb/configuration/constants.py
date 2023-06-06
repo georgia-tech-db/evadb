@@ -14,13 +14,13 @@
 # limitations under the License.
 from pathlib import Path
 
-import eva
+import evadb
 
-EVA_INSTALLATION_DIR = Path(eva.__file__).parent
-EVA_ROOT_DIR = Path(eva.__file__).parent.parent
-EVA_DATABASE_DIR = "eva_data"
-EVA_DATASET_DIR = "eva_datasets"
-EVA_CONFIG_FILE = "eva.yml"
+EVA_INSTALLATION_DIR = Path(evadb.__file__).parent
+EVA_ROOT_DIR = Path(evadb.__file__).parent.parent
+EVA_DATABASE_DIR = "evadb_data"
+EVA_DATASET_DIR = "evadb_datasets"
+EVA_CONFIG_FILE = "evadb.yml"
 UDF_DIR = "udfs"
 CATALOG_DIR = "catalog"
 INDEX_DIR = "index"

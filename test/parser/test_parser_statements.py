@@ -77,7 +77,7 @@ class ParserStatementTests(unittest.TestCase):
                   OUTPUT (bboxes NDARRAY FLOAT32(ANYDIM, 4),
                           scores NDARRAY FLOAT32(ANYDIM))
                   TYPE  FaceDetection
-                  IMPL  'eva/udfs/face_detector.py';
+                  IMPL  'evadb/udfs/face_detector.py';
             """,
             "SHOW TABLES;",
             "SHOW UDFS;",
@@ -137,7 +137,7 @@ class ParserStatementTests(unittest.TestCase):
                 Output (bboxes ndArray float32(anydim, 4),
                 scores ndArray float32(ANYdim))
                 Type FaceDetection
-                Impl 'eva/udfs/face_detector.py';
+                Impl 'evadb/udfs/face_detector.py';
             """,
         ]
         queries = queries + randomized_cases
