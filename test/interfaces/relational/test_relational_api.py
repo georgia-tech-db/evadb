@@ -304,7 +304,7 @@ class RelationalAPI(unittest.TestCase):
             drop_dummy_object_detector_udf.execute()
 
         # drop existing table
-        drop_table = cursor.drop("dummy_video", if_exists=True)
+        drop_table = cursor.drop_table("dummy_video", if_exists=True)
         drop_table.execute()
 
         # Check if deleted successfully
@@ -313,10 +313,10 @@ class RelationalAPI(unittest.TestCase):
             cursor.query(select_query_sql).execute()
 
         # drop non existing table with if_exists=True should not raise error
-        drop_table = cursor.drop("dummy_video", if_exists=True)
+        drop_table = cursor.drop_table("dummy_video", if_exists=True)
         drop_table.execute()
 
         # if_exists=False should raise error
-        drop_table = cursor.drop("dummy_video", if_exists=False)
+        drop_table = cursor.drop_table("dummy_video", if_exists=False)
         with self.assertRaises(ExecutorError):
             drop_table.execute()

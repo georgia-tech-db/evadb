@@ -204,7 +204,7 @@ class EVADBCursor(object):
         stmt = parse_load(table_name, file_regex, format, **kwargs)
         return EVADBQuery(self._evadb, stmt)
 
-    def drop(self, table_name: str, if_exists: bool = True) -> "EVADBQuery":
+    def drop_table(self, table_name: str, if_exists: bool = True) -> "EVADBQuery":
         """
         Drop a table in the database.
 
