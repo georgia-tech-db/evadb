@@ -23,13 +23,14 @@ from test.util import (
 
 import numpy as np
 import pandas as pd
-from evadbbinder.binder_utils import BinderError
-from evadbconfiguration.constants import EVA_DATABASE_DIR, EVA_ROOT_DIR
-from evadbexecutor.executor_utils import ExecutorError
-from evadbinterfaces.relational.db import connect
-from evadbmodels.storage.batch import Batch
-from evadbserver.command_handler import execute_query_fetch_all
 from pandas.testing import assert_frame_equal
+
+from evadb.binder.binder_utils import BinderError
+from evadb.configuration.constants import EVA_DATABASE_DIR, EVA_ROOT_DIR
+from evadb.executor.executor_utils import ExecutorError
+from evadb.interfaces.relational.db import connect
+from evadb.models.storage.batch import Batch
+from evadb.server.command_handler import execute_query_fetch_all
 
 
 class RelationalAPI(unittest.TestCase):

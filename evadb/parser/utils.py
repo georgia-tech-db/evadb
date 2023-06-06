@@ -12,12 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from evadbparser.create_udf_statement import CreateUDFStatement
-from evadbparser.drop_statement import DropTableStatement
-from evadbparser.drop_udf_statement import DropUDFStatement
-from evadbparser.load_statement import LoadDataStatement
-from evadbparser.parser import Parser
-from evadbparser.select_statement import SelectStatement
+from evadb.parser.create_udf_statement import CreateUDFStatement
+from evadb.parser.drop_statement import DropTableStatement
+from evadb.parser.drop_udf_statement import DropUDFStatement
+from evadb.parser.load_statement import LoadDataStatement
+from evadb.parser.parser import Parser
+from evadb.parser.select_statement import SelectStatement
 
 
 def parse_expression(expr: str):
