@@ -13,17 +13,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 import os
 import unittest
 from test.markers import ray_skip_marker
 from test.util import get_evadb_for_testing
 from unittest.mock import MagicMock
 
+import openai
 import pandas as pd
 from mock import patch
 
-from eva.executor.executor_utils import ExecutorError
+from eva.configuration.configuration_manager import ConfigurationManager
 from eva.models.storage.batch import Batch
 from eva.server.command_handler import execute_query_fetch_all
 
@@ -101,12 +101,29 @@ class ChatGPTTest(unittest.TestCase):
         output_batch = execute_query_fetch_all(self.evadb, gpt_query)
         self.assertEqual(output_batch, expected_output)
 
-    def test_gpt_udf_no_key(self):
+    @patch.dict(os.environ, {"OPENAI_KEY": "dummy_openai_key"}, clear=True)
+    def test_gpt_udf_no_key_in_yml_should_read_env(self):
+        ConfigurationManager().update_value("third_party", "OPENAI_KEY", "")
         udf_name = "ChatGPT"
         execute_query_fetch_all(self.evadb, f"DROP UDF IF EXISTS {udf_name};")
 
-        with self.assertRaises(ExecutorError):
-            create_udf_query = f"""CREATE UDF {udf_name}
+        create_udf_query = f"""CREATE UDF {udf_name}
             IMPL 'eva/udfs/chatgpt.py'
             """
+        execute_query_fetch_all(self.evadb, create_udf_query)
+        self.assertEqual(openai.api_key, "dummy_openai_key")
+
+    @patch.dict(os.environ, {}, clear=True)
+    def test_gpt_udf_no_key_in_yml_and_env_should_raise(self):
+        ConfigurationManager().update_value("third_party", "OPENAI_KEY", "")
+        udf_name = "ChatGPT"
+        execute_query_fetch_all(self.evadb, f"DROP UDF IF EXISTS {udf_name};")
+
+        with self.assertRaises(
+            Exception,
+            msg="Please set your OpenAI API key in eva.yml file (third_party, open_api_key) or environment variable (OPENAI_KEY)",
+        ):
+            create_udf_query = f"""CREATE UDF {udf_name}
+                IMPL 'eva/udfs/chatgpt.py'
+                """
             execute_query_fetch_all(self.evadb, create_udf_query)
