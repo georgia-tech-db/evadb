@@ -70,6 +70,7 @@ def parse_load(table_name: str, file_regex: str, format: str, **kwargs):
     assert isinstance(stmt, LoadDataStatement), "Expected a load statement"
     return stmt
 
+
 def parse_drop(table_name: str, if_exists: bool, **kwargs):
     mock_query = (
         f"DROP TABLE IF EXISTS {table_name}"
@@ -82,17 +83,17 @@ def parse_drop(table_name: str, if_exists: bool, **kwargs):
     assert isinstance(stmt, DropTableStatement), "Expected a drop table statement"
     return stmt
 
+
 def parse_drop_udf(udf_name: str, if_exists: bool, **kwargs):
     mock_query = (
-        f"DROP UDF IF EXISTS {udf_name}"
-        if if_exists
-        else f"DROP UDF {udf_name}"
+        f"DROP UDF IF EXISTS {udf_name}" if if_exists else f"DROP UDF {udf_name}"
     )
     mock_query += ";"
 
     stmt = Parser().parse(mock_query)[0]
     assert isinstance(stmt, DropUDFStatement), "Expected a drop udf statement"
     return stmt
+
 
 def parse_query(query):
     stmt = Parser().parse(query)

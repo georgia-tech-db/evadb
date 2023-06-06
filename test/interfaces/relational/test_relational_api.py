@@ -303,15 +303,12 @@ class RelationalAPI(unittest.TestCase):
         with self.assertRaises(ExecutorError):
             drop_dummy_object_detector_udf.execute()
 
-
         # drop existing table
         drop_table = cursor.drop("dummy_video", if_exists=True)
         drop_table.execute()
 
         # Check if deleted successfully
-        select_query_sql = (
-            "SELECT id, data FROM dummy_video ORDER BY id;"
-        )
+        select_query_sql = "SELECT id, data FROM dummy_video ORDER BY id;"
         with self.assertRaises(ExecutorError):
             cursor.query(select_query_sql).execute()
 
@@ -323,5 +320,3 @@ class RelationalAPI(unittest.TestCase):
         drop_table = cursor.drop("dummy_video", if_exists=False)
         with self.assertRaises(ExecutorError):
             drop_table.execute()
-        
-

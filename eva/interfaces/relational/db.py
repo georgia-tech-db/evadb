@@ -28,11 +28,11 @@ from eva.parser.select_statement import SelectStatement
 from eva.parser.utils import (
     parse_create_udf,
     parse_create_vector_index,
+    parse_drop,
+    parse_drop_udf,
     parse_load,
     parse_query,
     parse_table_clause,
-    parse_drop,
-    parse_drop_udf,
 )
 from eva.udfs.udf_bootstrap_queries import init_builtin_udfs
 from eva.utils.logging_manager import logger
@@ -203,7 +203,7 @@ class EVADBCursor(object):
         # LOAD {FORMAT} file_regex INTO table_name
         stmt = parse_load(table_name, file_regex, format, **kwargs)
         return EVADBQuery(self._evadb, stmt)
-    
+
     def drop(self, table_name: str, if_exists: bool = True) -> "EVADBQuery":
         """
         Drop a table in the database.
@@ -218,7 +218,7 @@ class EVADBCursor(object):
         """
         stmt = parse_drop(table_name, if_exists)
         return EVADBQuery(self._evadb, stmt)
-    
+
     def drop_udf(self, udf_name: str, if_exists: bool = True) -> "EVADBQuery":
         """
         Drop a udf in the database.
