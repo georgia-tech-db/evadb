@@ -21,7 +21,11 @@ from evadb.optimizer.cost_model import CostModel
 from evadb.optimizer.operators import Operator
 from evadb.optimizer.optimizer_context import OptimizerContext
 from evadb.optimizer.optimizer_task_stack import OptimizerTaskStack
-from evadb.optimizer.optimizer_tasks import BottomUpRewrite, OptimizeGroup, TopDownRewrite
+from evadb.optimizer.optimizer_tasks import (
+    BottomUpRewrite,
+    OptimizeGroup,
+    TopDownRewrite,
+)
 from evadb.optimizer.property import PropertyType
 from evadb.optimizer.rules.rules_manager import RulesManager
 

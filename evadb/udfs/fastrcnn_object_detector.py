@@ -20,7 +20,10 @@ import pandas as pd
 from evadb.catalog.catalog_type import NdArrayType
 from evadb.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
 from evadb.udfs.decorators.decorators import forward, setup
-from evadb.udfs.decorators.io_descriptors.data_types import PandasDataframe, PyTorchTensor
+from evadb.udfs.decorators.io_descriptors.data_types import (
+    PandasDataframe,
+    PyTorchTensor,
+)
 
 try:
     from torch import Tensor

@@ -51,7 +51,9 @@ from evadb.catalog.services.udf_cache_catalog_service import UdfCacheCatalogServ
 from evadb.catalog.services.udf_catalog_service import UdfCatalogService
 from evadb.catalog.services.udf_cost_catalog_service import UdfCostCatalogService
 from evadb.catalog.services.udf_io_catalog_service import UdfIOCatalogService
-from evadb.catalog.services.udf_metadata_catalog_service import UdfMetadataCatalogService
+from evadb.catalog.services.udf_metadata_catalog_service import (
+    UdfMetadataCatalogService,
+)
 from evadb.catalog.sql_config import IDENTIFIER_COLUMN, SQLConfig
 from evadb.configuration.configuration_manager import ConfigurationManager
 from evadb.expression.function_expression import FunctionExpression
