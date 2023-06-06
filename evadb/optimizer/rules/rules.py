@@ -1228,8 +1228,11 @@ Rules to optimize Ray.
 def get_ray_env_dict():
     # Get the highest GPU id and expose all GPUs that have id lower than
     # the max id.
-    max_gpu_id = max(Context().gpus) + 1
-    return {"CUDA_VISIBLE_DEVICES": ",".join([str(n) for n in range(max_gpu_id)])}
+    if len(Context().gpus) > 0:
+        max_gpu_id = max(Context().gpus) + 1
+        return {"CUDA_VISIBLE_DEVICES": ",".join([str(n) for n in range(max_gpu_id)])}
+    else:
+        return {}
 
 
 class LogicalExchangeToPhysical(Rule):
