@@ -31,6 +31,8 @@ from eva.parser.utils import (
     parse_load,
     parse_query,
     parse_table_clause,
+    parse_drop,
+    parse_drop_udf,
 )
 from eva.udfs.udf_bootstrap_queries import init_builtin_udfs
 from eva.utils.logging_manager import logger
@@ -201,6 +203,36 @@ class EVADBCursor(object):
         # LOAD {FORMAT} file_regex INTO table_name
         stmt = parse_load(table_name, file_regex, format, **kwargs)
         return EVADBQuery(self._evadb, stmt)
+    
+    def drop(self, table_name: str, if_exists: bool = True) -> "EVADBQuery":
+        """
+        Drop a table in the database.
+
+        Args:
+            table_name (str): Name of the udf to be created.
+            if_exists (bool): If True, do not raise an error if the Tabel does not already exist. If False, raise an error.
+            **kwargs: Additional keyword arguments for configuring the create udf operation.
+
+        Returns
+            EVADBQuery: The EVADBQuery object representing the UDF created.
+        """
+        stmt = parse_drop(table_name, if_exists)
+        return EVADBQuery(self._evadb, stmt)
+    
+    def drop_udf(self, udf_name: str, if_exists: bool = True) -> "EVADBQuery":
+        """
+        Drop a udf in the database.
+
+        Args:
+            udf_name (str): Name of the udf to be created.
+            if_exists (bool): If True, do not raise an error if the UDF does not already exist. If False, raise an error.
+            **kwargs: Additional keyword arguments for configuring the create udf operation.
+
+        Returns
+            EVADBQuery: The EVADBQuery object representing the UDF created.
+        """
+        stmt = parse_drop_udf(udf_name, if_exists)
+        return EVADBQuery(self._evadb, stmt)
 
     def create_udf(
         self,
@@ -215,7 +247,7 @@ class EVADBCursor(object):
 
         Args:
             udf_name (str): Name of the udf to be created.
-            if_not_exists (bool): If True, do not raise an error if the UDF already exists. If False, raise an error.
+            if_not_exists (bool): If True, do not raise an error if the UDF already exist. If False, raise an error.
             impl_path (str): Path string to udf's implementation.
             type (str): Type of the udf (e.g. HuggingFace).
             **kwargs: Additional keyword arguments for configuring the create udf operation.
