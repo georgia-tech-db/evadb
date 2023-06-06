@@ -320,3 +320,48 @@ class RelationalAPI(unittest.TestCase):
         drop_table = cursor.drop_table("dummy_video", if_exists=False)
         with self.assertRaises(ExecutorError):
             drop_table.execute()
+
+    def test_pdf_similarity_search(self):
+        conn = connect()
+        cursor = conn.cursor()
+        pdf_path1 = f"{EVA_ROOT_DIR}/data/documents/state_of_the_union.pdf"
+        pdf_path2 = f"{EVA_ROOT_DIR}/data/documents/layout-parser-paper.pdf"
+
+        load_pdf = cursor.load(file_regex=pdf_path1, format="PDF", table_name="PDFss")
+        load_pdf.execute()
+
+        load_pdf = cursor.load(file_regex=pdf_path2, format="PDF", table_name="PDFss")
+        load_pdf.execute()
+
+        udf_check = cursor.query(
+            "DROP UDF IF  EXISTS SentenceTransformerFeatureExtractor"
+        )
+        udf_check.execute()
+        udf = cursor.create_udf(
+            "SentenceTransformerFeatureExtractor",
+            True,
+            f"{EVA_ROOT_DIR}/eva/udfs/sentence_transformer_feature_extractor.py",
+        )
+        udf.execute()
+
+        cursor.create_vector_index(
+            "faiss_index",
+            table_name="PDFss",
+            expr="SentenceTransformerFeatureExtractor(data)",
+            using="QDRANT",
+        ).df()
+
+        query = (
+            cursor.table("PDFss")
+            .order(
+                """Similarity(
+                    SentenceTransformerFeatureExtractor('When was the NATO created?'), SentenceTransformerFeatureExtractor(data)
+                ) DESC"""
+            )
+            .limit(3)
+            .select("data")
+        )
+        output = query.df()
+        print(output)
+        self.assertEqual(len(output), 3)
+        self.assertTrue("pdfss.data" in output.columns)

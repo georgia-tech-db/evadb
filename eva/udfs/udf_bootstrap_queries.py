@@ -194,7 +194,7 @@ def init_builtin_udfs(db: EVADatabase, mode: str = "debug") -> None:
         Open_udf_query,
         Similarity_udf_query,
         norfair_obj_tracker_query,
-        mnistcnn_udf_query
+        mnistcnn_udf_query,
         # Disabled because required packages (eg., easy_ocr might not be preinstalled)
         # face_detection_udf_query,
         # ocr_udf_query,

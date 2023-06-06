@@ -14,8 +14,9 @@
 # limitations under the License.
 import os
 import shutil
+import time
 
-from eva.interfaces.relational.db import EVADBConnection, connect
+from eva.interfaces.relational.db import EVADBConnection, EVADBCursor, connect
 from eva.configuration.configuration_manager import ConfigurationManager
 from pytube import YouTube
 
@@ -25,50 +26,45 @@ def download_youtube_video_from_link(video_link: str):
     Args:
         video_link (str): url of the target YouTube video.
     """
+    start = time.time()
     yt = YouTube(video_link).streams.first()
     try:
         print("Video download in progress...")
         yt.download(filename='online_video.mp4')
     except:
         print("An error has occurred")
-    print("Video downloaded successfully")
+    print(f"Video downloaded successfully in {time.time() - start} seconds")
 
 
-def analyze_video(api_key: str) -> EVADBConnection:
+def analyze_video() -> EVADBCursor:
     """Extracts speech from video for llm processing.
 
-    Args:
-        api_key (str): openai api key.
-
     Returns:
-        EVADBConnection: evadb api connection.
+        EVADBCursor: evadb api cursor.
     """
     print("Analyzing video. This may take a while...")
+    start = time.time()
     
-    # establish evadb api connection
-    conn = connect()
+    # establish evadb api cursor
+    cursor = connect().cursor()
 
     # bootstrap speech analyzer udf and chatgpt udf for analysis
-    speech_analyzer_udf_query = """
-        CREATE UDF IF NOT EXISTS SpeechRecognizer 
-        TYPE HuggingFace 
-        'task' 'automatic-speech-recognition' 
-        'model' 'openai/whisper-base';
-        """
-    conn.query(speech_analyzer_udf_query).execute()
+    args = {'task': 'automatic-speech-recognition' , 'model': 'openai/whisper-base'}
+    speech_analyzer_udf_rel = cursor.create_udf("SpeechRecognizer", type="HuggingFace", **args)
+    speech_analyzer_udf_rel.execute()
 
-    chatgpt_udf_query = """CREATE UDF IF NOT EXISTS ChatGPT IMPL 'eva/udfs/chatgpt.py';"""
-    conn.query(chatgpt_udf_query).execute()
+    # create chatgpt udf from implemententation
+    chatgpt_udf_rel = cursor.create_udf("ChatGPT", impl_path='../../eva/udfs/chatgpt.py')
+    chatgpt_udf_rel.execute()
 
     # load youtube video into an evadb table
-    conn.query("""DROP TABLE IF EXISTS youtube_video;""").execute()
-    conn.load("online_video.mp4", "youtube_video", "video").execute()
+    cursor.query("""DROP TABLE IF EXISTS youtube_video;""").execute()
+    cursor.load("online_video.mp4", "youtube_video", "video").execute()
 
     # extract speech texts from videos
-    conn.query("CREATE TABLE IF NOT EXISTS youtube_video_text AS SELECT SpeechRecognizer(audio) FROM youtube_video;").execute()
-
-    print("Video analysis completed!")
-    return conn
+    cursor.query("CREATE TABLE IF NOT EXISTS youtube_video_text AS SELECT SpeechRecognizer(audio) FROM youtube_video;").execute()
+    print(f"Video analysis completed in {time.time() - start} seconds.")
+    return cursor
 
 def cleanup():
     """Removes any temporary file / directory created by EVA.
@@ -94,7 +90,7 @@ if __name__ == "__main__":
     download_youtube_video_from_link(video_link)
 
     try:
-        conn = analyze_video(api_key)
+        cursor = analyze_video()
 
         print("===========================================")
         print("Ask anything about the video:")
@@ -104,9 +100,11 @@ if __name__ == "__main__":
             if question.lower() == 'exit':
                 ready = False
             else:
-                rel = conn.table("youtube_video_text").select(f"ChatGPT('{question}', text)")
-                response = rel.df()['chatgpt.response'][0]
-                print("Answer:")
+                # Generate response with chatgpt udf
+                generate_chatgpt_response_rel = cursor.table("youtube_video_text").select(f"ChatGPT('{question}', text)")
+                start = time.time()
+                response = generate_chatgpt_response_rel.df()['chatgpt.response'][0]
+                print(f"Answer (generated in {time.time() - start} seconds):")
                 print(response, "\n")
         
         cleanup()

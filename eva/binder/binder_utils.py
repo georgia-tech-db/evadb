@@ -20,6 +20,7 @@ from typing import TYPE_CHECKING, List
 from eva.catalog.catalog_type import TableType
 from eva.catalog.catalog_utils import (
     get_video_table_column_definitions,
+    is_document_table,
     is_string_col,
     is_video_table,
 )
@@ -94,23 +95,42 @@ def extend_star(
     return target_list
 
 
-def check_groupby_pattern(groupby_string: str) -> None:
-    # match the pattern of group by clause (e.g., 16f or 8s)
-    pattern = re.search(r"^\d+[fs]$", groupby_string)
+def check_groupby_pattern(table_ref: TableRef, groupby_string: str) -> None:
+    # match the pattern of group by clause (e.g., 16 frames or 8 samples)
+    pattern = re.search(r"^\d+\s*(?:frames|samples|paragraphs)$", groupby_string)
     # if valid pattern
     if not pattern:
         err_msg = "Incorrect GROUP BY pattern: {}".format(groupby_string)
         raise BinderError(err_msg)
     match_string = pattern.group(0)
-    if not match_string[-1] == "f":
-        err_msg = "Only grouping by frames (f) is supported"
+    suffix_string = re.sub(r"^\d+\s*", "", match_string)
+
+    if suffix_string not in ["frames", "samples", "paragraphs"]:
+        err_msg = "Grouping only supported by frames for videos, by samples for audio, and by paragraphs for documents"
         raise BinderError(err_msg)
+
+    if suffix_string == "frames" and not is_video_table(table_ref.table.table_obj):
+        err_msg = "Grouping by frames only supported for videos"
+        raise BinderError(err_msg)
+
+    if suffix_string == "samples" and not is_video_table(table_ref.table.table_obj):
+        err_msg = "Grouping by samples only supported for videos"
+        raise BinderError(err_msg)
+
+    if suffix_string == "paragraphs" and not is_document_table(
+        table_ref.table.table_obj
+    ):
+        err_msg = "Grouping by paragraphs only supported for documents"
+        raise BinderError(err_msg)
+
     # TODO ACTION condition on segment length?
 
 
-def check_table_object_is_video(table_ref: TableRef) -> None:
-    if not is_video_table(table_ref.table.table_obj):
-        err_msg = "GROUP BY only supported for video tables"
+def check_table_object_is_groupable(table_ref: TableRef) -> None:
+    if not is_video_table(table_ref.table.table_obj) and not is_document_table(
+        table_ref.table.table_obj
+    ):
+        err_msg = "GROUP BY only supported for video and document tables"
         raise BinderError(err_msg)
 
 

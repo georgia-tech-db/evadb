@@ -28,4 +28,4 @@ experimental:
   ray: True
 
 third_party:
-  openai_api_key: ""
+  OPENAI_KEY: ""
