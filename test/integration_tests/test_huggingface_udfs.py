@@ -219,7 +219,6 @@ class HuggingFaceTests(unittest.TestCase):
         )
         execute_query_fetch_all(self.evadb, create_udf)
 
-        self.evadb.config.update_value("experimental", "ray", False)
         # TODO: use with SAMPLE AUDIORATE 16000
         select_query = f"SELECT {udf_name}(audio) FROM VIDEOS;"
         output = execute_query_fetch_all(self.evadb, select_query)
@@ -232,7 +231,6 @@ class HuggingFaceTests(unittest.TestCase):
         select_query_with_group_by = (
             f"SELECT {udf_name}(SEGMENT(audio)) FROM VIDEOS GROUP BY '240 samples';"
         )
-        self.evadb.config.update_value("experimental", "ray", False)
         output = execute_query_fetch_all(self.evadb, select_query_with_group_by)
 
         # verify that output has one row and one column only

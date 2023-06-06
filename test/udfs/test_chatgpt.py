@@ -103,7 +103,7 @@ class ChatGPTTest(unittest.TestCase):
 
     @patch.dict(os.environ, {"OPENAI_KEY": "dummy_openai_key"}, clear=True)
     def test_gpt_udf_no_key_in_yml_should_read_env(self):
-        ConfigurationManager().update_value("third_party", "openai_api_key", "")
+        ConfigurationManager().update_value("third_party", "OPENAI_KEY", "")
         udf_name = "ChatGPT"
         execute_query_fetch_all(self.evadb, f"DROP UDF IF EXISTS {udf_name};")
 
@@ -115,7 +115,7 @@ class ChatGPTTest(unittest.TestCase):
 
     @patch.dict(os.environ, {}, clear=True)
     def test_gpt_udf_no_key_in_yml_and_env_should_raise(self):
-        ConfigurationManager().update_value("third_party", "openai_api_key", "")
+        ConfigurationManager().update_value("third_party", "OPENAI_KEY", "")
         udf_name = "ChatGPT"
         execute_query_fetch_all(self.evadb, f"DROP UDF IF EXISTS {udf_name};")
 

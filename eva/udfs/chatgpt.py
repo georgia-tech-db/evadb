@@ -47,9 +47,7 @@ class ChatGPT(AbstractUDF):
         temperature: float = 0,
     ) -> None:
         # Try Configuration Manager
-        openai.api_key = ConfigurationManager().get_value(
-            "third_party", "openai_api_key"
-        )
+        openai.api_key = ConfigurationManager().get_value("third_party", "OPENAI_KEY")
         # If not found, try OS Environment Variable
         if len(openai.api_key) == 0:
             openai.api_key = os.environ.get("OPENAI_KEY", "")
