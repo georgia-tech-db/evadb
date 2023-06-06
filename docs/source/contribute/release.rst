@@ -79,7 +79,7 @@ merged since the last release.
        python3 -m venv test_evadb  # create a virtualenv for testing
        source test_evadb/bin/activate  # activate virtualenv
        python3 -m pip install dist/evadb-0.9.1-py3-none-any.whl
-       python3 -c "import evasb; print(evadb.__version__)"
+       python3 -c "import evadb; print(evadb.__version__)"
 
 10. Publish to PyPI
 
