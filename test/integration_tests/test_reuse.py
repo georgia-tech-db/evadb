@@ -24,17 +24,17 @@ from test.util import (
     shutdown_ray,
 )
 
-from eva.configuration.constants import EVA_ROOT_DIR
-from eva.optimizer.operators import LogicalFunctionScan
-from eva.optimizer.plan_generator import PlanGenerator
-from eva.optimizer.rules.rules import (
+from evadb.configuration.constants import EVA_ROOT_DIR
+from evadb.optimizer.operators import LogicalFunctionScan
+from evadb.optimizer.plan_generator import PlanGenerator
+from evadb.optimizer.rules.rules import (
     CacheFunctionExpressionInApply,
     CacheFunctionExpressionInFilter,
     CacheFunctionExpressionInProject,
 )
-from eva.optimizer.rules.rules_manager import RulesManager, disable_rules
-from eva.server.command_handler import execute_query_fetch_all
-from eva.utils.stats import Timer
+from evadb.optimizer.rules.rules_manager import RulesManager, disable_rules
+from evadb.server.command_handler import execute_query_fetch_all
+from evadb.utils.stats import Timer
 
 
 class ReuseTest(unittest.TestCase):

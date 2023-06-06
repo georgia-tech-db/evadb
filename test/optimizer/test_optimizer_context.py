@@ -16,8 +16,8 @@ import unittest
 
 from mock import MagicMock
 
-from eva.optimizer.cost_model import CostModel
-from eva.optimizer.optimizer_context import OptimizerContext
+from evadb.optimizer.cost_model import CostModel
+from evadb.optimizer.optimizer_context import OptimizerContext
 
 
 class TestOptimizerContext(unittest.TestCase):

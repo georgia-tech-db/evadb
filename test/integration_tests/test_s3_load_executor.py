@@ -28,10 +28,10 @@ import pandas as pd
 import pytest
 from moto import mock_s3
 
-from eva.configuration.constants import EVA_ROOT_DIR
-from eva.models.storage.batch import Batch
-from eva.parser.types import FileFormatType
-from eva.server.command_handler import execute_query_fetch_all
+from evadb.configuration.constants import EVA_ROOT_DIR
+from evadb.models.storage.batch import Batch
+from evadb.parser.types import FileFormatType
+from evadb.server.command_handler import execute_query_fetch_all
 
 
 @pytest.mark.notparallel

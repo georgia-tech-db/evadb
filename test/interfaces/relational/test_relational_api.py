@@ -175,7 +175,7 @@ class RelationalAPI(unittest.TestCase):
         # todo support register udf
         cursor.query(
             f"""CREATE UDF IF NOT EXISTS SiftFeatureExtractor
-                IMPL  '{EVA_ROOT_DIR}/eva/udfs/sift_feature_extractor.py'"""
+                IMPL  '{EVA_ROOT_DIR}/evadb/udfs/sift_feature_extractor.py'"""
         ).df()
 
         # create a vector index using QDRANT
@@ -341,7 +341,7 @@ class RelationalAPI(unittest.TestCase):
         udf = cursor.create_udf(
             "SentenceTransformerFeatureExtractor",
             True,
-            f"{EVA_ROOT_DIR}/eva/udfs/sentence_transformer_feature_extractor.py",
+            f"{EVA_ROOT_DIR}/evadb/udfs/sentence_transformer_feature_extractor.py",
         )
         udf.execute()
 

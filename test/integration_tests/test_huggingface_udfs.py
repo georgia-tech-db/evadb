@@ -17,8 +17,8 @@ from test.util import create_text_csv, file_remove, get_evadb_for_testing
 
 import pytest
 
-from eva.executor.executor_utils import ExecutorError
-from eva.server.command_handler import execute_query_fetch_all
+from evadb.executor.executor_utils import ExecutorError
+from evadb.server.command_handler import execute_query_fetch_all
 
 NUM_FRAMES = 10
 

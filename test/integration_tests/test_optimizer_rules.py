@@ -26,20 +26,20 @@ import pandas as pd
 import pytest
 from mock import MagicMock, patch
 
-from eva.configuration.constants import EVA_ROOT_DIR
-from eva.expression.comparison_expression import ComparisonExpression
-from eva.models.storage.batch import Batch
-from eva.optimizer.plan_generator import PlanGenerator
-from eva.optimizer.rules.rules import (
+from evadb.configuration.constants import EVA_ROOT_DIR
+from evadb.expression.comparison_expression import ComparisonExpression
+from evadb.models.storage.batch import Batch
+from evadb.optimizer.plan_generator import PlanGenerator
+from evadb.optimizer.rules.rules import (
     PushDownFilterThroughApplyAndMerge,
     PushDownFilterThroughJoin,
     ReorderPredicates,
     XformLateralJoinToLinearFlow,
 )
-from eva.optimizer.rules.rules_manager import RulesManager, disable_rules
-from eva.plan_nodes.predicate_plan import PredicatePlan
-from eva.server.command_handler import execute_query_fetch_all
-from eva.utils.stats import Timer
+from evadb.optimizer.rules.rules_manager import RulesManager, disable_rules
+from evadb.plan_nodes.predicate_plan import PredicatePlan
+from evadb.server.command_handler import execute_query_fetch_all
+from evadb.utils.stats import Timer
 
 
 @pytest.mark.notparallel
@@ -59,8 +59,8 @@ class OptimizerRulesTest(unittest.TestCase):
         shutdown_ray()
         execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS MyVideo;")
 
-    @patch("eva.expression.function_expression.FunctionExpression.evaluate")
-    @patch("eva.models.storage.batch.Batch.merge_column_wise")
+    @patch("evadb.expression.function_expression.FunctionExpression.evaluate")
+    @patch("evadb.models.storage.batch.Batch.merge_column_wise")
     def test_should_benefit_from_pushdown(self, merge_mock, evaluate_mock):
         # added to mock away the
         evaluate_mock.return_value = Batch(
@@ -146,7 +146,7 @@ class OptimizerRulesTest(unittest.TestCase):
         self.assertEqual(result_without_pushdown_join_rule, result_with_rule)
         self.assertEqual(query_plan, query_plan_without_pushdown_join_rule)
 
-    @patch("eva.catalog.catalog_manager.CatalogManager.get_udf_cost_catalog_entry")
+    @patch("evadb.catalog.catalog_manager.CatalogManager.get_udf_cost_catalog_entry")
     def test_should_reorder_predicates(self, mock):
         def _check_reorder(cost_func):
             mock.side_effect = cost_func
@@ -179,7 +179,7 @@ class OptimizerRulesTest(unittest.TestCase):
             lambda name: MagicMock(cost=5) if name == "DummyObjectDetector" else None
         )
 
-    @patch("eva.catalog.catalog_manager.CatalogManager.get_udf_cost_catalog_entry")
+    @patch("evadb.catalog.catalog_manager.CatalogManager.get_udf_cost_catalog_entry")
     def test_should_not_reorder_predicates(self, mock):
         def _check_no_reorder(cost_func):
             mock.side_effect = cost_func
@@ -221,7 +221,7 @@ class OptimizerRulesTest(unittest.TestCase):
         # no reordering if default cost is used for both UDF
         _check_no_reorder(lambda name: None)
 
-    @patch("eva.catalog.catalog_manager.CatalogManager.get_udf_cost_catalog_entry")
+    @patch("evadb.catalog.catalog_manager.CatalogManager.get_udf_cost_catalog_entry")
     def test_should_reorder_multiple_predicates(self, mock):
         def side_effect_func(name):
             if name == "DummyMultiObjectDetector":

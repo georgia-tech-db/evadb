@@ -56,7 +56,7 @@ def get_string_in_line(file_path, line_number):
 # ==============================================
 
 # NOTE: absolute path to eva directory is calculated from current directory
-# directory structure: eva/scripts/formatting/<this_file>
+# directory structure: evadb/scripts/formatting/<this_file>
 # EVA_DIR needs to be redefined if the directory structure is changed
 CODE_SOURCE_DIR = os.path.abspath(os.path.dirname(__file__))
 EVA_DIR = functools.reduce(
@@ -208,7 +208,7 @@ def publish_wheels(tag):
     run_command("python3 setup.py bdist_wheel")
 
     run_command(f"python3 -m pip install dist/evadb-{tag}-py3-none-any.whl")
-    run_command("""python3 -c "import eva; print(eva.__version__)" """)
+    run_command("""python3 -c "import evadb; print(evadb.__version__)" """)
 
     print("Running twine to upload wheels")
     print("Ensure that you have .pypirc file in your $HOME folder")
@@ -299,7 +299,7 @@ if __name__ == "__main__":
 
     # version.py defines the VERSION and VERSION_SHORT variables
     VERSION_DICT: Dict[str, str] = {}
-    with open("eva/version.py", "r") as version_file:
+    with open("evadb/version.py", "r") as version_file:
         exec(version_file.read(), VERSION_DICT)
 
     VERSION = VERSION_DICT["VERSION"]
