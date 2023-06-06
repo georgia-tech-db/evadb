@@ -136,9 +136,7 @@ class CreateTableStatement(AbstractStatement):
         )
 
         if self._query is not None:
-            print_str = "CREATE TABLE {} AS {}\n".format(
-                self._table_info, self._query
-            )
+            print_str = "CREATE TABLE {} AS {}\n".format(self._table_info, self._query)
 
         for column in self.column_list:
             print_str += str(column) + "\n"
@@ -182,6 +180,6 @@ class CreateTableStatement(AbstractStatement):
                 self.table_info,
                 self.if_not_exists,
                 tuple(self.column_list or []),
-                self.query
+                self.query,
             )
         )
