@@ -17,27 +17,27 @@ from unittest.mock import MagicMock, patch
 
 import pandas as pd
 
-from eva.catalog.catalog_type import TableType
-from eva.catalog.models.table_catalog import TableCatalogEntry
-from eva.executor.create_executor import CreateExecutor
-from eva.executor.create_udf_executor import CreateUDFExecutor
-from eva.executor.drop_udf_executor import DropUDFExecutor
-from eva.executor.insert_executor import InsertExecutor
-from eva.executor.load_executor import LoadDataExecutor
-from eva.executor.plan_executor import PlanExecutor
-from eva.executor.pp_executor import PPExecutor
-from eva.executor.seq_scan_executor import SequentialScanExecutor
-from eva.models.storage.batch import Batch
-from eva.plan_nodes.create_plan import CreatePlan
-from eva.plan_nodes.create_udf_plan import CreateUDFPlan
-from eva.plan_nodes.drop_plan import DropPlan
-from eva.plan_nodes.drop_udf_plan import DropUDFPlan
-from eva.plan_nodes.insert_plan import InsertPlan
-from eva.plan_nodes.load_data_plan import LoadDataPlan
-from eva.plan_nodes.pp_plan import PPScanPlan
-from eva.plan_nodes.rename_plan import RenamePlan
-from eva.plan_nodes.seq_scan_plan import SeqScanPlan
-from eva.plan_nodes.storage_plan import StoragePlan
+from evadb.catalog.catalog_type import TableType
+from evadb.catalog.models.table_catalog import TableCatalogEntry
+from evadb.executor.create_executor import CreateExecutor
+from evadb.executor.create_udf_executor import CreateUDFExecutor
+from evadb.executor.drop_udf_executor import DropUDFExecutor
+from evadb.executor.insert_executor import InsertExecutor
+from evadb.executor.load_executor import LoadDataExecutor
+from evadb.executor.plan_executor import PlanExecutor
+from evadb.executor.pp_executor import PPExecutor
+from evadb.executor.seq_scan_executor import SequentialScanExecutor
+from evadb.models.storage.batch import Batch
+from evadb.plan_nodes.create_plan import CreatePlan
+from evadb.plan_nodes.create_udf_plan import CreateUDFPlan
+from evadb.plan_nodes.drop_plan import DropPlan
+from evadb.plan_nodes.drop_udf_plan import DropUDFPlan
+from evadb.plan_nodes.insert_plan import InsertPlan
+from evadb.plan_nodes.load_data_plan import LoadDataPlan
+from evadb.plan_nodes.pp_plan import PPScanPlan
+from evadb.plan_nodes.rename_plan import RenamePlan
+from evadb.plan_nodes.seq_scan_plan import SeqScanPlan
+from evadb.plan_nodes.storage_plan import StoragePlan
 
 
 class PlanExecutorTest(unittest.TestCase):
@@ -121,7 +121,7 @@ class PlanExecutorTest(unittest.TestCase):
         executor = PlanExecutor(MagicMock(), plan)._build_execution_tree(plan)
         self.assertIsInstance(executor, LoadDataExecutor)
 
-    @patch("eva.executor.plan_executor.PlanExecutor._build_execution_tree")
+    @patch("evadb.executor.plan_executor.PlanExecutor._build_execution_tree")
     def test_execute_plan_for_seq_scan_plan(self, mock_build):
         batch_list = [
             Batch(pd.DataFrame([1])),
@@ -140,7 +140,7 @@ class PlanExecutorTest(unittest.TestCase):
         tree.exec.assert_called_once()
         self.assertEqual(actual, batch_list)
 
-    @patch("eva.executor.plan_executor.PlanExecutor._build_execution_tree")
+    @patch("evadb.executor.plan_executor.PlanExecutor._build_execution_tree")
     def test_execute_plan_for_pp_scan_plan(self, mock_build):
         batch_list = [
             Batch(pd.DataFrame([1])),
@@ -158,7 +158,7 @@ class PlanExecutorTest(unittest.TestCase):
         tree.exec.assert_called_once()
         self.assertEqual(actual, batch_list)
 
-    @patch("eva.executor.plan_executor.PlanExecutor._build_execution_tree")
+    @patch("evadb.executor.plan_executor.PlanExecutor._build_execution_tree")
     def test_execute_plan_for_create_insert_load_upload_plans(self, mock_build):
         # CreateExecutor
         tree = MagicMock(node=CreatePlan(None, [], False))
@@ -202,7 +202,7 @@ class PlanExecutorTest(unittest.TestCase):
 
         self.assertEqual(actual, [])
 
-    @patch("eva.executor.plan_executor.PlanExecutor._build_execution_tree")
+    @patch("evadb.executor.plan_executor.PlanExecutor._build_execution_tree")
     def test_execute_plan_for_rename_plans(self, mock_build):
         # RenameExecutor
         tree = MagicMock(node=RenamePlan(None, None))
@@ -213,7 +213,7 @@ class PlanExecutorTest(unittest.TestCase):
 
         self.assertEqual(actual, [])
 
-    @patch("eva.executor.plan_executor.PlanExecutor._build_execution_tree")
+    @patch("evadb.executor.plan_executor.PlanExecutor._build_execution_tree")
     def test_execute_plan_for_drop_plans(self, mock_build):
         # DropExecutor
         tree = MagicMock(node=DropPlan(None, None))
@@ -236,7 +236,7 @@ class PlanExecutorTest(unittest.TestCase):
         self.assertEqual(actual, [])
 
     @unittest.skip("disk_based_storage_deprecated")
-    @patch("eva.executor.disk_based_storage_executor.Loader")
+    @patch("evadb.executor.disk_based_storage_executor.Loader")
     def test_should_return_the_new_path_after_execution(self, mock_class):
         class_instance = mock_class.return_value
 

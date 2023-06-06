@@ -19,8 +19,8 @@ from test.util import create_dataframe
 import pandas as pd
 from mock import MagicMock
 
-from eva.executor.seq_scan_executor import SequentialScanExecutor
-from eva.models.storage.batch import Batch
+from evadb.executor.seq_scan_executor import SequentialScanExecutor
+from evadb.models.storage.batch import Batch
 
 
 class SeqScanExecutorTest(unittest.TestCase):

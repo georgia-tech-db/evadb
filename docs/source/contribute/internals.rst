@@ -4,7 +4,7 @@ EVA Internals
 Path of a Query
 -------------------
 
-The following code represents a sequence of operations that can be used to execute a query in a evaql database. found in `eva/server/command_handler.py <https://github.com/georgia-tech-db/eva/blob/076704705c35245a6c83a626dba599342c59ff64/eva/server/command_handler.py#L37>`_
+The following code represents a sequence of operations that can be used to execute a query in a evaql database. found in `evadb/server/command_handler.py <https://github.com/georgia-tech-db/eva/blob/076704705c35245a6c83a626dba599342c59ff64/evadb/server/command_handler.py#L37>`_
 
     Parse the query using the Parser() function provided by the evaql library. The result of this step will be a parsed representation of the query in the form of an abstract syntax tree (AST).
 

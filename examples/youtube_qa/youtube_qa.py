@@ -16,8 +16,8 @@ import os
 import shutil
 import time
 
-from eva.interfaces.relational.db import EVADBConnection, EVADBCursor, connect
-from eva.configuration.configuration_manager import ConfigurationManager
+from evadb.interfaces.relational.db import EVADBConnection, EVADBCursor, connect
+from evadb.configuration.configuration_manager import ConfigurationManager
 from pytube import YouTube
 
 def download_youtube_video_from_link(video_link: str):
@@ -54,7 +54,7 @@ def analyze_video() -> EVADBCursor:
     speech_analyzer_udf_rel.execute()
 
     # create chatgpt udf from implemententation
-    chatgpt_udf_rel = cursor.create_udf("ChatGPT", impl_path='../../eva/udfs/chatgpt.py')
+    chatgpt_udf_rel = cursor.create_udf("ChatGPT", impl_path='../../evadb/udfs/chatgpt.py')
     chatgpt_udf_rel.execute()
 
     # load youtube video into an evadb table

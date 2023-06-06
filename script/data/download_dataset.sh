@@ -7,7 +7,7 @@ DATASET_NAME=$1
 SCRIPT_PATH=$(dirname "$0")
 
 # compute dataset path relative to script path
-DATASET_PATH=$HOME/.eva/data/datasets
+DATASET_PATH=$HOME/.evadb/data/datasets
 
 # check if the datasets folder exists, if not create it
 if [ ! -d "$DATASET_PATH" ]; then
