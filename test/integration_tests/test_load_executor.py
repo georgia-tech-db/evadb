@@ -520,7 +520,7 @@ class LoadExecutorTest(unittest.TestCase):
         )
         result = execute_query_fetch_all(self.evadb, "SELECT * from pdfs;")
         self.assertEqual(len(result.columns), 3)
-        self.assertEqual(len(result), 3)
+        self.assertEqual(len(result), 4)
 
 
 if __name__ == "__main__":
