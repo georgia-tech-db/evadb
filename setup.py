@@ -54,7 +54,7 @@ minimal_requirement = [
     "eva-decord>=0.6.1",
     "boto3",
     "nest_asyncio",
-    "langchain",
+    "langchain==0.0.190",
     "pymupdf",
     "pdfminer.six",
     "sentence-transformers"
