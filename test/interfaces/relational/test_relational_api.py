@@ -25,6 +25,7 @@ import numpy as np
 import pandas as pd
 from pandas.testing import assert_frame_equal
 
+from eva.binder.binder_utils import BinderError
 from eva.configuration.constants import EVA_DATABASE_DIR, EVA_ROOT_DIR
 from eva.executor.executor_utils import ExecutorError
 from eva.interfaces.relational.db import connect
@@ -287,7 +288,7 @@ class RelationalAPI(unittest.TestCase):
         select_query_sql = (
             "SELECT id, DummyObjectDetector(data) FROM dummy_video ORDER BY id;"
         )
-        with self.assertRaises(ExecutorError):
+        with self.assertRaises(BinderError):
             cursor.query(select_query_sql).execute()
 
         # drop non existing udf with if_exists=True should not raise error
@@ -309,7 +310,7 @@ class RelationalAPI(unittest.TestCase):
 
         # Check if deleted successfully
         select_query_sql = "SELECT id, data FROM dummy_video ORDER BY id;"
-        with self.assertRaises(ExecutorError):
+        with self.assertRaises(BinderError):
             cursor.query(select_query_sql).execute()
 
         # drop non existing table with if_exists=True should not raise error
