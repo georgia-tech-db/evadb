@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ import pytest
 
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.server.command_handler import execute_query_fetch_all
-from eva.udfs.udf_bootstrap_queries import Text_feat_udf_query
 
 
 @pytest.mark.torchtest
@@ -196,46 +195,3 @@ def test_load_large_scale_image_dataset(benchmark, setup_pytorch_tests):
     drop_query = "DROP TABLE IF EXISTS benchmarkImageDataset;"
     load_query = f"LOAD IMAGE '{img_dir}/*.jpg' INTO benchmarkImageDataset;"
     benchmark(_execute_query_list, [drop_query, load_query])
-
-
-@pytest.mark.benchmark(
-    warmup=False,
-    warmup_iterations=1,
-    min_rounds=1,
-)
-def test_question_answer_from_text(benchmark, setup_pytorch_tests):
-    execute_query_fetch_all(Text_feat_udf_query)
-
-    # Create table to store stories.
-    load_query = (
-        "CREATE TABLE IF NOT EXISTS hotPotatoStoryTable (id INTEGER, data TEXT(1000));"
-    )
-    execute_query_fetch_all(load_query)
-
-    whitelist = set("abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-
-    sentence_id = 1
-    with open("./data/question_answering/hot_potatos.txt", "r") as f:
-        for line in f.readlines():
-            if line == "\n" or len(line) == 0:
-                continue
-            for i in range(0, len(line), 1000):
-                cut_line = line[i : min(i + 1000, len(line))]
-                cut_line = "".join(filter(whitelist.__contains__, cut_line))
-
-                insert_query = f"""INSERT INTO hotPotatoStoryTable (id, data) VALUES ({sentence_id}, '{cut_line}');"""
-                execute_query_fetch_all(insert_query)
-
-                sentence_id += 1
-
-    # Feature extraction.
-    def _create_feature_table():
-        feature_extract_query = """CREATE TABLE IF NOT EXISTS hotPotatoStoryFeatTable AS
-            SELECT SentenceFeatureExtractor(data) FROM hotPotatoStoryTable;"""
-        execute_query_fetch_all(feature_extract_query)
-        execute_query_fetch_all("DROP TABLE IF EXISTS hotPotatoStoryFeatTable;")
-
-    benchmark(_create_feature_table)
-
-    drop_table = "DROP TABLE IF EXISTS hotPotatoStoryTable;"
-    execute_query_fetch_all(drop_table)
