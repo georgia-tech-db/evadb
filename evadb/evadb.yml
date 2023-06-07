@@ -25,7 +25,7 @@ server:
   socket_timeout: 60
 
 experimental:
-  ray: False
+  ray: False 
 
 third_party:
   OPENAI_KEY: ""
