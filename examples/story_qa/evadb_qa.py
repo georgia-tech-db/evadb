@@ -1,5 +1,3 @@
-import random
-
 from gpt4all import GPT4All
 from time import perf_counter
 
@@ -18,10 +16,9 @@ def ask_question(path):
     conn.query(Text_feat_udf_query).execute()
     conn.query(Similarity_udf_query).execute()
 
-    random_num = random.randint(0, 1000000)
-    story_table = f"TablePPText{random_num}"
-    story_feat_table = f"FeatTablePPText{random_num}"
-    index_table = f"IndexTable{random_num}"
+    story_table = f"TablePPText"
+    story_feat_table = f"FeatTablePPText"
+    index_table = f"IndexTable"
 
     try_execute(conn, f"DROP TABLE IF EXISTS {story_table};")
     try_execute(conn, f"DROP TABLE IF EXISTS {story_feat_table};")
