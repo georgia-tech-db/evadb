@@ -57,7 +57,9 @@ minimal_requirement = [
     "langchain==0.0.190",
     "pymupdf",
     "pdfminer.six",
-    "sentence-transformers"
+    "sentence-transformers",
+    "requests",
+    "gpt4all"
 
 ]
 
