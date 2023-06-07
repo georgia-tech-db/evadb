@@ -50,9 +50,7 @@ class TestLangchainLLM(unittest.TestCase):
         load_pdf = cursor.load(file_regex=pdf_path1, format="PDF", table_name="PDFss")
         load_pdf.execute()
 
-        cursor.drop_udf(
-            "SentenceTransformerFeatureExtractor", if_exists=True
-        ).execute()
+        cursor.drop_udf("SentenceTransformerFeatureExtractor", if_exists=True).execute()
 
         udf = cursor.create_udf(
             "SentenceTransformerFeatureExtractor",
