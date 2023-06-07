@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,25 +17,25 @@ from unittest.mock import patch
 
 from mock import MagicMock
 
-from eva.optimizer.cost_model import CostModel
-from eva.optimizer.operators import (
+from evadb.optimizer.cost_model import CostModel
+from evadb.optimizer.operators import (
     LogicalFilter,
     LogicalGet,
     LogicalProject,
     LogicalQueryDerivedGet,
 )
-from eva.optimizer.optimizer_context import OptimizerContext
-from eva.optimizer.optimizer_tasks import (
+from evadb.optimizer.optimizer_context import OptimizerContext
+from evadb.optimizer.optimizer_tasks import (
     BottomUpRewrite,
     OptimizeGroup,
     OptimizerTask,
     TopDownRewrite,
 )
-from eva.optimizer.property import PropertyType
-from eva.optimizer.rules.rules_manager import RulesManager
-from eva.plan_nodes.predicate_plan import PredicatePlan
-from eva.plan_nodes.project_plan import ProjectPlan
-from eva.plan_nodes.seq_scan_plan import SeqScanPlan
+from evadb.optimizer.property import PropertyType
+from evadb.optimizer.rules.rules_manager import RulesManager
+from evadb.plan_nodes.predicate_plan import PredicatePlan
+from evadb.plan_nodes.project_plan import ProjectPlan
+from evadb.plan_nodes.seq_scan_plan import SeqScanPlan
 
 
 class TestOptimizerTask(unittest.TestCase):
@@ -51,11 +51,13 @@ class TestOptimizerTask(unittest.TestCase):
             task.execute()
 
     def top_down_rewrite(self, opr):
-        opt_cxt = OptimizerContext(CostModel())
+        opt_cxt = OptimizerContext(MagicMock(), CostModel(), RulesManager(MagicMock()))
         grp_expr = opt_cxt.add_opr_to_group(opr)
         root_grp_id = grp_expr.group_id
         opt_cxt.task_stack.push(
-            TopDownRewrite(grp_expr, RulesManager().stage_one_rewrite_rules, opt_cxt)
+            TopDownRewrite(
+                grp_expr, RulesManager(MagicMock()).stage_one_rewrite_rules, opt_cxt
+            )
         )
         self.execute_task_stack(opt_cxt.task_stack)
         return opt_cxt, root_grp_id
@@ -63,7 +65,9 @@ class TestOptimizerTask(unittest.TestCase):
     def bottom_up_rewrite(self, root_grp_id, opt_cxt):
         grp_expr = opt_cxt.memo.groups[root_grp_id].logical_exprs[0]
         opt_cxt.task_stack.push(
-            BottomUpRewrite(grp_expr, RulesManager().stage_two_rewrite_rules, opt_cxt)
+            BottomUpRewrite(
+                grp_expr, RulesManager(MagicMock()).stage_two_rewrite_rules, opt_cxt
+            )
         )
         self.execute_task_stack(opt_cxt.task_stack)
         return opt_cxt, root_grp_id
@@ -91,8 +95,8 @@ class TestOptimizerTask(unittest.TestCase):
     def test_nested_implementation(self):
         child_predicate = MagicMock()
         root_predicate = MagicMock()
-        with patch("eva.optimizer.rules.rules.extract_pushdown_predicate") as mock:
-            with patch("eva.optimizer.rules.rules.is_video_table") as mock_vid:
+        with patch("evadb.optimizer.rules.rules.extract_pushdown_predicate") as mock:
+            with patch("evadb.optimizer.rules.rules.is_video_table") as mock_vid:
                 mock_vid.return_value = True
                 mock.side_effect = [
                     (child_predicate, None),

@@ -1,5 +1,3 @@
-.. _guide-getstarted:
-
 Command Line Client
 ====
 

@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ from decimal import Decimal
 
 import numpy as np
 
-from eva.catalog.catalog_type import ColumnType, NdArrayType
+from evadb.catalog.catalog_type import ColumnType, NdArrayType
 
 
 class ColumnTypeTests(unittest.TestCase):

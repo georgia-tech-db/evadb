@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,19 +13,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import create_sample_video, file_remove, load_udfs_for_testing
+from test.util import (
+    create_sample_video,
+    file_remove,
+    get_evadb_for_testing,
+    load_udfs_for_testing,
+)
 
 import pytest
 
-from eva.catalog.catalog_manager import CatalogManager
-from eva.optimizer.plan_generator import PlanGenerator
-from eva.optimizer.rules.rules import (
+from evadb.optimizer.plan_generator import PlanGenerator
+from evadb.optimizer.rules.rules import (
     EmbedFilterIntoGet,
     LogicalInnerJoinCommutativity,
     XformLateralJoinToLinearFlow,
 )
-from eva.optimizer.rules.rules_manager import disable_rules
-from eva.server.command_handler import execute_query_fetch_all
+from evadb.optimizer.rules.rules_manager import RulesManager, disable_rules
+from evadb.server.command_handler import execute_query_fetch_all
 
 NUM_FRAMES = 10
 
@@ -34,47 +38,54 @@ NUM_FRAMES = 10
 class ExplainExecutorTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        CatalogManager().reset()
+        cls.evadb = get_evadb_for_testing()
+        cls.evadb.catalog().reset()
         video_file_path = create_sample_video(NUM_FRAMES)
         load_query = f"LOAD VIDEO '{video_file_path}' INTO MyVideo;"
-        execute_query_fetch_all(load_query)
-        load_udfs_for_testing(mode="debug")
+        execute_query_fetch_all(cls.evadb, load_query)
+        load_udfs_for_testing(cls.evadb, mode="debug")
 
     @classmethod
     def tearDownClass(cls):
         file_remove("dummy.avi")
-        execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
+        execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS MyVideo;")
 
     def test_explain_simple_select(self):
         select_query = "EXPLAIN SELECT id, data FROM MyVideo"
-        batch = execute_query_fetch_all(select_query)
+        batch = execute_query_fetch_all(self.evadb, select_query)
         expected_output = (
             """|__ ProjectPlan\n    |__ SeqScanPlan\n        |__ StoragePlan\n"""
         )
         self.assertEqual(batch.frames[0][0], expected_output)
-
-        with disable_rules([XformLateralJoinToLinearFlow()]) as rules_manager:
-            custom_plan_generator = PlanGenerator(rules_manager)
+        rules_manager = RulesManager(self.evadb.config)
+        with disable_rules(rules_manager, [XformLateralJoinToLinearFlow()]):
+            custom_plan_generator = PlanGenerator(self.evadb, rules_manager)
             select_query = "EXPLAIN SELECT id, data FROM MyVideo JOIN LATERAL DummyObjectDetector(data) AS T ;"
             batch = execute_query_fetch_all(
-                select_query, plan_generator=custom_plan_generator
+                self.evadb, select_query, plan_generator=custom_plan_generator
             )
             expected_output = """|__ ProjectPlan\n    |__ LateralJoinPlan\n        |__ SeqScanPlan\n            |__ StoragePlan\n        |__ FunctionScanPlan\n"""
             self.assertEqual(batch.frames[0][0], expected_output)
 
         # Disable more rules
+        rules_manager = RulesManager(self.evadb.config)
         with disable_rules(
+            rules_manager,
             [
                 XformLateralJoinToLinearFlow(),
                 EmbedFilterIntoGet(),
                 LogicalInnerJoinCommutativity(),
-            ]
-        ) as rules_manager:
-            custom_plan_generator = PlanGenerator(rules_manager)
+            ],
+        ):
+            custom_plan_generator = PlanGenerator(self.evadb, rules_manager)
             select_query = "EXPLAIN SELECT id, data FROM MyVideo JOIN LATERAL DummyObjectDetector(data) AS T ;"
             batch = execute_query_fetch_all(
-                select_query, plan_generator=custom_plan_generator
+                self.evadb, select_query, plan_generator=custom_plan_generator
             )
             expected_output = """|__ ProjectPlan\n    |__ LateralJoinPlan\n        |__ SeqScanPlan\n            |__ StoragePlan\n        |__ FunctionScanPlan\n"""
             print(batch.frames[0][0])
             self.assertEqual(batch.frames[0][0], expected_output)
+
+
+if __name__ == "__main__":
+    unittest.main()

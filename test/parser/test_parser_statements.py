@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 import unittest
 from pprint import pprint
 
-from eva.parser.parser import Parser
+from evadb.parser.parser import Parser
 
 
 class ParserStatementTests(unittest.TestCase):
@@ -44,7 +44,7 @@ class ParserStatementTests(unittest.TestCase):
             UNION ALL SELECT CLASS, REDNESS FROM SHANGHAI;",
             "SELECT CLASS, REDNESS FROM TAIPAI \
             UNION SELECT CLASS, REDNESS FROM SHANGHAI;",
-            "SELECT FIRST(id) FROM TAIPAI GROUP BY '8f';",
+            "SELECT FIRST(id) FROM TAIPAI GROUP BY '8 frames';",
             "SELECT CLASS, REDNESS FROM TAIPAI \
                     WHERE (CLASS = 'VAN' AND REDNESS < 400 ) OR REDNESS > 700 \
                     ORDER BY CLASS, REDNESS DESC;",
@@ -77,7 +77,7 @@ class ParserStatementTests(unittest.TestCase):
                   OUTPUT (bboxes NDARRAY FLOAT32(ANYDIM, 4),
                           scores NDARRAY FLOAT32(ANYDIM))
                   TYPE  FaceDetection
-                  IMPL  'eva/udfs/face_detector.py';
+                  IMPL  'evadb/udfs/face_detector.py';
             """,
             "SHOW TABLES;",
             "SHOW UDFS;",
@@ -137,7 +137,7 @@ class ParserStatementTests(unittest.TestCase):
                 Output (bboxes ndArray float32(anydim, 4),
                 scores ndArray float32(ANYdim))
                 Type FaceDetection
-                Impl 'eva/udfs/face_detector.py';
+                Impl 'evadb/udfs/face_detector.py';
             """,
         ]
         queries = queries + randomized_cases

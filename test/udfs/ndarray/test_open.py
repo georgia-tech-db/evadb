@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,15 +20,13 @@ import pandas as pd
 import pytest
 from mock import patch
 
-from eva.configuration.configuration_manager import ConfigurationManager
-from eva.udfs.ndarray.open import Open
+from evadb.udfs.ndarray.open import Open
 
 
 @pytest.mark.notparallel
 class OpenTests(unittest.TestCase):
     def setUp(self):
         self.open_instance = Open()
-        self.config = ConfigurationManager()
         self.image_file_path = create_sample_image()
 
     def test_open_name_exists(self):
@@ -49,12 +47,12 @@ class OpenTests(unittest.TestCase):
 
     def test_open_same_path_should_use_cache(self):
         # un-cached open
-        with patch("eva.udfs.ndarray.open.cv2") as mock_cv2:
+        with patch("evadb.udfs.ndarray.open.cv2") as mock_cv2:
             self.open_instance(pd.DataFrame([self.image_file_path]))
             mock_cv2.imread.assert_called_once_with(self.image_file_path)
 
         # cached open
-        with patch("eva.udfs.ndarray.open.cv2") as mock_cv2:
+        with patch("evadb.udfs.ndarray.open.cv2") as mock_cv2:
             self.open_instance(pd.DataFrame([self.image_file_path]))
             mock_cv2.imread.assert_not_called()
 

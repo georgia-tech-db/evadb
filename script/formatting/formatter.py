@@ -85,7 +85,7 @@ with open(ignored_words_file) as f:
 # ==============================================
 
 header = """# coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -172,7 +172,7 @@ def format_file(file_path, add_header, strip_header, format_code):
 
     # Do not add a header here
     # Releaser assumes the lines in the file to be related to version
-    if file_path.ends_with("version.py"):
+    if file_path.endswith("version.py"):
         return
 
     abs_path = os.path.abspath(file_path)
@@ -275,6 +275,7 @@ def check_notebook_format(notebook_file):
                 break
 
     if contains_colab_link is False:
+        LOG.error(f"ERROR: Notebook {notebook_file} does not contain correct Colab link -- update the link.")
         sys.exit(1)
 
     return True
@@ -443,7 +444,7 @@ if __name__ == "__main__":
 
         # CODESPELL
         #LOG.info("Codespell")
-        subprocess.check_output("codespell eva/", 
+        subprocess.check_output("codespell evadb/", 
                 shell=True, 
                 universal_newlines=True)
         subprocess.check_output("codespell docs/source/*/*.rst", 
@@ -455,7 +456,7 @@ if __name__ == "__main__":
         subprocess.check_output("codespell *.md", 
                 shell=True, 
                 universal_newlines=True)
-        subprocess.check_output("codespell eva/*.md", 
+        subprocess.check_output("codespell evadb/*.md", 
                 shell=True, 
                 universal_newlines=True)
 

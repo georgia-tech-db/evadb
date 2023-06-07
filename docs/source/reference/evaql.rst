@@ -1,7 +1,7 @@
 EVA Query Language Reference
 ============================
 
-EVA Query Language (EVAQL) is derived from SQL. It is tailored for video analytics. EVAQL allows users to invoke deep learning models in the form
+EVA Query Language (EVAQL) is derived from SQL. It is tailored for AI-driven analytics. EVAQL allows users to invoke deep learning models in the form
 of user-defined functions (UDFs).
 
 Here is an example where we first define a UDF wrapping around the FastRCNN object detection model. We then issue a query with this function to detect objects.
@@ -14,7 +14,7 @@ Here is an example where we first define a UDF wrapping around the FastRCNN obje
     OUTPUT (labels NDARRAY STR(ANYDIM), bboxes NDARRAY FLOAT32(ANYDIM, 4),
             scores NDARRAY FLOAT32(ANYDIM))
     TYPE  Classification
-    IMPL  'eva/udfs/fastrcnn_object_detector.py';
+    IMPL  'evadb/udfs/fastrcnn_object_detector.py';
 
     --- Use the function to retrieve frames that contain more than 3 cars
     SELECT id FROM MyVideo

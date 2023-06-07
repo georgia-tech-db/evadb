@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,11 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import create_sample_video
+from test.util import create_sample_video, get_evadb_for_testing
 
 import pytest
 from mock import MagicMock, patch
 
+<<<<<<< HEAD
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import TableType
 from eva.catalog.models.table_catalog import TableCatalogEntry
@@ -30,23 +31,26 @@ from eva.experimental.parallel.optimizer.rules.rules import (
     LogicalGetToSeqScan as ParallelLogicalGetToSeqScan,
 )
 from eva.optimizer.operators import (
+=======
+from evadb.catalog.catalog_type import TableType
+from evadb.catalog.models.table_catalog import TableCatalogEntry
+from evadb.optimizer.operators import (
+>>>>>>> master
     LogicalFilter,
     LogicalGet,
     LogicalJoin,
     LogicalSample,
 )
-from eva.optimizer.rules.rules import (
+from evadb.optimizer.rules.rules import (
     CacheFunctionExpressionInApply,
     CacheFunctionExpressionInFilter,
     CacheFunctionExpressionInProject,
     CombineSimilarityOrderByAndLimitToVectorIndexScan,
     EmbedFilterIntoGet,
     EmbedSampleIntoGet,
-)
-from eva.optimizer.rules.rules import (
-    LogicalApplyAndMergeToPhysical as SequentialApplyAndMergeToPhysical,
-)
-from eva.optimizer.rules.rules import (
+    LogicalApplyAndMergeToPhysical,
+    LogicalApplyAndMergeToRayPhysical,
+    LogicalCreateFromSelectToPhysical,
     LogicalCreateIndexToVectorIndex,
     LogicalCreateMaterializedViewToPhysical,
     LogicalCreateToPhysical,
@@ -55,14 +59,11 @@ from eva.optimizer.rules.rules import (
     LogicalDerivedGetToPhysical,
     LogicalDropToPhysical,
     LogicalDropUDFToPhysical,
+    LogicalExchangeToPhysical,
     LogicalExplainToPhysical,
     LogicalFilterToPhysical,
     LogicalFunctionScanToPhysical,
-)
-from eva.optimizer.rules.rules import (
-    LogicalGetToSeqScan as SequentialLogicalGetToSeqScan,
-)
-from eva.optimizer.rules.rules import (
+    LogicalGetToSeqScan,
     LogicalGroupByToPhysical,
     LogicalInnerJoinCommutativity,
     LogicalInsertToPhysical,
@@ -73,6 +74,7 @@ from eva.optimizer.rules.rules import (
     LogicalLoadToPhysical,
     LogicalOrderByToPhysical,
     LogicalProjectToPhysical,
+    LogicalProjectToRayPhysical,
     LogicalRenameToPhysical,
     LogicalShowToPhysical,
     LogicalUnionToPhysical,
@@ -86,24 +88,25 @@ from eva.optimizer.rules.rules import (
     XformExtractObjectToLinearFlow,
     XformLateralJoinToLinearFlow,
 )
-from eva.optimizer.rules.rules_manager import RulesManager, disable_rules
-from eva.parser.types import JoinType
-from eva.server.command_handler import execute_query_fetch_all
+from evadb.optimizer.rules.rules_manager import RulesManager, disable_rules
+from evadb.parser.types import JoinType
+from evadb.server.command_handler import execute_query_fetch_all
 
 
 @pytest.mark.notparallel
 class RulesTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        cls.evadb = get_evadb_for_testing()
         # reset the catalog manager before running each test
-        CatalogManager().reset()
+        cls.evadb.catalog().reset()
         video_file_path = create_sample_video()
         load_query = f"LOAD VIDEO '{video_file_path}' INTO MyVideo;"
-        execute_query_fetch_all(load_query)
+        execute_query_fetch_all(cls.evadb, load_query)
 
     @classmethod
     def tearDownClass(cls):
-        execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
+        execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS MyVideo;")
 
     def test_rules_promises_order(self):
         # Promise of all rewrite should be greater than implementation
@@ -136,6 +139,7 @@ class RulesTest(unittest.TestCase):
             Promise.LOGICAL_DROP_TO_PHYSICAL,
             Promise.LOGICAL_LOAD_TO_PHYSICAL,
             Promise.LOGICAL_CREATE_TO_PHYSICAL,
+            Promise.LOGICAL_CREATE_FROM_SELECT_TO_PHYSICAL,
             Promise.LOGICAL_CREATE_UDF_TO_PHYSICAL,
             Promise.LOGICAL_SAMPLE_TO_UNIFORMSAMPLE,
             Promise.LOGICAL_GET_TO_SEQSCAN,
@@ -178,8 +182,8 @@ class RulesTest(unittest.TestCase):
             XformExtractObjectToLinearFlow(),
         ]
         rewrite_rules = (
-            RulesManager().stage_one_rewrite_rules
-            + RulesManager().stage_two_rewrite_rules
+            RulesManager(self.evadb.config).stage_one_rewrite_rules
+            + RulesManager(self.evadb.config).stage_two_rewrite_rules
         )
         self.assertEqual(
             len(supported_rewrite_rules),
@@ -196,15 +200,19 @@ class RulesTest(unittest.TestCase):
             CacheFunctionExpressionInProject(),
         ]
         self.assertEqual(
-            len(supported_logical_rules), len(RulesManager().logical_rules)
+            len(supported_logical_rules),
+            len(RulesManager(self.evadb.config).logical_rules),
         )
 
         for rule in supported_logical_rules:
             self.assertTrue(
-                any(isinstance(rule, type(x)) for x in RulesManager().logical_rules)
+                any(
+                    isinstance(rule, type(x))
+                    for x in RulesManager(self.evadb.config).logical_rules
+                )
             )
 
-        ray_enabled = ConfigurationManager().get_value("experimental", "ray")
+        ray_enabled = self.evadb.config.get_value("experimental", "ray")
 
         # For the current version, we choose either the distributed or the
         # sequential rule, because we do not have a logic to choose one over
@@ -213,6 +221,7 @@ class RulesTest(unittest.TestCase):
         # has some simple heuristics to choose one over the other.
         supported_implementation_rules = [
             LogicalCreateToPhysical(),
+            LogicalCreateFromSelectToPhysical(),
             LogicalRenameToPhysical(),
             LogicalDropToPhysical(),
             LogicalCreateUDFToPhysical(),
@@ -220,9 +229,10 @@ class RulesTest(unittest.TestCase):
             LogicalInsertToPhysical(),
             LogicalDeleteToPhysical(),
             LogicalLoadToPhysical(),
-            ParallelLogicalGetToSeqScan()
+            LogicalGetToSeqScan(),
+            LogicalProjectToRayPhysical()
             if ray_enabled
-            else SequentialLogicalGetToSeqScan(),
+            else LogicalProjectToPhysical(),
             LogicalDerivedGetToPhysical(),
             LogicalUnionToPhysical(),
             LogicalGroupByToPhysical(),
@@ -234,10 +244,14 @@ class RulesTest(unittest.TestCase):
             LogicalJoinToPhysicalHashJoin(),
             LogicalCreateMaterializedViewToPhysical(),
             LogicalFilterToPhysical(),
+<<<<<<< HEAD
             LogicalProjectToPhysical(),
             ParallelLogicalApplyAndMergeToPhysical()
+=======
+            LogicalApplyAndMergeToRayPhysical()
+>>>>>>> master
             if ray_enabled
-            else SequentialApplyAndMergeToPhysical(),
+            else LogicalApplyAndMergeToPhysical(),
             LogicalShowToPhysical(),
             LogicalExplainToPhysical(),
             LogicalCreateIndexToVectorIndex(),
@@ -248,14 +262,14 @@ class RulesTest(unittest.TestCase):
             supported_implementation_rules.append(LogicalExchangeToPhysical())
         self.assertEqual(
             len(supported_implementation_rules),
-            len(RulesManager().implementation_rules),
+            len(RulesManager(self.evadb.config).implementation_rules),
         )
 
         for rule in supported_implementation_rules:
             self.assertTrue(
                 any(
                     isinstance(rule, type(x))
-                    for x in RulesManager().implementation_rules
+                    for x in RulesManager(self.evadb.config).implementation_rules
                 )
             )
 
@@ -284,7 +298,8 @@ class RulesTest(unittest.TestCase):
         self.assertFalse(rule.check(logi_sample, MagicMock()))
 
     def test_disable_rules(self):
-        with disable_rules([PushDownFilterThroughApplyAndMerge()]) as rules_manager:
+        rules_manager = RulesManager(self.evadb.config)
+        with disable_rules(rules_manager, [PushDownFilterThroughApplyAndMerge()]):
             self.assertFalse(
                 any(
                     isinstance(PushDownFilterThroughApplyAndMerge, type(x))

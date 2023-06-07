@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,22 +14,25 @@
 # limitations under the License.
 import unittest
 from pathlib import Path
-from test.util import create_sample_csv, create_sample_video, file_remove, shutdown_ray
+from test.util import (
+    create_sample_csv,
+    create_sample_video,
+    file_remove,
+    get_evadb_for_testing,
+    shutdown_ray,
+)
 
 import pytest
 
-from eva.catalog.catalog_manager import CatalogManager
-from eva.configuration.configuration_manager import ConfigurationManager
-from eva.configuration.constants import EVA_ROOT_DIR
-from eva.server.command_handler import execute_query_fetch_all
-
-EVA_INSTALLATION_DIR = ConfigurationManager().get_value("core", "eva_installation_dir")
+from evadb.configuration.constants import EVA_ROOT_DIR
+from evadb.server.command_handler import execute_query_fetch_all
 
 
 @pytest.mark.notparallel
 class FuzzyJoinTests(unittest.TestCase):
     def setUp(self):
-        CatalogManager().reset()
+        self.evadb = get_evadb_for_testing()
+        self.evadb.catalog().reset()
         self.video_file_path = create_sample_video()
         self.image_files_path = Path(
             f"{EVA_ROOT_DIR}/test/data/uadetrac/small-data/MVI_20011/*.jpg"
@@ -49,15 +52,15 @@ class FuzzyJoinTests(unittest.TestCase):
                 object_id INTEGER
             );
             """
-        execute_query_fetch_all(create_table_query)
+        execute_query_fetch_all(self.evadb, create_table_query)
 
         # load the CSV
         load_query = f"LOAD CSV '{self.csv_file_path}' INTO MyVideoCSV;"
-        execute_query_fetch_all(load_query)
+        execute_query_fetch_all(self.evadb, load_query)
 
         # load the video to be joined with the csv
         query = f"LOAD VIDEO '{self.video_file_path}' INTO MyVideo;"
-        execute_query_fetch_all(query)
+        execute_query_fetch_all(self.evadb, query)
 
     def tearDown(self):
         shutdown_ray()
@@ -65,10 +68,13 @@ class FuzzyJoinTests(unittest.TestCase):
         file_remove("dummy.avi")
         file_remove("dummy.csv")
         # clean up
-        execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
-        execute_query_fetch_all("DROP TABLE IF EXISTS MyVideoCSV;")
+        execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS MyVideo;")
+        execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS MyVideoCSV;")
 
     def test_fuzzyjoin(self):
+        EVA_INSTALLATION_DIR = self.evadb.config.get_value(
+            "core", "eva_installation_dir"
+        )
         fuzzy_udf = """CREATE UDF IF NOT EXISTS FuzzDistance
                     INPUT (Input_Array1 NDARRAY ANYTYPE, Input_Array2 NDARRAY ANYTYPE)
                     OUTPUT (distance FLOAT(32, 7))
@@ -77,10 +83,10 @@ class FuzzyJoinTests(unittest.TestCase):
         """.format(
             EVA_INSTALLATION_DIR, "ndarray"
         )
-        execute_query_fetch_all(fuzzy_udf)
+        execute_query_fetch_all(self.evadb, fuzzy_udf)
 
         fuzzy_join_query = """SELECT * FROM MyVideo a JOIN MyVideoCSV b
                       ON FuzzDistance(a.id, b.id) = 100;"""
 
-        actual_batch = execute_query_fetch_all(fuzzy_join_query)
+        actual_batch = execute_query_fetch_all(self.evadb, fuzzy_join_query)
         self.assertEqual(len(actual_batch), 10)

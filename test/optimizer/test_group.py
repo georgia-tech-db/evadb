@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@ import unittest
 
 from mock import MagicMock
 
-from eva.optimizer.group import Group
-from eva.optimizer.group_expression import GroupExpression
-from eva.optimizer.property import Property, PropertyType
+from evadb.optimizer.group import Group
+from evadb.optimizer.group_expression import GroupExpression
+from evadb.optimizer.property import Property, PropertyType
 
 
 class TestGroup(unittest.TestCase):

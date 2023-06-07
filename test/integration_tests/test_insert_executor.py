@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,22 +13,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import create_sample_video, file_remove, shutdown_ray
+from test.util import (
+    create_sample_video,
+    file_remove,
+    get_evadb_for_testing,
+    shutdown_ray,
+)
 
 import numpy as np
 import pandas as pd
 import pytest
 
-from eva.catalog.catalog_manager import CatalogManager
-from eva.server.command_handler import execute_query_fetch_all
-from eva.utils.logging_manager import logger
+from evadb.server.command_handler import execute_query_fetch_all
+from evadb.utils.logging_manager import logger
 
 
 @pytest.mark.notparallel
 class InsertExecutorTest(unittest.TestCase):
     def setUp(self):
+        self.evadb = get_evadb_for_testing()
         # reset the catalog manager before running each test
-        CatalogManager().reset()
+        self.evadb.catalog().reset()
         self.video_file_path = create_sample_video()
 
         query = """CREATE TABLE IF NOT EXISTS CSVTable
@@ -36,7 +41,7 @@ class InsertExecutorTest(unittest.TestCase):
                 name TEXT(100)
             );
         """
-        execute_query_fetch_all(query)
+        execute_query_fetch_all(self.evadb, query)
 
     def tearDown(self):
         shutdown_ray()
@@ -46,20 +51,20 @@ class InsertExecutorTest(unittest.TestCase):
     @unittest.skip("Not supported in current version")
     def test_should_load_video_in_table(self):
         query = f"""LOAD VIDEO '{self.video_file_path}' INTO MyVideo;"""
-        execute_query_fetch_all(query)
+        execute_query_fetch_all(self.evadb, query)
 
         insert_query = """ INSERT INTO MyVideo (id, data) VALUES
             (40, [[40, 40, 40], [40, 40, 40]],
                  [[40, 40, 40], [40, 40, 40]]);"""
-        execute_query_fetch_all(insert_query)
+        execute_query_fetch_all(self.evadb, insert_query)
 
         insert_query_2 = """ INSERT INTO MyVideo (id, data) VALUES
         ( 41, [[41, 41, 41] , [41, 41, 41]],
                 [[41, 41, 41], [41, 41, 41]]);"""
-        execute_query_fetch_all(insert_query_2)
+        execute_query_fetch_all(self.evadb, insert_query_2)
 
         query = "SELECT id, data FROM MyVideo WHERE id = 40"
-        batch = execute_query_fetch_all(query)
+        batch = execute_query_fetch_all(self.evadb, query)
         self.assertIsNone(
             np.testing.assert_array_equal(
                 batch.frames["data"][0],
@@ -68,7 +73,7 @@ class InsertExecutorTest(unittest.TestCase):
         )
 
         query = "SELECT id, data FROM MyVideo WHERE id = 41;"
-        batch = execute_query_fetch_all(query)
+        batch = execute_query_fetch_all(self.evadb, query)
         self.assertIsNone(
             np.testing.assert_array_equal(
                 batch.frames["data"][0],
@@ -84,10 +89,10 @@ class InsertExecutorTest(unittest.TestCase):
                             '{i[1][1]}'
                         );"""
             logger.info(query)
-            batch = execute_query_fetch_all(query)
+            batch = execute_query_fetch_all(self.evadb, query)
 
         query = "SELECT name FROM CSVTable;"
-        batch = execute_query_fetch_all(query)
+        batch = execute_query_fetch_all(self.evadb, query)
         logger.info(batch)
 
         self.assertIsNone(
@@ -104,5 +109,5 @@ class InsertExecutorTest(unittest.TestCase):
         )
 
         query = """SELECT name FROM CSVTable WHERE name LIKE '.*(sad|happy)';"""
-        batch = execute_query_fetch_all(query)
+        batch = execute_query_fetch_all(self.evadb, query)
         self.assertEqual(len(batch._frames), 2)

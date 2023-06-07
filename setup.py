@@ -31,7 +31,7 @@ def read(path, encoding="utf-8"):
 
 # version.py defines the VERSION and VERSION_SHORT variables
 VERSION_DICT: Dict[str, str] = {}
-with open("eva/version.py", "r") as version_file:
+with open("evadb/version.py", "r") as version_file:
     exec(version_file.read(), VERSION_DICT)
 
 DOWNLOAD_URL = "https://github.com/georgia-tech-db/eva"
@@ -56,7 +56,9 @@ minimal_requirement = [
     "nest_asyncio",
     "langchain",
     "pymupdf",
-    "pdfminer.six"
+    "pdfminer.six",
+    "sentence-transformers"
+
 ]
 
 formatter_libs = ["black>=23.1.0", "isort>=5.10.1"]
@@ -93,7 +95,12 @@ benchmark_libs = [
 
 doc_libs = ["codespell", "pylint"]
 
-dist_libs = ["wheel>=0.37.1", "semantic_version", "PyGithub"]
+dist_libs = [
+    "wheel>=0.37.1", 
+    "semantic_version", 
+    "PyGithub", 
+    "twine"
+]
 
 ### NEEDED FOR AN ALTERNATE DATA SYSTEM OTHER THAN SQLITE
 database_libs = ["pymysql>=0.10.1"]
@@ -160,13 +167,13 @@ setup(
     # https://python-packaging.readthedocs.io/en/latest/command-line-scripts.html#the-console-scripts-entry-point
     entry_points={
         "console_scripts": [
-            "eva_server=eva.eva_server:main",
-            "eva_client=eva.eva_cmd_client:main",
+            "eva_server=evadb.eva_server:main",
+            "eva_client=evadb.eva_cmd_client:main",
         ]
     },
     python_requires=">=3.8",
     install_requires=INSTALL_REQUIRES,
     extras_require=EXTRA_REQUIRES,
     include_package_data=True,
-    package_data={"eva": ["eva.yml", "parser/eva.lark"]},
+    package_data={"evadb": ["evadb.yml", "parser/evadb.lark"]},
 )

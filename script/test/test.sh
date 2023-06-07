@@ -54,7 +54,7 @@ if [[ ( "$OSTYPE" != "msys" ) && ( "$MODE" = "LINTER" || "$MODE" = "ALL" ) ]];
 then 
     # Keeping the duplicate linting for time being
     # Run linter (checks code style)
-    PYTHONPATH=./ python -m flake8 --config=.flake8 eva/ test/ 
+    PYTHONPATH=./ python -m flake8 --config=.flake8 evadb/ test/ 
     linter_code=$?
 
     if [ "$linter_code" != "0" ];
@@ -76,10 +76,11 @@ if [[ "$OSTYPE" != "msys" ]];
 then
     if [[ "$MODE" = "TEST" || "$MODE" = "ALL" ]];
     then
-        PYTHONPATH=./ pytest --durations=20 --cov-report term-missing:skip-covered  --cov-config=.coveragerc --cov-context=test --cov=eva/ --capture=sys --tb=short -v --log-level=WARNING -m "not benchmark"
-    elif [[ "$MODE" = "RAY" ]];
+        PYTHONPATH=./ pytest --durations=20 --capture=sys --tb=short -v --log-level=WARNING -rsf -p no:cov test/ -m "not benchmark"
+    elif [[ "$MODE" = "COV" ]];
     then
-        PYTHONPATH=./ pytest -s -v -p no:cov test/ -m "not benchmark"
+	# As a workaround, ray needs to be disabled for COV.
+        PYTHONPATH=./ pytest --durations=20 --cov-report term-missing:skip-covered  --cov-config=.coveragerc --cov-context=test --cov=evadb/ --capture=sys --tb=short -v -rsf --log-level=WARNING -m "not benchmark"
     fi
 
     test_code=$?
@@ -113,7 +114,7 @@ then
     notebook_test_code=$?
     if [ "$notebook_test_code" != "0" ];
     then
-        cat tutorials/eva.log
+        cat tutorials/evadb.log
         echo "NOTEBOOK CODE: --|${notebook_test_code}|-- FAILURE"
         exit $notebook_test_code
     else
@@ -127,10 +128,9 @@ fi
 ##################################################
 
 if [[ ( "$PYTHON_VERSION" = "3.10" )  && 
-      ( "$MODE" = "TEST" || "$MODE" = "ALL" ) ]];
+      ( "$MODE" = "COV" ) ]];
 then 
     echo "UPLOADING COVERAGE REPORT"
     coveralls
     exit 0 # Success     
 fi
-

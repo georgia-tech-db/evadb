@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,15 +17,16 @@ from test.executor.utils import DummyExecutor
 
 import numpy as np
 import pandas as pd
+from mock import MagicMock
 
-from eva.executor.limit_executor import LimitExecutor
-from eva.executor.orderby_executor import OrderByExecutor
-from eva.expression.constant_value_expression import ConstantValueExpression
-from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.models.storage.batch import Batch
-from eva.parser.types import ParserOrderBySortType
-from eva.plan_nodes.limit_plan import LimitPlan
-from eva.plan_nodes.orderby_plan import OrderByPlan
+from evadb.executor.limit_executor import LimitExecutor
+from evadb.executor.orderby_executor import OrderByExecutor
+from evadb.expression.constant_value_expression import ConstantValueExpression
+from evadb.expression.tuple_value_expression import TupleValueExpression
+from evadb.models.storage.batch import Batch
+from evadb.parser.types import ParserOrderBySortType
+from evadb.plan_nodes.limit_plan import LimitPlan
+from evadb.plan_nodes.orderby_plan import OrderByPlan
 
 
 class LimitExecutorTest(unittest.TestCase):
@@ -41,7 +42,7 @@ class LimitExecutorTest(unittest.TestCase):
 
         plan = LimitPlan(ConstantValueExpression(limit_value))
 
-        limit_executor = LimitExecutor(plan)
+        limit_executor = LimitExecutor(MagicMock(), plan)
         limit_executor.append_child(DummyExecutor(batches))
         reduced_batches = list(limit_executor.exec())
 
@@ -71,7 +72,7 @@ class LimitExecutorTest(unittest.TestCase):
 
         plan = LimitPlan(ConstantValueExpression(limit_value))
 
-        limit_executor = LimitExecutor(plan)
+        limit_executor = LimitExecutor(MagicMock(), plan)
         limit_executor.append_child(DummyExecutor(batches))
         reduced_batches = list(limit_executor.exec())
 
@@ -115,14 +116,14 @@ class LimitExecutorTest(unittest.TestCase):
             ]
         )
 
-        orderby_executor = OrderByExecutor(plan)
+        orderby_executor = OrderByExecutor(MagicMock(), plan)
         orderby_executor.append_child(DummyExecutor(batches))
 
         sorted_batches = list(orderby_executor.exec())
 
         limit_value = 2
         plan = LimitPlan(ConstantValueExpression(limit_value))
-        limit_executor = LimitExecutor(plan)
+        limit_executor = LimitExecutor(MagicMock(), plan)
         limit_executor.append_child(DummyExecutor(sorted_batches))
         reduced_batches = list(limit_executor.exec())
 

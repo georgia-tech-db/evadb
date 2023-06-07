@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@ import unittest
 from test.util import (
     create_sample_image,
     file_remove,
+    get_evadb_for_testing,
     load_udfs_for_testing,
     shutdown_ray,
 )
@@ -24,29 +25,29 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from eva.catalog.catalog_manager import CatalogManager
-from eva.configuration.configuration_manager import ConfigurationManager
-from eva.models.storage.batch import Batch
-from eva.server.command_handler import execute_query_fetch_all
-from eva.storage.storage_engine import StorageEngine
+from evadb.models.storage.batch import Batch
+from evadb.server.command_handler import execute_query_fetch_all
+from evadb.storage.storage_engine import StorageEngine
 
 
 @pytest.mark.notparallel
 class OpenTests(unittest.TestCase):
     def setUp(self):
-        CatalogManager().reset()
-        ConfigurationManager()
+        self.evadb = get_evadb_for_testing()
+        self.evadb.catalog().reset()
         # Load built-in UDFs.
-        load_udfs_for_testing(mode="debug")
+        load_udfs_for_testing(self.evadb, mode="debug")
 
         # Insert image path.
         self.img_path = create_sample_image()
         create_table_query = "CREATE TABLE IF NOT EXISTS testOpenTable (num INTEGER);"
-        execute_query_fetch_all(create_table_query)
+        execute_query_fetch_all(self.evadb, create_table_query)
 
         # Insert dummy data into table.
-        table_catalog_entry = CatalogManager().get_table_catalog_entry("testOpenTable")
-        storage_engine = StorageEngine().factory(table_catalog_entry)
+        table_catalog_entry = self.evadb.catalog().get_table_catalog_entry(
+            "testOpenTable"
+        )
+        storage_engine = StorageEngine.factory(self.evadb, table_catalog_entry)
         storage_engine.write(
             table_catalog_entry, Batch(pd.DataFrame([{"num": 1}, {"num": 2}]))
         )
@@ -58,14 +59,14 @@ class OpenTests(unittest.TestCase):
 
         # Drop table.
         drop_table_query = "DROP TABLE testOpenTable;"
-        execute_query_fetch_all(drop_table_query)
+        execute_query_fetch_all(self.evadb, drop_table_query)
 
     def test_open_should_open_image(self):
         # Test query runs successfully with Open function call.
         select_query = """SELECT num, Open("{}") FROM testOpenTable;""".format(
             self.img_path
         )
-        batch_res = execute_query_fetch_all(select_query)
+        batch_res = execute_query_fetch_all(self.evadb, select_query)
 
         expected_img = np.array(np.ones((3, 3, 3)), dtype=np.float32)
         expected_img[0] -= 1

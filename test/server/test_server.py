@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ import unittest
 
 from mock import MagicMock, patch
 
-from eva.server.server import EvaServer
+from evadb.server.server import EvaServer
 
 # Check for Python 3.8+ for IsolatedAsyncioTestCase support
 if sys.version_info >= (3, 8):
@@ -33,7 +33,7 @@ if sys.version_info >= (3, 8):
             host = "localhost"
             port = 8803
 
-            await eva_server.start_eva_server(host, port)
+            await eva_server.start_eva_server("eva_db", host, port)
 
             # connection made
             client_reader1 = asyncio.StreamReader()

@@ -1,9 +1,7 @@
-.. _guide-getstarted:
-
 Getting Started
 ====
 
-Part 1: Install EVA
+Step 1: Install EVA
 ----
 
 EVA supports Python (versions >= 3.8). To install EVA, we recommend using the pip package manager:
@@ -31,14 +29,14 @@ Here is an `illustrative Jupyter notebook <https://evadb.readthedocs.io/en/stabl
 Connect to the EVA server
 ~~~~
 
-To connect to the EVA server in the notebook, use the following Python code:
+Connect to the EVA server in the notebook using the following code:
 
 .. code-block:: python
 
     # allow nested asyncio calls for client to connect with server
     import nest_asyncio
     nest_asyncio.apply()
-    from eva.server.db_api import connect
+    from evadb.server.db_api import connect
 
     # hostname and port of the server where EVA is running
     connection = connect(host = '0.0.0.0', port = 8803)
@@ -55,7 +53,7 @@ Download the MNIST video for analysis.
 
     !wget -nc https://www.dropbox.com/s/yxljxz6zxoqu54v/mnist.mp4
 
-Use the LOAD statement is used to load a video onto a table in EVA server. 
+Use the LOAD statement to load a video onto a table in EVA server. 
 
 .. code-block:: python
 
@@ -63,34 +61,14 @@ Use the LOAD statement is used to load a video onto a table in EVA server.
     response = cursor.fetch_all()
     print(response)
 
-Part 3: Register an user-defined function (UDF)
+Step 3: Run an AI Query on the loaded video
 ----
 
-User-defined functions allow us to combine SQL with deep learning models. These functions wrap around deep learning models.
-
-Download the user-defined function for classifying MNIST images.
-
-.. code-block:: bash
-
-    !wget -nc https://raw.githubusercontent.com/georgia-tech-db/eva/master/tutorials/apps/mnist/eva_mnist_udf.py
+User-defined functions (UDFs) allow us to combine SQL with AI models. These functions wrap around AI models. In this query, we use the `MnistImageClassifier` UDF that wraps around a model trained for classifying `MNIST` images.
 
 .. code-block:: python
 
-    cursor.execute("""CREATE UDF IF NOT EXISTS MnistCNN
-                      INPUT  (data NDARRAY (3, 28, 28))
-                      OUTPUT (label TEXT(2))
-                      TYPE  Classification
-                      IMPL  'eva_mnist_udf.py';
-                    """)
-    response = cursor.fetch_all()
-    print(response)
-
-Run a query using the newly registered UDF!
-~~~~
-
-.. code-block:: python
-
-    cursor.execute("""SELECT data, MnistCNN(data).label 
+    cursor.execute("""SELECT data, MnistImageClassifier(data).label 
                       FROM MNISTVideoTable
                       WHERE id = 30;""")
     response = cursor.fetch_all()
@@ -100,3 +78,4 @@ Visualize the output
 
 The output of the query is `visualized in the notebook <https://evadb.readthedocs.io/en/stable/source/tutorials/01-mnist.html#visualize-output-of-query-on-the-video>`_.
 
+.. image:: https://evadb.readthedocs.io/en/stable/_images/01-mnist_15_0.png
