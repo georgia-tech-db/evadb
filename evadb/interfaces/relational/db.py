@@ -28,8 +28,8 @@ from evadb.parser.select_statement import SelectStatement
 from evadb.parser.utils import (
     parse_create_udf,
     parse_create_vector_index,
-    parse_drop,
     parse_drop_index,
+    parse_drop_table,
     parse_drop_udf,
     parse_load,
     parse_query,
@@ -216,7 +216,7 @@ class EVADBCursor(object):
         Returns
             EVADBQuery: The EVADBQuery object representing the DROP TABLE.
         """
-        stmt = parse_drop(table_name, if_exists)
+        stmt = parse_drop_table(table_name, if_exists)
         return EVADBQuery(self._evadb, stmt)
 
     def drop_udf(self, udf_name: str, if_exists: bool = True) -> "EVADBQuery":
