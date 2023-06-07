@@ -50,6 +50,7 @@ from evadb.udfs.abstract.abstract_udf import AbstractUDF
 from evadb.udfs.decorators.decorators import forward, setup
 from evadb.udfs.decorators.io_descriptors.data_types import PandasDataframe
 
+
 class GPT4AllQaUDF(AbstractUDF):
     @setup(cacheable=False, udf_type="FeatureExtraction", batchable=False)
     def setup(self):

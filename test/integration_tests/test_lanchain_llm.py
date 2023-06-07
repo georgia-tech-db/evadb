@@ -14,23 +14,13 @@
 # limitations under the License.
 import unittest
 from test.util import (
-    DummyObjectDetector,
-    create_sample_video,
     load_udfs_for_testing,
     shutdown_ray,
     suffix_pytest_xdist_worker_id_to_dir,
 )
 
-import numpy as np
-import pandas as pd
-from pandas.testing import assert_frame_equal
-
-from evadb.binder.binder_utils import BinderError
 from evadb.configuration.constants import EVA_DATABASE_DIR, EVA_ROOT_DIR
-from evadb.executor.executor_utils import ExecutorError
 from evadb.interfaces.relational.db import connect
-from evadb.models.storage.batch import Batch
-from evadb.server.command_handler import execute_query_fetch_all
 
 
 class TestLangchainLLM(unittest.TestCase):
@@ -60,7 +50,7 @@ class TestLangchainLLM(unittest.TestCase):
         load_pdf = cursor.load(file_regex=pdf_path1, format="PDF", table_name="PDFss")
         load_pdf.execute()
 
-        udf_check = cursor.drop_udf(
+        cursor.drop_udf(
             "SentenceTransformerFeatureExtractor", if_exists=True
         ).execute()
 
@@ -71,7 +61,7 @@ class TestLangchainLLM(unittest.TestCase):
         )
         udf.execute()
 
-        udf_check = cursor.drop_udf("GPT4AllQaUDF", if_exists=True).execute()
+        cursor.drop_udf("GPT4AllQaUDF", if_exists=True).execute()
 
         udf = cursor.create_udf(
             "GPT4AllQaUDF",
