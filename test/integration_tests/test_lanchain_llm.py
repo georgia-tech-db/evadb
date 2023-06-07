@@ -59,7 +59,7 @@ class TestLangchainLLM(unittest.TestCase):
 
         load_pdf = cursor.load(file_regex=pdf_path1, format="PDF", table_name="PDFss")
         load_pdf.execute()
-        
+
         udf_check = cursor.drop_udf(
             "SentenceTransformerFeatureExtractor", if_exists=True
         ).execute()
@@ -71,9 +71,7 @@ class TestLangchainLLM(unittest.TestCase):
         )
         udf.execute()
 
-        udf_check = cursor.drop_udf(
-            "GPT4AllQaUDF", if_exists=True
-        ).execute()
+        udf_check = cursor.drop_udf("GPT4AllQaUDF", if_exists=True).execute()
 
         udf = cursor.create_udf(
             "GPT4AllQaUDF",
@@ -83,18 +81,19 @@ class TestLangchainLLM(unittest.TestCase):
         udf.execute()
 
         pdf_table_similarity = (
-                cursor.table("PDFss")
-                .order(
-                    """Similarity(
+            cursor.table("PDFss")
+            .order(
+                """Similarity(
                         SentenceTransformerFeatureExtractor('When was the NATO created?'), SentenceTransformerFeatureExtractor(data)
                     )"""
-                )
-                .limit(3)
             )
+            .limit(3)
+        )
         pdf_table_gpt = (
-                pdf_table_similarity
-                .cross_apply("GPT4AllQaUDF(data,'When was the NATO created?')", "objs(answers)")
-            ).df()
+            pdf_table_similarity.cross_apply(
+                "GPT4AllQaUDF(data,'When was the NATO created?')", "objs(answers)"
+            )
+        ).df()
 
         print(pdf_table_gpt)
         self.assertEqual(len(pdf_table_gpt), 3)
