@@ -67,7 +67,7 @@ class DropObjectExecutor(AbstractExecutor):
             table_obj
         ), "Failed to drop {}".format(table_name)
 
-        yield Batch(
+        return Batch(
             pd.DataFrame(
                 {"Table Successfully dropped: {}".format(table_name)},
                 index=[0],
@@ -91,7 +91,7 @@ class DropObjectExecutor(AbstractExecutor):
 
             self.catalog().delete_udf_catalog_entry_by_name(udf_name)
 
-            yield Batch(
+            return Batch(
                 pd.DataFrame(
                     {f"UDF {udf_name} successfully dropped"},
                     index=[0],
@@ -121,7 +121,7 @@ class DropObjectExecutor(AbstractExecutor):
 
             self.catalog().drop_index_catalog_entry(index_name)
 
-            yield Batch(
+            return Batch(
                 pd.DataFrame(
                     {f"Index {index_name} successfully dropped"},
                     index=[0],

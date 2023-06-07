@@ -14,17 +14,16 @@
 # limitations under the License.
 import unittest
 from pathlib import Path
-
-import pandas as pd
-from evadb.models.storage.batch import Batch
-from evadb.storage.storage_engine import StorageEngine
 from test.util import create_sample_video, file_remove, get_evadb_for_testing
 
+import pandas as pd
 import pytest
 
 from evadb.catalog.catalog_utils import get_video_table_column_definitions
 from evadb.executor.executor_utils import ExecutorError
+from evadb.models.storage.batch import Batch
 from evadb.server.command_handler import execute_query_fetch_all
+from evadb.storage.storage_engine import StorageEngine
 
 
 @pytest.mark.notparallel

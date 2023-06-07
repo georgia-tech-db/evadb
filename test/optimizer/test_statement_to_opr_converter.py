@@ -52,8 +52,7 @@ from evadb.optimizer.statement_to_opr_converter import StatementToPlanConverter
 from evadb.parser.create_index_statement import CreateIndexStatement
 from evadb.parser.create_statement import CreateTableStatement
 from evadb.parser.create_udf_statement import CreateUDFStatement
-from evadb.parser.drop_statement import DropTableStatement
-from evadb.parser.drop_object_statement import DropUDFStatement
+from evadb.parser.drop_object_statement import DropObjectStatement
 from evadb.parser.explain_statement import ExplainStatement
 from evadb.parser.insert_statement import InsertTableStatement
 from evadb.parser.rename_statement import RenameTableStatement
@@ -179,16 +178,6 @@ statement_to_opr_converter.metadata_definition_to_udf_metadata"
         l_drop_obj_mock.assert_called_once()
         l_drop_obj_mock.assert_called_with(stmt.object_type, stmt.name, stmt.if_exists)
 
-    def test_visit_should_call_drop_udf(self):
-        stmt = MagicMock(spec=DropUDFStatement)
-        converter = StatementToPlanConverter()
-        mock = MagicMock()
-        converter.visit_drop_udf = mock
-
-        converter.visit(stmt)
-        mock.assert_called_once()
-        mock.assert_called_with(stmt)
-
     def test_visit_should_call_insert(self):
         stmt = MagicMock(spec=InsertTableStatement)
         converter = StatementToPlanConverter()
@@ -230,10 +219,10 @@ statement_to_opr_converter.metadata_definition_to_udf_metadata"
         mock.assert_called_once_with(stmt)
 
     def test_visit_should_call_drop(self):
-        stmt = MagicMock(spec=DropTableStatement)
+        stmt = MagicMock(spec=DropObjectStatement)
         converter = StatementToPlanConverter()
         mock = MagicMock()
-        converter.visit_drop = mock
+        converter.visit_drop_object = mock
         converter.visit(stmt)
         mock.assert_called_once()
         mock.assert_called_with(stmt)

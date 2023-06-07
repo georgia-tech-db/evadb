@@ -21,7 +21,6 @@ from evadb.expression.constant_value_expression import ConstantValueExpression
 from evadb.expression.function_expression import FunctionExpression
 from evadb.expression.tuple_value_expression import TupleValueExpression
 from evadb.parser.create_udf_statement import CreateUDFStatement
-from evadb.parser.drop_object_statement import DropUDFStatement
 
 
 ##################################################################

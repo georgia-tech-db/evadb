@@ -75,6 +75,6 @@ class UDFType(EVAEnum):
 
 
 class ObjectType(EVAEnum):
-    TABLE # noqa: F821
-    UDF # noqa: F821
-    INDEX # noqa: F821
+    TABLE  # noqa: F821
+    UDF  # noqa: F821
+    INDEX  # noqa: F821

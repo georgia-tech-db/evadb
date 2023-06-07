@@ -26,7 +26,7 @@ from evadb.plan_nodes.abstract_plan import AbstractPlan
 from evadb.plan_nodes.create_mat_view_plan import CreateMaterializedViewPlan
 from evadb.plan_nodes.create_plan import CreatePlan
 from evadb.plan_nodes.create_udf_plan import CreateUDFPlan
-from evadb.plan_nodes.drop_object_plan import DropUDFPlan
+from evadb.plan_nodes.drop_object_plan import DropObjectPlan
 from evadb.plan_nodes.insert_plan import InsertPlan
 from evadb.plan_nodes.load_data_plan import LoadDataPlan
 from evadb.plan_nodes.rename_plan import RenamePlan
@@ -87,7 +87,7 @@ class PlanNodeTests(unittest.TestCase):
         self.assertEqual(node.impl_path, impl_path)
         self.assertEqual(node.udf_type, ty)
 
-    def test_drop_udf_plan(self):
+    def test_drop_object_plan(self):
         object_type = ObjectType.TABLE
         udf_name = "udf"
         if_exists = True

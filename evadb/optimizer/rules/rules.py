@@ -740,7 +740,6 @@ class LogicalRenameToPhysical(Rule):
         yield after
 
 
-
 class LogicalCreateUDFToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALCREATEUDF)

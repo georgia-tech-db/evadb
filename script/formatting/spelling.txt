@@ -161,11 +161,10 @@ DogBreedClassifier
 DropExecutor
 DropExecutorTest
 DropTable
-DropTableStatement
 DropUDFExecutor
 DropUDFExecutorTest
 DropUDFPlan
-DropUDFStatement
+DropObjectStatement
 DummyExecutor
 DummyFeatureExtractor
 DummyMultiObjectDetector

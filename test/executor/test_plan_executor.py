@@ -21,7 +21,7 @@ from evadb.catalog.catalog_type import TableType
 from evadb.catalog.models.table_catalog import TableCatalogEntry
 from evadb.executor.create_executor import CreateExecutor
 from evadb.executor.create_udf_executor import CreateUDFExecutor
-from evadb.executor.drop_object_executor import DropObjectPlan
+from evadb.executor.drop_object_executor import DropObjectExecutor, DropObjectPlan
 from evadb.executor.insert_executor import InsertExecutor
 from evadb.executor.load_executor import LoadDataExecutor
 from evadb.executor.plan_executor import PlanExecutor
@@ -107,10 +107,10 @@ class PlanExecutorTest(unittest.TestCase):
         executor = PlanExecutor(MagicMock(), plan)._build_execution_tree(plan)
         self.assertIsInstance(executor, CreateUDFExecutor)
 
-        # DropUDFExecutor
-        plan = DropUDFPlan("test", False)
+        # DropObjectExecutor
+        plan = DropObjectPlan("test", False)
         executor = PlanExecutor(MagicMock(), plan)._build_execution_tree(plan)
-        self.assertIsInstance(executor, DropUDFExecutor)
+        self.assertIsInstance(executor, DropObjectExecutor)
 
         # LoadDataExecutor
         plan = LoadDataPlan(
