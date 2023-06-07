@@ -3,44 +3,47 @@ from time import perf_counter
 
 from util import download_story, read_text_line, try_execute
 
-from eva.interfaces.relational.db import EVAConnection, connect
-from eva.udfs.udf_bootstrap_queries import Text_feat_udf_query, Similarity_udf_query
+import evadb
 
 
 def ask_question(path):
     # Initialize early to exlcude download time.
     llm = GPT4All("ggml-gpt4all-j-v1.3-groovy")
 
-    conn = connect()
+    cursor = evadb.connect().cursor()
 
-    conn.query(Text_feat_udf_query).execute()
-    conn.query(Similarity_udf_query).execute()
+    Text_feat_udf_query = """CREATE UDF IF NOT EXISTS SentenceFeatureExtractor
+            IMPL  '../eva/udfs/sentence_feature_extractor.py';
+            """
+    
+    cursor.query("DROP UDF IF EXISTS SentenceFeatureExtractor;").execute()
+    cursor.query(Text_feat_udf_query).execute()
 
     story_table = f"TablePPText"
     story_feat_table = f"FeatTablePPText"
     index_table = f"IndexTable"
 
-    try_execute(conn, f"DROP TABLE IF EXISTS {story_table};")
-    try_execute(conn, f"DROP TABLE IF EXISTS {story_feat_table};")
+    try_execute(cursor, f"DROP TABLE IF EXISTS {story_table};")
+    try_execute(cursor, f"DROP TABLE IF EXISTS {story_feat_table};")
 
-    conn.query(f"CREATE TABLE {story_table} (id INTEGER, data TEXT(1000));").execute()
+    cursor.query(f"CREATE TABLE {story_table} (id INTEGER, data TEXT(1000));").execute()
 
     # Insert text chunk by chunk.
     for i, text in enumerate(read_text_line(path)):
-        conn.query(f"INSERT INTO {story_table} (id, data) VALUES ({i}, '{text}');").execute()
+        cursor.query(f"INSERT INTO {story_table} (id, data) VALUES ({i}, '{text}');").execute()
 
     # Extract features from text.
     st = perf_counter()
-    conn.query(f"""CREATE TABLE {story_feat_table} AS
+    cursor.query(f"""CREATE TABLE {story_feat_table} AS
         SELECT SentenceFeatureExtractor(data), data FROM {story_table};""").execute()
     fin = perf_counter()
 
     # Create search index on extracted features.
-    conn.query(f"CREATE INDEX {index_table} ON {story_feat_table} (features) USING FAISS;").execute()
+    cursor.query(f"CREATE INDEX {index_table} ON {story_feat_table} (features) USING FAISS;").execute()
 
     # Search similar text as the asked question.
     question = "Who is Prince Boris Drubetskoy?"
-    res_batch = conn.query(f"""SELECT data FROM {story_feat_table} 
+    res_batch = cursor.query(f"""SELECT data FROM {story_feat_table} 
         ORDER BY Similarity(SentenceFeatureExtractor('{question}'), features)
         LIMIT 5;""").execute()
     
