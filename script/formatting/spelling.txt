@@ -160,13 +160,11 @@ DocumentStorageEngine
 DogBreedClassifier
 DropExecutor
 DropExecutorTest
-DropPlan
 DropTable
-DropTableStatement
 DropUDFExecutor
 DropUDFExecutorTest
 DropUDFPlan
-DropUDFStatement
+DropObjectStatement
 DummyExecutor
 DummyFeatureExtractor
 DummyMultiObjectDetector
@@ -363,10 +361,6 @@ LogicalCreateUDFToPhysical
 LogicalDelete
 LogicalDeleteToPhysical
 LogicalDerivedGetToPhysical
-LogicalDrop
-LogicalDropToPhysical
-LogicalDropUDF
-LogicalDropUDFToPhysical
 LogicalExchange
 LogicalExchangeToPhysical
 LogicalExplain

@@ -59,8 +59,7 @@ from evadb.optimizer.operators import (
     LogicalCreateMaterializedView,
     LogicalCreateUDF,
     LogicalDelete,
-    LogicalDrop,
-    LogicalDropUDF,
+    LogicalDropObject,
     LogicalExchange,
     LogicalExplain,
     LogicalExtractObject,
@@ -87,8 +86,7 @@ from evadb.plan_nodes.create_index_plan import CreateIndexPlan
 from evadb.plan_nodes.create_plan import CreatePlan
 from evadb.plan_nodes.create_udf_plan import CreateUDFPlan
 from evadb.plan_nodes.delete_plan import DeletePlan
-from evadb.plan_nodes.drop_plan import DropPlan
-from evadb.plan_nodes.drop_udf_plan import DropUDFPlan
+from evadb.plan_nodes.drop_object_plan import DropObjectPlan
 from evadb.plan_nodes.function_scan_plan import FunctionScanPlan
 from evadb.plan_nodes.groupby_plan import GroupByPlan
 from evadb.plan_nodes.hash_join_probe_plan import HashJoinProbePlan
@@ -742,22 +740,6 @@ class LogicalRenameToPhysical(Rule):
         yield after
 
 
-class LogicalDropToPhysical(Rule):
-    def __init__(self):
-        pattern = Pattern(OperatorType.LOGICALDROP)
-        super().__init__(RuleType.LOGICAL_DROP_TO_PHYSICAL, pattern)
-
-    def promise(self):
-        return Promise.LOGICAL_DROP_TO_PHYSICAL
-
-    def check(self, before: Operator, context: OptimizerContext):
-        return True
-
-    def apply(self, before: LogicalDrop, context: OptimizerContext):
-        after = DropPlan(before.table_infos, before.if_exists)
-        yield after
-
-
 class LogicalCreateUDFToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALCREATEUDF)
@@ -804,19 +786,19 @@ class LogicalCreateIndexToVectorIndex(Rule):
         yield after
 
 
-class LogicalDropUDFToPhysical(Rule):
+class LogicalDropObjectToPhysical(Rule):
     def __init__(self):
-        pattern = Pattern(OperatorType.LOGICALDROPUDF)
-        super().__init__(RuleType.LOGICAL_DROP_UDF_TO_PHYSICAL, pattern)
+        pattern = Pattern(OperatorType.LOGICAL_DROP_OBJECT)
+        super().__init__(RuleType.LOGICAL_DROP_OBJECT_TO_PHYSICAL, pattern)
 
     def promise(self):
-        return Promise.LOGICAL_DROP_UDF_TO_PHYSICAL
+        return Promise.LOGICAL_DROP_OBJECT_TO_PHYSICAL
 
     def check(self, before: Operator, context: OptimizerContext):
         return True
 
-    def apply(self, before: LogicalDropUDF, context: OptimizerContext):
-        after = DropUDFPlan(before.name, before.if_exists)
+    def apply(self, before: LogicalDropObject, context: OptimizerContext):
+        after = DropObjectPlan(before.object_type, before.name, before.if_exists)
         yield after
 
 

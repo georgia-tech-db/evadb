@@ -31,8 +31,7 @@ from evadb.parser.create_statement import (
 )
 from evadb.parser.create_udf_statement import CreateUDFStatement
 from evadb.parser.delete_statement import DeleteTableStatement
-from evadb.parser.drop_statement import DropTableStatement
-from evadb.parser.drop_udf_statement import DropUDFStatement
+from evadb.parser.drop_object_statement import DropObjectStatement
 from evadb.parser.insert_statement import InsertTableStatement
 from evadb.parser.load_statement import LoadDataStatement
 from evadb.parser.parser import Parser
@@ -40,7 +39,12 @@ from evadb.parser.rename_statement import RenameTableStatement
 from evadb.parser.select_statement import SelectStatement
 from evadb.parser.statement import AbstractStatement, StatementType
 from evadb.parser.table_ref import JoinNode, TableInfo, TableRef, TableValuedExpression
-from evadb.parser.types import FileFormatType, JoinType, ParserOrderBySortType
+from evadb.parser.types import (
+    FileFormatType,
+    JoinType,
+    ObjectType,
+    ParserOrderBySortType,
+)
 
 
 class ParserTests(unittest.TestCase):
@@ -249,31 +253,19 @@ class ParserTests(unittest.TestCase):
     def test_drop_table_statement(self):
         parser = Parser()
         drop_queries = "DROP TABLE student_info"
-        expected_stmt = DropTableStatement([TableInfo("student_info")], False)
+        expected_stmt = DropObjectStatement(ObjectType.TABLE, "student_info", False)
         eva_statement_list = parser.parse(drop_queries)
         self.assertIsInstance(eva_statement_list, list)
         self.assertEqual(len(eva_statement_list), 1)
-        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.DROP)
+        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.DROP_OBJECT)
         drop_stmt = eva_statement_list[0]
         self.assertEqual(drop_stmt, expected_stmt)
-
-    def test_drop_udf_statement(self):
-        parser = Parser()
-        drop_udf_query = """DROP UDF FastRCNN;"""
-
-        expected_stmt = DropUDFStatement("FastRCNN", False)
-        eva_statement_list = parser.parse(drop_udf_query)
-        self.assertIsInstance(eva_statement_list, list)
-        self.assertEqual(len(eva_statement_list), 1)
-        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.DROP_UDF)
-        drop_udf_stmt = eva_statement_list[0]
-        self.assertEqual(drop_udf_stmt, expected_stmt)
 
     def test_drop_udf_statement_str(self):
         drop_udf_query1 = """DROP UDF MyUDF;"""
         drop_udf_query2 = """DROP UDF IF EXISTS MyUDF;"""
-        expected_stmt1 = DropUDFStatement("MyUDF", False)
-        expected_stmt2 = DropUDFStatement("MyUDF", True)
+        expected_stmt1 = DropObjectStatement(ObjectType.UDF, "MyUDF", False)
+        expected_stmt2 = DropObjectStatement(ObjectType.UDF, "MyUDF", True)
         self.assertEqual(str(expected_stmt1), drop_udf_query1)
         self.assertEqual(str(expected_stmt2), drop_udf_query2)
 

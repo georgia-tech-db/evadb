@@ -19,8 +19,7 @@ from evadb.optimizer.operators import (
     LogicalCreateMaterializedView,
     LogicalCreateUDF,
     LogicalDelete,
-    LogicalDrop,
-    LogicalDropUDF,
+    LogicalDropObject,
     LogicalExplain,
     LogicalExtractObject,
     LogicalFilter,
@@ -48,8 +47,7 @@ from evadb.parser.create_mat_view_statement import CreateMaterializedViewStateme
 from evadb.parser.create_statement import CreateTableStatement
 from evadb.parser.create_udf_statement import CreateUDFStatement
 from evadb.parser.delete_statement import DeleteTableStatement
-from evadb.parser.drop_statement import DropTableStatement
-from evadb.parser.drop_udf_statement import DropUDFStatement
+from evadb.parser.drop_object_statement import DropObjectStatement
 from evadb.parser.explain_statement import ExplainStatement
 from evadb.parser.insert_statement import InsertTableStatement
 from evadb.parser.load_statement import LoadDataStatement
@@ -258,10 +256,6 @@ class StatementToPlanConverter:
         rename_opr = LogicalRename(statement.old_table_ref, statement.new_table_name)
         self._plan = rename_opr
 
-    def visit_drop(self, statement: DropTableStatement):
-        drop_opr = LogicalDrop(statement.table_infos, statement.if_exists)
-        self._plan = drop_opr
-
     def visit_create_udf(self, statement: CreateUDFStatement):
         """Converter for parsed create udf statement
 
@@ -283,13 +277,10 @@ class StatementToPlanConverter:
         )
         self._plan = create_udf_opr
 
-    def visit_drop_udf(self, statement: DropUDFStatement):
-        """Converter for parsed DROP UDF statement
-
-        Arguments:
-            statement {DropUDFStatement} - Drop UDF Statement
-        """
-        self._plan = LogicalDropUDF(statement.name, statement.if_exists)
+    def visit_drop_object(self, statement: DropObjectStatement):
+        self._plan = LogicalDropObject(
+            statement.object_type, statement.name, statement.if_exists
+        )
 
     def visit_load_data(self, statement: LoadDataStatement):
         """Converter for parsed load data statement
@@ -354,12 +345,10 @@ class StatementToPlanConverter:
             self.visit_create(statement)
         elif isinstance(statement, RenameTableStatement):
             self.visit_rename(statement)
-        elif isinstance(statement, DropTableStatement):
-            self.visit_drop(statement)
         elif isinstance(statement, CreateUDFStatement):
             self.visit_create_udf(statement)
-        elif isinstance(statement, DropUDFStatement):
-            self.visit_drop_udf(statement)
+        elif isinstance(statement, DropObjectStatement):
+            self.visit_drop_object(statement)
         elif isinstance(statement, LoadDataStatement):
             self.visit_load_data(statement)
         elif isinstance(statement, CreateMaterializedViewStatement):
