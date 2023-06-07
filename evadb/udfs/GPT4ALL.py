@@ -54,13 +54,16 @@ from evadb.udfs.decorators.io_descriptors.data_types import PandasDataframe
 class GPT4AllQaUDF(AbstractUDF):
     @setup(cacheable=False, udf_type="FeatureExtraction", batchable=False)
     def setup(self):
+        # check if model is available
         self.model_path = f"{EVA_ROOT_DIR}/data/models/ggml-gpt4all-j-v1.3-groovy.bin"
         check_file = os.path.isfile(self.model_path)
         if check_file is False:
+            # downloading gpt4all model
             url = "https://gpt4all.io/models/ggml-gpt4all-j-v1.3-groovy.bin"
             r = requests.get(url, allow_redirects=True)
             open(self.model_path, "wb").write(r.content)
 
+        # fetching openai key
         openai.api_key = ConfigurationManager().get_value("third_party", "OPENAI_KEY")
         # If not found, try OS Environment Variable
         if len(openai.api_key) == 0:
@@ -69,6 +72,7 @@ class GPT4AllQaUDF(AbstractUDF):
             len(openai.api_key) != 0
         ), "Please set your OpenAI API key in evadb.yml file (third_party, open_api_key) or environment variable (OPENAI_KEY)"
 
+        # creating llm instance for gpt4all model
         callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
         self.llm = GPT4All(
             model=self.model_path,
@@ -99,16 +103,17 @@ class GPT4AllQaUDF(AbstractUDF):
     )
     def forward(self, df: pd.DataFrame) -> pd.DataFrame:
         def _forward(row: pd.Series) -> np.ndarray:
+            # fetching the paragraph and question
             columns = row.axes[0]
             data = row.loc[columns[0]]
             question = row.loc[columns[1]]
-
+            # spliting text based on chunk
             text_splitter = RecursiveCharacterTextSplitter(
                 chunk_size=500, chunk_overlap=50
             )
             texts = text_splitter.split_text(data)
 
-            # create vector index
+            # create FAISS vector index based on HuggingFace Embeddings
             store = FAISS.from_texts(
                 texts,
                 HuggingFaceEmbeddings(),
@@ -118,10 +123,11 @@ class GPT4AllQaUDF(AbstractUDF):
                 ],
             )
             faiss.write_index(store.index, "docs.faiss")
-
+            # creating QA model based on gpt4all llm model
             qa = RetrievalQA.from_chain_type(
                 llm=self.llm, chain_type="stuff", retriever=store.as_retriever()
             )
+            # fetching answer based question
             ans = qa.run(question)
             return ans
 

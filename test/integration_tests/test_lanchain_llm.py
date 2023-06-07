@@ -45,29 +45,30 @@ class TestLangchainLLM(unittest.TestCase):
     def test_langchain_llm_gpt4all(self):
         conn = connect()
         cursor = conn.cursor()
+        # loading a pdf in eva
         pdf_path1 = f"{EVA_ROOT_DIR}/data/documents/state_of_the_union.pdf"
 
         load_pdf = cursor.load(file_regex=pdf_path1, format="PDF", table_name="PDFss")
         load_pdf.execute()
-
+        # droping SentenceTransformerFeatureExtractor udf if existes
         cursor.drop_udf("SentenceTransformerFeatureExtractor", if_exists=True).execute()
-
+        # creating SentenceTransformerFeatureExtractor udf
         udf = cursor.create_udf(
             "SentenceTransformerFeatureExtractor",
             True,
             f"{EVA_ROOT_DIR}/evadb/udfs/sentence_transformer_feature_extractor.py",
         )
         udf.execute()
-
+        # droping GPT4AllQaUDF udf if existes
         cursor.drop_udf("GPT4AllQaUDF", if_exists=True).execute()
-
+        # creating GPT4AllQaUDF udf
         udf = cursor.create_udf(
             "GPT4AllQaUDF",
             True,
             f"{EVA_ROOT_DIR}/evadb/udfs/GPT4ALL.py",
         )
         udf.execute()
-
+        # fetching Similarity based on features from SentenceTransformerFeatureExtractor udf and returning top 3 results
         pdf_table_similarity = (
             cursor.table("PDFss")
             .order(
@@ -77,6 +78,7 @@ class TestLangchainLLM(unittest.TestCase):
             )
             .limit(3)
         )
+        # passing the top results to the GPT4AllQaUDF
         pdf_table_gpt = (
             pdf_table_similarity.cross_apply(
                 "GPT4AllQaUDF(data,'When was the NATO created?')", "objs(answers)"
@@ -84,6 +86,7 @@ class TestLangchainLLM(unittest.TestCase):
         ).df()
 
         print(pdf_table_gpt)
+        # check for testcases
         self.assertEqual(len(pdf_table_gpt), 3)
         self.assertTrue("pdfss.data" in pdf_table_gpt.columns)
         self.assertTrue("objs.answers" in pdf_table_gpt.columns)

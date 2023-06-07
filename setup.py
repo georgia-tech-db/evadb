@@ -57,9 +57,7 @@ minimal_requirement = [
     "langchain==0.0.190",
     "pymupdf",
     "pdfminer.six",
-    "sentence-transformers",
-    "requests",
-    "gpt4all"
+    
 
 ]
 
@@ -117,6 +115,9 @@ udf_libs = [
     "openai>=0.27.4",  # CHATGPT
     "timm>=0.6.13",  # HUGGINGFACE VISION TASKS
     "norfair>=2.2.0",  # OBJECT TRACKING
+    "sentence-transformers", # Senetence Transformer Feature Extraction 
+    "requests", # url request 
+    "gpt4all"   # GPT4ALL Model Langchain
 ]
 
 ### NEEDED FOR EXPERIMENTAL FEATURES
