@@ -13,22 +13,15 @@ EVA supports Python (versions >= 3.8). To install EVA, we recommend using the pi
     pip install evadb
 
 
-Launch EVA server
+Connect to EvaDB in your Python file
 ----
 
-EVA is based on a `client-server architecture <https://www.postgresql.org/docs/15/tutorial-arch.html>`_. 
-
-To launch the EVA server using the pip package, run the following command on the terminal:
+Grab a ``cursor`` to run AI pipelines using EvaDB.
 
 .. code-block:: bash
 
-    eva_server &
-
-You can also launch the EVA server using Docker either locally or on a server with GPUs:
-
-.. code-block:: bash
-
-    docker run --name eva_server --gpus all -p 8803:8803 evadbai/evaserver
+    import evadb
+    cursor = evadb.connect().cursor()
 
 Part 2: Start a Jupyter Notebook Client
 ----
