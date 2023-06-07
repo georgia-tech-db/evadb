@@ -36,7 +36,7 @@ def ask_question(path):
     st = perf_counter()
     conn.query(f"""CREATE TABLE {story_feat_table} AS
         SELECT SentenceFeatureExtractor(data), data FROM {story_table};""").execute()
-    print(f"Feature extraction time: {(perf_counter() - st) * 1000:.3f} ms")
+    fin = perf_counter()
 
     # Create search index on extracted features.
     conn.query(f"CREATE INDEX {index_table} ON {story_feat_table} (features) USING FAISS;").execute()
@@ -59,6 +59,8 @@ def ask_question(path):
         {"role": "user", "content": f"Answer this question based on context: {question}"},
     ]
     llm.chat_completion(messages)
+
+    print(f"Feature extraction time: {(fin - st) * 1000:.3f} ms")
     print(f"Total QA time: {(perf_counter() - st) * 1000:.3f} ms")
 
 
