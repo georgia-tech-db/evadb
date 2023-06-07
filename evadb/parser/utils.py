@@ -17,6 +17,7 @@ from evadb.parser.drop_object_statement import DropObjectStatement
 from evadb.parser.load_statement import LoadDataStatement
 from evadb.parser.parser import Parser
 from evadb.parser.select_statement import SelectStatement
+from evadb.parser.types import ObjectType
 
 
 def parse_expression(expr: str):
@@ -70,11 +71,10 @@ def parse_load(table_name: str, file_regex: str, format: str, **kwargs):
     return stmt
 
 
-def parse_drop(table_name: str, if_exists: bool, **kwargs):
+def parse_drop(object_type: ObjectType, name: str, if_exists: bool):
+    mock_query = f"DROP {object_type}"
     mock_query = (
-        f"DROP TABLE IF EXISTS {table_name}"
-        if if_exists
-        else f"DROP TABLE {table_name}"
+        f" {mock_query} IF EXISTS {name} " if if_exists else f"{mock_query} {name}"
     )
     mock_query += ";"
 
@@ -83,15 +83,16 @@ def parse_drop(table_name: str, if_exists: bool, **kwargs):
     return stmt
 
 
-def parse_drop_udf(udf_name: str, if_exists: bool, **kwargs):
-    mock_query = (
-        f"DROP UDF IF EXISTS {udf_name}" if if_exists else f"DROP UDF {udf_name}"
-    )
-    mock_query += ";"
+def parse_drop_table(table_name: str, if_exists: bool):
+    return parse_drop(ObjectType.TABLE, table_name, if_exists)
 
-    stmt = Parser().parse(mock_query)[0]
-    assert isinstance(stmt, DropObjectStatement), "Expected a drop udf statement"
-    return stmt
+
+def parse_drop_udf(udf_name: str, if_exists: bool):
+    return parse_drop(ObjectType.UDF, udf_name, if_exists)
+
+
+def parse_drop_index(index_name: str, if_exists: bool):
+    return parse_drop(ObjectType.INDEX, index_name, if_exists)
 
 
 def parse_query(query):

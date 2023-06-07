@@ -257,7 +257,7 @@ class ParserTests(unittest.TestCase):
         eva_statement_list = parser.parse(drop_queries)
         self.assertIsInstance(eva_statement_list, list)
         self.assertEqual(len(eva_statement_list), 1)
-        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.DROP)
+        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.DROP_OBJECT)
         drop_stmt = eva_statement_list[0]
         self.assertEqual(drop_stmt, expected_stmt)
 

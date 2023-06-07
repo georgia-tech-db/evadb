@@ -168,13 +168,13 @@ statement_to_opr_converter.metadata_definition_to_udf_metadata"
         mock.assert_called_with(stmt)
 
     @patch("evadb.optimizer.statement_to_opr_converter.LogicalDropObject")
-    def test_visit_drop_udf(self, l_drop_obj_mock):
+    def test_visit_drop_object(self, l_drop_obj_mock):
         converter = StatementToPlanConverter()
         stmt = MagicMock()
         stmt.name = "name"
         stmt.object_type = "object_type"
         stmt.if_exists = True
-        converter.visit_drop_udf(stmt)
+        converter.visit_drop_object(stmt)
         l_drop_obj_mock.assert_called_once()
         l_drop_obj_mock.assert_called_with(stmt.object_type, stmt.name, stmt.if_exists)
 

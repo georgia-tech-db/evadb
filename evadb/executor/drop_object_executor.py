@@ -80,6 +80,7 @@ class DropObjectExecutor(AbstractExecutor):
             err_msg = f"UDF {udf_name} does not exist, therefore cannot be dropped."
             if if_exists:
                 logger.warning(err_msg)
+                return Batch(pd.DataFrame([err_msg]))
             else:
                 raise RuntimeError(err_msg)
         else:
@@ -104,6 +105,7 @@ class DropObjectExecutor(AbstractExecutor):
             err_msg = f"Index {index_name} does not exist, therefore cannot be dropped."
             if if_exists:
                 logger.warning(err_msg)
+                return Batch(pd.DataFrame([err_msg]))
             else:
                 raise RuntimeError(err_msg)
         else:

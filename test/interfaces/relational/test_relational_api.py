@@ -334,10 +334,8 @@ class RelationalAPI(unittest.TestCase):
         load_pdf = cursor.load(file_regex=pdf_path2, format="PDF", table_name="PDFss")
         load_pdf.execute()
 
-        udf_check = cursor.query(
-            "DROP UDF IF  EXISTS SentenceTransformerFeatureExtractor"
-        )
-        udf_check.execute()
+        udf_check = cursor.drop_udf("SentenceTransformerFeatureExtractor")
+        udf_check.df()
         udf = cursor.create_udf(
             "SentenceTransformerFeatureExtractor",
             True,
@@ -363,6 +361,7 @@ class RelationalAPI(unittest.TestCase):
             .select("data")
         )
         output = query.df()
-        print(output)
         self.assertEqual(len(output), 3)
         self.assertTrue("pdfss.data" in output.columns)
+
+        cursor.drop_index("faiss_index").df()

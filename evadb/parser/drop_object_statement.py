@@ -39,7 +39,7 @@ class DropObjectStatement(AbstractStatement):
         if self._if_exists:
             print_str = f"DROP {self._object_type} IF EXISTS {self._name};"
         else:
-            print_str = f"DROP {{self._object_type}} {self._name};"
+            print_str = f"DROP {self._object_type} {self._name};"
         return print_str
 
     @property
