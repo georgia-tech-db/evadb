@@ -42,23 +42,20 @@ from langchain.embeddings.huggingface import HuggingFaceEmbeddings
 from langchain.llms import GPT4All
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores.faiss import FAISS
-from sentence_transformers import SentenceTransformer
 
 from evadb.catalog.catalog_type import NdArrayType
 from evadb.configuration.configuration_manager import ConfigurationManager
-from evadb.configuration.constants import EVA_DATABASE_DIR, EVA_ROOT_DIR
+from evadb.configuration.constants import EVA_ROOT_DIR
 from evadb.udfs.abstract.abstract_udf import AbstractUDF
 from evadb.udfs.decorators.decorators import forward, setup
 from evadb.udfs.decorators.io_descriptors.data_types import PandasDataframe
-from evadb.udfs.gpu_compatible import GPUCompatible
-
 
 class GPT4AllQaUDF(AbstractUDF):
     @setup(cacheable=False, udf_type="FeatureExtraction", batchable=False)
     def setup(self):
         self.model_path = f"{EVA_ROOT_DIR}/data/models/ggml-gpt4all-j-v1.3-groovy.bin"
         check_file = os.path.isfile(self.model_path)
-        if check_file == False:
+        if check_file is False:
             url = "https://gpt4all.io/models/ggml-gpt4all-j-v1.3-groovy.bin"
             r = requests.get(url, allow_redirects=True)
             open(self.model_path, "wb").write(r.content)
