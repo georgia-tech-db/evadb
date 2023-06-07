@@ -160,7 +160,6 @@ DocumentStorageEngine
 DogBreedClassifier
 DropExecutor
 DropExecutorTest
-DropPlan
 DropTable
 DropTableStatement
 DropUDFExecutor
@@ -363,10 +362,6 @@ LogicalCreateUDFToPhysical
 LogicalDelete
 LogicalDeleteToPhysical
 LogicalDerivedGetToPhysical
-LogicalDrop
-LogicalDropToPhysical
-LogicalDropUDF
-LogicalDropUDFToPhysical
 LogicalExchange
 LogicalExchangeToPhysical
 LogicalExplain

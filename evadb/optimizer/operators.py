@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from collections import deque
+from dataclasses import dataclass
 from enum import IntEnum, auto
 from pathlib import Path
 from typing import Any, List
@@ -28,7 +29,7 @@ from evadb.expression.function_expression import FunctionExpression
 from evadb.parser.alias import Alias
 from evadb.parser.create_statement import ColumnDefinition
 from evadb.parser.table_ref import TableInfo, TableRef
-from evadb.parser.types import JoinType, ShowType
+from evadb.parser.types import JoinType, ObjectType, ShowType
 
 
 class OperatorType(IntEnum):
@@ -45,7 +46,7 @@ class OperatorType(IntEnum):
     LOGICALDELETE = auto()
     LOGICALCREATE = auto()
     LOGICALRENAME = auto()
-    LOGICALDROP = auto()
+    LOGICAL_DROP_OBJECT = auto()
     LOGICALCREATEUDF = auto()
     LOGICALLOADDATA = auto()
     LOGICALQUERYDERIVEDGET = auto()
@@ -58,7 +59,6 @@ class OperatorType(IntEnum):
     LOGICALFUNCTIONSCAN = auto()
     LOGICAL_CREATE_MATERIALIZED_VIEW = auto()
     LOGICAL_SHOW = auto()
-    LOGICALDROPUDF = auto()
     LOGICALEXPLAIN = auto()
     LOGICALCREATEINDEX = auto()
     LOGICAL_APPLY_AND_MERGE = auto()
@@ -631,38 +631,6 @@ class LogicalRename(Operator):
         return hash((super().__hash__(), self._new_name, self._old_table_ref))
 
 
-class LogicalDrop(Operator):
-    """
-    Logical node for drop table operations
-    """
-
-    def __init__(self, table_infos: List[TableInfo], if_exists: bool, children=None):
-        super().__init__(OperatorType.LOGICALDROP, children)
-        self._table_infos = table_infos
-        self._if_exists = if_exists
-
-    @property
-    def table_infos(self):
-        return self._table_infos
-
-    @property
-    def if_exists(self):
-        return self._if_exists
-
-    def __eq__(self, other):
-        is_subtree_equal = super().__eq__(other)
-        if not isinstance(other, LogicalDrop):
-            return False
-        return (
-            is_subtree_equal
-            and self.table_infos == other.table_infos
-            and self.if_exists == other.if_exists
-        )
-
-    def __hash__(self) -> int:
-        return hash((super().__hash__(), tuple(self._table_infos), self._if_exists))
-
-
 class LogicalCreateUDF(Operator):
     """
     Logical node for create udf operations
@@ -763,11 +731,12 @@ class LogicalCreateUDF(Operator):
         )
 
 
-class LogicalDropUDF(Operator):
+class LogicalDropObject(Operator):
     """
-    Logical node for DROP UDF operations
+    Logical node for DROP Object operations
 
     Attributes:
+        object_type: ObjectType
         name: str
             UDF name provided by the user
         if_exists: bool
@@ -775,10 +744,17 @@ class LogicalDropUDF(Operator):
             else logs a warning
     """
 
-    def __init__(self, name: str, if_exists: bool, children: List = None):
-        super().__init__(OperatorType.LOGICALDROPUDF, children)
+    def __init__(
+        self, object_type: ObjectType, name: str, if_exists: bool, children: List = None
+    ):
+        super().__init__(OperatorType.LOGICAL_DROP_OBJECT, children)
+        self._object_type = object_type
         self._name = name
         self._if_exists = if_exists
+
+    @property
+    def object_type(self):
+        return self._object_type
 
     @property
     def name(self):
@@ -790,16 +766,17 @@ class LogicalDropUDF(Operator):
 
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
-        if not isinstance(other, LogicalDropUDF):
+        if not isinstance(other, LogicalDropObject):
             return False
         return (
             is_subtree_equal
+            and self.object_type == other.object_type
             and self.name == other.name
             and self.if_exists == other.if_exists
         )
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(), self.name, self.if_exists))
+        return hash((super().__hash__(), self.object_type, self.name, self.if_exists))
 
 
 class LogicalLoadData(Operator):

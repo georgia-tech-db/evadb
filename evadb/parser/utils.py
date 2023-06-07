@@ -14,7 +14,7 @@
 # limitations under the License.
 from evadb.parser.create_udf_statement import CreateUDFStatement
 from evadb.parser.drop_statement import DropTableStatement
-from evadb.parser.drop_udf_statement import DropUDFStatement
+from evadb.parser.drop_object_statement import DropUDFStatement
 from evadb.parser.load_statement import LoadDataStatement
 from evadb.parser.parser import Parser
 from evadb.parser.select_statement import SelectStatement

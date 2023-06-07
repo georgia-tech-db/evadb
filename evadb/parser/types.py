@@ -31,14 +31,13 @@ class StatementType(EVAEnum):
     SELECT  # noqa: F821
     CREATE  # noqa: F821
     RENAME  # noqa: F821
-    DROP  # noqa: F821
+    DROP_OBJECT  # noqa: F821
     INSERT  # noqa: F821
     DELETE  # noqa: F821
     CREATE_UDF  # noqa: F821
     LOAD_DATA  # noqa: F821
     CREATE_MATERIALIZED_VIEW  # noqa: F821
     SHOW  # noqa: F821
-    DROP_UDF  # noqa: F821
     EXPLAIN  # noqa: F821
     CREATE_INDEX  # noqa: F821
     # add other types
@@ -73,3 +72,9 @@ class ShowType(EVAEnum):
 
 class UDFType(EVAEnum):
     EXTRACT_OBJECT  # noqa: F821
+
+
+class ObjectType(EVAEnum):
+    TABLE # noqa: F821
+    UDF # noqa: F821
+    INDEX # noqa: F821

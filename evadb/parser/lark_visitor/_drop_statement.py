@@ -14,23 +14,48 @@
 # limitations under the License.
 from lark import Tree
 
-from evadb.parser.drop_statement import DropTableStatement
+from evadb.parser.drop_object_statement import DropObjectStatement
+from evadb.parser.types import ObjectType
 
 
-class DropTable:
+class DropObject:
     def drop_table(self, tree):
-        table_info = None
+        table_name = None
         if_exists = False
 
         for child in tree.children:
             if isinstance(child, Tree):
                 if child.data == "if_exists":
                     if_exists = True
-                elif child.data == "table_name":
-                    table_info = self.visit(child)
+                elif child.data == "uid":
+                    table_name = self.visit(child)
 
-        # Need to wrap table in a list
-        table_info_list = [table_info]
+        return DropObjectStatement(ObjectType.TABLE, table_name, if_exists)
 
-        drop_stmt = DropTableStatement(table_info_list, if_exists)
-        return drop_stmt
+    # Drop Index
+    def drop_index(self, tree):
+        index_name = None
+        if_exists = False
+
+        for child in tree.children:
+            if isinstance(child, Tree):
+                if child.data == "if_exists":
+                    if_exists = True
+                elif child.data == "uid":
+                    index_name = self.visit(child)
+
+        return DropObjectStatement(ObjectType.INDEX, index_name, if_exists)
+
+    # Drop UDF
+    def drop_udf(self, tree):
+        udf_name = None
+        if_exists = False
+
+        for child in tree.children:
+            if isinstance(child, Tree):
+                if child.data == "uid":
+                    udf_name = self.visit(child)
+                elif child.data == "if_exists":
+                    if_exists = True
+
+        return DropObjectStatement(ObjectType.UDF, udf_name, if_exists)

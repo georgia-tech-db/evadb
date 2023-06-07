@@ -21,7 +21,7 @@ from evadb.expression.constant_value_expression import ConstantValueExpression
 from evadb.expression.function_expression import FunctionExpression
 from evadb.expression.tuple_value_expression import TupleValueExpression
 from evadb.parser.create_udf_statement import CreateUDFStatement
-from evadb.parser.drop_udf_statement import DropUDFStatement
+from evadb.parser.drop_object_statement import DropUDFStatement
 
 
 ##################################################################
@@ -54,20 +54,6 @@ class Functions:
             if isinstance(child, Tree):
                 args.append(self.visit(child))
         return args
-
-    # Drop UDF
-    def drop_udf(self, tree):
-        udf_name = None
-        if_exists = False
-
-        for child in tree.children:
-            if isinstance(child, Tree):
-                if child.data == "udf_name":
-                    udf_name = self.visit(child)
-                elif child.data == "if_exists":
-                    if_exists = True
-
-        return DropUDFStatement(udf_name, if_exists)
 
     # Create UDF
     def create_udf(self, tree):

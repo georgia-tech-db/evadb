@@ -21,13 +21,12 @@ import pytest
 from evadb.catalog.catalog_type import ColumnType
 from evadb.catalog.models.column_catalog import ColumnCatalogEntry
 from evadb.parser.table_ref import TableInfo, TableRef
-from evadb.parser.types import FileFormatType
+from evadb.parser.types import FileFormatType, ObjectType
 from evadb.plan_nodes.abstract_plan import AbstractPlan
 from evadb.plan_nodes.create_mat_view_plan import CreateMaterializedViewPlan
 from evadb.plan_nodes.create_plan import CreatePlan
 from evadb.plan_nodes.create_udf_plan import CreateUDFPlan
-from evadb.plan_nodes.drop_plan import DropPlan
-from evadb.plan_nodes.drop_udf_plan import DropUDFPlan
+from evadb.plan_nodes.drop_object_plan import DropUDFPlan
 from evadb.plan_nodes.insert_plan import InsertPlan
 from evadb.plan_nodes.load_data_plan import LoadDataPlan
 from evadb.plan_nodes.rename_plan import RenamePlan
@@ -64,14 +63,6 @@ class PlanNodeTests(unittest.TestCase):
         self.assertEqual(dummy_plan_node.old_table.table.table_name, "old")
         self.assertEqual(dummy_plan_node.new_name.table_name, "new")
 
-    def test_drop_plan(self):
-        dummy_info = TableInfo("dummy")
-
-        dummy_plan_node = DropPlan([dummy_info], False)
-
-        self.assertEqual(dummy_plan_node.opr_type, PlanOprType.DROP)
-        self.assertEqual(dummy_plan_node.table_infos[0].table_name, "dummy")
-
     def test_insert_plan(self):
         video_id = 0
         column_ids = [0, 1]
@@ -97,11 +88,13 @@ class PlanNodeTests(unittest.TestCase):
         self.assertEqual(node.udf_type, ty)
 
     def test_drop_udf_plan(self):
+        object_type = ObjectType.TABLE
         udf_name = "udf"
         if_exists = True
-        node = DropUDFPlan(udf_name, if_exists)
-        self.assertEqual(node.opr_type, PlanOprType.DROP_UDF)
+        node = DropObjectPlan(object_type, udf_name, if_exists)
+        self.assertEqual(node.opr_type, PlanOprType.DROP_OBJECT)
         self.assertEqual(node.if_exists, True)
+        self.assertEqual(node.object_type, ObjectType.TABLE)
 
     def test_load_data_plan(self):
         table_info = "info"

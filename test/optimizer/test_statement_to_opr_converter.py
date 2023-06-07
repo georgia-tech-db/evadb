@@ -26,8 +26,7 @@ from evadb.optimizer.operators import (
     LogicalCreateMaterializedView,
     LogicalCreateUDF,
     LogicalDelete,
-    LogicalDrop,
-    LogicalDropUDF,
+    LogicalDropObject,
     LogicalExchange,
     LogicalExplain,
     LogicalExtractObject,
@@ -54,7 +53,7 @@ from evadb.parser.create_index_statement import CreateIndexStatement
 from evadb.parser.create_statement import CreateTableStatement
 from evadb.parser.create_udf_statement import CreateUDFStatement
 from evadb.parser.drop_statement import DropTableStatement
-from evadb.parser.drop_udf_statement import DropUDFStatement
+from evadb.parser.drop_object_statement import DropUDFStatement
 from evadb.parser.explain_statement import ExplainStatement
 from evadb.parser.insert_statement import InsertTableStatement
 from evadb.parser.rename_statement import RenameTableStatement
@@ -169,19 +168,16 @@ statement_to_opr_converter.metadata_definition_to_udf_metadata"
         mock.assert_called_once()
         mock.assert_called_with(stmt)
 
-    @patch("evadb.optimizer.statement_to_opr_converter.LogicalDropUDF")
-    @patch(
-        "evadb.optimizer.\
-statement_to_opr_converter.column_definition_to_udf_io"
-    )
-    def test_visit_drop_udf(self, mock, l_drop_udf_mock):
+    @patch("evadb.optimizer.statement_to_opr_converter.LogicalDropObject")
+    def test_visit_drop_udf(self, l_drop_obj_mock):
         converter = StatementToPlanConverter()
         stmt = MagicMock()
         stmt.name = "name"
+        stmt.object_type = "object_type"
         stmt.if_exists = True
         converter.visit_drop_udf(stmt)
-        l_drop_udf_mock.assert_called_once()
-        l_drop_udf_mock.assert_called_with(stmt.name, stmt.if_exists)
+        l_drop_obj_mock.assert_called_once()
+        l_drop_obj_mock.assert_called_with(stmt.object_type, stmt.name, stmt.if_exists)
 
     def test_visit_should_call_drop_udf(self):
         stmt = MagicMock(spec=DropUDFStatement)
@@ -281,8 +277,7 @@ statement_to_opr_converter.column_definition_to_udf_io"
         explain_plan = LogicalExplain([MagicMock()])
         exchange_plan = LogicalExchange(MagicMock())
         show_plan = LogicalShow(MagicMock())
-        drop_plan = LogicalDrop(MagicMock(), MagicMock())
-        drop_udf_plan = LogicalDropUDF(MagicMock(), MagicMock())
+        drop_plan = LogicalDropObject(MagicMock(), MagicMock(), MagicMock())
         get_plan = LogicalGet(MagicMock(), MagicMock(), MagicMock())
         sample_plan = LogicalSample(MagicMock(), MagicMock())
         filter_plan = LogicalFilter(MagicMock())
@@ -313,7 +308,6 @@ statement_to_opr_converter.column_definition_to_udf_io"
         plans.append(limit_plan)
         plans.append(rename_plan)
         plans.append(drop_plan)
-        plans.append(drop_udf_plan)
         plans.append(get_plan)
         plans.append(sample_plan)
         plans.append(filter_plan)
