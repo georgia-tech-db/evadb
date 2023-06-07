@@ -42,7 +42,7 @@ def ask_question(path):
     conn.query(f"CREATE INDEX {index_table} ON {story_feat_table} (features) USING FAISS;").execute()
 
     # Search similar text as the asked question.
-    question = "Where does Bennet family live?"
+    question = "Who is Prince Boris Drubetskoy?"
     res_batch = conn.query(f"""SELECT data FROM {story_feat_table} 
         ORDER BY Similarity(SentenceFeatureExtractor('{question}'), features)
         LIMIT 5;""").execute()
@@ -55,7 +55,7 @@ def ask_question(path):
 
     # LLM
     messages = [
-        {"role": "system", "content": f"Here is some context:{context}"},
+        {"role": "user", "content": f"Here is some context:{context}"},
         {"role": "user", "content": f"Answer this question based on context: {question}"},
     ]
     llm.chat_completion(messages)

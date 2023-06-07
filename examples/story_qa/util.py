@@ -3,15 +3,14 @@ import urllib.request
 
 
 def download_story():
-    # Thanks to Project Gutenberg, we use Pride and Prejudice for our
-    # demonstration purpose.
-    if not os.path.exists("new_pp.txt"):
-        urllib.request.urlretrieve("https://www.gutenberg.org/cache/epub/1342/pg1342.txt", "pp.txt")
+    parsed_file_path, orig_file_path = "new_wp.txt", "wp.txt"
+    if not os.path.exists(parsed_file_path):
+        urllib.request.urlretrieve("https://www.gutenberg.org/cache/epub/2600/pg2600.txt", orig_file_path)
 
     # Process file each paragraph per line.
-    new_f = open("new_pp.txt", "w")
+    new_f = open(parsed_file_path, "w")
     merge_line = ""
-    with open("pp.txt", "r") as f:
+    with open(orig_file_path, "r") as f:
         for line in f.readlines():
             if line == "\n":
                 new_f.write(f"{merge_line}\n")
@@ -19,7 +18,7 @@ def download_story():
             else:
                 merge_line += line.rstrip("\n") + " "
 
-    return "new_pp.txt"
+    return parsed_file_path
 
 
 def read_text_line(path, num_token=1000):
