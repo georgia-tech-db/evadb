@@ -479,10 +479,7 @@ OrderBy
 OrderByExecutor
 OrderByExecutorTest
 OrderByPlan
-<<<<<<< HEAD
-=======
 OrderedDict
->>>>>>> master
 PDFColumnName
 PDFMinerLoader
 PDFReader
@@ -1002,10 +999,7 @@ hasattr
 hashjoin
 hashlib
 hexdigest
-<<<<<<< HEAD
-=======
 hiddens
->>>>>>> master
 horizontalFlip
 horovod
 hostname
@@ -1310,10 +1304,7 @@ th
 thefuzz
 tmp
 toGrayscale
-<<<<<<< HEAD
-=======
 toctree
->>>>>>> master
 todo
 tolist
 torchvision
