@@ -17,7 +17,7 @@ def download_story():
                 new_f.write(f"{merge_line}\n")
                 merge_line = ""
             else:
-                merge_line += line.rstrip("\n")
+                merge_line += line.rstrip("\n") + " "
 
     return "new_pp.txt"
 
@@ -32,3 +32,10 @@ def read_text_line(path, num_token=1000):
                 cut_line = line[i : min(i + 1000, len(line))]
                 cut_line = "".join(filter(whitelist.__contains__, cut_line))
                 yield cut_line
+
+
+def try_execute(conn, query):
+    try:
+        conn.query(query).execute()
+    except Exception:
+        pass
