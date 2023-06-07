@@ -18,24 +18,9 @@ from test.util import create_sample_video, get_evadb_for_testing
 import pytest
 from mock import MagicMock, patch
 
-<<<<<<< HEAD
-from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.catalog_type import TableType
-from eva.catalog.models.table_catalog import TableCatalogEntry
-from eva.configuration.configuration_manager import ConfigurationManager
-from eva.experimental.parallel.optimizer.rules.rules import (
-    LogicalApplyAndMergeToPhysical as ParallelLogicalApplyAndMergeToPhysical,
-)
-from eva.experimental.parallel.optimizer.rules.rules import LogicalExchangeToPhysical
-from eva.experimental.parallel.optimizer.rules.rules import (
-    LogicalGetToSeqScan as ParallelLogicalGetToSeqScan,
-)
-from eva.optimizer.operators import (
-=======
 from evadb.catalog.catalog_type import TableType
 from evadb.catalog.models.table_catalog import TableCatalogEntry
 from evadb.optimizer.operators import (
->>>>>>> master
     LogicalFilter,
     LogicalGet,
     LogicalJoin,
@@ -244,12 +229,7 @@ class RulesTest(unittest.TestCase):
             LogicalJoinToPhysicalHashJoin(),
             LogicalCreateMaterializedViewToPhysical(),
             LogicalFilterToPhysical(),
-<<<<<<< HEAD
-            LogicalProjectToPhysical(),
-            ParallelLogicalApplyAndMergeToPhysical()
-=======
             LogicalApplyAndMergeToRayPhysical()
->>>>>>> master
             if ray_enabled
             else LogicalApplyAndMergeToPhysical(),
             LogicalShowToPhysical(),
