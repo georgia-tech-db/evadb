@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from eva.udfs.ndarray.crop import Crop
+from evadb.udfs.ndarray.crop import Crop
 
 
 class CropTests(unittest.TestCase):

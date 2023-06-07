@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,8 +17,7 @@ from test.util import create_large_scale_image_dataset
 
 import pytest
 
-from eva.configuration.configuration_manager import ConfigurationManager
-from eva.server.command_handler import execute_query_fetch_all
+from evadb.server.command_handler import execute_query_fetch_all
 
 
 @pytest.mark.torchtest
@@ -31,7 +30,7 @@ from eva.server.command_handler import execute_query_fetch_all
 def test_should_run_pytorch_and_yolo(benchmark, setup_pytorch_tests):
     select_query = """SELECT Yolo(data) FROM MyVideo
                     WHERE id < 5;"""
-    actual_batch = benchmark(execute_query_fetch_all, select_query)
+    actual_batch = benchmark(execute_query_fetch_all, setup_pytorch_tests, select_query)
     assert len(actual_batch) == 5
 
 
@@ -48,14 +47,14 @@ def test_should_run_pytorch_and_facenet(benchmark, setup_pytorch_tests):
                 OUTPUT (bboxes NDARRAY FLOAT32(ANYDIM, 4),
                         scores NDARRAY FLOAT32(ANYDIM))
                 TYPE  FaceDetection
-                IMPL  'eva/udfs/face_detector.py';
+                IMPL  'evadb/udfs/face_detector.py';
     """
-    execute_query_fetch_all(create_udf_query)
+    execute_query_fetch_all(setup_pytorch_tests, create_udf_query)
 
     select_query = """SELECT FaceDetector(data) FROM MyVideo
                     WHERE id < 5;"""
 
-    actual_batch = benchmark(execute_query_fetch_all, select_query)
+    actual_batch = benchmark(execute_query_fetch_all, setup_pytorch_tests, select_query)
     assert len(actual_batch) == 5
 
 
@@ -71,13 +70,13 @@ def test_should_run_pytorch_and_resnet50(benchmark, setup_pytorch_tests):
                 INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
                 OUTPUT (features NDARRAY FLOAT32(ANYDIM))
                 TYPE  Classification
-                IMPL  'eva/udfs/feature_extractor.py';
+                IMPL  'evadb/udfs/feature_extractor.py';
     """
-    execute_query_fetch_all(create_udf_query)
+    execute_query_fetch_all(setup_pytorch_tests, create_udf_query)
 
     select_query = """SELECT FeatureExtractor(data) FROM MyVideo
                     WHERE id < 5;"""
-    actual_batch = benchmark(execute_query_fetch_all, select_query)
+    actual_batch = benchmark(execute_query_fetch_all, setup_pytorch_tests, select_query)
     assert len(actual_batch) == 5
 
     # non-trivial test case for Resnet50
@@ -96,7 +95,7 @@ def test_should_run_pytorch_and_resnet50(benchmark, setup_pytorch_tests):
 def test_lateral_join(benchmark, setup_pytorch_tests):
     select_query = """SELECT id, a FROM MyVideo JOIN LATERAL
                     Yolo(data) AS T(a,b,c) WHERE id < 5;"""
-    actual_batch = benchmark(execute_query_fetch_all, select_query)
+    actual_batch = benchmark(execute_query_fetch_all, setup_pytorch_tests, select_query)
     assert len(actual_batch) == 5
     assert list(actual_batch.columns) == ["myvideo.id", "T.a"]
 
@@ -112,11 +111,11 @@ def test_automatic_speech_recognition(benchmark, setup_pytorch_tests):
         f"CREATE UDF {udf_name} TYPE HuggingFace "
         "'task' 'automatic-speech-recognition' 'model' 'openai/whisper-base';"
     )
-    execute_query_fetch_all(create_udf)
+    execute_query_fetch_all(setup_pytorch_tests, create_udf)
 
     # TODO: use with SAMPLE AUDIORATE 16000
     select_query = f"SELECT {udf_name}(audio) FROM VIDEOS;"
-    output = benchmark(execute_query_fetch_all, select_query)
+    output = benchmark(execute_query_fetch_all, setup_pytorch_tests, select_query)
 
     # verify that output has one row and one column only
     assert output.frames.shape == (1, 1)
@@ -124,7 +123,7 @@ def test_automatic_speech_recognition(benchmark, setup_pytorch_tests):
     assert output.frames.iloc[0][0].count("touchdown") == 2
 
     drop_udf_query = f"DROP UDF {udf_name};"
-    execute_query_fetch_all(drop_udf_query)
+    execute_query_fetch_all(setup_pytorch_tests, drop_udf_query)
 
 
 @pytest.mark.benchmark(
@@ -138,18 +137,18 @@ def test_summarization_from_video(benchmark, setup_pytorch_tests):
         f"CREATE UDF {asr_udf} TYPE HuggingFace "
         "'task' 'automatic-speech-recognition' 'model' 'openai/whisper-base';"
     )
-    execute_query_fetch_all(create_udf)
+    execute_query_fetch_all(setup_pytorch_tests, create_udf)
 
     summary_udf = "Summarizer"
     create_udf = (
         f"CREATE UDF {summary_udf} TYPE HuggingFace "
         "'task' 'summarization' 'model' 'philschmid/bart-large-cnn-samsum' 'min_length' 10 'max_length' 100;"
     )
-    execute_query_fetch_all(create_udf)
+    execute_query_fetch_all(setup_pytorch_tests, create_udf)
 
     # TODO: use with SAMPLE AUDIORATE 16000
     select_query = f"SELECT {summary_udf}({asr_udf}(audio)) FROM VIDEOS;"
-    output = benchmark(execute_query_fetch_all, select_query)
+    output = benchmark(execute_query_fetch_all, setup_pytorch_tests, select_query)
 
     # verify that output has one row and one column only
     assert output.frames.shape == (1, 1)
@@ -160,9 +159,9 @@ def test_summarization_from_video(benchmark, setup_pytorch_tests):
     )
 
     drop_udf_query = f"DROP UDF {asr_udf};"
-    execute_query_fetch_all(drop_udf_query)
+    execute_query_fetch_all(setup_pytorch_tests, drop_udf_query)
     drop_udf_query = f"DROP UDF {summary_udf};"
-    execute_query_fetch_all(drop_udf_query)
+    execute_query_fetch_all(setup_pytorch_tests, drop_udf_query)
 
 
 @pytest.mark.benchmark(
@@ -172,7 +171,7 @@ def test_summarization_from_video(benchmark, setup_pytorch_tests):
 )
 def test_load_large_scale_image_dataset(benchmark, setup_pytorch_tests):
     # Test load 1M images.
-    tmp_dir = ConfigurationManager().get_value("storage", "tmp_dir")
+    tmp_dir = setup_pytorch_tests.config.get_value("storage", "tmp_dir")
 
     # Check directory's mounted disk available space.
     statvfs = os.statvfs(tmp_dir)
@@ -190,7 +189,7 @@ def test_load_large_scale_image_dataset(benchmark, setup_pytorch_tests):
 
     def _execute_query_list(query_list):
         for query in query_list:
-            execute_query_fetch_all(query)
+            execute_query_fetch_all(setup_pytorch_tests, query)
 
     drop_query = "DROP TABLE IF EXISTS benchmarkImageDataset;"
     load_query = f"LOAD IMAGE '{img_dir}/*.jpg' INTO benchmarkImageDataset;"

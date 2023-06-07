@@ -7,7 +7,7 @@ MODEL_NAME=$1
 SCRIPT_PATH=$(dirname "$0")
 
 # compute model path relative to script path
-MODEL_PATH=$HOME/.eva/data/models
+MODEL_PATH=$HOME/.evadb/data/models
 
 # check if the models folder exists, if not create it
 if [ ! -d "$MODEL_PATH" ]; then

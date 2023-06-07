@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,20 +17,24 @@ import os
 import unittest
 from pathlib import Path
 from test.markers import duplicate_skip_marker, windows_skip_marker
-from test.util import get_logical_query_plan, load_udfs_for_testing, shutdown_ray
+from test.util import (
+    get_evadb_for_testing,
+    get_logical_query_plan,
+    load_udfs_for_testing,
+    shutdown_ray,
+)
 
-from eva.catalog.catalog_manager import CatalogManager
-from eva.configuration.constants import EVA_ROOT_DIR
-from eva.optimizer.operators import LogicalFunctionScan
-from eva.optimizer.plan_generator import PlanGenerator
-from eva.optimizer.rules.rules import (
+from evadb.configuration.constants import EVA_ROOT_DIR
+from evadb.optimizer.operators import LogicalFunctionScan
+from evadb.optimizer.plan_generator import PlanGenerator
+from evadb.optimizer.rules.rules import (
     CacheFunctionExpressionInApply,
     CacheFunctionExpressionInFilter,
     CacheFunctionExpressionInProject,
 )
-from eva.optimizer.rules.rules_manager import disable_rules
-from eva.server.command_handler import execute_query_fetch_all
-from eva.utils.stats import Timer
+from evadb.optimizer.rules.rules_manager import RulesManager, disable_rules
+from evadb.server.command_handler import execute_query_fetch_all
+from evadb.utils.stats import Timer
 
 
 class ReuseTest(unittest.TestCase):
@@ -41,34 +45,37 @@ class ReuseTest(unittest.TestCase):
             'task' 'object-detection'
             'model' 'facebook/detr-resnet-50';
         """
-        execute_query_fetch_all(create_udf_query)
+        execute_query_fetch_all(self.evadb, create_udf_query)
 
     def setUp(self):
-        CatalogManager().reset()
+        self.evadb = get_evadb_for_testing()
+        self.evadb.catalog().reset()
         ua_detrac = f"{EVA_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
-        execute_query_fetch_all(f"LOAD VIDEO '{ua_detrac}' INTO DETRAC;")
-        load_udfs_for_testing()
+        execute_query_fetch_all(self.evadb, f"LOAD VIDEO '{ua_detrac}' INTO DETRAC;")
+        load_udfs_for_testing(self.evadb)
         self._load_hf_model()
 
     def tearDown(self):
         shutdown_ray()
-        execute_query_fetch_all("DROP TABLE IF EXISTS DETRAC;")
+        execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS DETRAC;")
 
     def _verify_reuse_correctness(self, query, reuse_batch):
         # Fix memory failures on CI when running reuse test cases. An issue with yolo
         # surfaces when the system is running on low memory. Explicitly calling garbage
         # collection to reduce the memory usage.
         gc.collect()
+        rules_manager = RulesManager(self.evadb.config)
         with disable_rules(
+            rules_manager,
             [
                 CacheFunctionExpressionInApply(),
                 CacheFunctionExpressionInFilter(),
                 CacheFunctionExpressionInProject(),
-            ]
-        ) as rules_manager:
-            custom_plan_generator = PlanGenerator(rules_manager)
+            ],
+        ):
+            custom_plan_generator = PlanGenerator(self.evadb, rules_manager)
             without_reuse_batch = execute_query_fetch_all(
-                query, plan_generator=custom_plan_generator
+                self.evadb, query, plan_generator=custom_plan_generator
             )
 
         # printing the batches so that we can see the mismatch in the logs
@@ -84,7 +91,7 @@ class ReuseTest(unittest.TestCase):
         for query in queries:
             timer = Timer()
             with timer:
-                batches.append(execute_query_fetch_all(query))
+                batches.append(execute_query_fetch_all(self.evadb, query))
             exec_times.append(timer.total_elapsed_time)
         return batches, exec_times
 
@@ -122,12 +129,12 @@ class ReuseTest(unittest.TestCase):
         select_query = (
             """SELECT id, HFObjectDetector(data).label FROM DETRAC WHERE id < 15;"""
         )
-        reuse_batch = execute_query_fetch_all(select_query)
+        reuse_batch = execute_query_fetch_all(self.evadb, select_query)
         self._verify_reuse_correctness(select_query, reuse_batch)
 
         # different query format
         select_query = """SELECT id, HFObjectDetector(data).label FROM DETRAC WHERE ['car'] <@ HFObjectDetector(data).label AND id < 20"""
-        reuse_batch = execute_query_fetch_all(select_query)
+        reuse_batch = execute_query_fetch_all(self.evadb, select_query)
         self._verify_reuse_correctness(select_query, reuse_batch)
 
     def test_reuse_logical_project_with_duplicate_query(self):
@@ -183,7 +190,7 @@ class ReuseTest(unittest.TestCase):
     def test_reuse_after_server_shutdown(self):
         select_query = """SELECT id, label FROM DETRAC JOIN
             LATERAL Yolo(data) AS Obj(label, bbox, conf) WHERE id < 4;"""
-        execute_query_fetch_all(select_query)
+        execute_query_fetch_all(self.evadb, select_query)
 
         # Stop and restart server
         os.system("nohup eva_server --stop")
@@ -192,7 +199,7 @@ class ReuseTest(unittest.TestCase):
         select_query = """SELECT id, label FROM DETRAC JOIN
             LATERAL Yolo(data) AS Obj(label, bbox, conf) WHERE id < 6;"""
 
-        reuse_batch = execute_query_fetch_all(select_query)
+        reuse_batch = execute_query_fetch_all(self.evadb, select_query)
         self._verify_reuse_correctness(select_query, reuse_batch)
 
         # stop the server
@@ -201,41 +208,47 @@ class ReuseTest(unittest.TestCase):
     def test_drop_udf_should_remove_cache(self):
         select_query = """SELECT id, label FROM DETRAC JOIN
             LATERAL Yolo(data) AS Obj(label, bbox, conf) WHERE id < 5;"""
-        execute_query_fetch_all(select_query)
+        execute_query_fetch_all(self.evadb, select_query)
 
-        plan = next(get_logical_query_plan(select_query).find_all(LogicalFunctionScan))
+        plan = next(
+            get_logical_query_plan(self.evadb, select_query).find_all(
+                LogicalFunctionScan
+            )
+        )
         cache_name = plan.func_expr.signature()
-        catalog_manager = CatalogManager()
 
         # cache exists
-        udf_cache = catalog_manager.get_udf_cache_catalog_entry_by_name(cache_name)
+        udf_cache = self.evadb.catalog().get_udf_cache_catalog_entry_by_name(cache_name)
         cache_dir = Path(udf_cache.cache_path)
         self.assertIsNotNone(udf_cache)
         self.assertTrue(cache_dir.exists())
 
         # cache should be removed if the UDF is removed
-        execute_query_fetch_all("DROP UDF Yolo;")
-        udf_cache = catalog_manager.get_udf_cache_catalog_entry_by_name(cache_name)
+        execute_query_fetch_all(self.evadb, "DROP UDF Yolo;")
+        udf_cache = self.evadb.catalog().get_udf_cache_catalog_entry_by_name(cache_name)
         self.assertIsNone(udf_cache)
         self.assertFalse(cache_dir.exists())
 
     def test_drop_table_should_remove_cache(self):
         select_query = """SELECT id, label FROM DETRAC JOIN
             LATERAL Yolo(data) AS Obj(label, bbox, conf) WHERE id < 5;"""
-        execute_query_fetch_all(select_query)
+        execute_query_fetch_all(self.evadb, select_query)
 
-        plan = next(get_logical_query_plan(select_query).find_all(LogicalFunctionScan))
+        plan = next(
+            get_logical_query_plan(self.evadb, select_query).find_all(
+                LogicalFunctionScan
+            )
+        )
         cache_name = plan.func_expr.signature()
-        catalog_manager = CatalogManager()
 
         # cache exists
-        udf_cache = catalog_manager.get_udf_cache_catalog_entry_by_name(cache_name)
+        udf_cache = self.evadb.catalog().get_udf_cache_catalog_entry_by_name(cache_name)
         cache_dir = Path(udf_cache.cache_path)
         self.assertIsNotNone(udf_cache)
         self.assertTrue(cache_dir.exists())
 
         # cache should be removed if the Table is removed
-        execute_query_fetch_all("DROP TABLE DETRAC;")
-        udf_cache = catalog_manager.get_udf_cache_catalog_entry_by_name(cache_name)
+        execute_query_fetch_all(self.evadb, "DROP TABLE DETRAC;")
+        udf_cache = self.evadb.catalog().get_udf_cache_catalog_entry_by_name(cache_name)
         self.assertIsNone(udf_cache)
         self.assertFalse(cache_dir.exists())

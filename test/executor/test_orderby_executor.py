@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,12 +17,13 @@ from test.executor.utils import DummyExecutor
 
 import numpy as np
 import pandas as pd
+from mock import MagicMock
 
-from eva.executor.orderby_executor import OrderByExecutor
-from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.models.storage.batch import Batch
-from eva.parser.types import ParserOrderBySortType
-from eva.plan_nodes.orderby_plan import OrderByPlan
+from evadb.executor.orderby_executor import OrderByExecutor
+from evadb.expression.tuple_value_expression import TupleValueExpression
+from evadb.models.storage.batch import Batch
+from evadb.parser.types import ParserOrderBySortType
+from evadb.plan_nodes.orderby_plan import OrderByPlan
 
 
 class OrderByExecutorTest(unittest.TestCase):
@@ -57,7 +58,7 @@ class OrderByExecutorTest(unittest.TestCase):
             ]
         )
 
-        orderby_executor = OrderByExecutor(plan)
+        orderby_executor = OrderByExecutor(MagicMock(), plan)
         orderby_executor.append_child(DummyExecutor(batches))
 
         sorted_batches = list(orderby_executor.exec())

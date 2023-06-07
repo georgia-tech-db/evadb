@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,18 +13,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import create_sample_video, prefix_worker_id
+from test.util import (
+    create_sample_video,
+    get_evadb_for_testing,
+    suffix_pytest_xdist_worker_id_to_dir,
+)
 from unittest.mock import MagicMock
 
 import mock
 import pandas as pd
 import pytest
 
-from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
-from eva.catalog.models.column_catalog import ColumnCatalogEntry
-from eva.catalog.models.table_catalog import TableCatalogEntry
-from eva.models.storage.batch import Batch
-from eva.storage.storage_engine import StorageEngine
+from evadb.catalog.catalog_type import ColumnType, NdArrayType, TableType
+from evadb.catalog.models.column_catalog import ColumnCatalogEntry
+from evadb.catalog.models.table_catalog import TableCatalogEntry
+from evadb.models.storage.batch import Batch
+from evadb.storage.storage_engine import StorageEngine
 
 
 @pytest.mark.notparallel
@@ -35,8 +39,8 @@ class VideoStorageEngineTest(unittest.TestCase):
 
     def create_sample_table(self):
         table_info = TableCatalogEntry(
-            prefix_worker_id("dataset"),
-            prefix_worker_id("dataset"),
+            str(suffix_pytest_xdist_worker_id_to_dir("dataset")),
+            str(suffix_pytest_xdist_worker_id_to_dir("dataset")),
             table_type=TableType.VIDEO_DATA,
         )
         column_1 = ColumnCatalogEntry("id", ColumnType.INTEGER, False)
@@ -47,9 +51,9 @@ class VideoStorageEngineTest(unittest.TestCase):
         return table_info
 
     def setUp(self):
-        mock = MagicMock()
+        evadb = get_evadb_for_testing()
         mock.table_type = TableType.VIDEO_DATA
-        self.video_engine = StorageEngine.factory(mock)
+        self.video_engine = StorageEngine.factory(evadb, mock)
         self.table = self.create_sample_table()
 
     def tearDown(self):

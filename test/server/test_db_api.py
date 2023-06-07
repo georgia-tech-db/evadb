@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@ import asyncio
 import os
 import sys
 import unittest
-from test.util import prefix_worker_id
+from test.util import suffix_pytest_xdist_worker_id_to_dir
 
 from mock import MagicMock, patch
 
-from eva.models.server.response import Response
-from eva.interfaces.relational.db import EVACursor, connect
+from evadb.interfaces.relational.db import EVADBCursor, connect_remote
+from evadb.models.server.response import Response
 
 # Check for Python 3.8+ for IsolatedAsyncioTestCase support
 if sys.version_info >= (3, 8):
@@ -33,19 +33,19 @@ if sys.version_info >= (3, 8):
 
         def setUp(self) -> None:
             print("setUp")
-            f = open(prefix_worker_id("upload.txt"), "w")
+            f = open(suffix_pytest_xdist_worker_id_to_dir("upload.txt"), "w")
             f.write("dummy data")
             f.close()
             return super().setUp()
 
         def tearDown(self) -> None:
             print("tearDown")
-            os.remove(prefix_worker_id("upload.txt"))
+            os.remove(suffix_pytest_xdist_worker_id_to_dir("upload.txt"))
             return super().tearDown()
 
         def test_eva_cursor_execute_async(self):
             connection = AsyncMock()
-            eva_cursor = EVACursor(connection)
+            eva_cursor = EVADBCursor(connection)
             query = "test_query"
             asyncio.run(eva_cursor.execute_async(query))
             self.assertEqual(eva_cursor._pending_query, True)
@@ -56,7 +56,7 @@ if sys.version_info >= (3, 8):
 
         def test_eva_cursor_fetch_all_async(self):
             connection = AsyncMock()
-            eva_cursor = EVACursor(connection)
+            eva_cursor = EVADBCursor(connection)
             message = "test_response"
             serialized_message = Response.serialize("test_response")
             serialized_message_length = b"%d" % len(serialized_message)
@@ -71,7 +71,7 @@ if sys.version_info >= (3, 8):
             asyncio.set_event_loop(loop)
 
             connection = AsyncMock()
-            eva_cursor = EVACursor(connection)
+            eva_cursor = EVADBCursor(connection)
 
             message = "test_response"
             serialized_message = Response.serialize("test_response")
@@ -90,7 +90,7 @@ if sys.version_info >= (3, 8):
             asyncio.set_event_loop(loop)
 
             connection = AsyncMock()
-            eva_cursor = EVACursor(connection)
+            eva_cursor = EVADBCursor(connection)
 
             # test attr
             with self.assertRaises(AttributeError):
@@ -98,14 +98,14 @@ if sys.version_info >= (3, 8):
 
             # test connection error with incorrect port
             with self.assertRaises(OSError):
-                connect(hostname, port=1)
+                connect_remote(hostname, port=1)
 
         async def test_eva_signal(self):
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
 
             connection = AsyncMock()
-            eva_cursor = EVACursor(connection)
+            eva_cursor = EVADBCursor(connection)
 
             query = "test_query"
             await eva_cursor.execute_async(query)
@@ -116,7 +116,7 @@ if sys.version_info >= (3, 8):
             asyncio.set_event_loop(loop)
             connection.protocol.loop = loop
 
-            eva_cursor = EVACursor(connection)
+            eva_cursor = EVADBCursor(connection)
             eva_cursor.execute("test_query")
             eva_cursor.stop_query()
             self.assertEqual(eva_cursor._pending_query, False)
@@ -124,7 +124,7 @@ if sys.version_info >= (3, 8):
         def test_get_attr(self):
             connection = AsyncMock()
 
-            eva_cursor = EVACursor(connection)
+            eva_cursor = EVADBCursor(connection)
             with self.assertRaises(AttributeError):
                 eva_cursor.missing_function()
 
@@ -134,6 +134,6 @@ if sys.version_info >= (3, 8):
             server_writer = MagicMock()
             mock_open.return_value = (server_reader, server_writer)
 
-            connection = connect("localhost", port=1)
+            connection = connect_remote("localhost", port=1)
 
             self.assertNotEqual(connection, None)

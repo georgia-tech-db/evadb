@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,22 +18,20 @@ from test.util import get_all_subclasses, get_mock_object
 
 import pytest
 
-from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.catalog_type import ColumnType
-from eva.catalog.models.column_catalog import ColumnCatalogEntry
-from eva.parser.table_ref import TableInfo, TableRef
-from eva.parser.types import FileFormatType
-from eva.plan_nodes.abstract_plan import AbstractPlan
-from eva.plan_nodes.create_mat_view_plan import CreateMaterializedViewPlan
-from eva.plan_nodes.create_plan import CreatePlan
-from eva.plan_nodes.create_udf_plan import CreateUDFPlan
-from eva.plan_nodes.drop_plan import DropPlan
-from eva.plan_nodes.drop_udf_plan import DropUDFPlan
-from eva.plan_nodes.insert_plan import InsertPlan
-from eva.plan_nodes.load_data_plan import LoadDataPlan
-from eva.plan_nodes.rename_plan import RenamePlan
-from eva.plan_nodes.types import PlanOprType
-from eva.plan_nodes.union_plan import UnionPlan
+from evadb.catalog.catalog_type import ColumnType
+from evadb.catalog.models.column_catalog import ColumnCatalogEntry
+from evadb.parser.table_ref import TableInfo, TableRef
+from evadb.parser.types import FileFormatType, ObjectType
+from evadb.plan_nodes.abstract_plan import AbstractPlan
+from evadb.plan_nodes.create_mat_view_plan import CreateMaterializedViewPlan
+from evadb.plan_nodes.create_plan import CreatePlan
+from evadb.plan_nodes.create_udf_plan import CreateUDFPlan
+from evadb.plan_nodes.drop_object_plan import DropObjectPlan
+from evadb.plan_nodes.insert_plan import InsertPlan
+from evadb.plan_nodes.load_data_plan import LoadDataPlan
+from evadb.plan_nodes.rename_plan import RenamePlan
+from evadb.plan_nodes.types import PlanOprType
+from evadb.plan_nodes.union_plan import UnionPlan
 
 
 @pytest.mark.notparallel
@@ -44,7 +42,6 @@ class PlanNodeTests(unittest.TestCase):
     def test_create_plan(self):
         dummy_info = TableInfo("dummy")
 
-        CatalogManager().reset()
         columns = [
             ColumnCatalogEntry("id", ColumnType.INTEGER),
             ColumnCatalogEntry("name", ColumnType.TEXT, array_dimensions=[50]),
@@ -61,20 +58,10 @@ class PlanNodeTests(unittest.TestCase):
         dummy_old = TableRef(dummy_info)
         dummy_new = TableInfo("new")
 
-        CatalogManager().reset()
         dummy_plan_node = RenamePlan(dummy_old, dummy_new)
         self.assertEqual(dummy_plan_node.opr_type, PlanOprType.RENAME)
         self.assertEqual(dummy_plan_node.old_table.table.table_name, "old")
         self.assertEqual(dummy_plan_node.new_name.table_name, "new")
-
-    def test_drop_plan(self):
-        dummy_info = TableInfo("dummy")
-
-        CatalogManager().reset()
-        dummy_plan_node = DropPlan([dummy_info], False)
-
-        self.assertEqual(dummy_plan_node.opr_type, PlanOprType.DROP)
-        self.assertEqual(dummy_plan_node.table_infos[0].table_name, "dummy")
 
     def test_insert_plan(self):
         video_id = 0
@@ -100,12 +87,14 @@ class PlanNodeTests(unittest.TestCase):
         self.assertEqual(node.impl_path, impl_path)
         self.assertEqual(node.udf_type, ty)
 
-    def test_drop_udf_plan(self):
+    def test_drop_object_plan(self):
+        object_type = ObjectType.TABLE
         udf_name = "udf"
         if_exists = True
-        node = DropUDFPlan(udf_name, if_exists)
-        self.assertEqual(node.opr_type, PlanOprType.DROP_UDF)
+        node = DropObjectPlan(object_type, udf_name, if_exists)
+        self.assertEqual(node.opr_type, PlanOprType.DROP_OBJECT)
         self.assertEqual(node.if_exists, True)
+        self.assertEqual(node.object_type, ObjectType.TABLE)
 
     def test_load_data_plan(self):
         table_info = "info"

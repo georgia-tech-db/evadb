@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,11 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 import sys
 
 import pytest
-
-from eva.configuration.configuration_manager import ConfigurationManager
 
 asyncio_skip_marker = pytest.mark.skipif(
     sys.version_info < (3, 8), reason="Test case requires asyncio support"
@@ -36,10 +35,14 @@ memory_skip_marker = pytest.mark.skipif(
 )
 
 ray_skip_marker = pytest.mark.skipif(
-    ConfigurationManager().get_value("experimental", "ray"),
+    os.environ.get("ray") is None,
     reason="Skip test for ray execution.",
 )
 
+ray_only_marker = pytest.mark.skipif(
+    os.environ.get("ray") is not None,
+    reason="Run only if ray is enabled",
+)
 
 duplicate_skip_marker = pytest.mark.skipif(
     sys.platform == "linux",

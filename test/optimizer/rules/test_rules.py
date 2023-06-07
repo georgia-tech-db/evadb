@@ -13,22 +13,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import create_sample_video
+from test.util import create_sample_video, get_evadb_for_testing
 
 import pytest
 from mock import MagicMock, patch
 
-from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.catalog_type import TableType
-from eva.catalog.models.table_catalog import TableCatalogEntry
-from eva.configuration.configuration_manager import ConfigurationManager
-from eva.optimizer.operators import (
+from evadb.catalog.catalog_type import TableType
+from evadb.catalog.models.table_catalog import TableCatalogEntry
+from evadb.optimizer.operators import (
     LogicalFilter,
     LogicalGet,
     LogicalJoin,
     LogicalSample,
 )
-from eva.optimizer.rules.rules import (
+from evadb.optimizer.rules.rules import (
     CacheFunctionExpressionInApply,
     CacheFunctionExpressionInFilter,
     CacheFunctionExpressionInProject,
@@ -44,8 +42,7 @@ from eva.optimizer.rules.rules import (
     LogicalCreateUDFToPhysical,
     LogicalDeleteToPhysical,
     LogicalDerivedGetToPhysical,
-    LogicalDropToPhysical,
-    LogicalDropUDFToPhysical,
+    LogicalDropObjectToPhysical,
     LogicalExchangeToPhysical,
     LogicalExplainToPhysical,
     LogicalFilterToPhysical,
@@ -75,24 +72,25 @@ from eva.optimizer.rules.rules import (
     XformExtractObjectToLinearFlow,
     XformLateralJoinToLinearFlow,
 )
-from eva.optimizer.rules.rules_manager import RulesManager, disable_rules
-from eva.parser.types import JoinType
-from eva.server.command_handler import execute_query_fetch_all
+from evadb.optimizer.rules.rules_manager import RulesManager, disable_rules
+from evadb.parser.types import JoinType
+from evadb.server.command_handler import execute_query_fetch_all
 
 
 @pytest.mark.notparallel
 class RulesTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        cls.evadb = get_evadb_for_testing()
         # reset the catalog manager before running each test
-        CatalogManager().reset()
+        cls.evadb.catalog().reset()
         video_file_path = create_sample_video()
         load_query = f"LOAD VIDEO '{video_file_path}' INTO MyVideo;"
-        execute_query_fetch_all(load_query)
+        execute_query_fetch_all(cls.evadb, load_query)
 
     @classmethod
     def tearDownClass(cls):
-        execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
+        execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS MyVideo;")
 
     def test_rules_promises_order(self):
         # Promise of all rewrite should be greater than implementation
@@ -122,7 +120,7 @@ class RulesTest(unittest.TestCase):
             Promise.LOGICAL_INSERT_TO_PHYSICAL,
             Promise.LOGICAL_DELETE_TO_PHYSICAL,
             Promise.LOGICAL_RENAME_TO_PHYSICAL,
-            Promise.LOGICAL_DROP_TO_PHYSICAL,
+            Promise.LOGICAL_DROP_OBJECT_TO_PHYSICAL,
             Promise.LOGICAL_LOAD_TO_PHYSICAL,
             Promise.LOGICAL_CREATE_TO_PHYSICAL,
             Promise.LOGICAL_CREATE_FROM_SELECT_TO_PHYSICAL,
@@ -137,7 +135,6 @@ class RulesTest(unittest.TestCase):
             Promise.LOGICAL_FILTER_TO_PHYSICAL,
             Promise.LOGICAL_PROJECT_TO_PHYSICAL,
             Promise.LOGICAL_SHOW_TO_PHYSICAL,
-            Promise.LOGICAL_DROP_UDF_TO_PHYSICAL,
             Promise.LOGICAL_EXPLAIN_TO_PHYSICAL,
             Promise.LOGICAL_CREATE_INDEX_TO_VECTOR_INDEX,
             Promise.LOGICAL_APPLY_AND_MERGE_TO_PHYSICAL,
@@ -168,8 +165,8 @@ class RulesTest(unittest.TestCase):
             XformExtractObjectToLinearFlow(),
         ]
         rewrite_rules = (
-            RulesManager().stage_one_rewrite_rules
-            + RulesManager().stage_two_rewrite_rules
+            RulesManager(self.evadb.config).stage_one_rewrite_rules
+            + RulesManager(self.evadb.config).stage_two_rewrite_rules
         )
         self.assertEqual(
             len(supported_rewrite_rules),
@@ -186,15 +183,19 @@ class RulesTest(unittest.TestCase):
             CacheFunctionExpressionInProject(),
         ]
         self.assertEqual(
-            len(supported_logical_rules), len(RulesManager().logical_rules)
+            len(supported_logical_rules),
+            len(RulesManager(self.evadb.config).logical_rules),
         )
 
         for rule in supported_logical_rules:
             self.assertTrue(
-                any(isinstance(rule, type(x)) for x in RulesManager().logical_rules)
+                any(
+                    isinstance(rule, type(x))
+                    for x in RulesManager(self.evadb.config).logical_rules
+                )
             )
 
-        ray_enabled = ConfigurationManager().get_value("experimental", "ray")
+        ray_enabled = self.evadb.config.get_value("experimental", "ray")
 
         # For the current version, we choose either the distributed or the
         # sequential rule, because we do not have a logic to choose one over
@@ -205,9 +206,8 @@ class RulesTest(unittest.TestCase):
             LogicalCreateToPhysical(),
             LogicalCreateFromSelectToPhysical(),
             LogicalRenameToPhysical(),
-            LogicalDropToPhysical(),
             LogicalCreateUDFToPhysical(),
-            LogicalDropUDFToPhysical(),
+            LogicalDropObjectToPhysical(),
             LogicalInsertToPhysical(),
             LogicalDeleteToPhysical(),
             LogicalLoadToPhysical(),
@@ -239,14 +239,14 @@ class RulesTest(unittest.TestCase):
             supported_implementation_rules.append(LogicalExchangeToPhysical())
         self.assertEqual(
             len(supported_implementation_rules),
-            len(RulesManager().implementation_rules),
+            len(RulesManager(self.evadb.config).implementation_rules),
         )
 
         for rule in supported_implementation_rules:
             self.assertTrue(
                 any(
                     isinstance(rule, type(x))
-                    for x in RulesManager().implementation_rules
+                    for x in RulesManager(self.evadb.config).implementation_rules
                 )
             )
 
@@ -275,7 +275,8 @@ class RulesTest(unittest.TestCase):
         self.assertFalse(rule.check(logi_sample, MagicMock()))
 
     def test_disable_rules(self):
-        with disable_rules([PushDownFilterThroughApplyAndMerge()]) as rules_manager:
+        rules_manager = RulesManager(self.evadb.config)
+        with disable_rules(rules_manager, [PushDownFilterThroughApplyAndMerge()]):
             self.assertFalse(
                 any(
                     isinstance(PushDownFilterThroughApplyAndMerge, type(x))

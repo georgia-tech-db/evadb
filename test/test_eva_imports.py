@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ class EVAImportTest(unittest.TestCase):
         if not os.path.exists(new_dir):
             os.makedirs(new_dir)
         os.chdir(new_dir)
-        _ = importlib.import_module("eva.eva_cmd_client")
-        _ = importlib.import_module("eva.eva_server")
+        _ = importlib.import_module("evadb.eva_cmd_client")
+        _ = importlib.import_module("evadb.eva_server")
         os.chdir(cur_dir)
         shutil.rmtree(new_dir)

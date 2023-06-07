@@ -31,7 +31,7 @@ myst-parser
 myst-nb
 
 # Jupyter conversion
-jupytext==1.14.5
+jupytext==1.14.6
 
 # Pin urllib to avoid downstream issues
 urllib3 < 2

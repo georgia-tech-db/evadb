@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,32 +15,36 @@
 import unittest
 from pathlib import Path
 
-from eva.catalog.catalog_type import ColumnType, NdArrayType, VectorStoreType
-from eva.expression.abstract_expression import ExpressionType
-from eva.expression.comparison_expression import ComparisonExpression
-from eva.expression.constant_value_expression import ConstantValueExpression
-from eva.expression.function_expression import FunctionExpression
-from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.parser.alias import Alias
-from eva.parser.create_index_statement import CreateIndexStatement
-from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
-from eva.parser.create_statement import (
+from evadb.catalog.catalog_type import ColumnType, NdArrayType, VectorStoreType
+from evadb.expression.abstract_expression import ExpressionType
+from evadb.expression.comparison_expression import ComparisonExpression
+from evadb.expression.constant_value_expression import ConstantValueExpression
+from evadb.expression.function_expression import FunctionExpression
+from evadb.expression.tuple_value_expression import TupleValueExpression
+from evadb.parser.alias import Alias
+from evadb.parser.create_index_statement import CreateIndexStatement
+from evadb.parser.create_mat_view_statement import CreateMaterializedViewStatement
+from evadb.parser.create_statement import (
     ColConstraintInfo,
     ColumnDefinition,
     CreateTableStatement,
 )
-from eva.parser.create_udf_statement import CreateUDFStatement
-from eva.parser.delete_statement import DeleteTableStatement
-from eva.parser.drop_statement import DropTableStatement
-from eva.parser.drop_udf_statement import DropUDFStatement
-from eva.parser.insert_statement import InsertTableStatement
-from eva.parser.load_statement import LoadDataStatement
-from eva.parser.parser import Parser
-from eva.parser.rename_statement import RenameTableStatement
-from eva.parser.select_statement import SelectStatement
-from eva.parser.statement import AbstractStatement, StatementType
-from eva.parser.table_ref import JoinNode, TableInfo, TableRef, TableValuedExpression
-from eva.parser.types import FileFormatType, JoinType, ParserOrderBySortType
+from evadb.parser.create_udf_statement import CreateUDFStatement
+from evadb.parser.delete_statement import DeleteTableStatement
+from evadb.parser.drop_object_statement import DropObjectStatement
+from evadb.parser.insert_statement import InsertTableStatement
+from evadb.parser.load_statement import LoadDataStatement
+from evadb.parser.parser import Parser
+from evadb.parser.rename_statement import RenameTableStatement
+from evadb.parser.select_statement import SelectStatement
+from evadb.parser.statement import AbstractStatement, StatementType
+from evadb.parser.table_ref import JoinNode, TableInfo, TableRef, TableValuedExpression
+from evadb.parser.types import (
+    FileFormatType,
+    JoinType,
+    ObjectType,
+    ParserOrderBySortType,
+)
 
 
 class ParserTests(unittest.TestCase):
@@ -249,31 +253,19 @@ class ParserTests(unittest.TestCase):
     def test_drop_table_statement(self):
         parser = Parser()
         drop_queries = "DROP TABLE student_info"
-        expected_stmt = DropTableStatement([TableInfo("student_info")], False)
+        expected_stmt = DropObjectStatement(ObjectType.TABLE, "student_info", False)
         eva_statement_list = parser.parse(drop_queries)
         self.assertIsInstance(eva_statement_list, list)
         self.assertEqual(len(eva_statement_list), 1)
-        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.DROP)
+        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.DROP_OBJECT)
         drop_stmt = eva_statement_list[0]
         self.assertEqual(drop_stmt, expected_stmt)
-
-    def test_drop_udf_statement(self):
-        parser = Parser()
-        drop_udf_query = """DROP UDF FastRCNN;"""
-
-        expected_stmt = DropUDFStatement("FastRCNN", False)
-        eva_statement_list = parser.parse(drop_udf_query)
-        self.assertIsInstance(eva_statement_list, list)
-        self.assertEqual(len(eva_statement_list), 1)
-        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.DROP_UDF)
-        drop_udf_stmt = eva_statement_list[0]
-        self.assertEqual(drop_udf_stmt, expected_stmt)
 
     def test_drop_udf_statement_str(self):
         drop_udf_query1 = """DROP UDF MyUDF;"""
         drop_udf_query2 = """DROP UDF IF EXISTS MyUDF;"""
-        expected_stmt1 = DropUDFStatement("MyUDF", False)
-        expected_stmt2 = DropUDFStatement("MyUDF", True)
+        expected_stmt1 = DropObjectStatement(ObjectType.UDF, "MyUDF", False)
+        expected_stmt2 = DropObjectStatement(ObjectType.UDF, "MyUDF", True)
         self.assertEqual(str(expected_stmt1), drop_udf_query1)
         self.assertEqual(str(expected_stmt2), drop_udf_query2)
 
@@ -395,7 +387,7 @@ class ParserTests(unittest.TestCase):
 
         parser = Parser()
 
-        select_query = "SELECT FIRST(id) FROM TAIPAI GROUP BY '8f';"
+        select_query = "SELECT FIRST(id) FROM TAIPAI GROUP BY '8 frames';"
 
         eva_statement_list = parser.parse(select_query)
         self.assertIsInstance(eva_statement_list, list)
@@ -419,7 +411,7 @@ class ParserTests(unittest.TestCase):
         # sample_freq
         self.assertEqual(
             select_stmt.groupby_clause,
-            ConstantValueExpression("8f", v_type=ColumnType.TEXT),
+            ConstantValueExpression("8 frames", v_type=ColumnType.TEXT),
         )
 
     def test_select_statement_orderby_class(self):
@@ -894,7 +886,7 @@ class ParserTests(unittest.TestCase):
                   OUTPUT (bboxes NDARRAY FLOAT32(ANYDIM, 4),
                           scores NDARRAY FLOAT32(ANYDIM))
                   TYPE  FaceDetection
-                  IMPL  'eva/udfs/face_detector.py';
+                  IMPL  'evadb/udfs/face_detector.py';
                   """
         parser = Parser()
         parser.parse(query)
