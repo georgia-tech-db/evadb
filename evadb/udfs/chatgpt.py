@@ -15,15 +15,16 @@
 
 
 import os
+import time
 
 import openai
 import pandas as pd
+from eva.catalog.catalog_type import NdArrayType
+from eva.configuration.configuration_manager import ConfigurationManager
+from eva.udfs.abstract.abstract_udf import AbstractUDF
+from eva.udfs.decorators.io_descriptors.data_types import PandasDataframe
 
-from evadb.catalog.catalog_type import NdArrayType
-from evadb.configuration.configuration_manager import ConfigurationManager
-from evadb.udfs.abstract.abstract_udf import AbstractUDF
-from evadb.udfs.decorators.decorators import forward, setup
-from evadb.udfs.decorators.io_descriptors.data_types import PandasDataframe
+from eva.udfs.decorators.decorators import forward, setup
 
 _VALID_CHAT_COMPLETION_MODEL = [
     "gpt-4",
@@ -47,13 +48,15 @@ class ChatGPT(AbstractUDF):
         temperature: float = 0,
     ) -> None:
         # Try Configuration Manager
-        openai.api_key = ConfigurationManager().get_value("third_party", "OPENAI_KEY")
+        openai.api_key = ConfigurationManager().get_value(
+            "third_party", "openai_api_key"
+        )
         # If not found, try OS Environment Variable
         if len(openai.api_key) == 0:
-            openai.api_key = os.environ.get("OPENAI_KEY", "")
+            openai.api_key = os.environ["openai_api_key"]
         assert (
             len(openai.api_key) != 0
-        ), "Please set your OpenAI API key in evadb.yml file (third_party, open_api_key) or environment variable (OPENAI_KEY)"
+        ), "Please set your OpenAI API key in eva.yml file (third_party, open_api_key)"
 
         assert model in _VALID_CHAT_COMPLETION_MODEL, f"Unsupported ChatGPT {model}"
 
@@ -104,8 +107,12 @@ class ChatGPT(AbstractUDF):
                     }
                 ],
             }
+            start = time.time()
             response = openai.ChatCompletion.create(**params)
             results.append(response.choices[0].message.content)
+            diff = 20 - time.time() + start
+            if diff > 0:
+                time.sleep(diff)
 
         df = pd.DataFrame({"response": results})
 

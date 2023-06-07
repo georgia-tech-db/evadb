@@ -172,6 +172,12 @@ mnistcnn_udf_query = """CREATE UDF IF NOT EXISTS MnistImageClassifier
     EVA_INSTALLATION_DIR
 )
 
+chatgpt_udf_query = """CREATE UDF IF NOT EXISTS ChatGPT
+        IMPL '{}/udfs/chatgpt.py';
+        """.format(
+    EVA_INSTALLATION_DIR
+)
+
 
 def init_builtin_udfs(db: EVADatabase, mode: str = "debug") -> None:
     """Load the built-in UDFs into the system during system bootstrapping.
@@ -195,6 +201,7 @@ def init_builtin_udfs(db: EVADatabase, mode: str = "debug") -> None:
         Similarity_udf_query,
         norfair_obj_tracker_query,
         mnistcnn_udf_query,
+        chatgpt_udf_query,
         # Disabled because required packages (eg., easy_ocr might not be preinstalled)
         # face_detection_udf_query,
         # ocr_udf_query,
