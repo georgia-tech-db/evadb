@@ -108,7 +108,7 @@ class PlanExecutorTest(unittest.TestCase):
         self.assertIsInstance(executor, CreateUDFExecutor)
 
         # DropObjectExecutor
-        plan = DropObjectPlan("test", False)
+        plan = DropObjectPlan(MagicMock(), "test", False)
         executor = PlanExecutor(MagicMock(), plan)._build_execution_tree(plan)
         self.assertIsInstance(executor, DropObjectExecutor)
 
