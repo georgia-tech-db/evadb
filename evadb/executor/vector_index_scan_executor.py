@@ -24,6 +24,7 @@ from evadb.models.storage.batch import Batch
 from evadb.plan_nodes.vector_index_scan_plan import VectorIndexScanPlan
 from evadb.third_party.vector_stores.types import VectorIndexQuery
 from evadb.third_party.vector_stores.utils import VectorStoreFactory
+from evadb.utils.logging_manager import logger
 
 
 # Helper function for getting row_id column alias.
@@ -51,7 +52,7 @@ class VectorIndexScanExecutor(AbstractExecutor):
         self.index = VectorStoreFactory.init_vector_store(
             self.node.vector_store_type,
             self.index_name,
-            **handle_vector_store_params(self.node.vector_store_type, self.index_path)
+            **handle_vector_store_params(self.node.vector_store_type, self.index_path),
         )
 
         # Get the query feature vector. Create a dummy
@@ -77,7 +78,16 @@ class VectorIndexScanExecutor(AbstractExecutor):
 
         # Load projected columns from disk and join with search results.
         row_id_col_name = None
-        res_row_list = [None for _ in range(self.limit_count.value)]
+
+        # handle the case where the index_results are less than self.limit_count.value
+        num_required_results = self.limit_count.value
+        if len(index_result.ids) < self.limit_count.value:
+            num_required_results = len(index_result.ids)
+            logger.warning(
+                f"The index {self.index_name} returned only {num_required_results} results, which is fewer than the required {self.limit_count.value}."
+            )
+
+        res_row_list = [None for _ in range(num_required_results)]
         for batch in self.children[0].exec(**kwargs):
             column_list = batch.columns
             if not row_id_col_name:

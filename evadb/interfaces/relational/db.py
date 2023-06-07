@@ -28,7 +28,8 @@ from evadb.parser.select_statement import SelectStatement
 from evadb.parser.utils import (
     parse_create_udf,
     parse_create_vector_index,
-    parse_drop,
+    parse_drop_index,
+    parse_drop_table,
     parse_drop_udf,
     parse_load,
     parse_query,
@@ -211,12 +212,11 @@ class EVADBCursor(object):
         Args:
             table_name (str): Name of the table to be dropped.
             if_exists (bool): If True, do not raise an error if the Tabel does not already exist. If False, raise an error.
-            **kwargs: Additional keyword arguments for configuring the drop operation.
 
         Returns
-            EVADBQuery: The EVADBQuery object representing the UDF created.
+            EVADBQuery: The EVADBQuery object representing the DROP TABLE.
         """
-        stmt = parse_drop(table_name, if_exists)
+        stmt = parse_drop_table(table_name, if_exists)
         return EVADBQuery(self._evadb, stmt)
 
     def drop_udf(self, udf_name: str, if_exists: bool = True) -> "EVADBQuery":
@@ -226,12 +226,25 @@ class EVADBCursor(object):
         Args:
             udf_name (str): Name of the udf to be dropped.
             if_exists (bool): If True, do not raise an error if the UDF does not already exist. If False, raise an error.
-            **kwargs: Additional keyword arguments for configuring the drop_udf operation.
 
         Returns
-            EVADBQuery: The EVADBQuery object representing the UDF created.
+            EVADBQuery: The EVADBQuery object representing the DROP UDF.
         """
         stmt = parse_drop_udf(udf_name, if_exists)
+        return EVADBQuery(self._evadb, stmt)
+
+    def drop_index(self, index_name: str, if_exists: bool = True) -> "EVADBQuery":
+        """
+        Drop an index in the database.
+
+        Args:
+            index_name (str): Name of the index to be dropped.
+            if_exists (bool): If True, do not raise an error if the index does not already exist. If False, raise an error.
+
+        Returns
+            EVADBQuery: The EVADBQuery object representing the DROP INDEX.
+        """
+        stmt = parse_drop_index(index_name, if_exists)
         return EVADBQuery(self._evadb, stmt)
 
     def create_udf(
