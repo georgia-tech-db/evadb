@@ -36,7 +36,7 @@ class SentenceFeatureExtractor(AbstractUDF, GPUCompatible):
     def to_device(self, device: str) -> GPUCompatible:
         print("Device", device)
         self.model_device = device
-        self.modle = self.model.to(device)
+        self.model = self.model.to(device)
         return self
 
     @property
