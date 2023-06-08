@@ -16,7 +16,7 @@ from time import perf_counter
 
 from gpt4all import GPT4All
 from unidecode import unidecode
-from util import download_story, read_text_line, try_execute
+from util import download_story, read_text_line, try_execute, log_time
 
 import evadb
 
@@ -32,54 +32,42 @@ def ask_question(path):
     index_table = "IndexTable"
 
     timestamps = {}
-    t_i = 0
-
-    timestamps[t_i] = perf_counter()
+    log_time(timestamps, init=True)
     print("Setup UDF")
 
-    Text_feat_udf_query = """CREATE UDF IF NOT EXISTS SentenceFeatureExtractor
-            IMPL  'evadb/udfs/sentence_feature_extractor.py';
+    Text_feat_udf_query = """CREATE UDF IF NOT EXISTS SentenceTransformerFeatureExtractor
+            IMPL  'evadb/udfs/sentence_transformer_feature_extractor.py';
             """
 
-    cursor.query("DROP UDF IF EXISTS SentenceFeatureExtractor;").execute()
+    cursor.query("DROP UDF IF EXISTS SentenceTransformerFeatureExtractor;").execute()
     cursor.query(Text_feat_udf_query).execute()
 
     try_execute(cursor, f"DROP TABLE IF EXISTS {story_table};")
     try_execute(cursor, f"DROP TABLE IF EXISTS {story_feat_table};")
 
-    t_i = t_i + 1
-    timestamps[t_i] = perf_counter()
-    print(f"Time: {(timestamps[t_i] - timestamps[t_i - 1]) * 1000:.3f} ms")
-
+    log_time(timestamps)
     print("Create table")
 
     cursor.query(f"CREATE TABLE {story_table} (id INTEGER, data TEXT(1000));").execute()
 
     # Insert text chunk by chunk.
     for i, text in enumerate(read_text_line(path)):
-        print("text: --" + text + "--")
         ascii_text = unidecode(text)
         cursor.query(
             f"""INSERT INTO {story_table} (id, data)
                 VALUES ({i}, '{ascii_text}');"""
         ).execute()
 
-    t_i = t_i + 1
-    timestamps[t_i] = perf_counter()
-    print(f"Time: {(timestamps[t_i] - timestamps[t_i - 1]) * 1000:.3f} ms")
-
+    log_time(timestamps)
     print("Extract features")
 
     # Extract features from text.
     cursor.query(
         f"""CREATE TABLE {story_feat_table} AS
-        SELECT SentenceFeatureExtractor(data), data FROM {story_table};"""
+        SELECT SentenceTransformerFeatureExtractor(data), data FROM {story_table};"""
     ).execute()
 
-    t_i = t_i + 1
-    timestamps[t_i] = perf_counter()
-    print(f"Time: {(timestamps[t_i] - timestamps[t_i - 1]) * 1000:.3f} ms")
-
+    log_time(timestamps)
     print("Create index")
 
     # Create search index on extracted features.
@@ -87,10 +75,7 @@ def ask_question(path):
         f"CREATE INDEX {index_table} ON {story_feat_table} (features) USING FAISS;"
     ).execute()
 
-    t_i = t_i + 1
-    timestamps[t_i] = perf_counter()
-    print(f"Time: {(timestamps[t_i] - timestamps[t_i - 1]) * 1000:.3f} ms")
-
+    log_time(timestamps)
     print("Query")
 
     # Search similar text as the asked question.
@@ -99,14 +84,11 @@ def ask_question(path):
 
     res_batch = cursor.query(
         f"""SELECT data FROM {story_feat_table}
-        ORDER BY Similarity(SentenceFeatureExtractor('{ascii_question}'),features)
+        ORDER BY Similarity(SentenceTransformerFeatureExtractor('{ascii_question}'),features)
         LIMIT 5;"""
     ).execute()
 
-    t_i = t_i + 1
-    timestamps[t_i] = perf_counter()
-    print(f"Time: {(timestamps[t_i] - timestamps[t_i - 1]) * 1000:.3f} ms")
-
+    log_time(timestamps)
     print("Merge")
 
     # Merge all context information.
@@ -115,10 +97,7 @@ def ask_question(path):
         context_list.append(res_batch.frames[f"{story_feat_table.lower()}.data"][i])
     context = "; \n".join(context_list)
 
-    t_i = t_i + 1
-    timestamps[t_i] = perf_counter()
-    print(f"Time: {(timestamps[t_i] - timestamps[t_i - 1]) * 1000:.3f} ms")
-
+    log_time(timestamps)
     print("LLM")
 
     # LLM
@@ -131,10 +110,7 @@ def ask_question(path):
     ]
     llm.chat_completion(messages)
 
-    t_i = t_i + 1
-    timestamps[t_i] = perf_counter()
-    print(f"Time: {(timestamps[t_i] - timestamps[t_i - 1]) * 1000:.3f} ms")
-
+    log_time(timestamps)
     print(f"Total Time: {(timestamps[t_i] - timestamps[0]) * 1000:.3f} ms")
 
 

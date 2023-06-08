@@ -15,6 +15,8 @@
 import os
 import urllib.request
 
+from time import perf_counter
+
 
 def download_story():
     parsed_file_path, orig_file_path = "new_wp.txt", "wp.txt"
@@ -38,22 +40,19 @@ def download_story():
 
 
 def read_text_line(path, num_token=1000):
+    # TODO: consider switching to other more intelligent text splitter. Current
+    # langchain text splitter does not have hard guarantee on text length, which
+    # may cause prompt to fail.
+
     # For simplicity, we only keep letters.
     whitelist = set(".!?abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
     with open(path, "r") as f:
-        line_itr = 0
         for line in f.readlines():
-            line_itr = line_itr + 1
-            if line_itr % 10 == 0:
-                print("line: " + str(line_itr))
             for i in range(0, len(line), num_token):
                 cut_line = line[i : min(i + 1000, len(line))]
                 cut_line = "".join(filter(whitelist.__contains__, cut_line))
                 yield cut_line
-
-            if line_itr == 1000:
-                break
 
 
 def try_execute(conn, query):
@@ -61,3 +60,12 @@ def try_execute(conn, query):
         conn.query(query).execute()
     except Exception:
         pass
+
+
+def log_time(ts, init=False):
+    if init:
+        ts[0] = perf_counter()
+    else:
+        t_i = len(ts)
+        ts[t_i] = perf_counter()
+        print(f"Time: {(ts[t_i] - ts[t_i - 1]) * 1000:.3f} ms")

@@ -163,8 +163,8 @@ Sift_udf_query = """CREATE UDF IF NOT EXISTS SiftFeatureExtractor
     EVA_INSTALLATION_DIR
 )
 
-Text_feat_udf_query = """CREATE UDF IF NOT EXISTS SentenceFeatureExtractor
-        IMPL  '{}/udfs/sentence_feature_extractor.py';
+Text_feat_udf_query = """CREATE UDF IF NOT EXISTS SentenceTransformerFeatureExtractor
+        IMPL  '{}/udfs/sentence_transformer_feature_extractor.py';
         """.format(
     EVA_INSTALLATION_DIR
 )
