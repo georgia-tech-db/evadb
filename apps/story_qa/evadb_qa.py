@@ -14,7 +14,7 @@
 # limitations under the License.
 from gpt4all import GPT4All
 from unidecode import unidecode
-from util import download_story, read_text_line, try_execute, log_time
+from util import download_story, log_time, read_text_line, try_execute
 
 import evadb
 
@@ -109,7 +109,9 @@ def ask_question(path):
     llm.chat_completion(messages)
 
     log_time(timestamps)
-    print(f"Total Time: {(timestamps[len(timestamps) - 1] - timestamps[0]) * 1000:.3f} ms")
+    print(
+        f"Total Time: {(timestamps[len(timestamps) - 1] - timestamps[0]) * 1000:.3f} ms"
+    )
 
 
 def main():
