@@ -113,6 +113,7 @@ udf_libs = [
     "ultralytics>=8.0.93",  # OBJECT DETECTION
     "transformers>=4.27.4",  # HUGGINGFACE
     "openai>=0.27.4",  # CHATGPT
+    "retry>=0.9.2", #CHATGPT
     "timm>=0.6.13",  # HUGGINGFACE VISION TASKS
     "norfair>=2.2.0",  # OBJECT TRACKING
 ]
