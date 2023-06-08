@@ -15,13 +15,13 @@
 import unittest
 from unittest.mock import MagicMock, patch
 
-from eva.binder.binder_utils import BinderError
-from eva.binder.statement_binder import StatementBinder
-from eva.binder.statement_binder_context import StatementBinderContext
-from eva.catalog.catalog_type import NdArrayType
-from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.parser.alias import Alias
-from eva.parser.create_statement import ColumnDefinition
+from evadb.binder.binder_utils import BinderError
+from evadb.binder.statement_binder import StatementBinder
+from evadb.binder.statement_binder_context import StatementBinderContext
+from evadb.catalog.catalog_type import NdArrayType
+from evadb.expression.tuple_value_expression import TupleValueExpression
+from evadb.parser.alias import Alias
+from evadb.parser.create_statement import ColumnDefinition
 
 
 class StatementBinderTests(unittest.TestCase):
@@ -40,7 +40,7 @@ class StatementBinderTests(unittest.TestCase):
             self.assertEqual(tve.col_object, "col_obj")
             self.assertEqual(tve.col_alias, col_alias)
 
-    @patch("eva.binder.statement_binder.bind_table_info")
+    @patch("evadb.binder.statement_binder.bind_table_info")
     def test_bind_tableref(self, mock_bind_table_info):
         with patch.object(StatementBinderContext, "add_table_alias") as mock:
             catalog = MagicMock()
@@ -100,7 +100,7 @@ class StatementBinderTests(unittest.TestCase):
                 tableref.is_table_atom.return_value = False
                 binder._bind_tableref(tableref)
 
-    @patch("eva.binder.statement_binder.StatementBinderContext")
+    @patch("evadb.binder.statement_binder.StatementBinderContext")
     def test_bind_tableref_starts_new_context(self, mock_ctx):
         with patch.object(StatementBinder, "bind"):
             binder = StatementBinder(StatementBinderContext(MagicMock()))
@@ -139,8 +139,8 @@ class StatementBinderTests(unittest.TestCase):
             binder._bind_explain_statement(stmt)
             mock_binder.assert_called_with(stmt.explainable_stmt)
 
-    @patch("eva.binder.statement_binder.load_udf_class_from_file")
-    @patch("eva.binder.statement_binder.get_file_checksum")
+    @patch("evadb.binder.statement_binder.load_udf_class_from_file")
+    @patch("evadb.binder.statement_binder.get_file_checksum")
     def test_bind_func_expr(
         self, mock_get_file_checksum, mock_load_udf_class_from_file
     ):
@@ -225,8 +225,9 @@ class StatementBinderTests(unittest.TestCase):
         )
         self.assertEqual(str(cm.exception), err_msg)
 
-    @patch("eva.binder.statement_binder.check_table_object_is_video")
-    def test_bind_select_statement(self, is_video_mock):
+    @patch("evadb.binder.statement_binder.check_table_object_is_groupable")
+    @patch("evadb.binder.statement_binder.check_groupby_pattern")
+    def test_bind_select_statement(self, is_groupable_mock, groupby_mock):
         with patch.object(StatementBinder, "bind") as mock_binder:
             binder = StatementBinder(StatementBinderContext(MagicMock()))
             select_statement = MagicMock()
@@ -234,17 +235,17 @@ class StatementBinderTests(unittest.TestCase):
             select_statement.target_list = mocks[:2]
             select_statement.orderby_list = [(mocks[2], 0), (mocks[3], 0)]
             select_statement.groupby_clause = mocks[4]
-            select_statement.groupby_clause.value = "8f"
+            select_statement.groupby_clause.value = "8 frames"
             binder._bind_select_statement(select_statement)
             mock_binder.assert_any_call(select_statement.from_table)
             mock_binder.assert_any_call(select_statement.where_clause)
             mock_binder.assert_any_call(select_statement.groupby_clause)
             mock_binder.assert_any_call(select_statement.union_link)
-            is_video_mock.assert_called()
+            is_groupable_mock.assert_called()
             for mock in mocks:
                 mock_binder.assert_any_call(mock)
 
-    @patch("eva.binder.statement_binder.StatementBinderContext")
+    @patch("evadb.binder.statement_binder.StatementBinderContext")
     def test_bind_select_statement_union_starts_new_context(self, mock_ctx):
         with patch.object(StatementBinder, "bind"):
             binder = StatementBinder(StatementBinderContext(MagicMock()))

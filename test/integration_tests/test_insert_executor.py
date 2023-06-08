@@ -24,8 +24,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from eva.server.command_handler import execute_query_fetch_all
-from eva.utils.logging_manager import logger
+from evadb.server.command_handler import execute_query_fetch_all
+from evadb.utils.logging_manager import logger
 
 
 @pytest.mark.notparallel

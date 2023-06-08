@@ -1,80 +1,49 @@
 Getting Started
 ====
 
-Step 1: Install EVA
+Step 1: Install EvaDB
 ----
 
-EVA supports Python (versions >= 3.8). To install EVA, we recommend using the pip package manager:
+EvaDB supports Python (versions >= ``3.8`` and <= ``3.10``). To install EvaDB, we recommend using the ``pip`` package manager:
 
 .. code-block:: bash
 
     pip install evadb
 
 
-Launch EVA server
+Step 2: Write your AI app
 ----
 
-EVA is based on a `client-server architecture <https://www.postgresql.org/docs/15/tutorial-arch.html>`_. To launch the EVA server using the pip package, run the following command on the terminal:
-
-.. code-block:: bash
-
-    eva_server &
-
-Step 2: Start a Jupyter Notebook Client
-----
-
-Here is an `illustrative Jupyter notebook <https://evadb.readthedocs.io/en/stable/source/tutorials/01-mnist.html>`_ focusing on MNIST image classification using EVA. The notebook works on `Google Colab <https://colab.research.google.com/github/georgia-tech-db/eva/blob/master/tutorials/01-mnist.ipynb>`_. 
-
-Connect to the EVA server
-~~~~
-
-Connect to the EVA server in the notebook using the following code:
+Here is an `illustrative MNIST digit classification app <https://evadb.readthedocs.io/en/stable/source/tutorials/01-mnist.html>`_ using EvaDB.
 
 .. code-block:: python
 
-    # allow nested asyncio calls for client to connect with server
-    import nest_asyncio
-    nest_asyncio.apply()
-    from eva.server.db_api import connect
+    # Connect to EvaDB for running AI queries
+    import evadb
+    cursor = evadb.connect().cursor()
 
-    # hostname and port of the server where EVA is running
-    connection = connect(host = '0.0.0.0', port = 8803)
+    # Load the MNIST video into EvaDB
+    cursor.load("mnist.mp4", "MNISTVid", format="video").df()
 
-    # cursor allows the notebook client to send queries to the server
-    cursor = connection.cursor()
+    # We now construct an AI pipeline to run the image classifier 
+    # over all the digit images in the video    
+    # Each frame in the loaded MNIST video contains a digit
 
-Load video for analysis
-~~~~
+    # Connect to the table with the loaded video
+    query = cursor.table("MNISTVid")
 
-Download the MNIST video for analysis.
+    # Run the model on a subset of frames
+    # Here, id refers to the frame id
+    query = query.filter("id = 30 OR id = 50 OR id = 70")
 
-.. code-block:: bash
+    # We are retrieving the frame "data" and 
+    # the output of the Image Classification function on the data 
+    query = query.select("data, MnistImageClassifier(data).label")
 
-    !wget -nc https://www.dropbox.com/s/yxljxz6zxoqu54v/mnist.mp4
+    # EvaDB uses a lazy query construction technique to improve performance
+    # Only calling query.df() will run the query
+    response = query.df()
 
-Use the LOAD statement to load a video onto a table in EVA server. 
+The notebook works on `Google Colab <https://colab.research.google.com/github/georgia-tech-db/eva/blob/master/tutorials/01-mnist.ipynb>`_. 
 
-.. code-block:: python
-
-    cursor.execute('LOAD VIDEO "mnist.mp4" INTO MNISTVideoTable;')
-    response = cursor.fetch_all()
-    print(response)
-
-Step 3: Run an AI Query on the loaded video
-----
-
-User-defined functions (UDFs) allow us to combine SQL with AI models. These functions wrap around AI models. In this query, we use the `MnistImageClassifier` UDF that wraps around a model trained for classifying `MNIST` images.
-
-.. code-block:: python
-
-    cursor.execute("""SELECT data, MnistImageClassifier(data).label 
-                      FROM MNISTVideoTable
-                      WHERE id = 30;""")
-    response = cursor.fetch_all()
-
-Visualize the output
-~~~~
-
-The output of the query is `visualized in the notebook <https://evadb.readthedocs.io/en/stable/source/tutorials/01-mnist.html#visualize-output-of-query-on-the-video>`_.
-
-.. image:: https://evadb.readthedocs.io/en/stable/_images/01-mnist_15_0.png
+.. image:: ../../images/reference/mnist.png

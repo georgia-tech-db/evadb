@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 # limitations under the License.
 import unittest
 
-from eva.udfs.ndarray.array_count import ArrayCount
+from evadb.udfs.ndarray.array_count import ArrayCount
 
 
 class CropTests(unittest.TestCase):

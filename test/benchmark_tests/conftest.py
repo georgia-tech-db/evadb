@@ -16,8 +16,8 @@ from test.util import get_evadb_for_testing
 
 import pytest
 
-from eva.server.command_handler import execute_query_fetch_all
-from eva.udfs.udf_bootstrap_queries import init_builtin_udfs
+from evadb.server.command_handler import execute_query_fetch_all
+from evadb.udfs.udf_bootstrap_queries import init_builtin_udfs
 
 
 @pytest.fixture(autouse=False)

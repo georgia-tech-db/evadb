@@ -16,15 +16,18 @@ import unittest
 from pathlib import Path
 from test.util import create_sample_video, file_remove, get_evadb_for_testing
 
+import pandas as pd
 import pytest
 
-from eva.catalog.catalog_utils import get_video_table_column_definitions
-from eva.executor.executor_utils import ExecutorError
-from eva.server.command_handler import execute_query_fetch_all
+from evadb.catalog.catalog_utils import get_video_table_column_definitions
+from evadb.executor.executor_utils import ExecutorError
+from evadb.models.storage.batch import Batch
+from evadb.server.command_handler import execute_query_fetch_all
+from evadb.storage.storage_engine import StorageEngine
 
 
 @pytest.mark.notparallel
-class DropExecutorTest(unittest.TestCase):
+class DropObjectExecutorTest(unittest.TestCase):
     def setUp(self):
         self.evadb = get_evadb_for_testing()
         # reset the catalog manager before running each test
@@ -33,6 +36,41 @@ class DropExecutorTest(unittest.TestCase):
 
     def tearDown(self):
         file_remove("dummy.avi")
+
+    def _create_index(self, index_name):
+        import numpy as np
+
+        # Create feature vector table and raw input table.
+        feat1 = np.array([[0, 0, 0]]).astype(np.float32)
+        feat2 = np.array([[100, 100, 100]]).astype(np.float32)
+        feat3 = np.array([[200, 200, 200]]).astype(np.float32)
+
+        # Create table.
+        execute_query_fetch_all(
+            self.evadb,
+            """create table if not exists testCreateIndexFeatTable (
+                feat NDARRAY FLOAT32(1,3)
+            );""",
+        )
+
+        # Create pandas dataframe.
+        feat_batch_data = Batch(
+            pd.DataFrame(
+                data={
+                    "feat": [feat1, feat2, feat3],
+                }
+            )
+        )
+        feat_tb_entry = self.evadb.catalog().get_table_catalog_entry(
+            "testCreateIndexFeatTable"
+        )
+        storage_engine = StorageEngine.factory(self.evadb, feat_tb_entry)
+        storage_engine.write(feat_tb_entry, feat_batch_data)
+
+        query = (
+            f"CREATE INDEX {index_name} ON testCreateIndexFeatTable (feat) USING FAISS;"
+        )
+        execute_query_fetch_all(self.evadb, query)
 
     # integration test
     def test_should_drop_table(self):
@@ -71,16 +109,6 @@ class DropExecutorTest(unittest.TestCase):
         drop_query = """DROP TABLE MyVideo;"""
         with self.assertRaises(ExecutorError):
             execute_query_fetch_all(self.evadb, drop_query)
-
-
-@pytest.mark.notparallel
-class DropUDFExecutorTest(unittest.TestCase):
-    def setUp(self):
-        self.evadb = get_evadb_for_testing()
-        self.evadb.catalog().reset()
-
-    def tearDown(self):
-        pass
 
     def run_create_udf_query(self):
         create_udf_query = """CREATE UDF DummyObjectDetector
@@ -122,3 +150,30 @@ class DropUDFExecutorTest(unittest.TestCase):
             self.assertTrue(str(e) == err_msg)
         udf = self.evadb.catalog().get_udf_catalog_entry_by_name(right_udf_name)
         self.assertTrue(udf is not None)
+
+    #### DROP INDEX
+
+    def test_should_drop_index(self):
+        index_name = "index_name"
+        self._create_index(index_name)
+
+        index_obj = self.evadb.catalog().get_index_catalog_entry_by_name(index_name)
+        self.assertTrue(index_obj is not None)
+
+        # Test that dropping the wrong Index:
+        # - does not affect Indexs in the catalog
+        # - raises an appropriate exception
+        wrong_udf_name = "wrong_udf_name"
+        drop_query = f"DROP INDEX {wrong_udf_name};"
+        with self.assertRaises(ExecutorError):
+            execute_query_fetch_all(self.evadb, drop_query)
+        obj = self.evadb.catalog().get_index_catalog_entry_by_name(index_name)
+        self.assertTrue(obj is not None)
+
+        # Test that dropping the Index reflects in the catalog
+        drop_query = f"DROP INDEX IF EXISTS {index_name};"
+        execute_query_fetch_all(self.evadb, drop_query)
+        index_obj = self.evadb.catalog().get_index_catalog_entry_by_name(index_name)
+        self.assertTrue(index_obj is None)
+
+        # todo check if the index is also removed from the underlying vector store

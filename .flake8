@@ -1,7 +1,7 @@
 [flake8]
 exclude =
-	eva/filters
-	eva/parser/evaql
+	evadb/filters
+	evadb/parser/evaql
 ignore = 
 	E203
 	E266 

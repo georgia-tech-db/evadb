@@ -38,7 +38,7 @@ The first part of Parser is build from a LARK grammar file.
 parser/eva
 ~~~~~~~~~~~~
 
--  ``eva.lark`` - add keywords(eg. CREATE, TABLE) under **Common
+-  ``evadb.lark`` - add keywords(eg. CREATE, TABLE) under **Common
    Keywords**
 
    -  Add new grammar rule (eg. create_table)

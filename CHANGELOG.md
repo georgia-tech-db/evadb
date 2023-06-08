@@ -10,6 +10,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### [Deprecated]
 ### [Removed]
 
+##  [0.2.7] - 2023-06-07
+
+* PR #819: feat: update tutorials to use Python API 
+* PR #828: feat: drop index 
+* PR #830: docs: updating docs based on Python API 
+* PR #826: fix: orderby bug 
+* PR #821: feat: adding python API drop and drop_udf 
+* PR #822: refactor: eva -> evadb 
+* PR #820: refactor: mv eva -> evadb 
+* PR #810: feat: grouping paragraphs in documents and samples in audio 
+* PR #800: test: api testing  -> similarity between text and relevance keyword 
+* PR #818: fix: update youtube qa app with new api updates 
+* PR #803: feat: saliency maps 
+* PR #815: chore
+* PR #816: docs: renamed apis 
+* PR #804: feat: create udf interface for pythonic api 
+* PR #813: feat: Expose apis 
+* PR #795: Import config should persist nothing 
+* PR #808: Bump v0.2.7+dev 
+
 ##  [0.2.6] - 2023-06-02
 
 * PR #807: Bump v0.2.6+dev 

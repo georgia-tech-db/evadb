@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,19 +15,19 @@
 import unittest
 from unittest.mock import Mock
 
-from eva.expression.abstract_expression import ExpressionType
-from eva.expression.arithmetic_expression import ArithmeticExpression
-from eva.expression.comparison_expression import ComparisonExpression
-from eva.expression.constant_value_expression import ConstantValueExpression
-from eva.expression.expression_utils import (
+from evadb.expression.abstract_expression import ExpressionType
+from evadb.expression.arithmetic_expression import ArithmeticExpression
+from evadb.expression.comparison_expression import ComparisonExpression
+from evadb.expression.constant_value_expression import ConstantValueExpression
+from evadb.expression.expression_utils import (
     conjunction_list_to_expression_tree,
     contains_single_column,
     extract_range_list_from_comparison_expr,
     extract_range_list_from_predicate,
     is_simple_predicate,
 )
-from eva.expression.logical_expression import LogicalExpression
-from eva.expression.tuple_value_expression import TupleValueExpression
+from evadb.expression.logical_expression import LogicalExpression
+from evadb.expression.tuple_value_expression import TupleValueExpression
 
 
 class ExpressionUtilsTest(unittest.TestCase):

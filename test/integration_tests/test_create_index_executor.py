@@ -21,10 +21,10 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from eva.catalog.catalog_type import VectorStoreType
-from eva.models.storage.batch import Batch
-from eva.server.command_handler import execute_query_fetch_all
-from eva.storage.storage_engine import StorageEngine
+from evadb.catalog.catalog_type import VectorStoreType
+from evadb.models.storage.batch import Batch
+from evadb.server.command_handler import execute_query_fetch_all
+from evadb.storage.storage_engine import StorageEngine
 
 
 @pytest.mark.notparallel
