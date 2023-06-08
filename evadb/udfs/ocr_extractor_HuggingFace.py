@@ -31,7 +31,6 @@ import re
 # limitations under the License.
 import numpy as np
 import pandas as pd
-import torch
 import torchvision
 from transformers import DonutProcessor, VisionEncoderDecoderModel
 
