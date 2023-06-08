@@ -15,6 +15,7 @@
 
 
 import os
+import time
 
 import openai
 import pandas as pd
@@ -104,8 +105,14 @@ class ChatGPT(AbstractUDF):
                     }
                 ],
             }
+
+            # TODO: we need a better solution to address api request limits
+            start = time.time()
             response = openai.ChatCompletion.create(**params)
             results.append(response.choices[0].message.content)
+            diff = 20 - time.time() + start
+            if diff > 0:
+                time.sleep(diff)
 
         df = pd.DataFrame({"response": results})
 
