@@ -211,7 +211,7 @@ class EVADBCursor(object):
 
         Args:
             table_name (str): Name of the table to be dropped.
-            if_exists (bool): If True, do not raise an error if the Tabel does not already exist. If False, raise an error.
+            if_exists (bool): If True, do not raise an error if the Table does not already exist. If False, raise an error.
 
         Returns
             EVADBQuery: The EVADBQuery object representing the DROP TABLE.

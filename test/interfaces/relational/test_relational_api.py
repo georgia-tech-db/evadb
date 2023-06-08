@@ -328,10 +328,10 @@ class RelationalAPI(unittest.TestCase):
         pdf_path1 = f"{EVA_ROOT_DIR}/data/documents/state_of_the_union.pdf"
         pdf_path2 = f"{EVA_ROOT_DIR}/data/documents/layout-parser-paper.pdf"
 
-        load_pdf = cursor.load(file_regex=pdf_path1, format="PDF", table_name="PDFss")
+        load_pdf = cursor.load(file_regex=pdf_path1, format="PDF", table_name="PDFs")
         load_pdf.execute()
 
-        load_pdf = cursor.load(file_regex=pdf_path2, format="PDF", table_name="PDFss")
+        load_pdf = cursor.load(file_regex=pdf_path2, format="PDF", table_name="PDFs")
         load_pdf.execute()
 
         udf_check = cursor.drop_udf("SentenceTransformerFeatureExtractor")
@@ -345,13 +345,13 @@ class RelationalAPI(unittest.TestCase):
 
         cursor.create_vector_index(
             "faiss_index",
-            table_name="PDFss",
+            table_name="PDFs",
             expr="SentenceTransformerFeatureExtractor(data)",
             using="QDRANT",
         ).df()
 
         query = (
-            cursor.table("PDFss")
+            cursor.table("PDFs")
             .order(
                 """Similarity(
                     SentenceTransformerFeatureExtractor('When was the NATO created?'), SentenceTransformerFeatureExtractor(data)
@@ -362,6 +362,6 @@ class RelationalAPI(unittest.TestCase):
         )
         output = query.df()
         self.assertEqual(len(output), 3)
-        self.assertTrue("pdfss.data" in output.columns)
+        self.assertTrue("PDFs.data" in output.columns)
 
         cursor.drop_index("faiss_index").df()

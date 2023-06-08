@@ -161,7 +161,7 @@ class DropObjectExecutorTest(unittest.TestCase):
         self.assertTrue(index_obj is not None)
 
         # Test that dropping the wrong Index:
-        # - does not affect Indexs in the catalog
+        # - does not affect Indexes in the catalog
         # - raises an appropriate exception
         wrong_udf_name = "wrong_udf_name"
         drop_query = f"DROP INDEX {wrong_udf_name};"
