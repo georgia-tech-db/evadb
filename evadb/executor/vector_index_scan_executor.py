@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ from typing import Iterator
 import pandas as pd
 
 from evadb.catalog.sql_config import IDENTIFIER_COLUMN
-from evadb.database import EVADatabase
+from evadb.database import EvaDBDatabase
 from evadb.executor.abstract_executor import AbstractExecutor
 from evadb.executor.executor_utils import handle_vector_store_params
 from evadb.models.storage.batch import Batch
@@ -36,7 +36,7 @@ def get_row_id_column_alias(column_list):
 
 
 class VectorIndexScanExecutor(AbstractExecutor):
-    def __init__(self, db: EVADatabase, node: VectorIndexScanPlan):
+    def __init__(self, db: EvaDBDatabase, node: VectorIndexScanPlan):
         super().__init__(db, node)
 
         self.index_name = node.index_name

@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ class ResponseStatus(str, Enum):
 @dataclass(frozen=True)
 class Response:
     """
-    Data model for EVA server response
+    Data model for EvaDB server response
     """
 
     status: ResponseStatus = ResponseStatus.FAIL

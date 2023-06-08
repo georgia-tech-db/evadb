@@ -3,7 +3,7 @@
 Packaging
 ===================
 
-    This section describes practices to follow when packaging your own models or datasets to be used along with EVA.
+    This section describes practices to follow when packaging your own models or datasets to be used along with EvaDB.
 
 .. tableofcontents::
 
@@ -48,4 +48,4 @@ Please follow the following steps to package datasets:
 * Zip this folder.
 * Upload the zipped folder to this `link <https://drive.google.com/drive/folders/1A7MAr93OS-ACegrPv8wTMWcUrBPazDgK>`_ inside the datasets folder.
 
-Note: In the future, will provide utility scripts along with EVA to download models and datasets easily and place them in the appropriate locations.
+Note: In the future, will provide utility scripts along with EvaDB to download models and datasets easily and place them in the appropriate locations.

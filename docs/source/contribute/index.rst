@@ -1,7 +1,7 @@
 Contributing
 ----
 
-We welcome all kinds of contributions to EVA.
+We welcome all kinds of contributions to EvaDB.
 
 -  `Code reviews <https://github.com/georgia-tech-db/eva/pulls>`_
 -  `Improving documentation <https://github.com/georgia-tech-db/eva/tree/master/docs>`_
@@ -11,8 +11,8 @@ We welcome all kinds of contributions to EVA.
 Setting up the Development Environment
 =====
 
-First, you will need to checkout the repository from GitHub and build EVA from
-the source. Follow the following instructions to build EVA locally. We recommend using a virtual environment and the pip package manager. 
+First, you will need to checkout the repository from GitHub and build EvaDB from
+the source. Follow the following instructions to build EvaDB locally. We recommend using a virtual environment and the pip package manager. 
 
 .. code-block:: bash
 
@@ -20,16 +20,16 @@ the source. Follow the following instructions to build EVA locally. We recommend
    python3 -m venv test_eva_db       # create a virtual environment
    source test_eva_db/bin/activate   # activate the virtual environment
    pip install --upgrade pip         # upgrade pip
-   pip install -e ".[dev]"           # build and install the EVA package
-   bash script/test/test.sh          # run the eva EVA suite
+   pip install -e ".[dev]"           # build and install the EvaDB package
+   bash script/test/test.sh          # run the eva EvaDB suite
    
 After installing the package locally, you can make changes and run the test cases to check their impact.
 
 .. code-block:: bash
 
-   pip install .         # reinstall EVA package to include local changes 
-   pkill -9 eva_server   # kill running EVA server (if any)
-   eva_server&           # launch EVA server with newly installed package
+   pip install .         # reinstall EvaDB package to include local changes 
+   pkill -9 eva_server   # kill running EvaDB server (if any)
+   eva_server&           # launch EvaDB server with newly installed package
 
 
 Testing
@@ -57,7 +57,7 @@ file.
 Submitting a Contribution
 ====
 
-Follow the following steps to contribute to EVA:
+Follow the following steps to contribute to EvaDB:
 
 -  Merge the most recent changes from the master branch
 
@@ -67,7 +67,7 @@ Follow the following steps to contribute to EVA:
        git pull . origin/master
 
 -  Run the `test script <#testing>`__ to ensure that all the test cases pass.
--  If you are adding a new EVAQL command, add an illustrative example usage in 
+-  If you are adding a new EvaDBQL command, add an illustrative example usage in 
    the `documentation <https://github.com/georgia-tech-db/eva/tree/master/docs>`_.
 - Run the following command to ensure that code is properly formatted.
 
@@ -99,7 +99,7 @@ formatting the Python code. For docstrings and documentation, we use
 Debugging
 ====
 
-We recommend using Visual Studio Code with a debugger for developing EVA. Here are the steps for setting up the development environment:
+We recommend using Visual Studio Code with a debugger for developing EvaDB. Here are the steps for setting up the development environment:
 
 1. Install the `Python extension <https://marketplace.visualstudio.com/items?itemName=ms-python.python>`__ in Visual Studio Code.
 
@@ -123,4 +123,4 @@ Architecture Diagram
 Troubleshooting
 ====
 
-If the test suite fails with a `PermissionDenied` exception, update the `path_prefix` attribute under the `storage` section in the EVA configuration file (``~/.evadb/evadb.yml``) to a directory where you have write privileges.
+If the test suite fails with a `PermissionDenied` exception, update the `path_prefix` attribute under the `storage` section in the EvaDB configuration file (``~/.evadb/evadb.yml``) to a directory where you have write privileges.

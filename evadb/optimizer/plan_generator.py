@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ import asyncio
 
 import nest_asyncio
 
-from evadb.database import EVADatabase
+from evadb.database import EvaDBDatabase
 from evadb.optimizer.cost_model import CostModel
 from evadb.optimizer.operators import Operator
 from evadb.optimizer.optimizer_context import OptimizerContext
@@ -39,7 +39,7 @@ class PlanGenerator:
 
     def __init__(
         self,
-        db: EVADatabase,
+        db: EvaDBDatabase,
         rules_manager: RulesManager = None,
         cost_model: CostModel = None,
     ) -> None:

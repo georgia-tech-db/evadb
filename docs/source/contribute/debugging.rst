@@ -1,7 +1,7 @@
 Debugging
 -----
 
-We recommend Visual Studio Code with a debugger for debugging EVA. This tutorial presents a detailed step-by-step process of using the debugger.
+We recommend Visual Studio Code with a debugger for debugging EvaDB. This tutorial presents a detailed step-by-step process of using the debugger.
 
 Setup debugger
 ====
@@ -19,7 +19,7 @@ Setup debugger
 .. image:: images/eva-debug-2.jpg
    :width: 1200
 
-Alternative: Manually Setup Debugger for EVA
+Alternative: Manually Setup Debugger for EvaDB
 ====
 
 When you press the debug icon, you will be given an option to create a ``launch.json`` file.
