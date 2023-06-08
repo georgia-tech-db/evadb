@@ -56,7 +56,6 @@ class OCRExactorHuggingFace(AbstractUDF, GPUCompatible):
         self.decoder_input_ids = self.processor.tokenizer(
             task_prompt, add_special_tokens=False, return_tensors="pt"
         ).input_ids
-        self.device = device = "cuda" if torch.cuda.is_available() else "cpu"
 
     def to_device(self, device: str) -> GPUCompatible:
         self.modle = self.model.to(device)
