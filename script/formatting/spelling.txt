@@ -1,4 +1,4 @@
-personal_ws-1.1 en 1390 
+personal_ws-1.1 en 1404 
 ABCD
 ABCMeta
 ANYDIM
@@ -49,6 +49,8 @@ AudioHFModel
 AudioReader
 AudioStorageEngine
 AutoEnum
+AutoModel
+AutoTokenizer
 AvgPool
 BDD
 BGR
@@ -160,6 +162,7 @@ DocumentStorageEngine
 DogBreedClassifier
 DropExecutor
 DropExecutorTest
+DropObject
 DropObjectExecutor
 DropObjectExecutorTest
 DropObjectPlan
@@ -175,18 +178,6 @@ DummyObjectDetector
 DummyObjectDetectorDecorators
 EDGAhab
 EIStakovskii
-EvaDB's
-EvaDBConnection
-EvaDBDBConnection
-EvaDBDBCursor
-EvaDBDBQuery
-EvaDBDatabase
-EvaDBEnum
-EvaDBEnums
-EvaDBImportTest
-EvaDBRelation
-EvaDBServerTest
-EvaDBTrackerAbstractUDF
 EXPRESISON
 EmbedFilterIntoDerivedGet
 EmbedFilterIntoGet
@@ -196,6 +187,17 @@ EnumInt
 ErrorHandlingRayTests
 EvaArgument
 EvaDB
+EvaDB's
+EvaDBConnection
+EvaDBCursor
+EvaDBDatabase
+EvaDBEnum
+EvaDBEnums
+EvaDBImportTest
+EvaDBQuery
+EvaDBRelation
+EvaDBServerTest
+EvaDBTrackerAbstractUDF
 EvaServer
 EverNoteLoader
 ExchangeExecutor
@@ -423,6 +425,7 @@ MaterializedViewTest
 MaxPool
 MemeImages
 MemoTest
+MiniLM
 MnistImageClassifier
 ModulePathTest
 MyCSV
@@ -518,6 +521,7 @@ PushDownFilterThroughJoin
 PyPI
 PyTorchTensor
 Pydoc
+Pythonic
 PytorchAbstractClassifierUDF
 PytorchAbstractTransformationUDF
 PytorchClassifierAbstractUDF
@@ -572,6 +576,8 @@ SchemaUtils
 Segmenter
 SelectExecutorTest
 SelectStatement
+SentenceFeatureExtractor
+SentenceTransformer
 SentenceTransformerFeatureExtractor
 SeqScanExecutorTest
 SeqScanPlan
@@ -592,6 +598,7 @@ ShowUDFPlan
 SiftFeatureExtractor
 SimilarityFeatureExtractor
 SimilarityTests
+SingletonMeta
 SpeechRecognizer
 StageCompleteSignal
 StatementBinder
@@ -719,7 +726,9 @@ VideoColumnName
 VideoFormat
 VideoStorageEngineTest
 VideoWriter
+WIP
 WMV
+WeakValueDictionary
 XdistTests
 XformExtractObjectToLinearFlow
 XformLateralJoinToLinearFlow
@@ -788,6 +797,7 @@ automethod
 autosummary
 autouse
 avi
+backend
 bart
 batchable
 bavail
@@ -929,7 +939,6 @@ epub
 eq
 equi
 etype
-eva
 evadb
 evadbai
 eval
@@ -1202,6 +1211,7 @@ pypi
 pypirc
 pypitest
 pytest
+pythonic
 pytorch
 qdrant
 qualname
@@ -1240,6 +1250,7 @@ samsum
 sdist
 sep
 serializer
+serverless
 sessionmaker
 setFormatter
 setLevel
@@ -1317,6 +1328,7 @@ tmp
 toGrayscale
 toctree
 todo
+tokenizer
 tolist
 torchvision
 tup
@@ -1329,6 +1341,7 @@ uadetrac
 uadtrac
 ubuntu
 udf
+udf's
 udfIO
 udfio
 udfmetadata
@@ -1364,6 +1377,7 @@ vstack
 wal
 warmup
 wb
+weakref
 wget
 whitespaces
 workspaceFolder

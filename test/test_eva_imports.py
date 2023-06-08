@@ -28,7 +28,7 @@ class EvaDBImportTest(unittest.TestCase):
         when current working directory is changed.
         """
         cur_dir = os.getcwd()
-        new_dir = os.path.join("test_eva", "test")
+        new_dir = os.path.join("test_evadb", "test")
         if not os.path.exists(new_dir):
             os.makedirs(new_dir)
         os.chdir(new_dir)

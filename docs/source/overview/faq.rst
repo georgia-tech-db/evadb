@@ -32,7 +32,7 @@ You can either kill that process or launch EvaDB server on another free port in 
 
 .. code-block:: bash
 
-    eva_server -p 9330
+    evadb_server -p 9330
 
 Why do I see no output from the server?
 ====================================
@@ -43,4 +43,4 @@ You can check the status of the server by running ``top`` or ``pgrep``:
 .. code-block:: bash
 
     top
-    pgrep eva_server
+    pgrep evadb_server

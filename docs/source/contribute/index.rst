@@ -28,8 +28,8 @@ After installing the package locally, you can make changes and run the test case
 .. code-block:: bash
 
    pip install .         # reinstall EvaDB package to include local changes 
-   pkill -9 eva_server   # kill running EvaDB server (if any)
-   eva_server&           # launch EvaDB server with newly installed package
+   pkill -9 evadb_server   # kill running EvaDB server (if any)
+   evadb_server&           # launch EvaDB server with newly installed package
 
 
 Testing

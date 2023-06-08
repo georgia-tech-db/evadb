@@ -6,7 +6,7 @@ Catalog Manager
 
 `catalog_manager <https://github.com/georgia-tech-db/eva/blob/076704705c35245a6c83a626dba599342c59ff64/evadb/catalog/catalog_manager.py#L44>`_ provides a set of services to interact with a database that stores metadata about tables, columns, and user-defined functions (UDFs). Information like what is the data type in a certain column in a table, type of a table, its name, etc.. It contains functions to get, insert and delete catalog entries for Tables, UDFs, UDF IOs, Columns and Indexes.  
 
-This data is stored in the eva_catalog.db file which can be found in `~/.evadb/<version>/` folder.  
+This data is stored in the evadb_catalog.db file which can be found in `~/.evadb/<version>/` folder.  
 
 Catalog manager currently has 5 services in it:  
 

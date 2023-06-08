@@ -5,8 +5,8 @@ Besides Python files and Jupyter notebooks, EvaDB also supports a command line i
 
 .. code-block:: bash
 
-    >>> eva_client
-    eva=# SELECT id, data FROM MNISTVid WHERE id < 1000;
+    >>> evadb_client
+    evadb=# SELECT id, data FROM MNISTVid WHERE id < 1000;
     @status: ResponseStatus.SUCCESS
     @batch:
                 mnistvid.id     mnistvid.data 
@@ -21,4 +21,4 @@ Besides Python files and Jupyter notebooks, EvaDB also supports a command line i
     [1000 rows x 2 columns]
     @query_time: 0.216  
 
-    eva=# exit
+    evadb=# exit

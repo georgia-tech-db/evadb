@@ -61,15 +61,15 @@ class SaliencyFeatureExtractor(AbstractUDF, GPUCompatible):
             rgb_img = row[0]
 
             composed = Compose([Resize((224, 224)), ToTensor()])
-            transfromed_img = composed(Image.fromarray(rgb_img[:, :, ::-1])).unsqueeze(
+            transformed_img = composed(Image.fromarray(rgb_img[:, :, ::-1])).unsqueeze(
                 0
             )
-            transfromed_img.requires_grad_()
-            outputs = self.model(transfromed_img)
+            transformed_img.requires_grad_()
+            outputs = self.model(transformed_img)
             score_max_index = outputs.argmax()
             score_max = outputs[0, score_max_index]
             score_max.backward()
-            saliency, _ = torch.max(transfromed_img.grad.data.abs(), dim=1)
+            saliency, _ = torch.max(transformed_img.grad.data.abs(), dim=1)
 
             return saliency
 

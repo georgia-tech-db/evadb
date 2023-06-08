@@ -20,7 +20,7 @@ from os.path import abspath, dirname, join
 from evadb.utils.logging_manager import logger
 
 """
-To allow running eva_server from any location
+To allow running evadb_server from any location
 """
 THIS_DIR = dirname(__file__)
 EvaDB_CODE_DIR = abspath(join(THIS_DIR, ".."))

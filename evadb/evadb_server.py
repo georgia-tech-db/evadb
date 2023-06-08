@@ -21,7 +21,7 @@ from signal import SIGTERM
 from psutil import process_iter
 
 """
-To allow running eva_server from any location
+To allow running evadb_server from any location
 """
 THIS_DIR = dirname(__file__)
 EvaDB_CODE_DIR = abspath(join(THIS_DIR, ".."))
@@ -34,8 +34,8 @@ async def start_evadb_server(
     db_dir: str, host: str, port: str, custom_db_uri: str = None
 ):
     """Start the evadb server"""
-    eva_server = EvaServer()
-    await eva_server.start_evadb_server(db_dir, host, port, custom_db_uri)
+    evadb_server = EvaServer()
+    await evadb_server.start_evadb_server(db_dir, host, port, custom_db_uri)
 
 
 def stop_server():
@@ -43,7 +43,7 @@ def stop_server():
     Stop the evadb server
     """
     for proc in process_iter():
-        if proc.name() == "eva_server":
+        if proc.name() == "evadb_server":
             proc.send_signal(SIGTERM)
 
     return 0

@@ -29,7 +29,7 @@ from evadb.configuration.constants import (
     EvaDB_CONFIG_FILE,
     EvaDB_DATASET_DIR,
 )
-from evadb.utils.logging_manager import logger as eva_logger
+from evadb.utils.logging_manager import logger as evadb_logger
 
 
 def get_base_config(evadb_installation_dir: Path) -> Path:
@@ -75,8 +75,8 @@ def bootstrap_environment(evadb_dir: Path, evadb_installation_dir: Path):
 
     # set logger to appropriate level (debug or release)
     level = logging.WARN if mode == "release" else logging.DEBUG
-    eva_logger.setLevel(level)
-    eva_logger.debug(f"Setting logging level to: {str(level)}")
+    evadb_logger.setLevel(level)
+    evadb_logger.debug(f"Setting logging level to: {str(level)}")
 
     return config_obj
 

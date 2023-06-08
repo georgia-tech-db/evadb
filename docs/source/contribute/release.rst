@@ -44,7 +44,7 @@ Part 2: Release Steps
 Make sure ``CHANGELOG.md`` is up to date for the release: compare against PRs
 merged since the last release.
 
-4. Update version to, e.g. ``0.0.6`` (remove the ``+dev`` label) in ``eva/version.py``.
+4. Update version to, e.g. ``0.0.6`` (remove the ``+dev`` label) in ``evadb/version.py``.
 
 5. Commit these changes and create a PR:
 
@@ -97,7 +97,7 @@ merged since the last release.
     * Attach the resulting binaries in (``dist/evadb-x.x.x.*``) to the release.
     * Publish the release.
 
-13. Update version to, e.g. ``0.9.1+dev`` in ``eva/version.py``.
+13. Update version to, e.g. ``0.9.1+dev`` in ``evadb/version.py``.
 
 14. Add a new changelog entry for the unreleased version in `CHANGELOG.md`:
 

@@ -100,9 +100,9 @@ class InsertExecutorTest(unittest.TestCase):
                 batch.frames["csvtable.name"].array,
                 np.array(
                     [
-                        "test_eva/similarity/data/sad.jpg",
-                        "test_eva/similarity/data/happy.jpg",
-                        "test_eva/similarity/data/angry.jpg",
+                        "test_evadb/similarity/data/sad.jpg",
+                        "test_evadb/similarity/data/happy.jpg",
+                        "test_evadb/similarity/data/angry.jpg",
                     ]
                 ),
             )

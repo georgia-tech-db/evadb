@@ -12,7 +12,7 @@ name (*str*): name of the numpy array.
 
 is_nullable (*bool*): boolean value indicating if the numpy array can be NULL.
 
-type (*NdArrayType*): data type of all the elements in the numpy array. The available types can be found in eva/catalog/catalog_type.py in the class `NdArrayType`
+type (*NdArrayType*): data type of all the elements in the numpy array. The available types can be found in evadb/catalog/catalog_type.py in the class `NdArrayType`
 
 dimensions(*Tuple(int)*): shape of the numpy array
 
