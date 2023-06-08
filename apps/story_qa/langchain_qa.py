@@ -22,7 +22,7 @@ from langchain.llms import GPT4All
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores.faiss import FAISS
 from tqdm import tqdm
-from util import download_story
+from util import download_story, read_text_line
 
 
 def download_model(local_path):
@@ -70,39 +70,44 @@ llm = GPT4All(
     n_threads=16,
 )
 
+# text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
+# texts = text_splitter.split_text(open(book_path).read())
+
+
 # setup the hugging face embeddding model
 embedding_model_name = "sentence-transformers/all-MiniLM-L6-v2"
 model_kwargs = {"device": "cuda"}
+encode_kwargs = {"normalize_embeddings": True}
 hf_embeddings = HuggingFaceEmbeddings(
     model_name=embedding_model_name,
     model_kwargs=model_kwargs,
+    encode_kwargs=encode_kwargs,
 )
 
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
-texts = text_splitter.split_text(open(book_path).read())
 
 # create FAISS vector index based on HuggingFace Embeddings
 print("Building FAISS Vector Index ...")
 ss = time.perf_counter()
+texts = list(read_text_line(book_path))
 store = FAISS.from_texts(
     texts,
     hf_embeddings,
     metadatas=[{"source": str(i)} for i in range(len(texts))],
 )
-# creating QA model based on gpt4all llm model
-chain = load_qa_with_sources_chain(llm=llm, chain_type="stuff")
 
 index_build_time = time.perf_counter() - ss
 print(f"Time taken to build index {index_build_time}")
 
+# creating QA model based on gpt4all llm model
+chain = load_qa_with_sources_chain(llm=llm, chain_type="stuff")
+
 # Answering questions
 for question in tqdm(open("./story_qa/questions.txt")):
     print(f"Question: {question}")
-    # fetching the top 5 context texts for the answer
-    docs = store.similarity_search(question, k=5)
+    # fetching the top 3 context texts for the answer
+    docs = store.similarity_search(question, k=3)
     answer = chain(
         {"input_documents": docs, "question": question}, return_only_outputs=True
     )
-    print(f"Answer {answer}")
 
 print(f"Total QA Time {time.perf_counter() - ss}")
