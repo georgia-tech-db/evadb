@@ -22,7 +22,8 @@ from youtube_transcript_api import YouTubeTranscriptApi
 
 import evadb
 
-MAX_CHUNK_SIZE = 10000
+MAX_CHUNK_SIZE = 5000
+DEFAULT_VIDEO_LINK = "https://www.youtube.com/watch?v=TvS1lHEQoKk"
 
 
 def partition_transcript(raw_transcript: str):
@@ -160,7 +161,14 @@ if __name__ == "__main__":
     )
 
     # Get Youtube video url
-    video_link = str(input("📺 Enter the URL of the YouTube video (or press `Enter` to go with the default URL):"))
+    video_link = str(
+        input(
+            "📺 Enter the URL of the YouTube video (press Enter to use a default Youtube video):"
+        )
+    )
+
+    if video_link == "":
+        video_link = DEFAULT_VIDEO_LINK
 
     # Get OpenAI key if needed
     try:
@@ -181,10 +189,6 @@ if __name__ == "__main__":
     try:
         # establish evadb api cursor
         cursor = evadb.connect().cursor()
-
-        # create chatgpt udf from implemententation
-        # chatgpt_udf_rel = cursor.create_udf("ChatGPT", impl_path="chatgpt.py")
-        # chatgpt_udf_rel.execute()
 
         if transcript is not None:
             grouped_transcript = group_transcript(transcript)
@@ -208,7 +212,7 @@ if __name__ == "__main__":
         cursor.load("transcript.csv", "Transcript", "csv").execute()
 
         print("===========================================")
-        print("Ask anything about the video:")
+        print("Ask anything about the video!")
         ready = True
         while ready:
             question = str(input("Question (enter 'exit' to exit): "))
@@ -218,7 +222,7 @@ if __name__ == "__main__":
                 # Generate response with chatgpt udf
                 print("Generating response...")
                 generate_chatgpt_response_rel = cursor.table("Transcript").select(
-                    f"ChatGPT('{question} in 30 words', text)"
+                    f"ChatGPT('{question} in 50 words', text)"
                 )
                 start = time.time()
                 responses = generate_chatgpt_response_rel.df()["chatgpt.response"]

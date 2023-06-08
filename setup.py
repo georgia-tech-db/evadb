@@ -49,6 +49,7 @@ minimal_requirement = [
     "pyyaml>=5.1",
     "importlib-metadata<5.0",
     "ray>=1.13.0,<2.5.0", # breaking change in 2.5.0
+    "retry>=0.9.2",
     "aenum>=2.2.0",
     "diskcache>=5.4.0",
     "eva-decord>=0.6.1",
@@ -113,7 +114,6 @@ udf_libs = [
     "ultralytics>=8.0.93",  # OBJECT DETECTION
     "transformers>=4.27.4",  # HUGGINGFACE
     "openai>=0.27.4",  # CHATGPT
-    "retry>=0.9.2", #CHATGPT
     "timm>=0.6.13",  # HUGGINGFACE VISION TASKS
     "norfair>=2.2.0",  # OBJECT TRACKING
 ]
