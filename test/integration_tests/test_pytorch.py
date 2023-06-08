@@ -28,11 +28,11 @@ import numpy as np
 import pandas.testing as pd_testing
 import pytest
 
-from eva.configuration.constants import EVA_ROOT_DIR
-from eva.executor.executor_utils import ExecutorError
-from eva.models.storage.batch import Batch
-from eva.server.command_handler import execute_query_fetch_all
-from eva.udfs.udf_bootstrap_queries import Asl_udf_query, Mvit_udf_query
+from evadb.configuration.constants import EVA_ROOT_DIR
+from evadb.executor.executor_utils import ExecutorError
+from evadb.models.storage.batch import Batch
+from evadb.server.command_handler import execute_query_fetch_all
+from evadb.udfs.udf_bootstrap_queries import Asl_udf_query, Mvit_udf_query
 
 
 @pytest.mark.notparallel
@@ -116,7 +116,7 @@ class PytorchTest(unittest.TestCase):
                   OUTPUT (bboxes NDARRAY FLOAT32(ANYDIM, 4),
                           scores NDARRAY FLOAT32(ANYDIM))
                   TYPE  FaceDetection
-                  IMPL  'eva/udfs/face_detector.py';
+                  IMPL  'evadb/udfs/face_detector.py';
         """
         execute_query_fetch_all(self.evadb, create_udf_query)
 
@@ -167,7 +167,7 @@ class PytorchTest(unittest.TestCase):
                             MVITActionRecognition(SEGMENT(data))
                             FROM Actions
                             WHERE id < 32
-                            GROUP BY '16f'; """
+                            GROUP BY '16 frames'; """
         actual_batch = execute_query_fetch_all(self.evadb, select_query)
         self.assertEqual(len(actual_batch), 2)
 
@@ -184,7 +184,7 @@ class PytorchTest(unittest.TestCase):
         select_query = """SELECT FIRST(id), ASLActionRecognition(SEGMENT(data))
                         FROM Asl_actions
                         SAMPLE 5
-                        GROUP BY '16f';"""
+                        GROUP BY '16 frames';"""
         actual_batch = execute_query_fetch_all(self.evadb, select_query)
 
         res = actual_batch.frames
@@ -200,7 +200,7 @@ class PytorchTest(unittest.TestCase):
                   OUTPUT (bboxes NDARRAY FLOAT32(ANYDIM, 4),
                           scores NDARRAY FLOAT32(ANYDIM))
                   TYPE  FaceDetection
-                  IMPL  'eva/udfs/face_detector.py';
+                  IMPL  'evadb/udfs/face_detector.py';
         """
         execute_query_fetch_all(self.evadb, create_udf_query)
 
@@ -219,7 +219,7 @@ class PytorchTest(unittest.TestCase):
                           bboxes NDARRAY FLOAT32(ANYDIM, 4),
                           scores NDARRAY FLOAT32(ANYDIM))
                   TYPE  OCRExtraction
-                  IMPL  'eva/udfs/ocr_extractor.py';
+                  IMPL  'evadb/udfs/ocr_extractor.py';
         """
         execute_query_fetch_all(self.evadb, create_udf_query)
 
@@ -239,7 +239,7 @@ class PytorchTest(unittest.TestCase):
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
                   OUTPUT (features NDARRAY FLOAT32(ANYDIM))
                   TYPE  Classification
-                  IMPL  'eva/udfs/feature_extractor.py';
+                  IMPL  'evadb/udfs/feature_extractor.py';
         """
         execute_query_fetch_all(self.evadb, create_udf_query)
 
@@ -259,7 +259,7 @@ class PytorchTest(unittest.TestCase):
                 INPUT (img_path TEXT(1000))
                 OUTPUT (data NDARRAY UINT8(3, ANYDIM, ANYDIM))
                 TYPE NdarrayUDF
-                IMPL "eva/udfs/ndarray/open.py";
+                IMPL "evadb/udfs/ndarray/open.py";
         """
         execute_query_fetch_all(self.evadb, create_open_udf_query)
 
@@ -269,7 +269,7 @@ class PytorchTest(unittest.TestCase):
                            Feature_Extractor_Name TEXT(100))
                     OUTPUT (distance FLOAT(32, 7))
                     TYPE NdarrayUDF
-                    IMPL "eva/udfs/ndarray/similarity.py";
+                    IMPL "evadb/udfs/ndarray/similarity.py";
         """
         execute_query_fetch_all(self.evadb, create_similarity_udf_query)
 
@@ -277,7 +277,7 @@ class PytorchTest(unittest.TestCase):
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
                   OUTPUT (features NDARRAY FLOAT32(ANYDIM))
                   TYPE  Classification
-                  IMPL  "eva/udfs/feature_extractor.py";
+                  IMPL  "evadb/udfs/feature_extractor.py";
         """
         execute_query_fetch_all(self.evadb, create_feat_udf_query)
 
@@ -315,7 +315,7 @@ class PytorchTest(unittest.TestCase):
                           bboxes NDARRAY FLOAT32(ANYDIM, 4),
                           scores NDARRAY FLOAT32(ANYDIM))
                   TYPE  OCRExtraction
-                  IMPL  'eva/udfs/ocr_extractor.py';
+                  IMPL  'evadb/udfs/ocr_extractor.py';
         """
         execute_query_fetch_all(self.evadb, create_udf_query)
 

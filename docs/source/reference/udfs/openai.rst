@@ -12,7 +12,7 @@ To create a chat completion UDF in EVA, use the following SQL command:
 .. code-block:: sql
 
     CREATE UDF IF NOT EXISTS OpenAIChatCompletion
-    IMPL 'eva/udfs/openai_chat_completion_udf.py'
+    IMPL 'evadb/udfs/openai_chat_completion_udf.py'
     'model' 'gpt-3.5-turbo'
 
 EVA supports the following models for chat completion task:

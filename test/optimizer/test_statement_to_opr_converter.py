@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ from test.util import get_all_subclasses
 
 from mock import MagicMock, patch
 
-from eva.optimizer.operators import (
+from evadb.optimizer.operators import (
     Dummy,
     LogicalApplyAndMerge,
     LogicalCreate,
@@ -26,8 +26,7 @@ from eva.optimizer.operators import (
     LogicalCreateMaterializedView,
     LogicalCreateUDF,
     LogicalDelete,
-    LogicalDrop,
-    LogicalDropUDF,
+    LogicalDropObject,
     LogicalExchange,
     LogicalExplain,
     LogicalExtractObject,
@@ -49,21 +48,20 @@ from eva.optimizer.operators import (
     LogicalVectorIndexScan,
     Operator,
 )
-from eva.optimizer.statement_to_opr_converter import StatementToPlanConverter
-from eva.parser.create_index_statement import CreateIndexStatement
-from eva.parser.create_statement import CreateTableStatement
-from eva.parser.create_udf_statement import CreateUDFStatement
-from eva.parser.drop_statement import DropTableStatement
-from eva.parser.drop_udf_statement import DropUDFStatement
-from eva.parser.explain_statement import ExplainStatement
-from eva.parser.insert_statement import InsertTableStatement
-from eva.parser.rename_statement import RenameTableStatement
-from eva.parser.select_statement import SelectStatement
-from eva.parser.table_ref import TableRef
+from evadb.optimizer.statement_to_opr_converter import StatementToPlanConverter
+from evadb.parser.create_index_statement import CreateIndexStatement
+from evadb.parser.create_statement import CreateTableStatement
+from evadb.parser.create_udf_statement import CreateUDFStatement
+from evadb.parser.drop_object_statement import DropObjectStatement
+from evadb.parser.explain_statement import ExplainStatement
+from evadb.parser.insert_statement import InsertTableStatement
+from evadb.parser.rename_statement import RenameTableStatement
+from evadb.parser.select_statement import SelectStatement
+from evadb.parser.table_ref import TableRef
 
 
 class StatementToOprTest(unittest.TestCase):
-    @patch("eva.optimizer.statement_to_opr_converter.LogicalGet")
+    @patch("evadb.optimizer.statement_to_opr_converter.LogicalGet")
     def test_visit_table_ref_should_create_logical_get_opr(self, mock_lget):
         converter = StatementToPlanConverter()
         table_ref = MagicMock(spec=TableRef, alias="alias")
@@ -73,7 +71,7 @@ class StatementToOprTest(unittest.TestCase):
         mock_lget.assert_called_with(table_ref, table_ref.table.table_obj, "alias")
         self.assertEqual(mock_lget.return_value, converter._plan)
 
-    @patch("eva.optimizer.statement_to_opr_converter.LogicalFilter")
+    @patch("evadb.optimizer.statement_to_opr_converter.LogicalFilter")
     def test_visit_select_predicate_should_add_logical_filter(self, mock_lfilter):
         converter = StatementToPlanConverter()
         select_predicate = MagicMock()
@@ -83,7 +81,7 @@ class StatementToOprTest(unittest.TestCase):
         mock_lfilter.return_value.append_child.assert_called()
         self.assertEqual(mock_lfilter.return_value, converter._plan)
 
-    @patch("eva.optimizer.statement_to_opr_converter.LogicalProject")
+    @patch("evadb.optimizer.statement_to_opr_converter.LogicalProject")
     def test_visit_projection_should_add_logical_predicate(self, mock_lproject):
         converter = StatementToPlanConverter()
         projects = MagicMock()
@@ -123,13 +121,13 @@ class StatementToOprTest(unittest.TestCase):
         converter._visit_projection.assert_not_called()
         converter._visit_select_predicate.assert_not_called()
 
-    @patch("eva.optimizer.statement_to_opr_converter.LogicalCreateUDF")
+    @patch("evadb.optimizer.statement_to_opr_converter.LogicalCreateUDF")
     @patch(
-        "eva.optimizer.\
+        "evadb.optimizer.\
 statement_to_opr_converter.column_definition_to_udf_io"
     )
     @patch(
-        "eva.optimizer.\
+        "evadb.optimizer.\
 statement_to_opr_converter.metadata_definition_to_udf_metadata"
     )
     def test_visit_create_udf(self, metadata_def_mock, col_def_mock, l_create_udf_mock):
@@ -169,29 +167,16 @@ statement_to_opr_converter.metadata_definition_to_udf_metadata"
         mock.assert_called_once()
         mock.assert_called_with(stmt)
 
-    @patch("eva.optimizer.statement_to_opr_converter.LogicalDropUDF")
-    @patch(
-        "eva.optimizer.\
-statement_to_opr_converter.column_definition_to_udf_io"
-    )
-    def test_visit_drop_udf(self, mock, l_drop_udf_mock):
+    @patch("evadb.optimizer.statement_to_opr_converter.LogicalDropObject")
+    def test_visit_drop_object(self, l_drop_obj_mock):
         converter = StatementToPlanConverter()
         stmt = MagicMock()
         stmt.name = "name"
+        stmt.object_type = "object_type"
         stmt.if_exists = True
-        converter.visit_drop_udf(stmt)
-        l_drop_udf_mock.assert_called_once()
-        l_drop_udf_mock.assert_called_with(stmt.name, stmt.if_exists)
-
-    def test_visit_should_call_drop_udf(self):
-        stmt = MagicMock(spec=DropUDFStatement)
-        converter = StatementToPlanConverter()
-        mock = MagicMock()
-        converter.visit_drop_udf = mock
-
-        converter.visit(stmt)
-        mock.assert_called_once()
-        mock.assert_called_with(stmt)
+        converter.visit_drop_object(stmt)
+        l_drop_obj_mock.assert_called_once()
+        l_drop_obj_mock.assert_called_with(stmt.object_type, stmt.name, stmt.if_exists)
 
     def test_visit_should_call_insert(self):
         stmt = MagicMock(spec=InsertTableStatement)
@@ -234,10 +219,10 @@ statement_to_opr_converter.column_definition_to_udf_io"
         mock.assert_called_once_with(stmt)
 
     def test_visit_should_call_drop(self):
-        stmt = MagicMock(spec=DropTableStatement)
+        stmt = MagicMock(spec=DropObjectStatement)
         converter = StatementToPlanConverter()
         mock = MagicMock()
-        converter.visit_drop = mock
+        converter.visit_drop_object = mock
         converter.visit(stmt)
         mock.assert_called_once()
         mock.assert_called_with(stmt)
@@ -281,8 +266,7 @@ statement_to_opr_converter.column_definition_to_udf_io"
         explain_plan = LogicalExplain([MagicMock()])
         exchange_plan = LogicalExchange(MagicMock())
         show_plan = LogicalShow(MagicMock())
-        drop_plan = LogicalDrop(MagicMock(), MagicMock())
-        drop_udf_plan = LogicalDropUDF(MagicMock(), MagicMock())
+        drop_plan = LogicalDropObject(MagicMock(), MagicMock(), MagicMock())
         get_plan = LogicalGet(MagicMock(), MagicMock(), MagicMock())
         sample_plan = LogicalSample(MagicMock(), MagicMock())
         filter_plan = LogicalFilter(MagicMock())
@@ -313,7 +297,6 @@ statement_to_opr_converter.column_definition_to_udf_io"
         plans.append(limit_plan)
         plans.append(rename_plan)
         plans.append(drop_plan)
-        plans.append(drop_udf_plan)
         plans.append(get_plan)
         plans.append(sample_plan)
         plans.append(filter_plan)

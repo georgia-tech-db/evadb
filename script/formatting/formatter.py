@@ -53,6 +53,7 @@ EVA_TEST_DIR = os.path.join(EVA_DIR, "test")
 EVA_SCRIPT_DIR = os.path.join(EVA_DIR, "script")
 EVA_NOTEBOOKS_DIR = os.path.join(EVA_DIR, "tutorials")
 EVA_DOCS_DIR = os.path.join(EVA_DIR, "docs")
+EVA_APPS_DIR = os.path.join(EVA_DIR, "apps")
 
 FORMATTING_DIR = os.path.join(EVA_SCRIPT_DIR, "formatting")
 PYLINTRC = os.path.join(FORMATTING_DIR, "pylintrc")
@@ -61,6 +62,7 @@ PYLINTRC = os.path.join(FORMATTING_DIR, "pylintrc")
 DEFAULT_DIRS = []
 DEFAULT_DIRS.append(EVA_SRC_DIR)
 DEFAULT_DIRS.append(EVA_TEST_DIR)
+DEFAULT_DIRS.append(EVA_APPS_DIR)
 
 IGNORE_FILES = ["version.py"]
 
@@ -275,6 +277,7 @@ def check_notebook_format(notebook_file):
                 break
 
     if contains_colab_link is False:
+        LOG.error(f"ERROR: Notebook {notebook_file} does not contain correct Colab link -- update the link.")
         sys.exit(1)
 
     return True
@@ -443,7 +446,7 @@ if __name__ == "__main__":
 
         # CODESPELL
         #LOG.info("Codespell")
-        subprocess.check_output("codespell eva/", 
+        subprocess.check_output("codespell evadb/", 
                 shell=True, 
                 universal_newlines=True)
         subprocess.check_output("codespell docs/source/*/*.rst", 
@@ -455,7 +458,7 @@ if __name__ == "__main__":
         subprocess.check_output("codespell *.md", 
                 shell=True, 
                 universal_newlines=True)
-        subprocess.check_output("codespell eva/*.md", 
+        subprocess.check_output("codespell evadb/*.md", 
                 shell=True, 
                 universal_newlines=True)
 

@@ -39,7 +39,7 @@ Then run `chmod 600 ./.pypirc` so only you can read/write.
   Make sure `CHANGELOG.md` is up to date for the release: compare against PRs
   merged since the last release.
 
-1. Update version to, e.g. 0.0.6 (remove the `+dev` label) in `eva/version.py`.
+1. Update version to, e.g. 0.0.6 (remove the `+dev` label) in `evadb/version.py`.
 
 1. Commit these changes and create a PR:
 
@@ -66,7 +66,7 @@ Then run `chmod 600 ./.pypirc` so only you can read/write.
        python3 -m venv test_evadb  # create a virtualenv for testing
        source test_evadb/bin/activate  # activate virtualenv
        python3 -m pip install dist/evadb-0.9.1-py3-none-any.whl
-       python3 -c "import eva; print(eva.__version__)"
+       python3 -c "import evadb; print(evadb.__version__)"
 
 1. Publish to PyPI
 
@@ -83,7 +83,7 @@ Then run `chmod 600 ./.pypirc` so only you can read/write.
     * Publish the release.
 
 
-1. Update version to, e.g. 0.9.1+dev in `eva/version.py`.
+1. Update version to, e.g. 0.9.1+dev in `evadb/version.py`.
 
 1. Add a new changelog entry for the unreleased version in `CHANGELOG.md`:
 

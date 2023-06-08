@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ from test.util import EVA_TEST_DATA_DIR
 import cv2
 import pandas as pd
 
-from eva.models.storage.batch import Batch
+from evadb.models.storage.batch import Batch
 
 
 class EmotionDetector(unittest.TestCase):
@@ -35,7 +35,7 @@ class EmotionDetector(unittest.TestCase):
 
     @unittest.skip("disable test due to model downloading time")
     def test_should_return_correct_emotion(self):
-        from eva.udfs.emotion_detector import EmotionDetector
+        from evadb.udfs.emotion_detector import EmotionDetector
 
         happy_img = self.base_path / "happy.jpg"
         sad_img = self.base_path / "sad.jpg"

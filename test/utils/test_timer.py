@@ -22,8 +22,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from eva.server.command_handler import handle_request
-from eva.utils.stats import Timer
+from evadb.server.command_handler import handle_request
+from evadb.utils.stats import Timer
 
 NUM_FRAMES = 10
 

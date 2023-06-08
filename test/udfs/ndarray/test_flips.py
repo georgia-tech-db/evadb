@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ import pandas as pd
 from numpy import asarray
 from PIL import Image
 
-from eva.configuration.constants import EVA_ROOT_DIR
-from eva.udfs.ndarray.horizontal_flip import HorizontalFlip
-from eva.udfs.ndarray.vertical_flip import VerticalFlip
+from evadb.configuration.constants import EVA_ROOT_DIR
+from evadb.udfs.ndarray.horizontal_flip import HorizontalFlip
+from evadb.udfs.ndarray.vertical_flip import VerticalFlip
 
 
 class FlipTests(unittest.TestCase):
