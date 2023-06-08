@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2022 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -53,6 +53,7 @@ EVA_TEST_DIR = os.path.join(EVA_DIR, "test")
 EVA_SCRIPT_DIR = os.path.join(EVA_DIR, "script")
 EVA_NOTEBOOKS_DIR = os.path.join(EVA_DIR, "tutorials")
 EVA_DOCS_DIR = os.path.join(EVA_DIR, "docs")
+EVA_APPS_DIR = os.path.join(EVA_DIR, "apps")
 
 FORMATTING_DIR = os.path.join(EVA_SCRIPT_DIR, "formatting")
 PYLINTRC = os.path.join(FORMATTING_DIR, "pylintrc")
@@ -61,6 +62,7 @@ PYLINTRC = os.path.join(FORMATTING_DIR, "pylintrc")
 DEFAULT_DIRS = []
 DEFAULT_DIRS.append(EVA_SRC_DIR)
 DEFAULT_DIRS.append(EVA_TEST_DIR)
+DEFAULT_DIRS.append(EVA_APPS_DIR)
 
 IGNORE_FILES = ["version.py"]
 
@@ -85,7 +87,7 @@ with open(ignored_words_file) as f:
 # ==============================================
 
 header = """# coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -149,7 +151,7 @@ def is_tool(name):
             installed_version = "not-found"
         if installed_version != req_version:
             LOG.warning(
-                f"EVA uses {name} {req_version}. The installed version is"
+                f"EvaDB uses {name} {req_version}. The installed version is"
                 f" {installed_version} which can result in different results."
             )
 

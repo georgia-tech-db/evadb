@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ from test.util import shutdown_ray, suffix_pytest_xdist_worker_id_to_dir
 
 import pytest
 
-from evadb.configuration.constants import EVA_DATABASE_DIR, EVA_ROOT_DIR
+from evadb.configuration.constants import EvaDB_DATABASE_DIR, EvaDB_ROOT_DIR
 from evadb.interfaces.relational.db import connect
 from evadb.server.command_handler import execute_query_fetch_all
 
@@ -26,7 +26,7 @@ from evadb.server.command_handler import execute_query_fetch_all
 class SaliencyTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.db_dir = suffix_pytest_xdist_worker_id_to_dir(EVA_DATABASE_DIR)
+        cls.db_dir = suffix_pytest_xdist_worker_id_to_dir(EvaDB_DATABASE_DIR)
         cls.conn = connect(cls.db_dir)
         cls.evadb = cls.conn._evadb
 
@@ -38,7 +38,7 @@ class SaliencyTests(unittest.TestCase):
         # file_remove("dummy.avi")
 
     def test_saliency(self):
-        Saliency1 = f"{EVA_ROOT_DIR}/data/saliency/test1.jpeg"
+        Saliency1 = f"{EvaDB_ROOT_DIR}/data/saliency/test1.jpeg"
         create_udf_query = f"LOAD IMAGE '{Saliency1}' INTO SALIENCY;"
 
         execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS SALIENCY;")
@@ -49,7 +49,7 @@ class SaliencyTests(unittest.TestCase):
         )
 
         create_udf_query = f"""CREATE UDF IF NOT EXISTS SaliencyFeatureExtractor
-                    IMPL  '{EVA_ROOT_DIR}/evadb/udfs/saliency_feature_extractor.py';
+                    IMPL  '{EvaDB_ROOT_DIR}/evadb/udfs/saliency_feature_extractor.py';
         """
         execute_query_fetch_all(self.evadb, create_udf_query)
 

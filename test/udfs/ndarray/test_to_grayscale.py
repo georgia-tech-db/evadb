@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import cv2
 import numpy as np
 import pandas as pd
 
-from evadb.configuration.constants import EVA_ROOT_DIR
+from evadb.configuration.constants import EvaDB_ROOT_DIR
 from evadb.udfs.ndarray.to_grayscale import ToGrayscale
 
 
@@ -32,11 +32,11 @@ class ToGrayscaleTests(unittest.TestCase):
         assert hasattr(self.to_grayscale_instance, "name")
 
     def test_should_convert_to_grayscale(self):
-        arr = cv2.imread(f"{EVA_ROOT_DIR}/test/udfs/data/dog.jpeg")
+        arr = cv2.imread(f"{EvaDB_ROOT_DIR}/test/udfs/data/dog.jpeg")
         df = pd.DataFrame([[arr]])
         modified_arr = self.to_grayscale_instance(df)["grayscale_frame_array"]
-        cv2.imwrite(f"{EVA_ROOT_DIR}/test/udfs/data/tmp.jpeg", modified_arr[0])
-        actual_array = cv2.imread(f"{EVA_ROOT_DIR}/test/udfs/data/tmp.jpeg")
-        expected_arr = cv2.imread(f"{EVA_ROOT_DIR}/test/udfs/data/grayscale_dog.jpeg")
+        cv2.imwrite(f"{EvaDB_ROOT_DIR}/test/udfs/data/tmp.jpeg", modified_arr[0])
+        actual_array = cv2.imread(f"{EvaDB_ROOT_DIR}/test/udfs/data/tmp.jpeg")
+        expected_arr = cv2.imread(f"{EvaDB_ROOT_DIR}/test/udfs/data/grayscale_dog.jpeg")
         self.assertEqual(np.sum(actual_array - expected_arr), 0)
-        file_remove(Path(f"{EVA_ROOT_DIR}/test/udfs/data/tmp.jpeg"))
+        file_remove(Path(f"{EvaDB_ROOT_DIR}/test/udfs/data/tmp.jpeg"))

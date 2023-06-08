@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 # limitations under the License.
 from typing import Iterator
 
-from evadb.database import EVADatabase
+from evadb.database import EvaDBDatabase
 from evadb.executor.abstract_executor import AbstractExecutor
 from evadb.executor.executor_utils import apply_predicate, apply_project
 from evadb.models.storage.batch import Batch
@@ -22,7 +22,7 @@ from evadb.plan_nodes.hash_join_probe_plan import HashJoinProbePlan
 
 
 class HashJoinExecutor(AbstractExecutor):
-    def __init__(self, db: EVADatabase, node: HashJoinProbePlan):
+    def __init__(self, db: EvaDBDatabase, node: HashJoinProbePlan):
         super().__init__(db, node)
         self.predicate = node.join_predicate
         self.join_type = node.join_type

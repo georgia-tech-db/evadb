@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,19 +16,19 @@ from pathlib import Path
 from typing import Any
 
 from evadb.configuration.bootstrap_environment import bootstrap_environment
-from evadb.configuration.constants import EVA_DATABASE_DIR, EVA_INSTALLATION_DIR
+from evadb.configuration.constants import EvaDB_DATABASE_DIR, EvaDB_INSTALLATION_DIR
 from evadb.utils.logging_manager import logger
 
 
 class ConfigurationManager(object):
     def __init__(self, eva_db_dir: str = None) -> None:
-        self._eva_db_dir = eva_db_dir or EVA_DATABASE_DIR
+        self._eva_db_dir = eva_db_dir or EvaDB_DATABASE_DIR
         self._config_obj = self._create_if_not_exists()
 
     def _create_if_not_exists(self):
         config_obj = bootstrap_environment(
             eva_db_dir=Path(self._eva_db_dir),
-            eva_installation_dir=Path(EVA_INSTALLATION_DIR),
+            eva_installation_dir=Path(EvaDB_INSTALLATION_DIR),
         )
         return config_obj
 

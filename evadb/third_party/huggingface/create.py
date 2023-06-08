@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -112,7 +112,7 @@ def infer_output_name_and_type(**pipeline_args):
     task = pipeline_args["task"]
     assert (
         task in INPUT_TYPE_FOR_SUPPORTED_TASKS
-    ), f"Task {task} not supported in EVA currently"
+    ), f"Task {task} not supported in EvaDB currently"
 
     # Construct the pipeline
     pipe = pipeline(**pipeline_args)

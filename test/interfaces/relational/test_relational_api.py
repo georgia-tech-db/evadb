@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import pandas as pd
 from pandas.testing import assert_frame_equal
 
 from evadb.binder.binder_utils import BinderError
-from evadb.configuration.constants import EVA_DATABASE_DIR, EVA_ROOT_DIR
+from evadb.configuration.constants import EvaDB_DATABASE_DIR, EvaDB_ROOT_DIR
 from evadb.executor.executor_utils import ExecutorError
 from evadb.interfaces.relational.db import connect
 from evadb.models.storage.batch import Batch
@@ -39,17 +39,17 @@ class RelationalAPI(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.db_dir = suffix_pytest_xdist_worker_id_to_dir(EVA_DATABASE_DIR)
+        cls.db_dir = suffix_pytest_xdist_worker_id_to_dir(EvaDB_DATABASE_DIR)
         cls.conn = connect(cls.db_dir)
         cls.evadb = cls.conn._evadb
 
     def setUp(self):
         self.evadb.catalog().reset()
-        self.mnist_path = f"{EVA_ROOT_DIR}/data/mnist/mnist.mp4"
+        self.mnist_path = f"{EvaDB_ROOT_DIR}/data/mnist/mnist.mp4"
         load_udfs_for_testing(
             self.evadb,
         )
-        self.images = f"{EVA_ROOT_DIR}/data/detoxify/*.jpg"
+        self.images = f"{EvaDB_ROOT_DIR}/data/detoxify/*.jpg"
 
     def tearDown(self):
         shutdown_ray()
@@ -175,7 +175,7 @@ class RelationalAPI(unittest.TestCase):
         # todo support register udf
         cursor.query(
             f"""CREATE UDF IF NOT EXISTS SiftFeatureExtractor
-                IMPL  '{EVA_ROOT_DIR}/evadb/udfs/sift_feature_extractor.py'"""
+                IMPL  '{EvaDB_ROOT_DIR}/evadb/udfs/sift_feature_extractor.py'"""
         ).df()
 
         # create a vector index using QDRANT
@@ -187,7 +187,7 @@ class RelationalAPI(unittest.TestCase):
         ).df()
 
         # do similarity search
-        base_image = f"{EVA_ROOT_DIR}/data/detoxify/meme1.jpg"
+        base_image = f"{EvaDB_ROOT_DIR}/data/detoxify/meme1.jpg"
         rel = (
             cursor.table("meme_images")
             .order(
@@ -325,13 +325,13 @@ class RelationalAPI(unittest.TestCase):
     def test_pdf_similarity_search(self):
         conn = connect()
         cursor = conn.cursor()
-        pdf_path1 = f"{EVA_ROOT_DIR}/data/documents/state_of_the_union.pdf"
-        pdf_path2 = f"{EVA_ROOT_DIR}/data/documents/layout-parser-paper.pdf"
+        pdf_path1 = f"{EvaDB_ROOT_DIR}/data/documents/state_of_the_union.pdf"
+        pdf_path2 = f"{EvaDB_ROOT_DIR}/data/documents/layout-parser-paper.pdf"
 
-        load_pdf = cursor.load(file_regex=pdf_path1, format="PDF", table_name="PDFss")
+        load_pdf = cursor.load(file_regex=pdf_path1, format="PDF", table_name="PDFs")
         load_pdf.execute()
 
-        load_pdf = cursor.load(file_regex=pdf_path2, format="PDF", table_name="PDFss")
+        load_pdf = cursor.load(file_regex=pdf_path2, format="PDF", table_name="PDFs")
         load_pdf.execute()
 
         udf_check = cursor.drop_udf("SentenceTransformerFeatureExtractor")
@@ -339,19 +339,19 @@ class RelationalAPI(unittest.TestCase):
         udf = cursor.create_udf(
             "SentenceTransformerFeatureExtractor",
             True,
-            f"{EVA_ROOT_DIR}/evadb/udfs/sentence_transformer_feature_extractor.py",
+            f"{EvaDB_ROOT_DIR}/evadb/udfs/sentence_transformer_feature_extractor.py",
         )
         udf.execute()
 
         cursor.create_vector_index(
             "faiss_index",
-            table_name="PDFss",
+            table_name="PDFs",
             expr="SentenceTransformerFeatureExtractor(data)",
             using="QDRANT",
         ).df()
 
         query = (
-            cursor.table("PDFss")
+            cursor.table("PDFs")
             .order(
                 """Similarity(
                     SentenceTransformerFeatureExtractor('When was the NATO created?'), SentenceTransformerFeatureExtractor(data)
@@ -362,6 +362,6 @@ class RelationalAPI(unittest.TestCase):
         )
         output = query.df()
         self.assertEqual(len(output), 3)
-        self.assertTrue("pdfss.data" in output.columns)
+        self.assertTrue("PDFs.data" in output.columns)
 
         cursor.drop_index("faiss_index").df()

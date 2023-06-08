@@ -4,7 +4,7 @@
 FAQ
 ===
 
-These are some Frequently Asked Questions that we've seen pop up for EVA DB.
+These are some Frequently Asked Questions that we've seen pop up for EvaDB DB.
 
 If you still have questions after reading this FAQ,  please reach out on
 `our Slack <https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg>`__!
