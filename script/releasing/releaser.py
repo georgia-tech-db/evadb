@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2022 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -57,15 +57,15 @@ def get_string_in_line(file_path, line_number):
 
 # NOTE: absolute path to eva directory is calculated from current directory
 # directory structure: evadb/scripts/formatting/<this_file>
-# EVA_DIR needs to be redefined if the directory structure is changed
+# EvaDB_DIR needs to be redefined if the directory structure is changed
 CODE_SOURCE_DIR = os.path.abspath(os.path.dirname(__file__))
-EVA_DIR = functools.reduce(
+EvaDB_DIR = functools.reduce(
     os.path.join, [CODE_SOURCE_DIR, os.path.pardir, os.path.pardir]
 )
 
 # other directory paths used are relative to peloton_dir
-EVA_SRC_DIR = os.path.join(EVA_DIR, "evadb")
-EVA_CHANGELOG_PATH = os.path.join(EVA_DIR, "CHANGELOG.md")
+EvaDB_SRC_DIR = os.path.join(EvaDB_DIR, "evadb")
+EvaDB_CHANGELOG_PATH = os.path.join(EvaDB_DIR, "CHANGELOG.md")
 
 # ==============================================
 # LOGGING CONFIGURATION
@@ -106,7 +106,7 @@ def get_changelog(github_timestamp):
     release_date = utc_timezone.localize(release_date)
 
     # GO TO ROOT DIR
-    os.chdir(EVA_DIR)
+    os.chdir(EvaDB_DIR)
 
     # PULL CHANGES
     run_command("git pull origin master")
@@ -153,7 +153,7 @@ def read_file(path, encoding="utf-8"):
 
 
 def release_version(current_version):
-    version_path = os.path.join(os.path.join(EVA_DIR, "evadb"), "version.py")
+    version_path = os.path.join(os.path.join(EvaDB_DIR, "evadb"), "version.py")
     with open(version_path, "r") as version_file:
         output = version_file.read()
         output = output.replace("+dev", "")
@@ -185,7 +185,7 @@ def get_commit_id_of_latest_release():
     return release_date
 
 def append_changelog(insert_changelog: str, version: str):
-    with open(EVA_CHANGELOG_PATH, 'r') as file:
+    with open(EvaDB_CHANGELOG_PATH, 'r') as file:
         file_contents = file.read()
 
     # Location after ### [Removed] in file
@@ -199,7 +199,7 @@ def append_changelog(insert_changelog: str, version: str):
 
     modified_content = file_contents[:position] + header + insert_changelog +  "\n" + file_contents[position:]
 
-    with open(EVA_CHANGELOG_PATH, 'w') as file:
+    with open(EvaDB_CHANGELOG_PATH, 'w') as file:
         file.write(modified_content)
 
 def publish_wheels(tag):
@@ -256,14 +256,14 @@ def upload_assets(changelog, tag):
     # Upload assets to the release
     for filepath in asset_filepaths:
         asset_name = filepath.split('/')[-1]
-        asset_path = Path(f"{EVA_DIR}/{filepath}")
+        asset_path = Path(f"{EvaDB_DIR}/{filepath}")
         print("path: " + str(asset_path))
         release.upload_asset(str(asset_path), asset_name)
 
     print('Release created and published successfully.')
 
 def bump_up_version(next_version):
-    version_path = os.path.join(os.path.join(EVA_DIR, "eva"), "version.py")
+    version_path = os.path.join(os.path.join(EvaDB_DIR, "eva"), "version.py")
 
     major_str = get_string_in_line(version_path, 1)
     minor_str = get_string_in_line(version_path, 2)
@@ -336,7 +336,7 @@ if __name__ == "__main__":
         "-r",
         "--release-version",
         action='store_true',
-        help="Publish a new version of EVA.",
+        help="Publish a new version of EvaDB.",
     )
 
     parser.add_argument(

@@ -32,7 +32,7 @@ from evadb.server.interpreter import start_cmd_client  # noqa: E402
 
 async def evadb_client(host: str, port: int):
     """
-    Start the eva client
+    Start the evadb client
     """
 
     # Launch client

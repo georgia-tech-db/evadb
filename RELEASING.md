@@ -1,8 +1,8 @@
-# EVA Release Guide
+# EvaDB Release Guide
 
 ## Before You Start
 
-Make sure you have [PyPI](https://pypi.org) account with maintainer access to the EVA project. 
+Make sure you have [PyPI](https://pypi.org) account with maintainer access to the EvaDB project. 
 Create a .pypirc in your `$HOME` directory.
 
 It should look like this (contain your PyPI credentials):
@@ -102,7 +102,7 @@ Then run `chmod 600 ./.pypirc` so only you can read/write.
        git push --set-upstream origin bump-v0.9.1+dev
 
        
-1. Add the new tag to [the EVA project on ReadTheDocs](https://readthedocs.org/projects/evadb),
+1. Add the new tag to [the EvaDB project on ReadTheDocs](https://readthedocs.org/projects/evadb),
     * Trigger a build for main to pull new tags.
     * Go to the "Versions" tab, and "Activate" the new tag.
     * Go to Admin/Advanced to set this tag as the new default version.

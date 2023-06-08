@@ -17,11 +17,11 @@ the source. Follow the following instructions to build EvaDB locally. We recomme
 .. code-block:: bash
 
    git clone https://github.com/georgia-tech-db/eva.git && cd eva
-   python3 -m venv test_eva_db       # create a virtual environment
-   source test_eva_db/bin/activate   # activate the virtual environment
+   python3 -m venv test_evadb       # create a virtual environment
+   source test_evadb/bin/activate   # activate the virtual environment
    pip install --upgrade pip         # upgrade pip
    pip install -e ".[dev]"           # build and install the EvaDB package
-   bash script/test/test.sh          # run the eva EvaDB suite
+   bash script/test/test.sh          # run the EvaDB test suite
    
 After installing the package locally, you can make changes and run the test cases to check their impact.
 

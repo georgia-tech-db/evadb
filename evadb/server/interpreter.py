@@ -56,10 +56,10 @@ async def read_from_client_and_send_to_server(
     stdin_reader: StreamReader, writer: StreamWriter, server_reader: StreamReader
 ):
     VERSION = VERSION_DICT["VERSION"]
-    intro = f"eva (v{VERSION})\nType 'EXIT;' to exit the client \n"
+    intro = f"evadb (v{VERSION})\nType 'EXIT;' to exit the client \n"
     print(intro, flush=True)
 
-    prompt = "eva=#"
+    prompt = "evadb=#"
 
     # The EvaDBDatabase object is not passed from the command line client.
     # The concept is to always send a SQL query to the server, which is responsible for

@@ -55,9 +55,9 @@ class EvaDBConnection:
 
 
         Examples:
-            >>> from eva import connect
-            >>> conn = connect()
-            >>> cursor = conn.cursor()
+            >>> import evadb
+            >>> connection = connect()
+            >>> cursor = connection.cursor()
         """
         # One unique cursor for one connection
         if self._cursor is None:
