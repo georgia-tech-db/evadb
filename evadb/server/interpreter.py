@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ from asyncio import StreamReader, StreamWriter
 from collections import deque
 from typing import Dict
 
-from evadb.interfaces.relational.db import EVADBConnection
+from evadb.interfaces.relational.db import EvaDBDBConnection
 from evadb.utils.logging_manager import logger
 
 # version.py defines the VERSION and VERSION_SHORT variables
@@ -61,11 +61,11 @@ async def read_from_client_and_send_to_server(
 
     prompt = "eva=#"
 
-    # The EVADatabase object is not passed from the command line client.
+    # The EvaDBDatabase object is not passed from the command line client.
     # The concept is to always send a SQL query to the server, which is responsible for
     # executing it and returning the results. However, in the Pythonic interface, we
-    # adopt a serverless approach and don't rely on the EVADatabase object.
-    connection = EVADBConnection(None, server_reader, writer)
+    # adopt a serverless approach and don't rely on the EvaDBDatabase object.
+    connection = EvaDBDBConnection(None, server_reader, writer)
     cursor = connection.cursor()
 
     while True:

@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ from psutil import process_iter
 To allow running eva_server from any location
 """
 THIS_DIR = dirname(__file__)
-EVA_CODE_DIR = abspath(join(THIS_DIR, ".."))
-sys.path.append(EVA_CODE_DIR)
+EvaDB_CODE_DIR = abspath(join(THIS_DIR, ".."))
+sys.path.append(EvaDB_CODE_DIR)
 
 from evadb.server.server import EvaServer  # noqa: E402
 
@@ -50,7 +50,7 @@ def stop_server():
 
 
 def main():
-    parser = argparse.ArgumentParser(description="EVA Server")
+    parser = argparse.ArgumentParser(description="EvaDB Server")
 
     parser.add_argument(
         "--host",

@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ class AbstractHFUdf(AbstractUDF, GPUCompatible):
     An abstract class for all HuggingFace models.
 
     This is implemented using the pipeline API from HuggingFace. pipeline is an
-    easy way to use a huggingface model for inference. In EVA, we require users
+    easy way to use a huggingface model for inference. In EvaDB, we require users
     to mention the task they want to perform for simplicity. A HuggingFace task
     is different from a model(pytorch). There are a large number of models on HuggingFace
     hub that can be used for a particular task. The user can specify the model or a default
@@ -63,13 +63,13 @@ class AbstractHFUdf(AbstractUDF, GPUCompatible):
 
     def input_formatter(self, inputs: Any):
         """
-        Function that formats input from EVA format to HuggingFace format for that particular HF model
+        Function that formats input from EvaDB format to HuggingFace format for that particular HF model
         """
         return inputs
 
     def output_formatter(self, outputs: Any):
         """
-        Function that formats output from HuggingFace format to EVA format (pandas dataframe)
+        Function that formats output from HuggingFace format to EvaDB format (pandas dataframe)
         The output can be in various formats, depending on the model. For example:
             {'text' : 'transcript from video'}
             [[{'score': 0.25, 'label': 'bridge'}, {'score': 0.50, 'label': 'car'}]]

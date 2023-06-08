@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -115,7 +115,7 @@ def infer_output_name_and_type(udf_metadata: List[UdfMetadataCatalogEntry]):
     task = udf_def_args["task"]
     assert (
         task in INPUT_TYPE_FOR_SUPPORTED_TASKS
-    ), f"Task {task} not supported in EVA currently"
+    ), f"Task {task} not supported in EvaDB currently"
 
     # Get a dummy input
     input_type = INPUT_TYPE_FOR_SUPPORTED_TASKS[task]

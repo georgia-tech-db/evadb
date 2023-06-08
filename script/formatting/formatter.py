@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2022 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -87,7 +87,7 @@ with open(ignored_words_file) as f:
 # ==============================================
 
 header = """# coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -151,7 +151,7 @@ def is_tool(name):
             installed_version = "not-found"
         if installed_version != req_version:
             LOG.warning(
-                f"EVA uses {name} {req_version}. The installed version is"
+                f"EvaDB uses {name} {req_version}. The installed version is"
                 f" {installed_version} which can result in different results."
             )
 

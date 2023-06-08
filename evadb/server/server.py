@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ class EvaServer:
         hostname: hostname of the server
         port: port of the server
         """
-        print(f"EVA server started at host {host} and port {port}")
+        print(f"EvaDB server started at host {host} and port {port}")
         self._evadb = init_eva_db_instance(db_dir, host, port, custom_db_uri)
 
         self._server = await asyncio.start_server(self.accept_client, host, port)
@@ -53,10 +53,10 @@ class EvaServer:
         async with self._server:
             await self._server.serve_forever()
 
-        logger.warn("EVA server stopped")
+        logger.warn("EvaDB server stopped")
 
     async def stop_eva_server(self):
-        logger.warn("EVA server stopped")
+        logger.warn("EvaDB server stopped")
         if self._server is not None:
             await self._server.close()
 

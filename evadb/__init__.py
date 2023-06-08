@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,11 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from evadb.interfaces.relational.db import (  # noqa: E402,F401
-    EVADBConnection,
-    EVADBCursor,
+    EvaDBDBConnection,
+    EvaDBDBCursor,
     connect,
 )
-from evadb.interfaces.relational.relation import EVADBQuery  # noqa: E402,F401
+from evadb.interfaces.relational.relation import EvaDBDBQuery  # noqa: E402,F401
 
 from .version import VERSION as __version__  # noqa: E402,F401
 
