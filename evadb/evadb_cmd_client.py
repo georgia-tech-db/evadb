@@ -30,7 +30,7 @@ from evadb.configuration.configuration_manager import ConfigurationManager  # no
 from evadb.server.interpreter import start_cmd_client  # noqa: E402
 
 
-async def eva_client(host: str, port: int):
+async def evadb_client(host: str, port: int):
     """
     Start the eva client
     """
@@ -68,7 +68,7 @@ def main():
     port = (
         args.port if args.port else ConfigurationManager().get_value("server", "port")
     )
-    asyncio.run(eva_client(host, port))
+    asyncio.run(evadb_client(host, port))
 
 
 if __name__ == "__main__":

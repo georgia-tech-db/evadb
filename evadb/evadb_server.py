@@ -30,17 +30,17 @@ sys.path.append(EvaDB_CODE_DIR)
 from evadb.server.server import EvaServer  # noqa: E402
 
 
-async def start_eva_server(
+async def start_evadb_server(
     db_dir: str, host: str, port: str, custom_db_uri: str = None
 ):
-    """Start the eva server"""
+    """Start the evadb server"""
     eva_server = EvaServer()
-    await eva_server.start_eva_server(db_dir, host, port, custom_db_uri)
+    await eva_server.start_evadb_server(db_dir, host, port, custom_db_uri)
 
 
 def stop_server():
     """
-    Stop the eva server
+    Stop the evadb server
     """
     for proc in process_iter():
         if proc.name() == "eva_server":
@@ -63,7 +63,7 @@ def main():
     )
 
     parser.add_argument(
-        "--db_dir", help="Specify the eva directory which the server should access."
+        "--db_dir", help="Specify the evadb directory which the server should access."
     )
 
     parser.add_argument(
@@ -97,7 +97,7 @@ def main():
     # Start server
     if args.start:
         asyncio.run(
-            start_eva_server(args.db_dir, args.host, args.port, args.sql_backend)
+            start_evadb_server(args.db_dir, args.host, args.port, args.sql_backend)
         )
 
 

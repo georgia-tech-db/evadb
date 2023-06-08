@@ -38,11 +38,11 @@ class EvaDBDatabase:
         return self.catalog_func(self.catalog_uri, self.config)
 
 
-def get_default_db_uri(eva_db_dir: Path):
-    return f"sqlite:///{eva_db_dir.resolve()}/{DB_DEFAULT_NAME}"
+def get_default_db_uri(evadb_dir: Path):
+    return f"sqlite:///{evadb_dir.resolve()}/{DB_DEFAULT_NAME}"
 
 
-def init_eva_db_instance(
+def init_evadb_instance(
     db_dir: str, host: str = None, port: int = None, custom_db_uri: str = None
 ):
     if db_dir is None:

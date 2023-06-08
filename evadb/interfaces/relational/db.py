@@ -17,7 +17,7 @@ import asyncio
 import pandas
 
 from evadb.configuration.constants import EvaDB_DATABASE_DIR
-from evadb.database import EvaDBDatabase, init_eva_db_instance
+from evadb.database import EvaDBDatabase, init_evadb_instance
 from evadb.expression.tuple_value_expression import TupleValueExpression
 from evadb.interfaces.relational.relation import EvaDBDBQuery
 from evadb.interfaces.relational.utils import execute_statement, try_binding
@@ -291,7 +291,7 @@ def connect(
     Connects to the EvaDB server and returns a connection object.
 
     Args:
-        eva_dir (str): The directory used by EvaDB to store database-related content. Default is "eva_db".
+        eva_dir (str): The directory used by EvaDB to store database-related content. Default is "evadb".
         sql_backend (str): Custom database URI to be used. We follow the SQLAlchemy database URL format.
             Default is SQLite in the EvaDB directory. See https://docs.sqlalchemy.org/en/20/core/engines.html#database-urls.
 
@@ -302,7 +302,7 @@ def connect(
     # As we are not employing a client-server approach for the Pythonic interface, the
     # host and port parameters are irrelevant. Additionally, for the EvaDBDBConnection, the
     # reader and writer parameters are not relevant in the serverless approach.
-    evadb = init_eva_db_instance(eva_dir, custom_db_uri=sql_backend)
+    evadb = init_evadb_instance(eva_dir, custom_db_uri=sql_backend)
     init_builtin_udfs(evadb, mode="release")
     return EvaDBDBConnection(evadb, None, None)
 

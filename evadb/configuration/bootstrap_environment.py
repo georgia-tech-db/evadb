@@ -46,16 +46,16 @@ def get_base_config(eva_installation_dir: Path) -> Path:
         return eva_installation_dir / EvaDB_CONFIG_FILE
 
 
-def get_default_db_uri(eva_db_dir: Path):
-    return f"sqlite:///{eva_db_dir.resolve()}/{DB_DEFAULT_NAME}"
+def get_default_db_uri(evadb_dir: Path):
+    return f"sqlite:///{evadb_dir.resolve()}/{DB_DEFAULT_NAME}"
 
 
-def bootstrap_environment(eva_db_dir: Path, eva_installation_dir: Path):
+def bootstrap_environment(evadb_dir: Path, eva_installation_dir: Path):
     """
     Populates necessary configuration for EvaDB to be able to run.
 
     Arguments:
-        eva_db_dir: path to eva database directory
+        evadb_dir: path to eva database directory
         eva_installation_dir: path to eva module
     """
 
@@ -63,10 +63,10 @@ def bootstrap_environment(eva_db_dir: Path, eva_installation_dir: Path):
 
     # creates necessary directories
     config_default_dict = create_directories_and_get_default_config_values(
-        Path(eva_db_dir), Path(eva_installation_dir)
+        Path(evadb_dir), Path(eva_installation_dir)
     )
 
-    assert eva_db_dir.exists(), f"{eva_db_dir} does not exist"
+    assert evadb_dir.exists(), f"{evadb_dir} does not exist"
     assert eva_installation_dir.exists(), f"{eva_installation_dir} does not exist"
     config_obj = {}
     with default_config_path.open("r") as yml_file:
@@ -83,18 +83,18 @@ def bootstrap_environment(eva_db_dir: Path, eva_installation_dir: Path):
 
 
 def create_directories_and_get_default_config_values(
-    eva_db_dir: Path, eva_installation_dir: Path, category: str = None, key: str = None
+    evadb_dir: Path, eva_installation_dir: Path, category: str = None, key: str = None
 ) -> Union[dict, str]:
     default_install_dir = eva_installation_dir
-    dataset_location = eva_db_dir / EvaDB_DATASET_DIR
-    index_dir = eva_db_dir / INDEX_DIR
-    cache_dir = eva_db_dir / CACHE_DIR
-    s3_dir = eva_db_dir / S3_DOWNLOAD_DIR
-    tmp_dir = eva_db_dir / TMP_DIR
-    udf_dir = eva_db_dir / UDF_DIR
+    dataset_location = evadb_dir / EvaDB_DATASET_DIR
+    index_dir = evadb_dir / INDEX_DIR
+    cache_dir = evadb_dir / CACHE_DIR
+    s3_dir = evadb_dir / S3_DOWNLOAD_DIR
+    tmp_dir = evadb_dir / TMP_DIR
+    udf_dir = evadb_dir / UDF_DIR
 
-    if not eva_db_dir.exists():
-        eva_db_dir.mkdir(parents=True, exist_ok=True)
+    if not evadb_dir.exists():
+        evadb_dir.mkdir(parents=True, exist_ok=True)
     if not dataset_location.exists():
         dataset_location.mkdir(parents=True, exist_ok=True)
     if not index_dir.exists():
@@ -113,7 +113,7 @@ def create_directories_and_get_default_config_values(
     config_obj["storage"] = {}
     config_obj["core"]["eva_installation_dir"] = str(default_install_dir.resolve())
     config_obj["core"]["datasets_dir"] = str(dataset_location.resolve())
-    config_obj["core"]["catalog_database_uri"] = get_default_db_uri(eva_db_dir)
+    config_obj["core"]["catalog_database_uri"] = get_default_db_uri(evadb_dir)
     config_obj["storage"]["index_dir"] = str(index_dir.resolve())
     config_obj["storage"]["cache_dir"] = str(cache_dir.resolve())
     config_obj["storage"]["s3_download_dir"] = str(s3_dir.resolve())

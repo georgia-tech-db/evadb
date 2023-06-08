@@ -35,7 +35,7 @@ from evadb.binder.statement_binder_context import StatementBinderContext
 from evadb.catalog.catalog_type import NdArrayType
 from evadb.configuration.configuration_manager import ConfigurationManager
 from evadb.configuration.constants import EvaDB_DATABASE_DIR, EvaDB_INSTALLATION_DIR
-from evadb.database import init_evadb_db_instance
+from evadb.database import init_evadb_instance
 from evadb.expression.function_expression import FunctionExpression
 from evadb.models.storage.batch import Batch
 from evadb.optimizer.operators import LogicalFilter, Operator
@@ -67,7 +67,7 @@ def get_evadb_for_testing(uri: str = None):
     db_dir = suffix_pytest_xdist_worker_id_to_dir(EvaDB_DATABASE_DIR)
     remove_directory_contents(db_dir)
     gc.collect()
-    return init_evadb_db_instance(db_dir, custom_db_uri=uri)
+    return init_evadb_instance(db_dir, custom_db_uri=uri)
 
 
 def get_tmp_dir():

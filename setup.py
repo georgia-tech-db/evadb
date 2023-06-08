@@ -1,5 +1,5 @@
 ###############################
-### EVA PACKAGAGING
+### EvaDB PACKAGAGING
 ###############################
 
 import io
@@ -16,7 +16,7 @@ from subprocess import check_call
 this_directory = Path(__file__).parent
 LONG_DESCRIPTION = (this_directory / "README.md").read_text()
 
-DESCRIPTION = "EVA AI-Relational Database System"
+DESCRIPTION = "EvaDB AI-Relational Database System"
 NAME = "evadb"
 AUTHOR = "Georgia Tech Database Group"
 AUTHOR_EMAIL = "arulraj@gatech.edu"
@@ -96,9 +96,9 @@ benchmark_libs = [
 doc_libs = ["codespell", "pylint"]
 
 dist_libs = [
-    "wheel>=0.37.1", 
-    "semantic_version", 
-    "PyGithub", 
+    "wheel>=0.37.1",
+    "semantic_version",
+    "PyGithub",
     "twine"
 ]
 
@@ -167,8 +167,8 @@ setup(
     # https://python-packaging.readthedocs.io/en/latest/command-line-scripts.html#the-console-scripts-entry-point
     entry_points={
         "console_scripts": [
-            "eva_server=evadb.eva_server:main",
-            "eva_client=evadb.eva_cmd_client:main",
+            "eva_server=evadb.evadb_server:main",
+            "eva_client=evadb.evadb_cmd_client:main",
         ]
     },
     python_requires=">=3.8",
