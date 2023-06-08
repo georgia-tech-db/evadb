@@ -160,7 +160,11 @@ if __name__ == "__main__":
     )
 
     # Get Youtube video url
-    video_link = str(input("📺 Enter the URL of the YouTube video (or press `Enter` to go with the default URL):"))
+    video_link = str(
+        input(
+            "📺 Enter the URL of the YouTube video (or press `Enter` to go with the default URL):"
+        )
+    )
 
     # Get OpenAI key if needed
     try:
