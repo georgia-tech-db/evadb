@@ -33,8 +33,6 @@ import numpy as np
 import pandas as pd
 import torch
 import torchvision
-from PIL import Image
-from sentence_transformers import SentenceTransformer
 from transformers import DonutProcessor, VisionEncoderDecoderModel
 
 from evadb.catalog.catalog_type import NdArrayType

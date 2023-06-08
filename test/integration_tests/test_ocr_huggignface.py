@@ -18,8 +18,10 @@ from test.util import (
     shutdown_ray,
     suffix_pytest_xdist_worker_id_to_dir,
 )
+
 from evadb.configuration.constants import EvaDB_DATABASE_DIR, EvaDB_ROOT_DIR
 from evadb.interfaces.relational.db import connect
+
 
 class TestOCRHuggingFace(unittest.TestCase):
     def __init__(self, *args, **kwargs):
