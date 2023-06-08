@@ -1,7 +1,7 @@
 .. meta::
    :keywords: database, deep learning, video analytics, language models
 
-EvaDB DB
+EvaDB
 =====
 
 ..  rubric:: Database system for building simpler and faster AI-powered applications.
@@ -16,10 +16,10 @@ EvaDB DB
 
 ----------
 
-Welcome to EvaDB DB
+Welcome to EvaDB
 =================
 
-EvaDB DB is an AI-SQL database for developing applications powered by AI models. We aim to simplify the development and deployment of AI-powered applications that operate on structured (tables, feature stores) and unstructured data (videos, text, podcasts, PDFs, etc.).
+EvaDB is an AI-SQL database for developing applications powered by AI models. We aim to simplify the development and deployment of AI-powered applications that operate on structured (tables, feature stores) and unstructured data (videos, text, podcasts, PDFs, etc.).
 
 - Github: https://github.com/georgia-tech-db/eva
 - PyPI: https://pypi.org/project/evadb/
@@ -39,7 +39,7 @@ Over the last decade, AI models have radically changed the world of natural lang
 Proposed Solution
 ----------
 
-That's where EvaDB DB comes in.
+That's where EvaDB comes in.
 
 1. Quickly build AI-Powered Applications
 ^^^^
@@ -65,7 +65,7 @@ The high-level SQL API allows even beginners to use EvaDB in a few lines of code
 2. Save time and money
 ^^^^
 
-EvaDB DB **automatically** optimizes the queries to **save inference cost and query execution time** using its Cascades-style extensible query optimizer. EvaDB's optimizer is tailored for AI pipelines. The Cascades query optimization framework has worked well in SQL database systems for several decades. Query optimization in EvaDB is the bridge that connects the declarative query language to efficient execution.
+EvaDB **automatically** optimizes the queries to **save inference cost and query execution time** using its Cascades-style extensible query optimizer. EvaDB's optimizer is tailored for AI pipelines. The Cascades query optimization framework has worked well in SQL database systems for several decades. Query optimization in EvaDB is the bridge that connects the declarative query language to efficient execution.
 
 EvaDB accelerates AI pipelines using a collection of optimizations inspired by SQL database systems including function caching, sampling, and cost-based operator reordering.
 

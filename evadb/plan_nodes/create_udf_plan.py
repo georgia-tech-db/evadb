@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -37,8 +37,6 @@ class CreateUDFPlan(AbstractPlan):
             udf outputs, annotated list similar to table columns
         impl_file_path: Path
             file path which holds the implementation of the udf.
-            This file should be placed in the data directory and
-            the path provided should be relative to the eva dir.
         udf_type: str
             udf type. it ca be object detection, classification etc.
     """

@@ -193,8 +193,8 @@ class ReuseTest(unittest.TestCase):
         execute_query_fetch_all(self.evadb, select_query)
 
         # Stop and restart server
-        os.system("nohup eva_server --stop")
-        os.system("nohup eva_server --start &")
+        os.system("nohup evadb_server --stop")
+        os.system("nohup evadb_server --start &")
 
         select_query = """SELECT id, label FROM DETRAC JOIN
             LATERAL Yolo(data) AS Obj(label, bbox, conf) WHERE id < 6;"""
@@ -203,7 +203,7 @@ class ReuseTest(unittest.TestCase):
         self._verify_reuse_correctness(select_query, reuse_batch)
 
         # stop the server
-        os.system("nohup eva_server --stop")
+        os.system("nohup evadb_server --stop")
 
     def test_drop_udf_should_remove_cache(self):
         select_query = """SELECT id, label FROM DETRAC JOIN

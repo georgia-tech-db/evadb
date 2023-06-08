@@ -1,10 +1,8 @@
-
-
 ===
 FAQ
 ===
 
-These are some Frequently Asked Questions that we've seen pop up for EvaDB DB.
+These are some Frequently Asked Questions that we've seen pop up for EvaDB.
 
 If you still have questions after reading this FAQ,  please reach out on
 `our Slack <https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg>`__!
@@ -17,7 +15,7 @@ Ensure that the local Python version is >= 3.8 and <= 3.10. EvaDB cannot support
 Where does EvaDB store all the data?
 ====================================
 
-By default, EvaDB stores all the data in a local folder named ``eva_data``.
+By default, EvaDB stores all the data in a local folder named ``evadb_data``.
 
 
 Why does the EvaDB server not start?
@@ -34,7 +32,7 @@ You can either kill that process or launch EvaDB server on another free port in 
 
 .. code-block:: bash
 
-    eva_server -p 9330
+    evadb_server -p 9330
 
 Why do I see no output from the server?
 ====================================
@@ -45,4 +43,4 @@ You can check the status of the server by running ``top`` or ``pgrep``:
 .. code-block:: bash
 
     top
-    pgrep eva_server
+    pgrep evadb_server

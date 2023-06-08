@@ -41,7 +41,7 @@ def analyze_video():
     """Extracts speech from video for llm processing.
 
     Returns:
-        EvaDBDBCursor: evadb api cursor.
+        EvaDBCursor: evadb api cursor.
     """
     print("Analyzing video. This may take a while...")
     start = time.time()
@@ -78,8 +78,8 @@ def cleanup():
     """Removes any temporary file / directory created by EvaDB."""
     if os.path.exists("online_video.mp4"):
         os.remove("online_video.mp4")
-    if os.path.exists("eva_data"):
-        shutil.rmtree("eva_data")
+    if os.path.exists("evadb_data"):
+        shutil.rmtree("evadb_data")
 
 
 if __name__ == "__main__":
