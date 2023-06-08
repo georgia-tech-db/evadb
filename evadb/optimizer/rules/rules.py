@@ -1253,9 +1253,7 @@ def get_ray_env_dict():
     # Get the highest GPU id and expose all GPUs that have id lower than
     # the max id.
     max_gpu_id = max(Context().gpus) + 1
-    return {
-        "CUDA_VISIBLE_DEVICES": ",".join([str(n) for n in range(max_gpu_id)])
-    }
+    return {"CUDA_VISIBLE_DEVICES": ",".join([str(n) for n in range(max_gpu_id)])}
 
 
 class LogicalExchangeToPhysical(Rule):
@@ -1334,7 +1332,9 @@ class LogicalProjectToRayPhysical(Rule):
             parallelism = 2
 
             ray_process_env_dict = get_ray_env_dict()
-            ray_parallel_env_conf_dict = [ray_process_env_dict for _ in range(parallelism)]
+            ray_parallel_env_conf_dict = [
+                ray_process_env_dict for _ in range(parallelism)
+            ]
 
             exchange_plan = ExchangePlan(
                 inner_plan=project_plan,
