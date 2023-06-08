@@ -15,10 +15,10 @@
 
 
 import os
-import time
 
 import openai
 import pandas as pd
+import time
 
 from evadb.catalog.catalog_type import NdArrayType
 from evadb.configuration.configuration_manager import ConfigurationManager
@@ -48,15 +48,13 @@ class ChatGPT(AbstractUDF):
         temperature: float = 0,
     ) -> None:
         # Try Configuration Manager
-        openai.api_key = ConfigurationManager().get_value(
-            "third_party", "openai_api_key"
-        )
+        openai.api_key = ConfigurationManager().get_value("third_party", "OPENAI_KEY")
         # If not found, try OS Environment Variable
         if len(openai.api_key) == 0:
-            openai.api_key = os.environ["openai_api_key"]
+            openai.api_key = os.environ.get("OPENAI_KEY", "")
         assert (
             len(openai.api_key) != 0
-        ), "Please set your OpenAI API key in eva.yml file (third_party, open_api_key)"
+        ), "Please set your OpenAI API key in evadb.yml file (third_party, open_api_key) or environment variable (OPENAI_KEY)"
 
         assert model in _VALID_CHAT_COMPLETION_MODEL, f"Unsupported ChatGPT {model}"
 
@@ -110,6 +108,8 @@ class ChatGPT(AbstractUDF):
             start = time.time()
             response = openai.ChatCompletion.create(**params)
             results.append(response.choices[0].message.content)
+
+            # TODO: we need a cleaner solution to chatgpt api rate limits.
             diff = 20 - time.time() + start
             if diff > 0:
                 time.sleep(diff)

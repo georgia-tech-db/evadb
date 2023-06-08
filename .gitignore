@@ -203,6 +203,7 @@ dep.txt
 
 # data
 *eva_data*/
+*evadb_data*/
 
 # models
 models/

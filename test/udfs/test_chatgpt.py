@@ -68,14 +68,13 @@ class ChatGPTTest(unittest.TestCase):
     @patch("evadb.udfs.chatgpt.openai.ChatCompletion.create")
     def test_openai_chat_completion_udf(self, mock_req):
         # set dummy api key
-        os.environ["openai_api_key"] = "my_key"
+        os.environ["OPENAI_KEY"] = "my_key"
 
         udf_name = "OpenAIChatCompletion"
         execute_query_fetch_all(self.evadb, f"DROP UDF IF EXISTS {udf_name};")
 
-        create_udf_query = f"""CREATE UDF {udf_name}
-            IMPL 'evadb/udfs/chatgpt.py'
-            'model' 'gpt-3.5-turbo'
+        create_udf_query = f"""CREATE UDF IF NOT EXISTS {udf_name}
+            IMPL 'evadb/udfs/chatgpt.py';
         """
         execute_query_fetch_all(self.evadb, create_udf_query)
 
@@ -104,7 +103,7 @@ class ChatGPTTest(unittest.TestCase):
     @patch.dict(os.environ, {"OPENAI_KEY": "dummy_openai_key"}, clear=True)
     def test_gpt_udf_no_key_in_yml_should_read_env(self):
         ConfigurationManager().update_value("third_party", "OPENAI_KEY", "")
-        udf_name = "ChatGPT"
+        udf_name = "ChatGPT1"
         execute_query_fetch_all(self.evadb, f"DROP UDF IF EXISTS {udf_name};")
 
         create_udf_query = f"""CREATE UDF {udf_name}
@@ -116,7 +115,7 @@ class ChatGPTTest(unittest.TestCase):
     @patch.dict(os.environ, {}, clear=True)
     def test_gpt_udf_no_key_in_yml_and_env_should_raise(self):
         ConfigurationManager().update_value("third_party", "OPENAI_KEY", "")
-        udf_name = "ChatGPT"
+        udf_name = "ChatGPT2"
         execute_query_fetch_all(self.evadb, f"DROP UDF IF EXISTS {udf_name};")
 
         with self.assertRaises(

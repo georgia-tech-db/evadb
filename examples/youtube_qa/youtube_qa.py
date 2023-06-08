@@ -82,10 +82,10 @@ if __name__ == "__main__":
 
     # Get OpenAI key if needed
     try:
-        api_key = os.environ["openai_api_key"]
+        api_key = os.environ["OPENAI_KEY"]
     except KeyError:
         api_key = str(input("Enter your OpenAI API key: "))
-        os.environ["openai_api_key"] = api_key
+        os.environ["OPENAI_KEY"] = api_key
 
     download_youtube_video_from_link(video_link)
 
