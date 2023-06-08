@@ -15,10 +15,10 @@
 
 
 import os
-import time
 
 import openai
 import pandas as pd
+from retry import retry
 
 from evadb.catalog.catalog_type import NdArrayType
 from evadb.configuration.configuration_manager import ConfigurationManager
@@ -34,6 +34,11 @@ _VALID_CHAT_COMPLETION_MODEL = [
     "gpt-3.5-turbo",
     "gpt-3.5-turbo-0301",
 ]
+
+
+@retry(tries=6, delay=10)
+def completion_with_backoff(**kwargs):
+    return openai.ChatCompletion.create(**kwargs)
 
 
 class ChatGPT(AbstractUDF):
@@ -86,8 +91,7 @@ class ChatGPT(AbstractUDF):
         queries = text_df[text_df.columns[1]]
 
         # openai api currently supports answers to a single prompt only
-        # so this udf is designed such that
-
+        # so this udf is designed for that
         results = []
 
         for prompt, query in zip(prompts, queries):
@@ -105,13 +109,8 @@ class ChatGPT(AbstractUDF):
                 ],
             }
 
-            # TODO: we need a better solution to address api request limits
-            start = time.time()
-            response = openai.ChatCompletion.create(**params)
+            response = completion_with_backoff(**params)
             results.append(response.choices[0].message.content)
-            diff = 20 - time.time() + start
-            if diff > 0:
-                time.sleep(diff)
 
         df = pd.DataFrame({"response": results})
 
