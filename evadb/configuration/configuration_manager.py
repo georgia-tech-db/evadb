@@ -28,7 +28,7 @@ class ConfigurationManager(object):
     def _create_if_not_exists(self):
         config_obj = bootstrap_environment(
             evadb_dir=Path(self._evadb_dir),
-            eva_installation_dir=Path(EvaDB_INSTALLATION_DIR),
+            evadb_installation_dir=Path(EvaDB_INSTALLATION_DIR),
         )
         return config_obj
 

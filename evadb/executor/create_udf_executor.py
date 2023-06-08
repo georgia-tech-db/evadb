@@ -35,7 +35,7 @@ class CreateUDFExecutor(AbstractExecutor):
     def __init__(self, db: EvaDBDatabase, node: CreateUDFPlan):
         super().__init__(db, node)
         self.udf_dir = (
-            Path(self.config.get_value("core", "eva_installation_dir")) / "udfs"
+            Path(self.config.get_value("core", "evadb_installation_dir")) / "udfs"
         )
 
     def handle_huggingface_udf(self):
