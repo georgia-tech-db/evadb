@@ -1,6 +1,6 @@
 # Experimental 
 
-Experimental techniques that can be enabled optionally in the EVA system.
+Experimental techniques that can be enabled optionally in the EvaDB system.
 
 ## Parallel Execution
 

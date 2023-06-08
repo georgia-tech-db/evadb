@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,14 +18,14 @@ from typing import TYPE_CHECKING, Callable
 
 from evadb.catalog.catalog_utils import get_catalog_instance
 from evadb.configuration.configuration_manager import ConfigurationManager
-from evadb.configuration.constants import DB_DEFAULT_NAME, EVA_DATABASE_DIR
+from evadb.configuration.constants import DB_DEFAULT_NAME, EvaDB_DATABASE_DIR
 
 if TYPE_CHECKING:
     from evadb.catalog.catalog_manager import CatalogManager
 
 
 @dataclass
-class EVADatabase:
+class EvaDBDatabase:
     db_uri: str
     config: ConfigurationManager
     catalog_uri: str
@@ -38,17 +38,17 @@ class EVADatabase:
         return self.catalog_func(self.catalog_uri, self.config)
 
 
-def get_default_db_uri(eva_db_dir: Path):
-    return f"sqlite:///{eva_db_dir.resolve()}/{DB_DEFAULT_NAME}"
+def get_default_db_uri(evadb_dir: Path):
+    return f"sqlite:///{evadb_dir.resolve()}/{DB_DEFAULT_NAME}"
 
 
-def init_eva_db_instance(
+def init_evadb_instance(
     db_dir: str, host: str = None, port: int = None, custom_db_uri: str = None
 ):
     if db_dir is None:
-        db_dir = EVA_DATABASE_DIR
+        db_dir = EvaDB_DATABASE_DIR
     config = ConfigurationManager(db_dir)
 
     catalog_uri = custom_db_uri or get_default_db_uri(Path(db_dir))
 
-    return EVADatabase(db_dir, config, catalog_uri, get_catalog_instance)
+    return EvaDBDatabase(db_dir, config, catalog_uri, get_catalog_instance)

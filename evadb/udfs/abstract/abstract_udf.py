@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ InputType = Union[pd.DataFrame, ArrayLike]
 
 class AbstractUDF(metaclass=ABCMeta):
     """
-    Abstract class for UDFs. All the UDFs in EVA will inherit from this.
+    Abstract class for UDFs. All the UDFs in EvaDB will inherit from this.
 
     Load and initialize the machine learning model in the __init__.
 

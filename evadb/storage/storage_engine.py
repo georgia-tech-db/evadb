@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 # limitations under the License.
 from evadb.catalog.catalog_type import TableType
 from evadb.catalog.models.table_catalog import TableCatalogEntry
-from evadb.database import EVADatabase
+from evadb.database import EvaDBDatabase
 from evadb.storage.abstract_storage_engine import AbstractStorageEngine
 from evadb.storage.document_storage_engine import DocumentStorageEngine
 from evadb.storage.image_storage_engine import ImageStorageEngine
@@ -27,7 +27,7 @@ class StorageEngine:
     storages = None
 
     @classmethod
-    def _lazy_initialize_storages(cls, db: EVADatabase):
+    def _lazy_initialize_storages(cls, db: EvaDBDatabase):
         if not cls.storages:
             cls.storages = {
                 TableType.STRUCTURED_DATA: SQLStorageEngine,
@@ -39,7 +39,7 @@ class StorageEngine:
 
     @classmethod
     def factory(
-        cls, db: EVADatabase, table: TableCatalogEntry
+        cls, db: EvaDBDatabase, table: TableCatalogEntry
     ) -> AbstractStorageEngine:
         cls._lazy_initialize_storages(db)
         if table is None:

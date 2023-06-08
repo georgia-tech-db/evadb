@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import pandas as pd
 import pytest
 from mock import MagicMock, patch
 
-from evadb.configuration.constants import EVA_ROOT_DIR
+from evadb.configuration.constants import EvaDB_ROOT_DIR
 from evadb.expression.comparison_expression import ComparisonExpression
 from evadb.models.storage.batch import Batch
 from evadb.optimizer.plan_generator import PlanGenerator
@@ -49,7 +49,7 @@ class OptimizerRulesTest(unittest.TestCase):
     def setUpClass(cls):
         cls.evadb = get_evadb_for_testing()
         cls.evadb.catalog().reset()
-        ua_detrac = f"{EVA_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
+        ua_detrac = f"{EvaDB_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
         execute_query_fetch_all(cls.evadb, f"LOAD VIDEO '{ua_detrac}' INTO MyVideo;")
         execute_query_fetch_all(cls.evadb, f"LOAD VIDEO '{ua_detrac}' INTO MyVideo2;")
         load_udfs_for_testing(cls.evadb, mode="debug")

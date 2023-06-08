@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Iterator
 
 from evadb.catalog.models.table_catalog import TableCatalogEntry
-from evadb.database import EVADatabase
+from evadb.database import EvaDBDatabase
 from evadb.expression.abstract_expression import AbstractExpression
 from evadb.models.storage.batch import Batch
 from evadb.readers.decord_reader import DecordReader
@@ -25,7 +25,7 @@ from evadb.storage.abstract_media_storage_engine import AbstractMediaStorageEngi
 
 
 class DecordStorageEngine(AbstractMediaStorageEngine):
-    def __init__(self, db: EVADatabase):
+    def __init__(self, db: EvaDBDatabase):
         super().__init__(db)
 
     def read(

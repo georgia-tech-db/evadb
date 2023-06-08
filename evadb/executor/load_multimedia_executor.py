@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ from pathlib import Path
 import pandas as pd
 
 from evadb.catalog.models.table_catalog import TableCatalogEntry
-from evadb.database import EVADatabase
+from evadb.database import EvaDBDatabase
 from evadb.executor.abstract_executor import AbstractExecutor
 from evadb.executor.executor_utils import ExecutorError, iter_path_regex, validate_media
 from evadb.models.storage.batch import Batch
@@ -32,7 +32,7 @@ from evadb.utils.s3_utils import download_from_s3
 
 
 class LoadMultimediaExecutor(AbstractExecutor):
-    def __init__(self, db: EVADatabase, node: LoadDataPlan):
+    def __init__(self, db: EvaDBDatabase, node: LoadDataPlan):
         super().__init__(db, node)
         self.media_type = self.node.file_options["file_format"]
 

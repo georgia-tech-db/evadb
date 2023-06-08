@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -293,7 +293,7 @@ class OptimizeInputs(OptimizerTask):
         for child_id in self.root_expr.children:
             child_grp = memo.get_group_by_id(child_id)
             if child_grp.get_best_expr(PropertyType.DEFAULT):
-                # Note: May never get hit when using EVA on Ray
+                # Note: May never get hit when using EvaDB on Ray
                 cost += child_grp.get_best_expr_cost(PropertyType.DEFAULT)
             else:
                 self.optimizer_context.task_stack.push(

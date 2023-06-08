@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,19 +20,19 @@ from os.path import abspath, dirname, join
 from evadb.utils.logging_manager import logger
 
 """
-To allow running eva_server from any location
+To allow running evadb_server from any location
 """
 THIS_DIR = dirname(__file__)
-EVA_CODE_DIR = abspath(join(THIS_DIR, ".."))
-sys.path.append(EVA_CODE_DIR)
+EvaDB_CODE_DIR = abspath(join(THIS_DIR, ".."))
+sys.path.append(EvaDB_CODE_DIR)
 
 from evadb.configuration.configuration_manager import ConfigurationManager  # noqa: E402
 from evadb.server.interpreter import start_cmd_client  # noqa: E402
 
 
-async def eva_client(host: str, port: int):
+async def evadb_client(host: str, port: int):
     """
-    Start the eva client
+    Start the evadb client
     """
 
     # Launch client
@@ -46,7 +46,7 @@ async def eva_client(host: str, port: int):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="EVA Client")
+    parser = argparse.ArgumentParser(description="EvaDB Client")
 
     parser.add_argument(
         "--host",
@@ -68,7 +68,7 @@ def main():
     port = (
         args.port if args.port else ConfigurationManager().get_value("server", "port")
     )
-    asyncio.run(eva_client(host, port))
+    asyncio.run(evadb_client(host, port))
 
 
 if __name__ == "__main__":

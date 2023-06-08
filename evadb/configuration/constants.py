@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,16 +16,16 @@ from pathlib import Path
 
 import evadb
 
-EVA_INSTALLATION_DIR = Path(evadb.__file__).parent
-EVA_ROOT_DIR = Path(evadb.__file__).parent.parent
-EVA_DATABASE_DIR = "evadb_data"
-EVA_DATASET_DIR = "evadb_datasets"
-EVA_CONFIG_FILE = "evadb.yml"
+EvaDB_INSTALLATION_DIR = Path(evadb.__file__).parent
+EvaDB_ROOT_DIR = Path(evadb.__file__).parent.parent
+EvaDB_DATABASE_DIR = "evadb_data"
+EvaDB_DATASET_DIR = "evadb_datasets"
+EvaDB_CONFIG_FILE = "evadb.yml"
 UDF_DIR = "udfs"
 CATALOG_DIR = "catalog"
 INDEX_DIR = "index"
 CACHE_DIR = "cache"
 DATASET_DATAFRAME_NAME = "dataset"
-DB_DEFAULT_NAME = "eva.db"
+DB_DEFAULT_NAME = "evadb.db"
 S3_DOWNLOAD_DIR = "s3_downloads"
 TMP_DIR = "tmp"

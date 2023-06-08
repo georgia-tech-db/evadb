@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ from typing import Callable, List, Union
 
 from evadb.binder.statement_binder import StatementBinder
 from evadb.binder.statement_binder_context import StatementBinderContext
-from evadb.database import EVADatabase
+from evadb.database import EvaDBDatabase
 from evadb.executor.plan_executor import PlanExecutor
 from evadb.expression.abstract_expression import AbstractExpression
 from evadb.expression.constant_value_expression import ConstantValueExpression
@@ -36,13 +36,13 @@ from evadb.parser.utils import (
 
 
 def sql_string_to_expresssion_list(expr: str) -> List[AbstractExpression]:
-    """Converts the sql expression to list of eva abstract expressions
+    """Converts the sql expression to list of evadb abstract expressions
 
     Args:
         expr (str): the expr to convert
 
     Returns:
-        List[AbstractExpression]: list of eva abstract expressions
+        List[AbstractExpression]: list of evadb abstract expressions
 
     """
     return parse_expression(expr)
@@ -52,7 +52,7 @@ def sql_predicate_to_expresssion_tree(expr: str) -> AbstractExpression:
     return parse_predicate_expression(expr)
 
 
-def execute_statement(evadb: EVADatabase, statement: AbstractStatement) -> Batch:
+def execute_statement(evadb: EvaDBDatabase, statement: AbstractStatement) -> Batch:
     StatementBinder(StatementBinderContext(evadb.catalog)).bind(statement)
     l_plan = StatementToPlanConverter().visit(statement)
     p_plan = asyncio.run(PlanGenerator(evadb).build(l_plan))

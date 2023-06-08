@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ import asyncio
 import string
 from asyncio import StreamReader, StreamWriter
 
-from evadb.database import init_eva_db_instance
+from evadb.database import init_evadb_instance
 from evadb.udfs.udf_bootstrap_queries import init_builtin_udfs
 from evadb.utils.logging_manager import logger
 
@@ -31,7 +31,7 @@ class EvaServer:
         self._clients = {}  # client -> (reader, writer)
         self._evadb = None
 
-    async def start_eva_server(
+    async def start_evadb_server(
         self, db_dir: str, host: string, port: int, custom_db_uri: str = None
     ):
         """
@@ -41,8 +41,8 @@ class EvaServer:
         hostname: hostname of the server
         port: port of the server
         """
-        print(f"EVA server started at host {host} and port {port}")
-        self._evadb = init_eva_db_instance(db_dir, host, port, custom_db_uri)
+        print(f"EvaDB server started at host {host} and port {port}")
+        self._evadb = init_evadb_instance(db_dir, host, port, custom_db_uri)
 
         self._server = await asyncio.start_server(self.accept_client, host, port)
 
@@ -53,10 +53,10 @@ class EvaServer:
         async with self._server:
             await self._server.serve_forever()
 
-        logger.warn("EVA server stopped")
+        logger.warn("EvaDB server stopped")
 
-    async def stop_eva_server(self):
-        logger.warn("EVA server stopped")
+    async def stop_evadb_server(self):
+        logger.warn("EvaDB server stopped")
         if self._server is not None:
             await self._server.close()
 

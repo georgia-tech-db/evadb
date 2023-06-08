@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 
 import unittest
 from pathlib import Path
-from test.util import EVA_TEST_DATA_DIR
+from test.util import EvaDB_TEST_DATA_DIR
 
 import cv2
 import pandas as pd
@@ -26,7 +26,7 @@ from evadb.models.storage.batch import Batch
 class EmotionDetector(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.base_path = Path(EVA_TEST_DATA_DIR) / "data" / "emotion_detector"
+        self.base_path = Path(EvaDB_TEST_DATA_DIR) / "data" / "emotion_detector"
 
     def _load_image(self, path):
         assert path.exists(), f"File does not exist at the path {str(path)}"

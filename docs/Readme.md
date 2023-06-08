@@ -1,4 +1,4 @@
-## EVA Read-the-Docs Documentation
+## EvaDB Read-the-Docs Documentation
 Run the following commands from this directory to compile the documentation.
 
 ```

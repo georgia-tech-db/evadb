@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 # limitations under the License.
 from typing import Iterator
 
-from evadb.database import EVADatabase
+from evadb.database import EvaDBDatabase
 from evadb.executor.abstract_executor import AbstractExecutor
 from evadb.models.storage.batch import Batch
 from evadb.plan_nodes.apply_and_merge_plan import ApplyAndMergePlan
@@ -31,7 +31,7 @@ class ApplyAndMergeExecutor(AbstractExecutor):
 
     """
 
-    def __init__(self, db: EVADatabase, node: ApplyAndMergePlan):
+    def __init__(self, db: EvaDBDatabase, node: ApplyAndMergePlan):
         super().__init__(db, node)
         self.func_expr = node.func_expr
         self.do_unnest = node.do_unnest

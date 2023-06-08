@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,14 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from evadb.utils.generic_utils import EVAEnum
+from evadb.utils.generic_utils import EvaDBEnum
 
 
-class Dimension(EVAEnum):
+class Dimension(EvaDBEnum):
     ANYDIM  # noqa: F821
 
 
-class TableType(EVAEnum):
+class TableType(EvaDBEnum):
     STRUCTURED_DATA  # noqa: F821
     VIDEO_DATA  # noqa: F821
     IMAGE_DATA  # noqa: F821
@@ -32,7 +32,7 @@ class TableType(EVAEnum):
     SYSTEM_STRUCTURED_DATA  # noqa: F821
 
 
-class ColumnType(EVAEnum):
+class ColumnType(EvaDBEnum):
     BOOLEAN  # noqa: F821
     INTEGER  # noqa: F821
     FLOAT  # noqa: F821
@@ -41,7 +41,7 @@ class ColumnType(EVAEnum):
     ANY  # noqa: F821
 
 
-class NdArrayType(EVAEnum):
+class NdArrayType(EvaDBEnum):
     INT8  # noqa: F821
     UINT8  # noqa: F821
     INT16  # noqa: F821
@@ -94,12 +94,12 @@ class NdArrayType(EVAEnum):
         return np_type
 
 
-class VectorStoreType(EVAEnum):
+class VectorStoreType(EvaDBEnum):
     FAISS  # noqa: F821
     QDRANT  # noqa: F821
 
 
-class VideoColumnName(EVAEnum):
+class VideoColumnName(EvaDBEnum):
     name  # noqa: F821
     id  # noqa: F821
     data  # noqa: F821
@@ -110,24 +110,24 @@ class VideoColumnName(EVAEnum):
         if isinstance(other, str):
             return self.name == other
 
-        if isinstance(other, EVAEnum):
+        if isinstance(other, EvaDBEnum):
             return self.value == other.value
 
         return False
 
 
-class ImageColumnName(EVAEnum):
+class ImageColumnName(EvaDBEnum):
     name  # noqa: F821
     data  # noqa: F821
 
 
-class DocumentColumnName(EVAEnum):
+class DocumentColumnName(EvaDBEnum):
     name  # noqa: F821
     data  # noqa: F821
     metadata  # noqa: F821
 
 
-class PDFColumnName(EVAEnum):
+class PDFColumnName(EvaDBEnum):
     name  # noqa: F821
     page  # noqa: F821
     paragraph  # noqa: F821

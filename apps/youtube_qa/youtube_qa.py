@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,8 +19,7 @@ import time
 import pandas as pd
 from pytube import YouTube, extract
 from youtube_transcript_api import YouTubeTranscriptApi
-
-from evadb.interfaces.relational.db import EVADBCursor, connect
+import evadb
 
 MAX_CHUNK_SIZE = 10000
 
@@ -107,14 +106,14 @@ def download_youtube_video_from_link(video_link: str):
     print(f"Video downloaded successfully in {time.time() - start} seconds")
 
 
-def generate_online_video_transcript(cursor: EVADBCursor) -> str:
+def generate_online_video_transcript(cursor) -> str:
     """Extracts speech from video for llm processing.
 
     Args:
         cursor (EVADBCursor): evadb api cursor.
 
     Returns:
-        str: video transcript text.
+        EvaDBCursor: evadb api cursor.
     """
     print("Analyzing video. This may take a while...")
     start = time.time()
@@ -145,7 +144,7 @@ def generate_online_video_transcript(cursor: EVADBCursor) -> str:
 
 
 def cleanup():
-    """Removes any temporary file / directory created by EVA."""
+    """Removes any temporary file / directory created by EvaDB."""
     if os.path.exists("online_video.mp4"):
         os.remove("online_video.mp4")
     if os.path.exists("transcript.csv"):
@@ -180,7 +179,7 @@ if __name__ == "__main__":
 
     try:
         # establish evadb api cursor
-        cursor = connect().cursor()
+        cursor = evadb.connect().cursor()
 
         # create chatgpt udf from implemententation
         chatgpt_udf_rel = cursor.create_udf("ChatGPT", impl_path="chatgpt.py")

@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ from typing import Iterator
 
 from ray.util.queue import Queue
 
-from evadb.database import EVADatabase
+from evadb.database import EvaDBDatabase
 from evadb.executor.abstract_executor import AbstractExecutor
 from evadb.executor.executor_utils import ExecutorError
 from evadb.executor.ray_utils import (
@@ -53,7 +53,7 @@ class QueueReaderExecutor(AbstractExecutor):
 
 
 class ExchangeExecutor(AbstractExecutor):
-    def __init__(self, db: EVADatabase, node: ExchangePlan):
+    def __init__(self, db: EvaDBDatabase, node: ExchangePlan):
         self.inner_plan = node.inner_plan
         self.parallelism = node.parallelism
         self.ray_pull_env_conf_dict = node.ray_pull_env_conf_dict

@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,36 +21,36 @@ from signal import SIGTERM
 from psutil import process_iter
 
 """
-To allow running eva_server from any location
+To allow running evadb_server from any location
 """
 THIS_DIR = dirname(__file__)
-EVA_CODE_DIR = abspath(join(THIS_DIR, ".."))
-sys.path.append(EVA_CODE_DIR)
+EvaDB_CODE_DIR = abspath(join(THIS_DIR, ".."))
+sys.path.append(EvaDB_CODE_DIR)
 
 from evadb.server.server import EvaServer  # noqa: E402
 
 
-async def start_eva_server(
+async def start_evadb_server(
     db_dir: str, host: str, port: str, custom_db_uri: str = None
 ):
-    """Start the eva server"""
-    eva_server = EvaServer()
-    await eva_server.start_eva_server(db_dir, host, port, custom_db_uri)
+    """Start the evadb server"""
+    evadb_server = EvaServer()
+    await evadb_server.start_evadb_server(db_dir, host, port, custom_db_uri)
 
 
 def stop_server():
     """
-    Stop the eva server
+    Stop the evadb server
     """
     for proc in process_iter():
-        if proc.name() == "eva_server":
+        if proc.name() == "evadb_server":
             proc.send_signal(SIGTERM)
 
     return 0
 
 
 def main():
-    parser = argparse.ArgumentParser(description="EVA Server")
+    parser = argparse.ArgumentParser(description="EvaDB Server")
 
     parser.add_argument(
         "--host",
@@ -63,7 +63,7 @@ def main():
     )
 
     parser.add_argument(
-        "--db_dir", help="Specify the eva directory which the server should access."
+        "--db_dir", help="Specify the evadb directory which the server should access."
     )
 
     parser.add_argument(
@@ -97,7 +97,7 @@ def main():
     # Start server
     if args.start:
         asyncio.run(
-            start_eva_server(args.db_dir, args.host, args.port, args.sql_backend)
+            start_evadb_server(args.db_dir, args.host, args.port, args.sql_backend)
         )
 
 

@@ -31,41 +31,46 @@ You can then use this connection to run queries:
 
 
 
-EVADBConnection Interface
+EvaDBConnection Interface
 -------------------------
 
 .. autosummary::
     :toctree: ./doc
     
-    ~evadb.EVADBConnection.cursor
+    ~evadb.EvaDBConnection.cursor
 
 
-EVADBCursor Interface
+EvaDBCursor Interface
 ---------------------
 
 .. autosummary::
     :toctree: ./doc
 
-    ~evadb.EVADBCursor.connect
-    ~evadb.EVADBCursor.load
-    ~evadb.EVADBCursor.query
-    ~evadb.EVADBCursor.table
-    ~evadb.EVADBCursor.create_udf
-    ~evadb.EVADBCursor.create_vector_index
-    ~evadb.EVADBCursor.df
+    ~evadb.connect
+    ~evadb.EvaDBCursor.load
+    ~evadb.EvaDBCursor.query
+    ~evadb.EvaDBCursor.table
+    ~evadb.EvaDBCursor.create_udf
+    ~evadb.EvaDBCursor.create_vector_index
+    ~evadb.EvaDBCursor.df
+    ~evadb.EvaDBCursor.drop_table
+    ~evadb.EvaDBCursor.drop_udf
+    ~evadb.EvaDBCursor.drop_index
 
-EVADBQuery Interface
+
+EvaDBQuery Interface
 ---------------------
 
 .. autosummary::
     :toctree: ./doc
 
-    ~evadb.EVADBQuery.select
-    ~evadb.EVADBQuery.cross_apply
-    ~evadb.EVADBQuery.filter
-    ~evadb.EVADBQuery.df
-    ~evadb.EVADBQuery.alias
-    ~evadb.EVADBQuery.limit
-    ~evadb.EVADBQuery.order
-    ~evadb.EVADBQuery.show
-    ~evadb.EVADBQuery.sql_query
+    ~evadb.EvaDBQuery.select
+    ~evadb.EvaDBQuery.cross_apply
+    ~evadb.EvaDBQuery.filter
+    ~evadb.EvaDBQuery.df
+    ~evadb.EvaDBQuery.alias
+    ~evadb.EvaDBQuery.limit
+    ~evadb.EvaDBQuery.order
+    ~evadb.EvaDBQuery.show
+    ~evadb.EvaDBQuery.sql_query
+    ~evadb.EvaDBQuery.execute

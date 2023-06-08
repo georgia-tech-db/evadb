@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ from test.util import get_evadb_for_testing
 
 import pytest
 
-from evadb.configuration.constants import EVA_ROOT_DIR
+from evadb.configuration.constants import EvaDB_ROOT_DIR
 from evadb.server.command_handler import execute_query_fetch_all
 
 
@@ -32,7 +32,7 @@ class LoadExecutorTest(unittest.TestCase):
         execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS MyPDFs;")
 
     def test_load_pdfs(self):
-        pdf_path = f"{EVA_ROOT_DIR}/data/documents/pdf_sample1.pdf"
+        pdf_path = f"{EvaDB_ROOT_DIR}/data/documents/pdf_sample1.pdf"
 
         import fitz
 

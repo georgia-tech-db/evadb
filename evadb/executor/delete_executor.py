@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ from sqlalchemy import and_, or_
 
 from evadb.catalog.catalog_type import TableType
 from evadb.catalog.models.table_catalog import TableCatalogEntry
-from evadb.database import EVADatabase
+from evadb.database import EvaDBDatabase
 from evadb.executor.abstract_executor import AbstractExecutor
 from evadb.expression.abstract_expression import ExpressionType
 from evadb.expression.comparison_expression import ComparisonExpression
@@ -34,7 +34,7 @@ from evadb.storage.storage_engine import StorageEngine
 class DeleteExecutor(AbstractExecutor):
     """ """
 
-    def __init__(self, db: EVADatabase, node: ProjectPlan):
+    def __init__(self, db: EvaDBDatabase, node: ProjectPlan):
         super().__init__(db, node)
         self.predicate = node.where_clause
 

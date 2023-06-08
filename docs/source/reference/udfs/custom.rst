@@ -12,7 +12,7 @@ During each step, use `this UDF implementation <https://github.com/georgia-tech-
 
   .. note::
 
-      UDFs packaged along with EVA are located inside the `udfs <https://github.com/georgia-tech-db/eva/tree/master/evadb/udfs>`_ folder.
+      UDFs packaged along with EvaDB are located inside the `udfs <https://github.com/georgia-tech-db/eva/tree/master/evadb/udfs>`_ folder.
 
 2. Create a Python class that inherits from `PytorchClassifierAbstractUDF`.
 
@@ -111,10 +111,10 @@ A sample forward function is given below
 
 ----------
 
-Part 2: Registering and using the UDF in EVA Queries
+Part 2: Registering and using the UDF in EvaDB Queries
 ------------------------------------------------------
 
-Now that you have implemented your UDF, we need to register it as a UDF in EVA. You can then use the UDF in any query.
+Now that you have implemented your UDF, we need to register it as a UDF in EvaDB. You can then use the UDF in any query.
 
 1. Register the UDF with a query that follows this template:
 

@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 # limitations under the License.
 from typing import Iterator
 
-from evadb.database import EVADatabase
+from evadb.database import EvaDBDatabase
 from evadb.executor.abstract_executor import AbstractExecutor
 from evadb.executor.apply_and_merge_executor import ApplyAndMergeExecutor
 from evadb.executor.create_executor import CreateExecutor
@@ -59,10 +59,10 @@ class PlanExecutor:
 
     Arguments:
         plan (AbstractPlan): Physical plan tree which needs to be executed
-        evadb (EVADatabase): database to execute the query on
+        evadb (EvaDBDatabase): database to execute the query on
     """
 
-    def __init__(self, evadb: EVADatabase, plan: AbstractPlan):
+    def __init__(self, evadb: EvaDBDatabase, plan: AbstractPlan):
         self._db = evadb
         self._plan = plan
 

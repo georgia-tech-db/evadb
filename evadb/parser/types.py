@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,19 +13,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from evadb.utils.generic_utils import EVAEnum
+from evadb.utils.generic_utils import EvaDBEnum
 
 
-class ColumnConstraintEnum(EVAEnum):
+class ColumnConstraintEnum(EvaDBEnum):
     NOTNULL  # noqa: F821
     DEFAULT  # noqa: F821
     PRIMARY  # noqa: F821
     UNIQUE  # noqa: F821
 
 
-class StatementType(EVAEnum):
+class StatementType(EvaDBEnum):
     """
-    Manages EVAEnums for all the sql-like statements supported
+    Manages EvaDBEnums for all the sql-like statements supported
     """
 
     SELECT  # noqa: F821
@@ -43,21 +43,21 @@ class StatementType(EVAEnum):
     # add other types
 
 
-class ParserOrderBySortType(EVAEnum):
+class ParserOrderBySortType(EvaDBEnum):
     """
-    Manages EVAEnums for all order by sort types
+    Manages EvaDBEnums for all order by sort types
     """
 
     ASC  # noqa: F821
     DESC  # noqa: F821
 
 
-class JoinType(EVAEnum):
+class JoinType(EvaDBEnum):
     LATERAL_JOIN  # noqa: F821
     INNER_JOIN  # noqa: F821
 
 
-class FileFormatType(EVAEnum):
+class FileFormatType(EvaDBEnum):
     VIDEO  # noqa: F821
     CSV  # noqa: F821
     IMAGE  # noqa: F821
@@ -65,16 +65,16 @@ class FileFormatType(EVAEnum):
     PDF  # noqa: F821
 
 
-class ShowType(EVAEnum):
+class ShowType(EvaDBEnum):
     UDFS  # noqa: F821
     TABLES  # noqa: F821
 
 
-class UDFType(EVAEnum):
+class UDFType(EvaDBEnum):
     EXTRACT_OBJECT  # noqa: F821
 
 
-class ObjectType(EVAEnum):
+class ObjectType(EvaDBEnum):
     TABLE  # noqa: F821
     UDF  # noqa: F821
     INDEX  # noqa: F821

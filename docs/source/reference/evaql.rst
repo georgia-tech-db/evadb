@@ -1,7 +1,7 @@
-EVA Query Language Reference
+EvaDB Query Language Reference
 ============================
 
-EVA Query Language (EVAQL) is derived from SQL. It is tailored for AI-driven analytics. EVAQL allows users to invoke deep learning models in the form
+EvaDB Query Language (EvaDB) is derived from SQL. It is tailored for AI-driven analytics. EvaDB allows users to invoke deep learning models in the form
 of user-defined functions (UDFs).
 
 Here is an example where we first define a UDF wrapping around the FastRCNN object detection model. We then issue a query with this function to detect objects.
@@ -21,6 +21,6 @@ Here is an example where we first define a UDF wrapping around the FastRCNN obje
     WHERE ArrayCount(FastRCNNObjectDetector(data).label, 'car') > 3
     ORDER BY id;
 
-This page presents a list of all the EVAQL statements that you can leverage in your Jupyter Notebooks.
+This page presents a list of all the EvaDB statements that you can leverage in your Jupyter Notebooks.
 
 .. tableofcontents::

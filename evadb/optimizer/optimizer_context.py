@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 import copy
 
 from evadb.constants import UNDEFINED_GROUP_ID
-from evadb.database import EVADatabase
+from evadb.database import EvaDBDatabase
 from evadb.optimizer.cost_model import CostModel
 from evadb.optimizer.group_expression import GroupExpression
 from evadb.optimizer.memo import Memo
@@ -34,7 +34,10 @@ class OptimizerContext:
     """
 
     def __init__(
-        self, db: EVADatabase, cost_model: CostModel, rules_manager: RulesManager = None
+        self,
+        db: EvaDBDatabase,
+        cost_model: CostModel,
+        rules_manager: RulesManager = None,
     ):
         self._db = db
         self._task_stack = OptimizerTaskStack()

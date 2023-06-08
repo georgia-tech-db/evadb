@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from evadb.database import EVADatabase
+from evadb.database import EvaDBDatabase
 from evadb.executor.abstract_executor import AbstractExecutor
 from evadb.executor.load_csv_executor import LoadCSVExecutor
 from evadb.executor.load_multimedia_executor import LoadMultimediaExecutor
@@ -21,7 +21,7 @@ from evadb.plan_nodes.load_data_plan import LoadDataPlan
 
 
 class LoadDataExecutor(AbstractExecutor):
-    def __init__(self, db: EVADatabase, node: LoadDataPlan):
+    def __init__(self, db: EvaDBDatabase, node: LoadDataPlan):
         super().__init__(db, node)
 
     def exec(self, *args, **kwargs):

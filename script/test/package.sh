@@ -1,8 +1,8 @@
 #!/bin/bash
 
 ## backward compatibility
-EVA_VERSION=$(pip show evadb | grep Version | awk '{print $2}')
-if [[ "$EVA_VERSION" < "0.2.4" ]]; then
+EvaDB_VERSION=$(pip show evadb | grep Version | awk '{print $2}')
+if [[ "$EvaDB_VERSION" < "0.2.4" ]]; then
     PORT=5432
 else
     PORT=8803

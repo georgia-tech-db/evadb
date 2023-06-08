@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ import unittest
 from test.markers import ocr_skip_marker
 from test.util import get_evadb_for_testing, shutdown_ray
 
-from evadb.configuration.constants import EVA_ROOT_DIR
+from evadb.configuration.constants import EvaDB_ROOT_DIR
 from evadb.server.command_handler import execute_query_fetch_all
 
 
@@ -25,8 +25,8 @@ class LikeTest(unittest.TestCase):
         self.evadb = get_evadb_for_testing()
         # reset the catalog manager before running each test
         self.evadb.catalog().reset()
-        meme1 = f"{EVA_ROOT_DIR}/data/detoxify/meme1.jpg"
-        meme2 = f"{EVA_ROOT_DIR}/data/detoxify/meme2.jpg"
+        meme1 = f"{EvaDB_ROOT_DIR}/data/detoxify/meme1.jpg"
+        meme2 = f"{EvaDB_ROOT_DIR}/data/detoxify/meme2.jpg"
 
         execute_query_fetch_all(self.evadb, f"LOAD IMAGE '{meme1}' INTO MemeImages;")
         execute_query_fetch_all(self.evadb, f"LOAD IMAGE '{meme2}' INTO MemeImages;")

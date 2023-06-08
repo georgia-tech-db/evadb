@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -86,7 +86,7 @@ class HuggingFaceTests(unittest.TestCase):
         with self.assertRaises(ExecutorError) as exc_info:
             execute_query_fetch_all(self.evadb, create_udf_query)
         self.assertIn(
-            f"Task {task} not supported in EVA currently", str(exc_info.exception)
+            f"Task {task} not supported in EvaDB currently", str(exc_info.exception)
         )
 
     def test_object_detection(self):

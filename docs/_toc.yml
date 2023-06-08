@@ -67,18 +67,18 @@ parts:
   - caption: Developer Guide
     chapters:
       - file: source/contribute/index
-        title: Contributing to EVA
+        title: Contributing to EvaDB
 
       - file: source/contribute/debugging
         title: Debugging 
 
       - file: source/contribute/new_command
-        title: Extending EVA
+        title: Extending EvaDB
 
       - file: source/contribute/release
         title: Releasing 
 
       - file: source/contribute/internals
-        title: EVA Internals
+        title: EvaDB Internals
         sections:
           - file: source/contribute/internals/catalog

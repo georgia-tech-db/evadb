@@ -1,13 +1,13 @@
 HuggingFace Models
 ======================
 
-This section provides an overview of how you can use out-of-the-box HuggingFace models in EVA.
+This section provides an overview of how you can use out-of-the-box HuggingFace models in EvaDB.
 
 
 Creating UDF from HuggingFace
 ------------------------------
 
-EVA supports UDFS similar to `Pipelines <https://huggingface.co/docs/transformers/main_classes/pipelines>`_  in HuggingFace. 
+EvaDB supports UDFS similar to `Pipelines <https://huggingface.co/docs/transformers/main_classes/pipelines>`_  in HuggingFace. 
 
 .. code-block:: sql
 
@@ -16,11 +16,11 @@ EVA supports UDFS similar to `Pipelines <https://huggingface.co/docs/transformer
     'task' 'object-detection'
     'model' 'facebook / detr-resnet-50'
 
-EVA supports all arguments supported by HF pipelines. You can pass those using a key value format similar to task and model above.
+EvaDB supports all arguments supported by HF pipelines. You can pass those using a key value format similar to task and model above.
 
 Supported Tasks
 -----
-EVA supports the following tasks from huggingface:
+EvaDB supports the following tasks from huggingface:
 
 - Audio Classification
 - Automatic Speech Recognition

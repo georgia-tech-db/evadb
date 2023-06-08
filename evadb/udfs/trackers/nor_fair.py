@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,13 +15,13 @@
 import numpy as np
 from norfair import Detection, Tracker
 
-from evadb.udfs.abstract.tracker_abstract_udf import EVATrackerAbstractUDF
+from evadb.udfs.abstract.tracker_abstract_udf import EvaDBTrackerAbstractUDF
 from evadb.utils.math_utils import get_centroid
 
 DISTANCE_THRESHOLD_CENTROID: int = 30
 
 
-class NorFairTracker(EVATrackerAbstractUDF):
+class NorFairTracker(EvaDBTrackerAbstractUDF):
     @property
     def name(self) -> str:
         return "NorFairTracker"

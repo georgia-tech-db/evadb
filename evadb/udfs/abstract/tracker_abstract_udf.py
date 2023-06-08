@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,9 +23,9 @@ from evadb.udfs.decorators.decorators import forward, setup
 from evadb.udfs.decorators.io_descriptors.data_types import PandasDataframe
 
 
-class EVATrackerAbstractUDF(AbstractUDF):
+class EvaDBTrackerAbstractUDF(AbstractUDF):
     """
-    An abstract class for all EVA object trackers.
+    An abstract class for all EvaDB object trackers.
     """
 
     def __init__(self, *args, **kwargs):

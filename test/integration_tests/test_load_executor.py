@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import pandas as pd
 import pytest
 
 from evadb.binder.binder_utils import BinderError
-from evadb.configuration.constants import EVA_ROOT_DIR
+from evadb.configuration.constants import EvaDB_ROOT_DIR
 from evadb.executor.executor_utils import ExecutorError
 from evadb.models.storage.batch import Batch
 from evadb.parser.types import FileFormatType
@@ -50,7 +50,7 @@ class LoadExecutorTest(unittest.TestCase):
         self.evadb.catalog().reset()
         self.video_file_path = create_sample_video()
         self.image_files_path = Path(
-            f"{EVA_ROOT_DIR}/test/data/uadetrac/small-data/MVI_20011/*.jpg"
+            f"{EvaDB_ROOT_DIR}/test/data/uadetrac/small-data/MVI_20011/*.jpg"
         )
         self.csv_file_path = create_sample_csv()
 
@@ -118,7 +118,7 @@ class LoadExecutorTest(unittest.TestCase):
         create_sample_video()
 
     def test_should_load_videos_in_table(self):
-        path = f"{EVA_ROOT_DIR}/data/sample_videos/1/*.mp4"
+        path = f"{EvaDB_ROOT_DIR}/data/sample_videos/1/*.mp4"
         query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
         result = execute_query_fetch_all(self.evadb, query)
         expected = Batch(
@@ -128,7 +128,7 @@ class LoadExecutorTest(unittest.TestCase):
 
     def test_should_form_symlink_to_multiple_videos(self):
         catalog_manager = self.evadb.catalog()
-        path = f"{EVA_ROOT_DIR}/data/sample_videos/1/*.mp4"
+        path = f"{EvaDB_ROOT_DIR}/data/sample_videos/1/*.mp4"
         query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
         execute_query_fetch_all(self.evadb, query)
 
@@ -144,12 +144,12 @@ class LoadExecutorTest(unittest.TestCase):
             self.assertTrue(os.path.islink(video_file_path))
             self.assertTrue(
                 os.readlink(video_file_path).startswith(
-                    f"{EVA_ROOT_DIR}/data/sample_videos/1"
+                    f"{EvaDB_ROOT_DIR}/data/sample_videos/1"
                 )
             )
 
     def test_should_load_videos_with_same_name_but_different_path(self):
-        path = f"{EVA_ROOT_DIR}/data/sample_videos/**/*.mp4"
+        path = f"{EvaDB_ROOT_DIR}/data/sample_videos/**/*.mp4"
         query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
         result = execute_query_fetch_all(self.evadb, query)
         expected = Batch(
@@ -158,7 +158,7 @@ class LoadExecutorTest(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_should_fail_to_load_videos_with_same_path(self):
-        path = f"{EVA_ROOT_DIR}/data/sample_videos/2/*.mp4"
+        path = f"{EvaDB_ROOT_DIR}/data/sample_videos/2/*.mp4"
         query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
         result = execute_query_fetch_all(self.evadb, query)
         expected = Batch(
@@ -172,7 +172,7 @@ class LoadExecutorTest(unittest.TestCase):
         )
 
         # try adding duplicate files to the table
-        path = f"{EVA_ROOT_DIR}/data/sample_videos/**/*.mp4"
+        path = f"{EvaDB_ROOT_DIR}/data/sample_videos/**/*.mp4"
         query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
         with self.assertRaises(ExecutorError):
             execute_query_fetch_all(self.evadb, query)
@@ -185,7 +185,7 @@ class LoadExecutorTest(unittest.TestCase):
         self.assertEqual(expected_output, after_load_fail)
 
     def test_should_fail_to_load_missing_video(self):
-        path = f"{EVA_ROOT_DIR}/data/sample_videos/missing.mp4"
+        path = f"{EvaDB_ROOT_DIR}/data/sample_videos/missing.mp4"
         query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
         with self.assertRaises(ExecutorError) as exc_info:
             execute_query_fetch_all(self.evadb, query)
@@ -204,7 +204,7 @@ class LoadExecutorTest(unittest.TestCase):
                 execute_query_fetch_all(self.evadb, query)
 
     def test_should_fail_to_load_invalid_files_as_video(self):
-        path = f"{EVA_ROOT_DIR}/data/**"
+        path = f"{EvaDB_ROOT_DIR}/data/**"
         query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
         with self.assertRaises(Exception):
             execute_query_fetch_all(self.evadb, query)
@@ -212,7 +212,7 @@ class LoadExecutorTest(unittest.TestCase):
             execute_query_fetch_all(self.evadb, "SELECT name FROM MyVideos")
 
     def test_should_rollback_if_video_load_fails(self):
-        path_regex = Path(f"{EVA_ROOT_DIR}/data/sample_videos/1/*.mp4")
+        path_regex = Path(f"{EvaDB_ROOT_DIR}/data/sample_videos/1/*.mp4")
         valid_videos = glob.glob(str(path_regex.expanduser()), recursive=True)
 
         tempfile_name = os.urandom(24).hex()
@@ -244,11 +244,11 @@ class LoadExecutorTest(unittest.TestCase):
                     execute_query_fetch_all(self.evadb, "SELECT name FROM MyVideos")
 
     def test_should_rollback_and_preserve_previous_state(self):
-        path_regex = Path(f"{EVA_ROOT_DIR}/data/sample_videos/1/*.mp4")
+        path_regex = Path(f"{EvaDB_ROOT_DIR}/data/sample_videos/1/*.mp4")
         valid_videos = glob.glob(str(path_regex.expanduser()), recursive=True)
         # Load one correct file
         # commit
-        load_file = f"{EVA_ROOT_DIR}/data/sample_videos/1/1.mp4"
+        load_file = f"{EvaDB_ROOT_DIR}/data/sample_videos/1/1.mp4"
         execute_query_fetch_all(
             self.evadb, f"""LOAD VIDEO "{load_file}" INTO MyVideos;"""
         )
@@ -285,7 +285,7 @@ class LoadExecutorTest(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_should_fail_to_load_missing_image(self):
-        path = f"{EVA_ROOT_DIR}/data/sample_images/missing.jpg"
+        path = f"{EvaDB_ROOT_DIR}/data/sample_images/missing.jpg"
         query = f"""LOAD IMAGE "{path}" INTO MyImages;"""
         with self.assertRaises(ExecutorError) as exc_info:
             execute_query_fetch_all(self.evadb, query)
@@ -332,7 +332,7 @@ class LoadExecutorTest(unittest.TestCase):
                 execute_query_fetch_all(self.evadb, query)
 
     def test_should_fail_to_load_invalid_files_as_image(self):
-        path = f"{EVA_ROOT_DIR}/data/**"
+        path = f"{EvaDB_ROOT_DIR}/data/**"
         query = f"""LOAD IMAGE "{path}" INTO MyImages;"""
         with self.assertRaises(Exception):
             execute_query_fetch_all(self.evadb, query)
@@ -516,7 +516,7 @@ class LoadExecutorTest(unittest.TestCase):
     def test_load_pdfs(self):
         execute_query_fetch_all(
             self.evadb,
-            f"""LOAD DOCUMENT '{EVA_ROOT_DIR}/data/documents/*.pdf' INTO pdfs;""",
+            f"""LOAD DOCUMENT '{EvaDB_ROOT_DIR}/data/documents/*.pdf' INTO pdfs;""",
         )
         result = execute_query_fetch_all(self.evadb, "SELECT * from pdfs;")
         self.assertEqual(len(result.columns), 3)
