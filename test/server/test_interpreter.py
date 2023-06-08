@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,8 +30,8 @@ if sys.version_info >= (3, 8):
 
         @patch("asyncio.open_connection")
         @patch("evadb.server.interpreter.create_stdin_reader")
-        @patch("evadb.interfaces.relational.db.EVADBCursor.execute_async")
-        @patch("evadb.interfaces.relational.db.EVADBCursor.fetch_all_async")
+        @patch("evadb.interfaces.relational.db.EvaDBDBCursor.execute_async")
+        @patch("evadb.interfaces.relational.db.EvaDBDBCursor.fetch_all_async")
         async def test_start_cmd_client(
             self, mock_fetch, mock_execute, mock_stdin_reader, mock_open
         ):

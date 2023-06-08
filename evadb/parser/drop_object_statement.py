@@ -13,31 +13,38 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from evadb.parser.statement import AbstractStatement
-from evadb.parser.types import StatementType
+from evadb.parser.types import ObjectType, StatementType
 
 
-class DropUDFStatement(AbstractStatement):
-    """Drop UDF Statement constructed after parsing the input query
+class DropObjectStatement(AbstractStatement):
+
+    """Drop Object Statement constructed after parsing the input query
 
     Attributes:
-        name: str
-            name of the udf
+        object_type: ObjectType
+        name (str
+            name of the object to drop
         if_exists: bool
             if false, throws an error when no UDF with name exists
             else logs a warning
     """
 
-    def __init__(self, name: str, if_exists: bool):
-        super().__init__(StatementType.DROP_UDF)
+    def __init__(self, object_type: ObjectType, name: str, if_exists: bool):
+        super().__init__(StatementType.DROP_OBJECT)
+        self._object_type = object_type
         self._name = name
         self._if_exists = if_exists
 
     def __str__(self) -> str:
         if self._if_exists:
-            print_str = "DROP UDF IF EXISTS {};".format(self._name)
+            print_str = f"DROP {self._object_type} IF EXISTS {self._name};"
         else:
-            print_str = "DROP UDF {};".format(self._name)
+            print_str = f"DROP {self._object_type} {self._name};"
         return print_str
+
+    @property
+    def object_type(self):
+        return self._object_type
 
     @property
     def name(self):
@@ -48,9 +55,13 @@ class DropUDFStatement(AbstractStatement):
         return self._if_exists
 
     def __eq__(self, other):
-        if not isinstance(other, DropUDFStatement):
+        if not isinstance(other, DropObjectStatement):
             return False
-        return self.name == other.name and self.if_exists == other.if_exists
+        return (
+            self.object_type == other.object_type
+            and self.name == other.name
+            and self.if_exists == other.if_exists
+        )
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(), self.name, self.if_exists))
+        return hash((super().__hash__(), self.object_type, self.name, self.if_exists))

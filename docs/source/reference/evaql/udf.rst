@@ -4,7 +4,7 @@ UDF
 SHOW UDFS
 ----
 
-Here is a list of built-in user-defined functions in EVA.
+Here is a list of built-in user-defined functions in EvaDB.
 
 .. code:: mysql
 

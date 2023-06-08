@@ -65,11 +65,11 @@ column_constraint: null_notnull            ->null_column_constraint
 
 drop_database: DROP DATABASE if_exists? uid
     
-drop_index: DROP INDEX uid ON table_name
+drop_index: DROP INDEX if_exists? uid
     
-drop_table: DROP TABLE if_exists? table_name
+drop_table: DROP TABLE if_exists? uid
     
-drop_udf: DROP UDF if_exists? udf_name
+drop_udf: DROP UDF if_exists? uid
     
 
 // Data Manipulation Language

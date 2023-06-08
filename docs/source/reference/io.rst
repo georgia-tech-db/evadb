@@ -1,6 +1,6 @@
 IO Descriptors
 ======================
-EVA supports three key data types. The inputs and outputs of the user-defined functions (UDFs) must be of one of these types.
+EvaDB supports three key data types. The inputs and outputs of the user-defined functions (UDFs) must be of one of these types.
 
 NumpyArray
 ------------

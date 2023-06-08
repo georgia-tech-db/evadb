@@ -202,8 +202,8 @@ dep.txt
 \<Magic*
 
 # data
-*eva_data*/
-evadb_data/
+*eva_data/
+*evadb_data/
 
 # models
 models/
@@ -214,7 +214,7 @@ test.py
 # faiss
 *.faiss
 eva_db/*
-
+*.txt
 
 # older code
 eva/*

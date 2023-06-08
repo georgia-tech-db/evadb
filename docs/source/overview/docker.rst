@@ -1,7 +1,7 @@
 Docker
 ====
 
-You can launch the EVA server using Docker either locally or on a server with GPUs:
+You can launch the EvaDB server using Docker either locally or on a server with GPUs:
 
 .. code-block:: bash
 

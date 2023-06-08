@@ -1,4 +1,4 @@
-EVA Internals
+EvaDB Internals
 =============
 
 Path of a Query

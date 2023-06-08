@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ from evadb.binder.statement_binder import StatementBinder
 from evadb.binder.statement_binder_context import StatementBinderContext
 from evadb.catalog.catalog_type import NdArrayType
 from evadb.configuration.configuration_manager import ConfigurationManager
-from evadb.configuration.constants import EVA_DATABASE_DIR, EVA_INSTALLATION_DIR
+from evadb.configuration.constants import EvaDB_DATABASE_DIR, EvaDB_INSTALLATION_DIR
 from evadb.database import init_eva_db_instance
 from evadb.expression.function_expression import FunctionExpression
 from evadb.models.storage.batch import Batch
@@ -64,25 +64,25 @@ def suffix_pytest_xdist_worker_id_to_dir(path: str):
 
 
 def get_evadb_for_testing(uri: str = None):
-    db_dir = suffix_pytest_xdist_worker_id_to_dir(EVA_DATABASE_DIR)
+    db_dir = suffix_pytest_xdist_worker_id_to_dir(EvaDB_DATABASE_DIR)
     remove_directory_contents(db_dir)
     gc.collect()
     return init_eva_db_instance(db_dir, custom_db_uri=uri)
 
 
 def get_tmp_dir():
-    db_dir = suffix_pytest_xdist_worker_id_to_dir(EVA_DATABASE_DIR)
+    db_dir = suffix_pytest_xdist_worker_id_to_dir(EvaDB_DATABASE_DIR)
     config = ConfigurationManager(Path(db_dir))
     return config.get_value("storage", "tmp_dir")
 
 
 def s3_dir():
-    db_dir = suffix_pytest_xdist_worker_id_to_dir(EVA_DATABASE_DIR)
+    db_dir = suffix_pytest_xdist_worker_id_to_dir(EvaDB_DATABASE_DIR)
     config = ConfigurationManager(Path(db_dir))
     return config.get_value("storage", "s3_download_dir")
 
 
-EVA_TEST_DATA_DIR = Path(EVA_INSTALLATION_DIR).parent
+EvaDB_TEST_DATA_DIR = Path(EvaDB_INSTALLATION_DIR).parent
 
 
 def is_ray_stage_running():
@@ -90,7 +90,7 @@ def is_ray_stage_running():
 
 
 def shutdown_ray():
-    db_dir = suffix_pytest_xdist_worker_id_to_dir(EVA_DATABASE_DIR)
+    db_dir = suffix_pytest_xdist_worker_id_to_dir(EvaDB_DATABASE_DIR)
     config = ConfigurationManager(Path(db_dir))
     if config.get_value("experimental", "ray"):
         ray.shutdown()

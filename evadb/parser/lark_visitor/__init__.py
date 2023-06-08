@@ -19,7 +19,7 @@ from lark import Tree, visitors
 from evadb.parser.lark_visitor._common_clauses_ids import CommonClauses
 from evadb.parser.lark_visitor._create_statements import CreateTable
 from evadb.parser.lark_visitor._delete_statement import Delete
-from evadb.parser.lark_visitor._drop_statement import DropTable
+from evadb.parser.lark_visitor._drop_statement import DropObject
 from evadb.parser.lark_visitor._explain_statement import Explain
 from evadb.parser.lark_visitor._expressions import Expressions
 from evadb.parser.lark_visitor._functions import Functions
@@ -65,7 +65,7 @@ class LarkInterpreter(
     TableSources,
     Load,
     RenameTable,
-    DropTable,
+    DropObject,
     Show,
     Explain,
     Delete,

@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@ import asyncio
 
 import pandas
 
-from evadb.configuration.constants import EVA_DATABASE_DIR
-from evadb.database import EVADatabase, init_eva_db_instance
+from evadb.configuration.constants import EvaDB_DATABASE_DIR
+from evadb.database import EvaDBDatabase, init_eva_db_instance
 from evadb.expression.tuple_value_expression import TupleValueExpression
-from evadb.interfaces.relational.relation import EVADBQuery
+from evadb.interfaces.relational.relation import EvaDBDBQuery
 from evadb.interfaces.relational.utils import execute_statement, try_binding
 from evadb.models.server.response import Response
 from evadb.models.storage.batch import Batch
@@ -28,7 +28,8 @@ from evadb.parser.select_statement import SelectStatement
 from evadb.parser.utils import (
     parse_create_udf,
     parse_create_vector_index,
-    parse_drop,
+    parse_drop_index,
+    parse_drop_table,
     parse_drop_udf,
     parse_load,
     parse_query,
@@ -38,8 +39,8 @@ from evadb.udfs.udf_bootstrap_queries import init_builtin_udfs
 from evadb.utils.logging_manager import logger
 
 
-class EVADBConnection:
-    def __init__(self, evadb: EVADatabase, reader, writer):
+class EvaDBDBConnection:
+    def __init__(self, evadb: EvaDBDatabase, reader, writer):
         self._reader = reader
         self._writer = writer
         self._cursor = None
@@ -50,7 +51,7 @@ class EVADBConnection:
         """Retrieves a cursor associated with the connection.
 
         Returns:
-            EVADBCursor: The cursor object used to execute queries.
+            EvaDBDBCursor: The cursor object used to execute queries.
 
 
         Examples:
@@ -60,11 +61,11 @@ class EVADBConnection:
         """
         # One unique cursor for one connection
         if self._cursor is None:
-            self._cursor = EVADBCursor(self)
+            self._cursor = EvaDBDBCursor(self)
         return self._cursor
 
 
-class EVADBCursor(object):
+class EvaDBDBCursor(object):
     def __init__(self, connection):
         self._connection = connection
         self._evadb = connection._evadb
@@ -73,11 +74,11 @@ class EVADBCursor(object):
 
     async def execute_async(self, query: str):
         """
-        Send query to the EVA server.
+        Send query to the EvaDB server.
         """
         if self._pending_query:
             raise SystemError(
-                "EVA does not support concurrent queries. \
+                "EvaDB does not support concurrent queries. \
                     Call fetch_all() to complete the pending query"
             )
         query = self._multiline_query_transformation(query)
@@ -133,7 +134,7 @@ class EVADBCursor(object):
 
         return func_sync
 
-    def table(self, table_name: str) -> EVADBQuery:
+    def table(self, table_name: str) -> EvaDBDBQuery:
         """
         Retrieves data from a table in the database.
 
@@ -141,7 +142,7 @@ class EVADBCursor(object):
             table_name (str): Name of the table.
 
         Returns:
-            EVADBQuery: The EVADBQuery object representing the table query.
+            EvaDBDBQuery: The EvaDBDBQuery object representing the table query.
         """
         table = parse_table_clause(table_name)
         # SELECT * FROM table
@@ -149,7 +150,7 @@ class EVADBCursor(object):
             target_list=[TupleValueExpression(col_name="*")], from_table=table
         )
         try_binding(self._evadb.catalog, select_stmt)
-        return EVADBQuery(self._evadb, select_stmt, alias=Alias(table_name.lower()))
+        return EvaDBDBQuery(self._evadb, select_stmt, alias=Alias(table_name.lower()))
 
     def df(self) -> pandas.DataFrame:
         """
@@ -167,7 +168,7 @@ class EVADBCursor(object):
 
     def create_vector_index(
         self, index_name: str, table_name: str, expr: str, using: str
-    ) -> "EVADBCursor":
+    ) -> "EvaDBDBCursor":
         """
         Creates a vector index using the provided expr on the table.
 
@@ -178,7 +179,7 @@ class EVADBCursor(object):
             using (str): Method used for indexing, can be `FAISS` or `QDRANT`.
 
         Returns:
-            EVADBCursor: The EVADBCursor object.
+            EvaDBDBCursor: The EvaDBDBCursor object.
 
         """
         stmt = parse_create_vector_index(index_name, table_name, expr, using)
@@ -187,7 +188,7 @@ class EVADBCursor(object):
 
     def load(
         self, file_regex: str, table_name: str, format: str, **kwargs
-    ) -> EVADBQuery:
+    ) -> EvaDBDBQuery:
         """
         Loads data from files into a table.
 
@@ -198,41 +199,53 @@ class EVADBCursor(object):
             **kwargs: Additional keyword arguments for configuring the load operation.
 
         Returns:
-            EVADBQuery: The EVADBQuery object representing the load query.
+            EvaDBDBQuery: The EvaDBDBQuery object representing the load query.
         """
         # LOAD {FORMAT} file_regex INTO table_name
         stmt = parse_load(table_name, file_regex, format, **kwargs)
-        return EVADBQuery(self._evadb, stmt)
+        return EvaDBDBQuery(self._evadb, stmt)
 
-    def drop_table(self, table_name: str, if_exists: bool = True) -> "EVADBQuery":
+    def drop_table(self, table_name: str, if_exists: bool = True) -> "EvaDBDBQuery":
         """
         Drop a table in the database.
 
         Args:
             table_name (str): Name of the table to be dropped.
-            if_exists (bool): If True, do not raise an error if the Tabel does not already exist. If False, raise an error.
-            **kwargs: Additional keyword arguments for configuring the drop operation.
+            if_exists (bool): If True, do not raise an error if the Table does not already exist. If False, raise an error.
 
         Returns
-            EVADBQuery: The EVADBQuery object representing the UDF created.
+            EvaDBDBQuery: The EvaDBDBQuery object representing the DROP TABLE.
         """
-        stmt = parse_drop(table_name, if_exists)
-        return EVADBQuery(self._evadb, stmt)
+        stmt = parse_drop_table(table_name, if_exists)
+        return EvaDBDBQuery(self._evadb, stmt)
 
-    def drop_udf(self, udf_name: str, if_exists: bool = True) -> "EVADBQuery":
+    def drop_udf(self, udf_name: str, if_exists: bool = True) -> "EvaDBDBQuery":
         """
         Drop a udf in the database.
 
         Args:
             udf_name (str): Name of the udf to be dropped.
             if_exists (bool): If True, do not raise an error if the UDF does not already exist. If False, raise an error.
-            **kwargs: Additional keyword arguments for configuring the drop_udf operation.
 
         Returns
-            EVADBQuery: The EVADBQuery object representing the UDF created.
+            EvaDBDBQuery: The EvaDBDBQuery object representing the DROP UDF.
         """
         stmt = parse_drop_udf(udf_name, if_exists)
-        return EVADBQuery(self._evadb, stmt)
+        return EvaDBDBQuery(self._evadb, stmt)
+
+    def drop_index(self, index_name: str, if_exists: bool = True) -> "EvaDBDBQuery":
+        """
+        Drop an index in the database.
+
+        Args:
+            index_name (str): Name of the index to be dropped.
+            if_exists (bool): If True, do not raise an error if the index does not already exist. If False, raise an error.
+
+        Returns
+            EvaDBDBQuery: The EvaDBDBQuery object representing the DROP INDEX.
+        """
+        stmt = parse_drop_index(index_name, if_exists)
+        return EvaDBDBQuery(self._evadb, stmt)
 
     def create_udf(
         self,
@@ -241,7 +254,7 @@ class EVADBCursor(object):
         impl_path: str = None,
         type: str = None,
         **kwargs
-    ) -> "EVADBQuery":
+    ) -> "EvaDBDBQuery":
         """
         Create a udf in the database.
 
@@ -253,58 +266,58 @@ class EVADBCursor(object):
             **kwargs: Additional keyword arguments for configuring the create udf operation.
 
         Returns
-            EVADBQuery: The EVADBQuery object representing the UDF created.
+            EvaDBDBQuery: The EvaDBDBQuery object representing the UDF created.
         """
         stmt = parse_create_udf(udf_name, if_not_exists, impl_path, type, **kwargs)
-        return EVADBQuery(self._evadb, stmt)
+        return EvaDBDBQuery(self._evadb, stmt)
 
-    def query(self, sql_query: str) -> EVADBQuery:
+    def query(self, sql_query: str) -> EvaDBDBQuery:
         """
         Executes a SQL query.
 
         Args:
             sql_query (str): The SQL query to be executed
         Returns:
-            EVADBQuery: The EVADBQuery object.
+            EvaDBDBQuery: The EvaDBDBQuery object.
         """
         stmt = parse_query(sql_query)
-        return EVADBQuery(self._evadb, stmt)
+        return EvaDBDBQuery(self._evadb, stmt)
 
 
 def connect(
-    eva_dir: str = EVA_DATABASE_DIR, sql_backend: str = None
-) -> EVADBConnection:
+    eva_dir: str = EvaDB_DATABASE_DIR, sql_backend: str = None
+) -> EvaDBDBConnection:
     """
-    Connects to the EVA server and returns a connection object.
+    Connects to the EvaDB server and returns a connection object.
 
     Args:
-        eva_dir (str): The directory used by EVA to store database-related content. Default is "eva_db".
+        eva_dir (str): The directory used by EvaDB to store database-related content. Default is "eva_db".
         sql_backend (str): Custom database URI to be used. We follow the SQLAlchemy database URL format.
-            Default is SQLite in the EVA directory. See https://docs.sqlalchemy.org/en/20/core/engines.html#database-urls.
+            Default is SQLite in the EvaDB directory. See https://docs.sqlalchemy.org/en/20/core/engines.html#database-urls.
 
     Returns:
-        EVADBConnection: A connection object representing the connection to the EVA database.
+        EvaDBDBConnection: A connection object representing the connection to the EvaDB database.
     """
 
     # As we are not employing a client-server approach for the Pythonic interface, the
-    # host and port parameters are irrelevant. Additionally, for the EVADBConnection, the
+    # host and port parameters are irrelevant. Additionally, for the EvaDBDBConnection, the
     # reader and writer parameters are not relevant in the serverless approach.
     evadb = init_eva_db_instance(eva_dir, custom_db_uri=sql_backend)
     init_builtin_udfs(evadb, mode="release")
-    return EVADBConnection(evadb, None, None)
+    return EvaDBDBConnection(evadb, None, None)
 
 
 # WIP
 # support remote connections from pythonic APIs
 
 
-async def get_connection(host: str, port: int) -> EVADBConnection:
+async def get_connection(host: str, port: int) -> EvaDBDBConnection:
     reader, writer = await asyncio.open_connection(host, port)
     # no db required for remote connection
-    connection = EVADBConnection(None, reader, writer)
+    connection = EvaDBDBConnection(None, reader, writer)
     return connection
 
 
-def connect_remote(host: str, port: int) -> EVADBConnection:
+def connect_remote(host: str, port: int) -> EvaDBDBConnection:
     connection = asyncio.run(get_connection(host, port))
     return connection
