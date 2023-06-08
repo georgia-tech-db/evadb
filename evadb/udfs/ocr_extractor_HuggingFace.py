@@ -31,6 +31,7 @@ import re
 # limitations under the License.
 import numpy as np
 import pandas as pd
+import torch
 import torchvision
 from transformers import DonutProcessor, VisionEncoderDecoderModel
 
@@ -86,10 +87,10 @@ class OCRExactorHuggingFace(AbstractUDF, GPUCompatible):
             np_data = np.asarray(data)
             image = torchvision.transforms.ToPILImage()(np_data)
             pixel_values = self.processor(image, return_tensors="pt").pixel_values
-
+            device = "cuda" if torch.cuda.is_available() else "cpu"
             outputs = self.model.generate(
-                pixel_values.to(self.device),
-                decoder_input_ids=self.decoder_input_ids.to(self.device),
+                pixel_values.to(device),
+                decoder_input_ids=self.decoder_input_ids.to(device),
                 max_length=self.model.decoder.config.max_position_embeddings,
                 early_stopping=True,
                 pad_token_id=self.processor.tokenizer.pad_token_id,
