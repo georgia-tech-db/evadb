@@ -78,8 +78,8 @@ def cleanup():
     """Removes any temporary file / directory created by EVA."""
     if os.path.exists("online_video.mp4"):
         os.remove("online_video.mp4")
-    if os.path.exists("eva_data"):
-        shutil.rmtree("eva_data")
+    if os.path.exists("evadb_data"):
+        shutil.rmtree("evadb_data")
 
 
 if __name__ == "__main__":

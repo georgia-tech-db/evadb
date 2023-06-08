@@ -16,6 +16,7 @@
 import unittest
 from test.markers import windows_skip_marker
 
+from evadb.configuration.constants import EVA_DATASET_DIR
 from evadb.readers.decord_reader import DecordReader
 from evadb.utils.generic_utils import (
     generate_file_path,
@@ -85,7 +86,7 @@ class ModulePathTest(unittest.TestCase):
 
     @windows_skip_marker
     def test_should_return_a_random_full_path(self):
-        actual = generate_file_path("eva_datasets", "test")
+        actual = generate_file_path(EVA_DATASET_DIR, "test")
         self.assertTrue(actual.is_absolute())
         # Root directory must be the same, filename is random
-        self.assertTrue("eva_datasets" in str(actual.parent))
+        self.assertTrue(EVA_DATASET_DIR in str(actual.parent))

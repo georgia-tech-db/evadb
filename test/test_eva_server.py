@@ -16,6 +16,7 @@ import unittest
 
 from mock import patch
 
+from evadb.configuration.constants import EVA_DATABASE_DIR
 from evadb.eva_server import main, start_eva_server
 
 
@@ -33,5 +34,5 @@ class EVAServerTest(unittest.IsolatedAsyncioTestCase):
     @patch("evadb.eva_server.start_eva_server")
     @patch("asyncio.start_server")
     async def test_start_eva_server(self, mock_start_eva_server, mock_start):
-        await start_eva_server("eva_data", "0.0.0.0", 8803)
+        await start_eva_server(EVA_DATABASE_DIR, "0.0.0.0", 8803)
         mock_start_eva_server.assert_called_once()

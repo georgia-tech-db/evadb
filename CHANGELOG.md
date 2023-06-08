@@ -57,7 +57,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * PR #768: feat: create materialized view infers column name 
 * PR #770: tutorials: hugging face text summarizer, text classifier, + pdf loader 
 * PR #769: feat: load pdf 
-* PR #766: feat: change default dir to "eva_data" and make it configurable 
+* PR #766: feat: change default dir to "evadb_data" and make it configurable 
 * PR #767: ci: improve docker support 
 * PR #751: feat: integration with langchain 
 * PR #764: feat: db apis made more pythonic 

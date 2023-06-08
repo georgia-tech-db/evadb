@@ -17,7 +17,7 @@ Ensure that the local Python version is >= 3.8 and <= 3.10. EvaDB cannot support
 Where does EvaDB store all the data?
 ====================================
 
-By default, EvaDB stores all the data in a local folder named ``eva_data``.
+By default, EvaDB stores all the data in a local folder named ``evadb_data``.
 
 
 Why does the EvaDB server not start?
