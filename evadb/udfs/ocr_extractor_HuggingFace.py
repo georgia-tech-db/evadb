@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,6 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+import re
 
 # coding=utf-8
 # Copyright 2018-2022 EVA
@@ -29,32 +31,33 @@
 # limitations under the License.
 import numpy as np
 import pandas as pd
+import torch
+import torchvision
+from PIL import Image
 from sentence_transformers import SentenceTransformer
+from transformers import DonutProcessor, VisionEncoderDecoderModel
 
 from evadb.catalog.catalog_type import NdArrayType
 from evadb.udfs.abstract.abstract_udf import AbstractUDF
 from evadb.udfs.decorators.decorators import forward, setup
 from evadb.udfs.decorators.io_descriptors.data_types import PandasDataframe
 from evadb.udfs.gpu_compatible import GPUCompatible
-import torchvision
-
-from transformers import DonutProcessor, VisionEncoderDecoderModel
-import torch
-import re
-from PIL import Image
 
 
 class OCRExactorHuggingFace(AbstractUDF, GPUCompatible):
     @setup(cacheable=False, udf_type="FeatureExtraction", batchable=False)
     def setup(self):
         self.processor = DonutProcessor.from_pretrained(
-            "naver-clova-ix/donut-base-finetuned-cord-v2")
+            "naver-clova-ix/donut-base-finetuned-cord-v2"
+        )
         self.model = VisionEncoderDecoderModel.from_pretrained(
-            "naver-clova-ix/donut-base-finetuned-cord-v2")
+            "naver-clova-ix/donut-base-finetuned-cord-v2"
+        )
         # prepare decoder inputs
         task_prompt = "<s_cord-v2>"
         self.decoder_input_ids = self.processor.tokenizer(
-            task_prompt, add_special_tokens=False, return_tensors="pt").input_ids
+            task_prompt, add_special_tokens=False, return_tensors="pt"
+        ).input_ids
         self.device = device = "cuda" if torch.cuda.is_available() else "cpu"
 
     def to_device(self, device: str) -> GPUCompatible:
@@ -102,7 +105,9 @@ class OCRExactorHuggingFace(AbstractUDF, GPUCompatible):
                 output_scores=True,
             )
             sequence = self.processor.batch_decode(outputs.sequences)[0]
-            sequence = sequence.replace(self.processor.tokenizer.eos_token, "").replace(self.processor.tokenizer.pad_token, "")
+            sequence = sequence.replace(self.processor.tokenizer.eos_token, "").replace(
+                self.processor.tokenizer.pad_token, ""
+            )
             sequence = re.sub(r"<.*?>", "", sequence)
             # remove first task start token
             return sequence

@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,24 +14,12 @@
 # limitations under the License.
 import unittest
 from test.util import (
-    DummyObjectDetector,
-    create_sample_video,
     load_udfs_for_testing,
     shutdown_ray,
     suffix_pytest_xdist_worker_id_to_dir,
 )
-
-import numpy as np
-import pandas as pd
-from pandas.testing import assert_frame_equal
-
-from evadb.binder.binder_utils import BinderError
 from evadb.configuration.constants import EvaDB_DATABASE_DIR, EvaDB_ROOT_DIR
-from evadb.executor.executor_utils import ExecutorError
 from evadb.interfaces.relational.db import connect
-from evadb.models.storage.batch import Batch
-from evadb.server.command_handler import execute_query_fetch_all
-
 
 class TestOCRHuggingFace(unittest.TestCase):
     def __init__(self, *args, **kwargs):
@@ -58,12 +46,12 @@ class TestOCRHuggingFace(unittest.TestCase):
         cursor = conn.cursor()
         img_path1 = f"{EvaDB_ROOT_DIR}/data/ocr/output.png"
 
-        load_pdf = cursor.load(file_regex=img_path1, format="IMAGE", table_name="MyImage")
+        load_pdf = cursor.load(
+            file_regex=img_path1, format="IMAGE", table_name="MyImage"
+        )
         load_pdf.execute()
 
-        udf_check = cursor.query(
-            "DROP UDF IF  EXISTS OCRExactorHuggingFace"
-        )
+        udf_check = cursor.query("DROP UDF IF  EXISTS OCRExactorHuggingFace")
         udf_check.execute()
         udf = cursor.create_udf(
             "OCRExactorHuggingFace",
@@ -72,9 +60,8 @@ class TestOCRHuggingFace(unittest.TestCase):
         )
         udf.execute()
 
-        query = (
-            cursor.table("MyImage")
-            .cross_apply("OCRExactorHuggingFace(data)", "objs(ocr_data)")
+        query = cursor.table("MyImage").cross_apply(
+            "OCRExactorHuggingFace(data)", "objs(ocr_data)"
         )
         output = query.df()
         print(output)
