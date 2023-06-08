@@ -1,13 +1,14 @@
-import faiss
+import time
 from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
-from langchain.chains import RetrievalQA
 from langchain.embeddings.huggingface import HuggingFaceEmbeddings
 from langchain.llms import GPT4All
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores.faiss import FAISS
+from langchain.chains.qa_with_sources import load_qa_with_sources_chain
+from tqdm import tqdm
 
-from examples.story_qa.util import download_story
+from util import download_story
 
 
 def download_model(local_path):
@@ -20,6 +21,7 @@ def download_model(local_path):
 
     # skip downloading the model
     if Path(local_path).exists():
+        print("Skip downloading as model already exists")
         return
     # Example model. Check https://github.com/nomic-ai/gpt4all for the latest models.
     url = "http://gpt4all.io/models/ggml-gpt4all-j-v1.3-groovy.bin"
@@ -35,25 +37,28 @@ def download_model(local_path):
                 f.write(chunk)
 
 
-model_path = "./ggml-gpt4all-j-v1.3-groovy"
+print("Downloading model ...")
+model_path = "./ggml-gpt4all-j-v1.3-groovy.bin"
 download_model(model_path)
 
 # Download The Project Gutenberg eBook of War and Peace
+print("Downloading story ...")
 book_path = download_story()
 
 # setup the model
+print("Setting up langchain ...")
 callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
 llm = GPT4All(
     model=model_path,
-    backend="gptj",
+    # backend="gptj",
     callbacks=callback_manager,
-    verbose=False,
+    verbose=True,
     n_threads=16,
 )
 
 # setup the hugging face embeddding model
 embedding_model_name = "sentence-transformers/all-MiniLM-L6-v2"
-model_kwargs = {"device": "gpu"}
+model_kwargs = {"device": "cuda"}
 hf_embeddings = HuggingFaceEmbeddings(
     model_name=embedding_model_name,
     model_kwargs=model_kwargs,
@@ -63,19 +68,27 @@ text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
 texts = text_splitter.split_text(open(book_path).read())
 
 # create FAISS vector index based on HuggingFace Embeddings
+print("Building FAISS Vector Index ...")
+ss = time.perf_counter()
 store = FAISS.from_texts(
     texts,
     hf_embeddings,
-    metadatas=[
-        {"source": f"Text chunk {i} of {len(texts)}"} for i in range(len(texts))
-    ],
+    metadatas=[{"source": str(i)} for i in range(len(texts))],
 )
 # creating QA model based on gpt4all llm model
-qa = RetrievalQA.from_chain_type(
-    llm=llm, chain_type="stuff", retriever=store.as_retriever()
-)
+chain = load_qa_with_sources_chain(llm=llm, chain_type="stuff")
 
-for question in open("questions.txt").readline():
-    # fetching answer based question
-    ans = qa.run(question)
-    print("Question: {question} \n Answer {ans}")
+index_build_time = time.perf_counter() - ss
+print(f"Time taken to build index {index_build_time}")
+
+# Answering questions
+for question in tqdm(open("examples/story_qa/questions.txt").readline()):
+    print(f"Question: {question}")
+    # fetching the top 5 context texts for the answer
+    docs = store.similarity_search(question, k=5)
+    answer = chain(
+        {"input_documents": docs, "question": question}, return_only_outputs=True
+    )
+    print(f"Answer {answer}")
+
+print(f"Total QA Time {time.perf_counter() - ss}")
