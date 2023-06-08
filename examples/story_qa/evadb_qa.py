@@ -1,7 +1,7 @@
 from gpt4all import GPT4All
 from time import perf_counter
 
-from util import download_story, read_text_line, try_execute
+from util import download_story, text_splitter, try_execute
 
 import evadb
 
@@ -16,22 +16,18 @@ def ask_question(path):
     story_feat_table = f"FeatTablePPText"
     index_table = f"IndexTable"
 
-    Text_feat_udf_query = """CREATE UDF IF NOT EXISTS SentenceFeatureExtractor
-            IMPL  'evadb/udfs/sentence_feature_extractor.py';
-            """
+    cursor.drop_udf("SentenceFeatureExtractor;").execute()
+    cursor.create_udf("SentenceFeatureExtractor", impl_path="evadb/udfs/sentence_feature_extractor.py").execute()
 
-    cursor.query("DROP UDF IF EXISTS SentenceFeatureExtractor;").execute()
-    cursor.query(Text_feat_udf_query).execute()
-
-    try_execute(cursor, f"DROP TABLE IF EXISTS {story_table};")
-    try_execute(cursor, f"DROP TABLE IF EXISTS {story_feat_table};")
-
+    cursor.drop_table(story_table)
+    cursor.drop_table(story_feat_table)
+    
     print("Create table")
 
     cursor.query(f"CREATE TABLE {story_table} (id INTEGER, data TEXT(1000));").execute()
 
     # Insert text chunk by chunk.
-    for i, text in enumerate(read_text_line(path)):
+    for i, text in enumerate(text_splitter(path)):
         cursor.query(f"INSERT INTO {story_table} (id, data) VALUES ({i}, '{text}');").execute()
 
     print("Extract features")
@@ -45,10 +41,10 @@ def ask_question(path):
     print("Create index")
 
     # Create search index on extracted features.
-    cursor.query(f"CREATE INDEX {index_table} ON {story_feat_table} (features) USING FAISS;").execute()
+    cursor.create_vector_index(index_table, story_feat_table, "features", "FAISS")
 
     print("Query")
-
+    
     # Search similar text as the asked question.
     question = "Who is Prince Boris Drubetskoy?"
     res_batch = cursor.query(f"""SELECT data FROM { } 

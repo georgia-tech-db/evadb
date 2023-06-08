@@ -1,11 +1,14 @@
 import os
 import urllib.request
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 
 def download_story():
     parsed_file_path, orig_file_path = "new_wp.txt", "wp.txt"
     if not os.path.exists(parsed_file_path):
-        urllib.request.urlretrieve("https://www.gutenberg.org/cache/epub/2600/pg2600.txt", orig_file_path)
+        urllib.request.urlretrieve(
+            "https://www.gutenberg.org/cache/epub/2600/pg2600.txt", orig_file_path
+        )
 
     # Process file each paragraph per line.
     new_f = open(parsed_file_path, "w")
@@ -42,5 +45,8 @@ def try_execute(conn, query):
         conn.query(query).execute()
     except Exception:
         pass
-    
-    
+
+
+def text_splitter(text_file_path):
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
+    return text_splitter.split_text(open(text_file_path).read())

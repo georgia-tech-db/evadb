@@ -82,7 +82,7 @@ index_build_time = time.perf_counter() - ss
 print(f"Time taken to build index {index_build_time}")
 
 # Answering questions
-for question in tqdm(open("examples/story_qa/questions.txt").readline()):
+for question in tqdm(open("./story_qa/questions.txt")):
     print(f"Question: {question}")
     # fetching the top 5 context texts for the answer
     docs = store.similarity_search(question, k=5)
