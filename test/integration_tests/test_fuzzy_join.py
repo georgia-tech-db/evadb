@@ -26,6 +26,7 @@ import pytest
 
 from evadb.configuration.constants import EvaDB_ROOT_DIR
 from evadb.server.command_handler import execute_query_fetch_all
+from evadb.udfs.udf_bootstrap_queries import fuzzy_udf_query
 
 
 @pytest.mark.notparallel
@@ -72,18 +73,7 @@ class FuzzyJoinTests(unittest.TestCase):
         execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS MyVideoCSV;")
 
     def test_fuzzyjoin(self):
-        EvaDB_INSTALLATION_DIR = self.evadb.config.get_value(
-            "core", "evadb_installation_dir"
-        )
-        fuzzy_udf = """CREATE UDF IF NOT EXISTS FuzzDistance
-                    INPUT (Input_Array1 NDARRAY ANYTYPE, Input_Array2 NDARRAY ANYTYPE)
-                    OUTPUT (distance FLOAT(32, 7))
-                    TYPE NdarrayUDF
-                    IMPL "{}/udfs/{}/fuzzy_join.py";
-        """.format(
-            EvaDB_INSTALLATION_DIR, "ndarray"
-        )
-        execute_query_fetch_all(self.evadb, fuzzy_udf)
+        execute_query_fetch_all(self.evadb, fuzzy_udf_query)
 
         fuzzy_join_query = """SELECT * FROM MyVideo a JOIN MyVideoCSV b
                       ON FuzzDistance(a.id, b.id) = 100;"""

@@ -18,6 +18,7 @@ import unittest
 
 from mock import MagicMock, patch
 
+from evadb.configuration.constants import EvaDB_DATABASE_DIR
 from evadb.server.server import EvaServer
 
 # Check for Python 3.8+ for IsolatedAsyncioTestCase support
@@ -33,7 +34,7 @@ if sys.version_info >= (3, 8):
             host = "localhost"
             port = 8803
 
-            await evadb_server.start_evadb_server("evadb_db", host, port)
+            await evadb_server.start_evadb_server(EvaDB_DATABASE_DIR, host, port)
 
             # connection made
             client_reader1 = asyncio.StreamReader()
