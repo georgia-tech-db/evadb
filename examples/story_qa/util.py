@@ -1,7 +1,6 @@
 import os
 import urllib.request
 
-
 def download_story():
     parsed_file_path, orig_file_path = "new_wp.txt", "wp.txt"
     if not os.path.exists(parsed_file_path):
@@ -23,7 +22,7 @@ def download_story():
 
 def read_text_line(path, num_token=1000):
     # For simplicity, we only keep letters.
-    whitelist = set("abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+    whitelist = set(".!?abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ")    
 
     with open(path, "r") as f:
         l = 0
@@ -35,6 +34,9 @@ def read_text_line(path, num_token=1000):
                 cut_line = line[i : min(i + 1000, len(line))]
                 cut_line = "".join(filter(whitelist.__contains__, cut_line))
                 yield cut_line
+
+            if l == 1000:
+                break
 
 
 def try_execute(conn, query):
