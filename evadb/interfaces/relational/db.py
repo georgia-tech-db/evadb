@@ -143,6 +143,9 @@ class EvaDBCursor(object):
 
         Returns:
             EvaDBQuery: The EvaDBQuery object representing the table query.
+
+        Examples:
+            >>> relation = conn.table("sample_table")
         """
         table = parse_table_clause(table_name)
         # SELECT * FROM table
@@ -161,6 +164,9 @@ class EvaDBCursor(object):
 
         Raises:
             Exception: If no valid result is available with the current connection.
+
+        Examples:
+            >>> result = conn.query("CREATE TABLE IF NOT EXISTS youtube_video_text AS SELECT SpeechRecognizer(audio) FROM youtube_video;").df()
         """
         if not self._result:
             raise Exception("No valid result with the current cursor")
@@ -181,6 +187,15 @@ class EvaDBCursor(object):
         Returns:
             EvaDBCursor: The EvaDBCursor object.
 
+        Examples:
+            Create a Vector Index using QDRANT
+
+            >>> conn.create_vector_index(
+                    "faiss_index",
+                    table_name="meme_images",
+                    expr="SiftFeatureExtractor(data)",
+                    using="QDRANT"
+                )
         """
         stmt = parse_create_vector_index(index_name, table_name, expr, using)
         self._result = execute_statement(self._evadb, stmt)
@@ -200,6 +215,11 @@ class EvaDBCursor(object):
 
         Returns:
             EvaDBQuery: The EvaDBQuery object representing the load query.
+
+        Examples:
+            Load the online_video.mp4 file into table named 'youtube_video'.
+
+            >>> conn.load("online_video.mp4", "youtube_video", "video")
         """
         # LOAD {FORMAT} file_regex INTO table_name
         stmt = parse_load(table_name, file_regex, format, **kwargs)
@@ -213,8 +233,13 @@ class EvaDBCursor(object):
             table_name (str): Name of the table to be dropped.
             if_exists (bool): If True, do not raise an error if the Table does not already exist. If False, raise an error.
 
-        Returns
+        Returns:
             EvaDBQuery: The EvaDBQuery object representing the DROP TABLE.
+
+        Examples:
+            Drop table 'sample_table'
+
+            >>> conn.drop_table("sample_table", if_exists = True)
         """
         stmt = parse_drop_table(table_name, if_exists)
         return EvaDBQuery(self._evadb, stmt)
@@ -227,8 +252,13 @@ class EvaDBCursor(object):
             udf_name (str): Name of the udf to be dropped.
             if_exists (bool): If True, do not raise an error if the UDF does not already exist. If False, raise an error.
 
-        Returns
+        Returns:
             EvaDBQuery: The EvaDBQuery object representing the DROP UDF.
+
+        Examples:
+            Drop UDF 'ObjectDetector'
+
+            >>> conn.drop_udf("ObjectDetector", if_exists = True) 
         """
         stmt = parse_drop_udf(udf_name, if_exists)
         return EvaDBQuery(self._evadb, stmt)
@@ -241,8 +271,13 @@ class EvaDBCursor(object):
             index_name (str): Name of the index to be dropped.
             if_exists (bool): If True, do not raise an error if the index does not already exist. If False, raise an error.
 
-        Returns
+        Returns:
             EvaDBQuery: The EvaDBQuery object representing the DROP INDEX.
+
+        Examples:
+            Drop the index with name 'faiss_index'
+
+            >>> conn.drop_index("faiss_index", if_exists = True)
         """
         stmt = parse_drop_index(index_name, if_exists)
         return EvaDBQuery(self._evadb, stmt)
@@ -265,8 +300,11 @@ class EvaDBCursor(object):
             type (str): Type of the udf (e.g. HuggingFace).
             **kwargs: Additional keyword arguments for configuring the create udf operation.
 
-        Returns
+        Returns:
             EvaDBQuery: The EvaDBQuery object representing the UDF created.
+
+        Examples:
+            >>> conn.create_udf("MnistImageClassifier", if_exists = True, 'mnist_image_classifier.py')
         """
         stmt = parse_create_udf(udf_name, if_not_exists, impl_path, type, **kwargs)
         return EvaDBQuery(self._evadb, stmt)
@@ -277,8 +315,12 @@ class EvaDBCursor(object):
 
         Args:
             sql_query (str): The SQL query to be executed
+
         Returns:
             EvaDBQuery: The EvaDBQuery object.
+
+        Examples:
+            >>> conn.query("DROP UDF IF EXISTS SentenceFeatureExtractor;")
         """
         stmt = parse_query(sql_query)
         return EvaDBQuery(self._evadb, stmt)
@@ -297,6 +339,10 @@ def connect(
 
     Returns:
         EvaDBConnection: A connection object representing the connection to the EvaDB database.
+
+    Examples:
+        >>> from evadb import connect
+        >>> conn = connect()
     """
 
     # As we are not employing a client-server approach for the Pythonic interface, the

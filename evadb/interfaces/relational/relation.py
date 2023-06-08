@@ -123,7 +123,7 @@ class EvaDBQuery:
 
     def filter(self, expr: str) -> "EvaDBQuery":
         """
-        Filters rows using the given condition. Multiple chained filters results in `AND`
+        Filters rows using the given condition. Multiple filters can be chained using `AND`
 
         Parameters:
             expr (str): The filter expression.
@@ -181,6 +181,11 @@ class EvaDBQuery:
 
         Returns:
             EvaDBQuery: A EvaDBQuery ordered based on the order_expr.
+
+        Examples:
+            >>> relation = conn.table("PDFs")
+            >>> relation.order("Similarity(SentenceTransformerFeatureExtractor('When was the NATO created?'), SentenceTransformerFeatureExtractor(data) ) DESC")
+
         """
 
         parsed_expr = parse_sql_orderby_expr(order_expr)

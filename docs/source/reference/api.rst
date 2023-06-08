@@ -46,13 +46,17 @@ EvaDBCursor Interface
 .. autosummary::
     :toctree: ./doc
 
-    ~evadb.EvaDBCursor.connect
+    ~evadb.connect
     ~evadb.EvaDBCursor.load
     ~evadb.EvaDBCursor.query
     ~evadb.EvaDBCursor.table
     ~evadb.EvaDBCursor.create_udf
     ~evadb.EvaDBCursor.create_vector_index
     ~evadb.EvaDBCursor.df
+    ~evadb.EvaDBCursor.drop_table
+    ~evadb.EvaDBCursor.drop_udf
+    ~evadb.EvaDBCursor.drop_index
+
 
 EvaDBQuery Interface
 ---------------------
@@ -69,3 +73,4 @@ EvaDBQuery Interface
     ~evadb.EvaDBQuery.order
     ~evadb.EvaDBQuery.show
     ~evadb.EvaDBQuery.sql_query
+    ~evadb.EvaDBQuery.execute
