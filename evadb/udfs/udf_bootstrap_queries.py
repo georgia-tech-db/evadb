@@ -190,7 +190,7 @@ mnistcnn_udf_query = """CREATE UDF IF NOT EXISTS MnistImageClassifier
 chatgpt_udf_query = """CREATE UDF IF NOT EXISTS ChatGPT
         IMPL '{}/udfs/chatgpt.py';
         """.format(
-    EVA_INSTALLATION_DIR
+    EvaDB_INSTALLATION_DIR
 )
 
 

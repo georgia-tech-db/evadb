@@ -19,6 +19,7 @@ import time
 import pandas as pd
 from pytube import YouTube, extract
 from youtube_transcript_api import YouTubeTranscriptApi
+
 import evadb
 
 MAX_CHUNK_SIZE = 10000
@@ -155,7 +156,7 @@ def cleanup():
 
 if __name__ == "__main__":
     print(
-        "Welcome! This app lets you ask questions about any YouTube video. You will only need to supply a Youtube URL and an OpenAI API key."
+        "Welcome! This EvaDB app lets you ask questions about any YouTube video. You will only need to supply a Youtube URL and an OpenAI API key."
     )
 
     # Get Youtube video url
@@ -182,8 +183,8 @@ if __name__ == "__main__":
         cursor = evadb.connect().cursor()
 
         # create chatgpt udf from implemententation
-        chatgpt_udf_rel = cursor.create_udf("ChatGPT", impl_path="chatgpt.py")
-        chatgpt_udf_rel.execute()
+        # chatgpt_udf_rel = cursor.create_udf("ChatGPT", impl_path="chatgpt.py")
+        # chatgpt_udf_rel.execute()
 
         if transcript is not None:
             grouped_transcript = group_transcript(transcript)
