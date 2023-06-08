@@ -26,343 +26,57 @@ import pandas as pd
 from pandas.testing import assert_frame_equal
 
 from evadb.binder.binder_utils import BinderError
-from evadb.configuration.constants import EVA_DATABASE_DIR, EVA_ROOT_DIR
+from evadb.configuration.constants import EvaDB_DATABASE_DIR, EvaDB_ROOT_DIR
 from evadb.executor.executor_utils import ExecutorError
 from evadb.interfaces.relational.db import connect
 from evadb.models.storage.batch import Batch
 from evadb.server.command_handler import execute_query_fetch_all
 
 
-class RelationalAPI(unittest.TestCase):
+class TestOCRHuggingFace(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
     @classmethod
     def setUpClass(cls):
-        cls.db_dir = suffix_pytest_xdist_worker_id_to_dir(EVA_DATABASE_DIR)
+        cls.db_dir = suffix_pytest_xdist_worker_id_to_dir(EvaDB_DATABASE_DIR)
         cls.conn = connect(cls.db_dir)
         cls.evadb = cls.conn._evadb
 
     def setUp(self):
         self.evadb.catalog().reset()
-        self.mnist_path = f"{EVA_ROOT_DIR}/data/mnist/mnist.mp4"
         load_udfs_for_testing(
             self.evadb,
         )
-        self.images = f"{EVA_ROOT_DIR}/data/detoxify/*.jpg"
 
     def tearDown(self):
         shutdown_ray()
         # todo: move these to relational apis as well
-        execute_query_fetch_all(self.evadb, """DROP TABLE IF EXISTS mnist_video;""")
-        execute_query_fetch_all(self.evadb, """DROP TABLE IF EXISTS meme_images;""")
 
-    def test_relation_apis(self):
-        cursor = self.conn.cursor()
-        rel = cursor.load(
-            self.mnist_path,
-            table_name="mnist_video",
-            format="video",
-        )
-        rel.execute()
-
-        rel = cursor.table("mnist_video")
-        assert_frame_equal(rel.df(), cursor.query("select * from mnist_video;").df())
-
-        rel = rel.select("_row_id, id, data")
-        assert_frame_equal(
-            rel.df(),
-            cursor.query("select _row_id, id, data from mnist_video;").df(),
-        )
-
-        rel = rel.filter("id < 10")
-        assert_frame_equal(
-            rel.df(),
-            cursor.query(
-                "select _row_id, id, data from mnist_video where id < 10;"
-            ).df(),
-        )
-
-        rel = (
-            rel.cross_apply("unnest(MnistImageClassifier(data))", "mnist(label)")
-            .filter("mnist.label = 1")
-            .select("_row_id, id")
-        )
-
-        query = """ select _row_id, id
-                    from mnist_video
-                        join lateral unnest(MnistImageClassifier(data)) AS mnist(label)
-                    where id < 10 AND mnist.label = 1;"""
-        assert_frame_equal(rel.df(), cursor.query(query).df())
-
-        rel = cursor.load(
-            self.images,
-            table_name="meme_images",
-            format="image",
-        )
-        rel.execute()
-
-        rel = cursor.table("meme_images").select("_row_id, name")
-        assert_frame_equal(
-            rel.df(), cursor.query("select _row_id, name from meme_images;").df()
-        )
-
-        rel = rel.filter("_row_id < 3")
-        assert_frame_equal(
-            rel.df(),
-            cursor.query(
-                "select _row_id, name from meme_images where _row_id < 3;"
-            ).df(),
-        )
-
-    def test_relation_api_chaining(self):
-        cursor = self.conn.cursor()
-
-        rel = cursor.load(
-            self.mnist_path,
-            table_name="mnist_video",
-            format="video",
-        )
-        rel.execute()
-
-        rel = (
-            cursor.table("mnist_video")
-            .select("id, data")
-            .filter("id > 10")
-            .filter("id < 20")
-        )
-        assert_frame_equal(
-            rel.df(),
-            cursor.query(
-                "select id, data from mnist_video where id > 10 AND id < 20;"
-            ).df(),
-        )
-
-    def test_interleaving_calls(self):
-        cursor = self.conn.cursor()
-
-        rel = cursor.load(
-            self.mnist_path,
-            table_name="mnist_video",
-            format="video",
-        )
-        rel.execute()
-
-        rel = cursor.table("mnist_video")
-        filtered_rel = rel.filter("id > 10")
-
-        assert_frame_equal(
-            rel.filter("id > 10").df(),
-            cursor.query("select * from mnist_video where id > 10;").df(),
-        )
-
-        assert_frame_equal(
-            filtered_rel.select("_row_id, id").df(),
-            cursor.query("select _row_id, id from mnist_video where id > 10;").df(),
-        )
-
-    def test_create_index(self):
-        cursor = self.conn.cursor()
-
-        # load some images
-        rel = cursor.load(
-            self.images,
-            table_name="meme_images",
-            format="image",
-        )
-        rel.execute()
-
-        # todo support register udf
-        cursor.query(
-            f"""CREATE UDF IF NOT EXISTS SiftFeatureExtractor
-                IMPL  '{EVA_ROOT_DIR}/evadb/udfs/sift_feature_extractor.py'"""
-        ).df()
-
-        # create a vector index using QDRANT
-        cursor.create_vector_index(
-            "faiss_index",
-            table_name="meme_images",
-            expr="SiftFeatureExtractor(data)",
-            using="QDRANT",
-        ).df()
-
-        # do similarity search
-        base_image = f"{EVA_ROOT_DIR}/data/detoxify/meme1.jpg"
-        rel = (
-            cursor.table("meme_images")
-            .order(
-                f"Similarity(SiftFeatureExtractor(Open('{base_image}')), SiftFeatureExtractor(data))"
-            )
-            .limit(1)
-            .select("name")
-        )
-        similarity_sql = """SELECT name FROM meme_images
-                            ORDER BY
-                                Similarity(SiftFeatureExtractor(Open("{}")), SiftFeatureExtractor(data))
-                            LIMIT 1;""".format(
-            base_image
-        )
-        assert_frame_equal(rel.df(), cursor.query(similarity_sql).df())
-
-    def test_create_udf_with_relational_api(self):
-        video_file_path = create_sample_video(10)
-
-        cursor = self.conn.cursor()
-        # load video
-        rel = cursor.load(
-            video_file_path,
-            table_name="dummy_video",
-            format="video",
-        )
-        rel.execute()
-
-        create_dummy_object_detector_udf = cursor.create_udf(
-            "DummyObjectDetector", if_not_exists=True, impl_path="test/util.py"
-        )
-        create_dummy_object_detector_udf.execute()
-
-        args = {"task": "automatic-speech-recognition", "model": "openai/whisper-base"}
-
-        create_speech_recognizer_udf_if_not_exists = cursor.create_udf(
-            "SpeechRecognizer", if_not_exists=True, type="HuggingFace", **args
-        )
-        query = create_speech_recognizer_udf_if_not_exists.sql_query()
-        self.assertEqual(
-            query,
-            """CREATE UDF SpeechRecognizer IF NOT EXISTS TYPE HuggingFace 'task' 'automatic-speech-recognition' 'model' 'openai/whisper-base'""",
-        )
-        create_speech_recognizer_udf_if_not_exists.execute()
-
-        # check if next create call of same UDF raises error
-        create_speech_recognizer_udf = cursor.create_udf(
-            "SpeechRecognizer", if_not_exists=False, type="HuggingFace", **args
-        )
-        query = create_speech_recognizer_udf.sql_query()
-        self.assertEqual(
-            query,
-            "CREATE UDF SpeechRecognizer TYPE HuggingFace 'task' 'automatic-speech-recognition' 'model' 'openai/whisper-base'",
-        )
-        with self.assertRaises(ExecutorError):
-            create_speech_recognizer_udf.execute()
-
-        select_query_sql = (
-            "SELECT id, DummyObjectDetector(data) FROM dummy_video ORDER BY id;"
-        )
-        actual_batch = cursor.query(select_query_sql).execute()
-        labels = DummyObjectDetector().labels
-        expected = [
-            {
-                "dummy_video.id": i,
-                "dummyobjectdetector.label": np.array([labels[1 + i % 2]]),
-            }
-            for i in range(10)
-        ]
-        expected_batch = Batch(frames=pd.DataFrame(expected))
-        self.assertEqual(actual_batch, expected_batch)
-
-    def test_drop_with_relational_api(self):
-        video_file_path = create_sample_video(10)
-
-        cursor = self.conn.cursor()
-        # load video
-        rel = cursor.load(
-            video_file_path,
-            table_name="dummy_video",
-            format="video",
-        )
-        rel.execute()
-
-        # Create dummy udf
-        create_dummy_object_detector_udf = cursor.create_udf(
-            "DummyObjectDetector", if_not_exists=True, impl_path="test/util.py"
-        )
-        create_dummy_object_detector_udf.execute()
-
-        # drop dummy udf
-        drop_dummy_object_detector_udf = cursor.drop_udf(
-            "DummyObjectDetector", if_exists=True
-        )
-        drop_dummy_object_detector_udf.execute()
-
-        # Check if deleted successfully
-        select_query_sql = (
-            "SELECT id, DummyObjectDetector(data) FROM dummy_video ORDER BY id;"
-        )
-        with self.assertRaises(BinderError):
-            cursor.query(select_query_sql).execute()
-
-        # drop non existing udf with if_exists=True should not raise error
-        drop_dummy_object_detector_udf = cursor.drop_udf(
-            "DummyObjectDetector", if_exists=True
-        )
-        drop_dummy_object_detector_udf.execute()
-
-        # if_exists=False should raise error
-        drop_dummy_object_detector_udf = cursor.drop_udf(
-            "DummyObjectDetector", if_exists=False
-        )
-        with self.assertRaises(ExecutorError):
-            drop_dummy_object_detector_udf.execute()
-
-        # drop existing table
-        drop_table = cursor.drop_table("dummy_video", if_exists=True)
-        drop_table.execute()
-
-        # Check if deleted successfully
-        select_query_sql = "SELECT id, data FROM dummy_video ORDER BY id;"
-        with self.assertRaises(BinderError):
-            cursor.query(select_query_sql).execute()
-
-        # drop non existing table with if_exists=True should not raise error
-        drop_table = cursor.drop_table("dummy_video", if_exists=True)
-        drop_table.execute()
-
-        # if_exists=False should raise error
-        drop_table = cursor.drop_table("dummy_video", if_exists=False)
-        with self.assertRaises(ExecutorError):
-            drop_table.execute()
-
-    def test_pdf_similarity_search(self):
+    def test_ocr_donut_huggingface(self):
         conn = connect()
         cursor = conn.cursor()
-        pdf_path1 = f"{EVA_ROOT_DIR}/data/documents/state_of_the_union.pdf"
-        pdf_path2 = f"{EVA_ROOT_DIR}/data/documents/layout-parser-paper.pdf"
+        img_path1 = f"{EvaDB_ROOT_DIR}/data/ocr/output.png"
 
-        load_pdf = cursor.load(file_regex=pdf_path1, format="PDF", table_name="PDFss")
-        load_pdf.execute()
-
-        load_pdf = cursor.load(file_regex=pdf_path2, format="PDF", table_name="PDFss")
+        load_pdf = cursor.load(file_regex=img_path1, format="IMAGE", table_name="MyImage")
         load_pdf.execute()
 
         udf_check = cursor.query(
-            "DROP UDF IF  EXISTS SentenceTransformerFeatureExtractor"
+            "DROP UDF IF  EXISTS OCRExactorHuggingFace"
         )
         udf_check.execute()
         udf = cursor.create_udf(
-            "SentenceTransformerFeatureExtractor",
+            "OCRExactorHuggingFace",
             True,
-            f"{EVA_ROOT_DIR}/evadb/udfs/sentence_transformer_feature_extractor.py",
+            f"{EvaDB_ROOT_DIR}/evadb/udfs/ocr_extractor_HuggingFace.py",
         )
         udf.execute()
 
-        cursor.create_vector_index(
-            "faiss_index",
-            table_name="PDFss",
-            expr="SentenceTransformerFeatureExtractor(data)",
-            using="QDRANT",
-        ).df()
-
         query = (
-            cursor.table("PDFss")
-            .order(
-                """Similarity(
-                    SentenceTransformerFeatureExtractor('When was the NATO created?'), SentenceTransformerFeatureExtractor(data)
-                ) DESC"""
-            )
-            .limit(3)
-            .select("data")
+            cursor.table("MyImage")
+            .cross_apply("OCRExactorHuggingFace(data)", "objs(ocr_data)")
         )
         output = query.df()
         print(output)
-        self.assertEqual(len(output), 3)
-        self.assertTrue("pdfss.data" in output.columns)
+        self.assertEqual(len(output), 1)
+        self.assertTrue("objs.ocr_data" in output.columns)

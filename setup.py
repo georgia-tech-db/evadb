@@ -115,6 +115,7 @@ udf_libs = [
     "openai>=0.27.4",  # CHATGPT
     "timm>=0.6.13",  # HUGGINGFACE VISION TASKS
     "norfair>=2.2.0",  # OBJECT TRACKING
+    "protobuf==3.20.*" # OCR DONUT HUGGING FACE
 ]
 
 ### NEEDED FOR EXPERIMENTAL FEATURES

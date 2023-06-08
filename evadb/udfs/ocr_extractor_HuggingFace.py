@@ -36,20 +36,26 @@ from evadb.udfs.abstract.abstract_udf import AbstractUDF
 from evadb.udfs.decorators.decorators import forward, setup
 from evadb.udfs.decorators.io_descriptors.data_types import PandasDataframe
 from evadb.udfs.gpu_compatible import GPUCompatible
+import torchvision
 
 from transformers import DonutProcessor, VisionEncoderDecoderModel
 import torch
 import re
 from PIL import Image
 
+
 class OCRExactorHuggingFace(AbstractUDF, GPUCompatible):
     @setup(cacheable=False, udf_type="FeatureExtraction", batchable=False)
     def setup(self):
-        self.processor = DonutProcessor.from_pretrained("naver-clova-ix/donut-base-finetuned-cord-v2")
-        self.model = VisionEncoderDecoderModel.from_pretrained("naver-clova-ix/donut-base-finetuned-cord-v2")
+        self.processor = DonutProcessor.from_pretrained(
+            "naver-clova-ix/donut-base-finetuned-cord-v2")
+        self.model = VisionEncoderDecoderModel.from_pretrained(
+            "naver-clova-ix/donut-base-finetuned-cord-v2")
         # prepare decoder inputs
         task_prompt = "<s_cord-v2>"
-        self.decoder_input_ids = self.processor.tokenizer(task_prompt, add_special_tokens=False, return_tensors="pt").input_ids
+        self.decoder_input_ids = self.processor.tokenizer(
+            task_prompt, add_special_tokens=False, return_tensors="pt").input_ids
+        self.device = device = "cuda" if torch.cuda.is_available() else "cpu"
 
     def to_device(self, device: str) -> GPUCompatible:
         self.modle = self.model.to(device)
@@ -69,23 +75,38 @@ class OCRExactorHuggingFace(AbstractUDF, GPUCompatible):
         ],
         output_signatures=[
             PandasDataframe(
-                columns=["features"],
-                column_types=[NdArrayType.FLOAT32],
-                column_shapes=[(1, 384)],
+                columns=["ocr_data"],
+                column_types=[NdArrayType.STR],
+                column_shapes=[(1)],
             )
         ],
     )
     def forward(self, df: pd.DataFrame) -> pd.DataFrame:
         def _forward(row: pd.Series) -> np.ndarray:
-            data = row
-            image = Image.fromarray(data)
-            type_im = type(image)
-            pixel_values = processor(image, return_tensors="pt").pixel_values
+            data = row[0]
+            np_data = np.asarray(data)
+            image = torchvision.transforms.ToPILImage()(np_data)
+            pixel_values = self.processor(image, return_tensors="pt").pixel_values
 
-
-
-            return embedded_list
+            outputs = self.model.generate(
+                pixel_values.to(self.device),
+                decoder_input_ids=self.decoder_input_ids.to(self.device),
+                max_length=self.model.decoder.config.max_position_embeddings,
+                early_stopping=True,
+                pad_token_id=self.processor.tokenizer.pad_token_id,
+                eos_token_id=self.processor.tokenizer.eos_token_id,
+                use_cache=True,
+                num_beams=1,
+                bad_words_ids=[[self.processor.tokenizer.unk_token_id]],
+                return_dict_in_generate=True,
+                output_scores=True,
+            )
+            sequence = self.processor.batch_decode(outputs.sequences)[0]
+            sequence = sequence.replace(self.processor.tokenizer.eos_token, "").replace(self.processor.tokenizer.pad_token, "")
+            sequence = re.sub(r"<.*?>", "", sequence)
+            # remove first task start token
+            return sequence
 
         ret = pd.DataFrame()
-        ret["features"] = df.apply(_forward, axis=1)
+        ret["ocr_data"] = df.apply(_forward, axis=1)
         return ret
