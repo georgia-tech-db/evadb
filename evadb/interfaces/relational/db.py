@@ -258,7 +258,7 @@ class EvaDBCursor(object):
         Examples:
             Drop UDF 'ObjectDetector'
 
-            >>> conn.drop_udf("ObjectDetector", if_exists = True) 
+            >>> conn.drop_udf("ObjectDetector", if_exists = True)
         """
         stmt = parse_drop_udf(udf_name, if_exists)
         return EvaDBQuery(self._evadb, stmt)

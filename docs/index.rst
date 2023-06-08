@@ -32,7 +32,7 @@ Why EvaDB?
 
 Over the last decade, AI models have radically changed the world of natural language processing and computer vision. They are accurate on various tasks ranging from question answering to object tracking in videos. However, two challenges prevent many users from benefiting from these models.
 
-- *Usability*: To use an AI model, the user needs to program against multiple low-level libraries, like OpenCV, PyTorch, and Hugging Face. This tedious process often leads to a complex application that glues together these libraries to accomplish the given task. This programming complexity **prevents people who are experts in other domains from benefiting from these models**.
+- *Usability*: To use an AI model, the user needs to program against multiple low-level libraries, like OpenCV, PyTorch, and Hugging Face. This tedious process often leads to a complex application that glues together these libraries to accomplish the given task. This programming complexity prevents people who are experts in other domains from benefiting from these models.
 
 - *Money and Time*: Running these deep learning models on large video or document datasets is costly and time-consuming. For example, the state-of-the-art object detection model takes multiple GPU years to process just a week's videos from a single traffic monitoring camera. Besides the money spent on hardware, these models also increase the time that you spend waiting for the model inference to finish.
 
@@ -44,19 +44,49 @@ That's where EvaDB comes in.
 1. Quickly build AI-Powered Applications
 ^^^^
 
-Historically, SQL database systems have been successful because the **query language is simple enough** in its basic structure that users without prior experience can learn a usable subset of the language on their first sitting. EvaDB supports a simple SQL-like query language designed to make it easier for users to leverage AI models. With this query language, the user may **chain multiple models in a single query** to accomplish complicated tasks with **minimal programming**.
+Historically, SQL database systems have been successful because the query language is simple enough in its basic structure that users without prior experience can learn a usable subset of the language on their first sitting. EvaDB supports a simple SQL-like query language designed to make it easier for users to leverage AI models. With this query language, the user may chain multiple models in a single query to accomplish complicated tasks with minimal programming.
 
 Here is an illustrative query that examines the emotions of actors in a movie by leveraging multiple deep-learning models that take care of detecting faces and analyzing the emotions of the detected bounding boxes:
 
+.. code:: python
+
+    # Query for analyzing the emotions of actors in a movie scene
+
+    # Incrementally construct the AI query using Python API
+    # Connect to the movie table
+    import evadb
+    cursor = evadb.connect().cursor()
+    query = cursor.table("Interstellar")
+
+    # Run the Face Detection model on the video frames ("data")
+    # To get a set of detected faces 
+    # with bounding boxes ("bbox") and confidence scores ("conf")
+    query = query.cross_apply("UNNEST(FaceDetector(data))", "Face(bbox, conf)")
+
+    # Add filter based on frame id ("id")
+    # Here, we run the query on frames 100 through 200
+    query = query.filter("id > 100 AND id < 200")
+
+    # Crop the bounding box from the frames and 
+    # Send the face picture to the Emotion Detection model 
+    query = query.select("id, bbox, EmotionDetector(Crop(data, bbox))")
+
+    # Get the results as a dataframe
+    # With three columns id, bbox, and emotion
+    response = query.df()
+
+The same AI query can also be written directly in SQL and run on EvaDB.
+
 .. code:: sql
 
-   --- Analyze the emotions of actors in a movie scene
+   --- Query for analyzing the emotions of actors in a movie scene
    SELECT id, bbox, EmotionDetector(Crop(data, bbox)) 
    FROM Interstellar 
       JOIN LATERAL UNNEST(FaceDetector(data)) AS Face(bbox, conf)  
    WHERE id < 15;
 
-EvaDB's declarative query language reduces the complexity of the application, leading to **more maintainable code** that allows users to build on top of each other's queries.
+
+EvaDB's declarative query language reduces the complexity of the application, leading to more maintainable code that allows users to build on top of each other's queries.
 
 EvaDB comes with a wide range of models for analyzing unstructured data including image classification, object detection, OCR, face detection, etc. It is fully implemented in Python, and `licensed under the Apache license <https://github.com/georgia-tech-db/eva>`__. It already contains integrations with widely-used AI pipelines based on Hugging Face, PyTorch, and Open AI. 
 
@@ -65,7 +95,7 @@ The high-level SQL API allows even beginners to use EvaDB in a few lines of code
 2. Save time and money
 ^^^^
 
-EvaDB **automatically** optimizes the queries to **save inference cost and query execution time** using its Cascades-style extensible query optimizer. EvaDB's optimizer is tailored for AI pipelines. The Cascades query optimization framework has worked well in SQL database systems for several decades. Query optimization in EvaDB is the bridge that connects the declarative query language to efficient execution.
+EvaDB automatically optimizes the queries to save inference cost and query execution time using its Cascades-style extensible query optimizer. EvaDB's optimizer is tailored for AI pipelines. The Cascades query optimization framework has worked well in SQL database systems for several decades. Query optimization in EvaDB is the bridge that connects the declarative query language to efficient execution.
 
 EvaDB accelerates AI pipelines using a collection of optimizations inspired by SQL database systems including function caching, sampling, and cost-based operator reordering.
 
@@ -87,11 +117,13 @@ The `User Guides <source/tutorials/index.html>`_ section contains Jupyter Notebo
 Key Features
 ------------
 
-1. With EvaDB, you can **easily combine SQL and deep learning models to build next-generation database applications**. EvaDB treats deep learning models as  functions similar to traditional SQL functions like SUM().
-
-2. EvaDB is **extensible by design**. You can write an **user-defined function** (UDF) that wraps around your custom deep learning model. In fact, all the built-in models that are included in EvaDB are written as user-defined functions.
-
-3. EvaDB comes with a collection of **built-in sampling, caching, and filtering optimizations** inspired by relational database systems. These optimizations help **speed up queries on large datasets and save money spent on model inference**.
+- 🔮 Build simpler AI-powered applications using short Python or SQL queries
+- ⚡️ 10x faster applications using AI-centric query optimization  
+- 💰 Save money spent on GPUs
+- 🚀 First-class support for your custom deep learning models through user-defined functions
+- 📦 Built-in caching to eliminate redundant model invocations across queries
+- ⌨️ First-class support for PyTorch, Hugging Face, YOLO, and Open AI models
+- 🐍 Installable via pip and fully implemented in Python
 
 Next Steps
 ------------
@@ -113,8 +145,8 @@ Next Steps
         
         List of all the query commands supported by EvaDB
     
-    .. grid-item-card:: :doc:`User Defined Functions <source/reference/udf>`
-        :link: source/reference/udf
+    .. grid-item-card:: :doc:`User Defined Function <source/reference/udf>`
+        :link: source/reference/udfs/custom
         :link-type: doc
         
         A step-by-step tour of registering a user defined function that wraps around a custom deep learning model

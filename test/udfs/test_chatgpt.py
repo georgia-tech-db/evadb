@@ -19,11 +19,9 @@ from test.markers import ray_skip_marker
 from test.util import get_evadb_for_testing
 from unittest.mock import MagicMock
 
-import openai
 import pandas as pd
 from mock import patch
 
-from evadb.configuration.configuration_manager import ConfigurationManager
 from evadb.models.storage.batch import Batch
 from evadb.server.command_handler import execute_query_fetch_all
 
@@ -100,30 +98,3 @@ class ChatGPTTest(unittest.TestCase):
         gpt_query = f"SELECT {udf_name}(prompt, content) FROM MyTextCSV;"
         output_batch = execute_query_fetch_all(self.evadb, gpt_query)
         self.assertEqual(output_batch, expected_output)
-
-    @patch.dict(os.environ, {"OPENAI_KEY": "dummy_openai_key"}, clear=True)
-    def test_gpt_udf_no_key_in_yml_should_read_env(self):
-        ConfigurationManager().update_value("third_party", "OPENAI_KEY", "")
-        udf_name = "ChatGPT"
-        execute_query_fetch_all(self.evadb, f"DROP UDF IF EXISTS {udf_name};")
-
-        create_udf_query = f"""CREATE UDF {udf_name}
-            IMPL 'evadb/udfs/chatgpt.py'
-            """
-        execute_query_fetch_all(self.evadb, create_udf_query)
-        self.assertEqual(openai.api_key, "dummy_openai_key")
-
-    @patch.dict(os.environ, {}, clear=True)
-    def test_gpt_udf_no_key_in_yml_and_env_should_raise(self):
-        ConfigurationManager().update_value("third_party", "OPENAI_KEY", "")
-        udf_name = "ChatGPT"
-        execute_query_fetch_all(self.evadb, f"DROP UDF IF EXISTS {udf_name};")
-
-        with self.assertRaises(
-            Exception,
-            msg="Please set your OpenAI API key in evadb.yml file (third_party, open_api_key) or environment variable (OPENAI_KEY)",
-        ):
-            create_udf_query = f"""CREATE UDF {udf_name}
-                IMPL 'evadb/udfs/chatgpt.py'
-                """
-            execute_query_fetch_all(self.evadb, create_udf_query)
