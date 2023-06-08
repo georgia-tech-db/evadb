@@ -47,17 +47,7 @@ class ChatGPT(AbstractUDF):
         model="gpt-3.5-turbo",
         temperature: float = 0,
     ) -> None:
-        # Try Configuration Manager
-        openai.api_key = ConfigurationManager().get_value("third_party", "OPENAI_KEY")
-        # If not found, try OS Environment Variable
-        if len(openai.api_key) == 0:
-            openai.api_key = os.environ.get("OPENAI_KEY", "")
-        assert (
-            len(openai.api_key) != 0
-        ), "Please set your OpenAI API key in evadb.yml file (third_party, open_api_key) or environment variable (OPENAI_KEY)"
-
         assert model in _VALID_CHAT_COMPLETION_MODEL, f"Unsupported ChatGPT {model}"
-
         self.model = model
         self.temperature = temperature
 
@@ -83,6 +73,15 @@ class ChatGPT(AbstractUDF):
         ],
     )
     def forward(self, text_df):
+        # Register API key, try configuration manager first
+        openai.api_key = ConfigurationManager().get_value("third_party", "OPENAI_KEY")
+        # If not found, try OS Environment Variable
+        if len(openai.api_key) == 0:
+            openai.api_key = os.environ.get("OPENAI_KEY", "")
+        assert (
+            len(openai.api_key) != 0
+        ), "Please set your OpenAI API key in evadb.yml file (third_party, open_api_key) or environment variable (OPENAI_KEY)"
+
         prompts = text_df[text_df.columns[0]]
         queries = text_df[text_df.columns[1]]
 
