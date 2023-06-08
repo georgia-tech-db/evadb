@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,10 +18,10 @@ import gpt4all
 import pandas as pd
 
 from evadb.catalog.catalog_type import NdArrayType
-from evadb.configuration.configuration_manager import ConfigurationManager
 from evadb.udfs.abstract.abstract_udf import AbstractUDF
 from evadb.udfs.decorators.decorators import forward, setup
 from evadb.udfs.decorators.io_descriptors.data_types import PandasDataframe
+
 
 class CustomGPT4All(AbstractUDF):
     @property
@@ -37,7 +37,7 @@ class CustomGPT4All(AbstractUDF):
         temp=0.8,
         top_k=40,
         repeat_last_n=64,
-        repeat_penalty=1.3, 
+        repeat_penalty=1.3,
         context_erase=0.5,
     ) -> None:
         # Try Configuration Manager
@@ -51,9 +51,7 @@ class CustomGPT4All(AbstractUDF):
             "repeat_last_n": repeat_last_n,
             "repeat_penalty": repeat_penalty,
             "context_erase": context_erase,
-
         }
-
 
     @forward(
         input_signatures=[
@@ -76,6 +74,6 @@ class CustomGPT4All(AbstractUDF):
         ],
     )
     def forward(self, text_df):
-        prompt = text_df.iloc[0,0]
+        prompt = text_df.iloc[0, 0]
         response = self.model.generate(prompt, **self.generate_args, streaming=False)
         return pd.DataFrame({"response": [response]})

@@ -13,21 +13,31 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import evadb
-from evadb.configuration.constants import EvaDB_ROOT_DIR
 
 cursor = evadb.connect().cursor()
 
-def setup_udfs():
 
-    embedding_udf = cursor.create_udf(udf_name="embedding", if_not_exists=True, impl_path='evadb/udfs/sentence_feature_extractor.py')
+def setup_udfs():
+    embedding_udf = cursor.create_udf(
+        udf_name="embedding",
+        if_not_exists=True,
+        impl_path="evadb/udfs/sentence_feature_extractor.py",
+    )
     embedding_udf.execute()
 
-    prompt_udf = cursor.create_udf(udf_name="prompt_generator", if_not_exists=True, impl_path='evadb/udfs/prompt_generator.py')
+    prompt_udf = cursor.create_udf(
+        udf_name="prompt_generator",
+        if_not_exists=True,
+        impl_path="evadb/udfs/prompt_generator.py",
+    )
     prompt_udf.execute()
 
-    gpt4all_udf = cursor.create_udf(udf_name="custom_gpt4all", if_not_exists=True, impl_path='evadb/udfs/custom_gpt4all.py')
+    gpt4all_udf = cursor.create_udf(
+        udf_name="custom_gpt4all",
+        if_not_exists=True,
+        impl_path="evadb/udfs/custom_gpt4all.py",
+    )
     gpt4all_udf.execute()
-
 
 
 def query(question):
@@ -38,7 +48,6 @@ def query(question):
     ).execute()
 
     return response.frames.iloc[0][0]
-
 
 
 setup_udfs()
