@@ -48,13 +48,43 @@ Historically, SQL database systems have been successful because the **query lang
 
 Here is an illustrative query that examines the emotions of actors in a movie by leveraging multiple deep-learning models that take care of detecting faces and analyzing the emotions of the detected bounding boxes:
 
+.. code:: python
+
+    # Query for analyzing the emotions of actors in a movie scene
+
+    # Incrementally construct the AI query using Python API
+    # Connect to the movie table
+    import evadb
+    cursor = evadb.connect().cursor()
+    query = cursor.table("Interstellar")
+
+    # Run the Face Detection model on the video frames ("data")
+    # To get a set of detected faces 
+    # with bounding boxes ("bbox") and confidence scores ("conf")
+    query = query.cross_apply("UNNEST(FaceDetector(data))", "Face(bbox, conf)")
+
+    # Add filter based on frame id ("id")
+    # Here, we run the query on frames 100 through 200
+    query = query.filter("id > 100 AND id < 200")
+
+    # Crop the bounding box from the frames and 
+    # Send the face picture to the Emotion Detection model 
+    query = query.select("id, bbox, EmotionDetector(Crop(data, bbox))")
+
+    # Get the results as a dataframe
+    # With three columns id, bbox, and emotion
+    response = query.df()
+
+The same AI query can also be written directly in SQL and run on EvaDB.
+
 .. code:: sql
 
-   --- Analyze the emotions of actors in a movie scene
+   --- Query for analyzing the emotions of actors in a movie scene
    SELECT id, bbox, EmotionDetector(Crop(data, bbox)) 
    FROM Interstellar 
       JOIN LATERAL UNNEST(FaceDetector(data)) AS Face(bbox, conf)  
    WHERE id < 15;
+
 
 EvaDB's declarative query language reduces the complexity of the application, leading to **more maintainable code** that allows users to build on top of each other's queries.
 
