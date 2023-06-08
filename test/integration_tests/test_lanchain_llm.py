@@ -65,7 +65,7 @@ class TestLangchainLLM(unittest.TestCase):
         udf = cursor.create_udf(
             "GPT4AllQaUDF",
             True,
-            f"{EVA_ROOT_DIR}/evadb/udfs/GPT4ALL.py",
+            f"{EVA_ROOT_DIR}/evadb/udfs/GPT4AllQA.py",
         )
         udf.execute()
         # fetching Similarity based on features from SentenceTransformerFeatureExtractor udf and returning top 3 results
