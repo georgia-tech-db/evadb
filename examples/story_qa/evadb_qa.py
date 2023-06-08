@@ -51,7 +51,7 @@ def ask_question(path):
 
     # Search similar text as the asked question.
     question = "Who is Prince Boris Drubetskoy?"
-    res_batch = cursor.query(f"""SELECT data FROM {story_feat_table} 
+    res_batch = cursor.query(f"""SELECT data FROM { } 
         ORDER BY Similarity(SentenceFeatureExtractor('{question}'), features)
         LIMIT 5;""").execute()
     

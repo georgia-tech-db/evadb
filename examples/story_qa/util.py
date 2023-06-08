@@ -42,3 +42,5 @@ def try_execute(conn, query):
         conn.query(query).execute()
     except Exception:
         pass
+    
+    
