@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ from typing import Iterator, Optional
 
 from evadb.binder.statement_binder import StatementBinder
 from evadb.binder.statement_binder_context import StatementBinderContext
-from evadb.database import EVADatabase
+from evadb.database import EvaDBDatabase
 from evadb.executor.plan_executor import PlanExecutor
 from evadb.models.server.response import Response, ResponseStatus
 from evadb.models.storage.batch import Batch
@@ -29,7 +29,7 @@ from evadb.utils.stats import Timer
 
 
 def execute_query(
-    evadb: EVADatabase, query, report_time: bool = False, **kwargs
+    evadb: EvaDBDatabase, query, report_time: bool = False, **kwargs
 ) -> Iterator[Batch]:
     """
     Execute the query and return a result generator.
@@ -48,7 +48,7 @@ def execute_query(
 
 
 def execute_query_fetch_all(
-    evadb: EVADatabase, query=None, **kwargs
+    evadb: EvaDBDatabase, query=None, **kwargs
 ) -> Optional[Batch]:
     """
     Execute the query and fetch all results into one Batch object.
@@ -59,7 +59,7 @@ def execute_query_fetch_all(
         return Batch.concat(batch_list, copy=False)
 
 
-async def handle_request(evadb: EVADatabase, client_writer, request_message):
+async def handle_request(evadb: EvaDBDatabase, client_writer, request_message):
     """
     Reads a request from a client and processes it
 

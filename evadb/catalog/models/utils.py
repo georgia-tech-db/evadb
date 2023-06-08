@@ -71,7 +71,7 @@ def drop_all_tables_except_catalog(engine: Engine):
 
 
 #####
-# Dataclass equivalents of catalog entires
+# Dataclass equivalents of catalog entries
 # This is done to ensure we don't expose the sqlalchemy dependencies beyond catalog
 # service. Further, sqlalchemy does not allow sharing of objects across threads.
 

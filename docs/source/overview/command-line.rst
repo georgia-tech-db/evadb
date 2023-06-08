@@ -1,18 +1,11 @@
 Command Line Client
 ====
 
-Besides the Jupyter notebook interface, EVA also exports a command line interface for querying the server. This interface allows for quick querying from the terminal:
+Besides Python files and Jupyter notebooks, EvaDB also supports a command line interface for querying the data. This interface allows for quick querying from the terminal:
 
 .. code-block:: bash
 
     >>> eva_client
-    eva=# LOAD VIDEO "mnist.mp4" INTO MNISTVid;
-    @status: ResponseStatus.SUCCESS
-    @batch:
-
-    0 Video successfully added at location: mnist.p4
-    @query_time: 0.045
-
     eva=# SELECT id, data FROM MNISTVid WHERE id < 1000;
     @status: ResponseStatus.SUCCESS
     @batch:

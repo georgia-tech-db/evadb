@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import pandas as pd
 import pytest
 from moto import mock_s3
 
-from evadb.configuration.constants import EVA_ROOT_DIR
+from evadb.configuration.constants import EvaDB_ROOT_DIR
 from evadb.models.storage.batch import Batch
 from evadb.parser.types import FileFormatType
 from evadb.server.command_handler import execute_query_fetch_all
@@ -43,7 +43,7 @@ class S3LoadExecutorTest(unittest.TestCase):
         # reset the catalog manager before running each test
         self.evadb.catalog().reset()
         self.video_file_path = create_sample_video()
-        self.multiple_video_file_path = f"{EVA_ROOT_DIR}/data/sample_videos/1"
+        self.multiple_video_file_path = f"{EvaDB_ROOT_DIR}/data/sample_videos/1"
         self.s3_download_dir = self.evadb.config.get_value("storage", "s3_download_dir")
 
         """Mocked AWS Credentials for moto."""

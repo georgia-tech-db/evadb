@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 # limitations under the License.
 from typing import Iterator
 
-from evadb.database import EVADatabase
+from evadb.database import EvaDBDatabase
 from evadb.executor.abstract_executor import AbstractExecutor
 from evadb.executor.apply_and_merge_executor import ApplyAndMergeExecutor
 from evadb.executor.create_executor import CreateExecutor
@@ -22,8 +22,7 @@ from evadb.executor.create_index_executor import CreateIndexExecutor
 from evadb.executor.create_mat_view_executor import CreateMaterializedViewExecutor
 from evadb.executor.create_udf_executor import CreateUDFExecutor
 from evadb.executor.delete_executor import DeleteExecutor
-from evadb.executor.drop_executor import DropExecutor
-from evadb.executor.drop_udf_executor import DropUDFExecutor
+from evadb.executor.drop_object_executor import DropObjectExecutor
 from evadb.executor.exchange_executor import ExchangeExecutor
 from evadb.executor.executor_utils import ExecutorError
 from evadb.executor.explain_executor import ExplainExecutor
@@ -60,10 +59,10 @@ class PlanExecutor:
 
     Arguments:
         plan (AbstractPlan): Physical plan tree which needs to be executed
-        evadb (EVADatabase): database to execute the query on
+        evadb (EvaDBDatabase): database to execute the query on
     """
 
-    def __init__(self, evadb: EVADatabase, plan: AbstractPlan):
+    def __init__(self, evadb: EvaDBDatabase, plan: AbstractPlan):
         self._db = evadb
         self._plan = plan
 
@@ -95,14 +94,12 @@ class PlanExecutor:
             executor_node = CreateExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.RENAME:
             executor_node = RenameExecutor(db=self._db, node=plan)
-        elif plan_opr_type == PlanOprType.DROP:
-            executor_node = DropExecutor(db=self._db, node=plan)
+        elif plan_opr_type == PlanOprType.DROP_OBJECT:
+            executor_node = DropObjectExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.INSERT:
             executor_node = InsertExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.CREATE_UDF:
             executor_node = CreateUDFExecutor(db=self._db, node=plan)
-        elif plan_opr_type == PlanOprType.DROP_UDF:
-            executor_node = DropUDFExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.LOAD_DATA:
             executor_node = LoadDataExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.GROUP_BY:

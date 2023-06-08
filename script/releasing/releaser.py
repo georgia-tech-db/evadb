@@ -64,7 +64,7 @@ EVA_DIR = functools.reduce(
 )
 
 # other directory paths used are relative to peloton_dir
-EVA_SRC_DIR = os.path.join(EVA_DIR, "eva")
+EVA_SRC_DIR = os.path.join(EVA_DIR, "evadb")
 EVA_CHANGELOG_PATH = os.path.join(EVA_DIR, "CHANGELOG.md")
 
 # ==============================================
@@ -153,7 +153,7 @@ def read_file(path, encoding="utf-8"):
 
 
 def release_version(current_version):
-    version_path = os.path.join(os.path.join(EVA_DIR, "eva"), "version.py")
+    version_path = os.path.join(os.path.join(EVA_DIR, "evadb"), "version.py")
     with open(version_path, "r") as version_file:
         output = version_file.read()
         output = output.replace("+dev", "")

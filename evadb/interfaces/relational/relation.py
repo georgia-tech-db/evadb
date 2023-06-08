@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ from typing import Union
 
 import pandas
 
-from evadb.database import EVADatabase
+from evadb.database import EvaDBDatabase
 from evadb.interfaces.relational.utils import (
     create_limit_expression,
     create_star_expression,
@@ -36,10 +36,10 @@ from evadb.parser.types import JoinType
 from evadb.parser.utils import parse_sql_orderby_expr
 
 
-class EVADBQuery:
+class EvaDBDBQuery:
     def __init__(
         self,
-        evadb: EVADatabase,
+        evadb: EvaDBDatabase,
         query_node: Union[AbstractStatement, TableRef],
         alias: Alias = None,
     ):
@@ -47,14 +47,14 @@ class EVADBQuery:
         self._query_node = query_node
         self._alias = alias
 
-    def alias(self, alias: str) -> "EVADBQuery":
+    def alias(self, alias: str) -> "EvaDBDBQuery":
         """Returns a new Relation with an alias set.
 
         Args:
             alias (str): an alias name to be set for the Relation.
 
         Returns:
-            EVADBQuery: Aliased Relation.
+            EvaDBDBQuery: Aliased Relation.
 
         Examples:
             >>> relation = conn.table("sample_table")
@@ -62,7 +62,7 @@ class EVADBQuery:
         """
         self._alias = Alias(alias)
 
-    def cross_apply(self, expr: str, alias: str) -> "EVADBQuery":
+    def cross_apply(self, expr: str, alias: str) -> "EvaDBDBQuery":
         """Execute a expr on all the rows of the relation
 
         Args:
@@ -70,7 +70,7 @@ class EVADBQuery:
             alias (str): alias of the output of the expr
 
         Returns:
-            `EVADBQuery`: relation
+            `EvaDBDBQuery`: relation
 
         Examples:
 
@@ -121,7 +121,7 @@ class EVADBQuery:
         assert result.frames is not None
         return result
 
-    def filter(self, expr: str) -> "EVADBQuery":
+    def filter(self, expr: str) -> "EvaDBDBQuery":
         """
         Filters rows using the given condition. Multiple chained filters results in `AND`
 
@@ -129,7 +129,7 @@ class EVADBQuery:
             expr (str): The filter expression.
 
         Returns:
-            EVADBQuery : Filtered EVADBQuery.
+            EvaDBDBQuery : Filtered EvaDBDBQuery.
         Examples:
             >>> relation = conn.table("sample_table")
             >>> relation.filter("col1 > 10")
@@ -149,14 +149,14 @@ class EVADBQuery:
 
         return self
 
-    def limit(self, num: int) -> "EVADBQuery":
+    def limit(self, num: int) -> "EvaDBDBQuery":
         """Limits the result count to the number specified.
 
         Args:
             num (int): Number of records to return. Will return num records or all records if the Relation contains fewer records.
 
         Returns:
-            EVADBQuery: Relation with subset of records
+            EvaDBDBQuery: Relation with subset of records
 
         Examples:
             >>> relation = conn.table("sample_table")
@@ -173,14 +173,14 @@ class EVADBQuery:
 
         return self
 
-    def order(self, order_expr: str) -> "EVADBQuery":
+    def order(self, order_expr: str) -> "EvaDBDBQuery":
         """Reorder the relation based on the order_expr
 
         Args:
             order_expr (str): sql expression to order the relation
 
         Returns:
-            EVADBQuery: A EVADBQuery ordered based on the order_expr.
+            EvaDBDBQuery: A EvaDBDBQuery ordered based on the order_expr.
         """
 
         parsed_expr = parse_sql_orderby_expr(order_expr)
@@ -192,24 +192,24 @@ class EVADBQuery:
 
         return self
 
-    def select(self, expr: str) -> "EVADBQuery":
+    def select(self, expr: str) -> "EvaDBDBQuery":
         """
-        Projects a set of expressions and returns a new EVADBQuery.
+        Projects a set of expressions and returns a new EvaDBDBQuery.
 
         Parameters:
-            exprs (Union[str, List[str]]): The expression(s) to be selected. If '*' is provided, it expands to all columns in the current EVADBQuery.
+            exprs (Union[str, List[str]]): The expression(s) to be selected. If '*' is provided, it expands to all columns in the current EvaDBDBQuery.
 
         Returns:
-            EVADBQuery: A EVADBQuery with subset (or all) of columns.
+            EvaDBDBQuery: A EvaDBDBQuery with subset (or all) of columns.
 
         Examples:
             >>> relation = conn.table("sample_table")
 
-            Select all columns in the EVADBQuery.
+            Select all columns in the EvaDBDBQuery.
 
             >>> relation.select("*")
 
-            Select all subset of columns in the EVADBQuery.
+            Select all subset of columns in the EvaDBDBQuery.
 
             >>> relation.select("col1")
             >>> relation.select("col1, col2")

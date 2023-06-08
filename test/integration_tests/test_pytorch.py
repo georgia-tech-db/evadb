@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import numpy as np
 import pandas.testing as pd_testing
 import pytest
 
-from evadb.configuration.constants import EVA_ROOT_DIR
+from evadb.configuration.constants import EvaDB_ROOT_DIR
 from evadb.executor.executor_utils import ExecutorError
 from evadb.models.storage.batch import Batch
 from evadb.server.command_handler import execute_query_fetch_all
@@ -43,12 +43,12 @@ class PytorchTest(unittest.TestCase):
         cls.evadb.catalog().reset()
         os.environ["ray"] = str(cls.evadb.config.get_value("experimental", "ray"))
 
-        ua_detrac = f"{EVA_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
-        mnist = f"{EVA_ROOT_DIR}/data/mnist/mnist.mp4"
-        actions = f"{EVA_ROOT_DIR}/data/actions/actions.mp4"
-        asl_actions = f"{EVA_ROOT_DIR}/data/actions/computer_asl.mp4"
-        meme1 = f"{EVA_ROOT_DIR}/data/detoxify/meme1.jpg"
-        meme2 = f"{EVA_ROOT_DIR}/data/detoxify/meme2.jpg"
+        ua_detrac = f"{EvaDB_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
+        mnist = f"{EvaDB_ROOT_DIR}/data/mnist/mnist.mp4"
+        actions = f"{EvaDB_ROOT_DIR}/data/actions/actions.mp4"
+        asl_actions = f"{EvaDB_ROOT_DIR}/data/actions/computer_asl.mp4"
+        meme1 = f"{EvaDB_ROOT_DIR}/data/detoxify/meme1.jpg"
+        meme2 = f"{EvaDB_ROOT_DIR}/data/detoxify/meme2.jpg"
 
         execute_query_fetch_all(cls.evadb, f"LOAD VIDEO '{ua_detrac}' INTO MyVideo;")
         execute_query_fetch_all(cls.evadb, f"LOAD VIDEO '{mnist}' INTO MNIST;")
