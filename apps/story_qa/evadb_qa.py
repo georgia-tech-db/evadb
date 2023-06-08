@@ -12,8 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from time import perf_counter
-
 from gpt4all import GPT4All
 from unidecode import unidecode
 from util import download_story, read_text_line, try_execute, log_time
@@ -111,7 +109,7 @@ def ask_question(path):
     llm.chat_completion(messages)
 
     log_time(timestamps)
-    print(f"Total Time: {(timestamps[t_i] - timestamps[0]) * 1000:.3f} ms")
+    print(f"Total Time: {(timestamps[len(timestamps) - 1] - timestamps[0]) * 1000:.3f} ms")
 
 
 def main():

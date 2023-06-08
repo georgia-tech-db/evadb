@@ -14,7 +14,6 @@
 # limitations under the License.
 import os
 import urllib.request
-
 from time import perf_counter
 
 
