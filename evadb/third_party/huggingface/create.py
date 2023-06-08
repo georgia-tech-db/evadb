@@ -28,7 +28,7 @@ from evadb.third_party.huggingface.model import (
     ImageHFModel,
     TextHFModel,
 )
-from eva.third_party.huggingface.utils import split_args_from_metadata
+from evadb.third_party.huggingface.utils import split_args_from_metadata
 
 """
 We currently support the following tasks from HuggingFace.
