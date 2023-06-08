@@ -1,6 +1,6 @@
-===
+=========
 Concepts
-===
+=========
 
 These are some high-level concepts related to EvaDB.
 
@@ -25,12 +25,22 @@ Here is an illustrative UDF for classifying MNIST images.
     response = cursor.df()
     print(response)
 
-You can use the newly registered UDF anywhere in the query!
-~~~~
+That's it! You can now use the newly registered UDF anywhere in the query -- in the ``select`` or ``filter`` calls.
 
 .. code-block:: python
 
-    query = cursor.table("MNISTVid")
+    query = cursor.table("MNISTVideo")
     query = query.filter("id = 30 OR id = 50 OR id = 70")
+
+    # Here, we are selecting the output of the function
     query = query.select("data, MnistImageClassifier(data).label")
     response = query.df()
+
+.. code-block:: python
+
+    query2 = cursor.table("MNISTVideo")
+
+    # Here, we are also filtering based on the output of the function
+    query2 = query2.filter("MnistImageClassifier(data).label = '6' AND id < 10")
+    query2 = query2.select("data, MnistImageClassifier(data).label")
+    response = query2.df()
