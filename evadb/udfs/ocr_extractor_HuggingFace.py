@@ -15,6 +15,8 @@
 
 import re
 
+import cv2
+
 # coding=utf-8
 # Copyright 2018-2022 EVA
 #
@@ -34,7 +36,7 @@ import pandas as pd
 import torch
 import torchvision
 from transformers import DonutProcessor, VisionEncoderDecoderModel
-import cv2
+
 from evadb.catalog.catalog_type import NdArrayType
 from evadb.udfs.abstract.abstract_udf import AbstractUDF
 from evadb.udfs.decorators.decorators import forward, setup
