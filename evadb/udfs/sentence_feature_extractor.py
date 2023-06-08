@@ -18,11 +18,11 @@ import torch
 import torch.nn.functional as F
 from transformers import AutoModel, AutoTokenizer
 
-from eva.catalog.catalog_type import NdArrayType
-from eva.udfs.abstract.abstract_udf import AbstractUDF
-from eva.udfs.decorators.decorators import forward, setup
-from eva.udfs.decorators.io_descriptors.data_types import PandasDataframe
-from eva.udfs.gpu_compatible import GPUCompatible
+from evadb.catalog.catalog_type import NdArrayType
+from evadb.udfs.abstract.abstract_udf import AbstractUDF
+from evadb.udfs.decorators.decorators import forward, setup
+from evadb.udfs.decorators.io_descriptors.data_types import PandasDataframe
+from evadb.udfs.gpu_compatible import GPUCompatible
 
 
 class SentenceFeatureExtractor(AbstractUDF, GPUCompatible):

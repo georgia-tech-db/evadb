@@ -26,7 +26,11 @@ def read_text_line(path, num_token=1000):
     whitelist = set("abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
     with open(path, "r") as f:
+        l = 0
         for line in f.readlines():
+            l = l + 1
+            if l % 10 == 0:
+                print("line: " + str(l))
             for i in range(0, len(line), num_token):
                 cut_line = line[i : min(i + 1000, len(line))]
                 cut_line = "".join(filter(whitelist.__contains__, cut_line))

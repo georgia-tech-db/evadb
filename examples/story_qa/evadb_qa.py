@@ -11,20 +11,22 @@ def ask_question(path):
     llm = GPT4All("ggml-gpt4all-j-v1.3-groovy")
 
     cursor = evadb.connect().cursor()
-
-    Text_feat_udf_query = """CREATE UDF IF NOT EXISTS SentenceFeatureExtractor
-            IMPL  '../eva/udfs/sentence_feature_extractor.py';
-            """
     
-    cursor.query("DROP UDF IF EXISTS SentenceFeatureExtractor;").execute()
-    cursor.query(Text_feat_udf_query).execute()
-
     story_table = f"TablePPText"
     story_feat_table = f"FeatTablePPText"
     index_table = f"IndexTable"
 
+    Text_feat_udf_query = """CREATE UDF IF NOT EXISTS SentenceFeatureExtractor
+            IMPL  'evadb/udfs/sentence_feature_extractor.py';
+            """
+
+    cursor.query("DROP UDF IF EXISTS SentenceFeatureExtractor;").execute()
+    cursor.query(Text_feat_udf_query).execute()
+
     try_execute(cursor, f"DROP TABLE IF EXISTS {story_table};")
     try_execute(cursor, f"DROP TABLE IF EXISTS {story_feat_table};")
+
+    print("Create table")
 
     cursor.query(f"CREATE TABLE {story_table} (id INTEGER, data TEXT(1000));").execute()
 
@@ -32,14 +34,20 @@ def ask_question(path):
     for i, text in enumerate(read_text_line(path)):
         cursor.query(f"INSERT INTO {story_table} (id, data) VALUES ({i}, '{text}');").execute()
 
+    print("Extract features")
+
     # Extract features from text.
     st = perf_counter()
     cursor.query(f"""CREATE TABLE {story_feat_table} AS
         SELECT SentenceFeatureExtractor(data), data FROM {story_table};""").execute()
     fin = perf_counter()
 
+    print("Create index")
+
     # Create search index on extracted features.
     cursor.query(f"CREATE INDEX {index_table} ON {story_feat_table} (features) USING FAISS;").execute()
+
+    print("Query")
 
     # Search similar text as the asked question.
     question = "Who is Prince Boris Drubetskoy?"
@@ -47,11 +55,15 @@ def ask_question(path):
         ORDER BY Similarity(SentenceFeatureExtractor('{question}'), features)
         LIMIT 5;""").execute()
     
+    print("Merge")
+
     # Merge all context information.
     context_list = []
     for i in range(len(res_batch)):
         context_list.append(res_batch.frames[f"{story_feat_table.lower()}.data"][i])
     context = ";".join(context_list)
+
+    print("LLM")
 
     # LLM
     messages = [
