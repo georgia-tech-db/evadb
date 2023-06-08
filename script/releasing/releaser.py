@@ -420,6 +420,16 @@ if __name__ == "__main__":
     # GET CHANGELOG 
     release_date = get_commit_id_of_latest_release()
     changelog = get_changelog(release_date)
+    print(changelog)
+
+    # UPDATE CHANGELOG
+    append_changelog(changelog, current_version_str_without_dev)
+
+    # RELEASE VERSION
+    release_version(current_version_str_without_dev)
+
+    # PUBLISH WHEELS ON PYPI
+    publish_wheels(current_version_str_without_dev)
 
     # UPLOAD ASSETS ON GITHUB
     upload_assets(changelog, current_version_str_without_dev)
