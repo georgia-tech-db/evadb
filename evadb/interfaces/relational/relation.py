@@ -115,7 +115,7 @@ class EvaDBQuery:
         """Transform the relation into a result set
 
         Returns:
-            Batch: result as eva Batch
+            Batch: result as evadb Batch
         """
         result = execute_statement(self._evadb, self._query_node.copy())
         assert result.frames is not None

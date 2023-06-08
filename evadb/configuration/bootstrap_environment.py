@@ -29,45 +29,44 @@ from evadb.configuration.constants import (
     EvaDB_CONFIG_FILE,
     EvaDB_DATASET_DIR,
 )
-from evadb.utils.logging_manager import logger as eva_logger
+from evadb.utils.logging_manager import logger as evadb_logger
 
 
-def get_base_config(eva_installation_dir: Path) -> Path:
+def get_base_config(evadb_installation_dir: Path) -> Path:
     """
     Get path to .evadb.yml source path.
-    This file will be copied to user's .eva directory.
     """
-    # if eva package is installed into environment
+    # if evadb package is installed in environment
     if importlib_resources.is_resource("evadb", EvaDB_CONFIG_FILE):
         with importlib_resources.path("evadb", EvaDB_CONFIG_FILE) as yml_path:
             return yml_path
     else:
         # For local dev environments without package installed
-        return eva_installation_dir / EvaDB_CONFIG_FILE
+        return evadb_installation_dir / EvaDB_CONFIG_FILE
 
 
-def get_default_db_uri(eva_db_dir: Path):
-    return f"sqlite:///{eva_db_dir.resolve()}/{DB_DEFAULT_NAME}"
+def get_default_db_uri(evadb_dir: Path):
+    return f"sqlite:///{evadb_dir.resolve()}/{DB_DEFAULT_NAME}"
 
 
-def bootstrap_environment(eva_db_dir: Path, eva_installation_dir: Path):
+def bootstrap_environment(evadb_dir: Path, evadb_installation_dir: Path):
     """
     Populates necessary configuration for EvaDB to be able to run.
 
     Arguments:
-        eva_db_dir: path to eva database directory
-        eva_installation_dir: path to eva module
+        evadb_dir: path to evadb database directory
+        evadb_installation_dir: path to evadb package
     """
 
-    default_config_path = get_base_config(eva_installation_dir).resolve()
+    default_config_path = get_base_config(evadb_installation_dir).resolve()
 
     # creates necessary directories
     config_default_dict = create_directories_and_get_default_config_values(
-        Path(eva_db_dir), Path(eva_installation_dir)
+        Path(evadb_dir), Path(evadb_installation_dir)
     )
 
-    assert eva_db_dir.exists(), f"{eva_db_dir} does not exist"
-    assert eva_installation_dir.exists(), f"{eva_installation_dir} does not exist"
+    assert evadb_dir.exists(), f"{evadb_dir} does not exist"
+    assert evadb_installation_dir.exists(), f"{evadb_installation_dir} does not exist"
     config_obj = {}
     with default_config_path.open("r") as yml_file:
         config_obj = yaml.load(yml_file, Loader=yaml.FullLoader)
@@ -76,25 +75,25 @@ def bootstrap_environment(eva_db_dir: Path, eva_installation_dir: Path):
 
     # set logger to appropriate level (debug or release)
     level = logging.WARN if mode == "release" else logging.DEBUG
-    eva_logger.setLevel(level)
-    eva_logger.debug(f"Setting logging level to: {str(level)}")
+    evadb_logger.setLevel(level)
+    evadb_logger.debug(f"Setting logging level to: {str(level)}")
 
     return config_obj
 
 
 def create_directories_and_get_default_config_values(
-    eva_db_dir: Path, eva_installation_dir: Path, category: str = None, key: str = None
+    evadb_dir: Path, evadb_installation_dir: Path, category: str = None, key: str = None
 ) -> Union[dict, str]:
-    default_install_dir = eva_installation_dir
-    dataset_location = eva_db_dir / EvaDB_DATASET_DIR
-    index_dir = eva_db_dir / INDEX_DIR
-    cache_dir = eva_db_dir / CACHE_DIR
-    s3_dir = eva_db_dir / S3_DOWNLOAD_DIR
-    tmp_dir = eva_db_dir / TMP_DIR
-    udf_dir = eva_db_dir / UDF_DIR
+    default_install_dir = evadb_installation_dir
+    dataset_location = evadb_dir / EvaDB_DATASET_DIR
+    index_dir = evadb_dir / INDEX_DIR
+    cache_dir = evadb_dir / CACHE_DIR
+    s3_dir = evadb_dir / S3_DOWNLOAD_DIR
+    tmp_dir = evadb_dir / TMP_DIR
+    udf_dir = evadb_dir / UDF_DIR
 
-    if not eva_db_dir.exists():
-        eva_db_dir.mkdir(parents=True, exist_ok=True)
+    if not evadb_dir.exists():
+        evadb_dir.mkdir(parents=True, exist_ok=True)
     if not dataset_location.exists():
         dataset_location.mkdir(parents=True, exist_ok=True)
     if not index_dir.exists():
@@ -111,9 +110,9 @@ def create_directories_and_get_default_config_values(
     config_obj = {}
     config_obj["core"] = {}
     config_obj["storage"] = {}
-    config_obj["core"]["eva_installation_dir"] = str(default_install_dir.resolve())
+    config_obj["core"]["evadb_installation_dir"] = str(default_install_dir.resolve())
     config_obj["core"]["datasets_dir"] = str(dataset_location.resolve())
-    config_obj["core"]["catalog_database_uri"] = get_default_db_uri(eva_db_dir)
+    config_obj["core"]["catalog_database_uri"] = get_default_db_uri(evadb_dir)
     config_obj["storage"]["index_dir"] = str(index_dir.resolve())
     config_obj["storage"]["cache_dir"] = str(cache_dir.resolve())
     config_obj["storage"]["s3_download_dir"] = str(s3_dir.resolve())

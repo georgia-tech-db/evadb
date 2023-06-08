@@ -85,9 +85,9 @@ source_suffix = [".rst", ".md"]
 master_doc = "index"
 
 # General information about the project.
-project = "EvaDB DB"
-copyright = str(date.today().year) + ", EvaDB DB."
-author = u"EvaDB DB"
+project = "EvaDB"
+copyright = str(date.today().year) + ", EvaDB."
+author = u"EvaDB"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.

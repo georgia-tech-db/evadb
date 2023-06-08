@@ -17,7 +17,7 @@ import asyncio
 import pandas
 
 from evadb.configuration.constants import EvaDB_DATABASE_DIR
-from evadb.database import EvaDBDatabase, init_eva_db_instance
+from evadb.database import EvaDBDatabase, init_evadb_instance
 from evadb.expression.tuple_value_expression import TupleValueExpression
 from evadb.interfaces.relational.relation import EvaDBQuery
 from evadb.interfaces.relational.utils import execute_statement, try_binding
@@ -55,9 +55,9 @@ class EvaDBConnection:
 
 
         Examples:
-            >>> from eva import connect
-            >>> conn = connect()
-            >>> cursor = conn.cursor()
+            >>> import evadb
+            >>> connection = connect()
+            >>> cursor = connection.cursor()
         """
         # One unique cursor for one connection
         if self._cursor is None:
@@ -327,13 +327,13 @@ class EvaDBCursor(object):
 
 
 def connect(
-    eva_dir: str = EvaDB_DATABASE_DIR, sql_backend: str = None
+    evadb_dir: str = EvaDB_DATABASE_DIR, sql_backend: str = None
 ) -> EvaDBConnection:
     """
     Connects to the EvaDB server and returns a connection object.
 
     Args:
-        eva_dir (str): The directory used by EvaDB to store database-related content. Default is "eva_db".
+        evadb_dir (str): The directory used by EvaDB to store database-related content. Default is "evadb".
         sql_backend (str): Custom database URI to be used. We follow the SQLAlchemy database URL format.
             Default is SQLite in the EvaDB directory. See https://docs.sqlalchemy.org/en/20/core/engines.html#database-urls.
 
@@ -348,7 +348,7 @@ def connect(
     # As we are not employing a client-server approach for the Pythonic interface, the
     # host and port parameters are irrelevant. Additionally, for the EvaDBConnection, the
     # reader and writer parameters are not relevant in the serverless approach.
-    evadb = init_eva_db_instance(eva_dir, custom_db_uri=sql_backend)
+    evadb = init_evadb_instance(evadb_dir, custom_db_uri=sql_backend)
     init_builtin_udfs(evadb, mode="release")
     return EvaDBConnection(evadb, None, None)
 

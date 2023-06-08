@@ -103,16 +103,16 @@ class AbstractExecutor(ABC):
             for child in node.children:
                 queue.append(child)
 
-    def find_all(self, exceution_type: Any):
-        """Returns a generator which visits all the nodes in execution tree and yields one that matches the passed `exceution_type`.
+    def find_all(self, execution_type: Any):
+        """Returns a generator which visits all the nodes in execution tree and yields one that matches the passed `execution_type`.
 
         Args:
-            exceution_type (Any): execution type to match with
+            execution_type (Any): execution type to match with
 
         Returns:
             the generator object.
         """
 
         for node in self.bfs():
-            if isinstance(node, exceution_type):
+            if isinstance(node, execution_type):
                 yield node

@@ -26,11 +26,11 @@ RUN chown -R evauser:evauser /app
 USER evauser
 ENV PATH="/home/evauser/.local/bin:${PATH}"
 
-# Install EVA
+# Install EvaDB
 RUN python3.9 -m pip install evadb 
 
-# Expose the default port EVA runs on 
+# Expose the default port EvaDB runs on 
 EXPOSE 8803
 
-# Start EVA
+# Start EvaDB
 CMD ["eva_server"]

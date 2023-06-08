@@ -49,6 +49,15 @@ DummyFeatureExtractor_udf_query = """CREATE UDF
     EvaDB_INSTALLATION_DIR
 )
 
+fuzzy_udf_query = """CREATE UDF IF NOT EXISTS FuzzDistance
+                    INPUT (Input_Array1 NDARRAY ANYTYPE, Input_Array2 NDARRAY ANYTYPE)
+                    OUTPUT (distance FLOAT(32, 7))
+                    TYPE NdarrayUDF
+                    IMPL "{}/udfs/{}/fuzzy_join.py";
+        """.format(
+    EvaDB_INSTALLATION_DIR, NDARRAY_DIR
+)
+
 ArrayCount_udf_query = """CREATE UDF
             IF NOT EXISTS  ArrayCount
             INPUT (Input_Array NDARRAY ANYTYPE, Search_Key ANYTYPE)

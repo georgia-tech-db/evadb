@@ -57,7 +57,8 @@ EvaDBCursor Interface
     ~evadb.EvaDBCursor.drop_udf
     ~evadb.EvaDBCursor.drop_index
 
-EVADBQuery Interface
+
+EvaDBQuery Interface
 ---------------------
 
 .. autosummary::
