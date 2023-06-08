@@ -41,7 +41,7 @@ def analyze_video():
     """Extracts speech from video for llm processing.
 
     Returns:
-        EvaDBDBCursor: evadb api cursor.
+        EvaDBCursor: evadb api cursor.
     """
     print("Analyzing video. This may take a while...")
     start = time.time()
