@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ from evadb.catalog.models.column_catalog import ColumnCatalogEntry
 from evadb.catalog.models.table_catalog import TableCatalogEntry
 from evadb.catalog.schema_utils import SchemaUtils
 from evadb.catalog.sql_config import IDENTIFIER_COLUMN
-from evadb.database import EVADatabase
+from evadb.database import EvaDBDatabase
 from evadb.models.storage.batch import Batch
 from evadb.parser.table_ref import TableInfo
 from evadb.storage.abstract_storage_engine import AbstractStorageEngine
@@ -37,7 +37,7 @@ from evadb.utils.logging_manager import logger
 
 
 class SQLStorageEngine(AbstractStorageEngine):
-    def __init__(self, db: EVADatabase):
+    def __init__(self, db: EvaDBDatabase):
         """
         Grab the existing sql session
         """

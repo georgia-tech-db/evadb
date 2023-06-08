@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,11 +18,11 @@ import shutil
 import unittest
 
 
-class EVAImportTest(unittest.TestCase):
+class EvaDBImportTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def test_eva_cli_imports(self):
+    def test_evadb_cli_imports(self):
         """
         Testing imports for running client and server packages,
         when current working directory is changed.
@@ -32,7 +32,7 @@ class EVAImportTest(unittest.TestCase):
         if not os.path.exists(new_dir):
             os.makedirs(new_dir)
         os.chdir(new_dir)
-        _ = importlib.import_module("evadb.eva_cmd_client")
-        _ = importlib.import_module("evadb.eva_server")
+        _ = importlib.import_module("evadb.evadb_cmd_client")
+        _ = importlib.import_module("evadb.evadb_server")
         os.chdir(cur_dir)
         shutil.rmtree(new_dir)

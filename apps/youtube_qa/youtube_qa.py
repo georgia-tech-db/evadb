@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ def analyze_video():
     """Extracts speech from video for llm processing.
 
     Returns:
-        EVADBCursor: evadb api cursor.
+        EvaDBDBCursor: evadb api cursor.
     """
     print("Analyzing video. This may take a while...")
     start = time.time()
@@ -75,7 +75,7 @@ def analyze_video():
 
 
 def cleanup():
-    """Removes any temporary file / directory created by EVA."""
+    """Removes any temporary file / directory created by EvaDB."""
     if os.path.exists("online_video.mp4"):
         os.remove("online_video.mp4")
     if os.path.exists("evadb_data"):

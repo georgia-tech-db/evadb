@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from evadb.configuration.constants import EVA_INSTALLATION_DIR
-from evadb.database import EVADatabase
+from evadb.configuration.constants import EvaDB_INSTALLATION_DIR
+from evadb.database import EvaDBDatabase
 from evadb.server.command_handler import execute_query_fetch_all
 
 NDARRAY_DIR = "ndarray"
@@ -26,7 +26,7 @@ DummyObjectDetector_udf_query = """CREATE UDF IF NOT EXISTS DummyObjectDetector
                   TYPE  Classification
                   IMPL  '{}/../test/util.py';
         """.format(
-    EVA_INSTALLATION_DIR
+    EvaDB_INSTALLATION_DIR
 )
 
 DummyMultiObjectDetector_udf_query = """CREATE UDF
@@ -36,7 +36,7 @@ DummyMultiObjectDetector_udf_query = """CREATE UDF
                   TYPE  Classification
                   IMPL  '{}/../test/util.py';
         """.format(
-    EVA_INSTALLATION_DIR
+    EvaDB_INSTALLATION_DIR
 )
 
 DummyFeatureExtractor_udf_query = """CREATE UDF
@@ -46,7 +46,7 @@ DummyFeatureExtractor_udf_query = """CREATE UDF
                   TYPE Classification
                   IMPL '{}/../test/util.py';
         """.format(
-    EVA_INSTALLATION_DIR
+    EvaDB_INSTALLATION_DIR
 )
 
 ArrayCount_udf_query = """CREATE UDF
@@ -56,7 +56,7 @@ ArrayCount_udf_query = """CREATE UDF
             TYPE NdarrayUDF
             IMPL "{}/udfs/{}/array_count.py";
         """.format(
-    EVA_INSTALLATION_DIR, NDARRAY_DIR
+    EvaDB_INSTALLATION_DIR, NDARRAY_DIR
 )
 
 Crop_udf_query = """CREATE UDF IF NOT EXISTS Crop
@@ -66,7 +66,7 @@ Crop_udf_query = """CREATE UDF IF NOT EXISTS Crop
                 TYPE  NdarrayUDF
                 IMPL  "{}/udfs/{}/crop.py";
         """.format(
-    EVA_INSTALLATION_DIR, NDARRAY_DIR
+    EvaDB_INSTALLATION_DIR, NDARRAY_DIR
 )
 
 Open_udf_query = """CREATE UDF IF NOT EXISTS Open
@@ -75,7 +75,7 @@ Open_udf_query = """CREATE UDF IF NOT EXISTS Open
                 TYPE NdarrayUDF
                 IMPL "{}/udfs/{}/open.py";
         """.format(
-    EVA_INSTALLATION_DIR, NDARRAY_DIR
+    EvaDB_INSTALLATION_DIR, NDARRAY_DIR
 )
 
 Similarity_udf_query = """CREATE UDF IF NOT EXISTS Similarity
@@ -86,7 +86,7 @@ Similarity_udf_query = """CREATE UDF IF NOT EXISTS Similarity
                     TYPE NdarrayUDF
                     IMPL "{}/udfs/{}/similarity.py";
         """.format(
-    EVA_INSTALLATION_DIR, NDARRAY_DIR
+    EvaDB_INSTALLATION_DIR, NDARRAY_DIR
 )
 
 Unnest_udf_query = """CREATE UDF IF NOT EXISTS Unnest
@@ -95,7 +95,7 @@ Unnest_udf_query = """CREATE UDF IF NOT EXISTS Unnest
                 TYPE  NdarrayUDF
                 IMPL  "{}/udfs/{}/unnest.py";
         """.format(
-    EVA_INSTALLATION_DIR, NDARRAY_DIR
+    EvaDB_INSTALLATION_DIR, NDARRAY_DIR
 )
 
 Fastrcnn_udf_query = """CREATE UDF IF NOT EXISTS FastRCNNObjectDetector
@@ -105,7 +105,7 @@ Fastrcnn_udf_query = """CREATE UDF IF NOT EXISTS FastRCNNObjectDetector
       TYPE  Classification
       IMPL  '{}/udfs/fastrcnn_object_detector.py';
       """.format(
-    EVA_INSTALLATION_DIR
+    EvaDB_INSTALLATION_DIR
 )
 
 Yolo_udf_query = """CREATE UDF IF NOT EXISTS Yolo
@@ -120,7 +120,7 @@ ocr_udf_query = """CREATE UDF IF NOT EXISTS OCRExtractor
       TYPE  OCRExtraction
       IMPL  '{}/udfs/ocr_extractor.py';
       """.format(
-    EVA_INSTALLATION_DIR
+    EvaDB_INSTALLATION_DIR
 )
 
 face_detection_udf_query = """CREATE UDF IF NOT EXISTS FaceDetector
@@ -130,7 +130,7 @@ face_detection_udf_query = """CREATE UDF IF NOT EXISTS FaceDetector
                   TYPE  FaceDetection
                   IMPL  '{}/udfs/face_detector.py';
         """.format(
-    EVA_INSTALLATION_DIR
+    EvaDB_INSTALLATION_DIR
 )
 
 Mvit_udf_query = """CREATE UDF IF NOT EXISTS MVITActionRecognition
@@ -139,7 +139,7 @@ Mvit_udf_query = """CREATE UDF IF NOT EXISTS MVITActionRecognition
         TYPE  Classification
         IMPL  '{}/udfs/mvit_action_recognition.py';
         """.format(
-    EVA_INSTALLATION_DIR
+    EvaDB_INSTALLATION_DIR
 )
 
 Asl_udf_query = """CREATE UDF IF NOT EXISTS ASLActionRecognition
@@ -148,25 +148,25 @@ Asl_udf_query = """CREATE UDF IF NOT EXISTS ASLActionRecognition
         TYPE  Classification
         IMPL  '{}/udfs/asl_action_recognition.py';
         """.format(
-    EVA_INSTALLATION_DIR
+    EvaDB_INSTALLATION_DIR
 )
 
 norfair_obj_tracker_query = """CREATE UDF IF NOT EXISTS NorFairTracker
                   IMPL  '{}/udfs/trackers/nor_fair.py';
         """.format(
-    EVA_INSTALLATION_DIR
+    EvaDB_INSTALLATION_DIR
 )
 
 Sift_udf_query = """CREATE UDF IF NOT EXISTS SiftFeatureExtractor
         IMPL  '{}/udfs/sift_feature_extractor.py';
         """.format(
-    EVA_INSTALLATION_DIR
+    EvaDB_INSTALLATION_DIR
 )
 
 Text_feat_udf_query = """CREATE UDF IF NOT EXISTS SentenceFeatureExtractor
         IMPL  '{}/udfs/sentence_feature_extractor.py';
         """.format(
-    EVA_INSTALLATION_DIR
+    EvaDB_INSTALLATION_DIR
 )
 
 mnistcnn_udf_query = """CREATE UDF IF NOT EXISTS MnistImageClassifier
@@ -175,11 +175,11 @@ mnistcnn_udf_query = """CREATE UDF IF NOT EXISTS MnistImageClassifier
         TYPE  Classification
         IMPL  '{}/udfs/mnist_image_classifier.py';
         """.format(
-    EVA_INSTALLATION_DIR
+    EvaDB_INSTALLATION_DIR
 )
 
 
-def init_builtin_udfs(db: EVADatabase, mode: str = "debug") -> None:
+def init_builtin_udfs(db: EvaDBDatabase, mode: str = "debug") -> None:
     """Load the built-in UDFs into the system during system bootstrapping.
 
     The function loads a set of pre-defined UDF queries based on the `mode` argument.

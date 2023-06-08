@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ from evadb.parser.lark_parser import LarkParser
 
 class Parser(object):
     """
-    Parser based on EVAQL grammar: evadb.lark
+    Parser based on EvaDBQL grammar: evadb.lark
     """
 
     _lark_parser = None

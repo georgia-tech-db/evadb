@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ from evadb.binder.binder_utils import (
 from evadb.binder.statement_binder_context import StatementBinderContext
 from evadb.catalog.catalog_type import NdArrayType, TableType, VideoColumnName
 from evadb.catalog.catalog_utils import get_metadata_properties
-from evadb.configuration.constants import EVA_INSTALLATION_DIR
+from evadb.configuration.constants import EvaDB_INSTALLATION_DIR
 from evadb.expression.abstract_expression import AbstractExpression, ExpressionType
 from evadb.expression.function_expression import FunctionExpression
 from evadb.expression.tuple_value_expression import TupleValueExpression
@@ -310,7 +310,7 @@ class StatementBinder:
             if udf_obj.type == "ultralytics":
                 # manually set the impl_path for yolo udfs we only handle object
                 # detection for now, hopefully this can be generalized
-                udf_dir = Path(EVA_INSTALLATION_DIR) / "udfs"
+                udf_dir = Path(EvaDB_INSTALLATION_DIR) / "udfs"
                 udf_obj.impl_file_path = (
                     Path(f"{udf_dir}/yolo_object_detector.py").absolute().as_posix()
                 )

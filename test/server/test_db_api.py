@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ from test.util import suffix_pytest_xdist_worker_id_to_dir
 
 from mock import MagicMock, patch
 
-from evadb.interfaces.relational.db import EVADBCursor, connect_remote
+from evadb.interfaces.relational.db import EvaDBDBCursor, connect_remote
 from evadb.models.server.response import Response
 
 # Check for Python 3.8+ for IsolatedAsyncioTestCase support
@@ -43,35 +43,35 @@ if sys.version_info >= (3, 8):
             os.remove(suffix_pytest_xdist_worker_id_to_dir("upload.txt"))
             return super().tearDown()
 
-        def test_eva_cursor_execute_async(self):
+        def test_evadb_cursor_execute_async(self):
             connection = AsyncMock()
-            eva_cursor = EVADBCursor(connection)
+            evadb_cursor = EvaDBDBCursor(connection)
             query = "test_query"
-            asyncio.run(eva_cursor.execute_async(query))
-            self.assertEqual(eva_cursor._pending_query, True)
+            asyncio.run(evadb_cursor.execute_async(query))
+            self.assertEqual(evadb_cursor._pending_query, True)
 
             # concurrent queries not allowed
             with self.assertRaises(SystemError):
-                asyncio.run(eva_cursor.execute_async(query))
+                asyncio.run(evadb_cursor.execute_async(query))
 
-        def test_eva_cursor_fetch_all_async(self):
+        def test_evadb_cursor_fetch_all_async(self):
             connection = AsyncMock()
-            eva_cursor = EVADBCursor(connection)
+            evadb_cursor = EvaDBDBCursor(connection)
             message = "test_response"
             serialized_message = Response.serialize("test_response")
             serialized_message_length = b"%d" % len(serialized_message)
             connection._reader.readline.side_effect = [serialized_message_length]
             connection._reader.readexactly.side_effect = [serialized_message]
-            response = asyncio.run(eva_cursor.fetch_all_async())
-            self.assertEqual(eva_cursor._pending_query, False)
+            response = asyncio.run(evadb_cursor.fetch_all_async())
+            self.assertEqual(evadb_cursor._pending_query, False)
             self.assertEqual(message, response)
 
-        def test_eva_cursor_fetch_one_sync(self):
+        def test_evadb_cursor_fetch_one_sync(self):
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
 
             connection = AsyncMock()
-            eva_cursor = EVADBCursor(connection)
+            evadb_cursor = EvaDBDBCursor(connection)
 
             message = "test_response"
             serialized_message = Response.serialize("test_response")
@@ -79,36 +79,36 @@ if sys.version_info >= (3, 8):
             connection._reader.readline.side_effect = [serialized_message_length]
             connection._reader.readexactly.side_effect = [serialized_message]
 
-            response = eva_cursor.fetch_one()
-            self.assertEqual(eva_cursor._pending_query, False)
+            response = evadb_cursor.fetch_one()
+            self.assertEqual(evadb_cursor._pending_query, False)
             self.assertEqual(message, response)
 
-        def test_eva_connection(self):
+        def test_evadb_connection(self):
             hostname = "localhost"
 
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
 
             connection = AsyncMock()
-            eva_cursor = EVADBCursor(connection)
+            evadb_cursor = EvaDBDBCursor(connection)
 
             # test attr
             with self.assertRaises(AttributeError):
-                eva_cursor.__getattr__("foo")
+                evadb_cursor.__getattr__("foo")
 
             # test connection error with incorrect port
             with self.assertRaises(OSError):
                 connect_remote(hostname, port=1)
 
-        async def test_eva_signal(self):
+        async def test_evadb_signal(self):
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
 
             connection = AsyncMock()
-            eva_cursor = EVADBCursor(connection)
+            evadb_cursor = EvaDBDBCursor(connection)
 
             query = "test_query"
-            await eva_cursor.execute_async(query)
+            await evadb_cursor.execute_async(query)
 
         def test_client_stop_query(self):
             connection = AsyncMock()
@@ -116,17 +116,17 @@ if sys.version_info >= (3, 8):
             asyncio.set_event_loop(loop)
             connection.protocol.loop = loop
 
-            eva_cursor = EVADBCursor(connection)
-            eva_cursor.execute("test_query")
-            eva_cursor.stop_query()
-            self.assertEqual(eva_cursor._pending_query, False)
+            evadb_cursor = EvaDBDBCursor(connection)
+            evadb_cursor.execute("test_query")
+            evadb_cursor.stop_query()
+            self.assertEqual(evadb_cursor._pending_query, False)
 
         def test_get_attr(self):
             connection = AsyncMock()
 
-            eva_cursor = EVADBCursor(connection)
+            evadb_cursor = EvaDBDBCursor(connection)
             with self.assertRaises(AttributeError):
-                eva_cursor.missing_function()
+                evadb_cursor.missing_function()
 
         @patch("asyncio.open_connection")
         def test_get_connection(self, mock_open):

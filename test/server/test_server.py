@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,11 +29,11 @@ if sys.version_info >= (3, 8):
 
         @patch("asyncio.start_server")
         async def test_server_functions(self, mock_start):
-            eva_server = EvaServer()
+            evadb_server = EvaServer()
             host = "localhost"
             port = 8803
 
-            await eva_server.start_eva_server("eva_db", host, port)
+            await evadb_server.start_evadb_server("evadb_db", host, port)
 
             # connection made
             client_reader1 = asyncio.StreamReader()
@@ -45,16 +45,16 @@ if sys.version_info >= (3, 8):
             client_reader1.feed_data(b"SHOW UDFS;\n")
             client_reader1.feed_data(b"EXIT;\n")
 
-            await eva_server.accept_client(client_reader1, client_writer1)
-            assert len(eva_server._clients) == 1
+            await evadb_server.accept_client(client_reader1, client_writer1)
+            assert len(evadb_server._clients) == 1
 
             # another client
             client_reader2.feed_data(b"\xC4pple")  # trigger UnicodeDecodeError
             client_reader2.feed_eof()
 
-            await eva_server.accept_client(client_reader2, client_writer2)
-            assert len(eva_server._clients) == 2
+            await evadb_server.accept_client(client_reader2, client_writer2)
+            assert len(evadb_server._clients) == 2
 
-            await eva_server.handle_client(client_reader2, client_writer2)
+            await evadb_server.handle_client(client_reader2, client_writer2)
 
-            await eva_server.stop_eva_server()
+            await evadb_server.stop_evadb_server()

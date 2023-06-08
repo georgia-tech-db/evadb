@@ -1,7 +1,7 @@
-Extending EVA 
+Extending EvaDB 
 =============
 
-This document details the steps involved in adding support for a new operator (or command) in EVA. We illustrate the process using a DDL command.
+This document details the steps involved in adding support for a new operator (or command) in EvaDB. We illustrate the process using a DDL command.
 
 Command Handler
 ----
@@ -250,7 +250,7 @@ executor/
 Additional Notes
 --------------------
 
-Key data structures in EVA:
+Key data structures in EvaDB:
 
 -  **Catalog**: Records ``DataFrameMetadata`` for all tables.
 

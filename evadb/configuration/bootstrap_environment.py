@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,12 +22,12 @@ import yaml
 from evadb.configuration.constants import (
     CACHE_DIR,
     DB_DEFAULT_NAME,
-    EVA_CONFIG_FILE,
-    EVA_DATASET_DIR,
     INDEX_DIR,
     S3_DOWNLOAD_DIR,
     TMP_DIR,
     UDF_DIR,
+    EvaDB_CONFIG_FILE,
+    EvaDB_DATASET_DIR,
 )
 from evadb.utils.logging_manager import logger as eva_logger
 
@@ -38,12 +38,12 @@ def get_base_config(eva_installation_dir: Path) -> Path:
     This file will be copied to user's .eva directory.
     """
     # if eva package is installed into environment
-    if importlib_resources.is_resource("evadb", EVA_CONFIG_FILE):
-        with importlib_resources.path("evadb", EVA_CONFIG_FILE) as yml_path:
+    if importlib_resources.is_resource("evadb", EvaDB_CONFIG_FILE):
+        with importlib_resources.path("evadb", EvaDB_CONFIG_FILE) as yml_path:
             return yml_path
     else:
         # For local dev environments without package installed
-        return eva_installation_dir / EVA_CONFIG_FILE
+        return eva_installation_dir / EvaDB_CONFIG_FILE
 
 
 def get_default_db_uri(eva_db_dir: Path):
@@ -52,7 +52,7 @@ def get_default_db_uri(eva_db_dir: Path):
 
 def bootstrap_environment(eva_db_dir: Path, eva_installation_dir: Path):
     """
-    Populates necessary configuration for EVA to be able to run.
+    Populates necessary configuration for EvaDB to be able to run.
 
     Arguments:
         eva_db_dir: path to eva database directory
@@ -86,7 +86,7 @@ def create_directories_and_get_default_config_values(
     eva_db_dir: Path, eva_installation_dir: Path, category: str = None, key: str = None
 ) -> Union[dict, str]:
     default_install_dir = eva_installation_dir
-    dataset_location = eva_db_dir / EVA_DATASET_DIR
+    dataset_location = eva_db_dir / EvaDB_DATASET_DIR
     index_dir = eva_db_dir / INDEX_DIR
     cache_dir = eva_db_dir / CACHE_DIR
     s3_dir = eva_db_dir / S3_DOWNLOAD_DIR

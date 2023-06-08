@@ -31,41 +31,41 @@ You can then use this connection to run queries:
 
 
 
-EVADBConnection Interface
+EvaDBDBConnection Interface
 -------------------------
 
 .. autosummary::
     :toctree: ./doc
     
-    ~evadb.EVADBConnection.cursor
+    ~evadb.EvaDBDBConnection.cursor
 
 
-EVADBCursor Interface
+EvaDBDBCursor Interface
 ---------------------
 
 .. autosummary::
     :toctree: ./doc
 
-    ~evadb.EVADBCursor.connect
-    ~evadb.EVADBCursor.load
-    ~evadb.EVADBCursor.query
-    ~evadb.EVADBCursor.table
-    ~evadb.EVADBCursor.create_udf
-    ~evadb.EVADBCursor.create_vector_index
-    ~evadb.EVADBCursor.df
+    ~evadb.EvaDBDBCursor.connect
+    ~evadb.EvaDBDBCursor.load
+    ~evadb.EvaDBDBCursor.query
+    ~evadb.EvaDBDBCursor.table
+    ~evadb.EvaDBDBCursor.create_udf
+    ~evadb.EvaDBDBCursor.create_vector_index
+    ~evadb.EvaDBDBCursor.df
 
-EVADBQuery Interface
+EvaDBDBQuery Interface
 ---------------------
 
 .. autosummary::
     :toctree: ./doc
 
-    ~evadb.EVADBQuery.select
-    ~evadb.EVADBQuery.cross_apply
-    ~evadb.EVADBQuery.filter
-    ~evadb.EVADBQuery.df
-    ~evadb.EVADBQuery.alias
-    ~evadb.EVADBQuery.limit
-    ~evadb.EVADBQuery.order
-    ~evadb.EVADBQuery.show
-    ~evadb.EVADBQuery.sql_query
+    ~evadb.EvaDBDBQuery.select
+    ~evadb.EvaDBDBQuery.cross_apply
+    ~evadb.EvaDBDBQuery.filter
+    ~evadb.EvaDBDBQuery.df
+    ~evadb.EvaDBDBQuery.alias
+    ~evadb.EvaDBDBQuery.limit
+    ~evadb.EvaDBDBQuery.order
+    ~evadb.EvaDBDBQuery.show
+    ~evadb.EvaDBDBQuery.sql_query

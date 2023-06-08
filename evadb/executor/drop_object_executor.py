@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 import pandas as pd
 
-from evadb.database import EVADatabase
+from evadb.database import EvaDBDatabase
 from evadb.executor.abstract_executor import AbstractExecutor
 from evadb.executor.executor_utils import ExecutorError, handle_vector_store_params
 from evadb.models.storage.batch import Batch
@@ -28,7 +28,7 @@ from evadb.utils.logging_manager import logger
 
 
 class DropObjectExecutor(AbstractExecutor):
-    def __init__(self, db: EVADatabase, node: DropObjectPlan):
+    def __init__(self, db: EvaDBDatabase, node: DropObjectPlan):
         super().__init__(db, node)
 
     def exec(self, *args, **kwargs):

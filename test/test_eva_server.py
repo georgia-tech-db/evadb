@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,23 +16,23 @@ import unittest
 
 from mock import patch
 
-from evadb.configuration.constants import EVA_DATABASE_DIR
-from evadb.eva_server import main, start_eva_server
+from evadb.configuration.constants import EvaDB_DATABASE_DIR
+from evadb.evadb_server import main, start_evadb_server
 
 
-class EVAServerTest(unittest.IsolatedAsyncioTestCase):
+class EvaDBServerTest(unittest.IsolatedAsyncioTestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    @patch("evadb.eva_server.start_eva_server")
+    @patch("evadb.evadb_server.start_evadb_server")
     @patch("asyncio.run")
-    def test_main(self, mock_run, mock_start_eva_server):
+    def test_main(self, mock_run, mock_start_evadb_server):
         main()
-        mock_start_eva_server.assert_called_once()
+        mock_start_evadb_server.assert_called_once()
         mock_run.assert_called_once()
 
-    @patch("evadb.eva_server.start_eva_server")
+    @patch("evadb.evadb_server.start_evadb_server")
     @patch("asyncio.start_server")
-    async def test_start_eva_server(self, mock_start_eva_server, mock_start):
-        await start_eva_server(EVA_DATABASE_DIR, "0.0.0.0", 8803)
-        mock_start_eva_server.assert_called_once()
+    async def test_start_evadb_server(self, mock_start_evadb_server, mock_start):
+        await start_evadb_server(EvaDB_DATABASE_DIR, "0.0.0.0", 8803)
+        mock_start_evadb_server.assert_called_once()

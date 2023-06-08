@@ -1,6 +1,6 @@
-# Architecture of EVA Database System
+# Architecture of EvaDB Database System
 
-<img src="https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/images/evadb/eva-arch.png" alt="EVA Architecture Diagram" width="500">
+<img src="https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/images/evadb/eva-arch.png" alt="EvaDB Architecture Diagram" width="500">
 
 * `server` - Code for launching server that sends client commands to command handler.
 * `parser` - Converts SQL queries to statements (e.g., CREATE, SELECT, INSERT, and LOAD statements).

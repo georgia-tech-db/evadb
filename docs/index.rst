@@ -1,7 +1,7 @@
 .. meta::
    :keywords: database, deep learning, video analytics, language models
 
-EVA DB
+EvaDB DB
 =====
 
 ..  rubric:: Database system for building simpler and faster AI-powered applications.
@@ -10,16 +10,16 @@ EVA DB
     ..  figure:: https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/images/eva/eva-banner.png
         :target: https://github.com/georgia-tech-db/eva
         :width: 100%
-        :alt: EVA Banner
+        :alt: EvaDB Banner
 
 |pypi_status| |License|
 
 ----------
 
-Welcome to EVA DB
+Welcome to EvaDB DB
 =================
 
-EVA DB is an AI-SQL database for developing applications powered by AI models. We aim to simplify the development and deployment of AI-powered applications that operate on structured (tables, feature stores) and unstructured data (videos, text, podcasts, PDFs, etc.).
+EvaDB DB is an AI-SQL database for developing applications powered by AI models. We aim to simplify the development and deployment of AI-powered applications that operate on structured (tables, feature stores) and unstructured data (videos, text, podcasts, PDFs, etc.).
 
 - Github: https://github.com/georgia-tech-db/eva
 - PyPI: https://pypi.org/project/evadb/
@@ -27,7 +27,7 @@ EVA DB is an AI-SQL database for developing applications powered by AI models. W
 - Slack: `Invite link <https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg>`_
 
 
-Why EVA?
+Why EvaDB?
 ----------
 
 Over the last decade, AI models have radically changed the world of natural language processing and computer vision. They are accurate on various tasks ranging from question answering to object tracking in videos. However, two challenges prevent many users from benefiting from these models.
@@ -39,12 +39,12 @@ Over the last decade, AI models have radically changed the world of natural lang
 Proposed Solution
 ----------
 
-That's where EVA DB comes in.
+That's where EvaDB DB comes in.
 
 1. Quickly build AI-Powered Applications
 ^^^^
 
-Historically, SQL database systems have been successful because the **query language is simple enough** in its basic structure that users without prior experience can learn a usable subset of the language on their first sitting. EVA supports a simple SQL-like query language designed to make it easier for users to leverage AI models. With this query language, the user may **chain multiple models in a single query** to accomplish complicated tasks with **minimal programming**.
+Historically, SQL database systems have been successful because the **query language is simple enough** in its basic structure that users without prior experience can learn a usable subset of the language on their first sitting. EvaDB supports a simple SQL-like query language designed to make it easier for users to leverage AI models. With this query language, the user may **chain multiple models in a single query** to accomplish complicated tasks with **minimal programming**.
 
 Here is an illustrative query that examines the emotions of actors in a movie by leveraging multiple deep-learning models that take care of detecting faces and analyzing the emotions of the detected bounding boxes:
 
@@ -56,20 +56,20 @@ Here is an illustrative query that examines the emotions of actors in a movie by
       JOIN LATERAL UNNEST(FaceDetector(data)) AS Face(bbox, conf)  
    WHERE id < 15;
 
-EVA's declarative query language reduces the complexity of the application, leading to **more maintainable code** that allows users to build on top of each other's queries.
+EvaDB's declarative query language reduces the complexity of the application, leading to **more maintainable code** that allows users to build on top of each other's queries.
 
-EVA comes with a wide range of models for analyzing unstructured data including image classification, object detection, OCR, face detection, etc. It is fully implemented in Python, and `licensed under the Apache license <https://github.com/georgia-tech-db/eva>`__. It already contains integrations with widely-used AI pipelines based on Hugging Face, PyTorch, and Open AI. 
+EvaDB comes with a wide range of models for analyzing unstructured data including image classification, object detection, OCR, face detection, etc. It is fully implemented in Python, and `licensed under the Apache license <https://github.com/georgia-tech-db/eva>`__. It already contains integrations with widely-used AI pipelines based on Hugging Face, PyTorch, and Open AI. 
 
-The high-level SQL API allows even beginners to use EVA in a few lines of code. Advanced users can define custom user-defined functions that wrap around any AI model or Python library.
+The high-level SQL API allows even beginners to use EvaDB in a few lines of code. Advanced users can define custom user-defined functions that wrap around any AI model or Python library.
 
 2. Save time and money
 ^^^^
 
-EVA DB **automatically** optimizes the queries to **save inference cost and query execution time** using its Cascades-style extensible query optimizer. EVA's optimizer is tailored for AI pipelines. The Cascades query optimization framework has worked well in SQL database systems for several decades. Query optimization in EVA is the bridge that connects the declarative query language to efficient execution.
+EvaDB DB **automatically** optimizes the queries to **save inference cost and query execution time** using its Cascades-style extensible query optimizer. EvaDB's optimizer is tailored for AI pipelines. The Cascades query optimization framework has worked well in SQL database systems for several decades. Query optimization in EvaDB is the bridge that connects the declarative query language to efficient execution.
 
-EVA accelerates AI pipelines using a collection of optimizations inspired by SQL database systems including function caching, sampling, and cost-based operator reordering.
+EvaDB accelerates AI pipelines using a collection of optimizations inspired by SQL database systems including function caching, sampling, and cost-based operator reordering.
 
-EVA supports an AI-oriented query language for analysing both structured and unstructured data. Here are some illustrative applications:
+EvaDB supports an AI-oriented query language for analysing both structured and unstructured data. Here are some illustrative applications:
 
  * `Using ChatGPT to ask questions based on videos <https://evadb.readthedocs.io/en/stable/source/tutorials/08-chatgpt.html>`_
  * `Analysing traffic flow at an intersection <https://evadb.readthedocs.io/en/stable/source/tutorials/02-object-detection.html>`_
@@ -80,18 +80,18 @@ EVA supports an AI-oriented query language for analysing both structured and uns
  * `Recognizing license plates <https://github.com/georgia-tech-db/license-plate-recognition>`_
  * `Analysing toxicity of social media memes <https://github.com/georgia-tech-db/toxicity-classification>`_
 
-The `Getting Started <source/overview/installation.html>`_ page shows how you can use EVA for different AI tasks and how you can easily extend EVA to support your custom deep learning model through user-defined functions.
+The `Getting Started <source/overview/installation.html>`_ page shows how you can use EvaDB for different AI tasks and how you can easily extend EvaDB to support your custom deep learning model through user-defined functions.
 
-The `User Guides <source/tutorials/index.html>`_ section contains Jupyter Notebooks that demonstrate how to use various features of EVA. Each notebook includes a link to Google Colab, where you can run the code yourself.
+The `User Guides <source/tutorials/index.html>`_ section contains Jupyter Notebooks that demonstrate how to use various features of EvaDB. Each notebook includes a link to Google Colab, where you can run the code yourself.
 
 Key Features
 ------------
 
-1. With EVA, you can **easily combine SQL and deep learning models to build next-generation database applications**. EVA treats deep learning models as  functions similar to traditional SQL functions like SUM().
+1. With EvaDB, you can **easily combine SQL and deep learning models to build next-generation database applications**. EvaDB treats deep learning models as  functions similar to traditional SQL functions like SUM().
 
-2. EVA is **extensible by design**. You can write an **user-defined function** (UDF) that wraps around your custom deep learning model. In fact, all the built-in models that are included in EVA are written as user-defined functions.
+2. EvaDB is **extensible by design**. You can write an **user-defined function** (UDF) that wraps around your custom deep learning model. In fact, all the built-in models that are included in EvaDB are written as user-defined functions.
 
-3. EVA comes with a collection of **built-in sampling, caching, and filtering optimizations** inspired by relational database systems. These optimizations help **speed up queries on large datasets and save money spent on model inference**.
+3. EvaDB comes with a collection of **built-in sampling, caching, and filtering optimizations** inspired by relational database systems. These optimizations help **speed up queries on large datasets and save money spent on model inference**.
 
 Next Steps
 ------------
@@ -105,13 +105,13 @@ Next Steps
         :link: source/overview/installation
         :link-type: doc
         
-        A step-by-step guide to installing EVA and running queries
+        A step-by-step guide to installing EvaDB and running queries
 
     .. grid-item-card:: :doc:`Query Language <source/reference/evaql>`
         :link: source/reference/evaql
         :link-type: doc
         
-        List of all the query commands supported by EVA
+        List of all the query commands supported by EvaDB
     
     .. grid-item-card:: :doc:`User Defined Functions <source/reference/udf>`
         :link: source/reference/udf
@@ -121,7 +121,7 @@ Next Steps
 
 ----------
 
-Illustrative EVA Applications 
+Illustrative EvaDB Applications 
 ----
 
 |:desert_island:| Traffic Analysis Application using Object Detection Model
@@ -168,13 +168,13 @@ Illustrative EVA Applications
 Community
 --------
 
-Join the EVA community on `Slack <https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg>`_ to ask questions and to share your ideas for improving EVA.
+Join the EvaDB community on `Slack <https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg>`_ to ask questions and to share your ideas for improving EvaDB.
 
 ..
     ..  figure:: https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/images/eva/eva-slack.png
         :target: https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg
         :width: 100%
-        :alt: EVA Slack Channel
+        :alt: EvaDB Slack Channel
 
 .. |pypi_status| image:: https://img.shields.io/pypi/v/evadb.svg
    :target: https://pypi.org/project/evadb

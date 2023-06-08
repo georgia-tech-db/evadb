@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ from test.util import (
 import numpy as np
 import pytest
 
-from evadb.configuration.constants import EVA_ROOT_DIR
+from evadb.configuration.constants import EvaDB_ROOT_DIR
 from evadb.server.command_handler import execute_query_fetch_all
 
 
@@ -65,7 +65,7 @@ class DeleteExecutorTest(unittest.TestCase):
         # Create a table for testing Delete with Video Data#
         ####################################################
 
-        path = f"{EVA_ROOT_DIR}/data/sample_videos/1/*.mp4"
+        path = f"{EvaDB_ROOT_DIR}/data/sample_videos/1/*.mp4"
         query = f'LOAD VIDEO "{path}" INTO TestDeleteVideos;'
         _ = execute_query_fetch_all(self.evadb, query)
 
@@ -76,7 +76,7 @@ class DeleteExecutorTest(unittest.TestCase):
     # integration test
     @unittest.skip("Not supported in current version")
     def test_should_delete_single_video_in_table(self):
-        path = f"{EVA_ROOT_DIR}/data/sample_videos/1/2.mp4"
+        path = f"{EvaDB_ROOT_DIR}/data/sample_videos/1/2.mp4"
         delete_query = f"""DELETE FROM TestDeleteVideos WHERE name="{path}";"""
         batch = execute_query_fetch_all(self.evadb, delete_query)
 
@@ -100,7 +100,7 @@ class DeleteExecutorTest(unittest.TestCase):
 
     @unittest.skip("Not supported in current version")
     def test_should_delete_single_image_in_table(self):
-        path = f"{EVA_ROOT_DIR}/data/sample_videos/1/2.mp4"
+        path = f"{EvaDB_ROOT_DIR}/data/sample_videos/1/2.mp4"
         delete_query = f"""DELETE FROM TestDeleteVideos WHERE name="{path}";"""
         batch = execute_query_fetch_all(self.evadb, delete_query)
 
