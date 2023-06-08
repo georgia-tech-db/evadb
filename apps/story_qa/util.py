@@ -15,8 +15,6 @@
 import os
 import urllib.request
 
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-
 
 def download_story():
     parsed_file_path, orig_file_path = "new_wp.txt", "wp.txt"
@@ -41,18 +39,21 @@ def download_story():
 
 def read_text_line(path, num_token=1000):
     # For simplicity, we only keep letters.
-    whitelist = set("abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+    whitelist = set(".!?abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
     with open(path, "r") as f:
-        l = 0
+        line_itr = 0
         for line in f.readlines():
-            l = l + 1
-            if l % 10 == 0:
-                print("line: " + str(l))
+            line_itr = line_itr + 1
+            if line_itr % 10 == 0:
+                print("line: " + str(line_itr))
             for i in range(0, len(line), num_token):
                 cut_line = line[i : min(i + 1000, len(line))]
                 cut_line = "".join(filter(whitelist.__contains__, cut_line))
                 yield cut_line
+
+            if line_itr == 1000:
+                break
 
 
 def try_execute(conn, query):
@@ -60,8 +61,3 @@ def try_execute(conn, query):
         conn.query(query).execute()
     except Exception:
         pass
-
-
-def text_splitter(text_file_path):
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
-    return text_splitter.split_text(open(text_file_path).read())
