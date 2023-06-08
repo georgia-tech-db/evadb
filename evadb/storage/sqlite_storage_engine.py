@@ -100,7 +100,7 @@ class SQLStorageEngine(AbstractStorageEngine):
 
         insp = inspect(self._sql_engine)
         if insp.has_table(table.name):
-            logger.warning("Trying to create an exsiting table {table.name}")
+            logger.warning("Table {table.name} already exists")
             return BaseModel.metadata.tables[table.name]
 
         # dynamic schema generation
