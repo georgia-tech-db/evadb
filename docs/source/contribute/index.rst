@@ -67,7 +67,7 @@ Follow the following steps to contribute to EvaDB:
        git pull . origin/master
 
 -  Run the `test script <#testing>`__ to ensure that all the test cases pass.
--  If you are adding a new EvaDBQL command, add an illustrative example usage in 
+-  If you are adding a new EvaDB command, add an illustrative example usage in 
    the `documentation <https://github.com/georgia-tech-db/eva/tree/master/docs>`_.
 - Run the following command to ensure that code is properly formatted.
 
