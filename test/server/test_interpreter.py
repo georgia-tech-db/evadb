@@ -30,8 +30,8 @@ if sys.version_info >= (3, 8):
 
         @patch("asyncio.open_connection")
         @patch("evadb.server.interpreter.create_stdin_reader")
-        @patch("evadb.interfaces.relational.db.EvaDBDBCursor.execute_async")
-        @patch("evadb.interfaces.relational.db.EvaDBDBCursor.fetch_all_async")
+        @patch("evadb.interfaces.relational.db.EvaDBCursor.execute_async")
+        @patch("evadb.interfaces.relational.db.EvaDBCursor.fetch_all_async")
         async def test_start_cmd_client(
             self, mock_fetch, mock_execute, mock_stdin_reader, mock_open
         ):

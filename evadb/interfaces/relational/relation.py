@@ -36,7 +36,7 @@ from evadb.parser.types import JoinType
 from evadb.parser.utils import parse_sql_orderby_expr
 
 
-class EvaDBDBQuery:
+class EvaDBQuery:
     def __init__(
         self,
         evadb: EvaDBDatabase,
@@ -47,14 +47,14 @@ class EvaDBDBQuery:
         self._query_node = query_node
         self._alias = alias
 
-    def alias(self, alias: str) -> "EvaDBDBQuery":
+    def alias(self, alias: str) -> "EvaDBQuery":
         """Returns a new Relation with an alias set.
 
         Args:
             alias (str): an alias name to be set for the Relation.
 
         Returns:
-            EvaDBDBQuery: Aliased Relation.
+            EvaDBQuery: Aliased Relation.
 
         Examples:
             >>> relation = conn.table("sample_table")
@@ -62,7 +62,7 @@ class EvaDBDBQuery:
         """
         self._alias = Alias(alias)
 
-    def cross_apply(self, expr: str, alias: str) -> "EvaDBDBQuery":
+    def cross_apply(self, expr: str, alias: str) -> "EvaDBQuery":
         """Execute a expr on all the rows of the relation
 
         Args:
@@ -70,7 +70,7 @@ class EvaDBDBQuery:
             alias (str): alias of the output of the expr
 
         Returns:
-            `EvaDBDBQuery`: relation
+            `EvaDBQuery`: relation
 
         Examples:
 
@@ -121,7 +121,7 @@ class EvaDBDBQuery:
         assert result.frames is not None
         return result
 
-    def filter(self, expr: str) -> "EvaDBDBQuery":
+    def filter(self, expr: str) -> "EvaDBQuery":
         """
         Filters rows using the given condition. Multiple chained filters results in `AND`
 
@@ -129,7 +129,7 @@ class EvaDBDBQuery:
             expr (str): The filter expression.
 
         Returns:
-            EvaDBDBQuery : Filtered EvaDBDBQuery.
+            EvaDBQuery : Filtered EvaDBQuery.
         Examples:
             >>> relation = conn.table("sample_table")
             >>> relation.filter("col1 > 10")
@@ -149,14 +149,14 @@ class EvaDBDBQuery:
 
         return self
 
-    def limit(self, num: int) -> "EvaDBDBQuery":
+    def limit(self, num: int) -> "EvaDBQuery":
         """Limits the result count to the number specified.
 
         Args:
             num (int): Number of records to return. Will return num records or all records if the Relation contains fewer records.
 
         Returns:
-            EvaDBDBQuery: Relation with subset of records
+            EvaDBQuery: Relation with subset of records
 
         Examples:
             >>> relation = conn.table("sample_table")
@@ -173,14 +173,14 @@ class EvaDBDBQuery:
 
         return self
 
-    def order(self, order_expr: str) -> "EvaDBDBQuery":
+    def order(self, order_expr: str) -> "EvaDBQuery":
         """Reorder the relation based on the order_expr
 
         Args:
             order_expr (str): sql expression to order the relation
 
         Returns:
-            EvaDBDBQuery: A EvaDBDBQuery ordered based on the order_expr.
+            EvaDBQuery: A EvaDBQuery ordered based on the order_expr.
         """
 
         parsed_expr = parse_sql_orderby_expr(order_expr)
@@ -192,24 +192,24 @@ class EvaDBDBQuery:
 
         return self
 
-    def select(self, expr: str) -> "EvaDBDBQuery":
+    def select(self, expr: str) -> "EvaDBQuery":
         """
-        Projects a set of expressions and returns a new EvaDBDBQuery.
+        Projects a set of expressions and returns a new EvaDBQuery.
 
         Parameters:
-            exprs (Union[str, List[str]]): The expression(s) to be selected. If '*' is provided, it expands to all columns in the current EvaDBDBQuery.
+            exprs (Union[str, List[str]]): The expression(s) to be selected. If '*' is provided, it expands to all columns in the current EvaDBQuery.
 
         Returns:
-            EvaDBDBQuery: A EvaDBDBQuery with subset (or all) of columns.
+            EvaDBQuery: A EvaDBQuery with subset (or all) of columns.
 
         Examples:
             >>> relation = conn.table("sample_table")
 
-            Select all columns in the EvaDBDBQuery.
+            Select all columns in the EvaDBQuery.
 
             >>> relation.select("*")
 
-            Select all subset of columns in the EvaDBDBQuery.
+            Select all subset of columns in the EvaDBQuery.
 
             >>> relation.select("col1")
             >>> relation.select("col1, col2")
