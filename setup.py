@@ -48,7 +48,7 @@ minimal_requirement = [
     "lark>=1.0.0",
     "pyyaml>=5.1",
     "importlib-metadata<5.0",
-    "ray>=1.13.0",
+    "ray>=1.13.0,<2.5.0", # breaking change in 2.5.0
     "aenum>=2.2.0",
     "diskcache>=5.4.0",
     "eva-decord>=0.6.1",
