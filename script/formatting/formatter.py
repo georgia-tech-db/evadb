@@ -53,6 +53,7 @@ EVA_TEST_DIR = os.path.join(EVA_DIR, "test")
 EVA_SCRIPT_DIR = os.path.join(EVA_DIR, "script")
 EVA_NOTEBOOKS_DIR = os.path.join(EVA_DIR, "tutorials")
 EVA_DOCS_DIR = os.path.join(EVA_DIR, "docs")
+EVA_APPS_DIR = os.path.join(EVA_DIR, "apps")
 
 FORMATTING_DIR = os.path.join(EVA_SCRIPT_DIR, "formatting")
 PYLINTRC = os.path.join(FORMATTING_DIR, "pylintrc")
@@ -61,6 +62,7 @@ PYLINTRC = os.path.join(FORMATTING_DIR, "pylintrc")
 DEFAULT_DIRS = []
 DEFAULT_DIRS.append(EVA_SRC_DIR)
 DEFAULT_DIRS.append(EVA_TEST_DIR)
+DEFAULT_DIRS.append(EVA_APPS_DIR)
 
 IGNORE_FILES = ["version.py"]
 

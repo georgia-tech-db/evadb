@@ -1,24 +1,25 @@
-from gpt4all import GPT4All
 from time import perf_counter
-from unidecode import unidecode
 
+from gpt4all import GPT4All
+from unidecode import unidecode
 from util import download_story, read_text_line, try_execute
 
 import evadb
+
 
 def ask_question(path):
     # Initialize early to exlcude download time.
     llm = GPT4All("ggml-gpt4all-j-v1.3-groovy")
 
     cursor = evadb.connect().cursor()
-    
-    story_table = f"TablePPText"
-    story_feat_table = f"FeatTablePPText"
-    index_table = f"IndexTable"
+
+    story_table = "TablePPText"
+    story_feat_table = "FeatTablePPText"
+    index_table = "IndexTable"
 
     timestamps = {}
     t_i = 0
- 
+
     timestamps[t_i] = perf_counter()
     print("Setup UDF")
 
@@ -44,8 +45,10 @@ def ask_question(path):
     for i, text in enumerate(read_text_line(path)):
         print("text: --" + text + "--")
         ascii_text = unidecode(text)
-        cursor.query(f"""INSERT INTO {story_table} (id, data) 
-                         VALUES ({i}, '{ascii_text}');""").execute()
+        cursor.query(
+            f"""INSERT INTO {story_table} (id, data)
+                VALUES ({i}, '{ascii_text}');"""
+        ).execute()
 
     t_i = t_i + 1
     timestamps[t_i] = perf_counter()
@@ -54,10 +57,10 @@ def ask_question(path):
     print("Extract features")
 
     # Extract features from text.
-    st = perf_counter()
-    cursor.query(f"""CREATE TABLE {story_feat_table} AS
-        SELECT SentenceFeatureExtractor(data), data FROM {story_table};""").execute()
-    fin = perf_counter()
+    cursor.query(
+        f"""CREATE TABLE {story_feat_table} AS
+        SELECT SentenceFeatureExtractor(data), data FROM {story_table};"""
+    ).execute()
 
     t_i = t_i + 1
     timestamps[t_i] = perf_counter()
@@ -66,7 +69,9 @@ def ask_question(path):
     print("Create index")
 
     # Create search index on extracted features.
-    cursor.query(f"CREATE INDEX {index_table} ON {story_feat_table} (features) USING FAISS;").execute()
+    cursor.query(
+        f"CREATE INDEX {index_table} ON {story_feat_table} (features) USING FAISS;"
+    ).execute()
 
     t_i = t_i + 1
     timestamps[t_i] = perf_counter()
@@ -78,10 +83,12 @@ def ask_question(path):
     question = "Who is Cyril Vladmirovich?"
     ascii_question = unidecode(question)
 
-    res_batch = cursor.query(f"""SELECT data FROM {story_feat_table} 
-        ORDER BY Similarity(SentenceFeatureExtractor('{ascii_question}'), features)
-        LIMIT 5;""").execute()
-    
+    res_batch = cursor.query(
+        f"""SELECT data FROM {story_feat_table}
+        ORDER BY Similarity(SentenceFeatureExtractor('{ascii_question}'),features)
+        LIMIT 5;"""
+    ).execute()
+
     t_i = t_i + 1
     timestamps[t_i] = perf_counter()
     print(f"Time: {(timestamps[t_i] - timestamps[t_i - 1]) * 1000:.3f} ms")
@@ -103,7 +110,10 @@ def ask_question(path):
     # LLM
     messages = [
         {"role": "user", "content": f"Here is some context:{context}"},
-        {"role": "user", "content": f"Answer this question based on context: {question}"},
+        {
+            "role": "user",
+            "content": f"Answer this question based on context: {question}",
+        },
     ]
     llm.chat_completion(messages)
 
