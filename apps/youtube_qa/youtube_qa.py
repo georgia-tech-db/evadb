@@ -114,7 +114,7 @@ def generate_online_video_transcript(cursor) -> str:
         cursor (EVADBCursor): evadb api cursor.
 
     Returns:
-        EvaDBCursor: evadb api cursor.
+        str: video transcript text.
     """
     print("Analyzing video. This may take a while...")
     start = time.time()
