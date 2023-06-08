@@ -156,17 +156,17 @@ def cleanup():
 
 if __name__ == "__main__":
     print(
-        "Welcome! This EvaDB app lets you ask questions about any YouTube video. You will only need to supply a Youtube URL and an OpenAI API key."
+        "🔮 Welcome to EvaDB! This app lets you ask questions on any YouTube video.\nYou will only need to supply a Youtube URL and an OpenAI API key.\n\n"
     )
 
     # Get Youtube video url
-    video_link = str(input("Enter the URL of the YouTube video: "))
+    video_link = str(input("📺 Enter the URL of the YouTube video (or press `Enter` to go with the default URL):"))
 
     # Get OpenAI key if needed
     try:
         api_key = os.environ["OPENAI_KEY"]
     except KeyError:
-        api_key = str(input("Enter your OpenAI API key: "))
+        api_key = str(input("🔥 Enter your OpenAI API key: "))
         os.environ["OPENAI_KEY"] = api_key
 
     transcript = None
