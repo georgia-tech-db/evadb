@@ -1,7 +1,17 @@
-User-Defined Function
-====
+===
+Concepts
+===
 
-User-defined functions (UDFs) allow us to combine SQL with deep learning models. These functions wrap around deep learning models.
+These are some high-level concepts related to EvaDB.
+
+If you still have questions after reading this documents,  ping us on
+`our Slack <https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg>`__!
+
+User-Defined Function (UDF) or Function
+======================================
+
+User-defined functions are thin wrappers around deep learning models. They 
+allow us to use deep learning models in AI queries.
 
 Here is an illustrative UDF for classifying MNIST images.
 
@@ -11,15 +21,11 @@ Here is an illustrative UDF for classifying MNIST images.
 
 .. code-block:: python
 
-    cursor.execute("""DROP UDF IF EXISTS MnistImageClassifier;""")
-    response = cursor.df()
-    print(response)
-
     cursor.create_udf("MnistImageClassifier", True, 'mnist_image_classifier.py')
     response = cursor.df()
     print(response)
 
-Run a query using the newly registered UDF!
+You can use the newly registered UDF anywhere in the query!
 ~~~~
 
 .. code-block:: python

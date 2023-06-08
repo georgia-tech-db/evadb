@@ -5,15 +5,17 @@ parts:
   - caption: Overview
     chapters:
       - file: source/overview/installation
-      - file: source/overview/udf
       - file: source/overview/faq
+      - file: source/overview/concepts
 
-  - caption: Tutorials
+  - caption: EvaDB Tutorials
     chapters:
-      - file: source/tutorials/08-chatgpt.ipynb
-        title: ChatGPT + Whisper [OpenAI + HuggingFace]
       - file: source/tutorials/11-similarity-search-for-motif-mining.ipynb
         title: Image Similarity Search on Reddit [FAISS + Qdrant]
+      - file: source/tutorials/08-chatgpt.ipynb
+        title: ChatGPT + Whisper [OpenAI + HuggingFace]
+      - file: source/tutorials/03-emotion-analysis.ipynb
+        title: Emotion Analysis with PyTorch
 
   - caption: User Reference
     chapters:
@@ -55,8 +57,6 @@ parts:
 
   - caption: More Tutorials
     chapters:
-      - file: source/tutorials/03-emotion-analysis.ipynb
-        title: Emotion Analysis with PyTorch
       - file: source/tutorials/01-mnist.ipynb
         title: MNIST Image Classification
       - file: source/tutorials/02-object-detection.ipynb
@@ -70,15 +70,10 @@ parts:
         title: Contributing to EvaDB
 
       - file: source/contribute/debugging
-        title: Debugging 
+        title: Debugging EvaDB
 
       - file: source/contribute/new_command
         title: Extending EvaDB
 
       - file: source/contribute/release
-        title: Releasing 
-
-      - file: source/contribute/internals
-        title: EvaDB Internals
-        sections:
-          - file: source/contribute/internals/catalog
+        title: Releasing EvaDB
