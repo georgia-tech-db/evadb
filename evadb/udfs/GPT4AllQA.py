@@ -45,7 +45,7 @@ from langchain.vectorstores.faiss import FAISS
 
 from evadb.catalog.catalog_type import NdArrayType
 from evadb.configuration.configuration_manager import ConfigurationManager
-from evadb.configuration.constants import EVA_ROOT_DIR
+from evadb.configuration.constants import EvaDB_ROOT_DIR
 from evadb.udfs.abstract.abstract_udf import AbstractUDF
 from evadb.udfs.decorators.decorators import forward, setup
 from evadb.udfs.decorators.io_descriptors.data_types import PandasDataframe
@@ -55,7 +55,7 @@ class GPT4AllQaUDF(AbstractUDF):
     @setup(cacheable=False, udf_type="FeatureExtraction", batchable=False)
     def setup(self):
         # check if model is available
-        self.model_path = f"{EVA_ROOT_DIR}/data/models/ggml-gpt4all-j-v1.3-groovy.bin"
+        self.model_path = f"{EvaDB_ROOT_DIR}/data/models/ggml-gpt4all-j-v1.3-groovy.bin"
         check_file = os.path.isfile(self.model_path)
         if check_file is False:
             # downloading gpt4all model

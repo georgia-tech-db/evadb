@@ -19,7 +19,7 @@ from test.util import (
     suffix_pytest_xdist_worker_id_to_dir,
 )
 
-from evadb.configuration.constants import EVA_DATABASE_DIR, EVA_ROOT_DIR
+from evadb.configuration.constants import EvaDB_DATABASE_DIR, EvaDB_ROOT_DIR
 from evadb.interfaces.relational.db import connect
 
 
@@ -29,7 +29,7 @@ class TestLangchainLLM(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.db_dir = suffix_pytest_xdist_worker_id_to_dir(EVA_DATABASE_DIR)
+        cls.db_dir = suffix_pytest_xdist_worker_id_to_dir(EvaDB_DATABASE_DIR)
         cls.conn = connect(cls.db_dir)
         cls.evadb = cls.conn._evadb
 
@@ -46,7 +46,7 @@ class TestLangchainLLM(unittest.TestCase):
         conn = connect()
         cursor = conn.cursor()
         # loading a pdf in eva
-        pdf_path1 = f"{EVA_ROOT_DIR}/data/documents/state_of_the_union.pdf"
+        pdf_path1 = f"{EvaDB_ROOT_DIR}/data/documents/state_of_the_union.pdf"
 
         load_pdf = cursor.load(file_regex=pdf_path1, format="PDF", table_name="PDFss")
         load_pdf.execute()
@@ -56,7 +56,7 @@ class TestLangchainLLM(unittest.TestCase):
         udf = cursor.create_udf(
             "SentenceTransformerFeatureExtractor",
             True,
-            f"{EVA_ROOT_DIR}/evadb/udfs/sentence_transformer_feature_extractor.py",
+            f"{EvaDB_ROOT_DIR}/evadb/udfs/sentence_transformer_feature_extractor.py",
         )
         udf.execute()
         # droping GPT4AllQaUDF udf if existes
@@ -65,7 +65,7 @@ class TestLangchainLLM(unittest.TestCase):
         udf = cursor.create_udf(
             "GPT4AllQaUDF",
             True,
-            f"{EVA_ROOT_DIR}/evadb/udfs/GPT4AllQA.py",
+            f"{EvaDB_ROOT_DIR}/evadb/udfs/GPT4AllQA.py",
         )
         udf.execute()
         # fetching Similarity based on features from SentenceTransformerFeatureExtractor udf and returning top 3 results
