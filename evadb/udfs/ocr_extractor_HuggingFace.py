@@ -34,7 +34,7 @@ import pandas as pd
 import torch
 import torchvision
 from transformers import DonutProcessor, VisionEncoderDecoderModel
-
+import cv2
 from evadb.catalog.catalog_type import NdArrayType
 from evadb.udfs.abstract.abstract_udf import AbstractUDF
 from evadb.udfs.decorators.decorators import forward, setup
@@ -85,7 +85,8 @@ class OCRExactorHuggingFace(AbstractUDF, GPUCompatible):
         def _forward(row: pd.Series) -> np.ndarray:
             data = row[0]
             np_data = np.asarray(data)
-            image = torchvision.transforms.ToPILImage()(np_data)
+            im_rgb = cv2.cvtColor(np_data, cv2.COLOR_BGR2RGB)
+            image = torchvision.transforms.ToPILImage()(im_rgb)
             pixel_values = self.processor(image, return_tensors="pt").pixel_values
             device = "cuda" if torch.cuda.is_available() else "cpu"
             outputs = self.model.generate(
@@ -106,7 +107,6 @@ class OCRExactorHuggingFace(AbstractUDF, GPUCompatible):
                 self.processor.tokenizer.pad_token, ""
             )
             sequence = re.sub(r"<.*?>", "", sequence)
-            # remove first task start token
             return sequence
 
         ret = pd.DataFrame()
