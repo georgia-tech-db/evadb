@@ -10,6 +10,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### [Deprecated]
 ### [Removed]
 
+##  [0.2.8] - 2023-06-09
+
+* PR #842: docs: add pdf qa picture 
+* PR #840: docs: update docs 
+* PR #839: docs: updates 
+* PR #838: Summary : Added missing API documentation 
+* PR #834: refactor: move 'EVA' to 'EvaDB' 
+* PR #814: feat: benchmark question answering v1 
+* PR #831: Bump v0.2.8+dev 
+* PR #819: feat: update tutorials to use Python API 
+
 ##  [0.2.7] - 2023-06-07
 
 * PR #819: feat: update tutorials to use Python API 
