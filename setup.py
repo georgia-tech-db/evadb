@@ -99,7 +99,8 @@ dist_libs = [
     "wheel>=0.37.1",
     "semantic_version",
     "PyGithub",
-    "twine"
+    "twine",
+    "PyDriller"
 ]
 
 ### NEEDED FOR AN ALTERNATE DATA SYSTEM OTHER THAN SQLITE
