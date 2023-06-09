@@ -56,10 +56,6 @@ print(
     "🔮 Welcome to EvaDB! Don't forget to run `python ingest.py` before running this file."
 )
 
-print(
-    "🔮 Welcome to EvaDB! Don't forget to run `python ingest.py` before running this file."
-)
-
 ## Take input of queries from user in a loop
 while True:
     question = input("Enter your question (type 'exit' to stop): ")
