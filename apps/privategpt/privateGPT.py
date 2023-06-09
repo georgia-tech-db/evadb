@@ -51,6 +51,7 @@ def query(question):
     print("\n>> Context: ")
     print(context)
 
+
 print(
     "🔮 Welcome to EvaDB! Don't forget to run `python ingest.py` before running this file."
 )
@@ -60,6 +61,5 @@ while True:
     question = input("Enter your question (type 'exit' to stop): ")
     if question == "exit" or question == "stop":
         break
-    
-    query(question)
 
+    query(question)
