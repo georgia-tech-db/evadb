@@ -51,7 +51,6 @@ def query(question):
     print("\n>> Context: ")
     print(context)
 
-
 print(
     "🔮 Welcome to EvaDB! Don't forget to run `python ingest.py` before running this file."
 )

@@ -49,6 +49,7 @@ minimal_requirement = [
     "pyyaml>=5.1",
     "importlib-metadata<5.0",
     "ray>=1.13.0,<2.5.0", # breaking change in 2.5.0
+    "retry>=0.9.2",
     "aenum>=2.2.0",
     "diskcache>=5.4.0",
     "eva-decord>=0.6.1",

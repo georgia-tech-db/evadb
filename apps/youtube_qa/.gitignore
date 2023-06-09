@@ -1,0 +1,180 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*__pycache__*
+**/__pycache__
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.pypirc
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+*.pyc
+MagicMock/
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# generated documenation files
+/docs/_build
+/docs/source/**/doc/
+
+# PyBuilder
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb
+# pyenv
+.python-version
+
+# celery beat schedule file
+celerybeat-schedule
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+env38/
+env_eva/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+
+# Pycharm configuration
+.idea/
+
+**/faster_rcnn_pytorch/data
+**/faster_rcnn_pytorch/models
+**/faster_rcnn_pytorch/images
+**/faster_rcnn_pytorch/output
+**/faster_rcnn_pytorch/output_images
+*.pkl
+
+# data
+data/*
+!data/README.md
+!data/ua_detrac/README.md
+!data/ua_detrac/*.sh
+!data/ua_detrac/ua_detrac.mp4
+
+# Eclipse
+.pydevproject
+.project
+
+# macos data
+*.DS_Store
+
+tmp/*
+.settings/*
+
+# configuration
+
+# Grammar files and ANTLR4
+*.jar
+evaql_lexer.py
+evaql_parser.py
+evaql_parserListener.py
+evaql_parserVisitor.py
+*.tokens
+*.interp
+*.antlr
+
+#VSCode
+.vscode/*
+
+/api-docs/_autosummary/
+
+# Conda
+miniconda.sh
+
+# Datasets
+eva_datasets/
+eva.history
+
+# nohup
+nohup.out
+*mp4*
+develop.sh
+*build/
+eva_dev_env/
+test_eva/
+test_eva_db/
+test_evadb/
+
+# data
+*evadb_data/
