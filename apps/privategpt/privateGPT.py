@@ -19,20 +19,19 @@ import evadb
 llm = GPT4All("ggml-gpt4all-j-v1.3-groovy")
 llm.model.set_thread_count(16)
 
-cursor = evadb.connect().cursor()
+cursor = evadb.connect("apps/evadb_data").cursor()
 
 
 def query(question):
     context_docs = (
-        cursor.table("data_table")
+        cursor.table("embedding_table")
         .order(f"""Similarity(embedding('{question}'), embedding(data))""")
         .limit(3)
         .select("data")
         .df()
     )
-
     # Merge all context information.
-    context = "; \n".join(context_docs["data_table.data"])
+    context = "; \n".join(context_docs["embedding_table.data"])
 
     # run llm
     messages = [

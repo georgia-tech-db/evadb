@@ -21,16 +21,20 @@ path = os.path.dirname(evadb.__file__)
 
 
 def load_data(path_to_data: str):
-    cursor = evadb.connect().cursor()
+    cursor = evadb.connect("apps/evadb_data").cursor()
     embedding_udf = cursor.create_udf(
         udf_name="embedding",
         if_not_exists=True,
         impl_path=f"{path}/udfs/sentence_feature_extractor.py",
     )
     embedding_udf.execute()
-    print("loading pdfs into evadb")
+    print("Dropping existing data")
+    cursor.drop_table("data_table").execute()
+    cursor.drop_table("embedding_table").execute()
+
+    print("Loading pdfs into evadb")
     cursor.load(
-        file_regex=path_to_data, format="DOCUMENT", table_name="data_table"
+        file_regex=path_to_data, format="PDF", table_name="data_table"
     ).execute()
 
     print("Extracting Feature Emebeddings. Time may take time ...")
