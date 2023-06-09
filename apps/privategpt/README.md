@@ -19,7 +19,7 @@ In this project, we use EvaDB to replicate the privateGPT workflow using SQL-lik
 
 We plan to add these two features in the coming week:
 
-1. Besides text documents, EvaDB also supports search over images and videos.
+1. Besides PDF documents, EvaDB also supports search over text documents, images, and videos.
 2. Improving the quality of answers by building a hierarchical index over documents at different granularities (sentences, paragraphs, and entire documents).
 
 You can ask questions on your documents without an internet connection using the power of LLMs. 100% private, no data leaves your execution environment at any point.
@@ -62,8 +62,3 @@ The purpose of NATO was to secure peace and stability in Europe after World War 
 To exit the script, simply type `exit`.
 
 If you face any issues, please create an issue on [Github](https://github.com/georgia-tech-db/eva) or ping us on [Slack](https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg).
-
-
-## Instructions for ingesting your own dataset
-
-Put any and all of your .txt, .pdf, or .csv files into the `source_documents` directory. The current default file types are .txt, .pdf, .csv, and .xlsx, if you want to use any other file type, you will need to convert it to one of the default file types.
