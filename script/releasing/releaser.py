@@ -263,7 +263,7 @@ def upload_assets(changelog, tag):
     print('Release created and published successfully.')
 
 def bump_up_version(next_version):
-    version_path = os.path.join(os.path.join(EvaDB_DIR, "eva"), "version.py")
+    version_path = os.path.join(os.path.join(EvaDB_DIR, "evadb"), "version.py")
 
     major_str = get_string_in_line(version_path, 1)
     minor_str = get_string_in_line(version_path, 2)
