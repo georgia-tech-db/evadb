@@ -46,8 +46,8 @@ def query(question):
 
 ## Take input of queries from user in a loop
 while True:
-    question = input("Enter your question: ")
-    if question == "exit":
+    question = input("Enter your question (type 'exit' to stop): ")
+    if question == "exit" or "quit":
         break
     answer = query(question)
 

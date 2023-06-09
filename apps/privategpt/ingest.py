@@ -34,10 +34,12 @@ def load_data(path_to_data: str):
 
     print("Loading pdfs into evadb")
     cursor.load(
-        file_regex=path_to_data, format="PDF", table_name="data_table"
+        file_regex=f"{path_to_data}/*.pdf", 
+        format="PDF", 
+        table_name="data_table"
     ).execute()
 
-    print("Extracting Feature Emebeddings. Time may take time ...")
+    print("Extracting Feature Embeddings. This step will take some time ...")
     cursor.query(
         "CREATE TABLE IF NOT EXISTS embedding_table AS SELECT embedding(data), data FROM data_table;"
     ).execute()
