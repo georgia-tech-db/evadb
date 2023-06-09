@@ -2,7 +2,22 @@
 
 This project was inspired by the original [privateGPT](https://github.com/imartinez/privateGPT) and [localGPT](https://github.com/PromtEngineer/localGPT) projects.Most of the description is derived from these projects.
 
-In this project, we use EvaDB to replicate the privateGPT workflow using SQL-like queries. We plan to add these two features in the coming week:
+In this project, we use EvaDB to replicate the privateGPT workflow using SQL-like queries. Here are the key SQL queries:
+
+```sql
+    --- Generate feature embeddings of document chunks
+    CREATE TABLE IF NOT EXISTS 
+    embedding_table AS SELECT embedding(data), data FROM data_table;
+
+    --- Run a similarity search query based on the feature embeddings
+    --- Uses a feature index for faster retrieval of relevant chunks
+    SELECT data 
+    FROM embedding_table 
+    ORDER BY Similarity(embedding("Why was NATO created?"),features) 
+    ASC LIMIT 3
+```
+
+We plan to add these two features in the coming week:
 
 1. Besides text documents, EvaDB also supports search over images and videos.
 2. Improving the quality of answers by building a hierarchical index over documents at different granularities (sentences, paragraphs, and entire documents).
@@ -22,7 +37,7 @@ pip install -r requirements.txt
 
 ## Ask questions to your documents, locally!
 
-Ingest the pdfs by executing the following command:
+Ingest all PDF documents by executing the following command:
 
 ```shell
 python ingest.py
