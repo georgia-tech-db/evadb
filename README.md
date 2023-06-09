@@ -208,7 +208,7 @@ This diagram presents the key components of EvaDB. EvaDB's AI-centric Query Opti
 
 ## Community and Support
 
-👋 If you have general questions about EvaDB, want to say hello or just follow along, we'd like to invite you to join our [Slack Community](https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg)and to [follow us on Twitter](https://twitter.com/evadb_ai).
+👋 If you have general questions about EvaDB, want to say hello or just follow along, we'd like to invite you to join our [Slack Community](https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg) and to [follow us on Twitter](https://twitter.com/evadb_ai).
 
 <a href="https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg">              
     <img src="https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/images/eva/eva-slack.png" alt="EvaDB Slack Channel" width="500">
