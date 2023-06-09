@@ -14,6 +14,7 @@
 # limitations under the License.
 import argparse
 import os
+
 import evadb
 
 path = os.path.dirname(evadb.__file__)
