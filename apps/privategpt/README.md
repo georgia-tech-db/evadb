@@ -4,8 +4,8 @@ This project was inspired by the original [privateGPT](https://github.com/imarti
 
 In this project, we use EvaDB to replicate the privateGPT workflow using SQL-like queries. We plan to add these two features in the coming week:
 
-1. Improving the quality of answers by building hierarchical index over the documents at different granularities (sentences, paragraphs, and entire documents).
-2. Besides text documents, EvaDB also supports search over images and videos.
+1. Besides text documents, EvaDB also supports search over images and videos.
+2. Improving the quality of answers by building a hierarchical index over documents at different granularities (sentences, paragraphs, and entire documents).
 
 You can ask questions on your documents without an internet connection using the power of LLMs. 100% private, no data leaves your execution environment at any point.
 
