@@ -163,7 +163,7 @@ Illustrative EvaDB Applications
     :width: 45%
     :alt: App
 
-|pic 7|
+|pic7|
 
 |:desert_island:| Traffic Analysis Application using Object Detection Model
 ~~~~
