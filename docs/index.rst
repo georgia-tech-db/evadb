@@ -1,10 +1,10 @@
 .. meta::
    :keywords: database, deep learning, video analytics, language models
 
-Welcome to EvaDB 🤖💾 ! 
-========================
+Welcome to EvaDB 🤖 + 💾 ! 
+==========================
 
-..  rubric:: Database system for building simpler and faster AI-powered applications.
+..  rubric:: Database system for building simpler and faster AI-powered apps.
 
 ..
     ..  figure:: https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/images/eva/eva-banner.png
@@ -16,7 +16,7 @@ Welcome to EvaDB 🤖💾 !
 
 ----------
 
-EvaDB is an AI-SQL database for developing applications powered by AI models. We aim to simplify the development and deployment of AI-powered applications that operate on structured (tables, feature stores) and unstructured data (videos, text, podcasts, PDFs, etc.).
+EvaDB is an AI-SQL database for developing apps powered by AI models. We aim to simplify the development and deployment of AI-powered apps that operate on structured (tables, feature stores) and unstructured data (videos, text, podcasts, PDFs, etc.).
 
 - Github: https://github.com/georgia-tech-db/eva
 - PyPI: https://pypi.org/project/evadb/
@@ -27,35 +27,45 @@ EvaDB is an AI-SQL database for developing applications powered by AI models. We
 Why EvaDB?
 ----------
 
-Over the last decade, AI models have radically changed the world of natural language processing and computer vision. They are accurate on various tasks ranging from question answering to object tracking in videos. However, two challenges prevent many users from benefiting from these models.
+Over the last decade, AI models have radically changed the world of natural language processing and computer vision. They are accurate on various tasks ranging from question answering to object tracking in videos. However, it is challenging for users to leverage these models due to two challenges:
 
-- *Usability*: To use an AI model, the user needs to program against multiple low-level libraries, like OpenCV, PyTorch, and Hugging Face. This tedious process often leads to a complex application that glues together these libraries to accomplish the given task. This programming complexity prevents people who are experts in other domains from benefiting from these models.
+- *Usability*: To use an AI model, the user needs to program against multiple low-level libraries, like PyTorch, Hugging Face, Open AI, etc. This tedious process often leads to a complex AI app that glues together these libraries to accomplish the given task. This programming complexity prevents people who are experts in other domains from benefiting from these models.
 
-- *Money and Time*: Running these deep learning models on large video or document datasets is costly and time-consuming. For example, the state-of-the-art object detection model takes multiple GPU years to process just a week's videos from a single traffic monitoring camera. Besides the money spent on hardware, these models also increase the time that you spend waiting for the model inference to finish.
+- *Money & Time*: Running these deep learning models on large document or video datasets is costly and time-consuming. For example, the state-of-the-art object detection model takes multiple GPU years to process just a week's videos from a single traffic monitoring camera. Besides the money spent on hardware, these models also increase the time that you spend waiting for the model inference to finish.
 
 Proposed Solution
 ----------
 
-That's where EvaDB comes in.
+That is where EvaDB comes in!
 
-1. Quickly build AI-Powered Applications
+1. Quickly build AI-Powered Apps
 ^^^^
 
-Historically, SQL database systems have been successful because the query language is simple enough in its basic structure that users without prior experience can learn a usable subset of the language on their first sitting. EvaDB supports a simple SQL-like query language designed to make it easier for users to leverage AI models. With this query language, the user may chain multiple models in a single query to accomplish complicated tasks with minimal programming.
+SQL database systems have been successful because the query language is simple enough in its basic structure that users without prior experience can learn a usable subset of the language on their first sitting. EvaDB supports a simple SQL-like query language designed to make it easier for users to leverage AI models. It is easy to chain multiple models in a single query to accomplish complicated tasks with minimal programming.
 
-Here is an illustrative workflow that demonstrates loading news videos into a evadb, extracting audio transcripts from the videos using a speech-to-text model, and performing natural language processing tasks using the ChatGPT model. 
+Here is an illustrative EvaDB app for ChatGPT-based question answering on videos. The app loads a collection of news videos into EvaDB and runs a query for extracting audio transcripts from the videos using a HuggingFace model, followed by question answering using ChatGPT.
 
 .. code:: python
 
+    # pip install evadb and import it
     import evadb
-    
-    # Connect to the movie table
+
+    # Grab a evadb cursor to load data and run queries    
     cursor = evadb.connect().cursor()
 
-    # Load news videos into evadb
-    cursor.load(file_regex="news/*.mp4", format="VIDEO", table_name="news").df()
+    # Load a collection of news videos into the 'news_videos' table
+    # This command returns a Pandas Dataframe with the query's output
+    # In this case, the output indicates the number of loaded videos
+    cursor.load(
+        file_regex="news_videos/*.mp4", 
+        format="VIDEO", 
+        table_name="news_videos"
+    ).df()
 
-    # Register a speech-to-text (whisper) model to evadb from Hugging Face
+    # Define a function that wraps around a speech-to-text (Whisper) model 
+    # Such functions are known as user-defined functions or UDFs
+    # So, we are creating a Whisper UDF here
+    # After creating the UDF, we can use the function in any query
     cursor.create_udf(
         udf_name="SpeechRecognizer",
         type="HuggingFace",
@@ -63,20 +73,26 @@ Here is an illustrative workflow that demonstrates loading news videos into a ev
         model='openai/whisper-base'
     ).df()
 
-    # Extract transcript and persist in a table
+    # EvaDB automatically extract the audio from the video
+    # We only need to run the SpeechRecongizer UDF on the 'audio' column 
+    # to get the transcript and persist it in a table called 'transcripts'
     cursor.query(
-        "CREATE TABLE transcripts AS SELECT SpeechRecognizer(audio) from news;"
+        """CREATE TABLE transcripts AS 
+           SELECT SpeechRecognizer(audio) from news_videos;"""
     ).df()
 
-    # Incrementally construct the AI query using Python API
+    # We next incrementally construct the ChatGPT query using EvaDB's Python API
+    # The query is based on the 'transcripts' table 
+    # This table has a column called 'text' with the transcript text
     query = cursor.table('transcripts')
 
-    # Ask the question using the ChatGPT model
-    # Remember to set the OPENAI_KEY in environment 
+    # Since ChatGPT is a built-in function, we don't have to define it
+    # We can just directly use it in the query
+    # We need to set the OPENAI_KEY as an environment variable
     os.environ["OPENAI_KEY"] = OPENAI_KEY 
     query = query.select("ChatGPT('Is this video summary related to LLMs', text)")
 
-    # Get the results as a dataframe
+    # Finally, we run the query to get the results as a dataframe
     response = query.df()
 
 .. .. code:: python
@@ -103,10 +119,11 @@ The same AI query can also be written directly in SQL and run on EvaDB.
 .. code:: sql
 
    --- Query for asking question using ChatGPT
-   SELECT ChatGPT('Is this video summary related to LLMs', SpeechRecognizer(audio)) FROM news;
+   SELECT ChatGPT('Is this video summary related to LLMs', 
+                  SpeechRecognizer(audio)) FROM news_videos;
 
 
-EvaDB's declarative query language reduces the complexity of the application, leading to more maintainable code that allows users to build on top of each other's queries.
+EvaDB's declarative query language reduces the complexity of the app, leading to more maintainable code that allows users to build on top of each other's queries.
 
 EvaDB comes with a wide range of models for analyzing unstructured data including image classification, object detection, OCR, face detection, etc. It is fully implemented in Python, and `licensed under the Apache license <https://github.com/georgia-tech-db/eva>`__. It already contains integrations with widely-used AI pipelines based on Hugging Face, PyTorch, and Open AI. 
 
@@ -119,7 +136,7 @@ EvaDB automatically optimizes the queries to save inference cost and query execu
 
 EvaDB accelerates AI pipelines using a collection of optimizations inspired by SQL database systems including function caching, sampling, and cost-based operator reordering.
 
-EvaDB supports an AI-oriented query language for analysing both structured and unstructured data. Here are some illustrative applications:
+EvaDB supports an AI-oriented query language for analysing both structured and unstructured data. Here are some illustrative apps:
 
 
  * `Reddit Image Similarity Search <https://evadb.readthedocs.io/en/stable/source/tutorials/11-similarity-search-for-motif-mining.html>`_
@@ -140,8 +157,8 @@ The `User Guides <source/tutorials/index.html>`_ section contains Jupyter Notebo
 Key Features
 ------------
 
-- 🔮 Build simpler AI-powered applications using short Python or SQL queries
-- ⚡️ 10x faster applications using AI-centric query optimization  
+- 🔮 Build simpler AI-powered apps using short Python or SQL queries
+- ⚡️ 10x faster apps using AI-centric query optimization  
 - 💰 Save money spent on GPUs
 - 🚀 First-class support for your custom deep learning models through user-defined functions
 - 📦 Built-in caching to eliminate redundant model invocations across queries
@@ -176,7 +193,7 @@ Next Steps
 
 ----------
 
-Illustrative EvaDB Applications 
+Illustrative EvaDB Apps 
 ----
 
 |:desert_island:| PDF Question Answering
@@ -188,7 +205,7 @@ Illustrative EvaDB Applications
 
 |pic 7|
 
-|:desert_island:| Traffic Analysis Application using Object Detection Model
+|:desert_island:| Traffic Analysis App using Object Detection Model
 ~~~~
 
 .. |pic1| image:: https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/traffic-input.webp
@@ -214,7 +231,7 @@ Illustrative EvaDB Applications
 
 |pic3| |pic4|
 
-|:desert_island:| Movie Analysis Application using Face Detection + Emotion Classification Models
+|:desert_island:| Movie Analysis App using Face Detection + Emotion Classification Models
 ~~~~
 
 ..  |pic5| image:: https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/gangubai-input.webp
