@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
 from gpt4all import GPT4All
 
 import evadb
@@ -19,7 +20,8 @@ import evadb
 llm = GPT4All("ggml-gpt4all-j-v1.3-groovy")
 llm.model.set_thread_count(16)
 
-cursor = evadb.connect("apps/evadb_data").cursor()
+path = os.path.dirname(evadb.__file__)
+cursor = evadb.connect(path).cursor()
 
 
 def query(question):
@@ -51,7 +53,5 @@ while True:
         break
     answer = query(question)
 
-    print("\n\n> Question:")
-    print(query)
     print("\n> Answer:")
-    print(answer)
+    print(answer['choices'][0]['message']['content'])
