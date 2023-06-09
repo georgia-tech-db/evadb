@@ -98,14 +98,17 @@ EvaDB accelerates AI pipelines using a collection of optimizations inspired by S
 
 EvaDB supports an AI-oriented query language for analysing both structured and unstructured data. Here are some illustrative applications:
 
+
+ * `Reddit Image Similarity Search <https://evadb.readthedocs.io/en/stable/source/tutorials/11-similarity-search-for-motif-mining.html>`_
  * `Using ChatGPT to ask questions based on videos <https://evadb.readthedocs.io/en/stable/source/tutorials/08-chatgpt.html>`_
+ * `Querying PDF documents <https://evadb.readthedocs.io/en/stable/source/tutorials/12-query-pdf.html>`_
  * `Analysing traffic flow at an intersection <https://evadb.readthedocs.io/en/stable/source/tutorials/02-object-detection.html>`_
  * `Examining the emotion palette of actors in a movie <https://evadb.readthedocs.io/en/stable/source/tutorials/03-emotion-analysis.html>`_
- * `Finding similar images on Reddit <https://evadb.readthedocs.io/en/stable/source/tutorials/11-similarity-search-for-motif-mining.html>`_
  * `Classifying images based on their content <https://evadb.readthedocs.io/en/stable/source/tutorials/01-mnist.html>`_
  * `Image Segmentation using Hugging Face <https://evadb.readthedocs.io/en/stable/source/tutorials/07-object-segmentation-huggingface.html>`_
  * `Recognizing license plates <https://github.com/georgia-tech-db/license-plate-recognition>`_
  * `Analysing toxicity of social media memes <https://github.com/georgia-tech-db/toxicity-classification>`_
+
 
 The `Getting Started <source/overview/installation.html>`_ page shows how you can use EvaDB for different AI tasks and how you can easily extend EvaDB to support your custom deep learning model through user-defined functions.
 
@@ -153,6 +156,15 @@ Next Steps
 Illustrative EvaDB Applications 
 ----
 
+|:desert_island:| PDF Question Answering
+~~~~
+
+..  |pic7| image:: https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/pdf-qa.webp
+    :width: 45%
+    :alt: App
+
+|pic 7|
+
 |:desert_island:| Traffic Analysis Application using Object Detection Model
 ~~~~
 
@@ -193,17 +205,6 @@ Illustrative EvaDB Applications
 |pic5| |pic6|
 
 ----------
-
-Community
---------
-
-Join the EvaDB community on `Slack <https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg>`_ to ask questions and to share your ideas for improving EvaDB.
-
-..
-    ..  figure:: https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/images/eva/eva-slack.png
-        :target: https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg
-        :width: 100%
-        :alt: EvaDB Slack Channel
 
 .. |pypi_status| image:: https://img.shields.io/pypi/v/evadb.svg
    :target: https://pypi.org/project/evadb
