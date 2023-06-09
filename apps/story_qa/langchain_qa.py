@@ -96,7 +96,7 @@ store = FAISS.from_texts(
 )
 
 index_build_time = time.perf_counter() - ss
-print(f"Time taken to build index {index_build_time}")
+print(f"Time taken to build index {index_build_time * 1000:.3f} ms")
 
 # creating QA model based on gpt4all llm model
 chain = load_qa_with_sources_chain(llm=llm, chain_type="stuff")
