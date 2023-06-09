@@ -263,7 +263,7 @@ class Batch:
             method="ffill"
         )
         if new_frames.columns.duplicated().any():
-            logger.warn("Duplicated column name detected {}".format(new_frames))
+            logger.debug("Duplicated column name detected {}".format(new_frames))
         return Batch(new_frames)
 
     def __add__(self, other: Batch) -> Batch:

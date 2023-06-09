@@ -13,7 +13,7 @@ python evadb_qa.py
 ```
 
 ### Performance Results
-We set the degree of parallelism to `8` to compare with no parallelism. We also need to update the `batch_mem_size` to a small value (e.g., `1`) to encourage more data-level parallelism. The reason we obrain better performance is because we achieve better GPU utilization by overlapping the feature extractor compuation better through parallelization.
+We set the degree of parallelism to `8` to compare with no parallelism. We also need to update the `batch_mem_size` to a small value (e.g., `1`) to encourage more data-level parallelism. The reason we obrain better performance is because we achieve better GPU utilization by overlapping the feature extractor computation better through parallelization.
 
 |  | Feature Extraction Time | Total QA Time |
 | --- | ----------------------- | ------------- |
