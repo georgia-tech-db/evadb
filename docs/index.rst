@@ -1,8 +1,8 @@
 .. meta::
    :keywords: database, deep learning, video analytics, language models
 
-EvaDB
-=====
+Welcome to EvaDB 🤖💾 ! 
+========================
 
 ..  rubric:: Database system for building simpler and faster AI-powered applications.
 
@@ -16,15 +16,12 @@ EvaDB
 
 ----------
 
-Welcome to EvaDB
-=================
-
 EvaDB is an AI-SQL database for developing applications powered by AI models. We aim to simplify the development and deployment of AI-powered applications that operate on structured (tables, feature stores) and unstructured data (videos, text, podcasts, PDFs, etc.).
 
 - Github: https://github.com/georgia-tech-db/eva
 - PyPI: https://pypi.org/project/evadb/
 - Twitter: https://twitter.com/evadb_ai
-- Slack: `Invite link <https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg>`_
+- Slack: https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg
 
 
 Why EvaDB?
@@ -145,7 +142,7 @@ Next Steps
         
         List of all the query commands supported by EvaDB
     
-    .. grid-item-card:: :doc:`User Defined Function <source/reference/udf>`
+    .. grid-item-card:: :doc:`User Defined Function <source/reference/udfs/custom>`
         :link: source/reference/udfs/custom
         :link-type: doc
         

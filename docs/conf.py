@@ -85,7 +85,7 @@ source_suffix = [".rst", ".md"]
 master_doc = "index"
 
 # General information about the project.
-project = "EvaDB"
+project = "EvaDB 🤖💾"
 copyright = str(date.today().year) + ", EvaDB."
 author = u"EvaDB Team"
 
@@ -113,7 +113,7 @@ notfound_urls_prefix = ""
 # The theme to use for pages.
 html_theme = "furo"
 
-html_title = project + " " + LATEST_VERSION
+html_title = project + "\n" + LATEST_VERSION
 html_static_path = ["_static"]
 
 # Theme options are theme-specific and customize the look and feel of a theme
