@@ -22,7 +22,7 @@ import evadb
 
 
 def ask_question(path):
-    # Initialize early to exlcude download time.
+    # Initialize early to exclude download time.
     llm = GPT4All("ggml-gpt4all-j-v1.3-groovy")
 
     cursor = evadb.connect().cursor()

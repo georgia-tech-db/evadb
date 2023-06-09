@@ -34,7 +34,6 @@ class SentenceFeatureExtractor(AbstractUDF, GPUCompatible):
         self.model = AutoModel.from_pretrained("sentence-transformers/all-MiniLM-L6-v2")
 
     def to_device(self, device: str) -> GPUCompatible:
-        print("Device", device)
         self.model_device = device
         self.model = self.model.to(device)
         return self
