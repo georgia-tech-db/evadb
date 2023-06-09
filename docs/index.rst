@@ -1,8 +1,8 @@
 .. meta::
    :keywords: database, deep learning, video analytics, language models
 
-EvaDB 🤖💾
-==========
+Welcome to EvaDB 🤖 + 💾 ! 
+==========================
 
 ..  rubric:: Database system for building simpler and faster AI-powered applications.
 
@@ -15,9 +15,6 @@ EvaDB 🤖💾
 |pypi_status| |License|
 
 ----------
-
-Welcome to EvaDB
-=================
 
 EvaDB is an AI-SQL database for developing applications powered by AI models. We aim to simplify the development and deployment of AI-powered applications that operate on structured (tables, feature stores) and unstructured data (videos, text, podcasts, PDFs, etc.).
 
