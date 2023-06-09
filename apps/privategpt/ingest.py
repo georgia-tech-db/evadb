@@ -12,19 +12,32 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import argparse
+import os
 import evadb
-from evadb.configuration.constants import EvaDB_ROOT_DIR
+
+path = os.path.dirname(evadb.__file__)
 
 
-def load_data(cursor, path_to_data: str):
-    load_pdf = cursor.load(file_regex=path_to_data, format="PDF", table_name="sotu")
-    load_pdf.execute()
-
-    emebdding_table = cursor.query(
-        "CREATE TABLE IF NOT EXISTS embedding_table AS SELECT embedding(data), data FROM sotu;"
+def load_data(path_to_data: str):
+    cursor = evadb.connect().cursor()
+    embedding_udf = cursor.create_udf(
+        udf_name="embedding",
+        if_not_exists=True,
+        impl_path=f"{path}/udfs/sentence_feature_extractor.py",
     )
-    emebdding_table.execute()
+    embedding_udf.execute()
+    print("loading pdfs into evadb")
+    cursor.load(
+        file_regex=path_to_data, format="DOCUMENT", table_name="data_table"
+    ).execute()
 
+    print("Extracting Feature Emebeddings. Time may take time ...")
+    cursor.query(
+        "CREATE TABLE IF NOT EXISTS embedding_table AS SELECT embedding(data), data FROM data_table;"
+    ).execute()
+
+    print("Building FAISS Index ...")
     cursor.create_vector_index(
         index_name="embedding_index",
         table_name="embedding_table",
@@ -33,6 +46,22 @@ def load_data(cursor, path_to_data: str):
     )
 
 
-cursor = evadb.connect().cursor()
+def main():
+    parser = argparse.ArgumentParser(description="Ingest data into evadb")
+    parser.add_argument(
+        "--data-directory",
+        "-D",
+        help="Regex path to the pdf documents",
+    )
 
-load_data(cursor, f"{EvaDB_ROOT_DIR}/data/documents/state_of_the_union.pdf")
+    args = parser.parse_args()
+    if args.data_directory is None:
+        print("Please provide the data directory using -D option.")
+        exit()
+    load_data(args.data_directory)
+
+    print("Ingestion complete! You can now run privateGPT.py to query your documents")
+
+
+if __name__ == "__main__":
+    main()
