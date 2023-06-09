@@ -68,7 +68,7 @@ class EvaDBDBConnection:
 class EvaDBDBCursor(object):
     def __init__(self, connection):
         self._connection = connection
-        self._evadb = connection._evadb
+        self._evadb: EvaDBDatabase = connection._evadb
         self._pending_query = False
         self._result = None
 
@@ -282,6 +282,10 @@ class EvaDBDBCursor(object):
         """
         stmt = parse_query(sql_query)
         return EvaDBDBQuery(self._evadb, stmt)
+
+    def set_config(self, category: str, key: str, value: str):
+        self._evadb.config.update_value(category, key, value)
+        return self
 
 
 def connect(

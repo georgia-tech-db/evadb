@@ -54,8 +54,8 @@ def read_text_line(path, num_token=1000):
                 cut_line = "".join(filter(whitelist.__contains__, cut_line))
                 yield cut_line
 
-            if line_itr == 1000:
-                break
+            # if line_itr == 100:
+            #     break
 
 
 def try_execute(conn, query):

@@ -68,11 +68,6 @@ class SentenceTransformerFeatureExtractor(AbstractUDF, GPUCompatible):
         ],
     )
     def forward(self, df: pd.DataFrame) -> pd.DataFrame:
-        def _forward(row: pd.Series) -> np.ndarray:
-            data = row
-            embedded_list = self.model.encode(data)
-            return embedded_list
-
-        ret = pd.DataFrame()
-        ret["features"] = df.apply(_forward, axis=1)
+        result = self.model.encode(df[df.columns[0]].tolist())
+        ret = pd.DataFrame({"features": [row for row in result]})
         return ret
