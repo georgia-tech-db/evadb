@@ -43,44 +43,67 @@ That's where EvaDB comes in.
 
 Historically, SQL database systems have been successful because the query language is simple enough in its basic structure that users without prior experience can learn a usable subset of the language on their first sitting. EvaDB supports a simple SQL-like query language designed to make it easier for users to leverage AI models. With this query language, the user may chain multiple models in a single query to accomplish complicated tasks with minimal programming.
 
-Here is an illustrative query that examines the emotions of actors in a movie by leveraging multiple deep-learning models that take care of detecting faces and analyzing the emotions of the detected bounding boxes:
+Here is an illustrative workflow that demonstrates loading news videos into a evadb, extracting audio transcripts from the videos using a speech-to-text model, and performing natural language processing tasks using the ChatGPT model. 
 
 .. code:: python
 
-    # Query for analyzing the emotions of actors in a movie scene
+    import evadb
+    
+    # Connect to the movie table
+    cursor = evadb.connect().cursor()
+
+    # Load news videos into evadb
+    cursor.load(file_regex="news/*.mp4", format="VIDEO", table_name="news").df()
+
+    # Register a speech-to-text (whisper) model to evadb from Hugging Face
+    cursor.create_udf(
+        udf_name="SpeechRecognizer",
+        type="HuggingFace",
+        task='automatic-speech-recognition',
+        model='openai/whisper-base'
+    ).df()
+
+    # Extract transcript and persist in a table
+    cursor.query(
+        "CREATE TABLE transcripts AS SELECT SpeechRecognizer(audio) from news;"
+    ).df()
 
     # Incrementally construct the AI query using Python API
-    # Connect to the movie table
-    import evadb
-    cursor = evadb.connect().cursor()
-    query = cursor.table("Interstellar")
+    query = cursor.table('transcripts')
 
-    # Run the Face Detection model on the video frames ("data")
-    # To get a set of detected faces 
-    # with bounding boxes ("bbox") and confidence scores ("conf")
-    query = query.cross_apply("UNNEST(FaceDetector(data))", "Face(bbox, conf)")
-
-    # Add filter based on frame id ("id")
-    # Here, we run the query on frames 100 through 200
-    query = query.filter("id > 100 AND id < 200")
-
-    # Crop the bounding box from the frames and 
-    # Send the face picture to the Emotion Detection model 
-    query = query.select("id, bbox, EmotionDetector(Crop(data, bbox))")
+    # Ask the question using the ChatGPT model
+    # Remember to set the OPENAI_KEY in environment 
+    os.environ["OPENAI_KEY"] = OPENAI_KEY 
+    query = query.select("ChatGPT('Is this video summary related to LLMs', text)")
 
     # Get the results as a dataframe
-    # With three columns id, bbox, and emotion
     response = query.df()
+
+.. .. code:: python
+
+..     # Query for analyzing the emotions of actors in a movie scene
+..     query = cursor.table("Interstellar")
+
+..     # Run the Face Detection model on the video frames ("data")
+..     query = query.cross_apply("UNNEST(FaceDetector(data))", "Face(bbox, conf)")
+
+..     # Add filter based on frame id ("id")
+..     query = query.filter("id > 100 AND id < 200")
+
+..     # Crop the bounding box from the frames and 
+..     # send the face picture to the Emotion Detection model 
+..     query = query.select("id, bbox, EmotionDetector(Crop(data, bbox))")
+
+..     # Get the results as a dataframe
+..     # With three columns id, bbox, and emotion
+..     response = query.df()
 
 The same AI query can also be written directly in SQL and run on EvaDB.
 
 .. code:: sql
 
-   --- Query for analyzing the emotions of actors in a movie scene
-   SELECT id, bbox, EmotionDetector(Crop(data, bbox)) 
-   FROM Interstellar 
-      JOIN LATERAL UNNEST(FaceDetector(data)) AS Face(bbox, conf)  
-   WHERE id < 15;
+   --- Query for asking question using ChatGPT
+   SELECT ChatGPT('Is this video summary related to LLMs', SpeechRecognizer(audio)) FROM news;
 
 
 EvaDB's declarative query language reduces the complexity of the application, leading to more maintainable code that allows users to build on top of each other's queries.
