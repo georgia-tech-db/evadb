@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import os
+
 from gpt4all import GPT4All
 
 import evadb
