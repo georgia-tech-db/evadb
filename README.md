@@ -5,13 +5,13 @@
             <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open EvaDB on Colab"/>
         </a>
         <a href="https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg">
-            <img alt="Slack" src="https://img.shields.io/badge/slack-eva-ff69b4.svg?logo=slack">
+            <img alt="Slack" src="https://img.shields.io/badge/slack-evadb-ff69b4.svg?logo=slack">
         </a>          
         <a href="https://twitter.com/evadb_ai">
-            <img alt="Twitter" src="https://img.shields.io/badge/twitter-eva-bde1ee.svg?logo=twitter">
+            <img alt="Twitter" src="https://img.shields.io/badge/twitter-evadb-bde1ee.svg?logo=twitter">
         </a>  
         <a href="https://github.com/orgs/georgia-tech-db/projects/3">
-            <img src="https://img.shields.io/badge/eva-roadmap-a6c096" alt="Roadmap"/>
+            <img src="https://img.shields.io/badge/evadb-roadmap-a6c096" alt="Roadmap"/>
         </a>
         <img alt="PyPI" src="https://img.shields.io/pypi/v/evadb.svg"/>
         <img alt="License" src="https://img.shields.io/badge/license-Apache%202-brightgreen.svg?logo=apache"/>
