@@ -66,7 +66,7 @@ class SentenceFeatureExtractor(AbstractUDF, GPUCompatible):
             encoded_input = self.tokenizer(
                 [sentence], padding=True, truncation=True, return_tensors="pt"
             )
-            if self.model_device != None:
+            if self.model_device is not None:
                 encoded_input.to(self.model_device)
             with torch.no_grad():
                 model_output = self.model(**encoded_input)

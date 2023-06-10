@@ -239,7 +239,7 @@ def init_builtin_udfs(db: EvaDBDatabase, mode: str = "debug") -> None:
                 DummyObjectDetector_udf_query,
                 DummyMultiObjectDetector_udf_query,
                 DummyFeatureExtractor_udf_query,
-                yolo8n_query
+                yolo8n_query,
             ]
         )
 
