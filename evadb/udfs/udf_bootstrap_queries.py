@@ -198,6 +198,7 @@ yolo8n_query = """CREATE UDF IF NOT EXISTS Yolo
             'model' 'yolov8n.pt';
         """
 
+
 def init_builtin_udfs(db: EvaDBDatabase, mode: str = "debug") -> None:
     """Load the built-in UDFs into the system during system bootstrapping.
 
@@ -235,7 +236,7 @@ def init_builtin_udfs(db: EvaDBDatabase, mode: str = "debug") -> None:
                 DummyObjectDetector_udf_query,
                 DummyMultiObjectDetector_udf_query,
                 DummyFeatureExtractor_udf_query,
-                Yolo_udf_query
+                Yolo_udf_query,
             ]
         )
 
