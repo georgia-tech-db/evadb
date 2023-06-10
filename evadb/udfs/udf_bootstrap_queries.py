@@ -229,14 +229,17 @@ def init_builtin_udfs(db: EvaDBDatabase, mode: str = "debug") -> None:
         # Sift_udf_query, - requires package kornia
     ]
 
-    if mode == "debug":
+    if mode == "release":
+        # if mode is 'release', add the Yolo query to the list
+        queries.append(Yolo_udf_query)
+    else:
         # if mode is 'debug', add debug UDFs and a smaller Yolo model
         queries.extend(
             [
                 DummyObjectDetector_udf_query,
                 DummyMultiObjectDetector_udf_query,
                 DummyFeatureExtractor_udf_query,
-                Yolo_udf_query,
+                yolo8n_query
             ]
         )
 

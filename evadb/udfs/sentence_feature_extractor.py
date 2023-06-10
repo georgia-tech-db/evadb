@@ -32,7 +32,7 @@ class SentenceFeatureExtractor(AbstractUDF, GPUCompatible):
             "sentence-transformers/all-MiniLM-L6-v2"
         )
         self.model = AutoModel.from_pretrained("sentence-transformers/all-MiniLM-L6-v2")
-        self.device = None
+        self.model_device = None
 
     def to_device(self, device: str) -> GPUCompatible:
         self.model_device = device
@@ -66,7 +66,8 @@ class SentenceFeatureExtractor(AbstractUDF, GPUCompatible):
             encoded_input = self.tokenizer(
                 [sentence], padding=True, truncation=True, return_tensors="pt"
             )
-            encoded_input.to(self.model_device)
+            if self.model_device != None:
+                encoded_input.to(self.model_device)
             with torch.no_grad():
                 model_output = self.model(**encoded_input)
 
