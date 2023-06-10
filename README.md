@@ -80,65 +80,92 @@ Here are some illustrative EvaDB-powered applications (each Jupyter notebook can
 
 ## Quick Start
 
-- Install EvaDB using the pip package manager. EvaDB supports Python versions >= 3.8:
+- Step 1: Install EvaDB using pip. EvaDB supports Python versions >= `3.8`:
 
 ```shell
 pip install evadb
 ```
 
-- To launch and connect to an EvaDB server in a Jupyter notebook, check out this [illustrative emotion analysis notebook](https://github.com/georgia-tech-db/eva/blob/master/tutorials/03-emotion-analysis.ipynb):
-```shell
-cursor = connect_to_server()
+- Step 2: Write your AI app!
+
+```python
+import evadb
+
+# Grab a EvaDB cursor to load data and run queries
+cursor = evadb.connect().cursor()
+
+# Load a collection of news videos into the 'news_videos' table
+# This command returns a Pandas Dataframe with the query's output
+# In this case, the output indicates the number of loaded videos
+cursor.load(
+    file_regex="news_videos/*.mp4",
+    format="VIDEO",
+    table_name="news_videos"
+).df()
+
+# Define a function that wraps around a speech-to-text (Whisper) model
+# Such functions are known as user-defined functions or UDFs
+# So, we are creating a Whisper UDF here
+# After creating the UDF, we can use the function in any query
+cursor.create_udf(
+    udf_name="SpeechRecognizer",
+    type="HuggingFace",
+    task='automatic-speech-recognition',
+    model='openai/whisper-base'
+).df()
+
+# EvaDB automatically extract the audio from the video
+# We only need to run the SpeechRecongizer UDF on the 'audio' column
+# to get the transcript and persist it in a table called 'transcripts'
+cursor.query(
+    """CREATE TABLE transcripts AS
+       SELECT SpeechRecognizer(audio) from news_videos;"""
+).df()
+
+# We next incrementally construct the ChatGPT query using EvaDB's Python API
+# The query is based on the 'transcripts' table
+# This table has a column called 'text' with the transcript text
+query = cursor.table('transcripts')
+
+# Since ChatGPT is a built-in function, we don't have to define it
+# We can just directly use it in the query
+# We need to set the OPENAI_KEY as an environment variable
+os.environ["OPENAI_KEY"] = OPENAI_KEY
+query = query.select("ChatGPT('Is this video summary related to LLMs', text)")
+
+# Finally, we run the query to get the results as a dataframe
+response = query.df()
 ```
 
-- Load a video onto the EvaDB server (we use [ua_detrac.mp4](data/ua_detrac/ua_detrac.mp4) for illustration):
+- **Write functions to wrap around your custom deep learning models**
 
-```mysql
-LOAD VIDEO "data/ua_detrac/ua_detrac.mp4" INTO TrafficVideo;
+```python
+# Define a function that wraps around a speech-to-text (Whisper) model
+# Such functions are known as user-defined functions or UDFs
+# So, we are creating a Whisper UDF here
+# After creating the UDF, we can use the function in any query
+cursor.create_udf(
+    udf_name="SpeechRecognizer",
+    type="HuggingFace",
+    task='automatic-speech-recognition',
+    model='openai/whisper-base'
+).df()
 ```
 
-- That's it! You can now run queries over the loaded video:
+- **Chain multiple models in a single query to set up useful AI pipelines**
 
-```mysql
-SELECT id, data FROM TrafficVideo WHERE id < 5;
-```
+```python
+# Analyse emotions of actors in an Interstellar movie clip using PyTorch models
+query = cursor.table("Interstellar")
+# Get faces using a `FaceDetector` function
+query = query.cross_apply("UNNEST(FaceDetector(data))", "Face(bounding_box, confidence)")
+# Focus only on frames 100 through 200 in the clip
+query = query.filter("id > 100 AND id < 200")
+# Get the emotions of the detected faces using a `EmotionDetector` function
+query = query.select("id, bbox, EmotionDetector(Crop(data, bounding_box))")
 
-- Search for frames in the video that contain a car:
-
-```mysql
-SELECT id, data FROM TrafficVideo WHERE ['car'] <@ Yolo(data).labels;
-```
-| Source Video  | Query Result |
-|---------------|--------------|
-|<img alt="Source Video" src="https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/traffic-input.webp" width="300"> |<img alt="Query Result" src="https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/traffic-output.webp" width="300"> |
-
-- Search for frames in the video that contain a pedestrian and a car:
-
-```mysql
-SELECT id, data FROM TrafficVideo WHERE ['pedestrian', 'car'] <@ Yolo(data).labels;
-```
-
-- Search for frames with more than three cars:
-
-```mysql
-SELECT id, data FROM TrafficVideo WHERE ArrayCount(Yolo(data).labels, 'car') > 3;
-```
-
-- **Use your custom deep learning model in queries** with a user-defined function (UDF):
-
-```mysql
-CREATE UDF IF NOT EXISTS Yolo
-TYPE  ultralytics
-'model' 'yolov8m.pt';
-```
-
-- **Chain multiple models in a single query** to set up useful AI pipelines.
-
-```mysql
-   -- Analyse emotions of faces in a video
-   SELECT id, bbox, EmotionDetector(Crop(data, bbox)) 
-   FROM MovieVideo JOIN LATERAL UNNEST(FaceDetector(data)) AS Face(bbox, conf)  
-   WHERE id < 15;
+# Run the query and get the query result as a dataframe
+response = query.df()
 ```
 
 - **EvaDB runs queries faster using its AI-centric query optimizer**. Two key optimizations are:
@@ -146,9 +173,6 @@ TYPE  ultralytics
    💾 **Caching**: EvaDB automatically caches and reuses previous query results (especially model inference results), eliminating redundant computation and reducing query processing time.
 
    🎯 **Predicate Reordering**: EvaDB optimizes the order in which the query predicates are evaluated (e.g., runs the faster, more selective model first), leading to faster queries and lower inference costs.
-
-Consider these two exploratory queries on a dataset of dog images:
-<img align="right" style="display:inline;" width="40%" src="https://github.com/georgia-tech-db/eva/blob/master/data/assets/eva_performance_comparison.png?raw=true"></a>
 
 ```mysql
   -- Query 1: Find all images of black-colored dogs
