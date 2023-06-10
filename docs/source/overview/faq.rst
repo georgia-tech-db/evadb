@@ -17,6 +17,11 @@ Where does EvaDB store all the data?
 
 By default, EvaDB stores all the data in a local folder named ``evadb_data``.
 
+pip install ray fails because of grpcio
+=======================================
+
+Follow these instructions to install ``ray``:
+https://github.com/ray-project/ray/issues/33039
 
 Why does the EvaDB server not start?
 ====================================

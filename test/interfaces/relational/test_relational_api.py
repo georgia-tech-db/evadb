@@ -334,19 +334,19 @@ class RelationalAPI(unittest.TestCase):
         load_pdf = cursor.load(file_regex=pdf_path2, format="PDF", table_name="PDFs")
         load_pdf.execute()
 
-        udf_check = cursor.drop_udf("SentenceTransformerFeatureExtractor")
+        udf_check = cursor.drop_udf("SentenceFeatureExtractor")
         udf_check.df()
         udf = cursor.create_udf(
-            "SentenceTransformerFeatureExtractor",
+            "SentenceFeatureExtractor",
             True,
-            f"{EvaDB_ROOT_DIR}/evadb/udfs/sentence_transformer_feature_extractor.py",
+            f"{EvaDB_ROOT_DIR}/evadb/udfs/sentence_feature_extractor.py",
         )
         udf.execute()
 
         cursor.create_vector_index(
             "faiss_index",
             table_name="PDFs",
-            expr="SentenceTransformerFeatureExtractor(data)",
+            expr="SentenceFeatureExtractor(data)",
             using="QDRANT",
         ).df()
 
@@ -354,7 +354,7 @@ class RelationalAPI(unittest.TestCase):
             cursor.table("PDFs")
             .order(
                 """Similarity(
-                    SentenceTransformerFeatureExtractor('When was the NATO created?'), SentenceTransformerFeatureExtractor(data)
+                    SentenceFeatureExtractor('When was the NATO created?'), SentenceFeatureExtractor(data)
                 ) DESC"""
             )
             .limit(3)

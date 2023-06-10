@@ -193,6 +193,10 @@ chatgpt_udf_query = """CREATE UDF IF NOT EXISTS ChatGPT
     EvaDB_INSTALLATION_DIR
 )
 
+yolo8n_query = """CREATE UDF IF NOT EXISTS Yolo
+            TYPE  ultralytics
+            'model' 'yolov8n.pt';
+        """
 
 def init_builtin_udfs(db: EvaDBDatabase, mode: str = "debug") -> None:
     """Load the built-in UDFs into the system during system bootstrapping.
@@ -224,24 +228,16 @@ def init_builtin_udfs(db: EvaDBDatabase, mode: str = "debug") -> None:
         # Sift_udf_query, - requires package kornia
     ]
 
-    if mode == "release":
-        # if mode is 'release', add the Yolo query to the list
-        queries.append(Yolo_udf_query)
-    else:
+    if mode == "debug":
         # if mode is 'debug', add debug UDFs and a smaller Yolo model
         queries.extend(
             [
                 DummyObjectDetector_udf_query,
                 DummyMultiObjectDetector_udf_query,
                 DummyFeatureExtractor_udf_query,
+                Yolo_udf_query
             ]
         )
-
-        yolo8n = """CREATE UDF IF NOT EXISTS Yolo
-            TYPE  ultralytics
-            'model' 'yolov8n.pt';
-        """
-        queries.append(yolo8n)
 
     # execute each query in the list of UDF queries
     for query in queries:

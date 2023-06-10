@@ -59,7 +59,6 @@ minimal_requirement = [
     "pymupdf",
     "pdfminer.six",
     "sentence-transformers"
-
 ]
 
 formatter_libs = ["black>=23.1.0", "isort>=5.10.1"]
