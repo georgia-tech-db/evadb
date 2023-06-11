@@ -19,6 +19,7 @@ from test.util import find_free_port
 
 from mock import MagicMock, patch
 
+from test.markers import macos_skip_marker
 from evadb.server.interpreter import create_stdin_reader, start_cmd_client
 
 # Check for Python 3.8+ for IsolatedAsyncioTestCase support
@@ -61,6 +62,7 @@ if sys.version_info >= (3, 8):
 
             await start_cmd_client(MagicMock(), MagicMock())
 
+        @macos_skip_marker
         @patch("asyncio.events.AbstractEventLoop.connect_read_pipe")
         async def test_create_stdin_reader(self, mock_read_pipe):
             sys.stdin = MagicMock()
