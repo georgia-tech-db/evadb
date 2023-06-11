@@ -12,17 +12,20 @@ fi
 
 function is_server_up () {
     # check if server started
-    netstat -an | grep 0.0.0.0:${PORT}
-    return $?
+    pgrep "evadb_server"
+    status_code=$?
+    echo $status_code
+    return $status_code
 }
 
 evadb_server &> evadb.log &
 SERVER_PID=$!
+echo $SERVER_PID
 i=0
 while [ $i -lt 5 ];
 do
     echo "Waiting for server to launch, try $i"
-    sleep 20
+    sleep 5
     is_server_up
     test_code=$?
     if [ $test_code == 0 ]; then
