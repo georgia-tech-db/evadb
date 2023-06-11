@@ -52,14 +52,12 @@ minimal_requirement = [
     "retry>=0.9.2",
     "aenum>=2.2.0",
     "diskcache>=5.4.0",
-    "eva-decord>=0.6.1",
     "boto3",
     "nest_asyncio",
     "langchain",
     "pymupdf",
     "pdfminer.six",
     "sentence-transformers"
-
 ]
 
 formatter_libs = ["black>=23.1.0", "isort>=5.10.1"]
@@ -120,8 +118,9 @@ udf_libs = [
     "norfair>=2.2.0",  # OBJECT TRACKING
 ]
 
-### NEEDED FOR EXPERIMENTAL FEATURES
+### NEEDED FOR A BATTERIES-LOADED EXPERIENCE
 third_party_libs = [
+    "eva-decord>=0.6.1", # for processing videos
     "qdrant-client>=1.1.7",  # Qdrant vector store client
     "kornia",  # SIFT features
     "langchain>=0.0.177",  # langchain document loaders

@@ -14,12 +14,11 @@
 # limitations under the License.
 from typing import Any
 
-import decord
 import numpy as np
 from PIL import Image
 
 from evadb.udfs.abstract.hf_abstract_udf import AbstractHFUdf
-from evadb.utils.generic_utils import EvaDBEnum
+from evadb.utils.generic_utils import EvaDBEnum, try_import_decord
 
 
 class HFInputTypes(EvaDBEnum):
@@ -64,6 +63,10 @@ class AudioHFModel(AbstractHFUdf):
         # else expect that the user passed an array of video file paths, get audio as numpy array
         audio = []
         files = inputs.iloc[:, 0].tolist()
+
+        try_import_decord()
+        import decord
+
         for file in files:
             # must read audio at 16000Hz because most models were trained at this sampling rate
             reader = decord.AudioReader(file, mono=True, sample_rate=16000)
