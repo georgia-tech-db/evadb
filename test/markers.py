@@ -30,6 +30,10 @@ linux_skip_marker = pytest.mark.skipif(
     sys.platform == "linux", reason="Test case not supported on Linux"
 )
 
+macos_skip_marker = pytest.mark.skipif(
+    sys.platform == "darwin", reason="Test case not supported on MacOS"
+)
+
 memory_skip_marker = pytest.mark.skipif(
     sys.platform == "linux", reason="Test case consumes too much memory"
 )
@@ -49,7 +53,6 @@ duplicate_skip_marker = pytest.mark.skipif(
     reason="Test case is duplicate. Disabling to speed up test suite",
 )
 
-ocr_skip_marker = pytest.mark.skipif(
-    sys.platform == "linux",
+ocr_skip_marker = pytest.mark.skip(
     reason="We do not have built-in support for OCR",
 )
