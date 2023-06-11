@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### [Deprecated]
 ### [Removed]
 
+##  [0.2.10] - 2023-06-10
+
+* PR #852: feat: optional import of decord, fix for sentence feature extractor 
+* PR #851: Bump v0.2.10+dev 
+
 ##  [0.2.9] - 2023-06-09
 
 * PR #849: app: add a text and mp4 file 
