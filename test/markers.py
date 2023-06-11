@@ -31,7 +31,7 @@ linux_skip_marker = pytest.mark.skipif(
 )
 
 macos_skip_marker = pytest.mark.skipif(
-    sys.platform == "darwin", reason="Test case not supported on MacOS"
+    "darwin" in sys.platform, reason="Test case not supported on MacOS"
 )
 
 memory_skip_marker = pytest.mark.skipif(
