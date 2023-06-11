@@ -16,7 +16,7 @@ function is_server_up () {
     return $?
 }
 
-eva_server &> evadb.log &
+evadb_server &> evadb.log &
 SERVER_PID=$!
 i=0
 while [ $i -lt 5 ];
@@ -43,7 +43,7 @@ then
 fi
 
 cmd="exit"
-echo "$cmd"  | eva_client &> client.log &
+echo "$cmd"  | evadb_client &> client.log &
 
 # wait for client to launch
 sleep 5
