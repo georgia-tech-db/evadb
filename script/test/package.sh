@@ -38,6 +38,7 @@ if [ "$test_code" -ne 0 ];
 then
     echo "Server did not start"
     echo "$test_code"
+    cat evadb.log
     exit "$test_code"
 fi
 
@@ -58,6 +59,7 @@ if [ "$?" -ne 1 ];
 then
     echo "Client did not start"
     echo "$test_code"
+    cat client.log
     exit "$test_code"
 fi
 

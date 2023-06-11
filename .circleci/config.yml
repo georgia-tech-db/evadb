@@ -59,9 +59,8 @@ workflows:
             mode: "COV"
         - Windows:
             name: "Windows | v3.10"
-        # test_create_index_doesn't work on MacOS
-        # - MacOS:
-        #    name: "MacOS | v3.10"
+        - MacOS:
+            name: "MacOS | v3.10"
         # missing Torchvision
         #- Linux:
         #    name: "Linux -  v3.11"  
