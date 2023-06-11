@@ -15,11 +15,11 @@
 import asyncio
 import sys
 import unittest
+from test.markers import macos_skip_marker
 from test.util import find_free_port
 
 from mock import MagicMock, patch
 
-from test.markers import macos_skip_marker
 from evadb.server.interpreter import create_stdin_reader, start_cmd_client
 
 # Check for Python 3.8+ for IsolatedAsyncioTestCase support
