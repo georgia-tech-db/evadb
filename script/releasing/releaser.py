@@ -241,15 +241,6 @@ def upload_assets(changelog, tag):
     release_name = tag_name
     release_message = f'{tag_name}\n\n {changelog}' 
 
-    # Publish the release
-    release = repo.create_git_release(
-        tag=tag_name, 
-        name=release_name, 
-        message=release_message, 
-        draft=False, 
-        prerelease=False
-    )
-
     # Retrieve the release by tag name
     release = repo.get_release(tag_name)
 
@@ -421,15 +412,6 @@ if __name__ == "__main__":
     release_date = get_commit_id_of_latest_release()
     changelog = get_changelog(release_date)
     print(changelog)
-
-    # UPDATE CHANGELOG
-    append_changelog(changelog, current_version_str_without_dev)
-
-    # RELEASE VERSION
-    release_version(current_version_str_without_dev)
-
-    # PUBLISH WHEELS ON PYPI
-    publish_wheels(current_version_str_without_dev)
 
     # UPLOAD ASSETS ON GITHUB
     upload_assets(changelog, current_version_str_without_dev)
