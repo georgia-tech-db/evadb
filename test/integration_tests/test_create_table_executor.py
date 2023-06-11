@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+from test.markers import macos_skip_marker
 from test.util import (
     DummyObjectDetector,
     create_sample_video,
@@ -63,6 +64,7 @@ class CreateTableTest(unittest.TestCase):
             execute_query_fetch_all(self.evadb, query)
 
     # @ray_skip_marker
+    @macos_skip_marker
     def test_should_create_table_from_select(self):
         create_query = """CREATE TABLE dummy_table
             AS SELECT id, DummyObjectDetector(data).label FROM MyVideo;
