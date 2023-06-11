@@ -169,8 +169,8 @@ setup(
     # https://python-packaging.readthedocs.io/en/latest/command-line-scripts.html#the-console-scripts-entry-point
     entry_points={
         "console_scripts": [
-            "eva_server=evadb.evadb_server:main",
-            "eva_client=evadb.evadb_cmd_client:main",
+            "evadb_server=evadb.evadb_server:main",
+            "evadb_client=evadb.evadb_cmd_client:main",
         ]
     },
     python_requires=">=3.8",
