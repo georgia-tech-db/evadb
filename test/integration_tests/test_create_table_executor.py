@@ -83,6 +83,7 @@ class CreateTableTest(unittest.TestCase):
         expected_batch = Batch(frames=pd.DataFrame(expected))
         self.assertEqual(actual_batch, expected_batch)
 
+    @macos_skip_marker
     @pytest.mark.torchtest
     def test_should_create_table_from_select_lateral_join(self):
         select_query = (
