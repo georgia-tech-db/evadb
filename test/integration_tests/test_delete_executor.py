@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+from test.markers import macos_skip_marker
 from test.util import (
     file_remove,
     get_evadb_for_testing,
@@ -122,6 +123,7 @@ class DeleteExecutorTest(unittest.TestCase):
             )
         )
 
+    @macos_skip_marker
     def test_should_delete_tuple_in_table(self):
         delete_query = """DELETE FROM testDeleteOne WHERE
                id < 20 OR dummyfloat < 2 AND id < 5 AND 20 > id

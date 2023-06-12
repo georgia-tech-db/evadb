@@ -57,7 +57,8 @@ minimal_requirement = [
     "langchain",
     "pymupdf",
     "pdfminer.six",
-    "sentence-transformers"
+    "sentence-transformers",
+    "eva-decord>=0.6.1", # for processing videos
 ]
 
 formatter_libs = ["black>=23.1.0", "isort>=5.10.1"]
@@ -120,7 +121,6 @@ udf_libs = [
 
 ### NEEDED FOR A BATTERIES-LOADED EXPERIENCE
 third_party_libs = [
-    "eva-decord>=0.6.1", # for processing videos
     "qdrant-client>=1.1.7",  # Qdrant vector store client
     "kornia",  # SIFT features
     "langchain>=0.0.177",  # langchain document loaders
