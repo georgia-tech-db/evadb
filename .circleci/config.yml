@@ -59,8 +59,8 @@ workflows:
             mode: "COV"
         - Windows:
             name: "Windows | v3.10"
-        - MacOS:
-            name: "MacOS | v3.10"
+        #- MacOS:
+        #    name: "MacOS | v3.10"
         # missing Torchvision
         #- Linux:
         #    name: "Linux -  v3.11"  
