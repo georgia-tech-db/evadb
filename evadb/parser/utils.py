@@ -15,6 +15,9 @@
 from evadb.parser.create_udf_statement import CreateUDFStatement
 from evadb.parser.drop_object_statement import DropObjectStatement
 from evadb.parser.load_statement import LoadDataStatement
+from evadb.parser.explain_statement import ExplainStatement
+from evadb.parser.show_statement import ShowStatement
+from evadb.parser.insert_statement import InsertTableStatement
 from evadb.parser.parser import Parser
 from evadb.parser.select_statement import SelectStatement
 from evadb.parser.types import ObjectType
@@ -69,6 +72,23 @@ def parse_create_udf(
     assert isinstance(stmt, CreateUDFStatement), "Expected a create udf statement"
     return stmt
 
+def parse_show(show_type: str, **kwargs):
+    mock_query = f"SHOW {show_type};"
+    stmt = Parser().parse(mock_query)[0]
+    assert isinstance(stmt, ShowStatement), "Expected a show statement"
+    return stmt
+
+def parse_explain(query: str, **kwargs):
+    mock_query = f"EXPLAIN {query};"
+    stmt = Parser().parse(mock_query)[0]
+    assert isinstance(stmt, ExplainStatement), "Expected a explain statement"
+    return stmt
+
+def parse_insert(table_name: str, columns: str, values: str, **kwargs):
+    mock_query = f"INSERT INTO {table_name} {columns} VALUES {values};"
+    stmt = Parser().parse(mock_query)[0]
+    assert isinstance(stmt, InsertTableStatement), "Expected a insert statement"
+    return stmt
 
 def parse_load(table_name: str, file_regex: str, format: str, **kwargs):
     mock_query = f"LOAD {format.upper()} '{file_regex}' INTO {table_name};"

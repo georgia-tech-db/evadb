@@ -34,6 +34,9 @@ from evadb.parser.utils import (
     parse_load,
     parse_query,
     parse_table_clause,
+    parse_explain,
+    parse_show,
+    parse_insert,
 )
 from evadb.udfs.udf_bootstrap_queries import init_builtin_udfs
 from evadb.utils.logging_manager import logger
@@ -334,6 +337,58 @@ class EvaDBCursor(object):
             >>> conn.query("DROP UDF IF EXISTS SentenceFeatureExtractor;")
         """
         stmt = parse_query(sql_query)
+        return EvaDBQuery(self._evadb, stmt)
+    
+    def show(self, show_type: str, **kwargs) -> EvaDBQuery:
+        """
+        Executes a SHOW query.
+
+        Args:
+            show_type (str): The type of SHOW query to be executed
+            **kwargs: Additional keyword arguments for configuring the SHOW operation.
+
+        Returns:
+            EvaDBQuery: The EvaDBQuery object.
+
+        Examples:
+            >>> conn.show("tables")
+        """
+        stmt = parse_show(show_type, **kwargs)
+        return EvaDBQuery(self._evadb, stmt)
+    
+    def explain(self, sql_query: str) -> EvaDBQuery:
+        """
+        Executes an EXPLAIN query.
+
+        Args:
+            sql_query (str): The SQL query to be explained
+
+        Returns:
+            EvaDBQuery: The EvaDBQuery object.
+
+        Examples:
+            >>> conn.explain("SELECT * FROM sample_table;")
+        """
+        stmt = parse_explain(sql_query)
+        return EvaDBQuery(self._evadb, stmt)
+    
+    def insert(self, table_name, columns, values, **kwargs) -> EvaDBQuery:
+        """
+        Executes an INSERT query.
+
+        Args:
+            table_name (str): The name of the table to insert into
+            columns (list): The list of columns to insert into
+            values (list): The list of values to insert
+            **kwargs: Additional keyword arguments for configuring the INSERT operation.
+
+        Returns:
+            EvaDBQuery: The EvaDBQuery object.
+
+        Examples:
+            >>> conn.insert("sample_table", ["id", "name"], [1, "Alice"])
+        """
+        stmt = parse_insert(table_name, columns, values, **kwargs)
         return EvaDBQuery(self._evadb, stmt)
 
 
