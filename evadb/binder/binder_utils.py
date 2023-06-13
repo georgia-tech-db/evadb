@@ -21,6 +21,7 @@ from evadb.catalog.catalog_type import TableType
 from evadb.catalog.catalog_utils import (
     get_video_table_column_definitions,
     is_document_table,
+    is_pdf_table,
     is_string_col,
     is_video_table,
 )
@@ -117,21 +118,22 @@ def check_groupby_pattern(table_ref: TableRef, groupby_string: str) -> None:
         err_msg = "Grouping by samples only supported for videos"
         raise BinderError(err_msg)
 
-    if suffix_string == "paragraphs" and not is_document_table(
-        table_ref.table.table_obj
-    ):
-        err_msg = "Grouping by paragraphs only supported for documents"
+    if suffix_string == "paragraphs" and not is_pdf_table(table_ref.table.table_obj):
+        err_msg = "Grouping by paragraphs only supported for pdf tables"
         raise BinderError(err_msg)
 
     # TODO ACTION condition on segment length?
 
 
 def check_table_object_is_groupable(table_ref: TableRef) -> None:
-    if not is_video_table(table_ref.table.table_obj) and not is_document_table(
-        table_ref.table.table_obj
+    table_obj = table_ref.table.table_obj
+
+    if not (
+        is_video_table(table_obj)
+        or is_document_table(table_obj)
+        or is_pdf_table(table_obj)
     ):
-        err_msg = "GROUP BY only supported for video and document tables"
-        raise BinderError(err_msg)
+        raise BinderError("GROUP BY only supported for video and document tables")
 
 
 def check_column_name_is_string(col_ref) -> None:

@@ -766,3 +766,16 @@ class SelectExecutorTest(unittest.TestCase):
 
         batch = execute_query_fetch_all(self.evadb, "SELECT * FROM table1;")
         self.assertTrue("table1._row_id" in batch.columns)
+
+    def test_chunk_param_should_fail(self):
+        with self.assertRaises(AssertionError):
+            execute_query_fetch_all(
+                self.evadb,
+                "SELECT data from MyVideo chunk_size 4000 chunk_overlap 200;",
+            )
+
+        with self.assertRaises(AssertionError):
+            execute_query_fetch_all(
+                self.evadb,
+                "SELECT data from MemeImages chunk_size 4000 chunk_overlap 200;",
+            )

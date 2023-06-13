@@ -13,9 +13,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import_err_msg = "`langchain` package not found, please run `pip install langchain`"
+SUPPORTED_TYPES = [
+    ".doc",
+    ".docx",
+    ".enex",
+    ".eml",
+    ".epub",
+    ".html",
+    ".md",
+    ".pdf",
+    ".ppt",
+    ".pptx",
+    ".txt",
+]
+
 
 def _lazy_import_loader():
-    import_err_msg = "`langchain` package not found, please run `pip install langchain`"
     try:
         from langchain.document_loaders import (
             EverNoteLoader,
@@ -48,16 +62,10 @@ def _lazy_import_loader():
     return LOADER_MAPPING
 
 
-SUPPORTED_TYPES = [
-    ".doc",
-    ".docx",
-    ".enex",
-    ".eml",
-    ".epub",
-    ".html",
-    ".md",
-    ".pdf",
-    ".ppt",
-    ".pptx",
-    ".txt",
-]
+def _lazy_import_text_splitter():
+    try:
+        from langchain.text_splitter import RecursiveCharacterTextSplitter
+    except ImportError:
+        raise ImportError(import_err_msg)
+
+    return RecursiveCharacterTextSplitter

@@ -28,7 +28,7 @@ from evadb.binder.binder_utils import (
 )
 from evadb.binder.statement_binder_context import StatementBinderContext
 from evadb.catalog.catalog_type import NdArrayType, TableType, VideoColumnName
-from evadb.catalog.catalog_utils import get_metadata_properties
+from evadb.catalog.catalog_utils import get_metadata_properties, is_document_table
 from evadb.configuration.constants import EvaDB_INSTALLATION_DIR
 from evadb.expression.abstract_expression import AbstractExpression, ExpressionType
 from evadb.expression.function_expression import FunctionExpression
@@ -133,10 +133,17 @@ class StatementBinder:
             self.bind(node.union_link)
             self._binder_context = current_context
 
+        # chunk_params only supported for DOCUMENT TYPE
+        if node.from_table.chunk_params:
+            assert is_document_table(
+                node.from_table.table.table_obj
+            ), "CHUNK related parameters only supported for DOCUMENT tables."
+
         assert not (
             self._binder_context.is_retrieve_audio()
             and self._binder_context.is_retrieve_video()
         ), "Cannot query over both audio and video streams"
+
         if self._binder_context.is_retrieve_audio():
             node.from_table.get_audio = True
         if self._binder_context.is_retrieve_video():

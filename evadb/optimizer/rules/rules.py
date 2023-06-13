@@ -878,6 +878,7 @@ class LogicalGetToSeqScan(Rule):
                 predicate=before.predicate,
                 sampling_rate=before.sampling_rate,
                 sampling_type=before.sampling_type,
+                chunk_params=before.chunk_params,
             )
         )
         yield after

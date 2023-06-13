@@ -56,10 +56,11 @@ def is_video_table(table: TableCatalogEntry):
 
 
 def is_document_table(table: TableCatalogEntry):
-    return (
-        table.table_type == TableType.DOCUMENT_DATA
-        or table.table_type == TableType.PDF_DATA
-    )
+    return table.table_type == TableType.DOCUMENT_DATA
+
+
+def is_pdf_table(table: TableCatalogEntry):
+    return table.table_type == TableType.PDF_DATA
 
 
 def is_string_col(col: ColumnCatalogEntry):

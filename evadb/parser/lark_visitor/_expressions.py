@@ -109,6 +109,16 @@ class Expressions:
                     expr_list.append(expression)
         return expr_list
 
+    def sample_params(self, tree):
+        sample_type = None
+        sample_freq = None
+        for child in tree.children:
+            if child.data == "sample_clause":
+                sample_freq = self.visit(child)
+            elif child.data == "sample_clause_with_type":
+                sample_type, sample_freq = self.visit(child)
+        return sample_type, sample_freq
+
     def sample_clause(self, tree):
         sample_list = self.visit_children(tree)
         assert len(sample_list) == 2
@@ -123,3 +133,24 @@ class Expressions:
             )
         else:
             return ConstantValueExpression(sample_list[1]), ConstantValueExpression(1)
+
+    def chunk_params(self, tree):
+        chunk_params = self.visit_children(tree)
+        assert len(chunk_params) == 2 or len(chunk_params) == 4
+        if len(chunk_params) == 4:
+            return {
+                "chunk_size": ConstantValueExpression(chunk_params[1]),
+                "chunk_overlap": ConstantValueExpression(chunk_params[3]),
+            }
+
+        elif len(chunk_params) == 2:
+            if chunk_params[0] == "CHUNK_SIZE":
+                return {
+                    "chunk_size": ConstantValueExpression(chunk_params[1]),
+                }
+            elif chunk_params[0] == "CHUNK_OVERLAP":
+                return {
+                    "chunk_overlap": ConstantValueExpression(chunk_params[1]),
+                }
+            else:
+                assert f"incorrect keyword found {chunk_params[0]}"

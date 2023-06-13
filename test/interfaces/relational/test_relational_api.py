@@ -365,3 +365,36 @@ class RelationalAPI(unittest.TestCase):
         self.assertTrue("pdfs.data" in output.columns)
 
         cursor.drop_index("faiss_index").df()
+
+    def test_langchain_split_doc(self):
+        conn = connect()
+        cursor = conn.cursor()
+        pdf_path1 = f"{EvaDB_ROOT_DIR}/data/documents/state_of_the_union.pdf"
+
+        load_pdf = cursor.load(
+            file_regex=pdf_path1, format="DOCUMENT", table_name="docs"
+        )
+        load_pdf.execute()
+
+        result1 = (
+            cursor.table("docs", chunk_size=2000, chunk_overlap=0).select("data").df()
+        )
+
+        result2 = (
+            cursor.table("docs", chunk_size=4000, chunk_overlap=2000)
+            .select("data")
+            .df()
+        )
+
+        self.assertEqual(len(result1), len(result2))
+
+        result1 = cursor.table("docs").select("data").df()
+
+        result2 = cursor.query(
+            "SELECT data from docs chunk_size 4000 chunk_overlap 200"
+        ).df()
+        self.assertEqual(len(result1), len(result2))
+
+
+if __name__ == "__main__":
+    unittest.main()

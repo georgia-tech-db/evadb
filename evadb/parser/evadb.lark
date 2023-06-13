@@ -110,9 +110,13 @@ sort_order: ASC | DESC
 // Forcing EXPLICIT JOIN KEYWORD
 table_sources: table_source
     
-table_source: table_source_item_with_sample join_part* 
-    
-table_source_item_with_sample: table_source_item alias_clause? (sample_clause | sample_clause_with_type)?
+table_source: table_source_item_with_param join_part* 
+
+table_source_item_with_param: table_source_item alias_clause? (sample_params | chunk_params)?
+
+sample_params:  sample_clause | sample_clause_with_type
+
+chunk_params: CHUNK_SIZE decimal_literal | CHUNK_SIZE decimal_literal CHUNK_OVERLAP decimal_literal | CHUNK_OVERLAP decimal_literal
 
 table_source_item: table_name | subquery_table_source_item   
     
@@ -128,7 +132,8 @@ sample_clause_with_type: SAMPLE sample_type decimal_literal*
 
 sample_type: IFRAMES | AUDIORATE
 
-join_part: JOIN table_source_item_with_sample (ON expression | USING LR_BRACKET uid_list RR_BRACKET)?  ->inner_join
+
+join_part: JOIN table_source_item_with_param (ON expression | USING LR_BRACKET uid_list RR_BRACKET)?  ->inner_join
          | JOIN LATERAL table_valued_function alias_clause? ->lateral_join
     
 alias_clause: AS? uid "(" uid_list ")" | AS? uid
@@ -307,6 +312,8 @@ AS:                                  "AS"i
 ASC:                                 "ASC"i
 BLOB:                                "BLOB"i
 BY:                                  "BY"i
+CHUNK_SIZE:                          "CHUNK_SIZE"i
+CHUNK_OVERLAP:                       "CHUNK_OVERLAP"i
 COLUMN:                              "COLUMN"i
 CREATE:                              "CREATE"i
 DATABASE:                            "DATABASE"i
