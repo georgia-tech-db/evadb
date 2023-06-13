@@ -47,7 +47,7 @@ class TableSources:
 
         for child in tree.children:
             if isinstance(child, Tree):
-                if child.data == "table_source_item_with_sample":
+                if child.data == "table_source_item_with_param":
                     left_node = self.visit(child)
                     join_nodes = [left_node]
                 elif child.data.endswith("join"):
@@ -67,25 +67,30 @@ class TableSources:
         else:
             return join_nodes[0]
 
-    def table_source_item_with_sample(self, tree):
+    def table_source_item_with_param(self, tree):
         sample_freq = None
         sample_type = None
         alias = None
         table = None
+        chunk_params = {}
 
         for child in tree.children:
             if isinstance(child, Tree):
                 if child.data == "table_source_item":
                     table = self.visit(child)
-                elif child.data == "sample_clause":
-                    sample_freq = self.visit(child)
-                elif child.data == "sample_clause_with_type":
+                elif child.data == "sample_params":
                     sample_type, sample_freq = self.visit(child)
+                elif child.data == "chunk_params":
+                    chunk_params = self.visit(child)
                 elif child.data == "alias_clause":
                     alias = self.visit(child)
 
         return TableRef(
-            table=table, alias=alias, sample_freq=sample_freq, sample_type=sample_type
+            table=table,
+            alias=alias,
+            sample_freq=sample_freq,
+            sample_type=sample_type,
+            chunk_params=chunk_params,
         )
 
     def table_source_item(self, tree):
@@ -160,7 +165,7 @@ class TableSources:
 
         for child in tree.children:
             if isinstance(child, Tree):
-                if child.data == "table_source_item_with_sample":
+                if child.data == "table_source_item_with_param":
                     table = self.visit(child)
                 elif child.data.endswith("expression"):
                     join_predicate = self.visit(child)

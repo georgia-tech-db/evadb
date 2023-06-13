@@ -34,8 +34,14 @@ def parse_predicate_expression(expr: str):
     return stmt.where_clause
 
 
-def parse_table_clause(expr: str):
-    mock_query = f"SELECT * FROM {expr};"
+def parse_table_clause(expr: str, chunk_size: int = None, chunk_overlap: int = None):
+    mock_query_parts = [f"SELECT * FROM {expr}"]
+    if chunk_size:
+        mock_query_parts.append(f"CHUNK_SIZE {chunk_size}")
+    if chunk_overlap:
+        mock_query_parts.append(f"CHUNK_OVERLAP {chunk_overlap}")
+    mock_query_parts.append(";")
+    mock_query = " ".join(mock_query_parts)
     stmt = Parser().parse(mock_query)[0]
     assert isinstance(stmt, SelectStatement), "Expected a select statement"
     assert stmt.from_table.is_table_atom
