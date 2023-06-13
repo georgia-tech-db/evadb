@@ -35,7 +35,7 @@ then transform syntax tree into **statement**.
 
 The first part of Parser is build from a LARK grammar file.
 
-parser/eva
+parser/evadb
 ~~~~~~~~~~~~
 
 -  ``evadb.lark`` - add keywords(eg. CREATE, TABLE) under **Common

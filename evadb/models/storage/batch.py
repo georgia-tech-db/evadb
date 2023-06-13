@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -263,7 +263,7 @@ class Batch:
             method="ffill"
         )
         if new_frames.columns.duplicated().any():
-            logger.warn("Duplicated column name detected {}".format(new_frames))
+            logger.debug("Duplicated column name detected {}".format(new_frames))
         return Batch(new_frames)
 
     def __add__(self, other: Batch) -> Batch:

@@ -66,7 +66,7 @@ class ShowExecutorTest(unittest.TestCase):
 
     @windows_skip_marker
     def test_show_tables(self):
-        # Note this test can causes sqlalchemy issues if the eva_server is not stopped
+        # Note this test can causes sqlalchemy issues if the evadb_server is not stopped
         result = execute_query_fetch_all(self.evadb, "SHOW TABLES;")
         self.assertEqual(len(result), 3)
         expected = {"name": ["MyVideo", "MNIST", "Actions"]}
@@ -74,8 +74,8 @@ class ShowExecutorTest(unittest.TestCase):
         self.assertEqual(result, Batch(expected_df))
 
         # Stop and restart server
-        os.system("nohup eva_server --stop")
-        os.system("nohup eva_server --start &")
+        os.system("nohup evadb_server --stop")
+        os.system("nohup evadb_server --start &")
 
         result = execute_query_fetch_all(self.evadb, "SHOW TABLES;")
         self.assertEqual(len(result), 3)
@@ -84,4 +84,4 @@ class ShowExecutorTest(unittest.TestCase):
         self.assertEqual(result, Batch(expected_df))
 
         # stop the server
-        os.system("nohup eva_server --stop")
+        os.system("nohup evadb_server --stop")

@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,9 +14,7 @@
 # limitations under the License.
 import numpy as np
 import pandas as pd
-import torch
-import torch.nn.functional as F
-from transformers import AutoModel, AutoTokenizer
+from sentence_transformers import SentenceTransformer
 
 from evadb.catalog.catalog_type import NdArrayType
 from evadb.udfs.abstract.abstract_udf import AbstractUDF
@@ -25,30 +23,25 @@ from evadb.udfs.decorators.io_descriptors.data_types import PandasDataframe
 from evadb.udfs.gpu_compatible import GPUCompatible
 
 
-class SentenceFeatureExtractor(AbstractUDF, GPUCompatible):
+class SentenceTransformerFeatureExtractor(AbstractUDF, GPUCompatible):
     @setup(cacheable=False, udf_type="FeatureExtraction", batchable=False)
     def setup(self):
-        self.tokenizer = AutoTokenizer.from_pretrained(
-            "sentence-transformers/all-MiniLM-L6-v2"
-        )
-        self.model = AutoModel.from_pretrained("sentence-transformers/all-MiniLM-L6-v2")
+        self.model = SentenceTransformer("all-MiniLM-L6-v2")
 
     def to_device(self, device: str) -> GPUCompatible:
-        print("Device", device)
-        self.model_device = device
         self.model = self.model.to(device)
         return self
 
     @property
     def name(self) -> str:
-        return "SentenceFeatureExtractor"
+        return "SentenceTransformerFeatureExtractor"
 
     @forward(
         input_signatures=[
             PandasDataframe(
                 columns=["data"],
                 column_types=[NdArrayType.STR],
-                column_shapes=[(None, 1)],
+                column_shapes=[(1)],
             )
         ],
         output_signatures=[
@@ -61,27 +54,9 @@ class SentenceFeatureExtractor(AbstractUDF, GPUCompatible):
     )
     def forward(self, df: pd.DataFrame) -> pd.DataFrame:
         def _forward(row: pd.Series) -> np.ndarray:
-            sentence = row[0]
-
-            encoded_input = self.tokenizer(
-                [sentence], padding=True, truncation=True, return_tensors="pt"
-            )
-            encoded_input.to(self.model_device)
-            with torch.no_grad():
-                model_output = self.model(**encoded_input)
-
-            attention_mask = encoded_input["attention_mask"]
-            token_embedding = model_output[0]
-            input_mask_expanded = (
-                attention_mask.unsqueeze(-1).expand(token_embedding.size()).float()
-            )
-            sentence_embedding = torch.sum(
-                token_embedding * input_mask_expanded, 1
-            ) / torch.clamp(input_mask_expanded.sum(1), min=1e-9)
-            sentence_embedding = F.normalize(sentence_embedding, p=2, dim=1)
-
-            sentence_embedding_np = sentence_embedding.cpu().numpy()
-            return sentence_embedding_np
+            data = row
+            embedded_list = self.model.encode(data)
+            return embedded_list
 
         ret = pd.DataFrame()
         ret["features"] = df.apply(_forward, axis=1)

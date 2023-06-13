@@ -13,11 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from evadb.interfaces.relational.db import (  # noqa: E402,F401
-    EvaDBDBConnection,
-    EvaDBDBCursor,
+    EvaDBConnection,
+    EvaDBCursor,
     connect,
 )
-from evadb.interfaces.relational.relation import EvaDBDBQuery  # noqa: E402,F401
+from evadb.interfaces.relational.relation import EvaDBQuery  # noqa: E402,F401
 
 from .version import VERSION as __version__  # noqa: E402,F401
 

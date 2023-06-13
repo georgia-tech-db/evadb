@@ -1,5 +1,5 @@
 ###############################
-### EVA PACKAGAGING
+### EvaDB PACKAGAGING
 ###############################
 
 import io
@@ -16,7 +16,7 @@ from subprocess import check_call
 this_directory = Path(__file__).parent
 LONG_DESCRIPTION = (this_directory / "README.md").read_text()
 
-DESCRIPTION = "EVA AI-Relational Database System"
+DESCRIPTION = "EvaDB AI-Relational Database System"
 NAME = "evadb"
 AUTHOR = "Georgia Tech Database Group"
 AUTHOR_EMAIL = "arulraj@gatech.edu"
@@ -48,17 +48,17 @@ minimal_requirement = [
     "lark>=1.0.0",
     "pyyaml>=5.1",
     "importlib-metadata<5.0",
-    "ray>=1.13.0",
+    "ray>=1.13.0,<2.5.0", # breaking change in 2.5.0
+    "retry>=0.9.2",
     "aenum>=2.2.0",
     "diskcache>=5.4.0",
-    "eva-decord>=0.6.1",
     "boto3",
     "nest_asyncio",
     "langchain",
     "pymupdf",
     "pdfminer.six",
-    "sentence-transformers"
-
+    "sentence-transformers",
+    "eva-decord>=0.6.1", # for processing videos
 ]
 
 formatter_libs = ["black>=23.1.0", "isort>=5.10.1"]
@@ -96,10 +96,11 @@ benchmark_libs = [
 doc_libs = ["codespell", "pylint"]
 
 dist_libs = [
-    "wheel>=0.37.1", 
-    "semantic_version", 
-    "PyGithub", 
-    "twine"
+    "wheel>=0.37.1",
+    "semantic_version",
+    "PyGithub",
+    "twine",
+    "PyDriller"
 ]
 
 ### NEEDED FOR AN ALTERNATE DATA SYSTEM OTHER THAN SQLITE
@@ -113,12 +114,13 @@ udf_libs = [
     "ultralytics>=8.0.93",  # OBJECT DETECTION
     "transformers>=4.27.4",  # HUGGINGFACE
     "openai>=0.27.4",  # CHATGPT
+    "retry>=0.9.2", #CHATGPT
     "timm>=0.6.13",  # HUGGINGFACE VISION TASKS
     "norfair>=2.2.0",  # OBJECT TRACKING
     "protobuf==3.20.*" # OCR DONUT HUGGING FACE
 ]
 
-### NEEDED FOR EXPERIMENTAL FEATURES
+### NEEDED FOR A BATTERIES-LOADED EXPERIENCE
 third_party_libs = [
     "qdrant-client>=1.1.7",  # Qdrant vector store client
     "kornia",  # SIFT features
@@ -168,8 +170,8 @@ setup(
     # https://python-packaging.readthedocs.io/en/latest/command-line-scripts.html#the-console-scripts-entry-point
     entry_points={
         "console_scripts": [
-            "eva_server=evadb.eva_server:main",
-            "eva_client=evadb.eva_cmd_client:main",
+            "evadb_server=evadb.evadb_server:main",
+            "evadb_client=evadb.evadb_cmd_client:main",
         ]
     },
     python_requires=">=3.8",

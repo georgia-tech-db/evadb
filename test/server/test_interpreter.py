@@ -15,6 +15,7 @@
 import asyncio
 import sys
 import unittest
+from test.markers import macos_skip_marker
 from test.util import find_free_port
 
 from mock import MagicMock, patch
@@ -30,8 +31,8 @@ if sys.version_info >= (3, 8):
 
         @patch("asyncio.open_connection")
         @patch("evadb.server.interpreter.create_stdin_reader")
-        @patch("evadb.interfaces.relational.db.EvaDBDBCursor.execute_async")
-        @patch("evadb.interfaces.relational.db.EvaDBDBCursor.fetch_all_async")
+        @patch("evadb.interfaces.relational.db.EvaDBCursor.execute_async")
+        @patch("evadb.interfaces.relational.db.EvaDBCursor.fetch_all_async")
         async def test_start_cmd_client(
             self, mock_fetch, mock_execute, mock_stdin_reader, mock_open
         ):
@@ -61,6 +62,7 @@ if sys.version_info >= (3, 8):
 
             await start_cmd_client(MagicMock(), MagicMock())
 
+        @macos_skip_marker
         @patch("asyncio.events.AbstractEventLoop.connect_read_pipe")
         async def test_create_stdin_reader(self, mock_read_pipe):
             sys.stdin = MagicMock()

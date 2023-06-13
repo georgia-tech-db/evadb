@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import unittest
 from mock import call, patch
 
 from evadb.configuration.configuration_manager import ConfigurationManager
-from evadb.eva_cmd_client import eva_client, main
+from evadb.evadb_cmd_client import evadb_client, main
 
 
 class CMDClientTest(unittest.TestCase):
@@ -32,15 +32,15 @@ class CMDClientTest(unittest.TestCase):
         stdin_reader.feed_eof()
         return stdin_reader
 
-    @patch("evadb.eva_cmd_client.start_cmd_client")
+    @patch("evadb.evadb_cmd_client.start_cmd_client")
     @patch("evadb.server.interpreter.create_stdin_reader")
-    def test_eva_client(self, mock_stdin_reader, mock_client):
+    def test_evadb_client(self, mock_stdin_reader, mock_client):
         mock_stdin_reader.return_value = self.get_mock_stdin_reader()
         mock_client.side_effect = Exception("Test")
 
         async def test():
             with self.assertRaises(Exception):
-                await eva_client("0.0.0.0", 8803)
+                await evadb_client("0.0.0.0", 8803)
 
         asyncio.run(test())
 
@@ -49,13 +49,13 @@ class CMDClientTest(unittest.TestCase):
 
         async def test2():
             # Pass exception
-            await eva_client("0.0.0.0", 8803)
+            await evadb_client("0.0.0.0", 8803)
 
         asyncio.run(test2())
 
     @patch("argparse.ArgumentParser.parse_known_args")
-    @patch("evadb.eva_cmd_client.start_cmd_client")
-    def test_eva_client_with_cmd_arguments(
+    @patch("evadb.evadb_cmd_client.start_cmd_client")
+    def test_evadb_client_with_cmd_arguments(
         self, mock_start_cmd_client, mock_parse_known_args
     ):
         # Set up the mock to simulate command-line arguments
@@ -69,7 +69,7 @@ class CMDClientTest(unittest.TestCase):
         mock_start_cmd_client.assert_called_once_with("127.0.0.1", "8800")
 
     @patch("argparse.ArgumentParser.parse_known_args")
-    @patch("evadb.eva_cmd_client.start_cmd_client")
+    @patch("evadb.evadb_cmd_client.start_cmd_client")
     def test_main_without_cmd_arguments(
         self, mock_start_cmd_client, mock_parse_known_args
     ):

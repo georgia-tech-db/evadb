@@ -10,6 +10,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### [Deprecated]
 ### [Removed]
 
+##  [0.2.11] - 2023-06-10
+
+* PR #856: Bump v0.2.11+dev 
+* PR #855: Release 0.2.10 
+* PR #854: fix: update sentence transformer udf 
+
+##  [0.2.10] - 2023-06-10
+
+* PR #852: feat: optional import of decord, fix for sentence feature extractor 
+* PR #851: Bump v0.2.10+dev 
+
+##  [0.2.9] - 2023-06-09
+
+* PR #849: app: add a text and mp4 file 
+* PR #833: app: Youtube qa app now supports long videos 
+* PR #848: app: minor updates 
+* PR #847: app: minor updates to privateGPT app 
+* PR #841: app: private gpt 
+* PR #845: docs: Index.rst docs 
+* PR #844: Bump v0.2.9+dev 
+
+##  [0.2.8] - 2023-06-09
+
+* PR #842: docs: add pdf qa picture 
+* PR #840: docs: update docs 
+* PR #839: docs: updates 
+* PR #838: Summary : Added missing API documentation 
+* PR #834: refactor: move 'EVA' to 'EvaDB' 
+* PR #814: feat: benchmark question answering v1 
+* PR #831: Bump v0.2.8+dev 
+* PR #819: feat: update tutorials to use Python API 
+
 ##  [0.2.7] - 2023-06-07
 
 * PR #819: feat: update tutorials to use Python API 
@@ -17,8 +49,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * PR #830: docs: updating docs based on Python API 
 * PR #826: fix: orderby bug 
 * PR #821: feat: adding python API drop and drop_udf 
-* PR #822: refactor: eva -> evadb 
-* PR #820: refactor: mv eva -> evadb 
 * PR #810: feat: grouping paragraphs in documents and samples in audio 
 * PR #800: test: api testing  -> similarity between text and relevance keyword 
 * PR #818: fix: update youtube qa app with new api updates 
@@ -36,14 +66,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ##  [0.2.5] - 2023-06-02
 
-* PR #801: feat / doc: example app that summarizes any youtube video with eva api 
+* PR #801: feat / doc: example app that summarizes any youtube video with Python api 
 * PR #796: docs: Updating Docs based on feedback 
 * PR #787: feat: enable ray by default 
 * PR #777: feat: Hugging face entity extraction 
 * PR #789: feat: create table from select query 
 * PR #794: docs: bump python for docs 
 * PR #793: refactor: Create .git-blame-ignore-revs  
-* PR #792: refactor: updated eva license 
 * PR #784: feat: support relational apis 
 * PR #774: Improve create mat 
 * PR #785: fix: update mnist notebook 
@@ -57,12 +86,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * PR #768: feat: create materialized view infers column name 
 * PR #770: tutorials: hugging face text summarizer, text classifier, + pdf loader 
 * PR #769: feat: load pdf 
-* PR #766: feat: change default dir to "eva_data" and make it configurable 
 * PR #767: ci: improve docker support 
 * PR #751: feat: integration with langchain 
 * PR #764: feat: db apis made more pythonic 
 * PR #765: test: fix test case 
-* PR #752: fix: restart eva_server process for every tutorial 
 * PR #753: chore
 * PR #748: feat: common image transformation UDFs 
 * PR #731: feat: extensible parallel execution 
@@ -155,15 +182,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * PR #647: feat: LOAD CSV Notebook 
 * PR #626: docs: Documentation for creating UDFs using Decorators. 
-* PR #599: feat: EVA x HuggingFace 
+* PR #599: feat: EvaDB x HuggingFace 
 * PR #621: feat: Ray integration
 
 ### [Changed]
 
 * PR #649: fix: Expr bugs 
 * PR #628: test: adding support for pytest-xdist 
-* PR #633: fix: Install Decord from EVA-Fork 
-* PR #646: update doc for extending eva 
+* PR #633: fix: Install Decord from EvaDB-Fork 
 * PR #642: Build fix 
 * PR #641: fix: Unnest bug  
 
@@ -188,7 +214,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * PR #617: feat: Add UDF Cost Catalog 
 * PR #616: feat: Add support for iframe based video sampling 
 * PR #606: feat: Add metadata to UDFs in catalog 
-* PR #589: feat: Fuzzy Join support in EVA 
+* PR #589: feat: Fuzzy Join support in EvaDB 
 * PR #601: feat: Decorators for UDF 
 * PR #619: chore: reducing coverage loss 
 * PR #595: doc: Adding CatalogManager, INSERT and DELETE documentation 
@@ -208,7 +234,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * PR #611: fix: insert and delete executor 
 * PR #615: fix: dropbox links fixed  
 * PR #614: Fix: updated dropbox links 
-* PR #602: fix: EVA on Ray bugs 
+* PR #602: fix: EvaDB on Ray bugs 
 * PR #596: fix: Raise Error on Missing Files during Load 
 * PR #593: fix: Windows path error in S3 testcases 
 * PR #584: Rename Array_Count to ArrayCount 
@@ -299,7 +325,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * PR #419: Updated Dockerfile
 * PR #407: Movie analysis notebook
 * PR #404: feat: Lateral join + sampling
-* PR #393: feat: EVA config updates
+* PR #393: feat: EvaDB config updates
 
 ### [Contributors]
 
@@ -312,7 +338,7 @@ Thanks to @gaurav274, @xzdandy, @LordDarkula, @jarulraj, @Anirudh58, @Aryan-Rajo
 * PR #372: bugfix: Make ConfigurationManager read and update operate on eva.yml (#372)
 * PR #367: Dataset support (#367)
 * PR #362: Automatically adding Tutorial Notebooks to docs (#362) 
-* PR #359: Layout for EVA Documentation (#359)
+* PR #359: Layout for EvaDB Documentation (#359)
 * PR #355: docs: Adding instructions for setup on M1 Mac (#355)
 * PR #344: Updated the tutorial notebooks (#344)
 * PR #342: Support for NOT NULL (#342)
@@ -329,7 +355,7 @@ Thanks to @gaurav274, @jarulraj, @xzdandy, @LordDarkula, @Anirudh58, @Aryan-Rajo
 ## [0.0.9] - 2022-08-13
 ### [Added]
 
-* PR #323: Fix EVA Configuration
+* PR #323: Fix EvaDB Configuration
 * PR #321: CI: Caching dependencies
 * PR #315: Unified load 
 * PR #313: Logo update

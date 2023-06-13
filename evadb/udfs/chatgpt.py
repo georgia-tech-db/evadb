@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ import os
 
 import openai
 import pandas as pd
+from retry import retry
 
 from evadb.catalog.catalog_type import NdArrayType
 from evadb.configuration.configuration_manager import ConfigurationManager
@@ -35,6 +36,11 @@ _VALID_CHAT_COMPLETION_MODEL = [
 ]
 
 
+@retry(tries=6, delay=10)
+def completion_with_backoff(**kwargs):
+    return openai.ChatCompletion.create(**kwargs)
+
+
 class ChatGPT(AbstractUDF):
     @property
     def name(self) -> str:
@@ -46,17 +52,7 @@ class ChatGPT(AbstractUDF):
         model="gpt-3.5-turbo",
         temperature: float = 0,
     ) -> None:
-        # Try Configuration Manager
-        openai.api_key = ConfigurationManager().get_value("third_party", "OPENAI_KEY")
-        # If not found, try OS Environment Variable
-        if len(openai.api_key) == 0:
-            openai.api_key = os.environ.get("OPENAI_KEY", "")
-        assert (
-            len(openai.api_key) != 0
-        ), "Please set your OpenAI API key in evadb.yml file (third_party, open_api_key) or environment variable (OPENAI_KEY)"
-
         assert model in _VALID_CHAT_COMPLETION_MODEL, f"Unsupported ChatGPT {model}"
-
         self.model = model
         self.temperature = temperature
 
@@ -82,12 +78,20 @@ class ChatGPT(AbstractUDF):
         ],
     )
     def forward(self, text_df):
+        # Register API key, try configuration manager first
+        openai.api_key = ConfigurationManager().get_value("third_party", "OPENAI_KEY")
+        # If not found, try OS Environment Variable
+        if len(openai.api_key) == 0:
+            openai.api_key = os.environ.get("OPENAI_KEY", "")
+        assert (
+            len(openai.api_key) != 0
+        ), "Please set your OpenAI API key in evadb.yml file (third_party, open_api_key) or environment variable (OPENAI_KEY)"
+
         prompts = text_df[text_df.columns[0]]
         queries = text_df[text_df.columns[1]]
 
         # openai api currently supports answers to a single prompt only
-        # so this udf is designed such that
-
+        # so this udf is designed for that
         results = []
 
         for prompt, query in zip(prompts, queries):
@@ -104,7 +108,8 @@ class ChatGPT(AbstractUDF):
                     }
                 ],
             }
-            response = openai.ChatCompletion.create(**params)
+
+            response = completion_with_backoff(**params)
             results.append(response.choices[0].message.content)
 
         df = pd.DataFrame({"response": results})

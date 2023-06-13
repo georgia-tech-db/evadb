@@ -12,3 +12,54 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
+
+import evadb
+
+
+def load_data(folder_name: str):
+    path = os.path.dirname(evadb.__file__)
+    cursor = evadb.connect(path).cursor()
+
+    embedding_udf = cursor.create_udf(
+        udf_name="embedding",
+        if_not_exists=True,
+        impl_path=f"{path}/udfs/sentence_feature_extractor.py",
+    )
+    embedding_udf.execute()
+
+    print("🧹 Dropping existing tables in EvaDB")
+    cursor.drop_table("data_table").execute()
+    cursor.drop_table("embedding_table").execute()
+
+    print("📄 Loading PDFs into EvaDB")
+    cursor.load(
+        file_regex=f"{folder_name}/*.pdf", format="PDF", table_name="data_table"
+    ).execute()
+
+    print("🤖 Extracting Feature Embeddings. This may take some time ...")
+    cursor.query(
+        "CREATE TABLE IF NOT EXISTS embedding_table AS SELECT embedding(data), data FROM data_table;"
+    ).execute()
+
+    print("🔍 Building FAISS Index ...")
+    cursor.create_vector_index(
+        index_name="embedding_index",
+        table_name="embedding_table",
+        expr="features",
+        using="FAISS",
+    )
+
+
+def main():
+    print("🔮 Welcome to EvaDB! Ingesting data in `source_documents`")
+
+    load_data(folder_name="source_documents")
+
+    print(
+        "🔥 Data ingestion complete! You can now run `privateGPT.py` to query your loaded data."
+    )
+
+
+if __name__ == "__main__":
+    main()

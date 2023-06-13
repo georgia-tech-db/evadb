@@ -49,6 +49,15 @@ DummyFeatureExtractor_udf_query = """CREATE UDF
     EvaDB_INSTALLATION_DIR
 )
 
+fuzzy_udf_query = """CREATE UDF IF NOT EXISTS FuzzDistance
+                    INPUT (Input_Array1 NDARRAY ANYTYPE, Input_Array2 NDARRAY ANYTYPE)
+                    OUTPUT (distance FLOAT(32, 7))
+                    TYPE NdarrayUDF
+                    IMPL "{}/udfs/{}/fuzzy_join.py";
+        """.format(
+    EvaDB_INSTALLATION_DIR, NDARRAY_DIR
+)
+
 ArrayCount_udf_query = """CREATE UDF
             IF NOT EXISTS  ArrayCount
             INPUT (Input_Array NDARRAY ANYTYPE, Search_Key ANYTYPE)
@@ -178,6 +187,17 @@ mnistcnn_udf_query = """CREATE UDF IF NOT EXISTS MnistImageClassifier
     EvaDB_INSTALLATION_DIR
 )
 
+chatgpt_udf_query = """CREATE UDF IF NOT EXISTS ChatGPT
+        IMPL '{}/udfs/chatgpt.py';
+        """.format(
+    EvaDB_INSTALLATION_DIR
+)
+
+yolo8n_query = """CREATE UDF IF NOT EXISTS Yolo
+            TYPE  ultralytics
+            'model' 'yolov8n.pt';
+        """
+
 
 def init_builtin_udfs(db: EvaDBDatabase, mode: str = "debug") -> None:
     """Load the built-in UDFs into the system during system bootstrapping.
@@ -201,6 +221,7 @@ def init_builtin_udfs(db: EvaDBDatabase, mode: str = "debug") -> None:
         Similarity_udf_query,
         norfair_obj_tracker_query,
         mnistcnn_udf_query,
+        chatgpt_udf_query,
         # Disabled because required packages (eg., easy_ocr might not be preinstalled)
         # face_detection_udf_query,
         # ocr_udf_query,
@@ -218,14 +239,9 @@ def init_builtin_udfs(db: EvaDBDatabase, mode: str = "debug") -> None:
                 DummyObjectDetector_udf_query,
                 DummyMultiObjectDetector_udf_query,
                 DummyFeatureExtractor_udf_query,
+                yolo8n_query,
             ]
         )
-
-        yolo8n = """CREATE UDF IF NOT EXISTS Yolo
-            TYPE  ultralytics
-            'model' 'yolov8n.pt';
-        """
-        queries.append(yolo8n)
 
     # execute each query in the list of UDF queries
     for query in queries:

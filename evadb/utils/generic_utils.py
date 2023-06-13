@@ -218,3 +218,18 @@ def remove_directory_contents(dir_path):
                     shutil.rmtree(file_path)
             except Exception as e:
                 logger.warning(f"Failed to delete {file_path}. Reason: {str(e)}")
+
+
+##############################
+
+## TRY TO IMPORT PACKAGES
+
+
+def try_import_decord():
+    try:
+        import decord  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import decord python package.
+                Please install it with `pip install eva-decord`."""
+        )

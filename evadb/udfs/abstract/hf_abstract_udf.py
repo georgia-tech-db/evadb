@@ -95,8 +95,8 @@ class AbstractHFUdf(AbstractUDF, GPUCompatible):
     def forward(self, inputs, *args, **kwargs) -> pd.DataFrame:
         hf_input = self.input_formatter(inputs)
         hf_output = self.hf_udf_obj(hf_input, *args, **kwargs)
-        eva_output = self.output_formatter(hf_output)
-        return eva_output
+        evadb_output = self.output_formatter(hf_output)
+        return evadb_output
 
     def to_device(self, device: str) -> GPUCompatible:
         self.hf_udf_obj = pipeline(**self.pipeline_args, device=device)

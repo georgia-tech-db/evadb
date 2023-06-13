@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,19 +21,8 @@ from evadb.constants import AUDIORATE, IFRAMES
 from evadb.expression.abstract_expression import AbstractExpression
 from evadb.expression.expression_utils import extract_range_list_from_predicate
 from evadb.readers.abstract_reader import AbstractReader
+from evadb.utils.generic_utils import try_import_decord
 from evadb.utils.logging_manager import logger
-
-# Lazy import to avoid torch init failures
-_decord = None
-
-
-def _lazy_import_decord():
-    global _decord
-    if _decord is None:
-        import decord
-
-        _decord = decord
-    return _decord
 
 
 class DecordReader(AbstractReader):
@@ -106,7 +95,9 @@ class DecordReader(AbstractReader):
                     yield self._get_frame(frame_id)
 
     def initialize_reader(self):
-        decord = _lazy_import_decord()
+        try_import_decord()
+        import decord
+
         if self._read_audio:
             assert (
                 self._sampling_type != IFRAMES

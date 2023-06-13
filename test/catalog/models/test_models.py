@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -67,12 +67,12 @@ class CatalogModelsTest(unittest.TestCase):
         column_2 = ColumnCatalogEntry("frame_label", ColumnType.INTEGER, False)
         col_list = [column_1, column_2]
         table_catalog_entry = TableCatalogEntry(
-            "name", "eva_dataset", table_type=TableType.VIDEO_DATA, columns=col_list
+            "name", "evadb_dataset", table_type=TableType.VIDEO_DATA, columns=col_list
         )
         self.assertEqual(table_catalog_entry, table_catalog_entry)
 
         table_catalog_entry1 = TableCatalogEntry(
-            "name2", "eva_dataset", table_type=TableType.VIDEO_DATA, columns=col_list
+            "name2", "evadb_dataset", table_type=TableType.VIDEO_DATA, columns=col_list
         )
 
         self.assertNotEqual(table_catalog_entry, table_catalog_entry1)
