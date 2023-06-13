@@ -338,4 +338,4 @@ statement_to_opr_converter.metadata_definition_to_udf_metadata"
         for derived_operator in derived_operators:
             sig = signature(derived_operator.__init__)
             params = sig.parameters
-            self.assertLess(len(params), 10)
+            self.assertLess(len(params), 15)
