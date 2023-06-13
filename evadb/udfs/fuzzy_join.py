@@ -13,9 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import re
-
-import cv2
 
 # coding=utf-8
 # Copyright 2018-2022 EVA
@@ -33,16 +30,12 @@ import cv2
 # limitations under the License.
 import numpy as np
 import pandas as pd
-import torch
-import torchvision
-from transformers import DonutProcessor, VisionEncoderDecoderModel
+from thefuzz import fuzz
 
 from evadb.catalog.catalog_type import NdArrayType
 from evadb.udfs.abstract.abstract_udf import AbstractUDF
 from evadb.udfs.decorators.decorators import forward, setup
 from evadb.udfs.decorators.io_descriptors.data_types import PandasDataframe
-from evadb.udfs.gpu_compatible import GPUCompatible
-from thefuzz import fuzz
 
 
 class FuzzDistance(AbstractUDF):
@@ -57,9 +50,9 @@ class FuzzDistance(AbstractUDF):
     @forward(
         input_signatures=[
             PandasDataframe(
-                columns=["data1","data2"],
-                column_types=[NdArrayType.STR,NdArrayType.STR],
-                column_shapes=[(1),(1)],
+                columns=["data1", "data2"],
+                column_types=[NdArrayType.STR, NdArrayType.STR],
+                column_shapes=[(1), (1)],
             )
         ],
         output_signatures=[
