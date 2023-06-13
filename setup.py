@@ -59,6 +59,7 @@ minimal_requirement = [
     "pdfminer.six",
     "sentence-transformers",
     "eva-decord>=0.6.1", # for processing videos
+    "opencv-python",
 ]
 
 formatter_libs = ["black>=23.1.0", "isort>=5.10.1"]
