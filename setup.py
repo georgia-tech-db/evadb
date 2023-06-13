@@ -116,6 +116,7 @@ udf_libs = [
     "retry>=0.9.2", #CHATGPT
     "timm>=0.6.13",  # HUGGINGFACE VISION TASKS
     "norfair>=2.2.0",  # OBJECT TRACKING
+    "protobuf==3.20.*" # OCR DONUT HUGGING FACE
 ]
 
 ### NEEDED FOR A BATTERIES-LOADED EXPERIENCE
