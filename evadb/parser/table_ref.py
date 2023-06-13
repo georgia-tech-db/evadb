@@ -161,12 +161,18 @@ class TableRef:
         sample_type: str = None,
         get_audio: bool = False,
         get_video: bool = False,
+        chunk_params: dict = {},
     ):
+        # clean up so that we can support arbitrary new attributes
         self._ref_handle = table
         self._sample_freq = sample_freq
         self._sample_type = sample_type
         self._get_audio = get_audio
         self._get_video = get_video
+
+        # related to DOCUMENT tables
+        # chunk_size, chunk_overlap
+        self.chunk_params = chunk_params
         # Alias generation must happen after ref handle is initialized
         self.alias = alias or self.generate_alias()
 
@@ -260,16 +266,25 @@ class TableRef:
             return Alias(self._ref_handle.table_name.lower())
 
     def __str__(self):
+        parts = []
         if self.is_select():
-            table_ref_str = f"( {str(self._ref_handle)} ) AS {self.alias}"
+            parts.append(f"( {str(self._ref_handle)} ) AS {self.alias}")
         else:
-            table_ref_str = f"{str(self._ref_handle)}"
+            parts.append(str(self._ref_handle))
 
         if self.sample_freq is not None:
-            table_ref_str += f" {str(self.sample_freq)}"
+            parts.append(str(self.sample_freq))
         if self.sample_type is not None:
-            table_ref_str += f" {str(self.sample_type)}"
-        return table_ref_str
+            parts.append(str(self.sample_type))
+
+        if self.chunk_params is not None:
+            parts.append(
+                " ".join(
+                    [f"{key}: {value}" for key, value in self.chunk_params.items()]
+                )
+            )
+
+        return " ".join(parts)
 
     def __eq__(self, other):
         if not isinstance(other, TableRef):
@@ -281,6 +296,7 @@ class TableRef:
             and self.sample_type == other.sample_type
             and self.get_video == other.get_video
             and self.get_audio == other.get_audio
+            and self.chunk_params == other.chunk_params
         )
 
     def __hash__(self) -> int:
@@ -292,5 +308,6 @@ class TableRef:
                 self.sample_type,
                 self.get_video,
                 self.get_audio,
+                frozenset(self.chunk_params.items()),
             )
         )

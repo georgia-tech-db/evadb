@@ -236,6 +236,7 @@ class StatementBinderTests(unittest.TestCase):
             select_statement.orderby_list = [(mocks[2], 0), (mocks[3], 0)]
             select_statement.groupby_clause = mocks[4]
             select_statement.groupby_clause.value = "8 frames"
+            select_statement.from_table.chunk_params = None
             binder._bind_select_statement(select_statement)
             mock_binder.assert_any_call(select_statement.from_table)
             mock_binder.assert_any_call(select_statement.where_clause)
@@ -252,11 +253,13 @@ class StatementBinderTests(unittest.TestCase):
             select_statement = MagicMock()
             select_statement.union_link = None
             select_statement.groupby_clause = None
+            select_statement.from_table.chunk_params = None
             binder._bind_select_statement(select_statement)
             self.assertEqual(mock_ctx.call_count, 0)
 
             binder = StatementBinder(StatementBinderContext(MagicMock()))
             select_statement = MagicMock()
+            select_statement.from_table.chunk_params = None
             select_statement.groupby_clause = None
             binder._bind_select_statement(select_statement)
             self.assertEqual(mock_ctx.call_count, 1)

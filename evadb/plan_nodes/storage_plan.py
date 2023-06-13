@@ -49,6 +49,7 @@ class StoragePlan(AbstractPlan):
         sampling_rate: int = None,
         batch_mem_size: int = 30000000,
         sampling_type: str = None,
+        chunk_params: dict = {},
     ):
         super().__init__(PlanOprType.STORAGE_PLAN)
         self._table = table
@@ -62,6 +63,7 @@ class StoragePlan(AbstractPlan):
         self._predicate = predicate
         self._sampling_rate = sampling_rate
         self._sampling_type = sampling_type
+        self.chunk_params = chunk_params
 
     @property
     def table(self):
@@ -147,5 +149,6 @@ class StoragePlan(AbstractPlan):
                 self.predicate,
                 self.sampling_rate,
                 self.sampling_type,
+                frozenset(self.chunk_params.items()),
             )
         )
