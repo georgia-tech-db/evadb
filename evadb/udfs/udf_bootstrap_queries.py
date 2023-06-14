@@ -214,13 +214,13 @@ def init_builtin_udfs(db: EvaDBDatabase, mode: str = "debug") -> None:
     """
     # list of UDF queries to load
     queries = [
-        Fastrcnn_udf_query,
+        #Fastrcnn_udf_query,
         ArrayCount_udf_query,
         Crop_udf_query,
         Open_udf_query,
-        Similarity_udf_query,
-        norfair_obj_tracker_query,
-        mnistcnn_udf_query,
+        #Similarity_udf_query,
+        #norfair_obj_tracker_query,
+        #mnistcnn_udf_query,
         chatgpt_udf_query,
         # Disabled because required packages (eg., easy_ocr might not be preinstalled)
         # face_detection_udf_query,
@@ -230,8 +230,11 @@ def init_builtin_udfs(db: EvaDBDatabase, mode: str = "debug") -> None:
     ]
 
     if mode == "release":
+        pass
         # if mode is 'release', add the Yolo query to the list
-        queries.append(Yolo_udf_query)
+        #queries.append(
+        #    #Yolo_udf_query
+        #)
     else:
         # if mode is 'debug', add debug UDFs and a smaller Yolo model
         queries.extend(

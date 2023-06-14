@@ -15,7 +15,6 @@
 from typing import Dict, List, Type, Union
 
 import numpy as np
-from PIL import Image, ImageDraw
 from transformers import pipeline
 
 from evadb.catalog.catalog_type import ColumnType, NdArrayType
@@ -71,6 +70,7 @@ def sample_text():
 
 
 def sample_image():
+    from PIL import Image, ImageDraw    
     width, height = 224, 224
     image = Image.new("RGB", (width, height), "white")
     draw = ImageDraw.Draw(image)
