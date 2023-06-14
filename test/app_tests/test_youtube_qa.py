@@ -39,8 +39,6 @@ class YoutubeQATest(unittest.TestCase):
         shutdown_ray()
 
     def test_should_run_youtube_qa_app(self):
-        print("TEST")
-
         app_path = Path(
             EvaDB_INSTALLATION_DIR.parent, EvaDB_APPS_DIR, "youtube_qa", "youtube_qa.py"
         )
