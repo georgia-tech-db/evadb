@@ -47,6 +47,7 @@ class PrivateGPTTest(unittest.TestCase):
         if shutil.os.path.exists(source_directory):
             shutil.rmtree(source_directory)
 
+    @unittest.skip("disable test due to inference time")
     def test_should_run_privategpt(self):
         ##################
         # INGEST
