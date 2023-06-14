@@ -99,7 +99,7 @@ def download_youtube_video_from_link(video_link: str):
         video_link (str): url of the target YouTube video.
     """
     start = time.time()
-    yt = YouTube(video_link).streams.first()
+    yt = YouTube(video_link).streams.filter(file_extension='mp4', progressive='True').first()
     try:
         print("Video download in progress...")
         yt.download(filename="online_video.mp4")
