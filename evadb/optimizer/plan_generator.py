@@ -14,8 +14,6 @@
 # limitations under the License.
 import asyncio
 
-#import nest_asyncio
-
 from evadb.database import EvaDBDatabase
 from evadb.optimizer.cost_model import CostModel
 from evadb.optimizer.operators import Operator
@@ -29,7 +27,10 @@ from evadb.optimizer.optimizer_tasks import (
 from evadb.optimizer.property import PropertyType
 from evadb.optimizer.rules.rules_manager import RulesManager
 
-#nest_asyncio.apply()
+# import nest_asyncio
+
+
+# nest_asyncio.apply()
 
 
 class PlanGenerator:

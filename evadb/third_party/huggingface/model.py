@@ -46,6 +46,7 @@ class ImageHFModel(AbstractHFUdf):
         frames_list = inputs.values.tolist()
         frames = np.vstack(frames_list)
         from PIL import Image
+
         images = [Image.fromarray(row) for row in frames]
         return images
 

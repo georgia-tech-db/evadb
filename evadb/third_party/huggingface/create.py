@@ -70,7 +70,8 @@ def sample_text():
 
 
 def sample_image():
-    from PIL import Image, ImageDraw    
+    from PIL import Image, ImageDraw
+
     width, height = 224, 224
     image = Image.new("RGB", (width, height), "white")
     draw = ImageDraw.Draw(image)
