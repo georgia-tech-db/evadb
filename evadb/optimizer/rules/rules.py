@@ -486,6 +486,7 @@ class XformExtractObjectToLinearFlow(Rule):
         tracker.append_child(detector)
         yield tracker
 
+# Vector Index Queries
 
 class CombineSimilarityOrderByAndLimitToVectorIndexScan(Rule):
     """

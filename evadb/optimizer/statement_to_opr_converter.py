@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from evadb.expression.abstract_expression import AbstractExpression
+from evadb.expression.arithmetic_expression import ArithmeticExpression
 from evadb.optimizer.operators import (
     LogicalCreate,
     LogicalCreateIndex,
@@ -313,13 +314,33 @@ class StatementToPlanConverter:
         self._plan = explain_opr
 
     def visit_create_index(self, statement: CreateIndexStatement):
+        # convert it into a following plan
+        # LogicalCreateIndex
+        #        |
+        #    LogicalProject
+        #        |
+        #    LogicalGet
+        table_ref = statement.table_ref
+        catalog_entry = table_ref.table.table_obj
+        logical_get = LogicalGet(table_ref, catalog_entry, table_ref.alias)
+        project_exprs = statement.col_list
+        # if there is a function expr, make col as its children
+        if statement.udf_func:
+            statement.udf_func.children = statement.col_list
+            project_exprs = [statement.udf_func]
+
+        # hack: we also project the unique columns to identify the tuple
+        
+        ArithmeticExpression()
+        logical_project = LogicalProject(project_exprs)
+        logical_project.append_child(logical_get)
+        
         create_index_opr = LogicalCreateIndex(
             statement.name,
-            statement.table_ref,
-            statement.col_list,
             statement.vector_store_type,
-            statement.udf_func,
         )
+        create_index_opr.append_child(logical_get)
+        
         self._plan = create_index_opr
 
     def visit_delete(self, statement: DeleteTableStatement):

@@ -31,6 +31,7 @@ from evadb.catalog.models.utils import (
     UdfCacheCatalogEntry,
     UdfCatalogEntry,
 )
+from evadb.catalog.sql_config import IDENTIFIER_COLUMN
 from evadb.configuration.configuration_manager import ConfigurationManager
 from evadb.expression.function_expression import FunctionExpression
 from evadb.expression.tuple_value_expression import TupleValueExpression
@@ -120,6 +121,7 @@ def get_image_table_column_definitions() -> List[ColumnDefinition]:
 def get_document_table_column_definitions() -> List[ColumnDefinition]:
     """
     name: file path
+    chunk_id: chunk id
     data: file extracted data
     """
     columns = [
@@ -129,6 +131,9 @@ def get_document_table_column_definitions() -> List[ColumnDefinition]:
             None,
             None,
             ColConstraintInfo(unique=True),
+        ),
+        ColumnDefinition(
+            DocumentColumnName.chunk_id.name, ColumnType.INTEGER, None, None
         ),
         ColumnDefinition(
             DocumentColumnName.data.name,
@@ -162,14 +167,17 @@ def get_pdf_table_column_definitions() -> List[ColumnDefinition]:
 
 
 def get_table_primary_columns(table_catalog_obj: TableCatalogEntry):
+    
     if table_catalog_obj.table_type == TableType.VIDEO_DATA:
         return get_video_table_column_definitions()[:2]
     elif table_catalog_obj.table_type == TableType.IMAGE_DATA:
         return get_image_table_column_definitions()[:1]
     elif table_catalog_obj.table_type == TableType.DOCUMENT_DATA:
-        return get_document_table_column_definitions()[:1]
+        return get_document_table_column_definitions()[:2]
     elif table_catalog_obj.table_type == TableType.PDF_DATA:
         return get_pdf_table_column_definitions()[:3]
+    elif table_catalog_obj.table_type == TableType.STRUCTURED_DATA:
+        return [ColumnDefinition(IDENTIFIER_COLUMN, ColumnType.INTEGER, None, None)]
     else:
         raise Exception(f"Unexpected table type {table_catalog_obj.table_type}")
 
