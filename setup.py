@@ -125,6 +125,9 @@ third_party_libs = [
     "kornia",  # SIFT features
     "langchain>=0.0.177",  # langchain document loaders
     "pdfminer.six",  # for reading pdfs
+    "gpt4all", # for private GPT
+    "pytube", # for youtube QA app,
+    "youtube-transcript-api"
 ]
 
 ### NEEDED FOR EXPERIMENTAL FEATURES
