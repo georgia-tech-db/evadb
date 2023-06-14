@@ -13,23 +13,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import os
-import unittest
-import subprocess
-import requests
 import shutil
-
-from test.util import (
-    get_evadb_for_testing,
-    shutdown_ray,
-)
+import subprocess
+import unittest
 from pathlib import Path
-from evadb.configuration.constants import EvaDB_INSTALLATION_DIR, EvaDB_APPS_DIR
+from test.util import get_evadb_for_testing, shutdown_ray
 
 import pytest
+import requests
+
+from evadb.configuration.constants import EvaDB_APPS_DIR, EvaDB_INSTALLATION_DIR
+
 
 @pytest.mark.notparallel
 class PrivateGPTTest(unittest.TestCase):
-    
     @classmethod
     def setUpClass(cls):
         cls.evadb = get_evadb_for_testing()
@@ -50,9 +47,7 @@ class PrivateGPTTest(unittest.TestCase):
         if shutil.os.path.exists(source_directory):
             shutil.rmtree(source_directory)
 
-
     def test_should_run_privategpt(self):
-
         ##################
         # INGEST
         ##################
@@ -62,21 +57,28 @@ class PrivateGPTTest(unittest.TestCase):
         if shutil.os.path.exists(source_directory):
             shutil.rmtree(source_directory)
 
-        url = 'https://www.eisenhowerlibrary.gov/sites/default/files/file/1953_state_of_the_union.pdf'
-        pdf_destination = 'state_of_the_union.pdf'
+        url = "https://www.eisenhowerlibrary.gov/sites/default/files/file/1953_state_of_the_union.pdf"
+        pdf_destination = "state_of_the_union.pdf"
         response = requests.get(url)
         if response.status_code == 200:
-            with open(pdf_destination, 'wb') as file:
+            with open(pdf_destination, "wb") as file:
                 file.write(response.content)
 
         os.makedirs(source_directory, exist_ok=True)
         shutil.move(pdf_destination, source_directory)
 
-        app_path = Path(EvaDB_INSTALLATION_DIR.parent, EvaDB_APPS_DIR, "privategpt", "ingest.py")
+        app_path = Path(
+            EvaDB_INSTALLATION_DIR.parent, EvaDB_APPS_DIR, "privategpt", "ingest.py"
+        )
         inputs = ""
-        command = ['python', app_path, "--directory", "source_documents"]
+        command = ["python", app_path, "--directory", "source_documents"]
 
-        process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        process = subprocess.Popen(
+            command,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
         stdout, stderr = process.communicate(inputs.encode())
 
         decoded_stdout = stdout.decode()
@@ -88,13 +90,20 @@ class PrivateGPTTest(unittest.TestCase):
         # PRIVATE GPT
         ##################
 
-        inputs = 'When was NATO created?\nexit\n'
+        inputs = "When was NATO created?\nexit\n"
 
-        app_path = Path(EvaDB_INSTALLATION_DIR.parent, EvaDB_APPS_DIR, "privategpt", "privateGPT.py")
+        app_path = Path(
+            EvaDB_INSTALLATION_DIR.parent, EvaDB_APPS_DIR, "privategpt", "privateGPT.py"
+        )
 
-        command = ['python', app_path]
+        command = ["python", app_path]
 
-        process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        process = subprocess.Popen(
+            command,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
         stdout, stderr = process.communicate(inputs.encode())
 
         decoded_stdout = stdout.decode()
