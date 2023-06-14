@@ -18,8 +18,6 @@ import unittest
 from pathlib import Path
 from test.util import get_evadb_for_testing, shutdown_ray
 
-from evadb.configuration.constants import EvaDB_APPS_DIR, EvaDB_INSTALLATION_DIR
-
 
 class YoutubeQATest(unittest.TestCase):
     @classmethod
@@ -39,9 +37,7 @@ class YoutubeQATest(unittest.TestCase):
         shutdown_ray()
 
     def test_should_run_youtube_qa_app(self):
-        app_path = Path(
-            EvaDB_INSTALLATION_DIR.parent, EvaDB_APPS_DIR, "youtube_qa", "youtube_qa.py"
-        )
+        app_path = Path("apps", "youtube_qa", "youtube_qa.py")
         input1 = "\n"  # Go with default URL
         # Assuming that OPENAI_KEY is already set as an environment variable
         input2 = "What is this video on?\n"  # Question

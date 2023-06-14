@@ -22,8 +22,6 @@ from test.util import get_evadb_for_testing, shutdown_ray
 import pytest
 import requests
 
-from evadb.configuration.constants import EvaDB_APPS_DIR, EvaDB_INSTALLATION_DIR
-
 
 @pytest.mark.notparallel
 class PrivateGPTTest(unittest.TestCase):
@@ -68,9 +66,7 @@ class PrivateGPTTest(unittest.TestCase):
         os.makedirs(source_directory, exist_ok=True)
         shutil.move(pdf_destination, source_directory)
 
-        app_path = Path(
-            EvaDB_INSTALLATION_DIR.parent, EvaDB_APPS_DIR, "privategpt", "ingest.py"
-        )
+        app_path = Path("apps", "privategpt", "ingest.py")
         inputs = ""
         command = ["python", app_path, "--directory", "source_documents"]
 
@@ -93,9 +89,7 @@ class PrivateGPTTest(unittest.TestCase):
 
         inputs = "When was NATO created?\nexit\n"
 
-        app_path = Path(
-            EvaDB_INSTALLATION_DIR.parent, EvaDB_APPS_DIR, "privategpt", "privateGPT.py"
-        )
+        app_path = Path("apps", "privategpt", "privateGPT.py")
 
         command = ["python", app_path]
 

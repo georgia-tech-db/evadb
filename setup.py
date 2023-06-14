@@ -126,7 +126,8 @@ third_party_libs = [
     "langchain>=0.0.177",  # langchain document loaders
     "pdfminer.six",  # for reading pdfs
     "gpt4all", # for private GPT
-    "pytube", # for youtube QA app
+    "pytube", # for youtube QA app,
+    "youtube-transcript-api"
 ]
 
 ### NEEDED FOR EXPERIMENTAL FEATURES
