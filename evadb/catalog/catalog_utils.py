@@ -121,8 +121,13 @@ def get_image_table_column_definitions() -> List[ColumnDefinition]:
 def get_document_table_column_definitions() -> List[ColumnDefinition]:
     """
     name: file path
+<<<<<<< HEAD
     chunk_id: chunk id
     data: file extracted data
+=======
+    chunk_id: chunk id (0-indexed for each file)
+    data: text data associated with the chunk
+>>>>>>> minor-fixes
     """
     columns = [
         ColumnDefinition(
@@ -166,20 +171,45 @@ def get_pdf_table_column_definitions() -> List[ColumnDefinition]:
     return columns
 
 
-def get_table_primary_columns(table_catalog_obj: TableCatalogEntry):
-    
+def get_table_primary_columns(
+    table_catalog_obj: TableCatalogEntry,
+) -> List[ColumnDefinition]:
+    """
+    Get the primary columns for a table based on its table type.
+
+    Args:
+        table_catalog_obj (TableCatalogEntry): The table catalog object.
+
+    Returns:
+        List[ColumnDefinition]: The list of primary columns for the table.
+    """
+    primary_columns = [
+        ColumnDefinition(IDENTIFIER_COLUMN, ColumnType.INTEGER, None, None)
+    ]
+    # _row_id for all the TableTypes, however for Video data and PDF data we also add frame_id (id) and paragraph as part of unique key
     if table_catalog_obj.table_type == TableType.VIDEO_DATA:
-        return get_video_table_column_definitions()[:2]
-    elif table_catalog_obj.table_type == TableType.IMAGE_DATA:
-        return get_image_table_column_definitions()[:1]
-    elif table_catalog_obj.table_type == TableType.DOCUMENT_DATA:
-        return get_document_table_column_definitions()[:2]
+        # _row_id, id
+        primary_columns.append(
+            ColumnDefinition(VideoColumnName.id.name, ColumnType.INTEGER, None, None),
+        )
+
     elif table_catalog_obj.table_type == TableType.PDF_DATA:
-        return get_pdf_table_column_definitions()[:3]
-    elif table_catalog_obj.table_type == TableType.STRUCTURED_DATA:
-        return [ColumnDefinition(IDENTIFIER_COLUMN, ColumnType.INTEGER, None, None)]
-    else:
-        raise Exception(f"Unexpected table type {table_catalog_obj.table_type}")
+        # _row_id, paragraph
+        primary_columns.append(
+            ColumnDefinition(
+                PDFColumnName.paragraph.name, ColumnType.INTEGER, None, None
+            )
+        )
+
+    elif table_catalog_obj.table_type == TableType.DOCUMENT_DATA:
+        # _row_id, chunk_id
+        primary_columns.append(
+            ColumnDefinition(
+                DocumentColumnName.chunk_id.name, ColumnType.INTEGER, None, None
+            )
+        )
+
+    return primary_columns
 
 
 def xform_column_definitions_to_catalog_entries(
