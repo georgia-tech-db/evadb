@@ -196,6 +196,14 @@ def get_table_primary_columns(
             )
         )
 
+    elif table_catalog_obj.table_type == TableType.DOCUMENT_DATA:
+        # _row_id, chunk_id
+        primary_columns.append(
+            ColumnDefinition(
+                DocumentColumnName.chunk_id.name, ColumnType.INTEGER, None, None
+            )
+        )
+
     return primary_columns
 
 
