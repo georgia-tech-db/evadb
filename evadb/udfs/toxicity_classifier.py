@@ -30,7 +30,6 @@
 # limitations under the License.
 import numpy as np
 import pandas as pd
-from thefuzz import fuzz
 
 from evadb.catalog.catalog_type import NdArrayType
 from evadb.udfs.abstract.abstract_udf import AbstractUDF
@@ -44,6 +43,7 @@ except ImportError as e:
         f"Failed to import with error {e}, \
         please try `pip install detoxify`"
     )
+
 
 class ToxicityClassifier(AbstractUDF):
     @setup(cacheable=False, udf_type="FeatureExtraction", batchable=False)
