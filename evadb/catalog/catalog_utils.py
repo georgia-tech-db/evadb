@@ -121,7 +121,8 @@ def get_image_table_column_definitions() -> List[ColumnDefinition]:
 def get_document_table_column_definitions() -> List[ColumnDefinition]:
     """
     name: file path
-    data: file extracted data
+    chunk_id: chunk id (0-indexed for each file)
+    data: text data associated with the chunk
     """
     columns = [
         ColumnDefinition(
@@ -130,6 +131,9 @@ def get_document_table_column_definitions() -> List[ColumnDefinition]:
             None,
             None,
             ColConstraintInfo(unique=True),
+        ),
+        ColumnDefinition(
+            DocumentColumnName.chunk_id.name, ColumnType.INTEGER, None, None
         ),
         ColumnDefinition(
             DocumentColumnName.data.name,
