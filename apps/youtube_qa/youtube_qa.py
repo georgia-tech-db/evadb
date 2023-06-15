@@ -23,7 +23,7 @@ from youtube_transcript_api import YouTubeTranscriptApi
 
 import evadb
 
-MAX_CHUNK_SIZE = 5000
+MAX_CHUNK_SIZE = 10000
 DEFAULT_VIDEO_LINK = "https://www.youtube.com/watch?v=TvS1lHEQoKk"
 DEFAULT_VIDEO_PATH = "./apps/youtube_qa/benchmarks/russia_ukraine.mp4"
 
@@ -219,6 +219,50 @@ def generate_local_video_transcript(cursor: evadb.EvaDBCursor, video_path: str) 
     return raw_transcript_string
 
 
+def generate_blog_post(cursor: evadb.EvaDBCursor) -> str:
+    to_generate = str(
+        input("\nWould you like to generate a blog post of the video? (y/n): ")
+    )
+    if to_generate.lower() == "y":
+        start = time.time()
+        print("⏳ Generating blog post (may take a while)...")
+
+        generate_chatgpt_summary_rel = cursor.table("Transcript").select(
+            "ChatGPT('summarize this video', text)"
+        )
+        responses = generate_chatgpt_summary_rel.df()["chatgpt.response"]
+
+        summary = ""
+        for r in responses:
+            summary += f"{r} \n"
+
+        df = pd.DataFrame([{"summary": summary}])
+        df.to_csv("./evadb_data/tmp/summary.csv")
+
+        cursor.drop_table("Summary", if_exists=True).execute()
+        cursor.query(
+            """CREATE TABLE IF NOT EXISTS Summary (summary TEXT(100));"""
+        ).execute()
+        cursor.load("./evadb_data/tmp/summary.csv", "Summary", "csv").execute()
+
+        generate_blog_rel = cursor.table("Summary").select(
+            "ChatGPT('generate a blog post of the video summary', summary)"
+        )
+        responses = generate_blog_rel.df()["chatgpt.response"]
+        blog = responses[0]
+        print(blog)
+
+        if os.path.exists("blog.txt"):
+            os.remove("blog.txt")
+
+        with open("blog.txt", "w") as file:
+            file.write(blog)
+
+        print(
+            f"✅ blog post (generated in {time.time() - start} seconds) is saved to file blog.txt"
+        )
+
+
 def cleanup():
     """Removes any temporary file / directory created by EvaDB."""
     if os.path.exists("online_video.mp4"):
@@ -293,7 +337,7 @@ if __name__ == "__main__":
                 # Generate response with chatgpt udf
                 print("⏳ Generating response (may take a while)...")
                 generate_chatgpt_response_rel = cursor.table("Transcript").select(
-                    f"ChatGPT('{question} in 100 words', text)"
+                    f"ChatGPT('given this video, {question} (in 100 words)', text)"
                 )
                 start = time.time()
                 responses = generate_chatgpt_response_rel.df()["chatgpt.response"]
@@ -303,6 +347,9 @@ if __name__ == "__main__":
                     response += f"{r} \n"
                 print(response, "\n")
                 print(f"✅ Answer (generated in {time.time() - start} seconds):")
+
+        # Generate a blog post on user demand
+        generate_blog_post(cursor)
 
         cleanup()
         print("✅ Session ended.")
