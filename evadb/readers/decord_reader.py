@@ -21,7 +21,7 @@ from evadb.constants import AUDIORATE, IFRAMES
 from evadb.expression.abstract_expression import AbstractExpression
 from evadb.expression.expression_utils import extract_range_list_from_predicate
 from evadb.readers.abstract_reader import AbstractReader
-from evadb.utils.generic_utils import try_import_decord
+from evadb.utils.generic_utils import try_to_import_decord
 from evadb.utils.logging_manager import logger
 
 
@@ -95,7 +95,7 @@ class DecordReader(AbstractReader):
                     yield self._get_frame(frame_id)
 
     def initialize_reader(self):
-        try_import_decord()
+        try_to_import_decord()
         import decord
 
         if self._read_audio:

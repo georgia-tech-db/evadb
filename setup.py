@@ -41,14 +41,15 @@ VERSION = VERSION_DICT["VERSION"]
 minimal_requirements = [
     "numpy>=1.19.5",
     "pandas>=1.1.5",
-    "sqlalchemy>=1.4.0,<2.0.0",  # major changes in 2.0.0
+    "sqlalchemy>=1.4.0,<2.0.0",  # breaking changes in 2.0.0
     "sqlalchemy-utils>=0.36.6",
     "lark>=1.0.0",
     "pyyaml>=5.1",
-    "ray>=1.13.0,<2.5.0", # breaking change in 2.5.0
+    "ray>=1.13.0,<2.5.0",        # breaking changes in 2.5.0
     "aenum>=2.2.0",
     "diskcache>=5.4.0",
     "transformers>=4.27.4",  # HUGGINGFACE
+    "retry>=0.9.2",
 ]
 
 vision_libs = [
@@ -57,11 +58,13 @@ vision_libs = [
     "faiss-cpu",
     "opencv-contrib-python-headless>=4.6.0.66",
     "Pillow>=8.4.0",
-    "eva-decord>=0.6.1", # for processing videos
+    "eva-decord>=0.6.1",    # VIDEO PROCESSING
+    "ultralytics>=8.0.93",  # OBJECT DETECTION
 ]
 
 document_libs = [
     "langchain",
+    "faiss-cpu",
     "pymupdf",
     "pdfminer.six",
     "sentence-transformers"
@@ -69,30 +72,29 @@ document_libs = [
 
 udf_libs = [
     "facenet-pytorch>=2.5.2",  # FACE DETECTION
-    "ipython<8.13.0",  # NOTEBOOKS
-    "thefuzz",  # FUZZY STRING MATCHING
-    "ultralytics>=8.0.93",  # OBJECT DETECTION
-    "openai>=0.27.4",  # CHATGPT
-    "retry>=0.9.2", #CHATGPT
-    "timm>=0.6.13",  # HUGGINGFACE VISION TASKS
-    "norfair>=2.2.0",  # OBJECT TRACKING
-    "gpt4all", # for private GPT
-    "pytube", # for youtube QA app,
-    "youtube-transcript-api",
-    "qdrant-client>=1.1.7",  # Qdrant vector store client
-    "kornia",  # SIFT features
-    "boto3", # AWS
+    "thefuzz",                 # FUZZY STRING MATCHING
+    "openai>=0.27.4",          # CHATGPT
+    "timm>=0.6.13",            # HUGGINGFACE VISION TASKS
+    "norfair>=2.2.0",          # OBJECT TRACKING
+    "gpt4all",                 # PRIVATE GPT
+    "pytube",                  # YOUTUBE QA APP
+    "youtube-transcript-api",  # YOUTUBE QA APP
+    "qdrant-client>=1.1.7",    # QDRANT VECTOR STORE
+    "kornia",                  # SIFT FEATURES
+    "boto3",                   # AWS
+]
+
+notebook_libs = [
+    "ipython<8.13.0",
+    "ipywidgets>=7.7.2",
+    "matplotlib>=3.3.4",
+    "nbmake>=1.2.1",
+    "nest-asyncio>=1.5.6",
 ]
 
 ### NEEDED FOR DEVELOPER TESTING ONLY
 
 dev_libs = [
-    # NOTEBOOK PACKAGES
-    "ipywidgets>=7.7.2",
-    "matplotlib>=3.3.4",
-    "nbmake>=1.2.1",
-    "nest-asyncio>=1.5.6",
-
     # TESTING PACKAGES
     "pytest>=6.1.2",
     "pytest-cov>=2.11.1",
@@ -124,14 +126,12 @@ dev_libs = [
 INSTALL_REQUIRES = minimal_requirements
 
 EXTRA_REQUIRES = {
-    "dev": dev_libs,
     "vision": vision_libs,
     "document": document_libs,
-    "udf": udf_libs
+    "udf": udf_libs,
+    "notebook": notebook_libs,
+    "dev": dev_libs + vision_libs + document_libs + udf_libs + notebook_libs,
 }
-
-from pprint import pprint
-pprint(EXTRA_REQUIRES)
 
 setup(
     name=NAME,

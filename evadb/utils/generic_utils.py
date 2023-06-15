@@ -81,7 +81,7 @@ def load_udf_class_from_file(filepath, classname=None):
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
     except Exception as e:
-        err_msg = f"Couldn't load UDF from {filepath} : {str(e)}. Ensure that the file exists and that it is a valid Python file."
+        err_msg = f"Couldn't load UDF from {filepath} : {str(e)}. This might be due to a missing Python package, or because the UDF implementation file does not exist, or it is not a valid Python file."
         raise RuntimeError(err_msg)
 
     # Try to load the specified class by name
@@ -225,11 +225,62 @@ def remove_directory_contents(dir_path):
 ## TRY TO IMPORT PACKAGES
 
 
-def try_import_decord():
+def try_to_import_faiss():
+    try:
+        import faiss  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import pillow python package.
+                Please install it with `pip install faiss-cpu` or `pip install faiss-gpu`."""
+        )
+
+
+def try_to_import_pillow():
+    try:
+        import PIL  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import pillow python package.
+                Please install it with `pip install pillow`."""
+        )
+
+
+def try_to_import_torch_and_torchvision():
+    try:
+        import torch  # noqa: F401
+        import torchvision  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import torch or torchvision python packages.
+                Please install them with `pip install torch torchvision`."""
+        )
+
+
+def try_to_import_cv():
+    try:
+        import cv  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import cv python package.
+                Please install it with `pip install opencv-contrib-python-headless`."""
+        )
+
+
+def try_to_import_decord():
     try:
         import decord  # noqa: F401
     except ImportError:
         raise ValueError(
             """Could not import decord python package.
                 Please install it with `pip install eva-decord`."""
+        )
+
+
+def try_to_import_ultralytics():
+    try:
+        import ultralytics  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import ultralytics python package.
+                Please install it with `pip install ultralytics`."""
         )
