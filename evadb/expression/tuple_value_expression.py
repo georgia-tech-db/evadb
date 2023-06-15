@@ -30,21 +30,14 @@ class TupleValueExpression(AbstractExpression):
         self,
         name: str = None,
         table_alias: str = None,
-        col_idx: int = -1,
         col_object: Union[ColumnCatalogEntry, UdfIOCatalogEntry] = None,
         col_alias=None,
     ):
         super().__init__(ExpressionType.TUPLE_VALUE, rtype=ExpressionReturnType.INVALID)
         self._name = name
         self._table_alias = table_alias
-        self._table_id = None
-        self._col_idx = col_idx
         self._col_object = col_object
         self._col_alias = col_alias
-
-    @property
-    def table_id(self) -> int:
-        return self._table_id
 
     @property
     def table_alias(self) -> str:
@@ -105,11 +98,9 @@ class TupleValueExpression(AbstractExpression):
         return (
             is_subtree_equal
             and self.table_alias == other.table_alias
-            and self.table_id == other.table_id
             and self.name == other.name
             and self.col_alias == other.col_alias
             and self.col_object == other.col_object
-            and self._col_idx == other._col_idx
         )
 
     def __str__(self) -> str:
@@ -128,10 +119,8 @@ class TupleValueExpression(AbstractExpression):
             (
                 super().__hash__(),
                 self.table_alias,
-                self.table_id,
                 self.name,
                 self.col_alias,
                 self.col_object,
-                self._col_idx,
             )
         )

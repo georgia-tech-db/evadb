@@ -268,7 +268,7 @@ class StatementBinder:
             for obj, alias in zip(func_expr.output_objs, func_expr.alias.col_names):
                 col_alias = "{}.{}".format(func_expr.alias.alias_name, alias)
                 alias_obj = TupleValueExpression(
-                    col_name=alias,
+                    name=alias,
                     table_alias=func_expr.alias.alias_name,
                     col_object=obj,
                     col_alias=col_alias,

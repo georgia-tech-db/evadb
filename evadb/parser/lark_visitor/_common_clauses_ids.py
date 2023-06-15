@@ -40,7 +40,7 @@ class CommonClauses:
         # check for dottedid
         if len(tree.children) > 1:
             dotted_id = self.visit(tree.children[1])
-            return TupleValueExpression(table_alias=uid, col_name=dotted_id)
+            return TupleValueExpression(table_alias=uid, name=dotted_id)
         else:
             return TupleValueExpression(name=uid)
 
