@@ -247,6 +247,6 @@ def init_builtin_udfs(db: EvaDBDatabase, mode: str = "debug") -> None:
     # ignore exceptions during the bootstrapping phase due to missing packages
     for query in queries:
         try:
-            execute_query_fetch_all(db, query)
+            execute_query_fetch_all(db, query, ignore_exceptions=True)
         except Exception:
             pass

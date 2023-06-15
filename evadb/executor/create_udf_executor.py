@@ -131,12 +131,10 @@ class CreateUDFExecutor(AbstractExecutor):
 
         Args:
             impl_path (str): The file path of the UDF implementation file.
-            udf_args (Dict, optional): Dictionary of arguments to pass to the UDF.
-            Defaults to {}.
+            udf_args (Dict, optional): Dictionary of arguments to pass to the UDF. Defaults to {}.
 
         Returns:
-            UdfCatalogEntry: A UdfCatalogEntry object that represents the initialized
-            UDF.
+            UdfCatalogEntry: A UdfCatalogEntry object that represents the initialized UDF.
 
         Raises:
             RuntimeError: If an error occurs while initializing the UDF.
@@ -150,7 +148,7 @@ class CreateUDFExecutor(AbstractExecutor):
             udf(**udf_args)
         except Exception as e:
             err_msg = f"Error creating UDF: {str(e)}"
-            logger.error(err_msg)
+            # logger.error(err_msg)
             raise RuntimeError(err_msg)
 
         return udf
