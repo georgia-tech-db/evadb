@@ -12,8 +12,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from evadb.expression.abstract_expression import AbstractExpression
+from evadb.catalog.catalog_type import TableType
+from evadb.catalog.catalog_utils import get_table_primary_columns
+from evadb.constants import MAGIC_NUMBER
+from evadb.expression.abstract_expression import AbstractExpression, ExpressionType
 from evadb.expression.arithmetic_expression import ArithmeticExpression
+from evadb.expression.constant_value_expression import ConstantValueExpression
+from evadb.expression.tuple_value_expression import TupleValueExpression
 from evadb.optimizer.operators import (
     LogicalCreate,
     LogicalCreateIndex,
@@ -320,27 +325,79 @@ class StatementToPlanConverter:
         #    LogicalProject
         #        |
         #    LogicalGet
+
         table_ref = statement.table_ref
         catalog_entry = table_ref.table.table_obj
         logical_get = LogicalGet(table_ref, catalog_entry, table_ref.alias)
         project_exprs = statement.col_list
         # if there is a function expr, make col as its children
         if statement.udf_func:
-            statement.udf_func.children = statement.col_list
-            project_exprs = [statement.udf_func]
+            project_exprs = [statement.udf_func.copy()]
 
-        # hack: we also project the unique columns to identify the tuple
-        
-        ArithmeticExpression()
+        # We need to also store the primary keys of the table in the index to later do
+        # the mapping. Typically, the vector indexes support setting an integer ID with
+        # the embedding. Unfortunately, we cannot support multi-column primary keys for
+        # cases like video table and document table.
+        # Hack: In such cases, we convert them into a unique ID using the following
+        # logic: We assume that the maximum number of files in the table is <=
+        # MAGIC_NUMBER and the number of frames or chunks for each video/document is <=
+        # MAGIC_NUMBER. Based on this assumption, we can safely say that
+        # `_row_id` * MAGIC_NUMBER + `chunk_id` for document table and
+        # `_row_id` * MAGIC_NUMBER + `id`) for video table
+        # `_row_id` * MAGIC_NUMBER + `paragraph`) for PDF table
+        # will be unique.
+        def _build_expression(row_id_expr, id_expr):
+            left = ArithmeticExpression(
+                ExpressionType.ARITHMETIC_MULTIPLY,
+                row_id_expr,
+                ConstantValueExpression(MAGIC_NUMBER),
+            )
+            right = id_expr
+            return ArithmeticExpression(ExpressionType.ARITHMETIC_ADD, left, right)
+
+        primary_cols = get_table_primary_columns(catalog_entry)
+
+        # primary_col to TupleValueExpressions
+        primary_exprs = []
+        for col in primary_cols:
+            col_obj = next(
+                (obj for obj in catalog_entry.columns if obj.name == col.name), None
+            )
+            assert (
+                col_obj is not None
+            ), f"Invalid Primary Column {col.name} for table {catalog_entry.name}"
+            primary_exprs.append(
+                TupleValueExpression(
+                    col_name=col.name,
+                    table_alias=table_ref.alias,
+                    col_object=col_obj,
+                    col_alias=f"{table_ref.alias}.{col.name}",
+                )
+            )
+
+        unique_col = primary_exprs[0]
+
+        if catalog_entry.table_type in [
+            TableType.VIDEO_DATA,
+            TableType.DOCUMENT_DATA,
+            TableType.PDF_DATA,
+        ]:
+            unique_col = _build_expression(primary_exprs[0], primary_exprs[1])
+
+        project_exprs = [unique_col] + project_exprs
+
         logical_project = LogicalProject(project_exprs)
         logical_project.append_child(logical_get)
-        
+
         create_index_opr = LogicalCreateIndex(
             statement.name,
+            statement.table_ref,
+            statement.col_list,
             statement.vector_store_type,
+            statement.udf_func,
         )
-        create_index_opr.append_child(logical_get)
-        
+        create_index_opr.append_child(logical_project)
+
         self._plan = create_index_opr
 
     def visit_delete(self, statement: DeleteTableStatement):

@@ -16,13 +16,11 @@ from pathlib import Path
 
 import pandas as pd
 
-from evadb.catalog.sql_config import IDENTIFIER_COLUMN
 from evadb.database import EvaDBDatabase
 from evadb.executor.abstract_executor import AbstractExecutor
 from evadb.executor.executor_utils import ExecutorError, handle_vector_store_params
 from evadb.models.storage.batch import Batch
 from evadb.plan_nodes.create_index_plan import CreateIndexPlan
-from evadb.storage.storage_engine import StorageEngine
 from evadb.third_party.vector_stores.types import FeaturePayload
 from evadb.third_party.vector_stores.utils import VectorStoreFactory
 from evadb.utils.logging_manager import logger
@@ -59,38 +57,17 @@ class CreateIndexExecutor(AbstractExecutor):
 
     def _create_index(self):
         try:
-            # Get feature tables.
-            feat_catalog_entry = self.node.table_ref.table.table_obj
-
             # Get feature column.
-            feat_col_name = self.node.col_list[0].name
-            feat_column = [
-                col for col in feat_catalog_entry.columns if col.name == feat_col_name
-            ][0]
+            feat_column = self.node.col_list[0].col_object
 
             # Add features to index.
-            # TODO: batch size is hardcoded for now.
             input_dim = -1
-            storage_engine = StorageEngine.factory(self.db, feat_catalog_entry)
-            for input_batch in storage_engine.read(feat_catalog_entry):
-                if self.node.udf_func:
-                    # Create index through UDF expression.
-                    # UDF(input column) -> 2 dimension feature vector.
-                    input_batch.modify_column_alias(feat_catalog_entry.name.lower())
-                    feat_batch = self.node.udf_func.evaluate(input_batch)
-                    feat_batch.drop_column_alias()
-                    input_batch.drop_column_alias()
-                    feat = feat_batch.column_as_numpy_array("features")
-                else:
-                    # Create index on the feature table directly.
-                    # Pandas wraps numpy array as an object inside a numpy
-                    # array. Use zero index to get the actual numpy array.
-                    feat = input_batch.column_as_numpy_array(feat_col_name)
+            for input_batch in self.children[0].exec():
+                row_ids = input_batch.column_as_numpy_array(input_batch.columns[0])
+                features = input_batch.column_as_numpy_array(input_batch.columns[1])
 
-                row_id = input_batch.column_as_numpy_array(IDENTIFIER_COLUMN)
-
-                for i in range(len(input_batch)):
-                    row_feat = feat[i].reshape(1, -1)
+                for row_id, feat in zip(row_ids, features):
+                    row_feat = feat.reshape(1, -1)
                     if self.index is None:
                         input_dim = row_feat.shape[1]
                         self.index = VectorStoreFactory.init_vector_store(
@@ -103,7 +80,7 @@ class CreateIndexExecutor(AbstractExecutor):
                         self.index.create(input_dim)
 
                     # Row ID for mapping back to the row.
-                    self.index.add([FeaturePayload(row_id[i], row_feat)])
+                    self.index.add([FeaturePayload(row_id, row_feat)])
 
             # Persist index.
             self.index.persist()

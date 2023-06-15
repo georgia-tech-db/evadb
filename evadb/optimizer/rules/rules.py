@@ -486,7 +486,9 @@ class XformExtractObjectToLinearFlow(Rule):
         tracker.append_child(detector)
         yield tracker
 
+
 # Vector Index Queries
+
 
 class CombineSimilarityOrderByAndLimitToVectorIndexScan(Rule):
     """
@@ -768,6 +770,7 @@ class LogicalCreateUDFToPhysical(Rule):
 class LogicalCreateIndexToVectorIndex(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALCREATEINDEX)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
         super().__init__(RuleType.LOGICAL_CREATE_INDEX_TO_VECTOR_INDEX, pattern)
 
     def promise(self):
@@ -784,6 +787,8 @@ class LogicalCreateIndexToVectorIndex(Rule):
             before.vector_store_type,
             before.udf_func,
         )
+        for child in before.children:
+            after.append_child(child)
         yield after
 
 

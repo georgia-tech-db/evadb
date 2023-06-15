@@ -297,10 +297,7 @@ class CreateTable:
                 index_elem = index_elem.children[0]
             index_elem = [index_elem]
 
-        col_list = [
-            ColumnDefinition(tv_expr.col_name, None, None, None)
-            for tv_expr in index_elem
-        ]
+        col_list = index_elem
 
         return CreateIndexStatement(
             index_name, table_ref, col_list, vector_store_type, udf_func

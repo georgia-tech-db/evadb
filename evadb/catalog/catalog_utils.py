@@ -120,14 +120,14 @@ def get_image_table_column_definitions() -> List[ColumnDefinition]:
 
 def get_document_table_column_definitions() -> List[ColumnDefinition]:
     """
-    name: file path
-<<<<<<< HEAD
-    chunk_id: chunk id
-    data: file extracted data
-=======
-    chunk_id: chunk id (0-indexed for each file)
-    data: text data associated with the chunk
->>>>>>> minor-fixes
+        name: file path
+    <<<<<<< HEAD
+        chunk_id: chunk id
+        data: file extracted data
+    =======
+        chunk_id: chunk id (0-indexed for each file)
+        data: text data associated with the chunk
+    >>>>>>> minor-fixes
     """
     columns = [
         ColumnDefinition(

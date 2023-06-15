@@ -165,3 +165,7 @@ class CreateIndexTest(unittest.TestCase):
 
         # Cleanup.
         self.evadb.catalog().drop_index_catalog_entry("testCreateIndexName")
+
+
+if __name__ == "__main__":
+    unittest.main()
