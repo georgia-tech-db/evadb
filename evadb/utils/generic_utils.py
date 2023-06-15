@@ -304,6 +304,16 @@ def try_to_import_norfair():
 ##############################
 
 
+def try_to_import_transformers():
+    try:
+        import transformers  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import transformers python package.
+                Please install it with `pip install transformers`."""
+        )
+
+
 ##############################
 ## APPS
 ##############################

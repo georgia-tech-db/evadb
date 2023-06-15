@@ -48,26 +48,25 @@ minimal_requirements = [
     "ray>=1.13.0,<2.5.0",        # breaking changes in 2.5.0
     "aenum>=2.2.0",
     "diskcache>=5.4.0",
-    "transformers>=4.27.4",  # HUGGINGFACE
     "retry>=0.9.2",
 ]
 
 vision_libs = [
     "torch>=1.10.0",
     "torchvision>=0.11.1",
-    "faiss-cpu",
+    "transformers>=4.27.4",  # HUGGINGFACE
+    "faiss-cpu",             # DEFAULT VECTOR INDEX
     "opencv-contrib-python-headless>=4.6.0.66",
     "Pillow>=8.4.0",
-    "eva-decord>=0.6.1",    # VIDEO PROCESSING
-    "ultralytics>=8.0.93",  # OBJECT DETECTION
-    "timm>=0.6.13",         # HUGGINGFACE VISION TASKS
-    "norfair>=2.2.0",       # OBJECT TRACKING
-    "kornia",               # SIFT FEATURES    
+    "eva-decord>=0.6.1",     # VIDEO PROCESSING
+    "ultralytics>=8.0.93",   # OBJECT DETECTION
+    "timm>=0.6.13",          # HUGGINGFACE VISION TASKS
 ]
 
 document_libs = [
-    "langchain",
-    "faiss-cpu",
+    "transformers>=4.27.4",  # HUGGINGFACE
+    "langchain",             # DATA LOADERS
+    "faiss-cpu",             # DEFAULT VECTOR INDEX
     "pymupdf",
     "pdfminer.six",
     "sentence-transformers",
@@ -82,6 +81,8 @@ udf_libs = [
     "youtube-transcript-api",  # YOUTUBE QA APP
     "qdrant-client>=1.1.7",    # QDRANT VECTOR STORE
     "boto3",                   # AWS
+    "norfair>=2.2.0",          # OBJECT TRACKING
+    "kornia",                  # SIFT FEATURES        
 ]
 
 notebook_libs = [
@@ -104,7 +105,6 @@ dev_libs = [
     "mock",
     "pytest-xdist",
     "coveralls>=3.0.1",
-    "flake8>=3.9.1",
     "moto[s3]>=4.1.1",
 
     # BENCHMARK PACKAGES
@@ -115,6 +115,7 @@ dev_libs = [
     "pylint",
     "black>=23.1.0", 
     "isort>=5.10.1",
+    "flake8>=3.9.1",
 
     # DISTRIBUTION PACKAGES
     "wheel>=0.37.1",
@@ -131,6 +132,7 @@ EXTRA_REQUIRES = {
     "document": document_libs,
     "udf": udf_libs,
     "notebook": notebook_libs,
+    "all": vision_libs + document_libs + udf_libs + notebook_libs,
     "dev": dev_libs + vision_libs + document_libs + udf_libs + notebook_libs,
 }
 

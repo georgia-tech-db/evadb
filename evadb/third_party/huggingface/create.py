@@ -15,7 +15,6 @@
 from typing import Dict, List, Type, Union
 
 import numpy as np
-from transformers import pipeline
 
 from evadb.catalog.catalog_type import ColumnType, NdArrayType
 from evadb.catalog.models.udf_io_catalog import UdfIOCatalogEntry
@@ -27,6 +26,7 @@ from evadb.third_party.huggingface.model import (
     ImageHFModel,
     TextHFModel,
 )
+from evadb.utils.generic_utils import try_to_import_transformers
 
 """
 We currently support the following tasks from HuggingFace.
@@ -116,6 +116,9 @@ def infer_output_name_and_type(**pipeline_args):
     ), f"Task {task} not supported in EvaDB currently"
 
     # Construct the pipeline
+    try_to_import_transformers()
+    from transformers import pipeline
+
     pipe = pipeline(**pipeline_args)
 
     # Run the pipeline through a dummy input to get a sample output
