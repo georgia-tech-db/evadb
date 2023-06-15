@@ -1318,15 +1318,17 @@ class LogicalProjectToRayPhysical(Rule):
                 project_plan.append_child(child)
             yield project_plan
         else:
-            parallelism = 2 if len(Context().gpus) > 1 else 1
+            parallelism = 16
+
+            ray_process_env_dict = {"CUDA_VISIBLE_DEVICES": "0,1"}
             ray_parallel_env_conf_dict = [
-                {"CUDA_VISIBLE_DEVICES": str(i)} for i in range(parallelism)
+               ray_process_env_dict for _ in range(parallelism)
             ]
 
             exchange_plan = ExchangePlan(
                 inner_plan=project_plan,
                 parallelism=parallelism,
-                ray_pull_env_conf_dict={"CUDA_VISIBLE_DEVICES": "0"},
+                ray_pull_env_conf_dict=ray_process_env_dict,
                 ray_parallel_env_conf_dict=ray_parallel_env_conf_dict,
             )
             for child in before.children:
