@@ -221,8 +221,11 @@ def remove_directory_contents(dir_path):
 
 
 ##############################
-
 ## TRY TO IMPORT PACKAGES
+
+##############################
+## VISION
+##############################
 
 
 def try_to_import_faiss():
@@ -284,3 +287,13 @@ def try_to_import_ultralytics():
             """Could not import ultralytics python package.
                 Please install it with `pip install ultralytics`."""
         )
+
+
+##############################
+## DOCUMENT
+##############################
+
+
+##############################
+## APPS
+##############################
