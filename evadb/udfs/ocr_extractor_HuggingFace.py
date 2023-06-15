@@ -86,8 +86,8 @@ class OCRExactorHuggingFace(AbstractUDF, GPUCompatible):
     def forward(self, df: pd.DataFrame) -> pd.DataFrame:
         def _forward(row: pd.Series) -> np.ndarray:
             data = row[0]
-            image = cv2.cvtColor(data, cv2.COLOR_BGR2RGB)
-            image = torchvision.transforms.ToPILImage()(image)
+            # image = cv2.cvtColor(data, cv2.COLOR_BGR2GRAY)
+            image = torchvision.transforms.ToPILImage()(data)
             pixel_values = self.processor(image, return_tensors="pt").pixel_values
             device = "cuda" if torch.cuda.is_available() else "cpu"
             outputs = self.model.generate(
