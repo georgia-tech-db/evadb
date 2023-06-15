@@ -314,6 +314,16 @@ def try_to_import_transformers():
         )
 
 
+def try_to_import_facenet_pytorch():
+    try:
+        import facenet_pytorch  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import facenet_pytorch python package.
+                Please install it with `pip install facenet-pytorch`."""
+        )
+
+
 ##############################
 ## APPS
 ##############################
