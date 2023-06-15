@@ -82,6 +82,8 @@ class StatementBinder:
         # TODO: create index currently only works on TableInfo, but will extend later.
         assert node.table_ref.is_table_atom(), "Index can only be created on Tableinfo"
 
+        self.bind(node.col_list[0])
+
         if not node.udf_func:
             # Feature table type needs to be float32 numpy array.
             col_def = node.col_list[0]
@@ -115,7 +117,7 @@ class StatementBinder:
             if (
                 len(node.target_list) == 1
                 and isinstance(node.target_list[0], TupleValueExpression)
-                and node.target_list[0].col_name == "*"
+                and node.target_list[0].name == "*"
             ):
                 node.target_list = extend_star(self._binder_context)
             for expr in node.target_list:
@@ -174,7 +176,7 @@ class StatementBinder:
             idx = 0
             for expr in node.query.target_list:
                 output_objs = (
-                    [(expr.col_name, expr.col_object)]
+                    [(expr.name, expr.col_object)]
                     if expr.etype == ExpressionType.TUPLE_VALUE
                     else zip(expr.projection_columns, expr.output_objs)
                 )
@@ -212,7 +214,7 @@ class StatementBinder:
         idx = 0
         for expr in node.query.target_list:
             output_objs = (
-                [(expr.col_name, expr.col_object)]
+                [(expr.name, expr.col_object)]
                 if expr.etype == ExpressionType.TUPLE_VALUE
                 else zip(expr.projection_columns, expr.output_objs)
             )
@@ -281,14 +283,14 @@ class StatementBinder:
     @bind.register(TupleValueExpression)
     def _bind_tuple_expr(self, node: TupleValueExpression):
         table_alias, col_obj = self._binder_context.get_binded_column(
-            node.col_name, node.table_alias
+            node.name, node.table_alias
         )
         node.table_alias = table_alias
-        if node.col_name == VideoColumnName.audio:
+        if node.name == VideoColumnName.audio:
             self._binder_context.enable_audio_retrieval()
-        if node.col_name == VideoColumnName.data:
+        if node.name == VideoColumnName.data:
             self._binder_context.enable_video_retrieval()
-        node.col_alias = "{}.{}".format(table_alias, node.col_name.lower())
+        node.col_alias = "{}.{}".format(table_alias, node.name.lower())
         node.col_object = col_obj
 
     @bind.register(FunctionExpression)

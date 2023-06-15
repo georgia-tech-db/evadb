@@ -449,9 +449,9 @@ class ParserTests(unittest.TestCase):
         # orderby_clause
         self.assertIsNotNone(select_stmt.orderby_list)
         self.assertEqual(len(select_stmt.orderby_list), 2)
-        self.assertEqual(select_stmt.orderby_list[0][0].col_name, "CLASS")
+        self.assertEqual(select_stmt.orderby_list[0][0].name, "CLASS")
         self.assertEqual(select_stmt.orderby_list[0][1], ParserOrderBySortType.ASC)
-        self.assertEqual(select_stmt.orderby_list[1][0].col_name, "REDNESS")
+        self.assertEqual(select_stmt.orderby_list[1][0].name, "REDNESS")
         self.assertEqual(select_stmt.orderby_list[1][1], ParserOrderBySortType.DESC)
 
     def test_select_statement_limit_class(self):
@@ -488,9 +488,9 @@ class ParserTests(unittest.TestCase):
         # orderby_clause
         self.assertIsNotNone(select_stmt.orderby_list)
         self.assertEqual(len(select_stmt.orderby_list), 2)
-        self.assertEqual(select_stmt.orderby_list[0][0].col_name, "CLASS")
+        self.assertEqual(select_stmt.orderby_list[0][0].name, "CLASS")
         self.assertEqual(select_stmt.orderby_list[0][1], ParserOrderBySortType.ASC)
-        self.assertEqual(select_stmt.orderby_list[1][0].col_name, "REDNESS")
+        self.assertEqual(select_stmt.orderby_list[1][0].name, "REDNESS")
         self.assertEqual(select_stmt.orderby_list[1][1], ParserOrderBySortType.DESC)
 
         # limit_count
@@ -683,7 +683,7 @@ class ParserTests(unittest.TestCase):
         parsed_sub_query = parser.parse(sub_query)[0]
         actual_stmt = parser.parse(nested_query)[0]
         self.assertEqual(actual_stmt.stmt_type, StatementType.SELECT)
-        self.assertEqual(actual_stmt.target_list[0].col_name, "ID")
+        self.assertEqual(actual_stmt.target_list[0].name, "ID")
         self.assertEqual(
             actual_stmt.from_table, TableRef(parsed_sub_query, alias=Alias("T"))
         )

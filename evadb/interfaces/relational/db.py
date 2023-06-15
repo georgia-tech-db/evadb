@@ -161,7 +161,7 @@ class EvaDBCursor(object):
         )
         # SELECT * FROM table
         select_stmt = SelectStatement(
-            target_list=[TupleValueExpression(col_name="*")], from_table=table
+            target_list=[TupleValueExpression(name="*")], from_table=table
         )
         try_binding(self._evadb.catalog, select_stmt)
         return EvaDBQuery(self._evadb, select_stmt, alias=Alias(table_name.lower()))

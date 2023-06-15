@@ -28,14 +28,14 @@ from .abstract_expression import (
 class TupleValueExpression(AbstractExpression):
     def __init__(
         self,
-        col_name: str = None,
+        name: str = None,
         table_alias: str = None,
         col_idx: int = -1,
         col_object: Union[ColumnCatalogEntry, UdfIOCatalogEntry] = None,
         col_alias=None,
     ):
         super().__init__(ExpressionType.TUPLE_VALUE, rtype=ExpressionReturnType.INVALID)
-        self._col_name = col_name
+        self._name = name
         self._table_alias = table_alias
         self._table_id = None
         self._col_idx = col_idx
@@ -55,8 +55,8 @@ class TupleValueExpression(AbstractExpression):
         self._table_alias = table_alias
 
     @property
-    def col_name(self) -> str:
-        return self._col_name
+    def name(self) -> str:
+        return self._name
 
     @property
     def col_object(self) -> Union[ColumnCatalogEntry, UdfIOCatalogEntry]:
@@ -106,7 +106,7 @@ class TupleValueExpression(AbstractExpression):
             is_subtree_equal
             and self.table_alias == other.table_alias
             and self.table_id == other.table_id
-            and self.col_name == other.col_name
+            and self.name == other.name
             and self.col_alias == other.col_alias
             and self.col_object == other.col_object
             and self._col_idx == other._col_idx
@@ -116,8 +116,8 @@ class TupleValueExpression(AbstractExpression):
         expr_str = ""
         if self.table_alias:
             expr_str += f"{str(self.table_alias)}."
-        if self.col_name:
-            expr_str += f"{str(self.col_name)}"
+        if self.name:
+            expr_str += f"{str(self.name)}"
         if self.col_alias:
             expr_str += f" AS {str(self.col_alias)}"
         expr_str += ""
@@ -129,7 +129,7 @@ class TupleValueExpression(AbstractExpression):
                 super().__hash__(),
                 self.table_alias,
                 self.table_id,
-                self.col_name,
+                self.name,
                 self.col_alias,
                 self.col_object,
                 self._col_idx,

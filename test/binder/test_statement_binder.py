@@ -33,7 +33,7 @@ class StatementBinderTests(unittest.TestCase):
             mock.return_value = ["table_alias", "col_obj"]
             binder = StatementBinder(StatementBinderContext(MagicMock()))
             tve = MagicMock()
-            tve.col_name = "col_name"
+            tve.name = "col_name"
             binder._bind_tuple_expr(tve)
             col_alias = "{}.{}".format("table_alias", "col_name")
             mock.assert_called_once()
@@ -124,8 +124,8 @@ class StatementBinderTests(unittest.TestCase):
             mat_statement = MagicMock()
             mat_statement.col_list = [ColumnDefinition("id", None, None, None)]
             mat_statement.query.target_list = [
-                TupleValueExpression(col_name="id"),
-                TupleValueExpression(col_name="label"),
+                TupleValueExpression(name="id"),
+                TupleValueExpression(name="label"),
             ]
             with self.assertRaises(
                 Exception, msg="Projected columns mismatch, expected 1 found 2."

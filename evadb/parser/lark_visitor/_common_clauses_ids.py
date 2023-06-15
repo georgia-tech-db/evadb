@@ -42,7 +42,7 @@ class CommonClauses:
             dotted_id = self.visit(tree.children[1])
             return TupleValueExpression(table_alias=uid, col_name=dotted_id)
         else:
-            return TupleValueExpression(col_name=uid)
+            return TupleValueExpression(name=uid)
 
     def dotted_id(self, tree):
         dotted_id = str(tree.children[0])
