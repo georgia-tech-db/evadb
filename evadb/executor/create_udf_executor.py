@@ -27,7 +27,10 @@ from evadb.plan_nodes.create_udf_plan import CreateUDFPlan
 from evadb.third_party.huggingface.create import gen_hf_io_catalog_entries
 from evadb.udfs.decorators.utils import load_io_from_udf_decorators
 from evadb.utils.errors import UDFIODefinitionError
-from evadb.utils.generic_utils import load_udf_class_from_file
+from evadb.utils.generic_utils import (
+    load_udf_class_from_file,
+    try_to_import_ultralytics,
+)
 from evadb.utils.logging_manager import logger
 
 
@@ -56,6 +59,7 @@ class CreateUDFExecutor(AbstractExecutor):
 
     def handle_ultralytics_udf(self):
         """Handle Ultralytics UDFs"""
+        try_to_import_ultralytics()
 
         impl_path = (
             Path(f"{self.udf_dir}/yolo_object_detector.py").absolute().as_posix()

@@ -259,13 +259,13 @@ def try_to_import_torch_and_torchvision():
         )
 
 
-def try_to_import_cv():
+def try_to_import_cv2():
     try:
-        import cv  # noqa: F401
+        import cv2  # noqa: F401
     except ImportError:
         raise ValueError(
-            """Could not import cv python package.
-                Please install it with `pip install opencv-contrib-python-headless`."""
+            """Could not import cv2 python package.
+                Please install it with `pip install opencv-python`."""
         )
 
 
@@ -286,6 +286,16 @@ def try_to_import_ultralytics():
         raise ValueError(
             """Could not import ultralytics python package.
                 Please install it with `pip install ultralytics`."""
+        )
+
+
+def try_to_import_norfair():
+    try:
+        import norfair  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import norfair python package.
+                Please install it with `pip install norfair`."""
         )
 
 

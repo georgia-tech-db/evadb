@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import asyncio
 from typing import Iterator, Optional
 
 from evadb.binder.statement_binder import StatementBinder
@@ -40,7 +39,7 @@ def execute_query(
         stmt = Parser().parse(query)[0]
         StatementBinder(StatementBinderContext(evadb.catalog)).bind(stmt)
         l_plan = StatementToPlanConverter().visit(stmt)
-        p_plan = asyncio.run(plan_generator.build(l_plan))
+        p_plan = plan_generator.build(l_plan)
         output = PlanExecutor(evadb, p_plan).execute_plan()
 
     query_compile_time.log_elapsed_time("Query Compile Time")

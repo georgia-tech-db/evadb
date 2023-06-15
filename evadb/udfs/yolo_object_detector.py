@@ -20,14 +20,7 @@ from evadb.udfs.abstract.abstract_udf import AbstractUDF
 from evadb.udfs.decorators.decorators import forward, setup
 from evadb.udfs.decorators.io_descriptors.data_types import PandasDataframe
 from evadb.udfs.gpu_compatible import GPUCompatible
-
-try:
-    from ultralytics import YOLO
-except ImportError as e:
-    raise ImportError(
-        f"Failed to import with error {e}, \
-        please try `pip install ultralytics`"
-    )
+from evadb.utils.generic_utils import try_to_import_ultralytics
 
 
 class Yolo(AbstractUDF, GPUCompatible):
@@ -42,6 +35,9 @@ class Yolo(AbstractUDF, GPUCompatible):
 
     @setup(cacheable=True, udf_type="object_detection", batchable=True)
     def setup(self, model: str, threshold=0.3):
+        try_to_import_ultralytics()
+        from ultralytics import YOLO
+
         self.threshold = threshold
         self.model = YOLO(model)
         self.device = "cpu"

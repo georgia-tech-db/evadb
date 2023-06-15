@@ -60,6 +60,9 @@ vision_libs = [
     "Pillow>=8.4.0",
     "eva-decord>=0.6.1",    # VIDEO PROCESSING
     "ultralytics>=8.0.93",  # OBJECT DETECTION
+    "timm>=0.6.13",         # HUGGINGFACE VISION TASKS
+    "norfair>=2.2.0",       # OBJECT TRACKING
+    "kornia",               # SIFT FEATURES    
 ]
 
 document_libs = [
@@ -67,20 +70,17 @@ document_libs = [
     "faiss-cpu",
     "pymupdf",
     "pdfminer.six",
-    "sentence-transformers"
+    "sentence-transformers",
+    "openai>=0.27.4",          # CHATGPT
+    "gpt4all",                 # PRIVATE GPT
 ]
 
 udf_libs = [
     "facenet-pytorch>=2.5.2",  # FACE DETECTION
     "thefuzz",                 # FUZZY STRING MATCHING
-    "openai>=0.27.4",          # CHATGPT
-    "timm>=0.6.13",            # HUGGINGFACE VISION TASKS
-    "norfair>=2.2.0",          # OBJECT TRACKING
-    "gpt4all",                 # PRIVATE GPT
     "pytube",                  # YOUTUBE QA APP
     "youtube-transcript-api",  # YOUTUBE QA APP
     "qdrant-client>=1.1.7",    # QDRANT VECTOR STORE
-    "kornia",                  # SIFT FEATURES
     "boto3",                   # AWS
 ]
 
@@ -101,6 +101,7 @@ dev_libs = [
     "pytest-random-order>=1.0.4",
     "pytest-virtualenv",
     "pytest-asyncio",
+    "mock",
     "pytest-xdist",
     "coveralls>=3.0.1",
     "flake8>=3.9.1",

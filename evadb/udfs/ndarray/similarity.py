@@ -12,10 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import faiss
 import pandas as pd
 
 from evadb.udfs.abstract.abstract_udf import AbstractUDF
+from evadb.utils.generic_utils import try_to_import_faiss
 
 
 class Similarity(AbstractUDF):
@@ -23,6 +23,7 @@ class Similarity(AbstractUDF):
         return numpy_distance[0][0]
 
     def setup(self):
+        try_to_import_faiss()
         pass
 
     @property
@@ -46,6 +47,8 @@ class Similarity(AbstractUDF):
             # Transform to 2D.
             open_feat_np = open_feat_np.reshape(1, -1)
             base_feat_np = base_feat_np.reshape(1, -1)
+            import faiss
+
             distance_np = faiss.pairwise_distances(open_feat_np, base_feat_np)
 
             return self._get_distance(distance_np)
