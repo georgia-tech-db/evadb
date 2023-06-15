@@ -123,6 +123,7 @@ class ImageColumnName(EvaDBEnum):
 
 class DocumentColumnName(EvaDBEnum):
     name  # noqa: F821
+    chunk_id  # noqa: F821
     data  # noqa: F821
     metadata  # noqa: F821
 
