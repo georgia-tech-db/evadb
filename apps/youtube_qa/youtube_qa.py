@@ -223,8 +223,6 @@ def cleanup():
     """Removes any temporary file / directory created by EvaDB."""
     if os.path.exists("online_video.mp4"):
         os.remove("online_video.mp4")
-    if os.path.exists("transcript.csv"):
-        os.remove("transcript.csv")
     if os.path.exists("evadb_data"):
         shutil.rmtree("evadb_data")
 
@@ -249,7 +247,7 @@ if __name__ == "__main__":
         if transcript is not None:
             grouped_transcript = group_transcript(transcript)
             df = pd.DataFrame(grouped_transcript)
-            df.to_csv("transcript.csv")
+            df.to_csv("./evadb_data/tmp/transcript.csv")
         else:
             # create speech recognizer UDF from HuggingFace
             args = {
@@ -275,14 +273,14 @@ if __name__ == "__main__":
             )
             partitioned_transcript = partition_transcript(raw_transcript_string)
             df = pd.DataFrame(partitioned_transcript)
-            df.to_csv("transcript.csv")
+            df.to_csv("./evadb_data/tmp/transcript.csv")
 
         # load chunked transcript into table
         cursor.drop_table("Transcript", if_exists=True).execute()
         cursor.query(
             """CREATE TABLE IF NOT EXISTS Transcript (text TEXT(50));"""
         ).execute()
-        cursor.load("transcript.csv", "Transcript", "csv").execute()
+        cursor.load("./evadb_data/tmp/transcript.csv", "Transcript", "csv").execute()
 
         print("===========================================")
         print("🪄 Ask anything about the video!")
@@ -293,7 +291,7 @@ if __name__ == "__main__":
                 ready = False
             else:
                 # Generate response with chatgpt udf
-                print("⏳ Generating response...")
+                print("⏳ Generating response (may take a while)...")
                 generate_chatgpt_response_rel = cursor.table("Transcript").select(
                     f"ChatGPT('{question} in 100 words', text)"
                 )
@@ -303,8 +301,8 @@ if __name__ == "__main__":
                 response = ""
                 for r in responses:
                     response += f"{r} \n"
-                print(f"✅ Answer (generated in {time.time() - start} seconds):")
                 print(response, "\n")
+                print(f"✅ Answer (generated in {time.time() - start} seconds):")
 
         cleanup()
         print("✅ Session ended.")
