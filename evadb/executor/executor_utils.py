@@ -15,7 +15,7 @@
 import glob
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, Generator, List
+from typing import TYPE_CHECKING, Callable, Generator, List
 
 import cv2
 
@@ -36,38 +36,46 @@ class ExecutorError(Exception):
     pass
 
 
+def _upsert_stats_related_to_function_expression(
+    expr: AbstractExpression, catalog: Callable
+):
+    # try persisting stats for function expression
+    # avoiding raising error if it fails
+    try:
+        for func_expr in expr.find_all(FunctionExpression):
+            if func_expr.udf_obj and func_expr._stats:
+                udf_id = func_expr.udf_obj.row_id
+                catalog().upsert_udf_cost_catalog_entry(
+                    udf_id, func_expr.udf_obj.name, func_expr._stats.prev_cost
+                )
+    except Exception as e:
+        logger.warning(f"{str(e)} while upserting cost for {func_expr.name}")
+
+
 def apply_project(
-    batch: Batch, project_list: List[AbstractExpression], catalog: "CatalogManager"
+    batch: Batch, project_list: List[AbstractExpression], catalog: Callable
 ):
     if not batch.empty() and project_list:
         batches = [expr.evaluate(batch) for expr in project_list]
         batch = Batch.merge_column_wise(batches)
 
-        # persist stats of function expression
+        # try persisting stats for function expression
         for expr in project_list:
-            for func_expr in expr.find_all(FunctionExpression):
-                if func_expr.udf_obj and func_expr._stats:
-                    udf_id = func_expr.udf_obj.row_id
-                    catalog.upsert_udf_cost_catalog_entry(
-                        udf_id, func_expr.udf_obj.name, func_expr._stats.prev_cost
-                    )
+            _upsert_stats_related_to_function_expression(expr, catalog)
+
     return batch
 
 
 def apply_predicate(
-    batch: Batch, predicate: AbstractExpression, catalog: "CatalogManager"
+    batch: Batch, predicate: AbstractExpression, catalog: Callable
 ) -> Batch:
     if not batch.empty() and predicate is not None:
         outcomes = predicate.evaluate(batch)
         batch.drop_zero(outcomes)
 
         # persist stats of function expression
-        for func_expr in predicate.find_all(FunctionExpression):
-            if func_expr.udf_obj and func_expr._stats:
-                udf_id = func_expr.udf_obj.row_id
-                catalog.upsert_udf_cost_catalog_entry(
-                    udf_id, func_expr.udf_obj.name, func_expr._stats.prev_cost
-                )
+        _upsert_stats_related_to_function_expression(predicate, catalog)
+
     return batch
 
 
