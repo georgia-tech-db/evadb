@@ -233,8 +233,18 @@ def try_to_import_faiss():
         import faiss  # noqa: F401
     except ImportError:
         raise ValueError(
-            """Could not import pillow python package.
+            """Could not import faiss python package.
                 Please install it with `pip install faiss-cpu` or `pip install faiss-gpu`."""
+        )
+
+
+def try_to_import_qdrant_client():
+    try:
+        import qdrant_client  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import qdrant_client python package.
+                Please install it with `pip install qdrant_client`."""
         )
 
 
@@ -248,14 +258,23 @@ def try_to_import_pillow():
         )
 
 
-def try_to_import_torch_and_torchvision():
+def try_to_import_torch():
     try:
         import torch  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import torch python package.
+                Please install them with `pip install torch`."""
+        )
+
+
+def try_to_import_torchvision():
+    try:
         import torchvision  # noqa: F401
     except ImportError:
         raise ValueError(
-            """Could not import torch or torchvision python packages.
-                Please install them with `pip install torch torchvision`."""
+            """Could not import torchvision python package.
+                Please install them with `pip install torchvision`."""
         )
 
 
@@ -266,6 +285,16 @@ def try_to_import_cv2():
         raise ValueError(
             """Could not import cv2 python package.
                 Please install it with `pip install opencv-python`."""
+        )
+
+
+def try_to_import_kornia():
+    try:
+        import kornia  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import kornia python package.
+                Please install it with `pip install kornia`."""
         )
 
 

@@ -12,22 +12,27 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import cv2
-import kornia
 import numpy as np
 import pandas as pd
-import torch
 
 from evadb.catalog.catalog_type import NdArrayType
 from evadb.udfs.abstract.abstract_udf import AbstractUDF
 from evadb.udfs.decorators.decorators import forward, setup
 from evadb.udfs.decorators.io_descriptors.data_types import PandasDataframe
 from evadb.udfs.gpu_compatible import GPUCompatible
+from evadb.utils.generic_utils import (
+    try_to_import_cv2,
+    try_to_import_kornia,
+    try_to_import_torch,
+)
 
 
 class SiftFeatureExtractor(AbstractUDF, GPUCompatible):
     @setup(cacheable=False, udf_type="FeatureExtraction", batchable=False)
     def setup(self):
+        try_to_import_kornia()
+        import kornia
+
         self.model = kornia.feature.SIFTDescriptor(100)
 
     def to_device(self, device: str) -> GPUCompatible:
@@ -58,6 +63,9 @@ class SiftFeatureExtractor(AbstractUDF, GPUCompatible):
         def _forward(row: pd.Series) -> np.ndarray:
             # Prepare gray image to batched gray image within size.
             rgb_img = row[0]
+            try_to_import_cv2()
+            import cv2
+
             gray_img = cv2.cvtColor(rgb_img, cv2.COLOR_RGB2GRAY)
             resized_gray_img = cv2.resize(
                 gray_img, (100, 100), interpolation=cv2.INTER_AREA
@@ -66,6 +74,9 @@ class SiftFeatureExtractor(AbstractUDF, GPUCompatible):
             batch_resized_gray_img = np.expand_dims(resized_gray_img, axis=0)
             batch_resized_gray_img = np.expand_dims(batch_resized_gray_img, axis=0)
             batch_resized_gray_img = batch_resized_gray_img.astype(np.float32)
+
+            try_to_import_torch()
+            import torch
 
             # Sift inference.
             with torch.no_grad():

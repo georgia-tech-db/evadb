@@ -25,11 +25,13 @@ from evadb.udfs.abstract.abstract_udf import (
 from evadb.udfs.gpu_compatible import GPUCompatible
 from evadb.utils.generic_utils import (
     try_to_import_pillow,
-    try_to_import_torch_and_torchvision,
+    try_to_import_torch,
+    try_to_import_torchvision,
 )
 
 try_to_import_pillow()
-try_to_import_torch_and_torchvision()
+try_to_import_torch()
+try_to_import_torchvision()
 
 from PIL import Image
 from torch import nn

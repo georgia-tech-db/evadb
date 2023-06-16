@@ -17,7 +17,7 @@ from collections import OrderedDict
 import pandas as pd
 
 from evadb.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
-from evadb.utils.generic_utils import try_to_import_torch_and_torchvision
+from evadb.utils.generic_utils import try_to_import_torch, try_to_import_torchvision
 
 
 class MnistImageClassifier(PytorchAbstractClassifierUDF):
@@ -26,7 +26,8 @@ class MnistImageClassifier(PytorchAbstractClassifierUDF):
         return "MnistImageClassifier"
 
     def setup(self):
-        try_to_import_torch_and_torchvision()
+        try_to_import_torch()
+        try_to_import_torchvision()
         import torch
         import torch.nn as nn
 

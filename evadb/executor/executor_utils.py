@@ -17,8 +17,6 @@ import os
 from pathlib import Path
 from typing import TYPE_CHECKING, Generator, List
 
-import cv2
-
 if TYPE_CHECKING:
     from evadb.catalog.catalog_manager import CatalogManager
 
@@ -29,6 +27,7 @@ from evadb.models.storage.batch import Batch
 from evadb.parser.table_ref import TableInfo
 from evadb.parser.types import FileFormatType
 from evadb.readers.document.registry import SUPPORTED_TYPES
+from evadb.utils.generic_utils import try_to_import_cv2
 from evadb.utils.logging_manager import logger
 
 
@@ -93,6 +92,9 @@ def handle_if_not_exists(
 
 def validate_image(image_path: Path) -> bool:
     try:
+        try_to_import_cv2()
+        import cv2
+
         data = cv2.imread(str(image_path))
         return data is not None
     except Exception as e:
@@ -108,6 +110,9 @@ def iter_path_regex(path_regex: Path) -> Generator[str, None, None]:
 
 def validate_video(video_path: Path) -> bool:
     try:
+        try_to_import_cv2()
+        import cv2
+
         vid = cv2.VideoCapture(str(video_path))
         if not vid.isOpened():
             return False

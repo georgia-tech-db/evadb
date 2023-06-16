@@ -99,7 +99,6 @@ dev_libs = [
     # TESTING PACKAGES
     "pytest>=6.1.2",
     "pytest-cov>=2.11.1",
-    "pytest-random-order>=1.0.4",
     "pytest-virtualenv",
     "pytest-asyncio",
     "mock",

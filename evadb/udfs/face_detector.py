@@ -22,7 +22,8 @@ from evadb.udfs.abstract.abstract_udf import AbstractClassifierUDF
 from evadb.udfs.gpu_compatible import GPUCompatible
 from evadb.utils.generic_utils import (
     try_to_import_facenet_pytorch,
-    try_to_import_torch_and_torchvision,
+    try_to_import_torch,
+    try_to_import_torchvision,
 )
 from evadb.utils.logging_manager import logger
 
@@ -35,6 +36,8 @@ class FaceDetector(AbstractClassifierUDF, GPUCompatible):
 
     def setup(self, threshold=0.85):
         self.threshold = threshold
+        try_to_import_torch()
+        try_to_import_torchvision()
         try_to_import_facenet_pytorch()
         from facenet_pytorch import MTCNN
 
@@ -46,10 +49,8 @@ class FaceDetector(AbstractClassifierUDF, GPUCompatible):
 
     def to_device(self, device: str):
         try_to_import_facenet_pytorch()
-        from facenet_pytorch import MTCNN
-
-        try_to_import_torch_and_torchvision()
         import torch
+        from facenet_pytorch import MTCNN
 
         gpu = "cuda:{}".format(device)
         self.model = MTCNN(device=torch.device(gpu))

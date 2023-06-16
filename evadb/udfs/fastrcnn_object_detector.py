@@ -24,7 +24,7 @@ from evadb.udfs.decorators.io_descriptors.data_types import (
     PandasDataframe,
     PyTorchTensor,
 )
-from evadb.utils.generic_utils import try_to_import_torch_and_torchvision
+from evadb.utils.generic_utils import try_to_import_torch, try_to_import_torchvision
 
 
 class FastRCNNObjectDetector(PytorchAbstractClassifierUDF):
@@ -40,7 +40,8 @@ class FastRCNNObjectDetector(PytorchAbstractClassifierUDF):
 
     @setup(cacheable=True, udf_type="object_detection", batchable=True)
     def setup(self, threshold=0.85):
-        try_to_import_torch_and_torchvision()
+        try_to_import_torch()
+        try_to_import_torchvision()
         import torchvision
 
         self.threshold = threshold
