@@ -95,7 +95,7 @@ class StatementBinderContext:
                 for obj in expr.output_objs:
                     col_alias_map[obj.name] = obj
             elif isinstance(expr, TupleValueExpression):
-                col_alias_map[expr.col_name] = expr.col_object
+                col_alias_map[expr.name] = expr.col_object
             else:
                 continue
 

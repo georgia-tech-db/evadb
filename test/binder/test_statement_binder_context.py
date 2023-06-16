@@ -57,15 +57,21 @@ class StatementBinderTests(unittest.TestCase):
 
     def test_add_derived_table_alias(self):
         objs = [MagicMock(), MagicMock()]
+
+        attributes = {"name": "A", "col_object": "A_obj"}
+
+        mock = MagicMock(spec=TupleValueExpression)
+        for attr, value in attributes.items():
+            setattr(mock, attr, value)
+
         exprs = [
-            MagicMock(spec=TupleValueExpression, col_name="A", col_object="A_obj"),
+            mock,
             MagicMock(spec=FunctionExpression, output_objs=objs),
         ]
         ctx = StatementBinderContext(MagicMock())
 
         mock_check = ctx._check_duplicate_alias = MagicMock()
         ctx.add_derived_table_alias("alias", exprs)
-
         mock_check.assert_called_with("alias")
         col_map = {"A": "A_obj", objs[0].name: objs[0], objs[1].name: objs[1]}
         self.assertEqual(ctx._derived_table_alias_map["alias"], col_map)
