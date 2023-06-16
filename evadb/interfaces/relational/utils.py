@@ -67,7 +67,7 @@ def string_to_lateral_join(expr: str, alias: str):
 
 
 def create_star_expression():
-    return [TupleValueExpression(col_name="*")]
+    return [TupleValueExpression(name="*")]
 
 
 def create_limit_expression(num: int):

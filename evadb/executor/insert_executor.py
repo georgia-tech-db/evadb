@@ -44,7 +44,7 @@ class InsertExecutor(AbstractExecutor):
 
         values_to_insert = [val_node.value for val_node in self.node.value_list]
         tuple_to_insert = tuple(values_to_insert)
-        columns_to_insert = [col_node.col_name for col_node in self.node.column_list]
+        columns_to_insert = [col_node.name for col_node in self.node.column_list]
 
         # Adding all values to Batch for insert
         dataframe = pd.DataFrame([tuple_to_insert], columns=columns_to_insert)

@@ -251,9 +251,7 @@ class CreateTable:
                     query = self.visit(child)
 
         # When uid_list is empty, the column information is inferred from the subquery in the binder.
-        col_list = [
-            ColumnDefinition(uid.col_name, None, None, None) for uid in uid_list
-        ]
+        col_list = [ColumnDefinition(uid.name, None, None, None) for uid in uid_list]
         return CreateMaterializedViewStatement(
             view_info, col_list, if_not_exists, query
         )

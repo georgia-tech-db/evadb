@@ -218,7 +218,7 @@ def optimize_cache_key(context: "OptimizerContext", expr: FunctionExpression):
                 new_obj = catalog.get_column_catalog_entry(table_obj, col.name)
                 new_keys.append(
                     TupleValueExpression(
-                        col_name=col.name,
+                        name=col.name,
                         table_alias=child.table_alias,
                         col_object=new_obj,
                         col_alias=f"{child.table_alias}.{col.name}",

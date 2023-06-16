@@ -168,7 +168,7 @@ class CreateIndexTest(unittest.TestCase):
         # Cleanup.
         self.evadb.catalog().drop_index_catalog_entry("testCreateIndexName")
 
-    def test_aashould_create_index_with_udf_on_doc_table(self):
+    def test_should_create_index_with_udf_on_doc_table(self):
         execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS MYPDFs;")
         pdf_path1 = f"{EvaDB_ROOT_DIR}/data/documents/pdf_sample1.pdf"
         pdf_path2 = f"{EvaDB_ROOT_DIR}/data/documents/one_page.pdf"

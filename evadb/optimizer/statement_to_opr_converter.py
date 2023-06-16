@@ -368,7 +368,7 @@ class StatementToPlanConverter:
             ), f"Invalid Primary Column {col.name} for table {catalog_entry.name}"
             primary_exprs.append(
                 TupleValueExpression(
-                    col_name=col.name,
+                    name=col.name,
                     table_alias=table_ref.alias,
                     col_object=col_obj,
                     col_alias=f"{table_ref.alias}.{col.name}",

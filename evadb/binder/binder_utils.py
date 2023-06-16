@@ -89,7 +89,7 @@ def extend_star(
 
     target_list = list(
         [
-            TupleValueExpression(col_name=col_name, table_alias=alias)
+            TupleValueExpression(name=col_name, table_alias=alias)
             for alias, col_name in col_objs
         ]
     )
@@ -190,20 +190,18 @@ def handle_bind_extract_object_function(
     # 2. Construct the detector
     # convert detector to FunctionExpression before binding
     # eg. YoloV5 -> YoloV5(data)
-    detector = FunctionExpression(None, node.children[1].col_name)
+    detector = FunctionExpression(None, node.children[1].name)
     detector.append_child(video_data.copy())
     binder_context.bind(detector)
 
     # 3. Construct the tracker
     # convert tracker to FunctionExpression before binding
     # eg. ByteTracker -> ByteTracker(id, data, labels, bboxes, scores)
-    tracker = FunctionExpression(None, node.children[2].col_name)
+    tracker = FunctionExpression(None, node.children[2].name)
     # create the video id expression
     columns = get_video_table_column_definitions()
     tracker.append_child(
-        TupleValueExpression(
-            col_name=columns[1].name, table_alias=video_data.table_alias
-        )
+        TupleValueExpression(name=columns[1].name, table_alias=video_data.table_alias)
     )
     tracker.append_child(video_data.copy())
     binder_context.bind(tracker)

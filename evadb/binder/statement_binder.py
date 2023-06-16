@@ -115,7 +115,7 @@ class StatementBinder:
             if (
                 len(node.target_list) == 1
                 and isinstance(node.target_list[0], TupleValueExpression)
-                and node.target_list[0].col_name == "*"
+                and node.target_list[0].name == "*"
             ):
                 node.target_list = extend_star(self._binder_context)
             for expr in node.target_list:
@@ -174,7 +174,7 @@ class StatementBinder:
             idx = 0
             for expr in node.query.target_list:
                 output_objs = (
-                    [(expr.col_name, expr.col_object)]
+                    [(expr.name, expr.col_object)]
                     if expr.etype == ExpressionType.TUPLE_VALUE
                     else zip(expr.projection_columns, expr.output_objs)
                 )
@@ -212,7 +212,7 @@ class StatementBinder:
         idx = 0
         for expr in node.query.target_list:
             output_objs = (
-                [(expr.col_name, expr.col_object)]
+                [(expr.name, expr.col_object)]
                 if expr.etype == ExpressionType.TUPLE_VALUE
                 else zip(expr.projection_columns, expr.output_objs)
             )
@@ -266,7 +266,7 @@ class StatementBinder:
             for obj, alias in zip(func_expr.output_objs, func_expr.alias.col_names):
                 col_alias = "{}.{}".format(func_expr.alias.alias_name, alias)
                 alias_obj = TupleValueExpression(
-                    col_name=alias,
+                    name=alias,
                     table_alias=func_expr.alias.alias_name,
                     col_object=obj,
                     col_alias=col_alias,
@@ -281,14 +281,14 @@ class StatementBinder:
     @bind.register(TupleValueExpression)
     def _bind_tuple_expr(self, node: TupleValueExpression):
         table_alias, col_obj = self._binder_context.get_binded_column(
-            node.col_name, node.table_alias
+            node.name, node.table_alias
         )
         node.table_alias = table_alias
-        if node.col_name == VideoColumnName.audio:
+        if node.name == VideoColumnName.audio:
             self._binder_context.enable_audio_retrieval()
-        if node.col_name == VideoColumnName.data:
+        if node.name == VideoColumnName.data:
             self._binder_context.enable_video_retrieval()
-        node.col_alias = "{}.{}".format(table_alias, node.col_name.lower())
+        node.col_alias = "{}.{}".format(table_alias, node.name.lower())
         node.col_object = col_obj
 
     @bind.register(FunctionExpression)
