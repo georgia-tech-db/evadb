@@ -14,9 +14,10 @@
 # limitations under the License.
 import unittest
 from pathlib import Path
+from evadb.configuration.constants import EvaDB_ROOT_DIR
 from test.markers import macos_skip_marker
 from test.util import get_evadb_for_testing, load_udfs_for_testing
-
+from evadb.udfs.udf_bootstrap_queries import Text_feat_udf_query
 import faiss
 import numpy as np
 import pandas as pd
@@ -30,10 +31,10 @@ from evadb.storage.storage_engine import StorageEngine
 
 @pytest.mark.notparallel
 class CreateIndexTest(unittest.TestCase):
-    def _index_save_path(self):
+    def _index_save_path(self, name="testCreateIndexName"):
         return str(
             Path(self.evadb.config.get_value("storage", "index_dir"))
-            / Path("{}_{}.index".format("FAISS", "testCreateIndexName"))
+            / Path("{}_{}.index".format("FAISS", name))
         )
 
     @classmethod
@@ -165,6 +166,42 @@ class CreateIndexTest(unittest.TestCase):
 
         # Cleanup.
         self.evadb.catalog().drop_index_catalog_entry("testCreateIndexName")
+
+    def test_aashould_create_index_with_udf_on_doc_table(self):
+        pdf_path = f"{EvaDB_ROOT_DIR}/data/documents/pdf_sample1.pdf"
+        execute_query_fetch_all(self.evadb, f"LOAD DOCUMENT '{pdf_path}' INTO MyPDFs;")
+        execute_query_fetch_all(self.evadb, Text_feat_udf_query)
+
+        self.evadb.config.update_value("experimental", "ray", False)
+        query = "CREATE INDEX doc_index ON MyPDFs (SentenceFeatureExtractor(data)) USING FAISS;"
+        execute_query_fetch_all(self.evadb, query)
+
+        # Test index udf signature.
+        index_catalog_entry = self.evadb.catalog().get_index_catalog_entry_by_name(
+            "doc_index"
+        )
+        self.assertEqual(index_catalog_entry.type, VectorStoreType.FAISS)
+        self.assertEqual(
+            index_catalog_entry.save_file_path,
+            self._index_save_path("doc_index"),
+        )
+
+        # Test referenced column.
+        input_table_entry = self.evadb.catalog().get_table_catalog_entry("doc_index")
+        input_column = [col for col in input_table_entry.columns if col.name == "data"][
+            0
+        ]
+        self.assertEqual(index_catalog_entry.feat_column_id, input_column.row_id)
+        self.assertEqual(index_catalog_entry.feat_column, input_column)
+
+        # Test on disk index.
+        # index = faiss.read_index(index_catalog_entry.save_file_path)
+        # distance, row_id = index.search(np.array([[0, 0, 0]]).astype(np.float32), 1)
+        # self.assertEqual(distance[0][0], 0)
+        # self.assertEqual(row_id[0][0], 1)
+
+        # Cleanup.
+        self.evadb.catalog().drop_index_catalog_entry("doc_index")
 
 
 if __name__ == "__main__":

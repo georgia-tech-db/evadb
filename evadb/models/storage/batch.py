@@ -341,14 +341,19 @@ class Batch:
         """
         Creates Batch by combining two batches using some arithmetic expression.
         """
+        assert (
+            len(first.columns) == 1 and len(second.columns) == 1
+        ), "Arithmatic operations only supported on Batch with one column"
+        lvalues = first._frames.to_numpy()
+        rvalues = second._frames.to_numpy()
         if expression == ExpressionType.ARITHMETIC_ADD:
-            return Batch(pd.DataFrame(first._frames + second._frames))
+            return Batch(pd.DataFrame(lvalues + rvalues))
         elif expression == ExpressionType.ARITHMETIC_SUBTRACT:
-            return Batch(pd.DataFrame(first._frames - second._frames))
+            return Batch(pd.DataFrame(lvalues - rvalues))
         elif expression == ExpressionType.ARITHMETIC_MULTIPLY:
-            return Batch(pd.DataFrame(first._frames * second._frames))
+            return Batch(pd.DataFrame(lvalues * rvalues))
         elif expression == ExpressionType.ARITHMETIC_DIVIDE:
-            return Batch(pd.DataFrame(first._frames / second._frames))
+            return Batch(pd.DataFrame(lvalues / rvalues))
 
     def reassign_indices_to_hash(self, indices) -> None:
         """
