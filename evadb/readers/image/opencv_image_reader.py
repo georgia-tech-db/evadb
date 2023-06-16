@@ -24,7 +24,8 @@ class CVImageReader(AbstractReader):
         super().__init__(*args, **kwargs)
 
     def _read(self) -> Iterator[Dict]:
-        im_bgr = cv2.imread(str(self.file_url))
+        cap = cv2.VideoCapture(str(self.file_url))
+        im_bgr = cv2.imread(str(self.file_url),1 )
         im_rgb = cv2.cvtColor(im_bgr, cv2.COLOR_BGR2RGB)
         assert im_rgb is not None, f"Failed to read image file {self.file_url}"
         yield {"data": im_rgb}
