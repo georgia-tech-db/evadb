@@ -196,6 +196,7 @@ class EvaDBQuery:
         try_binding(self._evadb.catalog, self._query_node)
 
         return self
+        
 
     def select(self, expr: str) -> "EvaDBQuery":
         """
