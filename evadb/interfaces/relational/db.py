@@ -37,6 +37,9 @@ from evadb.parser.utils import (
     parse_explain,
     parse_show,
     parse_insert,
+    parse_explain,
+    parse_show,
+    parse_insert,
 )
 from evadb.udfs.udf_bootstrap_queries import init_builtin_udfs
 from evadb.utils.logging_manager import logger
