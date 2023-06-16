@@ -23,6 +23,7 @@ from evadb.third_party.vector_stores.types import (
     VectorIndexQueryResult,
     VectorStore,
 )
+from evadb.utils.generic_utils import try_to_import_faiss
 
 _faiss = None
 
@@ -30,14 +31,11 @@ _faiss = None
 def _lazy_load_faiss():
     global _faiss
     if _faiss is None:
-        import_err_msg = "`faiss` package not found, please visit https://github.com/facebookresearch/faiss/wiki/Installing-Faiss for instructions"
-        try:
-            import faiss  # noqa: F401
+        try_to_import_faiss()
+        import faiss
 
-            _faiss = faiss
-        except ImportError:
-            raise ImportError(import_err_msg)
-    return _faiss
+        _faiss = faiss
+        return _faiss
 
 
 required_params = ["index_path"]
