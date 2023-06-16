@@ -46,7 +46,7 @@ class TestOCRHuggingFace(unittest.TestCase):
     def test_ocr_donut_huggingface(self):
         conn = connect()
         cursor = conn.cursor()
-        img_path1 = f"{EvaDB_ROOT_DIR}/data/license/Cars1.png"
+        img_path1 = f"{EvaDB_ROOT_DIR}/data/ocr/Example.jpg"
         cursor.drop_table(table_name="MyImage")
         load_pdf = cursor.load(
             file_regex=img_path1, format="IMAGE", table_name="MyImage"
