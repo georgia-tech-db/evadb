@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,8 +25,8 @@ from test.util import (
     shutdown_ray,
 )
 
-from eva.executor.executor_utils import ExecutorError
-from eva.server.command_handler import execute_query_fetch_all
+from evadb.executor.executor_utils import ExecutorError
+from evadb.server.command_handler import execute_query_fetch_all
 
 
 class ErrorHandlingRayTests(unittest.TestCase):

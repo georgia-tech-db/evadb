@@ -30,7 +30,7 @@ To register an user-defined function, specify the implementation details of the 
     OUTPUT (labels NDARRAY STR(ANYDIM), bboxes NDARRAY FLOAT32(ANYDIM, 4),
             scores NDARRAY FLOAT32(ANYDIM))
     TYPE  Classification
-    IMPL  'eva/udfs/fastrcnn_object_detector.py';
+    IMPL  'evadb/udfs/fastrcnn_object_detector.py';
 
 CREATE MATERIALIZED VIEW
 ----

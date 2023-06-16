@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,25 +30,25 @@ import psutil
 import ray
 from mock import MagicMock
 
-from eva.binder.statement_binder import StatementBinder
-from eva.binder.statement_binder_context import StatementBinderContext
-from eva.catalog.catalog_type import NdArrayType
-from eva.configuration.configuration_manager import ConfigurationManager
-from eva.configuration.constants import EVA_DATABASE_DIR, EVA_INSTALLATION_DIR
-from eva.database import init_eva_db_instance
-from eva.expression.function_expression import FunctionExpression
-from eva.models.storage.batch import Batch
-from eva.optimizer.operators import LogicalFilter, Operator
-from eva.optimizer.plan_generator import PlanGenerator
-from eva.optimizer.statement_to_opr_converter import StatementToPlanConverter
-from eva.parser.parser import Parser
-from eva.plan_nodes.abstract_plan import AbstractPlan
-from eva.server.command_handler import execute_query_fetch_all
-from eva.udfs.abstract.abstract_udf import AbstractClassifierUDF
-from eva.udfs.decorators import decorators
-from eva.udfs.decorators.io_descriptors.data_types import NumpyArray, PandasDataframe
-from eva.udfs.udf_bootstrap_queries import init_builtin_udfs
-from eva.utils.generic_utils import remove_directory_contents
+from evadb.binder.statement_binder import StatementBinder
+from evadb.binder.statement_binder_context import StatementBinderContext
+from evadb.catalog.catalog_type import NdArrayType
+from evadb.configuration.configuration_manager import ConfigurationManager
+from evadb.configuration.constants import EvaDB_DATABASE_DIR, EvaDB_INSTALLATION_DIR
+from evadb.database import init_evadb_instance
+from evadb.expression.function_expression import FunctionExpression
+from evadb.models.storage.batch import Batch
+from evadb.optimizer.operators import LogicalFilter, Operator
+from evadb.optimizer.plan_generator import PlanGenerator
+from evadb.optimizer.statement_to_opr_converter import StatementToPlanConverter
+from evadb.parser.parser import Parser
+from evadb.plan_nodes.abstract_plan import AbstractPlan
+from evadb.server.command_handler import execute_query_fetch_all
+from evadb.udfs.abstract.abstract_udf import AbstractClassifierUDF
+from evadb.udfs.decorators import decorators
+from evadb.udfs.decorators.io_descriptors.data_types import NumpyArray, PandasDataframe
+from evadb.udfs.udf_bootstrap_queries import init_builtin_udfs
+from evadb.utils.generic_utils import remove_directory_contents
 
 NUM_FRAMES = 10
 FRAME_SIZE = (32, 32)
@@ -64,25 +64,25 @@ def suffix_pytest_xdist_worker_id_to_dir(path: str):
 
 
 def get_evadb_for_testing(uri: str = None):
-    db_dir = suffix_pytest_xdist_worker_id_to_dir(EVA_DATABASE_DIR)
+    db_dir = suffix_pytest_xdist_worker_id_to_dir(EvaDB_DATABASE_DIR)
     remove_directory_contents(db_dir)
     gc.collect()
-    return init_eva_db_instance(db_dir, custom_db_uri=uri)
+    return init_evadb_instance(db_dir, custom_db_uri=uri)
 
 
 def get_tmp_dir():
-    db_dir = suffix_pytest_xdist_worker_id_to_dir(EVA_DATABASE_DIR)
+    db_dir = suffix_pytest_xdist_worker_id_to_dir(EvaDB_DATABASE_DIR)
     config = ConfigurationManager(Path(db_dir))
     return config.get_value("storage", "tmp_dir")
 
 
 def s3_dir():
-    db_dir = suffix_pytest_xdist_worker_id_to_dir(EVA_DATABASE_DIR)
+    db_dir = suffix_pytest_xdist_worker_id_to_dir(EvaDB_DATABASE_DIR)
     config = ConfigurationManager(Path(db_dir))
     return config.get_value("storage", "s3_download_dir")
 
 
-EVA_TEST_DATA_DIR = Path(EVA_INSTALLATION_DIR).parent
+EvaDB_TEST_DATA_DIR = Path(EvaDB_INSTALLATION_DIR).parent
 
 
 def is_ray_stage_running():
@@ -90,7 +90,7 @@ def is_ray_stage_running():
 
 
 def shutdown_ray():
-    db_dir = suffix_pytest_xdist_worker_id_to_dir(EVA_DATABASE_DIR)
+    db_dir = suffix_pytest_xdist_worker_id_to_dir(EvaDB_DATABASE_DIR)
     config = ConfigurationManager(Path(db_dir))
     if config.get_value("experimental", "ray"):
         ray.shutdown()
@@ -177,6 +177,21 @@ def get_mock_object(class_type, number_of_args):
         )
     elif number_of_args == 12:
         return class_type(
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+        )
+    elif number_of_args == 13:
+        return class_type(
+            MagicMock(),
             MagicMock(),
             MagicMock(),
             MagicMock(),

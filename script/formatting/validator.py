@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2 EVA
+# Copyright 2 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -38,14 +38,14 @@ VALIDATOR_PATTERNS = [re.compile(patterns) for patterns in [
 ]
 
 CODE_SOURCE_DIR = os.path.abspath(os.path.dirname(__file__))
-EVA_DIR = functools.reduce(os.path.join,
+EvaDB_DIR = functools.reduce(os.path.join,
                            [CODE_SOURCE_DIR, os.path.pardir, os.path.pardir])
 
-EVA_SRC_DIR = os.path.join(EVA_DIR, "eva")
-EVA_TEST_DIR = os.path.join(EVA_DIR, "test")
-EVA_SCRIPT_DIR = os.path.join(EVA_DIR, "script")
+EvaDB_SRC_DIR = os.path.join(EvaDB_DIR, "eva")
+EvaDB_TEST_DIR = os.path.join(EvaDB_DIR, "test")
+EvaDB_SCRIPT_DIR = os.path.join(EvaDB_DIR, "script")
 
-DIRS = [EVA_SRC_DIR, EVA_TEST_DIR]
+DIRS = [EvaDB_SRC_DIR, EvaDB_TEST_DIR]
 
 # ==============================================
 # UTILITY FUNCTION DEFINITIONS
@@ -153,7 +153,7 @@ def validate_directory(directory_list):
 if __name__ == '__main__':
 
     PARSER = argparse.ArgumentParser(
-        description="Perform source code validation on EVA."
+        description="Perform source code validation on EvaDB."
     )
 
     PARSER.add_argument("--files", nargs="*",

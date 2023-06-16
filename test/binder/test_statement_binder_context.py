@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from eva.binder.binder_utils import BinderError
-from eva.binder.statement_binder_context import StatementBinderContext
-from eva.expression.function_expression import FunctionExpression
-from eva.expression.tuple_value_expression import TupleValueExpression
+from evadb.binder.binder_utils import BinderError
+from evadb.binder.statement_binder_context import StatementBinderContext
+from evadb.expression.function_expression import FunctionExpression
+from evadb.expression.tuple_value_expression import TupleValueExpression
 
 
 @pytest.mark.notparallel
@@ -57,15 +57,21 @@ class StatementBinderTests(unittest.TestCase):
 
     def test_add_derived_table_alias(self):
         objs = [MagicMock(), MagicMock()]
+
+        attributes = {"name": "A", "col_object": "A_obj"}
+
+        mock = MagicMock(spec=TupleValueExpression)
+        for attr, value in attributes.items():
+            setattr(mock, attr, value)
+
         exprs = [
-            MagicMock(spec=TupleValueExpression, col_name="A", col_object="A_obj"),
+            mock,
             MagicMock(spec=FunctionExpression, output_objs=objs),
         ]
         ctx = StatementBinderContext(MagicMock())
 
         mock_check = ctx._check_duplicate_alias = MagicMock()
         ctx.add_derived_table_alias("alias", exprs)
-
         mock_check.assert_called_with("alias")
         col_map = {"A": "A_obj", objs[0].name: objs[0], objs[1].name: objs[1]}
         self.assertEqual(ctx._derived_table_alias_map["alias"], col_map)

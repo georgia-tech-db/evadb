@@ -1,0 +1,39 @@
+# coding=utf-8
+# Copyright 2018-2023 EvaDB
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+import pandas as pd
+
+from evadb.database import EvaDBDatabase
+from evadb.executor.abstract_executor import AbstractExecutor
+from evadb.models.storage.batch import Batch
+from evadb.plan_nodes.abstract_plan import AbstractPlan
+from evadb.plan_nodes.explain_plan import ExplainPlan
+
+
+class ExplainExecutor(AbstractExecutor):
+    def __init__(self, db: EvaDBDatabase, node: ExplainPlan):
+        super().__init__(db, node)
+
+    def exec(self, *args, **kwargs):
+        # Traverse optimized physical plan, which is commonly supported.
+        # Logical plan can be also printed by passing explainable_opr
+        # attribute of the node, but is not done for now.
+        plan_str = self._exec(self._node.children[0], 0)
+        yield Batch(pd.DataFrame([plan_str]))
+
+    def _exec(self, node: AbstractPlan, depth: int):
+        cur_str = " " * depth * 4 + "|__ " + str(node.__class__.__name__) + "\n"
+        for child in node.children:
+            cur_str += self._exec(child, depth + 1)
+        return cur_str

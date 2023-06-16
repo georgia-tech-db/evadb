@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
 # limitations under the License.
 import unittest
 from pathlib import Path
+from test.markers import macos_skip_marker
 from test.util import get_evadb_for_testing, load_udfs_for_testing
 
 import faiss
@@ -21,10 +22,10 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from eva.catalog.catalog_type import VectorStoreType
-from eva.models.storage.batch import Batch
-from eva.server.command_handler import execute_query_fetch_all
-from eva.storage.storage_engine import StorageEngine
+from evadb.catalog.catalog_type import VectorStoreType
+from evadb.models.storage.batch import Batch
+from evadb.server.command_handler import execute_query_fetch_all
+from evadb.storage.storage_engine import StorageEngine
 
 
 @pytest.mark.notparallel
@@ -131,6 +132,7 @@ class CreateIndexTest(unittest.TestCase):
         # Cleanup.
         self.evadb.catalog().drop_index_catalog_entry("testCreateIndexName")
 
+    @macos_skip_marker
     def test_should_create_index_with_udf(self):
         query = "CREATE INDEX testCreateIndexName ON testCreateIndexInputTable (DummyFeatureExtractor(input)) USING FAISS;"
         execute_query_fetch_all(self.evadb, query)

@@ -1,4 +1,4 @@
 ,demo.name
-0,test_eva/similarity/data/sad.jpg
-1,test_eva/similarity/data/happy.jpg
-2,test_eva/similarity/data/angry.jpg
+0,test_evadb/similarity/data/sad.jpg
+1,test_evadb/similarity/data/happy.jpg
+2,test_evadb/similarity/data/angry.jpg

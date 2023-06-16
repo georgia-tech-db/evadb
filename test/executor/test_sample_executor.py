@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,10 +19,10 @@ import numpy as np
 import pandas as pd
 from mock import MagicMock
 
-from eva.executor.sample_executor import SampleExecutor
-from eva.expression.constant_value_expression import ConstantValueExpression
-from eva.models.storage.batch import Batch
-from eva.plan_nodes.sample_plan import SamplePlan
+from evadb.executor.sample_executor import SampleExecutor
+from evadb.expression.constant_value_expression import ConstantValueExpression
+from evadb.models.storage.batch import Batch
+from evadb.plan_nodes.sample_plan import SamplePlan
 
 
 class SampleExecutorTest(unittest.TestCase):

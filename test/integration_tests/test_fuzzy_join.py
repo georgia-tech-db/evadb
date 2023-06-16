@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,8 +24,9 @@ from test.util import (
 
 import pytest
 
-from eva.configuration.constants import EVA_ROOT_DIR
-from eva.server.command_handler import execute_query_fetch_all
+from evadb.configuration.constants import EvaDB_ROOT_DIR
+from evadb.server.command_handler import execute_query_fetch_all
+from evadb.udfs.udf_bootstrap_queries import fuzzy_udf_query
 
 
 @pytest.mark.notparallel
@@ -35,7 +36,7 @@ class FuzzyJoinTests(unittest.TestCase):
         self.evadb.catalog().reset()
         self.video_file_path = create_sample_video()
         self.image_files_path = Path(
-            f"{EVA_ROOT_DIR}/test/data/uadetrac/small-data/MVI_20011/*.jpg"
+            f"{EvaDB_ROOT_DIR}/test/data/uadetrac/small-data/MVI_20011/*.jpg"
         )
         self.csv_file_path = create_sample_csv()
 
@@ -72,18 +73,7 @@ class FuzzyJoinTests(unittest.TestCase):
         execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS MyVideoCSV;")
 
     def test_fuzzyjoin(self):
-        EVA_INSTALLATION_DIR = self.evadb.config.get_value(
-            "core", "eva_installation_dir"
-        )
-        fuzzy_udf = """CREATE UDF IF NOT EXISTS FuzzDistance
-                    INPUT (Input_Array1 NDARRAY ANYTYPE, Input_Array2 NDARRAY ANYTYPE)
-                    OUTPUT (distance FLOAT(32, 7))
-                    TYPE NdarrayUDF
-                    IMPL "{}/udfs/{}/fuzzy_join.py";
-        """.format(
-            EVA_INSTALLATION_DIR, "ndarray"
-        )
-        execute_query_fetch_all(self.evadb, fuzzy_udf)
+        execute_query_fetch_all(self.evadb, fuzzy_udf_query)
 
         fuzzy_join_query = """SELECT * FROM MyVideo a JOIN MyVideoCSV b
                       ON FuzzDistance(a.id, b.id) = 100;"""

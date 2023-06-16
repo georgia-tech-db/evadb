@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,14 +22,14 @@ from test.util import (
 
 import pytest
 
-from eva.optimizer.plan_generator import PlanGenerator
-from eva.optimizer.rules.rules import (
+from evadb.optimizer.plan_generator import PlanGenerator
+from evadb.optimizer.rules.rules import (
     EmbedFilterIntoGet,
     LogicalInnerJoinCommutativity,
     XformLateralJoinToLinearFlow,
 )
-from eva.optimizer.rules.rules_manager import RulesManager, disable_rules
-from eva.server.command_handler import execute_query_fetch_all
+from evadb.optimizer.rules.rules_manager import RulesManager, disable_rules
+from evadb.server.command_handler import execute_query_fetch_all
 
 NUM_FRAMES = 10
 

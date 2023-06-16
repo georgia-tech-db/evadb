@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,14 +24,14 @@ from test.util import (
 import numpy as np
 import pytest
 
-from eva.configuration.constants import EVA_ROOT_DIR
-from eva.constants import AUDIORATE, IFRAMES
-from eva.expression.abstract_expression import ExpressionType
-from eva.expression.comparison_expression import ComparisonExpression
-from eva.expression.constant_value_expression import ConstantValueExpression
-from eva.expression.logical_expression import LogicalExpression
-from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.readers.decord_reader import DecordReader
+from evadb.configuration.constants import EvaDB_ROOT_DIR
+from evadb.constants import AUDIORATE, IFRAMES
+from evadb.expression.abstract_expression import ExpressionType
+from evadb.expression.comparison_expression import ComparisonExpression
+from evadb.expression.constant_value_expression import ConstantValueExpression
+from evadb.expression.logical_expression import LogicalExpression
+from evadb.expression.tuple_value_expression import TupleValueExpression
+from evadb.readers.decord_reader import DecordReader
 
 
 @pytest.mark.notparallel
@@ -40,12 +40,12 @@ class DecordLoaderTest(unittest.TestCase):
     def setUpClass(self):
         self.video_file_url = create_sample_video()
         self.video_with_audio_file_url = (
-            f"{EVA_ROOT_DIR}/data/sample_videos/touchdown.mp4"
+            f"{EvaDB_ROOT_DIR}/data/sample_videos/touchdown.mp4"
         )
         self.frame_size = FRAME_SIZE[0] * FRAME_SIZE[1] * 3
         self.audio_frames = []
         for line in open(
-            f"{EVA_ROOT_DIR}/test/data/touchdown_audio_frames.csv"
+            f"{EvaDB_ROOT_DIR}/test/data/touchdown_audio_frames.csv"
         ).readlines():
             self.audio_frames.append(np.fromstring(line, sep=","))
 

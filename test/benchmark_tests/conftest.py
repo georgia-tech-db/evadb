@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@ from test.util import get_evadb_for_testing
 
 import pytest
 
-from eva.server.command_handler import execute_query_fetch_all
-from eva.udfs.udf_bootstrap_queries import init_builtin_udfs
+from evadb.server.command_handler import execute_query_fetch_all
+from evadb.udfs.udf_bootstrap_queries import init_builtin_udfs
 
 
 @pytest.fixture(autouse=False)

@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,11 +29,11 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from eva.binder.binder_utils import BinderError
-from eva.configuration.constants import EVA_ROOT_DIR
-from eva.models.storage.batch import Batch
-from eva.readers.decord_reader import DecordReader
-from eva.server.command_handler import execute_query_fetch_all
+from evadb.binder.binder_utils import BinderError
+from evadb.configuration.constants import EvaDB_ROOT_DIR
+from evadb.models.storage.batch import Batch
+from evadb.readers.decord_reader import DecordReader
+from evadb.server.command_handler import execute_query_fetch_all
 
 NUM_FRAMES = 10
 
@@ -47,7 +47,7 @@ class SelectExecutorTest(unittest.TestCase):
         video_file_path = create_sample_video(NUM_FRAMES)
         load_query = f"LOAD VIDEO '{video_file_path}' INTO MyVideo;"
         execute_query_fetch_all(cls.evadb, load_query)
-        ua_detrac = f"{EVA_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
+        ua_detrac = f"{EvaDB_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
         load_query = f"LOAD VIDEO '{ua_detrac}' INTO DETRAC;"
         execute_query_fetch_all(cls.evadb, load_query)
         load_udfs_for_testing(cls.evadb)
@@ -55,8 +55,8 @@ class SelectExecutorTest(unittest.TestCase):
         cls.table2 = create_table(cls.evadb, "table2", 500, 3)
         cls.table3 = create_table(cls.evadb, "table3", 1000, 3)
 
-        cls.meme1 = f"{EVA_ROOT_DIR}/data/detoxify/meme1.jpg"
-        cls.meme2 = f"{EVA_ROOT_DIR}/data/detoxify/meme2.jpg"
+        cls.meme1 = f"{EvaDB_ROOT_DIR}/data/detoxify/meme1.jpg"
+        cls.meme2 = f"{EvaDB_ROOT_DIR}/data/detoxify/meme2.jpg"
 
         execute_query_fetch_all(cls.evadb, f"LOAD IMAGE '{cls.meme1}' INTO MemeImages;")
         execute_query_fetch_all(cls.evadb, f"LOAD IMAGE '{cls.meme2}' INTO MemeImages;")
@@ -323,7 +323,7 @@ class SelectExecutorTest(unittest.TestCase):
         # only applies to video data which is already sorted
         segment_size = 3
         select_query = (
-            "SELECT FIRST(id), SEGMENT(data) FROM MyVideo GROUP BY '{}f';".format(
+            "SELECT FIRST(id), SEGMENT(data) FROM MyVideo GROUP BY '{} frames';".format(
                 segment_size
             )
         )
@@ -348,7 +348,7 @@ class SelectExecutorTest(unittest.TestCase):
         # only applies to video data which is already sorted
         segment_size = 3
         select_query = (
-            "SELECT LAST(id), SEGMENT(data) FROM MyVideo GROUP BY '{}f';".format(
+            "SELECT LAST(id), SEGMENT(data) FROM MyVideo GROUP BY '{}frames';".format(
                 segment_size
             )
         )
@@ -373,7 +373,7 @@ class SelectExecutorTest(unittest.TestCase):
     def test_select_and_groupby_should_fail_with_incorrect_pattern(self):
         segment_size = "4a"
         select_query = (
-            "SELECT FIRST(id), SEGMENT(data) FROM MyVideo GROUP BY '{}f';".format(
+            "SELECT FIRST(id), SEGMENT(data) FROM MyVideo GROUP BY '{} frames';".format(
                 segment_size
             )
         )
@@ -383,10 +383,8 @@ class SelectExecutorTest(unittest.TestCase):
 
     def test_select_and_groupby_should_fail_with_seconds(self):
         segment_size = 4
-        select_query = (
-            "SELECT FIRST(id), SEGMENT(data) FROM MyVideo GROUP BY '{}s';".format(
-                segment_size
-            )
+        select_query = "SELECT FIRST(id), SEGMENT(data) FROM MyVideo GROUP BY '{} seconds';".format(
+            segment_size
         )
         self.assertRaises(
             BinderError, execute_query_fetch_all, self.evadb, select_query
@@ -394,7 +392,7 @@ class SelectExecutorTest(unittest.TestCase):
 
     def test_select_and_groupby_should_fail_with_non_video_table(self):
         segment_size = 4
-        select_query = "SELECT FIRST(a1) FROM table1 GROUP BY '{}f';".format(
+        select_query = "SELECT FIRST(a1) FROM table1 GROUP BY '{} frames';".format(
             segment_size
         )
         self.assertRaises(
@@ -406,7 +404,7 @@ class SelectExecutorTest(unittest.TestCase):
         # only applies to video data which is already sorted
         segment_size = 2
         sampling_rate = 2
-        select_query = "SELECT FIRST(id), SEGMENT(data) FROM MyVideo SAMPLE {} GROUP BY '{}f';".format(
+        select_query = "SELECT FIRST(id), SEGMENT(data) FROM MyVideo SAMPLE {} GROUP BY '{} frames';".format(
             sampling_rate, segment_size
         )
         actual_batch = execute_query_fetch_all(self.evadb, select_query)
@@ -768,3 +766,16 @@ class SelectExecutorTest(unittest.TestCase):
 
         batch = execute_query_fetch_all(self.evadb, "SELECT * FROM table1;")
         self.assertTrue("table1._row_id" in batch.columns)
+
+    def test_chunk_param_should_fail(self):
+        with self.assertRaises(AssertionError):
+            execute_query_fetch_all(
+                self.evadb,
+                "SELECT data from MyVideo chunk_size 4000 chunk_overlap 200;",
+            )
+
+        with self.assertRaises(AssertionError):
+            execute_query_fetch_all(
+                self.evadb,
+                "SELECT data from MemeImages chunk_size 4000 chunk_overlap 200;",
+            )

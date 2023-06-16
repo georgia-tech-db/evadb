@@ -1,7 +1,7 @@
 Configure GPU 
 -----
 
-1. Queries in EVA use deep learning models that run much faster on a GPU as opposed to a CPU. If your workstation has a GPU, you can configure EVA to use the GPU during query execution. Use  the following command to check your hardware capabilities:
+1. Queries in EvaDB use deep learning models that run much faster on a GPU as opposed to a CPU. If your workstation has a GPU, you can configure EvaDB to use the GPU during query execution. Use  the following command to check your hardware capabilities:
 
 .. code-block:: bash
 
@@ -23,11 +23,11 @@ A valid output from the command indicates that your GPU is configured and ready 
 
 Output of `cuda:0` indicates the presence of a GPU. 0 indicates the index of the GPU in system. If you have multiple GPUs on your workstation, the index must be updated accordingly.
 
-3. Now configure the executor section in eva.yml as follows:
+3. Now configure the executor section in evadb.yml as follows:
 
 .. code-block:: yaml
 
     executor:
         gpus: {'127.0.1.1': [0]}
 
-Here, `127.0.1.1` is the loopback address on which the EVA server is running. 0 refers to the GPU index to be used.
+Here, `127.0.1.1` is the loopback address on which the EvaDB server is running. 0 refers to the GPU index to be used.

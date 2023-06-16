@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.abspath(".."))
 
 # The full version, including alpha/beta/rc tags
 VERSION_DICT = {}
-with open("../eva/version.py", "r") as version_file:
+with open("../evadb/version.py", "r") as version_file:
     exec(version_file.read(), VERSION_DICT)
 
 # Set the latest version.
@@ -85,9 +85,9 @@ source_suffix = [".rst", ".md"]
 master_doc = "index"
 
 # General information about the project.
-project = "EVA DB"
-copyright = str(date.today().year) + ", EVA DB."
-author = u"EVA DB"
+project = "EvaDB 🤖💾"
+copyright = str(date.today().year) + ", EvaDB."
+author = u"EvaDB Team"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -113,13 +113,14 @@ notfound_urls_prefix = ""
 # The theme to use for pages.
 html_theme = "furo"
 
+html_title = project + "\n" + LATEST_VERSION
+html_static_path = ["_static"]
+
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for the theme, see the
 # documentation.
 html_theme_options = {
-    "sidebar_hide_name": True,
     "navigation_with_keys": True,
-    "top_of_page_button": "edit",
     "light_css_variables": {
         "color-background-secondary": "#fff",
         "color-sidebar-background-border": "none",
@@ -136,16 +137,6 @@ external_toc_path = "_toc.yml"  # optional, default: _toc.yml
 external_toc_exclude_missing = False  # optional, default: False
 
 # html_logo = "images/eva/eva-logo.png"
-
-html_sidebars = {
-    "**": [
-        "sidebar/scroll-start.html",
-        "sidebar/brand.html",
-        "sidebar/search.html",
-        "sidebar/navigation.html",
-        "sidebar/scroll-end.html",
-    ]
-}
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", (None, "python-inv.txt"))

@@ -1,10 +1,10 @@
-EVA Release Guide
+EvaDB Release Guide
 ----
 
 Part 1: Before You Start
 ====
 
-Make sure you have `PyPI <https://pypi.org>`_ account with maintainer access to the EVA project. 
+Make sure you have `PyPI <https://pypi.org>`_ account with maintainer access to the EvaDB project. 
 Create a .pypirc in your home directory. It should look like this:
 
 .. code-block:: python
@@ -44,7 +44,7 @@ Part 2: Release Steps
 Make sure ``CHANGELOG.md`` is up to date for the release: compare against PRs
 merged since the last release.
 
-4. Update version to, e.g. ``0.0.6`` (remove the ``+dev`` label) in ``eva/version.py``.
+4. Update version to, e.g. ``0.0.6`` (remove the ``+dev`` label) in ``evadb/version.py``.
 
 5. Commit these changes and create a PR:
 
@@ -79,7 +79,7 @@ merged since the last release.
        python3 -m venv test_evadb  # create a virtualenv for testing
        source test_evadb/bin/activate  # activate virtualenv
        python3 -m pip install dist/evadb-0.9.1-py3-none-any.whl
-       python3 -c "import eva; print(eva.__version__)"
+       python3 -c "import evadb; print(evadb.__version__)"
 
 10. Publish to PyPI
 
@@ -97,7 +97,7 @@ merged since the last release.
     * Attach the resulting binaries in (``dist/evadb-x.x.x.*``) to the release.
     * Publish the release.
 
-13. Update version to, e.g. ``0.9.1+dev`` in ``eva/version.py``.
+13. Update version to, e.g. ``0.9.1+dev`` in ``evadb/version.py``.
 
 14. Add a new changelog entry for the unreleased version in `CHANGELOG.md`:
 
@@ -119,7 +119,7 @@ merged since the last release.
        git commit -m "[BUMP]: v0.9.1+dev"
        git push --set-upstream origin bump-v0.9.1+dev
        
-16. Add the new tag to `the EVA project on ReadTheDocs <https://readthedocs.org/projects/evadb>`_,
+16. Add the new tag to `the EvaDB project on ReadTheDocs <https://readthedocs.org/projects/evadb>`_,
 
     * Trigger a build for main to pull new tags.
     * Go to the ``Versions`` tab, and ``Activate`` the new tag.

@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@ import unittest
 from test.markers import ocr_skip_marker
 from test.util import get_evadb_for_testing, shutdown_ray
 
-from eva.configuration.constants import EVA_ROOT_DIR
-from eva.server.command_handler import execute_query_fetch_all
+from evadb.configuration.constants import EvaDB_ROOT_DIR
+from evadb.server.command_handler import execute_query_fetch_all
 
 
 class LikeTest(unittest.TestCase):
@@ -25,8 +25,8 @@ class LikeTest(unittest.TestCase):
         self.evadb = get_evadb_for_testing()
         # reset the catalog manager before running each test
         self.evadb.catalog().reset()
-        meme1 = f"{EVA_ROOT_DIR}/data/detoxify/meme1.jpg"
-        meme2 = f"{EVA_ROOT_DIR}/data/detoxify/meme2.jpg"
+        meme1 = f"{EvaDB_ROOT_DIR}/data/detoxify/meme1.jpg"
+        meme2 = f"{EvaDB_ROOT_DIR}/data/detoxify/meme2.jpg"
 
         execute_query_fetch_all(self.evadb, f"LOAD IMAGE '{meme1}' INTO MemeImages;")
         execute_query_fetch_all(self.evadb, f"LOAD IMAGE '{meme2}' INTO MemeImages;")
@@ -44,7 +44,7 @@ class LikeTest(unittest.TestCase):
                           bboxes NDARRAY FLOAT32(ANYDIM, 4),
                           scores NDARRAY FLOAT32(ANYDIM))
                   TYPE  OCRExtraction
-                  IMPL  'eva/udfs/ocr_extractor.py';
+                  IMPL  'evadb/udfs/ocr_extractor.py';
         """
         execute_query_fetch_all(self.evadb, create_udf_query)
         select_query = """SELECT X.label, X.x, X.y FROM MemeImages JOIN LATERAL UNNEST(OCRExtractor(data)) AS X(label, x, y) WHERE label LIKE {};""".format(
@@ -61,7 +61,7 @@ class LikeTest(unittest.TestCase):
                           bboxes NDARRAY FLOAT32(ANYDIM, 4),
                           scores NDARRAY FLOAT32(ANYDIM))
                   TYPE  OCRExtraction
-                  IMPL  'eva/udfs/ocr_extractor.py';
+                  IMPL  'evadb/udfs/ocr_extractor.py';
         """
         execute_query_fetch_all(self.evadb, create_udf_query)
 

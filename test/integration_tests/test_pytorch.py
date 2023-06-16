@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,11 +28,11 @@ import numpy as np
 import pandas.testing as pd_testing
 import pytest
 
-from eva.configuration.constants import EVA_ROOT_DIR
-from eva.executor.executor_utils import ExecutorError
-from eva.models.storage.batch import Batch
-from eva.server.command_handler import execute_query_fetch_all
-from eva.udfs.udf_bootstrap_queries import Asl_udf_query, Mvit_udf_query
+from evadb.configuration.constants import EvaDB_ROOT_DIR
+from evadb.executor.executor_utils import ExecutorError
+from evadb.models.storage.batch import Batch
+from evadb.server.command_handler import execute_query_fetch_all
+from evadb.udfs.udf_bootstrap_queries import Asl_udf_query, Mvit_udf_query
 
 
 @pytest.mark.notparallel
@@ -43,12 +43,12 @@ class PytorchTest(unittest.TestCase):
         cls.evadb.catalog().reset()
         os.environ["ray"] = str(cls.evadb.config.get_value("experimental", "ray"))
 
-        ua_detrac = f"{EVA_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
-        mnist = f"{EVA_ROOT_DIR}/data/mnist/mnist.mp4"
-        actions = f"{EVA_ROOT_DIR}/data/actions/actions.mp4"
-        asl_actions = f"{EVA_ROOT_DIR}/data/actions/computer_asl.mp4"
-        meme1 = f"{EVA_ROOT_DIR}/data/detoxify/meme1.jpg"
-        meme2 = f"{EVA_ROOT_DIR}/data/detoxify/meme2.jpg"
+        ua_detrac = f"{EvaDB_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
+        mnist = f"{EvaDB_ROOT_DIR}/data/mnist/mnist.mp4"
+        actions = f"{EvaDB_ROOT_DIR}/data/actions/actions.mp4"
+        asl_actions = f"{EvaDB_ROOT_DIR}/data/actions/computer_asl.mp4"
+        meme1 = f"{EvaDB_ROOT_DIR}/data/detoxify/meme1.jpg"
+        meme2 = f"{EvaDB_ROOT_DIR}/data/detoxify/meme2.jpg"
 
         execute_query_fetch_all(cls.evadb, f"LOAD VIDEO '{ua_detrac}' INTO MyVideo;")
         execute_query_fetch_all(cls.evadb, f"LOAD VIDEO '{mnist}' INTO MNIST;")
@@ -116,7 +116,7 @@ class PytorchTest(unittest.TestCase):
                   OUTPUT (bboxes NDARRAY FLOAT32(ANYDIM, 4),
                           scores NDARRAY FLOAT32(ANYDIM))
                   TYPE  FaceDetection
-                  IMPL  'eva/udfs/face_detector.py';
+                  IMPL  'evadb/udfs/face_detector.py';
         """
         execute_query_fetch_all(self.evadb, create_udf_query)
 
@@ -167,7 +167,7 @@ class PytorchTest(unittest.TestCase):
                             MVITActionRecognition(SEGMENT(data))
                             FROM Actions
                             WHERE id < 32
-                            GROUP BY '16f'; """
+                            GROUP BY '16 frames'; """
         actual_batch = execute_query_fetch_all(self.evadb, select_query)
         self.assertEqual(len(actual_batch), 2)
 
@@ -184,7 +184,7 @@ class PytorchTest(unittest.TestCase):
         select_query = """SELECT FIRST(id), ASLActionRecognition(SEGMENT(data))
                         FROM Asl_actions
                         SAMPLE 5
-                        GROUP BY '16f';"""
+                        GROUP BY '16 frames';"""
         actual_batch = execute_query_fetch_all(self.evadb, select_query)
 
         res = actual_batch.frames
@@ -200,7 +200,7 @@ class PytorchTest(unittest.TestCase):
                   OUTPUT (bboxes NDARRAY FLOAT32(ANYDIM, 4),
                           scores NDARRAY FLOAT32(ANYDIM))
                   TYPE  FaceDetection
-                  IMPL  'eva/udfs/face_detector.py';
+                  IMPL  'evadb/udfs/face_detector.py';
         """
         execute_query_fetch_all(self.evadb, create_udf_query)
 
@@ -219,7 +219,7 @@ class PytorchTest(unittest.TestCase):
                           bboxes NDARRAY FLOAT32(ANYDIM, 4),
                           scores NDARRAY FLOAT32(ANYDIM))
                   TYPE  OCRExtraction
-                  IMPL  'eva/udfs/ocr_extractor.py';
+                  IMPL  'evadb/udfs/ocr_extractor.py';
         """
         execute_query_fetch_all(self.evadb, create_udf_query)
 
@@ -239,7 +239,7 @@ class PytorchTest(unittest.TestCase):
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
                   OUTPUT (features NDARRAY FLOAT32(ANYDIM))
                   TYPE  Classification
-                  IMPL  'eva/udfs/feature_extractor.py';
+                  IMPL  'evadb/udfs/feature_extractor.py';
         """
         execute_query_fetch_all(self.evadb, create_udf_query)
 
@@ -259,7 +259,7 @@ class PytorchTest(unittest.TestCase):
                 INPUT (img_path TEXT(1000))
                 OUTPUT (data NDARRAY UINT8(3, ANYDIM, ANYDIM))
                 TYPE NdarrayUDF
-                IMPL "eva/udfs/ndarray/open.py";
+                IMPL "evadb/udfs/ndarray/open.py";
         """
         execute_query_fetch_all(self.evadb, create_open_udf_query)
 
@@ -269,7 +269,7 @@ class PytorchTest(unittest.TestCase):
                            Feature_Extractor_Name TEXT(100))
                     OUTPUT (distance FLOAT(32, 7))
                     TYPE NdarrayUDF
-                    IMPL "eva/udfs/ndarray/similarity.py";
+                    IMPL "evadb/udfs/ndarray/similarity.py";
         """
         execute_query_fetch_all(self.evadb, create_similarity_udf_query)
 
@@ -277,7 +277,7 @@ class PytorchTest(unittest.TestCase):
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
                   OUTPUT (features NDARRAY FLOAT32(ANYDIM))
                   TYPE  Classification
-                  IMPL  "eva/udfs/feature_extractor.py";
+                  IMPL  "evadb/udfs/feature_extractor.py";
         """
         execute_query_fetch_all(self.evadb, create_feat_udf_query)
 
@@ -315,7 +315,7 @@ class PytorchTest(unittest.TestCase):
                           bboxes NDARRAY FLOAT32(ANYDIM, 4),
                           scores NDARRAY FLOAT32(ANYDIM))
                   TYPE  OCRExtraction
-                  IMPL  'eva/udfs/ocr_extractor.py';
+                  IMPL  'evadb/udfs/ocr_extractor.py';
         """
         execute_query_fetch_all(self.evadb, create_udf_query)
 

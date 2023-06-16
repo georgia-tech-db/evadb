@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from eva.server.command_handler import handle_request
-from eva.utils.stats import Timer
+from evadb.server.command_handler import handle_request
+from evadb.utils.stats import Timer
 
 NUM_FRAMES = 10
 

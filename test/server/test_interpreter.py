@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2023 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,11 +15,12 @@
 import asyncio
 import sys
 import unittest
+from test.markers import macos_skip_marker
 from test.util import find_free_port
 
 from mock import MagicMock, patch
 
-from eva.server.interpreter import create_stdin_reader, start_cmd_client
+from evadb.server.interpreter import create_stdin_reader, start_cmd_client
 
 # Check for Python 3.8+ for IsolatedAsyncioTestCase support
 if sys.version_info >= (3, 8):
@@ -29,9 +30,9 @@ if sys.version_info >= (3, 8):
             super().__init__(*args, **kwargs)
 
         @patch("asyncio.open_connection")
-        @patch("eva.server.interpreter.create_stdin_reader")
-        @patch("eva.interfaces.relational.db.EVADBCursor.execute_async")
-        @patch("eva.interfaces.relational.db.EVADBCursor.fetch_all_async")
+        @patch("evadb.server.interpreter.create_stdin_reader")
+        @patch("evadb.interfaces.relational.db.EvaDBCursor.execute_async")
+        @patch("evadb.interfaces.relational.db.EvaDBCursor.fetch_all_async")
         async def test_start_cmd_client(
             self, mock_fetch, mock_execute, mock_stdin_reader, mock_open
         ):
@@ -61,6 +62,7 @@ if sys.version_info >= (3, 8):
 
             await start_cmd_client(MagicMock(), MagicMock())
 
+        @macos_skip_marker
         @patch("asyncio.events.AbstractEventLoop.connect_read_pipe")
         async def test_create_stdin_reader(self, mock_read_pipe):
             sys.stdin = MagicMock()

@@ -6,11 +6,11 @@ To begin your querying session, get a connection to the EvaDB using ``connect``:
 .. autosummary:: 
     :toctree: ./doc
     
-    ~eva.connect
+    ~evadb.connect
 
 .. code-block:: python
 
-    from eva import connect
+    from evadb import connect
     conn = connect()
 
 You can then use this connection to run queries:
@@ -31,41 +31,46 @@ You can then use this connection to run queries:
 
 
 
-EVADBConnection Interface
+EvaDBConnection Interface
 -------------------------
 
 .. autosummary::
     :toctree: ./doc
     
-    ~eva.EVADBConnection.cursor
+    ~evadb.EvaDBConnection.cursor
 
 
-EVADBCursor Interface
+EvaDBCursor Interface
 ---------------------
 
 .. autosummary::
     :toctree: ./doc
 
-    ~eva.EVADBCursor.connect
-    ~eva.EVADBCursor.load
-    ~eva.EVADBCursor.query
-    ~eva.EVADBCursor.table
-    ~eva.EVADBCursor.create_udf
-    ~eva.EVADBCursor.create_vector_index
-    ~eva.EVADBCursor.df
+    ~evadb.connect
+    ~evadb.EvaDBCursor.load
+    ~evadb.EvaDBCursor.query
+    ~evadb.EvaDBCursor.table
+    ~evadb.EvaDBCursor.create_udf
+    ~evadb.EvaDBCursor.create_vector_index
+    ~evadb.EvaDBCursor.df
+    ~evadb.EvaDBCursor.drop_table
+    ~evadb.EvaDBCursor.drop_udf
+    ~evadb.EvaDBCursor.drop_index
 
-EVADBQuery Interface
+
+EvaDBQuery Interface
 ---------------------
 
 .. autosummary::
     :toctree: ./doc
 
-    ~eva.EVADBQuery.select
-    ~eva.EVADBQuery.cross_apply
-    ~eva.EVADBQuery.filter
-    ~eva.EVADBQuery.df
-    ~eva.EVADBQuery.alias
-    ~eva.EVADBQuery.limit
-    ~eva.EVADBQuery.order
-    ~eva.EVADBQuery.show
-    ~eva.EVADBQuery.sql_query
+    ~evadb.EvaDBQuery.select
+    ~evadb.EvaDBQuery.cross_apply
+    ~evadb.EvaDBQuery.filter
+    ~evadb.EvaDBQuery.df
+    ~evadb.EvaDBQuery.alias
+    ~evadb.EvaDBQuery.limit
+    ~evadb.EvaDBQuery.order
+    ~evadb.EvaDBQuery.show
+    ~evadb.EvaDBQuery.sql_query
+    ~evadb.EvaDBQuery.execute
