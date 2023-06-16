@@ -15,8 +15,6 @@
 
 import re
 
-import cv2
-
 # coding=utf-8
 # Copyright 2018-2022 EVA
 #
@@ -42,6 +40,8 @@ from evadb.udfs.abstract.abstract_udf import AbstractUDF
 from evadb.udfs.decorators.decorators import forward, setup
 from evadb.udfs.decorators.io_descriptors.data_types import PandasDataframe
 from evadb.udfs.gpu_compatible import GPUCompatible
+
+# import cv2
 
 
 class OCRExactorHuggingFace(AbstractUDF, GPUCompatible):
