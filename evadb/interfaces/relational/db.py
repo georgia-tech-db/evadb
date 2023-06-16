@@ -339,9 +339,9 @@ class EvaDBCursor(object):
         stmt = parse_query(sql_query)
         return EvaDBQuery(self._evadb, stmt)
     
-    def show(self, show_type: str, **kwargs) -> EvaDBQuery:
+    def show(self, object_type: str, **kwargs) -> EvaDBQuery:
         """
-        Executes a SHOW query.
+        Shows all entries of the current object_type.
 
         Args:
             show_type (str): The type of SHOW query to be executed
@@ -353,7 +353,7 @@ class EvaDBCursor(object):
         Examples:
             >>> conn.show("tables")
         """
-        stmt = parse_show(show_type, **kwargs)
+        stmt = parse_show(object_type, **kwargs)
         return EvaDBQuery(self._evadb, stmt)
     
     def explain(self, sql_query: str) -> EvaDBQuery:
