@@ -46,7 +46,7 @@ class DeleteExecutor(AbstractExecutor):
         right = predicate_node.get_child(1)
 
         if type(left) == TupleValueExpression:
-            column = left.col_name
+            column = left.name
             x = table.columns[column]
         elif type(left) == ConstantValueExpression:
             value = left.value
@@ -55,7 +55,7 @@ class DeleteExecutor(AbstractExecutor):
             left_filter_clause = self.predicate_node_to_filter_clause(table, left)
 
         if type(right) == TupleValueExpression:
-            column = right.col_name
+            column = right.name
             y = table.columns[column]
         elif type(right) == ConstantValueExpression:
             value = right.value

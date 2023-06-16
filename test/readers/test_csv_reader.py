@@ -28,9 +28,9 @@ class CSVLoaderTest(unittest.TestCase):
 
     def test_should_return_one_batch(self):
         column_list = [
-            TupleValueExpression(col_name="id", table_alias="dummy"),
-            TupleValueExpression(col_name="frame_id", table_alias="dummy"),
-            TupleValueExpression(col_name="video_id", table_alias="dummy"),
+            TupleValueExpression(name="id", table_alias="dummy"),
+            TupleValueExpression(name="frame_id", table_alias="dummy"),
+            TupleValueExpression(name="video_id", table_alias="dummy"),
         ]
 
         # call the CSVReader

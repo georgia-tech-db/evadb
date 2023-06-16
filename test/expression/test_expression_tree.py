@@ -27,8 +27,8 @@ class ExpressionEvaluationTest(unittest.TestCase):
     def test_if_expr_tree_is_equal(self):
         const_exp1 = ConstantValueExpression(0)
         const_exp2 = ConstantValueExpression(0)
-        columnName1 = TupleValueExpression(col_name="DATA")
-        columnName2 = TupleValueExpression(col_name="DATA")
+        columnName1 = TupleValueExpression(name="DATA")
+        columnName2 = TupleValueExpression(name="DATA")
 
         aggr_expr1 = AggregationExpression(
             ExpressionType.AGGREGATION_AVG, None, columnName1
@@ -52,7 +52,7 @@ class ExpressionEvaluationTest(unittest.TestCase):
         cmpr_exp = ComparisonExpression(
             ExpressionType.COMPARE_NEQ, const_exp1, const_exp2
         )
-        tuple_expr = TupleValueExpression(col_name="id")
+        tuple_expr = TupleValueExpression(name="id")
         aggr_expr = AggregationExpression(
             ExpressionType.AGGREGATION_MAX, None, tuple_expr
         )

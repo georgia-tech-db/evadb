@@ -30,7 +30,7 @@ class TableSources:
     def select_elements(self, tree):
         kind = tree.children[0]
         if kind == "*":
-            select_list = [TupleValueExpression(col_name="*")]
+            select_list = [TupleValueExpression(name="*")]
         else:
             select_list = []
             for child in tree.children:
@@ -276,6 +276,6 @@ class TableSources:
                     alias_name = self.visit(child)
                 elif child.data == "uid_list":
                     column_list = self.visit(child)
-                    column_list = [col.col_name for col in column_list]
+                    column_list = [col.name for col in column_list]
 
         return Alias(alias_name, column_list)
