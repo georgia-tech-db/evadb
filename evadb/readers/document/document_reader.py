@@ -45,5 +45,7 @@ class DocumentReader(AbstractReader):
         )
 
         for data in loader.load():
-            for row in langchain_text_splitter.split_documents([data]):
-                yield {"data": row.page_content}
+            for chunk_id, row in enumerate(
+                langchain_text_splitter.split_documents([data])
+            ):
+                yield {"chunk_id": chunk_id, "data": row.page_content}
