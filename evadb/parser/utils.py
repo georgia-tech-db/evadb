@@ -146,3 +146,11 @@ def parse_sql_orderby_expr(expr: str):
     stmt = Parser().parse(mock_query)[0]
     assert isinstance(stmt, SelectStatement), "Expected a select statement"
     return stmt.orderby_list
+
+def parse_similarity_expr(dataset: str, featureextractor: str, compare_with: str, compare_field: str, limit: int, mock_query: str):
+    query = f"""SELECT _row_id FROM {dataset}
+                            ORDER BY Similarity({featureextractor}({compare_with}), {featureextractor}({compare_field}))
+                            LIMIT {limit};"""
+    stmt = Parser().parse(mock_query)[0]
+    assert isinstance(stmt, SelectStatement), "Expected a select statement"
+    return stmt.where_clause

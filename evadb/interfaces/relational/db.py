@@ -390,6 +390,7 @@ class EvaDBCursor(object):
         """
         stmt = parse_insert(table_name, columns, values, **kwargs)
         return EvaDBQuery(self._evadb, stmt)
+    
 
 
 def connect(
