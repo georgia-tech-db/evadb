@@ -40,6 +40,7 @@ from evadb.parser.utils import (
     parse_explain,
     parse_show,
     parse_insert,
+    parse_rename,
 )
 from evadb.udfs.udf_bootstrap_queries import init_builtin_udfs
 from evadb.utils.logging_manager import logger
@@ -392,6 +393,24 @@ class EvaDBCursor(object):
             >>> conn.insert("sample_table", ["id", "name"], [1, "Alice"])
         """
         stmt = parse_insert(table_name, columns, values, **kwargs)
+        return EvaDBQuery(self._evadb, stmt)
+    
+    def rename(self, table_name, new_table_name, **kwargs) -> EvaDBQuery:
+        """
+        Executes a RENAME query.
+
+        Args:
+            table_name (str): The name of the table to rename
+            new_table_name (str): The new name of the table
+            **kwargs: Additional keyword arguments for configuring the RENAME operation.
+
+        Returns:
+            EvaDBQuery: The EvaDBQuery object.
+
+        Examples:
+            >>> conn.rename("sample_table", "new_sample_table")
+        """
+        stmt = parse_rename(table_name, new_table_name, **kwargs)
         return EvaDBQuery(self._evadb, stmt)
     
 

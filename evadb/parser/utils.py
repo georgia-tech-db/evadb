@@ -17,6 +17,7 @@ from evadb.parser.drop_object_statement import DropObjectStatement
 from evadb.parser.load_statement import LoadDataStatement
 from evadb.parser.explain_statement import ExplainStatement
 from evadb.parser.show_statement import ShowStatement
+from evadb.parser.rename_statement import RenameTableStatement
 from evadb.parser.insert_statement import InsertTableStatement
 from evadb.parser.parser import Parser
 from evadb.parser.select_statement import SelectStatement
@@ -146,3 +147,10 @@ def parse_sql_orderby_expr(expr: str):
     stmt = Parser().parse(mock_query)[0]
     assert isinstance(stmt, SelectStatement), "Expected a select statement"
     return stmt.orderby_list
+
+
+def parse_rename(old_name: str, new_name: str):
+    mock_query = f"RENAME TABLE {old_name} TO {new_name};"
+    stmt = Parser().parse(mock_query)[0]
+    assert isinstance(stmt, RenameTableStatement), "Expected a rename statement"
+    return stmt
