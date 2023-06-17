@@ -21,6 +21,7 @@ from evadb.udfs.decorators.decorators import forward, setup
 from evadb.udfs.decorators.io_descriptors.data_types import PandasDataframe
 from evadb.utils.generic_utils import try_to_import_cv2
 
+
 class GaussianBlur(AbstractUDF):
     @setup(cacheable=False, udf_type="cv2-transformation", batchable=True)
     def setup(self):
@@ -59,6 +60,7 @@ class GaussianBlur(AbstractUDF):
             frame = row[0]
             try_to_import_cv2()
             import cv2
+
             frame = cv2.GaussianBlur(frame, (5, 5), cv2.BORDER_DEFAULT)
             # since cv2 by default reads an image in BGR
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)

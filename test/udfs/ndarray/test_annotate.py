@@ -22,6 +22,7 @@ from evadb.configuration.constants import EvaDB_ROOT_DIR
 from evadb.udfs.ndarray.annotate import Annotate
 from evadb.utils.generic_utils import try_to_import_pillow
 
+
 class AnnotateTests(unittest.TestCase):
     def setUp(self):
         try_to_import_pillow()

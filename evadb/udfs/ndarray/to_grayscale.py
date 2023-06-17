@@ -60,6 +60,7 @@ class ToGrayscale(AbstractUDF):
             frame = row[0]
 
             import cv2
+
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2RGB)
 

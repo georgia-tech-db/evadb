@@ -18,6 +18,7 @@ import pandas as pd
 from evadb.udfs.abstract.abstract_udf import AbstractUDF
 from evadb.utils.generic_utils import try_to_import_cv2
 
+
 class Open(AbstractUDF):
     def setup(self):
         # cache data to avoid expensive open files on disk
@@ -42,6 +43,7 @@ class Open(AbstractUDF):
             else:
                 try_to_import_cv2()
                 import cv2
+
                 data = cv2.imread(path_str)
                 assert data is not None, f"Failed to open file {path_str}"
             self._data_cache[path_str] = data

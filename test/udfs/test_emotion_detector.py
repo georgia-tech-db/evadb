@@ -31,6 +31,7 @@ class EmotionDetector(unittest.TestCase):
     def _load_image(self, path):
         try_to_import_cv2()
         import cv2
+
         assert path.exists(), f"File does not exist at the path {str(path)}"
         img = cv2.imread(str(path))
         return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)

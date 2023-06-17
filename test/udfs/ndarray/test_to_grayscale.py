@@ -23,6 +23,7 @@ from evadb.configuration.constants import EvaDB_ROOT_DIR
 from evadb.udfs.ndarray.to_grayscale import ToGrayscale
 from evadb.utils.generic_utils import try_to_import_cv2
 
+
 class ToGrayscaleTests(unittest.TestCase):
     def setUp(self):
         self.to_grayscale_instance = ToGrayscale()
@@ -33,6 +34,7 @@ class ToGrayscaleTests(unittest.TestCase):
     def test_should_convert_to_grayscale(self):
         try_to_import_cv2()
         import cv2
+
         arr = cv2.imread(f"{EvaDB_ROOT_DIR}/test/udfs/data/dog.jpeg")
         df = pd.DataFrame([[arr]])
         modified_arr = self.to_grayscale_instance(df)["grayscale_frame_array"]

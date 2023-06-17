@@ -20,7 +20,11 @@ import numpy as np
 import pandas as pd
 
 from evadb.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
-from evadb.utils.generic_utils import try_to_import_torch,try_to_import_torchvision, try_to_import_pillow
+from evadb.utils.generic_utils import (
+    try_to_import_pillow,
+    try_to_import_torch,
+    try_to_import_torchvision,
+)
 
 # VGG configuration
 cfg = {
@@ -62,6 +66,7 @@ class EmotionDetector(PytorchAbstractClassifierUDF):
 
     def _download_weights(self, weights_url, weights_path):
         import torch
+
         if not os.path.exists(weights_path):
             torch.hub.download_url_to_file(
                 weights_url,
@@ -149,6 +154,7 @@ class EmotionDetector(PytorchAbstractClassifierUDF):
     def transform(self, images: np.ndarray):
         # reverse the channels from opencv
         from PIL import Image
+
         return self.transforms_ed(Image.fromarray(images[:, :, ::-1]))
 
     @property
@@ -168,9 +174,9 @@ class EmotionDetector(PytorchAbstractClassifierUDF):
         # result dataframe
         outcome = []
 
-        import transforms
         import torch
         import torch.nn.functional as F
+        import transforms
 
         # convert to 3 channels, ten crop and stack
         frames = frames.repeat(3, 1, 1)

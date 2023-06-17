@@ -107,6 +107,7 @@ class SimilarityTests(unittest.TestCase):
             )
             try_to_import_cv2()
             import cv2
+
             cv2.imwrite(img_save_path, base_img)
             load_image_query = (
                 f"LOAD IMAGE '{img_save_path}' INTO testSimilarityImageDataset;"

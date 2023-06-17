@@ -295,6 +295,7 @@ class PytorchTest(unittest.TestCase):
 
         try_to_import_cv2()
         import cv2
+
         cv2.imwrite(img_save_path, img)
 
         similarity_query = """SELECT data FROM MyVideo WHERE id < 5
