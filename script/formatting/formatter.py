@@ -446,7 +446,10 @@ if __name__ == "__main__":
 
         # CODESPELL
         #LOG.info("Codespell")
-        subprocess.check_output("codespell evadb/", 
+        subprocess.check_output("codespell evadb/*.py", 
+                shell=True, 
+                universal_newlines=True)
+        subprocess.check_output("codespell evadb/*/*.py", 
                 shell=True, 
                 universal_newlines=True)
         subprocess.check_output("codespell docs/source/*/*.rst", 

@@ -23,7 +23,7 @@ from evadb.configuration.constants import EvaDB_DATABASE_DIR, EvaDB_ROOT_DIR
 from evadb.interfaces.relational.db import connect
 
 
-class TestOCRHuggingFace(unittest.TestCase):
+class TestOCR(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -53,17 +53,17 @@ class TestOCRHuggingFace(unittest.TestCase):
         )
         load_pdf.execute()
 
-        udf_check = cursor.query("DROP UDF IF  EXISTS OCRExactorHuggingFace")
+        udf_check = cursor.query("DROP UDF IF  EXISTS OCRExtractor")
         udf_check.execute()
         udf = cursor.create_udf(
-            "OCRExactorHuggingFace",
+            "OCRExtractor",
             True,
             f"{EvaDB_ROOT_DIR}/evadb/udfs/ocr_extractor_HuggingFace.py",
         )
         udf.execute()
 
         query = cursor.table("MyImage").cross_apply(
-            "OCRExactorHuggingFace(data)", "objs(ocr_data)"
+            "OCRExtractor(data)", "objs(ocr_data)"
         )
         output = query.df()
         print(output)
