@@ -25,13 +25,13 @@ from evadb.utils.generic_utils import try_to_import_pillow
 
 class AnnotateTests(unittest.TestCase):
     def setUp(self):
+        try_to_import_pillow()
         self.annotate_instance = Annotate()
 
     def test_annotate_name_exists(self):
         assert hasattr(self.annotate_instance, "name")
 
     def test_should_annotate(self):
-        try_to_import_pillow()
         from PIL import Image
 
         img = Image.open(

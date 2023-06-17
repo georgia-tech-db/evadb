@@ -18,14 +18,13 @@ from typing import List
 
 import numpy as np
 import pandas as pd
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-from PIL import Image
-from torch import Tensor
-from torchvision import transforms
 
 from evadb.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
+from evadb.utils.generic_utils import (
+    try_to_import_pillow,
+    try_to_import_torch,
+    try_to_import_torchvision,
+)
 
 # VGG configuration
 cfg = {
@@ -55,37 +54,6 @@ cfg = {
 }
 
 
-# helper class for VGG
-class VGG(nn.Module):
-    def __init__(self, vgg_name):
-        super(VGG, self).__init__()
-        self.features = self._make_layers(cfg[vgg_name])
-        self.classifier = nn.Linear(512, 7)
-
-    def forward(self, x):
-        out = self.features(x)
-        out = out.view(out.size(0), -1)
-        out = F.dropout(out, p=0.5, training=self.training)
-        out = self.classifier(out)
-        return out
-
-    def _make_layers(self, cfg):
-        layers = []
-        in_channels = 3
-        for x in cfg:
-            if x == "M":
-                layers += [nn.MaxPool2d(kernel_size=2, stride=2)]
-            else:
-                layers += [
-                    nn.Conv2d(in_channels, x, kernel_size=3, padding=1),
-                    nn.BatchNorm2d(x),
-                    nn.ReLU(inplace=True),
-                ]
-                in_channels = x
-        layers += [nn.AvgPool2d(kernel_size=1, stride=1)]
-        return nn.Sequential(*layers)
-
-
 class EmotionDetector(PytorchAbstractClassifierUDF):
     """
     Arguments:
@@ -97,6 +65,8 @@ class EmotionDetector(PytorchAbstractClassifierUDF):
         return "EmotionDetector"
 
     def _download_weights(self, weights_url, weights_path):
+        import torch
+
         if not os.path.exists(weights_path):
             torch.hub.download_url_to_file(
                 weights_url,
@@ -107,6 +77,13 @@ class EmotionDetector(PytorchAbstractClassifierUDF):
 
     def setup(self, threshold=0.85):
         self.threshold = threshold
+        try_to_import_pillow()
+        try_to_import_torch()
+        try_to_import_torchvision()
+
+        import torch
+        import torch.nn.functional as F
+
         model_url = (
             "https://www.dropbox.com/s/85b63eahka5r439/emotion_detector.t7?raw=1"
         )
@@ -114,8 +91,38 @@ class EmotionDetector(PytorchAbstractClassifierUDF):
         # pull model weights from dropbox if not present
         self._download_weights(model_url, model_weights_path)
 
+        # helper class for VGG
+        class VGG(torch.nn.Module):
+            def __init__(self, vgg_name):
+                super(VGG, self).__init__()
+                self.features = self._make_layers(cfg[vgg_name])
+                self.classifier = torch.nn.Linear(512, 7)
+
+            def forward(self, x):
+                out = self.features(x)
+                out = out.view(out.size(0), -1)
+                out = F.dropout(out, p=0.5, training=self.training)
+                out = self.classifier(out)
+                return out
+
+            def _make_layers(self, cfg):
+                layers = []
+                in_channels = 3
+                for x in cfg:
+                    if x == "M":
+                        layers += [torch.nn.MaxPool2d(kernel_size=2, stride=2)]
+                    else:
+                        layers += [
+                            torch.nn.Conv2d(in_channels, x, kernel_size=3, padding=1),
+                            torch.nn.BatchNorm2d(x),
+                            torch.nn.ReLU(inplace=True),
+                        ]
+                        in_channels = x
+                layers += [torch.nn.AvgPool2d(kernel_size=1, stride=1)]
+                return torch.nn.Sequential(*layers)
+
         # load model
-        self.model = VGG("VGG19")
+        self.model = self.VGG("VGG19")
 
         # self.get_device() infers device from the loaded model, so not using it
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -126,7 +133,7 @@ class EmotionDetector(PytorchAbstractClassifierUDF):
         # for augmentation
         self.cut_size = 44
 
-    def transforms_ed(self, frame: Image) -> Tensor:
+    def transforms_ed(self, frame):
         """
         Performs augmentation on input frame
         Arguments:
@@ -135,6 +142,7 @@ class EmotionDetector(PytorchAbstractClassifierUDF):
         Returns:
             frame (Tensor): Augmented frame
         """
+        from torchvision import transforms
 
         # convert to grayscale, resize and make tensor
         frame = frame.convert("L")
@@ -145,13 +153,15 @@ class EmotionDetector(PytorchAbstractClassifierUDF):
 
     def transform(self, images: np.ndarray):
         # reverse the channels from opencv
+        from PIL import Image
+
         return self.transforms_ed(Image.fromarray(images[:, :, ::-1]))
 
     @property
     def labels(self) -> List[str]:
         return ["angry", "disgust", "fear", "happy", "sad", "surprise", "neutral"]
 
-    def forward(self, frames: Tensor) -> pd.DataFrame:
+    def forward(self, frames) -> pd.DataFrame:
         """
         Performs predictions on input frames
         Arguments:
@@ -163,6 +173,10 @@ class EmotionDetector(PytorchAbstractClassifierUDF):
 
         # result dataframe
         outcome = []
+
+        import torch
+        import torch.nn.functional as F
+        import transforms
 
         # convert to 3 channels, ten crop and stack
         frames = frames.repeat(3, 1, 1)

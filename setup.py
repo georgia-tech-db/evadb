@@ -41,11 +41,11 @@ VERSION = VERSION_DICT["VERSION"]
 minimal_requirements = [
     "numpy>=1.19.5",
     "pandas>=1.1.5",
-    "sqlalchemy>=1.4.0,<2.0.0",  # breaking changes in 2.0.0
+    "sqlalchemy>=1.4.0,<2.0.0",  # BREAKING CHANGES IN 2.0.0
     "sqlalchemy-utils>=0.36.6",
     "lark>=1.0.0",
     "pyyaml>=5.1",
-    "ray>=1.13.0,<2.5.0",        # breaking changes in 2.5.0
+    "ray>=1.13.0",
     "aenum>=2.2.0",
     "diskcache>=5.4.0",
     "retry>=0.9.2",
@@ -54,24 +54,26 @@ minimal_requirements = [
 vision_libs = [
     "torch>=1.10.0",
     "torchvision>=0.11.1",
-    "transformers>=4.27.4",  # HUGGINGFACE
+    "transformers>=4.27.4,<4.30.2",  # HUGGINGFACE
     "faiss-cpu",             # DEFAULT VECTOR INDEX
-    "opencv-contrib-python-headless>=4.6.0.66",
+    "opencv-python-headless>=4.6.0.66",
     "Pillow>=8.4.0",
     "eva-decord>=0.6.1",     # VIDEO PROCESSING
     "ultralytics>=8.0.93",   # OBJECT DETECTION
     "timm>=0.6.13",          # HUGGINGFACE VISION TASKS
+    "sentencepiece",         # TRANSFORMERS
 ]
 
 document_libs = [
-    "transformers>=4.27.4",  # HUGGINGFACE
-    "langchain",             # DATA LOADERS
-    "faiss-cpu",             # DEFAULT VECTOR INDEX
+    "transformers>=4.27.4,<4.30.2",  # HUGGINGFACE
+    "langchain",              # DATA LOADERS
+    "faiss-cpu",              # DEFAULT VECTOR INDEX
     "pymupdf",
     "pdfminer.six",
     "sentence-transformers",
     "openai>=0.27.4",          # CHATGPT
     "gpt4all",                 # PRIVATE GPT
+    "sentencepiece",           # TRANSFORMERS
 ]
 
 udf_libs = [

@@ -23,10 +23,12 @@ from evadb.database import EvaDBDatabase
 from evadb.executor.abstract_executor import AbstractExecutor
 from evadb.executor.executor_utils import ExecutorError, iter_path_regex, validate_media
 from evadb.models.storage.batch import Batch
+from evadb.parser.types import FileFormatType
 from evadb.plan_nodes.load_data_plan import LoadDataPlan
 from evadb.storage.abstract_storage_engine import AbstractStorageEngine
 from evadb.storage.storage_engine import StorageEngine
 from evadb.utils.errors import DatasetFileNotFoundError
+from evadb.utils.generic_utils import try_to_import_cv2, try_to_import_decord
 from evadb.utils.logging_manager import logger
 from evadb.utils.s3_utils import download_from_s3
 
@@ -35,6 +37,11 @@ class LoadMultimediaExecutor(AbstractExecutor):
     def __init__(self, db: EvaDBDatabase, node: LoadDataPlan):
         super().__init__(db, node)
         self.media_type = self.node.file_options["file_format"]
+        # check for appropriate packages
+        if self.media_type == FileFormatType.IMAGE:
+            try_to_import_cv2()
+        elif self.media_type == FileFormatType.VIDEO:
+            try_to_import_decord()
 
     def exec(self, *args, **kwargs):
         storage_engine = None

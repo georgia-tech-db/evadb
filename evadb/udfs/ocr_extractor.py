@@ -13,81 +13,99 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List
+import re
 
-import easyocr
 import numpy as np
 import pandas as pd
 
-from evadb.udfs.abstract.abstract_udf import AbstractClassifierUDF
+from evadb.catalog.catalog_type import NdArrayType
+from evadb.udfs.abstract.abstract_udf import AbstractUDF
+from evadb.udfs.decorators.decorators import forward, setup
+from evadb.udfs.decorators.io_descriptors.data_types import PandasDataframe
 from evadb.udfs.gpu_compatible import GPUCompatible
+from evadb.utils.generic_utils import (
+    try_to_import_torch,
+    try_to_import_torchvision,
+    try_to_import_transformers,
+)
+
+# import cv2
 
 
-class OCRExtractor(AbstractClassifierUDF, GPUCompatible):
-    """
-    Arguments:
-        threshold (float): Threshold for classifier confidence score
-    """
+class OCRExtractor(AbstractUDF, GPUCompatible):
+    @setup(cacheable=False, udf_type="FeatureExtraction", batchable=False)
+    def setup(self):
+        try_to_import_torch()
+        try_to_import_torchvision()
+        try_to_import_transformers()
+        from transformers import DonutProcessor, VisionEncoderDecoderModel
 
-    def to_device(self, device: str):
-        """
-        :param device:
-        :return:
-        """
-        self.model = easyocr.Reader(["en"], gpu="cuda:{}".format(device), verbose=False)
+        self.processor = DonutProcessor.from_pretrained(
+            "naver-clova-ix/donut-base-finetuned-cord-v2"
+        )
+        self.model = VisionEncoderDecoderModel.from_pretrained(
+            "naver-clova-ix/donut-base-finetuned-cord-v2"
+        )
+        # prepare decoder inputs
+        task_prompt = "<s_cord-v2>"
+        self.decoder_input_ids = self.processor.tokenizer(
+            task_prompt, add_special_tokens=False, return_tensors="pt"
+        ).input_ids
+
+    def to_device(self, device: str) -> GPUCompatible:
+        self.model = self.model.to(device)
         return self
-
-    def setup(self, threshold=0.85):
-        self.threshold = threshold
-        self.model = easyocr.Reader(["en"], verbose=False)
 
     @property
     def name(self) -> str:
         return "OCRExtractor"
 
-    @property
-    def labels(self) -> List[str]:
-        """
-        Empty as there are no labels required for
-        optical character recognition
-        """
-        return
-
-    def forward(self, frames: np.ndarray) -> pd.DataFrame:
-        """
-        Performs predictions on input frames
-        Arguments:
-            frames (tensor): Frames on which OCR needs
-            to be performed
-        Returns:
-            tuple containing OCR labels (List[List[str]]),
-            predicted_boxes (List[List[BoundingBox]]),
-            predicted_scores (List[List[float]])
-        """
-
-        frames_list = frames.values.tolist()
-        frames = np.array(frames_list)
-
-        # Get detections
-        detections_in_frames = self.model.readtext_batched(np.vstack(frames))
-
-        outcome = []
-
-        for i in range(0, frames.shape[0]):
-            labels = []
-            bboxes = []
-            scores = []
-            for detection in detections_in_frames[i]:
-                labels.append(detection[1])
-                bboxes.append(detection[0])
-                scores.append(detection[2])
-
-            outcome.append(
-                {
-                    "labels": list(labels),
-                    "bboxes": list(bboxes),
-                    "scores": list(scores),
-                }
+    @forward(
+        input_signatures=[
+            PandasDataframe(
+                columns=["data"],
+                column_types=[NdArrayType.STR],
+                column_shapes=[(1)],
             )
+        ],
+        output_signatures=[
+            PandasDataframe(
+                columns=["ocr_data"],
+                column_types=[NdArrayType.STR],
+                column_shapes=[(1)],
+            )
+        ],
+    )
+    def forward(self, df: pd.DataFrame) -> pd.DataFrame:
+        def _forward(row: pd.Series) -> np.ndarray:
+            data = row[0]
+            import torch
+            import torchvision
 
-        return pd.DataFrame(outcome, columns=["labels", "bboxes", "scores"])
+            # image = cv2.cvtColor(data, cv2.COLOR_BGR2GRAY)
+            image = torchvision.transforms.ToPILImage()(data)
+            pixel_values = self.processor(image, return_tensors="pt").pixel_values
+            device = "cuda" if torch.cuda.is_available() else "cpu"
+            outputs = self.model.generate(
+                pixel_values.to(device),
+                decoder_input_ids=self.decoder_input_ids.to(device),
+                max_length=self.model.decoder.config.max_position_embeddings,
+                early_stopping=True,
+                pad_token_id=self.processor.tokenizer.pad_token_id,
+                eos_token_id=self.processor.tokenizer.eos_token_id,
+                use_cache=True,
+                num_beams=1,
+                bad_words_ids=[[self.processor.tokenizer.unk_token_id]],
+                return_dict_in_generate=True,
+                output_scores=True,
+            )
+            sequence = self.processor.batch_decode(outputs.sequences)[0]
+            sequence = sequence.replace(self.processor.tokenizer.eos_token, "").replace(
+                self.processor.tokenizer.pad_token, ""
+            )
+            sequence = re.sub(r"<.*?>", "", sequence)
+            return sequence
+
+        ret = pd.DataFrame()
+        ret["ocr_data"] = df.apply(_forward, axis=1)
+        return ret

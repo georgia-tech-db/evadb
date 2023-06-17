@@ -1,8 +1,8 @@
 .. meta::
    :keywords: database, deep learning, video analytics, language models
 
-Welcome to EvaDB 🤖 + 💾 ! 
-==========================
+Welcome to EvaDB! 
+=================
 
 ..  rubric:: Database system for building simpler and faster AI-powered apps.
 
@@ -74,7 +74,7 @@ Here is an illustrative EvaDB app for ChatGPT-based question answering on videos
     ).df()
 
     # EvaDB automatically extract the audio from the video
-    # We only need to run the SpeechRecongizer UDF on the 'audio' column 
+    # We only need to run the SpeechRecognizer UDF on the 'audio' column 
     # to get the transcript and persist it in a table called 'transcripts'
     cursor.query(
         """CREATE TABLE transcripts AS 
@@ -90,7 +90,7 @@ Here is an illustrative EvaDB app for ChatGPT-based question answering on videos
     # We can just directly use it in the query
     # We need to set the OPENAI_KEY as an environment variable
     os.environ["OPENAI_KEY"] = OPENAI_KEY 
-    query = query.select("ChatGPT('Is this video summary related to LLMs', text)")
+    query = query.select("ChatGPT('Is this video summary related to LLM', text)")
 
     # Finally, we run the query to get the results as a dataframe
     response = query.df()
@@ -119,7 +119,7 @@ The same AI query can also be written directly in SQL and run on EvaDB.
 .. code:: sql
 
    --- Query for asking question using ChatGPT
-   SELECT ChatGPT('Is this video summary related to LLMs', 
+   SELECT ChatGPT('Is this video summary related to LLM', 
                   SpeechRecognizer(audio)) FROM news_videos;
 
 

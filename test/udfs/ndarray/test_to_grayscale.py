@@ -16,12 +16,12 @@ import unittest
 from pathlib import Path
 from test.util import file_remove
 
-import cv2
 import numpy as np
 import pandas as pd
 
 from evadb.configuration.constants import EvaDB_ROOT_DIR
 from evadb.udfs.ndarray.to_grayscale import ToGrayscale
+from evadb.utils.generic_utils import try_to_import_cv2
 
 
 class ToGrayscaleTests(unittest.TestCase):
@@ -32,6 +32,9 @@ class ToGrayscaleTests(unittest.TestCase):
         assert hasattr(self.to_grayscale_instance, "name")
 
     def test_should_convert_to_grayscale(self):
+        try_to_import_cv2()
+        import cv2
+
         arr = cv2.imread(f"{EvaDB_ROOT_DIR}/test/udfs/data/dog.jpeg")
         df = pd.DataFrame([[arr]])
         modified_arr = self.to_grayscale_instance(df)["grayscale_frame_array"]
