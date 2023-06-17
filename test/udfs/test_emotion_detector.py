@@ -17,10 +17,10 @@ import unittest
 from pathlib import Path
 from test.util import EvaDB_TEST_DATA_DIR
 
-import cv2
 import pandas as pd
 
 from evadb.models.storage.batch import Batch
+from evadb.utils.generic_utils import try_to_import_cv2
 
 
 class EmotionDetector(unittest.TestCase):
@@ -29,6 +29,9 @@ class EmotionDetector(unittest.TestCase):
         self.base_path = Path(EvaDB_TEST_DATA_DIR) / "data" / "emotion_detector"
 
     def _load_image(self, path):
+        try_to_import_cv2()
+        import cv2
+
         assert path.exists(), f"File does not exist at the path {str(path)}"
         img = cv2.imread(str(path))
         return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)

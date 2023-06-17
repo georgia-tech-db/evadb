@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import cv2
 import numpy as np
 import pandas as pd
 
@@ -20,6 +19,7 @@ from evadb.catalog.catalog_type import NdArrayType
 from evadb.udfs.abstract.abstract_udf import AbstractUDF
 from evadb.udfs.decorators.decorators import forward, setup
 from evadb.udfs.decorators.io_descriptors.data_types import PandasDataframe
+from evadb.utils.generic_utils import try_to_import_cv2
 
 
 class GaussianBlur(AbstractUDF):
@@ -58,6 +58,8 @@ class GaussianBlur(AbstractUDF):
         def gaussianBlur(row: pd.Series) -> np.ndarray:
             row = row.to_list()
             frame = row[0]
+            try_to_import_cv2()
+            import cv2
 
             frame = cv2.GaussianBlur(frame, (5, 5), cv2.BORDER_DEFAULT)
             # since cv2 by default reads an image in BGR

@@ -22,7 +22,6 @@ from test.util import (
     shutdown_ray,
 )
 
-import cv2
 import numpy as np
 import pandas as pd
 import pytest
@@ -30,6 +29,7 @@ import pytest
 from evadb.models.storage.batch import Batch
 from evadb.server.command_handler import execute_query_fetch_all
 from evadb.storage.storage_engine import StorageEngine
+from evadb.utils.generic_utils import try_to_import_cv2
 
 
 @pytest.mark.notparallel
@@ -105,6 +105,9 @@ class SimilarityTests(unittest.TestCase):
                 self.evadb.config.get_value("storage", "tmp_dir"),
                 f"test_similar_img{i}.jpg",
             )
+            try_to_import_cv2()
+            import cv2
+
             cv2.imwrite(img_save_path, base_img)
             load_image_query = (
                 f"LOAD IMAGE '{img_save_path}' INTO testSimilarityImageDataset;"

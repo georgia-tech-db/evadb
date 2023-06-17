@@ -1,0 +1,3 @@
+evadb[document]
+pytube
+youtube_transcript_api

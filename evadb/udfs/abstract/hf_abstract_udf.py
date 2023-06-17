@@ -15,11 +15,11 @@
 from typing import Any
 
 import pandas as pd
-from transformers import pipeline
 
 from evadb.catalog.models.udf_catalog import UdfCatalogEntry
 from evadb.udfs.abstract.abstract_udf import AbstractUDF
 from evadb.udfs.gpu_compatible import GPUCompatible
+from evadb.utils.generic_utils import try_to_import_transformers
 
 
 class AbstractHFUdf(AbstractUDF, GPUCompatible):
@@ -50,6 +50,9 @@ class AbstractHFUdf(AbstractUDF, GPUCompatible):
             else:
                 pipeline_args[entry.key] = entry.value
         self.pipeline_args = pipeline_args
+        try_to_import_transformers()
+        from transformers import pipeline
+
         self.hf_udf_obj = pipeline(**pipeline_args, device=device)
 
     def setup(self, *args, **kwargs) -> None:
@@ -99,5 +102,8 @@ class AbstractHFUdf(AbstractUDF, GPUCompatible):
         return evadb_output
 
     def to_device(self, device: str) -> GPUCompatible:
+        try_to_import_transformers()
+        from transformers import pipeline
+
         self.hf_udf_obj = pipeline(**self.pipeline_args, device=device)
         return self

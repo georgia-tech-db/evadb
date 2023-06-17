@@ -38,116 +38,101 @@ DOWNLOAD_URL = "https://github.com/georgia-tech-db/eva"
 LICENSE = "Apache License 2.0"
 VERSION = VERSION_DICT["VERSION"]
 
-minimal_requirement = [
+minimal_requirements = [
     "numpy>=1.19.5",
     "pandas>=1.1.5",
-    "opencv-contrib-python-headless>=4.6.0.66",
-    "Pillow>=8.4.0",
-    "sqlalchemy>=1.4.0,<2.0.0",  # major changes in 2.0.0
+    "sqlalchemy>=1.4.0,<2.0.0",  # BREAKING CHANGES IN 2.0.0
     "sqlalchemy-utils>=0.36.6",
     "lark>=1.0.0",
     "pyyaml>=5.1",
-    "importlib-metadata<5.0",
-    "ray>=1.13.0,<2.5.0", # breaking change in 2.5.0
-    "retry>=0.9.2",
+    "ray>=1.13.0,<2.5.0",        # BREAKING CHANGES IN 2.5.0
     "aenum>=2.2.0",
     "diskcache>=5.4.0",
-    "boto3",
-    "nest_asyncio",
-    "langchain",
+    "retry>=0.9.2",
+]
+
+vision_libs = [
+    "torch>=1.10.0",
+    "torchvision>=0.11.1",
+    "transformers>=4.27.4,<4.30.2",  # HUGGINGFACE
+    "faiss-cpu",             # DEFAULT VECTOR INDEX
+    "opencv-python-headless>=4.6.0.66",
+    "Pillow>=8.4.0",
+    "eva-decord>=0.6.1",     # VIDEO PROCESSING
+    "ultralytics>=8.0.93",   # OBJECT DETECTION
+    "timm>=0.6.13",          # HUGGINGFACE VISION TASKS
+    "sentencepiece",         # TRANSFORMERS
+]
+
+document_libs = [
+    "transformers>=4.27.4,<4.30.2",  # HUGGINGFACE
+    "langchain",              # DATA LOADERS
+    "faiss-cpu",              # DEFAULT VECTOR INDEX
     "pymupdf",
     "pdfminer.six",
     "sentence-transformers",
-    "eva-decord>=0.6.1", # for processing videos
+    "openai>=0.27.4",          # CHATGPT
+    "gpt4all",                 # PRIVATE GPT
+    "sentencepiece",           # TRANSFORMERS
 ]
 
-formatter_libs = ["black>=23.1.0", "isort>=5.10.1"]
-
-test_libs = [
-    "pytest>=6.1.2",
-    "pytest-cov>=2.11.1",
-    "pytest-random-order>=1.0.4",
-    "pytest-virtualenv",
-    "pytest-asyncio",
-    "pytest-xdist",
-    "coveralls>=3.0.1",
-    "flake8>=3.9.1",
-    "moto[s3]>=4.1.1",
+udf_libs = [
+    "facenet-pytorch>=2.5.2",  # FACE DETECTION
+    "thefuzz",                 # FUZZY STRING MATCHING
+    "pytube",                  # YOUTUBE QA APP
+    "youtube-transcript-api",  # YOUTUBE QA APP
+    "qdrant-client>=1.1.7",    # QDRANT VECTOR STORE
+    "boto3",                   # AWS
+    "norfair>=2.2.0",          # OBJECT TRACKING
+    "kornia",                  # SIFT FEATURES        
 ]
 
 notebook_libs = [
+    "ipython<8.13.0",
     "ipywidgets>=7.7.2",
     "matplotlib>=3.3.4",
     "nbmake>=1.2.1",
     "nest-asyncio>=1.5.6",
 ]
 
-### NEEDED FOR INTEGRATION TESTS ONLY
-integration_test_libs = [
-    "torch>=1.10.0",
-    "torchvision>=0.11.1",
-    "faiss-cpu",  # faiss-gpu does not work on mac
-]
+### NEEDED FOR DEVELOPER TESTING ONLY
 
-benchmark_libs = [
+dev_libs = [
+    # TESTING PACKAGES
+    "pytest>=6.1.2",
+    "pytest-cov>=2.11.1",
+    "mock",
+    "coveralls>=3.0.1",
+    "moto[s3]>=4.1.1",
+
+    # BENCHMARK PACKAGES
     "pytest-benchmark",
-]
 
-doc_libs = ["codespell", "pylint"]
+    # LINTING PACKAGES
+    "codespell", 
+    "pylint",
+    "black>=23.1.0", 
+    "isort>=5.10.1",
+    "flake8>=3.9.1",
 
-dist_libs = [
+    # DISTRIBUTION PACKAGES
     "wheel>=0.37.1",
     "semantic_version",
     "PyGithub",
     "twine",
-    "PyDriller"
+    "PyDriller",
 ]
 
-### NEEDED FOR AN ALTERNATE DATA SYSTEM OTHER THAN SQLITE
-database_libs = ["pymysql>=0.10.1"]
+INSTALL_REQUIRES = minimal_requirements
 
-### NEEDED FOR A BATTERIES-LOADED EXPERIENCE
-udf_libs = [
-    "facenet-pytorch>=2.5.2",  # FACE DETECTION
-    "ipython<8.13.0",  # NOTEBOOKS
-    "thefuzz",  # FUZZY STRING MATCHING
-    "ultralytics>=8.0.93",  # OBJECT DETECTION
-    "transformers>=4.27.4",  # HUGGINGFACE
-    "openai>=0.27.4",  # CHATGPT
-    "retry>=0.9.2", #CHATGPT
-    "timm>=0.6.13",  # HUGGINGFACE VISION TASKS
-    "norfair>=2.2.0",  # OBJECT TRACKING
-]
-
-### NEEDED FOR A BATTERIES-LOADED EXPERIENCE
-third_party_libs = [
-    "qdrant-client>=1.1.7",  # Qdrant vector store client
-    "kornia",  # SIFT features
-    "langchain>=0.0.177",  # langchain document loaders
-    "pdfminer.six",  # for reading pdfs
-    "gpt4all", # for private GPT
-    "pytube", # for youtube QA app,
-    "youtube-transcript-api"
-]
-
-### NEEDED FOR EXPERIMENTAL FEATURES
-experimental_libs = []
-
-INSTALL_REQUIRES = minimal_requirement + integration_test_libs + udf_libs
-DEV_REQUIRES = (
-    INSTALL_REQUIRES
-    + formatter_libs
-    + test_libs
-    + notebook_libs
-    + benchmark_libs
-    + doc_libs
-    + database_libs
-    + dist_libs
-    + experimental_libs
-    + third_party_libs
-)
-
-EXTRA_REQUIRES = {"dev": DEV_REQUIRES}
+EXTRA_REQUIRES = {
+    "vision": vision_libs,
+    "document": document_libs,
+    "udf": udf_libs,
+    "notebook": notebook_libs,
+    "all": vision_libs + document_libs + udf_libs + notebook_libs,
+    "dev": dev_libs + vision_libs + document_libs + udf_libs + notebook_libs,
+}
 
 setup(
     name=NAME,
