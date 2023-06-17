@@ -1,6 +1,6 @@
 IO Descriptors
 ======================
-EVA supports three key data types. The inputs and outputs of the user-defined functions (UDFs) must be of one of these types.
+EvaDB supports three key data types. The inputs and outputs of the user-defined functions (UDFs) must be of one of these types.
 
 NumpyArray
 ------------
@@ -12,13 +12,13 @@ name (*str*): name of the numpy array.
 
 is_nullable (*bool*): boolean value indicating if the numpy array can be NULL.
 
-type (*NdArrayType*): data type of all the elements in the numpy array. The available types can be found in eva/catalog/catalog_type.py in the class `NdArrayType`
+type (*NdArrayType*): data type of all the elements in the numpy array. The available types can be found in evadb/catalog/catalog_type.py in the class `NdArrayType`
 
 dimensions(*Tuple(int)*): shape of the numpy array
 
 .. code-block:: python
 
-    from eva.catalog.catalog_type import NdArrayType
+    from evadb.catalog.catalog_type import NdArrayType
     NumpyArray(
             name="input_arr",
             is_nullable=False,
@@ -34,13 +34,13 @@ name (*str*): name of the pytorch tensor.
 
 is_nullable (*bool*): boolean value indicating if the pytorch tensor can be NULL.
 
-type (*NdArrayType*): data type of elements in the pytorch tensor. The available types can be found in eva/catalog/catalog_type.py in class NdArrayType
+type (*NdArrayType*): data type of elements in the pytorch tensor. The available types can be found in evadb/catalog/catalog_type.py in class NdArrayType
 
 dimensions(*Tuple(int)*): shape of the numpy array
 
 .. code-block:: python
 
-    from eva.catalog.catalog_type import NdArrayType
+    from evadb.catalog.catalog_type import NdArrayType
     PyTorchTensor(
                     name="input_arr",
                     is_nullable=False,
@@ -53,7 +53,7 @@ PandasDataframe
 ----------------
 columns (*List[str]*): list of strings that represent the expected column names in the pandas dataframe that is returned from the UDF.
 
-column_types (*NdArrayType*): expected datatype of the column in the pandas dataframe returned from the UDF. The NdArrayType class is inherited from eva.catalog.catalog_type.
+column_types (*NdArrayType*): expected datatype of the column in the pandas dataframe returned from the UDF. The NdArrayType class is inherited from evadb.catalog.catalog_type.
 
 column_shapes (*List[tuples]*): list of tuples that represent the expected shapes of columns in the pandas dataframe returned from the UDF.
 

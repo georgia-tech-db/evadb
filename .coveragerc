@@ -1,9 +1,10 @@
 [run]
 omit = 
-    eva/udfs/abstract/*
-    eva/udfs/emotion_detector.py
-    eva/udfs/yolo_object_detector.py
-    eva/experimental/*
+    evadb/udfs/abstract/*
+    evadb/udfs/emotion_detector.py
+    evadb/udfs/yolo_object_detector.py
+    evadb/executor/exchange_executor.py
+    evadb/executor/ray_utils.py
 
 [report]
 exclude_lines =

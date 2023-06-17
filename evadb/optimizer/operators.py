@@ -1,0 +1,1296 @@
+# coding=utf-8
+# Copyright 2018-2023 EvaDB
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+from collections import deque
+from enum import IntEnum, auto
+from pathlib import Path
+from typing import Any, List
+
+from evadb.catalog.catalog_type import VectorStoreType
+from evadb.catalog.models.column_catalog import ColumnCatalogEntry
+from evadb.catalog.models.table_catalog import TableCatalogEntry
+from evadb.catalog.models.udf_io_catalog import UdfIOCatalogEntry
+from evadb.catalog.models.udf_metadata_catalog import UdfMetadataCatalogEntry
+from evadb.expression.abstract_expression import AbstractExpression
+from evadb.expression.constant_value_expression import ConstantValueExpression
+from evadb.expression.function_expression import FunctionExpression
+from evadb.parser.alias import Alias
+from evadb.parser.create_statement import ColumnDefinition
+from evadb.parser.table_ref import TableInfo, TableRef
+from evadb.parser.types import JoinType, ObjectType, ShowType
+
+
+class OperatorType(IntEnum):
+    """
+    Manages enums for all the operators supported
+    """
+
+    DUMMY = auto()
+    LOGICALEXCHANGE = auto()
+    LOGICALGET = auto()
+    LOGICALFILTER = auto()
+    LOGICALPROJECT = auto()
+    LOGICALINSERT = auto()
+    LOGICALDELETE = auto()
+    LOGICALCREATE = auto()
+    LOGICALRENAME = auto()
+    LOGICAL_DROP_OBJECT = auto()
+    LOGICALCREATEUDF = auto()
+    LOGICALLOADDATA = auto()
+    LOGICALQUERYDERIVEDGET = auto()
+    LOGICALUNION = auto()
+    LOGICALGROUPBY = auto()
+    LOGICALORDERBY = auto()
+    LOGICALLIMIT = auto()
+    LOGICALSAMPLE = auto()
+    LOGICALJOIN = auto()
+    LOGICALFUNCTIONSCAN = auto()
+    LOGICAL_CREATE_MATERIALIZED_VIEW = auto()
+    LOGICAL_SHOW = auto()
+    LOGICALEXPLAIN = auto()
+    LOGICALCREATEINDEX = auto()
+    LOGICAL_APPLY_AND_MERGE = auto()
+    LOGICAL_EXTRACT_OBJECT = auto()
+    LOGICAL_VECTOR_INDEX_SCAN = auto()
+    LOGICALDELIMITER = auto()
+
+
+class Operator:
+    """Base class for logical plan of operators
+    Arguments:
+        op_type: {OperatorType} -- {the opr type held by this node}
+        children: {List} -- {the list of operator children for this node}
+    """
+
+    def __init__(self, op_type: OperatorType, children=None):
+        self._opr_type = op_type
+        self._children = children or []
+
+    @property
+    def children(self):
+        return self._children
+
+    @children.setter
+    def children(self, children):
+        self._children = children
+
+    @property
+    def opr_type(self):
+        return self._opr_type
+
+    def append_child(self, child: "Operator"):
+        self.children.append(child)
+
+    def clear_children(self):
+        self.children = []
+
+    def __str__(self) -> str:
+        return "%s[%s](%s)" % (
+            type(self).__name__,
+            hex(id(self)),
+            ", ".join("%s=%s" % item for item in vars(self).items()),
+        )
+
+    def __eq__(self, other):
+        is_subtree_equal = True
+        if not isinstance(other, Operator):
+            return False
+        if len(self.children) != len(other.children):
+            return False
+        for child1, child2 in zip(self.children, other.children):
+            is_subtree_equal = is_subtree_equal and (child1 == child2)
+        return is_subtree_equal
+
+    def is_logical(self):
+        return self._opr_type < OperatorType.LOGICALDELIMITER
+
+    def __hash__(self) -> int:
+        return hash((self.opr_type, tuple(self.children)))
+
+    def __copy__(self):
+        # deepcopy the children
+        cls = self.__class__
+        result = cls.__new__(cls)
+        for k, v in self.__dict__.items():
+            if k == "_children":
+                setattr(result, k, [])
+            else:
+                setattr(result, k, v)
+        return result
+
+    def bfs(self):
+        """Returns a generator which visits all nodes in operator tree in
+        breadth-first search (BFS) traversal order.
+
+        Returns:
+            the generator object.
+        """
+        queue = deque([self])
+        while queue:
+            node = queue.popleft()
+            yield node
+            for child in node.children:
+                queue.append(child)
+
+    def find_all(self, operator_type: Any):
+        """Returns a generator which visits all the nodes in operator tree and yields one that matches the passed `operator_type`.
+
+        Args:
+            operator_type (Any): operator type to match with
+
+        Returns:
+            the generator object.
+        """
+
+        for node in self.bfs():
+            if isinstance(node, operator_type):
+                yield node
+
+
+class Dummy(Operator):
+    """
+    Acts as a placeholder for matching any operator in optimizer.
+    It tracks the group_id of the matching operator.
+    """
+
+    def __init__(self, group_id: int, opr: Operator):
+        super().__init__(OperatorType.DUMMY, None)
+        self.group_id = group_id
+        self.opr = opr
+
+
+class LogicalGet(Operator):
+    def __init__(
+        self,
+        video: TableRef,
+        table_obj: TableCatalogEntry,
+        alias: str,
+        predicate: AbstractExpression = None,
+        target_list: List[AbstractExpression] = None,
+        sampling_rate: int = None,
+        sampling_type: str = None,
+        chunk_params: dict = {},
+        children=None,
+    ):
+        self._video = video
+        self._table_obj = table_obj
+        self._alias = alias
+        self._predicate = predicate
+        self._target_list = target_list
+        self._sampling_rate = sampling_rate
+        self._sampling_type = sampling_type
+        self.chunk_params = chunk_params
+        super().__init__(OperatorType.LOGICALGET, children)
+
+    @property
+    def video(self):
+        return self._video
+
+    @property
+    def table_obj(self):
+        return self._table_obj
+
+    @property
+    def alias(self):
+        return self._alias
+
+    @property
+    def predicate(self):
+        return self._predicate
+
+    @property
+    def target_list(self):
+        return self._target_list
+
+    @property
+    def sampling_rate(self):
+        return self._sampling_rate
+
+    @property
+    def sampling_type(self):
+        return self._sampling_type
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalGet):
+            return False
+        return (
+            is_subtree_equal
+            and self.video == other.video
+            and self.table_obj == other.table_obj
+            and self.alias == other.alias
+            and self.predicate == other.predicate
+            and self.target_list == other.target_list
+            and self.sampling_rate == other.sampling_rate
+            and self.sampling_type == other.sampling_type
+            and self.chunk_params == other.chunk_params
+        )
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                super().__hash__(),
+                self.alias,
+                self.video,
+                self.table_obj,
+                self.predicate,
+                tuple(self.target_list or []),
+                self.sampling_rate,
+                self.sampling_type,
+                frozenset(self.chunk_params.items()),
+            )
+        )
+
+
+class LogicalQueryDerivedGet(Operator):
+    def __init__(
+        self,
+        alias: str,
+        predicate: AbstractExpression = None,
+        target_list: List[AbstractExpression] = None,
+        children: List = None,
+    ):
+        super().__init__(OperatorType.LOGICALQUERYDERIVEDGET, children=children)
+        self._alias = alias
+        self.predicate = predicate
+        self.target_list = target_list or []
+
+    @property
+    def alias(self):
+        return self._alias
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalQueryDerivedGet):
+            return False
+        return (
+            is_subtree_equal
+            and self.predicate == other.predicate
+            and self.target_list == other.target_list
+            and self.alias == other.alias
+        )
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                super().__hash__(),
+                self.alias,
+                self.predicate,
+                tuple(self.target_list),
+            )
+        )
+
+
+class LogicalFilter(Operator):
+    def __init__(self, predicate: AbstractExpression, children=None):
+        self._predicate = predicate
+        super().__init__(OperatorType.LOGICALFILTER, children)
+
+    @property
+    def predicate(self):
+        return self._predicate
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalFilter):
+            return False
+        return is_subtree_equal and self.predicate == other.predicate
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(), self.predicate))
+
+
+class LogicalProject(Operator):
+    def __init__(self, target_list: List[AbstractExpression], children=None):
+        super().__init__(OperatorType.LOGICALPROJECT, children)
+        self._target_list = target_list
+
+    @property
+    def target_list(self):
+        return self._target_list
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalProject):
+            return False
+        return is_subtree_equal and self.target_list == other.target_list
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(), tuple(self.target_list)))
+
+
+class LogicalGroupBy(Operator):
+    def __init__(self, groupby_clause: ConstantValueExpression, children: List = None):
+        super().__init__(OperatorType.LOGICALGROUPBY, children)
+        self._groupby_clause = groupby_clause
+
+    @property
+    def groupby_clause(self):
+        return self._groupby_clause
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalGroupBy):
+            return False
+        return is_subtree_equal and self.groupby_clause == other.groupby_clause
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(), self.groupby_clause))
+
+
+class LogicalOrderBy(Operator):
+    def __init__(self, orderby_list: List, children: List = None):
+        super().__init__(OperatorType.LOGICALORDERBY, children)
+        self._orderby_list = orderby_list
+
+    @property
+    def orderby_list(self):
+        return self._orderby_list
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalOrderBy):
+            return False
+        return is_subtree_equal and self.orderby_list == other.orderby_list
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(), tuple(self.orderby_list)))
+
+
+class LogicalLimit(Operator):
+    def __init__(self, limit_count: ConstantValueExpression, children: List = None):
+        super().__init__(OperatorType.LOGICALLIMIT, children)
+        self._limit_count = limit_count
+
+    @property
+    def limit_count(self):
+        return self._limit_count
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalLimit):
+            return False
+        return is_subtree_equal and self.limit_count == other.limit_count
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(), self.limit_count))
+
+
+class LogicalSample(Operator):
+    def __init__(
+        self,
+        sample_freq: ConstantValueExpression,
+        sample_type: ConstantValueExpression,
+        children: List = None,
+    ):
+        super().__init__(OperatorType.LOGICALSAMPLE, children)
+        self._sample_freq = sample_freq
+        self._sample_type = sample_type
+
+    @property
+    def sample_freq(self):
+        return self._sample_freq
+
+    @property
+    def sample_type(self):
+        return self._sample_type
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalSample):
+            return False
+        return (
+            is_subtree_equal
+            and self.sample_freq == other.sample_freq
+            and self.sample_type == other.sample_type
+        )
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(), self.sample_freq, self.sample_type))
+
+
+class LogicalUnion(Operator):
+    def __init__(self, all: bool, children: List = None):
+        super().__init__(OperatorType.LOGICALUNION, children)
+        self._all = all
+
+    @property
+    def all(self):
+        return self._all
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalUnion):
+            return False
+        return is_subtree_equal and self.all == other.all
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(), self.all))
+
+
+class LogicalInsert(Operator):
+    """[Logical Node for Insert operation]
+
+    Arguments:
+        table(TableCatalogEntry): table to insert data into
+        column_list{List[AbstractExpression]}:
+            [After binding annotated column_list]
+        value_list{List[AbstractExpression]}:
+            [value list to insert]
+    """
+
+    def __init__(
+        self,
+        table: TableCatalogEntry,
+        column_list: List[AbstractExpression],
+        value_list: List[AbstractExpression],
+        children: List = None,
+    ):
+        super().__init__(OperatorType.LOGICALINSERT, children)
+        self._table = table
+        self._column_list = column_list
+        self._value_list = value_list
+
+    @property
+    def table(self):
+        return self._table
+
+    @property
+    def value_list(self):
+        return self._value_list
+
+    @property
+    def column_list(self):
+        return self._column_list
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalInsert):
+            return False
+        return (
+            is_subtree_equal
+            and self.table == other.table
+            and self.value_list == other.value_list
+            and self.column_list == other.column_list
+        )
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                super().__hash__(),
+                self.table,
+                tuple(self.value_list),
+                tuple(self.column_list),
+            )
+        )
+
+
+class LogicalDelete(Operator):
+    """[Logical Node for Delete Operation]
+
+    Arguments:
+        table_ref(TableCatalogEntry): table to delete tuples from,
+        where_clause(AbstractExpression): the predicate used to select which rows to delete,
+
+    """
+
+    def __init__(
+        self,
+        table_ref: TableRef,
+        where_clause: AbstractExpression = None,
+        children=None,
+    ):
+        super().__init__(OperatorType.LOGICALDELETE, children)
+        self._table_ref = table_ref
+        self._where_clause = where_clause
+
+    @property
+    def table_ref(self):
+        return self._table_ref
+
+    @property
+    def where_clause(self):
+        return self._where_clause
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalDelete):
+            return False
+        return (
+            is_subtree_equal
+            and self.table_ref == other.table_ref
+            and self.where_clause == other.where_clause
+        )
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                super().__hash__(),
+                self.table_ref,
+                self.where_clause,
+            )
+        )
+
+
+class LogicalCreate(Operator):
+    """Logical node for create table operations
+
+    Arguments:
+        video {TableRef}: [video table that is to be created]
+        column_list {List[ColumnDefinition]}:
+        if_not_exists {bool}: [create table if exists]
+
+    """
+
+    def __init__(
+        self,
+        video: TableInfo,
+        column_list: List[ColumnDefinition],
+        if_not_exists: bool = False,
+        children: List = None,
+    ):
+        super().__init__(OperatorType.LOGICALCREATE, children)
+        self._video = video
+        self._column_list = column_list
+        self._if_not_exists = if_not_exists
+
+    @property
+    def video(self):
+        return self._video
+
+    @property
+    def column_list(self):
+        return self._column_list
+
+    @property
+    def if_not_exists(self):
+        return self._if_not_exists
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalCreate):
+            return False
+        return (
+            is_subtree_equal
+            and self.video == other.video
+            and self.column_list == other.column_list
+            and self.if_not_exists == other.if_not_exists
+        )
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                super().__hash__(),
+                self.video,
+                tuple(self.column_list),
+                self.if_not_exists,
+            )
+        )
+
+
+class LogicalRename(Operator):
+    """Logical node for rename table operations
+
+    Arguments:
+        old_table {TableRef}: [old table that is to be renamed]
+        new_name {TableInfo}: [new name for the old table]
+    """
+
+    def __init__(self, old_table_ref: TableRef, new_name: TableInfo, children=None):
+        super().__init__(OperatorType.LOGICALRENAME, children)
+        self._new_name = new_name
+        self._old_table_ref = old_table_ref
+
+    @property
+    def new_name(self):
+        return self._new_name
+
+    @property
+    def old_table_ref(self):
+        return self._old_table_ref
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalRename):
+            return False
+        return (
+            is_subtree_equal
+            and self._new_name == other._new_name
+            and self._old_table_ref == other._old_table_ref
+        )
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(), self._new_name, self._old_table_ref))
+
+
+class LogicalCreateUDF(Operator):
+    """
+    Logical node for create udf operations
+
+    Attributes:
+        name: str
+            udf_name provided by the user required
+        if_not_exists: bool
+            if true should throw an error if udf with same name exists
+            else will replace the existing
+        inputs: List[UdfIOCatalogEntry]
+            udf inputs, annotated list similar to table columns
+        outputs: List[UdfIOCatalogEntry]
+            udf outputs, annotated list similar to table columns
+        impl_path: Path
+            file path which holds the implementation of the udf.
+            This file should be placed in the UDF directory and
+            the path provided should be relative to the UDF dir.
+        udf_type: str
+            udf type. it ca be object detection, classification etc.
+    """
+
+    def __init__(
+        self,
+        name: str,
+        if_not_exists: bool,
+        inputs: List[UdfIOCatalogEntry],
+        outputs: List[UdfIOCatalogEntry],
+        impl_path: Path,
+        udf_type: str = None,
+        metadata: List[UdfMetadataCatalogEntry] = None,
+        children: List = None,
+    ):
+        super().__init__(OperatorType.LOGICALCREATEUDF, children)
+        self._name = name
+        self._if_not_exists = if_not_exists
+        self._inputs = inputs
+        self._outputs = outputs
+        self._impl_path = impl_path
+        self._udf_type = udf_type
+        self._metadata = metadata
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def if_not_exists(self):
+        return self._if_not_exists
+
+    @property
+    def inputs(self):
+        return self._inputs
+
+    @property
+    def outputs(self):
+        return self._outputs
+
+    @property
+    def impl_path(self):
+        return self._impl_path
+
+    @property
+    def udf_type(self):
+        return self._udf_type
+
+    @property
+    def metadata(self):
+        return self._metadata
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalCreateUDF):
+            return False
+        return (
+            is_subtree_equal
+            and self.name == other.name
+            and self.if_not_exists == other.if_not_exists
+            and self.inputs == other.inputs
+            and self.outputs == other.outputs
+            and self.udf_type == other.udf_type
+            and self.impl_path == other.impl_path
+            and self.metadata == other.metadata
+        )
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                super().__hash__(),
+                self.name,
+                self.if_not_exists,
+                tuple(self.inputs),
+                tuple(self.outputs),
+                self.udf_type,
+                self.impl_path,
+                tuple(self.metadata),
+            )
+        )
+
+
+class LogicalDropObject(Operator):
+    """
+    Logical node for DROP Object operations
+
+    Attributes:
+        object_type: ObjectType
+        name: str
+            UDF name provided by the user
+        if_exists: bool
+            if false, throws an error when no UDF with name exists
+            else logs a warning
+    """
+
+    def __init__(
+        self, object_type: ObjectType, name: str, if_exists: bool, children: List = None
+    ):
+        super().__init__(OperatorType.LOGICAL_DROP_OBJECT, children)
+        self._object_type = object_type
+        self._name = name
+        self._if_exists = if_exists
+
+    @property
+    def object_type(self):
+        return self._object_type
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def if_exists(self):
+        return self._if_exists
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalDropObject):
+            return False
+        return (
+            is_subtree_equal
+            and self.object_type == other.object_type
+            and self.name == other.name
+            and self.if_exists == other.if_exists
+        )
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(), self.object_type, self.name, self.if_exists))
+
+
+class LogicalLoadData(Operator):
+    """Logical node for load data operation
+
+    Arguments:
+        table(TableCatalogEntry): table to load data into
+        path(Path): file path from where we are loading data
+    """
+
+    def __init__(
+        self,
+        table_info: TableInfo,
+        path: Path,
+        column_list: List[AbstractExpression] = None,
+        file_options: dict = dict(),
+        children: List = None,
+    ):
+        super().__init__(OperatorType.LOGICALLOADDATA, children=children)
+        self._table_info = table_info
+        self._path = path
+        self._column_list = column_list or []
+        self._file_options = file_options
+
+    @property
+    def table_info(self):
+        return self._table_info
+
+    @property
+    def path(self):
+        return self._path
+
+    @property
+    def column_list(self):
+        return self._column_list
+
+    @property
+    def file_options(self):
+        return self._file_options
+
+    def __str__(self):
+        return "LogicalLoadData(table: {}, path: {}, \
+                column_list: {}, \
+                file_options: {})".format(
+            self.table_info, self.path, self.column_list, self.file_options
+        )
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalLoadData):
+            return False
+        return (
+            is_subtree_equal
+            and self.table_info == other.table_info
+            and self.path == other.path
+            and self.column_list == other.column_list
+            and self.file_options == other.file_options
+        )
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                super().__hash__(),
+                self.table_info,
+                self.path,
+                tuple(self.column_list),
+                frozenset(self.file_options.items()),
+            )
+        )
+
+
+class LogicalFunctionScan(Operator):
+    """
+    Logical node for function table scans
+
+    Attributes:
+        func_expr: AbstractExpression
+            function_expression that yield a table like output
+    """
+
+    def __init__(
+        self,
+        func_expr: AbstractExpression,
+        alias: Alias,
+        do_unnest: bool = False,
+        children: List = None,
+    ):
+        super().__init__(OperatorType.LOGICALFUNCTIONSCAN, children)
+        self._func_expr = func_expr
+        self._do_unnest = do_unnest
+        self._alias = alias
+
+    @property
+    def alias(self):
+        return self._alias
+
+    @property
+    def func_expr(self):
+        return self._func_expr
+
+    @property
+    def do_unnest(self):
+        return self._do_unnest
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalFunctionScan):
+            return False
+        return (
+            is_subtree_equal
+            and self.func_expr == other.func_expr
+            and self.do_unnest == other.do_unnest
+            and self.alias == other.alias
+        )
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(), self.func_expr, self.do_unnest, self.alias))
+
+
+class LogicalExtractObject(Operator):
+    def __init__(
+        self,
+        detector: FunctionExpression,
+        tracker: FunctionExpression,
+        alias: Alias,
+        do_unnest: bool = False,
+        children: List = None,
+    ):
+        super().__init__(OperatorType.LOGICAL_EXTRACT_OBJECT, children)
+        self.detector = detector
+        self.tracker = tracker
+        self.do_unnest = do_unnest
+        self.alias = alias
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalExtractObject):
+            return False
+        return (
+            is_subtree_equal
+            and self.detector == other.detector
+            and self.tracker == other.tracker
+            and self.do_unnest == other.do_unnest
+            and self.alias == other.alias
+        )
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                super().__hash__(),
+                self.detector,
+                self.tracker,
+                self.do_unnest,
+                self.alias,
+            )
+        )
+
+
+class LogicalJoin(Operator):
+    """
+    Logical node for join operators
+
+    Attributes:
+        join_type: JoinType
+            Join type provided by the user - Lateral, Inner, Outer
+        join_predicate: AbstractExpression
+            condition/predicate expression used to join the tables
+    """
+
+    def __init__(
+        self,
+        join_type: JoinType,
+        join_predicate: AbstractExpression = None,
+        left_keys: List[ColumnCatalogEntry] = None,
+        right_keys: List[ColumnCatalogEntry] = None,
+        children: List = None,
+    ):
+        super().__init__(OperatorType.LOGICALJOIN, children)
+        self._join_type = join_type
+        self._join_predicate = join_predicate
+        self._left_keys = left_keys
+        self._right_keys = right_keys
+        self._join_project = None
+
+    @property
+    def join_type(self):
+        return self._join_type
+
+    @property
+    def join_predicate(self):
+        return self._join_predicate
+
+    @property
+    def left_keys(self):
+        return self._left_keys
+
+    @property
+    def right_keys(self):
+        return self._right_keys
+
+    @property
+    def join_project(self):
+        return self._join_project
+
+    def lhs(self):
+        return self.children[0]
+
+    def rhs(self):
+        return self.children[1]
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalJoin):
+            return False
+        return (
+            is_subtree_equal
+            and self.join_type == other.join_type
+            and self.join_predicate == other.join_predicate
+            and self.left_keys == other.left_keys
+            and self.right_keys == other.right_keys
+            and self.join_project == other.join_project
+        )
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                super().__hash__(),
+                self.join_type,
+                self.join_predicate,
+                self.left_keys,
+                self.right_keys,
+                tuple(self.join_project or []),
+            )
+        )
+
+
+class LogicalCreateMaterializedView(Operator):
+    """Logical node for create materialized view operations
+    Arguments:
+        view {TableRef}: [view table that is to be created]
+        col_list{List[ColumnDefinition]} -- column names in the view
+        if_not_exists {bool}: [whether to override if view exists]
+    """
+
+    def __init__(
+        self,
+        view: TableInfo,
+        col_list: List[ColumnDefinition],
+        if_not_exists: bool = False,
+        children=None,
+    ):
+        super().__init__(OperatorType.LOGICAL_CREATE_MATERIALIZED_VIEW, children)
+        self._view = view
+        self._col_list = col_list
+        self._if_not_exists = if_not_exists
+
+    @property
+    def view(self):
+        return self._view
+
+    @property
+    def if_not_exists(self):
+        return self._if_not_exists
+
+    @property
+    def col_list(self):
+        return self._col_list
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalCreateMaterializedView):
+            return False
+        return (
+            is_subtree_equal
+            and self.view == other.view
+            and self.col_list == other.col_list
+            and self.if_not_exists == other.if_not_exists
+        )
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                super().__hash__(),
+                self.view,
+                tuple(self.col_list),
+                self.if_not_exists,
+            )
+        )
+
+
+class LogicalShow(Operator):
+    def __init__(self, show_type: ShowType, children: List = None):
+        super().__init__(OperatorType.LOGICAL_SHOW, children)
+        self._show_type = show_type
+
+    @property
+    def show_type(self):
+        return self._show_type
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalShow):
+            return False
+        return is_subtree_equal and self.show_type == other.show_type
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(), self.show_type))
+
+
+class LogicalExchange(Operator):
+    def __init__(self, children=None):
+        super().__init__(OperatorType.LOGICALEXCHANGE, children)
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalExchange):
+            return False
+        return is_subtree_equal
+
+
+class LogicalExplain(Operator):
+    def __init__(self, children: List = None):
+        super().__init__(OperatorType.LOGICALEXPLAIN, children)
+        assert len(children) == 1, "EXPLAIN command only takes one child"
+        self._explainable_opr = children[0]
+
+    @property
+    def explainable_opr(self):
+        return self._explainable_opr
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalExplain):
+            return False
+        return is_subtree_equal and self._explainable_opr == other.explainable_opr
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(), self._explainable_opr))
+
+
+class LogicalCreateIndex(Operator):
+    def __init__(
+        self,
+        name: str,
+        table_ref: TableRef,
+        col_list: List[ColumnDefinition],
+        vector_store_type: VectorStoreType,
+        udf_func: FunctionExpression = None,
+        children: List = None,
+    ):
+        super().__init__(OperatorType.LOGICALCREATEINDEX, children)
+        self._name = name
+        self._table_ref = table_ref
+        self._col_list = col_list
+        self._vector_store_type = vector_store_type
+        self._udf_func = udf_func
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def table_ref(self):
+        return self._table_ref
+
+    @property
+    def col_list(self):
+        return self._col_list
+
+    @property
+    def vector_store_type(self):
+        return self._vector_store_type
+
+    @property
+    def udf_func(self):
+        return self._udf_func
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalCreateIndex):
+            return False
+        return (
+            is_subtree_equal
+            and self.name == other.name
+            and self.table_ref == other.table_ref
+            and self.col_list == other.col_list
+            and self.vector_store_type == other.vector_store_type
+            and self.udf_func == other.udf_func
+        )
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                super().__hash__(),
+                self.name,
+                self.table_ref,
+                tuple(self.col_list),
+                self.vector_store_type,
+                self.udf_func,
+            )
+        )
+
+
+class LogicalApplyAndMerge(Operator):
+    """Evaluate the function expression on the input data and return the merged output.
+    This operator simplifies the process of evaluating functions on a table source.
+    Currently, it performs an inner join while merging the function output with the
+    input data. This means that if the function does not return any output for a given
+    input row, that row will be dropped from the output. We can consider expanding this
+    to support left joins and other types of joins in the future.
+    """
+
+    def __init__(
+        self,
+        func_expr: FunctionExpression,
+        alias: Alias,
+        do_unnest: bool = False,
+        children: List = None,
+    ):
+        super().__init__(OperatorType.LOGICAL_APPLY_AND_MERGE, children)
+        self._func_expr = func_expr
+        self._do_unnest = do_unnest
+        self._alias = alias
+        self._merge_type = JoinType.INNER_JOIN
+
+    @property
+    def alias(self):
+        return self._alias
+
+    @property
+    def func_expr(self):
+        return self._func_expr
+
+    @property
+    def do_unnest(self):
+        return self._do_unnest
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalApplyAndMerge):
+            return False
+        return (
+            is_subtree_equal
+            and self.func_expr == other.func_expr
+            and self.do_unnest == other.do_unnest
+            and self.alias == other.alias
+            and self._merge_type == other._merge_type
+        )
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                super().__hash__(),
+                self.func_expr,
+                self.do_unnest,
+                self.alias,
+                self._merge_type,
+            )
+        )
+
+
+class LogicalVectorIndexScan(Operator):
+    def __init__(
+        self,
+        index_name: str,
+        vector_store_type: VectorStoreType,
+        limit_count: ConstantValueExpression,
+        search_query_expr: FunctionExpression,
+        children: List = None,
+    ):
+        super().__init__(OperatorType.LOGICAL_VECTOR_INDEX_SCAN, children)
+        self._index_name = index_name
+        self._vector_store_type = vector_store_type
+        self._limit_count = limit_count
+        self._search_query_expr = search_query_expr
+
+    @property
+    def index_name(self):
+        return self._index_name
+
+    @property
+    def vector_store_type(self):
+        return self._vector_store_type
+
+    @property
+    def limit_count(self):
+        return self._limit_count
+
+    @property
+    def search_query_expr(self):
+        return self._search_query_expr
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalVectorIndexScan):
+            return False
+        return (
+            is_subtree_equal
+            and self.index_name == other.index_name
+            and self.vector_store_type == other.vector_store_type
+            and self.limit_count == other.limit_count
+            and self.search_query_expr == other.search_query_expr
+        )
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                super().__hash__(),
+                self.index_name,
+                self.vector_store_type,
+                self.limit_count,
+                self.search_query_expr,
+            )
+        )

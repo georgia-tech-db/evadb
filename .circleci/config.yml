@@ -9,6 +9,8 @@ workflows:
     jobs:
         - Pip-PyPI
         - Pip-Local
+        - Docker-Local
+        - AWS
         #### UNIT TESTS
         - Linux:
             name: "Test | v3.8 | Linux"
@@ -52,13 +54,12 @@ workflows:
             mode: "LINTER"
         ### RAY
         - Linux:
-            name: "Test | Ray | v3.10 | Linux"
+            name: "Test | Coverage | v3.10 | Linux"
             v: "3.10"
-            mode: "RAY"
+            mode: "COV"
         - Windows:
             name: "Windows | v3.10"
-        # test_create_index_doesn't work on MacOS
-        # - MacOS:
+        #- MacOS:
         #    name: "MacOS | v3.10"
         # missing Torchvision
         #- Linux:
@@ -84,28 +85,26 @@ jobs:
 
       - restore_cache:
           keys:
-            - v5-model_cache-{{ checksum "setup.py" }}
+            - v1-model_cache-{{ checksum "setup.py" }}
       
       - run:
           name: Install EVA package from GitHub repo with all dependencies
           command: |
-            sudo apt-get update
-            sudo apt-get install -y enchant-2 aspell
             "python<< parameters.v >>" -m venv test_evadb
             pip install --upgrade pip
             source test_evadb/bin/activate
             pip install ".[dev]"
 
-      # Enable Ray conditionally
+      # Disable Ray for Coverage
       - when:
-          condition: 
-            equal: [ RAY, << parameters.mode >> ]
+          condition:
+            equal: [ COV, << parameters.mode >> ]
           steps:
             - run:
-                name: Enable Ray setting in the config.yml file
+                name: Disable Ray setting in the config.yml file
                 command: |
                   source test_evadb/bin/activate
-                  python -c "import yaml;f = open('eva/eva.yml', 'r+');config_obj = yaml.load(f, Loader=yaml.FullLoader);config_obj['experimental']['ray'] = True;f.seek(0);f.write(yaml.dump(config_obj));f.truncate();"
+                  python -c "import yaml;f = open('evadb/evadb.yml', 'r+');config_obj = yaml.load(f, Loader=yaml.FullLoader);config_obj['experimental']['ray'] = False;f.seek(0);f.write(yaml.dump(config_obj));f.truncate();"
 
       - run:
           name: Test and upload coverage report to coveralls
@@ -120,10 +119,11 @@ jobs:
             equal: [ TEST, << parameters.mode >> ]
           steps:
             - save_cache:
-                key: v5-model_cache-{{ checksum "setup.py" }}
+                key: v1-model_cache-{{ checksum "setup.py" }}
                 paths:
                   - /home/circleci/.cache/huggingface/
                   - /home/circleci/.cache/torch/
+                  - /home/circleci/.cache/gpt4all/
 
   Windows:
       executor: win/default
@@ -192,3 +192,31 @@ jobs:
             pip install --upgrade pip
             pip install "."
             bash script/test/package.sh
+
+  Docker-Local:
+    resource_class: large
+    docker:
+      - image: cimg/base:2023.05
+
+    steps:
+      - setup_remote_docker
+      - checkout
+      - run:
+          name: Build EVA Docker image and start server
+          command: |
+            docker build -t evadb docker
+            timeout 30 docker run evadb || true
+
+  AWS:
+    resource_class: large
+    docker:
+      - image: cimg/aws:2023.05
+
+    steps:
+      - setup_remote_docker
+      - run:
+          name: Pull EVA Docker image and start server
+          command: |
+            aws --version
+            docker pull evadbai/evaserver
+            timeout 30 docker run evadbai/evaserver || true

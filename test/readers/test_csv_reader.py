@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
 import unittest
 from test.util import create_dummy_csv_batches, create_sample_csv, file_remove
 
-from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.readers.csv_reader import CSVReader
+from evadb.expression.tuple_value_expression import TupleValueExpression
+from evadb.readers.csv_reader import CSVReader
 
 
 class CSVLoaderTest(unittest.TestCase):
@@ -28,9 +28,9 @@ class CSVLoaderTest(unittest.TestCase):
 
     def test_should_return_one_batch(self):
         column_list = [
-            TupleValueExpression(col_name="id", table_alias="dummy"),
-            TupleValueExpression(col_name="frame_id", table_alias="dummy"),
-            TupleValueExpression(col_name="video_id", table_alias="dummy"),
+            TupleValueExpression(name="id", table_alias="dummy"),
+            TupleValueExpression(name="frame_id", table_alias="dummy"),
+            TupleValueExpression(name="video_id", table_alias="dummy"),
         ]
 
         # call the CSVReader

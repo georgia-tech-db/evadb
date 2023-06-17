@@ -1,13 +1,13 @@
 Ultralytics Models
 =========================
 
-This section provides an overview of how you can use out-of-the-box Ultralytics models in EVA.
+This section provides an overview of how you can use out-of-the-box Ultralytics models in EvaDB.
 
 
 Creating YOLO Model
 -------------------
 
-To create a YOLO UDF in EVA using Ultralytics models, use the following SQL command:
+To create a YOLO UDF in EvaDB using Ultralytics models, use the following SQL command:
 
 .. code-block:: sql
 
@@ -20,7 +20,7 @@ You can change the `model` value to specify any other model supported by Ultraly
 Supported Models
 ----------------
 
-The following models are currently supported by Ultralytics in EVA:
+The following models are currently supported by Ultralytics in EvaDB:
 
 - yolov8n.pt
 - yolov8s.pt

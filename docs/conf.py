@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.abspath(".."))
 
 # The full version, including alpha/beta/rc tags
 VERSION_DICT = {}
-with open("../eva/version.py", "r") as version_file:
+with open("../evadb/version.py", "r") as version_file:
     exec(version_file.read(), VERSION_DICT)
 
 # Set the latest version.
@@ -29,12 +29,12 @@ extensions = [
     "sphinx_click.ext",
     "sphinx-jsonschema",
     "sphinx_copybutton",
-    "sphinx_sitemap",
     "sphinx.ext.doctest",
     "sphinx.ext.coverage",
     "sphinx.ext.autosectionlabel",
     "sphinx.ext.autosummary",
     "sphinx.ext.autodoc",
+    "sphinx.ext.autodoc.typehints",
     "sphinx.ext.todo",
     "sphinx.ext.mathjax",
     "sphinx.ext.githubpages",
@@ -43,9 +43,21 @@ extensions = [
     "sphinxcontrib.redoc",
     "sphinxcontrib.youtube",
     "sphinx_inline_tabs",
+    "sphinx.ext.intersphinx",
     "myst_nb",
-    "versionwarning.extension"
+    "versionwarning.extension",
+    "IPython.sphinxext.ipython_console_highlighting",
 ]
+source_suffix = [".ipynb", ".html", ".md", ".rst"]
+
+autodoc_pydantic_model_show_json = False
+autodoc_pydantic_field_list_validators = False
+autodoc_pydantic_config_members = False
+autodoc_pydantic_model_show_config_summary = False
+autodoc_pydantic_model_show_validator_members = False
+autodoc_pydantic_model_show_field_summary = False
+autodoc_pydantic_model_members = False
+autodoc_pydantic_model_undoc_members = False
 
 myst_enable_extensions = [
     "dollarmath",
@@ -57,6 +69,7 @@ myst_enable_extensions = [
     "smartquotes",
     "replacements",
 ]
+
 
 # Thebe configuration for launching notebook cells within the docs.
 thebe_config = {
@@ -72,16 +85,16 @@ source_suffix = [".rst", ".md"]
 master_doc = "index"
 
 # General information about the project.
-project = "EVA DB"
-copyright = str(date.today().year) + ", EVA DB."
-author = u"EVA DB"
+project = "EvaDB"
+copyright = str(date.today().year) + ", EvaDB."
+author = u"EvaDB Team"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # The name of the Pygments (syntax highlighting) style to use.
-#pygments_style = "lovelace"
+# pygments_style = "lovelace"
 
 # List of substitutions
 rst_prolog = """
@@ -100,13 +113,14 @@ notfound_urls_prefix = ""
 # The theme to use for pages.
 html_theme = "furo"
 
+html_title = project + "\n" + LATEST_VERSION
+html_static_path = ["_static"]
+
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for the theme, see the
 # documentation.
 html_theme_options = {
-    "sidebar_hide_name": True,
     "navigation_with_keys": True,
-    "top_of_page_button": "edit",
     "light_css_variables": {
         "color-background-secondary": "#fff",
         "color-sidebar-background-border": "none",
@@ -116,35 +130,31 @@ html_theme_options = {
     },
     "navigation_with_keys": True,
     # Add important announcement here
-    #"announcement": "<em>Important</em> announcement!"
+    # "announcement": "<em>Important</em> announcement!"
 }
 
 external_toc_path = "_toc.yml"  # optional, default: _toc.yml
 external_toc_exclude_missing = False  # optional, default: False
 
-html_logo = "images/eva/eva-logo.png"
+# html_logo = "images/eva/eva-logo.png"
 
-html_sidebars = {
-    "**": [
-        "sidebar/scroll-start.html",
-        "sidebar/brand.html",
-        "sidebar/search.html",
-        "sidebar/navigation.html",
-        "sidebar/scroll-end.html"
-    ]
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3", (None, "python-inv.txt"))
 }
 
+
 # Adding custom css file
-html_static_path = ['_static']
-html_css_files = ['custom.css']
+html_static_path = ["_static"]
+html_css_files = ["custom.css"]
 
 # Adding the Tutorial notebooks to ./docs/source/tutorials/
 
-for i in os.listdir('../tutorials'):
-    if i.endswith('.ipynb'):
-        shutil.copy(f'../tutorials/{i}', './source/tutorials/')
+for i in os.listdir("../tutorials"):
+    if i.endswith(".ipynb"):
+        shutil.copy(f"../tutorials/{i}", "./source/tutorials/")
 
 jupyter_execute_notebooks = "off"
+
 
 # -- Initialize Sphinx ----------------------------------------------
 def setup(sphinx):

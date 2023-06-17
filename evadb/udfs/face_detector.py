@@ -1,0 +1,91 @@
+# coding=utf-8
+# Copyright 2018-2023 EvaDB
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+from typing import List
+
+import numpy as np
+import pandas as pd
+
+from evadb.udfs.abstract.abstract_udf import AbstractClassifierUDF
+from evadb.udfs.gpu_compatible import GPUCompatible
+from evadb.utils.generic_utils import (
+    try_to_import_facenet_pytorch,
+    try_to_import_torch,
+    try_to_import_torchvision,
+)
+from evadb.utils.logging_manager import logger
+
+
+class FaceDetector(AbstractClassifierUDF, GPUCompatible):
+    """
+    Arguments:
+        threshold (float): Threshold for classifier confidence score
+    """
+
+    def setup(self, threshold=0.85):
+        self.threshold = threshold
+        try_to_import_torch()
+        try_to_import_torchvision()
+        try_to_import_facenet_pytorch()
+        from facenet_pytorch import MTCNN
+
+        self.model = MTCNN()
+
+    @property
+    def name(self) -> str:
+        return "FaceDetector"
+
+    def to_device(self, device: str):
+        try_to_import_facenet_pytorch()
+        import torch
+        from facenet_pytorch import MTCNN
+
+        gpu = "cuda:{}".format(device)
+        self.model = MTCNN(device=torch.device(gpu))
+        return self
+
+    @property
+    def labels(self) -> List[str]:
+        return []
+
+    def forward(self, frames: pd.DataFrame) -> pd.DataFrame:
+        """
+        Performs predictions on input frames
+        Arguments:
+            frames (np.ndarray): Frames on which predictions need
+            to be performed
+        Returns:
+            face boxes (List[List[BoundingBox]])
+        """
+
+        frames_list = frames.transpose().values.tolist()[0]
+        frames = np.asarray(frames_list)
+        detections = self.model.detect(frames)
+        boxes, scores = detections
+        outcome = []
+        for frame_boxes, frame_scores in zip(boxes, scores):
+            pred_boxes = []
+            pred_scores = []
+            if frame_boxes is not None and frame_scores is not None:
+                if not np.isnan(pred_boxes):
+                    pred_boxes = np.asarray(frame_boxes, dtype="int")
+                    pred_scores = frame_scores
+                else:
+                    logger.warn(f"Nan entry in box {frame_boxes}")
+            outcome.append(
+                {"bboxes": pred_boxes, "scores": pred_scores},
+            )
+
+        return pd.DataFrame(outcome, columns=["bboxes", "scores"])

@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,32 +15,36 @@
 import unittest
 from pathlib import Path
 
-from eva.catalog.catalog_type import ColumnType, NdArrayType, VectorStoreType
-from eva.expression.abstract_expression import ExpressionType
-from eva.expression.comparison_expression import ComparisonExpression
-from eva.expression.constant_value_expression import ConstantValueExpression
-from eva.expression.function_expression import FunctionExpression
-from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.parser.alias import Alias
-from eva.parser.create_index_statement import CreateIndexStatement
-from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
-from eva.parser.create_statement import (
+from evadb.catalog.catalog_type import ColumnType, NdArrayType, VectorStoreType
+from evadb.expression.abstract_expression import ExpressionType
+from evadb.expression.comparison_expression import ComparisonExpression
+from evadb.expression.constant_value_expression import ConstantValueExpression
+from evadb.expression.function_expression import FunctionExpression
+from evadb.expression.tuple_value_expression import TupleValueExpression
+from evadb.parser.alias import Alias
+from evadb.parser.create_index_statement import CreateIndexStatement
+from evadb.parser.create_mat_view_statement import CreateMaterializedViewStatement
+from evadb.parser.create_statement import (
     ColConstraintInfo,
     ColumnDefinition,
     CreateTableStatement,
 )
-from eva.parser.create_udf_statement import CreateUDFStatement
-from eva.parser.delete_statement import DeleteTableStatement
-from eva.parser.drop_statement import DropTableStatement
-from eva.parser.drop_udf_statement import DropUDFStatement
-from eva.parser.insert_statement import InsertTableStatement
-from eva.parser.load_statement import LoadDataStatement
-from eva.parser.parser import Parser
-from eva.parser.rename_statement import RenameTableStatement
-from eva.parser.select_statement import SelectStatement
-from eva.parser.statement import AbstractStatement, StatementType
-from eva.parser.table_ref import JoinNode, TableInfo, TableRef, TableValuedExpression
-from eva.parser.types import FileFormatType, JoinType, ParserOrderBySortType
+from evadb.parser.create_udf_statement import CreateUDFStatement
+from evadb.parser.delete_statement import DeleteTableStatement
+from evadb.parser.drop_object_statement import DropObjectStatement
+from evadb.parser.insert_statement import InsertTableStatement
+from evadb.parser.load_statement import LoadDataStatement
+from evadb.parser.parser import Parser
+from evadb.parser.rename_statement import RenameTableStatement
+from evadb.parser.select_statement import SelectStatement
+from evadb.parser.statement import AbstractStatement, StatementType
+from evadb.parser.table_ref import JoinNode, TableInfo, TableRef, TableValuedExpression
+from evadb.parser.types import (
+    FileFormatType,
+    JoinType,
+    ObjectType,
+    ParserOrderBySortType,
+)
 
 
 class ParserTests(unittest.TestCase):
@@ -51,12 +55,12 @@ class ParserTests(unittest.TestCase):
         parser = Parser()
 
         create_index_query = "CREATE INDEX testindex ON MyVideo (featCol) USING FAISS;"
-        eva_stmt_list = parser.parse(create_index_query)
+        evadb_stmt_list = parser.parse(create_index_query)
 
         # check stmt itself
-        self.assertIsInstance(eva_stmt_list, list)
-        self.assertEqual(len(eva_stmt_list), 1)
-        self.assertEqual(eva_stmt_list[0].stmt_type, StatementType.CREATE_INDEX)
+        self.assertIsInstance(evadb_stmt_list, list)
+        self.assertEqual(len(evadb_stmt_list), 1)
+        self.assertEqual(evadb_stmt_list[0].stmt_type, StatementType.CREATE_INDEX)
 
         expected_stmt = CreateIndexStatement(
             "testindex",
@@ -66,19 +70,19 @@ class ParserTests(unittest.TestCase):
             ],
             VectorStoreType.FAISS,
         )
-        actual_stmt = eva_stmt_list[0]
+        actual_stmt = evadb_stmt_list[0]
         self.assertEqual(actual_stmt, expected_stmt)
 
         # create index on UDF expression
         create_index_query = (
             "CREATE INDEX testindex ON MyVideo (FeatureExtractor(featCol)) USING FAISS;"
         )
-        eva_stmt_list = parser.parse(create_index_query)
+        evadb_stmt_list = parser.parse(create_index_query)
 
         # check stmt itself
-        self.assertIsInstance(eva_stmt_list, list)
-        self.assertEqual(len(eva_stmt_list), 1)
-        self.assertEqual(eva_stmt_list[0].stmt_type, StatementType.CREATE_INDEX)
+        self.assertIsInstance(evadb_stmt_list, list)
+        self.assertEqual(len(evadb_stmt_list), 1)
+        self.assertEqual(evadb_stmt_list[0].stmt_type, StatementType.CREATE_INDEX)
 
         func_expr = FunctionExpression(None, "FeatureExtractor")
         func_expr.append_child(TupleValueExpression("featCol"))
@@ -91,7 +95,7 @@ class ParserTests(unittest.TestCase):
             VectorStoreType.FAISS,
             func_expr,
         )
-        actual_stmt = eva_stmt_list[0]
+        actual_stmt = evadb_stmt_list[0]
         self.assertEqual(actual_stmt, expected_stmt)
 
     @unittest.skip("Skip parser exception handling testcase, moved to binder")
@@ -109,15 +113,15 @@ class ParserTests(unittest.TestCase):
         parser = Parser()
 
         explain_query = "EXPLAIN SELECT CLASS FROM TAIPAI;"
-        eva_statement_list = parser.parse(explain_query)
+        evadb_statement_list = parser.parse(explain_query)
 
         # check explain stmt itself
-        self.assertIsInstance(eva_statement_list, list)
-        self.assertEqual(len(eva_statement_list), 1)
-        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.EXPLAIN)
+        self.assertIsInstance(evadb_statement_list, list)
+        self.assertEqual(len(evadb_statement_list), 1)
+        self.assertEqual(evadb_statement_list[0].stmt_type, StatementType.EXPLAIN)
 
         # check inner stmt
-        inner_stmt = eva_statement_list[0].explainable_stmt
+        inner_stmt = evadb_statement_list[0].explainable_stmt
         self.assertEqual(inner_stmt.stmt_type, StatementType.SELECT)
 
         # check inner stmt from
@@ -134,15 +138,15 @@ class ParserTests(unittest.TestCase):
             select_query
         )
 
-        eva_statement_list = parser.parse(explain_query)
+        evadb_statement_list = parser.parse(explain_query)
 
         # check explain stmt itself
-        self.assertIsInstance(eva_statement_list, list)
-        self.assertEqual(len(eva_statement_list), 1)
-        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.EXPLAIN)
+        self.assertIsInstance(evadb_statement_list, list)
+        self.assertEqual(len(evadb_statement_list), 1)
+        self.assertEqual(evadb_statement_list[0].stmt_type, StatementType.EXPLAIN)
 
         # check inner stmt
-        inner_stmt = eva_statement_list[0].explainable_stmt
+        inner_stmt = evadb_statement_list[0].explainable_stmt
         self.assertEqual(inner_stmt.stmt_type, StatementType.CREATE_MATERIALIZED_VIEW)
 
         # check inner stmt from
@@ -190,11 +194,11 @@ class ParserTests(unittest.TestCase):
         )
 
         for query in single_queries:
-            eva_statement_list = parser.parse(query)
-            self.assertIsInstance(eva_statement_list, list)
-            self.assertEqual(len(eva_statement_list), 1)
-            self.assertIsInstance(eva_statement_list[0], AbstractStatement)
-            self.assertEqual(eva_statement_list[0], expected_stmt)
+            evadb_statement_list = parser.parse(query)
+            self.assertIsInstance(evadb_statement_list, list)
+            self.assertEqual(len(evadb_statement_list), 1)
+            self.assertIsInstance(evadb_statement_list[0], AbstractStatement)
+            self.assertEqual(evadb_statement_list[0], expected_stmt)
 
     def test_create_table_statement_with_rare_datatypes(self):
         parser = Parser()
@@ -210,10 +214,10 @@ class ParserTests(unittest.TestCase):
                   K NDARRAY DATETIME(5)
             );"""
 
-        eva_statement_list = parser.parse(query)
-        self.assertIsInstance(eva_statement_list, list)
-        self.assertEqual(len(eva_statement_list), 1)
-        self.assertIsInstance(eva_statement_list[0], AbstractStatement)
+        evadb_statement_list = parser.parse(query)
+        self.assertIsInstance(evadb_statement_list, list)
+        self.assertEqual(len(evadb_statement_list), 1)
+        self.assertIsInstance(evadb_statement_list[0], AbstractStatement)
 
     def test_create_table_statement_without_proper_datatype(self):
         parser = Parser()
@@ -238,42 +242,30 @@ class ParserTests(unittest.TestCase):
         expected_stmt = RenameTableStatement(
             TableRef(TableInfo("student")), TableInfo("student_info")
         )
-        eva_statement_list = parser.parse(rename_queries)
-        self.assertIsInstance(eva_statement_list, list)
-        self.assertEqual(len(eva_statement_list), 1)
-        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.RENAME)
+        evadb_statement_list = parser.parse(rename_queries)
+        self.assertIsInstance(evadb_statement_list, list)
+        self.assertEqual(len(evadb_statement_list), 1)
+        self.assertEqual(evadb_statement_list[0].stmt_type, StatementType.RENAME)
 
-        rename_stmt = eva_statement_list[0]
+        rename_stmt = evadb_statement_list[0]
         self.assertEqual(rename_stmt, expected_stmt)
 
     def test_drop_table_statement(self):
         parser = Parser()
         drop_queries = "DROP TABLE student_info"
-        expected_stmt = DropTableStatement([TableInfo("student_info")], False)
-        eva_statement_list = parser.parse(drop_queries)
-        self.assertIsInstance(eva_statement_list, list)
-        self.assertEqual(len(eva_statement_list), 1)
-        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.DROP)
-        drop_stmt = eva_statement_list[0]
+        expected_stmt = DropObjectStatement(ObjectType.TABLE, "student_info", False)
+        evadb_statement_list = parser.parse(drop_queries)
+        self.assertIsInstance(evadb_statement_list, list)
+        self.assertEqual(len(evadb_statement_list), 1)
+        self.assertEqual(evadb_statement_list[0].stmt_type, StatementType.DROP_OBJECT)
+        drop_stmt = evadb_statement_list[0]
         self.assertEqual(drop_stmt, expected_stmt)
-
-    def test_drop_udf_statement(self):
-        parser = Parser()
-        drop_udf_query = """DROP UDF FastRCNN;"""
-
-        expected_stmt = DropUDFStatement("FastRCNN", False)
-        eva_statement_list = parser.parse(drop_udf_query)
-        self.assertIsInstance(eva_statement_list, list)
-        self.assertEqual(len(eva_statement_list), 1)
-        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.DROP_UDF)
-        drop_udf_stmt = eva_statement_list[0]
-        self.assertEqual(drop_udf_stmt, expected_stmt)
 
     def test_drop_udf_statement_str(self):
         drop_udf_query1 = """DROP UDF MyUDF;"""
         drop_udf_query2 = """DROP UDF IF EXISTS MyUDF;"""
-        expected_stmt1 = DropUDFStatement("MyUDF", False)
-        expected_stmt2 = DropUDFStatement("MyUDF", True)
+        expected_stmt1 = DropObjectStatement(ObjectType.UDF, "MyUDF", False)
+        expected_stmt2 = DropObjectStatement(ObjectType.UDF, "MyUDF", True)
         self.assertEqual(str(expected_stmt1), drop_udf_query1)
         self.assertEqual(str(expected_stmt2), drop_udf_query2)
 
@@ -297,11 +289,11 @@ class ParserTests(unittest.TestCase):
         )
 
         for query in single_queries:
-            eva_statement_list = parser.parse(query)
+            evadb_statement_list = parser.parse(query)
 
-            self.assertIsInstance(eva_statement_list, list)
-            self.assertEqual(len(eva_statement_list), 1)
-            self.assertIsInstance(eva_statement_list[0], AbstractStatement)
+            self.assertIsInstance(evadb_statement_list, list)
+            self.assertEqual(len(evadb_statement_list), 1)
+            self.assertIsInstance(evadb_statement_list[0], AbstractStatement)
 
     def test_multiple_statement_queries(self):
         parser = Parser()
@@ -315,22 +307,22 @@ class ParserTests(unittest.TestCase):
         )
 
         for query in multiple_queries:
-            eva_statement_list = parser.parse(query)
-            self.assertIsInstance(eva_statement_list, list)
-            self.assertEqual(len(eva_statement_list), 2)
-            self.assertIsInstance(eva_statement_list[0], AbstractStatement)
-            self.assertIsInstance(eva_statement_list[1], AbstractStatement)
+            evadb_statement_list = parser.parse(query)
+            self.assertIsInstance(evadb_statement_list, list)
+            self.assertEqual(len(evadb_statement_list), 2)
+            self.assertIsInstance(evadb_statement_list[0], AbstractStatement)
+            self.assertIsInstance(evadb_statement_list[1], AbstractStatement)
 
     def test_select_statement(self):
         parser = Parser()
         select_query = "SELECT CLASS, REDNESS FROM TAIPAI \
                 WHERE (CLASS = 'VAN' AND REDNESS < 300 ) OR REDNESS > 500;"
-        eva_statement_list = parser.parse(select_query)
-        self.assertIsInstance(eva_statement_list, list)
-        self.assertEqual(len(eva_statement_list), 1)
-        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.SELECT)
+        evadb_statement_list = parser.parse(select_query)
+        self.assertIsInstance(evadb_statement_list, list)
+        self.assertEqual(len(evadb_statement_list), 1)
+        self.assertEqual(evadb_statement_list[0].stmt_type, StatementType.SELECT)
 
-        select_stmt = eva_statement_list[0]
+        select_stmt = evadb_statement_list[0]
 
         # target List
         self.assertIsNotNone(select_stmt.target_list)
@@ -352,17 +344,17 @@ class ParserTests(unittest.TestCase):
 
         select_query = """SELECT '' FROM TAIPAI;"""
 
-        eva_statement_list = parser.parse(select_query)
-        self.assertIsInstance(eva_statement_list, list)
-        self.assertEqual(len(eva_statement_list), 1)
-        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.SELECT)
+        evadb_statement_list = parser.parse(select_query)
+        self.assertIsInstance(evadb_statement_list, list)
+        self.assertEqual(len(evadb_statement_list), 1)
+        self.assertEqual(evadb_statement_list[0].stmt_type, StatementType.SELECT)
 
     def test_select_union_statement(self):
         parser = Parser()
         select_union_query = "SELECT CLASS, REDNESS FROM TAIPAI \
             UNION ALL SELECT CLASS, REDNESS FROM SHANGHAI;"
-        eva_statement_list = parser.parse(select_union_query)
-        select_stmt = eva_statement_list[0]
+        evadb_statement_list = parser.parse(select_union_query)
+        select_stmt = evadb_statement_list[0]
         self.assertIsNotNone(select_stmt.union_link)
         self.assertEqual(select_stmt.union_all, True)
         second_select_stmt = select_stmt.union_link
@@ -378,8 +370,8 @@ class ParserTests(unittest.TestCase):
 
         select_query_new = "SELECT CLASS, REDNESS FROM TAIPAI \
             WHERE (CLASS = 'VAN' AND REDNESS < 400 ) OR REDNESS > 700;"
-        eva_statement_list = parser.parse(select_query_new)
-        select_stmt = eva_statement_list[0]
+        evadb_statement_list = parser.parse(select_query_new)
+        select_stmt = evadb_statement_list[0]
 
         select_stmt_new.where_clause = select_stmt.where_clause
         select_stmt_new.target_list = select_stmt.target_list
@@ -395,14 +387,14 @@ class ParserTests(unittest.TestCase):
 
         parser = Parser()
 
-        select_query = "SELECT FIRST(id) FROM TAIPAI GROUP BY '8f';"
+        select_query = "SELECT FIRST(id) FROM TAIPAI GROUP BY '8 frames';"
 
-        eva_statement_list = parser.parse(select_query)
-        self.assertIsInstance(eva_statement_list, list)
-        self.assertEqual(len(eva_statement_list), 1)
-        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.SELECT)
+        evadb_statement_list = parser.parse(select_query)
+        self.assertIsInstance(evadb_statement_list, list)
+        self.assertEqual(len(evadb_statement_list), 1)
+        self.assertEqual(evadb_statement_list[0].stmt_type, StatementType.SELECT)
 
-        select_stmt = eva_statement_list[0]
+        select_stmt = evadb_statement_list[0]
 
         # target List
         self.assertIsNotNone(select_stmt.target_list)
@@ -419,7 +411,7 @@ class ParserTests(unittest.TestCase):
         # sample_freq
         self.assertEqual(
             select_stmt.groupby_clause,
-            ConstantValueExpression("8f", v_type=ColumnType.TEXT),
+            ConstantValueExpression("8 frames", v_type=ColumnType.TEXT),
         )
 
     def test_select_statement_orderby_class(self):
@@ -433,12 +425,12 @@ class ParserTests(unittest.TestCase):
                     ORDER BY CLASS, REDNESS DESC;"
         # if orderby sort_type (ASC/DESC) not provided, should default to ASC
 
-        eva_statement_list = parser.parse(select_query)
-        self.assertIsInstance(eva_statement_list, list)
-        self.assertEqual(len(eva_statement_list), 1)
-        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.SELECT)
+        evadb_statement_list = parser.parse(select_query)
+        self.assertIsInstance(evadb_statement_list, list)
+        self.assertEqual(len(evadb_statement_list), 1)
+        self.assertEqual(evadb_statement_list[0].stmt_type, StatementType.SELECT)
 
-        select_stmt = eva_statement_list[0]
+        select_stmt = evadb_statement_list[0]
 
         # target List
         self.assertIsNotNone(select_stmt.target_list)
@@ -457,9 +449,9 @@ class ParserTests(unittest.TestCase):
         # orderby_clause
         self.assertIsNotNone(select_stmt.orderby_list)
         self.assertEqual(len(select_stmt.orderby_list), 2)
-        self.assertEqual(select_stmt.orderby_list[0][0].col_name, "CLASS")
+        self.assertEqual(select_stmt.orderby_list[0][0].name, "CLASS")
         self.assertEqual(select_stmt.orderby_list[0][1], ParserOrderBySortType.ASC)
-        self.assertEqual(select_stmt.orderby_list[1][0].col_name, "REDNESS")
+        self.assertEqual(select_stmt.orderby_list[1][0].name, "REDNESS")
         self.assertEqual(select_stmt.orderby_list[1][1], ParserOrderBySortType.DESC)
 
     def test_select_statement_limit_class(self):
@@ -472,12 +464,12 @@ class ParserTests(unittest.TestCase):
                     WHERE (CLASS = 'VAN' AND REDNESS < 400 ) OR REDNESS > 700 \
                     ORDER BY CLASS, REDNESS DESC LIMIT 3;"
 
-        eva_statement_list = parser.parse(select_query)
-        self.assertIsInstance(eva_statement_list, list)
-        self.assertEqual(len(eva_statement_list), 1)
-        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.SELECT)
+        evadb_statement_list = parser.parse(select_query)
+        self.assertIsInstance(evadb_statement_list, list)
+        self.assertEqual(len(evadb_statement_list), 1)
+        self.assertEqual(evadb_statement_list[0].stmt_type, StatementType.SELECT)
 
-        select_stmt = eva_statement_list[0]
+        select_stmt = evadb_statement_list[0]
 
         # target List
         self.assertIsNotNone(select_stmt.target_list)
@@ -496,9 +488,9 @@ class ParserTests(unittest.TestCase):
         # orderby_clause
         self.assertIsNotNone(select_stmt.orderby_list)
         self.assertEqual(len(select_stmt.orderby_list), 2)
-        self.assertEqual(select_stmt.orderby_list[0][0].col_name, "CLASS")
+        self.assertEqual(select_stmt.orderby_list[0][0].name, "CLASS")
         self.assertEqual(select_stmt.orderby_list[0][1], ParserOrderBySortType.ASC)
-        self.assertEqual(select_stmt.orderby_list[1][0].col_name, "REDNESS")
+        self.assertEqual(select_stmt.orderby_list[1][0].name, "REDNESS")
         self.assertEqual(select_stmt.orderby_list[1][1], ParserOrderBySortType.DESC)
 
         # limit_count
@@ -512,12 +504,12 @@ class ParserTests(unittest.TestCase):
 
         select_query = "SELECT CLASS, REDNESS FROM TAIPAI SAMPLE 5;"
 
-        eva_statement_list = parser.parse(select_query)
-        self.assertIsInstance(eva_statement_list, list)
-        self.assertEqual(len(eva_statement_list), 1)
-        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.SELECT)
+        evadb_statement_list = parser.parse(select_query)
+        self.assertIsInstance(evadb_statement_list, list)
+        self.assertEqual(len(evadb_statement_list), 1)
+        self.assertEqual(evadb_statement_list[0].stmt_type, StatementType.SELECT)
 
-        select_stmt = eva_statement_list[0]
+        select_stmt = evadb_statement_list[0]
 
         # target List
         self.assertIsNotNone(select_stmt.target_list)
@@ -561,24 +553,24 @@ class ParserTests(unittest.TestCase):
                 ConstantValueExpression("/mnt/frames/1.png", ColumnType.TEXT),
             ],
         )
-        eva_statement_list = parser.parse(insert_query)
-        self.assertIsInstance(eva_statement_list, list)
-        self.assertEqual(len(eva_statement_list), 1)
-        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.INSERT)
+        evadb_statement_list = parser.parse(insert_query)
+        self.assertIsInstance(evadb_statement_list, list)
+        self.assertEqual(len(evadb_statement_list), 1)
+        self.assertEqual(evadb_statement_list[0].stmt_type, StatementType.INSERT)
 
-        insert_stmt = eva_statement_list[0]
+        insert_stmt = evadb_statement_list[0]
         self.assertEqual(insert_stmt, expected_stmt)
 
     def test_delete_statement(self):
         parser = Parser()
         delete_statement = """DELETE FROM Foo WHERE id > 5"""
 
-        eva_statement_list = parser.parse(delete_statement)
-        self.assertIsInstance(eva_statement_list, list)
-        self.assertEqual(len(eva_statement_list), 1)
-        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.DELETE)
+        evadb_statement_list = parser.parse(delete_statement)
+        self.assertIsInstance(evadb_statement_list, list)
+        self.assertEqual(len(evadb_statement_list), 1)
+        self.assertEqual(evadb_statement_list[0].stmt_type, StatementType.DELETE)
 
-        delete_stmt = eva_statement_list[0]
+        delete_stmt = evadb_statement_list[0]
 
         expected_stmt = DeleteTableStatement(
             TableRef(TableInfo("Foo")),
@@ -627,13 +619,13 @@ class ParserTests(unittest.TestCase):
             "Classification",
             [("KEY", "VALUE")],
         )
-        eva_statement_list = parser.parse(create_udf_query)
-        self.assertIsInstance(eva_statement_list, list)
-        self.assertEqual(len(eva_statement_list), 1)
-        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.CREATE_UDF)
-        self.assertEqual(str(eva_statement_list[0]), str(expected_stmt))
+        evadb_statement_list = parser.parse(create_udf_query)
+        self.assertIsInstance(evadb_statement_list, list)
+        self.assertEqual(len(evadb_statement_list), 1)
+        self.assertEqual(evadb_statement_list[0].stmt_type, StatementType.CREATE_UDF)
+        self.assertEqual(str(evadb_statement_list[0]), str(expected_stmt))
 
-        create_udf_stmt = eva_statement_list[0]
+        create_udf_stmt = evadb_statement_list[0]
 
         self.assertEqual(create_udf_stmt, expected_stmt)
 
@@ -650,12 +642,12 @@ class ParserTests(unittest.TestCase):
             column_list,
             file_options,
         )
-        eva_statement_list = parser.parse(load_data_query)
-        self.assertIsInstance(eva_statement_list, list)
-        self.assertEqual(len(eva_statement_list), 1)
-        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.LOAD_DATA)
+        evadb_statement_list = parser.parse(load_data_query)
+        self.assertIsInstance(evadb_statement_list, list)
+        self.assertEqual(len(evadb_statement_list), 1)
+        self.assertEqual(evadb_statement_list[0].stmt_type, StatementType.LOAD_DATA)
 
-        load_data_stmt = eva_statement_list[0]
+        load_data_stmt = evadb_statement_list[0]
         self.assertEqual(load_data_stmt, expected_stmt)
 
     def test_load_csv_data_statement(self):
@@ -676,12 +668,12 @@ class ParserTests(unittest.TestCase):
             ],
             file_options,
         )
-        eva_statement_list = parser.parse(load_data_query)
-        self.assertIsInstance(eva_statement_list, list)
-        self.assertEqual(len(eva_statement_list), 1)
-        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.LOAD_DATA)
+        evadb_statement_list = parser.parse(load_data_query)
+        self.assertIsInstance(evadb_statement_list, list)
+        self.assertEqual(len(evadb_statement_list), 1)
+        self.assertEqual(evadb_statement_list[0].stmt_type, StatementType.LOAD_DATA)
 
-        load_data_stmt = eva_statement_list[0]
+        load_data_stmt = evadb_statement_list[0]
         self.assertEqual(load_data_stmt, expected_stmt)
 
     def test_nested_select_statement(self):
@@ -691,7 +683,7 @@ class ParserTests(unittest.TestCase):
         parsed_sub_query = parser.parse(sub_query)[0]
         actual_stmt = parser.parse(nested_query)[0]
         self.assertEqual(actual_stmt.stmt_type, StatementType.SELECT)
-        self.assertEqual(actual_stmt.target_list[0].col_name, "ID")
+        self.assertEqual(actual_stmt.target_list[0].name, "ID")
         self.assertEqual(
             actual_stmt.from_table, TableRef(parsed_sub_query, alias=Alias("T"))
         )
@@ -894,7 +886,7 @@ class ParserTests(unittest.TestCase):
                   OUTPUT (bboxes NDARRAY FLOAT32(ANYDIM, 4),
                           scores NDARRAY FLOAT32(ANYDIM))
                   TYPE  FaceDetection
-                  IMPL  'eva/udfs/face_detector.py';
+                  IMPL  'evadb/udfs/face_detector.py';
                   """
         parser = Parser()
         parser.parse(query)

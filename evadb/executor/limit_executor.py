@@ -1,0 +1,50 @@
+# coding=utf-8
+# Copyright 2018-2023 EvaDB
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+from typing import Iterator
+
+from evadb.database import EvaDBDatabase
+from evadb.executor.abstract_executor import AbstractExecutor
+from evadb.models.storage.batch import Batch
+from evadb.plan_nodes.limit_plan import LimitPlan
+
+
+class LimitExecutor(AbstractExecutor):
+    """
+    Limits the number of rows returned
+
+    Arguments:
+        node (AbstractPlan): The Limit Plan
+
+    """
+
+    def __init__(self, db: EvaDBDatabase, node: LimitPlan):
+        super().__init__(db, node)
+        self._limit_count = node.limit_value
+
+    def exec(self, *args, **kwargs) -> Iterator[Batch]:
+        child_executor = self.children[0]
+        remaining_tuples = self._limit_count
+        # aggregates the batches into one large batch
+        for batch in child_executor.exec(**kwargs):
+            if len(batch) > remaining_tuples:
+                yield batch[:remaining_tuples]
+                return
+
+            remaining_tuples -= len(batch)
+            yield batch
+
+            if remaining_tuples <= 0:
+                assert remaining_tuples == 0
+                return

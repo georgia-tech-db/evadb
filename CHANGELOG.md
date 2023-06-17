@@ -10,6 +10,118 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### [Deprecated]
 ### [Removed]
 
+##  [0.2.12] - 2023-06-16
+
+* PR #836: feat: OCR UDF based on Donut Hugging Face Model 
+* PR #865: feat: reduce package dependencies 
+* PR #870: refactor: Moved `col_name` -> `name` in `TupleValueExpression` 
+* PR #867: fix: minor fix to the catalog utils. 
+* PR #866: feat: app testing 
+* PR #864: test: support for testing apps 
+* PR #860: Summary :  'progressive' filter while downloding streams in youtube_qa app. 
+* PR #861: feat: add chunk_size and chunk_overlap similar to langchain 
+* PR #859: ci: Macos build 
+* PR #853: feat: chatgpt test with real API key 
+* PR #858: Bump v0.2.12+dev 
+
+##  [0.2.11] - 2023-06-10
+
+* PR #856: Bump v0.2.11+dev 
+* PR #855: Release 0.2.10 
+* PR #854: fix: update sentence transformer udf 
+
+##  [0.2.10] - 2023-06-10
+
+* PR #852: feat: optional import of decord, fix for sentence feature extractor 
+* PR #851: Bump v0.2.10+dev 
+
+##  [0.2.9] - 2023-06-09
+
+* PR #849: app: add a text and mp4 file 
+* PR #833: app: Youtube qa app now supports long videos 
+* PR #848: app: minor updates 
+* PR #847: app: minor updates to privateGPT app 
+* PR #841: app: private gpt 
+* PR #845: docs: Index.rst docs 
+* PR #844: Bump v0.2.9+dev 
+
+##  [0.2.8] - 2023-06-09
+
+* PR #842: docs: add pdf qa picture 
+* PR #840: docs: update docs 
+* PR #839: docs: updates 
+* PR #838: Summary : Added missing API documentation 
+* PR #834: refactor: move 'EVA' to 'EvaDB' 
+* PR #814: feat: benchmark question answering v1 
+* PR #831: Bump v0.2.8+dev 
+* PR #819: feat: update tutorials to use Python API 
+
+##  [0.2.7] - 2023-06-07
+
+* PR #819: feat: update tutorials to use Python API 
+* PR #828: feat: drop index 
+* PR #830: docs: updating docs based on Python API 
+* PR #826: fix: orderby bug 
+* PR #821: feat: adding python API drop and drop_udf 
+* PR #810: feat: grouping paragraphs in documents and samples in audio 
+* PR #800: test: api testing  -> similarity between text and relevance keyword 
+* PR #818: fix: update youtube qa app with new api updates 
+* PR #803: feat: saliency maps 
+* PR #815: chore
+* PR #816: docs: renamed apis 
+* PR #804: feat: create udf interface for pythonic api 
+* PR #813: feat: Expose apis 
+* PR #795: Import config should persist nothing 
+* PR #808: Bump v0.2.7+dev 
+
+##  [0.2.6] - 2023-06-02
+
+* PR #807: Bump v0.2.6+dev 
+
+##  [0.2.5] - 2023-06-02
+
+* PR #801: feat / doc: example app that summarizes any youtube video with Python api 
+* PR #796: docs: Updating Docs based on feedback 
+* PR #787: feat: enable ray by default 
+* PR #777: feat: Hugging face entity extraction 
+* PR #789: feat: create table from select query 
+* PR #794: docs: bump python for docs 
+* PR #793: refactor: Create .git-blame-ignore-revs  
+* PR #784: feat: support relational apis 
+* PR #774: Improve create mat 
+* PR #785: fix: update mnist notebook 
+* PR #781: docs: minor updates 
+* PR #780: feat: add mnistCNN as builtin udf 
+* PR #779: docs: many minor updates 
+* PR #776: docs: update getting started page 
+* PR #775: docs: style updates 
+* PR #773: fix: gracefully handle missing config values 
+* PR #771: chore: improve logging of error messages  
+* PR #768: feat: create materialized view infers column name 
+* PR #770: tutorials: hugging face text summarizer, text classifier, + pdf loader 
+* PR #769: feat: load pdf 
+* PR #767: ci: improve docker support 
+* PR #751: feat: integration with langchain 
+* PR #764: feat: db apis made more pythonic 
+* PR #765: test: fix test case 
+* PR #753: chore
+* PR #748: feat: common image transformation UDFs 
+* PR #731: feat: extensible parallel execution 
+* PR #750: release: automating the release script 
+* PR #745: fix docs build 
+* PR #744: docs: fix links 
+* PR #743: fix: hot fix for similarity notebook 
+* PR #700: docs: similarity search tutorial 
+* PR #741: docs: test links in documentation with linkcheck 
+* PR #740: docs: minor updates to read-the-docs 
+* PR #707: feat: add support for third party vector stores 
+* PR #738: feat: allow users to specify host and port while launching server 
+* PR #733: docs: enable spellcheck on all python files, notebooks, and docs  
+* PR #566: feat: object tracking 
+* PR #720: fix: similarity test 
+* PR #726: ci: bump up oldest python version from 3.7 to 3.8 
+* PR #729: docs: update notebooks on landing page 
+* PR #724: release: Bump v0.2.3+dev 
 
 ##  [0.2.4] - 2023-05-17
 ### [Added]
@@ -26,7 +138,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### [Changed]
 
 * PR #740: docs: minor updates to read-the-docs 
-* PR #727: docs: "recogizing" in index.rst 
 * PR #729: docs: update notebooks on landing page
 
 ##  [0.2.3] - 2023-05-11
@@ -85,15 +196,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * PR #647: feat: LOAD CSV Notebook 
 * PR #626: docs: Documentation for creating UDFs using Decorators. 
-* PR #599: feat: EVA x HuggingFace 
+* PR #599: feat: EvaDB x HuggingFace 
 * PR #621: feat: Ray integration
 
 ### [Changed]
 
 * PR #649: fix: Expr bugs 
 * PR #628: test: adding support for pytest-xdist 
-* PR #633: fix: Install Decord from EVA-Fork 
-* PR #646: update doc for extending eva 
+* PR #633: fix: Install Decord from EvaDB-Fork 
 * PR #642: Build fix 
 * PR #641: fix: Unnest bug  
 
@@ -118,7 +228,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * PR #617: feat: Add UDF Cost Catalog 
 * PR #616: feat: Add support for iframe based video sampling 
 * PR #606: feat: Add metadata to UDFs in catalog 
-* PR #589: feat: Fuzzy Join support in EVA 
+* PR #589: feat: Fuzzy Join support in EvaDB 
 * PR #601: feat: Decorators for UDF 
 * PR #619: chore: reducing coverage loss 
 * PR #595: doc: Adding CatalogManager, INSERT and DELETE documentation 
@@ -138,7 +248,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * PR #611: fix: insert and delete executor 
 * PR #615: fix: dropbox links fixed  
 * PR #614: Fix: updated dropbox links 
-* PR #602: fix: EVA on Ray bugs 
+* PR #602: fix: EvaDB on Ray bugs 
 * PR #596: fix: Raise Error on Missing Files during Load 
 * PR #593: fix: Windows path error in S3 testcases 
 * PR #584: Rename Array_Count to ArrayCount 
@@ -229,7 +339,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * PR #419: Updated Dockerfile
 * PR #407: Movie analysis notebook
 * PR #404: feat: Lateral join + sampling
-* PR #393: feat: EVA config updates
+* PR #393: feat: EvaDB config updates
 
 ### [Contributors]
 
@@ -242,7 +352,7 @@ Thanks to @gaurav274, @xzdandy, @LordDarkula, @jarulraj, @Anirudh58, @Aryan-Rajo
 * PR #372: bugfix: Make ConfigurationManager read and update operate on eva.yml (#372)
 * PR #367: Dataset support (#367)
 * PR #362: Automatically adding Tutorial Notebooks to docs (#362) 
-* PR #359: Layout for EVA Documentation (#359)
+* PR #359: Layout for EvaDB Documentation (#359)
 * PR #355: docs: Adding instructions for setup on M1 Mac (#355)
 * PR #344: Updated the tutorial notebooks (#344)
 * PR #342: Support for NOT NULL (#342)
@@ -259,7 +369,7 @@ Thanks to @gaurav274, @jarulraj, @xzdandy, @LordDarkula, @Anirudh58, @Aryan-Rajo
 ## [0.0.9] - 2022-08-13
 ### [Added]
 
-* PR #323: Fix EVA Configuration
+* PR #323: Fix EvaDB Configuration
 * PR #321: CI: Caching dependencies
 * PR #315: Unified load 
 * PR #313: Logo update

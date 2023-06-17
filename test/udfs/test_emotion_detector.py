@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2023 EvaDB
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,27 +15,30 @@
 
 import unittest
 from pathlib import Path
-from test.util import EVA_TEST_DATA_DIR
+from test.util import EvaDB_TEST_DATA_DIR
 
-import cv2
 import pandas as pd
 
-from eva.models.storage.batch import Batch
+from evadb.models.storage.batch import Batch
+from evadb.utils.generic_utils import try_to_import_cv2
 
 
 class EmotionDetector(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.base_path = Path(EVA_TEST_DATA_DIR) / "data" / "emotion_detector"
+        self.base_path = Path(EvaDB_TEST_DATA_DIR) / "data" / "emotion_detector"
 
     def _load_image(self, path):
+        try_to_import_cv2()
+        import cv2
+
         assert path.exists(), f"File does not exist at the path {str(path)}"
         img = cv2.imread(str(path))
         return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
     @unittest.skip("disable test due to model downloading time")
     def test_should_return_correct_emotion(self):
-        from eva.udfs.emotion_detector import EmotionDetector
+        from evadb.udfs.emotion_detector import EmotionDetector
 
         happy_img = self.base_path / "happy.jpg"
         sad_img = self.base_path / "sad.jpg"

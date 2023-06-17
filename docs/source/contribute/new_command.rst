@@ -1,7 +1,7 @@
-Extending EVA 
+Extending EvaDB 
 =============
 
-This document details the steps involved in adding support for a new operator (or command) in EVA. We illustrate the process using a DDL command.
+This document details the steps involved in adding support for a new operator (or command) in EvaDB. We illustrate the process using a DDL command.
 
 Command Handler
 ----
@@ -35,10 +35,10 @@ then transform syntax tree into **statement**.
 
 The first part of Parser is build from a LARK grammar file.
 
-parser/eva
+parser/evadb
 ~~~~~~~~~~~~
 
--  ``eva.lark`` - add keywords(eg. CREATE, TABLE) under **Common
+-  ``evadb.lark`` - add keywords(eg. CREATE, TABLE) under **Common
    Keywords**
 
    -  Add new grammar rule (eg. create_table)
@@ -250,7 +250,7 @@ executor/
 Additional Notes
 --------------------
 
-Key data structures in EVA:
+Key data structures in EvaDB:
 
 -  **Catalog**: Records ``DataFrameMetadata`` for all tables.
 

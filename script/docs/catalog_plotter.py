@@ -1,7 +1,7 @@
 # updated SQLA schema display to work with pydot 1.0.2
 
-from eva.catalog.catalog_manager import CatalogManager
-from eva.configuration.configuration_manager import ConfigurationManager
+from evadb.catalog.catalog_manager import CatalogManager
+from evadb.configuration.configuration_manager import ConfigurationManager
 from sqlalchemy.orm.properties import RelationshipProperty
 import pydot
 import types

@@ -3,7 +3,7 @@
 Setup
 ===========
 
-Installation of EVA involves setting a virtual environment using `miniconda <https://conda.io/projects/conda/en/latest/user-guide/install/index.html>`_ and configuring git hooks.
+Installation of EvaDB involves setting a virtual environment using `miniconda <https://conda.io/projects/conda/en/latest/user-guide/install/index.html>`_ and configuring git hooks.
 
 - Clone the repository::
 
