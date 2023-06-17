@@ -17,10 +17,10 @@ from pathlib import Path
 from test.markers import windows_skip_marker
 from test.util import EvaDB_TEST_DATA_DIR
 
-import cv2
 import pandas as pd
 
 from evadb.models.storage.batch import Batch
+from evadb.utils.generic_utils import try_to_import_cv2
 
 NUM_FRAMES = 10
 
@@ -32,6 +32,8 @@ class FaceNet(unittest.TestCase):
 
     def _load_image(self, path):
         assert path.exists(), f"File does not exist at the path {str(path)}"
+        try_to_import_cv2()
+        import cv2
         img = cv2.imread(str(path))
         return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 

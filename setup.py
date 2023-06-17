@@ -54,19 +54,18 @@ minimal_requirements = [
 vision_libs = [
     "torch>=1.10.0",
     "torchvision>=0.11.1",
-    "transformers>=4.27.4",  # HUGGINGFACE
+    "transformers>=4.27.4,<4.30.2",  # HUGGINGFACE
     "faiss-cpu",             # DEFAULT VECTOR INDEX
     "opencv-python-headless>=4.6.0.66",
     "Pillow>=8.4.0",
     "eva-decord>=0.6.1",     # VIDEO PROCESSING
     "ultralytics>=8.0.93",   # OBJECT DETECTION
     "timm>=0.6.13",          # HUGGINGFACE VISION TASKS
-    "transformers",          # TRANSFORMERS
     "sentencepiece",         # TRANSFORMERS
 ]
 
 document_libs = [
-    "transformers",           # HUGGINGFACE
+    "transformers>=4.27.4,<4.30.2",  # HUGGINGFACE
     "langchain",              # DATA LOADERS
     "faiss-cpu",              # DEFAULT VECTOR INDEX
     "pymupdf",
@@ -74,7 +73,6 @@ document_libs = [
     "sentence-transformers",
     "openai>=0.27.4",          # CHATGPT
     "gpt4all",                 # PRIVATE GPT
-    "transformers",            # TRANSFORMERS
     "sentencepiece",           # TRANSFORMERS
 ]
 

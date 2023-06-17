@@ -15,10 +15,10 @@
 import os
 import unittest
 
-import cv2
 import pandas as pd
 
 from evadb.models.storage.batch import Batch
+from evadb.utils.generic_utils import try_to_import_cv2
 
 NUM_FRAMES = 10
 
@@ -29,6 +29,8 @@ class FastRCNNObjectDetectorTest(unittest.TestCase):
         self.base_path = os.path.dirname(os.path.abspath(__file__))
 
     def _load_image(self, path):
+        try_to_import_cv2()
+        import cv2
         img = cv2.imread(path)
         return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
