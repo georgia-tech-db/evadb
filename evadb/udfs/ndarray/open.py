@@ -23,6 +23,7 @@ class Open(AbstractUDF):
     def setup(self):
         # cache data to avoid expensive open files on disk
         self._data_cache = dict()
+        try_to_import_cv2()
 
     @property
     def name(self):
@@ -41,7 +42,6 @@ class Open(AbstractUDF):
             if path_str in self._data_cache:
                 data = self._data_cache[path_str]
             else:
-                try_to_import_cv2()
                 import cv2
 
                 data = cv2.imread(path_str)
