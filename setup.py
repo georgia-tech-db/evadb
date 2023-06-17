@@ -45,7 +45,7 @@ minimal_requirements = [
     "sqlalchemy-utils>=0.36.6",
     "lark>=1.0.0",
     "pyyaml>=5.1",
-    "ray>=1.13.0",
+    "ray>=1.13.0,<2.5.0",        # BREAKING CHANGES IN 2.5.0
     "aenum>=2.2.0",
     "diskcache>=5.4.0",
     "retry>=0.9.2",
@@ -101,10 +101,7 @@ dev_libs = [
     # TESTING PACKAGES
     "pytest>=6.1.2",
     "pytest-cov>=2.11.1",
-    "pytest-virtualenv",
-    "pytest-asyncio",
     "mock",
-    "pytest-xdist",
     "coveralls>=3.0.1",
     "moto[s3]>=4.1.1",
 
