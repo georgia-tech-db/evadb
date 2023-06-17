@@ -81,7 +81,7 @@ def load_udf_class_from_file(filepath, classname=None):
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
     except Exception as e:
-        err_msg = f"Couldn't load UDF from {filepath} : {str(e)}. Ensure that the file exists and that it is a valid Python file."
+        err_msg = f"Couldn't load UDF from {filepath} : {str(e)}. This might be due to a missing Python package, or because the UDF implementation file does not exist, or it is not a valid Python file."
         raise RuntimeError(err_msg)
 
     # Try to load the specified class by name
@@ -221,11 +221,84 @@ def remove_directory_contents(dir_path):
 
 
 ##############################
-
 ## TRY TO IMPORT PACKAGES
 
+##############################
+## VISION
+##############################
 
-def try_import_decord():
+
+def try_to_import_faiss():
+    try:
+        import faiss  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import faiss python package.
+                Please install it with `pip install faiss-cpu` or `pip install faiss-gpu`."""
+        )
+
+
+def try_to_import_qdrant_client():
+    try:
+        import qdrant_client  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import qdrant_client python package.
+                Please install it with `pip install qdrant_client`."""
+        )
+
+
+def try_to_import_pillow():
+    try:
+        import PIL  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import pillow python package.
+                Please install it with `pip install pillow`."""
+        )
+
+
+def try_to_import_torch():
+    try:
+        import torch  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import torch python package.
+                Please install them with `pip install torch`."""
+        )
+
+
+def try_to_import_torchvision():
+    try:
+        import torchvision  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import torchvision python package.
+                Please install them with `pip install torchvision`."""
+        )
+
+
+def try_to_import_cv2():
+    try:
+        import cv2  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import cv2 python package.
+                Please install it with `pip install opencv-python`."""
+        )
+
+
+def try_to_import_kornia():
+    try:
+        import kornia  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import kornia python package.
+                Please install it with `pip install kornia`."""
+        )
+
+
+def try_to_import_decord():
     try:
         import decord  # noqa: F401
     except ImportError:
@@ -233,3 +306,53 @@ def try_import_decord():
             """Could not import decord python package.
                 Please install it with `pip install eva-decord`."""
         )
+
+
+def try_to_import_ultralytics():
+    try:
+        import ultralytics  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import ultralytics python package.
+                Please install it with `pip install ultralytics`."""
+        )
+
+
+def try_to_import_norfair():
+    try:
+        import norfair  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import norfair python package.
+                Please install it with `pip install norfair`."""
+        )
+
+
+##############################
+## DOCUMENT
+##############################
+
+
+def try_to_import_transformers():
+    try:
+        import transformers  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import transformers python package.
+                Please install it with `pip install transformers`."""
+        )
+
+
+def try_to_import_facenet_pytorch():
+    try:
+        import facenet_pytorch  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import facenet_pytorch python package.
+                Please install it with `pip install facenet-pytorch`."""
+        )
+
+
+##############################
+## APPS
+##############################

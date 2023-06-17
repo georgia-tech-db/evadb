@@ -29,6 +29,16 @@ class PDFReader(AbstractReader):
         super().__init__(*args, **kwargs)
 
     def _read(self) -> Iterator[Dict]:
+        def try_to_import_fitz():
+            try:
+                import fitz  # noqa: F401
+            except ImportError:
+                raise ValueError(
+                    """Could not import PyMuPDF python package.
+                        Please install it with `pip install PyMuPDF`."""
+                )
+
+        try_to_import_fitz()
         import fitz
 
         doc = fitz.open(self.file_url)

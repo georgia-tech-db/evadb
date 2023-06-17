@@ -1,0 +1,2 @@
+evadb[documents]
+gpt4all

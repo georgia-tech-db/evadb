@@ -17,11 +17,11 @@ import unittest
 import numpy as np
 import pandas as pd
 from numpy import asarray
-from PIL import Image
 
 from evadb.configuration.constants import EvaDB_ROOT_DIR
 from evadb.udfs.ndarray.horizontal_flip import HorizontalFlip
 from evadb.udfs.ndarray.vertical_flip import VerticalFlip
+from evadb.utils.generic_utils import try_to_import_pillow
 
 
 class FlipTests(unittest.TestCase):
@@ -34,6 +34,9 @@ class FlipTests(unittest.TestCase):
         assert hasattr(self.vertical_flip_instance, "name")
 
     def test_should_flip_horizontally(self):
+        try_to_import_pillow()
+        from PIL import Image
+
         img = Image.open(
             f"{EvaDB_ROOT_DIR}/test/data/uadetrac/small-data/MVI_20011/img00001.jpg"
         )
@@ -46,6 +49,9 @@ class FlipTests(unittest.TestCase):
         self.assertEqual(np.sum(arr[:, 0] - np.flip(flipped_arr[0][:, -1], 1)), 0)
 
     def test_should_flip_vertically(self):
+        try_to_import_pillow()
+        from PIL import Image
+
         img = Image.open(
             f"{EvaDB_ROOT_DIR}/test/data/uadetrac/small-data/MVI_20011/img00001.jpg"
         )

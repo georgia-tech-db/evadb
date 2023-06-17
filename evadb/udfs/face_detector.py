@@ -17,11 +17,14 @@ from typing import List
 
 import numpy as np
 import pandas as pd
-import torch
-from facenet_pytorch import MTCNN
 
 from evadb.udfs.abstract.abstract_udf import AbstractClassifierUDF
 from evadb.udfs.gpu_compatible import GPUCompatible
+from evadb.utils.generic_utils import (
+    try_to_import_facenet_pytorch,
+    try_to_import_torch,
+    try_to_import_torchvision,
+)
 from evadb.utils.logging_manager import logger
 
 
@@ -33,6 +36,11 @@ class FaceDetector(AbstractClassifierUDF, GPUCompatible):
 
     def setup(self, threshold=0.85):
         self.threshold = threshold
+        try_to_import_torch()
+        try_to_import_torchvision()
+        try_to_import_facenet_pytorch()
+        from facenet_pytorch import MTCNN
+
         self.model = MTCNN()
 
     @property
@@ -40,6 +48,10 @@ class FaceDetector(AbstractClassifierUDF, GPUCompatible):
         return "FaceDetector"
 
     def to_device(self, device: str):
+        try_to_import_facenet_pytorch()
+        import torch
+        from facenet_pytorch import MTCNN
+
         gpu = "cuda:{}".format(device)
         self.model = MTCNN(device=torch.device(gpu))
         return self

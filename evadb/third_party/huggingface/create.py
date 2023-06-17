@@ -15,8 +15,6 @@
 from typing import Dict, List, Type, Union
 
 import numpy as np
-from PIL import Image, ImageDraw
-from transformers import pipeline
 
 from evadb.catalog.catalog_type import ColumnType, NdArrayType
 from evadb.catalog.models.udf_io_catalog import UdfIOCatalogEntry
@@ -28,6 +26,7 @@ from evadb.third_party.huggingface.model import (
     ImageHFModel,
     TextHFModel,
 )
+from evadb.utils.generic_utils import try_to_import_transformers
 
 """
 We currently support the following tasks from HuggingFace.
@@ -71,6 +70,8 @@ def sample_text():
 
 
 def sample_image():
+    from PIL import Image, ImageDraw
+
     width, height = 224, 224
     image = Image.new("RGB", (width, height), "white")
     draw = ImageDraw.Draw(image)
@@ -115,6 +116,9 @@ def infer_output_name_and_type(**pipeline_args):
     ), f"Task {task} not supported in EvaDB currently"
 
     # Construct the pipeline
+    try_to_import_transformers()
+    from transformers import pipeline
+
     pipe = pipeline(**pipeline_args)
 
     # Run the pipeline through a dummy input to get a sample output

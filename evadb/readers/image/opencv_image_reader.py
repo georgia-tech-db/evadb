@@ -14,9 +14,8 @@
 # limitations under the License.
 from typing import Dict, Iterator
 
-import cv2
-
 from evadb.readers.abstract_reader import AbstractReader
+from evadb.utils.generic_utils import try_to_import_cv2
 
 
 class CVImageReader(AbstractReader):
@@ -24,6 +23,9 @@ class CVImageReader(AbstractReader):
         super().__init__(*args, **kwargs)
 
     def _read(self) -> Iterator[Dict]:
+        try_to_import_cv2()
+        import cv2
+
         im_bgr = cv2.imread(str(self.file_url))
         im_rgb = cv2.cvtColor(im_bgr, cv2.COLOR_BGR2RGB)
         assert im_rgb is not None, f"Failed to read image file {self.file_url}"

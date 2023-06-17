@@ -16,8 +16,6 @@
 import re
 from pathlib import Path
 
-import boto3
-
 
 # write a function that splits s3 uri into bucket and key
 def parse_s3_uri(s3_uri):
@@ -33,6 +31,8 @@ def download_from_s3(s3_uri, save_dir):
     """
     Downloads a file from s3 to the local file system
     """
+    import boto3
+
     s3_client = boto3.client("s3")
     s3_uri = s3_uri.as_posix()
     bucket_name, regex_key = parse_s3_uri(s3_uri)
