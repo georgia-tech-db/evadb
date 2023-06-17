@@ -1,8 +1,8 @@
 .. meta::
    :keywords: database, deep learning, video analytics, language models
 
-Welcome to EvaDB 🤖 + 💾 ! 
-==========================
+Welcome to EvaDB! 
+=================
 
 ..  rubric:: Database system for building simpler and faster AI-powered apps.
 
