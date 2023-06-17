@@ -29,8 +29,6 @@ from evadb.utils.generic_utils import (
     try_to_import_transformers,
 )
 
-# import cv2
-
 
 class OCRExtractor(AbstractUDF, GPUCompatible):
     @setup(cacheable=False, udf_type="FeatureExtraction", batchable=False)
@@ -38,7 +36,12 @@ class OCRExtractor(AbstractUDF, GPUCompatible):
         try_to_import_torch()
         try_to_import_torchvision()
         try_to_import_transformers()
+        # https://stackoverflow.com/a/76322515
+        import os
+
         from transformers import DonutProcessor, VisionEncoderDecoderModel
+
+        os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
 
         self.processor = DonutProcessor.from_pretrained(
             "naver-clova-ix/donut-base-finetuned-cord-v2"
