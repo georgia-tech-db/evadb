@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### [Deprecated]
 ### [Removed]
 
+##  [0.2.13] - 2023-06-17
+
+* PR #873: notebooks: update notebooks 
+* PR #872: Bump v0.2.13+dev 
+* PR #836: feat: OCR UDF based on Donut Hugging Face Model 
+
 ##  [0.2.12] - 2023-06-16
 
 * PR #836: feat: OCR UDF based on Donut Hugging Face Model 
