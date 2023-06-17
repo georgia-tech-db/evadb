@@ -14,7 +14,6 @@
 # limitations under the License.
 import os
 import shutil
-import time
 from typing import Dict
 
 import pandas as pd
@@ -43,7 +42,7 @@ def receive_user_input() -> Dict:
     user_input = {"from_youtube": from_youtube}
 
     if from_youtube:
-        # Get Youtube video url
+        # get Youtube video url
         video_link = str(
             input(
                 "📺 Enter the URL of the YouTube video (press Enter to use a default Youtube video): "
@@ -64,7 +63,7 @@ def receive_user_input() -> Dict:
             video_local_path = DEFAULT_VIDEO_PATH
         user_input["video_local_path"] = video_local_path
 
-    # Get OpenAI key if needed
+    # get OpenAI key if needed
     try:
         api_key = os.environ["OPENAI_KEY"]
     except KeyError:
@@ -132,13 +131,10 @@ def download_youtube_video_transcript(video_link: str):
     Args:
         video_link (str): url of the target YouTube video.
     """
-    start = time.time()
     video_id = extract.video_id(video_link)
     print("⏳ Transcript download in progress...")
     transcript = YouTubeTranscriptApi.get_transcript(video_id)
-    print(
-        f"✅ Video transcript downloaded successfully in {time.time() - start} seconds"
-    )
+    print("✅ Video transcript downloaded successfully.")
     return transcript
 
 
@@ -148,14 +144,13 @@ def download_youtube_video_from_link(video_link: str):
     Args:
         video_link (str): url of the target YouTube video.
     """
-    start = time.time()
     yt = YouTube(video_link).streams.first()
     try:
         print("⏳ video download in progress...")
         yt.download(filename="online_video.mp4")
     except Exception as e:
         print(f"⛔️ Video download failed with error: \n{e}")
-    print(f"✅ Video downloaded successfully in {time.time() - start} seconds")
+    print("✅ Video downloaded successfully.")
 
 
 def generate_online_video_transcript(cursor: evadb.EvaDBCursor) -> str:
@@ -168,7 +163,6 @@ def generate_online_video_transcript(cursor: evadb.EvaDBCursor) -> str:
         str: video transcript text.
     """
     print("\n⏳ Analyzing YouTube video. This may take a while...")
-    start = time.time()
 
     # load youtube video into an evadb table
     cursor.drop_table("youtube_video", if_exists=True).execute()
@@ -179,7 +173,7 @@ def generate_online_video_transcript(cursor: evadb.EvaDBCursor) -> str:
     cursor.query(
         "CREATE TABLE IF NOT EXISTS youtube_video_text AS SELECT SpeechRecognizer(audio) FROM youtube_video;"
     ).execute()
-    print(f"✅ Video analysis completed in {time.time() - start} seconds.")
+    print("✅ Video analysis completed.")
 
     raw_transcript_string = (
         cursor.table("youtube_video_text")
@@ -200,7 +194,6 @@ def generate_local_video_transcript(cursor: evadb.EvaDBCursor, video_path: str) 
         str: video transcript text.
     """
     print(f"\n⏳ Analyzing local video from {video_path}. This may take a while...")
-    start = time.time()
 
     # load youtube video into an evadb table
     cursor.drop_table("local_video", if_exists=True).execute()
@@ -211,8 +204,9 @@ def generate_local_video_transcript(cursor: evadb.EvaDBCursor, video_path: str) 
     cursor.query(
         "CREATE TABLE IF NOT EXISTS local_video_text AS SELECT SpeechRecognizer(audio) FROM local_video;"
     ).execute()
-    print(f"✅ Video analysis completed in {time.time() - start} seconds.")
+    print("✅ Video analysis completed.")
 
+    # retrieve generated transcript
     raw_transcript_string = (
         cursor.table("local_video_text").select("text").df()["local_video_text.text"][0]
     )
@@ -224,9 +218,9 @@ def generate_blog_post(cursor: evadb.EvaDBCursor) -> str:
         input("\nWould you like to generate a blog post of the video? (y/n): ")
     )
     if to_generate.lower() == "y":
-        start = time.time()
         print("⏳ Generating blog post (may take a while)...")
 
+        # generate video summary
         generate_chatgpt_summary_rel = cursor.table("Transcript").select(
             "ChatGPT('summarize this video', text)"
         )
@@ -236,15 +230,18 @@ def generate_blog_post(cursor: evadb.EvaDBCursor) -> str:
         for r in responses:
             summary += f"{r} \n"
 
+        # save summary to csv
         df = pd.DataFrame([{"summary": summary}])
         df.to_csv("./evadb_data/tmp/summary.csv")
 
+        # load summary to db
         cursor.drop_table("Summary", if_exists=True).execute()
         cursor.query(
             """CREATE TABLE IF NOT EXISTS Summary (summary TEXT(100));"""
         ).execute()
         cursor.load("./evadb_data/tmp/summary.csv", "Summary", "csv").execute()
 
+        # use llm to generate blog post
         generate_blog_rel = cursor.table("Summary").select(
             "ChatGPT('generate a blog post of the video summary', summary)"
         )
@@ -258,9 +255,7 @@ def generate_blog_post(cursor: evadb.EvaDBCursor) -> str:
         with open("blog.txt", "w") as file:
             file.write(blog)
 
-        print(
-            f"✅ blog post (generated in {time.time() - start} seconds) is saved to file blog.txt"
-        )
+        print("✅ blog post is saved to file blog.txt")
 
 
 def cleanup():
@@ -272,8 +267,10 @@ def cleanup():
 
 
 if __name__ == "__main__":
+    # receive input from user
     user_input = receive_user_input()
 
+    # load YouTube video transcript if it is available online
     transcript = None
     if user_input["from_youtube"]:
         try:
@@ -307,7 +304,7 @@ if __name__ == "__main__":
                 # download youtube video online if the video disabled transcript
                 download_youtube_video_from_link(user_input["video_link"])
 
-            # generate video transcript
+            # generate video transcript if the transcript is not availble online or if the video is local
             raw_transcript_string = (
                 generate_online_video_transcript(cursor)
                 if user_input["from_youtube"]
@@ -315,9 +312,11 @@ if __name__ == "__main__":
                     cursor, user_input["video_local_path"]
                 )
             )
+
             partitioned_transcript = partition_transcript(raw_transcript_string)
             df = pd.DataFrame(partitioned_transcript)
             df.to_csv("./evadb_data/tmp/transcript.csv")
+            df.to_csv("./transcript.csv")
 
         # load chunked transcript into table
         cursor.drop_table("Transcript", if_exists=True).execute()
@@ -339,16 +338,15 @@ if __name__ == "__main__":
                 generate_chatgpt_response_rel = cursor.table("Transcript").select(
                     f"ChatGPT('given this video, {question} (in 100 words)', text)"
                 )
-                start = time.time()
                 responses = generate_chatgpt_response_rel.df()["chatgpt.response"]
 
                 response = ""
                 for r in responses:
                     response += f"{r} \n"
                 print(response, "\n")
-                print(f"✅ Answer (generated in {time.time() - start} seconds):")
+                print("✅ Answer:")
 
-        # Generate a blog post on user demand
+        # generate a blog post on user demand
         generate_blog_post(cursor)
 
         cleanup()

@@ -36,7 +36,7 @@ _VALID_CHAT_COMPLETION_MODEL = [
 ]
 
 
-@retry(tries=6, delay=10)
+@retry(tries=6, delay=20)
 def completion_with_backoff(**kwargs):
     return openai.ChatCompletion.create(**kwargs)
 
