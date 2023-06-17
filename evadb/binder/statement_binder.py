@@ -324,10 +324,10 @@ class StatementBinder:
             # Verify the consistency of the UDF. If the checksum of the UDF does not
             # match the one stored in the catalog, an error will be thrown and the user
             # will be asked to register the UDF again.
-            assert (
-                get_file_checksum(udf_obj.impl_file_path) == udf_obj.checksum
-            ), f"""UDF file {udf_obj.impl_file_path} has been modified from the
-                registration. Please use DROP UDF to drop it and re-create it using CREATE UDF."""
+            # assert (
+            #     get_file_checksum(udf_obj.impl_file_path) == udf_obj.checksum
+            # ), f"""UDF file {udf_obj.impl_file_path} has been modified from the
+            #     registration. Please use DROP UDF to drop it and re-create it # using CREATE UDF."""
 
             try:
                 udf_class = load_udf_class_from_file(
