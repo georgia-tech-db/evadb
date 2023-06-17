@@ -55,5 +55,7 @@ class YoutubeQATest(unittest.TestCase):
 
         decoded_stdout = stdout.decode()
         assert "Julia" or "Rate limit" in decoded_stdout
+        print(decoded_stdout)
+        print(stderr.decode())
         # decoded_stderr = stderr.decode()
         # assert "Ray" in decoded_stderr

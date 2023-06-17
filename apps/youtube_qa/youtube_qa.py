@@ -17,10 +17,24 @@ import shutil
 import time
 
 import pandas as pd
-from pytube import YouTube, extract
-from youtube_transcript_api import YouTubeTranscriptApi
 
 import evadb
+
+
+def try_to_import_pytube():
+    try:
+        import pytube  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import pytube python package.
+                Please install it with `pip install -r requirements.txt`."""
+        )
+
+
+try_to_import_pytube()
+
+from pytube import YouTube, extract  # noqa: E402
+from youtube_transcript_api import YouTubeTranscriptApi  # noqa: E402
 
 MAX_CHUNK_SIZE = 5000
 DEFAULT_VIDEO_LINK = "https://www.youtube.com/watch?v=TvS1lHEQoKk"
