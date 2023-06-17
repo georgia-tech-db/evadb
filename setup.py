@@ -56,22 +56,26 @@ vision_libs = [
     "torchvision>=0.11.1",
     "transformers>=4.27.4",  # HUGGINGFACE
     "faiss-cpu",             # DEFAULT VECTOR INDEX
-    "opencv-contrib-python-headless>=4.6.0.66",
+    "opencv-python-headless>=4.6.0.66",
     "Pillow>=8.4.0",
     "eva-decord>=0.6.1",     # VIDEO PROCESSING
     "ultralytics>=8.0.93",   # OBJECT DETECTION
     "timm>=0.6.13",          # HUGGINGFACE VISION TASKS
+    "transformers",          # TRANSFORMERS
+    "sentencepiece",         # TRANSFORMERS
 ]
 
 document_libs = [
-    "transformers>=4.27.4",  # HUGGINGFACE
-    "langchain",             # DATA LOADERS
-    "faiss-cpu",             # DEFAULT VECTOR INDEX
+    "transformers",           # HUGGINGFACE
+    "langchain",              # DATA LOADERS
+    "faiss-cpu",              # DEFAULT VECTOR INDEX
     "pymupdf",
     "pdfminer.six",
     "sentence-transformers",
     "openai>=0.27.4",          # CHATGPT
     "gpt4all",                 # PRIVATE GPT
+    "transformers",            # TRANSFORMERS
+    "sentencepiece",           # TRANSFORMERS
 ]
 
 udf_libs = [

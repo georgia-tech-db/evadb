@@ -58,7 +58,7 @@ class TestOCR(unittest.TestCase):
         udf = cursor.create_udf(
             "OCRExtractor",
             True,
-            f"{EvaDB_ROOT_DIR}/evadb/udfs/ocr_extractor_HuggingFace.py",
+            f"{EvaDB_ROOT_DIR}/evadb/udfs/ocr_extractor.py",
         )
         udf.execute()
 
