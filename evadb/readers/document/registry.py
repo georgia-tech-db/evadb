@@ -13,7 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import_err_msg = "`langchain` package not found, please run `pip install langchain`"
+from evadb.utils.generic_utils import try_to_import_langchain
+
 SUPPORTED_TYPES = [
     ".doc",
     ".docx",
@@ -30,20 +31,18 @@ SUPPORTED_TYPES = [
 
 
 def _lazy_import_loader():
-    try:
-        from langchain.document_loaders import (
-            EverNoteLoader,
-            PDFMinerLoader,
-            TextLoader,
-            UnstructuredEmailLoader,
-            UnstructuredEPubLoader,
-            UnstructuredHTMLLoader,
-            UnstructuredMarkdownLoader,
-            UnstructuredPowerPointLoader,
-            UnstructuredWordDocumentLoader,
-        )
-    except ImportError:
-        raise ImportError(import_err_msg)
+    try_to_import_langchain()
+    from langchain.document_loaders import (
+        EverNoteLoader,
+        PDFMinerLoader,
+        TextLoader,
+        UnstructuredEmailLoader,
+        UnstructuredEPubLoader,
+        UnstructuredHTMLLoader,
+        UnstructuredMarkdownLoader,
+        UnstructuredPowerPointLoader,
+        UnstructuredWordDocumentLoader,
+    )
 
     LOADER_MAPPING = {
         ".doc": (UnstructuredWordDocumentLoader, {}),
@@ -63,9 +62,7 @@ def _lazy_import_loader():
 
 
 def _lazy_import_text_splitter():
-    try:
-        from langchain.text_splitter import RecursiveCharacterTextSplitter
-    except ImportError:
-        raise ImportError(import_err_msg)
+    try_to_import_langchain()
+    from langchain.text_splitter import RecursiveCharacterTextSplitter
 
     return RecursiveCharacterTextSplitter

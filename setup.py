@@ -128,54 +128,7 @@ dev_libs = [
     "PyDriller",
 ]
 
-<<<<<<< HEAD
-### NEEDED FOR AN ALTERNATE DATA SYSTEM OTHER THAN SQLITE
-database_libs = ["pymysql>=0.10.1"]
-
-### NEEDED FOR A BATTERIES-LOADED EXPERIENCE
-udf_libs = [
-    "facenet-pytorch>=2.5.2",  # FACE DETECTION
-    "ipython<8.13.0",  # NOTEBOOKS
-    "thefuzz",  # FUZZY STRING MATCHING
-    "ultralytics>=8.0.93",  # OBJECT DETECTION
-    "transformers>=4.27.4",  # HUGGINGFACE
-    "openai>=0.27.4",  # CHATGPT
-    "retry>=0.9.2", #CHATGPT
-    "timm>=0.6.13",  # HUGGINGFACE VISION TASKS
-    "norfair>=2.2.0",  # OBJECT TRACKING
-    "protobuf==3.20.*" # OCR DONUT HUGGING FACE
-]
-
-### NEEDED FOR A BATTERIES-LOADED EXPERIENCE
-third_party_libs = [
-    "qdrant-client>=1.1.7",  # Qdrant vector store client
-    "kornia",  # SIFT features
-    "langchain>=0.0.177",  # langchain document loaders
-    "pdfminer.six",  # for reading pdfs
-    "gpt4all", # for private GPT
-    "pytube", # for youtube QA app,
-    "youtube-transcript-api"
-]
-
-### NEEDED FOR EXPERIMENTAL FEATURES
-experimental_libs = []
-
-INSTALL_REQUIRES = minimal_requirement + integration_test_libs + udf_libs
-DEV_REQUIRES = (
-    INSTALL_REQUIRES
-    + formatter_libs
-    + test_libs
-    + notebook_libs
-    + benchmark_libs
-    + doc_libs
-    + database_libs
-    + dist_libs
-    + experimental_libs
-    + third_party_libs
-)
-=======
 INSTALL_REQUIRES = minimal_requirements
->>>>>>> master
 
 EXTRA_REQUIRES = {
     "vision": vision_libs,

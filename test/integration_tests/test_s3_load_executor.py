@@ -30,6 +30,7 @@ from evadb.configuration.constants import EvaDB_ROOT_DIR
 from evadb.models.storage.batch import Batch
 from evadb.parser.types import FileFormatType
 from evadb.server.command_handler import execute_query_fetch_all
+from evadb.utils.generic_utils import try_to_import_moto
 
 
 @pytest.mark.notparallel
@@ -49,10 +50,10 @@ class S3LoadExecutorTest(unittest.TestCase):
         os.environ["AWS_SESSION_TOKEN"] = "testing"
         os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
 
+        try_to_import_moto()
         from moto import mock_s3
 
         self.mock_s3 = mock_s3()
-
         self.mock_s3.start()
         import boto3
 

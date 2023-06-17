@@ -228,26 +228,6 @@ def remove_directory_contents(dir_path):
 ##############################
 
 
-def try_to_import_faiss():
-    try:
-        import faiss  # noqa: F401
-    except ImportError:
-        raise ValueError(
-            """Could not import faiss python package.
-                Please install it with `pip install faiss-cpu` or `pip install faiss-gpu`."""
-        )
-
-
-def try_to_import_qdrant_client():
-    try:
-        import qdrant_client  # noqa: F401
-    except ImportError:
-        raise ValueError(
-            """Could not import qdrant_client python package.
-                Please install it with `pip install qdrant_client`."""
-        )
-
-
 def try_to_import_pillow():
     try:
         import PIL  # noqa: F401
@@ -353,6 +333,71 @@ def try_to_import_facenet_pytorch():
         )
 
 
+def try_to_import_openai():
+    try:
+        import openai  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import openai python package.
+                Please install them with `pip install openai`."""
+        )
+
+
+def try_to_import_langchain():
+    try:
+        import langchain  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import langchain package.
+                Please install it with `pip install langchain`."""
+        )
+
+
 ##############################
-## APPS
+## VECTOR STORES
 ##############################
+
+
+def try_to_import_faiss():
+    try:
+        import faiss  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import faiss python package.
+                Please install it with `pip install faiss-cpu` or `pip install faiss-gpu`."""
+        )
+
+
+def try_to_import_qdrant_client():
+    try:
+        import qdrant_client  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import qdrant_client python package.
+                Please install it with `pip install qdrant_client`."""
+        )
+
+
+##############################
+## UTILS
+##############################
+
+
+def try_to_import_moto():
+    try:
+        import boto3  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import boto3 python package.
+                Please install it with `pip install moto[s3]`."""
+        )
+
+
+def try_to_import_fitz():
+    try:
+        import fitz  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import fitz python package.
+                Please install it with `pip install pymupdfs`."""
+        )

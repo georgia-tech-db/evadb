@@ -16,7 +16,6 @@
 
 import os
 
-import openai
 import pandas as pd
 from retry import retry
 
@@ -25,6 +24,7 @@ from evadb.configuration.configuration_manager import ConfigurationManager
 from evadb.udfs.abstract.abstract_udf import AbstractUDF
 from evadb.udfs.decorators.decorators import forward, setup
 from evadb.udfs.decorators.io_descriptors.data_types import PandasDataframe
+from evadb.utils.generic_utils import try_to_import_openai
 
 _VALID_CHAT_COMPLETION_MODEL = [
     "gpt-4",
@@ -34,11 +34,6 @@ _VALID_CHAT_COMPLETION_MODEL = [
     "gpt-3.5-turbo",
     "gpt-3.5-turbo-0301",
 ]
-
-
-@retry(tries=6, delay=10)
-def completion_with_backoff(**kwargs):
-    return openai.ChatCompletion.create(**kwargs)
 
 
 class ChatGPT(AbstractUDF):
@@ -78,6 +73,13 @@ class ChatGPT(AbstractUDF):
         ],
     )
     def forward(self, text_df):
+        try_to_import_openai()
+        import openai
+
+        @retry(tries=6, delay=10)
+        def completion_with_backoff(**kwargs):
+            return openai.ChatCompletion.create(**kwargs)
+
         # Register API key, try configuration manager first
         openai.api_key = ConfigurationManager().get_value("third_party", "OPENAI_KEY")
         # If not found, try OS Environment Variable
