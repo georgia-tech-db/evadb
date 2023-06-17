@@ -20,7 +20,6 @@ import cv2
 import mock
 import numpy as np
 import pandas as pd
-import torch
 
 NUM_FRAMES = 10
 
@@ -28,6 +27,8 @@ NUM_FRAMES = 10
 def numpy_to_yolo_format(numpy_image):
     numpy_image = numpy_image.astype(np.float64)
     numpy_image = numpy_image / 255
+    import torch
+
     r = torch.tensor(numpy_image[:, :, 0])
     g = torch.tensor(numpy_image[:, :, 1])
     b = torch.tensor(numpy_image[:, :, 2])

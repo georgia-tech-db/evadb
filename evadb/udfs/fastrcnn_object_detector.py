@@ -24,22 +24,7 @@ from evadb.udfs.decorators.io_descriptors.data_types import (
     PandasDataframe,
     PyTorchTensor,
 )
-
-try:
-    from torch import Tensor
-except ImportError as e:
-    raise ImportError(
-        f"Failed to import with error {e}, \
-        please try `pip install torch`"
-    )
-
-try:
-    import torchvision
-except ImportError as e:
-    raise ImportError(
-        f"Failed to import with error {e}, \
-        please try `pip install torch`"
-    )
+from evadb.utils.generic_utils import try_to_import_torch, try_to_import_torchvision
 
 
 class FastRCNNObjectDetector(PytorchAbstractClassifierUDF):
@@ -55,6 +40,10 @@ class FastRCNNObjectDetector(PytorchAbstractClassifierUDF):
 
     @setup(cacheable=True, udf_type="object_detection", batchable=True)
     def setup(self, threshold=0.85):
+        try_to_import_torch()
+        try_to_import_torchvision()
+        import torchvision
+
         self.threshold = threshold
         self.model = torchvision.models.detection.fasterrcnn_resnet50_fpn(
             weights="COCO_V1", progress=False
@@ -178,7 +167,7 @@ class FastRCNNObjectDetector(PytorchAbstractClassifierUDF):
             )
         ],
     )
-    def forward(self, frames: Tensor) -> pd.DataFrame:
+    def forward(self, frames) -> pd.DataFrame:
         """
         Performs predictions on input frames
         Arguments:

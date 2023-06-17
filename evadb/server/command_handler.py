@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import asyncio
 from typing import Iterator, Optional
 
 from evadb.binder.statement_binder import StatementBinder
@@ -29,7 +28,11 @@ from evadb.utils.stats import Timer
 
 
 def execute_query(
-    evadb: EvaDBDatabase, query, report_time: bool = False, **kwargs
+    evadb: EvaDBDatabase,
+    query,
+    report_time: bool = False,
+    ignore_exceptions: bool = False,
+    **kwargs
 ) -> Iterator[Batch]:
     """
     Execute the query and return a result generator.
@@ -40,20 +43,26 @@ def execute_query(
         stmt = Parser().parse(query)[0]
         StatementBinder(StatementBinderContext(evadb.catalog)).bind(stmt)
         l_plan = StatementToPlanConverter().visit(stmt)
-        p_plan = asyncio.run(plan_generator.build(l_plan))
-        output = PlanExecutor(evadb, p_plan).execute_plan()
+        p_plan = plan_generator.build(l_plan)
+        output = PlanExecutor(evadb, p_plan).execute_plan(ignore_exceptions)
 
-    query_compile_time.log_elapsed_time("Query Compile Time")
+    if report_time is True:
+        query_compile_time.log_elapsed_time("Query Compile Time")
+
     return output
 
 
 def execute_query_fetch_all(
-    evadb: EvaDBDatabase, query=None, **kwargs
+    evadb: EvaDBDatabase,
+    query=None,
+    report_time: bool = False,
+    ignore_exceptions: bool = False,
+    **kwargs
 ) -> Optional[Batch]:
     """
     Execute the query and fetch all results into one Batch object.
     """
-    output = execute_query(evadb, query, report_time=True, **kwargs)
+    output = execute_query(evadb, query, report_time, ignore_exceptions, **kwargs)
     if output:
         batch_list = list(output)
         return Batch.concat(batch_list, copy=False)

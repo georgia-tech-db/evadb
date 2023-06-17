@@ -17,7 +17,6 @@ from pathlib import Path
 from test.markers import macos_skip_marker
 from test.util import get_evadb_for_testing, load_udfs_for_testing
 
-import faiss
 import numpy as np
 import pandas as pd
 import pytest
@@ -26,6 +25,7 @@ from evadb.catalog.catalog_type import VectorStoreType
 from evadb.models.storage.batch import Batch
 from evadb.server.command_handler import execute_query_fetch_all
 from evadb.storage.storage_engine import StorageEngine
+from evadb.utils.generic_utils import try_to_import_faiss
 
 
 @pytest.mark.notparallel
@@ -124,6 +124,9 @@ class CreateIndexTest(unittest.TestCase):
         self.assertEqual(index_catalog_entry.feat_column, feat_column)
 
         # Test on disk index.
+        try_to_import_faiss()
+        import faiss
+
         index = faiss.read_index(index_catalog_entry.save_file_path)
         distance, row_id = index.search(np.array([[0, 0, 0]]).astype(np.float32), 1)
         self.assertEqual(distance[0][0], 0)
@@ -158,6 +161,9 @@ class CreateIndexTest(unittest.TestCase):
         self.assertEqual(index_catalog_entry.feat_column, input_column)
 
         # Test on disk index.
+        try_to_import_faiss()
+        import faiss
+
         index = faiss.read_index(index_catalog_entry.save_file_path)
         distance, row_id = index.search(np.array([[0, 0, 0]]).astype(np.float32), 1)
         self.assertEqual(distance[0][0], 0)

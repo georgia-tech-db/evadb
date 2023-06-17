@@ -12,9 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import asyncio
-
-import nest_asyncio
 
 from evadb.database import EvaDBDatabase
 from evadb.optimizer.cost_model import CostModel
@@ -28,8 +25,6 @@ from evadb.optimizer.optimizer_tasks import (
 )
 from evadb.optimizer.property import PropertyType
 from evadb.optimizer.rules.rules_manager import RulesManager
-
-nest_asyncio.apply()
 
 
 class PlanGenerator:
@@ -69,7 +64,7 @@ class PlanGenerator:
 
         return physical_plan
 
-    async def optimize(self, logical_plan: Operator):
+    def optimize(self, logical_plan: Operator):
         optimizer_context = OptimizerContext(
             self.db, self.cost_model, self.rules_manager
         )
@@ -109,10 +104,10 @@ class PlanGenerator:
         optimal_plan = self.build_optimal_physical_plan(root_grp_id, optimizer_context)
         return optimal_plan
 
-    async def build(self, logical_plan: Operator):
+    def build(self, logical_plan: Operator):
         # apply optimizations
         try:
-            plan = await asyncio.wait_for(self.optimize(logical_plan), timeout=60.0)
+            plan = self.optimize(logical_plan)
         except TimeoutError:
             print("Optimizer timed out!")
 

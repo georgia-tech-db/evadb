@@ -17,10 +17,10 @@ import unittest
 import numpy as np
 import pandas as pd
 from numpy import asarray
-from PIL import Image
 
 from evadb.configuration.constants import EvaDB_ROOT_DIR
 from evadb.udfs.ndarray.annotate import Annotate
+from evadb.utils.generic_utils import try_to_import_pillow
 
 
 class AnnotateTests(unittest.TestCase):
@@ -31,6 +31,9 @@ class AnnotateTests(unittest.TestCase):
         assert hasattr(self.annotate_instance, "name")
 
     def test_should_annotate(self):
+        try_to_import_pillow()
+        from PIL import Image
+
         img = Image.open(
             f"{EvaDB_ROOT_DIR}/test/data/uadetrac/small-data/MVI_20011/img00001.jpg"
         )

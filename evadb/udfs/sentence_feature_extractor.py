@@ -14,13 +14,26 @@
 # limitations under the License.
 import numpy as np
 import pandas as pd
-from sentence_transformers import SentenceTransformer
 
 from evadb.catalog.catalog_type import NdArrayType
 from evadb.udfs.abstract.abstract_udf import AbstractUDF
 from evadb.udfs.decorators.decorators import forward, setup
 from evadb.udfs.decorators.io_descriptors.data_types import PandasDataframe
 from evadb.udfs.gpu_compatible import GPUCompatible
+
+
+def try_to_import_sentence_transformers():
+    try:
+        import sentence_transformers  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import sentence-transformers python package.
+                Please install it with `pip install sentence-transformers`."""
+        )
+
+
+try_to_import_sentence_transformers()
+from sentence_transformers import SentenceTransformer  # noqa: E402
 
 
 class SentenceTransformerFeatureExtractor(AbstractUDF, GPUCompatible):
