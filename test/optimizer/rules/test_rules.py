@@ -77,6 +77,7 @@ from evadb.parser.types import JoinType
 from evadb.server.command_handler import execute_query_fetch_all
 from evadb.utils.generic_utils import is_ray_available
 
+
 @pytest.mark.notparallel
 class RulesTest(unittest.TestCase):
     @classmethod
