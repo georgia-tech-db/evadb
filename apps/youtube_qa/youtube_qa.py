@@ -26,7 +26,7 @@ MAX_CHUNK_SIZE = 10000
 DEFAULT_VIDEO_LINK = "https://www.youtube.com/watch?v=TvS1lHEQoKk"
 DEFAULT_VIDEO_PATH = "./apps/youtube_qa/benchmarks/russia_ukraine.mp4"
 
-#temporary file paths
+# temporary file paths
 TRANSCRIPT_PATH = "./evadb_data/tmp/transcript.csv"
 SUMMARY_PATH = "./evadb_data/tmp/summary.csv"
 BLOG_PATH = "blog.txt"
@@ -239,12 +239,12 @@ def generate_local_video_transcript(cursor: evadb.EvaDBCursor, video_path: str) 
 
 def generate_summary(cursor: evadb.EvaDBCursor):
     """Generate summary of a video transcript if it is too long (exceeds llm token limits)
-    
+
     Args:
         cursor (EVADBCursor): evadb api cursor.
     """
     generate_summary_rel = cursor.table("Transcript").select(
-        f"ChatGPT('summarize the video', text)"
+        "ChatGPT('summarize the video', text)"
     )
     responses = generate_summary_rel.df()["chatgpt.response"]
 
@@ -253,7 +253,7 @@ def generate_summary(cursor: evadb.EvaDBCursor):
         summary += f"{r} \n"
     df = pd.DataFrame([{"summary": summary}])
     df.to_csv(SUMMARY_PATH)
-        
+
     need_to_summarize = len(summary) > MAX_CHUNK_SIZE
     while need_to_summarize:
         partitioned_summary = partition_summary(summary)
@@ -268,15 +268,15 @@ def generate_summary(cursor: evadb.EvaDBCursor):
         cursor.load(SUMMARY_PATH, "Summary", "csv").execute()
 
         generate_summary_rel = cursor.table("Summary").select(
-        "ChatGPT('summarize', summary)"
+            "ChatGPT('summarize', summary)"
         )
         responses = generate_summary_rel.df()["chatgpt.response"]
         summary = " ".join(responses)
-        
+
         # no further summarization is needed if the summary is short enough
         if len(summary) <= MAX_CHUNK_SIZE:
             need_to_summarize = False
-    
+
     # load final summary to table
     cursor.drop_table("Summary", if_exists=True).execute()
     cursor.query(
@@ -291,18 +291,26 @@ def generate_response(cursor: evadb.EvaDBCursor, question: str) -> str:
     Args:
         cursor (EVADBCursor): evadb api cursor.
         question (str): question to ask to llm.
-    
+
     Returns
         str: response from llm.
     """
     # generate summary
     if len(cursor.table("Transcript").select("text").df()["transcript.text"]) == 1:
-        return cursor.table("Transcript").select(f"ChatGPT('{question}', text)").df()["chatgpt.response"][0]
+        return (
+            cursor.table("Transcript")
+            .select(f"ChatGPT('{question}', text)")
+            .df()["chatgpt.response"][0]
+        )
     else:
         if not os.path.exists(SUMMARY_PATH):
             generate_summary(cursor)
-        
-        return cursor.table("Summary").select(f"ChatGPT('{question}', summary)").df()["chatgpt.response"][0]
+
+        return (
+            cursor.table("Summary")
+            .select(f"ChatGPT('{question}', summary)")
+            .df()["chatgpt.response"][0]
+        )
 
 
 def generate_blog_post(cursor: evadb.EvaDBCursor) -> str:
