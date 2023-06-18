@@ -204,12 +204,14 @@ class LoadExecutorTest(unittest.TestCase):
                 execute_query_fetch_all(self.evadb, query)
 
     def test_should_fail_to_load_invalid_files_as_video(self):
-        path = f"{EvaDB_ROOT_DIR}/data/**"
+        path = f"{EvaDB_ROOT_DIR}/data/README.md"
         query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
         with self.assertRaises(Exception):
-            execute_query_fetch_all(self.evadb, query)
+            execute_query_fetch_all(self.evadb, query, do_not_print_exceptions=True)
         with self.assertRaises(BinderError):
-            execute_query_fetch_all(self.evadb, "SELECT name FROM MyVideos")
+            execute_query_fetch_all(
+                self.evadb, "SELECT name FROM MyVideos", do_not_print_exceptions=True
+            )
 
     def test_should_rollback_if_video_load_fails(self):
         path_regex = Path(f"{EvaDB_ROOT_DIR}/data/sample_videos/1/*.mp4")
@@ -332,12 +334,14 @@ class LoadExecutorTest(unittest.TestCase):
                 execute_query_fetch_all(self.evadb, query)
 
     def test_should_fail_to_load_invalid_files_as_image(self):
-        path = f"{EvaDB_ROOT_DIR}/data/**"
+        path = f"{EvaDB_ROOT_DIR}/data/README.md"
         query = f"""LOAD IMAGE "{path}" INTO MyImages;"""
         with self.assertRaises(Exception):
-            execute_query_fetch_all(self.evadb, query)
+            execute_query_fetch_all(self.evadb, query, do_not_print_exceptions=True)
         with self.assertRaises(BinderError):
-            execute_query_fetch_all(self.evadb, "SELECT name FROM MyImages;")
+            execute_query_fetch_all(
+                self.evadb, "SELECT name FROM MyImages;", do_not_print_exceptions=True
+            )
 
     def test_should_rollback_if_image_load_fails(self):
         valid_images = glob.glob(
