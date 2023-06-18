@@ -228,6 +228,7 @@ def remove_directory_contents(dir_path):
 def try_to_import_ray():
     try:
         import ray  # noqa: F401
+        from ray.util.queue import Queue  # noqa: F401
     except ImportError:
         raise ValueError(
             """Could not import ray python package.
@@ -239,7 +240,7 @@ def is_ray_available() -> bool:
     try:
         try_to_import_ray()
         return True
-    except:  # noqa: E722
+    except ValueError:  # noqa: E722
         return False
 
 
