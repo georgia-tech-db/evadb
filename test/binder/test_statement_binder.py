@@ -140,9 +140,7 @@ class StatementBinderTests(unittest.TestCase):
             mock_binder.assert_called_with(stmt.explainable_stmt)
 
     @patch("evadb.binder.statement_binder.load_udf_class_from_file")
-    def test_bind_func_expr(
-        self, mock_load_udf_class_from_file
-    ):
+    def test_bind_func_expr(self, mock_load_udf_class_from_file):
         # setup
         func_expr = MagicMock(
             name="func_expr", alias=Alias("func_expr"), output_col_aliases=[]

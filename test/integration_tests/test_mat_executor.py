@@ -39,6 +39,7 @@ class MaterializedViewTest(unittest.TestCase):
     def setUpClass(cls):
         try_to_import_ray()
         import ray
+
         ray.init(num_cpus=1)
         cls.evadb = get_evadb_for_testing()
         # reset the catalog manager before running each test
