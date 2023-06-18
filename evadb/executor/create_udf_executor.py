@@ -41,6 +41,11 @@ class CreateUDFExecutor(AbstractExecutor):
             Path(self.config.get_value("core", "evadb_installation_dir")) / "udfs"
         )
 
+        # https://stackoverflow.com/a/76322515
+        import os
+
+        os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
+
     def handle_huggingface_udf(self):
         """Handle HuggingFace UDFs
 

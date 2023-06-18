@@ -28,6 +28,7 @@ import pytest
 from evadb.configuration.constants import EvaDB_ROOT_DIR
 from evadb.models.storage.batch import Batch
 from evadb.server.command_handler import execute_query_fetch_all
+from evadb.utils.generic_utils import try_to_import_ray
 
 NUM_FRAMES = 10
 
@@ -36,8 +37,8 @@ NUM_FRAMES = 10
 class MaterializedViewTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        try_to_import_ray()
         import ray
-
         ray.init(num_cpus=1)
         cls.evadb = get_evadb_for_testing()
         # reset the catalog manager before running each test

@@ -111,6 +111,7 @@ class ExchangeExecutor(AbstractExecutor):
         class StageCompleteSignal:
             pass
 
+        try_to_import_ray()
         from ray.util.queue import Queue
 
         input_queue = Queue(maxsize=100)

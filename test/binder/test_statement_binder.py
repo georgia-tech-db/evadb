@@ -140,9 +140,8 @@ class StatementBinderTests(unittest.TestCase):
             mock_binder.assert_called_with(stmt.explainable_stmt)
 
     @patch("evadb.binder.statement_binder.load_udf_class_from_file")
-    @patch("evadb.binder.statement_binder.get_file_checksum")
     def test_bind_func_expr(
-        self, mock_get_file_checksum, mock_load_udf_class_from_file
+        self, mock_load_udf_class_from_file
     ):
         # setup
         func_expr = MagicMock(
@@ -167,7 +166,7 @@ class StatementBinderTests(unittest.TestCase):
         mock_load_udf_class_from_file.return_value.return_value = (
             "load_udf_class_from_file"
         )
-        mock_get_file_checksum.return_value = udf_obj.checksum
+        # mock_get_file_checksum.return_value = udf_obj.checksum
 
         # Case 1 set output
         func_expr.output = "out1"

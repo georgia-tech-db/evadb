@@ -36,9 +36,6 @@ class OCRExtractor(AbstractUDF, GPUCompatible):
         try_to_import_torch()
         try_to_import_torchvision()
         try_to_import_transformers()
-        # https://stackoverflow.com/a/76322515
-        # import os
-        # os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
 
         from transformers import DonutProcessor, VisionEncoderDecoderModel
 
