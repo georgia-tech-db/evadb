@@ -26,6 +26,11 @@ MAX_CHUNK_SIZE = 10000
 DEFAULT_VIDEO_LINK = "https://www.youtube.com/watch?v=TvS1lHEQoKk"
 DEFAULT_VIDEO_PATH = "./apps/youtube_qa/benchmarks/russia_ukraine.mp4"
 
+#temporary file paths
+TRANSCRIPT_PATH = "./evadb_data/tmp/transcript.csv"
+SUMMARY_PATH = "./evadb_data/tmp/summary.csv"
+BLOG_PATH = "blog.txt"
+
 
 def receive_user_input() -> Dict:
     """Receives user input.
@@ -45,7 +50,7 @@ def receive_user_input() -> Dict:
         # get Youtube video url
         video_link = str(
             input(
-                "📺 Enter the URL of the YouTube video (press Enter to use a default Youtube video): "
+                "📺 Enter the URL of the YouTube video (press Enter to use our default Youtube video): "
             )
         )
 
@@ -102,6 +107,32 @@ def partition_transcript(raw_transcript: str):
     return partitioned_transcript
 
 
+def partition_summary(prev_summary: str):
+    """Summarize a summary if a summary is too large.
+
+    Args:
+        prev_summary (str): previous summary that is too large.
+
+    Returns:
+        List: a list of partitioned summary
+    """
+    k = 2
+    while True:
+        if (len(prev_summary) / k) <= MAX_CHUNK_SIZE:
+            break
+        else:
+            k += 1
+    chunk_size = int(len(prev_summary) / k)
+
+    new_summary = [
+        {"summary": prev_summary[i : i + chunk_size]}
+        for i in range(0, len(prev_summary), chunk_size)
+    ]
+    if len(new_summary[-1]["summary"]) < 30:
+        new_summary.pop()
+    return new_summary
+
+
 def group_transcript(transcript: dict):
     """Group video transcript elements when they are too short.
 
@@ -109,20 +140,13 @@ def group_transcript(transcript: dict):
         transcript (dict): downloaded video transcript as a dictionary.
 
     Returns:
-        List: a list of partitioned transcript
+        str: full transcript as a single string.
     """
-    grouped_transcript = []
     new_line = ""
     for line in transcript:
-        if len(new_line) <= MAX_CHUNK_SIZE:
-            new_line += line["text"]
-        else:
-            grouped_transcript.append({"text": new_line})
-            new_line = ""
+        new_line += line["text"]
 
-    if grouped_transcript == []:
-        return [{"text": new_line}]
-    return grouped_transcript
+    return new_line
 
 
 def download_youtube_video_transcript(video_link: str):
@@ -213,6 +237,74 @@ def generate_local_video_transcript(cursor: evadb.EvaDBCursor, video_path: str) 
     return raw_transcript_string
 
 
+def generate_summary(cursor: evadb.EvaDBCursor):
+    """Generate summary of a video transcript if it is too long (exceeds llm token limits)
+    
+    Args:
+        cursor (EVADBCursor): evadb api cursor.
+    """
+    generate_summary_rel = cursor.table("Transcript").select(
+        f"ChatGPT('summarize the video', text)"
+    )
+    responses = generate_summary_rel.df()["chatgpt.response"]
+
+    summary = ""
+    for r in responses:
+        summary += f"{r} \n"
+    df = pd.DataFrame([{"summary": summary}])
+    df.to_csv(SUMMARY_PATH)
+        
+    need_to_summarize = len(summary) > MAX_CHUNK_SIZE
+    while need_to_summarize:
+        partitioned_summary = partition_summary(summary)
+
+        df = pd.DataFrame([{"summary": partitioned_summary}])
+        df.to_csv(SUMMARY_PATH)
+
+        cursor.drop_table("Summary", if_exists=True).execute()
+        cursor.query(
+            """CREATE TABLE IF NOT EXISTS Summary (summary TEXT(100));"""
+        ).execute()
+        cursor.load(SUMMARY_PATH, "Summary", "csv").execute()
+
+        generate_summary_rel = cursor.table("Summary").select(
+        "ChatGPT('summarize', summary)"
+        )
+        responses = generate_summary_rel.df()["chatgpt.response"]
+        summary = " ".join(responses)
+        
+        # no further summarization is needed if the summary is short enough
+        if len(summary) <= MAX_CHUNK_SIZE:
+            need_to_summarize = False
+    
+    # load final summary to table
+    cursor.drop_table("Summary", if_exists=True).execute()
+    cursor.query(
+        """CREATE TABLE IF NOT EXISTS Summary (summary TEXT(100));"""
+    ).execute()
+    cursor.load(SUMMARY_PATH, "Summary", "csv").execute()
+
+
+def generate_response(cursor: evadb.EvaDBCursor, question: str) -> str:
+    """Generates question response with llm.
+
+    Args:
+        cursor (EVADBCursor): evadb api cursor.
+        question (str): question to ask to llm.
+    
+    Returns
+        str: response from llm.
+    """
+    # generate summary
+    if len(cursor.table("Transcript").select("text").df()["transcript.text"]) == 1:
+        return cursor.table("Transcript").select(f"ChatGPT('{question}', text)").df()["chatgpt.response"][0]
+    else:
+        if not os.path.exists(SUMMARY_PATH):
+            generate_summary(cursor)
+        
+        return cursor.table("Summary").select(f"ChatGPT('{question}', summary)").df()["chatgpt.response"][0]
+
+
 def generate_blog_post(cursor: evadb.EvaDBCursor) -> str:
     to_generate = str(
         input("\nWould you like to generate a blog post of the video? (y/n): ")
@@ -220,42 +312,24 @@ def generate_blog_post(cursor: evadb.EvaDBCursor) -> str:
     if to_generate.lower() == "y":
         print("⏳ Generating blog post (may take a while)...")
 
-        # generate video summary
-        generate_chatgpt_summary_rel = cursor.table("Transcript").select(
-            "ChatGPT('summarize this video', text)"
-        )
-        responses = generate_chatgpt_summary_rel.df()["chatgpt.response"]
-
-        summary = ""
-        for r in responses:
-            summary += f"{r} \n"
-
-        # save summary to csv
-        df = pd.DataFrame([{"summary": summary}])
-        df.to_csv("./evadb_data/tmp/summary.csv")
-
-        # load summary to db
-        cursor.drop_table("Summary", if_exists=True).execute()
-        cursor.query(
-            """CREATE TABLE IF NOT EXISTS Summary (summary TEXT(100));"""
-        ).execute()
-        cursor.load("./evadb_data/tmp/summary.csv", "Summary", "csv").execute()
+        if not os.path.exists(SUMMARY_PATH):
+            generate_summary(cursor)
 
         # use llm to generate blog post
         generate_blog_rel = cursor.table("Summary").select(
-            "ChatGPT('generate a blog post of the video summary', summary)"
+            "ChatGPT('generate a formmatted blog post of the video summary', summary)"
         )
         responses = generate_blog_rel.df()["chatgpt.response"]
         blog = responses[0]
         print(blog)
 
-        if os.path.exists("blog.txt"):
-            os.remove("blog.txt")
+        if os.path.exists(BLOG_PATH):
+            os.remove(BLOG_PATH)
 
-        with open("blog.txt", "w") as file:
-            file.write(blog)
+        with open(BLOG_PATH, "w") as file:
+            file.write(BLOG_PATH)
 
-        print("✅ blog post is saved to file blog.txt")
+        print(f"✅ blog post is saved to file {BLOG_PATH}")
 
 
 def cleanup():
@@ -285,10 +359,9 @@ if __name__ == "__main__":
         # establish evadb api cursor
         cursor = evadb.connect().cursor()
 
+        raw_transcript_string = None
         if transcript is not None:
-            grouped_transcript = group_transcript(transcript)
-            df = pd.DataFrame(grouped_transcript)
-            df.to_csv("./evadb_data/tmp/transcript.csv")
+            raw_transcript_string = group_transcript(transcript)
         else:
             # create speech recognizer UDF from HuggingFace
             args = {
@@ -313,17 +386,17 @@ if __name__ == "__main__":
                 )
             )
 
+        if raw_transcript_string is not None:
             partitioned_transcript = partition_transcript(raw_transcript_string)
             df = pd.DataFrame(partitioned_transcript)
-            df.to_csv("./evadb_data/tmp/transcript.csv")
-            df.to_csv("./transcript.csv")
+            df.to_csv(TRANSCRIPT_PATH)
 
         # load chunked transcript into table
         cursor.drop_table("Transcript", if_exists=True).execute()
         cursor.query(
             """CREATE TABLE IF NOT EXISTS Transcript (text TEXT(50));"""
         ).execute()
-        cursor.load("./evadb_data/tmp/transcript.csv", "Transcript", "csv").execute()
+        cursor.load(TRANSCRIPT_PATH, "Transcript", "csv").execute()
 
         print("===========================================")
         print("🪄 Ask anything about the video!")
@@ -335,16 +408,11 @@ if __name__ == "__main__":
             else:
                 # Generate response with chatgpt udf
                 print("⏳ Generating response (may take a while)...")
-                generate_chatgpt_response_rel = cursor.table("Transcript").select(
-                    f"ChatGPT('given this video, {question} (in 100 words)', text)"
-                )
-                responses = generate_chatgpt_response_rel.df()["chatgpt.response"]
-
-                response = ""
-                for r in responses:
-                    response += f"{r} \n"
-                print(response, "\n")
+                response = generate_response(cursor, question)
+                print("+--------------------------------------------------+")
                 print("✅ Answer:")
+                print(response)
+                print("+--------------------------------------------------+")
 
         # generate a blog post on user demand
         generate_blog_post(cursor)
