@@ -76,7 +76,7 @@ if [[ "$OSTYPE" != "msys" ]];
 then
     if [[ "$MODE" = "TEST" || "$MODE" = "ALL" ]];
     then
-        PYTHONPATH=./ pytest --durations=20 --capture=sys --tb=short -v --log-level=WARNING -rsf -p no:cov test/integration_tests/test_pytorch.py -m "not benchmark" -s -v
+        PYTHONPATH=./ pytest --durations=20 --capture=sys --tb=short -v --log-level=WARNING -rsf -p no:cov test -m "not benchmark"
     elif [[ "$MODE" = "COV" ]];
     then
 	# As a workaround, ray needs to be disabled for COV.
