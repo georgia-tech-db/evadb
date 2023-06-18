@@ -14,7 +14,7 @@
 # limitations under the License.
 import os
 import unittest
-from test.markers import ocr_skip_marker, ray_only_marker, windows_skip_marker
+from test.markers import ocr_skip_marker, ray_skip_marker, windows_skip_marker
 from test.util import (
     create_sample_video,
     file_remove,
@@ -85,7 +85,7 @@ class PytorchTest(unittest.TestCase):
     def tearDown(self) -> None:
         shutdown_ray()
 
-    @ray_only_marker
+    @ray_skip_marker
     def test_should_apply_parallel_match_sequential(self):
         # Parallel execution
         select_query = """SELECT id, obj.labels
@@ -109,8 +109,9 @@ class PytorchTest(unittest.TestCase):
         self.assertEqual(len(par_batch), len(seq_batch))
         self.assertEqual(par_batch, seq_batch)
 
-    @ray_only_marker
+    @ray_skip_marker
     def test_should_project_parallel_match_sequential(self):
+        print(os.environ.get("ray"))
         create_udf_query = """CREATE UDF IF NOT EXISTS FaceDetector
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
                   OUTPUT (bboxes NDARRAY FLOAT32(ANYDIM, 4),
