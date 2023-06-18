@@ -108,7 +108,9 @@ class LoadExecutorTest(unittest.TestCase):
 
         # try to read the table again
         with self.assertRaises(ExecutorError) as e:
-            execute_query_fetch_all(self.evadb, select_query)
+            execute_query_fetch_all(
+                self.evadb, select_query, do_not_print_exceptions=True
+            )
         self.assertEqual(
             str(e.exception),
             "The dataset file could not be found. Please verify that the file exists in the specified path.",
@@ -175,7 +177,7 @@ class LoadExecutorTest(unittest.TestCase):
         path = f"{EvaDB_ROOT_DIR}/data/sample_videos/**/*.mp4"
         query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
         with self.assertRaises(ExecutorError):
-            execute_query_fetch_all(self.evadb, query)
+            execute_query_fetch_all(self.evadb, query, do_not_print_exceptions=True)
 
         # original data should be preserved
         after_load_fail = execute_query_fetch_all(
@@ -188,7 +190,7 @@ class LoadExecutorTest(unittest.TestCase):
         path = f"{EvaDB_ROOT_DIR}/data/sample_videos/missing.mp4"
         query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
         with self.assertRaises(ExecutorError) as exc_info:
-            execute_query_fetch_all(self.evadb, query)
+            execute_query_fetch_all(self.evadb, query, do_not_print_exceptions=True)
         self.assertIn(
             "Load VIDEO failed due to no valid files found on path",
             str(exc_info.exception),
@@ -201,7 +203,7 @@ class LoadExecutorTest(unittest.TestCase):
         with open(tempfile_path, "wb") as tmp:
             query = f"""LOAD VIDEO "{tmp.name}" INTO MyVideos;"""
             with self.assertRaises(Exception):
-                execute_query_fetch_all(self.evadb, query)
+                execute_query_fetch_all(self.evadb, query, do_not_print_exceptions=True)
 
     def test_should_fail_to_load_invalid_files_as_video(self):
         path = f"{EvaDB_ROOT_DIR}/data/README.md"
@@ -228,9 +230,15 @@ class LoadExecutorTest(unittest.TestCase):
                 path = Path(tmp_dir) / "*"
                 query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
                 with self.assertRaises(Exception):
-                    execute_query_fetch_all(self.evadb, query)
+                    execute_query_fetch_all(
+                        self.evadb, query, do_not_print_exceptions=True
+                    )
                 with self.assertRaises(BinderError):
-                    execute_query_fetch_all(self.evadb, "SELECT name FROM MyVideos")
+                    execute_query_fetch_all(
+                        self.evadb,
+                        "SELECT name FROM MyVideos",
+                        do_not_print_exceptions=True,
+                    )
 
             # Load two correct file and one empty file
             # nothing should be added
@@ -241,9 +249,15 @@ class LoadExecutorTest(unittest.TestCase):
                 path = Path(tmp_dir) / "*"
                 query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
                 with self.assertRaises(Exception):
-                    execute_query_fetch_all(self.evadb, query)
+                    execute_query_fetch_all(
+                        self.evadb, query, do_not_print_exceptions=True
+                    )
                 with self.assertRaises(BinderError):
-                    execute_query_fetch_all(self.evadb, "SELECT name FROM MyVideos")
+                    execute_query_fetch_all(
+                        self.evadb,
+                        "SELECT name FROM MyVideos",
+                        do_not_print_exceptions=True,
+                    )
 
     def test_should_rollback_and_preserve_previous_state(self):
         path_regex = Path(f"{EvaDB_ROOT_DIR}/data/sample_videos/1/*.mp4")
@@ -266,7 +280,9 @@ class LoadExecutorTest(unittest.TestCase):
                 path = Path(tmp_dir) / "*"
                 query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
                 with self.assertRaises(Exception):
-                    execute_query_fetch_all(self.evadb, query)
+                    execute_query_fetch_all(
+                        self.evadb, query, do_not_print_exceptions=True
+                    )
                 result = execute_query_fetch_all(
                     self.evadb, "SELECT name FROM MyVideos"
                 )
@@ -290,7 +306,7 @@ class LoadExecutorTest(unittest.TestCase):
         path = f"{EvaDB_ROOT_DIR}/data/sample_images/missing.jpg"
         query = f"""LOAD IMAGE "{path}" INTO MyImages;"""
         with self.assertRaises(ExecutorError) as exc_info:
-            execute_query_fetch_all(self.evadb, query)
+            execute_query_fetch_all(self.evadb, query, do_not_print_exceptions=True)
         self.assertIn(
             "Load IMAGE failed due to no valid files found on path",
             str(exc_info.exception),
@@ -315,7 +331,7 @@ class LoadExecutorTest(unittest.TestCase):
         # try adding duplicate files to the table
         query = f"""LOAD IMAGE "{image_files[0]}" INTO MyImages;"""
         with self.assertRaises(Exception):
-            execute_query_fetch_all(self.evadb, query)
+            execute_query_fetch_all(self.evadb, query, do_not_print_exceptions=True)
 
         # original data should be preserved
         after_load_fail = execute_query_fetch_all(
@@ -331,7 +347,7 @@ class LoadExecutorTest(unittest.TestCase):
         with open(tempfile_path, "wb") as tmp:
             query = f"""LOAD IMAGE "{tmp.name}" INTO MyImages;"""
             with self.assertRaises(Exception):
-                execute_query_fetch_all(self.evadb, query)
+                execute_query_fetch_all(self.evadb, query, do_not_print_exceptions=True)
 
     def test_should_fail_to_load_invalid_files_as_image(self):
         path = f"{EvaDB_ROOT_DIR}/data/README.md"
@@ -359,9 +375,15 @@ class LoadExecutorTest(unittest.TestCase):
                 path = Path(tmp_dir) / "*"
                 query = f"""LOAD IMAGE "{path}" INTO MyImages;"""
                 with self.assertRaises(Exception):
-                    execute_query_fetch_all(self.evadb, query)
+                    execute_query_fetch_all(
+                        self.evadb, query, do_not_print_exceptions=True
+                    )
                 with self.assertRaises(BinderError):
-                    execute_query_fetch_all(self.evadb, "SELECT name FROM MyImages;")
+                    execute_query_fetch_all(
+                        self.evadb,
+                        "SELECT name FROM MyImages;",
+                        do_not_print_exceptions=True,
+                    )
 
             # Load two correct file and one empty file
             # nothing should be added
@@ -372,9 +394,15 @@ class LoadExecutorTest(unittest.TestCase):
                 path = Path(tmp_dir) / "*"
                 query = f"""LOAD IMAGE "{path}" INTO MyImages;"""
                 with self.assertRaises(Exception):
-                    execute_query_fetch_all(self.evadb, query)
+                    execute_query_fetch_all(
+                        self.evadb, query, do_not_print_exceptions=True
+                    )
                 with self.assertRaises(BinderError):
-                    execute_query_fetch_all(self.evadb, "SELECT name FROM MyImages;")
+                    execute_query_fetch_all(
+                        self.evadb,
+                        "SELECT name FROM MyImages;",
+                        do_not_print_exceptions=True,
+                    )
 
     def test_should_rollback_and_preserve_previous_state_for_load_images(self):
         valid_images = glob.glob(
@@ -397,7 +425,9 @@ class LoadExecutorTest(unittest.TestCase):
                 path = Path(tmp_dir) / "*"
                 query = f"""LOAD IMAGE "{path}" INTO MyImages;"""
                 with self.assertRaises(Exception):
-                    execute_query_fetch_all(self.evadb, query)
+                    execute_query_fetch_all(
+                        self.evadb, query, do_not_print_exceptions=True
+                    )
                 result = execute_query_fetch_all(
                     self.evadb, "SELECT name FROM MyImages"
                 )
@@ -509,7 +539,9 @@ class LoadExecutorTest(unittest.TestCase):
 
         with self.assertRaises(ExecutorError):
             load_query = f"LOAD IMAGE '{large_scale_image_files_path}/**/*.jpg' INTO MyLargeScaleImages;"
-            execute_query_fetch_all(self.evadb, load_query)
+            execute_query_fetch_all(
+                self.evadb, load_query, do_not_print_exceptions=True
+            )
 
         drop_query = "DROP TABLE IF EXISTS MyLargeScaleImages;"
         execute_query_fetch_all(self.evadb, drop_query)
