@@ -234,6 +234,12 @@ def try_to_import_ray():
                 Please install it with `pip install ray`."""
         )
 
+def is_ray_available() -> bool:
+    try:
+        try_to_import_ray()
+        return True
+    except:
+        return False
 
 ##############################
 ## VISION

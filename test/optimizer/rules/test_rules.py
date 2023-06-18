@@ -75,7 +75,7 @@ from evadb.optimizer.rules.rules import (
 from evadb.optimizer.rules.rules_manager import RulesManager, disable_rules
 from evadb.parser.types import JoinType
 from evadb.server.command_handler import execute_query_fetch_all
-
+from evadb.utils.generic_utils import is_ray_available
 
 @pytest.mark.notparallel
 class RulesTest(unittest.TestCase):
@@ -195,7 +195,8 @@ class RulesTest(unittest.TestCase):
                 )
             )
 
-        ray_enabled = self.evadb.config.get_value("experimental", "ray")
+        # ray_enabled = self.evadb.config.get_value("experimental", "ray")
+        ray_enabled = is_ray_available()
 
         # For the current version, we choose either the distributed or the
         # sequential rule, because we do not have a logic to choose one over
