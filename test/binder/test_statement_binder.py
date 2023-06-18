@@ -140,10 +140,7 @@ class StatementBinderTests(unittest.TestCase):
             mock_binder.assert_called_with(stmt.explainable_stmt)
 
     @patch("evadb.binder.statement_binder.load_udf_class_from_file")
-    @patch("evadb.binder.statement_binder.get_file_checksum")
-    def test_bind_func_expr(
-        self, mock_get_file_checksum, mock_load_udf_class_from_file
-    ):
+    def test_bind_func_expr(self, mock_load_udf_class_from_file):
         # setup
         func_expr = MagicMock(
             name="func_expr", alias=Alias("func_expr"), output_col_aliases=[]
@@ -167,14 +164,14 @@ class StatementBinderTests(unittest.TestCase):
         mock_load_udf_class_from_file.return_value.return_value = (
             "load_udf_class_from_file"
         )
-        mock_get_file_checksum.return_value = udf_obj.checksum
+        # mock_get_file_checksum.return_value = udf_obj.checksum
 
         # Case 1 set output
         func_expr.output = "out1"
         binder = StatementBinder(StatementBinderContext(mock_catalog))
         binder._bind_func_expr(func_expr)
 
-        mock_get_file_checksum.assert_called_with(udf_obj.impl_file_path)
+        # mock_get_file_checksum.assert_called_with(udf_obj.impl_file_path)
         mock_get_name.assert_called_with(func_expr.name)
         mock_get_udf_outputs.assert_called_with(udf_obj)
         mock_load_udf_class_from_file.assert_called_with(
@@ -194,7 +191,7 @@ class StatementBinderTests(unittest.TestCase):
         binder = StatementBinder(StatementBinderContext(mock_catalog))
         binder._bind_func_expr(func_expr)
 
-        mock_get_file_checksum.assert_called_with(udf_obj.impl_file_path)
+        # mock_get_file_checksum.assert_called_with(udf_obj.impl_file_path)
         mock_get_name.assert_called_with(func_expr.name)
         mock_get_udf_outputs.assert_called_with(udf_obj)
         mock_load_udf_class_from_file.assert_called_with(
@@ -220,7 +217,7 @@ class StatementBinderTests(unittest.TestCase):
         with self.assertRaises(BinderError) as cm:
             binder._bind_func_expr(func_expr)
         err_msg = (
-            f"{mock_error_msg}. Please verify that the UDF class name in the"
+            f"{mock_error_msg}. Please verify that the UDF class name in the "
             "implementation file matches the UDF name."
         )
         self.assertEqual(str(cm.exception), err_msg)
