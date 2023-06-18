@@ -45,10 +45,14 @@ minimal_requirements = [
     "sqlalchemy-utils>=0.36.6",
     "lark>=1.0.0",
     "pyyaml>=5.1",
-    "ray>=1.13.0,<2.5.0",        # BREAKING CHANGES IN 2.5.0
     "aenum>=2.2.0",
     "diskcache>=5.4.0",
     "retry>=0.9.2",
+    "psutil"
+]
+
+ray_libs = [
+    "ray>=1.13.0,<2.5.0",        # BREAKING CHANGES IN 2.5.0
 ]
 
 vision_libs = [
@@ -126,6 +130,7 @@ dev_libs = [
 INSTALL_REQUIRES = minimal_requirements
 
 EXTRA_REQUIRES = {
+    "ray": ray_libs,
     "vision": vision_libs,
     "document": document_libs,
     "udf": udf_libs,
