@@ -147,7 +147,8 @@ class PytorchTest(unittest.TestCase):
                           AS obj(labels, bboxes, scores)
                          WHERE id < 2;"""
         with self.assertRaises(ExecutorError):
-            execute_query_fetch_all(self.evadb, select_query)
+            execute_query_fetch_all(self.evadb, select_query,
+            do_not_print_exceptions=True)
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_fastrcnn_with_lateral_join(self):

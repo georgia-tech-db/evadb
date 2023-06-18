@@ -218,7 +218,8 @@ class UDFExecutorTest(unittest.TestCase):
         select_query = "SELECT id,DummyObjectDetector1(data) FROM MyVideo \
             ORDER BY id;"
         with self.assertRaises(BinderError) as cm:
-            execute_query_fetch_all(self.evadb, select_query)
+            execute_query_fetch_all(self.evadb, select_query,
+            do_not_print_exceptions=True)
 
         err_msg = (
             "UDF with name DummyObjectDetector1 does not exist in the catalog. "
@@ -234,7 +235,8 @@ class UDFExecutorTest(unittest.TestCase):
                   IMPL  'test/util.py';
         """
         with self.assertRaises(ExecutorError):
-            execute_query_fetch_all(self.evadb, create_udf_query)
+            execute_query_fetch_all(self.evadb, create_udf_query,
+            do_not_print_exceptions=True)
 
     def test_should_raise_if_udf_file_is_modified(self):
         execute_query_fetch_all(self.evadb, "DROP UDF DummyObjectDetector;")

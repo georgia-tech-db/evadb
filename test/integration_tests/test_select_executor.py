@@ -561,7 +561,7 @@ class SelectExecutorTest(unittest.TestCase):
         query = """SELECT id, labels
                   FROM MyVideo JOIN LATERAL DummyMultiObjectDetector(data).labels;"""
         with self.assertRaises(SyntaxError) as cm:
-            execute_query_fetch_all(self.evadb, query)
+            execute_query_fetch_all(self.evadb, query, do_not_print_exceptions=True)
         self.assertEqual(
             str(cm.exception),
             f"TableValuedFunction {udf_name} should have alias.",
