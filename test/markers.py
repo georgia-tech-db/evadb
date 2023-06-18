@@ -39,13 +39,7 @@ memory_skip_marker = pytest.mark.skipif(
 )
 
 ray_skip_marker = pytest.mark.skipif(
-    os.environ.get("ray") is None,
-    reason="Skip test for ray execution.",
-)
-
-ray_only_marker = pytest.mark.skipif(
-    os.environ.get("ray") is not None,
-    reason="Run only if ray is enabled",
+    os.environ.get("ray") is None, reason="Run only if Ray is enabled"
 )
 
 duplicate_skip_marker = pytest.mark.skipif(

@@ -91,6 +91,10 @@ udf_libs = [
     "kornia",                  # SIFT FEATURES        
 ]
 
+ray_libs = [
+    "ray>=1.13.0,<2.5.0",        # BREAKING CHANGES IN 2.5.0
+]
+
 notebook_libs = [
     "ipython<8.13.0",
     "ipywidgets>=7.7.2",
