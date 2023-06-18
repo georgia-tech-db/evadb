@@ -29,7 +29,7 @@ DEFAULT_VIDEO_PATH = "./apps/youtube_qa/benchmarks/russia_ukraine.mp4"
 # temporary file paths
 TRANSCRIPT_PATH = "./evadb_data/tmp/transcript.csv"
 SUMMARY_PATH = "./evadb_data/tmp/summary.csv"
-BLOG_PATH = "blog.txt"
+BLOG_PATH = "blog.md"
 
 
 def receive_user_input() -> Dict:
@@ -325,7 +325,7 @@ def generate_blog_post(cursor: evadb.EvaDBCursor) -> str:
 
         # use llm to generate blog post
         generate_blog_rel = cursor.table("Summary").select(
-            "ChatGPT('generate a formmatted blog post of the video summary', summary)"
+            "ChatGPT('generate a blog post of the video summary in markdown format that has sections', summary)"
         )
         responses = generate_blog_rel.df()["chatgpt.response"]
         blog = responses[0]
@@ -335,7 +335,7 @@ def generate_blog_post(cursor: evadb.EvaDBCursor) -> str:
             os.remove(BLOG_PATH)
 
         with open(BLOG_PATH, "w") as file:
-            file.write(BLOG_PATH)
+            file.write(blog)
 
         print(f"✅ blog post is saved to file {BLOG_PATH}")
 
