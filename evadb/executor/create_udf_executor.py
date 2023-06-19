@@ -42,8 +42,9 @@ class CreateUDFExecutor(AbstractExecutor):
         )
 
         # https://stackoverflow.com/a/76322515
-        # import os
-        # os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
+        import os
+
+        os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
 
     def handle_huggingface_udf(self):
         """Handle HuggingFace UDFs

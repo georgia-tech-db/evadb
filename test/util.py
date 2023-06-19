@@ -46,9 +46,9 @@ from evadb.udfs.decorators import decorators
 from evadb.udfs.decorators.io_descriptors.data_types import NumpyArray, PandasDataframe
 from evadb.udfs.udf_bootstrap_queries import init_builtin_udfs
 from evadb.utils.generic_utils import (
+    is_ray_available,
     remove_directory_contents,
     try_to_import_cv2,
-    try_to_import_ray,
 )
 
 NUM_FRAMES = 10
@@ -93,10 +93,8 @@ def is_ray_stage_running():
 
 
 def shutdown_ray():
-    db_dir = suffix_pytest_xdist_worker_id_to_dir(EvaDB_DATABASE_DIR)
-    config = ConfigurationManager(Path(db_dir))
-    if config.get_value("experimental", "ray"):
-        try_to_import_ray()
+    is_ray_enabled = is_ray_available()
+    if is_ray_enabled:
         import ray
 
         ray.shutdown()

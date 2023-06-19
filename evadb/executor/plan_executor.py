@@ -168,5 +168,6 @@ class PlanExecutor:
                 yield from output
         except Exception as e:
             if do_not_raise_exceptions is False:
-                logger.exception(str(e))
+                if do_not_print_exceptions is False:
+                    logger.exception(str(e))
                 raise ExecutorError(e)
