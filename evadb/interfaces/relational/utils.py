@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import asyncio
 from typing import Callable, List, Union
 
 from evadb.binder.statement_binder import StatementBinder
@@ -55,7 +54,7 @@ def sql_predicate_to_expresssion_tree(expr: str) -> AbstractExpression:
 def execute_statement(evadb: EvaDBDatabase, statement: AbstractStatement) -> Batch:
     StatementBinder(StatementBinderContext(evadb.catalog)).bind(statement)
     l_plan = StatementToPlanConverter().visit(statement)
-    p_plan = asyncio.run(PlanGenerator(evadb).build(l_plan))
+    p_plan = PlanGenerator(evadb).build(l_plan)
     output = PlanExecutor(evadb, p_plan).execute_plan()
     if output:
         batch_list = list(output)
@@ -67,7 +66,7 @@ def string_to_lateral_join(expr: str, alias: str):
 
 
 def create_star_expression():
-    return [TupleValueExpression(col_name="*")]
+    return [TupleValueExpression(name="*")]
 
 
 def create_limit_expression(num: int):

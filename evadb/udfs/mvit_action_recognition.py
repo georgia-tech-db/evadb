@@ -15,16 +15,9 @@
 
 import numpy as np
 import pandas as pd
-import torch
-import torchvision
 
-try:
-    from torchvision.models.video import MViT_V2_S_Weights, mvit_v2_s
-except ImportError:
-    raise ImportError(
-        f"torchvision>=0.14.0 is required to use MVITActionRecognition, found {torchvision.__version__}"
-    )
 from evadb.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
+from evadb.utils.generic_utils import try_to_import_torch, try_to_import_torchvision
 
 
 class MVITActionRecognition(PytorchAbstractClassifierUDF):
@@ -33,6 +26,10 @@ class MVITActionRecognition(PytorchAbstractClassifierUDF):
         return "MVITActionRecognition"
 
     def setup(self):
+        try_to_import_torchvision()
+        try_to_import_torch()
+        from torchvision.models.video import MViT_V2_S_Weights, mvit_v2_s
+
         self.weights = MViT_V2_S_Weights.DEFAULT
         self.model = mvit_v2_s(weights=self.weights)
         self.preprocess = self.weights.transforms()
@@ -45,12 +42,16 @@ class MVITActionRecognition(PytorchAbstractClassifierUDF):
     def forward(self, segments):
         return self.classify(segments)
 
-    def transform(self, segments) -> torch.Tensor:
+    def transform(self, segments):
+        import torch
+
         segments = torch.Tensor(segments)
         segments = segments.permute(0, 3, 1, 2)
         return self.preprocess(segments).unsqueeze(0)
 
-    def classify(self, segments: torch.Tensor) -> pd.DataFrame:
+    def classify(self, segments) -> pd.DataFrame:
+        import torch
+
         with torch.no_grad():
             preds = self.model(segments).softmax(1)
         label_indices = preds.argmax(axis=1)

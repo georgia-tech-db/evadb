@@ -53,7 +53,7 @@ class LoadCSVExecutor(AbstractExecutor):
         for column in table_obj.columns:
             column_list.append(
                 TupleValueExpression(
-                    col_name=column.name,
+                    name=column.name,
                     table_alias=table_obj.name.lower(),
                     col_object=column,
                 )

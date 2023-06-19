@@ -16,20 +16,36 @@ from pathlib import Path
 from typing import Dict, Iterator
 
 from evadb.readers.abstract_reader import AbstractReader
-from evadb.readers.document.registry import _lazy_import_loader
+from evadb.readers.document.registry import (
+    _lazy_import_loader,
+    _lazy_import_text_splitter,
+)
 
 
 class DocumentReader(AbstractReader):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, chunk_params, **kwargs):
         super().__init__(*args, **kwargs)
         self._LOADER_MAPPING = _lazy_import_loader()
+        self._splitter_class = _lazy_import_text_splitter()
+
+        # https://github.com/hwchase17/langchain/blob/5b6bbf4ab2a33ed0d33ff5d3cb3979a7edc15682/langchain/text_splitter.py#L570
+        # by default we use chunk_size 4000 and overlap 200
+        self._chunk_size = chunk_params.get("chunk_size", 4000)
+        self._chunk_overlap = chunk_params.get("chunk_overlap", 200)
 
     def _read(self) -> Iterator[Dict]:
         ext = Path(self.file_url).suffix
         assert ext in self._LOADER_MAPPING, f"File Format {ext} not supported"
         loader_class, loader_args = self._LOADER_MAPPING[ext]
         loader = loader_class(self.file_url, **loader_args)
-        # load entire document as one entry
-        # https://github.com/hwchase17/langchain/blob/d4fd58963885465fba70a5cea9554a7b043b02a1/langchain/schema.py#L269
+
+        # todo: implement out own splitter
+        langchain_text_splitter = self._splitter_class(
+            chunk_size=self._chunk_size, chunk_overlap=self._chunk_overlap
+        )
+
         for data in loader.load():
-            yield {"data": data.page_content}
+            for chunk_id, row in enumerate(
+                langchain_text_splitter.split_documents([data])
+            ):
+                yield {"chunk_id": chunk_id, "data": row.page_content}

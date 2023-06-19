@@ -134,23 +134,34 @@ class EvaDBCursor(object):
 
         return func_sync
 
-    def table(self, table_name: str) -> EvaDBQuery:
+    def table(
+        self, table_name: str, chunk_size: int = None, chunk_overlap: int = None
+    ) -> EvaDBQuery:
         """
         Retrieves data from a table in the database.
 
         Args:
-            table_name (str): Name of the table.
+            table_name (str): The name of the table to retrieve data from.
+            chunk_size (int, optional): The size of the chunk to break the document into. Only valid for DOCUMENT tables.
+                If not provided, the default value is 4000.
+            chunk_overlap (int, optional): The overlap between consecutive chunks. Only valid for DOCUMENT tables.
+                If not provided, the default value is 200.
 
         Returns:
-            EvaDBQuery: The EvaDBQuery object representing the table query.
+            EvaDBQuery: An EvaDBQuery object representing the table query.
 
         Examples:
             >>> relation = conn.table("sample_table")
+
+            Read a document table using chunk_size 100 and chunk_overlap 10.
+            >>> relation = conn.table("doc_table", chunk_size=100, chunk_overlap=10)
         """
-        table = parse_table_clause(table_name)
+        table = parse_table_clause(
+            table_name, chunk_size=chunk_size, chunk_overlap=chunk_overlap
+        )
         # SELECT * FROM table
         select_stmt = SelectStatement(
-            target_list=[TupleValueExpression(col_name="*")], from_table=table
+            target_list=[TupleValueExpression(name="*")], from_table=table
         )
         try_binding(self._evadb.catalog, select_stmt)
         return EvaDBQuery(self._evadb, select_stmt, alias=Alias(table_name.lower()))

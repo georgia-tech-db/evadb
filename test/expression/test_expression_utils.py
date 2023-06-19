@@ -39,7 +39,7 @@ class ExpressionUtilsTest(unittest.TestCase):
         const_first=False,
     ):
         constexpr = ConstantValueExpression(val)
-        colname = TupleValueExpression(col_name=name, col_alias=f"T.{name}")
+        colname = TupleValueExpression(name=name, col_alias=f"T.{name}")
         if const_first:
             return ComparisonExpression(expr_type, constexpr, colname)
         return ComparisonExpression(expr_type, colname, constexpr)

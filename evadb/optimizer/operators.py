@@ -180,6 +180,7 @@ class LogicalGet(Operator):
         target_list: List[AbstractExpression] = None,
         sampling_rate: int = None,
         sampling_type: str = None,
+        chunk_params: dict = {},
         children=None,
     ):
         self._video = video
@@ -189,6 +190,7 @@ class LogicalGet(Operator):
         self._target_list = target_list
         self._sampling_rate = sampling_rate
         self._sampling_type = sampling_type
+        self.chunk_params = chunk_params
         super().__init__(OperatorType.LOGICALGET, children)
 
     @property
@@ -232,6 +234,7 @@ class LogicalGet(Operator):
             and self.target_list == other.target_list
             and self.sampling_rate == other.sampling_rate
             and self.sampling_type == other.sampling_type
+            and self.chunk_params == other.chunk_params
         )
 
     def __hash__(self) -> int:
@@ -245,6 +248,7 @@ class LogicalGet(Operator):
                 tuple(self.target_list or []),
                 self.sampling_rate,
                 self.sampling_type,
+                frozenset(self.chunk_params.items()),
             )
         )
 

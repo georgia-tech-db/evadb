@@ -1,4 +1,4 @@
-personal_ws-1.1 en 1404 
+personal_ws-1.1 en 1431 
 ABCD
 ABCMeta
 ANYDIM
@@ -160,6 +160,7 @@ DocumentColumnName
 DocumentReader
 DocumentStorageEngine
 DogBreedClassifier
+DonutProcessor
 DropExecutor
 DropExecutorTest
 DropObject
@@ -415,11 +416,13 @@ LordDarkula
 MLP
 MNIST
 MNISTVid
+MNISTVideo
 MNISTVideoTable
 MTCNN
 MVI
 MVITActionRecognition
 MViT
+MacOS
 MagicMock
 MaterializedViewTest
 MaxPool
@@ -510,14 +513,17 @@ PlanExecutorTest
 PlanGenerator
 PlanNodeTests
 PlanOprType
+Popen
 PredicateExecutor
 PredicatePlan
+PrivateGPTTest
 ProjectExecutor
 ProjectPlan
 PropertyMock
 PropertyType
 PushDownFilterThroughApplyAndMerge
 PushDownFilterThroughJoin
+PyMuPDF
 PyPI
 PyTorchTensor
 Pydoc
@@ -539,6 +545,7 @@ RayError
 RayTaskError
 ReLU
 ReadTheDocs
+RecursiveCharacterTextSplitter
 Reddit
 RelationalAPI
 RenameExecutor
@@ -631,6 +638,7 @@ TableInfo
 TableRef
 TableSources
 TableType
+TableTypes
 TableValuedExpression
 TableValuedFunction
 Tableinfo
@@ -641,6 +649,7 @@ TestCase
 TestDeleteVideos
 TestGroup
 TestIndex
+TestOCR
 TestOptimizerContext
 TestOptimizerTask
 TestSuite
@@ -657,6 +666,7 @@ ToTensor
 Todo
 TopDown
 TopDownRewrite
+ToxicityClassifier
 TupleValueExpression
 TypeError
 TypeVar
@@ -726,6 +736,7 @@ VideoColumnName
 VideoFormat
 VideoStorageEngineTest
 VideoWriter
+VisionEncoderDecoderModel
 WIP
 WMV
 WeakValueDictionary
@@ -738,6 +749,7 @@ YoloDecorators
 YoloObjectDetection
 YoloTest
 YoloV
+YoutubeQATest
 Za
 aa
 aaequality
@@ -798,6 +810,7 @@ autosummary
 autouse
 avi
 backend
+backoff
 bart
 batchable
 bavail
@@ -833,6 +846,7 @@ ci
 classmethod
 classname
 cli
+clova
 cls
 cmd
 cmp
@@ -872,6 +886,7 @@ cvtColor
 cwd
 cxt
 dane
+darwin
 dataclass
 dataclasses
 dataframe
@@ -939,6 +954,7 @@ epub
 eq
 equi
 etype
+eva
 evadb
 evadbai
 eval
@@ -966,6 +982,7 @@ ffmpeg
 filepath
 filesystem
 fillna
+finetuned
 fitz
 fmt
 fn
@@ -1012,6 +1029,7 @@ grayscale
 groupable
 groupby
 grp
+grpcio
 gw
 hardcoded
 hasattr
@@ -1130,6 +1148,7 @@ myvideo
 myvideocsv
 myvideos
 nType
+naver
 nb
 nc
 ndArray
@@ -1138,6 +1157,7 @@ ndarrays
 ndim
 neq
 ner
+nexit
 nlp
 nn
 nohup
@@ -1197,6 +1217,8 @@ preds
 prepend
 preprocess
 pretrained
+privateGPT
+privategpt
 proc
 proj
 prpty
@@ -1213,6 +1235,7 @@ pypitest
 pytest
 pythonic
 pytorch
+qa
 qdrant
 qualname
 randomUDF
@@ -1267,6 +1290,7 @@ singledispatchmethod
 smi
 softmax
 spacy
+splitter
 sql
 sqlaclchemy
 sqlalchemy
@@ -1276,7 +1300,9 @@ src
 statementtoplanconverter
 staticmethod
 statvfs
+stderr
 stdin
+stdout
 stmt
 storages
 str
@@ -1285,6 +1311,7 @@ subclasses
 subdirectory
 sublist
 subplan
+subprocess
 subqueries
 subquery
 subset

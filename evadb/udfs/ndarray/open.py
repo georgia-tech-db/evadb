@@ -12,17 +12,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import cv2
 import numpy as np
 import pandas as pd
 
 from evadb.udfs.abstract.abstract_udf import AbstractUDF
+from evadb.utils.generic_utils import try_to_import_cv2
 
 
 class Open(AbstractUDF):
     def setup(self):
         # cache data to avoid expensive open files on disk
         self._data_cache = dict()
+        try_to_import_cv2()
 
     @property
     def name(self):
@@ -41,6 +42,8 @@ class Open(AbstractUDF):
             if path_str in self._data_cache:
                 data = self._data_cache[path_str]
             else:
+                import cv2
+
                 data = cv2.imread(path_str)
                 assert data is not None, f"Failed to open file {path_str}"
             self._data_cache[path_str] = data

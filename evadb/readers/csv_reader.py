@@ -50,12 +50,10 @@ class CSVReader(AbstractReader):
         # Read the csv in chunks, and only keep the columns we need.
         # Ignore _row_id that we don't need to take care of.
         col_list_names = [
-            col.col_name
-            for col in self._column_list
-            if col.col_name != IDENTIFIER_COLUMN
+            col.name for col in self._column_list if col.name != IDENTIFIER_COLUMN
         ]
 
-        col_map = {col.col_name: col for col in self._column_list}
+        col_map = {col.name: col for col in self._column_list}
         for chunk in pd.read_csv(self.file_url, chunksize=512, usecols=col_list_names):
             # apply the required conversions
             for col in chunk.columns:

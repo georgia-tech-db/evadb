@@ -15,11 +15,7 @@
 
 import numpy as np
 import pandas as pd
-import torch
 from numpy.typing import ArrayLike
-from PIL import Image
-from torch import Tensor, nn
-from torchvision.transforms import Compose, transforms
 
 from evadb.configuration.configuration_manager import ConfigurationManager
 from evadb.udfs.abstract.abstract_udf import (
@@ -27,6 +23,19 @@ from evadb.udfs.abstract.abstract_udf import (
     AbstractTransformationUDF,
 )
 from evadb.udfs.gpu_compatible import GPUCompatible
+from evadb.utils.generic_utils import (
+    try_to_import_pillow,
+    try_to_import_torch,
+    try_to_import_torchvision,
+)
+
+try_to_import_pillow()
+try_to_import_torch()
+try_to_import_torchvision()
+
+from PIL import Image
+from torch import nn
+from torchvision.transforms import Compose, transforms
 
 
 class PytorchAbstractClassifierUDF(AbstractClassifierUDF, nn.Module, GPUCompatible):
@@ -64,6 +73,8 @@ class PytorchAbstractClassifierUDF(AbstractClassifierUDF, nn.Module, GPUCompatib
             frames = frames.transpose().values.tolist()[0]
 
         gpu_batch_size = ConfigurationManager().get_value("executor", "gpu_batch_size")
+        import torch
+
         tens_batch = torch.cat([self.transform(x) for x in frames]).to(
             self.get_device()
         )
@@ -77,7 +88,7 @@ class PytorchAbstractClassifierUDF(AbstractClassifierUDF, nn.Module, GPUCompatib
         else:
             return self.forward(frames)
 
-    def as_numpy(self, val: Tensor) -> np.ndarray:
+    def as_numpy(self, val) -> np.ndarray:
         """
         Given a tensor in GPU, detach and get the numpy output
         Arguments:
@@ -91,6 +102,8 @@ class PytorchAbstractClassifierUDF(AbstractClassifierUDF, nn.Module, GPUCompatib
         """
         Required to make class a member of GPUCompatible Protocol.
         """
+        import torch
+
         return self.to(torch.device("cuda:{}".format(device)))
 
 

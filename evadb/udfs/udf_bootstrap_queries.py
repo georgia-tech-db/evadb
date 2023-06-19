@@ -222,27 +222,29 @@ def init_builtin_udfs(db: EvaDBDatabase, mode: str = "debug") -> None:
         norfair_obj_tracker_query,
         mnistcnn_udf_query,
         chatgpt_udf_query,
-        # Disabled because required packages (eg., easy_ocr might not be preinstalled)
-        # face_detection_udf_query,
-        # ocr_udf_query,
-        # Mvit_udf_query, - Disabled as it requires specific pytorch package
-        # Sift_udf_query, - requires package kornia
+        face_detection_udf_query,
+        ocr_udf_query,
+        Mvit_udf_query,
+        Sift_udf_query,
+        Yolo_udf_query,
     ]
 
-    if mode == "release":
-        # if mode is 'release', add the Yolo query to the list
-        queries.append(Yolo_udf_query)
-    else:
-        # if mode is 'debug', add debug UDFs and a smaller Yolo model
+    # if mode is 'debug', add debug UDFs and a smaller Yolo model
+    if mode == "debug":
         queries.extend(
             [
                 DummyObjectDetector_udf_query,
                 DummyMultiObjectDetector_udf_query,
                 DummyFeatureExtractor_udf_query,
-                yolo8n_query,
             ]
         )
+        queries.remove(Yolo_udf_query)
+        queries.append(yolo8n_query)
 
     # execute each query in the list of UDF queries
+    # ignore exceptions during the bootstrapping phase due to missing packages
     for query in queries:
-        execute_query_fetch_all(db, query)
+        try:
+            execute_query_fetch_all(db, query, ignore_exceptions=True)
+        except Exception:
+            pass

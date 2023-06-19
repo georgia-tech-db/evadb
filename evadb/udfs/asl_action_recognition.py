@@ -18,20 +18,9 @@ import pickle as pkl
 
 import numpy as np
 import pandas as pd
-import torch
-import torchvision
-
-try:
-    from torchvision.models.video import R3D_18_Weights, r3d_18
-
-except ImportError:
-    raise ImportError(
-        f"torchvision>=0.14.0 is required to use video_resnet, found {torchvision.__version__}"
-    )
-import torch.nn as nn
-import torchvision
 
 from evadb.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
+from evadb.utils.generic_utils import try_to_import_torch, try_to_import_torchvision
 
 
 class ASLActionRecognition(PytorchAbstractClassifierUDF):
@@ -40,6 +29,9 @@ class ASLActionRecognition(PytorchAbstractClassifierUDF):
         return "ASLActionRecognition"
 
     def download_weights(self):
+        try_to_import_torch()
+        import torch
+
         if not os.path.exists(self.asl_weights_path):
             torch.hub.download_url_to_file(
                 self.asl_weights_url,
@@ -52,14 +44,18 @@ class ASLActionRecognition(PytorchAbstractClassifierUDF):
         self.asl_weights_url = (
             "https://www.dropbox.com/s/s9l1mezuplc6ttl/asl_top20_resnet_wts.pth?raw=1"
         )
+        import torch
 
         self.asl_weights_path = torch.hub.get_dir() + "/asl_weights.pth"
         self.download_weights()
 
+        try_to_import_torchvision()
+        from torchvision.models.video import R3D_18_Weights, r3d_18
+
         self.weights = R3D_18_Weights.DEFAULT
         self.model = r3d_18(weights=self.weights)
         in_feats = self.model.fc.in_features
-        self.model.fc = nn.Linear(in_feats, 20)
+        self.model.fc = torch.nn.Linear(in_feats, 20)
         self.model.load_state_dict(
             torch.load(self.asl_weights_path, map_location="cpu")
         )
@@ -81,14 +77,18 @@ class ASLActionRecognition(PytorchAbstractClassifierUDF):
     def forward(self, segments):
         return self.classify(segments)
 
-    def transform(self, segments) -> torch.Tensor:
+    def transform(self, segments):
+        import torch
+
         segments = torch.Tensor(segments)
         permute_order = [2, 1, 0]
         segments = segments[:, :, :, permute_order]
         segments = segments.permute(0, 3, 1, 2).to(torch.uint8)
         return self.preprocess(segments).unsqueeze(0)
 
-    def classify(self, segments: torch.Tensor) -> pd.DataFrame:
+    def classify(self, segments) -> pd.DataFrame:
+        import torch
+
         with torch.no_grad():
             preds = self.model(segments).softmax(1)
         label_indices = preds.argmax(axis=1)

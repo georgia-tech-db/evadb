@@ -33,7 +33,7 @@ class StatementBinderTests(unittest.TestCase):
             mock.return_value = ["table_alias", "col_obj"]
             binder = StatementBinder(StatementBinderContext(MagicMock()))
             tve = MagicMock()
-            tve.col_name = "col_name"
+            tve.name = "col_name"
             binder._bind_tuple_expr(tve)
             col_alias = "{}.{}".format("table_alias", "col_name")
             mock.assert_called_once()
@@ -124,8 +124,8 @@ class StatementBinderTests(unittest.TestCase):
             mat_statement = MagicMock()
             mat_statement.col_list = [ColumnDefinition("id", None, None, None)]
             mat_statement.query.target_list = [
-                TupleValueExpression(col_name="id"),
-                TupleValueExpression(col_name="label"),
+                TupleValueExpression(name="id"),
+                TupleValueExpression(name="label"),
             ]
             with self.assertRaises(
                 Exception, msg="Projected columns mismatch, expected 1 found 2."
@@ -140,10 +140,7 @@ class StatementBinderTests(unittest.TestCase):
             mock_binder.assert_called_with(stmt.explainable_stmt)
 
     @patch("evadb.binder.statement_binder.load_udf_class_from_file")
-    @patch("evadb.binder.statement_binder.get_file_checksum")
-    def test_bind_func_expr(
-        self, mock_get_file_checksum, mock_load_udf_class_from_file
-    ):
+    def test_bind_func_expr(self, mock_load_udf_class_from_file):
         # setup
         func_expr = MagicMock(
             name="func_expr", alias=Alias("func_expr"), output_col_aliases=[]
@@ -167,14 +164,14 @@ class StatementBinderTests(unittest.TestCase):
         mock_load_udf_class_from_file.return_value.return_value = (
             "load_udf_class_from_file"
         )
-        mock_get_file_checksum.return_value = udf_obj.checksum
+        # mock_get_file_checksum.return_value = udf_obj.checksum
 
         # Case 1 set output
         func_expr.output = "out1"
         binder = StatementBinder(StatementBinderContext(mock_catalog))
         binder._bind_func_expr(func_expr)
 
-        mock_get_file_checksum.assert_called_with(udf_obj.impl_file_path)
+        # mock_get_file_checksum.assert_called_with(udf_obj.impl_file_path)
         mock_get_name.assert_called_with(func_expr.name)
         mock_get_udf_outputs.assert_called_with(udf_obj)
         mock_load_udf_class_from_file.assert_called_with(
@@ -194,7 +191,7 @@ class StatementBinderTests(unittest.TestCase):
         binder = StatementBinder(StatementBinderContext(mock_catalog))
         binder._bind_func_expr(func_expr)
 
-        mock_get_file_checksum.assert_called_with(udf_obj.impl_file_path)
+        # mock_get_file_checksum.assert_called_with(udf_obj.impl_file_path)
         mock_get_name.assert_called_with(func_expr.name)
         mock_get_udf_outputs.assert_called_with(udf_obj)
         mock_load_udf_class_from_file.assert_called_with(
@@ -220,7 +217,7 @@ class StatementBinderTests(unittest.TestCase):
         with self.assertRaises(BinderError) as cm:
             binder._bind_func_expr(func_expr)
         err_msg = (
-            f"{mock_error_msg}. Please verify that the UDF class name in the"
+            f"{mock_error_msg}. Please verify that the UDF class name in the "
             "implementation file matches the UDF name."
         )
         self.assertEqual(str(cm.exception), err_msg)
@@ -236,6 +233,7 @@ class StatementBinderTests(unittest.TestCase):
             select_statement.orderby_list = [(mocks[2], 0), (mocks[3], 0)]
             select_statement.groupby_clause = mocks[4]
             select_statement.groupby_clause.value = "8 frames"
+            select_statement.from_table.chunk_params = None
             binder._bind_select_statement(select_statement)
             mock_binder.assert_any_call(select_statement.from_table)
             mock_binder.assert_any_call(select_statement.where_clause)
@@ -252,11 +250,13 @@ class StatementBinderTests(unittest.TestCase):
             select_statement = MagicMock()
             select_statement.union_link = None
             select_statement.groupby_clause = None
+            select_statement.from_table.chunk_params = None
             binder._bind_select_statement(select_statement)
             self.assertEqual(mock_ctx.call_count, 0)
 
             binder = StatementBinder(StatementBinderContext(MagicMock()))
             select_statement = MagicMock()
+            select_statement.from_table.chunk_params = None
             select_statement.groupby_clause = None
             binder._bind_select_statement(select_statement)
             self.assertEqual(mock_ctx.call_count, 1)

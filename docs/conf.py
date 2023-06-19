@@ -85,7 +85,7 @@ source_suffix = [".rst", ".md"]
 master_doc = "index"
 
 # General information about the project.
-project = "EvaDB 🤖💾"
+project = "EvaDB"
 copyright = str(date.today().year) + ", EvaDB."
 author = u"EvaDB Team"
 

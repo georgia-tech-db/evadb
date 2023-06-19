@@ -519,8 +519,8 @@ class LoadExecutorTest(unittest.TestCase):
             f"""LOAD DOCUMENT '{EvaDB_ROOT_DIR}/data/documents/*.pdf' INTO pdfs;""",
         )
         result = execute_query_fetch_all(self.evadb, "SELECT * from pdfs;")
-        self.assertEqual(len(result.columns), 3)
-        self.assertEqual(len(result), 4)
+        self.assertEqual(len(result.columns), 4)
+        self.assertEqual(len(result), 26)
 
 
 if __name__ == "__main__":

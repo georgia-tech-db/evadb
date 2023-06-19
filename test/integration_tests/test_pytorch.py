@@ -23,7 +23,6 @@ from test.util import (
     shutdown_ray,
 )
 
-import cv2
 import numpy as np
 import pandas.testing as pd_testing
 import pytest
@@ -33,6 +32,7 @@ from evadb.executor.executor_utils import ExecutorError
 from evadb.models.storage.batch import Batch
 from evadb.server.command_handler import execute_query_fetch_all
 from evadb.udfs.udf_bootstrap_queries import Asl_udf_query, Mvit_udf_query
+from evadb.utils.generic_utils import try_to_import_cv2
 
 
 @pytest.mark.notparallel
@@ -292,6 +292,10 @@ class PytorchTest(unittest.TestCase):
             os.remove(img_save_path)
         except FileNotFoundError:
             pass
+
+        try_to_import_cv2()
+        import cv2
+
         cv2.imwrite(img_save_path, img)
 
         similarity_query = """SELECT data FROM MyVideo WHERE id < 5

@@ -19,6 +19,7 @@ import evadb
 EvaDB_INSTALLATION_DIR = Path(evadb.__file__).parent
 EvaDB_ROOT_DIR = Path(evadb.__file__).parent.parent
 EvaDB_DATABASE_DIR = "evadb_data"
+EvaDB_APPS_DIR = "apps"
 EvaDB_DATASET_DIR = "evadb_datasets"
 EvaDB_CONFIG_FILE = "evadb.yml"
 UDF_DIR = "udfs"

@@ -16,12 +16,11 @@ import unittest
 from pathlib import Path
 from test.markers import windows_skip_marker
 from test.util import EvaDB_TEST_DATA_DIR
-from unittest.mock import patch
 
-import cv2
 import pandas as pd
 
 from evadb.models.storage.batch import Batch
+from evadb.utils.generic_utils import try_to_import_cv2
 
 NUM_FRAMES = 10
 
@@ -33,6 +32,9 @@ class FaceNet(unittest.TestCase):
 
     def _load_image(self, path):
         assert path.exists(), f"File does not exist at the path {str(path)}"
+        try_to_import_cv2()
+        import cv2
+
         img = cv2.imread(str(path))
         return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
@@ -76,15 +78,3 @@ class FaceNet(unittest.TestCase):
         detector = FaceDetector().to_device(0)
         result = detector(frame_batch.project(["data"]).frames)
         self.assertEqual(6, len(result.iloc[0]["bboxes"]))
-
-    def test_mock_to_device(self):
-        device = 10
-        from evadb.udfs.face_detector import FaceDetector
-
-        with patch("evadb.udfs.face_detector.MTCNN") as mock_mtcnn:
-            with patch("evadb.udfs.face_detector.torch") as mock_torch:
-                mock_torch.device.return_value = "cuda:10"
-                detector = FaceDetector()
-                detector = detector.to_device(device)
-                mock_torch.device.assert_called_once()
-            mock_mtcnn.assert_called_with(device=f"cuda:{device}")

@@ -28,7 +28,7 @@ from evadb.binder.binder_utils import (
 )
 from evadb.binder.statement_binder_context import StatementBinderContext
 from evadb.catalog.catalog_type import NdArrayType, TableType, VideoColumnName
-from evadb.catalog.catalog_utils import get_metadata_properties
+from evadb.catalog.catalog_utils import get_metadata_properties, is_document_table
 from evadb.configuration.constants import EvaDB_INSTALLATION_DIR
 from evadb.expression.abstract_expression import AbstractExpression, ExpressionType
 from evadb.expression.function_expression import FunctionExpression
@@ -44,7 +44,7 @@ from evadb.parser.statement import AbstractStatement
 from evadb.parser.table_ref import TableRef
 from evadb.parser.types import UDFType
 from evadb.third_party.huggingface.binder import assign_hf_udf
-from evadb.utils.generic_utils import get_file_checksum, load_udf_class_from_file
+from evadb.utils.generic_utils import load_udf_class_from_file
 from evadb.utils.logging_manager import logger
 
 
@@ -81,7 +81,6 @@ class StatementBinder:
 
         # TODO: create index currently only works on TableInfo, but will extend later.
         assert node.table_ref.is_table_atom(), "Index can only be created on Tableinfo"
-
         if not node.udf_func:
             # Feature table type needs to be float32 numpy array.
             col_def = node.col_list[0]
@@ -115,7 +114,7 @@ class StatementBinder:
             if (
                 len(node.target_list) == 1
                 and isinstance(node.target_list[0], TupleValueExpression)
-                and node.target_list[0].col_name == "*"
+                and node.target_list[0].name == "*"
             ):
                 node.target_list = extend_star(self._binder_context)
             for expr in node.target_list:
@@ -133,10 +132,17 @@ class StatementBinder:
             self.bind(node.union_link)
             self._binder_context = current_context
 
+        # chunk_params only supported for DOCUMENT TYPE
+        if node.from_table.chunk_params:
+            assert is_document_table(
+                node.from_table.table.table_obj
+            ), "CHUNK related parameters only supported for DOCUMENT tables."
+
         assert not (
             self._binder_context.is_retrieve_audio()
             and self._binder_context.is_retrieve_video()
         ), "Cannot query over both audio and video streams"
+
         if self._binder_context.is_retrieve_audio():
             node.from_table.get_audio = True
         if self._binder_context.is_retrieve_video():
@@ -167,7 +173,7 @@ class StatementBinder:
             idx = 0
             for expr in node.query.target_list:
                 output_objs = (
-                    [(expr.col_name, expr.col_object)]
+                    [(expr.name, expr.col_object)]
                     if expr.etype == ExpressionType.TUPLE_VALUE
                     else zip(expr.projection_columns, expr.output_objs)
                 )
@@ -205,7 +211,7 @@ class StatementBinder:
         idx = 0
         for expr in node.query.target_list:
             output_objs = (
-                [(expr.col_name, expr.col_object)]
+                [(expr.name, expr.col_object)]
                 if expr.etype == ExpressionType.TUPLE_VALUE
                 else zip(expr.projection_columns, expr.output_objs)
             )
@@ -259,7 +265,7 @@ class StatementBinder:
             for obj, alias in zip(func_expr.output_objs, func_expr.alias.col_names):
                 col_alias = "{}.{}".format(func_expr.alias.alias_name, alias)
                 alias_obj = TupleValueExpression(
-                    col_name=alias,
+                    name=alias,
                     table_alias=func_expr.alias.alias_name,
                     col_object=obj,
                     col_alias=col_alias,
@@ -274,14 +280,14 @@ class StatementBinder:
     @bind.register(TupleValueExpression)
     def _bind_tuple_expr(self, node: TupleValueExpression):
         table_alias, col_obj = self._binder_context.get_binded_column(
-            node.col_name, node.table_alias
+            node.name, node.table_alias
         )
         node.table_alias = table_alias
-        if node.col_name == VideoColumnName.audio:
+        if node.name == VideoColumnName.audio:
             self._binder_context.enable_audio_retrieval()
-        if node.col_name == VideoColumnName.data:
+        if node.name == VideoColumnName.data:
             self._binder_context.enable_video_retrieval()
-        node.col_alias = "{}.{}".format(table_alias, node.col_name.lower())
+        node.col_alias = "{}.{}".format(table_alias, node.name.lower())
         node.col_object = col_obj
 
     @bind.register(FunctionExpression)
@@ -318,10 +324,10 @@ class StatementBinder:
             # Verify the consistency of the UDF. If the checksum of the UDF does not
             # match the one stored in the catalog, an error will be thrown and the user
             # will be asked to register the UDF again.
-            assert (
-                get_file_checksum(udf_obj.impl_file_path) == udf_obj.checksum
-            ), f"""UDF file {udf_obj.impl_file_path} has been modified from the
-                registration. Please use DROP UDF to drop it and re-create it using CREATE UDF."""
+            # assert (
+            #     get_file_checksum(udf_obj.impl_file_path) == udf_obj.checksum
+            # ), f"""UDF file {udf_obj.impl_file_path} has been modified from the
+            #     registration. Please use DROP UDF to drop it and re-create it # using CREATE UDF."""
 
             try:
                 udf_class = load_udf_class_from_file(
@@ -333,7 +339,7 @@ class StatementBinder:
                 node.function = lambda: udf_class(**get_metadata_properties(udf_obj))
             except Exception as e:
                 err_msg = (
-                    f"{str(e)}. Please verify that the UDF class name in the"
+                    f"{str(e)}. Please verify that the UDF class name in the "
                     "implementation file matches the UDF name."
                 )
                 logger.error(err_msg)

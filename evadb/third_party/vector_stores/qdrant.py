@@ -20,6 +20,7 @@ from evadb.third_party.vector_stores.types import (
     VectorIndexQueryResult,
     VectorStore,
 )
+from evadb.utils.generic_utils import try_to_import_qdrant_client
 
 _qdrant_client_instance = None
 
@@ -29,13 +30,8 @@ required_params = ["index_db"]
 def get_qdrant_client(path: str):
     global _qdrant_client_instance
     if _qdrant_client_instance is None:
-        import_err_msg = (
-            "`qdrant-client` package not found, please run `pip install qdrant-client`"
-        )
-        try:
-            import qdrant_client  # noqa: F401
-        except ImportError:
-            raise ImportError(import_err_msg)
+        try_to_import_qdrant_client()
+        import qdrant_client  # noqa: F401
 
         # creating a local mode client
         # modify to support server modes

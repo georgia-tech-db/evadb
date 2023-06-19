@@ -12,15 +12,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import argparse
 import os
 
 import evadb
 
 
-def load_data(folder_name: str):
+def load_data(source_folder_path: str):
     path = os.path.dirname(evadb.__file__)
     cursor = evadb.connect(path).cursor()
 
+    # Drop function if it already exists
+    cursor.drop_udf("embedding").execute()
+
+    # Create function from Python file
+    # This function is a sentence feature extractor
     embedding_udf = cursor.create_udf(
         udf_name="embedding",
         if_not_exists=True,
@@ -34,7 +40,7 @@ def load_data(folder_name: str):
 
     print("📄 Loading PDFs into EvaDB")
     cursor.load(
-        file_regex=f"{folder_name}/*.pdf", format="PDF", table_name="data_table"
+        file_regex=f"{source_folder_path}/*.pdf", format="PDF", table_name="data_table"
     ).execute()
 
     print("🤖 Extracting Feature Embeddings. This may take some time ...")
@@ -52,9 +58,23 @@ def load_data(folder_name: str):
 
 
 def main():
-    print("🔮 Welcome to EvaDB! Ingesting data in `source_documents`")
+    parser = argparse.ArgumentParser()
 
-    load_data(folder_name="source_documents")
+    parser.add_argument(
+        "-d",
+        "--directory",
+        type=str,
+        help="Path to the directory with documents",
+        default="source_documents",
+    )
+
+    args = parser.parse_args()
+
+    directory_path = args.directory
+
+    print(f"🔮 Welcome to EvaDB! Ingesting data in `{directory_path}`")
+
+    load_data(source_folder_path=directory_path)
 
     print(
         "🔥 Data ingestion complete! You can now run `privateGPT.py` to query your loaded data."

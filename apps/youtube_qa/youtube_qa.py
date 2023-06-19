@@ -17,10 +17,24 @@ import shutil
 from typing import Dict
 
 import pandas as pd
-from pytube import YouTube, extract
-from youtube_transcript_api import YouTubeTranscriptApi
 
 import evadb
+
+
+def try_to_import_pytube():
+    try:
+        import pytube  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import pytube python package.
+                Please install it with `pip install -r requirements.txt`."""
+        )
+
+
+try_to_import_pytube()
+
+from pytube import YouTube, extract  # noqa: E402
+from youtube_transcript_api import YouTubeTranscriptApi  # noqa: E402
 
 MAX_CHUNK_SIZE = 10000
 DEFAULT_VIDEO_LINK = "https://www.youtube.com/watch?v=TvS1lHEQoKk"
@@ -43,7 +57,9 @@ def receive_user_input() -> Dict:
         "🔮 Welcome to EvaDB! This app lets you ask questions on any local or YouTube online video.\nYou will only need to supply a Youtube URL and an OpenAI API key.\n\n"
     )
     from_youtube = str(
-        input("📹 Are you using a YouTube video online? (y/n): ")
+        input(
+            "📹 Are you querying an online Youtube video or a local video? ('yes' for online/ 'no' for local): "
+        )
     ).lower() in ["y", "yes"]
     user_input = {"from_youtube": from_youtube}
 
@@ -51,7 +67,7 @@ def receive_user_input() -> Dict:
         # get Youtube video url
         video_link = str(
             input(
-                "📺 Enter the URL of the YouTube video (press Enter to use our default Youtube video): "
+                "📺 Enter the URL of the YouTube video (press Enter to use our default Youtube video URL): "
             )
         )
 
@@ -73,7 +89,7 @@ def receive_user_input() -> Dict:
     try:
         api_key = os.environ["OPENAI_KEY"]
     except KeyError:
-        api_key = str(input("🔑 Enter your OpenAI API key: "))
+        api_key = str(input("🔑 Enter your OpenAI key: "))
         os.environ["OPENAI_KEY"] = api_key
 
     return user_input
@@ -169,7 +185,11 @@ def download_youtube_video_from_link(video_link: str):
     Args:
         video_link (str): url of the target YouTube video.
     """
-    yt = YouTube(video_link).streams.first()
+    yt = (
+        YouTube(video_link)
+        .streams.filter(file_extension="mp4", progressive="True")
+        .first()
+    )
     try:
         print("⏳ video download in progress...")
         yt.download(filename=ONLINE_VIDEO_PATH)
@@ -316,9 +336,9 @@ def generate_response(cursor: evadb.EvaDBCursor, question: str) -> str:
 
 def generate_blog_post(cursor: evadb.EvaDBCursor) -> str:
     to_generate = str(
-        input("\nWould you like to generate a blog post of the video? (y/n): ")
+        input("\nWould you like to generate a blog post based on the video? (yes/no): ")
     )
-    if to_generate.lower() == "y":
+    if to_generate.lower() == "yes" or to_generate.lower() == "y":
         print("⏳ Generating blog post (may take a while)...")
 
         if not os.path.exists(SUMMARY_PATH):

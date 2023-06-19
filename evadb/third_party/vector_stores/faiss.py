@@ -23,22 +23,7 @@ from evadb.third_party.vector_stores.types import (
     VectorIndexQueryResult,
     VectorStore,
 )
-
-_faiss = None
-
-
-def _lazy_load_faiss():
-    global _faiss
-    if _faiss is None:
-        import_err_msg = "`faiss` package not found, please visit https://github.com/facebookresearch/faiss/wiki/Installing-Faiss for instructions"
-        try:
-            import faiss  # noqa: F401
-
-            _faiss = faiss
-        except ImportError:
-            raise ImportError(import_err_msg)
-    return _faiss
-
+from evadb.utils.generic_utils import try_to_import_faiss
 
 required_params = ["index_path"]
 
@@ -48,13 +33,15 @@ class FaissVectorStore(VectorStore):
         # Reference to Faiss documentation.
         # IDMap: https://github.com/facebookresearch/faiss/wiki/Pre--and-post-processing#faiss-id-mapping
         # Other index types: https://github.com/facebookresearch/faiss/wiki/The-index-factory
-        self.faiss = _lazy_load_faiss()
+        try_to_import_faiss()
         self._index_name = index_name
         self._index_path = index_path
         self._index = None
 
     def create(self, vector_dim: int):
-        self._index = self.faiss.IndexIDMap2(self.faiss.IndexHNSWFlat(vector_dim, 32))
+        import faiss
+
+        self._index = faiss.IndexIDMap2(faiss.IndexHNSWFlat(vector_dim, 32))
 
     def add(self, payload: List[FeaturePayload]):
         assert self._index is not None, "Please create an index before adding features."
@@ -66,11 +53,13 @@ class FaissVectorStore(VectorStore):
 
     def persist(self):
         assert self._index is not None, "Please create an index before calling persist."
-        faiss = _lazy_load_faiss()
+        import faiss
+
         faiss.write_index(self._index, self._index_path)
 
     def query(self, query: VectorIndexQuery) -> VectorIndexQueryResult:
-        faiss = _lazy_load_faiss()
+        import faiss
+
         if self._index is None:
             self._index = faiss.read_index(self._index_path)
         assert self._index is not None, "Cannot query as index does not exists."
