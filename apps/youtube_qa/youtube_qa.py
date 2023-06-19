@@ -27,6 +27,7 @@ DEFAULT_VIDEO_LINK = "https://www.youtube.com/watch?v=TvS1lHEQoKk"
 DEFAULT_VIDEO_PATH = "./apps/youtube_qa/benchmarks/russia_ukraine.mp4"
 
 # temporary file paths
+ONLINE_VIDEO_PATH = "./evadb_data/tmp/online_video.mp4"
 TRANSCRIPT_PATH = "./evadb_data/tmp/transcript.csv"
 SUMMARY_PATH = "./evadb_data/tmp/summary.csv"
 BLOG_PATH = "blog.md"
@@ -171,7 +172,7 @@ def download_youtube_video_from_link(video_link: str):
     yt = YouTube(video_link).streams.first()
     try:
         print("⏳ video download in progress...")
-        yt.download(filename="online_video.mp4")
+        yt.download(filename=ONLINE_VIDEO_PATH)
     except Exception as e:
         print(f"⛔️ Video download failed with error: \n{e}")
     print("✅ Video downloaded successfully.")
@@ -190,7 +191,7 @@ def generate_online_video_transcript(cursor: evadb.EvaDBCursor) -> str:
 
     # load youtube video into an evadb table
     cursor.drop_table("youtube_video", if_exists=True).execute()
-    cursor.load("online_video.mp4", "youtube_video", "video").execute()
+    cursor.load(ONLINE_VIDEO_PATH, "youtube_video", "video").execute()
 
     # extract speech texts from videos
     cursor.drop_table("youtube_video_text", if_exists=True).execute()
@@ -244,7 +245,7 @@ def generate_summary(cursor: evadb.EvaDBCursor):
         cursor (EVADBCursor): evadb api cursor.
     """
     generate_summary_rel = cursor.table("Transcript").select(
-        "ChatGPT('summarize the video', text)"
+        "ChatGPT('summarize the video in detail', text)"
     )
     responses = generate_summary_rel.df()["chatgpt.response"]
 
@@ -268,7 +269,7 @@ def generate_summary(cursor: evadb.EvaDBCursor):
         cursor.load(SUMMARY_PATH, "Summary", "csv").execute()
 
         generate_summary_rel = cursor.table("Summary").select(
-            "ChatGPT('summarize', summary)"
+            "ChatGPT('summarize in detail', summary)"
         )
         responses = generate_summary_rel.df()["chatgpt.response"]
         summary = " ".join(responses)
@@ -325,7 +326,7 @@ def generate_blog_post(cursor: evadb.EvaDBCursor) -> str:
 
         # use llm to generate blog post
         generate_blog_rel = cursor.table("Summary").select(
-            "ChatGPT('generate a blog post of the video summary in markdown format that has sections', summary)"
+            "ChatGPT('generate a long detailed blog post of the video summary in markdown format that has sections and hyperlinks', summary)"
         )
         responses = generate_blog_rel.df()["chatgpt.response"]
         blog = responses[0]
@@ -342,8 +343,8 @@ def generate_blog_post(cursor: evadb.EvaDBCursor) -> str:
 
 def cleanup():
     """Removes any temporary file / directory created by EvaDB."""
-    if os.path.exists("online_video.mp4"):
-        os.remove("online_video.mp4")
+    if os.path.exists(ONLINE_VIDEO_PATH):
+        os.remove(ONLINE_VIDEO_PATH)
     if os.path.exists("evadb_data"):
         shutil.rmtree("evadb_data")
 
