@@ -63,7 +63,6 @@ class ExchangeExecutor(AbstractExecutor):
         self.inner_executor.children = [QueueReaderExecutor()]
 
     def exec(self) -> Iterator[Batch]:
-        print("RAY")
         from ray.util.queue import Queue
 
         input_queue = Queue(maxsize=100)
