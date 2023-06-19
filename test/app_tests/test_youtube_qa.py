@@ -38,10 +38,10 @@ class YoutubeQATest(unittest.TestCase):
 
     def test_should_run_youtube_qa_app(self):
         app_path = Path("apps", "youtube_qa", "youtube_qa.py")
-        input1 = "\n"  # Go with default URL
+        input1 = "yes\n\n"  # Go with online video and default URL
         # Assuming that OPENAI_KEY is already set as an environment variable
         input2 = "What is this video on?\n"  # Question
-        input3 = "exit\n"  # Exit
+        input3 = "exit\nexit\n"  # Exit
         inputs = input1 + input2 + input3
         command = ["python", app_path]
 
