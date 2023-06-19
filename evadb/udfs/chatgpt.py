@@ -76,7 +76,7 @@ class ChatGPT(AbstractUDF):
         try_to_import_openai()
         import openai
 
-        @retry(tries=6, delay=10)
+        @retry(tries=6, delay=20)
         def completion_with_backoff(**kwargs):
             return openai.ChatCompletion.create(**kwargs)
 
