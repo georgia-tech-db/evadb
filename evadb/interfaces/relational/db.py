@@ -26,22 +26,19 @@ from evadb.models.storage.batch import Batch
 from evadb.parser.alias import Alias
 from evadb.parser.select_statement import SelectStatement
 from evadb.parser.utils import (
+    parse_create_table,
     parse_create_udf,
     parse_create_vector_index,
     parse_drop_index,
     parse_drop_table,
     parse_drop_udf,
+    parse_explain,
+    parse_insert,
     parse_load,
     parse_query,
-    parse_table_clause,
-    parse_explain,
-    parse_show,
-    parse_insert,
-    parse_explain,
-    parse_show,
-    parse_insert,
     parse_rename,
-    parse_create_table
+    parse_show,
+    parse_table_clause,
 )
 from evadb.udfs.udf_bootstrap_queries import init_builtin_udfs
 from evadb.utils.logging_manager import logger
@@ -66,14 +63,14 @@ class EvaDBConnection:
             >>> import evadb
             >>> connection = evadb.connection()
             >>> cursor = connection.cursor()
-        
+
         The cursor can be used to execute queries.
 
             >>> cursor.query('SELECT * FROM sample_table;').df()
                col1  col2
             0     1     2
             1     3     4
-            2     5     6   
+            2     5     6
 
         """
         # One unique cursor for one connection
@@ -174,9 +171,9 @@ class EvaDBCursor(object):
                col1  col2
             0     1     2
             1     3     4
-            2     5     6   
+            2     5     6
 
-            Read a document table using chunk_size 100 and chunk_overlap 10. 
+            Read a document table using chunk_size 100 and chunk_overlap 10.
 
             >>> relation = cursor.table("doc_table", chunk_size=100, chunk_overlap=10)
         """
@@ -236,12 +233,12 @@ class EvaDBCursor(object):
                     expr="SiftFeatureExtractor(data)",
                     using="QDRANT"
                 ).df()
-	                0
-                0	Index faiss_index successfully added to the database            
+                        0
+                0	Index faiss_index successfully added to the database
             >>> relation = cursor.table("PDFs")
             >>> relation.order("Similarity(ImageFeatureExtractor(Open('/images/my_meme')), ImageFeatureExtractor(data) ) DESC")
             >>> relation.df()
-               
+
 
         """
         stmt = parse_create_vector_index(index_name, table_name, expr, using)
@@ -289,7 +286,7 @@ class EvaDBCursor(object):
         Examples:
             Drop table 'sample_table'
 
-            >>> cursor.drop_table("sample_table", if_exists = True).df()            
+            >>> cursor.drop_table("sample_table", if_exists = True).df()
                 0
             0	Table Successfully dropped: sample_table
         """
@@ -366,11 +363,7 @@ class EvaDBCursor(object):
         return EvaDBQuery(self._evadb, stmt)
 
     def create_table(
-        self,
-        table_name: str,
-        if_not_exists: bool = True,
-        columns: str = None,
-        **kwargs
+        self, table_name: str, if_not_exists: bool = True, columns: str = None, **kwargs
     ) -> "EvaDBQuery":
         """
         Create a udf in the database.
@@ -417,11 +410,11 @@ class EvaDBCursor(object):
                col1  col2
             0     1     2
             1     3     4
-            2     5     6  
+            2     5     6
         """
         stmt = parse_query(sql_query)
         return EvaDBQuery(self._evadb, stmt)
-    
+
     def show(self, object_type: str, **kwargs) -> EvaDBQuery:
         """
         Shows all entries of the current object_type.
@@ -435,14 +428,14 @@ class EvaDBCursor(object):
 
         Examples:
             >>> cursor.show("tables").df()
-            	name
+                name
             0	SampleTable1
             1	SampleTable2
             2	SampleTable3
         """
         stmt = parse_show(object_type, **kwargs)
         return EvaDBQuery(self._evadb, stmt)
-    
+
     def explain(self, sql_query: str) -> EvaDBQuery:
         """
         Executes an EXPLAIN query.
@@ -463,7 +456,7 @@ class EvaDBCursor(object):
         """
         stmt = parse_explain(sql_query)
         return EvaDBQuery(self._evadb, stmt)
-    
+
     def insert(self, table_name, columns, values, **kwargs) -> EvaDBQuery:
         """
         Executes an INSERT query.
@@ -482,7 +475,7 @@ class EvaDBCursor(object):
         """
         stmt = parse_insert(table_name, columns, values, **kwargs)
         return EvaDBQuery(self._evadb, stmt)
-    
+
     def rename(self, table_name, new_table_name, **kwargs) -> EvaDBQuery:
         """
         Executes a RENAME query.
@@ -497,15 +490,15 @@ class EvaDBCursor(object):
 
         Examples:
             >>> cursor.show("tables").df()
-            	name
+                name
             0	SampleVideoTable
             1	SampleTable
             2	MyCSV
             3	videotable
-            >>> cursor.rename("videotable", "sample_table").df() 
+            >>> cursor.rename("videotable", "sample_table").df()
             _
             >>> cursor.show("tables").df()
-                	name
+                        name
             0	SampleVideoTable
             1	SampleTable
             2	MyCSV
@@ -514,7 +507,6 @@ class EvaDBCursor(object):
         """
         stmt = parse_rename(table_name, new_table_name, **kwargs)
         return EvaDBQuery(self._evadb, stmt)
-    
 
 
 def connect(
