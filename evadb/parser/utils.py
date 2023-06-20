@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from evadb.parser.create_udf_statement import CreateUDFStatement
+from evadb.parser.create_statement import CreateTableStatement
 from evadb.parser.drop_object_statement import DropObjectStatement
 from evadb.parser.load_statement import LoadDataStatement
 from evadb.parser.explain_statement import ExplainStatement
@@ -71,6 +72,16 @@ def parse_create_udf(
 
     stmt = Parser().parse(mock_query)[0]
     assert isinstance(stmt, CreateUDFStatement), "Expected a create udf statement"
+    return stmt
+
+def parse_create_table(table_name: str,if_not_exists: bool, columns: str, **kwargs):
+    mock_query = (
+        f"CREATE TABLE IF NOT EXISTS {table_name} ({columns});"
+        if if_not_exists
+        else f"CREATE TABLE {table_name} ({columns});"
+    )
+    stmt = Parser().parse(mock_query)[0]
+    assert isinstance(stmt, CreateTableStatement), "Expected a create table statement"
     return stmt
 
 def parse_show(show_type: str, **kwargs):

@@ -41,6 +41,7 @@ from evadb.parser.utils import (
     parse_show,
     parse_insert,
     parse_rename,
+    parse_create_table
 )
 from evadb.udfs.udf_bootstrap_queries import init_builtin_udfs
 from evadb.utils.logging_manager import logger
@@ -360,6 +361,42 @@ class EvaDBCursor(object):
             0	UDF Successfully created: MnistImageClassifier
         """
         stmt = parse_create_udf(udf_name, if_not_exists, impl_path, type, **kwargs)
+        return EvaDBQuery(self._evadb, stmt)
+
+    def create_table(
+        self,
+        table_name: str,
+        if_not_exists: bool = True,
+        columns: str = None,
+        **kwargs
+    ) -> "EvaDBQuery":
+        """
+        Create a udf in the database.
+
+        Args:
+            udf_name (str): Name of the udf to be created.
+            if_not_exists (bool): If True, do not raise an error if the UDF already exist. If False, raise an error.
+            impl_path (str): Path string to udf's implementation.
+            type (str): Type of the udf (e.g. HuggingFace).
+            **kwargs: Additional keyword arguments for configuring the create udf operation.
+
+        Returns:
+            EvaDBQuery: The EvaDBQuery object representing the UDF created.
+
+        Examples:
+            >>> cursor.create_table("MyCSV", if_exists = True, columns=\"\"\"
+                id INTEGER UNIQUE,
+                frame_id INTEGER,
+                video_id INTEGER,
+                dataset_name TEXT(30),
+                label TEXT(30),
+                bbox NDARRAY FLOAT32(4),
+                object_id INTEGER\"\"\"
+                )
+                0
+            0	Table Successfully created: MyCSV
+        """
+        stmt = parse_create_table(table_name, if_not_exists, columns, **kwargs)
         return EvaDBQuery(self._evadb, stmt)
 
     def query(self, sql_query: str) -> EvaDBQuery:
