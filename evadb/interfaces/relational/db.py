@@ -235,7 +235,9 @@ class EvaDBCursor(object):
                     table_name="meme_images",
                     expr="SiftFeatureExtractor(data)",
                     using="QDRANT"
-                )
+                ).df()
+	                0
+                0	Index faiss_index successfully added to the database            
             >>> relation = cursor.table("PDFs")
             >>> relation.order("Similarity(ImageFeatureExtractor(Open('/images/my_meme')), ImageFeatureExtractor(data) ) DESC")
             >>> relation.df()
