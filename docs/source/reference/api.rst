@@ -51,11 +51,16 @@ EvaDBCursor Interface
     ~evadb.EvaDBCursor.query
     ~evadb.EvaDBCursor.table
     ~evadb.EvaDBCursor.create_udf
+    ~evadb.EvaDBCursor.create_table
     ~evadb.EvaDBCursor.create_vector_index
     ~evadb.EvaDBCursor.df
     ~evadb.EvaDBCursor.drop_table
     ~evadb.EvaDBCursor.drop_udf
     ~evadb.EvaDBCursor.drop_index
+    ~evadb.EvaDBCursor.show
+    ~evadb.EvaDBCursor.insert
+    ~evadb.EvaDBCursor.explain
+    ~evadb.EvaDBCursor.rename
 
 
 EvaDBQuery Interface

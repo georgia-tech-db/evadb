@@ -385,14 +385,14 @@ class EvaDBCursor(object):
 
         Examples:
             >>> cursor.create_table("MyCSV", if_exists = True, columns=\"\"\"
-                id INTEGER UNIQUE,
-                frame_id INTEGER,
-                video_id INTEGER,
-                dataset_name TEXT(30),
-                label TEXT(30),
-                bbox NDARRAY FLOAT32(4),
-                object_id INTEGER\"\"\"
-                )
+                    id INTEGER UNIQUE,
+                    frame_id INTEGER,
+                    video_id INTEGER,
+                    dataset_name TEXT(30),
+                    label TEXT(30),
+                    bbox NDARRAY FLOAT32(4),
+                    object_id INTEGER\"\"\"
+                    )
                 0
             0	Table Successfully created: MyCSV
         """

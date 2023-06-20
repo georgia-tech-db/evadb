@@ -445,6 +445,25 @@ class RelationalAPI(unittest.TestCase):
 
         self.assertEqual(len(result), 1)
         self.assertEqual(result['name'][0], 'dummy_video_renamed')
+    
+    def test_create_table_relational(self):
+        cursor = self.conn.cursor()
+        
+        cursor.create_table(table_name="dummy_table", if_not_exists=True, columns="id INTEGER, name text(30)").df()
+
+        result = cursor.show("tables").df()
+
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result['name'][0], 'dummy_table')
+
+        #if_not_exists=True should not raise error
+        # rel = cursor.create_table(table_name="dummy_table", if_not_exists=True, columns="id INTEGER, name text(30)")
+        # rel.execute()
+
+        #if_not_exists=False should raise error
+        rel = cursor.create_table(table_name="dummy_table", if_not_exists=False, columns="id INTEGER, name text(30)")
+        with self.assertRaises(ExecutorError):
+            rel.execute()
 
 if __name__ == "__main__":
     unittest.main()
