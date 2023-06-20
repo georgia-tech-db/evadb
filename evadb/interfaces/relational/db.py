@@ -205,7 +205,7 @@ class EvaDBCursor(object):
             Empty DataFrame
             >>> relation = cursor.table("youtube_video_text").select('*').df()
                 speechrecognizer.response
-            0	"Sample Text"
+            0	"Sample Text from speech recognizer"
         """
         if not self._result:
             raise Exception("No valid result with the current cursor")
@@ -235,6 +235,11 @@ class EvaDBCursor(object):
                     expr="SiftFeatureExtractor(data)",
                     using="QDRANT"
                 )
+            >>> relation = cursor.table("PDFs")
+            >>> relation.order("Similarity(ImageFeatureExtractor(Open('/images/my_meme')), ImageFeatureExtractor(data) ) DESC")
+            >>> relation.df()
+               
+
         """
         stmt = parse_create_vector_index(index_name, table_name, expr, using)
         self._result = execute_statement(self._evadb, stmt)
@@ -258,7 +263,10 @@ class EvaDBCursor(object):
         Examples:
             Load the online_video.mp4 file into table named 'youtube_video'.
 
-            >>> cursor.load("online_video.mp4", "youtube_video", "video")
+            >>> cursor.load(file_regex="online_video.mp4", table_name="youtube_video", format="video").df()
+                    0
+            0	Number of loaded VIDEO: 1
+
         """
         # LOAD {FORMAT} file_regex INTO table_name
         stmt = parse_load(table_name, file_regex, format, **kwargs)
@@ -278,7 +286,9 @@ class EvaDBCursor(object):
         Examples:
             Drop table 'sample_table'
 
-            >>> cursor.drop_table("sample_table", if_exists = True)
+            >>> cursor.drop_table("sample_table", if_exists = True).df()            
+                0
+            0	Table Successfully dropped: sample_table
         """
         stmt = parse_drop_table(table_name, if_exists)
         return EvaDBQuery(self._evadb, stmt)
@@ -298,6 +308,8 @@ class EvaDBCursor(object):
             Drop UDF 'ObjectDetector'
 
             >>> cursor.drop_udf("ObjectDetector", if_exists = True)
+                0
+            0	UDF Successfully dropped: ObjectDetector
         """
         stmt = parse_drop_udf(udf_name, if_exists)
         return EvaDBQuery(self._evadb, stmt)
@@ -344,6 +356,8 @@ class EvaDBCursor(object):
 
         Examples:
             >>> cursor.create_udf("MnistImageClassifier", if_exists = True, 'mnist_image_classifier.py')
+                0
+            0	UDF Successfully created: MnistImageClassifier
         """
         stmt = parse_create_udf(udf_name, if_not_exists, impl_path, type, **kwargs)
         return EvaDBQuery(self._evadb, stmt)
@@ -360,6 +374,11 @@ class EvaDBCursor(object):
 
         Examples:
             >>> cursor.query("DROP UDF IF EXISTS SentenceFeatureExtractor;")
+            >>> cursor.query('SELECT * FROM sample_table;').df()
+               col1  col2
+            0     1     2
+            1     3     4
+            2     5     6  
         """
         stmt = parse_query(sql_query)
         return EvaDBQuery(self._evadb, stmt)
@@ -376,7 +395,11 @@ class EvaDBCursor(object):
             EvaDBQuery: The EvaDBQuery object.
 
         Examples:
-            >>> cursor.show("tables")
+            >>> cursor.show("tables").df()
+            	name
+            0	SampleTable1
+            1	SampleTable2
+            2	SampleTable3
         """
         stmt = parse_show(object_type, **kwargs)
         return EvaDBQuery(self._evadb, stmt)
@@ -392,7 +415,12 @@ class EvaDBCursor(object):
             EvaDBQuery: The EvaDBQuery object.
 
         Examples:
-            >>> cursor.explain("SELECT * FROM sample_table;")
+            >>> proposed_plan = cursor.explain("SELECT * FROM sample_table;").df()
+            >>> for step in proposed_plan[0]:
+            >>>   print(step)
+             |__ ProjectPlan
+                |__ SeqScanPlan
+                    |__ StoragePlan
         """
         stmt = parse_explain(sql_query)
         return EvaDBQuery(self._evadb, stmt)
@@ -429,7 +457,21 @@ class EvaDBCursor(object):
             EvaDBQuery: The EvaDBQuery object.
 
         Examples:
-            >>> cursor.rename("sample_table", "new_sample_table")
+            >>> cursor.show("tables").df()
+            	name
+            0	SampleVideoTable
+            1	SampleTable
+            2	MyCSV
+            3	videotable
+            >>> cursor.rename("videotable", "sample_table").df() 
+            _
+            >>> cursor.show("tables").df()
+                	name
+            0	SampleVideoTable
+            1	SampleTable
+            2	MyCSV
+            3	sample_table
+
         """
         stmt = parse_rename(table_name, new_table_name, **kwargs)
         return EvaDBQuery(self._evadb, stmt)
