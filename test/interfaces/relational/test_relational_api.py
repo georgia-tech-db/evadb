@@ -46,9 +46,7 @@ class RelationalAPI(unittest.TestCase):
     def setUp(self):
         self.evadb.catalog().reset()
         self.mnist_path = f"{EvaDB_ROOT_DIR}/data/mnist/mnist.mp4"
-        load_udfs_for_testing(
-            self.evadb,
-        )
+        load_udfs_for_testing(self.evadb,)
         self.images = f"{EvaDB_ROOT_DIR}/data/detoxify/*.jpg"
 
     def tearDown(self):
@@ -59,11 +57,7 @@ class RelationalAPI(unittest.TestCase):
 
     def test_relation_apis(self):
         cursor = self.conn.cursor()
-        rel = cursor.load(
-            self.mnist_path,
-            table_name="mnist_video",
-            format="video",
-        )
+        rel = cursor.load(self.mnist_path, table_name="mnist_video", format="video",)
         rel.execute()
 
         rel = cursor.table("mnist_video")
@@ -71,8 +65,7 @@ class RelationalAPI(unittest.TestCase):
 
         rel = rel.select("_row_id, id, data")
         assert_frame_equal(
-            rel.df(),
-            cursor.query("select _row_id, id, data from mnist_video;").df(),
+            rel.df(), cursor.query("select _row_id, id, data from mnist_video;").df(),
         )
 
         rel = rel.filter("id < 10")
@@ -95,11 +88,7 @@ class RelationalAPI(unittest.TestCase):
                     where id < 10 AND mnist.label = 1;"""
         assert_frame_equal(rel.df(), cursor.query(query).df())
 
-        rel = cursor.load(
-            self.images,
-            table_name="meme_images",
-            format="image",
-        )
+        rel = cursor.load(self.images, table_name="meme_images", format="image",)
         rel.execute()
 
         rel = cursor.table("meme_images").select("_row_id, name")
@@ -118,11 +107,7 @@ class RelationalAPI(unittest.TestCase):
     def test_relation_api_chaining(self):
         cursor = self.conn.cursor()
 
-        rel = cursor.load(
-            self.mnist_path,
-            table_name="mnist_video",
-            format="video",
-        )
+        rel = cursor.load(self.mnist_path, table_name="mnist_video", format="video",)
         rel.execute()
 
         rel = (
@@ -141,11 +126,7 @@ class RelationalAPI(unittest.TestCase):
     def test_interleaving_calls(self):
         cursor = self.conn.cursor()
 
-        rel = cursor.load(
-            self.mnist_path,
-            table_name="mnist_video",
-            format="video",
-        )
+        rel = cursor.load(self.mnist_path, table_name="mnist_video", format="video",)
         rel.execute()
 
         rel = cursor.table("mnist_video")
@@ -165,11 +146,7 @@ class RelationalAPI(unittest.TestCase):
         cursor = self.conn.cursor()
 
         # load some images
-        rel = cursor.load(
-            self.images,
-            table_name="meme_images",
-            format="image",
-        )
+        rel = cursor.load(self.images, table_name="meme_images", format="image",)
         rel.execute()
 
         # todo support register udf
@@ -209,11 +186,7 @@ class RelationalAPI(unittest.TestCase):
 
         cursor = self.conn.cursor()
         # load video
-        rel = cursor.load(
-            video_file_path,
-            table_name="dummy_video",
-            format="video",
-        )
+        rel = cursor.load(video_file_path, table_name="dummy_video", format="video",)
         rel.execute()
 
         create_dummy_object_detector_udf = cursor.create_udf(
@@ -265,11 +238,7 @@ class RelationalAPI(unittest.TestCase):
 
         cursor = self.conn.cursor()
         # load video
-        rel = cursor.load(
-            video_file_path,
-            table_name="dummy_video",
-            format="video",
-        )
+        rel = cursor.load(video_file_path, table_name="dummy_video", format="video",)
         rel.execute()
 
         # Create dummy udf
@@ -400,11 +369,7 @@ class RelationalAPI(unittest.TestCase):
 
         cursor = self.conn.cursor()
         # load video
-        rel = cursor.load(
-            video_file_path,
-            table_name="dummy_video",
-            format="video",
-        )
+        rel = cursor.load(video_file_path, table_name="dummy_video", format="video",)
         rel.execute()
 
         result = cursor.show("tables").df()
@@ -416,11 +381,7 @@ class RelationalAPI(unittest.TestCase):
 
         cursor = self.conn.cursor()
         # load video
-        rel = cursor.load(
-            video_file_path,
-            table_name="dummy_video",
-            format="video",
-        )
+        rel = cursor.load(video_file_path, table_name="dummy_video", format="video",)
         rel.execute()
 
         result = cursor.explain("SELECT * FROM dummy_video").df()
@@ -435,11 +396,7 @@ class RelationalAPI(unittest.TestCase):
 
         cursor = self.conn.cursor()
         # load video
-        rel = cursor.load(
-            video_file_path,
-            table_name="dummy_video",
-            format="video",
-        )
+        rel = cursor.load(video_file_path, table_name="dummy_video", format="video",)
         rel.execute()
 
         cursor.rename("dummy_video", "dummy_video_renamed").df()
