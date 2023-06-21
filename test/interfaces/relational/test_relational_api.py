@@ -395,6 +395,87 @@ class RelationalAPI(unittest.TestCase):
         ).df()
         self.assertEqual(len(result1), len(result2))
 
+    def test_show_relational(self):
+        video_file_path = create_sample_video(10)
+
+        cursor = self.conn.cursor()
+        # load video
+        rel = cursor.load(
+            video_file_path,
+            table_name="dummy_video",
+            format="video",
+        )
+        rel.execute()
+
+        result = cursor.show("tables").df()
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result["name"][0], "dummy_video")
+
+    def test_explain_relational(self):
+        video_file_path = create_sample_video(10)
+
+        cursor = self.conn.cursor()
+        # load video
+        rel = cursor.load(
+            video_file_path,
+            table_name="dummy_video",
+            format="video",
+        )
+        rel.execute()
+
+        result = cursor.explain("SELECT * FROM dummy_video").df()
+        self.assertEqual(len(result), 1)
+        self.assertEqual(
+            result[0][0],
+            "|__ ProjectPlan\n    |__ SeqScanPlan\n        |__ StoragePlan\n",
+        )
+
+    def test_rename_relational(self):
+        video_file_path = create_sample_video(10)
+
+        cursor = self.conn.cursor()
+        # load video
+        rel = cursor.load(
+            video_file_path,
+            table_name="dummy_video",
+            format="video",
+        )
+        rel.execute()
+
+        cursor.rename("dummy_video", "dummy_video_renamed").df()
+
+        result = cursor.show("tables").df()
+
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result["name"][0], "dummy_video_renamed")
+
+    def test_create_table_relational(self):
+        cursor = self.conn.cursor()
+
+        cursor.create_table(
+            table_name="dummy_table",
+            if_not_exists=True,
+            columns="id INTEGER, name text(30)",
+        ).df()
+
+        result = cursor.show("tables").df()
+
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result["name"][0], "dummy_table")
+
+        # if_not_exists=True should not raise error
+        # rel = cursor.create_table(table_name="dummy_table", if_not_exists=True, columns="id INTEGER, name text(30)")
+        # rel.execute()
+
+        # if_not_exists=False should raise error
+        rel = cursor.create_table(
+            table_name="dummy_table",
+            if_not_exists=False,
+            columns="id INTEGER, name text(30)",
+        )
+        with self.assertRaises(ExecutorError):
+            rel.execute()
+
 
 if __name__ == "__main__":
     unittest.main()
