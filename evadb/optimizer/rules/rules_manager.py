@@ -116,9 +116,8 @@ class RulesManager:
             LogicalVectorIndexScanToPhysical(),
         ]
 
-        # ray_enabled = config.get_value("experimental", "ray")
-        ray_enabled = is_ray_available()
-        if ray_enabled:
+        ray_enabled = config.get_value("experimental", "ray")
+        if ray_enabled and is_ray_available():
             self._implementation_rules.extend(
                 [
                     LogicalExchangeToPhysical(),

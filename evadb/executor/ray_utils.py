@@ -22,12 +22,13 @@ class StageCompleteSignal:
     pass
 
 
-def ray_wait_and_alert(tasks, queue):
+def ray_wait_and_alert():
     import ray
     from ray.exceptions import RayTaskError
     from ray.util.queue import Queue
 
-    @ray.remote(num_cpus=0)
+    ray.remote(num_cpus=0)
+
     def _ray_wait_and_alert(tasks: List[ray.ObjectRef], queue: Queue):
         try:
             ray.get(tasks)
@@ -35,7 +36,7 @@ def ray_wait_and_alert(tasks, queue):
         except RayTaskError as e:
             queue.put(ExecutorError(e.cause))
 
-    return _ray_wait_and_alert(tasks, queue)
+    return _ray_wait_and_alert
 
 
 # Max calls set to 1 to forcefully release GPU resource when the job is
@@ -47,12 +48,7 @@ def ray_wait_and_alert(tasks, queue):
 # https://github.com/georgia-tech-db/eva/pull/731
 
 
-def ray_parallel(
-    conf_dict: Dict[str, str],
-    executor: Callable,
-    input_queue,
-    output_queue,
-):
+def ray_parallel():
     import ray
     from ray.util.queue import Queue
 
@@ -70,10 +66,10 @@ def ray_parallel(
         for next_item in gen:
             output_queue.put(next_item)
 
-    return _ray_parallel(conf_dict, executor, input_queue, output_queue)
+    return _ray_parallel
 
 
-def ray_pull(conf_dict: Dict[str, str], executor: Callable, input_queue):
+def ray_pull():
     import ray
     from ray.util.queue import Queue
 
@@ -85,4 +81,4 @@ def ray_pull(conf_dict: Dict[str, str], executor: Callable, input_queue):
         for next_item in executor():
             input_queue.put(next_item)
 
-    return _ray_pull(conf_dict, executor, input_queue)
+    return _ray_pull

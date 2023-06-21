@@ -48,51 +48,47 @@ minimal_requirements = [
     "aenum>=2.2.0",
     "diskcache>=5.4.0",
     "retry>=0.9.2",
-    "psutil"
-]
-
-ray_libs = [
-    "ray>=1.13.0,<2.5.0",        # BREAKING CHANGES IN 2.5.0
+    "psutil",
 ]
 
 vision_libs = [
     "torch>=1.10.0",
     "torchvision>=0.11.1",
     "transformers>=4.27.4,<4.30.2",  # HUGGINGFACE
-    "faiss-cpu",             # DEFAULT VECTOR INDEX
+    "faiss-cpu",  # DEFAULT VECTOR INDEX
     "opencv-python-headless>=4.6.0.66",
     "Pillow>=8.4.0",
-    "eva-decord>=0.6.1",     # VIDEO PROCESSING
-    "ultralytics>=8.0.93",   # OBJECT DETECTION
-    "timm>=0.6.13",          # HUGGINGFACE VISION TASKS
-    "sentencepiece",         # TRANSFORMERS
+    "eva-decord>=0.6.1",  # VIDEO PROCESSING
+    "ultralytics>=8.0.93",  # OBJECT DETECTION
+    "timm>=0.6.13",  # HUGGINGFACE VISION TASKS
+    "sentencepiece",  # TRANSFORMERS
 ]
 
 document_libs = [
     "transformers>=4.27.4,<4.30.2",  # HUGGINGFACE
-    "langchain",              # DATA LOADERS
-    "faiss-cpu",              # DEFAULT VECTOR INDEX
+    "langchain",  # DATA LOADERS
+    "faiss-cpu",  # DEFAULT VECTOR INDEX
     "pymupdf",
     "pdfminer.six",
     "sentence-transformers",
-    "openai>=0.27.4",          # CHATGPT
-    "gpt4all",                 # PRIVATE GPT
-    "sentencepiece",           # TRANSFORMERS
+    "openai>=0.27.4",  # CHATGPT
+    "gpt4all",  # PRIVATE GPT
+    "sentencepiece",  # TRANSFORMERS
 ]
 
 udf_libs = [
     "facenet-pytorch>=2.5.2",  # FACE DETECTION
-    "thefuzz",                 # FUZZY STRING MATCHING
-    "pytube",                  # YOUTUBE QA APP
+    "thefuzz",  # FUZZY STRING MATCHING
+    "pytube",  # YOUTUBE QA APP
     "youtube-transcript-api",  # YOUTUBE QA APP
-    "qdrant-client>=1.1.7",    # QDRANT VECTOR STORE
-    "boto3",                   # AWS
-    "norfair>=2.2.0",          # OBJECT TRACKING
-    "kornia",                  # SIFT FEATURES        
+    "qdrant-client>=1.1.7",  # QDRANT VECTOR STORE
+    "boto3",  # AWS
+    "norfair>=2.2.0",  # OBJECT TRACKING
+    "kornia",  # SIFT FEATURES
 ]
 
 ray_libs = [
-    "ray>=1.13.0,<2.5.0",        # BREAKING CHANGES IN 2.5.0
+    "ray>=1.13.0,<2.5.0",  # BREAKING CHANGES IN 2.5.0
 ]
 
 notebook_libs = [
@@ -112,17 +108,14 @@ dev_libs = [
     "mock",
     "coveralls>=3.0.1",
     "moto[s3]>=4.1.1",
-
     # BENCHMARK PACKAGES
     "pytest-benchmark",
-
     # LINTING PACKAGES
-    "codespell", 
+    "codespell",
     "pylint",
-    "black>=23.1.0", 
+    "black>=23.1.0",
     "isort>=5.10.1",
     "flake8>=3.9.1",
-
     # DISTRIBUTION PACKAGES
     "wheel>=0.37.1",
     "semantic_version",

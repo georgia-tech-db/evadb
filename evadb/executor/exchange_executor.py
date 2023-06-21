@@ -72,7 +72,7 @@ class ExchangeExecutor(AbstractExecutor):
         assert (
             len(self.children) == 1
         ), "Exchange currently only supports parallelization of node with only one child"
-        ray_pull_task = ray_pull.remote(
+        ray_pull_task = ray_pull().remote(
             self.ray_pull_env_conf_dict,
             self.children[0],
             input_queue,
@@ -82,7 +82,7 @@ class ExchangeExecutor(AbstractExecutor):
         ray_parallel_task_list = []
         for i in range(self.parallelism):
             ray_parallel_task_list.append(
-                ray_parallel.remote(
+                ray_parallel().remote(
                     self.ray_parallel_env_conf_dict[i],
                     self.inner_executor,
                     input_queue,
@@ -90,8 +90,8 @@ class ExchangeExecutor(AbstractExecutor):
                 )
             )
 
-        ray_wait_and_alert.remote([ray_pull_task], input_queue)
-        ray_wait_and_alert.remote(ray_parallel_task_list, output_queue)
+        ray_wait_and_alert().remote([ray_pull_task], input_queue)
+        ray_wait_and_alert().remote(ray_parallel_task_list, output_queue)
 
         while True:
             res = output_queue.get(block=True)
