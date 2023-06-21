@@ -1,44 +1,37 @@
 Basic API
 ==========
 
-To begin your querying session, get a connection to the EvaDB using ``connect``:
+To begin your querying session, get a connection with a cursor to EvaDB using ``connect`` and ``cursor`` function calls:
 
 .. autosummary:: 
     :toctree: ./doc
     
     ~evadb.connect
+    ~evadb.EvaDBConnection.cursor
 
 .. code-block:: python
 
-    from evadb import connect
-    conn = connect()
+    import evadb
 
-You can then use this connection to run queries:
+    cursor = evadb.connect().cursor()
+
+You can then use this cursor to run queries:
 
 .. code-block:: python
 
-    conn.load("online_video.mp4", "youtube_video", "video").df()
-    conn.query("CREATE TABLE IF NOT EXISTS youtube_video_text AS SELECT SpeechRecognizer(audio) FROM youtube_video;").df()
+    ### load the pdfs in a given folder into the "office_data" table
+    cursor.load(
+        file_regex=f"office_data/*.pdf", format="PDF", table_name="office_data_table"
+    ).df()
+
+    ### load a given video into the "youtube_videos" table
+    cursor.load("movie.mp4", "youtube_videos", "video").df()
 
 .. warning::
 
-    It is important to call ``df`` to run the actual query. 
-    
-    EvaDB uses a lazy query execution technique to improve performance.
-    Calling ``conn.query("...")`` will only construct and not run the query. Calling ``conn.query("...").df()`` will both construct and run the query.
+    It is important to call ``df`` to run the actual query and get the result dataframe. EvaDB does lazy query execution to improve performance.
 
-
-
-
-
-EvaDBConnection Interface
--------------------------
-
-.. autosummary::
-    :toctree: ./doc
-    
-    ~evadb.EvaDBConnection.cursor
-
+    Calling ``cursor.query("...")`` will only construct and not run the query. Calling ``cursor.query("...").df()`` will both construct and run the query.
 
 EvaDBCursor Interface
 ---------------------
@@ -46,17 +39,14 @@ EvaDBCursor Interface
 .. autosummary::
     :toctree: ./doc
 
-    ~evadb.connect
     ~evadb.EvaDBCursor.load
-    ~evadb.EvaDBCursor.query
-    ~evadb.EvaDBCursor.table
-    ~evadb.EvaDBCursor.create_udf
-    ~evadb.EvaDBCursor.create_vector_index
-    ~evadb.EvaDBCursor.df
     ~evadb.EvaDBCursor.drop_table
+    ~evadb.EvaDBCursor.table
+    ~evadb.EvaDBCursor.query
+    ~evadb.EvaDBCursor.create_udf
     ~evadb.EvaDBCursor.drop_udf
+    ~evadb.EvaDBCursor.create_vector_index
     ~evadb.EvaDBCursor.drop_index
-
 
 EvaDBQuery Interface
 ---------------------
