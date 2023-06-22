@@ -27,8 +27,7 @@ def ray_wait_and_alert():
     from ray.exceptions import RayTaskError
     from ray.util.queue import Queue
 
-    ray.remote(num_cpus=0)
-
+    @ray.remote(num_cpus=0)
     def _ray_wait_and_alert(tasks: List[ray.ObjectRef], queue: Queue):
         try:
             ray.get(tasks)
