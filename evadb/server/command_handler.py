@@ -31,7 +31,8 @@ def execute_query(
     evadb: EvaDBDatabase,
     query,
     report_time: bool = False,
-    ignore_exceptions: bool = False,
+    do_not_raise_exceptions: bool = False,
+    do_not_print_exceptions: bool = False,
     **kwargs
 ) -> Iterator[Batch]:
     """
@@ -44,7 +45,9 @@ def execute_query(
         StatementBinder(StatementBinderContext(evadb.catalog)).bind(stmt)
         l_plan = StatementToPlanConverter().visit(stmt)
         p_plan = plan_generator.build(l_plan)
-        output = PlanExecutor(evadb, p_plan).execute_plan(ignore_exceptions)
+        output = PlanExecutor(evadb, p_plan).execute_plan(
+            do_not_raise_exceptions, do_not_print_exceptions
+        )
 
     if report_time is True:
         query_compile_time.log_elapsed_time("Query Compile Time")
@@ -56,13 +59,21 @@ def execute_query_fetch_all(
     evadb: EvaDBDatabase,
     query=None,
     report_time: bool = False,
-    ignore_exceptions: bool = False,
+    do_not_raise_exceptions: bool = False,
+    do_not_print_exceptions: bool = False,
     **kwargs
 ) -> Optional[Batch]:
     """
     Execute the query and fetch all results into one Batch object.
     """
-    output = execute_query(evadb, query, report_time, ignore_exceptions, **kwargs)
+    output = execute_query(
+        evadb,
+        query,
+        report_time,
+        do_not_raise_exceptions,
+        do_not_print_exceptions,
+        **kwargs
+    )
     if output:
         batch_list = list(output)
         return Batch.concat(batch_list, copy=False)

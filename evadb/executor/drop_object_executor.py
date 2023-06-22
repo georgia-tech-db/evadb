@@ -47,7 +47,6 @@ class DropObjectExecutor(AbstractExecutor):
         if not self.catalog().check_table_exists(table_name):
             err_msg = "Table: {} does not exist".format(table_name)
             if if_exists:
-                logger.warning(err_msg)
                 return Batch(pd.DataFrame([err_msg]))
             else:
                 raise ExecutorError(err_msg)

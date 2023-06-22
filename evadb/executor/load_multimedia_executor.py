@@ -80,7 +80,6 @@ class LoadMultimediaExecutor(AbstractExecutor):
 
                 invalid_files_str = "\n".join(invalid_files)
                 err_msg = f"Load {self.media_type.name} failed due to invalid files: \n{invalid_files_str}"
-                logger.error(err_msg)
                 raise ValueError(err_msg)
 
             # Get valid files.
@@ -131,7 +130,6 @@ class LoadMultimediaExecutor(AbstractExecutor):
             if storage_engine and table_obj:
                 self._rollback_load(storage_engine, table_obj, do_create)
             err_msg = f"Load {self.media_type.name} failed: encountered unexpected error {str(e)}"
-            logger.error(err_msg)
             raise ExecutorError(err_msg)
         else:
             yield Batch(

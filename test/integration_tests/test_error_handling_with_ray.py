@@ -16,7 +16,7 @@ import os
 import time
 import unittest
 from pathlib import Path
-from test.markers import ray_only_marker
+from test.markers import ray_skip_marker
 from test.util import (
     create_sample_image,
     get_evadb_for_testing,
@@ -53,7 +53,7 @@ class ErrorHandlingRayTests(unittest.TestCase):
         drop_table_query = "DROP TABLE testRayErrorHandling;"
         execute_query_fetch_all(self.evadb, drop_table_query)
 
-    @ray_only_marker
+    @ray_skip_marker
     def test_ray_error_populate_to_all_stages(self):
         udf_name, task = "HFObjectDetector", "image-classification"
         create_udf_query = f"""CREATE UDF {udf_name}
