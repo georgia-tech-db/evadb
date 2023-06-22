@@ -84,7 +84,9 @@ class HuggingFaceTests(unittest.TestCase):
         # catch an assert
 
         with self.assertRaises(ExecutorError) as exc_info:
-            execute_query_fetch_all(self.evadb, create_udf_query)
+            execute_query_fetch_all(
+                self.evadb, create_udf_query, do_not_print_exceptions=True
+            )
         self.assertIn(
             f"Task {task} not supported in EvaDB currently", str(exc_info.exception)
         )

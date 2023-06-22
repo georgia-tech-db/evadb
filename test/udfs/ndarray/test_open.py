@@ -21,6 +21,7 @@ import pytest
 from mock import patch
 
 from evadb.udfs.ndarray.open import Open
+from evadb.utils.generic_utils import try_to_import_cv2
 
 
 @pytest.mark.notparallel
@@ -28,6 +29,7 @@ class OpenTests(unittest.TestCase):
     def setUp(self):
         self.open_instance = Open()
         self.image_file_path = create_sample_image()
+        try_to_import_cv2()
 
     def test_open_name_exists(self):
         assert hasattr(self.open_instance, "name")
@@ -46,15 +48,17 @@ class OpenTests(unittest.TestCase):
         self.assertEqual(np.sum(actual_img[2]), np.sum(expected_img[2]))
 
     def test_open_same_path_should_use_cache(self):
+        import cv2  # noqa: F401
+
         # un-cached open
-        with patch("evadb.udfs.ndarray.open.cv2") as mock_cv2:
+        with patch("cv2.imread") as mock_cv2_imread:
             self.open_instance(pd.DataFrame([self.image_file_path]))
-            mock_cv2.imread.assert_called_once_with(self.image_file_path)
+            mock_cv2_imread.assert_called_once_with(self.image_file_path)
 
         # cached open
-        with patch("evadb.udfs.ndarray.open.cv2") as mock_cv2:
+        with patch("cv2.imread") as mock_cv2_imread:
             self.open_instance(pd.DataFrame([self.image_file_path]))
-            mock_cv2.imread.assert_not_called()
+            mock_cv2_imread.assert_not_called()
 
     def test_open_path_should_raise_error(self):
         with self.assertRaises((AssertionError, FileNotFoundError)):

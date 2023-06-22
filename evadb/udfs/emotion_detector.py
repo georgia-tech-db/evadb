@@ -122,7 +122,7 @@ class EmotionDetector(PytorchAbstractClassifierUDF):
                 return torch.nn.Sequential(*layers)
 
         # load model
-        self.model = self.VGG("VGG19")
+        self.model = VGG("VGG19")
 
         # self.get_device() infers device from the loaded model, so not using it
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

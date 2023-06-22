@@ -44,7 +44,7 @@ from evadb.parser.statement import AbstractStatement
 from evadb.parser.table_ref import TableRef
 from evadb.parser.types import UDFType
 from evadb.third_party.huggingface.binder import assign_hf_udf
-from evadb.utils.generic_utils import get_file_checksum, load_udf_class_from_file
+from evadb.utils.generic_utils import load_udf_class_from_file
 from evadb.utils.logging_manager import logger
 
 
@@ -339,7 +339,7 @@ class StatementBinder:
                 node.function = lambda: udf_class(**get_metadata_properties(udf_obj))
             except Exception as e:
                 err_msg = (
-                    f"{str(e)}. Please verify that the UDF class name in the"
+                    f"{str(e)}. Please verify that the UDF class name in the "
                     "implementation file matches the UDF name."
                 )
                 logger.error(err_msg)

@@ -27,7 +27,7 @@ from evadb.server.command_handler import execute_query_fetch_all
     min_rounds=1,
 )
 @pytest.mark.notparallel
-def test_should_run_pytorch_and_yolo(benchmark, setup_pytorch_tests):
+def test_should_run_benchmark_pytorch_and_yolo(benchmark, setup_pytorch_tests):
     select_query = """SELECT Yolo(data) FROM MyVideo
                     WHERE id < 5;"""
     actual_batch = benchmark(execute_query_fetch_all, setup_pytorch_tests, select_query)
@@ -41,7 +41,7 @@ def test_should_run_pytorch_and_yolo(benchmark, setup_pytorch_tests):
     min_rounds=1,
 )
 @pytest.mark.notparallel
-def test_should_run_pytorch_and_facenet(benchmark, setup_pytorch_tests):
+def test_should_run_benchmark_pytorch_and_facenet(benchmark, setup_pytorch_tests):
     create_udf_query = """CREATE UDF IF NOT EXISTS FaceDetector
                 INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
                 OUTPUT (bboxes NDARRAY FLOAT32(ANYDIM, 4),
@@ -65,7 +65,7 @@ def test_should_run_pytorch_and_facenet(benchmark, setup_pytorch_tests):
     min_rounds=1,
 )
 @pytest.mark.notparallel
-def test_should_run_pytorch_and_resnet50(benchmark, setup_pytorch_tests):
+def test_should_run_benchmark_pytorch_and_resnet50(benchmark, setup_pytorch_tests):
     create_udf_query = """CREATE UDF IF NOT EXISTS FeatureExtractor
                 INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
                 OUTPUT (features NDARRAY FLOAT32(ANYDIM))

@@ -155,7 +155,11 @@ class PlanExecutor:
 
         return executor_node
 
-    def execute_plan(self, ignore_exceptions: bool = False) -> Iterator[Batch]:
+    def execute_plan(
+        self,
+        do_not_raise_exceptions: bool = False,
+        do_not_print_exceptions: bool = False,
+    ) -> Iterator[Batch]:
         """execute the plan tree"""
         try:
             execution_tree = self._build_execution_tree(self._plan)
@@ -163,6 +167,7 @@ class PlanExecutor:
             if output is not None:
                 yield from output
         except Exception as e:
-            if ignore_exceptions is False:
-                logger.exception(str(e))
+            if do_not_raise_exceptions is False:
+                if do_not_print_exceptions is False:
+                    logger.exception(str(e))
                 raise ExecutorError(e)
