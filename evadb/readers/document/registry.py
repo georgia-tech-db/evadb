@@ -16,6 +16,7 @@
 from evadb.utils.generic_utils import try_to_import_langchain
 
 SUPPORTED_TYPES = [
+    ".csv",
     ".doc",
     ".docx",
     ".enex",
@@ -33,6 +34,7 @@ SUPPORTED_TYPES = [
 def _lazy_import_loader():
     try_to_import_langchain()
     from langchain.document_loaders import (
+        CSVLoader,
         EverNoteLoader,
         PDFMinerLoader,
         TextLoader,
@@ -51,6 +53,7 @@ def _lazy_import_loader():
         ".eml": (UnstructuredEmailLoader, {}),
         ".epub": (UnstructuredEPubLoader, {}),
         ".html": (UnstructuredHTMLLoader, {}),
+        ".csv": (CSVLoader, {}),
         ".md": (UnstructuredMarkdownLoader, {}),
         ".pdf": (PDFMinerLoader, {}),
         ".ppt": (UnstructuredPowerPointLoader, {}),
