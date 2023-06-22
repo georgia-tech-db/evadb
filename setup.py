@@ -132,8 +132,8 @@ EXTRA_REQUIRES = {
     "document": document_libs,
     "udf": udf_libs,
     "notebook": notebook_libs,
-    "all": vision_libs + document_libs + udf_libs + notebook_libs,
-    "dev": dev_libs + vision_libs + document_libs + udf_libs + notebook_libs,
+    "all": vision_libs + document_libs + udf_libs + notebook_libs + ray_libs,
+    "dev": dev_libs + vision_libs + document_libs + udf_libs + notebook_libs + ray_libs,
 }
 
 setup(
