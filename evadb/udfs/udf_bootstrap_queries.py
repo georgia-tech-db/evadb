@@ -223,8 +223,8 @@ def init_builtin_udfs(db: EvaDBDatabase, mode: str = "debug") -> None:
         mnistcnn_udf_query,
         chatgpt_udf_query,
         face_detection_udf_query,
-        ocr_udf_query,
-        Mvit_udf_query,
+        # ocr_udf_query,
+        # Mvit_udf_query,
         Sift_udf_query,
         Yolo_udf_query,
     ]
