@@ -15,10 +15,6 @@
 import os
 from typing import Callable, Dict, List
 
-import ray
-from ray.exceptions import RayTaskError
-from ray.util.queue import Queue
-
 from evadb.executor.executor_utils import ExecutorError
 
 
@@ -26,13 +22,21 @@ class StageCompleteSignal:
     pass
 
 
-@ray.remote(num_cpus=0)
-def ray_wait_and_alert(tasks: List[ray.ObjectRef], queue: Queue):
-    try:
-        ray.get(tasks)
-        queue.put(StageCompleteSignal)
-    except RayTaskError as e:
-        queue.put(ExecutorError(e.cause))
+def ray_wait_and_alert():
+    import ray
+    from ray.exceptions import RayTaskError
+    from ray.util.queue import Queue
+
+    ray.remote(num_cpus=0)
+
+    def _ray_wait_and_alert(tasks: List[ray.ObjectRef], queue: Queue):
+        try:
+            ray.get(tasks)
+            queue.put(StageCompleteSignal)
+        except RayTaskError as e:
+            queue.put(ExecutorError(e.cause))
+
+    return _ray_wait_and_alert
 
 
 # Max calls set to 1 to forcefully release GPU resource when the job is
@@ -42,25 +46,39 @@ def ray_wait_and_alert(tasks: List[ray.ObjectRef], queue: Queue):
 # cleanly done on the Ray side, we need to set this to prevent memory leak.
 # More detailed explanation can be found in
 # https://github.com/georgia-tech-db/eva/pull/731
-@ray.remote(max_calls=1)
-def ray_parallel(
-    conf_dict: Dict[str, str],
-    executor: Callable,
-    input_queue: Queue,
-    output_queue: Queue,
-):
-    for k, v in conf_dict.items():
-        os.environ[k] = v
-
-    gen = executor(input_queue=input_queue)
-    for next_item in gen:
-        output_queue.put(next_item)
 
 
-@ray.remote(max_calls=1)
-def ray_pull(conf_dict: Dict[str, str], executor: Callable, input_queue: Queue):
-    for k, v in conf_dict.items():
-        os.environ[k] = v
+def ray_parallel():
+    import ray
+    from ray.util.queue import Queue
 
-    for next_item in executor():
-        input_queue.put(next_item)
+    @ray.remote(max_calls=1)
+    def _ray_parallel(
+        conf_dict: Dict[str, str],
+        executor: Callable,
+        input_queue: Queue,
+        output_queue: Queue,
+    ):
+        for k, v in conf_dict.items():
+            os.environ[k] = v
+
+        gen = executor(input_queue=input_queue)
+        for next_item in gen:
+            output_queue.put(next_item)
+
+    return _ray_parallel
+
+
+def ray_pull():
+    import ray
+    from ray.util.queue import Queue
+
+    @ray.remote(max_calls=1)
+    def _ray_pull(conf_dict: Dict[str, str], executor: Callable, input_queue: Queue):
+        for k, v in conf_dict.items():
+            os.environ[k] = v
+
+        for next_item in executor():
+            input_queue.put(next_item)
+
+    return _ray_pull
