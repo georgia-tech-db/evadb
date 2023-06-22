@@ -15,7 +15,8 @@ To begin your querying session, get a connection with a cursor to EvaDB using ``
 
     cursor = evadb.connect().cursor()
 
-You can then use this cursor to run queries:
+After getting a cursor, you can load documents and run queries using the ``EvaDBCursor`` interface. To construct the queries with pandas-like API, 
+use the ``EvaDBQuery`` interface.
 
 .. code-block:: python
 
@@ -36,12 +37,15 @@ You can then use this cursor to run queries:
 EvaDBCursor Interface
 ---------------------
 
+Using the cursor, you can refer to a table, load documents, create functions, create vector index, and several other tasks.
+
+After connecting to a table using ``table``, you can construct a complex query using the ``EvaDBQuery`` interface.
+
 .. autosummary::
     :toctree: ./doc
 
-    ~evadb.EvaDBCursor.load
-    ~evadb.EvaDBCursor.drop_table
     ~evadb.EvaDBCursor.table
+    ~evadb.EvaDBCursor.load
     ~evadb.EvaDBCursor.query
     ~evadb.EvaDBCursor.create_udf
     ~evadb.EvaDBCursor.create_table
