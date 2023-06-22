@@ -46,9 +46,7 @@ class RelationalAPI(unittest.TestCase):
     def setUp(self):
         self.evadb.catalog().reset()
         self.mnist_path = f"{EvaDB_ROOT_DIR}/data/mnist/mnist.mp4"
-        load_udfs_for_testing(
-            self.evadb,
-        )
+        load_udfs_for_testing(self.evadb,)
         self.images = f"{EvaDB_ROOT_DIR}/data/detoxify/*.jpg"
 
     def tearDown(self):
@@ -59,11 +57,7 @@ class RelationalAPI(unittest.TestCase):
 
     def test_relation_apis(self):
         cursor = self.conn.cursor()
-        rel = cursor.load(
-            self.mnist_path,
-            table_name="mnist_video",
-            format="video",
-        )
+        rel = cursor.load(self.mnist_path, table_name="mnist_video", format="video",)
         rel.execute()
 
         rel = cursor.table("mnist_video")
@@ -71,8 +65,7 @@ class RelationalAPI(unittest.TestCase):
 
         rel = rel.select("_row_id, id, data")
         assert_frame_equal(
-            rel.df(),
-            cursor.query("select _row_id, id, data from mnist_video;").df(),
+            rel.df(), cursor.query("select _row_id, id, data from mnist_video;").df(),
         )
 
         rel = rel.filter("id < 10")
@@ -95,11 +88,7 @@ class RelationalAPI(unittest.TestCase):
                     where id < 10 AND mnist.label = 1;"""
         assert_frame_equal(rel.df(), cursor.query(query).df())
 
-        rel = cursor.load(
-            self.images,
-            table_name="meme_images",
-            format="image",
-        )
+        rel = cursor.load(self.images, table_name="meme_images", format="image",)
         rel.execute()
 
         rel = cursor.table("meme_images").select("_row_id, name")
@@ -118,11 +107,7 @@ class RelationalAPI(unittest.TestCase):
     def test_relation_api_chaining(self):
         cursor = self.conn.cursor()
 
-        rel = cursor.load(
-            self.mnist_path,
-            table_name="mnist_video",
-            format="video",
-        )
+        rel = cursor.load(self.mnist_path, table_name="mnist_video", format="video",)
         rel.execute()
 
         rel = (
@@ -141,11 +126,7 @@ class RelationalAPI(unittest.TestCase):
     def test_interleaving_calls(self):
         cursor = self.conn.cursor()
 
-        rel = cursor.load(
-            self.mnist_path,
-            table_name="mnist_video",
-            format="video",
-        )
+        rel = cursor.load(self.mnist_path, table_name="mnist_video", format="video",)
         rel.execute()
 
         rel = cursor.table("mnist_video")
@@ -165,11 +146,7 @@ class RelationalAPI(unittest.TestCase):
         cursor = self.conn.cursor()
 
         # load some images
-        rel = cursor.load(
-            self.images,
-            table_name="meme_images",
-            format="image",
-        )
+        rel = cursor.load(self.images, table_name="meme_images", format="image",)
         rel.execute()
 
         # todo support register udf
@@ -209,11 +186,7 @@ class RelationalAPI(unittest.TestCase):
 
         cursor = self.conn.cursor()
         # load video
-        rel = cursor.load(
-            video_file_path,
-            table_name="dummy_video",
-            format="video",
-        )
+        rel = cursor.load(video_file_path, table_name="dummy_video", format="video",)
         rel.execute()
 
         create_dummy_object_detector_udf = cursor.create_udf(
@@ -265,11 +238,7 @@ class RelationalAPI(unittest.TestCase):
 
         cursor = self.conn.cursor()
         # load video
-        rel = cursor.load(
-            video_file_path,
-            table_name="dummy_video",
-            format="video",
-        )
+        rel = cursor.load(video_file_path, table_name="dummy_video", format="video",)
         rel.execute()
 
         # Create dummy udf
@@ -394,6 +363,75 @@ class RelationalAPI(unittest.TestCase):
             "SELECT data from docs chunk_size 4000 chunk_overlap 200"
         ).df()
         self.assertEqual(len(result1), len(result2))
+
+    def test_show_relational(self):
+        video_file_path = create_sample_video(10)
+
+        cursor = self.conn.cursor()
+        # load video
+        rel = cursor.load(video_file_path, table_name="dummy_video", format="video",)
+        rel.execute()
+
+        result = cursor.show("tables").df()
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result["name"][0], "dummy_video")
+
+    def test_explain_relational(self):
+        video_file_path = create_sample_video(10)
+
+        cursor = self.conn.cursor()
+        # load video
+        rel = cursor.load(video_file_path, table_name="dummy_video", format="video",)
+        rel.execute()
+
+        result = cursor.explain("SELECT * FROM dummy_video").df()
+        self.assertEqual(len(result), 1)
+        self.assertEqual(
+            result[0][0],
+            "|__ ProjectPlan\n    |__ SeqScanPlan\n        |__ StoragePlan\n",
+        )
+
+    def test_rename_relational(self):
+        video_file_path = create_sample_video(10)
+
+        cursor = self.conn.cursor()
+        # load video
+        rel = cursor.load(video_file_path, table_name="dummy_video", format="video",)
+        rel.execute()
+
+        cursor.rename("dummy_video", "dummy_video_renamed").df()
+
+        result = cursor.show("tables").df()
+
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result["name"][0], "dummy_video_renamed")
+
+    def test_create_table_relational(self):
+        cursor = self.conn.cursor()
+
+        cursor.create_table(
+            table_name="dummy_table",
+            if_not_exists=True,
+            columns="id INTEGER, name text(30)",
+        ).df()
+
+        result = cursor.show("tables").df()
+
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result["name"][0], "dummy_table")
+
+        # if_not_exists=True should not raise error
+        # rel = cursor.create_table(table_name="dummy_table", if_not_exists=True, columns="id INTEGER, name text(30)")
+        # rel.execute()
+
+        # if_not_exists=False should raise error
+        rel = cursor.create_table(
+            table_name="dummy_table",
+            if_not_exists=False,
+            columns="id INTEGER, name text(30)",
+        )
+        with self.assertRaises(ExecutorError):
+            rel.execute()
 
 
 if __name__ == "__main__":
