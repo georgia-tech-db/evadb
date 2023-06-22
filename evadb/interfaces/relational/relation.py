@@ -57,7 +57,7 @@ class EvaDBQuery:
             EvaDBQuery: Aliased Relation.
 
         Examples:
-            >>> relation = conn.table("sample_table")
+            >>> relation = cursor.table("sample_table")
             >>> relation.alias('table')
         """
         self._alias = Alias(alias)
@@ -76,7 +76,7 @@ class EvaDBQuery:
 
             Runs Yolo on all the frames of the input table
 
-            >>> relation = conn.table("videos")
+            >>> relation = cursor.table("videos")
             >>> relation.cross_apply("Yolo(data)", "objs(labels, bboxes, scores)")
 
             Runs Yolo on all the frames of the input table and unnest each object as separate row.
@@ -131,7 +131,7 @@ class EvaDBQuery:
         Returns:
             EvaDBQuery : Filtered EvaDBQuery.
         Examples:
-            >>> relation = conn.table("sample_table")
+            >>> relation = cursor.table("sample_table")
             >>> relation.filter("col1 > 10")
 
             Filter by sql string
@@ -159,7 +159,7 @@ class EvaDBQuery:
             EvaDBQuery: Relation with subset of records
 
         Examples:
-            >>> relation = conn.table("sample_table")
+            >>> relation = cursor.table("sample_table")
             >>> relation.limit(10)
 
         """
@@ -183,7 +183,7 @@ class EvaDBQuery:
             EvaDBQuery: A EvaDBQuery ordered based on the order_expr.
 
         Examples:
-            >>> relation = conn.table("PDFs")
+            >>> relation = cursor.table("PDFs")
             >>> relation.order("Similarity(SentenceTransformerFeatureExtractor('When was the NATO created?'), SentenceTransformerFeatureExtractor(data) ) DESC")
 
         """
@@ -208,7 +208,7 @@ class EvaDBQuery:
             EvaDBQuery: A EvaDBQuery with subset (or all) of columns.
 
         Examples:
-            >>> relation = conn.table("sample_table")
+            >>> relation = cursor.table("sample_table")
 
             Select all columns in the EvaDBQuery.
 
@@ -247,7 +247,7 @@ class EvaDBQuery:
             str: the sql query
 
         Examples:
-            >>> relation = conn.table("sample_table").project('i')
+            >>> relation = cursor.table("sample_table").project('i')
             >>> relation.sql_query()
         """
 
