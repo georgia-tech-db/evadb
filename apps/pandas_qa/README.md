@@ -1,9 +1,9 @@
 # YouTube Question Answering
 
 ## Overview
-This app lets you ask questions about any YouTube video. You will only need to supply a Youtube URL and an OpenAI API key.
+This app lets you run data analytics to a CSV file like a conversation. You will only need to supply a csv file path and an OpenAI API key.
 
-This app is powered by EvaDB's Python API and ChatGPT UDF.
+This app is powered by EvaDB's Python API and ChatGPT UDF. Also, credits to the worflow presented by [pandas-ai](https://github.com/gventuri/pandas-ai)
 
 ## Setup
 Ensure that the local Python version is >= 3.8. Install the required libraries:
@@ -15,24 +15,41 @@ pip install -r requirements.txt
 ## Usage
 Run script: 
 ```bat
-python youtube_qa.py
+python pandas_qa.py
 ```
 
 ## Example
 
 ```bat
-📺 Enter the URL of the YouTube video (press Enter to use a default YouTube video): https://www.youtube.com/watch?v=TvS1lHEQoKk
-🔥 Enter your OpenAI API key: sk-*****
+🔮 Welcome to EvaDB! This app lets you to run data analytics on a csv file like in a conversational manner.
+You will only need to supply a path to csv file and an OpenAI API key.
 
-===========================================
-Ask anything about the video!
+📋 Enter the csv file path (press Enter to use our default csv file): [enter]
+🔑 Enter your OpenAI key: [your openai key]
+Could not find image processor class in the image processor config or the model config. Loading based on pattern matching with the model's feature extractor configuration.
 
-Question (enter 'exit' to exit): summarize this video
-Answer:
-    Julia Louis-Dreyfus, a decorated figure in television history, joins Sean Evans on Hot Ones to talk about her new film, You Hurt My Feelings, and her collaboration with director Nicole Holofcener. She also discusses her love for hot sauce, her college improv show, and her podcast, Wiser Than Me, where she talks to icons like Carol Burnett and Jane Fonda. 
-    Actress Julia Louis-Dreyfus discusses the importance of facing fears and doing things that frighten you, as well as her experiences on the set of Seinfeld and Marvel's Wakanda Forever. She also tries spicy wings and talks about her role in Veep. 
-    Julia Louis-Dreyfus appears on the YouTube show "Hot Ones" and eats progressively spicier chicken wings while answering questions. She discusses her career, living in Oakwood Apartments, and the most underrated National Park. She struggles with the spiciness of the sauces but manages to finish the challenge. 
+\===========================================
+🪄 Run anything on the csv table like a conversation!
+What do you want to do with the dataframe?
+(enter 'exit' to exit): print out the 3 countries with the highest GDPs
+⏳ Generating response (may take a while)...
+\+--------------------------------------------------+
+✅ Script body:
+\# First, we need to sort the dataframe by GDP in descending order
+sorted_df = df.sort_values(by='gdp', ascending=False)
 
-Question (enter 'exit' to exit): exit
-Session ended.
-===========================================
+\# Then, we can select the top 3 countries with the highest GDPs
+top_3_countries = sorted_df.head(3)['country']
+
+\# Finally, we can print out the result
+print("The 3 countries with the highest GDPs are:")
+for country in top_3_countries:
+print(country)
+\+--------------------------------------------------+
+🪄 Want to run it? (y/n): y
+The 3 countries with the highest GDPs are:
+United States
+China
+Japan
+✅ Session ended.
+\===========================================
