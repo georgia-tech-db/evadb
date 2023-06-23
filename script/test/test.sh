@@ -74,13 +74,14 @@ fi
 if [[ "$OSTYPE" != "msys" ]];
 # Non-Windows
 then
-    if [[ "$MODE" = "TEST" || "$MODE" = "ALL" ]];
+    if [[ "$MODE" = "COV" || "$MODE" = "ALL" ]];
     then
-        PYTHONPATH=./ pytest --durations=20 --capture=sys --tb=short -v --log-level=WARNING -rsf -p no:cov test -m "not benchmark"
-    elif [[ "$MODE" = "COV" ]];
-    then
-	# As a workaround, ray needs to be disabled for COV.
         PYTHONPATH=./ pytest --durations=20 --cov-report term-missing:skip-covered  --cov-config=.coveragerc --cov-context=test --cov=evadb/ --capture=sys --tb=short -v -rsf --log-level=WARNING -m "not benchmark"
+    elif [[ "$MODE" = "RAY" ]];
+    then
+	# As a workaround, ray needs to be disabled for RAY.
+        
+        PYTHONPATH=./ pytest --durations=20 --capture=sys --tb=short -v --log-level=WARNING -rsf -p no:cov test -m "not benchmark"
     fi
 
     test_code=$?
@@ -110,7 +111,7 @@ fi
 
 if [[ ( "$OSTYPE" != "msys" ) && ( "$MODE" = "NOTEBOOK" || "$MODE" = "ALL" ) ]];
 then 
-    PYTHONPATH=./ python -m pytest --durations=5 --nbmake --overwrite "./tutorials" --capture=sys --tb=short -v --log-level=WARNING --nbmake-timeout=3000
+    PYTHONPATH=./ python -m pytest --durations=5 --nbmake --overwrite "./tutorials" --capture=sys --tb=short -v --log-level=WARNING --nbmake-timeout=3000 
     notebook_test_code=$?
     if [ "$notebook_test_code" != "0" ];
     then

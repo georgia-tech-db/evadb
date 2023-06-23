@@ -15,15 +15,15 @@ workflows:
         - Linux:
             name: "Test | v3.8 | Linux"
             v: "3.8"
-            mode: "TEST"
+            mode: "COV"
         - Linux:
             name: "Test | v3.9 | Linux"
             v: "3.9"
-            mode: "TEST"
+            mode: "COV"
         - Linux:
             name: "Test | v3.10 | Linux"
             v: "3.10"
-            mode: "TEST"
+            mode: "COV"
         # Ray does not work on 3.11
         # https://github.com/ray-project/ray/issues/33232
         # - Linux:
@@ -54,13 +54,13 @@ workflows:
             mode: "LINTER"
         ### RAY
         - Linux:
-            name: "Test | Coverage | v3.10 | Linux"
+            name: "Test | Ray | v3.10 | Linux"
             v: "3.10"
-            mode: "COV"
+            mode: "RAY"
         - Windows:
             name: "Windows | v3.10"
-        #- MacOS:
-        #    name: "MacOS | v3.10"
+        - MacOS:
+           name: "MacOS | v3.10"
         # missing Torchvision
         #- Linux:
         #    name: "Linux -  v3.11"  
@@ -95,16 +95,16 @@ jobs:
             source test_evadb/bin/activate
             pip install ".[dev]"
 
-      # Disable Ray for Coverage
+      # Enable Ray
       - when:
           condition:
-            equal: [ COV, << parameters.mode >> ]
+            equal: [ RAY, << parameters.mode >> ]
           steps:
             - run:
-                name: Disable Ray setting in the config.yml file
+                name: Enable Ray setting in the config.yml file
                 command: |
                   source test_evadb/bin/activate
-                  python -c "import yaml;f = open('evadb/evadb.yml', 'r+');config_obj = yaml.load(f, Loader=yaml.FullLoader);config_obj['experimental']['ray'] = False;f.seek(0);f.write(yaml.dump(config_obj));f.truncate();"
+                  python -c "import yaml;f = open('evadb/evadb.yml', 'r+');config_obj = yaml.load(f, Loader=yaml.FullLoader);config_obj['experimental']['ray'] = True;f.seek(0);f.write(yaml.dump(config_obj));f.truncate();"
 
       - run:
           name: Test and upload coverage report to coveralls
@@ -158,6 +158,7 @@ jobs:
         - checkout
         - run:           
             name: Install EVA package from GitHub repo and run tests
+            no_output_timeout: 30m # 30 minute timeout
             command: |
               python -m venv test_evadb
               source test_evadb/bin/activate
