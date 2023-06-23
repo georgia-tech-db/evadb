@@ -22,7 +22,7 @@ import pandas as pd
 import evadb
 
 # default file paths
-DEFAULT_CSV_PATH = "./apps/pandas_qa/country.csv"
+DEFAULT_CSV_PATH = "./apps/pandas_qa/data/country.csv"
 
 # temporary file paths
 QUESTION_PATH = "./evadb_data/tmp/question.csv"
