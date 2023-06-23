@@ -36,7 +36,7 @@ def receive_user_input() -> Dict:
         user_input (dict): global configurations
     """
     print(
-        "🔮 Welcome to EvaDB! This app lets you to run data analytics on a csv file like in a conversational manner\nYou will only need to supply a path to csv file and an OpenAI API key.\n\n"
+        "🔮 Welcome to EvaDB! This app lets you to run data analytics on a csv file like in a conversational manner.\nYou will only need to supply a path to csv file and an OpenAI API key.\n\n"
     )
     user_input = dict()
 
@@ -140,7 +140,7 @@ if __name__ == "__main__":
             print("⏳ Generating response (may take a while)...")
             script_body = generate_script(cursor, df, question)
             print("+--------------------------------------------------+")
-            print("✅ Answer:")
+            print("✅ Script:")
             print(script_body)
             print("+--------------------------------------------------+")
 
