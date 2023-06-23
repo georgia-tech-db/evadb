@@ -214,13 +214,13 @@ def init_builtin_udfs(db: EvaDBDatabase, mode: str = "debug") -> None:
     """
     # list of UDF queries to load
     queries = [
+        mnistcnn_udf_query,
         Fastrcnn_udf_query,
         ArrayCount_udf_query,
         Crop_udf_query,
         Open_udf_query,
         Similarity_udf_query,
         norfair_obj_tracker_query,
-        mnistcnn_udf_query,
         chatgpt_udf_query,
         face_detection_udf_query,
         # ocr_udf_query,
