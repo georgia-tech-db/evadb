@@ -44,7 +44,7 @@ class TestOCR(unittest.TestCase):
         shutdown_ray()
         # todo: move these to relational apis as well
 
-    @ray_skip_marker
+    # @ray_skip_marker
     def test_ocr_donut_huggingface(self):
         conn = connect()
         cursor = conn.cursor()
