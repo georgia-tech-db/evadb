@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.markers import ray_skip_marker
 from test.util import (
     load_udfs_for_testing,
     shutdown_ray,
@@ -44,7 +43,6 @@ class TestOCR(unittest.TestCase):
         shutdown_ray()
         # todo: move these to relational apis as well
 
-    # @ray_skip_marker
     def test_ocr_donut_huggingface(self):
         conn = connect()
         cursor = conn.cursor()
