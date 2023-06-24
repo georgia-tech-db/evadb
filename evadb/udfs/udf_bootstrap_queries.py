@@ -212,6 +212,16 @@ def init_builtin_udfs(db: EvaDBDatabase, mode: str = "debug") -> None:
         Defaults to 'debug'.
 
     """
+
+    # Attempting to import torch module
+    # It is necessary to import torch before to avoid encountering a
+    # "RuntimeError: random_device could not be read"
+    # The suspicion is that importing torch prior to decord resolves this issue
+    try:
+        import torch  # noqa
+    except ImportError:
+        pass
+
     # list of UDF queries to load
     queries = [
         mnistcnn_udf_query,
