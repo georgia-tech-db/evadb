@@ -176,7 +176,7 @@ class EmotionDetector(PytorchAbstractClassifierUDF):
 
         import torch
         import torch.nn.functional as F
-        import transforms
+        from torchvision import transforms
 
         # convert to 3 channels, ten crop and stack
         frames = frames.repeat(3, 1, 1)
