@@ -56,6 +56,7 @@ class UdfCostCatalogService(BaseService):
             udf_obj = self.session.execute(
                 select(self.model).filter(self.model._udf_id == udf_id)
             ).scalar_one_or_none()
+            print(udf_obj)
             if udf_obj:
                 udf_obj.update(self.session, cost=new_cost)
             else:
