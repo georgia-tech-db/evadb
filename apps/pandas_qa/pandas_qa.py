@@ -74,18 +74,18 @@ def generate_script(cursor: evadb.EvaDBCursor, df: pd.DataFrame, question: str) 
 
     prompt = f"""There is a dataframe in pandas (python). The name of the
             dataframe is df. This is the result of print(df.head()):
-            {str(df.head())}. Return a python script with comments to get the answer to the following question:"""
+            {str(df.head())}. Return a python script with comments to get the answer to the following question: {question}"""
 
-    question_df = pd.DataFrame([{"question": question}])
+    question_df = pd.DataFrame([{"prompt": prompt}])
     question_df.to_csv(QUESTION_PATH)
 
     cursor.drop_table("Question", if_exists=True).execute()
     cursor.query(
-        """CREATE TABLE IF NOT EXISTS Question (question TEXT(50));"""
+       """CREATE TABLE IF NOT EXISTS Question (prompt TEXT(50));"""
     ).execute()
     cursor.load(QUESTION_PATH, "Question", "csv").execute()
 
-    query = cursor.table("Question").select(f"ChatGPT('{prompt}', question)")
+    query = cursor.table("Question").select(f"ChatGPT(prompt)")
     script_body = query.df()["chatgpt.response"][0]
 
     return script_body
@@ -121,12 +121,14 @@ if __name__ == "__main__":
         user_input = receive_user_input()
 
         # establish evadb api cursor
+        print("⏳ Establishing evadb connection...")
         cursor = evadb.connect().cursor()
+        print("✅ evadb connection setup complete!")
 
         # Retrieve Dataframe
         df = pd.read_csv(user_input["csv_path"])
 
-        print("===========================================")
+        print("\n===========================================")
         print("🪄 Run anything on the csv table like a conversation!")
 
         question = str(
