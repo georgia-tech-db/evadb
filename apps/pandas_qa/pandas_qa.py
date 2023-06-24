@@ -85,7 +85,7 @@ def generate_script(cursor: evadb.EvaDBCursor, df: pd.DataFrame, question: str) 
     ).execute()
     cursor.load(QUESTION_PATH, "Question", "csv").execute()
 
-    query = cursor.table("Question").select(f"ChatGPT(prompt)")
+    query = cursor.table("Question").select("ChatGPT(prompt)")
     script_body = query.df()["chatgpt.response"][0]
 
     return script_body
