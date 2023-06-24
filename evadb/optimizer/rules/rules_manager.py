@@ -62,7 +62,7 @@ from evadb.optimizer.rules.rules import (
     XformLateralJoinToLinearFlow,
 )
 from evadb.optimizer.rules.rules_base import Rule
-from evadb.utils.generic_utils import is_ray_available
+from evadb.utils.generic_utils import is_ray_enabled_and_installed
 
 
 class RulesManager:
@@ -116,8 +116,13 @@ class RulesManager:
             LogicalVectorIndexScanToPhysical(),
         ]
 
+        # These rules are enabled only if
+        # (1) ray is installed and (2) ray is enabled
+        # Ray must be installed using pip
+        # It must also be enabled in "evadb.yml"
+        # NOTE: By default, it is not enabled
         ray_enabled = config.get_value("experimental", "ray")
-        if ray_enabled and is_ray_available():
+        if is_ray_enabled_and_installed(ray_enabled):
             self._implementation_rules.extend(
                 [
                     LogicalExchangeToPhysical(),

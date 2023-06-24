@@ -41,6 +41,7 @@ from evadb.parser.utils import (
     parse_table_clause,
 )
 from evadb.udfs.udf_bootstrap_queries import init_builtin_udfs
+from evadb.utils.generic_utils import is_ray_enabled_and_installed
 from evadb.utils.logging_manager import logger
 
 
@@ -521,7 +522,11 @@ class EvaDBCursor(object):
         """
         self._evadb.catalog().close()
 
-        # TODO: Close ray
+        ray_enabled = self._evadb.config.get_value("experimental", "ray")
+        if is_ray_enabled_and_installed(ray_enabled):
+            import ray
+
+            ray.shutdown()
 
 
 def connect(

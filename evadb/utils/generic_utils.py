@@ -244,6 +244,11 @@ def is_ray_available() -> bool:
         return False
 
 
+def is_ray_enabled_and_installed(ray_enabled: bool) -> bool:
+    ray_installed = is_ray_available()
+    return ray_enabled and ray_installed
+
+
 ##############################
 ## VISION
 ##############################
