@@ -37,7 +37,6 @@ from evadb.optimizer.rules.rules import (
     LogicalApplyAndMergeToRayPhysical,
     LogicalCreateFromSelectToPhysical,
     LogicalCreateIndexToVectorIndex,
-    LogicalCreateMaterializedViewToPhysical,
     LogicalCreateToPhysical,
     LogicalCreateUDFToPhysical,
     LogicalDeleteToPhysical,
@@ -114,7 +113,6 @@ class RulesTest(unittest.TestCase):
         implementation_promises = [
             Promise.LOGICAL_EXCHANGE_TO_PHYSICAL,
             Promise.LOGICAL_UNION_TO_PHYSICAL,
-            Promise.LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL,
             Promise.LOGICAL_GROUPBY_TO_PHYSICAL,
             Promise.LOGICAL_ORDERBY_TO_PHYSICAL,
             Promise.LOGICAL_LIMIT_TO_PHYSICAL,
@@ -226,7 +224,6 @@ class RulesTest(unittest.TestCase):
             LogicalLateralJoinToPhysical(),
             LogicalFunctionScanToPhysical(),
             LogicalJoinToPhysicalHashJoin(),
-            LogicalCreateMaterializedViewToPhysical(),
             LogicalFilterToPhysical(),
             LogicalApplyAndMergeToRayPhysical()
             if ray_enabled

@@ -39,7 +39,7 @@ class CreateExecutor(AbstractExecutor):
             if self.children != []:
                 assert (
                     len(self.children) == 1
-                ), "Create materialized view expects 1 child, finds {}".format(
+                ), "Create table from query expects 1 child, finds {}".format(
                     len(self.children)
                 )
                 child = self.children[0]
