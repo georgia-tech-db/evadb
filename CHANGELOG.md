@@ -10,6 +10,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### [Deprecated]
 ### [Removed]
 
+##  [0.2.14] - 2023-06-24
+
+* PR #887: fix: Notebooks fix 
+* PR #889: fix: ocr donut model  
+* PR #886: doc: improve youtube qa app doc 
+* PR #878: feat: make ray optional 
+* PR #884: test: disable reuse tests 
+* PR #883: test: update tests 
+* PR #880: feat: pandas qa 
+* PR #882: feat: adding more functions to Python API 
+* PR #881: docs: minor updates 
+* PR #863: feat: youtube qa app support analyzing a local video 
+* PR #877: notebooks: updates 
+* PR #875: Bump v0.2.14+dev 
+* PR #873: notebooks: update notebooks 
+
 ##  [0.2.13] - 2023-06-17
 
 * PR #873: notebooks: update notebooks 
