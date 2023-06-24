@@ -20,6 +20,7 @@ import pandas as pd
 
 from pytube import YouTube, extract
 from youtube_transcript_api import YouTubeTranscriptApi
+import scrapetube
 
 import evadb
 
@@ -28,6 +29,9 @@ CHATGPT_UDF_PATH = "../../evadb/udfs/chatgpt.py"
 SENTENCE_FEATURE_EXTRACTOR_UDF_PATH = "../../evadb/udfs/sentence_feature_extractor.py"
 QUESTIONS_PATH = "./questions"
 YT_VIDEO_IDS_PATH = "./yt_video_ids"
+
+DEFAULT_CHANNEL_NAME = "LinusTechTips"
+DEFAULT_SORTING_ORDER = "popular"
 
 total_transcription_time = 0
 
@@ -159,6 +163,35 @@ def generate_online_video_transcript(cursor) -> str:
     )
     return raw_transcript_string
 
+def generate_response(cursor: evadb.EvaDBCursor, question: str) -> str:
+    """Generates question response with llm.
+
+    Args:
+        cursor (EVADBCursor): evadb api cursor.
+        question (str): question to ask to llm.
+
+    Returns
+        str: response from llm.
+    """
+
+    # instead of passing all the documents to the LLM, we first do a
+    # semantic search over the embeddings and get the most relevant rows.
+    cursor.drop_table("EMBED_TEXT", if_exists = True).execute()
+    text_summarization_query = f"""
+        CREATE TABLE EMBED_TEXT AS 
+        SELECT text FROM embedding_table
+        ORDER BY Similarity(embedding('{question}'), features) DESC
+        LIMIT 3; 
+        """
+    cursor.query(text_summarization_query).execute()
+
+    start = time.time()
+    generate_chatgpt_response_rel = cursor.table("EMBED_TEXT").select(
+        f"ChatGPT('{question}', text)"
+    )
+    responses = generate_chatgpt_response_rel.df()["chatgpt.response"]
+    print(f"Answer (generated in {time.time() - start} seconds):")
+    print(responses[0], "\n")
 
 def cleanup():
     """Removes any temporary file / directory created by EvaDB."""
@@ -173,8 +206,51 @@ def cleanup():
 
 if __name__ == "__main__":
     print(
-        "🔮 Welcome to EvaDB! This app lets you ask questions across any number of YouTube videos.\nYou will only need to supply the video URLs and an OpenAI API key.\n\n"
+        "🔮 Welcome to EvaDB! This app lets you ask questions across any number of YouTube videos.\nYou can either specify the YouTube channel name or list the Video IDs manually.\n\n"
     )
+
+    from_youtube = str(
+        input(
+            "📹 Are you downloading from an online Youtube Channel or the Local File? ('yes' for online/ 'no' for local) : "
+        )
+    ).lower() in ["y", "yes"]
+
+    yt_video_ids = []
+    if from_youtube:
+        # get Youtube video url
+        channel_name = str(
+            input(
+                "📺 Enter the Channel Name (press Enter to use our default Youtube Channel) : "
+            )
+        )
+
+        if channel_name == "":
+            channel_name = DEFAULT_CHANNEL_NAME
+
+        limit = input("Enter the number of videos to Download (press Enter to download all Channel Videos) : ")
+
+        if limit == "":
+            limit = None
+        else:
+            limit = int(limit)
+
+        sort_by = str(
+            input(
+                "Enter the order in which to retrieve the vidoes (Either 'newest' / 'oldest' / 'popular') : "
+            )
+        ).lower()
+
+        if sort_by not in ["newest", "oldest", "popular"]:
+            sort_by = DEFAULT_SORTING_ORDER
+
+        print("\nWill download", limit if limit else "all", f"videos from {channel_name} in {sort_by} order\n")
+
+        video_ids = scrapetube.get_channel(channel_username = channel_name, limit = limit, sort_by = sort_by)
+
+        for video in video_ids:
+            yt_video_ids.append(video['videoId'])
+    else:
+        yt_video_ids = open(YT_VIDEO_IDS_PATH, 'r')
 
     # Get OpenAI key if needed
     try:
@@ -185,9 +261,9 @@ if __name__ == "__main__":
 
     transcripts = []
     failed_download_links = []
-    print("Downloading YT videos")
-    link=open(YT_VIDEO_IDS_PATH, 'r')
-    for id in link:
+    print("\nDownloading YT videos\n")
+    
+    for id in yt_video_ids:
         yt_url = "https://www.youtube.com/watch?v=" + id;
         print("⏳ Downloading : ", yt_url)
         try:
@@ -195,7 +271,7 @@ if __name__ == "__main__":
         except Exception as e:
             print(e)
             print(
-                "Failed to download video transcript. Will try downloading video and generating transcript later... \n\n"
+                "❗️ Failed to download video transcript. Will try downloading video and generating transcript later... \n\n"
             )
             failed_download_links.append(yt_url)
             continue 
@@ -281,36 +357,29 @@ if __name__ == "__main__":
         vet = time.time()
         print(f"Creating index took {vet - eft} seconds")
 
-        questions = open(QUESTIONS_PATH, 'r')
-        st = time.time()
-        for question in questions:
-            print(question)
-            
-            # instead of passing all the documents to the LLM, we first do a
-            # semantic search over the embeddings and get the most relevant rows.
-            cursor.drop_table("EMBED_TEXT", if_exists = True).execute()
-            text_summarization_query = f"""
-                CREATE TABLE EMBED_TEXT AS 
-                SELECT text FROM embedding_table
-                ORDER BY Similarity(embedding('{question}'), features) DESC
-                LIMIT 3; 
-                """
-            cursor.query(text_summarization_query).execute()
-
-            start = time.time()
-            generate_chatgpt_response_rel = cursor.table("EMBED_TEXT").select(
-                f"ChatGPT('{question}', text)"
-            )
-            responses = generate_chatgpt_response_rel.df()["chatgpt.response"]
-            print(f"Answer (generated in {time.time() - start} seconds):")
-            print(responses[0], "\n")
-
-        print("Total time taken in answering all questions = ", str(time.time() - st))
+        questions = []
+        if os.path.isfile(QUESTIONS_PATH) and os.path.getsize(QUESTIONS_PATH) > 0:
+            questions = open(QUESTIONS_PATH, 'r')
+            st = time.time()
+            for question in questions:
+                print(question)
+                generate_response(cursor, question)         
+            print("Total time taken in answering all questions = ", str(time.time() - st))
+        else: # Enter a QA Loop.
+            ready = True
+            while ready:
+                question = str(input("Question (enter 'exit' to exit): "))
+                if question.lower() == "exit":
+                    ready = False
+                else:
+                    # Generate response with chatgpt udf
+                    print("⏳ Generating response (may take a while)...")
+                    generate_response(cursor, question)
         cleanup()
-        print("Session ended.")
+        print("✅ Session ended.")
         print("===========================================")
     except Exception as e:
         cleanup()
-        print("Session ended with an error.")
+        print("❗️ Session ended with an error.")
         print(e)
         print("===========================================")

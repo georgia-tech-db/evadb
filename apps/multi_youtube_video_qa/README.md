@@ -1,11 +1,20 @@
-# YouTube Question Answering
+# YouTube Channel Question Answering
 
 ## Overview
-This app lets you ask questions across any number of YouTube videos. You will only need to supply the YouTube Video IDs (in 'yt_video_ids' file) and an OpenAI API key.
+This app enables you to ask questions about any number of YouTube videos effortlessly. Whether you want to inquire about a specific YouTube channel or manually select video IDs, this app has got you covered. It utilizes the power of OpenAI's Language Model to provide insightful responses.
 
-The questions to ask can be specified in the 'questions' file.
-The default video ids correspond to a random selection of videos from he HowTo100M dataset which contains instructional videos spanning a wide range of categories including motorcycles, fashion, gardening, cooking, arts, fitness, etc. The questions specified in the file pertain to these videos.
+## Setting up the necessary files
 
+yt_video_ids: In case you dont want to ask questions on a particular YouTube Channel, manually list the Video IDs of the YouTube videos you want to ask questions about in this file.
+
+questions: Specify the questions you want to ask. If this file is empty or doesn't exist, the app enters a Question-Answer (QA) loop where you can manually input your questions.
+
+The default video ids correspond to a random selection of videos from the HowTo100M dataset which contains instructional videos spanning a wide range of categories including motorcycles, fashion, gardening, cooking, arts, fitness, etc. The questions specified in the file pertain to these videos.
+
+The default YouTube Channel that the app downloads from is LinusTechTips. This can be altered by changing the
+'DEFAULT_CHANNEL_NAME' variable.
+
+## Dependencies
 
 This app is powered by EvaDB's Python API and ChatGPT UDF.
 
