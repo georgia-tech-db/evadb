@@ -71,6 +71,8 @@ document_libs = [
     "pymupdf",
     "pdfminer.six",
     "sentence-transformers",
+    "protobuf<=3.20.1",
+    "bs4",
     "openai>=0.27.4",  # CHATGPT
     "gpt4all",  # PRIVATE GPT
     "sentencepiece",  # TRANSFORMERS
