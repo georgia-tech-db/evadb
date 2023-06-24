@@ -21,7 +21,6 @@ from evadb.binder.statement_binder_context import StatementBinderContext
 from evadb.catalog.catalog_type import ColumnType, NdArrayType
 from evadb.expression.tuple_value_expression import TupleValueExpression
 from evadb.parser.alias import Alias
-from evadb.parser.create_statement import ColumnDefinition
 
 
 class StatementBinderTests(unittest.TestCase):
