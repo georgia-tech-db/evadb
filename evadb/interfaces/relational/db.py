@@ -507,7 +507,7 @@ class EvaDBCursor(object):
         """
         stmt = parse_rename(table_name, new_table_name, **kwargs)
         return EvaDBQuery(self._evadb, stmt)
-    
+
     def close(self):
         """
         Closes the connection.
@@ -549,6 +549,7 @@ def connect(
     evadb = init_evadb_instance(evadb_dir, custom_db_uri=sql_backend)
     init_builtin_udfs(evadb, mode="release")
     return EvaDBConnection(evadb, None, None)
+
 
 # WIP
 # support remote connections from pythonic APIs

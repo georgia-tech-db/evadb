@@ -61,7 +61,7 @@ class SQLConfig(metaclass=SingletonMeta):
 
         self.worker_uri = str(uri)
         # set echo=True to log SQL
-        self.engine = create_engine(self.worker_uri, connect_args={'timeout': 1000})
+        self.engine = create_engine(self.worker_uri, connect_args={"timeout": 1000})
 
         if self.engine.url.get_backend_name() == "sqlite":
             # enforce foreign key constraint and wal logging for sqlite

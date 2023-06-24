@@ -219,7 +219,7 @@ def init_builtin_udfs(db: EvaDBDatabase, mode: str = "debug") -> None:
     # "RuntimeError: random_device could not be read"
     # The suspicion is that importing torch prior to decord resolves this issue
     try:
-        import torch  # noqa
+        try_to_import_torch()
     except ImportError:
         pass
 
