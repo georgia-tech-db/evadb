@@ -9,21 +9,21 @@ workflows:
     jobs:
         - Pip-PyPI
         - Pip-Local
-        # - Docker-Local
-        # - AWS
-        # #### UNIT TESTS
-        # - Linux:
-        #     name: "Test | v3.8 | Linux"
-        #     v: "3.8"
-        #     mode: "COV"
-        # - Linux:
-        #     name: "Test | v3.9 | Linux"
-        #     v: "3.9"
-        #     mode: "COV"
-        # - Linux:
-        #     name: "Test | v3.10 | Linux"
-        #     v: "3.10"
-        #     mode: "COV"
+        - Docker-Local
+        - AWS
+        #### UNIT TESTS
+        - Linux:
+            name: "Test | v3.8 | Linux"
+            v: "3.8"
+            mode: "COV"
+        - Linux:
+            name: "Test | v3.9 | Linux"
+            v: "3.9"
+            mode: "COV"
+        - Linux:
+            name: "Test | v3.10 | Linux"
+            v: "3.10"
+            mode: "COV"
         # Ray does not work on 3.11
         # https://github.com/ray-project/ray/issues/33232
         # - Linux:
@@ -31,14 +31,14 @@ workflows:
         #     v: "3.11"
         #     mode: "TEST"
         ### NOTEBOOKS
-        # - Linux:
-        #     name: "Notebook | v3.8 | Linux"
-        #     v: "3.8"
-        #     mode: "NOTEBOOK"
-        # - Linux:
-        #     name: "Notebook | v3.9 | Linux"
-        #     v: "3.9"
-        #     mode: "NOTEBOOK"
+        - Linux:
+            name: "Notebook | v3.8 | Linux"
+            v: "3.8"
+            mode: "NOTEBOOK"
+        - Linux:
+            name: "Notebook | v3.9 | Linux"
+            v: "3.9"
+            mode: "NOTEBOOK"
         - Linux:
             name: "Notebook | v3.10 | Linux"
             v: "3.10"
@@ -47,20 +47,20 @@ workflows:
         #     name: "Notebook | v3.11 | Linux"
         #     v: "3.11"
         #     mode: "NOTEBOOK"
-        ### LINTER
-        # - Linux:
-        #     name: "Linter | Linux"
-        #     v: "3.10"
-        #     mode: "LINTER"
-        # ### RAY
-        # - Linux:
-        #     name: "Test | Ray | v3.10 | Linux"
-        #     v: "3.10"
-        #     mode: "RAY"
-        # - Windows:
-        #     name: "Windows | v3.10"
-        # - MacOS:
-        #    name: "MacOS | v3.10"
+        ## LINTER
+        - Linux:
+            name: "Linter | Linux"
+            v: "3.10"
+            mode: "LINTER"
+        ### RAY
+        - Linux:
+            name: "Test | Ray | v3.10 | Linux"
+            v: "3.10"
+            mode: "RAY"
+        - Windows:
+            name: "Windows | v3.10"
+        - MacOS:
+           name: "MacOS | v3.10"
         # missing Torchvision
         #- Linux:
         #    name: "Linux -  v3.11"  
