@@ -111,8 +111,7 @@ fi
 
 if [[ ( "$OSTYPE" != "msys" ) && ( "$MODE" = "NOTEBOOK" || "$MODE" = "ALL" ) ]];
 then 
-    PYTHONPATH=./ python -m pytest --durations=5 --nbmake --overwrite "./tutorials" --capture=sys --tb=short -v --log-level=WARNING --nbmake-timeout=3000 --ignore="tutorials/09-license-plate-fuzzy-join.ipynb" --ignore="tutorials/10-toxicity-classifier-huggingface.ipynb" 
-    notebook_test_code=$?
+    PYTHONPATH=./ python -m pytest --durations=5 --nbmake --overwrite "./tutorials" --capture=sys --tb=short -v --log-level=WARNING --nbmake-timeout=3000 "tutorials/15-asl-action-recognition.ipynb" notebook_test_code=$?
     if [ "$notebook_test_code" != "0" ];
     then
         cat tutorials/evadb.log
