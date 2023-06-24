@@ -239,7 +239,7 @@ def try_to_import_ray():
 def is_ray_available() -> bool:
     try:
         try_to_import_ray()
-        return False
+        return True
     except ValueError:  # noqa: E722
         return False
 

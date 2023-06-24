@@ -237,10 +237,10 @@ def init_builtin_udfs(db: EvaDBDatabase, mode: str = "debug") -> None:
         # ocr_udf_query,
         # Mvit_udf_query,
         Sift_udf_query,
-        Yolo_udf_query,
+        yolo8n_query,
     ]
 
-    # if mode is 'debug', add debug UDFs and a smaller Yolo model
+    # if mode is 'debug', add debug UDFs
     if mode == "debug":
         queries.extend(
             [
@@ -249,8 +249,6 @@ def init_builtin_udfs(db: EvaDBDatabase, mode: str = "debug") -> None:
                 DummyFeatureExtractor_udf_query,
             ]
         )
-        queries.remove(Yolo_udf_query)
-        queries.append(yolo8n_query)
 
     # execute each query in the list of UDF queries
     # ignore exceptions during the bootstrapping phase due to missing packages
