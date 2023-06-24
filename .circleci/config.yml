@@ -47,7 +47,7 @@ workflows:
         #     name: "Notebook | v3.11 | Linux"
         #     v: "3.11"
         #     mode: "NOTEBOOK"
-        ### LINTER
+        ## LINTER
         - Linux:
             name: "Linter | Linux"
             v: "3.10"
