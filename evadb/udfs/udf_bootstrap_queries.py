@@ -16,6 +16,7 @@
 from evadb.configuration.constants import EvaDB_INSTALLATION_DIR
 from evadb.database import EvaDBDatabase
 from evadb.server.command_handler import execute_query_fetch_all
+from evadb.utils.generic_utils import try_to_import_torch
 
 NDARRAY_DIR = "ndarray"
 TUTORIALS_DIR = "tutorials"
@@ -212,6 +213,13 @@ def init_builtin_udfs(db: EvaDBDatabase, mode: str = "debug") -> None:
         Defaults to 'debug'.
 
     """
+
+    # Try to import torch first
+    try:
+        try_to_import_torch()
+    except:
+        pass
+
     # list of UDF queries to load
     queries = [
         mnistcnn_udf_query,
