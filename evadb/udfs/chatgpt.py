@@ -97,9 +97,6 @@ class ChatGPT(AbstractUDF):
         results = []
 
         for prompt, query in zip(prompts, queries):
-            # if prompt != "None":
-            #     query = prompt + ": " + query
-
             params = {
                 "model": self.model,
                 "temperature": self.temperature,
@@ -110,13 +107,12 @@ class ChatGPT(AbstractUDF):
                     },
                     {
                         "role": "user",
-                        "content": f"Answer the question based on context : {prompt} Answer only from the context, don't generate responses on your own",
+                        "content": f"Answer the question based on context : {prompt}",
                     }
                 ],
             }
 
             response = completion_with_backoff(**params)
-            print("Response : ", response.choices[0].message.content)
             results.append(response.choices[0].message.content)
 
         df = pd.DataFrame({"response": results})

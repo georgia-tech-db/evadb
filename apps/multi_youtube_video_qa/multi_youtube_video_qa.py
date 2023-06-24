@@ -17,12 +17,18 @@ import shutil
 import time
 
 import pandas as pd
+
 from pytube import YouTube, extract
 from youtube_transcript_api import YouTubeTranscriptApi
 
 import evadb
 
-MAX_CHUNK_SIZE = 5000
+MAX_CHUNK_SIZE = 10000
+CHATGPT_UDF_PATH = "../../evadb/udfs/chatgpt.py"
+SENTENCE_FEATURE_EXTRACTOR_UDF_PATH = "../../evadb/udfs/sentence_feature_extractor.py"
+QUESTIONS_PATH = "./questions"
+YT_VIDEO_IDS_PATH = "./yt_video_ids"
+
 total_transcription_time = 0
 
 def partition_transcript(raw_transcript: str):
@@ -86,7 +92,7 @@ def download_youtube_video_transcript(video_link: str):
     global total_transcription_time
     start = time.time()
     title = YouTube(video_link).streams[0].title
-    print(title)
+    print(f"Video Title : {title}")
     video_id = extract.video_id(video_link)
     transcript = [{}]
     transcript = YouTubeTranscriptApi.get_transcript(video_id)
@@ -94,7 +100,7 @@ def download_youtube_video_transcript(video_link: str):
 
     time_taken = time.time() - start
     total_transcription_time += time_taken
-    print(f"Video transcript downloaded successfully in {time_taken} seconds \n")
+    print(f"✅ Video transcript downloaded successfully in {time_taken} seconds \n")
     return transcript
 
 
@@ -136,7 +142,7 @@ def generate_online_video_transcript(cursor) -> str:
     speech_analyzer_udf_rel.execute()
 
     # load youtube video into an evadb table
-    cursor.query("""DROP TABLE IF EXISTS youtube_video;""").execute()
+    cursor.drop_table("youtube_video", if_exists=True).execute()
     cursor.load("*.mp4", "youtube_video", "video").execute()
 
     # extract speech texts from videos
@@ -174,63 +180,58 @@ if __name__ == "__main__":
     try:
         api_key = os.environ["OPENAI_KEY"]
     except KeyError:
-        api_key = str(input("🔥 Enter your OpenAI API key: "))
+        api_key = str(input("🔑 Enter your OpenAI API key: "))
         os.environ["OPENAI_KEY"] = api_key
 
     transcripts = []
     failed_download_links = []
     print("Downloading YT videos")
-    link=open('yt_video_ids', 'r')
+    link=open(YT_VIDEO_IDS_PATH, 'r')
     for id in link:
         yt_url = "https://www.youtube.com/watch?v=" + id;
-        print("Downloading : ", yt_url)
+        print("⏳ Downloading : ", yt_url)
         try:
             transcripts.append(download_youtube_video_transcript(yt_url))
         except Exception as e:
             print(e)
             print(
-                "Failed to download video transcript. Will try downloading video and generating transcript later..."
+                "Failed to download video transcript. Will try downloading video and generating transcript later... \n\n"
             )
             failed_download_links.append(yt_url)
-            continue
-    
+            continue 
 
     try:
-        print("establish evadb api cursor")
-        cursor = evadb.connect().cursor()
-
         grouped_transcript = []
-        print("Create transcript csv")
         if len(transcripts) > 0:
             for transcript in transcripts:
                 group_transcript(transcript, grouped_transcript)
 
-            # print(grouped_transcript)
             df = pd.DataFrame(grouped_transcript)
-            # df = pd.DataFrame(transcripts) 
-            # print(df)
             if os.path.exists("transcript.csv"):
                 df.to_csv("transcript.csv", mode='a')
             else:
                 df.to_csv("transcript.csv")
 
-        print("Failed downloads : ", failed_download_links)
+        print(f"Failed downloads : {failed_download_links}\n")
 
         # download youtube video online if the video disabled transcript
         for yt_url in failed_download_links:
-            print("Downloading : ", yt_url)
+            print(f"Downloading : {yt_url}")
             try:
                 download_youtube_video_from_link(yt_url)
             except Exception as e:
-                print(f"Downloading {yt_url} failed with ", e)
+                print(f"Downloading {yt_url} failed with {e} \n")
                 continue
         
+        print("⏳ Establishing evadb api cursor connection.")
+        cursor = evadb.connect().cursor()
+
         # generate video transcript for the downloaded videos
         current_directory = os.getcwd()
         files = os.listdir(current_directory)
         mp4_files = [file for file in files if file.endswith(".mp4")]
         if not mp4_files:
-            print("No mp4 files found in current directory. Not generating video transcripts .....")
+            print("No mp4 files found in current directory. Not generating video transcripts ...")
         else:
             raw_transcript_string = generate_online_video_transcript(cursor)           
             partitioned_transcript = partition_transcript(raw_transcript_string)
@@ -245,7 +246,7 @@ if __name__ == "__main__":
 
         load_start_time = time.time()
         # load chunked transcript into table
-        cursor.query("""DROP TABLE IF EXISTS Transcript;""").execute()
+        cursor.drop_table("Transcript", if_exists = True).execute()
         cursor.query(
             """CREATE TABLE IF NOT EXISTS Transcript (text TEXT(100));"""
         ).execute()
@@ -254,17 +255,13 @@ if __name__ == "__main__":
         
         print("Creating embeddings and Vector Index")
         
-        udf_query = """CREATE UDF IF NOT EXISTS embedding
-            IMPL  '../../../evadb/udfs/sentence_feature_extractor.py';
-            """
-        cursor.query("DROP UDF IF EXISTS embedding;").execute()
-        cursor.query(udf_query).execute()
+        cursor.drop_udf("embedding", if_exists = True).execute()
+        cursor.create_udf("embedding", if_not_exists = True,
+            impl_path = SENTENCE_FEATURE_EXTRACTOR_UDF_PATH).execute()
+        cursor.create_udf("ChatGPT", if_not_exists = True,
+            impl_path = CHATGPT_UDF_PATH).execute()
 
-        cursor.query("DROP UDF IF EXISTS ChatGPT;").execute()
-        cursor.query(""" CREATE UDF IF NOT EXISTS ChatGPT
-          IMPL '../../../evadb/udfs/chatgpt.py';""").execute()
-
-        cursor.drop_table("embedding_table").execute()
+        cursor.drop_table("embedding_table", if_exists = True).execute()
         est = time.time()
         cursor.query(
             f"""CREATE TABLE embedding_table AS
@@ -274,38 +271,33 @@ if __name__ == "__main__":
         print(f"Creating embeddings took {eft - est} seconds")
 
         # Create search index on extracted features.
-        cursor.query(
-            f"CREATE INDEX faiss_index ON embedding_table (features) USING FAISS;"
-        ).execute()
+        cursor.create_vector_index(
+            index_name="faiss_index",
+            table_name="embedding_table",
+            expr="features",
+            using="FAISS",
+        ).df()
 
         vet = time.time()
         print(f"Creating index took {vet - eft} seconds")
 
-        questions = open('questions', 'r')
+        questions = open(QUESTIONS_PATH, 'r')
         st = time.time()
         for question in questions:
             print(question)
-            question_start = time.time()
             
             # instead of passing all the documents to the LLM, we first do a
             # semantic search over the embeddings and get the most relevant rows.
-            cursor.query("DROP TABLE IF EXISTS EMBED_TEXT;").execute()
+            cursor.drop_table("EMBED_TEXT", if_exists = True).execute()
             text_summarization_query = f"""
-                CREATE MATERIALIZED VIEW 
-                EMBED_TEXT(text) AS 
+                CREATE TABLE EMBED_TEXT AS 
                 SELECT text FROM embedding_table
                 ORDER BY Similarity(embedding('{question}'), features) DESC
                 LIMIT 3; 
                 """
             cursor.query(text_summarization_query).execute()
-            print(cursor.table('EMBED_TEXT').select("*").execute())
 
-            chatgpt_udf = """
-                SELECT ChatGPT(f"{question}", text) 
-                FROM EMBED_TEXT;
-            """
             start = time.time()
-            print(f"Time taken to create materialized view {start - question_start}")
             generate_chatgpt_response_rel = cursor.table("EMBED_TEXT").select(
                 f"ChatGPT('{question}', text)"
             )
