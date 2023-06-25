@@ -55,7 +55,7 @@ class TestOCR(unittest.TestCase):
 
         udf_check = cursor.query("DROP UDF IF  EXISTS OCRExtractor")
         udf_check.execute()
-        udf = cursor.create_udf(
+        udf = cursor.create_function(
             "OCRExtractor",
             True,
             f"{EvaDB_ROOT_DIR}/evadb/udfs/ocr_extractor.py",

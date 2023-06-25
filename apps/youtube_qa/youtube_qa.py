@@ -397,7 +397,7 @@ if __name__ == "__main__":
                 "task": "automatic-speech-recognition",
                 "model": "openai/whisper-base",
             }
-            speech_analyzer_udf_rel = cursor.create_udf(
+            speech_analyzer_udf_rel = cursor.create_function(
                 "SpeechRecognizer", type="HuggingFace", **args
             )
             speech_analyzer_udf_rel.execute()
