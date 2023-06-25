@@ -23,7 +23,6 @@ from evadb.optimizer.operators import (
     LogicalApplyAndMerge,
     LogicalCreate,
     LogicalCreateIndex,
-    LogicalCreateMaterializedView,
     LogicalCreateUDF,
     LogicalDelete,
     LogicalDropObject,
@@ -251,9 +250,6 @@ statement_to_opr_converter.metadata_definition_to_udf_metadata"
         create_index_plan = LogicalCreateIndex(
             MagicMock(), MagicMock(), MagicMock(), MagicMock(), MagicMock()
         )
-        create_materialized_view_plan = LogicalCreateMaterializedView(
-            MagicMock(), MagicMock(), MagicMock(), MagicMock()
-        )
         delete_plan = LogicalDelete(MagicMock())
         insert_plan = LogicalInsert(
             MagicMock(), MagicMock(), [MagicMock()], [MagicMock()]
@@ -289,7 +285,6 @@ statement_to_opr_converter.metadata_definition_to_udf_metadata"
         plans.append(create_plan)
         plans.append(create_udf_plan)
         plans.append(create_index_plan)
-        plans.append(create_materialized_view_plan)
         plans.append(delete_plan)
         plans.append(insert_plan)
         plans.append(query_derived_plan)

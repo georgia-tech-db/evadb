@@ -23,7 +23,6 @@ from evadb.catalog.models.column_catalog import ColumnCatalogEntry
 from evadb.parser.table_ref import TableInfo, TableRef
 from evadb.parser.types import FileFormatType, ObjectType
 from evadb.plan_nodes.abstract_plan import AbstractPlan
-from evadb.plan_nodes.create_mat_view_plan import CreateMaterializedViewPlan
 from evadb.plan_nodes.create_plan import CreatePlan
 from evadb.plan_nodes.create_udf_plan import CreateUDFPlan
 from evadb.plan_nodes.drop_object_plan import DropObjectPlan
@@ -125,14 +124,6 @@ class PlanNodeTests(unittest.TestCase):
         plan = UnionPlan(all)
         self.assertEqual(plan.opr_type, PlanOprType.UNION)
         self.assertEqual(plan.all, all)
-
-    def test_create_materialized_view_plan(self):
-        dummy_view = TableRef(TableInfo("dummy"))
-        columns = ["id", "id2"]
-        plan = CreateMaterializedViewPlan(dummy_view, columns)
-        self.assertEqual(plan.opr_type, PlanOprType.CREATE_MATERIALIZED_VIEW)
-        self.assertEqual(plan.view, dummy_view)
-        self.assertEqual(plan.columns, columns)
 
     def test_abstract_plan_str(self):
         derived_plan_classes = list(get_all_subclasses(AbstractPlan))

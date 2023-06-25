@@ -23,7 +23,6 @@ from evadb.expression.function_expression import FunctionExpression
 from evadb.expression.tuple_value_expression import TupleValueExpression
 from evadb.parser.alias import Alias
 from evadb.parser.create_index_statement import CreateIndexStatement
-from evadb.parser.create_mat_view_statement import CreateMaterializedViewStatement
 from evadb.parser.create_statement import (
     ColConstraintInfo,
     ColumnDefinition,
@@ -134,7 +133,7 @@ class ParserTests(unittest.TestCase):
 
         select_query = """SELECT id, Yolo(frame).labels FROM MyVideo
                         WHERE id<5; """
-        explain_query = "EXPLAIN CREATE MATERIALIZED VIEW uadtrac_fastRCNN (id, labels) AS {}".format(
+        explain_query = "EXPLAIN CREATE TABLE uadtrac_fastRCNN AS {}".format(
             select_query
         )
 
@@ -147,11 +146,11 @@ class ParserTests(unittest.TestCase):
 
         # check inner stmt
         inner_stmt = evadb_statement_list[0].explainable_stmt
-        self.assertEqual(inner_stmt.stmt_type, StatementType.CREATE_MATERIALIZED_VIEW)
+        self.assertEqual(inner_stmt.stmt_type, StatementType.CREATE)
 
         # check inner stmt from
         self.assertIsNotNone(
-            inner_stmt.view_info, TableRef(TableInfo("uadetrac_fastRCNN"))
+            inner_stmt.table_info, TableRef(TableInfo("uadetrac_fastRCNN"))
         )
 
     def test_create_table_statement(self):
@@ -737,22 +736,17 @@ class ParserTests(unittest.TestCase):
         self.assertNotEqual(create_udf, insert_stmt)
         self.assertNotEqual(select_stmt, create_udf)
 
-    def test_materialized_view(self):
+    def test_create_table_from_select(self):
         select_query = """SELECT id, Yolo(frame).labels FROM MyVideo
                         WHERE id<5; """
-        query = "CREATE MATERIALIZED VIEW uadtrac_fastRCNN (id, labels) AS {}".format(
-            select_query
-        )
+        query = "CREATE TABLE uadtrac_fastRCNN AS {}".format(select_query)
         parser = Parser()
         mat_view_stmt = parser.parse(query)
         select_stmt = parser.parse(select_query)
-        expected_stmt = CreateMaterializedViewStatement(
+        expected_stmt = CreateTableStatement(
             TableInfo("uadtrac_fastRCNN"),
-            [
-                ColumnDefinition("id", None, None, None),
-                ColumnDefinition("labels", None, None, None),
-            ],
             False,
+            [],
             select_stmt[0],
         )
         self.assertEqual(mat_view_stmt[0], expected_stmt)

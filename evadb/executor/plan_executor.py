@@ -19,7 +19,6 @@ from evadb.executor.abstract_executor import AbstractExecutor
 from evadb.executor.apply_and_merge_executor import ApplyAndMergeExecutor
 from evadb.executor.create_executor import CreateExecutor
 from evadb.executor.create_index_executor import CreateIndexExecutor
-from evadb.executor.create_mat_view_executor import CreateMaterializedViewExecutor
 from evadb.executor.create_udf_executor import CreateUDFExecutor
 from evadb.executor.delete_executor import DeleteExecutor
 from evadb.executor.drop_object_executor import DropObjectExecutor
@@ -124,8 +123,6 @@ class PlanExecutor:
             executor_node = BuildJoinExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.FUNCTION_SCAN:
             executor_node = FunctionScanExecutor(db=self._db, node=plan)
-        elif plan_opr_type == PlanOprType.CREATE_MATERIALIZED_VIEW:
-            executor_node = CreateMaterializedViewExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.EXCHANGE:
             executor_node = ExchangeExecutor(db=self._db, node=plan)
             inner_executor = self._build_execution_tree(plan.inner_plan)

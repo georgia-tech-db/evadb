@@ -62,7 +62,7 @@ class ParserStatementTests(unittest.TestCase):
                               WHERE Yolo(frame).label = 'vehicle') AS T
                           WHERE Is_suspicious(bbox) = 1 AND
                                 Licence_plate(bbox) = '12345';""",
-            """CREATE MATERIALIZED VIEW uadtrac_fastRCNN (id, labels) AS
+            """CREATE TABLE uadtrac_fastRCNN AS
                SELECT id, Yolo(frame).labels FROM MyVideo
                         WHERE id<5; """,
             """SELECT table1.a FROM table1 JOIN table2
@@ -122,7 +122,7 @@ class ParserStatementTests(unittest.TestCase):
                 where Yolo(frame).label = 'vehicle') as T
                 where is_suspicious(bbox) = 1 and
                 Licence_plate(bbox) = '12345';""",
-            """Create materialized view UADTrac_FastRCNN (id, labels) as
+            """Create TABLE UADTrac_FastRCNN as
                 Select id, YoloV5(Frame).labels from MyVideo
                     where id<5; """,
             """Select Table1.A from Table1 join Table2
