@@ -7,6 +7,10 @@ orbs:
 workflows:
   main:
     jobs:
+        ################################
+        #### PIP
+        ################################
+        ################################
         - Pip-PyPI
         - Pip-Local
         ################################
@@ -28,7 +32,7 @@ workflows:
             v: "3.10"
             mode: "TEST"
             ray: "DISABLED"
-       - Linux:
+        - Linux:
             name: "Test | Ray | v3.10 | Linux"
             v: "3.10"
             mode: "TEST"
