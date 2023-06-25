@@ -246,6 +246,7 @@ jobs:
           name: Install EVA package locally and start server
           command: |
             pip install --upgrade pip
+            pip cache purge
             pip install "."
             bash script/test/package.sh
 

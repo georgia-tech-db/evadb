@@ -42,6 +42,7 @@ class LoadMultimediaExecutor(AbstractExecutor):
             try_to_import_cv2()
         elif self.media_type == FileFormatType.VIDEO:
             try_to_import_decord()
+            try_to_import_cv2()
 
     def exec(self, *args, **kwargs):
         storage_engine = None
@@ -79,7 +80,7 @@ class LoadMultimediaExecutor(AbstractExecutor):
                 ]
 
                 invalid_files_str = "\n".join(invalid_files)
-                err_msg = f"Load {self.media_type.name} failed due to invalid files: \n{invalid_files_str}"
+                err_msg = f"invalid file: \n{invalid_files_str}"
                 raise ValueError(err_msg)
 
             # Get valid files.
@@ -91,7 +92,7 @@ class LoadMultimediaExecutor(AbstractExecutor):
 
             if not valid_files:
                 raise DatasetFileNotFoundError(
-                    f"Load {self.media_type.name} failed due to no valid files found on path {str(self.node.file_path)}"
+                    f"no valid file found at: {str(self.node.file_path)}"
                 )
 
             # Create catalog entry
