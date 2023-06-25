@@ -222,6 +222,13 @@ def init_builtin_udfs(db: EvaDBDatabase, mode: str = "debug") -> None:
     except ImportError:
         pass
 
+    # Enable environment variables
+    # Relevant for ocr and other transformer-based models
+    import os
+
+    os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
+    os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
     # list of UDF queries to load
     queries = [
         mnistcnn_udf_query,

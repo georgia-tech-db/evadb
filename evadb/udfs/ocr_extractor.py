@@ -37,11 +37,8 @@ class OCRExtractor(AbstractUDF, GPUCompatible):
         try_to_import_torchvision()
         try_to_import_transformers()
         # https://developers.google.com/protocol-buffers/docs/news/2022-05-06#python-updates
-        import os
 
         from transformers import DonutProcessor, VisionEncoderDecoderModel
-
-        os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
 
         self.processor = DonutProcessor.from_pretrained(
             "naver-clova-ix/donut-base-finetuned-cord-v2"
