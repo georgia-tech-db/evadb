@@ -233,6 +233,7 @@ def format_file(file_path, add_header, strip_header, format_code):
 
 # check the notebooks
 def check_notebook_format(notebook_file):
+    print(notebook_file)
     notebook_file_name = os.path.basename(notebook_file)
 
     # Ignore this notebook
