@@ -64,7 +64,7 @@ workflows:
             mode: "NOTEBOOK"
             ray: "DISABLED"
         - Linux:
-            name: "Notebook | v3.10 | Linux"
+            name: "Notebook |  Ray | v3.10 | Linux"
             v: "3.10"
             mode: "NOTEBOOK"
             ray: "ENABLED"            
@@ -127,7 +127,7 @@ jobs:
             pip install --upgrade pip
             source test_evadb/bin/activate
             pip install ".[dev]"
-            pip uninstall ray
+            pip uninstall -y ray
 
       # Enable Ray (update evadb.yml file and install Ray package)
       - when:
