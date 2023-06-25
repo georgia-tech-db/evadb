@@ -44,6 +44,10 @@ a:visited {
     color: var(--orange);
 }
 
+article table.align-default {
+    display: inherit;
+}  
+
 /* --------- TOC sidebar --------- */
 
 div.sidebar-tree .toctree-l1>.reference {

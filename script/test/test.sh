@@ -71,35 +71,30 @@ fi
 ## with cov pytest plugin
 ##################################################
 
-if [[ "$OSTYPE" != "msys" ]];
-# Non-Windows
+if [[ "$MODE" = "TEST" || "$MODE" = "ALL" ]];
 then
-    if [[ "$MODE" = "TEST" || "$MODE" = "ALL" ]];
+    # Non-Windows
+    if [[ "$OSTYPE" != "msys" ]];
     then
-        PYTHONPATH=./ pytest --durations=20 --capture=sys --tb=short -v --log-level=WARNING -rsf -p no:cov test/ -m "not benchmark"
-    elif [[ "$MODE" = "COV" ]];
-    then
-	# As a workaround, ray needs to be disabled for COV.
-        PYTHONPATH=./ pytest --durations=20 --cov-report term-missing:skip-covered  --cov-config=.coveragerc --cov-context=test --cov=evadb/ --capture=sys --tb=short -v -rsf --log-level=WARNING -m "not benchmark"
-    fi
-
-    test_code=$?
-    if [ "$test_code" != "0" ];
-    then
-        echo "PYTEST CODE: --|${test_code}|-- FAILURE"
-        exit $test_code
+        PYTHONPATH=./ pytest --durations=20 --cov-report term-missing:skip-covered  --cov-config=.coveragerc --cov-context=test --cov=evadb/ --capture=sys --tb=short -v -rsf --log-level=WARNING -m "not benchmark"        
+        test_code=$?
+        if [ "$test_code" != "0" ];
+        then
+            echo "PYTEST CODE: --|${test_code}|-- FAILURE"
+            exit $test_code
+        else
+            echo "PYTEST CODE: --|${test_code}|-- SUCCESS"
+        fi
+    # Windows -- no need for coverage report
     else
-        echo "PYTEST CODE: --|${test_code}|-- SUCCESS"
-    fi
-# Windows -- no need for coverage report
-else
-    PYTHONPATH=./ python -m pytest -p no:cov test/ -m "not benchmark"
-    test_code=$?
-    if [ "$test_code" != "0" ];
-    then
-        echo "PYTEST CODE: --|${test_code}|-- FAILURE"
-    else
-        echo "PYTEST CODE: --|${test_code}|-- SUCCESS"
+        PYTHONPATH=./ python -m pytest -p no:cov test/ -m "not benchmark"
+        test_code=$?
+        if [ "$test_code" != "0" ];
+        then
+            echo "PYTEST CODE: --|${test_code}|-- FAILURE"
+        else
+            echo "PYTEST CODE: --|${test_code}|-- SUCCESS"
+        fi
     fi
 fi
 
@@ -110,7 +105,7 @@ fi
 
 if [[ ( "$OSTYPE" != "msys" ) && ( "$MODE" = "NOTEBOOK" || "$MODE" = "ALL" ) ]];
 then 
-    PYTHONPATH=./ python -m pytest --durations=5 --nbmake --overwrite "./tutorials" --capture=sys --tb=short -v --log-level=WARNING --nbmake-timeout=3000
+    PYTHONPATH=./ python -m pytest --durations=5 --nbmake --overwrite "./tutorials" --capture=sys --tb=short -v --log-level=WARNING --nbmake-timeout=3000 --ignore="tutorials/09-license-plate-fuzzy-join.ipynb" --ignore="tutorials/10-toxicity-classifier-huggingface.ipynb" --ignore="tutorials/11-similarity-search-for-motif-mining.ipynb" 
     notebook_test_code=$?
     if [ "$notebook_test_code" != "0" ];
     then

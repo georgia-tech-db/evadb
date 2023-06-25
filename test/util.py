@@ -25,7 +25,6 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import ray
 from mock import MagicMock
 
 from evadb.binder.statement_binder import StatementBinder
@@ -46,7 +45,11 @@ from evadb.udfs.abstract.abstract_udf import AbstractClassifierUDF
 from evadb.udfs.decorators import decorators
 from evadb.udfs.decorators.io_descriptors.data_types import NumpyArray, PandasDataframe
 from evadb.udfs.udf_bootstrap_queries import init_builtin_udfs
-from evadb.utils.generic_utils import remove_directory_contents, try_to_import_cv2
+from evadb.utils.generic_utils import (
+    is_ray_available,
+    remove_directory_contents,
+    try_to_import_cv2,
+)
 
 NUM_FRAMES = 10
 FRAME_SIZE = (32, 32)
@@ -90,9 +93,10 @@ def is_ray_stage_running():
 
 
 def shutdown_ray():
-    db_dir = suffix_pytest_xdist_worker_id_to_dir(EvaDB_DATABASE_DIR)
-    config = ConfigurationManager(Path(db_dir))
-    if config.get_value("experimental", "ray"):
+    is_ray_enabled = is_ray_available()
+    if is_ray_enabled:
+        import ray
+
         ray.shutdown()
 
 

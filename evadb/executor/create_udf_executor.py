@@ -29,6 +29,7 @@ from evadb.udfs.decorators.utils import load_io_from_udf_decorators
 from evadb.utils.errors import UDFIODefinitionError
 from evadb.utils.generic_utils import (
     load_udf_class_from_file,
+    try_to_import_torch,
     try_to_import_ultralytics,
 )
 from evadb.utils.logging_manager import logger
@@ -47,6 +48,9 @@ class CreateUDFExecutor(AbstractExecutor):
         HuggingFace UDFs are special UDFs that are not loaded from a file.
         So we do not need to call the setup method on them like we do for other UDFs.
         """
+        # We need atleast one deep learning framework for HuggingFace
+        # Torch or Tensorflow
+        try_to_import_torch()
         impl_path = f"{self.udf_dir}/abstract/hf_abstract_udf.py"
         io_list = gen_hf_io_catalog_entries(self.node.name, self.node.metadata)
         return (

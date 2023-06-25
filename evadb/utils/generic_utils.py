@@ -222,6 +222,32 @@ def remove_directory_contents(dir_path):
 
 ##############################
 ## TRY TO IMPORT PACKAGES
+##############################
+
+
+def try_to_import_ray():
+    try:
+        import ray  # noqa: F401
+        from ray.util.queue import Queue  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import ray python package.
+                Please install it with `pip install ray`."""
+        )
+
+
+def is_ray_available() -> bool:
+    try:
+        try_to_import_ray()
+        return True
+    except ValueError:  # noqa: E722
+        return False
+
+
+def is_ray_enabled_and_installed(ray_enabled: bool) -> bool:
+    ray_installed = is_ray_available()
+    return ray_enabled and ray_installed
+
 
 ##############################
 ## VISION

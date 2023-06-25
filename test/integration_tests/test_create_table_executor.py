@@ -63,7 +63,6 @@ class CreateTableTest(unittest.TestCase):
         with self.assertRaises(ExecutorError):
             execute_query_fetch_all(self.evadb, query)
 
-    # @ray_skip_marker
     @macos_skip_marker
     def test_should_create_table_from_select(self):
         create_query = """CREATE TABLE dummy_table
