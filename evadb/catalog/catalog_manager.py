@@ -91,6 +91,14 @@ class CatalogManager(object):
         """
         self._clear_catalog_contents()
 
+    def close(self):
+        """
+        This method closes all the connections
+        """
+        if self.sql_config is not None:
+            sqlalchemy_engine = self.sql_config.engine
+            sqlalchemy_engine.dispose()
+
     def _bootstrap_catalog(self):
         """Bootstraps catalog.
         This method runs all tasks required for using catalog. Currently,

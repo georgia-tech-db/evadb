@@ -111,8 +111,13 @@ class ChatGPT(AbstractUDF):
                 ],
             }
 
-            response = completion_with_backoff(**params)
-            results.append(response.choices[0].message.content)
+            try:
+                response = completion_with_backoff(**params)
+                results.append(response.choices[0].message.content)
+            # https://help.openai.com/en/articles/6897213-openai-library-error-types-guidance
+            # ignore API rate limit error etc.
+            except Exception as e:
+                results.append(f"{e}")
 
         df = pd.DataFrame({"response": results})
 

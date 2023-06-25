@@ -16,7 +16,7 @@ import gc
 import os
 import unittest
 from pathlib import Path
-from test.markers import duplicate_skip_marker, linux_skip_marker, windows_skip_marker
+from test.markers import gpu_skip_marker, windows_skip_marker
 from test.util import (
     get_evadb_for_testing,
     get_logical_query_plan,
@@ -103,7 +103,7 @@ class ReuseTest(unittest.TestCase):
         # reuse should be faster than no reuse
         self.assertTrue(exec_times[0] > exec_times[1])
 
-    @duplicate_skip_marker
+    @gpu_skip_marker
     def test_reuse_partial(self):
         select_query1 = """SELECT id, label FROM DETRAC JOIN
             LATERAL HFObjectDetector(data) AS Obj(score, label, bbox) WHERE id < 5;"""
@@ -113,7 +113,7 @@ class ReuseTest(unittest.TestCase):
         batches, exec_times = self._reuse_experiment([select_query1, select_query2])
         self._verify_reuse_correctness(select_query2, batches[1])
 
-    @linux_skip_marker
+    @gpu_skip_marker
     def test_reuse_in_with_multiple_occurrences(self):
         select_query1 = """SELECT id, label FROM DETRAC JOIN
             LATERAL HFObjectDetector(data) AS Obj(score, label, bbox) WHERE id < 10;"""
@@ -138,7 +138,7 @@ class ReuseTest(unittest.TestCase):
         reuse_batch = execute_query_fetch_all(self.evadb, select_query)
         self._verify_reuse_correctness(select_query, reuse_batch)
 
-    @linux_skip_marker
+    @gpu_skip_marker
     def test_reuse_logical_project_with_duplicate_query(self):
         project_query = (
             """SELECT id, HFObjectDetector(data).label FROM DETRAC WHERE id < 10;"""
@@ -148,7 +148,7 @@ class ReuseTest(unittest.TestCase):
         # reuse should be faster than no reuse
         self.assertGreater(exec_times[0], exec_times[1])
 
-    @linux_skip_marker
+    @gpu_skip_marker
     def test_reuse_with_udf_in_predicate(self):
         select_query = """SELECT id FROM DETRAC WHERE ['car'] <@ HFObjectDetector(data).label AND id < 4"""
 
@@ -157,7 +157,7 @@ class ReuseTest(unittest.TestCase):
         # reuse should be faster than no reuse
         self.assertGreater(exec_times[0], exec_times[1])
 
-    @linux_skip_marker
+    @gpu_skip_marker
     def test_reuse_across_different_predicate_using_same_udf(self):
         query1 = """SELECT id FROM DETRAC WHERE ['car'] <@ HFObjectDetector(data).label AND id < 15"""
 
@@ -168,7 +168,7 @@ class ReuseTest(unittest.TestCase):
         # reuse should be faster than no reuse
         self.assertGreater(exec_times[0], exec_times[1])
 
-    @linux_skip_marker
+    @gpu_skip_marker
     def test_reuse_filter_with_project(self):
         project_query = """
             SELECT id, Yolo(data).labels FROM DETRAC WHERE id < 5;"""
@@ -180,7 +180,7 @@ class ReuseTest(unittest.TestCase):
         # reuse should be faster than no reuse
         self.assertGreater(exec_times[0], exec_times[1])
 
-    @linux_skip_marker
+    @gpu_skip_marker
     def test_reuse_in_extract_object(self):
         select_query = """
             SELECT id, T.iids, T.bboxes, T.scores, T.labels

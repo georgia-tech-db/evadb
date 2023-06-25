@@ -75,7 +75,7 @@ from evadb.optimizer.rules.rules import (
 from evadb.optimizer.rules.rules_manager import RulesManager, disable_rules
 from evadb.parser.types import JoinType
 from evadb.server.command_handler import execute_query_fetch_all
-from evadb.utils.generic_utils import is_ray_available
+from evadb.utils.generic_utils import is_ray_enabled_and_installed
 
 
 @pytest.mark.notparallel
@@ -196,8 +196,8 @@ class RulesTest(unittest.TestCase):
                 )
             )
 
-        # ray_enabled = self.evadb.config.get_value("experimental", "ray")
-        ray_enabled = is_ray_available()
+        ray_enabled = self.evadb.config.get_value("experimental", "ray")
+        ray_enabled_and_installed = is_ray_enabled_and_installed(ray_enabled)
 
         # For the current version, we choose either the distributed or the
         # sequential rule, because we do not have a logic to choose one over
@@ -215,7 +215,7 @@ class RulesTest(unittest.TestCase):
             LogicalLoadToPhysical(),
             LogicalGetToSeqScan(),
             LogicalProjectToRayPhysical()
-            if ray_enabled
+            if ray_enabled_and_installed
             else LogicalProjectToPhysical(),
             LogicalDerivedGetToPhysical(),
             LogicalUnionToPhysical(),
@@ -229,7 +229,7 @@ class RulesTest(unittest.TestCase):
             LogicalCreateMaterializedViewToPhysical(),
             LogicalFilterToPhysical(),
             LogicalApplyAndMergeToRayPhysical()
-            if ray_enabled
+            if ray_enabled_and_installed
             else LogicalApplyAndMergeToPhysical(),
             LogicalShowToPhysical(),
             LogicalExplainToPhysical(),
@@ -237,7 +237,7 @@ class RulesTest(unittest.TestCase):
             LogicalVectorIndexScanToPhysical(),
         ]
 
-        if ray_enabled:
+        if ray_enabled_and_installed:
             supported_implementation_rules.append(LogicalExchangeToPhysical())
         self.assertEqual(
             len(supported_implementation_rules),
