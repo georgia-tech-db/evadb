@@ -78,7 +78,12 @@ class ChatGPT(AbstractUDF):
 
         @retry(tries=6, delay=20)
         def completion_with_backoff(**kwargs):
-            return openai.ChatCompletion.create(**kwargs)
+            try:
+                response = openai.ChatCompletion.create(**kwargs)
+            # ignore API rate limit error etc.
+            except Exception as e:
+                response = f"{e}"
+            return response
 
         # Register API key, try configuration manager first
         openai.api_key = ConfigurationManager().get_value("third_party", "OPENAI_KEY")
@@ -112,13 +117,8 @@ class ChatGPT(AbstractUDF):
                 ],
             }
 
-            try:
-                response = completion_with_backoff(**params)
-                results.append(response.choices[0].message.content)
-            # https://help.openai.com/en/articles/6897213-openai-library-error-types-guidance
-            # ignore API rate limit error etc.
-            except Exception as e:
-                results.append(f"{e}")
+            response = completion_with_backoff(**params)
+            results.append(response.choices[0].message.content)
 
         df = pd.DataFrame({"response": results})
 
