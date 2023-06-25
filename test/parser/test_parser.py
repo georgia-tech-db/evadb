@@ -739,9 +739,7 @@ class ParserTests(unittest.TestCase):
     def test_create_table_from_query(self):
         select_query = """SELECT id, Yolo(frame).labels FROM MyVideo
                         WHERE id<5; """
-        query = "CREATE TABLE uadtrac_fastRCNN AS {}".format(
-            select_query
-        )
+        query = "CREATE TABLE uadtrac_fastRCNN AS {}".format(select_query)
         parser = Parser()
         mat_view_stmt = parser.parse(query)
         select_stmt = parser.parse(select_query)

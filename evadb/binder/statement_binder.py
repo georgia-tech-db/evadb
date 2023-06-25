@@ -167,7 +167,7 @@ class StatementBinder:
                     raise BinderError(
                         "Unsupported expression type {}.".format(expr.etype)
                     )
-            
+
             binded_col_list = []
             idx = 0
             for expr in node.query.target_list:
@@ -187,7 +187,6 @@ class StatementBinder:
                     )
                     idx += 1
             node.column_list = binded_col_list
-
 
     @bind.register(RenameTableStatement)
     def _bind_rename_table_statement(self, node: RenameTableStatement):
