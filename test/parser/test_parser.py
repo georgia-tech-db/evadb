@@ -736,7 +736,7 @@ class ParserTests(unittest.TestCase):
         self.assertNotEqual(create_udf, insert_stmt)
         self.assertNotEqual(select_stmt, create_udf)
 
-    def test_create_table_from_query(self):
+    def test_create_table_from_select(self):
         select_query = """SELECT id, Yolo(frame).labels FROM MyVideo
                         WHERE id<5; """
         query = "CREATE TABLE uadtrac_fastRCNN AS {}".format(select_query)
@@ -749,10 +749,6 @@ class ParserTests(unittest.TestCase):
             [],
             select_stmt[0],
         )
-        self.assertEqual(mat_view_stmt[0].table_info, expected_stmt.table_info)
-        self.assertEqual(mat_view_stmt[0].if_not_exists, expected_stmt.if_not_exists)
-        self.assertEqual(mat_view_stmt[0].column_list, expected_stmt.column_list)
-        self.assertEqual(mat_view_stmt[0].query, expected_stmt.query)
         self.assertEqual(mat_view_stmt[0], expected_stmt)
 
     def test_join(self):
