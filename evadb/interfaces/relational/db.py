@@ -215,6 +215,8 @@ class EvaDBCursor(object):
     ) -> "EvaDBCursor":
         """
         Creates a vector index using the provided expr on the table.
+        This feature directly works on IMAGE tables.
+        For VIDEO tables, the feature should be extracted first and stored in an intermediate table, before creating the index.
 
         Args:
             index_name (str): Name of the index.
