@@ -14,7 +14,12 @@
 # limitations under the License.
 import os
 import unittest
-from test.markers import ocr_skip_marker, ray_skip_marker, windows_skip_marker
+from test.markers import (
+    gpu_skip_marker,
+    ocr_skip_marker,
+    ray_skip_marker,
+    windows_skip_marker,
+)
 from test.util import (
     create_sample_video,
     file_remove,
@@ -337,6 +342,7 @@ class PytorchTest(unittest.TestCase):
         self.assertTrue(res["ocrextractor.scores"][2][0] > 0.9)
 
     @pytest.mark.torchtest
+    @gpu_skip_marker
     def test_should_run_extract_object(self):
         select_query = """
             SELECT id, T.iids, T.bboxes, T.scores, T.labels

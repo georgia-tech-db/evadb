@@ -14,7 +14,7 @@
 # limitations under the License.
 import os
 import unittest
-from test.markers import ray_skip_marker
+from test.markers import gpu_skip_marker
 from test.util import (
     create_sample_image,
     get_evadb_for_testing,
@@ -327,7 +327,7 @@ class SimilarityTests(unittest.TestCase):
         res_batch = execute_query_fetch_all(self.evadb, select_query)
         self.assertEqual(res_batch.frames["testsimilarityimagedataset._row_id"][0], 5)
 
-    @ray_skip_marker
+    @gpu_skip_marker
     def test_end_to_end_index_scan_should_work_correctly_on_image_dataset_qdrant(self):
         create_index_query = """CREATE INDEX testFaissIndexImageDataset
                                     ON testSimilarityImageDataset (DummyFeatureExtractor(data))

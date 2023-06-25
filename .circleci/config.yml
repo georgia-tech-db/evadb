@@ -17,21 +17,31 @@ workflows:
         #### UNIT TESTS
         ################################
         ################################
-        #- Linux:
-        #    name: "Test | v3.8 | Linux"
-        #    v: "3.8"
-        #    mode: "TEST"
-        #    ray: "DISABLED"
-        #- Linux:
-        #    name: "Test | v3.9 | Linux"
-        #    v: "3.9"
-        #    mode: "TEST"
-        #    ray: "DISABLED"
+        - Linux:
+            name: "Test | v3.8 | Linux"
+            v: "3.8"
+            mode: "TEST"
+            ray: "DISABLED"
+        - Linux:
+            name: "Test | v3.9 | Linux"
+            v: "3.9"
+            mode: "TEST"
+            ray: "DISABLED"
         - Linux:
             name: "Test | v3.10 | Linux"
             v: "3.10"
             mode: "TEST"
             ray: "DISABLED"
+        - Linux:
+            name: "Test | Ray | v3.8 | Linux"
+            v: "3.8"
+            mode: "TEST"
+            ray: "ENABLED"
+        - Linux:
+            name: "Test | Ray | v3.9 | Linux"
+            v: "3.9"
+            mode: "TEST"
+            ray: "ENABLED"
         - Linux:
             name: "Test | Ray | v3.10 | Linux"
             v: "3.10"
@@ -48,21 +58,31 @@ workflows:
         ### NOTEBOOKS
         ################################
         ################################
-        #- Linux:
-        #    name: "Notebook | v3.8 | Linux"
-        #    v: "3.8"
-        #    mode: "NOTEBOOK"
-        #    ray: "DISABLED"
-        #- Linux:
-        #    name: "Notebook | v3.9 | Linux"
-        #    v: "3.9"
-        #    mode: "NOTEBOOK"
-        #    ray: "DISABLED"
+        - Linux:
+            name: "Notebook | v3.8 | Linux"
+            v: "3.8"
+            mode: "NOTEBOOK"
+            ray: "DISABLED"
+        - Linux:
+            name: "Notebook | v3.9 | Linux"
+            v: "3.9"
+            mode: "NOTEBOOK"
+            ray: "DISABLED"
         - Linux:
             name: "Notebook | v3.10 | Linux"
             v: "3.10"
             mode: "NOTEBOOK"
             ray: "DISABLED"
+        - Linux:
+            name: "Notebook | Ray | v3.8 | Linux"
+            v: "3.8"
+            mode: "NOTEBOOK"
+            ray: "ENABLED"
+        - Linux:
+            name: "Notebook | Ray | v3.9 | Linux"
+            v: "3.9"
+            mode: "NOTEBOOK"
+            ray: "ENABLED"            
         - Linux:
             name: "Notebook |  Ray | v3.10 | Linux"
             v: "3.10"
@@ -93,8 +113,8 @@ workflows:
         # DOCKER AND CLOUD
         ################################
         ################################
-        #- Docker-Local
-        #- AWS
+        - Docker-Local
+        - AWS
 
 jobs:
   Linux:
