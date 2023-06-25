@@ -296,7 +296,7 @@ class EvaDBCursor(object):
         stmt = parse_drop_table(table_name, if_exists)
         return EvaDBQuery(self._evadb, stmt)
 
-    def drop_udf(self, udf_name: str, if_exists: bool = True) -> "EvaDBQuery":
+    def drop_function(self, udf_name: str, if_exists: bool = True) -> "EvaDBQuery":
         """
         Drop a udf in the database.
 
@@ -336,7 +336,7 @@ class EvaDBCursor(object):
         stmt = parse_drop_index(index_name, if_exists)
         return EvaDBQuery(self._evadb, stmt)
 
-    def create_udf(
+    def create_function(
         self,
         udf_name: str,
         if_not_exists: bool = True,
