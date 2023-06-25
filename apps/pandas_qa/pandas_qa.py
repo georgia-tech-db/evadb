@@ -80,9 +80,7 @@ def generate_script(cursor: evadb.EvaDBCursor, df: pd.DataFrame, question: str) 
     question_df.to_csv(QUESTION_PATH)
 
     cursor.drop_table("Question", if_exists=True).execute()
-    cursor.query(
-       """CREATE TABLE IF NOT EXISTS Question (prompt TEXT(50));"""
-    ).execute()
+    cursor.query("""CREATE TABLE IF NOT EXISTS Question (prompt TEXT(50));""").execute()
     cursor.load(QUESTION_PATH, "Question", "csv").execute()
 
     query = cursor.table("Question").select("ChatGPT(prompt)")
