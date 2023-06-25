@@ -21,13 +21,17 @@ import pandas as pd
 
 import evadb
 
+APP_SOURCE_DIR = os.path.abspath(os.path.dirname(__file__))
+
 # default file paths
-DEFAULT_CSV_PATH = "./apps/pandas_qa/data/country.csv"
+DEFAULT_CSV_PATH = os.path.join(APP_SOURCE_DIR, "pandas_qa", "data",
+                                "country.csv")
 
 # temporary file paths
-QUESTION_PATH = "./evadb_data/tmp/question.csv"
-SCRIPT_PATH = "./evadb_data/tmp/script.py"
-
+QUESTION_PATH = os.path.join(APP_SOURCE_DIR, "pandas_qa", "evadb_data",
+                               "tmp", "question.csv")
+SCRIPT_PATH = os.path.join(APP_SOURCE_DIR, "pandas_qa", "evadb_data",
+                               "tmp", "script.py")
 
 def receive_user_input() -> Dict:
     """Receives user input.
@@ -98,6 +102,7 @@ def run_script(script_body: str, user_input: Dict):
     """
     absolute_csv_path = os.path.abspath(user_input["csv_path"])
     absolute_script_path = os.path.abspath(SCRIPT_PATH)
+    print(absolute_csv_path)
     load_df = f"import pandas as pd\ndf = pd.read_csv('{absolute_csv_path}')\n"
     script_body = load_df + script_body
 
