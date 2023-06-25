@@ -90,15 +90,17 @@ class ChatGPT(AbstractUDF):
         ), "Please set your OpenAI API key in evadb.yml file (third_party, open_api_key) or environment variable (OPENAI_KEY)"
 
         prompts = text_df[text_df.columns[0]]
-        queries = text_df[text_df.columns[1]]
+        queries = text_df[text_df.columns[0]]
+        if len(text_df.columns) > 1:
+            queries = text_df[text_df.columns[1]]
 
         # openai api currently supports answers to a single prompt only
         # so this udf is designed for that
         results = []
 
         for prompt, query in zip(prompts, queries):
-            if prompt != "None":
-                query = prompt + ": " + query
+            if prompt != "None" and prompt != query:
+                prompt = f"{prompt}: {query}"
 
             params = {
                 "model": self.model,
@@ -106,7 +108,7 @@ class ChatGPT(AbstractUDF):
                 "messages": [
                     {
                         "role": "user",
-                        "content": query,
+                        "content": prompt,
                     }
                 ],
             }
