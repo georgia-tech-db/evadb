@@ -85,7 +85,6 @@ then
         else
             echo "PYTEST CODE: --|${test_code}|-- SUCCESS"
         fi
-    fi
     # Windows -- no need for coverage report
     else
         PYTHONPATH=./ python -m pytest -p no:cov test/ -m "not benchmark"
