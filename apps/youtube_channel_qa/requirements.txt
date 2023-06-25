@@ -1,0 +1,7 @@
+evadb>=0.2.14
+torch
+opencv-python
+openai
+pytube>=15.0.0
+youtube_transcript_api>=0.6.0
+scrapetube

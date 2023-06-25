@@ -26,8 +26,8 @@ import evadb
 MAX_CHUNK_SIZE = 10000
 CHATGPT_UDF_PATH = "../../evadb/udfs/chatgpt.py"
 SENTENCE_FEATURE_EXTRACTOR_UDF_PATH = "../../evadb/udfs/sentence_feature_extractor.py"
-QUESTIONS_PATH = "./questions"
-YT_VIDEO_IDS_PATH = "./yt_video_ids"
+QUESTIONS_PATH = "./questions.txt"
+YT_VIDEO_IDS_PATH = "./yt_video_ids.txt"
 
 DEFAULT_CHANNEL_NAME = "LinusTechTips"
 DEFAULT_SORTING_ORDER = "popular"
