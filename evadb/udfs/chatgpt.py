@@ -97,16 +97,17 @@ class ChatGPT(AbstractUDF):
         results = []
 
         for prompt, query in zip(prompts, queries):
-            if prompt != "None":
-                query = prompt + ": " + query
-
             params = {
                 "model": self.model,
                 "temperature": self.temperature,
                 "messages": [
                     {
                         "role": "user",
-                        "content": query,
+                        "content": f"Context to answer the question : {query}",
+                    },
+                    {
+                        "role": "user",
+                        "content": f"Answer the question based on context : {prompt}",
                     }
                 ],
             }

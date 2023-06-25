@@ -161,7 +161,7 @@ def group_transcript(transcript: dict):
     """
     new_line = ""
     for line in transcript:
-        new_line += line["text"]
+        new_line += " " + line["text"]
 
     return new_line
 
