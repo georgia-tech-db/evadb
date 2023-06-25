@@ -37,7 +37,6 @@ class PandasQATest(unittest.TestCase):
         shutdown_ray()
 
     def test_should_run_pandas_qa_app(self):
-        os.environ["OPENAI_KEY"] = "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"
         app_path = Path("apps", "pandas_qa", "pandas_qa.py")
         input1 = "\n\n"  # use default csv
         input2 = "print country with highest gdp\n\n"  # what to do with the csv
