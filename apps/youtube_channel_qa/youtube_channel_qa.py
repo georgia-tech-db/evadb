@@ -17,10 +17,9 @@ import shutil
 import time
 
 import pandas as pd
-
+import scrapetube
 from pytube import YouTube, extract
 from youtube_transcript_api import YouTubeTranscriptApi
-import scrapetube
 
 import evadb
 
@@ -34,6 +33,7 @@ DEFAULT_CHANNEL_NAME = "LinusTechTips"
 DEFAULT_SORTING_ORDER = "popular"
 
 total_transcription_time = 0
+
 
 def partition_transcript(raw_transcript: str):
     """Parition video transcript elements when they are too large.
@@ -64,7 +64,7 @@ def partition_transcript(raw_transcript: str):
     return partitioned_transcript
 
 
-def group_transcript(transcript: dict, grouped_transcript : list):
+def group_transcript(transcript: dict, grouped_transcript: list):
     """Group video transcript elements when they are too short.
 
     Args:
@@ -74,7 +74,7 @@ def group_transcript(transcript: dict, grouped_transcript : list):
         List: a list of grouped transcripts
     """
     new_line = ""
-    title_text = transcript[0]['text']
+    title_text = transcript[0]["text"]
     for line in transcript:
         if len(new_line) <= MAX_CHUNK_SIZE:
             new_line += " " + line["text"]
@@ -100,7 +100,7 @@ def download_youtube_video_transcript(video_link: str):
     video_id = extract.video_id(video_link)
     transcript = [{}]
     transcript = YouTubeTranscriptApi.get_transcript(video_id)
-    transcript.insert(0, {'text': "Title : '" + title + "', Summary : "})
+    transcript.insert(0, {"text": "Title : '" + title + "', Summary : "})
 
     time_taken = time.time() - start
     total_transcription_time += time_taken
@@ -115,7 +115,11 @@ def download_youtube_video_from_link(video_link: str):
         video_link (str): url of the target YouTube video.
     """
     start = time.time()
-    yt = YouTube(video_link).streams.filter(file_extension='mp4', progressive='True').first()
+    yt = (
+        YouTube(video_link)
+        .streams.filter(file_extension="mp4", progressive="True")
+        .first()
+    )
     try:
         print("Video download in progress...")
         yt.download()
@@ -154,7 +158,7 @@ def generate_online_video_transcript(cursor) -> str:
         "CREATE TABLE IF NOT EXISTS youtube_video_text AS SELECT SpeechRecognizer(audio) FROM youtube_video;"
     ).execute()
     print(f"Video transcript generated in {time.time() - start} seconds.")
-    total_transcription_time += time.time() - start 
+    total_transcription_time += time.time() - start
 
     raw_transcript_string = (
         cursor.table("youtube_video_text")
@@ -162,6 +166,7 @@ def generate_online_video_transcript(cursor) -> str:
         .df()["youtube_video_text.text"][0]
     )
     return raw_transcript_string
+
 
 def generate_response(cursor: evadb.EvaDBCursor, question: str) -> str:
     """Generates question response with llm.
@@ -176,12 +181,12 @@ def generate_response(cursor: evadb.EvaDBCursor, question: str) -> str:
 
     # instead of passing all the documents to the LLM, we first do a
     # semantic search over the embeddings and get the most relevant rows.
-    cursor.drop_table("EMBED_TEXT", if_exists = True).execute()
+    cursor.drop_table("EMBED_TEXT", if_exists=True).execute()
     text_summarization_query = f"""
-        CREATE TABLE EMBED_TEXT AS 
+        CREATE TABLE EMBED_TEXT AS
         SELECT text FROM embedding_table
         ORDER BY Similarity(embedding('{question}'), features) DESC
-        LIMIT 3; 
+        LIMIT 3;
         """
     cursor.query(text_summarization_query).execute()
 
@@ -193,11 +198,9 @@ def generate_response(cursor: evadb.EvaDBCursor, question: str) -> str:
     print(f"Answer (generated in {time.time() - start} seconds):")
     print(responses[0], "\n")
 
+
 def cleanup():
     """Removes any temporary file / directory created by EvaDB."""
-    current_directory = os.getcwd()
-    files = os.listdir(current_directory)
-    mp4_files = [file for file in files if file.endswith(".mp4")]
     if os.path.exists("transcript.csv"):
         os.remove("transcript.csv")
     if os.path.exists("evadb_data"):
@@ -206,51 +209,50 @@ def cleanup():
 
 if __name__ == "__main__":
     print(
-        "🔮 Welcome to EvaDB! This app lets you ask questions across any number of YouTube videos.\nYou can either specify the YouTube channel name or list the Video IDs manually.\n\n"
+        "🔮 Welcome to EvaDB! This app lets you ask questions on any YouTube channel.\n\n"
     )
 
-    from_youtube = str(
-        input(
-            "📹 Are you downloading from an online Youtube Channel or the Local File? ('yes' for online/ 'no' for local) : "
-        )
-    ).lower() in ["y", "yes"]
-
     yt_video_ids = []
-    if from_youtube:
-        # get Youtube video url
-        channel_name = str(
-            input(
-                "📺 Enter the Channel Name (press Enter to use our default Youtube Channel) : "
-            )
+    # get Youtube video url
+    channel_name = str(
+        input(
+            "📺 Enter the Channel Name (press Enter to use our default Youtube Channel) : "
         )
+    )
 
-        if channel_name == "":
-            channel_name = DEFAULT_CHANNEL_NAME
+    if channel_name == "":
+        channel_name = DEFAULT_CHANNEL_NAME
 
-        limit = input("Enter the number of videos to Download (press Enter to download all Channel Videos) : ")
+    limit = input(
+        "Enter the number of videos to download (press Enter to download one video) : "
+    )
 
-        if limit == "":
-            limit = None
-        else:
-            limit = int(limit)
-
-        sort_by = str(
-            input(
-                "Enter the order in which to retrieve the vidoes (Either 'newest' / 'oldest' / 'popular') : "
-            )
-        ).lower()
-
-        if sort_by not in ["newest", "oldest", "popular"]:
-            sort_by = DEFAULT_SORTING_ORDER
-
-        print("\nWill download", limit if limit else "all", f"videos from {channel_name} in {sort_by} order\n")
-
-        video_ids = scrapetube.get_channel(channel_username = channel_name, limit = limit, sort_by = sort_by)
-
-        for video in video_ids:
-            yt_video_ids.append(video['videoId'])
+    if limit == "":
+        limit = 1
     else:
-        yt_video_ids = open(YT_VIDEO_IDS_PATH, 'r')
+        limit = int(limit)
+
+    sort_by = str(
+        input(
+            "Enter the order in which to retrieve the videos (Either 'newest' / 'oldest' / 'popular'). Press Enter to go with 'popular' option : "
+        )
+    ).lower()
+
+    if sort_by not in ["newest", "oldest", "popular"]:
+        sort_by = DEFAULT_SORTING_ORDER
+
+    print(
+        "\nWill download",
+        limit if limit else "all",
+        f"videos from {channel_name} in {sort_by} order\n",
+    )
+
+    video_ids = scrapetube.get_channel(
+        channel_username=channel_name, limit=limit, sort_by=sort_by
+    )
+
+    for video in video_ids:
+        yt_video_ids.append(video["videoId"])
 
     # Get OpenAI key if needed
     try:
@@ -262,9 +264,9 @@ if __name__ == "__main__":
     transcripts = []
     failed_download_links = []
     print("\nDownloading YT videos\n")
-    
+
     for id in yt_video_ids:
-        yt_url = "https://www.youtube.com/watch?v=" + id;
+        yt_url = "https://www.youtube.com/watch?v=" + id
         print("⏳ Downloading : ", yt_url)
         try:
             transcripts.append(download_youtube_video_transcript(yt_url))
@@ -274,7 +276,7 @@ if __name__ == "__main__":
                 "❗️ Failed to download video transcript. Will try downloading video and generating transcript later... \n\n"
             )
             failed_download_links.append(yt_url)
-            continue 
+            continue
 
     try:
         grouped_transcript = []
@@ -284,7 +286,7 @@ if __name__ == "__main__":
 
             df = pd.DataFrame(grouped_transcript)
             if os.path.exists("transcript.csv"):
-                df.to_csv("transcript.csv", mode='a')
+                df.to_csv("transcript.csv", mode="a")
             else:
                 df.to_csv("transcript.csv")
 
@@ -298,7 +300,7 @@ if __name__ == "__main__":
             except Exception as e:
                 print(f"Downloading {yt_url} failed with {e} \n")
                 continue
-        
+
         print("⏳ Establishing evadb api cursor connection.")
         cursor = evadb.connect().cursor()
 
@@ -307,14 +309,16 @@ if __name__ == "__main__":
         files = os.listdir(current_directory)
         mp4_files = [file for file in files if file.endswith(".mp4")]
         if not mp4_files:
-            print("No mp4 files found in current directory. Not generating video transcripts ...")
+            print(
+                "No mp4 files found in current directory. Not generating video transcripts ..."
+            )
         else:
-            raw_transcript_string = generate_online_video_transcript(cursor)           
+            raw_transcript_string = generate_online_video_transcript(cursor)
             partitioned_transcript = partition_transcript(raw_transcript_string)
             df = pd.DataFrame(partitioned_transcript)
             print(df)
             if os.path.exists("transcript.csv"):
-                df.to_csv("transcript.csv", mode='a')
+                df.to_csv("transcript.csv", mode="a")
             else:
                 df.to_csv("transcript.csv")
 
@@ -322,26 +326,33 @@ if __name__ == "__main__":
 
         load_start_time = time.time()
         # load chunked transcript into table
-        cursor.drop_table("Transcript", if_exists = True).execute()
+        cursor.drop_table("Transcript", if_exists=True).execute()
         cursor.query(
             """CREATE TABLE IF NOT EXISTS Transcript (text TEXT(100));"""
         ).execute()
         cursor.load("transcript.csv", "Transcript", "csv").execute()
-        print(f"Loading transcripts into DB took {time.time() - load_start_time} seconds")
-        
-        print("Creating embeddings and Vector Index")
-        
-        cursor.drop_udf("embedding", if_exists = True).execute()
-        cursor.create_udf("embedding", if_not_exists = True,
-            impl_path = SENTENCE_FEATURE_EXTRACTOR_UDF_PATH).execute()
-        cursor.create_udf("ChatGPT", if_not_exists = True,
-            impl_path = CHATGPT_UDF_PATH).execute()
+        print(
+            f"Loading transcripts into DB took {time.time() - load_start_time} seconds"
+        )
 
-        cursor.drop_table("embedding_table", if_exists = True).execute()
+        print("Creating embeddings and Vector Index")
+
+        cursor.drop_udf("embedding", if_exists=True).execute()
+        cursor.create_udf(
+            "embedding",
+            if_not_exists=True,
+            impl_path=SENTENCE_FEATURE_EXTRACTOR_UDF_PATH,
+        ).execute()
+        cursor.create_udf(
+            "ChatGPT", if_not_exists=True, impl_path=CHATGPT_UDF_PATH
+        ).execute()
+
+        cursor.drop_table("embedding_table", if_exists=True).execute()
         est = time.time()
         cursor.query(
-            f"""CREATE TABLE embedding_table AS
-            SELECT embedding(text), text FROM Transcript;"""
+            """CREATE TABLE embedding_table AS
+            SELECT embedding(text), text FROM Transcript;
+            """
         ).execute()
         eft = time.time()
         print(f"Creating embeddings took {eft - est} seconds")
@@ -359,13 +370,15 @@ if __name__ == "__main__":
 
         questions = []
         if os.path.isfile(QUESTIONS_PATH) and os.path.getsize(QUESTIONS_PATH) > 0:
-            questions = open(QUESTIONS_PATH, 'r')
+            questions = open(QUESTIONS_PATH, "r")
             st = time.time()
             for question in questions:
                 print(question)
-                generate_response(cursor, question)         
-            print("Total time taken in answering all questions = ", str(time.time() - st))
-        else: # Enter a QA Loop.
+                generate_response(cursor, question)
+            print(
+                "Total time taken in answering all questions = ", str(time.time() - st)
+            )
+        else:  # Enter a QA Loop.
             ready = True
             while ready:
                 question = str(input("Question (enter 'exit' to exit): "))

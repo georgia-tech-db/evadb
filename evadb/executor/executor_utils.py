@@ -113,8 +113,11 @@ def validate_video(video_path: Path) -> bool:
         try_to_import_cv2()
         import cv2
 
+        print(str(video_path))
+
         vid = cv2.VideoCapture(str(video_path))
         if not vid.isOpened():
+            print("not opened")
             return False
         return True
     except Exception as e:

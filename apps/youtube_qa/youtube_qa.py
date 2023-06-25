@@ -38,12 +38,13 @@ from youtube_transcript_api import YouTubeTranscriptApi  # noqa: E402
 
 MAX_CHUNK_SIZE = 10000
 DEFAULT_VIDEO_LINK = "https://www.youtube.com/watch?v=TvS1lHEQoKk"
-DEFAULT_VIDEO_PATH = "./apps/youtube_qa/benchmarks/russia_ukraine.mp4"
 
+APP_SOURCE_DIR = os.path.abspath(os.path.dirname(__file__))
+DEFAULT_VIDEO_PATH = os.path.join(APP_SOURCE_DIR, "benchmarks", "russia_ukraine.mp4")
 # temporary file paths
-ONLINE_VIDEO_PATH = "./evadb_data/tmp/online_video.mp4"
-TRANSCRIPT_PATH = "./evadb_data/tmp/transcript.csv"
-SUMMARY_PATH = "./evadb_data/tmp/summary.csv"
+ONLINE_VIDEO_PATH = os.path.join("evadb_data", "tmp", "online_video.mp4")
+TRANSCRIPT_PATH = os.path.join("evadb_data", "tmp", "transcript.csv")
+SUMMARY_PATH = os.path.join("evadb_data", "tmp", "summary.csv")
 BLOG_PATH = "blog.md"
 
 

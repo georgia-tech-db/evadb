@@ -108,7 +108,7 @@ class ChatGPT(AbstractUDF):
                     {
                         "role": "user",
                         "content": f"Answer the question based on context : {prompt}",
-                    }
+                    },
                 ],
             }
 
