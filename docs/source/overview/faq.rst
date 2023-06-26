@@ -15,13 +15,7 @@ Ensure that the local Python version is >= 3.8 and <= 3.10. EvaDB cannot support
 Where does EvaDB store all the data?
 ====================================
 
-By default, EvaDB stores all the data in a local folder named ``evadb_data``.
-
-pip install ray fails because of grpcio
-=======================================
-
-Follow these instructions to install ``ray``:
-https://github.com/ray-project/ray/issues/33039
+By default, EvaDB stores all the data in a local folder named ``evadb_data``. Deleting this folder will reset the system's state and lead to data loss.
 
 Why does the EvaDB server not start?
 ====================================
@@ -49,3 +43,9 @@ You can check the status of the server by running ``top`` or ``pgrep``:
 
     top
     pgrep evadb_server
+
+pip install ray fails because of grpcio
+=======================================
+
+Follow these instructions to install ``ray``:
+https://github.com/ray-project/ray/issues/33039
