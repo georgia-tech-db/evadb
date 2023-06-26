@@ -10,6 +10,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### [Deprecated]
 ### [Removed]
 
+##  [0.2.15] - 2023-06-26
+
+* PR #898: fix: index creation better error msg 
+* PR #817: fix: GPU ids and degree of parallelism 
+* PR #897: feat: add support for 3.11 
+* PR #885: feat: pandas qa sample app 
+* PR #896: app: youtube channel qa app 
+* PR #893: feat: cleanup create mat view 
+* PR #892: feat: update notebooks 
+* PR #894: fix: Youtube app 
+
 ##  [0.2.14] - 2023-06-24
 
 * PR #887: fix: Notebooks fix 
