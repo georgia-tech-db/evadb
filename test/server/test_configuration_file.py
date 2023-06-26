@@ -14,8 +14,8 @@
 # limitations under the License.
 import os
 import unittest
-
 from test.markers import ray_skip_marker
+
 from evadb.configuration.constants import EvaDB_CONFIG_FILE, EvaDB_ROOT_DIR
 
 
