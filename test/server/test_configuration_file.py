@@ -12,10 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import unittest
 import os
+import unittest
 
-from evadb.configuration.constants import EvaDB_ROOT_DIR, EvaDB_CONFIG_FILE
+from evadb.configuration.constants import EvaDB_CONFIG_FILE, EvaDB_ROOT_DIR
 
 
 class ConfigurationFileTests(unittest.TestCase):
@@ -26,7 +26,7 @@ class ConfigurationFileTests(unittest.TestCase):
         config_file_path = os.path.join(EvaDB_ROOT_DIR, "evadb", EvaDB_CONFIG_FILE)
         import yaml
 
-        with open(config_file_path, 'r') as file:
+        with open(config_file_path, "r") as file:
             yaml_data = yaml.safe_load(file)
 
             ray_setting = yaml_data.get("experimental").get("ray")

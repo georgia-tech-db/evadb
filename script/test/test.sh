@@ -122,8 +122,8 @@ fi
 ## based on Python version
 ##################################################
 
-if [[ ( "$PYTHON_VERSION" = "3.11" )  && 
-      ( "$MODE" = "COV" ) ]];
+if [[ ( "$PYTHON_VERSION" = "3.10" )  && 
+      ( "$MODE" = "TEST" ) ]];
 then 
     echo "UPLOADING COVERAGE REPORT"
     coveralls
