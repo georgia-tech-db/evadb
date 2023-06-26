@@ -2,7 +2,7 @@ blank_issues_enabled: true
 contact_links:
   - name: 📚 Documentation
     url: https://evadb.readthedocs.io/en/stable/
-    about: View EVA DB Docs
+    about: View EvaDB Documentation
   - name: 💬 Slack
     url: https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg
-    about: Ask on EVA DB Slack Forum
+    about: Join our Slack!

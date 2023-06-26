@@ -225,6 +225,13 @@ def format_file(file_path, add_header, strip_header, format_code):
             #if ret_val:
             #    sys.exit(1)
 
+            # CHECK FOR INVALID WORDS (like print)
+            with open(file_path, 'r') as file:
+                for line_num, line in enumerate(file, start=1):
+                    if ' print(' in line:
+                        LOG.warning(f"print() found in {file_path}, line {line_num}: {line.strip()}")
+                        sys.exit(1)                        
+
     # END WITH
 
     fd.close()

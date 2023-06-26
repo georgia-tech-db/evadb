@@ -123,7 +123,7 @@ fi
 ##################################################
 
 if [[ ( "$PYTHON_VERSION" = "3.10" )  && 
-      ( "$MODE" = "COV" ) ]];
+      ( "$MODE" = "TEST" ) ]];
 then 
     echo "UPLOADING COVERAGE REPORT"
     coveralls

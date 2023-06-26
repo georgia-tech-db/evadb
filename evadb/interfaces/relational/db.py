@@ -450,7 +450,7 @@ class EvaDBCursor(object):
         Examples:
             >>> proposed_plan = cursor.explain("SELECT * FROM sample_table;").df()
             >>> for step in proposed_plan[0]:
-            >>>   print(step)
+            >>>   pprint(step)
              |__ ProjectPlan
                 |__ SeqScanPlan
                     |__ StoragePlan
