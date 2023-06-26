@@ -78,7 +78,13 @@ class ChatGPT(AbstractUDF):
 
         @retry(tries=6, delay=20)
         def completion_with_backoff(**kwargs):
-            return openai.ChatCompletion.create(**kwargs)
+            try:
+                response = openai.ChatCompletion.create(**kwargs)
+                answer = response.choices[0].message.content
+            # ignore API rate limit error etc.
+            except Exception as e:
+                answer = f"{e}"
+            return answer
 
         # Register API key, try configuration manager first
         openai.api_key = ConfigurationManager().get_value("third_party", "OPENAI_KEY")
@@ -90,34 +96,32 @@ class ChatGPT(AbstractUDF):
         ), "Please set your OpenAI API key in evadb.yml file (third_party, open_api_key) or environment variable (OPENAI_KEY)"
 
         prompts = text_df[text_df.columns[0]]
-        queries = text_df[text_df.columns[1]]
+        queries = text_df[text_df.columns[0]]
+        if len(text_df.columns) > 1:
+            queries = text_df[text_df.columns[1]]
 
         # openai api currently supports answers to a single prompt only
         # so this udf is designed for that
         results = []
 
         for prompt, query in zip(prompts, queries):
-            if prompt != "None":
-                query = prompt + ": " + query
-
             params = {
                 "model": self.model,
                 "temperature": self.temperature,
                 "messages": [
                     {
                         "role": "user",
-                        "content": query,
-                    }
+                        "content": f"Context to answer the question : {query}",
+                    },
+                    {
+                        "role": "user",
+                        "content": f"Answer the question based on context : {prompt}",
+                    },
                 ],
             }
 
-            try:
-                response = completion_with_backoff(**params)
-                results.append(response.choices[0].message.content)
-            # https://help.openai.com/en/articles/6897213-openai-library-error-types-guidance
-            # ignore API rate limit error etc.
-            except Exception as e:
-                results.append(f"{e}")
+            answer = completion_with_backoff(**params)
+            results.append(answer)
 
         df = pd.DataFrame({"response": results})
 

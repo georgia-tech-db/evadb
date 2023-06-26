@@ -39,7 +39,6 @@ from evadb.optimizer.rules.pattern import Pattern
 from evadb.optimizer.rules.rules_base import Promise, Rule, RuleType
 from evadb.parser.types import JoinType, ParserOrderBySortType
 from evadb.plan_nodes.apply_and_merge_plan import ApplyAndMergePlan
-from evadb.plan_nodes.create_mat_view_plan import CreateMaterializedViewPlan
 from evadb.plan_nodes.exchange_plan import ExchangePlan
 from evadb.plan_nodes.explain_plan import ExplainPlan
 from evadb.plan_nodes.hash_join_build_plan import HashJoinBuildPlan
@@ -56,7 +55,6 @@ from evadb.optimizer.operators import (
     LogicalApplyAndMerge,
     LogicalCreate,
     LogicalCreateIndex,
-    LogicalCreateMaterializedView,
     LogicalCreateUDF,
     LogicalDelete,
     LogicalDropObject,
@@ -1104,29 +1102,6 @@ class LogicalJoinToPhysicalNestedLoopJoin(Rule):
         nested_loop_join_plan.append_child(join_node.lhs())
         nested_loop_join_plan.append_child(join_node.rhs())
         yield nested_loop_join_plan
-
-
-class LogicalCreateMaterializedViewToPhysical(Rule):
-    def __init__(self):
-        pattern = Pattern(OperatorType.LOGICAL_CREATE_MATERIALIZED_VIEW)
-        pattern.append_child(Pattern(OperatorType.DUMMY))
-        super().__init__(RuleType.LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL, pattern)
-
-    def promise(self):
-        return Promise.LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL
-
-    def check(self, grp_id: int, context: OptimizerContext):
-        return True
-
-    def apply(self, before: LogicalCreateMaterializedView, context: OptimizerContext):
-        after = CreateMaterializedViewPlan(
-            before.view,
-            columns=before.col_list,
-            if_not_exists=before.if_not_exists,
-        )
-        for child in before.children:
-            after.append_child(child)
-        yield after
 
 
 class LogicalFilterToPhysical(Rule):

@@ -18,10 +18,9 @@ from unittest.mock import MagicMock, patch
 from evadb.binder.binder_utils import BinderError
 from evadb.binder.statement_binder import StatementBinder
 from evadb.binder.statement_binder_context import StatementBinderContext
-from evadb.catalog.catalog_type import NdArrayType
+from evadb.catalog.catalog_type import ColumnType, NdArrayType
 from evadb.expression.tuple_value_expression import TupleValueExpression
 from evadb.parser.alias import Alias
-from evadb.parser.create_statement import ColumnDefinition
 
 
 class StatementBinderTests(unittest.TestCase):
@@ -111,26 +110,25 @@ class StatementBinderTests(unittest.TestCase):
             binder._bind_tableref(tableref)
             self.assertEqual(mock_ctx.call_count, 1)
 
-    def test_bind_create_mat_statement(self):
+    def test_bind_create_table_from_select_statement(self):
         with patch.object(StatementBinder, "bind") as mock_binder:
             binder = StatementBinder(StatementBinderContext(MagicMock()))
-            mat_statement = MagicMock()
-            binder._bind_create_mat_statement(mat_statement)
-            mock_binder.assert_called_with(mat_statement.query)
 
-    def test_raises_mismatch_columns_create_mat_statement(self):
-        with patch.object(StatementBinder, "bind"):
-            binder = StatementBinder(StatementBinderContext(MagicMock()))
-            mat_statement = MagicMock()
-            mat_statement.col_list = [ColumnDefinition("id", None, None, None)]
-            mat_statement.query.target_list = [
-                TupleValueExpression(name="id"),
-                TupleValueExpression(name="label"),
+            output_obj = MagicMock()
+            output_obj.type = ColumnType.INTEGER
+            output_obj.array_type = NdArrayType.UINT8
+            output_obj.array_dimensions = (1, 1)
+
+            create_statement = MagicMock()
+            create_statement.column_list = []
+            create_statement.query.target_list = [
+                TupleValueExpression(name="id", col_object=output_obj),
+                TupleValueExpression(name="label", col_object=output_obj),
             ]
-            with self.assertRaises(
-                Exception, msg="Projected columns mismatch, expected 1 found 2."
-            ):
-                binder._bind_create_mat_statement(mat_statement)
+
+            binder._bind_create_statement(create_statement)
+            mock_binder.assert_called_with(create_statement.query)
+            self.assertEqual(2, len(create_statement.column_list))
 
     def test_bind_explain_statement(self):
         with patch.object(StatementBinder, "bind") as mock_binder:

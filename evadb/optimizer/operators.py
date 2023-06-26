@@ -56,7 +56,6 @@ class OperatorType(IntEnum):
     LOGICALSAMPLE = auto()
     LOGICALJOIN = auto()
     LOGICALFUNCTIONSCAN = auto()
-    LOGICAL_CREATE_MATERIALIZED_VIEW = auto()
     LOGICAL_SHOW = auto()
     LOGICALEXPLAIN = auto()
     LOGICALCREATEINDEX = auto()
@@ -1012,60 +1011,6 @@ class LogicalJoin(Operator):
                 self.left_keys,
                 self.right_keys,
                 tuple(self.join_project or []),
-            )
-        )
-
-
-class LogicalCreateMaterializedView(Operator):
-    """Logical node for create materialized view operations
-    Arguments:
-        view {TableRef}: [view table that is to be created]
-        col_list{List[ColumnDefinition]} -- column names in the view
-        if_not_exists {bool}: [whether to override if view exists]
-    """
-
-    def __init__(
-        self,
-        view: TableInfo,
-        col_list: List[ColumnDefinition],
-        if_not_exists: bool = False,
-        children=None,
-    ):
-        super().__init__(OperatorType.LOGICAL_CREATE_MATERIALIZED_VIEW, children)
-        self._view = view
-        self._col_list = col_list
-        self._if_not_exists = if_not_exists
-
-    @property
-    def view(self):
-        return self._view
-
-    @property
-    def if_not_exists(self):
-        return self._if_not_exists
-
-    @property
-    def col_list(self):
-        return self._col_list
-
-    def __eq__(self, other):
-        is_subtree_equal = super().__eq__(other)
-        if not isinstance(other, LogicalCreateMaterializedView):
-            return False
-        return (
-            is_subtree_equal
-            and self.view == other.view
-            and self.col_list == other.col_list
-            and self.if_not_exists == other.if_not_exists
-        )
-
-    def __hash__(self) -> int:
-        return hash(
-            (
-                super().__hash__(),
-                self.view,
-                tuple(self.col_list),
-                self.if_not_exists,
             )
         )
 
