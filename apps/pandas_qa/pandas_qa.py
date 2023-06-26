@@ -22,16 +22,15 @@ import pandas as pd
 import evadb
 
 APP_SOURCE_DIR = os.path.abspath(os.path.dirname(__file__))
+CURRENT_WORKING_DIR = os.getcwd() # used to locate evadb_data dir
 
 # default file paths
-DEFAULT_CSV_PATH = os.path.join(APP_SOURCE_DIR, "pandas_qa", "data",
+DEFAULT_CSV_PATH = os.path.join(APP_SOURCE_DIR, "data",
                                 "country.csv")
 
 # temporary file paths
-QUESTION_PATH = os.path.join(APP_SOURCE_DIR, "pandas_qa", "evadb_data",
-                               "tmp", "question.csv")
-SCRIPT_PATH = os.path.join(APP_SOURCE_DIR, "pandas_qa", "evadb_data",
-                               "tmp", "script.py")
+QUESTION_PATH = os.path.join(APP_SOURCE_DIR, "question.csv")
+SCRIPT_PATH = os.path.join(APP_SOURCE_DIR, "script.py")
 
 def receive_user_input() -> Dict:
     """Receives user input.
@@ -78,7 +77,7 @@ def generate_script(cursor: evadb.EvaDBCursor, df: pd.DataFrame, question: str) 
 
     prompt = f"""There is a dataframe in pandas (python). The name of the
             dataframe is df. This is the result of print(df.head()):
-            {str(df.head())}. Return a python script with comments to get the answer to the following question: {question}"""
+            {str(df.head())}. Return a python script with comments to get the answer to the following question: {question}. Do not write code to load the CSV file."""
 
     question_df = pd.DataFrame([{"prompt": prompt}])
     question_df.to_csv(QUESTION_PATH)
@@ -86,6 +85,8 @@ def generate_script(cursor: evadb.EvaDBCursor, df: pd.DataFrame, question: str) 
     cursor.drop_table("Question", if_exists=True).execute()
     cursor.query("""CREATE TABLE IF NOT EXISTS Question (prompt TEXT(50));""").execute()
     cursor.load(QUESTION_PATH, "Question", "csv").execute()
+
+    pd.set_option('display.max_colwidth', None)
 
     query = cursor.table("Question").select("ChatGPT(prompt)")
     script_body = query.df()["chatgpt.response"][0]
@@ -116,7 +117,10 @@ def cleanup():
     """Removes any temporary file / directory created by EvaDB."""
     if os.path.exists("evadb_data"):
         shutil.rmtree("evadb_data")
-
+    if os.path.exists(QUESTION_PATH):
+        os.remove(QUESTION_PATH)
+    if os.path.exists(SCRIPT_PATH):
+        os.remove(SCRIPT_PATH)
 
 if __name__ == "__main__":
     try:
@@ -145,19 +149,17 @@ if __name__ == "__main__":
             print("⏳ Generating response (may take a while)...")
             script_body = generate_script(cursor, df, question)
             print("+--------------------------------------------------+")
-            print("✅ Script:")
+            print("✅ Running this Python script:")
             print(script_body)
             print("+--------------------------------------------------+")
 
-            to_run = str(input("🪄 Want to run it? (y/n): "))
-            if to_run.lower() == "y" or to_run.lower() == "yes":
-                try:
-                    run_script(script_body, user_input)
-                except Exception as e:
-                    print(
-                        "❗️ Error encountered while running the script automatically. You can copy the script body and run it manually instead"
-                    )
-                    print(e)
+            try:
+                run_script(script_body, user_input)
+            except Exception as e:
+                print(
+                    "❗️ Error encountered while running the script. You will likely need to edit the pandas script and run it manually."
+                )
+                print(e)
 
         cleanup()
         print("✅ Session ended.")
