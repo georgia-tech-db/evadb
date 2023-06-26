@@ -283,6 +283,15 @@ def try_to_import_torchvision():
                 Please install them with `pip install torchvision`."""
         )
 
+def try_to_import_donutmodel():
+    try:
+        import donut  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import donut python package.
+                Please install them with `pip install donut`."""
+        )
+
 
 def try_to_import_cv2():
     try:
