@@ -98,6 +98,7 @@ def download_youtube_video_transcript(video_link: str):
     title = YouTube(video_link).streams[0].title
     print(f"Video Title : {title}")
     video_id = extract.video_id(video_link)
+    print(f"Video id : {video_id} ")
     transcript = [{}]
     transcript = YouTubeTranscriptApi.get_transcript(video_id)
     transcript.insert(0, {"text": "Title : '" + title + "', Summary : "})
