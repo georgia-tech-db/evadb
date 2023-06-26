@@ -82,12 +82,18 @@ class StatementBinder:
         assert node.table_ref.is_table_atom(), "Index can only be created on Tableinfo"
         if not node.udf_func:
             # Feature table type needs to be float32 numpy array.
-            assert len(node.col_list) == 1, f"Index can be only created on one column, but instead {len(node.col_list)} are provided"
+            assert (
+                len(node.col_list) == 1
+            ), f"Index can be only created on one column, but instead {len(node.col_list)} are provided"
             col_def = node.col_list[0]
 
             table_ref_obj = node.table_ref.table.table_obj
-            col_list = [col for col in table_ref_obj.columns if col.name == col_def.name]
-            assert len(col_list) == 1, f"Index is created on non-existent column {col_def.name}"
+            col_list = [
+                col for col in table_ref_obj.columns if col.name == col_def.name
+            ]
+            assert (
+                len(col_list) == 1
+            ), f"Index is created on non-existent column {col_def.name}"
 
             col = col_list[0]
             assert (
