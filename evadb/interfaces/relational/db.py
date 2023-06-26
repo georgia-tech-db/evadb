@@ -310,7 +310,7 @@ class EvaDBCursor(object):
         Examples:
             Drop UDF 'ObjectDetector'
 
-            >>> cursor.drop_udf("ObjectDetector", if_exists = True)
+            >>> cursor.drop_function("ObjectDetector", if_exists = True)
                 0
             0	UDF Successfully dropped: ObjectDetector
         """
@@ -358,7 +358,7 @@ class EvaDBCursor(object):
             EvaDBQuery: The EvaDBQuery object representing the UDF created.
 
         Examples:
-            >>> cursor.create_udf("MnistImageClassifier", if_exists = True, 'mnist_image_classifier.py')
+            >>> cursor.create_function("MnistImageClassifier", if_exists = True, 'mnist_image_classifier.py')
                 0
             0	UDF Successfully created: MnistImageClassifier
         """
