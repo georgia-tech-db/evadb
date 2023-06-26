@@ -54,12 +54,13 @@ class ChatGPT(AbstractUDF):
     @forward(
         input_signatures=[
             PandasDataframe(
-                columns=["prompt", "query"],
+                columns=["query", "content", "prompt"],
                 column_types=[
                     NdArrayType.STR,
                     NdArrayType.STR,
+                    NdArrayType.STR,
                 ],
-                column_shapes=[(1,), (1,)],
+                column_shapes=[(1,), (1,), (None,)],
             )
         ],
         output_signatures=[
@@ -95,30 +96,45 @@ class ChatGPT(AbstractUDF):
             len(openai.api_key) != 0
         ), "Please set your OpenAI API key in evadb.yml file (third_party, open_api_key) or environment variable (OPENAI_KEY)"
 
-        prompts = text_df[text_df.columns[0]]
         queries = text_df[text_df.columns[0]]
+        content = text_df[text_df.columns[0]]
         if len(text_df.columns) > 1:
-            queries = text_df[text_df.columns[1]]
+            queries = text_df.iloc[:, 0]
+            content = text_df.iloc[:, 1]
+
+        prompt = None
+        if len(text_df.columns) > 2:
+            prompt = text_df.iloc[0, 2]
 
         # openai api currently supports answers to a single prompt only
         # so this udf is designed for that
         results = []
 
-        for prompt, query in zip(prompts, queries):
+        for query, content in zip(queries, content):
             params = {
                 "model": self.model,
                 "temperature": self.temperature,
-                "messages": [
+                "messages": []
+            }
+
+            def_sys_prompt_message = {
+                "role" : "system",
+                "content" : prompt if prompt is not None else "You are a helpful assistant that accomplishes user tasks."
+            }
+
+            params["messages"].append(def_sys_prompt_message)
+            params["messages"].extend(
+                [
                     {
                         "role": "user",
-                        "content": f"Context to answer the question : {query}",
+                        "content": f"Here is some context : {content}",
                     },
                     {
                         "role": "user",
-                        "content": f"Answer the question based on context : {prompt}",
+                        "content": f"Complete the following task: {query}",
                     },
                 ],
-            }
+            )
 
             answer = completion_with_backoff(**params)
             results.append(answer)
