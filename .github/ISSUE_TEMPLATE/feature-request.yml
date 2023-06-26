@@ -1,11 +1,7 @@
 name: 🚀 Feature Request
-description: Suggest a feature for EVA DB
+description: Suggest a feature for EvaDB
 labels: [enhancement]
 body:
-  - type: markdown
-    attributes:
-      value: |
-        🙏 Thanks for submitting a EVA DB Feature Request!
 
   - type: checkboxes
     attributes:
@@ -14,7 +10,7 @@ body:
         🔍 Please search the [issues](https://github.com/georgia-tech-db/eva/issues) to see if a similar feature request already exists.
       options:
         - label: >
-            I have searched the EVA DB [issues](https://github.com/georgia-tech-db/eva/issues) and found no similar feature requests.
+            I have searched the EvaDB [issues](https://github.com/georgia-tech-db/eva/issues) and found no similar feature requests.
           required: true
 
   - type: textarea
@@ -22,7 +18,7 @@ body:
       label: Description
       description: 💡 A short description of your feature.
       placeholder: |
-        What new feature would you like to see in EVA DB?
+        What new feature would you like to see in EvaDB?
     validations:
       required: true
 
@@ -34,16 +30,11 @@ body:
       placeholder: |
         How would this feature be used, and who would use it?
 
-  - type: textarea
-    attributes:
-      label: Additional
-      description: 📝 Anything else you would like to share?
-
   - type: checkboxes
     attributes:
       label: Are you willing to submit a PR?
       description: >
-        (Optional)  Please consider submitting a [Pull Request](https://github.com/georgia-tech-db/eva/pulls) (PR) to help improve EVA DB for everyone, especially if you have a good understanding of how to implement a fix or feature.
+        (Optional)  Please consider submitting a [Pull Request](https://github.com/georgia-tech-db/eva/pulls) (PR) to help improve EvaDB for everyone, especially if you have a good understanding of how to implement a fix or feature.
         Please see our ✅ [Contributing Guide](https://github.com/georgia-tech-db/eva/pulls) to get started.
       options:
         - label: Yes I'd like to help by submitting a PR!
