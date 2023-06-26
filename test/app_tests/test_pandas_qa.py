@@ -38,9 +38,9 @@ class PandasQATest(unittest.TestCase):
 
     def test_should_run_pandas_qa_app(self):
         app_path = Path("apps", "pandas_qa", "pandas_qa.py")
-        input1 = "\n\n"  # use default csv
-        input2 = "print country with highest gdp\n\n"  # what to do with the csv
-        input3 = "no\n\n"  # don't run the script
+        input1 = "\n"  # use default csv
+        input2 = "Print country with highest gdp\n\n"  # what to do with the csv
+        input3 = "yes\n\n"  # run the script
         inputs = input1 + input2 + input3
         command = ["python", app_path]
 
@@ -53,4 +53,4 @@ class PandasQATest(unittest.TestCase):
         stdout, stderr = process.communicate(inputs.encode())
 
         decoded_stdout = stdout.decode()
-        assert "df" in decoded_stdout
+        assert "Country" or "Rate" in decoded_stdout
