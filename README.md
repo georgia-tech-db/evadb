@@ -167,38 +167,22 @@ query = query.select("id, bbox, EmotionDetector(Crop(data, bounding_box))")
 # Run the query and get the query result as a dataframe
 response = query.df()
 ```
+- **EvaDB runs AI apps 10--100x faster using its AI-centric query optimizer**. Three key built-in optimizations are:
 
-- **EvaDB runs queries faster using its AI-centric query optimizer**. Two key optimizations are:
+   💾 **Caching**: EvaDB automatically caches and reuses model inference results.
 
-   💾 **Caching**: EvaDB automatically caches and reuses previous query results (especially model inference results), eliminating redundant computation and reducing query processing time.
+   ⚡️ **Parallel Query Execution**: EvaDB runs the app in parallel on all the available hardware resources (CPUs and GPUs).
 
-   🎯 **Predicate Reordering**: EvaDB optimizes the order in which the query predicates are evaluated (e.g., runs the faster, more selective model first), leading to faster queries and lower inference costs.
-
-```mysql
-  -- Query 1: Find all images of black-colored dogs
-  SELECT id, bbox FROM dogs 
-  JOIN LATERAL UNNEST(Yolo(data)) AS Obj(label, bbox, score) 
-  WHERE Obj.label = 'dog' 
-    AND Color(Crop(data, bbox)) = 'black'; 
-
-  -- Query 2: Find all Great Danes that are black-colored
-  SELECT id, bbox FROM dogs 
-  JOIN LATERAL UNNEST(Yolo(data)) AS Obj(label, bbox, score) 
-  WHERE Obj.label = 'dog' 
-    AND DogBreedClassifier(Crop(data, bbox)) = 'great dane' 
-    AND Color(Crop(data, bbox)) = 'black';
-```
-
-By reusing the results of the first query and reordering the predicates based on the available cached inference results, EvaDB runs the second query **10x faster**!
+   🎯 **Model Ordering**: EvaDB optimizes the order in which models are evaluated (e.g., runs the faster, more selective model first).
 
 ## Architecture Diagram
 
-This diagram presents the key components of EvaDB. EvaDB's AI-centric Query Optimizer takes a parsed query as input and generates a query plan that is then executed by the Query Engine. The Query Engine hits multiple storage engines to retrieve the data required for efficiently running the query:
+This diagram presents the key components of EvaDB. EvaDB's AI-centric query optimizer takes a query as input and generates a query plan that is executed by the query engine. The query engine hits the relevant storage engines to quickly retrieve the data required for efficiently running the query:
 1. Structured data (SQL database system connected via `sqlalchemy`).
-2. Unstructured media data (on cloud buckets or local filesystem).
-3. Vector data (vector database system).
+2. Unstructured media data (on cloud buckets/local filesystem).
+3. Feature data (vector database system).
 
-<img width="700" alt="Architecture Diagram" src="https://github.com/georgia-tech-db/eva/assets/5521975/01452ec9-87d9-4d27-90b2-c0b1ab29b16c">
+<img width="500" alt="Architecture Diagram" src="https://github.com/georgia-tech-db/eva/assets/5521975/01452ec9-87d9-4d27-90b2-c0b1ab29b16c">
 
 ## Screenshots
 

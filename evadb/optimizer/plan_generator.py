@@ -109,6 +109,6 @@ class PlanGenerator:
         try:
             plan = self.optimize(logical_plan)
         except TimeoutError:
-            print("Optimizer timed out!")
+            raise ValueError("Optimizer timed out!")
 
         return plan

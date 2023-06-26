@@ -1,11 +1,7 @@
 name: 🐞 Bug Report
-description: Problems with EVA DB
+description: Problems with EvaDB
 labels: [bug, triage]
 body:
-  - type: markdown
-    attributes:
-      value: |
-        🙏 Thanks for submitting a EVA DB Bug Report!
 
   - type: checkboxes
     attributes:
@@ -14,24 +10,8 @@ body:
         🔍 Please search the [issues](https://github.com/georgia-tech-db/eva/issues) to see if a similar bug report already exists.
       options:
         - label: >
-            I have searched the EVA DB [issues](https://github.com/georgia-tech-db/eva/issues) and found no similar bug report.
+            I have searched the EvaDB [issues](https://github.com/georgia-tech-db/eva/issues) and found no similar bug report.
           required: true
-
-  - type: dropdown
-    attributes:
-      label: EVA DB Component
-      description: |
-        🤔 Please select the part of EVA DB where you found the bug.
-      multiple: true
-      options:
-        - "Query Parser"
-        - "Query Optimizer"
-        - "Query Executor"
-        - "Data Loader"
-        - "Integrations"
-        - "Other"
-    validations:
-      required: false
 
   - type: textarea
     attributes:
@@ -47,34 +27,19 @@ body:
       label: Environment
       description: 🖥️ Please specify the software and hardware you used to produce the bug.
       placeholder: |
-        - EVA DB: v2.0.1
+        - EvaDB: v2.0.1
         - OS: Ubuntu 20.04
         - Python: 3.9.0
+        - GPU: Yes
+        - Ray: Not installed
     validations:
       required: false
-
-  - type: textarea
-    attributes:
-      label: Minimal Reproducible Example
-      description: >
-        🧐 When asking a question, people will be better able to provide help if you provide code that they can easily understand and use to **reproduce** the problem.
-      placeholder: |
-        ```
-        # Code to reproduce your issue here
-        ```
-    validations:
-      required: false
-
-  - type: textarea
-    attributes:
-      label: Additional
-      description: 📝 Anything else you would like to share?
 
   - type: checkboxes
     attributes:
       label: Are you willing to submit a PR?
       description: >
-        👍 (Optional) Please consider submitting a [Pull Request](https://github.com/georgia-tech-db/eva/pulls) (PR) to help improve EVA DB for everyone, especially if you have a good understanding of how to implement a fix or feature.
+        👍 (Optional) Please consider submitting a [Pull Request](https://github.com/georgia-tech-db/eva/pulls) (PR) to help improve EvaDB for everyone, especially if you have a good understanding of how to implement a fix or feature.
         Please see our ✅ [Contributing Guide](https://evadb.readthedocs.io/en/stable/source/contribute/index.html) to get started.
       options:
         - label: Yes I'd like to help by submitting a PR!

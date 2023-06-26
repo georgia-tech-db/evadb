@@ -57,7 +57,9 @@ async def read_from_client_and_send_to_server(
 ):
     VERSION = VERSION_DICT["VERSION"]
     intro = f"evadb (v{VERSION})\nType 'EXIT;' to exit the client \n"
-    print(intro, flush=True)
+    from pprint import pprint
+
+    pprint(intro, flush=True)
 
     prompt = "evadb=#"
 

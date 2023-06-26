@@ -28,7 +28,8 @@ class Insert:
         column_list = []
         value_list = []
 
-        # print(tree.pretty())
+        # from pprint import pprint
+        # pprint(tree.pretty())
 
         for child in tree.children:
             if isinstance(child, Tree):
