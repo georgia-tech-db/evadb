@@ -24,29 +24,21 @@
 
 <p align="center"> <b><h3>EvaDB is a database system for building simpler and faster AI-powered applications.</b></h3> </p>
 
-EvaDB is an AI-SQL database system for developing applications powered by AI models. We aim to simplify the development and deployment of AI-powered applications that operate on structured (tables, feature stores) and unstructured data (text documents, videos, PDFs, podcasts, etc.).
+EvaDB is a database system for developing AI apps. We aim to simplify the development and deployment of AI-powered apps that operate on unstructured data (text documents, videos, PDFs, podcasts, etc.) and structured data (tables, vector index).
 
-EvaDB accelerates AI pipelines by 10x using a collection of performance optimizations inspired by time-tested SQL database systems, including data-parallel query execution, function caching, sampling, and cost-based predicate reordering. EvaDB supports an AI-oriented query language tailored for analyzing both structured and unstructured data. It has first-class support for PyTorch, Hugging Face, YOLO, and Open AI models.
-
-The high-level Python and SQL APIs allows even beginners to use EvaDB in a few lines of code. Advanced users can define custom user-defined functions that wrap around any AI model or Python library. EvaDB is fully implemented in Python and licensed under the Apache license.
+The high-level Python and SQL APIs allow beginners to use EvaDB in a few lines of code. Advanced users can define custom user-defined functions that wrap around any AI model or Python library. EvaDB is fully implemented in Python and licensed under the Apache license.
 
 ## Quick Links
 
 - [Features](#features)
 - [Quick Start](#quick-start)
 - [Documentation](#documentation)
-- [Roadmap](https://github.com/orgs/georgia-tech-db/projects/3)
-- [Architecture Diagram](#architecture-diagram)
-- [Illustrative Applications](#illustrative-applications)
-- [Screenshots](#screenshots)
 - [Community and Support](#community-and-support)
 - [Twitter](https://twitter.com/evadb_ai)
-- [Contributing](#contributing)
-- [License](#license)
 
 ## Features
 
-- 🔮 Build simpler AI-powered applications using short Python or SQL queries
+- 🔮 Build simpler AI-powered applications using Python functions or SQL queries
 - ⚡️ 10x faster applications using AI-centric query optimization  
 - 💰 Save money spent on GPUs
 - 🚀 First-class support for your custom deep learning models through user-defined functions
@@ -58,25 +50,22 @@ The high-level Python and SQL APIs allows even beginners to use EvaDB in a few l
 
 Here are some illustrative EvaDB-powered applications (each Jupyter notebook can be opened on Google Colab):
 
- * 🔮 <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/11-similarity-search-for-motif-mining.html">Reddit Image Similarity Search</a>
- * 🔮 <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/08-chatgpt.html">ChatGPT-based video question answering</a>
- * 🔮 <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/12-query-pdf.html">Querying PDF documents</a>
- * 🔮 <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/02-object-detection.html">Analysing traffic flow with YOLO</a>
- * 🔮 <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/03-emotion-analysis.html">Examining emotion palette of a movie</a>
- * 🔮 <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/07-object-segmentation-huggingface.html">Image segmentation with Hugging Face</a>
- * 🔮 <a href="https://github.com/georgia-tech-db/license-plate-recognition">Recognizing license plates</a>
- * 🔮 <a href="https://github.com/georgia-tech-db/toxicity-classification">Analysing toxicity of social media memes </a>
+ * 🔮 <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/13-privategpt.html">PrivateGPT</a>
+ * 🔮 <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/08-chatgpt.html">ChatGPT-based Video Question Answering</a>
+ * 🔮 <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/12-query-pdf.html">Querying PDF Documents</a>
+ * 🔮 <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/02-object-detection.html">Analysing Traffic Flow with YOLO</a>
+ * 🔮 <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/03-emotion-analysis.html">Examining Emotions of Movie</a>
+ * 🔮 <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/07-object-segmentation-huggingface.html">Image Segmentation with Hugging Face</a>
+ * 🔮 <a href="https://github.com/georgia-tech-db/license-plate-recognition">Recognizing License Plates</a>
 
 ## Documentation
 
-* [Detailed Documentation](https://evadb.readthedocs.io/)
+* [Documentation](https://evadb.readthedocs.io/)
   - The <a href="https://evadb.readthedocs.io/en/stable/source/overview/installation.html">Getting Started</a> page shows how you can use EvaDB for different AI tasks and how you can easily extend EvaDB to support your custom deep learning model through user-defined functions.
-  - The <a href="https://evadb.readthedocs.io/en/latest/source/tutorials/11-similarity-search-for-motif-mining.html">User Guides</a> section contains Jupyter Notebooks that demonstrate how to use various features of EvaDB. Each notebook includes a link to Google Colab, where you can run the code yourself.
-* [Tutorials](https://github.com/georgia-tech-db/eva/blob/master/tutorials/03-emotion-analysis.ipynb)
+  - The <a href="https://evadb.readthedocs.io/en/latest/source/tutorials/13-privategpt.html">User Guides</a> section contains Jupyter Notebooks that demonstrate how to use various features of EvaDB. Each notebook includes a link to Google Colab, where you can run the code yourself.
 * [Join us on Slack](https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg)
 * [Follow us on Twitter](https://twitter.com/evadb_ai)
-* [Medium-Term Roadmap](https://github.com/orgs/georgia-tech-db/projects/3)
-* [Demo](https://evadb.readthedocs.io/en/stable/source/tutorials/08-chatgpt.html)
+* [Roadmap](https://github.com/orgs/georgia-tech-db/projects/3)
 
 ## Quick Start
 
@@ -103,7 +92,8 @@ cursor.load(
     table_name="news_videos"
 ).df()
 
-# Define a function that wraps around a speech-to-text (Whisper) model
+# Define a function that wraps around your deep learning model
+# Here, this function wraps around an off-the-shelf speech-to-text (Whisper) model
 # Such functions are known as user-defined functions or UDFs
 # So, we are creating a Whisper UDF here
 # After creating the UDF, we can use the function in any query
@@ -135,21 +125,6 @@ query = query.select("ChatGPT('Is this video summary related to LLMs', text)")
 
 # Finally, we run the query to get the results as a dataframe
 response = query.df()
-```
-
-- **Write functions to wrap around your custom deep learning models**
-
-```python
-# Define a function that wraps around a speech-to-text (Whisper) model
-# Such functions are known as user-defined functions or UDFs
-# So, we are creating a Whisper UDF here
-# After creating the UDF, we can use the function in any query
-cursor.create_udf(
-    udf_name="SpeechRecognizer",
-    type="HuggingFace",
-    task='automatic-speech-recognition',
-    model='openai/whisper-base'
-).df()
 ```
 
 - **Chain multiple models in a single query to set up useful AI pipelines**
