@@ -156,8 +156,7 @@ jobs:
             "python<< parameters.v >>" -m venv test_evadb
             pip install --upgrade pip
             source test_evadb/bin/activate
-            pip install ".[dev]"
-            pip uninstall -y ray
+            pip install ".[dev]" --skip-packages ray
 
       # Enable Ray (update evadb.yml file and install Ray package)
       - when:

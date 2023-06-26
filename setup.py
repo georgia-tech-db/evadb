@@ -22,6 +22,10 @@ AUTHOR = "Georgia Tech Database Group"
 AUTHOR_EMAIL = "arulraj@gatech.edu"
 URL = "https://github.com/georgia-tech-db/eva"
 
+# Check Python version
+# import sys
+# if sys.version_info < (3, 8):
+#     sys.exit("Python 3.8 or later is required.")
 
 def read(path, encoding="utf-8"):
     path = os.path.join(os.path.dirname(__file__), path)
