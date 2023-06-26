@@ -122,7 +122,7 @@ fi
 ## based on Python version
 ##################################################
 
-if [[ ( "$PYTHON_VERSION" = "3.10" )  && 
+if [[ ( "$PYTHON_VERSION" = "3.11" )  && 
       ( "$MODE" = "COV" ) ]];
 then 
     echo "UPLOADING COVERAGE REPORT"
