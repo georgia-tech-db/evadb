@@ -22,15 +22,15 @@ import pandas as pd
 import evadb
 
 APP_SOURCE_DIR = os.path.abspath(os.path.dirname(__file__))
-CURRENT_WORKING_DIR = os.getcwd() # used to locate evadb_data dir
+CURRENT_WORKING_DIR = os.getcwd()  # used to locate evadb_data dir
 
 # default file paths
-DEFAULT_CSV_PATH = os.path.join(APP_SOURCE_DIR, "data",
-                                "country.csv")
+DEFAULT_CSV_PATH = os.path.join(APP_SOURCE_DIR, "data", "country.csv")
 
 # temporary file paths
 QUESTION_PATH = os.path.join(APP_SOURCE_DIR, "question.csv")
 SCRIPT_PATH = os.path.join(APP_SOURCE_DIR, "script.py")
+
 
 def receive_user_input() -> Dict:
     """Receives user input.
@@ -86,7 +86,7 @@ def generate_script(cursor: evadb.EvaDBCursor, df: pd.DataFrame, question: str) 
     cursor.query("""CREATE TABLE IF NOT EXISTS Question (prompt TEXT(50));""").execute()
     cursor.load(QUESTION_PATH, "Question", "csv").execute()
 
-    pd.set_option('display.max_colwidth', None)
+    pd.set_option("display.max_colwidth", None)
 
     query = cursor.table("Question").select("ChatGPT(prompt)")
     script_body = query.df()["chatgpt.response"][0]
@@ -121,6 +121,7 @@ def cleanup():
         os.remove(QUESTION_PATH)
     if os.path.exists(SCRIPT_PATH):
         os.remove(SCRIPT_PATH)
+
 
 if __name__ == "__main__":
     try:
