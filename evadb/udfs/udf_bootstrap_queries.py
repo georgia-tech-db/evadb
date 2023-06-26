@@ -218,9 +218,16 @@ def init_builtin_udfs(db: EvaDBDatabase, mode: str = "debug") -> None:
     # "RuntimeError: random_device could not be read"
     # The suspicion is that importing torch prior to decord resolves this issue
     try:
-        import torch  # noqa
+        import torch  # noqa: F401
     except ImportError:
         pass
+
+    # Enable environment variables
+    # Relevant for ocr and other transformer-based models
+    import os
+
+    os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
+    os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
     # list of UDF queries to load
     queries = [
@@ -236,10 +243,10 @@ def init_builtin_udfs(db: EvaDBDatabase, mode: str = "debug") -> None:
         # ocr_udf_query,
         # Mvit_udf_query,
         Sift_udf_query,
-        Yolo_udf_query,
+        yolo8n_query,
     ]
 
-    # if mode is 'debug', add debug UDFs and a smaller Yolo model
+    # if mode is 'debug', add debug UDFs
     if mode == "debug":
         queries.extend(
             [
@@ -248,8 +255,6 @@ def init_builtin_udfs(db: EvaDBDatabase, mode: str = "debug") -> None:
                 DummyFeatureExtractor_udf_query,
             ]
         )
-        queries.remove(Yolo_udf_query)
-        queries.append(yolo8n_query)
 
     # execute each query in the list of UDF queries
     # ignore exceptions during the bootstrapping phase due to missing packages

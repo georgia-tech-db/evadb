@@ -239,9 +239,14 @@ def try_to_import_ray():
 def is_ray_available() -> bool:
     try:
         try_to_import_ray()
-        return False
+        return True
     except ValueError:  # noqa: E722
         return False
+
+
+def is_ray_enabled_and_installed(ray_enabled: bool) -> bool:
+    ray_installed = is_ray_available()
+    return ray_enabled and ray_installed
 
 
 ##############################

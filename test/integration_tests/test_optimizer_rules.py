@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.markers import ray_skip_marker
+from test.markers import gpu_skip_marker
 from test.util import (
     get_evadb_for_testing,
     get_physical_query_plan,
@@ -43,7 +43,7 @@ from evadb.utils.stats import Timer
 
 
 @pytest.mark.notparallel
-@ray_skip_marker
+@gpu_skip_marker
 class OptimizerRulesTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
