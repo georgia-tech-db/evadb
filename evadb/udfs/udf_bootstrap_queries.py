@@ -243,7 +243,7 @@ def init_builtin_udfs(db: EvaDBDatabase, mode: str = "debug") -> None:
         # ocr_udf_query,
         # Mvit_udf_query,
         Sift_udf_query,
-        yolo8n_query,
+        Yolo_udf_query,
     ]
 
     # if mode is 'debug', add debug UDFs
