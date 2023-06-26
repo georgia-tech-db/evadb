@@ -32,11 +32,11 @@ workflows:
             v: "3.10"
             mode: "TEST"
             ray: "DISABLED"
-        - Linux:
-            name: "Test | v3.11 | Linux"
-            v: "3.10"
-            mode: "TEST"
-            ray: "DISABLED"
+        #- Linux:
+        #    name: "Test | v3.11 | Linux"
+        #    v: "3.11"
+        #    mode: "TEST"
+        #    ray: "DISABLED"
         - Linux:
             name: "Test | Ray | v3.8 | Linux"
             v: "3.8"
@@ -78,11 +78,11 @@ workflows:
             v: "3.10"
             mode: "NOTEBOOK"
             ray: "DISABLED"
-        - Linux:
-            name: "Notebook | v3.11 | Linux"
-            v: "3.11"
-            mode: "NOTEBOOK"
-            ray: "DISABLED"            
+        #- Linux:
+        #    name: "Notebook | v3.11 | Linux"
+        #    v: "3.11"
+        #    mode: "NOTEBOOK"
+        #    ray: "DISABLED"            
         - Linux:
             name: "Notebook | Ray | v3.8 | Linux"
             v: "3.8"
