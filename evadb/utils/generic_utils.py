@@ -283,6 +283,7 @@ def try_to_import_torchvision():
                 Please install them with `pip install torchvision`."""
         )
 
+
 def try_to_import_donutmodel():
     try:
         import donut  # noqa: F401

@@ -23,23 +23,21 @@ from evadb.udfs.abstract.abstract_udf import AbstractUDF
 from evadb.udfs.decorators.decorators import forward, setup
 from evadb.udfs.decorators.io_descriptors.data_types import PandasDataframe
 from evadb.udfs.gpu_compatible import GPUCompatible
-from evadb.utils.generic_utils import (
-    try_to_import_torch,
-    try_to_import_donutmodel
-)
+from evadb.utils.generic_utils import try_to_import_donutmodel, try_to_import_torch
 
 
 class OCRExtractor(AbstractUDF, GPUCompatible):
     @setup(cacheable=False, udf_type="FeatureExtraction", batchable=False)
     def setup(self):
         try_to_import_torch()
-        try_to_import_torchvision()
         try_to_import_donutmodel()
         import torch
         from donut import DonutModel
 
-        self.task_prompt="<s_cord-v2>"
-        self.pretrained_model = DonutModel.from_pretrained("naver-clova-ix/donut-base-finetuned-cord-v2")
+        self.task_prompt = "<s_cord-v2>"
+        self.pretrained_model = DonutModel.from_pretrained(
+            "naver-clova-ix/donut-base-finetuned-cord-v2"
+        )
         if torch.cuda.is_available():
             self.pretrained_model.half()
             device = torch.device("cuda")
@@ -47,7 +45,7 @@ class OCRExtractor(AbstractUDF, GPUCompatible):
         else:
             self.pretrained_model.encoder.to(torch.float)
         self.pretrained_model.eval()
-        
+
     def to_device(self, device: str) -> GPUCompatible:
         self.model = self.model.to(device)
         return self
@@ -77,9 +75,11 @@ class OCRExtractor(AbstractUDF, GPUCompatible):
             from PIL import Image
 
             data = row[0]
-            input_img = Image.fromarray(data)            
-            output = self.pretrained_model.inference(image=input_img, prompt=self.task_prompt)
-            res=self.pretrained_model.json2token(output)
+            input_img = Image.fromarray(data)
+            output = self.pretrained_model.inference(
+                image=input_img, prompt=self.task_prompt
+            )
+            res = self.pretrained_model.json2token(output)
             sequence = re.sub(r"<.*?>", "", res)
             return sequence
 
