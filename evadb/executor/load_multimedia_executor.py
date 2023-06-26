@@ -80,7 +80,7 @@ class LoadMultimediaExecutor(AbstractExecutor):
                 ]
 
                 invalid_files_str = "\n".join(invalid_files)
-                err_msg = f"invalid file: \n{invalid_files_str}"
+                err_msg = f"no valid file found at -- '{invalid_files_str}'."
                 raise ValueError(err_msg)
 
             # Get valid files.
@@ -92,7 +92,7 @@ class LoadMultimediaExecutor(AbstractExecutor):
 
             if not valid_files:
                 raise DatasetFileNotFoundError(
-                    f"no valid file found at: {str(self.node.file_path)}"
+                    f"no file found at -- '{str(self.node.file_path)}'."
                 )
 
             # Create catalog entry
@@ -130,7 +130,7 @@ class LoadMultimediaExecutor(AbstractExecutor):
             # there is no further action to take.
             if storage_engine and table_obj:
                 self._rollback_load(storage_engine, table_obj, do_create)
-            err_msg = f"Load {self.media_type.name} failed: encountered unexpected error {str(e)}"
+            err_msg = f"Load {self.media_type.name} failed: {str(e)}"
             raise ExecutorError(err_msg)
         else:
             yield Batch(
