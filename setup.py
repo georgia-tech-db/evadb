@@ -87,7 +87,6 @@ udf_libs = [
     "thefuzz",  # FUZZY STRING MATCHING
     "pytube",  # YOUTUBE QA APP
     "youtube-transcript-api",  # YOUTUBE QA APP
-    "qdrant-client>=1.1.7",  # QDRANT VECTOR STORE
     "boto3",  # AWS
     "norfair>=2.2.0",  # OBJECT TRACKING
     "kornia",  # SIFT FEATURES
@@ -103,6 +102,10 @@ notebook_libs = [
     "matplotlib>=3.3.4",
     "nbmake>=1.2.1",
     "nest-asyncio>=1.5.6",
+]
+
+qdrant_libs = [
+    "qdrant_client" # cannot install on 3.11 due to grcpio
 ]
 
 ### NEEDED FOR DEVELOPER TESTING ONLY
@@ -138,7 +141,8 @@ EXTRA_REQUIRES = {
     "document": document_libs,
     "udf": udf_libs,
     "notebook": notebook_libs,
-    # everything except ray
+    "qdrant": qdrant_libs,
+    # everything except ray and qdrant
     "dev": dev_libs + vision_libs + document_libs + udf_libs + notebook_libs,
 }
 

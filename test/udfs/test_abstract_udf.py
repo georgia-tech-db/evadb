@@ -75,6 +75,8 @@ class AbstractUDFTest(unittest.TestCase):
                                 class_list.append([obj])
                         except OSError:
                             pass
+                        except TypeError:
+                            pass
 
             flat_class_list = [item for sublist in class_list for item in sublist]
             return set(flat_class_list)
