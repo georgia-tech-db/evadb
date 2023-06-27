@@ -1,6 +1,6 @@
 _MAJOR = "0"
-_MINOR = "2"
-_REVISION = "15+dev"
+_MINOR = "3"
+_REVISION = "0+dev"
 
 VERSION_SHORT = f"{_MAJOR}.{_MINOR}"
 VERSION = f"{_MAJOR}.{_MINOR}.{_REVISION}"
