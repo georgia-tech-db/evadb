@@ -10,6 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### [Deprecated]
 ### [Removed]
 
+##  [0.3.0] - 2023-06-27
+
+* PR #907: feat: table filtering based on multiple keywords UDF 
+* PR #906: ci: add 3.11 
+* PR #905: feat: remove ocr 
+* PR #904: feat: chatgpt prompt arg 
+* PR #903: Bump v0.3.0+dev 
+
 ##  [0.2.15] - 2023-06-26
 
 * PR #898: fix: index creation better error msg 
