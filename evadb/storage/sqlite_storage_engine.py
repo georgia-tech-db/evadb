@@ -213,7 +213,7 @@ class SQLStorageEngine(AbstractStorageEngine):
         try:
             table_to_delete_from = self._try_loading_table_via_reflection(table.name)
             d = table_to_delete_from.delete().where(sqlalchemy_filter_clause)
-            self._sql_engine.execute(d)
+            self._sql_session.execute(d)
             self._sql_session.commit()
         except Exception as e:
             err_msg = (
