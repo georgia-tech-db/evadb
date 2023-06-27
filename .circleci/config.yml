@@ -169,6 +169,17 @@ jobs:
                   source test_evadb/bin/activate
                   python -c "import yaml;f = open('evadb/evadb.yml', 'r+');config_obj = yaml.load(f, Loader=yaml.FullLoader);config_obj['experimental']['ray'] = True;f.seek(0);f.write(yaml.dump(config_obj));f.truncate();"
                   pip install ".[ray]"
+      
+      # Install qdrant only on versions < 3.11
+      - when:
+          condition:
+            not:
+              equal: [ "3.11", << parameters.v >> ]
+            steps:
+              - run:
+                  name: Install qdrant
+                  command: |
+                    pip install ".[qdrant]"
 
       - run:
           name: Test and upload coverage report to coveralls

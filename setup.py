@@ -104,6 +104,10 @@ notebook_libs = [
     "nest-asyncio>=1.5.6",
 ]
 
+qdrant_libs = [
+    "qdrant_client" # cannot install on 3.11 due to grcpio
+]
+
 ### NEEDED FOR DEVELOPER TESTING ONLY
 
 dev_libs = [
@@ -137,7 +141,8 @@ EXTRA_REQUIRES = {
     "document": document_libs,
     "udf": udf_libs,
     "notebook": notebook_libs,
-    # everything except ray
+    "qdrant": qdrant_libs,
+    # everything except ray and qdrant
     "dev": dev_libs + vision_libs + document_libs + udf_libs + notebook_libs,
 }
 
