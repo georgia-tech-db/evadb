@@ -49,5 +49,4 @@ class LoadExecutorTest(unittest.TestCase):
             .df()
         )
         filtered_data.dropna(inplace=True)
-        print(filtered_data)
         self.assertNotEqual(len(filtered_data), len(load_pdf_data))
