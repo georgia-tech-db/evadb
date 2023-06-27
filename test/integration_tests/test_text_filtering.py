@@ -23,7 +23,7 @@ from evadb.server.command_handler import execute_query_fetch_all
 
 
 @pytest.mark.notparallel
-class LoadExecutorTest(unittest.TestCase):
+class TextFilteringTests(unittest.TestCase):
     def setUp(self):
         self.db_dir = suffix_pytest_xdist_worker_id_to_dir(EvaDB_DATABASE_DIR)
         self.conn = connect(self.db_dir)
@@ -33,7 +33,7 @@ class LoadExecutorTest(unittest.TestCase):
     def tearDown(self):
         execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS MyPDFs;")
 
-    def test_load_pdfs(self):
+    def test_text_filter(self):
         pdf_path = f"{EvaDB_ROOT_DIR}/data/documents/layout-parser-paper.pdf"
         cursor = self.conn.cursor()
         cursor.load(pdf_path, "MyPDFs", "pdf").df()
@@ -45,8 +45,12 @@ class LoadExecutorTest(unittest.TestCase):
         ).df()
         filtered_data = (
             cursor.table("MyPDFs")
-            .cross_apply("TextFilterKeyword(data,'References')", "objs(filtered)")
+            .cross_apply("TextFilterKeyword(data, ['References'])", "objs(filtered)")
             .df()
         )
         filtered_data.dropna(inplace=True)
+        import pandas as pd
+
+        pd.set_option("display.max_colwidth", None)
+        print(filtered_data)
         self.assertNotEqual(len(filtered_data), len(load_pdf_data))

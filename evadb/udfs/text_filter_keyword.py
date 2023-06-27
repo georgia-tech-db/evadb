@@ -19,17 +19,12 @@ from evadb.catalog.catalog_type import NdArrayType
 from evadb.udfs.abstract.abstract_udf import AbstractUDF
 from evadb.udfs.decorators.decorators import forward, setup
 from evadb.udfs.decorators.io_descriptors.data_types import PandasDataframe
-from evadb.udfs.gpu_compatible import GPUCompatible
 
 
-class TextFilterKeyword(AbstractUDF, GPUCompatible):
-    @setup(cacheable=False, udf_type="FeatureExtraction", batchable=False)
+class TextFilterKeyword(AbstractUDF):
+    @setup(cacheable=False, udf_type="TextProcessing", batchable=False)
     def setup(self):
         pass
-
-    def to_device(self, device: str) -> GPUCompatible:
-        pass
-        return self
 
     @property
     def name(self) -> str:
@@ -56,7 +51,7 @@ class TextFilterKeyword(AbstractUDF, GPUCompatible):
             import re
 
             data = row.iloc[0]
-            keywords = row.iloc[1].split(",")
+            keywords = row.iloc[1]
             flag = False
             for i in keywords:
                 pattern = rf"^(.*?({i})[^$]*)$"
