@@ -223,8 +223,8 @@ class UDFExecutorTest(unittest.TestCase):
             )
 
         err_msg = (
-            "UDF with name DummyObjectDetector1 does not exist in the catalog. "
-            "Please create the UDF using CREATE UDF command."
+            "Function 'DummyObjectDetector1' does not exist in the catalog. "
+            "Please create the function using CREATE UDF command."
         )
         self.assertEqual(str(cm.exception), err_msg)
 

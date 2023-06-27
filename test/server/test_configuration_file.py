@@ -14,6 +14,7 @@
 # limitations under the License.
 import os
 import unittest
+from test.markers import ray_skip_marker
 
 from evadb.configuration.constants import EvaDB_CONFIG_FILE, EvaDB_ROOT_DIR
 
@@ -22,6 +23,7 @@ class ConfigurationFileTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+    @ray_skip_marker
     def test_check_configuration_file(self):
         config_file_path = os.path.join(EvaDB_ROOT_DIR, "evadb", EvaDB_CONFIG_FILE)
         import yaml

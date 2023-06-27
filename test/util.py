@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import asyncio
 import gc
 import multiprocessing as mp
 import os
@@ -230,7 +229,7 @@ def get_physical_query_plan(
     db, query: str, rule_manager=None, cost_model=None
 ) -> AbstractPlan:
     l_plan = get_logical_query_plan(db, query)
-    p_plan = asyncio.run(PlanGenerator(db, rule_manager, cost_model).build(l_plan))
+    p_plan = PlanGenerator(db, rule_manager, cost_model).build(l_plan)
     return p_plan
 
 
