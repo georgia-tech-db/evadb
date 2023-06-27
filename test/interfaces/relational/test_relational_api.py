@@ -165,6 +165,10 @@ class RelationalAPI(unittest.TestCase):
     @qdrant_skip_marker
     def test_create_index(self):
         cursor = self.conn.cursor()
+        import sys
+
+        print(sys.version_info)
+        print(sys.version_info == (3, 11))
 
         # load some images
         rel = cursor.load(
