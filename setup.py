@@ -87,7 +87,6 @@ udf_libs = [
     "thefuzz",  # FUZZY STRING MATCHING
     "pytube",  # YOUTUBE QA APP
     "youtube-transcript-api",  # YOUTUBE QA APP
-    "qdrant-client>=1.1.7",  # QDRANT VECTOR STORE
     "boto3",  # AWS
     "norfair>=2.2.0",  # OBJECT TRACKING
     "kornia",  # SIFT FEATURES
