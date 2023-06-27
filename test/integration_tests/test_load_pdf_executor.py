@@ -22,7 +22,7 @@ from evadb.server.command_handler import execute_query_fetch_all
 
 
 @pytest.mark.notparallel
-class LoadExecutorTest(unittest.TestCase):
+class LoadPDFExecutorTests(unittest.TestCase):
     def setUp(self):
         self.evadb = get_evadb_for_testing()
         # reset the catalog manager before running each test
