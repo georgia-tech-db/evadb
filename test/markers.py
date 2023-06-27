@@ -25,7 +25,8 @@ asyncio_skip_marker = pytest.mark.skipif(
 )
 
 qdrant_skip_marker = pytest.mark.skipif(
-    sys.version_info == (3, 11), reason="qdrant requires grcpio which is broken on 3.11"
+    sys.version_info.minor == 11,
+    reason="qdrant requires grcpio which is broken on 3.11",
 )
 
 windows_skip_marker = pytest.mark.skipif(

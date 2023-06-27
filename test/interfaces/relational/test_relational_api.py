@@ -169,6 +169,7 @@ class RelationalAPI(unittest.TestCase):
 
         print(sys.version_info)
         print(sys.version_info == (3, 11))
+        print(sys.version_info.minor == 11)
 
         # load some images
         rel = cursor.load(
