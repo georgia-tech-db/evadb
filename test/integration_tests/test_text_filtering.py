@@ -14,12 +14,9 @@
 # limitations under the License.
 import unittest
 from test.util import (
-    DummyObjectDetector,
-    create_sample_video,
-    load_udfs_for_testing,
-    shutdown_ray,
     suffix_pytest_xdist_worker_id_to_dir,
 )
+
 import pytest
 
 from evadb.configuration.constants import EvaDB_DATABASE_DIR, EvaDB_ROOT_DIR
@@ -30,12 +27,10 @@ from evadb.server.command_handler import execute_query_fetch_all
 @pytest.mark.notparallel
 class LoadExecutorTest(unittest.TestCase):
     def setUp(self):
-        
         self.db_dir = suffix_pytest_xdist_worker_id_to_dir(EvaDB_DATABASE_DIR)
         self.conn = connect(self.db_dir)
         self.evadb = self.conn._evadb
         self.evadb.catalog().reset()
-
 
     def tearDown(self):
         execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS MyPDFs;")
@@ -43,10 +38,18 @@ class LoadExecutorTest(unittest.TestCase):
     def test_load_pdfs(self):
         pdf_path = f"{EvaDB_ROOT_DIR}/data/documents/layout-parser-paper.pdf"
         cursor = self.conn.cursor()
-        load_pdf = cursor.load(pdf_path,"MyPDFs","pdf").df()
+        cursor.load(pdf_path, "MyPDFs", "pdf").df()
         load_pdf_data = cursor.table("MyPDFs").df()
-        cursor.create_udf("TextFilterKeyword",True,f"{EvaDB_ROOT_DIR}/evadb/udfs/text_filter_keyword.py").df()
-        filtered_data = cursor.table("MyPDFs").cross_apply("TextFilterKeyword(data,'References')","objs(filtered)").df()
+        cursor.create_udf(
+            "TextFilterKeyword",
+            True,
+            f"{EvaDB_ROOT_DIR}/evadb/udfs/text_filter_keyword.py",
+        ).df()
+        filtered_data = (
+            cursor.table("MyPDFs")
+            .cross_apply("TextFilterKeyword(data,'References')", "objs(filtered)")
+            .df()
+        )
         filtered_data.dropna(inplace=True)
-        print(filtered_data)     
-        self.assertNotEqual(len(filtered_data), len(load_pdf_data))   
+        print(filtered_data)
+        self.assertNotEqual(len(filtered_data), len(load_pdf_data))

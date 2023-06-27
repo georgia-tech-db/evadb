@@ -26,6 +26,7 @@ class TextFilterKeyword(AbstractUDF, GPUCompatible):
     @setup(cacheable=False, udf_type="FeatureExtraction", batchable=False)
     def setup(self):
         pass
+
     def to_device(self, device: str) -> GPUCompatible:
         pass
         return self
@@ -37,9 +38,9 @@ class TextFilterKeyword(AbstractUDF, GPUCompatible):
     @forward(
         input_signatures=[
             PandasDataframe(
-                columns=["data","keyword"],
-                column_types=[NdArrayType.STR,NdArrayType.STR],
-                column_shapes=[(1),(1)],
+                columns=["data", "keyword"],
+                column_types=[NdArrayType.STR, NdArrayType.STR],
+                column_shapes=[(1), (1)],
             )
         ],
         output_signatures=[
@@ -53,6 +54,7 @@ class TextFilterKeyword(AbstractUDF, GPUCompatible):
     def forward(self, df: pd.DataFrame) -> pd.DataFrame:
         def _forward(row: pd.Series) -> np.ndarray:
             import re
+
             data = row.iloc[0]
             keywords = row.iloc[1].split(",")
             flag = False
@@ -61,9 +63,10 @@ class TextFilterKeyword(AbstractUDF, GPUCompatible):
                 match_check = re.search(pattern, data, re.IGNORECASE)
                 if match_check:
                     flag = True
-            if flag == False:
+            if flag is False:
                 return data
             flag = False
+
         ret = pd.DataFrame()
         ret["filtered"] = df.apply(_forward, axis=1)
         return ret
