@@ -175,11 +175,11 @@ jobs:
           condition:
             not:
               equal: [ "3.11", << parameters.v >> ]
-            steps:
-              - run:
-                  name: Install qdrant
-                  command: |
-                    pip install ".[qdrant]"
+          steps:
+            - run:
+                name: Install qdrant
+                command: |
+                  pip install ".[qdrant]"
 
       - run:
           name: Test and upload coverage report to coveralls
