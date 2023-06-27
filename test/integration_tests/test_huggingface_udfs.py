@@ -276,7 +276,6 @@ class HuggingFaceTests(unittest.TestCase):
         drop_udf_query = f"DROP UDF {summary_udf};"
         execute_query_fetch_all(self.evadb, drop_udf_query)
 
-    @pytest.mark.benchmark
     def test_toxicity_classification(self):
         udf_name = "HFToxicityClassifier"
         create_udf_query = f"""CREATE UDF {udf_name}
