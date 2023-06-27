@@ -294,6 +294,16 @@ def try_to_import_cv2():
         )
 
 
+def try_to_import_timm():
+    try:
+        import timm  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import timm python package.
+                Please install them with `pip install timm`."""
+        )
+
+
 def try_to_import_kornia():
     try:
         import kornia  # noqa: F401

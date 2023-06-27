@@ -122,16 +122,6 @@ Yolo_udf_query = """CREATE UDF IF NOT EXISTS Yolo
       'model' 'yolov8m.pt';
       """
 
-ocr_udf_query = """CREATE UDF IF NOT EXISTS OCRExtractor
-      INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
-      OUTPUT (labels NDARRAY STR(10), bboxes NDARRAY FLOAT32(ANYDIM, 4),
-                scores NDARRAY FLOAT32(ANYDIM))
-      TYPE  OCRExtraction
-      IMPL  '{}/udfs/ocr_extractor.py';
-      """.format(
-    EvaDB_INSTALLATION_DIR
-)
-
 face_detection_udf_query = """CREATE UDF IF NOT EXISTS FaceDetector
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
                   OUTPUT (bboxes NDARRAY FLOAT32(ANYDIM, 4),
@@ -223,7 +213,7 @@ def init_builtin_udfs(db: EvaDBDatabase, mode: str = "debug") -> None:
         pass
 
     # Enable environment variables
-    # Relevant for ocr and other transformer-based models
+    # Relevant for transformer-based models
     import os
 
     os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
@@ -240,7 +230,6 @@ def init_builtin_udfs(db: EvaDBDatabase, mode: str = "debug") -> None:
         norfair_obj_tracker_query,
         chatgpt_udf_query,
         face_detection_udf_query,
-        # ocr_udf_query,
         # Mvit_udf_query,
         Sift_udf_query,
         Yolo_udf_query,
