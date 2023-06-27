@@ -76,7 +76,7 @@ then
     # Non-Windows
     if [[ "$OSTYPE" != "msys" ]];
     then
-        PYTHONPATH=./ pytest test/interfaces/relational/ --durations=20 --cov-report term-missing:skip-covered  --cov-config=.coveragerc --cov-context=test --cov=evadb/ --capture=sys --tb=short -v -rsf --log-level=WARNING -m "not benchmark"        
+        PYTHONPATH=./ pytest test/ --durations=20 --cov-report term-missing:skip-covered  --cov-config=.coveragerc --cov-context=test --cov=evadb/ --capture=sys --tb=short -v -rsf --log-level=WARNING -m "not benchmark"        
         test_code=$?
         if [ "$test_code" != "0" ];
         then
