@@ -19,7 +19,7 @@
         <a href="https://pepy.tech/project/evadb">
           <img alt="Downloads" src="https://static.pepy.tech/badge/evadb"/>
         </a>
-        <img alt="Python Versions" src="https://img.shields.io/badge/Python--versions-3.8%20|%203.9%20|%203.10-brightgreen"/>       
+        <img alt="Python Versions" src="https://img.shields.io/badge/Python--versions-3.8%20|%203.9%20|%203.10|%203.11-brightgreen"/>       
 </div>
 
 <p align="center"> <b><h3>EvaDB is a database system for building simpler and faster AI-powered applications.</b></h3> </p>
