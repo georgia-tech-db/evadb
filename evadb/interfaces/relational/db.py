@@ -215,6 +215,8 @@ class EvaDBCursor(object):
     ) -> "EvaDBCursor":
         """
         Creates a vector index using the provided expr on the table.
+        This feature directly works on IMAGE tables.
+        For VIDEO tables, the feature should be extracted first and stored in an intermediate table, before creating the index.
 
         Args:
             index_name (str): Name of the index.
@@ -294,7 +296,7 @@ class EvaDBCursor(object):
         stmt = parse_drop_table(table_name, if_exists)
         return EvaDBQuery(self._evadb, stmt)
 
-    def drop_udf(self, udf_name: str, if_exists: bool = True) -> "EvaDBQuery":
+    def drop_function(self, udf_name: str, if_exists: bool = True) -> "EvaDBQuery":
         """
         Drop a udf in the database.
 
@@ -308,7 +310,7 @@ class EvaDBCursor(object):
         Examples:
             Drop UDF 'ObjectDetector'
 
-            >>> cursor.drop_udf("ObjectDetector", if_exists = True)
+            >>> cursor.drop_function("ObjectDetector", if_exists = True)
                 0
             0	UDF Successfully dropped: ObjectDetector
         """
@@ -334,7 +336,7 @@ class EvaDBCursor(object):
         stmt = parse_drop_index(index_name, if_exists)
         return EvaDBQuery(self._evadb, stmt)
 
-    def create_udf(
+    def create_function(
         self,
         udf_name: str,
         if_not_exists: bool = True,
@@ -356,7 +358,7 @@ class EvaDBCursor(object):
             EvaDBQuery: The EvaDBQuery object representing the UDF created.
 
         Examples:
-            >>> cursor.create_udf("MnistImageClassifier", if_exists = True, 'mnist_image_classifier.py')
+            >>> cursor.create_function("MnistImageClassifier", if_exists = True, 'mnist_image_classifier.py')
                 0
             0	UDF Successfully created: MnistImageClassifier
         """

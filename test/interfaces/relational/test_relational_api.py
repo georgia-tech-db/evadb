@@ -218,14 +218,14 @@ class RelationalAPI(unittest.TestCase):
         )
         rel.execute()
 
-        create_dummy_object_detector_udf = cursor.create_udf(
+        create_dummy_object_detector_udf = cursor.create_function(
             "DummyObjectDetector", if_not_exists=True, impl_path="test/util.py"
         )
         create_dummy_object_detector_udf.execute()
 
         args = {"task": "automatic-speech-recognition", "model": "openai/whisper-base"}
 
-        create_speech_recognizer_udf_if_not_exists = cursor.create_udf(
+        create_speech_recognizer_udf_if_not_exists = cursor.create_function(
             "SpeechRecognizer", if_not_exists=True, type="HuggingFace", **args
         )
         query = create_speech_recognizer_udf_if_not_exists.sql_query()
@@ -236,7 +236,7 @@ class RelationalAPI(unittest.TestCase):
         create_speech_recognizer_udf_if_not_exists.execute()
 
         # check if next create call of same UDF raises error
-        create_speech_recognizer_udf = cursor.create_udf(
+        create_speech_recognizer_udf = cursor.create_function(
             "SpeechRecognizer", if_not_exists=False, type="HuggingFace", **args
         )
         query = create_speech_recognizer_udf.sql_query()
@@ -275,13 +275,13 @@ class RelationalAPI(unittest.TestCase):
         rel.execute()
 
         # Create dummy udf
-        create_dummy_object_detector_udf = cursor.create_udf(
+        create_dummy_object_detector_udf = cursor.create_function(
             "DummyObjectDetector", if_not_exists=True, impl_path="test/util.py"
         )
         create_dummy_object_detector_udf.execute()
 
         # drop dummy udf
-        drop_dummy_object_detector_udf = cursor.drop_udf(
+        drop_dummy_object_detector_udf = cursor.drop_function(
             "DummyObjectDetector", if_exists=True
         )
         drop_dummy_object_detector_udf.execute()
@@ -294,13 +294,13 @@ class RelationalAPI(unittest.TestCase):
             cursor.query(select_query_sql).execute()
 
         # drop non existing udf with if_exists=True should not raise error
-        drop_dummy_object_detector_udf = cursor.drop_udf(
+        drop_dummy_object_detector_udf = cursor.drop_function(
             "DummyObjectDetector", if_exists=True
         )
         drop_dummy_object_detector_udf.execute()
 
         # if_exists=False should raise error
-        drop_dummy_object_detector_udf = cursor.drop_udf(
+        drop_dummy_object_detector_udf = cursor.drop_function(
             "DummyObjectDetector", if_exists=False
         )
         with self.assertRaises(ExecutorError):
@@ -332,9 +332,9 @@ class RelationalAPI(unittest.TestCase):
         load_pdf = cursor.load(file_regex=pdf_path, format="PDF", table_name="PDFs")
         load_pdf.execute()
 
-        udf_check = cursor.drop_udf("SentenceFeatureExtractor")
+        udf_check = cursor.drop_function("SentenceFeatureExtractor")
         udf_check.df()
-        udf = cursor.create_udf(
+        udf = cursor.create_function(
             "SentenceFeatureExtractor",
             True,
             f"{EvaDB_ROOT_DIR}/evadb/udfs/sentence_feature_extractor.py",

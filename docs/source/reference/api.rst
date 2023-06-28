@@ -47,11 +47,11 @@ After connecting to a table using ``table``, you can construct a complex query u
     ~evadb.EvaDBCursor.table
     ~evadb.EvaDBCursor.load
     ~evadb.EvaDBCursor.query
-    ~evadb.EvaDBCursor.create_udf
+    ~evadb.EvaDBCursor.create_function
     ~evadb.EvaDBCursor.create_table
     ~evadb.EvaDBCursor.create_vector_index
     ~evadb.EvaDBCursor.drop_table
-    ~evadb.EvaDBCursor.drop_udf
+    ~evadb.EvaDBCursor.drop_function
     ~evadb.EvaDBCursor.drop_index
     ~evadb.EvaDBCursor.df
     ~evadb.EvaDBCursor.show
