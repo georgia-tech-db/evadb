@@ -201,7 +201,7 @@ class SQLStorageEngine(AbstractStorageEngine):
             raise Exception(err_msg)
 
     def delete(
-        self, table: TableCatalogEntry, sqlalchemy_filter_clause: ColumnElement[bool]
+        self, table: TableCatalogEntry, sqlalchemy_filter_clause: "ColumnElement[bool]"
     ):
         """Delete tuples from the table where rows satisfy the where_clause.
         The current implementation only handles equality predicates.
