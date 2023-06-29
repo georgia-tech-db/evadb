@@ -717,7 +717,9 @@ class LogicalCreateFromSelectToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalCreate, context: OptimizerContext):
-        after = CreateFromSelectPlan(before.video, before.column_list, before.if_not_exists)
+        after = CreateFromSelectPlan(
+            before.video, before.column_list, before.if_not_exists
+        )
         for child in before.children:
             after.append_child(child)
         yield after

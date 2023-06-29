@@ -62,5 +62,10 @@ class CreateFromSelectPlan(AbstractPlan):
 
     def __hash__(self) -> int:
         return hash(
-            (super().__hash__(), self.table_info, self.if_not_exists, tuple(self.column_list))
+            (
+                super().__hash__(),
+                self.table_info,
+                self.if_not_exists,
+                tuple(self.column_list),
+            )
         )
