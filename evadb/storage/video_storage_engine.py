@@ -38,8 +38,10 @@ class DecordStorageEngine(AbstractMediaStorageEngine):
         read_audio: bool = False,
         read_video: bool = True,
     ) -> Iterator[Batch]:
+        # Software row_id generated at runtime
+        row_id = 1
         for video_files in self._rdb_handler.read(self._get_metadata_table(table), 12):
-            for _, (row_id, video_file_name) in video_files.iterrows():
+            for _, (_, video_file_name) in video_files.iterrows():
                 system_file_name = self._xform_file_url_to_file_name(video_file_name)
                 video_file = Path(table.file_url) / system_file_name
                 # increase batch size when reading audio so that
@@ -59,3 +61,4 @@ class DecordStorageEngine(AbstractMediaStorageEngine):
                     batch.frames[table.columns[0].name] = row_id
                     batch.frames[table.columns[1].name] = str(video_file_name)
                     yield batch
+                    row_id += 1

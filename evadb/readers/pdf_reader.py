@@ -35,11 +35,10 @@ class PDFReader(AbstractReader):
 
         # PAGE ID, PARAGRAPH ID, STRING
         # Maintain a global paragraph number per PDF
-        global_paragraph_no = 0
         for page_no, page in enumerate(doc):
             blocks = page.get_text("dict")["blocks"]
             # iterate through the text blocks
-            for _, b in enumerate(blocks):
+            for paragraph_no, b in enumerate(blocks):
                 # this block contains text
                 if b["type"] == 0:
                     # text found in block
@@ -52,8 +51,7 @@ class PDFReader(AbstractReader):
                             if span["text"].strip():
                                 block_string += span["text"]
                     yield {
-                        "paragraph": global_paragraph_no,
+                        "paragraph": paragraph_no,
                         "page": page_no,
                         "data": block_string,
                     }
-                    global_paragraph_no += 1

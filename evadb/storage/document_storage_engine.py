@@ -29,8 +29,10 @@ class DocumentStorageEngine(AbstractMediaStorageEngine):
     def read(
         self, table: TableCatalogEntry, chunk_params: dict = {}
     ) -> Iterator[Batch]:
+        # Software row_id generated at runtime
+        row_id = 1
         for doc_files in self._rdb_handler.read(self._get_metadata_table(table), 12):
-            for _, (row_id, file_name) in doc_files.iterrows():
+            for _, (_, file_name) in doc_files.iterrows():
                 system_file_name = self._xform_file_url_to_file_name(file_name)
                 doc_file = Path(table.file_url) / system_file_name
                 # setting batch_mem_size = 1, we need fix it
@@ -41,3 +43,4 @@ class DocumentStorageEngine(AbstractMediaStorageEngine):
                     batch.frames[table.columns[0].name] = row_id
                     batch.frames[table.columns[1].name] = str(file_name)
                     yield batch
+                    row_id += 1
