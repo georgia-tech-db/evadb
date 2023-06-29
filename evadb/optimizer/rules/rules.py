@@ -39,6 +39,7 @@ from evadb.optimizer.rules.pattern import Pattern
 from evadb.optimizer.rules.rules_base import Promise, Rule, RuleType
 from evadb.parser.types import JoinType, ParserOrderBySortType
 from evadb.plan_nodes.apply_and_merge_plan import ApplyAndMergePlan
+from evadb.plan_nodes.create_from_select_plan import CreateFromSelectPlan
 from evadb.plan_nodes.exchange_plan import ExchangePlan
 from evadb.plan_nodes.explain_plan import ExplainPlan
 from evadb.plan_nodes.hash_join_build_plan import HashJoinBuildPlan
@@ -716,7 +717,7 @@ class LogicalCreateFromSelectToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalCreate, context: OptimizerContext):
-        after = CreatePlan(before.video, before.column_list, before.if_not_exists)
+        after = CreateFromSelectPlan(before.video, before.column_list, before.if_not_exists)
         for child in before.children:
             after.append_child(child)
         yield after
