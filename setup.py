@@ -53,6 +53,7 @@ minimal_requirements = [
     "diskcache>=5.4.0",
     "retry>=0.9.2",
     "psutil",
+    "thefuzz"
 ]
 
 vision_libs = [
@@ -84,7 +85,6 @@ document_libs = [
 
 udf_libs = [
     "facenet-pytorch>=2.5.2",  # FACE DETECTION
-    "thefuzz",  # FUZZY STRING MATCHING
     "pytube",  # YOUTUBE QA APP
     "youtube-transcript-api",  # YOUTUBE QA APP
     "boto3",  # AWS

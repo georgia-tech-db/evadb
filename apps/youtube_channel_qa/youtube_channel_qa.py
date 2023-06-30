@@ -145,7 +145,7 @@ def generate_online_video_transcript(cursor) -> str:
 
     # bootstrap speech analyzer udf and chatgpt udf for analysis
     args = {"task": "automatic-speech-recognition", "model": "openai/whisper-base"}
-    speech_analyzer_udf_rel = cursor.create_udf(
+    speech_analyzer_udf_rel = cursor.create_function(
         "SpeechRecognizer", type="HuggingFace", **args
     )
     speech_analyzer_udf_rel.execute()
@@ -340,8 +340,8 @@ if __name__ == "__main__":
 
         print("Creating embeddings and Vector Index")
 
-        cursor.drop_udf("embedding", if_exists=True).execute()
-        cursor.create_udf(
+        cursor.drop_function("embedding", if_exists=True).execute()
+        cursor.create_function(
             "embedding",
             if_not_exists=True,
             impl_path=SENTENCE_FEATURE_EXTRACTOR_UDF_PATH,

@@ -220,6 +220,15 @@ def remove_directory_contents(dir_path):
                 logger.warning(f"Failed to delete {file_path}. Reason: {str(e)}")
 
 
+def find_nearest_word(word, word_list):
+    from thefuzz import process
+
+    nearest_word_and_score = process.extractOne(word, word_list)
+    nearest_word = nearest_word_and_score[0]
+
+    return nearest_word
+
+
 ##############################
 ## TRY TO IMPORT PACKAGES
 ##############################
