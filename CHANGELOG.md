@@ -10,6 +10,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### [Deprecated]
 ### [Removed]
 
+##  [0.3.1] - 2023-06-30
+
+* PR #913: fix: motif_mining query 
+* PR #895: fix: Renaming Cursor Functions 
+* PR #911: Added comments for ChatGPT UDF. 
+* PR #908: feat: migrate to sqlalchemy 2.0 
+* PR #910: Bump v0.3.1+dev 
+* PR #907: feat: table filtering based on multiple keywords UDF 
+
 ##  [0.3.0] - 2023-06-27
 
 * PR #907: feat: table filtering based on multiple keywords UDF 
