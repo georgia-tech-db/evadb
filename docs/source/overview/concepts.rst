@@ -21,7 +21,7 @@ Here is an illustrative UDF for classifying MNIST images.
 
 .. code-block:: python
 
-    cursor.create_udf("MnistImageClassifier", True, 'mnist_image_classifier.py')
+    cursor.create_function("MnistImageClassifier", True, 'mnist_image_classifier.py')
     response = cursor.df()
     print(response)
 
