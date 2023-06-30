@@ -16,6 +16,7 @@ import os
 import subprocess
 import unittest
 from pathlib import Path
+from test.markers import chatgpt_skip_marker
 from test.util import get_evadb_for_testing, shutdown_ray
 
 
@@ -36,6 +37,7 @@ class PandasQATest(unittest.TestCase):
     def tearDown(self) -> None:
         shutdown_ray()
 
+    @chatgpt_skip_marker
     def test_should_run_pandas_qa_app(self):
         app_path = Path("apps", "pandas_qa", "pandas_qa.py")
         input1 = "\n"  # use default csv

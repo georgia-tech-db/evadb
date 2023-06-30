@@ -152,12 +152,13 @@ class EvaDBCursor(object):
             "show",
             "insert" "explain",
             "rename",
+            "fetch_one",
         ]
 
         if name not in function_name_list:
             nearest_function = find_nearest_word(name, function_name_list)
-            raise ValueError(
-                f"function does not exist: {name}. Did you mean to run: {nearest_function}()"
+            raise AttributeError(
+                f"EvaDBCursor does not contain a function named: '{name}'. Did you mean to run: '{nearest_function}()'?"
             )
 
         try:
