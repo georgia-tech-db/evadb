@@ -35,6 +35,7 @@ _VALID_CHAT_COMPLETION_MODEL = [
     "gpt-3.5-turbo-0301",
 ]
 
+
 class ChatGPT(AbstractUDF):
     """
     Arguments:
@@ -62,12 +63,12 @@ class ChatGPT(AbstractUDF):
         In the above UDF invocation, the 'query' passed would be the user task to generate video summaries, and the
         'content' passed would be the video transcripts that need to be used in order to generate the summary. Since
         no prompt is passed, the default system prompt will be used.
-        
+
         Now assume the user wants to create the video summary in 50 words and in French. Instead of passing these instructions
         along with each query, a prompt can be set as such:
 
             prompt = "Generate your responses in 50 words or less. Also, generate the response in French."
-            cursor.table("video_transcripts").select(f"ChatGPT({question}, text, {prompt})") 
+            cursor.table("video_transcripts").select(f"ChatGPT({question}, text, {prompt})")
 
         In the above invocation, an additional argument is passed as prompt. While the query and content arguments remain
         the same, the 'prompt' argument will be set as a system message in model params.
