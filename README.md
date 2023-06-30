@@ -1,4 +1,4 @@
-# EvaDB AI-SQL Database System
+# EvaDB: Database System for AI Apps
 
 <div>
         <a href="https://colab.research.google.com/github/georgia-tech-db/eva/blob/master/tutorials/03-emotion-analysis.ipynb">
@@ -24,9 +24,9 @@
 
 <p align="center"> <b><h3>EvaDB is a database system for building simpler and faster AI-powered applications.</b></h3> </p>
 
-EvaDB is a database system for developing AI apps. We aim to simplify the development and deployment of AI-powered apps that operate on unstructured data (text documents, videos, PDFs, podcasts, etc.) and structured data (tables, vector index).
+EvaDB is a database system for developing AI apps. We aim to simplify the development and deployment of AI apps that operate on unstructured data (text documents, videos, PDFs, podcasts, etc.) and structured data (tables, vector index).
 
-The high-level Python and SQL APIs allow beginners to use EvaDB in a few lines of code. Advanced users can define custom user-defined functions that wrap around any AI model or Python library. EvaDB is fully implemented in Python and licensed under the Apache license.
+The high-level Python and SQL APIs allow beginners to use EvaDB in a few lines of code. Advanced users can define custom user-defined functions that wrap around any AI model or Python library. EvaDB is fully implemented in Python and licensed under an Apache license.
 
 ## Quick Links
 
@@ -38,17 +38,17 @@ The high-level Python and SQL APIs allow beginners to use EvaDB in a few lines o
 
 ## Features
 
-- 🔮 Build simpler AI-powered applications using Python functions or SQL queries
+- 🔮 Build simpler AI-powered apps using Python functions or SQL queries
 - ⚡️ 10x faster applications using AI-centric query optimization  
-- 💰 Save money spent on GPUs
+- 💰 Save money spent on inference
 - 🚀 First-class support for your custom deep learning models through user-defined functions
 - 📦 Built-in caching to eliminate redundant model invocations across queries
-- ⌨️ First-class support for PyTorch, Hugging Face, YOLO, and Open AI models
+- ⌨️ Integrations for PyTorch, Hugging Face, YOLO, and Open AI models
 - 🐍 Installable via pip and fully implemented in Python
 
 ## Illustrative Applications
 
-Here are some illustrative EvaDB-powered applications (each Jupyter notebook can be opened on Google Colab):
+Here are some illustrative AI apps built using EvaDB (each notebook can be opened on Google Colab):
 
  * 🔮 <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/13-privategpt.html">PrivateGPT</a>
  * 🔮 <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/08-chatgpt.html">ChatGPT-based Video Question Answering</a>
@@ -68,23 +68,23 @@ Here are some illustrative EvaDB-powered applications (each Jupyter notebook can
 
 ## Quick Start
 
-- Step 1: Install EvaDB using pip. EvaDB supports Python versions >= `3.8`:
+- Step 1: Install EvaDB using `pip`. EvaDB supports Python versions >= `3.8`:
 
 ```shell
 pip install evadb
 ```
 
-- Step 2: Write your AI app!
+- Step 2: It's time to write an AI app.
 
 ```python
 import evadb
 
-# Grab a EvaDB cursor to load data and run queries
+# Grab a EvaDB cursor to load data into tables and run AI queries
 cursor = evadb.connect().cursor()
 
 # Load a collection of news videos into the 'news_videos' table
-# This command returns a Pandas Dataframe with the query's output
-# In this case, the output indicates the number of loaded videos
+# This function returns a Pandas dataframe with the query's output
+# In this case, the output dataframe indicates the number of loaded videos
 cursor.load(
     file_regex="news_videos/*.mp4",
     format="VIDEO",
@@ -92,19 +92,17 @@ cursor.load(
 ).df()
 
 # Define a function that wraps around your deep learning model
-# Here, this function wraps around an off-the-shelf speech-to-text (Whisper) model
-# Such functions are known as user-defined functions or UDFs
-# So, we are creating a Whisper UDF here
-# After creating the UDF, we can use the function in any query
-cursor.create_udf(
+# Here, this function wraps around a speech-to-text model
+# After registering the function, we can use the registered function in subsequent queries
+cursor.create_function(
     udf_name="SpeechRecognizer",
     type="HuggingFace",
     task='automatic-speech-recognition',
     model='openai/whisper-base'
 ).df()
 
-# EvaDB automatically extract the audio from the video
-# We only need to run the SpeechRecongizer UDF on the 'audio' column
+# EvaDB automatically extracts the audio from the video
+# We only need to run the SpeechRecongizer function on the 'audio' column
 # to get the transcript and persist it in a table called 'transcripts'
 cursor.query(
     """CREATE TABLE transcripts AS
@@ -123,13 +121,16 @@ os.environ["OPENAI_KEY"] = OPENAI_KEY
 query = query.select("ChatGPT('Is this video summary related to LLMs', text)")
 
 # Finally, we run the query to get the results as a dataframe
+# You can then post-process the dataframe using other Python libraries
 response = query.df()
 ```
 
-- **Chain multiple models in a single query to set up useful AI pipelines**
+- **Incrementally build an AI query that chains together multiple models**
+
+Here is a AI query that analyses emotions of actors in an `Interstellar` movie clip using multiple PyTorch models.
 
 ```python
-# Analyse emotions of actors in an Interstellar movie clip using PyTorch models
+# Access the Interstellar movie clip table using a cursor
 query = cursor.table("Interstellar")
 # Get faces using a `FaceDetector` function
 query = query.cross_apply("UNNEST(FaceDetector(data))", "Face(bounding_box, confidence)")
@@ -139,9 +140,14 @@ query = query.filter("id > 100 AND id < 200")
 query = query.select("id, bbox, EmotionDetector(Crop(data, bounding_box))")
 
 # Run the query and get the query result as a dataframe
+# At each of the above steps, you can run the query and see the output
+# If you are familiar with SQL, you can get the SQL query with query.sql_query()
 response = query.df()
 ```
-- **EvaDB runs AI apps 10--100x faster using its AI-centric query optimizer**. Three key built-in optimizations are:
+
+- **EvaDB runs AI apps 10x faster using its AI-centric query optimizer**.
+
+  Three key built-in optimizations are:
 
    💾 **Caching**: EvaDB automatically caches and reuses model inference results.
 
@@ -153,7 +159,7 @@ response = query.df()
 
 This diagram presents the key components of EvaDB. EvaDB's AI-centric query optimizer takes a query as input and generates a query plan that is executed by the query engine. The query engine hits the relevant storage engines to quickly retrieve the data required for efficiently running the query:
 1. Structured data (SQL database system connected via `sqlalchemy`).
-2. Unstructured media data (on cloud buckets/local filesystem).
+2. Unstructured media data (PDFs, videos, etc. on cloud/local filesystem).
 3. Feature data (vector database system).
 
 <img width="500" alt="Architecture Diagram" src="https://github.com/georgia-tech-db/eva/assets/5521975/01452ec9-87d9-4d27-90b2-c0b1ab29b16c">
@@ -212,5 +218,5 @@ For more information, see our
 [contribution guide](https://evadb.readthedocs.io/en/stable/source/contribute/index.html).
 
 ## License
-Copyright (c) 2018-present [Georgia Tech Database Group](http://db.cc.gatech.edu/).
+Copyright (c) 2018--present [Georgia Tech Database Group](http://db.cc.gatech.edu/).
 Licensed under [Apache License](LICENSE).
