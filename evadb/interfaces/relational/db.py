@@ -41,7 +41,7 @@ from evadb.parser.utils import (
     parse_table_clause,
 )
 from evadb.udfs.udf_bootstrap_queries import init_builtin_udfs
-from evadb.utils.generic_utils import is_ray_enabled_and_installed
+from evadb.utils.generic_utils import find_nearest_word, is_ray_enabled_and_installed
 from evadb.utils.logging_manager import logger
 
 
@@ -137,6 +137,30 @@ class EvaDBCursor(object):
         Auto generate sync function calls from async
         Sync function calls should not be used in an async environment.
         """
+        function_name_list = [
+            "table",
+            "load",
+            "execute",
+            "query",
+            "create_function",
+            "create_table",
+            "create_vector_index",
+            "drop_table",
+            "drop_function",
+            "drop_index",
+            "df",
+            "show",
+            "insert" "explain",
+            "rename",
+            "fetch_one",
+        ]
+
+        if name not in function_name_list:
+            nearest_function = find_nearest_word(name, function_name_list)
+            raise AttributeError(
+                f"EvaDBCursor does not contain a function named: '{name}'. Did you mean to run: '{nearest_function}()'?"
+            )
+
         try:
             func = object.__getattribute__(self, "%s_async" % name)
         except Exception as e:
@@ -342,7 +366,7 @@ class EvaDBCursor(object):
         if_not_exists: bool = True,
         impl_path: str = None,
         type: str = None,
-        **kwargs
+        **kwargs,
     ) -> "EvaDBQuery":
         """
         Create a udf in the database.

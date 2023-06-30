@@ -38,7 +38,7 @@ class TextFilteringTests(unittest.TestCase):
         cursor = self.conn.cursor()
         cursor.load(pdf_path, "MyPDFs", "pdf").df()
         load_pdf_data = cursor.table("MyPDFs").df()
-        cursor.create_udf(
+        cursor.create_function(
             "TextFilterKeyword",
             True,
             f"{EvaDB_ROOT_DIR}/evadb/udfs/text_filter_keyword.py",
