@@ -61,3 +61,7 @@ ocr_skip_marker = pytest.mark.skip(
 gpu_skip_marker = pytest.mark.skipif(
     is_gpu_available() is False, reason="Run only if gpu is available"
 )
+
+chatgpt_skip_marker = pytest.mark.skip(
+    reason="requires chatgpt",
+)

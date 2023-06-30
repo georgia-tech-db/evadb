@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import unittest
+from test.markers import chatgpt_skip_marker
 from test.util import get_evadb_for_testing
 
 import pandas as pd
@@ -56,6 +57,7 @@ class ChatGPTTest(unittest.TestCase):
     def tearDown(self) -> None:
         execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS MyTextCSV;")
 
+    @chatgpt_skip_marker
     def test_openai_chat_completion_udf(self):
         udf_name = "OpenAIChatCompletion"
         execute_query_fetch_all(self.evadb, f"DROP UDF IF EXISTS {udf_name};")
