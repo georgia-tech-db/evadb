@@ -1,9 +1,9 @@
-# YouTube Question Answering
+# Pandas Question Answering
 
 ## Overview
-This app lets you run data analytics to a CSV file like a conversation. You will only need to supply a csv file path and an OpenAI API key.
+This app lets you run data analytics on a Pandas dataframe like a conversation. You will only need to supply a CSV file path and an OpenAI API key.
 
-This app is powered by EvaDB's Python API and ChatGPT UDF. Also, credits to the worflow presented by [pandas-ai](https://github.com/gventuri/pandas-ai)
+This app is powered by EvaDB's Python API and ChatGPT. Credits to the worflow presented by [pandas-ai](https://github.com/gventuri/pandas-ai)
 
 ## Setup
 Ensure that the local Python version is >= 3.8. Install the required libraries:
