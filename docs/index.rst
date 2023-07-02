@@ -1,8 +1,8 @@
 .. meta::
    :keywords: database, deep learning, video analytics, language models
 
-Welcome to EvaDB 🤖 + 💾 ! 
-==========================
+Welcome to EvaDB! 
+=================
 
 ..  rubric:: Database system for building simpler and faster AI-powered apps.
 
@@ -36,7 +36,7 @@ Over the last decade, AI models have radically changed the world of natural lang
 Proposed Solution
 ----------
 
-That is where EvaDB comes in!
+That is where EvaDB comes in.
 
 1. Quickly build AI-Powered Apps
 ^^^^
@@ -63,10 +63,8 @@ Here is an illustrative EvaDB app for ChatGPT-based question answering on videos
     ).df()
 
     # Define a function that wraps around a speech-to-text (Whisper) model 
-    # Such functions are known as user-defined functions or UDFs
-    # So, we are creating a Whisper UDF here
-    # After creating the UDF, we can use the function in any query
-    cursor.create_udf(
+    # After creating the function, we can use the function in any future query
+    cursor.create_function(
         udf_name="SpeechRecognizer",
         type="HuggingFace",
         task='automatic-speech-recognition',
@@ -74,7 +72,7 @@ Here is an illustrative EvaDB app for ChatGPT-based question answering on videos
     ).df()
 
     # EvaDB automatically extract the audio from the video
-    # We only need to run the SpeechRecongizer UDF on the 'audio' column 
+    # We only need to run the SpeechRecognizer UDF on the 'audio' column 
     # to get the transcript and persist it in a table called 'transcripts'
     cursor.query(
         """CREATE TABLE transcripts AS 
@@ -90,7 +88,7 @@ Here is an illustrative EvaDB app for ChatGPT-based question answering on videos
     # We can just directly use it in the query
     # We need to set the OPENAI_KEY as an environment variable
     os.environ["OPENAI_KEY"] = OPENAI_KEY 
-    query = query.select("ChatGPT('Is this video summary related to LLMs', text)")
+    query = query.select("ChatGPT('Is this video summary related to LLM', text)")
 
     # Finally, we run the query to get the results as a dataframe
     response = query.df()
@@ -119,7 +117,7 @@ The same AI query can also be written directly in SQL and run on EvaDB.
 .. code:: sql
 
    --- Query for asking question using ChatGPT
-   SELECT ChatGPT('Is this video summary related to LLMs', 
+   SELECT ChatGPT('Is this video summary related to LLM', 
                   SpeechRecognizer(audio)) FROM news_videos;
 
 
@@ -139,16 +137,12 @@ EvaDB accelerates AI pipelines using a collection of optimizations inspired by S
 EvaDB supports an AI-oriented query language for analysing both structured and unstructured data. Here are some illustrative apps:
 
 
- * `Reddit Image Similarity Search <https://evadb.readthedocs.io/en/stable/source/tutorials/11-similarity-search-for-motif-mining.html>`_
- * `Using ChatGPT to ask questions based on videos <https://evadb.readthedocs.io/en/stable/source/tutorials/08-chatgpt.html>`_
+ * `PrivateGPT <https://evadb.readthedocs.io/en/stable/source/tutorials/13-privategpt.html>`_
+ * `Video Question Answering using ChatGPT <https://evadb.readthedocs.io/en/stable/source/tutorials/08-chatgpt.html>`_
  * `Querying PDF documents <https://evadb.readthedocs.io/en/stable/source/tutorials/12-query-pdf.html>`_
  * `Analysing traffic flow at an intersection <https://evadb.readthedocs.io/en/stable/source/tutorials/02-object-detection.html>`_
  * `Examining the emotion palette of actors in a movie <https://evadb.readthedocs.io/en/stable/source/tutorials/03-emotion-analysis.html>`_
  * `Classifying images based on their content <https://evadb.readthedocs.io/en/stable/source/tutorials/01-mnist.html>`_
- * `Image Segmentation using Hugging Face <https://evadb.readthedocs.io/en/stable/source/tutorials/07-object-segmentation-huggingface.html>`_
- * `Recognizing license plates <https://github.com/georgia-tech-db/license-plate-recognition>`_
- * `Analysing toxicity of social media memes <https://github.com/georgia-tech-db/toxicity-classification>`_
-
 
 The `Getting Started <source/overview/installation.html>`_ page shows how you can use EvaDB for different AI tasks and how you can easily extend EvaDB to support your custom deep learning model through user-defined functions.
 
@@ -157,8 +151,8 @@ The `User Guides <source/tutorials/index.html>`_ section contains Jupyter Notebo
 Key Features
 ------------
 
-- 🔮 Build simpler AI-powered apps using short Python or SQL queries
-- ⚡️ 10x faster apps using AI-centric query optimization  
+- 🔮 Build simpler AI-powered apps using short Python functions or SQL queries
+- ⚡️ 10x faster AI apps using AI-centric query optimization  
 - 💰 Save money spent on GPUs
 - 🚀 First-class support for your custom deep learning models through user-defined functions
 - 📦 Built-in caching to eliminate redundant model invocations across queries

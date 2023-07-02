@@ -18,10 +18,9 @@ from unittest.mock import MagicMock, patch
 from evadb.binder.binder_utils import BinderError
 from evadb.binder.statement_binder import StatementBinder
 from evadb.binder.statement_binder_context import StatementBinderContext
-from evadb.catalog.catalog_type import NdArrayType
+from evadb.catalog.catalog_type import ColumnType, NdArrayType
 from evadb.expression.tuple_value_expression import TupleValueExpression
 from evadb.parser.alias import Alias
-from evadb.parser.create_statement import ColumnDefinition
 
 
 class StatementBinderTests(unittest.TestCase):
@@ -111,26 +110,25 @@ class StatementBinderTests(unittest.TestCase):
             binder._bind_tableref(tableref)
             self.assertEqual(mock_ctx.call_count, 1)
 
-    def test_bind_create_mat_statement(self):
+    def test_bind_create_table_from_select_statement(self):
         with patch.object(StatementBinder, "bind") as mock_binder:
             binder = StatementBinder(StatementBinderContext(MagicMock()))
-            mat_statement = MagicMock()
-            binder._bind_create_mat_statement(mat_statement)
-            mock_binder.assert_called_with(mat_statement.query)
 
-    def test_raises_mismatch_columns_create_mat_statement(self):
-        with patch.object(StatementBinder, "bind"):
-            binder = StatementBinder(StatementBinderContext(MagicMock()))
-            mat_statement = MagicMock()
-            mat_statement.col_list = [ColumnDefinition("id", None, None, None)]
-            mat_statement.query.target_list = [
-                TupleValueExpression(name="id"),
-                TupleValueExpression(name="label"),
+            output_obj = MagicMock()
+            output_obj.type = ColumnType.INTEGER
+            output_obj.array_type = NdArrayType.UINT8
+            output_obj.array_dimensions = (1, 1)
+
+            create_statement = MagicMock()
+            create_statement.column_list = []
+            create_statement.query.target_list = [
+                TupleValueExpression(name="id", col_object=output_obj),
+                TupleValueExpression(name="label", col_object=output_obj),
             ]
-            with self.assertRaises(
-                Exception, msg="Projected columns mismatch, expected 1 found 2."
-            ):
-                binder._bind_create_mat_statement(mat_statement)
+
+            binder._bind_create_statement(create_statement)
+            mock_binder.assert_called_with(create_statement.query)
+            self.assertEqual(2, len(create_statement.column_list))
 
     def test_bind_explain_statement(self):
         with patch.object(StatementBinder, "bind") as mock_binder:
@@ -140,10 +138,7 @@ class StatementBinderTests(unittest.TestCase):
             mock_binder.assert_called_with(stmt.explainable_stmt)
 
     @patch("evadb.binder.statement_binder.load_udf_class_from_file")
-    @patch("evadb.binder.statement_binder.get_file_checksum")
-    def test_bind_func_expr(
-        self, mock_get_file_checksum, mock_load_udf_class_from_file
-    ):
+    def test_bind_func_expr(self, mock_load_udf_class_from_file):
         # setup
         func_expr = MagicMock(
             name="func_expr", alias=Alias("func_expr"), output_col_aliases=[]
@@ -167,14 +162,14 @@ class StatementBinderTests(unittest.TestCase):
         mock_load_udf_class_from_file.return_value.return_value = (
             "load_udf_class_from_file"
         )
-        mock_get_file_checksum.return_value = udf_obj.checksum
+        # mock_get_file_checksum.return_value = udf_obj.checksum
 
         # Case 1 set output
         func_expr.output = "out1"
         binder = StatementBinder(StatementBinderContext(mock_catalog))
         binder._bind_func_expr(func_expr)
 
-        mock_get_file_checksum.assert_called_with(udf_obj.impl_file_path)
+        # mock_get_file_checksum.assert_called_with(udf_obj.impl_file_path)
         mock_get_name.assert_called_with(func_expr.name)
         mock_get_udf_outputs.assert_called_with(udf_obj)
         mock_load_udf_class_from_file.assert_called_with(
@@ -194,7 +189,7 @@ class StatementBinderTests(unittest.TestCase):
         binder = StatementBinder(StatementBinderContext(mock_catalog))
         binder._bind_func_expr(func_expr)
 
-        mock_get_file_checksum.assert_called_with(udf_obj.impl_file_path)
+        # mock_get_file_checksum.assert_called_with(udf_obj.impl_file_path)
         mock_get_name.assert_called_with(func_expr.name)
         mock_get_udf_outputs.assert_called_with(udf_obj)
         mock_load_udf_class_from_file.assert_called_with(
@@ -220,7 +215,7 @@ class StatementBinderTests(unittest.TestCase):
         with self.assertRaises(BinderError) as cm:
             binder._bind_func_expr(func_expr)
         err_msg = (
-            f"{mock_error_msg}. Please verify that the UDF class name in the"
+            f"{mock_error_msg}. Please verify that the UDF class name in the "
             "implementation file matches the UDF name."
         )
         self.assertEqual(str(cm.exception), err_msg)

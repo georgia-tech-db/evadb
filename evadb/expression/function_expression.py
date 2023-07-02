@@ -46,7 +46,9 @@ class FunctionExpression(AbstractExpression):
     FunctionExpression also needs to prepend its alias to all the
     projected columns. This is important as other parts of the query
     might be assessing the results using alias. Eg,
-    `Select OD.labels FROM Video JOIN LATERAL ObjDetector AS OD;`
+
+    `Select Detector.labels
+     FROM Video JOIN LATERAL ObjDetector AS Detector;`
     """
 
     def __init__(

@@ -36,7 +36,6 @@ class StatementType(EvaDBEnum):
     DELETE  # noqa: F821
     CREATE_UDF  # noqa: F821
     LOAD_DATA  # noqa: F821
-    CREATE_MATERIALIZED_VIEW  # noqa: F821
     SHOW  # noqa: F821
     EXPLAIN  # noqa: F821
     CREATE_INDEX  # noqa: F821

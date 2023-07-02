@@ -39,7 +39,7 @@ from evadb.optimizer.rules.pattern import Pattern
 from evadb.optimizer.rules.rules_base import Promise, Rule, RuleType
 from evadb.parser.types import JoinType, ParserOrderBySortType
 from evadb.plan_nodes.apply_and_merge_plan import ApplyAndMergePlan
-from evadb.plan_nodes.create_mat_view_plan import CreateMaterializedViewPlan
+from evadb.plan_nodes.create_from_select_plan import CreateFromSelectPlan
 from evadb.plan_nodes.exchange_plan import ExchangePlan
 from evadb.plan_nodes.explain_plan import ExplainPlan
 from evadb.plan_nodes.hash_join_build_plan import HashJoinBuildPlan
@@ -56,7 +56,6 @@ from evadb.optimizer.operators import (
     LogicalApplyAndMerge,
     LogicalCreate,
     LogicalCreateIndex,
-    LogicalCreateMaterializedView,
     LogicalCreateUDF,
     LogicalDelete,
     LogicalDropObject,
@@ -721,7 +720,9 @@ class LogicalCreateFromSelectToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalCreate, context: OptimizerContext):
-        after = CreatePlan(before.video, before.column_list, before.if_not_exists)
+        after = CreateFromSelectPlan(
+            before.video, before.column_list, before.if_not_exists
+        )
         for child in before.children:
             after.append_child(child)
         yield after
@@ -1112,29 +1113,6 @@ class LogicalJoinToPhysicalNestedLoopJoin(Rule):
         yield nested_loop_join_plan
 
 
-class LogicalCreateMaterializedViewToPhysical(Rule):
-    def __init__(self):
-        pattern = Pattern(OperatorType.LOGICAL_CREATE_MATERIALIZED_VIEW)
-        pattern.append_child(Pattern(OperatorType.DUMMY))
-        super().__init__(RuleType.LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL, pattern)
-
-    def promise(self):
-        return Promise.LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL
-
-    def check(self, grp_id: int, context: OptimizerContext):
-        return True
-
-    def apply(self, before: LogicalCreateMaterializedView, context: OptimizerContext):
-        after = CreateMaterializedViewPlan(
-            before.view,
-            columns=before.col_list,
-            if_not_exists=before.if_not_exists,
-        )
-        for child in before.children:
-            after.append_child(child)
-        yield after
-
-
 class LogicalFilterToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALFILTER)
@@ -1251,6 +1229,21 @@ class LogicalVectorIndexScanToPhysical(Rule):
         yield after
 
 
+"""
+Rules to optimize Ray.
+"""
+
+
+def get_ray_env_dict():
+    # Get the highest GPU id and expose all GPUs that have id lower than
+    # the max id.
+    if len(Context().gpus) > 0:
+        max_gpu_id = max(Context().gpus) + 1
+        return {"CUDA_VISIBLE_DEVICES": ",".join([str(n) for n in range(max_gpu_id)])}
+    else:
+        return {}
+
+
 class LogicalExchangeToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALEXCHANGE)
@@ -1285,15 +1278,15 @@ class LogicalApplyAndMergeToRayPhysical(Rule):
     def apply(self, before: LogicalApplyAndMerge, context: OptimizerContext):
         apply_plan = ApplyAndMergePlan(before.func_expr, before.alias, before.do_unnest)
 
-        parallelism = 2 if len(Context().gpus) > 1 else 1
-        ray_parallel_env_conf_dict = [
-            {"CUDA_VISIBLE_DEVICES": str(i)} for i in range(parallelism)
-        ]
+        parallelism = 2
+
+        ray_process_env_dict = get_ray_env_dict()
+        ray_parallel_env_conf_dict = [ray_process_env_dict for _ in range(parallelism)]
 
         exchange_plan = ExchangePlan(
             inner_plan=apply_plan,
             parallelism=parallelism,
-            ray_pull_env_conf_dict={"CUDA_VISIBLE_DEVICES": "0"},
+            ray_pull_env_conf_dict=ray_process_env_dict,
             ray_parallel_env_conf_dict=ray_parallel_env_conf_dict,
         )
         for child in before.children:
@@ -1324,15 +1317,17 @@ class LogicalProjectToRayPhysical(Rule):
                 project_plan.append_child(child)
             yield project_plan
         else:
-            parallelism = 2 if len(Context().gpus) > 1 else 1
+            parallelism = 2
+
+            ray_process_env_dict = get_ray_env_dict()
             ray_parallel_env_conf_dict = [
-                {"CUDA_VISIBLE_DEVICES": str(i)} for i in range(parallelism)
+                ray_process_env_dict for _ in range(parallelism)
             ]
 
             exchange_plan = ExchangePlan(
                 inner_plan=project_plan,
                 parallelism=parallelism,
-                ray_pull_env_conf_dict={"CUDA_VISIBLE_DEVICES": "0"},
+                ray_pull_env_conf_dict=ray_process_env_dict,
                 ray_parallel_env_conf_dict=ray_parallel_env_conf_dict,
             )
             for child in before.children:

@@ -41,7 +41,9 @@ class EvaServer:
         hostname: hostname of the server
         port: port of the server
         """
-        print(f"EvaDB server started at host {host} and port {port}")
+        from pprint import pprint
+
+        pprint(f"EvaDB server started at host {host} and port {port}")
         self._evadb = init_evadb_instance(db_dir, host, port, custom_db_uri)
 
         self._server = await asyncio.start_server(self.accept_client, host, port)

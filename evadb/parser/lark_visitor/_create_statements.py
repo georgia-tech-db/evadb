@@ -18,7 +18,6 @@ from lark import Tree
 from evadb.catalog.catalog_type import ColumnType, NdArrayType, VectorStoreType
 from evadb.expression.tuple_value_expression import TupleValueExpression
 from evadb.parser.create_index_statement import CreateIndexStatement
-from evadb.parser.create_mat_view_statement import CreateMaterializedViewStatement
 from evadb.parser.create_statement import (
     ColConstraintInfo,
     ColumnDefinition,
@@ -231,30 +230,6 @@ class CreateTable:
     def length_dimension_list(self, tree):
         dimensions = self.dimension_helper(tree)
         return dimensions
-
-    # MATERIALIZED VIEW
-    def create_materialized_view(self, tree):
-        view_info = None
-        if_not_exists = False
-        query = None
-        uid_list = []
-
-        for child in tree.children:
-            if isinstance(child, Tree):
-                if child.data == "table_name":
-                    view_info = self.visit(child)
-                elif child.data == "if_not_exists":
-                    if_not_exists = True
-                elif child.data == "uid_list":
-                    uid_list = self.visit(child)
-                elif child.data == "simple_select":
-                    query = self.visit(child)
-
-        # When uid_list is empty, the column information is inferred from the subquery in the binder.
-        col_list = [ColumnDefinition(uid.name, None, None, None) for uid in uid_list]
-        return CreateMaterializedViewStatement(
-            view_info, col_list, if_not_exists, query
-        )
 
     def vector_store_type(self, tree):
         vector_store_type = None

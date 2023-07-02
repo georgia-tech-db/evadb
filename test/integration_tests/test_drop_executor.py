@@ -108,7 +108,9 @@ class DropObjectExecutorTest(unittest.TestCase):
         # Fail if table already dropped
         drop_query = """DROP TABLE MyVideo;"""
         with self.assertRaises(ExecutorError):
-            execute_query_fetch_all(self.evadb, drop_query)
+            execute_query_fetch_all(
+                self.evadb, drop_query, do_not_print_exceptions=True
+            )
 
     def run_create_udf_query(self):
         create_udf_query = """CREATE UDF DummyObjectDetector
@@ -142,7 +144,9 @@ class DropObjectExecutorTest(unittest.TestCase):
         # - raises an appropriate exception
         drop_query = "DROP UDF {};".format(wrong_udf_name)
         try:
-            execute_query_fetch_all(self.evadb, drop_query)
+            execute_query_fetch_all(
+                self.evadb, drop_query, do_not_print_exceptions=True
+            )
         except Exception as e:
             err_msg = "UDF {} does not exist, therefore cannot be dropped.".format(
                 wrong_udf_name
@@ -166,7 +170,9 @@ class DropObjectExecutorTest(unittest.TestCase):
         wrong_udf_name = "wrong_udf_name"
         drop_query = f"DROP INDEX {wrong_udf_name};"
         with self.assertRaises(ExecutorError):
-            execute_query_fetch_all(self.evadb, drop_query)
+            execute_query_fetch_all(
+                self.evadb, drop_query, do_not_print_exceptions=True
+            )
         obj = self.evadb.catalog().get_index_catalog_entry_by_name(index_name)
         self.assertTrue(obj is not None)
 

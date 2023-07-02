@@ -13,9 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import numpy as np
-from norfair import Detection, Tracker
 
 from evadb.udfs.abstract.tracker_abstract_udf import EvaDBTrackerAbstractUDF
+from evadb.utils.generic_utils import try_to_import_norfair
 from evadb.utils.math_utils import get_centroid
 
 DISTANCE_THRESHOLD_CENTROID: int = 30
@@ -28,6 +28,9 @@ class NorFairTracker(EvaDBTrackerAbstractUDF):
 
     def setup(self, distance_threshold=DISTANCE_THRESHOLD_CENTROID) -> None:
         # https://github.com/tryolabs/norfair/blob/74b11edde83941dd6e32bcccd5fa849e16bf8564/norfair/tracker.py#L18
+        try_to_import_norfair()
+        from norfair import Tracker
+
         self.tracker = Tracker(
             distance_function="euclidean",
             distance_threshold=distance_threshold,
@@ -35,6 +38,8 @@ class NorFairTracker(EvaDBTrackerAbstractUDF):
         self.prev_frame_id = None
 
     def forward(self, frame_id, frame, labels, bboxes, scores):
+        from norfair import Detection
+
         norfair_detections = [
             Detection(
                 points=get_centroid(bbox),

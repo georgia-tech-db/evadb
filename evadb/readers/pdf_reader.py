@@ -15,6 +15,7 @@
 from typing import Dict, Iterator
 
 from evadb.readers.abstract_reader import AbstractReader
+from evadb.utils.generic_utils import try_to_import_fitz
 
 
 class PDFReader(AbstractReader):
@@ -25,8 +26,8 @@ class PDFReader(AbstractReader):
             column_list: list of columns (TupleValueExpression)
             to read from the PDF file
         """
-
         super().__init__(*args, **kwargs)
+        try_to_import_fitz()
 
     def _read(self) -> Iterator[Dict]:
         import fitz

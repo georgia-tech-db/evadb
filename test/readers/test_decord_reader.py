@@ -32,12 +32,14 @@ from evadb.expression.constant_value_expression import ConstantValueExpression
 from evadb.expression.logical_expression import LogicalExpression
 from evadb.expression.tuple_value_expression import TupleValueExpression
 from evadb.readers.decord_reader import DecordReader
+from evadb.utils.generic_utils import try_to_import_decord
 
 
 @pytest.mark.notparallel
 class DecordLoaderTest(unittest.TestCase):
     @classmethod
     def setUpClass(self):
+        try_to_import_decord()
         self.video_file_url = create_sample_video()
         self.video_with_audio_file_url = (
             f"{EvaDB_ROOT_DIR}/data/sample_videos/touchdown.mp4"

@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import asyncio
 import gc
 import multiprocessing as mp
 import os
@@ -23,11 +22,8 @@ from itertools import repeat
 from multiprocessing import Pool
 from pathlib import Path
 
-import cv2
 import numpy as np
 import pandas as pd
-import psutil
-import ray
 from mock import MagicMock
 
 from evadb.binder.statement_binder import StatementBinder
@@ -48,7 +44,11 @@ from evadb.udfs.abstract.abstract_udf import AbstractClassifierUDF
 from evadb.udfs.decorators import decorators
 from evadb.udfs.decorators.io_descriptors.data_types import NumpyArray, PandasDataframe
 from evadb.udfs.udf_bootstrap_queries import init_builtin_udfs
-from evadb.utils.generic_utils import remove_directory_contents
+from evadb.utils.generic_utils import (
+    is_ray_available,
+    remove_directory_contents,
+    try_to_import_cv2,
+)
 
 NUM_FRAMES = 10
 FRAME_SIZE = (32, 32)
@@ -86,13 +86,16 @@ EvaDB_TEST_DATA_DIR = Path(EvaDB_INSTALLATION_DIR).parent
 
 
 def is_ray_stage_running():
+    import psutil
+
     return "ray::ray_stage" in (p.name() for p in psutil.process_iter())
 
 
 def shutdown_ray():
-    db_dir = suffix_pytest_xdist_worker_id_to_dir(EvaDB_DATABASE_DIR)
-    config = ConfigurationManager(Path(db_dir))
-    if config.get_value("experimental", "ray"):
+    is_ray_enabled = is_ray_available()
+    if is_ray_enabled:
+        import ray
+
         ray.shutdown()
 
 
@@ -226,7 +229,7 @@ def get_physical_query_plan(
     db, query: str, rule_manager=None, cost_model=None
 ) -> AbstractPlan:
     l_plan = get_logical_query_plan(db, query)
-    p_plan = asyncio.run(PlanGenerator(db, rule_manager, cost_model).build(l_plan))
+    p_plan = PlanGenerator(db, rule_manager, cost_model).build(l_plan)
     return p_plan
 
 
@@ -380,12 +383,18 @@ def create_sample_image():
     img = np.array(np.ones((3, 3, 3)), dtype=np.uint8)
     img[0] -= 1
     img[2] += 1
+    try_to_import_cv2()
+    import cv2
+
     cv2.imwrite(img_path, img)
     return img_path
 
 
 def create_random_image(i, path):
     img = np.random.random_sample([400, 400, 3]).astype(np.uint8)
+    try_to_import_cv2()
+    import cv2
+
     cv2.imwrite(os.path.join(path, f"img{i}.jpg"), img)
 
 
@@ -411,6 +420,9 @@ def create_sample_video(num_frames=NUM_FRAMES):
 
     duration = 1
     fps = NUM_FRAMES
+    try_to_import_cv2()
+    import cv2
+
     out = cv2.VideoWriter(
         file_name, cv2.VideoWriter_fourcc("M", "J", "P", "G"), fps, (32, 32), False
     )

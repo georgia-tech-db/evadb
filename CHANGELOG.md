@@ -10,6 +10,70 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### [Deprecated]
 ### [Removed]
 
+##  [0.3.1] - 2023-06-30
+
+* PR #913: fix: motif_mining query 
+* PR #895: fix: Renaming Cursor Functions 
+* PR #911: Added comments for ChatGPT UDF. 
+* PR #908: feat: migrate to sqlalchemy 2.0 
+* PR #910: Bump v0.3.1+dev 
+* PR #907: feat: table filtering based on multiple keywords UDF 
+
+##  [0.3.0] - 2023-06-27
+
+* PR #907: feat: table filtering based on multiple keywords UDF 
+* PR #906: ci: add 3.11 
+* PR #905: feat: remove ocr 
+* PR #904: feat: chatgpt prompt arg 
+* PR #903: Bump v0.3.0+dev 
+
+##  [0.2.15] - 2023-06-26
+
+* PR #898: fix: index creation better error msg 
+* PR #817: fix: GPU ids and degree of parallelism 
+* PR #897: feat: add support for 3.11 
+* PR #885: feat: pandas qa sample app 
+* PR #896: app: youtube channel qa app 
+* PR #893: feat: cleanup create mat view 
+* PR #892: feat: update notebooks 
+* PR #894: fix: Youtube app 
+
+##  [0.2.14] - 2023-06-24
+
+* PR #887: fix: Notebooks fix 
+* PR #889: fix: ocr donut model  
+* PR #886: doc: improve youtube qa app doc 
+* PR #878: feat: make ray optional 
+* PR #884: test: disable reuse tests 
+* PR #883: test: update tests 
+* PR #880: feat: pandas qa 
+* PR #882: feat: adding more functions to Python API 
+* PR #881: docs: minor updates 
+* PR #863: feat: youtube qa app support analyzing a local video 
+* PR #877: notebooks: updates 
+* PR #875: Bump v0.2.14+dev 
+* PR #873: notebooks: update notebooks 
+
+##  [0.2.13] - 2023-06-17
+
+* PR #873: notebooks: update notebooks 
+* PR #872: Bump v0.2.13+dev 
+* PR #836: feat: OCR UDF based on Donut Hugging Face Model 
+
+##  [0.2.12] - 2023-06-16
+
+* PR #836: feat: OCR UDF based on Donut Hugging Face Model 
+* PR #865: feat: reduce package dependencies 
+* PR #870: refactor: Moved `col_name` -> `name` in `TupleValueExpression` 
+* PR #867: fix: minor fix to the catalog utils. 
+* PR #866: feat: app testing 
+* PR #864: test: support for testing apps 
+* PR #860: Summary :  'progressive' filter while downloding streams in youtube_qa app. 
+* PR #861: feat: add chunk_size and chunk_overlap similar to langchain 
+* PR #859: ci: Macos build 
+* PR #853: feat: chatgpt test with real API key 
+* PR #858: Bump v0.2.12+dev 
+
 ##  [0.2.11] - 2023-06-10
 
 * PR #856: Bump v0.2.11+dev 

@@ -4,7 +4,7 @@ Getting Started
 Step 1: Install EvaDB
 ----
 
-EvaDB supports Python (versions >= ``3.8`` and <= ``3.10``). To install EvaDB, we recommend using the ``pip`` package manager:
+EvaDB supports Python (versions >= ``3.8``). To install EvaDB, we recommend using the ``pip`` package manager:
 
 .. code-block:: bash
 

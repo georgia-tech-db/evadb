@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import cv2
 import numpy as np
 import pandas as pd
 
@@ -20,6 +19,7 @@ from evadb.catalog.catalog_type import NdArrayType
 from evadb.udfs.abstract.abstract_udf import AbstractUDF
 from evadb.udfs.decorators.decorators import forward, setup
 from evadb.udfs.decorators.io_descriptors.data_types import PandasDataframe
+from evadb.utils.generic_utils import try_to_import_cv2
 
 color = (207, 248, 64)
 thickness = 4
@@ -66,6 +66,8 @@ class Annotate(AbstractUDF):
             row = row.to_list()
             frame = row[0]
             bboxes = row[2]
+            try_to_import_cv2()
+            import cv2
 
             for bbox in bboxes:
                 x1, y1, x2, y2 = np.asarray(bbox, dtype="int")

@@ -27,7 +27,11 @@ from evadb.plan_nodes.create_udf_plan import CreateUDFPlan
 from evadb.third_party.huggingface.create import gen_hf_io_catalog_entries
 from evadb.udfs.decorators.utils import load_io_from_udf_decorators
 from evadb.utils.errors import UDFIODefinitionError
-from evadb.utils.generic_utils import load_udf_class_from_file
+from evadb.utils.generic_utils import (
+    load_udf_class_from_file,
+    try_to_import_torch,
+    try_to_import_ultralytics,
+)
 from evadb.utils.logging_manager import logger
 
 
@@ -44,6 +48,9 @@ class CreateUDFExecutor(AbstractExecutor):
         HuggingFace UDFs are special UDFs that are not loaded from a file.
         So we do not need to call the setup method on them like we do for other UDFs.
         """
+        # We need atleast one deep learning framework for HuggingFace
+        # Torch or Tensorflow
+        try_to_import_torch()
         impl_path = f"{self.udf_dir}/abstract/hf_abstract_udf.py"
         io_list = gen_hf_io_catalog_entries(self.node.name, self.node.metadata)
         return (
@@ -56,6 +63,7 @@ class CreateUDFExecutor(AbstractExecutor):
 
     def handle_ultralytics_udf(self):
         """Handle Ultralytics UDFs"""
+        try_to_import_ultralytics()
 
         impl_path = (
             Path(f"{self.udf_dir}/yolo_object_detector.py").absolute().as_posix()
@@ -127,12 +135,10 @@ class CreateUDFExecutor(AbstractExecutor):
 
         Args:
             impl_path (str): The file path of the UDF implementation file.
-            udf_args (Dict, optional): Dictionary of arguments to pass to the UDF.
-            Defaults to {}.
+            udf_args (Dict, optional): Dictionary of arguments to pass to the UDF. Defaults to {}.
 
         Returns:
-            UdfCatalogEntry: A UdfCatalogEntry object that represents the initialized
-            UDF.
+            UdfCatalogEntry: A UdfCatalogEntry object that represents the initialized UDF.
 
         Raises:
             RuntimeError: If an error occurs while initializing the UDF.
@@ -146,7 +152,7 @@ class CreateUDFExecutor(AbstractExecutor):
             udf(**udf_args)
         except Exception as e:
             err_msg = f"Error creating UDF: {str(e)}"
-            logger.error(err_msg)
+            # logger.error(err_msg)
             raise RuntimeError(err_msg)
 
         return udf

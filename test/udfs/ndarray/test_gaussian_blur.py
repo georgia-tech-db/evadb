@@ -16,12 +16,12 @@ import unittest
 from pathlib import Path
 from test.util import file_remove
 
-import cv2
 import numpy as np
 import pandas as pd
 
 from evadb.configuration.constants import EvaDB_ROOT_DIR
 from evadb.udfs.ndarray.gaussian_blur import GaussianBlur
+from evadb.utils.generic_utils import try_to_import_cv2
 
 
 class GaussianBlurTests(unittest.TestCase):
@@ -33,6 +33,9 @@ class GaussianBlurTests(unittest.TestCase):
         assert hasattr(self.gb_instance, "name")
 
     def test_should_blur_image(self):
+        try_to_import_cv2()
+        import cv2
+
         arr = cv2.imread(f"{EvaDB_ROOT_DIR}/test/udfs/data/dog.jpeg")
         df = pd.DataFrame([[arr]])
         modified_arr = self.gb_instance(df)["blurred_frame_array"]

@@ -122,16 +122,6 @@ Yolo_udf_query = """CREATE UDF IF NOT EXISTS Yolo
       'model' 'yolov8m.pt';
       """
 
-ocr_udf_query = """CREATE UDF IF NOT EXISTS OCRExtractor
-      INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
-      OUTPUT (labels NDARRAY STR(10), bboxes NDARRAY FLOAT32(ANYDIM, 4),
-                scores NDARRAY FLOAT32(ANYDIM))
-      TYPE  OCRExtraction
-      IMPL  '{}/udfs/ocr_extractor.py';
-      """.format(
-    EvaDB_INSTALLATION_DIR
-)
-
 face_detection_udf_query = """CREATE UDF IF NOT EXISTS FaceDetector
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
                   OUTPUT (bboxes NDARRAY FLOAT32(ANYDIM, 4),
@@ -212,37 +202,55 @@ def init_builtin_udfs(db: EvaDBDatabase, mode: str = "debug") -> None:
         Defaults to 'debug'.
 
     """
+
+    # Attempting to import torch module
+    # It is necessary to import torch before to avoid encountering a
+    # "RuntimeError: random_device could not be read"
+    # The suspicion is that importing torch prior to decord resolves this issue
+    try:
+        import torch  # noqa: F401
+    except ImportError:
+        pass
+
+    # Enable environment variables
+    # Relevant for transformer-based models
+    import os
+
+    os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
+    os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
     # list of UDF queries to load
     queries = [
+        mnistcnn_udf_query,
         Fastrcnn_udf_query,
         ArrayCount_udf_query,
         Crop_udf_query,
         Open_udf_query,
         Similarity_udf_query,
         norfair_obj_tracker_query,
-        mnistcnn_udf_query,
         chatgpt_udf_query,
-        # Disabled because required packages (eg., easy_ocr might not be preinstalled)
-        # face_detection_udf_query,
-        # ocr_udf_query,
-        # Mvit_udf_query, - Disabled as it requires specific pytorch package
-        # Sift_udf_query, - requires package kornia
+        face_detection_udf_query,
+        # Mvit_udf_query,
+        Sift_udf_query,
+        Yolo_udf_query,
     ]
 
-    if mode == "release":
-        # if mode is 'release', add the Yolo query to the list
-        queries.append(Yolo_udf_query)
-    else:
-        # if mode is 'debug', add debug UDFs and a smaller Yolo model
+    # if mode is 'debug', add debug UDFs
+    if mode == "debug":
         queries.extend(
             [
                 DummyObjectDetector_udf_query,
                 DummyMultiObjectDetector_udf_query,
                 DummyFeatureExtractor_udf_query,
-                yolo8n_query,
             ]
         )
 
     # execute each query in the list of UDF queries
+    # ignore exceptions during the bootstrapping phase due to missing packages
     for query in queries:
-        execute_query_fetch_all(db, query)
+        try:
+            execute_query_fetch_all(
+                db, query, do_not_print_exceptions=True, do_not_raise_exceptions=True
+            )
+        except Exception:
+            pass

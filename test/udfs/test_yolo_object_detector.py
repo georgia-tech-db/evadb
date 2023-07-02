@@ -16,11 +16,11 @@ import os
 import sys
 import unittest
 
-import cv2
 import mock
 import numpy as np
 import pandas as pd
-import torch
+
+from evadb.utils.generic_utils import try_to_import_cv2, try_to_import_torch
 
 NUM_FRAMES = 10
 
@@ -28,6 +28,9 @@ NUM_FRAMES = 10
 def numpy_to_yolo_format(numpy_image):
     numpy_image = numpy_image.astype(np.float64)
     numpy_image = numpy_image / 255
+    try_to_import_torch()
+    import torch
+
     r = torch.tensor(numpy_image[:, :, 0])
     g = torch.tensor(numpy_image[:, :, 1])
     b = torch.tensor(numpy_image[:, :, 2])
@@ -42,6 +45,9 @@ class YoloTest(unittest.TestCase):
         self.base_path = os.path.dirname(os.path.abspath(__file__))
 
     def _load_image(self, path):
+        try_to_import_cv2()
+        import cv2
+
         img = cv2.imread(path)
         return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 

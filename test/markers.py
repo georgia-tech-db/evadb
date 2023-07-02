@@ -18,8 +18,15 @@ import sys
 
 import pytest
 
+from evadb.utils.generic_utils import is_gpu_available
+
 asyncio_skip_marker = pytest.mark.skipif(
     sys.version_info < (3, 8), reason="Test case requires asyncio support"
+)
+
+qdrant_skip_marker = pytest.mark.skipif(
+    sys.version_info.minor == 11,
+    reason="qdrant requires grcpio which is broken on 3.11",
 )
 
 windows_skip_marker = pytest.mark.skipif(
@@ -39,20 +46,22 @@ memory_skip_marker = pytest.mark.skipif(
 )
 
 ray_skip_marker = pytest.mark.skipif(
-    os.environ.get("ray") is None,
-    reason="Skip test for ray execution.",
+    os.environ.get("ray") is None, reason="Run only if Ray is enabled"
 )
 
-ray_only_marker = pytest.mark.skipif(
-    os.environ.get("ray") is not None,
-    reason="Run only if ray is enabled",
-)
-
-duplicate_skip_marker = pytest.mark.skipif(
+redundant_test_skip_marker = pytest.mark.skipif(
     sys.platform == "linux",
     reason="Test case is duplicate. Disabling to speed up test suite",
 )
 
 ocr_skip_marker = pytest.mark.skip(
     reason="We do not have built-in support for OCR",
+)
+
+gpu_skip_marker = pytest.mark.skipif(
+    is_gpu_available() is False, reason="Run only if gpu is available"
+)
+
+chatgpt_skip_marker = pytest.mark.skip(
+    reason="requires chatgpt",
 )

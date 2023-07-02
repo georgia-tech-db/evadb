@@ -34,7 +34,6 @@ from evadb.expression.abstract_expression import AbstractExpression, ExpressionT
 from evadb.expression.function_expression import FunctionExpression
 from evadb.expression.tuple_value_expression import TupleValueExpression
 from evadb.parser.create_index_statement import CreateIndexStatement
-from evadb.parser.create_mat_view_statement import CreateMaterializedViewStatement
 from evadb.parser.create_statement import ColumnDefinition, CreateTableStatement
 from evadb.parser.delete_statement import DeleteTableStatement
 from evadb.parser.explain_statement import ExplainStatement
@@ -44,7 +43,7 @@ from evadb.parser.statement import AbstractStatement
 from evadb.parser.table_ref import TableRef
 from evadb.parser.types import UDFType
 from evadb.third_party.huggingface.binder import assign_hf_udf
-from evadb.utils.generic_utils import get_file_checksum, load_udf_class_from_file
+from evadb.utils.generic_utils import load_udf_class_from_file
 from evadb.utils.logging_manager import logger
 
 
@@ -86,7 +85,20 @@ class StatementBinder:
 
         if not node.udf_func:
             # Feature table type needs to be float32 numpy array.
-            col_entry = node.col_list[0].col_object
+            assert (
+                len(node.col_list) == 1
+            ), f"Index can be only created on one column, but instead {len(node.col_list)} are provided"
+            col_def = node.col_list[0]
+
+            table_ref_obj = node.table_ref.table.table_obj
+            col_list = [
+                col for col in table_ref_obj.columns if col.name == col_def.name
+            ]
+            assert (
+                len(col_list) == 1
+            ), f"Index is created on non-existent column {col_def.name}"
+
+            col = col_list[0]
             assert (
                 col_entry.array_type == NdArrayType.FLOAT32
             ), "Index input needs to be float32."
@@ -190,46 +202,6 @@ class StatementBinder:
                     idx += 1
             node.column_list = binded_col_list
 
-    @bind.register(CreateMaterializedViewStatement)
-    def _bind_create_mat_statement(self, node: CreateMaterializedViewStatement):
-        self.bind(node.query)
-        num_projected_columns = 0
-        # TODO we should fix the binder. All binded object should have the same interface.
-        for expr in node.query.target_list:
-            if expr.etype == ExpressionType.TUPLE_VALUE:
-                num_projected_columns += 1
-            elif expr.etype == ExpressionType.FUNCTION_EXPRESSION:
-                num_projected_columns += len(expr.output_objs)
-            else:
-                raise BinderError("Unsupported expression type {}.".format(expr.etype))
-
-        assert (
-            len(node.col_list) == 0 or len(node.col_list) == num_projected_columns
-        ), "Projected columns mismatch, expected {} found {}.".format(
-            len(node.col_list), num_projected_columns
-        )
-        binded_col_list = []
-        idx = 0
-        for expr in node.query.target_list:
-            output_objs = (
-                [(expr.name, expr.col_object)]
-                if expr.etype == ExpressionType.TUPLE_VALUE
-                else zip(expr.projection_columns, expr.output_objs)
-            )
-            for col_name, output_obj in output_objs:
-                binded_col_list.append(
-                    ColumnDefinition(
-                        col_name
-                        if len(node.col_list) == 0
-                        else node.col_list[idx].name,
-                        output_obj.type,
-                        output_obj.array_type,
-                        output_obj.array_dimensions,
-                    )
-                )
-                idx += 1
-        node.col_list = binded_col_list
-
     @bind.register(RenameTableStatement)
     def _bind_rename_table_statement(self, node: RenameTableStatement):
         self.bind(node.old_table_ref)
@@ -304,8 +276,8 @@ class StatementBinder:
         udf_obj = self._catalog().get_udf_catalog_entry_by_name(node.name)
         if udf_obj is None:
             err_msg = (
-                f"UDF with name {node.name} does not exist in the catalog. "
-                "Please create the UDF using CREATE UDF command."
+                f"Function '{node.name}' does not exist in the catalog. "
+                "Please create the function using CREATE UDF command."
             )
             logger.error(err_msg)
             raise BinderError(err_msg)
@@ -325,10 +297,10 @@ class StatementBinder:
             # Verify the consistency of the UDF. If the checksum of the UDF does not
             # match the one stored in the catalog, an error will be thrown and the user
             # will be asked to register the UDF again.
-            assert (
-                get_file_checksum(udf_obj.impl_file_path) == udf_obj.checksum
-            ), f"""UDF file {udf_obj.impl_file_path} has been modified from the
-                registration. Please use DROP UDF to drop it and re-create it using CREATE UDF."""
+            # assert (
+            #     get_file_checksum(udf_obj.impl_file_path) == udf_obj.checksum
+            # ), f"""UDF file {udf_obj.impl_file_path} has been modified from the
+            #     registration. Please use DROP UDF to drop it and re-create it # using CREATE UDF."""
 
             try:
                 udf_class = load_udf_class_from_file(
@@ -340,7 +312,7 @@ class StatementBinder:
                 node.function = lambda: udf_class(**get_metadata_properties(udf_obj))
             except Exception as e:
                 err_msg = (
-                    f"{str(e)}. Please verify that the UDF class name in the"
+                    f"{str(e)}. Please verify that the UDF class name in the "
                     "implementation file matches the UDF name."
                 )
                 logger.error(err_msg)

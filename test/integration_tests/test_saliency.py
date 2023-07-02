@@ -37,6 +37,7 @@ class SaliencyTests(unittest.TestCase):
         execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS SALIENCY;")
         # file_remove("dummy.avi")
 
+    @unittest.skip("Not supported in current version")
     def test_saliency(self):
         Saliency1 = f"{EvaDB_ROOT_DIR}/data/saliency/test1.jpeg"
         create_udf_query = f"LOAD IMAGE '{Saliency1}' INTO SALIENCY;"

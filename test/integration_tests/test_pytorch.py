@@ -14,7 +14,12 @@
 # limitations under the License.
 import os
 import unittest
-from test.markers import ocr_skip_marker, ray_only_marker, windows_skip_marker
+from test.markers import (
+    gpu_skip_marker,
+    ocr_skip_marker,
+    ray_skip_marker,
+    windows_skip_marker,
+)
 from test.util import (
     create_sample_video,
     file_remove,
@@ -23,7 +28,6 @@ from test.util import (
     shutdown_ray,
 )
 
-import cv2
 import numpy as np
 import pandas.testing as pd_testing
 import pytest
@@ -33,6 +37,7 @@ from evadb.executor.executor_utils import ExecutorError
 from evadb.models.storage.batch import Batch
 from evadb.server.command_handler import execute_query_fetch_all
 from evadb.udfs.udf_bootstrap_queries import Asl_udf_query, Mvit_udf_query
+from evadb.utils.generic_utils import try_to_import_cv2
 
 
 @pytest.mark.notparallel
@@ -85,7 +90,7 @@ class PytorchTest(unittest.TestCase):
     def tearDown(self) -> None:
         shutdown_ray()
 
-    @ray_only_marker
+    @ray_skip_marker
     def test_should_apply_parallel_match_sequential(self):
         # Parallel execution
         select_query = """SELECT id, obj.labels
@@ -109,8 +114,9 @@ class PytorchTest(unittest.TestCase):
         self.assertEqual(len(par_batch), len(seq_batch))
         self.assertEqual(par_batch, seq_batch)
 
-    @ray_only_marker
+    @ray_skip_marker
     def test_should_project_parallel_match_sequential(self):
+        print(os.environ.get("ray"))
         create_udf_query = """CREATE UDF IF NOT EXISTS FaceDetector
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
                   OUTPUT (bboxes NDARRAY FLOAT32(ANYDIM, 4),
@@ -146,7 +152,9 @@ class PytorchTest(unittest.TestCase):
                           AS obj(labels, bboxes, scores)
                          WHERE id < 2;"""
         with self.assertRaises(ExecutorError):
-            execute_query_fetch_all(self.evadb, select_query)
+            execute_query_fetch_all(
+                self.evadb, select_query, do_not_print_exceptions=True
+            )
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_fastrcnn_with_lateral_join(self):
@@ -292,6 +300,10 @@ class PytorchTest(unittest.TestCase):
             os.remove(img_save_path)
         except FileNotFoundError:
             pass
+
+        try_to_import_cv2()
+        import cv2
+
         cv2.imwrite(img_save_path, img)
 
         similarity_query = """SELECT data FROM MyVideo WHERE id < 5
@@ -330,6 +342,7 @@ class PytorchTest(unittest.TestCase):
         self.assertTrue(res["ocrextractor.scores"][2][0] > 0.9)
 
     @pytest.mark.torchtest
+    @gpu_skip_marker
     def test_should_run_extract_object(self):
         select_query = """
             SELECT id, T.iids, T.bboxes, T.scores, T.labels
