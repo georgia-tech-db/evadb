@@ -319,30 +319,9 @@ class StatementToPlanConverter:
         catalog_entry = table_ref.table.table_obj
         logical_get = LogicalGet(table_ref, catalog_entry, table_ref.alias)
         project_exprs = statement.col_list
-        # if there is a function expr, make col as its children
+
         if statement.udf_func:
             project_exprs = [statement.udf_func.copy()]
-
-        # We need to also store the primary keys of the table in the index to later do
-        # the mapping. Typically, the vector indexes support setting an integer ID with
-        # the embedding. Unfortunately, we cannot support multi-column primary keys for
-        # cases like video table and document table.
-        # Hack: In such cases, we convert them into a unique ID using the following
-        # logic: We assume that the maximum number of files in the table is <=
-        # MAGIC_NUMBER and the number of frames or chunks for each video/document is <=
-        # MAGIC_NUMBER. Based on this assumption, we can safely say that
-        # `_row_id` * MAGIC_NUMBER + `chunk_id` for document table and
-        # `_row_id` * MAGIC_NUMBER + `id`) for video table
-        # `_row_id` * MAGIC_NUMBER + `paragraph`) for PDF table
-        # will be unique.
-        def _build_expression(row_id_expr, id_expr):
-            left = ArithmeticExpression(
-                ExpressionType.ARITHMETIC_MULTIPLY,
-                row_id_expr,
-                ConstantValueExpression(MAGIC_NUMBER),
-            )
-            right = id_expr
-            return ArithmeticExpression(ExpressionType.ARITHMETIC_ADD, left, right)
 
         primary_cols = get_table_primary_columns(catalog_entry)
 
@@ -365,13 +344,6 @@ class StatementToPlanConverter:
             )
 
         unique_col = primary_exprs[0]
-
-        if catalog_entry.table_type in [
-            TableType.VIDEO_DATA,
-            TableType.DOCUMENT_DATA,
-            TableType.PDF_DATA,
-        ]:
-            unique_col = _build_expression(primary_exprs[0], primary_exprs[1])
 
         project_exprs = [unique_col] + project_exprs
 

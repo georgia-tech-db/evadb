@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Iterator
 
 from evadb.catalog.models.table_catalog import TableCatalogEntry
+from evadb.constants import MAGIC_NUMBER
 from evadb.database import EvaDBDatabase
 from evadb.expression.abstract_expression import AbstractExpression
 from evadb.models.storage.batch import Batch
@@ -58,4 +59,12 @@ class DecordStorageEngine(AbstractMediaStorageEngine):
                 for batch in reader.read():
                     batch.frames[table.columns[0].name] = row_id
                     batch.frames[table.columns[1].name] = str(video_file_name)
+
+                    # To create a distinct identifier, we use the following logic.
+                    # Assuming the total number of entries in the table is less than a
+                    # specified constant, referred to as MAGIC_NUMBER. Under this
+                    # assumption, we can safely conclude that the expression
+                    # `row_id * MAGIC_NUMBER + id` will yield a unique value.
+
+                    batch.frames["_id"] = row_id * MAGIC_NUMBER + batch.frames["id"]
                     yield batch

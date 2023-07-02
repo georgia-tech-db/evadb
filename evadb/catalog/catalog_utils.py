@@ -70,12 +70,14 @@ def is_string_col(col: ColumnCatalogEntry):
 
 def get_video_table_column_definitions() -> List[ColumnDefinition]:
     """
+    _id: unique id
     name: video path
     id: frame id
     data: frame data
     audio: frame audio
     """
     columns = [
+        ColumnDefinition("_id", ColumnType.INTEGER, None, None),
         ColumnDefinition(
             VideoColumnName.name.name,
             ColumnType.TEXT,
@@ -120,11 +122,13 @@ def get_image_table_column_definitions() -> List[ColumnDefinition]:
 
 def get_document_table_column_definitions() -> List[ColumnDefinition]:
     """
+    _id: unique id
     name: file path
     chunk_id: chunk id (0-indexed for each file)
     data: text data associated with the chunk
     """
     columns = [
+        ColumnDefinition("_id", ColumnType.INTEGER, None, None),
         ColumnDefinition(
             DocumentColumnName.name.name,
             ColumnType.TEXT,
@@ -147,12 +151,14 @@ def get_document_table_column_definitions() -> List[ColumnDefinition]:
 
 def get_pdf_table_column_definitions() -> List[ColumnDefinition]:
     """
+    _id: unique id
     name: pdf name
     page: page no
     paragraph: paragraph no
     data: pdf paragraph data
     """
     columns = [
+        ColumnDefinition("_id", ColumnType.INTEGER, None, None),
         ColumnDefinition(PDFColumnName.name.name, ColumnType.TEXT, None, None),
         ColumnDefinition(PDFColumnName.page.name, ColumnType.INTEGER, None, None),
         ColumnDefinition(PDFColumnName.paragraph.name, ColumnType.INTEGER, None, None),
@@ -183,26 +189,18 @@ def get_table_primary_columns(
     ]
     # _row_id for all the TableTypes, however for Video data and PDF data we also add frame_id (id) and paragraph as part of unique key
     if table_catalog_obj.table_type == TableType.VIDEO_DATA:
-        # _row_id, id
-        primary_columns.append(
-            ColumnDefinition(VideoColumnName.id.name, ColumnType.INTEGER, None, None),
-        )
+        # _row_id * MAGIC_NUMBER +  id
+        primary_columns = [
+            ColumnDefinition("_id", ColumnType.INTEGER, None, None),
+        ]
 
     elif table_catalog_obj.table_type == TableType.PDF_DATA:
-        # _row_id, paragraph
-        primary_columns.append(
-            ColumnDefinition(
-                PDFColumnName.paragraph.name, ColumnType.INTEGER, None, None
-            )
-        )
+        # _row_id * MAGIC_NUMBER +  page * MAGIC_NUMBER + paragraph
+        primary_columns = [ColumnDefinition("_id", ColumnType.INTEGER, None, None)]
 
     elif table_catalog_obj.table_type == TableType.DOCUMENT_DATA:
-        # _row_id, chunk_id
-        primary_columns.append(
-            ColumnDefinition(
-                DocumentColumnName.chunk_id.name, ColumnType.INTEGER, None, None
-            )
-        )
+        # _row_id * MAGIC_NUMBER +  chunk_id
+        primary_columns = [ColumnDefinition("_id", ColumnType.INTEGER, None, None)]
 
     return primary_columns
 
