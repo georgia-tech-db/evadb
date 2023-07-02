@@ -12,12 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from evadb.catalog.catalog_type import TableType
 from evadb.catalog.catalog_utils import get_table_primary_columns
-from evadb.constants import MAGIC_NUMBER
-from evadb.expression.abstract_expression import AbstractExpression, ExpressionType
-from evadb.expression.arithmetic_expression import ArithmeticExpression
-from evadb.expression.constant_value_expression import ConstantValueExpression
+from evadb.expression.abstract_expression import AbstractExpression
 from evadb.expression.tuple_value_expression import TupleValueExpression
 from evadb.optimizer.operators import (
     LogicalCreate,

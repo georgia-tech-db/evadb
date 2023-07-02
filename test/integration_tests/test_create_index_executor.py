@@ -17,6 +17,7 @@ from pathlib import Path
 from test.markers import macos_skip_marker
 from test.util import get_evadb_for_testing, load_udfs_for_testing
 
+import faiss
 import numpy as np
 import pandas as pd
 import pytest
@@ -26,6 +27,7 @@ from evadb.configuration.constants import EvaDB_ROOT_DIR
 from evadb.models.storage.batch import Batch
 from evadb.server.command_handler import execute_query_fetch_all
 from evadb.storage.storage_engine import StorageEngine
+from evadb.udfs.udf_bootstrap_queries import Text_feat_udf_query
 from evadb.utils.generic_utils import try_to_import_faiss
 
 
