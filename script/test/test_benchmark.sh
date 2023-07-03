@@ -32,7 +32,7 @@ else
 fi
 
 # Check demo page
-curl https://ada-00.cc.gatech.edu/eva/playground
+curl https://ada-00.cc.gatech.edu/evadb/playground
 demo_code=$?
 if [ $demo_code -ne 0 ];
 then

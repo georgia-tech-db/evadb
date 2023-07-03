@@ -2,7 +2,7 @@
 Run the following commands from this directory to compile the documentation.
 
 ```
-cd eva/docs
+cd evadb/docs
 pip install -r requirements.txt
 make html
 open _build/html/index.html
@@ -11,6 +11,6 @@ open _build/html/index.html
 To test links:
 
 ```
-cd eva/docs
+cd evadb/docs
 sphinx-build . _build -b linkcheck
 ```

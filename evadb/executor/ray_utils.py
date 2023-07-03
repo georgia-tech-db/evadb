@@ -44,7 +44,7 @@ def ray_wait_and_alert():
 # when the job enters the Ray process. Due to that, resource release is not
 # cleanly done on the Ray side, we need to set this to prevent memory leak.
 # More detailed explanation can be found in
-# https://github.com/georgia-tech-db/eva/pull/731
+# https://github.com/georgia-tech-db/evadb/pull/731
 
 
 def ray_parallel():
