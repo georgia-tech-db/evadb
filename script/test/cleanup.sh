@@ -1,7 +1,7 @@
 #!/bin/bash
 
-read -p "Remove the directory ~/.eva/* [Y/n]?" yn
+read -p "Remove the directory evadb_data/* [Y/n]?" yn
 case $yn in
-	[Yy]* ) rm -rf ~/.eva/*;;
+	[Yy]* ) rm -rf evadb_data/*;;
         * ) exit;;
 esac

@@ -7,8 +7,8 @@ Welcome to EvaDB!
 ..  rubric:: Database system for building simpler and faster AI-powered apps.
 
 ..
-    ..  figure:: https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/images/eva/eva-banner.png
-        :target: https://github.com/georgia-tech-db/eva
+    ..  figure:: https://raw.githubusercontent.com/georgia-tech-db/evadb/master/docs/images/evadb/evadb-banner.png
+        :target: https://github.com/georgia-tech-db/evadb
         :width: 100%
         :alt: EvaDB Banner
 
@@ -18,7 +18,7 @@ Welcome to EvaDB!
 
 EvaDB is an AI-SQL database for developing apps powered by AI models. We aim to simplify the development and deployment of AI-powered apps that operate on structured (tables, feature stores) and unstructured data (videos, text, podcasts, PDFs, etc.).
 
-- Github: https://github.com/georgia-tech-db/eva
+- Github: https://github.com/georgia-tech-db/evadb
 - PyPI: https://pypi.org/project/evadb/
 - Twitter: https://twitter.com/evadb_ai
 - Slack: https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg
@@ -123,7 +123,7 @@ The same AI query can also be written directly in SQL and run on EvaDB.
 
 EvaDB's declarative query language reduces the complexity of the app, leading to more maintainable code that allows users to build on top of each other's queries.
 
-EvaDB comes with a wide range of models for analyzing unstructured data including image classification, object detection, OCR, face detection, etc. It is fully implemented in Python, and `licensed under the Apache license <https://github.com/georgia-tech-db/eva>`__. It already contains integrations with widely-used AI pipelines based on Hugging Face, PyTorch, and Open AI. 
+EvaDB comes with a wide range of models for analyzing unstructured data including image classification, object detection, OCR, face detection, etc. It is fully implemented in Python, and `licensed under the Apache license <https://github.com/georgia-tech-db/evadb>`__. It already contains integrations with widely-used AI pipelines based on Hugging Face, PyTorch, and Open AI. 
 
 The high-level SQL API allows even beginners to use EvaDB in a few lines of code. Advanced users can define custom user-defined functions that wrap around any AI model or Python library.
 
@@ -193,7 +193,7 @@ Illustrative EvaDB Apps
 |:desert_island:| PDF Question Answering
 ~~~~
 
-..  |pic7| image:: https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/pdf-qa.webp
+..  |pic7| image:: https://github.com/georgia-tech-db/evadb/releases/download/v0.1.0/pdf-qa.webp
     :width: 45%
     :alt: App
 
@@ -202,11 +202,11 @@ Illustrative EvaDB Apps
 |:desert_island:| Traffic Analysis App using Object Detection Model
 ~~~~
 
-.. |pic1| image:: https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/traffic-input.webp
+.. |pic1| image:: https://github.com/georgia-tech-db/evadb/releases/download/v0.1.0/traffic-input.webp
     :width: 45%
     :alt: Source Video
 
-.. |pic2| image:: https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/traffic-output.webp
+.. |pic2| image:: https://github.com/georgia-tech-db/evadb/releases/download/v0.1.0/traffic-output.webp
     :width: 45%
     :alt: Query Result
 
@@ -215,11 +215,11 @@ Illustrative EvaDB Apps
 |:desert_island:| MNIST Digit Recognition using Image Classification Model
 ~~~~
 
-..  |pic3| image:: https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/mnist-input.webp
+..  |pic3| image:: https://github.com/georgia-tech-db/evadb/releases/download/v0.1.0/mnist-input.webp
     :width: 20%
     :alt: Source Video
 
-..  |pic4| image:: https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/mnist-output.webp
+..  |pic4| image:: https://github.com/georgia-tech-db/evadb/releases/download/v0.1.0/mnist-output.webp
     :width: 20%
     :alt: Query Result
 
@@ -228,11 +228,11 @@ Illustrative EvaDB Apps
 |:desert_island:| Movie Analysis App using Face Detection + Emotion Classification Models
 ~~~~
 
-..  |pic5| image:: https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/gangubai-input.webp
+..  |pic5| image:: https://github.com/georgia-tech-db/evadb/releases/download/v0.1.0/gangubai-input.webp
     :width: 45%
     :alt: Source Video
 
-..  |pic6| image:: https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/gangubai-output.webp
+..  |pic6| image:: https://github.com/georgia-tech-db/evadb/releases/download/v0.1.0/gangubai-output.webp
     :width: 45%
     :alt: Query Result
 
@@ -243,4 +243,4 @@ Illustrative EvaDB Apps
 .. |pypi_status| image:: https://img.shields.io/pypi/v/evadb.svg
    :target: https://pypi.org/project/evadb
 .. |License| image:: https://img.shields.io/badge/license-Apache%202-brightgreen.svg?logo=apache
-   :target: https://github.com/georgia-tech-db/eva/blob/master/LICENSE.txt
+   :target: https://github.com/georgia-tech-db/evadb/blob/master/LICENSE.txt
