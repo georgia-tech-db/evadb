@@ -19,10 +19,10 @@ from typing import Union
 
 import yaml
 
-from evadb.configuration.constants import (
+from evadb.configuration.constants import (  # DB_DEFAULT_NAME,
     CACHE_DIR,
-    DB_DEFAULT_NAME,
     INDEX_DIR,
+    PG_DB_DEFAULT_NAME,
     S3_DOWNLOAD_DIR,
     TMP_DIR,
     UDF_DIR,
@@ -46,7 +46,8 @@ def get_base_config(evadb_installation_dir: Path) -> Path:
 
 
 def get_default_db_uri(evadb_dir: Path):
-    return f"sqlite:///{evadb_dir.resolve()}/{DB_DEFAULT_NAME}"
+    # return f"sqlite:///{evadb_dir.resolve()}/{DB_DEFAULT_NAME}"
+    return f"postgresql://postgres:password@localhost:5432/{PG_DB_DEFAULT_NAME}"
 
 
 def bootstrap_environment(evadb_dir: Path, evadb_installation_dir: Path):
@@ -70,7 +71,7 @@ def bootstrap_environment(evadb_dir: Path, evadb_installation_dir: Path):
     config_obj = {}
     with default_config_path.open("r") as yml_file:
         config_obj = yaml.load(yml_file, Loader=yaml.FullLoader)
-    config_obj = merge_dict_of_dicts(config_obj, config_default_dict)
+    config_obj = merge_dict_of_dicts(config_default_dict, config_obj)
     mode = config_obj["core"]["mode"]
 
     # set logger to appropriate level (debug or release)
