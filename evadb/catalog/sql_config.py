@@ -62,16 +62,20 @@ class SQLConfig(metaclass=SingletonMeta):
         self.worker_uri = str(uri)
         # set echo=True to log SQL
         import yaml
-        f = open('evadb/evadb.yml', 'r+')
+
+        f = open("evadb/evadb.yml", "r+")
         connect_args = {}
         config_obj = yaml.load(f, Loader=yaml.FullLoader)
-        if config_obj['backend']['use_sqlite'] == True:
+        if config_obj["backend"]["use_sqlite"] is True:
             connect_args = {"timeout": 1000}
         else:
             connect_args = {"connect_timeout": 1000}
-        #https://www.oddbird.net/2014/06/14/sqlalchemy-postgres-autocommit/
+        # https://www.oddbird.net/2014/06/14/sqlalchemy-postgres-autocommit/
         self.engine = create_engine(
-            self.worker_uri, pool_size=1000, isolation_level = "AUTOCOMMIT", connect_args=connect_args
+            self.worker_uri,
+            pool_size=1000,
+            isolation_level="AUTOCOMMIT",
+            connect_args=connect_args,
         )
 
         if self.engine.url.get_backend_name() == "sqlite":
