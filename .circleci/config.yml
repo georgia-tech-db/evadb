@@ -207,7 +207,7 @@ jobs:
                   - /home/circleci/.cache/gpt4all/
 
   LinuxPostgres:
-      parameters:
+    parameters:
       v:
         type: string
         default: "3.10"
