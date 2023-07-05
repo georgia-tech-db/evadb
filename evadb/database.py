@@ -46,7 +46,7 @@ def get_default_db_uri(evadb_dir: Path):
     import yaml
     f = open('evadb/evadb.yml', 'r+')
     config_obj = yaml.load(f, Loader=yaml.FullLoader)
-    if config_obj['backend']['store'] == 'SQLite':
+    if config_obj['backend']['use_sqlite'] == True:
         return f"sqlite:///{evadb_dir.resolve()}/{DB_DEFAULT_NAME}"
     else:
         return f"postgresql://postgres:password@localhost:5432/{PG_DB_DEFAULT_NAME}"

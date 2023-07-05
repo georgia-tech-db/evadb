@@ -28,7 +28,7 @@ experimental:
   ray: False
 
 backend:
-  store: "SQLite"
+  use_sqlite: True
 
 third_party:
   OPENAI_KEY: ""
