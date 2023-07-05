@@ -68,9 +68,10 @@ class SQLConfig(metaclass=SingletonMeta):
         if config_obj['backend']['use_sqlite'] == True:
             connect_args = {"timeout": 1000}
         else:
-            connect_args = {"connect_timeout": 1000} 
+            connect_args = {"connect_timeout": 1000}
+        #https://www.oddbird.net/2014/06/14/sqlalchemy-postgres-autocommit/
         self.engine = create_engine(
-            self.worker_uri, pool_size=1000, connect_args=connect_args
+            self.worker_uri, pool_size=1000, isolation_level = "AUTOCOMMIT", connect_args=connect_args
         )
 
         if self.engine.url.get_backend_name() == "sqlite":
