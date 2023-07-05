@@ -19,6 +19,7 @@ from typing import TYPE_CHECKING, Callable
 from evadb.catalog.catalog_utils import get_catalog_instance
 from evadb.configuration.configuration_manager import ConfigurationManager
 from evadb.configuration.constants import (  # DB_DEFAULT_NAME,
+    DB_DEFAULT_NAME,
     PG_DB_DEFAULT_NAME,
     EvaDB_DATABASE_DIR,
 )
@@ -42,8 +43,13 @@ class EvaDBDatabase:
 
 
 def get_default_db_uri(evadb_dir: Path):
-    # return f"sqlite:///{evadb_dir.resolve()}/{DB_DEFAULT_NAME}"
-    return f"postgresql://postgres:password@localhost:5432/{PG_DB_DEFAULT_NAME}"
+    import yaml
+    f = open('evadb/evadb.yml', 'r+')
+    config_obj = yaml.load(f, Loader=yaml.FullLoader)
+    if config_obj['backend']['store'] == 'SQLite':
+        return f"sqlite:///{evadb_dir.resolve()}/{DB_DEFAULT_NAME}"
+    else:
+        return f"postgresql://postgres:password@localhost:5432/{PG_DB_DEFAULT_NAME}"
 
 
 def init_evadb_instance(

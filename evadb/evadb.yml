@@ -25,7 +25,10 @@ server:
   socket_timeout: 60
 
 experimental:
-  ray: False 
+  ray: False
+
+backend:
+  store: "SQLite"
 
 third_party:
   OPENAI_KEY: ""
