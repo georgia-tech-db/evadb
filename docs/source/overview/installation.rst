@@ -44,6 +44,6 @@ Here is an `illustrative MNIST digit classification app <https://evadb.readthedo
     # Only calling query.df() will run the query
     response = query.df()
 
-The notebook works on `Google Colab <https://colab.research.google.com/github/georgia-tech-db/eva/blob/master/tutorials/01-mnist.ipynb>`_. 
+The notebook works on `Google Colab <https://colab.research.google.com/github/georgia-tech-db/evadb/blob/master/tutorials/01-mnist.ipynb>`_. 
 
 .. image:: ../../images/reference/mnist.png

@@ -40,7 +40,7 @@ def background(f):
 # ==============================================
 
 # NOTE: absolute path to repo directory is calculated from current directory
-# directory structure: eva/scripts/formatting/<this_file>
+# directory structure: evadb/scripts/formatting/<this_file>
 # EvaDB_DIR needs to be redefined if the directory structure is changed
 CODE_SOURCE_DIR = os.path.abspath(os.path.dirname(__file__))
 EvaDB_DIR = functools.reduce(
