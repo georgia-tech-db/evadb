@@ -350,25 +350,29 @@ def generate_response(cursor: evadb.EvaDBCursor, question: str) -> str:
 
 def generate_blog_sections(cursor: evadb.EvaDBCursor) -> List:
     """Generates logical sections of the blog post.
-    
+
     Args:
         cursor (EVADBCursor): evadb api cursor.
-    
+
     Returns
         List: list of blog sections
     """
-    sections_query = "list 7 logical sections of a blog post from the transcript as a python list"
-    sections_string = str(cursor.table("Summary").select(
-        f"ChatGPT('{sections_query}', summary)"
-    ).df()["chatgpt.response"][0])
-    begin = sections_string.find('[')
-    end = sections_string.find(']')
+    sections_query = (
+        "list 7 logical sections of a blog post from the transcript as a python list"
+    )
+    sections_string = str(
+        cursor.table("Summary")
+        .select(f"ChatGPT('{sections_query}', summary)")
+        .df()["chatgpt.response"][0]
+    )
+    begin = sections_string.find("[")
+    end = sections_string.find("]")
     assert begin != -1 and end != -1, "cannot infer blog sections."
-    
-    sections_string = sections_string[begin + 1: end]
-    sections_string = sections_string.replace('\n', '')
-    sections_string = sections_string.replace('\t', '')
-    sections_string = sections_string.replace('"', '')
+
+    sections_string = sections_string[begin + 1 : end]
+    sections_string = sections_string.replace("\n", "")
+    sections_string = sections_string.replace("\t", "")
+    sections_string = sections_string.replace('"', "")
 
     sections = sections_string.split(",")
     for i in range(len(sections)):
@@ -379,11 +383,11 @@ def generate_blog_sections(cursor: evadb.EvaDBCursor) -> List:
 
 def generate_blog_post(cursor: evadb.EvaDBCursor):
     """Generates blog post.
-    
+
     Args:
         cursor (EVADBCursor): evadb api cursor.
     """
-    
+
     to_generate = str(
         input("\nWould you like to generate a blog post based on the video? (yes/no): ")
     )
@@ -400,31 +404,35 @@ def generate_blog_post(cursor: evadb.EvaDBCursor):
         generate_title_rel = cursor.table("Summary").select(
             f"ChatGPT('{title_query}', summary)"
         )
-        blog = "# " + generate_title_rel.df()["chatgpt.response"][0].replace('"', '')
+        blog = "# " + generate_title_rel.df()["chatgpt.response"][0].replace('"', "")
 
         i = 1
         for section in sections:
             print(f"--⏳ Generating body ({i}/{len(sections)})...")
             if "introduction" in section.lower():
                 section_query = f"write a section about {section} from transcript"
-                section_prompt =  "generate response in markdown format and highlight important technical terms with hyperlinks"
+                section_prompt = "generate response in markdown format and highlight important technical terms with hyperlinks"
             elif "conclusion" in section.lower():
-                section_query = f"write a creative conclusion from transcript"
+                section_query = "write a creative conclusion from transcript"
                 section_prompt = "generate response in markdown format"
             else:
-                section_query = f"write a single detailed section about {section} from transcript"
+                section_query = (
+                    f"write a single detailed section about {section} from transcript"
+                )
                 section_prompt = "generate response in markdown format with information from the internet"
 
             generate_section_rel = cursor.table("Summary").select(
                 f"ChatGPT('{section_query}', summary, '{section_prompt}')"
             )
-            
+
             generated_section = generate_section_rel.df()["chatgpt.response"][0]
             print(generated_section)
             blog += "\n" + generated_section + "\n"
             i += 1
 
-        source_query = "generate a list of important keywords for the transcript with hyperlinks"
+        source_query = (
+            "generate a short list of keywords for the transcript with hyperlinks"
+        )
         source_prompt = "generate response in markdown format"
         print("--⏳ Wrapping up...")
         generate_source_rel = cursor.table("Summary").select(
