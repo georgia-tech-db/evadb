@@ -218,13 +218,15 @@ jobs:
     docker:
       # https://circleci.com/docs/circleci-images#language-image-variants
       - image: "cimg/python:<< parameters.v >>"
-        environment:
-          DATABASE_URL: postgresql://postgres:password@localhost:5432/evadb
+          environment:
+            PG_HOST: localhost
+            PG_USER: postgres
+            # DATABASE_URL: postgresql://postgres:password@localhost:5432/evadb
       - image: "cimg/postgres:14.8"
-        environment:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: password
-          POSTGRES_DB: evadb
+          environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: password
+            POSTGRES_DB: evadb
     steps:
 
       - checkout
