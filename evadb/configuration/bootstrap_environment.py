@@ -19,7 +19,7 @@ from typing import Union
 
 import yaml
 
-from evadb.configuration.constants import (  # DB_DEFAULT_NAME,
+from evadb.configuration.constants import (
     CACHE_DIR,
     DB_DEFAULT_NAME,
     INDEX_DIR,
@@ -51,7 +51,7 @@ def get_default_db_uri(evadb_dir: Path):
 
     f = open("evadb/evadb.yml", "r+")
     config_obj = yaml.load(f, Loader=yaml.FullLoader)
-    if config_obj["backend"]["use_sqlite"] is True:
+    if config_obj["experimental"]["use_postgres_backend"] is False:
         return f"sqlite:///{evadb_dir.resolve()}/{DB_DEFAULT_NAME}"
     else:
         return f"postgresql://postgres:password@localhost:5432/{PG_DB_DEFAULT_NAME}"

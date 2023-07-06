@@ -26,9 +26,7 @@ server:
 
 experimental:
   ray: False
-
-backend:
-  use_sqlite: True
+  use_postgres_backend: False
 
 third_party:
   OPENAI_KEY: ""

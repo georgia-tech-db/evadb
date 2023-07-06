@@ -66,7 +66,7 @@ class SQLConfig(metaclass=SingletonMeta):
         f = open("evadb/evadb.yml", "r+")
         connect_args = {}
         config_obj = yaml.load(f, Loader=yaml.FullLoader)
-        if config_obj["backend"]["use_sqlite"] is True:
+        if config_obj["experimental"]["use_postgres_backend"] is False:
             connect_args = {"timeout": 1000}
         else:
             connect_args = {"connect_timeout": 1000}
