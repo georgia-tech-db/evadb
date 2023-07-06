@@ -26,7 +26,7 @@ server:
 
 experimental:
   ray: False
-  use_postgres_backend: False
+  use_postgres_backend: True
 
 third_party:
   OPENAI_KEY: ""

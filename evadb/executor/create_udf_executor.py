@@ -20,6 +20,7 @@ import pandas as pd
 from evadb.catalog.catalog_utils import get_metadata_properties
 from evadb.catalog.models.udf_catalog import UdfCatalogEntry
 from evadb.catalog.models.udf_io_catalog import UdfIOCatalogEntry
+from evadb.configuration.constants import EvaDB_INSTALLATION_DIR
 from evadb.database import EvaDBDatabase
 from evadb.executor.abstract_executor import AbstractExecutor
 from evadb.models.storage.batch import Batch
@@ -39,7 +40,7 @@ class CreateUDFExecutor(AbstractExecutor):
     def __init__(self, db: EvaDBDatabase, node: CreateUDFPlan):
         super().__init__(db, node)
         self.udf_dir = (
-            Path(self.config.get_value("core", "evadb_installation_dir")) / "udfs"
+            Path(EvaDB_INSTALLATION_DIR) / "udfs"
         )
 
     def handle_huggingface_udf(self):

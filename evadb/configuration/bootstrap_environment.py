@@ -27,6 +27,7 @@ from evadb.configuration.constants import (
     S3_DOWNLOAD_DIR,
     TMP_DIR,
     UDF_DIR,
+    EvaDB_INSTALLATION_DIR,
     EvaDB_CONFIG_FILE,
     EvaDB_DATASET_DIR,
 )
@@ -49,7 +50,7 @@ def get_base_config(evadb_installation_dir: Path) -> Path:
 def get_default_db_uri(evadb_dir: Path):
     import yaml
 
-    f = open("evadb/evadb.yml", "r+")
+    f = open(Path(EvaDB_INSTALLATION_DIR) / "evadb.yml", "r+")
     config_obj = yaml.load(f, Loader=yaml.FullLoader)
     if config_obj["experimental"]["use_postgres_backend"] is False:
         return f"sqlite:///{evadb_dir.resolve()}/{DB_DEFAULT_NAME}"
