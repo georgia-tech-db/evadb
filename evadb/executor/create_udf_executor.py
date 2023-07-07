@@ -39,9 +39,7 @@ from evadb.utils.logging_manager import logger
 class CreateUDFExecutor(AbstractExecutor):
     def __init__(self, db: EvaDBDatabase, node: CreateUDFPlan):
         super().__init__(db, node)
-        self.udf_dir = (
-            Path(EvaDB_INSTALLATION_DIR) / "udfs"
-        )
+        self.udf_dir = Path(EvaDB_INSTALLATION_DIR) / "udfs"
 
     def handle_huggingface_udf(self):
         """Handle HuggingFace UDFs

@@ -22,7 +22,7 @@ from evadb.configuration.constants import (  # DB_DEFAULT_NAME,
     DB_DEFAULT_NAME,
     PG_DB_DEFAULT_NAME,
     EvaDB_DATABASE_DIR,
-    EvaDB_INSTALLATION_DIR
+    EvaDB_INSTALLATION_DIR,
 )
 
 if TYPE_CHECKING:

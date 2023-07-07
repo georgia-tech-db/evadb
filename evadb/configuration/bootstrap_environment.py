@@ -27,9 +27,9 @@ from evadb.configuration.constants import (
     S3_DOWNLOAD_DIR,
     TMP_DIR,
     UDF_DIR,
-    EvaDB_INSTALLATION_DIR,
     EvaDB_CONFIG_FILE,
     EvaDB_DATASET_DIR,
+    EvaDB_INSTALLATION_DIR,
 )
 from evadb.utils.logging_manager import logger as evadb_logger
 

@@ -16,11 +16,11 @@ import weakref
 from pathlib import Path
 from threading import Lock
 
-from evadb.configuration.constants import EvaDB_INSTALLATION_DIR
-
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.pool import NullPool
+
+from evadb.configuration.constants import EvaDB_INSTALLATION_DIR
 
 IDENTIFIER_COLUMN = "_row_id"
 
