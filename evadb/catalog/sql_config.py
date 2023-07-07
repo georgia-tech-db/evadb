@@ -13,10 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import weakref
+from pathlib import Path
 from threading import Lock
+
+from evadb.configuration.constants import EvaDB_INSTALLATION_DIR
 
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.pool import NullPool
 
 IDENTIFIER_COLUMN = "_row_id"
 
@@ -63,20 +67,25 @@ class SQLConfig(metaclass=SingletonMeta):
         # set echo=True to log SQL
         import yaml
 
-        f = open("evadb/evadb.yml", "r+")
+        f = open(Path(EvaDB_INSTALLATION_DIR) / "evadb.yml", "r+")
         connect_args = {}
         config_obj = yaml.load(f, Loader=yaml.FullLoader)
         if config_obj["experimental"]["use_postgres_backend"] is False:
+            # Default to SQLite.
             connect_args = {"timeout": 1000}
+            self.engine = create_engine(
+                self.worker_uri,
+                connect_args=connect_args,
+            )
         else:
             connect_args = {"connect_timeout": 1000}
-        # https://www.oddbird.net/2014/06/14/sqlalchemy-postgres-autocommit/
-        self.engine = create_engine(
-            self.worker_uri,
-            pool_size=1000,
-            isolation_level="AUTOCOMMIT",
-            connect_args=connect_args,
-        )
+            # https://www.oddbird.net/2014/06/14/sqlalchemy-postgres-autocommit/
+            self.engine = create_engine(
+                self.worker_uri,
+                poolclass=NullPool,
+                isolation_level="AUTOCOMMIT",
+                connect_args=connect_args,
+            )
 
         if self.engine.url.get_backend_name() == "sqlite":
             # enforce foreign key constraint and wal logging for sqlite
