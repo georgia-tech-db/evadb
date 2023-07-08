@@ -474,6 +474,32 @@ class RelationalAPI(unittest.TestCase):
         with self.assertRaises(ExecutorError):
             rel.execute()
 
+    def test_create_table_from_select_relational(self):
+        video_file_path = create_sample_video(10)
+
+        cursor = self.conn.cursor()
+        # load video
+        rel = cursor.load(
+            video_file_path,
+            table_name="dummy_video",
+            format="video",
+        )
+        rel.execute()
+
+        # Create dummy udf
+        create_dummy_object_detector_udf = cursor.create_function(
+            "DummyObjectDetector", if_not_exists=True, impl_path="test/util.py"
+        )
+        create_dummy_object_detector_udf.execute()
+
+        # Check create table from select relation
+        select_query_sql_rel = cursor.table("dummy_video").select("id, DummyObjectDetector(data)")
+        cursor.drop_table("dummy_objects", if_exists=True)
+        cursor.create_table("dummy_objects", query=select_query_sql_rel).execute()
+
+        table_df = cursor.table("dummy_objects").select("id").df()
+        self.assertTrue(table_df is not None)
+
 
 if __name__ == "__main__":
     unittest.main()

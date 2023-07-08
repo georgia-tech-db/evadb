@@ -27,6 +27,7 @@ from evadb.parser.alias import Alias
 from evadb.parser.select_statement import SelectStatement
 from evadb.parser.utils import (
     parse_create_table,
+    parse_create_table_from_select,
     parse_create_udf,
     parse_create_vector_index,
     parse_drop_index,
@@ -390,20 +391,21 @@ class EvaDBCursor(object):
         return EvaDBQuery(self._evadb, stmt)
 
     def create_table(
-        self, table_name: str, if_not_exists: bool = True, columns: str = None, **kwargs
+        self, table_name: str, if_not_exists: bool = True, columns: str = None, query: EvaDBQuery = None, **kwargs
     ) -> "EvaDBQuery":
         """
         Create a udf in the database.
 
         Args:
-            udf_name (str): Name of the udf to be created.
+            table_name (str): Name of table to be created.
             if_not_exists (bool): If True, do not raise an error if the UDF already exist. If False, raise an error.
-            impl_path (str): Path string to udf's implementation.
+            columns (str): Column metadata of the table.
+            query (EvaDBQuery): Query, only filled when creating table from select query.
             type (str): Type of the udf (e.g. HuggingFace).
-            **kwargs: Additional keyword arguments for configuring the create udf operation.
+            **kwargs: Additional keyword arguments for configuring the create table operation.
 
         Returns:
-            EvaDBQuery: The EvaDBQuery object representing the UDF created.
+            EvaDBQuery: The EvaDBQuery object representing the table created.
 
         Examples:
             >>> cursor.create_table("MyCSV", if_exists = True, columns=\"\"\"
@@ -418,7 +420,11 @@ class EvaDBCursor(object):
                 0
             0	Table Successfully created: MyCSV
         """
-        stmt = parse_create_table(table_name, if_not_exists, columns, **kwargs)
+        if query is None:
+            stmt = parse_create_table(table_name, if_not_exists, columns, **kwargs)
+        else:
+            select_query = query.sql_query()
+            stmt = parse_create_table_from_select(table_name, if_not_exists, select_query, **kwargs)
         return EvaDBQuery(self._evadb, stmt)
 
     def query(self, sql_query: str) -> EvaDBQuery:

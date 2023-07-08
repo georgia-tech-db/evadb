@@ -85,6 +85,16 @@ def parse_create_table(table_name: str, if_not_exists: bool, columns: str, **kwa
     assert isinstance(stmt, CreateTableStatement), "Expected a create table statement"
     return stmt
 
+def parse_create_table_from_select(table_name: str, if_not_exists: bool, query: str, **kwargs):
+    mock_query = (
+        f"CREATE TABLE IF NOT EXISTS {table_name} AS {query};"
+        if if_not_exists
+        else f"CREATE TABLE AS {query};"
+    )
+    stmt = Parser().parse(mock_query)[0]
+    assert isinstance(stmt, CreateTableStatement), "Expected a create table statement"
+    return stmt 
+
 
 def parse_show(show_type: str, **kwargs):
     mock_query = f"SHOW {show_type};"
