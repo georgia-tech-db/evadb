@@ -25,6 +25,7 @@ from typing import List
 
 from aenum import AutoEnum, unique
 
+from evadb.configuration.constants import EvaDB_INSTALLATION_DIR
 from evadb.utils.logging_manager import logger
 
 
@@ -189,6 +190,16 @@ def get_file_checksum(fname: str) -> str:
         for chunk in iter(lambda: f.read(4096), b""):
             hash_md5.update(chunk)
     return hash_md5.hexdigest()
+
+
+def parse_config_yml():
+    """
+    Parses the 'evadb.yml' file and returns the config object.
+    """
+    import yaml
+    f = open(Path(EvaDB_INSTALLATION_DIR) / "evadb.yml", "r+")
+    config_obj = yaml.load(f, Loader=yaml.FullLoader)
+    return config_obj
 
 
 class PickleSerializer(object):

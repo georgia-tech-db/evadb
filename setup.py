@@ -52,7 +52,6 @@ minimal_requirements = [
     "aenum>=2.2.0",
     "diskcache>=5.4.0",
     "retry>=0.9.2",
-    "psycopg2",
     "psutil",
     "thefuzz"
 ]
@@ -109,6 +108,10 @@ qdrant_libs = [
     "qdrant_client" # cannot install on 3.11 due to grcpio
 ]
 
+postgres_libs = [
+    "psycopg2",
+]
+
 ### NEEDED FOR DEVELOPER TESTING ONLY
 
 dev_libs = [
@@ -143,7 +146,8 @@ EXTRA_REQUIRES = {
     "udf": udf_libs,
     "notebook": notebook_libs,
     "qdrant": qdrant_libs,
-    # everything except ray and qdrant
+    "postgres": postgres_libs,
+    # everything except ray, qdrant and postgres
     "dev": dev_libs + vision_libs + document_libs + udf_libs + notebook_libs,
 }
 

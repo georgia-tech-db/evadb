@@ -24,5 +24,11 @@ experimental:
   ray: False
   use_postgres_backend: False
 
+postgres:
+  pg_user: "postgres"
+  pg_password: "password"
+  pg_host: "localhost"
+  pg_port: 5432
+
 third_party:
   OPENAI_KEY: ""

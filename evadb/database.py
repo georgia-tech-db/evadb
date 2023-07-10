@@ -22,8 +22,8 @@ from evadb.configuration.constants import (  # DB_DEFAULT_NAME,
     DB_DEFAULT_NAME,
     PG_DB_DEFAULT_NAME,
     EvaDB_DATABASE_DIR,
-    EvaDB_INSTALLATION_DIR,
 )
+from evadb.utils.generic_utils import parse_config_yml
 
 if TYPE_CHECKING:
     from evadb.catalog.catalog_manager import CatalogManager
@@ -44,10 +44,7 @@ class EvaDBDatabase:
 
 
 def get_default_db_uri(evadb_dir: Path):
-    import yaml
-
-    f = open(Path(EvaDB_INSTALLATION_DIR) / "evadb.yml", "r+")
-    config_obj = yaml.load(f, Loader=yaml.FullLoader)
+    config_obj = parse_config_yml()
     if config_obj["experimental"]["use_postgres_backend"] is False:
         return f"sqlite:///{evadb_dir.resolve()}/{DB_DEFAULT_NAME}"
     else:

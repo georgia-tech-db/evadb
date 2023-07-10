@@ -20,7 +20,7 @@ from sqlalchemy import create_engine, event
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.pool import NullPool
 
-from evadb.configuration.constants import EvaDB_INSTALLATION_DIR
+from evadb.utils.generic_utils import parse_config_yml
 
 IDENTIFIER_COLUMN = "_row_id"
 
@@ -65,11 +65,9 @@ class SQLConfig(metaclass=SingletonMeta):
 
         self.worker_uri = str(uri)
         # set echo=True to log SQL
-        import yaml
 
-        f = open(Path(EvaDB_INSTALLATION_DIR) / "evadb.yml", "r+")
         connect_args = {}
-        config_obj = yaml.load(f, Loader=yaml.FullLoader)
+        config_obj = parse_config_yml()
         if config_obj["experimental"]["use_postgres_backend"] is False:
             # Default to SQLite.
             connect_args = {"timeout": 1000}

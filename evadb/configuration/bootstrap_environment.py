@@ -29,8 +29,8 @@ from evadb.configuration.constants import (
     UDF_DIR,
     EvaDB_CONFIG_FILE,
     EvaDB_DATASET_DIR,
-    EvaDB_INSTALLATION_DIR,
 )
+from evadb.utils.generic_utils import parse_config_yml
 from evadb.utils.logging_manager import logger as evadb_logger
 
 
@@ -48,14 +48,27 @@ def get_base_config(evadb_installation_dir: Path) -> Path:
 
 
 def get_default_db_uri(evadb_dir: Path):
-    import yaml
+    """
+    Get the default database uri.
 
-    f = open(Path(EvaDB_INSTALLATION_DIR) / "evadb.yml", "r+")
-    config_obj = yaml.load(f, Loader=yaml.FullLoader)
+    Arguments:
+        evadb_dir: path to evadb database directory
+    """
+    config_obj = parse_config_yml()
     if config_obj["experimental"]["use_postgres_backend"] is False:
         return f"sqlite:///{evadb_dir.resolve()}/{DB_DEFAULT_NAME}"
     else:
-        return f"postgresql://postgres:password@localhost:5432/{PG_DB_DEFAULT_NAME}"
+        # Custom Postgres server arguments need to be set in the evadb.yml file
+        pg_host = config_obj["postgres"]["pg_host"]
+        pg_port = config_obj["postgres"]["pg_port"]
+        pg_user = config_obj["postgres"]["pg_user"]
+        pg_password = config_obj["postgres"]["pg_password"]
+
+        if not pg_password:
+            return f"postgresql://{pg_user}@{pg_host}:{pg_port}/{PG_DB_DEFAULT_NAME}"
+        else:
+            # Include the password in the db_uri.
+            return f"postgresql://{pg_user}:{pg_password}@{pg_host}:{pg_port}/{PG_DB_DEFAULT_NAME}"
 
 
 def bootstrap_environment(evadb_dir: Path, evadb_installation_dir: Path):
