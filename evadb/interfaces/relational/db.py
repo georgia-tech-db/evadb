@@ -391,7 +391,12 @@ class EvaDBCursor(object):
         return EvaDBQuery(self._evadb, stmt)
 
     def create_table(
-        self, table_name: str, if_not_exists: bool = True, columns: str = None, query: EvaDBQuery = None, **kwargs
+        self,
+        table_name: str,
+        if_not_exists: bool = True,
+        columns: str = None,
+        query: EvaDBQuery = None,
+        **kwargs,
     ) -> "EvaDBQuery":
         """
         Create a udf in the database.
@@ -424,7 +429,9 @@ class EvaDBCursor(object):
             stmt = parse_create_table(table_name, if_not_exists, columns, **kwargs)
         else:
             select_query = query.sql_query()
-            stmt = parse_create_table_from_select(table_name, if_not_exists, select_query, **kwargs)
+            stmt = parse_create_table_from_select(
+                table_name, if_not_exists, select_query, **kwargs
+            )
         return EvaDBQuery(self._evadb, stmt)
 
     def query(self, sql_query: str) -> EvaDBQuery:

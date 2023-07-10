@@ -493,7 +493,9 @@ class RelationalAPI(unittest.TestCase):
         create_dummy_object_detector_udf.execute()
 
         # Check create table from select relation
-        select_query_sql_rel = cursor.table("dummy_video").select("id, DummyObjectDetector(data)")
+        select_query_sql_rel = cursor.table("dummy_video").select(
+            "id, DummyObjectDetector(data)"
+        )
         cursor.drop_table("dummy_objects", if_exists=True)
         cursor.create_table("dummy_objects", query=select_query_sql_rel).execute()
 

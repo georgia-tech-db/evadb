@@ -216,7 +216,9 @@ def generate_online_video_transcript(cursor: evadb.EvaDBCursor) -> str:
 
     # extract speech texts from videos
     cursor.drop_table("youtube_video_text", if_exists=True).execute()
-    speech_recognizer_rel = cursor.table("youtube_video").select("SpeechRecognizer(audio)")
+    speech_recognizer_rel = cursor.table("youtube_video").select(
+        "SpeechRecognizer(audio)"
+    )
     cursor.create_table("youtube_video_text", query=speech_recognizer_rel).execute()
     print("✅ Video analysis completed.")
 
