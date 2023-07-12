@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING, Callable
 
 from evadb.catalog.catalog_utils import get_catalog_instance
 from evadb.configuration.configuration_manager import ConfigurationManager
-from evadb.configuration.constants import (  # DB_DEFAULT_NAME,
+from evadb.configuration.constants import (
     DB_DEFAULT_NAME,
     EvaDB_DATABASE_DIR,
 )
