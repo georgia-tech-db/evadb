@@ -1,7 +1,7 @@
 core:
   evadb_installation_dir: ""
   datasets_dir: ""
-  catalog_database_uri: "postgresql://postgres:password@localhost:5432/evadb"
+  catalog_database_uri: ""
   application: "evadb"
   mode: "release" #release or debug
 
@@ -23,7 +23,7 @@ server:
 experimental:
   ray: False
   # Set the postgres db uri to connect to in 'catalog_database_uri' 
-  use_postgres_backend: True
+  use_postgres_backend: False
 
 third_party:
   OPENAI_KEY: ""

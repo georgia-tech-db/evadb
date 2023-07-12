@@ -19,7 +19,7 @@ from sqlalchemy import Column, Integer
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy_utils import create_database, database_exists
+from sqlalchemy_utils import database_exists
 
 from evadb.catalog.sql_config import CATALOG_TABLES
 from evadb.utils.logging_manager import logger

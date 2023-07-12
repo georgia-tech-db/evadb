@@ -197,6 +197,7 @@ def parse_config_yml():
     Parses the 'evadb.yml' file and returns the config object.
     """
     import yaml
+
     f = open(Path(EvaDB_INSTALLATION_DIR) / "evadb.yml", "r+")
     config_obj = yaml.load(f, Loader=yaml.FullLoader)
     return config_obj

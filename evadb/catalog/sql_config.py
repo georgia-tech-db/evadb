@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import weakref
-from pathlib import Path
 from threading import Lock
 
 from sqlalchemy import create_engine, event
