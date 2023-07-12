@@ -20,7 +20,6 @@ from evadb.catalog.catalog_utils import get_catalog_instance
 from evadb.configuration.configuration_manager import ConfigurationManager
 from evadb.configuration.constants import (  # DB_DEFAULT_NAME,
     DB_DEFAULT_NAME,
-    PG_DB_DEFAULT_NAME,
     EvaDB_DATABASE_DIR,
 )
 from evadb.utils.generic_utils import parse_config_yml
@@ -48,17 +47,7 @@ def get_default_db_uri(evadb_dir: Path):
     if config_obj["experimental"]["use_postgres_backend"] is False:
         return f"sqlite:///{evadb_dir.resolve()}/{DB_DEFAULT_NAME}"
     else:
-        # Custom Postgres server arguments need to be set in the evadb.yml file
-        pg_host = config_obj["postgres"]["pg_host"]
-        pg_port = config_obj["postgres"]["pg_port"]
-        pg_user = config_obj["postgres"]["pg_user"]
-        pg_password = config_obj["postgres"]["pg_password"]
-
-        if not pg_password:
-            return f"postgresql://{pg_user}@{pg_host}:{pg_port}/{PG_DB_DEFAULT_NAME}"
-        else:
-            # Include the password in the db_uri.
-            return f"postgresql://{pg_user}:{pg_password}@{pg_host}:{pg_port}/{PG_DB_DEFAULT_NAME}"
+        return config_obj["core"]["catalog_database_uri"]
 
 
 def init_evadb_instance(

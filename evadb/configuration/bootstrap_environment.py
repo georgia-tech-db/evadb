@@ -23,7 +23,6 @@ from evadb.configuration.constants import (
     CACHE_DIR,
     DB_DEFAULT_NAME,
     INDEX_DIR,
-    PG_DB_DEFAULT_NAME,
     S3_DOWNLOAD_DIR,
     TMP_DIR,
     UDF_DIR,
@@ -58,17 +57,7 @@ def get_default_db_uri(evadb_dir: Path):
     if config_obj["experimental"]["use_postgres_backend"] is False:
         return f"sqlite:///{evadb_dir.resolve()}/{DB_DEFAULT_NAME}"
     else:
-        # Custom Postgres server arguments need to be set in the evadb.yml file
-        pg_host = config_obj["postgres"]["pg_host"]
-        pg_port = config_obj["postgres"]["pg_port"]
-        pg_user = config_obj["postgres"]["pg_user"]
-        pg_password = config_obj["postgres"]["pg_password"]
-
-        if not pg_password:
-            return f"postgresql://{pg_user}@{pg_host}:{pg_port}/{PG_DB_DEFAULT_NAME}"
-        else:
-            # Include the password in the db_uri.
-            return f"postgresql://{pg_user}:{pg_password}@{pg_host}:{pg_port}/{PG_DB_DEFAULT_NAME}"
+        return config_obj["core"]["catalog_database_uri"]
 
 
 def bootstrap_environment(evadb_dir: Path, evadb_installation_dir: Path):
@@ -152,13 +141,15 @@ def merge_dict_of_dicts(dict1, dict2):
     merged_dict = dict1.copy()
 
     for key, value in dict2.items():
-        if (
-            key in merged_dict
-            and isinstance(merged_dict[key], dict)
-            and isinstance(value, dict)
-        ):
-            merged_dict[key] = merge_dict_of_dicts(merged_dict[key], value)
-        else:
-            merged_dict[key] = value
+        # Overwrite only if some value is specified.
+        if value:
+            if (
+                key in merged_dict
+                and isinstance(merged_dict[key], dict)
+                and isinstance(value, dict)
+            ):
+                merged_dict[key] = merge_dict_of_dicts(merged_dict[key], value)
+            else:
+                merged_dict[key] = value
 
     return merged_dict

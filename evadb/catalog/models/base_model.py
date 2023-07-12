@@ -102,15 +102,6 @@ class CustomModel:
 BaseModel = declarative_base(cls=CustomModel, constructor=None)
 
 
-def init_db(engine: Engine):
-    """Create database if doesn't exist and create all tables."""
-    if not database_exists(engine.url):
-        logger.info("Database does not exist, creating database.")
-        create_database(engine.url)
-    logger.info("Creating tables")
-    BaseModel.metadata.create_all(bind=engine)
-
-
 def truncate_catalog_tables(engine: Engine):
     """Truncate all the catalog tables"""
     # https://stackoverflow.com/questions/4763472/sqlalchemy-clear-database-content-but-dont-drop-the-schema/5003705#5003705 #noqa
