@@ -44,10 +44,11 @@ class EvaDBDatabase:
 
 def get_default_db_uri(evadb_dir: Path):
     config_obj = parse_config_yml()
-    if config_obj["experimental"]["use_postgres_backend"] is False:
-        return f"sqlite:///{evadb_dir.resolve()}/{DB_DEFAULT_NAME}"
-    else:
+    if config_obj["core"]["catalog_database_uri"]:
         return config_obj["core"]["catalog_database_uri"]
+    else:
+        # Default to sqlite.
+        return f"sqlite:///{evadb_dir.resolve()}/{DB_DEFAULT_NAME}"
 
 
 def init_evadb_instance(

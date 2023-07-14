@@ -19,7 +19,7 @@ from sqlalchemy import create_engine, event
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.pool import NullPool
 
-from evadb.utils.generic_utils import parse_config_yml
+from evadb.utils.generic_utils import parse_config_yml, is_postgres_uri
 
 IDENTIFIER_COLUMN = "_row_id"
 
@@ -67,20 +67,21 @@ class SQLConfig(metaclass=SingletonMeta):
 
         connect_args = {}
         config_obj = parse_config_yml()
-        if config_obj["experimental"]["use_postgres_backend"] is False:
-            # Default to SQLite.
-            connect_args = {"timeout": 1000}
-            self.engine = create_engine(
-                self.worker_uri,
-                connect_args=connect_args,
-            )
-        else:
+        if is_postgres_uri(config_obj["core"]["catalog_database_uri"]):
+            # Set the arguments for postgres backend.
             connect_args = {"connect_timeout": 1000}
             # https://www.oddbird.net/2014/06/14/sqlalchemy-postgres-autocommit/
             self.engine = create_engine(
                 self.worker_uri,
                 poolclass=NullPool,
                 isolation_level="AUTOCOMMIT",
+                connect_args=connect_args,
+            )
+        else:
+            # Default to SQLite.
+            connect_args = {"timeout": 1000}
+            self.engine = create_engine(
+                self.worker_uri,
                 connect_args=connect_args,
             )
 

@@ -22,6 +22,7 @@ import sys
 import uuid
 from pathlib import Path
 from typing import List
+from urllib.parse import urlparse
 
 from aenum import AutoEnum, unique
 
@@ -201,6 +202,17 @@ def parse_config_yml():
     f = open(Path(EvaDB_INSTALLATION_DIR) / "evadb.yml", "r+")
     config_obj = yaml.load(f, Loader=yaml.FullLoader)
     return config_obj
+
+
+def is_postgres_uri(db_uri):
+    """
+    Determines if the db_uri is that of postgres.
+
+    Args:
+        db_uri (str) : db_uri to parse
+    """
+    parsed_uri = urlparse(db_uri)
+    return parsed_uri.scheme == 'postgres' or parsed_uri.scheme == 'postgresql'
 
 
 class PickleSerializer(object):

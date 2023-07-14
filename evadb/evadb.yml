@@ -22,8 +22,6 @@ server:
 
 experimental:
   ray: False
-  # Set the postgres db uri to connect to in 'catalog_database_uri' 
-  use_postgres_backend: False
 
 third_party:
   OPENAI_KEY: ""
