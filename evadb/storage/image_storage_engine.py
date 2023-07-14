@@ -29,6 +29,7 @@ class ImageStorageEngine(AbstractMediaStorageEngine):
     def read(self, table: TableCatalogEntry) -> Iterator[Batch]:
         for image_files in self._rdb_handler.read(self._get_metadata_table(table)):
             for _, (row_id, file_name) in image_files.iterrows():
+                self._rdb_handler._sql_session.close()
                 system_file_name = self._xform_file_url_to_file_name(file_name)
                 image_file = Path(table.file_url) / system_file_name
                 # setting batch_mem_size = 1, we need fix it
