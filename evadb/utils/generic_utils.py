@@ -212,7 +212,7 @@ def is_postgres_uri(db_uri):
         db_uri (str) : db_uri to parse
     """
     parsed_uri = urlparse(db_uri)
-    return parsed_uri.scheme == 'postgres' or parsed_uri.scheme == 'postgresql'
+    return parsed_uri.scheme == "postgres" or parsed_uri.scheme == "postgresql"
 
 
 class PickleSerializer(object):

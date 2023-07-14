@@ -19,7 +19,7 @@ from sqlalchemy import create_engine, event
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.pool import NullPool
 
-from evadb.utils.generic_utils import parse_config_yml, is_postgres_uri
+from evadb.utils.generic_utils import is_postgres_uri, parse_config_yml
 
 IDENTIFIER_COLUMN = "_row_id"
 

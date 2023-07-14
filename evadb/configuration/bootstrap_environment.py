@@ -60,6 +60,7 @@ def get_default_db_uri(evadb_dir: Path):
         # Default to sqlite.
         return f"sqlite:///{evadb_dir.resolve()}/{DB_DEFAULT_NAME}"
 
+
 def bootstrap_environment(evadb_dir: Path, evadb_installation_dir: Path):
     """
     Populates necessary configuration for EvaDB to be able to run.
