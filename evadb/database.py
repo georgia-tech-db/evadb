@@ -19,6 +19,7 @@ from typing import TYPE_CHECKING, Callable
 from evadb.catalog.catalog_utils import get_catalog_instance
 from evadb.configuration.configuration_manager import ConfigurationManager
 from evadb.configuration.constants import DB_DEFAULT_NAME, EvaDB_DATABASE_DIR
+from evadb.utils.generic_utils import parse_config_yml
 
 if TYPE_CHECKING:
     from evadb.catalog.catalog_manager import CatalogManager
@@ -39,7 +40,12 @@ class EvaDBDatabase:
 
 
 def get_default_db_uri(evadb_dir: Path):
-    return f"sqlite:///{evadb_dir.resolve()}/{DB_DEFAULT_NAME}"
+    config_obj = parse_config_yml()
+    if config_obj["core"]["catalog_database_uri"]:
+        return config_obj["core"]["catalog_database_uri"]
+    else:
+        # Default to sqlite.
+        return f"sqlite:///{evadb_dir.resolve()}/{DB_DEFAULT_NAME}"
 
 
 def init_evadb_instance(
