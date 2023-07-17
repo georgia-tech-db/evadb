@@ -177,7 +177,7 @@ class SQLStorageEngine(AbstractStorageEngine):
         """
         try:
             table_to_read = self._try_loading_table_via_reflection(table.name)
-            result = self._sql_session.execute(table_to_read.select()).fetchall()
+            result = self._sql_session.execute(table_to_read.select())
             data_batch = []
             row_size = None
             for row in result:
