@@ -46,8 +46,6 @@ class SingletonMeta(type):
 
     def __call__(cls, uri):
         key = (cls, uri)
-        instances = cls._instances
-        print(instances)
         with cls._lock:
             if key not in cls._instances:
                 instance = super().__call__(uri)
@@ -97,7 +95,7 @@ class SQLConfig(metaclass=SingletonMeta):
                 # Currently, there are too many connections being made, which is not an
                 # optimal design. Ideally, we should implement a connection pool for
                 # better management.
-                dbapi_con.execute("pragma journal_mode=WAL")
+                # dbapi_con.execute("pragma journal_mode=WAL")
                 # dbapi_con.close()
 
             event.listen(self.engine, "connect", _enable_sqlite_pragma)
