@@ -46,6 +46,8 @@ class SingletonMeta(type):
 
     def __call__(cls, uri):
         key = (cls, uri)
+        instances = cls._instances
+        print(instances)
         with cls._lock:
             if key not in cls._instances:
                 instance = super().__call__(uri)
