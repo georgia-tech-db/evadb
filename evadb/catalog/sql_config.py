@@ -12,8 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import weakref
 from threading import Lock
+from weakref import WeakValueDictionary
 
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -42,8 +42,7 @@ class SingletonMeta(type):
     This is a thread-safe implementation of Singleton.
     """
 
-    _instances = weakref.WeakValueDictionary()
-
+    _instances = WeakValueDictionary()
     _lock: Lock = Lock()
 
     def __call__(cls, uri):
@@ -98,6 +97,7 @@ class SQLConfig(metaclass=SingletonMeta):
                 # optimal design. Ideally, we should implement a connection pool for
                 # better management.
                 # dbapi_con.execute("pragma journal_mode=WAL")
+                # dbapi_con.close()
 
             event.listen(self.engine, "connect", _enable_sqlite_pragma)
         # statements
