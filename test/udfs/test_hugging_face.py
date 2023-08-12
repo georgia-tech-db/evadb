@@ -14,24 +14,27 @@
 # limitations under the License.
 
 import unittest
-from mock import MagicMock
+
 import pandas as pd
+from mock import MagicMock
 
 from evadb.third_party.huggingface.model import TextHFModel
 
+
 class TestTextHFModel(TextHFModel):
-    
     @property
     def default_pipeline_args(self) -> dict:
-        # We need to improve the hugging face interface, passing 
+        # We need to improve the hugging face interface, passing
         # UdfCatalogEntry into UDF is not ideal.
-        return {"task": "summarization", 
-                "model": "sshleifer/distilbart-cnn-12-6",
-                "min_length": 5,
-                "max_length": 100}
+        return {
+            "task": "summarization",
+            "model": "sshleifer/distilbart-cnn-12-6",
+            "min_length": 5,
+            "max_length": 100,
+        }
+
 
 class HuggingFaceTest(unittest.TestCase):
-    
     def test_hugging_face_with_large_input(self):
         udf_obj = MagicMock()
         udf_obj.metadata = []
