@@ -11,10 +11,10 @@ Assume the database has loaded a video ``mnist_video``.
     import evadb
     cursor = evadb.connect().cursor()
 
-2. Register Image Classification Model as UDF
+2. Register Image Classification Model as a Function in SQL
 ----
 
-Create an image classification UDF from python source code.
+Create an image classification function from python source code.
 
 .. code-block:: python
 
@@ -26,7 +26,7 @@ Create an image classification UDF from python source code.
 3. Execute Image Classification through SQL
 ----
 
-After the UDF is registered to EvaDB system, it can be directly called and used in SQL query.
+After the function is registered to EvaDB system, it can be directly called and used in SQL query.
 
 .. code-block:: python
 

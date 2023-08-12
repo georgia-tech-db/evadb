@@ -9,7 +9,7 @@ Q&A Application on Videos
     import evadb
     cursor = evadb.connect().cursor()
 
-2. Register UDFs
+2. Register Functions 
 ----
 
 Whisper
@@ -26,7 +26,7 @@ Whisper
 
 .. note::
     
-    EvaDB allows users to register any model in HuggingFace as a UDF.
+    EvaDB allows users to register any model in HuggingFace as a function.
 
 ChatGPT
 ****
@@ -44,7 +44,7 @@ ChatGPT
 
 .. note::
     
-    ChatGPT UDF is a thin wrapper around OpenAI API call. You can also switch to other LLM models that can run locally.
+    ChatGPT function is a wrapper around OpenAI API call. You can also switch to other LLM models that can run locally.
 
 3. Summarize Video in Text
 ----

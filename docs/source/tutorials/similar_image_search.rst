@@ -17,7 +17,7 @@ We populate a table in the database that contains all images.
     import evadb
     cursor = evadb.connect().cursor()
 
-2. Register SIFT as UDFs
+2. Register SIFT as Function
 ----
 
 .. code-block:: python
@@ -50,7 +50,7 @@ Search Index for a Given Image
 ****
 
 EvaDB leverages the ``ORDER BY ... LIMIT ...`` SQL syntax to retrieve the top 5 similar images.
-In this example, ``Similarity(x, y)`` is a built-in UDF to calculate distance between ``x`` and ``y``.
+In this example, ``Similarity(x, y)`` is a built-in function to calculate distance between ``x`` and ``y``.
 In current version, ``x`` is a single tuple and ``y`` is a column that contains multiple tuples.
 By default EvaDB does pairwise distance calculation between ``x`` and all tuples from ``y``.
 In this case, EvaDB leverages the index that we have already built.
