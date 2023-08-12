@@ -97,7 +97,10 @@ class AbstractHFUdf(AbstractUDF, GPUCompatible):
 
     def forward(self, inputs, *args, **kwargs) -> pd.DataFrame:
         hf_input = self.input_formatter(inputs)
-        hf_output = self.hf_udf_obj(hf_input, *args, **kwargs)
+        # Use truncation=True to handle the case where num of tokens is larger
+        # than limit
+        # Ref: https://stackoverflow.com/questions/66954682/token-indices-sequence-length-is-longer-than-the-specified-maximum-sequence-leng
+        hf_output = self.hf_udf_obj(hf_input, *args, **kwargs, truncation=True)
         evadb_output = self.output_formatter(hf_output)
         return evadb_output
 
