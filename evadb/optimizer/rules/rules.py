@@ -872,6 +872,7 @@ class LogicalGetToSeqScan(Rule):
         # read in a batch from storage engine.
         # Todo: Experiment heuristics.
         after = SeqScanPlan(None, before.target_list, before.alias)
+        batch_mem_size = context.db.config.get_value("executor", "batch_mem_size")
         after.append_child(
             StoragePlan(
                 before.table_obj,
@@ -880,6 +881,7 @@ class LogicalGetToSeqScan(Rule):
                 sampling_rate=before.sampling_rate,
                 sampling_type=before.sampling_type,
                 chunk_params=before.chunk_params,
+                batch_mem_size=batch_mem_size,
             )
         )
         yield after
