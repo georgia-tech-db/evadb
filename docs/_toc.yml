@@ -61,6 +61,11 @@ parts:
       - file: source/overview/docker
         title: Docker
 
+  - caption: Benchmarks
+    chapters:
+      - file: source/benchmarks/text_summarization.rst
+        title: Text Summarization
+
   - caption: Developer Guide
     chapters:
       - file: source/contribute/index
