@@ -15,10 +15,11 @@
 import unittest
 from test.util import get_evadb_for_testing
 
-from mock import patch, ANY
+from mock import ANY, patch
 
 from evadb.server.command_handler import execute_query_fetch_all
 from evadb.storage.sqlite_storage_engine import SQLStorageEngine
+
 
 class BatchMemSizeTest(unittest.TestCase):
     @classmethod
@@ -33,11 +34,13 @@ class BatchMemSizeTest(unittest.TestCase):
 
     def test_batch_mem_size_for_sqlite_storage_engine(self):
         """
-	    This testcase make sure that the `batch_mem_size` is correctly passed to
+            This testcase make sure that the `batch_mem_size` is correctly passed to
         the storage engine.
-	    """
+        """
         test_batch_mem_size = 100
-        self.evadb.config.update_value("executor", "batch_mem_size", test_batch_mem_size)
+        self.evadb.config.update_value(
+            "executor", "batch_mem_size", test_batch_mem_size
+        )
         create_table_query = """
             CREATE TABLE IF NOT EXISTS MyCSV (
                 id INTEGER UNIQUE,
@@ -51,8 +54,7 @@ class BatchMemSizeTest(unittest.TestCase):
         execute_query_fetch_all(self.evadb, create_table_query)
 
         select_table_query = "SELECT * FROM MyCSV;"
-        with patch.object(SQLStorageEngine, 'read') as mock_read:
+        with patch.object(SQLStorageEngine, "read") as mock_read:
             mock_read.__iter__.return_value = []
             execute_query_fetch_all(self.evadb, select_table_query)
             mock_read.assert_called_with(ANY, test_batch_mem_size)
-			
