@@ -19,6 +19,7 @@ In this benchmark, we compare the performance of text summarization between EvaD
    
 .. code-block: bash
 
+   cd benchmark/text_summarization
    python text_summarization_with_evadb.py
 
 
