@@ -32,7 +32,7 @@ class TextHFModel(AbstractHFUdf):
     """
     Base Model for all HF Models that take in text as input
     """
-    
+
     def __call__(self, *args, **kwargs):
         # Use truncation=True to handle the case where num of tokens is larger
         # than limit
