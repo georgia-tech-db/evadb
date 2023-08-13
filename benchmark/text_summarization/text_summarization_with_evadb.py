@@ -31,7 +31,7 @@ cursor._evadb.config.update_value("experimental", "ray", True)
 start_time = time.perf_counter()
 cursor.query("""
     CREATE TABLE IF NOT EXISTS cnn_news_summary AS
-    SELECT TextSummarizer(article) FROM cnn_news_test LIMIT 5;""").df()
+    SELECT TextSummarizer(article) FROM cnn_news_test;""").df()
 end_time = time.perf_counter()
 print(f"{end_time-start_time:.2f} seconds")
 
