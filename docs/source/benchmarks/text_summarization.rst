@@ -1,6 +1,6 @@
 Text summarization benchmark 
 ====
-In this benchmark, we compare the performance of text summarization between EvaDB and MindsDB on `CNN-DailyMail News <https://www.kaggle.com/datasets/gowrishankarp/newspaper-text-summarization-cnn-dailymail>`.
+In this benchmark, we compare the performance of text summarization between EvaDB and MindsDB on `<CNN-DailyMail News https://www.kaggle.com/datasets/gowrishankarp/newspaper-text-summarization-cnn-dailymail>`.
 
 1. Prepare dataset
 ----
