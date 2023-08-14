@@ -26,8 +26,6 @@ In this benchmark, we compare the performance of text summarization between EvaD
 3. Using MindsDB to summarize the CNN DailyMail News
 ----
 
-.. _sqlite database:
-
 Prepare sqlite database for MindsDB
 ****
 
@@ -56,7 +54,7 @@ After the installation, we use mysql cli to connect to MindsDB. Replace the port
 Run Experiment
 ****
 
-Connect the sqlite database we created before: :ref:`sqlite database`.
+Connect the sqlite database we created before.
 
 .. code-block:: sql
 
