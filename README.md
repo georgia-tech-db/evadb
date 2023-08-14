@@ -213,6 +213,10 @@ EvaDB is the beneficiary of many [contributors](https://github.com/georgia-tech-
 For more information, see our
 [contribution guide](https://evadb.readthedocs.io/en/stable/source/contribute/index.html).
 
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=georgia-tech-db/evadb&type=Date)](https://star-history.com/#georgia-tech-db/evadb&Date)
+
 ## License
 Copyright (c) 2018--present [Georgia Tech Database Group](http://db.cc.gatech.edu/).
 Licensed under [Apache License](LICENSE).
