@@ -1,6 +1,6 @@
 Text summarization benchmark 
 ====
-In this benchmark, we compare the performance of text summarization between EvaDB and MindsDB on `<CNN-DailyMail News https://www.kaggle.com/datasets/gowrishankarp/newspaper-text-summarization-cnn-dailymail>`.
+In this benchmark, we compare the performance of text summarization between EvaDB and MindsDB on `CNN-DailyMail News <https://www.kaggle.com/datasets/gowrishankarp/newspaper-text-summarization-cnn-dailymail>`_.
 
 1. Prepare dataset
 ----
@@ -41,7 +41,7 @@ Prepare sqlite database for MindsDB
 
 Install MindsDB
 ****
-Follow the `Setup for Source Code via pip <https://docs.mindsdb.com/setup/self-hosted/pip/source>` to install mindsdb.
+Follow the `Setup for Source Code via pip <https://docs.mindsdb.com/setup/self-hosted/pip/source>`_ to install mindsdb.
 
 .. note::
 
