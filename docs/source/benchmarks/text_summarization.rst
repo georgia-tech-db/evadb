@@ -80,7 +80,7 @@ Create text summarization model and wait for its readiness.
 
    DESCRIBE mindsdb.hf_bart_sum_20;
 
-Use the model to summarize the CNN DailyMail news
+Use the model to summarize the CNN DailyMail news.
 
 .. code-block:: sql
 
@@ -93,7 +93,7 @@ Use the model to summarize the CNN DailyMail news
 
 4. Experiment results
 ----
-Below are nubmers from a server with 56 Intel(R) Xeon(R) CPU E5-2690 v4 @ 2.60GHz and two Quadro P6000 GPU
+Below are nubmers from a server with 56 Intel(R) Xeon(R) CPU E5-2690 v4 @ 2.60GHz and two Quadro P6000 GPU.
 
 .. list-table:: Text summarization with ``sshleifer/distilbart-cnn-12-6`` on CNN-DailyMail News
 
