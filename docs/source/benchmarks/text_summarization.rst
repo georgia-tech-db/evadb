@@ -5,7 +5,7 @@ In this benchmark, we compare the performance of text summarization between EvaD
 1. Prepare dataset
 ----
 
-.. code-block: bash
+.. code-block:: bash
 
    cd benchmark/text_summarization
    bash download_dataset.sh
@@ -17,7 +17,7 @@ In this benchmark, we compare the performance of text summarization between EvaD
  
    Install ray in your EvaDB virtual environment. ``pip install "ray>=1.13.0,<2.5.0"``
    
-.. code-block: bash
+.. code-block:: bash
 
    cd benchmark/text_summarization
    python text_summarization_with_evadb.py
@@ -31,7 +31,7 @@ In this benchmark, we compare the performance of text summarization between EvaD
 Prepare sqlite database for MindsDB
 ****
 
-.. code-block: bash
+.. code-block:: bash
 
    sqlite3 cnn_news_test.db
    > .mode csv
@@ -49,7 +49,7 @@ Follow the `Setup for Source Code via pip <https://docs.mindsdb.com/setup/self-h
 
 After the installation, we use mysql cli to connect to MindsDB. Replace the port number as needed.
 
-.. code-block: bash
+.. code-block:: bash
 
    mysql -h 127.0.0.1 --port 47335 -u mindsdb -p
 
@@ -58,7 +58,7 @@ Run Experiment
 
 Connect the sqlite database we created before: :ref:`sqlite database`.
 
-.. code-block: sql
+.. code-block:: sql
 
    CREATE DATABASE sqlite_datasource
    WITH ENGINE = 'sqlite',
@@ -68,7 +68,7 @@ Connect the sqlite database we created before: :ref:`sqlite database`.
 
 Create text summarization model and wait for its readiness.
 
-.. code-block: sql
+.. code-block:: sql
 
    CREATE MODEL mindsdb.hf_bart_sum_20
    PREDICT PRED
@@ -84,7 +84,7 @@ Create text summarization model and wait for its readiness.
 
 Use the model to summarize the CNN DailyMail news
 
-.. code-block: sql
+.. code-block:: sql
 
    CREATE OR REPLACE TABLE sqlite_datasource.cnn_news_summary (
      SELECT PRED
