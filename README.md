@@ -198,10 +198,6 @@ This diagram presents the key components of EvaDB. EvaDB's AI-centric query opti
 
 👋 If you have general questions about EvaDB, want to say hello or just follow along, we'd like to invite you to join our [Slack Community](https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg) and to [follow us on Twitter](https://twitter.com/evadb_ai).
 
-<a href="https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg">              
-    <img src="https://raw.githubusercontent.com/georgia-tech-db/evadb/master/docs/images/evadb/eva-slack.png" alt="EvaDB Slack Channel" width="500">
-</a>
-
 If you run into any problems or issues, please create a Github issue and we'll try our best to help.
 
 Don't see a feature in the list? Search our issue tracker if someone has already requested it and add a comment to it explaining your use-case, or open a new issue if not. We prioritize our [roadmap](https://github.com/orgs/georgia-tech-db/projects/3) based on user feedback, so we'd love to hear from you.
