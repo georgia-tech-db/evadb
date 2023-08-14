@@ -217,6 +217,7 @@ For more information, see our
 
 [![Star History Chart](https://api.star-history.com/svg?repos=georgia-tech-db/evadb&type=Date)](https://star-history.com/#georgia-tech-db/evadb&Date)
 
+
 ## License
 Copyright (c) 2018--present [Georgia Tech Database Group](http://db.cc.gatech.edu/).
 Licensed under [Apache License](LICENSE).
