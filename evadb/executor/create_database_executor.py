@@ -12,10 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import pandas as pd
 from evadb.database import EvaDBDatabase
 from evadb.executor.abstract_executor import AbstractExecutor
+from evadb.models.storage.batch import Batch
 from evadb.parser.create_statement import CreateDatabaseStatement
-from evadb.storage.storage_engine import StorageEngine
 from evadb.utils.logging_manager import logger
 
 
@@ -24,7 +25,18 @@ class CreateDatabaseExecutor(AbstractExecutor):
         super().__init__(db, node)
 
     def exec(self, *args, **kwargs):
-        self.node.database_name
-        self.node.if_not_exists
-        self.node.engine
-        self.node.param_list
+        # todo handle if_not_exists
+
+        logger.debug(f"Creating database {self.node}")
+
+        self.catalog().create_and_insert_database_catalog_entry(
+            self.node.database_name, self.node.engine, self.node.param_list
+        )
+
+        yield Batch(
+            pd.DataFrame(
+                [
+                    f"The database {self.node.database_name} has been successfully created."
+                ]
+            )
+        )
