@@ -17,6 +17,7 @@ from typing import Iterator
 from evadb.database import EvaDBDatabase
 from evadb.executor.abstract_executor import AbstractExecutor
 from evadb.executor.apply_and_merge_executor import ApplyAndMergeExecutor
+from evadb.executor.create_database_executor import CreateDatabaseExecutor
 from evadb.executor.create_executor import CreateExecutor
 from evadb.executor.create_index_executor import CreateIndexExecutor
 from evadb.executor.create_udf_executor import CreateUDFExecutor
@@ -46,6 +47,7 @@ from evadb.executor.storage_executor import StorageExecutor
 from evadb.executor.union_executor import UnionExecutor
 from evadb.executor.vector_index_scan_executor import VectorIndexScanExecutor
 from evadb.models.storage.batch import Batch
+from evadb.parser.create_statement import CreateDatabaseStatement
 from evadb.plan_nodes.abstract_plan import AbstractPlan
 from evadb.plan_nodes.types import PlanOprType
 from evadb.utils.logging_manager import logger
@@ -80,6 +82,10 @@ class PlanExecutor:
 
         # Get plan node type
         plan_opr_type = plan.opr_type
+
+        # First handle cases when the plan is actually a parser statement
+        if isinstance(plan_opr_type, CreateDatabaseStatement):
+            return CreateDatabaseExecutor(db=self._db, node=plan)
 
         if plan_opr_type == PlanOprType.SEQUENTIAL_SCAN:
             executor_node = SequentialScanExecutor(db=self._db, node=plan)
