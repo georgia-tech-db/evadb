@@ -55,7 +55,7 @@ def get_string_in_line(file_path, line_number):
 # CONFIGURATION
 # ==============================================
 
-# NOTE: absolute path to eva directory is calculated from current directory
+# NOTE: absolute path to evadb directory is calculated from current directory
 # directory structure: evadb/scripts/formatting/<this_file>
 # EvaDB_DIR needs to be redefined if the directory structure is changed
 CODE_SOURCE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -174,7 +174,7 @@ def release_version(current_version):
 def get_commit_id_of_latest_release():
     import requests
 
-    repo = 'georgia-tech-db/eva'
+    repo = 'georgia-tech-db/evadb'
     url = f'https://api.github.com/repos/{repo}/releases'
     response = requests.get(url)
     data = response.json()
@@ -221,7 +221,7 @@ def upload_assets(changelog, tag):
 
     # Repository information
     repo_owner = 'georgia-tech-db'
-    repo_name = 'eva'
+    repo_name = 'evadb'
 
     # Release information
     tag_name = 'v' + tag
@@ -295,7 +295,7 @@ def bump_up_version(next_version):
 # ==============================================
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Release eva")
+    parser = argparse.ArgumentParser(description="Release EvaDB")
 
     # version.py defines the VERSION and VERSION_SHORT variables
     VERSION_DICT: Dict[str, str] = {}

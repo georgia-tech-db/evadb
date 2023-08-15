@@ -12,11 +12,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import weakref
 from threading import Lock
+from weakref import WeakValueDictionary
 
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.pool import NullPool
+
+from evadb.utils.generic_utils import is_postgres_uri, parse_config_yml
 
 IDENTIFIER_COLUMN = "_row_id"
 
@@ -39,8 +42,7 @@ class SingletonMeta(type):
     This is a thread-safe implementation of Singleton.
     """
 
-    _instances = weakref.WeakValueDictionary()
-
+    _instances = WeakValueDictionary()
     _lock: Lock = Lock()
 
     def __call__(cls, uri):
@@ -61,7 +63,26 @@ class SQLConfig(metaclass=SingletonMeta):
 
         self.worker_uri = str(uri)
         # set echo=True to log SQL
-        self.engine = create_engine(self.worker_uri, connect_args={"timeout": 1000})
+
+        connect_args = {}
+        config_obj = parse_config_yml()
+        if is_postgres_uri(config_obj["core"]["catalog_database_uri"]):
+            # Set the arguments for postgres backend.
+            connect_args = {"connect_timeout": 1000}
+            # https://www.oddbird.net/2014/06/14/sqlalchemy-postgres-autocommit/
+            self.engine = create_engine(
+                self.worker_uri,
+                poolclass=NullPool,
+                isolation_level="AUTOCOMMIT",
+                connect_args=connect_args,
+            )
+        else:
+            # Default to SQLite.
+            connect_args = {"timeout": 1000}
+            self.engine = create_engine(
+                self.worker_uri,
+                connect_args=connect_args,
+            )
 
         if self.engine.url.get_backend_name() == "sqlite":
             # enforce foreign key constraint and wal logging for sqlite
@@ -76,6 +97,7 @@ class SQLConfig(metaclass=SingletonMeta):
                 # optimal design. Ideally, we should implement a connection pool for
                 # better management.
                 # dbapi_con.execute("pragma journal_mode=WAL")
+                # dbapi_con.close()
 
             event.listen(self.engine, "connect", _enable_sqlite_pragma)
         # statements

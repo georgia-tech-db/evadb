@@ -1,20 +1,15 @@
 name: ❓ Question
-description: Ask a EVA DB question
+description: Ask a question on EvaDB
 labels: [question]
 body:
-  - type: markdown
-    attributes:
-      value: |
-        🙏 Thanks for asking a EVA DB Question!
-
   - type: checkboxes
     attributes:
       label: Search before asking
       description: >
-        🔍 Please search the [issues](https://github.com/georgia-tech-db/eva/issues) to see if a similar question already exists.
+        🔍 Please search our [issues](https://github.com/georgia-tech-db/eva/issues) to see if a similar question already exists.
       options:
         - label: >
-            I have searched the EVA DB [issues](https://github.com/georgia-tech-db/eva/issues) and found no similar questions.
+            I have searched the EvaDB [issues](https://github.com/georgia-tech-db/eva/issues) and found no similar questions.
           required: true
 
   - type: textarea
@@ -25,8 +20,3 @@ body:
         💡 ProTip! Include as much information as possible (screenshots, logs, tracebacks etc.) to receive the most helpful response.
     validations:
       required: true
-
-  - type: textarea
-    attributes:
-      label: Additional
-      description: 📝 Anything else you would like to share?

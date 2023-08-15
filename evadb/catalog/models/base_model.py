@@ -19,7 +19,7 @@ from sqlalchemy import Column, Integer
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy_utils import create_database, database_exists
+from sqlalchemy_utils import database_exists
 
 from evadb.catalog.sql_config import CATALOG_TABLES
 from evadb.utils.logging_manager import logger
@@ -100,15 +100,6 @@ class CustomModel:
 
 # Custom Base Model to be inherited by all models
 BaseModel = declarative_base(cls=CustomModel, constructor=None)
-
-
-def init_db(engine: Engine):
-    """Create database if doesn't exist and create all tables."""
-    if not database_exists(engine.url):
-        logger.info("Database does not exist, creating database.")
-        create_database(engine.url)
-        logger.info("Creating tables")
-        BaseModel.metadata.create_all(bind=engine)
 
 
 def truncate_catalog_tables(engine: Engine):

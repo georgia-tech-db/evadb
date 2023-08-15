@@ -40,7 +40,7 @@ def background(f):
 # ==============================================
 
 # NOTE: absolute path to repo directory is calculated from current directory
-# directory structure: eva/scripts/formatting/<this_file>
+# directory structure: evadb/scripts/formatting/<this_file>
 # EvaDB_DIR needs to be redefined if the directory structure is changed
 CODE_SOURCE_DIR = os.path.abspath(os.path.dirname(__file__))
 EvaDB_DIR = functools.reduce(
@@ -224,6 +224,13 @@ def format_file(file_path, add_header, strip_header, format_code):
             #ret_val = os.system(pylint_command)
             #if ret_val:
             #    sys.exit(1)
+
+            # CHECK FOR INVALID WORDS (like print)
+            with open(file_path, 'r') as file:
+                for line_num, line in enumerate(file, start=1):
+                    if ' print(' in line:
+                        LOG.warning(f"print() found in {file_path}, line {line_num}: {line.strip()}")
+                        sys.exit(1)                        
 
     # END WITH
 

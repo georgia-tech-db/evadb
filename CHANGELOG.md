@@ -10,6 +10,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### [Deprecated]
 ### [Removed]
 
+##  [0.3.1] - 2023-06-30
+
+* PR #913: fix: motif_mining query 
+* PR #895: fix: Renaming Cursor Functions 
+* PR #911: Added comments for ChatGPT UDF. 
+* PR #908: feat: migrate to sqlalchemy 2.0 
+* PR #910: Bump v0.3.1+dev 
+* PR #907: feat: table filtering based on multiple keywords UDF 
+
+##  [0.3.0] - 2023-06-27
+
+* PR #907: feat: table filtering based on multiple keywords UDF 
+* PR #906: ci: add 3.11 
+* PR #905: feat: remove ocr 
+* PR #904: feat: chatgpt prompt arg 
+* PR #903: Bump v0.3.0+dev 
+
+##  [0.2.15] - 2023-06-26
+
+* PR #898: fix: index creation better error msg 
+* PR #817: fix: GPU ids and degree of parallelism 
+* PR #897: feat: add support for 3.11 
+* PR #885: feat: pandas qa sample app 
+* PR #896: app: youtube channel qa app 
+* PR #893: feat: cleanup create mat view 
+* PR #892: feat: update notebooks 
+* PR #894: fix: Youtube app 
+
 ##  [0.2.14] - 2023-06-24
 
 * PR #887: fix: Notebooks fix 

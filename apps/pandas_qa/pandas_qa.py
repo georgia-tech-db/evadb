@@ -14,37 +14,22 @@
 # limitations under the License.
 import os
 import shutil
+import subprocess
 from typing import Dict
 
 import pandas as pd
 
 import evadb
 
+APP_SOURCE_DIR = os.path.abspath(os.path.dirname(__file__))
+CURRENT_WORKING_DIR = os.getcwd()  # used to locate evadb_data dir
 
-def try_to_import_pytube():
-    try:
-        import pytube  # noqa: F401
-    except ImportError:
-        raise ValueError(
-            """Could not import pytube python package.
-                Please install it with `pip install -r requirements.txt`."""
-        )
-
-
-try_to_import_pytube()
-
-from pytube import YouTube, extract  # noqa: E402
-from youtube_transcript_api import YouTubeTranscriptApi  # noqa: E402
-
-MAX_CHUNK_SIZE = 10000
-DEFAULT_VIDEO_LINK = "https://www.youtube.com/watch?v=TvS1lHEQoKk"
-DEFAULT_VIDEO_PATH = "./apps/youtube_qa/benchmarks/russia_ukraine.mp4"
+# default file paths
+DEFAULT_CSV_PATH = os.path.join(APP_SOURCE_DIR, "data", "country.csv")
 
 # temporary file paths
-ONLINE_VIDEO_PATH = "./evadb_data/tmp/online_video.mp4"
-TRANSCRIPT_PATH = "./evadb_data/tmp/transcript.csv"
-SUMMARY_PATH = "./evadb_data/tmp/summary.csv"
-BLOG_PATH = "blog.md"
+QUESTION_PATH = os.path.join(APP_SOURCE_DIR, "question.csv")
+SCRIPT_PATH = os.path.join(APP_SOURCE_DIR, "script.py")
 
 
 def receive_user_input() -> Dict:
@@ -54,36 +39,17 @@ def receive_user_input() -> Dict:
         user_input (dict): global configurations
     """
     print(
-        "🔮 Welcome to EvaDB! This app lets you ask questions on any local or YouTube online video.\nYou will only need to supply a Youtube URL and an OpenAI API key.\n\n"
+        "🔮 Welcome to EvaDB! This app lets you to run data analytics on a csv file like in a conversational manner.\nYou will only need to supply a path to csv file and an OpenAI API key.\n\n"
     )
-    from_youtube = str(
-        input(
-            "📹 Are you querying an online Youtube video or a local video? ('yes' for online/ 'no' for local): "
-        )
-    ).lower() in ["y", "yes"]
-    user_input = {"from_youtube": from_youtube}
+    user_input = dict()
 
-    if from_youtube:
-        # get Youtube video url
-        video_link = str(
-            input(
-                "📺 Enter the URL of the YouTube video (press Enter to use our default Youtube video URL): "
-            )
-        )
+    csv_path = str(
+        input("📋 Enter the csv file path (press Enter to use our default csv file): ")
+    )
 
-        if video_link == "":
-            video_link = DEFAULT_VIDEO_LINK
-        user_input["video_link"] = video_link
-    else:
-        video_local_path = str(
-            input(
-                "📺 Enter the local path to your video (press Enter to use our demo video): "
-            )
-        )
-
-        if video_local_path == "":
-            video_local_path = DEFAULT_VIDEO_PATH
-        user_input["video_local_path"] = video_local_path
+    if csv_path == "":
+        csv_path = DEFAULT_CSV_PATH
+    user_input["csv_path"] = csv_path
 
     # get OpenAI key if needed
     try:
@@ -95,347 +61,106 @@ def receive_user_input() -> Dict:
     return user_input
 
 
-def partition_transcript(raw_transcript: str):
-    """Group video transcript elements when they are too large.
-
-    Args:
-        transcript (str): downloaded video transcript as a raw string.
-
-    Returns:
-        List: a list of partitioned transcript
-    """
-    if len(raw_transcript) <= MAX_CHUNK_SIZE:
-        return [{"text": raw_transcript}]
-
-    k = 2
-    while True:
-        if (len(raw_transcript) / k) <= MAX_CHUNK_SIZE:
-            break
-        else:
-            k += 1
-    chunk_size = int(len(raw_transcript) / k)
-
-    partitioned_transcript = [
-        {"text": raw_transcript[i : i + chunk_size]}
-        for i in range(0, len(raw_transcript), chunk_size)
-    ]
-    if len(partitioned_transcript[-1]["text"]) < 30:
-        partitioned_transcript.pop()
-    return partitioned_transcript
-
-
-def partition_summary(prev_summary: str):
-    """Summarize a summary if a summary is too large.
-
-    Args:
-        prev_summary (str): previous summary that is too large.
-
-    Returns:
-        List: a list of partitioned summary
-    """
-    k = 2
-    while True:
-        if (len(prev_summary) / k) <= MAX_CHUNK_SIZE:
-            break
-        else:
-            k += 1
-    chunk_size = int(len(prev_summary) / k)
-
-    new_summary = [
-        {"summary": prev_summary[i : i + chunk_size]}
-        for i in range(0, len(prev_summary), chunk_size)
-    ]
-    if len(new_summary[-1]["summary"]) < 30:
-        new_summary.pop()
-    return new_summary
-
-
-def group_transcript(transcript: dict):
-    """Group video transcript elements when they are too short.
-
-    Args:
-        transcript (dict): downloaded video transcript as a dictionary.
-
-    Returns:
-        str: full transcript as a single string.
-    """
-    new_line = ""
-    for line in transcript:
-        new_line += line["text"]
-
-    return new_line
-
-
-def download_youtube_video_transcript(video_link: str):
-    """Downloads a YouTube video's transcript.
-
-    Args:
-        video_link (str): url of the target YouTube video.
-    """
-    video_id = extract.video_id(video_link)
-    print("⏳ Transcript download in progress...")
-    transcript = YouTubeTranscriptApi.get_transcript(video_id)
-    print("✅ Video transcript downloaded successfully.")
-    return transcript
-
-
-def download_youtube_video_from_link(video_link: str):
-    """Downloads a YouTube video from url.
-
-    Args:
-        video_link (str): url of the target YouTube video.
-    """
-    yt = (
-        YouTube(video_link)
-        .streams.filter(file_extension="mp4", progressive="True")
-        .first()
-    )
-    try:
-        print("⏳ video download in progress...")
-        yt.download(filename=ONLINE_VIDEO_PATH)
-    except Exception as e:
-        print(f"⛔️ Video download failed with error: \n{e}")
-    print("✅ Video downloaded successfully.")
-
-
-def generate_online_video_transcript(cursor: evadb.EvaDBCursor) -> str:
-    """Extracts speech from video for llm processing.
-
-    Args:
-        cursor (EVADBCursor): evadb api cursor.
-
-    Returns:
-        str: video transcript text.
-    """
-    print("\n⏳ Analyzing YouTube video. This may take a while...")
-
-    # load youtube video into an evadb table
-    cursor.drop_table("youtube_video", if_exists=True).execute()
-    cursor.load(ONLINE_VIDEO_PATH, "youtube_video", "video").execute()
-
-    # extract speech texts from videos
-    cursor.drop_table("youtube_video_text", if_exists=True).execute()
-    cursor.query(
-        "CREATE TABLE IF NOT EXISTS youtube_video_text AS SELECT SpeechRecognizer(audio) FROM youtube_video;"
-    ).execute()
-    print("✅ Video analysis completed.")
-
-    raw_transcript_string = (
-        cursor.table("youtube_video_text")
-        .select("text")
-        .df()["youtube_video_text.text"][0]
-    )
-    return raw_transcript_string
-
-
-def generate_local_video_transcript(cursor: evadb.EvaDBCursor, video_path: str) -> str:
-    """Extracts speech from video for llm processing.
-
-    Args:
-        cursor (EVADBCursor): evadb api cursor.
-        video_path (str): video path.
-
-    Returns:
-        str: video transcript text.
-    """
-    print(f"\n⏳ Analyzing local video from {video_path}. This may take a while...")
-
-    # load youtube video into an evadb table
-    cursor.drop_table("local_video", if_exists=True).execute()
-    cursor.load(video_path, "local_video", "video").execute()
-
-    # extract speech texts from videos
-    cursor.drop_table("local_video_text", if_exists=True).execute()
-    cursor.query(
-        "CREATE TABLE IF NOT EXISTS local_video_text AS SELECT SpeechRecognizer(audio) FROM local_video;"
-    ).execute()
-    print("✅ Video analysis completed.")
-
-    # retrieve generated transcript
-    raw_transcript_string = (
-        cursor.table("local_video_text").select("text").df()["local_video_text.text"][0]
-    )
-    return raw_transcript_string
-
-
-def generate_summary(cursor: evadb.EvaDBCursor):
-    """Generate summary of a video transcript if it is too long (exceeds llm token limits)
-
-    Args:
-        cursor (EVADBCursor): evadb api cursor.
-    """
-    generate_summary_rel = cursor.table("Transcript").select(
-        "ChatGPT('summarize the video in detail', text)"
-    )
-    responses = generate_summary_rel.df()["chatgpt.response"]
-
-    summary = ""
-    for r in responses:
-        summary += f"{r} \n"
-    df = pd.DataFrame([{"summary": summary}])
-    df.to_csv(SUMMARY_PATH)
-
-    need_to_summarize = len(summary) > MAX_CHUNK_SIZE
-    while need_to_summarize:
-        partitioned_summary = partition_summary(summary)
-
-        df = pd.DataFrame([{"summary": partitioned_summary}])
-        df.to_csv(SUMMARY_PATH)
-
-        cursor.drop_table("Summary", if_exists=True).execute()
-        cursor.query(
-            """CREATE TABLE IF NOT EXISTS Summary (summary TEXT(100));"""
-        ).execute()
-        cursor.load(SUMMARY_PATH, "Summary", "csv").execute()
-
-        generate_summary_rel = cursor.table("Summary").select(
-            "ChatGPT('summarize in detail', summary)"
-        )
-        responses = generate_summary_rel.df()["chatgpt.response"]
-        summary = " ".join(responses)
-
-        # no further summarization is needed if the summary is short enough
-        if len(summary) <= MAX_CHUNK_SIZE:
-            need_to_summarize = False
-
-    # load final summary to table
-    cursor.drop_table("Summary", if_exists=True).execute()
-    cursor.query(
-        """CREATE TABLE IF NOT EXISTS Summary (summary TEXT(100));"""
-    ).execute()
-    cursor.load(SUMMARY_PATH, "Summary", "csv").execute()
-
-
-def generate_response(cursor: evadb.EvaDBCursor, df, question: str) -> str:
-    """Generates question response with llm.
+def generate_script(cursor: evadb.EvaDBCursor, df: pd.DataFrame, question: str) -> str:
+    """Generates script with llm.
 
     Args:
         cursor (EVADBCursor): evadb api cursor.
         question (str): question to ask to llm.
 
     Returns
-        str: response from llm.
+        str: script generated by llm.
     """
     # generate summary
+    all_columns = list(df)  # Creates list of all column headers
+    df[all_columns] = df[all_columns].astype(str)
+
     prompt = f"""There is a dataframe in pandas (python). The name of the
             dataframe is df. This is the result of print(df.head()):
-            {df}. Return the python code (do not import anything) to get the answer to the following question: {question}"""
-    context = ""
+            {str(df.head())}. Return a python script with comments to get the answer to the following question: {question}. Do not write code to load the CSV file."""
 
-    print(prompt)
+    question_df = pd.DataFrame([{"prompt": prompt}])
+    question_df.to_csv(QUESTION_PATH)
 
-    query = cursor.table("Transcript").select(f"ChatGPT('{prompt}', 'country')")
+    cursor.drop_table("Question", if_exists=True).execute()
+    cursor.query("""CREATE TABLE IF NOT EXISTS Question (prompt TEXT(50));""").execute()
+    cursor.load(QUESTION_PATH, "Question", "csv").execute()
 
-    print(query.sql_query())
-    output = query.df()["chatgpt.response"][0]
+    pd.set_option("display.max_colwidth", None)
 
-    return output
+    query = cursor.table("Question").select("ChatGPT(prompt)")
+    script_body = query.df()["chatgpt.response"][0]
+
+    return script_body
 
 
-def generate_blog_post(cursor: evadb.EvaDBCursor) -> str:
-    to_generate = str(
-        input("\nWould you like to generate a blog post based on the video? (yes/no): ")
-    )
-    if to_generate.lower() == "yes" or to_generate.lower() == "y":
-        print("⏳ Generating blog post (may take a while)...")
+def run_script(script_body: str, user_input: Dict):
+    """Runs script generated by llm.
 
-        if not os.path.exists(SUMMARY_PATH):
-            generate_summary(cursor)
+    Args:
+        script_body (str): script generated by llm.
+        user_input (Dict): user input.
+    """
+    absolute_csv_path = os.path.abspath(user_input["csv_path"])
+    absolute_script_path = os.path.abspath(SCRIPT_PATH)
+    print(absolute_csv_path)
+    load_df = f"import pandas as pd\ndf = pd.read_csv('{absolute_csv_path}')\n"
+    script_body = load_df + script_body
 
-        # use llm to generate blog post
-        generate_blog_rel = cursor.table("Summary").select(
-            "ChatGPT('generate a long detailed blog post of the video summary in markdown format that has sections and hyperlinks', summary)"
-        )
-        responses = generate_blog_rel.df()["chatgpt.response"]
-        blog = responses[0]
-        print(blog)
+    with open(absolute_script_path, "w+") as script_file:
+        script_file.write(script_body)
 
-        if os.path.exists(BLOG_PATH):
-            os.remove(BLOG_PATH)
-
-        with open(BLOG_PATH, "w") as file:
-            file.write(blog)
-
-        print(f"✅ blog post is saved to file {BLOG_PATH}")
+    subprocess.run(["python", absolute_script_path])
 
 
 def cleanup():
     """Removes any temporary file / directory created by EvaDB."""
-    # if os.path.exists("evadb_data"):
-    #    shutil.rmtree("evadb_data")
+    if os.path.exists("evadb_data"):
+        shutil.rmtree("evadb_data")
+    if os.path.exists(QUESTION_PATH):
+        os.remove(QUESTION_PATH)
+    if os.path.exists(SCRIPT_PATH):
+        os.remove(SCRIPT_PATH)
 
 
 if __name__ == "__main__":
     try:
-        # establish evadb api cursor
-        cursor = evadb.connect().cursor()
+        # receive input from user
+        user_input = receive_user_input()
 
-        # Sample DataFrame
-        df = pd.DataFrame(
-            {
-                "country": [
-                    "United States",
-                    "United Kingdom",
-                    "France",
-                    "Germany",
-                    "Italy",
-                    "Spain",
-                    "Canada",
-                    "Australia",
-                    "Japan",
-                    "China",
-                ],
-                "gdp": [
-                    19294482071552,
-                    2891615567872,
-                    2411255037952,
-                    3435817336832,
-                    1745433788416,
-                    1181205135360,
-                    1607402389504,
-                    1490967855104,
-                    4380756541440,
-                    14631844184064,
-                ],
-                "happiness_index": [
-                    6.94,
-                    7.16,
-                    6.66,
-                    7.07,
-                    6.38,
-                    6.4,
-                    7.23,
-                    7.22,
-                    5.87,
-                    5.12,
-                ],
-            }
+        # establish evadb api cursor
+        print("⏳ Establishing evadb connection...")
+        cursor = evadb.connect().cursor()
+        print("✅ evadb connection setup complete!")
+
+        # Retrieve Dataframe
+        df = pd.read_csv(user_input["csv_path"])
+
+        print("\n===========================================")
+        print("🪄 Run anything on the csv table like a conversation!")
+
+        question = str(
+            input(
+                "What do you want to do with the dataframe? \n(enter 'exit' to exit): "
+            )
         )
 
-        df.to_csv(TRANSCRIPT_PATH)
+        if question.lower() != "exit":
+            # Generate response with chatgpt udf
+            print("⏳ Generating response (may take a while)...")
+            script_body = generate_script(cursor, df, question)
+            print("+--------------------------------------------------+")
+            print("✅ Running this Python script:")
+            print(script_body)
+            print("+--------------------------------------------------+")
 
-        # load chunked transcript into table
-        cursor.drop_table("Transcript", if_exists=True).execute()
-        cursor.load(TRANSCRIPT_PATH, "Transcript", "Document").execute()
-
-        print("===========================================")
-        print("🪄 Ask anything about the dataframe!")
-        ready = True
-        while ready:
-            question = str(input("Question (enter 'exit' to exit): "))
-            if question.lower() == "exit":
-                ready = False
-            else:
-                # Generate response with chatgpt udf
-                print("⏳ Generating response (may take a while)...")
-                response = generate_response(cursor, df, question)
-                print("+--------------------------------------------------+")
-                print("✅ Answer:")
-                print(response)
-                print("+--------------------------------------------------+")
-
-        # generate a blog post on user demand
-        generate_blog_post(cursor)
+            try:
+                run_script(script_body, user_input)
+            except Exception as e:
+                print(
+                    "❗️ Error encountered while running the script. You will likely need to edit the pandas script and run it manually."
+                )
+                print(e)
 
         cleanup()
         print("✅ Session ended.")

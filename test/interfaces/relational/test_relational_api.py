@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+from test.markers import qdrant_skip_marker
 from test.util import (
     DummyObjectDetector,
     create_sample_video,
@@ -46,7 +47,9 @@ class RelationalAPI(unittest.TestCase):
     def setUp(self):
         self.evadb.catalog().reset()
         self.mnist_path = f"{EvaDB_ROOT_DIR}/data/mnist/mnist.mp4"
-        load_udfs_for_testing(self.evadb,)
+        load_udfs_for_testing(
+            self.evadb,
+        )
         self.images = f"{EvaDB_ROOT_DIR}/data/detoxify/*.jpg"
 
     def tearDown(self):
@@ -57,7 +60,11 @@ class RelationalAPI(unittest.TestCase):
 
     def test_relation_apis(self):
         cursor = self.conn.cursor()
-        rel = cursor.load(self.mnist_path, table_name="mnist_video", format="video",)
+        rel = cursor.load(
+            self.mnist_path,
+            table_name="mnist_video",
+            format="video",
+        )
         rel.execute()
 
         rel = cursor.table("mnist_video")
@@ -65,7 +72,8 @@ class RelationalAPI(unittest.TestCase):
 
         rel = rel.select("_row_id, id, data")
         assert_frame_equal(
-            rel.df(), cursor.query("select _row_id, id, data from mnist_video;").df(),
+            rel.df(),
+            cursor.query("select _row_id, id, data from mnist_video;").df(),
         )
 
         rel = rel.filter("id < 10")
@@ -88,7 +96,11 @@ class RelationalAPI(unittest.TestCase):
                     where id < 10 AND mnist.label = 1;"""
         assert_frame_equal(rel.df(), cursor.query(query).df())
 
-        rel = cursor.load(self.images, table_name="meme_images", format="image",)
+        rel = cursor.load(
+            self.images,
+            table_name="meme_images",
+            format="image",
+        )
         rel.execute()
 
         rel = cursor.table("meme_images").select("_row_id, name")
@@ -107,7 +119,11 @@ class RelationalAPI(unittest.TestCase):
     def test_relation_api_chaining(self):
         cursor = self.conn.cursor()
 
-        rel = cursor.load(self.mnist_path, table_name="mnist_video", format="video",)
+        rel = cursor.load(
+            self.mnist_path,
+            table_name="mnist_video",
+            format="video",
+        )
         rel.execute()
 
         rel = (
@@ -126,7 +142,11 @@ class RelationalAPI(unittest.TestCase):
     def test_interleaving_calls(self):
         cursor = self.conn.cursor()
 
-        rel = cursor.load(self.mnist_path, table_name="mnist_video", format="video",)
+        rel = cursor.load(
+            self.mnist_path,
+            table_name="mnist_video",
+            format="video",
+        )
         rel.execute()
 
         rel = cursor.table("mnist_video")
@@ -142,11 +162,16 @@ class RelationalAPI(unittest.TestCase):
             cursor.query("select _row_id, id from mnist_video where id > 10;").df(),
         )
 
+    @qdrant_skip_marker
     def test_create_index(self):
         cursor = self.conn.cursor()
 
         # load some images
-        rel = cursor.load(self.images, table_name="meme_images", format="image",)
+        rel = cursor.load(
+            self.images,
+            table_name="meme_images",
+            format="image",
+        )
         rel.execute()
 
         # todo support register udf
@@ -186,17 +211,21 @@ class RelationalAPI(unittest.TestCase):
 
         cursor = self.conn.cursor()
         # load video
-        rel = cursor.load(video_file_path, table_name="dummy_video", format="video",)
+        rel = cursor.load(
+            video_file_path,
+            table_name="dummy_video",
+            format="video",
+        )
         rel.execute()
 
-        create_dummy_object_detector_udf = cursor.create_udf(
+        create_dummy_object_detector_udf = cursor.create_function(
             "DummyObjectDetector", if_not_exists=True, impl_path="test/util.py"
         )
         create_dummy_object_detector_udf.execute()
 
         args = {"task": "automatic-speech-recognition", "model": "openai/whisper-base"}
 
-        create_speech_recognizer_udf_if_not_exists = cursor.create_udf(
+        create_speech_recognizer_udf_if_not_exists = cursor.create_function(
             "SpeechRecognizer", if_not_exists=True, type="HuggingFace", **args
         )
         query = create_speech_recognizer_udf_if_not_exists.sql_query()
@@ -207,7 +236,7 @@ class RelationalAPI(unittest.TestCase):
         create_speech_recognizer_udf_if_not_exists.execute()
 
         # check if next create call of same UDF raises error
-        create_speech_recognizer_udf = cursor.create_udf(
+        create_speech_recognizer_udf = cursor.create_function(
             "SpeechRecognizer", if_not_exists=False, type="HuggingFace", **args
         )
         query = create_speech_recognizer_udf.sql_query()
@@ -238,17 +267,21 @@ class RelationalAPI(unittest.TestCase):
 
         cursor = self.conn.cursor()
         # load video
-        rel = cursor.load(video_file_path, table_name="dummy_video", format="video",)
+        rel = cursor.load(
+            video_file_path,
+            table_name="dummy_video",
+            format="video",
+        )
         rel.execute()
 
         # Create dummy udf
-        create_dummy_object_detector_udf = cursor.create_udf(
+        create_dummy_object_detector_udf = cursor.create_function(
             "DummyObjectDetector", if_not_exists=True, impl_path="test/util.py"
         )
         create_dummy_object_detector_udf.execute()
 
         # drop dummy udf
-        drop_dummy_object_detector_udf = cursor.drop_udf(
+        drop_dummy_object_detector_udf = cursor.drop_function(
             "DummyObjectDetector", if_exists=True
         )
         drop_dummy_object_detector_udf.execute()
@@ -261,13 +294,13 @@ class RelationalAPI(unittest.TestCase):
             cursor.query(select_query_sql).execute()
 
         # drop non existing udf with if_exists=True should not raise error
-        drop_dummy_object_detector_udf = cursor.drop_udf(
+        drop_dummy_object_detector_udf = cursor.drop_function(
             "DummyObjectDetector", if_exists=True
         )
         drop_dummy_object_detector_udf.execute()
 
         # if_exists=False should raise error
-        drop_dummy_object_detector_udf = cursor.drop_udf(
+        drop_dummy_object_detector_udf = cursor.drop_function(
             "DummyObjectDetector", if_exists=False
         )
         with self.assertRaises(ExecutorError):
@@ -294,18 +327,14 @@ class RelationalAPI(unittest.TestCase):
     def test_pdf_similarity_search(self):
         conn = connect()
         cursor = conn.cursor()
-        pdf_path1 = f"{EvaDB_ROOT_DIR}/data/documents/state_of_the_union.pdf"
-        pdf_path2 = f"{EvaDB_ROOT_DIR}/data/documents/layout-parser-paper.pdf"
+        pdf_path = f"{EvaDB_ROOT_DIR}/data/documents/state_of_the_union.pdf"
 
-        load_pdf = cursor.load(file_regex=pdf_path1, format="PDF", table_name="PDFs")
+        load_pdf = cursor.load(file_regex=pdf_path, format="PDF", table_name="PDFs")
         load_pdf.execute()
 
-        load_pdf = cursor.load(file_regex=pdf_path2, format="PDF", table_name="PDFs")
-        load_pdf.execute()
-
-        udf_check = cursor.drop_udf("SentenceFeatureExtractor")
+        udf_check = cursor.drop_function("SentenceFeatureExtractor")
         udf_check.df()
-        udf = cursor.create_udf(
+        udf = cursor.create_function(
             "SentenceFeatureExtractor",
             True,
             f"{EvaDB_ROOT_DIR}/evadb/udfs/sentence_feature_extractor.py",
@@ -316,7 +345,7 @@ class RelationalAPI(unittest.TestCase):
             "faiss_index",
             table_name="PDFs",
             expr="SentenceFeatureExtractor(data)",
-            using="QDRANT",
+            using="FAISS",
         ).df()
 
         query = (
@@ -369,7 +398,11 @@ class RelationalAPI(unittest.TestCase):
 
         cursor = self.conn.cursor()
         # load video
-        rel = cursor.load(video_file_path, table_name="dummy_video", format="video",)
+        rel = cursor.load(
+            video_file_path,
+            table_name="dummy_video",
+            format="video",
+        )
         rel.execute()
 
         result = cursor.show("tables").df()
@@ -381,7 +414,11 @@ class RelationalAPI(unittest.TestCase):
 
         cursor = self.conn.cursor()
         # load video
-        rel = cursor.load(video_file_path, table_name="dummy_video", format="video",)
+        rel = cursor.load(
+            video_file_path,
+            table_name="dummy_video",
+            format="video",
+        )
         rel.execute()
 
         result = cursor.explain("SELECT * FROM dummy_video").df()
@@ -396,7 +433,11 @@ class RelationalAPI(unittest.TestCase):
 
         cursor = self.conn.cursor()
         # load video
-        rel = cursor.load(video_file_path, table_name="dummy_video", format="video",)
+        rel = cursor.load(
+            video_file_path,
+            table_name="dummy_video",
+            format="video",
+        )
         rel.execute()
 
         cursor.rename("dummy_video", "dummy_video_renamed").df()

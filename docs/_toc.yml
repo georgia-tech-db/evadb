@@ -8,14 +8,20 @@ parts:
       - file: source/overview/faq
       - file: source/overview/concepts
 
-  - caption: EvaDB Tutorials
+  - caption: Use Cases
     chapters:
-      - file: source/tutorials/11-similarity-search-for-motif-mining.ipynb
-        title: Image Similarity Search on Reddit [FAISS + Qdrant]
-      - file: source/tutorials/08-chatgpt.ipynb
-        title: ChatGPT + Whisper [OpenAI + HuggingFace]
+      - file: source/tutorials/image_classification.rst
+        title: Image Classification
+      - file: source/tutorials/02-object-detection.ipynb
+        title: Object Detection
       - file: source/tutorials/03-emotion-analysis.ipynb
-        title: Emotion Analysis with PyTorch
+        title: Emotion Analysis
+      - file: source/tutorials/07-object-segmentation-huggingface.ipynb
+        title: Image Segmentation [HuggingFace]
+      - file: source/tutorials/similar_image_search.rst
+        title: Image Search [FAISS]
+      - file: source/tutorials/qa_video.rst
+        title: Q&A from Videos [ChatGPT + HuggingFace]
 
   - caption: User Reference
     chapters:
@@ -55,14 +61,10 @@ parts:
       - file: source/overview/docker
         title: Docker
 
-  - caption: More Tutorials
+  - caption: Benchmarks
     chapters:
-      - file: source/tutorials/01-mnist.ipynb
-        title: MNIST Image Classification
-      - file: source/tutorials/02-object-detection.ipynb
-        title: Object Detection with YOLO
-      - file: source/tutorials/07-object-segmentation-huggingface.ipynb
-        title: Image Segmentation with HuggingFace 
+      - file: source/benchmarks/text_summarization.rst
+        title: Text Summarization
 
   - caption: Developer Guide
     chapters:

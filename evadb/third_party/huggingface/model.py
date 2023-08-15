@@ -33,6 +33,12 @@ class TextHFModel(AbstractHFUdf):
     Base Model for all HF Models that take in text as input
     """
 
+    def __call__(self, *args, **kwargs):
+        # Use truncation=True to handle the case where num of tokens is larger
+        # than limit
+        # Ref: https://stackoverflow.com/questions/66954682/token-indices-sequence-length-is-longer-than-the-specified-maximum-sequence-leng
+        return self.forward(args[0], truncation=True)
+
     def input_formatter(self, inputs: Any):
         return inputs.values.flatten().tolist()
 

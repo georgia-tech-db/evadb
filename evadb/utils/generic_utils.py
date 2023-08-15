@@ -22,9 +22,11 @@ import sys
 import uuid
 from pathlib import Path
 from typing import List
+from urllib.parse import urlparse
 
 from aenum import AutoEnum, unique
 
+from evadb.configuration.constants import EvaDB_INSTALLATION_DIR
 from evadb.utils.logging_manager import logger
 
 
@@ -191,6 +193,28 @@ def get_file_checksum(fname: str) -> str:
     return hash_md5.hexdigest()
 
 
+def parse_config_yml():
+    """
+    Parses the 'evadb.yml' file and returns the config object.
+    """
+    import yaml
+
+    f = open(Path(EvaDB_INSTALLATION_DIR) / "evadb.yml", "r+")
+    config_obj = yaml.load(f, Loader=yaml.FullLoader)
+    return config_obj
+
+
+def is_postgres_uri(db_uri):
+    """
+    Determines if the db_uri is that of postgres.
+
+    Args:
+        db_uri (str) : db_uri to parse
+    """
+    parsed_uri = urlparse(db_uri)
+    return parsed_uri.scheme == "postgres" or parsed_uri.scheme == "postgresql"
+
+
 class PickleSerializer(object):
     @classmethod
     def serialize(cls, data):
@@ -218,6 +242,15 @@ def remove_directory_contents(dir_path):
                     shutil.rmtree(file_path)
             except Exception as e:
                 logger.warning(f"Failed to delete {file_path}. Reason: {str(e)}")
+
+
+def find_nearest_word(word, word_list):
+    from thefuzz import process
+
+    nearest_word_and_score = process.extractOne(word, word_list)
+    nearest_word = nearest_word_and_score[0]
+
+    return nearest_word
 
 
 ##############################
@@ -291,6 +324,16 @@ def try_to_import_cv2():
         raise ValueError(
             """Could not import cv2 python package.
                 Please install it with `pip install opencv-python`."""
+        )
+
+
+def try_to_import_timm():
+    try:
+        import timm  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import timm python package.
+                Please install them with `pip install timm`."""
         )
 
 
