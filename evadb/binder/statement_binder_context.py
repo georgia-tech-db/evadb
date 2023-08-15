@@ -14,7 +14,7 @@
 # limitations under the License.
 from typing import Callable, Dict, List, Tuple, Union
 
-from evadb.binder.binder_utils import BinderError
+from evadb.binder.binder_utils import BinderError, get_multimedia_table_runtime_columns
 from evadb.catalog.models.column_catalog import ColumnCatalogEntry
 from evadb.catalog.models.table_catalog import TableCatalogEntry
 from evadb.catalog.models.udf_io_catalog import UdfIOCatalogEntry
@@ -143,6 +143,11 @@ class StatementBinderContext:
             column object
         """
         table_obj = self._table_alias_map.get(alias, None)
+
+        for col in get_multimedia_table_runtime_columns(table_obj):
+            if col_name == col.name:
+                return col
+
         if table_obj:
             return self._catalog().get_column_catalog_entry(table_obj, col_name)
 

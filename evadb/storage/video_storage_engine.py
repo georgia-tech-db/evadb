@@ -38,7 +38,7 @@ class DecordStorageEngine(AbstractMediaStorageEngine):
         read_audio: bool = False,
         read_video: bool = True,
     ) -> Iterator[Batch]:
-        for video_files in self._rdb_handler.read(self._get_metadata_table(table), 12):
+        for video_files in self._rdb_handler.read(self._get_table_catalog_entry(table), 12):
             for _, (row_id, video_file_name) in video_files.iterrows():
                 system_file_name = self._xform_file_url_to_file_name(video_file_name)
                 video_file = Path(table.file_url) / system_file_name

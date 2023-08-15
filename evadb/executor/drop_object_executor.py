@@ -62,9 +62,6 @@ class DropObjectExecutor(AbstractExecutor):
                 self.catalog().drop_udf_cache_catalog_entry(cache)
 
         # todo also delete the indexes associated with the table
-        assert self.catalog().delete_table_catalog_entry(
-            table_obj
-        ), "Failed to drop {}".format(table_name)
 
         return Batch(
             pd.DataFrame(

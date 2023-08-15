@@ -33,15 +33,8 @@ class AbstractMediaStorageEngine(AbstractStorageEngine):
         super().__init__(db)
         self._rdb_handler: SQLStorageEngine = SQLStorageEngine(db)
 
-    def _get_metadata_table(self, table: TableCatalogEntry):
-        return self.db.catalog().get_multimedia_metadata_table_catalog_entry(table)
-
-    def _create_metadata_table(self, table: TableCatalogEntry):
-        return (
-            self.db.catalog().create_and_insert_multimedia_metadata_table_catalog_entry(
-                table
-            )
-        )
+    def _get_table_catalog_entry(self, table: TableCatalogEntry):
+        return self.db.catalog().get_table_catalog_entry(table.name)
 
     def _xform_file_url_to_file_name(self, file_url: Path) -> str:
         # Convert media_path to file name. This is done to support duplicate media_names with
@@ -76,14 +69,14 @@ class AbstractMediaStorageEngine(AbstractStorageEngine):
             logger.error(error)
             raise FileExistsError(error)
 
-        self._rdb_handler.create(self._create_metadata_table(table))
+        self._rdb_handler.create(self._get_table_catalog_entry(table))
         return True
 
     def drop(self, table: TableCatalogEntry):
         try:
             dir_path = Path(table.file_url)
             shutil.rmtree(str(dir_path))
-            metadata_table = self._get_metadata_table(table)
+            metadata_table = self._get_table_catalog_entry(table)
             self._rdb_handler.drop(metadata_table)
             # remove the metadata table from the catalog
             self.db.catalog().delete_table_catalog_entry(metadata_table)
@@ -94,7 +87,7 @@ class AbstractMediaStorageEngine(AbstractStorageEngine):
 
     def delete(self, table: TableCatalogEntry, rows: Batch):
         try:
-            media_metadata_table = self._get_metadata_table(table)
+            media_metadata_table = self._get_table_catalog_entry(table)
             for media_file_path in rows.file_paths():
                 dst_file_name = self._xform_file_url_to_file_name(Path(media_file_path))
                 image_file = Path(table.file_url) / dst_file_name
@@ -128,7 +121,7 @@ class AbstractMediaStorageEngine(AbstractStorageEngine):
                 copied_files.append(dst_path)
             # assuming sql write is an atomic operation
             self._rdb_handler.write(
-                self._get_metadata_table(table),
+                self._get_table_catalog_entry(table),
                 Batch(pd.DataFrame({"file_url": list(rows.file_paths())})),
             )
 
