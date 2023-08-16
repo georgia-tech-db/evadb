@@ -285,7 +285,7 @@ class CreateDatabase:
         database_name = None
         if_not_exists = False
         engine = None
-        param_list = []
+        param_dict = {}
 
         for child in tree.children:
             if isinstance(child, Tree):
@@ -294,21 +294,21 @@ class CreateDatabase:
                 elif child.data == "uid":
                     database_name = self.visit(child)
                 elif child.data == "create_database_engine_clause":
-                    engine, param_list = self.visit(child)
+                    engine, param_dict = self.visit(child)
 
         create_stmt = CreateDatabaseStatement(
-            database_name, if_not_exists, engine, param_list
+            database_name, if_not_exists, engine, param_dict
         )
         return create_stmt
 
     def create_database_engine_clause(self, tree):
         engine = None
-        param_list = []
+        param_dict = {}
         for child in tree.children:
             if isinstance(child, Tree):
-                if child.data == "uid":
-                    engine = self.visit(child)
+                if child.data == "string_literal":
+                    engine = self.visit(child).value
                 elif child.data == "colon_param_dict":
-                    param_list = self.visit(child)
+                    param_dict = self.visit(child)
 
-        return engine, param_list
+        return engine, param_dict

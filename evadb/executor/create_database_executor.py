@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import pandas as pd
+
 from evadb.database import EvaDBDatabase
 from evadb.executor.abstract_executor import AbstractExecutor
 from evadb.models.storage.batch import Batch
@@ -27,10 +28,15 @@ class CreateDatabaseExecutor(AbstractExecutor):
     def exec(self, *args, **kwargs):
         # todo handle if_not_exists
 
+        logger.debug(
+            f"Trying to connect to the provided engine {self.node.engine} with params {self.node.param_dict}"
+        )
+        # todo handle if the provided database params are valid
+
         logger.debug(f"Creating database {self.node}")
 
         self.catalog().insert_database_catalog_entry(
-            self.node.database_name, self.node.engine, self.node.param_list
+            self.node.database_name, self.node.engine, self.node.param_dict
         )
 
         yield Batch(

@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from pprint import pprint
 
 from evadb.parser.parser import Parser
 
@@ -160,9 +159,6 @@ class ParserStatementTests(unittest.TestCase):
 
         for other_query in queries[1:]:
             stmt = parser.parse(other_query)[0]
-
-            pprint(str(stmt))
-
             # Check eq operator
             self.assertNotEqual(stmt, ref_stmt)
             self.assertEqual(stmt, stmt)
@@ -173,3 +169,7 @@ class ParserStatementTests(unittest.TestCase):
 
             # Check hash operator
             statement_to_query_dict[stmt] = other_query
+
+
+if __name__ == "__main__":
+    unittest.main()

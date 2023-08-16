@@ -33,6 +33,7 @@ from evadb.catalog.catalog_utils import (
 )
 from evadb.catalog.models.utils import (
     ColumnCatalogEntry,
+    DatabaseCatalogEntry,
     IndexCatalogEntry,
     TableCatalogEntry,
     UdfCacheCatalogEntry,
@@ -45,6 +46,7 @@ from evadb.catalog.models.utils import (
     truncate_catalog_tables,
 )
 from evadb.catalog.services.column_catalog_service import ColumnCatalogService
+from evadb.catalog.services.database_catalog_service import DatabaseCatalogService
 from evadb.catalog.services.index_catalog_service import IndexCatalogService
 from evadb.catalog.services.table_catalog_service import TableCatalogService
 from evadb.catalog.services.udf_cache_catalog_service import UdfCacheCatalogService
@@ -70,6 +72,7 @@ class CatalogManager(object):
         self._sql_config = SQLConfig(db_uri)
         self._config = config
         self._bootstrap_catalog()
+        self._db_catalog_service = DatabaseCatalogService(self._sql_config.session)
         self._table_catalog_service = TableCatalogService(self._sql_config.session)
         self._column_service = ColumnCatalogService(self._sql_config.session)
         self._udf_service = UdfCatalogService(self._sql_config.session)
@@ -131,8 +134,37 @@ class CatalogManager(object):
             engine: engine name
             params: required params as a dictionary for the database
         """
-        self._database_catalog_service.insert_entry(name, engine, params)
+        self._db_catalog_service.insert_entry(name, engine, params)
 
+    def get_database_catalog_entry(self, database_name: str) -> DatabaseCatalogEntry:
+        """
+        Returns the database catalog entry for the given database_name
+        Arguments:
+            database_name (str): name of the database
+
+        Returns:
+            DatabaseCatalogEntry
+        """
+
+        table_entry = self._db_catalog_service.get_entry_by_name(database_name)
+
+        return table_entry
+
+    def delete_database_catalog_entry(
+        self, database_entry: DatabaseCatalogEntry
+    ) -> bool:
+        """
+        This method deletes the database from  catalog.
+
+        Arguments:
+           database_entry: database catalog entry to remove
+
+        Returns:
+           True if successfully deleted else False
+        """
+        # todo: do we need to remove also the associated tables etc or that will be
+        # taken care by the underlying db
+        return self._db_catalog_service.delete_entry(database_entry)
 
     "Table catalog services"
 

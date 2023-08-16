@@ -47,7 +47,7 @@ def execute_query(
         # For certain statements, we plan to omit binder and optimizer to keep the code
         # clean. So, we handle such cases here and pass the statement directly to the
         # executor.
-        if stmt not in SKIP_BINDER_AND_OPTIMIZER_STATEMENTS:
+        if not isinstance(stmt, SKIP_BINDER_AND_OPTIMIZER_STATEMENTS):
             StatementBinder(StatementBinderContext(evadb.catalog)).bind(stmt)
             l_plan = StatementToPlanConverter().visit(stmt)
             p_plan = plan_generator.build(l_plan)

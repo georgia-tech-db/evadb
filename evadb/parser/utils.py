@@ -26,7 +26,7 @@ from evadb.parser.types import ObjectType
 
 # List of statements for which we omit binder and optimizer and pass the statement
 # directly to the executor.
-SKIP_BINDER_AND_OPTIMIZER_STATEMENTS = [CreateDatabaseStatement]
+SKIP_BINDER_AND_OPTIMIZER_STATEMENTS = (CreateDatabaseStatement,)
 
 
 def parse_expression(expr: str):
