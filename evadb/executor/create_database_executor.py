@@ -29,7 +29,7 @@ class CreateDatabaseExecutor(AbstractExecutor):
 
         logger.debug(f"Creating database {self.node}")
 
-        self.catalog().create_and_insert_database_catalog_entry(
+        self.catalog().insert_database_catalog_entry(
             self.node.database_name, self.node.engine, self.node.param_list
         )
 

@@ -121,6 +121,19 @@ class CatalogManager(object):
         # clean up the dataset, index, and cache directories
         cleanup_storage(self._config)
 
+    "Database catalog services"
+
+    def insert_database_catalog_entry(self, name: str, engine: str, params: dict):
+        """A new entry is persisted in the database catalog."
+
+        Args:
+            name: database name
+            engine: engine name
+            params: required params as a dictionary for the database
+        """
+        self._database_catalog_service.insert_entry(name, engine, params)
+
+
     "Table catalog services"
 
     def insert_table_catalog_entry(
