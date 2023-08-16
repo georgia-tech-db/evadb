@@ -15,17 +15,13 @@ executor:
 
   gpu_ids: [0]
 
-storage:
-  tmp_dir: ""
-  s3_download_dir: ""
-
 server:
   host: "0.0.0.0"
   port: 8803
   socket_timeout: 60
 
 experimental:
-  ray: False 
+  ray: False
 
 third_party:
   OPENAI_KEY: ""

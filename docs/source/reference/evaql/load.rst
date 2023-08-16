@@ -27,7 +27,7 @@ LOAD VIDEO FROM S3
    LOAD VIDEO 's3://bucket/dummy.avi' INTO MyVideo;
    LOAD VIDEO 's3://bucket/eva_videos/*.mp4' INTO MyVideos;
 
-The videos are downloaded to a directory that can be configured in the EvaDB configuration file under `storage:s3_download_dir`. The default directory is ``~/.eva/s3_downloads``.
+The videos are downloaded to a directory that can be configured in the EvaDB configuration file under `storage:s3_download_dir`. The default directory is ``evadb_data/s3_downloads``.
 
 .. _3-load-image-from-file:
 

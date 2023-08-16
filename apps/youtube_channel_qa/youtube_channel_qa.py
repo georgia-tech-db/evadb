@@ -98,6 +98,7 @@ def download_youtube_video_transcript(video_link: str):
     title = YouTube(video_link).streams[0].title
     print(f"Video Title : {title}")
     video_id = extract.video_id(video_link)
+    print(f"Video id : {video_id} ")
     transcript = [{}]
     transcript = YouTubeTranscriptApi.get_transcript(video_id)
     transcript.insert(0, {"text": "Title : '" + title + "', Summary : "})
@@ -144,7 +145,7 @@ def generate_online_video_transcript(cursor) -> str:
 
     # bootstrap speech analyzer udf and chatgpt udf for analysis
     args = {"task": "automatic-speech-recognition", "model": "openai/whisper-base"}
-    speech_analyzer_udf_rel = cursor.create_udf(
+    speech_analyzer_udf_rel = cursor.create_function(
         "SpeechRecognizer", type="HuggingFace", **args
     )
     speech_analyzer_udf_rel.execute()
@@ -188,11 +189,13 @@ def generate_response(cursor: evadb.EvaDBCursor, question: str) -> str:
         ORDER BY Similarity(embedding('{question}'), features) DESC
         LIMIT 3;
         """
+
     cursor.query(text_summarization_query).execute()
 
     start = time.time()
+    prompt = "Answer the questions based on context alone. Do no generate responses on your own."
     generate_chatgpt_response_rel = cursor.table("EMBED_TEXT").select(
-        f"ChatGPT('{question}', text)"
+        f"ChatGPT('{question}', text, '{prompt}')"
     )
     responses = generate_chatgpt_response_rel.df()["chatgpt.response"]
     print(f"Answer (generated in {time.time() - start} seconds):")
@@ -337,14 +340,11 @@ if __name__ == "__main__":
 
         print("Creating embeddings and Vector Index")
 
-        cursor.drop_udf("embedding", if_exists=True).execute()
-        cursor.create_udf(
+        cursor.drop_function("embedding", if_exists=True).execute()
+        cursor.create_function(
             "embedding",
             if_not_exists=True,
             impl_path=SENTENCE_FEATURE_EXTRACTOR_UDF_PATH,
-        ).execute()
-        cursor.create_udf(
-            "ChatGPT", if_not_exists=True, impl_path=CHATGPT_UDF_PATH
         ).execute()
 
         cursor.drop_table("embedding_table", if_exists=True).execute()

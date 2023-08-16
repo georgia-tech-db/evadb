@@ -76,7 +76,7 @@ then
     # Non-Windows
     if [[ "$OSTYPE" != "msys" ]];
     then
-        PYTHONPATH=./ pytest --durations=20 --cov-report term-missing:skip-covered  --cov-config=.coveragerc --cov-context=test --cov=evadb/ --capture=sys --tb=short -v -rsf --log-level=WARNING -m "not benchmark"        
+        PYTHONPATH=./ pytest test/ --durations=20 --cov-report term-missing:skip-covered  --cov-config=.coveragerc --cov-context=test --cov=evadb/ --capture=sys --tb=short -v -rsf --log-level=WARNING -m "not benchmark"        
         test_code=$?
         if [ "$test_code" != "0" ];
         then
@@ -105,7 +105,7 @@ fi
 
 if [[ ( "$OSTYPE" != "msys" ) && ( "$MODE" = "NOTEBOOK" || "$MODE" = "ALL" ) ]];
 then 
-    PYTHONPATH=./ python -m pytest --durations=5 --nbmake --overwrite "./tutorials" --capture=sys --tb=short -v --log-level=WARNING --nbmake-timeout=3000 --ignore="tutorials/09-license-plate-fuzzy-join.ipynb" --ignore="tutorials/10-toxicity-classifier-huggingface.ipynb" --ignore="tutorials/11-similarity-search-for-motif-mining.ipynb" 
+    PYTHONPATH=./ python -m pytest --durations=5 --nbmake --overwrite "./tutorials" --capture=sys --tb=short -v --log-level=WARNING --nbmake-timeout=3000 --ignore="tutorials/08-chatgpt.ipynb" 
     notebook_test_code=$?
     if [ "$notebook_test_code" != "0" ];
     then
@@ -123,7 +123,7 @@ fi
 ##################################################
 
 if [[ ( "$PYTHON_VERSION" = "3.10" )  && 
-      ( "$MODE" = "COV" ) ]];
+      ( "$MODE" = "TEST" ) ]];
 then 
     echo "UPLOADING COVERAGE REPORT"
     coveralls

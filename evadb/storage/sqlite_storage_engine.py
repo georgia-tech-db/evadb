@@ -59,14 +59,14 @@ class SQLStorageEngine(AbstractStorageEngine):
                 dict_row[col.name] = dict_row[col.name].tolist()
         return dict_row
 
-    def _sql_row_to_dict(self, sql_row: tuple, columns: List[ColumnCatalogEntry]):
+    def _deserialize_sql_row(self, sql_row: dict, columns: List[ColumnCatalogEntry]):
         # Deserialize numpy data
         dict_row = {}
         for idx, col in enumerate(columns):
             if col.type == ColumnType.NDARRAY:
-                dict_row[col.name] = self._serializer.deserialize(sql_row[idx])
+                dict_row[col.name] = self._serializer.deserialize(sql_row[col.name])
             else:
-                dict_row[col.name] = sql_row[idx]
+                dict_row[col.name] = sql_row[col.name]
         return dict_row
 
     def _try_loading_table_via_reflection(self, table_name: str):
@@ -177,14 +177,15 @@ class SQLStorageEngine(AbstractStorageEngine):
         """
         try:
             table_to_read = self._try_loading_table_via_reflection(table.name)
-            result = self._sql_engine.execute(table_to_read.select())
+            result = self._sql_session.execute(table_to_read.select()).fetchall()
             data_batch = []
             row_size = None
             for row in result:
-                # Todo: Verify the order of columns in row matches the table.columns
                 # For table read, we provide row_id so that user can also retrieve
                 # row_id from the table.
-                data_batch.append(self._sql_row_to_dict(row, table.columns))
+                data_batch.append(
+                    self._deserialize_sql_row(row._asdict(), table.columns)
+                )
                 if row_size is None:
                     row_size = 0
                     row_size = get_size(data_batch)
@@ -200,7 +201,7 @@ class SQLStorageEngine(AbstractStorageEngine):
             raise Exception(err_msg)
 
     def delete(
-        self, table: TableCatalogEntry, sqlalchemy_filter_clause: ColumnElement[bool]
+        self, table: TableCatalogEntry, sqlalchemy_filter_clause: "ColumnElement[bool]"
     ):
         """Delete tuples from the table where rows satisfy the where_clause.
         The current implementation only handles equality predicates.
@@ -212,7 +213,7 @@ class SQLStorageEngine(AbstractStorageEngine):
         try:
             table_to_delete_from = self._try_loading_table_via_reflection(table.name)
             d = table_to_delete_from.delete().where(sqlalchemy_filter_clause)
-            self._sql_engine.execute(d)
+            self._sql_session.execute(d)
             self._sql_session.commit()
         except Exception as e:
             err_msg = (

@@ -41,7 +41,7 @@ from evadb.parser.utils import (
     parse_table_clause,
 )
 from evadb.udfs.udf_bootstrap_queries import init_builtin_udfs
-from evadb.utils.generic_utils import is_ray_enabled_and_installed
+from evadb.utils.generic_utils import find_nearest_word, is_ray_enabled_and_installed
 from evadb.utils.logging_manager import logger
 
 
@@ -137,6 +137,30 @@ class EvaDBCursor(object):
         Auto generate sync function calls from async
         Sync function calls should not be used in an async environment.
         """
+        function_name_list = [
+            "table",
+            "load",
+            "execute",
+            "query",
+            "create_function",
+            "create_table",
+            "create_vector_index",
+            "drop_table",
+            "drop_function",
+            "drop_index",
+            "df",
+            "show",
+            "insert" "explain",
+            "rename",
+            "fetch_one",
+        ]
+
+        if name not in function_name_list:
+            nearest_function = find_nearest_word(name, function_name_list)
+            raise AttributeError(
+                f"EvaDBCursor does not contain a function named: '{name}'. Did you mean to run: '{nearest_function}()'?"
+            )
+
         try:
             func = object.__getattribute__(self, "%s_async" % name)
         except Exception as e:
@@ -215,6 +239,8 @@ class EvaDBCursor(object):
     ) -> "EvaDBCursor":
         """
         Creates a vector index using the provided expr on the table.
+        This feature directly works on IMAGE tables.
+        For VIDEO tables, the feature should be extracted first and stored in an intermediate table, before creating the index.
 
         Args:
             index_name (str): Name of the index.
@@ -294,7 +320,7 @@ class EvaDBCursor(object):
         stmt = parse_drop_table(table_name, if_exists)
         return EvaDBQuery(self._evadb, stmt)
 
-    def drop_udf(self, udf_name: str, if_exists: bool = True) -> "EvaDBQuery":
+    def drop_function(self, udf_name: str, if_exists: bool = True) -> "EvaDBQuery":
         """
         Drop a udf in the database.
 
@@ -308,7 +334,7 @@ class EvaDBCursor(object):
         Examples:
             Drop UDF 'ObjectDetector'
 
-            >>> cursor.drop_udf("ObjectDetector", if_exists = True)
+            >>> cursor.drop_function("ObjectDetector", if_exists = True)
                 0
             0	UDF Successfully dropped: ObjectDetector
         """
@@ -334,13 +360,13 @@ class EvaDBCursor(object):
         stmt = parse_drop_index(index_name, if_exists)
         return EvaDBQuery(self._evadb, stmt)
 
-    def create_udf(
+    def create_function(
         self,
         udf_name: str,
         if_not_exists: bool = True,
         impl_path: str = None,
         type: str = None,
-        **kwargs
+        **kwargs,
     ) -> "EvaDBQuery":
         """
         Create a udf in the database.
@@ -356,7 +382,7 @@ class EvaDBCursor(object):
             EvaDBQuery: The EvaDBQuery object representing the UDF created.
 
         Examples:
-            >>> cursor.create_udf("MnistImageClassifier", if_exists = True, 'mnist_image_classifier.py')
+            >>> cursor.create_function("MnistImageClassifier", if_exists = True, 'mnist_image_classifier.py')
                 0
             0	UDF Successfully created: MnistImageClassifier
         """
@@ -450,7 +476,7 @@ class EvaDBCursor(object):
         Examples:
             >>> proposed_plan = cursor.explain("SELECT * FROM sample_table;").df()
             >>> for step in proposed_plan[0]:
-            >>>   print(step)
+            >>>   pprint(step)
              |__ ProjectPlan
                 |__ SeqScanPlan
                     |__ StoragePlan

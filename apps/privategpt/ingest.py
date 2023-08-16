@@ -23,11 +23,11 @@ def load_data(source_folder_path: str):
     cursor = evadb.connect(path).cursor()
 
     # Drop function if it already exists
-    cursor.drop_udf("embedding").execute()
+    cursor.drop_function("embedding").execute()
 
     # Create function from Python file
     # This function is a sentence feature extractor
-    embedding_udf = cursor.create_udf(
+    embedding_udf = cursor.create_function(
         udf_name="embedding",
         if_not_exists=True,
         impl_path=f"{path}/udfs/sentence_feature_extractor.py",

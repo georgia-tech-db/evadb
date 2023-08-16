@@ -17,11 +17,11 @@ Here is an illustrative UDF for classifying MNIST images.
 
 .. code-block:: bash
 
-    !wget -nc https://raw.githubusercontent.com/georgia-tech-db/eva/master/evadb/udfs/mnist_image_classifier.py
+    !wget -nc https://raw.githubusercontent.com/georgia-tech-db/evadb/master/evadb/udfs/mnist_image_classifier.py
 
 .. code-block:: python
 
-    cursor.create_udf("MnistImageClassifier", True, 'mnist_image_classifier.py')
+    cursor.create_function("MnistImageClassifier", True, 'mnist_image_classifier.py')
     response = cursor.df()
     print(response)
 

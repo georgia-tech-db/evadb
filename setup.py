@@ -22,6 +22,10 @@ AUTHOR = "Georgia Tech Database Group"
 AUTHOR_EMAIL = "arulraj@gatech.edu"
 URL = "https://github.com/georgia-tech-db/eva"
 
+# Check Python version
+# import sys
+# if sys.version_info < (3, 8):
+#     sys.exit("Python 3.8 or later is required.")
 
 def read(path, encoding="utf-8"):
     path = os.path.join(os.path.dirname(__file__), path)
@@ -41,7 +45,7 @@ VERSION = VERSION_DICT["VERSION"]
 minimal_requirements = [
     "numpy>=1.19.5",
     "pandas>=1.1.5",
-    "sqlalchemy>=1.4.0,<2.0.0",  # BREAKING CHANGES IN 2.0.0
+    "sqlalchemy>=2.0.0",
     "sqlalchemy-utils>=0.36.6",
     "lark>=1.0.0",
     "pyyaml>=5.1",
@@ -49,6 +53,7 @@ minimal_requirements = [
     "diskcache>=5.4.0",
     "retry>=0.9.2",
     "psutil",
+    "thefuzz"
 ]
 
 vision_libs = [
@@ -80,10 +85,8 @@ document_libs = [
 
 udf_libs = [
     "facenet-pytorch>=2.5.2",  # FACE DETECTION
-    "thefuzz",  # FUZZY STRING MATCHING
     "pytube",  # YOUTUBE QA APP
     "youtube-transcript-api",  # YOUTUBE QA APP
-    "qdrant-client>=1.1.7",  # QDRANT VECTOR STORE
     "boto3",  # AWS
     "norfair>=2.2.0",  # OBJECT TRACKING
     "kornia",  # SIFT FEATURES
@@ -99,6 +102,14 @@ notebook_libs = [
     "matplotlib>=3.3.4",
     "nbmake>=1.2.1",
     "nest-asyncio>=1.5.6",
+]
+
+qdrant_libs = [
+    "qdrant_client" # cannot install on 3.11 due to grcpio
+]
+
+postgres_libs = [
+    "psycopg2",
 ]
 
 ### NEEDED FOR DEVELOPER TESTING ONLY
@@ -134,8 +145,10 @@ EXTRA_REQUIRES = {
     "document": document_libs,
     "udf": udf_libs,
     "notebook": notebook_libs,
-    "all": vision_libs + document_libs + udf_libs + notebook_libs + ray_libs,
-    "dev": dev_libs + vision_libs + document_libs + udf_libs + notebook_libs + ray_libs,
+    "qdrant": qdrant_libs,
+    "postgres": postgres_libs,
+    # everything except ray, qdrant and postgres
+    "dev": dev_libs + vision_libs + document_libs + udf_libs + notebook_libs,
 }
 
 setup(

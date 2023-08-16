@@ -136,8 +136,6 @@ html_theme_options = {
 external_toc_path = "_toc.yml"  # optional, default: _toc.yml
 external_toc_exclude_missing = False  # optional, default: False
 
-# html_logo = "images/eva/eva-logo.png"
-
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", (None, "python-inv.txt"))
 }

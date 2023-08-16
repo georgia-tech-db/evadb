@@ -45,31 +45,31 @@ class DeleteExecutor(AbstractExecutor):
         left = predicate_node.get_child(0)
         right = predicate_node.get_child(1)
 
-        if type(left) == TupleValueExpression:
+        if isinstance(left, TupleValueExpression):
             column = left.name
             x = table.columns[column]
-        elif type(left) == ConstantValueExpression:
+        elif isinstance(left, ConstantValueExpression):
             value = left.value
             x = value
         else:
             left_filter_clause = self.predicate_node_to_filter_clause(table, left)
 
-        if type(right) == TupleValueExpression:
+        if isinstance(right, TupleValueExpression):
             column = right.name
             y = table.columns[column]
-        elif type(right) == ConstantValueExpression:
+        elif isinstance(right, ConstantValueExpression):
             value = right.value
             y = value
         else:
             right_filter_clause = self.predicate_node_to_filter_clause(table, right)
 
-        if type(predicate_node) == LogicalExpression:
+        if isinstance(predicate_node, LogicalExpression):
             if predicate_node.etype == ExpressionType.LOGICAL_AND:
                 filter_clause = and_(left_filter_clause, right_filter_clause)
             elif predicate_node.etype == ExpressionType.LOGICAL_OR:
                 filter_clause = or_(left_filter_clause, right_filter_clause)
 
-        elif type(predicate_node) == ComparisonExpression:
+        elif isinstance(predicate_node, ComparisonExpression):
             assert (
                 predicate_node.etype != ExpressionType.COMPARE_CONTAINS
                 and predicate_node.etype != ExpressionType.COMPARE_IS_CONTAINED

@@ -24,6 +24,11 @@ asyncio_skip_marker = pytest.mark.skipif(
     sys.version_info < (3, 8), reason="Test case requires asyncio support"
 )
 
+qdrant_skip_marker = pytest.mark.skipif(
+    sys.version_info.minor == 11,
+    reason="qdrant requires grcpio which is broken on 3.11",
+)
+
 windows_skip_marker = pytest.mark.skipif(
     sys.platform == "win32", reason="Test case not supported on Windows"
 )
@@ -55,4 +60,8 @@ ocr_skip_marker = pytest.mark.skip(
 
 gpu_skip_marker = pytest.mark.skipif(
     is_gpu_available() is False, reason="Run only if gpu is available"
+)
+
+chatgpt_skip_marker = pytest.mark.skip(
+    reason="requires chatgpt",
 )

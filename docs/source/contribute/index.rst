@@ -3,9 +3,9 @@ Contributing
 
 We welcome all kinds of contributions to EvaDB.
 
--  `Code reviews <https://github.com/georgia-tech-db/eva/pulls>`_
--  `Improving documentation <https://github.com/georgia-tech-db/eva/tree/master/docs>`_
--  `Tutorials and applications <https://github.com/georgia-tech-db/eva/tree/master/tutorials>`_
+-  `Code reviews <https://github.com/georgia-tech-db/evadb/pulls>`_
+-  `Improving documentation <https://github.com/georgia-tech-db/evadb/tree/master/docs>`_
+-  `Tutorials and applications <https://github.com/georgia-tech-db/evadb/tree/master/tutorials>`_
 -  New features
 
 Setting up the Development Environment
@@ -16,7 +16,7 @@ the source. Follow the following instructions to build EvaDB locally. We recomme
 
 .. code-block:: bash
 
-   git clone https://github.com/georgia-tech-db/eva.git && cd eva
+   git clone https://github.com/georgia-tech-db/evadb.git && cd evadb
    python3 -m venv test_evadb       # create a virtual environment
    source test_evadb/bin/activate   # activate the virtual environment
    pip install --upgrade pip         # upgrade pip
@@ -63,12 +63,12 @@ Follow the following steps to contribute to EvaDB:
 
 .. code-block:: bash
 
-       git remote add origin git@github.com:georgia-tech-db/eva.git
+       git remote add origin git@github.com:georgia-tech-db/evadb.git
        git pull . origin/master
 
 -  Run the `test script <#testing>`__ to ensure that all the test cases pass.
 -  If you are adding a new EvaDB command, add an illustrative example usage in 
-   the `documentation <https://github.com/georgia-tech-db/eva/tree/master/docs>`_.
+   the `documentation <https://github.com/georgia-tech-db/evadb/tree/master/docs>`_.
 - Run the following command to ensure that code is properly formatted.
 
 .. code-block:: python
@@ -108,16 +108,16 @@ We recommend using Visual Studio Code with a debugger for developing EvaDB. Here
 3. Follow these instructions to run a particular test case from the file:
 `Getting started <https://github.com/kondratyev-nv/vscode-python-test-adapter#getting-started>`__.
 
-.. image:: images/eva-debug-1.jpg
+.. image:: images/evadb-debug-1.jpg
    :width: 1200
 
-.. image:: images/eva-debug-2.jpg
+.. image:: images/evadb-debug-2.jpg
    :width: 1200
 
 Architecture Diagram
 ====
 
-.. image:: ../../images/eva/eva-arch.png
+.. image:: ../../images/evadb/evadb-arch.png
    :width: 1200
 
 Troubleshooting

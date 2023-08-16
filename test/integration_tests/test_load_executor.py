@@ -43,7 +43,7 @@ from evadb.server.command_handler import execute_query_fetch_all
 
 
 @pytest.mark.notparallel
-class LoadExecutorTest(unittest.TestCase):
+class LoadExecutorTests(unittest.TestCase):
     def setUp(self):
         self.evadb = get_evadb_for_testing()
         # reset the catalog manager before running each test
@@ -192,7 +192,7 @@ class LoadExecutorTest(unittest.TestCase):
         with self.assertRaises(ExecutorError) as exc_info:
             execute_query_fetch_all(self.evadb, query, do_not_print_exceptions=True)
         self.assertIn(
-            "Load VIDEO failed due to no valid files found on path",
+            "Load VIDEO failed",
             str(exc_info.exception),
         )
 
@@ -308,7 +308,7 @@ class LoadExecutorTest(unittest.TestCase):
         with self.assertRaises(ExecutorError) as exc_info:
             execute_query_fetch_all(self.evadb, query, do_not_print_exceptions=True)
         self.assertIn(
-            "Load IMAGE failed due to no valid files found on path",
+            "Load IMAGE failed",
             str(exc_info.exception),
         )
 

@@ -4,7 +4,7 @@ Getting Started
 Step 1: Install EvaDB
 ----
 
-EvaDB supports Python (versions >= ``3.8`` and <= ``3.10``). To install EvaDB, we recommend using the ``pip`` package manager:
+EvaDB supports Python (versions >= ``3.8``). To install EvaDB, we recommend using the ``pip`` package manager:
 
 .. code-block:: bash
 
@@ -44,6 +44,6 @@ Here is an `illustrative MNIST digit classification app <https://evadb.readthedo
     # Only calling query.df() will run the query
     response = query.df()
 
-The notebook works on `Google Colab <https://colab.research.google.com/github/georgia-tech-db/eva/blob/master/tutorials/01-mnist.ipynb>`_. 
+The notebook works on `Google Colab <https://colab.research.google.com/github/georgia-tech-db/evadb/blob/master/tutorials/01-mnist.ipynb>`_. 
 
 .. image:: ../../images/reference/mnist.png
