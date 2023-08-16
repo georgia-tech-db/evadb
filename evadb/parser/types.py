@@ -39,6 +39,7 @@ class StatementType(EvaDBEnum):
     SHOW  # noqa: F821
     EXPLAIN  # noqa: F821
     CREATE_INDEX  # noqa: F821
+    CREATE_DATABASE  # noqa: F821
     # add other types
 
 
