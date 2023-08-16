@@ -38,7 +38,7 @@ class TextPickleType(TypeDecorator):
     https://stackoverflow.com/questions/1378325/python-dicts-in-sqlalchemy
     """
 
-    impl = sqlalchemy.Text(1024)
+    impl = sqlalchemy.String(1024)
 
     def process_bind_param(self, value, dialect):
         if value is not None:
