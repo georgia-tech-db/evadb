@@ -23,6 +23,7 @@ from evadb.models.storage.batch import Batch
 from evadb.optimizer.plan_generator import PlanGenerator
 from evadb.optimizer.statement_to_opr_converter import StatementToPlanConverter
 from evadb.parser.parser import Parser
+from evadb.parser.utils import SKIP_BINDER_AND_OPTIMIZER_STATEMENTS
 from evadb.utils.logging_manager import logger
 from evadb.utils.stats import Timer
 
@@ -42,9 +43,16 @@ def execute_query(
     plan_generator = kwargs.pop("plan_generator", PlanGenerator(evadb))
     with query_compile_time:
         stmt = Parser().parse(query)[0]
-        StatementBinder(StatementBinderContext(evadb.catalog)).bind(stmt)
-        l_plan = StatementToPlanConverter().visit(stmt)
-        p_plan = plan_generator.build(l_plan)
+
+        # For certain statements, we plan to omit binder and optimizer to keep the code
+        # clean. So, we handle such cases here and pass the statement directly to the
+        # executor.
+        if not isinstance(stmt, SKIP_BINDER_AND_OPTIMIZER_STATEMENTS):
+            StatementBinder(StatementBinderContext(evadb.catalog)).bind(stmt)
+            l_plan = StatementToPlanConverter().visit(stmt)
+            p_plan = plan_generator.build(l_plan)
+        else:
+            p_plan = stmt
         output = PlanExecutor(evadb, p_plan).execute_plan(
             do_not_raise_exceptions, do_not_print_exceptions
         )

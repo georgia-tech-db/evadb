@@ -26,6 +26,7 @@ IDENTIFIER_COLUMN = "_row_id"
 CATALOG_TABLES = [
     "column_catalog",
     "table_catalog",
+    "database_catalog",
     "depend_column_and_udf_cache",
     "udf_cache",
     "udf_catalog",

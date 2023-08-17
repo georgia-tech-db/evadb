@@ -16,7 +16,13 @@ utility_statement: describe_statement | show_statement | help_statement | explai
 
 //    Create statements
 
-create_database: CREATE DATABASE if_not_exists? uid
+create_database: CREATE DATABASE if_not_exists? uid create_database_engine_clause
+
+colon_param: string_literal ":" string_literal
+
+colon_param_dict: LR_CURLY_BRACKET colon_param ("," colon_param)* RR_CURLY_BRACKET
+
+create_database_engine_clause: WITH ENGINE "=" string_literal "," PARAMETERS "=" colon_param_dict 
 
 create_index: CREATE INDEX uid ON table_name index_elem vector_store_type?
 
@@ -320,6 +326,7 @@ DESC:                                "DESC"i
 DESCRIBE:                            "DESCRIBE"i
 DISTINCT:                            "DISTINCT"i
 DROP:                                "DROP"i
+ENGINE:                              "ENGINE"i
 EXIT:                                "EXIT"i
 EXISTS:                              "EXISTS"i
 EXPLAIN:                             "EXPLAIN"i
@@ -349,6 +356,7 @@ ON:                                  "ON"i
 OR:                                  "OR"i
 ORDER:                               "ORDER"i
 PATH:                                "PATH"i
+PARAMETERS:                          "PARAMETERS"i
 PRIMARY:                             "PRIMARY"i
 REFERENCES:                          "REFERENCES"i
 RENAME:                              "RENAME"i
@@ -501,6 +509,8 @@ LR_BRACKET:                          "("
 RR_BRACKET:                          ")"
 LR_SQ_BRACKET:                       "["
 RR_SQ_BRACKET:                       "]"
+LR_CURLY_BRACKET:                    "{"
+RR_CURLY_BRACKET:                    "}"
 COMMA:                               ","
 SEMI:                                ";"
 AT_SIGN:                             "@"

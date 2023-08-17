@@ -13,11 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import contextlib
+import json
 from dataclasses import dataclass, field
 from typing import List, Tuple
 
 import sqlalchemy
 from sqlalchemy.engine import Engine
+from sqlalchemy.types import TypeDecorator
 from sqlalchemy_utils import create_database, database_exists
 
 from evadb.catalog.catalog_type import (
@@ -29,6 +31,25 @@ from evadb.catalog.catalog_type import (
 from evadb.catalog.models.base_model import BaseModel
 from evadb.catalog.sql_config import CATALOG_TABLES
 from evadb.utils.logging_manager import logger
+
+
+class TextPickleType(TypeDecorator):
+    """Used to handle serialization and deserialization to Text
+    https://stackoverflow.com/questions/1378325/python-dicts-in-sqlalchemy
+    """
+
+    impl = sqlalchemy.String(1024)
+
+    def process_bind_param(self, value, dialect):
+        if value is not None:
+            value = json.dumps(value)
+
+        return value
+
+    def process_result_value(self, value, dialect):
+        if value is not None:
+            value = json.loads(value)
+        return value
 
 
 def init_db(engine: Engine):
@@ -208,4 +229,23 @@ class UdfCatalogEntry:
             "type": self.type,
             "impl": self.impl_file_path,
             "metadata": self.metadata,
+        }
+
+
+@dataclass(unsafe_hash=True)
+class DatabaseCatalogEntry:
+    """Dataclass representing an entry in the `DatabaseCatalog`.
+    This is done to ensure we don't expose the sqlalchemy dependencies beyond catalog service. Further, sqlalchemy does not allow sharing of objects across threads.
+    """
+
+    name: str
+    engine: str
+    params: dict
+    row_id: int = None
+
+    def display_format(self):
+        return {
+            "name": self.name,
+            "engine": self.engine,
+            "params": self.params,
         }

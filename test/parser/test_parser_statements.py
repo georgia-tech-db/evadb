@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from pprint import pprint
 
 from evadb.parser.parser import Parser
 
@@ -139,6 +138,16 @@ class ParserStatementTests(unittest.TestCase):
                 Type FaceDetection
                 Impl 'evadb/udfs/face_detector.py';
             """,
+            """CREATE DATABASE example_db
+                WITH ENGINE = "postgres",
+                PARAMETERS = {
+                    "user": "demo_user",
+                    "password": "demo_password",
+                    "host": "3.220.66.106",
+                    "port": "5432",
+                    "database": "demo"
+                };
+            """,
         ]
         queries = queries + randomized_cases
         ref_stmt = parser.parse(queries[0])[0]
@@ -150,9 +159,6 @@ class ParserStatementTests(unittest.TestCase):
 
         for other_query in queries[1:]:
             stmt = parser.parse(other_query)[0]
-
-            pprint(str(stmt))
-
             # Check eq operator
             self.assertNotEqual(stmt, ref_stmt)
             self.assertEqual(stmt, stmt)
@@ -163,3 +169,7 @@ class ParserStatementTests(unittest.TestCase):
 
             # Check hash operator
             statement_to_query_dict[stmt] = other_query
+
+
+if __name__ == "__main__":
+    unittest.main()

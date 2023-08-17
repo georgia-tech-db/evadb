@@ -12,11 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Iterator
+from typing import Iterator, Union
 
 from evadb.database import EvaDBDatabase
 from evadb.executor.abstract_executor import AbstractExecutor
 from evadb.executor.apply_and_merge_executor import ApplyAndMergeExecutor
+from evadb.executor.create_database_executor import CreateDatabaseExecutor
 from evadb.executor.create_executor import CreateExecutor
 from evadb.executor.create_index_executor import CreateIndexExecutor
 from evadb.executor.create_udf_executor import CreateUDFExecutor
@@ -46,6 +47,8 @@ from evadb.executor.storage_executor import StorageExecutor
 from evadb.executor.union_executor import UnionExecutor
 from evadb.executor.vector_index_scan_executor import VectorIndexScanExecutor
 from evadb.models.storage.batch import Batch
+from evadb.parser.create_statement import CreateDatabaseStatement
+from evadb.parser.statement import AbstractStatement
 from evadb.plan_nodes.abstract_plan import AbstractPlan
 from evadb.plan_nodes.types import PlanOprType
 from evadb.utils.logging_manager import logger
@@ -65,7 +68,9 @@ class PlanExecutor:
         self._db = evadb
         self._plan = plan
 
-    def _build_execution_tree(self, plan: AbstractPlan) -> AbstractExecutor:
+    def _build_execution_tree(
+        self, plan: Union[AbstractPlan, AbstractStatement]
+    ) -> AbstractExecutor:
         """build the execution tree from plan tree
 
         Arguments:
@@ -77,6 +82,10 @@ class PlanExecutor:
         root = None
         if plan is None:
             return root
+
+        # First handle cases when the plan is actually a parser statement
+        if isinstance(plan, CreateDatabaseStatement):
+            return CreateDatabaseExecutor(db=self._db, node=plan)
 
         # Get plan node type
         plan_opr_type = plan.opr_type
