@@ -294,9 +294,7 @@ class StatementBinder:
                 "GenericLudwigModel",
             )
             udf_metadata = get_metadata_properties(udf_obj)
-            assert (
-                "model_path" in udf_metadata
-            ), "Ludwig models expect 'model_path'."
+            assert "model_path" in udf_metadata, "Ludwig models expect 'model_path'."
             node.function = lambda: udf_class(model_path=udf_metadata["model_path"])
 
         else:
