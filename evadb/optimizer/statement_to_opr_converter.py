@@ -273,7 +273,7 @@ class StatementToPlanConverter:
             statement.udf_type,
             annotated_metadata,
         )
-        
+
         if statement.query is not None:
             self.visit_select(statement.query)
             create_udf_opr.append_child(self._plan)

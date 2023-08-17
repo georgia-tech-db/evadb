@@ -23,10 +23,10 @@ from evadb.configuration.constants import (
     CACHE_DIR,
     DB_DEFAULT_NAME,
     INDEX_DIR,
+    MODEL_DIR,
     S3_DOWNLOAD_DIR,
     TMP_DIR,
     UDF_DIR,
-    MODEL_DIR,
     EvaDB_CONFIG_FILE,
     EvaDB_DATASET_DIR,
 )

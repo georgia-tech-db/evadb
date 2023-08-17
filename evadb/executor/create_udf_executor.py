@@ -12,10 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
 from pathlib import Path
 from typing import Dict, List
 
-import os
 import pandas as pd
 
 from evadb.catalog.catalog_utils import get_metadata_properties
@@ -32,9 +32,9 @@ from evadb.udfs.decorators.utils import load_io_from_udf_decorators
 from evadb.utils.errors import UDFIODefinitionError
 from evadb.utils.generic_utils import (
     load_udf_class_from_file,
+    try_to_import_ludwig,
     try_to_import_torch,
     try_to_import_ultralytics,
-    try_to_import_ludwig,
 )
 from evadb.utils.logging_manager import logger
 
@@ -69,8 +69,8 @@ class CreateUDFExecutor(AbstractExecutor):
         Use ludwig's auto_train engine to train/tune models. 
         """
         try_to_import_ludwig()
-        from ludwig.automl import auto_train
         from evadb.configuration.constants import DEFAULT_TRAIN_TIME_LIMIT
+        from ludwig.automl import auto_train
 
         assert (
             len(self.children) == 1
@@ -90,7 +90,7 @@ class CreateUDFExecutor(AbstractExecutor):
             "predict" in arg_map        
         ), "Create ludwig UDF expects 'predict' metadata."
         auto_train_results = auto_train(
-            dataset=aggregated_batch.frames
+            dataset=aggregated_batch.frames,
             target = arg_map["predict"],
             tune_for_memory=arg_map.get("tune_for_memory", False),
             time_limit_s=arg_map.get("time_limit", DEFAULT_TRAIN_TIME_LIMIT),

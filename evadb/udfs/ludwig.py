@@ -14,14 +14,11 @@
 # limitations under the License.
 import pandas as pd
 
-from evadb.catalog.catalog_type import NdArrayType
 from evadb.udfs.abstract.abstract_udf import AbstractUDF
-from evadb.udfs.decorators.decorators import forward, setup
 from evadb.utils.generic_utils import try_to_import_ludwig
 
 
 class GenericLudwigModel(AbstractUDF):
-
     @property
     def name(self) -> str:
         return "GenericLudwigModel"
@@ -33,9 +30,8 @@ class GenericLudwigModel(AbstractUDF):
         self.model = LudwigModel.load(model_path)
 
     def forward(self, frames: pd.DataFrame) -> pd.DataFrame:
-        predictions, _ = self.model.predict(frames) 
+        predictions, _ = self.model.predict(frames)
         return predictions
-        
 
     def to_device(self, device: str):
         # TODO figure out how to control the GPU for ludwig models
