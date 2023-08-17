@@ -64,9 +64,9 @@ class CreateUDFExecutor(AbstractExecutor):
         )
 
     def handle_ludwig_udf(self):
-        """Handle ludwig UDFs 
+        """Handle ludwig UDFs
 
-        Use ludwig's auto_train engine to train/tune models. 
+        Use ludwig's auto_train engine to train/tune models.
         """
         try_to_import_ludwig()
         from evadb.configuration.constants import DEFAULT_TRAIN_TIME_LIMIT
@@ -74,11 +74,9 @@ class CreateUDFExecutor(AbstractExecutor):
 
         assert (
             len(self.children) == 1
-        ), "Create ludwig UDF expects 1 child, finds {}.".format(
-            len(self.children)
-        )
+        ), "Create ludwig UDF expects 1 child, finds {}.".format(len(self.children))
 
-        aggregated_batch_list = [] 
+        aggregated_batch_list = []
         child = self.children[0]
         for batch in child.exec():
             aggregated_batch_list.append(batch)
@@ -86,26 +84,21 @@ class CreateUDFExecutor(AbstractExecutor):
         aggregated_batch.drop_column_alias()
 
         arg_map = {arg.key: arg.value for arg in self.node.metadata}
-        assert (
-            "predict" in arg_map        
-        ), "Create ludwig UDF expects 'predict' metadata."
+        assert "predict" in arg_map, "Create ludwig UDF expects 'predict' metadata."
         auto_train_results = auto_train(
             dataset=aggregated_batch.frames,
-            target = arg_map["predict"],
+            target=arg_map["predict"],
             tune_for_memory=arg_map.get("tune_for_memory", False),
             time_limit_s=arg_map.get("time_limit", DEFAULT_TRAIN_TIME_LIMIT),
-            output_directory = self.db.config.get_value("storage", "tmp_dir")
+            output_directory=self.db.config.get_value("storage", "tmp_dir"),
         )
         model_path = os.path.join(
-            self.db.config.get_value("storage", "model_dir"),
-            self.node.name
+            self.db.config.get_value("storage", "model_dir"), self.node.name
         )
         auto_train_results.best_model.save(model_path)
-        self.node.metadata.append(UdfMetadataCatalogEntry("model_path": model_path))
+        self.node.metadata.append(UdfMetadataCatalogEntry("model_path", model_path))
 
-        impl_path = (
-            Path(f"{self.udf_dir}/ludwig.py").absolute().as_posix()
-        )
+        impl_path = Path(f"{self.udf_dir}/ludwig.py").absolute().as_posix()
         # TODO figure out the io
         io_list = None
         return (
