@@ -283,6 +283,20 @@ def is_ray_enabled_and_installed(ray_enabled: bool) -> bool:
 
 
 ##############################
+## MODEL TRAIN FRAMEWORK
+##############################
+
+def try_to_import_ludwig():
+    try:
+        import ludwig
+        from ludwig.automl import auto_train
+    except ImportError:
+        raise ValueError(
+            """Could not import ludwig.
+                Please install it with `pip install ludwig[full]`."""
+        )
+
+##############################
 ## VISION
 ##############################
 

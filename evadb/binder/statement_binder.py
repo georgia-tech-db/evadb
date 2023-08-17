@@ -35,6 +35,7 @@ from evadb.expression.function_expression import FunctionExpression
 from evadb.expression.tuple_value_expression import TupleValueExpression
 from evadb.parser.create_index_statement import CreateIndexStatement
 from evadb.parser.create_statement import ColumnDefinition, CreateTableStatement
+from evadb.parser.create_udf_statement import CreateUDFStatement 
 from evadb.parser.delete_statement import DeleteTableStatement
 from evadb.parser.explain_statement import ExplainStatement
 from evadb.parser.rename_statement import RenameTableStatement
@@ -68,6 +69,11 @@ class StatementBinder:
     @bind.register(ExplainStatement)
     def _bind_explain_statement(self, node: ExplainStatement):
         self.bind(node.explainable_stmt)
+
+    @bind.register(CreateUDFStatement)
+    def _bind_create_udf_statement(self, node: CreateUDFStatement):
+        if node.query is not None:
+            self.bind(node.query)
 
     @bind.register(CreateIndexStatement)
     def _bind_create_index_statement(self, node: CreateIndexStatement):
@@ -281,6 +287,18 @@ class StatementBinder:
 
         if udf_obj.type == "HuggingFace":
             node.function = assign_hf_udf(udf_obj)
+        
+        elif udf_obj.type == "Ludwig":
+            udf_class = load_udf_class_from_file(
+                udf_obj.impl_file_path,
+                "GenericLudwigModel",
+            )
+            udf_metadata = get_metadata_properties(udf_obj)
+            assert (
+                "model_path" in udf_metadata, 
+                "Ludwig models expect 'model_path'."
+            )
+            node.function = lambda: udf_class(model_path=udf_metadata["model_path"])
 
         else:
             if udf_obj.type == "ultralytics":

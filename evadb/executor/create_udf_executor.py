@@ -15,11 +15,13 @@
 from pathlib import Path
 from typing import Dict, List
 
+import os
 import pandas as pd
 
 from evadb.catalog.catalog_utils import get_metadata_properties
 from evadb.catalog.models.udf_catalog import UdfCatalogEntry
 from evadb.catalog.models.udf_io_catalog import UdfIOCatalogEntry
+from evadb.catalog.models.udf_metadata_catalog import UdfMetadataCatalogEntry
 from evadb.configuration.constants import EvaDB_INSTALLATION_DIR
 from evadb.database import EvaDBDatabase
 from evadb.executor.abstract_executor import AbstractExecutor
@@ -32,6 +34,7 @@ from evadb.utils.generic_utils import (
     load_udf_class_from_file,
     try_to_import_torch,
     try_to_import_ultralytics,
+    try_to_import_ludwig,
 )
 from evadb.utils.logging_manager import logger
 
@@ -52,6 +55,59 @@ class CreateUDFExecutor(AbstractExecutor):
         try_to_import_torch()
         impl_path = f"{self.udf_dir}/abstract/hf_abstract_udf.py"
         io_list = gen_hf_io_catalog_entries(self.node.name, self.node.metadata)
+        return (
+            self.node.name,
+            impl_path,
+            self.node.udf_type,
+            io_list,
+            self.node.metadata,
+        )
+
+    def handle_ludwig_udf(self):
+        """Handle ludwig UDFs 
+
+        Use ludwig's auto_train engine to train/tune models. 
+        """
+        try_to_import_ludwig()
+        from ludwig.automl import auto_train
+        from evadb.configuration.constants import DEFAULT_TRAIN_TIME_LIMIT
+
+        assert (
+            len(self.children) == 1
+        ), "Create ludwig UDF expects 1 child, finds {}.".format(
+            len(self.children)
+        )
+
+        aggregated_batch_list = [] 
+        child = self.children[0]
+        for batch in child.exec():
+            aggregated_batch_list.append(batch)
+        aggregated_batch = Batch.concat(aggregated_batch_list, copy=False)
+        aggregated_batch.drop_column_alias()
+
+        arg_map = {arg.key: arg.value for arg in self.node.metadata}
+        assert (
+            "predict" in arg_map        
+        ), "Create ludwig UDF expects 'predict' metadata."
+        auto_train_results = auto_train(
+            dataset=aggregated_batch.frames
+            target = arg_map["predict"],
+            tune_for_memory=arg_map.get("tune_for_memory", False),
+            time_limit_s=arg_map.get("time_limit", DEFAULT_TRAIN_TIME_LIMIT),
+            output_directory = self.db.config.get_value("storage", "tmp_dir")
+        )
+        model_path = os.path.join(
+            self.db.config.get_value("storage", "model_dir"),
+            self.node.name
+        )
+        auto_train_results.best_model.save(model_path)
+        self.node.metadata.append(UdfMetadataCatalogEntry("model_path": model_path))
+
+        impl_path = (
+            Path(f"{self.udf_dir}/ludwig.py").absolute().as_posix()
+        )
+        # TODO figure out the io
+        io_list = None
         return (
             self.node.name,
             impl_path,
@@ -117,6 +173,8 @@ class CreateUDFExecutor(AbstractExecutor):
             name, impl_path, udf_type, io_list, metadata = self.handle_huggingface_udf()
         elif self.node.udf_type == "ultralytics":
             name, impl_path, udf_type, io_list, metadata = self.handle_ultralytics_udf()
+        elif self.node.udf_type == "ludwig":
+            name, impl_path, udf_type, io_list, metadata = self.handle_ludwig_udf()
         else:
             name, impl_path, udf_type, io_list, metadata = self.handle_generic_udf()
 
