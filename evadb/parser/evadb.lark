@@ -176,7 +176,7 @@ explainable_statement : select_statement | insert_statement | update_statement |
 
 // Context Statements
 
-use_statement: USE database_name "(" query_string ")" // One shortcoming that query string cannot have parenthesis
+use_statement: USE database_name "{" query_string "}" // One shortcoming that query string cannot have parenthesis
 
 // Common Clauses
 
@@ -567,7 +567,7 @@ ID_LITERAL:                 /[A-Za-z_$0-9]*?[A-Za-z_$]+?[A-Za-z_$0-9]*/
 DQUOTA_STRING:              /"[^";]*"/
 SQUOTA_STRING:              /'[^';]*'/
 BQUOTA_STRING:              /`[^'`]*`/
-QUERY_STRING:               /[^();]+/
+QUERY_STRING:               /[^{};]+/
 DEC_DIGIT:                  /[0-9]/
 
 // LARK

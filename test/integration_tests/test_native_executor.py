@@ -31,7 +31,62 @@ class NativeExecutorTest(unittest.TestCase):
         shutdown_ray()
 
     def test_should_run_simple_query_in_sqlalchemy(self):
+        # Create database.
+        params = {
+            "user": "eva",
+            "password": "password",
+            "host": "127.0.0.1",
+            "port": "5432",
+            "database": "test",
+        }
+        query = """CREATE DATABASE postgres_data
+                    WITH ENGINE = "postgres",
+                    PARAMETERS = {};""".format(
+            params
+        )
+        execute_query_fetch_all(self.evadb, query)
+
+        # Create table.
         execute_query_fetch_all(
             self.evadb,
-            "USE DemoDB (SELECT * FROM table);",
+            """USE postgres_data {
+                CREATE TABLE test_table (
+                    name VARCHAR(10),
+                    age INT,
+                    comment VARCHAR(100)
+                )
+            };""",
+        )
+        execute_query_fetch_all(
+            self.evadb,
+            """USE postgres_data {
+                INSERT INTO test_table (
+                    name, age, comment
+                ) VALUES (
+                    'aa', 1, 'aaaa'
+                )
+            }
+            """,
+        )
+
+        # Select.
+        res_batch = execute_query_fetch_all(
+            self.evadb,
+            """USE postgres_data {
+                SELECT * FROM test_table
+            }
+            """,
+        )
+        self.assertEqual(len(res_batch), 1)
+        self.assertEqual(res_batch.frames["name"][0], "aa")
+        self.assertEqual(res_batch.frames["age"][0], 1)
+        self.assertEqual(res_batch.frames["comment"][0], "aaaa")
+
+        # DROP table.
+        execute_query_fetch_all(
+            self.evadb,
+            """USE postgres_data {
+                DROP TABLE test_table
+            }
+            """,
         )

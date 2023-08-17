@@ -63,7 +63,7 @@ class ParserTests(unittest.TestCase):
         ]
 
         for query in query_list:
-            use_query = f"USE DemoDB ({query});"
+            use_query = f"USE DemoDB {{{query}}};"
             evadb_stmt_list = parser.parse(use_query)
 
             # check stmt itself
@@ -73,7 +73,6 @@ class ParserTests(unittest.TestCase):
 
             expected_stmt = UseStatement("DemoDB", query)
             actual_stmt = evadb_stmt_list[0]
-            print(actual_stmt.query_string, expected_stmt.query_string)
             self.assertEqual(actual_stmt, expected_stmt)
 
     def test_create_index_statement(self):

@@ -14,6 +14,10 @@
 # limitations under the License.
 from typing import Iterator
 
+import pandas as pd
+from sqlalchemy import create_engine
+
+from evadb.catalog.catalog_utils import generate_sqlalchemy_conn_str
 from evadb.database import EvaDBDatabase
 from evadb.executor.abstract_executor import AbstractExecutor
 from evadb.models.storage.batch import Batch
@@ -31,7 +35,20 @@ class SQLAlchemyExecutor(AbstractExecutor):
         self._query_string = node.query_string
 
     def exec(self, *args, **kwargs) -> Iterator[Batch]:
-        print(self._query_string)
-        import pandas as pd
+        db_catalog_entry = self.db.catalog().get_database_catalog_entry(
+            self._database_name
+        )
 
-        yield Batch(pd.DataFrame({"status": ["Ok"]}))
+        conn_str = generate_sqlalchemy_conn_str(
+            db_catalog_entry.engine,
+            db_catalog_entry.params,
+        )
+
+        engine = create_engine(conn_str)
+
+        with engine.connect() as con:
+            if "SELECT" in self._query_string or "select" in self._query_string:
+                yield Batch(pd.read_sql(self._query_string, engine))
+            else:
+                con.execute(self._query_string)
+                yield Batch(pd.DataFrame({"status": ["Ok"]}))
