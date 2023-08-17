@@ -46,6 +46,7 @@ from evadb.executor.show_info_executor import ShowInfoExecutor
 from evadb.executor.storage_executor import StorageExecutor
 from evadb.executor.union_executor import UnionExecutor
 from evadb.executor.vector_index_scan_executor import VectorIndexScanExecutor
+from evadb.executor.sqlalchemy_executor import SQLAlchemyExecutor
 from evadb.models.storage.batch import Batch
 from evadb.parser.create_statement import CreateDatabaseStatement
 from evadb.parser.statement import AbstractStatement
@@ -152,6 +153,8 @@ class PlanExecutor:
             executor_node = VectorIndexScanExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.DELETE:
             executor_node = DeleteExecutor(db=self._db, node=plan)
+        elif plan_opr_type == PlanOprType.SQLALCHEMY:
+            executor_node = SQLAlchemyExecutor(db=self._db, node=plan)
 
         # EXPLAIN does not need to build execution tree for its children
         if plan_opr_type != PlanOprType.EXPLAIN:

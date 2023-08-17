@@ -36,6 +36,7 @@ from evadb.optimizer.operators import (
     LogicalSample,
     LogicalShow,
     LogicalUnion,
+    LogicalUse,
 )
 from evadb.optimizer.optimizer_utils import (
     column_definition_to_udf_io,
@@ -53,6 +54,7 @@ from evadb.parser.rename_statement import RenameTableStatement
 from evadb.parser.select_statement import SelectStatement
 from evadb.parser.show_statement import ShowStatement
 from evadb.parser.statement import AbstractStatement
+from evadb.parser.use_statement import UseStatement
 from evadb.parser.table_ref import TableRef
 from evadb.parser.types import UDFType
 from evadb.utils.logging_manager import logger
@@ -318,6 +320,13 @@ class StatementToPlanConverter:
         )
         self._plan = delete_opr
 
+    def visit_use(self, statement: UseStatement):
+        use_opr = LogicalUse(
+            statement.database_name,
+            statement.query_string,
+        )
+        self._plan = use_opr
+
     def visit(self, statement: AbstractStatement):
         """Based on the instance of the statement the corresponding
            visit is called.
@@ -348,6 +357,8 @@ class StatementToPlanConverter:
             self.visit_create_index(statement)
         elif isinstance(statement, DeleteTableStatement):
             self.visit_delete(statement)
+        elif isinstance(statement, UseStatement):
+            self.visit_use(statement)
         return self._plan
 
     @property

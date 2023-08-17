@@ -62,6 +62,7 @@ class OperatorType(IntEnum):
     LOGICAL_APPLY_AND_MERGE = auto()
     LOGICAL_EXTRACT_OBJECT = auto()
     LOGICAL_VECTOR_INDEX_SCAN = auto()
+    LOGICAL_USE = auto()
     LOGICALDELIMITER = auto()
 
 
@@ -1237,5 +1238,39 @@ class LogicalVectorIndexScan(Operator):
                 self.vector_store_type,
                 self.limit_count,
                 self.search_query_expr,
+            )
+        )
+
+
+class LogicalUse(Operator):
+    def __init__(self, database_name: str, query_string: str, children: List = None):
+        super().__init__(OperatorType.LOGICAL_USE, children)
+        self._database_name = database_name
+        self._query_string = query_string
+
+    @property
+    def database_name(self):
+        return self._database_name
+
+    @property
+    def query_string(self):
+        return self._query_string
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalUse):
+            return False
+        return (
+            is_subtree_equal
+            and self.database_name == other.database_name
+            and self.query_string == other.query_string
+        )
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                super().__hash__(),
+                self.database_name,
+                self.query_string,
             )
         )

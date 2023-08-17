@@ -47,6 +47,7 @@ from evadb.plan_nodes.nested_loop_join_plan import NestedLoopJoinPlan
 from evadb.plan_nodes.predicate_plan import PredicatePlan
 from evadb.plan_nodes.project_plan import ProjectPlan
 from evadb.plan_nodes.show_info_plan import ShowInfoPlan
+from evadb.plan_nodes.native_plan import SQLAlchemyPlan
 
 if TYPE_CHECKING:
     from evadb.optimizer.optimizer_context import OptimizerContext
@@ -78,6 +79,7 @@ from evadb.optimizer.operators import (
     LogicalShow,
     LogicalUnion,
     LogicalVectorIndexScan,
+    LogicalUse,
     Operator,
     OperatorType,
 )
@@ -99,6 +101,7 @@ from evadb.plan_nodes.seq_scan_plan import SeqScanPlan
 from evadb.plan_nodes.storage_plan import StoragePlan
 from evadb.plan_nodes.union_plan import UnionPlan
 from evadb.plan_nodes.vector_index_scan_plan import VectorIndexScanPlan
+from evadb.plan_nodes.native_plan import SQLAlchemyPlan
 
 ##############################################
 # REWRITE RULES START
@@ -1329,6 +1332,22 @@ class LogicalProjectToRayPhysical(Rule):
             for child in before.children:
                 exchange_plan.append_child(child)
             yield exchange_plan
+
+
+class LogicalUseToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICAL_USE)
+        super().__init__(RuleType.LOGICAL_USE_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_USE_TO_PHYSICAL
+
+    def check(self, before: LogicalUse, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalUse, context: OptimizerContext):
+        # TODO: convert to different physical plan based on USE operator
+        yield SQLAlchemyPlan(before.database_name, before.query_string)
 
 
 # IMPLEMENTATION RULES END
