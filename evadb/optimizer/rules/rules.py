@@ -47,7 +47,6 @@ from evadb.plan_nodes.nested_loop_join_plan import NestedLoopJoinPlan
 from evadb.plan_nodes.predicate_plan import PredicatePlan
 from evadb.plan_nodes.project_plan import ProjectPlan
 from evadb.plan_nodes.show_info_plan import ShowInfoPlan
-from evadb.plan_nodes.native_plan import SQLAlchemyPlan
 
 if TYPE_CHECKING:
     from evadb.optimizer.optimizer_context import OptimizerContext
@@ -78,8 +77,8 @@ from evadb.optimizer.operators import (
     LogicalSample,
     LogicalShow,
     LogicalUnion,
-    LogicalVectorIndexScan,
     LogicalUse,
+    LogicalVectorIndexScan,
     Operator,
     OperatorType,
 )
@@ -95,13 +94,13 @@ from evadb.plan_nodes.insert_plan import InsertPlan
 from evadb.plan_nodes.lateral_join_plan import LateralJoinPlan
 from evadb.plan_nodes.limit_plan import LimitPlan
 from evadb.plan_nodes.load_data_plan import LoadDataPlan
+from evadb.plan_nodes.native_plan import SQLAlchemyPlan
 from evadb.plan_nodes.orderby_plan import OrderByPlan
 from evadb.plan_nodes.rename_plan import RenamePlan
 from evadb.plan_nodes.seq_scan_plan import SeqScanPlan
 from evadb.plan_nodes.storage_plan import StoragePlan
 from evadb.plan_nodes.union_plan import UnionPlan
 from evadb.plan_nodes.vector_index_scan_plan import VectorIndexScanPlan
-from evadb.plan_nodes.native_plan import SQLAlchemyPlan
 
 ##############################################
 # REWRITE RULES START

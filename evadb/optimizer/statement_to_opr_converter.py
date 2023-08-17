@@ -54,9 +54,9 @@ from evadb.parser.rename_statement import RenameTableStatement
 from evadb.parser.select_statement import SelectStatement
 from evadb.parser.show_statement import ShowStatement
 from evadb.parser.statement import AbstractStatement
-from evadb.parser.use_statement import UseStatement
 from evadb.parser.table_ref import TableRef
 from evadb.parser.types import UDFType
+from evadb.parser.use_statement import UseStatement
 from evadb.utils.logging_manager import logger
 
 

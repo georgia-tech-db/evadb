@@ -21,6 +21,7 @@ class NativePlan(AbstractPlan):
     This plan is used for pushing down query string directly to
     backend database engine.
     """
+
     def __init__(self, plan_type: PlanOprType, database_name: str, query_string: str):
         self._database_name = database_name
         self._query_string = query_string

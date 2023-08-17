@@ -38,12 +38,15 @@ class UseStatement(AbstractStatement):
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, UseStatement):
             return False
-        return self.database_name == other.database_name and self.query_string == other.query_string
+        return (
+            self.database_name == other.database_name
+            and self.query_string == other.query_string
+        )
 
     def __hash__(self) -> int:
         return hash(
             (
-                super().__hash__(), 
+                super().__hash__(),
                 self.database_name,
                 self.query_string,
             )

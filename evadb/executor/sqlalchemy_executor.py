@@ -33,4 +33,5 @@ class SQLAlchemyExecutor(AbstractExecutor):
     def exec(self, *args, **kwargs) -> Iterator[Batch]:
         print(self._query_string)
         import pandas as pd
+
         yield Batch(pd.DataFrame({"status": ["Ok"]}))
