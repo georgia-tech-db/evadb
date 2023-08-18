@@ -24,11 +24,7 @@ from evadb.models.storage.batch import Batch
 from evadb.plan_nodes.native_plan import SQLAlchemyPlan
 
 
-class SQLAlchemyExecutor(AbstractExecutor):
-    """
-    Execute SQL through SQLAlchemy engine.
-    """
-
+class UseExecutor(AbstractExecutor):
     def __init__(self, db: EvaDBDatabase, node: SQLAlchemyPlan):
         super().__init__(db, node)
         self._database_name = node.database_name

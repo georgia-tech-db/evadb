@@ -77,7 +77,6 @@ from evadb.optimizer.operators import (
     LogicalSample,
     LogicalShow,
     LogicalUnion,
-    LogicalUse,
     LogicalVectorIndexScan,
     Operator,
     OperatorType,
@@ -94,7 +93,6 @@ from evadb.plan_nodes.insert_plan import InsertPlan
 from evadb.plan_nodes.lateral_join_plan import LateralJoinPlan
 from evadb.plan_nodes.limit_plan import LimitPlan
 from evadb.plan_nodes.load_data_plan import LoadDataPlan
-from evadb.plan_nodes.native_plan import SQLAlchemyPlan
 from evadb.plan_nodes.orderby_plan import OrderByPlan
 from evadb.plan_nodes.rename_plan import RenamePlan
 from evadb.plan_nodes.seq_scan_plan import SeqScanPlan
@@ -1331,22 +1329,6 @@ class LogicalProjectToRayPhysical(Rule):
             for child in before.children:
                 exchange_plan.append_child(child)
             yield exchange_plan
-
-
-class LogicalUseToPhysical(Rule):
-    def __init__(self):
-        pattern = Pattern(OperatorType.LOGICAL_USE)
-        super().__init__(RuleType.LOGICAL_USE_TO_PHYSICAL, pattern)
-
-    def promise(self):
-        return Promise.LOGICAL_USE_TO_PHYSICAL
-
-    def check(self, before: LogicalUse, context: OptimizerContext):
-        return True
-
-    def apply(self, before: LogicalUse, context: OptimizerContext):
-        # TODO: convert to different physical plan based on USE operator
-        yield SQLAlchemyPlan(before.database_name, before.query_string)
 
 
 # IMPLEMENTATION RULES END
