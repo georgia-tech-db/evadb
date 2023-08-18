@@ -71,3 +71,20 @@ class PostgresHandler(DBHandler):
             return DBHandlerResponse(data=columns_df)
         except psycopg2.Error as e:
             return DBHandlerResponse(data=None, error=str(e))
+
+    def execute_native_query(self, query_string: str) -> DBHandlerResponse:
+        if not self.connection:
+            return DBHandlerResponse(data=None, error="Not connected to the database.")
+
+        try:
+            cursor = self.connection.cursor()
+            cursor.execute(query_string)
+            if cursor.rowcount == 0:
+                res_df = pd.DataFrame({"status": ["SUCCESS"]})
+            else:
+                res_df = pd.DataFrame(
+                    cursor.fetchall(), columns=[desc[0] for desc in cursor.description]
+                )
+            return DBHandlerResponse(data=res_df)
+        except psycopg2.Error as e:
+            return DBHandlerResponse(data=None, error=str(e))

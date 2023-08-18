@@ -111,3 +111,18 @@ class DBHandler:
             NotImplementedError: This method should be implemented in derived classes.
         """
         raise NotImplementedError()
+
+    def execute_native_query(self, query_string: str) -> DBHandlerResponse:
+        """
+        Executes the query through the handler's database engine.
+
+        Args:
+            query_string (str): The string representation of the native query.
+
+        Returns:
+            DBHandlerResponse: An instance of DBHandlerResponse containing the columns or an error message.
+
+        Raises:
+            NotImplementedError: This method should be implemented in derived classes.
+        """
+        raise NotImplementedError()
