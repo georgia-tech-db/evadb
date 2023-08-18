@@ -35,7 +35,7 @@ from evadb.expression.abstract_expression import AbstractExpression, ExpressionT
 from evadb.expression.function_expression import FunctionExpression
 from evadb.expression.tuple_value_expression import TupleValueExpression
 from evadb.parser.create_index_statement import CreateIndexStatement
-from evadb.parser.create_statement import ColumnDefinition, CreateTableStatement
+from evadb.parser.create_statement import CreateTableStatement
 from evadb.parser.create_udf_statement import CreateUDFStatement
 from evadb.parser.delete_statement import DeleteTableStatement
 from evadb.parser.explain_statement import ExplainStatement
@@ -182,7 +182,7 @@ class StatementBinder:
             node.column_list = get_column_definition_from_select_target_list(
                 node.query.target_list
             )
-            
+
     @bind.register(RenameTableStatement)
     def _bind_rename_table_statement(self, node: RenameTableStatement):
         self.bind(node.old_table_ref)

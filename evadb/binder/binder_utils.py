@@ -30,7 +30,7 @@ from evadb.catalog.models.table_catalog import TableCatalogEntry
 if TYPE_CHECKING:
     from evadb.binder.statement_binder_context import StatementBinderContext
     from evadb.catalog.catalog_manager import CatalogManager
-from evadb.expression.abstract_expression import AbstractExpression
+from evadb.expression.abstract_expression import AbstractExpression, ExpressionType
 from evadb.expression.function_expression import FunctionExpression
 from evadb.expression.tuple_value_expression import TupleValueExpression
 from evadb.parser.alias import Alias
@@ -233,7 +233,7 @@ def handle_bind_extract_object_function(
 
 
 def get_column_definition_from_select_target_list(
-    target_list: List[AbstractExpression]
+    target_list: List[AbstractExpression],
 ) -> List[ColumnDefinition]:
     """
     This function is used by CREATE TABLE AS (SELECT...) and
