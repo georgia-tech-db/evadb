@@ -75,9 +75,24 @@ class StatementBinder:
     def _bind_create_udf_statement(self, node: CreateUDFStatement):
         if node.query is not None:
             self.bind(node.query)
-            node.column_list = get_column_definition_from_select_target_list(
+            all_column_list = get_column_definition_from_select_target_list(
                 node.query.target_list
             )
+            arg_map = {key: value for key, value in node.metadata}
+            assert "predict" in arg_map, f"Creating {node.udf_type} UDFs expects 'predict' metadata."
+            # We only support a single predict column for now
+            predict_columns = set([arg_map["predict"]])
+            inputs, outputs = [], []
+            for column in all_column_list:
+                if column.name in predict_columns:
+                    outputs.append(column)
+                else:
+                    inputs.append(column)
+            assert (
+                len(node.inputs) == 0 and len(node.outputs) == 0
+            ), f"{node.udf_type} UDFs' input and output are auto assigned"
+            node.inputs, node.outputs = inputs, outputs
+
 
     @bind.register(CreateIndexStatement)
     def _bind_create_index_statement(self, node: CreateIndexStatement):

@@ -84,7 +84,6 @@ class CreateUDFExecutor(AbstractExecutor):
         aggregated_batch.drop_column_alias()
 
         arg_map = {arg.key: arg.value for arg in self.node.metadata}
-        assert "predict" in arg_map, "Create ludwig UDF expects 'predict' metadata."
         auto_train_results = auto_train(
             dataset=aggregated_batch.frames,
             target=arg_map["predict"],
@@ -99,8 +98,7 @@ class CreateUDFExecutor(AbstractExecutor):
         self.node.metadata.append(UdfMetadataCatalogEntry("model_path", model_path))
 
         impl_path = Path(f"{self.udf_dir}/ludwig.py").absolute().as_posix()
-        # TODO figure out the io
-        io_list = None
+        io_list = self._resolve_udf_io(None)
         return (
             self.node.name,
             impl_path,
