@@ -23,6 +23,7 @@ from evadb.binder.binder_utils import (
     check_groupby_pattern,
     check_table_object_is_groupable,
     extend_star,
+    get_column_definition_from_select_target_list,
     handle_bind_extract_object_function,
     resolve_alias_table_value_expression,
 )
@@ -74,6 +75,9 @@ class StatementBinder:
     def _bind_create_udf_statement(self, node: CreateUDFStatement):
         if node.query is not None:
             self.bind(node.query)
+            node.column_list = get_column_definition_from_select_target_list(
+                node.query.target_list
+            )
 
     @bind.register(CreateIndexStatement)
     def _bind_create_index_statement(self, node: CreateIndexStatement):
@@ -174,37 +178,11 @@ class StatementBinder:
     def _bind_create_statement(self, node: CreateTableStatement):
         if node.query is not None:
             self.bind(node.query)
-            num_projected_columns = 0
-            for expr in node.query.target_list:
-                if expr.etype == ExpressionType.TUPLE_VALUE:
-                    num_projected_columns += 1
-                elif expr.etype == ExpressionType.FUNCTION_EXPRESSION:
-                    num_projected_columns += len(expr.output_objs)
-                else:
-                    raise BinderError(
-                        "Unsupported expression type {}.".format(expr.etype)
-                    )
 
-            binded_col_list = []
-            idx = 0
-            for expr in node.query.target_list:
-                output_objs = (
-                    [(expr.name, expr.col_object)]
-                    if expr.etype == ExpressionType.TUPLE_VALUE
-                    else zip(expr.projection_columns, expr.output_objs)
-                )
-                for col_name, output_obj in output_objs:
-                    binded_col_list.append(
-                        ColumnDefinition(
-                            col_name,
-                            output_obj.type,
-                            output_obj.array_type,
-                            output_obj.array_dimensions,
-                        )
-                    )
-                    idx += 1
-            node.column_list = binded_col_list
-
+            node.column_list = get_column_definition_from_select_target_list(
+                node.query.target_list
+            )
+            
     @bind.register(RenameTableStatement)
     def _bind_rename_table_statement(self, node: RenameTableStatement):
         self.bind(node.old_table_ref)

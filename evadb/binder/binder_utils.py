@@ -25,14 +25,16 @@ from evadb.catalog.catalog_utils import (
     is_string_col,
     is_video_table,
 )
-from evadb.expression.function_expression import FunctionExpression
-from evadb.parser.alias import Alias
+from evadb.catalog.models.table_catalog import TableCatalogEntry
 
 if TYPE_CHECKING:
     from evadb.binder.statement_binder_context import StatementBinderContext
     from evadb.catalog.catalog_manager import CatalogManager
-from evadb.catalog.models.table_catalog import TableCatalogEntry
+from evadb.expression.abstract_expression import AbstractExpression
+from evadb.expression.function_expression import FunctionExpression
 from evadb.expression.tuple_value_expression import TupleValueExpression
+from evadb.parser.alias import Alias
+from evadb.parser.create_statement import ColumnDefinition
 from evadb.parser.table_ref import TableInfo, TableRef
 from evadb.utils.logging_manager import logger
 
@@ -228,3 +230,30 @@ def handle_bind_extract_object_function(
     # we assign the alias to tracker as it governs the output of the extract object
     resolve_alias_table_value_expression(node)
     tracker.alias = node.alias
+
+
+def get_column_definition_from_select_target_list(
+    target_list: List[AbstractExpression]
+) -> List[ColumnDefinition]:
+    """
+    This function is used by CREATE TABLE AS (SELECT...) and
+    CREATE UDF FROM (SELECT ...) to get the output objs from the
+    child SELECT statement.
+    """
+    binded_col_list = []
+    for expr in target_list:
+        output_objs = (
+            [(expr.name, expr.col_object)]
+            if expr.etype == ExpressionType.TUPLE_VALUE
+            else zip(expr.projection_columns, expr.output_objs)
+        )
+        for col_name, output_obj in output_objs:
+            binded_col_list.append(
+                ColumnDefinition(
+                    col_name,
+                    output_obj.type,
+                    output_obj.array_type,
+                    output_obj.array_dimensions,
+                )
+            )
+    return binded_col_list
