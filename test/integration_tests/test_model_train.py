@@ -66,6 +66,7 @@ class ModelTrainTests(unittest.TestCase):
                 rental_price
             FROM HomeRentals
         """
+
         create_predict_udf = f"""
             CREATE UDF IF NOT EXISTS PredictHouseRent FROM
             ({select_query})

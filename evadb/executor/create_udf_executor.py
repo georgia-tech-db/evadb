@@ -164,7 +164,7 @@ class CreateUDFExecutor(AbstractExecutor):
             name, impl_path, udf_type, io_list, metadata = self.handle_huggingface_udf()
         elif self.node.udf_type == "ultralytics":
             name, impl_path, udf_type, io_list, metadata = self.handle_ultralytics_udf()
-        elif self.node.udf_type == "ludwig":
+        elif self.node.udf_type == "Ludwig":
             name, impl_path, udf_type, io_list, metadata = self.handle_ludwig_udf()
         else:
             name, impl_path, udf_type, io_list, metadata = self.handle_generic_udf()
