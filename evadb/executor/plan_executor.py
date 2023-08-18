@@ -45,10 +45,12 @@ from evadb.executor.seq_scan_executor import SequentialScanExecutor
 from evadb.executor.show_info_executor import ShowInfoExecutor
 from evadb.executor.storage_executor import StorageExecutor
 from evadb.executor.union_executor import UnionExecutor
+from evadb.executor.use_executor import UseExecutor
 from evadb.executor.vector_index_scan_executor import VectorIndexScanExecutor
 from evadb.models.storage.batch import Batch
 from evadb.parser.create_statement import CreateDatabaseStatement
 from evadb.parser.statement import AbstractStatement
+from evadb.parser.use_statement import UseStatement
 from evadb.plan_nodes.abstract_plan import AbstractPlan
 from evadb.plan_nodes.types import PlanOprType
 from evadb.utils.logging_manager import logger
@@ -86,6 +88,8 @@ class PlanExecutor:
         # First handle cases when the plan is actually a parser statement
         if isinstance(plan, CreateDatabaseStatement):
             return CreateDatabaseExecutor(db=self._db, node=plan)
+        elif isinstance(plan, UseStatement):
+            return UseExecutor(db=self._db, node=plan)
 
         # Get plan node type
         plan_opr_type = plan.opr_type

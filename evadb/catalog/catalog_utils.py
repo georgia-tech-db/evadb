@@ -33,10 +33,19 @@ from evadb.catalog.models.utils import (
 )
 from evadb.catalog.sql_config import IDENTIFIER_COLUMN
 from evadb.configuration.configuration_manager import ConfigurationManager
+from evadb.executor.executor_utils import ExecutorError
 from evadb.expression.function_expression import FunctionExpression
 from evadb.expression.tuple_value_expression import TupleValueExpression
 from evadb.parser.create_statement import ColConstraintInfo, ColumnDefinition
 from evadb.utils.generic_utils import get_str_hash, remove_directory_contents
+
+
+def generate_sqlalchemy_conn_str(engine: str, params: Dict[str, str]):
+    if engine == "postgres":
+        conn_str = f"""postgresql://{params["user"]}:{params["password"]}@{params["host"]}:{params["port"]}/{params["database"]}"""
+    else:
+        raise ExecutorError(f"Native engine: {engine} is not currently supported")
+    return conn_str
 
 
 def is_video_table(table: TableCatalogEntry):
