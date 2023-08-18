@@ -79,7 +79,9 @@ class StatementBinder:
                 node.query.target_list
             )
             arg_map = {key: value for key, value in node.metadata}
-            assert "predict" in arg_map, f"Creating {node.udf_type} UDFs expects 'predict' metadata."
+            assert (
+                "predict" in arg_map
+            ), f"Creating {node.udf_type} UDFs expects 'predict' metadata."
             # We only support a single predict column for now
             predict_columns = set([arg_map["predict"]])
             inputs, outputs = [], []
@@ -92,7 +94,6 @@ class StatementBinder:
                 len(node.inputs) == 0 and len(node.outputs) == 0
             ), f"{node.udf_type} UDFs' input and output are auto assigned"
             node.inputs, node.outputs = inputs, outputs
-
 
     @bind.register(CreateIndexStatement)
     def _bind_create_index_statement(self, node: CreateIndexStatement):
