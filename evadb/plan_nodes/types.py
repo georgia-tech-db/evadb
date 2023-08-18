@@ -46,4 +46,6 @@ class PlanOprType(Enum):
     CREATE_INDEX = auto()
     APPLY_AND_MERGE = auto()
     VECTOR_INDEX_SCAN = auto()
+    NATIVE = auto()
+    SQLALCHEMY = auto()
     # add other types

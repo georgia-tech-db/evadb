@@ -44,11 +44,36 @@ from evadb.parser.types import (
     ObjectType,
     ParserOrderBySortType,
 )
+from evadb.parser.use_statement import UseStatement
 
 
 class ParserTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+    def test_use_statement(self):
+        parser = Parser()
+
+        query_list = [
+            "SELECT * FROM DemoTable",
+            """SELECT * FROM DemoTable WHERE col == "xxx"
+            """,
+            """SELECT * FROM DemoTable WHERE col == 'xxx'
+            """,
+        ]
+
+        for query in query_list:
+            use_query = f"USE DemoDB {{{query}}};"
+            evadb_stmt_list = parser.parse(use_query)
+
+            # check stmt itself
+            self.assertIsInstance(evadb_stmt_list, list)
+            self.assertEqual(len(evadb_stmt_list), 1)
+            self.assertEqual(evadb_stmt_list[0].stmt_type, StatementType.USE)
+
+            expected_stmt = UseStatement("DemoDB", query)
+            actual_stmt = evadb_stmt_list[0]
+            self.assertEqual(actual_stmt, expected_stmt)
 
     def test_create_index_statement(self):
         parser = Parser()

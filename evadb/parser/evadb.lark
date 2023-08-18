@@ -2,7 +2,7 @@
 
 start: (sql_statement? ";")+
 
-sql_statement: ddl_statement | dml_statement | utility_statement
+sql_statement: ddl_statement | dml_statement | utility_statement | context_statement
         
 ddl_statement: create_database | create_table | create_index | create_udf
     | drop_database | drop_table | drop_udf | drop_index | rename_table
@@ -11,6 +11,8 @@ dml_statement: select_statement | insert_statement | update_statement
     | delete_statement | load_statement
     
 utility_statement: describe_statement | show_statement | help_statement | explain_statement
+
+context_statement: use_statement
 
 // Data Definition Language
 
@@ -175,11 +177,19 @@ explain_statement: EXPLAIN explainable_statement
 
 explainable_statement : select_statement | insert_statement | update_statement | delete_statement | create_table
 
+// Context Statements
+
+use_statement: USE database_name "{" query_string "}" // One shortcoming that query string cannot have parenthesis
+
 // Common Clauses
 
 //    DB Objects
 
+query_string: QUERY_STRING
+
 full_id: uid dotted_id?
+
+database_name: full_id
     
 table_name: full_id
         
@@ -363,6 +373,7 @@ PARAMETERS:                          "PARAMETERS"i
 PRIMARY:                             "PRIMARY"i
 REFERENCES:                          "REFERENCES"i
 RENAME:                              "RENAME"i
+USE:                                 "USE"i
 SAMPLE:                              "SAMPLE"i
 IFRAMES:                             "IFRAMES"i
 AUDIORATE:                           "AUDIORATE"i
@@ -559,6 +570,7 @@ ID_LITERAL:                 /[A-Za-z_$0-9]*?[A-Za-z_$]+?[A-Za-z_$0-9]*/
 DQUOTA_STRING:              /"[^";]*"/
 SQUOTA_STRING:              /'[^';]*'/
 BQUOTA_STRING:              /`[^'`]*`/
+QUERY_STRING:               /[^{};]+/
 DEC_DIGIT:                  /[0-9]/
 
 // LARK
