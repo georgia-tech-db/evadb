@@ -101,9 +101,17 @@ class CreateUDFStatement(AbstractStatement):
     def inputs(self):
         return self._inputs
 
+    @inputs.setter
+    def inputs(self, value):
+        self._inputs = value
+
     @property
     def outputs(self):
         return self._outputs
+
+    @outputs.setter
+    def outputs(self, value):
+        self._outputs = value
 
     @property
     def impl_path(self):

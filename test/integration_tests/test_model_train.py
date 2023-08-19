@@ -72,7 +72,7 @@ class ModelTrainTests(unittest.TestCase):
             ({select_query})
             TYPE Ludwig
             'predict' 'rental_price'
-            'time_limit' 60;
+            'time_limit' 120;
         """
         execute_query_fetch_all(self.evadb, create_predict_udf)
 
