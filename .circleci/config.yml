@@ -175,6 +175,7 @@ jobs:
                 pip install ".[dev,ludwig,qdrant]"
               else
                 pip install ".[dev,ludwig]" 
+              fi
             fi
 
       # Enable Ray (update evadb.yml file and install Ray package)
