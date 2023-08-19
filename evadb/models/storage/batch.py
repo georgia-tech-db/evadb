@@ -169,6 +169,7 @@ class Batch:
         """
         Execute function expression on frames.
         """
+        self.drop_column_alias()
         return Batch(expr(self._frames))
 
     def iterrows(self):

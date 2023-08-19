@@ -87,6 +87,7 @@ class StatementBinder:
             inputs, outputs = [], []
             for column in all_column_list:
                 if column.name in predict_columns:
+                    column.name = column.name + "_predictions"
                     outputs.append(column)
                 else:
                     inputs.append(column)

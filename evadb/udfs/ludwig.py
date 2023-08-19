@@ -30,7 +30,7 @@ class GenericLudwigModel(AbstractUDF):
         self.model = LudwigModel.load(model_path)
 
     def forward(self, frames: pd.DataFrame) -> pd.DataFrame:
-        predictions, _ = self.model.predict(frames)
+        predictions, _ = self.model.predict(frames, return_type=pd.DataFrame)
         return predictions
 
     def to_device(self, device: str):
