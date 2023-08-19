@@ -25,17 +25,22 @@ from evadb.third_party.databases.types import (
 class PostgresHandler(DBHandler):
     def __init__(self, name: str, **kwargs):
         super().__init__(name)
-        self.params = kwargs.get("params", None)
+        self.host = kwargs.get("host")
+        self.port = kwargs.get("port")
+        self.user = kwargs.get("user")
+        self.password = kwargs.get("password")
+        self.database = kwargs.get("database")
 
     def connect(self):
         try:
             self.connection = psycopg2.connect(
-                host=self.params.get("host"),
-                port=self.params.get("port"),
-                user=self.params.get("username"),
-                password=self.params.get("password"),
-                database=self.params.get("database"),
+                host=self.host,
+                port=self.port,
+                user=self.user,
+                password=self.password,
+                database=self.database,
             )
+            self.connection.autocommit = True
             return DBHandlerStatus(status=True)
         except psycopg2.Error as e:
             return DBHandlerStatus(status=False, error=str(e))
@@ -72,6 +77,29 @@ class PostgresHandler(DBHandler):
         except psycopg2.Error as e:
             return DBHandlerResponse(data=None, error=str(e))
 
+    def _fetch_results_as_df(self, cursor):
+        """
+        This is currently the only clean solution that we have found so far.
+        Reference to Postgres API: https://www.psycopg.org/docs/cursor.html#fetch
+
+        In short, currently there is no very clean programming way to differentiate
+        CREATE, INSERT, SELECT. CREATE and INSERT do not return any result, so calling
+        fetchall() on those will yield a programming error. Cursor has an attribute
+        rowcount, but it indicates # of rows that are affected. In that case, for both
+        INSERT and SELECT rowcount is not 0, so we also cannot use this API to 
+        differentiate INSERT and SELECT.
+        """
+        try:
+            res = cursor.fetchall()
+            res_df = pd.DataFrame(
+                res, columns=[desc[0] for desc in cursor.description]
+            )
+            return res_df
+        except psycopg2.ProgrammingError as e:
+            if str(e) == "no results to fetch":
+                return pd.DataFrame({"status": ["success"]})
+            raise e
+
     def execute_native_query(self, query_string: str) -> DBHandlerResponse:
         if not self.connection:
             return DBHandlerResponse(data=None, error="Not connected to the database.")
@@ -79,12 +107,6 @@ class PostgresHandler(DBHandler):
         try:
             cursor = self.connection.cursor()
             cursor.execute(query_string)
-            if cursor.rowcount == 0:
-                res_df = pd.DataFrame({"status": ["SUCCESS"]})
-            else:
-                res_df = pd.DataFrame(
-                    cursor.fetchall(), columns=[desc[0] for desc in cursor.description]
-                )
-            return DBHandlerResponse(data=res_df)
+            return DBHandlerResponse(data=self._fetch_results_as_df(cursor))
         except psycopg2.Error as e:
             return DBHandlerResponse(data=None, error=str(e))

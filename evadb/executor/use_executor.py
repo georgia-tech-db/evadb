@@ -14,18 +14,16 @@
 # limitations under the License.
 from typing import Iterator
 
-import pandas as pd
-from sqlalchemy import create_engine
-
-from evadb.catalog.catalog_utils import generate_sqlalchemy_conn_str
 from evadb.database import EvaDBDatabase
 from evadb.executor.abstract_executor import AbstractExecutor
+from evadb.executor.executor_utils import ExecutorError
 from evadb.models.storage.batch import Batch
-from evadb.plan_nodes.native_plan import SQLAlchemyPlan
+from evadb.parser.use_statement import UseStatement
+from evadb.third_party.databases.interface import get_database_handler
 
 
 class UseExecutor(AbstractExecutor):
-    def __init__(self, db: EvaDBDatabase, node: SQLAlchemyPlan):
+    def __init__(self, db: EvaDBDatabase, node: UseStatement):
         super().__init__(db, node)
         self._database_name = node.database_name
         self._query_string = node.query_string
@@ -35,16 +33,16 @@ class UseExecutor(AbstractExecutor):
             self._database_name
         )
 
-        conn_str = generate_sqlalchemy_conn_str(
+        handler = get_database_handler(
             db_catalog_entry.engine,
-            db_catalog_entry.params,
+            **db_catalog_entry.params,
         )
 
-        engine = create_engine(conn_str)
+        handler.connect()
+        resp = handler.execute_native_query(self._query_string)
+        handler.disconnect()
 
-        with engine.connect() as con:
-            if "SELECT" in self._query_string or "select" in self._query_string:
-                yield Batch(pd.read_sql(self._query_string, engine))
-            else:
-                con.execute(self._query_string)
-                yield Batch(pd.DataFrame({"status": ["Ok"]}))
+        if resp.error is None:
+            return Batch(resp.data)
+        else:
+            raise ExecutorError(resp.error)
