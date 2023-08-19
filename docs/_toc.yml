@@ -38,6 +38,8 @@ parts:
         title: User-Defined Functions
       - file: source/reference/udfs/custom
         title: Custom User-Defined Function
+      - file: source/reference/model_train
+        title: Customized UDFs and Model Train/Finetune
         
       - file: source/reference/evaql      
         title: Query Language 
