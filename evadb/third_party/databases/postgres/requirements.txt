@@ -1,0 +1,2 @@
+psycopg<=2.9.7
+pandas<=2.0.2

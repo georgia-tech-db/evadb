@@ -12,11 +12,52 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from evadb.third_party.databases.postgres.postgres_handler import PostgresHandler
+import os
+import pip
+import importlib
+
+INSTALL_CACHE = []
 
 
 def get_database_handler(engine: str, **kwargs):
+    """
+    Return the database handler. User should modify this function for
+    their new integrated handlers. 
+    """
+
+    # Dynamically install dependencies.
+    dynamic_install(engine)
+
+    # Dynamically import the top module.
+    mod = dynamic_import(engine)
+
     if engine == "postgres":
-        return PostgresHandler(engine, **kwargs)
+        return mod.PostgresHandler(engine, **kwargs)
     else:
         raise NotImplementedError(f"Engine {engine} is not supported")
+
+
+def dynamic_install(handler_dir):
+    """
+    Dynamically install package from requirements.txt.
+    """
+
+    # Skip installation
+    if handler_dir in INSTALL_CACHE:
+        return
+
+    INSTALL_CACHE.append(handler_dir)
+
+    req_file = os.path.join(handler_dir, "requirements.txt")
+    if os.path.isfile(req_file):
+        with open(req_file) as f:
+            for package in f.read().splitlines():
+                if hasattr(pip, "main"):
+                    pip.main(["install", package])
+                else:
+                    pip._internal.main(["install", package])
+
+
+def dynamic_import(handler_dir):
+    import_path = f"evadb.third_party.databases.{handler_dir}.{handler_dir}_handler"
+    return importlib.import_module(import_path)
