@@ -430,7 +430,7 @@ class Batch:
         # table1.a, table1.b, table1.c -> a, b, c
         new_col_names = []
         for col_name in self.columns:
-            if "." in col_name:
+            if isinstance(col_name, str) and "." in col_name:
                 new_col_names.append(col_name.split(".")[1])
             else:
                 new_col_names.append(col_name)
