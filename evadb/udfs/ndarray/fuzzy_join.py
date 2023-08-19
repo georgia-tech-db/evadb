@@ -34,5 +34,7 @@ class FuzzDistance(AbstractUDF):
             ret (pd.DataFrame): The cropped frame.
         """
         ret = pd.DataFrame()
-        ret["distance"] = df.apply(lambda row: fuzz.ratio(row[0], row[1]), axis=1)
+        ret["distance"] = df.apply(
+            lambda row: fuzz.ratio(str(row[0]), str(row[1])), axis=1
+        )
         return ret
