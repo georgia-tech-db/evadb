@@ -173,6 +173,15 @@ jobs:
                   source test_evadb/bin/activate
                   python -c "import yaml;f = open('evadb/evadb.yml', 'r+');config_obj = yaml.load(f, Loader=yaml.FullLoader);config_obj['experimental']['ray'] = True;f.seek(0);f.write(yaml.dump(config_obj));f.truncate();"
                   pip install ".[ray]"
+          condition:
+            equal: [ DISABLED, << parameters.ray >> ]
+          steps:
+            - run:
+                # Install Ludwig also installs ray. However, the ray test will not involve ludwig now. 
+                name: Install Ludwig
+                command: |
+                  source test_evadb/bin/activate
+                  pip install ".[dev,ludwig]"
       
       # Install qdrant only on versions < 3.11
       - when:
