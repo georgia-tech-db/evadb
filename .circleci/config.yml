@@ -167,14 +167,14 @@ jobs:
               if [ $PY_VERSION != "3.11" ]; then
                 pip install ".[dev,ray,qdrant]"
               else
-                pip install ".[dev,ray]"
+                pip install ".[dev]" # ray < 2.5.0 does not work with python 3.11 ray-project/ray#33864
               fi
               python -c "import yaml;f = open('evadb/evadb.yml', 'r+');config_obj = yaml.load(f, Loader=yaml.FullLoader);config_obj['experimental']['ray'] = True;f.seek(0);f.write(yaml.dump(config_obj));f.truncate();"
             else
               if [ $PY_VERSION != "3.11" ]; then
                 pip install ".[dev,ludwig,qdrant]"
               else
-                pip install ".[dev,ludwig]" 
+                pip install ".[dev]" # ray < 2.5.0 does not work with python 3.11 ray-project/ray#33864
               fi
             fi
 
