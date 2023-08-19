@@ -71,7 +71,7 @@ class DBHandler:
 
         This method can be overridden in derived classes to perform specific disconnect actions.
         """
-        return
+        raise NotImplementedError()
 
     def check_connection(self) -> DBHandlerStatus:
         """
@@ -90,7 +90,7 @@ class DBHandler:
         Retrieves the list of tables from the database.
 
         Returns:
-            DBHandlerResponse: An instance of DBHandlerResponse containing the list of tables or an error message.
+            DBHandlerResponse: An instance of DBHandlerResponse containing the list of tables or an error message. Data is in a pandas DataFrame.
 
         Raises:
             NotImplementedError: This method should be implemented in derived classes.
@@ -105,7 +105,7 @@ class DBHandler:
             table_name (str): The name of the table for which to retrieve columns.
 
         Returns:
-            DBHandlerResponse: An instance of DBHandlerResponse containing the columns or an error message.
+            DBHandlerResponse: An instance of DBHandlerResponse containing the columns or an error message. Data is in a pandas DataFrame.
 
         Raises:
             NotImplementedError: This method should be implemented in derived classes.
@@ -120,7 +120,7 @@ class DBHandler:
             query_string (str): The string representation of the native query.
 
         Returns:
-            DBHandlerResponse: An instance of DBHandlerResponse containing the columns or an error message.
+            DBHandlerResponse: An instance of DBHandlerResponse containing the columns or an error message. Data is in a pandas DataFrame.
 
         Raises:
             NotImplementedError: This method should be implemented in derived classes.

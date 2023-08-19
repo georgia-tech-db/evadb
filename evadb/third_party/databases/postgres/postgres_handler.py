@@ -86,14 +86,12 @@ class PostgresHandler(DBHandler):
         CREATE, INSERT, SELECT. CREATE and INSERT do not return any result, so calling
         fetchall() on those will yield a programming error. Cursor has an attribute
         rowcount, but it indicates # of rows that are affected. In that case, for both
-        INSERT and SELECT rowcount is not 0, so we also cannot use this API to 
+        INSERT and SELECT rowcount is not 0, so we also cannot use this API to
         differentiate INSERT and SELECT.
         """
         try:
             res = cursor.fetchall()
-            res_df = pd.DataFrame(
-                res, columns=[desc[0] for desc in cursor.description]
-            )
+            res_df = pd.DataFrame(res, columns=[desc[0] for desc in cursor.description])
             return res_df
         except psycopg2.ProgrammingError as e:
             if str(e) == "no results to fetch":

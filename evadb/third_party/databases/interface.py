@@ -12,9 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import os
-import pip
 import importlib
+import os
+
+import pip
 
 INSTALL_CACHE = []
 
@@ -22,7 +23,7 @@ INSTALL_CACHE = []
 def get_database_handler(engine: str, **kwargs):
     """
     Return the database handler. User should modify this function for
-    their new integrated handlers. 
+    their new integrated handlers.
     """
 
     # Dynamically install dependencies.
