@@ -75,6 +75,7 @@ class FuzzyJoinTests(unittest.TestCase):
     def test_fuzzyjoin(self):
         execute_query_fetch_all(self.evadb, fuzzy_udf_query)
 
+        # TODO this test does not make sense. Need to improve
         fuzzy_join_query = """SELECT * FROM MyVideo a JOIN MyVideoCSV b
                       ON FuzzDistance(a.id, b.id) = 100;"""
 
