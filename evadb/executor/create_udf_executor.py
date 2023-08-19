@@ -69,9 +69,8 @@ class CreateUDFExecutor(AbstractExecutor):
         Use ludwig's auto_train engine to train/tune models.
         """
         try_to_import_ludwig()
-        from ludwig.automl import auto_train
-
         from evadb.configuration.constants import DEFAULT_TRAIN_TIME_LIMIT
+        from ludwig.automl import auto_train
 
         assert (
             len(self.children) == 1

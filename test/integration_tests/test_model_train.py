@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+from test.markers import ludwig_skip_marker
 from test.util import get_evadb_for_testing, shutdown_ray
 
 import pytest
@@ -53,6 +54,7 @@ class ModelTrainTests(unittest.TestCase):
         # clean up
         execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS HomeRentals;")
 
+    @ludwig_skip_marker
     def test_ludwig_automl(self):
         select_query = """
             SELECT

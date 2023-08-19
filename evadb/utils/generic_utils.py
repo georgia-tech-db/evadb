@@ -298,6 +298,14 @@ def try_to_import_ludwig():
         )
 
 
+def is_ludwig_available() -> bool:
+    try:
+        try_to_import_ludwig()
+        return True
+    except ValueError:  # noqa: E722
+        return False
+
+
 ##############################
 ## VISION
 ##############################
