@@ -488,70 +488,18 @@ class CatalogManager(object):
         ], f"Format Type {format_type} is not supported"
 
         if format_type is FileFormatType.VIDEO:
-            columns = get_video_table_column_definitions()
             table_type = TableType.VIDEO_DATA
         elif format_type is FileFormatType.IMAGE:
-            columns = get_image_table_column_definitions()
             table_type = TableType.IMAGE_DATA
         elif format_type is FileFormatType.DOCUMENT:
-            columns = get_document_table_column_definitions()
             table_type = TableType.DOCUMENT_DATA
         elif format_type is FileFormatType.PDF:
-            columns = get_pdf_table_column_definitions()
             table_type = TableType.PDF_DATA
 
+        columns = [ColumnDefinition("file_url", ColumnType.TEXT, None, None)]
         return self.create_and_insert_table_catalog_entry(
             TableInfo(name), columns, table_type=table_type
         )
-
-    def get_multimedia_metadata_table_catalog_entry(
-        self, input_table: TableCatalogEntry
-    ) -> TableCatalogEntry:
-        """Get table catalog entry for multimedia metadata table.
-        Raise if it does not exists
-        Args:
-            input_table (TableCatalogEntryEntryEntryEntry): input media table
-
-        Returns:
-            TableCatalogEntry: metainfo table entry which is maintained by the system
-        """
-        # use file_url as the metadata table name
-        media_metadata_name = Path(input_table.file_url).stem
-        obj = self.get_table_catalog_entry(media_metadata_name)
-        assert (
-            obj is not None
-        ), f"Table with name {media_metadata_name} does not exist in catalog"
-
-        return obj
-
-    def create_and_insert_multimedia_metadata_table_catalog_entry(
-        self, input_table: TableCatalogEntry
-    ) -> TableCatalogEntry:
-        """Create and insert table catalog entry for multimedia metadata table.
-         This table is used to store all media filenames and related information. In
-         order to prevent direct access or modification by users, it should be
-         designated as a SYSTEM_STRUCTURED_DATA type.
-         **Note**: this table is managed by the storage engine, so it should not be
-         called elsewhere.
-        Args:
-            input_table (TableCatalogEntry): input video table
-
-        Returns:
-            TableCatalogEntry: metainfo table entry which is maintained by the system
-        """
-        # use file_url as the metadata table name
-        media_metadata_name = Path(input_table.file_url).stem
-        obj = self.get_table_catalog_entry(media_metadata_name)
-        assert obj is None, "Table with name {media_metadata_name} already exists"
-
-        columns = [ColumnDefinition("file_url", ColumnType.TEXT, None, None)]
-        obj = self.create_and_insert_table_catalog_entry(
-            TableInfo(media_metadata_name),
-            columns,
-            identifier_column=columns[0].name,
-            table_type=TableType.SYSTEM_STRUCTURED_DATA,
-        )
-        return obj
 
 
 #### get catalog instance

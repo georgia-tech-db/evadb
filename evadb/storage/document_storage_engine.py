@@ -27,7 +27,7 @@ class DocumentStorageEngine(AbstractMediaStorageEngine):
         super().__init__(db)
 
     def read(self, table: TableCatalogEntry, chunk_params: dict) -> Iterator[Batch]:
-        for doc_files in self._rdb_handler.read(self._get_metadata_table(table), 12):
+        for doc_files in self._rdb_handler.read(self._get_table_catalog_entry(table), 12):
             for _, (row_id, file_name) in doc_files.iterrows():
                 system_file_name = self._xform_file_url_to_file_name(file_name)
                 doc_file = Path(table.file_url) / system_file_name

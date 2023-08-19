@@ -19,7 +19,11 @@ from typing import TYPE_CHECKING, List
 
 from evadb.catalog.catalog_type import TableType
 from evadb.catalog.catalog_utils import (
+    xform_column_definitions_to_catalog_entries,
     get_video_table_column_definitions,
+    get_image_table_column_definitions,
+    get_document_table_column_definitions,
+    get_pdf_table_column_definitions,
     is_document_table,
     is_pdf_table,
     is_string_col,
@@ -32,6 +36,7 @@ if TYPE_CHECKING:
     from evadb.binder.statement_binder_context import StatementBinderContext
     from evadb.catalog.catalog_manager import CatalogManager
 from evadb.catalog.models.table_catalog import TableCatalogEntry
+from evadb.catalog.models.column_catalog import ColumnCatalogEntry
 from evadb.expression.tuple_value_expression import TupleValueExpression
 from evadb.parser.table_ref import TableInfo, TableRef
 from evadb.utils.logging_manager import logger
@@ -39,6 +44,25 @@ from evadb.utils.logging_manager import logger
 
 class BinderError(Exception):
     pass
+
+
+def get_multimedia_table_runtime_columns(table: TableCatalogEntry):
+    """
+    Some columns of the multimedia table are not stored in database, but instead being
+    generated during execution. We attach those definitions during binding.
+    """
+    table_type = table.table_type
+    if table_type == TableType.VIDEO_DATA:
+        col_list = get_video_table_column_definitions()
+    elif table_type == TableType.IMAGE_DATA:
+        col_list = get_image_table_column_definitions()
+    elif table_type == TableType.DOCUMENT_DATA:
+        col_list = get_document_table_column_definitions()
+    elif table_type == TableType.PDF_DATA:
+        col_list = get_pdf_table_column_definitions()
+    else:
+        col_list = []
+    return xform_column_definitions_to_catalog_entries(col_list)
 
 
 def bind_table_info(
@@ -58,6 +82,9 @@ def bind_table_info(
         table_info.table_name,
         table_info.database_name,
     )
+
+    # Bind runtime columns.
+    obj.columns += get_multimedia_table_runtime_columns(obj)
 
     # Users should not be allowed to directly access or modify the SYSTEM tables, as
     # doing so can lead to the corruption of other tables. These tables include
