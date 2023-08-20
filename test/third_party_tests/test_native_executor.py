@@ -30,26 +30,11 @@ class NativeExecutorTest(unittest.TestCase):
     def tearDown(self):
         shutdown_ray()
 
-    def test_should_run_simple_query_in_sqlalchemy(self):
-        # Create database.
-        params = {
-            "user": "eva",
-            "password": "password",
-            "host": "127.0.0.1",
-            "port": "5432",
-            "database": "test",
-        }
-        query = """CREATE DATABASE postgres_data
-                    WITH ENGINE = "postgres",
-                    PARAMETERS = {};""".format(
-            params
-        )
-        execute_query_fetch_all(self.evadb, query)
-
+    def _simple_execute(self):
         # Create table.
         execute_query_fetch_all(
             self.evadb,
-            """USE postgres_data {
+            """USE test_data_source {
                 CREATE TABLE test_table (
                     name VARCHAR(10),
                     age INT,
@@ -59,7 +44,7 @@ class NativeExecutorTest(unittest.TestCase):
         )
         execute_query_fetch_all(
             self.evadb,
-            """USE postgres_data {
+            """USE test_data_source {
                 INSERT INTO test_table (
                     name, age, comment
                 ) VALUES (
@@ -72,7 +57,7 @@ class NativeExecutorTest(unittest.TestCase):
         # Select.
         res_batch = execute_query_fetch_all(
             self.evadb,
-            """USE postgres_data {
+            """USE test_data_source {
                 SELECT * FROM test_table
             }
             """,
@@ -85,8 +70,26 @@ class NativeExecutorTest(unittest.TestCase):
         # DROP table.
         execute_query_fetch_all(
             self.evadb,
-            """USE postgres_data {
+            """USE test_data_source {
                 DROP TABLE test_table
             }
             """,
         )
+
+    def test_should_run_simple_query_in_postgres(self):
+        # Create database.
+        params = {
+            "user": "eva",
+            "password": "password",
+            "host": "localhost",
+            "port": "5432",
+            "database": "evadb",
+        }
+        query = """CREATE DATABASE test_data_source
+                    WITH ENGINE = "postgres",
+                    PARAMETERS = {};""".format(
+            params
+        )
+        execute_query_fetch_all(self.evadb, query)
+
+        self._simple_execute()
