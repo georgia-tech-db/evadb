@@ -23,6 +23,7 @@ from evadb.binder.binder_utils import (
     check_groupby_pattern,
     check_table_object_is_groupable,
     extend_star,
+    get_column_definition_from_select_target_list,
     handle_bind_extract_object_function,
     resolve_alias_table_value_expression,
 )
@@ -34,7 +35,8 @@ from evadb.expression.abstract_expression import AbstractExpression, ExpressionT
 from evadb.expression.function_expression import FunctionExpression
 from evadb.expression.tuple_value_expression import TupleValueExpression
 from evadb.parser.create_index_statement import CreateIndexStatement
-from evadb.parser.create_statement import ColumnDefinition, CreateTableStatement
+from evadb.parser.create_statement import CreateTableStatement
+from evadb.parser.create_udf_statement import CreateUDFStatement
 from evadb.parser.delete_statement import DeleteTableStatement
 from evadb.parser.explain_statement import ExplainStatement
 from evadb.parser.rename_statement import RenameTableStatement
@@ -68,6 +70,31 @@ class StatementBinder:
     @bind.register(ExplainStatement)
     def _bind_explain_statement(self, node: ExplainStatement):
         self.bind(node.explainable_stmt)
+
+    @bind.register(CreateUDFStatement)
+    def _bind_create_udf_statement(self, node: CreateUDFStatement):
+        if node.query is not None:
+            self.bind(node.query)
+            all_column_list = get_column_definition_from_select_target_list(
+                node.query.target_list
+            )
+            arg_map = {key: value for key, value in node.metadata}
+            assert (
+                "predict" in arg_map
+            ), f"Creating {node.udf_type} UDFs expects 'predict' metadata."
+            # We only support a single predict column for now
+            predict_columns = set([arg_map["predict"]])
+            inputs, outputs = [], []
+            for column in all_column_list:
+                if column.name in predict_columns:
+                    column.name = column.name + "_predictions"
+                    outputs.append(column)
+                else:
+                    inputs.append(column)
+            assert (
+                len(node.inputs) == 0 and len(node.outputs) == 0
+            ), f"{node.udf_type} UDFs' input and output are auto assigned"
+            node.inputs, node.outputs = inputs, outputs
 
     @bind.register(CreateIndexStatement)
     def _bind_create_index_statement(self, node: CreateIndexStatement):
@@ -168,36 +195,10 @@ class StatementBinder:
     def _bind_create_statement(self, node: CreateTableStatement):
         if node.query is not None:
             self.bind(node.query)
-            num_projected_columns = 0
-            for expr in node.query.target_list:
-                if expr.etype == ExpressionType.TUPLE_VALUE:
-                    num_projected_columns += 1
-                elif expr.etype == ExpressionType.FUNCTION_EXPRESSION:
-                    num_projected_columns += len(expr.output_objs)
-                else:
-                    raise BinderError(
-                        "Unsupported expression type {}.".format(expr.etype)
-                    )
 
-            binded_col_list = []
-            idx = 0
-            for expr in node.query.target_list:
-                output_objs = (
-                    [(expr.name, expr.col_object)]
-                    if expr.etype == ExpressionType.TUPLE_VALUE
-                    else zip(expr.projection_columns, expr.output_objs)
-                )
-                for col_name, output_obj in output_objs:
-                    binded_col_list.append(
-                        ColumnDefinition(
-                            col_name,
-                            output_obj.type,
-                            output_obj.array_type,
-                            output_obj.array_dimensions,
-                        )
-                    )
-                    idx += 1
-            node.column_list = binded_col_list
+            node.column_list = get_column_definition_from_select_target_list(
+                node.query.target_list
+            )
 
     @bind.register(RenameTableStatement)
     def _bind_rename_table_statement(self, node: RenameTableStatement):
@@ -281,6 +282,15 @@ class StatementBinder:
 
         if udf_obj.type == "HuggingFace":
             node.function = assign_hf_udf(udf_obj)
+
+        elif udf_obj.type == "Ludwig":
+            udf_class = load_udf_class_from_file(
+                udf_obj.impl_file_path,
+                "GenericLudwigModel",
+            )
+            udf_metadata = get_metadata_properties(udf_obj)
+            assert "model_path" in udf_metadata, "Ludwig models expect 'model_path'."
+            node.function = lambda: udf_class(model_path=udf_metadata["model_path"])
 
         else:
             if udf_obj.type == "ultralytics":

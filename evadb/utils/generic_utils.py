@@ -283,6 +283,30 @@ def is_ray_enabled_and_installed(ray_enabled: bool) -> bool:
 
 
 ##############################
+## MODEL TRAIN FRAMEWORK
+##############################
+
+
+def try_to_import_ludwig():
+    try:
+        import ludwig  # noqa: F401
+        from ludwig.automl import auto_train  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import ludwig.
+                Please install it with `pip install ludwig[full]`."""
+        )
+
+
+def is_ludwig_available() -> bool:
+    try:
+        try_to_import_ludwig()
+        return True
+    except ValueError:  # noqa: E722
+        return False
+
+
+##############################
 ## VISION
 ##############################
 

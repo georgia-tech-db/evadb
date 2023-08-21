@@ -138,6 +138,7 @@ statement_to_opr_converter.metadata_definition_to_udf_metadata"
         stmt.outputs = ["out"]
         stmt.impl_path = "tmp.py"
         stmt.udf_type = "classification"
+        stmt.query = None
         stmt.metadata = [("key1", "value1"), ("key2", "value2")]
         col_def_mock.side_effect = ["inp", "out"]
         metadata_def_mock.side_effect = [{"key1": "value1", "key2": "value2"}]

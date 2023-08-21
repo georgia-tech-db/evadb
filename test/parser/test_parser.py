@@ -641,6 +641,7 @@ class ParserTests(unittest.TestCase):
                 ),
             ],
             "Classification",
+            None,
             [("KEY", "VALUE")],
         )
         evadb_statement_list = parser.parse(create_udf_query)
