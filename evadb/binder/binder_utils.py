@@ -26,6 +26,7 @@ from evadb.catalog.catalog_utils import (
     is_video_table,
 )
 from evadb.catalog.models.table_catalog import TableCatalogEntry
+from evadb.catalog.models.column_catalog import ColumnCatalogEntry
 
 if TYPE_CHECKING:
     from evadb.binder.statement_binder_context import StatementBinderContext
@@ -37,6 +38,7 @@ from evadb.parser.alias import Alias
 from evadb.parser.create_statement import ColumnDefinition
 from evadb.parser.table_ref import TableInfo, TableRef
 from evadb.utils.logging_manager import logger
+from evadb.third_party.databases.interface import get_database_handler
 
 
 class BinderError(Exception):
@@ -45,7 +47,7 @@ class BinderError(Exception):
 
 def bind_table_info(
     catalog: CatalogManager, table_info: TableInfo
-) -> TableCatalogEntry:
+):
     """
     Uses catalog to bind the table information .
 
@@ -56,6 +58,66 @@ def bind_table_info(
     Returns:
         TableCatalogEntry  -  corresponding table catalog entry for the input table info
     """
+    if table_info.database_name is not None:
+        bind_native_table_info(catalog, table_info)
+    else:
+        bind_evadb_table_info(catalog, table_info)
+
+
+def bind_native_table_info(
+    catalog: CatalogManager, table_info: TableInfo
+):
+    db_catalog_entry = catalog.get_database_catalog_entry(table_info.database_name)
+
+    if db_catalog_entry is not None:
+        handler = get_database_handler(db_catalog_entry.engine)
+
+        # Get table definition.
+        resp = handler.get_tables()
+        if resp.error is not None:
+            error = "There is no table in data source {}. Create the table using native query.".format(
+                table_info.database_name,
+            )
+            logger.error(error)
+            raise BinderError(error)
+
+        # Check table existance.
+        table_df = resp.data
+        if table_info.table_name not in table_df["table_name"].values:
+            error = "Table {} does not exist in data source {}. Create the table using native query.".format(
+                table_info.table_name,
+                table_info.database_name,
+            )
+            logger.error(error)
+            raise BinderError(error)
+
+        # Assemble columns.
+        column_df = handler.get_columns(table_info.table_name).data
+        column_list = []
+        for column_name in column_df["column_name"]:
+            column_list.append(
+                ColumnCatalogEntry(column_name)
+            )
+
+        # Assemble table.
+        table_catalog_entry = TableCatalogEntry(
+            name=table_info.table_name,
+            table_type=TableType.NATIVE_DATA,
+            columns=column_list,
+        )
+        table_info.table_obj = table_catalog_entry
+
+    else:
+        error = "{} data source does not exist. Create the new database source using CREATE DATABASE.".format(
+            table_info.database_name,
+        )
+        logger.error(error)
+        raise BinderError(error)
+
+
+def bind_evadb_table_info(
+    catalog: CatalogManager, table_info: TableInfo
+):
     obj = catalog.get_table_catalog_entry(
         table_info.table_name,
         table_info.database_name,

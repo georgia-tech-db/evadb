@@ -21,15 +21,21 @@ from evadb.utils.logging_manager import logger
 
 class CommonClauses:
     def table_name(self, tree):
-        table_name = self.visit(tree.children[0])
+        database_name, table_name = self.visit(tree.children[0])
         if table_name is not None:
-            return TableInfo(table_name=table_name)
+            return TableInfo(table_name=table_name, database_name=database_name)
         else:
             error = "Invalid Table Name"
             logger.error(error)
 
     def full_id(self, tree):
-        return self.visit(tree.children[0])
+        if len(tree.children) == 1:
+            # Table only
+            return [None, self.visit(tree.children[0])]
+        elif len(tree.children) == 2:
+            # Data source and table
+            # Ex. DemoDB.TestTable
+            return [self.visit(tree.children[0]), self.visit(tree.children[1])]
 
     def uid(self, tree):
         return self.visit(tree.children[0])
