@@ -49,7 +49,9 @@ def dynamic_install(handler_dir):
 
     INSTALL_CACHE.append(handler_dir)
 
-    req_file = os.path.join(handler_dir, "requirements.txt")
+    req_file = os.path.join(
+        "evadb", "third_party", "databases", handler_dir, "requirements.txt"
+    )
     if os.path.isfile(req_file):
         with open(req_file) as f:
             for package in f.read().splitlines():
