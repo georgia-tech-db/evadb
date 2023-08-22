@@ -18,7 +18,7 @@ import sys
 
 import pytest
 
-from evadb.utils.generic_utils import is_gpu_available
+from evadb.utils.generic_utils import is_gpu_available, is_ludwig_available
 
 asyncio_skip_marker = pytest.mark.skipif(
     sys.version_info < (3, 8), reason="Test case requires asyncio support"
@@ -60,6 +60,10 @@ ocr_skip_marker = pytest.mark.skip(
 
 gpu_skip_marker = pytest.mark.skipif(
     is_gpu_available() is False, reason="Run only if gpu is available"
+)
+
+ludwig_skip_marker = pytest.mark.skipif(
+    is_ludwig_available() is False, reason="Run only if ludwig is available"
 )
 
 chatgpt_skip_marker = pytest.mark.skip(

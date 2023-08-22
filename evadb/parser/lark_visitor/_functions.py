@@ -62,6 +62,7 @@ class Functions:
         output_definitions = []
         impl_path = None
         udf_type = None
+        query = None
         metadata = []
 
         create_definitions_index = 0
@@ -84,6 +85,8 @@ class Functions:
                     udf_type = self.visit(child)
                 elif child.data == "udf_impl":
                     impl_path = self.visit(child).value
+                elif child.data == "simple_select":
+                    query = self.visit(child)
                 elif child.data == "udf_metadata":
                     # Each UDF metadata is a key value pair
                     key_value_pair = self.visit(child)
@@ -100,6 +103,7 @@ class Functions:
             input_definitions,
             output_definitions,
             udf_type,
+            query,
             metadata,
         )
 

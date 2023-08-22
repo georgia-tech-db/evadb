@@ -32,6 +32,22 @@ To register an user-defined function, specify the implementation details of the 
     TYPE  Classification
     IMPL  'evadb/udfs/fastrcnn_object_detector.py';
 
+.. _create-udf-train:
+
+CREATE UDF via Training
+----
+
+To register an user-defined function by training a predication model.
+
+.. code-block:: sql
+
+   CREATE UDF IF NOT EXISTS PredictHouseRent FROM
+   (SELECT * FROM HomeRentals)
+   TYPE Ludwig
+   'predict' 'rental_price'
+   'time_list' 120;
+   'tune_for_memory' False;
+
 CREATE MATERIALIZED VIEW
 ----
 

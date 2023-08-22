@@ -231,7 +231,7 @@ class RelationalAPI(unittest.TestCase):
         query = create_speech_recognizer_udf_if_not_exists.sql_query()
         self.assertEqual(
             query,
-            """CREATE UDF SpeechRecognizer IF NOT EXISTS TYPE HuggingFace 'task' 'automatic-speech-recognition' 'model' 'openai/whisper-base'""",
+            """CREATE UDF IF NOT EXISTS SpeechRecognizer TYPE HuggingFace 'task' 'automatic-speech-recognition' 'model' 'openai/whisper-base'""",
         )
         create_speech_recognizer_udf_if_not_exists.execute()
 

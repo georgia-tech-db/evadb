@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import List, Tuple
 
 from evadb.parser.create_statement import ColumnDefinition
+from evadb.parser.select_statement import SelectStatement
 from evadb.parser.statement import AbstractStatement
 from evadb.parser.types import StatementType
 
@@ -37,8 +38,10 @@ class CreateUDFStatement(AbstractStatement):
             file path which holds the implementation of the udf.
             This file should be placed in the UDF directory and
             the path provided should be relative to the UDF dir.
+        query: SelectStatement
+            data source for the model train or fine tune.
         udf_type: str
-            udf type. it ca be object detection, classification etc.
+            udf type. it can be object detection, classification etc.
         metadata: List[Tuple[str, str]]
             metadata, list of key value pairs used for storing metadata of udfs, mostly used for advanced udf types
     """
@@ -51,6 +54,7 @@ class CreateUDFStatement(AbstractStatement):
         inputs: List[ColumnDefinition] = [],
         outputs: List[ColumnDefinition] = [],
         udf_type: str = None,
+        query: SelectStatement = None,
         metadata: List[Tuple[str, str]] = None,
     ):
         super().__init__(StatementType.CREATE_UDF)
@@ -60,28 +64,30 @@ class CreateUDFStatement(AbstractStatement):
         self._outputs = outputs
         self._impl_path = Path(impl_path) if impl_path else None
         self._udf_type = udf_type
+        self._query = query
         self._metadata = metadata
 
     def __str__(self) -> str:
-        exists_str = " "
+        s = "CREATE UDF"
+
         if self._if_not_exists:
-            exists_str = " IF NOT EXISTS "
+            s += " IF NOT EXISTS"
 
-        type_str = ""
+        s += " " + self._name
+
+        if self._query is not None:
+            s += f" FROM ({self._query})"
+
         if self._udf_type is not None:
-            type_str += "TYPE " + str(self._udf_type)
+            s += " TYPE " + str(self._udf_type)
 
-        impl_str = ""
         if self._impl_path:
-            impl_str = f" IMPL {self._impl_path.name} "
+            s += f" IMPL {self._impl_path.name}"
 
-        metadata_str = ""
         if self._metadata is not None:
             for key, value in self._metadata:
-                metadata_str += f"'{key}' '{value}' "
-            metadata_str = metadata_str.rstrip(" ")
-
-        return f"""CREATE UDF {self._name}{exists_str}TYPE {self._udf_type}{impl_str} {metadata_str}"""
+                s += f" '{key}' '{value}'"
+        return s
 
     @property
     def name(self):
@@ -95,9 +101,17 @@ class CreateUDFStatement(AbstractStatement):
     def inputs(self):
         return self._inputs
 
+    @inputs.setter
+    def inputs(self, value):
+        self._inputs = value
+
     @property
     def outputs(self):
         return self._outputs
+
+    @outputs.setter
+    def outputs(self, value):
+        self._outputs = value
 
     @property
     def impl_path(self):
@@ -106,6 +120,10 @@ class CreateUDFStatement(AbstractStatement):
     @property
     def udf_type(self):
         return self._udf_type
+
+    @property
+    def query(self):
+        return self._query
 
     @property
     def metadata(self):
@@ -121,6 +139,7 @@ class CreateUDFStatement(AbstractStatement):
             and self.outputs == other.outputs
             and self.impl_path == other.impl_path
             and self.udf_type == other.udf_type
+            and self.query == other.query
             and self.metadata == other.metadata
         )
 
@@ -134,6 +153,7 @@ class CreateUDFStatement(AbstractStatement):
                 tuple(self.outputs),
                 self.impl_path,
                 self.udf_type,
+                self.query,
                 tuple(self.metadata),
             )
         )
