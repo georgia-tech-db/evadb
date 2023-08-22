@@ -56,22 +56,9 @@ class ModelTrainTests(unittest.TestCase):
 
     @ludwig_skip_marker
     def test_ludwig_automl(self):
-        select_query = """
-            SELECT
-                number_of_rooms,
-                number_of_bathrooms,
-                sqft,
-                location,
-                days_on_market,
-                initial_price,
-                neighborhood,
-                rental_price
-            FROM HomeRentals
-        """
-
-        create_predict_udf = f"""
+        create_predict_udf = """
             CREATE UDF IF NOT EXISTS PredictHouseRent FROM
-            ({select_query})
+            ( SELECT * FROM HomeRentals )
             TYPE Ludwig
             'predict' 'rental_price'
             'time_limit' 120;

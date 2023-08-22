@@ -26,6 +26,7 @@ from evadb.catalog.catalog_utils import (
     is_video_table,
 )
 from evadb.catalog.models.table_catalog import TableCatalogEntry
+from evadb.catalog.sql_config import IDENTIFIER_COLUMN
 
 if TYPE_CHECKING:
     from evadb.binder.statement_binder_context import StatementBinderContext
@@ -257,3 +258,18 @@ def get_column_definition_from_select_target_list(
                 )
             )
     return binded_col_list
+
+
+def drop_row_id_from_target_list(
+    target_list: List[AbstractExpression],
+) -> List[AbstractExpression]:
+    """
+    This function is intended to be used by CREATE UDF FROM (SELECT * FROM ...) and CREATE TABLE AS SELECT * FROM ... to exclude the row_id column.
+    """
+    filtered_list = []
+    for expr in target_list:
+        if isinstance(expr, TupleValueExpression):
+            if expr.name == IDENTIFIER_COLUMN:
+                continue
+        filtered_list.append(expr)
+    return filtered_list
