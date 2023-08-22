@@ -10,12 +10,22 @@ Model Train and Finetune
 .. code-block:: sql
 
    CREATE UDF IF NOT EXISTS PredictHouseRent FROM
-   (SELECT * FROM HomeRentals)
+   ( SELECT sqft, location, rental_price FROM HomeRentals )
    TYPE Ludwig
    'predict' 'rental_price'
    'time_limit' 120;
 
-In the above query, you are creating a new customized UDF by automatically training a model from the `HomeRentals` table. The `rental_price` column will be the target column for predication, while all other columns in `HomeRentals` are the inputs. 
+In the above query, you are creating a new customized UDF by automatically training a model from the `HomeRentals` table. The `rental_price` column will be the target column for predication, while `sqft` and `location` are the inputs. 
+
+You can also simply give all other columns in `HomeRentals` as inputs and let the underlying automl framework to figure it out. Below is an examplequery:
+
+.. code-block:: sql
+
+   CREATE UDF IF NOT EXISTS PredictHouseRent FROM
+   ( SELECT * FROM HomeRentals )
+   TYPE Ludwig
+   'predict' 'rental_price'
+   'time_limit' 120;
 
 .. note::
 
@@ -25,7 +35,7 @@ In the above query, you are creating a new customized UDF by automatically train
 
 .. code-block:: sql
 
-   CREATE PredictHouseRent(*) FROM HomeRentals;
+   CREATE PredictHouseRent(sqft, location) FROM HomeRentals;
 
 Check out our `Integration Tests <https://github.com/georgia-tech-db/evadb/blob/master/test/integration_tests/test_model_train.py>`_ for working example.
 
