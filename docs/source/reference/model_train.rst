@@ -17,7 +17,7 @@ Model Train and Finetune
 
 In the above query, you are creating a new customized UDF by automatically training a model from the `HomeRentals` table. The `rental_price` column will be the target column for predication, while `sqft` and `location` are the inputs. 
 
-You can also simply give all other columns in `HomeRentals` as inputs and let the underlying automl framework to figure it out. Below is an examplequery:
+You can also simply give all other columns in `HomeRentals` as inputs and let the underlying automl framework to figure it out. Below is an example query:
 
 .. code-block:: sql
 
