@@ -17,7 +17,7 @@ from __future__ import annotations
 import re
 from typing import TYPE_CHECKING, List
 
-from evadb.catalog.catalog_type import TableType
+from evadb.catalog.catalog_type import ColumnType, TableType
 from evadb.catalog.catalog_utils import (
     get_video_table_column_definitions,
     is_document_table,
@@ -25,29 +25,86 @@ from evadb.catalog.catalog_utils import (
     is_string_col,
     is_video_table,
 )
-from evadb.catalog.models.table_catalog import TableCatalogEntry
 from evadb.catalog.models.column_catalog import ColumnCatalogEntry
+from evadb.catalog.models.table_catalog import TableCatalogEntry
 
 if TYPE_CHECKING:
     from evadb.binder.statement_binder_context import StatementBinderContext
     from evadb.catalog.catalog_manager import CatalogManager
+
 from evadb.expression.abstract_expression import AbstractExpression, ExpressionType
 from evadb.expression.function_expression import FunctionExpression
 from evadb.expression.tuple_value_expression import TupleValueExpression
 from evadb.parser.alias import Alias
 from evadb.parser.create_statement import ColumnDefinition
 from evadb.parser.table_ref import TableInfo, TableRef
-from evadb.utils.logging_manager import logger
 from evadb.third_party.databases.interface import get_database_handler
+from evadb.utils.logging_manager import logger
 
 
 class BinderError(Exception):
     pass
 
 
-def bind_table_info(
-    catalog: CatalogManager, table_info: TableInfo
+def check_data_source_and_table_are_valid(
+    catalog: CatalogManager, database_name: str, table_name: str
 ):
+    """
+    Validate the database is valid and the requested table in database is
+    also valid.
+    """
+    db_catalog_entry = catalog.get_database_catalog_entry(database_name)
+
+    if db_catalog_entry is not None:
+        handler = get_database_handler(
+            db_catalog_entry.engine, **db_catalog_entry.params
+        )
+        handler.connect()
+
+        # Get table definition.
+        resp = handler.get_tables()
+        if resp.error is not None:
+            error = "There is no table in data source {}. Create the table using native query.".format(
+                database_name,
+            )
+            logger.error(error)
+            raise BinderError(error)
+
+        # Check table existance.
+        table_df = resp.data
+        if table_name not in table_df["table_name"].values:
+            error = "Table {} does not exist in data source {}. Create the table using native query.".format(
+                table_name,
+                database_name,
+            )
+            logger.error(error)
+            raise BinderError(error)
+    else:
+        error = "{} data source does not exist. Create the new database source using CREATE DATABASE.".format(
+            database_name,
+        )
+        logger.error(error)
+        raise BinderError(error)
+
+
+def create_table_catalog_entry_for_data_source(
+    table_name: str, column_name_list: List[str]
+):
+    column_list = []
+    for column_name in column_name_list:
+        column_list.append(ColumnCatalogEntry(column_name, ColumnType.ANY))
+
+    # Assemble table.
+    table_catalog_entry = TableCatalogEntry(
+        name=table_name,
+        file_url=None,
+        table_type=TableType.NATIVE_DATA,
+        columns=column_list,
+    )
+    return table_catalog_entry
+
+
+def bind_table_info(catalog: CatalogManager, table_info: TableInfo):
     """
     Uses catalog to bind the table information .
 
@@ -64,60 +121,23 @@ def bind_table_info(
         bind_evadb_table_info(catalog, table_info)
 
 
-def bind_native_table_info(
-    catalog: CatalogManager, table_info: TableInfo
-):
+def bind_native_table_info(catalog: CatalogManager, table_info: TableInfo):
+    check_data_source_and_table_are_valid(
+        catalog, table_info.database_name, table_info.table_name
+    )
+
     db_catalog_entry = catalog.get_database_catalog_entry(table_info.database_name)
+    handler = get_database_handler(db_catalog_entry.engine, **db_catalog_entry.params)
+    handler.connect()
 
-    if db_catalog_entry is not None:
-        handler = get_database_handler(db_catalog_entry.engine)
-
-        # Get table definition.
-        resp = handler.get_tables()
-        if resp.error is not None:
-            error = "There is no table in data source {}. Create the table using native query.".format(
-                table_info.database_name,
-            )
-            logger.error(error)
-            raise BinderError(error)
-
-        # Check table existance.
-        table_df = resp.data
-        if table_info.table_name not in table_df["table_name"].values:
-            error = "Table {} does not exist in data source {}. Create the table using native query.".format(
-                table_info.table_name,
-                table_info.database_name,
-            )
-            logger.error(error)
-            raise BinderError(error)
-
-        # Assemble columns.
-        column_df = handler.get_columns(table_info.table_name).data
-        column_list = []
-        for column_name in column_df["column_name"]:
-            column_list.append(
-                ColumnCatalogEntry(column_name)
-            )
-
-        # Assemble table.
-        table_catalog_entry = TableCatalogEntry(
-            name=table_info.table_name,
-            table_type=TableType.NATIVE_DATA,
-            columns=column_list,
-        )
-        table_info.table_obj = table_catalog_entry
-
-    else:
-        error = "{} data source does not exist. Create the new database source using CREATE DATABASE.".format(
-            table_info.database_name,
-        )
-        logger.error(error)
-        raise BinderError(error)
+    # Assemble columns.
+    column_df = handler.get_columns(table_info.table_name).data
+    table_info.table_obj = create_table_catalog_entry_for_data_source(
+        table_info.table_name, list(column_df["column_name"])
+    )
 
 
-def bind_evadb_table_info(
-    catalog: CatalogManager, table_info: TableInfo
-):
+def bind_evadb_table_info(catalog: CatalogManager, table_info: TableInfo):
     obj = catalog.get_table_catalog_entry(
         table_info.table_name,
         table_info.database_name,
