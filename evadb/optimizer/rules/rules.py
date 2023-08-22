@@ -765,6 +765,33 @@ class LogicalCreateUDFToPhysical(Rule):
         yield after
 
 
+class LogicalCreateUDFFromSelectToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALCREATEUDF)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_CREATE_UDF_FROM_SELECT_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_CREATE_UDF_FROM_SELECT_TO_PHYSICAL
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalCreateUDF, context: OptimizerContext):
+        after = CreateUDFPlan(
+            before.name,
+            before.if_not_exists,
+            before.inputs,
+            before.outputs,
+            before.impl_path,
+            before.udf_type,
+            before.metadata,
+        )
+        for child in before.children:
+            after.append_child(child)
+        yield after
+
+
 class LogicalCreateIndexToVectorIndex(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALCREATEINDEX)

@@ -35,7 +35,10 @@ create_table: CREATE TABLE if_not_exists? table_name (create_definitions | (AS s
 rename_table: RENAME TABLE table_name TO table_name
     
 // Create UDFs
-create_udf: CREATE UDF if_not_exists? udf_name INPUT create_definitions OUTPUT create_definitions TYPE udf_type IMPL udf_impl udf_metadata* | CREATE UDF if_not_exists? udf_name IMPL udf_impl udf_metadata* | CREATE UDF if_not_exists? udf_name TYPE udf_type udf_metadata*
+create_udf: CREATE UDF if_not_exists? udf_name INPUT create_definitions OUTPUT create_definitions TYPE udf_type IMPL udf_impl udf_metadata*
+	| CREATE UDF if_not_exists? udf_name IMPL udf_impl udf_metadata* 
+	| CREATE UDF if_not_exists? udf_name TYPE udf_type udf_metadata*
+	| CREATE UDF if_not_exists? udf_name FROM LR_BRACKET select_statement RR_BRACKET TYPE udf_type udf_metadata*
 
 // Details
 udf_name: uid

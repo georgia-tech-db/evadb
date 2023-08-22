@@ -15,7 +15,7 @@ In this benchmark, we compare the performance of text summarization between EvaD
 
 .. note::
  
-   Install ray in your EvaDB virtual environment. ``pip install "ray>=1.13.0,<2.5.0"``
+   Install ray in your EvaDB virtual environment: ``pip install evadb[ray]``
    
 .. code-block:: bash
 

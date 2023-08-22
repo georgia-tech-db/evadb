@@ -160,35 +160,27 @@ jobs:
       
       - run:
           name: Install EvaDB package from GitHub repo with all dependencies
+          environment:
+            PY_VERSION: << parameters.v >>
+            RAY: << parameters.ray >>
           command: |
             "python<< parameters.v >>" -m venv test_evadb
             pip install --upgrade pip
             source test_evadb/bin/activate
-            pip install ".[dev]"
-
-      # Enable Ray (update evadb.yml file and install Ray package)
-      - when:
-          condition:
-            equal: [ ENABLED, << parameters.ray >> ]
-          steps:
-            - run:
-                name: Enable Ray setting in the config.yml file
-                command: |
-                  source test_evadb/bin/activate
-                  python -c "import yaml;f = open('evadb/evadb.yml', 'r+');config_obj = yaml.load(f, Loader=yaml.FullLoader);config_obj['experimental']['ray'] = True;f.seek(0);f.write(yaml.dump(config_obj));f.truncate();"
-                  pip install ".[ray]"
-      
-      # Install qdrant only on versions < 3.11
-      - when:
-          condition:
-            not:
-              equal: [ "3.11", << parameters.v >> ]
-          steps:
-            - run:
-                name: Install Qdrant
-                command: |
-                  source test_evadb/bin/activate
-                  pip install ".[qdrant]"
+            if [ $RAY = "ENABLED" ]; then
+              if [ $PY_VERSION != "3.11" ]; then
+                pip install ".[dev,ray,qdrant]"
+              else
+                pip install ".[dev]" # ray < 2.5.0 does not work with python 3.11 ray-project/ray#33864
+              fi
+              python -c "import yaml;f = open('evadb/evadb.yml', 'r+');config_obj = yaml.load(f, Loader=yaml.FullLoader);config_obj['experimental']['ray'] = True;f.seek(0);f.write(yaml.dump(config_obj));f.truncate();"
+            else
+              if [ $PY_VERSION != "3.11" ]; then
+                pip install ".[dev,ludwig,qdrant]"
+              else
+                pip install ".[dev]" # ray < 2.5.0 does not work with python 3.11 ray-project/ray#33864
+              fi
+            fi
 
       - run:
           name: Test and upload coverage report to coveralls
