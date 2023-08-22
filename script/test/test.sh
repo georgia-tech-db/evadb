@@ -76,7 +76,7 @@ then
     # Non-Windows
     if [[ "$OSTYPE" != "msys" ]];
     then
-        PYTHONPATH=./ pytest test/ --durations=20 --cov-report term-missing:skip-covered  --cov-config=.coveragerc --cov-context=test --cov=evadb/ --capture=sys --tb=short -v -rsf --log-level=WARNING -m "not benchmark"        
+        PYTHONPATH=./ pytest test/ --durations=20 --cov-report term-missing:skip-covered  --cov-config=.coveragerc --cov-context=test --cov=evadb/ --capture=sys --tb=short -v -rsf --log-level=WARNING -m "not benchmark" --ignore=test/third_party_tests
         test_code=$?
         if [ "$test_code" != "0" ];
         then
@@ -87,7 +87,7 @@ then
         fi
     # Windows -- no need for coverage report
     else
-        PYTHONPATH=./ python -m pytest -p no:cov test/ -m "not benchmark"
+        PYTHONPATH=./ python -m pytest -p no:cov test/ -m "not benchmark" --ignore=test/third_party_tests
         test_code=$?
         if [ "$test_code" != "0" ];
         then
