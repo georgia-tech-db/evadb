@@ -17,12 +17,11 @@ from typing import Iterator
 import pandas as pd
 
 from evadb.catalog.models.table_catalog import TableCatalogEntry
-from evadb.catalog.sql_config import IDENTIFIER_COLUMN
 from evadb.database import EvaDBDatabase
 from evadb.models.storage.batch import Batch
 from evadb.storage.abstract_storage_engine import AbstractStorageEngine
-from evadb.utils.logging_manager import logger
 from evadb.third_party.databases.interface import get_database_handler
+from evadb.utils.logging_manager import logger
 
 
 class NativeStorageEngine(AbstractStorageEngine):
@@ -35,17 +34,17 @@ class NativeStorageEngine(AbstractStorageEngine):
     def write(self, table: TableCatalogEntry, rows: Batch):
         pass
 
-    def read(
-        self, database_name: str, table: TableCatalogEntry
-    ) -> Iterator[Batch]:
+    def read(self, database_name: str, table: TableCatalogEntry) -> Iterator[Batch]:
         try:
-            db_catalog_entry = self.db.catalog().get_database_catalog_entry(database_name)
-            handler = get_database_handler(db_catalog_entry.engine, **db_catalog_entry.params)
+            db_catalog_entry = self.db.catalog().get_database_catalog_entry(
+                database_name
+            )
+            handler = get_database_handler(
+                db_catalog_entry.engine, **db_catalog_entry.params
+            )
             handler.connect()
 
             data_df = handler.execute_native_query(f"SELECT * FROM {table.name}").data
-            pk_df = pd.DataFrame({IDENTIFIER_COLUMN: [i + 1 for i in range(len(data_df))]})
-            data_df = pd.concat([data_df, pk_df], axis=1)
             yield Batch(pd.DataFrame(data_df))
 
         except Exception as e:

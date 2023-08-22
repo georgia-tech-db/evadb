@@ -29,54 +29,75 @@ class NativeExecutorTest(unittest.TestCase):
 
     def tearDown(self):
         shutdown_ray()
+        self._drop_table_in_native_database()
 
-    def _simple_execute(self):
-        # Create table.
+    def _create_table_in_native_database(self):
         execute_query_fetch_all(
             self.evadb,
             """USE test_data_source {
                 CREATE TABLE test_table (
                     name VARCHAR(10),
                     age INT,
-                    comment VARCHAR(100)
+                    comment VARCHAR (100)
                 )
-            };""",
+            }""",
         )
+
+    def _insert_value_into_native_database(self, col1, col2, col3):
         execute_query_fetch_all(
             self.evadb,
-            """USE test_data_source {
+            f"""USE test_data_source {{
                 INSERT INTO test_table (
                     name, age, comment
                 ) VALUES (
-                    'aa', 1, 'aaaa'
+                    '{col1}', {col2}, '{col3}'
                 )
-            }
-            """,
+            }}""",
         )
 
-        # Select.
+    def _drop_table_in_native_database(self):
+        execute_query_fetch_all(
+            self.evadb,
+            """USE test_data_source {
+                DROP TABLE IF EXISTS test_table
+            }""",
+        )
+
+    def _execute_evadb_query(self):
+        self._create_table_in_native_database()
+        self._insert_value_into_native_database("aa", 1, "aaaa")
+        self._insert_value_into_native_database("bb", 2, "bbbb")
+
+        res_batch = execute_query_fetch_all(
+            self.evadb,
+            "SELECT * FROM test_data_source.test_table",
+        )
+        self.assertEqual(len(res_batch), 2)
+        self.assertEqual(res_batch.frames["test_table.name"][0], "aa")
+        self.assertEqual(res_batch.frames["test_table.age"][0], 1)
+        self.assertEqual(res_batch.frames["test_table.name"][1], "bb")
+        self.assertEqual(res_batch.frames["test_table.age"][1], 2)
+
+        self._drop_table_in_native_database()
+
+    def _execute_native_query(self):
+        self._create_table_in_native_database()
+        self._insert_value_into_native_database("aa", 1, "aaaa")
+
         res_batch = execute_query_fetch_all(
             self.evadb,
             """USE test_data_source {
                 SELECT * FROM test_table
-            }
-            """,
+            }""",
         )
         self.assertEqual(len(res_batch), 1)
         self.assertEqual(res_batch.frames["name"][0], "aa")
         self.assertEqual(res_batch.frames["age"][0], 1)
         self.assertEqual(res_batch.frames["comment"][0], "aaaa")
 
-        # DROP table.
-        execute_query_fetch_all(
-            self.evadb,
-            """USE test_data_source {
-                DROP TABLE test_table
-            }
-            """,
-        )
+        self._drop_table_in_native_database()
 
-    def test_should_run_simple_query_in_postgres(self):
+    def test_should_run_query_in_postgres(self):
         # Create database.
         params = {
             "user": "eva",
@@ -85,11 +106,11 @@ class NativeExecutorTest(unittest.TestCase):
             "port": "5432",
             "database": "evadb",
         }
-        query = """CREATE DATABASE test_data_source
+        query = f"""CREATE DATABASE test_data_source
                     WITH ENGINE = "postgres",
-                    PARAMETERS = {};""".format(
-            params
-        )
+                    PARAMETERS = {params};"""
         execute_query_fetch_all(self.evadb, query)
 
-        self._simple_execute()
+        # Test executions.
+        self._execute_native_query()
+        self._execute_evadb_query()
