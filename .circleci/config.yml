@@ -185,6 +185,8 @@ jobs:
       - run:
           name: Test and upload coverage report to coveralls
           no_output_timeout: 30m # 30 minute timeout
+          environment:
+            PY_VERSION: << parameters.v >>
           command: |
             source test_evadb/bin/activate
             # https://github.com/pypa/setuptools/issues/3297#issuecomment-1113850079
