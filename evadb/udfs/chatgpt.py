@@ -58,7 +58,7 @@ class ChatGPT(AbstractUDF):
         If the user wants to retrieve the summary of each video, the ChatGPT UDF can be used as:
 
             query = "Generate the summary of the video"
-            cursor.table("video_transcripts").select(f"ChatGPT({question}, text)")
+            cursor.table("video_transcripts").select(f"ChatGPT({query}, text)")
 
         In the above UDF invocation, the 'query' passed would be the user task to generate video summaries, and the
         'content' passed would be the video transcripts that need to be used in order to generate the summary. Since
@@ -68,7 +68,7 @@ class ChatGPT(AbstractUDF):
         along with each query, a prompt can be set as such:
 
             prompt = "Generate your responses in 50 words or less. Also, generate the response in French."
-            cursor.table("video_transcripts").select(f"ChatGPT({question}, text, {prompt})")
+            cursor.table("video_transcripts").select(f"ChatGPT({query}, text, {prompt})")
 
         In the above invocation, an additional argument is passed as prompt. While the query and content arguments remain
         the same, the 'prompt' argument will be set as a system message in model params.
