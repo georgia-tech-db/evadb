@@ -249,7 +249,7 @@ jobs:
           name: Run integration tests
           command: |
              source test_evadb/bin/activate
-             PYTHONPATH="." python -m pytest test/third_party_tests/test_native_executor.py -k test_should_run_simple_query_in_postgres
+             PYTHONPATH="." python -m pytest test/third_party_tests/test_native_executor.py -k test_should_run_query_in_postgres
 
   Windows:
       executor: win/default

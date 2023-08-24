@@ -31,6 +31,10 @@ class TableType(EvaDBEnum):
     # cannot be accessed/modified directly by user
     SYSTEM_STRUCTURED_DATA  # noqa: F821
 
+    # Reserved for tables that are stored in native
+    # database backend.
+    NATIVE_DATA  # noqa: F821
+
 
 class ColumnType(EvaDBEnum):
     BOOLEAN  # noqa: F821
