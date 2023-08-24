@@ -78,3 +78,92 @@ div.sidebar-tree ul {
 .toc li {
     padding-left: 20px; /* Adjust the indentation value as needed */
  }
+
+
+ /* sphinx-panels overrides the content width to 1140 for large displays.*/
+@media (min-width: 1200px) {
+    .container, .container-lg, .container-md, .container-sm, .container-xl {
+        max-width: 1400px !important;
+    }
+}
+
+
+.image-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding-left: 16px;
+    padding-right:16px;
+    gap: 16px;
+}
+
+.info-box {
+    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
+    padding: 10px;
+}
+
+.info-box:hover{
+    /* box-shadow: 0px 4px 20px var(--orange);; */
+    outline: 2px solid var(--orange); /* Color change on hover */
+    cursor: pointer; /* Change cursor to pointer on hover */
+}
+
+.no-underline{
+    text-decoration: none;
+}
+.no-underline:hover{
+    text-decoration: none;
+}
+
+.icon-hover:hover{
+    height: 30px ;
+    width: 30px;
+}
+
+.info-box-2 {
+    background-color: #F9FAFB;
+    border-radius: 8px;
+    padding-right: 16px;
+    padding-left: 16px;
+    padding-bottom: 24px;
+    padding-top: 4px;
+}
+
+
+.bold-link {
+    color: #000000 !important;
+    font-weight: 600;
+}
+
+.community-box {
+    border: 1px solid #D2DCE6;
+    border-radius: 8px;
+    display: flex;
+    margin-bottom: 16px;
+}
+
+.community-box:hover {
+    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.05);
+    text-decoration: none;
+}
+
+.community-box p {
+    margin-top: 1rem !important;
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
+    grid-gap: 16px;
+}
+
+.grid-item {
+    border: 1px solid black;
+    padding: 20px;
+}
+
+.grid-item:hover {
+    background-color: var(--orange); /* Color change on hover */
+    cursor: pointer; /* Change cursor to pointer on hover */
+  }

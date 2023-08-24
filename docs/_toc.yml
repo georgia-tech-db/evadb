@@ -4,6 +4,7 @@ parts:
 
   - caption: Overview
     chapters:
+      - file: source/overview/getting-started
       - file: source/overview/installation
       - file: source/overview/faq
       - file: source/overview/concepts
