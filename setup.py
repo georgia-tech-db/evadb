@@ -74,7 +74,7 @@ document_libs = [
     "transformers",  # HUGGINGFACE
     "langchain",  # DATA LOADERS
     "faiss-cpu",  # DEFAULT VECTOR INDEX
-    "pymupdf",
+    "pymupdf<1.23.0", # The new release has issue
     "pdfminer.six",
     "sentence-transformers",
     "protobuf",

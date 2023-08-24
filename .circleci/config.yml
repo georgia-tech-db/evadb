@@ -191,7 +191,6 @@ jobs:
             source test_evadb/bin/activate
             # https://github.com/pypa/setuptools/issues/3297#issuecomment-1113850079
             if [[ $PY_VERSION = "3.10" ]] || [[ $PY_VERSION = "3.11" ]]; then
-              echo "Fall back to default lib"
               export SETUPTOOLS_USE_DISTUTILS=stdlib
             fi
             bash script/test/test.sh -m "<< parameters.mode >>"
