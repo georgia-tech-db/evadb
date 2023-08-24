@@ -28,7 +28,7 @@ create_database_engine_clause: WITH ENGINE "=" string_literal "," PARAMETERS "="
 
 create_index: CREATE INDEX uid ON table_name index_elem vector_store_type?
 
-create_table: CREATE TABLE if_not_exists? table_name (create_definitions | (AS select_statement))
+create_table: CREATE TABLE if_not_exists? table_name platform_name? token_input?(create_definitions | (AS select_statement))
     
 // Rename statements
 
@@ -61,6 +61,14 @@ index_elem: ("(" uid_list ")"
 create_definitions: "(" create_definition ("," create_definition)* ")"
 
 create_definition: uid column_definition          -> column_declaration
+
+platform_name: PLATFORM platform_sdk
+
+platform_sdk: string_literal
+
+token_input: TOKEN token
+
+token: string_literal
 
 column_definition: data_type column_constraint*
     
@@ -407,6 +415,10 @@ VIDEO:                "VIDEO"i
 IMAGE:                "IMAGE"i
 DOCUMENT:             "DOCUMENT"i
 PDF:                  "PDF"i
+
+// Application Support
+PLATFORM:             "PLATFORM"i
+TOKEN:                 "TOKEN"i
 
 // Index types
 HNSW:                                "HNSW"i
