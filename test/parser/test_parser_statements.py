@@ -32,6 +32,7 @@ class ParserStatementTests(unittest.TestCase):
                   Frame_Value FLOAT(1000, 201),
                   Frame_Array NDARRAY UINT8(5, 100, 2432, 4324, 100)
             )""",
+            "CREATE TABLE slacktable PLATFORM 'slack' TOKEN '1234' (id INTEGER);",
             "RENAME TABLE student TO student_info",
             "DROP TABLE IF EXISTS student_info",
             "DROP TABLE student_info",
