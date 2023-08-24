@@ -24,6 +24,7 @@ from evadb.parser.create_statement import (
     CreateDatabaseStatement,
     CreateTableStatement,
 )
+from evadb.parser.create_platform_table import CreatePlatformTableStatment
 from evadb.parser.table_ref import TableRef
 from evadb.parser.types import ColumnConstraintEnum
 
@@ -36,6 +37,8 @@ class CreateTable:
         table_info = None
         if_not_exists = False
         create_definitions = []
+        table_platform = None
+        table_token = None
         query = None
 
         for child in tree.children:
@@ -44,14 +47,23 @@ class CreateTable:
                     if_not_exists = True
                 elif child.data == "table_name":
                     table_info = self.visit(child)
+                elif child.data == "platform_name":
+                    table_platform = self.visit(child)
+                elif child.data == "token_input":
+                    table_token = self.visit(child)
                 elif child.data == "create_definitions":
                     create_definitions = self.visit(child)
                 elif child.data == "simple_select":
                     query = self.visit(child)
-
-        create_stmt = CreateTableStatement(
-            table_info, if_not_exists, create_definitions, query=query
-        )
+        
+        if table_platform == None:
+            create_stmt = CreateTableStatement(
+                table_info, if_not_exists, create_definitions, query=query
+            )
+        else:
+            create_stmt = CreatePlatformTableStatment(
+                table_info, if_not_exists, table_platform, table_token, create_definitions, query=query
+            )
         return create_stmt
 
     def create_definitions(self, tree):

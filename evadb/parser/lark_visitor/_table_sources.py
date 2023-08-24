@@ -37,6 +37,12 @@ class TableSources:
                 element = self.visit(child)
                 select_list.append(element)
         return select_list
+    
+    def platform_name(self, tree):
+        pass
+
+    def token_input(self, tree):
+        pass
 
     def table_sources(self, tree):
         return self.visit(tree.children[0])

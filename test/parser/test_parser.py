@@ -150,6 +150,19 @@ class ParserTests(unittest.TestCase):
 
         with self.assertRaises(Exception):
             parser.parse(create_index_query)
+    
+    def test_create_platform_table(self):
+        parser = Parser()
+
+        create_platform_query = (
+            "CREATE TABLE slacktable PLATFORM 'slack' TOKEN 'token1234' (id INTEGER);"
+        )
+
+        evadb_stmt_list = parser.parse(create_platform_query)
+
+        self.assertIsInstance(evadb_stmt_list, list)
+        self.assertEqual(len(evadb_stmt_list), 1)
+        self.assertEqual(evadb_stmt_list[0].stmt_type, StatementType.CREATE)
 
     def test_explain_dml_statement(self):
         parser = Parser()
