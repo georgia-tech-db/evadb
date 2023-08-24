@@ -14,7 +14,7 @@
 # limitations under the License.
 import os
 import shutil
-from typing import Dict
+from typing import Dict, List
 
 import pandas as pd
 
@@ -37,7 +37,7 @@ from pytube import YouTube, extract  # noqa: E402
 from youtube_transcript_api import YouTubeTranscriptApi  # noqa: E402
 
 MAX_CHUNK_SIZE = 10000
-DEFAULT_VIDEO_LINK = "https://www.youtube.com/watch?v=TvS1lHEQoKk"
+DEFAULT_VIDEO_LINK = "https://www.youtube.com/watch?v=-d-w1tL0WBk"
 
 APP_SOURCE_DIR = os.path.abspath(os.path.dirname(__file__))
 DEFAULT_VIDEO_PATH = os.path.join(APP_SOURCE_DIR, "benchmarks", "russia_ukraine.mp4")
@@ -55,7 +55,7 @@ def receive_user_input() -> Dict:
         user_input (dict): global configurations
     """
     print(
-        "🔮 Welcome to EvaDB! This app lets you ask questions on any local or YouTube online video.\nYou will only need to supply a Youtube URL and an OpenAI API key.\n\n"
+        "🔮 Welcome to EvaDB! This app lets you ask questions on any local or YouTube online video.\nYou will only need to supply a Youtube URL and an OpenAI API key.\n"
     )
     from_youtube = str(
         input(
@@ -68,7 +68,7 @@ def receive_user_input() -> Dict:
         # get Youtube video url
         video_link = str(
             input(
-                "📺 Enter the URL of the YouTube video (press Enter to use our default Youtube video URL): "
+                "🌐 Enter the URL of the YouTube video (press Enter to use our default Youtube video URL): "
             )
         )
 
@@ -78,7 +78,7 @@ def receive_user_input() -> Dict:
     else:
         video_local_path = str(
             input(
-                "📺 Enter the local path to your video (press Enter to use our demo video): "
+                "💽 Enter the local path to your video (press Enter to use our demo video): "
             )
         )
 
@@ -265,6 +265,19 @@ def generate_summary(cursor: evadb.EvaDBCursor):
     Args:
         cursor (EVADBCursor): evadb api cursor.
     """
+    transcript_list = cursor.table("Transcript").select("text").df()["transcript.text"]
+    if len(transcript_list) == 1:
+        summary = transcript_list[0]
+        df = pd.DataFrame([{"summary": summary}])
+        df.to_csv(SUMMARY_PATH)
+
+        cursor.drop_table("Summary", if_exists=True).execute()
+        cursor.query(
+            """CREATE TABLE IF NOT EXISTS Summary (summary TEXT(100));"""
+        ).execute()
+        cursor.load(SUMMARY_PATH, "Summary", "csv").execute()
+        return
+
     generate_summary_rel = cursor.table("Transcript").select(
         "ChatGPT('summarize the video in detail', text)"
     )
@@ -335,7 +348,46 @@ def generate_response(cursor: evadb.EvaDBCursor, question: str) -> str:
         )
 
 
-def generate_blog_post(cursor: evadb.EvaDBCursor) -> str:
+def generate_blog_sections(cursor: evadb.EvaDBCursor) -> List:
+    """Generates logical sections of the blog post.
+
+    Args:
+        cursor (EVADBCursor): evadb api cursor.
+
+    Returns
+        List: list of blog sections
+    """
+    sections_query = (
+        "list 7 logical sections of a blog post from the transcript as a python list"
+    )
+    sections_string = str(
+        cursor.table("Summary")
+        .select(f"ChatGPT('{sections_query}', summary)")
+        .df()["chatgpt.response"][0]
+    )
+    begin = sections_string.find("[")
+    end = sections_string.find("]")
+    assert begin != -1 and end != -1, "cannot infer blog sections."
+
+    sections_string = sections_string[begin + 1 : end]
+    sections_string = sections_string.replace("\n", "")
+    sections_string = sections_string.replace("\t", "")
+    sections_string = sections_string.replace('"', "")
+
+    sections = sections_string.split(",")
+    for i in range(len(sections)):
+        sections[i] = sections[i].strip()
+    print(sections)
+    return sections
+
+
+def generate_blog_post(cursor: evadb.EvaDBCursor):
+    """Generates blog post.
+
+    Args:
+        cursor (EVADBCursor): evadb api cursor.
+    """
+
     to_generate = str(
         input("\nWould you like to generate a blog post based on the video? (yes/no): ")
     )
@@ -346,11 +398,47 @@ def generate_blog_post(cursor: evadb.EvaDBCursor) -> str:
             generate_summary(cursor)
 
         # use llm to generate blog post
-        generate_blog_rel = cursor.table("Summary").select(
-            "ChatGPT('generate a long detailed blog post of the video summary in markdown format that has sections and hyperlinks', summary)"
+        sections = generate_blog_sections(cursor)
+
+        title_query = "generate a creative title of a blog post from the transcript"
+        generate_title_rel = cursor.table("Summary").select(
+            f"ChatGPT('{title_query}', summary)"
         )
-        responses = generate_blog_rel.df()["chatgpt.response"]
-        blog = responses[0]
+        blog = "# " + generate_title_rel.df()["chatgpt.response"][0].replace('"', "")
+
+        i = 1
+        for section in sections:
+            print(f"--⏳ Generating body ({i}/{len(sections)})...")
+            if "introduction" in section.lower():
+                section_query = f"write a section about {section} from transcript"
+                section_prompt = "generate response in markdown format and highlight important technical terms with hyperlinks"
+            elif "conclusion" in section.lower():
+                section_query = "write a creative conclusion from transcript"
+                section_prompt = "generate response in markdown format"
+            else:
+                section_query = (
+                    f"write a single detailed section about {section} from transcript"
+                )
+                section_prompt = "generate response in markdown format with information from the internet"
+
+            generate_section_rel = cursor.table("Summary").select(
+                f"ChatGPT('{section_query}', summary, '{section_prompt}')"
+            )
+
+            generated_section = generate_section_rel.df()["chatgpt.response"][0]
+            print(generated_section)
+            blog += "\n" + generated_section + "\n"
+            i += 1
+
+        source_query = (
+            "generate a short list of keywords for the transcript with hyperlinks"
+        )
+        source_prompt = "generate response in markdown format"
+        print("--⏳ Wrapping up...")
+        generate_source_rel = cursor.table("Summary").select(
+            f"ChatGPT('{source_query}', summary, '{source_prompt}')"
+        )
+        blog += "\n## Sources\n" + generate_source_rel.df()["chatgpt.response"][0]
         print(blog)
 
         if os.path.exists(BLOG_PATH):
@@ -359,13 +447,11 @@ def generate_blog_post(cursor: evadb.EvaDBCursor) -> str:
         with open(BLOG_PATH, "w") as file:
             file.write(blog)
 
-        print(f"✅ blog post is saved to file {BLOG_PATH}")
+        print(f"✅ blog post is saved to file {os.path.abspath(BLOG_PATH)}")
 
 
 def cleanup():
     """Removes any temporary file / directory created by EvaDB."""
-    if os.path.exists(ONLINE_VIDEO_PATH):
-        os.remove(ONLINE_VIDEO_PATH)
     if os.path.exists("evadb_data"):
         shutil.rmtree("evadb_data")
 

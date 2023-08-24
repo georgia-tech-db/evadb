@@ -48,7 +48,9 @@ class StatementBinderTests(unittest.TestCase):
             tableref.is_table_atom.return_value = True
             binder._bind_tableref(tableref)
             mock.assert_called_with(
-                tableref.alias.alias_name, tableref.table.table_name
+                tableref.alias.alias_name,
+                tableref.table.database_name,
+                tableref.table.table_name,
             )
             mock_bind_table_info.assert_called_once_with(catalog(), tableref.table)
 
@@ -176,7 +178,6 @@ class StatementBinderTests(unittest.TestCase):
             udf_obj.impl_file_path, udf_obj.name
         )
         self.assertEqual(func_expr.output_objs, [obj1])
-        print(str(func_expr.alias))
         self.assertEqual(
             func_expr.alias,
             Alias("func_expr", ["out1"]),
