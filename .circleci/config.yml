@@ -185,8 +185,14 @@ jobs:
       - run:
           name: Test and upload coverage report to coveralls
           no_output_timeout: 30m # 30 minute timeout
+          environment:
+            PY_VERSION: << parameters.v >>
           command: |
             source test_evadb/bin/activate
+            # https://github.com/pypa/setuptools/issues/3297#issuecomment-1113850079
+            if [[ $PY_VERSION = "3.10" ]] || [[ $PY_VERSION = "3.11" ]]; then
+              export SETUPTOOLS_USE_DISTUTILS=stdlib
+            fi
             bash script/test/test.sh -m "<< parameters.mode >>"
 
       # Enable cache save conditionally (to avoid empty cache in Notebooks)
