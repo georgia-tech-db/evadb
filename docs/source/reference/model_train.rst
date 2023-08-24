@@ -37,6 +37,12 @@ You can also simply give all other columns in `HomeRentals` as inputs and let th
 
    CREATE PredictHouseRent(sqft, location) FROM HomeRentals;
 
+You can also simply give all columns in `HomeRentals` as inputs for inference. The customized UDF with the underlying model can figure out the proper inference columns via the training columns.
+
+.. code-block:: sql
+
+   CREATE PredictHouseRent(*) FROM HomeRentals;
+
 Check out our `Integration Tests <https://github.com/georgia-tech-db/evadb/blob/master/test/integration_tests/test_model_train.py>`_ for working example.
 
 
