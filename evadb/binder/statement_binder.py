@@ -217,7 +217,7 @@ class StatementBinder:
         if node.is_table_atom():
             # Table
             self._binder_context.add_table_alias(
-                node.alias.alias_name, node.table.table_name
+                node.alias.alias_name, node.table.database_name, node.table.table_name
             )
             bind_table_info(self._catalog(), node.table)
         elif node.is_select():

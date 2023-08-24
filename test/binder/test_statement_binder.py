@@ -51,7 +51,9 @@ class StatementBinderTests(unittest.TestCase):
             tableref.is_table_atom.return_value = True
             binder._bind_tableref(tableref)
             mock.assert_called_with(
-                tableref.alias.alias_name, tableref.table.table_name
+                tableref.alias.alias_name,
+                tableref.table.database_name,
+                tableref.table.table_name,
             )
             mock_bind_table_info.assert_called_once_with(catalog(), tableref.table)
 

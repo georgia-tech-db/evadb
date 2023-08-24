@@ -51,6 +51,24 @@ class ParserTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+    def test_select_from_data_source(self):
+        parser = Parser()
+
+        query = "SELECT * FROM DemoDB.DemoTable"
+        evadb_stmt_list = parser.parse(query)
+
+        # check stmt itself
+        self.assertIsInstance(evadb_stmt_list, list)
+        self.assertEqual(len(evadb_stmt_list), 1)
+        self.assertEqual(evadb_stmt_list[0].stmt_type, StatementType.SELECT)
+
+        # from_table
+        select_stmt = evadb_stmt_list[0]
+        self.assertIsNotNone(select_stmt.from_table)
+        self.assertIsInstance(select_stmt.from_table, TableRef)
+        self.assertEqual(select_stmt.from_table.table.table_name, "DemoTable")
+        self.assertEqual(select_stmt.from_table.table.database_name, "DemoDB")
+
     def test_use_statement(self):
         parser = Parser()
 

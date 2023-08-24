@@ -50,7 +50,7 @@ class StatementBinderTests(unittest.TestCase):
         ctx = StatementBinderContext(mock_catalog)
 
         mock_check = ctx._check_duplicate_alias = MagicMock()
-        ctx.add_table_alias("alias", "table_name")
+        ctx.add_table_alias("alias", None, "table_name")
         mock_check.assert_called_with("alias")
         mock_get.assert_called_with("table_name")
         self.assertEqual(ctx._table_alias_map["alias"], "table_obj")
@@ -127,9 +127,10 @@ class StatementBinderTests(unittest.TestCase):
         mock_get_column_object.return_value = "catalog_value"
         # key exists
         ctx = StatementBinderContext(mock_catalog)
-        ctx._table_alias_map["alias"] = "table_obj"
+        table_obj = MagicMock()
+        ctx._table_alias_map["alias"] = table_obj
         result = ctx._check_table_alias_map("alias", "col_name")
-        mock_get_column_object.assert_called_once_with("table_obj", "col_name")
+        mock_get_column_object.assert_called_once_with(table_obj, "col_name")
         self.assertEqual(result, "catalog_value")
 
         # key does not exist
