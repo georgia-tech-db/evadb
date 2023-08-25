@@ -21,15 +21,13 @@ from langchain.document_loaders import UnstructuredURLLoader
 
 import evadb
 
-CHATGPT_UDF_PATH = "../../evadb/udfs/chatgpt.py"
-
 DEFAULT_URL = "https://alphasec.io/what-are-passkeys/"
 
 
 def cleanup():
     """Removes any temporary file / directory created by EvaDB."""
-    if os.path.exists("transcript.csv"):
-        os.remove("transcript.csv")
+    if os.path.exists("summary.csv"):
+        os.remove("summary.csv")
     if os.path.exists("evadb_data"):
         shutil.rmtree("evadb_data")
 
@@ -58,18 +56,18 @@ if __name__ == "__main__":
         url_data = UnstructuredURLLoader(urls=[url_link]).load()
 
         df = pd.DataFrame({"text": [url_data]})
-        df.to_csv("transcript.csv")
+        df.to_csv("summary.csv")
         print(df)
 
         print("📶 Establishing evadb api cursor connection.")
         cursor = evadb.connect().cursor()
 
-        # Load chunked transcript into table
+        # Load summary into table
         cursor.drop_table("URL_Summary", if_exists=True).execute()
         cursor.query(
             """CREATE TABLE IF NOT EXISTS URL_Summary (text TEXT(4096));"""
         ).execute()
-        cursor.load("transcript.csv", "URL_Summary", "csv").execute()
+        cursor.load("summary.csv", "URL_Summary", "csv").execute()
 
         # Generate summary with chatgpt udf
         print("⏳ Generating Summary (may take a while)... \n")
