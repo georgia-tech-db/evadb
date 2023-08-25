@@ -44,13 +44,13 @@ unit_test() {
 }
 
 short_integration_test() {
-  PYTHONPATH=./ python -m pytest test/integration/short/ -p no:cov -m "not benchmark"
+  PYTHONPATH=./ python -m pytest test/integration_tests/short/ -p no:cov -m "not benchmark"
   code=$?
   print_error_code $code "SHORT INTEGRATION TEST"
 }
 
 long_integration_test() {
-  PYTHONPATH=./ python -m pytest test/integration/long/ -p no:cov -m "not benchmark"
+  PYTHONPATH=./ python -m pytest test/integration_tests/long/ -p no:cov -m "not benchmark"
   code=$?
   print_error_code $code "LONG INTEGRATION TEST"
 }
