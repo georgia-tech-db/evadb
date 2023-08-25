@@ -126,7 +126,7 @@ topNavContent.append(topNavContentLeft);
 
 topNavContentRight = document.createElement("div");
 topNavContentRight.setAttribute("class", "image-header");
-topNavContentRight.innerHTML = "<a href='https://github.com/georgia-tech-db/evadb'><img class='icon-hover' src='_static/icons/github.png' width='25px' height='25px'></a> <a href='https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg'><img class='icon-hover' src='_static/icons/slack.png' width='25px' height='25px'> </a><a href='https://twitter.com/evadb_ai'> <img class='icon-hover' src='_static/icons/twitter.png' width='25px' height='25px'> </a>"
+topNavContentRight.innerHTML = "<a href='https://github.com/georgia-tech-db/evadb'><img class='icon-hover' src='https://raw.githubusercontent.com/georgia-tech-db/evadb/master/docs/_static/icons/github.png' width='25px' height='25px'></a> <a href='https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg'><img class='icon-hover' src='https://raw.githubusercontent.com/georgia-tech-db/evadb/master/docs/_static/icons/slack.png' width='25px' height='25px'> </a><a href='https://twitter.com/evadb_ai'> <img class='icon-hover' src='https://raw.githubusercontent.com/georgia-tech-db/evadb/master/docs/_static/icons/twitter.png' width='25px' height='25px'> </a>"
 
 topNavContent.append(topNavContentRight)
 
