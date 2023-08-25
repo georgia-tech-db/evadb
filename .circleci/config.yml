@@ -156,10 +156,15 @@ jobs:
 
       - checkout
 
+      # Restore pip wheel
+      - restore_cache:
+          keys:
+            - v1-pip-wheel_cache-python<< parameters.v >>-ray<< parameters.ray >>-{{ checksum "setup.py" }}
+
+      # Restore model
       - restore_cache:
           keys:
             - v1-model_cache-{{ checksum "setup.py" }}
-            - v1-pip-wheel_cache-python<< parameters.v >>-ray<< parameters.ray >>-{{ checksum "setup.py" }}
       
       - run:
           name: Install EvaDB package from GitHub repo with all dependencies
