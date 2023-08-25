@@ -19,6 +19,10 @@
     max-width: 20%;
 }
 
+.sidebar-brand-text {
+    font-size: 17px; /* Adjust the value as needed */
+  }
+
 /* --------- misc --------- */
 
 p.rubric {
@@ -259,10 +263,21 @@ div.sidebar-tree .toctree-l2>.reference:hover {
 }
 
 /* Special styling for the evadb logo */
-.top-nav-content .left > a.evadb-logo {
+/* .top-nav-content .left > a.evadb-logo {
     width: 90px;
-    height: 20px;
+    height: 25px;
     padding: 10px 12px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 0px;
+} */
+
+.top-nav-content .left > a.evadb-logo {
+    width: 150px;
+    height: 34px;
+    padding: 1px 10px;
     overflow: hidden;
     display: flex;
     align-items: center;
