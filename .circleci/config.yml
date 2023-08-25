@@ -87,6 +87,11 @@ workflows:
         ################################
         - Postgres:
             name: Third Party Test - Postgres | v3.10 | Linux
+            filters:
+              branches:
+                only: 
+                  - master
+                  - staging
         ################################
         ### NOTEBOOKS: Staging, Master
         ################################
