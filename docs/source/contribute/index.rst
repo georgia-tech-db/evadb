@@ -1,5 +1,5 @@
 Contributing
-----
+----------------
 
 We welcome all kinds of contributions to EvaDB.
 
@@ -7,9 +7,10 @@ We welcome all kinds of contributions to EvaDB.
 -  `Improving documentation <https://github.com/georgia-tech-db/evadb/tree/master/docs>`_
 -  `Tutorials and applications <https://github.com/georgia-tech-db/evadb/tree/master/tutorials>`_
 -  New features
+-  :doc:`New features <source/contribute/index>`
 
 Setting up the Development Environment
-=====
+=====================================================
 
 First, you will need to checkout the repository from GitHub and build EvaDB from
 the source. Follow the following instructions to build EvaDB locally. We recommend using a virtual environment and the pip package manager. 
@@ -33,7 +34,7 @@ After installing the package locally, you can make changes and run the test case
 
 
 Testing
-====
+=========
 
 Check if your local changes broke any unit or integration tests by running the following script:
 
@@ -55,7 +56,7 @@ file.
    python -m pytest test/integration_tests/test_select_executor.py -k 'test_should_load_and_select_in_table'
 
 Submitting a Contribution
-====
+============================
 
 Follow the following steps to contribute to EvaDB:
 
@@ -76,7 +77,7 @@ Follow the following steps to contribute to EvaDB:
       python script/formatting/formatter.py 
 
 Code Style
-====
+============
 
 We use the `black <https://github.com/psf/black>`__ code style for
 formatting the Python code. For docstrings and documentation, we use
@@ -97,7 +98,7 @@ formatting the Python code. For docstrings and documentation, we use
            bool: The return value. True for success, False otherwise.
 
 Debugging
-====
+============
 
 We recommend using Visual Studio Code with a debugger for developing EvaDB. Here are the steps for setting up the development environment:
 
@@ -115,12 +116,12 @@ We recommend using Visual Studio Code with a debugger for developing EvaDB. Here
    :width: 1200
 
 Architecture Diagram
-====
+========================
 
 .. image:: ../../images/evadb/evadb-arch.png
    :width: 1200
 
 Troubleshooting
-====
+====================
 
 If the test suite fails with a `PermissionDenied` exception, update the `path_prefix` attribute under the `storage` section in the EvaDB configuration file (``~/.evadb/evadb.yml``) to a directory where you have write privileges.

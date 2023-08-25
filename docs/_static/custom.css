@@ -59,7 +59,11 @@ div.sidebar-tree .caption>.reference {
 
 div.sidebar-tree .toctree-l1>.current.reference.internal {
     color: var(--orange); /* Set your desired background color */
-  }
+}
+
+div.sidebar-tree .toctree-l2>.current.reference.internal {
+    color: var(--orange); /* Set your desired background color */
+}
 
 div.sidebar-tree .toctree-l1>.reference {
     color: #646776;
@@ -69,7 +73,9 @@ div.sidebar-tree .toctree-l1>.reference:hover {
     color: var(--orange);
 }
 
-
+div.sidebar-tree .toctree-l2>.reference:hover {
+    color: var(--orange);
+}
 
 /* div.sidebar-tree ul {
     border-bottom: 1px solid var(--orange);
