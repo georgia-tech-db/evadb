@@ -2,7 +2,10 @@
 /****  CUSTOM CSS FOR EvaDB  ****/
 /******************************/
 
-:root {
+ /* Insipred  by https://github.com/ray-project/ray/blob/692428a67e65d2f055f828ed6331cf5fbe732b02/doc/source/_static/css/custom.css */
+
+
+ :root {
     --orange: #FF9300;
 }
 
@@ -13,7 +16,7 @@
 }
 
 .sidebar-logo {
-    max-width: 80%;
+    max-width: 20%;
 }
 
 /* --------- misc --------- */
@@ -50,17 +53,27 @@ article table.align-default {
 
 /* --------- TOC sidebar --------- */
 
+div.sidebar-tree .caption>.reference {
+    color: #646776;
+}
+
+div.sidebar-tree .toctree-l1>.current.reference.internal {
+    color: var(--orange); /* Set your desired background color */
+  }
+
 div.sidebar-tree .toctree-l1>.reference {
-    color: #666;
+    color: #646776;
 }
 
 div.sidebar-tree .toctree-l1>.reference:hover {
     color: var(--orange);
 }
 
-div.sidebar-tree ul {
+
+
+/* div.sidebar-tree ul {
     border-bottom: 1px solid var(--orange);
-}
+} */
 
 /* --------- furniture --------- */
 
@@ -167,3 +180,146 @@ div.sidebar-tree ul {
     background-color: var(--orange); /* Color change on hover */
     cursor: pointer; /* Change cursor to pointer on hover */
   }
+
+
+
+
+.topnav {
+    /* background-color: white; */
+    border-bottom: 1px solid rgba(0, 0, 0, .1);
+    display: flex;
+    align-items: center;
+}
+
+/* Content wrapper for the unified nav link / menus */
+.top-nav-content {
+    max-width: 1400px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+@media (max-width: 900px) {
+  /* If the window is too small, hide the custom sticky navigation bar at the top of the page.
+
+  */
+    .top-nav-content {
+        display: none;
+    }
+    div.header-article.row.announcement-content.noprint {
+      position: sticky;
+      top: 0;
+    }
+}
+
+
+
+
+/* Styling the links and menus in the top nav */
+.top-nav-content a {
+    text-decoration: none;
+    color: black;
+    font-size: 17px;
+}
+
+.top-nav-content a:hover {
+    color: var(--orange);
+}
+
+/* The left part are the links and menus */
+.top-nav-content > .left {
+    display: flex;
+    white-space: nowrap;
+}
+
+.top-nav-content .left > * {
+    margin-right: 8px;
+}
+
+.top-nav-content .left > a,
+.top-nav-content .left > .menu > a {
+    text-align: center;
+    padding: 10px 12px;
+    /* border-bottom: 2px solid white; */
+}
+
+.top-nav-content .menu:hover > a,
+.top-nav-content .left > a:hover {
+    border-bottom: 2px solid var(--orange);
+}
+
+/* Special styling for the evadb logo */
+.top-nav-content .left > a.evadb-logo {
+    width: 90px;
+    height: 20px;
+    padding: 10px 12px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 0px;
+}
+
+.top-nav-content .left > a.evadb-logo:hover {
+    border-bottom: 0px solid white;
+}
+
+.evadb-logo svg {
+    max-width: 100%;
+    max-height: 100%;
+  }
+  
+  
+  
+  
+/* Styling the dropdown menus */
+.top-nav-content .menu {
+    display: flex;
+}
+.top-nav-content .menu > a > .down-caret {
+    margin-left: 8px;
+}
+.top-nav-content .menu > ul {
+    display: none;
+}
+
+
+.top-nav-content .menu:hover > ul {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    box-shadow: 0 5px 15px 0 rgb(0 0 0 / 10%);
+    padding: 15px;
+    width: 330px;
+    position: absolute;
+    z-index: 2000;
+    background-color: white;
+    top: 58px;
+}
+
+.top-nav-content .menu:hover > ul > li {
+    list-style: none;
+    padding: 5px 0;
+}
+
+.top-nav-content .menu:hover > ul > li span {
+    display: block;
+}
+
+.top-nav-content .menu:hover > ul > li span.secondary {
+    color: #787878;
+}
+
+
+/* Remove flicker for announcement top bar replacement */
+.announcement {
+    background-color: white;
+    color: white;
+    padding: 0;
+}
+
+
