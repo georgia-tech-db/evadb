@@ -14,12 +14,18 @@
 # limitations under the License.
 from typing import Callable, Dict, List, Tuple, Union
 
-from evadb.binder.binder_utils import BinderError
+from evadb.binder.binder_utils import (
+    BinderError,
+    check_data_source_and_table_are_valid,
+    create_table_catalog_entry_for_data_source,
+)
+from evadb.catalog.catalog_type import TableType
 from evadb.catalog.models.column_catalog import ColumnCatalogEntry
 from evadb.catalog.models.table_catalog import TableCatalogEntry
 from evadb.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 from evadb.expression.function_expression import FunctionExpression
 from evadb.expression.tuple_value_expression import TupleValueExpression
+from evadb.third_party.databases.interface import get_database_handler
 from evadb.utils.logging_manager import logger
 
 CatalogColumnType = Union[ColumnCatalogEntry, UdfIOCatalogEntry]
@@ -64,7 +70,7 @@ class StatementBinderContext:
             logger.error(err_msg)
             raise BinderError(err_msg)
 
-    def add_table_alias(self, alias: str, table_name: str):
+    def add_table_alias(self, alias: str, database_name: str, table_name: str):
         """
         Add a alias -> table_name mapping
         Arguments:
@@ -72,7 +78,26 @@ class StatementBinderContext:
             table_name (str): name of the table
         """
         self._check_duplicate_alias(alias)
-        table_obj = self._catalog().get_table_catalog_entry(table_name)
+
+        if database_name is not None:
+            check_data_source_and_table_are_valid(
+                self._catalog(), database_name, table_name
+            )
+
+            db_catalog_entry = self._catalog().get_database_catalog_entry(database_name)
+            handler = get_database_handler(
+                db_catalog_entry.engine, **db_catalog_entry.params
+            )
+            handler.connect()
+
+            # Assemble columns.
+            column_df = handler.get_columns(table_name).data
+            table_obj = create_table_catalog_entry_for_data_source(
+                table_name, list(column_df["column_name"])
+            )
+        else:
+            table_obj = self._catalog().get_table_catalog_entry(table_name)
+
         self._table_alias_map[alias] = table_obj
 
     def add_derived_table_alias(
@@ -143,8 +168,13 @@ class StatementBinderContext:
             column object
         """
         table_obj = self._table_alias_map.get(alias, None)
-        if table_obj:
-            return self._catalog().get_column_catalog_entry(table_obj, col_name)
+        if table_obj is not None:
+            if table_obj.table_type == TableType.NATIVE_DATA:
+                for column_catalog_entry in table_obj.columns:
+                    if column_catalog_entry.name == col_name:
+                        return column_catalog_entry
+            else:
+                return self._catalog().get_column_catalog_entry(table_obj, col_name)
 
     def _check_derived_table_alias_map(self, alias, col_name) -> CatalogColumnType:
         """

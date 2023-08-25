@@ -19,8 +19,11 @@ from evadb.binder.binder_utils import BinderError
 from evadb.binder.statement_binder import StatementBinder
 from evadb.binder.statement_binder_context import StatementBinderContext
 from evadb.catalog.catalog_type import ColumnType, NdArrayType
+from evadb.catalog.models.utils import ColumnCatalogEntry
+from evadb.catalog.sql_config import IDENTIFIER_COLUMN
 from evadb.expression.tuple_value_expression import TupleValueExpression
 from evadb.parser.alias import Alias
+from evadb.parser.create_statement import ColumnDefinition
 
 
 class StatementBinderTests(unittest.TestCase):
@@ -48,7 +51,9 @@ class StatementBinderTests(unittest.TestCase):
             tableref.is_table_atom.return_value = True
             binder._bind_tableref(tableref)
             mock.assert_called_with(
-                tableref.alias.alias_name, tableref.table.table_name
+                tableref.alias.alias_name,
+                tableref.table.database_name,
+                tableref.table.table_name,
             )
             mock_bind_table_info.assert_called_once_with(catalog(), tableref.table)
 
@@ -176,7 +181,6 @@ class StatementBinderTests(unittest.TestCase):
             udf_obj.impl_file_path, udf_obj.name
         )
         self.assertEqual(func_expr.output_objs, [obj1])
-        print(str(func_expr.alias))
         self.assertEqual(
             func_expr.alias,
             Alias("func_expr", ["out1"]),
@@ -307,3 +311,81 @@ class StatementBinderTests(unittest.TestCase):
                 binder._bind_create_index_statement(create_index_statement)
             col.array_dimensions = [1, 10]
             binder._bind_create_index_statement(create_index_statement)
+
+    def test_bind_create_udf_should_raise(self):
+        with patch.object(StatementBinder, "bind"):
+            create_udf_statement = MagicMock()
+            create_udf_statement.query.target_list = []
+            create_udf_statement.metadata = []
+            binder = StatementBinder(StatementBinderContext(MagicMock()))
+            with self.assertRaises(AssertionError):
+                binder._bind_create_udf_statement(create_udf_statement)
+
+    def test_bind_create_udf_should_drop_row_id(self):
+        with patch.object(StatementBinder, "bind"):
+            create_udf_statement = MagicMock()
+            row_id_col_obj = ColumnCatalogEntry(
+                name=IDENTIFIER_COLUMN,
+                type=MagicMock(),
+                array_type=MagicMock(),
+                array_dimensions=MagicMock(),
+            )
+            input_col_obj = ColumnCatalogEntry(
+                name="input_column",
+                type=MagicMock(),
+                array_type=MagicMock(),
+                array_dimensions=MagicMock(),
+            )
+            output_col_obj = ColumnCatalogEntry(
+                name="predict_column",
+                type=MagicMock(),
+                array_type=MagicMock(),
+                array_dimensions=MagicMock(),
+            )
+            create_udf_statement.query.target_list = [
+                TupleValueExpression(
+                    name=IDENTIFIER_COLUMN, table_alias="a", col_object=row_id_col_obj
+                ),
+                TupleValueExpression(
+                    name="input_column", table_alias="a", col_object=input_col_obj
+                ),
+                TupleValueExpression(
+                    name="predict_column", table_alias="a", col_object=output_col_obj
+                ),
+            ]
+            create_udf_statement.metadata = [("predict", "predict_column")]
+            binder = StatementBinder(StatementBinderContext(MagicMock()))
+            binder._bind_create_udf_statement(create_udf_statement)
+
+            self.assertEqual(
+                create_udf_statement.query.target_list,
+                [
+                    TupleValueExpression(
+                        name="input_column", table_alias="a", col_object=input_col_obj
+                    ),
+                    TupleValueExpression(
+                        name="predict_column",
+                        table_alias="a",
+                        col_object=output_col_obj,
+                    ),
+                ],
+            )
+
+            expected_inputs = [
+                ColumnDefinition(
+                    "input_column",
+                    input_col_obj.type,
+                    input_col_obj.array_type,
+                    input_col_obj.array_dimensions,
+                )
+            ]
+            expected_outputs = [
+                ColumnDefinition(
+                    "predict_column_predictions",
+                    output_col_obj.type,
+                    output_col_obj.array_type,
+                    output_col_obj.array_dimensions,
+                )
+            ]
+            self.assertEqual(create_udf_statement.inputs, expected_inputs)
+            self.assertEqual(create_udf_statement.outputs, expected_outputs)

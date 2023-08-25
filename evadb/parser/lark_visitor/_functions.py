@@ -85,7 +85,7 @@ class Functions:
                     udf_type = self.visit(child)
                 elif child.data == "udf_impl":
                     impl_path = self.visit(child).value
-                elif child.data == "select_statement":
+                elif child.data == "simple_select":
                     query = self.visit(child)
                 elif child.data == "udf_metadata":
                     # Each UDF metadata is a key value pair

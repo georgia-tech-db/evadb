@@ -118,6 +118,12 @@ class SelectExecutorTest(unittest.TestCase):
         expected_batch = list(create_dummy_batches())
         self.assertEqual([actual_batch], expected_batch)
 
+    def test_should_raise_binder_error_on_native_datasource(self):
+        select_query = "SELECT * FROM test.MyVideo"
+        self.assertRaises(
+            BinderError, execute_query_fetch_all, self.evadb, select_query
+        )
+
     def test_should_select_star_in_table(self):
         select_query = "SELECT * FROM MyVideo;"
         actual_batch = execute_query_fetch_all(self.evadb, select_query)

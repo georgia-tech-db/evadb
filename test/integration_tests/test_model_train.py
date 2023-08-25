@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+from test.markers import ludwig_skip_marker
 from test.util import get_evadb_for_testing, shutdown_ray
 
 import pytest
@@ -53,25 +54,14 @@ class ModelTrainTests(unittest.TestCase):
         # clean up
         execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS HomeRentals;")
 
+    @ludwig_skip_marker
     def test_ludwig_automl(self):
-        select_query = """
-            SELECT
-                number_of_rooms,
-                number_of_bathrooms,
-                sqft,
-                location,
-                days_on_market,
-                initial_price,
-                neighborhood,
-                rental_price
-            FROM HomeRentals
-        """
-        create_predict_udf = f"""
+        create_predict_udf = """
             CREATE UDF IF NOT EXISTS PredictHouseRent FROM
-            ({select_query})
+            ( SELECT * FROM HomeRentals )
             TYPE Ludwig
             'predict' 'rental_price'
-            'time_limit' 60;
+            'time_limit' 120;
         """
         execute_query_fetch_all(self.evadb, create_predict_udf)
 

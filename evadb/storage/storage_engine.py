@@ -18,6 +18,7 @@ from evadb.database import EvaDBDatabase
 from evadb.storage.abstract_storage_engine import AbstractStorageEngine
 from evadb.storage.document_storage_engine import DocumentStorageEngine
 from evadb.storage.image_storage_engine import ImageStorageEngine
+from evadb.storage.native_storage_engine import NativeStorageEngine
 from evadb.storage.pdf_storage_engine import PDFStorageEngine
 from evadb.storage.sqlite_storage_engine import SQLStorageEngine
 from evadb.storage.video_storage_engine import DecordStorageEngine
@@ -35,6 +36,7 @@ class StorageEngine:
                 TableType.IMAGE_DATA: ImageStorageEngine,
                 TableType.DOCUMENT_DATA: DocumentStorageEngine,
                 TableType.PDF_DATA: PDFStorageEngine,
+                TableType.NATIVE_DATA: NativeStorageEngine,
             }
 
     @classmethod

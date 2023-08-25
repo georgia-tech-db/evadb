@@ -22,6 +22,7 @@ from evadb.binder.binder_utils import (
     check_column_name_is_string,
     check_groupby_pattern,
     check_table_object_is_groupable,
+    drop_row_id_from_target_list,
     extend_star,
     get_column_definition_from_select_target_list,
     handle_bind_extract_object_function,
@@ -75,6 +76,10 @@ class StatementBinder:
     def _bind_create_udf_statement(self, node: CreateUDFStatement):
         if node.query is not None:
             self.bind(node.query)
+            # Drop the automatically generated _row_id column
+            node.query.target_list = drop_row_id_from_target_list(
+                node.query.target_list
+            )
             all_column_list = get_column_definition_from_select_target_list(
                 node.query.target_list
             )
@@ -87,6 +92,7 @@ class StatementBinder:
             inputs, outputs = [], []
             for column in all_column_list:
                 if column.name in predict_columns:
+                    column.name = column.name + "_predictions"
                     outputs.append(column)
                 else:
                     inputs.append(column)
@@ -211,7 +217,7 @@ class StatementBinder:
         if node.is_table_atom():
             # Table
             self._binder_context.add_table_alias(
-                node.alias.alias_name, node.table.table_name
+                node.alias.alias_name, node.table.database_name, node.table.table_name
             )
             bind_table_info(self._catalog(), node.table)
         elif node.is_select():

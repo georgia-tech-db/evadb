@@ -22,7 +22,10 @@ from evadb.catalog.catalog_utils import get_metadata_properties
 from evadb.catalog.models.udf_catalog import UdfCatalogEntry
 from evadb.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 from evadb.catalog.models.udf_metadata_catalog import UdfMetadataCatalogEntry
-from evadb.configuration.constants import EvaDB_INSTALLATION_DIR
+from evadb.configuration.constants import (
+    DEFAULT_TRAIN_TIME_LIMIT,
+    EvaDB_INSTALLATION_DIR,
+)
 from evadb.database import EvaDBDatabase
 from evadb.executor.abstract_executor import AbstractExecutor
 from evadb.models.storage.batch import Batch
@@ -69,7 +72,6 @@ class CreateUDFExecutor(AbstractExecutor):
         Use ludwig's auto_train engine to train/tune models.
         """
         try_to_import_ludwig()
-        from evadb.configuration.constants import DEFAULT_TRAIN_TIME_LIMIT
         from ludwig.automl import auto_train
 
         assert (
@@ -164,7 +166,7 @@ class CreateUDFExecutor(AbstractExecutor):
             name, impl_path, udf_type, io_list, metadata = self.handle_huggingface_udf()
         elif self.node.udf_type == "ultralytics":
             name, impl_path, udf_type, io_list, metadata = self.handle_ultralytics_udf()
-        elif self.node.udf_type == "ludwig":
+        elif self.node.udf_type == "Ludwig":
             name, impl_path, udf_type, io_list, metadata = self.handle_ludwig_udf()
         else:
             name, impl_path, udf_type, io_list, metadata = self.handle_generic_udf()

@@ -52,7 +52,7 @@ minimal_requirements = [
     "aenum>=2.2.0",
     "diskcache>=5.4.0",
     "retry>=0.9.2",
-    "pydantic<2",
+    "pydantic<2", # ray-project/ray#37019.
     "psutil",
     "thefuzz"
 ]
@@ -60,7 +60,7 @@ minimal_requirements = [
 vision_libs = [
     "torch>=1.10.0",
     "torchvision>=0.11.1",
-    "transformers>=4.27.4,<4.30.2",  # HUGGINGFACE
+    "transformers",  # HUGGINGFACE
     "faiss-cpu",  # DEFAULT VECTOR INDEX
     "opencv-python-headless>=4.6.0.66",
     "Pillow>=8.4.0",
@@ -71,13 +71,13 @@ vision_libs = [
 ]
 
 document_libs = [
-    "transformers>=4.27.4,<4.30.2",  # HUGGINGFACE
+    "transformers",  # HUGGINGFACE
     "langchain",  # DATA LOADERS
     "faiss-cpu",  # DEFAULT VECTOR INDEX
-    "pymupdf",
+    "pymupdf<1.23.0", # pymupdf/PyMuPDF#2617 and pymupdf/PyMuPDF#2614
     "pdfminer.six",
     "sentence-transformers",
-    "protobuf<=3.20.1",
+    "protobuf",
     "bs4",
     "openai>=0.27.4",  # CHATGPT
     "gpt4all",  # PRIVATE GPT
@@ -111,6 +111,10 @@ qdrant_libs = [
 
 postgres_libs = [
     "psycopg2",
+]
+
+ludwig_libs = [
+    "ludwig[full]" # MODEL TRAIN AND FINE TUNING
 ]
 
 ### NEEDED FOR DEVELOPER TESTING ONLY
@@ -148,6 +152,7 @@ EXTRA_REQUIRES = {
     "notebook": notebook_libs,
     "qdrant": qdrant_libs,
     "postgres": postgres_libs,
+    "ludwig": ludwig_libs,
     # everything except ray, qdrant and postgres
     "dev": dev_libs + vision_libs + document_libs + udf_libs + notebook_libs,
 }
