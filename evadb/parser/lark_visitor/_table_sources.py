@@ -39,10 +39,12 @@ class TableSources:
         return select_list
     
     def platform_name(self, tree):
-        pass
+        # TODO: can be made better (like in create table)
+        return eval(tree.children[1].children[0].children[0])
 
     def token_input(self, tree):
-        pass
+        # TODO: can be made better (like in create table)
+        return eval(tree.children[1].children[0].children[0])
 
     def table_sources(self, tree):
         return self.visit(tree.children[0])
