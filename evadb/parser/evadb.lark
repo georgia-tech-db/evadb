@@ -270,7 +270,7 @@ if_not_exists: IF NOT EXISTS
 function_call: udf_function         ->udf_function_call           
     | aggregate_windowed_function   ->aggregate_function_call
 
-udf_function: simple_id "(" function_args ")" dotted_id?
+udf_function: simple_id "(" (STAR | function_args) ")" dotted_id?
     
 aggregate_windowed_function: aggregate_function_name "(" function_arg ")"
                            | COUNT "(" (STAR | function_arg) ")"
