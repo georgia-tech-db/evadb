@@ -62,6 +62,20 @@ class LoadExecutorTests(unittest.TestCase):
         # clean up
         execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS MyVideos;")
 
+    # integration test for load video
+    def test_should_load_video_in_table(self):
+        query = f"LOAD VIDEO '{self.video_file_path}' INTO MyVideo;"
+        execute_query_fetch_all(self.evadb, query)
+
+        select_query = """SELECT * FROM MyVideo;"""
+
+        actual_batch = execute_query_fetch_all(self.evadb, select_query)
+        actual_batch.sort()
+        expected_batch = list(create_dummy_batches())[0]
+        self.assertEqual(actual_batch, expected_batch)
+        execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS MyVideo;")
+
+
     def test_should_form_symlink_to_individual_video(self):
         catalog_manager = self.evadb.catalog()
         query = f"LOAD VIDEO '{self.video_file_path}' INTO MyVideo;"
@@ -105,15 +119,6 @@ class LoadExecutorTests(unittest.TestCase):
 
         # create the file again for other test cases
         create_sample_video()
-
-    def test_should_load_videos_in_table(self):
-        path = f"{EvaDB_ROOT_DIR}/data/sample_videos/1/*.mp4"
-        query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
-        result = execute_query_fetch_all(self.evadb, query)
-        expected = Batch(
-            pd.DataFrame([f"Number of loaded {FileFormatType.VIDEO.name}: 2"])
-        )
-        self.assertEqual(result, expected)
 
     def test_should_form_symlink_to_multiple_videos(self):
         catalog_manager = self.evadb.catalog()

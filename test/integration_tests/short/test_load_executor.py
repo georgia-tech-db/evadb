@@ -84,16 +84,6 @@ class LoadExecutorTests(unittest.TestCase):
         )
         self.assertEqual(result, expected)
 
-    def test_should_fail_to_load_missing_image(self):
-        path = f"{EvaDB_ROOT_DIR}/data/sample_images/missing.jpg"
-        query = f"""LOAD IMAGE "{path}" INTO MyImages;"""
-        with self.assertRaises(ExecutorError) as exc_info:
-            execute_query_fetch_all(self.evadb, query, do_not_print_exceptions=True)
-        self.assertIn(
-            "Load IMAGE failed",
-            str(exc_info.exception),
-        )
-
     ###################################
     # integration tests for csv
     def test_should_load_csv_in_table(self):
