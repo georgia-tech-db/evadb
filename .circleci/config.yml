@@ -200,7 +200,7 @@ jobs:
       # Enable cache save conditionally (to avoid empty cache in Notebooks)
       - when:
           condition: 
-            equal: [ TEST, << parameters.mode >> ]
+            equal: [ FULL, << parameters.mode >> ]
           steps:
             - save_cache:
                 key: v1-model_cache-{{ checksum "setup.py" }}
