@@ -15,8 +15,8 @@
 import argparse
 import asyncio
 import unittest
-import pytest
 
+import pytest
 from mock import call, patch
 
 from evadb.configuration.configuration_manager import ConfigurationManager
