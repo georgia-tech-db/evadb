@@ -4,23 +4,24 @@ parts:
   - caption: Overview
     chapters:
       - file: source/overview/getting-started
-      - file: source/overview/faq
       - file: source/overview/concepts
+      # - file: source/overview/faq
 
   - caption: Use Cases
     chapters:
       - file: source/usecases/image-classification.rst
         title: Image Classification
+      - file: source/usecases/similar-image-search.rst
+        title: Image Search [FAISS]
+      - file: source/usecases/qa-video.rst
+        title: Q&A from Videos [ChatGPT + HuggingFace]
       - file: source/usecases/02-object-detection.ipynb
         title: Object Detection
       - file: source/usecases/03-emotion-analysis.ipynb
         title: Emotion Analysis
       - file: source/usecases/07-object-segmentation-huggingface.ipynb
         title: Image Segmentation [HuggingFace]
-      - file: source/usecases/similar-image-search.rst
-        title: Image Search [FAISS]
-      - file: source/usecases/qa-video.rst
-        title: Q&A from Videos [ChatGPT + HuggingFace]
+
 
   - caption: User Reference
     chapters:

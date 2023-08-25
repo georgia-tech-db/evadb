@@ -45,7 +45,7 @@ Getting Started
 .. raw:: html
 
     <div class="grid-container">
-    <a class="no-underline" href="source/overview/getting-started" target="_blank"> <div class="info-box" >
+    <a class="no-underline" href="source/overview/getting-started.html" target="_blank"> <div class="info-box" >
             <div class="image-header" style="padding:0px;">
                 <img src="_static/icons/code.png" width="44px" height="44px" />
                 <h3 style="font-size:20px;">Learn basics</h3>
@@ -54,7 +54,7 @@ Getting Started
             <p class="only-dark" style="color:#FFFFFF;">Understand how to use EvaDB to build AI apps.</p>    
             <p style="font-weight:600;">Learn more > </p>  
     </div> </a>  
-    <a class="no-underline" href="source/overview/concepts" target="_blank"> 
+    <a class="no-underline" href="source/overview/concepts.html" target="_blank"> 
         <div class="info-box" >
             <div class="image-header" style="padding:0px;">
                 <img src="_static/icons/download.png" width="44px" height="44px" />
@@ -74,7 +74,7 @@ Getting Started
             <p class="only-light" style="color:#000000;">Have a question? Join our Slack community.</p> 
             <p class="only-dark" style="color:#FFFFFF;">Have a question? Join our Slack community.</p>   
             <p style="color:#515151;"></p>
-            <p style="font-weight:600;">Open the notebook></p> 
+            <p style="font-weight:600;">Support > </p> 
     </div></a>
     </div>
 

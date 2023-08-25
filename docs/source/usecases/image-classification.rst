@@ -1,4 +1,4 @@
-Implementing a Image Classification Pipeline using EvaDB on a Video
+Image Classification Pipeline using EvaDB
 ====
 
 Assume the database has loaded a video ``mnist_video``.
@@ -28,23 +28,25 @@ Create an image classification function from python source code.
 
 After the function is registered to EvaDB system, it can be directly called and used in SQL query.
 
-.. code-block:: python
+.. tab-set::
+    
+    .. tab-item:: Python
 
-    query = cursor.table("mnist_video").select("MnistImageClassifier(data).label")
+        .. code-block:: python
 
-.. note::
+            query = cursor.table("mnist_video").select("MnistImageClassifier(data).label")
+            
+            # Get results in a DataFrame.
+            query.df()
 
-    SQL statement
 
-.. code-block:: sql
+    .. tab-item:: SQL 
 
-    SELECT MnistImageClassifier(data).label FROM mnist_video
+        .. code-block:: sql
 
-Get results in a ``DataFrame``.
+            SELECT MnistImageClassifier(data).label FROM mnist_video;
 
-.. code-block:: python
-
-    query.df()
+    
 
 The result contains a projected ``label`` column, which indicates the digit of a particular frame.
 
@@ -69,26 +71,26 @@ The result contains a projected ``label`` column, which indicates the digit of a
 
 Like normal SQL, you can also specify conditions to filter out some frames of the video.
 
-.. code-block:: python
+.. tab-set::
+    
+    .. tab-item:: Python
 
-    query = cursor.table("mnist_video") \
-                  .filter("id < 2") \
-                  .select("MnistImageClassifier(data).label")
+        .. code-block:: python
 
-.. note::
+            query = cursor.table("mnist_video") \
+                        .filter("id < 2") \
+                        .select("MnistImageClassifier(data).label")
+            
+            # Return results in a DataFrame.
+            query.df()
 
-    SQL statement
+    .. tab-item:: SQL
 
-.. code-block:: sql
+        .. code-block:: sql
 
-    SELECT MnistImageClassifier(data).label FROM mnist_video 
-        WHERE id < 2
+            SELECT MnistImageClassifier(data).label FROM mnist_video 
+                WHERE id < 2
 
-Return results in a ``DataFrame``.
-
-.. code-block:: python
-
-    query.df()
 
 Now, the ``DataFrame`` only contains 2 rows after filtering.
 
