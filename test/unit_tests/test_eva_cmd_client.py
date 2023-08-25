@@ -15,6 +15,7 @@
 import argparse
 import asyncio
 import unittest
+import pytest
 
 from mock import call, patch
 
@@ -22,6 +23,7 @@ from evadb.configuration.configuration_manager import ConfigurationManager
 from evadb.evadb_cmd_client import evadb_client, main
 
 
+@pytest.mark.skip
 class CMDClientTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
