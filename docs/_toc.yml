@@ -1,26 +1,25 @@
 format: jb-book
 root: index
 parts:
-
   - caption: Overview
     chapters:
-      - file: source/overview/installation
+      - file: source/overview/getting-started
       - file: source/overview/faq
       - file: source/overview/concepts
 
   - caption: Use Cases
     chapters:
-      - file: source/tutorials/image_classification.rst
+      - file: source/usecases/image-classification.rst
         title: Image Classification
-      - file: source/tutorials/02-object-detection.ipynb
+      - file: source/usecases/02-object-detection.ipynb
         title: Object Detection
-      - file: source/tutorials/03-emotion-analysis.ipynb
+      - file: source/usecases/03-emotion-analysis.ipynb
         title: Emotion Analysis
-      - file: source/tutorials/07-object-segmentation-huggingface.ipynb
+      - file: source/usecases/07-object-segmentation-huggingface.ipynb
         title: Image Segmentation [HuggingFace]
-      - file: source/tutorials/similar_image_search.rst
+      - file: source/usecases/similar-image-search.rst
         title: Image Search [FAISS]
-      - file: source/tutorials/qa_video.rst
+      - file: source/usecases/qa-video.rst
         title: Q&A from Videos [ChatGPT + HuggingFace]
 
   - caption: User Reference
