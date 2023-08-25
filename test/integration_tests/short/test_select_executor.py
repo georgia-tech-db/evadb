@@ -30,9 +30,7 @@ import pandas as pd
 import pytest
 
 from evadb.binder.binder_utils import BinderError
-from evadb.configuration.constants import EvaDB_ROOT_DIR
 from evadb.models.storage.batch import Batch
-from evadb.readers.decord_reader import DecordReader
 from evadb.server.command_handler import execute_query_fetch_all
 
 NUM_FRAMES = 10

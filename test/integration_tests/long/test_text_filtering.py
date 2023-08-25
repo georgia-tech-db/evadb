@@ -52,5 +52,4 @@ class TextFilteringTests(unittest.TestCase):
         import pandas as pd
 
         pd.set_option("display.max_colwidth", None)
-        print(filtered_data)
         self.assertNotEqual(len(filtered_data), len(load_pdf_data))

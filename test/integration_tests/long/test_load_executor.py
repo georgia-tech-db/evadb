@@ -75,7 +75,6 @@ class LoadExecutorTests(unittest.TestCase):
         self.assertEqual(actual_batch, expected_batch)
         execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS MyVideo;")
 
-
     def test_should_form_symlink_to_individual_video(self):
         catalog_manager = self.evadb.catalog()
         query = f"LOAD VIDEO '{self.video_file_path}' INTO MyVideo;"

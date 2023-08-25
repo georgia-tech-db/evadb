@@ -14,13 +14,11 @@
 # limitations under the License.
 import unittest
 from test.util import (  # file_remove,
-    create_dummy_4d_batches,
     create_dummy_batches,
     create_sample_video,
     create_table,
     file_remove,
     get_evadb_for_testing,
-    get_logical_query_plan,
     load_udfs_for_testing,
     shutdown_ray,
 )
@@ -29,7 +27,6 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from evadb.binder.binder_utils import BinderError
 from evadb.configuration.constants import EvaDB_ROOT_DIR
 from evadb.models.storage.batch import Batch
 from evadb.readers.decord_reader import DecordReader
@@ -109,7 +106,6 @@ class SelectExecutorTest(unittest.TestCase):
         actual_batch = execute_query_fetch_all(self.evadb, select_query)
         self.assertEqual(list(actual_batch.columns), ["detrac.id", "T.a"])
         self.assertEqual(len(actual_batch), 5)
-
 
     def test_complex_logical_expressions(self):
         query = """SELECT id FROM MyVideo

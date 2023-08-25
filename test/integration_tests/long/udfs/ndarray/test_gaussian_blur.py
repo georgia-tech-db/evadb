@@ -45,6 +45,8 @@ class GaussianBlurTests(unittest.TestCase):
         )
 
         actual_array = cv2.imread(self.tmp_file)
-        expected_array = cv2.imread(f"{EvaDB_ROOT_DIR}/test/unit_tests/udfs/data/blurred_dog.jpeg")
+        expected_array = cv2.imread(
+            f"{EvaDB_ROOT_DIR}/test/unit_tests/udfs/data/blurred_dog.jpeg"
+        )
         self.assertEqual(np.sum(actual_array - expected_array), 0)
         file_remove(Path(self.tmp_file))

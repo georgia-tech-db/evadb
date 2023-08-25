@@ -13,16 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import glob
-import multiprocessing as mp
 import os
-import shutil
-import tempfile
 import unittest
 from pathlib import Path
 from test.util import (
-    create_dummy_batches,
     create_dummy_csv_batches,
-    create_large_scale_image_dataset,
     create_sample_csv,
     create_sample_video,
     file_remove,
@@ -30,13 +25,10 @@ from test.util import (
     shutdown_ray,
 )
 
-import numpy as np
 import pandas as pd
 import pytest
 
-from evadb.binder.binder_utils import BinderError
 from evadb.configuration.constants import EvaDB_ROOT_DIR
-from evadb.executor.executor_utils import ExecutorError
 from evadb.models.storage.batch import Batch
 from evadb.parser.types import FileFormatType
 from evadb.server.command_handler import execute_query_fetch_all
