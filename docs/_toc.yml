@@ -78,7 +78,7 @@ parts:
       - file: source/contribute/debugging
         title: Debugging EvaDB
 
-      - file: source/contribute/new_command
+      - file: source/contribute/new-command
         title: Extending EvaDB
 
       - file: source/contribute/release
