@@ -159,6 +159,7 @@ jobs:
       - restore_cache:
           keys:
             - v1-model_cache-{{ checksum "setup.py" }}
+            - v1-pip-wheel_cache-python<< parameters.v >>-ray<< parameters.ray >>-{{ checksum "setup.py" }}
       
       - run:
           name: Install EvaDB package from GitHub repo with all dependencies
@@ -208,6 +209,11 @@ jobs:
                   - /home/circleci/.cache/huggingface/
                   - /home/circleci/.cache/torch/
                   - /home/circleci/.cache/gpt4all/
+
+      - save_cache:
+          key: v1-pip-wheel_cache-python<< parameters.v >>-ray<< parameters.ray >>-{{ checksum "setup.py" }}
+          paths:
+            - test_evadb
 
   Postgres:
     parameters:
