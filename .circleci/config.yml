@@ -8,117 +8,120 @@ workflows:
   main:
     jobs:
         ################################
-        #### PIP
-        ################################
-        ################################
-        - Pip-PyPI
-        - Pip-Local
-        ################################
-        #### UNIT TESTS
+        ## LINTER: All
         ################################
         ################################
         - Linux:
-            name: "Test | v3.8 | Linux"
-            v: "3.8"
-            mode: "TEST"
-            ray: "DISABLED"
-        - Linux:
-            name: "Test | v3.9 | Linux"
-            v: "3.9"
-            mode: "TEST"
-            ray: "DISABLED"
-        - Linux:
-            name: "Test | v3.10 | Linux"
-            v: "3.10"
-            mode: "TEST"
-            ray: "DISABLED"
-        - Linux:
-            name: "Test | v3.11 | Linux"
-            v: "3.11"
-            mode: "TEST"
-            ray: "DISABLED"
-        - Linux:
-            name: "Test | Ray | v3.8 | Linux"
-            v: "3.8"
-            mode: "TEST"
-            ray: "ENABLED"
-        - Linux:
-            name: "Test | Ray | v3.9 | Linux"
-            v: "3.9"
-            mode: "TEST"
-            ray: "ENABLED"
-        - Linux:
-            name: "Test | Ray | v3.10 | Linux"
-            v: "3.10"
-            mode: "TEST"
-            ray: "ENABLED"
-        # Ray does not work on 3.11
-        # https://github.com/ray-project/ray/issues/33232
-        # - Linux:
-        #     name: "Test | v3.11 | Linux"
-        #     v: "3.11"
-        #     mode: "TEST"
-        #     ray: "ENABLED"
+            name: Linter | v3.10 | Linux
+            mode: LINTER
         ################################
-        ### INTEGRATIONS
+        #### PIP: Master
+        ################################
+        ################################
+        - Pip-PyPI:
+            filters:
+              branches:
+                only: master
+        - Pip-Local:
+            filters:
+              branches:
+                only: master
+        ################################
+        #### UNIT TESTS: PR
+        ################################
+        ################################
+        - Linux:
+            name: Unit Test | v3.10 | Linux
+            mode: UNIT
+            filters:
+              branches:
+                ignore: 
+                  - master
+                  - staging
+        ################################
+        #### SHORT INTEGRATION TESTS: PR
+        ################################
+        ################################
+        - Linux:
+            name: Short Integration Test | v3.10 | Linux
+            mode: SHORT INTEGRATION
+            filters:
+              branches:
+                ignore: 
+                  - master
+                  - staging
+        ################################
+        #### LONG INTEGRATION TESTS:
+        #### Staging
+        ################################
+        ################################
+        - Linux:
+            name: Long Integration Test | v<< matrix.v >> | Linux
+            mode: LONG INTEGRATION
+            matrix:
+              parameters:
+                v: ["3.8", "3.9", "3.10", "3.11"]
+            filters:
+              branches:
+                only: staging
+        ################################
+        #### LONG INTEGRATION TESTS + RAY:
+        #### Staging, Master
+        ################################
+        ################################
+        - Linux:
+            name: Long Integration Test | Ray | v<< matrix.v >> | Linux
+            mode: LONG INTEGRATION
+            ray: ENABLED
+            matrix:
+              parameters:
+                v: ["3.8", "3.9", "3.10"]
+            filters:
+              branches:
+                only: 
+                  - master
+                  - staging
+        ################################
+        ### THIRD PARTY: Staging, Master
         ################################
         ################################
         - Postgres:
-            name: "Test Integration - Postgres | v3.10 | Linux"
-            v: "3.10"
-            mode: "INTEGRATION"
+            name: Third Party Test - Postgres | v3.10 | Linux
         ################################
-        ### NOTEBOOKS
+        ### NOTEBOOKS: Staging, Master
         ################################
         ################################
         - Linux:
-            name: "Notebook | v3.8 | Linux"
-            v: "3.8"
-            mode: "NOTEBOOK"
-            ray: "DISABLED"
-        - Linux:
-            name: "Notebook | v3.9 | Linux"
-            v: "3.9"
-            mode: "NOTEBOOK"
-            ray: "DISABLED"
-        - Linux:
-            name: "Notebook | v3.10 | Linux"
-            v: "3.10"
-            mode: "NOTEBOOK"
-            ray: "DISABLED"
-        - Linux:
-            name: "Notebook | v3.11 | Linux"
-            v: "3.11"
-            mode: "NOTEBOOK"
-            ray: "DISABLED"            
-        - Linux:
-            name: "Notebook | Ray | v3.8 | Linux"
-            v: "3.8"
-            mode: "NOTEBOOK"
-            ray: "ENABLED"
-        - Linux:
-            name: "Notebook | Ray | v3.9 | Linux"
-            v: "3.9"
-            mode: "NOTEBOOK"
-            ray: "ENABLED"            
-        - Linux:
-            name: "Notebook |  Ray | v3.10 | Linux"
-            v: "3.10"
-            mode: "NOTEBOOK"
-            ray: "ENABLED"            
-        # - Linux:
-        #     name: "Notebook | v3.11 | Linux"
-        #     v: "3.11"
-        #     mode: "NOTEBOOK"
+            name: Notebook Test | v<< matrix.v >> | Linux
+            mode: NOTEBOOK
+            filters:
+              branches:
+                only: 
+                  - master
+                  - staging
+            matrix:
+              parameters:
+                v: ["3.8", "3.9", "3.10", "3.11"]
         ################################
-        ## LINTER
+        #### FULL TESTS:
+        #### Master 
         ################################
         ################################
         - Linux:
-            name: "Linter | Linux"
-            v: "3.10"
-            mode: "LINTER"
-            ray: "DISABLED"
+            name: Full Test | v<< matrix.v >> | Linux
+            mode: FULL
+            matrix:
+              parameters:
+                v: ["3.8", "3.9", "3.10", "3.11"]
+            filters:
+              branches:
+                only: master 
+        ################################
+        # DOCKER AND CLOUD: Master
+        ################################
+        ################################
+        # - Docker-Local
+        # - AWS
         ################################
         # OTHER OPERATING SYSTEMS
         ################################
@@ -127,12 +130,6 @@ workflows:
         #    name: "Windows | v3.10"
         # - MacOS:
         #    name: "MacOS | v3.10"
-        ################################
-        # DOCKER AND CLOUD
-        ################################
-        ################################
-        - Docker-Local
-        - AWS
 
 jobs:
   Linux:
@@ -142,7 +139,7 @@ jobs:
         default: "3.10"
       mode:
         type: string
-        default: "ALL"
+        default: "FULL"
       ray:
         type: string
         default: "DISABLED"
@@ -184,7 +181,7 @@ jobs:
 
       - run:
           name: Test and upload coverage report to coveralls
-          no_output_timeout: 30m # 30 minute timeout
+          no_output_timeout: 10m # 10 minute timeout
           environment:
             PY_VERSION: << parameters.v >>
           command: |
@@ -212,10 +209,6 @@ jobs:
       v:
         type: string
         default: "3.10"
-      mode:
-        type: string
-        default: "ALL"
-
     resource_class: large
     docker:
       # https://circleci.com/docs/circleci-images#language-image-variants  DATABASE_URL: postgresql://postgres:password@localhost:5432/evadb
