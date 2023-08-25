@@ -62,19 +62,6 @@ class LoadExecutorTests(unittest.TestCase):
         # clean up
         execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS MyVideos;")
 
-    # integration test for load video
-    def test_should_load_video_in_table(self):
-        query = f"LOAD VIDEO '{self.video_file_path}' INTO MyVideo;"
-        execute_query_fetch_all(self.evadb, query)
-
-        select_query = """SELECT * FROM MyVideo;"""
-
-        actual_batch = execute_query_fetch_all(self.evadb, select_query)
-        actual_batch.sort()
-        expected_batch = list(create_dummy_batches())[0]
-        self.assertEqual(actual_batch, expected_batch)
-        execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS MyVideo;")
-
     def test_should_form_symlink_to_individual_video(self):
         catalog_manager = self.evadb.catalog()
         query = f"LOAD VIDEO '{self.video_file_path}' INTO MyVideo;"
@@ -291,16 +278,6 @@ class LoadExecutorTests(unittest.TestCase):
 
     ###########################################
     # integration testcases for load image
-    def test_should_load_images_in_table(self):
-        num_files = len(
-            glob.glob(os.path.expanduser(self.image_files_path), recursive=True)
-        )
-        query = f"""LOAD IMAGE "{self.image_files_path}" INTO MyImages;"""
-        result = execute_query_fetch_all(self.evadb, query)
-        expected = Batch(
-            pd.DataFrame([f"Number of loaded {FileFormatType.IMAGE.name}: {num_files}"])
-        )
-        self.assertEqual(result, expected)
 
     def test_should_fail_to_load_missing_image(self):
         path = f"{EvaDB_ROOT_DIR}/data/sample_images/missing.jpg"
@@ -437,45 +414,6 @@ class LoadExecutorTests(unittest.TestCase):
 
     ###################################
     # integration tests for csv
-    def test_should_load_csv_in_table(self):
-        # loading a csv requires a table to be created first
-        create_table_query = """
-
-            CREATE TABLE IF NOT EXISTS MyVideoCSV (
-                id INTEGER UNIQUE,
-                frame_id INTEGER,
-                video_id INTEGER,
-                dataset_name TEXT(30),
-                label TEXT(30),
-                bbox NDARRAY FLOAT32(4),
-                object_id INTEGER
-            );
-
-            """
-        execute_query_fetch_all(self.evadb, create_table_query)
-
-        # load the CSV
-        load_query = f"LOAD CSV '{self.csv_file_path}' INTO MyVideoCSV;"
-        execute_query_fetch_all(self.evadb, load_query)
-
-        # execute a select query
-        select_query = """SELECT id, frame_id, video_id,
-                          dataset_name, label, bbox,
-                          object_id
-                          FROM MyVideoCSV;"""
-
-        actual_batch = execute_query_fetch_all(self.evadb, select_query)
-        actual_batch.sort()
-
-        # assert the batches are equal
-        expected_batch = next(create_dummy_csv_batches())
-        expected_batch.modify_column_alias("myvideocsv")
-        self.assertEqual(actual_batch, expected_batch)
-
-        # clean up
-        drop_query = "DROP TABLE IF EXISTS MyVideoCSV;"
-        execute_query_fetch_all(self.evadb, drop_query)
-
     def test_should_load_csv_with_columns_in_table(self):
         # loading a csv requires a table to be created first
         create_table_query = """

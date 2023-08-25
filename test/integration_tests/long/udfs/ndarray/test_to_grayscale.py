@@ -20,31 +20,26 @@ import numpy as np
 import pandas as pd
 
 from evadb.configuration.constants import EvaDB_ROOT_DIR
-from evadb.udfs.ndarray.gaussian_blur import GaussianBlur
+from evadb.udfs.ndarray.to_grayscale import ToGrayscale
 from evadb.utils.generic_utils import try_to_import_cv2
 
 
-class GaussianBlurTests(unittest.TestCase):
+class ToGrayscaleTests(unittest.TestCase):
     def setUp(self):
-        self.gb_instance = GaussianBlur()
-        self.tmp_file = f"{EvaDB_ROOT_DIR}/test/udfs/data/tmp.jpeg"
+        self.to_grayscale_instance = ToGrayscale()
 
-    def test_gb_name_exists(self):
-        assert hasattr(self.gb_instance, "name")
+    def test_gray_scale_name_exists(self):
+        assert hasattr(self.to_grayscale_instance, "name")
 
-    def test_should_blur_image(self):
+    def test_should_convert_to_grayscale(self):
         try_to_import_cv2()
         import cv2
 
-        arr = cv2.imread(f"{EvaDB_ROOT_DIR}/test/udfs/data/dog.jpeg")
+        arr = cv2.imread(f"{EvaDB_ROOT_DIR}/test/unit_tests/udfs/data/dog.jpeg")
         df = pd.DataFrame([[arr]])
-        modified_arr = self.gb_instance(df)["blurred_frame_array"]
-        cv2.imwrite(
-            self.tmp_file,
-            cv2.cvtColor(modified_arr[0], cv2.COLOR_RGB2BGR),
-        )
-
-        actual_array = cv2.imread(self.tmp_file)
-        expected_array = cv2.imread(f"{EvaDB_ROOT_DIR}/test/udfs/data/blurred_dog.jpeg")
-        self.assertEqual(np.sum(actual_array - expected_array), 0)
-        file_remove(Path(self.tmp_file))
+        modified_arr = self.to_grayscale_instance(df)["grayscale_frame_array"]
+        cv2.imwrite(f"{EvaDB_ROOT_DIR}/test/unit_tests/udfs/data/tmp.jpeg", modified_arr[0])
+        actual_array = cv2.imread(f"{EvaDB_ROOT_DIR}/test/unit_tests/udfs/data/tmp.jpeg")
+        expected_arr = cv2.imread(f"{EvaDB_ROOT_DIR}/test/unit_tests/udfs/data/grayscale_dog.jpeg")
+        self.assertEqual(np.sum(actual_array - expected_arr), 0)
+        file_remove(Path(f"{EvaDB_ROOT_DIR}/test/unit_tests/udfs/data/tmp.jpeg"))
