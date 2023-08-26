@@ -84,6 +84,6 @@ Add your created data source handler in `get_database_handler` function at `evad
 
    ...
    elif engine == "mydb":
-        return mod.MyDBHandler(engine, **kwargs)
+        return mod.MydbHandler(engine, **kwargs)
    ...
 
