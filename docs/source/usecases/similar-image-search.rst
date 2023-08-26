@@ -1,9 +1,7 @@
-Implementing a Similar Image Search Pipeline using EvaDB on Images
+Image Similarity Search Pipeline using EvaDB on Images
 ====
 
-In this use case, we want to search similar images based on an image provided by the user. 
-To implement this use case, we leverage EvaDB's capability of easily expressing feature extraction pipeline.
-Additionaly, we also leverage EvaDB's capability of building a similarity search index and searching the index to
+In this use case, we want to search similar images based on an image provided by the user. To implement this use case, we leverage EvaDB's capability of easily expressing feature extraction pipeline. Additionaly, we also leverage EvaDB's capability of building a similarity search index and searching the index to
 locate similar images through ``FAISS`` library.
 
 For this use case, we use a reddit image dataset that can be downloaded from `Here <https://www.dropbox.com/scl/fo/fcj6ojmii0gw92zg3jb2s/h\?dl\=1\&rlkey\=j3kj1ox4yn5fhonw06v0pn7r9>`_.

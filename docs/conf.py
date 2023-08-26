@@ -128,9 +128,8 @@ html_theme_options = {
     "dark_css_variables": {
         "color-background-secondary": "#000",
     },
-    "navigation_with_keys": True,
     # Add important announcement here
-    # "announcement": "<em>Important</em> announcement!"
+    "announcement": "<div class='topnav'></div>",
 }
 
 external_toc_path = "_toc.yml"  # optional, default: _toc.yml
@@ -143,21 +142,27 @@ intersphinx_mapping = {
 
 # Adding custom css file
 html_static_path = ["_static"]
-html_css_files = ["custom.css"]
+html_css_files = [
+                    "custom.css", 
+                    "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/fontawesome.min.css",
+                    "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/solid.min.css",
+                    "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/brands.min.css"]
 
 # Adding the Tutorial notebooks to ./docs/source/tutorials/
 
 for i in os.listdir("../tutorials"):
     if i.endswith(".ipynb"):
-        shutil.copy(f"../tutorials/{i}", "./source/tutorials/")
+        shutil.copy(f"../tutorials/{i}", "./source/usecases/")
 
 jupyter_execute_notebooks = "off"
 
 
 # -- Initialize Sphinx ----------------------------------------------
-def setup(sphinx):
+def setup(app):
     warnings.filterwarnings(
         action="ignore",
         category=UserWarning,
         message=r".*Container node skipped.*",
     )
+    # Custom JS
+    app.add_js_file("js/top-navigation.js", defer="defer")
