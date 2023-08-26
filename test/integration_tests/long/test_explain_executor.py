@@ -83,7 +83,6 @@ class ExplainExecutorTest(unittest.TestCase):
                 self.evadb, select_query, plan_generator=custom_plan_generator
             )
             expected_output = """|__ ProjectPlan\n    |__ LateralJoinPlan\n        |__ SeqScanPlan\n            |__ StoragePlan\n        |__ FunctionScanPlan\n"""
-            print(batch.frames[0][0])
             self.assertEqual(batch.frames[0][0], expected_output)
 
 

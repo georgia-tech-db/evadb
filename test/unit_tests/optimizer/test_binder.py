@@ -26,7 +26,6 @@ from evadb.optimizer.rules.pattern import Pattern
 
 class TestBinder(unittest.TestCase):
     def helper_pre_order_match(self, cur_opr, res_opr):
-        print(cur_opr)
         self.assertEqual(cur_opr.opr_type, res_opr.opr_type)
         self.assertEqual(len(cur_opr.children), len(res_opr.children))
 
