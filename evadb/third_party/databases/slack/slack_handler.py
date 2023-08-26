@@ -18,15 +18,11 @@ from slack_sdk.errors import SlackApiError
 from evadb.third_party.databases.types import (
     DBHandler,
     DBHandlerResponse,
-    DBHandlerStatus,
 )
 
 class SlackHandler(DBHandler):
     def __init__(self, name: str, **kwargs):
         super().__init__(name)
-        self.host = kwargs.get("host")
-        self.port = kwargs.get("port")
-        self.user = kwargs.get("user")
         self.token = kwargs.get("token")
         self.channel = kwargs.get("channel")
 
