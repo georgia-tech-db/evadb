@@ -17,32 +17,43 @@ Create Data Source Handler
 
 .. note::
 
-   The directory name is also the engine name used in the `CREATE DATABASE mydb_source WITH ENGINE = "..."`. In this document, we use **MyDB** as the example data source we want to integrate in EvaDB.
+   The directory name is also the engine name used in the `CREATE DATABASE mydb_source WITH ENGINE = "..."`. In this document, we use **mydb** as the example data source we want to integrate in EvaDB.
 
 The directory should contain three files:
 
 - __init__.py
 - requirements.txt
-- MyDB_handler.py
+- mydb_handler.py
 
-The *__init__.py* can contain copyright information. The *requirements.txt* contains the extra python libraries that need to be installed via pip for the MyDB data source. 
+The *__init__.py* can contain copyright information. The *requirements.txt* contains the extra python libraries that need to be installed via pip for the mydb data source. 
 
 .. note:: 
 
-   EvaDB will only install a data source's specific dependency libraries when a connection to the data source is created by the user via, e.g., `CREATE DATABASE mydb_source WITH ENGINE = "MyDB";`.
+   EvaDB will only install a data source's specific dependency libraries when a connection to the data source is created by the user via, e.g., `CREATE DATABASE mydb_source WITH ENGINE = "mydb";`.
 
 2. Implement the data source handler
 ~~~~
 
-In *MyDB_handler.py*, you need to implement the `DBHandler` declared at `evadb/third_party/databases/types.py <https://github.com/georgia-tech-db/evadb/blob/master/evadb/third_party/databases/types.py>`_. There are 7 functions that you need to implement:
+In *mydb_handler.py*, you need to implement the `DBHandler` declared at `evadb/third_party/databases/types.py <https://github.com/georgia-tech-db/evadb/blob/master/evadb/third_party/databases/types.py>`_. There are 7 functions that you need to implement:
 
-- __init__
-- connect
-- disconnect
-- check_connection
-- get_tables
-- get_columns
-- execute_native_query
+.. code:: python
+
+   class MydbHandler(DBHandler):
+
+        def __init__(self, name: str, **kwargs):
+                ...
+        def connect(self):
+                ...
+        def disconnect(self):
+                ...
+        def check_connection(self) -> DBHandlerStatus:
+                ...
+        def get_tables(self) -> DBHandlerResponse:
+                ...
+        def get_columns(self, table_name: str) -> DBHandlerResponse:
+                ...
+        def execute_native_query(self, query_string: str) -> DBHandlerResponse:
+                ...
 
 The *get_tables* should retrieve the list of tables from the data source. The *get_columns* should retrieve the columns of a specified table from the database. The *execute_native_query* specifies how to execute the query through the data source's engine. For more details, please check the function signature and documentation at `evadb/third_party/databases/types.py <https://github.com/georgia-tech-db/evadb/blob/master/evadb/third_party/databases/types.py>`_.
 
@@ -59,7 +70,7 @@ You can get the data source's configuration parameters from `__init__(self, name
 
 .. note::
 
-   Those paramters will be specified when the user creates a connection to the data source: `CREATE DATABASE mydb_source WITH ENGINE = "MyDB", PARAMETERS = {"host": "localhost", "port": "5432", "user": "eva", "password": "password"};`.
+   Those paramters will be specified when the user creates a connection to the data source: `CREATE DATABASE mydb_source WITH ENGINE = "mydb", PARAMETERS = {"host": "localhost", "port": "5432", "user": "eva", "password": "password"};`.
 
 You can check the PostgreSQL's handler example at `evadb/third_party/databases/postgres/postgres_handler.py <https://github.com/georgia-tech-db/evadb/blob/master/evadb/third_party/databases/postgres/postgres_handler.py>`_ for ideas.
 
@@ -67,18 +78,12 @@ You can check the PostgreSQL's handler example at `evadb/third_party/databases/p
 Register the Data Source Handler
 ----
 
-Add your created data source handler in `get_database_handler` function at `evadb/third_party/databases/interface.py <https://github.com/georgia-tech-db/evadb/blob/master/evadb/third_party/databases/interface.py>`_. Below is an example of registering the created MyDB data source:
+Add your created data source handler in `get_database_handler` function at `evadb/third_party/databases/interface.py <https://github.com/georgia-tech-db/evadb/blob/master/evadb/third_party/databases/interface.py>`_. Below is an example of registering the created mydb data source:
 
 .. code:: python
 
    ...
-   elif engine == "MyDB":
+   elif engine == "mydb":
         return mod.MyDBHandler(engine, **kwargs)
    ...
-
-
-Add a Testcase for the Data Source
-----
-
-Add a testcase for your new data source at `test/third_party_tests/ <https://github.com/georgia-tech-db/evadb/blob/master/test/third_party_tests>`_. You can check the exsiting `test_native_executor.py <https://github.com/georgia-tech-db/evadb/blob/master/test/third_party_tests/test_native_executor.py>`_ for ideas.
 
