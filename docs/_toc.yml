@@ -81,8 +81,11 @@ parts:
       - file: source/contribute/extend
         title: Extending EvaDB
         sections:
+          - file: source/contribute/new-data-source
+            title: Structured Data Source Integration
           - file: source/contribute/new-command
-            title: Adding a New Operator
+            title: Operators
+
 
       - file: source/contribute/release
         title: Releasing EvaDB

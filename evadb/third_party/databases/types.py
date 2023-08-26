@@ -53,7 +53,7 @@ class DBHandler:
         name (str): The name associated with the database handler instance.
     """
 
-    def __init__(self, name: str):
+    def __init__(self, name: str, **kwargs):
         self.name = name
 
     def connect(self):

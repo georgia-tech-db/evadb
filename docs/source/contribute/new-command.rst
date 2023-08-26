@@ -1,4 +1,4 @@
-Adding a New Operator
+Operators / Commands
 =============
 
 This document details the steps involved in adding support for a new operator (or command) in EvaDB. We illustrate the process using a DDL command.
