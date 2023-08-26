@@ -32,6 +32,7 @@ The *__init__.py* can contain copyright information. The *requirements.txt* cont
    EvaDB will only install a data source's specific dependency libraries when a connection to the data source is created by the user via, e.g., `CREATE DATABASE mydb_source WITH ENGINE = "MyDB";`.
 
 2. Implement the data source handler
+~~~~
 
 In *MyDB_handler.py*, you need to implement the `DBHandler` declared at `evadb/third_party/databases/types.py <https://github.com/georgia-tech-db/evadb/blob/master/evadb/third_party/databases/types.py>`_. There are 7 functions that you need to implement:
 
