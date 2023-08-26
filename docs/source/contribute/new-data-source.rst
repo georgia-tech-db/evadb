@@ -20,6 +20,7 @@ Create Data Source Handler
    The directory name is also the engine name used in the `CREATE DATABASE mydb_source WITH ENGINE = "..."`. In this document, we use **MyDB** as the example data source we want to integrate in EvaDB.
 
 The directory should contain three files:
+
 - __init__.py
 - requirements.txt
 - MyDB_handler.py
@@ -33,6 +34,7 @@ The *__init__.py* can contain copyright information. The *requirements.txt* cont
 2. Implement the data source handler
 
 In *MyDB_handler.py*, you need to implement the `DBHandler` declared at `evadb/third_party/databases/types.py <https://github.com/georgia-tech-db/evadb/blob/master/evadb/third_party/databases/types.py>`_. There are 7 functions that you need to implement:
+
 - __init__
 - connect
 - disconnect
