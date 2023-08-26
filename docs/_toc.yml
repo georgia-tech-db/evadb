@@ -78,8 +78,11 @@ parts:
       - file: source/contribute/debugging
         title: Debugging EvaDB
 
-      - file: source/contribute/new-command
+      - file: source/contribute/extend
         title: Extending EvaDB
+        sections:
+          - file: source/contribute/new-command
+            title: Adding a New Operator
 
       - file: source/contribute/release
         title: Releasing EvaDB
