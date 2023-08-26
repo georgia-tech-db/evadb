@@ -567,6 +567,36 @@ class ParserTests(unittest.TestCase):
         # sample_freq
         self.assertEqual(select_stmt.from_table.sample_freq, ConstantValueExpression(5))
 
+    def test_select_udf_star(self):
+        parser = Parser()
+
+        query = "SELECT DemoUDF(*) FROM DemoDB.DemoTable"
+        evadb_stmt_list = parser.parse(query)
+
+        # check stmt itself
+        self.assertIsInstance(evadb_stmt_list, list)
+        self.assertEqual(len(evadb_stmt_list), 1)
+        self.assertEqual(evadb_stmt_list[0].stmt_type, StatementType.SELECT)
+        select_stmt = evadb_stmt_list[0]
+
+        # target List
+        self.assertIsNotNone(select_stmt.target_list)
+        self.assertEqual(len(select_stmt.target_list), 1)
+        self.assertEqual(
+            select_stmt.target_list[0].etype, ExpressionType.FUNCTION_EXPRESSION
+        )
+        self.assertEqual(len(select_stmt.target_list[0].children), 1)
+        self.assertEqual(
+            select_stmt.target_list[0].children[0].etype, ExpressionType.TUPLE_VALUE
+        )
+        self.assertEqual(select_stmt.target_list[0].children[0].name, "*")
+
+        # from_table
+        self.assertIsNotNone(select_stmt.from_table)
+        self.assertIsInstance(select_stmt.from_table, TableRef)
+        self.assertEqual(select_stmt.from_table.table.table_name, "DemoTable")
+        self.assertEqual(select_stmt.from_table.table.database_name, "DemoDB")
+
     def test_table_ref(self):
         """Testing table info in TableRef
         Class: TableInfo
