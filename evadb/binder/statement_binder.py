@@ -272,6 +272,14 @@ class StatementBinder:
         if node.name.upper() == str(UDFType.EXTRACT_OBJECT):
             handle_bind_extract_object_function(node, self)
             return
+
+        # Handle Func(*)
+        if (
+            len(node.children) == 1
+            and isinstance(node.children[0], TupleValueExpression)
+            and node.children[0].name == "*"
+        ):
+            node.children = extend_star(self._binder_context)
         # bind all the children
         for child in node.children:
             self.bind(child)

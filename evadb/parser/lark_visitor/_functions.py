@@ -33,6 +33,9 @@ class Functions:
         udf_args = None
 
         for child in tree.children:
+            if isinstance(child, Token):
+                if child.value == "*":
+                    udf_args = [TupleValueExpression(name="*")]
             if isinstance(child, Tree):
                 if child.data == "simple_id":
                     udf_name = self.visit(child)
