@@ -268,6 +268,16 @@ def try_to_import_ray():
                 Please install it with `pip install ray`."""
         )
 
+def try_to_import_forecast():
+    try:
+        from statsforecast import StatsForecast
+        from statsforecast.models import AutoARIMA, AutoCES, AutoETS, AutoTheta
+    except ImportError:
+        raise ValueError(
+            """Could not import ray python package.
+                Please install it with `pip install ray`."""
+        )
+
 
 def is_ray_available() -> bool:
     try:
