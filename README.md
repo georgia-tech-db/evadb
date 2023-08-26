@@ -208,6 +208,10 @@ Don't see a feature in the list? Search our issue tracker if someone has already
 [![CI Status](https://circleci.com/gh/georgia-tech-db/evadb.svg?style=svg)](https://circleci.com/gh/georgia-tech-db/evadb)
 [![Documentation Status](https://readthedocs.org/projects/evadb/badge/?version=latest)](https://evadb.readthedocs.io/en/latest/index.html)
 
+<a href="https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg">
+    <img src="https://raw.githubusercontent.com/georgia-tech-db/evadb/master/docs/images/evadb/evadb-slack.png" alt="EvaDB Slack Channel" width="600">
+</a>
+
 EvaDB is the beneficiary of many [contributors](https://github.com/georgia-tech-db/evadb/graphs/contributors). All kinds of contributions to EvaDB are appreciated. To file a bug or to request a feature, please use <a href="https://github.com/georgia-tech-db/evadb/issues">GitHub issues</a>. <a href="https://github.com/georgia-tech-db/evadb/pulls">Pull requests</a> are welcome.
 
 For more information, see our
@@ -215,8 +219,9 @@ For more information, see our
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=georgia-tech-db/evadb&type=Date)](https://star-history.com/#georgia-tech-db/evadb&Date)
-
+<a href="https://star-history.com/#georgia-tech-db/evadb&Date">
+    <img src="https://api.star-history.com/svg?repos=georgia-tech-db/evadb&type=Date" alt="EvaDB Star History Chart">
+</a>
 
 ## License
 Copyright (c) 2018--present [Georgia Tech Database Group](http://db.cc.gatech.edu/).
