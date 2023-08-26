@@ -116,7 +116,6 @@ class PytorchTest(unittest.TestCase):
 
     @ray_skip_marker
     def test_should_project_parallel_match_sequential(self):
-        print(os.environ.get("ray"))
         create_udf_query = """CREATE UDF IF NOT EXISTS FaceDetector
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
                   OUTPUT (bboxes NDARRAY FLOAT32(ANYDIM, 4),

@@ -147,7 +147,6 @@ class HuggingFaceTests(unittest.TestCase):
 
         select_query = f"SELECT {udf_name}(data) FROM DETRAC WHERE id < 3;"
         output = execute_query_fetch_all(self.evadb, select_query)
-        print("output: ", output)
 
         # Test that output has 2 columns
         self.assertEqual(len(output.frames.columns), 2)
