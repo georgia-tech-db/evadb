@@ -142,6 +142,33 @@ class StatementBinderTests(unittest.TestCase):
             binder._bind_explain_statement(stmt)
             mock_binder.assert_called_with(stmt.explainable_stmt)
 
+    def test_bind_func_expr_with_star(self):
+        func_expr = MagicMock(
+            name="func_expr", alias=Alias("func_expr"), output_col_aliases=[]
+        )
+        func_expr.name.lower.return_value = "func_expr"
+        func_expr.children = [TupleValueExpression(name="*")]
+
+        binderContext = MagicMock()
+        tvp1 = ("T", "col1")
+        tvp2 = ("T", "col2")
+        binderContext._catalog.return_value.get_udf_catalog_entry_by_name.return_value = (
+            None
+        )
+        binderContext._get_all_alias_and_col_name.return_value = [tvp1, tvp2]
+
+        with patch.object(StatementBinder, "bind") as mock_binder:
+            binder = StatementBinder(binderContext)
+            with self.assertRaises(BinderError):
+                binder._bind_func_expr(func_expr)
+            call1, call2 = mock_binder.call_args_list
+            self.assertEqual(
+                call1.args[0], TupleValueExpression(name=tvp1[1], table_alias=tvp1[0])
+            )
+            self.assertEqual(
+                call2.args[0], TupleValueExpression(name=tvp2[1], table_alias=tvp2[0])
+            )
+
     @patch("evadb.binder.statement_binder.load_udf_class_from_file")
     def test_bind_func_expr(self, mock_load_udf_class_from_file):
         # setup
