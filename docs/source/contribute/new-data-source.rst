@@ -44,7 +44,7 @@ In *MyDB_handler.py*, you need to implement the `DBHandler` declared at `evadb/t
 - get_columns
 - execute_native_query
 
-The *get_tables* should retrieve the list of tables from the data source. The *get_columns* should retrieve the columns of a specified table from the database. The *execute_native_query* specifies how to execute the query through the data source's engine. 
+The *get_tables* should retrieve the list of tables from the data source. The *get_columns* should retrieve the columns of a specified table from the database. The *execute_native_query* specifies how to execute the query through the data source's engine. For more details, please check the function signature and documentation at `evadb/third_party/databases/types.py <https://github.com/georgia-tech-db/evadb/blob/master/evadb/third_party/databases/types.py>`_.
 
 You can get the data source's configuration parameters from `__init__(self, name: str, **kwargs)`. Below is an example:
 
