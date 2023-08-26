@@ -4,4 +4,3 @@ _REVISION = "3+dev"
 
 VERSION_SHORT = f"{_MAJOR}.{_MINOR}"
 VERSION = f"{_MAJOR}.{_MINOR}.{_REVISION}"
-
