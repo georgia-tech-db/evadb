@@ -26,23 +26,10 @@ parts:
   - caption: User Reference
     chapters:
       - file: source/reference/api
-        title: API
+        title: Python API
 
-      - file: source/reference/udfs/hf
-        title: Hugging Face UDFs
-      - file: source/reference/udfs/openai
-        title: OpenAI UDFs
-      - file: source/reference/udfs/yolo
-        title: YOLO UDFs
-      - file: source/reference/udf
-        title: User-Defined Functions
-      - file: source/reference/udfs/custom
-        title: Custom User-Defined Function
-      - file: source/reference/model_train
-        title: Customized UDFs and Model Train/Finetune
-        
       - file: source/reference/evaql      
-        title: Query Language 
+        title: Eva Query Language 
         sections:
           - file: source/reference/evaql/load
           - file: source/reference/evaql/select
@@ -54,14 +41,29 @@ parts:
           - file: source/reference/evaql/delete
           - file: source/reference/evaql/rename
 
-      - file: source/reference/io
-        title: IO Descriptors
+      - file: source/reference/udfs/index
+        title: Models
+        sections:
+          - file: source/reference/udfs/hf
+            title: Hugging Face
+          - file: source/reference/udfs/openai
+            title: OpenAI 
+          - file: source/reference/udfs/yolo
+            title: YOLO 
+          - file: source/reference/udfs/custom
+            title: Custom Model
+          - file: source/reference/udfs/model-train
+            title: Model Train/Finetune
+        
 
-      - file: source/reference/gpu
-        title: Configure GPU
+      # - file: source/reference/io
+      #   title: IO Descriptors
 
-      - file: source/overview/docker
-        title: Docker
+      # - file: source/reference/gpu
+      #   title: Configure GPU
+
+      # - file: source/overview/docker
+      #   title: Docker
 
   - caption: Benchmarks
     chapters:
@@ -76,7 +78,7 @@ parts:
       - file: source/contribute/debugging
         title: Debugging EvaDB
 
-      - file: source/contribute/new_command
+      - file: source/contribute/new-command
         title: Extending EvaDB
 
       - file: source/contribute/release
