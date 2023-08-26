@@ -10,6 +10,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### [Deprecated]
 ### [Removed]
 
+##  [0.3.2] - 2023-08-25
+
+* PR #953: docs: Fix User Reference and Dev Guide 
+* PR #952: docs: Update PULL_REQUEST_TEMPLATE.md 
+* PR #951: docs: updated overview and usecases 
+* PR #950: docs: improve the docs 
+* PR #943: Auto drop row id for `CREATE UDF xxx FROM 
+* PR #945: fix: circle ci pip + setuptools conflict 
+* PR #942: feat: select from native database 
+* PR #921: fix: more detailed YouTube QA app blog generator 
+* PR #940: feat: update ci test for third party integration 
+* PR #941: chore
+* PR #935: Ludwig-based model train and tune support. 
+* PR #937: feat: integration for pg_handler added 
+* PR #939: Hot Fix for Fuzzy Join 
+* PR #936: Use statement 
+* PR #938: pydantic > 2 conflicts with ray 
+* PR #932: feat: postgres integration - create database   
+* PR #931: Revert "Revert "Fix benchmark documentation 
+* PR #931: Revert "Fix benchmark documentation 
+* PR #931: Fix benchmark documentation 
+* PR #930: Text summarization benchmark with MindsDB and EvaDB 
+* PR #929: Fix problems found when running hugging face text summariztion model on large input. 
+* PR #928: feat: improve the use case doc 
+* PR #927: chore
+* PR #925: chore
+* PR #926: chore
+* PR #924: fix tutorials 11-similarity-search-for-motif-mining.ipynb 
+* PR #922: feat : Run EvaDB on Postgres 
+* PR #919: chore: redirect to evadb 
+* PR #918: docs: updates 
+* PR #916: Bump v0.3.2+dev 
+* PR #915: Release 0.3.1 
+
 ##  [0.3.1] - 2023-06-30
 
 * PR #913: fix: motif_mining query 
