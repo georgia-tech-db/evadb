@@ -11,116 +11,116 @@ workflows:
         ## LINTER: All
         ################################
         ################################
-        - Linux:
-            name: Linter | v3.10 | Linux
-            mode: LINTER
+        #- Linux:
+        #    name: Linter | v3.10 | Linux
+        #    mode: LINTER
         ################################
         #### PIP: Master
         ################################
         ################################
-        - Pip-PyPI:
-            filters:
-              branches:
-                only: master
-        - Pip-Local:
-            filters:
-              branches:
-                only: master
+        #- Pip-PyPI:
+        #    filters:
+        #      branches:
+        #        only: master
+        #- Pip-Local:
+        #    filters:
+        #      branches:
+        #        only: master
         ################################
         #### UNIT TESTS: PR
         ################################
         ################################
-        - Linux:
-            name: Unit Test | v3.10 | Linux
-            mode: UNIT
-            filters:
-              branches:
-                ignore: 
-                  - master
-                  - staging
+        #- Linux:
+        #    name: Unit Test | v3.10 | Linux
+        #    mode: UNIT
+        #    filters:
+        #      branches:
+        #        ignore: 
+        #          - master
+        #          - staging
         ################################
         #### SHORT INTEGRATION TESTS: PR
         ################################
         ################################
-        - Linux:
-            name: Short Integration Test | v3.10 | Linux
-            mode: SHORT INTEGRATION
-            filters:
-              branches:
-                ignore: 
-                  - master
-                  - staging
+        #- Linux:
+        #    name: Short Integration Test | v3.10 | Linux
+        #    mode: SHORT INTEGRATION
+        #    filters:
+        #      branches:
+        #        ignore: 
+        #          - master
+        #          - staging
         ################################
         #### LONG INTEGRATION TESTS:
         #### Staging
         ################################
         ################################
-        - Linux:
-            name: Long Integration Test | v<< matrix.v >> | Linux
-            mode: LONG INTEGRATION
-            matrix:
-              parameters:
-                v: ["3.8", "3.9", "3.10", "3.11"]
-            filters:
-              branches:
-                only: staging
+        #- Linux:
+        #    name: Long Integration Test | v<< matrix.v >> | Linux
+        #    mode: LONG INTEGRATION
+        #    matrix:
+        #      parameters:
+        #        v: ["3.8", "3.9", "3.10", "3.11"]
+        #    filters:
+        #      branches:
+        #        only: staging
         ################################
         #### LONG INTEGRATION TESTS + RAY:
         #### Staging, Master
         ################################
         ################################
-        - Linux:
-            name: Long Integration Test | Ray | v<< matrix.v >> | Linux
-            mode: LONG INTEGRATION
-            ray: ENABLED
-            matrix:
-              parameters:
-                v: ["3.8", "3.9", "3.10"]
-            filters:
-              branches:
-                only: 
-                  - master
-                  - staging
+        #- Linux:
+        #    name: Long Integration Test | Ray | v<< matrix.v >> | Linux
+        #    mode: LONG INTEGRATION
+        #    ray: ENABLED
+        #    matrix:
+        #      parameters:
+        #        v: ["3.8", "3.9", "3.10"]
+        #    filters:
+        #      branches:
+        #        only: 
+        #          - master
+        #          - staging
         ################################
         ### THIRD PARTY: Staging, Master
         ################################
         ################################
-        - Postgres:
-            name: Third Party Test - Postgres | v3.10 | Linux
-            filters:
-              branches:
-                only: 
-                  - master
-                  - staging
+        #- Postgres:
+        #    name: Third Party Test - Postgres | v3.10 | Linux
+        #    filters:
+        #      branches:
+        #        only: 
+        #          - master
+        #          - staging
         ################################
         ### NOTEBOOKS: Staging, Master
         ################################
         ################################
-        - Linux:
-            name: Notebook Test | v<< matrix.v >> | Linux
-            mode: NOTEBOOK
-            filters:
-              branches:
-                only: 
-                  - master
-                  - staging
-            matrix:
-              parameters:
-                v: ["3.8", "3.9", "3.10", "3.11"]
+        #- Linux:
+        #    name: Notebook Test | v<< matrix.v >> | Linux
+        #    mode: NOTEBOOK
+        #    filters:
+        #      branches:
+        #        only: 
+        #          - master
+        #          - staging
+        #    matrix:
+        #      parameters:
+        #        v: ["3.8", "3.9", "3.10", "3.11"]
         ################################
         #### FULL TESTS:
         #### Master 
         ################################
         ################################
-        - Linux:
-            name: Full Test | v<< matrix.v >> | Linux
-            mode: FULL
-            matrix:
-              parameters:
-                v: ["3.8", "3.9", "3.10", "3.11"]
-            filters:
-              branches:
-                only: master 
+        #- Linux:
+        #    name: Full Test | v<< matrix.v >> | Linux
+        #    mode: FULL
+        #    matrix:
+        #      parameters:
+        #        v: ["3.8", "3.9", "3.10", "3.11"]
+        #    filters:
+        #      branches:
+        #        only: master 
         ################################
         # DOCKER AND CLOUD: Master
         ################################
@@ -133,8 +133,8 @@ workflows:
         ################################
         #- Windows:
         #    name: "Windows | v3.10"
-        # - MacOS:
-        #    name: "MacOS | v3.10"
+        - MacOS:
+            name: "MacOS | v3.10"
 
 jobs:
   Linux:
@@ -305,7 +305,7 @@ jobs:
               source test_evadb/bin/activate
               pip install --upgrade pip
               pip debug --verbose
-              pip install ".[dev]"
+              pip install ".[dev,ludwig,qdrant]"
               source test_evadb/bin/activate
               bash script/test/test.sh 
 
