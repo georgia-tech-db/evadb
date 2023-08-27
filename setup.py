@@ -54,8 +54,7 @@ minimal_requirements = [
     "retry>=0.9.2",
     "pydantic<2", # ray-project/ray#37019.
     "psutil",
-    "thefuzz",
-    "slack_sdk"
+    "thefuzz"
 ]
 
 vision_libs = [
