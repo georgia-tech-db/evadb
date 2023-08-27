@@ -1,0 +1,1 @@
+# tests whether the slack_handler is running the queries properly
