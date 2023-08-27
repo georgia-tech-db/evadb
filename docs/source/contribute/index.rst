@@ -64,12 +64,12 @@ Submitting a PR
 ============================
 
 For every open PR, we only run unit tests and short integration test to facilitate merging features quickly. 
-Once PR passes those tests, it will be merged into our `staging` branch for more comprehensive integration, version, and
+Once PR passes those tests, it will be merged into our ``staging`` branch for more comprehensive integration, version, and
 application tests. 
 
 Follow the following steps to contribute to EvaDB:
 
--  Merge the most recent changes from the `staging` branch
+-  Merge the most recent changes from the ``staging`` branch
 
 .. code-block:: bash
 
