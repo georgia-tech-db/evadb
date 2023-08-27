@@ -289,6 +289,13 @@ jobs:
               bash script\test\test.sh
 
   MacOS:
+      parameters:
+        v:
+          type: string
+          default: "3.10"
+        mode:
+          type: string
+          default: "FULL"
       macos:
         xcode: "14.2.0"
       steps:
