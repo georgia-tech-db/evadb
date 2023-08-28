@@ -1,26 +1,5 @@
-Debugging
------------
-
-We recommend Visual Studio Code with a debugger for debugging EvaDB. This tutorial presents a detailed step-by-step process of using the debugger.
-
-Setup debugger
-================
-
-1. Install the `Python extension <https://marketplace.visualstudio.com/items?itemName=ms-python.python>`__ in Visual Studio Code.
-
-2. Install the `Python Test Explorer extension <https://marketplace.visualstudio.com/items?itemName=LittleFoxTeam.vscode-python-test-adapter>`__.
-
-3. Follow these instructions to run a particular test case from the file:
-`Getting started <https://github.com/kondratyev-nv/vscode-python-test-adapter>`__.
-
-.. image:: images/eva-debug-1.jpg
-   :width: 1200
-
-.. image:: images/eva-debug-2.jpg
-   :width: 1200
-
-Alternative: Manually Setup Debugger for EvaDB
-====================================================
+Alternative: Manually Setup Debugger
+====================================
 
 When you press the debug icon, you will be given an option to create a ``launch.json`` file.
 
