@@ -75,12 +75,25 @@ class SlackHandler(DBHandler):
             assert e.response["ok"] is False
             assert e.response["error"]
             return DBHandlerResponse(data=None, error=e.response['error'])
+    
+    def _convert_json_response_to_DataFrame(self, json_response):
+        messages = json_response['messages']
+        columns = ["text", "ts", "user"]
+        data_df = pd.DataFrame(columns=columns)
+        for message in messages:
+            if message['text'] and message['ts'] and message['user']:
+                data_df.loc[len(data_df.index)] = [message['text'], message['ts'], message['user']]
+        return data_df
+
 
     def get_messages (self) -> DBHandlerResponse:
         try:
             channels = self.client.conversations_list(types="public_channel,private_channel")["channels"]
             channel_ids = {c["name"]: c["id"] for c in channels}
             response = self.client.conversations_history(channel=channel_ids[self.channel_name])
+            data_df = self._convert_json_response_to_DataFrame(response)
+            return data_df
+
         except SlackApiError as e:
             assert e.response["ok"] is False
             assert e.response["error"]
