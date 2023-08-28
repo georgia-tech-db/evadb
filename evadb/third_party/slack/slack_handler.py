@@ -14,17 +14,55 @@
 # limitations under the License.
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
+import pandas as pd
+import os
 
 from evadb.third_party.databases.types import (
     DBHandler,
     DBHandlerResponse,
+    DBHandlerStatus
 )
 
 class SlackHandler(DBHandler):
+    """
+    SlackHandler helps connect EvaDB to slack using the slack_sdk.
+    Run connect() function before the post_message, get_messages, del_message.
+
+    TODO: check for connect before executing other functions
+    """
     def __init__(self, name: str, **kwargs):
         super().__init__(name)
         self.token = kwargs.get("token")
-        self.channel = kwargs.get("channel")
+        self.token = os.getenv("TOKEN")
+        self.channel_name = kwargs.get("channel")
+
+    def get_tables(self) -> DBHandlerStatus:
+        if self.client:
+            channels = self.client.conversations_list(types="public_channel,private_channel")["channels"]
+            self.channel_names = [c['name'] for c in channels]
+            tables_df = pd.DataFrame(self.channel_names, columns=['table_name'])
+            return DBHandlerResponse(data=tables_df)
+    
+
+
+    def get_columns(self, table_name: str) -> DBHandlerResponse:
+        columns = [
+            'ts',
+            'text',
+            'message_created_at',
+            'user',
+            'channel',
+            'reactions',
+            'attachments',
+            'thread_ts',
+            'reply_count',
+            'reply_users_count',
+            'latest_reply',
+            'subtype',
+            'hidden',
+        ]
+        columns_df = pd.DataFrame(columns, columns=["column_name"])
+        return DBHandlerResponse(data=columns_df)
 
     def connect(self):
         self.client = WebClient(token=self.token)
@@ -39,4 +77,26 @@ class SlackHandler(DBHandler):
             return DBHandlerResponse(data=None, error=e.response['error'])
 
     def get_messages (self) -> DBHandlerResponse:
-        return DBHandlerResponse(data=self.client.conversations_history(channel=self.channel))
+        try:
+            channels = self.client.conversations_list(types="public_channel,private_channel")["channels"]
+            channel_ids = {c["name"]: c["id"] for c in channels}
+            response = self.client.conversations_history(channel=channel_ids[self.channel_name])
+        except SlackApiError as e:
+            assert e.response["ok"] is False
+            assert e.response["error"]
+            return DBHandlerResponse(data=None, error=e.response['error'])
+
+    def del_message(self, timestamp) -> DBHandlerResponse:
+        try:
+            response = self.client.chat_delete(
+                channel=self.channel,
+                ts = timestamp
+            )
+        except SlackApiError as e:
+            assert e.response["ok"] is False
+            assert e.response["error"]
+            return DBHandlerResponse(data=None, error=e.response['error'])
+    
+    def execute_native_query(self, query_string: str) -> DBHandlerResponse:
+
+        raise NotImplemented

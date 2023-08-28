@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.executor.utils import DummyExecutor
+from test.unit_tests.executor.utils import DummyExecutor
 
 import numpy as np
 import pandas as pd

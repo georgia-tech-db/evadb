@@ -35,11 +35,17 @@ class ToGrayscaleTests(unittest.TestCase):
         try_to_import_cv2()
         import cv2
 
-        arr = cv2.imread(f"{EvaDB_ROOT_DIR}/test/udfs/data/dog.jpeg")
+        arr = cv2.imread(f"{EvaDB_ROOT_DIR}/test/unit_tests/udfs/data/dog.jpeg")
         df = pd.DataFrame([[arr]])
         modified_arr = self.to_grayscale_instance(df)["grayscale_frame_array"]
-        cv2.imwrite(f"{EvaDB_ROOT_DIR}/test/udfs/data/tmp.jpeg", modified_arr[0])
-        actual_array = cv2.imread(f"{EvaDB_ROOT_DIR}/test/udfs/data/tmp.jpeg")
-        expected_arr = cv2.imread(f"{EvaDB_ROOT_DIR}/test/udfs/data/grayscale_dog.jpeg")
+        cv2.imwrite(
+            f"{EvaDB_ROOT_DIR}/test/unit_tests/udfs/data/tmp.jpeg", modified_arr[0]
+        )
+        actual_array = cv2.imread(
+            f"{EvaDB_ROOT_DIR}/test/unit_tests/udfs/data/tmp.jpeg"
+        )
+        expected_arr = cv2.imread(
+            f"{EvaDB_ROOT_DIR}/test/unit_tests/udfs/data/grayscale_dog.jpeg"
+        )
         self.assertEqual(np.sum(actual_array - expected_arr), 0)
-        file_remove(Path(f"{EvaDB_ROOT_DIR}/test/udfs/data/tmp.jpeg"))
+        file_remove(Path(f"{EvaDB_ROOT_DIR}/test/unit_tests/udfs/data/tmp.jpeg"))
