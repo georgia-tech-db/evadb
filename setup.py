@@ -54,7 +54,7 @@ minimal_requirements = [
     "retry>=0.9.2",
     "pydantic<2", # ray-project/ray#37019.
     "psutil",
-    "thefuzz",
+    "thefuzz"
 ]
 
 vision_libs = [
@@ -114,7 +114,11 @@ postgres_libs = [
 ]
 
 slack_libs = [
-    "slack-sdk"
+    "slack-sdk",
+    "slack-bolt",
+    "slack",
+    "slackclient",
+    "openai"
 ]
 
 ludwig_libs = [
