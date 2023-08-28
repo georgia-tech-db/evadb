@@ -55,7 +55,10 @@ minimal_requirements = [
     "pydantic<2", # ray-project/ray#37019.
     "psutil",
     "thefuzz",
-    "slack_sdk"
+    "slack_sdk",
+    "slack-bolt",
+    "slack",
+    "slackclient"
 ]
 
 vision_libs = [
