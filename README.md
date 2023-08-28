@@ -166,21 +166,11 @@ This diagram presents the key components of EvaDB. EvaDB's AI-centric query opti
 
 ## Screenshots
 
-### 🔮 [Traffic Analysis](https://evadb.readthedocs.io/en/stable/source/tutorials/02-object-detection.html) (Object Detection Model)
-| Source Video  | Query Result |
-|---------------|--------------|
-|<img alt="Source Video" src="https://github.com/georgia-tech-db/evadb/releases/download/v0.1.0/traffic-input.webp" width="300"> |<img alt="Query Result" src="https://github.com/georgia-tech-db/evadb/releases/download/v0.1.0/traffic-output.webp" width="300"> |
-
 ### 🔮 [PDF Question Answering](https://evadb.readthedocs.io/en/stable/source/tutorials/12-query-pdf.html) (Question Answering Model)
 
 | App |
 |-----|
 |<img alt="Source Video" src="https://github.com/georgia-tech-db/evadb/releases/download/v0.1.0/pdf-qa.webp" width="400"> |
-
-### 🔮 [MNIST Digit Recognition](https://evadb.readthedocs.io/en/stable/source/tutorials/01-mnist.html) (Image Classification Model)
-| Source Video  | Query Result |
-|---------------|--------------|
-|<img alt="Source Video" src="https://github.com/georgia-tech-db/evadb/releases/download/v0.1.0/mnist-input.webp" width="150"> |<img alt="Query Result" src="https://github.com/georgia-tech-db/evadb/releases/download/v0.1.0/mnist-output.webp" width="150"> |
 
 ### 🔮 [Movie Emotion Analysis](https://evadb.readthedocs.io/en/stable/source/tutorials/03-emotion-analysis.html) (Face Detection + Emotion Classification Models)
 
@@ -188,11 +178,6 @@ This diagram presents the key components of EvaDB. EvaDB's AI-centric query opti
 |---------------|--------------|
 |<img alt="Source Video" src="https://github.com/georgia-tech-db/evadb/releases/download/v0.1.0/gangubai-input.webp" width="400"> |<img alt="Query Result" src="https://github.com/georgia-tech-db/evadb/releases/download/v0.1.0/gangubai-output.webp" width="400"> |
 
-### 🔮 [License Plate Recognition](https://github.com/georgia-tech-db/evadb-application-template) (Plate Detection + OCR Extraction Models)
-
-| Query Result |
-|--------------|
-<img alt="Query Result" src="https://github.com/georgia-tech-db/license-plate-recognition/blob/main/README_files/README_12_3.png" width="300"> |
 
 ## Community and Support
 
@@ -224,5 +209,5 @@ For more information, see our
 </a>
 
 ## License
-Copyright (c) 2018--present [Georgia Tech Database Group](http://db.cc.gatech.edu/).
+Copyright (c) [Georgia Tech Database Group](http://db.cc.gatech.edu/).
 Licensed under [Apache License](LICENSE).
