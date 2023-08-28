@@ -4,6 +4,9 @@ from slack_bolt import App
 import openai
 from evadb.configuration.configuration_manager import ConfigurationManager
 
+# SLACK_BOT_TOKEN = "xoxb-5796901551090-5819342908849-cuy0rnmk5FUfxRbjxmAprD1w"
+# SLACK_APP_TOKEN = "xapp-1-A05Q39W0CBB-5796901890983-b1b8d9816feef0efff23ab538b5ba085889d2559814286af56e3ebe117f5a532"
+# OPENAI_API_KEY = "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"
 SLACK_BOT_TOKEN = ConfigurationManager().get_value("third_party", "SLACK_BOT_TOKEN")
 SLACK_APP_TOKEN = ConfigurationManager().get_value("third_party", "SLACK_APP_TOKEN")
 OPENAI_API_KEY = ConfigurationManager().get_value("third_party", "OPENAI_KEY")
@@ -38,4 +41,5 @@ def handle_message_events(body, logger):
                                        thread_ts=body["event"]["event_ts"],
                                        text=f"{response}")
 
-SocketModeHandler(app, SLACK_APP_TOKEN).start()
+def create_slack_bot ():
+    SocketModeHandler(app, SLACK_APP_TOKEN).start()
