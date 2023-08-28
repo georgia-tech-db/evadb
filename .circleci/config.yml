@@ -65,7 +65,6 @@ workflows:
               branches:
                 only:
                   - staging
-                  - macos_debug
         ################################
         #### LONG INTEGRATION TESTS + RAY:
         #### Staging, Master
@@ -135,12 +134,12 @@ workflows:
         ################################
         #- Windows:
         #    name: "Windows | v3.10"
-        - MacOS:
-            name: FULL TEST | v<< matrix.v >> | MacOS
-            mode: FULL
-            matrix:
-              parameters:
-                v: ["3.10"]
+        #- MacOS:
+        #    name: FULL TEST | v<< matrix.v >> | MacOS
+        #    mode: FULL
+        #    matrix:
+        #      parameters:
+        #        v: ["3.10"]
 
 jobs:
   Linux:
