@@ -21,6 +21,15 @@ def handle_message_events(body, logger):
                                        text=f"Hello from your bot! :robot_face: \nThanks for your request, I'm on it!")
 
     response = "I got your message: " + prompt
+    # Check ChatGPT
+    # openai.api_key = OPENAI_API_KEY
+    # response = openai.Completion.create(
+    #     engine="text-davinci-003",
+    #     prompt=prompt,
+    #     max_tokens=1024,
+    #     n=1,
+    #     stop=None,
+    #     temperature=0.5).choices[0].text
 
     # Reply to thread 
     response = client.chat_postMessage(channel=body["event"]["channel"], 
