@@ -19,8 +19,7 @@ from evadb.executor.abstract_executor import AbstractExecutor
 from evadb.models.storage.batch import Batch
 from evadb.parser.create_statement import CreateDatabaseStatement
 from evadb.utils.logging_manager import logger
-from evadb.third_party.slack.slack_chatbot import create_slack_bot
-
+from evadb.third_party.databases.slack.slack_chatbot import create_slack_bot
 
 class CreateDatabaseExecutor(AbstractExecutor):
     def __init__(self, db: EvaDBDatabase, node: CreateDatabaseStatement):
