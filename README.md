@@ -71,17 +71,26 @@ Here are some illustrative AI apps built using EvaDB (each notebook can be opene
 
 You can find the complete documentation of EvaDB at [https://evadb.readthedocs.io/](https://evadb.readthedocs.io/).
 
-## How EvaDB works
+## How does EvaDB work?
 
-* CONNECT EvaDB to your data platform. 
-* CREATE FUNCTION and pick the AI Engine to learn from your data. The models get provisioned and deployed automatically and become ready for inference instantaneously.
-   - Pick pre-trained models like OpenAI’s GPT, Hugging Face, YOLO, LangChain, etc, for NLP or generative AI use cases;
-   - or pick from a variety of state-of-the-art engines for classic machine Learning use cases (regression, classification, or time-series tasks);
-   - or IMPORT custom model built with any ML framework to automatically deploy as AI Tables.
-* Query models using SQL statements to make predictions for thousands or millions of data points simultaneously.
-* Experiment with your models and Fine-Tune them to achieve the best results.
+* Connect EvaDB to your data platform with the USE statement. 
+* Pick one of the built-in AI FUNCTIONs that wrap around AI models to query your data.
+   - Pick pre-trained models from Hugging Face, OpenAI, YOLO, PyTorch etc, for generative AI, NLP, and vision applications;
+   - or pick from a variety of state-of-the-art AI ENGINEs for classic machine Learning use cases (regression, classification, or time-series tasks);
+   - or bring your custom model built with any ML framework using CREATE FUNCTION.
+* Query data using SQL statements that run AI models to get inference results.
+* FINETUNE your AI models to achieve better results.
 
 Follow the [getting started](https://evadb.readthedocs.io/en/stable/source/overview/getting-started.html) guide with sample data to get on-boarded as fast as possible.
+
+## Architecture of EvaDB
+
+This diagram presents the key components of EvaDB. EvaDB's AI-centric query optimizer takes a query as input and generates a query plan that is executed by the query engine. The query engine hits the relevant storage engines to quickly retrieve the data required for efficiently running the query:
+1. Structured data (Tables in a SQL database system)
+2. Unstructured media data (PDFs, videos, etc. on cloud/local filesystem)
+3. Feature embeddings (Vector database system)
+
+<img width="500" alt="Architecture Diagram" src="https://github.com/georgia-tech-db/evadb/assets/5521975/01452ec9-87d9-4d27-90b2-c0b1ab29b16c">
 
 ## Community and Support
 
