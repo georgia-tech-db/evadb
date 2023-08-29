@@ -36,7 +36,7 @@
 
 EvaDB is a database system for developing AI apps. We aim to simplify the development and deployment of AI apps that operate on unstructured data (text documents, videos, PDFs, podcasts, etc.) and structured data (tables, vector index).
 
-The high-level Python and SQL APIs allow beginners to use EvaDB in a few lines of code. Advanced users can define custom user-defined functions that wrap around any AI model or Python library. EvaDB is fully implemented in Python and licensed under an Apache license.
+The high-level SQL and Python APIs allow beginners to use EvaDB in a few lines of code. Advanced users can define custom functions that wrap around any AI model or Python library. EvaDB is fully implemented in Python and licensed under an Apache license.
 
 ## Quick Links
 
@@ -48,10 +48,10 @@ The high-level Python and SQL APIs allow beginners to use EvaDB in a few lines o
 
 ## Features
 
-- 🔮 Build simpler AI-powered apps using Python functions or SQL queries
-- ⚡️ 10x faster applications using AI-centric query optimization  
+- 🔮 Build simpler AI-powered apps using SQL queries or Python functions
+- ⚡️ 10x faster applications using AI-centric query optimization
 - 💰 Save money spent on inference
-- 🚀 First-class support for your custom deep learning models through user-defined functions
+- 🚀 First-class support for custom deep learning models through user-defined functions
 - 📦 Built-in caching to eliminate redundant model invocations across queries
 - ⌨️ Integrations for PyTorch, Hugging Face, YOLO, and Open AI models
 - 🐍 Installable via pip and fully implemented in Python
@@ -69,102 +69,19 @@ Here are some illustrative AI apps built using EvaDB (each notebook can be opene
 
 ## Documentation
 
-* [Documentation](https://evadb.readthedocs.io/)
-  - The <a href="https://evadb.readthedocs.io/en/stable/source/overview/installation.html">Getting Started</a> page shows how you can use EvaDB for different AI tasks and how you can easily extend EvaDB to support your custom deep learning model through user-defined functions.
-  - The <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/13-privategpt.html">User Guides</a> section contains Jupyter Notebooks that demonstrate how to use various features of EvaDB. Each notebook includes a link to Google Colab, where you can run the code yourself.
-* [Join us on Slack](https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg)
-* [Follow us on Twitter](https://twitter.com/evadb_ai)
-* [Roadmap](https://github.com/orgs/georgia-tech-db/projects/3)
+You can find the complete documentation of EvaDB at [https://evadb.readthedocs.io/](https://evadb.readthedocs.io/).
 
-## Quick Start
+## How EvaDB works
 
-- Step 1: Install EvaDB using `pip`. EvaDB supports Python versions >= `3.8`:
+* CONNECT EvaDB to your data platform. 
+* CREATE FUNCTION and pick the AI Engine to learn from your data. The models get provisioned and deployed automatically and become ready for inference instantaneously.
+   - Pick pre-trained models like OpenAI’s GPT, Hugging Face, YOLO, LangChain, etc, for NLP or generative AI use cases;
+   - or pick from a variety of state-of-the-art engines for classic machine Learning use cases (regression, classification, or time-series tasks);
+   - or IMPORT custom model built with any ML framework to automatically deploy as AI Tables.
+* Query models using SQL statements to make predictions for thousands or millions of data points simultaneously.
+* Experiment with your models and Fine-Tune them to achieve the best results.
 
-```shell
-pip install evadb
-```
-
-- Step 2: It's time to write an AI app.
-
-```python
-import evadb
-
-# Grab a EvaDB cursor to load data into tables and run AI queries
-cursor = evadb.connect().cursor()
-
-# Load a collection of news videos into the 'news_videos' table
-# This function returns a Pandas dataframe with the query's output
-# In this case, the output dataframe indicates the number of loaded videos
-cursor.load(
-    file_regex="news_videos/*.mp4",
-    format="VIDEO",
-    table_name="news_videos"
-).df()
-
-# Define a function that wraps around your deep learning model
-# Here, this function wraps around a speech-to-text model
-# After registering the function, we can use the registered function in subsequent queries
-cursor.create_function(
-    udf_name="SpeechRecognizer",
-    type="HuggingFace",
-    task='automatic-speech-recognition',
-    model='openai/whisper-base'
-).df()
-
-# EvaDB automatically extracts the audio from the video
-# We only need to run the SpeechRecongizer function on the 'audio' column
-# to get the transcript and persist it in a table called 'transcripts'
-cursor.query(
-    """CREATE TABLE transcripts AS
-       SELECT SpeechRecognizer(audio) from news_videos;"""
-).df()
-
-# We next incrementally construct the ChatGPT query using EvaDB's Python API
-# The query is based on the 'transcripts' table
-# This table has a column called 'text' with the transcript text
-query = cursor.table('transcripts')
-
-# Since ChatGPT is a built-in function, we don't have to define it
-# We can just directly use it in the query
-# We need to set the OPENAI_KEY as an environment variable
-os.environ["OPENAI_KEY"] = OPENAI_KEY
-query = query.select("ChatGPT('Is this video summary related to LLMs', text)")
-
-# Finally, we run the query to get the results as a dataframe
-# You can then post-process the dataframe using other Python libraries
-response = query.df()
-```
-
-- **Incrementally build an AI query that chains together multiple models**
-
-Here is a AI query that analyses emotions of actors in an `Interstellar` movie clip using multiple PyTorch models.
-
-```python
-# Access the Interstellar movie clip table using a cursor
-query = cursor.table("Interstellar")
-# Get faces using a `FaceDetector` function
-query = query.cross_apply("UNNEST(FaceDetector(data))", "Face(bounding_box, confidence)")
-# Focus only on frames 100 through 200 in the clip
-query = query.filter("id > 100 AND id < 200")
-# Get the emotions of the detected faces using a `EmotionDetector` function
-query = query.select("id, bbox, EmotionDetector(Crop(data, bounding_box))")
-
-# Run the query and get the query result as a dataframe
-# At each of the above steps, you can run the query and see the output
-# If you are familiar with SQL, you can get the SQL query with query.sql_query()
-response = query.df()
-```
-
-## AI-Centric Query Optimizer
-
-EvaDB runs AI apps 10x faster using its AI-centric query optimizer. Three key built-in optimizations are:
-
- ⚡️ **Parallel Query Execution**: EvaDB runs the app in parallel on all the available hardware resources (CPUs and GPUs).
-
- 💾 **Caching**: EvaDB automatically caches and reuses model inference results.
-
- 🎯 **Model Predicate Re-ordering**: EvaDB optimizes the order in which models are evaluated (e.g., runs the faster, more selective model first).
- 
+Follow the [getting started](https://evadb.readthedocs.io/en/stable/source/overview/getting-started.html) guide with sample data to get on-boarded as fast as possible.
 
 ## Community and Support
 
