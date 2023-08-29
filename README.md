@@ -155,54 +155,16 @@ query = query.select("id, bbox, EmotionDetector(Crop(data, bounding_box))")
 response = query.df()
 ```
 
-- **EvaDB runs AI apps 10x faster using its AI-centric query optimizer**.
+## AI-Centric Query Optimizer
 
-  Three key built-in optimizations are:
+EvaDB runs AI apps 10x faster using its AI-centric query optimizer. Three key built-in optimizations are:
 
-   💾 **Caching**: EvaDB automatically caches and reuses model inference results.
+ ⚡️ **Parallel Query Execution**: EvaDB runs the app in parallel on all the available hardware resources (CPUs and GPUs).
 
-   ⚡️ **Parallel Query Execution**: EvaDB runs the app in parallel on all the available hardware resources (CPUs and GPUs).
+ 💾 **Caching**: EvaDB automatically caches and reuses model inference results.
 
-   🎯 **Model Ordering**: EvaDB optimizes the order in which models are evaluated (e.g., runs the faster, more selective model first).
-
-## Architecture Diagram
-
-This diagram presents the key components of EvaDB. EvaDB's AI-centric query optimizer takes a query as input and generates a query plan that is executed by the query engine. The query engine hits the relevant storage engines to quickly retrieve the data required for efficiently running the query:
-1. Structured data (SQL database system connected via `sqlalchemy`).
-2. Unstructured media data (PDFs, videos, etc. on cloud/local filesystem).
-3. Feature data (vector database system).
-
-<img width="500" alt="Architecture Diagram" src="https://github.com/georgia-tech-db/evadb/assets/5521975/01452ec9-87d9-4d27-90b2-c0b1ab29b16c">
-
-## Screenshots
-
-### 🔮 [Traffic Analysis](https://evadb.readthedocs.io/en/stable/source/tutorials/02-object-detection.html) (Object Detection Model)
-| Source Video  | Query Result |
-|---------------|--------------|
-|<img alt="Source Video" src="https://github.com/georgia-tech-db/evadb/releases/download/v0.1.0/traffic-input.webp" width="300"> |<img alt="Query Result" src="https://github.com/georgia-tech-db/evadb/releases/download/v0.1.0/traffic-output.webp" width="300"> |
-
-### 🔮 [PDF Question Answering](https://evadb.readthedocs.io/en/stable/source/tutorials/12-query-pdf.html) (Question Answering Model)
-
-| App |
-|-----|
-|<img alt="Source Video" src="https://github.com/georgia-tech-db/evadb/releases/download/v0.1.0/pdf-qa.webp" width="400"> |
-
-### 🔮 [MNIST Digit Recognition](https://evadb.readthedocs.io/en/stable/source/tutorials/01-mnist.html) (Image Classification Model)
-| Source Video  | Query Result |
-|---------------|--------------|
-|<img alt="Source Video" src="https://github.com/georgia-tech-db/evadb/releases/download/v0.1.0/mnist-input.webp" width="150"> |<img alt="Query Result" src="https://github.com/georgia-tech-db/evadb/releases/download/v0.1.0/mnist-output.webp" width="150"> |
-
-### 🔮 [Movie Emotion Analysis](https://evadb.readthedocs.io/en/stable/source/tutorials/03-emotion-analysis.html) (Face Detection + Emotion Classification Models)
-
-| Source Video  | Query Result |
-|---------------|--------------|
-|<img alt="Source Video" src="https://github.com/georgia-tech-db/evadb/releases/download/v0.1.0/gangubai-input.webp" width="400"> |<img alt="Query Result" src="https://github.com/georgia-tech-db/evadb/releases/download/v0.1.0/gangubai-output.webp" width="400"> |
-
-### 🔮 [License Plate Recognition](https://github.com/georgia-tech-db/evadb-application-template) (Plate Detection + OCR Extraction Models)
-
-| Query Result |
-|--------------|
-<img alt="Query Result" src="https://github.com/georgia-tech-db/license-plate-recognition/blob/main/README_files/README_12_3.png" width="300"> |
+ 🎯 **Model Predicate Re-ordering**: EvaDB optimizes the order in which models are evaluated (e.g., runs the faster, more selective model first).
+ 
 
 ## Community and Support
 
