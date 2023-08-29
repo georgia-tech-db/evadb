@@ -24,7 +24,7 @@ is_get_started = window.location.href.endsWith(
   "source/overview/getting-started.html"
 );
 is_use_cases = window.location.href.includes("source/usecases/");
-is_developer_guide = window.location.href.includes("source/contribute/");
+is_developer_guide = window.location.href.includes("source/dev-guide/");
 is_documentation = !(is_get_started || is_use_cases || is_developer_guide);
 
 lightEvaLogoSvg =
@@ -87,7 +87,7 @@ leftContents.push(useCasesLink);
 //-- The Documentation link
 documentationLink = document.createElement("a");
 documentationLink.innerText = "Docs";
-documentationLink.setAttribute("href", getNavURL("source/contribute/index.html").replace("source/contribute/index.html", "index.html"))
+documentationLink.setAttribute("href", getNavURL("source/overview/getting-started.html").replace("source/overview/getting-started.html", "index.html"))
 if (is_documentation) {
   documentationLink.style.borderBottom = "2px solid var(--orange)";
 }
@@ -98,7 +98,7 @@ developerGuideLink = document.createElement("a");
 developerGuideLink.innerText = "Developer Guide";
 developerGuideLink.setAttribute(
   "href",
-  getNavURL("source/contribute/index.html")
+  getNavURL("source/dev-guide/")
 );
 if (is_developer_guide) {
   developerGuideLink.style.borderBottom = "2px solid var(--orange)";
