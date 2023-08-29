@@ -40,4 +40,3 @@ def handle_message_events(body, logger):
 
 def create_slack_bot ():
     SocketModeHandler(app, SLACK_APP_TOKEN).start()
-create_slack_bot()
