@@ -38,6 +38,7 @@ import unittest
 from test.util import get_evadb_for_testing, shutdown_ray
 
 from evadb.server.command_handler import execute_query_fetch_all
+from evadb.configuration.configuration_manager import ConfigurationManager
 
 
 class CreateSlackDatabaseTest(unittest.TestCase):
