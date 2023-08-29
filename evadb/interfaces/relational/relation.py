@@ -20,7 +20,6 @@ from evadb.database import EvaDBDatabase
 from evadb.interfaces.relational.utils import (
     create_limit_expression,
     create_star_expression,
-    execute_statement,
     handle_select_clause,
     sql_predicate_to_expresssion_tree,
     sql_string_to_expresssion_list,
@@ -34,6 +33,7 @@ from evadb.parser.statement import AbstractStatement
 from evadb.parser.table_ref import JoinNode, TableRef
 from evadb.parser.types import JoinType
 from evadb.parser.utils import parse_sql_orderby_expr
+from evadb.server.command_handler import execute_statement
 
 
 class EvaDBQuery:

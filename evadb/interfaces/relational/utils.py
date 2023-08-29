@@ -16,14 +16,9 @@ from typing import Callable, List, Union
 
 from evadb.binder.statement_binder import StatementBinder
 from evadb.binder.statement_binder_context import StatementBinderContext
-from evadb.database import EvaDBDatabase
-from evadb.executor.plan_executor import PlanExecutor
 from evadb.expression.abstract_expression import AbstractExpression
 from evadb.expression.constant_value_expression import ConstantValueExpression
 from evadb.expression.tuple_value_expression import TupleValueExpression
-from evadb.models.storage.batch import Batch
-from evadb.optimizer.plan_generator import PlanGenerator
-from evadb.optimizer.statement_to_opr_converter import StatementToPlanConverter
 from evadb.parser.select_statement import SelectStatement
 from evadb.parser.statement import AbstractStatement
 from evadb.parser.table_ref import TableRef
@@ -49,16 +44,6 @@ def sql_string_to_expresssion_list(expr: str) -> List[AbstractExpression]:
 
 def sql_predicate_to_expresssion_tree(expr: str) -> AbstractExpression:
     return parse_predicate_expression(expr)
-
-
-def execute_statement(evadb: EvaDBDatabase, statement: AbstractStatement) -> Batch:
-    StatementBinder(StatementBinderContext(evadb.catalog)).bind(statement)
-    l_plan = StatementToPlanConverter().visit(statement)
-    p_plan = PlanGenerator(evadb).build(l_plan)
-    output = PlanExecutor(evadb, p_plan).execute_plan()
-    if output:
-        batch_list = list(output)
-        return Batch.concat(batch_list, copy=False)
 
 
 def string_to_lateral_join(expr: str, alias: str):
