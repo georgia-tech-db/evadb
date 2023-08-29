@@ -34,7 +34,6 @@ class TableType(EvaDBEnum):
     # Reserved for tables that are stored in native
     # database backend.
     NATIVE_DATA  # noqa: F821
-    SLACK_DATA # noqa: F821
 
 
 class ColumnType(EvaDBEnum):

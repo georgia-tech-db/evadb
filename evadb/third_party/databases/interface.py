@@ -34,7 +34,7 @@ def get_database_handler(engine: str, **kwargs):
 
     if engine == "postgres":
         return mod.PostgresHandler(engine, **kwargs)
-    if engine == "slack":
+    elif engine == "slack":
         return mod.SlackHandler(engine, **kwargs)
     else:
         raise NotImplementedError(f"Engine {engine} is not supported")
