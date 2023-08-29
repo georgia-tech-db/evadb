@@ -20,9 +20,9 @@ from evadb.storage.document_storage_engine import DocumentStorageEngine
 from evadb.storage.image_storage_engine import ImageStorageEngine
 from evadb.storage.native_storage_engine import NativeStorageEngine
 from evadb.storage.pdf_storage_engine import PDFStorageEngine
+from evadb.storage.slack_storage_engine import SlackStorageEngine
 from evadb.storage.sqlite_storage_engine import SQLStorageEngine
 from evadb.storage.video_storage_engine import DecordStorageEngine
-from evadb.storage.slack_storage_engine import SlackStorageEngine
 
 
 class StorageEngine:
