@@ -260,6 +260,7 @@ class Batch:
             return Batch()
 
         frames = [batch.frames for batch in batches]
+        frames = [frame.reset_index(drop=True) for frame in frames]
         new_frames = pd.concat(frames, axis=1, copy=False, ignore_index=False).fillna(
             method="ffill"
         )
