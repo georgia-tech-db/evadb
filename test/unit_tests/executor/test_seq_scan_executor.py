@@ -42,7 +42,7 @@ class SeqScanExecutorTest(unittest.TestCase):
         predicate_executor = SequentialScanExecutor(MagicMock(), plan)
         predicate_executor.append_child(DummyExecutor([batch]))
 
-        expected = Batch(batch[[2]].frames)
+        expected = Batch(batch.frames[batch.frames.index == 2].reset_index(drop=True))
         filtered = list(predicate_executor.exec())[0]
         self.assertEqual(expected, filtered)
 
