@@ -59,6 +59,7 @@ def apply_predicate(
     if not batch.empty() and predicate is not None:
         outcomes = predicate.evaluate(batch)
         batch.drop_zero(outcomes)
+        batch.reset_index()
 
         # persist stats of function expression
         for func_expr in predicate.find_all(FunctionExpression):
