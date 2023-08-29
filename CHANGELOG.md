@@ -10,6 +10,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### [Deprecated]
 ### [Removed]
 
+##  [0.3.3] - 2023-08-29
+
+* PR #983: doc: fix nav bar 
+* PR #982: fix: batch merge causing redundant row 
+* PR #981: fix: use the same interface 
+* PR #979: docs: added logo 
+* PR #980: docs: Update README.md 
+* PR #975: Simplify the ludwig dependency 
+* PR #972: feat: improve dev doc 
+* PR #971: Revert "feat: Integrating thirdy party Slack API " 
+* PR #967: feat: Integrating thirdy party Slack API  
+* PR #966: Developer guide for new structure data source integration 
+* PR #949: feat: improve circle ci 
+* PR #946: Support `SELECT Func
+
 ##  [0.3.2] - 2023-08-25
 
 * PR #953: docs: Fix User Reference and Dev Guide 
