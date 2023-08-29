@@ -35,7 +35,7 @@ def handle_message_events(body, logger):
     prompt = str(body["event"]["text"]).split(">")[1]
 
     # Let the user know that we are busy with the request
-    response = client.chat_postMessage(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
+    response = client.chat_postMessage(
         channel=body["event"]["channel"],
         thread_ts=body["event"]["event_ts"],
         text=f'{"Hello from EVADB bot! :robot_face:"}',
