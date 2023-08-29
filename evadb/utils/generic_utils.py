@@ -471,6 +471,14 @@ def try_to_import_qdrant_client():
         )
 
 
+def is_qdrant_available() -> bool:
+    try:
+        try_to_import_qdrant_client()
+        return True
+    except ValueError:  # noqa: E722
+        return False
+
+
 ##############################
 ## UTILS
 ##############################

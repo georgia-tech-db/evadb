@@ -23,9 +23,35 @@ from evadb.models.storage.batch import Batch
 from evadb.optimizer.plan_generator import PlanGenerator
 from evadb.optimizer.statement_to_opr_converter import StatementToPlanConverter
 from evadb.parser.parser import Parser
+from evadb.parser.statement import AbstractStatement
 from evadb.parser.utils import SKIP_BINDER_AND_OPTIMIZER_STATEMENTS
 from evadb.utils.logging_manager import logger
 from evadb.utils.stats import Timer
+
+
+def execute_statement(
+    evadb: EvaDBDatabase,
+    stmt: AbstractStatement,
+    do_not_raise_exceptions: bool = False,
+    do_not_print_exceptions: bool = False,
+    **kwargs
+) -> Iterator[Batch]:
+    # For certain statements, we plan to omit binder and optimizer to keep the code
+    # clean. So, we handle such cases here and pass the statement directly to the
+    # executor.
+    plan_generator = kwargs.pop("plan_generator", PlanGenerator(evadb))
+    if not isinstance(stmt, SKIP_BINDER_AND_OPTIMIZER_STATEMENTS):
+        StatementBinder(StatementBinderContext(evadb.catalog)).bind(stmt)
+        l_plan = StatementToPlanConverter().visit(stmt)
+        p_plan = plan_generator.build(l_plan)
+    else:
+        p_plan = stmt
+    output = PlanExecutor(evadb, p_plan).execute_plan(
+        do_not_raise_exceptions, do_not_print_exceptions
+    )
+    if output:
+        batch_list = list(output)
+        return Batch.concat(batch_list, copy=False)
 
 
 def execute_query(
@@ -40,27 +66,17 @@ def execute_query(
     Execute the query and return a result generator.
     """
     query_compile_time = Timer()
-    plan_generator = kwargs.pop("plan_generator", PlanGenerator(evadb))
+
     with query_compile_time:
         stmt = Parser().parse(query)[0]
-
-        # For certain statements, we plan to omit binder and optimizer to keep the code
-        # clean. So, we handle such cases here and pass the statement directly to the
-        # executor.
-        if not isinstance(stmt, SKIP_BINDER_AND_OPTIMIZER_STATEMENTS):
-            StatementBinder(StatementBinderContext(evadb.catalog)).bind(stmt)
-            l_plan = StatementToPlanConverter().visit(stmt)
-            p_plan = plan_generator.build(l_plan)
-        else:
-            p_plan = stmt
-        output = PlanExecutor(evadb, p_plan).execute_plan(
-            do_not_raise_exceptions, do_not_print_exceptions
+        res_batch = execute_statement(
+            evadb, stmt, do_not_raise_exceptions, do_not_print_exceptions, **kwargs
         )
 
     if report_time is True:
         query_compile_time.log_elapsed_time("Query Compile Time")
 
-    return output
+    return res_batch
 
 
 def execute_query_fetch_all(
@@ -74,7 +90,7 @@ def execute_query_fetch_all(
     """
     Execute the query and fetch all results into one Batch object.
     """
-    output = execute_query(
+    res_batch = execute_query(
         evadb,
         query,
         report_time,
@@ -82,9 +98,7 @@ def execute_query_fetch_all(
         do_not_print_exceptions,
         **kwargs
     )
-    if output:
-        batch_list = list(output)
-        return Batch.concat(batch_list, copy=False)
+    return res_batch
 
 
 async def handle_request(evadb: EvaDBDatabase, client_writer, request_message):
