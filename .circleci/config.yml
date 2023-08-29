@@ -63,7 +63,8 @@ workflows:
                 v: ["3.8", "3.9", "3.10", "3.11"]
             filters:
               branches:
-                only: staging
+                only:
+                  - staging
         ################################
         #### LONG INTEGRATION TESTS + RAY:
         #### Staging, Master
@@ -133,8 +134,12 @@ workflows:
         ################################
         #- Windows:
         #    name: "Windows | v3.10"
-        # - MacOS:
-        #    name: "MacOS | v3.10"
+        #- MacOS:
+        #    name: FULL TEST | v<< matrix.v >> | MacOS
+        #    mode: FULL
+        #    matrix:
+        #      parameters:
+        #        v: ["3.10"]
 
 jobs:
   Linux:
@@ -283,6 +288,13 @@ jobs:
               bash script\test\test.sh
 
   MacOS:
+      parameters:
+        v:
+          type: string
+          default: "3.10"
+        mode:
+          type: string
+          default: "FULL"
       macos:
         xcode: "14.2.0"
       steps:
@@ -291,8 +303,8 @@ jobs:
             command: |
               brew update
               brew install pyenv git
-              pyenv install 3.10.8
-              pyenv global 3.10.8
+              pyenv install "<< parameters.v >>"
+              pyenv global "<< parameters.v >>"
               eval "$(pyenv init -)"
               python --version
               pip --version
@@ -305,9 +317,9 @@ jobs:
               source test_evadb/bin/activate
               pip install --upgrade pip
               pip debug --verbose
-              pip install ".[dev]"
+              pip install ".[dev,ludwig,qdrant]"
               source test_evadb/bin/activate
-              bash script/test/test.sh 
+              bash script/test/test.sh -m "<< parameters.mode >>"
 
   Pip-PyPI:
     resource_class: large

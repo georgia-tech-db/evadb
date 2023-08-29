@@ -260,6 +260,14 @@ class Batch:
             return Batch()
 
         frames = [batch.frames for batch in batches]
+
+        # Check merging matched indices
+        frames_index = [list(frame.index) for frame in frames]
+        for i, frame_index in enumerate(frames_index):
+            assert (
+                frame_index == frames_index[i - 1]
+            ), "Merging of DataFrames with unmatched indice can cause undefined behavior"
+
         new_frames = pd.concat(frames, axis=1, copy=False, ignore_index=False).fillna(
             method="ffill"
         )

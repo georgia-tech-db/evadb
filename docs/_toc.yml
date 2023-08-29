@@ -4,6 +4,9 @@ parts:
   - caption: Overview
     chapters:
       - file: source/overview/getting-started
+        sections:
+          - file: source/overview/getting-started/install-guide
+            title: Installation Guide
       - file: source/overview/concepts
       # - file: source/overview/faq
 
@@ -72,14 +75,43 @@ parts:
 
   - caption: Developer Guide
     chapters:
-      - file: source/contribute/index
+      - file: source/dev-guide/architecture
+        title: Architecture Design of EvaDB
+
+      - file: source/dev-guide/contribute
         title: Contributing to EvaDB
+        sections:
+          - file: source/dev-guide/contribute/setup-dev
+            title: Setup Environment
+          - file: source/contribute/contribute/testing
+            title: Testing
+          - file: source/dev-guide/contribute/submit-pr
+            title: Submit a PR
+          - file: source/dev-guide/contribute/code-style
+            title: Code Style
+          - file: source/dev-guide/contribute/troubleshoot
+            title: Troubleshooting
 
-      - file: source/contribute/debugging
+      - file: source/dev-guide/debugging
         title: Debugging EvaDB
+        sections:
+          - file: source/dev-guide/debugger/vscode-debugger
+            title: VSCode Debugger
+          - file: source/dev-guide/debugger/alternative
+            title: Alternaitve Debugger
 
-      - file: source/contribute/new-command
+      - file: source/dev-guide/extend
         title: Extending EvaDB
+        sections:
+          - file: source/dev-guide/extend/new-data-source
+            title: Structured Data Source Integration
+          - file: source/dev-guide/extend/new-command
+            title: Operators
 
-      - file: source/contribute/release
+      - file: source/dev-guide/release
         title: Releasing EvaDB
+        sections:
+          - file: source/dev-guide/release/pypi-account
+            title: Setup PyPI Account
+          - file: source/dev-guide/release/release-steps
+            title: How to Release
