@@ -13,17 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from slack_sdk import WebClient
-from slack_sdk.errors import SlackApiError
+from evadb.third_party.databases.types import DBHandler
 
-from evadb.third_party.databases.types import (
-    DBHandler,
-    DBHandlerResponse,
-    DBHandlerStatus,
-)
 
 class SlackHandler(DBHandler):
-    def __init__(self, name:str, **kwargs):
+    def __init__(self, name: str, **kwargs):
         super().__init__()
         self.host = kwargs.get("host")
-        

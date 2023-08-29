@@ -1,6 +1,17 @@
-# this file tests the fetch, post and delete functions for slack integration
-# will be adding a complete 'SQLAlchemy to slack' middleware later
-# then this will be updated
+# coding=utf-8
+# Copyright 2018-2023 EvaDB
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 """
 queries to test:
@@ -15,20 +26,19 @@ queries to test:
 
 3) Post messages using post_message() method
     INSERT INTO slacktest.channels (channel, message)
-    VALUES 
+    VALUES
     ("#test1", "hello, world!"),
     (...);
 
 4) Delete from the channel
     DELETE FROM slacktest.channels
-    WHERE channel = "#test1" and ts = "12341235125.31543232";    
-
+    WHERE channel = "#test1" and ts = "12341235125.31543232";
 """
 import unittest
 from test.util import get_evadb_for_testing, shutdown_ray
 
 from evadb.server.command_handler import execute_query_fetch_all
-from evadb.configuration.configuration_manager import ConfigurationManager
+
 
 class CreateSlackDatabaseTest(unittest.TestCase):
     @classmethod
@@ -50,7 +60,6 @@ class CreateSlackDatabaseTest(unittest.TestCase):
         db_entry = self.evadb.catalog().get_database_catalog_entry("demo_db")
         self.assertEqual(db_entry.name, "demo_db")
         self.assertEqual(db_entry.engine, "slack")
-    
 
     def test_select_database_should_get_slack_api(self):
         # TODO: get token from evadb.yml
@@ -61,6 +70,4 @@ class CreateSlackDatabaseTest(unittest.TestCase):
         execute_query_fetch_all(self.evadb, query)
 
         query = "SELECT * FROM demo_db.test1"
-        batch = execute_query_fetch_all(self.evadb, query)
-        print(batch)
-
+        execute_query_fetch_all(self.evadb, query)
