@@ -15,8 +15,8 @@
 import unittest
 from test.util import get_evadb_for_testing, shutdown_ray
 
-from evadb.server.command_handler import execute_query_fetch_all
 from evadb.executor.executor_utils import ExecutorError
+from evadb.server.command_handler import execute_query_fetch_all
 
 
 class CreateDatabaseTest(unittest.TestCase):
