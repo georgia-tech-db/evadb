@@ -60,7 +60,7 @@ You can find the complete documentation of EvaDB at: [https://evadb.readthedocs.
 
 ## How does EvaDB work?
 
-* Connect EvaDB to your database system with the `USE` statement.
+* Connect EvaDB to your database system with the `CREATE DATABASE` statement.
 * Write SQL queries with AI functions to get inference results:
    - Pick a pre-trained AI model from Hugging Face, OpenAI, YOLO, PyTorch etc. for generative AI, NLP, and vision applications;
    - or pick from a variety of state-of-the-art ML engines for classic ML use-cases (classification, regression, etc.);
