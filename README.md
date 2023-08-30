@@ -134,7 +134,9 @@ EvaDB's AI-centric query optimizer takes a query as input and generates a query 
 2. AI Frameworks (Transform Unstructured Data to Structured Data, Unstructured data includes PDFs, images, podcasts, etc. stored on cloud buckets or local filesystem)
 3. Vector Database Systems (Feature Embeddings)
 
-<img width="70%" alt="Architecture Diagram" src="https://raw.githubusercontent.com/georgia-tech-db/evadb/staging/docs/images/evadb/eva-arch-for-user.png">
+<p align="center">
+  <img width="70%" alt="Architecture Diagram" src="https://raw.githubusercontent.com/georgia-tech-db/evadb/staging/docs/images/evadb/eva-arch-for-user.png">
+</p>
 
 ## Community and Support
 
@@ -143,9 +145,11 @@ EvaDB's AI-centric query optimizer takes a query as input and generates a query 
   - joining our [Slack Community 📟](https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg)
   - [following us on Twitter 🐦](https://twitter.com/evadb_ai)
 
-<a href="https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg">
-    <img src="https://raw.githubusercontent.com/georgia-tech-db/evadb/master/docs/images/evadb/evadb-slack.png" alt="EvaDB Slack Channel" width="70%">
-</a>
+<p align="center">
+  <a href="https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg">
+      <img width="70%" src="https://raw.githubusercontent.com/georgia-tech-db/evadb/master/docs/images/evadb/evadb-slack.png" alt="EvaDB Slack Channel">
+  </a>
+</p>
 
 If you run into any bugs or have any comments, please create a [Github Issue :bug:](https://github.com/georgia-tech-db/evadb/issues). 
 
@@ -162,9 +166,11 @@ EvaDB is the beneficiary of many [contributors 🙌](https://github.com/georgia-
 
 ## Star History
 
-<a href="https://star-history.com/#georgia-tech-db/evadb&Date">
-    <img src="https://api.star-history.com/svg?repos=georgia-tech-db/evadb&type=Date" alt="EvaDB Star History Chart" width="70%">
-</a>
+<p align="center">
+  <a href="https://star-history.com/#georgia-tech-db/evadb&Date">
+      <img width="70%" src="https://api.star-history.com/svg?repos=georgia-tech-db/evadb&type=Date" alt="EvaDB Star History Chart">
+  </a>
+</p>
 
 ## License
 Copyright (c) [Georgia Tech Database Group](http://db.cc.gatech.edu/).
