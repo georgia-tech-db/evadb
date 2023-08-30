@@ -36,7 +36,7 @@
 
 EvaDB is a database system for developing AI apps. We aim to simplify the development and deployment of AI apps that operate on unstructured data (text documents, videos, PDFs, podcasts, etc.) and structured data (tables, vector index).
 
-The high-level Python and SQL APIs allow beginners to use EvaDB in a few lines of code. Advanced users can define custom user-defined functions that wrap around any AI model or Python library. EvaDB is fully implemented in Python and licensed under an Apache license.
+The high-level SQL and Python APIs allow beginners to use EvaDB in a few lines of code. Advanced users can define custom functions that wrap around any AI model or Python library. EvaDB is fully implemented in Python and licensed under an Apache license.
 
 ## Quick Links
 
@@ -48,10 +48,10 @@ The high-level Python and SQL APIs allow beginners to use EvaDB in a few lines o
 
 ## Features
 
-- 🔮 Build simpler AI-powered apps using Python functions or SQL queries
-- ⚡️ 10x faster applications using AI-centric query optimization  
+- 🔮 Build simpler AI-powered apps using SQL queries or Python functions
+- ⚡️ 10x faster applications using AI-centric query optimization
 - 💰 Save money spent on inference
-- 🚀 First-class support for your custom deep learning models through user-defined functions
+- 🚀 First-class support for custom deep learning models through user-defined functions
 - 📦 Built-in caching to eliminate redundant model invocations across queries
 - ⌨️ Integrations for PyTorch, Hugging Face, YOLO, and Open AI models
 - 🐍 Installable via pip and fully implemented in Python
@@ -69,140 +69,68 @@ Here are some illustrative AI apps built using EvaDB (each notebook can be opene
 
 ## Documentation
 
-* [Documentation](https://evadb.readthedocs.io/)
-  - The <a href="https://evadb.readthedocs.io/en/stable/source/overview/installation.html">Getting Started</a> page shows how you can use EvaDB for different AI tasks and how you can easily extend EvaDB to support your custom deep learning model through user-defined functions.
-  - The <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/13-privategpt.html">User Guides</a> section contains Jupyter Notebooks that demonstrate how to use various features of EvaDB. Each notebook includes a link to Google Colab, where you can run the code yourself.
-* [Join us on Slack](https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg)
-* [Follow us on Twitter](https://twitter.com/evadb_ai)
-* [Roadmap](https://github.com/orgs/georgia-tech-db/projects/3)
+You can find the complete documentation of EvaDB at [https://evadb.readthedocs.io/](https://evadb.readthedocs.io/).
 
-## Quick Start
+## How does EvaDB work?
 
-- Step 1: Install EvaDB using `pip`. EvaDB supports Python versions >= `3.8`:
+* Connect EvaDB to your data platform with the USE statement.
+* Write SQL queries with AI functions to get inference results:
+   - Pick a pre-trained AI model from Hugging Face, OpenAI, YOLO, PyTorch etc. for generative AI, NLP, and vision applications;
+   - or pick from a variety of state-of-the-art AI engines for classic ML use-cases (classification, regression, etc.);
+   - or bring your custom model built with any AI framework using CREATE FUNCTION.
+* FINETUNE your AI models to achieve better results.
 
-```shell
-pip install evadb
+Follow the [getting started](https://evadb.readthedocs.io/en/stable/source/overview/getting-started.html) guide with sample data to get on-boarded as fast as possible.
+
+## Illustrative Queries
+
+* Call the MNIST Image Classification model to obtain digit labels for each frame in the video.
+
+```sql
+SELECT MnistImageClassifier(data).label FROM mnist_video;
 ```
 
-- Step 2: It's time to write an AI app.
+* Build a vector index on the feature embeddings returned by the SIFT Feature Extractor on a collection of images.
 
-```python
-import evadb
-
-# Grab a EvaDB cursor to load data into tables and run AI queries
-cursor = evadb.connect().cursor()
-
-# Load a collection of news videos into the 'news_videos' table
-# This function returns a Pandas dataframe with the query's output
-# In this case, the output dataframe indicates the number of loaded videos
-cursor.load(
-    file_regex="news_videos/*.mp4",
-    format="VIDEO",
-    table_name="news_videos"
-).df()
-
-# Define a function that wraps around your deep learning model
-# Here, this function wraps around a speech-to-text model
-# After registering the function, we can use the registered function in subsequent queries
-cursor.create_function(
-    udf_name="SpeechRecognizer",
-    type="HuggingFace",
-    task='automatic-speech-recognition',
-    model='openai/whisper-base'
-).df()
-
-# EvaDB automatically extracts the audio from the video
-# We only need to run the SpeechRecongizer function on the 'audio' column
-# to get the transcript and persist it in a table called 'transcripts'
-cursor.query(
-    """CREATE TABLE transcripts AS
-       SELECT SpeechRecognizer(audio) from news_videos;"""
-).df()
-
-# We next incrementally construct the ChatGPT query using EvaDB's Python API
-# The query is based on the 'transcripts' table
-# This table has a column called 'text' with the transcript text
-query = cursor.table('transcripts')
-
-# Since ChatGPT is a built-in function, we don't have to define it
-# We can just directly use it in the query
-# We need to set the OPENAI_KEY as an environment variable
-os.environ["OPENAI_KEY"] = OPENAI_KEY
-query = query.select("ChatGPT('Is this video summary related to LLMs', text)")
-
-# Finally, we run the query to get the results as a dataframe
-# You can then post-process the dataframe using other Python libraries
-response = query.df()
+```sql
+CREATE INDEX reddit_sift_image_index
+    ON reddit_dataset (SiftFeatureExtractor(data))
+    USING FAISS
 ```
 
-- **Incrementally build an AI query that chains together multiple models**
+* Retrieve the top 5 most similar images for given image.
 
-Here is a AI query that analyses emotions of actors in an `Interstellar` movie clip using multiple PyTorch models.
-
-```python
-# Access the Interstellar movie clip table using a cursor
-query = cursor.table("Interstellar")
-# Get faces using a `FaceDetector` function
-query = query.cross_apply("UNNEST(FaceDetector(data))", "Face(bounding_box, confidence)")
-# Focus only on frames 100 through 200 in the clip
-query = query.filter("id > 100 AND id < 200")
-# Get the emotions of the detected faces using a `EmotionDetector` function
-query = query.select("id, bbox, EmotionDetector(Crop(data, bounding_box))")
-
-# Run the query and get the query result as a dataframe
-# At each of the above steps, you can run the query and see the output
-# If you are familiar with SQL, you can get the SQL query with query.sql_query()
-response = query.df()
+```sql
+SELECT name FROM reddit_dataset ORDER BY
+    Similarity(
+        SiftFeatureExtractor(Open('reddit-images/g1074_d4mxztt.jpg')),
+        SiftFeatureExtractor(data)
+    )
+    LIMIT 5
 ```
 
-- **EvaDB runs AI apps 10x faster using its AI-centric query optimizer**.
+* Store the text returned by a Speech Recognition model on the audio component of a video in a table.
 
-  Three key built-in optimizations are:
+```sql
+CREATE TABLE text_summary AS
+    SELECT SpeechRecognizer(audio) FROM ukraine_video;
+```
 
-   💾 **Caching**: EvaDB automatically caches and reuses model inference results.
+* Run ChatGPT on the text column
 
-   ⚡️ **Parallel Query Execution**: EvaDB runs the app in parallel on all the available hardware resources (CPUs and GPUs).
+```sql
+SELECT ChatGPT('Is this video summary related to Ukraine russia war', text)
+    FROM text_summary;
+```
 
-   🎯 **Model Ordering**: EvaDB optimizes the order in which models are evaluated (e.g., runs the faster, more selective model first).
-
-## Architecture Diagram
+## Architecture of EvaDB
 
 This diagram presents the key components of EvaDB. EvaDB's AI-centric query optimizer takes a query as input and generates a query plan that is executed by the query engine. The query engine hits the relevant storage engines to quickly retrieve the data required for efficiently running the query:
-1. Structured data (SQL database system connected via `sqlalchemy`).
-2. Unstructured media data (PDFs, videos, etc. on cloud/local filesystem).
-3. Feature data (vector database system).
+1. Structured data (Tables in a SQL database system)
+2. Unstructured media data (PDFs, videos, etc. on cloud/local filesystem)
+3. Feature embeddings (Vector database system)
 
 <img width="500" alt="Architecture Diagram" src="https://github.com/georgia-tech-db/evadb/assets/5521975/01452ec9-87d9-4d27-90b2-c0b1ab29b16c">
-
-## Screenshots
-
-### 🔮 [Traffic Analysis](https://evadb.readthedocs.io/en/stable/source/tutorials/02-object-detection.html) (Object Detection Model)
-| Source Video  | Query Result |
-|---------------|--------------|
-|<img alt="Source Video" src="https://github.com/georgia-tech-db/evadb/releases/download/v0.1.0/traffic-input.webp" width="300"> |<img alt="Query Result" src="https://github.com/georgia-tech-db/evadb/releases/download/v0.1.0/traffic-output.webp" width="300"> |
-
-### 🔮 [PDF Question Answering](https://evadb.readthedocs.io/en/stable/source/tutorials/12-query-pdf.html) (Question Answering Model)
-
-| App |
-|-----|
-|<img alt="Source Video" src="https://github.com/georgia-tech-db/evadb/releases/download/v0.1.0/pdf-qa.webp" width="400"> |
-
-### 🔮 [MNIST Digit Recognition](https://evadb.readthedocs.io/en/stable/source/tutorials/01-mnist.html) (Image Classification Model)
-| Source Video  | Query Result |
-|---------------|--------------|
-|<img alt="Source Video" src="https://github.com/georgia-tech-db/evadb/releases/download/v0.1.0/mnist-input.webp" width="150"> |<img alt="Query Result" src="https://github.com/georgia-tech-db/evadb/releases/download/v0.1.0/mnist-output.webp" width="150"> |
-
-### 🔮 [Movie Emotion Analysis](https://evadb.readthedocs.io/en/stable/source/tutorials/03-emotion-analysis.html) (Face Detection + Emotion Classification Models)
-
-| Source Video  | Query Result |
-|---------------|--------------|
-|<img alt="Source Video" src="https://github.com/georgia-tech-db/evadb/releases/download/v0.1.0/gangubai-input.webp" width="400"> |<img alt="Query Result" src="https://github.com/georgia-tech-db/evadb/releases/download/v0.1.0/gangubai-output.webp" width="400"> |
-
-### 🔮 [License Plate Recognition](https://github.com/georgia-tech-db/evadb-application-template) (Plate Detection + OCR Extraction Models)
-
-| Query Result |
-|--------------|
-<img alt="Query Result" src="https://github.com/georgia-tech-db/license-plate-recognition/blob/main/README_files/README_12_3.png" width="300"> |
 
 ## Community and Support
 
