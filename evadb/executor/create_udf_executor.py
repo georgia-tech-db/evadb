@@ -40,7 +40,7 @@ from evadb.utils.generic_utils import (
     try_to_import_ultralytics,
 )
 from evadb.utils.logging_manager import logger
-
+import pudb
 
 class CreateUDFExecutor(AbstractExecutor):
     def __init__(self, db: EvaDBDatabase, node: CreateUDFPlan):
@@ -128,6 +128,25 @@ class CreateUDFExecutor(AbstractExecutor):
             self.node.metadata,
         )
 
+    def handle_forecasting_udf(self):
+        """Handle forecasting UDFs"""
+        if not self.node.impl_path:
+            impl_path = Path(f"{self.udf_dir}/forecast.py").absolute().as_posix()
+        else:
+            impl_path = self.node.impl_path.absolute().as_posix()
+        arg_map = {arg.key: arg.value for arg in self.node.metadata}
+        udf = self._try_initializing_udf(impl_path, arg_map)
+        io_list = self._resolve_udf_io(udf)
+
+        return (
+            self.node.name,
+            impl_path,
+            self.node.udf_type,
+            io_list,
+            self.node.metadata,
+        )
+
+
     def handle_generic_udf(self):
         """Handle generic UDFs
 
@@ -168,6 +187,8 @@ class CreateUDFExecutor(AbstractExecutor):
             name, impl_path, udf_type, io_list, metadata = self.handle_ultralytics_udf()
         elif self.node.udf_type == "Ludwig":
             name, impl_path, udf_type, io_list, metadata = self.handle_ludwig_udf()
+        elif self.node.udf_type == "Forecasting":
+            name, impl_path, udf_type, io_list, metadata = self.handle_forecasting_udf()
         else:
             name, impl_path, udf_type, io_list, metadata = self.handle_generic_udf()
 
