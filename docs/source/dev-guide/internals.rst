@@ -1,5 +1,7 @@
+:orphan:
+
 EvaDB Internals
-=============
+================
 
 Path of a Query
 -------------------
@@ -41,4 +43,3 @@ Overall, this sequence of operations represents the path of query execution in a
 Topics
 ------
 
-.. tableofcontents::

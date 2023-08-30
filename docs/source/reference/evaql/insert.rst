@@ -6,18 +6,18 @@ TABLE MyVideo
 
 MyVideo Table schema
 
-.. code:: mysql
+.. code:: text
 
     CREATE TABLE MyVideo
     (id INTEGER,
     data NDARRAY FLOAT32(ANYDIM));
 
 INSERT INTO TABLE
------
+-----------------
 
 Insert a tuple into a table.
 
-.. code:: mysql
+.. code:: text
 
     INSERT INTO MyVideo (id, data) VALUES 
         (1,

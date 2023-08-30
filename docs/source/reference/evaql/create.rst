@@ -2,7 +2,7 @@ CREATE
 ======
 
 CREATE TABLE
-----
+------------
 
 To create a table, specify the schema of the table.
 
@@ -19,7 +19,7 @@ To create a table, specify the schema of the table.
     );
 
 CREATE UDF
-----
+----------
 
 To register an user-defined function, specify the implementation details of the UDF.
 
@@ -35,7 +35,7 @@ To register an user-defined function, specify the implementation details of the 
 .. _create-udf-train:
 
 CREATE UDF via Training
-----
+-----------------------
 
 To register an user-defined function by training a predication model.
 
@@ -49,7 +49,7 @@ To register an user-defined function by training a predication model.
    'tune_for_memory' False;
 
 CREATE MATERIALIZED VIEW
-----
+------------------------
 
 To create a view with materialized results -- like the outputs of deep learning model, use the following template:
 

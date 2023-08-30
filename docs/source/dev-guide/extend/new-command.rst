@@ -1,10 +1,10 @@
 Operators / Commands
-=============
+====================
 
 This document details the steps involved in adding support for a new operator (or command) in EvaDB. We illustrate the process using a DDL command.
 
 Command Handler
-----
+---------------
 
 An input query string is handled by **Parser**,
 **StatementTOPlanConverter**, **PlanGenerator**, and **PlanExecutor**. 
@@ -83,7 +83,7 @@ parser/
 .. _2-statementtoplanconverter:
 
 2. Statement To Plan Converter
----------------------------
+------------------------------
 
 The part transforms the statement into corresponding logical plan.
 
@@ -154,13 +154,13 @@ Optimizer
 .. _3-plangenerator:
 
 3. Plan Generator
-----------------
+------------------
 
 The part transformed logical plan to physical plan. The modified files
 are stored under **Optimizer** and **Planner** folders.
 
 plan_nodes/
-~~~~~~~~
+~~~~~~~~~~~~
 
 -  ``[cmd]_plan.py`` - class [cmd]Plan, which stored information
    required for rename table.
@@ -220,7 +220,7 @@ optimizer/rules
 .. _4-PlanExecutor:
 
 4. Plan Executor
---------------
+-----------------
 
 ``PlanExecutor`` uses data stored in physical plan to run the command.
 

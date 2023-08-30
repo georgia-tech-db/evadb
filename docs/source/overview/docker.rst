@@ -1,5 +1,7 @@
+:orphan:
+
 Docker
-====
+======
 
 You can launch the EvaDB server using Docker either locally or on a server with GPUs:
 

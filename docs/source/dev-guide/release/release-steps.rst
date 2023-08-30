@@ -1,5 +1,5 @@
 Release Steps
-====
+=============
 
 1. Ensure that you're in the top-level ``eva`` directory.
 2. Ensure that your branch is in sync with the ``master`` branch:

@@ -8,7 +8,7 @@ parts:
           - file: source/overview/getting-started/install-guide
             title: Installation Guide
       - file: source/overview/concepts
-      # - file: source/overview/faq
+      - file: source/overview/faq
 
   - caption: Use Cases
     chapters:
@@ -18,12 +18,12 @@ parts:
         title: Image Search [FAISS]
       - file: source/usecases/qa-video.rst
         title: Q&A from Videos [ChatGPT + HuggingFace]
-      - file: source/usecases/02-object-detection.ipynb
-        title: Object Detection
-      - file: source/usecases/03-emotion-analysis.ipynb
-        title: Emotion Analysis
-      - file: source/usecases/07-object-segmentation-huggingface.ipynb
-        title: Image Segmentation [HuggingFace]
+          #- file: source/usecases/02-object-detection.ipynb
+          #  title: Object Detection
+          #- file: source/usecases/03-emotion-analysis.ipynb
+          #  title: Emotion Analysis
+          #- file: source/usecases/07-object-segmentation-huggingface.ipynb
+          #  title: Image Segmentation [HuggingFace]
 
 
   - caption: User Reference
@@ -83,7 +83,7 @@ parts:
         sections:
           - file: source/dev-guide/contribute/setup-dev
             title: Setup Environment
-          - file: source/contribute/contribute/testing
+          - file: source/dev-guide/contribute/testing
             title: Testing
           - file: source/dev-guide/contribute/submit-pr
             title: Submit a PR

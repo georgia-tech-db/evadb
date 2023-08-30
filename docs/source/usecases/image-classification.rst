@@ -1,10 +1,10 @@
 Image Classification Pipeline using EvaDB
-====
+=========================================
 
 Assume the database has loaded a video ``mnist_video``.
 
 1. Connect to EvaDB
-----
+-------------------
 
 .. code-block:: python
 
@@ -12,7 +12,7 @@ Assume the database has loaded a video ``mnist_video``.
     cursor = evadb.connect().cursor()
 
 2. Register Image Classification Model as a Function in SQL
-----
+-----------------------------------------------------------
 
 Create an image classification function from python source code.
 
@@ -24,7 +24,7 @@ Create an image classification function from python source code.
     """).execute()
 
 3. Execute Image Classification through SQL
-----
+-------------------------------------------
 
 After the function is registered to EvaDB system, it can be directly called and used in SQL query.
 
@@ -67,7 +67,7 @@ The result contains a projected ``label`` column, which indicates the digit of a
     ... ...
 
 4. Optional: Process Only Segments of Videos based on Conditions
-----
+-----------------------------------------------------------------
 
 Like normal SQL, you can also specify conditions to filter out some frames of the video.
 
