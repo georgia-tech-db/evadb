@@ -41,7 +41,6 @@ The high-level SQL and Python APIs allow beginners to use EvaDB in a few lines o
 ## Quick Links
 
 - [Features](#features)
-- [Quick Start](#quick-start)
 - [Documentation](#documentation)
 - [Community and Support](#community-and-support)
 - [Twitter](https://twitter.com/evadb_ai)
@@ -69,7 +68,7 @@ Here are some illustrative AI apps built using EvaDB (each notebook can be opene
 
 ## Documentation
 
-You can find the complete documentation of EvaDB at [https://evadb.readthedocs.io/](https://evadb.readthedocs.io/).
+You can find the complete documentation of EvaDB at: [https://evadb.readthedocs.io/](https://evadb.readthedocs.io/)
 
 ## How does EvaDB work?
 
@@ -130,11 +129,11 @@ This diagram presents the key components of EvaDB. EvaDB's AI-centric query opti
 2. Unstructured media data (PDFs, videos, etc. on cloud/local filesystem)
 3. Feature embeddings (Vector database system)
 
-<img width="500" alt="Architecture Diagram" src="https://github.com/georgia-tech-db/evadb/assets/5521975/01452ec9-87d9-4d27-90b2-c0b1ab29b16c">
+<img width="500" alt="Architecture Diagram" src="https://raw.githubusercontent.com/georgia-tech-db/evadb/master/docs/images/evadb/evadb-arch-for-user.png">
 
 ## Community and Support
 
-👋 If you have general questions about EvaDB, want to say hello or just follow along, please join our [Slack Community](https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg) and [follow us on Twitter](https://twitter.com/evadb_ai).
+👋 Hey! If you have questions or comments about EvaDB, join our [Slack Community](https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg) and [follow us on Twitter](https://twitter.com/evadb_ai).
 
 <a href="https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg">
     <img src="https://raw.githubusercontent.com/georgia-tech-db/evadb/master/docs/images/evadb/evadb-slack.png" alt="EvaDB Slack Channel" width="600">
