@@ -1,4 +1,4 @@
-Model Train and Finetune
+Training and Finetuning
 ========================
 
 1. You can train a predication model easily in EvaDB
