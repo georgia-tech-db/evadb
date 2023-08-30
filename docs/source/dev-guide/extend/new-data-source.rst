@@ -1,6 +1,6 @@
 Structured Data Source Integration
 ==================================
-This document details steps invovled in adding a new structured data source integration in EvaDB.
+This document details steps involved in adding a new structured data source integration in EvaDB.
 
 
 Example Data Source Integration In EvaDB
