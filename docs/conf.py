@@ -156,11 +156,14 @@ nitpicky = True
 # BUG: https://stackoverflow.com/questions/11417221/sphinx-autodoc-gives-warning-pyclass-reference-target-not-found-type-warning
 nitpick_ignore_regex = [('py:class', r'.*')]
 
-# Adding the Tutorial notebooks to ./docs/source/tutorials/
 
-#for i in os.listdir("../tutorials"):
-#    if i.endswith(".ipynb"):
-#        shutil.copy(f"../tutorials/{i}", "./source/usecases/")
+for i in os.listdir("../tutorials"):
+    if i in [
+        "02-object-detection.ipynb",
+        "03-emotion-analysis.ipynb", 
+        "07-object-segmentation-huggingface.ipynb"
+    ]:
+        shutil.copy(f"../tutorials/{i}", "./source/usecases/")
 
 nb_execution_mode = "off"
 
