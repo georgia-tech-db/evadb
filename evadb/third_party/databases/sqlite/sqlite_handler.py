@@ -12,8 +12,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import sqlite3
+
 import pandas as pd
-import psycopg2
 
 from evadb.third_party.databases.types import (
     DBHandler,
@@ -22,7 +23,7 @@ from evadb.third_party.databases.types import (
 )
 
 
-class PostgresHandler(DBHandler):
+class SQLiteHandler(DBHandler):
     def __init__(self, name: str, **kwargs):
         """
         Initialize the handler.
@@ -31,30 +32,20 @@ class PostgresHandler(DBHandler):
             **kwargs: arbitrary keyword arguments for establishing the connection.
         """
         super().__init__(name)
-        self.host = kwargs.get("host")
-        self.port = kwargs.get("port")
-        self.user = kwargs.get("user")
-        self.password = kwargs.get("password")
         self.database = kwargs.get("database")
-        self.connection = None
 
-    def connect(self) -> DBHandlerStatus:
+    def connect(self):
         """
         Set up the connection required by the handler.
         Returns:
             DBHandlerStatus
         """
         try:
-            self.connection = psycopg2.connect(
-                host=self.host,
-                port=self.port,
-                user=self.user,
-                password=self.password,
-                database=self.database,
+            self.connection = sqlite3.connect(
+                database=self.database, isolation_level=None  # Autocommit mode.
             )
-            self.connection.autocommit = True
             return DBHandlerStatus(status=True)
-        except psycopg2.Error as e:
+        except sqlite3.Error as e:
             return DBHandlerStatus(status=False, error=str(e))
 
     def disconnect(self):
@@ -85,10 +76,10 @@ class PostgresHandler(DBHandler):
             return DBHandlerResponse(data=None, error="Not connected to the database.")
 
         try:
-            query = "SELECT table_name FROM information_schema.tables WHERE table_schema NOT IN ('information_schema', 'pg_catalog')"
+            query = "SELECT name AS table_name FROM sqlite_master WHERE type = 'table'"
             tables_df = pd.read_sql_query(query, self.connection)
             return DBHandlerResponse(data=tables_df)
-        except psycopg2.Error as e:
+        except sqlite3.Error as e:
             return DBHandlerResponse(data=None, error=str(e))
 
     def get_columns(self, table_name: str) -> DBHandlerResponse:
@@ -101,32 +92,30 @@ class PostgresHandler(DBHandler):
         """
         if not self.connection:
             return DBHandlerResponse(data=None, error="Not connected to the database.")
-
+        """
+        SQLite does not provide an in-built way to get the column names using a SELECT statement.
+        Hence we have to use the PRAGMA command and filter the required columns.
+        """
         try:
-            query = f"SELECT column_name as name, data_type as dtype FROM information_schema.columns WHERE table_name='{table_name}'"
-            columns_df = pd.read_sql_query(query, self.connection)
-            columns_df["dtype"] = columns_df["dtype"].apply(self._pg_to_python_types)
+            query = f"PRAGMA table_info('{table_name}')"
+            pragma_df = pd.read_sql_query(query, self.connection)
+            columns_df = pragma_df[["name"]].copy()
+            columns_df.columns = ["column_name"]
             return DBHandlerResponse(data=columns_df)
-        except psycopg2.Error as e:
+        except sqlite3.Error as e:
             return DBHandlerResponse(data=None, error=str(e))
 
     def _fetch_results_as_df(self, cursor):
-        """
-        This is currently the only clean solution that we have found so far.
-        Reference to Postgres API: https://www.psycopg.org/docs/cursor.html#fetch
-
-        In short, currently there is no very clean programming way to differentiate
-        CREATE, INSERT, SELECT. CREATE and INSERT do not return any result, so calling
-        fetchall() on those will yield a programming error. Cursor has an attribute
-        rowcount, but it indicates # of rows that are affected. In that case, for both
-        INSERT and SELECT rowcount is not 0, so we also cannot use this API to
-        differentiate INSERT and SELECT.
-        """
         try:
             res = cursor.fetchall()
-            res_df = pd.DataFrame(res, columns=[desc[0] for desc in cursor.description])
+            res_df = pd.DataFrame(
+                res,
+                columns=[desc[0] for desc in cursor.description]
+                if cursor.description
+                else [],
+            )
             return res_df
-        except psycopg2.ProgrammingError as e:
+        except sqlite3.ProgrammingError as e:
             if str(e) == "no results to fetch":
                 return pd.DataFrame({"status": ["success"]})
             raise e
@@ -141,32 +130,9 @@ class PostgresHandler(DBHandler):
         """
         if not self.connection:
             return DBHandlerResponse(data=None, error="Not connected to the database.")
-
         try:
             cursor = self.connection.cursor()
             cursor.execute(query_string)
             return DBHandlerResponse(data=self._fetch_results_as_df(cursor))
-        except psycopg2.Error as e:
+        except sqlite3.Error as e:
             return DBHandlerResponse(data=None, error=str(e))
-
-    def _pg_to_python_types(self, pg_type: str):
-        mapping = {
-            "integer": int,
-            "bigint": int,
-            "smallint": int,
-            "numeric": float,
-            "real": float,
-            "double precision": float,
-            "character": str,
-            "character varying": str,
-            "text": str,
-            "boolean": bool,
-            # Add more mappings as needed
-        }
-
-        if pg_type in mapping:
-            return mapping[pg_type]
-        else:
-            raise Exception(
-                f"Unsupported column {pg_type} encountered in the postgres table. Please raise a feature request!"
-            )
