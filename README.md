@@ -82,6 +82,47 @@ You can find the complete documentation of EvaDB at [https://evadb.readthedocs.i
 
 Follow the [getting started](https://evadb.readthedocs.io/en/stable/source/overview/getting-started.html) guide with sample data to get on-boarded as fast as possible.
 
+## Illustrative Queries
+
+* Call the MNIST Image Classification model to obtain digit labels for each frame in the video.
+
+```sql
+SELECT MnistImageClassifier(data).label FROM mnist_video;
+```
+
+* Build a vector index on the feature embeddings returned by the SIFT Feature Extractor on a collection of images.
+
+```sql
+CREATE INDEX reddit_sift_image_index
+    ON reddit_dataset (SiftFeatureExtractor(data))
+    USING FAISS
+```
+
+* Retrieve the top 5 most similar images for given image.
+
+```sql
+SELECT name FROM reddit_dataset ORDER BY
+    Similarity(
+        SiftFeatureExtractor(Open('reddit-images/g1074_d4mxztt.jpg')),
+        SiftFeatureExtractor(data)
+    )
+    LIMIT 5
+```
+
+* Store the text returned by a Speech Recognition model on the audio component of a video in a table.
+
+```sql
+CREATE TABLE text_summary AS
+    SELECT SpeechRecognizer(audio) FROM ukraine_video;
+```
+
+* Run ChatGPT on the text column
+
+```sql
+SELECT ChatGPT('Is this video summary related to Ukraine russia war', text)
+    FROM text_summary;
+```
+
 ## Architecture of EvaDB
 
 This diagram presents the key components of EvaDB. EvaDB's AI-centric query optimizer takes a query as input and generates a query plan that is executed by the query engine. The query engine hits the relevant storage engines to quickly retrieve the data required for efficiently running the query:
