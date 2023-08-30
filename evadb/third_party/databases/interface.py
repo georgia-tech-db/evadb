@@ -26,11 +26,16 @@ def get_database_handler(engine: str, **kwargs):
     their new integrated handlers.
     """
 
-    # Dynamically install dependencies.
-    dynamic_install(engine)
-
     # Dynamically import the top module.
-    mod = dynamic_import(engine)
+    try:
+        mod = dynamic_import(engine)
+    except ImportError:
+        req_file = os.path.join(
+            "evadb", "third_party", "databases", engine, "requirements.txt"
+        )
+        if os.path.isfile(req_file):
+            with open(req_file) as f:
+                raise ImportError(f"Please install the following packages {f.read()}")
 
     if engine == "postgres":
         return mod.PostgresHandler(engine, **kwargs)
