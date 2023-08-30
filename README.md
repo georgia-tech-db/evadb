@@ -87,12 +87,18 @@ EvaDB enables software developers to build AI apps in a few lines of code. Its p
 
 ## Quick Links
 
+- [Quick Links](#quick-links)
 - [Documentation](#documentation)
 - [Why EvaDB](#why-evadb)
 - [How does EvaDB work](#how-does-evadb-work)
-- [Community and Support](#community-and-support)
 - [Illustrative Queries](#illustrative-queries)
 - [Illustrative Apps](#illustrative-apps)
+- [More Illustrative Queries](#more-illustrative-queries)
+- [Architecture of EvaDB](#architecture-of-evadb)
+- [Community and Support](#community-and-support)
+- [Contributing](#contributing)
+- [Star History](#star-history)
+- [License](#license)
 
 ## Documentation
 
