@@ -19,7 +19,7 @@ EvaDB supports Python (versions >= `3.8`). To install EvaDB, we recommend using 
 Write Your AI App
 --------------------------
 
-Here is an `illustrative MNIST digit classification app <https://evadb.readthedocs.io/en/stable/source/tutorials/01-mnist.html>`_ using EvaDB.
+Here is an illustrative MNIST digit classification app using EvaDB.
 
 .. code-block:: python
 
@@ -50,6 +50,7 @@ Here is an `illustrative MNIST digit classification app <https://evadb.readthedo
     response = query.df()
 
 
-The notebook works on `Google Colab <https://colab.research.google.com/github/georgia-tech-db/evadb/blob/master/tutorials/01-mnist.ipynb>`_.
+
+Check out our `Google Colab <https://colab.research.google.com/github/georgia-tech-db/evadb/blob/master/tutorials/01-mnist.ipynb>`_ for working example.
 
 .. image:: ../../images/reference/mnist.png
