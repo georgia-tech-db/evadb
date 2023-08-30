@@ -134,7 +134,8 @@ class CreateUDFExecutor(AbstractExecutor):
         Generic UDFs are loaded from a file. We check for inputs passed by the user during CREATE or try to load io from decorators.
         """
         impl_path = self.node.impl_path.absolute().as_posix()
-        udf = self._try_initializing_udf(impl_path)
+        arg_map = {arg.key: arg.value for arg in self.node.metadata}
+        udf = self._try_initializing_udf(impl_path, arg_map)
         io_list = self._resolve_udf_io(udf)
 
         return (
