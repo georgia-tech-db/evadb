@@ -65,7 +65,6 @@ You can find the complete documentation of EvaDB at: [https://evadb.readthedocs.
    - Pick a pre-trained AI model from Hugging Face, OpenAI, YOLO, PyTorch etc. for generative AI, NLP, and vision applications;
    - or pick from a variety of state-of-the-art ML engines for classic ML use-cases (classification, regression, etc.);
    - or bring your custom model built with any AI/ML framework using `CREATE FUNCTION`.
-* `FINETUNE` your AI models to achieve better results.
 
 Follow the [getting started](https://evadb.readthedocs.io/en/stable/source/overview/getting-started.html) guide with sample data to get on-boarded as fast as possible.
 
