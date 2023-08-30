@@ -3,7 +3,7 @@
 
 <p align="center">
   <a href="https://evadb.readthedocs.io">
-    <img src="https://raw.githubusercontent.com/georgia-tech-db/evadb/master/docs/images/evadb/evadb-full-logo.svg" width="500" alt="EvaDB">
+    <img src="https://raw.githubusercontent.com/georgia-tech-db/evadb/master/docs/images/evadb/evadb-full-logo.svg" width="70%" alt="EvaDB">
   </a>
 </p>
 
@@ -124,24 +124,24 @@ SELECT ChatGPT('Is this video summary related to Ukraine russia war', text)
 
 ## Architecture of EvaDB
 
-This diagram presents the key components of EvaDB. EvaDB's AI-centric query optimizer takes a query as input and generates a query plan that is executed by the query engine. The query engine hits the relevant storage engines to quickly retrieve the data required for efficiently running the query:
-1. Structured data (Tables in a SQL database system)
-2. Unstructured media data (PDFs, videos, etc. on cloud/local filesystem)
-3. Feature embeddings (Vector database system)
+EvaDB's AI-centric query optimizer takes a query as input and generates a query plan. The query engine takes the query plan and hits the relevant backends to efficiently process the query:
+1. SQL Database Systems (Structured Data)
+2. AI Frameworks (Transform Unstructured Data to Structured Data, Unstructured data includes PDFs, images, podcasts, etc. stored on cloud buckets or local filesystem)
+3. Vector Database Systems (Feature Embeddings)
 
-<img width="500" alt="Architecture Diagram" src="https://raw.githubusercontent.com/georgia-tech-db/evadb/master/docs/images/evadb/evadb-arch-for-user.png">
+<img width="70%" alt="Architecture Diagram" src="https://raw.githubusercontent.com/georgia-tech-db/evadb/staging/docs/images/evadb/eva-arch-for-user.png">
 
 ## Community and Support
 
-👋 Hey! If you have questions or comments about EvaDB, join our [Slack Community](https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg) and [follow us on Twitter](https://twitter.com/evadb_ai).
+👋 Hey! Please consider leaving a ⭐ on the [EvaDB Github repo](https://github.com/georgia-tech-db/evadb), joining our [Slack Community](https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg), and [following us on Twitter](https://twitter.com/evadb_ai).
 
 <a href="https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg">
-    <img src="https://raw.githubusercontent.com/georgia-tech-db/evadb/master/docs/images/evadb/evadb-slack.png" alt="EvaDB Slack Channel" width="600">
+    <img src="https://raw.githubusercontent.com/georgia-tech-db/evadb/master/docs/images/evadb/evadb-slack.png" alt="EvaDB Slack Channel" width="70%">
 </a>
 
-If you run into any problems or issues, please create a Github issue.
+If you run into any problems or have any comments, please create a [Github Issue](https://github.com/georgia-tech-db/evadb/issues).
 
-Don't see a feature in the list? Search our issue tracker if someone has already requested it and add a comment to it explaining your use-case, or open a new issue if not. We prioritize our [roadmap](https://github.com/orgs/georgia-tech-db/projects/3) based on user feedback, so we'd love to hear from you.
+Check out our [roadmap](https://github.com/orgs/georgia-tech-db/projects/3). We prioritize the features based on user feedback, so we'd love to hear from you! If you do not see a feature you are interested in the roadamp, please create a [Github Issue](https://github.com/georgia-tech-db/evadb/issues).
 
 ## Contributing
 
@@ -157,9 +157,9 @@ For more information, see our
 ## Star History
 
 <a href="https://star-history.com/#georgia-tech-db/evadb&Date">
-    <img src="https://api.star-history.com/svg?repos=georgia-tech-db/evadb&type=Date" alt="EvaDB Star History Chart" width="600">
+    <img src="https://api.star-history.com/svg?repos=georgia-tech-db/evadb&type=Date" alt="EvaDB Star History Chart" width="70%">
 </a>
 
 ## License
-Copyright (c) 2018--present [Georgia Tech Database Group](http://db.cc.gatech.edu/).
-Licensed under [Apache License](LICENSE).
+Copyright (c) [Georgia Tech Database Group](http://db.cc.gatech.edu/).
+Licensed under an [Apache License](LICENSE).
