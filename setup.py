@@ -188,5 +188,5 @@ setup(
     install_requires=INSTALL_REQUIRES,
     extras_require=EXTRA_REQUIRES,
     include_package_data=True,
-    package_data={"evadb": ["evadb.yml", "parser/evadb.lark"]},
+    package_data={"evadb": ["evadb.yml", "parser/evadb.lark", "third_party/databases/**/requirements.txt"]},
 )

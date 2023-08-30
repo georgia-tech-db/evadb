@@ -49,9 +49,8 @@ def dynamic_install(handler_dir):
 
     INSTALL_CACHE.append(handler_dir)
 
-    req_file = os.path.join(
-        "evadb", "third_party", "databases", handler_dir, "requirements.txt"
-    )
+    # Install package using absolute path.
+    req_file = os.path.join(os.path.dirname(__file__), handler_dir, "requirements.txt")
     if os.path.isfile(req_file):
         with open(req_file) as f:
             for package in f.read().splitlines():
@@ -62,5 +61,6 @@ def dynamic_install(handler_dir):
 
 
 def dynamic_import(handler_dir):
+    # Import package using relative path.
     import_path = f"evadb.third_party.databases.{handler_dir}.{handler_dir}_handler"
     return importlib.import_module(import_path)
