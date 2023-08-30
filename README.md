@@ -36,7 +36,10 @@
 <img src="https://img.shields.io/twitter/follow/evadb_ai?label=Follow: evadb_ai&style=social" alt="Follow evadb_ai"/>
 </a>
 <a href="https://medium.com/evadb-blog/" target="blank">
-<img src="https://img.shields.io/badge/EvaDB_Blog-Medium-8A2BE2" alt="EvaDB on Meidum"/>
+<img src="https://img.shields.io/badge/EvaDB_Blog-Medium-8A2BE2" alt="EvaDB on Medium"/>
+<a href="https://evadb.ai/" target="blank">
+<img src="https://img.shields.io/website/http/www.evadb.ai" alt="EvaDB Website"/>
+</a>
 </p>
 
 <p align="center"><b>Share EvaDB</b></p>
@@ -54,13 +57,12 @@
   <a href="https://colab.research.google.com/github/georgia-tech-db/evadb/blob/master/tutorials/03-emotion-analysis.ipynb">
       <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Launch EvaDB on Colab"/>
   </a>  	
-  <img alt="Python Versions Supported" src="https://img.shields.io/badge/Python--versions-3.8.x%20|%203.9.x%20|%203.10.x|%203.11.x-brightgreen"/>
-  <img alt="License" src="https://img.shields.io/badge/license-Apache%202-brightgreen.svg?logo=apache"/>
-  <img alt="Coverage Status" src="https://coveralls.io/repos/github/georgia-tech-db/eva/badge.svg?branch=master"/>  
-	<a href="https://www.evadb.ai/"><img src="https://img.shields.io/website?url=https%3A%2F%2Fwww.evadb.ai%2F" alt="EvaDB Website"></a>   
   <a href="https://github.com/orgs/georgia-tech-db/projects/3">
       <img src="https://img.shields.io/badge/evadb-roadmap-a6c096" alt="Roadmap"/>
   </a>
+  <img alt="Python Versions Supported" src="https://img.shields.io/badge/Python--versions-3.8~3.11-brightgreen"/>
+  <img alt="License" src="https://img.shields.io/badge/license-Apache%202-brightgreen.svg?logo=apache"/>
+  <img alt="Coverage Status" src="https://coveralls.io/repos/github/georgia-tech-db/eva/badge.svg?branch=master"/>  
 <!-- <a href="https://pepy.tech/project/evadb">
           <img alt="Downloads" src="https://static.pepy.tech/badge/evadb"/>
         </a> -->  
