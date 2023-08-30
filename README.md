@@ -147,13 +147,11 @@ EvaDB's AI-centric query optimizer takes a query as input and generates a query 
 
 If you run into any bugs or have any comments, please create a [Github Issue :bug:](https://github.com/georgia-tech-db/evadb/issues). 
 
-Here is our [roadmap 🛤️](https://github.com/orgs/georgia-tech-db/projects/3). We prioritize features based on user feedback, so we'd love to hear from you! If you do not see a feature you are interested in the roadmap, please create a [Github Issue :bug:](https://github.com/georgia-tech-db/evadb/issues).
+Here is EvaDB's public [roadmap 🛤️](https://github.com/orgs/georgia-tech-db/projects/3). We prioritize features based on user feedback, so we'd love to hear from you!
 
 ## Contributing
 
-[![PyPI Version](https://img.shields.io/pypi/v/evadb.svg)](https://pypi.org/project/evadb)
-[![CI Status](https://circleci.com/gh/georgia-tech-db/evadb.svg?style=svg)](https://circleci.com/gh/georgia-tech-db/evadb)
-[![Documentation Status](https://readthedocs.org/projects/evadb/badge/?version=latest)](https://evadb.readthedocs.io/en/latest/index.html)
+We are a lean team on a mission to bring AI to database systems! All kinds of contributions to EvaDB are appreciated. If you'd like to get involved, here's information on where we could use your help: [contribution guide](https://evadb.readthedocs.io/en/latest/source/dev-guide/contribute.html)
 
 EvaDB is the beneficiary of many [contributors 🙌](https://github.com/georgia-tech-db/evadb/graphs/contributors). 
 
@@ -163,8 +161,10 @@ EvaDB is the beneficiary of many [contributors 🙌](https://github.com/georgia-
   </a>
 </p>
 
-All kinds of contributions to EvaDB are appreciated. To file a bug or to request a feature, please use <a href="https://github.com/georgia-tech-db/evadb/issues">GitHub issues</a>. <a href="https://github.com/georgia-tech-db/evadb/pulls">Pull requests</a> are welcome. For more information, see our
-[contribution guide](https://evadb.readthedocs.io/en/stable/source/contribute/index.html).
+<b> CI Status: </b> 
+
+[![CI Status](https://circleci.com/gh/georgia-tech-db/evadb.svg?style=svg)](https://circleci.com/gh/georgia-tech-db/evadb)
+[![Documentation Status](https://readthedocs.org/projects/evadb/badge/?version=latest)](https://evadb.readthedocs.io/en/latest/index.html)
 
 ## Star History
 
