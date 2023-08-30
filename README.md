@@ -73,12 +73,11 @@ You can find the complete documentation of EvaDB at [https://evadb.readthedocs.i
 
 ## How does EvaDB work?
 
-* Connect EvaDB to your data platform with the USE statement. 
-* Pick one of the built-in AI FUNCTIONs that wrap around AI models to query your data.
-   - Pick pre-trained models from Hugging Face, OpenAI, YOLO, PyTorch etc, for generative AI, NLP, and vision applications;
-   - or pick from a variety of state-of-the-art AI ENGINEs for classic machine Learning use cases (regression, classification, or time-series tasks);
-   - or bring your custom model built with any ML framework using CREATE FUNCTION.
-* Query data using SQL statements that run AI models to get inference results.
+* Connect EvaDB to your data platform with the USE statement.
+* Write SQL queries with AI functions to get inference results:
+   - Pick a pre-trained AI model from Hugging Face, OpenAI, YOLO, PyTorch etc. for generative AI, NLP, and vision applications;
+   - or pick from a variety of state-of-the-art AI engines for classic ML use-cases (classification, regression, etc.);
+   - or bring your custom model built with any AI framework using CREATE FUNCTION.
 * FINETUNE your AI models to achieve better results.
 
 Follow the [getting started](https://evadb.readthedocs.io/en/stable/source/overview/getting-started.html) guide with sample data to get on-boarded as fast as possible.
