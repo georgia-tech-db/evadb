@@ -29,7 +29,7 @@
 <p align="center"><b>Follow EvaDB</b></p>
 
 <p align="center">
-<a href="https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg" target="blank">
+<a href="https://evadb.ai/community" target="blank">
 <img src="https://img.shields.io/badge/slack-evadb-orange.svg?logo=slack" alt="Join EvaDB Slack Community"/>
 </a>
 <a href="https://twitter.com/evadb_ai" target="blank">
@@ -82,7 +82,7 @@ EvaDB's benefits include:
 👋 Hey! If you're excited about our vision of bringing AI inside database systems, please show some ❤️ by: 
 <ul>
   <li> giving a ⭐ on our <a href="https://github.com/georgia-tech-db/evadb">EvaDB repo on Github 🐙</a>
-  <li> joining our <a href="https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg">Slack Community 📟</a>
+  <li> joining our <a href="https://evadb.ai/community">Slack Community 📟</a>
   <li> following us on <a href="https://twitter.com/evadb_ai">Twitter 🐦</a>
 </ul>
 
@@ -95,7 +95,7 @@ EvaDB's benefits include:
 
 ## Documentation
 
-You can find the complete documentation of EvaDB at: [https://evadb.readthedocs.io/](https://evadb.readthedocs.io/)
+You can find the complete documentation of EvaDB at [evadb.ai/docs](https://evadb.ai/docs/) 📚✨🚀
 
 ## How does EvaDB work?
 
@@ -192,12 +192,12 @@ EvaDB's AI-centric query optimizer takes a query as input and generates a query 
 ## Community and Support
 
 <!--<p>
-  <a href="https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg">
+  <a href="https://evadb.ai/community">
       <img width="70%" src="https://raw.githubusercontent.com/georgia-tech-db/evadb/master/docs/images/evadb/evadb-slack.png" alt="EvaDB Slack Channel">
   </a>
 </p>-->
 
-If you run into any bugs or have any comments, you can reach us on our <a href="https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg">Slack Community 📟</a>  or create a [Github Issue :bug:](https://github.com/georgia-tech-db/evadb/issues). 
+If you run into any bugs or have any comments, you can reach us on our <a href="https://evadb.ai/community">Slack Community 📟</a>  or create a [Github Issue :bug:](https://github.com/georgia-tech-db/evadb/issues). 
 
 Here is EvaDB's public [roadmap 🛤️](https://github.com/orgs/georgia-tech-db/projects/3). We prioritize features based on user feedback, so we'd love to hear from you!
 
