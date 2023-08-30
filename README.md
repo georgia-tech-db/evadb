@@ -4,7 +4,7 @@
   </a>
 </p>
 
-<p align="center"><i><b>Bring AI inside your database system to build AI-powered apps</b></i></p>
+<p align="center"><i><b>Bring AI inside your database system and build AI-powered apps</b></i></p>
 
 <p align="center">
 <a href="https://github.com/georgia-tech-db/evadb/fork" target="blank">
@@ -43,10 +43,10 @@
 
 <p align="center">
 
-<a href="https://twitter.com/intent/tweet?text=Check%20out%20EvaDB!%20EvaDB%20brings%20AI%20inside%20your%20database%20for%20building%20AI-powered%20apps.%20&url=https://github.com/georgia-tech-db/evadb&hashtags=EvaDB,AI,Database" target="blank">
+<a href="https://twitter.com/intent/tweet?text=Check%20out%20EvaDB!%20Bring%20AI%20inside%20your%20database%20system%20and%20build%20AI-powered%20apps.%20&url=https://github.com/georgia-tech-db/evadb&hashtags=EvaDB,AI,Database" target="blank">
 <img src="https://img.shields.io/twitter/follow/_superAGI?label=Twitter&style=social" alt="Follow _superAGI"/></a> 
-<a href="https://t.me/share/url?text=Check%20out%20EvaDB!%20EvaDB%20brings%20AI%20inside%20your%20database%20for%20building%20AI-powered%20apps.%20&url=https://github.com/georgia-tech-db/evadb" target="_blank"><img src="https://img.shields.io/twitter/url?label=Telegram&logo=Telegram&style=social&url=https://github.com/georgia-tech-db/evadb" alt="Share on Telegram"/></a>
-<a href="https://api.whatsapp.com/send?text=Check%20out%20EvaDB!%20EvaDB%20brings%20AI%20inside%20your%20database%20for%20building%20AI-powered%20apps.%20https://github.com/georgia-tech-db/evadb"><img src="https://img.shields.io/twitter/url?label=whatsapp&logo=whatsapp&style=social&url=https://github.com/georgia-tech-db/evadb" /></a> <a href="https://www.reddit.com/submit?url=https://github.com/georgia-tech-db/evadb&title=Check%20out%20EvaDB!%20EvaDB%20brings%20AI%20inside%20your%20database%20for%20building%20AI-powered%20apps." target="blank">
+<a href="https://t.me/share/url?text=Check%20out%20EvaDB!%20Bring%20AI%20inside%20your%20database%20and%20build%20AI-powered%20apps.%20&url=https://github.com/georgia-tech-db/evadb" target="_blank"><img src="https://img.shields.io/twitter/url?label=Telegram&logo=Telegram&style=social&url=https://github.com/georgia-tech-db/evadb" alt="Share on Telegram"/></a>
+<a href="https://api.whatsapp.com/send?text=Check%20out%20EvaDB!%20Bring%20AI%20inside%20your%20database%20and%20build%20AI-powered%20apps.%20https://github.com/georgia-tech-db/evadb"><img src="https://img.shields.io/twitter/url?label=whatsapp&logo=whatsapp&style=social&url=https://github.com/georgia-tech-db/evadb" /></a> <a href="https://www.reddit.com/submit?url=https://github.com/georgia-tech-db/evadb&title=Check%20out%20EvaDB!%20Bring%20AI%20inside%20your%20database%20and%20build%20AI-powered%20apps." target="blank">
 <img src="https://img.shields.io/twitter/url?label=Reddit&logo=Reddit&style=social&url=https://github.com/georgia-tech-db/evadb" alt="Share on Reddit"/>
 </p>
 
