@@ -79,7 +79,7 @@ EvaDB's benefits include:
 - 💰 Save money spent on running models by efficient CPU/GPU use
 - 🔧 Fine-tune your ML models to achieve better results
 
-👋 Hey there! If you're excited about our vision of bringing AI to database systems, please show some ❤️ by: 
+👋 Hey friend! If you're excited about our vision of bringing AI to database systems, please show some ❤️ by: 
 <ul>
   <li> giving a ⭐ on our <a href="https://github.com/georgia-tech-db/evadb">EvaDB repo on Github 🐙</a>
   <li> joining our <a href="https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg">Slack Community 📟</a>
