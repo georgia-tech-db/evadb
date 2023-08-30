@@ -38,6 +38,11 @@ EvaDB is a database system for developing AI apps. We aim to simplify the develo
 
 The high-level SQL and Python APIs allow beginners to use EvaDB in a few lines of code. Advanced users can define custom functions that wrap around any AI model or Python library. EvaDB is fully implemented in Python and licensed under an Apache license.
 
+👋 Hey there! If you're excited about our vision of bringing AI to database systems, please show some ❤️ by: 
+  - giving a ⭐ on our [EvaDB repo on Github 🐙](https://github.com/georgia-tech-db/evadb)
+  - joining our [Slack Community 📟](https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg)
+  - [following us on Twitter 🐦](https://twitter.com/evadb_ai)
+
 ## Quick Links
 
 - [Features](#features)
@@ -133,15 +138,18 @@ EvaDB's AI-centric query optimizer takes a query as input and generates a query 
 
 ## Community and Support
 
-👋 Hey! Please consider leaving a ⭐ on the [EvaDB Github repo](https://github.com/georgia-tech-db/evadb), joining our [Slack Community](https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg), and [following us on Twitter](https://twitter.com/evadb_ai).
+👋 Hey there! If you're excited about our vision of bringing AI to database systems, please show some ❤️ by: 
+  - giving a ⭐ on our [EvaDB repo on Github 🐙](https://github.com/georgia-tech-db/evadb)
+  - joining our [Slack Community 📟](https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg)
+  - [following us on Twitter 🐦](https://twitter.com/evadb_ai)
 
 <a href="https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg">
     <img src="https://raw.githubusercontent.com/georgia-tech-db/evadb/master/docs/images/evadb/evadb-slack.png" alt="EvaDB Slack Channel" width="70%">
 </a>
 
-If you run into any problems or have any comments, please create a [Github Issue](https://github.com/georgia-tech-db/evadb/issues).
+If you run into any bugs or have any comments, please create a [Github Issue :bug:](https://github.com/georgia-tech-db/evadb/issues). 
 
-Check out our [roadmap](https://github.com/orgs/georgia-tech-db/projects/3). We prioritize the features based on user feedback, so we'd love to hear from you! If you do not see a feature you are interested in the roadamp, please create a [Github Issue](https://github.com/georgia-tech-db/evadb/issues).
+Here is our [roadmap 🛤️](https://github.com/orgs/georgia-tech-db/projects/3). We prioritize features based on user feedback, so we'd love to hear from you! If you do not see a feature you are interested in the roadmap, please create a [Github Issue :bug:](https://github.com/georgia-tech-db/evadb/issues).
 
 ## Contributing
 
@@ -149,9 +157,7 @@ Check out our [roadmap](https://github.com/orgs/georgia-tech-db/projects/3). We 
 [![CI Status](https://circleci.com/gh/georgia-tech-db/evadb.svg?style=svg)](https://circleci.com/gh/georgia-tech-db/evadb)
 [![Documentation Status](https://readthedocs.org/projects/evadb/badge/?version=latest)](https://evadb.readthedocs.io/en/latest/index.html)
 
-EvaDB is the beneficiary of many [contributors](https://github.com/georgia-tech-db/evadb/graphs/contributors). All kinds of contributions to EvaDB are appreciated. To file a bug or to request a feature, please use <a href="https://github.com/georgia-tech-db/evadb/issues">GitHub issues</a>. <a href="https://github.com/georgia-tech-db/evadb/pulls">Pull requests</a> are welcome.
-
-For more information, see our
+EvaDB is the beneficiary of many [contributors 🙌](https://github.com/georgia-tech-db/evadb/graphs/contributors). All kinds of contributions to EvaDB are appreciated. To file a bug or to request a feature, please use <a href="https://github.com/georgia-tech-db/evadb/issues">GitHub issues</a>. <a href="https://github.com/georgia-tech-db/evadb/pulls">Pull requests</a> are welcome. For more information, see our
 [contribution guide](https://evadb.readthedocs.io/en/stable/source/contribute/index.html).
 
 ## Star History
