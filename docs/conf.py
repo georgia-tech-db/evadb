@@ -151,7 +151,7 @@ html_css_files = [
                     "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/solid.min.css",
                     "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/brands.min.css"]
 
-# Check interal link: https://stackoverflow.com/questions/14492743/have-sphinx-report-broken-links/14735060#14735060
+# Check link: https://stackoverflow.com/questions/14492743/have-sphinx-report-broken-links/14735060#14735060
 nitpicky = True
 # BUG: https://stackoverflow.com/questions/11417221/sphinx-autodoc-gives-warning-pyclass-reference-target-not-found-type-warning
 nitpick_ignore_regex = [('py:class', r'.*')]
