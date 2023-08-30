@@ -27,7 +27,7 @@ After installing the package locally, you can make changes and run the test case
 .. note::
    
    EvaDB provides multiple installation options for extending its functionalities. 
-   Please see :doc:`Installation Guide <getting-started/install-guide>` for all options.
+   Please see :ref:`installation guide` for all options.
 
 Other options can be installed with the ``dev`` environment.
 

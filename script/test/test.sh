@@ -37,6 +37,22 @@ check_linter() {
   print_error_code $code "LINTER"
 }
 
+check_doc_build() {
+  pushd docs
+  make html
+  code=$?
+  popd
+  print_error_code $code "DOC BUILD"  
+}
+
+check_doc_link() {
+  pushd docs
+  make linkcheck
+  code=$?
+  popd
+  print_error_code $code "DOC LINK CHECK"  
+}
+
 unit_test() {
   PYTHONPATH="." pytest test/unit_tests/ --durations=20 --cov-report term-missing:skip-covered  --cov-config=.coveragerc --cov-context=test --cov=evadb/ --capture=sys --tb=short -v -rsf --log-level=WARNING -m "not benchmark"
   code=$?
@@ -115,6 +131,17 @@ then
   # Keeping the duplicate linting for time being
   # Run linter (checks code style)
   check_linter
+fi
+
+##################################################
+## DOC BUILD TESTS
+##################################################
+
+if [[ ( "$OSTYPE" != "msys" ) && ( "$MODE" = "DOC" || "$MODE" = "ALL" ) ]];
+then 
+  # Run black, isort, linter 
+  check_doc_build
+  check_doc_link
 fi
 
 ##################################################

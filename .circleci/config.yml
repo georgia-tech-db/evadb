@@ -15,6 +15,12 @@ workflows:
             name: Linter | v3.10 | Linux
             mode: LINTER
         ################################
+        ## DOC: All
+        ################################
+        ################################
+        - Doc:
+            name: Doc | v3.10 | Linux
+        ################################
         #### PIP: Master
         ################################
         ################################
@@ -178,8 +184,8 @@ jobs:
             RAY: << parameters.ray >>
           command: |
             "python<< parameters.v >>" -m venv test_evadb
-            pip install --upgrade pip
             source test_evadb/bin/activate
+            pip install --upgrade pip
             if [ $RAY = "ENABLED" ]; then
               if [ $PY_VERSION != "3.11" ]; then
                 pip install ".[dev,ray,qdrant]"
@@ -224,6 +230,47 @@ jobs:
           key: v1-pip-wheel_cache-python<< parameters.v >>-ray<< parameters.ray >>-{{ checksum "setup.py" }}
           paths:
             - test_evadb
+
+  Doc:
+    parameters:
+      v:
+        type: string
+        default: "3.10"
+      mode:
+        type: string
+        default: "DOC"
+    resource_class: large
+    docker:
+      # https://circleci.com/docs/circleci-images#language-image-variants
+      - image: "cimg/python:<< parameters.v >>"
+    steps:
+
+      - checkout
+
+      # Restore pip wheel
+      - restore_cache:
+          keys:
+            - v1-pip-wheel_cache-python<< parameters.v >>-{{ checksum "docs/requirements.txt" }}
+
+      - run:
+          name: Install EvaDB Doc dependencies
+          command: |
+            "python<< parameters.v >>" -m venv test_evadb_doc
+            source test_evadb_doc/bin/activate
+            pip install --upgrade pip
+            pip install -r docs/requirements.txt 
+
+      - run:
+          name: Test doc build and link validation
+          no_output_timeout: 10m # 10 minute timeout
+          command: |
+            source test_evadb_doc/bin/activate
+            bash script/test/test.sh -m "<< parameters.mode >>"
+
+      - save_cache:
+          key: v1-pip-wheel_cache-python<< parameters.v >>-{{ checksum "docs/requirements.txt" }}
+          paths:
+            - test_evadb_doc
 
   Postgres:
     parameters:
