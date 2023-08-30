@@ -208,10 +208,12 @@ We are a lean team on a mission to bring AI to database systems! All kinds of co
   </a>
 </p>
 
+<details>
 <b> CI Status: </b> 
 
 [![CI Status](https://circleci.com/gh/georgia-tech-db/evadb.svg?style=svg)](https://circleci.com/gh/georgia-tech-db/evadb)
 [![Documentation Status](https://readthedocs.org/projects/evadb/badge/?version=latest)](https://evadb.readthedocs.io/en/latest/index.html)
+</details>
 
 ## Star History
 
