@@ -1,11 +1,11 @@
+:orphan:
+
 .. _guide-packaging:
 
 Packaging
 ===================
 
     This section describes practices to follow when packaging your own models or datasets to be used along with EvaDB.
-
-.. tableofcontents::
 
 Models
 --------

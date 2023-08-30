@@ -2,7 +2,7 @@ DROP
 ====
 
 DROP TABLE
-----
+----------
 
 .. code:: mysql
 
@@ -10,7 +10,7 @@ DROP TABLE
 
 
 DROP UDF
-----
+--------
 
 .. code:: mysql
 

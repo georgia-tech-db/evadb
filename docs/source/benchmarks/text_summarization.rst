@@ -1,9 +1,9 @@
 Text summarization benchmark 
-====
+============================
 In this benchmark, we compare the performance of text summarization between EvaDB and MindsDB on `CNN-DailyMail News <https://www.kaggle.com/datasets/gowrishankarp/newspaper-text-summarization-cnn-dailymail>`_.
 
 1. Prepare dataset
-----
+------------------
 
 .. code-block:: bash
 
@@ -11,7 +11,7 @@ In this benchmark, we compare the performance of text summarization between EvaD
    bash download_dataset.sh
 
 2. Using EvaDB to summarize the CNN DailyMail News
-----
+--------------------------------------------------
 
 .. note::
  
@@ -24,10 +24,10 @@ In this benchmark, we compare the performance of text summarization between EvaD
 
 
 3. Using MindsDB to summarize the CNN DailyMail News
-----
+----------------------------------------------------
 
 Prepare sqlite database for MindsDB
-****
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: bash
 
@@ -38,7 +38,8 @@ Prepare sqlite database for MindsDB
 
 
 Install MindsDB
-****
+~~~~~~~~~~~~~~~
+
 Follow the `Setup for Source Code via pip <https://docs.mindsdb.com/setup/self-hosted/pip/source>`_ to install mindsdb.
 
 .. note::
@@ -52,11 +53,11 @@ After the installation, we use mysql cli to connect to MindsDB. Replace the port
    mysql -h 127.0.0.1 --port 47335 -u mindsdb -p
 
 Run Experiment
-****
+~~~~~~~~~~~~~~
 
 Connect the sqlite database we created before.
 
-.. code-block:: sql
+.. code-block:: text
 
    CREATE DATABASE sqlite_datasource
    WITH ENGINE = 'sqlite',
@@ -66,7 +67,7 @@ Connect the sqlite database we created before.
 
 Create text summarization model and wait for its readiness.
 
-.. code-block:: sql
+.. code-block:: text
 
    CREATE MODEL mindsdb.hf_bart_sum_20
    PREDICT PRED
@@ -82,7 +83,7 @@ Create text summarization model and wait for its readiness.
 
 Use the model to summarize the CNN DailyMail news.
 
-.. code-block:: sql
+.. code-block:: text
 
    CREATE OR REPLACE TABLE sqlite_datasource.cnn_news_summary (
      SELECT PRED
@@ -92,8 +93,8 @@ Use the model to summarize the CNN DailyMail news.
 
 
 4. Experiment results
-----
-Below are nubmers from a server with 56 Intel(R) Xeon(R) CPU E5-2690 v4 @ 2.60GHz and two Quadro P6000 GPU.
+---------------------
+Below are numbers from a server with 56 Intel(R) Xeon(R) CPU E5-2690 v4 @ 2.60GHz and two Quadro P6000 GPU.
 
 .. list-table:: Text summarization with ``sshleifer/distilbart-cnn-12-6`` on CNN-DailyMail News
 

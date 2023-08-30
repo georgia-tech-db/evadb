@@ -2,7 +2,7 @@ DELETE
 =======
 
 DELETE INTO TABLE
------
+-----------------
 
 Delete a tuple from a table based on a predicate.
 

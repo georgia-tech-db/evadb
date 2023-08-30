@@ -1,8 +1,8 @@
 EXPLAIN 
-====
+========
 
 EXPLAIN QUERY
-----
+-------------
 
 List the query plan associated with a EvaDB query
 
