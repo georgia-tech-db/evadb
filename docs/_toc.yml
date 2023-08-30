@@ -8,7 +8,7 @@ parts:
           - file: source/overview/getting-started/install-guide
             title: Installation Guide
       - file: source/overview/concepts
-      - file: source/overview/faq
+        #- file: source/overview/faq
 
   - caption: Use Cases
     chapters:
