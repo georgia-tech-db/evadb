@@ -95,12 +95,12 @@ Key Features
 Try it out!
 ------------
 
-- `PrivateGPT <https://evadb.readthedocs.io/en/stable/source/tutorials/13-privategpt.html>`_
-- `Video Question Answering using ChatGPT <https://evadb.readthedocs.io/en/stable/source/tutorials/08-chatgpt.html>`_
-- `Querying PDF documents <https://evadb.readthedocs.io/en/stable/source/tutorials/12-query-pdf.html>`_
-- `Analyzing traffic flow at an intersection <https://evadb.readthedocs.io/en/stable/source/tutorials/02-object-detection.html>`_
-- `Examining the emotion palette of actors in a movie <https://evadb.readthedocs.io/en/stable/source/tutorials/03-emotion-analysis.html>`_
-- `Classifying images based on their content <https://evadb.readthedocs.io/en/stable/source/tutorials/01-mnist.html>`_
+- `PrivateGPT <https://colab.research.google.com/github/georgia-tech-db/evadb/blob/master/tutorials/13-privategpt.ipynb>`_
+- `Video Question Answering using ChatGPT <https://colab.research.google.com/github/georgia-tech-db/evadb/blob/master/tutorials/08-chatgpt.ipynb>`_
+- `Querying PDF documents <https://colab.research.google.com/github/georgia-tech-db/evadb/blob/master/tutorials/12-query-pdf.ipynb>`_
+- `Analyzing traffic flow at an intersection <https://colab.research.google.com/github/georgia-tech-db/evadb/blob/master/tutorials/02-object-detection.ipynb>`_
+- `Examining the emotion palette of actors in a movie <https://colab.research.google.com/github/georgia-tech-db/evadb/blob/master/tutorials/03-emotion-analysis.ipynb>`_
+- `Classifying images based on their content <https://colab.research.google.com/github/georgia-tech-db/evadb/blob/master/tutorials/01-mnist.ipynb>`_
 
 
 

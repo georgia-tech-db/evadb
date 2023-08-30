@@ -18,7 +18,7 @@ Merge the most recent changes from the ``staging`` branch
        git pull . origin/staging
 
 Testing
--------
+-----------------
 
 Run the :doc:`test script <./testing>` to ensure that all the test cases pass.
 
