@@ -4,7 +4,7 @@
   </a>
 </p>
 
-<p align="center"><i><b>Bring AI inside your database for building AI-powered apps</b></i></p>
+<p align="center"><i><b>Bring AI inside your database system to build AI-powered apps</b></i></p>
 
 <p align="center">
 <a href="https://github.com/georgia-tech-db/evadb/fork" target="blank">
@@ -35,6 +35,8 @@
 <a href="https://twitter.com/evadb_ai" target="blank">
 <img src="https://img.shields.io/twitter/follow/evadb_ai?label=Follow: evadb_ai&style=social" alt="Follow evadb_ai"/>
 </a>
+<a href="https://medium.com/evadb-blog/" target="blank">
+<img src="https://img.shields.io/badge/EvaDB_Blog-Medium-8A2BE2" alt="EvaDB on Meidum"/>
 </p>
 
 <p align="center"><b>Share EvaDB</b></p>
@@ -66,18 +68,14 @@
   <a href="https://gitpod.io/#https://github.com/georgia-tech-db/evadb" target="_blank"><img src="https://gitpod.io/button/open-in-gitpod.svg" alt="Open in Gitpod"></a>
 </p>
 
-## EvaDB is an AI layer on your Database System
+EvaDB simplifies AI app development for structured and unstructured data. Its powerful SQL API enables software developers to build AI apps in a few lines of code.
 
-EvaDB simplifies the development of AI apps that operate on both structured data (tables, feature vectors) and unstructured data (text, images, videos, PDFs, podcasts, etc.). 
-
-Its powerful SQL API empowers software developers to build AI apps in a few lines of code. Developers can define custom functions that wrap around any AI model or Python library.
-
-EvaDB offers these primary benefits:
-- 🔮 Easy to connect EvaDB with a SQL database system and build AI-powered applications with a few SQL queries
-- 🤝 Query your data using a pre-trained AI model from Hugging Face, OpenAI, YOLO, PyTorch, and other built-in integrations
-- ⚡️ 10x faster queries using AI-centric query optimization
-- 💰 Save money spent on running models by improving utilization of CPUs and GPUs
-- 🔧 Fine-tune your AI models to achieve better results
+EvaDB's benefits include:
+- 🔮 Easy to connect EvaDB with a SQL database system and build AI-powered apps with a few SQL queries
+- 🤝 Query your data using a pre-trained AI model from Hugging Face, OpenAI, YOLO, PyTorch, and other AI frameworks
+- ⚡️ Faster queries using AI-centric query optimization
+- 💰 Save money spent on running models by efficient CPU/GPU use
+- 🔧 Fine-tune your ML models to achieve better results
 
 👋 Hey there! If you're excited about our vision of bringing AI to database systems, please show some ❤️ by: 
 <ul>
@@ -109,13 +107,13 @@ Follow the [getting started](https://evadb.readthedocs.io/en/stable/source/overv
 
 ## Illustrative Queries
 
-* Call the MNIST Image Classification model to obtain digit labels for each frame in the video.
+* Run the MNIST Image Classification model to obtain digit labels for each frame in the video.
 
 ```sql
 SELECT MnistImageClassifier(data).label FROM mnist_video;
 ```
 
-* Build a vector index on the feature embeddings returned by the SIFT Feature Extractor on a collection of images.
+* Build a vector index on the feature embeddings returned by the SIFT Feature Extractor on a collection of Reddit images.
 
 ```sql
 CREATE INDEX reddit_sift_image_index
@@ -123,7 +121,7 @@ CREATE INDEX reddit_sift_image_index
     USING FAISS
 ```
 
-* Retrieve the top 5 most similar images for given image.
+* Retrieve the top-5 most similar images for the given image using the index.
 
 ```sql
 SELECT name FROM reddit_dataset ORDER BY
@@ -134,6 +132,10 @@ SELECT name FROM reddit_dataset ORDER BY
     LIMIT 5
 ```
 
+## More Illustrative Queries
+
+<details>
+
 * Store the text returned by a Speech Recognition model on the audio component of a video in a table.
 
 ```sql
@@ -141,12 +143,24 @@ CREATE TABLE text_summary AS
     SELECT SpeechRecognizer(audio) FROM ukraine_video;
 ```
 
-* Run ChatGPT on the text column
+* Run ChatGPT on the `text` column in a table.
 
 ```sql
 SELECT ChatGPT('Is this video summary related to Ukraine russia war', text)
     FROM text_summary;
 ```
+
+* Train an ML model using the <a href="https://ludwig.ai/latest/">Ludwig AI</a> engine to predict a column in a table.
+
+```sql
+CREATE UDF IF NOT EXISTS PredictHouseRent FROM
+( SELECT * FROM HomeRentals )
+TYPE Ludwig
+'predict' 'rental_price'
+'time_limit' 120;
+```
+
+</details>
 
 ## Illustrative Apps
 
