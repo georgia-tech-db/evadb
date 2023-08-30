@@ -18,12 +18,12 @@ parts:
         title: Image Search [FAISS]
       - file: source/usecases/qa-video.rst
         title: Q&A from Videos [ChatGPT + HuggingFace]
-          #- file: source/usecases/02-object-detection.ipynb
-          #  title: Object Detection
-          #- file: source/usecases/03-emotion-analysis.ipynb
-          #  title: Emotion Analysis
-          #- file: source/usecases/07-object-segmentation-huggingface.ipynb
-          #  title: Image Segmentation [HuggingFace]
+      - file: source/usecases/02-object-detection.ipynb
+        title: Object Detection
+      - file: source/usecases/03-emotion-analysis.ipynb
+        title: Emotion Analysis
+      - file: source/usecases/07-object-segmentation-huggingface.ipynb
+        title: Image Segmentation [HuggingFace]
 
 
   - caption: User Reference

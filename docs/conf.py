@@ -44,15 +44,14 @@ extensions = [
     "sphinxcontrib.youtube",
     "sphinx_inline_tabs",
     "sphinx.ext.intersphinx",
- #   "myst_nb",
+    "myst_nb",
     "versionwarning.extension",
- #   "IPython.sphinxext.ipython_console_highlighting",
+    "IPython.sphinxext.ipython_console_highlighting",
 ]
 
-suppress_warnings = ["etoc.toctree"]
+suppress_warnings = ["etoc.toctree", "myst.header"]
 
-#source_suffix = [".ipynb", ".html", ".md", ".rst"]
-source_suffix = [".html", ".md", ".rst"]
+source_suffix = [".ipynb", ".html", ".md", ".rst"]
 
 autodoc_pydantic_model_show_json = False
 autodoc_pydantic_field_list_validators = False
@@ -163,7 +162,7 @@ nitpick_ignore_regex = [('py:class', r'.*')]
 #    if i.endswith(".ipynb"):
 #        shutil.copy(f"../tutorials/{i}", "./source/usecases/")
 
-#nb_execution_mode = "off"
+nb_execution_mode = "off"
 
 # -- Initialize Sphinx ----------------------------------------------
 def setup(app):

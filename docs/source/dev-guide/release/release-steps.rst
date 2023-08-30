@@ -66,7 +66,7 @@ merged since the last release.
        pip install twine  # if not installed
        twine upload dist/* -r pypi
 
-11. A PR is automatically submitted (this will take a few hours) on [`conda-forge/eva-feedstock`](https://github.com/conda-forge/eva-feedstock) to update the version.
+11. A PR is automatically submitted (this will take a few hours) on [`conda-forge/eva-feedstock`] to update the version.
     * A maintainer needs to accept and merge those changes.
 
 12. Create a new release on Github.

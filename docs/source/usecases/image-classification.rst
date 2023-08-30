@@ -1,3 +1,5 @@
+.. _image classification:
+
 Image Classification Pipeline using EvaDB
 =========================================
 
