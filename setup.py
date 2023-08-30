@@ -114,7 +114,7 @@ postgres_libs = [
 ]
 
 ludwig_libs = [
-    "ludwig[full]" # MODEL TRAIN AND FINE TUNING
+    "ludwig[hyperopt,distributed]" # MODEL TRAIN AND FINE TUNING
 ]
 
 ### NEEDED FOR DEVELOPER TESTING ONLY

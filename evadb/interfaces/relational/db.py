@@ -20,7 +20,7 @@ from evadb.configuration.constants import EvaDB_DATABASE_DIR
 from evadb.database import EvaDBDatabase, init_evadb_instance
 from evadb.expression.tuple_value_expression import TupleValueExpression
 from evadb.interfaces.relational.relation import EvaDBQuery
-from evadb.interfaces.relational.utils import execute_statement, try_binding
+from evadb.interfaces.relational.utils import try_binding
 from evadb.models.server.response import Response
 from evadb.models.storage.batch import Batch
 from evadb.parser.alias import Alias
@@ -40,6 +40,7 @@ from evadb.parser.utils import (
     parse_show,
     parse_table_clause,
 )
+from evadb.server.command_handler import execute_statement
 from evadb.udfs.udf_bootstrap_queries import init_builtin_udfs
 from evadb.utils.generic_utils import find_nearest_word, is_ray_enabled_and_installed
 from evadb.utils.logging_manager import logger

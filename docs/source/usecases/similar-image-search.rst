@@ -1,5 +1,5 @@
 Image Similarity Search Pipeline using EvaDB on Images
-====
+======================================================
 
 In this use case, we want to search similar images based on an image provided by the user. To implement this use case, we leverage EvaDB's capability of easily expressing feature extraction pipeline. Additionaly, we also leverage EvaDB's capability of building a similarity search index and searching the index to
 locate similar images through ``FAISS`` library.
@@ -8,7 +8,7 @@ For this use case, we use a reddit image dataset that can be downloaded from `He
 We populate a table in the database that contains all images.
 
 1. Connect to EvaDB
-----
+-------------------
 
 .. code-block:: python
 
@@ -16,7 +16,7 @@ We populate a table in the database that contains all images.
     cursor = evadb.connect().cursor()
 
 2. Register SIFT as Function
-----
+----------------------------
 
 .. code-block:: python
 
@@ -26,13 +26,13 @@ We populate a table in the database that contains all images.
     """).execute()
 
 3. Search Similar Images
-----
+------------------------
 
 To locate images that have similar appearance, we will first build an index based on embeddings of images.
 Then, for the given image, EvaDB can find similar images by searching in the index.
 
 Build Index using ``FAISS``
-****
+***************************
 
 The below query creates a new index on the projected column ``SiftFeatureExtractor(data)`` from the ``reddit_dataset`` table.
 
@@ -45,7 +45,7 @@ The below query creates a new index on the projected column ``SiftFeatureExtract
     """).execute()
 
 Search Index for a Given Image
-****
+*******************************
 
 EvaDB leverages the ``ORDER BY ... LIMIT ...`` SQL syntax to retrieve the top 5 similar images.
 In this example, ``Similarity(x, y)`` is a built-in function to calculate distance between ``x`` and ``y``.

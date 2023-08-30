@@ -15,6 +15,12 @@ workflows:
             name: Linter | v3.10 | Linux
             mode: LINTER
         ################################
+        ## DOC: All
+        ################################
+        ################################
+        - Doc:
+            name: Doc | v3.10 | Linux
+        ################################
         #### PIP: Master
         ################################
         ################################
@@ -63,7 +69,8 @@ workflows:
                 v: ["3.8", "3.9", "3.10", "3.11"]
             filters:
               branches:
-                only: staging
+                only:
+                  - staging
         ################################
         #### LONG INTEGRATION TESTS + RAY:
         #### Staging, Master
@@ -133,8 +140,12 @@ workflows:
         ################################
         #- Windows:
         #    name: "Windows | v3.10"
-        # - MacOS:
-        #    name: "MacOS | v3.10"
+        #- MacOS:
+        #    name: FULL TEST | v<< matrix.v >> | MacOS
+        #    mode: FULL
+        #    matrix:
+        #      parameters:
+        #        v: ["3.10"]
 
 jobs:
   Linux:
@@ -173,8 +184,8 @@ jobs:
             RAY: << parameters.ray >>
           command: |
             "python<< parameters.v >>" -m venv test_evadb
-            pip install --upgrade pip
             source test_evadb/bin/activate
+            pip install --upgrade pip
             if [ $RAY = "ENABLED" ]; then
               if [ $PY_VERSION != "3.11" ]; then
                 pip install ".[dev,ray,qdrant]"
@@ -219,6 +230,47 @@ jobs:
           key: v1-pip-wheel_cache-python<< parameters.v >>-ray<< parameters.ray >>-{{ checksum "setup.py" }}
           paths:
             - test_evadb
+
+  Doc:
+    parameters:
+      v:
+        type: string
+        default: "3.10"
+      mode:
+        type: string
+        default: "DOC"
+    resource_class: large
+    docker:
+      # https://circleci.com/docs/circleci-images#language-image-variants
+      - image: "cimg/python:<< parameters.v >>"
+    steps:
+
+      - checkout
+
+      # Restore pip wheel
+      - restore_cache:
+          keys:
+            - v1-pip-wheel_cache-python<< parameters.v >>-{{ checksum "docs/requirements.txt" }}
+
+      - run:
+          name: Install EvaDB Doc dependencies
+          command: |
+            "python<< parameters.v >>" -m venv test_evadb_doc
+            source test_evadb_doc/bin/activate
+            pip install --upgrade pip
+            pip install -r docs/requirements.txt 
+
+      - run:
+          name: Test doc build and link validation
+          no_output_timeout: 10m # 10 minute timeout
+          command: |
+            source test_evadb_doc/bin/activate
+            bash script/test/test.sh -m "<< parameters.mode >>"
+
+      - save_cache:
+          key: v1-pip-wheel_cache-python<< parameters.v >>-{{ checksum "docs/requirements.txt" }}
+          paths:
+            - test_evadb_doc
 
   Postgres:
     parameters:
@@ -283,6 +335,13 @@ jobs:
               bash script\test\test.sh
 
   MacOS:
+      parameters:
+        v:
+          type: string
+          default: "3.10"
+        mode:
+          type: string
+          default: "FULL"
       macos:
         xcode: "14.2.0"
       steps:
@@ -291,8 +350,8 @@ jobs:
             command: |
               brew update
               brew install pyenv git
-              pyenv install 3.10.8
-              pyenv global 3.10.8
+              pyenv install "<< parameters.v >>"
+              pyenv global "<< parameters.v >>"
               eval "$(pyenv init -)"
               python --version
               pip --version
@@ -305,9 +364,9 @@ jobs:
               source test_evadb/bin/activate
               pip install --upgrade pip
               pip debug --verbose
-              pip install ".[dev]"
+              pip install ".[dev,ludwig,qdrant]"
               source test_evadb/bin/activate
-              bash script/test/test.sh 
+              bash script/test/test.sh -m "<< parameters.mode >>"
 
   Pip-PyPI:
     resource_class: large

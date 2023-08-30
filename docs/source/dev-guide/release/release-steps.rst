@@ -1,27 +1,5 @@
-EvaDB Release Guide
-----
-
-Part 1: Before You Start
-====
-
-Make sure you have `PyPI <https://pypi.org>`_ account with maintainer access to the EvaDB project. 
-Create a .pypirc in your home directory. It should look like this:
-
-.. code-block:: python
-
-    [distutils]
-    index-servers =
-    pypi
-    pypitest
-    
-    [pypi]
-    username=YOUR_USERNAME
-    password=YOUR_PASSWORD
-
-Then run ``chmod 600 ./.pypirc`` so that only you can read/write the file.
-
-Part 2: Release Steps
-====
+Release Steps
+=============
 
 1. Ensure that you're in the top-level ``eva`` directory.
 2. Ensure that your branch is in sync with the ``master`` branch:
@@ -88,7 +66,7 @@ merged since the last release.
        pip install twine  # if not installed
        twine upload dist/* -r pypi
 
-11. A PR is automatically submitted (this will take a few hours) on [`conda-forge/eva-feedstock`](https://github.com/conda-forge/eva-feedstock) to update the version.
+11. A PR is automatically submitted (this will take a few hours) on [`conda-forge/eva-feedstock`] to update the version.
     * A maintainer needs to accept and merge those changes.
 
 12. Create a new release on Github.
