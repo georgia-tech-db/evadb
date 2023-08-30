@@ -114,3 +114,19 @@ class NativeExecutorTest(unittest.TestCase):
         # Test executions.
         self._execute_native_query()
         self._execute_evadb_query()
+
+
+    def test_should_run_query_in_sqlite(self):
+        # Create database.
+        params = {
+            "database": "evadb.db",
+        }
+        query = f"""CREATE DATABASE test_data
+                    WITH ENGINE = "sqlite",
+                    PARAMETERS = {params};"""
+        execute_query_fetch_all(self.evadb, query)
+
+        # Test executions.
+        self._execute_native_query()
+        self._execute_evadb_query()
+
