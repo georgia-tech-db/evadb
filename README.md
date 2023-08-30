@@ -51,7 +51,6 @@ EvaDB offers these primary benefits to its users:
 
 - [Documentation](#documentation)
 - [Community and Support](#community-and-support)
-- [Twitter](https://twitter.com/evadb_ai)
 - [Illustrative Queries](#illustrative-queries)
 - [Illustrative Apps](#illustrative-apps)
 
