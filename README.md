@@ -158,7 +158,7 @@ For more information, see our
 ## Star History
 
 <a href="https://star-history.com/#georgia-tech-db/evadb&Date">
-    <img src="https://api.star-history.com/svg?repos=georgia-tech-db/evadb&type=Date" alt="EvaDB Star History Chart">
+    <img src="https://api.star-history.com/svg?repos=georgia-tech-db/evadb&type=Date" alt="EvaDB Star History Chart" width="600">
 </a>
 
 ## License
