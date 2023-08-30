@@ -120,7 +120,7 @@ class NativeExecutorTest(unittest.TestCase):
     def test_should_run_query_in_postgres(self):
         # Create database.
         params = {
-            "user": "gkakkar7",
+            "user": "eva",
             "password": "password",
             "host": "localhost",
             "port": "5432",
