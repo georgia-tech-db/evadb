@@ -1,42 +1,46 @@
-# EvaDB: Database System for AI Apps
-
-
 <p align="center">
   <a href="https://evadb.readthedocs.io">
     <img src="https://raw.githubusercontent.com/georgia-tech-db/evadb/master/docs/images/evadb/evadb-full-logo.svg" width="70%" alt="EvaDB">
   </a>
 </p>
 
-#
-
-<div align="center">
-        <a href="https://colab.research.google.com/github/georgia-tech-db/evadb/blob/master/tutorials/03-emotion-analysis.ipynb">
-            <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Check out EvaDB on Colab"/>
-        </a>
-        <a href="https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg">
-            <img alt="Slack" src="https://img.shields.io/badge/slack-evadb-ff69b4.svg?logo=slack">
-        </a>          
-        <a href="https://twitter.com/evadb_ai">
-            <img alt="Twitter" src="https://img.shields.io/badge/twitter-evadb-bde1ee.svg?logo=twitter">
-        </a>  
-        <a href="https://github.com/orgs/georgia-tech-db/projects/3">
-            <img src="https://img.shields.io/badge/evadb-roadmap-a6c096" alt="Roadmap"/>
-        </a>
-        <br>
-        <img alt="PyPI" src="https://img.shields.io/pypi/v/evadb.svg"/>
-        <img alt="License" src="https://img.shields.io/badge/license-Apache%202-brightgreen.svg?logo=apache"/>
-        <img alt="Coverage Status" src="https://coveralls.io/repos/github/georgia-tech-db/eva/badge.svg?branch=master"/>     
-<!--         <a href="https://pepy.tech/project/evadb">
+<p align="center">
+	<a href="https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg"><img src="https://img.shields.io/badge/slack-@evadb-ff69b4.svg?logo=slack " alt="EvaDB Community"></a>
+  <a href="https://twitter.com/evadb_ai">
+      <img alt="Twitter" src="https://img.shields.io/badge/twitter-@evadb_ai-bde1ee.svg?logo=twitter">
+  </a>   
+  <img alt="Python Versions Supported" src="https://img.shields.io/badge/Python--versions-3.8.x%20|%203.9.x%20|%203.10.x|%203.11.x-brightgreen"/>
+	<br />     
+  <img alt="PyPI" src="https://img.shields.io/pypi/v/evadb.svg"/>
+  <img alt="License" src="https://img.shields.io/badge/license-Apache%202-brightgreen.svg?logo=apache"/>
+  <img alt="Coverage Status" src="https://coveralls.io/repos/github/georgia-tech-db/eva/badge.svg?branch=master"/>  
+	<a href="https://www.evadb.ai/"><img src="https://img.shields.io/website?url=https%3A%2F%2Fwww.evadb.ai%2F" alt="EvaDB Website"></a>   
+  <a href="https://github.com/orgs/georgia-tech-db/projects/3">
+      <img src="https://img.shields.io/badge/evadb-roadmap-a6c096" alt="Roadmap"/>
+  </a>
+<!-- <a href="https://pepy.tech/project/evadb">
           <img alt="Downloads" src="https://static.pepy.tech/badge/evadb"/>
-        </a> -->
-        <img alt="Python Versions" src="https://img.shields.io/badge/Python--versions-3.8%20|%203.9%20|%203.10|%203.11-brightgreen"/>       
-</div>
+        </a> -->  
+  <br />
+  <a href="https://colab.research.google.com/github/georgia-tech-db/evadb/blob/master/tutorials/03-emotion-analysis.ipynb">
+      <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Launch EvaDB on Colab"/>
+  </a>  
+  <br />
+  <a href="https://gitpod.io/#https://github.com/georgia-tech-db/evadb" target="_blank"><img src="https://gitpod.io/button/open-in-gitpod.svg" alt="Open in Gitpod"></a>
+</p>
 
-<p align="center"> <b><h3>EvaDB is a database system for building simpler and faster AI-powered applications.</b></h3> </p>
+## EvaDB is an AI layer on top of your Database System
 
-EvaDB is a database system for developing AI apps. We aim to simplify the development and deployment of AI apps that operate on unstructured data (text documents, videos, PDFs, podcasts, etc.) and structured data (tables, vector index).
+We aim to simplify the development and deployment of AI apps that operate on both structured data (tables, feature vectors) and unstructured data (text, images, videos, PDFs, podcasts, etc.). 
 
-The high-level SQL and Python APIs allow beginners to use EvaDB in a few lines of code. Advanced users can define custom functions that wrap around any AI model or Python library. EvaDB is fully implemented in Python and licensed under an Apache license.
+The high-level SQL API allow software developers to write AI apps using EvaDB in a few lines of code. Developers can define custom functions that wrap around any AI model or Python library. 
+
+EvaDB is fully implemented in Python and licensed under an Apache license.
+
+EvaDB offers these primary benefits to its users:
+- 🔮 Easy to connect EvaDB with your SQL database system to build AI-powered applications with just SQL queries
+- 🤝 Query your data using a pre-trained AI model from Hugging Face, OpenAI, YOLO, PyTorch, and other built-in integrations
+- ⚡️ 10x faster queries and save money spent on running models using AI-centric query optimization
 
 👋 Hey there! If you're excited about our vision of bringing AI to database systems, please show some ❤️ by: 
   - giving a ⭐ on our [EvaDB repo on Github 🐙](https://github.com/georgia-tech-db/evadb)
@@ -45,31 +49,11 @@ The high-level SQL and Python APIs allow beginners to use EvaDB in a few lines o
 
 ## Quick Links
 
-- [Features](#features)
 - [Documentation](#documentation)
 - [Community and Support](#community-and-support)
 - [Twitter](https://twitter.com/evadb_ai)
-
-## Features
-
-- 🔮 Build simpler AI-powered apps using SQL queries or Python functions
-- ⚡️ 10x faster applications using AI-centric query optimization
-- 💰 Save money spent on inference
-- 🚀 First-class support for custom deep learning models through user-defined functions
-- 📦 Built-in caching to eliminate redundant model invocations across queries
-- ⌨️ Integrations for PyTorch, Hugging Face, YOLO, and Open AI models
-- 🐍 Installable via pip and fully implemented in Python
-
-## Illustrative Applications
-
-Here are some illustrative AI apps built using EvaDB (each notebook can be opened on Google Colab):
-
- * 🔮 <a href="https://evadb.readthedocs.io/en/stable/source/usecases/13-privategpt.html">PrivateGPT</a>
- * 🔮 <a href="https://evadb.readthedocs.io/en/stable/source/usecases/08-chatgpt.html">ChatGPT-based Video Question Answering</a>
- * 🔮 <a href="https://evadb.readthedocs.io/en/stable/source/usecases/12-query-pdf.html">Querying PDF Documents</a>
- * 🔮 <a href="https://evadb.readthedocs.io/en/stable/source/usecases/02-object-detection.html">Analysing Traffic Flow with YOLO</a>
- * 🔮 <a href="https://evadb.readthedocs.io/en/stable/source/usecases/03-emotion-analysis.html">Examining Emotions of Movie</a>
- * 🔮 <a href="https://evadb.readthedocs.io/en/stable/source/usecases/07-object-segmentation-huggingface.html">Image Segmentation with Hugging Face</a>
+- [Illustrative Queries](#illustrative-queries)
+- [Illustrative Apps](#illustrative-apps)
 
 ## Documentation
 
@@ -77,12 +61,12 @@ You can find the complete documentation of EvaDB at: [https://evadb.readthedocs.
 
 ## How does EvaDB work?
 
-* Connect EvaDB to your data platform with the USE statement.
+* Connect EvaDB to your database system with the `USE` statement.
 * Write SQL queries with AI functions to get inference results:
    - Pick a pre-trained AI model from Hugging Face, OpenAI, YOLO, PyTorch etc. for generative AI, NLP, and vision applications;
-   - or pick from a variety of state-of-the-art AI engines for classic ML use-cases (classification, regression, etc.);
-   - or bring your custom model built with any AI framework using CREATE FUNCTION.
-* FINETUNE your AI models to achieve better results.
+   - or pick from a variety of state-of-the-art ML engines for classic ML use-cases (classification, regression, etc.);
+   - or bring your custom model built with any AI/ML framework using `CREATE FUNCTION`.
+* `FINETUNE` your AI models to achieve better results.
 
 Follow the [getting started](https://evadb.readthedocs.io/en/stable/source/overview/getting-started.html) guide with sample data to get on-boarded as fast as possible.
 
@@ -127,6 +111,17 @@ SELECT ChatGPT('Is this video summary related to Ukraine russia war', text)
     FROM text_summary;
 ```
 
+## Illustrative Apps
+
+Here are some illustrative AI apps built using EvaDB (each notebook can be opened on Google Colab):
+
+ * 🔮 <a href="https://evadb.readthedocs.io/en/stable/source/usecases/13-privategpt.html">PrivateGPT</a>
+ * 🔮 <a href="https://evadb.readthedocs.io/en/stable/source/usecases/08-chatgpt.html">ChatGPT-based Video Question Answering</a>
+ * 🔮 <a href="https://evadb.readthedocs.io/en/stable/source/usecases/12-query-pdf.html">Querying PDF Documents</a>
+ * 🔮 <a href="https://evadb.readthedocs.io/en/stable/source/usecases/02-object-detection.html">Analysing Traffic Flow with YOLO</a>
+ * 🔮 <a href="https://evadb.readthedocs.io/en/stable/source/usecases/03-emotion-analysis.html">Examining Emotions of Movie</a>
+ * 🔮 <a href="https://evadb.readthedocs.io/en/stable/source/usecases/07-object-segmentation-huggingface.html">Image Segmentation with Hugging Face</a>
+
 ## Architecture of EvaDB
 
 EvaDB's AI-centric query optimizer takes a query as input and generates a query plan. The query engine takes the query plan and hits the relevant backends to efficiently process the query:
@@ -161,14 +156,22 @@ Here is our [roadmap 🛤️](https://github.com/orgs/georgia-tech-db/projects/3
 [![CI Status](https://circleci.com/gh/georgia-tech-db/evadb.svg?style=svg)](https://circleci.com/gh/georgia-tech-db/evadb)
 [![Documentation Status](https://readthedocs.org/projects/evadb/badge/?version=latest)](https://evadb.readthedocs.io/en/latest/index.html)
 
-EvaDB is the beneficiary of many [contributors 🙌](https://github.com/georgia-tech-db/evadb/graphs/contributors). All kinds of contributions to EvaDB are appreciated. To file a bug or to request a feature, please use <a href="https://github.com/georgia-tech-db/evadb/issues">GitHub issues</a>. <a href="https://github.com/georgia-tech-db/evadb/pulls">Pull requests</a> are welcome. For more information, see our
+EvaDB is the beneficiary of many [contributors 🙌](https://github.com/georgia-tech-db/evadb/graphs/contributors). 
+
+<p align="center">
+  <a href="https://github.com/georgia-tech-db/evadb/graphs/contributors">
+    <img width="70%" src="https://contrib.rocks/image?repo=georgia-tech-db/evadb" />
+  </a>
+</p>
+
+All kinds of contributions to EvaDB are appreciated. To file a bug or to request a feature, please use <a href="https://github.com/georgia-tech-db/evadb/issues">GitHub issues</a>. <a href="https://github.com/georgia-tech-db/evadb/pulls">Pull requests</a> are welcome. For more information, see our
 [contribution guide](https://evadb.readthedocs.io/en/stable/source/contribute/index.html).
 
 ## Star History
 
 <p align="center">
   <a href="https://star-history.com/#georgia-tech-db/evadb&Date">
-      <img width="70%" src="https://api.star-history.com/svg?repos=georgia-tech-db/evadb&type=Date" alt="EvaDB Star History Chart">
+      <img width="90%" src="https://api.star-history.com/svg?repos=georgia-tech-db/evadb&type=Date" alt="EvaDB Star History Chart">
   </a>
 </p>
 
