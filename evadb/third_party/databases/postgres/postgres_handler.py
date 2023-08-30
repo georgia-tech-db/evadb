@@ -112,7 +112,6 @@ class PostgresHandler(DBHandler):
             return DBHandlerResponse(data=None, error=str(e))
 
     def _pg_to_python_types(self, pg_type: str):
-
         mapping = {
             "integer": int,
             "bigint": int,
