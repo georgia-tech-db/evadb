@@ -29,18 +29,18 @@
   <a href="https://gitpod.io/#https://github.com/georgia-tech-db/evadb" target="_blank"><img src="https://gitpod.io/button/open-in-gitpod.svg" alt="Open in Gitpod"></a>
 </p>
 
-## EvaDB is an AI layer on top of your Database System
+## EvaDB is an AI layer on your Database System
 
-We aim to simplify the development and deployment of AI apps that operate on both structured data (tables, feature vectors) and unstructured data (text, images, videos, PDFs, podcasts, etc.). 
+EvaDB simplifies the development of AI apps that operate on both structured data (tables, feature vectors) and unstructured data (text, images, videos, PDFs, podcasts, etc.). 
 
-The high-level SQL API allow software developers to write AI apps using EvaDB in a few lines of code. Developers can define custom functions that wrap around any AI model or Python library. 
+Its powerful SQL API empowers software developers to build AI apps in a few lines of code. Developers can define custom functions that wrap around any AI model or Python library.
 
-EvaDB is fully implemented in Python and licensed under an Apache license.
-
-EvaDB offers these primary benefits to its users:
-- 🔮 Easy to connect EvaDB with your SQL database system to build AI-powered applications with just SQL queries
+EvaDB offers these primary benefits:
+- 🔮 Easy to connect EvaDB with a SQL database system and build AI-powered applications with a few SQL queries
 - 🤝 Query your data using a pre-trained AI model from Hugging Face, OpenAI, YOLO, PyTorch, and other built-in integrations
-- ⚡️ 10x faster queries and save money spent on running models using AI-centric query optimization
+- ⚡️ 10x faster queries using AI-centric query optimization
+- 💰 Save money spent on running models by improving utilization of CPUs and GPUs
+- 🔧 Fine-tune your AI models to achieve better results
 
 👋 Hey there! If you're excited about our vision of bringing AI to database systems, please show some ❤️ by: 
   - giving a ⭐ on our [EvaDB repo on Github 🐙](https://github.com/georgia-tech-db/evadb)
