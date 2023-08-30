@@ -93,7 +93,7 @@ class StatementBinderContext:
             # Assemble columns.
             column_df = handler.get_columns(table_name).data
             table_obj = create_table_catalog_entry_for_data_source(
-                table_name, list(column_df["column_name"])
+                table_name, column_df
             )
         else:
             table_obj = self._catalog().get_table_catalog_entry(table_name)

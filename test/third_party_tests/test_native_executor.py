@@ -79,7 +79,7 @@ class NativeExecutorTest(unittest.TestCase):
 
         execute_query_fetch_all(
             self.evadb,
-            "DROP TABLE ID EXISTS eva_table;",
+            "DROP TABLE IF EXISTS eva_table;",
         )
 
     def _execute_evadb_query(self):
@@ -97,6 +97,7 @@ class NativeExecutorTest(unittest.TestCase):
         self.assertEqual(res_batch.frames["test_table.name"][1], "bb")
         self.assertEqual(res_batch.frames["test_table.age"][1], 2)
 
+        self._create_evadb_table_using_select_query()
         self._drop_table_in_native_database()
 
     def _execute_native_query(self):
@@ -114,13 +115,12 @@ class NativeExecutorTest(unittest.TestCase):
         self.assertEqual(res_batch.frames["age"][0], 1)
         self.assertEqual(res_batch.frames["comment"][0], "aaaa")
 
-        self._create_evadb_table_using_select_query()
         self._drop_table_in_native_database()
 
     def test_should_run_query_in_postgres(self):
         # Create database.
         params = {
-            "user": "eva",
+            "user": "gkakkar7",
             "password": "password",
             "host": "localhost",
             "port": "5432",
@@ -134,3 +134,7 @@ class NativeExecutorTest(unittest.TestCase):
         # Test executions.
         self._execute_native_query()
         self._execute_evadb_query()
+
+
+if __name__ == "__main__":
+    unittest.main()
