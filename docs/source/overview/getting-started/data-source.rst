@@ -37,7 +37,7 @@ We can also run native queries in the connected database by the :ref:`USE<sql-us
         };""").df()
 
 
-2. Load unstructured data. EvaDB supports a wide range of type of unstructured data. Below are some example:
+2. Load unstructured data. EvaDB supports a wide range of type of unstructured data. Below are some examples:
 
 .. code-block:: python
    
