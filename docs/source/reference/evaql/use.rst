@@ -12,7 +12,7 @@ The USE statement allows us to run arbitary native queries in the connected data
 * `database_connection` is an external database connection instanced by the `CREATE DATABASE statement`.
 * `native_query` is an arbitary SQL query supprted by the `database_connection`. 
 
-.. limitation::
+.. warning::
 
    Currently EvaDB only supports single query in one USE statement. The native_query should not end with semicolon.
 
