@@ -35,6 +35,8 @@ def get_database_handler(engine: str, **kwargs):
         return mod.PostgresHandler(engine, **kwargs)
     elif engine == "sqlite":
         return mod.SQLiteHandler(engine, **kwargs)
+    elif engine == "mysql":
+        return mod.MysqlHandler(engine, **kwargs)
     else:
         raise NotImplementedError(f"Engine {engine} is not supported")
 

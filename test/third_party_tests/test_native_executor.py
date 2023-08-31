@@ -172,7 +172,7 @@ class NativeExecutorTest(unittest.TestCase):
     def test_should_run_query_in_sqlite(self):
         # Create database.
         params = {
-            "database": "test_data_source_5.db",
+            "database": "evadb.db",
         }
         query = f"""CREATE DATABASE test_data_source
                     WITH ENGINE = "sqlite",
@@ -183,6 +183,27 @@ class NativeExecutorTest(unittest.TestCase):
         self._execute_native_query()
         self._execute_evadb_query()
 
+    def test_should_run_query_in_mysql(self):
+        # Create database.
+        params = {
+            "user": "eva",
+            "password": "password",
+            "host": "localhost",
+            "port": "3306",
+            "database": "evadb",
+        }
+        query = f"""CREATE DATABASE test_data_source
+                    WITH ENGINE = "mysql",
+                    PARAMETERS = {params};"""
+        execute_query_fetch_all(self.evadb, query)
+
+        # Test executions.
+        self._execute_native_query()
+        self._execute_evadb_query()
+
+        # Test error.
+        self._raise_error_on_multiple_creation()
+        self._raise_error_on_invalid_connection()
 
 if __name__ == "__main__":
     unittest.main()
