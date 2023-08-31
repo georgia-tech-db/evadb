@@ -70,7 +70,7 @@ You can get the data source's configuration parameters from `__init__(self, name
 
 .. note::
 
-   Those paramters will be specified when the user creates a connection to the data source: `CREATE DATABASE mydb_source WITH ENGINE = "mydb", PARAMETERS = {"host": "localhost", "port": "5432", "user": "eva", "password": "password"};`.
+   Those parameters will be specified when the user creates a connection to the data source: `CREATE DATABASE mydb_source WITH ENGINE = "mydb", PARAMETERS = {"host": "localhost", "port": "5432", "user": "eva", "password": "password"};`.
 
 You can check the PostgreSQL's handler example at `evadb/third_party/databases/postgres/postgres_handler.py <https://github.com/georgia-tech-db/evadb/blob/master/evadb/third_party/databases/postgres/postgres_handler.py>`_ for ideas.
 

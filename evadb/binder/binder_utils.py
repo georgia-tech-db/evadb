@@ -72,7 +72,7 @@ def check_data_source_and_table_are_valid(
             logger.error(error)
             raise BinderError(error)
 
-        # Check table existance.
+        # Check table existence.
         table_df = resp.data
         if table_name not in table_df["table_name"].values:
             error = "Table {} does not exist in data source {}. Create the table using native query.".format(

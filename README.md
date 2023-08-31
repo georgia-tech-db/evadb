@@ -70,25 +70,26 @@
   <a href="https://gitpod.io/#https://github.com/georgia-tech-db/evadb" target="_blank"><img src="https://gitpod.io/button/open-in-gitpod.svg" alt="Open in Gitpod"></a>
 </p>
 
-EvaDB simplifies AI app development for structured and unstructured data. Its powerful SQL API enables software developers to build AI apps in a few lines of code.
-
-EvaDB's benefits include:
-- 🔮 Easy to connect EvaDB with a SQL database system and build AI-powered apps with a few SQL queries
-- 🤝 Query your data using a pre-trained AI model from Hugging Face, OpenAI, YOLO, PyTorch, and other AI frameworks
-- ⚡️ Faster queries using AI-centric query optimization
+EvaDB enables software developers to build AI apps in a few lines of code. Its powerful SQL API simplifies AI app development for both structured and unstructured data. EvaDB's benefits include:
+- 🔮 Easy to connect EvaDB with your SQL database system and build AI-powered apps with SQL queries
+- 🤝 Query your data with a pre-trained AI model from Hugging Face, OpenAI, YOLO, PyTorch, and other AI frameworks
+- ⚡️ Faster queries thanks to AI-centric query optimization
 - 💰 Save money spent on running models by efficient CPU/GPU use
-- 🔧 Fine-tune your ML models to achieve better results
+- 🔧 Fine-tune your AI models to achieve better results
 
-👋 Hey! If you're excited about our vision of bringing AI inside database systems, please show some ❤️ by: 
+👋 Hey! If you're excited about our vision of bringing AI inside database systems, show some ❤️ by: 
 <ul>
-  <li> giving a ⭐ on our <a href="https://github.com/georgia-tech-db/evadb">EvaDB repo on Github 🐙</a>
-  <li> joining our <a href="https://evadb.ai/community">Slack Community 📟</a>
-  <li> following us on <a href="https://twitter.com/evadb_ai">Twitter 🐦</a>
+  <li> 🐙 giving a ⭐ on our <a href="https://github.com/georgia-tech-db/evadb">EvaDB repo on Github</a>
+  <li> 📟 joining our <a href="https://evadb.ai/community">Slack Community</a>
+  <li> 🐦 following us on <a href="https://twitter.com/evadb_ai">Twitter</a>
+  <li> 📝 following us on <a href="https://medium.com/evadb-blog">Medium</a>
 </ul>
 
 ## Quick Links
 
 - [Documentation](#documentation)
+- [Why EvaDB](#why-evadb)
+- [How does EvaDB work](#how-does-evadb-work)
 - [Community and Support](#community-and-support)
 - [Illustrative Queries](#illustrative-queries)
 - [Illustrative Apps](#illustrative-apps)
@@ -97,15 +98,29 @@ EvaDB's benefits include:
 
 You can find the complete documentation of EvaDB at [evadb.ai/docs](https://evadb.ai/docs/) 📚✨🚀
 
-## How does EvaDB work?
+## Why EvaDB
+ 
+In the world of AI, we've reached a stage where many AI tasks that were traditionally handled by AI or ML engineers can now be automated. EvaDB enables software developers with the ability to perform advanced AI tasks without needing to delve into the intricate details.
 
-* Connect EvaDB to your database system with the `CREATE DATABASE` statement.
-* Write SQL queries with AI functions to get inference results:
-   - Pick a pre-trained AI model from Hugging Face, OpenAI, YOLO, PyTorch etc. for generative AI, NLP, and vision applications;
-   - or pick from a variety of state-of-the-art ML engines for classic ML use-cases (classification, regression, etc.);
-   - or bring your custom model built with any AI/ML framework using `CREATE FUNCTION`.
+EvaDB covers many AI applications, including regression, classification, image recognition, question answering, and many other generative AI applications. EvaDB targets 99% of AI problems that are often repetitive and can be automated with a simple function call in an SQL query. Until now, there is no comprehensive open-source framework for bringing AI into an existing SQL database system with a principled AI optimization framework, and that's where EvaDB comes in.
 
+Our target audience is software developers who may not necessarily have a background in AI but require AI capabilities to solve specific problems. We target programmers who write simple SQL queries inside their CRUD apps. With EvaDB, it is possible to easily add AI features to these apps by calling built-in AI functions in the queries.
+
+## How does EvaDB work
+
+<details>
+<ul>
+<li>Connect EvaDB to your database system with the `CREATE DATABASE` statement.</li>
+<li>Write SQL queries with AI functions to get inference results:</li>
+   <ul>
+   <li>Pick a pre-trained AI model from Hugging Face, Open AI, Ultralytics, PyTorch, and built-in AI frameworks for generative AI, NLP, and vision applications;</li>  
+   <li>or pick from a variety of state-of-the-art ML engines for classic ML use-cases (classification, regression, etc.);</li>
+   <li>or bring your custom model built with any AI/ML framework using `CREATE FUNCTION`.</li>
+   </ul>
+</ul> 
+  
 Follow the [getting started](https://evadb.readthedocs.io/en/stable/source/overview/getting-started.html) guide to get on-boarded as fast as possible.
+</details>
 
 ## Illustrative Queries
 
@@ -203,7 +218,7 @@ Here is EvaDB's public [roadmap 🛤️](https://github.com/orgs/georgia-tech-db
 
 ## Contributing
 
-We are a lean team on a mission to bring AI to database systems! All kinds of contributions to EvaDB are appreciated 🙌. If you'd like to get involved, here's information on where we could use your help: [contribution guide](https://evadb.readthedocs.io/en/latest/source/dev-guide/contribute.html).
+We are a lean team on a mission to bring AI inside database systems! All kinds of contributions to EvaDB are appreciated 🙌 If you'd like to get involved, here's information on where we could use your help: [contribution guide](https://evadb.readthedocs.io/en/latest/source/dev-guide/contribute.html) 🤗
 
 <p align="center">
   <a href="https://github.com/georgia-tech-db/evadb/graphs/contributors">
