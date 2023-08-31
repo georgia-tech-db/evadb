@@ -165,6 +165,7 @@ for i in os.listdir("../tutorials"):
         "02-object-detection.ipynb",
         "03-emotion-analysis.ipynb",
         "07-object-segmentation-huggingface.ipynb",
+        "chatgpt.png",
     ]:
         shutil.copy(f"../tutorials/{i}", "./source/usecases/")
 
