@@ -44,7 +44,6 @@ class ForecastModel(AbstractUDF):
         f.close()
         self.model = loaded_model
         self.model_name = model_name
-        self.horizon = 12
 
 
     @forward(
@@ -60,7 +59,11 @@ class ForecastModel(AbstractUDF):
         ],
     )
     def forward(self, data) -> pd.DataFrame:
-        forecast_df = self.model.predict(h=self.horizon)
+        horizon = list(data.iloc[:,-1])[0]
+        assert (
+                type(horizon) == int
+            ), f"Forecast UDF expects integral horizon in parameter."
+        forecast_df = self.model.predict(h=horizon)
         forecast_df = forecast_df.rename(columns={self.model_name: "y"})
         return pd.DataFrame(
             forecast_df,
