@@ -29,6 +29,7 @@ class SlackChatbot:
         self.SLACK_APP_TOKEN = self.verify_and_retreive_token("SLACK_APP_TOKEN")
         self.OPENAI_API_KEY = self.verify_and_retreive_token("OPENAI_KEY")
         dynamic_install("slack")
+        self.create_slack_bot()
 
     def verify_and_retreive_token(self, token_name: str):
         # Check configuration manager first
@@ -85,5 +86,4 @@ class SlackChatbot:
             )
 
     def run_slack_bot(self):
-        self.create_slack_bot()
         SocketModeHandler(self.app, self.SLACK_APP_TOKEN).start()
