@@ -1,5 +1,5 @@
 EvaDB Query Language Reference
-============================
+===============================
 
 EvaDB Query Language (EvaDB) is derived from SQL. It is tailored for AI-driven analytics. EvaDB allows users to invoke deep learning models in the form
 of user-defined functions (UDFs).

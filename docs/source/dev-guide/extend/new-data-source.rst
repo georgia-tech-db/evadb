@@ -1,19 +1,21 @@
+.. _add-data-source:
+
 Structured Data Source Integration
-====
-This document details steps invovled in adding a new structured data source integration in EvaDB.
+==================================
+This document details steps involved in adding a new structured data source integration in EvaDB.
 
 
 Example Data Source Integration In EvaDB
-----
+----------------------------------------
 
 - `PostgreSQL <https://github.com/georgia-tech-db/evadb/tree/master/evadb/third_party/databases/postgres>`_
 
 
 Create Data Source Handler
-----
+--------------------------
 
 1. Create a new directory at `evadb/third_party/databases/ <https://github.com/georgia-tech-db/evadb/tree/master/evadb/third_party/databases>`_
-~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. note::
 
@@ -32,7 +34,7 @@ The *__init__.py* can contain copyright information. The *requirements.txt* cont
    EvaDB will only install a data source's specific dependency libraries when a connection to the data source is created by the user via, e.g., `CREATE DATABASE mydb_source WITH ENGINE = "mydb";`.
 
 2. Implement the data source handler
-~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In *mydb_handler.py*, you need to implement the `DBHandler` declared at `evadb/third_party/databases/types.py <https://github.com/georgia-tech-db/evadb/blob/master/evadb/third_party/databases/types.py>`_. There are 7 functions that you need to implement:
 
@@ -70,13 +72,13 @@ You can get the data source's configuration parameters from `__init__(self, name
 
 .. note::
 
-   Those paramters will be specified when the user creates a connection to the data source: `CREATE DATABASE mydb_source WITH ENGINE = "mydb", PARAMETERS = {"host": "localhost", "port": "5432", "user": "eva", "password": "password"};`.
+   Those parameters will be specified when the user creates a connection to the data source: `CREATE DATABASE mydb_source WITH ENGINE = "mydb", PARAMETERS = {"host": "localhost", "port": "5432", "user": "eva", "password": "password"};`.
 
 You can check the PostgreSQL's handler example at `evadb/third_party/databases/postgres/postgres_handler.py <https://github.com/georgia-tech-db/evadb/blob/master/evadb/third_party/databases/postgres/postgres_handler.py>`_ for ideas.
 
 
 Register the Data Source Handler
-----
+--------------------------------
 
 Add your created data source handler in `get_database_handler` function at `evadb/third_party/databases/interface.py <https://github.com/georgia-tech-db/evadb/blob/master/evadb/third_party/databases/interface.py>`_. Below is an example of registering the created mydb data source:
 

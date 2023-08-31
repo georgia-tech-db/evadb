@@ -1,59 +1,56 @@
+.. _installation guide:
+
 Installation Guide
 ==================
 
 EvaDB provides couple different installation options to allow easy extension to rich functionalities. 
 
-Default
+Use pip
 -------
 
-By Default, EvaDB installs only the minimal requirements.
+EvaDB supports Python (versions >= 3.8). We recommend installing with ``pip`` within an `isolated virtual environment <https://docs.python-guide.org/dev/virtualenvs/>`_.
 
-.. code-block::
+.. code-block:: bash
 
+    python -m venv evadb-venv
+    source evadb-venv/bin/activate
+    pip install --upgrade pip
     pip install evadb
 
-Vision Capability
------------------
+Install additional packages
+---------------------------
 
-You can install EvaDB with the vision extension. 
-With vision extension, you can run queries to do image classification, object detection, and emotion analysis workloads, etc.
+* ``evadb[vision]`` for vision dependencies. With vision dependencies, we can run queries to do image classification, object detection, and emotion analysis workloads, etc.
+* ``evadb[document]`` for LLM dependencies. With LLM dependencies, we can leverage the capability of LLM to summarize or do question answering for documents.
+* ``evadb[qdrant]`` for embedding-based similarity search.
+* ``evadb[ludwig]`` for model training and finetuning.
+* ``evadb[ray]`` for distributed execution on ray.
 
-.. code-block::
+Install from source
+-------------------
 
-    pip install evadb[vision]
+.. code-block:: bash
 
-Documents Summarization with LLM
---------------------------------
+   git clone https://github.com/georgia-tech-db/evadb.git
+   cd evadb
+   pip install -e .
 
-You can also use EvaDB to leverage the capability of LLM to summarize or do question answering for documents.
+.. note::
 
-.. code-block::
+   Check :ref:`Contribution Guide<contributing>` for more details.
 
-    pip install evadb[document]
-
-Additional Vector Index
------------------------
-
-EvaDB installs ``faiss`` vector index by default, but users can also install other index library such as ``qdrant`` for similarity search feature.
-
-.. code-block::
-
-    pip install evadb[qdrant]
-
-Training or Finetuning Model
-----------------------------
-
-Instead of using existing models for only inference, you can also train a customized function inside EvaDB with the ``ludwig`` extension.
-
-.. code-block::
-
-    pip install evadb[ludwig]
-
-Better Performance and Scalability
+Run your first SQL query in EvaDB
 ----------------------------------
 
-EvaDB also allows users to improve the query performance by using ``ray`` to parallelize queries.
+To run SQL query in EvaDB, we need to first create a ``cursor`` object. The following query lists all the builtin user-defined functions. 
 
-.. code-block::
+.. code-block:: python
 
-    pip install evadb[ray]
+   import evdb
+   cursor = evadb.connect().cursor()
+   print(cursor.query("SHOW UDFS;").df())
+
+.. note::
+
+   Check :ref:`Python APIs<python-api>` for connection and cursor-related documentation.
+

@@ -19,7 +19,7 @@ EvaDB supports UDFS similar to `Pipelines <https://huggingface.co/docs/transform
 EvaDB supports all arguments supported by HF pipelines. You can pass those using a key value format similar to task and model above.
 
 Supported Tasks
------
+----------------
 EvaDB supports the following tasks from huggingface:
 
 - Audio Classification

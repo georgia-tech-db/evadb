@@ -12,8 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import mysql.connector
 import pandas as pd
-import psycopg2
 
 from evadb.third_party.databases.types import (
     DBHandler,
@@ -22,7 +22,7 @@ from evadb.third_party.databases.types import (
 )
 
 
-class PostgresHandler(DBHandler):
+class MysqlHandler(DBHandler):
     def __init__(self, name: str, **kwargs):
         super().__init__(name)
         self.host = kwargs.get("host")
@@ -30,11 +30,10 @@ class PostgresHandler(DBHandler):
         self.user = kwargs.get("user")
         self.password = kwargs.get("password")
         self.database = kwargs.get("database")
-        self.connection = None
 
     def connect(self):
         try:
-            self.connection = psycopg2.connect(
+            self.connection = mysql.connector.connect(
                 host=self.host,
                 port=self.port,
                 user=self.user,
@@ -43,7 +42,7 @@ class PostgresHandler(DBHandler):
             )
             self.connection.autocommit = True
             return DBHandlerStatus(status=True)
-        except psycopg2.Error as e:
+        except mysql.connector.Error as e:
             return DBHandlerStatus(status=False, error=str(e))
 
     def disconnect(self):
@@ -61,10 +60,10 @@ class PostgresHandler(DBHandler):
             return DBHandlerResponse(data=None, error="Not connected to the database.")
 
         try:
-            query = "SELECT table_name FROM information_schema.tables WHERE table_schema NOT IN ('information_schema', 'pg_catalog')"
+            query = f"SELECT table_name as 'table_name' FROM information_schema.tables WHERE table_schema='{self.database}'"
             tables_df = pd.read_sql_query(query, self.connection)
             return DBHandlerResponse(data=tables_df)
-        except psycopg2.Error as e:
+        except mysql.connector.Error as e:
             return DBHandlerResponse(data=None, error=str(e))
 
     def get_columns(self, table_name: str) -> DBHandlerResponse:
@@ -72,18 +71,16 @@ class PostgresHandler(DBHandler):
             return DBHandlerResponse(data=None, error="Not connected to the database.")
 
         try:
-            query = f"SELECT column_name as name, data_type as dtype FROM information_schema.columns WHERE table_name='{table_name}'"
+            query = f"SELECT column_name as 'column_name' FROM information_schema.columns WHERE table_name='{table_name}'"
             columns_df = pd.read_sql_query(query, self.connection)
-            columns_df["dtype"] = columns_df["dtype"].apply(self._pg_to_python_types)
             return DBHandlerResponse(data=columns_df)
-        except psycopg2.Error as e:
+        except mysql.connector.Error as e:
             return DBHandlerResponse(data=None, error=str(e))
 
     def _fetch_results_as_df(self, cursor):
         """
         This is currently the only clean solution that we have found so far.
-        Reference to Postgres API: https://www.psycopg.org/docs/cursor.html#fetch
-
+        Reference to MySQL API: https://dev.mysql.com/doc/connector-python/en/connector-python-api-mysqlcursor-fetchall.html
         In short, currently there is no very clean programming way to differentiate
         CREATE, INSERT, SELECT. CREATE and INSERT do not return any result, so calling
         fetchall() on those will yield a programming error. Cursor has an attribute
@@ -93,9 +90,11 @@ class PostgresHandler(DBHandler):
         """
         try:
             res = cursor.fetchall()
+            if not res:
+                return pd.DataFrame({"status": ["success"]})
             res_df = pd.DataFrame(res, columns=[desc[0] for desc in cursor.description])
             return res_df
-        except psycopg2.ProgrammingError as e:
+        except mysql.connector.ProgrammingError as e:
             if str(e) == "no results to fetch":
                 return pd.DataFrame({"status": ["success"]})
             raise e
@@ -108,27 +107,5 @@ class PostgresHandler(DBHandler):
             cursor = self.connection.cursor()
             cursor.execute(query_string)
             return DBHandlerResponse(data=self._fetch_results_as_df(cursor))
-        except psycopg2.Error as e:
+        except mysql.connector.Error as e:
             return DBHandlerResponse(data=None, error=str(e))
-
-    def _pg_to_python_types(self, pg_type: str):
-        mapping = {
-            "integer": int,
-            "bigint": int,
-            "smallint": int,
-            "numeric": float,
-            "real": float,
-            "double precision": float,
-            "character": str,
-            "character varying": str,
-            "text": str,
-            "boolean": bool,
-            # Add more mappings as needed
-        }
-
-        if pg_type in mapping:
-            return mapping[pg_type]
-        else:
-            raise Exception(
-                f"Unsupported column {pg_type} encountered in the postgres table. Please raise a feature request!"
-            )

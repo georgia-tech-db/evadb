@@ -15,8 +15,7 @@
 import unittest
 from test.util import get_evadb_for_testing, shutdown_ray
 
-from mock import patch
-
+from evadb.executor.executor_utils import ExecutorError
 from evadb.server.command_handler import execute_query_fetch_all
 
 
@@ -31,26 +30,13 @@ class CreateDatabaseTest(unittest.TestCase):
     def tearDownClass(cls):
         shutdown_ray()
 
-    def test_create_database_should_add_the_entry(self):
-        params = {
-            "user": "user",
-            "password": "password",
-            "host": "127.0.0.1",
-            "port": "5432",
-            "database": "demo",
-        }
-        query = """CREATE DATABASE demo_db
-                    WITH ENGINE = "postgres",
-                    PARAMETERS = {};""".format(
-            params
-        )
-        with patch("evadb.executor.create_database_executor.get_database_handler"):
-            execute_query_fetch_all(self.evadb, query)
+    def test_use_should_raise_executor_error(self):
+        query = """USE not_available_ds {
+            SELECT * FROM table
+        }"""
 
-        db_entry = self.evadb.catalog().get_database_catalog_entry("demo_db")
-        self.assertEqual(db_entry.name, "demo_db")
-        self.assertEqual(db_entry.engine, "postgres")
-        self.assertEqual(db_entry.params, params)
+        with self.assertRaises(ExecutorError):
+            execute_query_fetch_all(self.evadb, query)
 
 
 if __name__ == "__main__":
