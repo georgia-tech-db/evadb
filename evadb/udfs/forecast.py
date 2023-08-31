@@ -25,6 +25,8 @@ from evadb.udfs.abstract.abstract_udf import AbstractUDF
 from evadb.udfs.decorators.decorators import forward, setup
 from evadb.udfs.decorators.io_descriptors.data_types import PandasDataframe
 from evadb.utils.generic_utils import try_to_import_openai, try_to_import_forecast
+import pickle
+
 
 class ForecastModel(AbstractUDF):
     @property
@@ -32,34 +34,45 @@ class ForecastModel(AbstractUDF):
         return "ForecastModel"
 
     @setup(cacheable=False, udf_type="Forecasting", batchable=True)
-    def setup(self, model: str = "AutoARIMA", frequency: str = "M", horizon: int = 12):
+    def setup(self, model, model_path: str):
         try_to_import_forecast()
         from statsforecast import StatsForecast
         from statsforecast.models import AutoARIMA, AutoCES, AutoETS, AutoTheta
-        self.model_name = model
-        self.model_dict = {
-            "AutoARIMA": AutoARIMA,
-            "AutoCES": AutoCES,
-            "AutoETS": AutoETS,
-            "AutoTheta": AutoTheta,
-        }
 
-        season_dict = {  # https://pandas.pydata.org/docs/user_guide/timeseries.html#timeseries-offset-aliases
-            "H": 24,
-            "M": 12,
-            "Q": 4,
-            "SM": 24,
-            "BM": 12,
-            "BMS": 12,
-            "BQ": 4,
-            "BH": 24,
-            }
-        # pu.db
-        new_freq = frequency.split("-")[0] if "-" in frequency else frequency  # shortens longer frequencies like Q-DEC
-        season_length = season_dict[new_freq] if new_freq in season_dict else 1
-        self.model = StatsForecast([self.model_dict[self.model_name](season_length=season_length)], freq=new_freq)
-        self.data_memory = pd.DataFrame()
-        self.horizon = horizon
+        self.model = model
+
+        f = open(model_path, "rb")
+        loaded_weights = pickle.load(f)
+        f.close()
+        pu.db
+        self.model.fitted_[0][0].model_ = loaded_weights
+        
+
+
+        # self.model_name = model
+        # self.model_dict = {
+        #     "AutoARIMA": AutoARIMA,
+        #     "AutoCES": AutoCES,
+        #     "AutoETS": AutoETS,
+        #     "AutoTheta": AutoTheta,
+        # }
+
+        # season_dict = {  # https://pandas.pydata.org/docs/user_guide/timeseries.html#timeseries-offset-aliases
+        #     "H": 24,
+        #     "M": 12,
+        #     "Q": 4,
+        #     "SM": 24,
+        #     "BM": 12,
+        #     "BMS": 12,
+        #     "BQ": 4,
+        #     "BH": 24,
+        #     }
+        # # pu.db
+        # new_freq = frequency.split("-")[0] if "-" in frequency else frequency  # shortens longer frequencies like Q-DEC
+        # season_length = season_dict[new_freq] if new_freq in season_dict else 1
+        # self.model = StatsForecast([self.model_dict[self.model_name](season_length=season_length)], freq=new_freq)
+        # self.data_memory = pd.DataFrame()
+        # self.horizon = horizon
 
 
     @forward(
@@ -75,11 +88,12 @@ class ForecastModel(AbstractUDF):
         ],
     )
     def forward(self, data) -> pd.DataFrame:
-        if not self.data_memory.equals(data):
-            self.data_memory = data
-            self.model.fit(data)
+        # if not self.data_memory.equals(data):
+        #     self.data_memory = data
+        #     self.model.fit(data)
         forecast_df = self.model.predict(h=self.horizon)
         forecast_df = forecast_df.rename(columns={self.model_name: "y"})
+        # pu.db
         return pd.DataFrame(
             forecast_df,
             columns=[

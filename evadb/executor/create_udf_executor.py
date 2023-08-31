@@ -38,8 +38,12 @@ from evadb.utils.generic_utils import (
     try_to_import_ludwig,
     try_to_import_torch,
     try_to_import_ultralytics,
+    try_to_import_forecast
 )
 from evadb.utils.logging_manager import logger
+import hashlib
+import pickle
+from pathlib import Path
 import pudb
 
 class CreateUDFExecutor(AbstractExecutor):
@@ -130,12 +134,73 @@ class CreateUDFExecutor(AbstractExecutor):
 
     def handle_forecasting_udf(self):
         """Handle forecasting UDFs"""
+        aggregated_batch_list = []
+        child = self.children[0]
+        for batch in child.exec():
+            aggregated_batch_list.append(batch)
+        aggregated_batch = Batch.concat(aggregated_batch_list, copy=False)
+        aggregated_batch.drop_column_alias()
+
+        arg_map = {arg.key: arg.value for arg in self.node.metadata}
         if not self.node.impl_path:
             impl_path = Path(f"{self.udf_dir}/forecast.py").absolute().as_posix()
         else:
             impl_path = self.node.impl_path.absolute().as_posix()
         arg_map = {arg.key: arg.value for arg in self.node.metadata}
-        udf = self._try_initializing_udf(impl_path, arg_map)
+
+        if "model" not in arg_map.keys(): arg_map["model"] = "AutoARIMA"
+        if "frequency" not in arg_map.keys(): arg_map["frequency"] = "M"
+
+        model_name = arg_map["model"]
+        frequency = arg_map["frequency"]
+
+        try_to_import_forecast()
+        from statsforecast import StatsForecast
+        from statsforecast.models import AutoARIMA, AutoCES, AutoETS, AutoTheta
+
+
+        model_dict = {
+            "AutoARIMA": AutoARIMA,
+            "AutoCES": AutoCES,
+            "AutoETS": AutoETS,
+            "AutoTheta": AutoTheta,
+        }
+
+        season_dict = {  # https://pandas.pydata.org/docs/user_guide/timeseries.html#timeseries-offset-aliases
+            "H": 24,
+            "M": 12,
+            "Q": 4,
+            "SM": 24,
+            "BM": 12,
+            "BMS": 12,
+            "BQ": 4,
+            "BH": 24,
+            }
+        # pu.db
+        new_freq = frequency.split("-")[0] if "-" in frequency else frequency  # shortens longer frequencies like Q-DEC
+        season_length = season_dict[new_freq] if new_freq in season_dict else 1
+        model = StatsForecast([model_dict[model_name](season_length=season_length)], freq=new_freq)
+
+        model_dir = os.path.join(
+            self.db.config.get_value("storage", "model_dir"), self.node.name
+        )
+        Path(model_dir).mkdir(parents=True, exist_ok=True)
+        model_path = os.path.join(
+            self.db.config.get_value("storage", "model_dir"), self.node.name, str(hashlib.sha256(aggregated_batch.frames.to_string().encode()).hexdigest())+".pkl"
+        )
+
+        weight_file = Path(model_path)
+
+
+        if not weight_file.exists():
+            model.fit(aggregated_batch.frames)
+            weights = model.fitted_[0][0].model_
+            f = open(model_path, "wb")
+            pickle.dump(weights, f)
+            f.close()
+
+        arg_map_here = {"model": model, "model_path": model_path}
+        udf = self._try_initializing_udf(impl_path, arg_map_here)
         io_list = self._resolve_udf_io(udf)
 
         return (

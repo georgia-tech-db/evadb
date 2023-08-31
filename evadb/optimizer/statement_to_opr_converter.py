@@ -56,7 +56,7 @@ from evadb.parser.statement import AbstractStatement
 from evadb.parser.table_ref import TableRef
 from evadb.parser.types import UDFType
 from evadb.utils.logging_manager import logger
-
+import pudb
 
 class StatementToPlanConverter:
     def __init__(self):
