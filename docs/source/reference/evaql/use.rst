@@ -19,7 +19,7 @@ The USE statement allows us to run arbitary native queries in the connected data
 Examples
 --------
 
-.. code:: mysql
+.. code:: text
 
    USE postgres_data {
      DROP TABLE IF EXISTS food_review

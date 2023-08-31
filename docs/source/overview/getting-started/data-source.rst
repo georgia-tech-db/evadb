@@ -15,6 +15,10 @@ EvaDB supports an extensive data sources for both structured and unstructured da
  		"port": "5432",
  		"database": "evadb"
      	};""").df()
+
+.. note::
+
+   Check :ref:`Create DATABASE statement<sql-create-database>` for syntax documentation and :ref:`Data Sources<data-sources>` for all supported data source engines.
         
 The above query connects to an exsiting Postgres database, which allows us to build AI applications in EvaDB without data migration.
 For example, the following query previews the available data using :ref:`SELECT<sql-select>`.

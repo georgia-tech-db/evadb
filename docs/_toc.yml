@@ -49,6 +49,11 @@ parts:
           - file: source/reference/evaql/rename
           - file: source/reference/evaql/use
 
+      - file: source/reference/databases/index
+        title: Data Sources
+        sections: 
+          - file: source/reference/databases/postgres 
+
       - file: source/reference/udfs/index
         title: Models
         sections:
