@@ -89,6 +89,8 @@ EvaDB's benefits include:
 ## Quick Links
 
 - [Documentation](#documentation)
+- [Why EvaDB](#why-evadb)
+- [How does EvaDB work](#how-does-evadb-work)
 - [Community and Support](#community-and-support)
 - [Illustrative Queries](#illustrative-queries)
 - [Illustrative Apps](#illustrative-apps)
@@ -97,15 +99,29 @@ EvaDB's benefits include:
 
 You can find the complete documentation of EvaDB at [evadb.ai/docs](https://evadb.ai/docs/) 📚✨🚀
 
-## How does EvaDB work?
+## Why EvaDB
+ 
+In the world of AI, we've reached a stage where many AI tasks that were traditionally handled by AI or ML engineers can now be automated. EvaDB enables software developers with the ability to perform advanced AI tasks without needing to delve into the intricate details.
 
-* Connect EvaDB to your database system with the `CREATE DATABASE` statement.
-* Write SQL queries with AI functions to get inference results:
-   - Pick a pre-trained AI model from Hugging Face, OpenAI, YOLO, PyTorch etc. for generative AI, NLP, and vision applications;
-   - or pick from a variety of state-of-the-art ML engines for classic ML use-cases (classification, regression, etc.);
-   - or bring your custom model built with any AI/ML framework using `CREATE FUNCTION`.
+EvaDB covers many AI applications, including regression, classification, image recognition, question answering, and many other generative AI applications. EvaDB targets 99% of AI problems that are often repetitive and can be automated with a simple function call in an SQL query. Until now, there is no comprehensive open-source framework for bringing AI into an existing SQL database system with a principled AI optimization framework, and that's where EvaDB comes in.
 
+Our target audience is software developers who may not necessarily have a background in AI but require AI capabilities to solve specific problems. We target programmers who write simple SQL queries inside their CRUD apps. With EvaDB, it is possible to easily add AI features to these apps by calling built-in AI functions in the queries.
+
+## How does EvaDB work
+
+<details>
+<ul>
+<li>Connect EvaDB to your database system with the `CREATE DATABASE` statement.</li>
+<li>Write SQL queries with AI functions to get inference results:</li>
+   <ul>
+   <li>Pick a pre-trained AI model from Hugging Face, Open AI, Ultralytics, PyTorch, and built-in AI frameworks for generative AI, NLP, and vision applications;</li>  
+   <li>or pick from a variety of state-of-the-art ML engines for classic ML use-cases (classification, regression, etc.);</li>
+   <li>or bring your custom model built with any AI/ML framework using `CREATE FUNCTION`.</li>
+   </ul>
+</ul> 
+  
 Follow the [getting started](https://evadb.readthedocs.io/en/stable/source/overview/getting-started.html) guide to get on-boarded as fast as possible.
+</details>
 
 ## Illustrative Queries
 
