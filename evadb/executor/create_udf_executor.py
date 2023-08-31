@@ -176,7 +176,7 @@ class CreateUDFExecutor(AbstractExecutor):
             "BQ": 4,
             "BH": 24,
             }
-        # pu.db
+
         new_freq = frequency.split("-")[0] if "-" in frequency else frequency  # shortens longer frequencies like Q-DEC
         season_length = season_dict[new_freq] if new_freq in season_dict else 1
         model = StatsForecast([model_dict[model_name](season_length=season_length)], freq=new_freq)
@@ -194,21 +194,24 @@ class CreateUDFExecutor(AbstractExecutor):
 
         if not weight_file.exists():
             model.fit(aggregated_batch.frames)
-            weights = model.fitted_[0][0].model_
             f = open(model_path, "wb")
-            pickle.dump(weights, f)
+            pickle.dump(model, f)
             f.close()
 
-        arg_map_here = {"model": model, "model_path": model_path}
+        arg_map_here = {"model_name": model_name, "model_path": model_path}
         udf = self._try_initializing_udf(impl_path, arg_map_here)
         io_list = self._resolve_udf_io(udf)
+
+        metadata_here = [UdfMetadataCatalogEntry(key='model_name', value=model_name, udf_id=None, udf_name=None, row_id=None),
+                         UdfMetadataCatalogEntry(key='model_path', value=model_path, udf_id=None, udf_name=None, row_id=None)]
+
 
         return (
             self.node.name,
             impl_path,
             self.node.udf_type,
             io_list,
-            self.node.metadata,
+            metadata_here,
         )
 
 
