@@ -5,39 +5,23 @@ Welcome to EvaDB!
 =================
 
 ..  rubric:: Bring AI inside your Database System
-..
-    ..  figure:: https://raw.githubusercontent.com/georgia-tech-db/evadb/master/docs/images/evadb/evadb-banner.png
-        :target: https://github.com/georgia-tech-db/evadb
-        :width: 100%
-        :alt: EvaDB Banner
-
-.. |pypi_status| image:: https://img.shields.io/pypi/v/evadb.svg
-   :target: https://pypi.org/project/evadb
-.. |License| image:: https://img.shields.io/badge/license-Apache%202-brightgreen.svg?logo=apache
-   :target: https://github.com/georgia-tech-db/evadb/blob/master/LICENSE.txt
-
-
-|pypi_status| |License|
 
 ----------
 
-EvaDB simplifies AI app development for structured and unstructured data. Its powerful SQL API enables software developers to build AI apps in a few lines of code.
+EvaDB enables software developers to build AI apps in a few lines of code. Its powerful SQL API simplifies AI app development for both structured and unstructured data. EvaDB's benefits include:
 
-EvaDB's benefits include:
-
-- 🔮 Easy to connect EvaDB with a SQL database system and build AI-powered apps with a few SQL queries
-- 🤝 Query your data using a pre-trained AI model from Hugging Face, OpenAI, YOLO, PyTorch, and other AI frameworks
-- ⚡️ Faster queries using AI-centric query optimization
+- 🔮 Easy to connect EvaDB with your SQL database system and build AI-powered apps with SQL queries
+- 🤝 Query your data with a pre-trained AI model from Hugging Face, OpenAI, YOLO, PyTorch, and other AI frameworks
+- ⚡️ Faster queries thanks to AI-centric query optimization
 - 💰 Save money spent on running models by efficient CPU/GPU use
-- 🔧 Fine-tune your ML models to achieve better results
+- 🔧 Fine-tune your AI models to achieve better results
 
-👋 Hey! If you're excited about our vision of bringing AI inside database systems, please show some ❤️ by:
+👋 Hey! If you're excited about our vision of bringing AI inside database systems, show some ❤️ by:
 
-- giving a ⭐ on our EvaDB repo on Github 🐙: https://github.com/georgia-tech-db/evadb
-- joining our Slack Community 📟: https://evadb.ai/community
-- following us on Twitter 🐦: https://twitter.com/evadb_ai
-- following us on Medium 📝: https://medium.com/evadb-blog
-
+- 🐙 giving a ⭐ on our EvaDB repo on Github: https://github.com/georgia-tech-db/evadb
+- 📟 joining our Slack Community: https://evadb.ai/community
+- 🐦 following us on Twitter: https://twitter.com/evadb_ai
+- 📝 following us on Medium: https://medium.com/evadb-blog
 
 Why EvaDB?
 ----------
