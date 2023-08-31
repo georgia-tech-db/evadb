@@ -242,7 +242,7 @@ jobs:
     resource_class: large
     docker:
       # https://circleci.com/docs/circleci-images#language-image-variants
-      - image: "cimg/python:<< parameters.v >>"
+      - image: "cimg/python:<< parameters.v >>-node"
     steps:
 
       - checkout
@@ -250,7 +250,7 @@ jobs:
       # Restore pip wheel
       - restore_cache:
           keys:
-            - v1-pip-wheel_cache-python<< parameters.v >>-{{ checksum "docs/requirements.txt" }}
+            - v1-pip-wheel_cache-python<< parameters.v >>-{{ checksum "docs/requirements.txt" }}-{{ checksum "package-lock.json" }}
 
       - run:
           name: Install EvaDB Doc dependencies
@@ -259,6 +259,7 @@ jobs:
             source test_evadb_doc/bin/activate
             pip install --upgrade pip
             pip install -r docs/requirements.txt 
+            npm install markdown-link-check
 
       - run:
           name: Test doc build and link validation
@@ -268,9 +269,10 @@ jobs:
             bash script/test/test.sh -m "<< parameters.mode >>"
 
       - save_cache:
-          key: v1-pip-wheel_cache-python<< parameters.v >>-{{ checksum "docs/requirements.txt" }}
+          key: v1-pip-wheel_cache-python<< parameters.v >>-{{ checksum "docs/requirements.txt" }}-{{ checksum "package-lock.json" }}
           paths:
             - test_evadb_doc
+            - node_modules
 
   Postgres:
     parameters:

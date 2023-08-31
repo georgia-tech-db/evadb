@@ -53,6 +53,16 @@ check_doc_link() {
   print_error_code $code "DOC LINK CHECK"  
 }
 
+check_readme_link() {
+  if command -v npm > /dev/null && command -v npx >/dev/null && npm list --depth=0 | grep markdown-link-check; then
+    npx markdown-link-check -c ./script/test/link_check_config.json ./README.md 
+    code=$?
+    print_error_code $code "README LINK CHECK"
+  else
+    echo "README LINK CHECK: --||-- SKIPPED (missing dependency: npm install markdown-link-check)"		  
+  fi
+}
+
 unit_test() {
   PYTHONPATH=./ pytest test/unit_tests/ --durations=20 --cov-report term-missing:skip-covered  --cov-config=.coveragerc --cov-context=test --cov=evadb/ --capture=sys --tb=short -v -rsf --log-level=WARNING -m "not benchmark"
   code=$?
@@ -142,6 +152,7 @@ then
   # Run black, isort, linter 
   check_doc_build
   check_doc_link
+  check_readme_link
 fi
 
 ##################################################

@@ -20,13 +20,18 @@ parts:
         title: Q&A from Videos [ChatGPT + HuggingFace]
       - file: source/usecases/food-review.rst
         title: Sentiment Analysis and Response [ChatGPT + PostgreSQL]
+      - file: source/usecases/13-privategpt.ipynb
+        title: PrivateGPT
+      - file: source/usecases/08-chatgpt.ipynb
+        title: ChatGPT-based Video Question Answering
+      - file: source/usecases/12-query-pdf.ipynb
+        title: Querying PDF Documents
       - file: source/usecases/02-object-detection.ipynb
-        title: Object Detection
+        title: Analysing Traffic Flow with YOLO
       - file: source/usecases/03-emotion-analysis.ipynb
-        title: Emotion Analysis
+        title: Examining Emotions of Movie
       - file: source/usecases/07-object-segmentation-huggingface.ipynb
-        title: Image Segmentation [HuggingFace]
-
+        title: Image Segmentation with Hugging Face
 
   - caption: User Reference
     chapters:
