@@ -1,11 +1,10 @@
 .. meta::
-   :keywords: database, deep learning, video analytics, language models
+   :keywords: database, AI, language models, SQL, video analytics
 
-Welcome to EvaDB! 
+Welcome to EvaDB!
 =================
 
-..  rubric:: Database system for building simpler and faster AI-powered apps.
-
+..  rubric:: Bring AI inside your Database System
 ..
     ..  figure:: https://raw.githubusercontent.com/georgia-tech-db/evadb/master/docs/images/evadb/evadb-banner.png
         :target: https://github.com/georgia-tech-db/evadb
@@ -22,22 +21,33 @@ Welcome to EvaDB!
 
 ----------
 
-EvaDB is an open-source unified framework for developing AI-powered apps on top of your data sources. It offers a SQL-like declarative language to simplify the development and deployment of AI-powered apps, which can work with structured data (such as tables and feature stores) and unstructured data (like videos, text, podcasts, PDFs, and more).
+EvaDB simplifies AI app development for structured and unstructured data. Its powerful SQL API enables software developers to build AI apps in a few lines of code.
 
-- Github: https://github.com/georgia-tech-db/evadb
-- PyPI: https://pypi.org/project/evadb/
-- Twitter: https://twitter.com/evadb_ai
-- Slack: https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg
+EvaDB's benefits include:
+
+- 🔮 Easy to connect EvaDB with a SQL database system and build AI-powered apps with a few SQL queries
+- 🤝 Query your data using a pre-trained AI model from Hugging Face, OpenAI, YOLO, PyTorch, and other AI frameworks
+- ⚡️ Faster queries using AI-centric query optimization
+- 💰 Save money spent on running models by efficient CPU/GPU use
+- 🔧 Fine-tune your ML models to achieve better results
+
+👋 Hey! If you're excited about our vision of bringing AI inside database systems, please show some ❤️ by:
+
+- giving a ⭐ on our EvaDB repo on Github 🐙: https://github.com/georgia-tech-db/evadb
+- joining our Slack Community 📟: https://evadb.ai/community
+- following us on Twitter 🐦: https://twitter.com/evadb_ai
+- following us on Medium 📝: https://medium.com/evadb-blog
 
 
 Why EvaDB?
 ----------
 
-Over the last decade, AI models have radically changed the world of natural language processing and computer vision. They are accurate on various tasks ranging from question answering to object tracking in videos. However, it is challenging for users to leverage these models due to two challenges:
+In the world of AI, we've reached a stage where many AI tasks that were traditionally handled by AI or ML engineers can now be automated. EvaDB enables software developers with the ability to perform advanced AI tasks without needing to delve into the intricate details.
 
-- **Usability**: To use an AI model, the user needs to program against multiple low-level libraries, like PyTorch, Hugging Face, Open AI, etc. This tedious process often leads to a complex AI app that glues together these libraries to accomplish the given task. This programming complexity prevents people who are experts in other domains from benefiting from these models.
+EvaDB covers many AI applications, including regression, classification, image recognition, question answering, and many other generative AI applications. EvaDB targets 99% of AI problems that are often repetitive and can be automated with a simple function call in an SQL query. Until now, there is no comprehensive open-source framework for bringing AI into an existing SQL database system with a principled AI optimization framework, and that's where EvaDB comes in.
 
-- **Money & Time**: Running these deep learning models on large document or video datasets is costly and time-consuming. For example, the state-of-the-art object detection model takes multiple GPU years to process just a week's videos from a single traffic monitoring camera. Besides the money spent on hardware, these models also increase the time that you spend waiting for the model inference to finish.
+Our target audience is software developers who may not necessarily have a background in AI but require AI capabilities to solve specific problems. We target programmers who write simple SQL queries inside their CRUD apps. With EvaDB, it is possible to easily add AI features to these apps by calling built-in AI functions in the queries.
+
 
 Getting Started
 ----------------
@@ -77,30 +87,3 @@ Getting Started
             <p style="font-weight:600;">Support > </p> 
     </div></a>
     </div>
-
-
-Key Features
-------------
-
-- 🔮 Build simpler AI-powered apps using short Python functions or SQL queries
-- ⚡️ 10x faster AI apps using AI-centric query optimization  
-- 💰 Save money spent on GPUs
-- 🚀 First-class support for your custom deep learning models through user-defined functions
-- 📦 Built-in caching to eliminate redundant model invocations across queries
-- ⌨️ First-class support for PyTorch, Hugging Face, YOLO, and Open AI models
-- 🐍 Installable via pip and fully implemented in Python
-
-
-
-Try it out!
-------------
-
-- `PrivateGPT <https://colab.research.google.com/github/georgia-tech-db/evadb/blob/master/tutorials/13-privategpt.ipynb>`_
-- `Video Question Answering using ChatGPT <https://colab.research.google.com/github/georgia-tech-db/evadb/blob/master/tutorials/08-chatgpt.ipynb>`_
-- `Querying PDF documents <https://colab.research.google.com/github/georgia-tech-db/evadb/blob/master/tutorials/12-query-pdf.ipynb>`_
-- `Analyzing traffic flow at an intersection <https://colab.research.google.com/github/georgia-tech-db/evadb/blob/master/tutorials/02-object-detection.ipynb>`_
-- `Examining the emotion palette of actors in a movie <https://colab.research.google.com/github/georgia-tech-db/evadb/blob/master/tutorials/03-emotion-analysis.ipynb>`_
-- `Classifying images based on their content <https://colab.research.google.com/github/georgia-tech-db/evadb/blob/master/tutorials/01-mnist.ipynb>`_
-
-
-

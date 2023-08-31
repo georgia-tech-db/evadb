@@ -17,6 +17,7 @@ from test.util import get_evadb_for_testing, shutdown_ray
 
 import pytest
 
+from evadb.executor.executor_utils import ExecutorError
 from evadb.server.command_handler import execute_query_fetch_all
 
 
@@ -117,6 +118,34 @@ class NativeExecutorTest(unittest.TestCase):
 
         self._drop_table_in_native_database()
 
+    def _raise_error_on_multiple_creation(self):
+        params = {
+            "user": "eva",
+            "password": "password",
+            "host": "localhost",
+            "port": "5432",
+            "database": "evadb",
+        }
+        query = f"""CREATE DATABASE test_data_source
+                    WITH ENGINE = "postgres",
+                    PARAMETERS = {params};"""
+        with self.assertRaises(ExecutorError):
+            execute_query_fetch_all(self.evadb, query)
+
+    def _raise_error_on_invalid_connection(self):
+        params = {
+            "user": "xxxxxx",
+            "password": "xxxxxx",
+            "host": "localhost",
+            "port": "5432",
+            "database": "evadb",
+        }
+        query = f"""CREATE DATABASE invaid
+                    WITH ENGINE = "postgres",
+                    PARAMETERS = {params};"""
+        with self.assertRaises(ExecutorError):
+            execute_query_fetch_all(self.evadb, query)
+
     def test_should_run_query_in_postgres(self):
         # Create database.
         params = {
@@ -134,6 +163,10 @@ class NativeExecutorTest(unittest.TestCase):
         # Test executions.
         self._execute_native_query()
         self._execute_evadb_query()
+
+        # Test error.
+        self._raise_error_on_multiple_creation()
+        self._raise_error_on_invalid_connection()
 
 
 if __name__ == "__main__":
