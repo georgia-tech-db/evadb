@@ -28,7 +28,7 @@ class CreateDatabaseExecutor(AbstractExecutor):
         self._slack_chatbot = SlackChatbot() if node.engine == "slack" else None
 
     @property
-    def slack_chatbot (self):
+    def slack_chatbot(self):
         return self._slack_chatbot
 
     def exec(self, *args, **kwargs):

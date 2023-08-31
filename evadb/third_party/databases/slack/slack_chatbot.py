@@ -12,22 +12,25 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
+
 import openai
 from slack import WebClient
 from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
-import os 
+
 from evadb.configuration.configuration_manager import ConfigurationManager
 from evadb.third_party.databases.interface import dynamic_install
 
+
 class SlackChatbot:
-    def __init__ (self):
-        self.SLACK_BOT_TOKEN = self.verify_and_retreive_token ("SLACK_BOT_TOKEN")
-        self.SLACK_APP_TOKEN = self.verify_and_retreive_token ("SLACK_APP_TOKEN")
-        self.OPENAI_API_KEY = self.verify_and_retreive_token ("OPENAI_KEY")
+    def __init__(self):
+        self.SLACK_BOT_TOKEN = self.verify_and_retreive_token("SLACK_BOT_TOKEN")
+        self.SLACK_APP_TOKEN = self.verify_and_retreive_token("SLACK_APP_TOKEN")
+        self.OPENAI_API_KEY = self.verify_and_retreive_token("OPENAI_KEY")
         dynamic_install("slack")
 
-    def verify_and_retreive_token (self, token_name:str):
+    def verify_and_retreive_token(self, token_name: str):
         # Check configuration manager first
         token = ConfigurationManager().get_value("third_party", token_name)
 
@@ -36,7 +39,9 @@ class SlackChatbot:
             token = os.environ.get(token_name, "")
         assert (
             len(token) != 0
-        ), "Please set the {} in evadb.yml file (under third_party) or set environment variable ({})".format(token_name, token_name)
+        ), "Please set the {} in evadb.yml file (under third_party) or set environment variable ({})".format(
+            token_name, token_name
+        )
         return token_name
 
     def create_slack_bot(self):
@@ -79,6 +84,6 @@ class SlackChatbot:
                 text=f"{response}",
             )
 
-    def run_slack_bot (self):
+    def run_slack_bot(self):
         self.create_slack_bot()
         SocketModeHandler(self.app, self.SLACK_APP_TOKEN).start()
