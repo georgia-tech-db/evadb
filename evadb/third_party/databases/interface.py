@@ -15,10 +15,6 @@
 import importlib
 import os
 
-import pip
-
-INSTALL_CACHE = []
-
 
 def get_database_handler(engine: str, **kwargs):
     """
@@ -31,7 +27,7 @@ def get_database_handler(engine: str, **kwargs):
         mod = dynamic_import(engine)
     except ImportError:
         req_file = os.path.join(
-            "evadb", "third_party", "databases", engine, "requirements.txt"
+            os.path.dirname(__file__), engine, "requirements.txt"
         )
         if os.path.isfile(req_file):
             with open(req_file) as f:
@@ -41,29 +37,6 @@ def get_database_handler(engine: str, **kwargs):
         return mod.PostgresHandler(engine, **kwargs)
     else:
         raise NotImplementedError(f"Engine {engine} is not supported")
-
-
-def dynamic_install(handler_dir):
-    """
-    Dynamically install package from requirements.txt.
-    """
-
-    # Skip installation
-    if handler_dir in INSTALL_CACHE:
-        return
-
-    INSTALL_CACHE.append(handler_dir)
-
-    req_file = os.path.join(
-        "evadb", "third_party", "databases", handler_dir, "requirements.txt"
-    )
-    if os.path.isfile(req_file):
-        with open(req_file) as f:
-            for package in f.read().splitlines():
-                if hasattr(pip, "main"):
-                    pip.main(["install", package])
-                else:
-                    pip._internal.main(["install", package])
 
 
 def dynamic_import(handler_dir):
