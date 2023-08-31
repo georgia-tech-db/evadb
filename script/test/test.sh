@@ -54,13 +54,13 @@ check_doc_link() {
 }
 
 unit_test() {
-  PYTHONPATH="." pytest test/unit_tests/ --durations=20 --cov-report term-missing:skip-covered  --cov-config=.coveragerc --cov-context=test --cov=evadb/ --capture=sys --tb=short -v -rsf --log-level=WARNING -m "not benchmark"
+  PYTHONPATH=./ pytest test/unit_tests/ --durations=20 --cov-report term-missing:skip-covered  --cov-config=.coveragerc --cov-context=test --cov=evadb/ --capture=sys --tb=short -v -rsf --log-level=WARNING -m "not benchmark"
   code=$?
   print_error_code $code "UNIT TEST"
 }
 
 short_integration_test() {
-  PYTHONPATH=./ python -m pytest test/integration_tests/short/ -p no:cov -m "not benchmark"
+  PYTHONPATH=./ pytest test/integration_tests/short/ --durations=20 --cov-report term-missing:skip-covered  --cov-config=.coveragerc --cov-context=test --cov=evadb/ --capture=sys --tb=short -v -rsf --log-level=WARNING -m "not benchmark"
   code=$?
   print_error_code $code "SHORT INTEGRATION TEST"
 }
