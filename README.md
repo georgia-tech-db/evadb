@@ -70,20 +70,19 @@
   <a href="https://gitpod.io/#https://github.com/georgia-tech-db/evadb" target="_blank"><img src="https://gitpod.io/button/open-in-gitpod.svg" alt="Open in Gitpod"></a>
 </p>
 
-EvaDB simplifies AI app development for structured and unstructured data. Its powerful SQL API enables software developers to build AI apps in a few lines of code.
-
-EvaDB's benefits include:
-- 🔮 Easy to connect EvaDB with a SQL database system and build AI-powered apps with a few SQL queries
-- 🤝 Query your data using a pre-trained AI model from Hugging Face, OpenAI, YOLO, PyTorch, and other AI frameworks
-- ⚡️ Faster queries using AI-centric query optimization
+EvaDB enables software developers to build AI apps in a few lines of code. Its powerful SQL API simplifies AI app development for both structured and unstructured data. EvaDB's benefits include:
+- 🔮 Easy to connect EvaDB with your SQL database system and build AI-powered apps with SQL queries
+- 🤝 Query your data with a pre-trained AI model from Hugging Face, OpenAI, YOLO, PyTorch, and other AI frameworks
+- ⚡️ Faster queries thanks to AI-centric query optimization
 - 💰 Save money spent on running models by efficient CPU/GPU use
-- 🔧 Fine-tune your ML models to achieve better results
+- 🔧 Fine-tune your AI models to achieve better results
 
-👋 Hey! If you're excited about our vision of bringing AI inside database systems, please show some ❤️ by: 
+👋 Hey! If you're excited about our vision of bringing AI inside database systems, show some ❤️ by: 
 <ul>
-  <li> giving a ⭐ on our <a href="https://github.com/georgia-tech-db/evadb">EvaDB repo on Github 🐙</a>
-  <li> joining our <a href="https://evadb.ai/community">Slack Community 📟</a>
-  <li> following us on <a href="https://twitter.com/evadb_ai">Twitter 🐦</a>
+  <li> 🐙 giving a ⭐ on our <a href="https://github.com/georgia-tech-db/evadb">EvaDB repo on Github</a>
+  <li> 📟 joining our <a href="https://evadb.ai/community">Slack Community</a>
+  <li> 🐦 following us on <a href="https://twitter.com/evadb_ai">Twitter</a>
+  <li> 🐦 following us on <a href="https://medium.com/evadb-blog">Medium</a>
 </ul>
 
 ## Quick Links
@@ -219,7 +218,7 @@ Here is EvaDB's public [roadmap 🛤️](https://github.com/orgs/georgia-tech-db
 
 ## Contributing
 
-We are a lean team on a mission to bring AI to database systems! All kinds of contributions to EvaDB are appreciated 🙌. If you'd like to get involved, here's information on where we could use your help: [contribution guide](https://evadb.readthedocs.io/en/latest/source/dev-guide/contribute.html).
+We are a lean team on a mission to bring AI inside database systems! All kinds of contributions to EvaDB are appreciated 🙌 If you'd like to get involved, here's information on where we could use your help: [contribution guide](https://evadb.readthedocs.io/en/latest/source/dev-guide/contribute.html) 🤗
 
 <p align="center">
   <a href="https://github.com/georgia-tech-db/evadb/graphs/contributors">
