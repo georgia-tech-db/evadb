@@ -1,3 +1,5 @@
+.. _add-data-source:
+
 Structured Data Source Integration
 ==================================
 This document details steps involved in adding a new structured data source integration in EvaDB.

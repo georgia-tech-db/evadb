@@ -1,3 +1,5 @@
+.. _sql-select:
+
 SELECT
 ======
 
