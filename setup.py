@@ -161,6 +161,7 @@ EXTRA_REQUIRES = {
     "qdrant": qdrant_libs,
     "postgres": postgres_libs,
     "ludwig": ludwig_libs,
+    "slack": slack_libs,
     # everything except ray, qdrant and postgres
     "dev": dev_libs + vision_libs + document_libs + udf_libs + notebook_libs,
 }

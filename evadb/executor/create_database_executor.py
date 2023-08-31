@@ -18,13 +18,18 @@ from evadb.database import EvaDBDatabase
 from evadb.executor.abstract_executor import AbstractExecutor
 from evadb.models.storage.batch import Batch
 from evadb.parser.create_statement import CreateDatabaseStatement
-from evadb.third_party.databases.slack.slack_chatbot import create_slack_bot
+from evadb.third_party.databases.slack.slack_chatbot import SlackChatbot
 from evadb.utils.logging_manager import logger
 
 
 class CreateDatabaseExecutor(AbstractExecutor):
     def __init__(self, db: EvaDBDatabase, node: CreateDatabaseStatement):
         super().__init__(db, node)
+        self._slack_chatbot = SlackChatbot() if node.engine == "slack" else None
+
+    @property
+    def slack_chatbot (self):
+        return self._slack_chatbot
 
     def exec(self, *args, **kwargs):
         # todo handle if_not_exists
@@ -41,7 +46,7 @@ class CreateDatabaseExecutor(AbstractExecutor):
         )
 
         if self.node.engine == "slack":
-            create_slack_bot()
+            self.slack_chatbot.run_chatbot()
 
         yield Batch(
             pd.DataFrame(
