@@ -113,6 +113,14 @@ postgres_libs = [
     "psycopg2",
 ]
 
+slack_libs = [
+    "slack-sdk",
+    "slack-bolt",
+    "slack",
+    "slackclient",
+    "openai"
+]
+
 ludwig_libs = [
     "ludwig[hyperopt,distributed]" # MODEL TRAIN AND FINE TUNING
 ]

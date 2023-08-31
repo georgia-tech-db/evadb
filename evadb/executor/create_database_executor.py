@@ -18,6 +18,7 @@ from evadb.database import EvaDBDatabase
 from evadb.executor.abstract_executor import AbstractExecutor
 from evadb.models.storage.batch import Batch
 from evadb.parser.create_statement import CreateDatabaseStatement
+from evadb.third_party.databases.slack.slack_chatbot import create_slack_bot
 from evadb.utils.logging_manager import logger
 
 
@@ -38,6 +39,9 @@ class CreateDatabaseExecutor(AbstractExecutor):
         self.catalog().insert_database_catalog_entry(
             self.node.database_name, self.node.engine, self.node.param_dict
         )
+
+        if self.node.engine == "slack":
+            create_slack_bot()
 
         yield Batch(
             pd.DataFrame(
