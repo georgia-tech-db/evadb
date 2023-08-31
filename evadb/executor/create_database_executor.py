@@ -19,7 +19,10 @@ from evadb.executor.abstract_executor import AbstractExecutor
 from evadb.executor.executor_utils import ExecutorError
 from evadb.models.storage.batch import Batch
 from evadb.parser.create_statement import CreateDatabaseStatement
-from evadb.third_party.databases.slack.slack_chatbot import SlackChatbot, get_database_handler
+from evadb.third_party.databases.slack.slack_chatbot import (
+    SlackChatbot,
+    get_database_handler,
+)
 from evadb.utils.logging_manager import logger
 
 
