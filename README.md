@@ -85,11 +85,12 @@ EvaDB enables software developers to build AI apps in a few lines of code. Its p
   <li> 📝 following us on <a href="https://medium.com/evadb-blog">Medium</a>
 </ul>
 
-👋 Hey! If you're excited about our vision of bringing AI inside database systems, please show some ❤️ by: 
+👋 Hey! If you're excited about our vision of bringing AI inside database systems, show some ❤️ by: 
 <ul>
-  <li> giving a ⭐ on our <a href="https://github.com/georgia-tech-db/evadb">EvaDB repo on Github 🐙</a>
-  <li> joining our <a href="https://evadb.ai/community">Slack Community 📟</a>
-  <li> following us on <a href="https://twitter.com/evadb_ai">Twitter 🐦</a>
+  <li> 🐙 giving a ⭐ on our <a href="https://github.com/georgia-tech-db/evadb">EvaDB repo on Github</a>
+  <li> 📟 joining our <a href="https://evadb.ai/community">Slack Community</a>
+  <li> 🐦 following us on <a href="https://twitter.com/evadb_ai">Twitter</a>
+  <li> 🐦 following us on <a href="https://medium.com/evadb-blog">Medium</a>
 </ul>
 
 ## Quick Links
