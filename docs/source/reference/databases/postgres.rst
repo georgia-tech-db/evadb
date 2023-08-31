@@ -1,7 +1,7 @@
 PostgreSQL
 ==========
 
-The connection to PostgreSQL is based on the `psycopg2<https://pypi.org/project/psycopg2/>`_ library.
+The connection to PostgreSQL is based on the `psycopg2 <https://pypi.org/project/psycopg2/>`_ library.
 
 Dependency
 ----------
