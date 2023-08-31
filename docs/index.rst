@@ -42,7 +42,7 @@ Getting Started
     <a class="no-underline" href="source/overview/getting-started.html" target="_blank"> <div class="info-box" >
             <div class="image-header" style="padding:0px;">
                 <img src="_static/icons/code.png" width="44px" height="44px" />
-                <h3 style="font-size:20px;">Learn basics</h3>
+                <h3 style="font-size:20px;">Learn Basics</h3>
             </div>
             <p class="only-light" style="color:#000000;">Understand how to use EvaDB to build AI apps.</p> 
             <p class="only-dark" style="color:#FFFFFF;">Understand how to use EvaDB to build AI apps.</p>    
@@ -52,14 +52,16 @@ Getting Started
         <div class="info-box" >
             <div class="image-header" style="padding:0px;">
                 <img src="_static/icons/download.png" width="44px" height="44px" />
-                <h3 style="font-size:20px;">Features</h3>
+                <h3 style="font-size:20px;">Key Concepts</h3>
             </div>
-            <p class="only-light" style="color:#000000;">Learn about the EvaDB features.</p> 
-            <p class="only-dark" style="color:#FFFFFF;">Learn about the EvaDB features.</p>      
+            <p class="only-light" style="color:#000000;">Learn the 
+            high-level concepts related to EvaDB.</p> 
+            <p class="only-dark" style="color:#FFFFFF;">
+            Learn the high-level concepts related to EvaDB.</p>      
             <p style="font-weight:600;">Learn more > </p>  
         </div> 
     </a>  
-    <a class="no-underline" href="https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg"  target="_blank" 
+    <a class="no-underline" href="https://evadb.ai/community"  target="_blank" 
             ><div class="info-box" >
             <div class="image-header" style="padding:0px;">
                 <img src="_static/icons/slack.png" width="44px" height="44px" />
