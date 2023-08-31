@@ -246,6 +246,7 @@ jobs:
     steps:
 
       - checkout
+      - setup_remote_docker
 
       # Restore pip wheel
       - restore_cache:

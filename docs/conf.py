@@ -159,9 +159,12 @@ nitpick_ignore_regex = [('py:class', r'.*')]
 
 for i in os.listdir("../tutorials"):
     if i in [
+        "13-privategpt.ipynb",
+        "08-chatgpt.ipynb",
+        "12-query-pdf.ipynb",
         "02-object-detection.ipynb",
-        "03-emotion-analysis.ipynb", 
-        "07-object-segmentation-huggingface.ipynb"
+        "03-emotion-analysis.ipynb",
+        "07-object-segmentation-huggingface.ipynb",
     ]:
         shutil.copy(f"../tutorials/{i}", "./source/usecases/")
 
