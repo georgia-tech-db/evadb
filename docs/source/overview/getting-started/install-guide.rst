@@ -8,7 +8,7 @@ EvaDB provides couple different installation options to allow easy extension to 
 Use pip
 -------
 
-EvaDB supports Python (versions >= 3.8). We recommend installing with `pip` within an `isolated virtual environment <https://docs.python-guide.org/dev/virtualenvs/>`_.
+EvaDB supports Python (versions >= 3.8). We recommend installing with ``pip`` within an `isolated virtual environment <https://docs.python-guide.org/dev/virtualenvs/>`_.
 
 .. code-block:: bash
 
@@ -20,11 +20,11 @@ EvaDB supports Python (versions >= 3.8). We recommend installing with `pip` with
 Install additional packages
 ---------------------------
 
-* `evadb[vision]` for vision dependencies. With vision dependencies, we can run queries to do image classification, object detection, and emotion analysis workloads, etc.
-* `evadb[document]` for LLM dependencies. With LLM dependencies, we can leverage the capability of LLM to summarize or do question answering for documents.
-* `evadb[qdrant]` for embedding-based similarity search.
-* `evadb[ludwig]` for model training and finetuning.
-* `evadb[ray]` for distributed execution on ray.
+* ``evadb[vision]`` for vision dependencies. With vision dependencies, we can run queries to do image classification, object detection, and emotion analysis workloads, etc.
+* ``evadb[document]`` for LLM dependencies. With LLM dependencies, we can leverage the capability of LLM to summarize or do question answering for documents.
+* ``evadb[qdrant]`` for embedding-based similarity search.
+* ``evadb[ludwig]`` for model training and finetuning.
+* ``evadb[ray]`` for distributed execution on ray.
 
 Install from source
 -------------------
@@ -42,7 +42,7 @@ Install from source
 Run your first SQL query in EvaDB
 ----------------------------------
 
-To run SQL query in EvaDB, we need to first create a `cursor` object. The following query lists all the builtin user-defined functions. 
+To run SQL query in EvaDB, we need to first create a ``cursor`` object. The following query lists all the builtin user-defined functions. 
 
 .. code-block:: python
 
