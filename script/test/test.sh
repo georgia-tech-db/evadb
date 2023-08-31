@@ -54,9 +54,13 @@ check_doc_link() {
 }
 
 check_readme_link() {
-  npx markdown-link-check -c ./script/test/link_check_config.json ./README.md 
-  code=$?
-  print_error_code $code "README LINK CHECK"
+  if command -v npm > /dev/null && command -v npx >/dev/null && npm list --depth=0 | grep markdown-link-check; then
+    npx markdown-link-check -c ./script/test/link_check_config.json ./README.md 
+    code=$?
+    print_error_code $code "README LINK CHECK"
+  else
+    echo "README LINK CHECK: --||-- SKIPPED (missing dependency: npm install markdown-link-check)"		  
+  fi
 }
 
 unit_test() {
