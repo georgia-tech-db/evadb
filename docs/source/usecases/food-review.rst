@@ -23,7 +23,7 @@ EvaDB + ChatGPT to address negative reviews by proposing a solution to the custo
 For this use case, we assume user has a Postgres server running locally. You can also check our notebook above to skip Postgres setup.
 
 1. Connect to EvaDB
--------------------
+---------------------
 
 .. code-block:: python
 
@@ -31,7 +31,7 @@ For this use case, we assume user has a Postgres server running locally. You can
     cursor = evadb.connect().cursor()
 
 2. Connect to an Existing Postgres Database
--------------------------------------------
+---------------------------------------------
 
 .. tab-set::
     
@@ -51,7 +51,7 @@ For this use case, we assume user has a Postgres server running locally. You can
 
     .. tab-item:: SQL 
 
-        .. code-block:: sql
+        .. code-block:: text
 
             CREATE DATABASE postgres_data WITH ENGINE = 'postgres', PARAMETERS = {
                 "user": "eva",
@@ -62,11 +62,11 @@ For this use case, we assume user has a Postgres server running locally. You can
             }
 
 3. Sentiment Analysis of Food Review using ChatGPT
----------------------------------------------
+---------------------------------------------------
 
 We then use EvaDB + ChatGPT to analyze whether the review is "positive" or "negative" with customized ChatGPT prompt. For this use case,
 we assume reviews have been already loaded into the table inside PostgreSQL. 
-You can check our `Jupyter Notebook <https://github.com/georgia-tech-db/eva/blob/staging/tutorials/14-food-review-tone-analysis-and-response.ipynb>`_ for how to load data.
+You can check our `Jupyter Notebook <https://github.com/georgia-tech-db/eva/blob/staging/tutorials/14-food-review-tone-analysis-and-response.ipynb>`__ for how to load data.
 
 .. tab-set::
     
@@ -144,4 +144,4 @@ This query will first filter out positive reviews and then apply ChatGPT again t
     | Dear [Customer's Name], Thank you for bringing this issue to our attention. We apologize for the inconvenience caused by the missing chicken sandwich in your takeout order. We understand how frustrating it can be when an item is missing from your meal. To address this concern, we ... |
     +----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
-Check out our `Jupyter Notebook <https://github.com/georgia-tech-db/evadb/blob/staging/tutorials/14-food-review-tone-analysis-and-response.ipynb>`_ for working example.
+Check out our `Jupyter Notebook <https://github.com/georgia-tech-db/evadb/blob/staging/tutorials/14-food-review-tone-analysis-and-response.ipynb>`__ for working example.

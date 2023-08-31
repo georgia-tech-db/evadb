@@ -17,6 +17,8 @@ from __future__ import annotations
 import re
 from typing import TYPE_CHECKING, List
 
+import pandas as pd
+
 from evadb.catalog.catalog_type import ColumnType, TableType
 from evadb.catalog.catalog_utils import (
     get_video_table_column_definitions,
@@ -88,11 +90,16 @@ def check_data_source_and_table_are_valid(
 
 
 def create_table_catalog_entry_for_data_source(
-    table_name: str, column_name_list: List[str]
+    table_name: str, column_info: pd.DataFrame
 ):
+    column_name_list = list(column_info["name"])
+    column_type_list = [
+        ColumnType.python_type_to_evadb_type(dtype)
+        for dtype in list(column_info["dtype"])
+    ]
     column_list = []
-    for column_name in column_name_list:
-        column_list.append(ColumnCatalogEntry(column_name, ColumnType.ANY))
+    for name, dtype in zip(column_name_list, column_type_list):
+        column_list.append(ColumnCatalogEntry(name, dtype))
 
     # Assemble table.
     table_catalog_entry = TableCatalogEntry(
@@ -133,7 +140,7 @@ def bind_native_table_info(catalog: CatalogManager, table_info: TableInfo):
     # Assemble columns.
     column_df = handler.get_columns(table_info.table_name).data
     table_info.table_obj = create_table_catalog_entry_for_data_source(
-        table_info.table_name, list(column_df["column_name"])
+        table_info.table_name, column_df
     )
 
 

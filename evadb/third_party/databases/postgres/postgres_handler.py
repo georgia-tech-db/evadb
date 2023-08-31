@@ -30,6 +30,7 @@ class PostgresHandler(DBHandler):
         self.user = kwargs.get("user")
         self.password = kwargs.get("password")
         self.database = kwargs.get("database")
+        self.connection = None
 
     def connect(self):
         try:
@@ -71,8 +72,9 @@ class PostgresHandler(DBHandler):
             return DBHandlerResponse(data=None, error="Not connected to the database.")
 
         try:
-            query = f"SELECT column_name FROM information_schema.columns WHERE table_name='{table_name}'"
+            query = f"SELECT column_name as name, data_type as dtype FROM information_schema.columns WHERE table_name='{table_name}'"
             columns_df = pd.read_sql_query(query, self.connection)
+            columns_df["dtype"] = columns_df["dtype"].apply(self._pg_to_python_types)
             return DBHandlerResponse(data=columns_df)
         except psycopg2.Error as e:
             return DBHandlerResponse(data=None, error=str(e))
@@ -108,3 +110,25 @@ class PostgresHandler(DBHandler):
             return DBHandlerResponse(data=self._fetch_results_as_df(cursor))
         except psycopg2.Error as e:
             return DBHandlerResponse(data=None, error=str(e))
+
+    def _pg_to_python_types(self, pg_type: str):
+        mapping = {
+            "integer": int,
+            "bigint": int,
+            "smallint": int,
+            "numeric": float,
+            "real": float,
+            "double precision": float,
+            "character": str,
+            "character varying": str,
+            "text": str,
+            "boolean": bool,
+            # Add more mappings as needed
+        }
+
+        if pg_type in mapping:
+            return mapping[pg_type]
+        else:
+            raise Exception(
+                f"Unsupported column {pg_type} encountered in the postgres table. Please raise a feature request!"
+            )
