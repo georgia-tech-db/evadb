@@ -53,6 +53,12 @@ check_doc_link() {
   print_error_code $code "DOC LINK CHECK"  
 }
 
+check_readme_link() {
+  docker run -v ${PWD}:/tmp:ro --rm -i ghcr.io/tcort/markdown-link-check:stable -c /tmp/script/test/link_check_config.json /tmp/README.md 
+  code=$?
+  print_error_code $code "README LINK CHECK"
+}
+
 unit_test() {
   PYTHONPATH="." pytest test/unit_tests/ --durations=20 --cov-report term-missing:skip-covered  --cov-config=.coveragerc --cov-context=test --cov=evadb/ --capture=sys --tb=short -v -rsf --log-level=WARNING -m "not benchmark"
   code=$?
@@ -142,6 +148,7 @@ then
   # Run black, isort, linter 
   check_doc_build
   check_doc_link
+  check_readme_link
 fi
 
 ##################################################
