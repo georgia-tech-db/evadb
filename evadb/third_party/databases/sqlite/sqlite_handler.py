@@ -99,8 +99,8 @@ class SQLiteHandler(DBHandler):
         try:
             query = f"PRAGMA table_info('{table_name}')"
             pragma_df = pd.read_sql_query(query, self.connection)
-            columns_df = pragma_df[["name"]].copy()
-            columns_df.columns = ["column_name"]
+            columns_df = pragma_df[["name", "type"]].copy()
+            columns_df.rename(columns={"type": "dtype"}, inplace=True)
             return DBHandlerResponse(data=columns_df)
         except sqlite3.Error as e:
             return DBHandlerResponse(data=None, error=str(e))

@@ -169,7 +169,6 @@ class NativeExecutorTest(unittest.TestCase):
         self._raise_error_on_multiple_creation()
         self._raise_error_on_invalid_connection()
 
-
     def test_should_run_query_in_sqlite(self):
         # Create database.
         params = {
@@ -184,8 +183,6 @@ class NativeExecutorTest(unittest.TestCase):
         self._execute_native_query()
         self._execute_evadb_query()
 
+
 if __name__ == "__main__":
     unittest.main()
-
-
-
