@@ -44,7 +44,7 @@ Follow the `Setup for Source Code via pip <https://docs.mindsdb.com/setup/self-h
 
 .. note::
 
-   At the time of this documentation, we need to manully ``pip install evaluate`` for huggingface model to work in MindsDB.
+   At the time of this documentation, we need to manually ``pip install evaluate`` for huggingface model to work in MindsDB.
 
 After the installation, we use mysql cli to connect to MindsDB. Replace the port number as needed.
 
