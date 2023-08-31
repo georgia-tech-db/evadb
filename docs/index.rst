@@ -23,21 +23,6 @@ Welcome to EvaDB!
 
 EvaDB simplifies AI app development for structured and unstructured data. Its powerful SQL API enables software developers to build AI apps in a few lines of code.
 
-- Github: https://github.com/georgia-tech-db/evadb
-- PyPI: https://pypi.org/project/evadb/
-- Twitter: https://twitter.com/evadb_ai
-- Slack: https://evadb.ai/community
-- Medium: https://medium.com/evadb-blog
-
-Why EvaDB?
-----------
-
-We believe that in the world of AI, we've reached a stage where many AI tasks that were traditionally handled by machine learning engineers can now be automated. EvaDB empowers general-purpose software developers with the ability to perform advanced AI tasks without needing to delve into the intricate details. 
-
-EvaDB covers a wide range of AI applications, including regression, classification, image recognition, question answering, and many other generative AI applications. EvaDB is targeting the 99% of AI problems that are often repetitive and can be automated with a simple function call in a SQL query. Until now, there is no comprehensive open-source framework for bringing AI into an existing SQL database system with a principled AI optimization framework, and that's where EvaDB comes in.
-
-Our target audience is software developers who may not necessarily have a background in AI but require AI capabilities to solve certain problems. We are targeting programmers who currently write simple SQL queries inside their CRUD apps. With EvaDB, it is possible to easily add AI features in these apps by calling built-in AI functions in the queries.
-
 EvaDB's benefits include:
 
 - 🔮 Easy to connect EvaDB with a SQL database system and build AI-powered apps with a few SQL queries
@@ -51,6 +36,18 @@ EvaDB's benefits include:
 - giving a ⭐ on our EvaDB repo on Github 🐙: https://github.com/georgia-tech-db/evadb
 - joining our Slack Community 📟: https://evadb.ai/community
 - following us on Twitter 🐦: https://twitter.com/evadb_ai
+- following us on Medium 📝: https://medium.com/evadb-blog
+
+
+Why EvaDB?
+----------
+
+In the world of AI, we've reached a stage where many AI tasks that were traditionally handled by AI or ML engineers can now be automated. EvaDB enables software developers with the ability to perform advanced AI tasks without needing to delve into the intricate details.
+
+EvaDB covers many AI applications, including regression, classification, image recognition, question answering, and many other generative AI applications. EvaDB targets 99% of AI problems that are often repetitive and can be automated with a simple function call in an SQL query. Until now, there is no comprehensive open-source framework for bringing AI into an existing SQL database system with a principled AI optimization framework, and that's where EvaDB comes in.
+
+Our target audience is software developers who may not necessarily have a background in AI but require AI capabilities to solve specific problems. We target programmers who write simple SQL queries inside their CRUD apps. With EvaDB, it is possible to easily add AI features to these apps by calling built-in AI functions in the queries.
+
 
 Getting Started
 ----------------
