@@ -33,6 +33,7 @@ class SQLiteHandler(DBHandler):
         """
         super().__init__(name)
         self.database = kwargs.get("database")
+        self.connection = None
 
     def connect(self):
         """
