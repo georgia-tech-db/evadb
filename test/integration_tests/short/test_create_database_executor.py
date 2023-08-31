@@ -13,9 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+from test.util import get_evadb_for_testing, shutdown_ray
 
 from mock import patch
-from test.util import get_evadb_for_testing, shutdown_ray
 
 from evadb.server.command_handler import execute_query_fetch_all
 
