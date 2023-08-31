@@ -7,6 +7,8 @@ parts:
         sections:
           - file: source/overview/getting-started/install-guide
             title: Installation Guide
+          - file: source/overview/getting-started/data-source
+            title: Integrate Data Source
       - file: source/overview/concepts
         #- file: source/overview/faq
 
@@ -45,6 +47,7 @@ parts:
           - file: source/reference/evaql/insert
           - file: source/reference/evaql/delete
           - file: source/reference/evaql/rename
+          - file: source/reference/evaql/use
 
       - file: source/reference/udfs/index
         title: Models
