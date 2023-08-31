@@ -313,6 +313,7 @@ jobs:
             pip install --upgrade pip
             source test_evadb/bin/activate
             pip install ".[dev]"
+            pip install -r evadb/third_party/databases/postgres/requirements.txt
 
       - run:
           name: Run integration tests
