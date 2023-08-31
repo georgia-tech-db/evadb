@@ -12,8 +12,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import pandas as pd
 import sqlite3
+
+import pandas as pd
 
 from evadb.third_party.databases.types import (
     DBHandler,
@@ -24,49 +25,82 @@ from evadb.third_party.databases.types import (
 
 class SQLiteHandler(DBHandler):
     def __init__(self, name: str, **kwargs):
+        """
+        Initialize the handler.
+        Args:
+            name (str): name of the DB handler instance
+            **kwargs: arbitrary keyword arguments for establishing the connection.
+        """
         super().__init__(name)
         self.database = kwargs.get("database")
 
     def connect(self):
+        """
+        Set up the connection required by the handler.
+        Returns:
+            DBHandlerStatus
+        """
         try:
             self.connection = sqlite3.connect(
-                database=self.database,
-                isolation_level=None # Autocommit mode.
+                database=self.database, isolation_level=None  # Autocommit mode.
             )
             return DBHandlerStatus(status=True)
         except sqlite3.Error as e:
             return DBHandlerStatus(status=False, error=str(e))
 
     def disconnect(self):
+        """
+        Close any existing connections.
+        """
         if self.connection:
             self.connection.close()
 
     def check_connection(self) -> DBHandlerStatus:
+        """
+        Check connection to the handler.
+        Returns:
+            DBHandlerStatus
+        """
         if self.connection:
             return DBHandlerStatus(status=True)
         else:
             return DBHandlerStatus(status=False, error="Not connected to the database.")
 
     def get_tables(self) -> DBHandlerResponse:
+        """
+        Return the list of tables in the database.
+        Returns:
+            DBHandlerResponse
+        """
         if not self.connection:
             return DBHandlerResponse(data=None, error="Not connected to the database.")
 
         try:
-            query = "SELECT name FROM sqlite_master WHERE type = 'table'"
+            query = "SELECT name AS table_name FROM sqlite_master WHERE type = 'table'"
             tables_df = pd.read_sql_query(query, self.connection)
-            print(tables_df)
             return DBHandlerResponse(data=tables_df)
         except sqlite3.Error as e:
             return DBHandlerResponse(data=None, error=str(e))
 
     def get_columns(self, table_name: str) -> DBHandlerResponse:
+        """
+        Returns the list of columns for the given table.
+        Args:
+            table_name (str): name of the table whose columns are to be retrieved.
+        Returns:
+            DBHandlerResponse
+        """
         if not self.connection:
             return DBHandlerResponse(data=None, error="Not connected to the database.")
-
+        """
+        SQLite does not provide an in-built way to get the column names using a SELECT statement.
+        Hence we have to use the PRAGMA command and filter the required columns.
+        """
         try:
             query = f"PRAGMA table_info('{table_name}')"
-            columns_df = pd.read_sql_query(query, self.connection)
-            print(columns_df)
+            pragma_df = pd.read_sql_query(query, self.connection)
+            columns_df = pragma_df[["name"]].copy()
+            columns_df.columns = ["column_name"]
             return DBHandlerResponse(data=columns_df)
         except sqlite3.Error as e:
             return DBHandlerResponse(data=None, error=str(e))
@@ -74,7 +108,12 @@ class SQLiteHandler(DBHandler):
     def _fetch_results_as_df(self, cursor):
         try:
             res = cursor.fetchall()
-            res_df = pd.DataFrame(res, columns=[desc[0] for desc in cursor.description])
+            res_df = pd.DataFrame(
+                res,
+                columns=[desc[0] for desc in cursor.description]
+                if cursor.description
+                else [],
+            )
             return res_df
         except sqlite3.ProgrammingError as e:
             if str(e) == "no results to fetch":
@@ -82,9 +121,15 @@ class SQLiteHandler(DBHandler):
             raise e
 
     def execute_native_query(self, query_string: str) -> DBHandlerResponse:
+        """
+        Executes the native query on the database.
+        Args:
+            query_string (str): query in native format
+        Returns:
+            DBHandlerResponse
+        """
         if not self.connection:
             return DBHandlerResponse(data=None, error="Not connected to the database.")
-
         try:
             cursor = self.connection.cursor()
             cursor.execute(query_string)
