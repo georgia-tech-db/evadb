@@ -55,7 +55,6 @@ class DBHandler:
 
     def __init__(self, name: str, **kwargs):
         self.name = name
-        self.dependencies = []
 
     def connect(self):
         """
