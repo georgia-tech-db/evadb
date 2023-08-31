@@ -54,7 +54,7 @@ check_doc_link() {
 }
 
 check_readme_link() {
-  docker run -v ${PWD}:/tmp:ro --rm -i ghcr.io/tcort/markdown-link-check:stable -c /tmp/script/test/link_check_config.json /tmp/README.md 
+  markdown-link-check -c ./script/test/link_check_config.json ./README.md 
   code=$?
   print_error_code $code "README LINK CHECK"
 }

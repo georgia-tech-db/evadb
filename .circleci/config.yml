@@ -242,11 +242,10 @@ jobs:
     resource_class: large
     docker:
       # https://circleci.com/docs/circleci-images#language-image-variants
-      - image: "cimg/python:<< parameters.v >>"
+      - image: "cimg/python:<< parameters.v >>"-node
     steps:
 
       - checkout
-      - setup_remote_docker
 
       # Restore pip wheel
       - restore_cache:
@@ -260,6 +259,7 @@ jobs:
             source test_evadb_doc/bin/activate
             pip install --upgrade pip
             pip install -r docs/requirements.txt 
+            npm install -g markdown-link-check
 
       - run:
           name: Test doc build and link validation
