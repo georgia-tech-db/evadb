@@ -78,6 +78,8 @@ class NativeExecutorTest(unittest.TestCase):
         self.assertEqual(res_batch.frames["test_table.name"][1], "bb")
         self.assertEqual(res_batch.frames["test_table.age"][1], 2)
 
+        self._drop_table_in_native_database()
+
     def _execute_native_query(self):
         self._create_table_in_native_database()
         self._insert_value_into_native_database("aa", 1, "aaaa")
