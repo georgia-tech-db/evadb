@@ -54,7 +54,7 @@ check_doc_link() {
 }
 
 check_readme_link() {
-  markdown-link-check -c ./script/test/link_check_config.json ./README.md 
+  npx markdown-link-check -c ./script/test/link_check_config.json ./README.md 
   code=$?
   print_error_code $code "README LINK CHECK"
 }
