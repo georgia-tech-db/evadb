@@ -5,35 +5,36 @@ parts:
     chapters:
       - file: source/overview/getting-started
         sections:
-          - file: source/overview/getting-started/install-guide
-            title: Installation Guide
-          - file: source/overview/getting-started/data-source
-            title: Integrate Data Source
+          - file: source/overview/getting-started/installation-options
+            title: Installation Options
+      - file: source/overview/connect-to-database
+        title: Connect to Database
       - file: source/overview/concepts
+        title: Concepts
         #- file: source/overview/faq
 
   - caption: Use Cases
     chapters:
+      - file: source/usecases/food-review.rst
+        title: Sentiment Analysis
       - file: source/usecases/image-classification.rst
         title: Image Classification
       - file: source/usecases/similar-image-search.rst
-        title: Image Search [FAISS]
+        title: Image Search
       - file: source/usecases/qa-video.rst
-        title: Q&A from Videos [ChatGPT + HuggingFace]
-      - file: source/usecases/food-review.rst
-        title: Sentiment Analysis and Response [ChatGPT + PostgreSQL]
-      - file: source/usecases/13-privategpt.ipynb
-        title: PrivateGPT
+        title: Video Question Answering
       - file: source/usecases/08-chatgpt.ipynb
         title: ChatGPT-based Video Question Answering
       - file: source/usecases/12-query-pdf.ipynb
-        title: Querying PDF Documents
+        title: PDF Question Answering
       - file: source/usecases/02-object-detection.ipynb
-        title: Analysing Traffic Flow with YOLO
+        title: Object Detection
       - file: source/usecases/03-emotion-analysis.ipynb
-        title: Examining Emotions of Movie
+        title: Emotions Analysis
       - file: source/usecases/07-object-segmentation-huggingface.ipynb
-        title: Image Segmentation with Hugging Face
+        title: Image Segmentation
+      - file: source/usecases/13-privategpt.ipynb
+        title: PrivateGPT
 
   - caption: User Reference
     chapters:
@@ -59,6 +60,7 @@ parts:
         sections: 
           - file: source/reference/databases/postgres
           - file: source/reference/databases/sqlite
+          - file: source/reference/databases/mysql
 
       - file: source/reference/udfs/index
         title: Models

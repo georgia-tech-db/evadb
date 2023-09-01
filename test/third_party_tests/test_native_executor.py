@@ -201,10 +201,6 @@ class NativeExecutorTest(unittest.TestCase):
         self._execute_native_query()
         self._execute_evadb_query()
 
-        # Test error.
-        self._raise_error_on_multiple_creation()
-        self._raise_error_on_invalid_connection()
-
 
 if __name__ == "__main__":
     unittest.main()

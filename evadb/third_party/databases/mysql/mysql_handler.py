@@ -71,8 +71,9 @@ class MysqlHandler(DBHandler):
             return DBHandlerResponse(data=None, error="Not connected to the database.")
 
         try:
-            query = f"SELECT column_name as 'column_name' FROM information_schema.columns WHERE table_name='{table_name}'"
+            query = f"SELECT column_name as 'name', data_type as dtype FROM information_schema.columns WHERE table_name='{table_name}'"
             columns_df = pd.read_sql_query(query, self.connection)
+            columns_df["dtype"] = columns_df["dtype"].apply(self._mysql_to_python_types)
             return DBHandlerResponse(data=columns_df)
         except mysql.connector.Error as e:
             return DBHandlerResponse(data=None, error=str(e))
@@ -109,3 +110,23 @@ class MysqlHandler(DBHandler):
             return DBHandlerResponse(data=self._fetch_results_as_df(cursor))
         except mysql.connector.Error as e:
             return DBHandlerResponse(data=None, error=str(e))
+
+    def _mysql_to_python_types(self, mysql_type: str):
+        mapping = {
+            "char": str,
+            "varchar": str,
+            "text": str,
+            "boolean": bool,
+            "integer": int,
+            "int": int,
+            "float": float,
+            "double": float,
+            # Add more mappings as needed
+        }
+
+        if mysql_type in mapping:
+            return mapping[mysql_type]
+        else:
+            raise Exception(
+                f"Unsupported column {mysql_type} encountered in the mysql table. Please raise a feature request!"
+            )
