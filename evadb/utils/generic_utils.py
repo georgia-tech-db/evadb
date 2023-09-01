@@ -271,11 +271,10 @@ def try_to_import_ray():
 def try_to_import_forecast():
     try:
         from statsforecast import StatsForecast
-        from statsforecast.models import AutoARIMA, AutoCES, AutoETS, AutoTheta
     except ImportError:
         raise ValueError(
-            """Could not import ray python package.
-                Please install it with `pip install ray`."""
+            """Could not import StatsForecast python package.
+                Please install it with `pip install statsforecast`."""
         )
 
 
@@ -315,7 +314,13 @@ def is_ludwig_available() -> bool:
     except ValueError:  # noqa: E722
         return False
 
-
+def is_forecast_available() -> bool:
+    try:
+        try_to_import_forecast()
+        return True
+    except ValueError:  # noqa: E722
+        return False
+    
 ##############################
 ## VISION
 ##############################
