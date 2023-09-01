@@ -3,19 +3,73 @@
 Getting Started
 =================
 
-Install EvaDB
------------------------
+Install EvaDB Locally using pip
+----------------------
 
-EvaDB supports Python (versions >= `3.8`). To install EvaDB, we recommend using the `pip` package manager:
+To install EvaDB, we recommend using the `pip` package manager:
+
+1. Create a new virtual environment called `evadb-venv`.
 
 .. code-block:: bash
 
-    pip install evadb
+    python -m venv evadb-venv
+
+Now, activate it:
+
+.. code-block:: bash
+
+    source evadb-venv/bin/activate
+
+2. Once inside the virtual environment, run the command below to mitigate the dependency issues:
+
+.. code-block:: bash
+
+   pip install --upgrade pip setuptools wheel
+
+3. Install EvaDB:
+
+.. code-block:: bash
+
+   pip install evadb
+
+4. Verify EvaDB installation:
+
+.. code-block:: bash
+
+   pip freeze
+
+You should see a list of installed packages including but not limited to the following:
+
+.. code-block:: bash
+   Package           Version
+   ----------------- -------
+   aenum             3.1.15
+   decorator         5.1.1
+   diskcache         5.6.3
+   evadb             0.3.3
+   greenlet          2.0.2
+   lark              1.1.7
+   numpy             1.25.2
+   pandas            2.1.0
+   ...
+
+5. Run a query using EvaDB
+
+Run the following `Python` program to obtain a connection to EvaDB and run the `SHOW UDFS;` query. This query lists all the built-in functions.
+
+.. code-block:: python
+
+   import evadb
+   cursor = evadb.connect().cursor()
+   print(cursor.query("SHOW UDFS;").df())
 
 .. note::
 
-    EvaDB provides multiple installation options for extending its functionalities. 
-    Please see :doc:`Installation Guide <getting-started/install-guide>` for all options.
+   Go over the :ref:`Python API<python-api>` for `connect` and `cursor`-related documentation.
+
+.. note::
+
+    EvaDB supports additional installation options for extending its functionality. Refer to the see :doc:`Installation Guide <getting-started/install-guide>` for all the available options.
 
 Write Your AI App
 --------------------------
