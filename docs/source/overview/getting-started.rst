@@ -93,7 +93,7 @@ You should see a list of built-in functions including but not limited to the fol
 
 .. note::
 
-    EvaDB supports additional installation options for extending its functionality. Go over the :doc:`Additional Installation Options <getting-started/additional-installation-options>` for all the available options.
+    EvaDB supports additional installation options for extending its functionality. Go over the :doc:`Installation Options <getting-started/installation-options>` for all the available options.
 
 Illustrative AI App
 -------------------

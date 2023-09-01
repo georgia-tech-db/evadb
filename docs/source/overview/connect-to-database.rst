@@ -1,59 +1,92 @@
 Connect to Database
 ============================
 
-EvaDB supports an extensive data sources for both structured and unstructured data.
-
-1. Connect to an existing structured data source.
-
-.. code-block:: python
-
-   cursor.query("""
-        CREATE DATABASE postgres_data WITH ENGINE = 'postgres', PARAMETERS = {
-                "user": "eva",
- 		"password": "password",
- 		"host": "localhost",
- 		"port": "5432",
- 		"database": "evadb"
-     	};""").df()
+EvaDB supports an extensive range of data sources for structured and unstructured data.
 
 .. note::
 
-   Check :ref:`Create DATABASE statement<sql-create-database>` for syntax documentation and :ref:`Data Sources<data-sources>` for all supported data source engines.
-        
-The above query connects to an exsiting Postgres database, which allows us to build AI applications in EvaDB without data migration.
-For example, the following query previews the available data using :ref:`SELECT<sql-select>`.
+    Learn more about structured and unstructured data in :doc:`Data Sources <getting-started/data-sources>`.
 
-.. code-block:: python
 
-   cursor.query("SELECT * FROM postgres_data.food_review;").df()
+Connect to a SQL Database System
+--------------------------------
 
-We can also run native queries in the connected database by the :ref:`USE<sql-use>` statement.
+1. Use the `CREATE DATABASE` statement to connect to an existing SQL database.
 
 .. code-block:: python
 
    cursor.query("""
-        USE postgres_data {
-                INSERT INTO food_review (name, review) VALUES ('Customer 1', 'I ordered fried rice but it is too salty.')
-        };""").df()
+        CREATE DATABASE restaurant_reviews 
+        WITH ENGINE = 'postgres', 
+        PARAMETERS = {
+            "user": "eva",
+            "password": "password",
+            "host": "localhost",
+            "port": "5432",
+            "database": "restaurant_reviews"
+     	   };""").df()
+
+.. note::
+
+   Go over the :ref:`CREATE DATABASE<sql-create-database>` statement for more details. The :ref:`Databases<databases>` page lists all the database systems that EvaDB currently supports.
+
+2. Preview the Available Data Using `SELECT`
+
+You can now preview the available data in the `restaurant_reviews` database with a standard :ref:`SELECT<sql-select>` statement.
+
+.. code-block:: python
+
+   cursor.query("""
+      SELECT * 
+      FROM restaurant_reviews.food_review;
+      """).df()
+
+3. Run Native Queries in the Connected Database With `USE`
+
+You can also run native queries directly in the connected database system by the :ref:`USE<sql-use>` statement.
+
+.. code-block:: python
+
+   cursor.query(
+      """
+        USE restaurant_reviews {
+                INSERT INTO food_review (name, review) 
+                VALUES (
+                  'Customer 1', 
+                  'I ordered fried rice but it is too salty.'
+                )
+        };
+      """).df()
 
 
-2. Load unstructured data. EvaDB supports a wide range of type of unstructured data. Below are some examples:
+Load Unstructured Data
+-----------------------
+
+EvaDB supports diverse types of unstructured data. Here are some examples:
+
+1. Load Images from Local Filesystem
+
+You can load a collection of images obtained from Reddit from the local filesystem into EvaDB using the :ref:`LOAD<sql-load>` statement.
 
 .. code-block:: python
    
-   cursor.query(
-       "LOAD IMAGE 'reddit-images/*.jpg' INTO reddit_dataset;"
-   ).df()
+   cursor.query("""
+      LOAD IMAGE 'reddit-images/*.jpg' 
+      INTO reddit_dataset;
+   """).df()
 
-We load the local reddit image dataset into EvaDB. 
+2. Load Video from Cloud Bucket
+
+You can load a video from an S3 cloud bucket into EvaDB using the :ref:`LOAD<sql-load>` statement.
 
 .. code-block:: python
 
-   cursor.query("LOAD VIDEO 's3://bucket/eva_videos/mnist.mp4' INTO MNISTVid;").df()
-
-We load the MNIST video from s3 bucket into EvaDB.
+   cursor.query("""
+      LOAD VIDEO 's3://bucket/eva_videos/mnist.mp4' 
+      INTO MNISTVid;
+   """).df()
 
 .. note::
 
-   Check :ref:`LOAD statement<sql-load>` for all types of supported unstructured data.
+   Go over the :ref:`LOAD statement<sql-load>` statement for more details on the types of unstructured data that EvaDB supports.
    
