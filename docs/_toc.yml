@@ -28,7 +28,7 @@ parts:
       - file: source/usecases/12-query-pdf.ipynb
         title: PDF Question Answering
       - file: source/usecases/02-object-detection.ipynb
-        title: Analysing Traffic Flow with YOLO
+        title: Object Detection
       - file: source/usecases/03-emotion-analysis.ipynb
         title: Emotions Analysis
       - file: source/usecases/07-object-segmentation-huggingface.ipynb
