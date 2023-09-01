@@ -105,6 +105,11 @@ workflows:
         ################################
         - MySQL:
             name: Third Party Test - MySQL | v3.10 | Linux
+            filters:
+              branches:
+                only: 
+                  - master
+                  - staging
         ################################
         ### NOTEBOOKS: Staging, Master
         ################################
