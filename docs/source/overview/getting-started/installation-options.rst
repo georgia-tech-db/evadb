@@ -1,7 +1,7 @@
 .. _installation options:
 
 Installation Options
-==================
+====================
 
 EvaDB provides the following additional installation options for extending its functionality.
 
