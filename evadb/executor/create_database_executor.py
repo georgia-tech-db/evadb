@@ -12,6 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import importlib
+
 import pandas as pd
 
 from evadb.database import EvaDBDatabase
@@ -19,17 +21,18 @@ from evadb.executor.abstract_executor import AbstractExecutor
 from evadb.executor.executor_utils import ExecutorError
 from evadb.models.storage.batch import Batch
 from evadb.parser.create_statement import CreateDatabaseStatement
-from evadb.third_party.databases.slack.slack_chatbot import (
-    SlackChatbot,
-    get_database_handler,
-)
+from evadb.third_party.databases.interface import get_database_handler
 from evadb.utils.logging_manager import logger
 
 
 class CreateDatabaseExecutor(AbstractExecutor):
     def __init__(self, db: EvaDBDatabase, node: CreateDatabaseStatement):
         super().__init__(db, node)
-        self._slack_chatbot = SlackChatbot() if node.engine == "slack" else None
+        if node.engine == "slack":
+            mod = importlib.import_module(
+                "evadb.third_party.databases.slack.slack_chatbot"
+            )
+            self._slack_chatbot = mod.SlackChatbot()
 
     @property
     def slack_chatbot(self):
