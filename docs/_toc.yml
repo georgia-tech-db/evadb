@@ -57,7 +57,8 @@ parts:
       - file: source/reference/databases/index
         title: Data Sources
         sections: 
-          - file: source/reference/databases/postgres 
+          - file: source/reference/databases/postgres
+          - file: source/reference/databases/sqlite
 
       - file: source/reference/udfs/index
         title: Models
