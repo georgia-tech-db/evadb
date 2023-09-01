@@ -3,24 +3,25 @@
 Getting Started
 =================
 
-Install EvaDB Locally using pip
-----------------------
+Install EvaDB 
+-------------
 
-To install EvaDB, we recommend using the `pip` package manager:
+To install EvaDB, we recommend using the `pip` package manager.
 
-1. Create a new virtual environment called `evadb-venv`.
+1. Create a new `virtual environment<<https://docs.python-guide.org
+/dev/virtualenvs/>`_ called `evadb-venv`.
 
 .. code-block:: bash
 
     python -m venv evadb-venv
 
-Now, activate it:
+Now, activate the virtual environment.
 
 .. code-block:: bash
 
     source evadb-venv/bin/activate
 
-2. Once inside the virtual environment, run the command below to mitigate the dependency issues:
+2. Once inside the virtual environment, run the command below to mitigate the dependency issues.
 
 .. code-block:: bash
 
@@ -55,7 +56,7 @@ You should see a list of installed packages including but not limited to the fol
 
 5. Run a query using EvaDB
 
-Run the following `Python` program to obtain a connection to EvaDB and run the `SHOW UDFS;` query. This query lists all the built-in functions.
+To run a `SHOW UDFS;` query, use the following Python program. It consists of importing and connecting to EvaDB, and then running a query. The query result is returned as a Dataframe. The `SHOW UDFS;` query  lists all the built-in functions in EvaDB. 
 
 .. code-block:: python
 
@@ -64,17 +65,16 @@ Run the following `Python` program to obtain a connection to EvaDB and run the `
    print(cursor.query("SHOW UDFS;").df())
 
 .. note::
-
-   Go over the :ref:`Python API<python-api>` for `connect` and `cursor`-related documentation.
+    Go over the :ref:`Python API<python-api>` to learn more about `connect` and `cursor`.
 
 .. note::
 
-    EvaDB supports additional installation options for extending its functionality. Refer to the see :doc:`Installation Guide <getting-started/install-guide>` for all the available options.
+    EvaDB supports additional installation options for extending its functionality. Go over the :doc:`Installation Guide <getting-started/install-guide>` for all the available options.
 
-Write Your AI App
---------------------------
+Illustrative AI App
+-------------------
 
-Here is an illustrative MNIST digit classification app using EvaDB.
+Here is a simple, illustrative `MNIST image classification<https://en.wikipedia.org/wiki/MNIST_database>`_ AI app in EvaDB.
 
 .. code-block:: python
 
@@ -83,18 +83,18 @@ Here is an illustrative MNIST digit classification app using EvaDB.
     cursor = evadb.connect().cursor()
 
     # Load the MNIST video into EvaDB
+    # Each frame in the loaded MNIST video contains a digit
     cursor.load("mnist.mp4", "MNISTVid", format="video").df()
 
     # We now construct an AI pipeline to run the image classifier 
     # over all the digit images in the video    
-    # Each frame in the loaded MNIST video contains a digit
 
     # Connect to the table with the loaded video
     query = cursor.table("MNISTVid")
 
     # Run the model on a subset of frames
     # Here, id refers to the frame id
-    query = query.filter("id = 30 OR id = 50 OR id = 70")
+    query = query.filter("id = 30 OR id = 50 OR id = 70 OR id = 0 OR id = 140")
 
     # We are retrieving the frame "data" and 
     # the output of the Image Classification function on the data 
@@ -104,8 +104,9 @@ Here is an illustrative MNIST digit classification app using EvaDB.
     # Only calling query.df() will run the query
     response = query.df()
 
-
-
-Check out our `Google Colab <https://colab.research.google.com/github/georgia-tech-db/evadb/blob/master/tutorials/01-mnist.ipynb>`_ for working example.
+Try out EvaDB by experimenting with the introductory `MNIST notebook on Colab<https://colab.research.google.com/github/georgia-tech-db/evadb/blob/master/tutorials/01-mnist.ipynb>`_.
 
 .. image:: ../../images/reference/mnist.png
+
+.. note::
+    Go over the :ref:`Python API<python-api>` to learn more about the functions used in this app.
