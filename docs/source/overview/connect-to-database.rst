@@ -1,5 +1,5 @@
-Integrate Data Source
-=====================
+Connect to Database
+============================
 
 EvaDB supports an extensive data sources for both structured and unstructured data.
 
