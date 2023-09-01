@@ -114,11 +114,7 @@ postgres_libs = [
 ]
 
 slack_libs = [
-    "slack-sdk",
-    "slack-bolt",
-    "slack",
-    "slackclient",
-    "openai"
+    "slack-sdk"
 ]
 
 ludwig_libs = [

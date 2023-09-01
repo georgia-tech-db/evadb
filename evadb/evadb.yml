@@ -26,4 +26,3 @@ experimental:
 third_party:
   OPENAI_KEY: ""
   SLACK_API_TOKEN: ""
-  SLACK_BOT_TOKEN: ""
