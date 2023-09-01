@@ -65,7 +65,7 @@ To run a `SHOW UDFS;` query, use the following Python program. It consists of im
    print(cursor.query("SHOW UDFS;").df())
 
 .. note::
-    Go over the :ref:`Python API<python-api>` to learn more about `connect` and `cursor`.
+    Go over the :ref:`Python API<python-api>` to learn more about `connect()` and `cursor`.
 
 .. note::
 
@@ -74,7 +74,7 @@ To run a `SHOW UDFS;` query, use the following Python program. It consists of im
 Illustrative AI App
 -------------------
 
-Here is a simple, illustrative `MNIST image classification<https://en.wikipedia.org/wiki/MNIST_database>`_ AI app in EvaDB.
+Here is a simple, illustrative `MNIST image classification <https://en.wikipedia.org/wiki/MNIST_database>`_ AI app in EvaDB.
 
 .. code-block:: python
 
@@ -104,7 +104,7 @@ Here is a simple, illustrative `MNIST image classification<https://en.wikipedia.
     # Only calling query.df() will run the query
     response = query.df()
 
-Try out EvaDB by experimenting with the introductory `MNIST notebook on Colab<https://colab.research.google.com/github/georgia-tech-db/evadb/blob/master/tutorials/01-mnist.ipynb>`_.
+Try out EvaDB by experimenting with the introductory `MNIST notebook on Colab <https://colab.research.google.com/github/georgia-tech-db/evadb/blob/master/tutorials/01-mnist.ipynb>`_.
 
 .. image:: ../../images/reference/mnist.png
 
