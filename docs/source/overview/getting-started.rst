@@ -8,7 +8,7 @@ Install EvaDB
 
 To install EvaDB, we recommend using the `pip` package manager.
 
-1. Create a new `virtual environment<<https://docs.python-guide.org
+1. Create a new `virtual environment <https://docs.python-guide.org
 /dev/virtualenvs/>`_ called `evadb-venv`.
 
 .. code-block:: bash
