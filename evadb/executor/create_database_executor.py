@@ -20,6 +20,7 @@ from evadb.models.storage.batch import Batch
 from evadb.parser.create_statement import CreateDatabaseStatement
 from evadb.utils.logging_manager import logger
 
+
 class CreateDatabaseExecutor(AbstractExecutor):
     def __init__(self, db: EvaDBDatabase, node: CreateDatabaseStatement):
         super().__init__(db, node)
