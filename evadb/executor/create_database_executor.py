@@ -30,7 +30,7 @@ class CreateDatabaseExecutor(AbstractExecutor):
         super().__init__(db, node)
         if node.engine == "slack":
             mod = importlib.import_module(
-                "evadb.third_party.databases.slack.slack_chatbot"
+                "evadb.third_party.applications.slack.slack_chatbot"
             )
             self._slack_chatbot = mod.SlackChatbot()
 
