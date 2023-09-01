@@ -3,11 +3,6 @@ Connect to Database
 
 EvaDB supports an extensive range of data sources for structured and unstructured data.
 
-.. note::
-
-    Learn more about structured and unstructured data in :doc:`Data Sources <getting-started/data-sources>`.
-
-
 Connect to a SQL Database System
 --------------------------------
 
