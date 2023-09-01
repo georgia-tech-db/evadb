@@ -13,10 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import sys
 import unittest
 from test.util import get_evadb_for_testing
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -43,9 +42,6 @@ class SQLiiteNativeStorageEngineTest(unittest.TestCase):
     def setUp(self):
         connection_params = self.get_sqlite_params()
         self.evadb = get_evadb_for_testing()
-
-        sys.modules["sqlite"] = MagicMock()
-        sys.modules["sqlite3"] = MagicMock()
 
         # Create all class level patches
         self.get_database_catalog_entry_patcher = patch(
