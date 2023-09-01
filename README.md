@@ -185,8 +185,8 @@ SELECT ChatGPT('Is this video summary related to Ukraine russia war', text)
 CREATE UDF IF NOT EXISTS PredictHouseRent FROM
 ( SELECT * FROM HomeRentals )
 TYPE Ludwig
-'predict' 'rental_price'
-'time_limit' 120;
+PREDICT 'rental_price'
+TIME_LIMIT 120;
 ```
 
 </details>
