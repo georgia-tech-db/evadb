@@ -49,7 +49,7 @@ udf_impl: string_literal
 
 udf_metadata: udf_metadata_key udf_metadata_value
 
-udf_metadata_key: string_literal
+udf_metadata_key: uid 
 
 udf_metadata_value: string_literal | decimal_literal
 
@@ -207,7 +207,7 @@ simple_id: ID
     
 dotted_id: DOT_ID | "." uid
 
-//    Literals
+//    Literalss
     
 string_literal: STRING_LITERAL
 

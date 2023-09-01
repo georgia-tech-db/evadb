@@ -97,7 +97,8 @@ class Functions:
                     value = key_value_pair[1]
                     if isinstance(value, ConstantValueExpression):
                         value = value.value
-                    metadata.append((key_value_pair[0].value, value)),
+                    # Removing .value from key_value_pair[0] since key is now an ID_LITERAL
+                    metadata.append((key_value_pair[0], value)),
 
         return CreateUDFStatement(
             udf_name,
