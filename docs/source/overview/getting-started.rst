@@ -27,13 +27,13 @@ Now, activate the virtual environment.
 
    pip install --upgrade pip setuptools wheel
 
-3. Install EvaDB:
+3. Install EvaDB
 
 .. code-block:: bash
 
    pip install evadb
 
-4. Verify EvaDB installation:
+4. Verify EvaDB installation
 
 .. code-block:: bash
 
@@ -54,15 +54,39 @@ You should see a list of installed packages including but not limited to the fol
    pandas            2.1.0
    ...
 
-5. Run a query using EvaDB
+5. Run EvaDB
 
-To run a `SHOW UDFS;` query, use the following Python program. It consists of importing and connecting to EvaDB, and then running a query. The query result is returned as a Dataframe. The `SHOW UDFS;` query  lists all the built-in functions in EvaDB. 
+Copy the following Python program to a file called `run_evadb.py`.
+
+The program runs a SQL query for listing all the built-in functions in EvaDB. It consists of importing and connecting to EvaDB, and then running the query.
 
 .. code-block:: python
 
+   # Import the EvaDB package 
    import evadb
+
+   # Connect to EvaDB and get a database cursor for running queries
    cursor = evadb.connect().cursor()
+
+   # List all the built-in functions in EvaDB
    print(cursor.query("SHOW UDFS;").df())
+
+Now, run the Python program:
+
+.. code-block:: bash
+
+    python -m run_evadb.py
+
+You should see a list of built-in functions including but not limited to the following:
+
+.. code-block:: bash
+
+            name                                             inputs  ...                                               impl metadata
+    0  ArrayCount   [Input_Array NDARRAY ANYTYPE (), Search_Key ANY]  ...  /home/jarulraj3/evadb/evadb/udfs/ndarray/array...       []
+    1        Crop  [Frame_Array NDARRAY UINT8 (3, None, None), bb...  ...   /home/jarulraj3/evadb/evadb/udfs/ndarray/crop.py       []
+    2     ChatGPT  [query NDARRAY STR (1,), content NDARRAY STR (...  ...        /home/jarulraj3/evadb/evadb/udfs/chatgpt.py       []
+
+    [3 rows x 6 columns]
 
 .. note::
     Go over the :ref:`Python API<python-api>` to learn more about `connect()` and `cursor`.
