@@ -59,6 +59,7 @@ parts:
         title: Data Sources
         sections: 
           - file: source/reference/databases/postgres 
+          - file: source/reference/databases/mysql
 
       - file: source/reference/udfs/index
         title: Models
