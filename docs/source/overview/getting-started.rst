@@ -15,7 +15,7 @@ To install EvaDB, we recommend using the `pip` package manager.
 
     python -m venv evadb-venv
 
-Now, activate the virtual environment.
+Now, activate the virtual environment:
 
 .. code-block:: bash
 
@@ -58,7 +58,7 @@ You should see a list of installed packages including but not limited to the fol
 
 Copy the following Python program to a file called `run_evadb.py`.
 
-The program runs a SQL query for listing all the built-in functions in EvaDB. It consists of importing and connecting to EvaDB, and then running the query.
+The program runs a SQL query for listing all the built-in functions in EvaDB. It consists of importing and connecting to EvaDB, and then running the query. The query's result is returned as a Dataframe.
 
 .. code-block:: python
 
@@ -93,7 +93,7 @@ You should see a list of built-in functions including but not limited to the fol
 
 .. note::
 
-    EvaDB supports additional installation options for extending its functionality. Go over the :doc:`Installation Guide <getting-started/install-guide>` for all the available options.
+    EvaDB supports additional installation options for extending its functionality. Go over the :doc:`Additional Installation Options <getting-started/additional-installation-options>` for all the available options.
 
 Illustrative AI App
 -------------------

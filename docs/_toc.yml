@@ -5,10 +5,10 @@ parts:
     chapters:
       - file: source/overview/getting-started
         sections:
-          - file: source/overview/getting-started/install-guide
-            title: Installation Guide
-          - file: source/overview/getting-started/data-source
-            title: Integrate Data Source
+          - file: source/overview/getting-started/connect-to-database
+            title: Connect to Database
+          - file: source/overview/getting-started/installation-options
+            title: Installation Options
       - file: source/overview/concepts
         title: Concepts
         #- file: source/overview/faq
