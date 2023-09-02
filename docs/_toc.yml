@@ -57,6 +57,8 @@ parts:
             title: Custom Model
           - file: source/reference/udfs/model-train
             title: Model Train/Finetune
+          - file: source/reference/udfs/model-forecasting
+            title: Time Series Forecasting
         
 
       # - file: source/reference/io
