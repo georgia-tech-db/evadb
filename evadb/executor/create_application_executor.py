@@ -23,7 +23,6 @@ from evadb.third_party.applications.interface import get_application_handler
 from evadb.utils.logging_manager import logger
 
 
-
 class CreateApplicationExecutor(AbstractExecutor):
     def __init__(self, db: EvaDBDatabase, node: CreateApplicationStatement):
         super().__init__(db, node)

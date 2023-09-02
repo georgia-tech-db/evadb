@@ -13,12 +13,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from dataclasses import dataclass
-from evadb.third_party.types import ThirdPartyResponse, ThirdPartyStatus, ThirdPartyHandler
+
 import pandas as pd
+
+from evadb.third_party.types import (
+    ThirdPartyHandler,
+    ThirdPartyResponse,
+    ThirdPartyStatus,
+)
 
 
 @dataclass
-class DBHandlerResponse (ThirdPartyResponse):
+class DBHandlerResponse(ThirdPartyResponse):
     """
     Represents the response from a database handler containing data and an optional error message.
 
@@ -32,7 +38,7 @@ class DBHandlerResponse (ThirdPartyResponse):
 
 
 @dataclass
-class DBHandlerStatus (ThirdPartyStatus):
+class DBHandlerStatus(ThirdPartyStatus):
     """
     Represents the status of a database handler operation, along with an optional error message.
 
@@ -45,7 +51,7 @@ class DBHandlerStatus (ThirdPartyStatus):
     error: str = None
 
 
-class DBHandler (ThirdPartyHandler):
+class DBHandler(ThirdPartyHandler):
     """
     Base class for handling database operations.
 

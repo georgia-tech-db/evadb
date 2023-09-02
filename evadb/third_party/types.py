@@ -13,19 +13,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from dataclasses import dataclass
+
+
 @dataclass
 class ThirdPartyResponse:
     """
     Represents the response from a third party service handler
     """
+
     pass
+
 
 @dataclass
 class ThirdPartyStatus:
     """
     Represents the status of a third party service handler operation
     """
+
     pass
+
 
 class ThirdPartyHandler:
     """
