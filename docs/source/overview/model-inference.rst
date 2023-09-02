@@ -69,4 +69,4 @@ In EvaDB, every model is a user-defined function. We can compose SQL queries usi
 
 .. note::
 
-   Go over our :ref:`Usecases<chatgpt-postgres>` to check variety ways of utlizing models in real-world use cases.
+   Go over our :ref:`Usecases<chatgpt-postgres>` to check more ways of utlizing models in real-world use cases.
