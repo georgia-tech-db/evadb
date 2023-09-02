@@ -11,15 +11,15 @@ Connect to a SQL Database System
 .. code-block:: python
 
    cursor.query("""
-        CREATE DATABASE restaurant_reviews 
-        WITH ENGINE = 'postgres', 
-        PARAMETERS = {
-            "user": "eva",
-            "password": "password",
-            "host": "localhost",
-            "port": "5432",
-            "database": "restaurant_reviews"
-     	   };""").df()
+     CREATE DATABASE restaurant_reviews 
+     WITH ENGINE = 'postgres', 
+     PARAMETERS = {
+       "user": "eva",
+       "password": "password",
+       "host": "localhost",
+       "port": "5432",
+       "database": "restaurant_reviews"
+     };""").df()
 
 .. note::
 
@@ -32,9 +32,8 @@ You can now preview the available data in the `restaurant_reviews` database with
 .. code-block:: python
 
    cursor.query("""
-      SELECT * 
-      FROM restaurant_reviews.food_review;
-      """).df()
+     SELECT * 
+     FROM restaurant_reviews.food_review;""").df()
 
 3. Run Native Queries in the Connected Database With `USE`
 
@@ -42,16 +41,14 @@ You can also run native queries directly in the connected database system by the
 
 .. code-block:: python
 
-   cursor.query(
-      """
-        USE restaurant_reviews {
-                INSERT INTO food_review (name, review) 
-                VALUES (
-                  'Customer 1', 
-                  'I ordered fried rice but it is too salty.'
-                )
-        };
-      """).df()
+   cursor.query("""
+     USE restaurant_reviews {
+       INSERT INTO food_review (name, review) 
+       VALUES (
+         'Customer 1', 
+         'I ordered fried rice but it is too salty.'
+       )
+     };""").df()
 
 
 Load Unstructured Data
@@ -66,9 +63,8 @@ You can load a collection of images obtained from Reddit from the local filesyst
 .. code-block:: python
    
    cursor.query("""
-      LOAD IMAGE 'reddit-images/*.jpg' 
-      INTO reddit_dataset;
-   """).df()
+     LOAD IMAGE 'reddit-images/*.jpg' 
+     INTO reddit_dataset;""").df()
 
 2. Load Video from Cloud Bucket
 
@@ -77,9 +73,8 @@ You can load a video from an S3 cloud bucket into EvaDB using the :ref:`LOAD<sql
 .. code-block:: python
 
    cursor.query("""
-      LOAD VIDEO 's3://bucket/eva_videos/mnist.mp4' 
-      INTO MNISTVid;
-   """).df()
+     LOAD VIDEO 's3://bucket/eva_videos/mnist.mp4' 
+     INTO MNISTVid;""").df()
 
 .. note::
 
