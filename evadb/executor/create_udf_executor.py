@@ -53,7 +53,7 @@ class CreateUDFExecutor(AbstractExecutor):
         HuggingFace UDFs are special UDFs that are not loaded from a file.
         So we do not need to call the setup method on them like we do for other UDFs.
         """
-        # We need atleast one deep learning framework for HuggingFace
+        # We need at least one deep learning framework for HuggingFace
         # Torch or Tensorflow
         try_to_import_torch()
         impl_path = f"{self.udf_dir}/abstract/hf_abstract_udf.py"

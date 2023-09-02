@@ -87,9 +87,9 @@ EvaDB accelerates AI pipelines using a collection of optimizations inspired by S
 EvaDB supports an AI-oriented query language for analyzing both structured and unstructured data. Here are some illustrative apps:
 
 
-The `Getting Started <source/overview/installation.html>`__ page shows how you can use EvaDB for different AI tasks and how you can easily extend EvaDB to support your custom deep learning model through user-defined functions.
+The :ref:`Getting Started` page shows how you can use EvaDB for different AI tasks and how you can easily extend EvaDB to support your custom deep learning model through user-defined functions.
 
-The `User Guides <source/tutorials/index.html>`__ section contains Jupyter Notebooks that demonstrate how to use various features of EvaDB. Each notebook includes a link to Google Colab, where you can run the code yourself.
+The :ref:`User Guides<image classification>` section contains Jupyter Notebooks that demonstrate how to use various features of EvaDB. Each notebook includes a link to Google Colab, where you can run the code yourself.
 
 
 

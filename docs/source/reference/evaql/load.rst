@@ -1,10 +1,12 @@
+.. _sql-load:
+
 LOAD
 ====
 
 .. _1-load-video-from-filesystem:
 
 LOAD VIDEO FROM FILESYSTEM
-----
+--------------------------
 
 .. code:: mysql
 
@@ -20,7 +22,7 @@ When a video is loaded, there is no need to specify the schema for the video tab
 .. _2-load-video-from-s3:
 
 LOAD VIDEO FROM S3
-----
+------------------
 
 .. code:: mysql
 
@@ -32,7 +34,7 @@ The videos are downloaded to a directory that can be configured in the EvaDB con
 .. _3-load-image-from-file:
 
 LOAD IMAGE FROM FILESYSTEM
-----
+--------------------------
 
 .. code:: mysql
 
@@ -44,7 +46,7 @@ the following schema with two columns: ``name`` and ``data``, that correspond to
 .. _4-load-the-csv-file:
 
 LOAD CSV 
-----
+--------
 
 To **LOAD** a CSV file, we need to first specify the table schema.
 
