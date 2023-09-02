@@ -1,3 +1,5 @@
+.. _hf-models:
+
 HuggingFace Models
 ======================
 

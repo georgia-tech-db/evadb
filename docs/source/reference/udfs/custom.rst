@@ -1,3 +1,5 @@
+.. _custom-udf:
+
 User-Defined Functions
 ======================
 

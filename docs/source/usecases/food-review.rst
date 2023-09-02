@@ -1,3 +1,5 @@
+.. _chatgpt-postgres:
+
 ChatGPT + Postgres Tutorial
 ===========================
 
