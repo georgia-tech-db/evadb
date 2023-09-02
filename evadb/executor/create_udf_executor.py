@@ -44,7 +44,6 @@ from evadb.utils.logging_manager import logger
 import hashlib
 import pickle
 from pathlib import Path
-import pudb
 
 class CreateUDFExecutor(AbstractExecutor):
     def __init__(self, db: EvaDBDatabase, node: CreateUDFPlan):
@@ -154,6 +153,16 @@ class CreateUDFExecutor(AbstractExecutor):
         model_name = arg_map["model"]
         frequency = arg_map["frequency"]
 
+        data = aggregated_batch.frames.rename(columns={arg_map["predict"]: "y"})
+        if "time" in arg_map.keys(): aggregated_batch.frames.rename(columns={arg_map["time"]: "ds"})
+        if "id" in arg_map.keys(): aggregated_batch.frames.rename(columns={arg_map["id"]: "unique_id"})
+        
+        if "unique_id" not in list(data.columns):
+            data["unique_id"] = ["test" for x in range(len(data))]
+
+        if "ds" not in list(data.columns):
+            data["ds"] = [x+1 for x in range(len(data))]
+
         try_to_import_forecast()
         from statsforecast import StatsForecast
         from statsforecast.models import AutoARIMA, AutoCES, AutoETS, AutoTheta
@@ -186,14 +195,14 @@ class CreateUDFExecutor(AbstractExecutor):
         )
         Path(model_dir).mkdir(parents=True, exist_ok=True)
         model_path = os.path.join(
-            self.db.config.get_value("storage", "model_dir"), self.node.name, str(hashlib.sha256(aggregated_batch.frames.to_string().encode()).hexdigest())+".pkl"
+            self.db.config.get_value("storage", "model_dir"), self.node.name, str(hashlib.sha256(data.to_string().encode()).hexdigest())+".pkl"
         )
 
         weight_file = Path(model_path)
 
 
         if not weight_file.exists():
-            model.fit(aggregated_batch.frames)
+            model.fit(data)
             f = open(model_path, "wb")
             pickle.dump(model, f)
             f.close()

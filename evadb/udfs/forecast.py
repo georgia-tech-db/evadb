@@ -18,7 +18,6 @@ import os
 
 import pandas as pd
 from retry import retry
-import pudb
 from evadb.catalog.catalog_type import NdArrayType
 from evadb.configuration.configuration_manager import ConfigurationManager
 from evadb.udfs.abstract.abstract_udf import AbstractUDF

@@ -27,7 +27,6 @@ from evadb.parser.statement import AbstractStatement
 from evadb.parser.utils import SKIP_BINDER_AND_OPTIMIZER_STATEMENTS
 from evadb.utils.logging_manager import logger
 from evadb.utils.stats import Timer
-import pudb
 
 def execute_statement(
     evadb: EvaDBDatabase,

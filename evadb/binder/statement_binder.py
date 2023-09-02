@@ -48,7 +48,6 @@ from evadb.parser.types import UDFType
 from evadb.third_party.huggingface.binder import assign_hf_udf
 from evadb.utils.generic_utils import load_udf_class_from_file
 from evadb.utils.logging_manager import logger
-import pudb
 
 class StatementBinder:
     def __init__(self, binder_context: StatementBinderContext):
@@ -74,9 +73,7 @@ class StatementBinder:
 
     @bind.register(CreateUDFStatement)
     def _bind_create_udf_statement(self, node: CreateUDFStatement):
-        # pu.db
         if node.query is not None:
-            print(node.query)
             self.bind(node.query)
             # Drop the automatically generated _row_id column
             node.query.target_list = drop_row_id_from_target_list(
