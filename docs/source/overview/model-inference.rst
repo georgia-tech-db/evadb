@@ -24,9 +24,8 @@ In EvaDB, every model is a user-defined function. We can compose SQL queries usi
 .. code-block:: python
 
    cursor.query("""
-        SELECT TextSummarizer(data) FROM food_reviews
-        WHERE TextClassifier(data).label = 'NEGATIVE';
-   """).df()
+     SELECT TextSummarizer(data) FROM food_reviews
+     WHERE TextClassifier(data).label = 'NEGATIVE';""").df()
 
 3. Lateral Join
 
@@ -35,10 +34,9 @@ In EvaDB, every model is a user-defined function. We can compose SQL queries usi
 .. code-block:: python
 
    cursor.query("""
-        SELECT EmotionDetector(Crop(data, bbox))
-        FROM movie
-        LATERAL JOIN UNNEST(FaceDetector(data)) AS Face(bbox, conf);
-   """).df()
+     SELECT EmotionDetector(Crop(data, bbox))
+     FROM movie
+     LATERAL JOIN UNNEST(FaceDetector(data)) AS Face(bbox, conf);""").df()
 
 4. Aggregate Functions
 
@@ -47,24 +45,21 @@ In EvaDB, every model is a user-defined function. We can compose SQL queries usi
 .. code-block:: python
 
    cursor.query("""
-        SELECT ASLActionRecognition(SEGMENT(data)) 
-        FROM ASL_ACTIONS 
-        SAMPLE 5 
-        GROUP BY '16 frames';
-   """).df()
+     SELECT ASLActionRecognition(SEGMENT(data)) 
+     FROM ASL_ACTIONS 
+     SAMPLE 5 
+     GROUP BY '16 frames';""").df()
 
 5. Order By
-
-   Models (typically feature extractors) can also be used in the ``ORDER BY`` for embedding-based similarity search. EvaDB also has index support to facilitate this type of queries. In the below example, we use the `SentenceFeatureExtractor <https://github.com/georgia-tech-db/evadb/blob/staging/evadb/udfs/sentence_feature_extractor.py>`_ to answer the question `When was the NATO created` from a collection of pdfs as the knowledge base.
+Models (typically feature extractors) can also be used in the ``ORDER BY`` for embedding-based similarity search. EvaDB also has index support to facilitate this type of queries. In the below example, we use the `SentenceFeatureExtractor <https://github.com/georgia-tech-db/evadb/blob/staging/evadb/udfs/sentence_feature_extractor.py>`_ to answer the question `When was the NATO created` from a collection of pdfs as the knowledge base.
 
 .. code-block:: python
 
    cursor.query("""
-        SELECT data FROM MyPDFs
-        ORDER BY Similarity(
-                SentenceFeatureExtractor('When was the NATO created?'), SentenceFeatureExtractor(data)
-        )
-   """).df()
+     SELECT data FROM MyPDFs
+     ORDER BY Similarity(
+       SentenceFeatureExtractor('When was the NATO created?'), SentenceFeatureExtractor(data)
+     );""").df()
 
 
 .. note::
