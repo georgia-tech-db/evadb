@@ -4,7 +4,7 @@ start: (sql_statement? ";")+
 
 sql_statement: ddl_statement | dml_statement | utility_statement | context_statement
         
-ddl_statement: create_database | create_table | create_index | create_udf
+ddl_statement: create_database | create_application | create_table | create_index | create_udf
     | drop_database | drop_table | drop_udf | drop_index | rename_table
     
 dml_statement: select_statement | insert_statement | update_statement

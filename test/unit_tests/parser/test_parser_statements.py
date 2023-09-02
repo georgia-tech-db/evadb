@@ -153,7 +153,7 @@ class ParserStatementTests(unittest.TestCase):
                 PARAMETERS = {
                     "app_token": "abc123",
                     "bot_token": "abc123",
-                    "open_ai_token": "abc123",
+                    "open_ai_token": "abc123"
                 };
             """,
         ]
