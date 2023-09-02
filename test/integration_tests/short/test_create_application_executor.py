@@ -31,8 +31,8 @@ class CreateApplicationTest(unittest.TestCase):
 
     def test_create_application_should_add_the_entry(self):
         params = {
-            "app_token": "abc123",
-            "bot_token": "abc123",
+            "token": "xapp-1-A05PGEDKFHV-5813035563474-e52ef03f0b6d2600a6711db470382c59d0e40a91ad12a32402db5298730c55c6",
+            "channel": "evadb-bot-testing",
             "open_ai_token": "abc123",
         }
         query = """CREATE APPLICATION example_app
