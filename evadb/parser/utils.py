@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from evadb.parser.create_statement import CreateDatabaseStatement, CreateTableStatement
-from evadb.parser.create_udf_statement import CreateUDFStatement
+from evadb.parser.create_function_statement import CreateFunctionStatement
 from evadb.parser.drop_object_statement import DropObjectStatement
 from evadb.parser.explain_statement import ExplainStatement
 from evadb.parser.insert_statement import InsertTableStatement
@@ -58,13 +58,13 @@ def parse_table_clause(expr: str, chunk_size: int = None, chunk_overlap: int = N
     return stmt.from_table
 
 
-def parse_create_udf(
-    udf_name: str, if_not_exists: bool, udf_file_path: str, type: str, **kwargs
+def parse_create_function(
+    function_name: str, if_not_exists: bool, function_file_path: str, type: str, **kwargs
 ):
     mock_query = (
-        f"CREATE UDF IF NOT EXISTS {udf_name}"
+        f"CREATE FUNCTION IF NOT EXISTS {function_name}"
         if if_not_exists
-        else f"CREATE UDF {udf_name}"
+        else f"CREATE FUNCTION {function_name}"
     )
     if type is not None:
         mock_query += f" TYPE {type}"
@@ -72,11 +72,11 @@ def parse_create_udf(
         if task is not None and model is not None:
             mock_query += f" 'task' '{task}' 'model' '{model}'"
     else:
-        mock_query += f" IMPL '{udf_file_path}'"
+        mock_query += f" IMPL '{function_file_path}'"
     mock_query += ";"
 
     stmt = Parser().parse(mock_query)[0]
-    assert isinstance(stmt, CreateUDFStatement), "Expected a create udf statement"
+    assert isinstance(stmt, CreateFunctionStatement), "Expected a create function statement"
     return stmt
 
 
@@ -135,8 +135,8 @@ def parse_drop_table(table_name: str, if_exists: bool):
     return parse_drop(ObjectType.TABLE, table_name, if_exists)
 
 
-def parse_drop_udf(udf_name: str, if_exists: bool):
-    return parse_drop(ObjectType.UDF, udf_name, if_exists)
+def parse_drop_function(function_name: str, if_exists: bool):
+    return parse_drop(ObjectType.FUNCTION, function_name, if_exists)
 
 
 def parse_drop_index(index_name: str, if_exists: bool):

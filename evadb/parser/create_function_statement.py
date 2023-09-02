@@ -21,29 +21,29 @@ from evadb.parser.statement import AbstractStatement
 from evadb.parser.types import StatementType
 
 
-class CreateUDFStatement(AbstractStatement):
-    """Create UDF Statement constructed after parsing the input query
+class CreateFunctionStatement(AbstractStatement):
+    """Create Function Statement constructed after parsing the input query
 
     Attributes:
         name: str
-            udf_name provided by the user required
+            function_name provided by the user required
         if_not_exists: bool
-            if true should throw an error if udf with same name exists
+            if true should throw an error if function with same name exists
             else will replace the existing
         inputs: List[ColumnDefinition]
-            udf inputs, represented similar to a table column definition
+            function inputs, represented similar to a table column definition
         outputs: List[ColumnDefinition]
-            udf outputs, represented similar to a table column definition
+            function outputs, represented similar to a table column definition
         impl_file_path: str
-            file path which holds the implementation of the udf.
-            This file should be placed in the UDF directory and
-            the path provided should be relative to the UDF dir.
+            file path which holds the implementation of the function.
+            This file should be placed in the function directory and
+            the path provided should be relative to the function dir.
         query: SelectStatement
             data source for the model train or fine tune.
-        udf_type: str
-            udf type. it can be object detection, classification etc.
+        function_type: str
+            function type. it can be object detection, classification etc.
         metadata: List[Tuple[str, str]]
-            metadata, list of key value pairs used for storing metadata of udfs, mostly used for advanced udf types
+            metadata, list of key value pairs used for storing metadata of functions, mostly used for advanced function types
     """
 
     def __init__(
@@ -53,22 +53,22 @@ class CreateUDFStatement(AbstractStatement):
         impl_path: str,
         inputs: List[ColumnDefinition] = [],
         outputs: List[ColumnDefinition] = [],
-        udf_type: str = None,
+        function_type: str = None,
         query: SelectStatement = None,
         metadata: List[Tuple[str, str]] = None,
     ):
-        super().__init__(StatementType.CREATE_UDF)
+        super().__init__(StatementType.CREATE_FUNCTION)
         self._name = name
         self._if_not_exists = if_not_exists
         self._inputs = inputs
         self._outputs = outputs
         self._impl_path = Path(impl_path) if impl_path else None
-        self._udf_type = udf_type
+        self._function_type = function_type
         self._query = query
         self._metadata = metadata
 
     def __str__(self) -> str:
-        s = "CREATE UDF"
+        s = "CREATE FUNCTION"
 
         if self._if_not_exists:
             s += " IF NOT EXISTS"
@@ -78,8 +78,8 @@ class CreateUDFStatement(AbstractStatement):
         if self._query is not None:
             s += f" FROM ({self._query})"
 
-        if self._udf_type is not None:
-            s += " TYPE " + str(self._udf_type)
+        if self._function_type is not None:
+            s += " TYPE " + str(self._function_type)
 
         if self._impl_path:
             s += f" IMPL {self._impl_path.name}"
@@ -118,8 +118,8 @@ class CreateUDFStatement(AbstractStatement):
         return self._impl_path
 
     @property
-    def udf_type(self):
-        return self._udf_type
+    def function_type(self):
+        return self._function_type
 
     @property
     def query(self):
@@ -130,7 +130,7 @@ class CreateUDFStatement(AbstractStatement):
         return self._metadata
 
     def __eq__(self, other):
-        if not isinstance(other, CreateUDFStatement):
+        if not isinstance(other, CreateFunctionStatement):
             return False
         return (
             self.name == other.name
@@ -138,7 +138,7 @@ class CreateUDFStatement(AbstractStatement):
             and self.inputs == other.inputs
             and self.outputs == other.outputs
             and self.impl_path == other.impl_path
-            and self.udf_type == other.udf_type
+            and self.function_type == other.function_type
             and self.query == other.query
             and self.metadata == other.metadata
         )
@@ -152,7 +152,7 @@ class CreateUDFStatement(AbstractStatement):
                 tuple(self.inputs),
                 tuple(self.outputs),
                 self.impl_path,
-                self.udf_type,
+                self.function_type,
                 self.query,
                 tuple(self.metadata),
             )

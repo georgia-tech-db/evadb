@@ -28,7 +28,7 @@ from evadb.parser.create_statement import (
     ColumnDefinition,
     CreateTableStatement,
 )
-from evadb.parser.create_udf_statement import CreateUDFStatement
+from evadb.parser.create_function_statement import CreateFunctionStatement
 from evadb.parser.delete_statement import DeleteTableStatement
 from evadb.parser.drop_object_statement import DropObjectStatement
 from evadb.parser.insert_statement import InsertTableStatement
@@ -303,13 +303,13 @@ class ParserTests(unittest.TestCase):
         drop_stmt = evadb_statement_list[0]
         self.assertEqual(drop_stmt, expected_stmt)
 
-    def test_drop_udf_statement_str(self):
-        drop_udf_query1 = """DROP UDF MyUDF;"""
-        drop_udf_query2 = """DROP UDF IF EXISTS MyUDF;"""
-        expected_stmt1 = DropObjectStatement(ObjectType.UDF, "MyUDF", False)
-        expected_stmt2 = DropObjectStatement(ObjectType.UDF, "MyUDF", True)
-        self.assertEqual(str(expected_stmt1), drop_udf_query1)
-        self.assertEqual(str(expected_stmt2), drop_udf_query2)
+    def test_drop_function_statement_str(self):
+        drop_func_query1 = """DROP FUNCTION MyFunc;"""
+        drop_func_query2 = """DROP FUNCTION IF EXISTS MyFunc;"""
+        expected_stmt1 = DropObjectStatement(ObjectType.FUNCTION, "MyFunc", False)
+        expected_stmt2 = DropObjectStatement(ObjectType.FUNCTION, "MyFunc", True)
+        self.assertEqual(str(expected_stmt1), drop_func_query1)
+        self.assertEqual(str(expected_stmt2), drop_func_query2)
 
     def test_single_statement_queries(self):
         parser = Parser()
@@ -567,10 +567,10 @@ class ParserTests(unittest.TestCase):
         # sample_freq
         self.assertEqual(select_stmt.from_table.sample_freq, ConstantValueExpression(5))
 
-    def test_select_udf_star(self):
+    def test_select_function_star(self):
         parser = Parser()
 
-        query = "SELECT DemoUDF(*) FROM DemoDB.DemoTable"
+        query = "SELECT DemoFunc(*) FROM DemoDB.DemoTable"
         evadb_stmt_list = parser.parse(query)
 
         # check stmt itself
@@ -655,9 +655,9 @@ class ParserTests(unittest.TestCase):
 
         self.assertEqual(delete_stmt, expected_stmt)
 
-    def test_create_udf_statement(self):
+    def test_create_function_statement(self):
         parser = Parser()
-        create_udf_query = """CREATE UDF IF NOT EXISTS FastRCNN
+        create_func_query = """CREATE FUNCTION IF NOT EXISTS FastRCNN
                   INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
                   OUTPUT (Labels NDARRAY STR(10), Bbox NDARRAY UINT8(10, 4))
                   TYPE  Classification
@@ -667,7 +667,7 @@ class ParserTests(unittest.TestCase):
 
         expected_cci = ColConstraintInfo()
         expected_cci.nullable = True
-        expected_stmt = CreateUDFStatement(
+        expected_stmt = CreateFunctionStatement(
             "FastRCNN",
             True,
             Path("data/fastrcnn.py"),
@@ -692,15 +692,15 @@ class ParserTests(unittest.TestCase):
             None,
             [("KEY", "VALUE")],
         )
-        evadb_statement_list = parser.parse(create_udf_query)
+        evadb_statement_list = parser.parse(create_func_query)
         self.assertIsInstance(evadb_statement_list, list)
         self.assertEqual(len(evadb_statement_list), 1)
-        self.assertEqual(evadb_statement_list[0].stmt_type, StatementType.CREATE_UDF)
+        self.assertEqual(evadb_statement_list[0].stmt_type, StatementType.CREATE_FUNCTION)
         self.assertEqual(str(evadb_statement_list[0]), str(expected_stmt))
 
-        create_udf_stmt = evadb_statement_list[0]
+        create_func_stmt = evadb_statement_list[0]
 
-        self.assertEqual(create_udf_stmt, expected_stmt)
+        self.assertEqual(create_func_stmt, expected_stmt)
 
     def test_load_video_data_statement(self):
         parser = Parser()
@@ -789,8 +789,8 @@ class ParserTests(unittest.TestCase):
             table, Path("data/video.mp4"), FileFormatType.VIDEO
         )
         insert_stmt = InsertTableStatement(table)
-        create_udf = CreateUDFStatement(
-            "udf",
+        create_func = CreateFunctionStatement(
+            "func",
             False,
             Path("data/fastrcnn.py"),
             [
@@ -807,8 +807,8 @@ class ParserTests(unittest.TestCase):
         select_stmt = SelectStatement()
         self.assertNotEqual(load_stmt, insert_stmt)
         self.assertNotEqual(insert_stmt, load_stmt)
-        self.assertNotEqual(create_udf, insert_stmt)
-        self.assertNotEqual(select_stmt, create_udf)
+        self.assertNotEqual(create_func, insert_stmt)
+        self.assertNotEqual(select_stmt, create_func)
 
     def test_create_table_from_select(self):
         select_query = """SELECT id, Yolo(frame).labels FROM MyVideo
@@ -949,12 +949,12 @@ class ParserTests(unittest.TestCase):
         self.assertNotEqual(table_ref, table_info)
 
     def test_lark(self):
-        query = """CREATE UDF FaceDetector
+        query = """CREATE FUNCTION FaceDetector
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
                   OUTPUT (bboxes NDARRAY FLOAT32(ANYDIM, 4),
                           scores NDARRAY FLOAT32(ANYDIM))
                   TYPE  FaceDetection
-                  IMPL  'evadb/udfs/face_detector.py';
+                  IMPL  'evadb/functions/face_detector.py';
                   """
         parser = Parser()
         parser.parse(query)
