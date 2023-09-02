@@ -227,6 +227,7 @@ class CreateDatabaseStatement(AbstractStatement):
             f"PARAMETERS = {self.param_dict};"
         )
 
+
 class CreateApplicationStatement(AbstractStatement):
     def __init__(
         self, application_name: str, if_not_exists: bool, engine: str, param_dict: dict

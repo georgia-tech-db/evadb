@@ -181,7 +181,9 @@ class CatalogManager(object):
         """
         self._db_catalog_service.insert_entry(name, engine, params)
 
-    def get_application_catalog_entry(self, application_name: str) -> ApplicationCatalogEntry:
+    def get_application_catalog_entry(
+        self, application_name: str
+    ) -> ApplicationCatalogEntry:
         """
         Returns the application catalog entry for the given application_name
         Arguments:

@@ -17,7 +17,11 @@ from typing import List, TypeVar
 from lark import Tree, visitors
 
 from evadb.parser.lark_visitor._common_clauses_ids import CommonClauses
-from evadb.parser.lark_visitor._create_statements import CreateDatabase, CreateTable, CreateApplication
+from evadb.parser.lark_visitor._create_statements import (
+    CreateApplication,
+    CreateDatabase,
+    CreateTable,
+)
 from evadb.parser.lark_visitor._delete_statement import Delete
 from evadb.parser.lark_visitor._drop_statement import DropObject
 from evadb.parser.lark_visitor._explain_statement import Explain

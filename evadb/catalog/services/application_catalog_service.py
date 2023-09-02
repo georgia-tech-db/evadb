@@ -71,13 +71,13 @@ class ApplicationCatalogService(BaseService):
         """
         try:
             db_catalog_obj = self.session.execute(
-                select(self.model).filter(self.model._row_id == application_entry.row_id)
+                select(self.model).filter(
+                    self.model._row_id == application_entry.row_id
+                )
             ).scalar_one_or_none()
             db_catalog_obj.delete(self.session)
             return True
         except Exception as e:
-            err_msg = (
-                f"Delete application failed for {application_entry} with error {str(e)}."
-            )
+            err_msg = f"Delete application failed for {application_entry} with error {str(e)}."
             logger.exception(err_msg)
             raise CatalogError(err_msg)

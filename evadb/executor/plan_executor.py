@@ -49,7 +49,10 @@ from evadb.executor.union_executor import UnionExecutor
 from evadb.executor.use_executor import UseExecutor
 from evadb.executor.vector_index_scan_executor import VectorIndexScanExecutor
 from evadb.models.storage.batch import Batch
-from evadb.parser.create_statement import CreateApplicationStatement, CreateDatabaseStatement
+from evadb.parser.create_statement import (
+    CreateApplicationStatement,
+    CreateDatabaseStatement,
+)
 from evadb.parser.statement import AbstractStatement
 from evadb.parser.use_statement import UseStatement
 from evadb.plan_nodes.abstract_plan import AbstractPlan

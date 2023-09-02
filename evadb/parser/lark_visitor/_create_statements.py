@@ -21,9 +21,9 @@ from evadb.parser.create_index_statement import CreateIndexStatement
 from evadb.parser.create_statement import (
     ColConstraintInfo,
     ColumnDefinition,
+    CreateApplicationStatement,
     CreateDatabaseStatement,
     CreateTableStatement,
-    CreateApplicationStatement,
 )
 from evadb.parser.table_ref import TableRef
 from evadb.parser.types import ColumnConstraintEnum
@@ -313,6 +313,7 @@ class CreateDatabase:
                     param_dict = self.visit(child)
 
         return engine, param_dict
+
 
 class CreateApplication:
     def create_application(self, tree):

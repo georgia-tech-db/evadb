@@ -250,6 +250,7 @@ class DatabaseCatalogEntry:
             "params": self.params,
         }
 
+
 @dataclass(unsafe_hash=True)
 class ApplicationCatalogEntry:
     """Dataclass representing an entry in the `ApplicationCatalog`.
