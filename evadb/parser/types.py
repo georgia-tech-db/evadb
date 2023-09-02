@@ -41,6 +41,7 @@ class StatementType(EvaDBEnum):
     CREATE_INDEX  # noqa: F821
     CREATE_DATABASE  # noqa: F821
     USE  # noqa: F821
+    CREATE_APPLICATION  # noqa: F821
     # add other types
 
 

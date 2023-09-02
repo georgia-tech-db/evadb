@@ -20,11 +20,15 @@ context_statement: use_statement
 
 create_database: CREATE DATABASE if_not_exists? uid create_database_engine_clause
 
+create_application: CREATE APPLICATION if_not_exists? uid create_application_engine_clause
+
 colon_param: string_literal ":" string_literal
 
 colon_param_dict: LR_CURLY_BRACKET colon_param ("," colon_param)* RR_CURLY_BRACKET
 
 create_database_engine_clause: WITH ENGINE "=" string_literal "," PARAMETERS "=" colon_param_dict 
+
+create_application_engine_clause: WITH ENGINE "=" string_literal "," PARAMETERS "=" colon_param_dict
 
 create_index: CREATE INDEX uid ON table_name index_elem vector_store_type?
 
@@ -324,6 +328,7 @@ ALTER:                               "ALTER"i
 AND:                                 "AND"i
 ANY:                                 "ANY"i
 ANYDIM:                              "ANYDIM"i
+APPLICATION:                         "APPLICATION"i
 AS:                                  "AS"i
 ASC:                                 "ASC"i
 BLOB:                                "BLOB"i

@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from evadb.parser.create_statement import CreateDatabaseStatement, CreateTableStatement
+from evadb.parser.create_statement import CreateDatabaseStatement, CreateTableStatement, CreateApplicationStatement
 from evadb.parser.create_udf_statement import CreateUDFStatement
 from evadb.parser.drop_object_statement import DropObjectStatement
 from evadb.parser.explain_statement import ExplainStatement
@@ -27,7 +27,7 @@ from evadb.parser.use_statement import UseStatement
 
 # List of statements for which we omit binder and optimizer and pass the statement
 # directly to the executor.
-SKIP_BINDER_AND_OPTIMIZER_STATEMENTS = (CreateDatabaseStatement, UseStatement)
+SKIP_BINDER_AND_OPTIMIZER_STATEMENTS = (CreateDatabaseStatement, UseStatement, CreateApplicationStatement,)
 
 
 def parse_expression(expr: str):

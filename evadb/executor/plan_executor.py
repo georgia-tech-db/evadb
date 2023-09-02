@@ -17,6 +17,7 @@ from typing import Iterator, Union
 from evadb.database import EvaDBDatabase
 from evadb.executor.abstract_executor import AbstractExecutor
 from evadb.executor.apply_and_merge_executor import ApplyAndMergeExecutor
+from evadb.executor.create_application_executor import CreateApplicationExecutor
 from evadb.executor.create_database_executor import CreateDatabaseExecutor
 from evadb.executor.create_executor import CreateExecutor
 from evadb.executor.create_index_executor import CreateIndexExecutor
@@ -48,7 +49,7 @@ from evadb.executor.union_executor import UnionExecutor
 from evadb.executor.use_executor import UseExecutor
 from evadb.executor.vector_index_scan_executor import VectorIndexScanExecutor
 from evadb.models.storage.batch import Batch
-from evadb.parser.create_statement import CreateDatabaseStatement
+from evadb.parser.create_statement import CreateApplicationStatement, CreateDatabaseStatement
 from evadb.parser.statement import AbstractStatement
 from evadb.parser.use_statement import UseStatement
 from evadb.plan_nodes.abstract_plan import AbstractPlan
@@ -90,6 +91,8 @@ class PlanExecutor:
             return CreateDatabaseExecutor(db=self._db, node=plan)
         elif isinstance(plan, UseStatement):
             return UseExecutor(db=self._db, node=plan)
+        elif isinstance(plan, CreateApplicationStatement):
+            return CreateApplicationExecutor(db=self._db, node=plan)
 
         # Get plan node type
         plan_opr_type = plan.opr_type

@@ -32,6 +32,7 @@ from evadb.catalog.catalog_utils import (
     xform_column_definitions_to_catalog_entries,
 )
 from evadb.catalog.models.utils import (
+    ApplicationCatalogEntry,
     ColumnCatalogEntry,
     DatabaseCatalogEntry,
     IndexCatalogEntry,
@@ -45,6 +46,7 @@ from evadb.catalog.models.utils import (
     init_db,
     truncate_catalog_tables,
 )
+from evadb.catalog.services.application_catalog_service import ApplicationCatalogService
 from evadb.catalog.services.column_catalog_service import ColumnCatalogService
 from evadb.catalog.services.database_catalog_service import DatabaseCatalogService
 from evadb.catalog.services.index_catalog_service import IndexCatalogService
@@ -72,6 +74,7 @@ class CatalogManager(object):
         self._sql_config = SQLConfig(db_uri)
         self._config = config
         self._bootstrap_catalog()
+        self._app_catalog_service = ApplicationCatalogService(self._sql_config.session)
         self._db_catalog_service = DatabaseCatalogService(self._sql_config.session)
         self._table_catalog_service = TableCatalogService(self._sql_config.session)
         self._column_service = ColumnCatalogService(self._sql_config.session)
@@ -165,6 +168,48 @@ class CatalogManager(object):
         # todo: do we need to remove also the associated tables etc or that will be
         # taken care by the underlying db
         return self._db_catalog_service.delete_entry(database_entry)
+
+    "Application catalog services"
+
+    def insert_application_catalog_entry(self, name: str, engine: str, params: dict):
+        """A new entry is persisted in the application catalog."
+
+        Args:
+            name: application name
+            engine: engine name
+            params: required params as a dictionary for the application
+        """
+        self._db_catalog_service.insert_entry(name, engine, params)
+
+    def get_application_catalog_entry(self, application_name: str) -> ApplicationCatalogEntry:
+        """
+        Returns the application catalog entry for the given application_name
+        Arguments:
+            application_name (str): name of the application
+
+        Returns:
+            ApplicationCatalogEntry
+        """
+
+        table_entry = self._db_catalog_service.get_entry_by_name(application_name)
+
+        return table_entry
+
+    def delete_application_catalog_entry(
+        self, application_entry: ApplicationCatalogEntry
+    ) -> bool:
+        """
+        This method deletes the application from  catalog.
+
+        Arguments:
+           application_entry: application catalog entry to remove
+
+        Returns:
+           True if successfully deleted else False
+        """
+        # todo: do we need to remove also the associated tables etc or that will be
+        # taken care by the underlying db
+        return self._db_catalog_service.delete_entry(application_entry)
 
     "Table catalog services"
 

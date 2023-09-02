@@ -24,6 +24,7 @@ from evadb.utils.generic_utils import is_postgres_uri, parse_config_yml
 IDENTIFIER_COLUMN = "_row_id"
 
 CATALOG_TABLES = [
+    "application_catalog",
     "column_catalog",
     "table_catalog",
     "database_catalog",

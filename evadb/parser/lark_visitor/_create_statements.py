@@ -23,6 +23,7 @@ from evadb.parser.create_statement import (
     ColumnDefinition,
     CreateDatabaseStatement,
     CreateTableStatement,
+    CreateApplicationStatement,
 )
 from evadb.parser.table_ref import TableRef
 from evadb.parser.types import ColumnConstraintEnum
@@ -302,6 +303,39 @@ class CreateDatabase:
         return create_stmt
 
     def create_database_engine_clause(self, tree):
+        engine = None
+        param_dict = {}
+        for child in tree.children:
+            if isinstance(child, Tree):
+                if child.data == "string_literal":
+                    engine = self.visit(child).value
+                elif child.data == "colon_param_dict":
+                    param_dict = self.visit(child)
+
+        return engine, param_dict
+
+class CreateApplication:
+    def create_application(self, tree):
+        application_name = None
+        if_not_exists = False
+        engine = None
+        param_dict = {}
+
+        for child in tree.children:
+            if isinstance(child, Tree):
+                if child.data == "if_not_exists":
+                    if_not_exists = True
+                elif child.data == "uid":
+                    application_name = self.visit(child)
+                elif child.data == "create_application_engine_clause":
+                    engine, param_dict = self.visit(child)
+
+        create_stmt = CreateApplicationStatement(
+            application_name, if_not_exists, engine, param_dict
+        )
+        return create_stmt
+
+    def create_application_engine_clause(self, tree):
         engine = None
         param_dict = {}
         for child in tree.children:

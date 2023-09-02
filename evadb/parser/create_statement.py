@@ -226,3 +226,41 @@ class CreateDatabaseStatement(AbstractStatement):
             f"WITH ENGINE '{self.engine}' , \n"
             f"PARAMETERS = {self.param_dict};"
         )
+
+class CreateApplicationStatement(AbstractStatement):
+    def __init__(
+        self, application_name: str, if_not_exists: bool, engine: str, param_dict: dict
+    ):
+        super().__init__(StatementType.CREATE_APPLICATION)
+        self.application_name = application_name
+        self.if_not_exists = if_not_exists
+        self.engine = engine
+        self.param_dict = param_dict
+
+    def __eq__(self, other):
+        if not isinstance(other, CreateApplicationStatement):
+            return False
+        return (
+            self.application_name == other.application_name
+            and self.if_not_exists == other.if_not_exists
+            and self.engine == other.engine
+            and self.param_dict == other.param_dict
+        )
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                super().__hash__(),
+                self.application_name,
+                self.if_not_exists,
+                self.engine,
+                hash(frozenset(self.param_dict.items())),
+            )
+        )
+
+    def __str__(self) -> str:
+        return (
+            f"CREATE APPLICATION {self.application_name} \n"
+            f"WITH ENGINE '{self.engine}' , \n"
+            f"PARAMETERS = {self.param_dict};"
+        )
