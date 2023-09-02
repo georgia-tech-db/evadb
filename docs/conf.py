@@ -96,7 +96,6 @@ author = u"EvaDB Team"
 # directories to ignore when looking for source files.
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "README.md", "images/reference/README.md"]
 
-
 # The name of the Pygments (syntax highlighting) style to use.
 # pygments_style = "lovelace"
 
