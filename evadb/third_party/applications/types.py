@@ -18,7 +18,7 @@ import pandas as pd
 
 
 @dataclass
-class DBHandlerResponse (ThirdPartyResponse):
+class AppHandlerResponse (ThirdPartyResponse):
     """
     Represents the response from a database handler containing data and an optional error message.
 
@@ -32,7 +32,7 @@ class DBHandlerResponse (ThirdPartyResponse):
 
 
 @dataclass
-class DBHandlerStatus (ThirdPartyStatus):
+class AppHandlerStatus (ThirdPartyStatus):
     """
     Represents the status of a database handler operation, along with an optional error message.
 
@@ -45,7 +45,7 @@ class DBHandlerStatus (ThirdPartyStatus):
     error: str = None
 
 
-class DBHandler (ThirdPartyHandler):
+class AppHandler (ThirdPartyHandler):
     """
     Base class for handling database operations.
 
@@ -74,31 +74,31 @@ class DBHandler (ThirdPartyHandler):
         """
         raise NotImplementedError()
 
-    def check_connection(self) -> DBHandlerStatus:
+    def check_connection(self) -> AppHandlerStatus:
         """
         Checks the status of the database connection.
 
         Returns:
-            DBHandlerStatus: An instance of DBHandlerStatus indicating the connection status.
+            AppHandlerStatus: An instance of AppHandlerStatus indicating the connection status.
 
         Raises:
             NotImplementedError: This method should be implemented in derived classes.
         """
         raise NotImplementedError()
 
-    def get_tables(self) -> DBHandlerResponse:
+    def get_tables(self) -> AppHandlerResponse:
         """
         Retrieves the list of tables from the database.
 
         Returns:
-            DBHandlerResponse: An instance of DBHandlerResponse containing the list of tables or an error message. Data is in a pandas DataFrame.
+            AppHandlerResponse: An instance of AppHandlerResponse containing the list of tables or an error message. Data is in a pandas DataFrame.
 
         Raises:
             NotImplementedError: This method should be implemented in derived classes.
         """
         raise NotImplementedError()
 
-    def get_columns(self, table_name: str) -> DBHandlerResponse:
+    def get_columns(self, table_name: str) -> AppHandlerResponse:
         """
         Retrieves the columns of a specified table from the database.
 
@@ -106,14 +106,14 @@ class DBHandler (ThirdPartyHandler):
             table_name (str): The name of the table for which to retrieve columns.
 
         Returns:
-            DBHandlerResponse: An instance of DBHandlerResponse containing the columns or an error message. Data is in a pandas DataFrame. It should have the following two columns: name and dtype. The dtype should be a Python dtype and will default to `str`.
+            AppHandlerResponse: An instance of AppHandlerResponse containing the columns or an error message. Data is in a pandas DataFrame. It should have the following two columns: name and dtype. The dtype should be a Python dtype and will default to `str`.
 
         Raises:
             NotImplementedError: This method should be implemented in derived classes.
         """
         raise NotImplementedError()
 
-    def execute_native_query(self, query_string: str) -> DBHandlerResponse:
+    def execute_native_query(self, query_string: str) -> AppHandlerResponse:
         """
         Executes the query through the handler's database engine.
 
@@ -121,7 +121,7 @@ class DBHandler (ThirdPartyHandler):
             query_string (str): The string representation of the native query.
 
         Returns:
-            DBHandlerResponse: An instance of DBHandlerResponse containing the columns or an error message. Data is in a pandas DataFrame.
+            AppHandlerResponse: An instance of AppHandlerResponse containing the columns or an error message. Data is in a pandas DataFrame.
 
         Raises:
             NotImplementedError: This method should be implemented in derived classes.
