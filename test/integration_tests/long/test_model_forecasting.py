@@ -21,6 +21,7 @@ import pytest
 from evadb.configuration.constants import EvaDB_ROOT_DIR
 from evadb.server.command_handler import execute_query_fetch_all
 
+
 @pytest.mark.notparallel
 class ModelTrainTests(unittest.TestCase):
     @classmethod
@@ -61,7 +62,7 @@ class ModelTrainTests(unittest.TestCase):
             SELECT Forecast(12) FROM AirData;
         """
         result = execute_query_fetch_all(self.evadb, predict_query)
-        self.assertEqual(int(list(result.frames.iloc[:,-1])[-1]), 459)
+        self.assertEqual(int(list(result.frames.iloc[:, -1])[-1]), 459)
 
 
 if __name__ == "__main__":

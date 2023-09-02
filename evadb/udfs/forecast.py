@@ -14,17 +14,14 @@
 # limitations under the License.
 
 
-import os
+import pickle
 
 import pandas as pd
-from retry import retry
+
 from evadb.catalog.catalog_type import NdArrayType
-from evadb.configuration.configuration_manager import ConfigurationManager
 from evadb.udfs.abstract.abstract_udf import AbstractUDF
 from evadb.udfs.decorators.decorators import forward, setup
 from evadb.udfs.decorators.io_descriptors.data_types import PandasDataframe
-from evadb.utils.generic_utils import try_to_import_openai, try_to_import_forecast
-import pickle
 
 
 class ForecastModel(AbstractUDF):
@@ -34,16 +31,11 @@ class ForecastModel(AbstractUDF):
 
     @setup(cacheable=False, udf_type="Forecasting", batchable=True)
     def setup(self, model_name: str, model_path: str):
-        try_to_import_forecast()
-        from statsforecast import StatsForecast
-        from statsforecast.models import AutoARIMA, AutoCES, AutoETS, AutoTheta
-
         f = open(model_path, "rb")
         loaded_model = pickle.load(f)
         f.close()
         self.model = loaded_model
         self.model_name = model_name
-
 
     @forward(
         input_signatures=[],
@@ -58,10 +50,10 @@ class ForecastModel(AbstractUDF):
         ],
     )
     def forward(self, data) -> pd.DataFrame:
-        horizon = list(data.iloc[:,-1])[0]
+        horizon = list(data.iloc[:, -1])[0]
         assert (
-                type(horizon) == int
-            ), f"Forecast UDF expects integral horizon in parameter."
+            type(horizon) is int
+        ), "Forecast UDF expects integral horizon in parameter."
         forecast_df = self.model.predict(h=horizon)
         forecast_df = forecast_df.rename(columns={self.model_name: "y"})
         return pd.DataFrame(

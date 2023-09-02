@@ -49,6 +49,7 @@ from evadb.third_party.huggingface.binder import assign_hf_udf
 from evadb.utils.generic_utils import load_udf_class_from_file
 from evadb.utils.logging_manager import logger
 
+
 class StatementBinder:
     def __init__(self, binder_context: StatementBinderContext):
         self._binder_context = binder_context

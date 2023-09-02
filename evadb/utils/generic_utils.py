@@ -268,6 +268,7 @@ def try_to_import_ray():
                 Please install it with `pip install ray`."""
         )
 
+
 def try_to_import_forecast():
     try:
         from statsforecast import StatsForecast
@@ -314,13 +315,15 @@ def is_ludwig_available() -> bool:
     except ValueError:  # noqa: E722
         return False
 
+
 def is_forecast_available() -> bool:
     try:
         try_to_import_forecast()
         return True
     except ValueError:  # noqa: E722
         return False
-    
+
+
 ##############################
 ## VISION
 ##############################
