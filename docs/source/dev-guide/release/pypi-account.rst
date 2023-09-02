@@ -1,5 +1,5 @@
 Setup PyPI Account
-====
+==================
 
 Make sure you have `PyPI <https://pypi.org>`_ account with maintainer access to the EvaDB project. 
 Create a .pypirc in your home directory. It should look like this:

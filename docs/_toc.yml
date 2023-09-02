@@ -5,26 +5,36 @@ parts:
     chapters:
       - file: source/overview/getting-started
         sections:
-          - file: source/overview/getting-started/install-guide
-            title: Installation Guide
+          - file: source/overview/getting-started/installation-options
+            title: Installation Options
+      - file: source/overview/connect-to-database
+        title: Connect to Database
       - file: source/overview/concepts
-      # - file: source/overview/faq
+        title: Concepts
+        #- file: source/overview/faq
 
   - caption: Use Cases
     chapters:
+      - file: source/usecases/food-review.rst
+        title: Sentiment Analysis
       - file: source/usecases/image-classification.rst
         title: Image Classification
       - file: source/usecases/similar-image-search.rst
-        title: Image Search [FAISS]
+        title: Image Search
       - file: source/usecases/qa-video.rst
-        title: Q&A from Videos [ChatGPT + HuggingFace]
+        title: Video Question Answering
+      - file: source/usecases/08-chatgpt.ipynb
+        title: ChatGPT-based Video Question Answering
+      - file: source/usecases/12-query-pdf.ipynb
+        title: PDF Question Answering
       - file: source/usecases/02-object-detection.ipynb
         title: Object Detection
       - file: source/usecases/03-emotion-analysis.ipynb
-        title: Emotion Analysis
+        title: Emotions Analysis
       - file: source/usecases/07-object-segmentation-huggingface.ipynb
-        title: Image Segmentation [HuggingFace]
-
+        title: Image Segmentation
+      - file: source/usecases/13-privategpt.ipynb
+        title: PrivateGPT
 
   - caption: User Reference
     chapters:
@@ -43,6 +53,14 @@ parts:
           - file: source/reference/evaql/insert
           - file: source/reference/evaql/delete
           - file: source/reference/evaql/rename
+          - file: source/reference/evaql/use
+
+      - file: source/reference/databases/index
+        title: Data Sources
+        sections: 
+          - file: source/reference/databases/postgres
+          - file: source/reference/databases/sqlite
+          - file: source/reference/databases/mysql
 
       - file: source/reference/udfs/index
         title: Models
@@ -83,7 +101,7 @@ parts:
         sections:
           - file: source/dev-guide/contribute/setup-dev
             title: Setup Environment
-          - file: source/contribute/contribute/testing
+          - file: source/dev-guide/contribute/testing
             title: Testing
           - file: source/dev-guide/contribute/submit-pr
             title: Submit a PR

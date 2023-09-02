@@ -8,9 +8,8 @@ make html
 open _build/html/index.html
 ```
 
-To test links:
+To further test external links:
 
 ```
-cd evadb/docs
-sphinx-build . _build -b linkcheck
+make linkcheck
 ```

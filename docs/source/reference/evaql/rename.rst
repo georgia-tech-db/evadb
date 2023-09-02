@@ -2,7 +2,7 @@ RENAME
 ======
 
 RENAME TABLE
-----
+------------
 
 .. code:: sql
 

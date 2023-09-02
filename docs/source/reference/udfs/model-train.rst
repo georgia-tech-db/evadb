@@ -1,5 +1,5 @@
-Model Train and Finetune
-====
+Training and Finetuning
+========================
 
 1. You can train a predication model easily in EvaDB
 
@@ -43,6 +43,6 @@ You can also simply give all columns in `HomeRentals` as inputs for inference. T
 
    CREATE PredictHouseRent(*) FROM HomeRentals;
 
-Check out our `Integration Tests <https://github.com/georgia-tech-db/evadb/blob/master/test/integration_tests/test_model_train.py>`_ for working example.
+Check out our `Integration Tests <https://github.com/georgia-tech-db/evadb/blob/staging/test/integration_tests/long/test_model_train.py>`_ for working example.
 
 

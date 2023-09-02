@@ -33,6 +33,11 @@ class UseExecutor(AbstractExecutor):
             self._database_name
         )
 
+        if db_catalog_entry is None:
+            raise ExecutorError(
+                f"{self._database_name} data source does not exist. Use CREATE DATABASE to add a new data source."
+            )
+
         handler = get_database_handler(
             db_catalog_entry.engine,
             **db_catalog_entry.params,

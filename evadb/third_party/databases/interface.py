@@ -15,10 +15,6 @@
 import importlib
 import os
 
-import pip
-
-INSTALL_CACHE = []
-
 
 def get_database_handler(engine: str, **kwargs):
     """
@@ -26,39 +22,23 @@ def get_database_handler(engine: str, **kwargs):
     their new integrated handlers.
     """
 
-    # Dynamically install dependencies.
-    dynamic_install(engine)
-
     # Dynamically import the top module.
-    mod = dynamic_import(engine)
+    try:
+        mod = dynamic_import(engine)
+    except ImportError:
+        req_file = os.path.join(os.path.dirname(__file__), engine, "requirements.txt")
+        if os.path.isfile(req_file):
+            with open(req_file) as f:
+                raise ImportError(f"Please install the following packages {f.read()}")
 
     if engine == "postgres":
         return mod.PostgresHandler(engine, **kwargs)
+    elif engine == "sqlite":
+        return mod.SQLiteHandler(engine, **kwargs)
+    elif engine == "mysql":
+        return mod.MysqlHandler(engine, **kwargs)
     else:
         raise NotImplementedError(f"Engine {engine} is not supported")
-
-
-def dynamic_install(handler_dir):
-    """
-    Dynamically install package from requirements.txt.
-    """
-
-    # Skip installation
-    if handler_dir in INSTALL_CACHE:
-        return
-
-    INSTALL_CACHE.append(handler_dir)
-
-    req_file = os.path.join(
-        "evadb", "third_party", "databases", handler_dir, "requirements.txt"
-    )
-    if os.path.isfile(req_file):
-        with open(req_file) as f:
-            for package in f.read().splitlines():
-                if hasattr(pip, "main"):
-                    pip.main(["install", package])
-                else:
-                    pip._internal.main(["install", package])
 
 
 def dynamic_import(handler_dir):
