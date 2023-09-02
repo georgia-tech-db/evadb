@@ -85,7 +85,7 @@ document_libs = [
     "sentencepiece",  # TRANSFORMERS
 ]
 
-udf_libs = [
+function_libs = [
     "facenet-pytorch>=2.5.2",  # FACE DETECTION
     "pytube",  # YOUTUBE QA APP
     "youtube-transcript-api",  # YOUTUBE QA APP
@@ -145,13 +145,13 @@ EXTRA_REQUIRES = {
     "ray": ray_libs,
     "vision": vision_libs,
     "document": document_libs,
-    "udf": udf_libs,
+    "function": function_libs,
     "notebook": notebook_libs,
     "qdrant": qdrant_libs,
     "postgres": postgres_libs,
     "ludwig": ludwig_libs,
     # everything except ray, qdrant and postgres
-    "dev": dev_libs + vision_libs + document_libs + udf_libs + notebook_libs,
+    "dev": dev_libs + vision_libs + document_libs + function_libs + notebook_libs,
 }
 
 setup(
