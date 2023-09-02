@@ -115,7 +115,7 @@ class ParserTests(unittest.TestCase):
         actual_stmt = evadb_stmt_list[0]
         self.assertEqual(actual_stmt, expected_stmt)
 
-        # create index on UDF expression
+        # create index on Function expression
         create_index_query = (
             "CREATE INDEX testindex ON MyVideo (FeatureExtractor(featCol)) USING FAISS;"
         )

@@ -19,21 +19,21 @@ from inspect import isabstract
 from test.util import get_all_subclasses, get_mock_object
 
 import evadb
-from evadb.udfs.abstract.abstract_udf import AbstractUDF
-from evadb.udfs.abstract.hf_abstract_udf import AbstractHFUdf
-from evadb.udfs.yolo_object_detector import Yolo
+from evadb.functions.abstract.abstract_function import AbstractFunction
+from evadb.functions.abstract.hf_abstract_function import AbstractHFFunction
+from evadb.functions.yolo_object_detector import Yolo
 
 
-class AbstractUDFTest(unittest.TestCase):
-    def test_udf_abstract_functions(self):
-        derived_udf_classes = list(get_all_subclasses(AbstractUDF))
-        # Go over each derived class of AbstractUDF
-        for derived_udf_class in derived_udf_classes:
+class AbstractFunctionTest(unittest.TestCase):
+    def test_function_abstract_functions(self):
+        derived_function_classes = list(get_all_subclasses(AbstractFunction))
+        # Go over each derived class of AbstractFunction
+        for derived_function_class in derived_function_classes:
             # skip yolo and HF to avoid downloading model
-            if issubclass(derived_udf_class, (Yolo, AbstractHFUdf)):
+            if issubclass(derived_function_class, (Yolo, AbstractHFFunction)):
                 continue
-            if isabstract(derived_udf_class) is False:
-                class_type = derived_udf_class
+            if isabstract(derived_function_class) is False:
+                class_type = derived_function_class
                 # Check class init signature
                 # Ref: https://stackoverflow.com/a/2677263
                 sig = inspect.signature(class_type.__init__)

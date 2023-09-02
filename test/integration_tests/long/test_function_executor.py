@@ -37,7 +37,7 @@ NUM_FRAMES = 10
 
 
 @pytest.mark.notparallel
-class UDFExecutorTest(unittest.TestCase):
+class FunctionExecutorTest(unittest.TestCase):
     def setUp(self):
         self.evadb = get_evadb_for_testing()
         self.evadb.catalog().reset()
@@ -45,13 +45,13 @@ class UDFExecutorTest(unittest.TestCase):
         load_query = f"LOAD VIDEO '{video_file_path}' INTO MyVideo;"
         execute_query_fetch_all(self.evadb, load_query)
 
-        create_udf_query = """CREATE UDF DummyObjectDetector
+        create_function_query = """CREATE FUNCTION DummyObjectDetector
                   INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
                   OUTPUT (label NDARRAY STR(10))
                   TYPE  Classification
                   IMPL  'test/util.py';
         """
-        execute_query_fetch_all(self.evadb, create_udf_query)
+        execute_query_fetch_all(self.evadb, create_function_query)
 
     def tearDown(self):
         shutdown_ray()
@@ -60,7 +60,7 @@ class UDFExecutorTest(unittest.TestCase):
 
     # integration test
 
-    def test_should_load_and_select_using_udf_video_in_table(self):
+    def test_should_load_and_select_using_function_video_in_table(self):
         select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo \
             ORDER BY id;"
         actual_batch = execute_query_fetch_all(self.evadb, select_query)
@@ -75,7 +75,7 @@ class UDFExecutorTest(unittest.TestCase):
         expected_batch = Batch(frames=pd.DataFrame(expected))
         self.assertEqual(actual_batch, expected_batch)
 
-    def test_should_load_and_select_using_udf_video(self):
+    def test_should_load_and_select_using_function_video(self):
         # Equality test
         select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo \
             WHERE DummyObjectDetector(data).label = ['person'] ORDER BY id;"
@@ -140,35 +140,35 @@ class UDFExecutorTest(unittest.TestCase):
         expected_batch.modify_column_alias("T")
         self.assertEqual(actual_batch, expected_batch)
 
-    def test_create_udf(self):
-        udf_name = "DummyObjectDetector"
-        create_udf_query = """CREATE UDF {}
+    def test_create_function(self):
+        function_name = "DummyObjectDetector"
+        create_function_query = """CREATE FUNCTION {}
                   INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
                   OUTPUT (label NDARRAY STR(10))
                   TYPE  Classification
                   IMPL  'test/util.py';
         """
-        # Try to create duplicate UDF
+        # Try to create duplicate FUNCTION
         with self.assertRaises(ExecutorError):
             actual = execute_query_fetch_all(
-                self.evadb, create_udf_query.format(udf_name)
+                self.evadb, create_function_query.format(function_name)
             )
-            expected = Batch(pd.DataFrame([f"UDF {udf_name} already exists."]))
+            expected = Batch(pd.DataFrame([f"Function {function_name} already exists."]))
             self.assertEqual(actual, expected)
 
-        # Try to create UDF if not exists
+        # Try to create FUNCTION if not exists
         actual = execute_query_fetch_all(
-            self.evadb, create_udf_query.format("IF NOT EXISTS " + udf_name)
+            self.evadb, create_function_query.format("IF NOT EXISTS " + function_name)
         )
         expected = Batch(
-            pd.DataFrame([f"UDF {udf_name} already exists, nothing added."])
+            pd.DataFrame([f"Function {function_name} already exists, nothing added."])
         )
         self.assertEqual(actual, expected)
 
-    def test_should_create_udf_with_metadata(self):
-        udf_name = "DummyObjectDetector"
-        execute_query_fetch_all(self.evadb, f"DROP UDF {udf_name};")
-        create_udf_query = """CREATE UDF {}
+    def test_should_create_function_with_metadata(self):
+        function_name = "DummyObjectDetector"
+        execute_query_fetch_all(self.evadb, f"DROP FUNCTION {function_name};")
+        create_function_query = """CREATE FUNCTION {}
                   INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
                   OUTPUT (label NDARRAY STR(10))
                   TYPE  Classification
@@ -176,25 +176,25 @@ class UDFExecutorTest(unittest.TestCase):
                   'CACHE' 'TRUE'
                   'BATCH' 'FALSE';
         """
-        execute_query_fetch_all(self.evadb, create_udf_query.format(udf_name))
+        execute_query_fetch_all(self.evadb, create_function_query.format(function_name))
 
         # try fetching the metadata values
-        entries = self.evadb.catalog().get_udf_metadata_entries_by_udf_name(udf_name)
+        entries = self.evadb.catalog().get_function_metadata_entries_by_function_name(function_name)
         self.assertEqual(len(entries), 2)
         metadata = [(entry.key, entry.value) for entry in entries]
 
         expected_metadata = [("CACHE", "TRUE"), ("BATCH", "FALSE")]
         self.assertEqual(set(metadata), set(expected_metadata))
 
-    def test_should_return_empty_metadata_list_for_missing_udf(self):
-        # missing udf should return empty list
-        entries = self.evadb.catalog().get_udf_metadata_entries_by_udf_name("randomUDF")
+    def test_should_return_empty_metadata_list_for_missing_function(self):
+        # missing function should return empty list
+        entries = self.evadb.catalog().get_function_metadata_entries_by_function_name("randomFunction")
         self.assertEqual(len(entries), 0)
 
-    def test_should_return_empty_metadata_list_if_udf_is_removed(self):
-        udf_name = "DummyObjectDetector"
-        execute_query_fetch_all(self.evadb, f"DROP UDF {udf_name};")
-        create_udf_query = """CREATE UDF {}
+    def test_should_return_empty_metadata_list_if_function_is_removed(self):
+        function_name = "DummyObjectDetector"
+        execute_query_fetch_all(self.evadb, f"DROP FUNCTION {function_name};")
+        create_function_query = """CREATE FUNCTION {}
                   INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
                   OUTPUT (label NDARRAY STR(10))
                   TYPE  Classification
@@ -202,19 +202,19 @@ class UDFExecutorTest(unittest.TestCase):
                   'CACHE' 'TRUE'
                   'BATCH' 'FALSE';
         """
-        execute_query_fetch_all(self.evadb, create_udf_query.format(udf_name))
+        execute_query_fetch_all(self.evadb, create_function_query.format(function_name))
 
         # try fetching the metadata values
-        entries = self.evadb.catalog().get_udf_metadata_entries_by_udf_name(udf_name)
+        entries = self.evadb.catalog().get_function_metadata_entries_by_function_name(function_name)
         self.assertEqual(len(entries), 2)
 
-        # remove the udf
-        execute_query_fetch_all(self.evadb, f"DROP UDF {udf_name};")
+        # remove the function
+        execute_query_fetch_all(self.evadb, f"DROP FUNCTION {function_name};")
         # try fetching the metadata values
-        entries = self.evadb.catalog().get_udf_metadata_entries_by_udf_name(udf_name)
+        entries = self.evadb.catalog().get_function_metadata_entries_by_function_name(function_name)
         self.assertEqual(len(entries), 0)
 
-    def test_should_raise_using_missing_udf(self):
+    def test_should_raise_using_missing_function(self):
         select_query = "SELECT id,DummyObjectDetector1(data) FROM MyVideo \
             ORDER BY id;"
         with self.assertRaises(BinderError) as cm:
@@ -224,12 +224,12 @@ class UDFExecutorTest(unittest.TestCase):
 
         err_msg = (
             "Function 'DummyObjectDetector1' does not exist in the catalog. "
-            "Please create the function using CREATE UDF command."
+            "Please create the function using CREATE FUNCTION command."
         )
         self.assertEqual(str(cm.exception), err_msg)
 
-    def test_should_raise_for_udf_name_mismatch(self):
-        create_udf_query = """CREATE UDF TestUDF
+    def test_should_raise_for_function_name_mismatch(self):
+        create_function_query = """CREATE FUNCTION TestFUNCTION
                   INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
                   OUTPUT (label NDARRAY STR(10))
                   TYPE  Classification
@@ -237,14 +237,14 @@ class UDFExecutorTest(unittest.TestCase):
         """
         with self.assertRaises(ExecutorError):
             execute_query_fetch_all(
-                self.evadb, create_udf_query, do_not_print_exceptions=True
+                self.evadb, create_function_query, do_not_print_exceptions=True
             )
 
-    def test_should_raise_if_udf_file_is_modified(self):
-        execute_query_fetch_all(self.evadb, "DROP UDF DummyObjectDetector;")
+    def test_should_raise_if_function_file_is_modified(self):
+        execute_query_fetch_all(self.evadb, "DROP FUNCTION DummyObjectDetector;")
 
         # Test IF EXISTS
-        execute_query_fetch_all(self.evadb, "DROP UDF IF EXISTS DummyObjectDetector;")
+        execute_query_fetch_all(self.evadb, "DROP FUNCTION IF EXISTS DummyObjectDetector;")
 
         with tempfile.NamedTemporaryFile(mode="w", suffix=".py") as tmp_file:
             with open("test/util.py", "r") as file:
@@ -252,18 +252,18 @@ class UDFExecutorTest(unittest.TestCase):
 
             tmp_file.seek(0)
 
-            udf_name = "DummyObjectDetector"
-            create_udf_query = """CREATE UDF {}
+            function_name = "DummyObjectDetector"
+            create_function_query = """CREATE FUNCTION {}
                     INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
                     OUTPUT (label NDARRAY STR(10))
                     TYPE  Classification
                     IMPL  '{}';
             """
             execute_query_fetch_all(
-                self.evadb, create_udf_query.format(udf_name, tmp_file.name)
+                self.evadb, create_function_query.format(function_name, tmp_file.name)
             )
 
-            # Modify the udf file by appending
+            # Modify the function file by appending
             tmp_file.seek(0, 2)
             tmp_file.write("#comment")
             tmp_file.seek(0)
@@ -272,27 +272,27 @@ class UDFExecutorTest(unittest.TestCase):
                 "SELECT id,DummyObjectDetector(data) FROM MyVideo ORDER BY id;"
             )
 
-            # disabling warning for UDF modification for now
+            # disabling warning for function modificiation for now
             # with self.assertRaises(AssertionError):
             execute_query_fetch_all(self.evadb, select_query)
 
-    def test_create_udf_with_decorators(self):
+    def test_create_function_with_decorators(self):
         execute_query_fetch_all(
-            self.evadb, "DROP UDF IF EXISTS DummyObjectDetectorDecorators;"
+            self.evadb, "DROP FUNCTION IF EXISTS DummyObjectDetectorDecorators;"
         )
-        create_udf_query = """CREATE UDF DummyObjectDetectorDecorators
+        create_function_query = """CREATE FUNCTION DummyObjectDetectorDecorators
                   IMPL  'test/util.py';
         """
-        execute_query_fetch_all(self.evadb, create_udf_query)
+        execute_query_fetch_all(self.evadb, create_function_query)
 
         catalog_manager = self.evadb.catalog()
-        udf_obj = catalog_manager.get_udf_catalog_entry_by_name(
+        function_obj = catalog_manager.get_function_catalog_entry_by_name(
             "DummyObjectDetectorDecorators"
         )
-        udf_inputs = catalog_manager.get_udf_io_catalog_input_entries(udf_obj)
-        self.assertEquals(len(udf_inputs), 1)
+        function_inputs = catalog_manager.get_function_io_catalog_input_entries(function_obj)
+        self.assertEquals(len(function_inputs), 1)
 
-        udf_input = udf_inputs[0]
+        function_input = function_inputs[0]
 
         expected_input_attributes = {
             "name": "Frame_Array",
@@ -304,12 +304,12 @@ class UDFExecutorTest(unittest.TestCase):
         }
 
         for attr in expected_input_attributes:
-            self.assertEquals(getattr(udf_input, attr), expected_input_attributes[attr])
+            self.assertEquals(getattr(function_input, attr), expected_input_attributes[attr])
 
-        udf_outputs = catalog_manager.get_udf_io_catalog_output_entries(udf_obj)
-        self.assertEquals(len(udf_outputs), 1)
+        function_outputs = catalog_manager.get_function_io_catalog_output_entries(function_obj)
+        self.assertEquals(len(function_outputs), 1)
 
-        udf_output = udf_outputs[0]
+        function_output = function_outputs[0]
         expected_output_attributes = {
             "name": "label",
             "type": ColumnType.NDARRAY,
@@ -321,12 +321,12 @@ class UDFExecutorTest(unittest.TestCase):
 
         for attr in expected_output_attributes:
             self.assertEquals(
-                getattr(udf_output, attr), expected_output_attributes[attr]
+                getattr(function_output, attr), expected_output_attributes[attr]
             )
 
-    def test_udf_cost_entry_created(self):
+    def test_function_cost_entry_created(self):
         execute_query_fetch_all(
             self.evadb, "SELECT DummyObjectDetector(data) FROM MyVideo"
         )
-        entry = self.evadb.catalog().get_udf_cost_catalog_entry("DummyObjectDetector")
+        entry = self.evadb.catalog().get_function_cost_catalog_entry("DummyObjectDetector")
         self.assertIsNotNone(entry)

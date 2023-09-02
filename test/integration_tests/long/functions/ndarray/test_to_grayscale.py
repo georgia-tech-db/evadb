@@ -20,7 +20,7 @@ import numpy as np
 import pandas as pd
 
 from evadb.configuration.constants import EvaDB_ROOT_DIR
-from evadb.udfs.ndarray.to_grayscale import ToGrayscale
+from evadb.functions.ndarray.to_grayscale import ToGrayscale
 from evadb.utils.generic_utils import try_to_import_cv2
 
 
@@ -35,17 +35,17 @@ class ToGrayscaleTests(unittest.TestCase):
         try_to_import_cv2()
         import cv2
 
-        arr = cv2.imread(f"{EvaDB_ROOT_DIR}/test/unit_tests/udfs/data/dog.jpeg")
+        arr = cv2.imread(f"{EvaDB_ROOT_DIR}/test/unit_tests/functions/data/dog.jpeg")
         df = pd.DataFrame([[arr]])
         modified_arr = self.to_grayscale_instance(df)["grayscale_frame_array"]
         cv2.imwrite(
-            f"{EvaDB_ROOT_DIR}/test/unit_tests/udfs/data/tmp.jpeg", modified_arr[0]
+            f"{EvaDB_ROOT_DIR}/test/unit_tests/functions/data/tmp.jpeg", modified_arr[0]
         )
         actual_array = cv2.imread(
-            f"{EvaDB_ROOT_DIR}/test/unit_tests/udfs/data/tmp.jpeg"
+            f"{EvaDB_ROOT_DIR}/test/unit_tests/functions/data/tmp.jpeg"
         )
         expected_arr = cv2.imread(
-            f"{EvaDB_ROOT_DIR}/test/unit_tests/udfs/data/grayscale_dog.jpeg"
+            f"{EvaDB_ROOT_DIR}/test/unit_tests/functions/data/grayscale_dog.jpeg"
         )
         self.assertEqual(np.sum(actual_array - expected_arr), 0)
-        file_remove(Path(f"{EvaDB_ROOT_DIR}/test/unit_tests/udfs/data/tmp.jpeg"))
+        file_remove(Path(f"{EvaDB_ROOT_DIR}/test/unit_tests/functions/data/tmp.jpeg"))

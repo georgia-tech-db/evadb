@@ -54,7 +54,7 @@ class YoloTest(unittest.TestCase):
     def test_should_raise_import_error_with_missing_torch(self):
         with self.assertRaises(ImportError):
             with mock.patch.dict(sys.modules, {"torch": None}):
-                from evadb.udfs.decorators.yolo_object_detection_decorators import (  # noqa: F401
+                from evadb.functions.decorators.yolo_object_detection_decorators import (  # noqa: F401
                     Yolo,
                 )
 
@@ -62,7 +62,7 @@ class YoloTest(unittest.TestCase):
 
     @unittest.skip("disable test due to model downloading time")
     def test_should_return_batches_equivalent_to_number_of_frames(self):
-        from evadb.udfs.decorators.yolo_object_detection_decorators import Yolo
+        from evadb.functions.decorators.yolo_object_detection_decorators import Yolo
 
         frame_dog = {
             "id": 1,

@@ -21,7 +21,7 @@ from evadb.readers.decord_reader import DecordReader
 from evadb.utils.generic_utils import (
     generate_file_path,
     is_gpu_available,
-    load_udf_class_from_file,
+    load_function_class_from_file,
     str_to_class,
     validate_kwargs,
 )
@@ -37,31 +37,31 @@ class ModulePathTest(unittest.TestCase):
         self.assertEqual(vl, DecordReader)
 
     def test_should_return_correct_class_for_path(self):
-        vl = load_udf_class_from_file("evadb/readers/decord_reader.py", "DecordReader")
+        vl = load_function_class_from_file("evadb/readers/decord_reader.py", "DecordReader")
         # Can't check that v1 = DecordReader because the above function returns decord_reader.DecordReader instead of evadb.readers.decord_reader.DecordReader
         # So we check the qualname instead, qualname is the path to the class including the module name
         # Ref: https://peps.python.org/pep-3155/#rationale
         assert vl.__qualname__ == DecordReader.__qualname__
 
     def test_should_return_correct_class_for_path_without_classname(self):
-        vl = load_udf_class_from_file("evadb/readers/decord_reader.py")
+        vl = load_function_class_from_file("evadb/readers/decord_reader.py")
         assert vl.__qualname__ == DecordReader.__qualname__
 
     def test_should_raise_on_missing_file(self):
         with self.assertRaises(RuntimeError):
-            load_udf_class_from_file("evadb/readers/opencv_reader_abdfdsfds.py")
+            load_function_class_from_file("evadb/readers/opencv_reader_abdfdsfds.py")
 
     def test_should_raise_if_class_does_not_exists(self):
         with self.assertRaises(RuntimeError):
             # evadb/utils/s3_utils.py has no class in it
             # if this test fails due to change in s3_utils.py, change the file to something else
-            load_udf_class_from_file("evadb/utils/s3_utils.py")
+            load_function_class_from_file("evadb/utils/s3_utils.py")
 
     def test_should_raise_if_multiple_classes_exist_and_no_class_mentioned(self):
         with self.assertRaises(RuntimeError):
             # evadb/utils/generic_utils.py has multiple classes in it
             # if this test fails due to change in generic_utils.py, change the file to something else
-            load_udf_class_from_file("evadb/utils/generic_utils.py")
+            load_function_class_from_file("evadb/utils/generic_utils.py")
 
     def test_should_use_torch_to_check_if_gpu_is_available(self):
         # Emulate a missing import

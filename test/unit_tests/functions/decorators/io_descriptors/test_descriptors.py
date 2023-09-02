@@ -15,15 +15,15 @@
 import unittest
 
 from evadb.catalog.catalog_type import ColumnType, Dimension, NdArrayType
-from evadb.udfs.decorators.io_descriptors.data_types import (
+from evadb.functions.decorators.io_descriptors.data_types import (
     NumpyArray,
     PandasDataframe,
     PyTorchTensor,
 )
-from evadb.utils.errors import UDFIODefinitionError
+from evadb.utils.errors import FunctionIODefinitionError
 
 
-class UDFIODescriptorsTests(unittest.TestCase):
+class FunctionIODescriptorsTests(unittest.TestCase):
     def test_catalog_entry_for_numpy_entry(self):
         numpy_array = NumpyArray(
             name="input", is_nullable=False, type=NdArrayType.UINT8, dimensions=(2, 2)
@@ -154,5 +154,5 @@ class UDFIODescriptorsTests(unittest.TestCase):
             column_types=[NdArrayType.UINT8],
             column_shapes=[(3, 256, 256), (3, 256, 256)],
         )
-        with self.assertRaises(UDFIODefinitionError):
+        with self.assertRaises(FunctionIODefinitionError):
             pandas_dataframe.generate_catalog_entries()

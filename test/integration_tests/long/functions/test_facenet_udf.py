@@ -40,7 +40,7 @@ class FaceNet(unittest.TestCase):
 
     @windows_skip_marker
     def test_should_return_batches_equivalent_to_number_of_frames(self):
-        from evadb.udfs.face_detector import FaceDetector
+        from evadb.functions.face_detector import FaceDetector
 
         single_face_img = Path("data/facenet/one.jpg")
         multi_face_img = Path("data/facenet/multiface.jpg")
@@ -65,7 +65,7 @@ class FaceNet(unittest.TestCase):
 
     @unittest.skip("Needs GPU")
     def test_should_run_on_gpu(self):
-        from evadb.udfs.face_detector import FaceDetector
+        from evadb.functions.face_detector import FaceDetector
 
         single_face_img = Path("data/facenet/one.jpg")
         frame_single_face = {

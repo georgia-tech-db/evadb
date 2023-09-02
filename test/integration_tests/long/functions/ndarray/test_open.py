@@ -20,7 +20,7 @@ import pandas as pd
 import pytest
 from mock import patch
 
-from evadb.udfs.ndarray.open import Open
+from evadb.functions.ndarray.open import Open
 from evadb.utils.generic_utils import try_to_import_cv2
 
 

@@ -25,7 +25,7 @@ class TestTextHFModel(TextHFModel):
     @property
     def default_pipeline_args(self) -> dict:
         # We need to improve the hugging face interface, passing
-        # UdfCatalogEntry into UDF is not ideal.
+        # FunctionCatalogEntry into Function is not ideal.
         return {
             "task": "summarization",
             "model": "sshleifer/distilbart-cnn-12-6",
@@ -36,9 +36,9 @@ class TestTextHFModel(TextHFModel):
 
 class HuggingFaceTest(unittest.TestCase):
     def test_hugging_face_with_large_input(self):
-        udf_obj = MagicMock()
-        udf_obj.metadata = []
-        text_summarization_model = TestTextHFModel(udf_obj)
+        function_obj = MagicMock()
+        function_obj.metadata = []
+        text_summarization_model = TestTextHFModel(function_obj)
 
         large_text = pd.DataFrame([{"text": "hello" * 4096}])
         try:

@@ -12,14 +12,4 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import unittest
-
-from evadb.udfs.ndarray.array_count import ArrayCount
-
-
-class CropTests(unittest.TestCase):
-    def setUp(self):
-        self.array_count = ArrayCount()
-
-    def test_array_count_name_exists(self):
-        assert hasattr(self.array_count, "name")
+"""user defined test functions operating on ndarrays functions"""

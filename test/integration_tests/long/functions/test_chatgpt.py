@@ -58,15 +58,15 @@ class ChatGPTTest(unittest.TestCase):
         execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS MyTextCSV;")
 
     @chatgpt_skip_marker
-    def test_openai_chat_completion_udf(self):
-        udf_name = "OpenAIChatCompletion"
-        execute_query_fetch_all(self.evadb, f"DROP UDF IF EXISTS {udf_name};")
+    def test_openai_chat_completion_function(self):
+        function_name = "OpenAIChatCompletion"
+        execute_query_fetch_all(self.evadb, f"DROP FUNCTION IF EXISTS {function_name};")
 
-        create_udf_query = f"""CREATE UDF IF NOT EXISTS{udf_name}
-            IMPL 'evadb/udfs/chatgpt.py';
+        create_function_query = f"""CREATE FUNCTION IF NOT EXISTS{function_name}
+            IMPL 'evadb/functions/chatgpt.py';
         """
-        execute_query_fetch_all(self.evadb, create_udf_query)
+        execute_query_fetch_all(self.evadb, create_function_query)
 
-        gpt_query = f"SELECT {udf_name}('summarize', content) FROM MyTextCSV;"
+        gpt_query = f"SELECT {function_name}('summarize', content) FROM MyTextCSV;"
         output_batch = execute_query_fetch_all(self.evadb, gpt_query)
         self.assertEqual(output_batch.columns, ["openaichatcompletion.response"])

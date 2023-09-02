@@ -23,7 +23,7 @@ from evadb.optimizer.operators import (
     LogicalApplyAndMerge,
     LogicalCreate,
     LogicalCreateIndex,
-    LogicalCreateUDF,
+    LogicalCreateFunction,
     LogicalDelete,
     LogicalDropObject,
     LogicalExchange,
@@ -50,7 +50,7 @@ from evadb.optimizer.operators import (
 from evadb.optimizer.statement_to_opr_converter import StatementToPlanConverter
 from evadb.parser.create_index_statement import CreateIndexStatement
 from evadb.parser.create_statement import CreateTableStatement
-from evadb.parser.create_udf_statement import CreateUDFStatement
+from evadb.parser.create_function_statement import CreateFunctionStatement
 from evadb.parser.drop_object_statement import DropObjectStatement
 from evadb.parser.explain_statement import ExplainStatement
 from evadb.parser.insert_statement import InsertTableStatement
@@ -120,16 +120,16 @@ class StatementToOprTest(unittest.TestCase):
         converter._visit_projection.assert_not_called()
         converter._visit_select_predicate.assert_not_called()
 
-    @patch("evadb.optimizer.statement_to_opr_converter.LogicalCreateUDF")
+    @patch("evadb.optimizer.statement_to_opr_converter.LogicalCreateFunction")
     @patch(
         "evadb.optimizer.\
-statement_to_opr_converter.column_definition_to_udf_io"
+statement_to_opr_converter.column_definition_to_function_io"
     )
     @patch(
         "evadb.optimizer.\
-statement_to_opr_converter.metadata_definition_to_udf_metadata"
+statement_to_opr_converter.metadata_definition_to_function_metadata"
     )
-    def test_visit_create_udf(self, metadata_def_mock, col_def_mock, l_create_udf_mock):
+    def test_visit_create_function(self, metadata_def_mock, col_def_mock, l_create_function_mock):
         converter = StatementToPlanConverter()
         stmt = MagicMock()
         stmt.name = "name"
@@ -137,31 +137,31 @@ statement_to_opr_converter.metadata_definition_to_udf_metadata"
         stmt.inputs = ["inp"]
         stmt.outputs = ["out"]
         stmt.impl_path = "tmp.py"
-        stmt.udf_type = "classification"
+        stmt.function_type = "classification"
         stmt.query = None
         stmt.metadata = [("key1", "value1"), ("key2", "value2")]
         col_def_mock.side_effect = ["inp", "out"]
         metadata_def_mock.side_effect = [{"key1": "value1", "key2": "value2"}]
-        converter.visit_create_udf(stmt)
+        converter.visit_create_function(stmt)
         col_def_mock.assert_any_call(stmt.inputs, True)
         col_def_mock.assert_any_call(stmt.outputs, False)
         metadata_def_mock.assert_any_call(stmt.metadata)
-        l_create_udf_mock.assert_called_once()
-        l_create_udf_mock.assert_called_with(
+        l_create_function_mock.assert_called_once()
+        l_create_function_mock.assert_called_with(
             stmt.name,
             stmt.if_not_exists,
             "inp",
             "out",
             stmt.impl_path,
-            stmt.udf_type,
+            stmt.function_type,
             {"key1": "value1", "key2": "value2"},
         )
 
-    def test_visit_should_call_create_udf(self):
-        stmt = MagicMock(spec=CreateUDFStatement)
+    def test_visit_should_call_create_function(self):
+        stmt = MagicMock(spec=CreateFunctionStatement)
         converter = StatementToPlanConverter()
         mock = MagicMock()
-        converter.visit_create_udf = mock
+        converter.visit_create_function = mock
 
         converter.visit(stmt)
         mock.assert_called_once()
@@ -245,7 +245,7 @@ statement_to_opr_converter.metadata_definition_to_udf_metadata"
         plans = []
         dummy_plan = Dummy(MagicMock(), MagicMock())
         create_plan = LogicalCreate(MagicMock(), MagicMock())
-        create_udf_plan = LogicalCreateUDF(
+        create_function_plan = LogicalCreateFunction(
             MagicMock(), MagicMock(), MagicMock(), MagicMock(), MagicMock(), MagicMock()
         )
         create_index_plan = LogicalCreateIndex(
@@ -280,11 +280,11 @@ statement_to_opr_converter.metadata_definition_to_udf_metadata"
         extract_object_plan = LogicalExtractObject(
             MagicMock(), MagicMock(), MagicMock(), MagicMock()
         )
-        create_plan.append_child(create_udf_plan)
+        create_plan.append_child(create_function_plan)
 
         plans.append(dummy_plan)
         plans.append(create_plan)
-        plans.append(create_udf_plan)
+        plans.append(create_function_plan)
         plans.append(create_index_plan)
         plans.append(delete_plan)
         plans.append(insert_plan)

@@ -15,20 +15,20 @@
 import unittest
 
 from evadb.catalog.catalog_type import NdArrayType
-from evadb.udfs.decorators.decorators import forward, setup
-from evadb.udfs.decorators.io_descriptors.data_types import NumpyArray, PandasDataframe
+from evadb.functions.decorators.decorators import forward, setup
+from evadb.functions.decorators.io_descriptors.data_types import NumpyArray, PandasDataframe
 
 
 class DecoratorTests(unittest.TestCase):
     def test_setup_flags_are_updated(self):
-        @setup(cacheable=True, udf_type="classification", batchable=True)
+        @setup(cacheable=True, function_type="classification", batchable=True)
         def setup_func():
             pass
 
         setup_func()
         self.assertTrue(setup_func.tags["cacheable"])
         self.assertTrue(setup_func.tags["batchable"])
-        self.assertEqual(setup_func.tags["udf_type"], "classification")
+        self.assertEqual(setup_func.tags["function_type"], "classification")
 
     def test_setup_flags_are_updated_with_default_values(self):
         @setup()
@@ -38,7 +38,7 @@ class DecoratorTests(unittest.TestCase):
         setup_func()
         self.assertFalse(setup_func.tags["cacheable"])
         self.assertTrue(setup_func.tags["batchable"])
-        self.assertEqual(setup_func.tags["udf_type"], "Abstract")
+        self.assertEqual(setup_func.tags["function_type"], "Abstract")
 
     def test_forward_flags_are_updated(self):
         input_type = PandasDataframe(

@@ -19,8 +19,8 @@ import pandas as pd
 from numpy import asarray
 
 from evadb.configuration.constants import EvaDB_ROOT_DIR
-from evadb.udfs.ndarray.horizontal_flip import HorizontalFlip
-from evadb.udfs.ndarray.vertical_flip import VerticalFlip
+from evadb.functions.ndarray.horizontal_flip import HorizontalFlip
+from evadb.functions.ndarray.vertical_flip import VerticalFlip
 from evadb.utils.generic_utils import try_to_import_pillow
 
 

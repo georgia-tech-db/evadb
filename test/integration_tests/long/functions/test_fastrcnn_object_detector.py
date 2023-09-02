@@ -37,7 +37,7 @@ class FastRCNNObjectDetectorTest(unittest.TestCase):
 
     @unittest.skip("disable test due to model downloading time")
     def test_should_return_batches_equivalent_to_number_of_frames(self):
-        from evadb.udfs.fastrcnn_object_detector import FastRCNNObjectDetector
+        from evadb.functions.fastrcnn_object_detector import FastRCNNObjectDetector
 
         frame_dog = {
             "id": 1,

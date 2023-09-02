@@ -17,87 +17,87 @@ import unittest
 from mock import MagicMock, patch
 
 from evadb.catalog.catalog_type import NdArrayType
-from evadb.executor.create_udf_executor import CreateUDFExecutor
-from evadb.udfs.decorators.io_descriptors.data_types import PandasDataframe
+from evadb.executor.create_function_executor import CreateFunctionExecutor
+from evadb.functions.decorators.io_descriptors.data_types import PandasDataframe
 
 
-class CreateUdfExecutorTest(unittest.TestCase):
-    @patch("evadb.executor.create_udf_executor.load_udf_class_from_file")
-    def test_should_create_udf(self, load_udf_class_from_file_mock):
+class CreateFunctionExecutorTest(unittest.TestCase):
+    @patch("evadb.executor.create_function_executor.load_function_class_from_file")
+    def test_should_create_function(self, load_function_class_from_file_mock):
         catalog_instance = MagicMock()
-        catalog_instance().get_udf_catalog_entry_by_name.return_value = None
-        catalog_instance().insert_udf_catalog_entry.return_value = "udf"
+        catalog_instance().get_function_catalog_entry_by_name.return_value = None
+        catalog_instance().insert_function_catalog_entry.return_value = "function"
         impl_path = MagicMock()
         abs_path = impl_path.absolute.return_value = MagicMock()
         abs_path.as_posix.return_value = "test.py"
-        load_udf_class_from_file_mock.return_value.return_value = "mock_class"
+        load_function_class_from_file_mock.return_value.return_value = "mock_class"
         plan = type(
-            "CreateUDFPlan",
+            "CreateFunctionPlan",
             (),
             {
-                "name": "udf",
+                "name": "function",
                 "if_not_exists": False,
                 "inputs": ["inp"],
                 "outputs": ["out"],
                 "impl_path": impl_path,
-                "udf_type": "classification",
+                "function_type": "classification",
                 "metadata": {"key1": "value1", "key2": "value2"},
             },
         )
         evadb = MagicMock
         evadb.catalog = catalog_instance
         evadb.config = MagicMock()
-        create_udf_executor = CreateUDFExecutor(evadb, plan)
-        next(create_udf_executor.exec())
-        catalog_instance().insert_udf_catalog_entry.assert_called_with(
-            "udf",
+        create_function_executor = CreateFunctionExecutor(evadb, plan)
+        next(create_function_executor.exec())
+        catalog_instance().insert_function_catalog_entry.assert_called_with(
+            "function",
             "test.py",
             "classification",
             ["inp", "out"],
             {"key1": "value1", "key2": "value2"},
         )
 
-    @patch("evadb.executor.create_udf_executor.load_udf_class_from_file")
+    @patch("evadb.executor.create_function_executor.load_function_class_from_file")
     def test_should_raise_error_on_incorrect_io_definition(
-        self, load_udf_class_from_file_mock
+        self, load_function_class_from_file_mock
     ):
         catalog_instance = MagicMock()
-        catalog_instance().get_udf_catalog_entry_by_name.return_value = None
-        catalog_instance().insert_udf_catalog_entry.return_value = "udf"
+        catalog_instance().get_function_catalog_entry_by_name.return_value = None
+        catalog_instance().insert_function_catalog_entry.return_value = "function"
         impl_path = MagicMock()
         abs_path = impl_path.absolute.return_value = MagicMock()
         abs_path.as_posix.return_value = "test.py"
-        load_udf_class_from_file_mock.return_value.return_value = "mock_class"
+        load_function_class_from_file_mock.return_value.return_value = "mock_class"
         incorrect_input_definition = PandasDataframe(
             columns=["Frame_Array", "Frame_Array_2"],
             column_types=[NdArrayType.UINT8],
             column_shapes=[(3, 256, 256), (3, 256, 256)],
         )
-        load_udf_class_from_file_mock.return_value.forward.tags = {
+        load_function_class_from_file_mock.return_value.forward.tags = {
             "input": [incorrect_input_definition],
             "output": [],
         }
         plan = type(
-            "CreateUDFPlan",
+            "CreateFunctionPlan",
             (),
             {
-                "name": "udf",
+                "name": "function",
                 "if_not_exists": False,
                 "inputs": [],
                 "outputs": [],
                 "impl_path": impl_path,
-                "udf_type": "classification",
+                "function_type": "classification",
             },
         )
         evadb = MagicMock
         evadb.catalog = catalog_instance
         evadb.config = MagicMock()
-        create_udf_executor = CreateUDFExecutor(evadb, plan)
+        create_function_executor = CreateFunctionExecutor(evadb, plan)
         # check a string in the error message
         with self.assertRaises(RuntimeError) as exc:
-            next(create_udf_executor.exec())
+            next(create_function_executor.exec())
         self.assertIn(
-            "Error creating UDF, input/output definition incorrect:", str(exc.exception)
+            "Error creating Function, input/output definition incorrect:", str(exc.exception)
         )
 
-        catalog_instance().insert_udf_catalog_entry.assert_not_called()
+        catalog_instance().insert_function_catalog_entry.assert_not_called()

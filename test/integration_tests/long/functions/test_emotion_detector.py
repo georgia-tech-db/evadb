@@ -38,7 +38,7 @@ class EmotionDetector(unittest.TestCase):
 
     @unittest.skip("disable test due to model downloading time")
     def test_should_return_correct_emotion(self):
-        from evadb.udfs.emotion_detector import EmotionDetector
+        from evadb.functions.emotion_detector import EmotionDetector
 
         happy_img = self.base_path / "happy.jpg"
         sad_img = self.base_path / "sad.jpg"

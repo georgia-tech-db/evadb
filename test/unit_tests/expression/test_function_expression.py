@@ -21,7 +21,7 @@ from evadb.constants import NO_GPU
 from evadb.expression.function_expression import FunctionExpression
 from evadb.models.storage.batch import Batch
 from evadb.parser.alias import Alias
-from evadb.udfs.gpu_compatible import GPUCompatible
+from evadb.functions.gpu_compatible import GPUCompatible
 
 
 class FunctionExpressionTest(unittest.TestCase):

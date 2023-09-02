@@ -52,22 +52,22 @@ class HuggingFaceTests(unittest.TestCase):
         file_remove(self.csv_file_path)
 
     def test_io_catalog_entries_populated(self):
-        udf_name, task = "HFObjectDetector", "image-classification"
-        create_udf_query = f"""CREATE UDF {udf_name}
+        function_name, task = "HFObjectDetector", "image-classification"
+        create_function_query = f"""CREATE FUNCTION {function_name}
             TYPE HuggingFace
             'task' '{task}'
         """
 
-        execute_query_fetch_all(self.evadb, create_udf_query)
+        execute_query_fetch_all(self.evadb, create_function_query)
 
         catalog = self.evadb.catalog()
-        udf = catalog.get_udf_catalog_entry_by_name(udf_name)
-        input_entries = catalog.get_udf_io_catalog_input_entries(udf)
-        output_entries = catalog.get_udf_io_catalog_output_entries(udf)
+        function = catalog.get_function_catalog_entry_by_name(function_name)
+        input_entries = catalog.get_function_io_catalog_input_entries(function)
+        output_entries = catalog.get_function_io_catalog_output_entries(function)
 
         # Verify that there is one input entry with the name text
         self.assertEqual(len(input_entries), 1)
-        self.assertEqual(input_entries[0].name, f"{udf_name}_IMAGE")
+        self.assertEqual(input_entries[0].name, f"{function_name}_IMAGE")
 
         # Verify that there are 3 output entries with the names score, label and box
         self.assertEqual(len(output_entries), 2)
@@ -75,9 +75,9 @@ class HuggingFaceTests(unittest.TestCase):
         self.assertEqual(output_entries[1].name, "label")
 
     def test_raise_error_on_unsupported_task(self):
-        udf_name = "HFUnsupportedTask"
+        function_name = "HFUnsupportedTask"
         task = "zero-shot-object-detection"
-        create_udf_query = f"""CREATE UDF {udf_name}
+        create_function_query = f"""CREATE FUNCTION {function_name}
             TYPE HuggingFace
             'task' '{task}'
         """
@@ -85,22 +85,22 @@ class HuggingFaceTests(unittest.TestCase):
 
         with self.assertRaises(ExecutorError) as exc_info:
             execute_query_fetch_all(
-                self.evadb, create_udf_query, do_not_print_exceptions=True
+                self.evadb, create_function_query, do_not_print_exceptions=True
             )
         self.assertIn(
             f"Task {task} not supported in EvaDB currently", str(exc_info.exception)
         )
 
     def test_object_detection(self):
-        udf_name = "HFObjectDetector"
-        create_udf_query = f"""CREATE UDF {udf_name}
+        function_name = "HFObjectDetector"
+        create_function_query = f"""CREATE FUNCTION {function_name}
             TYPE HuggingFace
             'task' 'object-detection'
             'model' 'facebook/detr-resnet-50';
         """
-        execute_query_fetch_all(self.evadb, create_udf_query)
+        execute_query_fetch_all(self.evadb, create_function_query)
 
-        select_query = f"SELECT {udf_name}(data) FROM DETRAC WHERE id < 4;"
+        select_query = f"SELECT {function_name}(data) FROM DETRAC WHERE id < 4;"
         output = execute_query_fetch_all(self.evadb, select_query)
         output_frames = output.frames
 
@@ -110,21 +110,21 @@ class HuggingFaceTests(unittest.TestCase):
         # Test that number of rows is equal to 10
         self.assertEqual(len(output.frames), 4)
 
-        # Test that there exists a column with udf_name.score and each entry is a list of floats
-        self.assertTrue(udf_name.lower() + ".score" in output_frames.columns)
+        # Test that there exists a column with function_name.score and each entry is a list of floats
+        self.assertTrue(function_name.lower() + ".score" in output_frames.columns)
         self.assertTrue(
-            all(isinstance(x, list) for x in output.frames[udf_name.lower() + ".score"])
+            all(isinstance(x, list) for x in output.frames[function_name.lower() + ".score"])
         )
 
-        # Test that there exists a column with udf_name.label and each entry is a list of strings
-        self.assertTrue(udf_name.lower() + ".label" in output_frames.columns)
+        # Test that there exists a column with function_name.label and each entry is a list of strings
+        self.assertTrue(function_name.lower() + ".label" in output_frames.columns)
         self.assertTrue(
-            all(isinstance(x, list) for x in output.frames[udf_name.lower() + ".label"])
+            all(isinstance(x, list) for x in output.frames[function_name.lower() + ".label"])
         )
 
-        # Test that there exists a column with udf_name.box and each entry is a dictionary with 4 keys
-        self.assertTrue(udf_name.lower() + ".box" in output_frames.columns)
-        for bbox in output.frames[udf_name.lower() + ".box"]:
+        # Test that there exists a column with function_name.box and each entry is a dictionary with 4 keys
+        self.assertTrue(function_name.lower() + ".box" in output_frames.columns)
+        for bbox in output.frames[function_name.lower() + ".box"]:
             self.assertTrue(isinstance(bbox, list))
             bbox = bbox[0]
             self.assertTrue(isinstance(bbox, dict))
@@ -134,37 +134,37 @@ class HuggingFaceTests(unittest.TestCase):
             self.assertTrue("xmax" in bbox)
             self.assertTrue("ymax" in bbox)
 
-        drop_udf_query = f"DROP UDF {udf_name};"
-        execute_query_fetch_all(self.evadb, drop_udf_query)
+        drop_function_query = f"DROP FUNCTION {function_name};"
+        execute_query_fetch_all(self.evadb, drop_function_query)
 
     def test_image_classification(self):
-        udf_name = "HFImageClassifier"
-        create_udf_query = f"""CREATE UDF {udf_name}
+        function_name = "HFImageClassifier"
+        create_function_query = f"""CREATE FUNCTION {function_name}
             TYPE HuggingFace
             'task' 'image-classification'
         """
-        execute_query_fetch_all(self.evadb, create_udf_query)
+        execute_query_fetch_all(self.evadb, create_function_query)
 
-        select_query = f"SELECT {udf_name}(data) FROM DETRAC WHERE id < 3;"
+        select_query = f"SELECT {function_name}(data) FROM DETRAC WHERE id < 3;"
         output = execute_query_fetch_all(self.evadb, select_query)
 
         # Test that output has 2 columns
         self.assertEqual(len(output.frames.columns), 2)
 
-        # Test that there exists a column with udf_name.score and each entry is a list of floats
-        self.assertTrue(udf_name.lower() + ".score" in output.frames.columns)
+        # Test that there exists a column with function_name.score and each entry is a list of floats
+        self.assertTrue(function_name.lower() + ".score" in output.frames.columns)
         self.assertTrue(
-            all(isinstance(x, list) for x in output.frames[udf_name.lower() + ".score"])
+            all(isinstance(x, list) for x in output.frames[function_name.lower() + ".score"])
         )
 
-        # Test that there exists a column with udf_name.label and each entry is a list of strings
-        self.assertTrue(udf_name.lower() + ".label" in output.frames.columns)
+        # Test that there exists a column with function_name.label and each entry is a list of strings
+        self.assertTrue(function_name.lower() + ".label" in output.frames.columns)
         self.assertTrue(
-            all(isinstance(x, list) for x in output.frames[udf_name.lower() + ".label"])
+            all(isinstance(x, list) for x in output.frames[function_name.lower() + ".label"])
         )
 
-        drop_udf_query = f"DROP UDF {udf_name};"
-        execute_query_fetch_all(self.evadb, drop_udf_query)
+        drop_function_query = f"DROP FUNCTION {function_name};"
+        execute_query_fetch_all(self.evadb, drop_function_query)
 
     @pytest.mark.benchmark
     def test_text_classification(self):
@@ -177,51 +177,51 @@ class HuggingFaceTests(unittest.TestCase):
         load_table_query = f"""LOAD CSV '{self.csv_file_path}' INTO MyCSV;"""
         execute_query_fetch_all(self.evadb, load_table_query)
 
-        udf_name = "HFTextClassifier"
-        create_udf_query = f"""CREATE UDF {udf_name}
+        function_name = "HFTextClassifier"
+        create_function_query = f"""CREATE FUNCTION {function_name}
             TYPE HuggingFace
             'task' 'text-classification'
         """
-        execute_query_fetch_all(self.evadb, create_udf_query)
+        execute_query_fetch_all(self.evadb, create_function_query)
 
-        select_query = f"SELECT {udf_name}(comment) FROM MyCSV;"
+        select_query = f"SELECT {function_name}(comment) FROM MyCSV;"
         output = execute_query_fetch_all(self.evadb, select_query)
 
         # Test that output has 2 columns
         self.assertEqual(len(output.frames.columns), 2)
 
-        # Test that there exists a column with udf_name.label and each entry is either "POSITIVE" or "NEGATIVE"
-        self.assertTrue(udf_name.lower() + ".label" in output.frames.columns)
+        # Test that there exists a column with function_name.label and each entry is either "POSITIVE" or "NEGATIVE"
+        self.assertTrue(function_name.lower() + ".label" in output.frames.columns)
         self.assertTrue(
             all(
                 x in ["POSITIVE", "NEGATIVE"]
-                for x in output.frames[udf_name.lower() + ".label"]
+                for x in output.frames[function_name.lower() + ".label"]
             )
         )
 
-        # Test that there exists a column with udf_name.score and each entry is a float
-        self.assertTrue(udf_name.lower() + ".score" in output.frames.columns)
+        # Test that there exists a column with function_name.score and each entry is a float
+        self.assertTrue(function_name.lower() + ".score" in output.frames.columns)
         self.assertTrue(
             all(
-                isinstance(x, float) for x in output.frames[udf_name.lower() + ".score"]
+                isinstance(x, float) for x in output.frames[function_name.lower() + ".score"]
             )
         )
 
-        drop_udf_query = f"DROP UDF {udf_name};"
-        execute_query_fetch_all(self.evadb, drop_udf_query)
+        drop_function_query = f"DROP FUNCTION {function_name};"
+        execute_query_fetch_all(self.evadb, drop_function_query)
         execute_query_fetch_all(self.evadb, "DROP TABLE MyCSV;")
 
     @pytest.mark.benchmark
     def test_automatic_speech_recognition(self):
-        udf_name = "SpeechRecognizer"
-        create_udf = (
-            f"CREATE UDF {udf_name} TYPE HuggingFace "
+        function_name = "SpeechRecognizer"
+        create_function = (
+            f"CREATE FUNCTION {function_name} TYPE HuggingFace "
             "'task' 'automatic-speech-recognition' 'model' 'openai/whisper-base';"
         )
-        execute_query_fetch_all(self.evadb, create_udf)
+        execute_query_fetch_all(self.evadb, create_function)
 
         # TODO: use with SAMPLE AUDIORATE 16000
-        select_query = f"SELECT {udf_name}(audio) FROM VIDEOS;"
+        select_query = f"SELECT {function_name}(audio) FROM VIDEOS;"
         output = execute_query_fetch_all(self.evadb, select_query)
 
         # verify that output has one row and one column only
@@ -230,7 +230,7 @@ class HuggingFaceTests(unittest.TestCase):
         self.assertTrue(output.frames.iloc[0][0].count("touchdown") == 2)
 
         select_query_with_group_by = (
-            f"SELECT {udf_name}(SEGMENT(audio)) FROM VIDEOS GROUP BY '240 samples';"
+            f"SELECT {function_name}(SEGMENT(audio)) FROM VIDEOS GROUP BY '240 samples';"
         )
         output = execute_query_fetch_all(self.evadb, select_query_with_group_by)
 
@@ -239,27 +239,27 @@ class HuggingFaceTests(unittest.TestCase):
         # verify that speech was converted to text correctly
         self.assertEquals(output.frames.iloc[0][0].count("touchdown"), 1)
 
-        drop_udf_query = f"DROP UDF {udf_name};"
-        execute_query_fetch_all(self.evadb, drop_udf_query)
+        drop_function_query = f"DROP FUNCTION {function_name};"
+        execute_query_fetch_all(self.evadb, drop_function_query)
 
     @pytest.mark.benchmark
     def test_summarization_from_video(self):
-        asr_udf = "SpeechRecognizer"
-        create_udf = (
-            f"CREATE UDF {asr_udf} TYPE HuggingFace "
+        asr_function = "SpeechRecognizer"
+        create_function = (
+            f"CREATE FUNCTION {asr_function} TYPE HuggingFace "
             "'task' 'automatic-speech-recognition' 'model' 'openai/whisper-base';"
         )
-        execute_query_fetch_all(self.evadb, create_udf)
+        execute_query_fetch_all(self.evadb, create_function)
 
-        summary_udf = "Summarizer"
-        create_udf = (
-            f"CREATE UDF {summary_udf} TYPE HuggingFace "
+        summary_function = "Summarizer"
+        create_function = (
+            f"CREATE FUNCTION {summary_function} TYPE HuggingFace "
             "'task' 'summarization' 'model' 'philschmid/bart-large-cnn-samsum' 'min_length' 10 'max_new_tokens' 100;"
         )
-        execute_query_fetch_all(self.evadb, create_udf)
+        execute_query_fetch_all(self.evadb, create_function)
 
         # TODO: use with SAMPLE AUDIORATE 16000
-        select_query = f"SELECT {summary_udf}({asr_udf}(audio)) FROM VIDEOS;"
+        select_query = f"SELECT {summary_function}({asr_function}(audio)) FROM VIDEOS;"
         output = execute_query_fetch_all(self.evadb, select_query)
 
         # verify that output has one row and one column only
@@ -270,19 +270,19 @@ class HuggingFaceTests(unittest.TestCase):
             == "Jalen Hurts has scored his second rushing touchdown of the game."
         )
 
-        drop_udf_query = f"DROP UDF {asr_udf};"
-        execute_query_fetch_all(self.evadb, drop_udf_query)
-        drop_udf_query = f"DROP UDF {summary_udf};"
-        execute_query_fetch_all(self.evadb, drop_udf_query)
+        drop_function_query = f"DROP FUNCTION {asr_function};"
+        execute_query_fetch_all(self.evadb, drop_function_query)
+        drop_function_query = f"DROP FUNCTION {summary_function};"
+        execute_query_fetch_all(self.evadb, drop_function_query)
 
     def test_toxicity_classification(self):
-        udf_name = "HFToxicityClassifier"
-        create_udf_query = f"""CREATE UDF {udf_name}
+        function_name = "HFToxicityClassifier"
+        create_function_query = f"""CREATE FUNCTION {function_name}
             TYPE HuggingFace
             'task' 'text-classification'
             'model' 'martin-ha/toxic-comment-model'
         """
-        execute_query_fetch_all(self.evadb, create_udf_query)
+        execute_query_fetch_all(self.evadb, create_function_query)
 
         drop_table_query = """DROP TABLE IF EXISTS MyCSV;"""
         execute_query_fetch_all(self.evadb, drop_table_query)
@@ -296,42 +296,42 @@ class HuggingFaceTests(unittest.TestCase):
         load_table_query = f"""LOAD CSV '{self.csv_file_path}' INTO MyCSV;"""
         execute_query_fetch_all(self.evadb, load_table_query)
 
-        select_query = f"SELECT {udf_name}(comment) FROM MyCSV;"
+        select_query = f"SELECT {function_name}(comment) FROM MyCSV;"
         output = execute_query_fetch_all(self.evadb, select_query)
 
         # Test that output has 2 columns
         self.assertEqual(len(output.frames.columns), 2)
 
-        # Test that there exists a column with udf_name.label and each entry is either "POSITIVE" or "NEGATIVE"
-        self.assertTrue(udf_name.lower() + ".label" in output.frames.columns)
+        # Test that there exists a column with function_name.label and each entry is either "POSITIVE" or "NEGATIVE"
+        self.assertTrue(function_name.lower() + ".label" in output.frames.columns)
         self.assertTrue(
             all(
                 x in ["non-toxic", "toxic"]
-                for x in output.frames[udf_name.lower() + ".label"]
+                for x in output.frames[function_name.lower() + ".label"]
             )
         )
 
-        # Test that there exists a column with udf_name.score
+        # Test that there exists a column with function_name.score
         # and each entry is a float
-        self.assertTrue(udf_name.lower() + ".score" in output.frames.columns)
+        self.assertTrue(function_name.lower() + ".score" in output.frames.columns)
         self.assertTrue(
             all(
-                isinstance(x, float) for x in output.frames[udf_name.lower() + ".score"]
+                isinstance(x, float) for x in output.frames[function_name.lower() + ".score"]
             )
         )
 
-        drop_udf_query = f"DROP UDF {udf_name};"
-        execute_query_fetch_all(self.evadb, drop_udf_query)
+        drop_function_query = f"DROP FUNCTION {function_name};"
+        execute_query_fetch_all(self.evadb, drop_function_query)
 
     @pytest.mark.benchmark
     def test_multilingual_toxicity_classification(self):
-        udf_name = "HFMultToxicityClassifier"
-        create_udf_query = f"""CREATE UDF {udf_name}
+        function_name = "HFMultToxicityClassifier"
+        create_function_query = f"""CREATE FUNCTION {function_name}
             TYPE HuggingFace
             'task' 'text-classification'
             'model' 'EIStakovskii/xlm_roberta_base_multilingual_toxicity_classifier_plus'
         """
-        execute_query_fetch_all(self.evadb, create_udf_query)
+        execute_query_fetch_all(self.evadb, create_function_query)
 
         drop_table_query = """DROP TABLE IF EXISTS MyCSV;"""
         execute_query_fetch_all(self.evadb, drop_table_query)
@@ -345,56 +345,56 @@ class HuggingFaceTests(unittest.TestCase):
         load_table_query = f"""LOAD CSV '{self.csv_file_path}' INTO MyCSV;"""
         execute_query_fetch_all(self.evadb, load_table_query)
 
-        select_query = f"SELECT {udf_name}(comment) FROM MyCSV;"
+        select_query = f"SELECT {function_name}(comment) FROM MyCSV;"
         output = execute_query_fetch_all(self.evadb, select_query)
 
         # Test that output has 2 columns
         self.assertEqual(len(output.frames.columns), 2)
 
-        # Test that there exists a column with udf_name.label and each entry is either "POSITIVE" or "NEGATIVE"
-        self.assertTrue(udf_name.lower() + ".label" in output.frames.columns)
+        # Test that there exists a column with function_name.label and each entry is either "POSITIVE" or "NEGATIVE"
+        self.assertTrue(function_name.lower() + ".label" in output.frames.columns)
         self.assertTrue(
             all(
                 x in ["LABEL_1", "LABEL_0"]
-                for x in output.frames[udf_name.lower() + ".label"]
+                for x in output.frames[function_name.lower() + ".label"]
             )
         )
 
-        # Test that there exists a column with udf_name.score and each entry is a float
-        self.assertTrue(udf_name.lower() + ".score" in output.frames.columns)
+        # Test that there exists a column with function_name.score and each entry is a float
+        self.assertTrue(function_name.lower() + ".score" in output.frames.columns)
         self.assertTrue(
             all(
-                isinstance(x, float) for x in output.frames[udf_name.lower() + ".score"]
+                isinstance(x, float) for x in output.frames[function_name.lower() + ".score"]
             )
         )
 
-        drop_udf_query = f"DROP UDF {udf_name};"
-        execute_query_fetch_all(self.evadb, drop_udf_query)
+        drop_function_query = f"DROP FUNCTION {function_name};"
+        execute_query_fetch_all(self.evadb, drop_function_query)
 
     @pytest.mark.benchmark
     def test_named_entity_recognition_model_all_pdf_data(self):
-        udf_name = "HFNERModel"
-        create_udf_query = f"""CREATE UDF {udf_name}
+        function_name = "HFNERModel"
+        create_function_query = f"""CREATE FUNCTION {function_name}
             TYPE HuggingFace
             'task' 'ner'
         """
-        execute_query_fetch_all(self.evadb, create_udf_query)
+        execute_query_fetch_all(self.evadb, create_function_query)
 
         # running test case on all the pdf data
-        select_query = f"SELECT data, {udf_name}(data) FROM MyPDFs;"
+        select_query = f"SELECT data, {function_name}(data) FROM MyPDFs;"
         output = execute_query_fetch_all(self.evadb, select_query)
 
         # Test that output has 7 columns
         self.assertEqual(len(output.frames.columns), 7)
 
-        # Test that there exists a column with udf_name.entity
-        self.assertTrue(udf_name.lower() + ".entity" in output.frames.columns)
+        # Test that there exists a column with function_name.entity
+        self.assertTrue(function_name.lower() + ".entity" in output.frames.columns)
 
-        # Test that there exists a column with udf_name.score
-        self.assertTrue(udf_name.lower() + ".score" in output.frames.columns)
+        # Test that there exists a column with function_name.score
+        self.assertTrue(function_name.lower() + ".score" in output.frames.columns)
 
-        drop_udf_query = f"DROP UDF {udf_name};"
-        execute_query_fetch_all(self.evadb, drop_udf_query)
+        drop_function_query = f"DROP FUNCTION {function_name};"
+        execute_query_fetch_all(self.evadb, drop_function_query)
 
     def test_select_and_groupby_with_paragraphs(self):
         segment_size = 10
@@ -408,15 +408,15 @@ class HuggingFaceTests(unittest.TestCase):
 
     @pytest.mark.benchmark
     def test_named_entity_recognition_model_no_ner_data_exists(self):
-        udf_name = "HFNERModel"
-        create_udf_query = f"""CREATE UDF {udf_name}
+        function_name = "HFNERModel"
+        create_function_query = f"""CREATE FUNCTION {function_name}
             TYPE HuggingFace
             'task' 'ner'
         """
-        execute_query_fetch_all(self.evadb, create_udf_query)
+        execute_query_fetch_all(self.evadb, create_function_query)
 
         # running test case where ner gives no data
-        select_query = f"""SELECT data, {udf_name}(data)
+        select_query = f"""SELECT data, {function_name}(data)
                   FROM MyPDFs
                   WHERE page = 3
                   AND paragraph >= 1 AND paragraph <= 3;"""
@@ -425,11 +425,11 @@ class HuggingFaceTests(unittest.TestCase):
         # Test that output only has 1 column (data)
         self.assertEqual(len(output.frames.columns), 1)
 
-        # Test that there does not exist a column with udf_name.entity
-        self.assertFalse(udf_name.lower() + ".entity" in output.frames.columns)
+        # Test that there does not exist a column with function_name.entity
+        self.assertFalse(function_name.lower() + ".entity" in output.frames.columns)
 
-        drop_udf_query = f"DROP UDF {udf_name};"
-        execute_query_fetch_all(self.evadb, drop_udf_query)
+        drop_function_query = f"DROP FUNCTION {function_name};"
+        execute_query_fetch_all(self.evadb, drop_function_query)
 
 
 if __name__ == "__main__":

@@ -19,7 +19,7 @@ import pandas as pd
 from numpy import asarray
 
 from evadb.configuration.constants import EvaDB_ROOT_DIR
-from evadb.udfs.ndarray.annotate import Annotate
+from evadb.functions.ndarray.annotate import Annotate
 from evadb.utils.generic_utils import try_to_import_pillow
 
 
