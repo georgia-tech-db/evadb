@@ -13,22 +13,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from evadb.third_party.applications.types import AppHandler, AppHandlerResponse, AppHandlerStatus
 from slack_sdk import WebClient
 
-class SlackHandler (AppHandler):
+from evadb.third_party.applications.types import (
+    AppHandler,
+    AppHandlerResponse,
+    AppHandlerStatus,
+)
+
+
+class SlackHandler(AppHandler):
     def __init__(self, name: str, **kwargs):
         super().__init__(name)
         self.token = kwargs.get("token")
         self.channel_name = kwargs.get("channel")
-    
+
     def connect(self):
         try:
             self.client = WebClient(token=self.token)
             return AppHandlerStatus(status=True)
         except Exception as e:
             return AppHandlerStatus(status=False, error=str(e))
-    
+
     def disconnect(self):
         """
         TODO: integrate code for disconnecting from slack
