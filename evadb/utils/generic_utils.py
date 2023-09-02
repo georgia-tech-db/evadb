@@ -63,7 +63,7 @@ def str_to_class(class_path: str):
     return getattr(module, class_name)
 
 
-def load_udf_class_from_file(filepath, classname=None):
+def load_function_class_from_file(filepath, classname=None):
     """
     Load a class from a Python file. If the classname is not specified, the function will check if there is only one class in the file and load that. If there are multiple classes, it will raise an error.
 
@@ -83,7 +83,7 @@ def load_udf_class_from_file(filepath, classname=None):
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
     except Exception as e:
-        err_msg = f"Couldn't load UDF from {filepath} : {str(e)}. This might be due to a missing Python package, or because the UDF implementation file does not exist, or it is not a valid Python file."
+        err_msg = f"Couldn't load Function from {filepath} : {str(e)}. This might be due to a missing Python package, or because the Function implementation file does not exist, or it is not a valid Python file."
         raise RuntimeError(err_msg)
 
     # Try to load the specified class by name
@@ -98,7 +98,7 @@ def load_udf_class_from_file(filepath, classname=None):
     ]
     if len(classes) != 1:
         raise RuntimeError(
-            f"{filepath} contains {len(classes)} classes, please specify the correct class to load by naming the UDF with the same name in the CREATE query."
+            f"{filepath} contains {len(classes)} classes, please specify the correct class to load by naming the Function with the same name in the CREATE query."
         )
     return classes[0]
 

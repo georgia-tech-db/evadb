@@ -16,7 +16,7 @@ class CatalogError(Exception):
     pass
 
 
-class UDFIODefinitionError(Exception):
+class FunctionIODefinitionError(Exception):
     pass
 
 

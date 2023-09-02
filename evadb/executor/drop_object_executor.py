@@ -40,8 +40,8 @@ class DropObjectExecutor(AbstractExecutor):
         elif self.node.object_type == ObjectType.INDEX:
             yield self._handle_drop_index(self.node.name, self.node.if_exists)
 
-        elif self.node.object_type == ObjectType.UDF:
-            yield self._handle_drop_udf(self.node.name, self.node.if_exists)
+        elif self.node.object_type == ObjectType.FUNCTION:
+            yield self._handle_drop_function(self.node.name, self.node.if_exists)
 
     def _handle_drop_table(self, table_name: str, if_exists: bool):
         if not self.catalog().check_table_exists(table_name):
@@ -59,7 +59,7 @@ class DropObjectExecutor(AbstractExecutor):
 
         for col_obj in table_obj.columns:
             for cache in col_obj.dep_caches:
-                self.catalog().drop_udf_cache_catalog_entry(cache)
+                self.catalog().drop_function_cache_catalog_entry(cache)
 
         # todo also delete the indexes associated with the table
         assert self.catalog().delete_table_catalog_entry(
@@ -73,27 +73,27 @@ class DropObjectExecutor(AbstractExecutor):
             )
         )
 
-    def _handle_drop_udf(self, udf_name: str, if_exists: bool):
-        # check catalog if it already has this udf entry
-        if not self.catalog().get_udf_catalog_entry_by_name(udf_name):
-            err_msg = f"UDF {udf_name} does not exist, therefore cannot be dropped."
+    def _handle_drop_function(self, function_name: str, if_exists: bool):
+        # check catalog if it already has this function entry
+        if not self.catalog().get_function_catalog_entry_by_name(function_name):
+            err_msg = f"Function {function_name} does not exist, therefore cannot be dropped."
             if if_exists:
                 logger.warning(err_msg)
                 return Batch(pd.DataFrame([err_msg]))
             else:
                 raise RuntimeError(err_msg)
         else:
-            udf_entry = self.catalog().get_udf_catalog_entry_by_name(udf_name)
-            for cache in udf_entry.dep_caches:
-                self.catalog().drop_udf_cache_catalog_entry(cache)
+            function_entry = self.catalog().get_function_catalog_entry_by_name(function_name)
+            for cache in function_entry.dep_caches:
+                self.catalog().drop_function_cache_catalog_entry(cache)
 
             # todo also delete the indexes associated with the table
 
-            self.catalog().delete_udf_catalog_entry_by_name(udf_name)
+            self.catalog().delete_function_catalog_entry_by_name(function_name)
 
             return Batch(
                 pd.DataFrame(
-                    {f"UDF {udf_name} successfully dropped"},
+                    {f"Function {function_name} successfully dropped"},
                     index=[0],
                 )
             )

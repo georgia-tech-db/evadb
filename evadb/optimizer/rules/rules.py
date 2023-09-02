@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING
 
 from evadb.catalog.catalog_type import TableType
 from evadb.catalog.catalog_utils import is_video_table
-from evadb.constants import CACHEABLE_UDFS
+from evadb.constants import CACHEABLE_FUNCTIONS
 from evadb.executor.execution_context import Context
 from evadb.expression.expression_utils import (
     conjunction_list_to_expression_tree,
@@ -56,7 +56,7 @@ from evadb.optimizer.operators import (
     LogicalApplyAndMerge,
     LogicalCreate,
     LogicalCreateIndex,
-    LogicalCreateUDF,
+    LogicalCreateFunction,
     LogicalDelete,
     LogicalDropObject,
     LogicalExchange,
@@ -83,7 +83,7 @@ from evadb.optimizer.operators import (
 )
 from evadb.plan_nodes.create_index_plan import CreateIndexPlan
 from evadb.plan_nodes.create_plan import CreatePlan
-from evadb.plan_nodes.create_udf_plan import CreateUDFPlan
+from evadb.plan_nodes.create_function_plan import CreateFunctionPlan
 from evadb.plan_nodes.delete_plan import DeletePlan
 from evadb.plan_nodes.drop_object_plan import DropObjectPlan
 from evadb.plan_nodes.function_scan_plan import FunctionScanPlan
@@ -262,8 +262,8 @@ class CacheFunctionExpressionInApply(Rule):
     def check(self, before: LogicalApplyAndMerge, context: OptimizerContext):
         expr = before.func_expr
         # already cache enabled
-        # replace the cacheable condition once we have the property supported as part of the UDF itself.
-        if expr.has_cache() or expr.name not in CACHEABLE_UDFS:
+        # replace the cacheable condition once we have the property supported as part of the Function itself.
+        if expr.has_cache() or expr.name not in CACHEABLE_FUNCTIONS:
             return False
         # we do not support caching function expression instances with multiple arguments or nested function expressions
         if len(expr.children) > 1 or not isinstance(
@@ -348,7 +348,7 @@ class XformLateralJoinToLinearFlow(Rule):
     eliminate the join node and make the inner node the parent of the outer node. This
     produces a linear data flow path. Because this scenario is common in our system,
     we chose to explicitly convert it to a linear flow, which simplifies the
-    implementation of other optimizations such as UDF reuse and parallelized plans by
+    implementation of other optimizations such as Function reuse and parallelized plans by
     removing the join."""
 
     def __init__(self):
@@ -559,19 +559,19 @@ class CombineSimilarityOrderByAndLimitToVectorIndexScan(Rule):
         while not isinstance(tv_expr, TupleValueExpression):
             tv_expr = tv_expr.children[0]
 
-        # Get column catalog entry and udf_signature.
+        # Get column catalog entry and function_signature.
         column_catalog_entry = tv_expr.col_object
-        udf_signature = (
+        function_signature = (
             None
             if isinstance(base_func_expr, TupleValueExpression)
             else base_func_expr.signature()
         )
 
         # Get index catalog. Check if an index exists for matching
-        # udf signature and table columns.
+        # function signature and table columns.
         index_catalog_entry = (
-            catalog_manager().get_index_catalog_entry_by_column_and_udf_signature(
-                column_catalog_entry, udf_signature
+            catalog_manager().get_index_catalog_entry_by_column_and_function_signature(
+                column_catalog_entry, function_signature
             )
         )
         if not index_catalog_entry:
@@ -741,50 +741,50 @@ class LogicalRenameToPhysical(Rule):
         yield after
 
 
-class LogicalCreateUDFToPhysical(Rule):
+class LogicalCreateFunctionToPhysical(Rule):
     def __init__(self):
-        pattern = Pattern(OperatorType.LOGICALCREATEUDF)
-        super().__init__(RuleType.LOGICAL_CREATE_UDF_TO_PHYSICAL, pattern)
+        pattern = Pattern(OperatorType.LOGICALCREATEFUNCTION)
+        super().__init__(RuleType.LOGICAL_CREATE_FUNCTION_TO_PHYSICAL, pattern)
 
     def promise(self):
-        return Promise.LOGICAL_CREATE_UDF_TO_PHYSICAL
+        return Promise.LOGICAL_CREATE_FUNCTION_TO_PHYSICAL
 
     def check(self, before: Operator, context: OptimizerContext):
         return True
 
-    def apply(self, before: LogicalCreateUDF, context: OptimizerContext):
-        after = CreateUDFPlan(
+    def apply(self, before: LogicalCreateFunction, context: OptimizerContext):
+        after = CreateFunctionPlan(
             before.name,
             before.if_not_exists,
             before.inputs,
             before.outputs,
             before.impl_path,
-            before.udf_type,
+            before.function_type,
             before.metadata,
         )
         yield after
 
 
-class LogicalCreateUDFFromSelectToPhysical(Rule):
+class LogicalCreateFunctionFromSelectToPhysical(Rule):
     def __init__(self):
-        pattern = Pattern(OperatorType.LOGICALCREATEUDF)
+        pattern = Pattern(OperatorType.LOGICALCREATEFUNCTION)
         pattern.append_child(Pattern(OperatorType.DUMMY))
-        super().__init__(RuleType.LOGICAL_CREATE_UDF_FROM_SELECT_TO_PHYSICAL, pattern)
+        super().__init__(RuleType.LOGICAL_CREATE_FUNCTION_FROM_SELECT_TO_PHYSICAL, pattern)
 
     def promise(self):
-        return Promise.LOGICAL_CREATE_UDF_FROM_SELECT_TO_PHYSICAL
+        return Promise.LOGICAL_CREATE_FUNCTION_FROM_SELECT_TO_PHYSICAL
 
     def check(self, before: Operator, context: OptimizerContext):
         return True
 
-    def apply(self, before: LogicalCreateUDF, context: OptimizerContext):
-        after = CreateUDFPlan(
+    def apply(self, before: LogicalCreateFunction, context: OptimizerContext):
+        after = CreateFunctionPlan(
             before.name,
             before.if_not_exists,
             before.inputs,
             before.outputs,
             before.impl_path,
-            before.udf_type,
+            before.function_type,
             before.metadata,
         )
         for child in before.children:
@@ -809,7 +809,7 @@ class LogicalCreateIndexToVectorIndex(Rule):
             before.table_ref,
             before.col_list,
             before.vector_store_type,
-            before.udf_func,
+            before.function,
         )
         yield after
 
@@ -1332,7 +1332,7 @@ class LogicalProjectToRayPhysical(Rule):
 
     def apply(self, before: LogicalProject, context: OptimizerContext):
         project_plan = ProjectPlan(before.target_list)
-        # Check whether the projection contains a UDF
+        # Check whether the projection contains a Function
         if before.target_list is None or not any(
             [isinstance(expr, FunctionExpression) for expr in before.target_list]
         ):
