@@ -22,7 +22,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.types import Enum
 
 from evadb.catalog.catalog_type import ColumnType, Dimension, NdArrayType
-from evadb.catalog.models.association_models import depend_column_and_udf_cache
+from evadb.catalog.models.association_models import depend_column_and_function_cache
 from evadb.catalog.models.base_model import BaseModel
 from evadb.catalog.models.utils import ColumnCatalogEntry
 
@@ -37,7 +37,7 @@ class ColumnCatalog(BaseModel):
     `_array_type:` the type of array, as specified in `NdArrayType` (or `None` if the column is a primitive type)
     `_array_dimensions:` the dimensions of the array (if `_array_type` is not `None`)
     `_table_id:` the `_row_id` of the `TableCatalog` entry to which the column belongs
-    `_dep_caches`: list of udf caches associated with the column
+    `_dep_caches`: list of function caches associated with the column
     """
 
     __tablename__ = "column_catalog"
@@ -54,10 +54,10 @@ class ColumnCatalog(BaseModel):
     # Foreign key dependency with the table catalog
     _table_catalog = relationship("TableCatalog", back_populates="_columns")
 
-    # list of associated UdfCacheCatalog entries
+    # list of associated FunctionCacheCatalog entries
     _dep_caches = relationship(
-        "UdfCacheCatalog",
-        secondary=depend_column_and_udf_cache,
+        "FunctionCacheCatalog",
+        secondary=depend_column_and_function_cache,
         back_populates="_col_depends",
         cascade="all, delete",
     )

@@ -22,7 +22,7 @@ from evadb.catalog.catalog_manager import CatalogManager
 from evadb.catalog.catalog_type import ColumnType, TableType
 from evadb.catalog.catalog_utils import get_video_table_column_definitions
 from evadb.catalog.models.column_catalog import ColumnCatalogEntry
-from evadb.catalog.models.udf_catalog import UdfCatalogEntry
+from evadb.catalog.models.function_catalog import FunctionCatalogEntry
 from evadb.parser.table_ref import TableInfo
 from evadb.parser.types import FileFormatType
 
@@ -125,55 +125,55 @@ class CatalogManagerTests(unittest.TestCase):
         dcs_mock.return_value.filter_entries_by_table_id.assert_not_called()
         self.assertEqual(actual, table_obj)
 
-    @mock.patch("evadb.catalog.catalog_manager.UdfCatalogService")
-    @mock.patch("evadb.catalog.catalog_manager.UdfIOCatalogService")
-    @mock.patch("evadb.catalog.catalog_manager.UdfMetadataCatalogService")
+    @mock.patch("evadb.catalog.catalog_manager.FunctionCatalogService")
+    @mock.patch("evadb.catalog.catalog_manager.FunctionIOCatalogService")
+    @mock.patch("evadb.catalog.catalog_manager.FunctionMetadataCatalogService")
     @mock.patch("evadb.catalog.catalog_manager.get_file_checksum")
-    def test_insert_udf(self, checksum_mock, udfmetadata_mock, udfio_mock, udf_mock):
+    def test_insert_function(self, checksum_mock, functionmetadata_mock, functionio_mock, function_mock):
         catalog = CatalogManager(MagicMock(), MagicMock())
-        udf_io_list = [MagicMock()]
-        udf_metadata_list = [MagicMock()]
-        actual = catalog.insert_udf_catalog_entry(
-            "udf", "sample.py", "classification", udf_io_list, udf_metadata_list
+        function_io_list = [MagicMock()]
+        function_metadata_list = [MagicMock()]
+        actual = catalog.insert_function_catalog_entry(
+            "function", "sample.py", "classification", function_io_list, function_metadata_list
         )
-        udfio_mock.return_value.insert_entries.assert_called_with(udf_io_list)
-        udfmetadata_mock.return_value.insert_entries.assert_called_with(
-            udf_metadata_list
+        functionio_mock.return_value.insert_entries.assert_called_with(function_io_list)
+        functionmetadata_mock.return_value.insert_entries.assert_called_with(
+            function_metadata_list
         )
-        udf_mock.return_value.insert_entry.assert_called_with(
-            "udf", "sample.py", "classification", checksum_mock.return_value
+        function_mock.return_value.insert_entry.assert_called_with(
+            "function", "sample.py", "classification", checksum_mock.return_value
         )
         checksum_mock.assert_called_with("sample.py")
-        self.assertEqual(actual, udf_mock.return_value.insert_entry.return_value)
+        self.assertEqual(actual, function_mock.return_value.insert_entry.return_value)
 
-    @mock.patch("evadb.catalog.catalog_manager.UdfCatalogService")
-    def test_get_udf_catalog_entry_by_name(self, udf_mock):
+    @mock.patch("evadb.catalog.catalog_manager.FunctionCatalogService")
+    def test_get_function_catalog_entry_by_name(self, function_mock):
         catalog = CatalogManager(MagicMock(), MagicMock())
-        actual = catalog.get_udf_catalog_entry_by_name("name")
-        udf_mock.return_value.get_entry_by_name.assert_called_with("name")
-        self.assertEqual(actual, udf_mock.return_value.get_entry_by_name.return_value)
+        actual = catalog.get_function_catalog_entry_by_name("name")
+        function_mock.return_value.get_entry_by_name.assert_called_with("name")
+        self.assertEqual(actual, function_mock.return_value.get_entry_by_name.return_value)
 
-    @mock.patch("evadb.catalog.catalog_manager.UdfCatalogService")
-    def test_delete_udf(self, udf_mock):
-        CatalogManager(MagicMock(), MagicMock()).delete_udf_catalog_entry_by_name(
+    @mock.patch("evadb.catalog.catalog_manager.FunctionCatalogService")
+    def test_delete_function(self, function_mock):
+        CatalogManager(MagicMock(), MagicMock()).delete_function_catalog_entry_by_name(
             "name"
         )
-        udf_mock.return_value.delete_entry_by_name.assert_called_with("name")
+        function_mock.return_value.delete_entry_by_name.assert_called_with("name")
 
-    @mock.patch("evadb.catalog.catalog_manager.UdfIOCatalogService")
-    def test_get_udf_outputs(self, udf_mock):
-        mock_func = udf_mock.return_value.get_output_entries_by_udf_id
-        udf_obj = MagicMock(spec=UdfCatalogEntry)
-        CatalogManager(MagicMock(), MagicMock()).get_udf_io_catalog_output_entries(
-            udf_obj
+    @mock.patch("evadb.catalog.catalog_manager.FunctionIOCatalogService")
+    def test_get_function_outputs(self, function_mock):
+        mock_func = function_mock.return_value.get_output_entries_by_function_id
+        function_obj = MagicMock(spec=FunctionCatalogEntry)
+        CatalogManager(MagicMock(), MagicMock()).get_function_io_catalog_output_entries(
+            function_obj
         )
-        mock_func.assert_called_once_with(udf_obj.row_id)
+        mock_func.assert_called_once_with(function_obj.row_id)
 
-    @mock.patch("evadb.catalog.catalog_manager.UdfIOCatalogService")
-    def test_get_udf_inputs(self, udf_mock):
-        mock_func = udf_mock.return_value.get_input_entries_by_udf_id
-        udf_obj = MagicMock(spec=UdfCatalogEntry)
-        CatalogManager(MagicMock(), MagicMock()).get_udf_io_catalog_input_entries(
-            udf_obj
+    @mock.patch("evadb.catalog.catalog_manager.FunctionIOCatalogService")
+    def test_get_function_inputs(self, function_mock):
+        mock_func = function_mock.return_value.get_input_entries_by_function_id
+        function_obj = MagicMock(spec=FunctionCatalogEntry)
+        CatalogManager(MagicMock(), MagicMock()).get_function_io_catalog_input_entries(
+            function_obj
         )
-        mock_func.assert_called_once_with(udf_obj.row_id)
+        mock_func.assert_called_once_with(function_obj.row_id)

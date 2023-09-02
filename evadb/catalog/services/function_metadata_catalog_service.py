@@ -17,38 +17,38 @@ from typing import List
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import select
 
-from evadb.catalog.models.udf_metadata_catalog import (
-    UdfMetadataCatalog,
-    UdfMetadataCatalogEntry,
+from evadb.catalog.models.function_metadata_catalog import (
+    FunctionMetadataCatalog,
+    FunctionMetadataCatalogEntry,
 )
 from evadb.catalog.services.base_service import BaseService
 from evadb.utils.errors import CatalogError
 from evadb.utils.logging_manager import logger
 
 
-class UdfMetadataCatalogService(BaseService):
+class FunctionMetadataCatalogService(BaseService):
     def __init__(self, db_session: Session):
-        super().__init__(UdfMetadataCatalog, db_session)
+        super().__init__(FunctionMetadataCatalog, db_session)
 
-    def insert_entries(self, entries: List[UdfMetadataCatalogEntry]):
+    def insert_entries(self, entries: List[FunctionMetadataCatalogEntry]):
         try:
             for entry in entries:
-                metadata_obj = UdfMetadataCatalog(
-                    key=entry.key, value=entry.value, udf_id=entry.udf_id
+                metadata_obj = FunctionMetadataCatalog(
+                    key=entry.key, value=entry.value, function_id=entry.function_id
                 )
                 metadata_obj.save(self.session)
         except Exception as e:
             logger.exception(
-                f"Failed to insert entry {entry} into udf metadata catalog with exception {str(e)}"
+                f"Failed to insert entry {entry} into function metadata catalog with exception {str(e)}"
             )
             raise CatalogError(e)
 
-    def get_entries_by_udf_id(self, udf_id: int) -> List[UdfMetadataCatalogEntry]:
+    def get_entries_by_function_id(self, function_id: int) -> List[FunctionMetadataCatalogEntry]:
         try:
             result = (
                 self.session.execute(
                     select(self.model).filter(
-                        self.model._udf_id == udf_id,
+                        self.model._function_id == function_id,
                     )
                 )
                 .scalars()
@@ -56,6 +56,6 @@ class UdfMetadataCatalogService(BaseService):
             )
             return [obj.as_dataclass() for obj in result]
         except Exception as e:
-            error = f"Getting metadata entries for UDF id {udf_id} raised {e}"
+            error = f"Getting metadata entries for Function id {function_id} raised {e}"
             logger.error(error)
             raise CatalogError(error)

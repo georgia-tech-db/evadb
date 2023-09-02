@@ -16,44 +16,44 @@ from sqlalchemy.orm import Session
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql.expression import select
 
-from evadb.catalog.models.udf_cache_catalog import UdfCacheCatalog
-from evadb.catalog.models.utils import UdfCacheCatalogEntry
+from evadb.catalog.models.function_cache_catalog import FunctionCacheCatalog
+from evadb.catalog.models.utils import FunctionCacheCatalogEntry
 from evadb.catalog.services.base_service import BaseService
 from evadb.catalog.services.column_catalog_service import ColumnCatalogService
-from evadb.catalog.services.udf_catalog_service import UdfCatalogService
+from evadb.catalog.services.function_catalog_service import FunctionCatalogService
 from evadb.utils.errors import CatalogError
 from evadb.utils.logging_manager import logger
 
 
-class UdfCacheCatalogService(BaseService):
+class FunctionCacheCatalogService(BaseService):
     def __init__(self, db_session: Session):
-        super().__init__(UdfCacheCatalog, db_session)
+        super().__init__(FunctionCacheCatalog, db_session)
         self._column_service: ColumnCatalogService = ColumnCatalogService(db_session)
-        self._udf_service: UdfCatalogService = UdfCatalogService(db_session)
+        self._function_service: FunctionCatalogService = FunctionCatalogService(db_session)
 
-    def insert_entry(self, entry: UdfCacheCatalogEntry) -> UdfCacheCatalogEntry:
-        """Insert a new udf cache entry into udf cache catalog.
+    def insert_entry(self, entry: FunctionCacheCatalogEntry) -> FunctionCacheCatalogEntry:
+        """Insert a new function cache entry into function cache catalog.
         Arguments:
             `name` (str): name of the cache table
-            `udf_id` (int): `row_id` of the UDF on which the cache is built
+            `function_id` (int): `row_id` of the Function on which the cache is built
             `cache_path` (str): path of the cache table
-            `args` (List[Any]): arguments of the UDF whose output is being cached
-            `udf_depends` (List[UdfCatalogEntry]): dependent UDF  entries
+            `args` (List[Any]): arguments of the Function whose output is being cached
+            `function_depends` (List[FunctionCatalogEntry]): dependent Function  entries
             `col_depends` (List[ColumnCatalogEntry]): dependent column entries
         Returns:
-            `UdfCacheCatalogEntry`
+            `FunctionCacheCatalogEntry`
         """
         try:
             cache_obj = self.model(
                 name=entry.name,
-                udf_id=entry.udf_id,
+                function_id=entry.function_id,
                 cache_path=entry.cache_path,
                 args=entry.args,
             )
 
-            cache_obj._udf_depends = [
-                self._udf_service.get_entry_by_id(udf_id, return_alchemy=True)
-                for udf_id in entry.udf_depends
+            cache_obj._function_depends = [
+                self._function_service.get_entry_by_id(function_id, return_alchemy=True)
+                for function_id in entry.function_depends
             ]
             cache_obj._col_depends = [
                 self._column_service.get_entry_by_id(col_id, return_alchemy=True)
@@ -63,14 +63,14 @@ class UdfCacheCatalogService(BaseService):
 
         except Exception as e:
             err_msg = (
-                f"Failed to insert entry into udf cache catalog with exception {str(e)}"
+                f"Failed to insert entry into function cache catalog with exception {str(e)}"
             )
             logger.exception(err_msg)
             raise CatalogError(err_msg)
         else:
             return cache_obj.as_dataclass()
 
-    def get_entry_by_name(self, name: str) -> UdfCacheCatalogEntry:
+    def get_entry_by_name(self, name: str) -> FunctionCacheCatalogEntry:
         try:
             entry = self.session.execute(
                 select(self.model).filter(self.model._name == name)
@@ -79,10 +79,10 @@ class UdfCacheCatalogService(BaseService):
         except NoResultFound:
             return None
 
-    def delete_entry(self, cache: UdfCacheCatalogEntry):
+    def delete_entry(self, cache: FunctionCacheCatalogEntry):
         """Delete cache table from the db
         Arguments:
-            cache  (UdfCacheCatalogEntry): cache to delete
+            cache  (FunctionCacheCatalogEntry): cache to delete
         Returns:
             True if successfully removed else false
         """

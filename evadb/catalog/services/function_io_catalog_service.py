@@ -17,21 +17,21 @@ from typing import List
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import select
 
-from evadb.catalog.models.udf_io_catalog import UdfIOCatalog, UdfIOCatalogEntry
+from evadb.catalog.models.function_io_catalog import FunctionIOCatalog, FunctionIOCatalogEntry
 from evadb.catalog.services.base_service import BaseService
 from evadb.utils.logging_manager import logger
 
 
-class UdfIOCatalogService(BaseService):
+class FunctionIOCatalogService(BaseService):
     def __init__(self, db_session: Session):
-        super().__init__(UdfIOCatalog, db_session)
+        super().__init__(FunctionIOCatalog, db_session)
 
-    def get_input_entries_by_udf_id(self, udf_id: int) -> List[UdfIOCatalogEntry]:
+    def get_input_entries_by_function_id(self, function_id: int) -> List[FunctionIOCatalogEntry]:
         try:
             result = (
                 self.session.execute(
                     select(self.model).filter(
-                        self.model._udf_id == udf_id,
+                        self.model._function_id == function_id,
                         self.model._is_input == True,  # noqa
                     )
                 )
@@ -40,16 +40,16 @@ class UdfIOCatalogService(BaseService):
             )
             return [obj.as_dataclass() for obj in result]
         except Exception as e:
-            error = f"Getting inputs for UDF id {udf_id} raised {e}"
+            error = f"Getting inputs for Function id {function_id} raised {e}"
             logger.error(error)
             raise RuntimeError(error)
 
-    def get_output_entries_by_udf_id(self, udf_id: int) -> List[UdfIOCatalogEntry]:
+    def get_output_entries_by_function_id(self, function_id: int) -> List[FunctionIOCatalogEntry]:
         try:
             result = (
                 self.session.execute(
                     select(self.model).filter(
-                        self.model._udf_id == udf_id,
+                        self.model._function_id == function_id,
                         self.model._is_input == False,  # noqa
                     )
                 )
@@ -58,25 +58,25 @@ class UdfIOCatalogService(BaseService):
             )
             return [obj.as_dataclass() for obj in result]
         except Exception as e:
-            error = f"Getting outputs for UDF id {udf_id} raised {e}"
+            error = f"Getting outputs for Function id {function_id} raised {e}"
             logger.error(error)
             raise RuntimeError(error)
 
-    def insert_entries(self, io_list: List[UdfIOCatalogEntry]):
-        """Commit entries to the udf_io table
+    def insert_entries(self, io_list: List[FunctionIOCatalogEntry]):
+        """Commit entries to the function_io table
 
         Arguments:
-            io_list (List[UdfIOCatalogEntry]): List of io info io be added
+            io_list (List[FunctionIOCatalogEntry]): List of io info io be added
         """
 
         for io in io_list:
-            io_obj = UdfIOCatalog(
+            io_obj = FunctionIOCatalog(
                 name=io.name,
                 type=io.type,
                 is_nullable=io.is_nullable,
                 array_type=io.array_type,
                 array_dimensions=io.array_dimensions,
                 is_input=io.is_input,
-                udf_id=io.udf_id,
+                function_id=io.function_id,
             )
             io_obj.save(self.session)
