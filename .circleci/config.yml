@@ -200,6 +200,7 @@ jobs:
                 pip install ".[dev]" # ray < 2.5.0 does not work with python 3.11 ray-project/ray#33864
               fi
             fi
+            pip install statsforecast
 
       - run:
           name: Test and upload coverage report to coveralls
@@ -364,7 +365,7 @@ jobs:
               source test_evadb/bin/activate
               pip install --upgrade pip
               pip debug --verbose
-              pip install ".[dev,ludwig,qdrant]"
+              pip install ".[dev,ludwig,qdrant,forecasting]"
               source test_evadb/bin/activate
               bash script/test/test.sh -m "<< parameters.mode >>"
 
