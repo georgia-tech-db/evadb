@@ -1,3 +1,5 @@
+.. _sentiment-analysis:
+
 Sentiment Analysis
 ==================
 
@@ -25,7 +27,9 @@ In this tutorial, we present how to use OpenAI models in EvaDB to analyse sentim
 We will assume that the input data is loaded into a ``PostgreSQL`` database. 
 To load the food review data into your database, see the complete `sentiment analysis notebook on Colab <https://colab.research.google.com/github/georgia-tech-db/eva/blob/staging/tutorials/14-food-review-tone-analysis-and-response.ipynb>`_.
 
-.. include:: ../shared/prerequisite.rst
+.. include:: ../shared/evadb.rst
+
+.. include:: ../shared/postgres.rst
 
 Sentiment Analysis of Reviews using ChatGPT
 -------------------------------------------
