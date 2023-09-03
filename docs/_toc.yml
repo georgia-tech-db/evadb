@@ -38,11 +38,8 @@ parts:
 
   - caption: User Reference
     chapters:
-      - file: source/reference/api
-        title: Python API
-
       - file: source/reference/evaql      
-        title: Eva Query Language 
+        title: EvaQL
         sections:
           - file: source/reference/evaql/load
           - file: source/reference/evaql/select
@@ -55,6 +52,9 @@ parts:
           - file: source/reference/evaql/rename
           - file: source/reference/evaql/use
 
+      - file: source/reference/api
+        title: Python API
+
       - file: source/reference/databases/index
         title: Data Sources
         sections: 
@@ -62,21 +62,20 @@ parts:
           - file: source/reference/databases/sqlite
           - file: source/reference/databases/mysql
 
-      - file: source/reference/udfs/index
-        title: Models
+      - file: source/reference/ai/index
+        title: AI Engines
         sections:
-          - file: source/reference/udfs/hf
+          - file: source/reference/ai/model-train
+            title: Model Training
+          - file: source/reference/ai/hf
             title: Hugging Face
-          - file: source/reference/udfs/openai
+          - file: source/reference/ai/openai
             title: OpenAI 
-          - file: source/reference/udfs/yolo
+          - file: source/reference/ai/yolo
             title: YOLO 
-          - file: source/reference/udfs/custom
+          - file: source/reference/ai/custom
             title: Custom Model
-          - file: source/reference/udfs/model-train
-            title: Model Train/Finetune
         
-
       # - file: source/reference/io
       #   title: IO Descriptors
 
