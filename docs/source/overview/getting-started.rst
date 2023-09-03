@@ -98,7 +98,15 @@ You should see a list of built-in functions including but not limited to the fol
 Illustrative AI App
 -------------------
 
-Here is a simple, illustrative `MNIST image classification <https://en.wikipedia.org/wiki/MNIST_database>`_ AI app in EvaDB.
+Here is a simple, illustrative `MNIST image classification <https://en.wikipedia.org/wiki/MNIST_database>`_ AI app in EvaDB. As this app focuses on a vision task, you will need to install additional vision packages.
+
+.. code-block:: bash
+
+   pip install evadb[vision]
+
+Copy the following Python program to a file called `mnist.py`.
+
+The program runs a SQL query for retrieving a subset of images in the loaded MNIST video along with their digit labels. The query's result is returned as a Dataframe.
 
 .. code-block:: python
 
@@ -110,27 +118,27 @@ Here is a simple, illustrative `MNIST image classification <https://en.wikipedia
     # Each frame in the loaded MNIST video contains a digit
     cursor.load("mnist.mp4", "MNISTVid", format="video").df()
 
-    # We now construct an AI pipeline to run the image classifier 
-    # over all the digit images in the video    
+    # We now construct an AI query over all the digit frames 
+    # in the video and retrieve frames where the digit is 8 
+    # We limit to only the first 5 frames
+    response = cursor.query("""
+        SELECT data, id, MnistImageClassifier(data) 
+        FROM MNISTVid  
+        WHERE MnistImageClassifier(data) = '8'
+        LIMIT 5;
+    """
+    ).df()
 
-    # Connect to the table with the loaded video
-    query = cursor.table("MNISTVid")
 
-    # Run the model on a subset of frames
-    # Here, id refers to the frame id
-    query = query.filter("id = 30 OR id = 50 OR id = 70 OR id = 0 OR id = 140")
+Now, run the Python program:
 
-    # We are retrieving the frame "data" and 
-    # the output of the Image Classification function on the data 
-    query = query.select("data, MnistImageClassifier(data).label")
+.. code-block:: bash
 
-    # EvaDB uses a lazy query construction technique to improve performance
-    # Only calling query.df() will run the query
-    response = query.df()
-
-Try out EvaDB by experimenting with the introductory `MNIST notebook on Colab <https://colab.research.google.com/github/georgia-tech-db/evadb/blob/master/tutorials/01-mnist.ipynb>`_.
+    python -m mnist.py
 
 .. image:: ../../images/reference/mnist.png
+
+Try out EvaDB by experimenting with the introductory `MNIST notebook on Colab <https://colab.research.google.com/github/georgia-tech-db/evadb/blob/master/tutorials/01-mnist.ipynb>`_.
 
 .. note::
     Go over the :ref:`Python API<python-api>` to learn more about the functions used in this app.
