@@ -100,6 +100,17 @@ workflows:
                   - master
                   - staging
         ################################
+        ### THIRD PARTY: Staging, Master
+        ################################
+        ################################
+        - MySQL:
+            name: Third Party Test - MySQL | v3.10 | Linux
+            filters:
+              branches:
+                only: 
+                  - master
+                  - staging
+        ################################
         ### NOTEBOOKS: Staging, Master
         ################################
         ################################
@@ -274,6 +285,58 @@ jobs:
             - test_evadb_doc
             - node_modules
 
+  MySQL:
+    parameters:
+      v:
+        type: string
+        default: "3.10"
+    resource_class: large
+    docker:
+      - image: "cimg/python:<< parameters.v >>"
+      - image: "cimg/mysql:8.0"
+        environment:
+          MYSQL_USER: eva
+          MYSQL_PASSWORD: password
+          MYSQL_DATABASE: evadb
+
+    steps:
+
+      - checkout
+
+      # Restore pip wheel
+      - restore_cache:
+          keys:
+            - v1-pip-wheel_cache-python<< parameters.v >>-rayDISABLED-{{ checksum "setup.py" }}
+
+      - restore_cache:
+          keys:
+            - v1-model_cache-{{ checksum "setup.py" }}
+
+      - run:
+          name: Install dockerize
+          command: wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && sudo tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+          environment:
+            DOCKERIZE_VERSION: v0.6.1
+
+      - run:
+          name: Wait for DB to run
+          command : dockerize -wait tcp://localhost:3306 -timeout 1m
+
+      - run:
+          name: Install EvaDB package from GitHub repo with all dependencies
+          command: |
+            "python<< parameters.v >>" -m venv test_evadb
+            pip install --upgrade pip
+            source test_evadb/bin/activate
+            pip install ".[dev]"
+            pip install -r evadb/third_party/databases/mysql/requirements.txt
+
+      - run:
+          name: Run integration tests
+          command: |
+             source test_evadb/bin/activate
+             PYTHONPATH="." python -m pytest test/third_party_tests/test_native_executor.py -k test_should_run_query_in_mysql
+
   Postgres:
     parameters:
       v:
@@ -291,6 +354,11 @@ jobs:
     steps:
 
       - checkout
+
+      # Restore pip wheel
+      - restore_cache:
+          keys:
+            - v1-pip-wheel_cache-python<< parameters.v >>-rayDISABLED-{{ checksum "setup.py" }}
 
       - restore_cache:
           keys:

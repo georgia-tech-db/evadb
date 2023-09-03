@@ -42,6 +42,7 @@ Now, activate the virtual environment:
 You should see a list of installed packages including but not limited to the following:
 
 .. code-block:: bash
+
    Package           Version
    ----------------- -------
    aenum             3.1.15
