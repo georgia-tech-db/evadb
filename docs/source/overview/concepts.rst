@@ -12,6 +12,7 @@ EvaDB supports a SQL-like query language, called EvaQL, designed to assist softw
 Here is set of illustrative EvaQL queries for a ChatGPT-based video question answering app. This EvaDB app connects to collection of news videos stored in a folder and runs an AI query for extracting audio transcripts from the videos using a Hugging Face model, followed by another AI query for question answering using ChatGPT.
 
 .. code-block::sql
+
     --- Load a collection of news videos into the 'news_videos' table
     --- This command returns a Pandas Dataframe with the query's output
     --- In this case, the output indicates the number of loaded videos
