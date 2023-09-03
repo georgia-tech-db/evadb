@@ -112,7 +112,7 @@ parts:
           - file: source/dev-guide/debugger/vscode-debugger
             title: VSCode Debugger
           - file: source/dev-guide/debugger/alternative
-            title: Alternaitve Debugger
+            title: Alternative Debugger
 
       - file: source/dev-guide/extend
         title: Extending EvaDB

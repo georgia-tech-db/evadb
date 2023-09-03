@@ -272,7 +272,7 @@ class UDFExecutorTest(unittest.TestCase):
                 "SELECT id,DummyObjectDetector(data) FROM MyVideo ORDER BY id;"
             )
 
-            # disabling warning for UDF modificiation for now
+            # disabling warning for UDF modification for now
             # with self.assertRaises(AssertionError):
             execute_query_fetch_all(self.evadb, select_query)
 

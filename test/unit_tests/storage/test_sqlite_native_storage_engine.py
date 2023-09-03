@@ -30,7 +30,7 @@ class NativeQueryResponse:
 
 
 @pytest.mark.notparallel
-class SQLiiteNativeStorageEngineTest(unittest.TestCase):
+class SQLiteNativeStorageEngineTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
