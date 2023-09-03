@@ -42,7 +42,7 @@ Now, activate the virtual environment:
 You should see a list of installed packages including but not limited to the following:
 
 .. code-block:: bash
-    
+
    Package           Version
    ----------------- -------
    aenum             3.1.15
@@ -104,9 +104,8 @@ Here is an illustrative `MNIST image classification <https://en.wikipedia.org/wi
 .. code-block:: sql
     
     --- This AI query retrieves images in the loaded MNIST video with label 4
-    --- The query's result is returned as a Dataframe.
-    --- We limit our query to only return the first five frames with label 4
-    --- and to only search through the first 1000 frames
+    --- We constrain the query to only search through the first 100 frames
+    --- We limit the query to only return the first five frames with label 4
     SELECT data, id, MnistImageClassifier(data) 
     FROM MnistVideo 
     WHERE MnistImageClassifier(data) = '4' AND id < 100
