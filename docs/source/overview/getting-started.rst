@@ -42,7 +42,6 @@ Now, activate the virtual environment:
 You should see a list of installed packages including but not limited to the following:
 
 .. code-block:: bash
-
    Package           Version
    ----------------- -------
    aenum             3.1.15
@@ -117,14 +116,14 @@ The program runs a SQL query for retrieving a subset of images in the loaded MNI
 
     # Load the MNIST video into EvaDB
     # Each frame in the loaded MNIST video contains a digit
-    cursor.load("mnist.mp4", "MNISTVid", format="video").df()
+    cursor.load("mnist.mp4", "MnistVideo", format="video").df()
 
     # We now construct an AI query over all the digit frames 
     # in the video and retrieve frames where the digit is 8 
-    # We limit to only the first 5 frames
+    # We limit to only the first 5 frames)
     response = cursor.query("""
         SELECT data, id, MnistImageClassifier(data) 
-        FROM MNISTVid  
+        FROM MnistVideo 
         WHERE MnistImageClassifier(data) = '8'
         LIMIT 5;
     """
