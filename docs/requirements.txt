@@ -24,7 +24,7 @@ docutils>=0.15
 mock>=1.0.1
 pillow>=9.0.1
 readthedocs-sphinx-ext>1.1
-autodoc_pydantic
+#autodoc_pydantic
 
 # MyST
 myst-parser
