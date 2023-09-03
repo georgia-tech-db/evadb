@@ -69,7 +69,7 @@ class CreateUDFExecutor(AbstractExecutor):
     def handle_ludwig_udf(self):
         """Handle ludwig UDFs
 
-        Use ludwig's auto_train engine to train/tune models.
+        Use Ludwig's auto_train engine to train/tune models.
         """
         try_to_import_ludwig()
         from ludwig.automl import auto_train

@@ -76,7 +76,7 @@ You can check our `Jupyter Notebook <https://github.com/georgia-tech-db/eva/blob
 
             cursor.query("""
                 SELECT ChatGPT(
-                    "Is the review positive or negative. Only reply 'positive' or 'negative'. Here are examples. The food is very bad: negative. The food is very good: postive.",
+                    "Is the review positive or negative. Only reply 'positive' or 'negative'. Here are examples. The food is very bad: negative. The food is very good: positive.",
                     review)
                 FROM postgres_data.review_table;
             """).df()
@@ -86,7 +86,7 @@ You can check our `Jupyter Notebook <https://github.com/georgia-tech-db/eva/blob
         .. code-block:: sql
 
             SELECT ChatGPT(
-                "Is the review positive or negative. Only reply 'positive' or 'negative'. Here are examples. The food is very bad: negative. The food is very good: postive.",
+                "Is the review positive or negative. Only reply 'positive' or 'negative'. Here are examples. The food is very bad: negative. The food is very good: positive.",
                 review)
             FROM postgres_data.review_table;
 
@@ -117,7 +117,7 @@ This will return tone analysis results for existing reviews.
                     review)
                 FROM postgres_data.review_table
                 WHERE ChatGPT(
-                    "Is the review positive or negative. Only reply 'positive' or 'negative'. Here are examples. The food is very bad: negative. The food is very good: postive.",
+                    "Is the review positive or negative. Only reply 'positive' or 'negative'. Here are examples. The food is very bad: negative. The food is very good: positive.",
                     review) = "negative";
             """).df()
 
@@ -130,7 +130,7 @@ This will return tone analysis results for existing reviews.
                     review)
             FROM postgres_data.review_table
             WHERE ChatGPT(
-                "Is the review positive or negative. Only reply 'positive' or 'negative'. Here are examples. The food is very bad: negative. The food is very good: postive.",
+                "Is the review positive or negative. Only reply 'positive' or 'negative'. Here are examples. The food is very bad: negative. The food is very good: positive.",
                 review) = "negative";
 
 This query will first filter out positive reviews and then apply ChatGPT again to create response to negative reviews. This will give results.

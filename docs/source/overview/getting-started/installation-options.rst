@@ -11,7 +11,7 @@ EvaDB provides the following additional installation options for extending its f
 
 * ``pip install evadb[qdrant]`` for installing the Qdrant vector database system. It enables use-cases related to similarity search based on feature vectors.
 
-* ``pip install evadb[ludwig]`` for installing the Ludwig model training framework. It enables use-cases related to training and fine-tunining AI models.
+* ``pip install evadb[ludwig]`` for installing the Ludwig model training framework. It enables use-cases related to training and fine-tuning AI models.
 
 * ``pip install evadb[ray]`` for installing the Ray compute engine. It enables EvaDB to do more efficient query execution on CPUs and GPUs.
 
