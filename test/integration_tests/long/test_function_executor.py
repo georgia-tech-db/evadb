@@ -153,7 +153,9 @@ class FunctionExecutorTest(unittest.TestCase):
             actual = execute_query_fetch_all(
                 self.evadb, create_function_query.format(function_name)
             )
-            expected = Batch(pd.DataFrame([f"Function {function_name} already exists."]))
+            expected = Batch(
+                pd.DataFrame([f"Function {function_name} already exists."])
+            )
             self.assertEqual(actual, expected)
 
         # Try to create FUNCTION if not exists
@@ -179,7 +181,9 @@ class FunctionExecutorTest(unittest.TestCase):
         execute_query_fetch_all(self.evadb, create_function_query.format(function_name))
 
         # try fetching the metadata values
-        entries = self.evadb.catalog().get_function_metadata_entries_by_function_name(function_name)
+        entries = self.evadb.catalog().get_function_metadata_entries_by_function_name(
+            function_name
+        )
         self.assertEqual(len(entries), 2)
         metadata = [(entry.key, entry.value) for entry in entries]
 
@@ -188,7 +192,9 @@ class FunctionExecutorTest(unittest.TestCase):
 
     def test_should_return_empty_metadata_list_for_missing_function(self):
         # missing function should return empty list
-        entries = self.evadb.catalog().get_function_metadata_entries_by_function_name("randomFunction")
+        entries = self.evadb.catalog().get_function_metadata_entries_by_function_name(
+            "randomFunction"
+        )
         self.assertEqual(len(entries), 0)
 
     def test_should_return_empty_metadata_list_if_function_is_removed(self):
@@ -205,13 +211,17 @@ class FunctionExecutorTest(unittest.TestCase):
         execute_query_fetch_all(self.evadb, create_function_query.format(function_name))
 
         # try fetching the metadata values
-        entries = self.evadb.catalog().get_function_metadata_entries_by_function_name(function_name)
+        entries = self.evadb.catalog().get_function_metadata_entries_by_function_name(
+            function_name
+        )
         self.assertEqual(len(entries), 2)
 
         # remove the function
         execute_query_fetch_all(self.evadb, f"DROP FUNCTION {function_name};")
         # try fetching the metadata values
-        entries = self.evadb.catalog().get_function_metadata_entries_by_function_name(function_name)
+        entries = self.evadb.catalog().get_function_metadata_entries_by_function_name(
+            function_name
+        )
         self.assertEqual(len(entries), 0)
 
     def test_should_raise_using_missing_function(self):
@@ -244,7 +254,9 @@ class FunctionExecutorTest(unittest.TestCase):
         execute_query_fetch_all(self.evadb, "DROP FUNCTION DummyObjectDetector;")
 
         # Test IF EXISTS
-        execute_query_fetch_all(self.evadb, "DROP FUNCTION IF EXISTS DummyObjectDetector;")
+        execute_query_fetch_all(
+            self.evadb, "DROP FUNCTION IF EXISTS DummyObjectDetector;"
+        )
 
         with tempfile.NamedTemporaryFile(mode="w", suffix=".py") as tmp_file:
             with open("test/util.py", "r") as file:
@@ -289,7 +301,9 @@ class FunctionExecutorTest(unittest.TestCase):
         function_obj = catalog_manager.get_function_catalog_entry_by_name(
             "DummyObjectDetectorDecorators"
         )
-        function_inputs = catalog_manager.get_function_io_catalog_input_entries(function_obj)
+        function_inputs = catalog_manager.get_function_io_catalog_input_entries(
+            function_obj
+        )
         self.assertEquals(len(function_inputs), 1)
 
         function_input = function_inputs[0]
@@ -304,9 +318,13 @@ class FunctionExecutorTest(unittest.TestCase):
         }
 
         for attr in expected_input_attributes:
-            self.assertEquals(getattr(function_input, attr), expected_input_attributes[attr])
+            self.assertEquals(
+                getattr(function_input, attr), expected_input_attributes[attr]
+            )
 
-        function_outputs = catalog_manager.get_function_io_catalog_output_entries(function_obj)
+        function_outputs = catalog_manager.get_function_io_catalog_output_entries(
+            function_obj
+        )
         self.assertEquals(len(function_outputs), 1)
 
         function_output = function_outputs[0]
@@ -328,5 +346,7 @@ class FunctionExecutorTest(unittest.TestCase):
         execute_query_fetch_all(
             self.evadb, "SELECT DummyObjectDetector(data) FROM MyVideo"
         )
-        entry = self.evadb.catalog().get_function_cost_catalog_entry("DummyObjectDetector")
+        entry = self.evadb.catalog().get_function_cost_catalog_entry(
+            "DummyObjectDetector"
+        )
         self.assertIsNotNone(entry)

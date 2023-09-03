@@ -87,6 +87,8 @@ class FunctionCatalogService(BaseService):
             ).scalar_one()
             function_obj.delete(self.session)
         except Exception as e:
-            logger.exception(f"Delete function failed for name {name} with error {str(e)}")
+            logger.exception(
+                f"Delete function failed for name {name} with error {str(e)}"
+            )
             return False
         return True

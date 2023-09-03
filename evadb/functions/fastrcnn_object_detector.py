@@ -18,7 +18,9 @@ import numpy as np
 import pandas as pd
 
 from evadb.catalog.catalog_type import NdArrayType
-from evadb.functions.abstract.pytorch_abstract_function import PytorchAbstractClassifierFunction
+from evadb.functions.abstract.pytorch_abstract_function import (
+    PytorchAbstractClassifierFunction,
+)
 from evadb.functions.decorators.decorators import forward, setup
 from evadb.functions.decorators.io_descriptors.data_types import (
     PandasDataframe,

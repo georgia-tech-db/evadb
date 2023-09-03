@@ -43,7 +43,9 @@ class FunctionMetadataCatalogService(BaseService):
             )
             raise CatalogError(e)
 
-    def get_entries_by_function_id(self, function_id: int) -> List[FunctionMetadataCatalogEntry]:
+    def get_entries_by_function_id(
+        self, function_id: int
+    ) -> List[FunctionMetadataCatalogEntry]:
         try:
             result = (
                 self.session.execute(

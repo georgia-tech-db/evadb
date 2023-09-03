@@ -42,7 +42,9 @@ class FunctionCacheCatalog(BaseModel):
 
     _name = Column("name", String(128))
     _function_id = Column(
-        "function_id", Integer, ForeignKey("function_catalog._row_id", ondelete="CASCADE")
+        "function_id",
+        Integer,
+        ForeignKey("function_catalog._row_id", ondelete="CASCADE"),
     )
     _cache_path = Column("cache_path", String(256))
     _args = Column("args", String(1024))

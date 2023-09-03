@@ -69,7 +69,9 @@ class IOColumnArgument(IOArgument):
         self.array_type = array_type
         self.array_dimensions = array_dimensions
 
-    def generate_catalog_entries(self, is_input=False) -> List[Type[FunctionIOCatalogEntry]]:
+    def generate_catalog_entries(
+        self, is_input=False
+    ) -> List[Type[FunctionIOCatalogEntry]]:
         """Generates the catalog IO entries from the Argument.
 
         Returns:

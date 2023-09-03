@@ -27,9 +27,9 @@ from evadb.catalog.catalog_type import (
 )
 from evadb.catalog.models.utils import (
     ColumnCatalogEntry,
-    TableCatalogEntry,
     FunctionCacheCatalogEntry,
     FunctionCatalogEntry,
+    TableCatalogEntry,
 )
 from evadb.catalog.sql_config import IDENTIFIER_COLUMN
 from evadb.configuration.configuration_manager import ConfigurationManager

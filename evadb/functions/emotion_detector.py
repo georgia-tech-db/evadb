@@ -19,7 +19,9 @@ from typing import List
 import numpy as np
 import pandas as pd
 
-from evadb.functions.abstract.pytorch_abstract_function import PytorchAbstractClassifierFunction
+from evadb.functions.abstract.pytorch_abstract_function import (
+    PytorchAbstractClassifierFunction,
+)
 from evadb.utils.generic_utils import (
     try_to_import_pillow,
     try_to_import_torch,

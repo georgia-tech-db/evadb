@@ -417,5 +417,6 @@ class SelectExecutorTest(unittest.TestCase):
             self.evadb.catalog().get_column_catalog_entry(table_entry, "data").row_id
         )
         self.assertEqual(
-            signature, f"DummyMultiObjectDetector[{function_id}](MyVideo.data[{col_id}])"
+            signature,
+            f"DummyMultiObjectDetector[{function_id}](MyVideo.data[{col_id}])",
         )

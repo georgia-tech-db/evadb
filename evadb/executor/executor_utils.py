@@ -48,7 +48,9 @@ def apply_project(
                 if func_expr.function_obj and func_expr._stats:
                     function_id = func_expr.function_obj.row_id
                     catalog.upsert_function_cost_catalog_entry(
-                        function_id, func_expr.function_obj.name, func_expr._stats.prev_cost
+                        function_id,
+                        func_expr.function_obj.name,
+                        func_expr._stats.prev_cost,
                     )
     return batch
 

@@ -34,28 +34,32 @@ from evadb.catalog.catalog_utils import (
 from evadb.catalog.models.utils import (
     ColumnCatalogEntry,
     DatabaseCatalogEntry,
-    IndexCatalogEntry,
-    TableCatalogEntry,
     FunctionCacheCatalogEntry,
     FunctionCatalogEntry,
     FunctionCostCatalogEntry,
     FunctionIOCatalogEntry,
     FunctionMetadataCatalogEntry,
+    IndexCatalogEntry,
+    TableCatalogEntry,
     drop_all_tables_except_catalog,
     init_db,
     truncate_catalog_tables,
 )
 from evadb.catalog.services.column_catalog_service import ColumnCatalogService
 from evadb.catalog.services.database_catalog_service import DatabaseCatalogService
-from evadb.catalog.services.index_catalog_service import IndexCatalogService
-from evadb.catalog.services.table_catalog_service import TableCatalogService
-from evadb.catalog.services.function_cache_catalog_service import FunctionCacheCatalogService
+from evadb.catalog.services.function_cache_catalog_service import (
+    FunctionCacheCatalogService,
+)
 from evadb.catalog.services.function_catalog_service import FunctionCatalogService
-from evadb.catalog.services.function_cost_catalog_service import FunctionCostCatalogService
+from evadb.catalog.services.function_cost_catalog_service import (
+    FunctionCostCatalogService,
+)
 from evadb.catalog.services.function_io_catalog_service import FunctionIOCatalogService
 from evadb.catalog.services.function_metadata_catalog_service import (
     FunctionMetadataCatalogService,
 )
+from evadb.catalog.services.index_catalog_service import IndexCatalogService
+from evadb.catalog.services.table_catalog_service import TableCatalogService
 from evadb.catalog.sql_config import IDENTIFIER_COLUMN, SQLConfig
 from evadb.configuration.configuration_manager import ConfigurationManager
 from evadb.expression.function_expression import FunctionExpression
@@ -76,11 +80,17 @@ class CatalogManager(object):
         self._table_catalog_service = TableCatalogService(self._sql_config.session)
         self._column_service = ColumnCatalogService(self._sql_config.session)
         self._function_service = FunctionCatalogService(self._sql_config.session)
-        self._function_cost_catalog_service = FunctionCostCatalogService(self._sql_config.session)
+        self._function_cost_catalog_service = FunctionCostCatalogService(
+            self._sql_config.session
+        )
         self._function_io_service = FunctionIOCatalogService(self._sql_config.session)
-        self._function_metadata_service = FunctionMetadataCatalogService(self._sql_config.session)
+        self._function_metadata_service = FunctionMetadataCatalogService(
+            self._sql_config.session
+        )
         self._index_service = IndexCatalogService(self._sql_config.session)
-        self._function_cache_service = FunctionCacheCatalogService(self._sql_config.session)
+        self._function_cache_service = FunctionCacheCatalogService(
+            self._sql_config.session
+        )
 
     @property
     def sql_config(self):
@@ -302,7 +312,9 @@ class CatalogManager(object):
         """
 
         checksum = get_file_checksum(impl_file_path)
-        function_entry = self._function_service.insert_entry(name, impl_file_path, type, checksum)
+        function_entry = self._function_service.insert_entry(
+            name, impl_file_path, type, checksum
+        )
         for function_io in function_io_list:
             function_io.function_id = function_entry.row_id
         self._function_io_service.insert_entries(function_io_list)
@@ -355,12 +367,16 @@ class CatalogManager(object):
     def get_function_io_catalog_input_entries(
         self, function_obj: FunctionCatalogEntry
     ) -> List[FunctionIOCatalogEntry]:
-        return self._function_io_service.get_input_entries_by_function_id(function_obj.row_id)
+        return self._function_io_service.get_input_entries_by_function_id(
+            function_obj.row_id
+        )
 
     def get_function_io_catalog_output_entries(
         self, function_obj: FunctionCatalogEntry
     ) -> List[FunctionIOCatalogEntry]:
-        return self._function_io_service.get_output_entries_by_function_id(function_obj.row_id)
+        return self._function_io_service.get_output_entries_by_function_id(
+            function_obj.row_id
+        )
 
     """ Index related services. """
 
@@ -400,10 +416,14 @@ class CatalogManager(object):
         entry = construct_function_cache_catalog_entry(func_expr, cache_dir=cache_dir)
         return self._function_cache_service.insert_entry(entry)
 
-    def get_function_cache_catalog_entry_by_name(self, name: str) -> FunctionCacheCatalogEntry:
+    def get_function_cache_catalog_entry_by_name(
+        self, name: str
+    ) -> FunctionCacheCatalogEntry:
         return self._function_cache_service.get_entry_by_name(name)
 
-    def drop_function_cache_catalog_entry(self, entry: FunctionCacheCatalogEntry) -> bool:
+    def drop_function_cache_catalog_entry(
+        self, entry: FunctionCacheCatalogEntry
+    ) -> bool:
         # remove the data structure associated with the entry
         if entry:
             shutil.rmtree(entry.cache_path)
@@ -425,7 +445,9 @@ class CatalogManager(object):
         """
         function_entry = self.get_function_catalog_entry_by_name(function_name)
         if function_entry:
-            entries = self._function_metadata_service.get_entries_by_function_id(function_entry.row_id)
+            entries = self._function_metadata_service.get_entries_by_function_id(
+                function_entry.row_id
+            )
             return entries
         else:
             return []

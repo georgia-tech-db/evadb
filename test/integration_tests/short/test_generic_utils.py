@@ -37,7 +37,9 @@ class ModulePathTest(unittest.TestCase):
         self.assertEqual(vl, DecordReader)
 
     def test_should_return_correct_class_for_path(self):
-        vl = load_function_class_from_file("evadb/readers/decord_reader.py", "DecordReader")
+        vl = load_function_class_from_file(
+            "evadb/readers/decord_reader.py", "DecordReader"
+        )
         # Can't check that v1 = DecordReader because the above function returns decord_reader.DecordReader instead of evadb.readers.decord_reader.DecordReader
         # So we check the qualname instead, qualname is the path to the class including the module name
         # Ref: https://peps.python.org/pep-3155/#rationale

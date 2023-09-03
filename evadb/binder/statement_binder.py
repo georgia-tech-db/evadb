@@ -35,9 +35,9 @@ from evadb.configuration.constants import EvaDB_INSTALLATION_DIR
 from evadb.expression.abstract_expression import AbstractExpression, ExpressionType
 from evadb.expression.function_expression import FunctionExpression
 from evadb.expression.tuple_value_expression import TupleValueExpression
+from evadb.parser.create_function_statement import CreateFunctionStatement
 from evadb.parser.create_index_statement import CreateIndexStatement
 from evadb.parser.create_statement import CreateTableStatement
-from evadb.parser.create_function_statement import CreateFunctionStatement
 from evadb.parser.delete_statement import DeleteTableStatement
 from evadb.parser.explain_statement import ExplainStatement
 from evadb.parser.rename_statement import RenameTableStatement
@@ -134,7 +134,9 @@ class StatementBinder:
             assert len(col.array_dimensions) == 2
         else:
             # Output of the FUNCTION should be 2 dimension and float32 type.
-            function_obj = self._catalog().get_function_catalog_entry_by_name(node.function.name)
+            function_obj = self._catalog().get_function_catalog_entry_by_name(
+                node.function.name
+            )
             for output in function_obj.outputs:
                 assert (
                     output.array_type == NdArrayType.FLOAT32
@@ -302,8 +304,12 @@ class StatementBinder:
                 "GenericLudwigModel",
             )
             function_metadata = get_metadata_properties(function_obj)
-            assert "model_path" in function_metadata, "Ludwig models expect 'model_path'."
-            node.function = lambda: function_class(model_path=function_metadata["model_path"])
+            assert (
+                "model_path" in function_metadata
+            ), "Ludwig models expect 'model_path'."
+            node.function = lambda: function_class(
+                model_path=function_metadata["model_path"]
+            )
 
         else:
             if function_obj.type == "ultralytics":
@@ -311,7 +317,9 @@ class StatementBinder:
                 # detection for now, hopefully this can be generalized
                 function_dir = Path(EvaDB_INSTALLATION_DIR) / "functions"
                 function_obj.impl_file_path = (
-                    Path(f"{function_dir}/yolo_object_detector.py").absolute().as_posix()
+                    Path(f"{function_dir}/yolo_object_detector.py")
+                    .absolute()
+                    .as_posix()
                 )
 
             # Verify the consistency of the FUNCTION. If the checksum of the FUNCTION does not
@@ -329,7 +337,9 @@ class StatementBinder:
                 )
                 # certain functions take additional inputs like yolo needs the model_name
                 # these arguments are passed by the user as part of metadata
-                node.function = lambda: function_class(**get_metadata_properties(function_obj))
+                node.function = lambda: function_class(
+                    **get_metadata_properties(function_obj)
+                )
             except Exception as e:
                 err_msg = (
                     f"{str(e)}. Please verify that the Function class name in the "
@@ -339,13 +349,17 @@ class StatementBinder:
                 raise BinderError(err_msg)
 
         node.function_obj = function_obj
-        output_objs = self._catalog().get_function_io_catalog_output_entries(function_obj)
+        output_objs = self._catalog().get_function_io_catalog_output_entries(
+            function_obj
+        )
         if node.output:
             for obj in output_objs:
                 if obj.name.lower() == node.output:
                     node.output_objs = [obj]
             if not node.output_objs:
-                err_msg = f"Output {node.output} does not exist for {function_obj.name}."
+                err_msg = (
+                    f"Output {node.output} does not exist for {function_obj.name}."
+                )
                 logger.error(err_msg)
                 raise BinderError(err_msg)
             node.projection_columns = [node.output]

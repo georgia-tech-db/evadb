@@ -38,7 +38,9 @@ class FunctionCatalog(BaseModel):
 
     # FunctionIOCatalog storing the input/output attributes of the function
     _attributes = relationship(
-        "FunctionIOCatalog", back_populates="_function", cascade="all, delete, delete-orphan"
+        "FunctionIOCatalog",
+        back_populates="_function",
+        cascade="all, delete, delete-orphan",
     )
     _metadata = relationship(
         "FunctionMetadataCatalog",

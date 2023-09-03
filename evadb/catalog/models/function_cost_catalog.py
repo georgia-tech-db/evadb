@@ -30,7 +30,9 @@ class FunctionCostCatalog(BaseModel):
     __tablename__ = "function_cost_catalog"
 
     _function_id = Column(
-        "function_id", Integer, ForeignKey("function_catalog._row_id", ondelete="CASCADE")
+        "function_id",
+        Integer,
+        ForeignKey("function_catalog._row_id", ondelete="CASCADE"),
     )
     _function_name = Column(
         "name", String(128), ForeignKey("function_catalog.name", ondelete="CASCADE")

@@ -19,9 +19,9 @@ from mock import MagicMock, Mock, patch
 
 from evadb.constants import NO_GPU
 from evadb.expression.function_expression import FunctionExpression
+from evadb.functions.gpu_compatible import GPUCompatible
 from evadb.models.storage.batch import Batch
 from evadb.parser.alias import Alias
-from evadb.functions.gpu_compatible import GPUCompatible
 
 
 class FunctionExpressionTest(unittest.TestCase):

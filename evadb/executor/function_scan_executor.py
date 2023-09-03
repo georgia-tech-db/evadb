@@ -45,7 +45,9 @@ class FunctionScanExecutor(AbstractExecutor):
             if self.func_expr.function_obj and self.func_expr._stats:
                 function_id = self.func_expr.function_obj.row_id
                 self.catalog().upsert_function_cost_catalog_entry(
-                    function_id, self.func_expr.function_obj.name, self.func_expr._stats.prev_cost
+                    function_id,
+                    self.func_expr.function_obj.name,
+                    self.func_expr._stats.prev_cost,
                 )
 
             if not res.empty():

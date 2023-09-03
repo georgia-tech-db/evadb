@@ -21,9 +21,12 @@ import pandas as pd
 import pytest
 
 from evadb.configuration.constants import EvaDB_ROOT_DIR
+from evadb.functions.function_bootstrap_queries import (
+    ArrayCount_function_query,
+    Fastrcnn_function_query,
+)
 from evadb.models.storage.batch import Batch
 from evadb.server.command_handler import execute_query_fetch_all
-from evadb.functions.function_bootstrap_queries import ArrayCount_function_query, Fastrcnn_function_query
 
 NUM_FRAMES = 10
 

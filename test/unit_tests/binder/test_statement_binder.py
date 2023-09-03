@@ -313,7 +313,9 @@ class StatementBinderTests(unittest.TestCase):
             function_obj.outputs = [output]
 
             with patch.object(
-                catalog(), "get_function_catalog_entry_by_name", return_value=function_obj
+                catalog(),
+                "get_function_catalog_entry_by_name",
+                return_value=function_obj,
             ):
                 with self.assertRaises(AssertionError):
                     binder._bind_create_index_statement(create_index_statement)

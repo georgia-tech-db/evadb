@@ -224,14 +224,18 @@ class ReuseTest(unittest.TestCase):
         cache_name = plan.func_expr.signature()
 
         # cache exists
-        function_cache = self.evadb.catalog().get_function_cache_catalog_entry_by_name(cache_name)
+        function_cache = self.evadb.catalog().get_function_cache_catalog_entry_by_name(
+            cache_name
+        )
         cache_dir = Path(function_cache.cache_path)
         self.assertIsNotNone(function_cache)
         self.assertTrue(cache_dir.exists())
 
         # cache should be removed if the FUNCTION is removed
         execute_query_fetch_all(self.evadb, "DROP FUNCTION Yolo;")
-        function_cache = self.evadb.catalog().get_function_cache_catalog_entry_by_name(cache_name)
+        function_cache = self.evadb.catalog().get_function_cache_catalog_entry_by_name(
+            cache_name
+        )
         self.assertIsNone(function_cache)
         self.assertFalse(cache_dir.exists())
 
@@ -248,13 +252,17 @@ class ReuseTest(unittest.TestCase):
         cache_name = plan.func_expr.signature()
 
         # cache exists
-        function_cache = self.evadb.catalog().get_function_cache_catalog_entry_by_name(cache_name)
+        function_cache = self.evadb.catalog().get_function_cache_catalog_entry_by_name(
+            cache_name
+        )
         cache_dir = Path(function_cache.cache_path)
         self.assertIsNotNone(function_cache)
         self.assertTrue(cache_dir.exists())
 
         # cache should be removed if the Table is removed
         execute_query_fetch_all(self.evadb, "DROP TABLE DETRAC;")
-        function_cache = self.evadb.catalog().get_function_cache_catalog_entry_by_name(cache_name)
+        function_cache = self.evadb.catalog().get_function_cache_catalog_entry_by_name(
+            cache_name
+        )
         self.assertIsNone(function_cache)
         self.assertFalse(cache_dir.exists())

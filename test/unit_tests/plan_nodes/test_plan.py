@@ -23,8 +23,8 @@ from evadb.catalog.models.column_catalog import ColumnCatalogEntry
 from evadb.parser.table_ref import TableInfo, TableRef
 from evadb.parser.types import FileFormatType, ObjectType
 from evadb.plan_nodes.abstract_plan import AbstractPlan
-from evadb.plan_nodes.create_plan import CreatePlan
 from evadb.plan_nodes.create_function_plan import CreateFunctionPlan
+from evadb.plan_nodes.create_plan import CreatePlan
 from evadb.plan_nodes.drop_object_plan import DropObjectPlan
 from evadb.plan_nodes.insert_plan import InsertPlan
 from evadb.plan_nodes.load_data_plan import LoadDataPlan
@@ -78,7 +78,9 @@ class PlanNodeTests(unittest.TestCase):
         outputs = [functionIO]
         impl_path = "test"
         ty = "classification"
-        node = CreateFunctionPlan(function_name, if_not_exists, inputs, outputs, impl_path, ty)
+        node = CreateFunctionPlan(
+            function_name, if_not_exists, inputs, outputs, impl_path, ty
+        )
         self.assertEqual(node.opr_type, PlanOprType.CREATE_FUNCTION)
         self.assertEqual(node.if_not_exists, True)
         self.assertEqual(node.inputs, [functionIO, functionIO])

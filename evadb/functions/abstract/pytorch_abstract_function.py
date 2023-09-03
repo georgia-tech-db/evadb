@@ -38,7 +38,9 @@ from torch import nn
 from torchvision.transforms import Compose, transforms
 
 
-class PytorchAbstractClassifierFunction(AbstractClassifierFunction, nn.Module, GPUCompatible):
+class PytorchAbstractClassifierFunction(
+    AbstractClassifierFunction, nn.Module, GPUCompatible
+):
     """
     A pytorch based classifier. Used to make sure we make maximum
     utilization of features provided by pytorch without reinventing the wheel.

@@ -122,7 +122,9 @@ class ColumnCatalogEntry:
     table_id: int = None
     table_name: str = None
     row_id: int = None
-    dep_caches: List[FunctionCacheCatalogEntry] = field(compare=False, default_factory=list)
+    dep_caches: List[FunctionCacheCatalogEntry] = field(
+        compare=False, default_factory=list
+    )
 
 
 @dataclass(unsafe_hash=True)
@@ -214,8 +216,12 @@ class FunctionCatalogEntry:
     row_id: int = None
     args: List[FunctionIOCatalogEntry] = field(compare=False, default_factory=list)
     outputs: List[FunctionIOCatalogEntry] = field(compare=False, default_factory=list)
-    metadata: List[FunctionMetadataCatalogEntry] = field(compare=False, default_factory=list)
-    dep_caches: List[FunctionIOCatalogEntry] = field(compare=False, default_factory=list)
+    metadata: List[FunctionMetadataCatalogEntry] = field(
+        compare=False, default_factory=list
+    )
+    dep_caches: List[FunctionIOCatalogEntry] = field(
+        compare=False, default_factory=list
+    )
 
     def display_format(self):
         def _to_str(col):

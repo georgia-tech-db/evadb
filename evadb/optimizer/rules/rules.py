@@ -55,8 +55,8 @@ from evadb.optimizer.operators import (
     Dummy,
     LogicalApplyAndMerge,
     LogicalCreate,
-    LogicalCreateIndex,
     LogicalCreateFunction,
+    LogicalCreateIndex,
     LogicalDelete,
     LogicalDropObject,
     LogicalExchange,
@@ -81,9 +81,9 @@ from evadb.optimizer.operators import (
     Operator,
     OperatorType,
 )
+from evadb.plan_nodes.create_function_plan import CreateFunctionPlan
 from evadb.plan_nodes.create_index_plan import CreateIndexPlan
 from evadb.plan_nodes.create_plan import CreatePlan
-from evadb.plan_nodes.create_function_plan import CreateFunctionPlan
 from evadb.plan_nodes.delete_plan import DeletePlan
 from evadb.plan_nodes.drop_object_plan import DropObjectPlan
 from evadb.plan_nodes.function_scan_plan import FunctionScanPlan
@@ -769,7 +769,9 @@ class LogicalCreateFunctionFromSelectToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALCREATEFUNCTION)
         pattern.append_child(Pattern(OperatorType.DUMMY))
-        super().__init__(RuleType.LOGICAL_CREATE_FUNCTION_FROM_SELECT_TO_PHYSICAL, pattern)
+        super().__init__(
+            RuleType.LOGICAL_CREATE_FUNCTION_FROM_SELECT_TO_PHYSICAL, pattern
+        )
 
     def promise(self):
         return Promise.LOGICAL_CREATE_FUNCTION_FROM_SELECT_TO_PHYSICAL

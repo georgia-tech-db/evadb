@@ -113,13 +113,19 @@ class HuggingFaceTests(unittest.TestCase):
         # Test that there exists a column with function_name.score and each entry is a list of floats
         self.assertTrue(function_name.lower() + ".score" in output_frames.columns)
         self.assertTrue(
-            all(isinstance(x, list) for x in output.frames[function_name.lower() + ".score"])
+            all(
+                isinstance(x, list)
+                for x in output.frames[function_name.lower() + ".score"]
+            )
         )
 
         # Test that there exists a column with function_name.label and each entry is a list of strings
         self.assertTrue(function_name.lower() + ".label" in output_frames.columns)
         self.assertTrue(
-            all(isinstance(x, list) for x in output.frames[function_name.lower() + ".label"])
+            all(
+                isinstance(x, list)
+                for x in output.frames[function_name.lower() + ".label"]
+            )
         )
 
         # Test that there exists a column with function_name.box and each entry is a dictionary with 4 keys
@@ -154,13 +160,19 @@ class HuggingFaceTests(unittest.TestCase):
         # Test that there exists a column with function_name.score and each entry is a list of floats
         self.assertTrue(function_name.lower() + ".score" in output.frames.columns)
         self.assertTrue(
-            all(isinstance(x, list) for x in output.frames[function_name.lower() + ".score"])
+            all(
+                isinstance(x, list)
+                for x in output.frames[function_name.lower() + ".score"]
+            )
         )
 
         # Test that there exists a column with function_name.label and each entry is a list of strings
         self.assertTrue(function_name.lower() + ".label" in output.frames.columns)
         self.assertTrue(
-            all(isinstance(x, list) for x in output.frames[function_name.lower() + ".label"])
+            all(
+                isinstance(x, list)
+                for x in output.frames[function_name.lower() + ".label"]
+            )
         )
 
         drop_function_query = f"DROP FUNCTION {function_name};"
@@ -203,7 +215,8 @@ class HuggingFaceTests(unittest.TestCase):
         self.assertTrue(function_name.lower() + ".score" in output.frames.columns)
         self.assertTrue(
             all(
-                isinstance(x, float) for x in output.frames[function_name.lower() + ".score"]
+                isinstance(x, float)
+                for x in output.frames[function_name.lower() + ".score"]
             )
         )
 
@@ -229,9 +242,7 @@ class HuggingFaceTests(unittest.TestCase):
         # verify that speech was converted to text correctly
         self.assertTrue(output.frames.iloc[0][0].count("touchdown") == 2)
 
-        select_query_with_group_by = (
-            f"SELECT {function_name}(SEGMENT(audio)) FROM VIDEOS GROUP BY '240 samples';"
-        )
+        select_query_with_group_by = f"SELECT {function_name}(SEGMENT(audio)) FROM VIDEOS GROUP BY '240 samples';"
         output = execute_query_fetch_all(self.evadb, select_query_with_group_by)
 
         # verify that output has one row and one column only
@@ -316,7 +327,8 @@ class HuggingFaceTests(unittest.TestCase):
         self.assertTrue(function_name.lower() + ".score" in output.frames.columns)
         self.assertTrue(
             all(
-                isinstance(x, float) for x in output.frames[function_name.lower() + ".score"]
+                isinstance(x, float)
+                for x in output.frames[function_name.lower() + ".score"]
             )
         )
 
@@ -364,7 +376,8 @@ class HuggingFaceTests(unittest.TestCase):
         self.assertTrue(function_name.lower() + ".score" in output.frames.columns)
         self.assertTrue(
             all(
-                isinstance(x, float) for x in output.frames[function_name.lower() + ".score"]
+                isinstance(x, float)
+                for x in output.frames[function_name.lower() + ".score"]
             )
         )
 

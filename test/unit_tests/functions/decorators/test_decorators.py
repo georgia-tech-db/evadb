@@ -16,7 +16,10 @@ import unittest
 
 from evadb.catalog.catalog_type import NdArrayType
 from evadb.functions.decorators.decorators import forward, setup
-from evadb.functions.decorators.io_descriptors.data_types import NumpyArray, PandasDataframe
+from evadb.functions.decorators.io_descriptors.data_types import (
+    NumpyArray,
+    PandasDataframe,
+)
 
 
 class DecoratorTests(unittest.TestCase):

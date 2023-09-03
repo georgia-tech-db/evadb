@@ -129,12 +129,18 @@ class CatalogManagerTests(unittest.TestCase):
     @mock.patch("evadb.catalog.catalog_manager.FunctionIOCatalogService")
     @mock.patch("evadb.catalog.catalog_manager.FunctionMetadataCatalogService")
     @mock.patch("evadb.catalog.catalog_manager.get_file_checksum")
-    def test_insert_function(self, checksum_mock, functionmetadata_mock, functionio_mock, function_mock):
+    def test_insert_function(
+        self, checksum_mock, functionmetadata_mock, functionio_mock, function_mock
+    ):
         catalog = CatalogManager(MagicMock(), MagicMock())
         function_io_list = [MagicMock()]
         function_metadata_list = [MagicMock()]
         actual = catalog.insert_function_catalog_entry(
-            "function", "sample.py", "classification", function_io_list, function_metadata_list
+            "function",
+            "sample.py",
+            "classification",
+            function_io_list,
+            function_metadata_list,
         )
         functionio_mock.return_value.insert_entries.assert_called_with(function_io_list)
         functionmetadata_mock.return_value.insert_entries.assert_called_with(
@@ -151,7 +157,9 @@ class CatalogManagerTests(unittest.TestCase):
         catalog = CatalogManager(MagicMock(), MagicMock())
         actual = catalog.get_function_catalog_entry_by_name("name")
         function_mock.return_value.get_entry_by_name.assert_called_with("name")
-        self.assertEqual(actual, function_mock.return_value.get_entry_by_name.return_value)
+        self.assertEqual(
+            actual, function_mock.return_value.get_entry_by_name.return_value
+        )
 
     @mock.patch("evadb.catalog.catalog_manager.FunctionCatalogService")
     def test_delete_function(self, function_mock):

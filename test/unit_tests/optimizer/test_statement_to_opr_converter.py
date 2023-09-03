@@ -22,8 +22,8 @@ from evadb.optimizer.operators import (
     Dummy,
     LogicalApplyAndMerge,
     LogicalCreate,
-    LogicalCreateIndex,
     LogicalCreateFunction,
+    LogicalCreateIndex,
     LogicalDelete,
     LogicalDropObject,
     LogicalExchange,
@@ -48,9 +48,9 @@ from evadb.optimizer.operators import (
     Operator,
 )
 from evadb.optimizer.statement_to_opr_converter import StatementToPlanConverter
+from evadb.parser.create_function_statement import CreateFunctionStatement
 from evadb.parser.create_index_statement import CreateIndexStatement
 from evadb.parser.create_statement import CreateTableStatement
-from evadb.parser.create_function_statement import CreateFunctionStatement
 from evadb.parser.drop_object_statement import DropObjectStatement
 from evadb.parser.explain_statement import ExplainStatement
 from evadb.parser.insert_statement import InsertTableStatement
@@ -129,7 +129,9 @@ statement_to_opr_converter.column_definition_to_function_io"
         "evadb.optimizer.\
 statement_to_opr_converter.metadata_definition_to_function_metadata"
     )
-    def test_visit_create_function(self, metadata_def_mock, col_def_mock, l_create_function_mock):
+    def test_visit_create_function(
+        self, metadata_def_mock, col_def_mock, l_create_function_mock
+    ):
         converter = StatementToPlanConverter()
         stmt = MagicMock()
         stmt.name = "name"

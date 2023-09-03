@@ -36,7 +36,7 @@ class CreateIndexPlan(AbstractPlan):
         self._table_ref = table_ref
         self._col_list = col_list
         self._vector_store_type = vector_store_type
-        self._function = function 
+        self._function = function
 
     @property
     def name(self):

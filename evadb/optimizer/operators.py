@@ -19,9 +19,9 @@ from typing import Any, List
 
 from evadb.catalog.catalog_type import VectorStoreType
 from evadb.catalog.models.column_catalog import ColumnCatalogEntry
-from evadb.catalog.models.table_catalog import TableCatalogEntry
 from evadb.catalog.models.function_io_catalog import FunctionIOCatalogEntry
 from evadb.catalog.models.function_metadata_catalog import FunctionMetadataCatalogEntry
+from evadb.catalog.models.table_catalog import TableCatalogEntry
 from evadb.expression.abstract_expression import AbstractExpression
 from evadb.expression.constant_value_expression import ConstantValueExpression
 from evadb.expression.function_expression import FunctionExpression

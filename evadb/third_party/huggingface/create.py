@@ -194,7 +194,9 @@ def io_entry_for_outputs(function_outputs: Dict[str, Type]):
     return outputs
 
 
-def gen_hf_io_catalog_entries(function_name: str, metadata: List[FunctionMetadataCatalogEntry]):
+def gen_hf_io_catalog_entries(
+    function_name: str, metadata: List[FunctionMetadataCatalogEntry]
+):
     """
     Generates IO Catalog Entries for a HuggingFace Function.
     The attributes of the huggingface model can be extracted from metadata.

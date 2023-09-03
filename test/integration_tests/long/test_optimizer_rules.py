@@ -146,7 +146,9 @@ class OptimizerRulesTest(unittest.TestCase):
         self.assertEqual(result_without_pushdown_join_rule, result_with_rule)
         self.assertEqual(query_plan, query_plan_without_pushdown_join_rule)
 
-    @patch("evadb.catalog.catalog_manager.CatalogManager.get_function_cost_catalog_entry")
+    @patch(
+        "evadb.catalog.catalog_manager.CatalogManager.get_function_cost_catalog_entry"
+    )
     def test_should_reorder_predicates(self, mock):
         def _check_reorder(cost_func):
             mock.side_effect = cost_func
@@ -179,7 +181,9 @@ class OptimizerRulesTest(unittest.TestCase):
             lambda name: MagicMock(cost=5) if name == "DummyObjectDetector" else None
         )
 
-    @patch("evadb.catalog.catalog_manager.CatalogManager.get_function_cost_catalog_entry")
+    @patch(
+        "evadb.catalog.catalog_manager.CatalogManager.get_function_cost_catalog_entry"
+    )
     def test_should_not_reorder_predicates(self, mock):
         def _check_no_reorder(cost_func):
             mock.side_effect = cost_func
@@ -221,7 +225,9 @@ class OptimizerRulesTest(unittest.TestCase):
         # no reordering if default cost is used for both Function
         _check_no_reorder(lambda name: None)
 
-    @patch("evadb.catalog.catalog_manager.CatalogManager.get_function_cost_catalog_entry")
+    @patch(
+        "evadb.catalog.catalog_manager.CatalogManager.get_function_cost_catalog_entry"
+    )
     def test_should_reorder_multiple_predicates(self, mock):
         def side_effect_func(name):
             if name == "DummyMultiObjectDetector":

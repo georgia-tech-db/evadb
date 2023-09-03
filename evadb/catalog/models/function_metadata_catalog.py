@@ -35,7 +35,9 @@ class FunctionMetadataCatalog(BaseModel):
 
     _key = Column("key", String(100))
     _value = Column("value", String(100))
-    _function_id = Column("function_id", Integer, ForeignKey("function_catalog._row_id"))
+    _function_id = Column(
+        "function_id", Integer, ForeignKey("function_catalog._row_id")
+    )
 
     __table_args__ = (UniqueConstraint("key", "function_id"), {})
 

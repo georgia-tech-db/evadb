@@ -41,7 +41,9 @@ class AbstractHFFunction(AbstractFunction, GPUCompatible):
     def name(self) -> str:
         return "GenericHuggingfaceModel"
 
-    def __init__(self, function_obj: FunctionCatalogEntry, device: int = -1, *args, **kwargs):
+    def __init__(
+        self, function_obj: FunctionCatalogEntry, device: int = -1, *args, **kwargs
+    ):
         super().__init__(*args, **kwargs)
         pipeline_args = self.default_pipeline_args
         for entry in function_obj.metadata:

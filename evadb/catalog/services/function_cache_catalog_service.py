@@ -29,9 +29,13 @@ class FunctionCacheCatalogService(BaseService):
     def __init__(self, db_session: Session):
         super().__init__(FunctionCacheCatalog, db_session)
         self._column_service: ColumnCatalogService = ColumnCatalogService(db_session)
-        self._function_service: FunctionCatalogService = FunctionCatalogService(db_session)
+        self._function_service: FunctionCatalogService = FunctionCatalogService(
+            db_session
+        )
 
-    def insert_entry(self, entry: FunctionCacheCatalogEntry) -> FunctionCacheCatalogEntry:
+    def insert_entry(
+        self, entry: FunctionCacheCatalogEntry
+    ) -> FunctionCacheCatalogEntry:
         """Insert a new function cache entry into function cache catalog.
         Arguments:
             `name` (str): name of the cache table
@@ -62,9 +66,7 @@ class FunctionCacheCatalogService(BaseService):
             cache_obj = cache_obj.save(self.session)
 
         except Exception as e:
-            err_msg = (
-                f"Failed to insert entry into function cache catalog with exception {str(e)}"
-            )
+            err_msg = f"Failed to insert entry into function cache catalog with exception {str(e)}"
             logger.exception(err_msg)
             raise CatalogError(err_msg)
         else:

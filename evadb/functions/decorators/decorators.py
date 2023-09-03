@@ -19,7 +19,9 @@ from typing import List
 from evadb.functions.decorators.io_descriptors.abstract_types import IOArgument
 
 
-def setup(cacheable: bool = False, function_type: str = "Abstract", batchable: bool = True):
+def setup(
+    cacheable: bool = False, function_type: str = "Abstract", batchable: bool = True
+):
     """decorator for the setup function. It will be used to set the cache, batching and
     function_type parameters in the catalog
 

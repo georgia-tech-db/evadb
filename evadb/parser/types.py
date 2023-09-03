@@ -67,7 +67,7 @@ class FileFormatType(EvaDBEnum):
 
 
 class ShowType(EvaDBEnum):
-    FUNCTIONS # noqa: F821
+    FUNCTIONS  # noqa: F821
     TABLES  # noqa: F821
 
 
@@ -77,5 +77,5 @@ class FunctionType(EvaDBEnum):
 
 class ObjectType(EvaDBEnum):
     TABLE  # noqa: F821
-    FUNCTION # noqa: F821
+    FUNCTION  # noqa: F821
     INDEX  # noqa: F821

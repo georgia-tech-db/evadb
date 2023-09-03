@@ -123,20 +123,26 @@ class DropObjectExecutorTest(unittest.TestCase):
     def test_should_drop_function(self):
         self.run_create_function_query()
         function_name = "DummyObjectDetector"
-        function = self.evadb.catalog().get_function_catalog_entry_by_name(function_name)
+        function = self.evadb.catalog().get_function_catalog_entry_by_name(
+            function_name
+        )
         self.assertTrue(function is not None)
 
         # Test that dropping the FUNCTION reflects in the catalog
         drop_query = "DROP FUNCTION IF EXISTS {};".format(function_name)
         execute_query_fetch_all(self.evadb, drop_query)
-        function = self.evadb.catalog().get_function_catalog_entry_by_name(function_name)
+        function = self.evadb.catalog().get_function_catalog_entry_by_name(
+            function_name
+        )
         self.assertTrue(function is None)
 
     def test_drop_wrong_function_name(self):
         self.run_create_function_query()
         right_function_name = "DummyObjectDetector"
         wrong_function_name = "FakeDummyObjectDetector"
-        function = self.evadb.catalog().get_function_catalog_entry_by_name(right_function_name)
+        function = self.evadb.catalog().get_function_catalog_entry_by_name(
+            right_function_name
+        )
         self.assertTrue(function is not None)
 
         # Test that dropping the wrong FUNCTION:
@@ -152,7 +158,9 @@ class DropObjectExecutorTest(unittest.TestCase):
                 wrong_function_name
             )
             self.assertTrue(str(e) == err_msg)
-        function = self.evadb.catalog().get_function_catalog_entry_by_name(right_function_name)
+        function = self.evadb.catalog().get_function_catalog_entry_by_name(
+            right_function_name
+        )
         self.assertTrue(function is not None)
 
     #### DROP INDEX

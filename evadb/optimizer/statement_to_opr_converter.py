@@ -15,8 +15,8 @@
 from evadb.expression.abstract_expression import AbstractExpression
 from evadb.optimizer.operators import (
     LogicalCreate,
-    LogicalCreateIndex,
     LogicalCreateFunction,
+    LogicalCreateIndex,
     LogicalDelete,
     LogicalDropObject,
     LogicalExplain,
@@ -41,9 +41,9 @@ from evadb.optimizer.optimizer_utils import (
     column_definition_to_function_io,
     metadata_definition_to_function_metadata,
 )
+from evadb.parser.create_function_statement import CreateFunctionStatement
 from evadb.parser.create_index_statement import CreateIndexStatement
 from evadb.parser.create_statement import CreateTableStatement
-from evadb.parser.create_function_statement import CreateFunctionStatement
 from evadb.parser.delete_statement import DeleteTableStatement
 from evadb.parser.drop_object_statement import DropObjectStatement
 from evadb.parser.explain_statement import ExplainStatement
@@ -262,7 +262,9 @@ class StatementToPlanConverter:
         """
         annotated_inputs = column_definition_to_function_io(statement.inputs, True)
         annotated_outputs = column_definition_to_function_io(statement.outputs, False)
-        annotated_metadata = metadata_definition_to_function_metadata(statement.metadata)
+        annotated_metadata = metadata_definition_to_function_metadata(
+            statement.metadata
+        )
 
         create_function_opr = LogicalCreateFunction(
             statement.name,

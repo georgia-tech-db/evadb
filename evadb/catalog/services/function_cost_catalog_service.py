@@ -16,7 +16,10 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import select
 
-from evadb.catalog.models.function_cost_catalog import FunctionCostCatalog, FunctionCostCatalogEntry
+from evadb.catalog.models.function_cost_catalog import (
+    FunctionCostCatalog,
+    FunctionCostCatalogEntry,
+)
 from evadb.catalog.services.base_service import BaseService
 from evadb.utils.errors import CatalogError
 
@@ -25,7 +28,9 @@ class FunctionCostCatalogService(BaseService):
     def __init__(self, db_session: Session):
         super().__init__(FunctionCostCatalog, db_session)
 
-    def insert_entry(self, function_id: int, name: str, cost: int) -> FunctionCostCatalogEntry:
+    def insert_entry(
+        self, function_id: int, name: str, cost: int
+    ) -> FunctionCostCatalogEntry:
         """Insert a new function cost entry
 
         Arguments:

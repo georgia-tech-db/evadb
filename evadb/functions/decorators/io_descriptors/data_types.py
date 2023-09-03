@@ -70,7 +70,9 @@ class PandasDataframe(IOArgument):
         self.column_types = column_types
         self.column_shapes = column_shapes
 
-    def generate_catalog_entries(self, is_input=False) -> List[Type[FunctionIOCatalogEntry]]:
+    def generate_catalog_entries(
+        self, is_input=False
+    ) -> List[Type[FunctionIOCatalogEntry]]:
         catalog_entries = []
 
         if not self.column_types:

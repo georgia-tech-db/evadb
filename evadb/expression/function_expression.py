@@ -23,9 +23,9 @@ from evadb.catalog.models.function_io_catalog import FunctionIOCatalogEntry
 from evadb.constants import NO_GPU
 from evadb.executor.execution_context import Context
 from evadb.expression.abstract_expression import AbstractExpression, ExpressionType
+from evadb.functions.gpu_compatible import GPUCompatible
 from evadb.models.storage.batch import Batch
 from evadb.parser.alias import Alias
-from evadb.functions.gpu_compatible import GPUCompatible
 from evadb.utils.kv_cache import DiskKVCache
 from evadb.utils.logging_manager import logger
 from evadb.utils.stats import FunctionStats

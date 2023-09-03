@@ -309,7 +309,9 @@ def get_expression_execution_cost(
     total_cost = 0
     # iterate over all the function expression and accumulate the cost
     for child_expr in expr.find_all(FunctionExpression):
-        cost_entry = context.db.catalog().get_function_cost_catalog_entry(child_expr.name)
+        cost_entry = context.db.catalog().get_function_cost_catalog_entry(
+            child_expr.name
+        )
         if cost_entry:
             total_cost += cost_entry.cost
         else:

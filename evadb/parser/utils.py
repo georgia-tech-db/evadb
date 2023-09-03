@@ -12,8 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from evadb.parser.create_statement import CreateDatabaseStatement, CreateTableStatement
 from evadb.parser.create_function_statement import CreateFunctionStatement
+from evadb.parser.create_statement import CreateDatabaseStatement, CreateTableStatement
 from evadb.parser.drop_object_statement import DropObjectStatement
 from evadb.parser.explain_statement import ExplainStatement
 from evadb.parser.insert_statement import InsertTableStatement
@@ -59,7 +59,11 @@ def parse_table_clause(expr: str, chunk_size: int = None, chunk_overlap: int = N
 
 
 def parse_create_function(
-    function_name: str, if_not_exists: bool, function_file_path: str, type: str, **kwargs
+    function_name: str,
+    if_not_exists: bool,
+    function_file_path: str,
+    type: str,
+    **kwargs,
 ):
     mock_query = (
         f"CREATE FUNCTION IF NOT EXISTS {function_name}"
@@ -76,7 +80,9 @@ def parse_create_function(
     mock_query += ";"
 
     stmt = Parser().parse(mock_query)[0]
-    assert isinstance(stmt, CreateFunctionStatement), "Expected a create function statement"
+    assert isinstance(
+        stmt, CreateFunctionStatement
+    ), "Expected a create function statement"
     return stmt
 
 

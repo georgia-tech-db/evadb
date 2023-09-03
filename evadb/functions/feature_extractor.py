@@ -20,7 +20,9 @@ import torch
 from torch import Tensor
 from torchvision import models
 
-from evadb.functions.abstract.pytorch_abstract_function import PytorchAbstractClassifierFunction
+from evadb.functions.abstract.pytorch_abstract_function import (
+    PytorchAbstractClassifierFunction,
+)
 
 
 class FeatureExtractor(PytorchAbstractClassifierFunction):

@@ -28,8 +28,8 @@ from evadb.executor.plan_executor import PlanExecutor
 from evadb.executor.pp_executor import PPExecutor
 from evadb.executor.seq_scan_executor import SequentialScanExecutor
 from evadb.models.storage.batch import Batch
-from evadb.plan_nodes.create_plan import CreatePlan
 from evadb.plan_nodes.create_function_plan import CreateFunctionPlan
+from evadb.plan_nodes.create_plan import CreatePlan
 from evadb.plan_nodes.insert_plan import InsertPlan
 from evadb.plan_nodes.load_data_plan import LoadDataPlan
 from evadb.plan_nodes.pp_plan import PPScanPlan

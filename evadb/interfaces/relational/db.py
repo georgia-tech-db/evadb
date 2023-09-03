@@ -19,6 +19,7 @@ import pandas
 from evadb.configuration.constants import EvaDB_DATABASE_DIR
 from evadb.database import EvaDBDatabase, init_evadb_instance
 from evadb.expression.tuple_value_expression import TupleValueExpression
+from evadb.functions.function_bootstrap_queries import init_builtin_functions
 from evadb.interfaces.relational.relation import EvaDBQuery
 from evadb.interfaces.relational.utils import try_binding
 from evadb.models.server.response import Response
@@ -26,12 +27,12 @@ from evadb.models.storage.batch import Batch
 from evadb.parser.alias import Alias
 from evadb.parser.select_statement import SelectStatement
 from evadb.parser.utils import (
-    parse_create_table,
     parse_create_function,
+    parse_create_table,
     parse_create_vector_index,
+    parse_drop_function,
     parse_drop_index,
     parse_drop_table,
-    parse_drop_function,
     parse_explain,
     parse_insert,
     parse_load,
@@ -41,7 +42,6 @@ from evadb.parser.utils import (
     parse_table_clause,
 )
 from evadb.server.command_handler import execute_statement
-from evadb.functions.function_bootstrap_queries import init_builtin_functions
 from evadb.utils.generic_utils import find_nearest_word, is_ray_enabled_and_installed
 from evadb.utils.logging_manager import logger
 
@@ -387,7 +387,9 @@ class EvaDBCursor(object):
                 0
             0	Function Successfully created: MnistImageClassifier
         """
-        stmt = parse_create_function(function_name, if_not_exists, impl_path, type, **kwargs)
+        stmt = parse_create_function(
+            function_name, if_not_exists, impl_path, type, **kwargs
+        )
         return EvaDBQuery(self._evadb, stmt)
 
     def create_table(

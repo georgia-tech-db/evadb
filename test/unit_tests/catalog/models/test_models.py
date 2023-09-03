@@ -16,10 +16,10 @@ import unittest
 
 from evadb.catalog.catalog_type import ColumnType, NdArrayType, TableType
 from evadb.catalog.models.column_catalog import ColumnCatalogEntry
-from evadb.catalog.models.index_catalog import IndexCatalogEntry
-from evadb.catalog.models.table_catalog import TableCatalogEntry
 from evadb.catalog.models.function_catalog import FunctionCatalogEntry
 from evadb.catalog.models.function_io_catalog import FunctionIOCatalogEntry
+from evadb.catalog.models.index_catalog import IndexCatalogEntry
+from evadb.catalog.models.table_catalog import TableCatalogEntry
 
 
 class CatalogModelsTest(unittest.TestCase):
@@ -78,7 +78,9 @@ class CatalogModelsTest(unittest.TestCase):
         self.assertNotEqual(table_catalog_entry, table_catalog_entry1)
 
     def test_function(self):
-        function = FunctionCatalogEntry("function", "fasterRCNN", "ObjectDetection", "checksum")
+        function = FunctionCatalogEntry(
+            "function", "fasterRCNN", "ObjectDetection", "checksum"
+        )
         self.assertEqual(function.row_id, None)
         self.assertEqual(function.impl_file_path, "fasterRCNN")
         self.assertEqual(function.name, "function")
@@ -86,19 +88,31 @@ class CatalogModelsTest(unittest.TestCase):
         self.assertEqual(function.checksum, "checksum")
 
     def test_function_hash(self):
-        function1 = FunctionCatalogEntry("function", "fasterRCNN", "ObjectDetection", "checksum")
-        function2 = FunctionCatalogEntry("function", "fasterRCNN", "ObjectDetection", "checksum")
+        function1 = FunctionCatalogEntry(
+            "function", "fasterRCNN", "ObjectDetection", "checksum"
+        )
+        function2 = FunctionCatalogEntry(
+            "function", "fasterRCNN", "ObjectDetection", "checksum"
+        )
 
         self.assertEqual(hash(function1), hash(function2))
 
     def test_function_equality(self):
-        function = FunctionCatalogEntry("function", "fasterRCNN", "ObjectDetection", "checksum")
+        function = FunctionCatalogEntry(
+            "function", "fasterRCNN", "ObjectDetection", "checksum"
+        )
         self.assertEqual(function, function)
-        function2 = FunctionCatalogEntry("function2", "fasterRCNN", "ObjectDetection", "checksum")
+        function2 = FunctionCatalogEntry(
+            "function2", "fasterRCNN", "ObjectDetection", "checksum"
+        )
         self.assertNotEqual(function, function2)
-        function3 = FunctionCatalogEntry("function", "fasterRCNN2", "ObjectDetection", "checksum")
+        function3 = FunctionCatalogEntry(
+            "function", "fasterRCNN2", "ObjectDetection", "checksum"
+        )
         self.assertNotEqual(function, function3)
-        function4 = FunctionCatalogEntry("function2", "fasterRCNN", "ObjectDetection3", "checksum")
+        function4 = FunctionCatalogEntry(
+            "function2", "fasterRCNN", "ObjectDetection3", "checksum"
+        )
         self.assertNotEqual(function, function4)
 
     def test_function_io(self):

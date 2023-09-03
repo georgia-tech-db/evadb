@@ -19,8 +19,8 @@ from evadb.executor.abstract_executor import AbstractExecutor
 from evadb.executor.apply_and_merge_executor import ApplyAndMergeExecutor
 from evadb.executor.create_database_executor import CreateDatabaseExecutor
 from evadb.executor.create_executor import CreateExecutor
-from evadb.executor.create_index_executor import CreateIndexExecutor
 from evadb.executor.create_function_executor import CreateFunctionExecutor
+from evadb.executor.create_index_executor import CreateIndexExecutor
 from evadb.executor.delete_executor import DeleteExecutor
 from evadb.executor.drop_object_executor import DropObjectExecutor
 from evadb.executor.exchange_executor import ExchangeExecutor

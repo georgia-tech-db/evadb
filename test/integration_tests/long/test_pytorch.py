@@ -34,9 +34,12 @@ import pytest
 
 from evadb.configuration.constants import EvaDB_ROOT_DIR
 from evadb.executor.executor_utils import ExecutorError
+from evadb.functions.function_bootstrap_queries import (
+    Asl_function_query,
+    Mvit_function_query,
+)
 from evadb.models.storage.batch import Batch
 from evadb.server.command_handler import execute_query_fetch_all
-from evadb.functions.function_bootstrap_queries import Asl_function_query, Mvit_function_query
 from evadb.utils.generic_utils import try_to_import_cv2
 
 

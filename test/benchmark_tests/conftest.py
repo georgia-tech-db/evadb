@@ -16,8 +16,8 @@ from test.util import get_evadb_for_testing
 
 import pytest
 
-from evadb.server.command_handler import execute_query_fetch_all
 from evadb.functions.function_bootstrap_queries import init_builtin_functions
+from evadb.server.command_handler import execute_query_fetch_all
 
 
 @pytest.fixture(autouse=False)

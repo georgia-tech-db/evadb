@@ -76,14 +76,18 @@ class DropObjectExecutor(AbstractExecutor):
     def _handle_drop_function(self, function_name: str, if_exists: bool):
         # check catalog if it already has this function entry
         if not self.catalog().get_function_catalog_entry_by_name(function_name):
-            err_msg = f"Function {function_name} does not exist, therefore cannot be dropped."
+            err_msg = (
+                f"Function {function_name} does not exist, therefore cannot be dropped."
+            )
             if if_exists:
                 logger.warning(err_msg)
                 return Batch(pd.DataFrame([err_msg]))
             else:
                 raise RuntimeError(err_msg)
         else:
-            function_entry = self.catalog().get_function_catalog_entry_by_name(function_name)
+            function_entry = self.catalog().get_function_catalog_entry_by_name(
+                function_name
+            )
             for cache in function_entry.dep_caches:
                 self.catalog().drop_function_cache_catalog_entry(cache)
 

@@ -17,7 +17,10 @@ from typing import List
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import select
 
-from evadb.catalog.models.function_io_catalog import FunctionIOCatalog, FunctionIOCatalogEntry
+from evadb.catalog.models.function_io_catalog import (
+    FunctionIOCatalog,
+    FunctionIOCatalogEntry,
+)
 from evadb.catalog.services.base_service import BaseService
 from evadb.utils.logging_manager import logger
 
@@ -26,7 +29,9 @@ class FunctionIOCatalogService(BaseService):
     def __init__(self, db_session: Session):
         super().__init__(FunctionIOCatalog, db_session)
 
-    def get_input_entries_by_function_id(self, function_id: int) -> List[FunctionIOCatalogEntry]:
+    def get_input_entries_by_function_id(
+        self, function_id: int
+    ) -> List[FunctionIOCatalogEntry]:
         try:
             result = (
                 self.session.execute(
@@ -44,7 +49,9 @@ class FunctionIOCatalogService(BaseService):
             logger.error(error)
             raise RuntimeError(error)
 
-    def get_output_entries_by_function_id(self, function_id: int) -> List[FunctionIOCatalogEntry]:
+    def get_output_entries_by_function_id(
+        self, function_id: int
+    ) -> List[FunctionIOCatalogEntry]:
         try:
             result = (
                 self.session.execute(

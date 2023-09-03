@@ -22,13 +22,13 @@ from evadb.expression.constant_value_expression import ConstantValueExpression
 from evadb.expression.function_expression import FunctionExpression
 from evadb.expression.tuple_value_expression import TupleValueExpression
 from evadb.parser.alias import Alias
+from evadb.parser.create_function_statement import CreateFunctionStatement
 from evadb.parser.create_index_statement import CreateIndexStatement
 from evadb.parser.create_statement import (
     ColConstraintInfo,
     ColumnDefinition,
     CreateTableStatement,
 )
-from evadb.parser.create_function_statement import CreateFunctionStatement
 from evadb.parser.delete_statement import DeleteTableStatement
 from evadb.parser.drop_object_statement import DropObjectStatement
 from evadb.parser.insert_statement import InsertTableStatement
@@ -695,7 +695,9 @@ class ParserTests(unittest.TestCase):
         evadb_statement_list = parser.parse(create_func_query)
         self.assertIsInstance(evadb_statement_list, list)
         self.assertEqual(len(evadb_statement_list), 1)
-        self.assertEqual(evadb_statement_list[0].stmt_type, StatementType.CREATE_FUNCTION)
+        self.assertEqual(
+            evadb_statement_list[0].stmt_type, StatementType.CREATE_FUNCTION
+        )
         self.assertEqual(str(evadb_statement_list[0]), str(expected_stmt))
 
         create_func_stmt = evadb_statement_list[0]

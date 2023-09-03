@@ -25,8 +25,8 @@ from test.util import (
 import pytest
 
 from evadb.configuration.constants import EvaDB_ROOT_DIR
-from evadb.server.command_handler import execute_query_fetch_all
 from evadb.functions.function_bootstrap_queries import fuzzy_function_query
+from evadb.server.command_handler import execute_query_fetch_all
 
 
 @pytest.mark.notparallel

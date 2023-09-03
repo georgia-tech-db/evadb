@@ -14,7 +14,9 @@
 # limitations under the License.
 import numpy as np
 
-from evadb.functions.abstract.tracker_abstract_function import EvaDBTrackerAbstractFunction
+from evadb.functions.abstract.tracker_abstract_function import (
+    EvaDBTrackerAbstractFunction,
+)
 from evadb.utils.generic_utils import try_to_import_norfair
 from evadb.utils.math_utils import get_centroid
 
