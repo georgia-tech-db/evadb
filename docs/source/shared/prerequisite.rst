@@ -1,24 +1,24 @@
 Prerequisites
 -------------
 
-To follow along, you will need to set up a local instance of EvaDB via `pip <getting-started>`_. 
+To follow along, you will need to set up a local instance of EvaDB via `pip <../overview/getting-started>`_. 
 
-We will assume that you have a ``PostgreSQL`` database server running locally that contains the data needed for analysis. Follow these instructions to install `Postgres <https://www.postgresql.org/download/>`_.
+We will assume that you have a ``PostgreSQL`` database server running locally that contains the data needed for analysis. Follow these instructions to install `PostgreSQL <https://www.postgresql.org/download/>`_.
 
 Connect to EvaDB
 ----------------
 
-After you have installed EvaDB, use the following Python code to establish a connection and obtain a cursor that is used for running EvaQL queries.
+After installing EvaDB, use the following Python code to establish a connection and obtain a ``cursor`` for running ``EvaQL`` queries.
 
 .. code-block:: python
 
     import evadb
     cursor = evadb.connect().cursor()
 
-Connect EvaDB to an Existing Database Server
---------------------------------------------
+Connect EvaDB to PostgreSQL Database Server
+-------------------------------------------
 
-EvaDB lets you connect to your favorite databases, data warehouses, data lakes, etc., via the ``CREATE DATABASE`` statement. In this query, we connect to a ``PostgreSQL`` server.
+EvaDB lets you connect to your favorite databases, data warehouses, data lakes, etc., via the ``CREATE DATABASE`` statement. In this query, we connect EvaDB to an existing ``PostgreSQL`` server:
 
 .. tab-set::
     
