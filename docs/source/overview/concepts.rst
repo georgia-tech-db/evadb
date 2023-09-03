@@ -54,33 +54,37 @@ EvaDB accelerates AI queries using a collection of optimizations inspired by SQL
 AI Functions
 ------------
 
-In EvaDB, functions are typically thin wrappers around AI models. They are extensively used by developers in EvaQL queries. Here is an illustrative AI function for classifying MNIST images:
+In EvaDB, functions are typically thin wrappers around AI models and are extensively used by developers in EvaQL queries. 
+
+Here is an illustrative AI function for classifying MNIST images:
 
 .. code-block:: bash
 
     !wget -nc https://raw.githubusercontent.com/georgia-tech-db/evadb/master/evadb/udfs/mnist_image_classifier.py
 
+To register an user-defined function, you should use the `CREATE FUNCTION` statement:
+
 .. code-block:: sql
 
     --- Create an MNIST image classifier function
     --- The function's implementation code is in 'mnist_image_classifier.py'
-    CREATE UDF MnistImageClassifier
+    CREATE FUNCTION MnistImageClassifier
         IMPL 'mnist_image_classifier.py'
 
-After registering the function, you can use it anywhere in the ``SELECT`` and/or ``WHERE`` clauses of any query.
+After registering `MnistImageClassifier` function, you can call the function in the ``SELECT`` and/or ``WHERE`` clauses of any query.
 
 .. code-block:: sql
 
-    --- Get 'MnistImageClassifier' function's output on frame id 30
+    --- Get the output of 'MnistImageClassifier' on frame id 30
     --- This query returns the results of the image classification function
     --- In this case, it is the digit in the 30th frame in the video
     SELECT data, id, MnistImageClassifier(data).label 
     FROM MnistVideo  
     WHERE id = 30;
 
-    --- Use 'MnistImageClassifier' function's output to filter frames
+    --- Use the 'MnistImageClassifier' function's output to filter frames
     --- This query returns the frame ids of the frames with digit 6
-    --- We limit to the first five frames with digit 6
+    --- We limit to the first five frames containing digit 6
     SELECT data, id, MnistImageClassifier(data).label 
     FROM MnistVideo  
     WHERE MnistImageClassifier(data).label = '6'
