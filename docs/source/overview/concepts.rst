@@ -47,18 +47,14 @@ EvaQL reduces the complexity of the app, leading to more maintainable code that 
 AI-Centric Query Optimization 
 -----------------------------
 
-EvaDB optimizes the AI queries to save money spent on running models and reduce query execution time.
-
-EvaDB contains a novel `Cascades-style extensible query optimizer <https://www.cse.iitb.ac.in/infolab/Data/Courses/CS632/Papers/Cascades-graefe.pdf>`__ that is tailored for AI pipelines. Query optimization technology has powered traditional SQL database systems for several decades. Query optimization in EvaDB is the bridge that connects the declarative EvaQL to efficient query execution on CPUs/GPUs.
+EvaDB optimizes the AI queries to save money spent on running models and reduce query execution time. It contains a novel `Cascades-style extensible query optimizer <https://www.cse.iitb.ac.in/infolab/Data/Courses/CS632/Papers/Cascades-graefe.pdf>`__  tailored for AI queries. Query optimization has powered traditional SQL database systems for several decades. It is the bridge that connects the declarative query language to efficient query execution on hardware.
 
 EvaDB accelerates AI queries using a collection of optimizations inspired by SQL database systems including cost-based function predicate reordering, function caching, sampling, etc.
 
 AI Functions
 ------------
 
-In EvaDB, functions are typically thin wrappers around AI models. They are extensively used by developers in EvaQL queries.
-
-Here is an illustrative AI function for classifying MNIST images:
+In EvaDB, functions are typically thin wrappers around AI models. They are extensively used by developers in EvaQL queries. Here is an illustrative AI function for classifying MNIST images:
 
 .. code-block:: bash
 
@@ -71,7 +67,7 @@ Here is an illustrative AI function for classifying MNIST images:
     CREATE UDF MnistImageClassifier
         IMPL 'mnist_image_classifier.py'
 
-After registering the function, you can use it anywhere in the query -- in the ``select`` or ``filter`` calls.
+After registering the function, you can use it anywhere in the ``SELECT`` and/or ``WHERE`` clauses of any query.
 
 .. code-block:: sql
 
