@@ -101,6 +101,7 @@ Illustrative AI Query
 Here is an illustrative `MNIST image classification <https://en.wikipedia.org/wiki/MNIST_database>`_ AI query in EvaDB.
 
 .. code-block:: sql
+    
     --- This AI query retrieves images in the loaded MNIST video with label 4
     --- The query's result is returned as a Dataframe.
     --- We limit our query to only return the first five frames with label 4
