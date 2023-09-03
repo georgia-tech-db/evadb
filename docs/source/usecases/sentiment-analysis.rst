@@ -20,11 +20,10 @@ Sentiment Analysis
 Introduction
 ------------
 
-In this tutorial, we present how to use OpenAI models in EvaDB to analyse sentiment in text data. In particular, we focus on analysing sentiments expressed by customers in food reviews. We will assume that the input data is loaded into a ``PostgreSQL`` database. 
+In this tutorial, we present how to use OpenAI models in EvaDB to analyse sentiment in text data. In particular, we focus on analysing sentiments expressed by customers in food reviews. EvaDB makes it easy to do sentiment analysis using its built-in ChatGPT AI function. In this tutorial, besides classifying sentiment, we will also use another query to generate responses to customers for addressing ``negative`` reviews.
 
-To load the food review data into your database, see the `sentiment analysis notebook is available on Colab <https://colab.research.google.com/github/georgia-tech-db/eva/blob/staging/tutorials/14-food-review-tone-analysis-and-response.ipynb>`_.
-
-EvaDB makes it easy to do sentiment analysis using its built-in ChatGPT AI function. In this tutorial, besides classifying sentiment, we will also use another query to generate responses to customers for addressing ``negative`` reviews.
+We will assume that the input data is loaded into a ``PostgreSQL`` database. 
+To load the food review data into your database, see the complete `sentiment analysis notebook on Colab <https://colab.research.google.com/github/georgia-tech-db/eva/blob/staging/tutorials/14-food-review-tone-analysis-and-response.ipynb>`_.
 
 .. include:: ../shared/prerequisite.rst
 
@@ -110,11 +109,6 @@ While running this query, EvaDB first retrieves the negative reviews and then ap
     | Dear valued customer, Thank you for bringing this matter to our attention. We apologize for the inconvenience caused by the excessive saltiness of your fried rice. We understand how important it is to have a satisfying dining experience, and we would like to make it right for you ... |
     | Dear [Customer's Name], Thank you for bringing this issue to our attention. We apologize for the inconvenience caused by the missing chicken sandwich in your takeout order. We understand how frustrating it can be when an item is missing from your meal. To address this concern, we ... |
     +----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-
-Complete Notebook
------------------
-
-The complete 
 
 .. include:: ../shared/nlp.rst
 
