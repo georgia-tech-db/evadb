@@ -95,50 +95,20 @@ You should see a list of built-in functions including but not limited to the fol
 
     EvaDB supports additional installation options for extending its functionality. Go over the :doc:`Installation Options <getting-started/installation-options>` for all the available options.
 
-Illustrative AI App
--------------------
+Illustrative AI Query
+---------------------
 
-Here is a simple, illustrative `MNIST image classification <https://en.wikipedia.org/wiki/MNIST_database>`_ AI app in EvaDB. As this app focuses on a vision task, you will need to install additional vision packages.
+Here is an illustrative `MNIST image classification <https://en.wikipedia.org/wiki/MNIST_database>`_ AI query in EvaDB.
 
-.. code-block:: bash
+.. code-block:: sql
+    --- This AI query retrieves images in the loaded MNIST video with label 4
+    --- The query's result is returned as a Dataframe.
+    --- We limit our query to only return the first five frames with label 4
+    --- and to only search through the first 1000 frames
+    SELECT data, id, MnistImageClassifier(data) 
+    FROM MnistVideo 
+    WHERE MnistImageClassifier(data) = '4' AND id < 100
+    LIMIT 5;
 
-   pip install evadb[vision]
-
-Copy the following Python program to a file called `mnist.py`.
-
-The program runs a SQL query for retrieving a subset of images in the loaded MNIST video along with their digit labels. The query's result is returned as a Dataframe.
-
-.. code-block:: python
-
-    # Connect to EvaDB for running AI queries
-    import evadb
-    cursor = evadb.connect().cursor()
-
-    # Load the MNIST video into EvaDB
-    # Each frame in the loaded MNIST video contains a digit
-    cursor.load("mnist.mp4", "MnistVideo", format="video").df()
-
-    # We now construct an AI query over all the digit frames 
-    # in the video and retrieve frames where the digit is 8 
-    # We limit to only the first 5 frames)
-    response = cursor.query("""
-        SELECT data, id, MnistImageClassifier(data) 
-        FROM MnistVideo 
-        WHERE MnistImageClassifier(data) = '8'
-        LIMIT 5;
-    """
-    ).df()
-
-
-Now, run the Python program:
-
-.. code-block:: bash
-
-    python -m mnist.py
-
-.. image:: ../../images/reference/mnist.png
-
-Try out EvaDB by experimenting with the introductory `MNIST notebook on Colab <https://colab.research.google.com/github/georgia-tech-db/evadb/blob/master/tutorials/01-mnist.ipynb>`_.
-
-.. note::
-    Go over the :ref:`Python API<python-api>` to learn more about the functions used in this app.
+The complete `MNIST notebook is available on Colab <https://colab.research.google.com/github/georgia-tech-db/evadb/blob/master/tutorials/01-mnist.ipynb>`_.
+Try out EvaDB by experimenting with this introductory notebook.
