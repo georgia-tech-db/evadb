@@ -1,5 +1,5 @@
-ChatGPT + Postgres Tutorial
-===========================
+Sentiment Analysis
+==================
 
 .. raw:: html
 
@@ -15,58 +15,26 @@ ChatGPT + Postgres Tutorial
         <a target="_blank" href="https://github.com/georgia-tech-db/eva/raw/staging/tutorials/14-food-review-tone-analysis-and-response.ipynb"><img src="https://www.tensorflow.org/images/download_logo_32px.png" /> Download notebook</a>
     </td>
     </table><br><br>
-    </embed>
+</embed>
 
-In this tutorial, we demonstrate how to use EvaDB + ChatGPT to analyze the tone of food reviews stored in PostgreSQL. Then, based on the analysis, we further use
-EvaDB + ChatGPT to address negative reviews by proposing a solution to the customer. 
+Introduction
+------------
 
-For this use case, we assume user has a Postgres server running locally. You can also check our notebook above to skip Postgres setup.
+In this article, we present how to use OpenAI models in EvaDB to analyse sentiments in text. In particular, we focus on analysing sentiments in food reviews. The input data is taken from our sample `PostgreSQL` database.
 
-1. Connect to EvaDB
----------------------
+In addition to extracting sentiment using EvaDB's built-in ChatGPT AI function, this application also runs a second ChatGPT query to address `negative` reviews by proposing a solution for the customer based on their specific review.
 
-.. code-block:: python
+.. include:: ../shared/prerequisite.rst
 
-    import evadb
-    cursor = evadb.connect().cursor()
+Loading Food Review Data
+------------------------
 
-2. Connect to an Existing Postgres Database
----------------------------------------------
+To load the food review data into the database server, see the complete `notebook <https://github.com/georgia-tech-db/eva/blob/staging/tutorials/14-food-review-tone-analysis-and-response.ipynb>`__.
 
-.. tab-set::
-    
-    .. tab-item:: Python
+Sentiment Analysis of Reviews using ChatGPT
+-------------------------------------------
 
-        .. code-block:: python
-
-            params = {
-                "user": "eva",
-                "password": "password",
-                "host": "localhost",
-                "port": "5432",
-                "database": "evadb",
-            }
-            query = f"CREATE DATABASE postgres_data WITH ENGINE = 'postgres', PARAMETERS = {params};"
-            cursor.query(query).df()
-
-    .. tab-item:: SQL 
-
-        .. code-block:: text
-
-            CREATE DATABASE postgres_data WITH ENGINE = 'postgres', PARAMETERS = {
-                "user": "eva",
-                "password": "password",
-                "host": "localhost",
-                "port": "5432",
-                "database": "evadb"
-            }
-
-3. Sentiment Analysis of Food Review using ChatGPT
----------------------------------------------------
-
-We then use EvaDB + ChatGPT to analyze whether the review is "positive" or "negative" with customized ChatGPT prompt. For this use case,
-we assume reviews have been already loaded into the table inside PostgreSQL. 
-You can check our `Jupyter Notebook <https://github.com/georgia-tech-db/eva/blob/staging/tutorials/14-food-review-tone-analysis-and-response.ipynb>`__ for how to load data.
+We then use the following EvaQL query to analyze whether the review is `positive` or `negative` with a custom ChatGPT prompt. Here, the query runs on the `review` column in the `review_table` that is a part of the `PostgreSQL` database.
 
 .. tab-set::
     
@@ -86,11 +54,11 @@ You can check our `Jupyter Notebook <https://github.com/georgia-tech-db/eva/blob
         .. code-block:: sql
 
             SELECT ChatGPT(
-                "Is the review positive or negative. Only reply 'positive' or 'negative'. Here are examples. The food is very bad: negative. The food is very good: positive.",
+                "Is the review positive or negative? Only reply 'positive' or 'negative'. Here are examples. The food is very bad: negative. The food is very good: positive.",
                 review)
             FROM postgres_data.review_table;
 
-This will return tone analysis results for existing reviews.
+This query returns the sentiment of the reviews in the table:
 
 .. code-block:: 
 
@@ -102,8 +70,10 @@ This will return tone analysis results for existing reviews.
     |                     negative |
     +------------------------------+
 
-4. Response to Negative Reviews using ChatGPT
----------------------------------------------
+Respond to Negative reviews using ChatGPT
+-----------------------------------------
+
+Let's next respond to negative food reviews using another EvaQL query that first retrieves the reviews with `negative` sentiment, and processes those reviews with another ChatGPT function call that generates a response to address the concerns shared in the review.
 
 .. tab-set::
     
@@ -133,7 +103,7 @@ This will return tone analysis results for existing reviews.
                 "Is the review positive or negative. Only reply 'positive' or 'negative'. Here are examples. The food is very bad: negative. The food is very good: positive.",
                 review) = "negative";
 
-This query will first filter out positive reviews and then apply ChatGPT again to create response to negative reviews. This will give results.
+While running this query, EvaDB first retrieves the negative reviews and then applies ChatGPT to derive a response. Here is the output DataFrame:
 
 .. code-block:: 
 
@@ -144,4 +114,11 @@ This query will first filter out positive reviews and then apply ChatGPT again t
     | Dear [Customer's Name], Thank you for bringing this issue to our attention. We apologize for the inconvenience caused by the missing chicken sandwich in your takeout order. We understand how frustrating it can be when an item is missing from your meal. To address this concern, we ... |
     +----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
-Check out our `Jupyter Notebook <https://github.com/georgia-tech-db/evadb/blob/staging/tutorials/14-food-review-tone-analysis-and-response.ipynb>`__ for working example.
+Complete Notebook
+-----------------
+
+The complete `sentiment analysis notebook is available on Colab <https://colab.research.google.com/github/georgia-tech-db/eva/blob/staging/tutorials/14-food-review-tone-analysis-and-response.ipynb>`_.
+
+.. include:: ../shared/nlp.rst
+
+.. include:: ../shared/footer.rst

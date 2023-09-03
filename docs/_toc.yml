@@ -15,16 +15,14 @@ parts:
 
   - caption: Use Cases
     chapters:
-      - file: source/usecases/food-review.rst
+      - file: source/usecases/sentiment-analysis.rst
         title: Sentiment Analysis
       - file: source/usecases/image-classification.rst
         title: Image Classification
-      - file: source/usecases/similar-image-search.rst
+      - file: source/usecases/image-search.rst
         title: Image Search
-      - file: source/usecases/qa-video.rst
-        title: Video Question Answering
-      - file: source/usecases/08-chatgpt.ipynb
-        title: ChatGPT-based Video Question Answering
+      - file: source/usecases/question-answering.rst
+        title: Question Answering
       - file: source/usecases/12-query-pdf.ipynb
         title: PDF Question Answering
       - file: source/usecases/02-object-detection.ipynb
