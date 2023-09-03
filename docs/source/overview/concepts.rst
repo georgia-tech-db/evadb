@@ -56,13 +56,9 @@ AI Functions
 
 In EvaDB, functions are typically thin wrappers around AI models and are extensively used by developers in EvaQL queries. 
 
-Here is an illustrative AI function for classifying MNIST images:
+Here is an `illustrative AI function for classifying MNIST images <https://raw.githubusercontent.com/georgia-tech-db/evadb/master/evadb/udfs/mnist_image_classifier.py>`_.
 
-.. code-block:: bash
-
-    !wget -nc https://raw.githubusercontent.com/georgia-tech-db/evadb/master/evadb/udfs/mnist_image_classifier.py
-
-To register an user-defined function, you should use the `CREATE FUNCTION` statement:
+To register an user-defined function, you should use the ``CREATE FUNCTION`` statement:
 
 .. code-block:: sql
 
@@ -71,7 +67,7 @@ To register an user-defined function, you should use the `CREATE FUNCTION` state
     CREATE FUNCTION MnistImageClassifier
         IMPL 'mnist_image_classifier.py'
 
-After registering `MnistImageClassifier` function, you can call the function in the ``SELECT`` and/or ``WHERE`` clauses of any query.
+After registering ``MnistImageClassifier`` function, you can call the function in the ``SELECT`` and/or ``WHERE`` clauses of any query.
 
 .. code-block:: sql
 
