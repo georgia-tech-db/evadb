@@ -7,7 +7,7 @@ Here is a list of key concepts in EvaDB. If you have any questions, ask the comm
 EvaQL: AI-Centric Query Language
 --------------------------------
 
-EvaDB supports a SQL-like query language, called EvaQL, designed to assist software developers in bringing AI into their applications.
+EvaDB supports a SQL-like query language, called ``EvaQL``, designed to assist software developers in bringing AI into their applications.
 
 Here is set of illustrative EvaQL queries for a ChatGPT-based video question answering app. This EvaDB app connects to collection of news videos stored in a folder and runs an AI query for extracting audio transcripts from the videos using a Hugging Face model, followed by another AI query for question answering using ChatGPT.
 
@@ -54,11 +54,9 @@ EvaDB accelerates AI queries using a collection of optimizations inspired by SQL
 AI Functions
 ------------
 
-In EvaDB, functions are typically thin wrappers around AI models and are extensively used by developers in EvaQL queries. 
+``Functions`` are typically thin wrappers around AI models and are extensively used in queries. Here is an `illustrative AI function for classifying MNIST images <https://github.com/georgia-tech-db/evadb/blob/master/evadb/udfs/mnist_image_classifier.py>`_. 
 
-Here is an `illustrative AI function for classifying MNIST images <https://raw.githubusercontent.com/georgia-tech-db/evadb/master/evadb/udfs/mnist_image_classifier.py>`_.
-
-To register an user-defined function, you should use the ``CREATE FUNCTION`` statement:
+To register an user-defined function, use the ``CREATE FUNCTION`` statement:
 
 .. code-block:: sql
 
