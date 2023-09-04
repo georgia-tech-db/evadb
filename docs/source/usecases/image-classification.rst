@@ -71,6 +71,8 @@ In the following query, we call the classifier on every image in the video. The 
             SELECT MnistImageClassifier(data).label 
             FROM mnist_video;
 
+This query returns the label of all the images:
+
 .. code-block:: 
 
     +------------------------------+
