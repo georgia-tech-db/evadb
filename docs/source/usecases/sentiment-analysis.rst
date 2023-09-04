@@ -36,27 +36,12 @@ Sentiment Analysis of Reviews using ChatGPT
 
 We run the following query to analyze whether the review is ``positive`` or ``negative`` with a custom ChatGPT prompt. Here, the query runs on the ``review`` column in the ``review_table`` that is a part of the ``PostgreSQL`` database.
 
-.. tab-set::
-    
-    .. tab-item:: Python
+.. code-block:: sql
 
-        .. code-block:: python
-
-            cursor.query("""
-                SELECT ChatGPT(
-                    "Is the review positive or negative. Only reply 'positive' or 'negative'. Here are examples. The food is very bad: negative. The food is very good: positive.",
-                    review)
-                FROM postgres_data.review_table;
-            """).df()
-
-    .. tab-item:: SQL 
-
-        .. code-block:: sql
-
-            SELECT ChatGPT(
-                "Is the review positive or negative? Only reply 'positive' or 'negative'. Here are examples. The food is very bad: negative. The food is very good: positive.",
-                review)
-            FROM postgres_data.review_table;
+    SELECT ChatGPT(
+        "Is the review positive or negative? Only reply 'positive' or 'negative'. Here are examples. The food is very bad: negative. The food is very good: positive.",
+        review)
+    FROM postgres_data.review_table;
 
 This query returns the sentiment of the reviews in the table:
 
@@ -75,35 +60,17 @@ Respond to Negative reviews using ChatGPT
 
 Let's next respond to negative food reviews using another EvaQL query that first retrieves the reviews with ``negative`` sentiment, and processes those reviews with another ChatGPT function call that generates a response to address the concerns shared in the review.
 
-.. tab-set::
-    
-    .. tab-item:: Python
+.. code-block:: sql
 
-        .. code-block:: python
+    SELECT ChatGPT(
+            "Respond the the review with solution to address the review's concern",
+            review)
+    FROM postgres_data.review_table
+    WHERE ChatGPT(
+        "Is the review positive or negative. Only reply 'positive' or 'negative'. Here are examples. The food is very bad: negative. The food is very good: positive.",
+        review) = "negative";
 
-            cursor.query("""
-                SELECT ChatGPT(
-                    "Respond the the review with solution to address the review's concern",
-                    review)
-                FROM postgres_data.review_table
-                WHERE ChatGPT(
-                    "Is the review positive or negative. Only reply 'positive' or 'negative'. Here are examples. The food is very bad: negative. The food is very good: positive.",
-                    review) = "negative";
-            """).df()
-
-    .. tab-item:: SQL 
-
-        .. code-block:: sql
-
-            SELECT ChatGPT(
-                    "Respond the the review with solution to address the review's concern",
-                    review)
-            FROM postgres_data.review_table
-            WHERE ChatGPT(
-                "Is the review positive or negative. Only reply 'positive' or 'negative'. Here are examples. The food is very bad: negative. The food is very good: positive.",
-                review) = "negative";
-
-While running this query, EvaDB first retrieves the negative reviews and then applies ChatGPT to derive a response. Here is the output DataFrame:
+While running this query, EvaDB first retrieves the negative reviews and then applies ChatGPT to derive a response. Here is the query's output ``DataFrame``:
 
 .. code-block:: 
 
