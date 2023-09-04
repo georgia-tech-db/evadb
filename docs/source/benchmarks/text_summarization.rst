@@ -1,33 +1,38 @@
-Text summarization benchmark 
+Text Summarization Benchmark 
 ============================
-In this benchmark, we compare the performance of text summarization between EvaDB and MindsDB on `CNN-DailyMail News <https://www.kaggle.com/datasets/gowrishankarp/newspaper-text-summarization-cnn-dailymail>`_.
 
-1. Prepare dataset
-------------------
+In this benchmark, we compare the runtime performance of EvaDB and MindsDB on 
+a text summarization application operating on a news dataset. In particular, 
+we focus on the `CNN-DailyMail News <https://www.kaggle.com/datasets/gowrishankarp/newspaper-text-summarization-cnn-dailymail>`_ dataset.
+
+All the relevant files are located in the `text summarization benchmark folder on Github <https://github.com/georgia-tech-db/evadb/tree/staging/benchmark/text_summarization>`_.
+
+Prepare dataset
+---------------
 
 .. code-block:: bash
 
    cd benchmark/text_summarization
    bash download_dataset.sh
 
-2. Using EvaDB to summarize the CNN DailyMail News
---------------------------------------------------
+Use EvaDB for Text Summarization
+--------------------------------
 
 .. note::
  
-   Install ray in your EvaDB virtual environment: ``pip install evadb[ray]``
+   Install ``ray`` along with EvaDB to speed up the queries: 
+   ``pip install evadb[ray]``
    
 .. code-block:: bash
 
    cd benchmark/text_summarization
    python text_summarization_with_evadb.py
 
+Use MindsDB for Text Summarization
+--------------------------------
 
-3. Using MindsDB to summarize the CNN DailyMail News
-----------------------------------------------------
-
-Prepare sqlite database for MindsDB
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Setup SQLite Database 
+~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: bash
 
@@ -40,22 +45,22 @@ Prepare sqlite database for MindsDB
 Install MindsDB
 ~~~~~~~~~~~~~~~
 
-Follow the `Setup for Source Code via pip <https://docs.mindsdb.com/setup/self-hosted/pip/source>`_ to install mindsdb.
+Use the `installation guide<https://docs.mindsdb.com/setup/self-hosted/pip/source>`_ to install MindsDB via ``pip``.
 
 .. note::
 
-   At the time of this documentation, we need to manually ``pip install evaluate`` for huggingface model to work in MindsDB.
+   You will need to manually run ``pip install evaluate`` for the ``HuggingFace`` model to work in MindsDB.
 
-After the installation, we use mysql cli to connect to MindsDB. Replace the port number as needed.
+After installation, use the ``MySQL`` client for connecting to ``MindsDB``. Update the port number if needed.
 
 .. code-block:: bash
 
    mysql -h 127.0.0.1 --port 47335 -u mindsdb -p
 
-Run Experiment
-~~~~~~~~~~~~~~
+Benchmark MindsDB 
+~~~~~~~~~~~~~~~~~
 
-Connect the sqlite database we created before.
+Connect ``MindsDB`` to the ``sqlite`` database we created before:
 
 .. code-block:: text
 
@@ -65,7 +70,7 @@ Connect the sqlite database we created before.
      "db_file": "cnn_news_test.db"
    };
 
-Create text summarization model and wait for its readiness.
+Create a ``text summarization`` model and wait for it to be ``ready``.
 
 .. code-block:: text
 
@@ -81,7 +86,7 @@ Create text summarization model and wait for its readiness.
 
    DESCRIBE mindsdb.hf_bart_sum_20;
 
-Use the model to summarize the CNN DailyMail news.
+Use the ``text summarization`` model to summarize the CNN news dataset:
 
 .. code-block:: text
 
@@ -92,19 +97,33 @@ Use the model to summarize the CNN DailyMail news.
    );
 
 
-4. Experiment results
----------------------
-Below are numbers from a server with 56 Intel(R) Xeon(R) CPU E5-2690 v4 @ 2.60GHz and two Quadro P6000 GPU.
+Benchmarking Results
+--------------------
 
-.. list-table:: Text summarization with ``sshleifer/distilbart-cnn-12-6`` on CNN-DailyMail News
+Here are the key application runtime metrics.
 
-   * -
-     - MindsDB
-     - EvaDB (off-the-shelf)
-     - EvaDB (full GPU utilization)
-   * - Time
-     - 4 hours 45 mins 47.56 secs
-     - 1 hour 9 mins 39.8 secs
-     - 42 mins 50.22 secs
+The experiment is conducted on a server with 56 Intel(R) Xeon(R) CPU E5-2690 v4 @ 2.60GHz and two Quadro P6000 GPUs.
 
+.. list-table:: **Text Summarization of CNN News Dataset**
+   :widths: 20 30 30 30
 
+   * - 
+     - **MindsDB**
+     - **EvaDB** 
+     - **EvaDB**
+   * - 
+     - **(off-the-shelf)**
+     - **(off-the-shelf)**
+     - **(tuned for maximum**
+   * - 
+     - 
+     - 
+     - **GPU utilization)**     
+   * - **Runtime**
+     - 4 hours 45 mins
+     - 1 hour 10 mins
+     - 43 mins
+   * - **Speedup**
+     - 1x
+     - 4.1x
+     - 6.3x 
