@@ -74,7 +74,7 @@ class TupleValueExpression(AbstractExpression):
         """It constructs the signature of the tuple value expression.
         It assumes the col_object attribute is populated by the binder with the catalog
         entries. For a standard column in the table, it returns `table_name.col_name`,
-        and for Function output columns it returns `function_name.col_name`
+        and for function output columns it returns `function_name.col_name`
         Raises:
             ValueError: If the col_object is not a `Union[ColumnCatalogEntry, FunctionIOCatalogEntry]`. This can occur if the expression has not been bound using the binder.
         Returns:

@@ -55,12 +55,12 @@ class ChatGPT(AbstractFunction):
 
     Example Usage:
         Assume we have the transcripts for a few videos stored in a table 'video_transcripts' in a column named 'text'.
-        If the user wants to retrieve the summary of each video, the ChatGPT Function can be used as:
+        If the user wants to retrieve the summary of each video, the ChatGPT function can be used as:
 
             query = "Generate the summary of the video"
             cursor.table("video_transcripts").select(f"ChatGPT({query}, text)")
 
-        In the above Function invocation, the 'query' passed would be the user task to generate video summaries, and the
+        In the above function invocation, the 'query' passed would be the user task to generate video summaries, and the
         'content' passed would be the video transcripts that need to be used in order to generate the summary. Since
         no prompt is passed, the default system prompt will be used.
 

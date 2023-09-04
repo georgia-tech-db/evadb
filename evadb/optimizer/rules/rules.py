@@ -262,7 +262,7 @@ class CacheFunctionExpressionInApply(Rule):
     def check(self, before: LogicalApplyAndMerge, context: OptimizerContext):
         expr = before.func_expr
         # already cache enabled
-        # replace the cacheable condition once we have the property supported as part of the Function itself.
+        # replace the cacheable condition once we have the property supported as part of the function itself.
         if expr.has_cache() or expr.name not in CACHEABLE_FUNCTIONS:
             return False
         # we do not support caching function expression instances with multiple arguments or nested function expressions
@@ -348,7 +348,7 @@ class XformLateralJoinToLinearFlow(Rule):
     eliminate the join node and make the inner node the parent of the outer node. This
     produces a linear data flow path. Because this scenario is common in our system,
     we chose to explicitly convert it to a linear flow, which simplifies the
-    implementation of other optimizations such as Function reuse and parallelized plans by
+    implementation of other optimizations such as function reuse and parallelized plans by
     removing the join."""
 
     def __init__(self):
@@ -639,7 +639,7 @@ class ReorderPredicates(Rule):
         return Promise.REORDER_PREDICATES
 
     def check(self, before: LogicalFilter, context: OptimizerContext):
-        # there exists at least one Function Expression
+        # there exists at least one function Expression
         return len(list(before.predicate.find_all(FunctionExpression))) > 0
 
     def apply(self, before: LogicalFilter, context: OptimizerContext):

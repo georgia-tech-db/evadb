@@ -83,7 +83,7 @@ def load_function_class_from_file(filepath, classname=None):
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
     except Exception as e:
-        err_msg = f"Couldn't load Function from {filepath} : {str(e)}. This might be due to a missing Python package, or because the Function implementation file does not exist, or it is not a valid Python file."
+        err_msg = f"Couldn't load function from {filepath} : {str(e)}. This might be due to a missing Python package, or because the function implementation file does not exist, or it is not a valid Python file."
         raise RuntimeError(err_msg)
 
     # Try to load the specified class by name
@@ -98,7 +98,7 @@ def load_function_class_from_file(filepath, classname=None):
     ]
     if len(classes) != 1:
         raise RuntimeError(
-            f"{filepath} contains {len(classes)} classes, please specify the correct class to load by naming the Function with the same name in the CREATE query."
+            f"{filepath} contains {len(classes)} classes, please specify the correct class to load by naming the function with the same name in the CREATE query."
         )
     return classes[0]
 

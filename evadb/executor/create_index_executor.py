@@ -74,7 +74,7 @@ class CreateIndexExecutor(AbstractExecutor):
             storage_engine = StorageEngine.factory(self.db, feat_catalog_entry)
             for input_batch in storage_engine.read(feat_catalog_entry):
                 if self.node.function:
-                    # Create index through Function expression.
+                    # Create index through function expression.
                     # Function(input column) -> 2 dimension feature vector.
                     input_batch.modify_column_alias(feat_catalog_entry.name.lower())
                     feat_batch = self.node.function.evaluate(input_batch)

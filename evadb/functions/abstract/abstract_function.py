@@ -50,7 +50,7 @@ class AbstractFunction(metaclass=ABCMeta):
     @abstractmethod
     def forward(self, frames: InputType) -> InputType:
         """
-        Implement Function function call by overriding this function.
+        Implement function function call by overriding this function.
         Gets called automatically by __call__.
         """
         pass

@@ -386,7 +386,7 @@ TABLE:                               "TABLE"i
 TABLES:                              "TABLES"i
 TO:                                  "TO"i
 TRUE:                                "TRUE"i
-FUNCTIONS:                                "FUNCTIONS"i
+FUNCTIONS:                           "FUNCTIONS"i
 UNION:                               "UNION"i
 UNIQUE:                              "UNIQUE"i
 UNKNOWN:                             "UNKNOWN"i
@@ -459,7 +459,7 @@ HELP:                                "HELP"i
 TEMPTABLE:                           "TEMPTABLE"i
 VALUE:                               "VALUE"i
 
-// FUNCTION
+// Function
 FUNCTION:						     "FUNCTION"i
 INPUT:                               "INPUT"i
 OUTPUT:                              "OUTPUT"i

@@ -31,7 +31,7 @@ The following models are currently supported by Ultralytics in EvaDB:
 Please refer to the `Ultralytics documentation <https://docs.ultralytics.com/tasks/detect/#models>`_ for more information about these models and their capabilities.
 
 Using Ultralytics Models with Other Functions
-----------------------------------------
+---------------------------------------------
 This code block demonstrates how the YOLO model can be combined with other models such as Color and DogBreedClassifier to perform more specific and targeted object detection tasks. In this case, the goal is to find images of black-colored Great Danes.
 
 The first query uses YOLO to detect all images of dogs with black color. The ``UNNEST`` function is used to split the output of the ``Yolo`` function into individual rows, one for each object detected in the image. The ``Color`` function is then applied to the cropped portion of the image to identify the color of each detected dog object. The ``WHERE`` clause filters the results to only include objects labeled as "dog" and with a color of "black".

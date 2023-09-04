@@ -52,7 +52,7 @@ DummyFeatureExtractor_function_query = """CREATE FUNCTION
 fuzzy_function_query = """CREATE FUNCTION IF NOT EXISTS FuzzDistance
                     INPUT (Input_Array1 NDARRAY ANYTYPE, Input_Array2 NDARRAY ANYTYPE)
                     OUTPUT (distance FLOAT(32, 7))
-                    TYPE NdarrayFUNCTION
+                    TYPE NdarrayFunction
                     IMPL "{}/functions/{}/fuzzy_join.py";
         """.format(
     EvaDB_INSTALLATION_DIR, NDARRAY_DIR
@@ -62,7 +62,7 @@ ArrayCount_function_query = """CREATE FUNCTION
             IF NOT EXISTS  ArrayCount
             INPUT (Input_Array NDARRAY ANYTYPE, Search_Key ANYTYPE)
             OUTPUT (key_count INTEGER)
-            TYPE NdarrayFUNCTION
+            TYPE NdarrayFunction
             IMPL "{}/functions/{}/array_count.py";
         """.format(
     EvaDB_INSTALLATION_DIR, NDARRAY_DIR
@@ -72,7 +72,7 @@ Crop_function_query = """CREATE FUNCTION IF NOT EXISTS Crop
                 INPUT  (Frame_Array NDARRAY UINT8(3, ANYDIM, ANYDIM),
                         bboxes NDARRAY FLOAT32(ANYDIM, 4))
                 OUTPUT (Cropped_Frame_Array NDARRAY UINT8(3, ANYDIM, ANYDIM))
-                TYPE  NdarrayFUNCTION
+                TYPE  NdarrayFunction
                 IMPL  "{}/functions/{}/crop.py";
         """.format(
     EvaDB_INSTALLATION_DIR, NDARRAY_DIR
@@ -81,7 +81,7 @@ Crop_function_query = """CREATE FUNCTION IF NOT EXISTS Crop
 Open_function_query = """CREATE FUNCTION IF NOT EXISTS Open
                 INPUT (img_path TEXT(1000))
                 OUTPUT (data NDARRAY UINT8(3, ANYDIM, ANYDIM))
-                TYPE NdarrayFUNCTION
+                TYPE NdarrayFunction
                 IMPL "{}/functions/{}/open.py";
         """.format(
     EvaDB_INSTALLATION_DIR, NDARRAY_DIR
@@ -92,7 +92,7 @@ Similarity_function_query = """CREATE FUNCTION IF NOT EXISTS Similarity
                            Frame_Array_Base NDARRAY UINT8(3, ANYDIM, ANYDIM),
                            Feature_Extractor_Name TEXT(100))
                     OUTPUT (distance FLOAT(32, 7))
-                    TYPE NdarrayFUNCTION
+                    TYPE NdarrayFunction
                     IMPL "{}/functions/{}/similarity.py";
         """.format(
     EvaDB_INSTALLATION_DIR, NDARRAY_DIR
@@ -101,7 +101,7 @@ Similarity_function_query = """CREATE FUNCTION IF NOT EXISTS Similarity
 Unnest_function_query = """CREATE FUNCTION IF NOT EXISTS Unnest
                 INPUT  (inp NDARRAY ANYTYPE)
                 OUTPUT (out ANYTYPE)
-                TYPE  NdarrayFUNCTION
+                TYPE  NdarrayFunction
                 IMPL  "{}/functions/{}/unnest.py";
         """.format(
     EvaDB_INSTALLATION_DIR, NDARRAY_DIR
@@ -190,15 +190,15 @@ yolo8n_query = """CREATE FUNCTION IF NOT EXISTS Yolo
 
 
 def init_builtin_functions(db: EvaDBDatabase, mode: str = "debug") -> None:
-    """Load the built-in FUNCTIONs into the system during system bootstrapping.
+    """Load the built-in functions into the system during system bootstrapping.
 
-    The function loads a set of pre-defined FUNCTION queries based on the `mode` argument.
-    In 'debug' mode, the function loads debug FUNCTIONs along with release FUNCTIONs.
-    In 'release' mode, only release FUNCTIONs are loaded. In addition, in 'debug' mode,
+    The function loads a set of pre-defined function queries based on the `mode` argument.
+    In 'debug' mode, the function loads debug functions along with release functions.
+    In 'release' mode, only release functions are loaded. In addition, in 'debug' mode,
     the function loads a smaller model to accelerate the test suite time.
 
     Args:
-        mode (str, optional): The mode for loading FUNCTIONs, either 'debug' or 'release'.
+        mode (str, optional): The mode for loading functions, either 'debug' or 'release'.
         Defaults to 'debug'.
 
     """
@@ -219,7 +219,7 @@ def init_builtin_functions(db: EvaDBDatabase, mode: str = "debug") -> None:
     os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
     os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
-    # list of FUNCTION queries to load
+    # list of function queries to load
     queries = [
         mnistcnn_function_query,
         Fastrcnn_function_query,
@@ -235,7 +235,7 @@ def init_builtin_functions(db: EvaDBDatabase, mode: str = "debug") -> None:
         Yolo_function_query,
     ]
 
-    # if mode is 'debug', add debug FUNCTIONs
+    # if mode is 'debug', add debug functions
     if mode == "debug":
         queries.extend(
             [
@@ -245,7 +245,7 @@ def init_builtin_functions(db: EvaDBDatabase, mode: str = "debug") -> None:
             ]
         )
 
-    # execute each query in the list of FUNCTION queries
+    # execute each query in the list of function queries
     # ignore exceptions during the bootstrapping phase due to missing packages
     for query in queries:
         try:

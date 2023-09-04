@@ -258,7 +258,7 @@ class StatementToPlanConverter:
         """Converter for parsed create function statement
 
         Arguments:
-            statement {CreateFunctionStatement} - - Create Function Statement
+            statement {CreateFunctionStatement} - - CreateFunctionStatement
         """
         annotated_inputs = column_definition_to_function_io(statement.inputs, True)
         annotated_outputs = column_definition_to_function_io(statement.outputs, False)

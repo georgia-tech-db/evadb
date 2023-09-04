@@ -7,7 +7,7 @@ This section provides an overview of how you can use out-of-the-box HuggingFace 
 
 
 Creating Function from HuggingFace
-------------------------------
+----------------------------------
 
 EvaDB supports functions similar to `Pipelines <https://huggingface.co/docs/transformers/main_classes/pipelines>`_  in HuggingFace. 
 

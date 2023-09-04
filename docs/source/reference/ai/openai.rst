@@ -7,7 +7,7 @@ This section provides an overview of how you can use OpenAI models in EvaDB.
 
 
 Chat Completion Functions
---------------------
+-------------------------
 
 To create a chat completion function in EvaDB, use the following SQL command:
 

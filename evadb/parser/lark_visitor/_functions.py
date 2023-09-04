@@ -57,7 +57,7 @@ class Functions:
                 args.append(self.visit(child))
         return args
 
-    # Create Function
+    # Create function
     def create_function(self, tree):
         function_name = None
         if_not_exists = False

@@ -141,7 +141,7 @@ class FunctionExpression(AbstractExpression):
             self.consolidate_stats()
         except Exception as e:
             logger.warn(
-                f"Persisting Function Expression {str(self)} stats failed with {str(e)}"
+                f"Persisting FunctionExpression {str(self)} stats failed with {str(e)}"
             )
 
         return outcomes

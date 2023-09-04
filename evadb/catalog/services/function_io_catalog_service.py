@@ -45,7 +45,7 @@ class FunctionIOCatalogService(BaseService):
             )
             return [obj.as_dataclass() for obj in result]
         except Exception as e:
-            error = f"Getting inputs for Function id {function_id} raised {e}"
+            error = f"Getting inputs for function id {function_id} raised {e}"
             logger.error(error)
             raise RuntimeError(error)
 
@@ -65,7 +65,7 @@ class FunctionIOCatalogService(BaseService):
             )
             return [obj.as_dataclass() for obj in result]
         except Exception as e:
-            error = f"Getting outputs for Function id {function_id} raised {e}"
+            error = f"Getting outputs for function id {function_id} raised {e}"
             logger.error(error)
             raise RuntimeError(error)
 

@@ -86,7 +86,7 @@ class StatementBinder:
             arg_map = {key: value for key, value in node.metadata}
             assert (
                 "predict" in arg_map
-            ), f"Creating {node.function_type} FUNCTIONs expects 'predict' metadata."
+            ), f"Creating {node.function_type} functions expects 'predict' metadata."
             # We only support a single predict column for now
             predict_columns = set([arg_map["predict"]])
             inputs, outputs = [], []
@@ -98,7 +98,7 @@ class StatementBinder:
                     inputs.append(column)
             assert (
                 len(node.inputs) == 0 and len(node.outputs) == 0
-            ), f"{node.function_type} FUNCTIONs' input and output are auto assigned"
+            ), f"{node.function_type} functions' input and output are auto assigned"
             node.inputs, node.outputs = inputs, outputs
 
     @bind.register(CreateIndexStatement)
@@ -133,7 +133,7 @@ class StatementBinder:
             ), "Index input needs to be float32."
             assert len(col.array_dimensions) == 2
         else:
-            # Output of the FUNCTION should be 2 dimension and float32 type.
+            # Output of the function should be 2 dimension and float32 type.
             function_obj = self._catalog().get_function_catalog_entry_by_name(
                 node.function.name
             )
@@ -322,12 +322,12 @@ class StatementBinder:
                     .as_posix()
                 )
 
-            # Verify the consistency of the FUNCTION. If the checksum of the FUNCTION does not
+            # Verify the consistency of the function. If the checksum of the function does not
             # match the one stored in the catalog, an error will be thrown and the user
-            # will be asked to register the FUNCTION again.
+            # will be asked to register the function again.
             # assert (
             #     get_file_checksum(function_obj.impl_file_path) == function_obj.checksum
-            # ), f"""FUNCTION file {function_obj.impl_file_path} has been modified from the
+            # ), f"""Function file {function_obj.impl_file_path} has been modified from the
             #     registration. Please use DROP FUNCTION to drop it and re-create it # using CREATE FUNCTION."""
 
             try:
@@ -342,8 +342,8 @@ class StatementBinder:
                 )
             except Exception as e:
                 err_msg = (
-                    f"{str(e)}. Please verify that the Function class name in the "
-                    "implementation file matches the Function name."
+                    f"{str(e)}. Please verify that the function class name in the "
+                    "implementation file matches the function name."
                 )
                 logger.error(err_msg)
                 raise BinderError(err_msg)

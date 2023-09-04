@@ -22,7 +22,7 @@ from evadb.parser.types import StatementType
 
 
 class CreateFunctionStatement(AbstractStatement):
-    """Create Function Statement constructed after parsing the input query
+    """CreateFunctionStatement constructed after parsing the input query
 
     Attributes:
         name: str

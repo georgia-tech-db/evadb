@@ -76,7 +76,7 @@ class CreateFunctionExecutor(AbstractExecutor):
 
         assert (
             len(self.children) == 1
-        ), "Create ludwig Function expects 1 child, finds {}.".format(
+        ), "Create ludwig function expects 1 child, finds {}.".format(
             len(self.children)
         )
 
@@ -211,10 +211,10 @@ class CreateFunctionExecutor(AbstractExecutor):
     def _try_initializing_function(
         self, impl_path: str, function_args: Dict = {}
     ) -> FunctionCatalogEntry:
-        """Attempts to initialize Function given the implementation file path and arguments.
+        """Attempts to initialize function given the implementation file path and arguments.
 
         Args:
-            impl_path (str): The file path of the Function implementation file.
+            impl_path (str): The file path of the function implementation file.
             function_args (Dict, optional): Dictionary of arguments to pass to the Function. Defaults to {}.
 
         Returns:
@@ -244,14 +244,14 @@ class CreateFunctionExecutor(AbstractExecutor):
         It first searches for the input/outputs in the CREATE statement. If not found, it resolves them using decorators. If not found there as well, it raises an error.
 
         Args:
-            function (FunctionCatalogEntry): The Function for which to resolve input and output definitions.
+            function (FunctionCatalogEntry): The function for which to resolve input and output definitions.
 
         Returns:
             A List of FunctionIOCatalogEntry objects that represent the resolved input and
             output definitions for the Function.
 
         Raises:
-            RuntimeError: If an error occurs while resolving the Function input/output
+            RuntimeError: If an error occurs while resolving the function input/output
             definitions.
         """
         io_list = []

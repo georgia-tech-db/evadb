@@ -650,8 +650,8 @@ class LogicalCreateFunction(Operator):
             function outputs, annotated list similar to table columns
         impl_path: Path
             file path which holds the implementation of the function.
-            This file should be placed in the Function directory and
-            the path provided should be relative to the Function dir.
+            This file should be placed in the function directory and
+            the path provided should be relative to the function dir.
         function_type: str
             function type. it ca be object detection, classification etc.
     """
@@ -743,7 +743,7 @@ class LogicalDropObject(Operator):
         name: str
             Function name provided by the user
         if_exists: bool
-            if false, throws an error when no Function with name exists
+            if false, throws an error when no function with name exists
             else logs a warning
     """
 

@@ -39,10 +39,10 @@ class FunctionCacheCatalogService(BaseService):
         """Insert a new function cache entry into function cache catalog.
         Arguments:
             `name` (str): name of the cache table
-            `function_id` (int): `row_id` of the Function on which the cache is built
+            `function_id` (int): `row_id` of the function on which the cache is built
             `cache_path` (str): path of the cache table
-            `args` (List[Any]): arguments of the Function whose output is being cached
-            `function_depends` (List[FunctionCatalogEntry]): dependent Function  entries
+            `args` (List[Any]): arguments of the function whose output is being cached
+            `function_depends` (List[FunctionCatalogEntry]): dependent function  entries
             `col_depends` (List[ColumnCatalogEntry]): dependent column entries
         Returns:
             `FunctionCacheCatalogEntry`

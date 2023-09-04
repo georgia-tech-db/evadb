@@ -21,7 +21,7 @@ from evadb.catalog.models.function_io_catalog import FunctionIOCatalogEntry
 
 class IOArgument(ABC):
     """
-    Base class for representing inputs/outputs (IO) of a Function using decorators. This class defines methods
+    Base class for representing inputs/outputs (IO) of a function using decorators. This class defines methods
     that are common for all the IO arguments.
     """
 

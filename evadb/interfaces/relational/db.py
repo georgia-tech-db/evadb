@@ -327,7 +327,7 @@ class EvaDBCursor(object):
 
         Args:
             function_name (str): Name of the function to be dropped.
-            if_exists (bool): If True, do not raise an error if the Function does not already exist. If False, raise an error.
+            if_exists (bool): If True, do not raise an error if the function does not already exist. If False, raise an error.
 
         Returns:
             EvaDBQuery: The EvaDBQuery object representing the DROP FUNCTION.
@@ -374,13 +374,13 @@ class EvaDBCursor(object):
 
         Args:
             function_name (str): Name of the function to be created.
-            if_not_exists (bool): If True, do not raise an error if the Function already exist. If False, raise an error.
+            if_not_exists (bool): If True, do not raise an error if the function already exist. If False, raise an error.
             impl_path (str): Path string to function's implementation.
             type (str): Type of the function (e.g. HuggingFace).
             **kwargs: Additional keyword arguments for configuring the create function operation.
 
         Returns:
-            EvaDBQuery: The EvaDBQuery object representing the Function created.
+            EvaDBQuery: The EvaDBQuery object representing the function created.
 
         Examples:
             >>> cursor.create_function("MnistImageClassifier", if_exists = True, 'mnist_image_classifier.py')
@@ -400,13 +400,13 @@ class EvaDBCursor(object):
 
         Args:
             function_name (str): Name of the function to be created.
-            if_not_exists (bool): If True, do not raise an error if the Function already exist. If False, raise an error.
+            if_not_exists (bool): If True, do not raise an error if the function already exist. If False, raise an error.
             impl_path (str): Path string to function's implementation.
             type (str): Type of the function (e.g. HuggingFace).
             **kwargs: Additional keyword arguments for configuring the create function operation.
 
         Returns:
-            EvaDBQuery: The EvaDBQuery object representing the Function created.
+            EvaDBQuery: The EvaDBQuery object representing the function created.
 
         Examples:
             >>> cursor.create_table("MyCSV", if_exists = True, columns=\"\"\"

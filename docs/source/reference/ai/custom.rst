@@ -114,7 +114,7 @@ A sample forward function is given below
 ----------
 
 Part 2: Registering and using the function in EvaDB Queries
-------------------------------------------------------
+-----------------------------------------------------------
 
 Now that you have implemented your function, we need to register it as a function in EvaDB. You can then use the function in any query.
 
