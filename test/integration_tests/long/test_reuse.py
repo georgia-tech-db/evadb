@@ -42,8 +42,8 @@ class ReuseTest(unittest.TestCase):
         udf_name = "HFObjectDetector"
         create_udf_query = f"""CREATE UDF {udf_name}
             TYPE HuggingFace
-            'task' 'object-detection'
-            'model' 'facebook/detr-resnet-50';
+            TASK 'object-detection'
+            MODEL 'facebook/detr-resnet-50';
         """
         execute_query_fetch_all(self.evadb, create_udf_query)
 

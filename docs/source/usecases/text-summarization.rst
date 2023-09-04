@@ -41,13 +41,13 @@ To create custom ``TextSummarizer`` and ``TextClassifier`` functions, use the ``
 
         CREATE FUNCTION IF NOT EXISTS TextSummarizer
         TYPE HuggingFace
-        'task' 'summarization'
-        'model' 'facebook/bart-large-cnn';
+        TASK 'summarization'
+        MODEL 'facebook/bart-large-cnn';
 
         CREATE FUNCTION IF NOT EXISTS TextClassifier
         TYPE HuggingFace
-        'task' 'text-classification'
-        'model' 'distilbert-base-uncased-finetuned-sst-2-english';
+        TASK 'text-classification'
+        MODEL 'distilbert-base-uncased-finetuned-sst-2-english';
 
 .. note::
     

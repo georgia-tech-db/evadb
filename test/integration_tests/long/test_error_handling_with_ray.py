@@ -58,7 +58,7 @@ class ErrorHandlingRayTests(unittest.TestCase):
         udf_name, task = "HFObjectDetector", "image-classification"
         create_udf_query = f"""CREATE UDF {udf_name}
             TYPE HuggingFace
-            'task' '{task}'
+            TASK '{task}'
         """
 
         execute_query_fetch_all(self.evadb, create_udf_query)

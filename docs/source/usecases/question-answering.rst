@@ -41,8 +41,8 @@ To create a custom ``SpeechRecognizer`` function based on the popular ``Whisper`
 
     CREATE FUNCTION SpeechRecognizer 
     TYPE HuggingFace 
-        'task' 'automatic-speech-recognition' 
-        'model' 'openai/whisper-base';
+        TASK 'automatic-speech-recognition' 
+        MODEL 'openai/whisper-base';
 
 .. note::
     

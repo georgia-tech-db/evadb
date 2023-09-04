@@ -119,7 +119,7 @@ Fastrcnn_udf_query = """CREATE UDF IF NOT EXISTS FastRCNNObjectDetector
 
 Yolo_udf_query = """CREATE UDF IF NOT EXISTS Yolo
       TYPE  ultralytics
-      'model' 'yolov8m.pt';
+      MODEL 'yolov8m.pt';
       """
 
 face_detection_udf_query = """CREATE UDF IF NOT EXISTS FaceDetector
@@ -185,7 +185,7 @@ chatgpt_udf_query = """CREATE UDF IF NOT EXISTS ChatGPT
 
 yolo8n_query = """CREATE UDF IF NOT EXISTS Yolo
             TYPE  ultralytics
-            'model' 'yolov8n.pt';
+            MODEL 'yolov8n.pt';
         """
 
 

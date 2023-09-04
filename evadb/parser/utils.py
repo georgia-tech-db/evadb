@@ -70,7 +70,7 @@ def parse_create_udf(
         mock_query += f" TYPE {type}"
         task, model = kwargs["task"], kwargs["model"]
         if task is not None and model is not None:
-            mock_query += f" 'task' '{task}' 'model' '{model}'"
+            mock_query += f" TASK '{task}' MODEL '{model}'"
     else:
         mock_query += f" IMPL '{udf_file_path}'"
     mock_query += ";"

@@ -55,7 +55,7 @@ class HuggingFaceTests(unittest.TestCase):
         udf_name, task = "HFObjectDetector", "image-classification"
         create_udf_query = f"""CREATE UDF {udf_name}
             TYPE HuggingFace
-            'task' '{task}'
+            TASK '{task}'
         """
 
         execute_query_fetch_all(self.evadb, create_udf_query)
@@ -79,7 +79,7 @@ class HuggingFaceTests(unittest.TestCase):
         task = "zero-shot-object-detection"
         create_udf_query = f"""CREATE UDF {udf_name}
             TYPE HuggingFace
-            'task' '{task}'
+            TASK '{task}'
         """
         # catch an assert
 
@@ -95,8 +95,8 @@ class HuggingFaceTests(unittest.TestCase):
         udf_name = "HFObjectDetector"
         create_udf_query = f"""CREATE UDF {udf_name}
             TYPE HuggingFace
-            'task' 'object-detection'
-            'model' 'facebook/detr-resnet-50';
+            TASK 'object-detection'
+            MODEL 'facebook/detr-resnet-50';
         """
         execute_query_fetch_all(self.evadb, create_udf_query)
 
@@ -141,7 +141,7 @@ class HuggingFaceTests(unittest.TestCase):
         udf_name = "HFImageClassifier"
         create_udf_query = f"""CREATE UDF {udf_name}
             TYPE HuggingFace
-            'task' 'image-classification'
+            TASK 'image-classification'
         """
         execute_query_fetch_all(self.evadb, create_udf_query)
 
@@ -180,7 +180,7 @@ class HuggingFaceTests(unittest.TestCase):
         udf_name = "HFTextClassifier"
         create_udf_query = f"""CREATE UDF {udf_name}
             TYPE HuggingFace
-            'task' 'text-classification'
+            TASK 'text-classification'
         """
         execute_query_fetch_all(self.evadb, create_udf_query)
 
@@ -216,7 +216,7 @@ class HuggingFaceTests(unittest.TestCase):
         udf_name = "SpeechRecognizer"
         create_udf = (
             f"CREATE UDF {udf_name} TYPE HuggingFace "
-            "'task' 'automatic-speech-recognition' 'model' 'openai/whisper-base';"
+            "TASK 'automatic-speech-recognition' MODEL 'openai/whisper-base';"
         )
         execute_query_fetch_all(self.evadb, create_udf)
 
@@ -247,14 +247,14 @@ class HuggingFaceTests(unittest.TestCase):
         asr_udf = "SpeechRecognizer"
         create_udf = (
             f"CREATE UDF {asr_udf} TYPE HuggingFace "
-            "'task' 'automatic-speech-recognition' 'model' 'openai/whisper-base';"
+            "TASK 'automatic-speech-recognition' MODEL 'openai/whisper-base';"
         )
         execute_query_fetch_all(self.evadb, create_udf)
 
         summary_udf = "Summarizer"
         create_udf = (
             f"CREATE UDF {summary_udf} TYPE HuggingFace "
-            "'task' 'summarization' 'model' 'philschmid/bart-large-cnn-samsum' 'min_length' 10 'max_new_tokens' 100;"
+            "TASK 'summarization' MODEL 'philschmid/bart-large-cnn-samsum' MIN_LENGTH 10 'max_new_tokens' 100;"
         )
         execute_query_fetch_all(self.evadb, create_udf)
 
@@ -279,8 +279,8 @@ class HuggingFaceTests(unittest.TestCase):
         udf_name = "HFToxicityClassifier"
         create_udf_query = f"""CREATE UDF {udf_name}
             TYPE HuggingFace
-            'task' 'text-classification'
-            'model' 'martin-ha/toxic-comment-model'
+            TASK 'text-classification'
+            MODEL 'martin-ha/toxic-comment-model'
         """
         execute_query_fetch_all(self.evadb, create_udf_query)
 
@@ -328,8 +328,8 @@ class HuggingFaceTests(unittest.TestCase):
         udf_name = "HFMultToxicityClassifier"
         create_udf_query = f"""CREATE UDF {udf_name}
             TYPE HuggingFace
-            'task' 'text-classification'
-            'model' 'EIStakovskii/xlm_roberta_base_multilingual_toxicity_classifier_plus'
+            TASK 'text-classification'
+            MODEL 'EIStakovskii/xlm_roberta_base_multilingual_toxicity_classifier_plus'
         """
         execute_query_fetch_all(self.evadb, create_udf_query)
 
@@ -376,7 +376,7 @@ class HuggingFaceTests(unittest.TestCase):
         udf_name = "HFNERModel"
         create_udf_query = f"""CREATE UDF {udf_name}
             TYPE HuggingFace
-            'task' 'ner'
+            TASK 'ner'
         """
         execute_query_fetch_all(self.evadb, create_udf_query)
 
@@ -411,7 +411,7 @@ class HuggingFaceTests(unittest.TestCase):
         udf_name = "HFNERModel"
         create_udf_query = f"""CREATE UDF {udf_name}
             TYPE HuggingFace
-            'task' 'ner'
+            TASK 'ner'
         """
         execute_query_fetch_all(self.evadb, create_udf_query)
 
