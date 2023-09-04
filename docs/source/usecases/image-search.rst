@@ -33,13 +33,26 @@ Create Image Feature Extraction Function
 
 To create a custom ``SiftFeatureExtractor`` function, use the ``CREATE FUNCTION`` statement. We will assume that the file is downloaded and stored as ``sift_feature_extractor.py``. Now, run the following query to register this function:
 
-.. code-block:: python
+.. tab-set::
+    
+    .. tab-item:: Python
 
-    cursor.query("""
-        CREATE FUNCTION 
-        IF NOT EXISTS SiftFeatureExtractor
-        IMPL  'evadb/udfs/sift_feature_extractor.py'
-    """).execute()
+        .. code-block:: python
+
+            cursor.query("""
+                CREATE FUNCTION 
+                IF NOT EXISTS SiftFeatureExtractor
+                IMPL  'evadb/udfs/sift_feature_extractor.py'
+            """).df()
+
+    .. tab-item:: SQL 
+
+        .. code-block:: sql
+
+            CREATE FUNCTION 
+                IF NOT EXISTS SiftFeatureExtractor
+                IMPL  'evadb/udfs/sift_feature_extractor.py'
+
 
 Create Vector Index for Similar Image Search
 --------------------------------------------
@@ -107,7 +120,7 @@ EvaDB's query optimizer automatically picks the correct vector index to accelera
 
 .. code-block:: python
 
-This query returns the top-5 most similar images:
+This query returns the top-5 most similar images in a ``DataFrame``:
 
 .. code-block::
 
@@ -120,3 +133,5 @@ This query returns the top-5 most similar images:
     | reddit-images/g1190_cln9xzr.jpg |
     | reddit-images/g1190_clna2x2.jpg |
     +---------------------------------+
+
+.. include:: ../shared/footer.rst

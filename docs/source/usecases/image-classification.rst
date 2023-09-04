@@ -22,7 +22,7 @@ Image Classification
 Introduction
 ------------
 
-In this tutorial, we present how to use PyTorch models in EvaDB to classify images. In particular, we focus on classifying images from the ``MNIST`` dataset that contains ``digits``. EvaDB makes it easy to do image classification using its built-in support for PyTorch models.
+In this tutorial, we present how to use ``PyTorch`` models in EvaDB to classify images. In particular, we focus on classifying images from the ``MNIST`` dataset that contains ``digits``. EvaDB makes it easy to do image classification using its built-in support for ``PyTorch`` models.
 
 In this tutorial, besides classifying images, we will also showcase a query where the model's output is used to retrieve images with the digit ``6``.
 
@@ -37,13 +37,11 @@ To create a custom ``MnistImageClassifier`` function, use the ``CREATE FUNCTION`
 
 We will assume that the file is downloaded and stored as ``mnist_image_classifier.py``. Now, run the following query to register the AI function:
 
-.. code-block:: python
+.. code-block:: sql
 
-    query = cursor.query("""
         CREATE FUNCTION 
         IF NOT EXISTS MnistImageClassifier 
         IMPL 'mnist_image_classifier.py';
-    """).execute()
 
 Image Classification Queries
 ----------------------------
@@ -52,24 +50,10 @@ After the function is registered in ``EvaDB``, you can use it subsequent SQL que
 
 In the following query, we call the classifier on every image in the video. The output of the function is stored in the ``label`` column (i.e., the digit associated with the given frame) of the output ``DataFrame``.
 
-.. tab-set::
-    
-    .. tab-item:: Python
+.. code-block:: sql
 
-        .. code-block:: python
-
-            query = cursor.table("mnist_video").select("MnistImageClassifier(data).label")
-            
-            # Get results in a DataFrame.
-            query.df()
-
-
-    .. tab-item:: SQL 
-
-        .. code-block:: sql
-
-            SELECT MnistImageClassifier(data).label 
-            FROM mnist_video;
+    SELECT MnistImageClassifier(data).label 
+    FROM mnist_video;
 
 This query returns the label of all the images:
 
@@ -94,27 +78,11 @@ Filtering Based on AI Function
 
 In the following query, we use the output of the classifier to retrieve a subset of images that contain a particular digit (e.g., ``6``).
 
-.. tab-set::
-    
-    .. tab-item:: Python
+.. code-block:: sql
 
-        .. code-block:: python
-
-            query = cursor.table("mnist_video") \
-                        .filter("MnistImageClassifier(data).label = '6'") \
-                        .select("MnistImageClassifier(data).label")
-            
-            # Return results in a DataFrame.
-            query.df()
-
-    .. tab-item:: SQL
-
-        .. code-block:: sql
-
-            SELECT id, MnistImageClassifier(data).label 
-                FROM mnist_video 
-                WHERE MnistImageClassifier(data).label = '6';
-
+    SELECT id, MnistImageClassifier(data).label 
+        FROM mnist_video 
+        WHERE MnistImageClassifier(data).label = '6';
 
 Now, the ``DataFrame`` only contains images of the digit ``6``.
 
