@@ -28,9 +28,7 @@ parts:
       - file: source/usecases/02-object-detection.ipynb
         title: Object Detection
       - file: source/usecases/03-emotion-analysis.ipynb
-        title: Emotions Analysis
-      - file: source/usecases/07-object-segmentation-huggingface.ipynb
-        title: Image Segmentation
+        title: Emotion Analysis
       - file: source/usecases/13-privategpt.ipynb
         title: PrivateGPT
 
