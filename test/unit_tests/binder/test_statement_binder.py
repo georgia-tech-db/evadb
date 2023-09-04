@@ -246,8 +246,8 @@ class StatementBinderTests(unittest.TestCase):
         with self.assertRaises(BinderError) as cm:
             binder._bind_func_expr(func_expr)
         err_msg = (
-            f"{mock_error_msg}. Please verify that the Function class name in the "
-            "implementation file matches the Function name."
+            f"{mock_error_msg}. Please verify that the function class name in the "
+            "implementation file matches the function name."
         )
         self.assertEqual(str(cm.exception), err_msg)
 

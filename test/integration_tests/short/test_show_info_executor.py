@@ -61,7 +61,7 @@ class ShowExecutorTest(unittest.TestCase):
 
         expected = {
             "name": ["FastRCNNObjectDetector", "ArrayCount"],
-            "type": ["Classification", "NdarrayFUNCTION"],
+            "type": ["Classification", "NdarrayFunction"],
         }
         expected_df = pd.DataFrame(expected)
         self.assertTrue(all(expected_df.name == result.frames.name))
