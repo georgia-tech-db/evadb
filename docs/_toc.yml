@@ -25,7 +25,7 @@ parts:
         title: Image Classification
       - file: source/usecases/image-search.rst
         title: Image Search
-      - file: ssource/usecases/object-detection.rst
+      - file: source/usecases/object-detection.rst
         title: Object Detection
       - file: source/usecases/emotion-analysis.rst
         title: Emotion Analysis
