@@ -112,6 +112,7 @@ class NativeExecutorTest(unittest.TestCase):
             }""",
         )
         self.assertEqual(len(res_batch), 1)
+
         self.assertEqual(res_batch.frames["name"][0], "aa")
         self.assertEqual(res_batch.frames["age"][0], 1)
         self.assertEqual(res_batch.frames["comment"][0], "aaaa")
@@ -167,6 +168,38 @@ class NativeExecutorTest(unittest.TestCase):
         # Test error.
         self._raise_error_on_multiple_creation()
         self._raise_error_on_invalid_connection()
+
+    def test_should_run_query_in_sqlite(self):
+        # Create database.
+        params = {
+            "database": "evadb.db",
+        }
+        query = f"""CREATE DATABASE test_data_source
+                    WITH ENGINE = "sqlite",
+                    PARAMETERS = {params};"""
+        execute_query_fetch_all(self.evadb, query)
+
+        # Test executions.
+        self._execute_native_query()
+        self._execute_evadb_query()
+
+    def test_should_run_query_in_mysql(self):
+        # Create database.
+        params = {
+            "user": "eva",
+            "password": "password",
+            "host": "localhost",
+            "port": "3306",
+            "database": "evadb",
+        }
+        query = f"""CREATE DATABASE test_data_source
+                    WITH ENGINE = "mysql",
+                    PARAMETERS = {params};"""
+        execute_query_fetch_all(self.evadb, query)
+
+        # Test executions.
+        self._execute_native_query()
+        self._execute_evadb_query()
 
 
 if __name__ == "__main__":

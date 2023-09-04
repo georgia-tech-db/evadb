@@ -1,3 +1,5 @@
+.. _sql-load:
+
 LOAD
 ====
 

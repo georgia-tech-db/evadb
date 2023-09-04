@@ -243,4 +243,4 @@ We are a lean team on a mission to bring AI inside database systems! All kinds o
 
 ## License
 Copyright (c) [Georgia Tech Database Group](http://db.cc.gatech.edu/).
-Licensed under an [Apache License](LICENSE).
+Licensed under an [Apache License](LICENSE.txt).

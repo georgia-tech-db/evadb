@@ -1,3 +1,5 @@
+.. _add-data-source:
+
 Structured Data Source Integration
 ==================================
 This document details steps involved in adding a new structured data source integration in EvaDB.
@@ -87,3 +89,10 @@ Add your created data source handler in `get_database_handler` function at `evad
         return mod.MydbHandler(engine, **kwargs)
    ...
 
+Add the Data Source in Documentation
+------------------------------------
+
+Add your new data source into :ref:`databases` section for reference.
+
+- Create ``mydb.rst`` under `evadb/docs/source/reference/databases <https://github.com/georgia-tech-db/evadb/tree/staging/docs/source/reference/databases>`_ directory. You can refer to the existing documentation under the directory for example information to be covered in ``mydb.rst``.
+- Update ``source/reference/databases/postgres`` in `evadb/docs/_toc.yml <https://github.com/georgia-tech-db/evadb/blob/staging/docs/_toc.yml>`_.
