@@ -72,7 +72,7 @@ Text Summarization Query in EvaDB
     SELECT TextSummarizer(article) FROM cnn_news_test;
 
 Use MindsDB for Text Summarization
---------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Setup SQLite Database 
 ~~~~~~~~~~~~~~~~~~~~~~
