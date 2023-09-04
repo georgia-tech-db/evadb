@@ -28,6 +28,49 @@ Use EvaDB for Text Summarization
    cd benchmark/text_summarization
    python text_summarization_with_evadb.py
 
+
+Loading Data Into EvaDB
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: sql
+
+    CREATE TABLE IF NOT EXISTS cnn_news_test(
+        id TEXT(128),
+        article TEXT(4096),
+        highlights TEXT(1024)
+      );
+
+Creating Text Summarization Function in EvaDB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: sql
+
+   CREATE UDF IF NOT EXISTS TextSummarizer
+         TYPE HuggingFace
+         'task' 'summarization'
+         'model' 'sshleifer/distilbart-cnn-12-6'
+         'min_length' 5
+         'max_length' 100;
+
+
+Tuning EvaDB for Maximum GPU Utilization
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: python
+
+   cursor._evadb.config.update_value("executor", "batch_mem_size", 300000)
+   cursor._evadb.config.update_value("executor", "gpu_ids", [0,1])
+   cursor._evadb.config.update_value("experimental", "ray", True)
+
+
+Text Summarization Query in EvaDB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: sql
+
+    CREATE TABLE IF NOT EXISTS cnn_news_summary AS
+    SELECT TextSummarizer(article) FROM cnn_news_test;
+
 Use MindsDB for Text Summarization
 --------------------------------
 
@@ -100,11 +143,11 @@ Use the ``text summarization`` model to summarize the CNN news dataset:
 Benchmarking Results
 --------------------
 
-Here are the key application runtime metrics.
+Here are the key runtime metrics for the ``Text Summarization`` benchmark.
 
 The experiment is conducted on a server with 56 Intel(R) Xeon(R) CPU E5-2690 v4 @ 2.60GHz and two Quadro P6000 GPUs.
 
-.. list-table:: **Text Summarization of CNN News Dataset**
+.. list-table::
    :widths: 20 30 30 30
 
    * - 
