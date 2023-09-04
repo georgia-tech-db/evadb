@@ -17,19 +17,19 @@ parts:
     chapters:
       - file: source/usecases/sentiment-analysis.rst
         title: Sentiment Analysis
+      - file: source/usecases/question-answering.rst
+        title: Question Answering
+      - file: source/usecases/text-summarization.rst
+        title: Text Summarization
       - file: source/usecases/image-classification.rst
         title: Image Classification
       - file: source/usecases/image-search.rst
         title: Image Search
-      - file: source/usecases/question-answering.rst
-        title: Question Answering
-      - file: source/usecases/12-query-pdf.ipynb
-        title: PDF Question Answering
-      - file: source/usecases/02-object-detection.ipynb
+      - file: ssource/usecases/object-detection.rst
         title: Object Detection
-      - file: source/usecases/03-emotion-analysis.ipynb
+      - file: source/usecases/emotion-analysis.rst
         title: Emotion Analysis
-      - file: source/usecases/13-privategpt.ipynb
+      - file: source/usecases/privategpt.rst
         title: PrivateGPT
 
   - caption: User Reference
