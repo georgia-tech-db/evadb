@@ -6,14 +6,14 @@ HuggingFace Models
 This section provides an overview of how you can use out-of-the-box HuggingFace models in EvaDB.
 
 
-Creating UDF from HuggingFace
+Creating Function from HuggingFace
 ------------------------------
 
-EvaDB supports UDFS similar to `Pipelines <https://huggingface.co/docs/transformers/main_classes/pipelines>`_  in HuggingFace. 
+EvaDB supports functions similar to `Pipelines <https://huggingface.co/docs/transformers/main_classes/pipelines>`_  in HuggingFace. 
 
 .. code-block:: sql
 
-    CREATE UDF IF NOT EXISTS HFObjectDetector
+    CREATE FUNCTION IF NOT EXISTS HFObjectDetector
     TYPE  HuggingFace
     'task' 'object-detection'
     'model' 'facebook / detr-resnet-50'

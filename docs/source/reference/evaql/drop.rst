@@ -9,9 +9,9 @@ DROP TABLE
    DROP TABLE DETRACVideo;
 
 
-DROP UDF
+DROP FUNCTION
 --------
 
 .. code:: mysql
 
-    DROP UDF FastRCNNObjectDetector;
+    DROP FUNCTION FastRCNNObjectDetector;

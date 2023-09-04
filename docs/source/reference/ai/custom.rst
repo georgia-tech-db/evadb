@@ -6,7 +6,7 @@ User-Defined Functions
 This section provides an overview of how you can create and use a custom user-defined function (Function) in your queries. For example, you could write an Function that wraps around your custom PyTorch model.
 
 Part 1: Writing a custom Function
-------------------------------
+---------------------------------
 
 During each step, use `this Function implementation <https://github.com/georgia-tech-db/evadb/blob/master/evadb/functions/yolo_object_detector.py>`_  as a reference.
 
