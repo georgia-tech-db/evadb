@@ -1,7 +1,7 @@
 Prerequisites
 -------------
 
-To follow along, you will need to set up a local instance of EvaDB via `pip <../overview/getting-started>`_. 
+To follow along, you will need to set up a local instance of EvaDB via `pip <../overview/getting-started.html>`_. 
 
 Connect to EvaDB
 ----------------

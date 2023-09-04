@@ -1,71 +1,113 @@
-Image Similarity Search Pipeline using EvaDB on Images
-======================================================
+.. _image-search:
 
-In this use case, we want to search similar images based on an image provided by the user. To implement this use case, we leverage EvaDB's capability of easily expressing feature extraction pipeline. Additionally, we also leverage EvaDB's capability of building a similarity search index and searching the index to
-locate similar images through ``FAISS`` library.
+Image Search
+============
 
-For this use case, we use a reddit image dataset that can be downloaded from `Here <https://www.dropbox.com/scl/fo/fcj6ojmii0gw92zg3jb2s/h\?dl\=1\&rlkey\=j3kj1ox4yn5fhonw06v0pn7r9>`_.
-We populate a table in the database that contains all images.
+.. raw:: html
 
-1. Connect to EvaDB
--------------------
+    <embed>
+    <table align="left">
+    <td>
+        <a target="_blank" href="https://colab.research.google.com/github/georgia-tech-db/eva/blob/staging/tutorials/11-similarity-search-for-motif-mining.ipynb"><img src="https://www.tensorflow.org/images/colab_logo_32px.png" /> Run on Google Colab</a>
+    </td>
+    <td>
+        <a target="_blank" href="https://github.com/georgia-tech-db/eva/blob/staging/tutorials/11-similarity-search-for-motif-mining.ipynb"><img src="https://www.tensorflow.org/images/GitHub-Mark-32px.png" /> View source on GitHub</a>
+    </td>
+    <td>
+        <a target="_blank" href="https://github.com/georgia-tech-db/eva/raw/staging/tutorials/11-similarity-search-for-motif-mining.ipynb"><img src="https://www.tensorflow.org/images/download_logo_32px.png" /> Download notebook</a>
+    </td>
+    </table><br><br>
+    </embed>
 
-.. code-block:: python
+Introduction
+------------
 
-    import evadb
-    cursor = evadb.connect().cursor()
+In this tutorial, we present how to use classical vision models (i.e., ``SIFT feature extractor``) in EvaDB to search for similar images powered by a ``vector index``. In particular, we focus on retrieving similar images from the ``Reddit`` dataset that contain similar ``motifs``. EvaDB makes it easy to do image search using its built-in support for vision models and vector database systems (e.g., ``FAISS``).
 
-2. Register SIFT as Function
-----------------------------
+.. include:: ../shared/evadb.rst
+
+We will assume that the input ``Reddit`` image collection is loaded into ``EvaDB``. To download this image dataset and load it into ``EvaDB``, see the complete `image search notebook on Colab <https://colab.research.google.com/github/georgia-tech-db/eva/blob/master/tutorials/11-similarity-search-for-motif-mining.ipynb>`_.
+
+Create Image Feature Extraction Function
+----------------------------------------
+
+To create a custom ``SiftFeatureExtractor`` function, use the ``CREATE FUNCTION`` statement. We will assume that the file is downloaded and stored as ``sift_feature_extractor.py``. Now, run the following query to register this function:
 
 .. code-block:: python
 
     cursor.query("""
-        CREATE UDF IF NOT EXISTS SiftFeatureExtractor
+        CREATE FUNCTION 
+        IF NOT EXISTS SiftFeatureExtractor
         IMPL  'evadb/udfs/sift_feature_extractor.py'
     """).execute()
 
-3. Search Similar Images
-------------------------
+Create Vector Index for Similar Image Search
+--------------------------------------------
 
-To locate images that have similar appearance, we will first build an index based on embeddings of images.
-Then, for the given image, EvaDB can find similar images by searching in the index.
+To locate images with similar appearance, we next create an index based on the feature vectors returned by ``SiftFeatureExtractor`` on the loaded images. EvaDB will later use this vector index to quickly returns similar images.
 
-Build Index using ``FAISS``
-***************************
+EvaDB lets you connect to your favorite vector database via the ``CREATE INDEX`` statement. In this query, we will create a new index using the ``FAISS`` vector index framework from ``Meta``.
 
-The below query creates a new index on the projected column ``SiftFeatureExtractor(data)`` from the ``reddit_dataset`` table.
+The following EvaQL statement creates a vector index on the ``SiftFeatureExtractor(data)`` column in the ``reddit_dataset`` table:
+
+.. tab-set::
+    
+    .. tab-item:: Python
+
+        .. code-block:: python
+
+            cursor.query("""
+                CREATE INDEX reddit_sift_image_index 
+                ON reddit_dataset (SiftFeatureExtractor(data)) 
+                USING FAISS;
+            """).df()
+
+    .. tab-item:: SQL 
+
+        .. code-block:: sql
+
+            CREATE INDEX reddit_sift_image_index 
+                ON reddit_dataset (SiftFeatureExtractor(data)) 
+                USING FAISS;
+
+Similar Image Search Powered By Vector Index
+--------------------------------------------
+
+EvaQL supports the ``ORDER BY`` and ``LIMIT`` clauses to retrieve the ``top-k`` most similar images for a given image. 
+
+EvaDB contains a built-in ``Similarity(x, y)`` function that computets the Euclidean distance between ``x`` and ``y``. We will use this function to compare the feature vector of image being search (i.e., the given image) and the feature vectors of all the images in the dataset that is stored in the vector index.
+
+EvaDB's query optimizer automatically picks the correct vector index to accelerate a given EvaQL query. It uses the vector index created in the prior step to accelerate the following image search query:
+
+.. tab-set::
+    
+    .. tab-item:: Python
+
+        .. code-block:: python
+
+            query = cursor.query("""
+                SELECT name FROM reddit_dataset ORDER BY
+                Similarity(
+                    SiftFeatureExtractor(Open('reddit-images/g1074_d4mxztt.jpg')),
+                    SiftFeatureExtractor(data)
+                )
+                LIMIT 5
+            """).df()
+
+    .. tab-item:: SQL 
+
+        .. code-block:: sql
+
+            SELECT name FROM reddit_dataset ORDER BY
+            Similarity(
+                SiftFeatureExtractor(Open('reddit-images/g1074_d4mxztt.jpg')),
+                SiftFeatureExtractor(data)
+            )
+            LIMIT 5
 
 .. code-block:: python
 
-    cursor.query("""
-        CREATE INDEX reddit_sift_image_index 
-        ON reddit_dataset (SiftFeatureExtractor(data)) 
-        USING FAISS
-    """).execute()
-
-Search Index for a Given Image
-*******************************
-
-EvaDB leverages the ``ORDER BY ... LIMIT ...`` SQL syntax to retrieve the top 5 similar images.
-In this example, ``Similarity(x, y)`` is a built-in function to calculate distance between ``x`` and ``y``.
-In current version, ``x`` is a single tuple and ``y`` is a column that contains multiple tuples.
-By default EvaDB does pairwise distance calculation between ``x`` and all tuples from ``y``.
-In this case, EvaDB leverages the index that we have already built.
-
-.. code-block:: python
-
-    query = cursor.query("""
-        SELECT name FROM reddit_dataset ORDER BY
-        Similarity(
-            SiftFeatureExtractor(Open('reddit-images/g1074_d4mxztt.jpg')),
-            SiftFeatureExtractor(data)
-        )
-        LIMIT 5
-    """)
-    query.df()
-
-The ``DataFrame`` contains the top 5 similar images.
+This query returns the top-5 most similar images:
 
 .. code-block::
 
@@ -78,6 +120,3 @@ The ``DataFrame`` contains the top 5 similar images.
     | reddit-images/g1190_cln9xzr.jpg |
     | reddit-images/g1190_clna2x2.jpg |
     +---------------------------------+
-
-Check out our `Jupyter Notebook <https://github.com/georgia-tech-db/evadb/blob/master/tutorials/11-similarity-search-for-motif-mining.ipynb>`_ for working example.
-We also demonstrate more complicated features of EvaDB for similarity search.
