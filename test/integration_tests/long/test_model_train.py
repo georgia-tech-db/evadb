@@ -56,14 +56,14 @@ class ModelTrainTests(unittest.TestCase):
 
     @ludwig_skip_marker
     def test_ludwig_automl(self):
-        create_predict_udf = """
-            CREATE UDF IF NOT EXISTS PredictHouseRent FROM
+        create_predict_function = """
+            CREATE FUNCTION IF NOT EXISTS PredictHouseRent FROM
             ( SELECT * FROM HomeRentals )
             TYPE Ludwig
             'predict' 'rental_price'
             'time_limit' 120;
         """
-        execute_query_fetch_all(self.evadb, create_predict_udf)
+        execute_query_fetch_all(self.evadb, create_predict_function)
 
         predict_query = """
             SELECT PredictHouseRent(*) FROM HomeRentals LIMIT 10;

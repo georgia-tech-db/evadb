@@ -1,60 +1,60 @@
 .. _udf:
 
-User-Defined Functions
+Functions
 ======================
 
-This section provides an overview of how you can create and use a custom user-defined function (UDF) in your queries. For example, you could write an UDF that wraps around your custom PyTorch model.
+This section provides an overview of how you can create and use a custom function in your queries. For example, you could write an function that wraps around your custom PyTorch model.
 
-Part 1: Writing a custom UDF
-------------------------------
+Part 1: Writing a custom Function
+---------------------------------
 
-During each step, use `this UDF implementation <https://github.com/georgia-tech-db/evadb/blob/master/evadb/udfs/yolo_object_detector.py>`_  as a reference.
+During each step, use `this function implementation <https://github.com/georgia-tech-db/evadb/blob/master/evadb/functions/yolo_object_detector.py>`_  as a reference.
 
-1. Create a new file under `udfs/` folder and give it a descriptive name. eg: `yolo_object_detection.py`. 
+1. Create a new file under `functions/` folder and give it a descriptive name. eg: `yolo_object_detection.py`. 
 
   .. note::
 
-      UDFs packaged along with EvaDB are located inside the `udfs <https://github.com/georgia-tech-db/evadb/tree/master/evadb/udfs>`_ folder.
+      Functions packaged along with EvaDB are located inside the `functions <https://github.com/georgia-tech-db/evadb/tree/master/evadb/functions>`_ folder.
 
-2. Create a Python class that inherits from `PytorchClassifierAbstractUDF`.
+2. Create a Python class that inherits from `PytorchClassifierAbstractFunction`.
 
-* The `PytorchClassifierAbstractUDF` is a parent class that defines and implements standard methods for model inference.
+* The `PytorchClassifierAbstractFunction` is a parent class that defines and implements standard methods for model inference.
 
 * The functions setup and forward should be implemented in your child class. These functions can be implemented with the help of Decorators.
 
 Setup
 -----
 
-An abstract method that must be implemented in your child class. The setup function can be used to initialize the parameters for executing the UDF. The parameters that need to be set are 
+An abstract method that must be implemented in your child class. The setup function can be used to initialize the parameters for executing the function. The parameters that need to be set are 
 
 - cacheable: bool
  
-  - True: Cache should be enabled. Cache will be automatically invalidated when the UDF changes.
+  - True: Cache should be enabled. Cache will be automatically invalidated when the function changes.
   - False: cache should not be enabled.
-- udf_type: str
+- function_type: str
   
-  - object_detection: UDFs for object detection.
+  - object_detection: functions for object detection.
 - batchable: bool
   
   - True: Batching should be enabled
   - False: Batching is disabled.
 
-The custom setup operations for the UDF can be written inside the function in the child class. If there is no need for any custom logic, then you can just simply write "pass" in the function definition.
+The custom setup operations for the function can be written inside the function in the child class. If there is no need for any custom logic, then you can just simply write "pass" in the function definition.
 
-Example of a Setup function
+Example of a Setup Function
 
 .. code-block:: python
 
-  @setup(cacheable=True, udf_type="object_detection", batchable=True)
+  @setup(cacheable=True, function_type="object_detection", batchable=True)
   def setup(self, threshold=0.85):
-      #custom setup function that is specific for the UDF
+      #custom setup function that is specific for the function
       self.threshold = threshold 
       self.model = torch.hub.load("ultralytics/yolov5", "yolov5s", verbose=False)
 
 Forward
 --------
 
-An abstract method that must be implemented in your UDF. The forward function receives the frames and runs the deep learning model on the data. The logic for transforming the frames and running the models must be provided by you.
+An abstract method that must be implemented in your function. The forward function receives the frames and runs the deep learning model on the data. The logic for transforming the frames and running the models must be provided by you.
 The arguments that need to be passed are
 
 - input_signatures: List[IOColumnArgument] 
@@ -91,7 +91,7 @@ A sample forward function is given below
           ],
       )
       def forward(self, frames: Tensor) -> pd.DataFrame:
-        #the custom logic for the UDF
+        #the custom logic for the function
         outcome = []
 
         frames = torch.permute(frames, (0, 2, 3, 1))
@@ -113,39 +113,39 @@ A sample forward function is given below
 
 ----------
 
-Part 2: Registering and using the UDF in EvaDB Queries
-------------------------------------------------------
+Part 2: Registering and using the function in EvaDB Queries
+-----------------------------------------------------------
 
-Now that you have implemented your UDF, we need to register it as a UDF in EvaDB. You can then use the UDF in any query.
+Now that you have implemented your function, we need to register it as a function in EvaDB. You can then use the function in any query.
 
-1. Register the UDF with a query that follows this template:
+1. Register the function with a query that follows this template:
 
-    `CREATE UDF [ IF NOT EXISTS ] <name>
+    `CREATE FUNCTION [ IF NOT EXISTS ] <name>
     IMPL <path_to_implementation>;`
 
   where,
 
-        * <name> - specifies the unique identifier for the UDF.
-        * <path_to_implementation> - specifies the path to the implementation class for the UDF
+        * <name> - specifies the unique identifier for the function.
+        * <path_to_implementation> - specifies the path to the implementation class for the function
 
-  Here, is an example query that registers a UDF that wraps around the 'YoloObjectDetection' model that performs Object Detection.
+  Here, is an example query that registers a function that wraps around the 'YoloObjectDetection' model that performs Object Detection.
 
   .. code-block:: sql
 
-    CREATE UDF YoloDecorators
-    IMPL  'evadb/udfs/decorators/yolo_object_detection_decorators.py';
+    CREATE FUNCTION YoloDecorators
+    IMPL  'evadb/functions/decorators/yolo_object_detection_decorators.py';
     
 
-  A status of 0 in the response denotes the successful registration of this UDF.
+  A status of 0 in the response denotes the successful registration of this function.
 
-2. Now you can execute your UDF on any video:
+2. Now you can execute your function on any video:
 
   .. code-block:: sql
 
       SELECT YoloDecorators(data) FROM MyVideo WHERE id < 5;
 
-3. You can drop the UDF when you no longer need it.
+3. You can drop the function when you no longer need it.
 
   .. code-block:: sql
 
-      DROP UDF IF EXISTS YoloDecorators;
+      DROP FUNCTION IF EXISTS YoloDecorators;

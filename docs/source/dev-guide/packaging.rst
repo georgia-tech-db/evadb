@@ -12,8 +12,8 @@ Models
 
 Please follow the following steps to package models:
 
-* Create a folder with a descriptive name. This folder name will be used by the UDF that is invoking your model.
-* Place all files used by the UDF inside this folder. These are typically:
+* Create a folder with a descriptive name. This folder name will be used by the function that is invoking your model.
+* Place all files used by the function inside this folder. These are typically:
     * Model weights (The .pt files that contain the actual weights)
     * Model architectures (The .pt files that contain model architecture information)
     * Label files (Extra files that are used in the process of model inference for outputting labels.)

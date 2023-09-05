@@ -22,11 +22,11 @@ import yaml
 from evadb.configuration.constants import (
     CACHE_DIR,
     DB_DEFAULT_NAME,
+    FUNCTION_DIR,
     INDEX_DIR,
     MODEL_DIR,
     S3_DOWNLOAD_DIR,
     TMP_DIR,
-    UDF_DIR,
     EvaDB_CONFIG_FILE,
     EvaDB_DATASET_DIR,
 )
@@ -103,7 +103,7 @@ def create_directories_and_get_default_config_values(
     cache_dir = evadb_dir / CACHE_DIR
     s3_dir = evadb_dir / S3_DOWNLOAD_DIR
     tmp_dir = evadb_dir / TMP_DIR
-    udf_dir = evadb_dir / UDF_DIR
+    function_dir = evadb_dir / FUNCTION_DIR
     model_dir = evadb_dir / MODEL_DIR
 
     if not evadb_dir.exists():
@@ -118,8 +118,8 @@ def create_directories_and_get_default_config_values(
         s3_dir.mkdir(parents=True, exist_ok=True)
     if not tmp_dir.exists():
         tmp_dir.mkdir(parents=True, exist_ok=True)
-    if not udf_dir.exists():
-        udf_dir.mkdir(parents=True, exist_ok=True)
+    if not function_dir.exists():
+        function_dir.mkdir(parents=True, exist_ok=True)
     if not model_dir.exists():
         model_dir.mkdir(parents=True, exist_ok=True)
 
@@ -133,7 +133,7 @@ def create_directories_and_get_default_config_values(
     config_obj["storage"]["cache_dir"] = str(cache_dir.resolve())
     config_obj["storage"]["s3_download_dir"] = str(s3_dir.resolve())
     config_obj["storage"]["tmp_dir"] = str(tmp_dir.resolve())
-    config_obj["storage"]["udf_dir"] = str(udf_dir.resolve())
+    config_obj["storage"]["function_dir"] = str(function_dir.resolve())
     config_obj["storage"]["model_dir"] = str(model_dir.resolve())
     if category and key:
         return config_obj.get(category, {}).get(key, None)

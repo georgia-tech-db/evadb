@@ -112,48 +112,56 @@ class DropObjectExecutorTest(unittest.TestCase):
                 self.evadb, drop_query, do_not_print_exceptions=True
             )
 
-    def run_create_udf_query(self):
-        create_udf_query = """CREATE UDF DummyObjectDetector
+    def run_create_function_query(self):
+        create_function_query = """CREATE FUNCTION DummyObjectDetector
             INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
             OUTPUT (label NDARRAY STR(10))
             TYPE  Classification
             IMPL  'test/util.py';"""
-        execute_query_fetch_all(self.evadb, create_udf_query)
+        execute_query_fetch_all(self.evadb, create_function_query)
 
-    def test_should_drop_udf(self):
-        self.run_create_udf_query()
-        udf_name = "DummyObjectDetector"
-        udf = self.evadb.catalog().get_udf_catalog_entry_by_name(udf_name)
-        self.assertTrue(udf is not None)
+    def test_should_drop_function(self):
+        self.run_create_function_query()
+        function_name = "DummyObjectDetector"
+        function = self.evadb.catalog().get_function_catalog_entry_by_name(
+            function_name
+        )
+        self.assertTrue(function is not None)
 
-        # Test that dropping the UDF reflects in the catalog
-        drop_query = "DROP UDF IF EXISTS {};".format(udf_name)
+        # Test that dropping the FUNCTION reflects in the catalog
+        drop_query = "DROP FUNCTION IF EXISTS {};".format(function_name)
         execute_query_fetch_all(self.evadb, drop_query)
-        udf = self.evadb.catalog().get_udf_catalog_entry_by_name(udf_name)
-        self.assertTrue(udf is None)
+        function = self.evadb.catalog().get_function_catalog_entry_by_name(
+            function_name
+        )
+        self.assertTrue(function is None)
 
-    def test_drop_wrong_udf_name(self):
-        self.run_create_udf_query()
-        right_udf_name = "DummyObjectDetector"
-        wrong_udf_name = "FakeDummyObjectDetector"
-        udf = self.evadb.catalog().get_udf_catalog_entry_by_name(right_udf_name)
-        self.assertTrue(udf is not None)
+    def test_drop_wrong_function_name(self):
+        self.run_create_function_query()
+        right_function_name = "DummyObjectDetector"
+        wrong_function_name = "FakeDummyObjectDetector"
+        function = self.evadb.catalog().get_function_catalog_entry_by_name(
+            right_function_name
+        )
+        self.assertTrue(function is not None)
 
-        # Test that dropping the wrong UDF:
-        # - does not affect UDFs in the catalog
+        # Test that dropping the wrong FUNCTION:
+        # - does not affect FUNCTIONs in the catalog
         # - raises an appropriate exception
-        drop_query = "DROP UDF {};".format(wrong_udf_name)
+        drop_query = "DROP FUNCTION {};".format(wrong_function_name)
         try:
             execute_query_fetch_all(
                 self.evadb, drop_query, do_not_print_exceptions=True
             )
         except Exception as e:
-            err_msg = "UDF {} does not exist, therefore cannot be dropped.".format(
-                wrong_udf_name
+            err_msg = "Function {} does not exist, therefore cannot be dropped.".format(
+                wrong_function_name
             )
             self.assertTrue(str(e) == err_msg)
-        udf = self.evadb.catalog().get_udf_catalog_entry_by_name(right_udf_name)
-        self.assertTrue(udf is not None)
+        function = self.evadb.catalog().get_function_catalog_entry_by_name(
+            right_function_name
+        )
+        self.assertTrue(function is not None)
 
     #### DROP INDEX
 
@@ -167,8 +175,8 @@ class DropObjectExecutorTest(unittest.TestCase):
         # Test that dropping the wrong Index:
         # - does not affect Indexes in the catalog
         # - raises an appropriate exception
-        wrong_udf_name = "wrong_udf_name"
-        drop_query = f"DROP INDEX {wrong_udf_name};"
+        wrong_function_name = "wrong_function_name"
+        drop_query = f"DROP INDEX {wrong_function_name};"
         with self.assertRaises(ExecutorError):
             execute_query_fetch_all(
                 self.evadb, drop_query, do_not_print_exceptions=True
