@@ -33,6 +33,8 @@ def get_database_handler(engine: str, **kwargs):
 
     if engine == "postgres":
         return mod.PostgresHandler(engine, **kwargs)
+    elif engine == "sqlite":
+        return mod.SQLiteHandler(engine, **kwargs)
     elif engine == "mysql":
         return mod.MysqlHandler(engine, **kwargs)
     elif engine == "mariadb":

@@ -15,7 +15,7 @@ The CREATE DATABASE statement allows us to connect to an external structured dat
         PARAMETERS = [key_value_parameters];
 
 * [database_connection] is the name of the database connection. `[database_connection].[table_name]` will be used as table name to compose SQL queries in EvaDB.
-* [database_engine] is the supported database engine. Check :ref:`supported data sources<data-sources>` for all engine and their available configuration parameters.
+* [database_engine] is the supported database engine. Check :ref:`supported data sources<databases>` for all engine and their available configuration parameters.
 * [key_value_parameters] is a list of key-value pairs as arguments to establish a connection.
 
 

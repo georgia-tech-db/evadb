@@ -24,6 +24,12 @@ from evadb.third_party.databases.types import (
 
 class PostgresHandler(DBHandler):
     def __init__(self, name: str, **kwargs):
+        """
+        Initialize the handler.
+        Args:
+            name (str): name of the DB handler instance
+            **kwargs: arbitrary keyword arguments for establishing the connection.
+        """
         super().__init__(name)
         self.host = kwargs.get("host")
         self.port = kwargs.get("port")
@@ -32,7 +38,12 @@ class PostgresHandler(DBHandler):
         self.database = kwargs.get("database")
         self.connection = None
 
-    def connect(self):
+    def connect(self) -> DBHandlerStatus:
+        """
+        Set up the connection required by the handler.
+        Returns:
+            DBHandlerStatus
+        """
         try:
             self.connection = psycopg2.connect(
                 host=self.host,
@@ -47,16 +58,29 @@ class PostgresHandler(DBHandler):
             return DBHandlerStatus(status=False, error=str(e))
 
     def disconnect(self):
+        """
+        Close any existing connections.
+        """
         if self.connection:
             self.connection.close()
 
     def check_connection(self) -> DBHandlerStatus:
+        """
+        Check connection to the handler.
+        Returns:
+            DBHandlerStatus
+        """
         if self.connection:
             return DBHandlerStatus(status=True)
         else:
             return DBHandlerStatus(status=False, error="Not connected to the database.")
 
     def get_tables(self) -> DBHandlerResponse:
+        """
+        Return the list of tables in the database.
+        Returns:
+            DBHandlerResponse
+        """
         if not self.connection:
             return DBHandlerResponse(data=None, error="Not connected to the database.")
 
@@ -68,6 +92,13 @@ class PostgresHandler(DBHandler):
             return DBHandlerResponse(data=None, error=str(e))
 
     def get_columns(self, table_name: str) -> DBHandlerResponse:
+        """
+        Returns the list of columns for the given table.
+        Args:
+            table_name (str): name of the table whose columns are to be retrieved.
+        Returns:
+            DBHandlerResponse
+        """
         if not self.connection:
             return DBHandlerResponse(data=None, error="Not connected to the database.")
 
@@ -101,6 +132,13 @@ class PostgresHandler(DBHandler):
             raise e
 
     def execute_native_query(self, query_string: str) -> DBHandlerResponse:
+        """
+        Executes the native query on the database.
+        Args:
+            query_string (str): query in native format
+        Returns:
+            DBHandlerResponse
+        """
         if not self.connection:
             return DBHandlerResponse(data=None, error="Not connected to the database.")
 
