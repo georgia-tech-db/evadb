@@ -51,7 +51,7 @@ class ModelTrainTests(unittest.TestCase):
     @forecast_skip_marker
     def test_forecast(self):
         create_predict_udf = """
-            CREATE UDF Forecast FROM
+            CREATE FUNCTION Forecast FROM
             (SELECT unique_id, ds, y FROM AirData)
             TYPE Forecasting
             PREDICT 'y';
