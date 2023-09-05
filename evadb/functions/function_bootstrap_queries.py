@@ -119,7 +119,7 @@ Fastrcnn_function_query = """CREATE FUNCTION IF NOT EXISTS FastRCNNObjectDetecto
 
 Yolo_function_query = """CREATE FUNCTION IF NOT EXISTS Yolo
       TYPE  ultralytics
-      'model' 'yolov8m.pt';
+      MODEL 'yolov8m.pt';
       """
 
 face_detection_function_query = """CREATE FUNCTION IF NOT EXISTS FaceDetector
@@ -185,7 +185,7 @@ chatgpt_function_query = """CREATE FUNCTION IF NOT EXISTS ChatGPT
 
 yolo8n_query = """CREATE FUNCTION IF NOT EXISTS Yolo
             TYPE  ultralytics
-            'model' 'yolov8n.pt';
+            MODEL 'yolov8n.pt';
         """
 
 

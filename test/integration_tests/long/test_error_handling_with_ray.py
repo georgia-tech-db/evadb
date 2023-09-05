@@ -58,7 +58,7 @@ class ErrorHandlingRayTests(unittest.TestCase):
         function_name, task = "HFObjectDetector", "image-classification"
         create_function_query = f"""CREATE FUNCTION {function_name}
             TYPE HuggingFace
-            'task' '{task}'
+            TASK '{task}'
         """
 
         execute_query_fetch_all(self.evadb, create_function_query)

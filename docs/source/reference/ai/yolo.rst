@@ -13,7 +13,7 @@ To create a YOLO function in EvaDB using Ultralytics models, use the following S
 
     CREATE FUNCTION IF NOT EXISTS Yolo
     TYPE ultralytics
-    'model' 'yolov8m.pt'
+    MODEL 'yolov8m.pt'
 
 You can change the `model` value to specify any other model supported by Ultralytics.
 

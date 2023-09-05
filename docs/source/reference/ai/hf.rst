@@ -15,8 +15,8 @@ EvaDB supports functions similar to `Pipelines <https://huggingface.co/docs/tran
 
     CREATE FUNCTION IF NOT EXISTS HFObjectDetector
     TYPE  HuggingFace
-    'task' 'object-detection'
-    'model' 'facebook / detr-resnet-50'
+    TASK 'object-detection'
+    MODEL 'facebook / detr-resnet-50'
 
 EvaDB supports all arguments supported by HF pipelines. You can pass those using a key value format similar to task and model above.
 

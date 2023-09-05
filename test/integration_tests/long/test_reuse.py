@@ -42,8 +42,8 @@ class ReuseTest(unittest.TestCase):
         function_name = "HFObjectDetector"
         create_function_query = f"""CREATE FUNCTION {function_name}
             TYPE HuggingFace
-            'task' 'object-detection'
-            'model' 'facebook/detr-resnet-50';
+            TASK 'object-detection'
+            MODEL 'facebook/detr-resnet-50';
         """
         execute_query_fetch_all(self.evadb, create_function_query)
 

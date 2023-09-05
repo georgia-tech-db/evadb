@@ -231,7 +231,7 @@ class RelationalAPI(unittest.TestCase):
         query = create_speech_recognizer_function_if_not_exists.sql_query()
         self.assertEqual(
             query,
-            """CREATE FUNCTION IF NOT EXISTS SpeechRecognizer TYPE HuggingFace 'task' 'automatic-speech-recognition' 'model' 'openai/whisper-base'""",
+            """CREATE FUNCTION IF NOT EXISTS SpeechRecognizer TYPE HuggingFace TASK 'automatic-speech-recognition' MODEL 'openai/whisper-base'""",
         )
         create_speech_recognizer_function_if_not_exists.execute()
 
@@ -242,7 +242,7 @@ class RelationalAPI(unittest.TestCase):
         query = create_speech_recognizer_function.sql_query()
         self.assertEqual(
             query,
-            "CREATE FUNCTION SpeechRecognizer TYPE HuggingFace 'task' 'automatic-speech-recognition' 'model' 'openai/whisper-base'",
+            "CREATE FUNCTION SpeechRecognizer TYPE HuggingFace TASK 'automatic-speech-recognition' MODEL 'openai/whisper-base'",
         )
         with self.assertRaises(ExecutorError):
             create_speech_recognizer_function.execute()

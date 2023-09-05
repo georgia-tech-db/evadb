@@ -12,8 +12,8 @@ Training and Finetuning
    CREATE FUNCTION IF NOT EXISTS PredictHouseRent FROM
    ( SELECT sqft, location, rental_price FROM HomeRentals )
    TYPE Ludwig
-   'predict' 'rental_price'
-   'time_limit' 120;
+   PREDICT 'rental_price'
+   TIME_LIMIT 120;
 
 In the above query, you are creating a new customized function by automatically training a model from the `HomeRentals` table. The `rental_price` column will be the target column for predication, while `sqft` and `location` are the inputs. 
 
@@ -24,8 +24,8 @@ You can also simply give all other columns in `HomeRentals` as inputs and let th
    CREATE FUNCTION IF NOT EXISTS PredictHouseRent FROM
    ( SELECT * FROM HomeRentals )
    TYPE Ludwig
-   'predict' 'rental_price'
-   'time_limit' 120;
+   PREDICT 'rental_price'
+   TIME_LIMIT 120;
 
 .. note::
 

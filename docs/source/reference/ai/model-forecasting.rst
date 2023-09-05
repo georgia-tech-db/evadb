@@ -5,7 +5,7 @@ You can train a forecasting model easily in EvaDB.
 
 .. note::
 
-   Install `statsforecast` in your EvaDB virtual environment: ``pip install statsforecast``.
+   Install `statsforecast` in your EvaDB virtual environment: ``pip install eva[forecasting]``.
 
 First, we create a table to insert required data.
 
@@ -26,7 +26,7 @@ Next, we create a UDF of `TYPE Forecasting`. We must enter the column name on wh
    CREATE UDF IF NOT EXISTS Forecast FROM
    (SELECT y FROM AirData)
    TYPE Forecasting
-   'predict' 'y';
+   PREDICT 'y';
 
 This trains a forecasting model. The model can be called by providing the horizon for forecasting.
 

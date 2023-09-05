@@ -49,7 +49,7 @@ function_impl: string_literal
 
 function_metadata: function_metadata_key function_metadata_value
 
-function_metadata_key: string_literal
+function_metadata_key: uid
 
 function_metadata_value: string_literal | decimal_literal
 

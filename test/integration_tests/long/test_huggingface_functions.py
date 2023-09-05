@@ -55,7 +55,7 @@ class HuggingFaceTests(unittest.TestCase):
         function_name, task = "HFObjectDetector", "image-classification"
         create_function_query = f"""CREATE FUNCTION {function_name}
             TYPE HuggingFace
-            'task' '{task}'
+            TASK '{task}'
         """
 
         execute_query_fetch_all(self.evadb, create_function_query)
@@ -79,7 +79,7 @@ class HuggingFaceTests(unittest.TestCase):
         task = "zero-shot-object-detection"
         create_function_query = f"""CREATE FUNCTION {function_name}
             TYPE HuggingFace
-            'task' '{task}'
+            TASK '{task}'
         """
         # catch an assert
 
@@ -95,8 +95,8 @@ class HuggingFaceTests(unittest.TestCase):
         function_name = "HFObjectDetector"
         create_function_query = f"""CREATE FUNCTION {function_name}
             TYPE HuggingFace
-            'task' 'object-detection'
-            'model' 'facebook/detr-resnet-50';
+            TASK 'object-detection'
+            MODEL 'facebook/detr-resnet-50';
         """
         execute_query_fetch_all(self.evadb, create_function_query)
 
@@ -147,7 +147,7 @@ class HuggingFaceTests(unittest.TestCase):
         function_name = "HFImageClassifier"
         create_function_query = f"""CREATE FUNCTION {function_name}
             TYPE HuggingFace
-            'task' 'image-classification'
+            TASK 'image-classification'
         """
         execute_query_fetch_all(self.evadb, create_function_query)
 
@@ -192,7 +192,7 @@ class HuggingFaceTests(unittest.TestCase):
         function_name = "HFTextClassifier"
         create_function_query = f"""CREATE FUNCTION {function_name}
             TYPE HuggingFace
-            'task' 'text-classification'
+            TASK 'text-classification'
         """
         execute_query_fetch_all(self.evadb, create_function_query)
 
@@ -229,7 +229,7 @@ class HuggingFaceTests(unittest.TestCase):
         function_name = "SpeechRecognizer"
         create_function = (
             f"CREATE FUNCTION {function_name} TYPE HuggingFace "
-            "'task' 'automatic-speech-recognition' 'model' 'openai/whisper-base';"
+            "TASK 'automatic-speech-recognition' MODEL 'openai/whisper-base';"
         )
         execute_query_fetch_all(self.evadb, create_function)
 
@@ -258,14 +258,14 @@ class HuggingFaceTests(unittest.TestCase):
         asr_function = "SpeechRecognizer"
         create_function = (
             f"CREATE FUNCTION {asr_function} TYPE HuggingFace "
-            "'task' 'automatic-speech-recognition' 'model' 'openai/whisper-base';"
+            "TASK 'automatic-speech-recognition' MODEL 'openai/whisper-base';"
         )
         execute_query_fetch_all(self.evadb, create_function)
 
         summary_function = "Summarizer"
         create_function = (
             f"CREATE FUNCTION {summary_function} TYPE HuggingFace "
-            "'task' 'summarization' 'model' 'philschmid/bart-large-cnn-samsum' 'min_length' 10 'max_new_tokens' 100;"
+            "TASK 'summarization' MODEL 'philschmid/bart-large-cnn-samsum' MIN_LENGTH 10 MAX_NEW_TOKENS 100;"
         )
         execute_query_fetch_all(self.evadb, create_function)
 
@@ -290,8 +290,8 @@ class HuggingFaceTests(unittest.TestCase):
         function_name = "HFToxicityClassifier"
         create_function_query = f"""CREATE FUNCTION {function_name}
             TYPE HuggingFace
-            'task' 'text-classification'
-            'model' 'martin-ha/toxic-comment-model'
+            TASK 'text-classification'
+            MODEL 'martin-ha/toxic-comment-model'
         """
         execute_query_fetch_all(self.evadb, create_function_query)
 
@@ -340,8 +340,8 @@ class HuggingFaceTests(unittest.TestCase):
         function_name = "HFMultToxicityClassifier"
         create_function_query = f"""CREATE FUNCTION {function_name}
             TYPE HuggingFace
-            'task' 'text-classification'
-            'model' 'EIStakovskii/xlm_roberta_base_multilingual_toxicity_classifier_plus'
+            TASK 'text-classification'
+            MODEL 'EIStakovskii/xlm_roberta_base_multilingual_toxicity_classifier_plus'
         """
         execute_query_fetch_all(self.evadb, create_function_query)
 
@@ -389,7 +389,7 @@ class HuggingFaceTests(unittest.TestCase):
         function_name = "HFNERModel"
         create_function_query = f"""CREATE FUNCTION {function_name}
             TYPE HuggingFace
-            'task' 'ner'
+            TASK 'ner'
         """
         execute_query_fetch_all(self.evadb, create_function_query)
 
@@ -424,7 +424,7 @@ class HuggingFaceTests(unittest.TestCase):
         function_name = "HFNERModel"
         create_function_query = f"""CREATE FUNCTION {function_name}
             TYPE HuggingFace
-            'task' 'ner'
+            TASK 'ner'
         """
         execute_query_fetch_all(self.evadb, create_function_query)
 
