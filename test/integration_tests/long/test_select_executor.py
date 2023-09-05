@@ -19,7 +19,7 @@ from test.util import (  # file_remove,
     create_table,
     file_remove,
     get_evadb_for_testing,
-    load_udfs_for_testing,
+    load_functions_for_testing,
     shutdown_ray,
 )
 
@@ -47,7 +47,7 @@ class SelectExecutorTest(unittest.TestCase):
         ua_detrac = f"{EvaDB_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
         load_query = f"LOAD VIDEO '{ua_detrac}' INTO DETRAC;"
         execute_query_fetch_all(cls.evadb, load_query)
-        load_udfs_for_testing(cls.evadb)
+        load_functions_for_testing(cls.evadb)
         cls.table1 = create_table(cls.evadb, "table1", 100, 3)
         cls.table2 = create_table(cls.evadb, "table2", 500, 3)
         cls.table3 = create_table(cls.evadb, "table3", 1000, 3)

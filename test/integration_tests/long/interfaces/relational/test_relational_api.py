@@ -17,7 +17,7 @@ from test.markers import qdrant_skip_marker
 from test.util import (
     DummyObjectDetector,
     create_sample_video,
-    load_udfs_for_testing,
+    load_functions_for_testing,
     shutdown_ray,
     suffix_pytest_xdist_worker_id_to_dir,
 )
@@ -47,7 +47,7 @@ class RelationalAPI(unittest.TestCase):
     def setUp(self):
         self.evadb.catalog().reset()
         self.mnist_path = f"{EvaDB_ROOT_DIR}/data/mnist/mnist.mp4"
-        load_udfs_for_testing(
+        load_functions_for_testing(
             self.evadb,
         )
         self.images = f"{EvaDB_ROOT_DIR}/data/detoxify/*.jpg"
@@ -174,10 +174,10 @@ class RelationalAPI(unittest.TestCase):
         )
         rel.execute()
 
-        # todo support register udf
+        # todo support register function
         cursor.query(
-            f"""CREATE UDF IF NOT EXISTS SiftFeatureExtractor
-                IMPL  '{EvaDB_ROOT_DIR}/evadb/udfs/sift_feature_extractor.py'"""
+            f"""CREATE FUNCTION IF NOT EXISTS SiftFeatureExtractor
+                IMPL  '{EvaDB_ROOT_DIR}/evadb/functions/sift_feature_extractor.py'"""
         ).df()
 
         # create a vector index using QDRANT
@@ -206,7 +206,7 @@ class RelationalAPI(unittest.TestCase):
         )
         assert_frame_equal(rel.df(), cursor.query(similarity_sql).df())
 
-    def test_create_udf_with_relational_api(self):
+    def test_create_function_with_relational_api(self):
         video_file_path = create_sample_video(10)
 
         cursor = self.conn.cursor()
@@ -218,34 +218,34 @@ class RelationalAPI(unittest.TestCase):
         )
         rel.execute()
 
-        create_dummy_object_detector_udf = cursor.create_function(
+        create_dummy_object_detector_function = cursor.create_function(
             "DummyObjectDetector", if_not_exists=True, impl_path="test/util.py"
         )
-        create_dummy_object_detector_udf.execute()
+        create_dummy_object_detector_function.execute()
 
         args = {"task": "automatic-speech-recognition", "model": "openai/whisper-base"}
 
-        create_speech_recognizer_udf_if_not_exists = cursor.create_function(
+        create_speech_recognizer_function_if_not_exists = cursor.create_function(
             "SpeechRecognizer", if_not_exists=True, type="HuggingFace", **args
         )
-        query = create_speech_recognizer_udf_if_not_exists.sql_query()
+        query = create_speech_recognizer_function_if_not_exists.sql_query()
         self.assertEqual(
             query,
-            """CREATE UDF IF NOT EXISTS SpeechRecognizer TYPE HuggingFace TASK 'automatic-speech-recognition' MODEL 'openai/whisper-base'""",
+            """CREATE FUNCTION IF NOT EXISTS SpeechRecognizer TYPE HuggingFace TASK 'automatic-speech-recognition' MODEL 'openai/whisper-base'""",
         )
-        create_speech_recognizer_udf_if_not_exists.execute()
+        create_speech_recognizer_function_if_not_exists.execute()
 
-        # check if next create call of same UDF raises error
-        create_speech_recognizer_udf = cursor.create_function(
+        # check if next create call of same Function raises error
+        create_speech_recognizer_function = cursor.create_function(
             "SpeechRecognizer", if_not_exists=False, type="HuggingFace", **args
         )
-        query = create_speech_recognizer_udf.sql_query()
+        query = create_speech_recognizer_function.sql_query()
         self.assertEqual(
             query,
-            "CREATE UDF SpeechRecognizer TYPE HuggingFace TASK 'automatic-speech-recognition' MODEL 'openai/whisper-base'",
+            "CREATE FUNCTION SpeechRecognizer TYPE HuggingFace TASK 'automatic-speech-recognition' MODEL 'openai/whisper-base'",
         )
         with self.assertRaises(ExecutorError):
-            create_speech_recognizer_udf.execute()
+            create_speech_recognizer_function.execute()
 
         select_query_sql = (
             "SELECT id, DummyObjectDetector(data) FROM dummy_video ORDER BY id;"
@@ -274,17 +274,17 @@ class RelationalAPI(unittest.TestCase):
         )
         rel.execute()
 
-        # Create dummy udf
-        create_dummy_object_detector_udf = cursor.create_function(
+        # Create dummy function
+        create_dummy_object_detector_function = cursor.create_function(
             "DummyObjectDetector", if_not_exists=True, impl_path="test/util.py"
         )
-        create_dummy_object_detector_udf.execute()
+        create_dummy_object_detector_function.execute()
 
-        # drop dummy udf
-        drop_dummy_object_detector_udf = cursor.drop_function(
+        # drop dummy function
+        drop_dummy_object_detector_function = cursor.drop_function(
             "DummyObjectDetector", if_exists=True
         )
-        drop_dummy_object_detector_udf.execute()
+        drop_dummy_object_detector_function.execute()
 
         # Check if deleted successfully
         select_query_sql = (
@@ -293,18 +293,18 @@ class RelationalAPI(unittest.TestCase):
         with self.assertRaises(BinderError):
             cursor.query(select_query_sql).execute()
 
-        # drop non existing udf with if_exists=True should not raise error
-        drop_dummy_object_detector_udf = cursor.drop_function(
+        # drop non existing function with if_exists=True should not raise error
+        drop_dummy_object_detector_function = cursor.drop_function(
             "DummyObjectDetector", if_exists=True
         )
-        drop_dummy_object_detector_udf.execute()
+        drop_dummy_object_detector_function.execute()
 
         # if_exists=False should raise error
-        drop_dummy_object_detector_udf = cursor.drop_function(
+        drop_dummy_object_detector_function = cursor.drop_function(
             "DummyObjectDetector", if_exists=False
         )
         with self.assertRaises(ExecutorError):
-            drop_dummy_object_detector_udf.execute()
+            drop_dummy_object_detector_function.execute()
 
         # drop existing table
         drop_table = cursor.drop_table("dummy_video", if_exists=True)
@@ -332,14 +332,14 @@ class RelationalAPI(unittest.TestCase):
         load_pdf = cursor.load(file_regex=pdf_path, format="PDF", table_name="PDFs")
         load_pdf.execute()
 
-        udf_check = cursor.drop_function("SentenceFeatureExtractor")
-        udf_check.df()
-        udf = cursor.create_function(
+        function_check = cursor.drop_function("SentenceFeatureExtractor")
+        function_check.df()
+        function = cursor.create_function(
             "SentenceFeatureExtractor",
             True,
-            f"{EvaDB_ROOT_DIR}/evadb/udfs/sentence_feature_extractor.py",
+            f"{EvaDB_ROOT_DIR}/evadb/functions/sentence_feature_extractor.py",
         )
-        udf.execute()
+        function.execute()
 
         cursor.create_vector_index(
             "faiss_index",

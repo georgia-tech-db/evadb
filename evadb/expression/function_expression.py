@@ -18,17 +18,17 @@ from typing import Callable, List, Tuple
 import numpy as np
 import pandas as pd
 
-from evadb.catalog.models.udf_catalog import UdfCatalogEntry
-from evadb.catalog.models.udf_io_catalog import UdfIOCatalogEntry
+from evadb.catalog.models.function_catalog import FunctionCatalogEntry
+from evadb.catalog.models.function_io_catalog import FunctionIOCatalogEntry
 from evadb.constants import NO_GPU
 from evadb.executor.execution_context import Context
 from evadb.expression.abstract_expression import AbstractExpression, ExpressionType
+from evadb.functions.gpu_compatible import GPUCompatible
 from evadb.models.storage.batch import Batch
 from evadb.parser.alias import Alias
-from evadb.udfs.gpu_compatible import GPUCompatible
 from evadb.utils.kv_cache import DiskKVCache
 from evadb.utils.logging_manager import logger
-from evadb.utils.stats import UDFStats
+from evadb.utils.stats import FunctionStats
 
 
 class FunctionExpression(AbstractExpression):
@@ -66,11 +66,11 @@ class FunctionExpression(AbstractExpression):
         self._function_instance = None
         self._output = output
         self.alias = alias
-        self.udf_obj: UdfCatalogEntry = None
-        self.output_objs: List[UdfIOCatalogEntry] = []
+        self.function_obj: FunctionCatalogEntry = None
+        self.output_objs: List[FunctionIOCatalogEntry] = []
         self.projection_columns: List[str] = []
         self._cache: FunctionExpressionCache = None
-        self._stats = UDFStats()
+        self._stats = FunctionStats()
 
     @property
     def name(self):
@@ -104,7 +104,7 @@ class FunctionExpression(AbstractExpression):
         return self._cache is not None
 
     def consolidate_stats(self):
-        if self.udf_obj is None:
+        if self.function_obj is None:
             return
 
         # if the function expression support cache only approximate using cache_miss entries.
@@ -122,8 +122,8 @@ class FunctionExpression(AbstractExpression):
 
     def evaluate(self, batch: Batch, **kwargs) -> Batch:
         func = self._gpu_enabled_function()
-        # record the time taken for the udf execution
-        # note the udf might be using cache
+        # record the time taken for the function execution
+        # note the function might be using cache
         with self._stats.timer:
             # apply the function and project the required columns
             outcomes = self._apply_function_expression(func, batch, **kwargs)
@@ -141,7 +141,7 @@ class FunctionExpression(AbstractExpression):
             self.consolidate_stats()
         except Exception as e:
             logger.warn(
-                f"Persisting Function Expression {str(self)} stats failed with {str(e)}"
+                f"Persisting FunctionExpression {str(self)} stats failed with {str(e)}"
             )
 
         return outcomes
@@ -149,7 +149,7 @@ class FunctionExpression(AbstractExpression):
     def signature(self) -> str:
         """It constructs the signature of the function expression.
         It traverses the children (function arguments) and compute signature for each
-        child. The output is in the form `udf_name[row_id](arg1, arg2, ...)`.
+        child. The output is in the form `function_name[row_id](arg1, arg2, ...)`.
 
         Returns:
             str: signature string
@@ -158,7 +158,7 @@ class FunctionExpression(AbstractExpression):
         for child in self.children:
             child_sigs.append(child.signature())
 
-        func_sig = f"{self.name}[{self.udf_obj.row_id}]({','.join(child_sigs)})"
+        func_sig = f"{self.name}[{self.function_obj.row_id}]({','.join(child_sigs)})"
         return func_sig
 
     def _gpu_enabled_function(self):
@@ -187,7 +187,7 @@ class FunctionExpression(AbstractExpression):
         if not self._cache:
             return func_args.apply_function_expression(func)
 
-        output_cols = [obj.name for obj in self.udf_obj.outputs]
+        output_cols = [obj.name for obj in self.function_obj.outputs]
 
         # 1. check cache
         # We are required to iterate over the batch row by row and check the cache.

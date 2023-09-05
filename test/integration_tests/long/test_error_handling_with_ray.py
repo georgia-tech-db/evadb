@@ -21,7 +21,7 @@ from test.util import (
     create_sample_image,
     get_evadb_for_testing,
     is_ray_stage_running,
-    load_udfs_for_testing,
+    load_functions_for_testing,
     shutdown_ray,
 )
 
@@ -34,8 +34,8 @@ class ErrorHandlingRayTests(unittest.TestCase):
         self.evadb = get_evadb_for_testing()
         os.environ["ray"] = str(self.evadb.config.get_value("experimental", "ray"))
         self.evadb.catalog().reset()
-        # Load built-in UDFs.
-        load_udfs_for_testing(self.evadb, mode="debug")
+        # Load built-in Functions.
+        load_functions_for_testing(self.evadb, mode="debug")
 
         # Deliberately create a faulty path.
         img_path = create_sample_image()
@@ -55,13 +55,13 @@ class ErrorHandlingRayTests(unittest.TestCase):
 
     @ray_skip_marker
     def test_ray_error_populate_to_all_stages(self):
-        udf_name, task = "HFObjectDetector", "image-classification"
-        create_udf_query = f"""CREATE UDF {udf_name}
+        function_name, task = "HFObjectDetector", "image-classification"
+        create_function_query = f"""CREATE FUNCTION {function_name}
             TYPE HuggingFace
             TASK '{task}'
         """
 
-        execute_query_fetch_all(self.evadb, create_udf_query)
+        execute_query_fetch_all(self.evadb, create_function_query)
 
         select_query = """SELECT HFObjectDetector(data) FROM testRayErrorHandling;"""
 

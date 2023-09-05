@@ -46,16 +46,16 @@ class DropObject:
 
         return DropObjectStatement(ObjectType.INDEX, index_name, if_exists)
 
-    # Drop UDF
-    def drop_udf(self, tree):
-        udf_name = None
+    # Drop Function
+    def drop_function(self, tree):
+        function_name = None
         if_exists = False
 
         for child in tree.children:
             if isinstance(child, Tree):
                 if child.data == "uid":
-                    udf_name = self.visit(child)
+                    function_name = self.visit(child)
                 elif child.data == "if_exists":
                     if_exists = True
 
-        return DropObjectStatement(ObjectType.UDF, udf_name, if_exists)
+        return DropObjectStatement(ObjectType.FUNCTION, function_name, if_exists)

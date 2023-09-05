@@ -19,9 +19,9 @@ from typing import Any, List
 
 from evadb.catalog.catalog_type import VectorStoreType
 from evadb.catalog.models.column_catalog import ColumnCatalogEntry
+from evadb.catalog.models.function_io_catalog import FunctionIOCatalogEntry
+from evadb.catalog.models.function_metadata_catalog import FunctionMetadataCatalogEntry
 from evadb.catalog.models.table_catalog import TableCatalogEntry
-from evadb.catalog.models.udf_io_catalog import UdfIOCatalogEntry
-from evadb.catalog.models.udf_metadata_catalog import UdfMetadataCatalogEntry
 from evadb.expression.abstract_expression import AbstractExpression
 from evadb.expression.constant_value_expression import ConstantValueExpression
 from evadb.expression.function_expression import FunctionExpression
@@ -46,7 +46,7 @@ class OperatorType(IntEnum):
     LOGICALCREATE = auto()
     LOGICALRENAME = auto()
     LOGICAL_DROP_OBJECT = auto()
-    LOGICALCREATEUDF = auto()
+    LOGICALCREATEFUNCTION = auto()
     LOGICALLOADDATA = auto()
     LOGICALQUERYDERIVEDGET = auto()
     LOGICALUNION = auto()
@@ -634,46 +634,46 @@ class LogicalRename(Operator):
         return hash((super().__hash__(), self._new_name, self._old_table_ref))
 
 
-class LogicalCreateUDF(Operator):
+class LogicalCreateFunction(Operator):
     """
-    Logical node for create udf operations
+    Logical node for create function operations
 
     Attributes:
         name: str
-            udf_name provided by the user required
+            function_name provided by the user required
         if_not_exists: bool
-            if true should throw an error if udf with same name exists
+            if true should throw an error if function with same name exists
             else will replace the existing
-        inputs: List[UdfIOCatalogEntry]
-            udf inputs, annotated list similar to table columns
-        outputs: List[UdfIOCatalogEntry]
-            udf outputs, annotated list similar to table columns
+        inputs: List[FunctionIOCatalogEntry]
+            function inputs, annotated list similar to table columns
+        outputs: List[FunctionIOCatalogEntry]
+            function outputs, annotated list similar to table columns
         impl_path: Path
-            file path which holds the implementation of the udf.
-            This file should be placed in the UDF directory and
-            the path provided should be relative to the UDF dir.
-        udf_type: str
-            udf type. it ca be object detection, classification etc.
+            file path which holds the implementation of the function.
+            This file should be placed in the function directory and
+            the path provided should be relative to the function dir.
+        function_type: str
+            function type. it ca be object detection, classification etc.
     """
 
     def __init__(
         self,
         name: str,
         if_not_exists: bool,
-        inputs: List[UdfIOCatalogEntry],
-        outputs: List[UdfIOCatalogEntry],
+        inputs: List[FunctionIOCatalogEntry],
+        outputs: List[FunctionIOCatalogEntry],
         impl_path: Path,
-        udf_type: str = None,
-        metadata: List[UdfMetadataCatalogEntry] = None,
+        function_type: str = None,
+        metadata: List[FunctionMetadataCatalogEntry] = None,
         children: List = None,
     ):
-        super().__init__(OperatorType.LOGICALCREATEUDF, children)
+        super().__init__(OperatorType.LOGICALCREATEFUNCTION, children)
         self._name = name
         self._if_not_exists = if_not_exists
         self._inputs = inputs
         self._outputs = outputs
         self._impl_path = impl_path
-        self._udf_type = udf_type
+        self._function_type = function_type
         self._metadata = metadata
 
     @property
@@ -697,8 +697,8 @@ class LogicalCreateUDF(Operator):
         return self._impl_path
 
     @property
-    def udf_type(self):
-        return self._udf_type
+    def function_type(self):
+        return self._function_type
 
     @property
     def metadata(self):
@@ -706,7 +706,7 @@ class LogicalCreateUDF(Operator):
 
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
-        if not isinstance(other, LogicalCreateUDF):
+        if not isinstance(other, LogicalCreateFunction):
             return False
         return (
             is_subtree_equal
@@ -714,7 +714,7 @@ class LogicalCreateUDF(Operator):
             and self.if_not_exists == other.if_not_exists
             and self.inputs == other.inputs
             and self.outputs == other.outputs
-            and self.udf_type == other.udf_type
+            and self.function_type == other.function_type
             and self.impl_path == other.impl_path
             and self.metadata == other.metadata
         )
@@ -727,7 +727,7 @@ class LogicalCreateUDF(Operator):
                 self.if_not_exists,
                 tuple(self.inputs),
                 tuple(self.outputs),
-                self.udf_type,
+                self.function_type,
                 self.impl_path,
                 tuple(self.metadata),
             )
@@ -741,9 +741,9 @@ class LogicalDropObject(Operator):
     Attributes:
         object_type: ObjectType
         name: str
-            UDF name provided by the user
+            Function name provided by the user
         if_exists: bool
-            if false, throws an error when no UDF with name exists
+            if false, throws an error when no function with name exists
             else logs a warning
     """
 
@@ -1073,7 +1073,7 @@ class LogicalCreateIndex(Operator):
         table_ref: TableRef,
         col_list: List[ColumnDefinition],
         vector_store_type: VectorStoreType,
-        udf_func: FunctionExpression = None,
+        function: FunctionExpression = None,
         children: List = None,
     ):
         super().__init__(OperatorType.LOGICALCREATEINDEX, children)
@@ -1081,7 +1081,7 @@ class LogicalCreateIndex(Operator):
         self._table_ref = table_ref
         self._col_list = col_list
         self._vector_store_type = vector_store_type
-        self._udf_func = udf_func
+        self._function = function
 
     @property
     def name(self):
@@ -1100,8 +1100,8 @@ class LogicalCreateIndex(Operator):
         return self._vector_store_type
 
     @property
-    def udf_func(self):
-        return self._udf_func
+    def function(self):
+        return self._function
 
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
@@ -1113,7 +1113,7 @@ class LogicalCreateIndex(Operator):
             and self.table_ref == other.table_ref
             and self.col_list == other.col_list
             and self.vector_store_type == other.vector_store_type
-            and self.udf_func == other.udf_func
+            and self.function == other.function
         )
 
     def __hash__(self) -> int:
@@ -1124,7 +1124,7 @@ class LogicalCreateIndex(Operator):
                 self.table_ref,
                 tuple(self.col_list),
                 self.vector_store_type,
-                self.udf_func,
+                self.function,
             )
         )
 

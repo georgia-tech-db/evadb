@@ -38,15 +38,15 @@ class LikeTest(unittest.TestCase):
 
     @ocr_skip_marker
     def test_like_with_ocr(self):
-        create_udf_query = """CREATE UDF IF NOT EXISTS OCRExtractor
+        create_function_query = """CREATE FUNCTION IF NOT EXISTS OCRExtractor
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
                   OUTPUT (labels NDARRAY STR(10),
                           bboxes NDARRAY FLOAT32(ANYDIM, 4),
                           scores NDARRAY FLOAT32(ANYDIM))
                   TYPE  OCRExtraction
-                  IMPL  'evadb/udfs/ocr_extractor.py';
+                  IMPL  'evadb/functions/ocr_extractor.py';
         """
-        execute_query_fetch_all(self.evadb, create_udf_query)
+        execute_query_fetch_all(self.evadb, create_function_query)
         select_query = """SELECT X.label, X.x, X.y FROM MemeImages JOIN LATERAL UNNEST(OCRExtractor(data)) AS X(label, x, y) WHERE label LIKE {};""".format(
             r"""'.*SWAG.*'"""
         )
@@ -55,15 +55,15 @@ class LikeTest(unittest.TestCase):
 
     @ocr_skip_marker
     def test_like_fails_on_non_string_col(self):
-        create_udf_query = """CREATE UDF IF NOT EXISTS OCRExtractor
+        create_function_query = """CREATE FUNCTION IF NOT EXISTS OCRExtractor
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
                   OUTPUT (labels NDARRAY STR(10),
                           bboxes NDARRAY FLOAT32(ANYDIM, 4),
                           scores NDARRAY FLOAT32(ANYDIM))
                   TYPE  OCRExtraction
-                  IMPL  'evadb/udfs/ocr_extractor.py';
+                  IMPL  'evadb/functions/ocr_extractor.py';
         """
-        execute_query_fetch_all(self.evadb, create_udf_query)
+        execute_query_fetch_all(self.evadb, create_function_query)
 
         select_query = """SELECT * FROM MemeImages JOIN LATERAL UNNEST(OCRExtractor(data)) AS X(label, x, y) WHERE x LIKE "[A-Za-z]*CANT";"""
         with self.assertRaises(Exception):

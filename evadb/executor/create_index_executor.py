@@ -73,11 +73,11 @@ class CreateIndexExecutor(AbstractExecutor):
             input_dim = -1
             storage_engine = StorageEngine.factory(self.db, feat_catalog_entry)
             for input_batch in storage_engine.read(feat_catalog_entry):
-                if self.node.udf_func:
-                    # Create index through UDF expression.
-                    # UDF(input column) -> 2 dimension feature vector.
+                if self.node.function:
+                    # Create index through function expression.
+                    # Function(input column) -> 2 dimension feature vector.
                     input_batch.modify_column_alias(feat_catalog_entry.name.lower())
-                    feat_batch = self.node.udf_func.evaluate(input_batch)
+                    feat_batch = self.node.function.evaluate(input_batch)
                     feat_batch.drop_column_alias()
                     input_batch.drop_column_alias()
                     feat = feat_batch.column_as_numpy_array("features")
@@ -114,7 +114,7 @@ class CreateIndexExecutor(AbstractExecutor):
                 self.index_path,
                 self.node.vector_store_type,
                 feat_column,
-                self.node.udf_func.signature() if self.node.udf_func else None,
+                self.node.function.signature() if self.node.function else None,
             )
         except Exception as e:
             # Delete index.
