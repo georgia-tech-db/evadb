@@ -11,6 +11,9 @@ parts:
         title: Connect to Database
       - file: source/overview/concepts
         title: Concepts
+        sections:
+          - file: source/overview/concepts/data-sources
+            title: Data Sources
         #- file: source/overview/faq
 
   - caption: Use Cases

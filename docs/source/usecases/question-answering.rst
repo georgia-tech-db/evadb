@@ -46,7 +46,7 @@ To create a custom ``SpeechRecognizer`` function based on the popular ``Whisper`
 
 .. note::
     
-    EvaDB has built-in support for a wide range of `HuggingFace <../reference/ai/hf.html>`_ models.
+    EvaDB has built-in support for a wide range of :ref:`HuggingFace<hf>` models.
 
 Create ChatGPT Function
 ------------------------
@@ -61,7 +61,7 @@ EvaDB has built-in support for ``ChatGPT`` function from ``OpenAI``. You will ne
 
 .. note::
     
-    EvaDB has built-in support for a wide range of `OpenAI <../reference/ai/openai.html>`_ models. You can also switch to another large language models that runs locally by defining a `Custom Function <../reference/ai/custom.html`_.
+    EvaDB has built-in support for a wide range of :ref:`OpenAI<openai>` models. You can also switch to another large language models that runs locally by defining a :ref:`Custom Function<udf>`.
 
     ChatGPT function is a wrapper around OpenAI API call. You can also switch to other LLM models that can run locally.
 
