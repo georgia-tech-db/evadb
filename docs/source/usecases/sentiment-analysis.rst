@@ -29,7 +29,7 @@ To load the food review data into your database, see the complete `sentiment ana
 
 .. include:: ../shared/evadb.rst
 
-.. include:: ../shared/postgres.rst
+.. include:: ../shared/postgresql.rst
 
 Sentiment Analysis of Reviews using ChatGPT
 -------------------------------------------
