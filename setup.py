@@ -155,8 +155,8 @@ EXTRA_REQUIRES = {
     "postgres": postgres_libs,
     "ludwig": ludwig_libs,
     "forecasting": forecasting_libs,
-    # everything except ray, qdrant and postgres
-    "dev": dev_libs + vision_libs + document_libs + udf_libs + notebook_libs,
+    # everything except ray, qdrant, ludwig and postgres. The first three fail on pyhton 3.11.
+    "dev": dev_libs + vision_libs + document_libs + udf_libs + notebook_libs + forecasting_libs,
 }
 
 setup(
