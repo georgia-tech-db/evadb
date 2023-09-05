@@ -16,8 +16,8 @@ from test.util import get_evadb_for_testing
 
 import pytest
 
+from evadb.functions.function_bootstrap_queries import init_builtin_functions
 from evadb.server.command_handler import execute_query_fetch_all
-from evadb.udfs.udf_bootstrap_queries import init_builtin_udfs
 
 
 @pytest.fixture(autouse=False)
@@ -31,5 +31,5 @@ def setup_pytorch_tests():
     execute_query_fetch_all(
         evadb, "LOAD VIDEO 'data/sample_videos/touchdown.mp4' INTO VIDEOS"
     )
-    init_builtin_udfs(evadb, mode="release")
+    init_builtin_functions(evadb, mode="release")
     return evadb

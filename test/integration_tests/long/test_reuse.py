@@ -20,7 +20,7 @@ from test.markers import gpu_skip_marker, windows_skip_marker
 from test.util import (
     get_evadb_for_testing,
     get_logical_query_plan,
-    load_udfs_for_testing,
+    load_functions_for_testing,
     shutdown_ray,
 )
 
@@ -39,20 +39,20 @@ from evadb.utils.stats import Timer
 
 class ReuseTest(unittest.TestCase):
     def _load_hf_model(self):
-        udf_name = "HFObjectDetector"
-        create_udf_query = f"""CREATE UDF {udf_name}
+        function_name = "HFObjectDetector"
+        create_function_query = f"""CREATE FUNCTION {function_name}
             TYPE HuggingFace
             'task' 'object-detection'
             'model' 'facebook/detr-resnet-50';
         """
-        execute_query_fetch_all(self.evadb, create_udf_query)
+        execute_query_fetch_all(self.evadb, create_function_query)
 
     def setUp(self):
         self.evadb = get_evadb_for_testing()
         self.evadb.catalog().reset()
         ua_detrac = f"{EvaDB_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
         execute_query_fetch_all(self.evadb, f"LOAD VIDEO '{ua_detrac}' INTO DETRAC;")
-        load_udfs_for_testing(self.evadb)
+        load_functions_for_testing(self.evadb)
         self._load_hf_model()
 
     def tearDown(self):
@@ -149,7 +149,7 @@ class ReuseTest(unittest.TestCase):
         self.assertGreater(exec_times[0], exec_times[1])
 
     @gpu_skip_marker
-    def test_reuse_with_udf_in_predicate(self):
+    def test_reuse_with_function_in_predicate(self):
         select_query = """SELECT id FROM DETRAC WHERE ['car'] <@ HFObjectDetector(data).label AND id < 4"""
 
         batches, exec_times = self._reuse_experiment([select_query, select_query])
@@ -158,7 +158,7 @@ class ReuseTest(unittest.TestCase):
         self.assertGreater(exec_times[0], exec_times[1])
 
     @gpu_skip_marker
-    def test_reuse_across_different_predicate_using_same_udf(self):
+    def test_reuse_across_different_predicate_using_same_function(self):
         query1 = """SELECT id FROM DETRAC WHERE ['car'] <@ HFObjectDetector(data).label AND id < 15"""
 
         query2 = """SELECT id FROM DETRAC WHERE ArrayCount(HFObjectDetector(data).label, 'car') > 3 AND id < 12;"""
@@ -211,7 +211,7 @@ class ReuseTest(unittest.TestCase):
         # stop the server
         os.system("nohup evadb_server --stop")
 
-    def test_drop_udf_should_remove_cache(self):
+    def test_drop_function_should_remove_cache(self):
         select_query = """SELECT id, label FROM DETRAC JOIN
             LATERAL Yolo(data) AS Obj(label, bbox, conf) WHERE id < 5;"""
         execute_query_fetch_all(self.evadb, select_query)
@@ -224,15 +224,19 @@ class ReuseTest(unittest.TestCase):
         cache_name = plan.func_expr.signature()
 
         # cache exists
-        udf_cache = self.evadb.catalog().get_udf_cache_catalog_entry_by_name(cache_name)
-        cache_dir = Path(udf_cache.cache_path)
-        self.assertIsNotNone(udf_cache)
+        function_cache = self.evadb.catalog().get_function_cache_catalog_entry_by_name(
+            cache_name
+        )
+        cache_dir = Path(function_cache.cache_path)
+        self.assertIsNotNone(function_cache)
         self.assertTrue(cache_dir.exists())
 
-        # cache should be removed if the UDF is removed
-        execute_query_fetch_all(self.evadb, "DROP UDF Yolo;")
-        udf_cache = self.evadb.catalog().get_udf_cache_catalog_entry_by_name(cache_name)
-        self.assertIsNone(udf_cache)
+        # cache should be removed if the FUNCTION is removed
+        execute_query_fetch_all(self.evadb, "DROP FUNCTION Yolo;")
+        function_cache = self.evadb.catalog().get_function_cache_catalog_entry_by_name(
+            cache_name
+        )
+        self.assertIsNone(function_cache)
         self.assertFalse(cache_dir.exists())
 
     def test_drop_table_should_remove_cache(self):
@@ -248,13 +252,17 @@ class ReuseTest(unittest.TestCase):
         cache_name = plan.func_expr.signature()
 
         # cache exists
-        udf_cache = self.evadb.catalog().get_udf_cache_catalog_entry_by_name(cache_name)
-        cache_dir = Path(udf_cache.cache_path)
-        self.assertIsNotNone(udf_cache)
+        function_cache = self.evadb.catalog().get_function_cache_catalog_entry_by_name(
+            cache_name
+        )
+        cache_dir = Path(function_cache.cache_path)
+        self.assertIsNotNone(function_cache)
         self.assertTrue(cache_dir.exists())
 
         # cache should be removed if the Table is removed
         execute_query_fetch_all(self.evadb, "DROP TABLE DETRAC;")
-        udf_cache = self.evadb.catalog().get_udf_cache_catalog_entry_by_name(cache_name)
-        self.assertIsNone(udf_cache)
+        function_cache = self.evadb.catalog().get_function_cache_catalog_entry_by_name(
+            cache_name
+        )
+        self.assertIsNone(function_cache)
         self.assertFalse(cache_dir.exists())

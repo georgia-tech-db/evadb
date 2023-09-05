@@ -15,7 +15,7 @@
 import unittest
 from pathlib import Path
 from test.markers import macos_skip_marker
-from test.util import get_evadb_for_testing, load_udfs_for_testing
+from test.util import get_evadb_for_testing, load_functions_for_testing
 
 import numpy as np
 import pandas as pd
@@ -39,7 +39,7 @@ class CreateIndexTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.evadb = get_evadb_for_testing()
-        load_udfs_for_testing(cls.evadb, mode="debug")
+        load_functions_for_testing(cls.evadb, mode="debug")
 
         # Create feature vector table and raw input table.
         feat1 = np.array([[0, 0, 0]]).astype(np.float32)
@@ -112,7 +112,7 @@ class CreateIndexTest(unittest.TestCase):
             self._index_save_path(),
         )
         self.assertEqual(
-            index_catalog_entry.udf_signature,
+            index_catalog_entry.function_signature,
             None,
         )
 
@@ -137,11 +137,11 @@ class CreateIndexTest(unittest.TestCase):
         self.evadb.catalog().drop_index_catalog_entry("testCreateIndexName")
 
     @macos_skip_marker
-    def test_should_create_index_with_udf(self):
+    def test_should_create_index_with_function(self):
         query = "CREATE INDEX testCreateIndexName ON testCreateIndexInputTable (DummyFeatureExtractor(input)) USING FAISS;"
         execute_query_fetch_all(self.evadb, query)
 
-        # Test index udf signature.
+        # Test index function signature.
         index_catalog_entry = self.evadb.catalog().get_index_catalog_entry_by_name(
             "testCreateIndexName"
         )

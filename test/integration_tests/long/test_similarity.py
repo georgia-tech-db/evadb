@@ -18,7 +18,7 @@ from test.markers import gpu_skip_marker, qdrant_skip_marker
 from test.util import (
     create_sample_image,
     get_evadb_for_testing,
-    load_udfs_for_testing,
+    load_functions_for_testing,
     shutdown_ray,
 )
 
@@ -38,8 +38,8 @@ class SimilarityTests(unittest.TestCase):
         self.evadb = get_evadb_for_testing()
         self.evadb.catalog().reset()
 
-        # Prepare needed UDFs and data_col.
-        load_udfs_for_testing(self.evadb, mode="debug")
+        # Prepare needed Functions and data_col.
+        load_functions_for_testing(self.evadb, mode="debug")
         self.img_path = create_sample_image()
 
         # Create base comparison table.
@@ -128,7 +128,7 @@ class SimilarityTests(unittest.TestCase):
 
     def test_similarity_should_work_in_order(self):
         ###############################################
-        # Test case runs with UDF on raw input table. #
+        # Test case runs with Function on raw input table. #
         ###############################################
 
         # Top 1 - assume table contains base data_col.
@@ -253,7 +253,7 @@ class SimilarityTests(unittest.TestCase):
             )
 
         ###############################################
-        # Test case runs with UDF on raw input table. #
+        # Test case runs with Function on raw input table. #
         ###############################################
 
         # Execution without index scan.

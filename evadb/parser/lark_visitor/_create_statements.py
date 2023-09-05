@@ -261,10 +261,10 @@ class CreateTable:
                 elif child.data == "index_elem":
                     index_elem = self.visit(child)
 
-        # Parse either a single UDF function call or column list.
-        col_list, udf_func = None, None
+        # Parse either a single function call or column list.
+        col_list, function = None, None
         if not isinstance(index_elem, list):
-            udf_func = index_elem
+            function = index_elem
 
             # Traverse to the tuple value expression.
             while not isinstance(index_elem, TupleValueExpression):
@@ -276,7 +276,7 @@ class CreateTable:
         ]
 
         return CreateIndexStatement(
-            index_name, table_ref, col_list, vector_store_type, udf_func
+            index_name, table_ref, col_list, vector_store_type, function
         )
 
 

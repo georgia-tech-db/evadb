@@ -19,7 +19,7 @@ from test.util import (
     create_sample_video,
     file_remove,
     get_evadb_for_testing,
-    load_udfs_for_testing,
+    load_functions_for_testing,
     shutdown_ray,
 )
 
@@ -45,7 +45,7 @@ class CreateTableTest(unittest.TestCase):
         execute_query_fetch_all(cls.evadb, load_query)
         ua_detrac = f"{EvaDB_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
         execute_query_fetch_all(cls.evadb, f"LOAD VIDEO '{ua_detrac}' INTO UATRAC;")
-        load_udfs_for_testing(cls.evadb)
+        load_functions_for_testing(cls.evadb)
 
     @classmethod
     def tearDownClass(cls):
