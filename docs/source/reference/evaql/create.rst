@@ -50,7 +50,7 @@ To create a table, specify the schema of the table.
     );
 
 CREATE FUNCTION
-----------
+---------------
 
 To register an user-defined function, specify the implementation details of the function.
 
@@ -66,7 +66,7 @@ To register an user-defined function, specify the implementation details of the 
 .. _create-udf-train:
 
 CREATE FUNCTION via Training
------------------------
+----------------------------
 
 To register an user-defined function by training a predication model.
 

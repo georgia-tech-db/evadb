@@ -1,10 +1,10 @@
 :orphan:
 
 Functions
-===
+=========
 
 SHOW FUNCTIONS
----------
+--------------
 
 Here is a list of built-in user-defined functions in EvaDB.
 
@@ -24,7 +24,7 @@ FastRCNNObjectDetector is a model for detecting objects. MVITActionRecognition i
 ArrayCount and Crop are utility functions for counting the number of objects in an array and cropping a bounding box from an image, respectively.
 
 SELECT WITH MULTIPLE FUNCTIONS
--------------------------
+------------------------------
 
 Here is a query that illustrates how to use multiple functions in a single query.
 

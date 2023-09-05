@@ -10,7 +10,7 @@ DROP TABLE
 
 
 DROP FUNCTION
---------
+-------------
 
 .. code:: mysql
 
