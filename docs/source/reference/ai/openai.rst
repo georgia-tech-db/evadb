@@ -15,7 +15,7 @@ To create a chat completion function in EvaDB, use the following SQL command:
 
     CREATE FUNCTION IF NOT EXISTS OpenAIChatCompletion
     IMPL 'evadb/functions/openai_chat_completion_function.py'
-    'model' 'gpt-3.5-turbo'
+    MODEL 'gpt-3.5-turbo'
 
 EvaDB supports the following models for chat completion task:
 

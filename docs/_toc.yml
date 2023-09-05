@@ -66,7 +66,7 @@ parts:
         sections:
           - file: source/reference/ai/model-train
             title: Model Training
-          - file: source/reference/udfs/model-forecasting
+          - file: source/reference/ai/model-forecasting
             title: Time Series Forecasting
           - file: source/reference/ai/hf
             title: Hugging Face

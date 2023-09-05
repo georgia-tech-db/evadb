@@ -75,9 +75,9 @@ To register an user-defined function by training a predication model.
    CREATE FUNCTION IF NOT EXISTS PredictHouseRent FROM
    (SELECT * FROM HomeRentals)
    TYPE Ludwig
-   'predict' 'rental_price'
-   'time_list' 120;
-   'tune_for_memory' False;
+   PREDICT 'rental_price'
+   TIME_LIST 120;
+   TUNE_FOR_MEMORY False;
 
 CREATE MATERIALIZED VIEW
 ------------------------

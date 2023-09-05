@@ -97,7 +97,9 @@ class Functions:
                     value = key_value_pair[1]
                     if isinstance(value, ConstantValueExpression):
                         value = value.value
-                    metadata.append((key_value_pair[0].value, value)),
+                    # Removing .value from key_value_pair[0] since key is now an ID_LITERAL
+                    # Adding lower() to ensure the key is in lowercase
+                    metadata.append((key_value_pair[0].lower(), value)),
 
         return CreateFunctionStatement(
             function_name,

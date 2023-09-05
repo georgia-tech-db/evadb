@@ -86,7 +86,9 @@ class CreateFunctionStatement(AbstractStatement):
 
         if self._metadata is not None:
             for key, value in self._metadata:
-                s += f" '{key}' '{value}'"
+                # NOTE :- Removing quotes around key and making it upper case
+                # Since in tests we are doing a straight string comparison
+                s += f" {key.upper()} '{value}'"
         return s
 
     @property

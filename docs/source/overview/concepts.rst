@@ -24,8 +24,8 @@ Here is set of illustrative EvaQL queries for a ChatGPT-based video question ans
     --- After creating the function, we can use the function in any future query
     CREATE UDF SpeechRecognizer 
         TYPE HuggingFace 
-        'task' 'automatic-speech-recognition' 
-        'model' 'openai/whisper-base';
+        TASK 'automatic-speech-recognition' 
+        MODEL 'openai/whisper-base';
 
     --  EvaDB automatically extracts the audio from the videos
     --- We only need to run the SpeechRecognizer UDF on the 'audio' column 
