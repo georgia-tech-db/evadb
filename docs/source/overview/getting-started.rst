@@ -70,7 +70,7 @@ The program runs a SQL query for listing all the built-in functions in EvaDB. It
    cursor = evadb.connect().cursor()
 
    # List all the built-in functions in EvaDB
-   print(cursor.query("SHOW UDFS;").df())
+   print(cursor.query("SHOW FUNCTIONS;").df())
 
 Now, run the Python program:
 
@@ -83,9 +83,9 @@ You should see a list of built-in functions including but not limited to the fol
 .. code-block:: bash
 
             name                                             inputs  ...                                               impl metadata
-    0  ArrayCount   [Input_Array NDARRAY ANYTYPE (), Search_Key ANY]  ...  /home/jarulraj3/evadb/evadb/udfs/ndarray/array...       []
-    1        Crop  [Frame_Array NDARRAY UINT8 (3, None, None), bb...  ...   /home/jarulraj3/evadb/evadb/udfs/ndarray/crop.py       []
-    2     ChatGPT  [query NDARRAY STR (1,), content NDARRAY STR (...  ...        /home/jarulraj3/evadb/evadb/udfs/chatgpt.py       []
+    0  ArrayCount   [Input_Array NDARRAY ANYTYPE (), Search_Key ANY]  ...  /home/jarulraj3/evadb/evadb/functions/ndarray/array...       []
+    1        Crop  [Frame_Array NDARRAY UINT8 (3, None, None), bb...  ...   /home/jarulraj3/evadb/evadb/functions/ndarray/crop.py       []
+    2     ChatGPT  [query NDARRAY STR (1,), content NDARRAY STR (...  ...        /home/jarulraj3/evadb/evadb/functions/chatgpt.py       []
 
     [3 rows x 6 columns]
 

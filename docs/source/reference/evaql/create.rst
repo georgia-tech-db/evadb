@@ -49,30 +49,30 @@ To create a table, specify the schema of the table.
                    object_id INTEGER
     );
 
-CREATE UDF
-----------
+CREATE FUNCTION
+---------------
 
-To register an user-defined function, specify the implementation details of the UDF.
+To register an user-defined function, specify the implementation details of the function.
 
 .. code-block:: sql
 
-    CREATE UDF IF NOT EXISTS FastRCNNObjectDetector
+    CREATE FUNCTION IF NOT EXISTS FastRCNNObjectDetector
     INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
     OUTPUT (labels NDARRAY STR(ANYDIM), bboxes NDARRAY FLOAT32(ANYDIM, 4),
             scores NDARRAY FLOAT32(ANYDIM))
     TYPE  Classification
-    IMPL  'evadb/udfs/fastrcnn_object_detector.py';
+    IMPL  'evadb/functions/fastrcnn_object_detector.py';
 
 .. _create-udf-train:
 
-CREATE UDF via Training
------------------------
+CREATE FUNCTION via Training
+----------------------------
 
 To register an user-defined function by training a predication model.
 
 .. code-block:: sql
 
-   CREATE UDF IF NOT EXISTS PredictHouseRent FROM
+   CREATE FUNCTION IF NOT EXISTS PredictHouseRent FROM
    (SELECT * FROM HomeRentals)
    TYPE Ludwig
    'predict' 'rental_price'

@@ -47,7 +47,7 @@ class Timer:
 
 
 @dataclass
-class UDFStats:
+class FunctionStats:
     def __init__(self) -> None:
         self.num_calls: int = 0
         self.timer: Timer = Timer()

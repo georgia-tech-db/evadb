@@ -21,9 +21,12 @@ import pandas as pd
 import pytest
 
 from evadb.configuration.constants import EvaDB_ROOT_DIR
+from evadb.functions.function_bootstrap_queries import (
+    ArrayCount_function_query,
+    Fastrcnn_function_query,
+)
 from evadb.models.storage.batch import Batch
 from evadb.server.command_handler import execute_query_fetch_all
-from evadb.udfs.udf_bootstrap_queries import ArrayCount_udf_query, Fastrcnn_udf_query
 
 NUM_FRAMES = 10
 
@@ -34,7 +37,7 @@ class ShowExecutorTest(unittest.TestCase):
     def setUpClass(cls):
         cls.evadb = get_evadb_for_testing()
         cls.evadb.catalog().reset()
-        queries = [Fastrcnn_udf_query, ArrayCount_udf_query]
+        queries = [Fastrcnn_function_query, ArrayCount_function_query]
         for query in queries:
             execute_query_fetch_all(cls.evadb, query)
 
@@ -52,13 +55,13 @@ class ShowExecutorTest(unittest.TestCase):
         execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS MyVideo;")
 
     # integration test
-    def test_show_udfs(self):
-        result = execute_query_fetch_all(self.evadb, "SHOW UDFS;")
+    def test_show_functions(self):
+        result = execute_query_fetch_all(self.evadb, "SHOW FUNCTIONS;")
         self.assertEqual(len(result.columns), 6)
 
         expected = {
             "name": ["FastRCNNObjectDetector", "ArrayCount"],
-            "type": ["Classification", "NdarrayUDF"],
+            "type": ["Classification", "NdarrayFunction"],
         }
         expected_df = pd.DataFrame(expected)
         self.assertTrue(all(expected_df.name == result.frames.name))

@@ -20,32 +20,32 @@ from evadb.expression.aggregation_expression import AggregationExpression
 from evadb.expression.constant_value_expression import ConstantValueExpression
 from evadb.expression.function_expression import FunctionExpression
 from evadb.expression.tuple_value_expression import TupleValueExpression
-from evadb.parser.create_udf_statement import CreateUDFStatement
+from evadb.parser.create_function_statement import CreateFunctionStatement
 
 
 ##################################################################
-# Functions - UDFs, Aggregate Windowed functions
+# Functions - Functions, Aggregate Windowed functions
 ##################################################################
 class Functions:
-    def udf_function(self, tree):
-        udf_name = None
-        udf_output = None
-        udf_args = None
+    def function(self, tree):
+        function_name = None
+        function_output = None
+        function_args = None
 
         for child in tree.children:
             if isinstance(child, Token):
                 if child.value == "*":
-                    udf_args = [TupleValueExpression(name="*")]
+                    function_args = [TupleValueExpression(name="*")]
             if isinstance(child, Tree):
                 if child.data == "simple_id":
-                    udf_name = self.visit(child)
+                    function_name = self.visit(child)
                 elif child.data == "dotted_id":
-                    udf_output = self.visit(child)
+                    function_output = self.visit(child)
                 elif child.data == "function_args":
-                    udf_args = self.visit(child)
+                    function_args = self.visit(child)
 
-        func_expr = FunctionExpression(None, name=udf_name, output=udf_output)
-        for arg in udf_args:
+        func_expr = FunctionExpression(None, name=function_name, output=function_output)
+        for arg in function_args:
             func_expr.append_child(arg)
 
         return func_expr
@@ -57,41 +57,41 @@ class Functions:
                 args.append(self.visit(child))
         return args
 
-    # Create UDF
-    def create_udf(self, tree):
-        udf_name = None
+    # Create function
+    def create_function(self, tree):
+        function_name = None
         if_not_exists = False
         input_definitions = []
         output_definitions = []
         impl_path = None
-        udf_type = None
+        function_type = None
         query = None
         metadata = []
 
         create_definitions_index = 0
         for child in tree.children:
             if isinstance(child, Tree):
-                if child.data == "udf_name":
-                    udf_name = self.visit(child)
+                if child.data == "function_name":
+                    function_name = self.visit(child)
                 elif child.data == "if_not_exists":
                     if_not_exists = True
                 elif child.data == "create_definitions":
                     # There should be 2 createDefinition
-                    # idx 0 describing udf INPUT
-                    # idx 1 describing udf OUTPUT
+                    # idx 0 describing function INPUT
+                    # idx 1 describing function OUTPUT
                     if create_definitions_index == 0:
                         input_definitions = self.visit(child)
                         create_definitions_index += 1
                     elif create_definitions_index == 1:
                         output_definitions = self.visit(child)
-                elif child.data == "udf_type":
-                    udf_type = self.visit(child)
-                elif child.data == "udf_impl":
+                elif child.data == "function_type":
+                    function_type = self.visit(child)
+                elif child.data == "function_impl":
                     impl_path = self.visit(child).value
                 elif child.data == "simple_select":
                     query = self.visit(child)
-                elif child.data == "udf_metadata":
-                    # Each UDF metadata is a key value pair
+                elif child.data == "function_metadata":
+                    # Each function metadata is a key value pair
                     key_value_pair = self.visit(child)
                     # value can be an integer or string
                     value = key_value_pair[1]
@@ -99,13 +99,13 @@ class Functions:
                         value = value.value
                     metadata.append((key_value_pair[0].value, value)),
 
-        return CreateUDFStatement(
-            udf_name,
+        return CreateFunctionStatement(
+            function_name,
             if_not_exists,
             impl_path,
             input_definitions,
             output_definitions,
-            udf_type,
+            function_type,
             query,
             metadata,
         )

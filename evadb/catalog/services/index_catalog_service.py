@@ -34,10 +34,10 @@ class IndexCatalogService(BaseService):
         save_file_path: str,
         type: VectorStoreType,
         feat_column: ColumnCatalogEntry,
-        udf_signature: str,
+        function_signature: str,
     ) -> IndexCatalogEntry:
         index_entry = IndexCatalog(
-            name, save_file_path, type, feat_column.row_id, udf_signature
+            name, save_file_path, type, feat_column.row_id, function_signature
         )
         index_entry = index_entry.save(self.session)
         return index_entry.as_dataclass()
@@ -56,13 +56,13 @@ class IndexCatalogService(BaseService):
         except NoResultFound:
             return None
 
-    def get_entry_by_column_and_udf_signature(
-        self, column: ColumnCatalogEntry, udf_signature: str
+    def get_entry_by_column_and_function_signature(
+        self, column: ColumnCatalogEntry, function_signature: str
     ):
         try:
             entry = self.query.filter(
                 self.model._feat_column_id == column.row_id,
-                self.model._udf_signature == udf_signature,
+                self.model._function_signature == function_signature,
             ).one()
             return entry.as_dataclass()
         except NoResultFound:

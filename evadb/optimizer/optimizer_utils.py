@@ -20,9 +20,9 @@ if typing.TYPE_CHECKING:
 
 from evadb.catalog.catalog_utils import get_table_primary_columns
 from evadb.catalog.models.column_catalog import ColumnCatalogEntry
-from evadb.catalog.models.udf_io_catalog import UdfIOCatalogEntry
-from evadb.catalog.models.udf_metadata_catalog import UdfMetadataCatalogEntry
-from evadb.constants import CACHEABLE_UDFS, DEFAULT_FUNCTION_EXPRESSION_COST
+from evadb.catalog.models.function_io_catalog import FunctionIOCatalogEntry
+from evadb.catalog.models.function_metadata_catalog import FunctionMetadataCatalogEntry
+from evadb.constants import CACHEABLE_FUNCTIONS, DEFAULT_FUNCTION_EXPRESSION_COST
 from evadb.expression.abstract_expression import AbstractExpression, ExpressionType
 from evadb.expression.expression_utils import (
     conjunction_list_to_expression_tree,
@@ -41,8 +41,8 @@ from evadb.parser.create_statement import ColumnDefinition
 from evadb.utils.kv_cache import DiskKVCache
 
 
-def column_definition_to_udf_io(col_list: List[ColumnDefinition], is_input: bool):
-    """Create the UdfIOCatalogEntry object for each column definition provided
+def column_definition_to_function_io(col_list: List[ColumnDefinition], is_input: bool):
+    """Create the FunctionIOCatalogEntry object for each column definition provided
 
     Arguments:
         col_list(List[ColumnDefinition]): parsed input/output definitions
@@ -53,9 +53,9 @@ def column_definition_to_udf_io(col_list: List[ColumnDefinition], is_input: bool
 
     result_list = []
     for col in col_list:
-        assert col is not None, "Empty column definition while creating udf io"
+        assert col is not None, "Empty column definition while creating function io"
         result_list.append(
-            UdfIOCatalogEntry(
+            FunctionIOCatalogEntry(
                 col.name,
                 col.type,
                 col.cci.nullable,
@@ -67,8 +67,8 @@ def column_definition_to_udf_io(col_list: List[ColumnDefinition], is_input: bool
     return result_list
 
 
-def metadata_definition_to_udf_metadata(metadata_list: List[Tuple[str, str]]):
-    """Create the UdfMetadataCatalogEntry object for each metadata definition provided
+def metadata_definition_to_function_metadata(metadata_list: List[Tuple[str, str]]):
+    """Create the FunctionMetadataCatalogEntry object for each metadata definition provided
 
     Arguments:
         col_list(List[Tuple[str, str]]): parsed metadata definitions
@@ -76,7 +76,7 @@ def metadata_definition_to_udf_metadata(metadata_list: List[Tuple[str, str]]):
     result_list = []
     for metadata in metadata_list:
         result_list.append(
-            UdfMetadataCatalogEntry(
+            FunctionMetadataCatalogEntry(
                 metadata[0],
                 metadata[1],
             )
@@ -238,9 +238,9 @@ def enable_cache_init(
 
     catalog = context.db.catalog()
     name = func_expr.signature()
-    cache_entry = catalog.get_udf_cache_catalog_entry_by_name(name)
+    cache_entry = catalog.get_function_cache_catalog_entry_by_name(name)
     if not cache_entry:
-        cache_entry = catalog.insert_udf_cache_catalog_entry(func_expr)
+        cache_entry = catalog.insert_function_cache_catalog_entry(func_expr)
 
     cache = FunctionExpressionCache(
         key=tuple(optimized_key), store=DiskKVCache(cache_entry.cache_path)
@@ -281,7 +281,7 @@ def enable_cache_on_expression_tree(
 
 def check_expr_validity_for_cache(expr: FunctionExpression):
     return (
-        expr.name in CACHEABLE_UDFS
+        expr.name in CACHEABLE_FUNCTIONS
         and not expr.has_cache()
         and len(expr.children) <= 1
         and isinstance(expr.children[0], TupleValueExpression)
@@ -309,7 +309,9 @@ def get_expression_execution_cost(
     total_cost = 0
     # iterate over all the function expression and accumulate the cost
     for child_expr in expr.find_all(FunctionExpression):
-        cost_entry = context.db.catalog().get_udf_cost_catalog_entry(child_expr.name)
+        cost_entry = context.db.catalog().get_function_cost_catalog_entry(
+            child_expr.name
+        )
         if cost_entry:
             total_cost += cost_entry.cost
         else:

@@ -16,7 +16,7 @@ import unittest
 from test.util import (
     file_remove,
     get_evadb_for_testing,
-    load_udfs_for_testing,
+    load_functions_for_testing,
     shutdown_ray,
 )
 
@@ -32,7 +32,7 @@ class DeleteExecutorTest(unittest.TestCase):
     def setUp(self):
         self.evadb = get_evadb_for_testing()
         self.evadb.catalog().reset()
-        load_udfs_for_testing(self.evadb, mode="debug")
+        load_functions_for_testing(self.evadb, mode="debug")
 
         create_table_query = """
                 CREATE TABLE IF NOT EXISTS testDeleteOne

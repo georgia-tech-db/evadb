@@ -196,7 +196,7 @@ SELECT ChatGPT('Is this video summary related to Ukraine russia war', text)
 * Train an ML model using the <a href="https://ludwig.ai/latest/">Ludwig AI</a> engine to predict a column in a table.
 
 ```sql
-CREATE UDF IF NOT EXISTS PredictHouseRent FROM
+CREATE FUNCTION IF NOT EXISTS PredictHouseRent FROM
 ( SELECT * FROM HomeRentals )
 TYPE Ludwig
 'predict' 'rental_price'
