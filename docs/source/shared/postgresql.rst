@@ -25,7 +25,7 @@ EvaDB lets you connect to your favorite databases, data warehouses, data lakes, 
 
     .. tab-item:: SQL 
 
-        .. code-block:: sql
+        .. code-block:: text
 
             CREATE DATABASE postgres_data 
             WITH ENGINE = 'postgres', 

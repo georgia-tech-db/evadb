@@ -51,7 +51,7 @@ To create custom ``TextSummarizer`` and ``TextClassifier`` functions, use the ``
 
 .. note::
     
-    EvaDB has built-in support for a wide range of `HuggingFace <../reference/ai/hf.html>`_ models.
+    EvaDB has built-in support for a wide range of :ref:`HuggingFace<hf>` models.
 
 AI Query Using Registered Functions
 -----------------------------------
