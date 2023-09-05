@@ -271,7 +271,7 @@ def try_to_import_ray():
 
 def try_to_import_forecast():
     try:
-        from statsforecast import StatsForecast
+        from statsforecast import StatsForecast  # noqa: F401
     except ImportError:
         raise ValueError(
             """Could not import StatsForecast python package.
