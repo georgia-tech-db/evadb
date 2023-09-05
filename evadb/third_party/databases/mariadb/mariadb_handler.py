@@ -28,7 +28,10 @@ class MariaDbHandler(DBHandler):
     """
     def __init__(self, name: str, **kwargs):
         """
-        Init method for the class.
+        Initialize the handler.
+        Args:
+            name (str): name of the DB handler instance
+            **kwargs: arbitrary keyword arguments for establishing the connection.
         """
         super().__init__(name)
         self.host = kwargs.get("host")
@@ -40,6 +43,8 @@ class MariaDbHandler(DBHandler):
     def connect(self):
         """
         Establish connection to the database.
+        Returns:
+          DBHandlerStatus
         """
         try:
             self.connection = mariadb.connect(
@@ -65,6 +70,8 @@ class MariaDbHandler(DBHandler):
     def check_connection(self) -> DBHandlerStatus:
         """
         Method for checking the status of database connection.
+        Returns:
+          DBHandlerStatus
         """
         if self.connection:
             return DBHandlerStatus(status=True)
@@ -74,6 +81,8 @@ class MariaDbHandler(DBHandler):
     def get_tables(self) -> DBHandlerResponse:
         """
         Method to get the list of tables from database.
+        Returns:
+          DBHandlerStatus
         """
         if not self.connection:
             return DBHandlerResponse(data=None, error="Not connected to the database.")
@@ -88,6 +97,10 @@ class MariaDbHandler(DBHandler):
     def get_columns(self, table_name: str) -> DBHandlerResponse:
         """
         Method to retrieve the column of the specified table from the database.
+        Args:
+          table_name (str): name of the table whose columns are to be retrieved.
+        Returns:
+          DBHandlerStatus
         """
         if not self.connection:
             return DBHandlerResponse(data=None, error="Not connected to the database.")
@@ -114,6 +127,13 @@ class MariaDbHandler(DBHandler):
             raise e
 
     def execute_native_query(self, query_string: str) -> DBHandlerResponse:
+        """
+        Executes the native query on the database.
+        Args:
+            query_string (str): query in native format
+        Returns:
+            DBHandlerResponse
+        """
         if not self.connection:
             return DBHandlerResponse(data=None, error="Not connected to the database.")
 
