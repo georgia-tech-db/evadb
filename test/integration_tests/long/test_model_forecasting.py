@@ -54,7 +54,7 @@ class ModelTrainTests(unittest.TestCase):
             CREATE UDF Forecast FROM
             (SELECT unique_id, ds, y FROM AirData)
             TYPE Forecasting
-            'predict' 'y';
+            PREDICT 'y';
         """
         execute_query_fetch_all(self.evadb, create_predict_udf)
 
