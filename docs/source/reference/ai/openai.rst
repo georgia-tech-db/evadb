@@ -1,3 +1,5 @@
+.. _openai:
+
 OpenAI Models
 =====================
 
