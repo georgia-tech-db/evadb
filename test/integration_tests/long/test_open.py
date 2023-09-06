@@ -17,7 +17,7 @@ from test.util import (
     create_sample_image,
     file_remove,
     get_evadb_for_testing,
-    load_udfs_for_testing,
+    load_functions_for_testing,
     shutdown_ray,
 )
 
@@ -35,8 +35,8 @@ class OpenTests(unittest.TestCase):
     def setUp(self):
         self.evadb = get_evadb_for_testing()
         self.evadb.catalog().reset()
-        # Load built-in UDFs.
-        load_udfs_for_testing(self.evadb, mode="debug")
+        # Load built-in Functions.
+        load_functions_for_testing(self.evadb, mode="debug")
 
         # Insert image path.
         self.img_path = create_sample_image()

@@ -29,20 +29,20 @@ class CreateIndexStatement(AbstractStatement):
         table_ref: TableRef,
         col_list: List[ColumnDefinition],
         vector_store_type: VectorStoreType,
-        udf_func: FunctionExpression = None,
+        function: FunctionExpression = None,
     ):
         super().__init__(StatementType.CREATE_INDEX)
         self._name = name
         self._table_ref = table_ref
         self._col_list = col_list
         self._vector_store_type = vector_store_type
-        self._udf_func = udf_func
+        self._function = function
 
     def __str__(self) -> str:
         print_str = "CREATE INDEX {} ON {} ({}{}) ".format(
             self._name,
             self._table_ref,
-            "" if self._udf_func else self._udf_func,
+            "" if self._function else self._function,
             tuple(self._col_list),
         )
         return print_str
@@ -64,8 +64,8 @@ class CreateIndexStatement(AbstractStatement):
         return self._vector_store_type
 
     @property
-    def udf_func(self):
-        return self._udf_func
+    def function(self):
+        return self._function
 
     def __eq__(self, other):
         if not isinstance(other, CreateIndexStatement):
@@ -75,7 +75,7 @@ class CreateIndexStatement(AbstractStatement):
             and self._table_ref == other.table_ref
             and self.col_list == other.col_list
             and self._vector_store_type == other.vector_store_type
-            and self._udf_func == other.udf_func
+            and self._function == other.function
         )
 
     def __hash__(self) -> int:
@@ -86,6 +86,6 @@ class CreateIndexStatement(AbstractStatement):
                 self._table_ref,
                 tuple(self.col_list),
                 self._vector_store_type,
-                self._udf_func,
+                self._function,
             )
         )

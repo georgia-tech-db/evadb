@@ -19,8 +19,8 @@ from evadb.executor.abstract_executor import AbstractExecutor
 from evadb.executor.apply_and_merge_executor import ApplyAndMergeExecutor
 from evadb.executor.create_database_executor import CreateDatabaseExecutor
 from evadb.executor.create_executor import CreateExecutor
+from evadb.executor.create_function_executor import CreateFunctionExecutor
 from evadb.executor.create_index_executor import CreateIndexExecutor
-from evadb.executor.create_udf_executor import CreateUDFExecutor
 from evadb.executor.delete_executor import DeleteExecutor
 from evadb.executor.drop_object_executor import DropObjectExecutor
 from evadb.executor.exchange_executor import ExchangeExecutor
@@ -110,8 +110,8 @@ class PlanExecutor:
             executor_node = DropObjectExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.INSERT:
             executor_node = InsertExecutor(db=self._db, node=plan)
-        elif plan_opr_type == PlanOprType.CREATE_UDF:
-            executor_node = CreateUDFExecutor(db=self._db, node=plan)
+        elif plan_opr_type == PlanOprType.CREATE_FUNCTION:
+            executor_node = CreateFunctionExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.LOAD_DATA:
             executor_node = LoadDataExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.GROUP_BY:

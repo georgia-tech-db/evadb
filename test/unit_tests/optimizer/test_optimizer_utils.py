@@ -15,17 +15,17 @@
 import unittest
 
 from evadb.catalog.catalog_type import ColumnType, NdArrayType
-from evadb.optimizer.optimizer_utils import column_definition_to_udf_io
+from evadb.optimizer.optimizer_utils import column_definition_to_function_io
 from evadb.parser.create_statement import ColumnDefinition
 
 
 class OptimizerUtilsTest(unittest.TestCase):
-    def test_column_definition_to_udf_io(self):
+    def test_column_definition_to_function_io(self):
         col = ColumnDefinition(
             "data", ColumnType.NDARRAY, NdArrayType.UINT8, (None, None, None)
         )
         col_list = [col, col]
-        actual = column_definition_to_udf_io(col_list, True)
+        actual = column_definition_to_function_io(col_list, True)
         for io in actual:
             self.assertEqual(io.name, "data")
             self.assertEqual(io.type, ColumnType.NDARRAY)
@@ -33,10 +33,10 @@ class OptimizerUtilsTest(unittest.TestCase):
             self.assertEqual(io.array_type, NdArrayType.UINT8)
             self.assertEqual(io.array_dimensions, (None, None, None))
             self.assertEqual(io.is_input, True)
-            self.assertEqual(io.udf_id, None)
+            self.assertEqual(io.function_id, None)
 
         # input not list
-        actual2 = column_definition_to_udf_io(col, True)
+        actual2 = column_definition_to_function_io(col, True)
         for io in actual2:
             self.assertEqual(io.name, "data")
             self.assertEqual(io.type, ColumnType.NDARRAY)
@@ -44,4 +44,4 @@ class OptimizerUtilsTest(unittest.TestCase):
             self.assertEqual(io.array_type, NdArrayType.UINT8)
             self.assertEqual(io.array_dimensions, (None, None, None))
             self.assertEqual(io.is_input, True)
-            self.assertEqual(io.udf_id, None)
+            self.assertEqual(io.function_id, None)

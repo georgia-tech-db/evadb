@@ -27,8 +27,8 @@ class ShowInfoPlan(AbstractPlan):
         return self._show_type
 
     def __str__(self):
-        if self._show_type == ShowType.UDFS:
-            return "ShowUDFPlan"
+        if self._show_type == ShowType.FUNCTIONS:
+            return "ShowFunctionPlan"
         else:
             return "ShowTablePlan"
 

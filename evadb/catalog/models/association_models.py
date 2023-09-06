@@ -16,21 +16,21 @@ from sqlalchemy import Column, ForeignKey, Table, UniqueConstraint
 
 from evadb.catalog.models.base_model import BaseModel
 
-# dependency table to maintain a many-to-many relationship between udf_catalog and udf_cache_catalog. This is important to ensure that any changes to udf are propagated to udf_cache. For example, deletion of a udf should also clear the associated caches.
+# dependency table to maintain a many-to-many relationship between function_catalog and function_cache_catalog. This is important to ensure that any changes to function are propagated to function_cache. For example, deletion of a function should also clear the associated caches.
 
-depend_udf_and_udf_cache = Table(
-    "depend_udf_and_udf_cache",
+depend_function_and_function_cache = Table(
+    "depend_function_and_function_cache",
     BaseModel.metadata,
-    Column("_udf_id", ForeignKey("udf_catalog._row_id")),
-    Column("_udf_cache_id", ForeignKey("udf_cache._row_id")),
-    UniqueConstraint("_udf_id", "_udf_cache_id"),
+    Column("_function_id", ForeignKey("function_catalog._row_id")),
+    Column("_function_cache_id", ForeignKey("function_cache._row_id")),
+    UniqueConstraint("_function_id", "_function_cache_id"),
 )
 
 
-depend_column_and_udf_cache = Table(
-    "depend_column_and_udf_cache",
+depend_column_and_function_cache = Table(
+    "depend_column_and_function_cache",
     BaseModel.metadata,
     Column("_col_id", ForeignKey("column_catalog._row_id")),
-    Column("_udf_cache_id", ForeignKey("udf_cache._row_id")),
-    UniqueConstraint("_col_id", "_udf_cache_id"),
+    Column("_function_cache_id", ForeignKey("function_cache._row_id")),
+    UniqueConstraint("_col_id", "_function_cache_id"),
 )
