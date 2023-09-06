@@ -19,17 +19,17 @@ import pickle
 import pandas as pd
 
 from evadb.catalog.catalog_type import NdArrayType
-from evadb.udfs.abstract.abstract_udf import AbstractUDF
-from evadb.udfs.decorators.decorators import forward, setup
-from evadb.udfs.decorators.io_descriptors.data_types import PandasDataframe
+from evadb.functions.abstract.abstract_function import AbstractFunction
+from evadb.functions.decorators.decorators import forward, setup
+from evadb.functions.decorators.io_descriptors.data_types import PandasDataframe
 
 
-class ForecastModel(AbstractUDF):
+class ForecastModel(AbstractFunction):
     @property
     def name(self) -> str:
         return "ForecastModel"
 
-    @setup(cacheable=False, udf_type="Forecasting", batchable=True)
+    @setup(cacheable=False, function_type="Forecasting", batchable=True)
     def setup(self, model_name: str, model_path: str):
         f = open(model_path, "rb")
         loaded_model = pickle.load(f)
