@@ -4,8 +4,8 @@ start: (sql_statement? ";")+
 
 sql_statement: ddl_statement | dml_statement | utility_statement | context_statement
         
-ddl_statement: create_database | create_table | create_index | create_udf
-    | drop_database | drop_table | drop_udf | drop_index | rename_table
+ddl_statement: create_database | create_table | create_index | create_function
+    | drop_database | drop_table | drop_function | drop_index | rename_table
     
 dml_statement: select_statement | insert_statement | update_statement
     | delete_statement | load_statement
@@ -34,24 +34,24 @@ create_table: CREATE TABLE if_not_exists? table_name (create_definitions | (AS s
 
 rename_table: RENAME TABLE table_name TO table_name
     
-// Create UDFs
-create_udf: CREATE UDF if_not_exists? udf_name INPUT create_definitions OUTPUT create_definitions TYPE udf_type IMPL udf_impl udf_metadata*
-	| CREATE UDF if_not_exists? udf_name IMPL udf_impl udf_metadata* 
-	| CREATE UDF if_not_exists? udf_name TYPE udf_type udf_metadata*
-	| CREATE UDF if_not_exists? udf_name FROM LR_BRACKET select_statement RR_BRACKET TYPE udf_type udf_metadata*
+// Create Functions 
+create_function: CREATE FUNCTION if_not_exists? function_name INPUT create_definitions OUTPUT create_definitions TYPE function_type IMPL function_impl function_metadata*
+	| CREATE FUNCTION if_not_exists? function_name IMPL function_impl function_metadata* 
+	| CREATE FUNCTION if_not_exists? function_name TYPE function_type function_metadata*
+	| CREATE FUNCTION if_not_exists? function_name FROM LR_BRACKET select_statement RR_BRACKET TYPE function_type function_metadata*
 
 // Details
-udf_name: uid
+function_name: uid
 
-udf_type: uid
+function_type: uid
 
-udf_impl: string_literal
+function_impl: string_literal
 
-udf_metadata: udf_metadata_key udf_metadata_value
+function_metadata: function_metadata_key function_metadata_value
 
-udf_metadata_key: string_literal
+function_metadata_key: uid
 
-udf_metadata_value: string_literal | decimal_literal
+function_metadata_value: string_literal | decimal_literal
 
 vector_store_type: USING (FAISS | QDRANT)
 
@@ -77,7 +77,7 @@ drop_index: DROP INDEX if_exists? uid
     
 drop_table: DROP TABLE if_exists? uid
     
-drop_udf: DROP UDF if_exists? uid
+drop_function: DROP FUNCTION if_exists? uid
     
 
 // Data Manipulation Language
@@ -171,7 +171,7 @@ describe_statement: DESCRIBE table_name
     
 help_statement: HELP STRING_LITERAL
     
-show_statement: SHOW (UDFS | TABLES)
+show_statement: SHOW (FUNCTIONS | TABLES)
 
 explain_statement: EXPLAIN explainable_statement
 
@@ -267,10 +267,10 @@ if_not_exists: IF NOT EXISTS
 
 //    Functions
 
-function_call: udf_function         ->udf_function_call           
+function_call: function         ->function_call           
     | aggregate_windowed_function   ->aggregate_function_call
 
-udf_function: simple_id "(" (STAR | function_args) ")" dotted_id?
+function: simple_id "(" (STAR | function_args) ")" dotted_id?
     
 aggregate_windowed_function: aggregate_function_name "(" function_arg ")"
                            | COUNT "(" (STAR | function_arg) ")"
@@ -386,7 +386,7 @@ TABLE:                               "TABLE"i
 TABLES:                              "TABLES"i
 TO:                                  "TO"i
 TRUE:                                "TRUE"i
-UDFS:                                "UDFS"i
+FUNCTIONS:                           "FUNCTIONS"i
 UNION:                               "UNION"i
 UNIQUE:                              "UNIQUE"i
 UNKNOWN:                             "UNKNOWN"i
@@ -459,8 +459,8 @@ HELP:                                "HELP"i
 TEMPTABLE:                           "TEMPTABLE"i
 VALUE:                               "VALUE"i
 
-// UDF
-UDF:						         "UDF"i
+// Function
+FUNCTION:						     "FUNCTION"i
 INPUT:                               "INPUT"i
 OUTPUT:                              "OUTPUT"i
 TYPE:                                "TYPE"i

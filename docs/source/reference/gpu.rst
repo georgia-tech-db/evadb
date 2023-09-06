@@ -1,5 +1,7 @@
+:orphan:
+
 Configure GPU 
------
+-------------
 
 1. Queries in EvaDB use deep learning models that run much faster on a GPU as opposed to a CPU. If your workstation has a GPU, you can configure EvaDB to use the GPU during query execution. Use  the following command to check your hardware capabilities:
 

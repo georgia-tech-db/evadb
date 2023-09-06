@@ -19,19 +19,20 @@ import pandas
 from evadb.configuration.constants import EvaDB_DATABASE_DIR
 from evadb.database import EvaDBDatabase, init_evadb_instance
 from evadb.expression.tuple_value_expression import TupleValueExpression
+from evadb.functions.function_bootstrap_queries import init_builtin_functions
 from evadb.interfaces.relational.relation import EvaDBQuery
-from evadb.interfaces.relational.utils import execute_statement, try_binding
+from evadb.interfaces.relational.utils import try_binding
 from evadb.models.server.response import Response
 from evadb.models.storage.batch import Batch
 from evadb.parser.alias import Alias
 from evadb.parser.select_statement import SelectStatement
 from evadb.parser.utils import (
+    parse_create_function,
     parse_create_table,
-    parse_create_udf,
     parse_create_vector_index,
+    parse_drop_function,
     parse_drop_index,
     parse_drop_table,
-    parse_drop_udf,
     parse_explain,
     parse_insert,
     parse_load,
@@ -40,7 +41,7 @@ from evadb.parser.utils import (
     parse_show,
     parse_table_clause,
 )
-from evadb.udfs.udf_bootstrap_queries import init_builtin_udfs
+from evadb.server.command_handler import execute_statement
 from evadb.utils.generic_utils import find_nearest_word, is_ray_enabled_and_installed
 from evadb.utils.logging_manager import logger
 
@@ -320,25 +321,25 @@ class EvaDBCursor(object):
         stmt = parse_drop_table(table_name, if_exists)
         return EvaDBQuery(self._evadb, stmt)
 
-    def drop_function(self, udf_name: str, if_exists: bool = True) -> "EvaDBQuery":
+    def drop_function(self, function_name: str, if_exists: bool = True) -> "EvaDBQuery":
         """
-        Drop a udf in the database.
+        Drop a function in the database.
 
         Args:
-            udf_name (str): Name of the udf to be dropped.
-            if_exists (bool): If True, do not raise an error if the UDF does not already exist. If False, raise an error.
+            function_name (str): Name of the function to be dropped.
+            if_exists (bool): If True, do not raise an error if the function does not already exist. If False, raise an error.
 
         Returns:
-            EvaDBQuery: The EvaDBQuery object representing the DROP UDF.
+            EvaDBQuery: The EvaDBQuery object representing the DROP FUNCTION.
 
         Examples:
-            Drop UDF 'ObjectDetector'
+            Drop FUNCTION 'ObjectDetector'
 
             >>> cursor.drop_function("ObjectDetector", if_exists = True)
                 0
-            0	UDF Successfully dropped: ObjectDetector
+            0	Function Successfully dropped: ObjectDetector
         """
-        stmt = parse_drop_udf(udf_name, if_exists)
+        stmt = parse_drop_function(function_name, if_exists)
         return EvaDBQuery(self._evadb, stmt)
 
     def drop_index(self, index_name: str, if_exists: bool = True) -> "EvaDBQuery":
@@ -362,48 +363,50 @@ class EvaDBCursor(object):
 
     def create_function(
         self,
-        udf_name: str,
+        function_name: str,
         if_not_exists: bool = True,
         impl_path: str = None,
         type: str = None,
         **kwargs,
     ) -> "EvaDBQuery":
         """
-        Create a udf in the database.
+        Create a function in the database.
 
         Args:
-            udf_name (str): Name of the udf to be created.
-            if_not_exists (bool): If True, do not raise an error if the UDF already exist. If False, raise an error.
-            impl_path (str): Path string to udf's implementation.
-            type (str): Type of the udf (e.g. HuggingFace).
-            **kwargs: Additional keyword arguments for configuring the create udf operation.
+            function_name (str): Name of the function to be created.
+            if_not_exists (bool): If True, do not raise an error if the function already exist. If False, raise an error.
+            impl_path (str): Path string to function's implementation.
+            type (str): Type of the function (e.g. HuggingFace).
+            **kwargs: Additional keyword arguments for configuring the create function operation.
 
         Returns:
-            EvaDBQuery: The EvaDBQuery object representing the UDF created.
+            EvaDBQuery: The EvaDBQuery object representing the function created.
 
         Examples:
             >>> cursor.create_function("MnistImageClassifier", if_exists = True, 'mnist_image_classifier.py')
                 0
-            0	UDF Successfully created: MnistImageClassifier
+            0	Function Successfully created: MnistImageClassifier
         """
-        stmt = parse_create_udf(udf_name, if_not_exists, impl_path, type, **kwargs)
+        stmt = parse_create_function(
+            function_name, if_not_exists, impl_path, type, **kwargs
+        )
         return EvaDBQuery(self._evadb, stmt)
 
     def create_table(
         self, table_name: str, if_not_exists: bool = True, columns: str = None, **kwargs
     ) -> "EvaDBQuery":
         """
-        Create a udf in the database.
+        Create a function in the database.
 
         Args:
-            udf_name (str): Name of the udf to be created.
-            if_not_exists (bool): If True, do not raise an error if the UDF already exist. If False, raise an error.
-            impl_path (str): Path string to udf's implementation.
-            type (str): Type of the udf (e.g. HuggingFace).
-            **kwargs: Additional keyword arguments for configuring the create udf operation.
+            function_name (str): Name of the function to be created.
+            if_not_exists (bool): If True, do not raise an error if the function already exist. If False, raise an error.
+            impl_path (str): Path string to function's implementation.
+            type (str): Type of the function (e.g. HuggingFace).
+            **kwargs: Additional keyword arguments for configuring the create function operation.
 
         Returns:
-            EvaDBQuery: The EvaDBQuery object representing the UDF created.
+            EvaDBQuery: The EvaDBQuery object representing the function created.
 
         Examples:
             >>> cursor.create_table("MyCSV", if_exists = True, columns=\"\"\"
@@ -432,7 +435,7 @@ class EvaDBCursor(object):
             EvaDBQuery: The EvaDBQuery object.
 
         Examples:
-            >>> cursor.query("DROP UDF IF EXISTS SentenceFeatureExtractor;")
+            >>> cursor.query("DROP FUNCTION IF EXISTS SentenceFeatureExtractor;")
             >>> cursor.query('SELECT * FROM sample_table;').df()
                col1  col2
             0     1     2
@@ -578,7 +581,7 @@ def connect(
     # host and port parameters are irrelevant. Additionally, for the EvaDBConnection, the
     # reader and writer parameters are not relevant in the serverless approach.
     evadb = init_evadb_instance(evadb_dir, custom_db_uri=sql_backend)
-    init_builtin_udfs(evadb, mode="release")
+    init_builtin_functions(evadb, mode="release")
     return EvaDBConnection(evadb, None, None)
 
 

@@ -23,8 +23,8 @@ from evadb.catalog.models.column_catalog import ColumnCatalogEntry
 from evadb.parser.table_ref import TableInfo, TableRef
 from evadb.parser.types import FileFormatType, ObjectType
 from evadb.plan_nodes.abstract_plan import AbstractPlan
+from evadb.plan_nodes.create_function_plan import CreateFunctionPlan
 from evadb.plan_nodes.create_plan import CreatePlan
-from evadb.plan_nodes.create_udf_plan import CreateUDFPlan
 from evadb.plan_nodes.drop_object_plan import DropObjectPlan
 from evadb.plan_nodes.insert_plan import InsertPlan
 from evadb.plan_nodes.load_data_plan import LoadDataPlan
@@ -70,27 +70,29 @@ class PlanNodeTests(unittest.TestCase):
         dummy_plan_node = InsertPlan(video_id, column_ids, values)
         self.assertEqual(dummy_plan_node.opr_type, PlanOprType.INSERT)
 
-    def test_create_udf_plan(self):
-        udf_name = "udf"
+    def test_create_function_plan(self):
+        function_name = "function"
         if_not_exists = True
-        udfIO = "udfIO"
-        inputs = [udfIO, udfIO]
-        outputs = [udfIO]
+        functionIO = "functionIO"
+        inputs = [functionIO, functionIO]
+        outputs = [functionIO]
         impl_path = "test"
         ty = "classification"
-        node = CreateUDFPlan(udf_name, if_not_exists, inputs, outputs, impl_path, ty)
-        self.assertEqual(node.opr_type, PlanOprType.CREATE_UDF)
+        node = CreateFunctionPlan(
+            function_name, if_not_exists, inputs, outputs, impl_path, ty
+        )
+        self.assertEqual(node.opr_type, PlanOprType.CREATE_FUNCTION)
         self.assertEqual(node.if_not_exists, True)
-        self.assertEqual(node.inputs, [udfIO, udfIO])
-        self.assertEqual(node.outputs, [udfIO])
+        self.assertEqual(node.inputs, [functionIO, functionIO])
+        self.assertEqual(node.outputs, [functionIO])
         self.assertEqual(node.impl_path, impl_path)
-        self.assertEqual(node.udf_type, ty)
+        self.assertEqual(node.function_type, ty)
 
     def test_drop_object_plan(self):
         object_type = ObjectType.TABLE
-        udf_name = "udf"
+        function_name = "function"
         if_exists = True
-        node = DropObjectPlan(object_type, udf_name, if_exists)
+        node = DropObjectPlan(object_type, function_name, if_exists)
         self.assertEqual(node.opr_type, PlanOprType.DROP_OBJECT)
         self.assertEqual(node.if_exists, True)
         self.assertEqual(node.object_type, ObjectType.TABLE)

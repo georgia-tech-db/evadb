@@ -1,54 +1,61 @@
-Image Classification Pipeline using EvaDB
-====
+.. _image-classification:
 
-Assume the database has loaded a video ``mnist_video``.
+Image Classification
+====================
 
-1. Connect to EvaDB
-----
+.. raw:: html
 
-.. code-block:: python
+    <embed>
+    <table align="left">
+    <td>
+        <a target="_blank" href="https://colab.research.google.com/github/georgia-tech-db/eva/blob/staging/tutorials/01-mnist.ipynb"><img src="https://www.tensorflow.org/images/colab_logo_32px.png" /> Run on Google Colab</a>
+    </td>
+    <td>
+        <a target="_blank" href="https://github.com/georgia-tech-db/eva/blob/staging/tutorials/01-mnist.ipynb"><img src="https://www.tensorflow.org/images/GitHub-Mark-32px.png" /> View source on GitHub</a>
+    </td>
+    <td>
+        <a target="_blank" href="https://github.com/georgia-tech-db/eva/raw/staging/tutorials/01-mnist.ipynb"><img src="https://www.tensorflow.org/images/download_logo_32px.png" /> Download notebook</a>
+    </td>
+    </table><br><br>
+    </embed>
 
-    import evadb
-    cursor = evadb.connect().cursor()
+Introduction
+------------
 
-2. Register Image Classification Model as a Function in SQL
-----
+In this tutorial, we present how to use ``PyTorch`` models in EvaDB to classify images. In particular, we focus on classifying images from the ``MNIST`` dataset that contains ``digits``. EvaDB makes it easy to do image classification using its built-in support for ``PyTorch`` models.
 
-Create an image classification function from python source code.
+In this tutorial, besides classifying images, we will also showcase a query where the model's output is used to retrieve images with the digit ``6``.
 
-.. code-block:: python
+.. include:: ../shared/evadb.rst
 
-    query = cursor.query("""
-        CREATE UDF IF NOT EXISTS MnistImageClassifier 
-        IMPL 'evadb/udfs/mnist_image_classifier.py';
-    """).execute()
+We will assume that the input ``MNIST`` video is loaded into ``EvaDB``. To download the video and load it into ``EvaDB``, see the complete `image classification notebook on Colab <https://colab.research.google.com/github/georgia-tech-db/eva/blob/master/tutorials/01-mnist.ipynb>`_.
 
-3. Execute Image Classification through SQL
-----
+Create Image Classification Function
+------------------------------------
 
-After the function is registered to EvaDB system, it can be directly called and used in SQL query.
+To create a custom ``MnistImageClassifier`` function, use the ``CREATE FUNCTION`` statement. The code for the custom classification model is available `here <https://github.com/georgia-tech-db/evadb/blob/master/evadb/udfs/mnist_image_classifier.py>`_.
 
-.. tab-set::
-    
-    .. tab-item:: Python
+We will assume that the file is downloaded and stored as ``mnist_image_classifier.py``. Now, run the following query to register the AI function:
 
-        .. code-block:: python
+.. code-block:: sql
 
-            query = cursor.table("mnist_video").select("MnistImageClassifier(data).label")
-            
-            # Get results in a DataFrame.
-            query.df()
+        CREATE FUNCTION 
+        IF NOT EXISTS MnistImageClassifier 
+        IMPL 'mnist_image_classifier.py';
 
+Image Classification Queries
+----------------------------
 
-    .. tab-item:: SQL 
+After the function is registered in ``EvaDB``, you can use it subsequent SQL queries in different ways. 
 
-        .. code-block:: sql
+In the following query, we call the classifier on every image in the video. The output of the function is stored in the ``label`` column (i.e., the digit associated with the given frame) of the output ``DataFrame``.
 
-            SELECT MnistImageClassifier(data).label FROM mnist_video;
+.. code-block:: sql
 
-    
+    SELECT MnistImageClassifier(data).label 
+    FROM mnist_video;
 
-The result contains a projected ``label`` column, which indicates the digit of a particular frame.
+This query returns the label of all the images:
 
 .. code-block:: 
 
@@ -57,42 +64,27 @@ The result contains a projected ``label`` column, which indicates the digit of a
     |------------------------------|
     |                            6 |
     |                            6 |
-    |                            6 |
-    |                            6 |
-    |                            6 |
-    |                            6 |
+    |                          ... |
+    |                          ... |
+    |                          ... |
+    |                          ... |
     |                            4 |
     |                            4 |
-
-    ... ...
-
-4. Optional: Process Only Segments of Videos based on Conditions
-----
-
-Like normal SQL, you can also specify conditions to filter out some frames of the video.
-
-.. tab-set::
-    
-    .. tab-item:: Python
-
-        .. code-block:: python
-
-            query = cursor.table("mnist_video") \
-                        .filter("id < 2") \
-                        .select("MnistImageClassifier(data).label")
-            
-            # Return results in a DataFrame.
-            query.df()
-
-    .. tab-item:: SQL
-
-        .. code-block:: sql
-
-            SELECT MnistImageClassifier(data).label FROM mnist_video 
-                WHERE id < 2
+    +------------------------------+
 
 
-Now, the ``DataFrame`` only contains 2 rows after filtering.
+Filtering Based on AI Function
+------------------------------
+
+In the following query, we use the output of the classifier to retrieve a subset of images that contain a particular digit (e.g., ``6``).
+
+.. code-block:: sql
+
+    SELECT id, MnistImageClassifier(data).label 
+        FROM mnist_video 
+        WHERE MnistImageClassifier(data).label = '6';
+
+Now, the ``DataFrame`` only contains images of the digit ``6``.
 
 .. code-block:: 
 
@@ -103,4 +95,4 @@ Now, the ``DataFrame`` only contains 2 rows after filtering.
     |                            6 |
     +------------------------------+
 
-Check out our `Jupyter Notebook <https://github.com/georgia-tech-db/evadb/blob/master/tutorials/01-mnist.ipynb>`_ for working example.
+.. include:: ../shared/footer.rst

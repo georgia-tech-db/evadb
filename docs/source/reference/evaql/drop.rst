@@ -2,16 +2,16 @@ DROP
 ====
 
 DROP TABLE
-----
+----------
 
 .. code:: mysql
 
    DROP TABLE DETRACVideo;
 
 
-DROP UDF
-----
+DROP FUNCTION
+-------------
 
 .. code:: mysql
 
-    DROP UDF FastRCNNObjectDetector;
+    DROP FUNCTION FastRCNNObjectDetector;

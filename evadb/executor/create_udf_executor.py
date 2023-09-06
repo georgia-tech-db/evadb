@@ -12,7 +12,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import hashlib
 import os
+import pickle
 from pathlib import Path
 from typing import Dict, List
 
@@ -35,6 +37,7 @@ from evadb.udfs.decorators.utils import load_io_from_udf_decorators
 from evadb.utils.errors import UDFIODefinitionError
 from evadb.utils.generic_utils import (
     load_udf_class_from_file,
+    try_to_import_forecast,
     try_to_import_ludwig,
     try_to_import_torch,
     try_to_import_ultralytics,
@@ -53,7 +56,7 @@ class CreateUDFExecutor(AbstractExecutor):
         HuggingFace UDFs are special UDFs that are not loaded from a file.
         So we do not need to call the setup method on them like we do for other UDFs.
         """
-        # We need atleast one deep learning framework for HuggingFace
+        # We need at least one deep learning framework for HuggingFace
         # Torch or Tensorflow
         try_to_import_torch()
         impl_path = f"{self.udf_dir}/abstract/hf_abstract_udf.py"
@@ -69,7 +72,7 @@ class CreateUDFExecutor(AbstractExecutor):
     def handle_ludwig_udf(self):
         """Handle ludwig UDFs
 
-        Use ludwig's auto_train engine to train/tune models.
+        Use Ludwig's auto_train engine to train/tune models.
         """
         try_to_import_ludwig()
         from ludwig.automl import auto_train
@@ -128,6 +131,119 @@ class CreateUDFExecutor(AbstractExecutor):
             self.node.metadata,
         )
 
+    def handle_forecasting_udf(self):
+        """Handle forecasting UDFs"""
+        aggregated_batch_list = []
+        child = self.children[0]
+        for batch in child.exec():
+            aggregated_batch_list.append(batch)
+        aggregated_batch = Batch.concat(aggregated_batch_list, copy=False)
+        aggregated_batch.drop_column_alias()
+
+        arg_map = {arg.key: arg.value for arg in self.node.metadata}
+        if not self.node.impl_path:
+            impl_path = Path(f"{self.udf_dir}/forecast.py").absolute().as_posix()
+        else:
+            impl_path = self.node.impl_path.absolute().as_posix()
+        arg_map = {arg.key: arg.value for arg in self.node.metadata}
+
+        if "model" not in arg_map.keys():
+            arg_map["model"] = "AutoARIMA"
+        if "frequency" not in arg_map.keys():
+            arg_map["frequency"] = "M"
+
+        model_name = arg_map["model"]
+        frequency = arg_map["frequency"]
+
+        data = aggregated_batch.frames.rename(columns={arg_map["predict"]: "y"})
+        if "time" in arg_map.keys():
+            aggregated_batch.frames.rename(columns={arg_map["time"]: "ds"})
+        if "id" in arg_map.keys():
+            aggregated_batch.frames.rename(columns={arg_map["id"]: "unique_id"})
+
+        if "unique_id" not in list(data.columns):
+            data["unique_id"] = ["test" for x in range(len(data))]
+
+        if "ds" not in list(data.columns):
+            data["ds"] = [x + 1 for x in range(len(data))]
+
+        try_to_import_forecast()
+        from statsforecast import StatsForecast
+        from statsforecast.models import AutoARIMA, AutoCES, AutoETS, AutoTheta
+
+        model_dict = {
+            "AutoARIMA": AutoARIMA,
+            "AutoCES": AutoCES,
+            "AutoETS": AutoETS,
+            "AutoTheta": AutoTheta,
+        }
+
+        season_dict = {  # https://pandas.pydata.org/docs/user_guide/timeseries.html#timeseries-offset-aliases
+            "H": 24,
+            "M": 12,
+            "Q": 4,
+            "SM": 24,
+            "BM": 12,
+            "BMS": 12,
+            "BQ": 4,
+            "BH": 24,
+        }
+
+        new_freq = (
+            frequency.split("-")[0] if "-" in frequency else frequency
+        )  # shortens longer frequencies like Q-DEC
+        season_length = season_dict[new_freq] if new_freq in season_dict else 1
+        model = StatsForecast(
+            [model_dict[model_name](season_length=season_length)], freq=new_freq
+        )
+
+        model_dir = os.path.join(
+            self.db.config.get_value("storage", "model_dir"), self.node.name
+        )
+        Path(model_dir).mkdir(parents=True, exist_ok=True)
+        model_path = os.path.join(
+            self.db.config.get_value("storage", "model_dir"),
+            self.node.name,
+            str(hashlib.sha256(data.to_string().encode()).hexdigest()) + ".pkl",
+        )
+
+        weight_file = Path(model_path)
+
+        if not weight_file.exists():
+            model.fit(data)
+            f = open(model_path, "wb")
+            pickle.dump(model, f)
+            f.close()
+
+        arg_map_here = {"model_name": model_name, "model_path": model_path}
+        udf = self._try_initializing_udf(impl_path, arg_map_here)
+        io_list = self._resolve_udf_io(udf)
+
+        metadata_here = [
+            UdfMetadataCatalogEntry(
+                key="model_name",
+                value=model_name,
+                udf_id=None,
+                udf_name=None,
+                row_id=None,
+            ),
+            UdfMetadataCatalogEntry(
+                key="model_path",
+                value=model_path,
+                udf_id=None,
+                udf_name=None,
+                row_id=None,
+            ),
+        ]
+
+        return (
+            self.node.name,
+            impl_path,
+            self.node.udf_type,
+            io_list,
+            metadata_here,
+        )
+
     def handle_generic_udf(self):
         """Handle generic UDFs
 
@@ -168,6 +284,8 @@ class CreateUDFExecutor(AbstractExecutor):
             name, impl_path, udf_type, io_list, metadata = self.handle_ultralytics_udf()
         elif self.node.udf_type == "Ludwig":
             name, impl_path, udf_type, io_list, metadata = self.handle_ludwig_udf()
+        elif self.node.udf_type == "Forecasting":
+            name, impl_path, udf_type, io_list, metadata = self.handle_forecasting_udf()
         else:
             name, impl_path, udf_type, io_list, metadata = self.handle_generic_udf()
 

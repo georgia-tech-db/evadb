@@ -15,7 +15,7 @@
 from typing import Union
 
 from evadb.catalog.models.column_catalog import ColumnCatalogEntry
-from evadb.catalog.models.udf_io_catalog import UdfIOCatalogEntry
+from evadb.catalog.models.function_io_catalog import FunctionIOCatalogEntry
 from evadb.models.storage.batch import Batch
 
 from .abstract_expression import (
@@ -30,7 +30,7 @@ class TupleValueExpression(AbstractExpression):
         self,
         name: str = None,
         table_alias: str = None,
-        col_object: Union[ColumnCatalogEntry, UdfIOCatalogEntry] = None,
+        col_object: Union[ColumnCatalogEntry, FunctionIOCatalogEntry] = None,
         col_alias=None,
     ):
         super().__init__(ExpressionType.TUPLE_VALUE, rtype=ExpressionReturnType.INVALID)
@@ -52,11 +52,11 @@ class TupleValueExpression(AbstractExpression):
         return self._name
 
     @property
-    def col_object(self) -> Union[ColumnCatalogEntry, UdfIOCatalogEntry]:
+    def col_object(self) -> Union[ColumnCatalogEntry, FunctionIOCatalogEntry]:
         return self._col_object
 
     @col_object.setter
-    def col_object(self, value: Union[ColumnCatalogEntry, UdfIOCatalogEntry]):
+    def col_object(self, value: Union[ColumnCatalogEntry, FunctionIOCatalogEntry]):
         self._col_object = value
 
     @property
@@ -74,22 +74,22 @@ class TupleValueExpression(AbstractExpression):
         """It constructs the signature of the tuple value expression.
         It assumes the col_object attribute is populated by the binder with the catalog
         entries. For a standard column in the table, it returns `table_name.col_name`,
-        and for UDF output columns it returns `udf_name.col_name`
+        and for function output columns it returns `function_name.col_name`
         Raises:
-            ValueError: If the col_object is not a `Union[ColumnCatalogEntry, UdfIOCatalogEntry]`. This can occur if the expression has not been bound using the binder.
+            ValueError: If the col_object is not a `Union[ColumnCatalogEntry, FunctionIOCatalogEntry]`. This can occur if the expression has not been bound using the binder.
         Returns:
             str: signature string
         """
         assert isinstance(self.col_object, ColumnCatalogEntry) or isinstance(
-            self.col_object, UdfIOCatalogEntry
-        ), f"Unsupported type of self.col_object {type(self.col_object)}, expected ColumnCatalogEntry or UdfIOCatalogEntry"
+            self.col_object, FunctionIOCatalogEntry
+        ), f"Unsupported type of self.col_object {type(self.col_object)}, expected ColumnCatalogEntry or FunctionIOCatalogEntry"
 
         col_name = self.col_object.name
         row_id = self.col_object.row_id
         if isinstance(self.col_object, ColumnCatalogEntry):
             return f"{self.col_object.table_name}.{col_name}[{row_id}]"
-        elif isinstance(self.col_object, UdfIOCatalogEntry):
-            return f"{self.col_object.udf_name}.{col_name}[{row_id}]"
+        elif isinstance(self.col_object, FunctionIOCatalogEntry):
+            return f"{self.col_object.function_name}.{col_name}[{row_id}]"
 
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)

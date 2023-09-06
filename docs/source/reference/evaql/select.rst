@@ -1,8 +1,10 @@
+.. _sql-select:
+
 SELECT
 ======
 
 SELECT FRAMES WITH PREDICATES
-----
+-----------------------------
 
 Search for frames with a car
 
@@ -29,8 +31,8 @@ Search for frames containing greater than 3 cars
    WHERE ArrayCount(FastRCNNObjectDetector(data).label, 'car') > 3
    ORDER BY id;
 
-SELECT WITH MULTIPLE UDFS
-----
+SELECT WITH MULTIPLE FUNCTIONS
+------------------------------
 
 Compose multiple user-defined functions in a single query to construct semantically complex queries.
 

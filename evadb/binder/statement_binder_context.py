@@ -21,14 +21,14 @@ from evadb.binder.binder_utils import (
 )
 from evadb.catalog.catalog_type import TableType
 from evadb.catalog.models.column_catalog import ColumnCatalogEntry
+from evadb.catalog.models.function_io_catalog import FunctionIOCatalogEntry
 from evadb.catalog.models.table_catalog import TableCatalogEntry
-from evadb.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 from evadb.expression.function_expression import FunctionExpression
 from evadb.expression.tuple_value_expression import TupleValueExpression
 from evadb.third_party.databases.interface import get_database_handler
 from evadb.utils.logging_manager import logger
 
-CatalogColumnType = Union[ColumnCatalogEntry, UdfIOCatalogEntry]
+CatalogColumnType = Union[ColumnCatalogEntry, FunctionIOCatalogEntry]
 
 
 class StatementBinderContext:
@@ -93,7 +93,7 @@ class StatementBinderContext:
             # Assemble columns.
             column_df = handler.get_columns(table_name).data
             table_obj = create_table_catalog_entry_for_data_source(
-                table_name, list(column_df["column_name"])
+                table_name, column_df
             )
         else:
             table_obj = self._catalog().get_table_catalog_entry(table_name)
@@ -104,14 +104,14 @@ class StatementBinderContext:
         self,
         alias: str,
         target_list: List[
-            Union[TupleValueExpression, FunctionExpression, UdfIOCatalogEntry]
+            Union[TupleValueExpression, FunctionExpression, FunctionIOCatalogEntry]
         ],
     ):
         """
         Add a alias -> derived table column mapping
         Arguments:
             alias (str): name of alias
-            target_list: list of TupleValueExpression or FunctionExpression or UdfIOCatalogEntry
+            target_list: list of TupleValueExpression or FunctionExpression or FunctionIOCatalogEntry
         """
         self._check_duplicate_alias(alias)
         col_alias_map = {}

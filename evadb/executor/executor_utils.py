@@ -45,10 +45,12 @@ def apply_project(
         # persist stats of function expression
         for expr in project_list:
             for func_expr in expr.find_all(FunctionExpression):
-                if func_expr.udf_obj and func_expr._stats:
-                    udf_id = func_expr.udf_obj.row_id
-                    catalog.upsert_udf_cost_catalog_entry(
-                        udf_id, func_expr.udf_obj.name, func_expr._stats.prev_cost
+                if func_expr.function_obj and func_expr._stats:
+                    function_id = func_expr.function_obj.row_id
+                    catalog.upsert_function_cost_catalog_entry(
+                        function_id,
+                        func_expr.function_obj.name,
+                        func_expr._stats.prev_cost,
                     )
     return batch
 
@@ -59,13 +61,14 @@ def apply_predicate(
     if not batch.empty() and predicate is not None:
         outcomes = predicate.evaluate(batch)
         batch.drop_zero(outcomes)
+        batch.reset_index()
 
         # persist stats of function expression
         for func_expr in predicate.find_all(FunctionExpression):
-            if func_expr.udf_obj and func_expr._stats:
-                udf_id = func_expr.udf_obj.row_id
-                catalog.upsert_udf_cost_catalog_entry(
-                    udf_id, func_expr.udf_obj.name, func_expr._stats.prev_cost
+            if func_expr.function_obj and func_expr._stats:
+                function_id = func_expr.function_obj.row_id
+                catalog.upsert_function_cost_catalog_entry(
+                    function_id, func_expr.function_obj.name, func_expr._stats.prev_cost
                 )
     return batch
 

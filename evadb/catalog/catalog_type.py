@@ -44,6 +44,19 @@ class ColumnType(EvaDBEnum):
     NDARRAY  # noqa: F821
     ANY  # noqa: F821
 
+    @classmethod
+    def python_type_to_evadb_type(cls, dtype):
+        if dtype is str:
+            return cls.TEXT
+        elif dtype is int:
+            return cls.INTEGER
+        elif dtype is float:
+            return cls.FLOAT
+        elif dtype is bool:
+            return cls.BOOLEAN
+        else:
+            return cls.NDARRAY
+
 
 class NdArrayType(EvaDBEnum):
     INT8  # noqa: F821

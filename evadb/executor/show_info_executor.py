@@ -30,13 +30,13 @@ class ShowInfoExecutor(AbstractExecutor):
         show_entries = []
 
         assert (
-            self.node.show_type is ShowType.UDFS or ShowType.TABLES
+            self.node.show_type is ShowType.FUNCTIONS or ShowType.TABLES
         ), f"Show command does not support type {self.node.show_type}"
 
-        if self.node.show_type is ShowType.UDFS:
-            udfs = self.catalog().get_all_udf_catalog_entries()
-            for udf in udfs:
-                show_entries.append(udf.display_format())
+        if self.node.show_type is ShowType.FUNCTIONS:
+            functions = self.catalog().get_all_function_catalog_entries()
+            for function in functions:
+                show_entries.append(function.display_format())
         elif self.node.show_type is ShowType.TABLES:
             tables = self.catalog().get_all_table_catalog_entries()
             for table in tables:

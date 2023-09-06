@@ -1,10 +1,12 @@
+:orphan:
+
 IO Descriptors
 ======================
-EvaDB supports three key data types. The inputs and outputs of the user-defined functions (UDFs) must be of one of these types.
+EvaDB supports three key data types. The inputs and outputs of the functions must be of one of these types.
 
 NumpyArray
 ------------
-Used when the inputs or outputs of the UDF is of type Numpy Array. 
+Used when the inputs or outputs of the function is of type Numpy Array. 
 
 Parameters
 ------------ 
@@ -51,11 +53,11 @@ dimensions(*Tuple(int)*): shape of the numpy array
 
 PandasDataframe
 ----------------
-columns (*List[str]*): list of strings that represent the expected column names in the pandas dataframe that is returned from the UDF.
+columns (*List[str]*): list of strings that represent the expected column names in the pandas dataframe that is returned from the function.
 
-column_types (*NdArrayType*): expected datatype of the column in the pandas dataframe returned from the UDF. The NdArrayType class is inherited from evadb.catalog.catalog_type.
+column_types (*NdArrayType*): expected datatype of the column in the pandas dataframe returned from the function. The NdArrayType class is inherited from evadb.catalog.catalog_type.
 
-column_shapes (*List[tuples]*): list of tuples that represent the expected shapes of columns in the pandas dataframe returned from the UDF.
+column_shapes (*List[tuples]*): list of tuples that represent the expected shapes of columns in the pandas dataframe returned from the function.
 
 .. code-block:: python
 

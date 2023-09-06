@@ -15,6 +15,12 @@ workflows:
             name: Linter | v3.10 | Linux
             mode: LINTER
         ################################
+        ## DOC: All
+        ################################
+        ################################
+        - Doc:
+            name: Doc | v3.10 | Linux
+        ################################
         #### PIP: Master
         ################################
         ################################
@@ -63,7 +69,8 @@ workflows:
                 v: ["3.8", "3.9", "3.10", "3.11"]
             filters:
               branches:
-                only: staging
+                only:
+                  - staging
         ################################
         #### LONG INTEGRATION TESTS + RAY:
         #### Staging, Master
@@ -87,6 +94,17 @@ workflows:
         ################################
         - Postgres:
             name: Third Party Test - Postgres | v3.10 | Linux
+            filters:
+              branches:
+                only: 
+                  - master
+                  - staging
+        ################################
+        ### THIRD PARTY: Staging, Master
+        ################################
+        ################################
+        - MySQL:
+            name: Third Party Test - MySQL | v3.10 | Linux
             filters:
               branches:
                 only: 
@@ -133,8 +151,12 @@ workflows:
         ################################
         #- Windows:
         #    name: "Windows | v3.10"
-        # - MacOS:
-        #    name: "MacOS | v3.10"
+        #- MacOS:
+        #    name: FULL TEST | v<< matrix.v >> | MacOS
+        #    mode: FULL
+        #    matrix:
+        #      parameters:
+        #        v: ["3.10"]
 
 jobs:
   Linux:
@@ -173,8 +195,8 @@ jobs:
             RAY: << parameters.ray >>
           command: |
             "python<< parameters.v >>" -m venv test_evadb
-            pip install --upgrade pip
             source test_evadb/bin/activate
+            pip install --upgrade pip
             if [ $RAY = "ENABLED" ]; then
               if [ $PY_VERSION != "3.11" ]; then
                 pip install ".[dev,ray,qdrant]"
@@ -220,6 +242,101 @@ jobs:
           paths:
             - test_evadb
 
+  Doc:
+    parameters:
+      v:
+        type: string
+        default: "3.10"
+      mode:
+        type: string
+        default: "DOC"
+    resource_class: large
+    docker:
+      # https://circleci.com/docs/circleci-images#language-image-variants
+      - image: "cimg/python:<< parameters.v >>-node"
+    steps:
+
+      - checkout
+
+      # Restore pip wheel
+      - restore_cache:
+          keys:
+            - v1-pip-wheel_cache-python<< parameters.v >>-{{ checksum "docs/requirements.txt" }}-{{ checksum "package-lock.json" }}
+
+      - run:
+          name: Install EvaDB Doc dependencies
+          command: |
+            "python<< parameters.v >>" -m venv test_evadb_doc
+            source test_evadb_doc/bin/activate
+            pip install --upgrade pip
+            pip install -r docs/requirements.txt 
+            npm install markdown-link-check
+
+      - run:
+          name: Test doc build and link validation
+          no_output_timeout: 10m # 10 minute timeout
+          command: |
+            source test_evadb_doc/bin/activate
+            bash script/test/test.sh -m "<< parameters.mode >>"
+
+      - save_cache:
+          key: v1-pip-wheel_cache-python<< parameters.v >>-{{ checksum "docs/requirements.txt" }}-{{ checksum "package-lock.json" }}
+          paths:
+            - test_evadb_doc
+            - node_modules
+
+  MySQL:
+    parameters:
+      v:
+        type: string
+        default: "3.10"
+    resource_class: large
+    docker:
+      - image: "cimg/python:<< parameters.v >>"
+      - image: "cimg/mysql:8.0"
+        environment:
+          MYSQL_USER: eva
+          MYSQL_PASSWORD: password
+          MYSQL_DATABASE: evadb
+
+    steps:
+
+      - checkout
+
+      # Restore pip wheel
+      - restore_cache:
+          keys:
+            - v1-pip-wheel_cache-python<< parameters.v >>-rayDISABLED-{{ checksum "setup.py" }}
+
+      - restore_cache:
+          keys:
+            - v1-model_cache-{{ checksum "setup.py" }}
+
+      - run:
+          name: Install dockerize
+          command: wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && sudo tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+          environment:
+            DOCKERIZE_VERSION: v0.6.1
+
+      - run:
+          name: Wait for DB to run
+          command : dockerize -wait tcp://localhost:3306 -timeout 1m
+
+      - run:
+          name: Install EvaDB package from GitHub repo with all dependencies
+          command: |
+            "python<< parameters.v >>" -m venv test_evadb
+            pip install --upgrade pip
+            source test_evadb/bin/activate
+            pip install ".[dev]"
+            pip install -r evadb/third_party/databases/mysql/requirements.txt
+
+      - run:
+          name: Run integration tests
+          command: |
+             source test_evadb/bin/activate
+             PYTHONPATH="." python -m pytest test/third_party_tests/test_native_executor.py -k test_should_run_query_in_mysql
+
   Postgres:
     parameters:
       v:
@@ -237,6 +354,11 @@ jobs:
     steps:
 
       - checkout
+
+      # Restore pip wheel
+      - restore_cache:
+          keys:
+            - v1-pip-wheel_cache-python<< parameters.v >>-rayDISABLED-{{ checksum "setup.py" }}
 
       - restore_cache:
           keys:
@@ -259,6 +381,7 @@ jobs:
             pip install --upgrade pip
             source test_evadb/bin/activate
             pip install ".[dev]"
+            pip install -r evadb/third_party/databases/postgres/requirements.txt
 
       - run:
           name: Run integration tests
@@ -283,6 +406,13 @@ jobs:
               bash script\test\test.sh
 
   MacOS:
+      parameters:
+        v:
+          type: string
+          default: "3.10"
+        mode:
+          type: string
+          default: "FULL"
       macos:
         xcode: "14.2.0"
       steps:
@@ -291,8 +421,8 @@ jobs:
             command: |
               brew update
               brew install pyenv git
-              pyenv install 3.10.8
-              pyenv global 3.10.8
+              pyenv install "<< parameters.v >>"
+              pyenv global "<< parameters.v >>"
               eval "$(pyenv init -)"
               python --version
               pip --version
@@ -305,9 +435,9 @@ jobs:
               source test_evadb/bin/activate
               pip install --upgrade pip
               pip debug --verbose
-              pip install ".[dev]"
+              pip install ".[dev,ludwig,qdrant,forecasting]"
               source test_evadb/bin/activate
-              bash script/test/test.sh 
+              bash script/test/test.sh -m "<< parameters.mode >>"
 
   Pip-PyPI:
     resource_class: large

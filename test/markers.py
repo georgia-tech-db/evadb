@@ -18,14 +18,19 @@ import sys
 
 import pytest
 
-from evadb.utils.generic_utils import is_gpu_available, is_ludwig_available
+from evadb.utils.generic_utils import (
+    is_forecast_available,
+    is_gpu_available,
+    is_ludwig_available,
+    is_qdrant_available,
+)
 
 asyncio_skip_marker = pytest.mark.skipif(
     sys.version_info < (3, 8), reason="Test case requires asyncio support"
 )
 
 qdrant_skip_marker = pytest.mark.skipif(
-    sys.version_info.minor == 11,
+    is_qdrant_available() is False,
     reason="qdrant requires grcpio which is broken on 3.11",
 )
 
@@ -68,4 +73,9 @@ ludwig_skip_marker = pytest.mark.skipif(
 
 chatgpt_skip_marker = pytest.mark.skip(
     reason="requires chatgpt",
+)
+
+forecast_skip_marker = pytest.mark.skipif(
+    is_forecast_available() is False,
+    reason="Run only if forecasting packages available",
 )

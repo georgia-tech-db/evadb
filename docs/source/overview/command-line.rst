@@ -1,5 +1,7 @@
+:orphan:
+
 Command Line Client
-====
+===================
 
 Besides Python files and Jupyter notebooks, EvaDB also supports a command line interface for querying the data. This interface allows for quick querying from the terminal:
 

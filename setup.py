@@ -27,6 +27,7 @@ URL = "https://github.com/georgia-tech-db/eva"
 # if sys.version_info < (3, 8):
 #     sys.exit("Python 3.8 or later is required.")
 
+
 def read(path, encoding="utf-8"):
     path = os.path.join(os.path.dirname(__file__), path)
     with io.open(path, encoding=encoding) as fp:
@@ -52,9 +53,9 @@ minimal_requirements = [
     "aenum>=2.2.0",
     "diskcache>=5.4.0",
     "retry>=0.9.2",
-    "pydantic<2", # ray-project/ray#37019.
+    "pydantic<2",  # ray-project/ray#37019.
     "psutil",
-    "thefuzz"
+    "thefuzz",
 ]
 
 vision_libs = [
@@ -74,7 +75,7 @@ document_libs = [
     "transformers",  # HUGGINGFACE
     "langchain",  # DATA LOADERS
     "faiss-cpu",  # DEFAULT VECTOR INDEX
-    "pymupdf<1.23.0", # pymupdf/PyMuPDF#2617 and pymupdf/PyMuPDF#2614
+    "pymupdf<1.23.0",  # pymupdf/PyMuPDF#2617 and pymupdf/PyMuPDF#2614
     "pdfminer.six",
     "sentence-transformers",
     "protobuf",
@@ -84,7 +85,7 @@ document_libs = [
     "sentencepiece",  # TRANSFORMERS
 ]
 
-udf_libs = [
+function_libs = [
     "facenet-pytorch>=2.5.2",  # FACE DETECTION
     "pytube",  # YOUTUBE QA APP
     "youtube-transcript-api",  # YOUTUBE QA APP
@@ -105,9 +106,7 @@ notebook_libs = [
     "nest-asyncio>=1.5.6",
 ]
 
-qdrant_libs = [
-    "qdrant_client" # cannot install on 3.11 due to grcpio
-]
+qdrant_libs = ["qdrant_client"]  # cannot install on 3.11 due to grcpio
 
 postgres_libs = [
     "psycopg2",
@@ -117,8 +116,10 @@ slack_libs = [
     "slack-sdk"
 ]
 
-ludwig_libs = [
-    "ludwig[full]" # MODEL TRAIN AND FINE TUNING
+ludwig_libs = ["ludwig[hyperopt,distributed]"]  # MODEL TRAIN AND FINE TUNING
+
+forecasting_libs = [
+    "statsforecast" # MODEL TRAIN AND FINE TUNING
 ]
 
 ### NEEDED FOR DEVELOPER TESTING ONLY
@@ -152,13 +153,14 @@ EXTRA_REQUIRES = {
     "ray": ray_libs,
     "vision": vision_libs,
     "document": document_libs,
-    "udf": udf_libs,
+    "function": function_libs,
     "notebook": notebook_libs,
     "qdrant": qdrant_libs,
     "postgres": postgres_libs,
     "ludwig": ludwig_libs,
-    # everything except ray, qdrant and postgres
-    "dev": dev_libs + vision_libs + document_libs + udf_libs + notebook_libs,
+    "forecasting": forecasting_libs,
+    # everything except ray, qdrant, ludwig and postgres. The first three fail on pyhton 3.11.
+    "dev": dev_libs + vision_libs + document_libs + function_libs + notebook_libs + forecasting_libs,
 }
 
 setup(
@@ -192,5 +194,11 @@ setup(
     install_requires=INSTALL_REQUIRES,
     extras_require=EXTRA_REQUIRES,
     include_package_data=True,
-    package_data={"evadb": ["evadb.yml", "parser/evadb.lark"]},
+    package_data={
+        "evadb": [
+            "evadb.yml",
+            "parser/evadb.lark",
+            "third_party/databases/**/requirements.txt",
+        ]
+    },
 )

@@ -1,11 +1,11 @@
 SHOW 
 ====
 
-SHOW UDFS
-----
+SHOW FUNCTIONS
+--------------
 
 List the registered user-defined functions
 
 .. code:: sql
 
-    SHOW UDFS;
+    SHOW FUNCTIONS;

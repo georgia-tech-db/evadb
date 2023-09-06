@@ -16,10 +16,10 @@ import unittest
 
 from evadb.catalog.catalog_type import ColumnType, NdArrayType, TableType
 from evadb.catalog.models.column_catalog import ColumnCatalogEntry
+from evadb.catalog.models.function_catalog import FunctionCatalogEntry
+from evadb.catalog.models.function_io_catalog import FunctionIOCatalogEntry
 from evadb.catalog.models.index_catalog import IndexCatalogEntry
 from evadb.catalog.models.table_catalog import TableCatalogEntry
-from evadb.catalog.models.udf_catalog import UdfCatalogEntry
-from evadb.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 
 
 class CatalogModelsTest(unittest.TestCase):
@@ -77,72 +77,86 @@ class CatalogModelsTest(unittest.TestCase):
 
         self.assertNotEqual(table_catalog_entry, table_catalog_entry1)
 
-    def test_udf(self):
-        udf = UdfCatalogEntry("udf", "fasterRCNN", "ObjectDetection", "checksum")
-        self.assertEqual(udf.row_id, None)
-        self.assertEqual(udf.impl_file_path, "fasterRCNN")
-        self.assertEqual(udf.name, "udf")
-        self.assertEqual(udf.type, "ObjectDetection")
-        self.assertEqual(udf.checksum, "checksum")
+    def test_function(self):
+        function = FunctionCatalogEntry(
+            "function", "fasterRCNN", "ObjectDetection", "checksum"
+        )
+        self.assertEqual(function.row_id, None)
+        self.assertEqual(function.impl_file_path, "fasterRCNN")
+        self.assertEqual(function.name, "function")
+        self.assertEqual(function.type, "ObjectDetection")
+        self.assertEqual(function.checksum, "checksum")
 
-    def test_udf_hash(self):
-        udf1 = UdfCatalogEntry("udf", "fasterRCNN", "ObjectDetection", "checksum")
-        udf2 = UdfCatalogEntry("udf", "fasterRCNN", "ObjectDetection", "checksum")
+    def test_function_hash(self):
+        function1 = FunctionCatalogEntry(
+            "function", "fasterRCNN", "ObjectDetection", "checksum"
+        )
+        function2 = FunctionCatalogEntry(
+            "function", "fasterRCNN", "ObjectDetection", "checksum"
+        )
 
-        self.assertEqual(hash(udf1), hash(udf2))
+        self.assertEqual(hash(function1), hash(function2))
 
-    def test_udf_equality(self):
-        udf = UdfCatalogEntry("udf", "fasterRCNN", "ObjectDetection", "checksum")
-        self.assertEqual(udf, udf)
-        udf2 = UdfCatalogEntry("udf2", "fasterRCNN", "ObjectDetection", "checksum")
-        self.assertNotEqual(udf, udf2)
-        udf3 = UdfCatalogEntry("udf", "fasterRCNN2", "ObjectDetection", "checksum")
-        self.assertNotEqual(udf, udf3)
-        udf4 = UdfCatalogEntry("udf2", "fasterRCNN", "ObjectDetection3", "checksum")
-        self.assertNotEqual(udf, udf4)
+    def test_function_equality(self):
+        function = FunctionCatalogEntry(
+            "function", "fasterRCNN", "ObjectDetection", "checksum"
+        )
+        self.assertEqual(function, function)
+        function2 = FunctionCatalogEntry(
+            "function2", "fasterRCNN", "ObjectDetection", "checksum"
+        )
+        self.assertNotEqual(function, function2)
+        function3 = FunctionCatalogEntry(
+            "function", "fasterRCNN2", "ObjectDetection", "checksum"
+        )
+        self.assertNotEqual(function, function3)
+        function4 = FunctionCatalogEntry(
+            "function2", "fasterRCNN", "ObjectDetection3", "checksum"
+        )
+        self.assertNotEqual(function, function4)
 
-    def test_udf_io(self):
-        udf_io = UdfIOCatalogEntry(
+    def test_function_io(self):
+        function_io = FunctionIOCatalogEntry(
             "name", ColumnType.NDARRAY, True, NdArrayType.UINT8, [2, 3], True, 1
         )
-        self.assertEqual(udf_io.row_id, None)
-        self.assertEqual(udf_io.udf_id, 1)
-        self.assertEqual(udf_io.is_input, True)
-        self.assertEqual(udf_io.is_nullable, True)
-        self.assertEqual(udf_io.array_type, NdArrayType.UINT8)
-        self.assertEqual(udf_io.array_dimensions, [2, 3])
-        self.assertEqual(udf_io.name, "name")
-        self.assertEqual(udf_io.type, ColumnType.NDARRAY)
+        self.assertEqual(function_io.row_id, None)
+        self.assertEqual(function_io.function_id, 1)
+        self.assertEqual(function_io.is_input, True)
+        self.assertEqual(function_io.is_nullable, True)
+        self.assertEqual(function_io.array_type, NdArrayType.UINT8)
+        self.assertEqual(function_io.array_dimensions, [2, 3])
+        self.assertEqual(function_io.name, "name")
+        self.assertEqual(function_io.type, ColumnType.NDARRAY)
 
-    def test_udf_io_equality(self):
-        udf_io = UdfIOCatalogEntry(
+    def test_function_io_equality(self):
+        function_io = FunctionIOCatalogEntry(
             "name", ColumnType.FLOAT, True, None, [2, 3], True, 1
         )
-        self.assertEqual(udf_io, udf_io)
-        udf_io2 = UdfIOCatalogEntry(
+        self.assertEqual(function_io, function_io)
+        function_io2 = FunctionIOCatalogEntry(
             "name2", ColumnType.FLOAT, True, None, [2, 3], True, 1
         )
-        self.assertNotEqual(udf_io, udf_io2)
-        udf_io2 = UdfIOCatalogEntry(
+        self.assertNotEqual(function_io, function_io2)
+        function_io2 = FunctionIOCatalogEntry(
             "name", ColumnType.INTEGER, True, None, [2, 3], True, 1
         )
-        self.assertNotEqual(udf_io, udf_io2)
-        udf_io2 = UdfIOCatalogEntry(
+        self.assertNotEqual(function_io, function_io2)
+        function_io2 = FunctionIOCatalogEntry(
             "name", ColumnType.FLOAT, False, None, [2, 3], True, 1
         )
-        self.assertNotEqual(udf_io, udf_io2)
-        udf_io2 = UdfIOCatalogEntry(
+        self.assertNotEqual(function_io, function_io2)
+        function_io2 = FunctionIOCatalogEntry(
             "name", ColumnType.FLOAT, True, None, [2, 3, 4], True, 1
         )
-        self.assertNotEqual(udf_io, udf_io2)
-        udf_io2 = UdfIOCatalogEntry(
+        self.assertNotEqual(function_io, function_io2)
+        function_io2 = FunctionIOCatalogEntry(
             "name", ColumnType.FLOAT, True, None, [2, 3], False, 1
         )
-        self.assertNotEqual(udf_io, udf_io2)
-        udf_io2 = UdfIOCatalogEntry(
+        self.assertNotEqual(function_io, function_io2)
+        function_io2 = FunctionIOCatalogEntry(
             "name", ColumnType.FLOAT, True, None, [2, 3], True, 2
         )
-        self.assertNotEqual(udf_io, udf_io2)
+        self.assertNotEqual(function_io, function_io2)
 
     def test_index(self):
         index = IndexCatalogEntry("index", "FaissSavePath", "HNSW")

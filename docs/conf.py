@@ -31,7 +31,7 @@ extensions = [
     "sphinx_copybutton",
     "sphinx.ext.doctest",
     "sphinx.ext.coverage",
-    "sphinx.ext.autosectionlabel",
+#    "sphinx.ext.autosectionlabel",
     "sphinx.ext.autosummary",
     "sphinx.ext.autodoc",
     "sphinx.ext.autodoc.typehints",
@@ -48,6 +48,9 @@ extensions = [
     "versionwarning.extension",
     "IPython.sphinxext.ipython_console_highlighting",
 ]
+
+suppress_warnings = ["etoc.toctree", "myst.header"]
+
 source_suffix = [".ipynb", ".html", ".md", ".rst"]
 
 autodoc_pydantic_model_show_json = False
@@ -91,7 +94,8 @@ author = u"EvaDB Team"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "README.md", "images/reference/README.md"]
+
 
 # The name of the Pygments (syntax highlighting) style to use.
 # pygments_style = "lovelace"
@@ -148,14 +152,10 @@ html_css_files = [
                     "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/solid.min.css",
                     "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/brands.min.css"]
 
-# Adding the Tutorial notebooks to ./docs/source/tutorials/
-
-for i in os.listdir("../tutorials"):
-    if i.endswith(".ipynb"):
-        shutil.copy(f"../tutorials/{i}", "./source/usecases/")
-
-jupyter_execute_notebooks = "off"
-
+# Check link: https://stackoverflow.com/questions/14492743/have-sphinx-report-broken-links/14735060#14735060
+nitpicky = True
+# BUG: https://stackoverflow.com/questions/11417221/sphinx-autodoc-gives-warning-pyclass-reference-target-not-found-type-warning
+nitpick_ignore_regex = [('py:class', r'.*')]
 
 # -- Initialize Sphinx ----------------------------------------------
 def setup(app):

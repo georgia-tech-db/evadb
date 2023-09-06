@@ -55,6 +55,7 @@ class DBHandler:
 
     def __init__(self, name: str, **kwargs):
         self.name = name
+        self.connection = None
 
     def connect(self):
         """
@@ -105,7 +106,7 @@ class DBHandler:
             table_name (str): The name of the table for which to retrieve columns.
 
         Returns:
-            DBHandlerResponse: An instance of DBHandlerResponse containing the columns or an error message. Data is in a pandas DataFrame.
+            DBHandlerResponse: An instance of DBHandlerResponse containing the columns or an error message. Data is in a pandas DataFrame. It should have the following two columns: name and dtype. The dtype should be a Python dtype and will default to `str`.
 
         Raises:
             NotImplementedError: This method should be implemented in derived classes.
