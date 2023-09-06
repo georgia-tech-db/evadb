@@ -54,7 +54,7 @@ EvaDB accelerates AI queries using a collection of optimizations inspired by SQL
 AI Functions
 ------------
 
-``Functions`` are typically thin wrappers around AI models and are extensively used in queries. Here is an `illustrative AI function for classifying MNIST images <https://github.com/georgia-tech-db/evadb/blob/master/evadb/udfs/mnist_image_classifier.py>`_. 
+``Functions`` are typically thin wrappers around AI models and are extensively used in queries. Here is an `illustrative AI function for classifying MNIST images <https://github.com/georgia-tech-db/evadb/blob/master/evadb/functions/mnist_image_classifier.py>`_. 
 
 To register an user-defined function, use the ``CREATE FUNCTION`` statement:
 
