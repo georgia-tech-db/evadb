@@ -43,8 +43,9 @@ class CreateApplicationTest(unittest.TestCase):
 
         execute_query_fetch_all(self.evadb, query)
 
-        db_entry = self.evadb.catalog().get_application_catalog_entry("example_app")
+        db_entry = self.evadb.catalog().get_database_catalog_entry("example_app")
         self.assertEqual(db_entry.name, "example_app")
+        self.assertEqual(db_entry.app_type, "application")
         self.assertEqual(db_entry.engine, "slack")
         self.assertEqual(db_entry.params, params)
 
