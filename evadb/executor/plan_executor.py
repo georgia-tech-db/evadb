@@ -94,7 +94,9 @@ class PlanExecutor:
         elif isinstance(plan, UseStatement):
             return UseExecutor(db=self._db, node=plan)
         elif isinstance(plan, CreateApplicationStatement):
-            return CreateDatabaseExecutor(db=self._db, node=plan, app_type="Application")
+            return CreateDatabaseExecutor(
+                db=self._db, node=plan, app_type="Application"
+            )
 
         # Get plan node type
         plan_opr_type = plan.opr_type

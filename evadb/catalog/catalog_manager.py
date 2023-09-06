@@ -126,7 +126,9 @@ class CatalogManager(object):
 
     "Database catalog services"
 
-    def insert_database_catalog_entry(self, name: str, app_type: str, engine: str, params: dict):
+    def insert_database_catalog_entry(
+        self, name: str, app_type: str, engine: str, params: dict
+    ):
         """A new entry is persisted in the database catalog."
 
         Args:

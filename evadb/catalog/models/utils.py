@@ -251,4 +251,3 @@ class DatabaseCatalogEntry:
             "engine": self.engine,
             "params": self.params,
         }
-
