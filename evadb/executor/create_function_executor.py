@@ -12,7 +12,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import hashlib
 import os
+import pickle
 from pathlib import Path
 from typing import Dict, List
 
@@ -35,6 +37,7 @@ from evadb.third_party.huggingface.create import gen_hf_io_catalog_entries
 from evadb.utils.errors import FunctionIODefinitionError
 from evadb.utils.generic_utils import (
     load_function_class_from_file,
+    try_to_import_forecast,
     try_to_import_ludwig,
     try_to_import_torch,
     try_to_import_ultralytics,
@@ -48,10 +51,10 @@ class CreateFunctionExecutor(AbstractExecutor):
         self.function_dir = Path(EvaDB_INSTALLATION_DIR) / "functions"
 
     def handle_huggingface_function(self):
-        """Handle HuggingFace Functions
+        """Handle HuggingFace functions
 
-        HuggingFace Functions are special Functions that are not loaded from a file.
-        So we do not need to call the setup method on them like we do for other Functions.
+        HuggingFace functions are special functions that are not loaded from a file.
+        So we do not need to call the setup method on them like we do for other functions.
         """
         # We need at least one deep learning framework for HuggingFace
         # Torch or Tensorflow
@@ -67,9 +70,9 @@ class CreateFunctionExecutor(AbstractExecutor):
         )
 
     def handle_ludwig_function(self):
-        """Handle ludwig Functions
+        """Handle ludwig functions
 
-        Use ludwig's auto_train engine to train/tune models.
+        Use Ludwig's auto_train engine to train/tune models.
         """
         try_to_import_ludwig()
         from ludwig.automl import auto_train
@@ -114,7 +117,7 @@ class CreateFunctionExecutor(AbstractExecutor):
         )
 
     def handle_ultralytics_function(self):
-        """Handle Ultralytics Functions"""
+        """Handle Ultralytics functions"""
         try_to_import_ultralytics()
 
         impl_path = (
@@ -132,10 +135,123 @@ class CreateFunctionExecutor(AbstractExecutor):
             self.node.metadata,
         )
 
-    def handle_generic_function(self):
-        """Handle generic Functions
+    def handle_forecasting_function(self):
+        """Handle forecasting functions"""
+        aggregated_batch_list = []
+        child = self.children[0]
+        for batch in child.exec():
+            aggregated_batch_list.append(batch)
+        aggregated_batch = Batch.concat(aggregated_batch_list, copy=False)
+        aggregated_batch.drop_column_alias()
 
-        Generic Functions are loaded from a file. We check for inputs passed by the user during CREATE or try to load io from decorators.
+        arg_map = {arg.key: arg.value for arg in self.node.metadata}
+        if not self.node.impl_path:
+            impl_path = Path(f"{self.function_dir}/forecast.py").absolute().as_posix()
+        else:
+            impl_path = self.node.impl_path.absolute().as_posix()
+        arg_map = {arg.key: arg.value for arg in self.node.metadata}
+
+        if "model" not in arg_map.keys():
+            arg_map["model"] = "AutoARIMA"
+        if "frequency" not in arg_map.keys():
+            arg_map["frequency"] = "M"
+
+        model_name = arg_map["model"]
+        frequency = arg_map["frequency"]
+
+        data = aggregated_batch.frames.rename(columns={arg_map["predict"]: "y"})
+        if "time" in arg_map.keys():
+            aggregated_batch.frames.rename(columns={arg_map["time"]: "ds"})
+        if "id" in arg_map.keys():
+            aggregated_batch.frames.rename(columns={arg_map["id"]: "unique_id"})
+
+        if "unique_id" not in list(data.columns):
+            data["unique_id"] = ["test" for x in range(len(data))]
+
+        if "ds" not in list(data.columns):
+            data["ds"] = [x + 1 for x in range(len(data))]
+
+        try_to_import_forecast()
+        from statsforecast import StatsForecast
+        from statsforecast.models import AutoARIMA, AutoCES, AutoETS, AutoTheta
+
+        model_dict = {
+            "AutoARIMA": AutoARIMA,
+            "AutoCES": AutoCES,
+            "AutoETS": AutoETS,
+            "AutoTheta": AutoTheta,
+        }
+
+        season_dict = {  # https://pandas.pydata.org/docs/user_guide/timeseries.html#timeseries-offset-aliases
+            "H": 24,
+            "M": 12,
+            "Q": 4,
+            "SM": 24,
+            "BM": 12,
+            "BMS": 12,
+            "BQ": 4,
+            "BH": 24,
+        }
+
+        new_freq = (
+            frequency.split("-")[0] if "-" in frequency else frequency
+        )  # shortens longer frequencies like Q-DEC
+        season_length = season_dict[new_freq] if new_freq in season_dict else 1
+        model = StatsForecast(
+            [model_dict[model_name](season_length=season_length)], freq=new_freq
+        )
+
+        model_dir = os.path.join(
+            self.db.config.get_value("storage", "model_dir"), self.node.name
+        )
+        Path(model_dir).mkdir(parents=True, exist_ok=True)
+        model_path = os.path.join(
+            self.db.config.get_value("storage", "model_dir"),
+            self.node.name,
+            str(hashlib.sha256(data.to_string().encode()).hexdigest()) + ".pkl",
+        )
+
+        weight_file = Path(model_path)
+
+        if not weight_file.exists():
+            model.fit(data)
+            f = open(model_path, "wb")
+            pickle.dump(model, f)
+            f.close()
+
+        arg_map_here = {"model_name": model_name, "model_path": model_path}
+        function = self._try_initializing_function(impl_path, arg_map_here)
+        io_list = self._resolve_function_io(function)
+
+        metadata_here = [
+            FunctionMetadataCatalogEntry(
+                key="model_name",
+                value=model_name,
+                function_id=None,
+                function_name=None,
+                row_id=None,
+            ),
+            FunctionMetadataCatalogEntry(
+                key="model_path",
+                value=model_path,
+                function_id=None,
+                function_name=None,
+                row_id=None,
+            ),
+        ]
+
+        return (
+            self.node.name,
+            impl_path,
+            self.node.function_type,
+            io_list,
+            metadata_here,
+        )
+
+    def handle_generic_function(self):
+        """Handle generic functions
+
+        Generic functions are loaded from a file. We check for inputs passed by the user during CREATE or try to load io from decorators.
         """
         impl_path = self.node.impl_path.absolute().as_posix()
         function = self._try_initializing_function(impl_path)
@@ -190,6 +306,14 @@ class CreateFunctionExecutor(AbstractExecutor):
                 io_list,
                 metadata,
             ) = self.handle_ludwig_function()
+        elif self.node.function_type == "Forecasting":
+            (
+                name,
+                impl_path,
+                function_type,
+                io_list,
+                metadata,
+            ) = self.handle_forecasting_function()
         else:
             (
                 name,
@@ -215,13 +339,13 @@ class CreateFunctionExecutor(AbstractExecutor):
 
         Args:
             impl_path (str): The file path of the function implementation file.
-            function_args (Dict, optional): Dictionary of arguments to pass to the Function. Defaults to {}.
+            function_args (Dict, optional): Dictionary of arguments to pass to the function. Defaults to {}.
 
         Returns:
-            FunctionCatalogEntry: A FunctionCatalogEntry object that represents the initialized Function.
+            FunctionCatalogEntry: A FunctionCatalogEntry object that represents the initialized function.
 
         Raises:
-            RuntimeError: If an error occurs while initializing the Function.
+            RuntimeError: If an error occurs while initializing the function.
         """
 
         # load the function class from the file
@@ -231,7 +355,7 @@ class CreateFunctionExecutor(AbstractExecutor):
             # initializing the function class calls the setup method internally
             function(**function_args)
         except Exception as e:
-            err_msg = f"Error creating Function: {str(e)}"
+            err_msg = f"Error creating function: {str(e)}"
             # logger.error(err_msg)
             raise RuntimeError(err_msg)
 
@@ -240,7 +364,7 @@ class CreateFunctionExecutor(AbstractExecutor):
     def _resolve_function_io(
         self, function: FunctionCatalogEntry
     ) -> List[FunctionIOCatalogEntry]:
-        """Private method that resolves the input/output definitions for a given Function.
+        """Private method that resolves the input/output definitions for a given function.
         It first searches for the input/outputs in the CREATE statement. If not found, it resolves them using decorators. If not found there as well, it raises an error.
 
         Args:
@@ -248,7 +372,7 @@ class CreateFunctionExecutor(AbstractExecutor):
 
         Returns:
             A List of FunctionIOCatalogEntry objects that represent the resolved input and
-            output definitions for the Function.
+            output definitions for the function.
 
         Raises:
             RuntimeError: If an error occurs while resolving the function input/output
@@ -274,7 +398,7 @@ class CreateFunctionExecutor(AbstractExecutor):
 
         except FunctionIODefinitionError as e:
             err_msg = (
-                f"Error creating Function, input/output definition incorrect: {str(e)}"
+                f"Error creating function, input/output definition incorrect: {str(e)}"
             )
             logger.error(err_msg)
             raise RuntimeError(err_msg)
