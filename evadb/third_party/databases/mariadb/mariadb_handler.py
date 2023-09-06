@@ -88,7 +88,7 @@ class MariaDbHandler(DBHandler):
             return DBHandlerResponse(data=None, error="Not connected to the database.")
 
         try:
-            query = "SELECT TABLE_NAME from information_schema.tables where TABLE_SCHEMA NOT IN ('information_schema', 'performance_schema');"
+            query = f"SELECT table_name as 'table_name' FROM information_schema.tables WHERE table_schema='{self.database}'"
             tables_df = pd.read_sql_query(query, self.connection)
             return DBHandlerResponse(data=tables_df)
         except mariadb.Error as e:
@@ -96,7 +96,7 @@ class MariaDbHandler(DBHandler):
     
     def get_columns(self, table_name: str) -> DBHandlerResponse:
         """
-        Method to retrieve the column of the specified table from the database.
+        Method to retrieve the columns of the specified table from the database.
         Args:
           table_name (str): name of the table whose columns are to be retrieved.
         Returns:
@@ -106,7 +106,7 @@ class MariaDbHandler(DBHandler):
             return DBHandlerResponse(data=None, error="Not connected to the database.")
 
         try:
-            query = f"SELECT column_name FROM information_schema.columns WHERE table_name='{table_name}'"
+            query = f"SELECT column_name as 'name', data_type as 'dtype' FROM information_schema.columns WHERE table_name='{table_name}'"
             columns_df = pd.read_sql_query(query, self.connection)
             return DBHandlerResponse(data=columns_df)
         except mariadb.Error as e:
