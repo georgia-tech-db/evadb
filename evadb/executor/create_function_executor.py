@@ -30,10 +30,10 @@ from evadb.configuration.constants import (
 )
 from evadb.database import EvaDBDatabase
 from evadb.executor.abstract_executor import AbstractExecutor
+from evadb.functions.decorators.utils import load_io_from_function_decorators
 from evadb.models.storage.batch import Batch
 from evadb.plan_nodes.create_function_plan import CreateFunctionPlan
 from evadb.third_party.huggingface.create import gen_hf_io_catalog_entries
-from evadb.functions.decorators.utils import load_io_from_function_decorators
 from evadb.utils.errors import FunctionIODefinitionError
 from evadb.utils.generic_utils import (
     load_function_class_from_file,
@@ -79,7 +79,9 @@ class CreateFunctionExecutor(AbstractExecutor):
 
         assert (
             len(self.children) == 1
-        ), "Create ludwig function expects 1 child, finds {}.".format(len(self.children))
+        ), "Create ludwig function expects 1 child, finds {}.".format(
+            len(self.children)
+        )
 
         aggregated_batch_list = []
         child = self.children[0]
@@ -100,7 +102,9 @@ class CreateFunctionExecutor(AbstractExecutor):
             self.db.config.get_value("storage", "model_dir"), self.node.name
         )
         auto_train_results.best_model.save(model_path)
-        self.node.metadata.append(FunctionMetadataCatalogEntry("model_path", model_path))
+        self.node.metadata.append(
+            FunctionMetadataCatalogEntry("model_path", model_path)
+        )
 
         impl_path = Path(f"{self.function_dir}/ludwig.py").absolute().as_posix()
         io_list = self._resolve_function_io(None)
@@ -279,21 +283,53 @@ class CreateFunctionExecutor(AbstractExecutor):
 
         # if it's a type of HuggingFaceModel, override the impl_path
         if self.node.function_type == "HuggingFace":
-            name, impl_path, function_type, io_list, metadata = self.handle_huggingface_function()
+            (
+                name,
+                impl_path,
+                function_type,
+                io_list,
+                metadata,
+            ) = self.handle_huggingface_function()
         elif self.node.function_type == "ultralytics":
-            name, impl_path, function_type, io_list, metadata = self.handle_ultralytics_function()
+            (
+                name,
+                impl_path,
+                function_type,
+                io_list,
+                metadata,
+            ) = self.handle_ultralytics_function()
         elif self.node.function_type == "Ludwig":
-            name, impl_path, function_type, io_list, metadata = self.handle_ludwig_function()
+            (
+                name,
+                impl_path,
+                function_type,
+                io_list,
+                metadata,
+            ) = self.handle_ludwig_function()
         elif self.node.function_type == "Forecasting":
-            name, impl_path, function_type, io_list, metadata = self.handle_forecasting_function()
+            (
+                name,
+                impl_path,
+                function_type,
+                io_list,
+                metadata,
+            ) = self.handle_forecasting_function()
         else:
-            name, impl_path, function_type, io_list, metadata = self.handle_generic_function()
+            (
+                name,
+                impl_path,
+                function_type,
+                io_list,
+                metadata,
+            ) = self.handle_generic_function()
 
         self.catalog().insert_function_catalog_entry(
             name, impl_path, function_type, io_list, metadata
         )
         yield Batch(
-            pd.DataFrame([f"Function {self.node.name} successfully added to the database."])
+            pd.DataFrame(
+                [f"Function {self.node.name} successfully added to the database."]
+            )
         )
 
     def _try_initializing_function(
@@ -325,7 +361,9 @@ class CreateFunctionExecutor(AbstractExecutor):
 
         return function
 
-    def _resolve_function_io(self, function: FunctionCatalogEntry) -> List[FunctionIOCatalogEntry]:
+    def _resolve_function_io(
+        self, function: FunctionCatalogEntry
+    ) -> List[FunctionIOCatalogEntry]:
         """Private method that resolves the input/output definitions for a given function.
         It first searches for the input/outputs in the CREATE statement. If not found, it resolves them using decorators. If not found there as well, it raises an error.
 
@@ -346,16 +384,22 @@ class CreateFunctionExecutor(AbstractExecutor):
                 io_list.extend(self.node.inputs)
             else:
                 # try to load the inputs from decorators, the inputs from CREATE statement take precedence
-                io_list.extend(load_io_from_function_decorators(function, is_input=True))
+                io_list.extend(
+                    load_io_from_function_decorators(function, is_input=True)
+                )
 
             if self.node.outputs:
                 io_list.extend(self.node.outputs)
             else:
                 # try to load the outputs from decorators, the outputs from CREATE statement take precedence
-                io_list.extend(load_io_from_function_decorators(function, is_input=False))
+                io_list.extend(
+                    load_io_from_function_decorators(function, is_input=False)
+                )
 
         except FunctionIODefinitionError as e:
-            err_msg = f"Error creating function, input/output definition incorrect: {str(e)}"
+            err_msg = (
+                f"Error creating function, input/output definition incorrect: {str(e)}"
+            )
             logger.error(err_msg)
             raise RuntimeError(err_msg)
 
