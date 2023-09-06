@@ -5,34 +5,40 @@ parts:
     chapters:
       - file: source/overview/getting-started
         sections:
-          - file: source/overview/getting-started/install-guide
-            title: Installation Guide
+          - file: source/overview/getting-started/installation-options
+            title: Installation Options
+      - file: source/overview/connect-to-database
+        title: Connect to Database
       - file: source/overview/concepts
+        title: Concepts
+        sections:
+          - file: source/overview/concepts/data-sources
+            title: Data Sources
         #- file: source/overview/faq
 
   - caption: Use Cases
     chapters:
+      - file: source/usecases/sentiment-analysis.rst
+        title: Sentiment Analysis
+      - file: source/usecases/question-answering.rst
+        title: Question Answering
+      - file: source/usecases/text-summarization.rst
+        title: Text Summarization
       - file: source/usecases/image-classification.rst
         title: Image Classification
-      - file: source/usecases/similar-image-search.rst
-        title: Image Search [FAISS]
-      - file: source/usecases/qa-video.rst
-        title: Q&A from Videos [ChatGPT + HuggingFace]
-      - file: source/usecases/02-object-detection.ipynb
+      - file: source/usecases/image-search.rst
+        title: Image Search
+      - file: source/usecases/object-detection.rst
         title: Object Detection
-      - file: source/usecases/03-emotion-analysis.ipynb
+      - file: source/usecases/emotion-analysis.rst
         title: Emotion Analysis
-      - file: source/usecases/07-object-segmentation-huggingface.ipynb
-        title: Image Segmentation [HuggingFace]
-
+      - file: source/usecases/privategpt.rst
+        title: PrivateGPT
 
   - caption: User Reference
     chapters:
-      - file: source/reference/api
-        title: Python API
-
       - file: source/reference/evaql      
-        title: Eva Query Language 
+        title: EvaQL
         sections:
           - file: source/reference/evaql/load
           - file: source/reference/evaql/select
@@ -43,22 +49,34 @@ parts:
           - file: source/reference/evaql/insert
           - file: source/reference/evaql/delete
           - file: source/reference/evaql/rename
+          - file: source/reference/evaql/use
 
-      - file: source/reference/udfs/index
-        title: Models
+      - file: source/reference/api
+        title: Python API
+
+      - file: source/reference/databases/index
+        title: Data Sources
+        sections: 
+          - file: source/reference/databases/postgres
+          - file: source/reference/databases/sqlite
+          - file: source/reference/databases/mysql
+
+      - file: source/reference/ai/index
+        title: AI Engines
         sections:
-          - file: source/reference/udfs/hf
+          - file: source/reference/ai/model-train
+            title: Model Training
+          - file: source/reference/ai/model-forecasting
+            title: Time Series Forecasting
+          - file: source/reference/ai/hf
             title: Hugging Face
-          - file: source/reference/udfs/openai
+          - file: source/reference/ai/openai
             title: OpenAI 
-          - file: source/reference/udfs/yolo
+          - file: source/reference/ai/yolo
             title: YOLO 
-          - file: source/reference/udfs/custom
+          - file: source/reference/ai/custom
             title: Custom Model
-          - file: source/reference/udfs/model-train
-            title: Model Train/Finetune
         
-
       # - file: source/reference/io
       #   title: IO Descriptors
 
@@ -73,11 +91,8 @@ parts:
       - file: source/benchmarks/text_summarization.rst
         title: Text Summarization
 
-  - caption: Developer Guide
+  - caption: Developer Reference
     chapters:
-      - file: source/dev-guide/architecture
-        title: Architecture Design of EvaDB
-
       - file: source/dev-guide/contribute
         title: Contributing to EvaDB
         sections:
@@ -98,7 +113,7 @@ parts:
           - file: source/dev-guide/debugger/vscode-debugger
             title: VSCode Debugger
           - file: source/dev-guide/debugger/alternative
-            title: Alternaitve Debugger
+            title: Alternative Debugger
 
       - file: source/dev-guide/extend
         title: Extending EvaDB
@@ -114,4 +129,7 @@ parts:
           - file: source/dev-guide/release/pypi-account
             title: Setup PyPI Account
           - file: source/dev-guide/release/release-steps
-            title: How to Release
+            title: Release Guide
+
+      - file: source/dev-guide/architecture
+        title: Architecture Diagram

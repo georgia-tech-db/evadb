@@ -17,6 +17,8 @@ from __future__ import annotations
 import re
 from typing import TYPE_CHECKING, List
 
+import pandas as pd
+
 from evadb.catalog.catalog_type import ColumnType, TableType
 from evadb.catalog.catalog_utils import (
     get_video_table_column_definitions,
@@ -70,7 +72,7 @@ def check_data_source_and_table_are_valid(
             logger.error(error)
             raise BinderError(error)
 
-        # Check table existance.
+        # Check table existence.
         table_df = resp.data
         if table_name not in table_df["table_name"].values:
             error = "Table {} does not exist in data source {}. Create the table using native query.".format(
@@ -88,11 +90,16 @@ def check_data_source_and_table_are_valid(
 
 
 def create_table_catalog_entry_for_data_source(
-    table_name: str, column_name_list: List[str]
+    table_name: str, column_info: pd.DataFrame
 ):
+    column_name_list = list(column_info["name"])
+    column_type_list = [
+        ColumnType.python_type_to_evadb_type(dtype)
+        for dtype in list(column_info["dtype"])
+    ]
     column_list = []
-    for column_name in column_name_list:
-        column_list.append(ColumnCatalogEntry(column_name, ColumnType.ANY))
+    for name, dtype in zip(column_name_list, column_type_list):
+        column_list.append(ColumnCatalogEntry(name, dtype))
 
     # Assemble table.
     table_catalog_entry = TableCatalogEntry(
@@ -133,7 +140,7 @@ def bind_native_table_info(catalog: CatalogManager, table_info: TableInfo):
     # Assemble columns.
     column_df = handler.get_columns(table_info.table_name).data
     table_info.table_obj = create_table_catalog_entry_for_data_source(
-        table_info.table_name, list(column_df["column_name"])
+        table_info.table_name, column_df
     )
 
 
@@ -291,10 +298,10 @@ def handle_bind_extract_object_function(
     binder_context.bind(tracker)
     # append the bound output of detector
     for obj in detector.output_objs:
-        col_alias = "{}.{}".format(obj.udf_name.lower(), obj.name.lower())
+        col_alias = "{}.{}".format(obj.function_name.lower(), obj.name.lower())
         child = TupleValueExpression(
             obj.name,
-            table_alias=obj.udf_name.lower(),
+            table_alias=obj.function_name.lower(),
             col_object=obj,
             col_alias=col_alias,
         )
@@ -319,7 +326,7 @@ def get_column_definition_from_select_target_list(
 ) -> List[ColumnDefinition]:
     """
     This function is used by CREATE TABLE AS (SELECT...) and
-    CREATE UDF FROM (SELECT ...) to get the output objs from the
+    CREATE FUNCTION FROM (SELECT ...) to get the output objs from the
     child SELECT statement.
     """
     binded_col_list = []
@@ -345,7 +352,7 @@ def drop_row_id_from_target_list(
     target_list: List[AbstractExpression],
 ) -> List[AbstractExpression]:
     """
-    This function is intended to be used by CREATE UDF FROM (SELECT * FROM ...) and CREATE TABLE AS SELECT * FROM ... to exclude the row_id column.
+    This function is intended to be used by CREATE FUNCTION FROM (SELECT * FROM ...) and CREATE TABLE AS SELECT * FROM ... to exclude the row_id column.
     """
     filtered_list = []
     for expr in target_list:

@@ -40,19 +40,19 @@ class SaliencyTests(unittest.TestCase):
     @unittest.skip("Not supported in current version")
     def test_saliency(self):
         Saliency1 = f"{EvaDB_ROOT_DIR}/data/saliency/test1.jpeg"
-        create_udf_query = f"LOAD IMAGE '{Saliency1}' INTO SALIENCY;"
+        create_function_query = f"LOAD IMAGE '{Saliency1}' INTO SALIENCY;"
 
         execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS SALIENCY;")
 
-        execute_query_fetch_all(self.evadb, create_udf_query)
+        execute_query_fetch_all(self.evadb, create_function_query)
         execute_query_fetch_all(
-            self.evadb, "DROP UDF IF EXISTS SaliencyFeatureExtractor"
+            self.evadb, "DROP FUNCTION IF EXISTS SaliencyFeatureExtractor"
         )
 
-        create_udf_query = f"""CREATE UDF IF NOT EXISTS SaliencyFeatureExtractor
-                    IMPL  '{EvaDB_ROOT_DIR}/evadb/udfs/saliency_feature_extractor.py';
+        create_function_query = f"""CREATE FUNCTION IF NOT EXISTS SaliencyFeatureExtractor
+                    IMPL  '{EvaDB_ROOT_DIR}/evadb/functions/saliency_feature_extractor.py';
         """
-        execute_query_fetch_all(self.evadb, create_udf_query)
+        execute_query_fetch_all(self.evadb, create_function_query)
 
         select_query_saliency = """SELECT data, SaliencyFeatureExtractor(data)
                   FROM SALIENCY

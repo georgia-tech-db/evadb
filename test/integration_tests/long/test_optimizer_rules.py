@@ -17,7 +17,7 @@ from test.markers import gpu_skip_marker
 from test.util import (
     get_evadb_for_testing,
     get_physical_query_plan,
-    load_udfs_for_testing,
+    load_functions_for_testing,
     shutdown_ray,
 )
 
@@ -52,7 +52,7 @@ class OptimizerRulesTest(unittest.TestCase):
         ua_detrac = f"{EvaDB_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
         execute_query_fetch_all(cls.evadb, f"LOAD VIDEO '{ua_detrac}' INTO MyVideo;")
         execute_query_fetch_all(cls.evadb, f"LOAD VIDEO '{ua_detrac}' INTO MyVideo2;")
-        load_udfs_for_testing(cls.evadb, mode="debug")
+        load_functions_for_testing(cls.evadb, mode="debug")
 
     @classmethod
     def tearDownClass(cls):
@@ -146,7 +146,9 @@ class OptimizerRulesTest(unittest.TestCase):
         self.assertEqual(result_without_pushdown_join_rule, result_with_rule)
         self.assertEqual(query_plan, query_plan_without_pushdown_join_rule)
 
-    @patch("evadb.catalog.catalog_manager.CatalogManager.get_udf_cost_catalog_entry")
+    @patch(
+        "evadb.catalog.catalog_manager.CatalogManager.get_function_cost_catalog_entry"
+    )
     def test_should_reorder_predicates(self, mock):
         def _check_reorder(cost_func):
             mock.side_effect = cost_func
@@ -179,7 +181,9 @@ class OptimizerRulesTest(unittest.TestCase):
             lambda name: MagicMock(cost=5) if name == "DummyObjectDetector" else None
         )
 
-    @patch("evadb.catalog.catalog_manager.CatalogManager.get_udf_cost_catalog_entry")
+    @patch(
+        "evadb.catalog.catalog_manager.CatalogManager.get_function_cost_catalog_entry"
+    )
     def test_should_not_reorder_predicates(self, mock):
         def _check_no_reorder(cost_func):
             mock.side_effect = cost_func
@@ -213,15 +217,17 @@ class OptimizerRulesTest(unittest.TestCase):
             else MagicMock(cost=5)
         )
 
-        # no reordering if default cost is used for one UDF
+        # no reordering if default cost is used for one Function
         _check_no_reorder(
             lambda name: MagicMock(cost=5) if name == "DummyObjectDetector" else None
         )
 
-        # no reordering if default cost is used for both UDF
+        # no reordering if default cost is used for both Function
         _check_no_reorder(lambda name: None)
 
-    @patch("evadb.catalog.catalog_manager.CatalogManager.get_udf_cost_catalog_entry")
+    @patch(
+        "evadb.catalog.catalog_manager.CatalogManager.get_function_cost_catalog_entry"
+    )
     def test_should_reorder_multiple_predicates(self, mock):
         def side_effect_func(name):
             if name == "DummyMultiObjectDetector":

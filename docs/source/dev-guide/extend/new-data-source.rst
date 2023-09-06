@@ -1,3 +1,5 @@
+.. _add-data-source:
+
 Structured Data Source Integration
 ==================================
 This document details steps involved in adding a new structured data source integration in EvaDB.
@@ -70,7 +72,7 @@ You can get the data source's configuration parameters from `__init__(self, name
 
 .. note::
 
-   Those paramters will be specified when the user creates a connection to the data source: `CREATE DATABASE mydb_source WITH ENGINE = "mydb", PARAMETERS = {"host": "localhost", "port": "5432", "user": "eva", "password": "password"};`.
+   Those parameters will be specified when the user creates a connection to the data source: `CREATE DATABASE mydb_source WITH ENGINE = "mydb", PARAMETERS = {"host": "localhost", "port": "5432", "user": "eva", "password": "password"};`.
 
 You can check the PostgreSQL's handler example at `evadb/third_party/databases/postgres/postgres_handler.py <https://github.com/georgia-tech-db/evadb/blob/master/evadb/third_party/databases/postgres/postgres_handler.py>`_ for ideas.
 
@@ -87,3 +89,10 @@ Add your created data source handler in `get_database_handler` function at `evad
         return mod.MydbHandler(engine, **kwargs)
    ...
 
+Add the Data Source in Documentation
+------------------------------------
+
+Add your new data source into :ref:`databases` section for reference.
+
+- Create ``mydb.rst`` under `evadb/docs/source/reference/databases <https://github.com/georgia-tech-db/evadb/tree/staging/docs/source/reference/databases>`_ directory. You can refer to the existing documentation under the directory for example information to be covered in ``mydb.rst``.
+- Update ``source/reference/databases/postgres`` in `evadb/docs/_toc.yml <https://github.com/georgia-tech-db/evadb/blob/staging/docs/_toc.yml>`_.

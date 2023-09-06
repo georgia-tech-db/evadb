@@ -29,8 +29,8 @@ class ShowStatement(AbstractStatement):
 
     def __str__(self):
         show_str = ""
-        if self.show_type == ShowType.UDFS:
-            show_str = "UDFS"
+        if self.show_type == ShowType.FUNCTIONS:
+            show_str = "FUNCTIONS"
         elif self.show_type == ShowType.TABLES:
             show_str = "TABLES"
 
