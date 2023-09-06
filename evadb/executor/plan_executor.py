@@ -17,7 +17,6 @@ from typing import Iterator, Union
 from evadb.database import EvaDBDatabase
 from evadb.executor.abstract_executor import AbstractExecutor
 from evadb.executor.apply_and_merge_executor import ApplyAndMergeExecutor
-from evadb.executor.create_application_executor import CreateApplicationExecutor
 from evadb.executor.create_database_executor import CreateDatabaseExecutor
 from evadb.executor.create_executor import CreateExecutor
 from evadb.executor.create_index_executor import CreateIndexExecutor
@@ -91,11 +90,11 @@ class PlanExecutor:
 
         # First handle cases when the plan is actually a parser statement
         if isinstance(plan, CreateDatabaseStatement):
-            return CreateDatabaseExecutor(db=self._db, node=plan)
+            return CreateDatabaseExecutor(db=self._db, node=plan, app_type="Database")
         elif isinstance(plan, UseStatement):
             return UseExecutor(db=self._db, node=plan)
         elif isinstance(plan, CreateApplicationStatement):
-            return CreateApplicationExecutor(db=self._db, node=plan)
+            return CreateDatabaseExecutor(db=self._db, node=plan, app_type="Application")
 
         # Get plan node type
         plan_opr_type = plan.opr_type

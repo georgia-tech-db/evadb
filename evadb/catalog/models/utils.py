@@ -240,31 +240,15 @@ class DatabaseCatalogEntry:
 
     name: str
     engine: str
+    app_type: str
     params: dict
     row_id: int = None
 
     def display_format(self):
         return {
             "name": self.name,
+            "type": self.app_type,
             "engine": self.engine,
             "params": self.params,
         }
 
-
-@dataclass(unsafe_hash=True)
-class ApplicationCatalogEntry:
-    """Dataclass representing an entry in the `ApplicationCatalog`.
-    This is done to ensure we don't expose the sqlalchemy dependencies beyond catalog service. Further, sqlalchemy does not allow sharing of objects across threads.
-    """
-
-    name: str
-    engine: str
-    params: dict
-    row_id: int = None
-
-    def display_format(self):
-        return {
-            "name": self.name,
-            "engine": self.engine,
-            "params": self.params,
-        }

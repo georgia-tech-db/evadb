@@ -16,27 +16,33 @@ import importlib
 import os
 
 
-def get_application_handler(engine: str, **kwargs):
+def get_database_handler(engine: str, **kwargs):
     """
-    Return the application handler. User should modify this function for
+    Return the database handler. User should modify this function for
     their new integrated handlers.
     """
 
     # Dynamically import the top module.
     try:
-        mod = dynamic_import(engine)
+        mod = dynamic_import(engine, "applications" if engine == "slack" else "databases")
     except ImportError:
         req_file = os.path.join(os.path.dirname(__file__), engine, "requirements.txt")
         if os.path.isfile(req_file):
             with open(req_file) as f:
                 raise ImportError(f"Please install the following packages {f.read()}")
 
-    if engine == "slack":
+    if engine == "postgres":
+        return mod.PostgresHandler(engine, **kwargs)
+    elif engine == "sqlite":
+        return mod.SQLiteHandler(engine, **kwargs)
+    elif engine == "mysql":
+        return mod.MysqlHandler(engine, **kwargs)
+    elif engine == "slack":
         return mod.SlackHandler(engine, **kwargs)
     else:
         raise NotImplementedError(f"Engine {engine} is not supported")
 
 
-def dynamic_import(handler_dir):
-    import_path = f"evadb.third_party.applications.{handler_dir}.{handler_dir}_handler"
+def dynamic_import(handler_dir, app_type):
+    import_path = f"evadb.third_party.{app_type}.{handler_dir}.{handler_dir}_handler"
     return importlib.import_module(import_path)

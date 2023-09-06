@@ -30,12 +30,14 @@ class DatabaseCatalogService(BaseService):
     def insert_entry(
         self,
         name: str,
+        app_type: str,
         engine: str,
         params: dict,
     ):
         try:
             db_catalog_obj = self.model(
                 name=name,
+                app_type=app_type,
                 engine=engine,
                 params=params,
             )

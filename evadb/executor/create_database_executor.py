@@ -19,13 +19,14 @@ from evadb.executor.abstract_executor import AbstractExecutor
 from evadb.executor.executor_utils import ExecutorError
 from evadb.models.storage.batch import Batch
 from evadb.parser.create_statement import CreateDatabaseStatement
-from evadb.third_party.databases.interface import get_database_handler
+from evadb.third_party.interface import get_database_handler
 from evadb.utils.logging_manager import logger
 
 
 class CreateDatabaseExecutor(AbstractExecutor):
-    def __init__(self, db: EvaDBDatabase, node: CreateDatabaseStatement):
+    def __init__(self, db: EvaDBDatabase, node: CreateDatabaseStatement, app_type):
         super().__init__(db, node)
+        self.app_type = app_type
 
     def exec(self, *args, **kwargs):
         # TODO: handle if_not_exists
@@ -49,7 +50,7 @@ class CreateDatabaseExecutor(AbstractExecutor):
 
         logger.debug(f"Creating database {self.node}")
         self.catalog().insert_database_catalog_entry(
-            self.node.database_name, self.node.engine, self.node.param_dict
+            self.node.database_name, self.app_type, self.node.engine, self.node.param_dict
         )
 
         yield Batch(
