@@ -97,7 +97,7 @@ class CreateFunctionExecutorTest(unittest.TestCase):
         with self.assertRaises(RuntimeError) as exc:
             next(create_function_executor.exec())
         self.assertIn(
-            "Error creating Function, input/output definition incorrect:",
+            "Error creating function, input/output definition incorrect:",
             str(exc.exception),
         )
 
