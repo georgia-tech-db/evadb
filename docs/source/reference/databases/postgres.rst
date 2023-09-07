@@ -32,5 +32,5 @@ Create Connection
         "host": "localhost",
         "port": "5432", 
         "database": "evadb"
-   };
+   }
 
