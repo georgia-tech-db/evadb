@@ -21,7 +21,7 @@ from test.util import (  # file_remove,
     file_remove,
     get_evadb_for_testing,
     get_logical_query_plan,
-    load_udfs_for_testing,
+    load_functions_for_testing,
     shutdown_ray,
 )
 
@@ -47,7 +47,7 @@ class SelectExecutorTest(unittest.TestCase):
         load_query = f"LOAD VIDEO '{video_file_path}' INTO MyVideo;"
         execute_query_fetch_all(cls.evadb, load_query)
 
-        load_udfs_for_testing(cls.evadb)
+        load_functions_for_testing(cls.evadb)
 
         cls.table1 = create_table(cls.evadb, "table1", 100, 3)
         cls.table2 = create_table(cls.evadb, "table2", 500, 3)
@@ -315,14 +315,14 @@ class SelectExecutorTest(unittest.TestCase):
         self.assertEqual(unnest_batch, expected)
 
     def test_should_raise_error_with_missing_alias_in_lateral_join(self):
-        udf_name = "DummyMultiObjectDetector"
+        function_name = "DummyMultiObjectDetector"
         query = """SELECT id, labels
                   FROM MyVideo JOIN LATERAL DummyMultiObjectDetector(data).labels;"""
         with self.assertRaises(SyntaxError) as cm:
             execute_query_fetch_all(self.evadb, query, do_not_print_exceptions=True)
         self.assertEqual(
             str(cm.exception),
-            f"TableValuedFunction {udf_name} should have alias.",
+            f"TableValuedFunction {function_name} should have alias.",
         )
 
         query = """SELECT id, labels
@@ -332,7 +332,7 @@ class SelectExecutorTest(unittest.TestCase):
             execute_query_fetch_all(self.evadb, query)
         self.assertEqual(
             str(cm.exception),
-            f"TableValuedFunction {udf_name} should have alias.",
+            f"TableValuedFunction {function_name} should have alias.",
         )
 
         query = """SELECT id, labels
@@ -341,11 +341,11 @@ class SelectExecutorTest(unittest.TestCase):
             execute_query_fetch_all(self.evadb, query)
         self.assertEqual(
             str(cm.exception),
-            f"TableValuedFunction {udf_name} should have alias.",
+            f"TableValuedFunction {function_name} should have alias.",
         )
 
     def test_should_raise_error_with_invalid_number_of_aliases(self):
-        udf_name = "DummyMultiObjectDetector"
+        function_name = "DummyMultiObjectDetector"
         query = """SELECT id, labels
                   FROM MyVideo JOIN LATERAL
                     DummyMultiObjectDetector(data).bboxes AS T;"""
@@ -353,7 +353,7 @@ class SelectExecutorTest(unittest.TestCase):
             execute_query_fetch_all(self.evadb, query)
         self.assertEqual(
             str(cm.exception),
-            f"Output bboxes does not exist for {udf_name}.",
+            f"Output bboxes does not exist for {function_name}.",
         )
 
     def test_should_raise_error_with_invalid_output_lateral_join(self):
@@ -407,9 +407,9 @@ class SelectExecutorTest(unittest.TestCase):
             self.evadb, "SELECT DummyMultiObjectDetector(data).labels FROM MyVideo"
         )
         signature = plan.target_list[0].signature()
-        udf_id = (
+        function_id = (
             self.evadb.catalog()
-            .get_udf_catalog_entry_by_name("DummyMultiObjectDetector")
+            .get_function_catalog_entry_by_name("DummyMultiObjectDetector")
             .row_id
         )
         table_entry = self.evadb.catalog().get_table_catalog_entry("MyVideo")
@@ -417,5 +417,6 @@ class SelectExecutorTest(unittest.TestCase):
             self.evadb.catalog().get_column_catalog_entry(table_entry, "data").row_id
         )
         self.assertEqual(
-            signature, f"DummyMultiObjectDetector[{udf_id}](MyVideo.data[{col_id}])"
+            signature,
+            f"DummyMultiObjectDetector[{function_id}](MyVideo.data[{col_id}])",
         )

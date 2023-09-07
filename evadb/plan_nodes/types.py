@@ -26,7 +26,7 @@ class PlanOprType(Enum):
     CREATE = auto()
     RENAME = auto()
     DROP_OBJECT = auto()
-    CREATE_UDF = auto()
+    CREATE_FUNCTION = auto()
     LOAD_DATA = auto()
     UNION = auto()
     GROUP_BY = auto()

@@ -298,10 +298,10 @@ def handle_bind_extract_object_function(
     binder_context.bind(tracker)
     # append the bound output of detector
     for obj in detector.output_objs:
-        col_alias = "{}.{}".format(obj.udf_name.lower(), obj.name.lower())
+        col_alias = "{}.{}".format(obj.function_name.lower(), obj.name.lower())
         child = TupleValueExpression(
             obj.name,
-            table_alias=obj.udf_name.lower(),
+            table_alias=obj.function_name.lower(),
             col_object=obj,
             col_alias=col_alias,
         )
@@ -326,7 +326,7 @@ def get_column_definition_from_select_target_list(
 ) -> List[ColumnDefinition]:
     """
     This function is used by CREATE TABLE AS (SELECT...) and
-    CREATE UDF FROM (SELECT ...) to get the output objs from the
+    CREATE FUNCTION FROM (SELECT ...) to get the output objs from the
     child SELECT statement.
     """
     binded_col_list = []
@@ -352,7 +352,7 @@ def drop_row_id_from_target_list(
     target_list: List[AbstractExpression],
 ) -> List[AbstractExpression]:
     """
-    This function is intended to be used by CREATE UDF FROM (SELECT * FROM ...) and CREATE TABLE AS SELECT * FROM ... to exclude the row_id column.
+    This function is intended to be used by CREATE FUNCTION FROM (SELECT * FROM ...) and CREATE TABLE AS SELECT * FROM ... to exclude the row_id column.
     """
     filtered_list = []
     for expr in target_list:

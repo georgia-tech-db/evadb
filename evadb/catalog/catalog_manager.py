@@ -24,7 +24,7 @@ from evadb.catalog.catalog_type import (
 )
 from evadb.catalog.catalog_utils import (
     cleanup_storage,
-    construct_udf_cache_catalog_entry,
+    construct_function_cache_catalog_entry,
     get_document_table_column_definitions,
     get_image_table_column_definitions,
     get_pdf_table_column_definitions,
@@ -34,28 +34,32 @@ from evadb.catalog.catalog_utils import (
 from evadb.catalog.models.utils import (
     ColumnCatalogEntry,
     DatabaseCatalogEntry,
+    FunctionCacheCatalogEntry,
+    FunctionCatalogEntry,
+    FunctionCostCatalogEntry,
+    FunctionIOCatalogEntry,
+    FunctionMetadataCatalogEntry,
     IndexCatalogEntry,
     TableCatalogEntry,
-    UdfCacheCatalogEntry,
-    UdfCatalogEntry,
-    UdfCostCatalogEntry,
-    UdfIOCatalogEntry,
-    UdfMetadataCatalogEntry,
     drop_all_tables_except_catalog,
     init_db,
     truncate_catalog_tables,
 )
 from evadb.catalog.services.column_catalog_service import ColumnCatalogService
 from evadb.catalog.services.database_catalog_service import DatabaseCatalogService
+from evadb.catalog.services.function_cache_catalog_service import (
+    FunctionCacheCatalogService,
+)
+from evadb.catalog.services.function_catalog_service import FunctionCatalogService
+from evadb.catalog.services.function_cost_catalog_service import (
+    FunctionCostCatalogService,
+)
+from evadb.catalog.services.function_io_catalog_service import FunctionIOCatalogService
+from evadb.catalog.services.function_metadata_catalog_service import (
+    FunctionMetadataCatalogService,
+)
 from evadb.catalog.services.index_catalog_service import IndexCatalogService
 from evadb.catalog.services.table_catalog_service import TableCatalogService
-from evadb.catalog.services.udf_cache_catalog_service import UdfCacheCatalogService
-from evadb.catalog.services.udf_catalog_service import UdfCatalogService
-from evadb.catalog.services.udf_cost_catalog_service import UdfCostCatalogService
-from evadb.catalog.services.udf_io_catalog_service import UdfIOCatalogService
-from evadb.catalog.services.udf_metadata_catalog_service import (
-    UdfMetadataCatalogService,
-)
 from evadb.catalog.sql_config import IDENTIFIER_COLUMN, SQLConfig
 from evadb.configuration.configuration_manager import ConfigurationManager
 from evadb.expression.function_expression import FunctionExpression
@@ -75,12 +79,18 @@ class CatalogManager(object):
         self._db_catalog_service = DatabaseCatalogService(self._sql_config.session)
         self._table_catalog_service = TableCatalogService(self._sql_config.session)
         self._column_service = ColumnCatalogService(self._sql_config.session)
-        self._udf_service = UdfCatalogService(self._sql_config.session)
-        self._udf_cost_catalog_service = UdfCostCatalogService(self._sql_config.session)
-        self._udf_io_service = UdfIOCatalogService(self._sql_config.session)
-        self._udf_metadata_service = UdfMetadataCatalogService(self._sql_config.session)
+        self._function_service = FunctionCatalogService(self._sql_config.session)
+        self._function_cost_catalog_service = FunctionCostCatalogService(
+            self._sql_config.session
+        )
+        self._function_io_service = FunctionIOCatalogService(self._sql_config.session)
+        self._function_metadata_service = FunctionMetadataCatalogService(
+            self._sql_config.session
+        )
         self._index_service = IndexCatalogService(self._sql_config.session)
-        self._udf_cache_service = UdfCacheCatalogService(self._sql_config.session)
+        self._function_cache_service = FunctionCacheCatalogService(
+            self._sql_config.session
+        )
 
     @property
     def sql_config(self):
@@ -280,90 +290,96 @@ class CatalogManager(object):
         col_entries = self._column_service.filter_entries_by_table(table_obj)
         return col_entries
 
-    "udf catalog services"
+    "function catalog services"
 
-    def insert_udf_catalog_entry(
+    def insert_function_catalog_entry(
         self,
         name: str,
         impl_file_path: str,
         type: str,
-        udf_io_list: List[UdfIOCatalogEntry],
-        udf_metadata_list: List[UdfMetadataCatalogEntry],
-    ) -> UdfCatalogEntry:
-        """Inserts a UDF catalog entry along with UDF_IO entries.
+        function_io_list: List[FunctionIOCatalogEntry],
+        function_metadata_list: List[FunctionMetadataCatalogEntry],
+    ) -> FunctionCatalogEntry:
+        """Inserts a function catalog entry along with Function_IO entries.
         It persists the entry to the database.
 
         Arguments:
-            name(str): name of the udf
-            impl_file_path(str): implementation path of the udf
-            type(str): what kind of udf operator like classification,
+            name(str): name of the function
+            impl_file_path(str): implementation path of the function
+            type(str): what kind of function operator like classification,
                                                         detection etc
-            udf_io_list(List[UdfIOCatalogEntry]): input/output udf info list
+            function_io_list(List[FunctionIOCatalogEntry]): input/output function info list
 
         Returns:
-            The persisted UdfCatalogEntry object.
+            The persisted FunctionCatalogEntry object.
         """
 
         checksum = get_file_checksum(impl_file_path)
-        udf_entry = self._udf_service.insert_entry(name, impl_file_path, type, checksum)
-        for udf_io in udf_io_list:
-            udf_io.udf_id = udf_entry.row_id
-        self._udf_io_service.insert_entries(udf_io_list)
-        for udf_metadata in udf_metadata_list:
-            udf_metadata.udf_id = udf_entry.row_id
-        self._udf_metadata_service.insert_entries(udf_metadata_list)
-        return udf_entry
+        function_entry = self._function_service.insert_entry(
+            name, impl_file_path, type, checksum
+        )
+        for function_io in function_io_list:
+            function_io.function_id = function_entry.row_id
+        self._function_io_service.insert_entries(function_io_list)
+        for function_metadata in function_metadata_list:
+            function_metadata.function_id = function_entry.row_id
+        self._function_metadata_service.insert_entries(function_metadata_list)
+        return function_entry
 
-    def get_udf_catalog_entry_by_name(self, name: str) -> UdfCatalogEntry:
+    def get_function_catalog_entry_by_name(self, name: str) -> FunctionCatalogEntry:
         """
-        Get the UDF information based on name.
+        Get the function information based on name.
 
         Arguments:
-             name (str): name of the UDF
+             name (str): name of the function
 
         Returns:
-            UdfCatalogEntry object
+            FunctionCatalogEntry object
         """
-        return self._udf_service.get_entry_by_name(name)
+        return self._function_service.get_entry_by_name(name)
 
-    def delete_udf_catalog_entry_by_name(self, udf_name: str) -> bool:
-        return self._udf_service.delete_entry_by_name(udf_name)
+    def delete_function_catalog_entry_by_name(self, function_name: str) -> bool:
+        return self._function_service.delete_entry_by_name(function_name)
 
-    def get_all_udf_catalog_entries(self):
-        return self._udf_service.get_all_entries()
+    def get_all_function_catalog_entries(self):
+        return self._function_service.get_all_entries()
 
-    "udf cost catalog services"
+    "function cost catalog services"
 
-    def upsert_udf_cost_catalog_entry(
-        self, udf_id: int, name: str, cost: int
-    ) -> UdfCostCatalogEntry:
-        """Upserts UDF cost catalog entry.
+    def upsert_function_cost_catalog_entry(
+        self, function_id: int, name: str, cost: int
+    ) -> FunctionCostCatalogEntry:
+        """Upserts function cost catalog entry.
 
         Arguments:
-            udf_id(int): unique udf id
-            name(str): the name of the udf
-            cost(int): cost of this UDF
+            function_id(int): unique function id
+            name(str): the name of the function
+            cost(int): cost of this function
 
         Returns:
-            The persisted UdfCostCatalogEntry object.
+            The persisted FunctionCostCatalogEntry object.
         """
 
-        self._udf_cost_catalog_service.upsert_entry(udf_id, name, cost)
+        self._function_cost_catalog_service.upsert_entry(function_id, name, cost)
 
-    def get_udf_cost_catalog_entry(self, name: str):
-        return self._udf_cost_catalog_service.get_entry_by_name(name)
+    def get_function_cost_catalog_entry(self, name: str):
+        return self._function_cost_catalog_service.get_entry_by_name(name)
 
-    "UdfIO services"
+    "FunctionIO services"
 
-    def get_udf_io_catalog_input_entries(
-        self, udf_obj: UdfCatalogEntry
-    ) -> List[UdfIOCatalogEntry]:
-        return self._udf_io_service.get_input_entries_by_udf_id(udf_obj.row_id)
+    def get_function_io_catalog_input_entries(
+        self, function_obj: FunctionCatalogEntry
+    ) -> List[FunctionIOCatalogEntry]:
+        return self._function_io_service.get_input_entries_by_function_id(
+            function_obj.row_id
+        )
 
-    def get_udf_io_catalog_output_entries(
-        self, udf_obj: UdfCatalogEntry
-    ) -> List[UdfIOCatalogEntry]:
-        return self._udf_io_service.get_output_entries_by_udf_id(udf_obj.row_id)
+    def get_function_io_catalog_output_entries(
+        self, function_obj: FunctionCatalogEntry
+    ) -> List[FunctionIOCatalogEntry]:
+        return self._function_io_service.get_output_entries_by_function_id(
+            function_obj.row_id
+        )
 
     """ Index related services. """
 
@@ -373,21 +389,21 @@ class CatalogManager(object):
         save_file_path: str,
         vector_store_type: VectorStoreType,
         feat_column: ColumnCatalogEntry,
-        udf_signature: str,
+        function_signature: str,
     ) -> IndexCatalogEntry:
         index_catalog_entry = self._index_service.insert_entry(
-            name, save_file_path, vector_store_type, feat_column, udf_signature
+            name, save_file_path, vector_store_type, feat_column, function_signature
         )
         return index_catalog_entry
 
     def get_index_catalog_entry_by_name(self, name: str) -> IndexCatalogEntry:
         return self._index_service.get_entry_by_name(name)
 
-    def get_index_catalog_entry_by_column_and_udf_signature(
-        self, column: ColumnCatalogEntry, udf_signature: str
+    def get_index_catalog_entry_by_column_and_function_signature(
+        self, column: ColumnCatalogEntry, function_signature: str
     ):
-        return self._index_service.get_entry_by_column_and_udf_signature(
-            column, udf_signature
+        return self._index_service.get_entry_by_column_and_function_signature(
+            column, function_signature
         )
 
     def drop_index_catalog_entry(self, index_name: str) -> bool:
@@ -396,39 +412,45 @@ class CatalogManager(object):
     def get_all_index_catalog_entries(self):
         return self._index_service.get_all_entries()
 
-    """ Udf Cache related"""
+    """ Function Cache related"""
 
-    def insert_udf_cache_catalog_entry(self, func_expr: FunctionExpression):
+    def insert_function_cache_catalog_entry(self, func_expr: FunctionExpression):
         cache_dir = self._config.get_value("storage", "cache_dir")
-        entry = construct_udf_cache_catalog_entry(func_expr, cache_dir=cache_dir)
-        return self._udf_cache_service.insert_entry(entry)
+        entry = construct_function_cache_catalog_entry(func_expr, cache_dir=cache_dir)
+        return self._function_cache_service.insert_entry(entry)
 
-    def get_udf_cache_catalog_entry_by_name(self, name: str) -> UdfCacheCatalogEntry:
-        return self._udf_cache_service.get_entry_by_name(name)
+    def get_function_cache_catalog_entry_by_name(
+        self, name: str
+    ) -> FunctionCacheCatalogEntry:
+        return self._function_cache_service.get_entry_by_name(name)
 
-    def drop_udf_cache_catalog_entry(self, entry: UdfCacheCatalogEntry) -> bool:
+    def drop_function_cache_catalog_entry(
+        self, entry: FunctionCacheCatalogEntry
+    ) -> bool:
         # remove the data structure associated with the entry
         if entry:
             shutil.rmtree(entry.cache_path)
-        return self._udf_cache_service.delete_entry(entry)
+        return self._function_cache_service.delete_entry(entry)
 
-    """ UDF Metadata Catalog"""
+    """ function Metadata Catalog"""
 
-    def get_udf_metadata_entries_by_udf_name(
-        self, udf_name: str
-    ) -> List[UdfMetadataCatalogEntry]:
+    def get_function_metadata_entries_by_function_name(
+        self, function_name: str
+    ) -> List[FunctionMetadataCatalogEntry]:
         """
-        Get the UDF metadata information for the provided udf.
+        Get the function metadata information for the provided function.
 
         Arguments:
-             udf_name (str): name of the UDF
+             function_name (str): name of the function
 
         Returns:
-            UdfMetadataCatalogEntry objects
+            FunctionMetadataCatalogEntry objects
         """
-        udf_entry = self.get_udf_catalog_entry_by_name(udf_name)
-        if udf_entry:
-            entries = self._udf_metadata_service.get_entries_by_udf_id(udf_entry.row_id)
+        function_entry = self.get_function_catalog_entry_by_name(function_name)
+        if function_entry:
+            entries = self._function_metadata_service.get_entries_by_function_id(
+                function_entry.row_id
+            )
             return entries
         else:
             return []

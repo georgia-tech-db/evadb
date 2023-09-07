@@ -25,8 +25,8 @@ from test.util import (
 import pytest
 
 from evadb.configuration.constants import EvaDB_ROOT_DIR
+from evadb.functions.function_bootstrap_queries import fuzzy_function_query
 from evadb.server.command_handler import execute_query_fetch_all
-from evadb.udfs.udf_bootstrap_queries import fuzzy_udf_query
 
 
 @pytest.mark.notparallel
@@ -40,7 +40,7 @@ class FuzzyJoinTests(unittest.TestCase):
         )
         self.csv_file_path = create_sample_csv()
 
-        # Prepare needed UDFs and data.
+        # Prepare needed Functions and data.
         # loading a csv requires a table to be created first
         create_table_query = """
             CREATE TABLE IF NOT EXISTS MyVideoCSV (
@@ -73,7 +73,7 @@ class FuzzyJoinTests(unittest.TestCase):
         execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS MyVideoCSV;")
 
     def test_fuzzyjoin(self):
-        execute_query_fetch_all(self.evadb, fuzzy_udf_query)
+        execute_query_fetch_all(self.evadb, fuzzy_function_query)
 
         # TODO this test does not make sense. Need to improve
         fuzzy_join_query = """SELECT * FROM MyVideo a JOIN MyVideoCSV b

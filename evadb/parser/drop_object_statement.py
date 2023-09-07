@@ -25,7 +25,7 @@ class DropObjectStatement(AbstractStatement):
         name (str
             name of the object to drop
         if_exists: bool
-            if false, throws an error when no UDF with name exists
+            if false, throws an error when no function with name exists
             else logs a warning
     """
 

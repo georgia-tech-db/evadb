@@ -18,7 +18,7 @@ from test.util import (
     create_sample_video,
     file_remove,
     get_evadb_for_testing,
-    load_udfs_for_testing,
+    load_functions_for_testing,
     shutdown_ray,
 )
 
@@ -38,7 +38,7 @@ class ArrayCountTests(unittest.TestCase):
         video_file_path = create_sample_video(NUM_FRAMES)
         load_query = f"LOAD VIDEO '{video_file_path}' INTO MyVideo;"
         execute_query_fetch_all(cls.evadb, load_query)
-        load_udfs_for_testing(cls.evadb, mode="debug")
+        load_functions_for_testing(cls.evadb, mode="debug")
 
     @classmethod
     def tearDownClass(cls):
@@ -48,7 +48,7 @@ class ArrayCountTests(unittest.TestCase):
 
     # integration test
 
-    def test_should_load_and_select_using_udf_video(self):
+    def test_should_load_and_select_using_function_video(self):
         # Equality test
         select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo \
             WHERE DummyObjectDetector(data).label = ['person'] ORDER BY id;"

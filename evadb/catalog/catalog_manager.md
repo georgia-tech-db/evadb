@@ -1,6 +1,6 @@
 # Catalog Manager
 
-CatalogManager class provides a set of services to interact with a database that stores metadata about tables, columns, and user-defined functions (UDFs). Information like what is the data type in a certain column in a table, type of a table, its name, etc.. It contains functions to get, insert and delete catalog entries for Tables, UDFs, UDF IOs, Columns and Indexes.  
+CatalogManager class provides a set of services to interact with a database that stores metadata about tables, columns, and user-defined functions. Information like what is the data type in a certain column in a table, type of a table, its name, etc.. It contains functions to get, insert and delete catalog entries for Tables, Functions, Function IOs, Columns and Indexes.  
 
 This data is stored in the eva_catalog.db file which can be found in `evadb_data` folder.  
 
@@ -10,10 +10,10 @@ Catalog manager currently has 7 services in it:
 TableCatalogService()
 ColumnCatalogService()  
 IndexCatalogService() 
-UdfCatalogService()  
-UdfIOCatalogService()  
-UdfCostCatalogService() 
-UdfMetadataCatalogService()
+FunctionCatalogService()  
+FunctionIOCatalogService()  
+FunctionCostCatalogService() 
+FunctionMetadataCatalogService()
 ```
 
 ## Catalog Services  
@@ -55,20 +55,20 @@ save_file_path: str
 type: VectorStoreType  
 row_id: int 
 feat_column_id: int
-udf_signature: str 
+function_signature: str 
 feat_column: ColumnCatalogEntry 
 ```
-### UdfCatalog
+### FunctionCatalog
 Fields:  
 ```
 name: str  
 impl_file_path: str  
 type: str  
 row_id: int
-args: List[UdfIOCatalogEntry]
-outputs: List[UdfIOCatalogEntry]  
+args: List[FunctionIOCatalogEntry]
+outputs: List[FunctionIOCatalogEntry]  
 ```
-### UdfIOCatalog
+### FunctionIOCatalog
 Fields:  
 ```
 name: str  
@@ -77,26 +77,26 @@ is_nullable: bool
 array_type: NdArrayType
 array_dimensions: Tuple[int] 
 is_input: bool  
-udf_id: int  
-udf_name: str  
+function_id: int  
+function_name: str  
 row_id: int  
 ```
 
-### UdfCostCatalog
+### FunctionCostCatalog
 Fields:  
 ```
-udf_id: int
+function_id: int
 name: str
 cost: float
 row_id: int
 ```
 
-### UdfMetadataCatalog
+### FunctionMetadataCatalog
 Fields:  
 ```
 key: str
 value: str
-udf_id: int
-udf_name: str
+function_id: int
+function_name: str
 row_id: int 
 ```

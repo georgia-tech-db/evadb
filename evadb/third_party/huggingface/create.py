@@ -17,8 +17,8 @@ from typing import Dict, List, Type, Union
 import numpy as np
 
 from evadb.catalog.catalog_type import ColumnType, NdArrayType
-from evadb.catalog.models.udf_io_catalog import UdfIOCatalogEntry
-from evadb.catalog.models.udf_metadata_catalog import UdfMetadataCatalogEntry
+from evadb.catalog.models.function_io_catalog import FunctionIOCatalogEntry
+from evadb.catalog.models.function_metadata_catalog import FunctionMetadataCatalogEntry
 from evadb.third_party.huggingface.model import (
     ASRHFModel,
     AudioHFModel,
@@ -102,12 +102,12 @@ def gen_sample_input(input_type: HFInputTypes):
         return sample_image()
     elif input_type == HFInputTypes.AUDIO:
         return sample_audio()
-    assert False, "Invalid Input Type for UDF"
+    assert False, "Invalid Input Type for Function"
 
 
 def infer_output_name_and_type(**pipeline_args):
     """
-    Infer the name and type for each output of the HuggingFace UDF
+    Infer the name and type for each output of the HuggingFace Function
     """
     assert "task" in pipeline_args, "Task Not Found In Model Definition"
     task = pipeline_args["task"]
@@ -139,23 +139,23 @@ def infer_output_name_and_type(**pipeline_args):
     return input_type, output_types
 
 
-def io_entry_for_inputs(udf_name: str, udf_input: Union[str, List]):
+def io_entry_for_inputs(function_name: str, function_input: Union[str, List]):
     """
-    Generates the IO Catalog Entry for the inputs to HF UDFs
+    Generates the IO Catalog Entry for the inputs to HF Functions
     Input is one of ["text", "image", "audio", "video", "multimodal"]
     """
-    if isinstance(udf_input, HFInputTypes):
-        udf_input = [udf_input]
+    if isinstance(function_input, HFInputTypes):
+        function_input = [function_input]
     inputs = []
-    for input_type in udf_input:
+    for input_type in function_input:
         array_type = NdArrayType.ANYTYPE
         if input_type == HFInputTypes.TEXT:
             array_type = NdArrayType.STR
-        elif input_type == HFInputTypes.IMAGE or udf_input == HFInputTypes.AUDIO:
+        elif input_type == HFInputTypes.IMAGE or function_input == HFInputTypes.AUDIO:
             array_type = NdArrayType.FLOAT32
         inputs.append(
-            UdfIOCatalogEntry(
-                name=f"{udf_name}_{input_type}",
+            FunctionIOCatalogEntry(
+                name=f"{function_name}_{input_type}",
                 type=ColumnType.NDARRAY,
                 is_nullable=False,
                 array_type=array_type,
@@ -177,14 +177,14 @@ def ptype_to_ndarray_type(col_type: type):
         return NdArrayType.ANYTYPE
 
 
-def io_entry_for_outputs(udf_outputs: Dict[str, Type]):
+def io_entry_for_outputs(function_outputs: Dict[str, Type]):
     """
     Generates the IO Catalog Entry for the output
     """
     outputs = []
-    for col_name, col_type in udf_outputs.items():
+    for col_name, col_type in function_outputs.items():
         outputs.append(
-            UdfIOCatalogEntry(
+            FunctionIOCatalogEntry(
                 name=col_name,
                 type=ColumnType.NDARRAY,
                 array_type=ptype_to_ndarray_type(col_type),
@@ -194,13 +194,15 @@ def io_entry_for_outputs(udf_outputs: Dict[str, Type]):
     return outputs
 
 
-def gen_hf_io_catalog_entries(udf_name: str, metadata: List[UdfMetadataCatalogEntry]):
+def gen_hf_io_catalog_entries(
+    function_name: str, metadata: List[FunctionMetadataCatalogEntry]
+):
     """
-    Generates IO Catalog Entries for a HuggingFace UDF.
+    Generates IO Catalog Entries for a HuggingFace Function.
     The attributes of the huggingface model can be extracted from metadata.
     """
     pipeline_args = {arg.key: arg.value for arg in metadata}
-    udf_input, udf_output = infer_output_name_and_type(**pipeline_args)
-    annotated_inputs = io_entry_for_inputs(udf_name, udf_input)
-    annotated_outputs = io_entry_for_outputs(udf_output)
+    function_input, function_output = infer_output_name_and_type(**pipeline_args)
+    annotated_inputs = io_entry_for_inputs(function_name, function_input)
+    annotated_outputs = io_entry_for_outputs(function_output)
     return annotated_inputs + annotated_outputs
