@@ -15,7 +15,7 @@
 import mysql.connector
 import pandas as pd
 
-from evadb.third_party.databases.types import (
+from evadb.third_party.types import (
     DBHandler,
     DBHandlerResponse,
     DBHandlerStatus,
