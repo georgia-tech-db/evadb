@@ -45,7 +45,7 @@ class CreateApplicationTest(unittest.TestCase):
 
         db_entry = self.evadb.catalog().get_database_catalog_entry("example_app")
         self.assertEqual(db_entry.name, "example_app")
-        self.assertEqual(db_entry.app_type, "application")
+        self.assertEqual(db_entry.app_type, "Application")
         self.assertEqual(db_entry.engine, "slack")
         self.assertEqual(db_entry.params, params)
 

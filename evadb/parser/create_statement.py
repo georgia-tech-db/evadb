@@ -191,10 +191,10 @@ class CreateTableStatement(AbstractStatement):
 
 class CreateDatabaseStatement(AbstractStatement):
     def __init__(
-        self, database_name: str, if_not_exists: bool, engine: str, param_dict: dict
+        self, name: str, if_not_exists: bool, engine: str, param_dict: dict
     ):
         super().__init__(StatementType.CREATE_DATABASE)
-        self.database_name = database_name
+        self.name = name
         self.if_not_exists = if_not_exists
         self.engine = engine
         self.param_dict = param_dict
@@ -203,7 +203,7 @@ class CreateDatabaseStatement(AbstractStatement):
         if not isinstance(other, CreateDatabaseStatement):
             return False
         return (
-            self.database_name == other.database_name
+            self.name == other.name
             and self.if_not_exists == other.if_not_exists
             and self.engine == other.engine
             and self.param_dict == other.param_dict
@@ -213,7 +213,7 @@ class CreateDatabaseStatement(AbstractStatement):
         return hash(
             (
                 super().__hash__(),
-                self.database_name,
+                self.name,
                 self.if_not_exists,
                 self.engine,
                 hash(frozenset(self.param_dict.items())),
@@ -222,7 +222,7 @@ class CreateDatabaseStatement(AbstractStatement):
 
     def __str__(self) -> str:
         return (
-            f"CREATE DATABASE {self.database_name} \n"
+            f"CREATE DATABASE {self.name} \n"
             f"WITH ENGINE '{self.engine}' , \n"
             f"PARAMETERS = {self.param_dict};"
         )
@@ -230,10 +230,10 @@ class CreateDatabaseStatement(AbstractStatement):
 
 class CreateApplicationStatement(AbstractStatement):
     def __init__(
-        self, application_name: str, if_not_exists: bool, engine: str, param_dict: dict
+        self, name: str, if_not_exists: bool, engine: str, param_dict: dict
     ):
         super().__init__(StatementType.CREATE_APPLICATION)
-        self.application_name = application_name
+        self.name = name
         self.if_not_exists = if_not_exists
         self.engine = engine
         self.param_dict = param_dict
@@ -242,7 +242,7 @@ class CreateApplicationStatement(AbstractStatement):
         if not isinstance(other, CreateApplicationStatement):
             return False
         return (
-            self.application_name == other.application_name
+            self.name == other.name
             and self.if_not_exists == other.if_not_exists
             and self.engine == other.engine
             and self.param_dict == other.param_dict
@@ -252,7 +252,7 @@ class CreateApplicationStatement(AbstractStatement):
         return hash(
             (
                 super().__hash__(),
-                self.application_name,
+                self.name,
                 self.if_not_exists,
                 self.engine,
                 hash(frozenset(self.param_dict.items())),
@@ -261,7 +261,7 @@ class CreateApplicationStatement(AbstractStatement):
 
     def __str__(self) -> str:
         return (
-            f"CREATE APPLICATION {self.application_name} \n"
+            f"CREATE APPLICATION {self.name} \n"
             f"WITH ENGINE '{self.engine}' , \n"
             f"PARAMETERS = {self.param_dict};"
         )

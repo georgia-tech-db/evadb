@@ -317,7 +317,7 @@ class CreateDatabase:
 
 class CreateApplication:
     def create_application(self, tree):
-        application_name = None
+        name = None
         if_not_exists = False
         engine = None
         param_dict = {}
@@ -327,12 +327,12 @@ class CreateApplication:
                 if child.data == "if_not_exists":
                     if_not_exists = True
                 elif child.data == "uid":
-                    application_name = self.visit(child)
+                    name = self.visit(child)
                 elif child.data == "create_application_engine_clause":
                     engine, param_dict = self.visit(child)
 
         create_stmt = CreateApplicationStatement(
-            application_name, if_not_exists, engine, param_dict
+            name, if_not_exists, engine, param_dict
         )
         return create_stmt
 
