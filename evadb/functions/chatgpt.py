@@ -24,7 +24,7 @@ from evadb.configuration.configuration_manager import ConfigurationManager
 from evadb.functions.abstract.abstract_function import AbstractFunction
 from evadb.functions.decorators.decorators import forward, setup
 from evadb.functions.decorators.io_descriptors.data_types import PandasDataframe
-from evadb.utils.generic_utils import try_to_import_openai
+from evadb.utils.generic_utils import try_to_import_litellm
 
 _VALID_CHAT_COMPLETION_MODEL = [
     "gpt-4",
@@ -113,20 +113,20 @@ class ChatGPT(AbstractFunction):
         ],
     )
     def forward(self, text_df):
-        try_to_import_openai()
-        import openai
+        try_to_import_litellm()
+        import litellm
 
         @retry(tries=6, delay=20)
         def completion_with_backoff(**kwargs):
-            return openai.ChatCompletion.create(**kwargs)
+            return litellm.completion(**kwargs)
 
         # Register API key, try configuration manager first
-        openai.api_key = ConfigurationManager().get_value("third_party", "OPENAI_KEY")
+        litellm.api_key = ConfigurationManager().get_value("third_party", "OPENAI_KEY")
         # If not found, try OS Environment Variable
-        if len(openai.api_key) == 0:
-            openai.api_key = os.environ.get("OPENAI_KEY", "")
+        if len(litellm.api_key) == 0:
+            litellm.api_key = os.environ.get("OPENAI_KEY", "")
         assert (
-            len(openai.api_key) != 0
+            len(litellm.api_key) != 0
         ), "Please set your OpenAI API key in evadb.yml file (third_party, open_api_key) or environment variable (OPENAI_KEY)"
 
         queries = text_df[text_df.columns[0]]
