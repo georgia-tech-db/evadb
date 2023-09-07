@@ -19,11 +19,11 @@ First, we create a table to insert required data.
    LOAD CSV 'data/forecasting/air-passengers.csv' INTO AirData;
 
 
-Next, we create a UDF of `TYPE Forecasting`. We must enter the column name on which we wish to forecast using `predict`. Other options include `id` and `time` (they represent the unique id of the items and the time data if available).
+Next, we create a function of `TYPE Forecasting`. We must enter the column name on which we wish to forecast using `predict`. Other options include `id` and `time` (they represent the unique id of the items and the time data if available).
 
 .. code-block:: sql
    
-   CREATE UDF IF NOT EXISTS Forecast FROM
+   CREATE FUNCTION IF NOT EXISTS Forecast FROM
    (SELECT y FROM AirData)
    TYPE Forecasting
    PREDICT 'y';
