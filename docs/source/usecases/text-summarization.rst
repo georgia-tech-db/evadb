@@ -41,17 +41,17 @@ To create custom ``TextSummarizer`` and ``TextClassifier`` functions, use the ``
 
         CREATE FUNCTION IF NOT EXISTS TextSummarizer
         TYPE HuggingFace
-        'task' 'summarization'
-        'model' 'facebook/bart-large-cnn';
+        TASK 'summarization'
+        MODEL 'facebook/bart-large-cnn';
 
         CREATE FUNCTION IF NOT EXISTS TextClassifier
         TYPE HuggingFace
-        'task' 'text-classification'
-        'model' 'distilbert-base-uncased-finetuned-sst-2-english';
+        TASK 'text-classification'
+        MODEL 'distilbert-base-uncased-finetuned-sst-2-english';
 
 .. note::
     
-    EvaDB has built-in support for a wide range of `HuggingFace <../reference/ai/hf.html>`_ models.
+    EvaDB has built-in support for a wide range of :ref:`HuggingFace<hf>` models.
 
 AI Query Using Registered Functions
 -----------------------------------

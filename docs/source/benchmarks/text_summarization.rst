@@ -47,10 +47,10 @@ Creating Text Summarization Function in EvaDB
 
    CREATE UDF IF NOT EXISTS TextSummarizer
          TYPE HuggingFace
-         'task' 'summarization'
-         'model' 'sshleifer/distilbart-cnn-12-6'
-         'min_length' 5
-         'max_length' 100;
+         TASK 'summarization'
+         MODEL 'sshleifer/distilbart-cnn-12-6'
+         MIN_LENGTH 5
+         MAX_LENGTH 100;
 
 
 Tuning EvaDB for Maximum GPU Utilization
@@ -72,7 +72,7 @@ Text Summarization Query in EvaDB
     SELECT TextSummarizer(article) FROM cnn_news_test;
 
 Use MindsDB for Text Summarization
---------------------------------
+-----------------------------------
 
 Setup SQLite Database 
 ~~~~~~~~~~~~~~~~~~~~~~

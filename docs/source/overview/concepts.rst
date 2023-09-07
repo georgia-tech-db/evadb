@@ -24,8 +24,8 @@ Here is set of illustrative EvaQL queries for a ChatGPT-based video question ans
     --- After creating the function, we can use the function in any future query
     CREATE UDF SpeechRecognizer 
         TYPE HuggingFace 
-        'task' 'automatic-speech-recognition' 
-        'model' 'openai/whisper-base';
+        TASK 'automatic-speech-recognition' 
+        MODEL 'openai/whisper-base';
 
     --  EvaDB automatically extracts the audio from the videos
     --- We only need to run the SpeechRecognizer UDF on the 'audio' column 
@@ -54,7 +54,7 @@ EvaDB accelerates AI queries using a collection of optimizations inspired by SQL
 AI Functions
 ------------
 
-``Functions`` are typically thin wrappers around AI models and are extensively used in queries. Here is an `illustrative AI function for classifying MNIST images <https://github.com/georgia-tech-db/evadb/blob/master/evadb/udfs/mnist_image_classifier.py>`_. 
+``Functions`` are typically thin wrappers around AI models and are extensively used in queries. Here is an `illustrative AI function for classifying MNIST images <https://github.com/georgia-tech-db/evadb/blob/master/evadb/functions/mnist_image_classifier.py>`_. 
 
 To register an user-defined function, use the ``CREATE FUNCTION`` statement:
 

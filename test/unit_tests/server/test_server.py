@@ -43,7 +43,7 @@ if sys.version_info >= (3, 8):
             client_writer2 = MagicMock()
 
             # first client
-            client_reader1.feed_data(b"SHOW UDFS;\n")
+            client_reader1.feed_data(b"SHOW FUNCTIONS;\n")
             client_reader1.feed_data(b"EXIT;\n")
 
             await evadb_server.accept_client(client_reader1, client_writer1)

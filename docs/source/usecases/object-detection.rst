@@ -39,7 +39,7 @@ To create a custom ``Yolo`` function based on the popular ``YOLO-v8m`` model, us
 
         CREATE UDF IF NOT EXISTS Yolo
         TYPE  ultralytics
-        'model' 'yolov8m.pt';
+        MODEL 'yolov8m.pt';
 
 Object Detection Queries
 ------------------------
@@ -60,11 +60,11 @@ This query returns the label of all the images:
 .. code-block:: 
 
     +-----------------------------------------------------------------------------------------------------+
-| objectdetectionvideos.id              | yolo.labels                                                |
-+--------------------------+-----------------------------------------------------------------+
-| 0                        | [car, car, car, car, car, car, person, car, ...             |
-| 1                        | [car, car, car, car, car, car, car, car, car, ...             |
-+-----------------------------------------------------------------------------------------------------+
+    | objectdetectionvideos.id              | yolo.labels                                                |
+    +--------------------------+-----------------------------------------------------------------+
+    | 0                        | [car, car, car, car, car, car, person, car, ...             |
+    | 1                        | [car, car, car, car, car, car, car, car, car, ...             |
+    +-----------------------------------------------------------------------------------------------------+
 
 Filtering Based on YOLO Function
 --------------------------------

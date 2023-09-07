@@ -11,6 +11,9 @@ parts:
         title: Connect to Database
       - file: source/overview/concepts
         title: Concepts
+        sections:
+          - file: source/overview/concepts/data-sources
+            title: Data Sources
         #- file: source/overview/faq
 
   - caption: Use Cases
@@ -29,8 +32,8 @@ parts:
         title: Object Detection
       - file: source/usecases/emotion-analysis.rst
         title: Emotion Analysis
-      - file: source/usecases/privategpt.rst
-        title: PrivateGPT
+      # - file: source/usecases/privategpt.rst
+      #   title: PrivateGPT
 
   - caption: User Reference
     chapters:
@@ -64,6 +67,8 @@ parts:
         sections:
           - file: source/reference/ai/model-train
             title: Model Training
+          - file: source/reference/ai/model-forecasting
+            title: Time Series Forecasting
           - file: source/reference/ai/hf
             title: Hugging Face
           - file: source/reference/ai/openai

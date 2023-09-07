@@ -17,7 +17,7 @@ from test.util import (
     create_sample_video,
     file_remove,
     get_evadb_for_testing,
-    load_udfs_for_testing,
+    load_functions_for_testing,
 )
 
 import pytest
@@ -43,7 +43,7 @@ class ExplainExecutorTest(unittest.TestCase):
         video_file_path = create_sample_video(NUM_FRAMES)
         load_query = f"LOAD VIDEO '{video_file_path}' INTO MyVideo;"
         execute_query_fetch_all(cls.evadb, load_query)
-        load_udfs_for_testing(cls.evadb, mode="debug")
+        load_functions_for_testing(cls.evadb, mode="debug")
 
     @classmethod
     def tearDownClass(cls):
