@@ -81,6 +81,7 @@ document_libs = [
     "protobuf",
     "bs4",
     "openai>=0.27.4",  # CHATGPT
+    "litellm>=0.500",
     "gpt4all",  # PRIVATE GPT
     "sentencepiece",  # TRANSFORMERS
 ]
