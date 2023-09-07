@@ -17,6 +17,7 @@ from test.util import get_evadb_for_testing, shutdown_ray
 
 from evadb.server.command_handler import execute_query_fetch_all
 
+from mock import patch
 
 class CreateApplicationTest(unittest.TestCase):
     @classmethod
@@ -41,7 +42,8 @@ class CreateApplicationTest(unittest.TestCase):
             params
         )
 
-        execute_query_fetch_all(self.evadb, query)
+        with patch("evadb.executor.create_database_executor.get_database_handler"):
+            execute_query_fetch_all(self.evadb, query)
 
         db_entry = self.evadb.catalog().get_database_catalog_entry("example_app")
         self.assertEqual(db_entry.name, "example_app")
