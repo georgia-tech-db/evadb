@@ -15,9 +15,10 @@
 import unittest
 from test.util import get_evadb_for_testing, shutdown_ray
 
+from mock import patch
+
 from evadb.server.command_handler import execute_query_fetch_all
 
-from mock import patch
 
 class CreateApplicationTest(unittest.TestCase):
     @classmethod
@@ -41,7 +42,6 @@ class CreateApplicationTest(unittest.TestCase):
                    PARAMETERS = {};""".format(
             params
         )
-
         with patch("evadb.executor.create_database_executor.get_database_handler"):
             execute_query_fetch_all(self.evadb, query)
 
