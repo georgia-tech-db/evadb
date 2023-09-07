@@ -7,21 +7,17 @@
 #
 #     http://www.apache.org/licenses/LICENSE-2.0
 #
-# Unless required by DBlicable law or agreed to in writing, software
+# Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from slack_sdk import WebClient
 import pandas as pd
+from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 
-from evadb.third_party.types import (
-    DBHandler,
-    DBHandlerResponse,
-    DBHandlerStatus,
-)
+from evadb.third_party.types import DBHandler, DBHandlerResponse, DBHandlerStatus
 
 
 class SlackHandler(DBHandler):
@@ -125,6 +121,7 @@ class SlackHandler(DBHandler):
             assert e.response["ok"] is False
             assert e.response["error"]
             return DBHandlerResponse(data=None, error=e.response["error"])
+
     def execute_native_query(self, query_string: str) -> DBHandlerResponse:
         """
         TODO: integrate code for executing query on slack

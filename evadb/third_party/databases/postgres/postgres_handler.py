@@ -15,11 +15,7 @@
 import pandas as pd
 import psycopg2
 
-from evadb.third_party.types import (
-    DBHandler,
-    DBHandlerResponse,
-    DBHandlerStatus,
-)
+from evadb.third_party.types import DBHandler, DBHandlerResponse, DBHandlerStatus
 
 
 class PostgresHandler(DBHandler):
