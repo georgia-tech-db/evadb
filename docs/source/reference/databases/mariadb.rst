@@ -24,9 +24,9 @@ Create Connection
 
 .. code-block:: text
 
-CREATE DATABASE mariadb_data WITH ENGINE = 'mariadb', PARAMETERS = {
+   CREATE DATABASE mariadb_data WITH ENGINE = 'mariadb', PARAMETERS = {
         "user" : "eva",
         "password": "password",
         "database": "evadb"
-};
+   };
 

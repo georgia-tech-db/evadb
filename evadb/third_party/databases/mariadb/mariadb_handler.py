@@ -12,8 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import pandas as pd
 import mariadb
+import pandas as pd
 
 from evadb.third_party.databases.types import (
     DBHandler,
@@ -21,11 +21,14 @@ from evadb.third_party.databases.types import (
     DBHandlerStatus,
 )
 
+
 class MariaDbHandler(DBHandler):
+
     """
     Class for implementing the Maria DB handler as a backend store for
     EvaDb.
     """
+
     def __init__(self, name: str, **kwargs):
         """
         Initialize the handler.
@@ -39,7 +42,7 @@ class MariaDbHandler(DBHandler):
         self.user = kwargs.get("user")
         self.password = kwargs.get("password")
         self.database = kwargs.get("database")
-    
+
     def connect(self):
         """
         Establish connection to the database.
@@ -59,14 +62,14 @@ class MariaDbHandler(DBHandler):
             return DBHandlerStatus(status=True)
         except mariadb.Error as e:
             return DBHandlerStatus(status=False, error=str(e))
-    
+
     def disconnect(self):
         """
         Disconnect from the database.
         """
         if self.connection:
             self.connection.close()
-    
+
     def check_connection(self) -> DBHandlerStatus:
         """
         Method for checking the status of database connection.
@@ -77,7 +80,7 @@ class MariaDbHandler(DBHandler):
             return DBHandlerStatus(status=True)
         else:
             return DBHandlerStatus(status=False, error="Not connected to the database.")
-    
+
     def get_tables(self) -> DBHandlerResponse:
         """
         Method to get the list of tables from database.
@@ -93,7 +96,7 @@ class MariaDbHandler(DBHandler):
             return DBHandlerResponse(data=tables_df)
         except mariadb.Error as e:
             return DBHandlerResponse(data=None, error=str(e))
-    
+
     def get_columns(self, table_name: str) -> DBHandlerResponse:
         """
         Method to retrieve the columns of the specified table from the database.
@@ -111,7 +114,7 @@ class MariaDbHandler(DBHandler):
             return DBHandlerResponse(data=columns_df)
         except mariadb.Error as e:
             return DBHandlerResponse(data=None, error=str(e))
-    
+
     def _fetch_results_as_df(self, cursor):
         """
         Fetch results from the cursor for the executed query and return the

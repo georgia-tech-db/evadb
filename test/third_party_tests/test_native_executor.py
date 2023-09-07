@@ -168,7 +168,7 @@ class NativeExecutorTest(unittest.TestCase):
         # Test error.
         self._raise_error_on_multiple_creation()
         self._raise_error_on_invalid_connection()
-    
+
     def test_should_run_query_in_mariadb(self):
         # Create database.
         params = {

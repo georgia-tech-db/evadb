@@ -23,11 +23,12 @@ import pytest
 from evadb.catalog.models.utils import DatabaseCatalogEntry
 from evadb.server.command_handler import execute_query_fetch_all
 
+
 class NativeQueryResponse:
     def __init__(self):
         self.error = None
         self.data = None
-    
+
 
 @pytest.mark.notparallel
 class MariaDbStorageEngineTest(unittest.TestCase):
@@ -35,12 +36,8 @@ class MariaDbStorageEngineTest(unittest.TestCase):
         super().__init__(*args, **kwargs)
 
     def get_mariadb_params(self):
-        return {
-            "user": "eva",
-            "password": "password",
-            "database": "evadb"
-        }
-    
+        return {"user": "eva", "password": "password", "database": "evadb"}
+
     def setUp(self):
         connection_params = self.get_mariadb_params()
         self.evadb = get_evadb_for_testing()
@@ -83,7 +80,7 @@ class MariaDbStorageEngineTest(unittest.TestCase):
         self.execute_native_query_patcher.stop()
         self.connect_patcher.stop()
         self.disconnect_patcher.stop()
-    
+
     def test_execute_mariadb_select_query(self):
         execute_query_fetch_all(
             self.evadb,
