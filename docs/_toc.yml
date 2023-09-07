@@ -32,8 +32,8 @@ parts:
         title: Object Detection
       - file: source/usecases/emotion-analysis.rst
         title: Emotion Analysis
-      - file: source/usecases/privategpt.rst
-        title: PrivateGPT
+      # - file: source/usecases/privategpt.rst
+      #   title: PrivateGPT
 
   - caption: User Reference
     chapters:
