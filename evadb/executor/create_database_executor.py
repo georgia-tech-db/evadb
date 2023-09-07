@@ -36,9 +36,7 @@ class CreateDatabaseExecutor(AbstractExecutor):
         )
 
         # Check if database already exists.
-        db_catalog_entry = self.catalog().get_database_catalog_entry(
-            self.node.name
-        )
+        db_catalog_entry = self.catalog().get_database_catalog_entry(self.node.name)
         if db_catalog_entry is not None:
             raise ExecutorError(f"{self.node.name} already exists.")
 
@@ -58,8 +56,6 @@ class CreateDatabaseExecutor(AbstractExecutor):
 
         yield Batch(
             pd.DataFrame(
-                [
-                    f"The database {self.node.name} has been successfully created."
-                ]
+                [f"The database {self.node.name} has been successfully created."]
             )
         )

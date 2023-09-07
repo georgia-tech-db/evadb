@@ -78,7 +78,7 @@ class PostgresNativeStorageEngineTest(unittest.TestCase):
             name="test_data_source",
             engine="postgres",
             params=connection_params,
-            app_type="database", 
+            app_type="database",
             row_id=1,
         )
 

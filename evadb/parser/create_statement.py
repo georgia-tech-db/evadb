@@ -190,9 +190,7 @@ class CreateTableStatement(AbstractStatement):
 
 
 class CreateDatabaseStatement(AbstractStatement):
-    def __init__(
-        self, name: str, if_not_exists: bool, engine: str, param_dict: dict
-    ):
+    def __init__(self, name: str, if_not_exists: bool, engine: str, param_dict: dict):
         super().__init__(StatementType.CREATE_DATABASE)
         self.name = name
         self.if_not_exists = if_not_exists
@@ -229,9 +227,7 @@ class CreateDatabaseStatement(AbstractStatement):
 
 
 class CreateApplicationStatement(AbstractStatement):
-    def __init__(
-        self, name: str, if_not_exists: bool, engine: str, param_dict: dict
-    ):
+    def __init__(self, name: str, if_not_exists: bool, engine: str, param_dict: dict):
         super().__init__(StatementType.CREATE_APPLICATION)
         self.name = name
         self.if_not_exists = if_not_exists
