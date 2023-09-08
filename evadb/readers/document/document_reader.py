@@ -15,6 +15,7 @@
 from pathlib import Path
 from typing import Dict, Iterator
 
+from evadb.catalog.sql_config import ROW_NUM_COLUMN
 from evadb.readers.abstract_reader import AbstractReader
 from evadb.readers.document.registry import (
     _lazy_import_loader,
@@ -44,8 +45,14 @@ class DocumentReader(AbstractReader):
             chunk_size=self._chunk_size, chunk_overlap=self._chunk_overlap
         )
 
+        row_num = 0
         for data in loader.load():
             for chunk_id, row in enumerate(
                 langchain_text_splitter.split_documents([data])
             ):
-                yield {"chunk_id": chunk_id, "data": row.page_content}
+                yield {
+                    "chunk_id": chunk_id,
+                    "data": row.page_content,
+                    ROW_NUM_COLUMN: row_num,
+                }
+                row_num += 1

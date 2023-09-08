@@ -17,6 +17,7 @@ from typing import Dict, Iterator
 import numpy as np
 
 from evadb.catalog.catalog_type import VideoColumnName
+from evadb.catalog.sql_config import ROW_NUM_COLUMN
 from evadb.constants import AUDIORATE, IFRAMES
 from evadb.expression.abstract_expression import AbstractExpression
 from evadb.expression.expression_utils import extract_range_list_from_predicate
@@ -126,6 +127,7 @@ class DecordReader(AbstractReader):
 
         return {
             VideoColumnName.id.name: frame_id,
+            ROW_NUM_COLUMN: frame_id,
             VideoColumnName.data.name: frame_video,
             VideoColumnName.seconds.name: round(timestamp, 2),
         }
@@ -136,6 +138,7 @@ class DecordReader(AbstractReader):
 
         return {
             VideoColumnName.id.name: frame_id,
+            ROW_NUM_COLUMN: frame_id,
             VideoColumnName.data.name: np.empty(0),
             VideoColumnName.seconds.name: 0.0,
             VideoColumnName.audio.name: frame_audio,

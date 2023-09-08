@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Iterator
 
 from evadb.catalog.models.table_catalog import TableCatalogEntry
+from evadb.catalog.sql_config import ROW_NUM_COLUMN, ROW_NUM_MAGIC
 from evadb.database import EvaDBDatabase
 from evadb.models.storage.batch import Batch
 from evadb.readers.pdf_reader import PDFReader
@@ -28,7 +29,7 @@ class PDFStorageEngine(AbstractMediaStorageEngine):
 
     def read(self, table: TableCatalogEntry) -> Iterator[Batch]:
         for image_files in self._rdb_handler.read(self._get_metadata_table(table), 12):
-            for _, (row_id, file_name) in image_files.iterrows():
+            for _, (row_id, file_name, _) in image_files.iterrows():
                 system_file_name = self._xform_file_url_to_file_name(file_name)
                 image_file = Path(table.file_url) / system_file_name
                 # setting batch_mem_size = 1, we need fix it
@@ -36,4 +37,7 @@ class PDFStorageEngine(AbstractMediaStorageEngine):
                 for batch in reader.read():
                     batch.frames[table.columns[0].name] = row_id
                     batch.frames[table.columns[1].name] = str(file_name)
+                    batch.frames[ROW_NUM_COLUMN] = (
+                        row_id * ROW_NUM_MAGIC + batch.frames[ROW_NUM_COLUMN]
+                    )
                     yield batch
