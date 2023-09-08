@@ -35,8 +35,12 @@ class CreateIndexExecutor(AbstractExecutor):
     def exec(self, *args, **kwargs):
         if self.catalog().get_index_catalog_entry_by_name(self.node.name):
             msg = f"Index {self.node.name} already exists."
-            logger.error(msg)
-            raise ExecutorError(msg)
+            if self.node.if_not_exists:
+                logger.warn(msg)
+                return
+            else:
+                logger.error(msg)
+                raise ExecutorError(msg)
 
         self.index_path = self._get_index_save_path()
         self.index = None

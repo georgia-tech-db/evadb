@@ -808,6 +808,7 @@ class LogicalCreateIndexToVectorIndex(Rule):
     def apply(self, before: LogicalCreateIndex, context: OptimizerContext):
         after = CreateIndexPlan(
             before.name,
+            before.if_not_exists,
             before.table_ref,
             before.col_list,
             before.vector_store_type,

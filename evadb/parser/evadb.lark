@@ -26,7 +26,7 @@ colon_param_dict: LR_CURLY_BRACKET colon_param ("," colon_param)* RR_CURLY_BRACK
 
 create_database_engine_clause: WITH ENGINE "=" string_literal "," PARAMETERS "=" colon_param_dict 
 
-create_index: CREATE INDEX uid ON table_name index_elem vector_store_type?
+create_index: CREATE INDEX if_not_exists? uid ON table_name index_elem vector_store_type?
 
 create_table: CREATE TABLE if_not_exists? table_name (create_definitions | (AS select_statement))
     

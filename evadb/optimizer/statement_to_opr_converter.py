@@ -311,6 +311,7 @@ class StatementToPlanConverter:
     def visit_create_index(self, statement: CreateIndexStatement):
         create_index_opr = LogicalCreateIndex(
             statement.name,
+            statement.if_not_exists,
             statement.table_ref,
             statement.col_list,
             statement.vector_store_type,
