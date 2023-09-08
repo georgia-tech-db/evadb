@@ -72,7 +72,7 @@ class DecordLoaderTest(unittest.TestCase):
             batches = list(video_loader.read())
 
             expected = self._batches_to_reader_convertor(
-                create_dummy_batches(filters=[i for i in range(0, NUM_FRAMES, k)])
+                create_dummy_batches(filters=[i for i in range(0, NUM_FRAMES, k)], is_from_storage=True)
             )
 
             print(batches[0].frames)
@@ -96,7 +96,7 @@ class DecordLoaderTest(unittest.TestCase):
             value = NUM_FRAMES // 2
             start = value + k - (value % k) if value % k else value
             expected = self._batches_to_reader_convertor(
-                create_dummy_batches(filters=[i for i in range(start, NUM_FRAMES, k)])
+                create_dummy_batches(filters=[i for i in range(start, NUM_FRAMES, k)], is_from_storage=True)
             )
         self.assertEqual(batches, expected)
 
@@ -123,7 +123,7 @@ class DecordLoaderTest(unittest.TestCase):
             batches = list(video_loader.read())
             start = value + k - (value % k) if value % k else value
             expected = self._batches_to_reader_convertor(
-                create_dummy_batches(filters=[i for i in range(start, 8, k)])
+                create_dummy_batches(filters=[i for i in range(start, 8, k)], is_from_storage=True)
             )
         self.assertEqual(batches, expected)
 
@@ -132,7 +132,7 @@ class DecordLoaderTest(unittest.TestCase):
             file_url=self.video_file_url,
         )
         batches = list(video_loader.read())
-        expected = self._batches_to_reader_convertor(create_dummy_batches())
+        expected = self._batches_to_reader_convertor(create_dummy_batches(is_from_storage=True))
         self.assertEqual(batches, expected)
 
     def test_should_return_batches_equivalent_to_number_of_frames(self):
@@ -141,7 +141,7 @@ class DecordLoaderTest(unittest.TestCase):
             batch_mem_size=self.frame_size,
         )
         batches = list(video_loader.read())
-        expected = self._batches_to_reader_convertor(create_dummy_batches(batch_size=1))
+        expected = self._batches_to_reader_convertor(create_dummy_batches(batch_size=1, is_from_storage=True))
         self.assertEqual(batches, expected)
 
     def test_should_sample_every_k_frame(self):
@@ -152,7 +152,7 @@ class DecordLoaderTest(unittest.TestCase):
             )
             batches = list(video_loader.read())
             expected = self._batches_to_reader_convertor(
-                create_dummy_batches(filters=[i for i in range(0, NUM_FRAMES, k)])
+                create_dummy_batches(filters=[i for i in range(0, NUM_FRAMES, k)], is_from_storage=True)
             )
             self.assertEqual(batches, expected)
 

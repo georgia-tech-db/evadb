@@ -451,6 +451,7 @@ def create_dummy_batches(
     batch_size=10,
     start_id=0,
     video_dir=None,
+    is_from_storage=False, # if cover test directly from storage, it needs to append a _row_number
 ):
     video_dir = video_dir or get_tmp_dir()
 
@@ -461,7 +462,6 @@ def create_dummy_batches(
         data.append(
             {
                 "myvideo._row_id": 1,
-                "myvideo._row_number": i + start_id,
                 "myvideo.name": os.path.join(video_dir, "dummy.avi"),
                 "myvideo.id": i + start_id,
                 "myvideo.data": np.array(
@@ -470,6 +470,9 @@ def create_dummy_batches(
                 "myvideo.seconds": np.float32(i / num_frames),
             }
         )
+
+        if is_from_storage:
+            data[-1]["myvideo._row_number"] = i + start_id
 
         if len(data) % batch_size == 0:
             yield Batch(pd.DataFrame(data))
