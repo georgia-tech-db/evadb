@@ -111,6 +111,9 @@ class MariaDbHandler(DBHandler):
         try:
             query = f"SELECT column_name as 'name', data_type as 'dtype' FROM information_schema.columns WHERE table_name='{table_name}'"
             columns_df = pd.read_sql_query(query, self.connection)
+            columns_df["dtype"] = columns_df["dtype"].apply(
+                self._mariadb_to_python_types
+            )
             return DBHandlerResponse(data=columns_df)
         except mariadb.Error as e:
             return DBHandlerResponse(data=None, error=str(e))
@@ -146,3 +149,28 @@ class MariaDbHandler(DBHandler):
             return DBHandlerResponse(data=self._fetch_results_as_df(cursor))
         except mariadb.Error as e:
             return DBHandlerResponse(data=None, error=str(e))
+
+    def _mariadb_to_python_types(self, mariadb_type: str):
+        mapping = {
+            "tinyint": int,
+            "smallint": int,
+            "mediumint": int,
+            "bigint": int,
+            "int": int,
+            "decimal": float,
+            "float": float,
+            "double": float,
+            "text": str,
+            "string literals": str,
+            "char": str,
+            "varchar": str,
+            "boolean": bool,
+            # Add more mappings as needed
+        }
+
+        if mariadb_type in mapping:
+            return mapping[mariadb_type]
+        else:
+            raise Exception(
+                f"Unsupported column {mariadb_type} encountered in the MariaDB. Please raise a feature request!"
+            )
