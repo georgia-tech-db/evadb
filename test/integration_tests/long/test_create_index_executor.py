@@ -22,11 +22,11 @@ import pandas as pd
 import pytest
 
 from evadb.catalog.catalog_type import VectorStoreType
+from evadb.executor.executor_utils import ExecutorError
 from evadb.models.storage.batch import Batch
 from evadb.server.command_handler import execute_query_fetch_all
 from evadb.storage.storage_engine import StorageEngine
 from evadb.utils.generic_utils import try_to_import_faiss
-from evadb.executor.executor_utils import ExecutorError
 
 
 @pytest.mark.notparallel
@@ -109,7 +109,9 @@ class CreateIndexTest(unittest.TestCase):
         execute_query_fetch_all(self.evadb, query)
 
         self.assertEqual(
-            self.evadb.catalog().get_index_catalog_entry_by_name("testCreateIndexName").type,
+            self.evadb.catalog()
+            .get_index_catalog_entry_by_name("testCreateIndexName")
+            .type,
             VectorStoreType.FAISS,
         )
 
@@ -123,7 +125,9 @@ class CreateIndexTest(unittest.TestCase):
         execute_query_fetch_all(self.evadb, query)
 
         self.assertEqual(
-            self.evadb.catalog().get_index_catalog_entry_by_name("testCreateIndexName").type,
+            self.evadb.catalog()
+            .get_index_catalog_entry_by_name("testCreateIndexName")
+            .type,
             VectorStoreType.FAISS,
         )
 

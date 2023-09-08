@@ -117,7 +117,9 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(actual_stmt, expected_stmt)
 
         # create if_not_exists
-        create_index_query = "CREATE INDEX IF NOT EXISTS testindex ON MyVideo (featCol) USING FAISS;"
+        create_index_query = (
+            "CREATE INDEX IF NOT EXISTS testindex ON MyVideo (featCol) USING FAISS;"
+        )
         evadb_stmt_list = parser.parse(create_index_query)
         actual_stmt = evadb_stmt_list[0]
         expected_stmt._if_not_exists = True
