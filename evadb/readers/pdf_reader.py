@@ -14,9 +14,9 @@
 # limitations under the License.
 from typing import Dict, Iterator
 
+from evadb.catalog.sql_config import ROW_NUM_COLUMN
 from evadb.readers.abstract_reader import AbstractReader
 from evadb.utils.generic_utils import try_to_import_fitz
-from evadb.catalog.sql_config import ROW_NUM_COLUMN
 
 
 class PDFReader(AbstractReader):

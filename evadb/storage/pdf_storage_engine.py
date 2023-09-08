@@ -16,11 +16,11 @@ from pathlib import Path
 from typing import Iterator
 
 from evadb.catalog.models.table_catalog import TableCatalogEntry
+from evadb.catalog.sql_config import ROW_NUM_COLUMN, ROW_NUM_MAGIC
 from evadb.database import EvaDBDatabase
 from evadb.models.storage.batch import Batch
 from evadb.readers.pdf_reader import PDFReader
 from evadb.storage.abstract_media_storage_engine import AbstractMediaStorageEngine
-from evadb.catalog.sql_config import ROW_NUM_COLUMN, ROW_NUM_MAGIC
 
 
 class PDFStorageEngine(AbstractMediaStorageEngine):
@@ -37,5 +37,7 @@ class PDFStorageEngine(AbstractMediaStorageEngine):
                 for batch in reader.read():
                     batch.frames[table.columns[0].name] = row_id
                     batch.frames[table.columns[1].name] = str(file_name)
-                    batch.frames[ROW_NUM_COLUMN] = row_id * ROW_NUM_MAGIC + batch.frames[ROW_NUM_COLUMN]
+                    batch.frames[ROW_NUM_COLUMN] = (
+                        row_id * ROW_NUM_MAGIC + batch.frames[ROW_NUM_COLUMN]
+                    )
                     yield batch

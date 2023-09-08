@@ -17,13 +17,13 @@ from typing import Dict, Iterator
 import numpy as np
 
 from evadb.catalog.catalog_type import VideoColumnName
+from evadb.catalog.sql_config import ROW_NUM_COLUMN
 from evadb.constants import AUDIORATE, IFRAMES
 from evadb.expression.abstract_expression import AbstractExpression
 from evadb.expression.expression_utils import extract_range_list_from_predicate
 from evadb.readers.abstract_reader import AbstractReader
 from evadb.utils.generic_utils import try_to_import_decord
 from evadb.utils.logging_manager import logger
-from evadb.catalog.sql_config import ROW_NUM_COLUMN
 
 
 class DecordReader(AbstractReader):

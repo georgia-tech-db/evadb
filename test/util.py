@@ -451,7 +451,7 @@ def create_dummy_batches(
     batch_size=10,
     start_id=0,
     video_dir=None,
-    is_from_storage=False, # if cover test directly from storage, it needs to append a _row_number
+    is_from_storage=False,  # if cover test directly from storage, it needs to append a _row_number
 ):
     video_dir = video_dir or get_tmp_dir()
 

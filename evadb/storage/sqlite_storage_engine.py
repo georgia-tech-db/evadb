@@ -95,7 +95,11 @@ class SQLStorageEngine(AbstractStorageEngine):
 
         # During table creation, assume row_id is automatically handled by
         # the sqlalchemy engine.
-        table_columns = [col for col in table.columns if (col.name != IDENTIFIER_COLUMN and col.name != ROW_NUM_COLUMN)]
+        table_columns = [
+            col
+            for col in table.columns
+            if (col.name != IDENTIFIER_COLUMN and col.name != ROW_NUM_COLUMN)
+        ]
         sqlalchemy_schema = SchemaUtils.xform_to_sqlalchemy_schema(table_columns)
         attr_dict.update(sqlalchemy_schema)
 
@@ -149,12 +153,18 @@ class SQLStorageEngine(AbstractStorageEngine):
             # the sqlalchemy engine. Another assumption we make here is the
             # updated data need not to take care of row_id.
             table_columns = [
-                col for col in table.columns if (col.name != IDENTIFIER_COLUMN and col.name != ROW_NUM_COLUMN)
+                col
+                for col in table.columns
+                if (col.name != IDENTIFIER_COLUMN and col.name != ROW_NUM_COLUMN)
             ]
 
             # Todo: validate the data type before inserting into the table
             for record in rows.frames.values:
-                row_data = {col: record[idx] for idx, col in enumerate(columns) if col != ROW_NUM_COLUMN}
+                row_data = {
+                    col: record[idx]
+                    for idx, col in enumerate(columns)
+                    if col != ROW_NUM_COLUMN
+                }
                 data.append(self._dict_to_sql_row(row_data, table_columns))
             self._sql_session.execute(table_to_update.insert(), data)
             self._sql_session.commit()

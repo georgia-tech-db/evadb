@@ -16,11 +16,11 @@ from pathlib import Path
 from typing import Iterator
 
 from evadb.catalog.models.table_catalog import TableCatalogEntry
+from evadb.catalog.sql_config import ROW_NUM_COLUMN
 from evadb.database import EvaDBDatabase
 from evadb.models.storage.batch import Batch
 from evadb.readers.image.opencv_image_reader import CVImageReader
 from evadb.storage.abstract_media_storage_engine import AbstractMediaStorageEngine
-from evadb.catalog.sql_config import ROW_NUM_COLUMN
 
 
 class ImageStorageEngine(AbstractMediaStorageEngine):

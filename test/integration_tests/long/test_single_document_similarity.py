@@ -15,21 +15,11 @@
 import os
 import unittest
 from copy import deepcopy
-from test.markers import gpu_skip_marker, qdrant_skip_marker
-from test.util import (
-    create_sample_image,
-    get_evadb_for_testing,
-    load_functions_for_testing,
-    shutdown_ray,
-)
+from test.util import get_evadb_for_testing, load_functions_for_testing
 
-import numpy as np
-import pandas as pd
 import pytest
 
-from evadb.models.storage.batch import Batch
 from evadb.server.command_handler import execute_query_fetch_all
-from evadb.storage.storage_engine import StorageEngine
 from evadb.utils.generic_utils import try_to_import_fitz
 
 
@@ -97,7 +87,7 @@ class SingleDocumentSimilarityTests(unittest.TestCase):
 
         # Ensure index scan is used.
         query = """
-            SELECT data 
+            SELECT data
             FROM MyPDF
             ORDER BY Similarity(SentenceFeatureExtractor('{}'), SentenceFeatureExtractor(data))
             LIMIT 1

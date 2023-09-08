@@ -15,12 +15,12 @@
 from pathlib import Path
 from typing import Dict, Iterator
 
+from evadb.catalog.sql_config import ROW_NUM_COLUMN
 from evadb.readers.abstract_reader import AbstractReader
 from evadb.readers.document.registry import (
     _lazy_import_loader,
     _lazy_import_text_splitter,
 )
-from evadb.catalog.sql_config import ROW_NUM_COLUMN
 
 
 class DocumentReader(AbstractReader):
@@ -50,5 +50,9 @@ class DocumentReader(AbstractReader):
             for chunk_id, row in enumerate(
                 langchain_text_splitter.split_documents([data])
             ):
-                yield {"chunk_id": chunk_id, "data": row.page_content, ROW_NUM_COLUMN: row_num}
+                yield {
+                    "chunk_id": chunk_id,
+                    "data": row.page_content,
+                    ROW_NUM_COLUMN: row_num,
+                }
                 row_num += 1
