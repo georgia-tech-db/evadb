@@ -59,7 +59,7 @@ class DecordLoaderTest(unittest.TestCase):
         new_batches = []
         for batch in batches:
             batch.drop_column_alias()
-            new_batches.append(batch.project(["id", "data", "seconds"]))
+            new_batches.append(batch.project(["id", "data", "seconds", "_row_number"]))
         return new_batches
 
     def test_should_sample_only_iframe(self):
@@ -74,6 +74,9 @@ class DecordLoaderTest(unittest.TestCase):
             expected = self._batches_to_reader_convertor(
                 create_dummy_batches(filters=[i for i in range(0, NUM_FRAMES, k)])
             )
+
+            print(batches[0].frames)
+            print(expected[0].frames)
 
             self.assertEqual(batches, expected)
 

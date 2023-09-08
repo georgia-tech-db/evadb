@@ -461,6 +461,7 @@ def create_dummy_batches(
         data.append(
             {
                 "myvideo._row_id": 1,
+                "myvideo._row_number": i + start_id,
                 "myvideo.name": os.path.join(video_dir, "dummy.avi"),
                 "myvideo.id": i + start_id,
                 "myvideo.data": np.array(
