@@ -220,24 +220,13 @@ class CreateFunctionExecutor(AbstractExecutor):
             pickle.dump(model, f)
             f.close()
 
-        arg_map_here = {"model_name": model_name, "model_path": model_path}
-        function = self._try_initializing_function(impl_path, arg_map_here)
-        io_list = self._resolve_function_io(function)
+        io_list = self._resolve_function_io(None)
 
         metadata_here = [
+            FunctionMetadataCatalogEntry("model_name", model_name),
+            FunctionMetadataCatalogEntry("model_path", model_path),
             FunctionMetadataCatalogEntry(
-                key="model_name",
-                value=model_name,
-                function_id=None,
-                function_name=None,
-                row_id=None,
-            ),
-            FunctionMetadataCatalogEntry(
-                key="model_path",
-                value=model_path,
-                function_id=None,
-                function_name=None,
-                row_id=None,
+                "output_column_rename", self.node.outputs[0].name
             ),
         ]
 

@@ -268,8 +268,7 @@ class StatementBinder:
             self._binder_context.enable_audio_retrieval()
         if node.name == VideoColumnName.data:
             self._binder_context.enable_video_retrieval()
-        #node.col_alias = "{}.{}".format(table_alias, node.name.lower())
-        node.col_alias = "{}.{}".format(table_alias, node.name)
+        node.col_alias = "{}.{}".format(table_alias, node.name.lower())
         node.col_object = col_obj
 
     @bind.register(FunctionExpression)
