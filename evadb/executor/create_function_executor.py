@@ -225,9 +225,7 @@ class CreateFunctionExecutor(AbstractExecutor):
         metadata_here = [
             FunctionMetadataCatalogEntry("model_name", model_name),
             FunctionMetadataCatalogEntry("model_path", model_path),
-            FunctionMetadataCatalogEntry(
-                "output_column_rename", self.node.outputs[0].name
-            ),
+            FunctionMetadataCatalogEntry("output_column_rename", arg_map["predict"]),
         ]
 
         return (
