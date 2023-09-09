@@ -159,12 +159,13 @@ class CreateFunctionExecutor(AbstractExecutor):
         model_name = arg_map["model"]
         frequency = arg_map["frequency"]
 
-        data = aggregated_batch.frames.rename(columns={arg_map["predict"]: "y"})
+        aggregated_batch.rename(columns={arg_map["predict"]: "y"})
         if "time" in arg_map.keys():
-            aggregated_batch.frames.rename(columns={arg_map["time"]: "ds"})
+            aggregated_batch.rename(columns={arg_map["time"]: "ds"})
         if "id" in arg_map.keys():
-            aggregated_batch.frames.rename(columns={arg_map["id"]: "unique_id"})
+            aggregated_batch.rename(columns={arg_map["id"]: "unique_id"})
 
+        data = aggregated_batch.frames
         if "unique_id" not in list(data.columns):
             data["unique_id"] = ["test" for x in range(len(data))]
 
