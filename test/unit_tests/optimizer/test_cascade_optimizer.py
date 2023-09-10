@@ -58,7 +58,7 @@ class CascadeOptimizer(unittest.TestCase):
         actual_batch = execute_query_fetch_all(self.evadb, select_query)
         actual_batch.sort()
         expected = [
-            {"myvideo.id": i * 2, "dummyobjectdetector.label": ["person"]}
+            {"MyVideo.id": i * 2, "DummyObjectDetector.label": ["person"]}
             for i in range(NUM_FRAMES // 2)
         ]
         expected_batch = Batch(frames=pd.DataFrame(expected))

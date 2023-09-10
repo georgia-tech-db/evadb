@@ -97,7 +97,7 @@ class InsertExecutorTest(unittest.TestCase):
 
         self.assertIsNone(
             np.testing.assert_array_equal(
-                batch.frames["csvtable.name"].array,
+                batch.frames["CSVTable.name"].array,
                 np.array(
                     [
                         "test_evadb/similarity/data/sad.jpg",

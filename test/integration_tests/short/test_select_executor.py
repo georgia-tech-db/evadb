@@ -68,8 +68,8 @@ class SelectExecutorTest(unittest.TestCase):
         actual_batch = execute_query_fetch_all(self.evadb, select_query)
         expected_rows = [
             {
-                "myvideo.id": i,
-                "myvideo.data": np.array(np.ones((32, 32, 3)) * i, dtype=np.uint8),
+                "MyVideo.id": i,
+                "MyVideo.data": np.array(np.ones((32, 32, 3)) * i, dtype=np.uint8),
             }
             for i in range(NUM_FRAMES)
         ]
@@ -85,7 +85,7 @@ class SelectExecutorTest(unittest.TestCase):
         select_query = "SELECT id FROM MyVideo;"
         actual_batch = execute_query_fetch_all(self.evadb, select_query)
         actual_batch.sort()
-        expected_rows = [{"myvideo.id": i} for i in range(NUM_FRAMES)]
+        expected_rows = [{"MyVideo.id": i} for i in range(NUM_FRAMES)]
         expected_batch = Batch(frames=pd.DataFrame(expected_rows))
         self.assertEqual(actual_batch, expected_batch)
 
@@ -121,7 +121,7 @@ class SelectExecutorTest(unittest.TestCase):
         select_query = """SELECT * FROM MyVideo JOIN LATERAL
                           Yolo(data);"""
         actual_batch = execute_query_fetch_all(self.evadb, select_query)
-        self.assertEqual(actual_batch.frames.columns, ["myvideo.id"])
+        self.assertEqual(actual_batch.frames.columns, ["MyVideo.id"])
 
     def test_should_throw_error_when_both_audio_and_video_selected(self):
         query = """LOAD VIDEO 'data/sample_videos/touchdown.mp4'
@@ -159,7 +159,7 @@ class SelectExecutorTest(unittest.TestCase):
         actual_batch.sort()
 
         expected_batch = list(create_dummy_batches(filters=range(0, NUM_FRAMES, 7)))
-        expected_batch[0] = expected_batch[0].project(["myvideo.id"])
+        expected_batch[0] = expected_batch[0].project(["MyVideo.id"])
 
         self.assertEqual(len(actual_batch), len(expected_batch[0]))
         self.assertEqual(actual_batch, expected_batch[0])
@@ -170,7 +170,7 @@ class SelectExecutorTest(unittest.TestCase):
         actual_batch.sort()
 
         expected_batch = list(create_dummy_batches(filters=range(0, NUM_FRAMES, 1)))
-        expected_batch[0] = expected_batch[0].project(["myvideo.id"])
+        expected_batch[0] = expected_batch[0].project(["MyVideo.id"])
 
         self.assertEqual(len(actual_batch), len(expected_batch[0]))
         self.assertEqual(actual_batch, expected_batch[0])
@@ -193,7 +193,7 @@ class SelectExecutorTest(unittest.TestCase):
         self.assertEqual(len(actual_batch), len(expected_batch))
 
         expected_batch.rename(
-            columns={"myvideo.id": "FIRST.id", "myvideo.data": "SEGMENT.data"}
+            columns={"MyVideo.id": "FIRST.id", "MyVideo.data": "SEGMENT.data"}
         )
         self.assertEqual(
             actual_batch,
@@ -220,7 +220,7 @@ class SelectExecutorTest(unittest.TestCase):
         self.assertEqual(len(actual_batch), len(expected_batch))
 
         expected_batch.rename(
-            columns={"myvideo.id": "LAST.id", "myvideo.data": "SEGMENT.data"}
+            columns={"MyVideo.id": "LAST.id", "MyVideo.data": "SEGMENT.data"}
         )
         self.assertEqual(
             actual_batch,
@@ -274,7 +274,7 @@ class SelectExecutorTest(unittest.TestCase):
         self.assertEqual(len(actual_batch), len(expected_batch))
 
         expected_batch.rename(
-            columns={"myvideo.id": "FIRST.id", "myvideo.data": "SEGMENT.data"}
+            columns={"MyVideo.id": "FIRST.id", "MyVideo.data": "SEGMENT.data"}
         )
 
         self.assertEqual(
@@ -286,12 +286,12 @@ class SelectExecutorTest(unittest.TestCase):
         query = """SELECT id, label
                   FROM MyVideo SAMPLE 2 JOIN LATERAL
                     UNNEST(DummyMultiObjectDetector(data).labels) AS T(label)
-                  WHERE id < 10 ORDER BY id;"""
+                  WHERE iD < 10 ORDER BY id;"""
         unnest_batch = execute_query_fetch_all(self.evadb, query)
         expected = Batch(
             pd.DataFrame(
                 {
-                    "myvideo.id": np.array(
+                    "MyVideo.id": np.array(
                         [0, 0, 2, 2, 4, 4, 6, 6, 8, 8], dtype=np.intp
                     ),
                     "T.label": np.array(

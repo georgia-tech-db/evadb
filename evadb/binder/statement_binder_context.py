@@ -171,7 +171,7 @@ class StatementBinderContext:
         if table_obj is not None:
             if table_obj.table_type == TableType.NATIVE_DATA:
                 for column_catalog_entry in table_obj.columns:
-                    if column_catalog_entry.name == col_name:
+                    if column_catalog_entry.name.lower() == col_name.lower():
                         return column_catalog_entry
             else:
                 return self._catalog().get_column_catalog_entry(table_obj, col_name)
@@ -191,7 +191,7 @@ class StatementBinderContext:
             return None
 
         for name, obj in col_objs_map.items():
-            if name == col_name:
+            if name.lower() == col_name.lower():
                 return obj
 
     def _get_all_alias_and_col_name(self) -> List[Tuple[str, str]]:

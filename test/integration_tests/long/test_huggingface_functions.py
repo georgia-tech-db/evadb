@@ -113,19 +113,13 @@ class HuggingFaceTests(unittest.TestCase):
         # Test that there exists a column with function_name.score and each entry is a list of floats
         self.assertTrue(function_name + ".score" in output_frames.columns)
         self.assertTrue(
-            all(
-                isinstance(x, list)
-                for x in output.frames[function_name + ".score"]
-            )
+            all(isinstance(x, list) for x in output.frames[function_name + ".score"])
         )
 
         # Test that there exists a column with function_name.label and each entry is a list of strings
         self.assertTrue(function_name + ".label" in output_frames.columns)
         self.assertTrue(
-            all(
-                isinstance(x, list)
-                for x in output.frames[function_name + ".label"]
-            )
+            all(isinstance(x, list) for x in output.frames[function_name + ".label"])
         )
 
         # Test that there exists a column with function_name.box and each entry is a dictionary with 4 keys
@@ -160,19 +154,13 @@ class HuggingFaceTests(unittest.TestCase):
         # Test that there exists a column with function_name.score and each entry is a list of floats
         self.assertTrue(function_name + ".score" in output.frames.columns)
         self.assertTrue(
-            all(
-                isinstance(x, list)
-                for x in output.frames[function_name + ".score"]
-            )
+            all(isinstance(x, list) for x in output.frames[function_name + ".score"])
         )
 
         # Test that there exists a column with function_name.label and each entry is a list of strings
         self.assertTrue(function_name + ".label" in output.frames.columns)
         self.assertTrue(
-            all(
-                isinstance(x, list)
-                for x in output.frames[function_name + ".label"]
-            )
+            all(isinstance(x, list) for x in output.frames[function_name + ".label"])
         )
 
         drop_function_query = f"DROP FUNCTION {function_name};"
@@ -214,10 +202,7 @@ class HuggingFaceTests(unittest.TestCase):
         # Test that there exists a column with function_name.score and each entry is a float
         self.assertTrue(function_name + ".score" in output.frames.columns)
         self.assertTrue(
-            all(
-                isinstance(x, float)
-                for x in output.frames[function_name + ".score"]
-            )
+            all(isinstance(x, float) for x in output.frames[function_name + ".score"])
         )
 
         drop_function_query = f"DROP FUNCTION {function_name};"
@@ -326,10 +311,7 @@ class HuggingFaceTests(unittest.TestCase):
         # and each entry is a float
         self.assertTrue(function_name + ".score" in output.frames.columns)
         self.assertTrue(
-            all(
-                isinstance(x, float)
-                for x in output.frames[function_name + ".score"]
-            )
+            all(isinstance(x, float) for x in output.frames[function_name + ".score"])
         )
 
         drop_function_query = f"DROP FUNCTION {function_name};"
@@ -375,10 +357,7 @@ class HuggingFaceTests(unittest.TestCase):
         # Test that there exists a column with function_name.score and each entry is a float
         self.assertTrue(function_name + ".score" in output.frames.columns)
         self.assertTrue(
-            all(
-                isinstance(x, float)
-                for x in output.frames[function_name + ".score"]
-            )
+            all(isinstance(x, float) for x in output.frames[function_name + ".score"])
         )
 
         drop_function_query = f"DROP FUNCTION {function_name};"

@@ -242,9 +242,7 @@ def resolve_alias_table_value_expression(node: FunctionExpression):
         if not len(node.alias.col_names):
             node.alias = Alias(node.alias.alias_name, default_output_col_aliases)
         else:
-            output_aliases = [
-                str(col_name) for col_name in node.alias.col_names
-            ]
+            output_aliases = [str(col_name) for col_name in node.alias.col_names]
             node.alias = Alias(node.alias.alias_name, output_aliases)
 
     assert len(node.alias.col_names) == len(

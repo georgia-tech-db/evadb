@@ -110,7 +110,7 @@ class LoadExecutorTests(unittest.TestCase):
 
         # assert the batches are equal
         expected_batch = next(create_dummy_csv_batches())
-        expected_batch.modify_column_alias("myvideocsv")
+        expected_batch.modify_column_alias("MyVideoCSV")
         self.assertEqual(actual_batch, expected_batch)
 
         # clean up
