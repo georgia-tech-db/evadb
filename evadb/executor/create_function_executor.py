@@ -159,6 +159,14 @@ class CreateFunctionExecutor(AbstractExecutor):
         model_name = arg_map["model"]
         frequency = arg_map["frequency"]
 
+        """
+        The following rename is needed for statsforecast, which requires the column name to be the following:
+
+        - The unique_id (string, int or category) represents an identifier for the series.
+        - The ds (datestamp) column should be of a format expected by Pandas, ideally YYYY-MM-DD for a date or YYYY-MM-DD HH:MM:SS for a timestamp.
+        - The y (numeric) represents the measurement we wish to forecast.
+        For reference: https://nixtla.github.io/statsforecast/docs/getting-started/getting_started_short.html
+        """
         aggregated_batch.rename(columns={arg_map["predict"]: "y"})
         if "time" in arg_map.keys():
             aggregated_batch.rename(columns={arg_map["time"]: "ds"})
