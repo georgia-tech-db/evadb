@@ -26,6 +26,7 @@ class CreateIndexStatement(AbstractStatement):
     def __init__(
         self,
         name: str,
+        if_not_exists: bool,
         table_ref: TableRef,
         col_list: List[ColumnDefinition],
         vector_store_type: VectorStoreType,
@@ -33,14 +34,16 @@ class CreateIndexStatement(AbstractStatement):
     ):
         super().__init__(StatementType.CREATE_INDEX)
         self._name = name
+        self._if_not_exists = if_not_exists
         self._table_ref = table_ref
         self._col_list = col_list
         self._vector_store_type = vector_store_type
         self._function = function
 
     def __str__(self) -> str:
-        print_str = "CREATE INDEX {} ON {} ({}{}) ".format(
+        print_str = "CREATE INDEX {} {} ON {} ({}{}) ".format(
             self._name,
+            "IF NOT EXISTS" if self._if_not_exists else "",
             self._table_ref,
             "" if self._function else self._function,
             tuple(self._col_list),
@@ -50,6 +53,10 @@ class CreateIndexStatement(AbstractStatement):
     @property
     def name(self):
         return self._name
+
+    @property
+    def if_not_exists(self):
+        return self._if_not_exists
 
     @property
     def table_ref(self):
@@ -72,6 +79,7 @@ class CreateIndexStatement(AbstractStatement):
             return False
         return (
             self._name == other.name
+            and self._if_not_exists == other.if_not_exists
             and self._table_ref == other.table_ref
             and self.col_list == other.col_list
             and self._vector_store_type == other.vector_store_type
@@ -83,6 +91,7 @@ class CreateIndexStatement(AbstractStatement):
             (
                 super().__hash__(),
                 self._name,
+                self._if_not_exists,
                 self._table_ref,
                 tuple(self.col_list),
                 self._vector_store_type,

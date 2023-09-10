@@ -1070,6 +1070,7 @@ class LogicalCreateIndex(Operator):
     def __init__(
         self,
         name: str,
+        if_not_exists: bool,
         table_ref: TableRef,
         col_list: List[ColumnDefinition],
         vector_store_type: VectorStoreType,
@@ -1078,6 +1079,7 @@ class LogicalCreateIndex(Operator):
     ):
         super().__init__(OperatorType.LOGICALCREATEINDEX, children)
         self._name = name
+        self._if_not_exists = if_not_exists
         self._table_ref = table_ref
         self._col_list = col_list
         self._vector_store_type = vector_store_type
@@ -1086,6 +1088,10 @@ class LogicalCreateIndex(Operator):
     @property
     def name(self):
         return self._name
+
+    @property
+    def if_not_exists(self):
+        return self._if_not_exists
 
     @property
     def table_ref(self):
@@ -1110,6 +1116,7 @@ class LogicalCreateIndex(Operator):
         return (
             is_subtree_equal
             and self.name == other.name
+            and self.if_not_exists == other.if_not_exists
             and self.table_ref == other.table_ref
             and self.col_list == other.col_list
             and self.vector_store_type == other.vector_store_type
@@ -1121,6 +1128,7 @@ class LogicalCreateIndex(Operator):
             (
                 super().__hash__(),
                 self.name,
+                self.if_not_exists,
                 self.table_ref,
                 tuple(self.col_list),
                 self.vector_store_type,
