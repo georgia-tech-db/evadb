@@ -263,7 +263,7 @@ class TableRef:
         # TableInfo -> table_name.lower()
         # SelectStatement -> select
         if isinstance(self._ref_handle, TableInfo):
-            return Alias(self._ref_handle.table_name.lower())
+            return Alias(self._ref_handle.table_name)
 
     def __str__(self):
         parts = []

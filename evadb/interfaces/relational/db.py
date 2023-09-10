@@ -211,7 +211,7 @@ class EvaDBCursor(object):
             target_list=[TupleValueExpression(name="*")], from_table=table
         )
         try_binding(self._evadb.catalog, select_stmt)
-        return EvaDBQuery(self._evadb, select_stmt, alias=Alias(table_name.lower()))
+        return EvaDBQuery(self._evadb, select_stmt, alias=Alias(table_name))
 
     def df(self) -> pandas.DataFrame:
         """

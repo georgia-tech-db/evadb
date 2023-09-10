@@ -76,7 +76,7 @@ class CreateIndexExecutor(AbstractExecutor):
                 if self.node.function:
                     # Create index through function expression.
                     # Function(input column) -> 2 dimension feature vector.
-                    input_batch.modify_column_alias(feat_catalog_entry.name.lower())
+                    input_batch.modify_column_alias(feat_catalog_entry.name)
                     feat_batch = self.node.function.evaluate(input_batch)
                     feat_batch.drop_column_alias()
                     input_batch.drop_column_alias()

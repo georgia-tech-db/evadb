@@ -461,18 +461,18 @@ def create_dummy_batches(
     for i in filters:
         data.append(
             {
-                "myvideo._row_id": 1,
-                "myvideo.name": os.path.join(video_dir, "dummy.avi"),
-                "myvideo.id": i + start_id,
-                "myvideo.data": np.array(
+                "MyVideo._row_id": 1,
+                "MyVideo.name": os.path.join(video_dir, "dummy.avi"),
+                "MyVideo.id": i + start_id,
+                "MyVideo.data": np.array(
                     np.ones((FRAME_SIZE[1], FRAME_SIZE[0], 3)) * i, dtype=np.uint8
                 ),
-                "myvideo.seconds": np.float32(i / num_frames),
+                "MyVideo.seconds": np.float32(i / num_frames),
             }
         )
 
         if is_from_storage:
-            data[-1]["myvideo._row_number"] = i + start_id
+            data[-1]["MyVideo._row_number"] = i + start_id
 
         if len(data) % batch_size == 0:
             yield Batch(pd.DataFrame(data))

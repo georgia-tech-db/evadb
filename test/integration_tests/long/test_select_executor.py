@@ -71,10 +71,10 @@ class SelectExecutorTest(unittest.TestCase):
 
     def test_should_load_and_select_real_audio_in_table(self):
         query = """LOAD VIDEO 'data/sample_videos/touchdown.mp4'
-                   INTO TOUCHDOWN;"""
+                   INTO touchdown;"""
         execute_query_fetch_all(self.evadb, query)
 
-        select_query = "SELECT id, audio FROM TOUCHDOWN;"
+        select_query = "SELECT id, audio FROM touchdown;"
         actual_batch = execute_query_fetch_all(self.evadb, select_query)
         actual_batch.sort("touchdown.id")
         video_reader = DecordReader("data/sample_videos/touchdown.mp4", read_audio=True)
@@ -104,7 +104,7 @@ class SelectExecutorTest(unittest.TestCase):
         select_query = """SELECT id, a FROM DETRAC JOIN LATERAL
                         Yolo(data) AS T(a,b,c) WHERE id < 5;"""
         actual_batch = execute_query_fetch_all(self.evadb, select_query)
-        self.assertEqual(list(actual_batch.columns), ["detrac.id", "T.a"])
+        self.assertEqual(list(actual_batch.columns), ["DETRAC.id", "T.a"])
         self.assertEqual(len(actual_batch), 5)
 
     def test_complex_logical_expressions(self):
@@ -142,7 +142,7 @@ class SelectExecutorTest(unittest.TestCase):
         select_query = """SELECT * FROM MyVideo WHERE id < 3
             UNION ALL SELECT * FROM MyVideo WHERE id > 7;"""
         actual_batch = execute_query_fetch_all(self.evadb, select_query)
-        actual_batch.sort("myvideo.id")
+        actual_batch.sort("MyVideo.id")
         expected_batch = list(
             create_dummy_batches(
                 filters=[i for i in range(NUM_FRAMES) if i < 3 or i > 7]
@@ -154,7 +154,7 @@ class SelectExecutorTest(unittest.TestCase):
             UNION ALL SELECT * FROM MyVideo WHERE id > 4 AND id < 6
             UNION ALL SELECT * FROM MyVideo WHERE id > 7;"""
         actual_batch = execute_query_fetch_all(self.evadb, select_query)
-        actual_batch.sort("myvideo.id")
+        actual_batch.sort("MyVideo.id")
         expected_batch = list(
             create_dummy_batches(
                 filters=[i for i in range(NUM_FRAMES) if i < 2 or i == 5 or i > 7]
@@ -183,14 +183,14 @@ class SelectExecutorTest(unittest.TestCase):
 
         select_query = "SELECT id, data FROM MNIST;"
         actual_batch = execute_query_fetch_all(self.evadb, select_query)
-        actual_batch.sort("mnist.id")
+        actual_batch.sort("MNIST.id")
         video_reader = DecordReader("data/mnist/mnist.mp4")
         expected_batch = Batch(frames=pd.DataFrame())
         for batch in video_reader.read():
             batch.frames["name"] = "mnist.mp4"
             expected_batch += batch
-        expected_batch.modify_column_alias("mnist")
-        expected_batch = expected_batch.project(["mnist.id", "mnist.data"])
+        expected_batch.modify_column_alias("MNIST")
+        expected_batch = expected_batch.project(["MNIST.id", "MNIST.data"])
         self.assertEqual(actual_batch, expected_batch)
 
     def test_project_identifier_column(self):
@@ -199,15 +199,15 @@ class SelectExecutorTest(unittest.TestCase):
         expected = Batch(
             pd.DataFrame(
                 {
-                    "myvideo._row_id": [1] * NUM_FRAMES,
-                    "myvideo.id": range(NUM_FRAMES),
+                    "MyVideo._row_id": [1] * NUM_FRAMES,
+                    "MyVideo.id": range(NUM_FRAMES),
                 }
             )
         )
         self.assertEqual(batch, expected)
 
         batch = execute_query_fetch_all(self.evadb, "SELECT * FROM MyVideo;")
-        self.assertTrue("myvideo._row_id" in batch.columns)
+        self.assertTrue("MyVideo._row_id" in batch.columns)
 
         # test for image table
         batch = execute_query_fetch_all(
@@ -216,15 +216,15 @@ class SelectExecutorTest(unittest.TestCase):
         expected = Batch(
             pd.DataFrame(
                 {
-                    "memeimages._row_id": [1, 2],
-                    "memeimages.name": [self.meme1, self.meme2],
+                    "MemeImages._row_id": [1, 2],
+                    "MemeImages.name": [self.meme1, self.meme2],
                 }
             )
         )
         self.assertEqual(batch, expected)
 
         batch = execute_query_fetch_all(self.evadb, "SELECT * FROM MemeImages;")
-        self.assertTrue("memeimages._row_id" in batch.columns)
+        self.assertTrue("MemeImages._row_id" in batch.columns)
 
         # test for structural table
         batch = execute_query_fetch_all(self.evadb, "SELECT _row_id FROM table1;")
@@ -246,7 +246,7 @@ class SelectExecutorTest(unittest.TestCase):
         actual_batch.sort()
 
         expected_batch = list(create_dummy_batches(filters=range(0, NUM_FRAMES, 7)))
-        expected_batch[0] = expected_batch[0].project(["myvideo.id"])
+        expected_batch[0] = expected_batch[0].project(["MyVideo.id"])
 
         self.assertEqual(len(actual_batch), len(expected_batch[0]))
         self.assertEqual(actual_batch, expected_batch[0])
@@ -259,7 +259,7 @@ class SelectExecutorTest(unittest.TestCase):
 
         select_query = "SELECT data FROM MyVideo WHERE id = 5;"
         actual_batch = execute_query_fetch_all(self.evadb, select_query)
-        self.assertEqual(actual_batch, expected_batch.project(["myvideo.data"]))
+        self.assertEqual(actual_batch, expected_batch.project(["MyVideo.data"]))
 
         select_query = "SELECT id, data FROM MyVideo WHERE id >= 2;"
         actual_batch = execute_query_fetch_all(self.evadb, select_query)
@@ -267,7 +267,7 @@ class SelectExecutorTest(unittest.TestCase):
         expected_batch = list(create_dummy_batches(filters=range(2, NUM_FRAMES)))[0]
         self.assertEqual(
             actual_batch,
-            expected_batch.project(["myvideo.id", "myvideo.data"]),
+            expected_batch.project(["MyVideo.id", "MyVideo.data"]),
         )
 
         select_query = "SELECT * FROM MyVideo WHERE id >= 2 AND id < 5;"
@@ -327,19 +327,19 @@ class SelectExecutorTest(unittest.TestCase):
         select_query = "SELECT id FROM MyVideo SAMPLE 2 WHERE id > 5 ORDER BY id;"
         actual_batch = execute_query_fetch_all(self.evadb, select_query)
         expected_batch = list(create_dummy_batches(filters=range(6, NUM_FRAMES, 2)))
-        self.assertEqual(actual_batch, expected_batch[0].project(["myvideo.id"]))
+        self.assertEqual(actual_batch, expected_batch[0].project(["MyVideo.id"]))
 
         select_query = "SELECT id FROM MyVideo SAMPLE 4 WHERE id > 2 ORDER BY id;"
         actual_batch = execute_query_fetch_all(self.evadb, select_query)
         expected_batch = list(create_dummy_batches(filters=range(4, NUM_FRAMES, 4)))
-        self.assertEqual(actual_batch, expected_batch[0].project(["myvideo.id"]))
+        self.assertEqual(actual_batch, expected_batch[0].project(["MyVideo.id"]))
 
         select_query = (
             "SELECT id FROM MyVideo SAMPLE 2 WHERE id > 2 AND id < 8 ORDER BY id;"
         )
         actual_batch = execute_query_fetch_all(self.evadb, select_query)
         expected_batch = list(create_dummy_batches(filters=range(4, 8, 2)))
-        self.assertEqual(actual_batch, expected_batch[0].project(["myvideo.id"]))
+        self.assertEqual(actual_batch, expected_batch[0].project(["MyVideo.id"]))
 
     def test_lateral_join_with_unnest_on_subset_of_outputs(self):
         query = """SELECT id, label
@@ -350,7 +350,7 @@ class SelectExecutorTest(unittest.TestCase):
         expected = Batch(
             pd.DataFrame(
                 {
-                    "myvideo.id": np.array([0, 0, 1, 1], np.intp),
+                    "MyVideo.id": np.array([0, 0, 1, 1], np.intp),
                     "T.label": np.array(["person", "person", "bicycle", "bicycle"]),
                 }
             )
@@ -366,7 +366,7 @@ class SelectExecutorTest(unittest.TestCase):
         expected = Batch(
             pd.DataFrame(
                 {
-                    "myvideo.id": np.array([0, 0], np.intp),
+                    "MyVideo.id": np.array([0, 0], np.intp),
                     "T.label": np.array(["person", "person"]),
                 }
             )
@@ -382,7 +382,7 @@ class SelectExecutorTest(unittest.TestCase):
         expected = Batch(
             pd.DataFrame(
                 {
-                    "myvideo.id": np.array([0, 1], dtype=np.intp),
+                    "MyVideo.id": np.array([0, 1], dtype=np.intp),
                     "T.label": np.array(["person", "bicycle"]),
                 }
             )
@@ -398,7 +398,7 @@ class SelectExecutorTest(unittest.TestCase):
         expected = Batch(
             pd.DataFrame(
                 {
-                    "myvideo.id": np.array([0, 1], dtype=np.intp),
+                    "MyVideo.id": np.array([0, 1], dtype=np.intp),
                     "T.label": np.array(["person", "bicycle"]),
                 }
             )
@@ -411,7 +411,7 @@ class SelectExecutorTest(unittest.TestCase):
         select_query = """SELECT id, T.labels FROM DETRAC JOIN LATERAL
                         Yolo(data) AS T WHERE id < 5;"""
         actual_batch = execute_query_fetch_all(self.evadb, select_query)
-        self.assertTrue(all(actual_batch.frames.columns == ["detrac.id", "T.labels"]))
+        self.assertTrue(all(actual_batch.frames.columns == ["DETRAC.id", "T.labels"]))
         self.assertEqual(len(actual_batch), 5)
 
     def test_should_select_star_in_table(self):

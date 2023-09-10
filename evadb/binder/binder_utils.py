@@ -234,8 +234,8 @@ def check_column_name_is_string(col_ref) -> None:
 
 
 def resolve_alias_table_value_expression(node: FunctionExpression):
-    default_alias_name = node.name.lower()
-    default_output_col_aliases = [str(obj.name.lower()) for obj in node.output_objs]
+    default_alias_name = node.name
+    default_output_col_aliases = [str(obj.name) for obj in node.output_objs]
     if not node.alias:
         node.alias = Alias(default_alias_name, default_output_col_aliases)
     else:
@@ -243,7 +243,7 @@ def resolve_alias_table_value_expression(node: FunctionExpression):
             node.alias = Alias(node.alias.alias_name, default_output_col_aliases)
         else:
             output_aliases = [
-                str(col_name.lower()) for col_name in node.alias.col_names
+                str(col_name) for col_name in node.alias.col_names
             ]
             node.alias = Alias(node.alias.alias_name, output_aliases)
 
@@ -298,10 +298,10 @@ def handle_bind_extract_object_function(
     binder_context.bind(tracker)
     # append the bound output of detector
     for obj in detector.output_objs:
-        col_alias = "{}.{}".format(obj.function_name.lower(), obj.name.lower())
+        col_alias = "{}.{}".format(obj.function_name, obj.name)
         child = TupleValueExpression(
             obj.name,
-            table_alias=obj.function_name.lower(),
+            table_alias=obj.function_name,
             col_object=obj,
             col_alias=col_alias,
         )
@@ -313,7 +313,7 @@ def handle_bind_extract_object_function(
 
     # 5. assign the outputs of tracker to the output of extract_object
     node.output_objs = tracker.output_objs
-    node.projection_columns = [obj.name.lower() for obj in node.output_objs]
+    node.projection_columns = [obj.name for obj in node.output_objs]
 
     # 5. resolve alias based on the what user provided
     # we assign the alias to tracker as it governs the output of the extract object
