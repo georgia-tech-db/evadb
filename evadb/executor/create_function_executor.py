@@ -161,7 +161,6 @@ class CreateFunctionExecutor(AbstractExecutor):
 
         """
         The following rename is needed for statsforecast, which requires the column name to be the following:
-
         - The unique_id (string, int or category) represents an identifier for the series.
         - The ds (datestamp) column should be of a format expected by Pandas, ideally YYYY-MM-DD for a date or YYYY-MM-DD HH:MM:SS for a timestamp.
         - The y (numeric) represents the measurement we wish to forecast.
