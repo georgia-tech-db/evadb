@@ -75,7 +75,7 @@ class ModelTrainTests(unittest.TestCase):
         execute_query_fetch_all(self.evadb, create_predict_udf)
 
         predict_query = """
-            SELECT AirForecast(12) FROM AirData;
+            SELECT AirForecast(12);
         """
         result = execute_query_fetch_all(self.evadb, predict_query)
         self.assertEqual(int(list(result.frames.iloc[:, -1])[-1]), 459)
@@ -95,7 +95,7 @@ class ModelTrainTests(unittest.TestCase):
         execute_query_fetch_all(self.evadb, create_predict_udf)
 
         predict_query = """
-            SELECT HomeForecast(12) FROM AirData;
+            SELECT HomeForecast(12);
         """
         result = execute_query_fetch_all(self.evadb, predict_query)
         self.assertEqual(len(result), 12)

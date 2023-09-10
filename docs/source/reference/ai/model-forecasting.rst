@@ -32,6 +32,6 @@ This trains a forecasting model. The model can be called by providing the horizo
 
 .. code-block:: sql
 
-   SELECT Forecast(12) FROM AirData;
+   SELECT Forecast(12);
 
 Here, the horizon is `12`.
