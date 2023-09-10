@@ -159,12 +159,20 @@ class CreateFunctionExecutor(AbstractExecutor):
         model_name = arg_map["model"]
         frequency = arg_map["frequency"]
 
-        data = aggregated_batch.frames.rename(columns={arg_map["predict"]: "y"})
+        """
+        The following rename is needed for statsforecast, which requires the column name to be the following:
+        - The unique_id (string, int or category) represents an identifier for the series.
+        - The ds (datestamp) column should be of a format expected by Pandas, ideally YYYY-MM-DD for a date or YYYY-MM-DD HH:MM:SS for a timestamp.
+        - The y (numeric) represents the measurement we wish to forecast.
+        For reference: https://nixtla.github.io/statsforecast/docs/getting-started/getting_started_short.html
+        """
+        aggregated_batch.rename(columns={arg_map["predict"]: "y"})
         if "time" in arg_map.keys():
-            aggregated_batch.frames.rename(columns={arg_map["time"]: "ds"})
+            aggregated_batch.rename(columns={arg_map["time"]: "ds"})
         if "id" in arg_map.keys():
-            aggregated_batch.frames.rename(columns={arg_map["id"]: "unique_id"})
+            aggregated_batch.rename(columns={arg_map["id"]: "unique_id"})
 
+        data = aggregated_batch.frames
         if "unique_id" not in list(data.columns):
             data["unique_id"] = ["test" for x in range(len(data))]
 
@@ -219,25 +227,12 @@ class CreateFunctionExecutor(AbstractExecutor):
             pickle.dump(model, f)
             f.close()
 
-        arg_map_here = {"model_name": model_name, "model_path": model_path}
-        function = self._try_initializing_function(impl_path, arg_map_here)
-        io_list = self._resolve_function_io(function)
+        io_list = self._resolve_function_io(None)
 
         metadata_here = [
-            FunctionMetadataCatalogEntry(
-                key="model_name",
-                value=model_name,
-                function_id=None,
-                function_name=None,
-                row_id=None,
-            ),
-            FunctionMetadataCatalogEntry(
-                key="model_path",
-                value=model_path,
-                function_id=None,
-                function_name=None,
-                row_id=None,
-            ),
+            FunctionMetadataCatalogEntry("model_name", model_name),
+            FunctionMetadataCatalogEntry("model_path", model_path),
+            FunctionMetadataCatalogEntry("output_column_rename", arg_map["predict"]),
         ]
 
         return (
