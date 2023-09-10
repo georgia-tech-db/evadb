@@ -67,8 +67,8 @@ class FunctionExecutorTest(unittest.TestCase):
         labels = DummyObjectDetector().labels
         expected = [
             {
-                "myvideo.id": i,
-                "dummyobjectdetector.label": np.array([labels[1 + i % 2]]),
+                "MyVideo.id": i,
+                "DummyObjectDetector.label": np.array([labels[1 + i % 2]]),
             }
             for i in range(NUM_FRAMES)
         ]
@@ -82,8 +82,8 @@ class FunctionExecutorTest(unittest.TestCase):
         actual_batch = execute_query_fetch_all(self.evadb, select_query)
         expected = [
             {
-                "myvideo.id": i * 2,
-                "dummyobjectdetector.label": np.array(["person"]),
+                "MyVideo.id": i * 2,
+                "DummyObjectDetector.label": np.array(["person"]),
             }
             for i in range(NUM_FRAMES // 2)
         ]
@@ -104,15 +104,15 @@ class FunctionExecutorTest(unittest.TestCase):
         actual_batch = execute_query_fetch_all(self.evadb, select_query)
         expected = [
             {
-                "myvideo.id": i * 2,
-                "dummyobjectdetector.label": np.array(["person"]),
+                "MyVideo.id": i * 2,
+                "DummyObjectDetector.label": np.array(["person"]),
             }
             for i in range(NUM_FRAMES // 2)
         ]
         expected += [
             {
-                "myvideo.id": i,
-                "dummyobjectdetector.label": np.array(["bicycle"]),
+                "MyVideo.id": i,
+                "DummyObjectDetector.label": np.array(["bicycle"]),
             }
             for i in range(NUM_FRAMES)
             if i % 2 + 1 == 2
@@ -135,7 +135,7 @@ class FunctionExecutorTest(unittest.TestCase):
             )
         )[0]
         expected_batch = expected_batch.project(
-            ["myvideo.name", "myvideo.id", "myvideo.data"]
+            ["MyVideo.name", "MyVideo.id", "MyVideo.data"]
         )
         expected_batch.modify_column_alias("T")
         self.assertEqual(actual_batch, expected_batch)

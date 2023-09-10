@@ -63,7 +63,7 @@ class SingleDocumentSimilarityTests(unittest.TestCase):
         )
         res_batch = execute_query_fetch_all(self.evadb, "SELECT * FROM MyPDF")
         for i in range(len(res_batch)):
-            all_text.remove(res_batch.frames["mypdf.data"][i])
+            all_text.remove(res_batch.frames["MyPDF.data"][i])
         self.assertEqual(len(all_text), 0)
 
         # Create feature extrator.
@@ -99,7 +99,7 @@ class SingleDocumentSimilarityTests(unittest.TestCase):
         all_text = set(deepcopy(text_list))
         for text in text_list:
             res_batch = execute_query_fetch_all(self.evadb, query.format(text))
-            res_text = res_batch.frames["mypdf.data"][0]
+            res_text = res_batch.frames["MyPDF.data"][0]
             self.assertTrue(res_text in all_text)
             all_text.remove(res_text)
 

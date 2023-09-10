@@ -100,7 +100,7 @@ class CreateTableTest(unittest.TestCase):
         # non-trivial test case
         res = actual_batch.frames
         for idx in res.index:
-            self.assertTrue("car" in res["uadtrac_fastrcnn.label"][idx])
+            self.assertTrue("car" in res["uadtrac_fastRCNN.label"][idx])
 
 
 if __name__ == "__main__":

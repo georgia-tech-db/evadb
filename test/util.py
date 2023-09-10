@@ -494,21 +494,21 @@ def create_dummy_4d_batches(
         segment_data = np.stack(np.array(segment_data, dtype=np.uint8))
         data.append(
             {
-                "myvideo.name": "dummy.avi",
-                "myvideo.id": segment[0] + start_id,
-                "myvideo.data": segment_data,
-                "myvideo.seconds": np.float32(i / num_frames),
+                "MyVideo.name": "dummy.avi",
+                "MyVideo.id": segment[0] + start_id,
+                "MyVideo.data": segment_data,
+                "MyVideo.seconds": np.float32(i / num_frames),
             }
         )
 
         if len(data) % batch_size == 0:
             df = pd.DataFrame(data)
-            df = df.astype({"myvideo.id": np.intp})
+            df = df.astype({"MyVideo.id": np.intp})
             yield Batch(df)
             data = []
     if data:
         df = pd.DataFrame(data)
-        df = df.astype({"myvideo.id": np.intp})
+        df = df.astype({"MyVideo.id": np.intp})
         yield Batch(df)
 
 

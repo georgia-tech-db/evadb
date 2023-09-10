@@ -128,7 +128,7 @@ class S3LoadExecutorTest(unittest.TestCase):
         result = execute_query_fetch_all(self.evadb, select_query)
 
         result_videos = [
-            Path(video).as_posix() for video in result.frames["myvideos.name"].unique()
+            Path(video).as_posix() for video in result.frames["MyVideos.name"].unique()
         ]
 
         s3_dir_path = Path(self.s3_download_dir)

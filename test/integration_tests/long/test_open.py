@@ -74,7 +74,7 @@ class OpenTests(unittest.TestCase):
 
         expected_batch = Batch(
             pd.DataFrame(
-                {"testopentable.num": [1, 2], "open.data": [expected_img, expected_img]}
+                {"testOpenTable.num": [1, 2], "Open.data": [expected_img, expected_img]}
             )
         )
         self.assertEqual(expected_batch, batch_res)

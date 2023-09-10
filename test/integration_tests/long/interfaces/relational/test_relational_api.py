@@ -255,7 +255,7 @@ class RelationalAPI(unittest.TestCase):
         expected = [
             {
                 "dummy_video.id": i,
-                "dummyobjectdetector.label": np.array([labels[1 + i % 2]]),
+                "DummyObjectDetector.label": np.array([labels[1 + i % 2]]),
             }
             for i in range(10)
         ]
@@ -360,7 +360,7 @@ class RelationalAPI(unittest.TestCase):
         )
         output = query.df()
         self.assertEqual(len(output), 3)
-        self.assertTrue("pdfs.data" in output.columns)
+        self.assertTrue("PDFs.data" in output.columns)
 
         cursor.drop_index("faiss_index").df()
 

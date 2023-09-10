@@ -143,7 +143,7 @@ class SimilarityTests(unittest.TestCase):
         base_img[0] -= 1
         base_img[2] += 1
 
-        actual_open = actual_batch.frames["testsimilaritytable.data_col"].to_numpy()[0]
+        actual_open = actual_batch.frames["testSimilarityTable.data_col"].to_numpy()[0]
         self.assertTrue(np.array_equal(actual_open, base_img))
 
         # Top 2 - assume table contains base data.
@@ -154,9 +154,9 @@ class SimilarityTests(unittest.TestCase):
         )
         actual_batch = execute_query_fetch_all(self.evadb, select_query)
 
-        actual_open = actual_batch.frames["testsimilaritytable.data_col"].to_numpy()[0]
+        actual_open = actual_batch.frames["testSimilarityTable.data_col"].to_numpy()[0]
         self.assertTrue(np.array_equal(actual_open, base_img))
-        actual_open = actual_batch.frames["testsimilaritytable.data_col"].to_numpy()[1]
+        actual_open = actual_batch.frames["testSimilarityTable.data_col"].to_numpy()[1]
         self.assertTrue(np.array_equal(actual_open, base_img + 1))
 
         # Top 2 - descending order
@@ -167,9 +167,9 @@ class SimilarityTests(unittest.TestCase):
         )
         actual_batch = execute_query_fetch_all(self.evadb, select_query)
 
-        actual_open = actual_batch.frames["testsimilaritytable.data_col"].to_numpy()[0]
+        actual_open = actual_batch.frames["testSimilarityTable.data_col"].to_numpy()[0]
         self.assertTrue(np.array_equal(actual_open, base_img + 4))
-        actual_open = actual_batch.frames["testsimilaritytable.data_col"].to_numpy()[1]
+        actual_open = actual_batch.frames["testSimilarityTable.data_col"].to_numpy()[1]
         self.assertTrue(np.array_equal(actual_open, base_img + 3))
 
         ###########################################
@@ -190,7 +190,7 @@ class SimilarityTests(unittest.TestCase):
         base_img = base_img.astype(np.float32).reshape(1, -1)
 
         actual_open = actual_batch.frames[
-            "testsimilarityfeaturetable.feature_col"
+            "testSimilarityFeatureTable.feature_col"
         ].to_numpy()[0]
         self.assertTrue(np.array_equal(actual_open, base_img))
 
@@ -203,11 +203,11 @@ class SimilarityTests(unittest.TestCase):
         actual_batch = execute_query_fetch_all(self.evadb, select_query)
 
         actual_open = actual_batch.frames[
-            "testsimilarityfeaturetable.feature_col"
+            "testSimilarityFeatureTable.feature_col"
         ].to_numpy()[0]
         self.assertTrue(np.array_equal(actual_open, base_img))
         actual_open = actual_batch.frames[
-            "testsimilarityfeaturetable.feature_col"
+            "testSimilarityFeatureTable.feature_col"
         ].to_numpy()[1]
         self.assertTrue(np.array_equal(actual_open, base_img + 1))
 
@@ -244,10 +244,10 @@ class SimilarityTests(unittest.TestCase):
             self.assertTrue(
                 np.array_equal(
                     expected_batch.frames[
-                        "testsimilarityfeaturetable.feature_col"
+                        "testSimilarityFeatureTable.feature_col"
                     ].to_numpy()[i],
                     actual_batch.frames[
-                        "testsimilarityfeaturetable.feature_col"
+                        "testSimilarityFeatureTable.feature_col"
                     ].to_numpy()[i],
                 )
             )
@@ -283,8 +283,8 @@ class SimilarityTests(unittest.TestCase):
         for i in range(3):
             self.assertTrue(
                 np.array_equal(
-                    expected_batch.frames["testsimilaritytable.data_col"].to_numpy()[i],
-                    actual_batch.frames["testsimilaritytable.data_col"].to_numpy()[i],
+                    expected_batch.frames["testSimilarityTable.data_col"].to_numpy()[i],
+                    actual_batch.frames["testSimilarityTable.data_col"].to_numpy()[i],
                 )
             )
 
@@ -324,9 +324,9 @@ class SimilarityTests(unittest.TestCase):
         )
         actual_batch = execute_query_fetch_all(self.evadb, select_query)
 
-        actual_open = actual_batch.frames["testsimilaritytable.data_col"].to_numpy()[0]
+        actual_open = actual_batch.frames["testSimilarityTable.data_col"].to_numpy()[0]
         self.assertTrue(np.array_equal(actual_open, base_img + 4))
-        actual_open = actual_batch.frames["testsimilaritytable.data_col"].to_numpy()[1]
+        actual_open = actual_batch.frames["testSimilarityTable.data_col"].to_numpy()[1]
         self.assertTrue(np.array_equal(actual_open, base_img + 3))
 
         # Cleanup
@@ -366,7 +366,7 @@ class SimilarityTests(unittest.TestCase):
             self.img_path
         )
         res_batch = execute_query_fetch_all(self.evadb, select_query)
-        self.assertEqual(res_batch.frames["testsimilarityimagedataset._row_id"][0], 5)
+        self.assertEqual(res_batch.frames["testSimilarityImageDataset._row_id"][0], 5)
 
     @gpu_skip_marker
     @qdrant_skip_marker
@@ -387,4 +387,4 @@ class SimilarityTests(unittest.TestCase):
                     |__ StoragePlan"""
 
         res_batch = execute_query_fetch_all(self.evadb, select_query)
-        self.assertEqual(res_batch.frames["testsimilarityimagedataset._row_id"][0], 5)
+        self.assertEqual(res_batch.frames["testSimilarityImageDataset._row_id"][0], 5)

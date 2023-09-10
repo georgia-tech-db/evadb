@@ -413,7 +413,7 @@ class LoadExecutorTests(unittest.TestCase):
                     self.evadb, "SELECT name FROM MyImages"
                 )
                 self.assertEqual(len(result), 1)
-                expected = Batch(pd.DataFrame([{"myimages.name": valid_images[0]}]))
+                expected = Batch(pd.DataFrame([{"MyImages.name": valid_images[0]}]))
                 self.assertEqual(expected, result)
 
     ###################################
@@ -447,7 +447,7 @@ class LoadExecutorTests(unittest.TestCase):
         # assert the batches are equal
         select_columns = ["id", "frame_id", "video_id", "dataset_name"]
         expected_batch = next(create_dummy_csv_batches(target_columns=select_columns))
-        expected_batch.modify_column_alias("myvideocsv")
+        expected_batch.modify_column_alias("MyVideoCSV")
         self.assertEqual(actual_batch, expected_batch)
 
         # clean up

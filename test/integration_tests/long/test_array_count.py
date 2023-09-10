@@ -54,7 +54,7 @@ class ArrayCountTests(unittest.TestCase):
             WHERE DummyObjectDetector(data).label = ['person'] ORDER BY id;"
         actual_batch = execute_query_fetch_all(self.evadb, select_query)
         expected = [
-            {"myvideo.id": i * 2, "dummyobjectdetector.label": ["person"]}
+            {"MyVideo.id": i * 2, "DummyObjectDetector.label": ["person"]}
             for i in range(NUM_FRAMES // 2)
         ]
         expected_batch = Batch(frames=pd.DataFrame(expected))
@@ -69,7 +69,7 @@ class ArrayCountTests(unittest.TestCase):
         select_query = "SELECT id FROM MyVideo WHERE \
             DummyMultiObjectDetector(data).labels @> ['person'] ORDER BY id;"
         actual_batch = execute_query_fetch_all(self.evadb, select_query)
-        expected = [{"myvideo.id": i} for i in range(0, NUM_FRAMES, 3)]
+        expected = [{"MyVideo.id": i} for i in range(0, NUM_FRAMES, 3)]
         expected_batch = Batch(frames=pd.DataFrame(expected))
         self.assertEqual(actual_batch, expected_batch)
 
@@ -78,7 +78,7 @@ class ArrayCountTests(unittest.TestCase):
             ArrayCount(DummyMultiObjectDetector(data).labels, 'person') = 2
             ORDER BY id;"""
         actual_batch = execute_query_fetch_all(self.evadb, select_query)
-        expected = [{"myvideo.id": i} for i in range(0, NUM_FRAMES, 3)]
+        expected = [{"MyVideo.id": i} for i in range(0, NUM_FRAMES, 3)]
         expected_batch = Batch(frames=pd.DataFrame(expected))
         self.assertEqual(actual_batch, expected_batch)
 
@@ -86,6 +86,6 @@ class ArrayCountTests(unittest.TestCase):
             WHERE ArrayCount(DummyObjectDetector(data).label, 'bicycle') = 1
             ORDER BY id;"""
         actual_batch = execute_query_fetch_all(self.evadb, select_query)
-        expected = [{"myvideo.id": i} for i in range(1, NUM_FRAMES, 2)]
+        expected = [{"MyVideo.id": i} for i in range(1, NUM_FRAMES, 2)]
         expected_batch = Batch(frames=pd.DataFrame(expected))
         self.assertEqual(actual_batch, expected_batch)

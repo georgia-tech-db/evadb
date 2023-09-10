@@ -132,6 +132,6 @@ class DeleteExecutorTest(unittest.TestCase):
         batch = execute_query_fetch_all(self.evadb, query)
 
         np.testing.assert_array_equal(
-            batch.frames["testdeleteone.id"].array,
+            batch.frames["testDeleteOne.id"].array,
             np.array([25], dtype=np.int64),
         )

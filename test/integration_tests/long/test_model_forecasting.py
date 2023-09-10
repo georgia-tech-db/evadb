@@ -99,7 +99,7 @@ class ModelTrainTests(unittest.TestCase):
         """
         result = execute_query_fetch_all(self.evadb, predict_query)
         self.assertEqual(len(result), 12)
-        self.assertEqual(result.columns, ["homeforecast.ma"])
+        self.assertEqual(result.columns, ["HomeForecast.ma"])
 
 
 if __name__ == "__main__":

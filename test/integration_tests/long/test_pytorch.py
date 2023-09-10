@@ -184,8 +184,8 @@ class PytorchTest(unittest.TestCase):
         res = actual_batch.frames
         for idx in res.index:
             self.assertTrue(
-                "person" in res["yolo.labels"][idx]
-                and "yoga" in res["mvitactionrecognition.labels"][idx]
+                "person" in res["Yolo.labels"][idx]
+                and "yoga" in res["MVITActionRecognition.labels"][idx]
             )
 
     @pytest.mark.torchtest
@@ -201,7 +201,7 @@ class PytorchTest(unittest.TestCase):
 
         self.assertEqual(len(res), 1)
         for idx in res.index:
-            self.assertTrue("computer" in res["aslactionrecognition.labels"][idx])
+            self.assertTrue("computer" in res["ASLActionRecognition.labels"][idx])
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_facenet(self):
@@ -240,8 +240,8 @@ class PytorchTest(unittest.TestCase):
 
         # non-trivial test case for MNIST
         res = actual_batch.frames
-        self.assertTrue(res["ocrextractor.labels"][0][0] == "4")
-        self.assertTrue(res["ocrextractor.scores"][2][0] > 0.9)
+        self.assertTrue(res["OCRExtractor.labels"][0][0] == "4")
+        self.assertTrue(res["OCRExtractor.scores"][2][0] > 0.9)
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_resnet50(self):
@@ -260,7 +260,7 @@ class PytorchTest(unittest.TestCase):
 
         # non-trivial test case for Resnet50
         res = actual_batch.frames
-        self.assertEqual(res["featureextractor.features"][0].shape, (1, 2048))
+        self.assertEqual(res["FeatureExtractor.features"][0].shape, (1, 2048))
         # self.assertTrue(res["featureextractor.features"][0][0][0] > 0.3)
 
     @pytest.mark.torchtest
@@ -293,7 +293,7 @@ class PytorchTest(unittest.TestCase):
 
         select_query = """SELECT data FROM MyVideo WHERE id = 1;"""
         batch_res = execute_query_fetch_all(self.evadb, select_query)
-        img = batch_res.frames["myvideo.data"][0]
+        img = batch_res.frames["MyVideo.data"][0]
 
         tmp_dir_from_config = self.evadb.config.get_value("storage", "tmp_dir")
 
@@ -316,7 +316,7 @@ class PytorchTest(unittest.TestCase):
         )
         actual_batch = execute_query_fetch_all(self.evadb, similarity_query)
 
-        similar_data = actual_batch.frames["myvideo.data"][0]
+        similar_data = actual_batch.frames["MyVideo.data"][0]
         self.assertTrue(np.array_equal(img, similar_data))
 
     @pytest.mark.torchtest
@@ -340,8 +340,8 @@ class PytorchTest(unittest.TestCase):
 
         # non-trivial test case for MNIST
         res = actual_batch.frames
-        self.assertTrue(res["ocrextractor.labels"][0][0] == "4")
-        self.assertTrue(res["ocrextractor.scores"][2][0] > 0.9)
+        self.assertTrue(res["OCRExtractor.labels"][0][0] == "4")
+        self.assertTrue(res["OCRExtractor.scores"][2][0] > 0.9)
 
     @pytest.mark.torchtest
     @gpu_skip_marker

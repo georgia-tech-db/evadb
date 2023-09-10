@@ -111,26 +111,26 @@ class HuggingFaceTests(unittest.TestCase):
         self.assertEqual(len(output.frames), 4)
 
         # Test that there exists a column with function_name.score and each entry is a list of floats
-        self.assertTrue(function_name.lower() + ".score" in output_frames.columns)
+        self.assertTrue(function_name + ".score" in output_frames.columns)
         self.assertTrue(
             all(
                 isinstance(x, list)
-                for x in output.frames[function_name.lower() + ".score"]
+                for x in output.frames[function_name + ".score"]
             )
         )
 
         # Test that there exists a column with function_name.label and each entry is a list of strings
-        self.assertTrue(function_name.lower() + ".label" in output_frames.columns)
+        self.assertTrue(function_name + ".label" in output_frames.columns)
         self.assertTrue(
             all(
                 isinstance(x, list)
-                for x in output.frames[function_name.lower() + ".label"]
+                for x in output.frames[function_name + ".label"]
             )
         )
 
         # Test that there exists a column with function_name.box and each entry is a dictionary with 4 keys
-        self.assertTrue(function_name.lower() + ".box" in output_frames.columns)
-        for bbox in output.frames[function_name.lower() + ".box"]:
+        self.assertTrue(function_name + ".box" in output_frames.columns)
+        for bbox in output.frames[function_name + ".box"]:
             self.assertTrue(isinstance(bbox, list))
             bbox = bbox[0]
             self.assertTrue(isinstance(bbox, dict))
@@ -158,20 +158,20 @@ class HuggingFaceTests(unittest.TestCase):
         self.assertEqual(len(output.frames.columns), 2)
 
         # Test that there exists a column with function_name.score and each entry is a list of floats
-        self.assertTrue(function_name.lower() + ".score" in output.frames.columns)
+        self.assertTrue(function_name + ".score" in output.frames.columns)
         self.assertTrue(
             all(
                 isinstance(x, list)
-                for x in output.frames[function_name.lower() + ".score"]
+                for x in output.frames[function_name + ".score"]
             )
         )
 
         # Test that there exists a column with function_name.label and each entry is a list of strings
-        self.assertTrue(function_name.lower() + ".label" in output.frames.columns)
+        self.assertTrue(function_name + ".label" in output.frames.columns)
         self.assertTrue(
             all(
                 isinstance(x, list)
-                for x in output.frames[function_name.lower() + ".label"]
+                for x in output.frames[function_name + ".label"]
             )
         )
 
@@ -203,20 +203,20 @@ class HuggingFaceTests(unittest.TestCase):
         self.assertEqual(len(output.frames.columns), 2)
 
         # Test that there exists a column with function_name.label and each entry is either "POSITIVE" or "NEGATIVE"
-        self.assertTrue(function_name.lower() + ".label" in output.frames.columns)
+        self.assertTrue(function_name + ".label" in output.frames.columns)
         self.assertTrue(
             all(
                 x in ["POSITIVE", "NEGATIVE"]
-                for x in output.frames[function_name.lower() + ".label"]
+                for x in output.frames[function_name + ".label"]
             )
         )
 
         # Test that there exists a column with function_name.score and each entry is a float
-        self.assertTrue(function_name.lower() + ".score" in output.frames.columns)
+        self.assertTrue(function_name + ".score" in output.frames.columns)
         self.assertTrue(
             all(
                 isinstance(x, float)
-                for x in output.frames[function_name.lower() + ".score"]
+                for x in output.frames[function_name + ".score"]
             )
         )
 
@@ -314,21 +314,21 @@ class HuggingFaceTests(unittest.TestCase):
         self.assertEqual(len(output.frames.columns), 2)
 
         # Test that there exists a column with function_name.label and each entry is either "POSITIVE" or "NEGATIVE"
-        self.assertTrue(function_name.lower() + ".label" in output.frames.columns)
+        self.assertTrue(function_name + ".label" in output.frames.columns)
         self.assertTrue(
             all(
                 x in ["non-toxic", "toxic"]
-                for x in output.frames[function_name.lower() + ".label"]
+                for x in output.frames[function_name + ".label"]
             )
         )
 
         # Test that there exists a column with function_name.score
         # and each entry is a float
-        self.assertTrue(function_name.lower() + ".score" in output.frames.columns)
+        self.assertTrue(function_name + ".score" in output.frames.columns)
         self.assertTrue(
             all(
                 isinstance(x, float)
-                for x in output.frames[function_name.lower() + ".score"]
+                for x in output.frames[function_name + ".score"]
             )
         )
 
@@ -364,20 +364,20 @@ class HuggingFaceTests(unittest.TestCase):
         self.assertEqual(len(output.frames.columns), 2)
 
         # Test that there exists a column with function_name.label and each entry is either "POSITIVE" or "NEGATIVE"
-        self.assertTrue(function_name.lower() + ".label" in output.frames.columns)
+        self.assertTrue(function_name + ".label" in output.frames.columns)
         self.assertTrue(
             all(
                 x in ["LABEL_1", "LABEL_0"]
-                for x in output.frames[function_name.lower() + ".label"]
+                for x in output.frames[function_name + ".label"]
             )
         )
 
         # Test that there exists a column with function_name.score and each entry is a float
-        self.assertTrue(function_name.lower() + ".score" in output.frames.columns)
+        self.assertTrue(function_name + ".score" in output.frames.columns)
         self.assertTrue(
             all(
                 isinstance(x, float)
-                for x in output.frames[function_name.lower() + ".score"]
+                for x in output.frames[function_name + ".score"]
             )
         )
 
@@ -401,10 +401,10 @@ class HuggingFaceTests(unittest.TestCase):
         self.assertEqual(len(output.frames.columns), 7)
 
         # Test that there exists a column with function_name.entity
-        self.assertTrue(function_name.lower() + ".entity" in output.frames.columns)
+        self.assertTrue(function_name + ".entity" in output.frames.columns)
 
         # Test that there exists a column with function_name.score
-        self.assertTrue(function_name.lower() + ".score" in output.frames.columns)
+        self.assertTrue(function_name + ".score" in output.frames.columns)
 
         drop_function_query = f"DROP FUNCTION {function_name};"
         execute_query_fetch_all(self.evadb, drop_function_query)
@@ -439,7 +439,7 @@ class HuggingFaceTests(unittest.TestCase):
         self.assertEqual(len(output.frames.columns), 1)
 
         # Test that there does not exist a column with function_name.entity
-        self.assertFalse(function_name.lower() + ".entity" in output.frames.columns)
+        self.assertFalse(function_name + ".entity" in output.frames.columns)
 
         drop_function_query = f"DROP FUNCTION {function_name};"
         execute_query_fetch_all(self.evadb, drop_function_query)
