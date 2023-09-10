@@ -138,6 +138,7 @@ class FunctionExpression(AbstractExpression):
         if batch is not None:
             self._stats.num_calls += len(batch)
         else:
+            # SELECT func(1);
             self._stats.num_calls += 1
 
         # try persisting the stats to catalog and do not crash if we fail in doing so
