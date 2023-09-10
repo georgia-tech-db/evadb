@@ -38,7 +38,7 @@ class ExecutorError(Exception):
 def apply_project(
     batch: Batch, project_list: List[AbstractExpression], catalog: "CatalogManager"
 ):
-    if not batch.empty() and project_list:
+    if batch is None or (not batch.empty() and project_list):
         batches = [expr.evaluate(batch) for expr in project_list]
         batch = Batch.merge_column_wise(batches)
 

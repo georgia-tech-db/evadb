@@ -1176,6 +1176,22 @@ class LogicalProjectToPhysical(Rule):
         yield after
 
 
+class LogicalProjectNoTableToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALPROJECT)
+        super().__init__(RuleType.LOGICAL_PROJECT_NO_TABLE_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_PROJECT_NO_TABLE_TO_PHYSICAL
+
+    def check(self, grp_id: int, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalProject, context: OptimizerContext):
+        after = ProjectPlan(before.target_list)
+        yield after
+
+
 class LogicalShowToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICAL_SHOW)

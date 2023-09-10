@@ -150,7 +150,7 @@ alias_clause: AS? uid "(" uid_list ")" | AS? uid
 
 query_expression: "(" query_specification ")" | "(" query_expression ")"
     
-query_specification: SELECT select_elements from_clause order_by_clause? limit_clause?
+query_specification: SELECT select_elements from_clause? order_by_clause? limit_clause?
     
 select_elements: (STAR | select_element ) ("," select_element)*
     

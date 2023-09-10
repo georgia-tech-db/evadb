@@ -33,7 +33,13 @@ class ConstantValueExpression(AbstractExpression):
         self._v_type = v_type
 
     def evaluate(self, batch: Batch, **kwargs):
-        batch = Batch(pd.DataFrame({0: [self._value] * len(batch)}))
+        repeated = 0
+        # SELECT expr;
+        if batch is None:
+            repeated = 1
+        else:
+            repeated = len(batch)
+        batch = Batch(pd.DataFrame({0: [self._value] * repeated}))
         return batch
 
     def signature(self) -> str:
