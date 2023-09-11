@@ -24,7 +24,7 @@ from test.util import (
     create_sample_video,
     file_remove,
     get_evadb_for_testing,
-    load_udfs_for_testing,
+    load_functions_for_testing,
     shutdown_ray,
 )
 
@@ -34,9 +34,12 @@ import pytest
 
 from evadb.configuration.constants import EvaDB_ROOT_DIR
 from evadb.executor.executor_utils import ExecutorError
+from evadb.functions.function_bootstrap_queries import (
+    Asl_function_query,
+    Mvit_function_query,
+)
 from evadb.models.storage.batch import Batch
 from evadb.server.command_handler import execute_query_fetch_all
-from evadb.udfs.udf_bootstrap_queries import Asl_udf_query, Mvit_udf_query
 from evadb.utils.generic_utils import try_to_import_cv2
 
 
@@ -63,7 +66,7 @@ class PytorchTest(unittest.TestCase):
         )
         execute_query_fetch_all(cls.evadb, f"LOAD IMAGE '{meme1}' INTO MemeImages;")
         execute_query_fetch_all(cls.evadb, f"LOAD IMAGE '{meme2}' INTO MemeImages;")
-        load_udfs_for_testing(cls.evadb)
+        load_functions_for_testing(cls.evadb)
 
     @classmethod
     def tearDownClass(cls):
@@ -116,14 +119,14 @@ class PytorchTest(unittest.TestCase):
 
     @ray_skip_marker
     def test_should_project_parallel_match_sequential(self):
-        create_udf_query = """CREATE UDF IF NOT EXISTS FaceDetector
+        create_function_query = """CREATE FUNCTION IF NOT EXISTS FaceDetector
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
                   OUTPUT (bboxes NDARRAY FLOAT32(ANYDIM, 4),
                           scores NDARRAY FLOAT32(ANYDIM))
                   TYPE  FaceDetection
-                  IMPL  'evadb/udfs/face_detector.py';
+                  IMPL  'evadb/functions/face_detector.py';
         """
-        execute_query_fetch_all(self.evadb, create_udf_query)
+        execute_query_fetch_all(self.evadb, create_function_query)
 
         select_query = "SELECT FaceDetector(data) FROM MyVideo WHERE id < 5;"
         # Parallel execution
@@ -167,7 +170,7 @@ class PytorchTest(unittest.TestCase):
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_yolo_and_mvit(self):
-        execute_query_fetch_all(self.evadb, Mvit_udf_query)
+        execute_query_fetch_all(self.evadb, Mvit_function_query)
 
         select_query = """SELECT FIRST(id),
                             Yolo(FIRST(data)),
@@ -187,7 +190,7 @@ class PytorchTest(unittest.TestCase):
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_asl(self):
-        execute_query_fetch_all(self.evadb, Asl_udf_query)
+        execute_query_fetch_all(self.evadb, Asl_function_query)
         select_query = """SELECT FIRST(id), ASLActionRecognition(SEGMENT(data))
                         FROM Asl_actions
                         SAMPLE 5
@@ -202,14 +205,14 @@ class PytorchTest(unittest.TestCase):
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_facenet(self):
-        create_udf_query = """CREATE UDF IF NOT EXISTS FaceDetector
+        create_function_query = """CREATE FUNCTION IF NOT EXISTS FaceDetector
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
                   OUTPUT (bboxes NDARRAY FLOAT32(ANYDIM, 4),
                           scores NDARRAY FLOAT32(ANYDIM))
                   TYPE  FaceDetection
-                  IMPL  'evadb/udfs/face_detector.py';
+                  IMPL  'evadb/functions/face_detector.py';
         """
-        execute_query_fetch_all(self.evadb, create_udf_query)
+        execute_query_fetch_all(self.evadb, create_function_query)
 
         select_query = """SELECT FaceDetector(data) FROM MyVideo
                         WHERE id < 5;"""
@@ -220,15 +223,15 @@ class PytorchTest(unittest.TestCase):
     @windows_skip_marker
     @ocr_skip_marker
     def test_should_run_pytorch_and_ocr(self):
-        create_udf_query = """CREATE UDF IF NOT EXISTS OCRExtractor
+        create_function_query = """CREATE FUNCTION IF NOT EXISTS OCRExtractor
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
                   OUTPUT (labels NDARRAY STR(10),
                           bboxes NDARRAY FLOAT32(ANYDIM, 4),
                           scores NDARRAY FLOAT32(ANYDIM))
                   TYPE  OCRExtraction
-                  IMPL  'evadb/udfs/ocr_extractor.py';
+                  IMPL  'evadb/functions/ocr_extractor.py';
         """
-        execute_query_fetch_all(self.evadb, create_udf_query)
+        execute_query_fetch_all(self.evadb, create_function_query)
 
         select_query = """SELECT OCRExtractor(data) FROM MNIST
                         WHERE id >= 150 AND id < 155;"""
@@ -242,13 +245,13 @@ class PytorchTest(unittest.TestCase):
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_resnet50(self):
-        create_udf_query = """CREATE UDF IF NOT EXISTS FeatureExtractor
+        create_function_query = """CREATE FUNCTION IF NOT EXISTS FeatureExtractor
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
                   OUTPUT (features NDARRAY FLOAT32(ANYDIM))
                   TYPE  Classification
-                  IMPL  'evadb/udfs/feature_extractor.py';
+                  IMPL  'evadb/functions/feature_extractor.py';
         """
-        execute_query_fetch_all(self.evadb, create_udf_query)
+        execute_query_fetch_all(self.evadb, create_function_query)
 
         select_query = """SELECT FeatureExtractor(data) FROM MyVideo
                         WHERE id < 5;"""
@@ -262,31 +265,31 @@ class PytorchTest(unittest.TestCase):
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_similarity(self):
-        create_open_udf_query = """CREATE UDF IF NOT EXISTS Open
+        create_open_function_query = """CREATE FUNCTION IF NOT EXISTS Open
                 INPUT (img_path TEXT(1000))
                 OUTPUT (data NDARRAY UINT8(3, ANYDIM, ANYDIM))
-                TYPE NdarrayUDF
-                IMPL "evadb/udfs/ndarray/open.py";
+                TYPE NdarrayFUNCTION
+                IMPL "evadb/functions/ndarray/open.py";
         """
-        execute_query_fetch_all(self.evadb, create_open_udf_query)
+        execute_query_fetch_all(self.evadb, create_open_function_query)
 
-        create_similarity_udf_query = """CREATE UDF IF NOT EXISTS Similarity
+        create_similarity_function_query = """CREATE FUNCTION IF NOT EXISTS Similarity
                     INPUT (Frame_Array_Open NDARRAY UINT8(3, ANYDIM, ANYDIM),
                            Frame_Array_Base NDARRAY UINT8(3, ANYDIM, ANYDIM),
                            Feature_Extractor_Name TEXT(100))
                     OUTPUT (distance FLOAT(32, 7))
-                    TYPE NdarrayUDF
-                    IMPL "evadb/udfs/ndarray/similarity.py";
+                    TYPE NdarrayFUNCTION
+                    IMPL "evadb/functions/ndarray/similarity.py";
         """
-        execute_query_fetch_all(self.evadb, create_similarity_udf_query)
+        execute_query_fetch_all(self.evadb, create_similarity_function_query)
 
-        create_feat_udf_query = """CREATE UDF IF NOT EXISTS FeatureExtractor
+        create_feat_function_query = """CREATE FUNCTION IF NOT EXISTS FeatureExtractor
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
                   OUTPUT (features NDARRAY FLOAT32(ANYDIM))
                   TYPE  Classification
-                  IMPL  "evadb/udfs/feature_extractor.py";
+                  IMPL  "evadb/functions/feature_extractor.py";
         """
-        execute_query_fetch_all(self.evadb, create_feat_udf_query)
+        execute_query_fetch_all(self.evadb, create_feat_function_query)
 
         select_query = """SELECT data FROM MyVideo WHERE id = 1;"""
         batch_res = execute_query_fetch_all(self.evadb, select_query)
@@ -320,15 +323,15 @@ class PytorchTest(unittest.TestCase):
     @windows_skip_marker
     @ocr_skip_marker
     def test_should_run_ocr_on_cropped_data(self):
-        create_udf_query = """CREATE UDF IF NOT EXISTS OCRExtractor
+        create_function_query = """CREATE FUNCTION IF NOT EXISTS OCRExtractor
                   INPUT  (text NDARRAY STR(100))
                   OUTPUT (labels NDARRAY STR(10),
                           bboxes NDARRAY FLOAT32(ANYDIM, 4),
                           scores NDARRAY FLOAT32(ANYDIM))
                   TYPE  OCRExtraction
-                  IMPL  'evadb/udfs/ocr_extractor.py';
+                  IMPL  'evadb/functions/ocr_extractor.py';
         """
-        execute_query_fetch_all(self.evadb, create_udf_query)
+        execute_query_fetch_all(self.evadb, create_function_query)
 
         select_query = """SELECT OCRExtractor(Crop(data, [2, 2, 24, 24])) FROM MNIST
                         WHERE id >= 150 AND id < 155;"""

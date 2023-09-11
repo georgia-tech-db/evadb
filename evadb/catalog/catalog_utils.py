@@ -27,25 +27,16 @@ from evadb.catalog.catalog_type import (
 )
 from evadb.catalog.models.utils import (
     ColumnCatalogEntry,
+    FunctionCacheCatalogEntry,
+    FunctionCatalogEntry,
     TableCatalogEntry,
-    UdfCacheCatalogEntry,
-    UdfCatalogEntry,
 )
 from evadb.catalog.sql_config import IDENTIFIER_COLUMN
 from evadb.configuration.configuration_manager import ConfigurationManager
-from evadb.executor.executor_utils import ExecutorError
 from evadb.expression.function_expression import FunctionExpression
 from evadb.expression.tuple_value_expression import TupleValueExpression
 from evadb.parser.create_statement import ColConstraintInfo, ColumnDefinition
 from evadb.utils.generic_utils import get_str_hash, remove_directory_contents
-
-
-def generate_sqlalchemy_conn_str(engine: str, params: Dict[str, str]):
-    if engine == "postgres":
-        conn_str = f"""postgresql://{params["user"]}:{params["password"]}@{params["host"]}:{params["port"]}/{params["database"]}"""
-    else:
-        raise ExecutorError(f"Native engine: {engine} is not currently supported")
-    return conn_str
 
 
 def is_video_table(table: TableCatalogEntry):
@@ -227,24 +218,24 @@ def xform_column_definitions_to_catalog_entries(
     return result_list
 
 
-def construct_udf_cache_catalog_entry(
+def construct_function_cache_catalog_entry(
     func_expr: FunctionExpression, cache_dir: str
-) -> UdfCacheCatalogEntry:
-    """Constructs a udf cache catalog entry from a given function expression.
+) -> FunctionCacheCatalogEntry:
+    """Constructs a function cache catalog entry from a given function expression.
     It is assumed that the function expression has already been bound using the binder.
-    The catalog entry is populated with dependent udfs and columns by traversing the
+    The catalog entry is populated with dependent functions and columns by traversing the
     expression tree. The cache name is represented by the signature of the function
     expression.
     Args:
         func_expr (FunctionExpression): the function expression with which the cache is associated
         cache_dir (str): path to store the cache
     Returns:
-        UdfCacheCatalogEntry: the udf cache catalog entry
+        FunctionCacheCatalogEntry: the function cache catalog entry
     """
-    udf_depends = []
+    function_depends = []
     col_depends = []
     for expr in func_expr.find_all(FunctionExpression):
-        udf_depends.append(expr.udf_obj.row_id)
+        function_depends.append(expr.function_obj.row_id)
     for expr in func_expr.find_all(TupleValueExpression):
         col_depends.append(expr.col_object.row_id)
     cache_name = func_expr.signature()
@@ -253,12 +244,12 @@ def construct_udf_cache_catalog_entry(
     path = str(get_str_hash(cache_name + uuid.uuid4().hex))
     cache_path = str(Path(cache_dir) / Path(f"{path}_{func_expr.name}"))
     args = tuple([arg.signature() for arg in func_expr.children])
-    entry = UdfCacheCatalogEntry(
+    entry = FunctionCacheCatalogEntry(
         name=func_expr.signature(),
-        udf_id=func_expr.udf_obj.row_id,
+        function_id=func_expr.function_obj.row_id,
         cache_path=cache_path,
         args=args,
-        udf_depends=udf_depends,
+        function_depends=function_depends,
         col_depends=col_depends,
     )
 
@@ -272,14 +263,14 @@ def cleanup_storage(config):
 
 
 def get_metadata_entry_or_val(
-    udf_obj: UdfCatalogEntry, key: str, default_val: Any = None
+    function_obj: FunctionCatalogEntry, key: str, default_val: Any = None
 ) -> str:
     """
     Return the metadata value for the given key, or the default value if the
     key is not found.
 
     Args:
-        udf_obj (UdfCatalogEntry): An object of type `UdfCatalogEntry` which is
+        function_obj (FunctionCatalogEntry): An object of type `FunctionCatalogEntry` which is
         used to extract metadata information.
         key (str): The metadata key for which the corresponding value needs to be retrieved.
         default_val (Any): The default value to be returned if the metadata key is not found.
@@ -287,24 +278,24 @@ def get_metadata_entry_or_val(
     Returns:
         str: metadata value
     """
-    for metadata in udf_obj.metadata:
+    for metadata in function_obj.metadata:
         if metadata.key == key:
             return metadata.value
     return default_val
 
 
-def get_metadata_properties(udf_obj: UdfCatalogEntry) -> Dict:
+def get_metadata_properties(function_obj: FunctionCatalogEntry) -> Dict:
     """
     Return all the metadata properties as key value pair
 
     Args:
-        udf_obj (UdfCatalogEntry): An object of type `UdfCatalogEntry` which is
+        function_obj (FunctionCatalogEntry): An object of type `FunctionCatalogEntry` which is
         used to extract metadata information.
     Returns:
         Dict: key-value for each metadata entry
     """
     properties = {}
-    for metadata in udf_obj.metadata:
+    for metadata in function_obj.metadata:
         properties[metadata.key] = metadata.value
     return properties
 

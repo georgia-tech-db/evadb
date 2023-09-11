@@ -35,18 +35,18 @@ from evadb.configuration.constants import EvaDB_INSTALLATION_DIR
 from evadb.expression.abstract_expression import AbstractExpression, ExpressionType
 from evadb.expression.function_expression import FunctionExpression
 from evadb.expression.tuple_value_expression import TupleValueExpression
+from evadb.parser.create_function_statement import CreateFunctionStatement
 from evadb.parser.create_index_statement import CreateIndexStatement
 from evadb.parser.create_statement import CreateTableStatement
-from evadb.parser.create_udf_statement import CreateUDFStatement
 from evadb.parser.delete_statement import DeleteTableStatement
 from evadb.parser.explain_statement import ExplainStatement
 from evadb.parser.rename_statement import RenameTableStatement
 from evadb.parser.select_statement import SelectStatement
 from evadb.parser.statement import AbstractStatement
 from evadb.parser.table_ref import TableRef
-from evadb.parser.types import UDFType
-from evadb.third_party.huggingface.binder import assign_hf_udf
-from evadb.utils.generic_utils import load_udf_class_from_file
+from evadb.parser.types import FunctionType
+from evadb.third_party.huggingface.binder import assign_hf_function
+from evadb.utils.generic_utils import load_function_class_from_file
 from evadb.utils.logging_manager import logger
 
 
@@ -72,8 +72,8 @@ class StatementBinder:
     def _bind_explain_statement(self, node: ExplainStatement):
         self.bind(node.explainable_stmt)
 
-    @bind.register(CreateUDFStatement)
-    def _bind_create_udf_statement(self, node: CreateUDFStatement):
+    @bind.register(CreateFunctionStatement)
+    def _bind_create_function_statement(self, node: CreateFunctionStatement):
         if node.query is not None:
             self.bind(node.query)
             # Drop the automatically generated _row_id column
@@ -86,33 +86,36 @@ class StatementBinder:
             arg_map = {key: value for key, value in node.metadata}
             assert (
                 "predict" in arg_map
-            ), f"Creating {node.udf_type} UDFs expects 'predict' metadata."
+            ), f"Creating {node.function_type} functions expects 'predict' metadata."
             # We only support a single predict column for now
             predict_columns = set([arg_map["predict"]])
             inputs, outputs = [], []
             for column in all_column_list:
                 if column.name in predict_columns:
-                    column.name = column.name + "_predictions"
+                    if node.function_type != "Forecasting":
+                        column.name = column.name + "_predictions"
+                    else:
+                        column.name = column.name
                     outputs.append(column)
                 else:
                     inputs.append(column)
             assert (
                 len(node.inputs) == 0 and len(node.outputs) == 0
-            ), f"{node.udf_type} UDFs' input and output are auto assigned"
+            ), f"{node.function_type} functions' input and output are auto assigned"
             node.inputs, node.outputs = inputs, outputs
 
     @bind.register(CreateIndexStatement)
     def _bind_create_index_statement(self, node: CreateIndexStatement):
         self.bind(node.table_ref)
-        if node.udf_func:
-            self.bind(node.udf_func)
+        if node.function:
+            self.bind(node.function)
 
         # TODO: create index currently only supports single numpy column.
         assert len(node.col_list) == 1, "Index cannot be created on more than 1 column"
 
         # TODO: create index currently only works on TableInfo, but will extend later.
         assert node.table_ref.is_table_atom(), "Index can only be created on Tableinfo"
-        if not node.udf_func:
+        if not node.function:
             # Feature table type needs to be float32 numpy array.
             assert (
                 len(node.col_list) == 1
@@ -133,9 +136,11 @@ class StatementBinder:
             ), "Index input needs to be float32."
             assert len(col.array_dimensions) == 2
         else:
-            # Output of the UDF should be 2 dimension and float32 type.
-            udf_obj = self._catalog().get_udf_catalog_entry_by_name(node.udf_func.name)
-            for output in udf_obj.outputs:
+            # Output of the function should be 2 dimension and float32 type.
+            function_obj = self._catalog().get_function_catalog_entry_by_name(
+                node.function.name
+            )
+            for output in function_obj.outputs:
                 assert (
                     output.array_type == NdArrayType.FLOAT32
                 ), "Index input needs to be float32."
@@ -269,7 +274,7 @@ class StatementBinder:
     @bind.register(FunctionExpression)
     def _bind_func_expr(self, node: FunctionExpression):
         # handle the special case of "extract_object"
-        if node.name.upper() == str(UDFType.EXTRACT_OBJECT):
+        if node.name.upper() == str(FunctionType.EXTRACT_OBJECT):
             handle_bind_extract_object_function(node, self)
             return
 
@@ -284,68 +289,80 @@ class StatementBinder:
         for child in node.children:
             self.bind(child)
 
-        udf_obj = self._catalog().get_udf_catalog_entry_by_name(node.name)
-        if udf_obj is None:
+        function_obj = self._catalog().get_function_catalog_entry_by_name(node.name)
+        if function_obj is None:
             err_msg = (
                 f"Function '{node.name}' does not exist in the catalog. "
-                "Please create the function using CREATE UDF command."
+                "Please create the function using CREATE FUNCTION command."
             )
             logger.error(err_msg)
             raise BinderError(err_msg)
 
-        if udf_obj.type == "HuggingFace":
-            node.function = assign_hf_udf(udf_obj)
+        if function_obj.type == "HuggingFace":
+            node.function = assign_hf_function(function_obj)
 
-        elif udf_obj.type == "Ludwig":
-            udf_class = load_udf_class_from_file(
-                udf_obj.impl_file_path,
+        elif function_obj.type == "Ludwig":
+            function_class = load_function_class_from_file(
+                function_obj.impl_file_path,
                 "GenericLudwigModel",
             )
-            udf_metadata = get_metadata_properties(udf_obj)
-            assert "model_path" in udf_metadata, "Ludwig models expect 'model_path'."
-            node.function = lambda: udf_class(model_path=udf_metadata["model_path"])
+            function_metadata = get_metadata_properties(function_obj)
+            assert (
+                "model_path" in function_metadata
+            ), "Ludwig models expect 'model_path'."
+            node.function = lambda: function_class(
+                model_path=function_metadata["model_path"]
+            )
 
         else:
-            if udf_obj.type == "ultralytics":
-                # manually set the impl_path for yolo udfs we only handle object
+            if function_obj.type == "ultralytics":
+                # manually set the impl_path for yolo functions we only handle object
                 # detection for now, hopefully this can be generalized
-                udf_dir = Path(EvaDB_INSTALLATION_DIR) / "udfs"
-                udf_obj.impl_file_path = (
-                    Path(f"{udf_dir}/yolo_object_detector.py").absolute().as_posix()
+                function_dir = Path(EvaDB_INSTALLATION_DIR) / "functions"
+                function_obj.impl_file_path = (
+                    Path(f"{function_dir}/yolo_object_detector.py")
+                    .absolute()
+                    .as_posix()
                 )
 
-            # Verify the consistency of the UDF. If the checksum of the UDF does not
+            # Verify the consistency of the function. If the checksum of the function does not
             # match the one stored in the catalog, an error will be thrown and the user
-            # will be asked to register the UDF again.
+            # will be asked to register the function again.
             # assert (
-            #     get_file_checksum(udf_obj.impl_file_path) == udf_obj.checksum
-            # ), f"""UDF file {udf_obj.impl_file_path} has been modified from the
-            #     registration. Please use DROP UDF to drop it and re-create it # using CREATE UDF."""
+            #     get_file_checksum(function_obj.impl_file_path) == function_obj.checksum
+            # ), f"""Function file {function_obj.impl_file_path} has been modified from the
+            #     registration. Please use DROP FUNCTION to drop it and re-create it # using CREATE FUNCTION."""
 
             try:
-                udf_class = load_udf_class_from_file(
-                    udf_obj.impl_file_path,
-                    udf_obj.name,
+                function_class = load_function_class_from_file(
+                    function_obj.impl_file_path,
+                    function_obj.name,
                 )
-                # certain udfs take additional inputs like yolo needs the model_name
+                # certain functions take additional inputs like yolo needs the model_name
                 # these arguments are passed by the user as part of metadata
-                node.function = lambda: udf_class(**get_metadata_properties(udf_obj))
+                node.function = lambda: function_class(
+                    **get_metadata_properties(function_obj)
+                )
             except Exception as e:
                 err_msg = (
-                    f"{str(e)}. Please verify that the UDF class name in the "
-                    "implementation file matches the UDF name."
+                    f"{str(e)}. Please verify that the function class name in the "
+                    "implementation file matches the function name."
                 )
                 logger.error(err_msg)
                 raise BinderError(err_msg)
 
-        node.udf_obj = udf_obj
-        output_objs = self._catalog().get_udf_io_catalog_output_entries(udf_obj)
+        node.function_obj = function_obj
+        output_objs = self._catalog().get_function_io_catalog_output_entries(
+            function_obj
+        )
         if node.output:
             for obj in output_objs:
                 if obj.name.lower() == node.output:
                     node.output_objs = [obj]
             if not node.output_objs:
-                err_msg = f"Output {node.output} does not exist for {udf_obj.name}."
+                err_msg = (
+                    f"Output {node.output} does not exist for {function_obj.name}."
+                )
                 logger.error(err_msg)
                 raise BinderError(err_msg)
             node.projection_columns = [node.output]

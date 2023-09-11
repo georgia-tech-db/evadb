@@ -53,14 +53,24 @@ check_doc_link() {
   print_error_code $code "DOC LINK CHECK"  
 }
 
+check_readme_link() {
+  if command -v npm > /dev/null && command -v npx >/dev/null && npm list --depth=0 | grep markdown-link-check; then
+    npx markdown-link-check -c ./script/test/link_check_config.json ./README.md 
+    code=$?
+    print_error_code $code "README LINK CHECK"
+  else
+    echo "README LINK CHECK: --||-- SKIPPED (missing dependency: npm install markdown-link-check)"		  
+  fi
+}
+
 unit_test() {
-  PYTHONPATH="." pytest test/unit_tests/ --durations=20 --cov-report term-missing:skip-covered  --cov-config=.coveragerc --cov-context=test --cov=evadb/ --capture=sys --tb=short -v -rsf --log-level=WARNING -m "not benchmark"
+  PYTHONPATH=./ pytest test/unit_tests/ --durations=20 --cov-report term-missing:skip-covered  --cov-config=.coveragerc --cov-context=test --cov=evadb/ --capture=sys --tb=short -v -rsf --log-level=WARNING -m "not benchmark"
   code=$?
   print_error_code $code "UNIT TEST"
 }
 
 short_integration_test() {
-  PYTHONPATH=./ python -m pytest test/integration_tests/short/ -p no:cov -m "not benchmark"
+  PYTHONPATH=./ pytest test/integration_tests/short/ --durations=20 --cov-report term-missing:skip-covered  --cov-config=.coveragerc --cov-context=test --cov=evadb/ --capture=sys --tb=short -v -rsf --log-level=WARNING -m "not benchmark"
   code=$?
   print_error_code $code "SHORT INTEGRATION TEST"
 }
@@ -72,7 +82,7 @@ long_integration_test() {
 }
 
 notebook_test() {
-  PYTHONPATH=./ python -m pytest --durations=5 --nbmake --overwrite "./tutorials" --capture=sys --tb=short -v --log-level=WARNING --nbmake-timeout=3000 --ignore="tutorials/08-chatgpt.ipynb" 
+  PYTHONPATH=./ python -m pytest --durations=5 --nbmake --overwrite "./tutorials" --capture=sys --tb=short -v --log-level=WARNING --nbmake-timeout=3000 --ignore="tutorials/08-chatgpt.ipynb" --ignore="tutorials/14-food-review-tone-analysis-and-response.ipynb" --ignore="tutorials/15-AI-powered-join.ipynb"
   code=$?
   print_error_code $code "NOTEBOOK TEST"
 }
@@ -142,6 +152,7 @@ then
   # Run black, isort, linter 
   check_doc_build
   check_doc_link
+  check_readme_link
 fi
 
 ##################################################
@@ -203,8 +214,7 @@ fi
 ## based on Python version
 ##################################################
 
-if [[ ( "$PYTHON_VERSION" = "3.10" )  && 
-      ( "$MODE" = "FULL" ) ]];
+if [[ ( "$PYTHON_VERSION" = "3.10" ) ]]
 then 
     echo "UPLOADING COVERAGE REPORT"
     coveralls

@@ -25,6 +25,7 @@ import pytest
 from evadb.catalog.catalog_type import ColumnType, NdArrayType, TableType
 from evadb.catalog.models.column_catalog import ColumnCatalogEntry
 from evadb.catalog.models.table_catalog import TableCatalogEntry
+from evadb.catalog.sql_config import IDENTIFIER_COLUMN
 from evadb.storage.sqlite_storage_engine import SQLStorageEngine
 
 
@@ -40,12 +41,15 @@ class SQLStorageEngineTest(unittest.TestCase):
             str(suffix_pytest_xdist_worker_id_to_dir("dataset")),
             table_type=TableType.VIDEO_DATA,
         )
+        column_pk = ColumnCatalogEntry(
+            IDENTIFIER_COLUMN, ColumnType.INTEGER, is_nullable=False
+        )
         column_0 = ColumnCatalogEntry("name", ColumnType.TEXT, is_nullable=False)
         column_1 = ColumnCatalogEntry("id", ColumnType.INTEGER, is_nullable=False)
         column_2 = ColumnCatalogEntry(
             "data", ColumnType.NDARRAY, False, NdArrayType.UINT8, [2, 2, 3]
         )
-        table_info.schema = [column_0, column_1, column_2]
+        table_info.columns = [column_pk, column_0, column_1, column_2]
         return table_info
 
     def setUp(self):

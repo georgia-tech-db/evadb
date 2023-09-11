@@ -96,6 +96,7 @@ author = u"EvaDB Team"
 # directories to ignore when looking for source files.
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "README.md", "images/reference/README.md"]
 
+
 # The name of the Pygments (syntax highlighting) style to use.
 # pygments_style = "lovelace"
 
@@ -155,17 +156,6 @@ html_css_files = [
 nitpicky = True
 # BUG: https://stackoverflow.com/questions/11417221/sphinx-autodoc-gives-warning-pyclass-reference-target-not-found-type-warning
 nitpick_ignore_regex = [('py:class', r'.*')]
-
-
-for i in os.listdir("../tutorials"):
-    if i in [
-        "02-object-detection.ipynb",
-        "03-emotion-analysis.ipynb", 
-        "07-object-segmentation-huggingface.ipynb"
-    ]:
-        shutil.copy(f"../tutorials/{i}", "./source/usecases/")
-
-nb_execution_mode = "off"
 
 # -- Initialize Sphinx ----------------------------------------------
 def setup(app):

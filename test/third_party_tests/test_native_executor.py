@@ -17,6 +17,7 @@ from test.util import get_evadb_for_testing, shutdown_ray
 
 import pytest
 
+from evadb.executor.executor_utils import ExecutorError
 from evadb.server.command_handler import execute_query_fetch_all
 
 
@@ -63,6 +64,25 @@ class NativeExecutorTest(unittest.TestCase):
             }""",
         )
 
+    def _create_evadb_table_using_select_query(self):
+        execute_query_fetch_all(
+            self.evadb,
+            """CREATE TABLE eva_table AS SELECT name, age FROM test_data_source.test_table;""",
+        )
+
+        # check if the create table is successful
+        res_batch = execute_query_fetch_all(self.evadb, "Select * from eva_table")
+        self.assertEqual(len(res_batch), 2)
+        self.assertEqual(res_batch.frames["eva_table.name"][0], "aa")
+        self.assertEqual(res_batch.frames["eva_table.age"][0], 1)
+        self.assertEqual(res_batch.frames["eva_table.name"][1], "bb")
+        self.assertEqual(res_batch.frames["eva_table.age"][1], 2)
+
+        execute_query_fetch_all(
+            self.evadb,
+            "DROP TABLE IF EXISTS eva_table;",
+        )
+
     def _execute_evadb_query(self):
         self._create_table_in_native_database()
         self._insert_value_into_native_database("aa", 1, "aaaa")
@@ -78,6 +98,7 @@ class NativeExecutorTest(unittest.TestCase):
         self.assertEqual(res_batch.frames["test_table.name"][1], "bb")
         self.assertEqual(res_batch.frames["test_table.age"][1], 2)
 
+        self._create_evadb_table_using_select_query()
         self._drop_table_in_native_database()
 
     def _execute_native_query(self):
@@ -91,11 +112,40 @@ class NativeExecutorTest(unittest.TestCase):
             }""",
         )
         self.assertEqual(len(res_batch), 1)
+
         self.assertEqual(res_batch.frames["name"][0], "aa")
         self.assertEqual(res_batch.frames["age"][0], 1)
         self.assertEqual(res_batch.frames["comment"][0], "aaaa")
 
         self._drop_table_in_native_database()
+
+    def _raise_error_on_multiple_creation(self):
+        params = {
+            "user": "eva",
+            "password": "password",
+            "host": "localhost",
+            "port": "5432",
+            "database": "evadb",
+        }
+        query = f"""CREATE DATABASE test_data_source
+                    WITH ENGINE = "postgres",
+                    PARAMETERS = {params};"""
+        with self.assertRaises(ExecutorError):
+            execute_query_fetch_all(self.evadb, query)
+
+    def _raise_error_on_invalid_connection(self):
+        params = {
+            "user": "xxxxxx",
+            "password": "xxxxxx",
+            "host": "localhost",
+            "port": "5432",
+            "database": "evadb",
+        }
+        query = f"""CREATE DATABASE invaid
+                    WITH ENGINE = "postgres",
+                    PARAMETERS = {params};"""
+        with self.assertRaises(ExecutorError):
+            execute_query_fetch_all(self.evadb, query)
 
     def test_should_run_query_in_postgres(self):
         # Create database.
@@ -114,3 +164,43 @@ class NativeExecutorTest(unittest.TestCase):
         # Test executions.
         self._execute_native_query()
         self._execute_evadb_query()
+
+        # Test error.
+        self._raise_error_on_multiple_creation()
+        self._raise_error_on_invalid_connection()
+
+    def test_should_run_query_in_sqlite(self):
+        # Create database.
+        params = {
+            "database": "evadb.db",
+        }
+        query = f"""CREATE DATABASE test_data_source
+                    WITH ENGINE = "sqlite",
+                    PARAMETERS = {params};"""
+        execute_query_fetch_all(self.evadb, query)
+
+        # Test executions.
+        self._execute_native_query()
+        self._execute_evadb_query()
+
+    def test_should_run_query_in_mysql(self):
+        # Create database.
+        params = {
+            "user": "eva",
+            "password": "password",
+            "host": "localhost",
+            "port": "3306",
+            "database": "evadb",
+        }
+        query = f"""CREATE DATABASE test_data_source
+                    WITH ENGINE = "mysql",
+                    PARAMETERS = {params};"""
+        execute_query_fetch_all(self.evadb, query)
+
+        # Test executions.
+        self._execute_native_query()
+        self._execute_evadb_query()
+
+
+if __name__ == "__main__":
+    unittest.main()
