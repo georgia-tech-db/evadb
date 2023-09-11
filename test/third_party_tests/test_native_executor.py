@@ -150,7 +150,7 @@ class NativeExecutorTest(unittest.TestCase):
     def test_should_run_query_in_postgres(self):
         # Create database.
         params = {
-            "user": "gkakkar7",
+            "user": "eva",
             "password": "password",
             "host": "localhost",
             "port": "5432",
@@ -169,7 +169,7 @@ class NativeExecutorTest(unittest.TestCase):
         self._raise_error_on_multiple_creation()
         self._raise_error_on_invalid_connection()
 
-    def test_aaashould_run_query_in_sqlite(self):
+    def test_should_run_query_in_sqlite(self):
         # Create database.
         params = {
             "database": "evadb.db",
