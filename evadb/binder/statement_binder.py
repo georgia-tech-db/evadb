@@ -298,10 +298,15 @@ class StatementBinder:
             logger.error(err_msg)
             raise BinderError(err_msg)
 
-        if function_obj.type == "HuggingFace":
+        """
+        Lowercasing function_type and target string before 
+        matching so as to make it case insensitive 
+        """
+        function_type = function_obj.type.lower()
+        if function_type == "HuggingFace".lower():
             node.function = assign_hf_function(function_obj)
 
-        elif function_obj.type == "Ludwig":
+        elif function_type == "Ludwig".lower():
             function_class = load_function_class_from_file(
                 function_obj.impl_file_path,
                 "GenericLudwigModel",

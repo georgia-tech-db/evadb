@@ -277,7 +277,12 @@ class CreateFunctionExecutor(AbstractExecutor):
                 raise RuntimeError(msg)
 
         # if it's a type of HuggingFaceModel, override the impl_path
-        if self.node.function_type == "HuggingFace":
+        """
+        Lowercasing function_type and target string before 
+        matching so as to make it case insensitive 
+        """
+        node_function_type = self.node.function_type.lower()
+        if node_function_type == "HuggingFace".lower():
             (
                 name,
                 impl_path,
@@ -285,7 +290,7 @@ class CreateFunctionExecutor(AbstractExecutor):
                 io_list,
                 metadata,
             ) = self.handle_huggingface_function()
-        elif self.node.function_type == "ultralytics":
+        elif node_function_type == "ultralytics".lower():
             (
                 name,
                 impl_path,
@@ -293,7 +298,7 @@ class CreateFunctionExecutor(AbstractExecutor):
                 io_list,
                 metadata,
             ) = self.handle_ultralytics_function()
-        elif self.node.function_type == "Ludwig":
+        elif node_function_type == "Ludwig".lower():
             (
                 name,
                 impl_path,
@@ -301,7 +306,7 @@ class CreateFunctionExecutor(AbstractExecutor):
                 io_list,
                 metadata,
             ) = self.handle_ludwig_function()
-        elif self.node.function_type == "Forecasting":
+        elif node_function_type == "Forecasting".lower():
             (
                 name,
                 impl_path,
