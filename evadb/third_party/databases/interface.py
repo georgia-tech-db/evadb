@@ -14,9 +14,10 @@
 # limitations under the License.
 import importlib
 import os
+from contextlib import contextmanager
 
 
-def get_database_handler(engine: str, **kwargs):
+def _get_database_handler(engine: str, **kwargs):
     """
     Return the database handler. User should modify this function for
     their new integrated handlers.
@@ -39,6 +40,16 @@ def get_database_handler(engine: str, **kwargs):
         return mod.MysqlHandler(engine, **kwargs)
     else:
         raise NotImplementedError(f"Engine {engine} is not supported")
+
+
+@contextmanager
+def get_database_handler(engine: str, **kwargs):
+    handler = _get_database_handler(engine, **kwargs)
+    handler.connect()
+    try:
+        yield handler
+    finally:
+        handler.disconnect()
 
 
 def dynamic_import(handler_dir):

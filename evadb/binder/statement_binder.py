@@ -20,6 +20,7 @@ from evadb.binder.binder_utils import (
     BinderError,
     bind_table_info,
     check_column_name_is_string,
+    check_data_source_is_valid,
     check_groupby_pattern,
     check_table_object_is_groupable,
     drop_row_id_from_target_list,
