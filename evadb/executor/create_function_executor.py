@@ -254,7 +254,12 @@ class CreateFunctionExecutor(AbstractExecutor):
         Generic functions are loaded from a file. We check for inputs passed by the user during CREATE or try to load io from decorators.
         """
         impl_path = self.node.impl_path.absolute().as_posix()
-        function = self._try_initializing_function(impl_path)
+        try:
+            self.node.metadata
+            arg_map = {arg: self.node.metadata[arg] for arg in self.node.metadata}
+            function = self._try_initializing_function(impl_path, arg_map)
+        except:
+            function = self._try_initializing_function(impl_path)
         io_list = self._resolve_function_io(function)
 
         return (
