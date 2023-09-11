@@ -59,3 +59,17 @@ class DropObject:
                     if_exists = True
 
         return DropObjectStatement(ObjectType.FUNCTION, function_name, if_exists)
+
+    # Drop Database
+    def drop_database(self, tree):
+        database_name = None
+        if_exists = False
+
+        for child in tree.children:
+            if isinstance(child, Tree):
+                if child.data == "if_exists":
+                    if_exists = True
+                elif child.data == "uid":
+                    database_name = self.visit(child)
+
+        return DropObjectStatement(ObjectType.DATABASE, database_name, if_exists)

@@ -79,3 +79,4 @@ class ObjectType(EvaDBEnum):
     TABLE  # noqa: F821
     FUNCTION  # noqa: F821
     INDEX  # noqa: F821
+    DATABASE  # noqa: F821
