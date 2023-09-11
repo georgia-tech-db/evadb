@@ -85,9 +85,21 @@ class StatementToOprTest(unittest.TestCase):
         converter = StatementToPlanConverter()
         projects = MagicMock()
 
+        converter._plan = MagicMock()
         converter._visit_projection(projects)
         mock_lproject.assert_called_with(projects)
         mock_lproject.return_value.append_child.assert_called()
+        self.assertEqual(mock_lproject.return_value, converter._plan)
+
+    @patch("evadb.optimizer.statement_to_opr_converter.LogicalProject")
+    def test_visit_projection_should_not_add_logical_predicate(self, mock_lproject):
+        converter = StatementToPlanConverter()
+        projects = MagicMock()
+
+        converter._plan = None
+        converter._visit_projection(projects)
+        mock_lproject.assert_called_with(projects)
+        mock_lproject.return_value.append_child.assert_not_called()
         self.assertEqual(mock_lproject.return_value, converter._plan)
 
     def test_visit_select_should_call_appropriate_visit_methods(self):
@@ -119,6 +131,27 @@ class StatementToOprTest(unittest.TestCase):
         converter.visit_table_ref.assert_not_called()
         converter._visit_projection.assert_not_called()
         converter._visit_select_predicate.assert_not_called()
+
+    def test_visit_select_without_table_ref(self):
+        converter = StatementToPlanConverter()
+        converter.visit_table_ref = MagicMock()
+        converter._visit_projection = MagicMock()
+        converter._visit_select_predicate = MagicMock()
+        converter._visit_union = MagicMock()
+        converter._visit_groupby = MagicMock()
+        converter._visit_orderby = MagicMock()
+        converter._visit_limit = MagicMock()
+
+        column_list = MagicMock()
+        statement = SelectStatement(target_list=column_list)
+        converter.visit_select(statement)
+        converter.visit_table_ref.assert_not_called()
+        converter._visit_projection.assert_called_once_with(column_list)
+        converter._visit_select_predicate.assert_not_called()
+        converter._visit_union.assert_not_called()
+        converter._visit_groupby.assert_not_called()
+        converter._visit_orderby.assert_not_called()
+        converter._visit_limit.assert_not_called()
 
     @patch("evadb.optimizer.statement_to_opr_converter.LogicalCreateFunction")
     @patch(
