@@ -29,11 +29,12 @@ class ProjectExecutor(AbstractExecutor):
         self.target_list = node.target_list
 
     def exec(self, *args, **kwargs) -> Iterator[Batch]:
-        # SELECT FORECAST(12);
+        # SELECT expr;
         if len(self.children) == 0:
             batch = apply_project(None, self.target_list, self.catalog())
             if not batch.empty():
                 yield batch
+        # SELECT expr FROM table;
         elif len(self.children) == 1:
             child_executor = self.children[0]
             for batch in child_executor.exec(**kwargs):

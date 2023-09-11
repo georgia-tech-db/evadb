@@ -134,11 +134,10 @@ class FunctionExpression(AbstractExpression):
                 outcomes.modify_column_alias(self.alias)
 
         # record the number of function calls
-        # TODO: should get from the function abstract class.
         if batch is not None:
             self._stats.num_calls += len(batch)
         else:
-            # SELECT func(1);
+            # SELECT func(1); The function can only be executed once.
             self._stats.num_calls += 1
 
         # try persisting the stats to catalog and do not crash if we fail in doing so
