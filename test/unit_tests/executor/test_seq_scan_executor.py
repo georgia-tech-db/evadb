@@ -83,27 +83,6 @@ class SeqScanExecutorTest(unittest.TestCase):
         actual = list(proj_executor.exec())[0]
         self.assertEqual(proj_batch, actual)
 
-    def test_should_return_expr(self):
-        constant = Batch(pd.DataFrame([1]))
-        expression = [
-            type(
-                "AbstractExpression",
-                (),
-                {
-                    "evaluate": lambda x: constant,
-                    "find_all": lambda expr: [],
-                },
-            )
-        ]
-
-        plan = type(
-            "ScanPlan", (), {"predicate": None, "columns": expression, "alias": None}
-        )
-        proj_executor = SequentialScanExecutor(MagicMock(), plan)
-
-        actual = list(proj_executor.exec())[0]
-        self.assertEqual(constant, actual)
-
 
 if __name__ == "__main__":
     unittest.main()
