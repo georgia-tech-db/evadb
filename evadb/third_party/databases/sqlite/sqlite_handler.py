@@ -108,16 +108,10 @@ class SQLiteHandler(DBHandler):
 
     def _fetch_results_as_df(self, cursor):
         try:
-            # Handling case-sensitive databases like SQLite can be tricky. Currently,
-            # EvaDB converts all columns to lowercase, which may result in issues with
-            # these databases. As we move forward, we are actively working on improving
-            # this aspect within Binder.
-            # For more information, please refer to https://github.com/georgia-tech-db/evadb/issues/1079.
-
             res = cursor.fetchall()
             res_df = pd.DataFrame(
                 res,
-                columns=[desc[0].lower() for desc in cursor.description]
+                columns=[desc[0] for desc in cursor.description]
                 if cursor.description
                 else [],
             )
