@@ -38,7 +38,7 @@ class NativeExecutorTest(unittest.TestCase):
             """USE test_data_source {
                 CREATE TABLE test_table (
                     name VARCHAR(10),
-                    Age INT,
+                    age INT,
                     comment VARCHAR (100)
                 )
             }""",
@@ -49,7 +49,7 @@ class NativeExecutorTest(unittest.TestCase):
             self.evadb,
             f"""USE test_data_source {{
                 INSERT INTO test_table (
-                    name, Age, comment
+                    name, age, comment
                 ) VALUES (
                     '{col1}', {col2}, '{col3}'
                 )
@@ -67,7 +67,7 @@ class NativeExecutorTest(unittest.TestCase):
     def _create_evadb_table_using_select_query(self):
         execute_query_fetch_all(
             self.evadb,
-            """CREATE TABLE eva_table AS SELECT name, Age FROM test_data_source.test_table;""",
+            """CREATE TABLE eva_table AS SELECT name, age FROM test_data_source.test_table;""",
         )
 
         # check if the create table is successful

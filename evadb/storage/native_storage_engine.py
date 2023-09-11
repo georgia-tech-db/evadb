@@ -45,13 +45,6 @@ class NativeStorageEngine(AbstractStorageEngine):
             handler.connect()
 
             data_df = handler.execute_native_query(f"SELECT * FROM {table.name}").data
-
-            # Handling case-sensitive databases like SQLite can be tricky. Currently,
-            # EvaDB converts all columns to lowercase, which may result in issues with
-            # these databases. As we move forward, we are actively working on improving
-            # this aspect within Binder.
-            # For more information, please refer to https://github.com/georgia-tech-db/evadb/issues/1079.
-            data_df.columns = data_df.columns.str.lower()
             yield Batch(pd.DataFrame(data_df))
 
         except Exception as e:

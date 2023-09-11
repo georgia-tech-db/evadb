@@ -139,9 +139,6 @@ class StatementBinderContext:
             A tuple of alias and column object
         """
 
-        # binder is case insensitive
-        col_name = col_name.lower()
-
         def raise_error():
             err_msg = f"Found invalid column {col_name}"
             logger.error(err_msg)
