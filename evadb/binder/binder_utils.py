@@ -99,7 +99,7 @@ def create_table_catalog_entry_for_data_source(
     ]
     column_list = []
     for name, dtype in zip(column_name_list, column_type_list):
-        column_list.append(ColumnCatalogEntry(name, dtype))
+        column_list.append(ColumnCatalogEntry(name.lower(), dtype))
 
     # Assemble table.
     table_catalog_entry = TableCatalogEntry(
@@ -339,7 +339,7 @@ def get_column_definition_from_select_target_list(
         for col_name, output_obj in output_objs:
             binded_col_list.append(
                 ColumnDefinition(
-                    col_name,
+                    col_name.lower(),
                     output_obj.type,
                     output_obj.array_type,
                     output_obj.array_dimensions,

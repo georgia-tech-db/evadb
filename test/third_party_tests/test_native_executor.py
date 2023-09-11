@@ -38,7 +38,7 @@ class NativeExecutorTest(unittest.TestCase):
             """USE test_data_source {
                 CREATE TABLE test_table (
                     name VARCHAR(10),
-                    age INT,
+                    Age INT,
                     comment VARCHAR (100)
                 )
             }""",
@@ -49,7 +49,7 @@ class NativeExecutorTest(unittest.TestCase):
             self.evadb,
             f"""USE test_data_source {{
                 INSERT INTO test_table (
-                    name, age, comment
+                    name, Age, comment
                 ) VALUES (
                     '{col1}', {col2}, '{col3}'
                 )
@@ -67,7 +67,7 @@ class NativeExecutorTest(unittest.TestCase):
     def _create_evadb_table_using_select_query(self):
         execute_query_fetch_all(
             self.evadb,
-            """CREATE TABLE eva_table AS SELECT name, age FROM test_data_source.test_table;""",
+            """CREATE TABLE eva_table AS SELECT name, Age FROM test_data_source.test_table;""",
         )
 
         # check if the create table is successful
@@ -150,7 +150,7 @@ class NativeExecutorTest(unittest.TestCase):
     def test_should_run_query_in_postgres(self):
         # Create database.
         params = {
-            "user": "eva",
+            "user": "gkakkar7",
             "password": "password",
             "host": "localhost",
             "port": "5432",
@@ -169,7 +169,7 @@ class NativeExecutorTest(unittest.TestCase):
         self._raise_error_on_multiple_creation()
         self._raise_error_on_invalid_connection()
 
-    def test_should_run_query_in_sqlite(self):
+    def test_aaashould_run_query_in_sqlite(self):
         # Create database.
         params = {
             "database": "evadb.db",
