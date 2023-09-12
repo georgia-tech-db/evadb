@@ -46,7 +46,10 @@ from evadb.parser.statement import AbstractStatement
 from evadb.parser.table_ref import TableRef
 from evadb.parser.types import FunctionType
 from evadb.third_party.huggingface.binder import assign_hf_function
-from evadb.utils.generic_utils import load_function_class_from_file
+from evadb.utils.generic_utils import (
+    load_function_class_from_file,
+    string_comparison_case_insensitive,
+)
 from evadb.utils.logging_manager import logger
 
 
@@ -298,15 +301,10 @@ class StatementBinder:
             logger.error(err_msg)
             raise BinderError(err_msg)
 
-        """
-        Lowercasing function_type and target string before 
-        matching so as to make it case insensitive 
-        """
-        function_type = function_obj.type.lower()
-        if function_type == "HuggingFace".lower():
+        if string_comparison_case_insensitive(function_obj.type, "HuggingFace"):
             node.function = assign_hf_function(function_obj)
 
-        elif function_type == "Ludwig".lower():
+        elif string_comparison_case_insensitive(function_obj.type, "Ludwig"):
             function_class = load_function_class_from_file(
                 function_obj.impl_file_path,
                 "GenericLudwigModel",

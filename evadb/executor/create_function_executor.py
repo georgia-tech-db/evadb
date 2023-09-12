@@ -41,6 +41,7 @@ from evadb.utils.generic_utils import (
     try_to_import_ludwig,
     try_to_import_torch,
     try_to_import_ultralytics,
+    string_comparison_case_insensitive,
 )
 from evadb.utils.logging_manager import logger
 
@@ -277,12 +278,7 @@ class CreateFunctionExecutor(AbstractExecutor):
                 raise RuntimeError(msg)
 
         # if it's a type of HuggingFaceModel, override the impl_path
-        """
-        Lowercasing function_type and target string before 
-        matching so as to make it case insensitive 
-        """
-        node_function_type = self.node.function_type.lower()
-        if node_function_type == "HuggingFace".lower():
+        if string_comparison_case_insensitive(self.node.function_type, "HuggingFace"):
             (
                 name,
                 impl_path,
@@ -290,7 +286,7 @@ class CreateFunctionExecutor(AbstractExecutor):
                 io_list,
                 metadata,
             ) = self.handle_huggingface_function()
-        elif node_function_type == "ultralytics".lower():
+        elif string_comparison_case_insensitive(self.node.function_type, "ultralytics"):
             (
                 name,
                 impl_path,
@@ -298,7 +294,7 @@ class CreateFunctionExecutor(AbstractExecutor):
                 io_list,
                 metadata,
             ) = self.handle_ultralytics_function()
-        elif node_function_type == "Ludwig".lower():
+        elif string_comparison_case_insensitive(self.node.function_type, "Ludwig"):
             (
                 name,
                 impl_path,
@@ -306,7 +302,7 @@ class CreateFunctionExecutor(AbstractExecutor):
                 io_list,
                 metadata,
             ) = self.handle_ludwig_function()
-        elif node_function_type == "Forecasting".lower():
+        elif string_comparison_case_insensitive(self.node.function_type, "Forecasting"):
             (
                 name,
                 impl_path,
