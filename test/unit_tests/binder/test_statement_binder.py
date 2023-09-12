@@ -463,8 +463,8 @@ class StatementBinderTests(unittest.TestCase):
         test_one_string_null = string_comparison_case_insensitive(None, "HuggingFace")
         test_both_strings_null = string_comparison_case_insensitive(None, None)
 
-        assert test_string_exact_match == True
-        assert test_string_case_insensitive_match == True
-        assert test_string_no_match == False
-        assert test_one_string_null == False
-        assert test_both_strings_null == False
+        assert test_string_exact_match is True
+        assert test_string_case_insensitive_match is True
+        assert test_string_no_match is False
+        assert test_one_string_null is False
+        assert test_both_strings_null is False
