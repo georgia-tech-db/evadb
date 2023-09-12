@@ -49,13 +49,12 @@ def execute_query(
         # executor.
         if not isinstance(stmt, SKIP_BINDER_AND_OPTIMIZER_STATEMENTS):
             StatementBinder(StatementBinderContext(evadb.catalog)).bind(stmt)
-            l_plan = StatementToPlanConverter().visit(stmt)
-            p_plan = plan_generator.build(l_plan)
+            logical_plan = StatementToPlanConverter().visit(stmt)
+            physical_plan = plan_generator.build(logical_plan)
         else:
-            p_plan = stmt
-        output = PlanExecutor(evadb, p_plan).execute_plan(
-            do_not_raise_exceptions, do_not_print_exceptions
-        )
+            physical_plan = stmt
+        plan_executor = PlanExecutor(evadb, physical_plan)
+        output = plan_executor(do_not_raise_exceptions, do_not_print_exceptions)
 
     if report_time is True:
         query_compile_time.log_elapsed_time("Query Compile Time")

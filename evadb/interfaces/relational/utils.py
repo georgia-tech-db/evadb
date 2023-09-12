@@ -53,9 +53,10 @@ def sql_predicate_to_expresssion_tree(expr: str) -> AbstractExpression:
 
 def execute_statement(evadb: EvaDBDatabase, statement: AbstractStatement) -> Batch:
     StatementBinder(StatementBinderContext(evadb.catalog)).bind(statement)
-    l_plan = StatementToPlanConverter().visit(statement)
-    p_plan = PlanGenerator(evadb).build(l_plan)
-    output = PlanExecutor(evadb, p_plan).execute_plan()
+    logical_plan = StatementToPlanConverter().visit(statement)
+    physical_plan = PlanGenerator(evadb).build(logical_plan)
+    plan_executor = PlanExecutor(evadb, physical_plan)
+    output = plan_executor()
     if output:
         batch_list = list(output)
         return Batch.concat(batch_list, copy=False)

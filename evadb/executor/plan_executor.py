@@ -161,7 +161,7 @@ class PlanExecutor:
 
         return executor_node
 
-    def execute_plan(
+    def __call__(
         self,
         do_not_raise_exceptions: bool = False,
         do_not_print_exceptions: bool = False,

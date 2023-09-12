@@ -132,7 +132,7 @@ class PlanExecutorTest(unittest.TestCase):
         tree.exec.return_value = batch_list
         mock_build.return_value = tree
 
-        actual = list(PlanExecutor(MagicMock(), None).execute_plan())
+        actual = list(PlanExecutor(MagicMock(), None)())
         mock_build.assert_called_once_with(None)
 
         tree.exec.assert_called_once()
@@ -150,7 +150,7 @@ class PlanExecutorTest(unittest.TestCase):
         tree.exec.return_value = batch_list
         mock_build.return_value = tree
 
-        actual = list(PlanExecutor(MagicMock(), None).execute_plan())
+        actual = list(PlanExecutor(MagicMock(), None)())
         mock_build.assert_called_once_with(None)
 
         tree.exec.assert_called_once()
@@ -161,7 +161,7 @@ class PlanExecutorTest(unittest.TestCase):
         # CreateExecutor
         tree = MagicMock(node=CreatePlan(None, [], False))
         mock_build.return_value = tree
-        actual = list(PlanExecutor(MagicMock(), None).execute_plan())
+        actual = list(PlanExecutor(MagicMock(), None)())
         tree.exec.assert_called_once()
         mock_build.assert_called_once_with(None)
 
@@ -172,7 +172,7 @@ class PlanExecutorTest(unittest.TestCase):
 
         tree = MagicMock(node=InsertPlan(0, [], []))
         mock_build.return_value = tree
-        actual = list(PlanExecutor(MagicMock(), None).execute_plan())
+        actual = list(PlanExecutor(MagicMock(), None)())
         tree.exec.assert_called_once()
         mock_build.assert_called_once_with(None)
 
@@ -183,7 +183,7 @@ class PlanExecutorTest(unittest.TestCase):
 
         tree = MagicMock(node=CreateUDFPlan(None, False, [], [], None))
         mock_build.return_value = tree
-        actual = list(PlanExecutor(MagicMock(), None).execute_plan())
+        actual = list(PlanExecutor(MagicMock(), None)())
         tree.exec.assert_called_once()
         mock_build.assert_called_once_with(None)
 
@@ -194,7 +194,7 @@ class PlanExecutorTest(unittest.TestCase):
 
         tree = MagicMock(node=LoadDataPlan(None, None, None, None, None))
         mock_build.return_value = tree
-        actual = list(PlanExecutor(MagicMock(), None).execute_plan())
+        actual = list(PlanExecutor(MagicMock(), None)())
         tree.exec.assert_called_once()
         mock_build.assert_called_once_with(None)
 
@@ -205,7 +205,7 @@ class PlanExecutorTest(unittest.TestCase):
         # RenameExecutor
         tree = MagicMock(node=RenamePlan(None, None))
         mock_build.return_value = tree
-        actual = list(PlanExecutor(MagicMock(), None).execute_plan())
+        actual = list(PlanExecutor(MagicMock(), None)())
         tree.exec.assert_called_once()
         mock_build.assert_called_once_with(None)
 
@@ -216,7 +216,7 @@ class PlanExecutorTest(unittest.TestCase):
         # DropExecutor
         tree = MagicMock(node=DropObjectPlan(None, None, None))
         mock_build.return_value = tree
-        actual = list(PlanExecutor(MagicMock(), None).execute_plan())
+        actual = list(PlanExecutor(MagicMock(), None)())
         tree.exec.assert_called_once()
         mock_build.assert_called_once_with(None)
 
@@ -243,7 +243,7 @@ class PlanExecutorTest(unittest.TestCase):
 
         # Execute the plan
         executor = PlanExecutor(seq_scan)
-        actual = executor.execute_plan()
+        actual = executor()
         expected = batch_1[::2] + batch_2[::2]
 
         mock_class.assert_called_once()
