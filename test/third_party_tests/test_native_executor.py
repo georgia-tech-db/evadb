@@ -169,6 +169,22 @@ class NativeExecutorTest(unittest.TestCase):
         self._raise_error_on_multiple_creation()
         self._raise_error_on_invalid_connection()
 
+    def test_should_run_query_in_mariadb(self):
+        # Create database.
+        params = {
+            "user": "eva",
+            "password": "password",
+            "database": "evadb",
+        }
+        query = f"""CREATE DATABASE test_data_source
+                    WITH ENGINE = "mariadb",
+                    PARAMETERS = {params};"""
+        execute_query_fetch_all(self.evadb, query)
+
+        # Test executions.
+        self._execute_native_query()
+        self._execute_evadb_query()
+
     def test_should_run_query_in_sqlite(self):
         # Create database.
         params = {

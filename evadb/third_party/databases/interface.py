@@ -37,6 +37,8 @@ def get_database_handler(engine: str, **kwargs):
         return mod.SQLiteHandler(engine, **kwargs)
     elif engine == "mysql":
         return mod.MysqlHandler(engine, **kwargs)
+    elif engine == "mariadb":
+        return mod.MariaDbHandler(engine, **kwargs)
     else:
         raise NotImplementedError(f"Engine {engine} is not supported")
 
