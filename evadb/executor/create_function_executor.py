@@ -149,15 +149,11 @@ class CreateFunctionExecutor(AbstractExecutor):
             impl_path = Path(f"{self.function_dir}/forecast.py").absolute().as_posix()
         else:
             impl_path = self.node.impl_path.absolute().as_posix()
-        arg_map = {arg.key: arg.value for arg in self.node.metadata}
 
         if "model" not in arg_map.keys():
             arg_map["model"] = "AutoARIMA"
-        if "frequency" not in arg_map.keys():
-            arg_map["frequency"] = "M"
 
         model_name = arg_map["model"]
-        frequency = arg_map["frequency"]
 
         """
         The following rename is needed for statsforecast, which requires the column name to be the following:
@@ -178,6 +174,10 @@ class CreateFunctionExecutor(AbstractExecutor):
 
         if "ds" not in list(data.columns):
             data["ds"] = [x + 1 for x in range(len(data))]
+
+        if "frequency" not in arg_map.keys():
+            arg_map["frequency"] = pd.infer_freq(data["ds"])
+        frequency = arg_map["frequency"]
 
         try_to_import_forecast()
         from statsforecast import StatsForecast
@@ -220,7 +220,7 @@ class CreateFunctionExecutor(AbstractExecutor):
         )
 
         weight_file = Path(model_path)
-
+        data["ds"] = pd.to_datetime(data["ds"])
         if not weight_file.exists():
             model.fit(data)
             f = open(model_path, "wb")
@@ -233,6 +233,9 @@ class CreateFunctionExecutor(AbstractExecutor):
             FunctionMetadataCatalogEntry("model_name", model_name),
             FunctionMetadataCatalogEntry("model_path", model_path),
             FunctionMetadataCatalogEntry("output_column_rename", arg_map["predict"]),
+            FunctionMetadataCatalogEntry(
+                "time_column_rename", arg_map["time"] if "time" in arg_map else "ds"
+            ),
         ]
 
         return (
