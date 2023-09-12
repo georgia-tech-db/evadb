@@ -39,14 +39,14 @@ def execute_statement(
     # For certain statements, we plan to omit binder and optimizer to keep the code
     # clean. So, we handle such cases here and pass the statement directly to the
     # executor.
-    plan_generator = kwargs.pop("plan_generator", PlanGenerator(evadb))
+    plan_generator = kwargs.get("plan_generator", PlanGenerator(evadb))
     if not isinstance(stmt, SKIP_BINDER_AND_OPTIMIZER_STATEMENTS):
         StatementBinder(StatementBinderContext(evadb.catalog)).bind(stmt)
-        l_plan = StatementToPlanConverter().visit(stmt)
-        p_plan = plan_generator.build(l_plan)
+        logical_plan = StatementToPlanConverter().visit(stmt)
+        physical_plan = plan_generator.build(logical_plan)
     else:
-        p_plan = stmt
-    output = PlanExecutor(evadb, p_plan).execute_plan(
+        physical_plan = stmt
+    output = PlanExecutor(evadb, physical_plan).execute_plan(
         do_not_raise_exceptions, do_not_print_exceptions
     )
     if output:
