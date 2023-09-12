@@ -37,11 +37,11 @@ from evadb.third_party.huggingface.create import gen_hf_io_catalog_entries
 from evadb.utils.errors import FunctionIODefinitionError
 from evadb.utils.generic_utils import (
     load_function_class_from_file,
+    string_comparison_case_insensitive,
     try_to_import_forecast,
     try_to_import_ludwig,
     try_to_import_torch,
     try_to_import_ultralytics,
-    string_comparison_case_insensitive,
 )
 from evadb.utils.logging_manager import logger
 
