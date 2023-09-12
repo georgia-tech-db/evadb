@@ -160,9 +160,7 @@ class CatalogManager(object):
 
         return table_entry
 
-    def delete_database_catalog_entry(
-        self, database_entry: DatabaseCatalogEntry
-    ) -> bool:
+    def drop_database_catalog_entry(self, database_entry: DatabaseCatalogEntry) -> bool:
         """
         This method deletes the database from  catalog.
 
