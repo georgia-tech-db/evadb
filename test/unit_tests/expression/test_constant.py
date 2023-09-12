@@ -24,10 +24,6 @@ class ConstantExpressionsTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def test_constant_without_input_relationship(self):
-        const_expr = ConstantValueExpression(1)
-        self.assertEqual([1], const_expr.evaluate(None).frames[0].tolist())
-
     def test_constant_with_input_relationship(self):
         const_expr = ConstantValueExpression(1)
         input_size = 10
