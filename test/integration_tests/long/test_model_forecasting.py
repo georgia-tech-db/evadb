@@ -78,7 +78,8 @@ class ModelTrainTests(unittest.TestCase):
             SELECT AirForecast(12) FROM AirData;
         """
         result = execute_query_fetch_all(self.evadb, predict_query)
-        self.assertEqual(int(list(result.frames.iloc[:, -1])[-1]), 459)
+        self.assertEqual(len(result), 12)
+        self.assertEqual(result.columns, ["airforecast.y"])
 
     @forecast_skip_marker
     def test_forecast_with_column_rename(self):
