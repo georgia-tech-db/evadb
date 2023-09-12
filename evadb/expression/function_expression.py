@@ -134,11 +134,7 @@ class FunctionExpression(AbstractExpression):
                 outcomes.modify_column_alias(self.alias)
 
         # record the number of function calls
-        if batch is not None:
-            self._stats.num_calls += len(batch)
-        else:
-            # SELECT func(1); The function can only be executed once.
-            self._stats.num_calls += 1
+        self._stats.num_calls += len(batch)
 
         # try persisting the stats to catalog and do not crash if we fail in doing so
         try:
@@ -191,7 +187,6 @@ class FunctionExpression(AbstractExpression):
         if not self._cache:
             return func_args.apply_function_expression(func)
 
-        # TODO: the following cache code does not work for `SELECT func(1);`
         output_cols = [obj.name for obj in self.function_obj.outputs]
 
         # 1. check cache

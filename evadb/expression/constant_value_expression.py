@@ -33,14 +33,7 @@ class ConstantValueExpression(AbstractExpression):
         self._v_type = v_type
 
     def evaluate(self, batch: Batch, **kwargs):
-        repeated = 0
-        # SELECT expr; Without input relationship, the expression is always executed once.
-        if batch is None:
-            repeated = 1
-        # SELECT expr FROM table; With input relationship, the expression is executed multiple times which is equal to the number of rows in the input relationship, so we need accordingly repeat the constant value to create a matching data frame.
-        else:
-            repeated = len(batch)
-        batch = Batch(pd.DataFrame({0: [self._value] * repeated}))
+        batch = Batch(pd.DataFrame({0: [self._value] * len(batch)}))
         return batch
 
     def signature(self) -> str:

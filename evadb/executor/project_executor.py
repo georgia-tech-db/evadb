@@ -14,6 +14,8 @@
 # limitations under the License.
 from typing import Iterator
 
+import pandas as pd
+
 from evadb.database import EvaDBDatabase
 from evadb.executor.abstract_executor import AbstractExecutor
 from evadb.executor.executor_utils import ExecutorError, apply_project
@@ -31,7 +33,9 @@ class ProjectExecutor(AbstractExecutor):
     def exec(self, *args, **kwargs) -> Iterator[Batch]:
         # SELECT expr;
         if len(self.children) == 0:
-            batch = apply_project(None, self.target_list, self.catalog())
+            # Create a dummy batch with size 1
+            dummy_batch = Batch(pd.DataFrame([0]))
+            batch = apply_project(dummy_batch, self.target_list, self.catalog())
             if not batch.empty():
                 yield batch
         # SELECT expr FROM table;
