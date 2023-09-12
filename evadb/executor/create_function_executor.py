@@ -37,6 +37,7 @@ from evadb.third_party.huggingface.create import gen_hf_io_catalog_entries
 from evadb.utils.errors import FunctionIODefinitionError
 from evadb.utils.generic_utils import (
     load_function_class_from_file,
+    string_comparison_case_insensitive,
     try_to_import_forecast,
     try_to_import_ludwig,
     try_to_import_torch,
@@ -280,7 +281,7 @@ class CreateFunctionExecutor(AbstractExecutor):
                 raise RuntimeError(msg)
 
         # if it's a type of HuggingFaceModel, override the impl_path
-        if self.node.function_type == "HuggingFace":
+        if string_comparison_case_insensitive(self.node.function_type, "HuggingFace"):
             (
                 name,
                 impl_path,
@@ -288,7 +289,7 @@ class CreateFunctionExecutor(AbstractExecutor):
                 io_list,
                 metadata,
             ) = self.handle_huggingface_function()
-        elif self.node.function_type == "ultralytics":
+        elif string_comparison_case_insensitive(self.node.function_type, "ultralytics"):
             (
                 name,
                 impl_path,
@@ -296,7 +297,7 @@ class CreateFunctionExecutor(AbstractExecutor):
                 io_list,
                 metadata,
             ) = self.handle_ultralytics_function()
-        elif self.node.function_type == "Ludwig":
+        elif string_comparison_case_insensitive(self.node.function_type, "Ludwig"):
             (
                 name,
                 impl_path,
@@ -304,7 +305,7 @@ class CreateFunctionExecutor(AbstractExecutor):
                 io_list,
                 metadata,
             ) = self.handle_ludwig_function()
-        elif self.node.function_type == "Forecasting":
+        elif string_comparison_case_insensitive(self.node.function_type, "Forecasting"):
             (
                 name,
                 impl_path,
