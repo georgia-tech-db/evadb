@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 from evadb.binder.binder_utils import BinderError
 from evadb.binder.statement_binder import StatementBinder
@@ -24,6 +24,20 @@ from evadb.catalog.sql_config import IDENTIFIER_COLUMN
 from evadb.expression.tuple_value_expression import TupleValueExpression
 from evadb.parser.alias import Alias
 from evadb.parser.create_statement import ColumnDefinition
+
+
+def assert_not_called_with(self, *args, **kwargs):
+    try:
+        self.assert_called_with(*args, **kwargs)
+    except AssertionError:
+        return
+    raise AssertionError(
+        "Expected %s to not have been called."
+        % self._format_mock_call_signature(args, kwargs)
+    )
+
+
+Mock.assert_not_called_with = assert_not_called_with
 
 
 class StatementBinderTests(unittest.TestCase):
@@ -271,6 +285,17 @@ class StatementBinderTests(unittest.TestCase):
             is_groupable_mock.assert_called()
             for mock in mocks:
                 mock_binder.assert_any_call(mock)
+
+    def test_bind_select_statement_without_from(self):
+        with patch.object(StatementBinder, "bind") as mock_binder:
+            binder = StatementBinder(StatementBinderContext(MagicMock()))
+            expr = MagicMock()
+            from evadb.parser.select_statement import SelectStatement
+
+            select_statement = SelectStatement(target_list=[expr])
+            binder._bind_select_statement(select_statement)
+            mock_binder.assert_not_called_with(select_statement.from_table)
+            mock_binder.assert_any_call(expr)
 
     @patch("evadb.binder.statement_binder.StatementBinderContext")
     def test_bind_select_statement_union_starts_new_context(self, mock_ctx):

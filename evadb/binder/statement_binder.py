@@ -153,7 +153,9 @@ class StatementBinder:
 
     @bind.register(SelectStatement)
     def _bind_select_statement(self, node: SelectStatement):
-        self.bind(node.from_table)
+        if node.from_table:
+            self.bind(node.from_table)
+
         if node.where_clause:
             self.bind(node.where_clause)
             if node.where_clause.etype == ExpressionType.COMPARE_LIKE:
@@ -183,7 +185,7 @@ class StatementBinder:
             self._binder_context = current_context
 
         # chunk_params only supported for DOCUMENT TYPE
-        if node.from_table.chunk_params:
+        if node.from_table and node.from_table.chunk_params:
             assert is_document_table(
                 node.from_table.table.table_obj
             ), "CHUNK related parameters only supported for DOCUMENT tables."
