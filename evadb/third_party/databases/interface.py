@@ -45,9 +45,11 @@ def _get_database_handler(engine: str, **kwargs):
 @contextmanager
 def get_database_handler(engine: str, **kwargs):
     handler = _get_database_handler(engine, **kwargs)
-    handler.connect()
     try:
+        handler.connect()
         yield handler
+    except Exception as e:
+        raise Exception(f"Error connecting to the database: {str(e)}")
     finally:
         handler.disconnect()
 

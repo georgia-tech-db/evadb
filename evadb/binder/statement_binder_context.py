@@ -85,16 +85,14 @@ class StatementBinderContext:
             )
 
             db_catalog_entry = self._catalog().get_database_catalog_entry(database_name)
-            handler = get_database_handler(
+            with get_database_handler(
                 db_catalog_entry.engine, **db_catalog_entry.params
-            )
-            handler.connect()
-
-            # Assemble columns.
-            column_df = handler.get_columns(table_name).data
-            table_obj = create_table_catalog_entry_for_data_source(
-                table_name, column_df
-            )
+            ) as handler:
+                # Assemble columns.
+                column_df = handler.get_columns(table_name).data
+                table_obj = create_table_catalog_entry_for_data_source(
+                    table_name, database_name, column_df
+                )
         else:
             table_obj = self._catalog().get_table_catalog_entry(table_name)
 

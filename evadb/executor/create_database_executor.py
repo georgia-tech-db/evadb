@@ -42,10 +42,8 @@ class CreateDatabaseExecutor(AbstractExecutor):
             raise ExecutorError(f"{self.node.database_name} already exists.")
 
         # Check the validity of database entry.
-        handler = get_database_handler(self.node.engine, **self.node.param_dict)
-        resp = handler.connect()
-        if not resp.status:
-            raise ExecutorError(f"Cannot establish connection due to {resp.error}")
+        with get_database_handler(self.node.engine, **self.node.param_dict):
+            pass
 
         logger.debug(f"Creating database {self.node}")
         self.catalog().insert_database_catalog_entry(

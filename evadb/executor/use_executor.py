@@ -20,6 +20,7 @@ from evadb.executor.executor_utils import ExecutorError
 from evadb.models.storage.batch import Batch
 from evadb.parser.use_statement import UseStatement
 from evadb.third_party.databases.interface import get_database_handler
+from evadb.third_party.databases.types import DBHandlerResponse
 
 
 class UseExecutor(AbstractExecutor):
@@ -38,16 +39,12 @@ class UseExecutor(AbstractExecutor):
                 f"{self._database_name} data source does not exist. Use CREATE DATABASE to add a new data source."
             )
 
-        handler = get_database_handler(
-            db_catalog_entry.engine,
-            **db_catalog_entry.params,
-        )
-
-        handler.connect()
-        resp = handler.execute_native_query(self._query_string)
-        handler.disconnect()
-
-        if resp.error is None:
+        with get_database_handler(
+            db_catalog_entry.engine, **db_catalog_entry.params
+        ) as handler:
+            resp = handler.execute_native_query(self._query_string)
+        
+        if resp and resp.error is None:
             return Batch(resp.data)
         else:
             raise ExecutorError(resp.error)
