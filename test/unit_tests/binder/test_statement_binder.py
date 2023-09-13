@@ -24,7 +24,6 @@ from evadb.catalog.sql_config import IDENTIFIER_COLUMN
 from evadb.expression.tuple_value_expression import TupleValueExpression
 from evadb.parser.alias import Alias
 from evadb.parser.create_statement import ColumnDefinition
-from evadb.utils.generic_utils import string_comparison_case_insensitive
 
 
 def assert_not_called_with(self, *args, **kwargs):
@@ -367,18 +366,20 @@ class StatementBinderTests(unittest.TestCase):
             col.array_dimensions = [1, 10]
             binder._bind_create_index_statement(create_index_statement)
 
-    def test_bind_create_function_should_raise(self):
+    def test_bind_create_function_should_raise_without_predict_for_ludwig(self):
         with patch.object(StatementBinder, "bind"):
             create_function_statement = MagicMock()
+            create_function_statement.function_type = "ludwig"
             create_function_statement.query.target_list = []
             create_function_statement.metadata = []
             binder = StatementBinder(StatementBinderContext(MagicMock()))
             with self.assertRaises(AssertionError):
                 binder._bind_create_function_statement(create_function_statement)
 
-    def test_bind_create_function_should_drop_row_id(self):
+    def test_bind_create_function_should_drop_row_id_for_select_star(self):
         with patch.object(StatementBinder, "bind"):
             create_function_statement = MagicMock()
+            create_function_statement.function_type = "ludwig"
             row_id_col_obj = ColumnCatalogEntry(
                 name=IDENTIFIER_COLUMN,
                 type=MagicMock(),
@@ -445,26 +446,61 @@ class StatementBinderTests(unittest.TestCase):
             self.assertEqual(create_function_statement.inputs, expected_inputs)
             self.assertEqual(create_function_statement.outputs, expected_outputs)
 
-    def test_string_matching_case_insensitive(self):
-        """
-        A simple test for string_matching_case_insensitve in generic_utils
-        used by statement_binder
-        """
+    def test_bind_create_function_should_bind_forecast(self):
+        with patch.object(StatementBinder, "bind"):
+            create_function_statement = MagicMock()
+            create_function_statement.function_type = "forecasting"
+            id_col_obj = ColumnCatalogEntry(
+                name="unique_id",
+                type=MagicMock(),
+                array_type=MagicMock(),
+                array_dimensions=MagicMock(),
+            )
+            ds_col_obj = ColumnCatalogEntry(
+                name="ds",
+                type=MagicMock(),
+                array_type=MagicMock(),
+                array_dimensions=MagicMock(),
+            )
+            y_col_obj = ColumnCatalogEntry(
+                name="y",
+                type=MagicMock(),
+                array_type=MagicMock(),
+                array_dimensions=MagicMock(),
+            )
+            create_function_statement.query.target_list = [
+                TupleValueExpression(
+                    name=id_col_obj.name, table_alias="a", col_object=id_col_obj
+                ),
+                TupleValueExpression(
+                    name=ds_col_obj.name, table_alias="a", col_object=ds_col_obj
+                ),
+                TupleValueExpression(
+                    name=y_col_obj.name, table_alias="a", col_object=y_col_obj
+                ),
+            ]
+            create_function_statement.metadata = []
+            binder = StatementBinder(StatementBinderContext(MagicMock()))
+            binder._bind_create_function_statement(create_function_statement)
 
-        test_string_exact_match = string_comparison_case_insensitive(
-            "HuggingFace", "HuggingFace"
-        )
-        test_string_case_insensitive_match = string_comparison_case_insensitive(
-            "HuggingFace", "hugGingFaCe"
-        )
-        test_string_no_match = string_comparison_case_insensitive(
-            "HuggingFace", "HuggingFae"
-        )
-        test_one_string_null = string_comparison_case_insensitive(None, "HuggingFace")
-        test_both_strings_null = string_comparison_case_insensitive(None, None)
-
-        assert test_string_exact_match is True
-        assert test_string_case_insensitive_match is True
-        assert test_string_no_match is False
-        assert test_one_string_null is False
-        assert test_both_strings_null is False
+            expected_inputs = [
+                ColumnDefinition(
+                    "horizon",
+                    ColumnType.INTEGER,
+                    None,
+                    None,
+                )
+            ]
+            expected_outputs = list(
+                [
+                    ColumnDefinition(
+                        col_obj.name,
+                        col_obj.type,
+                        col_obj.array_type,
+                        col_obj.array_dimensions,
+                    )
+                    for col_obj in (id_col_obj, ds_col_obj, y_col_obj)
+                ]
+            )
+            self.assertEqual(create_function_statement.inputs, expected_inputs)
+            self.assertEqual(create_function_statement.outputs, expected_outputs)
