@@ -179,6 +179,10 @@ class CreateFunctionExecutor(AbstractExecutor):
         if "frequency" not in arg_map.keys():
             arg_map["frequency"] = pd.infer_freq(data["ds"])
         frequency = arg_map["frequency"]
+        if frequency is None:
+            raise RuntimeError(
+                f"Can not infer the frequency for {self.node.name}. Please explictly set it."
+            )
 
         try_to_import_forecast()
         from statsforecast import StatsForecast
