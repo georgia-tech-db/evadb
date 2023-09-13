@@ -84,9 +84,9 @@ Here is the query's output ``DataFrame``:
 .. code-block:: 
 
     +-------------------------------------------------------------------------------------------------------------------------+
-    |                                                  snl_text_summary.text                                                  |
+    |                                                    text_summary.text                                                    |
     +-------------------------------------------------------------------------------------------------------------------------+
-    | Doctor, I can't believe this. How long has my husband been awake? Since this morning, and hey, call me Dr. Jim. He' ... |
+    | The war in Ukraine has been on for 415 days. Who is winning it? Not Russia. Certainly not Ukraine. It is the US oil ... |
     +-------------------------------------------------------------------------------------------------------------------------+
 
 Question Answering using ChatGPT
