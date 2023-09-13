@@ -79,19 +79,23 @@ class ModelTrainTests(unittest.TestCase):
         """
         result = execute_query_fetch_all(self.evadb, predict_query)
         self.assertEqual(len(result), 12)
-        self.assertEqual(result.columns, ["airforecast.y"])
+        self.assertEqual(
+            result.columns, ["airforecast.unique_id", "airforecast.ds", "airforecast.y"]
+        )
 
     @forecast_skip_marker
     def test_forecast_with_column_rename(self):
         create_predict_udf = """
             CREATE FUNCTION HomeForecast FROM
             (
-                SELECT saledate, ma FROM HomeData
-                WHERE type = "house" AND bedrooms = 2
+                SELECT type, saledate, ma FROM HomeData
+                WHERE bedrooms = 2
             )
             TYPE Forecasting
             PREDICT 'ma'
-            TIME 'saledate';
+            ID 'type'
+            TIME 'saledate'
+            FREQUENCY 'M';
         """
         execute_query_fetch_all(self.evadb, create_predict_udf)
 
@@ -99,8 +103,11 @@ class ModelTrainTests(unittest.TestCase):
             SELECT HomeForecast(12);
         """
         result = execute_query_fetch_all(self.evadb, predict_query)
-        self.assertEqual(len(result), 12)
-        self.assertEqual(result.columns, ["homeforecast.ma"])
+        self.assertEqual(len(result), 24)
+        self.assertEqual(
+            result.columns,
+            ["homeforecast.type", "homeforecast.saledate", "homeforecast.ma"],
+        )
 
 
 if __name__ == "__main__":

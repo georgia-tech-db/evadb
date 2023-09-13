@@ -29,7 +29,12 @@ from evadb.binder.binder_utils import (
     resolve_alias_table_value_expression,
 )
 from evadb.binder.statement_binder_context import StatementBinderContext
-from evadb.catalog.catalog_type import NdArrayType, TableType, VideoColumnName
+from evadb.catalog.catalog_type import (
+    ColumnType,
+    NdArrayType,
+    TableType,
+    VideoColumnName,
+)
 from evadb.catalog.catalog_utils import get_metadata_properties, is_document_table
 from evadb.configuration.constants import EvaDB_INSTALLATION_DIR
 from evadb.expression.abstract_expression import AbstractExpression, ExpressionType
@@ -37,7 +42,7 @@ from evadb.expression.function_expression import FunctionExpression
 from evadb.expression.tuple_value_expression import TupleValueExpression
 from evadb.parser.create_function_statement import CreateFunctionStatement
 from evadb.parser.create_index_statement import CreateIndexStatement
-from evadb.parser.create_statement import CreateTableStatement
+from evadb.parser.create_statement import ColumnDefinition, CreateTableStatement
 from evadb.parser.delete_statement import DeleteTableStatement
 from evadb.parser.explain_statement import ExplainStatement
 from evadb.parser.rename_statement import RenameTableStatement
@@ -87,21 +92,44 @@ class StatementBinder:
                 node.query.target_list
             )
             arg_map = {key: value for key, value in node.metadata}
-            assert (
-                "predict" in arg_map
-            ), f"Creating {node.function_type} functions expects 'predict' metadata."
-            # We only support a single predict column for now
-            predict_columns = set([arg_map["predict"]])
             inputs, outputs = [], []
-            for column in all_column_list:
-                if column.name in predict_columns:
-                    if node.function_type != "Forecasting":
+            if string_comparison_case_insensitive(node.function_type, "ludwig"):
+                assert (
+                    "predict" in arg_map
+                ), f"Creating {node.function_type} functions expects 'predict' metadata."
+                # We only support a single predict column for now
+                predict_columns = set([arg_map["predict"]])
+                for column in all_column_list:
+                    if column.name in predict_columns:
                         column.name = column.name + "_predictions"
+                        outputs.append(column)
                     else:
-                        column.name = column.name
-                    outputs.append(column)
-                else:
-                    inputs.append(column)
+                        inputs.append(column)
+            elif string_comparison_case_insensitive(node.function_type, "forecasting"):
+                # Forecasting models have only one input column which is horizon
+                inputs = [ColumnDefinition("horizon", ColumnType.INTEGER, None, None)]
+                # Currently, we only support univariate forecast which should have three output columns, unique_id, ds, and y.
+                # The y column is required. unique_id and ds will be auto generated if not found.
+                required_columns = set([arg_map.get("predict", "y")])
+                for column in all_column_list:
+                    if column.name == arg_map.get("id", "unique_id"):
+                        outputs.append(column)
+                    elif column.name == arg_map.get("time", "ds"):
+                        outputs.append(column)
+                    elif column.name == arg_map.get("predict", "y"):
+                        outputs.append(column)
+                        required_columns.remove(column.name)
+                    else:
+                        raise BinderError(
+                            f"Unexpected column {column.name} found for forecasting function."
+                        )
+                assert (
+                    len(required_columns) == 0
+                ), f"Missing required {required_columns} columns for forecasting function."
+            else:
+                raise BinderError(
+                    f"Unsupported type of function: {node.function_type}."
+                )
             assert (
                 len(node.inputs) == 0 and len(node.outputs) == 0
             ), f"{node.function_type} functions' input and output are auto assigned"
