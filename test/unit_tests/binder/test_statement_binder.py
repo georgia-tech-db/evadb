@@ -24,6 +24,7 @@ from evadb.catalog.sql_config import IDENTIFIER_COLUMN
 from evadb.expression.tuple_value_expression import TupleValueExpression
 from evadb.parser.alias import Alias
 from evadb.parser.create_statement import ColumnDefinition
+from evadb.utils.generic_utils import string_comparison_case_insensitive
 
 
 def assert_not_called_with(self, *args, **kwargs):
@@ -443,3 +444,27 @@ class StatementBinderTests(unittest.TestCase):
             ]
             self.assertEqual(create_function_statement.inputs, expected_inputs)
             self.assertEqual(create_function_statement.outputs, expected_outputs)
+
+    def test_string_matching_case_insensitive(self):
+        """
+        A simple test for string_matching_case_insensitve in generic_utils
+        used by statement_binder
+        """
+
+        test_string_exact_match = string_comparison_case_insensitive(
+            "HuggingFace", "HuggingFace"
+        )
+        test_string_case_insensitive_match = string_comparison_case_insensitive(
+            "HuggingFace", "hugGingFaCe"
+        )
+        test_string_no_match = string_comparison_case_insensitive(
+            "HuggingFace", "HuggingFae"
+        )
+        test_one_string_null = string_comparison_case_insensitive(None, "HuggingFace")
+        test_both_strings_null = string_comparison_case_insensitive(None, None)
+
+        assert test_string_exact_match is True
+        assert test_string_case_insensitive_match is True
+        assert test_string_no_match is False
+        assert test_one_string_null is False
+        assert test_both_strings_null is False

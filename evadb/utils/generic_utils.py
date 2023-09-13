@@ -535,4 +535,8 @@ def string_comparison_case_insensitive(string_1, string_2) -> bool:
         True/False (bool): Returns True if the strings are same, false otherwise
     """
 
+    # Does not make sense in case of null strings
+    if string_1 is None or string_2 is None:
+        return False
+
     return string_1.lower() == string_2.lower()
