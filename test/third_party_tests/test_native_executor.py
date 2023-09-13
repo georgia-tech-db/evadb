@@ -83,27 +83,6 @@ class NativeExecutorTest(unittest.TestCase):
             "DROP TABLE IF EXISTS eva_table;",
         )
 
-    def _create_native_table_using_select_query(self):
-        execute_query_fetch_all(
-            self.evadb,
-            """CREATE TABLE test_data_source.derived_table AS SELECT name, age FROM test_data_source.test_table;""",
-        )
-        res_batch = execute_query_fetch_all(
-            self.evadb,
-            "SELECT * FROM test_data_source.derived_table",
-        )
-        self.assertEqual(len(res_batch), 2)
-        self.assertEqual(res_batch.frames["derived_table.name"][0], "aa")
-        self.assertEqual(res_batch.frames["derived_table.age"][0], 1)
-        self.assertEqual(res_batch.frames["derived_table.name"][1], "bb")
-        self.assertEqual(res_batch.frames["derived_table.age"][1], 2)
-        execute_query_fetch_all(
-            self.evadb,
-            """USE test_data_source {
-                DROP TABLE IF EXISTS derived_table
-            }""",
-        )
-        
     def _execute_evadb_query(self):
         self._create_table_in_native_database()
         self._insert_value_into_native_database("aa", 1, "aaaa")
@@ -120,7 +99,6 @@ class NativeExecutorTest(unittest.TestCase):
         self.assertEqual(res_batch.frames["test_table.age"][1], 2)
 
         self._create_evadb_table_using_select_query()
-        self._create_native_table_using_select_query()
         self._drop_table_in_native_database()
 
     def _execute_native_query(self):
@@ -191,7 +169,7 @@ class NativeExecutorTest(unittest.TestCase):
         self._raise_error_on_multiple_creation()
         self._raise_error_on_invalid_connection()
 
-    def test_aashould_run_query_in_sqlite(self):
+    def test_should_run_query_in_sqlite(self):
         # Create database.
         params = {
             "database": "evadb.db",

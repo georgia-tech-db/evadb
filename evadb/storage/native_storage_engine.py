@@ -12,20 +12,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from contextlib import contextmanager
 from typing import Iterator
 
 import pandas as pd
-from sqlalchemy import create_engine
 
 from evadb.catalog.models.table_catalog import TableCatalogEntry
-from evadb.catalog.schema_utils import SchemaUtils
 from evadb.database import EvaDBDatabase
 from evadb.models.storage.batch import Batch
 from evadb.storage.abstract_storage_engine import AbstractStorageEngine
-from evadb.third_party.databases.interface import (
-    get_database_handler,
-)
+from evadb.third_party.databases.interface import get_database_handler
 from evadb.utils.logging_manager import logger
 
 
@@ -39,7 +34,7 @@ def create_table(uri: str, table_name: str, columns: dict):
     table_name (str): The name of the table to create.
     columns (dict): A dictionary where keys are column names and values are column types.
     """
-    from sqlalchemy import create_engine, Column
+    from sqlalchemy import Column, create_engine
     from sqlalchemy.ext.declarative import declarative_base
     from sqlalchemy.orm import sessionmaker
 
@@ -68,19 +63,6 @@ def create_table(uri: str, table_name: str, columns: dict):
 class NativeStorageEngine(AbstractStorageEngine):
     def __init__(self, db: EvaDBDatabase):
         super().__init__(db)
-
-    def create(self, table: TableCatalogEntry):
-        db_catalog_entry = self.db.catalog().get_database_catalog_entry(
-            table.database_name
-        )
-        with get_database_handler(
-            db_catalog_entry.engine, **db_catalog_entry.params
-        ) as handler:
-            uri = handler.get_sqlalchmey_uri()
-            sqlalchemy_schema = SchemaUtils.xform_to_sqlalchemy_schema(
-                db_catalog_entry.columns
-            )
-            create_table(uri, db_catalog_entry.name, sqlalchemy_schema)
 
     def write(self, table: TableCatalogEntry, rows: Batch):
         pass

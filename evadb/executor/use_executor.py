@@ -43,7 +43,7 @@ class UseExecutor(AbstractExecutor):
             db_catalog_entry.engine, **db_catalog_entry.params
         ) as handler:
             resp = handler.execute_native_query(self._query_string)
-        
+
         if resp and resp.error is None:
             return Batch(resp.data)
         else:
