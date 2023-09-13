@@ -188,6 +188,12 @@ yolo8n_query = """CREATE FUNCTION IF NOT EXISTS Yolo
             MODEL 'yolov8n.pt';
         """
 
+stablediffusion_function_query = """CREATE FUNCTION IF NOT EXISTS StableDiffusion
+        IMPL '{}/functions/stable_diffusion.py';
+        """.format(
+    EvaDB_INSTALLATION_DIR
+)
+
 
 def init_builtin_functions(db: EvaDBDatabase, mode: str = "debug") -> None:
     """Load the built-in functions into the system during system bootstrapping.

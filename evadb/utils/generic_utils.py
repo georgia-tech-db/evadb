@@ -540,3 +540,12 @@ def string_comparison_case_insensitive(string_1, string_2) -> bool:
         return False
 
     return string_1.lower() == string_2.lower()
+
+def try_to_import_replicate():
+    try:
+        import replicate
+    except ImportError:
+        raise ValueError(
+            """Could not import replicate python package.
+                Please install it with `pip install replicate`."""
+        )
