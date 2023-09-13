@@ -24,42 +24,6 @@ from evadb.third_party.databases.interface import get_database_handler
 from evadb.utils.logging_manager import logger
 
 
-# Define a function to create a table
-def create_table(uri: str, table_name: str, columns: dict):
-    """
-    Create a table in the database using sqlalchmey.
-
-    Parameters:
-    uri (str): the sqlalchmey uri to connect to the database
-    table_name (str): The name of the table to create.
-    columns (dict): A dictionary where keys are column names and values are column types.
-    """
-    from sqlalchemy import Column, create_engine
-    from sqlalchemy.ext.declarative import declarative_base
-    from sqlalchemy.orm import sessionmaker
-
-    # Create a Base class for declarative models
-    Base = declarative_base()
-
-    # Define the SQLAlchemy model class dynamically
-    class CustomTable(Base):
-        __tablename__ = table_name
-        # Dynamically create columns based on input parameters
-        for column_name, column_type in columns.items():
-            locals()[column_name] = Column(column_type)
-
-    # Create a database engine (SQLite in this example)
-    engine = create_engine(uri)
-
-    # Create the table in the database
-    Base.metadata.create_all(engine)
-
-    Session = sessionmaker(bind=engine)
-    session = Session()
-    session.commit()
-    session.close()
-
-
 class NativeStorageEngine(AbstractStorageEngine):
     def __init__(self, db: EvaDBDatabase):
         super().__init__(db)

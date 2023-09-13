@@ -120,30 +120,28 @@ class StatementToPlanConverter:
         """
 
         table_ref = statement.from_table
-        if table_ref is None:
-            logger.error("From entry missing in select statement")
-            return None
+        if table_ref is not None:
+            self.visit_table_ref(table_ref)
 
-        self.visit_table_ref(table_ref)
+            # Filter Operator
+            predicate = statement.where_clause
+            if predicate is not None:
+                self._visit_select_predicate(predicate)
 
-        # Filter Operator
-        predicate = statement.where_clause
-        if predicate is not None:
-            self._visit_select_predicate(predicate)
+            # TODO ACTION: Group By
+
+            if statement.groupby_clause is not None:
+                self._visit_groupby(statement.groupby_clause)
+
+            if statement.orderby_list is not None:
+                self._visit_orderby(statement.orderby_list)
+
+            if statement.limit_count is not None:
+                self._visit_limit(statement.limit_count)
 
         # union
         if statement.union_link is not None:
             self._visit_union(statement.union_link, statement.union_all)
-
-        # TODO ACTION: Group By
-        if statement.groupby_clause is not None:
-            self._visit_groupby(statement.groupby_clause)
-
-        if statement.orderby_list is not None:
-            self._visit_orderby(statement.orderby_list)
-
-        if statement.limit_count is not None:
-            self._visit_limit(statement.limit_count)
 
         # Projection operator
         select_columns = statement.target_list
@@ -182,7 +180,8 @@ class StatementToPlanConverter:
 
     def _visit_projection(self, select_columns):
         projection_opr = LogicalProject(select_columns)
-        projection_opr.append_child(self._plan)
+        if self._plan is not None:
+            projection_opr.append_child(self._plan)
         self._plan = projection_opr
 
     def _visit_select_predicate(self, predicate: AbstractExpression):

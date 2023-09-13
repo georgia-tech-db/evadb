@@ -520,3 +520,23 @@ def try_to_import_fitz():
             """Could not import fitz python package.
                 Please install it with `pip install pymupdfs`."""
         )
+
+
+def string_comparison_case_insensitive(string_1, string_2) -> bool:
+    """
+    Case insensitive string comparison for two strings which gives
+    a bool response whether the strings are the same or not
+
+    Arguments:
+        string_1 (str)
+        string_2 (str)
+
+    Returns:
+        True/False (bool): Returns True if the strings are same, false otherwise
+    """
+
+    # Does not make sense in case of null strings
+    if string_1 is None or string_2 is None:
+        return False
+
+    return string_1.lower() == string_2.lower()

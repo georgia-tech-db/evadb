@@ -37,6 +37,7 @@ from evadb.third_party.huggingface.create import gen_hf_io_catalog_entries
 from evadb.utils.errors import FunctionIODefinitionError
 from evadb.utils.generic_utils import (
     load_function_class_from_file,
+    string_comparison_case_insensitive,
     try_to_import_forecast,
     try_to_import_ludwig,
     try_to_import_torch,
@@ -149,15 +150,11 @@ class CreateFunctionExecutor(AbstractExecutor):
             impl_path = Path(f"{self.function_dir}/forecast.py").absolute().as_posix()
         else:
             impl_path = self.node.impl_path.absolute().as_posix()
-        arg_map = {arg.key: arg.value for arg in self.node.metadata}
 
         if "model" not in arg_map.keys():
             arg_map["model"] = "AutoARIMA"
-        if "frequency" not in arg_map.keys():
-            arg_map["frequency"] = "M"
 
         model_name = arg_map["model"]
-        frequency = arg_map["frequency"]
 
         """
         The following rename is needed for statsforecast, which requires the column name to be the following:
@@ -174,10 +171,18 @@ class CreateFunctionExecutor(AbstractExecutor):
 
         data = aggregated_batch.frames
         if "unique_id" not in list(data.columns):
-            data["unique_id"] = ["test" for x in range(len(data))]
+            data["unique_id"] = [1 for x in range(len(data))]
 
         if "ds" not in list(data.columns):
             data["ds"] = [x + 1 for x in range(len(data))]
+
+        if "frequency" not in arg_map.keys():
+            arg_map["frequency"] = pd.infer_freq(data["ds"])
+        frequency = arg_map["frequency"]
+        if frequency is None:
+            raise RuntimeError(
+                f"Can not infer the frequency for {self.node.name}. Please explictly set it."
+            )
 
         try_to_import_forecast()
         from statsforecast import StatsForecast
@@ -220,7 +225,7 @@ class CreateFunctionExecutor(AbstractExecutor):
         )
 
         weight_file = Path(model_path)
-
+        data["ds"] = pd.to_datetime(data["ds"])
         if not weight_file.exists():
             model.fit(data)
             f = open(model_path, "wb")
@@ -232,7 +237,15 @@ class CreateFunctionExecutor(AbstractExecutor):
         metadata_here = [
             FunctionMetadataCatalogEntry("model_name", model_name),
             FunctionMetadataCatalogEntry("model_path", model_path),
-            FunctionMetadataCatalogEntry("output_column_rename", arg_map["predict"]),
+            FunctionMetadataCatalogEntry(
+                "predict_column_rename", arg_map.get("predict", "y")
+            ),
+            FunctionMetadataCatalogEntry(
+                "time_column_rename", arg_map.get("time", "ds")
+            ),
+            FunctionMetadataCatalogEntry(
+                "id_column_rename", arg_map.get("id", "unique_id")
+            ),
         ]
 
         return (
@@ -277,7 +290,7 @@ class CreateFunctionExecutor(AbstractExecutor):
                 raise RuntimeError(msg)
 
         # if it's a type of HuggingFaceModel, override the impl_path
-        if self.node.function_type == "HuggingFace":
+        if string_comparison_case_insensitive(self.node.function_type, "HuggingFace"):
             (
                 name,
                 impl_path,
@@ -285,7 +298,7 @@ class CreateFunctionExecutor(AbstractExecutor):
                 io_list,
                 metadata,
             ) = self.handle_huggingface_function()
-        elif self.node.function_type == "ultralytics":
+        elif string_comparison_case_insensitive(self.node.function_type, "ultralytics"):
             (
                 name,
                 impl_path,
@@ -293,7 +306,7 @@ class CreateFunctionExecutor(AbstractExecutor):
                 io_list,
                 metadata,
             ) = self.handle_ultralytics_function()
-        elif self.node.function_type == "Ludwig":
+        elif string_comparison_case_insensitive(self.node.function_type, "Ludwig"):
             (
                 name,
                 impl_path,
@@ -301,7 +314,7 @@ class CreateFunctionExecutor(AbstractExecutor):
                 io_list,
                 metadata,
             ) = self.handle_ludwig_function()
-        elif self.node.function_type == "Forecasting":
+        elif string_comparison_case_insensitive(self.node.function_type, "Forecasting"):
             (
                 name,
                 impl_path,

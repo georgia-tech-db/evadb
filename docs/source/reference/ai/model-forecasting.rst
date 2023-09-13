@@ -1,3 +1,5 @@
+.. _forecast:
+
 Time Series Forecasting
 ========================
 
@@ -32,7 +34,7 @@ This trains a forecasting model. The model can be called by providing the horizo
 
 .. code-block:: sql
 
-   SELECT Forecast(12) FROM AirData;
+   SELECT Forecast(12);
 
 Here, the horizon is `12`, which represents the forecast 12 steps into the future.
 
@@ -48,7 +50,7 @@ EvaDB's default forecast framework is `statsforecast <https://nixtla.github.io/s
    * - PREDICT (required) 
      - The name of the column we wish to forecast.
    * - TIME
-     - The name of the column that contains the datestamp, wihch should be of a format expected by Pandas, ideally YYYY-MM-DD for a date or YYYY-MM-DD HH:MM:SS for a timestamp. If not provided, an auto increasing ID column will be used.
+     - The name of the column that contains the datestamp, wihch should be of a format expected by Pandas, ideally YYYY-MM-DD for a date or YYYY-MM-DD HH:MM:SS for a timestamp. Please visit the `pandas documentation <https://pandas.pydata.org/docs/reference/api/pandas.to_datetime.html>`_ for details. If not provided, an auto increasing ID column will be used.
    * - ID
      - The name of column that represents an identifier for the series. If not provided, the whole table is considered as one series of data.
    * - MODEL
