@@ -48,18 +48,6 @@ class BinderError(Exception):
     pass
 
 
-def check_data_source_is_valid(catalog: CatalogManager, database_name: str):
-    db_catalog_entry = catalog.get_database_catalog_entry(database_name)
-
-    if db_catalog_entry is None:
-        error = "{} data source does not exist. Create the new database source using CREATE DATABASE.".format(
-            database_name,
-        )
-        logger.error(error)
-        raise BinderError(error)
-    return True
-
-
 def check_data_source_and_table_are_valid(
     catalog: CatalogManager, database_name: str, table_name: str
 ):
