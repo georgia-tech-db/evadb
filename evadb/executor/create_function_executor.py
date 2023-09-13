@@ -171,7 +171,7 @@ class CreateFunctionExecutor(AbstractExecutor):
 
         data = aggregated_batch.frames
         if "unique_id" not in list(data.columns):
-            data["unique_id"] = ["test" for x in range(len(data))]
+            data["unique_id"] = [1 for x in range(len(data))]
 
         if "ds" not in list(data.columns):
             data["ds"] = [x + 1 for x in range(len(data))]
@@ -233,9 +233,14 @@ class CreateFunctionExecutor(AbstractExecutor):
         metadata_here = [
             FunctionMetadataCatalogEntry("model_name", model_name),
             FunctionMetadataCatalogEntry("model_path", model_path),
-            FunctionMetadataCatalogEntry("output_column_rename", arg_map["predict"]),
             FunctionMetadataCatalogEntry(
-                "time_column_rename", arg_map["time"] if "time" in arg_map else "ds"
+                "predict_column_rename", arg_map.get("predict", "y")
+            ),
+            FunctionMetadataCatalogEntry(
+                "time_column_rename", arg_map.get("time", "ds")
+            ),
+            FunctionMetadataCatalogEntry(
+                "id_column_rename", arg_map.get("id", "unique_id")
             ),
         ]
 
