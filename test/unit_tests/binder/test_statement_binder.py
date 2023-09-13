@@ -446,7 +446,7 @@ class StatementBinderTests(unittest.TestCase):
             self.assertEqual(create_function_statement.inputs, expected_inputs)
             self.assertEqual(create_function_statement.outputs, expected_outputs)
 
-    def test_bind_create_function_should_bind_forecast(self):
+    def test_bind_create_function_should_bind_forecast_with_default_columns(self):
         with patch.object(StatementBinder, "bind"):
             create_function_statement = MagicMock()
             create_function_statement.function_type = "forecasting"
@@ -480,6 +480,69 @@ class StatementBinderTests(unittest.TestCase):
                 ),
             ]
             create_function_statement.metadata = []
+            binder = StatementBinder(StatementBinderContext(MagicMock()))
+            binder._bind_create_function_statement(create_function_statement)
+
+            expected_inputs = [
+                ColumnDefinition(
+                    "horizon",
+                    ColumnType.INTEGER,
+                    None,
+                    None,
+                )
+            ]
+            expected_outputs = list(
+                [
+                    ColumnDefinition(
+                        col_obj.name,
+                        col_obj.type,
+                        col_obj.array_type,
+                        col_obj.array_dimensions,
+                    )
+                    for col_obj in (id_col_obj, ds_col_obj, y_col_obj)
+                ]
+            )
+            self.assertEqual(create_function_statement.inputs, expected_inputs)
+            self.assertEqual(create_function_statement.outputs, expected_outputs)
+
+    def test_bind_create_function_should_bind_forecast_with_renaming_columns(self):
+        with patch.object(StatementBinder, "bind"):
+            create_function_statement = MagicMock()
+            create_function_statement.function_type = "forecasting"
+            id_col_obj = ColumnCatalogEntry(
+                name="type",
+                type=MagicMock(),
+                array_type=MagicMock(),
+                array_dimensions=MagicMock(),
+            )
+            ds_col_obj = ColumnCatalogEntry(
+                name="saledate",
+                type=MagicMock(),
+                array_type=MagicMock(),
+                array_dimensions=MagicMock(),
+            )
+            y_col_obj = ColumnCatalogEntry(
+                name="ma",
+                type=MagicMock(),
+                array_type=MagicMock(),
+                array_dimensions=MagicMock(),
+            )
+            create_function_statement.query.target_list = [
+                TupleValueExpression(
+                    name=id_col_obj.name, table_alias="a", col_object=id_col_obj
+                ),
+                TupleValueExpression(
+                    name=ds_col_obj.name, table_alias="a", col_object=ds_col_obj
+                ),
+                TupleValueExpression(
+                    name=y_col_obj.name, table_alias="a", col_object=y_col_obj
+                ),
+            ]
+            create_function_statement.metadata = [
+                ("predict", "ma"),
+                ("id", "type"),
+                ("time", "saledate"),
+            ]
             binder = StatementBinder(StatementBinderContext(MagicMock()))
             binder._bind_create_function_statement(create_function_statement)
 
