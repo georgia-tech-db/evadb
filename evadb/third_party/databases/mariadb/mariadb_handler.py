@@ -70,6 +70,9 @@ class MariaDbHandler(DBHandler):
         if self.connection:
             self.connection.close()
 
+    def get_sqlalchmey_uri(self) -> str:
+        return f"mysql+pymysql://{self.user}:{self.password}@{self.host}:{self.port}/{self.database}"
+
     def check_connection(self) -> DBHandlerStatus:
         """
         Method for checking the status of database connection.

@@ -28,33 +28,30 @@ class NativeStorageEngine(AbstractStorageEngine):
     def __init__(self, db: EvaDBDatabase):
         super().__init__(db)
 
-    def create(self, table: TableCatalogEntry):
-        pass
-
     def write(self, table: TableCatalogEntry, rows: Batch):
         pass
 
-    def read(self, database_name: str, table: TableCatalogEntry) -> Iterator[Batch]:
+    def read(self, table: TableCatalogEntry) -> Iterator[Batch]:
         try:
             db_catalog_entry = self.db.catalog().get_database_catalog_entry(
-                database_name
+                table.database_name
             )
-            handler = get_database_handler(
+            with get_database_handler(
                 db_catalog_entry.engine, **db_catalog_entry.params
-            )
-            handler.connect()
+            ) as handler:
+                data_df = handler.execute_native_query(
+                    f"SELECT * FROM {table.name}"
+                ).data
 
-            data_df = handler.execute_native_query(f"SELECT * FROM {table.name}").data
-
-            # Handling case-sensitive databases like SQLite can be tricky. Currently,
-            # EvaDB converts all columns to lowercase, which may result in issues with
-            # these databases. As we move forward, we are actively working on improving
-            # this aspect within Binder.
-            # For more information, please refer to https://github.com/georgia-tech-db/evadb/issues/1079.
-            data_df.columns = data_df.columns.str.lower()
-            yield Batch(pd.DataFrame(data_df))
+                # Handling case-sensitive databases like SQLite can be tricky.
+                # Currently, EvaDB converts all columns to lowercase, which may result
+                # in issues with these databases. As we move forward, we are actively
+                # working on improving this aspect within Binder. For more information,
+                # please refer to https://github.com/georgia-tech-db/evadb/issues/1079.
+                data_df.columns = data_df.columns.str.lower()
+                yield Batch(pd.DataFrame(data_df))
 
         except Exception as e:
-            err_msg = f"Failed to read the table {table.name} in data source {database_name} with exception {str(e)}"
+            err_msg = f"Failed to read the table {table.name} in data source {table.database_name} with exception {str(e)}"
             logger.exception(err_msg)
             raise Exception(err_msg)
