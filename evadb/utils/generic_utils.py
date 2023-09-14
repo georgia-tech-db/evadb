@@ -277,6 +277,13 @@ def try_to_import_forecast():
             """Could not import StatsForecast python package.
                 Please install it with `pip install statsforecast`."""
         )
+    try:
+        from neuralforecast import NeuralForecast  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import NeuralForecast python package.
+                Please install it with `pip install neuralforecast`."""
+        )
 
 
 def is_ray_available() -> bool:

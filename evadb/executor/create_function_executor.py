@@ -150,14 +150,32 @@ class CreateFunctionExecutor(AbstractExecutor):
             impl_path = Path(f"{self.function_dir}/forecast.py").absolute().as_posix()
         else:
             impl_path = self.node.impl_path.absolute().as_posix()
+        library = "statsforecast"
+        supported_libraries = ["statsforecast", "neuralforecast"]
+        
+        if "horizon" not in arg_map.keys():
+            raise ValueError(
+                "Horizon must be provided while creating function of type FORECASTING"
+            )
+        try:
+            horizon = int(arg_map["horizon"])
+        except:
+            raise ValueError(
+                    "Parameter horizon must be integral."
+                )
 
-        if "model" not in arg_map.keys():
-            arg_map["model"] = "AutoARIMA"
+        if "library" in arg_map.keys():
+            try:
+                assert arg_map["library"].lower() in supported_libraries
+            except:
+                raise ValueError(
+                    "EvaDB currently supports "+str(supported_libraries)+" only."
+                )
+            library = arg_map["library"].lower()
 
-        model_name = arg_map["model"]
-
+        
         """
-        The following rename is needed for statsforecast, which requires the column name to be the following:
+        The following rename is needed for statsforecast/neuralforecast, which requires the column name to be the following:
         - The unique_id (string, int or category) represents an identifier for the series.
         - The ds (datestamp) column should be of a format expected by Pandas, ideally YYYY-MM-DD for a date or YYYY-MM-DD HH:MM:SS for a timestamp.
         - The y (numeric) represents the measurement we wish to forecast.
@@ -176,6 +194,10 @@ class CreateFunctionExecutor(AbstractExecutor):
         if "ds" not in list(data.columns):
             data["ds"] = [x + 1 for x in range(len(data))]
 
+        """
+            Set or infer data frequency
+        """ 
+
         if "frequency" not in arg_map.keys():
             arg_map["frequency"] = pd.infer_freq(data["ds"])
         frequency = arg_map["frequency"]
@@ -183,17 +205,6 @@ class CreateFunctionExecutor(AbstractExecutor):
             raise RuntimeError(
                 f"Can not infer the frequency for {self.node.name}. Please explictly set it."
             )
-
-        try_to_import_forecast()
-        from statsforecast import StatsForecast
-        from statsforecast.models import AutoARIMA, AutoCES, AutoETS, AutoTheta
-
-        model_dict = {
-            "AutoARIMA": AutoARIMA,
-            "AutoCES": AutoCES,
-            "AutoETS": AutoETS,
-            "AutoTheta": AutoTheta,
-        }
 
         season_dict = {  # https://pandas.pydata.org/docs/user_guide/timeseries.html#timeseries-offset-aliases
             "H": 24,
@@ -210,9 +221,68 @@ class CreateFunctionExecutor(AbstractExecutor):
             frequency.split("-")[0] if "-" in frequency else frequency
         )  # shortens longer frequencies like Q-DEC
         season_length = season_dict[new_freq] if new_freq in season_dict else 1
-        model = StatsForecast(
-            [model_dict[model_name](season_length=season_length)], freq=new_freq
-        )
+
+
+        try_to_import_forecast()
+
+        """
+            Neuralforecast implementation
+        """
+        if library == "neuralforecast":
+            from neuralforecast import NeuralForecast
+            from neuralforecast.models import NBEATS
+            from neuralforecast.auto import AutoNBEATS
+            
+            model_dict = {
+                "AutoNBEATS": AutoNBEATS,
+                "NBEATS": NBEATS,
+            }
+
+            if "model" not in arg_map.keys():
+                arg_map["model"] = "NBEATS"
+
+            try:
+                model_name = arg_map["model"]
+            except:
+                raise ValueError(
+                    "Supported models: "+str(model_dict.keys())
+                )
+            
+            model = NeuralForecast(
+                [model_dict[model_name](input_size=2 * horizon, h=horizon, max_steps=50)], freq=new_freq
+            )
+
+
+
+        # """
+        #     Statsforecast implementation
+        # """
+        else:
+            from statsforecast import StatsForecast
+            from statsforecast.models import AutoARIMA, AutoCES, AutoETS, AutoTheta
+
+            model_dict = {
+                "AutoARIMA": AutoARIMA,
+                "AutoCES": AutoCES,
+                "AutoETS": AutoETS,
+                "AutoTheta": AutoTheta,
+            }
+
+            if "model" not in arg_map.keys():
+                arg_map["model"] = "AutoARIMA"
+
+            try:
+                model_name = arg_map["model"]
+            except:
+                raise ValueError(
+                    "Supported models: "+str(model_dict.keys())
+                )
+
+
+
+            model = StatsForecast(
+                [model_dict[model_name](season_length=season_length)], freq=new_freq
+            )
 
         model_dir = os.path.join(
             self.db.config.get_value("storage", "model_dir"), self.node.name
@@ -221,13 +291,13 @@ class CreateFunctionExecutor(AbstractExecutor):
         model_path = os.path.join(
             self.db.config.get_value("storage", "model_dir"),
             self.node.name,
-            str(hashlib.sha256(data.to_string().encode()).hexdigest()) + ".pkl",
+            library+"_"+str(hashlib.sha256(data.to_string().encode()).hexdigest()) + ".pkl",
         )
 
         weight_file = Path(model_path)
         data["ds"] = pd.to_datetime(data["ds"])
         if not weight_file.exists():
-            model.fit(data)
+            model.fit(df=data)
             f = open(model_path, "wb")
             pickle.dump(model, f)
             f.close()
@@ -245,6 +315,12 @@ class CreateFunctionExecutor(AbstractExecutor):
             ),
             FunctionMetadataCatalogEntry(
                 "id_column_rename", arg_map.get("id", "unique_id")
+            ),
+            FunctionMetadataCatalogEntry(
+                "horizon", horizon
+            ),
+            FunctionMetadataCatalogEntry(
+                "library", library
             ),
         ]
 

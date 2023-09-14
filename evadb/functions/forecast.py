@@ -21,7 +21,6 @@ import pandas as pd
 from evadb.functions.abstract.abstract_function import AbstractFunction
 from evadb.functions.decorators.decorators import setup
 
-
 class ForecastModel(AbstractFunction):
     @property
     def name(self) -> str:
@@ -35,6 +34,8 @@ class ForecastModel(AbstractFunction):
         predict_column_rename: str,
         time_column_rename: str,
         id_column_rename: str,
+        horizon: int,
+        library: str
     ):
         f = open(model_path, "rb")
         loaded_model = pickle.load(f)
@@ -44,13 +45,14 @@ class ForecastModel(AbstractFunction):
         self.predict_column_rename = predict_column_rename
         self.time_column_rename = time_column_rename
         self.id_column_rename = id_column_rename
+        self.horizon = int(horizon)
+        self.library = library
 
     def forward(self, data) -> pd.DataFrame:
-        horizon = list(data.iloc[:, -1])[0]
-        assert (
-            type(horizon) is int
-        ), "Forecast UDF expects integral horizon in parameter."
-        forecast_df = self.model.predict(h=horizon)
+        if self.library == "statsforecast":
+            forecast_df = self.model.predict(h=self.horizon)
+        else:
+            forecast_df = self.model.predict()
         forecast_df.reset_index(inplace=True)
         forecast_df = forecast_df.rename(
             columns={
