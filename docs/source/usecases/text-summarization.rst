@@ -75,12 +75,12 @@ Here is the query's output ``DataFrame``:
 
 .. code-block:: 
 
-    +--------------------------------------------------------+--------------------------------------------------------+
-    | mypdfs.data                                         | mypdfs.summary_text                             |
-    +--------------------------------------------------------+--------------------------------------------------------+
-    | DEFINATION  Specialized connective tissue wit...  | Specialized connective tissue with fluid matri... |
-    | PHYSICAL CHARACTERISTICS ( 1 ) COLOUR -- R...  | The temperature is 38° C / 100.4° F. The body ...  |
-    +--------------------------------------------------------+--------------------------------------------------------+
+    +--------------------------------------------------------------+--------------------------------------------------------------+
+    |                         mypdfs.data                          |                 textsummarizer.summary_text                  |
+    +--------------------------------------------------------------+--------------------------------------------------------------+
+    | DEFINATION  Specialized connective tissue with          ... | Specialized connective tissue with fluid matrix. Erythro ... |
+    | PHYSICAL CHARACTERISTICS ( 1 )  COLOUR   -- Red  ( 2 )  ... | The temperature is 38° C / 100.4° F. The body weight is  ... |
+    +--------------------------------------------------------------+--------------------------------------------------------------+
 
 
 .. include:: ../shared/nlp.rst
