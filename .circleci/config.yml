@@ -94,22 +94,22 @@ workflows:
         ################################
         - Postgres:
             name: Third Party Test - Postgres | v3.10 | Linux
-            filters:
-              branches:
-                only: 
-                  - master
-                  - staging
+            # filters:
+            #   branches:
+            #     only: 
+            #       - master
+            #       - staging
         ################################
         ### THIRD PARTY: Staging, Master
         ################################
         ################################
         - MySQL:
             name: Third Party Test - MySQL | v3.10 | Linux
-            filters:
-              branches:
-                only: 
-                  - master
-                  - staging
+            # filters:
+            #   branches:
+            #     only: 
+            #       - master
+            #       - staging
         ################################
         ### NOTEBOOKS: Staging, Master
         ################################

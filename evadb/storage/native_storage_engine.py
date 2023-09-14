@@ -31,6 +31,9 @@ class NativeStorageEngine(AbstractStorageEngine):
     def write(self, table: TableCatalogEntry, rows: Batch):
         pass
 
+    def create(self, table: TableCatalogEntry):
+        pass
+
     def read(self, table: TableCatalogEntry) -> Iterator[Batch]:
         try:
             db_catalog_entry = self.db.catalog().get_database_catalog_entry(
