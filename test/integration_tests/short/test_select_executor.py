@@ -314,6 +314,18 @@ class SelectExecutorTest(unittest.TestCase):
         self.assertEqual(len(unnest_batch), 10)
         self.assertEqual(unnest_batch, expected)
 
+    def test_select_without_from(self):
+        # Check test/integration_tests/long/test_model_forecasting.py for `SELECT FUNC(1)` test cases.
+        query = """SELECT 1;"""
+        batch = execute_query_fetch_all(self.evadb, query)
+        expected = Batch(pd.DataFrame([{0: 1}]))
+        self.assertEqual(batch, expected)
+
+        query = """SELECT 1>2;"""
+        batch = execute_query_fetch_all(self.evadb, query)
+        expected = Batch(pd.DataFrame([{0: False}]))
+        self.assertEqual(batch, expected)
+
     def test_should_raise_error_with_missing_alias_in_lateral_join(self):
         function_name = "DummyMultiObjectDetector"
         query = """SELECT id, labels

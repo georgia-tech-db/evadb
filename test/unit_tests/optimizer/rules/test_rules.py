@@ -57,6 +57,7 @@ from evadb.optimizer.rules.rules import (
     LogicalLimitToPhysical,
     LogicalLoadToPhysical,
     LogicalOrderByToPhysical,
+    LogicalProjectNoTableToPhysical,
     LogicalProjectToPhysical,
     LogicalProjectToRayPhysical,
     LogicalRenameToPhysical,
@@ -135,6 +136,7 @@ class RulesTest(unittest.TestCase):
             Promise.LOGICAL_FUNCTION_SCAN_TO_PHYSICAL,
             Promise.LOGICAL_FILTER_TO_PHYSICAL,
             Promise.LOGICAL_PROJECT_TO_PHYSICAL,
+            Promise.LOGICAL_PROJECT_NO_TABLE_TO_PHYSICAL,
             Promise.LOGICAL_SHOW_TO_PHYSICAL,
             Promise.LOGICAL_EXPLAIN_TO_PHYSICAL,
             Promise.LOGICAL_CREATE_INDEX_TO_VECTOR_INDEX,
@@ -218,6 +220,7 @@ class RulesTest(unittest.TestCase):
             LogicalProjectToRayPhysical()
             if ray_enabled_and_installed
             else LogicalProjectToPhysical(),
+            LogicalProjectNoTableToPhysical(),
             LogicalDerivedGetToPhysical(),
             LogicalUnionToPhysical(),
             LogicalGroupByToPhysical(),

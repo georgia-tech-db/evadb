@@ -28,13 +28,22 @@ class ForecastModel(AbstractFunction):
         return "ForecastModel"
 
     @setup(cacheable=False, function_type="Forecasting", batchable=True)
-    def setup(self, model_name: str, model_path: str, output_column_rename: str):
+    def setup(
+        self,
+        model_name: str,
+        model_path: str,
+        predict_column_rename: str,
+        time_column_rename: str,
+        id_column_rename: str,
+    ):
         f = open(model_path, "rb")
         loaded_model = pickle.load(f)
         f.close()
         self.model = loaded_model
         self.model_name = model_name
-        self.output_column_rename = output_column_rename
+        self.predict_column_rename = predict_column_rename
+        self.time_column_rename = time_column_rename
+        self.id_column_rename = id_column_rename
 
     def forward(self, data) -> pd.DataFrame:
         horizon = list(data.iloc[:, -1])[0]
@@ -42,7 +51,12 @@ class ForecastModel(AbstractFunction):
             type(horizon) is int
         ), "Forecast UDF expects integral horizon in parameter."
         forecast_df = self.model.predict(h=horizon)
+        forecast_df.reset_index(inplace=True)
         forecast_df = forecast_df.rename(
-            columns={self.model_name: self.output_column_rename}
+            columns={
+                "unique_id": self.id_column_rename,
+                "ds": self.time_column_rename,
+                self.model_name: self.predict_column_rename,
+            }
         )
         return forecast_df
