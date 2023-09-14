@@ -24,8 +24,10 @@ from youtube_transcript_api import YouTubeTranscriptApi
 import evadb
 
 MAX_CHUNK_SIZE = 10000
-CHATGPT_UDF_PATH = "../../evadb/udfs/chatgpt.py"
-SENTENCE_FEATURE_EXTRACTOR_UDF_PATH = "../../evadb/udfs/sentence_feature_extractor.py"
+CHATGPT_FUNCTION_PATH = "../../evadb/functions/chatgpt.py"
+SENTENCE_FEATURE_EXTRACTOR_FUNCTION_PATH = (
+    "../../evadb/functions/sentence_feature_extractor.py"
+)
 QUESTIONS_PATH = "./questions.txt"
 YT_VIDEO_IDS_PATH = "./yt_video_ids.txt"
 
@@ -105,7 +107,10 @@ def download_youtube_video_transcript(video_link: str):
 
     time_taken = time.time() - start
     total_transcription_time += time_taken
-    print(f"✅ Video transcript downloaded successfully in {time_taken} seconds \n")
+    print(
+        "✅ Video transcript downloaded successfully in"
+        f" {time_taken} seconds \n"
+    )
     return transcript
 
 
@@ -143,29 +148,30 @@ def generate_online_video_transcript(cursor) -> str:
     print("Analyzing videos. This may take a while...")
     start = time.time()
 
-    # bootstrap speech analyzer udf and chatgpt udf for analysis
-    args = {"task": "automatic-speech-recognition", "model": "openai/whisper-base"}
-    speech_analyzer_udf_rel = cursor.create_function(
-        "SpeechRecognizer", type="HuggingFace", **args
-    )
-    speech_analyzer_udf_rel.execute()
+    # bootstrap speech analyzer function and chatgpt function for analysis
+    speech_analyzer_function_query = """
+        CREATE FUNCTION SpeechRecognizer
+        TYPE HuggingFace
+        TASK 'automatic-speech-recognition'
+        MODEL 'openai/whisper-base';
+    """
+    cursor.query(speech_analyzer_function_query).execute()
 
     # load youtube video into an evadb table
-    cursor.drop_table("youtube_video", if_exists=True).execute()
-    cursor.load("*.mp4", "youtube_video", "video").execute()
+    cursor.query("DROP TABLE IF EXISTS youtube_video;").execute()
+    cursor.query("LOAD VIDEO '*.mp4' INTO youtube_video;").execute()
 
     # extract speech texts from videos
     cursor.query(
-        "CREATE TABLE IF NOT EXISTS youtube_video_text AS SELECT SpeechRecognizer(audio) FROM youtube_video;"
+        "CREATE TABLE IF NOT EXISTS youtube_video_text AS SELECT"
+        " SpeechRecognizer(audio) FROM youtube_video;"
     ).execute()
     print(f"Video transcript generated in {time.time() - start} seconds.")
     total_transcription_time += time.time() - start
 
-    raw_transcript_string = (
-        cursor.table("youtube_video_text")
-        .select("text")
-        .df()["youtube_video_text.text"][0]
-    )
+    raw_transcript_string = cursor.query(
+        "SELECT text FROM youtube_video_text;"
+    ).df()["youtube_video_text.text"][0]
     return raw_transcript_string
 
 
@@ -182,7 +188,7 @@ def generate_response(cursor: evadb.EvaDBCursor, question: str) -> str:
 
     # instead of passing all the documents to the LLM, we first do a
     # semantic search over the embeddings and get the most relevant rows.
-    cursor.drop_table("EMBED_TEXT", if_exists=True).execute()
+    cursor.query("DROP TABLE IF EXISTS EMBED_TEXT;").execute()
     text_summarization_query = f"""
         CREATE TABLE EMBED_TEXT AS
         SELECT text FROM embedding_table
@@ -193,9 +199,12 @@ def generate_response(cursor: evadb.EvaDBCursor, question: str) -> str:
     cursor.query(text_summarization_query).execute()
 
     start = time.time()
-    prompt = "Answer the questions based on context alone. Do no generate responses on your own."
-    generate_chatgpt_response_rel = cursor.table("EMBED_TEXT").select(
-        f"ChatGPT('{question}', text, '{prompt}')"
+    prompt = (
+        "Answer the questions based on context alone. Do no generate responses"
+        " on your own."
+    )
+    generate_chatgpt_response_rel = cursor.query(
+        f"SELECT ChatGPT('{question}', text, '{prompt}') FROM EMBED_TEXT;"
     )
     responses = generate_chatgpt_response_rel.df()["chatgpt.response"]
     print(f"Answer (generated in {time.time() - start} seconds):")
@@ -212,14 +221,16 @@ def cleanup():
 
 if __name__ == "__main__":
     print(
-        "🔮 Welcome to EvaDB! This app lets you ask questions on any YouTube channel.\n\n"
+        "🔮 Welcome to EvaDB! This app lets you ask questions on any YouTube"
+        " channel.\n\n"
     )
 
     yt_video_ids = []
     # get Youtube video url
     channel_name = str(
         input(
-            "📺 Enter the Channel Name (press Enter to use our default Youtube Channel) : "
+            "📺 Enter the Channel Name (press Enter to use our default Youtube"
+            " Channel) : "
         )
     )
 
@@ -227,7 +238,8 @@ if __name__ == "__main__":
         channel_name = DEFAULT_CHANNEL_NAME
 
     limit = input(
-        "Enter the number of videos to download (press Enter to download one video) : "
+        "Enter the number of videos to download (press Enter to download one"
+        " video) : "
     )
 
     if limit == "":
@@ -237,7 +249,9 @@ if __name__ == "__main__":
 
     sort_by = str(
         input(
-            "Enter the order in which to retrieve the videos (Either 'newest' / 'oldest' / 'popular'). Press Enter to go with 'popular' option : "
+            "Enter the order in which to retrieve the videos (Either 'newest'"
+            " / 'oldest' / 'popular'). Press Enter to go with 'popular'"
+            " option : "
         )
     ).lower()
 
@@ -276,7 +290,8 @@ if __name__ == "__main__":
         except Exception as e:
             print(e)
             print(
-                "❗️ Failed to download video transcript. Will try downloading video and generating transcript later... \n\n"
+                "❗️ Failed to download video transcript. Will try downloading"
+                " video and generating transcript later... \n\n"
             )
             failed_download_links.append(yt_url)
             continue
@@ -313,11 +328,14 @@ if __name__ == "__main__":
         mp4_files = [file for file in files if file.endswith(".mp4")]
         if not mp4_files:
             print(
-                "No mp4 files found in current directory. Not generating video transcripts ..."
+                "No mp4 files found in current directory. Not generating video"
+                " transcripts ..."
             )
         else:
             raw_transcript_string = generate_online_video_transcript(cursor)
-            partitioned_transcript = partition_transcript(raw_transcript_string)
+            partitioned_transcript = partition_transcript(
+                raw_transcript_string
+            )
             df = pd.DataFrame(partitioned_transcript)
             print(df)
             if os.path.exists("transcript.csv"):
@@ -329,25 +347,25 @@ if __name__ == "__main__":
 
         load_start_time = time.time()
         # load chunked transcript into table
-        cursor.drop_table("Transcript", if_exists=True).execute()
+        cursor.query("DROP TABLE IF EXISTS Transcript;").execute()
         cursor.query(
             """CREATE TABLE IF NOT EXISTS Transcript (text TEXT(100));"""
         ).execute()
-        cursor.load("transcript.csv", "Transcript", "csv").execute()
+        cursor.query("LOAD CSV 'transcript.csv' INTO Transcript;").execute()
         print(
-            f"Loading transcripts into DB took {time.time() - load_start_time} seconds"
+            "Loading transcripts into DB took"
+            f" {time.time() - load_start_time} seconds"
         )
 
         print("Creating embeddings and Vector Index")
 
-        cursor.drop_function("embedding", if_exists=True).execute()
-        cursor.create_function(
-            "embedding",
-            if_not_exists=True,
-            impl_path=SENTENCE_FEATURE_EXTRACTOR_UDF_PATH,
+        cursor.query("DROP FUNCTION IF EXISTS embedding;").execute()
+        cursor.query(
+            "CREATE FUNCTION IF NOT EXISTS embedding IMPL"
+            f" '{SENTENCE_FEATURE_EXTRACTOR_FUNCTION_PATH}';"
         ).execute()
 
-        cursor.drop_table("embedding_table", if_exists=True).execute()
+        cursor.query("DROP TABLE IF EXISTS embedding_table;").execute()
         est = time.time()
         cursor.query(
             """CREATE TABLE embedding_table AS
@@ -358,25 +376,29 @@ if __name__ == "__main__":
         print(f"Creating embeddings took {eft - est} seconds")
 
         # Create search index on extracted features.
-        cursor.create_vector_index(
-            index_name="faiss_index",
-            table_name="embedding_table",
-            expr="features",
-            using="FAISS",
-        ).df()
-
+        cursor.query(
+            """
+            CREATE INDEX faiss_index
+            ON embedding_table (features)
+            USING FAISS;
+        """
+        ).execute()
         vet = time.time()
         print(f"Creating index took {vet - eft} seconds")
 
         questions = []
-        if os.path.isfile(QUESTIONS_PATH) and os.path.getsize(QUESTIONS_PATH) > 0:
+        if (
+            os.path.isfile(QUESTIONS_PATH)
+            and os.path.getsize(QUESTIONS_PATH) > 0
+        ):
             questions = open(QUESTIONS_PATH, "r")
             st = time.time()
             for question in questions:
                 print(question)
                 generate_response(cursor, question)
             print(
-                "Total time taken in answering all questions = ", str(time.time() - st)
+                "Total time taken in answering all questions = ",
+                str(time.time() - st),
             )
         else:  # Enter a QA Loop.
             ready = True
@@ -385,7 +407,7 @@ if __name__ == "__main__":
                 if question.lower() == "exit":
                     ready = False
                 else:
-                    # Generate response with chatgpt udf
+                    # Generate response with chatgpt function
                     print("⏳ Generating response (may take a while)...")
                     generate_response(cursor, question)
         cleanup()

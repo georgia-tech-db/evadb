@@ -12,19 +12,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
 from time import perf_counter
 
 from gpt4all import GPT4All
 from unidecode import unidecode
-from util import download_story, read_text_line, try_execute
+from util import download_story, read_text_line
 
 import evadb
 
 
-def ask_question(path):
+def ask_question(story_path: str):
     # Initialize early to exclude download time.
     llm = GPT4All("ggml-gpt4all-j-v1.3-groovy")
 
+    path = os.path.dirname(evadb.__file__)
     cursor = evadb.connect().cursor()
 
     story_table = "TablePPText"
@@ -35,17 +37,17 @@ def ask_question(path):
     t_i = 0
 
     timestamps[t_i] = perf_counter()
-    print("Setup UDF")
+    print("Setup Function")
 
-    Text_feat_udf_query = """CREATE UDF IF NOT EXISTS SentenceFeatureExtractor
-            IMPL  'evadb/udfs/sentence_feature_extractor.py';
+    Text_feat_function_query = f"""CREATE FUNCTION IF NOT EXISTS SentenceFeatureExtractor
+            IMPL  '{path}/functions/sentence_feature_extractor.py';
             """
 
-    cursor.query("DROP UDF IF EXISTS SentenceFeatureExtractor;").execute()
-    cursor.query(Text_feat_udf_query).execute()
+    cursor.query("DROP FUNCTION IF EXISTS SentenceFeatureExtractor;").execute()
+    cursor.query(Text_feat_function_query).execute()
 
-    try_execute(cursor, f"DROP TABLE IF EXISTS {story_table};")
-    try_execute(cursor, f"DROP TABLE IF EXISTS {story_feat_table};")
+    cursor.query(f"DROP TABLE IF EXISTS {story_table};").execute()
+    cursor.query(f"DROP TABLE IF EXISTS {story_feat_table};").execute()
 
     t_i = t_i + 1
     timestamps[t_i] = perf_counter()
@@ -53,10 +55,12 @@ def ask_question(path):
 
     print("Create table")
 
-    cursor.query(f"CREATE TABLE {story_table} (id INTEGER, data TEXT(1000));").execute()
+    cursor.query(
+        f"CREATE TABLE {story_table} (id INTEGER, data TEXT(1000));"
+    ).execute()
 
     # Insert text chunk by chunk.
-    for i, text in enumerate(read_text_line(path)):
+    for i, text in enumerate(read_text_line(story_path)):
         print("text: --" + text + "--")
         ascii_text = unidecode(text)
         cursor.query(
@@ -84,7 +88,8 @@ def ask_question(path):
 
     # Create search index on extracted features.
     cursor.query(
-        f"CREATE INDEX {index_table} ON {story_feat_table} (features) USING FAISS;"
+        f"CREATE INDEX {index_table} ON {story_feat_table} (features) USING"
+        " FAISS;"
     ).execute()
 
     t_i = t_i + 1
@@ -112,7 +117,9 @@ def ask_question(path):
     # Merge all context information.
     context_list = []
     for i in range(len(res_batch)):
-        context_list.append(res_batch.frames[f"{story_feat_table.lower()}.data"][i])
+        context_list.append(
+            res_batch.frames[f"{story_feat_table.lower()}.data"][i]
+        )
     context = "; \n".join(context_list)
 
     t_i = t_i + 1
@@ -139,9 +146,9 @@ def ask_question(path):
 
 
 def main():
-    path = download_story()
+    story_path = download_story()
 
-    ask_question(path)
+    ask_question(story_path)
 
 
 if __name__ == "__main__":
