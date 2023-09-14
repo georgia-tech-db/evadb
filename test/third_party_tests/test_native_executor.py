@@ -103,7 +103,7 @@ class NativeExecutorTest(unittest.TestCase):
                 DROP TABLE IF EXISTS derived_table
             }""",
         )
-        
+
     def _execute_evadb_query(self):
         self._create_table_in_native_database()
         self._insert_value_into_native_database("aa", 1, "aaaa")
@@ -209,8 +209,12 @@ class NativeExecutorTest(unittest.TestCase):
 
     def test_should_run_query_in_sqlite(self):
         # Create database.
+        import os
+
+        current_file_dir = os.path.dirname(os.path.abspath(__file__))
+
         params = {
-            "database": "evadb.db",
+            "database": f"{current_file_dir}/evadb.db",
         }
         query = f"""CREATE DATABASE test_data_source
                     WITH ENGINE = "sqlite",

@@ -82,7 +82,7 @@ class DBHandler:
             NotImplementedError: This method should be implemented in derived classes.
         """
         raise NotImplementedError()
-    
+
     def check_connection(self) -> DBHandlerStatus:
         """
         Checks the status of the database connection.

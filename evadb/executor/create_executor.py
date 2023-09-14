@@ -50,6 +50,7 @@ class CreateExecutor(AbstractExecutor):
                     self.node.table_info, self.node.column_list
                 )
             storage_engine = StorageEngine.factory(self.db, catalog_entry)
+
             try:
                 storage_engine.create(table=catalog_entry)
                 create_table_done = True

@@ -18,7 +18,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Generator, List
 
 from evadb.catalog.catalog_utils import xform_column_definitions_to_catalog_entries
-from evadb.catalog.models.utils import ColumnCatalogEntry, TableCatalogEntry
+from evadb.catalog.models.utils import TableCatalogEntry
 from evadb.parser.create_statement import ColumnDefinition
 
 if TYPE_CHECKING:
