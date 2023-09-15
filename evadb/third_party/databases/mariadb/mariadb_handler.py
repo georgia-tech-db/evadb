@@ -71,7 +71,7 @@ class MariaDbHandler(DBHandler):
             self.connection.close()
 
     def get_sqlalchmey_uri(self) -> str:
-        return f"mysql+pymysql://{self.user}:{self.password}@{self.host}:{self.port}/{self.database}"
+        return f"mariadb+mariadbconnector://{self.user}:{self.password}@{self.host}:{self.port}/{self.database}"
 
     def check_connection(self) -> DBHandlerStatus:
         """

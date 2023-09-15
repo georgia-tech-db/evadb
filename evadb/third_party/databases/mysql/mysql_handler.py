@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import MySQLdb
+import mysql.connector
 import pandas as pd
 
 from evadb.third_party.databases.types import (
@@ -33,16 +33,16 @@ class MysqlHandler(DBHandler):
 
     def connect(self):
         try:
-            self.connection = MySQLdb.connect(
+            self.connection = mysql.connector.connect(
                 host=self.host,
-                port=int(self.port),
+                port=self.port,
                 user=self.user,
                 password=self.password,
                 database=self.database,
             )
             self.connection.autocommit = True
             return DBHandlerStatus(status=True)
-        except MySQLdb.Error as e:
+        except mysql.connector.Error as e:
             return DBHandlerStatus(status=False, error=str(e))
 
     def disconnect(self):
@@ -66,7 +66,7 @@ class MysqlHandler(DBHandler):
             query = f"SELECT table_name as 'table_name' FROM information_schema.tables WHERE table_schema='{self.database}'"
             tables_df = pd.read_sql_query(query, self.connection)
             return DBHandlerResponse(data=tables_df)
-        except MySQLdb.Error as e:
+        except mysql.connector.Error as e:
             return DBHandlerResponse(data=None, error=str(e))
 
     def get_columns(self, table_name: str) -> DBHandlerResponse:
@@ -78,7 +78,7 @@ class MysqlHandler(DBHandler):
             columns_df = pd.read_sql_query(query, self.connection)
             columns_df["dtype"] = columns_df["dtype"].apply(self._mysql_to_python_types)
             return DBHandlerResponse(data=columns_df)
-        except MySQLdb.Error as e:
+        except mysql.connector.Error as e:
             return DBHandlerResponse(data=None, error=str(e))
 
     def _fetch_results_as_df(self, cursor):
@@ -96,11 +96,9 @@ class MysqlHandler(DBHandler):
             res = cursor.fetchall()
             if not res:
                 return pd.DataFrame({"status": ["success"]})
-            res_df = pd.DataFrame(
-                res, columns=[desc[0].lower() for desc in cursor.description]
-            )
+            res_df = pd.DataFrame(res, columns=[desc[0] for desc in cursor.description])
             return res_df
-        except MySQLdb.ProgrammingError as e:
+        except mysql.connector.ProgrammingError as e:
             if str(e) == "no results to fetch":
                 return pd.DataFrame({"status": ["success"]})
             raise e
@@ -113,7 +111,7 @@ class MysqlHandler(DBHandler):
             cursor = self.connection.cursor()
             cursor.execute(query_string)
             return DBHandlerResponse(data=self._fetch_results_as_df(cursor))
-        except MySQLdb.Error as e:
+        except mysql.connector.Error as e:
             return DBHandlerResponse(data=None, error=str(e))
 
     def _mysql_to_python_types(self, mysql_type: str):

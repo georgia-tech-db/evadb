@@ -1,1 +1,1 @@
-mysqlclient # sqlalchemy prefers this over mysql-connector-python
+mysql-connector-python
