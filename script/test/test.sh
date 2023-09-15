@@ -101,7 +101,7 @@ full_test() {
 }
 
 no_coverage_full_test() {
-  PYTHONPATH=./ python -m pytest -p no:cov test/ test/third_party_tests/test_native_executor.py::NativeExecutorTest::test_should_run_query_in_sqlite-m "not benchmark" --ignore=test/third_party_tests/ --ignore=test/app_tests/
+  PYTHONPATH=./ python -m pytest -p no:cov test/ test/third_party_tests/test_native_executor.py::NativeExecutorTest::test_should_run_query_in_sqlite -m "not benchmark" --ignore=test/third_party_tests/ --ignore=test/app_tests/
   code=$?
   print_error_code $code "FULL TEST"
 }

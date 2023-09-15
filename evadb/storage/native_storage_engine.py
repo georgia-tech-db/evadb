@@ -88,6 +88,7 @@ def _dict_to_sql_row(dict_row: dict, columns: List[ColumnCatalogEntry]):
 
 def _deserialize_sql_row(sql_row: tuple, columns: List[ColumnCatalogEntry]):
     # Deserialize numpy data
+
     dict_row = {}
     for idx, col in enumerate(columns):
         # hack, we skip deserializing if sql_row[col.name] is not of type bytes
@@ -173,9 +174,23 @@ class NativeStorageEngine(AbstractStorageEngine):
             table_to_read = Table(table.name, metadata, autoload_with=engine)
             result = session.execute(table_to_read.select()).fetchall()
             data_batch = []
-            # todo check if the column order is consistent
+
+            # Ensure that the order of columns in the select is same as in table.columns
+            # Also verify if the column names are consistent
+            if result:
+                cols = result[0]._fields
+                index_dict = {
+                    element.lower(): index for index, element in enumerate(cols)
+                }
+                try:
+                    ordered_columns = sorted(
+                        table.columns, key=lambda x: index_dict[x.name.lower()]
+                    )
+                except KeyError as e:
+                    raise Exception(f"Column mismatch with error {e}")
+
             for row in result:
-                data_batch.append(_deserialize_sql_row(row, table.columns))
+                data_batch.append(_deserialize_sql_row(row, ordered_columns))
 
             if data_batch:
                 yield Batch(pd.DataFrame(data_batch))
