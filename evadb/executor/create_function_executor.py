@@ -37,6 +37,7 @@ from evadb.third_party.huggingface.create import gen_hf_io_catalog_entries
 from evadb.utils.errors import FunctionIODefinitionError
 from evadb.utils.generic_utils import (
     load_function_class_from_file,
+    string_comparison_case_insensitive,
     try_to_import_forecast,
     try_to_import_ludwig,
     try_to_import_torch,
@@ -149,27 +150,39 @@ class CreateFunctionExecutor(AbstractExecutor):
             impl_path = Path(f"{self.function_dir}/forecast.py").absolute().as_posix()
         else:
             impl_path = self.node.impl_path.absolute().as_posix()
-        arg_map = {arg.key: arg.value for arg in self.node.metadata}
 
         if "model" not in arg_map.keys():
             arg_map["model"] = "AutoARIMA"
-        if "frequency" not in arg_map.keys():
-            arg_map["frequency"] = "M"
 
         model_name = arg_map["model"]
-        frequency = arg_map["frequency"]
 
-        data = aggregated_batch.frames.rename(columns={arg_map["predict"]: "y"})
+        """
+        The following rename is needed for statsforecast, which requires the column name to be the following:
+        - The unique_id (string, int or category) represents an identifier for the series.
+        - The ds (datestamp) column should be of a format expected by Pandas, ideally YYYY-MM-DD for a date or YYYY-MM-DD HH:MM:SS for a timestamp.
+        - The y (numeric) represents the measurement we wish to forecast.
+        For reference: https://nixtla.github.io/statsforecast/docs/getting-started/getting_started_short.html
+        """
+        aggregated_batch.rename(columns={arg_map["predict"]: "y"})
         if "time" in arg_map.keys():
-            aggregated_batch.frames.rename(columns={arg_map["time"]: "ds"})
+            aggregated_batch.rename(columns={arg_map["time"]: "ds"})
         if "id" in arg_map.keys():
-            aggregated_batch.frames.rename(columns={arg_map["id"]: "unique_id"})
+            aggregated_batch.rename(columns={arg_map["id"]: "unique_id"})
 
+        data = aggregated_batch.frames
         if "unique_id" not in list(data.columns):
-            data["unique_id"] = ["test" for x in range(len(data))]
+            data["unique_id"] = [1 for x in range(len(data))]
 
         if "ds" not in list(data.columns):
             data["ds"] = [x + 1 for x in range(len(data))]
+
+        if "frequency" not in arg_map.keys():
+            arg_map["frequency"] = pd.infer_freq(data["ds"])
+        frequency = arg_map["frequency"]
+        if frequency is None:
+            raise RuntimeError(
+                f"Can not infer the frequency for {self.node.name}. Please explictly set it."
+            )
 
         try_to_import_forecast()
         from statsforecast import StatsForecast
@@ -212,31 +225,26 @@ class CreateFunctionExecutor(AbstractExecutor):
         )
 
         weight_file = Path(model_path)
-
+        data["ds"] = pd.to_datetime(data["ds"])
         if not weight_file.exists():
             model.fit(data)
             f = open(model_path, "wb")
             pickle.dump(model, f)
             f.close()
 
-        arg_map_here = {"model_name": model_name, "model_path": model_path}
-        function = self._try_initializing_function(impl_path, arg_map_here)
-        io_list = self._resolve_function_io(function)
+        io_list = self._resolve_function_io(None)
 
         metadata_here = [
+            FunctionMetadataCatalogEntry("model_name", model_name),
+            FunctionMetadataCatalogEntry("model_path", model_path),
             FunctionMetadataCatalogEntry(
-                key="model_name",
-                value=model_name,
-                function_id=None,
-                function_name=None,
-                row_id=None,
+                "predict_column_rename", arg_map.get("predict", "y")
             ),
             FunctionMetadataCatalogEntry(
-                key="model_path",
-                value=model_path,
-                function_id=None,
-                function_name=None,
-                row_id=None,
+                "time_column_rename", arg_map.get("time", "ds")
+            ),
+            FunctionMetadataCatalogEntry(
+                "id_column_rename", arg_map.get("id", "unique_id")
             ),
         ]
 
@@ -282,7 +290,7 @@ class CreateFunctionExecutor(AbstractExecutor):
                 raise RuntimeError(msg)
 
         # if it's a type of HuggingFaceModel, override the impl_path
-        if self.node.function_type == "HuggingFace":
+        if string_comparison_case_insensitive(self.node.function_type, "HuggingFace"):
             (
                 name,
                 impl_path,
@@ -290,7 +298,7 @@ class CreateFunctionExecutor(AbstractExecutor):
                 io_list,
                 metadata,
             ) = self.handle_huggingface_function()
-        elif self.node.function_type == "ultralytics":
+        elif string_comparison_case_insensitive(self.node.function_type, "ultralytics"):
             (
                 name,
                 impl_path,
@@ -298,7 +306,7 @@ class CreateFunctionExecutor(AbstractExecutor):
                 io_list,
                 metadata,
             ) = self.handle_ultralytics_function()
-        elif self.node.function_type == "Ludwig":
+        elif string_comparison_case_insensitive(self.node.function_type, "Ludwig"):
             (
                 name,
                 impl_path,
@@ -306,7 +314,7 @@ class CreateFunctionExecutor(AbstractExecutor):
                 io_list,
                 metadata,
             ) = self.handle_ludwig_function()
-        elif self.node.function_type == "Forecasting":
+        elif string_comparison_case_insensitive(self.node.function_type, "Forecasting"):
             (
                 name,
                 impl_path,

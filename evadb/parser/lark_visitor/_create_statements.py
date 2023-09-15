@@ -245,6 +245,7 @@ class CreateTable:
     # INDEX CREATION
     def create_index(self, tree):
         index_name = None
+        if_not_exists = False
         table_name = None
         vector_store_type = None
         index_elem = None
@@ -253,6 +254,8 @@ class CreateTable:
             if isinstance(child, Tree):
                 if child.data == "uid":
                     index_name = self.visit(child)
+                if child.data == "if_not_exists":
+                    if_not_exists = True
                 elif child.data == "table_name":
                     table_name = self.visit(child)
                     table_ref = TableRef(table_name)
@@ -276,7 +279,7 @@ class CreateTable:
         ]
 
         return CreateIndexStatement(
-            index_name, table_ref, col_list, vector_store_type, function
+            index_name, if_not_exists, table_ref, col_list, vector_store_type, function
         )
 
 

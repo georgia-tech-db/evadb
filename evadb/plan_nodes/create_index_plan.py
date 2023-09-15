@@ -26,6 +26,7 @@ class CreateIndexPlan(AbstractPlan):
     def __init__(
         self,
         name: str,
+        if_not_exists: bool,
         table_ref: TableRef,
         col_list: List[ColumnDefinition],
         vector_store_type: VectorStoreType,
@@ -33,6 +34,7 @@ class CreateIndexPlan(AbstractPlan):
     ):
         super().__init__(PlanOprType.CREATE_INDEX)
         self._name = name
+        self._if_not_exists = if_not_exists
         self._table_ref = table_ref
         self._col_list = col_list
         self._vector_store_type = vector_store_type
@@ -41,6 +43,10 @@ class CreateIndexPlan(AbstractPlan):
     @property
     def name(self):
         return self._name
+
+    @property
+    def if_not_exists(self):
+        return self._if_not_exists
 
     @property
     def table_ref(self):
@@ -76,6 +82,7 @@ class CreateIndexPlan(AbstractPlan):
             (
                 super().__hash__(),
                 self.name,
+                self.if_not_exists,
                 self.table_ref,
                 tuple(self.col_list),
                 self.vector_store_type,

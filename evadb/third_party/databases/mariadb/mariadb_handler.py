@@ -12,8 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import mariadb
 import pandas as pd
-import psycopg2
 
 from evadb.third_party.databases.types import (
     DBHandler,
@@ -22,7 +22,13 @@ from evadb.third_party.databases.types import (
 )
 
 
-class PostgresHandler(DBHandler):
+class MariaDbHandler(DBHandler):
+
+    """
+    Class for implementing the Maria DB handler as a backend store for
+    EvaDb.
+    """
+
     def __init__(self, name: str, **kwargs):
         """
         Initialize the handler.
@@ -36,42 +42,42 @@ class PostgresHandler(DBHandler):
         self.user = kwargs.get("user")
         self.password = kwargs.get("password")
         self.database = kwargs.get("database")
-        self.connection = None
 
-    def connect(self) -> DBHandlerStatus:
+    def connect(self):
         """
-        Set up the connection required by the handler.
+        Establish connection to the database.
         Returns:
-            DBHandlerStatus
+          DBHandlerStatus
         """
         try:
-            self.connection = psycopg2.connect(
+            self.connection = mariadb.connect(
                 host=self.host,
                 port=self.port,
                 user=self.user,
                 password=self.password,
                 database=self.database,
             )
+            # Auto commit is off by default.
             self.connection.autocommit = True
             return DBHandlerStatus(status=True)
-        except psycopg2.Error as e:
+        except mariadb.Error as e:
             return DBHandlerStatus(status=False, error=str(e))
 
     def disconnect(self):
         """
-        Close any existing connections.
+        Disconnect from the database.
         """
         if self.connection:
             self.connection.close()
 
     def get_sqlalchmey_uri(self) -> str:
-        return f"postgresql://{self.user}:{self.password}@{self.host}:{self.port}/{self.database}"
+        return f"mysql+pymysql://{self.user}:{self.password}@{self.host}:{self.port}/{self.database}"
 
     def check_connection(self) -> DBHandlerStatus:
         """
-        Check connection to the handler.
+        Method for checking the status of database connection.
         Returns:
-            DBHandlerStatus
+          DBHandlerStatus
         """
         if self.connection:
             return DBHandlerStatus(status=True)
@@ -80,56 +86,51 @@ class PostgresHandler(DBHandler):
 
     def get_tables(self) -> DBHandlerResponse:
         """
-        Return the list of tables in the database.
+        Method to get the list of tables from database.
         Returns:
-            DBHandlerResponse
+          DBHandlerStatus
         """
         if not self.connection:
             return DBHandlerResponse(data=None, error="Not connected to the database.")
 
         try:
-            query = "SELECT table_name FROM information_schema.tables WHERE table_schema NOT IN ('information_schema', 'pg_catalog')"
+            query = f"SELECT table_name as 'table_name' FROM information_schema.tables WHERE table_schema='{self.database}'"
             tables_df = pd.read_sql_query(query, self.connection)
             return DBHandlerResponse(data=tables_df)
-        except psycopg2.Error as e:
+        except mariadb.Error as e:
             return DBHandlerResponse(data=None, error=str(e))
 
     def get_columns(self, table_name: str) -> DBHandlerResponse:
         """
-        Returns the list of columns for the given table.
+        Method to retrieve the columns of the specified table from the database.
         Args:
-            table_name (str): name of the table whose columns are to be retrieved.
+          table_name (str): name of the table whose columns are to be retrieved.
         Returns:
-            DBHandlerResponse
+          DBHandlerStatus
         """
         if not self.connection:
             return DBHandlerResponse(data=None, error="Not connected to the database.")
 
         try:
-            query = f"SELECT column_name as name, data_type as dtype FROM information_schema.columns WHERE table_name='{table_name}'"
+            query = f"SELECT column_name as 'name', data_type as 'dtype' FROM information_schema.columns WHERE table_name='{table_name}'"
             columns_df = pd.read_sql_query(query, self.connection)
-            columns_df["dtype"] = columns_df["dtype"].apply(self._pg_to_python_types)
+            columns_df["dtype"] = columns_df["dtype"].apply(
+                self._mariadb_to_python_types
+            )
             return DBHandlerResponse(data=columns_df)
-        except psycopg2.Error as e:
+        except mariadb.Error as e:
             return DBHandlerResponse(data=None, error=str(e))
 
     def _fetch_results_as_df(self, cursor):
         """
-        This is currently the only clean solution that we have found so far.
-        Reference to Postgres API: https://www.psycopg.org/docs/cursor.html#fetch
-
-        In short, currently there is no very clean programming way to differentiate
-        CREATE, INSERT, SELECT. CREATE and INSERT do not return any result, so calling
-        fetchall() on those will yield a programming error. Cursor has an attribute
-        rowcount, but it indicates # of rows that are affected. In that case, for both
-        INSERT and SELECT rowcount is not 0, so we also cannot use this API to
-        differentiate INSERT and SELECT.
+        Fetch results from the cursor for the executed query and return the
+        query results as dataframe.
         """
         try:
             res = cursor.fetchall()
             res_df = pd.DataFrame(res, columns=[desc[0] for desc in cursor.description])
             return res_df
-        except psycopg2.ProgrammingError as e:
+        except mariadb.ProgrammingError as e:
             if str(e) == "no results to fetch":
                 return pd.DataFrame({"status": ["success"]})
             raise e
@@ -149,27 +150,30 @@ class PostgresHandler(DBHandler):
             cursor = self.connection.cursor()
             cursor.execute(query_string)
             return DBHandlerResponse(data=self._fetch_results_as_df(cursor))
-        except psycopg2.Error as e:
+        except mariadb.Error as e:
             return DBHandlerResponse(data=None, error=str(e))
 
-    def _pg_to_python_types(self, pg_type: str):
+    def _mariadb_to_python_types(self, mariadb_type: str):
         mapping = {
-            "integer": int,
-            "bigint": int,
+            "tinyint": int,
             "smallint": int,
-            "numeric": float,
-            "real": float,
-            "double precision": float,
-            "character": str,
-            "character varying": str,
+            "mediumint": int,
+            "bigint": int,
+            "int": int,
+            "decimal": float,
+            "float": float,
+            "double": float,
             "text": str,
+            "string literals": str,
+            "char": str,
+            "varchar": str,
             "boolean": bool,
             # Add more mappings as needed
         }
 
-        if pg_type in mapping:
-            return mapping[pg_type]
+        if mariadb_type in mapping:
+            return mapping[mariadb_type]
         else:
             raise Exception(
-                f"Unsupported column {pg_type} encountered in the postgres table. Please raise a feature request!"
+                f"Unsupported column {mariadb_type} encountered in the MariaDB. Please raise a feature request!"
             )

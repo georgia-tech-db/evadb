@@ -191,3 +191,39 @@ class DropObjectExecutorTest(unittest.TestCase):
         self.assertTrue(index_obj is None)
 
         # todo check if the index is also removed from the underlying vector store
+
+    #### DROP INDEX
+
+    def test_should_drop_database(self):
+        # Create database.
+        database_name = "test_data_source"
+        params = {
+            "database": "evadb.db",
+        }
+        query = f"""CREATE DATABASE {database_name}
+                    WITH ENGINE = "sqlite",
+                    PARAMETERS = {params};"""
+        execute_query_fetch_all(self.evadb, query)
+        self.assertIsNotNone(
+            self.evadb.catalog().get_database_catalog_entry(database_name)
+        )
+
+        # DROP DATABASE
+        execute_query_fetch_all(self.evadb, f"DROP DATABASE {database_name}")
+        self.assertIsNone(
+            self.evadb.catalog().get_database_catalog_entry(database_name)
+        )
+
+        # DROP should pass with warning
+        result = execute_query_fetch_all(
+            self.evadb, f"DROP DATABASE IF EXISTS {database_name}"
+        )
+        self.assertTrue("does not exist" in result.frames.to_string())
+
+        # DROP should throw error
+        with self.assertRaises(ExecutorError):
+            execute_query_fetch_all(
+                self.evadb,
+                f"DROP DATABASE {database_name}",
+                do_not_print_exceptions=True,
+            )

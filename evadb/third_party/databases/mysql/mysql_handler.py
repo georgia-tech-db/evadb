@@ -49,6 +49,9 @@ class MysqlHandler(DBHandler):
         if self.connection:
             self.connection.close()
 
+    def get_sqlalchmey_uri(self) -> str:
+        return f"mysql://{self.user}:{self.password}@{self.host}:{self.port}/{self.database}"
+
     def check_connection(self) -> DBHandlerStatus:
         if self.connection:
             return DBHandlerStatus(status=True)

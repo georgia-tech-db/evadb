@@ -14,6 +14,7 @@
 # limitations under the License.
 from typing import Dict, Iterator
 
+from evadb.catalog.sql_config import ROW_NUM_COLUMN
 from evadb.readers.abstract_reader import AbstractReader
 from evadb.utils.generic_utils import try_to_import_fitz
 
@@ -35,6 +36,7 @@ class PDFReader(AbstractReader):
         doc = fitz.open(self.file_url)
 
         # PAGE ID, PARAGRAPH ID, STRING
+        row_num = 0
         for page_no, page in enumerate(doc):
             blocks = page.get_text("dict")["blocks"]
             # iterate through the text blocks
@@ -51,7 +53,9 @@ class PDFReader(AbstractReader):
                             if span["text"].strip():
                                 block_string += span["text"]
                     yield {
+                        ROW_NUM_COLUMN: row_num,
                         "page": page_no + 1,
                         "paragraph": paragraph_no + 1,
                         "data": block_string,
                     }
+                    row_num += 1

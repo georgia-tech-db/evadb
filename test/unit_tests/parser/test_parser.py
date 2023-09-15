@@ -106,6 +106,7 @@ class ParserTests(unittest.TestCase):
 
         expected_stmt = CreateIndexStatement(
             "testindex",
+            False,
             TableRef(TableInfo("MyVideo")),
             [
                 ColumnDefinition("featCol", None, None, None),
@@ -113,6 +114,15 @@ class ParserTests(unittest.TestCase):
             VectorStoreType.FAISS,
         )
         actual_stmt = evadb_stmt_list[0]
+        self.assertEqual(actual_stmt, expected_stmt)
+
+        # create if_not_exists
+        create_index_query = (
+            "CREATE INDEX IF NOT EXISTS testindex ON MyVideo (featCol) USING FAISS;"
+        )
+        evadb_stmt_list = parser.parse(create_index_query)
+        actual_stmt = evadb_stmt_list[0]
+        expected_stmt._if_not_exists = True
         self.assertEqual(actual_stmt, expected_stmt)
 
         # create index on Function expression
@@ -130,6 +140,7 @@ class ParserTests(unittest.TestCase):
         func_expr.append_child(TupleValueExpression("featCol"))
         expected_stmt = CreateIndexStatement(
             "testindex",
+            False,
             TableRef(TableInfo("MyVideo")),
             [
                 ColumnDefinition("featCol", None, None, None),
@@ -570,7 +581,7 @@ class ParserTests(unittest.TestCase):
     def test_select_function_star(self):
         parser = Parser()
 
-        query = "SELECT DemoFunc(*) FROM DemoDB.DemoTable"
+        query = "SELECT DemoFunc(*) FROM DemoDB.DemoTable;"
         evadb_stmt_list = parser.parse(query)
 
         # check stmt itself
@@ -596,6 +607,33 @@ class ParserTests(unittest.TestCase):
         self.assertIsInstance(select_stmt.from_table, TableRef)
         self.assertEqual(select_stmt.from_table.table.table_name, "DemoTable")
         self.assertEqual(select_stmt.from_table.table.database_name, "DemoDB")
+
+    def test_select_without_table_source(self):
+        parser = Parser()
+
+        query = "SELECT DemoFunc(12);"
+        evadb_stmt_list = parser.parse(query)
+
+        # check stmt itself
+        self.assertIsInstance(evadb_stmt_list, list)
+        self.assertEqual(len(evadb_stmt_list), 1)
+        self.assertEqual(evadb_stmt_list[0].stmt_type, StatementType.SELECT)
+        select_stmt = evadb_stmt_list[0]
+
+        # target List
+        self.assertIsNotNone(select_stmt.target_list)
+        self.assertEqual(len(select_stmt.target_list), 1)
+        self.assertEqual(
+            select_stmt.target_list[0].etype, ExpressionType.FUNCTION_EXPRESSION
+        )
+        self.assertEqual(len(select_stmt.target_list[0].children), 1)
+        self.assertEqual(
+            select_stmt.target_list[0].children[0].etype, ExpressionType.CONSTANT_VALUE
+        )
+        self.assertEqual(select_stmt.target_list[0].children[0].value, 12)
+
+        # from_table
+        self.assertIsNone(select_stmt.from_table)
 
     def test_table_ref(self):
         """Testing table info in TableRef

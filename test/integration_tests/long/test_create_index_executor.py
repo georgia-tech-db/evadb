@@ -22,6 +22,7 @@ import pandas as pd
 import pytest
 
 from evadb.catalog.catalog_type import VectorStoreType
+from evadb.executor.executor_utils import ExecutorError
 from evadb.models.storage.batch import Batch
 from evadb.server.command_handler import execute_query_fetch_all
 from evadb.storage.storage_engine import StorageEngine
@@ -91,11 +92,44 @@ class CreateIndexTest(unittest.TestCase):
         storage_engine.write(input_tb_entry, input_batch_data)
 
     @classmethod
+    def tearDown(cls):
+        query = "DROP INDEX testCreateIndexName;"
+        execute_query_fetch_all(cls.evadb, query)
+
+    @classmethod
     def tearDownClass(cls):
         query = "DROP TABLE testCreateIndexFeatTable;"
         execute_query_fetch_all(cls.evadb, query)
         query = "DROP TABLE testCreateIndexInputTable;"
         execute_query_fetch_all(cls.evadb, query)
+
+    @macos_skip_marker
+    def test_index_already_exist(self):
+        query = "CREATE INDEX testCreateIndexName ON testCreateIndexFeatTable (feat) USING FAISS;"
+        execute_query_fetch_all(self.evadb, query)
+
+        self.assertEqual(
+            self.evadb.catalog()
+            .get_index_catalog_entry_by_name("testCreateIndexName")
+            .type,
+            VectorStoreType.FAISS,
+        )
+
+        # Should throw error without if_not_exists.
+        query = "CREATE INDEX testCreateIndexName ON testCreateIndexFeatTable (feat) USING FAISS;"
+        with self.assertRaises(ExecutorError):
+            execute_query_fetch_all(self.evadb, query)
+
+        # Should not create index but without throwing errors.
+        query = "CREATE INDEX IF NOT EXISTS testCreateIndexName ON testCreateIndexFeatTable (feat) USING QDRANT;"
+        execute_query_fetch_all(self.evadb, query)
+
+        self.assertEqual(
+            self.evadb.catalog()
+            .get_index_catalog_entry_by_name("testCreateIndexName")
+            .type,
+            VectorStoreType.FAISS,
+        )
 
     @macos_skip_marker
     def test_should_create_index_faiss(self):
@@ -133,9 +167,6 @@ class CreateIndexTest(unittest.TestCase):
         self.assertEqual(distance[0][0], 0)
         self.assertEqual(row_id[0][0], 1)
 
-        # Cleanup.
-        self.evadb.catalog().drop_index_catalog_entry("testCreateIndexName")
-
     @macos_skip_marker
     def test_should_create_index_with_function(self):
         query = "CREATE INDEX testCreateIndexName ON testCreateIndexInputTable (DummyFeatureExtractor(input)) USING FAISS;"
@@ -169,6 +200,3 @@ class CreateIndexTest(unittest.TestCase):
         distance, row_id = index.search(np.array([[0, 0, 0]]).astype(np.float32), 1)
         self.assertEqual(distance[0][0], 0)
         self.assertEqual(row_id[0][0], 1)
-
-        # Cleanup.
-        self.evadb.catalog().drop_index_catalog_entry("testCreateIndexName")
