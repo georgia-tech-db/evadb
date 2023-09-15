@@ -326,12 +326,12 @@ def is_forecast_available() -> bool:
 
 def try_to_import_sklearn():
     try:
-        import sklearn  # noqa: F401
-        from sklearn.linear_model import LinearRegression  # noqa: F401
+        import autosklearn  # noqa: F401
+        from autosklearn.regression import AutoSklearnRegressor  # noqa: F401
     except ImportError:
         raise ValueError(
-            """Could not import sklearn.
-                Please install it with `pip install scikit-learn`."""
+            """Could not import autosklearn.
+                Please install it with `pip install auto-sklearn`."""
         )
 
 

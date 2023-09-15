@@ -123,8 +123,8 @@ class CreateFunctionExecutor(AbstractExecutor):
 
         Use Sklearn's Linear Regression engine to train/tune models.
         """
-        try_to_import_sklearn
-        from sklearn.linear_model import LinearRegression
+        try_to_import_sklearn()
+        from autosklearn.regression import AutoSklearnRegressor
 
         assert (
             len(self.children) == 1
@@ -140,7 +140,7 @@ class CreateFunctionExecutor(AbstractExecutor):
         aggregated_batch.drop_column_alias()
 
         arg_map = {arg.key: arg.value for arg in self.node.metadata}
-        model = LinearRegression()
+        model = AutoSklearnRegressor()
         model.fit(X=aggregated_batch.frames, y=arg_map["predict"])
         model_path = os.path.join(
             self.db.config.get_value("storage", "model_dir"), self.node.name
@@ -348,6 +348,14 @@ class CreateFunctionExecutor(AbstractExecutor):
                 io_list,
                 metadata,
             ) = self.handle_ludwig_function()
+        elif string_comparison_case_insensitive(self.node.function_type, "Sklearn"):
+            (
+                name,
+                impl_path,
+                function_type,
+                io_list,
+                metadata,
+            ) = self.handle_sklearn_function()
         elif string_comparison_case_insensitive(self.node.function_type, "Forecasting"):
             (
                 name,
