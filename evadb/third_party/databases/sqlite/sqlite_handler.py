@@ -183,10 +183,8 @@ class SQLiteHandler(DBHandler):
             "DATETIME": datetime.datetime,
         }
 
-        def preprocess_sqlite_type(sqlite_type):
-            return sqlite_type.split("(")[0].strip().upper()
+        sqlite_type = sqlite_type.split("(")[0].strip().upper()
 
-        sqlite_type = preprocess_sqlite_type(sqlite_type)
         if sqlite_type in mapping:
             return mapping[sqlite_type]
         else:
