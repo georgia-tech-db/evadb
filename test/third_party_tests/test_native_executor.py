@@ -31,6 +31,7 @@ class NativeExecutorTest(unittest.TestCase):
     def tearDown(self):
         shutdown_ray()
         self._drop_table_in_native_database()
+        self._drop_table_in_evadb_database()
 
     def _create_table_in_native_database(self):
         execute_query_fetch_all(
@@ -63,6 +64,18 @@ class NativeExecutorTest(unittest.TestCase):
                 DROP TABLE IF EXISTS test_table
             }""",
         )
+        execute_query_fetch_all(
+            self.evadb,
+            """USE test_data_source {
+                DROP TABLE IF EXISTS derived_table
+            }""",
+        )
+
+    def _drop_table_in_evadb_database(self):
+        execute_query_fetch_all(
+            self.evadb,
+            "DROP TABLE IF EXISTS eva_table;",
+        )
 
     def _create_evadb_table_using_select_query(self):
         execute_query_fetch_all(
@@ -78,11 +91,6 @@ class NativeExecutorTest(unittest.TestCase):
         self.assertEqual(res_batch.frames["eva_table.name"][1], "bb")
         self.assertEqual(res_batch.frames["eva_table.age"][1], 2)
 
-        execute_query_fetch_all(
-            self.evadb,
-            "DROP TABLE IF EXISTS eva_table;",
-        )
-
     def _create_native_table_using_select_query(self):
         execute_query_fetch_all(
             self.evadb,
@@ -97,12 +105,6 @@ class NativeExecutorTest(unittest.TestCase):
         self.assertEqual(res_batch.frames["derived_table.age"][0], 1)
         self.assertEqual(res_batch.frames["derived_table.name"][1], "bb")
         self.assertEqual(res_batch.frames["derived_table.age"][1], 2)
-        execute_query_fetch_all(
-            self.evadb,
-            """USE test_data_source {
-                DROP TABLE IF EXISTS derived_table
-            }""",
-        )
 
     def _execute_evadb_query(self):
         self._create_table_in_native_database()
@@ -122,6 +124,7 @@ class NativeExecutorTest(unittest.TestCase):
         self._create_evadb_table_using_select_query()
         self._create_native_table_using_select_query()
         self._drop_table_in_native_database()
+        self._drop_table_in_evadb_database()
 
     def _execute_native_query(self):
         self._create_table_in_native_database()
