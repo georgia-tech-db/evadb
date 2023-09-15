@@ -96,7 +96,9 @@ class MysqlHandler(DBHandler):
             res = cursor.fetchall()
             if not res:
                 return pd.DataFrame({"status": ["success"]})
-            res_df = pd.DataFrame(res, columns=[desc[0] for desc in cursor.description])
+            res_df = pd.DataFrame(
+                res, columns=[desc[0].lower() for desc in cursor.description]
+            )
             return res_df
         except mysql.connector.ProgrammingError as e:
             if str(e) == "no results to fetch":
