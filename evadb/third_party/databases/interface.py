@@ -16,6 +16,8 @@ import importlib
 import os
 from contextlib import contextmanager
 
+from evadb.executor.executor_utils import ExecutorError
+
 
 def _get_database_handler(engine: str, **kwargs):
     """
@@ -48,10 +50,10 @@ def _get_database_handler(engine: str, **kwargs):
 def get_database_handler(engine: str, **kwargs):
     handler = _get_database_handler(engine, **kwargs)
     try:
-        handler.connect()
+        resp = handler.connect()
+        if not resp.status:
+            raise ExecutorError(f"Cannot establish connection due to {resp.error}")
         yield handler
-    except Exception as e:
-        raise Exception(f"Error connecting to the database: {str(e)}")
     finally:
         handler.disconnect()
 
