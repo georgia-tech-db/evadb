@@ -75,6 +75,12 @@ short_integration_test() {
   print_error_code $code "SHORT INTEGRATION TEST"
 }
 
+short_third_party_test(){
+  PYTHONPATH=./ python -m pytest -p no:cov test/third_party_tests/test_native_executor.py::NativeExecutorTest::test_should_run_query_in_sqlite -m "not benchmark" 
+  code=$?
+  print_error_code $code "SHORT THIRDPARTY TEST"
+}
+
 long_integration_test() {
   PYTHONPATH=./ python -m pytest test/integration_tests/long/ -p no:cov -m "not benchmark"
   code=$?
@@ -172,6 +178,15 @@ fi
 if [[ "$MODE" = "SHORT INTEGRATION" ]];
 then 
   short_integration_test
+fi
+
+##################################################
+## SHORT THIRDPARTY TESTS
+##################################################
+
+if [[ "$MODE" = "SHORT THIRDPARTY TEST" ]];
+then 
+  short_third_party_test
 fi
 
 ##################################################
