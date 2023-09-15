@@ -44,6 +44,6 @@ class UseExecutor(AbstractExecutor):
             resp = handler.execute_native_query(self._query_string)
 
         if resp and resp.error is None:
-            return Batch(resp.data)
+            yield Batch(resp.data)
         else:
             raise ExecutorError(resp.error)
