@@ -35,7 +35,7 @@ class MysqlHandler(DBHandler):
         try:
             self.connection = MySQLdb.connect(
                 host=self.host,
-                port=self.port,
+                port=int(self.port),
                 user=self.user,
                 password=self.password,
                 database=self.database,
