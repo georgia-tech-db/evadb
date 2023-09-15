@@ -152,28 +152,30 @@ class CreateFunctionExecutor(AbstractExecutor):
             impl_path = self.node.impl_path.absolute().as_posix()
         library = "statsforecast"
         supported_libraries = ["statsforecast", "neuralforecast"]
-        
+
         if "horizon" not in arg_map.keys():
             raise ValueError(
                 "Horizon must be provided while creating function of type FORECASTING"
             )
         try:
             horizon = int(arg_map["horizon"])
-        except:
-            raise ValueError(
-                    "Parameter horizon must be integral."
-                )
+        except Exception as e:
+            err_msg = f"{str(e)}. HORIZON must be integral."
+            logger.error(err_msg)
+            raise FunctionIODefinitionError(err_msg)
 
         if "library" in arg_map.keys():
             try:
                 assert arg_map["library"].lower() in supported_libraries
-            except:
-                raise ValueError(
-                    "EvaDB currently supports "+str(supported_libraries)+" only."
+            except Exception:
+                err_msg = (
+                    "EvaDB currently supports " + str(supported_libraries) + " only."
                 )
+                logger.error(err_msg)
+                raise FunctionIODefinitionError(err_msg)
+
             library = arg_map["library"].lower()
 
-        
         """
         The following rename is needed for statsforecast/neuralforecast, which requires the column name to be the following:
         - The unique_id (string, int or category) represents an identifier for the series.
@@ -196,7 +198,7 @@ class CreateFunctionExecutor(AbstractExecutor):
 
         """
             Set or infer data frequency
-        """ 
+        """
 
         if "frequency" not in arg_map.keys():
             arg_map["frequency"] = pd.infer_freq(data["ds"])
@@ -222,7 +224,6 @@ class CreateFunctionExecutor(AbstractExecutor):
         )  # shortens longer frequencies like Q-DEC
         season_length = season_dict[new_freq] if new_freq in season_dict else 1
 
-
         try_to_import_forecast()
 
         """
@@ -230,9 +231,9 @@ class CreateFunctionExecutor(AbstractExecutor):
         """
         if library == "neuralforecast":
             from neuralforecast import NeuralForecast
-            from neuralforecast.models import NBEATS
             from neuralforecast.auto import AutoNBEATS
-            
+            from neuralforecast.models import NBEATS
+
             model_dict = {
                 "AutoNBEATS": AutoNBEATS,
                 "NBEATS": NBEATS,
@@ -242,17 +243,16 @@ class CreateFunctionExecutor(AbstractExecutor):
                 arg_map["model"] = "NBEATS"
 
             try:
-                model_name = arg_map["model"]
-            except:
-                raise ValueError(
-                    "Supported models: "+str(model_dict.keys())
-                )
-            
+                model_here = model_dict[arg_map["model"]]
+            except Exception:
+                err_msg = "Supported models: " + str(model_dict.keys())
+                logger.error(err_msg)
+                raise FunctionIODefinitionError(err_msg)
+
             model = NeuralForecast(
-                [model_dict[model_name](input_size=2 * horizon, h=horizon, max_steps=50)], freq=new_freq
+                [model_here(input_size=2 * horizon, h=horizon, max_steps=50)],
+                freq=new_freq,
             )
-
-
 
         # """
         #     Statsforecast implementation
@@ -272,40 +272,56 @@ class CreateFunctionExecutor(AbstractExecutor):
                 arg_map["model"] = "AutoARIMA"
 
             try:
-                model_name = arg_map["model"]
-            except:
-                raise ValueError(
-                    "Supported models: "+str(model_dict.keys())
-                )
-
-
+                model_here = model_dict[arg_map["model"]]
+            except Exception:
+                err_msg = "Supported models: " + str(model_dict.keys())
+                logger.error(err_msg)
+                raise FunctionIODefinitionError(err_msg)
 
             model = StatsForecast(
-                [model_dict[model_name](season_length=season_length)], freq=new_freq
+                [model_here(season_length=season_length)], freq=new_freq
             )
 
+        data["ds"] = pd.to_datetime(data["ds"])
+
         model_dir = os.path.join(
-            self.db.config.get_value("storage", "model_dir"), self.node.name
-        )
-        Path(model_dir).mkdir(parents=True, exist_ok=True)
-        model_path = os.path.join(
             self.db.config.get_value("storage", "model_dir"),
             self.node.name,
-            library+"_"+str(hashlib.sha256(data.to_string().encode()).hexdigest()) + ".pkl",
+        )
+        Path(model_dir).mkdir(parents=True, exist_ok=True)
+
+        model_save_name = (
+            library
+            + "_"
+            + str(hashlib.sha256(data.to_string().encode()).hexdigest())
+            + "_horizon"
+            + str(horizon)
+            + ".pkl"
         )
 
-        weight_file = Path(model_path)
-        data["ds"] = pd.to_datetime(data["ds"])
-        if not weight_file.exists():
+        model_path = os.path.join(model_dir, model_save_name)
+
+        existing_model_files = sorted(
+            os.listdir(model_dir),
+            key=lambda x: int(x.split("horizon")[1].split(".pkl")[0]),
+        )
+        existing_model_files = [
+            x
+            for x in existing_model_files
+            if int(x.split("horizon")[1].split(".pkl")[0]) >= horizon
+        ]
+        if len(existing_model_files) == 0:
             model.fit(df=data)
             f = open(model_path, "wb")
             pickle.dump(model, f)
             f.close()
+        elif not Path(model_path).exists():
+            model_path = os.path.join(model_dir, existing_model_files[-1])
 
         io_list = self._resolve_function_io(None)
 
         metadata_here = [
-            FunctionMetadataCatalogEntry("model_name", model_name),
+            FunctionMetadataCatalogEntry("model_name", arg_map["model"]),
             FunctionMetadataCatalogEntry("model_path", model_path),
             FunctionMetadataCatalogEntry(
                 "predict_column_rename", arg_map.get("predict", "y")
@@ -316,12 +332,8 @@ class CreateFunctionExecutor(AbstractExecutor):
             FunctionMetadataCatalogEntry(
                 "id_column_rename", arg_map.get("id", "unique_id")
             ),
-            FunctionMetadataCatalogEntry(
-                "horizon", horizon
-            ),
-            FunctionMetadataCatalogEntry(
-                "library", library
-            ),
+            FunctionMetadataCatalogEntry("horizon", horizon),
+            FunctionMetadataCatalogEntry("library", library),
         ]
 
         return (

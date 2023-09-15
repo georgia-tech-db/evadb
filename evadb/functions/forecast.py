@@ -21,6 +21,7 @@ import pandas as pd
 from evadb.functions.abstract.abstract_function import AbstractFunction
 from evadb.functions.decorators.decorators import setup
 
+
 class ForecastModel(AbstractFunction):
     @property
     def name(self) -> str:
@@ -35,7 +36,7 @@ class ForecastModel(AbstractFunction):
         time_column_rename: str,
         id_column_rename: str,
         horizon: int,
-        library: str
+        library: str,
     ):
         f = open(model_path, "rb")
         loaded_model = pickle.load(f)
@@ -60,5 +61,5 @@ class ForecastModel(AbstractFunction):
                 "ds": self.time_column_rename,
                 self.model_name: self.predict_column_rename,
             }
-        )
+        )[: self.horizon]
         return forecast_df
