@@ -128,7 +128,9 @@ class MariaDbHandler(DBHandler):
         """
         try:
             res = cursor.fetchall()
-            res_df = pd.DataFrame(res, columns=[desc[0] for desc in cursor.description])
+            res_df = pd.DataFrame(
+                res, columns=[desc[0].lower() for desc in cursor.description]
+            )
             return res_df
         except mariadb.ProgrammingError as e:
             if str(e) == "no results to fetch":
