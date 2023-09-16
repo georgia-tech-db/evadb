@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 from evadb.binder.binder_utils import BinderError
 from evadb.binder.statement_binder import StatementBinder
@@ -24,6 +24,20 @@ from evadb.catalog.sql_config import IDENTIFIER_COLUMN
 from evadb.expression.tuple_value_expression import TupleValueExpression
 from evadb.parser.alias import Alias
 from evadb.parser.create_statement import ColumnDefinition
+
+
+def assert_not_called_with(self, *args, **kwargs):
+    try:
+        self.assert_called_with(*args, **kwargs)
+    except AssertionError:
+        return
+    raise AssertionError(
+        "Expected %s to not have been called."
+        % self._format_mock_call_signature(args, kwargs)
+    )
+
+
+Mock.assert_not_called_with = assert_not_called_with
 
 
 class StatementBinderTests(unittest.TestCase):
@@ -152,7 +166,7 @@ class StatementBinderTests(unittest.TestCase):
         binderContext = MagicMock()
         tvp1 = ("T", "col1")
         tvp2 = ("T", "col2")
-        binderContext._catalog.return_value.get_udf_catalog_entry_by_name.return_value = (
+        binderContext._catalog.return_value.get_function_catalog_entry_by_name.return_value = (
             None
         )
         binderContext._get_all_alias_and_col_name.return_value = [tvp1, tvp2]
@@ -169,8 +183,8 @@ class StatementBinderTests(unittest.TestCase):
                 call2.args[0], TupleValueExpression(name=tvp2[1], table_alias=tvp2[0])
             )
 
-    @patch("evadb.binder.statement_binder.load_udf_class_from_file")
-    def test_bind_func_expr(self, mock_load_udf_class_from_file):
+    @patch("evadb.binder.statement_binder.load_function_class_from_file")
+    def test_bind_func_expr(self, mock_load_function_class_from_file):
         # setup
         func_expr = MagicMock(
             name="func_expr", alias=Alias("func_expr"), output_col_aliases=[]
@@ -181,38 +195,38 @@ class StatementBinderTests(unittest.TestCase):
         obj2 = MagicMock()
         obj2.name.lower.return_value = "out2"
         func_output_objs = [obj1, obj2]
-        udf_obj = MagicMock()
+        function_obj = MagicMock()
 
         mock_catalog = MagicMock()
-        mock_get_name = mock_catalog().get_udf_catalog_entry_by_name = MagicMock()
-        mock_get_name.return_value = udf_obj
+        mock_get_name = mock_catalog().get_function_catalog_entry_by_name = MagicMock()
+        mock_get_name.return_value = function_obj
 
-        mock_get_udf_outputs = (
-            mock_catalog().get_udf_io_catalog_output_entries
+        mock_get_function_outputs = (
+            mock_catalog().get_function_io_catalog_output_entries
         ) = MagicMock()
-        mock_get_udf_outputs.return_value = func_output_objs
-        mock_load_udf_class_from_file.return_value.return_value = (
-            "load_udf_class_from_file"
+        mock_get_function_outputs.return_value = func_output_objs
+        mock_load_function_class_from_file.return_value.return_value = (
+            "load_function_class_from_file"
         )
-        # mock_get_file_checksum.return_value = udf_obj.checksum
+        # mock_get_file_checksum.return_value = function_obj.checksum
 
         # Case 1 set output
         func_expr.output = "out1"
         binder = StatementBinder(StatementBinderContext(mock_catalog))
         binder._bind_func_expr(func_expr)
 
-        # mock_get_file_checksum.assert_called_with(udf_obj.impl_file_path)
+        # mock_get_file_checksum.assert_called_with(function_obj.impl_file_path)
         mock_get_name.assert_called_with(func_expr.name)
-        mock_get_udf_outputs.assert_called_with(udf_obj)
-        mock_load_udf_class_from_file.assert_called_with(
-            udf_obj.impl_file_path, udf_obj.name
+        mock_get_function_outputs.assert_called_with(function_obj)
+        mock_load_function_class_from_file.assert_called_with(
+            function_obj.impl_file_path, function_obj.name
         )
         self.assertEqual(func_expr.output_objs, [obj1])
         self.assertEqual(
             func_expr.alias,
             Alias("func_expr", ["out1"]),
         )
-        self.assertEqual(func_expr.function(), "load_udf_class_from_file")
+        self.assertEqual(func_expr.function(), "load_function_class_from_file")
 
         # Case 2 output not set
         func_expr.output = None
@@ -220,11 +234,11 @@ class StatementBinderTests(unittest.TestCase):
         binder = StatementBinder(StatementBinderContext(mock_catalog))
         binder._bind_func_expr(func_expr)
 
-        # mock_get_file_checksum.assert_called_with(udf_obj.impl_file_path)
+        # mock_get_file_checksum.assert_called_with(function_obj.impl_file_path)
         mock_get_name.assert_called_with(func_expr.name)
-        mock_get_udf_outputs.assert_called_with(udf_obj)
-        mock_load_udf_class_from_file.assert_called_with(
-            udf_obj.impl_file_path, udf_obj.name
+        mock_get_function_outputs.assert_called_with(function_obj)
+        mock_load_function_class_from_file.assert_called_with(
+            function_obj.impl_file_path, function_obj.name
         )
         self.assertEqual(func_expr.output_objs, func_output_objs)
         self.assertEqual(
@@ -234,20 +248,20 @@ class StatementBinderTests(unittest.TestCase):
                 ["out1", "out2"],
             ),
         )
-        self.assertEqual(func_expr.function(), "load_udf_class_from_file")
+        self.assertEqual(func_expr.function(), "load_function_class_from_file")
 
         # Raise error if the class object cannot be created
-        mock_load_udf_class_from_file.reset_mock()
-        mock_error_msg = "mock_load_udf_class_from_file_error"
-        mock_load_udf_class_from_file.side_effect = MagicMock(
+        mock_load_function_class_from_file.reset_mock()
+        mock_error_msg = "mock_load_function_class_from_file_error"
+        mock_load_function_class_from_file.side_effect = MagicMock(
             side_effect=RuntimeError(mock_error_msg)
         )
         binder = StatementBinder(StatementBinderContext(mock_catalog))
         with self.assertRaises(BinderError) as cm:
             binder._bind_func_expr(func_expr)
         err_msg = (
-            f"{mock_error_msg}. Please verify that the UDF class name in the "
-            "implementation file matches the UDF name."
+            f"{mock_error_msg}. Please verify that the function class name in the "
+            "implementation file matches the function name."
         )
         self.assertEqual(str(cm.exception), err_msg)
 
@@ -271,6 +285,17 @@ class StatementBinderTests(unittest.TestCase):
             is_groupable_mock.assert_called()
             for mock in mocks:
                 mock_binder.assert_any_call(mock)
+
+    def test_bind_select_statement_without_from(self):
+        with patch.object(StatementBinder, "bind") as mock_binder:
+            binder = StatementBinder(StatementBinderContext(MagicMock()))
+            expr = MagicMock()
+            from evadb.parser.select_statement import SelectStatement
+
+            select_statement = SelectStatement(target_list=[expr])
+            binder._bind_select_statement(select_statement)
+            mock_binder.assert_not_called_with(select_statement.from_table)
+            mock_binder.assert_any_call(expr)
 
     @patch("evadb.binder.statement_binder.StatementBinderContext")
     def test_bind_select_statement_union_starts_new_context(self, mock_ctx):
@@ -308,12 +333,14 @@ class StatementBinderTests(unittest.TestCase):
                 binder._bind_create_index_statement(create_index_statement)
 
             create_index_statement.col_list = ["foo"]
-            udf_obj = MagicMock()
+            function_obj = MagicMock()
             output = MagicMock()
-            udf_obj.outputs = [output]
+            function_obj.outputs = [output]
 
             with patch.object(
-                catalog(), "get_udf_catalog_entry_by_name", return_value=udf_obj
+                catalog(),
+                "get_function_catalog_entry_by_name",
+                return_value=function_obj,
             ):
                 with self.assertRaises(AssertionError):
                     binder._bind_create_index_statement(create_index_statement)
@@ -323,7 +350,7 @@ class StatementBinderTests(unittest.TestCase):
                 output.array_dimensions = [1, 100]
                 binder._bind_create_index_statement(create_index_statement)
 
-            create_index_statement.udf_func = None
+            create_index_statement.function = None
             col_def = MagicMock()
             col_def.name = "a"
             create_index_statement.col_list = [col_def]
@@ -339,18 +366,20 @@ class StatementBinderTests(unittest.TestCase):
             col.array_dimensions = [1, 10]
             binder._bind_create_index_statement(create_index_statement)
 
-    def test_bind_create_udf_should_raise(self):
+    def test_bind_create_function_should_raise_without_predict_for_ludwig(self):
         with patch.object(StatementBinder, "bind"):
-            create_udf_statement = MagicMock()
-            create_udf_statement.query.target_list = []
-            create_udf_statement.metadata = []
+            create_function_statement = MagicMock()
+            create_function_statement.function_type = "ludwig"
+            create_function_statement.query.target_list = []
+            create_function_statement.metadata = []
             binder = StatementBinder(StatementBinderContext(MagicMock()))
             with self.assertRaises(AssertionError):
-                binder._bind_create_udf_statement(create_udf_statement)
+                binder._bind_create_function_statement(create_function_statement)
 
-    def test_bind_create_udf_should_drop_row_id(self):
+    def test_bind_create_function_should_drop_row_id_for_select_star(self):
         with patch.object(StatementBinder, "bind"):
-            create_udf_statement = MagicMock()
+            create_function_statement = MagicMock()
+            create_function_statement.function_type = "ludwig"
             row_id_col_obj = ColumnCatalogEntry(
                 name=IDENTIFIER_COLUMN,
                 type=MagicMock(),
@@ -369,7 +398,7 @@ class StatementBinderTests(unittest.TestCase):
                 array_type=MagicMock(),
                 array_dimensions=MagicMock(),
             )
-            create_udf_statement.query.target_list = [
+            create_function_statement.query.target_list = [
                 TupleValueExpression(
                     name=IDENTIFIER_COLUMN, table_alias="a", col_object=row_id_col_obj
                 ),
@@ -380,12 +409,12 @@ class StatementBinderTests(unittest.TestCase):
                     name="predict_column", table_alias="a", col_object=output_col_obj
                 ),
             ]
-            create_udf_statement.metadata = [("predict", "predict_column")]
+            create_function_statement.metadata = [("predict", "predict_column")]
             binder = StatementBinder(StatementBinderContext(MagicMock()))
-            binder._bind_create_udf_statement(create_udf_statement)
+            binder._bind_create_function_statement(create_function_statement)
 
             self.assertEqual(
-                create_udf_statement.query.target_list,
+                create_function_statement.query.target_list,
                 [
                     TupleValueExpression(
                         name="input_column", table_alias="a", col_object=input_col_obj
@@ -414,5 +443,209 @@ class StatementBinderTests(unittest.TestCase):
                     output_col_obj.array_dimensions,
                 )
             ]
-            self.assertEqual(create_udf_statement.inputs, expected_inputs)
-            self.assertEqual(create_udf_statement.outputs, expected_outputs)
+            self.assertEqual(create_function_statement.inputs, expected_inputs)
+            self.assertEqual(create_function_statement.outputs, expected_outputs)
+
+    def test_bind_create_function_should_bind_forecast_with_default_columns(self):
+        with patch.object(StatementBinder, "bind"):
+            create_function_statement = MagicMock()
+            create_function_statement.function_type = "forecasting"
+            id_col_obj = ColumnCatalogEntry(
+                name="unique_id",
+                type=MagicMock(),
+                array_type=MagicMock(),
+                array_dimensions=MagicMock(),
+            )
+            ds_col_obj = ColumnCatalogEntry(
+                name="ds",
+                type=MagicMock(),
+                array_type=MagicMock(),
+                array_dimensions=MagicMock(),
+            )
+            y_col_obj = ColumnCatalogEntry(
+                name="y",
+                type=MagicMock(),
+                array_type=MagicMock(),
+                array_dimensions=MagicMock(),
+            )
+            create_function_statement.query.target_list = [
+                TupleValueExpression(
+                    name=id_col_obj.name, table_alias="a", col_object=id_col_obj
+                ),
+                TupleValueExpression(
+                    name=ds_col_obj.name, table_alias="a", col_object=ds_col_obj
+                ),
+                TupleValueExpression(
+                    name=y_col_obj.name, table_alias="a", col_object=y_col_obj
+                ),
+            ]
+            create_function_statement.metadata = []
+            binder = StatementBinder(StatementBinderContext(MagicMock()))
+            binder._bind_create_function_statement(create_function_statement)
+
+            expected_inputs = [
+                ColumnDefinition(
+                    "horizon",
+                    ColumnType.INTEGER,
+                    None,
+                    None,
+                )
+            ]
+            expected_outputs = list(
+                [
+                    ColumnDefinition(
+                        col_obj.name,
+                        col_obj.type,
+                        col_obj.array_type,
+                        col_obj.array_dimensions,
+                    )
+                    for col_obj in (id_col_obj, ds_col_obj, y_col_obj)
+                ]
+            )
+            self.assertEqual(create_function_statement.inputs, expected_inputs)
+            self.assertEqual(create_function_statement.outputs, expected_outputs)
+
+    def test_bind_create_function_should_bind_forecast_with_renaming_columns(self):
+        with patch.object(StatementBinder, "bind"):
+            create_function_statement = MagicMock()
+            create_function_statement.function_type = "forecasting"
+            id_col_obj = ColumnCatalogEntry(
+                name="type",
+                type=MagicMock(),
+                array_type=MagicMock(),
+                array_dimensions=MagicMock(),
+            )
+            ds_col_obj = ColumnCatalogEntry(
+                name="saledate",
+                type=MagicMock(),
+                array_type=MagicMock(),
+                array_dimensions=MagicMock(),
+            )
+            y_col_obj = ColumnCatalogEntry(
+                name="ma",
+                type=MagicMock(),
+                array_type=MagicMock(),
+                array_dimensions=MagicMock(),
+            )
+            create_function_statement.query.target_list = [
+                TupleValueExpression(
+                    name=id_col_obj.name, table_alias="a", col_object=id_col_obj
+                ),
+                TupleValueExpression(
+                    name=ds_col_obj.name, table_alias="a", col_object=ds_col_obj
+                ),
+                TupleValueExpression(
+                    name=y_col_obj.name, table_alias="a", col_object=y_col_obj
+                ),
+            ]
+            create_function_statement.metadata = [
+                ("predict", "ma"),
+                ("id", "type"),
+                ("time", "saledate"),
+            ]
+            binder = StatementBinder(StatementBinderContext(MagicMock()))
+            binder._bind_create_function_statement(create_function_statement)
+
+            expected_inputs = [
+                ColumnDefinition(
+                    "horizon",
+                    ColumnType.INTEGER,
+                    None,
+                    None,
+                )
+            ]
+            expected_outputs = list(
+                [
+                    ColumnDefinition(
+                        col_obj.name,
+                        col_obj.type,
+                        col_obj.array_type,
+                        col_obj.array_dimensions,
+                    )
+                    for col_obj in (id_col_obj, ds_col_obj, y_col_obj)
+                ]
+            )
+            self.assertEqual(create_function_statement.inputs, expected_inputs)
+            self.assertEqual(create_function_statement.outputs, expected_outputs)
+
+    def test_bind_create_function_should_raise_forecast_with_unexpected_columns(self):
+        with patch.object(StatementBinder, "bind"):
+            create_function_statement = MagicMock()
+            create_function_statement.function_type = "forecasting"
+            id_col_obj = ColumnCatalogEntry(
+                name="type",
+                type=MagicMock(),
+                array_type=MagicMock(),
+                array_dimensions=MagicMock(),
+            )
+            ds_col_obj = ColumnCatalogEntry(
+                name="saledate",
+                type=MagicMock(),
+                array_type=MagicMock(),
+                array_dimensions=MagicMock(),
+            )
+            y_col_obj = ColumnCatalogEntry(
+                name="ma",
+                type=MagicMock(),
+                array_type=MagicMock(),
+                array_dimensions=MagicMock(),
+            )
+            create_function_statement.query.target_list = [
+                TupleValueExpression(
+                    name=id_col_obj.name, table_alias="a", col_object=id_col_obj
+                ),
+                TupleValueExpression(
+                    name=ds_col_obj.name, table_alias="a", col_object=ds_col_obj
+                ),
+                TupleValueExpression(
+                    name=y_col_obj.name, table_alias="a", col_object=y_col_obj
+                ),
+            ]
+            create_function_statement.metadata = [
+                ("predict", "ma"),
+                ("time", "saledate"),
+            ]
+            binder = StatementBinder(StatementBinderContext(MagicMock()))
+
+            with self.assertRaises(BinderError) as cm:
+                binder._bind_create_function_statement(create_function_statement)
+
+            err_msg = "Unexpected column type found for forecasting function."
+            self.assertEqual(str(cm.exception), err_msg)
+
+    def test_bind_create_function_should_raise_forecast_missing_required_columns(self):
+        with patch.object(StatementBinder, "bind"):
+            create_function_statement = MagicMock()
+            create_function_statement.function_type = "forecasting"
+            id_col_obj = ColumnCatalogEntry(
+                name="type",
+                type=MagicMock(),
+                array_type=MagicMock(),
+                array_dimensions=MagicMock(),
+            )
+            ds_col_obj = ColumnCatalogEntry(
+                name="saledate",
+                type=MagicMock(),
+                array_type=MagicMock(),
+                array_dimensions=MagicMock(),
+            )
+            create_function_statement.query.target_list = [
+                TupleValueExpression(
+                    name=id_col_obj.name, table_alias="a", col_object=id_col_obj
+                ),
+                TupleValueExpression(
+                    name=ds_col_obj.name, table_alias="a", col_object=ds_col_obj
+                ),
+            ]
+            create_function_statement.metadata = [
+                ("id", "type"),
+                ("time", "saledate"),
+                ("predict", "ma"),
+            ]
+            binder = StatementBinder(StatementBinderContext(MagicMock()))
+
+            with self.assertRaises(AssertionError) as cm:
+                binder._bind_create_function_statement(create_function_statement)
+
+            err_msg = "Missing required {'ma'} columns for forecasting function."
+            self.assertEqual(str(cm.exception), err_msg)

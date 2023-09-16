@@ -13,23 +13,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from evadb.catalog.catalog_utils import get_metadata_entry_or_val
-from evadb.catalog.models.udf_catalog import UdfCatalogEntry
+from evadb.catalog.models.function_catalog import FunctionCatalogEntry
 from evadb.third_party.huggingface.create import MODEL_FOR_TASK
 
 
-def assign_hf_udf(udf_obj: UdfCatalogEntry):
+def assign_hf_function(function_obj: FunctionCatalogEntry):
     """
-    Assigns the correct HF Model to the UDF. The model assigned depends on
-    the task type for the UDF. This is done so that we can
+    Assigns the correct HF Model to the Function. The model assigned depends on
+    the task type for the Function. This is done so that we can
     process the input correctly before passing it to the HF model.
     """
-    inputs = udf_obj.args
+    inputs = function_obj.args
 
     # NOTE: Currently, we only support models that require a single input.
     assert len(inputs) == 1, "Only single input models are supported."
 
-    task = get_metadata_entry_or_val(udf_obj, "task", None)
-    assert task is not None, "task not specified in Hugging Face UDF"
+    task = get_metadata_entry_or_val(function_obj, "task", None)
+    assert task is not None, "task not specified in Hugging Face Function"
     model_class = MODEL_FOR_TASK[task]
 
-    return lambda: model_class(udf_obj)
+    return lambda: model_class(function_obj)

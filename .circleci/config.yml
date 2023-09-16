@@ -56,6 +56,20 @@ workflows:
                 ignore: 
                   - master
                   - staging
+
+        ################################
+        #### SHORT THIRDPARTY TESTS: PR
+        ################################
+        ################################
+        - Linux:
+            name: Short Third Party Test | v3.10 | Linux
+            mode: SHORT THIRDPARTY TEST
+            filters:
+              branches:
+                ignore: 
+                  - master
+                  - staging
+
         ################################
         #### LONG INTEGRATION TESTS:
         #### Staging
@@ -435,7 +449,7 @@ jobs:
               source test_evadb/bin/activate
               pip install --upgrade pip
               pip debug --verbose
-              pip install ".[dev,ludwig,qdrant]"
+              pip install ".[dev,ludwig,qdrant,forecasting]"
               source test_evadb/bin/activate
               bash script/test/test.sh -m "<< parameters.mode >>"
 

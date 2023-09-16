@@ -47,7 +47,12 @@ class LogicalExpression(AbstractExpression):
                     return left_batch
                 mask = left_batch.create_inverted_mask()
 
-            right_batch = self.get_child(1).evaluate(batch[mask], **kwargs)
+            # When some rows are filtered, the push down batch indices need to
+            # be reset as well.
+            pushdown_batch = batch[mask]
+            pushdown_batch.reset_index()
+
+            right_batch = self.get_child(1).evaluate(pushdown_batch, **kwargs)
             left_batch.update_indices(mask, right_batch)
 
             return left_batch

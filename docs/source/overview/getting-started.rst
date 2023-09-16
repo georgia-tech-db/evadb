@@ -1,4 +1,4 @@
-.. _Getting Started:
+.. _getting-started:
 
 Getting Started
 =================
@@ -70,7 +70,7 @@ The program runs a SQL query for listing all the built-in functions in EvaDB. It
    cursor = evadb.connect().cursor()
 
    # List all the built-in functions in EvaDB
-   print(cursor.query("SHOW UDFS;").df())
+   print(cursor.query("SHOW FUNCTIONS;").df())
 
 Now, run the Python program:
 
@@ -83,9 +83,9 @@ You should see a list of built-in functions including but not limited to the fol
 .. code-block:: bash
 
             name                                             inputs  ...                                               impl metadata
-    0  ArrayCount   [Input_Array NDARRAY ANYTYPE (), Search_Key ANY]  ...  /home/jarulraj3/evadb/evadb/udfs/ndarray/array...       []
-    1        Crop  [Frame_Array NDARRAY UINT8 (3, None, None), bb...  ...   /home/jarulraj3/evadb/evadb/udfs/ndarray/crop.py       []
-    2     ChatGPT  [query NDARRAY STR (1,), content NDARRAY STR (...  ...        /home/jarulraj3/evadb/evadb/udfs/chatgpt.py       []
+    0  ArrayCount   [Input_Array NDARRAY ANYTYPE (), Search_Key ANY]  ...  /home/jarulraj3/evadb/evadb/functions/ndarray/array...       []
+    1        Crop  [Frame_Array NDARRAY UINT8 (3, None, None), bb...  ...   /home/jarulraj3/evadb/evadb/functions/ndarray/crop.py       []
+    2     ChatGPT  [query NDARRAY STR (1,), content NDARRAY STR (...  ...        /home/jarulraj3/evadb/evadb/functions/chatgpt.py       []
 
     [3 rows x 6 columns]
 
@@ -96,42 +96,20 @@ You should see a list of built-in functions including but not limited to the fol
 
     EvaDB supports additional installation options for extending its functionality. Go over the :doc:`Installation Options <getting-started/installation-options>` for all the available options.
 
-Illustrative AI App
--------------------
+Illustrative AI Query
+---------------------
 
-Here is a simple, illustrative `MNIST image classification <https://en.wikipedia.org/wiki/MNIST_database>`_ AI app in EvaDB.
+Here is an illustrative `MNIST image classification <https://en.wikipedia.org/wiki/MNIST_database>`_ AI query in EvaDB.
 
-.. code-block:: python
+.. code-block:: sql
+    
+    --- This AI query retrieves images in the loaded MNIST video with label 4
+    --- We constrain the query to only search through the first 100 frames
+    --- We limit the query to only return the first five frames with label 4
+    SELECT data, id, MnistImageClassifier(data) 
+    FROM MnistVideo 
+    WHERE MnistImageClassifier(data) = '4' AND id < 100
+    LIMIT 5;
 
-    # Connect to EvaDB for running AI queries
-    import evadb
-    cursor = evadb.connect().cursor()
-
-    # Load the MNIST video into EvaDB
-    # Each frame in the loaded MNIST video contains a digit
-    cursor.load("mnist.mp4", "MNISTVid", format="video").df()
-
-    # We now construct an AI pipeline to run the image classifier 
-    # over all the digit images in the video    
-
-    # Connect to the table with the loaded video
-    query = cursor.table("MNISTVid")
-
-    # Run the model on a subset of frames
-    # Here, id refers to the frame id
-    query = query.filter("id = 30 OR id = 50 OR id = 70 OR id = 0 OR id = 140")
-
-    # We are retrieving the frame "data" and 
-    # the output of the Image Classification function on the data 
-    query = query.select("data, MnistImageClassifier(data).label")
-
-    # EvaDB uses a lazy query construction technique to improve performance
-    # Only calling query.df() will run the query
-    response = query.df()
-
-Try out EvaDB by experimenting with the introductory `MNIST notebook on Colab <https://colab.research.google.com/github/georgia-tech-db/evadb/blob/master/tutorials/01-mnist.ipynb>`_.
-
-.. image:: ../../images/reference/mnist.png
-
-.. note::
-    Go over the :ref:`Python API<python-api>` to learn more about the functions used in this app.
+The complete `MNIST notebook is available on Colab <https://colab.research.google.com/github/georgia-tech-db/evadb/blob/master/tutorials/01-mnist.ipynb>`_.
+Try out EvaDB by experimenting with this introductory notebook.

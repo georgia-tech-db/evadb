@@ -412,7 +412,7 @@ if __name__ == "__main__":
     else:
         # LOG.info("Default fix modified files")
         MERGEBASE = subprocess.check_output(
-            "git merge-base origin/master HEAD", 
+            "git merge-base origin/staging HEAD", 
             shell=True, 
             universal_newlines=True
         ).rstrip()
@@ -447,29 +447,29 @@ if __name__ == "__main__":
         
         #LOG.info("ASPELL")
         for elem in Path(EvaDB_DOCS_DIR).rglob('*.*'):
-            if elem.suffix == ".rst":
+            if elem.suffix == ".rst" or elem.suffix == ".yml":
                 os.system(f"aspell --lang=en --personal='{ignored_words_file}' check {elem}")
 
         os.system(f"aspell --lang=en --personal='{ignored_words_file}' check 'README.md'")
 
         # CODESPELL
         #LOG.info("Codespell")
-        subprocess.check_output("codespell evadb/*.py", 
+        subprocess.check_output("codespell 'evadb/*.py'", 
                 shell=True, 
                 universal_newlines=True)
-        subprocess.check_output("codespell evadb/*/*.py", 
+        subprocess.check_output("codespell 'evadb/*/*.py'", 
                 shell=True, 
                 universal_newlines=True)
-        subprocess.check_output("codespell docs/source/*/*.rst", 
+        subprocess.check_output("codespell 'docs/source/*/*.rst'", 
                 shell=True, 
                 universal_newlines=True)
-        subprocess.check_output("codespell docs/source/*.rst", 
+        subprocess.check_output("codespell 'docs/source/*.rst'", 
                 shell=True, 
                 universal_newlines=True)
-        subprocess.check_output("codespell *.md", 
+        subprocess.check_output("codespell '*.md'", 
                 shell=True, 
                 universal_newlines=True)
-        subprocess.check_output("codespell evadb/*.md", 
+        subprocess.check_output("codespell 'evadb/*.md'", 
                 shell=True, 
                 universal_newlines=True)
 

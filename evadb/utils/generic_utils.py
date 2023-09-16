@@ -63,7 +63,7 @@ def str_to_class(class_path: str):
     return getattr(module, class_name)
 
 
-def load_udf_class_from_file(filepath, classname=None):
+def load_function_class_from_file(filepath, classname=None):
     """
     Load a class from a Python file. If the classname is not specified, the function will check if there is only one class in the file and load that. If there are multiple classes, it will raise an error.
 
@@ -83,7 +83,7 @@ def load_udf_class_from_file(filepath, classname=None):
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
     except Exception as e:
-        err_msg = f"Couldn't load UDF from {filepath} : {str(e)}. This might be due to a missing Python package, or because the UDF implementation file does not exist, or it is not a valid Python file."
+        err_msg = f"Couldn't load function from {filepath} : {str(e)}. This might be due to a missing Python package, or because the function implementation file does not exist, or it is not a valid Python file."
         raise RuntimeError(err_msg)
 
     # Try to load the specified class by name
@@ -98,7 +98,7 @@ def load_udf_class_from_file(filepath, classname=None):
     ]
     if len(classes) != 1:
         raise RuntimeError(
-            f"{filepath} contains {len(classes)} classes, please specify the correct class to load by naming the UDF with the same name in the CREATE query."
+            f"{filepath} contains {len(classes)} classes, please specify the correct class to load by naming the function with the same name in the CREATE query."
         )
     return classes[0]
 
@@ -269,6 +269,16 @@ def try_to_import_ray():
         )
 
 
+def try_to_import_forecast():
+    try:
+        from statsforecast import StatsForecast  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import StatsForecast python package.
+                Please install it with `pip install statsforecast`."""
+        )
+
+
 def is_ray_available() -> bool:
     try:
         try_to_import_ray()
@@ -301,6 +311,14 @@ def try_to_import_ludwig():
 def is_ludwig_available() -> bool:
     try:
         try_to_import_ludwig()
+        return True
+    except ValueError:  # noqa: E722
+        return False
+
+
+def is_forecast_available() -> bool:
+    try:
+        try_to_import_forecast()
         return True
     except ValueError:  # noqa: E722
         return False
@@ -502,3 +520,23 @@ def try_to_import_fitz():
             """Could not import fitz python package.
                 Please install it with `pip install pymupdfs`."""
         )
+
+
+def string_comparison_case_insensitive(string_1, string_2) -> bool:
+    """
+    Case insensitive string comparison for two strings which gives
+    a bool response whether the strings are the same or not
+
+    Arguments:
+        string_1 (str)
+        string_2 (str)
+
+    Returns:
+        True/False (bool): Returns True if the strings are same, false otherwise
+    """
+
+    # Does not make sense in case of null strings
+    if string_1 is None or string_2 is None:
+        return False
+
+    return string_1.lower() == string_2.lower()

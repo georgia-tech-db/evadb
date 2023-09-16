@@ -21,20 +21,25 @@ from sqlalchemy.pool import NullPool
 
 from evadb.utils.generic_utils import is_postgres_uri, parse_config_yml
 
+# Permanent identifier column.
 IDENTIFIER_COLUMN = "_row_id"
+
+# Runtime generated column.
+ROW_NUM_COLUMN = "_row_number"
+ROW_NUM_MAGIC = 0xFFFFFFFF
 
 CATALOG_TABLES = [
     "column_catalog",
     "table_catalog",
     "database_catalog",
-    "depend_column_and_udf_cache",
-    "udf_cache",
-    "udf_catalog",
-    "depend_udf_and_udf_cache",
+    "depend_column_and_function_cache",
+    "function_cache",
+    "function_catalog",
+    "depend_function_and_function_cache",
     "index_catalog",
-    "udfio_catalog",
-    "udf_cost_catalog",
-    "udf_metadata_catalog",
+    "functionio_catalog",
+    "function_cost_catalog",
+    "function_metadata_catalog",
 ]
 
 

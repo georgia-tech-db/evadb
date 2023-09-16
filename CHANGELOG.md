@@ -10,6 +10,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### [Deprecated]
 ### [Removed]
 
+##  [0.3.4] - 2023-09-06
+
+* PR #1057: fix: staging build fix 
+* PR #1056: fix: update notebook outputs 
+* PR #1053: docs: AI powered join 
+* PR #1054: fix: lint for notebooks 
+* PR #1051: fix: create function forecast due to incorrect merging 
+* PR #1047: fix: update udf to function in notebooks and docs 
+* PR #1046: fix: add missing needed file 
+* PR #1043: Hot fix forecasting 
+* PR #1026: Removing quotes from udf_metadata_key 
+* PR #969: Forecasting in EVA 
+* PR #1034: feat: UDF migrates to Function 
+* PR #1035: Fix all doc issues 
+* PR #1029: Fix the link in new-data-source.rst 
+* PR #1023: Feat : Sqlite Database Handler 
+* PR #1019: feat: add CI for MySQL 
+* PR #1025: Add mysql as an available data source into documentation 
+* PR #965: msyql integration added 
+* PR #1018: fix: install pkg and ignore tutorials 
+* PR #1016: Revamp getting started.  
+* PR #1014: Extend the circle ci link check to include README.md 
+* PR #1015: Enable Coverage Check 
+* PR #1008: fix: CREATE TABLE persists entry in the catalog even if the query fails 
+* PR #1007: fix: create Table fails when projecting column from native table 
+* PR #1006: fix: update more verbose message for creating database 
+* PR #991: feat: add use case of LLM on food review running on colab 
+* PR #997: fix: improve error msg 
+* PR #996: Fix all BUILD warning and link validation in the documentation 
+* PR #986: docs: Update README.md 
+* PR #983: doc: fix nav bar 
+
 ##  [0.3.3] - 2023-08-29
 
 * PR #983: doc: fix nav bar 

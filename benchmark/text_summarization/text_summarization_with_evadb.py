@@ -16,10 +16,10 @@ cursor.load('./cnn_news_test.csv', 'cnn_news_test', format="CSV").df()
 cursor.query("DROP UDF IF EXISTS TextSummarizer;").df()
 cursor.query("""CREATE UDF IF NOT EXISTS TextSummarizer
                 TYPE HuggingFace
-                'task' 'summarization'
-                'model' 'sshleifer/distilbart-cnn-12-6'
-                'min_length' 5
-                'max_length' 100;""").df()
+                TASK 'summarization'
+                MODEL 'sshleifer/distilbart-cnn-12-6'
+                MIN_LENGTH 5
+                MAX_LENGTH 100;""").df()
 
 
 cursor.query("DROP TABLE IF EXISTS cnn_news_summary;").df()

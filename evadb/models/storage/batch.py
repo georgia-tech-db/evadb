@@ -266,11 +266,9 @@ class Batch:
         for i, frame_index in enumerate(frames_index):
             assert (
                 frame_index == frames_index[i - 1]
-            ), "Merging of DataFrames with unmatched indice can cause undefined behavior"
+            ), "Merging of DataFrames with unmatched indices can cause undefined behavior"
 
-        new_frames = pd.concat(frames, axis=1, copy=False, ignore_index=False).fillna(
-            method="ffill"
-        )
+        new_frames = pd.concat(frames, axis=1, copy=False, ignore_index=False).ffill()
         if new_frames.columns.duplicated().any():
             logger.debug("Duplicated column name detected {}".format(new_frames))
         return Batch(new_frames)

@@ -24,7 +24,7 @@ from evadb.catalog.models.base_model import BaseModel
 from evadb.catalog.models.column_catalog import ColumnCatalogEntry
 from evadb.catalog.models.table_catalog import TableCatalogEntry
 from evadb.catalog.schema_utils import SchemaUtils
-from evadb.catalog.sql_config import IDENTIFIER_COLUMN
+from evadb.catalog.sql_config import IDENTIFIER_COLUMN, ROW_NUM_COLUMN
 from evadb.database import EvaDBDatabase
 from evadb.models.storage.batch import Batch
 from evadb.parser.table_ref import TableInfo
@@ -67,6 +67,7 @@ class SQLStorageEngine(AbstractStorageEngine):
                 dict_row[col.name] = self._serializer.deserialize(sql_row[col.name])
             else:
                 dict_row[col.name] = sql_row[col.name]
+        dict_row[ROW_NUM_COLUMN] = dict_row[IDENTIFIER_COLUMN]
         return dict_row
 
     def _try_loading_table_via_reflection(self, table_name: str):
@@ -94,7 +95,11 @@ class SQLStorageEngine(AbstractStorageEngine):
 
         # During table creation, assume row_id is automatically handled by
         # the sqlalchemy engine.
-        table_columns = [col for col in table.columns if col.name != IDENTIFIER_COLUMN]
+        table_columns = [
+            col
+            for col in table.columns
+            if (col.name != IDENTIFIER_COLUMN and col.name != ROW_NUM_COLUMN)
+        ]
         sqlalchemy_schema = SchemaUtils.xform_to_sqlalchemy_schema(table_columns)
         attr_dict.update(sqlalchemy_schema)
 
@@ -148,12 +153,18 @@ class SQLStorageEngine(AbstractStorageEngine):
             # the sqlalchemy engine. Another assumption we make here is the
             # updated data need not to take care of row_id.
             table_columns = [
-                col for col in table.columns if col.name != IDENTIFIER_COLUMN
+                col
+                for col in table.columns
+                if (col.name != IDENTIFIER_COLUMN and col.name != ROW_NUM_COLUMN)
             ]
 
             # Todo: validate the data type before inserting into the table
             for record in rows.frames.values:
-                row_data = {col: record[idx] for idx, col in enumerate(columns)}
+                row_data = {
+                    col: record[idx]
+                    for idx, col in enumerate(columns)
+                    if col != ROW_NUM_COLUMN
+                }
                 data.append(self._dict_to_sql_row(row_data, table_columns))
             self._sql_session.execute(table_to_update.insert(), data)
             self._sql_session.commit()

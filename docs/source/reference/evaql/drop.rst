@@ -9,9 +9,17 @@ DROP TABLE
    DROP TABLE DETRACVideo;
 
 
-DROP UDF
---------
+DROP FUNCTION
+-------------
 
 .. code:: mysql
 
-    DROP UDF FastRCNNObjectDetector;
+    DROP FUNCTION FastRCNNObjectDetector;
+
+DROP DATABASE
+-------------
+
+.. code:: mysql
+
+    DROP DATABASE postgres_db;
+    DROP DATABASE IF EXISTS postgres_db;

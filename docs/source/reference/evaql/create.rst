@@ -49,35 +49,71 @@ To create a table, specify the schema of the table.
                    object_id INTEGER
     );
 
-CREATE UDF
-----------
+CREATE INDEX
+------------
 
-To register an user-defined function, specify the implementation details of the UDF.
+The CREATE INDEX statement allows us to construct an EvaDB based index to accelerate semantic based searching.
+The index can be created on either a column of a table directly or outputs from a function running on a column of a table.
+
+.. code:: sql
+   
+   CREATE INDEX [index_name]
+      ON [table_name] ([column_name])
+      USING [index_method]
+
+   CREATE INDEX [index_name]
+      ON [table_name] ([function_name]([column_name]))
+      USING [index_method]
+
+* [index_name] is the name the of constructed index.
+* [table_name] is the name of the table, on which the index is created.
+* [column_name] is the name of one of the column in the table. We currently only support creating index on single column of a table.
+* [function_name] is an optional parameter that can be added if the index needs to be construsted on results of a funciton.
+
+Examples
+~~~~~~~~
+
+.. code:: sql
+
+   CREATE INDEX reddit_index
+   ON reddit_dataset (data)
+   USING FAISS
+
+   CREATE INDEX func_reddit_index
+   ON reddit_dataset (SiftFeatureExtractor(data))
+   USING QDRANT
+
+You can check out :ref:`similarity search use case<image-search>` about how to use index automatically.
+
+CREATE FUNCTION
+---------------
+
+To register an user-defined function, specify the implementation details of the function.
 
 .. code-block:: sql
 
-    CREATE UDF IF NOT EXISTS FastRCNNObjectDetector
+    CREATE FUNCTION IF NOT EXISTS FastRCNNObjectDetector
     INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
     OUTPUT (labels NDARRAY STR(ANYDIM), bboxes NDARRAY FLOAT32(ANYDIM, 4),
             scores NDARRAY FLOAT32(ANYDIM))
     TYPE  Classification
-    IMPL  'evadb/udfs/fastrcnn_object_detector.py';
+    IMPL  'evadb/functions/fastrcnn_object_detector.py';
 
 .. _create-udf-train:
 
-CREATE UDF via Training
------------------------
+CREATE FUNCTION via Training
+----------------------------
 
 To register an user-defined function by training a predication model.
 
 .. code-block:: sql
 
-   CREATE UDF IF NOT EXISTS PredictHouseRent FROM
+   CREATE FUNCTION IF NOT EXISTS PredictHouseRent FROM
    (SELECT * FROM HomeRentals)
    TYPE Ludwig
-   'predict' 'rental_price'
-   'time_list' 120;
-   'tune_for_memory' False;
+   PREDICT 'rental_price'
+   TIME_LIST 120;
+   TUNE_FOR_MEMORY False;
 
 CREATE MATERIALIZED VIEW
 ------------------------

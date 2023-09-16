@@ -15,8 +15,8 @@
 from evadb.expression.abstract_expression import AbstractExpression
 from evadb.optimizer.operators import (
     LogicalCreate,
+    LogicalCreateFunction,
     LogicalCreateIndex,
-    LogicalCreateUDF,
     LogicalDelete,
     LogicalDropObject,
     LogicalExplain,
@@ -38,12 +38,12 @@ from evadb.optimizer.operators import (
     LogicalUnion,
 )
 from evadb.optimizer.optimizer_utils import (
-    column_definition_to_udf_io,
-    metadata_definition_to_udf_metadata,
+    column_definition_to_function_io,
+    metadata_definition_to_function_metadata,
 )
+from evadb.parser.create_function_statement import CreateFunctionStatement
 from evadb.parser.create_index_statement import CreateIndexStatement
 from evadb.parser.create_statement import CreateTableStatement
-from evadb.parser.create_udf_statement import CreateUDFStatement
 from evadb.parser.delete_statement import DeleteTableStatement
 from evadb.parser.drop_object_statement import DropObjectStatement
 from evadb.parser.explain_statement import ExplainStatement
@@ -54,7 +54,7 @@ from evadb.parser.select_statement import SelectStatement
 from evadb.parser.show_statement import ShowStatement
 from evadb.parser.statement import AbstractStatement
 from evadb.parser.table_ref import TableRef
-from evadb.parser.types import UDFType
+from evadb.parser.types import FunctionType
 from evadb.utils.logging_manager import logger
 
 
@@ -76,7 +76,7 @@ class StatementToPlanConverter:
 
         elif table_ref.is_table_valued_expr():
             tve = table_ref.table_valued_expr
-            if tve.func_expr.name.lower() == str(UDFType.EXTRACT_OBJECT).lower():
+            if tve.func_expr.name.lower() == str(FunctionType.EXTRACT_OBJECT).lower():
                 self._plan = LogicalExtractObject(
                     detector=tve.func_expr.children[1],
                     tracker=tve.func_expr.children[2],
@@ -120,30 +120,28 @@ class StatementToPlanConverter:
         """
 
         table_ref = statement.from_table
-        if table_ref is None:
-            logger.error("From entry missing in select statement")
-            return None
+        if table_ref is not None:
+            self.visit_table_ref(table_ref)
 
-        self.visit_table_ref(table_ref)
+            # Filter Operator
+            predicate = statement.where_clause
+            if predicate is not None:
+                self._visit_select_predicate(predicate)
 
-        # Filter Operator
-        predicate = statement.where_clause
-        if predicate is not None:
-            self._visit_select_predicate(predicate)
+            # TODO ACTION: Group By
+
+            if statement.groupby_clause is not None:
+                self._visit_groupby(statement.groupby_clause)
+
+            if statement.orderby_list is not None:
+                self._visit_orderby(statement.orderby_list)
+
+            if statement.limit_count is not None:
+                self._visit_limit(statement.limit_count)
 
         # union
         if statement.union_link is not None:
             self._visit_union(statement.union_link, statement.union_all)
-
-        # TODO ACTION: Group By
-        if statement.groupby_clause is not None:
-            self._visit_groupby(statement.groupby_clause)
-
-        if statement.orderby_list is not None:
-            self._visit_orderby(statement.orderby_list)
-
-        if statement.limit_count is not None:
-            self._visit_limit(statement.limit_count)
 
         # Projection operator
         select_columns = statement.target_list
@@ -182,7 +180,8 @@ class StatementToPlanConverter:
 
     def _visit_projection(self, select_columns):
         projection_opr = LogicalProject(select_columns)
-        projection_opr.append_child(self._plan)
+        if self._plan is not None:
+            projection_opr.append_child(self._plan)
         self._plan = projection_opr
 
     def _visit_select_predicate(self, predicate: AbstractExpression):
@@ -254,31 +253,33 @@ class StatementToPlanConverter:
         rename_opr = LogicalRename(statement.old_table_ref, statement.new_table_name)
         self._plan = rename_opr
 
-    def visit_create_udf(self, statement: CreateUDFStatement):
-        """Converter for parsed create udf statement
+    def visit_create_function(self, statement: CreateFunctionStatement):
+        """Converter for parsed create function statement
 
         Arguments:
-            statement {CreateUDFStatement} - - Create UDF Statement
+            statement {CreateFunctionStatement} - - CreateFunctionStatement
         """
-        annotated_inputs = column_definition_to_udf_io(statement.inputs, True)
-        annotated_outputs = column_definition_to_udf_io(statement.outputs, False)
-        annotated_metadata = metadata_definition_to_udf_metadata(statement.metadata)
+        annotated_inputs = column_definition_to_function_io(statement.inputs, True)
+        annotated_outputs = column_definition_to_function_io(statement.outputs, False)
+        annotated_metadata = metadata_definition_to_function_metadata(
+            statement.metadata
+        )
 
-        create_udf_opr = LogicalCreateUDF(
+        create_function_opr = LogicalCreateFunction(
             statement.name,
             statement.if_not_exists,
             annotated_inputs,
             annotated_outputs,
             statement.impl_path,
-            statement.udf_type,
+            statement.function_type,
             annotated_metadata,
         )
 
         if statement.query is not None:
             self.visit_select(statement.query)
-            create_udf_opr.append_child(self._plan)
+            create_function_opr.append_child(self._plan)
 
-        self._plan = create_udf_opr
+        self._plan = create_function_opr
 
     def visit_drop_object(self, statement: DropObjectStatement):
         self._plan = LogicalDropObject(
@@ -309,10 +310,11 @@ class StatementToPlanConverter:
     def visit_create_index(self, statement: CreateIndexStatement):
         create_index_opr = LogicalCreateIndex(
             statement.name,
+            statement.if_not_exists,
             statement.table_ref,
             statement.col_list,
             statement.vector_store_type,
-            statement.udf_func,
+            statement.function,
         )
         self._plan = create_index_opr
 
@@ -339,8 +341,8 @@ class StatementToPlanConverter:
             self.visit_create(statement)
         elif isinstance(statement, RenameTableStatement):
             self.visit_rename(statement)
-        elif isinstance(statement, CreateUDFStatement):
-            self.visit_create_udf(statement)
+        elif isinstance(statement, CreateFunctionStatement):
+            self.visit_create_function(statement)
         elif isinstance(statement, DropObjectStatement):
             self.visit_drop_object(statement)
         elif isinstance(statement, LoadDataStatement):

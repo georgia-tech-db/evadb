@@ -42,13 +42,13 @@ if sys.version_info >= (3, 8):
             server_reader = asyncio.StreamReader()
             server_writer = MagicMock()
 
-            server_reader.feed_data(b"SHOW UDFS;\n")
+            server_reader.feed_data(b"SHOW FUNCTIONS;\n")
             server_reader.feed_data(b"EXIT;\n")
 
             mock_open.return_value = (server_reader, server_writer)
 
             stdin_reader = asyncio.StreamReader()
-            stdin_reader.feed_data(b"SHOW UDFS;\n")
+            stdin_reader.feed_data(b"SHOW FUNCTIONS;\n")
             stdin_reader.feed_data(b"EXIT;\n")
             stdin_reader.feed_eof()
 
@@ -65,8 +65,6 @@ if sys.version_info >= (3, 8):
         @macos_skip_marker
         @patch("asyncio.events.AbstractEventLoop.connect_read_pipe")
         async def test_create_stdin_reader(self, mock_read_pipe):
-            sys.stdin = MagicMock()
-
             try:
                 stdin_reader = await create_stdin_reader()
                 self.assertNotEqual(stdin_reader, None)

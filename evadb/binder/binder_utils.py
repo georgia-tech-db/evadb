@@ -58,13 +58,12 @@ def check_data_source_and_table_are_valid(
     db_catalog_entry = catalog.get_database_catalog_entry(database_name)
 
     if db_catalog_entry is not None:
-        handler = get_database_handler(
+        with get_database_handler(
             db_catalog_entry.engine, **db_catalog_entry.params
-        )
-        handler.connect()
+        ) as handler:
+            # Get table definition.
+            resp = handler.get_tables()
 
-        # Get table definition.
-        resp = handler.get_tables()
         if resp.error is not None:
             error = "There is no table in data source {}. Create the table using native query.".format(
                 database_name,
@@ -90,7 +89,7 @@ def check_data_source_and_table_are_valid(
 
 
 def create_table_catalog_entry_for_data_source(
-    table_name: str, column_info: pd.DataFrame
+    table_name: str, database_name: str, column_info: pd.DataFrame
 ):
     column_name_list = list(column_info["name"])
     column_type_list = [
@@ -99,7 +98,7 @@ def create_table_catalog_entry_for_data_source(
     ]
     column_list = []
     for name, dtype in zip(column_name_list, column_type_list):
-        column_list.append(ColumnCatalogEntry(name, dtype))
+        column_list.append(ColumnCatalogEntry(name.lower(), dtype))
 
     # Assemble table.
     table_catalog_entry = TableCatalogEntry(
@@ -107,6 +106,7 @@ def create_table_catalog_entry_for_data_source(
         file_url=None,
         table_type=TableType.NATIVE_DATA,
         columns=column_list,
+        database_name=database_name,
     )
     return table_catalog_entry
 
@@ -134,14 +134,14 @@ def bind_native_table_info(catalog: CatalogManager, table_info: TableInfo):
     )
 
     db_catalog_entry = catalog.get_database_catalog_entry(table_info.database_name)
-    handler = get_database_handler(db_catalog_entry.engine, **db_catalog_entry.params)
-    handler.connect()
-
-    # Assemble columns.
-    column_df = handler.get_columns(table_info.table_name).data
-    table_info.table_obj = create_table_catalog_entry_for_data_source(
-        table_info.table_name, column_df
-    )
+    with get_database_handler(
+        db_catalog_entry.engine, **db_catalog_entry.params
+    ) as handler:
+        # Assemble columns.
+        column_df = handler.get_columns(table_info.table_name).data
+        table_info.table_obj = create_table_catalog_entry_for_data_source(
+            table_info.table_name, table_info.database_name, column_df
+        )
 
 
 def bind_evadb_table_info(catalog: CatalogManager, table_info: TableInfo):
@@ -298,10 +298,10 @@ def handle_bind_extract_object_function(
     binder_context.bind(tracker)
     # append the bound output of detector
     for obj in detector.output_objs:
-        col_alias = "{}.{}".format(obj.udf_name.lower(), obj.name.lower())
+        col_alias = "{}.{}".format(obj.function_name.lower(), obj.name.lower())
         child = TupleValueExpression(
             obj.name,
-            table_alias=obj.udf_name.lower(),
+            table_alias=obj.function_name.lower(),
             col_object=obj,
             col_alias=col_alias,
         )
@@ -326,7 +326,7 @@ def get_column_definition_from_select_target_list(
 ) -> List[ColumnDefinition]:
     """
     This function is used by CREATE TABLE AS (SELECT...) and
-    CREATE UDF FROM (SELECT ...) to get the output objs from the
+    CREATE FUNCTION FROM (SELECT ...) to get the output objs from the
     child SELECT statement.
     """
     binded_col_list = []
@@ -339,7 +339,7 @@ def get_column_definition_from_select_target_list(
         for col_name, output_obj in output_objs:
             binded_col_list.append(
                 ColumnDefinition(
-                    col_name,
+                    col_name.lower(),
                     output_obj.type,
                     output_obj.array_type,
                     output_obj.array_dimensions,
@@ -352,7 +352,7 @@ def drop_row_id_from_target_list(
     target_list: List[AbstractExpression],
 ) -> List[AbstractExpression]:
     """
-    This function is intended to be used by CREATE UDF FROM (SELECT * FROM ...) and CREATE TABLE AS SELECT * FROM ... to exclude the row_id column.
+    This function is intended to be used by CREATE FUNCTION FROM (SELECT * FROM ...) and CREATE TABLE AS SELECT * FROM ... to exclude the row_id column.
     """
     filtered_list = []
     for expr in target_list:

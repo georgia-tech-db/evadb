@@ -39,17 +39,17 @@ class CascadeOptimizer(unittest.TestCase):
         shutdown_ray()
         file_remove("dummy.avi")
 
-    def test_logical_to_physical_udf(self):
+    def test_logical_to_physical_function(self):
         load_query = f"LOAD VIDEO '{self.video_file_path}' INTO MyVideo;"
         execute_query_fetch_all(self.evadb, load_query)
 
-        create_udf_query = """CREATE UDF DummyObjectDetector
+        create_function_query = """CREATE FUNCTION DummyObjectDetector
                   INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
                   OUTPUT (label NDARRAY STR(10))
                   TYPE  Classification
                   IMPL  'test/util.py';
         """
-        execute_query_fetch_all(self.evadb, create_udf_query)
+        execute_query_fetch_all(self.evadb, create_function_query)
 
         select_query = """SELECT id, DummyObjectDetector(data)
                     FROM MyVideo

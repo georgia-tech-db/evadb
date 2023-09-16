@@ -26,21 +26,27 @@ class CreateIndexPlan(AbstractPlan):
     def __init__(
         self,
         name: str,
+        if_not_exists: bool,
         table_ref: TableRef,
         col_list: List[ColumnDefinition],
         vector_store_type: VectorStoreType,
-        udf_func: FunctionExpression = None,
+        function: FunctionExpression = None,
     ):
         super().__init__(PlanOprType.CREATE_INDEX)
         self._name = name
+        self._if_not_exists = if_not_exists
         self._table_ref = table_ref
         self._col_list = col_list
         self._vector_store_type = vector_store_type
-        self._udf_func = udf_func
+        self._function = function
 
     @property
     def name(self):
         return self._name
+
+    @property
+    def if_not_exists(self):
+        return self._if_not_exists
 
     @property
     def table_ref(self):
@@ -55,8 +61,8 @@ class CreateIndexPlan(AbstractPlan):
         return self._vector_store_type
 
     @property
-    def udf_func(self):
-        return self._udf_func
+    def function(self):
+        return self._function
 
     def __str__(self):
         return "CreateIndexPlan(name={}, \
@@ -68,7 +74,7 @@ class CreateIndexPlan(AbstractPlan):
             self._table_ref,
             tuple(self._col_list),
             self._vector_store_type,
-            "" if not self._udf_func else "udf_func={}".format(self._udf_func),
+            "" if not self._function else "function={}".format(self._function),
         )
 
     def __hash__(self) -> int:
@@ -76,9 +82,10 @@ class CreateIndexPlan(AbstractPlan):
             (
                 super().__hash__(),
                 self.name,
+                self.if_not_exists,
                 self.table_ref,
                 tuple(self.col_list),
                 self.vector_store_type,
-                self.udf_func,
+                self.function,
             )
         )

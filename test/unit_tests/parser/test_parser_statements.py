@@ -35,7 +35,7 @@ class ParserStatementTests(unittest.TestCase):
             "RENAME TABLE student TO student_info",
             "DROP TABLE IF EXISTS student_info",
             "DROP TABLE student_info",
-            "DROP UDF FastRCNN;",
+            "DROP FUNCTION FastRCNN;",
             "SELECT MIN(id), MAX(id), SUM(id) FROM ABC",
             "SELECT CLASS FROM TAIPAI \
                 WHERE (CLASS = 'VAN' AND REDNESS < 300)  OR REDNESS > 500;",
@@ -71,16 +71,17 @@ class ParserStatementTests(unittest.TestCase):
             ON table3.a = table1.a WHERE table1.a <= 5""",
             """SELECT frame FROM MyVideo JOIN LATERAL
                             ObjectDet(frame) AS OD;""",
-            """CREATE UDF FaceDetector
+            """CREATE FUNCTION FaceDetector
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
                   OUTPUT (bboxes NDARRAY FLOAT32(ANYDIM, 4),
                           scores NDARRAY FLOAT32(ANYDIM))
                   TYPE  FaceDetection
-                  IMPL  'evadb/udfs/face_detector.py';
+                  IMPL  'evadb/functions/face_detector.py';
             """,
             "SHOW TABLES;",
-            "SHOW UDFS;",
+            "SHOW FUNCTIONS;",
             "EXPLAIN SELECT a FROM foo;",
+            "SELECT HomeRentalForecast(12);",
             """SELECT data FROM MyVideo WHERE id < 5
                     ORDER BY Similarity(FeatureExtractor(Open("abc.jpg")),
                                         FeatureExtractor(data))
@@ -99,7 +100,7 @@ class ParserStatementTests(unittest.TestCase):
             "Rename Table STUDENT to student_info",
             "drop table if exists Student_info",
             "drop table Student_Info",
-            "Drop udf FASTRCNN;",
+            "Drop function FASTRCNN;",
             "Select min(id), max(Id), Sum(Id) from ABC",
             "select CLASS from Taipai where (Class = 'VAN' and REDNESS < 300) or Redness > 500;",
             "select class, REDNESS from TAIPAI Union all select Class, redness from Shanghai;",
@@ -131,12 +132,12 @@ class ParserStatementTests(unittest.TestCase):
                 On Table3.A = Table1.A where Table1.a <= 5""",
             """Select Frame from MyVideo Join Lateral
                 ObjectDet(Frame) as OD;""",
-            """Create UDF FaceDetector
+            """Create FUNCTION FaceDetector
                 Input (Frame ndArray uint8(3, anydim, anydim))
                 Output (bboxes ndArray float32(anydim, 4),
                 scores ndArray float32(ANYdim))
                 Type FaceDetection
-                Impl 'evadb/udfs/face_detector.py';
+                Impl 'evadb/functions/face_detector.py';
             """,
             """CREATE DATABASE example_db
                 WITH ENGINE = "postgres",

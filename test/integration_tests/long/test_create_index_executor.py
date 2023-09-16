@@ -15,13 +15,14 @@
 import unittest
 from pathlib import Path
 from test.markers import macos_skip_marker
-from test.util import get_evadb_for_testing, load_udfs_for_testing
+from test.util import get_evadb_for_testing, load_functions_for_testing
 
 import numpy as np
 import pandas as pd
 import pytest
 
 from evadb.catalog.catalog_type import VectorStoreType
+from evadb.executor.executor_utils import ExecutorError
 from evadb.models.storage.batch import Batch
 from evadb.server.command_handler import execute_query_fetch_all
 from evadb.storage.storage_engine import StorageEngine
@@ -39,7 +40,7 @@ class CreateIndexTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.evadb = get_evadb_for_testing()
-        load_udfs_for_testing(cls.evadb, mode="debug")
+        load_functions_for_testing(cls.evadb, mode="debug")
 
         # Create feature vector table and raw input table.
         feat1 = np.array([[0, 0, 0]]).astype(np.float32)
@@ -91,11 +92,44 @@ class CreateIndexTest(unittest.TestCase):
         storage_engine.write(input_tb_entry, input_batch_data)
 
     @classmethod
+    def tearDown(cls):
+        query = "DROP INDEX testCreateIndexName;"
+        execute_query_fetch_all(cls.evadb, query)
+
+    @classmethod
     def tearDownClass(cls):
         query = "DROP TABLE testCreateIndexFeatTable;"
         execute_query_fetch_all(cls.evadb, query)
         query = "DROP TABLE testCreateIndexInputTable;"
         execute_query_fetch_all(cls.evadb, query)
+
+    @macos_skip_marker
+    def test_index_already_exist(self):
+        query = "CREATE INDEX testCreateIndexName ON testCreateIndexFeatTable (feat) USING FAISS;"
+        execute_query_fetch_all(self.evadb, query)
+
+        self.assertEqual(
+            self.evadb.catalog()
+            .get_index_catalog_entry_by_name("testCreateIndexName")
+            .type,
+            VectorStoreType.FAISS,
+        )
+
+        # Should throw error without if_not_exists.
+        query = "CREATE INDEX testCreateIndexName ON testCreateIndexFeatTable (feat) USING FAISS;"
+        with self.assertRaises(ExecutorError):
+            execute_query_fetch_all(self.evadb, query)
+
+        # Should not create index but without throwing errors.
+        query = "CREATE INDEX IF NOT EXISTS testCreateIndexName ON testCreateIndexFeatTable (feat) USING QDRANT;"
+        execute_query_fetch_all(self.evadb, query)
+
+        self.assertEqual(
+            self.evadb.catalog()
+            .get_index_catalog_entry_by_name("testCreateIndexName")
+            .type,
+            VectorStoreType.FAISS,
+        )
 
     @macos_skip_marker
     def test_should_create_index_faiss(self):
@@ -112,7 +146,7 @@ class CreateIndexTest(unittest.TestCase):
             self._index_save_path(),
         )
         self.assertEqual(
-            index_catalog_entry.udf_signature,
+            index_catalog_entry.function_signature,
             None,
         )
 
@@ -133,15 +167,12 @@ class CreateIndexTest(unittest.TestCase):
         self.assertEqual(distance[0][0], 0)
         self.assertEqual(row_id[0][0], 1)
 
-        # Cleanup.
-        self.evadb.catalog().drop_index_catalog_entry("testCreateIndexName")
-
     @macos_skip_marker
-    def test_should_create_index_with_udf(self):
+    def test_should_create_index_with_function(self):
         query = "CREATE INDEX testCreateIndexName ON testCreateIndexInputTable (DummyFeatureExtractor(input)) USING FAISS;"
         execute_query_fetch_all(self.evadb, query)
 
-        # Test index udf signature.
+        # Test index function signature.
         index_catalog_entry = self.evadb.catalog().get_index_catalog_entry_by_name(
             "testCreateIndexName"
         )
@@ -169,6 +200,3 @@ class CreateIndexTest(unittest.TestCase):
         distance, row_id = index.search(np.array([[0, 0, 0]]).astype(np.float32), 1)
         self.assertEqual(distance[0][0], 0)
         self.assertEqual(row_id[0][0], 1)
-
-        # Cleanup.
-        self.evadb.catalog().drop_index_catalog_entry("testCreateIndexName")

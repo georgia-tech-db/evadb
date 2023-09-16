@@ -34,7 +34,7 @@ class StatementType(EvaDBEnum):
     DROP_OBJECT  # noqa: F821
     INSERT  # noqa: F821
     DELETE  # noqa: F821
-    CREATE_UDF  # noqa: F821
+    CREATE_FUNCTION  # noqa: F821
     LOAD_DATA  # noqa: F821
     SHOW  # noqa: F821
     EXPLAIN  # noqa: F821
@@ -67,15 +67,16 @@ class FileFormatType(EvaDBEnum):
 
 
 class ShowType(EvaDBEnum):
-    UDFS  # noqa: F821
+    FUNCTIONS  # noqa: F821
     TABLES  # noqa: F821
 
 
-class UDFType(EvaDBEnum):
+class FunctionType(EvaDBEnum):
     EXTRACT_OBJECT  # noqa: F821
 
 
 class ObjectType(EvaDBEnum):
     TABLE  # noqa: F821
-    UDF  # noqa: F821
+    FUNCTION  # noqa: F821
     INDEX  # noqa: F821
+    DATABASE  # noqa: F821
