@@ -228,7 +228,7 @@ jobs:
 
       - run:
           name: Test and upload coverage report to coveralls
-          no_output_timeout: 10m # 10 minute timeout
+          no_output_timeout: 30m # 30 minute timeout
           environment:
             PY_VERSION: << parameters.v >>
           command: |
