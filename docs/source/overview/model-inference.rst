@@ -59,6 +59,12 @@ EvaDB also provides specialized array operators to construct queries. Go over bu
    SAMPLE 5 
    GROUP BY '16 frames';
 
+Here is another example grouping paragraphs from PDFs:
+
+.. code-block:: sql
+
+   SELECT SEGMENT(data) FROM MyPDFs GROUP BY '10 paragraphs';
+
 5. Order By
    
    Models (typically feature extractors) can also be used in the ``ORDER BY`` for embedding-based similarity search. EvaDB also has index support to facilitate this type of queries.
