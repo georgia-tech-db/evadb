@@ -61,7 +61,8 @@ EvaDB also provides specialized array operators to construct queries. Go over bu
 
 5. Order By
    
-   Models (typically feature extractors) can also be used in the ``ORDER BY`` for embedding-based similarity search. EvaDB also has index support to facilitate this type of queries. In the below example, we use the `SentenceFeatureExtractor <https://github.com/georgia-tech-db/evadb/blob/staging/evadb/functions/sentence_feature_extractor.py>`_ to answer the question `When was the NATO created` from a collection of pdfs as the knowledge base.
+   Models (typically feature extractors) can also be used in the ``ORDER BY`` for embedding-based similarity search. EvaDB also has index support to facilitate this type of queries.
+   In the below examples, we use the `SentenceFeatureExtractor <https://github.com/georgia-tech-db/evadb/blob/staging/evadb/functions/sentence_feature_extractor.py>`_ to find relevant context `When was the NATO created` from a collection of pdfs as the knowledge base. Go over `PrivateGPT notebook <https://github.com/georgia-tech-db/evadb/blob/staging/tutorials/13-privategpt.ipynb>`_ for more details.
 
 .. code-block:: sql
 
@@ -69,6 +70,16 @@ EvaDB also provides specialized array operators to construct queries. Go over bu
    ORDER BY Similarity(
        SentenceFeatureExtractor('When was the NATO created?'),
        SentenceFeatureExtractor(data)
+   );
+
+We can also use the `SiftFeatureExtractor <https://github.com/georgia-tech-db/evadb/blob/staging/evadb/functions/sift_feature_extractor.py>`_ to find similar images from a collection of images as the gallery. Go over :ref:`image-search` for more details.
+
+.. code-block:: sql
+
+   SELECT name FROM reddit_dataset
+   ORDER BY Similarity(
+       SiftFeatureExtractor(Open('reddit-images/cat.jpg')),
+       SiftFeatureExtractor(data)
    );
 
 
