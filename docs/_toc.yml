@@ -9,6 +9,8 @@ parts:
             title: Installation Options
       - file: source/overview/connect-to-database
         title: Connect to Database
+      - file: source/overview/model-inference
+        title: Model inference
       - file: source/overview/concepts
         title: Concepts
         sections:
@@ -77,6 +79,9 @@ parts:
             title: YOLO 
           - file: source/reference/ai/custom
             title: Custom Model
+
+      - file: source/reference/optimizations
+        title: Optimizations
         
       # - file: source/reference/io
       #   title: IO Descriptors
