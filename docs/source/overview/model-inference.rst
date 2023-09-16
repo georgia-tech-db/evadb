@@ -50,7 +50,7 @@ EvaDB also provides specialized array operators to construct queries. Go over bu
 
 4. Aggregate Functions
 
-   Models or user-defined functions can also act as aggregate functions for ``GROUP BY``. Typical usecases are action recognition. 
+   Models can also be executed on a sequence of frames, particularly for action detection. This can be accomplished by utilizing ``GROUP BY`` and ``SEGMENT`` to concatenate consecutive frames into a single segment.
 
 .. code-block:: sql
 
