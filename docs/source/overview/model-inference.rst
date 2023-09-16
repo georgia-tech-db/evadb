@@ -44,7 +44,7 @@ EvaDB also provides specialized array operators to construct queries. Go over bu
    
 .. code-block:: sql
    
-   SELECT EmotionDetector(Crop(data, bbox))
+   SELECT EmotionDetector(Crop(data, Face.bbox))
    FROM movie
    LATERAL JOIN UNNEST(FaceDetector(data)) AS Face(bbox, conf);
 
