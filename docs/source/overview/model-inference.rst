@@ -11,7 +11,7 @@ In EvaDB, every model is a function. We can compose SQL queries using functions 
 
 1. Projection
 
-   The most common usecases are model inference in projections. For example, we can use the `MnistImageClassifier <https://github.com/georgia-tech-db/evadb/blob/staging/evadb/functions/mnist_image_classifier.py>`_ to indefity numbers from the `MINST <https://www.dropbox.com/s/yxljxz6zxoqu54v/mnist.mp4>`_ video. 
+   The most common usecases are model inference in projections. For example, we can use the `MnistImageClassifier <https://github.com/georgia-tech-db/evadb/blob/staging/evadb/functions/mnist_image_classifier.py>`_ to identify numbers from the `MINST <https://www.dropbox.com/s/yxljxz6zxoqu54v/mnist.mp4>`_ video. 
 
 .. code-block:: sql
 
@@ -19,13 +19,20 @@ In EvaDB, every model is a function. We can compose SQL queries using functions 
 
 2. Selection
 
-   Another common usecases are model inference in selections. In the below example, we use ``TextSummarizer`` and ``TextClassifier`` from :ref:`HuggingFace<hf>` to summarize the negaitve food reviews.
+   Another common usecases are model inference in selections. In the below example, we use ``TextSummarizer`` and ``TextClassifier`` from :ref:`HuggingFace<hf>` to summarize the negative food reviews.
 
 .. code-block:: sql
 
    SELECT TextSummarizer(data)
    FROM food_reviews
    WHERE TextClassifier(data).label = 'NEGATIVE';
+
+EvaDB also provides specialized array operators to construct queries. Go over built-in utility operators and functions for all of them. Below is an example of ``CONTAIN``:
+
+.. code-block:: sql
+
+   SELECT id FROM camera_videos 
+   WHERE ObjectDetector(data).labels @> ['person', 'car'];
 
 3. Lateral Join
 
