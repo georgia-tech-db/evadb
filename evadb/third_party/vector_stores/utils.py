@@ -14,8 +14,8 @@
 # limitations under the License.
 from evadb.catalog.catalog_type import VectorStoreType
 from evadb.third_party.vector_stores.faiss import FaissVectorStore
-from evadb.third_party.vector_stores.qdrant import QdrantVectorStore
 from evadb.third_party.vector_stores.pinecone import PineconeVectorStore
+from evadb.third_party.vector_stores.qdrant import QdrantVectorStore
 from evadb.utils.generic_utils import validate_kwargs
 
 
@@ -35,7 +35,7 @@ class VectorStoreFactory:
 
             validate_kwargs(kwargs, required_params, required_params)
             return QdrantVectorStore(index_name, **kwargs)
-        
+
         elif vector_store_type == VectorStoreType.PINECONE:
             from evadb.third_party.vector_stores.pinecone import required_params
 
