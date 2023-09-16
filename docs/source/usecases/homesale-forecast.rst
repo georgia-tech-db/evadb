@@ -72,7 +72,10 @@ Particularly, we are interested in the price of the properties that have three b
   ID 'propertytype'
   FREQUENCY 'W';
 
-While running this query, EvaDB will train different models respectively for different property types (i.e., house, unit). Here is the query's output ``DataFrame``:
+In the ``home_sales`` dataset, we have two different property types, houses and units, and price gap between them are large. 
+We'd like to ask EvaDB to analyze the price of houses and units independently. 
+To do so, we specify the ``propertytype`` column as the ``ID `` of the time series data, which represents an identifier for the series.
+Here is the query's output ``DataFrame``:
 
 .. note::
 
@@ -107,8 +110,6 @@ The input of the trained model is the horizon (i.e., week in this case), the ste
    |                          unit |                2018-12-30 |                 409601 |
    |                          unit |                2019-01-06 |                 402112 |
    +-------------------------------+---------------------------+------------------------+
-
-In the previous ``CREATE FUNCTION`` query, we specified the ``propertytype`` as the ID column because the price gap between houses and units can be large. Accordingly, EvaDB will train independent time-series models for house and unit to capture the difference as shown in the above output. 
 
 We can further use ``ORDER BY`` to find out which month in the following year has the lower price.
 
