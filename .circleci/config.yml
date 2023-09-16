@@ -56,6 +56,20 @@ workflows:
                 ignore: 
                   - master
                   - staging
+
+        ################################
+        #### SHORT THIRDPARTY TESTS: PR
+        ################################
+        ################################
+        - Linux:
+            name: Short Third Party Test | v3.10 | Linux
+            mode: SHORT THIRDPARTY TEST
+            filters:
+              branches:
+                ignore: 
+                  - master
+                  - staging
+
         ################################
         #### LONG INTEGRATION TESTS:
         #### Staging
