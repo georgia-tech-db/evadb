@@ -488,6 +488,14 @@ def try_to_import_qdrant_client():
                 Please install it with `pip install qdrant_client`."""
         )
 
+def try_to_import_pinecone_client():
+    try:
+        import pinecone # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import pinecone_client python package.
+                Please install it with 'pip install pinecone_client`."""
+        )
 
 def is_qdrant_available() -> bool:
     try:

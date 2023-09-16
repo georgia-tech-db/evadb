@@ -25,3 +25,5 @@ experimental:
 
 third_party:
   OPENAI_KEY: ""
+  PINECONE_API_KEY: "9c7eb119-02f2-44ce-ae88-77f3afaa06e4"
+  PINECONE_ENV: "gcp-starter"

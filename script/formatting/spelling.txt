@@ -556,6 +556,8 @@ ParserStatementTests
 ParserTests
 PermissionDenied
 PickleSerializer
+PINECONE
+Pinecone
 PlanExecutor
 PlanExecutorTest
 PlanGenerator

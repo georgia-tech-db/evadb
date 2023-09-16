@@ -53,7 +53,7 @@ function_metadata_key: uid
 
 function_metadata_value: string_literal | decimal_literal
 
-vector_store_type: USING (FAISS | QDRANT)
+vector_store_type: USING (FAISS | QDRANT | PINECONE)
 
 index_elem: ("(" uid_list ")"
           | "(" function_call ")")
@@ -412,6 +412,7 @@ PDF:                  "PDF"i
 HNSW:                                "HNSW"i
 FAISS:                               "FAISS"i
 QDRANT:                              "QDRANT"i
+PINECONE:                            "PINECONE"i
 
 // Computer vision tasks
 
