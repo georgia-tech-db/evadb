@@ -148,8 +148,4 @@ Now that you have implemented your function, we need to register it as a functio
 
   .. code-block:: sql
 
-<<<<<<< HEAD:docs/source/reference/udfs/custom.rst
-      DROP UDF IF EXISTS YoloDecorators;
-=======
       DROP FUNCTION IF EXISTS YoloDecorators;
->>>>>>> staging:docs/source/reference/ai/custom.rst
