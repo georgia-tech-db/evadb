@@ -76,7 +76,7 @@ While running this query, EvaDB will train different models respectively for dif
 
 .. note::
 
-   Go over :ref:`forecast` page on fine tuning the forecast model.
+   Go over :ref:`forecast` page on exploring all configurable paramters for the forecast model.
 
 .. code-block:: 
 
@@ -129,7 +129,4 @@ Here is the query's output:
    |                  unit |        2019-03-10 |         340584 |
    +-----------------------|-------------------|----------------|
    
-
-.. include:: ../shared/nlp.rst
-
 .. include:: ../shared/footer.rst
