@@ -93,7 +93,7 @@ Next we use the trained ``HomeSaleForecast`` to predict the home sale price for 
 
    SELECT HomeSaleForecast(3);
 
-The input of the trained model is the horizon, the steps we want to forecast in the future. Here is the query's output ``DataFrame``:
+The input of the trained model is the horizon (i.e., week in this case), the steps we want to forecast in the future. Here is the query's output ``DataFrame``:
 
 .. code-block::
 
