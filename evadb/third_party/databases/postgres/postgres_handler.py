@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import numpy as np
 import pandas as pd
 import psycopg2
 
@@ -106,9 +107,11 @@ class PostgresHandler(DBHandler):
             return DBHandlerResponse(data=None, error="Not connected to the database.")
 
         try:
-            query = f"SELECT column_name as name, data_type as dtype FROM information_schema.columns WHERE table_name='{table_name}'"
+            query = f"SELECT column_name as name, data_type as dtype, udt_name FROM information_schema.columns WHERE table_name='{table_name}'"
             columns_df = pd.read_sql_query(query, self.connection)
-            columns_df["dtype"] = columns_df["dtype"].apply(self._pg_to_python_types)
+            columns_df["dtype"] = columns_df.apply(
+                lambda x: self._pg_to_python_types(x["dtype"], x["udt_name"]), axis=1
+            )
             return DBHandlerResponse(data=columns_df)
         except psycopg2.Error as e:
             return DBHandlerResponse(data=None, error=str(e))
@@ -154,8 +157,8 @@ class PostgresHandler(DBHandler):
         except psycopg2.Error as e:
             return DBHandlerResponse(data=None, error=str(e))
 
-    def _pg_to_python_types(self, pg_type: str):
-        mapping = {
+    def _pg_to_python_types(self, pg_type: str, udt_name: str):
+        primitive_type_mapping = {
             "integer": int,
             "bigint": int,
             "smallint": int,
@@ -169,8 +172,16 @@ class PostgresHandler(DBHandler):
             # Add more mappings as needed
         }
 
-        if pg_type in mapping:
-            return mapping[pg_type]
+        user_defined_type_mapping = {
+            "vector": np.ndarray
+            # Handle user defined types constructed by Postgres extension.
+        }
+
+        print("Type conversion", pg_type, udt_name)
+        if pg_type in primitive_type_mapping:
+            return primitive_type_mapping[pg_type]
+        elif pg_type == "USER-DEFINED" and udt_name in user_defined_type_mapping:
+            return user_defined_type_mapping[udt_name]
         else:
             raise Exception(
                 f"Unsupported column {pg_type} encountered in the postgres table. Please raise a feature request!"
