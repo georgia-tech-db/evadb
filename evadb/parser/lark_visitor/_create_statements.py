@@ -21,7 +21,6 @@ from evadb.parser.create_index_statement import CreateIndexStatement
 from evadb.parser.create_statement import (
     ColConstraintInfo,
     ColumnDefinition,
-    CreateApplicationStatement,
     CreateDatabaseStatement,
     CreateTableStatement,
 )
@@ -298,7 +297,7 @@ class CreateDatabase:
                     engine, param_dict = self.visit(child)
 
         create_stmt = CreateDatabaseStatement(
-            database_name, if_not_exists, engine, param_dict
+            database_name, if_not_exists, engine, param_dict, "Database"
         )
         return create_stmt
 
@@ -317,7 +316,7 @@ class CreateDatabase:
 
 class CreateApplication:
     def create_application(self, tree):
-        name = None
+        app_name = None
         if_not_exists = False
         engine = None
         param_dict = {}
@@ -327,12 +326,12 @@ class CreateApplication:
                 if child.data == "if_not_exists":
                     if_not_exists = True
                 elif child.data == "uid":
-                    name = self.visit(child)
+                    app_name = self.visit(child)
                 elif child.data == "create_application_engine_clause":
                     engine, param_dict = self.visit(child)
 
-        create_stmt = CreateApplicationStatement(
-            name, if_not_exists, engine, param_dict
+        create_stmt = CreateDatabaseStatement(
+            app_name, if_not_exists, engine, param_dict, "Application"
         )
         return create_stmt
 

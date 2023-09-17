@@ -190,12 +190,13 @@ class CreateTableStatement(AbstractStatement):
 
 
 class CreateDatabaseStatement(AbstractStatement):
-    def __init__(self, name: str, if_not_exists: bool, engine: str, param_dict: dict):
+    def __init__(self, name: str, if_not_exists: bool, engine: str, param_dict: dict, app_type: string):
         super().__init__(StatementType.CREATE_DATABASE)
         self.name = name
         self.if_not_exists = if_not_exists
         self.engine = engine
         self.param_dict = param_dict
+        self.app_type = app_type
 
     def __eq__(self, other):
         if not isinstance(other, CreateDatabaseStatement):
@@ -219,45 +220,10 @@ class CreateDatabaseStatement(AbstractStatement):
         )
 
     def __str__(self) -> str:
+        app_type_syntax = "DATABASE" if app_type = "Database" else "APPLICATION"
         return (
-            f"CREATE DATABASE {self.name} \n"
+            f"CREATE {app_type_syntax} {self.name} \n"
             f"WITH ENGINE '{self.engine}' , \n"
             f"PARAMETERS = {self.param_dict};"
         )
 
-
-class CreateApplicationStatement(AbstractStatement):
-    def __init__(self, name: str, if_not_exists: bool, engine: str, param_dict: dict):
-        super().__init__(StatementType.CREATE_APPLICATION)
-        self.name = name
-        self.if_not_exists = if_not_exists
-        self.engine = engine
-        self.param_dict = param_dict
-
-    def __eq__(self, other):
-        if not isinstance(other, CreateApplicationStatement):
-            return False
-        return (
-            self.name == other.name
-            and self.if_not_exists == other.if_not_exists
-            and self.engine == other.engine
-            and self.param_dict == other.param_dict
-        )
-
-    def __hash__(self) -> int:
-        return hash(
-            (
-                super().__hash__(),
-                self.name,
-                self.if_not_exists,
-                self.engine,
-                hash(frozenset(self.param_dict.items())),
-            )
-        )
-
-    def __str__(self) -> str:
-        return (
-            f"CREATE APPLICATION {self.name} \n"
-            f"WITH ENGINE '{self.engine}' , \n"
-            f"PARAMETERS = {self.param_dict};"
-        )
