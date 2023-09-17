@@ -136,6 +136,12 @@ class StatementToPlanConverter:
                 self._visit_groupby(statement.groupby_clause)
 
         # Projection operator
+        # move function expressions out of projection list to table valued expression
+        # this is done to handle the https://github.com/georgia-tech-db/evadb/issues/1147 and https://github.com/georgia-tech-db/evadb/issues/1130.
+
+        # a complete fix would require modifying the binder
+        #
+
         select_columns = statement.target_list
 
         if select_columns is not None:
