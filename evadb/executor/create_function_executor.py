@@ -278,12 +278,25 @@ class CreateFunctionExecutor(AbstractExecutor):
 
         Calls the catalog to insert a function catalog entry.
         """
+        assert (self.node.if_not_exists and self.node.or_replace) is False, "OR REPLACE and IF NOT EXISTS can not be both set for CREATE FUNCTION."
+
+        overwrite = False
         # check catalog if it already has this function entry
         if self.catalog().get_function_catalog_entry_by_name(self.node.name):
             if self.node.if_not_exists:
                 msg = f"Function {self.node.name} already exists, nothing added."
                 yield Batch(pd.DataFrame([msg]))
                 return
+            elif self.node.or_replace:
+                # We use DropObjectExecutor to avoid bookkeeping the code. The drop function should be moved to catalog.
+                from evadb.executor.drop_object_executor import DropObjectExecutor
+                drop_exectuor = DropObjectExecutor(self.db, None)
+                try:
+                    drop_exectuor._handle_drop_function(self.node.name, if_exists=False)
+                except RuntimeError:
+                    pass
+                else:
+                    overwrite = True
             else:
                 msg = f"Function {self.node.name} already exists."
                 logger.error(msg)
@@ -334,11 +347,12 @@ class CreateFunctionExecutor(AbstractExecutor):
         self.catalog().insert_function_catalog_entry(
             name, impl_path, function_type, io_list, metadata
         )
-        yield Batch(
-            pd.DataFrame(
-                [f"Function {self.node.name} successfully added to the database."]
-            )
-        )
+
+        if overwrite:
+            msg = f"Function {self.node.name} overwritten." 
+        else:
+            msg = f"Function {self.node.name} added to the database."
+        yield Batch(pd.DataFrame([msg]))
 
     def _try_initializing_function(
         self, impl_path: str, function_args: Dict = {}
