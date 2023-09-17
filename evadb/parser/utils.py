@@ -15,7 +15,6 @@
 
 from evadb.parser.create_function_statement import CreateFunctionStatement
 from evadb.parser.create_statement import (
-    CreateApplicationStatement,
     CreateDatabaseStatement,
     CreateTableStatement,
 )
@@ -35,7 +34,6 @@ from evadb.parser.use_statement import UseStatement
 SKIP_BINDER_AND_OPTIMIZER_STATEMENTS = (
     CreateDatabaseStatement,
     UseStatement,
-    CreateApplicationStatement,
 )
 
 
