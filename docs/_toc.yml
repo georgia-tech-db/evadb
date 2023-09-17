@@ -34,6 +34,8 @@ parts:
         title: Object Detection
       - file: source/usecases/emotion-analysis.rst
         title: Emotion Analysis
+      - file: source/usecases/homesale-forecast.rst
+        title: Home Sale Forecasting
       # - file: source/usecases/privategpt.rst
       #   title: PrivateGPT
 
