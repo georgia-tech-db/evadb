@@ -190,7 +190,14 @@ class CreateTableStatement(AbstractStatement):
 
 
 class CreateDatabaseStatement(AbstractStatement):
-    def __init__(self, name: str, if_not_exists: bool, engine: str, param_dict: dict, app_type: string):
+    def __init__(
+        self,
+        name: str,
+        if_not_exists: bool,
+        engine: str,
+        param_dict: dict,
+        app_type: str,
+    ):
         super().__init__(StatementType.CREATE_DATABASE)
         self.name = name
         self.if_not_exists = if_not_exists
@@ -220,10 +227,9 @@ class CreateDatabaseStatement(AbstractStatement):
         )
 
     def __str__(self) -> str:
-        app_type_syntax = "DATABASE" if app_type = "Database" else "APPLICATION"
+        app_type_syntax = "DATABASE" if self.app_type == "Database" else "APPLICATION"
         return (
             f"CREATE {app_type_syntax} {self.name} \n"
             f"WITH ENGINE '{self.engine}' , \n"
             f"PARAMETERS = {self.param_dict};"
         )
-
