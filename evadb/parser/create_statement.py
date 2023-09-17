@@ -213,6 +213,7 @@ class CreateDatabaseStatement(AbstractStatement):
             and self.if_not_exists == other.if_not_exists
             and self.engine == other.engine
             and self.param_dict == other.param_dict
+            and self.app_type == other.app_type
         )
 
     def __hash__(self) -> int:
@@ -223,6 +224,7 @@ class CreateDatabaseStatement(AbstractStatement):
                 self.if_not_exists,
                 self.engine,
                 hash(frozenset(self.param_dict.items())),
+                self.app_type
             )
         )
 
