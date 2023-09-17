@@ -30,9 +30,7 @@ class CreateDatabaseExecutor(AbstractExecutor):
 
     def exec(self, *args, **kwargs):
         # Check if database already exists.
-        db_catalog_entry = self.catalog().get_database_catalog_entry(
-            self.node.name
-        )
+        db_catalog_entry = self.catalog().get_database_catalog_entry(self.node.name)
 
         if db_catalog_entry is not None:
             if self.node.if_not_exists:

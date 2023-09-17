@@ -73,7 +73,7 @@ class MariaDbStorageEngineTest(unittest.TestCase):
             engine="mariadb",
             params=connection_params,
             row_id=1,
-            app_type="Database"
+            app_type="Database",
         )
 
     def tearDown(self):

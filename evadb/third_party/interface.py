@@ -49,6 +49,7 @@ def _get_database_handler(engine: str, **kwargs):
     else:
         raise NotImplementedError(f"Engine {engine} is not supported")
 
+
 @contextmanager
 def get_database_handler(engine: str, **kwargs):
     handler = _get_database_handler(engine, **kwargs)

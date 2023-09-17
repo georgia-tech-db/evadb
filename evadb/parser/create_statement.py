@@ -224,7 +224,7 @@ class CreateDatabaseStatement(AbstractStatement):
                 self.if_not_exists,
                 self.engine,
                 hash(frozenset(self.param_dict.items())),
-                self.app_type
+                self.app_type,
             )
         )
 
