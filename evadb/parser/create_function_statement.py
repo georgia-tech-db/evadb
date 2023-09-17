@@ -75,7 +75,7 @@ class CreateFunctionStatement(AbstractStatement):
         if self._or_replace:
             s += " OR REPLACE"
 
-        s + = " " + "FUNCTION"
+        s += " " + "FUNCTION"
 
         if self._if_not_exists:
             s += " IF NOT EXISTS"

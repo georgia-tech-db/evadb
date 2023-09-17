@@ -278,7 +278,11 @@ class CreateFunctionExecutor(AbstractExecutor):
 
         Calls the catalog to insert a function catalog entry.
         """
-        assert (self.node.if_not_exists and self.node.or_replace) is False, "OR REPLACE and IF NOT EXISTS can not be both set for CREATE FUNCTION."
+        assert (
+            self.node.if_not_exists and self.node.or_replace
+        ) is False, (
+            "OR REPLACE and IF NOT EXISTS can not be both set for CREATE FUNCTION."
+        )
 
         overwrite = False
         # check catalog if it already has this function entry
@@ -290,6 +294,7 @@ class CreateFunctionExecutor(AbstractExecutor):
             elif self.node.or_replace:
                 # We use DropObjectExecutor to avoid bookkeeping the code. The drop function should be moved to catalog.
                 from evadb.executor.drop_object_executor import DropObjectExecutor
+
                 drop_exectuor = DropObjectExecutor(self.db, None)
                 try:
                     drop_exectuor._handle_drop_function(self.node.name, if_exists=False)
@@ -349,7 +354,7 @@ class CreateFunctionExecutor(AbstractExecutor):
         )
 
         if overwrite:
-            msg = f"Function {self.node.name} overwritten." 
+            msg = f"Function {self.node.name} overwritten."
         else:
             msg = f"Function {self.node.name} added to the database."
         yield Batch(pd.DataFrame([msg]))
