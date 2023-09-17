@@ -38,16 +38,12 @@ class UseExecutor(AbstractExecutor):
                 f"{self._database_name} data source does not exist. Use CREATE DATABASE to add a new data source."
             )
 
-        handler = get_database_handler(
-            db_catalog_entry.engine,
-            **db_catalog_entry.params,
-        )
+        with get_database_handler(
+            db_catalog_entry.engine, **db_catalog_entry.params
+        ) as handler:
+            resp = handler.execute_native_query(self._query_string)
 
-        handler.connect()
-        resp = handler.execute_native_query(self._query_string)
-        handler.disconnect()
-
-        if resp.error is None:
-            return Batch(resp.data)
+        if resp and resp.error is None:
+            yield Batch(resp.data)
         else:
             raise ExecutorError(resp.error)

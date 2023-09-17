@@ -60,6 +60,9 @@ class PostgresHandler(DBHandler):
         if self.connection:
             self.connection.close()
 
+    def get_sqlalchmey_uri(self) -> str:
+        return f"postgresql+psycopg2://{self.user}:{self.password}@{self.host}:{self.port}/{self.database}"
+
     def check_connection(self) -> DBHandlerStatus:
         """
         Check connection to the handler.
@@ -120,7 +123,9 @@ class PostgresHandler(DBHandler):
         """
         try:
             res = cursor.fetchall()
-            res_df = pd.DataFrame(res, columns=[desc[0] for desc in cursor.description])
+            res_df = pd.DataFrame(
+                res, columns=[desc[0].lower() for desc in cursor.description]
+            )
             return res_df
         except psycopg2.ProgrammingError as e:
             if str(e) == "no results to fetch":

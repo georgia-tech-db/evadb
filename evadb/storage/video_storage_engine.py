@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Iterator
 
 from evadb.catalog.models.table_catalog import TableCatalogEntry
+from evadb.catalog.sql_config import ROW_NUM_COLUMN, ROW_NUM_MAGIC
 from evadb.database import EvaDBDatabase
 from evadb.expression.abstract_expression import AbstractExpression
 from evadb.models.storage.batch import Batch
@@ -39,7 +40,7 @@ class DecordStorageEngine(AbstractMediaStorageEngine):
         read_video: bool = True,
     ) -> Iterator[Batch]:
         for video_files in self._rdb_handler.read(self._get_metadata_table(table), 12):
-            for _, (row_id, video_file_name) in video_files.iterrows():
+            for _, (row_id, video_file_name, _) in video_files.iterrows():
                 system_file_name = self._xform_file_url_to_file_name(video_file_name)
                 video_file = Path(table.file_url) / system_file_name
                 # increase batch size when reading audio so that
@@ -58,4 +59,7 @@ class DecordStorageEngine(AbstractMediaStorageEngine):
                 for batch in reader.read():
                     batch.frames[table.columns[0].name] = row_id
                     batch.frames[table.columns[1].name] = str(video_file_name)
+                    batch.frames[ROW_NUM_COLUMN] = (
+                        row_id * ROW_NUM_MAGIC + batch.frames[ROW_NUM_COLUMN]
+                    )
                     yield batch

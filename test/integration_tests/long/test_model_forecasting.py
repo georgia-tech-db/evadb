@@ -37,8 +37,20 @@ class ModelTrainTests(unittest.TestCase):
             y INTEGER);"""
         execute_query_fetch_all(cls.evadb, create_table_query)
 
+        create_table_query = """
+            CREATE TABLE HomeData (\
+            saledate TEXT(30),\
+            ma INTEGER,
+            type TEXT(30),\
+            bedrooms INTEGER);"""
+        execute_query_fetch_all(cls.evadb, create_table_query)
+
         path = f"{EvaDB_ROOT_DIR}/data/forecasting/air-passengers.csv"
         load_query = f"LOAD CSV '{path}' INTO AirData;"
+        execute_query_fetch_all(cls.evadb, load_query)
+
+        path = f"{EvaDB_ROOT_DIR}/data/forecasting/home_sales.csv"
+        load_query = f"LOAD CSV '{path}' INTO HomeData;"
         execute_query_fetch_all(cls.evadb, load_query)
 
     @classmethod
@@ -46,12 +58,16 @@ class ModelTrainTests(unittest.TestCase):
         shutdown_ray()
 
         # clean up
-        execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS HomeRentals;")
+        execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS AirData;")
+        execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS HomeData;")
+
+        execute_query_fetch_all(cls.evadb, "DROP FUNCTION IF EXISTS AirForecast;")
+        execute_query_fetch_all(cls.evadb, "DROP FUNCTION IF EXISTS HomeForecast;")
 
     @forecast_skip_marker
     def test_forecast(self):
         create_predict_udf = """
-            CREATE FUNCTION Forecast FROM
+            CREATE FUNCTION AirForecast FROM
             (SELECT unique_id, ds, y FROM AirData)
             TYPE Forecasting
             PREDICT 'y';
@@ -59,10 +75,39 @@ class ModelTrainTests(unittest.TestCase):
         execute_query_fetch_all(self.evadb, create_predict_udf)
 
         predict_query = """
-            SELECT Forecast(12) FROM AirData;
+            SELECT AirForecast(12) order by y;
         """
         result = execute_query_fetch_all(self.evadb, predict_query)
-        self.assertEqual(int(list(result.frames.iloc[:, -1])[-1]), 459)
+        self.assertEqual(len(result), 12)
+        self.assertEqual(
+            result.columns, ["airforecast.unique_id", "airforecast.ds", "airforecast.y"]
+        )
+
+    @forecast_skip_marker
+    def test_forecast_with_column_rename(self):
+        create_predict_udf = """
+            CREATE FUNCTION HomeForecast FROM
+            (
+                SELECT type, saledate, ma FROM HomeData
+                WHERE bedrooms = 2
+            )
+            TYPE Forecasting
+            PREDICT 'ma'
+            ID 'type'
+            TIME 'saledate'
+            FREQUENCY 'M';
+        """
+        execute_query_fetch_all(self.evadb, create_predict_udf)
+
+        predict_query = """
+            SELECT HomeForecast(12);
+        """
+        result = execute_query_fetch_all(self.evadb, predict_query)
+        self.assertEqual(len(result), 24)
+        self.assertEqual(
+            result.columns,
+            ["homeforecast.type", "homeforecast.saledate", "homeforecast.ma"],
+        )
 
 
 if __name__ == "__main__":

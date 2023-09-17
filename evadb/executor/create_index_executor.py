@@ -16,7 +16,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from evadb.catalog.sql_config import IDENTIFIER_COLUMN
+from evadb.catalog.sql_config import ROW_NUM_COLUMN
 from evadb.database import EvaDBDatabase
 from evadb.executor.abstract_executor import AbstractExecutor
 from evadb.executor.executor_utils import ExecutorError, handle_vector_store_params
@@ -35,8 +35,12 @@ class CreateIndexExecutor(AbstractExecutor):
     def exec(self, *args, **kwargs):
         if self.catalog().get_index_catalog_entry_by_name(self.node.name):
             msg = f"Index {self.node.name} already exists."
-            logger.error(msg)
-            raise ExecutorError(msg)
+            if self.node.if_not_exists:
+                logger.warn(msg)
+                return
+            else:
+                logger.error(msg)
+                raise ExecutorError(msg)
 
         self.index_path = self._get_index_save_path()
         self.index = None
@@ -87,7 +91,7 @@ class CreateIndexExecutor(AbstractExecutor):
                     # array. Use zero index to get the actual numpy array.
                     feat = input_batch.column_as_numpy_array(feat_col_name)
 
-                row_id = input_batch.column_as_numpy_array(IDENTIFIER_COLUMN)
+                row_num = input_batch.column_as_numpy_array(ROW_NUM_COLUMN)
 
                 for i in range(len(input_batch)):
                     row_feat = feat[i].reshape(1, -1)
@@ -103,7 +107,7 @@ class CreateIndexExecutor(AbstractExecutor):
                         self.index.create(input_dim)
 
                     # Row ID for mapping back to the row.
-                    self.index.add([FeaturePayload(row_id[i], row_feat)])
+                    self.index.add([FeaturePayload(row_num[i], row_feat)])
 
             # Persist index.
             self.index.persist()

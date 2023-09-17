@@ -18,10 +18,8 @@ import pickle
 
 import pandas as pd
 
-from evadb.catalog.catalog_type import NdArrayType
 from evadb.functions.abstract.abstract_function import AbstractFunction
-from evadb.functions.decorators.decorators import forward, setup
-from evadb.functions.decorators.io_descriptors.data_types import PandasDataframe
+from evadb.functions.decorators.decorators import setup
 
 
 class ForecastModel(AbstractFunction):
@@ -30,35 +28,35 @@ class ForecastModel(AbstractFunction):
         return "ForecastModel"
 
     @setup(cacheable=False, function_type="Forecasting", batchable=True)
-    def setup(self, model_name: str, model_path: str):
+    def setup(
+        self,
+        model_name: str,
+        model_path: str,
+        predict_column_rename: str,
+        time_column_rename: str,
+        id_column_rename: str,
+    ):
         f = open(model_path, "rb")
         loaded_model = pickle.load(f)
         f.close()
         self.model = loaded_model
         self.model_name = model_name
+        self.predict_column_rename = predict_column_rename
+        self.time_column_rename = time_column_rename
+        self.id_column_rename = id_column_rename
 
-    @forward(
-        input_signatures=[],
-        output_signatures=[
-            PandasDataframe(
-                columns=["y"],
-                column_types=[
-                    NdArrayType.FLOAT32,
-                ],
-                column_shapes=[(None,)],
-            )
-        ],
-    )
     def forward(self, data) -> pd.DataFrame:
         horizon = list(data.iloc[:, -1])[0]
         assert (
             type(horizon) is int
         ), "Forecast UDF expects integral horizon in parameter."
         forecast_df = self.model.predict(h=horizon)
-        forecast_df = forecast_df.rename(columns={self.model_name: "y"})
-        return pd.DataFrame(
-            forecast_df,
-            columns=[
-                "y",
-            ],
+        forecast_df.reset_index(inplace=True)
+        forecast_df = forecast_df.rename(
+            columns={
+                "unique_id": self.id_column_rename,
+                "ds": self.time_column_rename,
+                self.model_name: self.predict_column_rename,
+            }
         )
+        return forecast_df

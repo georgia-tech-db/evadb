@@ -81,6 +81,7 @@ class ParserStatementTests(unittest.TestCase):
             "SHOW TABLES;",
             "SHOW FUNCTIONS;",
             "EXPLAIN SELECT a FROM foo;",
+            "SELECT HomeRentalForecast(12);",
             """SELECT data FROM MyVideo WHERE id < 5
                     ORDER BY Similarity(FeatureExtractor(Open("abc.jpg")),
                                         FeatureExtractor(data))

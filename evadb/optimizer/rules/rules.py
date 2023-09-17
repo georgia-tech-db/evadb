@@ -808,6 +808,7 @@ class LogicalCreateIndexToVectorIndex(Rule):
     def apply(self, before: LogicalCreateIndex, context: OptimizerContext):
         after = CreateIndexPlan(
             before.name,
+            before.if_not_exists,
             before.table_ref,
             before.col_list,
             before.vector_store_type,
@@ -1173,6 +1174,22 @@ class LogicalProjectToPhysical(Rule):
         after = ProjectPlan(before.target_list)
         for child in before.children:
             after.append_child(child)
+        yield after
+
+
+class LogicalProjectNoTableToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALPROJECT)
+        super().__init__(RuleType.LOGICAL_PROJECT_NO_TABLE_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_PROJECT_NO_TABLE_TO_PHYSICAL
+
+    def check(self, grp_id: int, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalProject, context: OptimizerContext):
+        after = ProjectPlan(before.target_list)
         yield after
 
 

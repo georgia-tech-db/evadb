@@ -12,11 +12,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
 import unittest
 from test.util import get_evadb_for_testing, shutdown_ray
 
 from mock import patch
 
+from evadb.executor.executor_utils import ExecutorError
 from evadb.server.command_handler import execute_query_fetch_all
 
 
@@ -26,10 +28,15 @@ class CreateDatabaseTest(unittest.TestCase):
         cls.evadb = get_evadb_for_testing()
         # reset the catalog manager before running each test
         cls.evadb.catalog().reset()
+        cls.db_path = f"{os.path.dirname(os.path.abspath(__file__))}/testing.db"
 
     @classmethod
     def tearDownClass(cls):
         shutdown_ray()
+        execute_query_fetch_all(cls.evadb, "DROP DATABASE IF EXISTS test_data_source;")
+        execute_query_fetch_all(cls.evadb, "DROP DATABASE IF EXISTS demo;")
+        if os.path.exists(cls.db_path):
+            os.remove(cls.db_path)
 
     def test_create_database_should_add_the_entry(self):
         params = {
@@ -51,6 +58,31 @@ class CreateDatabaseTest(unittest.TestCase):
         self.assertEqual(db_entry.name, "demo_db")
         self.assertEqual(db_entry.engine, "postgres")
         self.assertEqual(db_entry.params, params)
+
+    def test_should_create_sqlite_database(self):
+        import os
+
+        current_file_dir = os.path.dirname(os.path.abspath(__file__))
+        database_path = f"{current_file_dir}/testing.db"
+
+        if_not_exists = "IF NOT EXISTS"
+
+        params = {
+            "database": database_path,
+        }
+        query = """CREATE DATABASE {} test_data_source
+                    WITH ENGINE = "sqlite",
+                    PARAMETERS = {};"""
+
+        # Create the database.
+        execute_query_fetch_all(self.evadb, query.format(if_not_exists, params))
+
+        # Trying to create the same database should raise an exception.
+        with self.assertRaises(ExecutorError):
+            execute_query_fetch_all(self.evadb, query.format("", params))
+
+        # Trying to create the same database should warn if "IF NOT EXISTS" is provided.
+        execute_query_fetch_all(self.evadb, query.format(if_not_exists, params))
 
 
 if __name__ == "__main__":

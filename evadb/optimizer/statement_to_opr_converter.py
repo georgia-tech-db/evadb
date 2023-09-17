@@ -119,25 +119,27 @@ class StatementToPlanConverter:
             statement {SelectStatement} - - [input select statement]
         """
 
+        # order of evaluation
+        # from, where, group by, select, order by, limit, union
         table_ref = statement.from_table
-        if table_ref is None:
-            logger.error("From entry missing in select statement")
-            return None
+        if table_ref is not None:
+            self.visit_table_ref(table_ref)
 
-        self.visit_table_ref(table_ref)
+            # Filter Operator
+            predicate = statement.where_clause
+            if predicate is not None:
+                self._visit_select_predicate(predicate)
 
-        # Filter Operator
-        predicate = statement.where_clause
-        if predicate is not None:
-            self._visit_select_predicate(predicate)
+            # TODO ACTION: Group By
 
-        # union
-        if statement.union_link is not None:
-            self._visit_union(statement.union_link, statement.union_all)
+            if statement.groupby_clause is not None:
+                self._visit_groupby(statement.groupby_clause)
 
-        # TODO ACTION: Group By
-        if statement.groupby_clause is not None:
-            self._visit_groupby(statement.groupby_clause)
+        # Projection operator
+        select_columns = statement.target_list
+
+        if select_columns is not None:
+            self._visit_projection(select_columns)
 
         if statement.orderby_list is not None:
             self._visit_orderby(statement.orderby_list)
@@ -145,11 +147,9 @@ class StatementToPlanConverter:
         if statement.limit_count is not None:
             self._visit_limit(statement.limit_count)
 
-        # Projection operator
-        select_columns = statement.target_list
-
-        if select_columns is not None:
-            self._visit_projection(select_columns)
+        # union
+        if statement.union_link is not None:
+            self._visit_union(statement.union_link, statement.union_all)
 
     def _visit_sample(self, sample_freq, sample_type):
         sample_opr = LogicalSample(sample_freq, sample_type)
@@ -182,7 +182,8 @@ class StatementToPlanConverter:
 
     def _visit_projection(self, select_columns):
         projection_opr = LogicalProject(select_columns)
-        projection_opr.append_child(self._plan)
+        if self._plan is not None:
+            projection_opr.append_child(self._plan)
         self._plan = projection_opr
 
     def _visit_select_predicate(self, predicate: AbstractExpression):
@@ -311,6 +312,7 @@ class StatementToPlanConverter:
     def visit_create_index(self, statement: CreateIndexStatement):
         create_index_opr = LogicalCreateIndex(
             statement.name,
+            statement.if_not_exists,
             statement.table_ref,
             statement.col_list,
             statement.vector_store_type,

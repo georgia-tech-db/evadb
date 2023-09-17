@@ -30,7 +30,7 @@ create_database_engine_clause: WITH ENGINE "=" string_literal "," PARAMETERS "="
 
 create_application_engine_clause: WITH ENGINE "=" string_literal "," PARAMETERS "=" colon_param_dict
 
-create_index: CREATE INDEX uid ON table_name index_elem vector_store_type?
+create_index: CREATE INDEX if_not_exists? uid ON table_name index_elem vector_store_type?
 
 create_table: CREATE TABLE if_not_exists? table_name (create_definitions | (AS select_statement))
     
@@ -154,7 +154,7 @@ alias_clause: AS? uid "(" uid_list ")" | AS? uid
 
 query_expression: "(" query_specification ")" | "(" query_expression ")"
     
-query_specification: SELECT select_elements from_clause order_by_clause? limit_clause?
+query_specification: SELECT select_elements from_clause? order_by_clause? limit_clause?
     
 select_elements: (STAR | select_element ) ("," select_element)*
     

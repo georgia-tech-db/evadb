@@ -9,6 +9,8 @@ parts:
             title: Installation Options
       - file: source/overview/connect-to-database
         title: Connect to Database
+      - file: source/overview/model-inference
+        title: Model inference
       - file: source/overview/concepts
         title: Concepts
         sections:
@@ -32,6 +34,8 @@ parts:
         title: Object Detection
       - file: source/usecases/emotion-analysis.rst
         title: Emotion Analysis
+      - file: source/usecases/homesale-forecast.rst
+        title: Home Sale Forecasting
       # - file: source/usecases/privategpt.rst
       #   title: PrivateGPT
 
@@ -60,6 +64,7 @@ parts:
           - file: source/reference/databases/postgres
           - file: source/reference/databases/sqlite
           - file: source/reference/databases/mysql
+          - file: source/reference/databases/mariadb
 
       - file: source/reference/ai/index
         title: AI Engines
@@ -76,6 +81,9 @@ parts:
             title: YOLO 
           - file: source/reference/ai/custom
             title: Custom Model
+
+      - file: source/reference/optimizations
+        title: Optimizations
         
       # - file: source/reference/io
       #   title: IO Descriptors
