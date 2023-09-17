@@ -16,7 +16,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from evadb.catalog.catalog_type import TableType, VectorStoreType
+from evadb.catalog.catalog_type import TableType
 from evadb.catalog.catalog_utils import is_video_table
 from evadb.constants import CACHEABLE_FUNCTIONS
 from evadb.executor.execution_context import Context

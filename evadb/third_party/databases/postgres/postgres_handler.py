@@ -177,7 +177,6 @@ class PostgresHandler(DBHandler):
             # Handle user defined types constructed by Postgres extension.
         }
 
-        print("Type conversion", pg_type, udt_name)
         if pg_type in primitive_type_mapping:
             return primitive_type_mapping[pg_type]
         elif pg_type == "USER-DEFINED" and udt_name in user_defined_type_mapping:
