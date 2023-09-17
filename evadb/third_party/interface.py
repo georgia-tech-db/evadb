@@ -61,6 +61,6 @@ def get_database_handler(engine: str, **kwargs):
         handler.disconnect()
 
 
-def dynamic_import(handler_dir):
-    import_path = f"evadb.third_party.databases.{handler_dir}.{handler_dir}_handler"
+def dynamic_import(handler_dir, app_type):
+    import_path = f"evadb.third_party.{app_type}.{handler_dir}.{handler_dir}_handler"
     return importlib.import_module(import_path)
