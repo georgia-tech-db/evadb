@@ -44,17 +44,13 @@ class VectorIndexScanExecutor(AbstractExecutor):
         self.search_query_expr = node.search_query_expr
 
     def exec(self, *args, **kwargs) -> Iterator[Batch]:
-        # Fetch the index from disk.
-        index_catalog_entry = self.catalog().get_index_catalog_entry_by_name(
-            self.index_name
-        )
-        self.index_path = index_catalog_entry.save_file_path
-        self.index = VectorStoreFactory.init_vector_store(
-            self.node.vector_store_type,
-            self.index_name,
-            **handle_vector_store_params(self.node.vector_store_type, self.index_path),
-        )
+        if self.node.vector_store_type == VectorStoreFactory.PGVECTOR:
+            self._native_vector_index_scan()
+        else:
+            self._evadb_vector_index_scan(*args, **kwargs)
 
+
+    def _get_search_query_results(self):
         # Get the query feature vector. Create a dummy
         # batch to retreat a single file path.
         dummy_batch = Batch(
@@ -69,6 +65,29 @@ class VectorIndexScanExecutor(AbstractExecutor):
         search_batch.drop_column_alias()
         search_feat = search_batch.column_as_numpy_array(feature_col_name)[0]
         search_feat = search_feat.reshape(1, -1)
+        return search_feat
+
+
+    def _native_vector_index_scan(self):
+        search_feat = self._get_search_query_results()
+        search_feat = search_feat.reshape(-1)
+
+        # TODO: we need to access the Postgres handler here, but some parameters are only stored in children.
+
+
+    def _evadb_vector_index_scan(self, *args, **kwargs):
+        # Fetch the index from disk.
+        index_catalog_entry = self.catalog().get_index_catalog_entry_by_name(
+            self.index_name
+        )
+        self.index_path = index_catalog_entry.save_file_path
+        self.index = VectorStoreFactory.init_vector_store(
+            self.node.vector_store_type,
+            self.index_name,
+            **handle_vector_store_params(self.node.vector_store_type, self.index_path),
+        )
+
+        search_feat = self._get_search_query_results()
         index_result = self.index.query(
             VectorIndexQuery(search_feat, self.limit_count.value)
         )
