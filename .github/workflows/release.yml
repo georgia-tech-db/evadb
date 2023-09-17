@@ -1,0 +1,32 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create pypirc.
+        env:
+          PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }} 
+          PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }} 
+        run: |
+          cat > ~/.pypirc <<EOL
+          [distutils]
+          index-servers =
+            pypi
+
+          [pypi]
+          repository = https://upload.pypi.org/legacy/
+          username = ${PYPI_USERNAME} 
+          password = ${PYPI_PASSWORD}
+          EOL
+      - name: Release.
+        env:
+          GITHUB_KEY: ${{ github.token }}
+        run: |
+          python script/releasing/releaser.py -n minor -u

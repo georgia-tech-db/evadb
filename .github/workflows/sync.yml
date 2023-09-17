@@ -1,0 +1,26 @@
+name: Sync Staging and Master
+
+on:
+  push:
+    branches:
+      - staging
+    paths:
+      - evadb/version.py
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check revision version.
+        run: |
+          cmd=$(python -c "from evadb.version import _REVISION; print(_REVISION if 'dev' not in _REVISION else 'skip')")
+      - name: Sync master and staging.
+        run: |
+          if [[ "$cmd" != "skip" ]]; then
+            git_hash=$(git rev-parse --short "${{ github.sha }}")
+            git checkout master
+            git reset --hard $git_hash
+            git push -f origin master
+          fi
+
