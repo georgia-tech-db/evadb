@@ -18,12 +18,10 @@ jobs:
           source test_evadb/bin/activate
           pip install --upgrade pip
           pip install ".[dev]"
-      - name: Check revision version.
+      - name: Check version and sync.
         run: |
           source test_evadb/bin/activate
           cmd=$(python -c "from evadb.version import _REVISION; print(_REVISION if 'dev' not in _REVISION else 'skip')")
-      - name: Sync master and staging.
-        run: |
           if [[ "$cmd" != "skip" ]]; then
             git pull
             git checkout master
