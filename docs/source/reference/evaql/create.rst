@@ -110,11 +110,14 @@ CREATE FUNCTION via Type
    [ parameter [ ...] ]
 
 Where the `parameter` is ``key value`` pair.
-For a single ``CREATE FUNCTION`` query, we can specify ``OR REPLACE`` or ``IF NOT EXISTS`` or neither, but not both.
+
+.. warning::
+
+   For one ``CREATE FUNCTION`` query, we can specify ``OR REPLACE`` or ``IF NOT EXISTS`` or neither, but not both.
 
 .. note::
 
-   Go over :ref:'hf', :ref:`predict`,and :ref:`forecast` to check examples for creating function via type.
+   Go over :ref:'hf', :ref:`predict`, and :ref:`forecast` to check examples for creating function via type.
 
 CREATE MATERIALIZED VIEW
 ------------------------
