@@ -55,9 +55,7 @@ def ask_question(story_path: str):
 
     print("Create table")
 
-    cursor.query(
-        f"CREATE TABLE {story_table} (id INTEGER, data TEXT(1000));"
-    ).execute()
+    cursor.query(f"CREATE TABLE {story_table} (id INTEGER, data TEXT(1000));").execute()
 
     # Insert text chunk by chunk.
     for i, text in enumerate(read_text_line(story_path)):
@@ -88,8 +86,7 @@ def ask_question(story_path: str):
 
     # Create search index on extracted features.
     cursor.query(
-        f"CREATE INDEX {index_table} ON {story_feat_table} (features) USING"
-        " FAISS;"
+        f"CREATE INDEX {index_table} ON {story_feat_table} (features) USING" " FAISS;"
     ).execute()
 
     t_i = t_i + 1
@@ -117,9 +114,7 @@ def ask_question(story_path: str):
     # Merge all context information.
     context_list = []
     for i in range(len(res_batch)):
-        context_list.append(
-            res_batch.frames[f"{story_feat_table.lower()}.data"][i]
-        )
+        context_list.append(res_batch.frames[f"{story_feat_table.lower()}.data"][i])
     context = "; \n".join(context_list)
 
     t_i = t_i + 1

@@ -37,9 +37,7 @@ def load_data(source_folder_path: str):
     cursor.query("DROP TABLE IF EXISTS embedding_table;").execute()
 
     print("📄 Loading PDFs into EvaDB")
-    text_load_query = (
-        f"""LOAD PDF '{source_folder_path}/*.pdf' INTO data_table;"""
-    )
+    text_load_query = f"""LOAD PDF '{source_folder_path}/*.pdf' INTO data_table;"""
     print(text_load_query)
     cursor.query(text_load_query).execute()
 

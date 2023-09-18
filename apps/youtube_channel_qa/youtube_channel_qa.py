@@ -107,10 +107,7 @@ def download_youtube_video_transcript(video_link: str):
 
     time_taken = time.time() - start
     total_transcription_time += time_taken
-    print(
-        "✅ Video transcript downloaded successfully in"
-        f" {time_taken} seconds \n"
-    )
+    print("✅ Video transcript downloaded successfully in" f" {time_taken} seconds \n")
     return transcript
 
 
@@ -169,9 +166,9 @@ def generate_online_video_transcript(cursor) -> str:
     print(f"Video transcript generated in {time.time() - start} seconds.")
     total_transcription_time += time.time() - start
 
-    raw_transcript_string = cursor.query(
-        "SELECT text FROM youtube_video_text;"
-    ).df()["youtube_video_text.text"][0]
+    raw_transcript_string = cursor.query("SELECT text FROM youtube_video_text;").df()[
+        "youtube_video_text.text"
+    ][0]
     return raw_transcript_string
 
 
@@ -333,9 +330,7 @@ if __name__ == "__main__":
             )
         else:
             raw_transcript_string = generate_online_video_transcript(cursor)
-            partitioned_transcript = partition_transcript(
-                raw_transcript_string
-            )
+            partitioned_transcript = partition_transcript(raw_transcript_string)
             df = pd.DataFrame(partitioned_transcript)
             print(df)
             if os.path.exists("transcript.csv"):
@@ -387,10 +382,7 @@ if __name__ == "__main__":
         print(f"Creating index took {vet - eft} seconds")
 
         questions = []
-        if (
-            os.path.isfile(QUESTIONS_PATH)
-            and os.path.getsize(QUESTIONS_PATH) > 0
-        ):
+        if os.path.isfile(QUESTIONS_PATH) and os.path.getsize(QUESTIONS_PATH) > 0:
             questions = open(QUESTIONS_PATH, "r")
             st = time.time()
             for question in questions:
