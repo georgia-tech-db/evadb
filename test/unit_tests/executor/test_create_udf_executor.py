@@ -77,9 +77,7 @@ class CreateFunctionExecutorTest(unittest.TestCase):
         )
 
     @patch("evadb.executor.create_function_executor.load_function_class_from_file")
-    def test_should_skip_if_not_exists_function(
-        self, load_function_class_from_file_mock
-    ):
+    def test_should_skip_if_not_exists(self, load_function_class_from_file_mock):
         catalog_instance = MagicMock()
         catalog_instance().get_function_catalog_entry_by_name.return_value = True
         catalog_instance().insert_function_catalog_entry.return_value = "function"
