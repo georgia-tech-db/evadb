@@ -707,6 +707,7 @@ class ParserTests(unittest.TestCase):
         expected_cci.nullable = True
         expected_stmt = CreateFunctionStatement(
             "FastRCNN",
+            False,
             True,
             Path("data/fastrcnn.py"),
             [
@@ -831,6 +832,7 @@ class ParserTests(unittest.TestCase):
         insert_stmt = InsertTableStatement(table)
         create_func = CreateFunctionStatement(
             "func",
+            False,
             False,
             Path("data/fastrcnn.py"),
             [

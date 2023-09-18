@@ -69,7 +69,7 @@ class CreateFunctionPlan(AbstractPlan):
 
     @property
     def or_replace(self):
-        return self.or_replace
+        return self._or_replace
 
     @property
     def if_not_exists(self):
