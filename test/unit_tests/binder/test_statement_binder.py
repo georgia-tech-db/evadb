@@ -366,18 +366,20 @@ class StatementBinderTests(unittest.TestCase):
             col.array_dimensions = [1, 10]
             binder._bind_create_index_statement(create_index_statement)
 
-    def test_bind_create_function_should_raise(self):
+    def test_bind_create_function_should_raise_without_predict_for_ludwig(self):
         with patch.object(StatementBinder, "bind"):
             create_function_statement = MagicMock()
+            create_function_statement.function_type = "ludwig"
             create_function_statement.query.target_list = []
             create_function_statement.metadata = []
             binder = StatementBinder(StatementBinderContext(MagicMock()))
             with self.assertRaises(AssertionError):
                 binder._bind_create_function_statement(create_function_statement)
 
-    def test_bind_create_function_should_drop_row_id(self):
+    def test_bind_create_function_should_drop_row_id_for_select_star(self):
         with patch.object(StatementBinder, "bind"):
             create_function_statement = MagicMock()
+            create_function_statement.function_type = "ludwig"
             row_id_col_obj = ColumnCatalogEntry(
                 name=IDENTIFIER_COLUMN,
                 type=MagicMock(),
@@ -443,3 +445,207 @@ class StatementBinderTests(unittest.TestCase):
             ]
             self.assertEqual(create_function_statement.inputs, expected_inputs)
             self.assertEqual(create_function_statement.outputs, expected_outputs)
+
+    def test_bind_create_function_should_bind_forecast_with_default_columns(self):
+        with patch.object(StatementBinder, "bind"):
+            create_function_statement = MagicMock()
+            create_function_statement.function_type = "forecasting"
+            id_col_obj = ColumnCatalogEntry(
+                name="unique_id",
+                type=MagicMock(),
+                array_type=MagicMock(),
+                array_dimensions=MagicMock(),
+            )
+            ds_col_obj = ColumnCatalogEntry(
+                name="ds",
+                type=MagicMock(),
+                array_type=MagicMock(),
+                array_dimensions=MagicMock(),
+            )
+            y_col_obj = ColumnCatalogEntry(
+                name="y",
+                type=MagicMock(),
+                array_type=MagicMock(),
+                array_dimensions=MagicMock(),
+            )
+            create_function_statement.query.target_list = [
+                TupleValueExpression(
+                    name=id_col_obj.name, table_alias="a", col_object=id_col_obj
+                ),
+                TupleValueExpression(
+                    name=ds_col_obj.name, table_alias="a", col_object=ds_col_obj
+                ),
+                TupleValueExpression(
+                    name=y_col_obj.name, table_alias="a", col_object=y_col_obj
+                ),
+            ]
+            create_function_statement.metadata = []
+            binder = StatementBinder(StatementBinderContext(MagicMock()))
+            binder._bind_create_function_statement(create_function_statement)
+
+            expected_inputs = [
+                ColumnDefinition(
+                    "horizon",
+                    ColumnType.INTEGER,
+                    None,
+                    None,
+                )
+            ]
+            expected_outputs = list(
+                [
+                    ColumnDefinition(
+                        col_obj.name,
+                        col_obj.type,
+                        col_obj.array_type,
+                        col_obj.array_dimensions,
+                    )
+                    for col_obj in (id_col_obj, ds_col_obj, y_col_obj)
+                ]
+            )
+            self.assertEqual(create_function_statement.inputs, expected_inputs)
+            self.assertEqual(create_function_statement.outputs, expected_outputs)
+
+    def test_bind_create_function_should_bind_forecast_with_renaming_columns(self):
+        with patch.object(StatementBinder, "bind"):
+            create_function_statement = MagicMock()
+            create_function_statement.function_type = "forecasting"
+            id_col_obj = ColumnCatalogEntry(
+                name="type",
+                type=MagicMock(),
+                array_type=MagicMock(),
+                array_dimensions=MagicMock(),
+            )
+            ds_col_obj = ColumnCatalogEntry(
+                name="saledate",
+                type=MagicMock(),
+                array_type=MagicMock(),
+                array_dimensions=MagicMock(),
+            )
+            y_col_obj = ColumnCatalogEntry(
+                name="ma",
+                type=MagicMock(),
+                array_type=MagicMock(),
+                array_dimensions=MagicMock(),
+            )
+            create_function_statement.query.target_list = [
+                TupleValueExpression(
+                    name=id_col_obj.name, table_alias="a", col_object=id_col_obj
+                ),
+                TupleValueExpression(
+                    name=ds_col_obj.name, table_alias="a", col_object=ds_col_obj
+                ),
+                TupleValueExpression(
+                    name=y_col_obj.name, table_alias="a", col_object=y_col_obj
+                ),
+            ]
+            create_function_statement.metadata = [
+                ("predict", "ma"),
+                ("id", "type"),
+                ("time", "saledate"),
+            ]
+            binder = StatementBinder(StatementBinderContext(MagicMock()))
+            binder._bind_create_function_statement(create_function_statement)
+
+            expected_inputs = [
+                ColumnDefinition(
+                    "horizon",
+                    ColumnType.INTEGER,
+                    None,
+                    None,
+                )
+            ]
+            expected_outputs = list(
+                [
+                    ColumnDefinition(
+                        col_obj.name,
+                        col_obj.type,
+                        col_obj.array_type,
+                        col_obj.array_dimensions,
+                    )
+                    for col_obj in (id_col_obj, ds_col_obj, y_col_obj)
+                ]
+            )
+            self.assertEqual(create_function_statement.inputs, expected_inputs)
+            self.assertEqual(create_function_statement.outputs, expected_outputs)
+
+    def test_bind_create_function_should_raise_forecast_with_unexpected_columns(self):
+        with patch.object(StatementBinder, "bind"):
+            create_function_statement = MagicMock()
+            create_function_statement.function_type = "forecasting"
+            id_col_obj = ColumnCatalogEntry(
+                name="type",
+                type=MagicMock(),
+                array_type=MagicMock(),
+                array_dimensions=MagicMock(),
+            )
+            ds_col_obj = ColumnCatalogEntry(
+                name="saledate",
+                type=MagicMock(),
+                array_type=MagicMock(),
+                array_dimensions=MagicMock(),
+            )
+            y_col_obj = ColumnCatalogEntry(
+                name="ma",
+                type=MagicMock(),
+                array_type=MagicMock(),
+                array_dimensions=MagicMock(),
+            )
+            create_function_statement.query.target_list = [
+                TupleValueExpression(
+                    name=id_col_obj.name, table_alias="a", col_object=id_col_obj
+                ),
+                TupleValueExpression(
+                    name=ds_col_obj.name, table_alias="a", col_object=ds_col_obj
+                ),
+                TupleValueExpression(
+                    name=y_col_obj.name, table_alias="a", col_object=y_col_obj
+                ),
+            ]
+            create_function_statement.metadata = [
+                ("predict", "ma"),
+                ("time", "saledate"),
+            ]
+            binder = StatementBinder(StatementBinderContext(MagicMock()))
+
+            with self.assertRaises(BinderError) as cm:
+                binder._bind_create_function_statement(create_function_statement)
+
+            err_msg = "Unexpected column type found for forecasting function."
+            self.assertEqual(str(cm.exception), err_msg)
+
+    def test_bind_create_function_should_raise_forecast_missing_required_columns(self):
+        with patch.object(StatementBinder, "bind"):
+            create_function_statement = MagicMock()
+            create_function_statement.function_type = "forecasting"
+            id_col_obj = ColumnCatalogEntry(
+                name="type",
+                type=MagicMock(),
+                array_type=MagicMock(),
+                array_dimensions=MagicMock(),
+            )
+            ds_col_obj = ColumnCatalogEntry(
+                name="saledate",
+                type=MagicMock(),
+                array_type=MagicMock(),
+                array_dimensions=MagicMock(),
+            )
+            create_function_statement.query.target_list = [
+                TupleValueExpression(
+                    name=id_col_obj.name, table_alias="a", col_object=id_col_obj
+                ),
+                TupleValueExpression(
+                    name=ds_col_obj.name, table_alias="a", col_object=ds_col_obj
+                ),
+            ]
+            create_function_statement.metadata = [
+                ("id", "type"),
+                ("time", "saledate"),
+                ("predict", "ma"),
+            ]
+            binder = StatementBinder(StatementBinderContext(MagicMock()))
+
+            with self.assertRaises(AssertionError) as cm:
+                binder._bind_create_function_statement(create_function_statement)
+
+            err_msg = "Missing required {'ma'} columns for forecasting function."
+            self.assertEqual(str(cm.exception), err_msg)

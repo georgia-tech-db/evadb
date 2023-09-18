@@ -324,6 +324,17 @@ def is_forecast_available() -> bool:
         return False
 
 
+def try_to_import_sklearn():
+    try:
+        import sklearn  # noqa: F401
+        from sklearn.linear_model import LinearRegression  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import Sklearn.
+                Please install it with `pip install scikit-learn`."""
+        )
+
+
 ##############################
 ## VISION
 ##############################
@@ -534,5 +545,9 @@ def string_comparison_case_insensitive(string_1, string_2) -> bool:
     Returns:
         True/False (bool): Returns True if the strings are same, false otherwise
     """
+
+    # Does not make sense in case of null strings
+    if string_1 is None or string_2 is None:
+        return False
 
     return string_1.lower() == string_2.lower()

@@ -28,24 +28,26 @@ class CreateDatabaseExecutor(AbstractExecutor):
         super().__init__(db, node)
 
     def exec(self, *args, **kwargs):
-        # TODO: handle if_not_exists
+        # Check if database already exists.
+        db_catalog_entry = self.catalog().get_database_catalog_entry(
+            self.node.database_name
+        )
+
+        if db_catalog_entry is not None:
+            if self.node.if_not_exists:
+                msg = f"{self.node.database_name} already exists, nothing added."
+                yield Batch(pd.DataFrame([msg]))
+                return
+            else:
+                raise ExecutorError(f"{self.node.database_name} already exists.")
 
         logger.debug(
             f"Trying to connect to the provided engine {self.node.engine} with params {self.node.param_dict}"
         )
 
-        # Check if database already exists.
-        db_catalog_entry = self.catalog().get_database_catalog_entry(
-            self.node.database_name
-        )
-        if db_catalog_entry is not None:
-            raise ExecutorError(f"{self.node.database_name} already exists.")
-
         # Check the validity of database entry.
-        handler = get_database_handler(self.node.engine, **self.node.param_dict)
-        resp = handler.connect()
-        if not resp.status:
-            raise ExecutorError(f"Cannot establish connection due to {resp.error}")
+        with get_database_handler(self.node.engine, **self.node.param_dict):
+            pass
 
         logger.debug(f"Creating database {self.node}")
         self.catalog().insert_database_catalog_entry(
