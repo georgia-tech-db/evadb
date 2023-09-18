@@ -641,9 +641,10 @@ class LogicalCreateFunction(Operator):
     Attributes:
         name: str
             function_name provided by the user required
+        or_replace: bool
+            if true should overwrite if function with same name exists
         if_not_exists: bool
-            if true should throw an error if function with same name exists
-            else will replace the existing
+            if true should skip if function with same name exists
         inputs: List[FunctionIOCatalogEntry]
             function inputs, annotated list similar to table columns
         outputs: List[FunctionIOCatalogEntry]
@@ -659,6 +660,7 @@ class LogicalCreateFunction(Operator):
     def __init__(
         self,
         name: str,
+        or_replace: bool,
         if_not_exists: bool,
         inputs: List[FunctionIOCatalogEntry],
         outputs: List[FunctionIOCatalogEntry],
@@ -669,6 +671,7 @@ class LogicalCreateFunction(Operator):
     ):
         super().__init__(OperatorType.LOGICALCREATEFUNCTION, children)
         self._name = name
+        self._or_replace = or_replace
         self._if_not_exists = if_not_exists
         self._inputs = inputs
         self._outputs = outputs
@@ -679,6 +682,10 @@ class LogicalCreateFunction(Operator):
     @property
     def name(self):
         return self._name
+
+    @property
+    def or_replace(self):
+        return self._or_replace
 
     @property
     def if_not_exists(self):
@@ -711,6 +718,7 @@ class LogicalCreateFunction(Operator):
         return (
             is_subtree_equal
             and self.name == other.name
+            and self.or_replace == other.or_replace
             and self.if_not_exists == other.if_not_exists
             and self.inputs == other.inputs
             and self.outputs == other.outputs
@@ -724,6 +732,7 @@ class LogicalCreateFunction(Operator):
             (
                 super().__hash__(),
                 self.name,
+                self.or_replace,
                 self.if_not_exists,
                 tuple(self.inputs),
                 tuple(self.outputs),
