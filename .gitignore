@@ -7,6 +7,8 @@ __pycache__/
 
 # C extensions
 *.so
+# virtutal env
+test_evadb_venv/
 
 # Distribution / packaging
 .Python
