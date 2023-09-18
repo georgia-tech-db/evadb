@@ -75,6 +75,12 @@ short_integration_test() {
   print_error_code $code "SHORT INTEGRATION TEST"
 }
 
+short_third_party_test(){
+  PYTHONPATH=./ python -m pytest -p no:cov test/third_party_tests/test_native_executor.py::NativeExecutorTest::test_should_run_query_in_sqlite -m "not benchmark" 
+  code=$?
+  print_error_code $code "SHORT THIRDPARTY TEST"
+}
+
 long_integration_test() {
   PYTHONPATH=./ python -m pytest test/integration_tests/long/ -p no:cov -m "not benchmark"
   code=$?
@@ -82,19 +88,20 @@ long_integration_test() {
 }
 
 notebook_test() {
-  PYTHONPATH=./ python -m pytest --durations=5 --nbmake --overwrite "./tutorials" --capture=sys --tb=short -v --log-level=WARNING --nbmake-timeout=3000 --ignore="tutorials/08-chatgpt.ipynb" --ignore="tutorials/14-food-review-tone-analysis-and-response.ipynb" --ignore="tutorials/15-AI-powered-join.ipynb"
+  PYTHONPATH=./ python -m pytest --durations=5 --nbmake --overwrite "./tutorials" --capture=sys --tb=short -v --log-level=WARNING --nbmake-timeout=3000 --ignore="tutorials/08-chatgpt.ipynb" --ignore="tutorials/14-food-review-tone-analysis-and-response.ipynb" --ignore="tutorials/15-AI-powered-join.ipynb" --ignore="tutorials/16-homesale-forecasting.ipynb"
   code=$?
   print_error_code $code "NOTEBOOK TEST"
 }
 
 full_test() {
-  PYTHONPATH=./ pytest test/ --durations=20 --cov-report term-missing:skip-covered  --cov-config=.coveragerc --cov-context=test --cov=evadb/ --capture=sys --tb=short -v -rsf --log-level=WARNING -m "not benchmark" --ignore=test/third_party_tests/ --ignore=test/app_tests/
+  PYTHONPATH=./ pytest test/ test/third_party_tests/test_native_executor.py::NativeExecutorTest::test_should_run_query_in_sqlite --durations=20 --cov-report term-missing:skip-covered  --cov-config=.coveragerc --cov-context=test --cov=evadb/ --capture=sys --tb=short -v -rsf --log-level=WARNING -m "not benchmark" --ignore=test/third_party_tests/ --ignore=test/app_tests/
   code=$?
+  
   print_error_code $code "FULL TEST"
 }
 
 no_coverage_full_test() {
-  PYTHONPATH=./ python -m pytest -p no:cov test/ -m "not benchmark" --ignore=test/third_party_tests/ --ignore=test/app_tests/
+  PYTHONPATH=./ python -m pytest -p no:cov test/ test/third_party_tests/test_native_executor.py::NativeExecutorTest::test_should_run_query_in_sqlite -m "not benchmark" --ignore=test/third_party_tests/ --ignore=test/app_tests/
   code=$?
   print_error_code $code "FULL TEST"
 }
@@ -171,6 +178,15 @@ fi
 if [[ "$MODE" = "SHORT INTEGRATION" ]];
 then 
   short_integration_test
+fi
+
+##################################################
+## SHORT THIRDPARTY TESTS
+##################################################
+
+if [[ "$MODE" = "SHORT THIRDPARTY TEST" ]];
+then 
+  short_third_party_test
 fi
 
 ##################################################

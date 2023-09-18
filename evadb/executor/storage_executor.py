@@ -49,9 +49,7 @@ class StorageExecutor(AbstractExecutor):
             elif self.node.table.table_type == TableType.STRUCTURED_DATA:
                 return storage_engine.read(self.node.table, self.node.batch_mem_size)
             elif self.node.table.table_type == TableType.NATIVE_DATA:
-                return storage_engine.read(
-                    self.node.table_ref.table.database_name, self.node.table
-                )
+                return storage_engine.read(self.node.table)
             elif self.node.table.table_type == TableType.PDF_DATA:
                 return storage_engine.read(self.node.table)
             else:

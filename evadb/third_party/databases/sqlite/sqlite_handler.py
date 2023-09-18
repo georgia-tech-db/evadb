@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import datetime
 import sqlite3
 
 import pandas as pd
@@ -55,6 +56,9 @@ class SQLiteHandler(DBHandler):
         """
         if self.connection:
             self.connection.close()
+
+    def get_sqlalchmey_uri(self) -> str:
+        return f"sqlite:///{self.database}"
 
     def check_connection(self) -> DBHandlerStatus:
         """
@@ -102,6 +106,10 @@ class SQLiteHandler(DBHandler):
             pragma_df = pd.read_sql_query(query, self.connection)
             columns_df = pragma_df[["name", "type"]].copy()
             columns_df.rename(columns={"type": "dtype"}, inplace=True)
+            columns_df["dtype"] = columns_df["dtype"].apply(
+                self._sqlite_to_python_types
+            )
+
             return DBHandlerResponse(data=columns_df)
         except sqlite3.Error as e:
             return DBHandlerResponse(data=None, error=str(e))
@@ -143,3 +151,43 @@ class SQLiteHandler(DBHandler):
             return DBHandlerResponse(data=self._fetch_results_as_df(cursor))
         except sqlite3.Error as e:
             return DBHandlerResponse(data=None, error=str(e))
+
+    def _sqlite_to_python_types(self, sqlite_type: str):
+        mapping = {
+            "INT": int,
+            "INTEGER": int,
+            "TINYINT": int,
+            "SMALLINT": int,
+            "MEDIUMINT": int,
+            "BIGINT": int,
+            "UNSIGNED BIG INT": int,
+            "INT2": int,
+            "INT8": int,
+            "CHARACTER": str,
+            "VARCHAR": str,
+            "VARYING CHARACTER": str,
+            "NCHAR": str,
+            "NATIVE CHARACTER": str,
+            "NVARCHAR": str,
+            "TEXT": str,
+            "CLOB": str,
+            "BLOB": bytes,
+            "REAL": float,
+            "DOUBLE": float,
+            "DOUBLE PRECISION": float,
+            "FLOAT": float,
+            "NUMERIC": float,
+            "DECIMAL": float,
+            "BOOLEAN": bool,
+            "DATE": datetime.date,
+            "DATETIME": datetime.datetime,
+        }
+
+        sqlite_type = sqlite_type.split("(")[0].strip().upper()
+
+        if sqlite_type in mapping:
+            return mapping[sqlite_type]
+        else:
+            raise Exception(
+                f"Unsupported column {sqlite_type} encountered in the sqlite table. Please raise a feature request!"
+            )
