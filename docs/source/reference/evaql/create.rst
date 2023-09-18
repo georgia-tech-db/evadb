@@ -99,21 +99,22 @@ To register an user-defined function, specify the implementation details of the 
     TYPE  Classification
     IMPL  'evadb/functions/fastrcnn_object_detector.py';
 
-.. _create-udf-train:
-
-CREATE FUNCTION via Training
+CREATE FUNCTION via Type
 ----------------------------
-
-To register an user-defined function by training a predication model.
 
 .. code-block:: sql
 
-   CREATE FUNCTION IF NOT EXISTS PredictHouseRent FROM
-   (SELECT * FROM HomeRentals)
-   TYPE Ludwig
-   PREDICT 'rental_price'
-   TIME_LIST 120;
-   TUNE_FOR_MEMORY False;
+   CREATE [OR REPALCE] FUNCTION [IF NOT EXISTS] function_name
+   [ FROM ( select ) ]
+   TYPE function_type
+   [ parameter [ ...] ]
+
+Where the `parameter` is ``key value`` pair.
+For a single ``CREATE FUNCTION`` query, we can specify ``OR REPLACE`` or ``IF NOT EXISTS`` or neither, but not both.
+
+.. note::
+
+   Go over :ref:'hf', :ref:`predict`,and :ref:`forecast` to check examples for creating function via type.
 
 CREATE MATERIALIZED VIEW
 ------------------------

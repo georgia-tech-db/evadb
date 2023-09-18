@@ -1,3 +1,5 @@
+.. _predict:
+
 Training and Finetuning
 ========================
 
@@ -26,10 +28,6 @@ You can also simply give all other columns in `HomeRentals` as inputs and let th
    TYPE Ludwig
    PREDICT 'rental_price'
    TIME_LIMIT 120;
-
-.. note::
-
-   Check :ref:`create-udf-train` for available configurations for training models.
 
 2. After training completes, you can use the `PredictHouseRent` like all other functions in EvaDB
 
