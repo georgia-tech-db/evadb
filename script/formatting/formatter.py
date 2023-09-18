@@ -65,6 +65,13 @@ DEFAULT_DIRS.append(EvaDB_TEST_DIR)
 DEFAULT_DIRS.append(EvaDB_APPS_DIR)
 
 IGNORE_FILES = ["version.py"]
+IGNORE_PRINT_FILES = [
+    "apps/privategpt/privateGPT.py",
+    "apps/privategpt/ingest.py",
+    "apps/story_qa/evadb_qa.py",
+    "apps/youtube_qa/youtube_qa.py",
+    "apps/youtube_channel_qa/youtube_channel_qa.py",
+]
 
 FLAKE8_VERSION_REQUIRED = "3.9.1"
 BLACK_VERSION_REQUIRED = "22.6.0"
@@ -228,7 +235,7 @@ def format_file(file_path, add_header, strip_header, format_code):
             # CHECK FOR INVALID WORDS (like print)
             with open(file_path, 'r') as file:
                 for line_num, line in enumerate(file, start=1):
-                    if ' print(' in line:
+                    if file_path not in IGNORE_PRINT_FILES and ' print(' in line:
                         LOG.warning(f"print() found in {file_path}, line {line_num}: {line.strip()}")
                         sys.exit(1)                        
 

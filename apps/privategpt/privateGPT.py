@@ -23,13 +23,15 @@ cursor = evadb.connect(path).cursor()
 
 
 def query(question):
-    context_docs = (
-        cursor.table("embedding_table")
-        .order(f"Similarity(embedding('{question}'), features)")
-        .limit(3)
-        .select("data")
-        .df()
-    )
+    context_docs = cursor.query(
+        f"""
+        SELECT data
+        FROM embedding_table
+        ORDER BY Similarity(embedding('{question}'), features)
+        ASC LIMIT 3;
+    """
+    ).df()
+
     # Merge all context information.
     context = "; \n".join(context_docs["embedding_table.data"])
 
@@ -51,8 +53,10 @@ def query(question):
     print("\n>> Context: ")
     print(context)
 
+
 print(
-    "🔮 Welcome to EvaDB! Don't forget to run `python ingest.py` before running this file."
+    "🔮 Welcome to EvaDB! Don't forget to run `python ingest.py` before"
+    " running this file."
 )
 
 ## Take input of queries from user in a loop

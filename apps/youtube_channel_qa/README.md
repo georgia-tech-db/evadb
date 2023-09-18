@@ -28,6 +28,6 @@ pip install -r requirements.txt
 ## Usage
 Run script: 
 ```bat
-python multi_youtube_video_qa.py
+python youtube_channel_qa.py
 ```
 
