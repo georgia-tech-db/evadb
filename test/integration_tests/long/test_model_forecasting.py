@@ -75,7 +75,7 @@ class ModelTrainTests(unittest.TestCase):
         execute_query_fetch_all(self.evadb, create_predict_udf)
 
         predict_query = """
-            SELECT AirForecast(12);
+            SELECT AirForecast(12) order by y;
         """
         result = execute_query_fetch_all(self.evadb, predict_query)
         self.assertEqual(len(result), 12)

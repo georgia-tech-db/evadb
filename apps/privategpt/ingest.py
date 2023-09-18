@@ -23,25 +23,23 @@ def load_data(source_folder_path: str):
     cursor = evadb.connect(path).cursor()
 
     # Drop function if it already exists
-    cursor.drop_function("embedding").execute()
-
+    cursor.query("DROP FUNCTION IF EXISTS embedding;").execute()
     # Create function from Python file
     # This function is a sentence feature extractor
-    embedding_udf = cursor.create_function(
-        udf_name="embedding",
-        if_not_exists=True,
-        impl_path=f"{path}/udfs/sentence_feature_extractor.py",
-    )
-    embedding_udf.execute()
+    text_feat_function_query = f"""CREATE FUNCTION IF NOT EXISTS embedding
+            IMPL  '{path}/functions/sentence_feature_extractor.py';
+            """
+    print(text_feat_function_query)
+    cursor.query(text_feat_function_query).execute()
 
     print("🧹 Dropping existing tables in EvaDB")
-    cursor.drop_table("data_table").execute()
-    cursor.drop_table("embedding_table").execute()
+    cursor.query("DROP TABLE IF EXISTS data_table;").execute()
+    cursor.query("DROP TABLE IF EXISTS embedding_table;").execute()
 
     print("📄 Loading PDFs into EvaDB")
-    cursor.load(
-        file_regex=f"{source_folder_path}/*.pdf", format="PDF", table_name="data_table"
-    ).execute()
+    text_load_query = f"""LOAD PDF '{source_folder_path}/*.pdf' INTO data_table;"""
+    print(text_load_query)
+    cursor.query(text_load_query).execute()
 
     print("🤖 Extracting Feature Embeddings. This may take some time ...")
     cursor.query(
@@ -49,12 +47,13 @@ def load_data(source_folder_path: str):
     ).execute()
 
     print("🔍 Building FAISS Index ...")
-    cursor.create_vector_index(
-        index_name="embedding_index",
-        table_name="embedding_table",
-        expr="features",
-        using="FAISS",
-    )
+    cursor.query(
+        """
+        CREATE INDEX embedding_index
+        ON embedding_table (features)
+        USING FAISS;
+    """
+    ).execute()
 
 
 def main():

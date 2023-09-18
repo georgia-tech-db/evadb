@@ -70,6 +70,9 @@ class MariaDbHandler(DBHandler):
         if self.connection:
             self.connection.close()
 
+    def get_sqlalchmey_uri(self) -> str:
+        return f"mariadb+mariadbconnector://{self.user}:{self.password}@{self.host}:{self.port}/{self.database}"
+
     def check_connection(self) -> DBHandlerStatus:
         """
         Method for checking the status of database connection.
@@ -125,7 +128,9 @@ class MariaDbHandler(DBHandler):
         """
         try:
             res = cursor.fetchall()
-            res_df = pd.DataFrame(res, columns=[desc[0] for desc in cursor.description])
+            res_df = pd.DataFrame(
+                res, columns=[desc[0].lower() for desc in cursor.description]
+            )
             return res_df
         except mariadb.ProgrammingError as e:
             if str(e) == "no results to fetch":

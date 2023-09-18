@@ -6,52 +6,45 @@ EvaDB supports an extensive range of data sources for structured and unstructure
 Connect to a SQL Database System
 --------------------------------
 
-1. Use the `CREATE DATABASE` statement to connect to an existing SQL database.
+1. Use the ``CREATE DATABASE`` statement to connect to an existing SQL database.
 
-.. code-block:: python
+.. code-block::
 
-   cursor.query("""
-        CREATE DATABASE restaurant_reviews 
-        WITH ENGINE = 'postgres', 
-        PARAMETERS = {
-            "user": "eva",
-            "password": "password",
-            "host": "localhost",
-            "port": "5432",
-            "database": "restaurant_reviews"
-     	   };""").df()
+   CREATE DATABASE restaurant_reviews 
+   WITH ENGINE = 'postgres', 
+   PARAMETERS = {
+       "user": "eva",
+       "password": "password",
+       "host": "localhost",
+       "port": "5432",
+       "database": "restaurant_reviews"
+   };
 
 .. note::
 
    Go over the :ref:`CREATE DATABASE<sql-create-database>` statement for more details. The :ref:`Databases<databases>` page lists all the database systems that EvaDB currently supports.
 
-2. Preview the Available Data Using `SELECT`
+2. Preview the Available Data Using ``SELECT``
 
-You can now preview the available data in the `restaurant_reviews` database with a standard :ref:`SELECT<sql-select>` statement.
+You can now preview the available data in the ``restaurant_reviews`` database with a standard :ref:`SELECT<sql-select>` statement.
 
-.. code-block:: python
+.. code-block:: sql
 
-   cursor.query("""
-      SELECT * 
-      FROM restaurant_reviews.food_review;
-      """).df()
+   SELECT * FROM restaurant_reviews.food_review;
 
-3. Run Native Queries in the Connected Database With `USE`
+3. Run Native Queries in the Connected Database With ``USE``
 
 You can also run native queries directly in the connected database system by the :ref:`USE<sql-use>` statement.
 
-.. code-block:: python
+.. code-block::
 
-   cursor.query(
-      """
-        USE restaurant_reviews {
-                INSERT INTO food_review (name, review) 
-                VALUES (
-                  'Customer 1', 
-                  'I ordered fried rice but it is too salty.'
-                )
-        };
-      """).df()
+   USE restaurant_reviews {
+       INSERT INTO food_review (name, review) 
+       VALUES (
+           'Customer 1', 
+           'I ordered fried rice but it is too salty.'
+       )
+   };
 
 
 Load Unstructured Data
@@ -63,23 +56,17 @@ EvaDB supports diverse types of unstructured data. Here are some examples:
 
 You can load a collection of images obtained from Reddit from the local filesystem into EvaDB using the :ref:`LOAD<sql-load>` statement.
 
-.. code-block:: python
-   
-   cursor.query("""
-      LOAD IMAGE 'reddit-images/*.jpg' 
-      INTO reddit_dataset;
-   """).df()
+.. code-block:: sql
+
+   LOAD IMAGE 'reddit-images/*.jpg' INTO reddit_dataset;
 
 2. Load Video from Cloud Bucket
 
 You can load a video from an S3 cloud bucket into EvaDB using the :ref:`LOAD<sql-load>` statement.
 
-.. code-block:: python
+.. code-block:: sql
 
-   cursor.query("""
-      LOAD VIDEO 's3://bucket/eva_videos/mnist.mp4' 
-      INTO MNISTVid;
-   """).df()
+   LOAD VIDEO 's3://bucket/eva_videos/mnist.mp4' INTO MNISTVid;
 
 .. note::
 

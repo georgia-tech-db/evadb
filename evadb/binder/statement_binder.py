@@ -18,6 +18,7 @@ from typing import Callable
 
 from evadb.binder.binder_utils import (
     BinderError,
+    add_func_expr_outputs_to_binder_context,
     bind_table_info,
     check_column_name_is_string,
     check_groupby_pattern,
@@ -199,6 +200,9 @@ class StatementBinder:
                 node.target_list = extend_star(self._binder_context)
             for expr in node.target_list:
                 self.bind(expr)
+                if isinstance(expr, FunctionExpression):
+                    add_func_expr_outputs_to_binder_context(expr, self._binder_context)
+
         if node.groupby_clause:
             self.bind(node.groupby_clause)
             check_table_object_is_groupable(node.from_table)
@@ -275,19 +279,7 @@ class StatementBinder:
             func_expr = node.table_valued_expr.func_expr
             func_expr.alias = node.alias
             self.bind(func_expr)
-            output_cols = []
-            for obj, alias in zip(func_expr.output_objs, func_expr.alias.col_names):
-                col_alias = "{}.{}".format(func_expr.alias.alias_name, alias)
-                alias_obj = TupleValueExpression(
-                    name=alias,
-                    table_alias=func_expr.alias.alias_name,
-                    col_object=obj,
-                    col_alias=col_alias,
-                )
-                output_cols.append(alias_obj)
-            self._binder_context.add_derived_table_alias(
-                func_expr.alias.alias_name, output_cols
-            )
+            add_func_expr_outputs_to_binder_context(func_expr, self._binder_context)
         else:
             raise BinderError(f"Unsupported node {type(node)}")
 

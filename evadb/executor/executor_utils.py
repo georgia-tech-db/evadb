@@ -17,10 +17,14 @@ import os
 from pathlib import Path
 from typing import TYPE_CHECKING, Generator, List
 
+from evadb.catalog.catalog_utils import xform_column_definitions_to_catalog_entries
+from evadb.catalog.models.utils import TableCatalogEntry
+from evadb.parser.create_statement import ColumnDefinition
+
 if TYPE_CHECKING:
     from evadb.catalog.catalog_manager import CatalogManager
 
-from evadb.catalog.catalog_type import VectorStoreType
+from evadb.catalog.catalog_type import TableType, VectorStoreType
 from evadb.expression.abstract_expression import AbstractExpression
 from evadb.expression.function_expression import FunctionExpression
 from evadb.models.storage.batch import Batch
@@ -171,3 +175,19 @@ def handle_vector_store_params(
         return {}
     else:
         raise ValueError("Unsupported vector store type: {}".format(vector_store_type))
+
+
+def create_table_catalog_entry_for_native_table(
+    table_info: TableInfo, column_list: List[ColumnDefinition]
+):
+    column_catalog_entires = xform_column_definitions_to_catalog_entries(column_list)
+
+    # Assemble table.
+    table_catalog_entry = TableCatalogEntry(
+        name=table_info.table_name,
+        file_url=None,
+        table_type=TableType.NATIVE_DATA,
+        columns=column_catalog_entires,
+        database_name=table_info.database_name,
+    )
+    return table_catalog_entry

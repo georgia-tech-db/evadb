@@ -65,8 +65,6 @@ if sys.version_info >= (3, 8):
         @macos_skip_marker
         @patch("asyncio.events.AbstractEventLoop.connect_read_pipe")
         async def test_create_stdin_reader(self, mock_read_pipe):
-            sys.stdin = MagicMock()
-
             try:
                 stdin_reader = await create_stdin_reader()
                 self.assertNotEqual(stdin_reader, None)
