@@ -783,6 +783,7 @@ class LogicalCreateFunctionFromSelectToPhysical(Rule):
     def apply(self, before: LogicalCreateFunction, context: OptimizerContext):
         after = CreateFunctionPlan(
             before.name,
+            before.or_replace,
             before.if_not_exists,
             before.inputs,
             before.outputs,
