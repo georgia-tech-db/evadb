@@ -113,6 +113,85 @@ class CreateFunctionExecutorTest(unittest.TestCase):
         )
 
     @patch("evadb.executor.create_function_executor.load_function_class_from_file")
+    def test_should_overwrite_or_replace(self, load_function_class_from_file_mock):
+        catalog_instance = MagicMock()
+        catalog_instance().get_function_catalog_entry_by_name.return_value = False
+        catalog_instance().insert_function_catalog_entry.return_value = "function"
+        impl_path = MagicMock()
+        abs_path = impl_path.absolute.return_value = MagicMock()
+        abs_path.as_posix.return_value = "test.py"
+        load_function_class_from_file_mock.return_value.return_value = "mock_class"
+        plan = type(
+            "CreateFunctionPlan",
+            (),
+            {
+                "name": "function",
+                "or_replace": True,
+                "if_not_exists": False,
+                "inputs": ["inp"],
+                "outputs": ["out"],
+                "impl_path": impl_path,
+                "function_type": "classification",
+                "metadata": {"key1": "value1", "key2": "value2"},
+            },
+        )
+        evadb = MagicMock()
+        evadb.catalog = catalog_instance
+        evadb.config = MagicMock()
+        create_function_executor = CreateFunctionExecutor(evadb, plan)
+        actual_batch = next(create_function_executor.exec())
+        catalog_instance().insert_function_catalog_entry.assert_called_with(
+            "function",
+            "test.py",
+            "classification",
+            ["inp", "out"],
+            {"key1": "value1", "key2": "value2"},
+        )
+        self.assertEqual(
+            actual_batch.frames[0][0],
+            "Function function added to the database.",
+        )
+
+        # We create the function again with different paramaters
+        function_entry = MagicMock()
+        cache = MagicMock()
+        function_entry.dep_caches = [cache]
+        catalog_instance().get_function_catalog_entry_by_name.return_value = (
+            function_entry
+        )
+        plan = type(
+            "CreateFunctionPlan",
+            (),
+            {
+                "name": "function",
+                "or_replace": True,
+                "if_not_exists": False,
+                "inputs": ["inp"],
+                "outputs": ["out"],
+                "impl_path": impl_path,
+                "function_type": "prediction",
+                "metadata": {"key1": "value3", "key2": "value4"},
+            },
+        )
+        create_function_executor = CreateFunctionExecutor(evadb, plan)
+        actual_batch = next(create_function_executor.exec())
+        catalog_instance().drop_function_cache_catalog_entry.assert_called_with(cache)
+        catalog_instance().delete_function_catalog_entry_by_name.assert_called_with(
+            "function"
+        )
+        catalog_instance().insert_function_catalog_entry.assert_called_with(
+            "function",
+            "test.py",
+            "prediction",
+            ["inp", "out"],
+            {"key1": "value3", "key2": "value4"},
+        )
+        self.assertEqual(
+            actual_batch.frames[0][0],
+            "Function function overwritten.",
+        )
+
+    @patch("evadb.executor.create_function_executor.load_function_class_from_file")
     def test_should_raise_error_on_incorrect_io_definition(
         self, load_function_class_from_file_mock
     ):
