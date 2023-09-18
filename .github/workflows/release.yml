@@ -1,15 +1,26 @@
 name: Release
 
 on:
-  push:
-    branches:
-      - master
+  workflow_run:
+    workflows: [Sync Staging and Master]
+    types: 
+      - completed
+    branches: 
+      - staging
 
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: master
+      - name: Install env.
+        run: |
+          python -m venv test_evadb
+          source test_evadb/bin/activate
+          pip install --upgrade pip
+          pip install ".[dev]"
       - name: Create pypirc.
         env:
           PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }} 
@@ -19,7 +30,6 @@ jobs:
           [distutils]
           index-servers =
             pypi
-
           [pypi]
           repository = https://upload.pypi.org/legacy/
           username = ${PYPI_USERNAME} 
@@ -29,4 +39,5 @@ jobs:
         env:
           GITHUB_KEY: ${{ github.token }}
         run: |
+          source test_evadb/bin/activate
           python script/releasing/releaser.py -n minor -u
