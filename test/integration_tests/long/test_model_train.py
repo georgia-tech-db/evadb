@@ -72,7 +72,7 @@ class ModelTrainTests(unittest.TestCase):
         self.assertEqual(len(result.columns), 1)
         self.assertEqual(len(result), 10)
 
-    def test_autosklearn_regression(self):
+    def test_sklearn_regression(self):
         create_predict_function = """
             CREATE FUNCTION IF NOT EXISTS PredictHouseRent FROM
             ( SELECT * FROM HomeRentals )
