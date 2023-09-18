@@ -35,7 +35,7 @@ create_table: CREATE TABLE if_not_exists? table_name (create_definitions | (AS s
 rename_table: RENAME TABLE table_name TO table_name
     
 // Create Functions 
-create_function: CREATE FUNCTION if_not_exists? function_name INPUT create_definitions OUTPUT create_definitions TYPE function_type IMPL function_impl function_metadata*
+create_function: CREATE or_replace? FUNCTION if_not_exists? function_name INPUT create_definitions OUTPUT create_definitions TYPE function_type IMPL function_impl function_metadata*
 	| CREATE or_replace? FUNCTION if_not_exists? function_name IMPL function_impl function_metadata* 
 	| CREATE or_replace? FUNCTION if_not_exists? function_name TYPE function_type function_metadata*
 	| CREATE or_replace? FUNCTION if_not_exists? function_name FROM LR_BRACKET select_statement RR_BRACKET TYPE function_type function_metadata*
