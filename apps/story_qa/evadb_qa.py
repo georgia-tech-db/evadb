@@ -24,7 +24,7 @@ import evadb
 
 def ask_question(story_path: str):
     # Initialize early to exclude download time.
-    llm = GPT4All("ggml-gpt4all-j-v1.3-groovy")
+    llm = GPT4All("ggml-model-gpt4all-falcon-q4_0.bin")
 
     path = os.path.dirname(evadb.__file__)
     cursor = evadb.connect().cursor()
@@ -86,7 +86,7 @@ def ask_question(story_path: str):
 
     # Create search index on extracted features.
     cursor.query(
-        f"CREATE INDEX {index_table} ON {story_feat_table} (features) USING" " FAISS;"
+        f"CREATE INDEX {index_table} ON {story_feat_table} (features) USING QDRANT;"
     ).execute()
 
     t_i = t_i + 1
@@ -96,9 +96,13 @@ def ask_question(story_path: str):
     print("Query")
 
     # Search similar text as the asked question.
-    question = "Who is Cyril Vladmirovich?"
+    question = "Who is Count Cyril Vladmirovich?"
     ascii_question = unidecode(question)
 
+    print(cursor.query(f"""SELECT * FROM {story_feat_table};""").df())
+
+    # Instead of passing all the information to the LLM, we extract the 5 topmost similar sentences
+    # and use them as context for the LLM to answer.
     res_batch = cursor.query(
         f"""SELECT data FROM {story_feat_table}
         ORDER BY Similarity(SentenceFeatureExtractor('{ascii_question}'),features)
@@ -115,7 +119,8 @@ def ask_question(story_path: str):
     context_list = []
     for i in range(len(res_batch)):
         context_list.append(res_batch.frames[f"{story_feat_table.lower()}.data"][i])
-    context = "; \n".join(context_list)
+    context = "\n".join(context_list)
+    print(context)
 
     t_i = t_i + 1
     timestamps[t_i] = perf_counter()
@@ -124,14 +129,15 @@ def ask_question(story_path: str):
     print("LLM")
 
     # LLM
-    messages = [
-        {"role": "user", "content": f"Here is some context:{context}"},
-        {
-            "role": "user",
-            "content": f"Answer this question based on context: {question}",
-        },
-    ]
-    llm.chat_completion(messages)
+    query = f"""If the context is not relevant, please answer the question by using your own knowledge about the topic.
+    
+    {context}
+    
+    Question : {question}"""
+
+    full_response = llm.generate(query)
+    
+    print(full_response)
 
     t_i = t_i + 1
     timestamps[t_i] = perf_counter()
