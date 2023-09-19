@@ -41,7 +41,8 @@ class Batch:
         self._frames = pd.DataFrame() if frames is None else frames
         if not isinstance(self._frames, pd.DataFrame):
             raise ValueError(
-                "Batch constructor not properly called.\n" "Expected pandas.DataFrame"
+                "Batch constructor not properly called.\n"
+                f"Expected pandas.DataFrame, got {type(self._frames)}"
             )
 
     @property
