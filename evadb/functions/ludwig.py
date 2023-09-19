@@ -31,7 +31,7 @@ class GenericLudwigModel(AbstractFunction):
 
     def forward(self, frames: pd.DataFrame) -> pd.DataFrame:
         predictions, _ = self.model.predict(frames, return_type=pd.DataFrame)
-        # Ludwig will return a Dask DataFrame when dask is installed
+        # Ludwig may return a Dask DataFrame when dask is installed
         try:
             import dask
 
