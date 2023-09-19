@@ -136,7 +136,7 @@ def ask_question(story_path: str):
     Question : {question}"""
 
     full_response = llm.generate(query)
-    
+
     print(full_response)
 
     t_i = t_i + 1
