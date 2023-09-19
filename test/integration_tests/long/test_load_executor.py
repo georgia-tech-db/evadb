@@ -19,7 +19,6 @@ import shutil
 import tempfile
 import unittest
 from pathlib import Path
-from pprint import pprint
 from test.util import (
     create_dummy_batches,
     create_dummy_csv_batches,
@@ -502,13 +501,11 @@ class LoadExecutorTests(unittest.TestCase):
         self.assertEqual(len(result), 26)
 
     def test_load_query_incorrect_fileFormat(self):
-        try:
+        with self.assertRaises(ExecutorError):
             execute_query_fetch_all(
                 self.evadb,
                 f"""LOAD document '{EvaDB_ROOT_DIR}/data/documents/*.pdf' INTO pdfs;""",
             )
-        except ExecutorError as e:
-            pprint(e)
 
 
 if __name__ == "__main__":
