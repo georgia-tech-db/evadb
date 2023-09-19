@@ -76,7 +76,7 @@ class DropObjectExecutorTest(unittest.TestCase):
     def test_should_drop_table(self):
         query = f"""LOAD VIDEO '{self.video_file_path}' INTO MyVideo;"""
         execute_query_fetch_all(self.evadb, query)
-        
+
         execute_query_fetch_all(self.evadb, query)
 
         # catalog should contain video table and the metadata table
