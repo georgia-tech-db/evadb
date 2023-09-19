@@ -19,6 +19,7 @@ import shutil
 import tempfile
 import unittest
 from pathlib import Path
+from pprint import pprint
 from test.util import (
     create_dummy_batches,
     create_dummy_csv_batches,
@@ -40,7 +41,7 @@ from evadb.executor.executor_utils import ExecutorError
 from evadb.models.storage.batch import Batch
 from evadb.parser.types import FileFormatType
 from evadb.server.command_handler import execute_query_fetch_all
-from pprint import pprint
+
 
 @pytest.mark.notparallel
 class LoadExecutorTests(unittest.TestCase):
