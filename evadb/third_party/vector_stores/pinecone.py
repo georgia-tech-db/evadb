@@ -61,7 +61,6 @@ class PineconeVectorStore(VectorStore):
         if not _pinecone_init_done:
             # Initialize pinecone.
             import pinecone
-
             pinecone.init(api_key=self._api_key, environment=self._environment)
             _pinecone_init_done = True
         self._client = None
@@ -75,7 +74,7 @@ class PineconeVectorStore(VectorStore):
     def add(self, payload: List[FeaturePayload]):
         self._client.upsert(
             vectors=[
-                {"id": str(row.id), "values": row.embedding.reshape(-1).tolist()}
+                {'id': str(row.id), "values": row.embedding.reshape(-1).tolist()}
                 for row in payload
             ]
         )
@@ -91,15 +90,19 @@ class PineconeVectorStore(VectorStore):
     ) -> VectorIndexQueryResult:
         import pinecone
 
+        print(pinecone.list_indexes())
         if not self._client:
             self._client = pinecone.Index(self._index_name)
+
         response = self._client.query(
-            top_k=query.top_k, vector=query.embedding.reshape(-1).tolist()
+            top_k=query.top_k,
+            vector=query.embedding.reshape(-1).tolist()
         )
+        
         distances, ids = [], []
 
         for row in response["matches"]:
             distances.append(row["score"])
-            distances.append(row["id"])
+            ids.append(row["id"])
 
         return VectorIndexQueryResult(distances, ids)

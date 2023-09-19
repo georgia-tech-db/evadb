@@ -25,6 +25,7 @@ from test.util import (
 import numpy as np
 import pandas as pd
 import pytest
+import time
 
 from evadb.models.storage.batch import Batch
 from evadb.server.command_handler import execute_query_fetch_all
@@ -368,10 +369,13 @@ class SimilarityTests(unittest.TestCase):
         res_batch = execute_query_fetch_all(self.evadb, select_query)
         self.assertEqual(res_batch.frames["testsimilarityimagedataset._row_id"][0], 5)
 
-    @gpu_skip_marker
+        # Cleanup
+        self.evadb.catalog().drop_index_catalog_entry("testFaissIndexImageDataset")
+
+    # @gpu_skip_marker
     @qdrant_skip_marker
     def test_end_to_end_index_scan_should_work_correctly_on_image_dataset_qdrant(self):
-        create_index_query = """CREATE INDEX testFaissIndexImageDataset
+        create_index_query = """CREATE INDEX testQdrantIndexImageDataset
                                     ON testSimilarityImageDataset (DummyFeatureExtractor(data))
                                     USING QDRANT;"""
         execute_query_fetch_all(self.evadb, create_index_query)
@@ -388,3 +392,39 @@ class SimilarityTests(unittest.TestCase):
 
         res_batch = execute_query_fetch_all(self.evadb, select_query)
         self.assertEqual(res_batch.frames["testsimilarityimagedataset._row_id"][0], 5)
+
+         # Cleanup
+        self.evadb.catalog().drop_index_catalog_entry("testQdrantIndexImageDataset")
+
+    def test_end_to_end_index_scan_should_work_correctly_on_image_dataset_pinecone(self):
+        # Set the env variables.
+        original_pinecone_key = os.environ.get("PINECONE_API_KEY")
+        original_pinecone_env = os.environ.get("PINECONE_ENV")
+
+        os.environ["PINECONE_API_KEY"] = "657e4fae-7208-4555-b0f2-9847dfa5b818"
+        os.environ["PINECONE_ENV"] = "gcp-starter"
+
+        # We need to always drop the index as Pinecone's free tier only supports a single current index.
+        drop_index_query = "DROP INDEX IF EXISTS testpineconeindeximagedataset;"
+        execute_query_fetch_all(self.evadb, drop_index_query)
+        create_index_query = """CREATE INDEX testpineconeindeximagedataset
+                                ON testSimilarityImageDataset (DummyFeatureExtractor(data))
+                                USING PINECONE;"""
+        execute_query_fetch_all(self.evadb, create_index_query)
+        # Sleep to ensure the pinecone records get updated as Pinecone is eventually consistent.
+        time.sleep(20)
+
+        select_query = """SELECT _row_id FROM testSimilarityImageDataset
+                            ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data))
+                            LIMIT 5;""".format(
+            self.img_path
+        )
+
+        res_batch = execute_query_fetch_all(self.evadb, select_query)
+        print(res_batch)
+        self.assertEqual(res_batch.frames["testsimilarityimagedataset._row_id"][0], 5)
+
+        # Reset the env variables.
+        os.environ["PINECONE_API_KEY"] = original_pinecone_key
+        os.environ["PINECONE_ENV"] = original_pinecone_env
+
