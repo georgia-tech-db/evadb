@@ -324,6 +324,17 @@ def is_forecast_available() -> bool:
         return False
 
 
+def try_to_import_sklearn():
+    try:
+        import sklearn  # noqa: F401
+        from sklearn.linear_model import LinearRegression  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import sklearn.
+                Please install it with `pip install scikit-learn`."""
+        )
+
+
 ##############################
 ## VISION
 ##############################
