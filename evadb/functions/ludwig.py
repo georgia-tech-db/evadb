@@ -37,9 +37,6 @@ class GenericLudwigModel(AbstractFunction):
 
             if isinstance(predictions, dask.dataframe.core.DataFrame):
                 predictions = predictions.compute()
-                print(f"After compute: {type(predictions)}")
-            else:
-                print(type(predictions))
         except ImportError:
             pass
         return predictions
