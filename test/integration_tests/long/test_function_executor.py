@@ -167,6 +167,30 @@ class FunctionExecutorTest(unittest.TestCase):
         )
         self.assertEqual(actual, expected)
 
+    def test_create_or_replace(self):
+        function_name = "DummyObjectDetector"
+        execute_query_fetch_all(self.evadb, f"DROP FUNCTION IF EXISTS {function_name};")
+        create_function_query = """CREATE OR REPLACE FUNCTION {}
+                  INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
+                  OUTPUT (label NDARRAY STR(10))
+                  TYPE  Classification
+                  IMPL  'test/util.py';
+        """
+        actual = execute_query_fetch_all(
+            self.evadb, create_function_query.format(function_name)
+        )
+        expected = Batch(
+            pd.DataFrame([f"Function {function_name} added to the database."])
+        )
+        self.assertEqual(actual, expected)
+
+        # Try to create or replace FUNCTION
+        actual = execute_query_fetch_all(
+            self.evadb, create_function_query.format(function_name)
+        )
+        expected = Batch(pd.DataFrame([f"Function {function_name} overwritten."]))
+        self.assertEqual(actual, expected)
+
     def test_should_create_function_with_metadata(self):
         function_name = "DummyObjectDetector"
         execute_query_fetch_all(self.evadb, f"DROP FUNCTION {function_name};")

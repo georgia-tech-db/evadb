@@ -148,6 +148,8 @@ intersphinx_mapping = {
 html_static_path = ["_static"]
 html_css_files = [
                     "custom.css", 
+                    "algolia.css",
+                    "https://cdn.jsdelivr.net/npm/@docsearch/css@3",
                     "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/fontawesome.min.css",
                     "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/solid.min.css",
                     "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/brands.min.css"]
@@ -166,3 +168,5 @@ def setup(app):
     )
     # Custom JS
     app.add_js_file("js/top-navigation.js", defer="defer")
+    app.add_js_file("https://cdn.jsdelivr.net/npm/@docsearch/js@3.3.3/dist/umd/index.js",defer="defer")
+    app.add_js_file("js/algolia.js",defer="defer")

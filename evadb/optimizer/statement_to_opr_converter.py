@@ -311,6 +311,7 @@ class StatementToPlanConverter:
 
         create_function_opr = LogicalCreateFunction(
             statement.name,
+            statement.or_replace,
             statement.if_not_exists,
             annotated_inputs,
             annotated_outputs,
