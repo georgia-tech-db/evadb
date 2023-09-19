@@ -60,6 +60,7 @@ class Functions:
     # Create function
     def create_function(self, tree):
         function_name = None
+        or_replace = False
         if_not_exists = False
         input_definitions = []
         output_definitions = []
@@ -73,6 +74,8 @@ class Functions:
             if isinstance(child, Tree):
                 if child.data == "function_name":
                     function_name = self.visit(child)
+                elif child.data == "or_replace":
+                    or_replace = True
                 elif child.data == "if_not_exists":
                     if_not_exists = True
                 elif child.data == "create_definitions":
@@ -103,6 +106,7 @@ class Functions:
 
         return CreateFunctionStatement(
             function_name,
+            or_replace,
             if_not_exists,
             impl_path,
             input_definitions,
