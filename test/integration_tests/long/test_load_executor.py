@@ -40,7 +40,7 @@ from evadb.executor.executor_utils import ExecutorError
 from evadb.models.storage.batch import Batch
 from evadb.parser.types import FileFormatType
 from evadb.server.command_handler import execute_query_fetch_all
-
+from evadb.executor.executor_utils import ExecutorError
 
 @pytest.mark.notparallel
 class LoadExecutorTests(unittest.TestCase):
@@ -500,6 +500,15 @@ class LoadExecutorTests(unittest.TestCase):
         self.assertEqual(len(result.columns), 4)
         self.assertEqual(len(result), 26)
 
+    
+    def test_load_query_incorrect_fileFormat(self):
+        try:
+            execute_query_fetch_all(
+                self.evadb,
+                f"""LOAD document '{EvaDB_ROOT_DIR}/data/documents/*.pdf' INTO pdfs;""",
+            )
+        except ExecutorError as e:
+            print(e)
 
 if __name__ == "__main__":
     unittest.main()
