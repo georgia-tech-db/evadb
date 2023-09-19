@@ -60,7 +60,8 @@ class CreateIndexExecutor(AbstractExecutor):
             columns = table.table_obj.columns
             # As other libraries, we default to HNSW and L2 distance.
             resp = handler.execute_native_query(
-                f"""CREATE INDEX {self.node.name} ON {table.table_name} USING hnsw ({columns[0].name} vector_l2_ops)"""
+                f"""CREATE INDEX {self.node.name} ON {table.table_name} 
+                    USING hnsw ({self.node.col_list[0].name} vector_l2_ops)"""
             )
             if resp.error is not None:
                 raise ExecutorError(

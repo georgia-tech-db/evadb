@@ -18,6 +18,7 @@ from test.util import get_evadb_for_testing
 import pytest
 
 from evadb.server.command_handler import execute_query_fetch_all
+from test.util import create_sample_image, load_functions_for_testing
 
 
 @pytest.mark.notparallel
@@ -25,6 +26,12 @@ class CreateIndexTest(unittest.TestCase):
     def setUp(self):
         self.evadb = get_evadb_for_testing()
         self.evadb.catalog().reset()
+
+        # Get sample image.
+        self.img_path = create_sample_image()
+
+        # Load functions.
+        load_functions_for_testing(self.evadb, mode="debug")
 
     def test_native_engine_should_create_index(self):
         # Create database.
@@ -42,19 +49,21 @@ class CreateIndexTest(unittest.TestCase):
 
         # Create table.
         query = """USE test_data_source {
-            CREATE TABLE test_vector (embedding vector(3))
+            CREATE TABLE test_vector (idx INTEGER, dummy INTEGER, embedding vector(27))
         }"""
         execute_query_fetch_all(self.evadb, query)
 
         # Insert data.
         vector_list = [
-            [0, 0, 0],
-            [1, 1, 1],
-            [2, 2, 2],
+            [0.0 for _ in range(9)] + [1.0 for _ in range(9)] + [2.0 for _ in range(9)],
+            [1.0 for _ in range(9)] + [2.0 for _ in range(9)] + [3.0 for _ in range(9)],
+            [2.0 for _ in range(9)] + [3.0 for _ in range(9)] + [4.0 for _ in range(9)],
+            [3.0 for _ in range(9)] + [4.0 for _ in range(9)] + [5.0 for _ in range(9)],
+            [4.0 for _ in range(9)] + [5.0 for _ in range(9)] + [6.0 for _ in range(9)],
         ]
-        for vector in vector_list:
+        for idx, vector in enumerate(vector_list):
             query = f"""USE test_data_source {{
-                INSERT INTO test_vector (embedding) VALUES ('{vector}')
+                INSERT INTO test_vector (idx, dummy, embedding) VALUES ({idx}, {idx}, '{vector}')
             }}"""
             execute_query_fetch_all(self.evadb, query)
 
@@ -76,6 +85,18 @@ class CreateIndexTest(unittest.TestCase):
             df["indexdef"][0],
             """CREATE INDEX test_index ON public.test_vector USING hnsw (embedding vector_l2_ops)""",
         )
+
+        # Check the index scan plan.
+        query = f"""SELECT idx, embedding FROM test_data_source.test_vector 
+            ORDER BY Similarity(DummyFeatureExtractor(Open('{self.img_path}')), embedding) 
+            LIMIT 1"""
+        df = execute_query_fetch_all(self.evadb, f"EXPLAIN {query}").frames
+        self.assertIn("VectorIndexScan", df[0][0])
+
+        # Check results.
+        df = execute_query_fetch_all(self.evadb, query).frames
+        self.assertEqual(df["test_vector.idx"][0], 0)
+        self.assertNotIn("test_vector.dummy", df.columns)
 
         # Clean up.
         query = "USE test_data_source { DROP INDEX test_index }"

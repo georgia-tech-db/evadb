@@ -47,6 +47,8 @@ from evadb.plan_nodes.nested_loop_join_plan import NestedLoopJoinPlan
 from evadb.plan_nodes.predicate_plan import PredicatePlan
 from evadb.plan_nodes.project_plan import ProjectPlan
 from evadb.plan_nodes.show_info_plan import ShowInfoPlan
+from evadb.catalog.models.utils import IndexCatalogEntry
+from evadb.catalog.catalog_type import VectorStoreType
 
 if TYPE_CHECKING:
     from evadb.optimizer.optimizer_context import OptimizerContext
@@ -551,6 +553,11 @@ class CombineSimilarityOrderByAndLimitToVectorIndexScan(Rule):
         if not func_orderby_expr or func_orderby_expr.name != "Similarity":
             return
 
+        # Traverse to the LogicalGet operator.
+        tb_catalog_entry = list(sub_tree_root.opr.find_all(LogicalGet))[0].table_obj
+        db_catalog_entry = catalog_manager().get_database_catalog_entry(tb_catalog_entry.database_name)
+        is_postgres_data_source = db_catalog_entry is not None and db_catalog_entry.engine == "postgres"
+
         # Check if there exists an index on table and column.
         query_func_expr, base_func_expr = func_orderby_expr.children
 
@@ -561,26 +568,34 @@ class CombineSimilarityOrderByAndLimitToVectorIndexScan(Rule):
 
         # Get column catalog entry and function_signature.
         column_catalog_entry = tv_expr.col_object
-        function_signature = (
-            None
-            if isinstance(base_func_expr, TupleValueExpression)
-            else base_func_expr.signature()
-        )
 
-        # Get index catalog. Check if an index exists for matching
-        # function signature and table columns.
-        index_catalog_entry = (
-            catalog_manager().get_index_catalog_entry_by_column_and_function_signature(
-                column_catalog_entry, function_signature
+        # Only check the index existence when building on EvaDB data.
+        if not is_postgres_data_source:
+
+            # Get function_signature.
+            function_signature = (
+                None
+                if isinstance(base_func_expr, TupleValueExpression)
+                else base_func_expr.signature()
             )
-        )
-        if not index_catalog_entry:
-            return
+
+            # Get index catalog. Check if an index exists for matching
+            # function signature and table columns.
+            index_catalog_entry = (
+                catalog_manager().get_index_catalog_entry_by_column_and_function_signature(
+                    column_catalog_entry, function_signature
+                )
+            )
+            if not index_catalog_entry:
+                return
+        else:
+            index_catalog_entry = IndexCatalogEntry(
+                name="", save_file_path="", type=VectorStoreType.PGVECTOR, feat_column=column_catalog_entry,
+            )
 
         # Construct the Vector index scan plan.
         vector_index_scan_node = LogicalVectorIndexScan(
-            index_catalog_entry.name,
-            index_catalog_entry.type,
+            index_catalog_entry,
             limit_node.limit_count,
             query_func_expr,
         )
@@ -1263,8 +1278,7 @@ class LogicalVectorIndexScanToPhysical(Rule):
 
     def apply(self, before: LogicalVectorIndexScan, context: OptimizerContext):
         after = VectorIndexScanPlan(
-            before.index_name,
-            before.vector_store_type,
+            before.index,
             before.limit_count,
             before.search_query_expr,
         )

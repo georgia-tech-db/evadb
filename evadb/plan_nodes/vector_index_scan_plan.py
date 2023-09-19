@@ -12,11 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from evadb.catalog.catalog_type import VectorStoreType
 from evadb.expression.constant_value_expression import ConstantValueExpression
 from evadb.expression.function_expression import FunctionExpression
 from evadb.plan_nodes.abstract_plan import AbstractPlan
 from evadb.plan_nodes.types import PlanOprType
+from evadb.catalog.models.utils import IndexCatalogEntry
 
 
 class VectorIndexScanPlan(AbstractPlan):
@@ -33,24 +33,18 @@ class VectorIndexScanPlan(AbstractPlan):
 
     def __init__(
         self,
-        index_name: str,
-        vector_store_type: VectorStoreType,
+        index: IndexCatalogEntry,
         limit_count: ConstantValueExpression,
         search_query_expr: FunctionExpression,
     ):
         super().__init__(PlanOprType.VECTOR_INDEX_SCAN)
-        self._index_name = index_name
-        self._vector_store_type = vector_store_type
+        self._index = index
         self._limit_count = limit_count
         self._search_query_expr = search_query_expr
 
     @property
-    def index_name(self):
-        return self._index_name
-
-    @property
-    def vector_store_type(self):
-        return self._vector_store_type
+    def index(self):
+        return self._index
 
     @property
     def limit_count(self):
@@ -62,8 +56,8 @@ class VectorIndexScanPlan(AbstractPlan):
 
     def __str__(self):
         return "VectorIndexScan(index_name={}, vector_store_type={}, limit_count={}, search_query_expr={})".format(
-            self._index_name,
-            self.vector_store_type,
+            self._index.name,
+            self._index.vector_store_type,
             self._limit_count,
             self._search_query_expr,
         )
@@ -72,8 +66,7 @@ class VectorIndexScanPlan(AbstractPlan):
         return hash(
             (
                 super().__hash__(),
-                self.index_name,
-                self.vector_store_type,
+                self.index,
                 self.limit_count,
                 self.search_query_expr,
             )

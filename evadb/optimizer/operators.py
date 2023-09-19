@@ -29,6 +29,7 @@ from evadb.parser.alias import Alias
 from evadb.parser.create_statement import ColumnDefinition
 from evadb.parser.table_ref import TableInfo, TableRef
 from evadb.parser.types import JoinType, ObjectType, ShowType
+from evadb.catalog.models.utils import IndexCatalogEntry
 
 
 class OperatorType(IntEnum):
@@ -154,7 +155,7 @@ class Operator:
         """
 
         for node in self.bfs():
-            if isinstance(node, operator_type):
+            if isinstance(node, operator_type) or self.opr_type == operator_type:
                 yield node
 
 
@@ -1207,25 +1208,19 @@ class LogicalApplyAndMerge(Operator):
 class LogicalVectorIndexScan(Operator):
     def __init__(
         self,
-        index_name: str,
-        vector_store_type: VectorStoreType,
+        index: IndexCatalogEntry,
         limit_count: ConstantValueExpression,
         search_query_expr: FunctionExpression,
         children: List = None,
     ):
         super().__init__(OperatorType.LOGICAL_VECTOR_INDEX_SCAN, children)
-        self._index_name = index_name
-        self._vector_store_type = vector_store_type
+        self._index = index
         self._limit_count = limit_count
         self._search_query_expr = search_query_expr
 
     @property
-    def index_name(self):
-        return self._index_name
-
-    @property
-    def vector_store_type(self):
-        return self._vector_store_type
+    def index(self):
+        return self._index
 
     @property
     def limit_count(self):
@@ -1241,8 +1236,7 @@ class LogicalVectorIndexScan(Operator):
             return False
         return (
             is_subtree_equal
-            and self.index_name == other.index_name
-            and self.vector_store_type == other.vector_store_type
+            and self.index == other.index
             and self.limit_count == other.limit_count
             and self.search_query_expr == other.search_query_expr
         )
@@ -1251,8 +1245,7 @@ class LogicalVectorIndexScan(Operator):
         return hash(
             (
                 super().__hash__(),
-                self.index_name,
-                self.vector_store_type,
+                self.index,
                 self.limit_count,
                 self.search_query_expr,
             )
