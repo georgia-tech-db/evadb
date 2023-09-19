@@ -12,7 +12,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from evadb.binder.binder_utils import get_bound_func_expr_outputs_as_tuple_value_expr
 from evadb.expression.abstract_expression import AbstractExpression
+from evadb.expression.function_expression import FunctionExpression
 from evadb.optimizer.operators import (
     LogicalCreate,
     LogicalCreateFunction,
@@ -53,8 +55,8 @@ from evadb.parser.rename_statement import RenameTableStatement
 from evadb.parser.select_statement import SelectStatement
 from evadb.parser.show_statement import ShowStatement
 from evadb.parser.statement import AbstractStatement
-from evadb.parser.table_ref import TableRef
-from evadb.parser.types import FunctionType
+from evadb.parser.table_ref import JoinNode, TableRef, TableValuedExpression
+from evadb.parser.types import FunctionType, JoinType
 from evadb.utils.logging_manager import logger
 
 
@@ -121,7 +123,54 @@ class StatementToPlanConverter:
 
         # order of evaluation
         # from, where, group by, select, order by, limit, union
+
+        # if there is a table_ref, order by clause and no group by clause, we move all # the function expressions out of projection list to table valued expression.
+        # This is done to handle the
+        # https://github.com/georgia-tech-db/evadb/issues/1147
+        # and https://github.com/georgia-tech-db/evadb/issues/1130.
+        # It is a bit ugly but a complete fix would require modifying the binder
+
+        col_with_func_exprs = []
+
+        if (
+            statement.from_table
+            and statement.orderby_list
+            and statement.groupby_clause is None
+        ):
+            projection_cols = []
+            for col in statement.target_list:
+                if isinstance(col, FunctionExpression):
+                    col_with_func_exprs.append(col)
+                    # append the TupleValueExpression for the FunctionExpression
+                    projection_cols.extend(
+                        get_bound_func_expr_outputs_as_tuple_value_expr(col)
+                    )
+                else:
+                    projection_cols.append(col)
+
+            # update target list with projection cols
+            statement.target_list = projection_cols
+
         table_ref = statement.from_table
+        if not table_ref and col_with_func_exprs:
+            # if there is no table source, we add a projection node with all the
+            # function expressions
+            self._visit_projection(col_with_func_exprs)
+        else:
+            # add col_with_func_exprs to TableValuedExpressions
+            for col in col_with_func_exprs:
+                tve = TableValuedExpression(col)
+                if table_ref:
+                    table_ref = TableRef(
+                        JoinNode(
+                            table_ref,
+                            TableRef(tve, alias=col.alias),
+                            join_type=JoinType.LATERAL_JOIN,
+                        )
+                    )
+
+            statement.from_table = table_ref
+
         if table_ref is not None:
             self.visit_table_ref(table_ref)
 
@@ -135,17 +184,14 @@ class StatementToPlanConverter:
             if statement.groupby_clause is not None:
                 self._visit_groupby(statement.groupby_clause)
 
-        # Projection operator
-        select_columns = statement.target_list
-
-        if select_columns is not None:
-            self._visit_projection(select_columns)
-
         if statement.orderby_list is not None:
             self._visit_orderby(statement.orderby_list)
 
         if statement.limit_count is not None:
             self._visit_limit(statement.limit_count)
+
+        if statement.target_list is not None:
+            self._visit_projection(statement.target_list)
 
         # union
         if statement.union_link is not None:
