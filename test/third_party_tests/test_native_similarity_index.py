@@ -13,12 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import get_evadb_for_testing
+from test.util import (
+    create_sample_image,
+    get_evadb_for_testing,
+    load_functions_for_testing,
+)
 
 import pytest
 
 from evadb.server.command_handler import execute_query_fetch_all
-from test.util import create_sample_image, load_functions_for_testing
 
 
 @pytest.mark.notparallel
@@ -87,8 +90,8 @@ class CreateIndexTest(unittest.TestCase):
         )
 
         # Check the index scan plan.
-        query = f"""SELECT idx, embedding FROM test_data_source.test_vector 
-            ORDER BY Similarity(DummyFeatureExtractor(Open('{self.img_path}')), embedding) 
+        query = f"""SELECT idx, embedding FROM test_data_source.test_vector
+            ORDER BY Similarity(DummyFeatureExtractor(Open('{self.img_path}')), embedding)
             LIMIT 1"""
         df = execute_query_fetch_all(self.evadb, f"EXPLAIN {query}").frames
         self.assertIn("VectorIndexScan", df[0][0])

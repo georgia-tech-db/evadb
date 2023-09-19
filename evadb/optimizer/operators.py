@@ -22,6 +22,7 @@ from evadb.catalog.models.column_catalog import ColumnCatalogEntry
 from evadb.catalog.models.function_io_catalog import FunctionIOCatalogEntry
 from evadb.catalog.models.function_metadata_catalog import FunctionMetadataCatalogEntry
 from evadb.catalog.models.table_catalog import TableCatalogEntry
+from evadb.catalog.models.utils import IndexCatalogEntry
 from evadb.expression.abstract_expression import AbstractExpression
 from evadb.expression.constant_value_expression import ConstantValueExpression
 from evadb.expression.function_expression import FunctionExpression
@@ -29,7 +30,6 @@ from evadb.parser.alias import Alias
 from evadb.parser.create_statement import ColumnDefinition
 from evadb.parser.table_ref import TableInfo, TableRef
 from evadb.parser.types import JoinType, ObjectType, ShowType
-from evadb.catalog.models.utils import IndexCatalogEntry
 
 
 class OperatorType(IntEnum):

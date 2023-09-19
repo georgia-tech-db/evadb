@@ -16,8 +16,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from evadb.catalog.catalog_type import TableType
+from evadb.catalog.catalog_type import TableType, VectorStoreType
 from evadb.catalog.catalog_utils import is_video_table
+from evadb.catalog.models.utils import IndexCatalogEntry
 from evadb.constants import CACHEABLE_FUNCTIONS
 from evadb.executor.execution_context import Context
 from evadb.expression.expression_utils import (
@@ -47,8 +48,6 @@ from evadb.plan_nodes.nested_loop_join_plan import NestedLoopJoinPlan
 from evadb.plan_nodes.predicate_plan import PredicatePlan
 from evadb.plan_nodes.project_plan import ProjectPlan
 from evadb.plan_nodes.show_info_plan import ShowInfoPlan
-from evadb.catalog.models.utils import IndexCatalogEntry
-from evadb.catalog.catalog_type import VectorStoreType
 
 if TYPE_CHECKING:
     from evadb.optimizer.optimizer_context import OptimizerContext
@@ -555,8 +554,12 @@ class CombineSimilarityOrderByAndLimitToVectorIndexScan(Rule):
 
         # Traverse to the LogicalGet operator.
         tb_catalog_entry = list(sub_tree_root.opr.find_all(LogicalGet))[0].table_obj
-        db_catalog_entry = catalog_manager().get_database_catalog_entry(tb_catalog_entry.database_name)
-        is_postgres_data_source = db_catalog_entry is not None and db_catalog_entry.engine == "postgres"
+        db_catalog_entry = catalog_manager().get_database_catalog_entry(
+            tb_catalog_entry.database_name
+        )
+        is_postgres_data_source = (
+            db_catalog_entry is not None and db_catalog_entry.engine == "postgres"
+        )
 
         # Check if there exists an index on table and column.
         query_func_expr, base_func_expr = func_orderby_expr.children
@@ -571,7 +574,6 @@ class CombineSimilarityOrderByAndLimitToVectorIndexScan(Rule):
 
         # Only check the index existence when building on EvaDB data.
         if not is_postgres_data_source:
-
             # Get function_signature.
             function_signature = (
                 None
@@ -581,16 +583,17 @@ class CombineSimilarityOrderByAndLimitToVectorIndexScan(Rule):
 
             # Get index catalog. Check if an index exists for matching
             # function signature and table columns.
-            index_catalog_entry = (
-                catalog_manager().get_index_catalog_entry_by_column_and_function_signature(
-                    column_catalog_entry, function_signature
-                )
+            index_catalog_entry = catalog_manager().get_index_catalog_entry_by_column_and_function_signature(
+                column_catalog_entry, function_signature
             )
             if not index_catalog_entry:
                 return
         else:
             index_catalog_entry = IndexCatalogEntry(
-                name="", save_file_path="", type=VectorStoreType.PGVECTOR, feat_column=column_catalog_entry,
+                name="",
+                save_file_path="",
+                type=VectorStoreType.PGVECTOR,
+                feat_column=column_catalog_entry,
             )
 
         # Construct the Vector index scan plan.

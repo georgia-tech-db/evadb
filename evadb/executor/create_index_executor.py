@@ -57,10 +57,9 @@ class CreateIndexExecutor(AbstractExecutor):
         with get_database_handler(
             db_catalog_entry.engine, **db_catalog_entry.params
         ) as handler:
-            columns = table.table_obj.columns
             # As other libraries, we default to HNSW and L2 distance.
             resp = handler.execute_native_query(
-                f"""CREATE INDEX {self.node.name} ON {table.table_name} 
+                f"""CREATE INDEX {self.node.name} ON {table.table_name}
                     USING hnsw ({self.node.col_list[0].name} vector_l2_ops)"""
             )
             if resp.error is not None:
@@ -90,7 +89,7 @@ class CreateIndexExecutor(AbstractExecutor):
                 raise ExecutorError(msg)
 
         index = None
-        index_path = self._get_index_save_path()
+        index_path = self._get_evadb_index_save_path()
 
         try:
             # Get feature tables.
