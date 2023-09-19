@@ -32,10 +32,16 @@ class GenericLudwigModel(AbstractFunction):
     def forward(self, frames: pd.DataFrame) -> pd.DataFrame:
         predictions, _ = self.model.predict(frames, return_type=pd.DataFrame)
         # Ludwig will return a Dask DataFrame when dask is installed
-        print(f"In Ludwig function: {type(predictions).__name__}")
-        if type(predictions).__name__ == "dask.dataframe.core.DataFrame":
-            predictions = predictions.compute()
-            print(f"After compute: {type(predictions)}")
+        try:
+            import dask
+
+            if isinstance(predictions, dask.dataframe.core.DataFrame):
+                predictions = predictions.compute()
+                print(f"After compute: {type(predictions)}")
+            else:
+                print(type(predictions))
+        except ImportError:
+            pass
         return predictions
 
     def to_device(self, device: str):
