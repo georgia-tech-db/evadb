@@ -99,8 +99,6 @@ def ask_question(story_path: str):
     question = "Who is Count Cyril Vladmirovich?"
     ascii_question = unidecode(question)
 
-    print(cursor.query(f"""SELECT * FROM {story_feat_table};""").df())
-
     # Instead of passing all the information to the LLM, we extract the 5 topmost similar sentences
     # and use them as context for the LLM to answer.
     res_batch = cursor.query(
@@ -120,7 +118,6 @@ def ask_question(story_path: str):
     for i in range(len(res_batch)):
         context_list.append(res_batch.frames[f"{story_feat_table.lower()}.data"][i])
     context = "\n".join(context_list)
-    print(context)
 
     t_i = t_i + 1
     timestamps[t_i] = perf_counter()
