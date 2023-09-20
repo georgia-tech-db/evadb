@@ -39,10 +39,10 @@ create_table: CREATE TABLE if_not_exists? table_name (create_definitions | (AS s
 rename_table: RENAME TABLE table_name TO table_name
     
 // Create Functions 
-create_function: CREATE FUNCTION if_not_exists? function_name INPUT create_definitions OUTPUT create_definitions TYPE function_type IMPL function_impl function_metadata*
-	| CREATE FUNCTION if_not_exists? function_name IMPL function_impl function_metadata* 
-	| CREATE FUNCTION if_not_exists? function_name TYPE function_type function_metadata*
-	| CREATE FUNCTION if_not_exists? function_name FROM LR_BRACKET select_statement RR_BRACKET TYPE function_type function_metadata*
+create_function: CREATE or_replace? FUNCTION if_not_exists? function_name INPUT create_definitions OUTPUT create_definitions TYPE function_type IMPL function_impl function_metadata*
+	| CREATE or_replace? FUNCTION if_not_exists? function_name IMPL function_impl function_metadata* 
+	| CREATE or_replace? FUNCTION if_not_exists? function_name TYPE function_type function_metadata*
+	| CREATE or_replace? FUNCTION if_not_exists? function_name FROM LR_BRACKET select_statement RR_BRACKET TYPE function_type function_metadata*
 
 // Details
 function_name: uid
@@ -269,6 +269,8 @@ if_exists: IF EXISTS
 
 if_not_exists: IF NOT EXISTS
 
+or_replace: OR REPLACE
+
 //    Functions
 
 function_call: function         ->function_call           
@@ -378,11 +380,12 @@ PARAMETERS:                          "PARAMETERS"i
 PRIMARY:                             "PRIMARY"i
 REFERENCES:                          "REFERENCES"i
 RENAME:                              "RENAME"i
+REPLACE:                             "REPLACE"i
 USE:                                 "USE"i
 SAMPLE:                              "SAMPLE"i
 IFRAMES:                             "IFRAMES"i
 AUDIORATE:                           "AUDIORATE"i
-SELECT:                             "SELECT"i
+SELECT:                              "SELECT"i
 SET:                                 "SET"i
 SHUTDOWN:                            "SHUTDOWN"i
 SHOW:                                "SHOW"i
