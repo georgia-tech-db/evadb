@@ -39,10 +39,14 @@ jobs:
       - name: Release.
         env:
           GITHUB_KEY: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           source test_evadb/bin/activate
+          pip install twine
+          git config --global user.email "caojiashen24@gmail.com"
+          git config --global user.name "Jiashen Cao"
           python script/releasing/releaser.py -n patch -u # changelog
-          python script/releasing/releaser.py -n patch -r # release 
+          python script/releasing/releaser.py -n patch -r # release
           python script/releasing/releaser.py -n patch -p # push to PyPI
           python script/releasing/releaser.py -n patch -a # push the release
           python script/releasing/releaser.py -n patch -b # version bump up

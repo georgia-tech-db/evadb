@@ -229,7 +229,6 @@ def publish_wheels(tag):
 def upload_assets(changelog, tag):
     # Authentication token
     access_token = os.environ["GITHUB_KEY"]
-    print(access_token)
     # Repository information
     repo_owner = "georgia-tech-db"
     repo_name = "evadb"
@@ -296,7 +295,7 @@ def bump_up_version(next_version):
     run_command("git add . -u")
     run_command("git commit -m '[BUMP]: " + NEXT_RELEASE + "'")
     run_command("git push --set-upstream origin bump-" + NEXT_RELEASE)
-    run_command(f"gh pr create -B staging -H bump-{NEXT_RELEASE}")
+    run_command(f"gh pr create -B staging -H bump-{NEXT_RELEASE} --title 'Bump Version to {NEXT_RELEASE}' --body 'Bump Version to {NEXT_RELEASE}'")
 
 
 # ==============================================
