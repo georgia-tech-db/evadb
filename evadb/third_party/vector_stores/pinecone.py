@@ -23,6 +23,7 @@ from evadb.third_party.vector_stores.types import (
     VectorStore,
 )
 from evadb.utils.generic_utils import try_to_import_pinecone_client
+from evadb.utils.logging_manager import logger
 
 required_params = []
 _pinecone_init_done = False
@@ -70,6 +71,9 @@ class PineconeVectorStore(VectorStore):
         import pinecone
 
         pinecone.create_index(self._index_name, dimension=vector_dim, metric="cosine")
+        logger.warning(
+            f"""Created index {self._index_name}. Please note that Pinecone is eventually consistent, hence any additions to the Vector Index may not get immediately reflected in queries."""
+        )
         self._client = pinecone.Index(self._index_name)
 
     def add(self, payload: List[FeaturePayload]):
@@ -102,6 +106,6 @@ class PineconeVectorStore(VectorStore):
 
         for row in response["matches"]:
             distances.append(row["score"])
-            ids.append(row["id"])
+            ids.append(int(row["id"]))
 
         return VectorIndexQueryResult(distances, ids)
