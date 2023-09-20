@@ -229,7 +229,7 @@ class CreateDatabaseStatement(AbstractStatement):
         )
 
     def __str__(self) -> str:
-        app_type_syntax = "DATABASE" if self.app_type == "Database" else "APPLICATION"
+        app_type_syntax = self.app_type.upper()
         return (
             f"CREATE {app_type_syntax} {self.name} \n"
             f"WITH ENGINE '{self.engine}' , \n"

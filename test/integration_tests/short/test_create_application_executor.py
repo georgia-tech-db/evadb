@@ -17,6 +17,7 @@ from test.util import get_evadb_for_testing, shutdown_ray
 
 from mock import patch
 
+from evadb.parser.lark_visitor._create_statements import App_Type
 from evadb.server.command_handler import execute_query_fetch_all
 
 
@@ -47,7 +48,7 @@ class CreateApplicationTest(unittest.TestCase):
 
         db_entry = self.evadb.catalog().get_database_catalog_entry("example_app")
         self.assertEqual(db_entry.name, "example_app")
-        self.assertEqual(db_entry.app_type, "Application")
+        self.assertEqual(db_entry.app_type, App_Type.Application)
         self.assertEqual(db_entry.engine, "slack")
         self.assertEqual(db_entry.params, params)
 

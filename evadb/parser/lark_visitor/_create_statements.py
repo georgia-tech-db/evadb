@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from enum import Enum
+
 from lark import Tree
 
 from evadb.catalog.catalog_type import ColumnType, NdArrayType, VectorStoreType
@@ -283,6 +285,11 @@ class CreateTable:
         )
 
 
+class App_Type(str, Enum):
+    Application = "Application"
+    Database = "Database"
+
+
 class CreateDatabase:
     def create_database(self, tree):
         database_name = None
@@ -300,7 +307,7 @@ class CreateDatabase:
                     engine, param_dict = self.visit(child)
 
         create_stmt = CreateDatabaseStatement(
-            database_name, if_not_exists, engine, param_dict, "Database"
+            database_name, if_not_exists, engine, param_dict, App_Type.Database
         )
         return create_stmt
 
@@ -334,7 +341,7 @@ class CreateApplication:
                     engine, param_dict = self.visit(child)
 
         create_stmt = CreateDatabaseStatement(
-            app_name, if_not_exists, engine, param_dict, "Application"
+            app_name, if_not_exists, engine, param_dict, App_Type.Application
         )
         return create_stmt
 
