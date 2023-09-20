@@ -132,11 +132,7 @@ class StatementToPlanConverter:
 
         col_with_func_exprs = []
 
-        if (
-            statement.from_table
-            and statement.orderby_list
-            and statement.groupby_clause is None
-        ):
+        if statement.orderby_list and statement.groupby_clause is None:
             projection_cols = []
             for col in statement.target_list:
                 if isinstance(col, FunctionExpression):
