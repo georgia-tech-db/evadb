@@ -12,17 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from evadb.binder.binder_utils import (
-    BinderError,
-)
-from evadb.catalog.catalog_type import (
-    NdArrayType,
-    VectorStoreType,
-)
+from evadb.binder.binder_utils import BinderError
+from evadb.binder.statement_binder import StatementBinder
+from evadb.catalog.catalog_type import NdArrayType, VectorStoreType
 from evadb.parser.create_index_statement import CreateIndexStatement
 from evadb.third_party.databases.interface import get_database_handler
 
-from evadb.binder.statement_binder import StatementBinder
 
 def bind_create_index(binder: StatementBinder, node: CreateIndexStatement):
     binder.bind(node.table_ref)
@@ -44,9 +39,7 @@ def bind_create_index(binder: StatementBinder, node: CreateIndexStatement):
             node.table_ref.table.database_name
         )
         if db_catalog_entry.engine != "postgres":
-            raise BinderError(
-                "PGVECTOR index works only with Postgres data source."
-            )
+            raise BinderError("PGVECTOR index works only with Postgres data source.")
         with get_database_handler(
             db_catalog_entry.engine, **db_catalog_entry.params
         ) as handler:
@@ -69,9 +62,7 @@ def bind_create_index(binder: StatementBinder, node: CreateIndexStatement):
         col_def = node.col_list[0]
 
         table_ref_obj = node.table_ref.table.table_obj
-        col_list = [
-            col for col in table_ref_obj.columns if col.name == col_def.name
-        ]
+        col_list = [col for col in table_ref_obj.columns if col.name == col_def.name]
         assert (
             len(col_list) == 1
         ), f"Index is created on non-existent column {col_def.name}"
