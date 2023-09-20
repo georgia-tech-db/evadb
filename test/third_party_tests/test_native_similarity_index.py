@@ -26,7 +26,7 @@ from evadb.server.command_handler import execute_query_fetch_all
 
 @pytest.mark.notparallel
 class CreateIndexTest(unittest.TestCase):
-    def setUp(self):
+    def setUpClass(self):
         self.evadb = get_evadb_for_testing()
         self.evadb.catalog().reset()
 
@@ -36,7 +36,6 @@ class CreateIndexTest(unittest.TestCase):
         # Load functions.
         load_functions_for_testing(self.evadb, mode="debug")
 
-    def test_native_engine_should_create_index(self):
         # Create database.
         params = {
             "user": "eva",
@@ -50,6 +49,14 @@ class CreateIndexTest(unittest.TestCase):
                     PARAMETERS = {params};"""
         execute_query_fetch_all(self.evadb, query)
 
+    def tearDownClass(self):
+        # Clean up.
+        query = "USE test_data_source { DROP INDEX test_index }"
+        execute_query_fetch_all(self.evadb, query)
+        query = "USE test_data_source { DROP TABLE test_vector }"
+        execute_query_fetch_all(self.evadb, query)
+
+    def test_native_engine_should_create_index(self):
         # Create table.
         query = """USE test_data_source {
             CREATE TABLE test_vector (idx INTEGER, dummy INTEGER, embedding vector(27))
@@ -100,9 +107,3 @@ class CreateIndexTest(unittest.TestCase):
         df = execute_query_fetch_all(self.evadb, query).frames
         self.assertEqual(df["test_vector.idx"][0], 0)
         self.assertNotIn("test_vector.dummy", df.columns)
-
-        # Clean up.
-        query = "USE test_data_source { DROP INDEX test_index }"
-        execute_query_fetch_all(self.evadb, query)
-        query = "USE test_data_source { DROP TABLE test_vector }"
-        execute_query_fetch_all(self.evadb, query)
