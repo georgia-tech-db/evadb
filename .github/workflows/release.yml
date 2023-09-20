@@ -41,4 +41,8 @@ jobs:
           GITHUB_KEY: ${{ github.token }}
         run: |
           source test_evadb/bin/activate
-          python script/releasing/releaser.py -n minor -u
+          python script/releasing/releaser.py -n patch -u # changelog
+          python script/releasing/releaser.py -n patch -r # release 
+          python script/releasing/releaser.py -n patch -p # push to PyPI
+          python script/releasing/releaser.py -n patch -a # push the release
+          python script/releasing/releaser.py -n patch -b # version bump up
