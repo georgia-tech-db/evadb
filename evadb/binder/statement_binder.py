@@ -30,13 +30,7 @@ from evadb.binder.binder_utils import (
     resolve_alias_table_value_expression,
 )
 from evadb.binder.statement_binder_context import StatementBinderContext
-from evadb.catalog.catalog_type import (
-    ColumnType,
-    NdArrayType,
-    TableType,
-    VectorStoreType,
-    VideoColumnName,
-)
+from evadb.catalog.catalog_type import ColumnType, TableType, VideoColumnName
 from evadb.catalog.catalog_utils import get_metadata_properties, is_document_table
 from evadb.configuration.constants import EvaDB_INSTALLATION_DIR
 from evadb.expression.abstract_expression import AbstractExpression, ExpressionType
@@ -52,7 +46,6 @@ from evadb.parser.select_statement import SelectStatement
 from evadb.parser.statement import AbstractStatement
 from evadb.parser.table_ref import TableRef
 from evadb.parser.types import FunctionType
-from evadb.third_party.databases.interface import get_database_handler
 from evadb.third_party.huggingface.binder import assign_hf_function
 from evadb.utils.generic_utils import (
     load_function_class_from_file,
@@ -138,83 +131,6 @@ class StatementBinder:
             ), f"{node.function_type} functions' input and output are auto assigned"
             node.inputs, node.outputs = inputs, outputs
 
-    @bind.register(CreateIndexStatement)
-    def _bind_create_index_statement(self, node: CreateIndexStatement):
-        self.bind(node.table_ref)
-        if node.function:
-            self.bind(node.function)
-
-        # TODO: create index currently only supports single numpy column.
-        assert len(node.col_list) == 1, "Index cannot be created on more than 1 column"
-
-        # TODO: create index currently only works on TableInfo, but will extend later.
-        assert (
-            node.table_ref.is_table_atom()
-        ), "Index can only be created on an existing table"
-
-        # Vector type specific check.
-        catalog = self._catalog()
-        if node.vector_store_type == VectorStoreType.PGVECTOR:
-            db_catalog_entry = catalog.get_database_catalog_entry(
-                node.table_ref.table.database_name
-            )
-            if db_catalog_entry.engine != "postgres":
-                raise BinderError(
-                    "PGVECTOR index works only with Postgres data source."
-                )
-            with get_database_handler(
-                db_catalog_entry.engine, **db_catalog_entry.params
-            ) as handler:
-                # Check if vector extension is enabled, which is required for PGVECTOR.
-                df = handler.execute_native_query(
-                    "SELECT * FROM pg_extension WHERE extname = 'vector'"
-                ).data
-                if len(df) == 0:
-                    raise BinderError("PGVECTOR extension is not enabled.")
-
-            # Skip the rest of checking, because it will be anyway taken care by the
-            # underlying native storage engine.
-            return
-
-        if not node.function:
-            # Feature table type needs to be float32 numpy array.
-            assert (
-                len(node.col_list) == 1
-            ), f"Index can be only created on one column, but instead {len(node.col_list)} are provided"
-            col_def = node.col_list[0]
-
-            table_ref_obj = node.table_ref.table.table_obj
-            col_list = [
-                col for col in table_ref_obj.columns if col.name == col_def.name
-            ]
-            assert (
-                len(col_list) == 1
-            ), f"Index is created on non-existent column {col_def.name}"
-
-            col = col_list[0]
-            assert len(col.array_dimensions) == 2
-
-            # Vector type specific check.
-            if node.vector_store_type == VectorStoreType.FAISS:
-                assert (
-                    col.array_type == NdArrayType.FLOAT32
-                ), "Index input needs to be float32."
-        else:
-            # Output of the function should be 2 dimension and float32 type.
-            function_obj = self._catalog().get_function_catalog_entry_by_name(
-                node.function.name
-            )
-            for output in function_obj.outputs:
-                assert (
-                    len(output.array_dimensions) == 2
-                ), "Index input needs to be 2 dimensional."
-
-                # Vector type speciic check.
-                if node.vector_store_type == VectorStoreType.FAISS:
-                    assert (
-                        output.array_type == NdArrayType.FLOAT32
-                    ), "Index input needs to be float32."
-
     @bind.register(SelectStatement)
     def _bind_select_statement(self, node: SelectStatement):
         if node.from_table:
@@ -284,6 +200,12 @@ class StatementBinder:
             node.column_list = get_column_definition_from_select_target_list(
                 node.query.target_list
             )
+
+    @bind.register(CreateIndexStatement)
+    def _bind_create_index_statement(self, node: CreateIndexStatement):
+        from evadb.binder.create_index_statement_binder import bind_create_index
+
+        bind_create_index(self, node)
 
     @bind.register(RenameTableStatement)
     def _bind_rename_table_statement(self, node: RenameTableStatement):

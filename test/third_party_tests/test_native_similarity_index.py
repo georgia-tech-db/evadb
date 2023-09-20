@@ -26,15 +26,16 @@ from evadb.server.command_handler import execute_query_fetch_all
 
 @pytest.mark.notparallel
 class CreateIndexTest(unittest.TestCase):
-    def setUpClass(self):
-        self.evadb = get_evadb_for_testing()
-        self.evadb.catalog().reset()
+    @classmethod
+    def setUpClass(cls):
+        cls.evadb = get_evadb_for_testing()
+        cls.evadb.catalog().reset()
 
         # Get sample image.
-        self.img_path = create_sample_image()
+        cls.img_path = create_sample_image()
 
         # Load functions.
-        load_functions_for_testing(self.evadb, mode="debug")
+        load_functions_for_testing(cls.evadb, mode="debug")
 
         # Create database.
         params = {
@@ -47,14 +48,15 @@ class CreateIndexTest(unittest.TestCase):
         query = f"""CREATE DATABASE test_data_source
                     WITH ENGINE = "postgres",
                     PARAMETERS = {params};"""
-        execute_query_fetch_all(self.evadb, query)
+        execute_query_fetch_all(cls.evadb, query)
 
-    def tearDownClass(self):
+    @classmethod
+    def tearDownClass(cls):
         # Clean up.
         query = "USE test_data_source { DROP INDEX test_index }"
-        execute_query_fetch_all(self.evadb, query)
+        execute_query_fetch_all(cls.evadb, query)
         query = "USE test_data_source { DROP TABLE test_vector }"
-        execute_query_fetch_all(self.evadb, query)
+        execute_query_fetch_all(cls.evadb, query)
 
     def test_native_engine_should_create_index(self):
         # Create table.
