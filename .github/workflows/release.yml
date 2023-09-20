@@ -9,8 +9,9 @@ on:
       - staging
 
 jobs:
-  release:
+  release-on-success:
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - uses: actions/checkout@v4
         with:
