@@ -304,7 +304,7 @@ def try_to_import_ludwig():
     except ImportError:
         raise ValueError(
             """Could not import ludwig.
-                Please install it with `pip install ludwig[full]`."""
+                Please install it with `pip install evadb[ludwig]`."""
         )
 
 

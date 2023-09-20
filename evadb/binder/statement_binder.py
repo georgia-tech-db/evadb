@@ -18,13 +18,13 @@ from typing import Callable
 
 from evadb.binder.binder_utils import (
     BinderError,
-    add_func_expr_outputs_to_binder_context,
     bind_table_info,
     check_column_name_is_string,
     check_groupby_pattern,
     check_table_object_is_groupable,
     drop_row_id_from_target_list,
     extend_star,
+    get_bound_func_expr_outputs_as_tuple_value_expr,
     get_column_definition_from_select_target_list,
     handle_bind_extract_object_function,
     resolve_alias_table_value_expression,
@@ -201,7 +201,10 @@ class StatementBinder:
             for expr in node.target_list:
                 self.bind(expr)
                 if isinstance(expr, FunctionExpression):
-                    add_func_expr_outputs_to_binder_context(expr, self._binder_context)
+                    output_cols = get_bound_func_expr_outputs_as_tuple_value_expr(expr)
+                    self._binder_context.add_derived_table_alias(
+                        expr.alias.alias_name, output_cols
+                    )
 
         if node.groupby_clause:
             self.bind(node.groupby_clause)
@@ -279,7 +282,10 @@ class StatementBinder:
             func_expr = node.table_valued_expr.func_expr
             func_expr.alias = node.alias
             self.bind(func_expr)
-            add_func_expr_outputs_to_binder_context(func_expr, self._binder_context)
+            output_cols = get_bound_func_expr_outputs_as_tuple_value_expr(func_expr)
+            self._binder_context.add_derived_table_alias(
+                func_expr.alias.alias_name, output_cols
+            )
         else:
             raise BinderError(f"Unsupported node {type(node)}")
 
