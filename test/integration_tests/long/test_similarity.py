@@ -13,8 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import os
+import time
 import unittest
-from test.markers import gpu_skip_marker, qdrant_skip_marker
+from test.markers import qdrant_skip_marker
 from test.util import (
     create_sample_image,
     get_evadb_for_testing,
@@ -25,7 +26,6 @@ from test.util import (
 import numpy as np
 import pandas as pd
 import pytest
-import time
 
 from evadb.models.storage.batch import Batch
 from evadb.server.command_handler import execute_query_fetch_all
@@ -393,10 +393,12 @@ class SimilarityTests(unittest.TestCase):
         res_batch = execute_query_fetch_all(self.evadb, select_query)
         self.assertEqual(res_batch.frames["testsimilarityimagedataset._row_id"][0], 5)
 
-         # Cleanup
+        # Cleanup
         self.evadb.catalog().drop_index_catalog_entry("testQdrantIndexImageDataset")
 
-    def test_end_to_end_index_scan_should_work_correctly_on_image_dataset_pinecone(self):
+    def test_end_to_end_index_scan_should_work_correctly_on_image_dataset_pinecone(
+        self,
+    ):
         # Set the env variables.
         original_pinecone_key = os.environ.get("PINECONE_API_KEY")
         original_pinecone_env = os.environ.get("PINECONE_ENV")
@@ -421,10 +423,8 @@ class SimilarityTests(unittest.TestCase):
         )
 
         res_batch = execute_query_fetch_all(self.evadb, select_query)
-        print(res_batch)
         self.assertEqual(res_batch.frames["testsimilarityimagedataset._row_id"][0], 5)
 
         # Reset the env variables.
         os.environ["PINECONE_API_KEY"] = original_pinecone_key
         os.environ["PINECONE_ENV"] = original_pinecone_env
-
