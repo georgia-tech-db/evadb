@@ -416,6 +416,8 @@ if __name__ == "__main__":
         publish_wheels(current_version_str_without_dev)
 
     if args.upload_assets:
+        # We assume that we run each command sequentially here. When a new release
+        # is made, the change log needs to be based on the second latest release.
         release_date = get_commit_id_of_latest_release(release_index=1)
         changelog = get_changelog(release_date)
         upload_assets(changelog, current_version_str_without_dev)
