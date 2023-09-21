@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### [Deprecated]
 ### [Removed]
 
+##  [0.3.6] - 2023-09-21
+
+* PR #1181: releass: bump a version further to skip cached wheel 
+
 ##  [0.3.4] - 2023-09-06
 
 * PR #1057: fix: staging build fix 
