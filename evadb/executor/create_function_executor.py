@@ -141,11 +141,14 @@ class CreateFunctionExecutor(AbstractExecutor):
 
         arg_map = {arg.key: arg.value for arg in self.node.metadata}
         model = LinearRegression()
-        model.fit(X=aggregated_batch.frames, y=arg_map["predict"])
+        print(aggregated_batch.frames)
+        Y = aggregated_batch.frames[arg_map["predict"]]
+        aggregated_batch.frames.drop([arg_map["predict"]], axis=1, inplace=True)
+        model.fit(X=aggregated_batch.frames, y=Y)
         model_path = os.path.join(
             self.db.config.get_value("storage", "model_dir"), self.node.name
         )
-        pickle.dump(model, open(model_path, "rb"))
+        pickle.dump(model, open(model_path, "wb"))
         self.node.metadata.append(
             FunctionMetadataCatalogEntry("model_path", model_path)
         )

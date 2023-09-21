@@ -28,11 +28,15 @@ class GenericSklearnModel(AbstractFunction):
     def setup(self, model_path: str, **kwargs):
         try_to_import_sklearn()
 
-        self.model = pickle.load(open(model_path, "wb"))
+        self.model = pickle.load(open(model_path, "rb"))
 
     def forward(self, frames: pd.DataFrame) -> pd.DataFrame:
-        predictions, _ = self.model.predict(frames, return_type=pd.DataFrame)
-        return predictions
+        predictions = self.model.predict(frames.iloc[:, : -1])
+        predict_df = pd.DataFrame(predictions)
+        # Assign the prediction column name same as that for data provided.
+        predict_df.rename(columns={0 : frames.columns[-1]}, inplace=True)
+        print(predict_df)
+        return predict_df
 
     def to_device(self, device: str):
         # TODO figure out how to control the GPU for ludwig models

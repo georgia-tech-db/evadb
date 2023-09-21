@@ -83,7 +83,7 @@ class ModelTrainTests(unittest.TestCase):
         execute_query_fetch_all(self.evadb, create_predict_function)
 
         predict_query = """
-            SELECT PredictHouseRent(*) FROM HomeRentals LIMIT 10;
+            SELECT PredictHouseRent(number_of_rooms, number_of_bathrooms, days_on_market, rental_price) FROM HomeRentals LIMIT 10;
         """
         result = execute_query_fetch_all(self.evadb, predict_query)
         self.assertEqual(len(result.columns), 1)
