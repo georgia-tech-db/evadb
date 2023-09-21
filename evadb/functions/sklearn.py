@@ -31,11 +31,10 @@ class GenericSklearnModel(AbstractFunction):
         self.model = pickle.load(open(model_path, "rb"))
 
     def forward(self, frames: pd.DataFrame) -> pd.DataFrame:
-        predictions = self.model.predict(frames.iloc[:, : -1])
+        predictions = self.model.predict(frames.iloc[:, :-1])
         predict_df = pd.DataFrame(predictions)
         # Assign the prediction column name same as that for data provided.
-        predict_df.rename(columns={0 : frames.columns[-1]}, inplace=True)
-        print(predict_df)
+        predict_df.rename(columns={0: frames.columns[-1]}, inplace=True)
         return predict_df
 
     def to_device(self, device: str):

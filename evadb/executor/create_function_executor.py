@@ -141,7 +141,6 @@ class CreateFunctionExecutor(AbstractExecutor):
 
         arg_map = {arg.key: arg.value for arg in self.node.metadata}
         model = LinearRegression()
-        print(aggregated_batch.frames)
         Y = aggregated_batch.frames[arg_map["predict"]]
         aggregated_batch.frames.drop([arg_map["predict"]], axis=1, inplace=True)
         model.fit(X=aggregated_batch.frames, y=Y)
