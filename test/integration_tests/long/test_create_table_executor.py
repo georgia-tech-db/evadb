@@ -82,6 +82,11 @@ class CreateTableTest(unittest.TestCase):
         expected_batch = Batch(frames=pd.DataFrame(expected))
         self.assertEqual(actual_batch, expected_batch)
 
+        execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS dummy_table;")
+
+        # re create table should work
+        execute_query_fetch_all(self.evadb, create_query)
+
     @macos_skip_marker
     @pytest.mark.torchtest
     def test_should_create_table_from_select_lateral_join(self):
@@ -101,6 +106,12 @@ class CreateTableTest(unittest.TestCase):
         res = actual_batch.frames
         for idx in res.index:
             self.assertTrue("car" in res["uadtrac_fastrcnn.label"][idx])
+
+        execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS uadtrac_fastRCNN;")
+
+        # re create table should work
+        query = "CREATE TABLE IF NOT EXISTS " f"uadtrac_fastRCNN AS {select_query};"
+        execute_query_fetch_all(self.evadb, query)
 
 
 if __name__ == "__main__":
