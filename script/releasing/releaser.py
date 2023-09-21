@@ -415,9 +415,6 @@ if __name__ == "__main__":
         publish_wheels(current_version_str_without_dev)
 
     if args.upload_assets:
-        print("upload assets")
-        release_date = get_commit_id_of_latest_release()
-        changelog = get_changelog(release_date)
         upload_assets(changelog, current_version_str_without_dev)
 
     if args.bump_up_version:
