@@ -12,13 +12,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Union
+from typing import Any
 from evadb.plan_nodes.abstract_plan import AbstractPlan
 from evadb.plan_nodes.types import PlanOprType
 
 
 class SetPlan(AbstractPlan):
-    def __init__(self, config_name: str, config_value: Union(int, float, str)):
+    def __init__(self, config_name: str, config_value: Any):
         self.config_name = config_name
         self.config_value = config_value
         super().__init__(PlanOprType.SET)

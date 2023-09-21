@@ -30,6 +30,7 @@ from evadb.parser.lark_visitor._select_statement import Select
 from evadb.parser.lark_visitor._show_statements import Show
 from evadb.parser.lark_visitor._table_sources import TableSources
 from evadb.parser.lark_visitor._use_statement import Use
+from evadb.parser.lark_visitor._set_statement import Set
 
 # To add new functionality to the parser, create a new file under
 # the lark_visitor directory, and implement a new class which

@@ -15,7 +15,7 @@
 from collections import deque
 from enum import IntEnum, auto
 from pathlib import Path
-from typing import Any, List, Union
+from typing import Any, List
 
 from evadb.catalog.catalog_type import VectorStoreType
 from evadb.catalog.models.column_catalog import ColumnCatalogEntry
@@ -1264,28 +1264,27 @@ class LogicalSet(Operator):
     """[Logical Node for Set Operation]
 
     Arguments:
-        config_name(str): table to delete tuples from,
-        config_value(Union(int, float, str)): the predicate used to select which rows to delete,
-
+        config_name(str): The config_name to add,
+        config_value(Any): The config_value to add,
     """
 
     def __init__(
         self,
         config_name: str,
-        config_value: Union(int, float, str),
+        config_value: Any,
         children=None,
     ):
         super().__init__(OperatorType.LOGICALSET, children)
-        self.config_name = config_name
-        self.config_value = config_value
+        self._config_name = config_name
+        self._config_value = config_value
 
     @property
     def config_name(self):
-        return self.config_name
+        return self._config_name
 
     @property
     def config_value(self):
-        return self.config_value
+        return self._config_value
 
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)

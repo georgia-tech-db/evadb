@@ -42,6 +42,7 @@ from evadb.optimizer.operators import (
     LogicalQueryDerivedGet,
     LogicalRename,
     LogicalSample,
+    LogicalSet,
     LogicalShow,
     LogicalUnion,
     LogicalVectorIndexScan,
@@ -281,6 +282,7 @@ statement_to_opr_converter.metadata_definition_to_function_metadata"
     def test_check_plan_equality(self):
         plans = []
         dummy_plan = Dummy(MagicMock(), MagicMock())
+        set_plan = LogicalSet(MagicMock(), MagicMock())
         create_plan = LogicalCreate(MagicMock(), MagicMock())
         create_function_plan = LogicalCreateFunction(
             MagicMock(), MagicMock(), MagicMock(), MagicMock(), MagicMock(), MagicMock()
@@ -317,6 +319,7 @@ statement_to_opr_converter.metadata_definition_to_function_metadata"
         extract_object_plan = LogicalExtractObject(
             MagicMock(), MagicMock(), MagicMock(), MagicMock()
         )
+        
         create_plan.append_child(create_function_plan)
 
         plans.append(dummy_plan)
@@ -345,6 +348,7 @@ statement_to_opr_converter.metadata_definition_to_function_metadata"
         plans.append(faiss_plan)
         plans.append(project_plan)
         plans.append(extract_object_plan)
+        plans.append(set_plan)
 
         derived_operators = list(get_all_subclasses(Operator))
 

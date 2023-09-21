@@ -13,14 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from __future__ import annotations
-from typing import Union
+from typing import Any
 
 from evadb.parser.statement import AbstractStatement
 from evadb.parser.types import StatementType
 
 
 class SetStatement(AbstractStatement):
-    def __init__(self, config_name: str, config_value: Union[int, str, float]):
+    def __init__(self, config_name: str, config_value: Any):
         super().__init__(StatementType.SET)
         self.config_name = config_name
         self.config_value = config_value
