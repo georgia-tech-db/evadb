@@ -1,0 +1,52 @@
+name: Release
+
+on:
+  workflow_run:
+    workflows: [Sync Staging and Master]
+    types: 
+      - completed
+    branches: 
+      - staging
+
+jobs:
+  release-on-success:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+      - name: Install env.
+        run: |
+          python -m venv test_evadb
+          source test_evadb/bin/activate
+          pip install --upgrade pip
+          pip install ".[dev]"
+      - name: Create pypirc.
+        env:
+          PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }} 
+          PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }} 
+        run: |
+          cat > ~/.pypirc <<EOL
+          [distutils]
+          index-servers =
+            pypi
+          [pypi]
+          repository = https://upload.pypi.org/legacy/
+          username = ${PYPI_USERNAME} 
+          password = ${PYPI_PASSWORD}
+          EOL
+      - name: Release.
+        env:
+          GITHUB_KEY: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          source test_evadb/bin/activate
+          pip install twine
+          git config --global user.email "caojiashen24@gmail.com"
+          git config --global user.name "Jiashen Cao"
+          python script/releasing/releaser.py -n patch -u # changelog
+          python script/releasing/releaser.py -n patch -r # release
+          python script/releasing/releaser.py -n patch -p # push to PyPI
+          python script/releasing/releaser.py -n patch -a # push the release
+          python script/releasing/releaser.py -n patch -b # version bump up
