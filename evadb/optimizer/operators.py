@@ -15,7 +15,7 @@
 from collections import deque
 from enum import IntEnum, auto
 from pathlib import Path
-from typing import Any, List
+from typing import Any, List, Union
 
 from evadb.catalog.catalog_type import VectorStoreType
 from evadb.catalog.models.column_catalog import ColumnCatalogEntry
@@ -64,6 +64,7 @@ class OperatorType(IntEnum):
     LOGICAL_VECTOR_INDEX_SCAN = auto()
     LOGICAL_USE = auto()
     LOGICALDELIMITER = auto()
+    LOGICALSET = auto()
 
 
 class Operator:
@@ -1255,5 +1256,52 @@ class LogicalVectorIndexScan(Operator):
                 self.vector_store_type,
                 self.limit_count,
                 self.search_query_expr,
+            )
+        )
+
+
+class LogicalSet(Operator):
+    """[Logical Node for Set Operation]
+
+    Arguments:
+        config_name(str): table to delete tuples from,
+        config_value(Union(int, float, str)): the predicate used to select which rows to delete,
+
+    """
+
+    def __init__(
+        self,
+        config_name: str,
+        config_value: Union(int, float, str),
+        children=None,
+    ):
+        super().__init__(OperatorType.LOGICALSET, children)
+        self.config_name = config_name
+        self.config_value = config_value
+
+    @property
+    def config_name(self):
+        return self.config_name
+
+    @property
+    def config_value(self):
+        return self.config_value
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalSet):
+            return False
+        return (
+            is_subtree_equal
+            and self.config_name == other.config_name
+            and self.config_value == other.config_value
+        )
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                super().__hash__(),
+                self.config_name,
+                self.config_value,
             )
         )

@@ -156,6 +156,8 @@ class PlanExecutor:
             executor_node = VectorIndexScanExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.DELETE:
             executor_node = DeleteExecutor(db=self._db, node=plan)
+        elif plan_opr_type == PlanOprType.SET:
+            executor_node = SetExecutor(db=self._db, node=plan)
 
         # EXPLAIN does not need to build execution tree for its children
         if plan_opr_type != PlanOprType.EXPLAIN:
