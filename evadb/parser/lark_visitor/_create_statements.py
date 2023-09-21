@@ -240,6 +240,8 @@ class CreateTable:
             vector_store_type = VectorStoreType.FAISS
         elif str.upper(token) == "QDRANT":
             vector_store_type = VectorStoreType.QDRANT
+        elif str.upper(token) == "PINECONE":
+            vector_store_type = VectorStoreType.PINECONE
         return vector_store_type
 
     # INDEX CREATION
