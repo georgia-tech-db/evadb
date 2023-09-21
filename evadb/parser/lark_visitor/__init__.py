@@ -72,6 +72,7 @@ class LarkInterpreter(
     Explain,
     Delete,
     Use,
+    Set,
 ):
     def __init__(self, query):
         super().__init__()

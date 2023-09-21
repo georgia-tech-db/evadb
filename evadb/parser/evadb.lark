@@ -80,7 +80,11 @@ drop_table: DROP TABLE if_exists? uid
 drop_function: DROP FUNCTION if_exists? uid
     
 // SET statements (configuration)
-set_statement: SET uid EQUAL_SYMBOL (string_literal | decimal_literal | boolean_literal | real_literal)
+set_statement: SET config_name EQUAL_SYMBOL config_value
+
+config_name: uid
+
+config_value: (string_literal | decimal_literal | boolean_literal | real_literal)
 
 // Data Manipulation Language
 
