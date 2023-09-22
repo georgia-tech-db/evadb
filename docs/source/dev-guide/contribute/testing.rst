@@ -22,10 +22,10 @@ If you want to run a specific test file, use the following command.
 
 .. code-block:: bash
 
-   PYTHONPATH="." python -m pytest test/integration_tests/test_select_executor.py
+   PYTHONPATH="." python -m pytest test/integration_tests/long/test_select_executor.py
 
 Use the following command to run a specific test case within a specific test file.
 
 .. code-block:: bash
 
-   PYTHONPATH="." python -m pytest test/integration_tests/test_select_executor.py -k 'test_should_load_and_select_in_table'
+   PYTHONPATH="." python -m pytest test/integration_tests/long/test_select_executor.py -k 'test_should_load_and_select_in_table'

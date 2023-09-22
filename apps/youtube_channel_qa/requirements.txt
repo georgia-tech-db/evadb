@@ -1,9 +1,0 @@
-evadb>=0.2.14
-torch
-transformers
-opencv-python
-eva-decord
-openai
-youtube_transcript_api>=0.6.0
-pytube>=15.0.0
-scrapetube
