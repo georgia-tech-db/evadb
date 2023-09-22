@@ -201,6 +201,7 @@ def parse_config_yml():
 
     f = open(Path(EvaDB_INSTALLATION_DIR) / "evadb.yml", "r+")
     config_obj = yaml.load(f, Loader=yaml.FullLoader)
+    f.close()
     return config_obj
 
 
