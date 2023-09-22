@@ -19,17 +19,17 @@ from evadb.plan_nodes.types import PlanOprType
 
 class SetPlan(AbstractPlan):
     def __init__(self, config_name: str, config_value: Any):
-        self.config_name = config_name
-        self.config_value = config_value
+        self._config_name = config_name
+        self._config_value = config_value
         super().__init__(PlanOprType.SET)
 
     @property
     def config_name(self):
-        return self.config_name
+        return self._config_name
 
     @property
     def config_value(self):
-        return self.config_value
+        return self._config_value
 
     def __str__(self):
         return "SetPlan(config_name={}, \
