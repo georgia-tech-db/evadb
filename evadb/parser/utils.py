@@ -24,10 +24,15 @@ from evadb.parser.select_statement import SelectStatement
 from evadb.parser.show_statement import ShowStatement
 from evadb.parser.types import ObjectType
 from evadb.parser.use_statement import UseStatement
+from evadb.parser.set_statement import SetStatement
 
 # List of statements for which we omit binder and optimizer and pass the statement
 # directly to the executor.
-SKIP_BINDER_AND_OPTIMIZER_STATEMENTS = (CreateDatabaseStatement, UseStatement)
+SKIP_BINDER_AND_OPTIMIZER_STATEMENTS = (
+    CreateDatabaseStatement,
+    UseStatement,
+    SetStatement,
+)
 
 
 def parse_expression(expr: str):

@@ -39,5 +39,7 @@ class SetExecutor(AbstractExecutor):
         will be replaced
         """
         self._config.update_value(
-            category="default", key=SetPlan.config_name, value=SetPlan.config_value
+            category="default",
+            key=self.node.config_name,
+            value=self.node.config_value.value,
         )

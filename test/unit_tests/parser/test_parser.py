@@ -711,6 +711,22 @@ class ParserTests(unittest.TestCase):
 
         self.assertEqual(set_stmt, expected_stmt)
 
+        # TESTING 'TO' IN PLACE OF '='
+        set_statement = """SET OPENAIKEY TO 'ABCD'"""
+        evadb_statement_list = parser.parse(set_statement)
+
+        self.assertIsInstance(evadb_statement_list, list)
+        self.assertEqual(len(evadb_statement_list), 1)
+        self.assertEqual(evadb_statement_list[0].stmt_type, StatementType.SET)
+
+        set_stmt = evadb_statement_list[0]
+
+        expected_stmt = SetStatement(
+            "OPENAIKEY", ConstantValueExpression("ABCD", ColumnType.TEXT)
+        )
+
+        self.assertEqual(set_stmt, expected_stmt)
+
     def test_create_predict_function_statement(self):
         parser = Parser()
         create_func_query = """
