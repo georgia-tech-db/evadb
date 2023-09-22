@@ -18,24 +18,19 @@ from typing import Callable
 
 from evadb.binder.binder_utils import (
     BinderError,
-    add_func_expr_outputs_to_binder_context,
     bind_table_info,
     check_column_name_is_string,
     check_groupby_pattern,
     check_table_object_is_groupable,
     drop_row_id_from_target_list,
     extend_star,
+    get_bound_func_expr_outputs_as_tuple_value_expr,
     get_column_definition_from_select_target_list,
     handle_bind_extract_object_function,
     resolve_alias_table_value_expression,
 )
 from evadb.binder.statement_binder_context import StatementBinderContext
-from evadb.catalog.catalog_type import (
-    ColumnType,
-    NdArrayType,
-    TableType,
-    VideoColumnName,
-)
+from evadb.catalog.catalog_type import ColumnType, TableType, VideoColumnName
 from evadb.catalog.catalog_utils import get_metadata_properties, is_document_table
 from evadb.configuration.constants import EvaDB_INSTALLATION_DIR
 from evadb.expression.abstract_expression import AbstractExpression, ExpressionType
@@ -136,50 +131,6 @@ class StatementBinder:
             ), f"{node.function_type} functions' input and output are auto assigned"
             node.inputs, node.outputs = inputs, outputs
 
-    @bind.register(CreateIndexStatement)
-    def _bind_create_index_statement(self, node: CreateIndexStatement):
-        self.bind(node.table_ref)
-        if node.function:
-            self.bind(node.function)
-
-        # TODO: create index currently only supports single numpy column.
-        assert len(node.col_list) == 1, "Index cannot be created on more than 1 column"
-
-        # TODO: create index currently only works on TableInfo, but will extend later.
-        assert node.table_ref.is_table_atom(), "Index can only be created on Tableinfo"
-        if not node.function:
-            # Feature table type needs to be float32 numpy array.
-            assert (
-                len(node.col_list) == 1
-            ), f"Index can be only created on one column, but instead {len(node.col_list)} are provided"
-            col_def = node.col_list[0]
-
-            table_ref_obj = node.table_ref.table.table_obj
-            col_list = [
-                col for col in table_ref_obj.columns if col.name == col_def.name
-            ]
-            assert (
-                len(col_list) == 1
-            ), f"Index is created on non-existent column {col_def.name}"
-
-            col = col_list[0]
-            assert (
-                col.array_type == NdArrayType.FLOAT32
-            ), "Index input needs to be float32."
-            assert len(col.array_dimensions) == 2
-        else:
-            # Output of the function should be 2 dimension and float32 type.
-            function_obj = self._catalog().get_function_catalog_entry_by_name(
-                node.function.name
-            )
-            for output in function_obj.outputs:
-                assert (
-                    output.array_type == NdArrayType.FLOAT32
-                ), "Index input needs to be float32."
-                assert (
-                    len(output.array_dimensions) == 2
-                ), "Index input needs to be 2 dimensional."
-
     @bind.register(SelectStatement)
     def _bind_select_statement(self, node: SelectStatement):
         if node.from_table:
@@ -201,7 +152,10 @@ class StatementBinder:
             for expr in node.target_list:
                 self.bind(expr)
                 if isinstance(expr, FunctionExpression):
-                    add_func_expr_outputs_to_binder_context(expr, self._binder_context)
+                    output_cols = get_bound_func_expr_outputs_as_tuple_value_expr(expr)
+                    self._binder_context.add_derived_table_alias(
+                        expr.alias.alias_name, output_cols
+                    )
 
         if node.groupby_clause:
             self.bind(node.groupby_clause)
@@ -247,6 +201,12 @@ class StatementBinder:
                 node.query.target_list
             )
 
+    @bind.register(CreateIndexStatement)
+    def _bind_create_index_statement(self, node: CreateIndexStatement):
+        from evadb.binder.create_index_statement_binder import bind_create_index
+
+        bind_create_index(self, node)
+
     @bind.register(RenameTableStatement)
     def _bind_rename_table_statement(self, node: RenameTableStatement):
         self.bind(node.old_table_ref)
@@ -279,7 +239,10 @@ class StatementBinder:
             func_expr = node.table_valued_expr.func_expr
             func_expr.alias = node.alias
             self.bind(func_expr)
-            add_func_expr_outputs_to_binder_context(func_expr, self._binder_context)
+            output_cols = get_bound_func_expr_outputs_as_tuple_value_expr(func_expr)
+            self._binder_context.add_derived_table_alias(
+                func_expr.alias.alias_name, output_cols
+            )
         else:
             raise BinderError(f"Unsupported node {type(node)}")
 
