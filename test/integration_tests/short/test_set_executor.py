@@ -37,5 +37,5 @@ class SetExecutorTest(unittest.TestCase):
     def test_set_execution(self):
         execute_query_fetch_all(self.evadb, "SET OPENAIKEY = 'ABCD';")
         current_config_value = self.evadb.config.get_value("default", "OPENAIKEY")
-        
+
         self.assertEqual("ABCD", current_config_value)

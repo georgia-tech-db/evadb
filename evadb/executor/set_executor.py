@@ -26,17 +26,17 @@ class SetExecutor(AbstractExecutor):
     def exec(self, *args, **kwargs):
         # Get method implementation from the config.update_value
         """
-            NOTE :- Currently adding adding all configs in 'default' category.
-            The idea is to deprecate category to maintain the same format for
-            the query as DuckDB and Postgres
+        NOTE :- Currently adding adding all configs in 'default' category.
+        The idea is to deprecate category to maintain the same format for
+        the query as DuckDB and Postgres
 
-            Ref :-
-            https://www.postgresql.org/docs/7.0/sql-set.htm
-            https://duckdb.org/docs/sql/configuration.html
+        Ref :-
+        https://www.postgresql.org/docs/7.0/sql-set.htm
+        https://duckdb.org/docs/sql/configuration.html
 
-            This design change for configuation manager will be taken care of
-            as a separate PR for the issue #1140, where all instances of config use
-            will be replaced
+        This design change for configuation manager will be taken care of
+        as a separate PR for the issue #1140, where all instances of config use
+        will be replaced
         """
         self._config.update_value(
             category="default", key=SetPlan.config_name, value=SetPlan.config_value

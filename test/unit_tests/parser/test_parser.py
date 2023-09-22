@@ -693,7 +693,7 @@ class ParserTests(unittest.TestCase):
         )
 
         self.assertEqual(delete_stmt, expected_stmt)
-    
+
     def test_set_statement(self):
         parser = Parser()
         set_statement = """SET OPENAIKEY = 'ABCD'"""
@@ -705,7 +705,9 @@ class ParserTests(unittest.TestCase):
 
         set_stmt = evadb_statement_list[0]
 
-        expected_stmt = SetStatement("OPENAIKEY", ConstantValueExpression("ABCD", ColumnType.TEXT))
+        expected_stmt = SetStatement(
+            "OPENAIKEY", ConstantValueExpression("ABCD", ColumnType.TEXT)
+        )
 
         self.assertEqual(set_stmt, expected_stmt)
 
