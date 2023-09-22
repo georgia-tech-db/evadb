@@ -92,6 +92,8 @@ CatalogManagerTests
 CatalogModelsTest
 ChatGPT
 ChatGPTTest
+CHROMADB
+ChromaDB
 ColConstraintInfo
 Colab
 ColorSpace
