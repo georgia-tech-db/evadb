@@ -17,7 +17,7 @@ CONTINUOUS = 1
 NO_GPU = -1
 UNDEFINED_GROUP_ID = -1
 # remove this when we implement the cacheable logic in the function itself
-CACHEABLE_FUNCTIONS = ["Yolo", "FaceDetector", "OCRExtractor", "HFObjectDetector"]
+CACHEABLE_FUNCTIONS = ["Yolo", "FaceDetector", "OCRExtractor", "HFObjectDetector", "ChatGPT"]
 IFRAMES = "IFRAMES"
 AUDIORATE = "AUDIORATE"
 DEFAULT_FUNCTION_EXPRESSION_COST = 100
