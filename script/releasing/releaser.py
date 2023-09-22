@@ -174,7 +174,7 @@ def release_version(current_version):
     run_command(f"git push origin release-{NEXT_RELEASE}")
 
 
-def get_commit_id_of_latest_release(release_index=0):
+def get_commit_id_of_latest_release():
     # Default to the latest release.
     import requests
 
@@ -183,7 +183,7 @@ def get_commit_id_of_latest_release(release_index=0):
     response = requests.get(url)
     data = response.json()
 
-    latest_release = data[release_index]
+    latest_release = data[0]
     release_date = latest_release["created_at"]
 
     return release_date
@@ -416,9 +416,7 @@ if __name__ == "__main__":
         publish_wheels(current_version_str_without_dev)
 
     if args.upload_assets:
-        # We assume that we run each command sequentially here. When a new release
-        # is made, the change log needs to be based on the second latest release.
-        release_date = get_commit_id_of_latest_release(release_index=1)
+        release_date = get_commit_id_of_latest_release()
         changelog = get_changelog(release_date)
         upload_assets(changelog, current_version_str_without_dev)
 
@@ -455,3 +453,4 @@ if __name__ == "__main__":
 
         # BUMP UP VERSION
         bump_up_version(next_version)
+
