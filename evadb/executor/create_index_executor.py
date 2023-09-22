@@ -24,7 +24,7 @@ from evadb.executor.executor_utils import ExecutorError, handle_vector_store_par
 from evadb.models.storage.batch import Batch
 from evadb.plan_nodes.create_index_plan import CreateIndexPlan
 from evadb.storage.storage_engine import StorageEngine
-from evadb.third_party.databases.interface import get_database_handler
+from evadb.third_party.interface import get_database_handler
 from evadb.third_party.vector_stores.types import FeaturePayload
 from evadb.third_party.vector_stores.utils import VectorStoreFactory
 from evadb.utils.logging_manager import logger
