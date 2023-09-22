@@ -232,19 +232,9 @@ class CreateTable:
         dimensions = self.dimension_helper(tree)
         return dimensions
 
-    def vector_store_type(self, tree):
-        vector_store_type = None
-        token = tree.children[1]
 
-        if str.upper(token) == "FAISS":
-            vector_store_type = VectorStoreType.FAISS
-        elif str.upper(token) == "QDRANT":
-            vector_store_type = VectorStoreType.QDRANT
-        elif str.upper(token) == "PINECONE":
-            vector_store_type = VectorStoreType.PINECONE
-        return vector_store_type
-
-    # INDEX CREATION
+# INDEX CREATION
+class CreateIndex:
     def create_index(self, tree):
         index_name = None
         if_not_exists = False
@@ -283,6 +273,20 @@ class CreateTable:
         return CreateIndexStatement(
             index_name, if_not_exists, table_ref, col_list, vector_store_type, function
         )
+
+    def vector_store_type(self, tree):
+        vector_store_type = None
+        token = tree.children[1]
+
+        if str.upper(token) == "FAISS":
+            vector_store_type = VectorStoreType.FAISS
+        elif str.upper(token) == "QDRANT":
+            vector_store_type = VectorStoreType.QDRANT
+        elif str.upper(token) == "PINECONE":
+            vector_store_type = VectorStoreType.PINECONE
+        elif str.upper(token) == "PGVECTOR":
+            vector_store_type = VectorStoreType.PGVECTOR
+        return vector_store_type
 
 
 class CreateDatabase:
