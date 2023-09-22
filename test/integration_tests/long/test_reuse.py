@@ -113,7 +113,7 @@ class ReuseTest(unittest.TestCase):
 
     def test_reuse_chatgpt(self):
         import os
-        os.environ["OPENAI_KEY"] = "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"
+        os.environ["OPENAI_KEY"] = "sk-..."
         select_query = """SELECT ChatGPT('What is the fruit described in this sentence', data)
             FROM fruitTable"""
         batches, exec_times = self._reuse_experiment([select_query, select_query])
