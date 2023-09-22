@@ -56,6 +56,20 @@ workflows:
                 ignore: 
                   - master
                   - staging
+
+        ################################
+        #### SHORT THIRDPARTY TESTS: PR
+        ################################
+        ################################
+        - Linux:
+            name: Short Third Party Test | v3.10 | Linux
+            mode: SHORT THIRDPARTY TEST
+            filters:
+              branches:
+                ignore: 
+                  - master
+                  - staging
+
         ################################
         #### LONG INTEGRATION TESTS:
         #### Staging
@@ -214,7 +228,7 @@ jobs:
 
       - run:
           name: Test and upload coverage report to coveralls
-          no_output_timeout: 10m # 10 minute timeout
+          no_output_timeout: 30m # 30 minute timeout
           environment:
             PY_VERSION: << parameters.v >>
           command: |

@@ -361,3 +361,19 @@ def drop_row_id_from_target_list(
                 continue
         filtered_list.append(expr)
     return filtered_list
+
+
+def add_func_expr_outputs_to_binder_context(
+    func_expr: FunctionExpression, binder_context: StatementBinderContext
+):
+    output_cols = []
+    for obj, alias in zip(func_expr.output_objs, func_expr.alias.col_names):
+        col_alias = "{}.{}".format(func_expr.alias.alias_name, alias)
+        alias_obj = TupleValueExpression(
+            name=alias,
+            table_alias=func_expr.alias.alias_name,
+            col_object=obj,
+            col_alias=col_alias,
+        )
+        output_cols.append(alias_obj)
+    binder_context.add_derived_table_alias(func_expr.alias.alias_name, output_cols)

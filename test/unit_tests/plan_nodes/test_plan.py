@@ -72,6 +72,7 @@ class PlanNodeTests(unittest.TestCase):
 
     def test_create_function_plan(self):
         function_name = "function"
+        or_replace = False
         if_not_exists = True
         functionIO = "functionIO"
         inputs = [functionIO, functionIO]
@@ -79,10 +80,11 @@ class PlanNodeTests(unittest.TestCase):
         impl_path = "test"
         ty = "classification"
         node = CreateFunctionPlan(
-            function_name, if_not_exists, inputs, outputs, impl_path, ty
+            function_name, or_replace, if_not_exists, inputs, outputs, impl_path, ty
         )
         self.assertEqual(node.opr_type, PlanOprType.CREATE_FUNCTION)
-        self.assertEqual(node.if_not_exists, True)
+        self.assertEqual(node.or_replace, or_replace)
+        self.assertEqual(node.if_not_exists, if_not_exists)
         self.assertEqual(node.inputs, [functionIO, functionIO])
         self.assertEqual(node.outputs, [functionIO])
         self.assertEqual(node.impl_path, impl_path)
