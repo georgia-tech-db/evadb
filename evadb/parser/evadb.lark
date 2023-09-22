@@ -272,7 +272,7 @@ or_replace: OR REPLACE
 function_call: function         ->function_call           
     | aggregate_windowed_function   ->aggregate_function_call
 
-function: simple_id "(" (STAR | function_args) ")" dotted_id?
+function: simple_id "(" (STAR | function_args)? ")" dotted_id?
     
 aggregate_windowed_function: aggregate_function_name "(" function_arg ")"
                            | COUNT "(" (STAR | function_arg) ")"
