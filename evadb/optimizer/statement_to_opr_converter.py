@@ -36,7 +36,6 @@ from evadb.optimizer.operators import (
     LogicalQueryDerivedGet,
     LogicalRename,
     LogicalSample,
-    LogicalSet,
     LogicalShow,
     LogicalUnion,
 )
@@ -54,7 +53,6 @@ from evadb.parser.insert_statement import InsertTableStatement
 from evadb.parser.load_statement import LoadDataStatement
 from evadb.parser.rename_statement import RenameTableStatement
 from evadb.parser.select_statement import SelectStatement
-from evadb.parser.set_statement import SetStatement
 from evadb.parser.show_statement import ShowStatement
 from evadb.parser.statement import AbstractStatement
 from evadb.parser.table_ref import JoinNode, TableRef, TableValuedExpression
@@ -372,10 +370,6 @@ class StatementToPlanConverter:
         )
         self._plan = delete_opr
 
-    def visit_set(self, statement: SetStatement):
-        set_opr = LogicalSet(statement.config_name, statement.config_value)
-        self._plan = set_opr
-
     def visit(self, statement: AbstractStatement):
         """Based on the instance of the statement the corresponding
            visit is called.
@@ -406,8 +400,6 @@ class StatementToPlanConverter:
             self.visit_create_index(statement)
         elif isinstance(statement, DeleteTableStatement):
             self.visit_delete(statement)
-        elif isinstance(statement, SetStatement):
-            self.visit_set(statement)
         return self._plan
 
     @property

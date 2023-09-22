@@ -14,11 +14,11 @@
 # limitations under the License.
 from evadb.database import EvaDBDatabase
 from evadb.executor.abstract_executor import AbstractExecutor
-from evadb.plan_nodes.set_plan import SetPlan
+from evadb.parser.set_statement import SetStatement
 
 
 class SetExecutor(AbstractExecutor):
-    def __init__(self, db: EvaDBDatabase, node: SetPlan):
+    def __init__(self, db: EvaDBDatabase, node: SetStatement):
         super().__init__(db, node)
 
     def exec(self, *args, **kwargs):

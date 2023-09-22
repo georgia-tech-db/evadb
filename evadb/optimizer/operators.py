@@ -64,7 +64,6 @@ class OperatorType(IntEnum):
     LOGICAL_EXTRACT_OBJECT = auto()
     LOGICAL_VECTOR_INDEX_SCAN = auto()
     LOGICAL_USE = auto()
-    LOGICALSET = auto()
     LOGICALDELIMITER = auto()
 
 
@@ -1249,51 +1248,5 @@ class LogicalVectorIndexScan(Operator):
                 self.index,
                 self.limit_count,
                 self.search_query_expr,
-            )
-        )
-
-
-class LogicalSet(Operator):
-    """[Logical Node for Set Operation]
-
-    Arguments:
-        config_name(str): The config_name to add,
-        config_value(Any): The config_value to add,
-    """
-
-    def __init__(
-        self,
-        config_name: str,
-        config_value: Any,
-        children=None,
-    ):
-        super().__init__(OperatorType.LOGICALSET, children)
-        self._config_name = config_name
-        self._config_value = config_value
-
-    @property
-    def config_name(self):
-        return self._config_name
-
-    @property
-    def config_value(self):
-        return self._config_value
-
-    def __eq__(self, other):
-        is_subtree_equal = super().__eq__(other)
-        if not isinstance(other, LogicalSet):
-            return False
-        return (
-            is_subtree_equal
-            and self.config_name == other.config_name
-            and self.config_value == other.config_value
-        )
-
-    def __hash__(self) -> int:
-        return hash(
-            (
-                super().__hash__(),
-                self.config_name,
-                self.config_value,
             )
         )
