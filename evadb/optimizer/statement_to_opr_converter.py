@@ -36,9 +36,9 @@ from evadb.optimizer.operators import (
     LogicalQueryDerivedGet,
     LogicalRename,
     LogicalSample,
+    LogicalSet,
     LogicalShow,
     LogicalUnion,
-    LogicalSet,
 )
 from evadb.optimizer.optimizer_utils import (
     column_definition_to_function_io,
@@ -54,8 +54,8 @@ from evadb.parser.insert_statement import InsertTableStatement
 from evadb.parser.load_statement import LoadDataStatement
 from evadb.parser.rename_statement import RenameTableStatement
 from evadb.parser.select_statement import SelectStatement
-from evadb.parser.show_statement import ShowStatement
 from evadb.parser.set_statement import SetStatement
+from evadb.parser.show_statement import ShowStatement
 from evadb.parser.statement import AbstractStatement
 from evadb.parser.table_ref import JoinNode, TableRef, TableValuedExpression
 from evadb.parser.types import FunctionType, JoinType
