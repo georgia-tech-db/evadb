@@ -374,7 +374,7 @@ class StatementToPlanConverter:
 
     def visit_set(self, statement: SetStatement):
         set_opr = LogicalSet(statement.config_name, statement.config_value)
-        self.plan = set_opr
+        self._plan = set_opr
 
     def visit(self, statement: AbstractStatement):
         """Based on the instance of the statement the corresponding

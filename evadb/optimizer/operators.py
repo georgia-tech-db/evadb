@@ -63,8 +63,8 @@ class OperatorType(IntEnum):
     LOGICAL_EXTRACT_OBJECT = auto()
     LOGICAL_VECTOR_INDEX_SCAN = auto()
     LOGICAL_USE = auto()
-    LOGICALDELIMITER = auto()
     LOGICALSET = auto()
+    LOGICALDELIMITER = auto()
 
 
 class Operator:

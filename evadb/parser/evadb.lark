@@ -80,7 +80,7 @@ drop_table: DROP TABLE if_exists? uid
 drop_function: DROP FUNCTION if_exists? uid
     
 // SET statements (configuration)
-set_statement: SET config_name EQUAL_SYMBOL config_value
+set_statement: SET config_name (EQUAL_SYMBOL | TO) config_value
 
 config_name: uid
 
