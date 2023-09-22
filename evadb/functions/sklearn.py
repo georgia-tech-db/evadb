@@ -31,9 +31,14 @@ class GenericSklearnModel(AbstractFunction):
         self.model = pickle.load(open(model_path, "rb"))
 
     def forward(self, frames: pd.DataFrame) -> pd.DataFrame:
+        # The last column is the predictor variable column. Hence we do not
+        # pass that column in the predict method for sklearn.
         predictions = self.model.predict(frames.iloc[:, :-1])
         predict_df = pd.DataFrame(predictions)
-        # Assign the prediction column name same as that for data provided.
+        # We need to rename the column of the output dataframe. For this we
+        # shall rename it to the column name same as that of the last column of
+        # frames. This is because the last column of frames corresponds to the
+        # variable we want to predict.
         predict_df.rename(columns={0: frames.columns[-1]}, inplace=True)
         return predict_df
 

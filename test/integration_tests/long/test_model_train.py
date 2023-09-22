@@ -77,8 +77,7 @@ class ModelTrainTests(unittest.TestCase):
             CREATE FUNCTION IF NOT EXISTS PredictHouseRent FROM
             ( SELECT number_of_rooms, number_of_bathrooms, days_on_market, rental_price FROM HomeRentals )
             TYPE Sklearn
-            PREDICT 'rental_price'
-            TIME_LIMIT 120;
+            PREDICT 'rental_price';
         """
         execute_query_fetch_all(self.evadb, create_predict_function)
 
