@@ -31,6 +31,7 @@ import pytest
 
 from evadb.binder.binder_utils import BinderError
 from evadb.models.storage.batch import Batch
+from evadb.optimizer.operators import LogicalFilter
 from evadb.server.command_handler import execute_query_fetch_all
 
 NUM_FRAMES = 10
@@ -416,9 +417,10 @@ class SelectExecutorTest(unittest.TestCase):
 
     def test_expression_tree_signature(self):
         plan = get_logical_query_plan(
-            self.evadb, "SELECT DummyMultiObjectDetector(data).labels FROM MyVideo"
+            self.evadb,
+            "SELECT id FROM MyVideo WHERE DummyMultiObjectDetector(data).labels @> ['person'];",
         )
-        signature = plan.target_list[0].signature()
+        signature = next(plan.find_all(LogicalFilter)).predicate.children[0].signature()
         function_id = (
             self.evadb.catalog()
             .get_function_catalog_entry_by_name("DummyMultiObjectDetector")
@@ -432,3 +434,11 @@ class SelectExecutorTest(unittest.TestCase):
             signature,
             f"DummyMultiObjectDetector[{function_id}](MyVideo.data[{col_id}])",
         )
+
+    def test_function_with_no_input_arguments(self):
+        select_query = "SELECT DummyNoInputFunction();"
+        actual_batch = execute_query_fetch_all(self.evadb, select_query)
+        expected = Batch(
+            pd.DataFrame([{"dummynoinputfunction.label": "DummyNoInputFunction"}])
+        )
+        self.assertEqual(actual_batch, expected)

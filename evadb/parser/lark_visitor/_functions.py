@@ -30,7 +30,7 @@ class Functions:
     def function(self, tree):
         function_name = None
         function_output = None
-        function_args = None
+        function_args = []
 
         for child in tree.children:
             if isinstance(child, Token):

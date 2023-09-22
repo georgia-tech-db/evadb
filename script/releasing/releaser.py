@@ -175,6 +175,7 @@ def release_version(current_version):
 
 
 def get_commit_id_of_latest_release():
+    # Default to the latest release.
     import requests
 
     repo = "georgia-tech-db/evadb"
@@ -229,7 +230,6 @@ def publish_wheels(tag):
 def upload_assets(changelog, tag):
     # Authentication token
     access_token = os.environ["GITHUB_KEY"]
-    print(access_token)
     # Repository information
     repo_owner = "georgia-tech-db"
     repo_name = "evadb"
@@ -292,12 +292,11 @@ def bump_up_version(next_version):
 
     NEXT_RELEASE = f"v{str(next_version)}+dev"
 
-    print(NEXT_RELEASE)
-
     run_command("git checkout -b bump-" + NEXT_RELEASE)
     run_command("git add . -u")
     run_command("git commit -m '[BUMP]: " + NEXT_RELEASE + "'")
     run_command("git push --set-upstream origin bump-" + NEXT_RELEASE)
+    run_command(f"gh pr create -B staging -H bump-{NEXT_RELEASE} --title 'Bump Version to {NEXT_RELEASE}' --body 'Bump Version to {NEXT_RELEASE}'")
 
 
 # ==============================================
@@ -417,7 +416,6 @@ if __name__ == "__main__":
         publish_wheels(current_version_str_without_dev)
 
     if args.upload_assets:
-        print("upload assets")
         release_date = get_commit_id_of_latest_release()
         changelog = get_changelog(release_date)
         upload_assets(changelog, current_version_str_without_dev)
@@ -455,3 +453,4 @@ if __name__ == "__main__":
 
         # BUMP UP VERSION
         bump_up_version(next_version)
+

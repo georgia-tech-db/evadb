@@ -108,6 +108,8 @@ notebook_libs = [
 
 qdrant_libs = ["qdrant_client"]  # cannot install on 3.11 due to grcpio
 
+pinecone_libs = ["pinecone-client"]
+
 postgres_libs = [
     "psycopg2",
 ]
