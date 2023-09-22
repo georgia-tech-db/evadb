@@ -171,6 +171,8 @@ def handle_vector_store_params(
         return {"index_path": index_path}
     elif vector_store_type == VectorStoreType.QDRANT:
         return {"index_db": str(Path(index_path).parent)}
+    elif vector_store_type == VectorStoreType.PINECONE:
+        return {}
     else:
         raise ValueError("Unsupported vector store type: {}".format(vector_store_type))
 

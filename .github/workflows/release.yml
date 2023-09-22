@@ -9,12 +9,15 @@ on:
       - staging
 
 jobs:
-  release:
+  release-on-success:
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: master
+          fetch-depth: 0
+      - name: Switch to master
+        run: git checkout master
       - name: Install env.
         run: |
           python -m venv test_evadb
@@ -38,6 +41,14 @@ jobs:
       - name: Release.
         env:
           GITHUB_KEY: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           source test_evadb/bin/activate
-          python script/releasing/releaser.py -n minor -u
+          pip install twine
+          git config --global user.email "caojiashen24@gmail.com"
+          git config --global user.name "Jiashen Cao"
+          python script/releasing/releaser.py -n patch -u # changelog
+          python script/releasing/releaser.py -n patch -r # release
+          python script/releasing/releaser.py -n patch -p # push to PyPI
+          python script/releasing/releaser.py -n patch -a # push the release
+          python script/releasing/releaser.py -n patch -b # version bump up

@@ -114,6 +114,8 @@ class NdArrayType(EvaDBEnum):
 class VectorStoreType(EvaDBEnum):
     FAISS  # noqa: F821
     QDRANT  # noqa: F821
+    PINECONE  # noqa: F821
+    PGVECTOR  # noqa: F821
 
 
 class VideoColumnName(EvaDBEnum):

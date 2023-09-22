@@ -22,6 +22,7 @@ from evadb.utils.generic_utils import (
     is_forecast_available,
     is_gpu_available,
     is_ludwig_available,
+    is_pinecone_available,
     is_qdrant_available,
 )
 
@@ -32,6 +33,11 @@ asyncio_skip_marker = pytest.mark.skipif(
 qdrant_skip_marker = pytest.mark.skipif(
     is_qdrant_available() is False,
     reason="qdrant requires grcpio which is broken on 3.11",
+)
+
+pinecone_skip_marker = pytest.mark.skipif(
+    is_pinecone_available() is False,
+    reason="skipping since pinecone is not installed",
 )
 
 windows_skip_marker = pytest.mark.skipif(

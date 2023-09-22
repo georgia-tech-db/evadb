@@ -20,6 +20,7 @@ from evadb.parser.lark_visitor._common_clauses_ids import CommonClauses
 from evadb.parser.lark_visitor._create_statements import (
     CreateApplication,
     CreateDatabase,
+    CreateIndex,
     CreateTable,
 )
 from evadb.parser.lark_visitor._delete_statement import Delete
@@ -63,6 +64,7 @@ class LarkInterpreter(
     LarkBaseInterpreter,
     CommonClauses,
     CreateTable,
+    CreateIndex,
     CreateDatabase,
     Expressions,
     Functions,
