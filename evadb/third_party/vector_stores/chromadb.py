@@ -46,7 +46,7 @@ class ChromaDBVectorStore(VectorStore):
     def create(self, vector_dim: int):
         self._client.create_collection(
             name=self._collection_name,
-            metadata={"hnsw:construction_ef" : vector_dim, "hnsw:space": "cosine"}
+            metadata={"hnsw:construction_ef": vector_dim, "hnsw:space": "cosine"},
         )
 
     def add(self, payload: List[FeaturePayload]):
@@ -66,17 +66,16 @@ class ChromaDBVectorStore(VectorStore):
         self,
         query: VectorIndexQuery,
     ) -> VectorIndexQueryResult:
-        
         response = self._client.get_collection(self._collection_name).query(
             query_embeddings=query.embedding.reshape(-1).tolist(),
             n_results=query.top_k,
         )
 
         distances, ids = [], []
-        if 'ids' in response:
-            for id in response['ids'][0]:
+        if "ids" in response:
+            for id in response["ids"][0]:
                 ids.append(int(id))
-            for distance in response['distances'][0]:
+            for distance in response["distances"][0]:
                 distances.append(distance)
-            
+
         return VectorIndexQueryResult(distances, ids)

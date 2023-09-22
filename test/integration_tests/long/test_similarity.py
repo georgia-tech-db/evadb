@@ -15,7 +15,7 @@
 import os
 import time
 import unittest
-from test.markers import pinecone_skip_marker, qdrant_skip_marker, chromadb_skip_marker
+from test.markers import chromadb_skip_marker, pinecone_skip_marker, qdrant_skip_marker
 from test.util import (
     create_sample_image,
     get_evadb_for_testing,
