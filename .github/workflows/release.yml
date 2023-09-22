@@ -15,7 +15,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: master
+          fetch-depth: 0
+      - name: Switch to master
+        run: git checkout master
       - name: Install env.
         run: |
           python -m venv test_evadb
