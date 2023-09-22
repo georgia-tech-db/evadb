@@ -507,6 +507,14 @@ def is_qdrant_available() -> bool:
         return False
 
 
+def is_pinecone_available() -> bool:
+    try:
+        try_to_import_pinecone_client()
+        return True
+    except ValueError:  # noqa: E722
+        return False
+
+
 ##############################
 ## UTILS
 ##############################
