@@ -74,7 +74,7 @@ Particularly, we are interested in the price of the properties that have three b
 
 In the ``home_sales`` dataset, we have two different property types, houses and units, and price gap between them are large. 
 We'd like to ask EvaDB to analyze the price of houses and units independently. 
-To do so, we specify the ``propertytype`` column as the ``ID `` of the time series data, which represents an identifier for the series.
+To do so, we specify the ``propertytype`` column as the ``ID`` of the time series data, which represents an identifier for the series.
 Here is the query's output ``DataFrame``:
 
 .. note::
