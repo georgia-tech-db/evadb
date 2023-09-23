@@ -194,6 +194,11 @@ stablediffusion_function_query = """CREATE FUNCTION IF NOT EXISTS StableDiffusio
     EvaDB_INSTALLATION_DIR
 )
 
+dalle_function_query = """CREATE FUNCTION IF NOT EXISTS StableDiffusion
+        IMPL '{}/functions/dalle.py';
+        """.format(
+    EvaDB_INSTALLATION_DIR
+)
 
 def init_builtin_functions(db: EvaDBDatabase, mode: str = "debug") -> None:
     """Load the built-in functions into the system during system bootstrapping.

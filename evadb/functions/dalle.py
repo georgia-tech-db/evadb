@@ -13,8 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from evadb.utils.generic_utils import try_to_import_replicate
+from evadb.utils.generic_utils import try_to_import_openai
 import os
+from evadb.configuration.configuration_manager import ConfigurationManager
 
 import pandas as pd
 from retry import retry
@@ -24,22 +25,13 @@ from evadb.functions.abstract.abstract_function import AbstractFunction
 from evadb.functions.decorators.decorators import forward
 from evadb.functions.decorators.io_descriptors.data_types import PandasDataframe
 
-
-_VALID_STABLE_DIFFUSION_MODEL = [
-    "stable-diffusion:27b93a2413e7f36cd83da926f3656280b2931564ff050bf9575f1fdf9bcd7478",
-]
-
-class StableDiffusion(AbstractFunction):
+class DallEFunction(AbstractFunction):
     @property
     def name(self) -> str:
-        return "StableDiffusion"
+        return "DallE"
 
-    def setup(
-        self,
-        model="stable-diffusion:27b93a2413e7f36cd83da926f3656280b2931564ff050bf9575f1fdf9bcd7478"
-    ) -> None:
-        assert model in _VALID_STABLE_DIFFUSION_MODEL, f"Unsupported Stable Diffusion {model}"
-        self.model = model
+    def setup(self) -> None:
+        pass
 
     @forward(
         input_signatures=[
@@ -62,22 +54,28 @@ class StableDiffusion(AbstractFunction):
         ],
     )
     def forward(self, text_df):
-        try_to_import_replicate()
-        import replicate
+        try_to_import_openai()
+        import openai
 
-        replicate_api_key = 'r8_Q75IAgbaHFvYVfLSMGmjQPcW5uZZoXz0jGalu'
-        os.environ['REPLICATE_API_TOKEN'] = replicate_api_key
+        # Register API key, try configuration manager first
+        openai.api_key = ConfigurationManager().get_value("third_party", "OPENAI_KEY")
+        # If not found, try OS Environment Variable
+        if len(openai.api_key) == 0:
+            openai.api_key = os.environ.get("OPENAI_KEY", "")
+        assert (
+            len(openai.api_key) != 0
+        ), "Please set your OpenAI API key in evadb.yml file (third_party, open_api_key) or environment variable (OPENAI_KEY)"
 
-        # @retry(tries=5, delay=20)
         def generate_image(text_df : PandasDataframe):
             results = []
             queries = text_df[text_df.columns[0]]
             for query in queries:
-                output = replicate.run(
-                    "stability-ai/" + self.model,
-                    input={"prompt": query}
-                )
-                results.append(output[0])
+                response = openai.Image.create(
+                    prompt=query,
+                    n=1,
+                    size="1024x1024"
+                    )
+                results.append(response['data'][0]['url'])
             return results
 
         df = pd.DataFrame({"response":generate_image(text_df=text_df)})
