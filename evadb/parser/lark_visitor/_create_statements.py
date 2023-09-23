@@ -286,6 +286,8 @@ class CreateIndex:
             vector_store_type = VectorStoreType.PINECONE
         elif str.upper(token) == "PGVECTOR":
             vector_store_type = VectorStoreType.PGVECTOR
+        elif str.upper(token) == "CHROMADB":
+            vector_store_type = VectorStoreType.CHROMADB
         return vector_store_type
 
 

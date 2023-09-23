@@ -15,7 +15,7 @@
 import os
 import time
 import unittest
-from test.markers import pinecone_skip_marker, qdrant_skip_marker
+from test.markers import chromadb_skip_marker, pinecone_skip_marker, qdrant_skip_marker
 from test.util import (
     create_sample_image,
     get_evadb_for_testing,
@@ -410,6 +410,24 @@ class SimilarityTests(unittest.TestCase):
 
         # Cleanup
         self.evadb.catalog().drop_index_catalog_entry("testQdrantIndexImageDataset")
+
+    @chromadb_skip_marker
+    def test_end_to_end_index_scan_should_work_correctly_on_image_dataset_chromadb(
+        self,
+    ):
+        create_index_query = """CREATE INDEX testChromaDBIndexImageDataset
+                                ON testSimilarityImageDataset (DummyFeatureExtractor(data))
+                                USING CHROMADB;"""
+        execute_query_fetch_all(self.evadb, create_index_query)
+
+        select_query = """SELECT _row_id FROM testSimilarityImageDataset
+                            ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data))
+                            LIMIT 1;""".format(
+            self.img_path
+        )
+
+        res_batch = execute_query_fetch_all(self.evadb, select_query)
+        self.assertEqual(res_batch.frames["testsimilarityimagedataset._row_id"][0], 5)
 
     @pinecone_skip_marker
     def test_end_to_end_index_scan_should_work_correctly_on_image_dataset_pinecone(

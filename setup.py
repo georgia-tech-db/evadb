@@ -110,6 +110,8 @@ qdrant_libs = ["qdrant_client"]  # cannot install on 3.11 due to grcpio
 
 pinecone_libs = ["pinecone-client"]
 
+chromadb_libs = ["chromadb"]
+
 postgres_libs = [
     "psycopg2",
 ]
@@ -154,6 +156,8 @@ EXTRA_REQUIRES = {
     "function": function_libs,
     "notebook": notebook_libs,
     "qdrant": qdrant_libs,
+    "pinecone": pinecone_libs,
+    "chromadb": chromadb_libs,
     "postgres": postgres_libs,
     "ludwig": ludwig_libs,
     "forecasting": forecasting_libs,
