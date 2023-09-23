@@ -8,7 +8,7 @@ ddl_statement: create_database | create_table | create_index | create_function
     | drop_database | drop_table | drop_function | drop_index | rename_table
     
 dml_statement: select_statement | insert_statement | update_statement
-    | delete_statement | load_statement
+    | delete_statement | load_statement | set_statement
     
 utility_statement: describe_statement | show_statement | help_statement | explain_statement
 
@@ -79,6 +79,12 @@ drop_table: DROP TABLE if_exists? uid
     
 drop_function: DROP FUNCTION if_exists? uid
     
+// SET statements (configuration)
+set_statement: SET config_name (EQUAL_SYMBOL | TO) config_value
+
+config_name: uid
+
+config_value: (string_literal | decimal_literal | boolean_literal | real_literal)
 
 // Data Manipulation Language
 
