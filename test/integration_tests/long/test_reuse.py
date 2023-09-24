@@ -99,6 +99,18 @@ class ReuseTest(unittest.TestCase):
     def _reuse_experiment(self, queries):
         exec_times = []
         batches = []
+        for query in queries:
+            timer = Timer()
+            with timer:
+                batches.append(execute_query_fetch_all(self.evadb, query))
+            exec_times.append(timer.total_elapsed_time)
+        return batches, exec_times
+
+    def _strict_reuse_experiment(self, queries):
+        # This test mocks the apply_function_expression, if it is called, it will raise
+        # an exception. 
+        exec_times = []
+        batches = []
         for i, query in enumerate(queries):
             timer = Timer()
             if i != 0:
@@ -106,24 +118,22 @@ class ReuseTest(unittest.TestCase):
                     mock_batch_func.side_effect = Exception("Results are not reused")
                     batches.append(execute_query_fetch_all(self.evadb, query))
             else:
-                with timer, patch.object(Batch, "apply_function_expression") as mock_batch_func:
+                with timer:
                     batches.append(execute_query_fetch_all(self.evadb, query))
             exec_times.append(timer.total_elapsed_time)
         return batches, exec_times
 
     def test_reuse_chatgpt(self):
-        import os
-        os.environ["OPENAI_KEY"] = "sk-..."
-        select_query = """SELECT ChatGPT('What is the fruit described in this sentence', data)
+        select_query = """SELECT DummyLLM('What is the fruit described in this sentence', data)
             FROM fruitTable"""
-        batches, exec_times = self._reuse_experiment([select_query, select_query])
+        batches, exec_times = self._strict_reuse_experiment([select_query, select_query])
         self._verify_reuse_correctness(select_query, batches[1])
         self.assertTrue(exec_times[0] > exec_times[1])
 
     def test_reuse_when_query_is_duplicate(self):
         select_query = """SELECT id, label FROM DETRAC JOIN
             LATERAL HFObjectDetector(data) AS Obj(score, label, bbox) WHERE id < 15;"""
-        batches, exec_times = self._reuse_experiment([select_query, select_query])
+        batches, exec_times = self._strict_reuse_experiment([select_query, select_query])
         self._verify_reuse_correctness(select_query, batches[1])
         self.assertTrue(exec_times[0] > exec_times[1])
 
