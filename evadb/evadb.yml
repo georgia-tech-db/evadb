@@ -25,3 +25,5 @@ experimental:
 
 third_party:
   OPENAI_KEY: ""
+  PINECONE_API_KEY: ""
+  PINECONE_ENV: ""

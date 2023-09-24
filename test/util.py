@@ -33,7 +33,10 @@ from evadb.configuration.configuration_manager import ConfigurationManager
 from evadb.configuration.constants import EvaDB_DATABASE_DIR, EvaDB_INSTALLATION_DIR
 from evadb.database import init_evadb_instance
 from evadb.expression.function_expression import FunctionExpression
-from evadb.functions.abstract.abstract_function import AbstractClassifierFunction
+from evadb.functions.abstract.abstract_function import (
+    AbstractClassifierFunction,
+    AbstractFunction,
+)
 from evadb.functions.decorators import decorators
 from evadb.functions.decorators.io_descriptors.data_types import (
     NumpyArray,
@@ -636,3 +639,27 @@ class DummyObjectDetectorDecorators(AbstractClassifierFunction):
         i = int(frames[0][0][0][0]) - 1
         label = self.labels[i % 2 + 1]
         return np.array([label])
+
+
+class DummyNoInputFunction(AbstractFunction):
+    @decorators.setup(cacheable=False, function_type="test", batchable=False)
+    def setup(self, *args, **kwargs):
+        pass
+
+    @property
+    def name(self) -> str:
+        return "DummyNoInputFunction"
+
+    @decorators.forward(
+        input_signatures=[],
+        output_signatures=[
+            PandasDataframe(
+                columns=["label"],
+                column_types=[NdArrayType.STR],
+                column_shapes=[(None,)],
+            )
+        ],
+    )
+    def forward(self, df: pd.DataFrame) -> pd.DataFrame:
+        ret = pd.DataFrame([{"label": "DummyNoInputFunction"}])
+        return ret

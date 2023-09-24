@@ -126,5 +126,5 @@ class AbstractPlan(ABC):
         """
 
         for node in self.bfs():
-            if isinstance(node, plan_type):
+            if isinstance(node, plan_type) or self.opr_type == plan_type:
                 yield node
