@@ -181,7 +181,7 @@ class PlanExecutorTest(unittest.TestCase):
         # CreateFunctionExecutor
         mock_build.reset_mock()
 
-        tree = MagicMock(node=CreateFunctionPlan(None, False, [], [], None))
+        tree = MagicMock(node=CreateFunctionPlan(None, False, False, [], [], None))
         mock_build.return_value = tree
         actual = list(PlanExecutor(MagicMock(), None).execute_plan())
         tree.exec.assert_called_once()

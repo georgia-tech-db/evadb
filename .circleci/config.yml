@@ -56,6 +56,20 @@ workflows:
                 ignore: 
                   - master
                   - staging
+
+        ################################
+        #### SHORT THIRDPARTY TESTS: PR
+        ################################
+        ################################
+        - Linux:
+            name: Short Third Party Test | v3.10 | Linux
+            mode: SHORT THIRDPARTY TEST
+            filters:
+              branches:
+                ignore: 
+                  - master
+                  - staging
+
         ################################
         #### LONG INTEGRATION TESTS:
         #### Staging
@@ -199,22 +213,22 @@ jobs:
             pip install --upgrade pip
             if [ $RAY = "ENABLED" ]; then
               if [ $PY_VERSION != "3.11" ]; then
-                pip install ".[dev,ray,qdrant]"
+                pip install ".[dev,ray,qdrant,pinecone,chromadb]"
               else
-                pip install ".[dev]" # ray < 2.5.0 does not work with python 3.11 ray-project/ray#33864
+                pip install ".[dev,pinecone,chromadb]" # ray < 2.5.0 does not work with python 3.11 ray-project/ray#33864
               fi
               python -c "import yaml;f = open('evadb/evadb.yml', 'r+');config_obj = yaml.load(f, Loader=yaml.FullLoader);config_obj['experimental']['ray'] = True;f.seek(0);f.write(yaml.dump(config_obj));f.truncate();"
             else
               if [ $PY_VERSION != "3.11" ]; then
-                pip install ".[dev,ludwig,qdrant]"
+                pip install ".[dev,ludwig,qdrant,pinecone,chromadb]"
               else
-                pip install ".[dev]" # ray < 2.5.0 does not work with python 3.11 ray-project/ray#33864
+                pip install ".[dev,pinecone,chromadb]" # ray < 2.5.0 does not work with python 3.11 ray-project/ray#33864
               fi
             fi
 
       - run:
           name: Test and upload coverage report to coveralls
-          no_output_timeout: 10m # 10 minute timeout
+          no_output_timeout: 30m # 30 minute timeout
           environment:
             PY_VERSION: << parameters.v >>
           command: |
@@ -435,7 +449,7 @@ jobs:
               source test_evadb/bin/activate
               pip install --upgrade pip
               pip debug --verbose
-              pip install ".[dev,ludwig,qdrant,forecasting]"
+              pip install ".[dev,ludwig,qdrant,forecasting,pinecone,chromadb]"
               source test_evadb/bin/activate
               bash script/test/test.sh -m "<< parameters.mode >>"
 

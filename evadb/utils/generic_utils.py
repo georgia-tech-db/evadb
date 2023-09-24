@@ -201,6 +201,7 @@ def parse_config_yml():
 
     f = open(Path(EvaDB_INSTALLATION_DIR) / "evadb.yml", "r+")
     config_obj = yaml.load(f, Loader=yaml.FullLoader)
+    f.close()
     return config_obj
 
 
@@ -311,7 +312,7 @@ def try_to_import_ludwig():
     except ImportError:
         raise ValueError(
             """Could not import ludwig.
-                Please install it with `pip install ludwig[full]`."""
+                Please install it with `pip install evadb[ludwig]`."""
         )
 
 
@@ -329,6 +330,17 @@ def is_forecast_available() -> bool:
         return True
     except ValueError:  # noqa: E722
         return False
+
+
+def try_to_import_sklearn():
+    try:
+        import sklearn  # noqa: F401
+        from sklearn.linear_model import LinearRegression  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import sklearn.
+                Please install it with `pip install scikit-learn`."""
+        )
 
 
 ##############################
@@ -496,9 +508,45 @@ def try_to_import_qdrant_client():
         )
 
 
+def try_to_import_pinecone_client():
+    try:
+        import pinecone  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import pinecone_client python package.
+                Please install it with 'pip install pinecone_client`."""
+        )
+
+
+def try_to_import_chromadb_client():
+    try:
+        import chromadb  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import chromadb python package.
+                Please install it with 'pip install chromadb`."""
+        )
+
+
 def is_qdrant_available() -> bool:
     try:
         try_to_import_qdrant_client()
+        return True
+    except ValueError:  # noqa: E722
+        return False
+
+
+def is_pinecone_available() -> bool:
+    try:
+        try_to_import_pinecone_client()
+        return True
+    except ValueError:  # noqa: E722
+        return False
+
+
+def is_chromadb_available() -> bool:
+    try:
+        try_to_import_chromadb_client()
         return True
     except ValueError:  # noqa: E722
         return False

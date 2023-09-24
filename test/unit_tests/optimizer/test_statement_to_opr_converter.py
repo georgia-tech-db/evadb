@@ -168,6 +168,7 @@ statement_to_opr_converter.metadata_definition_to_function_metadata"
         converter = StatementToPlanConverter()
         stmt = MagicMock()
         stmt.name = "name"
+        stmt.or_replace = False
         stmt.if_not_exists = True
         stmt.inputs = ["inp"]
         stmt.outputs = ["out"]
@@ -184,6 +185,7 @@ statement_to_opr_converter.metadata_definition_to_function_metadata"
         l_create_function_mock.assert_called_once()
         l_create_function_mock.assert_called_with(
             stmt.name,
+            stmt.or_replace,
             stmt.if_not_exists,
             "inp",
             "out",
@@ -315,6 +317,7 @@ statement_to_opr_converter.metadata_definition_to_function_metadata"
         extract_object_plan = LogicalExtractObject(
             MagicMock(), MagicMock(), MagicMock(), MagicMock()
         )
+
         create_plan.append_child(create_function_plan)
 
         plans.append(dummy_plan)

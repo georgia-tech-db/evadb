@@ -12,19 +12,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
 from time import perf_counter
 
 from gpt4all import GPT4All
 from unidecode import unidecode
-from util import download_story, read_text_line, try_execute
+from util import download_story, read_text_line
 
 import evadb
 
 
-def ask_question(path):
+def ask_question(story_path: str):
     # Initialize early to exclude download time.
-    llm = GPT4All("ggml-gpt4all-j-v1.3-groovy")
+    llm = GPT4All("ggml-model-gpt4all-falcon-q4_0.bin")
 
+    path = os.path.dirname(evadb.__file__)
     cursor = evadb.connect().cursor()
 
     story_table = "TablePPText"
@@ -35,17 +37,17 @@ def ask_question(path):
     t_i = 0
 
     timestamps[t_i] = perf_counter()
-    print("Setup UDF")
+    print("Setup Function")
 
-    Text_feat_udf_query = """CREATE UDF IF NOT EXISTS SentenceFeatureExtractor
-            IMPL  'evadb/udfs/sentence_feature_extractor.py';
+    Text_feat_function_query = f"""CREATE FUNCTION IF NOT EXISTS SentenceFeatureExtractor
+            IMPL  '{path}/functions/sentence_feature_extractor.py';
             """
 
-    cursor.query("DROP UDF IF EXISTS SentenceFeatureExtractor;").execute()
-    cursor.query(Text_feat_udf_query).execute()
+    cursor.query("DROP FUNCTION IF EXISTS SentenceFeatureExtractor;").execute()
+    cursor.query(Text_feat_function_query).execute()
 
-    try_execute(cursor, f"DROP TABLE IF EXISTS {story_table};")
-    try_execute(cursor, f"DROP TABLE IF EXISTS {story_feat_table};")
+    cursor.query(f"DROP TABLE IF EXISTS {story_table};").execute()
+    cursor.query(f"DROP TABLE IF EXISTS {story_feat_table};").execute()
 
     t_i = t_i + 1
     timestamps[t_i] = perf_counter()
@@ -56,7 +58,7 @@ def ask_question(path):
     cursor.query(f"CREATE TABLE {story_table} (id INTEGER, data TEXT(1000));").execute()
 
     # Insert text chunk by chunk.
-    for i, text in enumerate(read_text_line(path)):
+    for i, text in enumerate(read_text_line(story_path)):
         print("text: --" + text + "--")
         ascii_text = unidecode(text)
         cursor.query(
@@ -84,7 +86,7 @@ def ask_question(path):
 
     # Create search index on extracted features.
     cursor.query(
-        f"CREATE INDEX {index_table} ON {story_feat_table} (features) USING FAISS;"
+        f"CREATE INDEX {index_table} ON {story_feat_table} (features) USING QDRANT;"
     ).execute()
 
     t_i = t_i + 1
@@ -94,9 +96,11 @@ def ask_question(path):
     print("Query")
 
     # Search similar text as the asked question.
-    question = "Who is Cyril Vladmirovich?"
+    question = "Who is Count Cyril Vladmirovich?"
     ascii_question = unidecode(question)
 
+    # Instead of passing all the information to the LLM, we extract the 5 topmost similar sentences
+    # and use them as context for the LLM to answer.
     res_batch = cursor.query(
         f"""SELECT data FROM {story_feat_table}
         ORDER BY Similarity(SentenceFeatureExtractor('{ascii_question}'),features)
@@ -113,7 +117,7 @@ def ask_question(path):
     context_list = []
     for i in range(len(res_batch)):
         context_list.append(res_batch.frames[f"{story_feat_table.lower()}.data"][i])
-    context = "; \n".join(context_list)
+    context = "\n".join(context_list)
 
     t_i = t_i + 1
     timestamps[t_i] = perf_counter()
@@ -122,14 +126,15 @@ def ask_question(path):
     print("LLM")
 
     # LLM
-    messages = [
-        {"role": "user", "content": f"Here is some context:{context}"},
-        {
-            "role": "user",
-            "content": f"Answer this question based on context: {question}",
-        },
-    ]
-    llm.chat_completion(messages)
+    query = f"""If the context is not relevant, please answer the question by using your own knowledge about the topic.
+    
+    {context}
+    
+    Question : {question}"""
+
+    full_response = llm.generate(query)
+
+    print(full_response)
 
     t_i = t_i + 1
     timestamps[t_i] = perf_counter()
@@ -139,9 +144,9 @@ def ask_question(path):
 
 
 def main():
-    path = download_story()
+    story_path = download_story()
 
-    ask_question(path)
+    ask_question(story_path)
 
 
 if __name__ == "__main__":

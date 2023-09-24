@@ -22,6 +22,7 @@ from evadb.catalog.models.column_catalog import ColumnCatalogEntry
 from evadb.catalog.models.function_io_catalog import FunctionIOCatalogEntry
 from evadb.catalog.models.function_metadata_catalog import FunctionMetadataCatalogEntry
 from evadb.catalog.models.table_catalog import TableCatalogEntry
+from evadb.catalog.models.utils import IndexCatalogEntry
 from evadb.expression.abstract_expression import AbstractExpression
 from evadb.expression.constant_value_expression import ConstantValueExpression
 from evadb.expression.function_expression import FunctionExpression
@@ -154,7 +155,7 @@ class Operator:
         """
 
         for node in self.bfs():
-            if isinstance(node, operator_type):
+            if isinstance(node, operator_type) or self.opr_type == operator_type:
                 yield node
 
 
@@ -641,9 +642,10 @@ class LogicalCreateFunction(Operator):
     Attributes:
         name: str
             function_name provided by the user required
+        or_replace: bool
+            if true should overwrite if function with same name exists
         if_not_exists: bool
-            if true should throw an error if function with same name exists
-            else will replace the existing
+            if true should skip if function with same name exists
         inputs: List[FunctionIOCatalogEntry]
             function inputs, annotated list similar to table columns
         outputs: List[FunctionIOCatalogEntry]
@@ -659,6 +661,7 @@ class LogicalCreateFunction(Operator):
     def __init__(
         self,
         name: str,
+        or_replace: bool,
         if_not_exists: bool,
         inputs: List[FunctionIOCatalogEntry],
         outputs: List[FunctionIOCatalogEntry],
@@ -669,6 +672,7 @@ class LogicalCreateFunction(Operator):
     ):
         super().__init__(OperatorType.LOGICALCREATEFUNCTION, children)
         self._name = name
+        self._or_replace = or_replace
         self._if_not_exists = if_not_exists
         self._inputs = inputs
         self._outputs = outputs
@@ -679,6 +683,10 @@ class LogicalCreateFunction(Operator):
     @property
     def name(self):
         return self._name
+
+    @property
+    def or_replace(self):
+        return self._or_replace
 
     @property
     def if_not_exists(self):
@@ -711,6 +719,7 @@ class LogicalCreateFunction(Operator):
         return (
             is_subtree_equal
             and self.name == other.name
+            and self.or_replace == other.or_replace
             and self.if_not_exists == other.if_not_exists
             and self.inputs == other.inputs
             and self.outputs == other.outputs
@@ -724,6 +733,7 @@ class LogicalCreateFunction(Operator):
             (
                 super().__hash__(),
                 self.name,
+                self.or_replace,
                 self.if_not_exists,
                 tuple(self.inputs),
                 tuple(self.outputs),
@@ -1198,25 +1208,19 @@ class LogicalApplyAndMerge(Operator):
 class LogicalVectorIndexScan(Operator):
     def __init__(
         self,
-        index_name: str,
-        vector_store_type: VectorStoreType,
+        index: IndexCatalogEntry,
         limit_count: ConstantValueExpression,
         search_query_expr: FunctionExpression,
         children: List = None,
     ):
         super().__init__(OperatorType.LOGICAL_VECTOR_INDEX_SCAN, children)
-        self._index_name = index_name
-        self._vector_store_type = vector_store_type
+        self._index = index
         self._limit_count = limit_count
         self._search_query_expr = search_query_expr
 
     @property
-    def index_name(self):
-        return self._index_name
-
-    @property
-    def vector_store_type(self):
-        return self._vector_store_type
+    def index(self):
+        return self._index
 
     @property
     def limit_count(self):
@@ -1232,8 +1236,7 @@ class LogicalVectorIndexScan(Operator):
             return False
         return (
             is_subtree_equal
-            and self.index_name == other.index_name
-            and self.vector_store_type == other.vector_store_type
+            and self.index == other.index
             and self.limit_count == other.limit_count
             and self.search_query_expr == other.search_query_expr
         )
@@ -1242,8 +1245,7 @@ class LogicalVectorIndexScan(Operator):
         return hash(
             (
                 super().__hash__(),
-                self.index_name,
-                self.vector_store_type,
+                self.index,
                 self.limit_count,
                 self.search_query_expr,
             )

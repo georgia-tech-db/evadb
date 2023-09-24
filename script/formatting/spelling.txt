@@ -92,6 +92,8 @@ CatalogManagerTests
 CatalogModelsTest
 ChatGPT
 ChatGPTTest
+CHROMADB
+ChromaDB
 ColConstraintInfo
 Colab
 ColorSpace
@@ -556,6 +558,8 @@ ParserStatementTests
 ParserTests
 PermissionDenied
 PickleSerializer
+PINECONE
+Pinecone
 PlanExecutor
 PlanExecutorTest
 PlanGenerator

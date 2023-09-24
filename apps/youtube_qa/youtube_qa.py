@@ -55,11 +55,14 @@ def receive_user_input() -> Dict:
         user_input (dict): global configurations
     """
     print(
-        "🔮 Welcome to EvaDB! This app lets you ask questions on any local or YouTube online video.\nYou will only need to supply a Youtube URL and an OpenAI API key.\n"
+        "🔮 Welcome to EvaDB! This app lets you ask questions on any local or"
+        " YouTube online video.\nYou will only need to supply a Youtube URL"
+        " and an OpenAI API key.\n"
     )
     from_youtube = str(
         input(
-            "📹 Are you querying an online Youtube video or a local video? ('yes' for online/ 'no' for local): "
+            "📹 Are you querying an online Youtube video or a local video?"
+            " ('yes' for online/ 'no' for local): "
         )
     ).lower() in ["y", "yes"]
     user_input = {"from_youtube": from_youtube}
@@ -68,7 +71,8 @@ def receive_user_input() -> Dict:
         # get Youtube video url
         video_link = str(
             input(
-                "🌐 Enter the URL of the YouTube video (press Enter to use our default Youtube video URL): "
+                "🌐 Enter the URL of the YouTube video (press Enter to use our"
+                " default Youtube video URL): "
             )
         )
 
@@ -78,7 +82,8 @@ def receive_user_input() -> Dict:
     else:
         video_local_path = str(
             input(
-                "💽 Enter the local path to your video (press Enter to use our demo video): "
+                "💽 Enter the local path to your video (press Enter to use our"
+                " demo video): "
             )
         )
 
@@ -211,21 +216,19 @@ def generate_online_video_transcript(cursor: evadb.EvaDBCursor) -> str:
     print("\n⏳ Analyzing YouTube video. This may take a while...")
 
     # load youtube video into an evadb table
-    cursor.drop_table("youtube_video", if_exists=True).execute()
-    cursor.load(ONLINE_VIDEO_PATH, "youtube_video", "video").execute()
-
+    cursor.query("DROP TABLE IF EXISTS youtube_video;").execute()
+    cursor.query(f"LOAD VIDEO '{ONLINE_VIDEO_PATH}' INTO youtube_video;").execute()
     # extract speech texts from videos
-    cursor.drop_table("youtube_video_text", if_exists=True).execute()
+    cursor.query("DROP TABLE IF EXISTS youtube_video_text;").execute()
     cursor.query(
-        "CREATE TABLE IF NOT EXISTS youtube_video_text AS SELECT SpeechRecognizer(audio) FROM youtube_video;"
+        "CREATE TABLE IF NOT EXISTS youtube_video_text AS SELECT"
+        " SpeechRecognizer(audio) FROM youtube_video;"
     ).execute()
     print("✅ Video analysis completed.")
 
-    raw_transcript_string = (
-        cursor.table("youtube_video_text")
-        .select("text")
-        .df()["youtube_video_text.text"][0]
-    )
+    raw_transcript_string = cursor.query("SELECT text FROM youtube_video_text;").df()[
+        "youtube_video_text.text"
+    ][0]
     return raw_transcript_string
 
 
@@ -239,23 +242,24 @@ def generate_local_video_transcript(cursor: evadb.EvaDBCursor, video_path: str) 
     Returns:
         str: video transcript text.
     """
-    print(f"\n⏳ Analyzing local video from {video_path}. This may take a while...")
+    print(f"\n⏳ Analyzing local video from {video_path}. This may take a" " while...")
 
     # load youtube video into an evadb table
-    cursor.drop_table("local_video", if_exists=True).execute()
-    cursor.load(video_path, "local_video", "video").execute()
+    cursor.query("DROP TABLE IF EXISTS local_video;").execute()
+    cursor.query(f"LOAD VIDEO '{video_path}' INTO local_video;").execute()
 
     # extract speech texts from videos
-    cursor.drop_table("local_video_text", if_exists=True).execute()
+    cursor.query("DROP TABLE IF EXISTS local_video_text;").execute()
     cursor.query(
-        "CREATE TABLE IF NOT EXISTS local_video_text AS SELECT SpeechRecognizer(audio) FROM local_video;"
+        "CREATE TABLE IF NOT EXISTS local_video_text AS SELECT"
+        " SpeechRecognizer(audio) FROM local_video;"
     ).execute()
     print("✅ Video analysis completed.")
 
     # retrieve generated transcript
-    raw_transcript_string = (
-        cursor.table("local_video_text").select("text").df()["local_video_text.text"][0]
-    )
+    raw_transcript_string = cursor.query("SELECT text FROM local_video_text;").df()[
+        "local_video_text.text"
+    ][0]
     return raw_transcript_string
 
 
@@ -265,24 +269,25 @@ def generate_summary(cursor: evadb.EvaDBCursor):
     Args:
         cursor (EVADBCursor): evadb api cursor.
     """
-    transcript_list = cursor.table("Transcript").select("text").df()["transcript.text"]
+    transcript_list = cursor.query("SELECT text FROM Transcript;").df()[
+        "transcript.text"
+    ]
     if len(transcript_list) == 1:
         summary = transcript_list[0]
         df = pd.DataFrame([{"summary": summary}])
         df.to_csv(SUMMARY_PATH)
 
-        cursor.drop_table("Summary", if_exists=True).execute()
+        cursor.query("DROP TABLE IF EXISTS Summary;").execute()
         cursor.query(
             """CREATE TABLE IF NOT EXISTS Summary (summary TEXT(100));"""
         ).execute()
-        cursor.load(SUMMARY_PATH, "Summary", "csv").execute()
+        cursor.query(f"LOAD CSV '{SUMMARY_PATH}' INTO Summary;").execute()
         return
 
-    generate_summary_rel = cursor.table("Transcript").select(
-        "ChatGPT('summarize the video in detail', text)"
+    generate_summary_text_query = (
+        "SELECT ChatGPT('summarize the video in detail', text) FROM" " Transcript;"
     )
-    responses = generate_summary_rel.df()["chatgpt.response"]
-
+    responses = cursor.query(generate_summary_text_query).df()["chatgpt.response"]
     summary = ""
     for r in responses:
         summary += f"{r} \n"
@@ -296,16 +301,16 @@ def generate_summary(cursor: evadb.EvaDBCursor):
         df = pd.DataFrame([{"summary": partitioned_summary}])
         df.to_csv(SUMMARY_PATH)
 
-        cursor.drop_table("Summary", if_exists=True).execute()
+        cursor.query("DROP TABLE IF EXISTS Summary;").execute()
         cursor.query(
             """CREATE TABLE IF NOT EXISTS Summary (summary TEXT(100));"""
         ).execute()
-        cursor.load(SUMMARY_PATH, "Summary", "csv").execute()
+        cursor.query(f"LOAD CSV '{SUMMARY_PATH}' INTO Summary;").execute()
 
-        generate_summary_rel = cursor.table("Summary").select(
-            "ChatGPT('summarize in detail', summary)"
+        generate_summary_text_query = (
+            "SELECT ChatGPT('summarize in detail', summary) FROM Summary;"
         )
-        responses = generate_summary_rel.df()["chatgpt.response"]
+        responses = cursor.query(generate_summary_text_query).df()["chatgpt.response"]
         summary = " ".join(responses)
 
         # no further summarization is needed if the summary is short enough
@@ -313,11 +318,11 @@ def generate_summary(cursor: evadb.EvaDBCursor):
             need_to_summarize = False
 
     # load final summary to table
-    cursor.drop_table("Summary", if_exists=True).execute()
+    cursor.query("DROP TABLE IF EXISTS Summary;").execute()
     cursor.query(
         """CREATE TABLE IF NOT EXISTS Summary (summary TEXT(100));"""
     ).execute()
-    cursor.load(SUMMARY_PATH, "Summary", "csv").execute()
+    cursor.query(f"LOAD CSV '{SUMMARY_PATH}' INTO Summary;").execute()
 
 
 def generate_response(cursor: evadb.EvaDBCursor, question: str) -> str:
@@ -331,21 +336,17 @@ def generate_response(cursor: evadb.EvaDBCursor, question: str) -> str:
         str: response from llm.
     """
     # generate summary
-    if len(cursor.table("Transcript").select("text").df()["transcript.text"]) == 1:
-        return (
-            cursor.table("Transcript")
-            .select(f"ChatGPT('{question}', text)")
-            .df()["chatgpt.response"][0]
-        )
+    if len(cursor.query("SELECT text FROM Transcript;").df()["transcript.text"]) == 1:
+        return cursor.query(
+            f"SELECT ChatGPT('{question}', text) FROM Transcript;"
+        ).df()["chatgpt.response"][0]
     else:
         if not os.path.exists(SUMMARY_PATH):
             generate_summary(cursor)
 
-        return (
-            cursor.table("Summary")
-            .select(f"ChatGPT('{question}', summary)")
-            .df()["chatgpt.response"][0]
-        )
+        return cursor.query(
+            f"SELECT ChatGPT('{question}', summary) FROM Summary;"
+        ).df()["chatgpt.response"][0]
 
 
 def generate_blog_sections(cursor: evadb.EvaDBCursor) -> List:
@@ -358,12 +359,12 @@ def generate_blog_sections(cursor: evadb.EvaDBCursor) -> List:
         List: list of blog sections
     """
     sections_query = (
-        "list 7 logical sections of a blog post from the transcript as a python list"
+        "list 7 logical sections of a blog post from the transcript as a" " python list"
     )
     sections_string = str(
-        cursor.table("Summary")
-        .select(f"ChatGPT('{sections_query}', summary)")
-        .df()["chatgpt.response"][0]
+        cursor.query(f"SELECT ChatGPT('{sections_query}', summary) FROM Summary;").df()[
+            "chatgpt.response"
+        ][0]
     )
     begin = sections_string.find("[")
     end = sections_string.find("]")
@@ -389,7 +390,9 @@ def generate_blog_post(cursor: evadb.EvaDBCursor):
     """
 
     to_generate = str(
-        input("\nWould you like to generate a blog post based on the video? (yes/no): ")
+        input(
+            "\nWould you like to generate a blog post based on the video?" " (yes/no): "
+        )
     )
     if to_generate.lower() == "yes" or to_generate.lower() == "y":
         print("⏳ Generating blog post (may take a while)...")
@@ -401,28 +404,36 @@ def generate_blog_post(cursor: evadb.EvaDBCursor):
         sections = generate_blog_sections(cursor)
 
         title_query = "generate a creative title of a blog post from the transcript"
-        generate_title_rel = cursor.table("Summary").select(
-            f"ChatGPT('{title_query}', summary)"
+        generate_title_rel = cursor.query(
+            f"SELECT ChatGPT('{title_query}', summary) FROM Summary;"
         )
         blog = "# " + generate_title_rel.df()["chatgpt.response"][0].replace('"', "")
 
         i = 1
         for section in sections:
-            print(f"--⏳ Generating body ({i}/{len(sections)})...")
+            print(f"--⏳ Generating body ({i}/{len(sections)}) titled" f" {section}...")
             if "introduction" in section.lower():
                 section_query = f"write a section about {section} from transcript"
-                section_prompt = "generate response in markdown format and highlight important technical terms with hyperlinks"
+                section_prompt = (
+                    "generate response in markdown format and highlight"
+                    " important technical terms with hyperlinks"
+                )
             elif "conclusion" in section.lower():
                 section_query = "write a creative conclusion from transcript"
                 section_prompt = "generate response in markdown format"
             else:
                 section_query = (
-                    f"write a single detailed section about {section} from transcript"
+                    "write a single detailed section about"
+                    f" {section} from transcript"
                 )
-                section_prompt = "generate response in markdown format with information from the internet"
+                section_prompt = (
+                    "generate response in markdown format with information"
+                    " from the internet"
+                )
 
-            generate_section_rel = cursor.table("Summary").select(
-                f"ChatGPT('{section_query}', summary, '{section_prompt}')"
+            generate_section_rel = cursor.query(
+                f"SELECT ChatGPT('{section_query}', summary,"
+                f" '{section_prompt}') FROM Summary;"
             )
 
             generated_section = generate_section_rel.df()["chatgpt.response"][0]
@@ -431,12 +442,13 @@ def generate_blog_post(cursor: evadb.EvaDBCursor):
             i += 1
 
         source_query = (
-            "generate a short list of keywords for the transcript with hyperlinks"
+            "generate a short list of keywords for the transcript with" " hyperlinks"
         )
         source_prompt = "generate response in markdown format"
         print("--⏳ Wrapping up...")
-        generate_source_rel = cursor.table("Summary").select(
-            f"ChatGPT('{source_query}', summary, '{source_prompt}')"
+        generate_source_rel = cursor.query(
+            f"SELECT ChatGPT('{source_query}', summary,"
+            f" '{source_prompt}') FROM Summary;"
         )
         blog += "\n## Sources\n" + generate_source_rel.df()["chatgpt.response"][0]
         print(blog)
@@ -468,7 +480,8 @@ if __name__ == "__main__":
         except Exception as e:
             print(e)
             print(
-                "Failed to download video transcript. Downloading video and generate transcript from video instead..."
+                "Failed to download video transcript. Downloading video and"
+                " generate transcript from video instead..."
             )
 
     try:
@@ -479,15 +492,15 @@ if __name__ == "__main__":
         if transcript is not None:
             raw_transcript_string = group_transcript(transcript)
         else:
-            # create speech recognizer UDF from HuggingFace
-            args = {
-                "task": "automatic-speech-recognition",
-                "model": "openai/whisper-base",
-            }
-            speech_analyzer_udf_rel = cursor.create_function(
-                "SpeechRecognizer", type="HuggingFace", **args
-            )
-            speech_analyzer_udf_rel.execute()
+            # create speech recognizer function from HuggingFace
+
+            speech_analyzer_function_query = """
+                CREATE FUNCTION SpeechRecognizer
+                TYPE HuggingFace
+                TASK 'automatic-speech-recognition'
+                MODEL 'openai/whisper-base';
+            """
+            cursor.query(speech_analyzer_function_query).execute()
 
             if user_input["from_youtube"]:
                 # download youtube video online if the video disabled transcript
@@ -508,11 +521,11 @@ if __name__ == "__main__":
             df.to_csv(TRANSCRIPT_PATH)
 
         # load chunked transcript into table
-        cursor.drop_table("Transcript", if_exists=True).execute()
+        cursor.query("DROP TABLE IF EXISTS Transcript;").execute()
         cursor.query(
             """CREATE TABLE IF NOT EXISTS Transcript (text TEXT(50));"""
         ).execute()
-        cursor.load(TRANSCRIPT_PATH, "Transcript", "csv").execute()
+        cursor.query(f"LOAD CSV '{TRANSCRIPT_PATH}' INTO Transcript;").execute()
 
         print("===========================================")
         print("🪄 Ask anything about the video!")

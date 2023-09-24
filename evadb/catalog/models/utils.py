@@ -137,6 +137,7 @@ class TableCatalogEntry:
     identifier_column: str = "id"
     columns: List[ColumnCatalogEntry] = field(compare=False, default_factory=list)
     row_id: int = None
+    database_name: str = "EvaDB"
 
 
 @dataclass(unsafe_hash=True)
