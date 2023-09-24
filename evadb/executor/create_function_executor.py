@@ -435,7 +435,7 @@ class CreateFunctionExecutor(AbstractExecutor):
             # initializing the function class calls the setup method internally
             function(**function_args)
         except Exception as e:
-            err_msg = f"Error creating function: {str(e)}"
+            err_msg = f"Error creating function {self.node.name}: {str(e)}"
             # logger.error(err_msg)
             raise RuntimeError(err_msg)
 
