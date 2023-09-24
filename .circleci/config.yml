@@ -56,7 +56,18 @@ workflows:
                 ignore: 
                   - master
                   - staging
-
+        ################################
+        #### LONG INTEGRATION TESTS: PR
+        ################################
+        ################################
+        - Linux:
+            name: Long Integration Test | v3.10 | Linux
+            mode: LONG INTEGRATION
+            filters:
+              branches:
+                ignore: 
+                  - master
+                  - staging
         ################################
         #### SHORT THIRDPARTY TESTS: PR
         ################################

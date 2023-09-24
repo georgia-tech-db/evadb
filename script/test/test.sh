@@ -82,7 +82,8 @@ short_third_party_test(){
 }
 
 long_integration_test() {
-  PYTHONPATH=./ python -m pytest test/integration_tests/long/ -p no:cov -m "not benchmark"
+  pip install pytest-testmon
+  PYTHONPATH=./ python -m pytest --testmon test/integration_tests/long/ -p no:cov -m "not benchmark"
   code=$?
   print_error_code $code "LONG INTEGRATION TEST"
 }
