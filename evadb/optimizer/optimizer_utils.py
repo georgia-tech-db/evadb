@@ -227,7 +227,7 @@ def optimize_cache_key_for_constant_value_expression(
 def optimize_cache_key(context: "OptimizerContext", expr: FunctionExpression):
     """Optimize the cache key
 
-    It tries to reduce the caching overhead by replacing the caching key with 
+    It tries to reduce the caching overhead by replacing the caching key with
     logically equivalent key. For instance, frame data can be replaced with frame id.
 
     Args:
@@ -316,8 +316,10 @@ def check_expr_validity_for_cache(expr: FunctionExpression):
         valid &= isinstance(expr.children[0], TupleValueExpression)
     elif len(expr.children) == 2:
         # LLM-based function that takes two parameters.
-        valid &= isinstance(expr.children[0], ConstantValueExpression) and isinstance(expr.children[1], TupleValueExpression)
-    return valid 
+        valid &= isinstance(expr.children[0], ConstantValueExpression) and isinstance(
+            expr.children[1], TupleValueExpression
+        )
+    return valid
 
 
 def get_expression_execution_cost(

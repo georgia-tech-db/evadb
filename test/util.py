@@ -49,7 +49,6 @@ from evadb.optimizer.plan_generator import PlanGenerator
 from evadb.optimizer.statement_to_opr_converter import StatementToPlanConverter
 from evadb.parser.parser import Parser
 from evadb.plan_nodes.abstract_plan import AbstractPlan
-from evadb.functions.abstract.abstract_function import AbstractFunction
 from evadb.server.command_handler import execute_query_fetch_all
 from evadb.utils.generic_utils import (
     is_ray_available,
