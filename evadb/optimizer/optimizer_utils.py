@@ -310,12 +310,14 @@ def enable_cache_on_expression_tree(
 
 
 def check_expr_validity_for_cache(expr: FunctionExpression):
-    return (
-        expr.name in CACHEABLE_FUNCTIONS
-        and not expr.has_cache()
-        # and len(expr.children) <= 1
-        and isinstance(expr.children[1], TupleValueExpression)
-    )
+    valid = expr.name in CACHEABLE_FUNCTIONS and not expr.has_cache()
+    if len(expr.children) == 1:
+        # Normal function that only takes one parameter.
+        valid &= isinstance(expr.children[0], TupleValueExpression)
+    elif len(expr.children) == 2:
+        # LLM-based function that takes two parameters.
+        valid &= isinstance(expr.children[0], ConstantValueExpression) and isinstance(expr.children[1], TupleValueExpression)
+    return valid 
 
 
 def get_expression_execution_cost(

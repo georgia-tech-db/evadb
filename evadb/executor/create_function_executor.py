@@ -334,7 +334,6 @@ class CreateFunctionExecutor(AbstractExecutor):
         if self.catalog().get_function_catalog_entry_by_name(self.node.name):
             if self.node.if_not_exists:
                 msg = f"Function {self.node.name} already exists, nothing added."
-                print(msg)
                 yield Batch(pd.DataFrame([msg]))
                 return
             elif self.node.or_replace:
