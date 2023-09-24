@@ -227,7 +227,8 @@ def optimize_cache_key_for_constant_value_expression(
 def optimize_cache_key(context: "OptimizerContext", expr: FunctionExpression):
     """Optimize the cache key
 
-    It tries to reduce the caching overhead by replacing the caching key with logically equivalent key. For instance, frame data can be replaced with frame id.
+    It tries to reduce the caching overhead by replacing the caching key with 
+    logically equivalent key. For instance, frame data can be replaced with frame id.
 
     Args:
         expr (FunctionExpression): expression to optimize the caching key for.

@@ -23,6 +23,7 @@ from test.util import (
     load_functions_for_testing,
     shutdown_ray,
 )
+from evadb.constants import CACHEABLE_FUNCTIONS
 
 from mock import patch
 
@@ -128,6 +129,8 @@ class ReuseTest(unittest.TestCase):
         return batches, exec_times
 
     def test_reuse_chatgpt(self):
+        global CACHEABLE_FUNCTIONS
+        CACHEABLE_FUNCTIONS += ["DummyLLM"]
         select_query = """SELECT DummyLLM('What is the fruit described in this sentence', data)
             FROM fruitTable"""
         batches, exec_times = self._strict_reuse_experiment(
