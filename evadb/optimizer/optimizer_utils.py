@@ -24,6 +24,7 @@ from evadb.catalog.models.function_io_catalog import FunctionIOCatalogEntry
 from evadb.catalog.models.function_metadata_catalog import FunctionMetadataCatalogEntry
 from evadb.constants import CACHEABLE_FUNCTIONS, DEFAULT_FUNCTION_EXPRESSION_COST
 from evadb.expression.abstract_expression import AbstractExpression, ExpressionType
+from evadb.expression.constant_value_expression import ConstantValueExpression
 from evadb.expression.expression_utils import (
     conjunction_list_to_expression_tree,
     contains_single_column,
@@ -36,7 +37,6 @@ from evadb.expression.function_expression import (
     FunctionExpressionCache,
 )
 from evadb.expression.tuple_value_expression import TupleValueExpression
-from evadb.expression.constant_value_expression import ConstantValueExpression
 from evadb.parser.alias import Alias
 from evadb.parser.create_statement import ColumnDefinition
 from evadb.utils.kv_cache import DiskKVCache
@@ -191,7 +191,9 @@ def extract_pushdown_predicate_for_alias(
     )
 
 
-def optimize_cache_key_for_tuple_value_expression(context: "OptimizerContext", tv_expr: TupleValueExpression):
+def optimize_cache_key_for_tuple_value_expression(
+    context: "OptimizerContext", tv_expr: TupleValueExpression
+):
     catalog = context.db.catalog()
     col_catalog_obj = tv_expr.col_object
 
@@ -215,10 +217,11 @@ def optimize_cache_key_for_tuple_value_expression(context: "OptimizerContext", t
     return [tv_expr]
 
 
-def optimize_cache_key_for_constant_value_expression(context: "OptimizerContext", cv_expr: ConstantValueExpression):
+def optimize_cache_key_for_constant_value_expression(
+    context: "OptimizerContext", cv_expr: ConstantValueExpression
+):
     # No need to additional optimization for constant value expression.
     return [cv_expr]
-
 
 
 def optimize_cache_key(context: "OptimizerContext", expr: FunctionExpression):
@@ -243,8 +246,14 @@ def optimize_cache_key(context: "OptimizerContext", expr: FunctionExpression):
         return optimize_cache_key_for_tuple_value_expression(context, keys[0])
 
     # Handle ConstantValueExpressin + TupleValueExpression
-    if len(keys) == 2 and isinstance(keys[0], ConstantValueExpression) and isinstance(keys[1], TupleValueExpression):
-        return optimize_cache_key_for_constant_value_expression(context, keys[0]) + optimize_cache_key_for_tuple_value_expression(context, keys[1])
+    if (
+        len(keys) == 2
+        and isinstance(keys[0], ConstantValueExpression)
+        and isinstance(keys[1], TupleValueExpression)
+    ):
+        return optimize_cache_key_for_constant_value_expression(
+            context, keys[0]
+        ) + optimize_cache_key_for_tuple_value_expression(context, keys[1])
 
     return keys
 

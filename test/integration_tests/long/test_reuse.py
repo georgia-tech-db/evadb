@@ -15,8 +15,6 @@
 import gc
 import os
 import unittest
-
-from mock import patch
 from pathlib import Path
 from test.markers import gpu_skip_marker, windows_skip_marker
 from test.util import (
@@ -26,7 +24,10 @@ from test.util import (
     shutdown_ray,
 )
 
+from mock import patch
+
 from evadb.configuration.constants import EvaDB_ROOT_DIR
+from evadb.models.storage.batch import Batch
 from evadb.optimizer.operators import LogicalFunctionScan
 from evadb.optimizer.plan_generator import PlanGenerator
 from evadb.optimizer.rules.rules import (
@@ -37,7 +38,6 @@ from evadb.optimizer.rules.rules import (
 from evadb.optimizer.rules.rules_manager import RulesManager, disable_rules
 from evadb.server.command_handler import execute_query_fetch_all
 from evadb.utils.stats import Timer
-from evadb.models.storage.batch import Batch
 
 
 class ReuseTest(unittest.TestCase):
@@ -55,13 +55,15 @@ class ReuseTest(unittest.TestCase):
         self.evadb.catalog().reset()
         ua_detrac = f"{EvaDB_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
         execute_query_fetch_all(self.evadb, f"LOAD VIDEO '{ua_detrac}' INTO DETRAC;")
-        execute_query_fetch_all(self.evadb, f"CREATE TABLE fruitTable (data TEXT(100))")
+        execute_query_fetch_all(self.evadb, "CREATE TABLE fruitTable (data TEXT(100))")
         data_list = [
             "The color of apple is red",
             "The color of banana is yellow",
         ]
         for data in data_list:
-            execute_query_fetch_all(self.evadb, f"INSERT INTO fruitTable (data) VALUES ('{data}')")
+            execute_query_fetch_all(
+                self.evadb, f"INSERT INTO fruitTable (data) VALUES ('{data}')"
+            )
         load_functions_for_testing(self.evadb)
         self._load_hf_model()
 
@@ -108,13 +110,15 @@ class ReuseTest(unittest.TestCase):
 
     def _strict_reuse_experiment(self, queries):
         # This test mocks the apply_function_expression, if it is called, it will raise
-        # an exception. 
+        # an exception.
         exec_times = []
         batches = []
         for i, query in enumerate(queries):
             timer = Timer()
             if i != 0:
-                with timer, patch.object(Batch, "apply_function_expression") as mock_batch_func:
+                with timer, patch.object(
+                    Batch, "apply_function_expression"
+                ) as mock_batch_func:
                     mock_batch_func.side_effect = Exception("Results are not reused")
                     batches.append(execute_query_fetch_all(self.evadb, query))
             else:
@@ -126,14 +130,18 @@ class ReuseTest(unittest.TestCase):
     def test_reuse_chatgpt(self):
         select_query = """SELECT DummyLLM('What is the fruit described in this sentence', data)
             FROM fruitTable"""
-        batches, exec_times = self._strict_reuse_experiment([select_query, select_query])
+        batches, exec_times = self._strict_reuse_experiment(
+            [select_query, select_query]
+        )
         self._verify_reuse_correctness(select_query, batches[1])
         self.assertTrue(exec_times[0] > exec_times[1])
 
     def test_reuse_when_query_is_duplicate(self):
         select_query = """SELECT id, label FROM DETRAC JOIN
             LATERAL HFObjectDetector(data) AS Obj(score, label, bbox) WHERE id < 15;"""
-        batches, exec_times = self._strict_reuse_experiment([select_query, select_query])
+        batches, exec_times = self._strict_reuse_experiment(
+            [select_query, select_query]
+        )
         self._verify_reuse_correctness(select_query, batches[1])
         self.assertTrue(exec_times[0] > exec_times[1])
 
