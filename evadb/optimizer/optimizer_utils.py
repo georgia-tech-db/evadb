@@ -242,19 +242,15 @@ def optimize_cache_key(context: "OptimizerContext", expr: FunctionExpression):
     """
     keys = expr.children
 
-    # Handle simple one column inputs.
-    if len(keys) == 1 and isinstance(keys[0], TupleValueExpression):
-        return optimize_cache_key_for_tuple_value_expression(context, keys[0])
+    optimize_key_mapping_f = {
+        TupleValueExpression: optimize_cache_key_for_tuple_value_expression,
+        ConstantValueExpression: optimize_cache_key_for_constant_value_expression,
+    }
 
-    # Handle ConstantValueExpressin + TupleValueExpression
-    if (
-        len(keys) == 2
-        and isinstance(keys[0], ConstantValueExpression)
-        and isinstance(keys[1], TupleValueExpression)
-    ):
-        return optimize_cache_key_for_constant_value_expression(
-            context, keys[0]
-        ) + optimize_cache_key_for_tuple_value_expression(context, keys[1])
+    for i, key in enumerate(keys):
+        if type(key) not in optimize_key_mapping_f:
+            raise RuntimeError(f"Optimize cache key of {type(key)} is not implemented")
+        keys[i] = optimize_key_mapping_f[type(key)](context, key)
 
     return keys
 
