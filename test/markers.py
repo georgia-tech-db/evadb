@@ -25,6 +25,7 @@ from evadb.utils.generic_utils import (
     is_ludwig_available,
     is_pinecone_available,
     is_qdrant_available,
+    is_sklearn_available,
 )
 
 asyncio_skip_marker = pytest.mark.skipif(
@@ -81,6 +82,10 @@ gpu_skip_marker = pytest.mark.skipif(
 
 ludwig_skip_marker = pytest.mark.skipif(
     is_ludwig_available() is False, reason="Run only if ludwig is available"
+)
+
+sklearn_skip_marker = pytest.mark.skipif(
+    is_sklearn_available() is False, reason="Run only if sklearn is available"
 )
 
 chatgpt_skip_marker = pytest.mark.skip(

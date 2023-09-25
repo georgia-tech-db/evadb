@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.markers import ludwig_skip_marker
+from test.markers import ludwig_skip_marker, sklearn_skip_marker
 from test.util import get_evadb_for_testing, shutdown_ray
 
 import pytest
@@ -53,11 +53,12 @@ class ModelTrainTests(unittest.TestCase):
 
         # clean up
         execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS HomeRentals;")
+        execute_query_fetch_all(cls.evadb, "DROP FUNCTION IF EXISTS PredictHouseRent;")
 
     @ludwig_skip_marker
     def test_ludwig_automl(self):
         create_predict_function = """
-            CREATE FUNCTION IF NOT EXISTS PredictHouseRent FROM
+            CREATE OR REPLACE FUNCTION PredictHouseRent FROM
             ( SELECT * FROM HomeRentals )
             TYPE Ludwig
             PREDICT 'rental_price'
@@ -72,9 +73,10 @@ class ModelTrainTests(unittest.TestCase):
         self.assertEqual(len(result.columns), 1)
         self.assertEqual(len(result), 10)
 
+    @sklearn_skip_marker
     def test_sklearn_regression(self):
         create_predict_function = """
-            CREATE FUNCTION IF NOT EXISTS PredictHouseRent FROM
+            CREATE OR REPLACE FUNCTION PredictHouseRent FROM
             ( SELECT number_of_rooms, number_of_bathrooms, days_on_market, rental_price FROM HomeRentals )
             TYPE Sklearn
             PREDICT 'rental_price';
