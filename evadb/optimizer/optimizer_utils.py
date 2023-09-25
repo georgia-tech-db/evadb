@@ -247,12 +247,13 @@ def optimize_cache_key(context: "OptimizerContext", expr: FunctionExpression):
         ConstantValueExpression: optimize_cache_key_for_constant_value_expression,
     }
 
-    for i, key in enumerate(keys):
+    optimized_keys = []
+    for key in keys:
         if type(key) not in optimize_key_mapping_f:
             raise RuntimeError(f"Optimize cache key of {type(key)} is not implemented")
-        keys[i] = optimize_key_mapping_f[type(key)](context, key)
+        optimized_keys += optimize_key_mapping_f[type(key)](context, key)
 
-    return keys
+    return optimized_keys
 
 
 def enable_cache_init(
