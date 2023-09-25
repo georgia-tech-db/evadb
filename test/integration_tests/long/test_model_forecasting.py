@@ -30,11 +30,21 @@ class ModelTrainTests(unittest.TestCase):
         # reset the catalog manager before running each test
         cls.evadb.catalog().reset()
 
+
         create_table_query = """
             CREATE TABLE AirData (\
             unique_id TEXT(30),\
             ds TEXT(30),\
             y INTEGER);"""
+        execute_query_fetch_all(cls.evadb, create_table_query)
+
+        create_table_query = """
+            CREATE TABLE AirDataPanel (\
+            unique_id TEXT(30),\
+            ds TEXT(30),\
+            y INTEGER,\
+            trend INTEGER,\
+            ylagged INTEGER);"""
         execute_query_fetch_all(cls.evadb, create_table_query)
 
         create_table_query = """
@@ -47,6 +57,10 @@ class ModelTrainTests(unittest.TestCase):
 
         path = f"{EvaDB_ROOT_DIR}/data/forecasting/air-passengers.csv"
         load_query = f"LOAD CSV '{path}' INTO AirData;"
+        execute_query_fetch_all(cls.evadb, load_query)
+
+        path = f"{EvaDB_ROOT_DIR}/data/forecasting/ AirPassengersPanel.csv"
+        load_query = f"LOAD CSV '{path}' INTO AirDataPanel;"
         execute_query_fetch_all(cls.evadb, load_query)
 
         path = f"{EvaDB_ROOT_DIR}/data/forecasting/home_sales.csv"
@@ -69,18 +83,40 @@ class ModelTrainTests(unittest.TestCase):
         create_predict_udf = """
             CREATE FUNCTION AirForecast FROM
             (SELECT unique_id, ds, y FROM AirData)
+            HORIZON 12
             TYPE Forecasting
             PREDICT 'y';
         """
         execute_query_fetch_all(self.evadb, create_predict_udf)
 
         predict_query = """
-            SELECT AirForecast(12) order by y;
+            SELECT AirForecast() order by y;
         """
         result = execute_query_fetch_all(self.evadb, predict_query)
         self.assertEqual(len(result), 12)
         self.assertEqual(
             result.columns, ["airforecast.unique_id", "airforecast.ds", "airforecast.y"]
+        )
+
+        create_predict_udf = """
+            CREATE FUNCTION AirPanelForecast FROM
+            (SELECT unique_id, ds, y, trend FROM AirDataPanel)
+            HORIZON 12
+            TYPE Forecasting
+            PREDICT 'y'
+            LIBRARY 'neuralforecast'
+            EXOGENOUS 'trend'
+            FREQUENCY 'M';
+        """
+        execute_query_fetch_all(self.evadb, create_predict_udf)
+
+        predict_query = """
+            SELECT AirPanelForecast() order by y;
+        """
+        result = execute_query_fetch_all(self.evadb, predict_query)
+        self.assertEqual(len(result), 12)
+        self.assertEqual(
+            result.columns, ["airpanelforecast.unique_id", "airpanelforecast.ds", "airpanelforecast.y"]
         )
 
     @forecast_skip_marker

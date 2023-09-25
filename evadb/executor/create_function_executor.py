@@ -244,7 +244,7 @@ class CreateFunctionExecutor(AbstractExecutor):
         """
             Set or infer data frequency
         """
-
+        
         if "frequency" not in arg_map.keys():
             arg_map["frequency"] = pd.infer_freq(data["ds"])
         frequency = arg_map["frequency"]
@@ -277,15 +277,17 @@ class CreateFunctionExecutor(AbstractExecutor):
         if library == "neuralforecast":
             from neuralforecast import NeuralForecast
             from neuralforecast.auto import AutoNBEATS, AutoNHITS
-            from neuralforecast.models import NHITS
+            from neuralforecast.models import NBEATS, NHITS
 
             model_dict = {
+                "AutoNBEATS": AutoNBEATS,
                 "AutoNHITS": AutoNHITS,
+                "NBEATS": NBEATS,
                 "NHITS": NHITS,
             }
 
             if "model" not in arg_map.keys():
-                arg_map["model"] = "AutoNHITS"
+                arg_map["model"] = "NBEATS"
 
             try:
                 model_here = model_dict[arg_map["model"]]
@@ -342,17 +344,21 @@ class CreateFunctionExecutor(AbstractExecutor):
 
         data["ds"] = pd.to_datetime(data["ds"])
 
+        encoding_text = data.to_string()
+        if "exogenous" in arg_map.keys():
+            encoding_text += "exogenous_"+str(sorted(exogenous_args))
+
         model_dir = os.path.join(
             self.db.config.get_value("storage", "model_dir"),
             self.node.name,
             library,
-            arg_map["model"]
+            arg_map["model"],
+            str(hashlib.sha256(encoding_text.encode()).hexdigest())
         )
         Path(model_dir).mkdir(parents=True, exist_ok=True)
 
         model_save_name = (
-            str(hashlib.sha256(data.to_string().encode()).hexdigest())
-            + "_horizon"
+            "horizon"
             + str(horizon)
             + ".pkl"
         )
