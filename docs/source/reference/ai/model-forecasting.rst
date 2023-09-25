@@ -56,7 +56,7 @@ EvaDB's default forecast framework is `statsforecast <https://nixtla.github.io/s
    * - LIBRARY
      - We can select one of `statsforecast` (default) or `neuralforecast`. `statsforecast` provides access to statistical forecasting methods, while `neuralforecast` gives access to deep-learning based forecasting methods.
    * - MODEL
-     - If LIBRARY is `statsforecast`, we can select one of AutoARIMA, AutoCES, AutoETS, AutoTheta. The default is AutoARIMA. Check `Automatic Forecasting <https://nixtla.github.io/statsforecast/src/core/models_intro.html#automatic-forecasting>`_ to learn details about these models. If LIBRARY is `neuralforecast`, we can select one of NHITS or NBEATS. The default is NBEATS. Check `Automatic Forecasting <https://nixtla.github.io/neuralforecast/models.nbeats.html>`_ for details.
+     - If LIBRARY is `statsforecast`, we can select one of AutoARIMA, AutoCES, AutoETS, AutoTheta. The default is AutoARIMA. Check `Automatic Forecasting <https://nixtla.github.io/statsforecast/src/core/models_intro.html#automatic-forecasting>`_ to learn details about these models. If LIBRARY is `neuralforecast`, we can select one of NHITS or NBEATS. The default is NBEATS. Check `NBEATS docs <https://nixtla.github.io/neuralforecast/models.nbeats.html>`_ for details.
    * - EXOGENOUS
      - The names of columns to be treated as exogenous variables, separated by comma. These columns would be considered for forecasting by the backend only for LIBRARY `neuralforecast`.
    * - Frequency

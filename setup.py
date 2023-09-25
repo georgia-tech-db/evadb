@@ -119,7 +119,7 @@ postgres_libs = [
 ludwig_libs = ["ludwig[hyperopt,distributed]"]  # MODEL TRAIN AND FINE TUNING
 
 forecasting_libs = [
-    "statsforecast" # MODEL TRAIN AND FINE TUNING
+    "statsforecast", # MODEL TRAIN AND FINE TUNING
     "neuralforecast" # MODEL TRAIN AND FINE TUNING
 ]
 

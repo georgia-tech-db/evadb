@@ -58,7 +58,7 @@ class ModelTrainTests(unittest.TestCase):
         load_query = f"LOAD CSV '{path}' INTO AirData;"
         execute_query_fetch_all(cls.evadb, load_query)
 
-        path = f"{EvaDB_ROOT_DIR}/data/forecasting/ AirPassengersPanel.csv"
+        path = f"{EvaDB_ROOT_DIR}/data/forecasting/AirPassengersPanel.csv"
         load_query = f"LOAD CSV '{path}' INTO AirDataPanel;"
         execute_query_fetch_all(cls.evadb, load_query)
 
@@ -82,8 +82,8 @@ class ModelTrainTests(unittest.TestCase):
         create_predict_udf = """
             CREATE FUNCTION AirForecast FROM
             (SELECT unique_id, ds, y FROM AirData)
-            HORIZON 12
             TYPE Forecasting
+            HORIZON 12
             PREDICT 'y';
         """
         execute_query_fetch_all(self.evadb, create_predict_udf)
@@ -100,8 +100,8 @@ class ModelTrainTests(unittest.TestCase):
         create_predict_udf = """
             CREATE FUNCTION AirPanelForecast FROM
             (SELECT unique_id, ds, y, trend FROM AirDataPanel)
-            HORIZON 12
             TYPE Forecasting
+            HORIZON 12
             PREDICT 'y'
             LIBRARY 'neuralforecast'
             EXOGENOUS 'trend'
