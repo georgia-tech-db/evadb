@@ -61,8 +61,8 @@ workflows:
         ################################
         ################################
         - Linux:
-            name: Long Integration Test | v3.10 | Linux
-            mode: LONG INTEGRATION
+            name: Long Integration Test (Cache) | v3.10 | Linux
+            mode: LONG INTEGRATION CACHE
             filters:
               branches:
                 ignore: 
@@ -212,6 +212,11 @@ jobs:
       - restore_cache:
           keys:
             - v1-model_cache-{{ checksum "setup.py" }}
+
+      # Restore testmondata
+      - restore_cache:
+          keys:
+            - v1-testmon_cache-python<< parameters.v >>-ray<< parameters.ray >>-{{ checksum "setup.py" }} 
       
       - run:
           name: Install EvaDB package from GitHub repo with all dependencies
@@ -261,6 +266,20 @@ jobs:
                   - /home/circleci/.cache/huggingface/
                   - /home/circleci/.cache/torch/
                   - /home/circleci/.cache/gpt4all/
+
+      # Collect the testmondata only on the staging branch 
+      - when:
+          condition:
+            and:
+              - equal: [ staging, << pipeline.git.branch >> ]
+              - equal: [ LONG INTEGRATION, << parameters.mode >> ]
+              - equal: [ 3.10, << parameters.v >> ]
+              - equal: [ DISABLED, << parameters.ray >> ] 
+          steps:
+            - save_cache:
+              key: v1-testmon_cache-python<< parameters.v >>-ray<< parameters.ray >>-{{ checksum "setup.py" }}
+              paths:
+                - .testmondata
 
       - save_cache:
           key: v1-pip-wheel_cache-python<< parameters.v >>-ray<< parameters.ray >>-{{ checksum "setup.py" }}

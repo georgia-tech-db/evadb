@@ -87,7 +87,7 @@ long_integration_test() {
   then
     PYTHONPATH=./ python -m pytest -ra --testmon-forceselect test/integration_tests/long/ -p no:cov -m "not benchmark"
   else
-    PYTHONPATH=./ python -m pytest -ra --no-testmon test/integration_tests/long/ -p no:cov -m "not benchmark"
+    PYTHONPATH=./ python -m pytest -ra --testmon-noselect test/integration_tests/long/ -p no:cov -m "not benchmark"
   fi
   code=$?
   print_error_code $code "LONG INTEGRATION TEST"
