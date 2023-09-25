@@ -388,11 +388,15 @@ class SimilarityTests(unittest.TestCase):
                                 LIMIT 1;""".format(
                 self.img_path
             )
-            explain_batch = execute_query_fetch_all(self.evadb, f"EXPLAIN {select_query}")
+            explain_batch = execute_query_fetch_all(
+                self.evadb, f"EXPLAIN {select_query}"
+            )
             self.assertTrue("VectorIndexScan" in explain_batch.frames[0][0])
 
             res_batch = execute_query_fetch_all(self.evadb, select_query)
-            self.assertEqual(res_batch.frames["testsimilarityimagedataset._row_id"][0], 5)
+            self.assertEqual(
+                res_batch.frames["testsimilarityimagedataset._row_id"][0], 5
+            )
 
             # Cleanup
             drop_query = "DROP INDEX testFaissIndexImageDataset"
@@ -411,7 +415,9 @@ class SimilarityTests(unittest.TestCase):
                                 LIMIT 1;""".format(
                 self.img_path
             )
-            explain_batch = execute_query_fetch_all(self.evadb, f"EXPLAIN {select_query}")
+            explain_batch = execute_query_fetch_all(
+                self.evadb, f"EXPLAIN {select_query}"
+            )
             self.assertTrue("VectorIndexScan" in explain_batch.frames[0][0])
 
             """|__ ProjectPlan
@@ -420,7 +426,9 @@ class SimilarityTests(unittest.TestCase):
                         |__ StoragePlan"""
 
             res_batch = execute_query_fetch_all(self.evadb, select_query)
-            self.assertEqual(res_batch.frames["testsimilarityimagedataset._row_id"][0], 5)
+            self.assertEqual(
+                res_batch.frames["testsimilarityimagedataset._row_id"][0], 5
+            )
 
             # Cleanup
             drop_query = "DROP INDEX testQdrantIndexImageDataset"
@@ -441,11 +449,15 @@ class SimilarityTests(unittest.TestCase):
                                 LIMIT 1;""".format(
                 self.img_path
             )
-            explain_batch = execute_query_fetch_all(self.evadb, f"EXPLAIN {select_query}")
+            explain_batch = execute_query_fetch_all(
+                self.evadb, f"EXPLAIN {select_query}"
+            )
             self.assertTrue("VectorIndexScan" in explain_batch.frames[0][0])
 
             res_batch = execute_query_fetch_all(self.evadb, select_query)
-            self.assertEqual(res_batch.frames["testsimilarityimagedataset._row_id"][0], 5)
+            self.assertEqual(
+                res_batch.frames["testsimilarityimagedataset._row_id"][0], 5
+            )
 
             # Cleanup
             drop_query = "DROP INDEX testChromaDBIndexImageDataset"
@@ -468,11 +480,15 @@ class SimilarityTests(unittest.TestCase):
                                 LIMIT 1;""".format(
                 self.img_path
             )
-            explain_batch = execute_query_fetch_all(self.evadb, f"EXPLAIN {select_query}")
+            explain_batch = execute_query_fetch_all(
+                self.evadb, f"EXPLAIN {select_query}"
+            )
             self.assertTrue("VectorIndexScan" in explain_batch.frames[0][0])
 
             res_batch = execute_query_fetch_all(self.evadb, select_query)
-            self.assertEqual(res_batch.frames["testsimilarityimagedataset._row_id"][0], 5)
+            self.assertEqual(
+                res_batch.frames["testsimilarityimagedataset._row_id"][0], 5
+            )
 
             drop_index_query = "DROP INDEX testpineconeindeximagedataset;"
             execute_query_fetch_all(self.evadb, drop_index_query)
