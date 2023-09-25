@@ -267,16 +267,16 @@ jobs:
                   - /home/circleci/.cache/torch/
                   - /home/circleci/.cache/gpt4all/
 
-      # Collect the testmondata only on the staging branch 
+    # Collect the testmondata only on the staging branch 
       - when:
           condition:
             and:
               - equal: [ staging, << pipeline.git.branch >> ]
               - equal: [ LONG INTEGRATION, << parameters.mode >> ]
-              - equal: [ 3.10, << parameters.v >> ]
+              - equal: [ "3.10", << parameters.v >> ]
               - equal: [ DISABLED, << parameters.ray >> ] 
           steps:
-            - save_cache:
+          - save_cache:
               key: v1-testmon_cache-python<< parameters.v >>-ray<< parameters.ray >>-{{ checksum "setup.py" }}
               paths:
                 - .testmondata
