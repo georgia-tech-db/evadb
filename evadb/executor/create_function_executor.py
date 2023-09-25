@@ -276,16 +276,16 @@ class CreateFunctionExecutor(AbstractExecutor):
         """
         if library == "neuralforecast":
             from neuralforecast import NeuralForecast
-            from neuralforecast.auto import AutoNBEATS
-            from neuralforecast.models import NBEATS
+            from neuralforecast.auto import AutoNBEATS, AutoNHITS
+            from neuralforecast.models import NHITS
 
             model_dict = {
-                "AutoNBEATS": AutoNBEATS,
-                "NBEATS": NBEATS,
+                "AutoNHITS": AutoNHITS,
+                "NHITS": NHITS,
             }
 
             if "model" not in arg_map.keys():
-                arg_map["model"] = "NBEATS"
+                arg_map["model"] = "AutoNHITS"
 
             try:
                 model_here = model_dict[arg_map["model"]]
@@ -293,11 +293,21 @@ class CreateFunctionExecutor(AbstractExecutor):
                 err_msg = "Supported models: " + str(model_dict.keys())
                 logger.error(err_msg)
                 raise FunctionIODefinitionError(err_msg)
+            model_args = {}
+            if "exogenous" in arg_map.keys():
+                exogenous_args = [x.strip() for x in arg_map["exogenous"].strip().split(",")]
+                model_args["hist_exog_list"] = exogenous_args
+
+            if "auto" not in arg_map["model"].lower():
+                model_args["input_size"] = 2*horizon
+                model_args["max_steps"] = 50
+            
+            model_args["h"] = horizon
 
             model = NeuralForecast(
-                [model_here(input_size=2 * horizon, h=horizon, max_steps=50)],
-                freq=new_freq,
-            )
+                    [model_here(**model_args)],
+                    freq=new_freq,
+                )
 
         # """
         #     Statsforecast implementation
@@ -323,22 +333,25 @@ class CreateFunctionExecutor(AbstractExecutor):
                 logger.error(err_msg)
                 raise FunctionIODefinitionError(err_msg)
 
-            model = StatsForecast(
-                [model_here(season_length=season_length)], freq=new_freq
-            )
+
+            
+            else:
+                model = StatsForecast(
+                    [model_here(season_length=season_length)], freq=new_freq
+                )
 
         data["ds"] = pd.to_datetime(data["ds"])
 
         model_dir = os.path.join(
             self.db.config.get_value("storage", "model_dir"),
             self.node.name,
+            library,
+            arg_map["model"]
         )
         Path(model_dir).mkdir(parents=True, exist_ok=True)
 
         model_save_name = (
-            library
-            + "_"
-            + str(hashlib.sha256(data.to_string().encode()).hexdigest())
+            str(hashlib.sha256(data.to_string().encode()).hexdigest())
             + "_horizon"
             + str(horizon)
             + ".pkl"
