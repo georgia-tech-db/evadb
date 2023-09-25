@@ -22,7 +22,7 @@ Home Sale Forecasting
 Introduction
 ------------
 
-In this tutorial, we present how to use :ref:`forecasting models<forecast>` in EvaDB to predict home sale price. EvaDB makes it easy to do time series predictions using its built-in Auto Forecast function.
+In this tutorial, we present how to use :ref:`Forecasting AI Engines<forecast>` in EvaDB to predict home sale price. EvaDB makes it easy to do time series predictions using its built-in Auto Forecast function.
 
 .. include:: ../shared/evadb.rst
 
@@ -34,7 +34,7 @@ To load the home sales data into your database, see the complete `home sale fore
 Preview the Home Sales Data
 -------------------------------------------
 
-We use the `raw_sales.csv of the House Property Sales Time Series <https://www.kaggle.com/datasets/htagholdings/property-sales?resource=download>`_ in this usecase. The data contains five columns: postcode, price, bedrooms, datesold, and propertytype.
+We use the `raw_sales.csv of the House Property Sales Time Series <https://www.kaggle.com/datasets/htagholdings/property-sales?resource=download>`_ in this usecase. The data contains five columns: ``postcode``, ``price``, ``bedrooms``, ``datesold``, and ``propertytype``.
 
 .. code-block:: sql
 
