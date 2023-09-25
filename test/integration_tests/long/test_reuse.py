@@ -24,7 +24,10 @@ from test.util import (
     shutdown_ray,
 )
 
+from mock import patch
+
 from evadb.configuration.constants import EvaDB_ROOT_DIR
+from evadb.models.storage.batch import Batch
 from evadb.optimizer.operators import LogicalFunctionScan
 from evadb.optimizer.plan_generator import PlanGenerator
 from evadb.optimizer.rules.rules import (
@@ -52,12 +55,22 @@ class ReuseTest(unittest.TestCase):
         self.evadb.catalog().reset()
         ua_detrac = f"{EvaDB_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
         execute_query_fetch_all(self.evadb, f"LOAD VIDEO '{ua_detrac}' INTO DETRAC;")
+        execute_query_fetch_all(self.evadb, "CREATE TABLE fruitTable (data TEXT(100))")
+        data_list = [
+            "The color of apple is red",
+            "The color of banana is yellow",
+        ]
+        for data in data_list:
+            execute_query_fetch_all(
+                self.evadb, f"INSERT INTO fruitTable (data) VALUES ('{data}')"
+            )
         load_functions_for_testing(self.evadb)
         self._load_hf_model()
 
     def tearDown(self):
         shutdown_ray()
         execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS DETRAC;")
+        execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS fruitTable;")
 
     def _verify_reuse_correctness(self, query, reuse_batch):
         # Fix memory failures on CI when running reuse test cases. An issue with yolo
@@ -95,12 +108,44 @@ class ReuseTest(unittest.TestCase):
             exec_times.append(timer.total_elapsed_time)
         return batches, exec_times
 
+    def _strict_reuse_experiment(self, queries):
+        # This test mocks the apply_function_expression, if it is called, it will raise
+        # an exception.
+        exec_times = []
+        batches = []
+        for i, query in enumerate(queries):
+            timer = Timer()
+            if i != 0:
+                with timer, patch.object(
+                    Batch, "apply_function_expression"
+                ) as mock_batch_func:
+                    mock_batch_func.side_effect = Exception("Results are not reused")
+                    batches.append(execute_query_fetch_all(self.evadb, query))
+            else:
+                with timer:
+                    batches.append(execute_query_fetch_all(self.evadb, query))
+            exec_times.append(timer.total_elapsed_time)
+        return batches, exec_times
+
+    def test_reuse_chatgpt(self):
+        from evadb.constants import CACHEABLE_FUNCTIONS
+
+        CACHEABLE_FUNCTIONS += ["DummyLLM"]
+        select_query = """SELECT DummyLLM('What is the fruit described in this sentence', data)
+            FROM fruitTable"""
+        batches, exec_times = self._strict_reuse_experiment(
+            [select_query, select_query]
+        )
+        self._verify_reuse_correctness(select_query, batches[1])
+        self.assertTrue(exec_times[0] > exec_times[1])
+
     def test_reuse_when_query_is_duplicate(self):
         select_query = """SELECT id, label FROM DETRAC JOIN
             LATERAL HFObjectDetector(data) AS Obj(score, label, bbox) WHERE id < 15;"""
-        batches, exec_times = self._reuse_experiment([select_query, select_query])
+        batches, exec_times = self._strict_reuse_experiment(
+            [select_query, select_query]
+        )
         self._verify_reuse_correctness(select_query, batches[1])
-        # reuse should be faster than no reuse
         self.assertTrue(exec_times[0] > exec_times[1])
 
     @gpu_skip_marker

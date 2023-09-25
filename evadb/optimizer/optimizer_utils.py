@@ -24,6 +24,7 @@ from evadb.catalog.models.function_io_catalog import FunctionIOCatalogEntry
 from evadb.catalog.models.function_metadata_catalog import FunctionMetadataCatalogEntry
 from evadb.constants import CACHEABLE_FUNCTIONS, DEFAULT_FUNCTION_EXPRESSION_COST
 from evadb.expression.abstract_expression import AbstractExpression, ExpressionType
+from evadb.expression.constant_value_expression import ConstantValueExpression
 from evadb.expression.expression_utils import (
     conjunction_list_to_expression_tree,
     contains_single_column,
@@ -190,10 +191,44 @@ def extract_pushdown_predicate_for_alias(
     )
 
 
+def optimize_cache_key_for_tuple_value_expression(
+    context: "OptimizerContext", tv_expr: TupleValueExpression
+):
+    catalog = context.db.catalog()
+    col_catalog_obj = tv_expr.col_object
+
+    # Optimized cache key for TupleValueExpression.
+    new_keys = []
+
+    if isinstance(col_catalog_obj, ColumnCatalogEntry):
+        table_obj = catalog.get_table_catalog_entry(col_catalog_obj.table_name)
+        for col in get_table_primary_columns(table_obj):
+            new_obj = catalog.get_column_catalog_entry(table_obj, col.name)
+            new_keys.append(
+                TupleValueExpression(
+                    name=col.name,
+                    table_alias=tv_expr.table_alias,
+                    col_object=new_obj,
+                    col_alias=f"{tv_expr.table_alias}.{col.name}",
+                )
+            )
+        return new_keys
+
+    return [tv_expr]
+
+
+def optimize_cache_key_for_constant_value_expression(
+    context: "OptimizerContext", cv_expr: ConstantValueExpression
+):
+    # No need to additional optimization for constant value expression.
+    return [cv_expr]
+
+
 def optimize_cache_key(context: "OptimizerContext", expr: FunctionExpression):
     """Optimize the cache key
 
-    It tries to reduce the caching overhead by replacing the caching key with logically equivalent key. For instance, frame data can be replaced with frame id.
+    It tries to reduce the caching overhead by replacing the caching key with
+    logically equivalent key. For instance, frame data can be replaced with frame id.
 
     Args:
         expr (FunctionExpression): expression to optimize the caching key for.
@@ -206,27 +241,19 @@ def optimize_cache_key(context: "OptimizerContext", expr: FunctionExpression):
 
     """
     keys = expr.children
-    catalog = context.db.catalog()
-    # handle simple one column inputs
-    if len(keys) == 1 and isinstance(keys[0], TupleValueExpression):
-        child = keys[0]
-        col_catalog_obj = child.col_object
-        if isinstance(col_catalog_obj, ColumnCatalogEntry):
-            new_keys = []
-            table_obj = catalog.get_table_catalog_entry(col_catalog_obj.table_name)
-            for col in get_table_primary_columns(table_obj):
-                new_obj = catalog.get_column_catalog_entry(table_obj, col.name)
-                new_keys.append(
-                    TupleValueExpression(
-                        name=col.name,
-                        table_alias=child.table_alias,
-                        col_object=new_obj,
-                        col_alias=f"{child.table_alias}.{col.name}",
-                    )
-                )
 
-            return new_keys
-    return keys
+    optimize_key_mapping_f = {
+        TupleValueExpression: optimize_cache_key_for_tuple_value_expression,
+        ConstantValueExpression: optimize_cache_key_for_constant_value_expression,
+    }
+
+    optimized_keys = []
+    for key in keys:
+        if type(key) not in optimize_key_mapping_f:
+            raise RuntimeError(f"Optimize cache key of {type(key)} is not implemented")
+        optimized_keys += optimize_key_mapping_f[type(key)](context, key)
+
+    return optimized_keys
 
 
 def enable_cache_init(
@@ -280,12 +307,16 @@ def enable_cache_on_expression_tree(
 
 
 def check_expr_validity_for_cache(expr: FunctionExpression):
-    return (
-        expr.name in CACHEABLE_FUNCTIONS
-        and not expr.has_cache()
-        and len(expr.children) <= 1
-        and isinstance(expr.children[0], TupleValueExpression)
-    )
+    valid = expr.name in CACHEABLE_FUNCTIONS and not expr.has_cache()
+    if len(expr.children) == 1:
+        # Normal function that only takes one parameter.
+        valid &= isinstance(expr.children[0], TupleValueExpression)
+    elif len(expr.children) == 2:
+        # LLM-based function that takes two parameters.
+        valid &= isinstance(expr.children[0], ConstantValueExpression) and isinstance(
+            expr.children[1], TupleValueExpression
+        )
+    return valid
 
 
 def get_expression_execution_cost(
