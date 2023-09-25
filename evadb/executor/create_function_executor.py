@@ -244,7 +244,7 @@ class CreateFunctionExecutor(AbstractExecutor):
         """
             Set or infer data frequency
         """
-        
+
         if "frequency" not in arg_map.keys():
             arg_map["frequency"] = pd.infer_freq(data["ds"])
         frequency = arg_map["frequency"]
@@ -297,19 +297,21 @@ class CreateFunctionExecutor(AbstractExecutor):
                 raise FunctionIODefinitionError(err_msg)
             model_args = {}
             if "exogenous" in arg_map.keys():
-                exogenous_args = [x.strip() for x in arg_map["exogenous"].strip().split(",")]
+                exogenous_args = [
+                    x.strip() for x in arg_map["exogenous"].strip().split(",")
+                ]
                 model_args["hist_exog_list"] = exogenous_args
 
             if "auto" not in arg_map["model"].lower():
-                model_args["input_size"] = 2*horizon
+                model_args["input_size"] = 2 * horizon
                 model_args["max_steps"] = 50
-            
+
             model_args["h"] = horizon
 
             model = NeuralForecast(
-                    [model_here(**model_args)],
-                    freq=new_freq,
-                )
+                [model_here(**model_args)],
+                freq=new_freq,
+            )
 
         # """
         #     Statsforecast implementation
@@ -335,8 +337,6 @@ class CreateFunctionExecutor(AbstractExecutor):
                 logger.error(err_msg)
                 raise FunctionIODefinitionError(err_msg)
 
-
-            
             else:
                 model = StatsForecast(
                     [model_here(season_length=season_length)], freq=new_freq
@@ -346,22 +346,18 @@ class CreateFunctionExecutor(AbstractExecutor):
 
         encoding_text = data.to_string()
         if "exogenous" in arg_map.keys():
-            encoding_text += "exogenous_"+str(sorted(exogenous_args))
+            encoding_text += "exogenous_" + str(sorted(exogenous_args))
 
         model_dir = os.path.join(
             self.db.config.get_value("storage", "model_dir"),
             self.node.name,
             library,
             arg_map["model"],
-            str(hashlib.sha256(encoding_text.encode()).hexdigest())
+            str(hashlib.sha256(encoding_text.encode()).hexdigest()),
         )
         Path(model_dir).mkdir(parents=True, exist_ok=True)
 
-        model_save_name = (
-            "horizon"
-            + str(horizon)
-            + ".pkl"
-        )
+        model_save_name = "horizon" + str(horizon) + ".pkl"
 
         model_path = os.path.join(model_dir, model_save_name)
 

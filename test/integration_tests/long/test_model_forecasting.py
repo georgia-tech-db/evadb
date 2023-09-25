@@ -30,7 +30,6 @@ class ModelTrainTests(unittest.TestCase):
         # reset the catalog manager before running each test
         cls.evadb.catalog().reset()
 
-
         create_table_query = """
             CREATE TABLE AirData (\
             unique_id TEXT(30),\
@@ -116,7 +115,8 @@ class ModelTrainTests(unittest.TestCase):
         result = execute_query_fetch_all(self.evadb, predict_query)
         self.assertEqual(len(result), 12)
         self.assertEqual(
-            result.columns, ["airpanelforecast.unique_id", "airpanelforecast.ds", "airpanelforecast.y"]
+            result.columns,
+            ["airpanelforecast.unique_id", "airpanelforecast.ds", "airpanelforecast.y"],
         )
 
     @forecast_skip_marker
