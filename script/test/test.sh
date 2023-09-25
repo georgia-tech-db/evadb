@@ -82,8 +82,13 @@ short_third_party_test(){
 }
 
 long_integration_test() {
-  pip install pytest-testmon
-  PYTHONPATH=./ python -m pytest --testmon test/integration_tests/long/ -p no:cov -m "not benchmark"
+  cache=$1
+  if [[ "$cache" = "WITH_CACHE" ]];
+  then
+    PYTHONPATH=./ python -m pytest -ra --testmon-forceselect test/integration_tests/long/ -p no:cov -m "not benchmark"
+  else
+    PYTHONPATH=./ python -m pytest -ra --no-testmon test/integration_tests/long/ -p no:cov -m "not benchmark"
+  fi
   code=$?
   print_error_code $code "LONG INTEGRATION TEST"
 }
@@ -195,8 +200,13 @@ fi
 ##################################################
 
 if [[ "$MODE" = "LONG INTEGRATION" ]];
-then 
-  long_integration_test
+then
+  long_integration_test "WITHOUT_CACHE"
+fi
+
+if [[ "$MODE" = "LONG INTEGRATION CACHE" ]];
+then
+  long_integration_test "WITH_CACHE"
 fi
 
 ##################################################

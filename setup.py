@@ -131,6 +131,7 @@ dev_libs = [
     "mock",
     "coveralls>=3.0.1",
     "moto[s3]>=4.1.1",
+    "pytest-testmon",
     # BENCHMARK PACKAGES
     "pytest-benchmark",
     # LINTING PACKAGES
