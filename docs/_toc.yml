@@ -71,8 +71,10 @@ parts:
       - file: source/reference/ai/index
         title: AI Engines
         sections:
-          - file: source/reference/ai/model-train
-            title: Model Training
+          - file: source/reference/ai/model-train-ludwig
+            title: Model Training with Ludwig
+          - file: source/reference/ai/model-train-sklearn
+            title: Model Training with Sklearn
           - file: source/reference/ai/model-forecasting
             title: Time Series Forecasting
           - file: source/reference/ai/hf
