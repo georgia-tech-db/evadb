@@ -171,6 +171,8 @@ def handle_vector_store_params(
         return {"index_path": index_path}
     elif vector_store_type == VectorStoreType.QDRANT:
         return {"index_db": str(Path(index_path).parent)}
+    elif vector_store_type == VectorStoreType.CHROMADB:
+        return {"index_path": str(Path(index_path).parent)}
     elif vector_store_type == VectorStoreType.PINECONE:
         return {}
     else:

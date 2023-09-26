@@ -19,6 +19,7 @@ import sys
 import pytest
 
 from evadb.utils.generic_utils import (
+    is_chromadb_available,
     is_forecast_available,
     is_gpu_available,
     is_ludwig_available,
@@ -37,7 +38,12 @@ qdrant_skip_marker = pytest.mark.skipif(
 
 pinecone_skip_marker = pytest.mark.skipif(
     is_pinecone_available() is False,
-    reason="skipping since pinecone is not installed",
+    reason="Skipping since pinecone is not installed",
+)
+
+chromadb_skip_marker = pytest.mark.skipif(
+    is_chromadb_available() is False,
+    reason="Skipping since chromadb is not installed",
 )
 
 windows_skip_marker = pytest.mark.skipif(

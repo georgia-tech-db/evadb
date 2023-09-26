@@ -15,7 +15,7 @@
 import os
 import time
 import unittest
-from test.markers import pinecone_skip_marker, qdrant_skip_marker
+from test.markers import chromadb_skip_marker, pinecone_skip_marker, qdrant_skip_marker
 from test.util import (
     create_sample_image,
     get_evadb_for_testing,
@@ -306,8 +306,10 @@ class SimilarityTests(unittest.TestCase):
             )
 
         # Cleanup
-        self.evadb.catalog().drop_index_catalog_entry("testFaissIndexScanRewrite1")
-        self.evadb.catalog().drop_index_catalog_entry("testFaissIndexScanRewrite2")
+        drop_query = "DROP INDEX testFaissIndexScanRewrite1"
+        execute_query_fetch_all(self.evadb, drop_query)
+        drop_query = "DROP INDEX testFaissIndexScanRewrite2"
+        execute_query_fetch_all(self.evadb, drop_query)
 
     def test_should_not_do_vector_index_scan_with_desc_order(self):
         # Execution with index scan.
@@ -347,7 +349,8 @@ class SimilarityTests(unittest.TestCase):
         self.assertTrue(np.array_equal(actual_open, base_img + 3))
 
         # Cleanup
-        self.evadb.catalog().drop_index_catalog_entry("testFaissIndexScanRewrite")
+        drop_query = "DROP INDEX testFaissIndexScanRewrite"
+        execute_query_fetch_all(self.evadb, drop_query)
 
     def test_should_not_do_vector_index_scan_with_predicate(self):
         # Execution with index scan.
@@ -370,68 +373,122 @@ class SimilarityTests(unittest.TestCase):
         self.assertFalse("FaissIndexScan" in batch.frames[0][0])
 
         # Cleanup
-        self.evadb.catalog().drop_index_catalog_entry("testFaissIndexScanRewrite")
+        drop_query = "DROP INDEX testFaissIndexScanRewrite"
+        execute_query_fetch_all(self.evadb, drop_query)
 
-    def test_end_to_end_index_scan_should_work_correctly_on_image_dataset(self):
-        create_index_query = """CREATE INDEX testFaissIndexImageDataset
-                                    ON testSimilarityImageDataset (DummyFeatureExtractor(data))
-                                    USING FAISS;"""
-        execute_query_fetch_all(self.evadb, create_index_query)
-        select_query = """SELECT _row_id FROM testSimilarityImageDataset
-                            ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data))
-                            LIMIT 1;""".format(
-            self.img_path
-        )
-        res_batch = execute_query_fetch_all(self.evadb, select_query)
-        self.assertEqual(res_batch.frames["testsimilarityimagedataset._row_id"][0], 5)
+    def test_end_to_end_index_scan_should_work_correctly_on_image_dataset_faiss(self):
+        for _ in range(2):
+            create_index_query = """CREATE INDEX testFaissIndexImageDataset
+                                        ON testSimilarityImageDataset (DummyFeatureExtractor(data))
+                                        USING FAISS;"""
+            execute_query_fetch_all(self.evadb, create_index_query)
 
-        # Cleanup
-        self.evadb.catalog().drop_index_catalog_entry("testFaissIndexImageDataset")
+            select_query = """SELECT _row_id FROM testSimilarityImageDataset
+                                ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data))
+                                LIMIT 1;""".format(
+                self.img_path
+            )
+            explain_batch = execute_query_fetch_all(
+                self.evadb, f"EXPLAIN {select_query}"
+            )
+            self.assertTrue("VectorIndexScan" in explain_batch.frames[0][0])
+
+            res_batch = execute_query_fetch_all(self.evadb, select_query)
+            self.assertEqual(
+                res_batch.frames["testsimilarityimagedataset._row_id"][0], 5
+            )
+
+            # Cleanup
+            drop_query = "DROP INDEX testFaissIndexImageDataset"
+            execute_query_fetch_all(self.evadb, drop_query)
 
     @qdrant_skip_marker
     def test_end_to_end_index_scan_should_work_correctly_on_image_dataset_qdrant(self):
-        create_index_query = """CREATE INDEX testQdrantIndexImageDataset
+        for _ in range(2):
+            create_index_query = """CREATE INDEX testQdrantIndexImageDataset
+                                        ON testSimilarityImageDataset (DummyFeatureExtractor(data))
+                                        USING QDRANT;"""
+            execute_query_fetch_all(self.evadb, create_index_query)
+
+            select_query = """SELECT _row_id FROM testSimilarityImageDataset
+                                ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data))
+                                LIMIT 1;""".format(
+                self.img_path
+            )
+            explain_batch = execute_query_fetch_all(
+                self.evadb, f"EXPLAIN {select_query}"
+            )
+            self.assertTrue("VectorIndexScan" in explain_batch.frames[0][0])
+
+            """|__ ProjectPlan
+                |__ VectorIndexScanPlan
+                    |__ SeqScanPlan
+                        |__ StoragePlan"""
+
+            res_batch = execute_query_fetch_all(self.evadb, select_query)
+            self.assertEqual(
+                res_batch.frames["testsimilarityimagedataset._row_id"][0], 5
+            )
+
+            # Cleanup
+            drop_query = "DROP INDEX testQdrantIndexImageDataset"
+            execute_query_fetch_all(self.evadb, drop_query)
+
+    @chromadb_skip_marker
+    def test_end_to_end_index_scan_should_work_correctly_on_image_dataset_chromadb(
+        self,
+    ):
+        for _ in range(2):
+            create_index_query = """CREATE INDEX testChromaDBIndexImageDataset
                                     ON testSimilarityImageDataset (DummyFeatureExtractor(data))
-                                    USING QDRANT;"""
-        execute_query_fetch_all(self.evadb, create_index_query)
-        select_query = """SELECT _row_id FROM testSimilarityImageDataset
-                            ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data))
-                            LIMIT 1;""".format(
-            self.img_path
-        )
+                                    USING CHROMADB;"""
+            execute_query_fetch_all(self.evadb, create_index_query)
 
-        """|__ ProjectPlan
-            |__ VectorIndexScanPlan
-                |__ SeqScanPlan
-                    |__ StoragePlan"""
+            select_query = """SELECT _row_id FROM testSimilarityImageDataset
+                                ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data))
+                                LIMIT 1;""".format(
+                self.img_path
+            )
+            explain_batch = execute_query_fetch_all(
+                self.evadb, f"EXPLAIN {select_query}"
+            )
+            self.assertTrue("VectorIndexScan" in explain_batch.frames[0][0])
 
-        res_batch = execute_query_fetch_all(self.evadb, select_query)
-        self.assertEqual(res_batch.frames["testsimilarityimagedataset._row_id"][0], 5)
+            res_batch = execute_query_fetch_all(self.evadb, select_query)
+            self.assertEqual(
+                res_batch.frames["testsimilarityimagedataset._row_id"][0], 5
+            )
 
-        # Cleanup
-        self.evadb.catalog().drop_index_catalog_entry("testQdrantIndexImageDataset")
+            # Cleanup
+            drop_query = "DROP INDEX testChromaDBIndexImageDataset"
+            execute_query_fetch_all(self.evadb, drop_query)
 
     @pinecone_skip_marker
     def test_end_to_end_index_scan_should_work_correctly_on_image_dataset_pinecone(
         self,
     ):
-        # We need to always drop the index as Pinecone's free tier only supports a single current index.
-        drop_index_query = "DROP INDEX IF EXISTS testpineconeindeximagedataset;"
-        execute_query_fetch_all(self.evadb, drop_index_query)
-        create_index_query = """CREATE INDEX testpineconeindeximagedataset
-                                ON testSimilarityImageDataset (DummyFeatureExtractor(data))
-                                USING PINECONE;"""
-        execute_query_fetch_all(self.evadb, create_index_query)
-        # Sleep to ensure the pinecone records get updated as Pinecone is eventually consistent.
-        time.sleep(20)
+        for _ in range(2):
+            create_index_query = """CREATE INDEX testpineconeindeximagedataset
+                                    ON testSimilarityImageDataset (DummyFeatureExtractor(data))
+                                    USING PINECONE;"""
+            execute_query_fetch_all(self.evadb, create_index_query)
+            # Sleep to ensure the pinecone records get updated as Pinecone is eventually consistent.
+            time.sleep(20)
 
-        select_query = """SELECT _row_id FROM testSimilarityImageDataset
-                            ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data))
-                            LIMIT 1;""".format(
-            self.img_path
-        )
+            select_query = """SELECT _row_id FROM testSimilarityImageDataset
+                                ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data))
+                                LIMIT 1;""".format(
+                self.img_path
+            )
+            explain_batch = execute_query_fetch_all(
+                self.evadb, f"EXPLAIN {select_query}"
+            )
+            self.assertTrue("VectorIndexScan" in explain_batch.frames[0][0])
 
-        res_batch = execute_query_fetch_all(self.evadb, select_query)
-        self.assertEqual(res_batch.frames["testsimilarityimagedataset._row_id"][0], 5)
-        drop_index_query = "DROP INDEX testpineconeindeximagedataset;"
-        execute_query_fetch_all(self.evadb, drop_index_query)
+            res_batch = execute_query_fetch_all(self.evadb, select_query)
+            self.assertEqual(
+                res_batch.frames["testsimilarityimagedataset._row_id"][0], 5
+            )
+
+            drop_index_query = "DROP INDEX testpineconeindeximagedataset;"
+            execute_query_fetch_all(self.evadb, drop_index_query)
