@@ -63,7 +63,6 @@ class CreateTableTest(unittest.TestCase):
         with self.assertRaises(ExecutorError):
             execute_query_fetch_all(self.evadb, query)
 
-    @macos_skip_marker
     def test_should_create_table_from_select(self):
         create_query = """CREATE TABLE dummy_table
             AS SELECT id, DummyObjectDetector(data).label FROM MyVideo;
@@ -112,6 +111,16 @@ class CreateTableTest(unittest.TestCase):
         # re create table should work
         query = "CREATE TABLE IF NOT EXISTS " f"uadtrac_fastRCNN AS {select_query};"
         execute_query_fetch_all(self.evadb, query)
+
+    def test_create_table_with_incorrect_info(self):
+        create_table = "CREATE TABLE SlackCSV(metadata TEXT(1000));"
+        with self.assertRaises(Exception):
+            execute_query_fetch_all(self.evadb, create_table)
+
+        # running create table after fixing the error
+        create_table = "CREATE TABLE SlackCSV(user_profile TEXT(1000));"
+        execute_query_fetch_all(self.evadb, create_table)
+        execute_query_fetch_all(self.evadb, "DROP TABLE SlackCSV;")
 
 
 if __name__ == "__main__":

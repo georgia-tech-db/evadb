@@ -72,6 +72,22 @@ class ModelTrainTests(unittest.TestCase):
         self.assertEqual(len(result.columns), 1)
         self.assertEqual(len(result), 10)
 
+    def test_sklearn_regression(self):
+        create_predict_function = """
+            CREATE FUNCTION IF NOT EXISTS PredictHouseRent FROM
+            ( SELECT number_of_rooms, number_of_bathrooms, days_on_market, rental_price FROM HomeRentals )
+            TYPE Sklearn
+            PREDICT 'rental_price';
+        """
+        execute_query_fetch_all(self.evadb, create_predict_function)
+
+        predict_query = """
+            SELECT PredictHouseRent(number_of_rooms, number_of_bathrooms, days_on_market, rental_price) FROM HomeRentals LIMIT 10;
+        """
+        result = execute_query_fetch_all(self.evadb, predict_query)
+        self.assertEqual(len(result.columns), 1)
+        self.assertEqual(len(result), 10)
+
 
 if __name__ == "__main__":
     unittest.main()

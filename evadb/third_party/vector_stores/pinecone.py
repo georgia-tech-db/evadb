@@ -46,7 +46,7 @@ class PineconeVectorStore(VectorStore):
 
         assert (
             self._api_key
-        ), "Please set your Pinecone API key in evadb.yml file (third_party, pinecone_api_key) or environment variable (PINECONE_KEY)"
+        ), "Please set your Pinecone API key in evadb.yml file (third_party, pinecone_api_key) or environment variable (PINECONE_KEY). It can be found at Pinecone Dashboard > API Keys > Value"
 
         # Get the environment name.
         self._environment = ConfigurationManager().get_value(
@@ -57,7 +57,7 @@ class PineconeVectorStore(VectorStore):
 
         assert (
             self._environment
-        ), "Please set the Pinecone environment key in evadb.yml file (third_party, pinecone_env) or environment variable (PINECONE_ENV)"
+        ), "Please set the Pinecone environment key in evadb.yml file (third_party, pinecone_env) or environment variable (PINECONE_ENV). It can be found Pinecone Dashboard > API Keys > Environment."
 
         if not _pinecone_init_done:
             # Initialize pinecone.
