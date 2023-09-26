@@ -53,12 +53,13 @@ class ModelTrainTests(unittest.TestCase):
 
         # clean up
         execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS HomeRentals;")
-        execute_query_fetch_all(cls.evadb, "DROP FUNCTION IF EXISTS PredictHouseRent;")
+        execute_query_fetch_all(cls.evadb, "DROP FUNCTION IF EXISTS PredictHouseRentLudwig;")
+        execute_query_fetch_all(cls.evadb, "DROP FUNCTION IF EXISTS PredictHouseRentSklearn;")
 
     @ludwig_skip_marker
     def test_ludwig_automl(self):
         create_predict_function = """
-            CREATE OR REPLACE FUNCTION PredictHouseRent FROM
+            CREATE OR REPLACE FUNCTION PredictHouseRentLudwig FROM
             ( SELECT * FROM HomeRentals )
             TYPE Ludwig
             PREDICT 'rental_price'
@@ -67,7 +68,7 @@ class ModelTrainTests(unittest.TestCase):
         execute_query_fetch_all(self.evadb, create_predict_function)
 
         predict_query = """
-            SELECT PredictHouseRent(*) FROM HomeRentals LIMIT 10;
+            SELECT PredictHouseRentLudwig(*) FROM HomeRentals LIMIT 10;
         """
         result = execute_query_fetch_all(self.evadb, predict_query)
         self.assertEqual(len(result.columns), 1)
@@ -76,7 +77,7 @@ class ModelTrainTests(unittest.TestCase):
     @sklearn_skip_marker
     def test_sklearn_regression(self):
         create_predict_function = """
-            CREATE OR REPLACE FUNCTION PredictHouseRent FROM
+            CREATE OR REPLACE FUNCTION PredictHouseRentSklearn FROM
             ( SELECT number_of_rooms, number_of_bathrooms, days_on_market, rental_price FROM HomeRentals )
             TYPE Sklearn
             PREDICT 'rental_price';
@@ -84,7 +85,7 @@ class ModelTrainTests(unittest.TestCase):
         execute_query_fetch_all(self.evadb, create_predict_function)
 
         predict_query = """
-            SELECT PredictHouseRent(number_of_rooms, number_of_bathrooms, days_on_market, rental_price) FROM HomeRentals LIMIT 10;
+            SELECT PredictHouseRentSklearn(number_of_rooms, number_of_bathrooms, days_on_market, rental_price) FROM HomeRentals LIMIT 10;
         """
         result = execute_query_fetch_all(self.evadb, predict_query)
         self.assertEqual(len(result.columns), 1)
