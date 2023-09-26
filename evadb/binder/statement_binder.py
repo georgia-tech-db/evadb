@@ -201,6 +201,9 @@ class StatementBinder:
                 node.query.target_list
             )
 
+            # verify if the table to be created is valid.
+            # possible issues: the native database does not exists.
+
     @bind.register(CreateIndexStatement)
     def _bind_create_index_statement(self, node: CreateIndexStatement):
         from evadb.binder.create_index_statement_binder import bind_create_index
