@@ -158,9 +158,6 @@ class NativeStorageEngine(AbstractStorageEngine):
             logger.exception(err_msg)
             raise Exception(err_msg)
 
-    def create(self, table: TableCatalogEntry):
-        pass
-
     def read(self, table: TableCatalogEntry) -> Iterator[Batch]:
         try:
             db_catalog_entry = self._get_database_catalog_entry(table.database_name)
