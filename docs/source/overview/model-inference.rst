@@ -43,7 +43,7 @@ In EvaDB, we can also use models in joins.
 The most powerful usecase is lateral join combined with ``UNNEST``, which is very helpful to flatten the output from `one-to-many` models.
 The key idea here is a model could give multiple outputs (e.g., bounding box) stored in an array. This syntax is used to unroll elements from the array into multiple rows.
 Typical examples are `face detectors <https://github.com/georgia-tech-db/evadb/blob/staging/evadb/functions/face_detector.py>`_ and `object detectors <https://github.com/georgia-tech-db/evadb/blob/staging/evadb/functions/fastrcnn_object_detector.py>`_. 
-In the below example, we use `emotion detector <https://github.com/georgia-tech-db/evadb/blob/staging/evadb/functions/emotion_detector.py>_` to detect emotions from faces in the movie, where a single scene can contain multiple faces. 
+In the below example, we use `emotion detector <https://github.com/georgia-tech-db/evadb/blob/staging/evadb/functions/emotion_detector.py>`_ to detect emotions from faces in the movie, where a single scene can contain multiple faces. 
    
 .. code-block:: sql
    

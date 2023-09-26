@@ -101,6 +101,17 @@ class StatementBinder:
                         outputs.append(column)
                     else:
                         inputs.append(column)
+            elif string_comparison_case_insensitive(node.function_type, "sklearn"):
+                assert (
+                    "predict" in arg_map
+                ), f"Creating {node.function_type} functions expects 'predict' metadata."
+                # We only support a single predict column for now
+                predict_columns = set([arg_map["predict"]])
+                for column in all_column_list:
+                    if column.name in predict_columns:
+                        outputs.append(column)
+                    else:
+                        inputs.append(column)
             elif string_comparison_case_insensitive(node.function_type, "forecasting"):
                 # Forecasting models have only one input column which is horizon
                 inputs = [ColumnDefinition("horizon", ColumnType.INTEGER, None, None)]

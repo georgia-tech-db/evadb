@@ -325,6 +325,17 @@ def is_forecast_available() -> bool:
         return False
 
 
+def try_to_import_sklearn():
+    try:
+        import sklearn  # noqa: F401
+        from sklearn.linear_model import LinearRegression  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import sklearn.
+                Please install it with `pip install scikit-learn`."""
+        )
+
+
 ##############################
 ## VISION
 ##############################
@@ -500,6 +511,16 @@ def try_to_import_pinecone_client():
         )
 
 
+def try_to_import_chromadb_client():
+    try:
+        import chromadb  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import chromadb python package.
+                Please install it with 'pip install chromadb`."""
+        )
+
+
 def is_qdrant_available() -> bool:
     try:
         try_to_import_qdrant_client()
@@ -511,6 +532,14 @@ def is_qdrant_available() -> bool:
 def is_pinecone_available() -> bool:
     try:
         try_to_import_pinecone_client()
+        return True
+    except ValueError:  # noqa: E722
+        return False
+
+
+def is_chromadb_available() -> bool:
+    try:
+        try_to_import_chromadb_client()
         return True
     except ValueError:  # noqa: E722
         return False

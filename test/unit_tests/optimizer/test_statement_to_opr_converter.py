@@ -317,6 +317,7 @@ statement_to_opr_converter.metadata_definition_to_function_metadata"
         extract_object_plan = LogicalExtractObject(
             MagicMock(), MagicMock(), MagicMock(), MagicMock()
         )
+
         create_plan.append_child(create_function_plan)
 
         plans.append(dummy_plan)

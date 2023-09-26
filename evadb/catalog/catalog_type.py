@@ -116,6 +116,7 @@ class VectorStoreType(EvaDBEnum):
     QDRANT  # noqa: F821
     PINECONE  # noqa: F821
     PGVECTOR  # noqa: F821
+    CHROMADB  # noqa: F821
 
 
 class VideoColumnName(EvaDBEnum):

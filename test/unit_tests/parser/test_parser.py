@@ -36,6 +36,7 @@ from evadb.parser.load_statement import LoadDataStatement
 from evadb.parser.parser import Parser
 from evadb.parser.rename_statement import RenameTableStatement
 from evadb.parser.select_statement import SelectStatement
+from evadb.parser.set_statement import SetStatement
 from evadb.parser.statement import AbstractStatement, StatementType
 from evadb.parser.table_ref import JoinNode, TableInfo, TableRef, TableValuedExpression
 from evadb.parser.types import (
@@ -692,6 +693,39 @@ class ParserTests(unittest.TestCase):
         )
 
         self.assertEqual(delete_stmt, expected_stmt)
+
+    def test_set_statement(self):
+        parser = Parser()
+        set_statement = """SET OPENAIKEY = 'ABCD'"""
+        evadb_statement_list = parser.parse(set_statement)
+
+        self.assertIsInstance(evadb_statement_list, list)
+        self.assertEqual(len(evadb_statement_list), 1)
+        self.assertEqual(evadb_statement_list[0].stmt_type, StatementType.SET)
+
+        set_stmt = evadb_statement_list[0]
+
+        expected_stmt = SetStatement(
+            "OPENAIKEY", ConstantValueExpression("ABCD", ColumnType.TEXT)
+        )
+
+        self.assertEqual(set_stmt, expected_stmt)
+
+        # TESTING 'TO' IN PLACE OF '='
+        set_statement = """SET OPENAIKEY TO 'ABCD'"""
+        evadb_statement_list = parser.parse(set_statement)
+
+        self.assertIsInstance(evadb_statement_list, list)
+        self.assertEqual(len(evadb_statement_list), 1)
+        self.assertEqual(evadb_statement_list[0].stmt_type, StatementType.SET)
+
+        set_stmt = evadb_statement_list[0]
+
+        expected_stmt = SetStatement(
+            "OPENAIKEY", ConstantValueExpression("ABCD", ColumnType.TEXT)
+        )
+
+        self.assertEqual(set_stmt, expected_stmt)
 
     def test_create_predict_function_statement(self):
         parser = Parser()
