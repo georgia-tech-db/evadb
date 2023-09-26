@@ -196,7 +196,6 @@ class CatalogManager(object):
 
             # Check table existence.
             table_df = resp.data
-            print(table_df)
             if table_name not in table_df["table_name"].values:
                 return False
 
