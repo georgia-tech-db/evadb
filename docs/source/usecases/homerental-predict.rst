@@ -22,7 +22,7 @@ Home Rental Prediction
 Introduction
 ------------
 
-In this tutorial, we present how to use :ref:`Prediction AI Engines<predict>` in EvaDB to predict home rental prices. EvaDB makes it easy to do predictions using its built-in AutoML engines with your existing databases.
+In this tutorial, we present how to use :ref:`Prediction AI Engines<ludwig>` in EvaDB to predict home rental prices. EvaDB makes it easy to do predictions using its built-in AutoML engines with your existing databases.
 
 .. include:: ../shared/evadb.rst
 
@@ -56,7 +56,7 @@ Train a Home Rental Prediction Model
 -------------------------------------
 
 Let's next train a prediction model from the home_rental table using EvaDB's ``CREATE FUNCTION`` query.
-We will use the built-in :ref:`Ludwig<predict>` engine for this task.
+We will use the built-in :ref:`Ludwig<ludwig>` engine for this task.
 
 .. code-block:: sql
   
@@ -71,7 +71,7 @@ We set the training time out to be 3600 seconds.
 
 .. note::
 
-   Go over :ref:`predict` page on exploring all configurable paramters for the model training frameworks.
+   Go over :ref:`ludwig` page on exploring all configurable paramters for the model training frameworks.
 
 .. code-block:: 
 
