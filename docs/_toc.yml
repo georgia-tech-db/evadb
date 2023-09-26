@@ -36,6 +36,8 @@ parts:
         title: Emotion Analysis
       - file: source/usecases/homesale-forecast.rst
         title: Home Sale Forecasting
+      - file: source/usecases/homerental-predict.rst
+        title: Home Rental Prediction
       # - file: source/usecases/privategpt.rst
       #   title: PrivateGPT
 
