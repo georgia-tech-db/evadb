@@ -56,6 +56,13 @@ DummyNoInputFunction_function_query = """CREATE FUNCTION
     EvaDB_INSTALLATION_DIR
 )
 
+DummyObjectDetectorDecorators_function_query = """CREATE FUNCTION
+                  IF NOT EXISTS DummyObjectDetectorDecorators
+                  IMPL '{}/../test/util.py';
+        """.format(
+    EvaDB_INSTALLATION_DIR
+)
+
 DummyLLM_function_query = """CREATE FUNCTION
                   IF NOT EXISTS DummyLLM
                   IMPL '{}/../test/util.py';
@@ -256,6 +263,7 @@ def init_builtin_functions(db: EvaDBDatabase, mode: str = "debug") -> None:
                 DummyObjectDetector_function_query,
                 DummyMultiObjectDetector_function_query,
                 DummyFeatureExtractor_function_query,
+                DummyObjectDetectorDecorators_function_query,
                 DummyNoInputFunction_function_query,
                 DummyLLM_function_query,
             ]
