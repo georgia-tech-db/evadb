@@ -53,8 +53,12 @@ class ModelTrainTests(unittest.TestCase):
 
         # clean up
         execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS HomeRentals;")
-        execute_query_fetch_all(cls.evadb, "DROP FUNCTION IF EXISTS PredictHouseRentLudwig;")
-        execute_query_fetch_all(cls.evadb, "DROP FUNCTION IF EXISTS PredictHouseRentSklearn;")
+        execute_query_fetch_all(
+            cls.evadb, "DROP FUNCTION IF EXISTS PredictHouseRentLudwig;"
+        )
+        execute_query_fetch_all(
+            cls.evadb, "DROP FUNCTION IF EXISTS PredictHouseRentSklearn;"
+        )
 
     @ludwig_skip_marker
     def test_ludwig_automl(self):
