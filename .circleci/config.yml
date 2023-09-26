@@ -269,7 +269,7 @@ jobs:
 
     # Collect the testmondata only on the staging branch 
       - save_cache:
-          key: v1-testmon_cache-<< pipline.git.branch >>-python<< parameters.v >>-ray<< parameters.ray >>-{{ checksum "setup.py" }}
+          key: v1-testmon_cache-{{ .Branch }}-python<< parameters.v >>-ray<< parameters.ray >>-{{ checksum "setup.py" }}
           paths:
             - .testmondata
 
