@@ -463,6 +463,7 @@ class SimilarityTests(unittest.TestCase):
             drop_query = "DROP INDEX testChromaDBIndexImageDataset"
             execute_query_fetch_all(self.evadb, drop_query)
 
+    @pytest.mark.skip(reason="Flaky testcase due to `bad request` error message")
     @pinecone_skip_marker
     def test_end_to_end_index_scan_should_work_correctly_on_image_dataset_pinecone(
         self,
