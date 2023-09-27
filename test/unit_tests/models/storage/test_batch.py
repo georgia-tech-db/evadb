@@ -112,6 +112,27 @@ class BatchTest(unittest.TestCase):
         # Special case
         self.assertEqual(Batch.merge_column_wise([]), Batch())
 
+        # Cases with None
+        batch_1 = Batch(frames=pd.DataFrame({"id": [0, None, 1]}))
+        batch_2 = Batch(frames=pd.DataFrame({"data": [None, 0, None]}))
+        batch_res = Batch(frames=pd.DataFrame({"id": [0, None, 1], "data": [None, 0, None]}))
+        self.assertEqual(Batch.merge_column_wise([batch_1, batch_2]), batch_res)
+
+        # Cases with filter
+        df_1 = pd.DataFrame({"id": [-10, 1, 2]})
+        df_2 = pd.DataFrame({"data": [-20, 2, 3]})
+        df_1 = df_1[df_1 < 0].dropna()
+        df_1.reset_index(drop=True, inplace=True)
+        df_2 = df_2[df_2 < 0].dropna()
+        df_2.reset_index(drop=True, inplace=True)
+        batch_1 = Batch(frames=df_1)
+        batch_2 = Batch(frames=df_2)
+        df_res = pd.DataFrame({"id": [-10, 1, 2], "data": [-20, 2, 3]})
+        df_res = df_res[df_res < 0].dropna()
+        df_res.reset_index(drop=True, inplace=True)
+        batch_res = Batch(frames=df_res)
+        self.assertEqual(Batch.merge_column_wise([batch_1, batch_2]), batch_res)
+
     def test_should_fail_for_list(self):
         frames = [{"id": 0, "data": [1, 2]}, {"id": 1, "data": [1, 2]}]
         self.assertRaises(ValueError, Batch, frames)
