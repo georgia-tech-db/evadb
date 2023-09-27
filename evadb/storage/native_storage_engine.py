@@ -103,11 +103,17 @@ class NativeStorageEngine(AbstractStorageEngine):
     def __init__(self, db: EvaDBDatabase):
         super().__init__(db)
 
+    def _get_database_catalog_entry(self, database_name):
+        db_catalog_entry = self.db.catalog().get_database_catalog_entry(database_name)
+        if db_catalog_entry is None:
+            raise Exception(
+                f"Could not find database with name {database_name}. Please register the database using the `CREATE DATABASE` command."
+            )
+        return db_catalog_entry
+
     def create(self, table: TableCatalogEntry):
         try:
-            db_catalog_entry = self.db.catalog().get_database_catalog_entry(
-                table.database_name
-            )
+            db_catalog_entry = self._get_database_catalog_entry(table.database_name)
             uri = None
             with get_database_handler(
                 db_catalog_entry.engine, **db_catalog_entry.params
@@ -122,9 +128,7 @@ class NativeStorageEngine(AbstractStorageEngine):
 
     def write(self, table: TableCatalogEntry, rows: Batch):
         try:
-            db_catalog_entry = self.db.catalog().get_database_catalog_entry(
-                table.database_name
-            )
+            db_catalog_entry = self._get_database_catalog_entry(table.database_name)
             with get_database_handler(
                 db_catalog_entry.engine, **db_catalog_entry.params
             ) as handler:
@@ -156,9 +160,7 @@ class NativeStorageEngine(AbstractStorageEngine):
 
     def read(self, table: TableCatalogEntry) -> Iterator[Batch]:
         try:
-            db_catalog_entry = self.db.catalog().get_database_catalog_entry(
-                table.database_name
-            )
+            db_catalog_entry = self._get_database_catalog_entry(table.database_name)
             with get_database_handler(
                 db_catalog_entry.engine, **db_catalog_entry.params
             ) as handler:

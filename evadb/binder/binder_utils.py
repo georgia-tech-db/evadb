@@ -55,35 +55,19 @@ def check_data_source_and_table_are_valid(
     Validate the database is valid and the requested table in database is
     also valid.
     """
-    db_catalog_entry = catalog.get_database_catalog_entry(database_name)
-
-    if db_catalog_entry is not None:
-        with get_database_handler(
-            db_catalog_entry.engine, **db_catalog_entry.params
-        ) as handler:
-            # Get table definition.
-            resp = handler.get_tables()
-
-        if resp.error is not None:
-            error = "There is no table in data source {}. Create the table using native query.".format(
-                database_name,
-            )
-            logger.error(error)
-            raise BinderError(error)
-
-        # Check table existence.
-        table_df = resp.data
-        if table_name not in table_df["table_name"].values:
-            error = "Table {} does not exist in data source {}. Create the table using native query.".format(
-                table_name,
-                database_name,
-            )
-            logger.error(error)
-            raise BinderError(error)
-    else:
+    error = None
+    if catalog.get_database_catalog_entry(database_name) is None:
         error = "{} data source does not exist. Create the new database source using CREATE DATABASE.".format(
             database_name,
         )
+
+    if not catalog.check_table_exists(table_name, database_name):
+        error = "Table {} does not exist in data source {}. Create the table using native query.".format(
+            table_name,
+            database_name,
+        )
+
+    if error:
         logger.error(error)
         raise BinderError(error)
 

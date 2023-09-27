@@ -33,12 +33,10 @@ class CreateExecutor(AbstractExecutor):
     def exec(self, *args, **kwargs):
         # create a table in the ative database if set
         is_native_table = self.node.table_info.database_name is not None
-        check_if_exists = False
-        # if exists only supported for evadb tables
-        if not is_native_table:
-            check_if_exists = handle_if_not_exists(
-                self.catalog(), self.node.table_info, self.node.if_not_exists
-            )
+
+        check_if_exists = handle_if_not_exists(
+            self.catalog(), self.node.table_info, self.node.if_not_exists
+        )
 
         if not check_if_exists:
             create_table_done = False
