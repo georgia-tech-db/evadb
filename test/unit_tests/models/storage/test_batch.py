@@ -115,7 +115,9 @@ class BatchTest(unittest.TestCase):
         # Cases with None
         batch_1 = Batch(frames=pd.DataFrame({"id": [0, None, 1]}))
         batch_2 = Batch(frames=pd.DataFrame({"data": [None, 0, None]}))
-        batch_res = Batch(frames=pd.DataFrame({"id": [0, None, 1], "data": [None, 0, None]}))
+        batch_res = Batch(
+            frames=pd.DataFrame({"id": [0, None, 1], "data": [None, 0, None]})
+        )
         self.assertEqual(Batch.merge_column_wise([batch_1, batch_2]), batch_res)
 
         # Cases with filter
