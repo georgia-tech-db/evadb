@@ -202,3 +202,27 @@ class NativeStorageEngine(AbstractStorageEngine):
             err_msg = f"Failed to read the table {table.name} in data source {table.database_name} with exception {str(e)}"
             logger.exception(err_msg)
             raise Exception(err_msg)
+
+    def drop(self, table: TableCatalogEntry):
+        try:
+            db_catalog_entry = self._get_database_catalog_entry(table.database_name)
+            with get_database_handler(
+                db_catalog_entry.engine, **db_catalog_entry.params
+            ) as handler:
+                uri = handler.get_sqlalchmey_uri()
+
+            # Create a metadata object
+            engine = create_engine(uri)
+            metadata = MetaData()
+            Session = sessionmaker(bind=engine)
+            session = Session()
+            # Retrieve the SQLAlchemy table object for the existing table
+            table_to_remove = Table(table.name, metadata, autoload_with=engine)
+
+            table_to_remove.drop(engine)
+            session.commit()
+            session.close()
+        except Exception as e:
+            err_msg = f"Failed to drop the table {table.name} in data source {table.database_name} with exception {str(e)}"
+            logger.error(err_msg)
+            raise Exception(err_msg)
