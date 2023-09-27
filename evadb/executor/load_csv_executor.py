@@ -80,7 +80,7 @@ class LoadCSVExecutor(AbstractExecutor):
             pd.DataFrame(
                 {
                     "CSV": str(self.node.file_path),
-                    "Number of loaded frames": num_loaded_frames,
+                    "Number of loaded rows": num_loaded_frames,
                 },
                 index=[0],
             )

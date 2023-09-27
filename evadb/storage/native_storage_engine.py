@@ -224,5 +224,5 @@ class NativeStorageEngine(AbstractStorageEngine):
             session.close()
         except Exception as e:
             err_msg = f"Failed to drop the table {table.name} in data source {table.database_name} with exception {str(e)}"
-            logger.exception(err_msg)
+            logger.error(err_msg)
             raise Exception(err_msg)
