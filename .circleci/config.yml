@@ -268,11 +268,19 @@ jobs:
                   - /home/circleci/.cache/torch/
                   - /home/circleci/.cache/gpt4all/
 
-    # Collect the testmondata only on the staging branch 
-      - save_cache:
-          key: v1-testmon_cache-{{ .Branch }}-python<< parameters.v >>-ray<< parameters.ray >>-{{ checksum "setup.py" }}
-          paths:
-            - .testmondata
+    # Collect the testmondata only for long intergration tests
+      - when:
+          condition:
+            and:
+              - equal: [ LONG INTEGRATION, << parameters.mode >> ]
+              - equal: [ staging, << pipeline.git.branch >> ]
+              - equal: [ "3.10", << parameters.v >> ]
+              - equal: [ DISABLED, << parameters.ray >>]
+          steps:
+          - save_cache:
+              key: v1-testmon_cache-{{ .Branch }}-python<< parameters.v >>-ray<< parameters.ray >>-{{ checksum "setup.py" }}-{{ epoch }}
+              paths:
+                - .testmondata
 
       - save_cache:
           key: v1-pip-wheel_cache-python<< parameters.v >>-ray<< parameters.ray >>-{{ checksum "setup.py" }}
