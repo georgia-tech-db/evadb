@@ -253,6 +253,7 @@ jobs:
             if [[ $PY_VERSION = "3.10" ]] || [[ $PY_VERSION = "3.11" ]]; then
               export SETUPTOOLS_USE_DISTUTILS=stdlib
             fi
+            set +e # To make sure the later cache step is not skipped.
             bash script/test/test.sh -m "<< parameters.mode >>"
 
       # Enable cache save conditionally (to avoid empty cache in Notebooks)

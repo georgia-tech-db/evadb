@@ -17,6 +17,7 @@ import multiprocessing as mp
 import os
 import shutil
 import socket
+import time
 from contextlib import closing
 from itertools import repeat
 from multiprocessing import Pool
@@ -713,5 +714,6 @@ class DummyLLM(AbstractFunction):
             results.append(("" if prompt is None else prompt) + query + " " + content)
 
         df = pd.DataFrame({"response": results})
-
+        # Make it slower
+        time.sleep(1)
         return df
