@@ -41,7 +41,7 @@ DummyMultiObjectDetector_function_query = """CREATE FUNCTION
 
 DummyFeatureExtractor_function_query = """CREATE FUNCTION
                   IF NOT EXISTS DummyFeatureExtractor
-                  INPUT (Frame_Array NDARRAY UINT8(3, ANYDIM, ANYDIM))
+                  INPUT (data NDARRAY UINT8(3, ANYDIM, ANYDIM))
                   OUTPUT (features NDARRAY FLOAT32(1, ANYDIM))
                   TYPE Classification
                   IMPL '{}/../test/util.py';

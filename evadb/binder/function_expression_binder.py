@@ -99,23 +99,27 @@ def bind_function_expression(binder: StatementBinder, node: FunctionExpression):
             logger.error(err_msg)
             raise BinderError(err_msg)
 
-    # Approximate way to check whether the input signature column is valid. The 
-    # reason this is approximate is because we do not have a mapping to indicate
-    # which table or children function expression the current fucntion expression
-    # is dependent on.
-    for arg in function_obj.args:
-        col_name = arg.name
-        found_valid_col = False
-        for alias, _ in binder._binder_context._table_alias_map.items():
-            if binder._binder_context._check_table_alias_map(alias, col_name) is not None:
-                found_valid_col = True
-        for alias, _ in binder._binder_context._derived_table_alias_map.items():
-            if binder._binder_context._check_derived_table_alias_map(alias, col_name) is not None:
-                found_valid_col = True
-        if not found_valid_col:
-            raise BinderError(f"Function {function_obj.name} input column {col_name} cannot be resolved.")
-        
+    # TODO: for now, we only check the validity of tuple value expression. 
+    # We can extend this validity checking later. Here are some limitations that 
+    # we currently face:
+    # 1. We cannot really check name for constant value expression. 
+    # 2. We should be able to check chained function expression based their output
+    #    and inputs, but it will introduce many breaking changes for the test suite.
+    should_check_func_input = True
+    for child in node.children:
+        if not isinstance(child, TupleValueExpression):
+            should_check_func_input = False
 
+    if should_check_func_input:
+        for arg in function_obj.args:
+            col_name = arg.name
+            found_valid_col = False
+            for alias, _ in binder._binder_context._table_alias_map.items():
+                if binder._binder_context._check_table_alias_map(alias, col_name) is not None:
+                    found_valid_col = True
+            if not found_valid_col:
+                raise BinderError(f"Function {function_obj.name} input column '{col_name}' cannot be resolved.")
+        
     node.function_obj = function_obj
     output_objs = binder._catalog().get_function_io_catalog_output_entries(
         function_obj
