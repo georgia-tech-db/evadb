@@ -21,7 +21,7 @@ NDARRAY_DIR = "ndarray"
 TUTORIALS_DIR = "tutorials"
 
 DummyObjectDetector_function_query = """CREATE FUNCTION IF NOT EXISTS DummyObjectDetector
-                  INPUT  (Frame_Array NDARRAY INT8(3, ANYDIM, ANYDIM))
+                  INPUT  (data NDARRAY INT8(3, ANYDIM, ANYDIM))
                   OUTPUT (label NDARRAY STR(1))
                   TYPE  Classification
                   IMPL  '{}/../test/util.py';
@@ -31,7 +31,7 @@ DummyObjectDetector_function_query = """CREATE FUNCTION IF NOT EXISTS DummyObjec
 
 DummyMultiObjectDetector_function_query = """CREATE FUNCTION
                   IF NOT EXISTS  DummyMultiObjectDetector
-                  INPUT  (Frame_Array NDARRAY INT8(3, ANYDIM, ANYDIM))
+                  INPUT  (data NDARRAY INT8(3, ANYDIM, ANYDIM))
                   OUTPUT (labels NDARRAY STR(2))
                   TYPE  Classification
                   IMPL  '{}/../test/util.py';
@@ -71,7 +71,7 @@ DummyLLM_function_query = """CREATE FUNCTION
 )
 
 fuzzy_function_query = """CREATE FUNCTION IF NOT EXISTS FuzzDistance
-                    INPUT (Input_Array1 NDARRAY ANYTYPE, Input_Array2 NDARRAY ANYTYPE)
+                    INPUT (id NDARRAY ANYTYPE, id NDARRAY ANYTYPE)
                     OUTPUT (distance FLOAT(32, 7))
                     TYPE NdarrayFunction
                     IMPL "{}/functions/{}/fuzzy_join.py";
