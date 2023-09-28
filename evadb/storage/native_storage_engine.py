@@ -28,7 +28,7 @@ from evadb.database import EvaDBDatabase
 from evadb.models.storage.batch import Batch
 from evadb.storage.abstract_storage_engine import AbstractStorageEngine
 from evadb.third_party.databases.interface import get_database_handler
-from evadb.utils.generic_utils import PickleSerializer, get_size
+from evadb.utils.generic_utils import PickleSerializer, rebatch
 from evadb.utils.logging_manager import logger
 
 
@@ -210,16 +210,7 @@ class NativeStorageEngine(AbstractStorageEngine):
                     elif handler_response.data:
                         result_iter = handler_response.data
 
-                data_batch = []
-                row_size = None
-                for row in result_iter:
-                    data_batch.append(row)
-                    if row_size is None:
-                        row_size = get_size(data_batch)
-                    if len(data_batch) * row_size >= batch_mem_size:
-                        yield Batch(pd.DataFrame(data_batch))
-                        data_batch = []
-                if data_batch:
+                for data_batch in rebatch(result_iter, batch_mem_size):
                     yield Batch(pd.DataFrame(data_batch))
 
                 session.close()
