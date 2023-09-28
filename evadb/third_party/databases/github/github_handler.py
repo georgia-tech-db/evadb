@@ -137,7 +137,7 @@ class GithubHandler(DBHandler):
                     data=None,
                     error="{} is not supported or does not exist.".format(table_name),
                 )
-            # Projection column trimming optimization opportunity
+            # TODO: Projection column trimming optimization opportunity
             return DBHandlerResponse(
                 data=None,
                 data_generator=self.supported_table[table_name]["generator"],
