@@ -274,7 +274,7 @@ jobs:
           condition:
             or:
               - equal: [ LONG INTEGRATION CACHE, << parameters.mode >> ]
-              and:
+              - and:
                 - equal: [ LONG INTEGRATION, << parameters.mode >> ]
                 - equal: [ staging, << pipeline.git.branch >> ]
                 - equal: [ "3.10", << parameters.v >> ]
