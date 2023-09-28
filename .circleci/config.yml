@@ -216,7 +216,7 @@ jobs:
       # Always restore testmondata from staging, python3.10, ray disabled.
       - restore_cache:
           keys:
-            - v1-testmon_cache-staging-python3.10-rayDISABLED-{{ checksum "setup.py" }}
+            - v1-testmon_cache-staging-python3.10-rayDISABLED-{{ checksum "setup.py" }}-
       
       - run:
           name: Install EvaDB package from GitHub repo with all dependencies
