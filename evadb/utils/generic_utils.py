@@ -343,6 +343,14 @@ def try_to_import_sklearn():
         )
 
 
+def is_sklearn_available() -> bool:
+    try:
+        try_to_import_sklearn()
+        return True
+    except ValueError:  # noqa: E722
+        return False
+
+
 ##############################
 ## VISION
 ##############################

@@ -74,7 +74,11 @@ class IndexCatalogService(BaseService):
             index_metadata = index_obj.as_dataclass()
             # clean up the on disk data
             if os.path.exists(index_metadata.save_file_path):
-                os.remove(index_metadata.save_file_path)
+                if os.path.isfile(index_metadata.save_file_path):
+                    # For service-hosting-based vector database, we should not
+                    # touch their base directory. The only case that needs to
+                    # be taken care of is FAISS index local disk file.
+                    os.remove(index_metadata.save_file_path)
             index_obj.delete(self.session)
         except Exception:
             logger.exception("Delete index failed for name {}".format(name))

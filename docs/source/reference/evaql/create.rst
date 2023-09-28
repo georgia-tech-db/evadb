@@ -117,7 +117,7 @@ Where the `parameter` is ``key value`` pair.
 
 .. note::
 
-   Go over :ref:`hf`, :ref:`predict`, and :ref:`forecast` to check examples for creating function via type.
+   Go over :ref:`hf`, :ref:`ludwig`, and :ref:`forecast` to check examples for creating function via type.
 
 CREATE MATERIALIZED VIEW
 ------------------------

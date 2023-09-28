@@ -82,13 +82,19 @@ short_third_party_test(){
 }
 
 long_integration_test() {
-  PYTHONPATH=./ python -m pytest test/integration_tests/long/ -p no:cov -m "not benchmark"
+  cache=$1
+  if [[ "$cache" = "WITH_CACHE" ]];
+  then
+    PYTHONPATH=./ python -m pytest -ra --testmon-forceselect test/integration_tests/long/ -p no:cov -m "not benchmark"
+  else
+    PYTHONPATH=./ python -m pytest -ra --testmon-noselect test/integration_tests/long/ -p no:cov -m "not benchmark"
+  fi
   code=$?
   print_error_code $code "LONG INTEGRATION TEST"
 }
 
 notebook_test() {
-  PYTHONPATH=./ python -m pytest --durations=5 --nbmake --overwrite "./tutorials" --capture=sys --tb=short -v --log-level=WARNING --nbmake-timeout=3000 --ignore="tutorials/08-chatgpt.ipynb" --ignore="tutorials/14-food-review-tone-analysis-and-response.ipynb" --ignore="tutorials/15-AI-powered-join.ipynb" --ignore="tutorials/16-homesale-forecasting.ipynb"
+  PYTHONPATH=./ python -m pytest --durations=5 --nbmake --overwrite "./tutorials" --capture=sys --tb=short -v --log-level=WARNING --nbmake-timeout=3000 --ignore="tutorials/08-chatgpt.ipynb" --ignore="tutorials/14-food-review-tone-analysis-and-response.ipynb" --ignore="tutorials/15-AI-powered-join.ipynb" --ignore="tutorials/16-homesale-forecasting.ipynb" --ignore="tutorials/17-home-rental-prediction.ipynb"
   code=$?
   print_error_code $code "NOTEBOOK TEST"
 }
@@ -194,8 +200,13 @@ fi
 ##################################################
 
 if [[ "$MODE" = "LONG INTEGRATION" ]];
-then 
-  long_integration_test
+then
+  long_integration_test "WITHOUT_CACHE"
+fi
+
+if [[ "$MODE" = "LONG INTEGRATION CACHE" ]];
+then
+  long_integration_test "WITH_CACHE"
 fi
 
 ##################################################

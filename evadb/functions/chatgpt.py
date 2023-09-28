@@ -80,7 +80,7 @@ class ChatGPT(AbstractFunction):
     def name(self) -> str:
         return "ChatGPT"
 
-    @setup(cacheable=False, function_type="chat-completion", batchable=True)
+    @setup(cacheable=True, function_type="chat-completion", batchable=True)
     def setup(
         self,
         model="gpt-3.5-turbo",

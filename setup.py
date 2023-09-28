@@ -118,6 +118,8 @@ postgres_libs = [
 
 ludwig_libs = ["ludwig[hyperopt,distributed]"]  # MODEL TRAIN AND FINE TUNING
 
+sklearn_libs = ["scikit-learn"]
+
 forecasting_libs = [
     "statsforecast", # MODEL TRAIN AND FINE TUNING
     "neuralforecast" # MODEL TRAIN AND FINE TUNING
@@ -132,6 +134,7 @@ dev_libs = [
     "mock",
     "coveralls>=3.0.1",
     "moto[s3]>=4.1.1",
+    "pytest-testmon",
     # BENCHMARK PACKAGES
     "pytest-benchmark",
     # LINTING PACKAGES
@@ -161,9 +164,10 @@ EXTRA_REQUIRES = {
     "chromadb": chromadb_libs,
     "postgres": postgres_libs,
     "ludwig": ludwig_libs,
+    "sklearn": sklearn_libs,
     "forecasting": forecasting_libs,
     # everything except ray, qdrant, ludwig and postgres. The first three fail on pyhton 3.11.
-    "dev": dev_libs + vision_libs + document_libs + function_libs + notebook_libs + forecasting_libs,
+    "dev": dev_libs + vision_libs + document_libs + function_libs + notebook_libs + forecasting_libs + sklearn_libs,
 }
 
 setup(

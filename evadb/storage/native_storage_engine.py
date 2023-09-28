@@ -103,11 +103,17 @@ class NativeStorageEngine(AbstractStorageEngine):
     def __init__(self, db: EvaDBDatabase):
         super().__init__(db)
 
+    def _get_database_catalog_entry(self, database_name):
+        db_catalog_entry = self.db.catalog().get_database_catalog_entry(database_name)
+        if db_catalog_entry is None:
+            raise Exception(
+                f"Could not find database with name {database_name}. Please register the database using the `CREATE DATABASE` command."
+            )
+        return db_catalog_entry
+
     def create(self, table: TableCatalogEntry):
         try:
-            db_catalog_entry = self.db.catalog().get_database_catalog_entry(
-                table.database_name
-            )
+            db_catalog_entry = self._get_database_catalog_entry(table.database_name)
             uri = None
             with get_database_handler(
                 db_catalog_entry.engine, **db_catalog_entry.params
@@ -122,9 +128,7 @@ class NativeStorageEngine(AbstractStorageEngine):
 
     def write(self, table: TableCatalogEntry, rows: Batch):
         try:
-            db_catalog_entry = self.db.catalog().get_database_catalog_entry(
-                table.database_name
-            )
+            db_catalog_entry = self._get_database_catalog_entry(table.database_name)
             with get_database_handler(
                 db_catalog_entry.engine, **db_catalog_entry.params
             ) as handler:
@@ -156,9 +160,7 @@ class NativeStorageEngine(AbstractStorageEngine):
 
     def read(self, table: TableCatalogEntry) -> Iterator[Batch]:
         try:
-            db_catalog_entry = self.db.catalog().get_database_catalog_entry(
-                table.database_name
-            )
+            db_catalog_entry = self._get_database_catalog_entry(table.database_name)
             with get_database_handler(
                 db_catalog_entry.engine, **db_catalog_entry.params
             ) as handler:
@@ -199,4 +201,28 @@ class NativeStorageEngine(AbstractStorageEngine):
         except Exception as e:
             err_msg = f"Failed to read the table {table.name} in data source {table.database_name} with exception {str(e)}"
             logger.exception(err_msg)
+            raise Exception(err_msg)
+
+    def drop(self, table: TableCatalogEntry):
+        try:
+            db_catalog_entry = self._get_database_catalog_entry(table.database_name)
+            with get_database_handler(
+                db_catalog_entry.engine, **db_catalog_entry.params
+            ) as handler:
+                uri = handler.get_sqlalchmey_uri()
+
+            # Create a metadata object
+            engine = create_engine(uri)
+            metadata = MetaData()
+            Session = sessionmaker(bind=engine)
+            session = Session()
+            # Retrieve the SQLAlchemy table object for the existing table
+            table_to_remove = Table(table.name, metadata, autoload_with=engine)
+
+            table_to_remove.drop(engine)
+            session.commit()
+            session.close()
+        except Exception as e:
+            err_msg = f"Failed to drop the table {table.name} in data source {table.database_name} with exception {str(e)}"
+            logger.error(err_msg)
             raise Exception(err_msg)

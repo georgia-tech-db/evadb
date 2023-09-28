@@ -17,6 +17,7 @@ import multiprocessing as mp
 import os
 import shutil
 import socket
+import time
 from contextlib import closing
 from itertools import repeat
 from multiprocessing import Pool
@@ -663,3 +664,56 @@ class DummyNoInputFunction(AbstractFunction):
     def forward(self, df: pd.DataFrame) -> pd.DataFrame:
         ret = pd.DataFrame([{"label": "DummyNoInputFunction"}])
         return ret
+
+
+class DummyLLM(AbstractFunction):
+    @property
+    def name(self) -> str:
+        return "DummyLLM"
+
+    @decorators.setup(cacheable=True, function_type="chat-completion", batchable=True)
+    def setup(self, *args, **kwargs):
+        pass
+
+    @decorators.forward(
+        input_signatures=[
+            PandasDataframe(
+                columns=["query", "content", "prompt"],
+                column_types=[
+                    NdArrayType.STR,
+                    NdArrayType.STR,
+                    NdArrayType.STR,
+                ],
+                column_shapes=[(1,), (1,), (None,)],
+            )
+        ],
+        output_signatures=[
+            PandasDataframe(
+                columns=["response"],
+                column_types=[
+                    NdArrayType.STR,
+                ],
+                column_shapes=[(1,)],
+            )
+        ],
+    )
+    def forward(self, text_df):
+        queries = text_df[text_df.columns[0]]
+        content = text_df[text_df.columns[0]]
+
+        if len(text_df.columns) > 1:
+            queries = text_df.iloc[:, 0]
+            content = text_df.iloc[:, 1]
+
+        prompt = None
+        if len(text_df.columns) > 2:
+            prompt = text_df.iloc[0, 2]
+
+        results = []
+        for query, content in zip(queries, content):
+            results.append(("" if prompt is None else prompt) + query + " " + content)
+
+        df = pd.DataFrame({"response": results})
+        # Make it slower
+        time.sleep(1)
+        return df
