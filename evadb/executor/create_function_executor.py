@@ -183,6 +183,7 @@ class CreateFunctionExecutor(AbstractExecutor):
 
     def handle_forecasting_function(self):
         """Handle forecasting functions"""
+        os.environ["CUDA_VISIBLE_DEVICES"] = ""
         aggregated_batch_list = []
         child = self.children[0]
         for batch in child.exec():
@@ -296,15 +297,17 @@ class CreateFunctionExecutor(AbstractExecutor):
                 logger.error(err_msg)
                 raise FunctionIODefinitionError(err_msg)
             model_args = {}
-            if "exogenous" in arg_map.keys():
-                exogenous_args = [
-                    x.strip() for x in arg_map["exogenous"].strip().split(",")
+
+            if len(data.columns) >= 4:
+                exogenous_columns = [
+                    x for x in list(data.columns) if x not in ["ds", "y", "unique_id"]
                 ]
-                model_args["hist_exog_list"] = exogenous_args
+                model_args["hist_exog_list"] = exogenous_columns
 
             if "auto" not in arg_map["model"].lower():
                 model_args["input_size"] = 2 * horizon
-                model_args["max_steps"] = 50
+
+            model_args["early_stop_patience_steps"] = 20
 
             model_args["h"] = horizon
 
@@ -344,16 +347,15 @@ class CreateFunctionExecutor(AbstractExecutor):
 
         data["ds"] = pd.to_datetime(data["ds"])
 
-        encoding_text = data.to_string()
-        if "exogenous" in arg_map.keys():
-            encoding_text += "exogenous_" + str(sorted(exogenous_args))
+        model_save_dir_name = library + "_" + arg_map["model"] + "_" + new_freq
+        if len(data.columns) >= 4:
+            model_save_dir_name += "_exogenous_" + str(sorted(exogenous_columns))
 
         model_dir = os.path.join(
             self.db.config.get_value("storage", "model_dir"),
             self.node.name,
-            library,
-            arg_map["model"],
-            str(hashlib.sha256(encoding_text.encode()).hexdigest()),
+            model_save_dir_name,
+            str(hashlib.sha256(data.to_string().encode()).hexdigest()),
         )
         Path(model_dir).mkdir(parents=True, exist_ok=True)
 
@@ -371,7 +373,11 @@ class CreateFunctionExecutor(AbstractExecutor):
             if int(x.split("horizon")[1].split(".pkl")[0]) >= horizon
         ]
         if len(existing_model_files) == 0:
-            model.fit(df=data)
+            print("Training")
+            if library == "neuralforecast":
+                model.fit(df=data, val_size=horizon)
+            else:
+                model.fit(df=data)
             f = open(model_path, "wb")
             pickle.dump(model, f)
             f.close()
@@ -395,6 +401,8 @@ class CreateFunctionExecutor(AbstractExecutor):
             FunctionMetadataCatalogEntry("horizon", horizon),
             FunctionMetadataCatalogEntry("library", library),
         ]
+
+        os.environ.pop("CUDA_VISIBLE_DEVICES", None)
 
         return (
             self.node.name,
