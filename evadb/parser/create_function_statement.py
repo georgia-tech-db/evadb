@@ -49,6 +49,7 @@ class CreateFunctionStatement(AbstractStatement):
     def __init__(
         self,
         name: str,
+        or_replace: bool,
         if_not_exists: bool,
         impl_path: str,
         inputs: List[ColumnDefinition] = [],
@@ -59,6 +60,7 @@ class CreateFunctionStatement(AbstractStatement):
     ):
         super().__init__(StatementType.CREATE_FUNCTION)
         self._name = name
+        self._or_replace = or_replace
         self._if_not_exists = if_not_exists
         self._inputs = inputs
         self._outputs = outputs
@@ -68,7 +70,12 @@ class CreateFunctionStatement(AbstractStatement):
         self._metadata = metadata
 
     def __str__(self) -> str:
-        s = "CREATE FUNCTION"
+        s = "CREATE"
+
+        if self._or_replace:
+            s += " OR REPLACE"
+
+        s += " " + "FUNCTION"
 
         if self._if_not_exists:
             s += " IF NOT EXISTS"
@@ -94,6 +101,10 @@ class CreateFunctionStatement(AbstractStatement):
     @property
     def name(self):
         return self._name
+
+    @property
+    def or_replace(self):
+        return self._or_replace
 
     @property
     def if_not_exists(self):
@@ -136,6 +147,7 @@ class CreateFunctionStatement(AbstractStatement):
             return False
         return (
             self.name == other.name
+            and self.or_replace == other.or_replace
             and self.if_not_exists == other.if_not_exists
             and self.inputs == other.inputs
             and self.outputs == other.outputs
@@ -150,6 +162,7 @@ class CreateFunctionStatement(AbstractStatement):
             (
                 super().__hash__(),
                 self.name,
+                self.or_replace,
                 self.if_not_exists,
                 tuple(self.inputs),
                 tuple(self.outputs),

@@ -23,36 +23,36 @@ cursor = evadb.connect(path).cursor()
 
 
 def query(question):
-    context_docs = (
-        cursor.table("embedding_table")
-        .order(f"Similarity(embedding('{question}'), features)")
-        .limit(3)
-        .select("data")
-        .df()
-    )
+    context_docs = cursor.query(
+        f"""
+        SELECT data
+        FROM embedding_table
+        ORDER BY Similarity(embedding('{question}'), features)
+        LIMIT 5;
+    """
+    ).df()
+
     # Merge all context information.
-    context = "; \n".join(context_docs["embedding_table.data"])
+    context = "\n".join(context_docs["embedding_table.data"])
 
     # run llm
-    messages = [
-        {"role": "user", "content": f"Here is some context:{context}"},
-        {
-            "role": "user",
-            "content": f"Answer this question based on context: {question}",
-        },
-    ]
-    llm = GPT4All("ggml-gpt4all-j-v1.3-groovy")
-    llm.model.set_thread_count(16)
+    llm = GPT4All("ggml-model-gpt4all-falcon-q4_0.bin")
+    llm.set_thread_count(16)
 
-    answer = llm.chat_completion(messages, verbose=False, streaming=False)
+    message = f"""If the context is not relevant, please answer the question by using your own knowledge about the topic.
+    
+    {context}
+    
+    Question : {question}"""
 
-    print("\n> Answer:")
-    print(answer["choices"][0]["message"]["content"])
-    print("\n>> Context: ")
-    print(context)
+    answer = llm.generate(message)
+
+    print("\n> Answer:", answer)
+
 
 print(
-    "🔮 Welcome to EvaDB! Don't forget to run `python ingest.py` before running this file."
+    "🔮 Welcome to EvaDB! Don't forget to run `python ingest.py` before"
+    " running this file."
 )
 
 ## Take input of queries from user in a loop

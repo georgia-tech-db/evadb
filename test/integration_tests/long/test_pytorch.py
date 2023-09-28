@@ -215,7 +215,7 @@ class PytorchTest(unittest.TestCase):
         execute_query_fetch_all(self.evadb, create_function_query)
 
         select_query = """SELECT FaceDetector(data) FROM MyVideo
-                        WHERE id < 5;"""
+                        WHERE id < 5 order by scores;"""
         actual_batch = execute_query_fetch_all(self.evadb, select_query)
         self.assertEqual(len(actual_batch), 5)
 

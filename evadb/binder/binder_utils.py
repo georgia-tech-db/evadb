@@ -55,42 +55,25 @@ def check_data_source_and_table_are_valid(
     Validate the database is valid and the requested table in database is
     also valid.
     """
-    db_catalog_entry = catalog.get_database_catalog_entry(database_name)
-
-    if db_catalog_entry is not None:
-        handler = get_database_handler(
-            db_catalog_entry.engine, **db_catalog_entry.params
-        )
-        handler.connect()
-
-        # Get table definition.
-        resp = handler.get_tables()
-        if resp.error is not None:
-            error = "There is no table in data source {}. Create the table using native query.".format(
-                database_name,
-            )
-            logger.error(error)
-            raise BinderError(error)
-
-        # Check table existence.
-        table_df = resp.data
-        if table_name not in table_df["table_name"].values:
-            error = "Table {} does not exist in data source {}. Create the table using native query.".format(
-                table_name,
-                database_name,
-            )
-            logger.error(error)
-            raise BinderError(error)
-    else:
+    error = None
+    if catalog.get_database_catalog_entry(database_name) is None:
         error = "{} data source does not exist. Create the new database source using CREATE DATABASE.".format(
             database_name,
         )
+
+    if not catalog.check_table_exists(table_name, database_name):
+        error = "Table {} does not exist in data source {}. Create the table using native query.".format(
+            table_name,
+            database_name,
+        )
+
+    if error:
         logger.error(error)
         raise BinderError(error)
 
 
 def create_table_catalog_entry_for_data_source(
-    table_name: str, column_info: pd.DataFrame
+    table_name: str, database_name: str, column_info: pd.DataFrame
 ):
     column_name_list = list(column_info["name"])
     column_type_list = [
@@ -107,6 +90,7 @@ def create_table_catalog_entry_for_data_source(
         file_url=None,
         table_type=TableType.NATIVE_DATA,
         columns=column_list,
+        database_name=database_name,
     )
     return table_catalog_entry
 
@@ -134,14 +118,14 @@ def bind_native_table_info(catalog: CatalogManager, table_info: TableInfo):
     )
 
     db_catalog_entry = catalog.get_database_catalog_entry(table_info.database_name)
-    handler = get_database_handler(db_catalog_entry.engine, **db_catalog_entry.params)
-    handler.connect()
-
-    # Assemble columns.
-    column_df = handler.get_columns(table_info.table_name).data
-    table_info.table_obj = create_table_catalog_entry_for_data_source(
-        table_info.table_name, column_df
-    )
+    with get_database_handler(
+        db_catalog_entry.engine, **db_catalog_entry.params
+    ) as handler:
+        # Assemble columns.
+        column_df = handler.get_columns(table_info.table_name).data
+        table_info.table_obj = create_table_catalog_entry_for_data_source(
+            table_info.table_name, table_info.database_name, column_df
+        )
 
 
 def bind_evadb_table_info(catalog: CatalogManager, table_info: TableInfo):
@@ -361,3 +345,17 @@ def drop_row_id_from_target_list(
                 continue
         filtered_list.append(expr)
     return filtered_list
+
+
+def get_bound_func_expr_outputs_as_tuple_value_expr(func_expr: FunctionExpression):
+    output_cols = []
+    for obj, alias in zip(func_expr.output_objs, func_expr.alias.col_names):
+        col_alias = "{}.{}".format(func_expr.alias.alias_name, alias)
+        alias_obj = TupleValueExpression(
+            name=alias,
+            table_alias=func_expr.alias.alias_name,
+            col_object=obj,
+            col_alias=col_alias,
+        )
+        output_cols.append(alias_obj)
+    return output_cols

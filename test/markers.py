@@ -19,11 +19,14 @@ import sys
 import pytest
 
 from evadb.utils.generic_utils import (
+    is_chromadb_available,
     is_forecast_available,
     is_gpu_available,
     is_ludwig_available,
+    is_pinecone_available,
     is_qdrant_available,
-    is_replicate_available
+    is_replicate_available,
+    is_sklearn_available,
 )
 
 asyncio_skip_marker = pytest.mark.skipif(
@@ -33,6 +36,16 @@ asyncio_skip_marker = pytest.mark.skipif(
 qdrant_skip_marker = pytest.mark.skipif(
     is_qdrant_available() is False,
     reason="qdrant requires grcpio which is broken on 3.11",
+)
+
+pinecone_skip_marker = pytest.mark.skipif(
+    is_pinecone_available() is False,
+    reason="Skipping since pinecone is not installed",
+)
+
+chromadb_skip_marker = pytest.mark.skipif(
+    is_chromadb_available() is False,
+    reason="Skipping since chromadb is not installed",
 )
 
 windows_skip_marker = pytest.mark.skipif(
@@ -70,6 +83,10 @@ gpu_skip_marker = pytest.mark.skipif(
 
 ludwig_skip_marker = pytest.mark.skipif(
     is_ludwig_available() is False, reason="Run only if ludwig is available"
+)
+
+sklearn_skip_marker = pytest.mark.skipif(
+    is_sklearn_available() is False, reason="Run only if sklearn is available"
 )
 
 chatgpt_skip_marker = pytest.mark.skip(

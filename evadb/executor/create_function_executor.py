@@ -40,6 +40,7 @@ from evadb.utils.generic_utils import (
     string_comparison_case_insensitive,
     try_to_import_forecast,
     try_to_import_ludwig,
+    try_to_import_sklearn,
     try_to_import_torch,
     try_to_import_ultralytics,
 )
@@ -117,6 +118,50 @@ class CreateFunctionExecutor(AbstractExecutor):
             self.node.metadata,
         )
 
+    def handle_sklearn_function(self):
+        """Handle sklearn functions
+
+        Use Sklearn's regression to train models.
+        """
+        try_to_import_sklearn()
+        from sklearn.linear_model import LinearRegression
+
+        assert (
+            len(self.children) == 1
+        ), "Create sklearn function expects 1 child, finds {}.".format(
+            len(self.children)
+        )
+
+        aggregated_batch_list = []
+        child = self.children[0]
+        for batch in child.exec():
+            aggregated_batch_list.append(batch)
+        aggregated_batch = Batch.concat(aggregated_batch_list, copy=False)
+        aggregated_batch.drop_column_alias()
+
+        arg_map = {arg.key: arg.value for arg in self.node.metadata}
+        model = LinearRegression()
+        Y = aggregated_batch.frames[arg_map["predict"]]
+        aggregated_batch.frames.drop([arg_map["predict"]], axis=1, inplace=True)
+        model.fit(X=aggregated_batch.frames, y=Y)
+        model_path = os.path.join(
+            self.db.config.get_value("storage", "model_dir"), self.node.name
+        )
+        pickle.dump(model, open(model_path, "wb"))
+        self.node.metadata.append(
+            FunctionMetadataCatalogEntry("model_path", model_path)
+        )
+
+        impl_path = Path(f"{self.function_dir}/sklearn.py").absolute().as_posix()
+        io_list = self._resolve_function_io(None)
+        return (
+            self.node.name,
+            impl_path,
+            self.node.function_type,
+            io_list,
+            self.node.metadata,
+        )
+
     def handle_ultralytics_function(self):
         """Handle Ultralytics functions"""
         try_to_import_ultralytics()
@@ -171,7 +216,7 @@ class CreateFunctionExecutor(AbstractExecutor):
 
         data = aggregated_batch.frames
         if "unique_id" not in list(data.columns):
-            data["unique_id"] = ["test" for x in range(len(data))]
+            data["unique_id"] = [1 for x in range(len(data))]
 
         if "ds" not in list(data.columns):
             data["ds"] = [x + 1 for x in range(len(data))]
@@ -179,6 +224,10 @@ class CreateFunctionExecutor(AbstractExecutor):
         if "frequency" not in arg_map.keys():
             arg_map["frequency"] = pd.infer_freq(data["ds"])
         frequency = arg_map["frequency"]
+        if frequency is None:
+            raise RuntimeError(
+                f"Can not infer the frequency for {self.node.name}. Please explictly set it."
+            )
 
         try_to_import_forecast()
         from statsforecast import StatsForecast
@@ -233,9 +282,14 @@ class CreateFunctionExecutor(AbstractExecutor):
         metadata_here = [
             FunctionMetadataCatalogEntry("model_name", model_name),
             FunctionMetadataCatalogEntry("model_path", model_path),
-            FunctionMetadataCatalogEntry("output_column_rename", arg_map["predict"]),
             FunctionMetadataCatalogEntry(
-                "time_column_rename", arg_map["time"] if "time" in arg_map else "ds"
+                "predict_column_rename", arg_map.get("predict", "y")
+            ),
+            FunctionMetadataCatalogEntry(
+                "time_column_rename", arg_map.get("time", "ds")
+            ),
+            FunctionMetadataCatalogEntry(
+                "id_column_rename", arg_map.get("id", "unique_id")
             ),
         ]
 
@@ -269,12 +323,30 @@ class CreateFunctionExecutor(AbstractExecutor):
 
         Calls the catalog to insert a function catalog entry.
         """
+        assert (
+            self.node.if_not_exists and self.node.or_replace
+        ) is False, (
+            "OR REPLACE and IF NOT EXISTS can not be both set for CREATE FUNCTION."
+        )
+
+        overwrite = False
         # check catalog if it already has this function entry
         if self.catalog().get_function_catalog_entry_by_name(self.node.name):
             if self.node.if_not_exists:
                 msg = f"Function {self.node.name} already exists, nothing added."
                 yield Batch(pd.DataFrame([msg]))
                 return
+            elif self.node.or_replace:
+                # We use DropObjectExecutor to avoid bookkeeping the code. The drop function should be moved to catalog.
+                from evadb.executor.drop_object_executor import DropObjectExecutor
+
+                drop_exectuor = DropObjectExecutor(self.db, None)
+                try:
+                    drop_exectuor._handle_drop_function(self.node.name, if_exists=False)
+                except RuntimeError:
+                    pass
+                else:
+                    overwrite = True
             else:
                 msg = f"Function {self.node.name} already exists."
                 logger.error(msg)
@@ -305,6 +377,14 @@ class CreateFunctionExecutor(AbstractExecutor):
                 io_list,
                 metadata,
             ) = self.handle_ludwig_function()
+        elif string_comparison_case_insensitive(self.node.function_type, "Sklearn"):
+            (
+                name,
+                impl_path,
+                function_type,
+                io_list,
+                metadata,
+            ) = self.handle_sklearn_function()
         elif string_comparison_case_insensitive(self.node.function_type, "Forecasting"):
             (
                 name,
@@ -325,11 +405,12 @@ class CreateFunctionExecutor(AbstractExecutor):
         self.catalog().insert_function_catalog_entry(
             name, impl_path, function_type, io_list, metadata
         )
-        yield Batch(
-            pd.DataFrame(
-                [f"Function {self.node.name} successfully added to the database."]
-            )
-        )
+
+        if overwrite:
+            msg = f"Function {self.node.name} overwritten."
+        else:
+            msg = f"Function {self.node.name} added to the database."
+        yield Batch(pd.DataFrame([msg]))
 
     def _try_initializing_function(
         self, impl_path: str, function_args: Dict = {}
@@ -354,7 +435,7 @@ class CreateFunctionExecutor(AbstractExecutor):
             # initializing the function class calls the setup method internally
             function(**function_args)
         except Exception as e:
-            err_msg = f"Error creating function: {str(e)}"
+            err_msg = f"Error creating function {self.node.name}: {str(e)}"
             # logger.error(err_msg)
             raise RuntimeError(err_msg)
 

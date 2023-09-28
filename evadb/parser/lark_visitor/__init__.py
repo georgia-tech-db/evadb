@@ -17,7 +17,11 @@ from typing import List, TypeVar
 from lark import Tree, visitors
 
 from evadb.parser.lark_visitor._common_clauses_ids import CommonClauses
-from evadb.parser.lark_visitor._create_statements import CreateDatabase, CreateTable
+from evadb.parser.lark_visitor._create_statements import (
+    CreateDatabase,
+    CreateIndex,
+    CreateTable,
+)
 from evadb.parser.lark_visitor._delete_statement import Delete
 from evadb.parser.lark_visitor._drop_statement import DropObject
 from evadb.parser.lark_visitor._explain_statement import Explain
@@ -27,6 +31,7 @@ from evadb.parser.lark_visitor._insert_statements import Insert
 from evadb.parser.lark_visitor._load_statement import Load
 from evadb.parser.lark_visitor._rename_statement import RenameTable
 from evadb.parser.lark_visitor._select_statement import Select
+from evadb.parser.lark_visitor._set_statement import Set
 from evadb.parser.lark_visitor._show_statements import Show
 from evadb.parser.lark_visitor._table_sources import TableSources
 from evadb.parser.lark_visitor._use_statement import Use
@@ -59,6 +64,7 @@ class LarkInterpreter(
     LarkBaseInterpreter,
     CommonClauses,
     CreateTable,
+    CreateIndex,
     CreateDatabase,
     Expressions,
     Functions,
@@ -72,6 +78,7 @@ class LarkInterpreter(
     Explain,
     Delete,
     Use,
+    Set,
 ):
     def __init__(self, query):
         super().__init__()

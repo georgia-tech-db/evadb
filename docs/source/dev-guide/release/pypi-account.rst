@@ -1,3 +1,5 @@
+.. _setup_pypi_account:
+
 Setup PyPI Account
 ==================
 
@@ -15,4 +17,4 @@ Create a .pypirc in your home directory. It should look like this:
     username=YOUR_USERNAME
     password=YOUR_PASSWORD
 
-Then run ``chmod 600 ./.pypirc`` so that only you can read/write the file.
+Then run ``chmod 600 ~/.pypirc`` so that only you can read/write the file.

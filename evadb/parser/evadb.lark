@@ -8,7 +8,7 @@ ddl_statement: create_database | create_table | create_index | create_function
     | drop_database | drop_table | drop_function | drop_index | rename_table
     
 dml_statement: select_statement | insert_statement | update_statement
-    | delete_statement | load_statement
+    | delete_statement | load_statement | set_statement
     
 utility_statement: describe_statement | show_statement | help_statement | explain_statement
 
@@ -35,10 +35,10 @@ create_table: CREATE TABLE if_not_exists? table_name (create_definitions | (AS s
 rename_table: RENAME TABLE table_name TO table_name
     
 // Create Functions 
-create_function: CREATE FUNCTION if_not_exists? function_name INPUT create_definitions OUTPUT create_definitions TYPE function_type IMPL function_impl function_metadata*
-	| CREATE FUNCTION if_not_exists? function_name IMPL function_impl function_metadata* 
-	| CREATE FUNCTION if_not_exists? function_name TYPE function_type function_metadata*
-	| CREATE FUNCTION if_not_exists? function_name FROM LR_BRACKET select_statement RR_BRACKET TYPE function_type function_metadata*
+create_function: CREATE or_replace? FUNCTION if_not_exists? function_name INPUT create_definitions OUTPUT create_definitions TYPE function_type IMPL function_impl function_metadata*
+	| CREATE or_replace? FUNCTION if_not_exists? function_name IMPL function_impl function_metadata* 
+	| CREATE or_replace? FUNCTION if_not_exists? function_name TYPE function_type function_metadata*
+	| CREATE or_replace? FUNCTION if_not_exists? function_name FROM LR_BRACKET select_statement RR_BRACKET TYPE function_type function_metadata*
 
 // Details
 function_name: uid
@@ -53,7 +53,7 @@ function_metadata_key: uid
 
 function_metadata_value: string_literal | decimal_literal
 
-vector_store_type: USING (FAISS | QDRANT)
+vector_store_type: USING (FAISS | QDRANT | PINECONE | PGVECTOR | CHROMADB)
 
 index_elem: ("(" uid_list ")"
           | "(" function_call ")")
@@ -79,6 +79,12 @@ drop_table: DROP TABLE if_exists? uid
     
 drop_function: DROP FUNCTION if_exists? uid
     
+// SET statements (configuration)
+set_statement: SET config_name (EQUAL_SYMBOL | TO) config_value
+
+config_name: uid
+
+config_value: (string_literal | decimal_literal | boolean_literal | real_literal)
 
 // Data Manipulation Language
 
@@ -265,12 +271,14 @@ if_exists: IF EXISTS
 
 if_not_exists: IF NOT EXISTS
 
+or_replace: OR REPLACE
+
 //    Functions
 
 function_call: function         ->function_call           
     | aggregate_windowed_function   ->aggregate_function_call
 
-function: simple_id "(" (STAR | function_args) ")" dotted_id?
+function: simple_id "(" (STAR | function_args)? ")" dotted_id?
     
 aggregate_windowed_function: aggregate_function_name "(" function_arg ")"
                            | COUNT "(" (STAR | function_arg) ")"
@@ -373,11 +381,12 @@ PARAMETERS:                          "PARAMETERS"i
 PRIMARY:                             "PRIMARY"i
 REFERENCES:                          "REFERENCES"i
 RENAME:                              "RENAME"i
+REPLACE:                             "REPLACE"i
 USE:                                 "USE"i
 SAMPLE:                              "SAMPLE"i
 IFRAMES:                             "IFRAMES"i
 AUDIORATE:                           "AUDIORATE"i
-SELECT:                             "SELECT"i
+SELECT:                              "SELECT"i
 SET:                                 "SET"i
 SHUTDOWN:                            "SHUTDOWN"i
 SHOW:                                "SHOW"i
@@ -409,9 +418,11 @@ DOCUMENT:             "DOCUMENT"i
 PDF:                  "PDF"i
 
 // Index types
-HNSW:                                "HNSW"i
 FAISS:                               "FAISS"i
 QDRANT:                              "QDRANT"i
+PINECONE:                            "PINECONE"i
+PGVECTOR:                            "PGVECTOR"i
+CHROMADB:                            "CHROMADB"i
 
 // Computer vision tasks
 
