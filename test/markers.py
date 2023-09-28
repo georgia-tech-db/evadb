@@ -23,6 +23,7 @@ from evadb.utils.generic_utils import (
     is_gpu_available,
     is_ludwig_available,
     is_qdrant_available,
+    is_replicate_available
 )
 
 asyncio_skip_marker = pytest.mark.skipif(
@@ -78,4 +79,9 @@ chatgpt_skip_marker = pytest.mark.skip(
 forecast_skip_marker = pytest.mark.skipif(
     is_forecast_available() is False,
     reason="Run only if forecasting packages available",
+)
+
+stable_diffusion_skip_marker = pytest.mark.skipif(
+    is_replicate_available() is False,
+    reason="requires replicate"
 )

@@ -25,8 +25,9 @@ from evadb.functions.decorators.decorators import forward
 from evadb.functions.decorators.io_descriptors.data_types import PandasDataframe
 
 
+
 _VALID_STABLE_DIFFUSION_MODEL = [
-    "stable-diffusion:27b93a2413e7f36cd83da926f3656280b2931564ff050bf9575f1fdf9bcd7478",
+    "sdxl:af1a68a271597604546c09c64aabcd7782c114a63539a4a8d14d1eeda5630c33",
 ]
 
 class StableDiffusion(AbstractFunction):
@@ -36,7 +37,7 @@ class StableDiffusion(AbstractFunction):
 
     def setup(
         self,
-        model="stable-diffusion:27b93a2413e7f36cd83da926f3656280b2931564ff050bf9575f1fdf9bcd7478"
+        model="sdxl:af1a68a271597604546c09c64aabcd7782c114a63539a4a8d14d1eeda5630c33"
     ) -> None:
         assert model in _VALID_STABLE_DIFFUSION_MODEL, f"Unsupported Stable Diffusion {model}"
         self.model = model
@@ -65,8 +66,9 @@ class StableDiffusion(AbstractFunction):
         try_to_import_replicate()
         import replicate
 
-        replicate_api_key = 'r8_Q75IAgbaHFvYVfLSMGmjQPcW5uZZoXz0jGalu'
-        os.environ['REPLICATE_API_TOKEN'] = replicate_api_key
+        if os.environ.get('REPLICATE_API_TOKEN') is None:
+            replicate_api_key = 'r8_Q75IAgbaHFvYVfLSMGmjQPcW5uZZoXz0jGalu' # token for testing
+            os.environ['REPLICATE_API_TOKEN'] = replicate_api_key
 
         # @retry(tries=5, delay=20)
         def generate_image(text_df : PandasDataframe):
