@@ -543,7 +543,7 @@ def string_comparison_case_insensitive(string_1, string_2) -> bool:
 
 def try_to_import_replicate():
     try:
-        import replicate
+        import replicate # noqa: F401
     except ImportError:
         raise ValueError(
             """Could not import replicate python package.

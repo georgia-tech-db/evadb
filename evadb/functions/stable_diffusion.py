@@ -17,7 +17,6 @@ from evadb.utils.generic_utils import try_to_import_replicate
 import os
 
 import pandas as pd
-from retry import retry
 
 from evadb.catalog.catalog_type import NdArrayType
 from evadb.functions.abstract.abstract_function import AbstractFunction

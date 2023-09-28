@@ -17,8 +17,6 @@ import unittest
 from test.markers import stable_diffusion_skip_marker
 from test.util import get_evadb_for_testing
 
-import pandas as pd
-
 from evadb.server.command_handler import execute_query_fetch_all
 
 class StableDiffusionTest(unittest.TestCase):
