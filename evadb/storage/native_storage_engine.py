@@ -28,7 +28,7 @@ from evadb.database import EvaDBDatabase
 from evadb.models.storage.batch import Batch
 from evadb.storage.abstract_storage_engine import AbstractStorageEngine
 from evadb.third_party.databases.interface import get_database_handler
-from evadb.utils.generic_utils import PickleSerializer
+from evadb.utils.generic_utils import PickleSerializer, get_size
 from evadb.utils.logging_manager import logger
 
 
@@ -158,46 +158,71 @@ class NativeStorageEngine(AbstractStorageEngine):
             logger.exception(err_msg)
             raise Exception(err_msg)
 
-    def read(self, table: TableCatalogEntry) -> Iterator[Batch]:
+    def read(
+        self, table: TableCatalogEntry, batch_mem_size: int = 30000000
+    ) -> Iterator[Batch]:
         try:
             db_catalog_entry = self._get_database_catalog_entry(table.database_name)
             with get_database_handler(
                 db_catalog_entry.engine, **db_catalog_entry.params
             ) as handler:
-                uri = handler.get_sqlalchmey_uri()
-
-            # Create a metadata object
-            engine = create_engine(uri)
-            metadata = MetaData()
-
-            Session = sessionmaker(bind=engine)
-            session = Session()
-            # Retrieve the SQLAlchemy table object for the existing table
-            table_to_read = Table(table.name, metadata, autoload_with=engine)
-            result = session.execute(table_to_read.select()).fetchall()
-            data_batch = []
-
-            # Ensure that the order of columns in the select is same as in table.columns
-            # Also verify if the column names are consistent
-            if result:
-                cols = result[0]._fields
-                index_dict = {
-                    element.lower(): index for index, element in enumerate(cols)
-                }
                 try:
-                    ordered_columns = sorted(
-                        table.columns, key=lambda x: index_dict[x.name.lower()]
-                    )
-                except KeyError as e:
-                    raise Exception(f"Column mismatch with error {e}")
+                    uri = handler.get_sqlalchmey_uri()
+                except NotImplementedError:
+                    # For data sources sqlalchemy is not available, we directly use the select interface.
+                    use_sqlchmey = False
+                else:
+                    use_sqlchmey = True
 
-            for row in result:
-                data_batch.append(_deserialize_sql_row(row, ordered_columns))
+                result_iter = []
+                if use_sqlchmey:
+                    # Create a metadata object
+                    engine = create_engine(uri)
+                    metadata = MetaData()
 
-            if data_batch:
-                yield Batch(pd.DataFrame(data_batch))
+                    Session = sessionmaker(bind=engine)
+                    session = Session()
+                    # Retrieve the SQLAlchemy table object for the existing table
+                    table_to_read = Table(table.name, metadata, autoload_with=engine)
+                    result = session.execute(table_to_read.select()).fetchall()
+                    # Ensure that the order of columns in the select is same as in table.columns
+                    # Also verify if the column names are consistent
+                    if result:
+                        cols = result[0]._fields
+                        index_dict = {
+                            element.lower(): index for index, element in enumerate(cols)
+                        }
+                        try:
+                            ordered_columns = sorted(
+                                table.columns, key=lambda x: index_dict[x.name.lower()]
+                            )
+                        except KeyError as e:
+                            raise Exception(f"Column mismatch with error {e}")
+                        result_iter = [
+                            _deserialize_sql_row(row, ordered_columns) for row in result
+                        ]
+                else:
+                    # we use the select interface when sqlalchemy is not available
+                    handler_response = handler.select(table.name)
+                    # we prefer the generator/iterator when available
+                    if handler_response.data_generator:
+                        result_iter = handler_response.data_generator()
+                    elif handler_response.data:
+                        result_iter = handler_response.data
 
-            session.close()
+                data_batch = []
+                row_size = None
+                for row in result_iter:
+                    data_batch.append(row)
+                    if row_size is None:
+                        row_size = get_size(data_batch)
+                    if len(data_batch) * row_size >= batch_mem_size:
+                        yield Batch(pd.DataFrame(data_batch))
+                        data_batch = []
+                if data_batch:
+                    yield Batch(pd.DataFrame(data_batch))
+
+                session.close()
         except Exception as e:
             err_msg = f"Failed to read the table {table.name} in data source {table.database_name} with exception {str(e)}"
             logger.exception(err_msg)

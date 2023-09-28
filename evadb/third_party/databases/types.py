@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from dataclasses import dataclass
+from typing import Generator
 
 import pandas as pd
 
@@ -28,6 +29,7 @@ class DBHandlerResponse:
     """
 
     data: pd.DataFrame
+    data_generator: Generator = None
     error: str = None
 
 
@@ -134,5 +136,18 @@ class DBHandler:
 
         Raises:
             NotImplementedError: This method should be implemented in derived classes.
+        """
+        raise NotImplementedError()
+
+    def select(self, table_name: str) -> DBHandlerResponse:
+        """
+        Returns a generator that yields the data from the given table, or the data.
+        Args:
+            table_name (str): name of the table whose data is to be retrieved.
+        Returns:
+            DBHandlerResponse: An instance of DBHandlerResponse containing the data, data generator, or an error message. Data is in a pandas DataFrame.
+
+        Raises:
+            NotImplementedError: This method is used when get_sqlalchmey_uri is not implemented.
         """
         raise NotImplementedError()
