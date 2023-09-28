@@ -16,6 +16,8 @@ from dataclasses import dataclass
 from typing import Generator
 
 import pandas as pd
+from sqlalchemy import MetaData, Table, create_engine
+from sqlalchemy.orm import sessionmaker
 
 
 @dataclass
@@ -85,6 +87,20 @@ class DBHandler:
         """
         raise NotImplementedError()
 
+    def is_sqlalchmey_compatible(self) -> bool:
+        """
+        Return  whether the data source is sqlaclemy compatible
+
+        Returns:
+            A True / False boolean value..
+        """
+        try:
+            self.get_sqlalchmey_uri()
+        except NotImplementedError:
+            return False
+        else:
+            return True
+
     def check_connection(self) -> DBHandlerStatus:
         """
         Checks the status of the database connection.
@@ -148,6 +164,21 @@ class DBHandler:
             DBHandlerResponse: An instance of DBHandlerResponse containing the data, data generator, or an error message. Data is in a pandas DataFrame.
 
         Raises:
-            NotImplementedError: This method is used when get_sqlalchmey_uri is not implemented.
+            NotImplementedError: The default implementation of this method is for sqlalchemy-supported data source. The data source that does not support sqlalchemy should overwrite this function.
         """
-        raise NotImplementedError()
+        try:
+            uri = self.get_sqlalchmey_uri()
+            # Create a metadata object
+            engine = create_engine(uri)
+            metadata = MetaData()
+
+            Session = sessionmaker(bind=engine)
+            session = Session()
+            # Retrieve the SQLAlchemy table object for the existing table
+            table_to_read = Table(table_name, metadata, autoload_with=engine)
+            result = session.execute(table_to_read.select()).fetchall()
+            session.close()
+            # A generator is better, however, the current implemntation suffers from deadlock from different sqlaclemy sessions.
+            return DBHandlerResponse(data=result)
+        except Exception as e:
+            return DBHandlerResponse(data=None, error=str(e))

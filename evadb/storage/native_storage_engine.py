@@ -166,54 +166,33 @@ class NativeStorageEngine(AbstractStorageEngine):
             with get_database_handler(
                 db_catalog_entry.engine, **db_catalog_entry.params
             ) as handler:
-                try:
-                    uri = handler.get_sqlalchmey_uri()
-                except NotImplementedError:
-                    # For data sources sqlalchemy is not available, we directly use the select interface.
-                    use_sqlchmey = False
-                else:
-                    use_sqlchmey = True
+                handler_response = handler.select(table.name)
+                # we prefer the generator/iterator when available
+                result = []
+                if handler_response.data_generator:
+                    result = handler_response.data_generator()
+                elif handler_response.data:
+                    result = handler_response.data
 
-                result_iter = []
-                if use_sqlchmey:
-                    # Create a metadata object
-                    engine = create_engine(uri)
-                    metadata = MetaData()
+                if handler.is_sqlalchmey_compatible():
+                    # For sql data source, we can deserialize sql rows into numpy array
+                    cols = result[0]._fields
+                    index_dict = {
+                        element.lower(): index for index, element in enumerate(cols)
+                    }
+                    try:
+                        ordered_columns = sorted(
+                            table.columns, key=lambda x: index_dict[x.name.lower()]
+                        )
+                    except KeyError as e:
+                        raise Exception(f"Column mismatch with error {e}")
+                    result = [
+                        _deserialize_sql_row(row, ordered_columns) for row in result
+                    ]
 
-                    Session = sessionmaker(bind=engine)
-                    session = Session()
-                    # Retrieve the SQLAlchemy table object for the existing table
-                    table_to_read = Table(table.name, metadata, autoload_with=engine)
-                    result = session.execute(table_to_read.select()).fetchall()
-                    # Ensure that the order of columns in the select is same as in table.columns
-                    # Also verify if the column names are consistent
-                    if result:
-                        cols = result[0]._fields
-                        index_dict = {
-                            element.lower(): index for index, element in enumerate(cols)
-                        }
-                        try:
-                            ordered_columns = sorted(
-                                table.columns, key=lambda x: index_dict[x.name.lower()]
-                            )
-                        except KeyError as e:
-                            raise Exception(f"Column mismatch with error {e}")
-                        result_iter = [
-                            _deserialize_sql_row(row, ordered_columns) for row in result
-                        ]
-                else:
-                    # we use the select interface when sqlalchemy is not available
-                    handler_response = handler.select(table.name)
-                    # we prefer the generator/iterator when available
-                    if handler_response.data_generator:
-                        result_iter = handler_response.data_generator()
-                    elif handler_response.data:
-                        result_iter = handler_response.data
-
-                for data_batch in rebatch(result_iter, batch_mem_size):
+                for data_batch in rebatch(result, batch_mem_size):
                     yield Batch(pd.DataFrame(data_batch))
 
-                session.close()
         except Exception as e:
             err_msg = f"Failed to read the table {table.name} in data source {table.database_name} with exception {str(e)}"
             logger.exception(err_msg)
