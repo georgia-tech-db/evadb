@@ -57,6 +57,31 @@ workflows:
                   - master
                   - staging
         ################################
+        #### LONG INTEGRATION TESTS: PR
+        ################################
+        ################################
+        - Linux:
+            name: Long Integration Test (Cache) | v3.10 | Linux
+            mode: LONG INTEGRATION CACHE
+            filters:
+              branches:
+                ignore: 
+                  - master
+                  - staging
+        ################################
+        #### SHORT THIRDPARTY TESTS: PR
+        ################################
+        ################################
+        - Linux:
+            name: Short Third Party Test | v3.10 | Linux
+            mode: SHORT THIRDPARTY TEST
+            filters:
+              branches:
+                ignore: 
+                  - master
+                  - staging
+
+        ################################
         #### LONG INTEGRATION TESTS:
         #### Staging
         ################################
@@ -187,6 +212,11 @@ jobs:
       - restore_cache:
           keys:
             - v1-model_cache-{{ checksum "setup.py" }}
+
+      # Always restore testmondata from staging, python3.10, ray disabled.
+      - restore_cache:
+          keys:
+            - v1-testmon_cache-staging-python3.10-rayDISABLED-{{ checksum "setup.py" }}
       
       - run:
           name: Install EvaDB package from GitHub repo with all dependencies
@@ -199,22 +229,22 @@ jobs:
             pip install --upgrade pip
             if [ $RAY = "ENABLED" ]; then
               if [ $PY_VERSION != "3.11" ]; then
-                pip install ".[dev,ray,qdrant]"
+                pip install ".[dev,ray,qdrant,pinecone,chromadb]"
               else
-                pip install ".[dev]" # ray < 2.5.0 does not work with python 3.11 ray-project/ray#33864
+                pip install ".[dev,pinecone,chromadb]" # ray < 2.5.0 does not work with python 3.11 ray-project/ray#33864
               fi
               python -c "import yaml;f = open('evadb/evadb.yml', 'r+');config_obj = yaml.load(f, Loader=yaml.FullLoader);config_obj['experimental']['ray'] = True;f.seek(0);f.write(yaml.dump(config_obj));f.truncate();"
             else
               if [ $PY_VERSION != "3.11" ]; then
-                pip install ".[dev,ludwig,qdrant]"
+                pip install ".[dev,ludwig,qdrant,pinecone,chromadb]"
               else
-                pip install ".[dev]" # ray < 2.5.0 does not work with python 3.11 ray-project/ray#33864
+                pip install ".[dev,pinecone,chromadb]" # ray < 2.5.0 does not work with python 3.11 ray-project/ray#33864
               fi
             fi
 
       - run:
           name: Test and upload coverage report to coveralls
-          no_output_timeout: 10m # 10 minute timeout
+          no_output_timeout: 30m # 30 minute timeout
           environment:
             PY_VERSION: << parameters.v >>
           command: |
@@ -223,6 +253,7 @@ jobs:
             if [[ $PY_VERSION = "3.10" ]] || [[ $PY_VERSION = "3.11" ]]; then
               export SETUPTOOLS_USE_DISTUTILS=stdlib
             fi
+            set +e # To make sure the later cache step is not skipped.
             bash script/test/test.sh -m "<< parameters.mode >>"
 
       # Enable cache save conditionally (to avoid empty cache in Notebooks)
@@ -236,6 +267,20 @@ jobs:
                   - /home/circleci/.cache/huggingface/
                   - /home/circleci/.cache/torch/
                   - /home/circleci/.cache/gpt4all/
+
+    # Collect the testmondata only for long intergration tests
+      - when:
+          condition:
+            and:
+              - equal: [ LONG INTEGRATION, << parameters.mode >> ]
+              - equal: [ staging, << pipeline.git.branch >> ]
+              - equal: [ "3.10", << parameters.v >> ]
+              - equal: [ DISABLED, << parameters.ray >>]
+          steps:
+          - save_cache:
+              key: v1-testmon_cache-{{ .Branch }}-python<< parameters.v >>-ray<< parameters.ray >>-{{ checksum "setup.py" }}-{{ epoch }}
+              paths:
+                - .testmondata
 
       - save_cache:
           key: v1-pip-wheel_cache-python<< parameters.v >>-ray<< parameters.ray >>-{{ checksum "setup.py" }}
@@ -435,7 +480,7 @@ jobs:
               source test_evadb/bin/activate
               pip install --upgrade pip
               pip debug --verbose
-              pip install ".[dev,ludwig,qdrant,forecasting]"
+              pip install ".[dev,ludwig,qdrant,forecasting,pinecone,chromadb]"
               source test_evadb/bin/activate
               bash script/test/test.sh -m "<< parameters.mode >>"
 

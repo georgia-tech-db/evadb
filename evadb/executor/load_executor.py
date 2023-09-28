@@ -14,6 +14,7 @@
 # limitations under the License.
 from evadb.database import EvaDBDatabase
 from evadb.executor.abstract_executor import AbstractExecutor
+from evadb.executor.executor_utils import ExecutorError
 from evadb.executor.load_csv_executor import LoadCSVExecutor
 from evadb.executor.load_multimedia_executor import LoadMultimediaExecutor
 from evadb.parser.types import FileFormatType
@@ -30,6 +31,9 @@ class LoadDataExecutor(AbstractExecutor):
         """
 
         # invoke the appropriate executor
+        if self.node.file_options["file_format"] is None:
+            err_msg = "Invalid file format, please use supported file formats: CSV | VIDEO | IMAGE | DOCUMENT | PDF"
+            raise ExecutorError(err_msg)
         if self.node.file_options["file_format"] in [
             FileFormatType.VIDEO,
             FileFormatType.IMAGE,

@@ -36,6 +36,7 @@ from evadb.parser.load_statement import LoadDataStatement
 from evadb.parser.parser import Parser
 from evadb.parser.rename_statement import RenameTableStatement
 from evadb.parser.select_statement import SelectStatement
+from evadb.parser.set_statement import SetStatement
 from evadb.parser.statement import AbstractStatement, StatementType
 from evadb.parser.table_ref import JoinNode, TableInfo, TableRef, TableValuedExpression
 from evadb.parser.types import (
@@ -693,6 +694,77 @@ class ParserTests(unittest.TestCase):
 
         self.assertEqual(delete_stmt, expected_stmt)
 
+    def test_set_statement(self):
+        parser = Parser()
+        set_statement = """SET OPENAIKEY = 'ABCD'"""
+        evadb_statement_list = parser.parse(set_statement)
+
+        self.assertIsInstance(evadb_statement_list, list)
+        self.assertEqual(len(evadb_statement_list), 1)
+        self.assertEqual(evadb_statement_list[0].stmt_type, StatementType.SET)
+
+        set_stmt = evadb_statement_list[0]
+
+        expected_stmt = SetStatement(
+            "OPENAIKEY", ConstantValueExpression("ABCD", ColumnType.TEXT)
+        )
+
+        self.assertEqual(set_stmt, expected_stmt)
+
+        # TESTING 'TO' IN PLACE OF '='
+        set_statement = """SET OPENAIKEY TO 'ABCD'"""
+        evadb_statement_list = parser.parse(set_statement)
+
+        self.assertIsInstance(evadb_statement_list, list)
+        self.assertEqual(len(evadb_statement_list), 1)
+        self.assertEqual(evadb_statement_list[0].stmt_type, StatementType.SET)
+
+        set_stmt = evadb_statement_list[0]
+
+        expected_stmt = SetStatement(
+            "OPENAIKEY", ConstantValueExpression("ABCD", ColumnType.TEXT)
+        )
+
+        self.assertEqual(set_stmt, expected_stmt)
+
+    def test_create_predict_function_statement(self):
+        parser = Parser()
+        create_func_query = """
+            CREATE OR REPLACE FUNCTION HomeSalesForecast FROM
+            ( SELECT * FROM postgres_data.home_sales )
+            TYPE Forecasting
+            PREDICT 'price';
+        """
+        evadb_statement_list = parser.parse(create_func_query)
+        self.assertIsInstance(evadb_statement_list, list)
+        self.assertEqual(len(evadb_statement_list), 1)
+        self.assertEqual(
+            evadb_statement_list[0].stmt_type, StatementType.CREATE_FUNCTION
+        )
+        create_func_stmt = evadb_statement_list[0]
+        self.assertEqual(create_func_stmt.name, "HomeSalesForecast")
+        self.assertEqual(create_func_stmt.or_replace, True)
+        self.assertEqual(create_func_stmt.if_not_exists, False)
+        self.assertEqual(create_func_stmt.impl_path, None)
+        self.assertEqual(create_func_stmt.inputs, [])
+        self.assertEqual(create_func_stmt.outputs, [])
+        self.assertEqual(create_func_stmt.function_type, "Forecasting")
+        self.assertEqual(create_func_stmt.metadata, [("predict", "price")])
+
+        nested_select_stmt = create_func_stmt.query
+        self.assertEqual(nested_select_stmt.stmt_type, StatementType.SELECT)
+        self.assertEqual(len(nested_select_stmt.target_list), 1)
+        self.assertEqual(
+            nested_select_stmt.target_list[0].etype, ExpressionType.TUPLE_VALUE
+        )
+        self.assertEqual(nested_select_stmt.target_list[0].name, "*")
+        self.assertIsInstance(nested_select_stmt.from_table, TableRef)
+        self.assertIsInstance(nested_select_stmt.from_table.table, TableInfo)
+        self.assertEqual(nested_select_stmt.from_table.table.table_name, "home_sales")
+        self.assertEqual(
+            nested_select_stmt.from_table.table.database_name, "postgres_data"
+        )
+
     def test_create_function_statement(self):
         parser = Parser()
         create_func_query = """CREATE FUNCTION IF NOT EXISTS FastRCNN
@@ -707,6 +779,7 @@ class ParserTests(unittest.TestCase):
         expected_cci.nullable = True
         expected_stmt = CreateFunctionStatement(
             "FastRCNN",
+            False,
             True,
             Path("data/fastrcnn.py"),
             [
@@ -831,6 +904,7 @@ class ParserTests(unittest.TestCase):
         insert_stmt = InsertTableStatement(table)
         create_func = CreateFunctionStatement(
             "func",
+            False,
             False,
             Path("data/fastrcnn.py"),
             [
@@ -987,14 +1061,3 @@ class ParserTests(unittest.TestCase):
         self.assertNotEqual(tuple_frame, table_ref)
         self.assertNotEqual(join_node, table_ref)
         self.assertNotEqual(table_ref, table_info)
-
-    def test_lark(self):
-        query = """CREATE FUNCTION FaceDetector
-                  INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
-                  OUTPUT (bboxes NDARRAY FLOAT32(ANYDIM, 4),
-                          scores NDARRAY FLOAT32(ANYDIM))
-                  TYPE  FaceDetection
-                  IMPL  'evadb/functions/face_detector.py';
-                  """
-        parser = Parser()
-        parser.parse(query)

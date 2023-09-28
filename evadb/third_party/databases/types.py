@@ -74,6 +74,15 @@ class DBHandler:
         """
         raise NotImplementedError()
 
+    def get_sqlalchmey_uri(self) -> str:
+        """
+        Return the valid sqlalchemy uri to connect to the database.
+
+        Raises:
+            NotImplementedError: This method should be implemented in derived classes.
+        """
+        raise NotImplementedError()
+
     def check_connection(self) -> DBHandlerStatus:
         """
         Checks the status of the database connection.

@@ -28,9 +28,10 @@ class CreateFunctionPlan(AbstractPlan):
     Attributes:
         name: str
             function_name provided by the user required
+        or_replace: bool
+            if true should overwrite if function with same name exists
         if_not_exists: bool
-            if true should throw an error if function with same name exists
-            else will replace the existing
+            if true should skip if function with same name exists
         inputs: List[FunctionIOCatalogEntry]
             function inputs, annotated list similar to table columns
         outputs: List[FunctionIOCatalogEntry]
@@ -44,6 +45,7 @@ class CreateFunctionPlan(AbstractPlan):
     def __init__(
         self,
         name: str,
+        or_replace: bool,
         if_not_exists: bool,
         inputs: List[FunctionIOCatalogEntry],
         outputs: List[FunctionIOCatalogEntry],
@@ -53,6 +55,7 @@ class CreateFunctionPlan(AbstractPlan):
     ):
         super().__init__(PlanOprType.CREATE_FUNCTION)
         self._name = name
+        self._or_replace = or_replace
         self._if_not_exists = if_not_exists
         self._inputs = inputs
         self._outputs = outputs
@@ -63,6 +66,10 @@ class CreateFunctionPlan(AbstractPlan):
     @property
     def name(self):
         return self._name
+
+    @property
+    def or_replace(self):
+        return self._or_replace
 
     @property
     def if_not_exists(self):
@@ -90,6 +97,7 @@ class CreateFunctionPlan(AbstractPlan):
 
     def __str__(self):
         return "CreateFunctionPlan(name={}, \
+            or_replace={}, \
             if_not_exists={}, \
             inputs={}, \
             outputs={}, \
@@ -97,6 +105,7 @@ class CreateFunctionPlan(AbstractPlan):
             function_type={}, \
             metadata={})".format(
             self._name,
+            self._or_replace,
             self._if_not_exists,
             self._inputs,
             self._outputs,
@@ -109,6 +118,7 @@ class CreateFunctionPlan(AbstractPlan):
         return hash(
             (
                 super().__hash__(),
+                self.or_replace,
                 self.if_not_exists,
                 tuple(self.inputs),
                 tuple(self.outputs),

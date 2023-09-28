@@ -112,6 +112,11 @@ class DropObjectExecutorTest(unittest.TestCase):
                 self.evadb, drop_query, do_not_print_exceptions=True
             )
 
+        # we should be able to re-create the table
+        execute_query_fetch_all(self.evadb, query)
+        # clean up
+        execute_query_fetch_all(self.evadb, drop_query)
+
     def run_create_function_query(self):
         create_function_query = """CREATE FUNCTION DummyObjectDetector
             INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
@@ -135,6 +140,11 @@ class DropObjectExecutorTest(unittest.TestCase):
             function_name
         )
         self.assertTrue(function is None)
+
+        # We should be able to re-create the function
+        self.run_create_function_query()
+        # clean up
+        execute_query_fetch_all(self.evadb, drop_query)
 
     def test_drop_wrong_function_name(self):
         self.run_create_function_query()
@@ -227,3 +237,11 @@ class DropObjectExecutorTest(unittest.TestCase):
                 f"DROP DATABASE {database_name}",
                 do_not_print_exceptions=True,
             )
+
+        # We should be able to add the database again
+        execute_query_fetch_all(self.evadb, query)
+
+        # clean up
+        result = execute_query_fetch_all(
+            self.evadb, f"DROP DATABASE IF EXISTS {database_name}"
+        )

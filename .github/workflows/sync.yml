@@ -1,0 +1,32 @@
+name: Sync Staging and Master
+
+on:
+  push:
+    branches:
+      - staging
+    paths:
+      - evadb/version.py
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT }}
+      - name: Install env.
+        run: |
+          python -m venv test_evadb
+          source test_evadb/bin/activate
+          pip install --upgrade pip
+          pip install ".[dev]"
+      - name: Check version and sync.
+        run: |
+          source test_evadb/bin/activate
+          cmd=$(python -c "from evadb.version import _REVISION; print(_REVISION if 'dev' not in _REVISION else 'skip')")
+          if [[ "$cmd" != "skip" ]]; then
+            git pull
+            git checkout master
+            git reset --hard ${{ github.sha }}
+            git push -f origin master
+          fi
