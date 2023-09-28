@@ -15,6 +15,7 @@
 import github
 import pandas as pd
 
+from evadb.third_party.databases.github.table_column_info import STARGAZERS_COLUMNS
 from evadb.third_party.databases.types import (
     DBHandler,
     DBHandlerResponse,
@@ -38,10 +39,12 @@ class GithubHandler(DBHandler):
     def supported_table(self):
         mapping = {
             "stargazers": {
-                "columns": [["github_username", str]],
-                # TODO: the NamedUser has dozens of columns, as a quick and dirty support, we only get the login column. Projection column trimming is an optimization opportunity here.
+                "columns": STARGAZERS_COLUMNS,
                 "generator": lambda: [
-                    {"github_username", stargazer.login}
+                    {
+                        property_name: getattr(stargazer, property_name)
+                        for property_name, _ in STARGAZERS_COLUMNS
+                    }
                     for stargazer in self.connection.get_repo(
                         "{}/{}".format(self.owner, self.repo)
                     ).get_stargazers()
@@ -57,7 +60,10 @@ class GithubHandler(DBHandler):
             DBHandlerStatus
         """
         try:
-            self.connection = github.Github(self.github_token)
+            if self.github_token:
+                self.connection = github.Github(self.github_token)
+            else:
+                self.connections = github.Github()
             return DBHandlerStatus(status=True)
         except Exception as e:
             return DBHandlerStatus(status=False, error=str(e))
@@ -131,6 +137,7 @@ class GithubHandler(DBHandler):
                     data=None,
                     error="{} is not supported or does not exist.".format(table_name),
                 )
+            # Projection column trimming optimization opportunity
             return DBHandlerResponse(
                 data=None,
                 data_generator=self.supported_table[table_name]["generator"],
