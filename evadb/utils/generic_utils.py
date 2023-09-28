@@ -376,6 +376,16 @@ def is_sklearn_available() -> bool:
     except ValueError:  # noqa: E722
         return False
 
+def try_to_import_automl():
+    try:
+        import flaml  # noqa: F401
+        from flaml import AutoML  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import Flaml AutoML.
+                Please install it with `pip install "flaml[automl]"`."""
+        )
+
 
 ##############################
 ## VISION

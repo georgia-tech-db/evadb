@@ -38,6 +38,8 @@ from evadb.utils.errors import FunctionIODefinitionError
 from evadb.utils.generic_utils import (
     load_function_class_from_file,
     string_comparison_case_insensitive,
+    try_to_import_automl,
+    try_to_import_forecast,
     try_to_import_ludwig,
     try_to_import_neuralforecast,
     try_to_import_sklearn,
@@ -154,6 +156,57 @@ class CreateFunctionExecutor(AbstractExecutor):
         )
 
         impl_path = Path(f"{self.function_dir}/sklearn.py").absolute().as_posix()
+        io_list = self._resolve_function_io(None)
+        return (
+            self.node.name,
+            impl_path,
+            self.node.function_type,
+            io_list,
+            self.node.metadata,
+        )
+
+    def handle_xgboost_function(self):
+        """Handle xgboost functions
+
+        We use the Flaml AutoML model for training xgboost models.
+        """
+        try_to_import_automl()
+
+        assert (
+            len(self.children) == 1
+        ), "Create sklearn function expects 1 child, finds {}.".format(
+            len(self.children)
+        )
+
+        aggregated_batch_list = []
+        child = self.children[0]
+        for batch in child.exec():
+            aggregated_batch_list.append(batch)
+        aggregated_batch = Batch.concat(aggregated_batch_list, copy=False)
+        aggregated_batch.drop_column_alias()
+
+        arg_map = {arg.key: arg.value for arg in self.node.metadata}
+        from flaml import AutoML
+
+        model = AutoML()
+        settings = {
+            "time_budget": 120,
+            "metric": "r2",
+            "estimator_list": ["xgboost"],
+            "task": "regression",
+        }
+        model.fit(
+            dataframe=aggregated_batch.frames, label=arg_map["predict"], **settings
+        )
+        model_path = os.path.join(
+            self.db.config.get_value("storage", "model_dir"), self.node.name
+        )
+        pickle.dump(model, open(model_path, "wb"))
+        self.node.metadata.append(
+            FunctionMetadataCatalogEntry("model_path", model_path)
+        )
+
+        impl_path = Path(f"{self.function_dir}/xgboost.py").absolute().as_posix()
         io_list = self._resolve_function_io(None)
         return (
             self.node.name,
@@ -516,6 +569,14 @@ class CreateFunctionExecutor(AbstractExecutor):
                 io_list,
                 metadata,
             ) = self.handle_sklearn_function()
+        elif string_comparison_case_insensitive(self.node.function_type, "XGBoost"):
+            (
+                name,
+                impl_path,
+                function_type,
+                io_list,
+                metadata,
+            ) = self.handle_xgboost_function()
         elif string_comparison_case_insensitive(self.node.function_type, "Forecasting"):
             (
                 name,
