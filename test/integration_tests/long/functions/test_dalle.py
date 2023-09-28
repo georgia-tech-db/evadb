@@ -13,14 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 import unittest
 from unittest.mock import patch
-from test.markers import stable_diffusion_skip_marker
 from test.util import get_evadb_for_testing
 
 from evadb.server.command_handler import execute_query_fetch_all
 
-class StableDiffusionTest(unittest.TestCase):
+class DallEFunctionTest(unittest.TestCase):
     def setUp(self) -> None:
         self.evadb = get_evadb_for_testing()
         self.evadb.catalog().reset()
@@ -29,7 +29,7 @@ class StableDiffusionTest(unittest.TestCase):
                 """
         execute_query_fetch_all(self.evadb, create_table_query)
 
-        test_prompts = ['pink cat riding a rocket to the moon']
+        test_prompts = ['a surreal painting of a cat']
 
         for prompt in test_prompts:
             insert_query = f"""INSERT INTO ImageGen (prompt) VALUES ('{prompt}')"""
@@ -38,23 +38,24 @@ class StableDiffusionTest(unittest.TestCase):
     def tearDown(self) -> None:
         execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS ImageGen;")
     
-    @stable_diffusion_skip_marker
-    @patch('replicate.run', return_value=[{'response': 'mocked response'}])
-    def test_stable_diffusion_image_generation(self, mock_replicate_run):
-        function_name = 'StableDiffusion'
+    @patch.dict('os.environ', {'OPENAI_KEY': 'mocked_openai_key'})
+    @patch('openai.Image.create', return_value={'data': [{'url': 'mocked_url'}]})
+    def test_dalle_image_generation(self, mock_openai_create):
+        function_name = 'DallE'
 
         execute_query_fetch_all(self.evadb, f"DROP FUNCTION IF EXISTS {function_name};")
 
         create_function_query = f"""CREATE FUNCTION IF NOT EXISTS{function_name}
-            IMPL 'evadb/functions/stable_diffusion.py';
+            IMPL 'evadb/functions/dalle.py';
         """
         execute_query_fetch_all(self.evadb, create_function_query)
 
         gpt_query = f"SELECT {function_name}(prompt) FROM ImageGen;"
         output_batch = execute_query_fetch_all(self.evadb, gpt_query)
         
-        self.assertEqual(output_batch.columns, ["stablediffusion.response"])
-        mock_replicate_run.assert_called_once_with(
-            "stability-ai/sdxl:af1a68a271597604546c09c64aabcd7782c114a63539a4a8d14d1eeda5630c33",
-            input={"prompt": 'pink cat riding a rocket to the moon'}
+        self.assertEqual(output_batch.columns, ["dalle.response"])
+        mock_openai_create.assert_called_once_with(
+            prompt='a surreal painting of a cat',
+            n=1,
+            size="1024x1024"
         )
