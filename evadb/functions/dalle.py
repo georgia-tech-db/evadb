@@ -13,16 +13,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from evadb.utils.generic_utils import try_to_import_openai
 import os
-from evadb.configuration.configuration_manager import ConfigurationManager
 
 import pandas as pd
 
 from evadb.catalog.catalog_type import NdArrayType
+from evadb.configuration.configuration_manager import ConfigurationManager
 from evadb.functions.abstract.abstract_function import AbstractFunction
 from evadb.functions.decorators.decorators import forward
 from evadb.functions.decorators.io_descriptors.data_types import PandasDataframe
+from evadb.utils.generic_utils import try_to_import_openai
+
 
 class DallEFunction(AbstractFunction):
     @property
@@ -35,11 +36,11 @@ class DallEFunction(AbstractFunction):
     @forward(
         input_signatures=[
             PandasDataframe(
-                columns = ["prompt"],
+                columns=["prompt"],
                 column_types=[
                     NdArrayType.STR,
                 ],
-                column_shapes=[(None,)]
+                column_shapes=[(None,)],
             )
         ],
         output_signatures=[
@@ -65,18 +66,14 @@ class DallEFunction(AbstractFunction):
             len(openai.api_key) != 0
         ), "Please set your OpenAI API key in evadb.yml file (third_party, open_api_key) or environment variable (OPENAI_KEY)"
 
-        def generate_image(text_df : PandasDataframe):
+        def generate_image(text_df: PandasDataframe):
             results = []
             queries = text_df[text_df.columns[0]]
             for query in queries:
-                response = openai.Image.create(
-                    prompt=query,
-                    n=1,
-                    size="1024x1024"
-                    )
-                results.append(response['data'][0]['url'])
+                response = openai.Image.create(prompt=query, n=1, size="1024x1024")
+                results.append(response["data"][0]["url"])
             return results
 
-        df = pd.DataFrame({"response":generate_image(text_df=text_df)})
+        df = pd.DataFrame({"response": generate_image(text_df=text_df)})
 
         return df

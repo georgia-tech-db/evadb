@@ -15,10 +15,11 @@
 
 
 import unittest
-from unittest.mock import patch
 from test.util import get_evadb_for_testing
+from unittest.mock import patch
 
 from evadb.server.command_handler import execute_query_fetch_all
+
 
 class DallEFunctionTest(unittest.TestCase):
     def setUp(self) -> None:
@@ -29,19 +30,19 @@ class DallEFunctionTest(unittest.TestCase):
                 """
         execute_query_fetch_all(self.evadb, create_table_query)
 
-        test_prompts = ['a surreal painting of a cat']
+        test_prompts = ["a surreal painting of a cat"]
 
         for prompt in test_prompts:
             insert_query = f"""INSERT INTO ImageGen (prompt) VALUES ('{prompt}')"""
             execute_query_fetch_all(self.evadb, insert_query)
-    
+
     def tearDown(self) -> None:
         execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS ImageGen;")
-    
-    @patch.dict('os.environ', {'OPENAI_KEY': 'mocked_openai_key'})
-    @patch('openai.Image.create', return_value={'data': [{'url': 'mocked_url'}]})
+
+    @patch.dict("os.environ", {"OPENAI_KEY": "mocked_openai_key"})
+    @patch("openai.Image.create", return_value={"data": [{"url": "mocked_url"}]})
     def test_dalle_image_generation(self, mock_openai_create):
-        function_name = 'DallE'
+        function_name = "DallE"
 
         execute_query_fetch_all(self.evadb, f"DROP FUNCTION IF EXISTS {function_name};")
 
@@ -52,10 +53,8 @@ class DallEFunctionTest(unittest.TestCase):
 
         gpt_query = f"SELECT {function_name}(prompt) FROM ImageGen;"
         output_batch = execute_query_fetch_all(self.evadb, gpt_query)
-        
+
         self.assertEqual(output_batch.columns, ["dalle.response"])
         mock_openai_create.assert_called_once_with(
-            prompt='a surreal painting of a cat',
-            n=1,
-            size="1024x1024"
+            prompt="a surreal painting of a cat", n=1, size="1024x1024"
         )

@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from evadb.utils.generic_utils import try_to_import_replicate
 import os
 
 import pandas as pd
@@ -22,12 +21,12 @@ from evadb.catalog.catalog_type import NdArrayType
 from evadb.functions.abstract.abstract_function import AbstractFunction
 from evadb.functions.decorators.decorators import forward
 from evadb.functions.decorators.io_descriptors.data_types import PandasDataframe
-
-
+from evadb.utils.generic_utils import try_to_import_replicate
 
 _VALID_STABLE_DIFFUSION_MODEL = [
     "sdxl:af1a68a271597604546c09c64aabcd7782c114a63539a4a8d14d1eeda5630c33",
 ]
+
 
 class StableDiffusion(AbstractFunction):
     @property
@@ -36,19 +35,21 @@ class StableDiffusion(AbstractFunction):
 
     def setup(
         self,
-        model="sdxl:af1a68a271597604546c09c64aabcd7782c114a63539a4a8d14d1eeda5630c33"
+        model="sdxl:af1a68a271597604546c09c64aabcd7782c114a63539a4a8d14d1eeda5630c33",
     ) -> None:
-        assert model in _VALID_STABLE_DIFFUSION_MODEL, f"Unsupported Stable Diffusion {model}"
+        assert (
+            model in _VALID_STABLE_DIFFUSION_MODEL
+        ), f"Unsupported Stable Diffusion {model}"
         self.model = model
 
     @forward(
         input_signatures=[
             PandasDataframe(
-                columns = ["prompt"],
+                columns=["prompt"],
                 column_types=[
                     NdArrayType.STR,
                 ],
-                column_shapes=[(None,)]
+                column_shapes=[(None,)],
             )
         ],
         output_signatures=[
@@ -65,22 +66,23 @@ class StableDiffusion(AbstractFunction):
         try_to_import_replicate()
         import replicate
 
-        if os.environ.get('REPLICATE_API_TOKEN') is None:
-            replicate_api_key = 'r8_Q75IAgbaHFvYVfLSMGmjQPcW5uZZoXz0jGalu' # token for testing
-            os.environ['REPLICATE_API_TOKEN'] = replicate_api_key
+        if os.environ.get("REPLICATE_API_TOKEN") is None:
+            replicate_api_key = (
+                "r8_Q75IAgbaHFvYVfLSMGmjQPcW5uZZoXz0jGalu"  # token for testing
+            )
+            os.environ["REPLICATE_API_TOKEN"] = replicate_api_key
 
         # @retry(tries=5, delay=20)
-        def generate_image(text_df : PandasDataframe):
+        def generate_image(text_df: PandasDataframe):
             results = []
             queries = text_df[text_df.columns[0]]
             for query in queries:
                 output = replicate.run(
-                    "stability-ai/" + self.model,
-                    input={"prompt": query}
+                    "stability-ai/" + self.model, input={"prompt": query}
                 )
                 results.append(output[0])
             return results
 
-        df = pd.DataFrame({"response":generate_image(text_df=text_df)})
+        df = pd.DataFrame({"response": generate_image(text_df=text_df)})
 
         return df
