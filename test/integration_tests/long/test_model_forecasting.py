@@ -127,7 +127,7 @@ class ModelTrainTests(unittest.TestCase):
                 WHERE bedrooms = 2
             )
             TYPE Forecasting
-            HORIZON 24
+            HORIZON 12
             PREDICT 'ma'
             ID 'type'
             TIME 'saledate'

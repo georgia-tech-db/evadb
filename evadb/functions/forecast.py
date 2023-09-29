@@ -61,5 +61,5 @@ class ForecastModel(AbstractFunction):
                 "ds": self.time_column_rename,
                 self.model_name: self.predict_column_rename,
             }
-        )[: self.horizon]
+        )[: self.horizon * forecast_df["unique_id"].nunique()]
         return forecast_df

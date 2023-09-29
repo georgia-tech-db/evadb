@@ -38,10 +38,10 @@ from evadb.utils.errors import FunctionIODefinitionError
 from evadb.utils.generic_utils import (
     load_function_class_from_file,
     string_comparison_case_insensitive,
-    try_to_import_statsforecast,
-    try_to_import_neuralforecast,
     try_to_import_ludwig,
+    try_to_import_neuralforecast,
     try_to_import_sklearn,
+    try_to_import_statsforecast,
     try_to_import_torch,
     try_to_import_ultralytics,
 )
@@ -271,7 +271,6 @@ class CreateFunctionExecutor(AbstractExecutor):
         )  # shortens longer frequencies like Q-DEC
         season_length = season_dict[new_freq] if new_freq in season_dict else 1
 
-
         """
             Neuralforecast implementation
         """
@@ -397,7 +396,7 @@ class CreateFunctionExecutor(AbstractExecutor):
             if library == "neuralforecast":
                 model.fit(df=data, val_size=horizon)
             else:
-                model.fit(df=data[["ds","y","unique_id"]])
+                model.fit(df=data[["ds", "y", "unique_id"]])
             f = open(model_path, "wb")
             pickle.dump(model, f)
             f.close()

@@ -279,6 +279,7 @@ def try_to_import_statsforecast():
                 Please install it with `pip install statsforecast`."""
         )
 
+
 def try_to_import_neuralforecast():
     try:
         from neuralforecast import NeuralForecast  # noqa: F401
