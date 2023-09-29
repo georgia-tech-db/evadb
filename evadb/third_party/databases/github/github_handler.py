@@ -38,18 +38,18 @@ class GithubHandler(DBHandler):
 
     @property
     def supported_table(self):
+
+        def _stargazer_generator():
+            for stargazer in self.connection.get_repo("{}/{}".format(self.owner, self.repo)).get_stargazers():
+                yield {
+                    property_name: getattr(stargazer, property_name)
+                    for property_name, _ in STARGAZERS_COLUMNS
+                }
+
         mapping = {
             "stargazers": {
                 "columns": STARGAZERS_COLUMNS,
-                "generator": lambda: [
-                    {
-                        property_name: getattr(stargazer, property_name)
-                        for property_name, _ in STARGAZERS_COLUMNS
-                    }
-                    for stargazer in self.connection.get_repo(
-                        "{}/{}".format(self.owner, self.repo)
-                    ).get_stargazers()[:1]
-                ],
+                "generator": _stargazer_generator(),
             },
         }
         return mapping

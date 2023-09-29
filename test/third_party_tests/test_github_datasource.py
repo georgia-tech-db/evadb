@@ -35,7 +35,6 @@ class GithubDataSourceTest(unittest.TestCase):
         params = {
             "owner": "georgia-tech-db",
             "repo": "evadb",
-            "github_token": "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",
         }
         query = f"""CREATE DATABASE github_data
                     WITH ENGINE = "github",

@@ -170,7 +170,7 @@ class NativeStorageEngine(AbstractStorageEngine):
                 # we prefer the generator/iterator when available
                 result = []
                 if handler_response.data_generator:
-                    result = handler_response.data_generator()
+                    result = [next(handler_response.data_generator)]
                 elif handler_response.data:
                     result = handler_response.data
 
