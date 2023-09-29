@@ -89,7 +89,10 @@ class StatementBinderContext:
                 db_catalog_entry.engine, **db_catalog_entry.params
             ) as handler:
                 # Assemble columns.
-                column_df = handler.get_columns(table_name).data
+                response = handler.get_columns(table_name)
+                if response.error is not None:
+                    raise BinderError(response.error)
+                column_df = response.data
                 table_obj = create_table_catalog_entry_for_data_source(
                     table_name, database_name, column_df
                 )

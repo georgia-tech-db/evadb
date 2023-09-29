@@ -32,10 +32,11 @@ class GithubHandler(DBHandler):
             **kwargs: arbitrary keyword arguments for establishing the connection.
         """
         super().__init__(name)
-        self.owner = kwargs.get("owner", default="")
-        self.repo = kwargs.get("repo", default="")
-        self.github_token = kwargs.get("github_token", default="")
+        self.owner = kwargs.get("owner", "")
+        self.repo = kwargs.get("repo", "")
+        self.github_token = kwargs.get("github_token", "")
 
+    @property
     def supported_table(self):
         mapping = {
             "stargazers": {
@@ -47,7 +48,7 @@ class GithubHandler(DBHandler):
                     }
                     for stargazer in self.connection.get_repo(
                         "{}/{}".format(self.owner, self.repo)
-                    ).get_stargazers()
+                    ).get_stargazers()[:1]
                 ],
             },
         }
@@ -63,7 +64,7 @@ class GithubHandler(DBHandler):
             if self.github_token:
                 self.connection = github.Github(self.github_token)
             else:
-                self.connections = github.Github()
+                self.connection = github.Github()
             return DBHandlerStatus(status=True)
         except Exception as e:
             return DBHandlerStatus(status=False, error=str(e))
@@ -72,8 +73,7 @@ class GithubHandler(DBHandler):
         """
         Close any existing connections.
         """
-        if self.connection:
-            self.connection.close()
+        pass
 
     def check_connection(self) -> DBHandlerStatus:
         """
@@ -97,7 +97,7 @@ class GithubHandler(DBHandler):
 
         try:
             tables_df = pd.DataFrame(
-                list(self.supported_table().keys()), columns=["table_name"]
+                list(self.supported_table.keys()), columns=["table_name"]
             )
             return DBHandlerResponse(data=tables_df)
         except Exception as e:
