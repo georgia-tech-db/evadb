@@ -18,6 +18,7 @@ from test.util import get_evadb_for_testing
 import pytest
 
 from evadb.server.command_handler import execute_query_fetch_all
+from evadb.third_party.databases.github.table_column_info import STARGAZERS_COLUMNS
 
 
 @pytest.mark.notparallel
@@ -42,9 +43,13 @@ class GithubDataSourceTest(unittest.TestCase):
                     PARAMETERS = {params};"""
         execute_query_fetch_all(self.evadb, query)
 
-        query = "SELECT login, name FROM github_data.stargazers LIMIT 10;"
+        query = "SELECT * FROM github_data.stargazers LIMIT 10;"
         batch = execute_query_fetch_all(self.evadb, query)
-        self.assertEqual(len(batch), 1)
+        self.assertEqual(len(batch), 10)
+        expected_column = list(
+            ["stargazers.{}".format(col) for col, _ in STARGAZERS_COLUMNS]
+        )
+        self.assertEqual(batch.columns, expected_column)
 
 
 if __name__ == "__main__":
