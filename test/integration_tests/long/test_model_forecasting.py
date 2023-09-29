@@ -104,7 +104,6 @@ class ModelTrainTests(unittest.TestCase):
             HORIZON 12
             PREDICT 'y'
             LIBRARY 'neuralforecast'
-            EXOGENOUS 'trend'
             FREQUENCY 'M';
         """
         execute_query_fetch_all(self.evadb, create_predict_udf)
@@ -128,6 +127,7 @@ class ModelTrainTests(unittest.TestCase):
                 WHERE bedrooms = 2
             )
             TYPE Forecasting
+            HORIZON 24
             PREDICT 'ma'
             ID 'type'
             TIME 'saledate'
@@ -136,7 +136,7 @@ class ModelTrainTests(unittest.TestCase):
         execute_query_fetch_all(self.evadb, create_predict_udf)
 
         predict_query = """
-            SELECT HomeForecast(12);
+            SELECT HomeForecast();
         """
         result = execute_query_fetch_all(self.evadb, predict_query)
         self.assertEqual(len(result), 24)

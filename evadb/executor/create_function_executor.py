@@ -246,7 +246,7 @@ class CreateFunctionExecutor(AbstractExecutor):
             Set or infer data frequency
         """
 
-        if "frequency" not in arg_map.keys():
+        if "frequency" not in arg_map.keys() or arg_map["frequency"] == "auto":
             arg_map["frequency"] = pd.infer_freq(data["ds"])
         frequency = arg_map["frequency"]
         if frequency is None:
@@ -290,6 +290,12 @@ class CreateFunctionExecutor(AbstractExecutor):
             if "model" not in arg_map.keys():
                 arg_map["model"] = "NBEATS"
 
+            if (
+                arg_map["model"].lower()[0] == "t"
+                and "auto" not in arg_map["model"].lower()
+            ):
+                arg_map["model"] = "Auto" + arg_map["model"]
+
             try:
                 model_here = model_dict[arg_map["model"]]
             except Exception:
@@ -298,16 +304,17 @@ class CreateFunctionExecutor(AbstractExecutor):
                 raise FunctionIODefinitionError(err_msg)
             model_args = {}
 
-            if len(data.columns) >= 4:
-                exogenous_columns = [
-                    x for x in list(data.columns) if x not in ["ds", "y", "unique_id"]
-                ]
-                model_args["hist_exog_list"] = exogenous_columns
-
             if "auto" not in arg_map["model"].lower():
                 model_args["input_size"] = 2 * horizon
+                if len(data.columns) >= 4:
+                    exogenous_columns = [
+                        x
+                        for x in list(data.columns)
+                        if x not in ["ds", "y", "unique_id"]
+                    ]
+                    model_args["hist_exog_list"] = exogenous_columns
 
-            model_args["early_stop_patience_steps"] = 20
+                model_args["early_stop_patience_steps"] = 20
 
             model_args["h"] = horizon
 
@@ -333,6 +340,12 @@ class CreateFunctionExecutor(AbstractExecutor):
             if "model" not in arg_map.keys():
                 arg_map["model"] = "AutoARIMA"
 
+            if (
+                arg_map["model"].lower()[0] == "t"
+                and "auto" not in arg_map["model"].lower()
+            ):
+                arg_map["model"] = "Auto" + arg_map["model"]
+
             try:
                 model_here = model_dict[arg_map["model"]]
             except Exception:
@@ -348,7 +361,11 @@ class CreateFunctionExecutor(AbstractExecutor):
         data["ds"] = pd.to_datetime(data["ds"])
 
         model_save_dir_name = library + "_" + arg_map["model"] + "_" + new_freq
-        if len(data.columns) >= 4:
+        if (
+            len(data.columns) >= 4
+            and "auto" not in arg_map["model"].lower()
+            and library == "neuralforecast"
+        ):
             model_save_dir_name += "_exogenous_" + str(sorted(exogenous_columns))
 
         model_dir = os.path.join(
@@ -373,7 +390,7 @@ class CreateFunctionExecutor(AbstractExecutor):
             if int(x.split("horizon")[1].split(".pkl")[0]) >= horizon
         ]
         if len(existing_model_files) == 0:
-            print("Training")
+            print("Training, please wait...")
             if library == "neuralforecast":
                 model.fit(df=data, val_size=horizon)
             else:

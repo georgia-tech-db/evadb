@@ -47,20 +47,22 @@ EvaDB's default forecast framework is `statsforecast <https://nixtla.github.io/s
 .. list-table:: Available Parameters
    :widths: 25 75
 
-   * - PREDICT (**required**) 
+   * - PREDICT (required) 
      - The name of the column we wish to forecast.
-   * - TIME
-     - The name of the column that contains the datestamp, wihch should be of a format expected by Pandas, ideally YYYY-MM-DD for a date or YYYY-MM-DD HH:MM:SS for a timestamp. Please visit the `pandas documentation <https://pandas.pydata.org/docs/reference/api/pandas.to_datetime.html>`_ for details. If not provided, an auto increasing ID column will be used.
-   * - ID
-     - The name of column that represents an identifier for the series. If not provided, the whole table is considered as one series of data.
-   * - LIBRARY
+   * - TIME (default: 'ds')
+     - The name of the column that contains the datestamp, which should be of a format expected by Pandas, ideally YYYY-MM-DD for a date or YYYY-MM-DD HH:MM:SS for a timestamp. Please visit the `pandas documentation <https://pandas.pydata.org/docs/reference/api/pandas.to_datetime.html>`_ for details. If relevant column is not found, an auto increasing ID column will be used.
+   * - ID (default: 'unique_id')
+     - The name of column that represents an identifier for the series. If relevant column is not found, the whole table is considered as one series of data.
+   * - LIBRARY (default: 'statsforecast')
      - We can select one of `statsforecast` (default) or `neuralforecast`. `statsforecast` provides access to statistical forecasting methods, while `neuralforecast` gives access to deep-learning based forecasting methods.
-   * - MODEL
+   * - MODEL (default: 'AutoARIMA')
      - If LIBRARY is `statsforecast`, we can select one of AutoARIMA, AutoCES, AutoETS, AutoTheta. The default is AutoARIMA. Check `Automatic Forecasting <https://nixtla.github.io/statsforecast/src/core/models_intro.html#automatic-forecasting>`_ to learn details about these models. If LIBRARY is `neuralforecast`, we can select one of NHITS or NBEATS. The default is NBEATS. Check `NBEATS docs <https://nixtla.github.io/neuralforecast/models.nbeats.html>`_ for details.
-   * - EXOGENOUS
+   * - AUTO (default: 'F')
      - The names of columns to be treated as exogenous variables, separated by comma. These columns would be considered for forecasting by the backend only for LIBRARY `neuralforecast`.
-   * - Frequency
-     - A string indicating the frequency of the data. The common used ones are D, W, M, Y, which repestively represents day-, week-, month- and year- end frequency. The default value is M. Check `pandas available frequencies <https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#offset-aliases>`_ for all available frequencies.
+   * - Frequency (default: 'auto')
+     - A string indicating the frequency of the data. The common used ones are D, W, M, Y, which repestively represents day-, week-, month- and year- end frequency. The default value is M. Check `pandas available frequencies <https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#offset-aliases>`_ for all available frequencies. If it is not provided, the frequency is attempted to be determined automatically.
+
+Note: If columns other than the ones required as mentioned above are passed while creating the function, they will be treated as exogenous variables if LIBRARY is `neuralforecast` and the AUTO is set to F. In other situations, they would be ignored.
 
 Below is an example query specifying the above parameters:
 
