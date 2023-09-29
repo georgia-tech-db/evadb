@@ -73,8 +73,20 @@ Below is an example query specifying the above parameters:
    CREATE FUNCTION IF NOT EXISTS HomeRentalForecast FROM
    (SELECT saledate, ma, type FROM HomeData)
    TYPE Forecasting
+   HORIZON 12
    PREDICT 'ma'
    TIME 'saledate'
    ID 'type'
-   MODEL 'AutoCES'
    Frequency 'W';
+
+Below is an example query with `neuralforecast` with `trend` column as exogenous:
+
+.. code-block:: sql
+   
+    CREATE FUNCTION AirPanelForecast FROM
+    (SELECT unique_id, ds, y, trend FROM AirDataPanel)
+    TYPE Forecasting
+    HORIZON 12
+    PREDICT 'y'
+    LIBRARY 'neuralforecast'
+    FREQUENCY 'M';
