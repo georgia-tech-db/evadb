@@ -38,7 +38,8 @@ from evadb.utils.errors import FunctionIODefinitionError
 from evadb.utils.generic_utils import (
     load_function_class_from_file,
     string_comparison_case_insensitive,
-    try_to_import_forecast,
+    try_to_import_statsforecast,
+    try_to_import_neuralforecast,
     try_to_import_ludwig,
     try_to_import_sklearn,
     try_to_import_torch,
@@ -270,12 +271,12 @@ class CreateFunctionExecutor(AbstractExecutor):
         )  # shortens longer frequencies like Q-DEC
         season_length = season_dict[new_freq] if new_freq in season_dict else 1
 
-        try_to_import_forecast()
 
         """
             Neuralforecast implementation
         """
         if library == "neuralforecast":
+            try_to_import_neuralforecast()
             from neuralforecast import NeuralForecast
             from neuralforecast.auto import AutoNBEATS, AutoNHITS
             from neuralforecast.models import NBEATS, NHITS
@@ -291,7 +292,8 @@ class CreateFunctionExecutor(AbstractExecutor):
                 arg_map["model"] = "NBEATS"
 
             if (
-                arg_map["model"].lower()[0] == "t"
+                "auto" in arg_map.keys()
+                and arg_map["auto"].lower()[0] == "t"
                 and "auto" not in arg_map["model"].lower()
             ):
                 arg_map["model"] = "Auto" + arg_map["model"]
@@ -327,6 +329,7 @@ class CreateFunctionExecutor(AbstractExecutor):
         #     Statsforecast implementation
         # """
         else:
+            try_to_import_statsforecast()
             from statsforecast import StatsForecast
             from statsforecast.models import AutoARIMA, AutoCES, AutoETS, AutoTheta
 
@@ -341,7 +344,8 @@ class CreateFunctionExecutor(AbstractExecutor):
                 arg_map["model"] = "AutoARIMA"
 
             if (
-                arg_map["model"].lower()[0] == "t"
+                "auto" in arg_map.keys()
+                and arg_map["auto"].lower()[0] == "t"
                 and "auto" not in arg_map["model"].lower()
             ):
                 arg_map["model"] = "Auto" + arg_map["model"]
@@ -353,10 +357,9 @@ class CreateFunctionExecutor(AbstractExecutor):
                 logger.error(err_msg)
                 raise FunctionIODefinitionError(err_msg)
 
-            else:
-                model = StatsForecast(
-                    [model_here(season_length=season_length)], freq=new_freq
-                )
+            model = StatsForecast(
+                [model_here(season_length=season_length)], freq=new_freq
+            )
 
         data["ds"] = pd.to_datetime(data["ds"])
 
@@ -370,7 +373,7 @@ class CreateFunctionExecutor(AbstractExecutor):
 
         model_dir = os.path.join(
             self.db.config.get_value("storage", "model_dir"),
-            self.node.name,
+            "tsforecasting",
             model_save_dir_name,
             str(hashlib.sha256(data.to_string().encode()).hexdigest()),
         )
@@ -394,7 +397,7 @@ class CreateFunctionExecutor(AbstractExecutor):
             if library == "neuralforecast":
                 model.fit(df=data, val_size=horizon)
             else:
-                model.fit(df=data)
+                model.fit(df=data[["ds","y","unique_id"]])
             f = open(model_path, "wb")
             pickle.dump(model, f)
             f.close()
