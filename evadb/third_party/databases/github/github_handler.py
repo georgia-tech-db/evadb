@@ -38,9 +38,10 @@ class GithubHandler(DBHandler):
 
     @property
     def supported_table(self):
-
         def _stargazer_generator():
-            for stargazer in self.connection.get_repo("{}/{}".format(self.owner, self.repo)).get_stargazers():
+            for stargazer in self.connection.get_repo(
+                "{}/{}".format(self.owner, self.repo)
+            ).get_stargazers():
                 yield {
                     property_name: getattr(stargazer, property_name)
                     for property_name, _ in STARGAZERS_COLUMNS

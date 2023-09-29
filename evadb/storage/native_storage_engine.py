@@ -28,7 +28,7 @@ from evadb.database import EvaDBDatabase
 from evadb.models.storage.batch import Batch
 from evadb.storage.abstract_storage_engine import AbstractStorageEngine
 from evadb.third_party.databases.interface import get_database_handler
-from evadb.utils.generic_utils import PickleSerializer, rebatch
+from evadb.utils.generic_utils import PickleSerializer
 from evadb.utils.logging_manager import logger
 
 
@@ -170,7 +170,7 @@ class NativeStorageEngine(AbstractStorageEngine):
                 # we prefer the generator/iterator when available
                 result = []
                 if handler_response.data_generator:
-                    result = [next(handler_response.data_generator)]
+                    result = handler_response.data_generator
                 elif handler_response.data:
                     result = handler_response.data
 
@@ -190,8 +190,8 @@ class NativeStorageEngine(AbstractStorageEngine):
                         _deserialize_sql_row(row, ordered_columns) for row in result
                     ]
 
-                for data_batch in rebatch(result, batch_mem_size):
-                    yield Batch(pd.DataFrame(data_batch))
+                for data_batch in result:
+                    yield Batch(pd.DataFrame([data_batch]))
 
         except Exception as e:
             err_msg = f"Failed to read the table {table.name} in data source {table.database_name} with exception {str(e)}"
