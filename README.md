@@ -116,7 +116,7 @@ Our target audience is software developers who may not necessarily have a backgr
 
 <details>
 <ul>
-<li>Connect EvaDB to your SQL and vector database systems with the `CREATE DATABASE` and `CREATE INDEX` statements.</li>
+<li>Connect EvaDB to your SQL and vector database systems with the <a href="https://evadb.readthedocs.io/en/stable/source/reference/databases/postgres.html">`CREATE DATABASE`</a> and <a href="https://evadb.readthedocs.io/en/stable/source/reference/evaql/create.html#create-index">`CREATE INDEX`</a> statements.</li>
 <li>Write SQL queries with AI functions to get inference results:</li>
    <ul>
    <li>Pick a pre-trained AI model from Hugging Face, Open AI, Ultralytics, PyTorch, and built-in AI frameworks for generative AI, NLP, and vision applications;</li>  
@@ -174,7 +174,7 @@ Here are some illustrative AI apps built using EvaDB (each notebook can be opene
 
 <details>
 
-* Store the text returned by a Speech Recognition model on the audio component of a video in a table. Run ChatGPT on the `text` column in a table.
+* Get a transcript from a video stored in a table using a Speech Recognition model. Then, ask questions on the extracted transcript using ChatGPT.
 
 ```sql
 CREATE TABLE text_summary AS
@@ -183,7 +183,7 @@ SELECT ChatGPT('Is this video summary related to Ukraine russia war', text)
     FROM text_summary;
 ```
 
-* Train a classic ML model for predicting a column using the <a href="https://ludwig.ai/latest/">Ludwig AI</a> engine.
+* Train a classic ML model for prediction using the <a href="https://ludwig.ai/latest/">Ludwig AI</a> engine.
 
 ```sql
 CREATE FUNCTION IF NOT EXISTS PredictHouseRent FROM
@@ -200,7 +200,7 @@ TIME_LIMIT 120;
 <details>	
 EvaDB's AI-centric query optimizer takes a query as input and generates a query plan. The query engine takes the query plan and hits the relevant backends to efficiently process the query:
 1. SQL Database Systems (Structured Data)
-2. AI Frameworks (Transform Unstructured Data to Structured Data, Unstructured data includes PDFs, images, podcasts, etc. stored on cloud buckets or local filesystem)
+2. AI Frameworks (Transform Unstructured Data to Structured Data; Unstructured data includes PDFs, text, images, etc. stored locally or on the cloud)
 3. Vector Database Systems (Feature Embeddings)
 
 <p align="center">
