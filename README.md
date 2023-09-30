@@ -116,7 +116,7 @@ Our target audience is software developers who may not necessarily have a backgr
 
 <details>
 <ul>
-<li>Connect EvaDB to your database system with the `CREATE DATABASE` statement.</li>
+<li>Connect EvaDB to your SQL and vector database systems with the `CREATE DATABASE` and `CREATE INDEX` statements.</li>
 <li>Write SQL queries with AI functions to get inference results:</li>
    <ul>
    <li>Pick a pre-trained AI model from Hugging Face, Open AI, Ultralytics, PyTorch, and built-in AI frameworks for generative AI, NLP, and vision applications;</li>  
