@@ -176,9 +176,10 @@ class DBHandler:
             session = Session()
             # Retrieve the SQLAlchemy table object for the existing table
             table_to_read = Table(table_name, metadata, autoload_with=engine)
+            # TODO: there is a BUG in the SQLAlchemy session management, when there is a function expression in the plan tree, we will update the catalog for its cost, which leads to a SQLAlchemy deadlock if we return a generator here.
             result = session.execute(table_to_read.select()).fetchall()
             session.close()
-            # A generator is better, however, the current implemntation suffers from deadlock from different sqlaclemy sessions.
+            # A generator is better, however, the current implementation suffers from deadlock from different SQLAlchemy sessions.
             return DBHandlerResponse(data=result)
         except Exception as e:
             return DBHandlerResponse(data=None, error=str(e))

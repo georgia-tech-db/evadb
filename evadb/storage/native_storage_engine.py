@@ -186,9 +186,9 @@ class NativeStorageEngine(AbstractStorageEngine):
                         )
                     except KeyError as e:
                         raise Exception(f"Column mismatch with error {e}")
-                    result = [
+                    result = (
                         _deserialize_sql_row(row, ordered_columns) for row in result
-                    ]
+                    )
 
                 for data_batch in result:
                     yield Batch(pd.DataFrame([data_batch]))
