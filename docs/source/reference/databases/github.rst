@@ -49,6 +49,7 @@ Here is the query output:
     |---------------------------------------------------|-----|---------------------------------------------|
     | https://avatars.githubusercontent.com/u/105357... | ... |      https://api.github.com/users/jaehobang |
     | https://avatars.githubusercontent.com/u/436141... | ... | https://api.github.com/users/VineethAljapur |
+    |                                               ... | ... |                                         ... |
     +---------------------------------------------------+-----+---------------------------------------------+
 
 .. note::
