@@ -4,7 +4,7 @@
   </a>
 </p>
 
-<p align="center"><i><b>Bring AI inside your database system and build AI-powered apps</b></i></p>
+<p align="center"><i><b>Database system for AI-powered apps</b></i></p>
 
 <p align="center">
 <a href="https://github.com/georgia-tech-db/evadb/fork" target="blank">
