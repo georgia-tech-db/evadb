@@ -42,6 +42,7 @@ from evadb.parser.create_statement import ColumnDefinition
 from evadb.parser.table_ref import TableInfo, TableRef
 from evadb.third_party.databases.interface import get_database_handler
 from evadb.utils.logging_manager import logger
+from evadb.catalog.sql_config import ROW_NUM_COLUMN
 
 
 class BinderError(Exception):
@@ -169,6 +170,14 @@ def extend_star(
         ]
     )
     return target_list
+
+
+def create_row_num_tv_expr(table_alias):
+    tv_expr = TupleValueExpression(name=ROW_NUM_COLUMN)
+    tv_expr.table_alias = table_alias
+    tv_expr.col_alias = f"{table_alias}.{ROW_NUM_COLUMN.lower()}"
+    tv_expr.col_object = ColumnCatalogEntry(name=ROW_NUM_COLUMN, type=ColumnType.INTEGER)
+    return tv_expr
 
 
 def check_groupby_pattern(table_ref: TableRef, groupby_string: str) -> None:

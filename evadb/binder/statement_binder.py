@@ -30,7 +30,7 @@ from evadb.binder.binder_utils import (
     resolve_alias_table_value_expression,
 )
 from evadb.binder.statement_binder_context import StatementBinderContext
-from evadb.catalog.catalog_type import ColumnType, TableType, VideoColumnName
+from evadb.catalog.catalog_type import ColumnType, TableType
 from evadb.catalog.catalog_utils import get_metadata_properties, is_document_table
 from evadb.configuration.constants import EvaDB_INSTALLATION_DIR
 from evadb.expression.abstract_expression import AbstractExpression, ExpressionType
@@ -258,16 +258,9 @@ class StatementBinder:
 
     @bind.register(TupleValueExpression)
     def _bind_tuple_expr(self, node: TupleValueExpression):
-        table_alias, col_obj = self._binder_context.get_binded_column(
-            node.name, node.table_alias
-        )
-        node.table_alias = table_alias
-        if node.name == VideoColumnName.audio:
-            self._binder_context.enable_audio_retrieval()
-        if node.name == VideoColumnName.data:
-            self._binder_context.enable_video_retrieval()
-        node.col_alias = "{}.{}".format(table_alias, node.name.lower())
-        node.col_object = col_obj
+        from evadb.binder.tuple_value_expression_binder import bind_tuple_expr
+
+        bind_tuple_expr(self, node)
 
     @bind.register(FunctionExpression)
     def _bind_func_expr(self, node: FunctionExpression):

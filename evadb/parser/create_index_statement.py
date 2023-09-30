@@ -12,10 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import List
+from typing import List, Union
 
 from evadb.catalog.catalog_type import VectorStoreType
 from evadb.expression.function_expression import FunctionExpression
+from evadb.expression.abstract_expression import AbstractExpression
 from evadb.parser.create_statement import ColumnDefinition
 from evadb.parser.statement import AbstractStatement
 from evadb.parser.table_ref import TableRef
@@ -30,7 +31,7 @@ class CreateIndexStatement(AbstractStatement):
         table_ref: TableRef,
         col_list: List[ColumnDefinition],
         vector_store_type: VectorStoreType,
-        function: FunctionExpression = None,
+        project_expr_list: List[AbstractStatement] = None,
     ):
         super().__init__(StatementType.CREATE_INDEX)
         self._name = name
@@ -38,14 +39,19 @@ class CreateIndexStatement(AbstractStatement):
         self._table_ref = table_ref
         self._col_list = col_list
         self._vector_store_type = vector_store_type
-        self._function = function
+        self._project_expr_list = project_expr_list
 
     def __str__(self) -> str:
+        function_expr = None
+        for project_expr in self._project_expr_list:
+            if isinstance(project_expr, FunctionExpression):
+                function_expr = project_expr
+
         print_str = "CREATE INDEX {} {} ON {} ({}{}) ".format(
             self._name,
             "IF NOT EXISTS" if self._if_not_exists else "",
             self._table_ref,
-            "" if self._function else self._function,
+            "" if function_expr is None else function_expr,
             tuple(self._col_list),
         )
         return print_str
@@ -71,9 +77,13 @@ class CreateIndexStatement(AbstractStatement):
         return self._vector_store_type
 
     @property
-    def function(self):
-        return self._function
+    def project_expr_list(self):
+        return self._project_expr_list
 
+    @project_expr_list.setter
+    def project_expr_list(self, project_expr_list: List[AbstractExpression]):
+        self._project_expr_list = project_expr_list
+    
     def __eq__(self, other):
         if not isinstance(other, CreateIndexStatement):
             return False
@@ -83,7 +93,7 @@ class CreateIndexStatement(AbstractStatement):
             and self._table_ref == other.table_ref
             and self.col_list == other.col_list
             and self._vector_store_type == other.vector_store_type
-            and self._function == other.function
+            and self._project_expr_list == other.project_expr_list
         )
 
     def __hash__(self) -> int:
@@ -95,6 +105,6 @@ class CreateIndexStatement(AbstractStatement):
                 self._table_ref,
                 tuple(self.col_list),
                 self._vector_store_type,
-                self._function,
+                self._project_expr_list,
             )
         )

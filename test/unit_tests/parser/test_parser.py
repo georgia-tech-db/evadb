@@ -113,6 +113,7 @@ class ParserTests(unittest.TestCase):
                 ColumnDefinition("featCol", None, None, None),
             ],
             VectorStoreType.FAISS,
+            TupleValueExpression("featCol"),
         )
         actual_stmt = evadb_stmt_list[0]
         self.assertEqual(actual_stmt, expected_stmt)

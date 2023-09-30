@@ -28,6 +28,7 @@ from evadb.third_party.databases.interface import get_database_handler
 from evadb.third_party.vector_stores.types import FeaturePayload
 from evadb.third_party.vector_stores.utils import VectorStoreFactory
 from evadb.utils.logging_manager import logger
+from evadb.expression.function_expression import FunctionExpression
 
 
 class CreateIndexExecutor(AbstractExecutor):
@@ -101,25 +102,21 @@ class CreateIndexExecutor(AbstractExecutor):
                 col for col in feat_catalog_entry.columns if col.name == feat_col_name
             ][0]
 
+            # Find function expression.
+            function_expression = None
+            for project_expr in self.node.project_expr_list:
+                if isinstance(project_expr, FunctionExpression):
+                    function_expression = project_expr
+
+            if function_expression is not None:
+                feat_col_name = function_expression.output_objs[0].name
+
             # Add features to index.
             # TODO: batch size is hardcoded for now.
             input_dim = -1
-            storage_engine = StorageEngine.factory(self.db, feat_catalog_entry)
-            for input_batch in storage_engine.read(feat_catalog_entry):
-                if self.node.function:
-                    # Create index through function expression.
-                    # Function(input column) -> 2 dimension feature vector.
-                    input_batch.modify_column_alias(feat_catalog_entry.name.lower())
-                    feat_batch = self.node.function.evaluate(input_batch)
-                    feat_batch.drop_column_alias()
-                    input_batch.drop_column_alias()
-                    feat = feat_batch.column_as_numpy_array("features")
-                else:
-                    # Create index on the feature table directly.
-                    # Pandas wraps numpy array as an object inside a numpy
-                    # array. Use zero index to get the actual numpy array.
-                    feat = input_batch.column_as_numpy_array(feat_col_name)
-
+            for input_batch in self.children[0].exec():
+                input_batch.drop_column_alias()
+                feat = input_batch.column_as_numpy_array(feat_col_name)
                 row_num = input_batch.column_as_numpy_array(ROW_NUM_COLUMN)
 
                 for i in range(len(input_batch)):
@@ -147,7 +144,7 @@ class CreateIndexExecutor(AbstractExecutor):
                 index_path,
                 self.node.vector_store_type,
                 feat_column,
-                self.node.function.signature() if self.node.function else None,
+                function_expression.signature() if function_expression is not None else None,
             )
         except Exception as e:
             # Delete index.

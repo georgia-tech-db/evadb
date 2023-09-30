@@ -134,6 +134,7 @@ class CreateIndexTest(unittest.TestCase):
     @macos_skip_marker
     def test_should_create_index_faiss(self):
         query = "CREATE INDEX testCreateIndexName ON testCreateIndexFeatTable (feat) USING FAISS;"
+        
         execute_query_fetch_all(self.evadb, query)
 
         # Test index catalog.

@@ -26,6 +26,7 @@ from evadb.parser.create_statement import (
 )
 from evadb.parser.table_ref import TableRef
 from evadb.parser.types import ColumnConstraintEnum
+from evadb.catalog.sql_config import ROW_NUM_COLUMN
 
 
 ##################################################################
@@ -256,10 +257,12 @@ class CreateIndex:
                 elif child.data == "index_elem":
                     index_elem = self.visit(child)
 
+        # Projection list of child of index creation.
+        project_expr_list = [TupleValueExpression(name="*")]
+
         # Parse either a single function call or column list.
-        col_list, function = None, None
         if not isinstance(index_elem, list):
-            function = index_elem
+            project_expr_list += [index_elem]
 
             # Traverse to the tuple value expression.
             while not isinstance(index_elem, TupleValueExpression):
@@ -271,7 +274,7 @@ class CreateIndex:
         ]
 
         return CreateIndexStatement(
-            index_name, if_not_exists, table_ref, col_list, vector_store_type, function
+            index_name, if_not_exists, table_ref, col_list, vector_store_type, project_expr_list
         )
 
     def vector_store_type(self, tree):
