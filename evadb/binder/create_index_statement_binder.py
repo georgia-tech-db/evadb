@@ -18,6 +18,9 @@ from evadb.catalog.catalog_type import NdArrayType, VectorStoreType
 from evadb.expression.function_expression import FunctionExpression
 from evadb.parser.create_index_statement import CreateIndexStatement
 from evadb.third_party.databases.interface import get_database_handler
+from evadb.expression.tuple_value_expression import TupleValueExpression
+from evadb.expression.function_expression import FunctionExpression
+from evadb.binder.binder_utils import extend_star, create_row_num_tv_expr
 
 
 def bind_create_index(binder: StatementBinder, node: CreateIndexStatement):

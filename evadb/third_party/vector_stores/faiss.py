@@ -67,6 +67,7 @@ class FaissVectorStore(VectorStore):
         if len(embedding.shape) != 2:
             embedding = embedding.reshape(1, -1)
 
+        print(embedding.shape, query.top_k)
         dists, indices = self._index.search(embedding, query.top_k)
         distances, ids = [], []
         for dis, idx in zip(dists[0], indices[0]):
