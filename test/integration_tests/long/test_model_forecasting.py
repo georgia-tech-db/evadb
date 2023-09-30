@@ -112,7 +112,7 @@ class ModelTrainTests(unittest.TestCase):
             SELECT AirPanelForecast() order by y;
         """
         result = execute_query_fetch_all(self.evadb, predict_query)
-        self.assertEqual(len(result), 12)
+        self.assertEqual(len(result), 24)
         self.assertEqual(
             result.columns,
             ["airpanelforecast.unique_id", "airpanelforecast.ds", "airpanelforecast.y"],

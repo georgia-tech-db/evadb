@@ -290,9 +290,8 @@ class CreateFunctionExecutor(AbstractExecutor):
             if "model" not in arg_map.keys():
                 arg_map["model"] = "NBEATS"
 
-            if (
-                "auto" in arg_map.keys()
-                and arg_map["auto"].lower()[0] == "t"
+            if "auto" not in arg_map.keys() or (
+                arg_map["auto"].lower()[0] == "t"
                 and "auto" not in arg_map["model"].lower()
             ):
                 arg_map["model"] = "Auto" + arg_map["model"]
@@ -307,15 +306,21 @@ class CreateFunctionExecutor(AbstractExecutor):
 
             if "auto" not in arg_map["model"].lower():
                 model_args["input_size"] = 2 * horizon
-                if len(data.columns) >= 4:
-                    exogenous_columns = [
-                        x
-                        for x in list(data.columns)
-                        if x not in ["ds", "y", "unique_id"]
-                    ]
-                    model_args["hist_exog_list"] = exogenous_columns
-
                 model_args["early_stop_patience_steps"] = 20
+            else:
+                model_args["config"] = {
+                    "input_size": 2 * horizon,
+                    "early_stop_patience_steps": 20,
+                }
+
+            if len(data.columns) >= 4:
+                exogenous_columns = [
+                    x for x in list(data.columns) if x not in ["ds", "y", "unique_id"]
+                ]
+                if "auto" not in arg_map["model"].lower():
+                    model_args["hist_exog_list"] = exogenous_columns
+                else:
+                    model_args["config"]["hist_exog_list"] = exogenous_columns
 
             model_args["h"] = horizon
 
@@ -328,6 +333,10 @@ class CreateFunctionExecutor(AbstractExecutor):
         #     Statsforecast implementation
         # """
         else:
+            if "auto" in arg_map.keys() and arg_map["auto"].lower()[0] != "t":
+                raise RuntimeError(
+                    "Statsforecast implementation only supports automatic hyperparameter optimization. Please set AUTO to true."
+                )
             try_to_import_statsforecast()
             from statsforecast import StatsForecast
             from statsforecast.models import AutoARIMA, AutoCES, AutoETS, AutoTheta
@@ -340,13 +349,9 @@ class CreateFunctionExecutor(AbstractExecutor):
             }
 
             if "model" not in arg_map.keys():
-                arg_map["model"] = "AutoARIMA"
+                arg_map["model"] = "ARIMA"
 
-            if (
-                "auto" in arg_map.keys()
-                and arg_map["auto"].lower()[0] == "t"
-                and "auto" not in arg_map["model"].lower()
-            ):
+            if "auto" not in arg_map["model"].lower():
                 arg_map["model"] = "Auto" + arg_map["model"]
 
             try:
@@ -363,11 +368,7 @@ class CreateFunctionExecutor(AbstractExecutor):
         data["ds"] = pd.to_datetime(data["ds"])
 
         model_save_dir_name = library + "_" + arg_map["model"] + "_" + new_freq
-        if (
-            len(data.columns) >= 4
-            and "auto" not in arg_map["model"].lower()
-            and library == "neuralforecast"
-        ):
+        if len(data.columns) >= 4 and library == "neuralforecast":
             model_save_dir_name += "_exogenous_" + str(sorted(exogenous_columns))
 
         model_dir = os.path.join(

@@ -57,14 +57,14 @@ EvaDB's default forecast framework is `statsforecast <https://nixtla.github.io/s
      - The name of column that represents an identifier for the series. If relevant column is not found, the whole table is considered as one series of data.
    * - LIBRARY (str, default: 'statsforecast')
      - We can select one of `statsforecast` (default) or `neuralforecast`. `statsforecast` provides access to statistical forecasting methods, while `neuralforecast` gives access to deep-learning based forecasting methods.
-   * - MODEL (str, default: 'AutoARIMA')
-     - If LIBRARY is `statsforecast`, we can select one of AutoARIMA, AutoCES, AutoETS, AutoTheta. The default is AutoARIMA. Check `Automatic Forecasting <https://nixtla.github.io/statsforecast/src/core/models_intro.html#automatic-forecasting>`_ to learn details about these models. If LIBRARY is `neuralforecast`, we can select one of NHITS or NBEATS. The default is NBEATS. Check `NBEATS docs <https://nixtla.github.io/neuralforecast/models.nbeats.html>`_ for details.
-   * - AUTO (str, default: 'F')
-     - The names of columns to be treated as exogenous variables, separated by comma. These columns would be considered for forecasting by the backend only for LIBRARY `neuralforecast`.
+   * - MODEL (str, default: 'ARIMA')
+     - If LIBRARY is `statsforecast`, we can select one of ARIMA, CES, ETS, Theta. The default is ARIMA. Check `Automatic Forecasting <https://nixtla.github.io/statsforecast/src/core/models_intro.html#automatic-forecasting>`_ to learn details about these models. If LIBRARY is `neuralforecast`, we can select one of NHITS or NBEATS. The default is NBEATS. Check `NBEATS docs <https://nixtla.github.io/neuralforecast/models.nbeats.html>`_ for details.
+   * - AUTO (str, default: 'T')
+     - If set to 'T', it enables automatic hyperparameter optimization. Must be set to 'T' for `statsforecast` library. One may set this parameter to `false` if LIBRARY is `neuralforecast` for faster (but less reliable) results.
    * - Frequency (str, default: 'auto')
      - A string indicating the frequency of the data. The common used ones are D, W, M, Y, which repestively represents day-, week-, month- and year- end frequency. The default value is M. Check `pandas available frequencies <https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#offset-aliases>`_ for all available frequencies. If it is not provided, the frequency is attempted to be determined automatically.
 
-Note: If columns other than the ones required as mentioned above are passed while creating the function, they will be treated as exogenous variables if LIBRARY is `neuralforecast` and the AUTO is set to F. In other situations, they would be ignored.
+Note: If columns other than the ones required as mentioned above are passed while creating the function, they will be treated as exogenous variables if LIBRARY is `neuralforecast`. Otherwise, they would be ignored.
 
 Below is an example query specifying the above parameters:
 
@@ -79,7 +79,7 @@ Below is an example query specifying the above parameters:
    ID 'type'
    Frequency 'W';
 
-Below is an example query with `neuralforecast` with `trend` column as exogenous:
+Below is an example query with `neuralforecast` with `trend` column as exogenous and without automatic hyperparameter optimization:
 
 .. code-block:: sql
    
@@ -89,4 +89,5 @@ Below is an example query with `neuralforecast` with `trend` column as exogenous
     HORIZON 12
     PREDICT 'y'
     LIBRARY 'neuralforecast'
+    AUTO 'f'
     FREQUENCY 'M';
