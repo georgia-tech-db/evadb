@@ -292,13 +292,23 @@ def try_to_import_ray():
         )
 
 
-def try_to_import_forecast():
+def try_to_import_statsforecast():
     try:
         from statsforecast import StatsForecast  # noqa: F401
     except ImportError:
         raise ValueError(
             """Could not import StatsForecast python package.
                 Please install it with `pip install statsforecast`."""
+        )
+
+
+def try_to_import_neuralforecast():
+    try:
+        from neuralforecast import NeuralForecast  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import NeuralForecast python package.
+                Please install it with `pip install neuralforecast`."""
         )
 
 
@@ -341,7 +351,8 @@ def is_ludwig_available() -> bool:
 
 def is_forecast_available() -> bool:
     try:
-        try_to_import_forecast()
+        try_to_import_statsforecast()
+        try_to_import_neuralforecast()
         return True
     except ValueError:  # noqa: E722
         return False

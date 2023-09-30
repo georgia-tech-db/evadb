@@ -126,10 +126,6 @@ class StatementBinder:
                     elif column.name == arg_map.get("predict", "y"):
                         outputs.append(column)
                         required_columns.remove(column.name)
-                    else:
-                        raise BinderError(
-                            f"Unexpected column {column.name} found for forecasting function."
-                        )
                 assert (
                     len(required_columns) == 0
                 ), f"Missing required {required_columns} columns for forecasting function."
