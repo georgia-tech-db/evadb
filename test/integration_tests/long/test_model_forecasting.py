@@ -104,6 +104,7 @@ class ModelTrainTests(unittest.TestCase):
             HORIZON 12
             PREDICT 'y'
             LIBRARY 'neuralforecast'
+            AUTO 'false'
             FREQUENCY 'M';
         """
         execute_query_fetch_all(self.evadb, create_predict_udf)
