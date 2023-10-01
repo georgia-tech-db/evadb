@@ -28,7 +28,6 @@ from evadb.third_party.databases.interface import get_database_handler
 from evadb.third_party.vector_stores.types import FeaturePayload
 from evadb.third_party.vector_stores.utils import VectorStoreFactory
 from evadb.utils.logging_manager import logger
-from evadb.expression.function_expression import FunctionExpression
 
 
 class CreateIndexExecutor(AbstractExecutor):

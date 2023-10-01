@@ -12,12 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import List, Union
+from typing import List
 
 from evadb.catalog.catalog_type import VectorStoreType
 from evadb.expression.abstract_expression import AbstractExpression
 from evadb.expression.function_expression import FunctionExpression
-from evadb.expression.abstract_expression import AbstractExpression
 from evadb.parser.create_statement import ColumnDefinition
 from evadb.parser.statement import AbstractStatement
 from evadb.parser.table_ref import TableRef
@@ -96,10 +95,6 @@ class CreateIndexStatement(AbstractStatement):
     def index_def(self):
         return self._index_def
 
-    @project_expr_list.setter
-    def project_expr_list(self, project_expr_list: List[AbstractExpression]):
-        self._project_expr_list = project_expr_list
-    
     def __eq__(self, other):
         if not isinstance(other, CreateIndexStatement):
             return False

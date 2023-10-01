@@ -44,7 +44,6 @@ from evadb.parser.create_statement import ColumnDefinition
 from evadb.parser.table_ref import TableInfo, TableRef
 from evadb.third_party.databases.interface import get_database_handler
 from evadb.utils.logging_manager import logger
-from evadb.catalog.sql_config import ROW_NUM_COLUMN
 
 
 class BinderError(Exception):

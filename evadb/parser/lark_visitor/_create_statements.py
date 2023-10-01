@@ -26,7 +26,6 @@ from evadb.parser.create_statement import (
 )
 from evadb.parser.table_ref import TableRef
 from evadb.parser.types import ColumnConstraintEnum
-from evadb.catalog.sql_config import ROW_NUM_COLUMN
 
 
 ##################################################################

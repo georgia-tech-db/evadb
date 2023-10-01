@@ -12,13 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import List, Union
+from typing import List
 
 from evadb.catalog.catalog_type import VectorStoreType
 from evadb.expression.abstract_expression import AbstractExpression
 from evadb.expression.function_expression import FunctionExpression
-from evadb.expression.tuple_value_expression import TupleValueExpression
-from evadb.expression.abstract_expression import AbstractExpression
 from evadb.parser.create_statement import ColumnDefinition
 from evadb.parser.table_ref import TableRef
 from evadb.plan_nodes.abstract_plan import AbstractPlan
