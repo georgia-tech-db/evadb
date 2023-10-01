@@ -31,7 +31,7 @@ class CreateIndexStatement(AbstractStatement):
         table_ref: TableRef,
         col_list: List[ColumnDefinition],
         vector_store_type: VectorStoreType,
-        project_expr_list: List[AbstractStatement] = None,
+        project_expr_list: List[AbstractStatement],
     ):
         super().__init__(StatementType.CREATE_INDEX)
         self._name = name
@@ -41,19 +41,26 @@ class CreateIndexStatement(AbstractStatement):
         self._vector_store_type = vector_store_type
         self._project_expr_list = project_expr_list
 
+        # Definition of CREATE INDEX.
+        self._index_def = self.__str__()
+
     def __str__(self) -> str:
         function_expr = None
         for project_expr in self._project_expr_list:
             if isinstance(project_expr, FunctionExpression):
                 function_expr = project_expr
 
-        print_str = "CREATE INDEX {} {} ON {} ({}{}) ".format(
-            self._name,
-            "IF NOT EXISTS" if self._if_not_exists else "",
-            self._table_ref,
-            "" if function_expr is None else function_expr,
-            tuple(self._col_list),
-        )
+        print_str = "CREATE INDEX"
+        if self._if_not_exists:
+            print_str += " IF NOT EXISTS"
+        print_str += f" {self._name}"
+        print_str += " ON"
+        print_str += f" {self._table_ref.table.table_name}"
+        if function_expr is None:
+            print_str += f" ({self.col_list[0].name})"
+        else:
+            print_str += f" ({function_expr.name}({self.col_list[0].name}))"
+        print_str += f" USING {self._vector_store_type};"
         return print_str
 
     @property
@@ -84,6 +91,10 @@ class CreateIndexStatement(AbstractStatement):
     def project_expr_list(self, project_expr_list: List[AbstractExpression]):
         self._project_expr_list = project_expr_list
 
+    @property
+    def index_def(self):
+        return self._index_def
+
     def __eq__(self, other):
         if not isinstance(other, CreateIndexStatement):
             return False
@@ -94,6 +105,7 @@ class CreateIndexStatement(AbstractStatement):
             and self.col_list == other.col_list
             and self._vector_store_type == other.vector_store_type
             and self._project_expr_list == other.project_expr_list
+            and self._index_def == other.index_def
         )
 
     def __hash__(self) -> int:
@@ -106,5 +118,6 @@ class CreateIndexStatement(AbstractStatement):
                 tuple(self.col_list),
                 self._vector_store_type,
                 tuple(self._project_expr_list),
+                self._index_def,
             )
         )

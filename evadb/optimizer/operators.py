@@ -1084,7 +1084,8 @@ class LogicalCreateIndex(Operator):
         table_ref: TableRef,
         col_list: List[ColumnDefinition],
         vector_store_type: VectorStoreType,
-        project_expr_list: List[AbstractExpression] = None,
+        project_expr_list: List[AbstractExpression],
+        index_def: str,
         children: List = None,
     ):
         super().__init__(OperatorType.LOGICALCREATEINDEX, children)
@@ -1094,6 +1095,7 @@ class LogicalCreateIndex(Operator):
         self._col_list = col_list
         self._vector_store_type = vector_store_type
         self._project_expr_list = project_expr_list
+        self._index_def = index_def
 
     @property
     def name(self):
@@ -1119,6 +1121,10 @@ class LogicalCreateIndex(Operator):
     def project_expr_list(self):
         return self._project_expr_list
 
+    @property
+    def index_def(self):
+        return self._index_def
+
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
         if not isinstance(other, LogicalCreateIndex):
@@ -1131,6 +1137,7 @@ class LogicalCreateIndex(Operator):
             and self.col_list == other.col_list
             and self.vector_store_type == other.vector_store_type
             and self.project_expr_list == other.project_expr_list
+            and self.index_def == other.index_def
         )
 
     def __hash__(self) -> int:
@@ -1143,6 +1150,7 @@ class LogicalCreateIndex(Operator):
                 tuple(self.col_list),
                 self.vector_store_type,
                 tuple(self.project_expr_list),
+                self.index_def,
             )
         )
 

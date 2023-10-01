@@ -360,6 +360,7 @@ class StatementToPlanConverter:
             statement.col_list,
             statement.vector_store_type,
             statement.project_expr_list,
+            statement.index_def,
         )
         self._plan = create_index_opr
 

@@ -42,6 +42,7 @@ class IndexCatalog(BaseModel):
         "column_id", Integer, ForeignKey("column_catalog._row_id", ondelete="CASCADE")
     )
     _function_signature = Column("function", String, default=None)
+    _index_def = Column("index_def", String, default=None)
 
     _feat_column = relationship(
         "ColumnCatalog",
@@ -55,12 +56,14 @@ class IndexCatalog(BaseModel):
         type: VectorStoreType,
         feat_column_id: int = None,
         function_signature: str = None,
+        index_def: str = None,
     ):
         self._name = name
         self._save_file_path = save_file_path
         self._type = type
         self._feat_column_id = feat_column_id
         self._function_signature = function_signature
+        self._index_def = index_def
 
     def as_dataclass(self) -> "IndexCatalogEntry":
         feat_column = self._feat_column.as_dataclass() if self._feat_column else None
@@ -71,5 +74,6 @@ class IndexCatalog(BaseModel):
             type=self._type,
             feat_column_id=self._feat_column_id,
             function_signature=self._function_signature,
+            index_def=self._index_def,
             feat_column=feat_column,
         )

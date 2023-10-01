@@ -146,6 +146,7 @@ class CreateIndexExecutor(AbstractExecutor):
                 function_expression.signature()
                 if function_expression is not None
                 else None,
+                self.node.index_def,
             )
         except Exception as e:
             # Delete index.

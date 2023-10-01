@@ -31,7 +31,8 @@ class CreateIndexPlan(AbstractPlan):
         table_ref: TableRef,
         col_list: List[ColumnDefinition],
         vector_store_type: VectorStoreType,
-        project_expr_list: List[AbstractExpression] = None,
+        project_expr_list: List[AbstractExpression],
+        index_def: str,
     ):
         super().__init__(PlanOprType.CREATE_INDEX)
         self._name = name
@@ -40,6 +41,7 @@ class CreateIndexPlan(AbstractPlan):
         self._col_list = col_list
         self._vector_store_type = vector_store_type
         self._project_expr_list = project_expr_list
+        self._index_def = index_def
 
     @property
     def name(self):
@@ -64,6 +66,10 @@ class CreateIndexPlan(AbstractPlan):
     @property
     def project_expr_list(self):
         return self._project_expr_list
+
+    @property
+    def index_def(self):
+        return self._index_def
 
     def __str__(self):
         function_expr = None
@@ -93,5 +99,6 @@ class CreateIndexPlan(AbstractPlan):
                 tuple(self.col_list),
                 self.vector_store_type,
                 tuple(self.project_expr_list),
+                self.index_def,
             )
         )
