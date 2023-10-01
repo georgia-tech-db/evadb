@@ -113,7 +113,7 @@ class ParserTests(unittest.TestCase):
                 ColumnDefinition("featCol", None, None, None),
             ],
             VectorStoreType.FAISS,
-            [],
+            [TupleValueExpression(name="*")],
         )
         actual_stmt = evadb_stmt_list[0]
         self.assertEqual(actual_stmt, expected_stmt)
@@ -148,7 +148,7 @@ class ParserTests(unittest.TestCase):
                 ColumnDefinition("featCol", None, None, None),
             ],
             VectorStoreType.FAISS,
-            [func_expr],
+            [TupleValueExpression(name="*"), func_expr],
         )
         actual_stmt = evadb_stmt_list[0]
         self.assertEqual(actual_stmt, expected_stmt)
