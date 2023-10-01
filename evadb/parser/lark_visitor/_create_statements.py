@@ -257,7 +257,7 @@ class CreateIndex:
                     index_elem = self.visit(child)
 
         # Projection list of child of index creation.
-        project_expr_list = []
+        project_expr_list = [TupleValueExpression(name="*")]
 
         # Parse either a single function call or column list.
         if not isinstance(index_elem, list):
