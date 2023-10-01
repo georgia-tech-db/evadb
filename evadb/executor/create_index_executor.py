@@ -21,14 +21,13 @@ from evadb.catalog.sql_config import ROW_NUM_COLUMN
 from evadb.database import EvaDBDatabase
 from evadb.executor.abstract_executor import AbstractExecutor
 from evadb.executor.executor_utils import ExecutorError, handle_vector_store_params
+from evadb.expression.function_expression import FunctionExpression
 from evadb.models.storage.batch import Batch
 from evadb.plan_nodes.create_index_plan import CreateIndexPlan
-from evadb.storage.storage_engine import StorageEngine
 from evadb.third_party.databases.interface import get_database_handler
 from evadb.third_party.vector_stores.types import FeaturePayload
 from evadb.third_party.vector_stores.utils import VectorStoreFactory
 from evadb.utils.logging_manager import logger
-from evadb.expression.function_expression import FunctionExpression
 
 
 class CreateIndexExecutor(AbstractExecutor):
@@ -144,7 +143,9 @@ class CreateIndexExecutor(AbstractExecutor):
                 index_path,
                 self.node.vector_store_type,
                 feat_column,
-                function_expression.signature() if function_expression is not None else None,
+                function_expression.signature()
+                if function_expression is not None
+                else None,
             )
         except Exception as e:
             # Delete index.

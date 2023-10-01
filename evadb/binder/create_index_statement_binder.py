@@ -12,14 +12,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from evadb.binder.binder_utils import BinderError
+from evadb.binder.binder_utils import BinderError, create_row_num_tv_expr, extend_star
 from evadb.binder.statement_binder import StatementBinder
 from evadb.catalog.catalog_type import NdArrayType, VectorStoreType
+from evadb.expression.function_expression import FunctionExpression
+from evadb.expression.tuple_value_expression import TupleValueExpression
 from evadb.parser.create_index_statement import CreateIndexStatement
 from evadb.third_party.databases.interface import get_database_handler
-from evadb.expression.tuple_value_expression import TupleValueExpression
-from evadb.expression.function_expression import FunctionExpression
-from evadb.binder.binder_utils import extend_star, create_row_num_tv_expr
 
 
 def bind_create_index(binder: StatementBinder, node: CreateIndexStatement):
@@ -33,7 +32,7 @@ def bind_create_index(binder: StatementBinder, node: CreateIndexStatement):
         if isinstance(project_expr, TupleValueExpression) and project_expr.name == "*":
             project_expr_list += extend_star(binder._binder_context)
         elif isinstance(project_expr, FunctionExpression):
-            func_project_expr = project_expr 
+            func_project_expr = project_expr
             project_expr_list += [project_expr]
 
     # Bind all projection expressions.

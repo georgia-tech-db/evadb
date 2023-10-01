@@ -34,6 +34,8 @@ from evadb.catalog.sql_config import IDENTIFIER_COLUMN
 if TYPE_CHECKING:
     from evadb.binder.statement_binder_context import StatementBinderContext
     from evadb.catalog.catalog_manager import CatalogManager
+
+from evadb.catalog.sql_config import ROW_NUM_COLUMN
 from evadb.expression.abstract_expression import AbstractExpression, ExpressionType
 from evadb.expression.function_expression import FunctionExpression
 from evadb.expression.tuple_value_expression import TupleValueExpression
@@ -42,7 +44,6 @@ from evadb.parser.create_statement import ColumnDefinition
 from evadb.parser.table_ref import TableInfo, TableRef
 from evadb.third_party.databases.interface import get_database_handler
 from evadb.utils.logging_manager import logger
-from evadb.catalog.sql_config import ROW_NUM_COLUMN
 
 
 class BinderError(Exception):
@@ -176,7 +177,9 @@ def create_row_num_tv_expr(table_alias):
     tv_expr = TupleValueExpression(name=ROW_NUM_COLUMN)
     tv_expr.table_alias = table_alias
     tv_expr.col_alias = f"{table_alias}.{ROW_NUM_COLUMN.lower()}"
-    tv_expr.col_object = ColumnCatalogEntry(name=ROW_NUM_COLUMN, type=ColumnType.INTEGER)
+    tv_expr.col_object = ColumnCatalogEntry(
+        name=ROW_NUM_COLUMN, type=ColumnType.INTEGER
+    )
     return tv_expr
 
 

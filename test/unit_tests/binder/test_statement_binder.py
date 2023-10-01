@@ -21,6 +21,7 @@ from evadb.binder.statement_binder_context import StatementBinderContext
 from evadb.catalog.catalog_type import ColumnType, NdArrayType
 from evadb.catalog.models.utils import ColumnCatalogEntry
 from evadb.catalog.sql_config import IDENTIFIER_COLUMN
+from evadb.expression.function_expression import FunctionExpression
 from evadb.expression.tuple_value_expression import TupleValueExpression
 from evadb.parser.alias import Alias
 from evadb.parser.create_statement import ColumnDefinition
@@ -332,10 +333,22 @@ class StatementBinderTests(unittest.TestCase):
             with self.assertRaises(AssertionError):
                 binder._bind_create_index_statement(create_index_statement)
 
-            create_index_statement.col_list = ["foo"]
+            col_def = MagicMock()
+            col_def.name = "a"
+            create_index_statement.col_list = [col_def]
+
+            col = MagicMock()
+            col.name = "a"
+            create_index_statement.table_ref.table.table_obj.columns = [col]
+
             function_obj = MagicMock()
             output = MagicMock()
             function_obj.outputs = [output]
+
+            create_index_statement.project_expr_list = [
+                FunctionExpression(MagicMock(), name="a"),
+                TupleValueExpression(name="*"),
+            ]
 
             with patch.object(
                 catalog(),
@@ -350,13 +363,7 @@ class StatementBinderTests(unittest.TestCase):
                 output.array_dimensions = [1, 100]
                 binder._bind_create_index_statement(create_index_statement)
 
-            create_index_statement.function = None
-            col_def = MagicMock()
-            col_def.name = "a"
-            create_index_statement.col_list = [col_def]
-            col = MagicMock()
-            col.name = "a"
-            create_index_statement.table_ref.table.table_obj.columns = [col]
+            create_index_statement.project_expr_list = [TupleValueExpression(name="*")]
 
             with self.assertRaises(AssertionError):
                 binder._bind_create_index_statement(create_index_statement)
