@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import os
-
 from pathlib import Path
 from typing import List
 
@@ -61,7 +60,7 @@ class FaissVectorStore(VectorStore):
             embedding = np.array(row.embedding, dtype="float32")
             if len(embedding.shape) != 2:
                 embedding = embedding.reshape(1, -1)
-            if not row.id in self._existing_id_set:
+            if row.id not in self._existing_id_set:
                 self._index.add_with_ids(embedding, np.array([row.id]))
 
     def persist(self):
@@ -71,8 +70,6 @@ class FaissVectorStore(VectorStore):
         faiss.write_index(self._index, self._index_path)
 
     def query(self, query: VectorIndexQuery) -> VectorIndexQueryResult:
-        import faiss
-
         assert self._index is not None, "Cannot query as index does not exists."
         embedding = np.array(query.embedding, dtype="float32")
         if len(embedding.shape) != 2:

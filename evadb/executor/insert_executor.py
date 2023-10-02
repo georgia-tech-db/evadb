@@ -21,6 +21,7 @@ from evadb.models.storage.batch import Batch
 from evadb.plan_nodes.insert_plan import InsertPlan
 from evadb.storage.storage_engine import StorageEngine
 
+
 class InsertExecutor(AbstractExecutor):
     def __init__(self, db: EvaDBDatabase, node: InsertPlan):
         super().__init__(db, node)
@@ -62,8 +63,13 @@ class InsertExecutor(AbstractExecutor):
                 create_index_query_list = index.index_def.split(" ")
                 if_not_exists = " ".join(create_index_query_list[2:5]).lower()
                 if if_not_exists != "if not exists":
-                    create_index_query = " ".join(create_index_query_list[:2]) + " IF NOT EXISTS " + " ".join(create_index_query_list[2:])
+                    create_index_query = (
+                        " ".join(create_index_query_list[:2])
+                        + " IF NOT EXISTS "
+                        + " ".join(create_index_query_list[2:])
+                    )
                 from evadb.server.command_handler import execute_query_fetch_all
+
                 execute_query_fetch_all(self.db, create_index_query)
 
         yield Batch(

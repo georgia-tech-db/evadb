@@ -79,7 +79,9 @@ class CreateIndexExecutor(AbstractExecutor):
 
     # Create EvaDB index.
     def _create_evadb_index(self):
-        index_catalog_entry = self.catalog().get_index_catalog_entry_by_name(self.node.name)
+        index_catalog_entry = self.catalog().get_index_catalog_entry_by_name(
+            self.node.name
+        )
 
         if index_catalog_entry is not None:
             msg = f"Index {self.node.name} already exists."
@@ -90,11 +92,15 @@ class CreateIndexExecutor(AbstractExecutor):
                 raise ExecutorError(msg)
 
         index_path = self._get_evadb_index_save_path()
-        index = VectorStoreFactory.init_vector_store(
-            self.node.vector_store_type,
-            self.node.name,
-            **handle_vector_store_params(self.node.vector_store_type, index_path),
-        ) if index_catalog_entry is not None else None
+        index = (
+            VectorStoreFactory.init_vector_store(
+                self.node.vector_store_type,
+                self.node.name,
+                **handle_vector_store_params(self.node.vector_store_type, index_path),
+            )
+            if index_catalog_entry is not None
+            else None
+        )
 
         try:
             # Get feature tables.
