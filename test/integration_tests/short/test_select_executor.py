@@ -442,3 +442,12 @@ class SelectExecutorTest(unittest.TestCase):
             pd.DataFrame([{"dummynoinputfunction.label": "DummyNoInputFunction"}])
         )
         self.assertEqual(actual_batch, expected)
+
+    def test_function_on_invalid_column(self):
+        select_query = "SELECT DummyObjectDetectorDecorators(data) FROM MyVideo;"
+        with self.assertRaises(BinderError):
+            execute_query_fetch_all(self.evadb, select_query)
+
+        select_query = "SELECT DummyObjectDetectorDecorators(DummyObjectDetector(data)) FROM MyVideo;"
+        with self.assertRaises(BinderError):
+            execute_query_fetch_all(self.evadb, select_query)

@@ -21,7 +21,7 @@ NDARRAY_DIR = "ndarray"
 TUTORIALS_DIR = "tutorials"
 
 DummyObjectDetector_function_query = """CREATE FUNCTION IF NOT EXISTS DummyObjectDetector
-                  INPUT  (Frame_Array NDARRAY INT8(3, ANYDIM, ANYDIM))
+                  INPUT  (data NDARRAY INT8(3, ANYDIM, ANYDIM))
                   OUTPUT (label NDARRAY STR(1))
                   TYPE  Classification
                   IMPL  '{}/../test/util.py';
@@ -31,7 +31,7 @@ DummyObjectDetector_function_query = """CREATE FUNCTION IF NOT EXISTS DummyObjec
 
 DummyMultiObjectDetector_function_query = """CREATE FUNCTION
                   IF NOT EXISTS  DummyMultiObjectDetector
-                  INPUT  (Frame_Array NDARRAY INT8(3, ANYDIM, ANYDIM))
+                  INPUT  (data NDARRAY INT8(3, ANYDIM, ANYDIM))
                   OUTPUT (labels NDARRAY STR(2))
                   TYPE  Classification
                   IMPL  '{}/../test/util.py';
@@ -41,7 +41,7 @@ DummyMultiObjectDetector_function_query = """CREATE FUNCTION
 
 DummyFeatureExtractor_function_query = """CREATE FUNCTION
                   IF NOT EXISTS DummyFeatureExtractor
-                  INPUT (Frame_Array NDARRAY UINT8(3, ANYDIM, ANYDIM))
+                  INPUT (data NDARRAY UINT8(3, ANYDIM, ANYDIM))
                   OUTPUT (features NDARRAY FLOAT32(1, ANYDIM))
                   TYPE Classification
                   IMPL '{}/../test/util.py';
@@ -56,6 +56,13 @@ DummyNoInputFunction_function_query = """CREATE FUNCTION
     EvaDB_INSTALLATION_DIR
 )
 
+DummyObjectDetectorDecorators_function_query = """CREATE FUNCTION
+                  IF NOT EXISTS DummyObjectDetectorDecorators
+                  IMPL '{}/../test/util.py';
+        """.format(
+    EvaDB_INSTALLATION_DIR
+)
+
 DummyLLM_function_query = """CREATE FUNCTION
                   IF NOT EXISTS DummyLLM
                   IMPL '{}/../test/util.py';
@@ -64,7 +71,7 @@ DummyLLM_function_query = """CREATE FUNCTION
 )
 
 fuzzy_function_query = """CREATE FUNCTION IF NOT EXISTS FuzzDistance
-                    INPUT (Input_Array1 NDARRAY ANYTYPE, Input_Array2 NDARRAY ANYTYPE)
+                    INPUT (id NDARRAY ANYTYPE, id NDARRAY ANYTYPE)
                     OUTPUT (distance FLOAT(32, 7))
                     TYPE NdarrayFunction
                     IMPL "{}/functions/{}/fuzzy_join.py";
@@ -256,6 +263,7 @@ def init_builtin_functions(db: EvaDBDatabase, mode: str = "debug") -> None:
                 DummyObjectDetector_function_query,
                 DummyMultiObjectDetector_function_query,
                 DummyFeatureExtractor_function_query,
+                DummyObjectDetectorDecorators_function_query,
                 DummyNoInputFunction_function_query,
                 DummyLLM_function_query,
             ]

@@ -61,7 +61,7 @@ class CreateIndexTest(unittest.TestCase):
         execute_query_fetch_all(
             cls.evadb,
             """create table if not exists testCreateIndexInputTable (
-                input NDARRAY UINT8(1,3)
+                data NDARRAY UINT8(1,3)
             );""",
         )
 
@@ -82,7 +82,7 @@ class CreateIndexTest(unittest.TestCase):
         input_batch_data = Batch(
             pd.DataFrame(
                 data={
-                    "input": [input1, input2, input3],
+                    "data": [input1, input2, input3],
                 }
             )
         )
@@ -169,7 +169,7 @@ class CreateIndexTest(unittest.TestCase):
 
     @macos_skip_marker
     def test_should_create_index_with_function(self):
-        query = "CREATE INDEX testCreateIndexName ON testCreateIndexInputTable (DummyFeatureExtractor(input)) USING FAISS;"
+        query = "CREATE INDEX testCreateIndexName ON testCreateIndexInputTable (DummyFeatureExtractor(data)) USING FAISS;"
         execute_query_fetch_all(self.evadb, query)
 
         # Test index function signature.
@@ -187,7 +187,7 @@ class CreateIndexTest(unittest.TestCase):
             "testCreateIndexInputTable"
         )
         input_column = [
-            col for col in input_table_entry.columns if col.name == "input"
+            col for col in input_table_entry.columns if col.name == "data"
         ][0]
         self.assertEqual(index_catalog_entry.feat_column_id, input_column.row_id)
         self.assertEqual(index_catalog_entry.feat_column, input_column)

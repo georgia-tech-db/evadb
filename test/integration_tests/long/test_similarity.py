@@ -45,7 +45,7 @@ class SimilarityTests(unittest.TestCase):
 
         # Create base comparison table.
         create_table_query = """CREATE TABLE IF NOT EXISTS testSimilarityTable
-                                  (data_col NDARRAY UINT8(3, ANYDIM, ANYDIM),
+                                  (data NDARRAY UINT8(3, ANYDIM, ANYDIM),
                                    dummy INTEGER);"""
         execute_query_fetch_all(self.evadb, create_table_query)
 
@@ -78,7 +78,7 @@ class SimilarityTests(unittest.TestCase):
                     pd.DataFrame(
                         [
                             {
-                                "data_col": base_img,
+                                "data": base_img,
                                 "dummy": i,
                             }
                         ]
@@ -149,8 +149,8 @@ class SimilarityTests(unittest.TestCase):
         ###############################################
 
         # Top 1 - assume table contains base data_col.
-        select_query = """SELECT data_col FROM testSimilarityTable
-                            ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data_col))
+        select_query = """SELECT data FROM testSimilarityTable
+                            ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data))
                             LIMIT 1;""".format(
             self.img_path
         )
@@ -160,33 +160,33 @@ class SimilarityTests(unittest.TestCase):
         base_img[0] -= 1
         base_img[2] += 1
 
-        actual_open = actual_batch.frames["testsimilaritytable.data_col"].to_numpy()[0]
+        actual_open = actual_batch.frames["testsimilaritytable.data"].to_numpy()[0]
         self.assertTrue(np.array_equal(actual_open, base_img))
 
         # Top 2 - assume table contains base data.
-        select_query = """SELECT data_col FROM testSimilarityTable
-                            ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data_col))
+        select_query = """SELECT data FROM testSimilarityTable
+                            ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data))
                             LIMIT 2;""".format(
             self.img_path
         )
         actual_batch = execute_query_fetch_all(self.evadb, select_query)
 
-        actual_open = actual_batch.frames["testsimilaritytable.data_col"].to_numpy()[0]
+        actual_open = actual_batch.frames["testsimilaritytable.data"].to_numpy()[0]
         self.assertTrue(np.array_equal(actual_open, base_img))
-        actual_open = actual_batch.frames["testsimilaritytable.data_col"].to_numpy()[1]
+        actual_open = actual_batch.frames["testsimilaritytable.data"].to_numpy()[1]
         self.assertTrue(np.array_equal(actual_open, base_img + 1))
 
         # Top 2 - descending order
-        select_query = """SELECT data_col FROM testSimilarityTable
-                            ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data_col)) DESC
+        select_query = """SELECT data FROM testSimilarityTable
+                            ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data)) DESC
                             LIMIT 2;""".format(
             self.img_path
         )
         actual_batch = execute_query_fetch_all(self.evadb, select_query)
 
-        actual_open = actual_batch.frames["testsimilaritytable.data_col"].to_numpy()[0]
+        actual_open = actual_batch.frames["testsimilaritytable.data"].to_numpy()[0]
         self.assertTrue(np.array_equal(actual_open, base_img + 4))
-        actual_open = actual_batch.frames["testsimilaritytable.data_col"].to_numpy()[1]
+        actual_open = actual_batch.frames["testsimilaritytable.data"].to_numpy()[1]
         self.assertTrue(np.array_equal(actual_open, base_img + 3))
 
         ###########################################
@@ -274,8 +274,8 @@ class SimilarityTests(unittest.TestCase):
         ###############################################
 
         # Execution without index scan.
-        select_query = """SELECT data_col FROM testSimilarityTable
-                            ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data_col))
+        select_query = """SELECT data FROM testSimilarityTable
+                            ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data))
                             LIMIT 3;""".format(
             self.img_path
         )
@@ -283,11 +283,11 @@ class SimilarityTests(unittest.TestCase):
 
         # Execution with index scan.
         create_index_query = """CREATE INDEX testFaissIndexScanRewrite2
-                                    ON testSimilarityTable (DummyFeatureExtractor(data_col))
+                                    ON testSimilarityTable (DummyFeatureExtractor(data))
                                     USING FAISS;"""
         execute_query_fetch_all(self.evadb, create_index_query)
-        select_query = """SELECT data_col FROM testSimilarityTable
-                            ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data_col))
+        select_query = """SELECT data FROM testSimilarityTable
+                            ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data))
                             LIMIT 3;""".format(
             self.img_path
         )
@@ -300,8 +300,8 @@ class SimilarityTests(unittest.TestCase):
         for i in range(3):
             self.assertTrue(
                 np.array_equal(
-                    expected_batch.frames["testsimilaritytable.data_col"].to_numpy()[i],
-                    actual_batch.frames["testsimilaritytable.data_col"].to_numpy()[i],
+                    expected_batch.frames["testsimilaritytable.data"].to_numpy()[i],
+                    actual_batch.frames["testsimilaritytable.data"].to_numpy()[i],
                 )
             )
 
@@ -314,14 +314,14 @@ class SimilarityTests(unittest.TestCase):
     def test_should_not_do_vector_index_scan_with_desc_order(self):
         # Execution with index scan.
         create_index_query = """CREATE INDEX testFaissIndexScanRewrite
-                                    ON testSimilarityTable (DummyFeatureExtractor(data_col))
+                                    ON testSimilarityTable (DummyFeatureExtractor(data))
                                     USING FAISS;"""
         execute_query_fetch_all(self.evadb, create_index_query)
 
         explain_query = """
             EXPLAIN
-                SELECT data_col FROM testSimilarityTable WHERE dummy = 0
-                  ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data_col))
+                SELECT data FROM testSimilarityTable WHERE dummy = 0
+                  ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data))
                   LIMIT 3;
         """.format(
             "dummypath"
@@ -336,16 +336,16 @@ class SimilarityTests(unittest.TestCase):
         base_img[0] -= 1
         base_img[2] += 1
 
-        select_query = """SELECT data_col FROM testSimilarityTable
-                            ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data_col)) DESC
+        select_query = """SELECT data FROM testSimilarityTable
+                            ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data)) DESC
                             LIMIT 2;""".format(
             self.img_path
         )
         actual_batch = execute_query_fetch_all(self.evadb, select_query)
 
-        actual_open = actual_batch.frames["testsimilaritytable.data_col"].to_numpy()[0]
+        actual_open = actual_batch.frames["testsimilaritytable.data"].to_numpy()[0]
         self.assertTrue(np.array_equal(actual_open, base_img + 4))
-        actual_open = actual_batch.frames["testsimilaritytable.data_col"].to_numpy()[1]
+        actual_open = actual_batch.frames["testsimilaritytable.data"].to_numpy()[1]
         self.assertTrue(np.array_equal(actual_open, base_img + 3))
 
         # Cleanup
@@ -355,14 +355,14 @@ class SimilarityTests(unittest.TestCase):
     def test_should_not_do_vector_index_scan_with_predicate(self):
         # Execution with index scan.
         create_index_query = """CREATE INDEX testFaissIndexScanRewrite
-                                    ON testSimilarityTable (DummyFeatureExtractor(data_col))
+                                    ON testSimilarityTable (DummyFeatureExtractor(data))
                                     USING FAISS;"""
         execute_query_fetch_all(self.evadb, create_index_query)
 
         explain_query = """
             EXPLAIN
-                SELECT data_col FROM testSimilarityTable WHERE dummy = 0
-                  ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data_col))
+                SELECT data FROM testSimilarityTable WHERE dummy = 0
+                  ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data))
                   LIMIT 3;
         """.format(
             "dummypath"
