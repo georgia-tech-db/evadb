@@ -69,6 +69,15 @@ parts:
           - file: source/reference/databases/mariadb
           - file: source/reference/databases/github
 
+      - file: source/reference/vector_stores/index
+        title: Vector Stores
+        sections: 
+          - file: source/reference/vector_stores/faiss
+          - file: source/reference/vector_stores/chromadb
+          - file: source/reference/vector_stores/qdrant
+          - file: source/reference/vector_stores/pgvector
+          - file: source/reference/vector_stores/pinecone
+
       - file: source/reference/ai/index
         title: AI Engines
         sections:
