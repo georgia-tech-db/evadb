@@ -50,9 +50,7 @@ class CreateIndexExecutor(AbstractExecutor):
             self._create_evadb_index()
 
         yield Batch(
-            pd.DataFrame(
-                [f"Index {self.name} successfully added to the database."]
-            )
+            pd.DataFrame([f"Index {self.name} successfully added to the database."])
         )
 
     # Create index through the native storage engine.
@@ -81,8 +79,7 @@ class CreateIndexExecutor(AbstractExecutor):
         if not index_dir.exists():
             index_dir.mkdir(parents=True, exist_ok=True)
         return str(
-            index_dir
-            / Path("{}_{}.index".format(self.vector_store_type, self.name))
+            index_dir / Path("{}_{}.index".format(self.vector_store_type, self.name))
         )
 
     # Create EvaDB index.
@@ -106,18 +103,27 @@ class CreateIndexExecutor(AbstractExecutor):
         if function_expression is not None:
             feat_col_name = function_expression.output_objs[0].name
 
-        index_catalog_entry = self.catalog().get_index_catalog_entry_by_name(
-            self.name
-        )
+        index_catalog_entry = self.catalog().get_index_catalog_entry_by_name(self.name)
         index_path = self._get_evadb_index_save_path()
 
         if index_catalog_entry is not None:
             msg = f"Index {self.name} already exists."
             if self.if_not_exists:
-                if index_catalog_entry.feat_column == feat_col_catalog_entry and index_catalog_entry.function_signature == function_expression_signature and index_catalog_entry.type == self.node.vector_store_type:
+                if (
+                    index_catalog_entry.feat_column == feat_col_catalog_entry
+                    and index_catalog_entry.function_signature
+                    == function_expression_signature
+                    and index_catalog_entry.type == self.node.vector_store_type
+                ):
                     # Only update index if everything matches.
                     logger.warn(msg + " It will be updated on existing table.")
-                    index = VectorStoreFactory.init_vector_store(self.vector_store_type, self.name, **handle_vector_store_params(self.vector_store_type, index_path))
+                    index = VectorStoreFactory.init_vector_store(
+                        self.vector_store_type,
+                        self.name,
+                        **handle_vector_store_params(
+                            self.vector_store_type, index_path
+                        ),
+                    )
                 else:
                     # Skip index update if CREATE INDEX runs on a different index.
                     logger.warn(msg)
@@ -127,7 +133,6 @@ class CreateIndexExecutor(AbstractExecutor):
                 raise ExecutorError(msg)
         else:
             index = None
-
 
         try:
             # Add features to index.
