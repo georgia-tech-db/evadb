@@ -34,22 +34,30 @@ class CreateIndexExecutor(AbstractExecutor):
     def __init__(self, db: EvaDBDatabase, node: CreateIndexPlan):
         super().__init__(db, node)
 
+        self.name = self.node.name
+        self.if_not_exists = self.node.if_not_exists
+        self.table_ref = self.node.table_ref
+        self.col_list = self.node.col_list
+        self.vector_store_type = self.node.vector_store_type
+        self.project_expr_list = self.node.project_expr_list
+        self.index_def = self.node.index_def
+
     def exec(self, *args, **kwargs):
         # Vector type specific creation.
-        if self.node.vector_store_type == VectorStoreType.PGVECTOR:
+        if self.vector_store_type == VectorStoreType.PGVECTOR:
             self._create_native_index()
         else:
             self._create_evadb_index()
 
         yield Batch(
             pd.DataFrame(
-                [f"Index {self.node.name} successfully added to the database."]
+                [f"Index {self.name} successfully added to the database."]
             )
         )
 
     # Create index through the native storage engine.
     def _create_native_index(self):
-        table = self.node.table_ref.table
+        table = self.table_ref.table
         db_catalog_entry = self.catalog().get_database_catalog_entry(
             table.database_name
         )
@@ -59,8 +67,8 @@ class CreateIndexExecutor(AbstractExecutor):
         ) as handler:
             # As other libraries, we default to HNSW and L2 distance.
             resp = handler.execute_native_query(
-                f"""CREATE INDEX {self.node.name} ON {table.table_name}
-                    USING hnsw ({self.node.col_list[0].name} vector_l2_ops)"""
+                f"""CREATE INDEX {self.name} ON {table.table_name}
+                    USING hnsw ({self.col_list[0].name} vector_l2_ops)"""
             )
             if resp.error is not None:
                 raise ExecutorError(
@@ -74,53 +82,54 @@ class CreateIndexExecutor(AbstractExecutor):
             index_dir.mkdir(parents=True, exist_ok=True)
         return str(
             index_dir
-            / Path("{}_{}.index".format(self.node.vector_store_type, self.node.name))
+            / Path("{}_{}.index".format(self.vector_store_type, self.name))
         )
 
     # Create EvaDB index.
     def _create_evadb_index(self):
+        # Find function expression.
+        function_expression, function_expression_signature = None, None
+        for project_expr in self.project_expr_list:
+            if isinstance(project_expr, FunctionExpression):
+                function_expression = project_expr
+                function_expression_signature = project_expr.signature()
+
+        # Get feature tables.
+        feat_tb_catalog_entry = self.table_ref.table.table_obj
+
+        # Get feature column.
+        feat_col_name = self.col_list[0].name
+        feat_col_catalog_entry = [
+            col for col in feat_tb_catalog_entry.columns if col.name == feat_col_name
+        ][0]
+
+        if function_expression is not None:
+            feat_col_name = function_expression.output_objs[0].name
+
         index_catalog_entry = self.catalog().get_index_catalog_entry_by_name(
-            self.node.name
+            self.name
         )
+        index_path = self._get_evadb_index_save_path()
 
         if index_catalog_entry is not None:
-            msg = f"Index {self.node.name} already exists."
-            if self.node.if_not_exists:
-                logger.warn(msg + " It will be updated on existing table.")
+            msg = f"Index {self.name} already exists."
+            if self.if_not_exists:
+                if index_catalog_entry.feat_column == feat_col_catalog_entry and index_catalog_entry.function_signature == function_expression_signature and index_catalog_entry.type == self.node.vector_store_type:
+                    # Only update index if everything matches.
+                    logger.warn(msg + " It will be updated on existing table.")
+                    index = VectorStoreFactory.init_vector_store(self.vector_store_type, self.name, **handle_vector_store_params(self.vector_store_type, index_path))
+                else:
+                    # Skip index update if CREATE INDEX runs on a different index.
+                    logger.warn(msg)
+                    return
             else:
                 logger.error(msg)
                 raise ExecutorError(msg)
+        else:
+            index = None
 
-        index_path = self._get_evadb_index_save_path()
-        index = (
-            VectorStoreFactory.init_vector_store(
-                self.node.vector_store_type,
-                self.node.name,
-                **handle_vector_store_params(self.node.vector_store_type, index_path),
-            )
-            if index_catalog_entry is not None
-            else None
-        )
 
         try:
-            # Get feature tables.
-            feat_catalog_entry = self.node.table_ref.table.table_obj
-
-            # Get feature column.
-            feat_col_name = self.node.col_list[0].name
-            feat_column = [
-                col for col in feat_catalog_entry.columns if col.name == feat_col_name
-            ][0]
-
-            # Find function expression.
-            function_expression = None
-            for project_expr in self.node.project_expr_list:
-                if isinstance(project_expr, FunctionExpression):
-                    function_expression = project_expr
-
-            if function_expression is not None:
-                feat_col_name = function_expression.output_objs[0].name
-
             # Add features to index.
             for input_batch in self.children[0].exec():
                 input_batch.drop_column_alias()
@@ -134,10 +143,10 @@ class CreateIndexExecutor(AbstractExecutor):
                     if index is None:
                         input_dim = row_feat.shape[1]
                         index = VectorStoreFactory.init_vector_store(
-                            self.node.vector_store_type,
-                            self.node.name,
+                            self.vector_store_type,
+                            self.name,
                             **handle_vector_store_params(
-                                self.node.vector_store_type, index_path
+                                self.vector_store_type, index_path
                             ),
                         )
                         index.create(input_dim)
@@ -151,14 +160,12 @@ class CreateIndexExecutor(AbstractExecutor):
             # Save to catalog.
             if index_catalog_entry is None:
                 self.catalog().insert_index_catalog_entry(
-                    self.node.name,
+                    self.name,
                     index_path,
-                    self.node.vector_store_type,
-                    feat_column,
-                    function_expression.signature()
-                    if function_expression is not None
-                    else None,
-                    self.node.index_def,
+                    self.vector_store_type,
+                    feat_col_catalog_entry,
+                    function_expression_signature,
+                    self.index_def,
                 )
         except Exception as e:
             # Delete index.
