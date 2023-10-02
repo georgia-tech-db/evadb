@@ -359,7 +359,8 @@ class StatementToPlanConverter:
             statement.table_ref,
             statement.col_list,
             statement.vector_store_type,
-            statement.function,
+            statement.project_expr_list,
+            statement.index_def,
         )
         self._plan = create_index_opr
 

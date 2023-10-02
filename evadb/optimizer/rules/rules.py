@@ -832,8 +832,19 @@ class LogicalCreateIndexToVectorIndex(Rule):
             before.table_ref,
             before.col_list,
             before.vector_store_type,
-            before.function,
+            before.project_expr_list,
+            before.index_def,
         )
+        child = SeqScanPlan(None, before.project_expr_list, before.table_ref.alias)
+        batch_mem_size = context.db.config.get_value("executor", "batch_mem_size")
+        child.append_child(
+            StoragePlan(
+                before.table_ref.table.table_obj,
+                before.table_ref,
+                batch_mem_size=batch_mem_size,
+            )
+        )
+        after.append_child(child)
         yield after
 
 

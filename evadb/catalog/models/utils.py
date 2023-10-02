@@ -201,6 +201,7 @@ class IndexCatalogEntry:
     row_id: int = None
     feat_column_id: int = None
     function_signature: str = None
+    index_def: str = None
     feat_column: ColumnCatalogEntry = None
 
 
