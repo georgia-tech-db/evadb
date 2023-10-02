@@ -79,17 +79,22 @@ class CreateIndexExecutor(AbstractExecutor):
 
     # Create EvaDB index.
     def _create_evadb_index(self):
-        if self.catalog().get_index_catalog_entry_by_name(self.node.name):
+        index_catalog_entry = self.catalog().get_index_catalog_entry_by_name(self.node.name)
+
+        if index_catalog_entry is not None:
             msg = f"Index {self.node.name} already exists."
             if self.node.if_not_exists:
-                logger.warn(msg)
-                return
+                logger.warn(msg + " It will be updated on existing table.")
             else:
                 logger.error(msg)
                 raise ExecutorError(msg)
 
-        index = None
         index_path = self._get_evadb_index_save_path()
+        index = VectorStoreFactory.init_vector_store(
+            self.node.vector_store_type,
+            self.node.name,
+            **handle_vector_store_params(self.node.vector_store_type, index_path),
+        ) if index_catalog_entry is not None else None
 
         try:
             # Get feature tables.
@@ -111,8 +116,6 @@ class CreateIndexExecutor(AbstractExecutor):
                 feat_col_name = function_expression.output_objs[0].name
 
             # Add features to index.
-            # TODO: batch size is hardcoded for now.
-            input_dim = -1
             for input_batch in self.children[0].exec():
                 input_batch.drop_column_alias()
                 feat = input_batch.column_as_numpy_array(feat_col_name)
@@ -120,6 +123,8 @@ class CreateIndexExecutor(AbstractExecutor):
 
                 for i in range(len(input_batch)):
                     row_feat = feat[i].reshape(1, -1)
+
+                    # Create new index if not exists.
                     if index is None:
                         input_dim = row_feat.shape[1]
                         index = VectorStoreFactory.init_vector_store(
@@ -138,16 +143,17 @@ class CreateIndexExecutor(AbstractExecutor):
             index.persist()
 
             # Save to catalog.
-            self.catalog().insert_index_catalog_entry(
-                self.node.name,
-                index_path,
-                self.node.vector_store_type,
-                feat_column,
-                function_expression.signature()
-                if function_expression is not None
-                else None,
-                self.node.index_def,
-            )
+            if index_catalog_entry is None:
+                self.catalog().insert_index_catalog_entry(
+                    self.node.name,
+                    index_path,
+                    self.node.vector_store_type,
+                    feat_column,
+                    function_expression.signature()
+                    if function_expression is not None
+                    else None,
+                    self.node.index_def,
+                )
         except Exception as e:
             # Delete index.
             if index:
