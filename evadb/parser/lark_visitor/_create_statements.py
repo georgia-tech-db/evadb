@@ -267,11 +267,12 @@ class CreateIndex:
             while not isinstance(index_elem, TupleValueExpression):
                 index_elem = index_elem.children[0]
             index_elem = [index_elem]
+        else:
+            project_expr_list += index_elem
 
         # Add tv_expr for projected columns.
         col_list = []
         for tv_expr in index_elem:
-            project_expr_list += [tv_expr]
             col_list += [ColumnDefinition(tv_expr.name, None, None, None)]
 
         return CreateIndexStatement(

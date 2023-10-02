@@ -113,7 +113,7 @@ class ParserTests(unittest.TestCase):
                 ColumnDefinition("featCol", None, None, None),
             ],
             VectorStoreType.FAISS,
-            [TupleValueExpression(name="*")],
+            [TupleValueExpression(name="featCol")],
         )
         actual_stmt = evadb_stmt_list[0]
         self.assertEqual(actual_stmt, expected_stmt)
@@ -128,7 +128,7 @@ class ParserTests(unittest.TestCase):
                 ColumnDefinition("featCol", None, None, None),
             ],
             VectorStoreType.FAISS,
-            [TupleValueExpression(name="*")],
+            [TupleValueExpression(name="featCol")],
         )
         create_index_query = (
             "CREATE INDEX IF NOT EXISTS testindex ON MyVideo (featCol) USING FAISS;"
@@ -160,7 +160,7 @@ class ParserTests(unittest.TestCase):
                 ColumnDefinition("featCol", None, None, None),
             ],
             VectorStoreType.FAISS,
-            [TupleValueExpression(name="*"), func_expr],
+            [func_expr],
         )
         actual_stmt = evadb_stmt_list[0]
         self.assertEqual(actual_stmt, expected_stmt)
