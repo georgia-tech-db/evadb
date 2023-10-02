@@ -12,11 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from evadb.binder.binder_utils import BinderError, create_row_num_tv_expr, extend_star
+from evadb.binder.binder_utils import BinderError, create_row_num_tv_expr
 from evadb.binder.statement_binder import StatementBinder
 from evadb.catalog.catalog_type import NdArrayType, VectorStoreType
 from evadb.expression.function_expression import FunctionExpression
-from evadb.expression.tuple_value_expression import TupleValueExpression
 from evadb.parser.create_index_statement import CreateIndexStatement
 from evadb.third_party.databases.interface import get_database_handler
 
@@ -24,21 +23,12 @@ from evadb.third_party.databases.interface import get_database_handler
 def bind_create_index(binder: StatementBinder, node: CreateIndexStatement):
     binder.bind(node.table_ref)
 
-    func_project_expr = None
-
-    # Extend projection list.
-    project_expr_list = []
-    for project_expr in node.project_expr_list:
-        if isinstance(project_expr, TupleValueExpression) and project_expr.name == "*":
-            project_expr_list += extend_star(binder._binder_context)
-        elif isinstance(project_expr, FunctionExpression):
-            func_project_expr = project_expr
-            project_expr_list += [project_expr]
-
     # Bind all projection expressions.
-    node.project_expr_list = project_expr_list
+    func_project_expr = None
     for project_expr in node.project_expr_list:
         binder.bind(project_expr)
+        if isinstance(project_expr, FunctionExpression):
+            func_project_expr = project_expr
 
     # Append ROW_NUM_COLUMN.
     node.project_expr_list += [create_row_num_tv_expr(node.table_ref.alias)]
