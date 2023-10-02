@@ -31,6 +31,8 @@ class IndexCatalog(BaseModel):
     `_feat_column_id:` the `_row_id` of the `ColumnCatalog` entry for the column on which the index is built.
     `_function_signature:` if the index is created by running function expression on input column, this will store
                       the function signature of the used function. Otherwise, this field is None.
+    `_index_def:` the original SQL statement that is used to create this index. We record this to rerun create index
+                on updated table.
     """
 
     __tablename__ = "index_catalog"
