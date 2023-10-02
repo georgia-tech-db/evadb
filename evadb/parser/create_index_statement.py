@@ -63,7 +63,7 @@ class CreateIndexStatement(AbstractStatement):
 
             def traverse_create_function_expression_str(expr):
                 if isinstance(expr, TupleValueExpression):
-                    return f"({self.col_list[0].name})"
+                    return f"{self.col_list[0].name}"
                 return f"{expr.name}({traverse_create_function_expression_str(expr.children[0])})"
 
             print_str += f" ({traverse_create_function_expression_str(function_expr)})"
