@@ -192,7 +192,7 @@ class CatalogManager(object):
             resp = handler.get_tables()
 
             if resp.error is not None:
-                return False
+                raise Exception(resp.error)
 
             # Check table existence.
             table_df = resp.data

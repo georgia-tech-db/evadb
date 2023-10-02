@@ -213,10 +213,11 @@ jobs:
           keys:
             - v1-model_cache-{{ checksum "setup.py" }}
 
-      # Always restore testmondata from staging, python3.10, ray disabled.
+      # First try restoring the testmondata from PR, than staging.
       - restore_cache:
           keys:
-            - v1-testmon_cache-staging-python3.10-rayDISABLED-{{ checksum "setup.py" }}
+            - v1-testmon_cache-{{ .Branch }}-python<< parameters.v >>-ray<< parameters.ray >>-{{ checksum "setup.py" }}-
+            - v1-testmon_cache-staging-python3.10-rayDISABLED-{{ checksum "setup.py" }}-
       
       - run:
           name: Install EvaDB package from GitHub repo with all dependencies
@@ -271,16 +272,21 @@ jobs:
     # Collect the testmondata only for long intergration tests
       - when:
           condition:
-            and:
-              - equal: [ LONG INTEGRATION, << parameters.mode >> ]
-              - equal: [ staging, << pipeline.git.branch >> ]
-              - equal: [ "3.10", << parameters.v >> ]
-              - equal: [ DISABLED, << parameters.ray >>]
+            or:
+              - equal: [ LONG INTEGRATION CACHE, << parameters.mode >> ]
+              - and:
+                - equal: [ LONG INTEGRATION, << parameters.mode >> ]
+                - equal: [ staging, << pipeline.git.branch >> ]
+                - equal: [ "3.10", << parameters.v >> ]
+                - equal: [ DISABLED, << parameters.ray >>]
           steps:
           - save_cache:
               key: v1-testmon_cache-{{ .Branch }}-python<< parameters.v >>-ray<< parameters.ray >>-{{ checksum "setup.py" }}-{{ epoch }}
               paths:
                 - .testmondata
+                - .testmondata-shm
+                - .testmondata-wal
+
 
       - save_cache:
           key: v1-pip-wheel_cache-python<< parameters.v >>-ray<< parameters.ray >>-{{ checksum "setup.py" }}

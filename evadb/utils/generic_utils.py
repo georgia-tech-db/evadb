@@ -21,7 +21,7 @@ import shutil
 import sys
 import uuid
 from pathlib import Path
-from typing import List
+from typing import Iterator, List
 from urllib.parse import urlparse
 
 from aenum import AutoEnum, unique
@@ -171,6 +171,28 @@ def get_size(obj, seen=None):
     elif hasattr(obj, "__iter__") and not isinstance(obj, (str, bytes, bytearray)):
         size += sum([get_size(i, seen) for i in obj])
     return size
+
+
+def rebatch(it: Iterator, batch_mem_size: int = 30000000) -> Iterator:
+    """
+    Utility function to rebatch the rows
+    Args:
+        it (Iterator): an iterator for rows, every row is a dictionary
+        batch_mem_size (int): the maximum batch memory size
+    Yields:
+        data_batch (List): a list of rows, every row is a dictionary
+    """
+    data_batch = []
+    row_size = None
+    for row in it:
+        data_batch.append(row)
+        if row_size is None:
+            row_size = get_size(data_batch)
+        if len(data_batch) * row_size >= batch_mem_size:
+            yield data_batch
+            data_batch = []
+    if data_batch:
+        yield data_batch
 
 
 def get_str_hash(s: str) -> str:
