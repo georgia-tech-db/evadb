@@ -57,6 +57,7 @@ class RelationalAPI(unittest.TestCase):
         # todo: move these to relational apis as well
         execute_query_fetch_all(self.evadb, """DROP TABLE IF EXISTS mnist_video;""")
         execute_query_fetch_all(self.evadb, """DROP TABLE IF EXISTS meme_images;""")
+        execute_query_fetch_all(self.evadb, """DROP TABLE IF EXISTS dummy_table;""")
 
     def test_relation_apis(self):
         cursor = self.conn.cursor()
