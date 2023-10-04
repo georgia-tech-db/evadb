@@ -389,14 +389,15 @@ class SimilarityTests(unittest.TestCase):
                                         USING FAISS;"""
             execute_query_fetch_all(self.evadb, create_index_query)
 
-            select_query = """SELECT _row_id FROM testSimilarityImageDataset
+            select_query = """SELECT _row_id, Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data)) FROM testSimilarityImageDataset
                                 ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data))
                                 LIMIT 1;""".format(
-                self.img_path
+                self.img_path, self.img_path,
             )
             explain_batch = execute_query_fetch_all(
                 self.evadb, f"EXPLAIN {select_query}"
             )
+            print(explain_batch.frames[0][0])
             self.assertTrue("VectorIndexScan" in explain_batch.frames[0][0])
 
             res_batch = execute_query_fetch_all(self.evadb, select_query)

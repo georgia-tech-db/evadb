@@ -48,6 +48,7 @@ from evadb.plan_nodes.nested_loop_join_plan import NestedLoopJoinPlan
 from evadb.plan_nodes.predicate_plan import PredicatePlan
 from evadb.plan_nodes.project_plan import ProjectPlan
 from evadb.plan_nodes.show_info_plan import ShowInfoPlan
+from evadb.utils.logging_manager import logger
 
 if TYPE_CHECKING:
     from evadb.optimizer.optimizer_context import OptimizerContext
@@ -534,32 +535,27 @@ class CombineSimilarityOrderByAndLimitToVectorIndexScan(Rule):
         def _exists_predicate(opr):
             if isinstance(opr, LogicalGet):
                 return opr.predicate is not None
-            # LogicalFilter
+            if isinstance(opr, LogicalFilter):
+                return True
+            if isinstance(opr, LogicalApplyAndMerge):
+                return False
             return True
 
         if _exists_predicate(sub_tree_root.opr):
             return
 
         # Check if orderby runs on similarity expression.
-        # Current optimization will only accept Similarity expression.
+        # Current similarity index optimization will only accept Similarity expression.
         func_orderby_expr = None
         for column, sort_type in orderby_node.orderby_list:
             if (
                 isinstance(column, FunctionExpression)
                 and sort_type == ParserOrderBySortType.ASC
+                and column.name == "Similarity"
             ):
                 func_orderby_expr = column
-        if not func_orderby_expr or func_orderby_expr.name != "Similarity":
+        if func_orderby_expr is None:
             return
-
-        # Traverse to the LogicalGet operator.
-        tb_catalog_entry = list(sub_tree_root.opr.find_all(LogicalGet))[0].table_obj
-        db_catalog_entry = catalog_manager().get_database_catalog_entry(
-            tb_catalog_entry.database_name
-        )
-        is_postgres_data_source = (
-            db_catalog_entry is not None and db_catalog_entry.engine == "postgres"
-        )
 
         # Check if there exists an index on table and column.
         query_func_expr, base_func_expr = func_orderby_expr.children
@@ -570,7 +566,33 @@ class CombineSimilarityOrderByAndLimitToVectorIndexScan(Rule):
             tv_expr = tv_expr.children[0]
 
         # Get column catalog entry and function_signature.
-        column_catalog_entry = tv_expr.col_object
+        col_catalog_entry = tv_expr.col_object
+
+        # Get the corespoinding table catalog entry.
+        tb_catalog_entry = None
+        for cur_tb_catalog_entry in catalog_manager().get_all_table_catalog_entries():
+            if col_catalog_entry in cur_tb_catalog_entry.columns:
+                tb_catalog_entry = cur_tb_catalog_entry
+                break
+        
+        # TODO: Traverse tree to get LogicalGet opr. This will not work when the child of
+        # LogicalOrder is not LogicalGet. We need to figure out a way to pass table
+        # info here.
+        db_catalog_entry = None
+        if tb_catalog_entry is None:
+            opr_list = list(sub_tree_root.opr.find_all(LogicalGet))
+            if len(opr_list) == 0:
+                logger.warn("Curernt plan does not work with Limit + Order BY -> IndexScan rule.")
+                return
+            tb_catalog_entry = opr_list[0].table_obj
+            db_catalog_entry = catalog_manager().get_database_catalog_entry(
+                tb_catalog_entry.database_name
+            )
+
+        # Check if the table source is from Postgres.
+        is_postgres_data_source = (
+            db_catalog_entry is not None and db_catalog_entry.engine == "postgres"
+        )
 
         # Only check the index existence when building on EvaDB data.
         if not is_postgres_data_source:
@@ -584,7 +606,7 @@ class CombineSimilarityOrderByAndLimitToVectorIndexScan(Rule):
             # Get index catalog. Check if an index exists for matching
             # function signature and table columns.
             index_catalog_entry = catalog_manager().get_index_catalog_entry_by_column_and_function_signature(
-                column_catalog_entry, function_signature
+                col_catalog_entry, function_signature
             )
             if not index_catalog_entry:
                 return
@@ -593,7 +615,7 @@ class CombineSimilarityOrderByAndLimitToVectorIndexScan(Rule):
                 name="",
                 save_file_path="",
                 type=VectorStoreType.PGVECTOR,
-                feat_column=column_catalog_entry,
+                feat_column=col_catalog_entry,
             )
 
         # Construct the Vector index scan plan.
