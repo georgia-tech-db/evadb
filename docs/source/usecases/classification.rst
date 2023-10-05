@@ -1,7 +1,7 @@
 .. _homerental-predict:
 
-Home Rental Prediction
-=======================
+Prediction
+==========
 
 .. raw:: html
 
@@ -22,7 +22,7 @@ Home Rental Prediction
 Introduction
 ------------
 
-In this tutorial, we present how to use :ref:`Prediction AI Engines<ludwig>` in EvaDB to predict home rental prices. EvaDB makes it easy to do predictions using its built-in AutoML engines with your existing databases.
+In this tutorial, we present how to to create and train a machine learning model for predicting the rental price of a home using the built-in :ref:`Prediction AI Engines<ludwig>` in EvaDB. EvaDB makes it easy to do prediction queries over data in your database using its built-in ``Prediction`` engines.
 
 .. include:: ../shared/evadb.rst
 
@@ -31,16 +31,16 @@ In this tutorial, we present how to use :ref:`Prediction AI Engines<ludwig>` in 
 We will assume that the input data is loaded into a ``PostgreSQL`` database. 
 To load the home rental data into your database, see the complete `home rental prediction notebook on Colab <https://colab.research.google.com/github/georgia-tech-db/eva/blob/staging/tutorials/17-home-rental-prediction.ipynb>`_.
 
-Preview the Home Sales Data
--------------------------------------------
+Preview the Home Rental Price Data
+----------------------------------
 
-We use the `home rental data <https://www.dropbox.com/scl/fi/gy2682i66a8l2tqsowm5x/home_rentals.csv?rlkey=e080k02rv5205h4ullfjdr8lw&raw=1>`_ in this usecase. The data contains eight columns: ``number_of_rooms``, ``number_of_bathrooms``, ``sqft``, ``location``, ``days_on_market``, ``initial_price``, ``neighborhood``, and ``rental_price``.
+The ``home_rentals`` table contains eight columns: ``number_of_rooms``, ``number_of_bathrooms``, ``sqft``, ``location``, ``days_on_market``, ``initial_price``, ``neighborhood``, and ``rental_price``.
 
 .. code-block:: sql
 
    SELECT * FROM postgres_data.home_rentals LIMIT 3;
 
-This query previews the data in the home_rentals table:
+This query presents a subset of data in the ``home_rentals`` table:
 
 .. code-block:: 
 
@@ -52,11 +52,10 @@ This query previews the data in the home_rentals table:
     |                            0 |                                1 |               529 |                 great |                           3 |                       2431 |                south_side |                      2431 | 
     +------------------------------+----------------------------------+-------------------+-----------------------+-----------------------------+----------------------------+---------------------------+---------------------------+
 
-Train a Home Rental Prediction Model
--------------------------------------
+Train a Home Rental Price Prediction Model
+------------------------------------------
 
-Let's next train a prediction model from the home_rental table using EvaDB's ``CREATE FUNCTION`` query.
-We will use the built-in :ref:`Ludwig<ludwig>` engine for this task.
+Let's next train a prediction model over the ``home_rental`` table using EvaDB's ``CREATE FUNCTION`` statement. We will use the built-in :ref:`Ludwig<ludwig>` engine for this task.
 
 .. code-block:: sql
   
@@ -67,11 +66,13 @@ We will use the built-in :ref:`Ludwig<ludwig>` engine for this task.
   TIME_LIMIT 3600;
 
 In the above query, we use all the columns (except ``rental_price``) from ``home_rental`` table to predict the ``rental_price`` column.
-We set the training time out to be 3600 seconds.
+We set the training time out to be ``3600`` seconds.
 
 .. note::
 
-   Go over :ref:`ludwig` page on exploring all configurable paramters for the model training frameworks.
+   The :ref:`ludwig` page lists all the configurable paramters for the model training framework.
+
+This query returns the trained model:
 
 .. code-block:: 
 
@@ -79,16 +80,18 @@ We set the training time out to be 3600 seconds.
    | Function PredictHouseRent successfully added |
    +----------------------------------------------+
 
-Predict the Home Rental Price using the Trained Model
------------------------------------------------------
+Predict using the Trained Model
+-------------------------------
 
 Next we use the trained ``PredictHouseRent`` to predict the home rental price.
 
 .. code-block:: sql
 
-   SELECT PredictHouseRent(*) FROM postgres_data.home_rentals LIMIT 3;
+   SELECT PredictHouseRent(*) 
+   FROM postgres_data.home_rentals 
+   LIMIT 3;
 
-We use ``*`` to simply pass all columns into the ``PredictHouseRent`` function.
+We use ``*`` to pass all the columns in the table as input into the ``PredictHouseRent`` function.
 
 .. code-block::
 
@@ -100,7 +103,7 @@ We use ``*`` to simply pass all columns into the ``PredictHouseRent`` function.
    |                               2346.319824 |
    +-------------------------------------------+
 
-We have the option to utilize a ``LATERAL JOIN`` to compare the actual rental prices in the ``home_rentals`` dataset with the predicted rental prices generated by the trained model, ``PredictHouseRent``.
+We next do a ``LATERAL JOIN`` to compare the actual rental prices in the ``home_rentals`` dataset against the predicted rental prices generated by the trained model, ``PredictHouseRent``.
 
 .. code-block:: sql
 
