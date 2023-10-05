@@ -28,16 +28,18 @@ Next, we create a function of `TYPE Forecasting`. We must enter the column name 
    CREATE FUNCTION IF NOT EXISTS Forecast FROM
    (SELECT y FROM AirData)
    TYPE Forecasting
+   HORIZON 12
    PREDICT 'y';
 
 This trains a forecasting model. The model can be called by providing the horizon for forecasting.
 
 .. code-block:: sql
 
-   SELECT Forecast(12);
+   SELECT Forecast();
 
-Here, the horizon is `12`, which represents the forecast 12 steps into the future.
+.. note::
 
+   `Forecasting` function also provides suggestions by default. If you wish to turn it off, send "False" as an optional argument while calling the function. Eg. `SELECT Forecast("False");`
 
 Forecast Parameters
 -------------------
@@ -91,3 +93,4 @@ Below is an example query with `neuralforecast` with `trend` column as exogenous
     LIBRARY 'neuralforecast'
     AUTO 'f'
     FREQUENCY 'M';
+

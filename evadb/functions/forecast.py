@@ -48,13 +48,33 @@ class ForecastModel(AbstractFunction):
         self.id_column_rename = id_column_rename
         self.horizon = int(horizon)
         self.library = library
+        self.suggestion_dict = {
+            1: "Predictions are flat. Consider using LIBRARY 'neuralforecast' for more accrate predictions.",
+        }
 
     def forward(self, data) -> pd.DataFrame:
         if self.library == "statsforecast":
-            forecast_df = self.model.predict(h=self.horizon)
+            forecast_df = self.model.predict(h=self.horizon).reset_index()
         else:
-            forecast_df = self.model.predict()
-        forecast_df.reset_index(inplace=True)
+            forecast_df = self.model.predict().reset_index()
+
+        # Suggestions
+        if len(data) == 0 or list(data[0])[0].lower()[0] == "t":
+            suggestion_list = []
+            # 1: Flat predictions
+            if self.library == "statsforecast":
+                for type_here in forecast_df["unique_id"].unique():
+                    if (
+                        forecast_df.loc[forecast_df["unique_id"] == type_here][
+                            self.model_name
+                        ].nunique()
+                        == 1
+                    ):
+                        suggestion_list.append(1)
+
+            for suggestion in set(suggestion_list):
+                print("\nSUGGESTION: " + self.suggestion_dict[suggestion])
+
         forecast_df = forecast_df.rename(
             columns={
                 "unique_id": self.id_column_rename,
