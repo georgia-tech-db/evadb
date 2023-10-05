@@ -68,7 +68,7 @@ The index can be created on either a column of a table directly or outputs from 
 * [index_name] is the name the of constructed index.
 * [table_name] is the name of the table, on which the index is created.
 * [column_name] is the name of one of the column in the table. We currently only support creating index on single column of a table.
-* [function_name] is an optional parameter that can be added if the index needs to be construsted on results of a funciton.
+* [function_name] is an optional parameter that can be added if the index needs to be constructed on results of a function.
 
 Examples
 ~~~~~~~~
@@ -104,7 +104,7 @@ CREATE FUNCTION via Type
 
 .. code-block:: sql
 
-   CREATE [OR REPALCE] FUNCTION [IF NOT EXISTS] function_name
+   CREATE [OR REPLACE] FUNCTION [IF NOT EXISTS] function_name
    [ FROM ( select ) ]
    TYPE function_type
    [ parameter [ ...] ]

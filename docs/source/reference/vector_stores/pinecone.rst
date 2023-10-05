@@ -2,7 +2,7 @@ Pinecone
 ==========
 
 Pinecone is a managed, cloud-native vector database with a simple API and no infrastructure hassles.
-The connection to Pincone is based on the `pinecone-client <https://docs.pinecone.io/docs/python-client>`_ library.
+The connection to Pinecone is based on the `pinecone-client <https://docs.pinecone.io/docs/python-client>`_ library.
 
 Dependency
 ----------

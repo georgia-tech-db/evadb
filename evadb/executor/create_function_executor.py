@@ -252,7 +252,7 @@ class CreateFunctionExecutor(AbstractExecutor):
         frequency = arg_map["frequency"]
         if frequency is None:
             raise RuntimeError(
-                f"Can not infer the frequency for {self.node.name}. Please explictly set it."
+                f"Can not infer the frequency for {self.node.name}. Please explicitly set it."
             )
 
         season_dict = {  # https://pandas.pydata.org/docs/user_guide/timeseries.html#timeseries-offset-aliases
@@ -393,7 +393,7 @@ class CreateFunctionExecutor(AbstractExecutor):
             if int(x.split("horizon")[1].split(".pkl")[0]) >= horizon
         ]
         if len(existing_model_files) == 0:
-            print("Training, please wait...")
+            logger.info("Training, please wait...")
             if library == "neuralforecast":
                 model.fit(df=data, val_size=horizon)
             else:
@@ -471,9 +471,9 @@ class CreateFunctionExecutor(AbstractExecutor):
                 # We use DropObjectExecutor to avoid bookkeeping the code. The drop function should be moved to catalog.
                 from evadb.executor.drop_object_executor import DropObjectExecutor
 
-                drop_exectuor = DropObjectExecutor(self.db, None)
+                drop_executor = DropObjectExecutor(self.db, None)
                 try:
-                    drop_exectuor._handle_drop_function(self.node.name, if_exists=False)
+                    drop_executor._handle_drop_function(self.node.name, if_exists=False)
                 except RuntimeError:
                     pass
                 else:
