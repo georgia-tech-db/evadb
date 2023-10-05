@@ -108,6 +108,7 @@ class EvaDBQuery:
             pandas.DataFrame:
         """
         batch = self.execute()
+        batch.drop_column_alias()
         assert batch is not None, "relation execute failed"
         return batch.frames
 

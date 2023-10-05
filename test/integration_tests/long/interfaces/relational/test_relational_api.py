@@ -361,7 +361,7 @@ class RelationalAPI(unittest.TestCase):
         )
         output = query.df()
         self.assertEqual(len(output), 3)
-        self.assertTrue("pdfs.data" in output.columns)
+        self.assertTrue("data" in output.columns)
 
         cursor.drop_index("faiss_index").df()
 
