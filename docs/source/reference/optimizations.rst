@@ -1,12 +1,14 @@
 .. _optimizations:
 
-Optimizations
-=============
+EvaDB Optimizations 🛠️
+======================
 
 EvaDB optimizes the evaluation of AI functions using these optimizations:
 
-1. EvaDB automatically caches the results of expensive function invocations while processing a query and reuses the results in future queries.
-2. EvaDB reorder predicates based on cost to evaluate fast, more selective predicates earlier.
-3. EvaDB runs AI models using the Ray framework in parallel to improve GPU utilization and sets up an AI pipeline to parallelize CPU processing (i.e., loading and decoding data).
+1️⃣ Result Caching: EvaDB caches outcomes from expensive function invocations during query processing. This approach facilitates faster retrieval in subsequent queries. 📂
 
+2️⃣ Predicate Reordering: Efficiency is key. EvaDB strategically reorders predicates to prioritize lower-cost and more selective evaluations. ⚖️
 
+3️⃣ Parallel Processing with Ray: Leveraging the Ray framework, EvaDB runs AI models in parallel, optimizing GPU utilization. Additionally, an AI pipeline is established for concurrent CPU tasks, such as data loading and decoding. 🚀
+
+These techniques ensure superior performance and responsiveness in EvaDB's AI function evaluations.
