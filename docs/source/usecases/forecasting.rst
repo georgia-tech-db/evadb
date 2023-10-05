@@ -22,25 +22,28 @@ Home Sale Forecasting
 Introduction
 ------------
 
-In this tutorial, we present how to use :ref:`Forecasting AI Engines<forecast>` in EvaDB to predict home sale price. EvaDB makes it easy to do time series predictions using its built-in Auto Forecast function.
+In this tutorial, we present how to create and train a machine learning model for forecasting the sale price of a home using the built-in :ref:`Forecasting AI Engines<forecast>` in EvaDB. EvaDB makes it easy to do forecasting queries over data in your database using its built-in ``Forecasting`` engines.
 
 .. include:: ../shared/evadb.rst
 
 .. include:: ../shared/postgresql.rst
 
 We will assume that the input data is loaded into a ``PostgreSQL`` database. 
-To load the home sales data into your database, see the complete `home sale forecasting notebook on Colab <https://colab.research.google.com/github/georgia-tech-db/eva/blob/staging/tutorials/16-homesale-forecasting.ipynb>`_.
+To load the home sales dataset into your database, see the complete `home sale forecasting notebook on Colab <https://colab.research.google.com/github/georgia-tech-db/eva/blob/staging/tutorials/16-homesale-forecasting.ipynb>`_.
 
-Preview the Home Sales Data
--------------------------------------------
+Preview the Home Sale Price Data
+--------------------------------
 
-We use the `raw_sales.csv of the House Property Sales Time Series <https://www.kaggle.com/datasets/htagholdings/property-sales?resource=download>`_ in this usecase. The data contains five columns: ``postcode``, ``price``, ``bedrooms``, ``datesold``, and ``propertytype``.
+We use the `House Property Sales Time Series <https://www.kaggle.com/datasets/htagholdings/property-sales?resource=download>`_ dataset from Kaggle in this tutorial. The dataset (``raw_sales.csv``) contains five columns: 
+``postcode``, ``price``, ``bedrooms``, ``datesold``, and ``propertytype``.
 
 .. code-block:: sql
 
-   SELECT * FROM postgres_data.home_sales LIMIT 3;
+   SELECT * 
+   FROM postgres_data.home_sales 
+   LIMIT 3;
 
-This query previews the data in the home_sales table:
+This query presents a subset of the dataset in the ``home_sales`` table:
 
 .. code-block:: 
 
@@ -52,34 +55,26 @@ This query previews the data in the home_sales table:
     |                2905 |           328000 |                   3 |          2007-03-07 |                   house |
     +---------------------+------------------+---------------------+---------------------+-------------------------+
 
-Train a Home Sale Forecasting Model
------------------------------------
+Train a Forecasting Model
+-------------------------
 
-Let's next train a time-series forecasting model from the home_sales table using EvaDB's ``CREATE FUNCTION`` query.
-Particularly, we are interested in the price of the properties that have three bedrooms and are in the postcode 2607 area.
+Let's next train a time-series forecasting model over the ``home_sales`` table using EvaDB's ``CREATE FUNCTION`` statement. In particular, we are interested in forecasting the price of homes with three bedrooms in the 2607 ``postcode``.
 
 .. code-block:: sql
 
   CREATE FUNCTION IF NOT EXISTS HomeSaleForecast FROM
-    (
+  (
       SELECT propertytype, datesold, price
       FROM postgres_data.home_sales
       WHERE bedrooms = 3 AND postcode = 2607
-    )
+  )
   TYPE Forecasting
   PREDICT 'price'
   TIME 'datesold'
   ID 'propertytype'
   FREQUENCY 'W';
 
-In the ``home_sales`` dataset, we have two different property types, houses and units, and price gap between them are large. 
-We'd like to ask EvaDB to analyze the price of houses and units independently. 
-To do so, we specify the ``propertytype`` column as the ``ID`` of the time series data, which represents an identifier for the series.
-Here is the query's output ``DataFrame``:
-
-.. note::
-
-   Go over :ref:`forecast` page on exploring all configurable paramters for the forecast model.
+This query returns the trained model:
 
 .. code-block:: 
 
@@ -87,16 +82,24 @@ Here is the query's output ``DataFrame``:
    | Function HomeSaleForecast successfully added |
    +----------------------------------------------+
 
-Predict the Home Price using the Trained Model
-----------------------------------------------
+.. note::
 
-Next we use the trained ``HomeSaleForecast`` to predict the home sale price for next 3 weeks.
+   The :ref:`forecast` page lists all the configurable paramters for the forecasting model.
+
+In the ``home_sales`` dataset, we have two different types of properties -- houses and units, and price gap between them is large. To get better forecasts,
+we specify the ``propertytype`` column as the ``ID`` of the time series data.
+This denotes the identifier for the series and allows EvaDB to forecast the prices of houses and units independently.
+
+Forecast using the Trained Model
+--------------------------------
+
+Next we use the trained ``HomeSaleForecast`` model to predict the home sale price for next 3 months. The model takes the ``horizon`` as input during prediction. The ``horizon`` denotes the steps in time over which we want to forecast in the future. In this query, the ``horizon`` is 3 months.
 
 .. code-block:: sql
 
    SELECT HomeSaleForecast(3);
 
-The input of the trained model is the horizon (i.e., week in this case), the steps we want to forecast in the future. Here is the query's output ``DataFrame``:
+The query returns the forecasted prices of the properties:
 
 .. code-block::
 
@@ -111,7 +114,7 @@ The input of the trained model is the horizon (i.e., week in this case), the ste
    |                          unit |                2019-01-06 |                 402112 |
    +-------------------------------+---------------------------+------------------------+
 
-We can further use ``ORDER BY`` to find out which month in the following year has the lower price.
+We may use ``ORDER BY`` to find out which month in the following year has the lowest price.
 
 .. code-block:: sql
 

@@ -20,6 +20,10 @@ parts:
 
   - caption: Use Cases
     chapters:
+      - file: source/usecases/forecasting.rst
+        title: Forecasting
+      - file: source/usecases/prediction.rst
+        title: Classification
       - file: source/usecases/sentiment-analysis.rst
         title: Sentiment Analysis
       - file: source/usecases/question-answering.rst
@@ -34,12 +38,6 @@ parts:
         title: Object Detection
       - file: source/usecases/emotion-analysis.rst
         title: Emotion Analysis
-      - file: source/usecases/homesale-forecast.rst
-        title: Home Sale Forecasting
-      - file: source/usecases/homerental-predict.rst
-        title: Home Rental Prediction
-      # - file: source/usecases/privategpt.rst
-      #   title: PrivateGPT
 
   - caption: User Reference
     chapters:
