@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import Optional
+
 from evadb.parser.types import ShowType
 from evadb.plan_nodes.abstract_plan import AbstractPlan
 from evadb.plan_nodes.types import PlanOprType
@@ -27,7 +28,7 @@ class ShowInfoPlan(AbstractPlan):
     @property
     def show_type(self):
         return self._show_type
-    
+
     @property
     def show_val(self):
         return self._show_val
@@ -39,6 +40,6 @@ class ShowInfoPlan(AbstractPlan):
             return "ShowTablePlan"
         elif self._show_type == ShowType.CONFIG:
             return "ShowConfigPlan"
-    
+
     def __hash__(self) -> int:
         return hash((super().__hash__(), self.show_type, self.show_val))

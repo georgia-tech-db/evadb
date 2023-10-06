@@ -742,7 +742,7 @@ class ParserTests(unittest.TestCase):
         )
 
         self.assertEqual(set_stmt, expected_stmt)
-    
+
     def test_show_config_statement(self):
         parser = Parser()
         show_config_statement = """SHOW OPENAIKEY"""
@@ -754,12 +754,9 @@ class ParserTests(unittest.TestCase):
 
         show_config_stmt = evadb_statement_list[0]
 
-        expected_stmt = ShowStatement(
-            show_type=ShowType.CONFIG, show_val="OPENAIKEY"
-        )
+        expected_stmt = ShowStatement(show_type=ShowType.CONFIG, show_val="OPENAIKEY")
 
         self.assertEqual(show_config_stmt, expected_stmt)
-
 
     def test_create_predict_function_statement(self):
         parser = Parser()

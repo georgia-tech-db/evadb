@@ -28,4 +28,4 @@ class Show:
         elif isinstance(token, str) and str.upper(token) == "TABLES":
             return ShowStatement(show_type=ShowType.TABLES)
         elif token is not None:
-            return ShowStatement(show_type=ShowType.CONFIG, show_val=self.visit(token)) 
+            return ShowStatement(show_type=ShowType.CONFIG, show_val=self.visit(token))

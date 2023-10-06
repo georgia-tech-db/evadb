@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from __future__ import annotations
+
 from typing import Optional
 
 from evadb.parser.statement import AbstractStatement
@@ -28,7 +29,7 @@ class ShowStatement(AbstractStatement):
     @property
     def show_type(self):
         return self._show_type
-    
+
     @property
     def show_val(self):
         return self._show_val
@@ -47,10 +48,7 @@ class ShowStatement(AbstractStatement):
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, ShowStatement):
             return False
-        return (
-            self.show_type == other.show_type
-            and self.show_val == other.show_val
-        )
+        return self.show_type == other.show_type and self.show_val == other.show_val
 
     def __hash__(self) -> int:
         return hash((super().__hash__(), self.show_type, self.show_val))

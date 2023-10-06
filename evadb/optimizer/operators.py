@@ -1027,7 +1027,9 @@ class LogicalJoin(Operator):
 
 
 class LogicalShow(Operator):
-    def __init__(self, show_type: ShowType, show_val: Optional[str] = "",  children: List = None):
+    def __init__(
+        self, show_type: ShowType, show_val: Optional[str] = "", children: List = None
+    ):
         super().__init__(OperatorType.LOGICAL_SHOW, children)
         self._show_type = show_type
         self._show_val = show_val
@@ -1035,7 +1037,7 @@ class LogicalShow(Operator):
     @property
     def show_type(self):
         return self._show_type
-    
+
     @property
     def show_val(self):
         return self._show_val
@@ -1044,7 +1046,11 @@ class LogicalShow(Operator):
         is_subtree_equal = super().__eq__(other)
         if not isinstance(other, LogicalShow):
             return False
-        return is_subtree_equal and self.show_type == other.show_type and self.show_val == other.show_val
+        return (
+            is_subtree_equal
+            and self.show_type == other.show_type
+            and self.show_val == other.show_val
+        )
 
     def __hash__(self) -> int:
         return hash((super().__hash__(), self.show_type, self.show_val))

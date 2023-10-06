@@ -89,11 +89,10 @@ class ShowExecutorTest(unittest.TestCase):
         # stop the server
         os.system("nohup evadb_server --stop")
 
-    
     def test_show_config_execution(self):
         execute_query_fetch_all(self.evadb, "SET OPENAIKEY = 'ABCD';")
-        # 
-        expected_output = Batch(pd.DataFrame({'OPENAIKEY': ['ABCD']}))
+        #
+        expected_output = Batch(pd.DataFrame({"OPENAIKEY": ["ABCD"]}))
 
         show_config_value = execute_query_fetch_all(self.evadb, "SHOW OPENAIKEY")
         self.assertEqual(show_config_value, expected_output)
