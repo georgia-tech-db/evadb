@@ -257,3 +257,19 @@ class DatabaseCatalogEntry:
             "engine": self.engine,
             "params": self.params,
         }
+
+@dataclass(unsafe_hash=True)
+class ConfigurationCatalogEntry:
+    """Dataclass representing an entry in the `ConfigurationCatalog`.
+    This is done to ensure we don't expose the sqlalchemy dependencies beyond catalog service. Further, sqlalchemy does not allow sharing of objects across threads.
+    """
+
+    key = str,
+    value = str,
+    row_id: int = None
+
+    def display_format(self):
+        return {
+            "key": self.key,
+            "value": self.value,
+        }

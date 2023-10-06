@@ -33,6 +33,7 @@ from evadb.catalog.catalog_utils import (
 )
 from evadb.catalog.models.utils import (
     ColumnCatalogEntry,
+    ConfigurationCatalogEntry,
     DatabaseCatalogEntry,
     FunctionCacheCatalogEntry,
     FunctionCatalogEntry,
@@ -45,6 +46,7 @@ from evadb.catalog.models.utils import (
     init_db,
     truncate_catalog_tables,
 )
+from evadb.catalog.services.configuration_catalog_service import ConfigurationCatalogService
 from evadb.catalog.services.column_catalog_service import ColumnCatalogService
 from evadb.catalog.services.database_catalog_service import DatabaseCatalogService
 from evadb.catalog.services.function_cache_catalog_service import (
@@ -78,6 +80,7 @@ class CatalogManager(object):
         self._config = config
         self._bootstrap_catalog()
         self._db_catalog_service = DatabaseCatalogService(self._sql_config.session)
+        self._config_catalog_service = ConfigurationCatalogService(self._sql_config.session)
         self._table_catalog_service = TableCatalogService(self._sql_config.session)
         self._column_service = ColumnCatalogService(self._sql_config.session)
         self._function_service = FunctionCatalogService(self._sql_config.session)
@@ -607,6 +610,31 @@ class CatalogManager(object):
             table_type=TableType.SYSTEM_STRUCTURED_DATA,
         )
         return obj
+    
+    "Configuration catalog services"
+
+    def insert_configuration_catalog_entry(self, key: str, value: any):
+        """A new entry is persisted in the database catalog."
+
+        Args:
+            key: key name
+            value: value name
+        """
+        self._db_catalog_service.insert_entry(key, value)
+
+    def get_configuration_catalog_entry(self, key: str) -> ConfigurationCatalogEntry:
+        """
+        Returns the value entry for the given key
+        Arguments:
+            key (str): key name
+
+        Returns:
+            ConfigurationCatalogEntry
+        """
+
+        table_entry = self._db_catalog_service.get_entry_by_name(key)
+
+        return table_entry
 
 
 #### get catalog instance

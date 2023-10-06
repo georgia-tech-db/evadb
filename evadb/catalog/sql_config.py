@@ -32,6 +32,7 @@ CATALOG_TABLES = [
     "column_catalog",
     "table_catalog",
     "database_catalog",
+    "configuration_catalog",
     "depend_column_and_function_cache",
     "function_cache",
     "function_catalog",
