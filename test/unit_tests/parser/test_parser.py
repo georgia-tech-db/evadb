@@ -245,11 +245,9 @@ class ParserTests(unittest.TestCase):
             True,
             [
                 ColumnDefinition("Frame_ID", ColumnType.INTEGER, None, (), unique_cci),
+                ColumnDefinition("Frame_Data", ColumnType.TEXT, None, (), expected_cci),
                 ColumnDefinition(
-                    "Frame_Data", ColumnType.TEXT, None, (10,), expected_cci
-                ),
-                ColumnDefinition(
-                    "Frame_Value", ColumnType.FLOAT, None, (1000, 201), expected_cci
+                    "Frame_Value", ColumnType.FLOAT, None, (), expected_cci
                 ),
                 ColumnDefinition(
                     "Frame_Array",
