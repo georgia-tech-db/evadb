@@ -1236,7 +1236,7 @@ class LogicalShowToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalShow, context: OptimizerContext):
-        after = ShowInfoPlan(before.show_type)
+        after = ShowInfoPlan(before.show_type, before.show_val)
         yield after
 
 
