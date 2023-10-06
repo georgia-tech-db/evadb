@@ -36,12 +36,12 @@ from evadb.utils.logging_manager import logger as evadb_logger
 
 def get_base_config(evadb_installation_dir: Path) -> Path:
     """
-    Get path to .evadb.yml source path.
+    Get path to .evadb_config.py source path.
     """
     # if evadb package is installed in environment
     if importlib_resources.is_resource("evadb", EvaDB_CONFIG_FILE):
-        with importlib_resources.path("evadb", EvaDB_CONFIG_FILE) as yml_path:
-            return yml_path
+        with importlib_resources.path("evadb", EvaDB_CONFIG_FILE) as config_path:
+            return config_path
     else:
         # For local dev environments without package installed
         return evadb_installation_dir / EvaDB_CONFIG_FILE
@@ -91,9 +91,11 @@ def bootstrap_environment(evadb_dir: Path, evadb_installation_dir: Path):
     evadb_logger.setLevel(level)
     evadb_logger.debug(f"Setting logging level to: {str(level)}")
 
+    # Mainly want to add all the configs to sqlite
+
     return config_obj
 
-
+# TODO : Change
 def create_directories_and_get_default_config_values(
     evadb_dir: Path, evadb_installation_dir: Path, category: str = None, key: str = None
 ) -> Union[dict, str]:

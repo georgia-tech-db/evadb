@@ -21,11 +21,12 @@ from evadb.utils.logging_manager import logger
 
 
 class ConfigurationManager(object):
-    def __init__(self, evadb_dir: str = None) -> None:
+    def __init__(self, evadb_dir: str = None, catalog_obj = None) -> None:
         self._evadb_dir = evadb_dir or EvaDB_DATABASE_DIR
-        self._config_obj = self._create_if_not_exists()
+        self._catalog_obj = catalog_obj
+        self._populate_base_configs()
 
-    def _create_if_not_exists(self):
+    def _populate_base_configs(self):
         config_obj = bootstrap_environment(
             evadb_dir=Path(self._evadb_dir),
             evadb_installation_dir=Path(EvaDB_INSTALLATION_DIR),
