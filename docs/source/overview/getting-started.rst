@@ -99,17 +99,19 @@ You should see a list of built-in functions including but not limited to the fol
 Illustrative AI Query
 ---------------------
 
-Here is an illustrative `MNIST image classification <https://en.wikipedia.org/wiki/MNIST_database>`_ AI query in EvaDB.
+Here is an illustrative `ChatGPT-based Sentiment Analysis`_ AI query focused on restaurant food reviews in EvaDB.
 
 .. code-block:: sql
     
-    --- This AI query retrieves images in the loaded MNIST video with label 4
-    --- We constrain the query to only search through the first 100 frames
-    --- We limit the query to only return the first five frames with label 4
-    SELECT data, id, MnistImageClassifier(data) 
-    FROM MnistVideo 
-    WHERE MnistImageClassifier(data) = '4' AND id < 100
-    LIMIT 5;
+    --- This AI query analyses the sentiment of restaurant food reviews stored 
+    --- in a database table and generates a response to negative food reviews --- using another ChatGPT call to address the concerns shared in the review
+    SELECT ChatGPT(
+            "Respond the the review with solution to address the review's concern",
+            review)
+    FROM postgres_data.review_table
+    WHERE ChatGPT(
+        "Is the review positive or negative. Only reply 'positive' or 'negative'. Here are examples. The food is very bad: negative. The food is very good: positive.",
+        review) = "negative";
 
-The complete `MNIST notebook is available on Colab <https://colab.research.google.com/github/georgia-tech-db/evadb/blob/master/tutorials/01-mnist.ipynb>`_.
+The complete `Sentiment Analysis notebook is available on Colab <https://colab.research.google.com/github/georgia-tech-db/eva/blob/staging/tutorials/14-food-review-tone-analysis-and-response.ipynb>`_.
 Try out EvaDB by experimenting with this introductory notebook.
