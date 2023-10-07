@@ -266,6 +266,53 @@ class ParserTests(unittest.TestCase):
             self.assertIsInstance(evadb_statement_list[0], AbstractStatement)
             self.assertEqual(evadb_statement_list[0], expected_stmt)
 
+    def test_create_table_with_dimension_statement(self):
+        # The test is for backwards compatibility
+        parser = Parser()
+
+        single_queries = []
+        single_queries.append(
+            """CREATE TABLE IF NOT EXISTS Persons (
+                  Frame_ID INTEGER UNIQUE,
+                  Frame_Data TEXT(10),
+                  Frame_Value FLOAT(1000, 201),
+                  Frame_Array NDARRAY UINT8(5, 100, 2432, 4324, 100)
+            );"""
+        )
+
+        expected_cci = ColConstraintInfo()
+        expected_cci.nullable = True
+        unique_cci = ColConstraintInfo()
+        unique_cci.unique = True
+        unique_cci.nullable = False
+        expected_stmt = CreateTableStatement(
+            TableInfo("Persons"),
+            True,
+            [
+                ColumnDefinition("Frame_ID", ColumnType.INTEGER, None, (), unique_cci),
+                ColumnDefinition(
+                    "Frame_Data", ColumnType.TEXT, None, (10,), expected_cci
+                ),
+                ColumnDefinition(
+                    "Frame_Value", ColumnType.FLOAT, None, (1000, 201), expected_cci
+                ),
+                ColumnDefinition(
+                    "Frame_Array",
+                    ColumnType.NDARRAY,
+                    NdArrayType.UINT8,
+                    (5, 100, 2432, 4324, 100),
+                    expected_cci,
+                ),
+            ],
+        )
+
+        for query in single_queries:
+            evadb_statement_list = parser.parse(query)
+            self.assertIsInstance(evadb_statement_list, list)
+            self.assertEqual(len(evadb_statement_list), 1)
+            self.assertIsInstance(evadb_statement_list[0], AbstractStatement)
+            self.assertEqual(evadb_statement_list[0], expected_stmt)
+
     def test_create_table_statement_with_rare_datatypes(self):
         parser = Parser()
         query = """CREATE TABLE IF NOT EXISTS Dummy (

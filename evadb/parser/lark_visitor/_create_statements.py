@@ -158,6 +158,9 @@ class CreateTable:
         elif str.upper(token) == "TEXT":
             data_type = ColumnType.TEXT
 
+        if len(tree.children) > 1:
+            dimensions = self.visit(tree.children[1])
+
         return data_type, array_type, dimensions
 
     def array_data_type(self, tree):
