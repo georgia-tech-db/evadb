@@ -255,8 +255,8 @@ class RelationalAPI(unittest.TestCase):
         labels = DummyObjectDetector().labels
         expected = [
             {
-                "dummy_video.id": i,
-                "dummyobjectdetector.label": np.array([labels[1 + i % 2]]),
+                "id": i,
+                "label": np.array([labels[1 + i % 2]]),
             }
             for i in range(10)
         ]
