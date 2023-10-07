@@ -112,7 +112,7 @@ class EvaDBQuery:
             pandas.DataFrame:
 
         Example:
-            
+
         Runs a SQL query and get a panda Dataframe.
             >>> cursor.query("SELECT * FROM MyTable;").df()
                 col1  col2
