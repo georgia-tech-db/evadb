@@ -14,7 +14,7 @@ To begin a querying session in EvaDB, obtain a connection with a cursor using ``
     cursor = evadb.connect().cursor()
 
     # List all the built-in functions in EvaDB
-    print(cursor.query("SHOW UDFS;").df())
+    print(cursor.query("SHOW FUNCTIONS;").df())
 
 
 .. autosummary:: 
@@ -27,7 +27,8 @@ To begin a querying session in EvaDB, obtain a connection with a cursor using ``
 
 .. warning::
 
-    It is important to call ``df`` to run the actual query and get the output dataframe.
+    ``cursor.query("...").df()`` constructs and then runs the query to get the output dataframe.
 
-    ``cursor.query("...")`` only construct the query and not run the query. ``cursor.query("...").df()`` will both construct and run the query.
+    It is important to call ``df`` to run the actual query and get the output dataframe. ``cursor.query("...")`` only constructs the query. It does not execute the query.
+    
 
