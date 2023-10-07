@@ -68,7 +68,7 @@ Below are all supported column types:
 
 .. note::
 
-   Check `NdArrayType <https://github.com/georgia-tech-db/evadb/blob/staging/evadb/catalog/catalog_type.py#L61>`_ for available NDARRAY types.
+   Check `NdArrayType <https://github.com/georgia-tech-db/evadb/blob/staging/evadb/catalog/catalog_type.py>`_ for available NDARRAY types.
 
 We can also create table from the output of a ``SELECT`` query.
 
