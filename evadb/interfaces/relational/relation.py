@@ -102,7 +102,8 @@ class EvaDBQuery:
         return self
 
     def df(self, drop_alias: bool = True) -> pandas.DataFrame:
-        """Execute and fetch all rows as a pandas DataFrame
+        """
+        Execute and fetch all rows as a pandas DataFrame
 
         Args:
             drop_alias (bool): whether to drop the table name in the output dataframe. Default: True.
@@ -111,13 +112,13 @@ class EvaDBQuery:
             pandas.DataFrame:
 
         Example:
-
-            Runs a SQL query and get a panda Dataframe
+            
+        Runs a SQL query and get a panda Dataframe.
             >>> cursor.query("SELECT * FROM MyTable;").df()
-               col1  col2
-            0     1     2
-            1     3     4
-            2     5     6
+                col1  col2
+            0      1     2
+            1      3     4
+            2      5     6
         """
         batch = self.execute(drop_alias=drop_alias)
         assert batch.frames is not None, "relation execute failed"
