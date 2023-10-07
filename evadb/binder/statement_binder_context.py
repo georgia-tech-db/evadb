@@ -146,8 +146,8 @@ class StatementBinderContext:
         col_name = col_name.lower()
 
         def raise_error():
-            all_columns = list(
-                set([col for _, col in self._get_all_alias_and_col_name()])
+            all_columns = sorted(
+                list(set([col for _, col in self._get_all_alias_and_col_name()]))
             )
             guess_column, _ = process.extractOne(col_name, all_columns)
             err_msg = f"Cannnot find column {col_name}. Did you mean {guess_column}? The available columns are {all_columns}."
