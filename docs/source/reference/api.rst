@@ -23,7 +23,7 @@ To begin a querying session in EvaDB, obtain a connection with a cursor using ``
     ~evadb.connect
     ~evadb.EvaDBConnection.cursor
     ~evadb.EvaDBCursor.query
-    ~evadb.EvaDBCursor.df
+    ~evadb.EvaDBQuery.df
 
 .. warning::
 
