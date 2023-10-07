@@ -24,7 +24,7 @@ class ShowStatement(AbstractStatement):
     def __init__(self, show_type: ShowType, show_val: Optional[str] = ""):
         super().__init__(StatementType.SHOW)
         self._show_type = show_type
-        self._show_val = show_val
+        self._show_val = show_val.upper()
 
     @property
     def show_type(self):

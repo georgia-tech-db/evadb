@@ -48,8 +48,14 @@ class ShowInfoExecutor(AbstractExecutor):
         elif self.node.show_type is ShowType.CONFIG:
             value = self._config.get_value(
                 category="default",
-                key=self.node.show_val,
+                key=self.node.show_val.upper(),
             )
-            show_entries = {self.node.show_val: [value]}
+            show_entries = {}
+            if value is not None:
+                show_entries = {self.node.show_val: [value]}
+            else:
+                raise Exception(
+                    "No configuration found with key {}".format(self.node.show_val)
+                )
 
         yield Batch(pd.DataFrame(show_entries))

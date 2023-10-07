@@ -96,3 +96,7 @@ class ShowExecutorTest(unittest.TestCase):
 
         show_config_value = execute_query_fetch_all(self.evadb, "SHOW OPENAIKEY")
         self.assertEqual(show_config_value, expected_output)
+
+        # Ensure an Exception is raised if config is not present
+        with self.assertRaises(Exception):
+            execute_query_fetch_all(self.evadb, "SHOW BADCONFIG")
