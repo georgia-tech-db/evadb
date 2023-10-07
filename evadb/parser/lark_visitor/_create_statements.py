@@ -155,9 +155,10 @@ class CreateTable:
         token = tree.children[0]
         if str.upper(token) == "FLOAT":
             data_type = ColumnType.FLOAT
-            dimensions = self.visit(tree.children[1])
         elif str.upper(token) == "TEXT":
             data_type = ColumnType.TEXT
+
+        if len(tree.children) > 1:
             dimensions = self.visit(tree.children[1])
 
         return data_type, array_type, dimensions
