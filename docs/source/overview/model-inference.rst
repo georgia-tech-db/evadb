@@ -12,11 +12,11 @@ In EvaDB, every model is a function. We can compose SQL queries using functions 
 1. Projection
 -------------
 
-The most common usecases are model inference in projections. For example, we can use the `MnistImageClassifier <https://github.com/georgia-tech-db/evadb/blob/staging/evadb/functions/mnist_image_classifier.py>`_ to identify numbers from the `MINST <https://www.dropbox.com/s/yxljxz6zxoqu54v/mnist.mp4>`_ video. 
+The most common usecases are model inference in projections. For example, we can use the `MnistImageClassifier <https://github.com/georgia-tech-db/evadb/blob/staging/evadb/functions/mnist_image_classifier.py>`_ to identify numbers from the `MNIST <https://www.dropbox.com/s/yxljxz6zxoqu54v/mnist.mp4>`_ video. 
 
 .. code-block:: sql
 
-   SELECT MnistImageClassifier(data).label FROM minst_vid;
+   SELECT MnistImageClassifier(data).label FROM mnist_vid;
 
 2. Selection
 ------------
@@ -96,4 +96,4 @@ We can also use the `SiftFeatureExtractor <https://github.com/georgia-tech-db/ev
 
 .. note::
 
-   Go over our :ref:`Usecases<sentiment-analysis>` to check more ways of utlizing models in real-world use cases.
+   Go over our :ref:`Usecases<sentiment-analysis>` to check more ways of utilizing models in real-world use cases.

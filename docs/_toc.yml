@@ -22,7 +22,7 @@ parts:
     chapters:
       - file: source/usecases/forecasting.rst
         title: Forecasting
-      - file: source/usecases/prediction.rst
+      - file: source/usecases/classification.rst
         title: Classification
       - file: source/usecases/sentiment-analysis.rst
         title: Sentiment Analysis

@@ -182,14 +182,14 @@ def handle_vector_store_params(
 def create_table_catalog_entry_for_native_table(
     table_info: TableInfo, column_list: List[ColumnDefinition]
 ):
-    column_catalog_entires = xform_column_definitions_to_catalog_entries(column_list)
+    column_catalog_entries = xform_column_definitions_to_catalog_entries(column_list)
 
     # Assemble table.
     table_catalog_entry = TableCatalogEntry(
         name=table_info.table_name,
         file_url=None,
         table_type=TableType.NATIVE_DATA,
-        columns=column_catalog_entires,
+        columns=column_catalog_entries,
         database_name=table_info.database_name,
     )
     return table_catalog_entry

@@ -95,7 +95,7 @@ def bind_create_index(binder: StatementBinder, node: CreateIndexStatement):
                 len(output.array_dimensions) == 2
             ), "Index input needs to be 2 dimensional."
 
-            # Vector type speciic check.
+            # Vector type specific check.
             if node.vector_store_type == VectorStoreType.FAISS:
                 assert (
                     output.array_type == NdArrayType.FLOAT32
