@@ -149,8 +149,14 @@ class StatementBinderContext:
             all_columns = sorted(
                 list(set([col for _, col in self._get_all_alias_and_col_name()]))
             )
-            guess_column, _ = process.extractOne(col_name, all_columns)
-            err_msg = f"Cannnot find column {col_name}. Did you mean {guess_column}? The available columns are {all_columns}."
+            res = process.extractOne(col_name, all_columns)
+            if res is not None:
+                guess_column, _ = res
+                err_msg = f"Cannnot find column {col_name}. Did you mean {guess_column}? The feasible columns are {all_columns}."
+            else:
+                err_msg = (
+                    f"Cannnot find column {col_name}. There are no feasible columns."
+                )
             logger.error(err_msg)
             raise BinderError(err_msg)
 

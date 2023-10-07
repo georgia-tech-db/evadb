@@ -110,7 +110,7 @@ class StatementBinderTests(unittest.TestCase):
         with self.assertRaises(BinderError):
             ctx = StatementBinderContext(MagicMock())
             mock_search_all = ctx._search_all_alias_maps = MagicMock()
-            mock_search_all.return_value = []
+            mock_search_all.return_value = (None, None)
             ctx.get_binded_column("col_name")
         # with alias
         with self.assertRaises(BinderError):
