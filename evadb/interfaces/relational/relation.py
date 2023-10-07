@@ -134,6 +134,7 @@ class EvaDBQuery:
             >>> batch = cursor.query("SELECT * FROM MyTable;").execute()
         """
         result = execute_statement(self._evadb, self._query_node.copy())
+        # TODO: this is a dirty implementation. Ideally this should be done in the final projection.
         if drop_alias:
             result.drop_column_alias()
         assert result is not None

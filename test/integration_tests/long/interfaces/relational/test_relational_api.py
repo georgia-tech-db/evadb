@@ -263,6 +263,18 @@ class RelationalAPI(unittest.TestCase):
         expected_batch = Batch(frames=pd.DataFrame(expected))
         self.assertEqual(actual_batch, expected_batch)
 
+        # Without dropping alias
+        actual_batch = cursor.query(select_query_sql).execute(drop_alias=False)
+        expected = [
+            {
+                "dummy_video.id": i,
+                "dummyobjectdetector.label": np.array([labels[1 + i % 2]]),
+            }
+            for i in range(10)
+        ]
+        expected_batch = Batch(frames=pd.DataFrame(expected))
+        self.assertEqual(actual_batch, expected_batch)
+
     def test_drop_with_relational_api(self):
         video_file_path = create_sample_video(10)
 
@@ -362,6 +374,10 @@ class RelationalAPI(unittest.TestCase):
         output = query.df()
         self.assertEqual(len(output), 3)
         self.assertTrue("data" in output.columns)
+
+        # Without dropping alias
+        output = query.df(drop_alias=False)
+        self.assertTrue("pdfs.data" in output.columns)
 
         cursor.drop_index("faiss_index").df()
 
