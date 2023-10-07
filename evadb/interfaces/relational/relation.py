@@ -113,7 +113,11 @@ class EvaDBQuery:
         Example:
 
             Runs a SQL query and get a panda Dataframe
-            >>> batch = cursor.query("SELECT * FROM MyTable;").df()
+            >>> cursor.query("SELECT * FROM MyTable;").df()
+               col1  col2
+            0     1     2
+            1     3     4
+            2     5     6
         """
         batch = self.execute(drop_alias=drop_alias)
         assert batch.frames is not None, "relation execute failed"
