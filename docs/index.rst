@@ -5,7 +5,6 @@ Welcome to EvaDB!
 =================
 
 ..  rubric:: Build AI apps in SQL
-
 ----------
 
 **EvaDB brings AI inside your database. You can easily build scalable AI apps in SQL.**
@@ -33,6 +32,7 @@ Our target audience is software developers who may not necessarily have a backgr
 - 📝 following us on Medium: https://evadb.ai/blog
 - 🖥️ contributing to EvaDB: https://evadb.ai/github
 
+
 Getting Started
 ----------------
 
@@ -41,7 +41,7 @@ Getting Started
     <div class="grid-container">
     <a class="no-underline" href="source/overview/getting-started.html" target="_blank"> <div class="info-box" >
             <div class="image-header" style="padding:0px;">
-                <img src="_static/icons/code.png" width="44px" height="44px" />
+                <img src="_static/icons/code.png" width="24px" height="24px" />
                 <h3 style="font-size:20px;">Learn Basics</h3>
             </div>
             <p class="only-light" style="color:#000000;">Understand how to use EvaDB to build AI apps.</p> 
@@ -51,7 +51,7 @@ Getting Started
     <a class="no-underline" href="source/overview/concepts.html" target="_blank"> 
         <div class="info-box" >
             <div class="image-header" style="padding:0px;">
-                <img src="_static/icons/download.png" width="44px" height="44px" />
+                <img src="_static/icons/download.png" width="24px" height="24px" />
                 <h3 style="font-size:20px;">Key Concepts</h3>
             </div>
             <p class="only-light" style="color:#000000;">Learn the 
@@ -64,7 +64,7 @@ Getting Started
     <a class="no-underline" href="https://evadb.ai/community"  target="_blank" 
             ><div class="info-box" >
             <div class="image-header" style="padding:0px;">
-                <img src="_static/icons/slack.png" width="44px" height="44px" />
+                <img src="_static/icons/slack.png" width="24px" height="24px" />
                 <h3 style="font-size:20px;">Join Slack</h3>
             </div>
             <p class="only-light" style="color:#000000;">Have a question? Join our Slack community.</p> 
