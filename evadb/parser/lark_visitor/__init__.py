@@ -21,6 +21,7 @@ from evadb.parser.lark_visitor._create_statements import (
     CreateDatabase,
     CreateIndex,
     CreateTable,
+    CreateJob,
 )
 from evadb.parser.lark_visitor._delete_statement import Delete
 from evadb.parser.lark_visitor._drop_statement import DropObject
@@ -66,6 +67,7 @@ class LarkInterpreter(
     CreateTable,
     CreateIndex,
     CreateDatabase,
+    CreateJob,
     Expressions,
     Functions,
     Insert,
@@ -89,3 +91,11 @@ class LarkInterpreter(
 
     def sql_statement(self, tree):
         return self.visit(tree.children[0])
+
+    def sql_statements(self, tree):
+        sql_statements = []
+        for child in tree.children:
+            if isinstance(child, Tree):
+                if child.data == "sql_statement":
+                    sql_statements.append(self.visit(child))
+        return sql_statements
