@@ -1,27 +1,29 @@
 .. meta::
-   :keywords: database, AI, language models, SQL, video analytics
+   :keywords: AI, database, SQL, LLM
 
 Welcome to EvaDB!
 =================
 
-..  rubric:: Bring AI inside your Database System
+..  rubric:: Build AI apps in SQL
 
 ----------
 
-EvaDB enables software developers to build AI apps in a few lines of code. Its powerful SQL API simplifies AI app development for both structured and unstructured data. EvaDB's benefits include:
+**EvaDB brings AI inside your database**. 
 
-- 🔮 Easy to connect EvaDB with your SQL database system and build AI-powered apps with SQL queries
-- 🤝 Query your data with a pre-trained AI model from Hugging Face, OpenAI, YOLO, PyTorch, and other AI frameworks
-- ⚡️ Faster queries thanks to AI-centric query optimization
-- 💰 Save money spent on running models by efficient CPU/GPU use
-- 🔧 Fine-tune your AI models to achieve better results
+You can easily build scalable AI apps in SQL. 
 
-👋 Hey! If you're excited about our vision of bringing AI inside database systems, show some ❤️ by:
+EvaDB's benefits include:
 
-- 🐙 giving a ⭐ on our EvaDB repo on Github: https://github.com/georgia-tech-db/evadb
-- 📟 joining our Slack Community: https://evadb.ai/community
-- 🐦 following us on Twitter: https://twitter.com/evadb_ai
-- 📝 following us on Medium: https://medium.com/evadb-blog
+- 🔮 Easy to connect EvaDB with your SQL and vector database systems and build AI-powered apps with SQL queries
+- 🤝 Query your data with a pre-trained AI model from Hugging Face, OpenAI, YOLO, PyTorch, and other AI engines
+- 💰 Faster and cheaper queries thanks to AI-centric query optimization and execution
+
+👋 If you're excited about our vision of bringing AI inside databases:
+
+- 🐙 give a star on Github: https://evadb.ai/github
+- 📟 join our Slack: https://evadb.ai/community
+- 🐦 follow us on Twitter: https://twitter.com/evadb_ai
+- 📝 follow us on Medium: https://evadb.ai/blog
 
 Why EvaDB?
 ----------
