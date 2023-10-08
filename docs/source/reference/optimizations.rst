@@ -13,4 +13,4 @@ EvaDB optimizes the evaluation of *AI functions* using these optimizations:
 
 These built-in optimizations ensure superior performance and responsiveness in EvaDB's AI function evaluations. Dive in and experience the EvaDB difference! 🌟🎉
 
-.. include:: ../shared/design6.rst
+.. include:: ../shared/designs/design6.rst

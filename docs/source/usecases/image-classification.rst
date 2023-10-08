@@ -96,3 +96,5 @@ Now, the ``DataFrame`` only contains images of the digit ``6``.
     +------------------------------+
 
 .. include:: ../shared/footer.rst
+
+.. include:: ../shared/designs/design7.rst

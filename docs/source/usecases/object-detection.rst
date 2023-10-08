@@ -96,3 +96,5 @@ Now, the ``DataFrame`` only contains frames with the desired objects:
     +--------------------------+--------------------------------------------------------------+
 
 .. include:: ../shared/footer.rst
+
+.. include:: ../shared/designs/design9.rst

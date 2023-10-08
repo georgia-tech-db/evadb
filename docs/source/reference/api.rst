@@ -32,4 +32,4 @@ To begin a querying session in EvaDB, obtain a connection with a cursor using ``
     It is important to call ``df`` to run the actual query and get the output dataframe. ``cursor.query("...")`` only constructs the query. It does not execute the query.
     
 
-.. include:: ../shared/design4.rst
+.. include:: ../shared/designs/design4.rst

@@ -82,4 +82,4 @@ Getting Started
     </div></a>
     </div>
 
-.. include:: source/shared/design1.rst
+.. include:: source/shared/designs/design1.rst

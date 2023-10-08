@@ -135,3 +135,5 @@ This query returns the top-5 most similar images in a ``DataFrame``:
     +---------------------------------+
 
 .. include:: ../shared/footer.rst
+
+.. include:: ../shared/designs/design8.rst

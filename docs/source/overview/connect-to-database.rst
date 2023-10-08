@@ -84,4 +84,4 @@ You can use the ``CREATE INDEX`` statement to connect to an existing vector data
 
    Go over the :ref:`CREATE INDEX<create-index>` statement for more details. The :ref:`Vector Databases<databases>` page lists all the vector database systems that EvaDB currently supports.
 
-.. include:: ../shared/design3.rst
+.. include:: ../shared/designs/design3.rst
