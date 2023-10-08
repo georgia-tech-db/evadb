@@ -25,11 +25,11 @@ EvaDB covers many AI applications, including regression, classification, image r
 
 Our target audience is software developers who may not necessarily have a background in AI but require AI capabilities to solve specific problems. We target programmers who write simple SQL queries inside their CRUD apps. With EvaDB, it is possible to easily add AI features to these apps by calling built-in AI functions in the queries.
 
-👋 If you're excited about our vision of bringing AI inside databases, show some ❤️ by:
+👋 If you are excited about our vision of bringing AI inside databases, consider:
 
-- 🐙 giving a star on Github: https://evadb.ai/github
-- 📟 joining our Slack: https://evadb.ai/community
-- 🐦 following us on Twitter: https://twitter.com/evadb_ai
+- 📟 joining our Slack: https://evadb.ai/slack
+- 🐙 following us on Github: https://evadb.ai/github
+- 🐦 following us on Twitter: https://evadb.ai/twitter
 - 📝 following us on Medium: https://evadb.ai/blog
 - 🖥️ contributing to EvaDB: https://evadb.ai/github
 

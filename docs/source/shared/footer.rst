@@ -1,12 +1,10 @@
 What's Next?
 ------------
 
-👋 EvaDB makes it easy to build fast AI-powered apps.
+👋 If you are excited about our vision of bringing AI inside databases, consider:
 
-If you liked this tutorial and are excited about our vision, show some ❤️ by:
-
-- 🐙 giving a star on Github: https://evadb.ai/github
-- 📟 joining our Slack: https://evadb.ai/community
-- 🐦 following us on Twitter: https://twitter.com/evadb_ai
+- 📟 joining our Slack: https://evadb.ai/slack
+- 🐙 following us on Github: https://evadb.ai/github
+- 🐦 following us on Twitter: https://evadb.ai/twitter
 - 📝 following us on Medium: https://evadb.ai/blog
 - 🖥️ contributing to EvaDB: https://evadb.ai/github
