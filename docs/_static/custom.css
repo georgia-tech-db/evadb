@@ -1,9 +1,12 @@
-/******************************/
-/****  CUSTOM CSS FOR EvaDB  ****/
-/******************************/
+/*********************************/
+/****  CUSTOM CSS FOR EvaDB  *****/
+/*********************************/
 
  /* Inspired  by https://github.com/ray-project/ray/blob/692428a67e65d2f055f828ed6331cf5fbe732b02/doc/source/_static/css/custom.css */
 
+
+/* --------- custom fonts --------- */
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code&family=Inter:wght@400;700&display=swap');
 
  :root {
     --orange: #FF9300;
