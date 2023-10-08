@@ -42,6 +42,7 @@ class StatementType(EvaDBEnum):
     CREATE_DATABASE  # noqa: F821
     USE  # noqa: F821
     SET  # noqa: F821
+    CREATE_JOB  # noqa: F821
     # add other types
 
 
