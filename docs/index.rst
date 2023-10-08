@@ -4,12 +4,9 @@
 Welcome to EvaDB!
 =================
 
-..  rubric:: Build AI apps in SQL
-----------
-
 **EvaDB brings AI inside your database. You can easily build scalable AI apps in SQL.**
 
-EvaDB's benefits include:
+EvaDB's key benefits include:
 
 - 🔮 Easy to connect EvaDB with your SQL and vector database systems and build AI-powered apps with SQL queries
 - 🤝 Query your data with a pre-trained AI model from Hugging Face, OpenAI, YOLO, PyTorch, and other AI engines
@@ -42,7 +39,7 @@ Getting Started
     <a class="no-underline" href="source/overview/getting-started.html" target="_blank"> <div class="info-box" >
             <div class="image-header" style="padding:0px;">
                 <img src="_static/icons/code.png" width="24px" height="24px" />
-                <h3 style="font-size:20px;">Learn Basics</h3>
+                <h3 style="font-size:20px;">Getting Started</h3>
             </div>
             <p class="only-light" style="color:#000000;">Understand how to use EvaDB to build AI apps.</p> 
             <p class="only-dark" style="color:#FFFFFF;">Understand how to use EvaDB to build AI apps.</p>    
@@ -55,9 +52,9 @@ Getting Started
                 <h3 style="font-size:20px;">Key Concepts</h3>
             </div>
             <p class="only-light" style="color:#000000;">Learn the 
-            high-level concepts related to EvaDB.</p> 
+            key concepts related to EvaDB.</p> 
             <p class="only-dark" style="color:#FFFFFF;">
-            Learn the high-level concepts related to EvaDB.</p>      
+            Learn the key concepts related to EvaDB.</p>      
             <p style="font-weight:600;">Learn more > </p>  
         </div> 
     </a>  
@@ -65,7 +62,7 @@ Getting Started
             ><div class="info-box" >
             <div class="image-header" style="padding:0px;">
                 <img src="_static/icons/slack.png" width="24px" height="24px" />
-                <h3 style="font-size:20px;">Join Slack</h3>
+                <h3 style="font-size:20px;">Join our Slack</h3>
             </div>
             <p class="only-light" style="color:#000000;">Have a question? Join our Slack community.</p> 
             <p class="only-dark" style="color:#FFFFFF;">Have a question? Join our Slack community.</p>   
@@ -73,3 +70,7 @@ Getting Started
             <p style="font-weight:600;">Support > </p> 
     </div></a>
     </div>
+
+    <br><br><br>
+
+.. include:: source/shared/design1.rst

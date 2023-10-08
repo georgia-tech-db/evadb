@@ -86,3 +86,5 @@ Here is the query's output ``DataFrame``:
 .. include:: ../shared/nlp.rst
 
 .. include:: ../shared/footer.rst
+
+.. include:: ../shared/design2.rst

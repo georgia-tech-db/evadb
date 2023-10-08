@@ -111,7 +111,7 @@ parts:
       - file: source/benchmarks/text_summarization.rst
         title: Text Summarization
 
-  - caption: Developer Reference
+  - caption: Contribution Guide
     chapters:
       - file: source/dev-guide/contribute
         title: Contributing to EvaDB

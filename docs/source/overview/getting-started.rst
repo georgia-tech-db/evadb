@@ -99,14 +99,23 @@ You should see a list of built-in functions including but not limited to the fol
 Illustrative AI Query
 ---------------------
 
-Here is an illustrative `ChatGPT-based Sentiment Analysis` AI query focused on restaurant food reviews in EvaDB.
+Here is an illustrative EvaQL query that analyzes the sentiment of restaurant food reviews and responds to them.
 
 .. code-block:: sql
     
     --- This AI query analyses the sentiment of restaurant food reviews stored 
-    --- in a database table and generates a response to negative food reviews --- using another ChatGPT call to address the concerns shared in the review
-    SELECT ChatGPT("Respond the the review with solution to address the reviewer's concern", review)
-    FROM postgres_data.review_table
-    WHERE ChatGPT("Is the review positive or negative. Only reply 'positive' or 'negative'.", review) = "negative";
+    --- in a database table and generates a response to negative food reviews
+    --- using another ChatGPT call to address the concerns shared in the review
+    SELECT
+        ChatGPT("Respond to the review with a solution to address the reviewer's concern",
+        review)     
+    FROM
+        postgres_data.review_table     
+    WHERE
+        ChatGPT("Is the review positive or negative. Only reply 'positive' or 'negative'.", review) = "negative";
+
+More details on this usecase is available in the :ref:`Sentiment Analysis <sentiment-analysis>` page. 
 
 Try out EvaDB by experimenting with the complete `sentiment analysis notebook on Colab <https://colab.research.google.com/github/georgia-tech-db/eva/blob/staging/tutorials/14-food-review-tone-analysis-and-response.ipynb>`_ 🙂
+
+.. include:: ../shared/design1.rst
