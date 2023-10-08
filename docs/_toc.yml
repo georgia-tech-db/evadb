@@ -44,14 +44,21 @@ parts:
       - file: source/reference/evaql      
         title: Query Language
         sections:
-          - file: source/reference/evaql/load
+          - file: source/reference/evaql/load_csv
+          - file: source/reference/evaql/load_image
+          - file: source/reference/evaql/load_video
           - file: source/reference/evaql/select
           - file: source/reference/evaql/explain
-          - file: source/reference/evaql/show
-          - file: source/reference/evaql/create
-          - file: source/reference/evaql/drop
-          - file: source/reference/evaql/insert
-          - file: source/reference/evaql/delete
+          - file: source/reference/evaql/show_functions
+          - file: source/reference/evaql/create_database
+          - file: source/reference/evaql/create_function
+          - file: source/reference/evaql/create_index
+          - file: source/reference/evaql/create_table
+          - file: source/reference/evaql/drop_database
+          - file: source/reference/evaql/drop_function
+          - file: source/reference/evaql/drop_table
+          - file: source/reference/evaql/insert_table
+          - file: source/reference/evaql/delete_table
           - file: source/reference/evaql/rename
           - file: source/reference/evaql/use
 
@@ -67,14 +74,14 @@ parts:
           - file: source/reference/databases/mariadb
           - file: source/reference/databases/github
 
-      - file: source/reference/vector_stores/index
-        title: Vector Stores
+      - file: source/reference/vector_databases/index
+        title: Vector Databases
         sections: 
-          - file: source/reference/vector_stores/faiss
-          - file: source/reference/vector_stores/chromadb
-          - file: source/reference/vector_stores/qdrant
-          - file: source/reference/vector_stores/pgvector
-          - file: source/reference/vector_stores/pinecone
+          - file: source/reference/vector_databases/faiss
+          - file: source/reference/vector_databases/chromadb
+          - file: source/reference/vector_databases/qdrant
+          - file: source/reference/vector_databases/pgvector
+          - file: source/reference/vector_databases/pinecone
 
       - file: source/reference/ai/index
         title: AI Engines
