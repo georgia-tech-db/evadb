@@ -109,4 +109,4 @@ Here is an illustrative `ChatGPT-based Sentiment Analysis` AI query focused on r
     FROM postgres_data.review_table
     WHERE ChatGPT("Is the review positive or negative. Only reply 'positive' or 'negative'.", review) = "negative";
 
-The complete `Sentiment Analysis notebook is available on Colab <https://colab.research.google.com/github/georgia-tech-db/eva/blob/staging/tutorials/14-food-review-tone-analysis-and-response.ipynb>`_. Try out EvaDB by experimenting with this notebook :)
+Try out EvaDB by experimenting with the complete `sentiment analysis notebook on Colab <https://colab.research.google.com/github/georgia-tech-db/eva/blob/staging/tutorials/14-food-review-tone-analysis-and-response.ipynb>`_ 🙂
