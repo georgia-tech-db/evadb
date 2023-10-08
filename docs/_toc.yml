@@ -7,15 +7,15 @@ parts:
         sections:
           - file: source/overview/getting-started/installation-options
             title: Installation Options
-      - file: source/overview/connect-to-database
-        title: Connect to Database
-      - file: source/overview/model-inference
-        title: Model inference
       - file: source/overview/concepts
         title: Concepts
+      - file: source/overview/model-inference
+        title: AI Models
         sections:
           - file: source/overview/concepts/data-sources
             title: Data Sources
+      - file: source/overview/connect-to-database
+        title: Connect to Database
         #- file: source/overview/faq
 
   - caption: Use Cases

@@ -118,4 +118,4 @@ More details on this usecase is available in the :ref:`Sentiment Analysis <senti
 
 Try out EvaDB by experimenting with the complete `sentiment analysis notebook on Colab <https://colab.research.google.com/github/georgia-tech-db/eva/blob/staging/tutorials/14-food-review-tone-analysis-and-response.ipynb>`_ 🙂
 
-.. include:: ../shared/design1.rst
+.. include:: ../shared/design2.rst

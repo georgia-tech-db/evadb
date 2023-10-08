@@ -72,3 +72,4 @@ You can load a video from an S3 cloud bucket into EvaDB using the :ref:`LOAD<sql
 
    Go over the :ref:`LOAD statement<sql-load>` statement for more details on the types of unstructured data that EvaDB supports.
    
+.. include:: ../shared/design3.rst
