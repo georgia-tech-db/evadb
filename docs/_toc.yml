@@ -42,7 +42,7 @@ parts:
   - caption: User Reference
     chapters:
       - file: source/reference/evaql      
-        title: EvaQL
+        title: Query Language
         sections:
           - file: source/reference/evaql/load
           - file: source/reference/evaql/select

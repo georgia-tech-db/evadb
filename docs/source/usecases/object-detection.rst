@@ -37,7 +37,7 @@ To create a custom ``Yolo`` function based on the popular ``YOLO-v8m`` model, us
 
 .. code-block:: sql
 
-        CREATE UDF IF NOT EXISTS Yolo
+        CREATE FUNCTION IF NOT EXISTS Yolo
         TYPE  ultralytics
         MODEL 'yolov8m.pt';
 
