@@ -256,12 +256,6 @@ def construct_function_cache_catalog_entry(
     return entry
 
 
-def cleanup_storage(config):
-    remove_directory_contents(config.get_value("storage", "index_dir"))
-    remove_directory_contents(config.get_value("storage", "cache_dir"))
-    remove_directory_contents(config.get_value("core", "datasets_dir"))
-
-
 def get_metadata_entry_or_val(
     function_obj: FunctionCatalogEntry, key: str, default_val: Any = None
 ) -> str:
@@ -308,7 +302,7 @@ def get_metadata_properties(function_obj: FunctionCatalogEntry) -> Dict:
 # instance across all objects within the same thread. It is worth investigating whether
 # SQLAlchemy already handles this optimization for us, which will be explored at a
 # later time.
-def get_catalog_instance(db_uri: str, config: ConfigurationManager):
+def get_catalog_instance(db_uri: str):
     from evadb.catalog.catalog_manager import CatalogManager
 
-    return CatalogManager(db_uri, config)
+    return CatalogManager(db_uri)

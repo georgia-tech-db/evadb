@@ -16,7 +16,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import select
 
-from evadb.catalog.models.configuration_catelog import ConfigurationCatalog
+from evadb.catalog.models.configuration_catalog import ConfigurationCatalog
 from evadb.catalog.models.utils import ConfigurationCatalogEntry
 from evadb.catalog.services.base_service import BaseService
 from evadb.utils.errors import CatalogError

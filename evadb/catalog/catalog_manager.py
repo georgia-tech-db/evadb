@@ -23,7 +23,6 @@ from evadb.catalog.catalog_type import (
     VideoColumnName,
 )
 from evadb.catalog.catalog_utils import (
-    cleanup_storage,
     construct_function_cache_catalog_entry,
     get_document_table_column_definitions,
     get_image_table_column_definitions,
@@ -46,7 +45,9 @@ from evadb.catalog.models.utils import (
     init_db,
     truncate_catalog_tables,
 )
-from evadb.catalog.services.configuration_catalog_service import ConfigurationCatalogService
+from evadb.catalog.services.configuration_catalog_service import (
+    ConfigurationCatalogService,
+)
 from evadb.catalog.services.column_catalog_service import ColumnCatalogService
 from evadb.catalog.services.database_catalog_service import DatabaseCatalogService
 from evadb.catalog.services.function_cache_catalog_service import (
@@ -63,24 +64,28 @@ from evadb.catalog.services.function_metadata_catalog_service import (
 from evadb.catalog.services.index_catalog_service import IndexCatalogService
 from evadb.catalog.services.table_catalog_service import TableCatalogService
 from evadb.catalog.sql_config import IDENTIFIER_COLUMN, SQLConfig
-from evadb.configuration.configuration_manager import ConfigurationManager
 from evadb.expression.function_expression import FunctionExpression
 from evadb.parser.create_statement import ColumnDefinition
 from evadb.parser.table_ref import TableInfo
 from evadb.parser.types import FileFormatType
 from evadb.third_party.databases.interface import get_database_handler
-from evadb.utils.generic_utils import generate_file_path, get_file_checksum
+from evadb.utils.generic_utils import (
+    generate_file_path,
+    get_file_checksum,
+    remove_directory_contents,
+)
 from evadb.utils.logging_manager import logger
 
 
 class CatalogManager(object):
-    def __init__(self, db_uri: str, config: ConfigurationManager):
+    def __init__(self, db_uri: str):
         self._db_uri = db_uri
         self._sql_config = SQLConfig(db_uri)
-        self._config = config
         self._bootstrap_catalog()
         self._db_catalog_service = DatabaseCatalogService(self._sql_config.session)
-        self._config_catalog_service = ConfigurationCatalogService(self._sql_config.session)
+        self._config_catalog_service = ConfigurationCatalogService(
+            self._sql_config.session
+        )
         self._table_catalog_service = TableCatalogService(self._sql_config.session)
         self._column_service = ColumnCatalogService(self._sql_config.session)
         self._function_service = FunctionCatalogService(self._sql_config.session)
@@ -136,7 +141,10 @@ class CatalogManager(object):
         # truncate the catalog tables
         truncate_catalog_tables(self._sql_config.engine)
         # clean up the dataset, index, and cache directories
-        cleanup_storage(self._config)
+        for folder in ["cache_dir", "index_dir", "datasets_dir"]:
+            remove_directory_contents(
+                self._config_catalog_service.get_entry_by_name(folder).value
+            )
 
     "Database catalog services"
 
@@ -448,7 +456,7 @@ class CatalogManager(object):
     """ Function Cache related"""
 
     def insert_function_cache_catalog_entry(self, func_expr: FunctionExpression):
-        cache_dir = self._config.get_value("storage", "cache_dir")
+        cache_dir = self._config_catalog_service.get_entry_by_name("cache_dir").value
         entry = construct_function_cache_catalog_entry(func_expr, cache_dir=cache_dir)
         return self._function_cache_service.insert_entry(entry)
 
@@ -511,7 +519,9 @@ class CatalogManager(object):
         table_name = table_info.table_name
         column_catalog_entries = xform_column_definitions_to_catalog_entries(columns)
 
-        dataset_location = self._config.get_value("core", "datasets_dir")
+        dataset_location = self._config_catalog_service.get_entry_by_name(
+            "datasets_dir"
+        )
         file_url = str(generate_file_path(dataset_location, table_name))
         table_catalog_entry = self.insert_table_catalog_entry(
             table_name,
@@ -610,7 +620,7 @@ class CatalogManager(object):
             table_type=TableType.SYSTEM_STRUCTURED_DATA,
         )
         return obj
-    
+
     "Configuration catalog services"
 
     def insert_configuration_catalog_entry(self, key: str, value: any):
@@ -645,5 +655,5 @@ class CatalogManager(object):
 # instance across all objects within the same thread. It is worth investigating whether
 # SQLAlchemy already handles this optimization for us, which will be explored at a
 # later time.
-def get_catalog_instance(db_uri: str, config: ConfigurationManager):
-    return CatalogManager(db_uri, config)
+def get_catalog_instance(db_uri: str):
+    return CatalogManager(db_uri)
