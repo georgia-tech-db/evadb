@@ -1,6 +1,6 @@
 .. figure:: /images/design/llamadb-10.png
    :alt: Language Models (🦙) and Databases
-   :width: 50%
+   :width: 30%
    :align: center
    
    Language Models (🦙) and Databases
