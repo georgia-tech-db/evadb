@@ -14,7 +14,7 @@
 # limitations under the License.
 import shutil
 from pathlib import Path
-from typing import List
+from typing import Any, List
 
 from evadb.catalog.catalog_type import (
     ColumnType,
@@ -138,8 +138,11 @@ class CatalogManager(object):
         logger.info("Clearing catalog")
         # drop tables which are not part of catalog
         drop_all_tables_except_catalog(self._sql_config.engine)
-        # truncate the catalog tables
-        truncate_catalog_tables(self._sql_config.engine)
+        # truncate the catalog tables except configuration_catalog
+        # We do not remove the configuration entries
+        truncate_catalog_tables(
+            self._sql_config.engine, tables_not_to_truncate=["configuration_catalog"]
+        )
         # clean up the dataset, index, and cache directories
         for folder in ["cache_dir", "index_dir", "datasets_dir"]:
             remove_directory_contents(
@@ -632,7 +635,7 @@ class CatalogManager(object):
         """
         self._db_catalog_service.insert_entry(key, value)
 
-    def get_configuration_catalog_entry(self, key: str) -> ConfigurationCatalogEntry:
+    def get_configuration_catalog_value(self, key: str) -> Any:
         """
         Returns the value entry for the given key
         Arguments:
@@ -643,17 +646,6 @@ class CatalogManager(object):
         """
 
         table_entry = self._db_catalog_service.get_entry_by_name(key)
-
-        return table_entry
-
-
-#### get catalog instance
-# This function plays a crucial role in ensuring that different threads do
-# not share the same catalog object, as it can result in serialization issues and
-# incorrect behavior with SQLAlchemy. Therefore, whenever a catalog instance is
-# required, we create a new one. One possible optimization is to share the catalog
-# instance across all objects within the same thread. It is worth investigating whether
-# SQLAlchemy already handles this optimization for us, which will be explored at a
-# later time.
-def get_catalog_instance(db_uri: str):
-    return CatalogManager(db_uri)
+        if table_entry:
+            return table_entry.value
+        return None

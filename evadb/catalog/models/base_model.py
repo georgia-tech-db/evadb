@@ -100,33 +100,3 @@ class CustomModel:
 
 # Custom Base Model to be inherited by all models
 BaseModel = declarative_base(cls=CustomModel, constructor=None)
-
-
-def truncate_catalog_tables(engine: Engine):
-    """Truncate all the catalog tables"""
-    # https://stackoverflow.com/questions/4763472/sqlalchemy-clear-database-content-but-dont-drop-the-schema/5003705#5003705 #noqa
-    # reflect to refresh the metadata
-    BaseModel.metadata.reflect(bind=engine)
-    insp = sqlalchemy.inspect(engine)
-    if database_exists(engine.url):
-        with contextlib.closing(engine.connect()) as con:
-            trans = con.begin()
-            for table in reversed(BaseModel.metadata.sorted_tables):
-                if insp.has_table(table.name):
-                    con.execute(table.delete())
-            trans.commit()
-
-
-def drop_all_tables_except_catalog(engine: Engine):
-    """drop all the tables except the catalog"""
-    # reflect to refresh the metadata
-    BaseModel.metadata.reflect(bind=engine)
-    insp = sqlalchemy.inspect(engine)
-    if database_exists(engine.url):
-        with contextlib.closing(engine.connect()) as con:
-            trans = con.begin()
-            for table in reversed(BaseModel.metadata.sorted_tables):
-                if table.name not in CATALOG_TABLES:
-                    if insp.has_table(table.name):
-                        table.drop(con)
-            trans.commit()

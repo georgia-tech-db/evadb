@@ -30,6 +30,7 @@ from evadb.configuration.constants import (
     EvaDB_CONFIG_FILE,
     EvaDB_DATASET_DIR,
 )
+from evadb.evadb_config import BASE_EVADB_CONFIG
 from evadb.utils.generic_utils import parse_config_yml
 from evadb.utils.logging_manager import logger as evadb_logger
 
@@ -38,6 +39,7 @@ def get_base_config(evadb_installation_dir: Path) -> Path:
     """
     Get path to .evadb_config.py source path.
     """
+    return BASE_EVADB_CONFIG
     # if evadb package is installed in environment
     if importlib_resources.is_resource("evadb", EvaDB_CONFIG_FILE):
         with importlib_resources.path("evadb", EvaDB_CONFIG_FILE) as config_path:
@@ -54,12 +56,8 @@ def get_default_db_uri(evadb_dir: Path):
     Arguments:
         evadb_dir: path to evadb database directory
     """
-    config_obj = parse_config_yml()
-    if config_obj["core"]["catalog_database_uri"]:
-        return config_obj["core"]["catalog_database_uri"]
-    else:
-        # Default to sqlite.
-        return f"sqlite:///{evadb_dir.resolve()}/{DB_DEFAULT_NAME}"
+    # Default to sqlite.
+    return f"sqlite:///{evadb_dir.resolve()}/{DB_DEFAULT_NAME}"
 
 
 def bootstrap_environment(evadb_dir: Path, evadb_installation_dir: Path):
@@ -71,7 +69,7 @@ def bootstrap_environment(evadb_dir: Path, evadb_installation_dir: Path):
         evadb_installation_dir: path to evadb package
     """
 
-    default_config_path = get_base_config(evadb_installation_dir).resolve()
+    config_obj = get_base_config(evadb_installation_dir)
 
     # creates necessary directories
     config_default_dict = create_directories_and_get_default_config_values(
@@ -80,11 +78,8 @@ def bootstrap_environment(evadb_dir: Path, evadb_installation_dir: Path):
 
     assert evadb_dir.exists(), f"{evadb_dir} does not exist"
     assert evadb_installation_dir.exists(), f"{evadb_installation_dir} does not exist"
-    config_obj = {}
-    with default_config_path.open("r") as yml_file:
-        config_obj = yaml.load(yml_file, Loader=yaml.FullLoader)
     config_obj = merge_dict_of_dicts(config_default_dict, config_obj)
-    mode = config_obj["core"]["mode"]
+    mode = config_obj["mode"]
 
     # set logger to appropriate level (debug or release)
     level = logging.WARN if mode == "release" else logging.DEBUG
@@ -94,6 +89,7 @@ def bootstrap_environment(evadb_dir: Path, evadb_installation_dir: Path):
     # Mainly want to add all the configs to sqlite
 
     return config_obj
+
 
 # TODO : Change
 def create_directories_and_get_default_config_values(
@@ -126,17 +122,15 @@ def create_directories_and_get_default_config_values(
         model_dir.mkdir(parents=True, exist_ok=True)
 
     config_obj = {}
-    config_obj["core"] = {}
-    config_obj["storage"] = {}
-    config_obj["core"]["evadb_installation_dir"] = str(default_install_dir.resolve())
-    config_obj["core"]["datasets_dir"] = str(dataset_location.resolve())
-    config_obj["core"]["catalog_database_uri"] = get_default_db_uri(evadb_dir)
-    config_obj["storage"]["index_dir"] = str(index_dir.resolve())
-    config_obj["storage"]["cache_dir"] = str(cache_dir.resolve())
-    config_obj["storage"]["s3_download_dir"] = str(s3_dir.resolve())
-    config_obj["storage"]["tmp_dir"] = str(tmp_dir.resolve())
-    config_obj["storage"]["function_dir"] = str(function_dir.resolve())
-    config_obj["storage"]["model_dir"] = str(model_dir.resolve())
+    config_obj["evadb_installation_dir"] = str(default_install_dir.resolve())
+    config_obj["datasets_dir"] = str(dataset_location.resolve())
+    config_obj["catalog_database_uri"] = get_default_db_uri(evadb_dir)
+    config_obj["index_dir"] = str(index_dir.resolve())
+    config_obj["cache_dir"] = str(cache_dir.resolve())
+    config_obj["s3_download_dir"] = str(s3_dir.resolve())
+    config_obj["tmp_dir"] = str(tmp_dir.resolve())
+    config_obj["function_dir"] = str(function_dir.resolve())
+    config_obj["model_dir"] = str(model_dir.resolve())
     if category and key:
         return config_obj.get(category, {}).get(key, None)
     elif category:

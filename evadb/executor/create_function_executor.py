@@ -99,10 +99,13 @@ class CreateFunctionExecutor(AbstractExecutor):
             target=arg_map["predict"],
             tune_for_memory=arg_map.get("tune_for_memory", False),
             time_limit_s=arg_map.get("time_limit", DEFAULT_TRAIN_TIME_LIMIT),
-            output_directory=self.db.config.get_value("storage", "tmp_dir"),
+            output_directory=self.db.catalog().get_configuration_catalog_value(
+                "tmp_dir"
+            ),
         )
         model_path = os.path.join(
-            self.db.config.get_value("storage", "model_dir"), self.node.name
+            self.db.catalog().get_configuration_catalog_value("model_dir"),
+            self.node.name,
         )
         auto_train_results.best_model.save(model_path)
         self.node.metadata.append(
@@ -146,7 +149,7 @@ class CreateFunctionExecutor(AbstractExecutor):
         aggregated_batch.frames.drop([arg_map["predict"]], axis=1, inplace=True)
         model.fit(X=aggregated_batch.frames, y=Y)
         model_path = os.path.join(
-            self.db.config.get_value("storage", "model_dir"), self.node.name
+            self.db.catalog().get_configuration_catalog_value("model_dir"), self.node.name
         )
         pickle.dump(model, open(model_path, "wb"))
         self.node.metadata.append(
@@ -372,7 +375,7 @@ class CreateFunctionExecutor(AbstractExecutor):
             model_save_dir_name += "_exogenous_" + str(sorted(exogenous_columns))
 
         model_dir = os.path.join(
-            self.db.config.get_value("storage", "model_dir"),
+            self.db.catalog().get_configuration_catalog_value("model_dir"),
             "tsforecasting",
             model_save_dir_name,
             str(hashlib.sha256(data.to_string().encode()).hexdigest()),

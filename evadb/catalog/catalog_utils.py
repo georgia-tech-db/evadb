@@ -294,6 +294,20 @@ def get_metadata_properties(function_obj: FunctionCatalogEntry) -> Dict:
     return properties
 
 
+def bootstrap_configs(catalog, configs: dict):
+    """
+    load all the configuration values into the catalog table configuration_catalog
+    """
+    for key, value in configs.items():
+        catalog._config_catalog_service.insert_entry(key, value)
+
+
+def get_configuration_value(key: str):
+    
+    catalog = get_catalog_instance()
+    return catalog.get_configuration_catalog_value(key)
+
+
 #### get catalog instance
 # This function plays a crucial role in ensuring that different threads do
 # not share the same catalog object, as it can result in serialization issues and

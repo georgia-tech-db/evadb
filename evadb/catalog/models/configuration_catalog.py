@@ -26,7 +26,7 @@ class ConfigurationCatalog(BaseModel):
     `_value:` the value for the config
     """
 
-    __tablename__ = "configuation_catalog"
+    __tablename__ = "configuration_catalog"
 
     _key = Column("name", String(100), unique=True)
     _value = Column("engine", TextPickleType()) # TODO :- Will this work or would we need to pickle ??

@@ -16,8 +16,13 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Callable
 
-from evadb.catalog.catalog_utils import get_catalog_instance
-from evadb.configuration.constants import DB_DEFAULT_NAME, EvaDB_DATABASE_DIR
+from evadb.catalog.catalog_utils import bootstrap_configs, get_catalog_instance
+from evadb.configuration.bootstrap_environment import bootstrap_environment
+from evadb.configuration.constants import (
+    DB_DEFAULT_NAME,
+    EvaDB_DATABASE_DIR,
+    EvaDB_INSTALLATION_DIR,
+)
 
 if TYPE_CHECKING:
     from evadb.catalog.catalog_manager import CatalogManager
@@ -47,6 +52,15 @@ def init_evadb_instance(
     if db_dir is None:
         db_dir = EvaDB_DATABASE_DIR
 
+    config_obj = bootstrap_environment(
+        Path(db_dir),
+        evadb_installation_dir=Path(EvaDB_INSTALLATION_DIR),
+    )
+
     catalog_uri = custom_db_uri or get_default_db_uri(Path(db_dir))
 
+    # load all the config into the configuration_catalog table
+    print("gg")
+    bootstrap_configs(get_catalog_instance(catalog_uri), config_obj)
+    
     return EvaDBDatabase(db_dir, catalog_uri, get_catalog_instance)
