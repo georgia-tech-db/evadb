@@ -45,6 +45,9 @@ def instrument_function_expression_cost(
 ):
     """We are expecting an instance of a catalog. An optimization can be to avoid creating a catalog instance if there is no function expression. An easy fix is to pass the function handler and create the catalog instance only if there is a function expression. In the past, this was problematic because of Ray. We can revisit it again."""
 
+    if expr is None:
+        return
+
     list_expr = expr
     if isinstance(expr, AbstractExpression):
         list_expr = [expr]
