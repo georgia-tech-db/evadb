@@ -60,48 +60,48 @@ topNavContentLeft.append(darkLinkEvaDB);
 
 // leftContents.push(linkEvaDB)
 
-//-- The Get started link
+//-- The Getting started link
 getStartedLink = document.createElement("a");
-getStartedLink.innerText = "Get started";
+getStartedLink.innerText = "Getting Started";
 getStartedLink.setAttribute(
   "href",
   getNavURL("source/overview/getting-started.html")
 );
 if (is_get_started) {
-  getStartedLink.style.borderBottom = "2px solid var(--orange)";
+  getStartedLink.style.borderBottom = "2px solid var(--black)";
 }
 leftContents.push(getStartedLink);
 
 //-- The Use Cases link
 useCasesLink = document.createElement("a");
-useCasesLink.innerText = "Use cases";
+useCasesLink.innerText = "Use Cases";
 useCasesLink.setAttribute(
   "href",
-  getNavURL("source/usecases/image-classification.html")
+  getNavURL("source/usecases/forecasting.html")
 );
 if (is_use_cases) {
-  useCasesLink.style.borderBottom = "2px solid var(--orange)";
+  useCasesLink.style.borderBottom = "2px solid var(--black)";
 }
 leftContents.push(useCasesLink);
 
 //-- The Documentation link
 documentationLink = document.createElement("a");
-documentationLink.innerText = "Docs";
-documentationLink.setAttribute("href", getNavURL("source/overview/getting-started.html").replace("source/overview/getting-started.html", "index.html"))
+documentationLink.innerText = "Documentation";
+documentationLink.setAttribute("href", getNavURL("source/overview/getting-started.html").replace("source/reference/evaql.html", "index.html"))
 if (is_documentation) {
-  documentationLink.style.borderBottom = "2px solid var(--orange)";
+  documentationLink.style.borderBottom = "2px solid var(--black)";
 }
 leftContents.push(documentationLink);
 
-//-- The Developer Guide
+//-- The Contribution Guide
 developerGuideLink = document.createElement("a");
-developerGuideLink.innerText = "Developer Guide";
+developerGuideLink.innerText = "Contribution Guide";
 developerGuideLink.setAttribute(
   "href",
   getNavURL("source/dev-guide/contribute.html")
 );
 if (is_developer_guide) {
-  developerGuideLink.style.borderBottom = "2px solid var(--orange)";
+  developerGuideLink.style.borderBottom = "2px solid var(--black)";
 }
 
 leftContents.push(developerGuideLink);
