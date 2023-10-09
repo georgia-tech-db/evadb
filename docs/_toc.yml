@@ -15,7 +15,7 @@ parts:
           - file: source/overview/concepts/data-sources
             title: Data Sources
       - file: source/overview/connect-to-database
-        title: Connect to Database
+        title: Connect to Data Sources
         #- file: source/overview/faq
 
   - caption: Use Cases

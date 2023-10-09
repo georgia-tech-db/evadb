@@ -1,7 +1,7 @@
-Connect to Database
-============================
+Connect to Data Sources
+=======================
 
-EvaDB supports a wide range of data sources.
+EvaDB supports a wide range of data sources including SQL database systems, object stores, and vector database systems.
 
 Connect to SQL Database System
 ------------------------------
