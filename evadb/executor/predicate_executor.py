@@ -34,3 +34,6 @@ class PredicateExecutor(AbstractExecutor):
             batch = apply_predicate(batch, self.predicate, self.catalog())
             if not batch.empty():
                 yield batch
+                
+        # perform any required instrumentation before we return
+        instrument_
