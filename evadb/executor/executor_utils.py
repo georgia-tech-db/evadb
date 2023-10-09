@@ -49,7 +49,7 @@ def instrument_function_expression_cost(
         return
 
     list_expr = expr
-    if isinstance(expr, AbstractExpression):
+    if not isinstance(expr, list):
         list_expr = [expr]
 
     # persist stats of function expression
