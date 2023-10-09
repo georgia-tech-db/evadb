@@ -8,7 +8,6 @@ Dependency
 
 * mysql-connector-python
 
-
 Parameters
 ----------
 
@@ -20,6 +19,9 @@ Required:
 * `port` is the port used to make TCP/IP connection.
 * `database` is the database name.
 
+.. warning:: 
+
+     Provide the parameters of an already running ``MySQL`` server. EvaDB only connects to an existing ``MySQL`` database.
 
 Create Connection
 -----------------

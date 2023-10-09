@@ -20,6 +20,9 @@ Required:
 * `port` is the port used to make TCP/IP connection.
 * `database` is the database name.
 
+.. warning:: 
+         
+     Provide the parameters of an already running ``PostgreSQL`` server. EvaDB only connects to an existing ``PostgreSQL`` database.
 
 Create Connection
 -----------------
