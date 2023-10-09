@@ -16,6 +16,7 @@ from typing import Iterator
 
 from evadb.database import EvaDBDatabase
 from evadb.executor.abstract_executor import AbstractExecutor
+from evadb.executor.executor_utils import instrument_function_expression_cost
 from evadb.models.storage.batch import Batch
 from evadb.plan_nodes.apply_and_merge_plan import ApplyAndMergePlan
 
@@ -42,15 +43,6 @@ class ApplyAndMergeExecutor(AbstractExecutor):
         for batch in child_executor.exec(**kwargs):
             func_result = self.func_expr.evaluate(batch)
 
-            # persist stats of function expression
-            if self.func_expr.function_obj and self.func_expr._stats:
-                function_id = self.func_expr.function_obj.row_id
-                self.catalog().upsert_function_cost_catalog_entry(
-                    function_id,
-                    self.func_expr.function_obj.name,
-                    self.func_expr._stats.prev_cost,
-                )
-
             output = Batch.merge_column_wise([batch, func_result])
             if self.do_unnest:
                 output.unnest(func_result.columns)
@@ -58,3 +50,6 @@ class ApplyAndMergeExecutor(AbstractExecutor):
                 output.reset_index()
 
             yield output
+
+        # persist stats of function expression
+        instrument_function_expression_cost(self.func_expr, self.catalog())
