@@ -9,14 +9,11 @@ parts:
             title: Installation Options
       - file: source/overview/concepts
         title: Concepts
-      - file: source/overview/model-inference
-        title: AI Models
-        sections:
-          - file: source/overview/concepts/data-sources
-            title: Data Sources
-      - file: source/overview/connect-to-database
+      - file: source/overview/ai-queries
+        title: AI Queries
+      - file: source/overview/connect-to-data-sources
         title: Connect to Data Sources
-        #- file: source/overview/faq
+      - file: source/overview/faq
 
   - caption: Use Cases
     chapters:
@@ -98,8 +95,9 @@ parts:
             title: OpenAI 
           - file: source/reference/ai/yolo
             title: YOLO 
-          - file: source/reference/ai/custom
-            title: Custom Model
+
+      - file: source/reference/ai/custom-ai-function
+        title: Bring Your Own AI Function
 
       - file: source/reference/optimizations
         title: Optimizations
