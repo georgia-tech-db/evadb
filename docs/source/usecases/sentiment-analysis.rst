@@ -85,4 +85,4 @@ While running this query, EvaDB first retrieves the negative reviews and then ap
 
 .. include:: ../shared/footer.rst
 
-.. include:: ../shared/designs/design2.rst
+.. include:: ../shared/designs/design3.rst
