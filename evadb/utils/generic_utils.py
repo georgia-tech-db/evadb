@@ -561,6 +561,14 @@ def try_to_import_chromadb_client():
                 Please install it with 'pip install chromadb`."""
         )
 
+def try_to_import_weaviate_client():
+    try:
+        import weaviate  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import weaviate python package.
+                Please install it with 'pip install weaviate-client`."""
+        )
 
 def is_qdrant_available() -> bool:
     try:
@@ -585,6 +593,12 @@ def is_chromadb_available() -> bool:
     except ValueError:  # noqa: E722
         return False
 
+def is_weaviate_available() -> bool:
+    try:
+        try_to_import_weaviate_client()
+        return True
+    except ValueError:  # noqa: E722
+        return False
 
 ##############################
 ## UTILS

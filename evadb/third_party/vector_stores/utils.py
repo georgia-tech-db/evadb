@@ -17,6 +17,7 @@ from evadb.third_party.vector_stores.chromadb import ChromaDBVectorStore
 from evadb.third_party.vector_stores.faiss import FaissVectorStore
 from evadb.third_party.vector_stores.pinecone import PineconeVectorStore
 from evadb.third_party.vector_stores.qdrant import QdrantVectorStore
+from evadb.third_party.vector_stores.weaviate import WeaviateVectorStore
 from evadb.utils.generic_utils import validate_kwargs
 
 
@@ -48,6 +49,12 @@ class VectorStoreFactory:
 
             validate_kwargs(kwargs, required_params, required_params)
             return ChromaDBVectorStore(index_name, **kwargs)
+
+        elif vector_store_type == VectorStoreType.WEAVIATE:
+            from evadb.third_party.vector_stores.weaviate import required_params
+
+            validate_kwargs(kwargs, required_params, required_params)
+            return WeaviateVectorStore(index_name, **kwargs)
 
         else:
             raise Exception(f"Vector store {vector_store_type} not supported")

@@ -938,6 +938,7 @@ VisionEncoderDecoderModel
 WIP
 WMV
 WeakValueDictionary
+WEAVIATE
 XdistTests
 Xeon
 XformExtractObjectToLinearFlow
@@ -1746,6 +1747,7 @@ wal
 warmup
 wb
 weakref
+weaviate
 westbrae
 wget
 whitespaces

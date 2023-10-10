@@ -112,6 +112,8 @@ pinecone_libs = ["pinecone-client"]
 
 chromadb_libs = ["chromadb"]
 
+weaviate_libs = ["weaviate-client"]
+
 postgres_libs = [
     "psycopg2",
 ]
