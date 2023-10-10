@@ -337,9 +337,17 @@ class StatementBinder:
                 )
                 # certain functions take additional inputs like yolo needs the model_name
                 # these arguments are passed by the user as part of metadata
-                node.function = lambda: function_class(
-                    **get_metadata_properties(function_obj)
-                )
+                # we also handle the special case of ChatGPT where we need to send the
+                # OpenAPI key as part of the parameter
+                # ToDO: this should be better handled
+                properties = get_metadata_properties(function_obj)
+                if node.name.upper() == str("CHATGPT"):
+                    openapi_key = self._catalog().get_configuration_catalog_value(
+                        "OPENAI_KEY"
+                    )
+                    properties["api_key"] = openapi_key
+
+                node.function = lambda: function_class(properties)
             except Exception as e:
                 err_msg = (
                     f"{str(e)}. Please verify that the function class name in the "

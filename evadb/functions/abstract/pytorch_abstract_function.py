@@ -17,7 +17,6 @@ import numpy as np
 import pandas as pd
 from numpy.typing import ArrayLike
 
-from evadb.configuration.configuration_manager import ConfigurationManager
 from evadb.functions.abstract.abstract_function import (
     AbstractClassifierFunction,
     AbstractTransformationFunction,
@@ -74,7 +73,7 @@ class PytorchAbstractClassifierFunction(
         if isinstance(frames, pd.DataFrame):
             frames = frames.transpose().values.tolist()[0]
 
-        gpu_batch_size = ConfigurationManager().get_value("executor", "gpu_batch_size")
+        gpu_batch_size = None
         import torch
 
         tens_batch = torch.cat([self.transform(x) for x in frames]).to(

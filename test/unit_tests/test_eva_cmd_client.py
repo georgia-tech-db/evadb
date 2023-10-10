@@ -17,13 +17,13 @@ import asyncio
 import unittest
 
 import pytest
-from mock import call, patch
+from mock import patch
 
-from evadb.configuration.configuration_manager import ConfigurationManager
+from evadb.evadb_config import BASE_EVADB_CONFIG
 from evadb.evadb_cmd_client import evadb_client, main
 
 
-@pytest.mark.skip
+# @pytest.mark.skip
 class CMDClientTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -81,17 +81,10 @@ class CMDClientTest(unittest.TestCase):
             [],
         )
 
-        # Mock the ConfigurationManager's get_value method
-        with patch.object(
-            ConfigurationManager, "get_value", return_value="default_value"
-        ) as mock_get_value:
-            # Call the function under test
-            main()
+        # Call the function under test
+        main()
 
-            # Assert that the mocked functions were called correctly
-            mock_start_cmd_client.assert_called_once_with(
-                "default_value", "default_value"
-            )
-            mock_get_value.assert_has_calls(
-                [call("server", "host"), call("server", "port")]
-            )
+        # Assert that the mocked functions were called correctly
+        mock_start_cmd_client.assert_called_once_with(
+            BASE_EVADB_CONFIG["host"], BASE_EVADB_CONFIG["port"]
+        )

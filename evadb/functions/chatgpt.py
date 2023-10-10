@@ -20,7 +20,6 @@ import pandas as pd
 from retry import retry
 
 from evadb.catalog.catalog_type import NdArrayType
-from evadb.configuration.configuration_manager import ConfigurationManager
 from evadb.functions.abstract.abstract_function import AbstractFunction
 from evadb.functions.decorators.decorators import forward, setup
 from evadb.functions.decorators.io_descriptors.data_types import PandasDataframe
@@ -85,10 +84,12 @@ class ChatGPT(AbstractFunction):
         self,
         model="gpt-3.5-turbo",
         temperature: float = 0,
+        api_key="",
     ) -> None:
         assert model in _VALID_CHAT_COMPLETION_MODEL, f"Unsupported ChatGPT {model}"
         self.model = model
         self.temperature = temperature
+        self.api_key = api_key
 
     @forward(
         input_signatures=[
@@ -120,9 +121,7 @@ class ChatGPT(AbstractFunction):
         def completion_with_backoff(**kwargs):
             return openai.ChatCompletion.create(**kwargs)
 
-        # Register API key, try configuration manager first
-        openai.api_key = ConfigurationManager().get_value("third_party", "OPENAI_KEY")
-        # If not found, try OS Environment Variable
+        openai.api_key = self.api_key
         if len(openai.api_key) == 0:
             openai.api_key = os.environ.get("OPENAI_KEY", "")
         assert (
