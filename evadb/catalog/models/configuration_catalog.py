@@ -28,10 +28,8 @@ class ConfigurationCatalog(BaseModel):
 
     __tablename__ = "configuration_catalog"
 
-    _key = Column("name", String(100), unique=True)
-    _value = Column(
-        "engine", TextPickleType()
-    )  # TODO :- Will this work or would we need to pickle ??
+    _key = Column("key", String(100), unique=True)
+    _value = Column("value", TextPickleType())
 
     def __init__(self, key: str, value: any):
         self._key = key

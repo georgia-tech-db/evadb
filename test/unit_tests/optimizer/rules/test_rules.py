@@ -195,7 +195,7 @@ class RulesTest(unittest.TestCase):
                 any(isinstance(rule, type(x)) for x in RulesManager().logical_rules)
             )
 
-        ray_enabled = self.evadb.config.get_value("experimental", "ray")
+        ray_enabled = self.evadb.catalog().get_configuration_catalog_value("ray")
         ray_enabled_and_installed = is_ray_enabled_and_installed(ray_enabled)
 
         # For the current version, we choose either the distributed or the

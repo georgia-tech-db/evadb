@@ -24,11 +24,11 @@ class ExecutionContextTest(unittest.TestCase):
     @patch("evadb.executor.execution_context.get_gpu_count")
     @patch("evadb.executor.execution_context.is_gpu_available")
     def test_CUDA_VISIBLE_DEVICES_gets_populated_from_config(
-        self, gpu_check, get_gpu_count, cfm
+        self, gpu_check, get_gpu_count
     ):
         gpu_check.return_value = True
         get_gpu_count.return_value = 3
-        context = Context([[0, 1]])
+        context = Context([0, 1])
 
         self.assertEqual(context.gpus, [0, 1])
 

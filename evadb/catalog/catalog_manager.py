@@ -145,7 +145,6 @@ class CatalogManager(object):
         )
         # clean up the dataset, index, and cache directories
         for folder in ["cache_dir", "index_dir", "datasets_dir"]:
-            print(folder, self.get_configuration_catalog_value(folder))
             remove_directory_contents(self.get_configuration_catalog_value(folder))
 
     "Database catalog services"

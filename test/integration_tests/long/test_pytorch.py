@@ -49,7 +49,8 @@ class PytorchTest(unittest.TestCase):
     def setUpClass(cls):
         cls.evadb = get_evadb_for_testing()
         cls.evadb.catalog().reset()
-        os.environ["ray"] = str(cls.evadb.config.get_value("experimental", "ray"))
+        print(cls.evadb.catalog().get_configuration_catalog_value("ray"), "ray")
+        os.environ["ray"] = cls.evadb.catalog().get_configuration_catalog_value("ray")
 
         ua_detrac = f"{EvaDB_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
         mnist = f"{EvaDB_ROOT_DIR}/data/mnist/mnist.mp4"

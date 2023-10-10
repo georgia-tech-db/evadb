@@ -67,7 +67,7 @@ class ConfigurationCatalogService(BaseService):
                 select(self.model).filter(self.model._key == key)
             ).scalar_one_or_none()
             if entry:
-                entry.update(self.session, value=value)
+                entry.update(self.session, _value=value)
             else:
                 self.insert_entry(key, value)
         except Exception as e:

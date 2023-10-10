@@ -44,7 +44,7 @@ class CatalogManagerTests(unittest.TestCase):
 
     @mock.patch("evadb.catalog.catalog_manager.init_db")
     def test_catalog_bootstrap(self, mocked_db):
-        x = CatalogManager(MagicMock(), MagicMock())
+        x = CatalogManager(MagicMock())
         x._bootstrap_catalog()
         mocked_db.assert_called()
 
@@ -52,7 +52,7 @@ class CatalogManagerTests(unittest.TestCase):
         "evadb.catalog.catalog_manager.CatalogManager.create_and_insert_table_catalog_entry"
     )
     def test_create_multimedia_table_catalog_entry(self, mock):
-        x = CatalogManager(MagicMock(), MagicMock())
+        x = CatalogManager(MagicMock())
         name = "myvideo"
         x.create_and_insert_multimedia_table_catalog_entry(
             name=name, format_type=FileFormatType.VIDEO
@@ -71,7 +71,7 @@ class CatalogManagerTests(unittest.TestCase):
     def test_insert_table_catalog_entry_should_create_table_and_columns(
         self, ds_mock, initdb_mock
     ):
-        catalog = CatalogManager(MagicMock(), MagicMock())
+        catalog = CatalogManager(MagicMock())
         file_url = "file1"
         table_name = "name"
 
@@ -88,7 +88,7 @@ class CatalogManagerTests(unittest.TestCase):
     @mock.patch("evadb.catalog.catalog_manager.init_db")
     @mock.patch("evadb.catalog.catalog_manager.TableCatalogService")
     def test_get_table_catalog_entry_when_table_exists(self, ds_mock, initdb_mock):
-        catalog = CatalogManager(MagicMock(), MagicMock())
+        catalog = CatalogManager(MagicMock())
         table_name = "name"
         database_name = "database"
         row_id = 1
@@ -110,7 +110,7 @@ class CatalogManagerTests(unittest.TestCase):
     def test_get_table_catalog_entry_when_table_doesnot_exists(
         self, dcs_mock, ds_mock, initdb_mock
     ):
-        catalog = CatalogManager(MagicMock(), MagicMock())
+        catalog = CatalogManager(MagicMock())
         table_name = "name"
 
         database_name = "database"
@@ -132,7 +132,7 @@ class CatalogManagerTests(unittest.TestCase):
     def test_insert_function(
         self, checksum_mock, functionmetadata_mock, functionio_mock, function_mock
     ):
-        catalog = CatalogManager(MagicMock(), MagicMock())
+        catalog = CatalogManager(MagicMock())
         function_io_list = [MagicMock()]
         function_metadata_list = [MagicMock()]
         actual = catalog.insert_function_catalog_entry(
@@ -154,7 +154,7 @@ class CatalogManagerTests(unittest.TestCase):
 
     @mock.patch("evadb.catalog.catalog_manager.FunctionCatalogService")
     def test_get_function_catalog_entry_by_name(self, function_mock):
-        catalog = CatalogManager(MagicMock(), MagicMock())
+        catalog = CatalogManager(MagicMock())
         actual = catalog.get_function_catalog_entry_by_name("name")
         function_mock.return_value.get_entry_by_name.assert_called_with("name")
         self.assertEqual(
@@ -163,7 +163,7 @@ class CatalogManagerTests(unittest.TestCase):
 
     @mock.patch("evadb.catalog.catalog_manager.FunctionCatalogService")
     def test_delete_function(self, function_mock):
-        CatalogManager(MagicMock(), MagicMock()).delete_function_catalog_entry_by_name(
+        CatalogManager(MagicMock()).delete_function_catalog_entry_by_name(
             "name"
         )
         function_mock.return_value.delete_entry_by_name.assert_called_with("name")
@@ -172,7 +172,7 @@ class CatalogManagerTests(unittest.TestCase):
     def test_get_function_outputs(self, function_mock):
         mock_func = function_mock.return_value.get_output_entries_by_function_id
         function_obj = MagicMock(spec=FunctionCatalogEntry)
-        CatalogManager(MagicMock(), MagicMock()).get_function_io_catalog_output_entries(
+        CatalogManager(MagicMock()).get_function_io_catalog_output_entries(
             function_obj
         )
         mock_func.assert_called_once_with(function_obj.row_id)
@@ -181,7 +181,7 @@ class CatalogManagerTests(unittest.TestCase):
     def test_get_function_inputs(self, function_mock):
         mock_func = function_mock.return_value.get_input_entries_by_function_id
         function_obj = MagicMock(spec=FunctionCatalogEntry)
-        CatalogManager(MagicMock(), MagicMock()).get_function_io_catalog_input_entries(
+        CatalogManager(MagicMock()).get_function_io_catalog_input_entries(
             function_obj
         )
         mock_func.assert_called_once_with(function_obj.row_id)
