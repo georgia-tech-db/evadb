@@ -3,16 +3,18 @@
 Model Inference
 ===============
 
-In EvaDB, every model is a function. We can compose SQL queries using functions as building units similar to conventional SQL functions. EvaDB's `cascades optimizer <https://faculty.cc.gatech.edu/~jarulraj/courses/8803-s21/slides/22-cascades.pdf>`_ will optimize the evaluation of user-defined functions for lower latency. Go over :ref:`optimizations` for more details.
+In EvaDB, AI models are simple function calls. 
+
+You can compose SQL queries using AI functions similar to canonical SQL functions like `SUM`. EvaDB automatically optimizes queries with AI functions to save money and time, as detailed in :ref:`optimizations`.
 
 .. note::
 
-   EvaDB ships with a variety of builtin user-defined functions. Go over :ref:`models` to check them. Did not find the desired model? Go over :ref:`udf` to create your own user-defined functions and contribute to EvaDB.
+   EvaDB ships with a wide range of built-in functions listed in :ref:`models`. If your desired AI model is not available, learn how to easily write your own AI function refer in :ref:`udf`.
 
 1. Projection
 -------------
 
-The most common usecases are model inference in projections. For example, we can use the `MnistImageClassifier <https://github.com/georgia-tech-db/evadb/blob/staging/evadb/functions/mnist_image_classifier.py>`_ to identify numbers from the `MNIST <https://www.dropbox.com/s/yxljxz6zxoqu54v/mnist.mp4>`_ video. 
+The most common AI queries run models in projection. For example, we can use the `MnistImageClassifier <https://github.com/georgia-tech-db/evadb/blob/staging/evadb/functions/mnist_image_classifier.py>`_ to identify digits.
 
 .. code-block:: sql
 

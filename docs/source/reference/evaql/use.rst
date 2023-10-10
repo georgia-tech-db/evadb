@@ -1,7 +1,7 @@
-.. _sql-use:
-
 USE
 ===
+
+.. _use:
 
 The USE statement allows us to run arbitrary native queries in the connected database.
 
