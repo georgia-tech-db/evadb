@@ -376,6 +376,7 @@ def is_sklearn_available() -> bool:
     except ValueError:  # noqa: E722
         return False
 
+
 def try_to_import_automl():
     try:
         import flaml  # noqa: F401

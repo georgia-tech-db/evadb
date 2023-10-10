@@ -39,7 +39,6 @@ from evadb.utils.generic_utils import (
     load_function_class_from_file,
     string_comparison_case_insensitive,
     try_to_import_automl,
-    try_to_import_forecast,
     try_to_import_ludwig,
     try_to_import_neuralforecast,
     try_to_import_sklearn,
