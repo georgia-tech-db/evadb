@@ -135,6 +135,13 @@ class SimilarityTests(unittest.TestCase):
         os.environ["PINECONE_API_KEY"] = "657e4fae-7208-4555-b0f2-9847dfa5b818"
         os.environ["PINECONE_ENV"] = "gcp-starter"
 
+        self.original_milvus_uri = os.environ.get("MILVUS_URI")
+        self.original_milvus_db_name = os.environ.get("MILVUS_DB_NAME")
+
+        os.environ["MILVUS_URI"] = "http://localhost:19530"
+        # use default Milvus database for testing
+        os.environ["MILVUS_DB_NAME"] = "default"
+
     def tearDown(self):
         shutdown_ray()
 
@@ -153,6 +160,14 @@ class SimilarityTests(unittest.TestCase):
             os.environ["PINECONE_ENV"] = self.original_pinecone_env
         else:
             del os.environ["PINECONE_ENV"]
+        if self.original_milvus_uri:
+            os.environ["MILVUS_URI"] = self.original_milvus_uri
+        else:
+            del os.environ["MILVUS_URI"]
+        if self.original_milvus_db_name:
+            os.environ["MILVUS_DB_NAME"] = self.original_milvus_db_name
+        else:
+            del os.environ["MILVUS_DB_NAME"]
 
     def test_similarity_should_work_in_order(self):
         ###############################################
@@ -550,6 +565,7 @@ class SimilarityTests(unittest.TestCase):
             self.assertTrue("VectorIndexScan" in explain_batch.frames[0][0])
 
             res_batch = execute_query_fetch_all(self.evadb, select_query)
+            print(res_batch)
             self.assertEqual(
                 res_batch.frames["testsimilarityimagedataset._row_id"][0], 5
             )

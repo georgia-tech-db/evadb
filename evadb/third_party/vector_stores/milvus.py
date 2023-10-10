@@ -12,9 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import atexit
+import os
 from typing import List
 
+from evadb.configuration.configuration_manager import ConfigurationManager
 from evadb.third_party.vector_stores.types import (
     FeaturePayload,
     VectorIndexQuery,
@@ -24,44 +25,80 @@ from evadb.third_party.vector_stores.types import (
 from evadb.utils.generic_utils import try_to_import_milvus_client
 
 _milvus_client_instance = None
-_milvus_server_instance = None
 
 required_params = ["index_dir"]
 
 
-def get_local_milvus_server(index_dir: str):
-    global _milvus_server_instance
-    if _milvus_server_instance is None:
-        try_to_import_milvus_client()
-        import milvus
-
-        _milvus_server_instance = milvus.default_server
-        _milvus_server_instance.set_base_dir(index_dir)
-        _milvus_server_instance.start()
-
-        # Ensure that local Milvus server is terminated before Python process terminates
-        atexit.register(_milvus_server_instance.stop)
-    return _milvus_server_instance
-
-
-def get_milvus_client(server_address: str, server_port: int):
+def get_milvus_client(
+    milvus_uri: str,
+    milvus_user: str,
+    milvus_password: str,
+    milvus_db_name: str,
+    milvus_token: str,
+):
     global _milvus_client_instance
     if _milvus_client_instance is None:
         try_to_import_milvus_client()
         import pymilvus
 
-        server_uri = f"http://{server_address}:{server_port}"
-        _milvus_client_instance = pymilvus.MilvusClient(uri=server_uri)
+        _milvus_client_instance = pymilvus.MilvusClient(
+            uri=milvus_uri,
+            user=milvus_user,
+            password=milvus_password,
+            db_name=milvus_db_name,
+            token=milvus_token,
+        )
 
     return _milvus_client_instance
 
 
 class MilvusVectorStore(VectorStore):
     def __init__(self, index_name: str, index_dir: str) -> None:
-        local_milvus_server = get_local_milvus_server(index_dir)
+        # Milvus URI is the only required
+        self._milvus_uri = ConfigurationManager().get_value("third_party", "MILVUS_URI")
+
+        if not self._milvus_uri:
+            self._milvus_uri = os.environ.get("MILVUS_URI")
+
+        assert (
+            self._milvus_uri
+        ), "Please set your Milvus URI in evadb.yml file (third_party, MILVUS_URI) or environment variable (MILVUS_URI)."
+
+        # Check other Milvus variables for additional customization
+        self._milvus_user = ConfigurationManager().get_value(
+            "third_party", "MILVUS_USER"
+        )
+
+        if not self._milvus_user:
+            self._milvus_user = os.environ.get("MILVUS_USER", "")
+
+        self._milvus_password = ConfigurationManager().get_value(
+            "third_party", "MILVUS_PASSWORD"
+        )
+
+        if not self._milvus_password:
+            self._milvus_password = os.environ.get("MILVUS_PASSWORD", "")
+
+        self._milvus_db_name = ConfigurationManager().get_value(
+            "third_party", "MILVUS_DB_NAME"
+        )
+
+        if not self._milvus_db_name:
+            self._milvus_db_name = os.environ.get("MILVUS_DB_NAME", "")
+
+        self._milvus_token = ConfigurationManager().get_value(
+            "third_party", "MILVUS_TOKEN"
+        )
+
+        if not self._milvus_token:
+            self._milvus_token = os.environ.get("MILVUS_TOKEN", "")
+
         self._client = get_milvus_client(
-            server_address=local_milvus_server.server_address,
-            server_port=local_milvus_server.listen_port,
+            milvus_uri=self._milvus_uri,
+            milvus_user=self._milvus_user,
+            milvus_password=self._milvus_password,
+            milvus_db_name=self._milvus_db_name,
+            milvus_token=self._milvus_token,
         )
         self._collection_name = index_name
 
@@ -69,7 +106,9 @@ class MilvusVectorStore(VectorStore):
         if self._collection_name in self._client.list_collections():
             self._client.drop_collection(self._collection_name)
         self._client.create_collection(
-            collection_name=self._collection_name, dimension=vector_dim
+            collection_name=self._collection_name,
+            dimension=vector_dim,
+            metric_type="COSINE",
         )
 
     def add(self, payload: List[FeaturePayload]):

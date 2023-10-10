@@ -50,7 +50,7 @@ chromadb_skip_marker = pytest.mark.skipif(
 
 milvus_skip_marker = pytest.mark.skipif(
     is_milvus_available() is False,
-    reason="Skipping since milvus and pymilvus is not installed",
+    reason="Skipping since pymilvus is not installed",
 )
 
 windows_skip_marker = pytest.mark.skipif(

@@ -112,7 +112,7 @@ pinecone_libs = ["pinecone-client"]
 
 chromadb_libs = ["chromadb"]
 
-milvus_libs = ["milvus[client]"]
+milvus_libs = ["pymilvus>=2.3.0"]
 
 postgres_libs = [
     "psycopg2",
@@ -123,8 +123,8 @@ ludwig_libs = ["ludwig[hyperopt,distributed]"]  # MODEL TRAIN AND FINE TUNING
 sklearn_libs = ["scikit-learn"]
 
 forecasting_libs = [
-    "statsforecast", # MODEL TRAIN AND FINE TUNING
-    "neuralforecast" # MODEL TRAIN AND FINE TUNING
+    "statsforecast",  # MODEL TRAIN AND FINE TUNING
+    "neuralforecast",  # MODEL TRAIN AND FINE TUNING
 ]
 
 ### NEEDED FOR DEVELOPER TESTING ONLY
@@ -170,7 +170,13 @@ EXTRA_REQUIRES = {
     "sklearn": sklearn_libs,
     "forecasting": forecasting_libs,
     # everything except ray, qdrant, ludwig and postgres. The first three fail on pyhton 3.11.
-    "dev": dev_libs + vision_libs + document_libs + function_libs + notebook_libs + forecasting_libs + sklearn_libs,
+    "dev": dev_libs
+    + vision_libs
+    + document_libs
+    + function_libs
+    + notebook_libs
+    + forecasting_libs
+    + sklearn_libs,
 }
 
 setup(

@@ -572,16 +572,6 @@ def try_to_import_milvus_client():
         )
 
 
-def try_to_import_milvus_server():
-    try:
-        import milvus
-    except:
-        raise ValueError(
-            """Could not import milvus python package.
-                Please install it with 'pip install milvus`."""
-        )
-
-
 def is_qdrant_available() -> bool:
     try:
         try_to_import_qdrant_client()
@@ -608,7 +598,6 @@ def is_chromadb_available() -> bool:
 
 def is_milvus_available() -> bool:
     try:
-        try_to_import_milvus_server()
         try_to_import_milvus_client()
         return True
     except ValueError:
