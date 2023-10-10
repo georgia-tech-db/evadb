@@ -544,6 +544,7 @@ class SimilarityTests(unittest.TestCase):
             drop_index_query = "DROP INDEX testpineconeindeximagedataset;"
             execute_query_fetch_all(self.evadb, drop_index_query)
 
+    @pytest.mark.skip(reason="Requires running local Milvus instance")
     @milvus_skip_marker
     def test_end_to_end_index_scan_should_work_correctly_on_image_dataset_milvus(
         self,
