@@ -16,11 +16,10 @@ import argparse
 import asyncio
 import unittest
 
-import pytest
 from mock import patch
 
-from evadb.evadb_config import BASE_EVADB_CONFIG
 from evadb.evadb_cmd_client import evadb_client, main
+from evadb.evadb_config import BASE_EVADB_CONFIG
 
 
 # @pytest.mark.skip

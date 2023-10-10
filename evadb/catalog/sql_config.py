@@ -18,7 +18,6 @@ from weakref import WeakValueDictionary
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import scoped_session, sessionmaker
 
-
 # Permanent identifier column.
 IDENTIFIER_COLUMN = "_row_id"
 

@@ -16,7 +16,6 @@ import logging
 from pathlib import Path
 from typing import Union
 
-
 from evadb.configuration.constants import (
     CACHE_DIR,
     DB_DEFAULT_NAME,

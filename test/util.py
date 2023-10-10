@@ -422,7 +422,6 @@ def create_large_scale_image_dataset(num=1000000):
 
 def create_sample_video(num_frames=NUM_FRAMES):
     file_name = os.path.join(get_tmp_dir(), "dummy.avi")
-    print(file_name)
     try:
         os.remove(file_name)
     except FileNotFoundError:

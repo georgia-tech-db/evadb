@@ -163,25 +163,19 @@ class CatalogManagerTests(unittest.TestCase):
 
     @mock.patch("evadb.catalog.catalog_manager.FunctionCatalogService")
     def test_delete_function(self, function_mock):
-        CatalogManager(MagicMock()).delete_function_catalog_entry_by_name(
-            "name"
-        )
+        CatalogManager(MagicMock()).delete_function_catalog_entry_by_name("name")
         function_mock.return_value.delete_entry_by_name.assert_called_with("name")
 
     @mock.patch("evadb.catalog.catalog_manager.FunctionIOCatalogService")
     def test_get_function_outputs(self, function_mock):
         mock_func = function_mock.return_value.get_output_entries_by_function_id
         function_obj = MagicMock(spec=FunctionCatalogEntry)
-        CatalogManager(MagicMock()).get_function_io_catalog_output_entries(
-            function_obj
-        )
+        CatalogManager(MagicMock()).get_function_io_catalog_output_entries(function_obj)
         mock_func.assert_called_once_with(function_obj.row_id)
 
     @mock.patch("evadb.catalog.catalog_manager.FunctionIOCatalogService")
     def test_get_function_inputs(self, function_mock):
         mock_func = function_mock.return_value.get_input_entries_by_function_id
         function_obj = MagicMock(spec=FunctionCatalogEntry)
-        CatalogManager(MagicMock()).get_function_io_catalog_input_entries(
-            function_obj
-        )
+        CatalogManager(MagicMock()).get_function_io_catalog_input_entries(function_obj)
         mock_func.assert_called_once_with(function_obj.row_id)

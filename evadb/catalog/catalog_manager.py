@@ -32,7 +32,6 @@ from evadb.catalog.catalog_utils import (
 )
 from evadb.catalog.models.utils import (
     ColumnCatalogEntry,
-    ConfigurationCatalogEntry,
     DatabaseCatalogEntry,
     FunctionCacheCatalogEntry,
     FunctionCatalogEntry,

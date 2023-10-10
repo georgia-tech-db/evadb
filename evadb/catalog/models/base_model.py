@@ -15,6 +15,7 @@
 from sqlalchemy import Column, Integer
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.declarative import declarative_base
+
 from evadb.utils.logging_manager import logger
 
 

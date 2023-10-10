@@ -293,7 +293,7 @@ def get_metadata_properties(function_obj: FunctionCatalogEntry) -> Dict:
     return properties
 
 
-def bootstrap_configs(catalog: "CatalogManager", configs: dict):
+def bootstrap_configs(catalog, configs: dict):
     """
     load all the configuration values into the catalog table configuration_catalog
     """
