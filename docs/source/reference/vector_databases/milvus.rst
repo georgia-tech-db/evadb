@@ -13,9 +13,9 @@ Parameters
 ----------
 
 To use Milvus you must have a URI to a running Milvus instance. Here are the `instructions to spin up a local instance <https://milvus.io/docs/install_standalone-docker.md>`_.
-If you are running it locally, the Milvus instance should be running on http://localhost:19530. Please be sure that the Milvus version is >= 2.3.0. Below are values that the Milvus integration uses:
+If you are running it locally, the Milvus instance should be running on ``http://localhost:19530``. Please be sure that the Milvus version is >= 2.3.0. Below are values that the Milvus integration uses:
 
-* `MILVUS_URI` is the URI of the Milvus instance (which would be http://localhost:19530 when running locally). **This value is required**
+* `MILVUS_URI` is the URI of the Milvus instance (which would be ``http://localhost:19530`` when running locally). **This value is required**
 * `MILVUS_USER` is the name of the user for the Milvus instance.
 * `MILVUS_PASSWORD` is the password of the user for the Milvus instance.
 * `MILVUS_DB_NAME` is the name of the database to be used. This will default to the `default` database if not provided.
