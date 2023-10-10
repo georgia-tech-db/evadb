@@ -176,7 +176,7 @@ def handle_vector_store_params(
     elif vector_store_type == VectorStoreType.PINECONE:
         return {}
     elif vector_store_type == VectorStoreType.MILVUS:
-        return {"index_dir": Path(str(Path(index_path).parent), "milvus")}
+        return {}
     else:
         raise ValueError("Unsupported vector store type: {}".format(vector_store_type))
 

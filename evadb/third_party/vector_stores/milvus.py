@@ -24,9 +24,8 @@ from evadb.third_party.vector_stores.types import (
 )
 from evadb.utils.generic_utils import try_to_import_milvus_client
 
+required_params = []
 _milvus_client_instance = None
-
-required_params = ["index_dir"]
 
 
 def get_milvus_client(
@@ -53,7 +52,7 @@ def get_milvus_client(
 
 
 class MilvusVectorStore(VectorStore):
-    def __init__(self, index_name: str, index_dir: str) -> None:
+    def __init__(self, index_name: str) -> None:
         # Milvus URI is the only required
         self._milvus_uri = ConfigurationManager().get_value("third_party", "MILVUS_URI")
 
