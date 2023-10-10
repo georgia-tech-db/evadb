@@ -74,7 +74,7 @@ def bootstrap_environment(evadb_dir: Path, evadb_installation_dir: Path):
 
 # TODO : Change
 def create_directories_and_get_default_config_values(
-    evadb_dir: Path, evadb_installation_dir: Path, category: str = None, key: str = None
+    evadb_dir: Path, evadb_installation_dir: Path
 ) -> Union[dict, str]:
     default_install_dir = evadb_installation_dir
     dataset_location = evadb_dir / EvaDB_DATASET_DIR
@@ -112,10 +112,6 @@ def create_directories_and_get_default_config_values(
     config_obj["tmp_dir"] = str(tmp_dir.resolve())
     config_obj["function_dir"] = str(function_dir.resolve())
     config_obj["model_dir"] = str(model_dir.resolve())
-    if category and key:
-        return config_obj.get(category, {}).get(key, None)
-    elif category:
-        return config_obj.get(category, {})
     return config_obj
 
 
