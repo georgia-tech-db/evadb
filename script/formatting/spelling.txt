@@ -551,6 +551,7 @@ MaxPool
 MemeImages
 MemoTest
 MetaData
+Milvus
 MindsDB
 MiniLM
 MnistImageClassifier
