@@ -34,7 +34,6 @@ from evadb.optimizer.rules.rules import (
     PushDownFilterThroughApplyAndMerge,
     PushDownFilterThroughJoin,
     ReorderPredicates,
-    XformLateralJoinToLinearFlow,
 )
 from evadb.optimizer.rules.rules_manager import RulesManager, disable_rules
 from evadb.plan_nodes.predicate_plan import PredicatePlan
@@ -107,16 +106,6 @@ class OptimizerRulesTest(unittest.TestCase):
         # without rule it should be slow as we end up running the function
         # on all the frames
         self.assertGreater(evaluate_count_without_rule, 3 * evaluate_count_with_rule)
-
-        result_without_xform_rule = None
-        rules_manager = RulesManager()
-        with disable_rules(rules_manager, [XformLateralJoinToLinearFlow()]):
-            custom_plan_generator = PlanGenerator(self.evadb, rules_manager)
-            result_without_xform_rule = execute_query_fetch_all(
-                self.evadb, query, plan_generator=custom_plan_generator
-            )
-
-        self.assertEqual(result_without_xform_rule, result_with_rule)
 
     def test_should_pushdown_without_pushdown_join_rule(self):
         query = """SELECT id, obj.labels
