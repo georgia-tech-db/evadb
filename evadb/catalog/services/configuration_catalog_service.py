@@ -33,10 +33,7 @@ class ConfigurationCatalogService(BaseService):
         value: any,
     ):
         try:
-            config_catalog_obj = self.model(
-                key = key,
-                value = value
-            )
+            config_catalog_obj = self.model(key=key, value=value)
             config_catalog_obj = config_catalog_obj.save(self.session)
 
         except Exception as e:
@@ -59,3 +56,21 @@ class ConfigurationCatalogService(BaseService):
         if entry:
             return entry.as_dataclass()
         return entry
+
+    def upsert_entry(
+        self,
+        key: str,
+        value: any,
+    ):
+        try:
+            entry = self.session.execute(
+                select(self.model).filter(self.model._key == key)
+            ).scalar_one_or_none()
+            if entry:
+                entry.update(self.session, value=value)
+            else:
+                self.insert_entry(key, value)
+        except Exception as e:
+            raise CatalogError(
+                f"Error while upserting entry to ConfigurationCatalog: {str(e)}"
+            )

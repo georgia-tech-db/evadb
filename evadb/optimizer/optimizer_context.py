@@ -43,8 +43,10 @@ class OptimizerContext:
         self._task_stack = OptimizerTaskStack()
         self._memo = Memo()
         self._cost_model = cost_model
-        self._rules_manager = rules_manager or RulesManager(db.config)
-
+        # check if ray is enabled
+        is_ray_enabled = self.db.catalog().get_configuration_catalog_value("ray")
+        self._rules_manager = rules_manager or RulesManager({"ray": is_ray_enabled})
+        
     @property
     def db(self):
         return self._db

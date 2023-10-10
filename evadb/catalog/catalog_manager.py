@@ -145,9 +145,8 @@ class CatalogManager(object):
         )
         # clean up the dataset, index, and cache directories
         for folder in ["cache_dir", "index_dir", "datasets_dir"]:
-            remove_directory_contents(
-                self._config_catalog_service.get_entry_by_name(folder).value
-            )
+            print(folder, self.get_configuration_catalog_value(folder))
+            remove_directory_contents(self.get_configuration_catalog_value(folder))
 
     "Database catalog services"
 
@@ -459,7 +458,7 @@ class CatalogManager(object):
     """ Function Cache related"""
 
     def insert_function_cache_catalog_entry(self, func_expr: FunctionExpression):
-        cache_dir = self._config_catalog_service.get_entry_by_name("cache_dir").value
+        cache_dir = self.get_configuration_catalog_value("cache_dir")
         entry = construct_function_cache_catalog_entry(func_expr, cache_dir=cache_dir)
         return self._function_cache_service.insert_entry(entry)
 
@@ -522,9 +521,7 @@ class CatalogManager(object):
         table_name = table_info.table_name
         column_catalog_entries = xform_column_definitions_to_catalog_entries(columns)
 
-        dataset_location = self._config_catalog_service.get_entry_by_name(
-            "datasets_dir"
-        )
+        dataset_location = self.get_configuration_catalog_value("datasets_dir")
         file_url = str(generate_file_path(dataset_location, table_name))
         table_catalog_entry = self.insert_table_catalog_entry(
             table_name,
@@ -626,14 +623,14 @@ class CatalogManager(object):
 
     "Configuration catalog services"
 
-    def insert_configuration_catalog_entry(self, key: str, value: any):
-        """A new entry is persisted in the database catalog."
+    def upsert_configuration_catalog_entry(self, key: str, value: any):
+        """Upserts configuration catalog entry"
 
         Args:
             key: key name
             value: value name
         """
-        self._db_catalog_service.insert_entry(key, value)
+        self._config_catalog_service.upsert_entry(key, value)
 
     def get_configuration_catalog_value(self, key: str) -> Any:
         """
@@ -645,7 +642,7 @@ class CatalogManager(object):
             ConfigurationCatalogEntry
         """
 
-        table_entry = self._db_catalog_service.get_entry_by_name(key)
+        table_entry = self._config_catalog_service.get_entry_by_name(key)
         if table_entry:
             return table_entry.value
         return None

@@ -33,6 +33,7 @@ from evadb.binder.statement_binder_context import StatementBinderContext
 from evadb.catalog.catalog_type import ColumnType, TableType
 from evadb.catalog.catalog_utils import get_metadata_properties, is_document_table
 from evadb.configuration.constants import EvaDB_INSTALLATION_DIR
+from evadb.executor.execution_context import Context
 from evadb.expression.abstract_expression import AbstractExpression, ExpressionType
 from evadb.expression.function_expression import FunctionExpression
 from evadb.expression.tuple_value_expression import TupleValueExpression
@@ -264,6 +265,11 @@ class StatementBinder:
 
     @bind.register(FunctionExpression)
     def _bind_func_expr(self, node: FunctionExpression):
+        # setup the context
+        # we read the GPUs from the catalog and populate in the context
+        gpus_ids = self._catalog().get_configuration_catalog_value("gpu_ids")
+        node._context = Context(gpus_ids)
+        
         # handle the special case of "extract_object"
         if node.name.upper() == str(FunctionType.EXTRACT_OBJECT):
             handle_bind_extract_object_function(node, self)

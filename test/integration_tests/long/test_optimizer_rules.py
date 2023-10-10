@@ -88,7 +88,7 @@ class OptimizerRulesTest(unittest.TestCase):
         result_without_pushdown_rules = None
 
         with time_without_rule:
-            rules_manager = RulesManager(self.evadb.config)
+            rules_manager = RulesManager()
             with disable_rules(
                 rules_manager,
                 [PushDownFilterThroughApplyAndMerge(), PushDownFilterThroughJoin()],
@@ -109,7 +109,7 @@ class OptimizerRulesTest(unittest.TestCase):
         self.assertGreater(evaluate_count_without_rule, 3 * evaluate_count_with_rule)
 
         result_without_xform_rule = None
-        rules_manager = RulesManager(self.evadb.config)
+        rules_manager = RulesManager()
         with disable_rules(rules_manager, [XformLateralJoinToLinearFlow()]):
             custom_plan_generator = PlanGenerator(self.evadb, rules_manager)
             result_without_xform_rule = execute_query_fetch_all(
@@ -132,7 +132,7 @@ class OptimizerRulesTest(unittest.TestCase):
         time_without_rule = Timer()
         result_without_pushdown_join_rule = None
         with time_without_rule:
-            rules_manager = RulesManager(self.evadb.config)
+            rules_manager = RulesManager()
             with disable_rules(rules_manager, [PushDownFilterThroughJoin()]):
                 # should use PushDownFilterThroughApplyAndMerge()
                 custom_plan_generator = PlanGenerator(self.evadb, rules_manager)
@@ -264,7 +264,7 @@ class OptimizerRulesTest(unittest.TestCase):
         query = "SELECT id FROM MyVideo WHERE id < 20 AND id > 10;"
         result = execute_query_fetch_all(self.evadb, query)
 
-        rules_manager = RulesManager(self.evadb.config)
+        rules_manager = RulesManager()
         with disable_rules(rules_manager, [ReorderPredicates()]):
             custom_plan_generator = PlanGenerator(self.evadb, rules_manager)
             expected = execute_query_fetch_all(
