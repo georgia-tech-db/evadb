@@ -30,7 +30,7 @@ from evadb.configuration.constants import (
     EvaDB_CONFIG_FILE,
     EvaDB_DATASET_DIR,
 )
-from evadb.utils.generic_utils import parse_config_yml
+from evadb.utils.generic_utils import get_base_config
 from evadb.utils.logging_manager import logger as evadb_logger
 
 
@@ -54,9 +54,9 @@ def get_default_db_uri(evadb_dir: Path):
     Arguments:
         evadb_dir: path to evadb database directory
     """
-    config_obj = parse_config_yml()
-    if config_obj["core"]["catalog_database_uri"]:
-        return config_obj["core"]["catalog_database_uri"]
+    base_config_obj = get_base_config()
+    if base_config_obj["catalog_database_uri"]:
+        return base_config_obj["catalog_database_uri"]
     else:
         # Default to sqlite.
         return f"sqlite:///{evadb_dir.resolve()}/{DB_DEFAULT_NAME}"

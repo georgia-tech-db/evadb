@@ -19,7 +19,7 @@ from sqlalchemy import create_engine, event
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.pool import NullPool
 
-from evadb.utils.generic_utils import is_postgres_uri, parse_config_yml
+from evadb.utils.generic_utils import is_postgres_uri, get_base_config
 
 # Permanent identifier column.
 IDENTIFIER_COLUMN = "_row_id"
@@ -31,6 +31,7 @@ ROW_NUM_MAGIC = 0xFFFFFFFF
 CATALOG_TABLES = [
     "column_catalog",
     "table_catalog",
+    "configuration_catalog",
     "database_catalog",
     "depend_column_and_function_cache",
     "function_cache",
@@ -71,8 +72,8 @@ class SQLConfig(metaclass=SingletonMeta):
         # set echo=True to log SQL
 
         connect_args = {}
-        config_obj = parse_config_yml()
-        if is_postgres_uri(config_obj["core"]["catalog_database_uri"]):
+        base_config_obj = get_base_config()
+        if is_postgres_uri(base_config_obj["catalog_database_uri"]):
             # Set the arguments for postgres backend.
             connect_args = {"connect_timeout": 1000}
             # https://www.oddbird.net/2014/06/14/sqlalchemy-postgres-autocommit/

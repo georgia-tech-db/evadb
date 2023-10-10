@@ -308,7 +308,7 @@ def get_metadata_properties(function_obj: FunctionCatalogEntry) -> Dict:
 # instance across all objects within the same thread. It is worth investigating whether
 # SQLAlchemy already handles this optimization for us, which will be explored at a
 # later time.
-def get_catalog_instance(db_uri: str, config: ConfigurationManager):
+def get_catalog_instance(db_uri: str, base_config: dict[str, Any]):
     from evadb.catalog.catalog_manager import CatalogManager
 
-    return CatalogManager(db_uri, config)
+    return CatalogManager(db_uri, base_config)

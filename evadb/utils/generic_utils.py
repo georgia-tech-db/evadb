@@ -28,6 +28,7 @@ from aenum import AutoEnum, unique
 
 from evadb.configuration.constants import EvaDB_INSTALLATION_DIR
 from evadb.utils.logging_manager import logger
+from evadb_config import BASE_EVADB_CONFIG
 
 
 def validate_kwargs(
@@ -215,16 +216,11 @@ def get_file_checksum(fname: str) -> str:
     return hash_md5.hexdigest()
 
 
-def parse_config_yml():
+def get_base_config():
     """
-    Parses the 'evadb.yml' file and returns the config object.
+    Gets the base config dict from evadb_config.py file
     """
-    import yaml
-
-    f = open(Path(EvaDB_INSTALLATION_DIR) / "evadb.yml", "r+")
-    config_obj = yaml.load(f, Loader=yaml.FullLoader)
-    f.close()
-    return config_obj
+    return BASE_EVADB_CONFIG
 
 
 def is_postgres_uri(db_uri):

@@ -14,7 +14,7 @@
 # limitations under the License.
 import shutil
 from pathlib import Path
-from typing import List
+from typing import Any, List
 
 from evadb.catalog.catalog_type import (
     ColumnType,
@@ -33,6 +33,7 @@ from evadb.catalog.catalog_utils import (
 )
 from evadb.catalog.models.utils import (
     ColumnCatalogEntry,
+    ConfigurationCatalogEntry,
     DatabaseCatalogEntry,
     FunctionCacheCatalogEntry,
     FunctionCatalogEntry,
@@ -47,6 +48,7 @@ from evadb.catalog.models.utils import (
 )
 from evadb.catalog.services.column_catalog_service import ColumnCatalogService
 from evadb.catalog.services.database_catalog_service import DatabaseCatalogService
+from evadb.catalog.services.configuration_catalog_service import ConfigurationCatalogService
 from evadb.catalog.services.function_cache_catalog_service import (
     FunctionCacheCatalogService,
 )
@@ -72,7 +74,7 @@ from evadb.utils.logging_manager import logger
 
 
 class CatalogManager(object):
-    def __init__(self, db_uri: str, config: ConfigurationManager):
+    def __init__(self, db_uri: str, base_config: dict[str, Any]):
         self._db_uri = db_uri
         self._sql_config = SQLConfig(db_uri)
         self._config = config
@@ -608,6 +610,28 @@ class CatalogManager(object):
         )
         return obj
 
+    "Configuration catalog services"
+
+    def insert_configuration_catalog_entry(self, key: str, value: any):
+        """A new entry is persisted in the database catalog."
+        Args:
+            key: key name
+            value: value name
+        """
+        self._db_catalog_service.insert_entry(key, value)
+
+    def get_configuration_catalog_entry(self, key: str) -> ConfigurationCatalogEntry:
+        """
+        Returns the value entry for the given key
+        Arguments:
+            key (str): key name
+        Returns:
+            ConfigurationCatalogEntry
+        """
+
+        table_entry = self._db_catalog_service.get_entry_by_name(key)
+
+        return table_entry
 
 #### get catalog instance
 # This function plays a crucial role in ensuring that different threads do
@@ -617,5 +641,5 @@ class CatalogManager(object):
 # instance across all objects within the same thread. It is worth investigating whether
 # SQLAlchemy already handles this optimization for us, which will be explored at a
 # later time.
-def get_catalog_instance(db_uri: str, config: ConfigurationManager):
-    return CatalogManager(db_uri, config)
+def get_catalog_instance(db_uri: str, base_config: dict[str, Any]):
+    return CatalogManager(db_uri, base_config)
