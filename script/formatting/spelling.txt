@@ -1,4 +1,4 @@
-personal_ws-1.1 en 1775 
+personal_ws-1.1 en 1776 
 ABCD
 ABCMeta
 ANYDIM
@@ -566,6 +566,7 @@ MyMeta
 MyPDF
 MyPDFs
 MySQLNativeStorageEngineTest
+MyTable
 MyTextCSV
 MyUDF
 MyVideo

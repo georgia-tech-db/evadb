@@ -20,6 +20,10 @@ Required:
 * `host` is the host name, IP address or the URL
 * `port` is the port used to make the TCP/IP connection.
 
+.. warning:: 
+         
+     Provide the parameters of an already running ``MariaDB`` server. EvaDB only connects to an existing ``MariaDB`` database.
+
 
 Create Connection
 -----------------

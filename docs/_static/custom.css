@@ -1,12 +1,15 @@
-/******************************/
-/****  CUSTOM CSS FOR EvaDB  ****/
-/******************************/
+/*********************************/
+/****  CUSTOM CSS FOR EvaDB  *****/
+/*********************************/
 
  /* Inspired  by https://github.com/ray-project/ray/blob/692428a67e65d2f055f828ed6331cf5fbe732b02/doc/source/_static/css/custom.css */
 
 
+/* --------- custom fonts --------- */
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code&family=Inter:wght@400;700&display=swap');
+
  :root {
-    --orange: #FF9300;
+    --black: #15141A;
 }
 
 /* --------- left and right TOCs --------- */
@@ -34,7 +37,7 @@ p.rubric {
 
 
 hr.docutils {
-    background-color: var(--orange);
+    background-color: var(--black);
 }
 
 figcaption {
@@ -43,60 +46,14 @@ figcaption {
 }
 
 div.lined div.sd-col:nth-child(2n) {
-    border-bottom: 1px solid var(--orange);
-}
-
-a:link,
-a:visited {
-    color: var(--orange);
+    border-bottom: 1px solid var(--black);
 }
 
 article table.align-default {
     display: inherit;
 }  
 
-/* --------- TOC sidebar --------- */
-
-div.sidebar-tree .caption>.reference {
-    color: #646776;
-}
-
-div.sidebar-tree .toctree-l1>.current.reference.internal {
-    color: var(--orange); /* Set your desired background color */
-}
-
-div.sidebar-tree .toctree-l2>.current.reference.internal {
-    color: var(--orange); /* Set your desired background color */
-}
-
-div.sidebar-tree .toctree-l1>.reference {
-    color: #646776;
-}
-
-div.sidebar-tree .toctree-l1>.reference:hover {
-    color: var(--orange);
-}
-
-div.sidebar-tree .toctree-l2>.reference:hover {
-    color: var(--orange);
-}
-
-/* div.sidebar-tree ul {
-    border-bottom: 1px solid var(--orange);
-} */
-
 /* --------- furniture --------- */
-
-.nav-overlay-icon .icon svg,
-.toc-overlay-icon .icon svg,
-.theme-toggle svg {
-    color: var(--orange);
-}
-
-.toc-tree li.scroll-current>.reference {
-    color: var(--orange);
-}
-
 
 .toc li {
     padding-left: 20px; /* Adjust the indentation value as needed */
@@ -127,21 +84,8 @@ div.sidebar-tree .toctree-l2>.reference:hover {
 }
 
 .info-box:hover{
-    /* box-shadow: 0px 4px 20px var(--orange);; */
-    outline: 2px solid var(--orange); /* Color change on hover */
+    outline: 2px solid var(--black); /* Color change on hover */
     cursor: pointer; /* Change cursor to pointer on hover */
-}
-
-.no-underline{
-    text-decoration: none;
-}
-.no-underline:hover{
-    text-decoration: none;
-}
-
-.icon-hover:hover{
-    height: 30px ;
-    width: 30px;
 }
 
 .info-box-2 {
@@ -187,7 +131,7 @@ div.sidebar-tree .toctree-l2>.reference:hover {
 }
 
 .grid-item:hover {
-    background-color: var(--orange); /* Color change on hover */
+    background-color: var(--black); /* Color change on hover */
     cursor: pointer; /* Change cursor to pointer on hover */
   }
 
@@ -226,9 +170,6 @@ div.sidebar-tree .toctree-l2>.reference:hover {
     }
 }
 
-
-
-
 /* Styling the links and menus in the top nav */
 .top-nav-content a {
     text-decoration: none;
@@ -237,7 +178,7 @@ div.sidebar-tree .toctree-l2>.reference:hover {
 }
 
 .top-nav-content a:hover {
-    color: var(--orange);
+    color: var(--black);
 }
 
 /* The left part are the links and menus */
@@ -259,20 +200,10 @@ div.sidebar-tree .toctree-l2>.reference:hover {
 
 .top-nav-content .menu:hover > a,
 .top-nav-content .left > a:hover {
-    border-bottom: 2px solid var(--orange);
+    border-bottom: 2px solid var(--black);
 }
 
-/* Special styling for the evadb logo */
-/* .top-nav-content .left > a.evadb-logo {
-    width: 90px;
-    height: 25px;
-    padding: 10px 12px;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-bottom: 0px;
-} */
+/* Special styling for logo */
 
 .top-nav-content .left > a.evadb-logo {
     width: 150px;
@@ -292,55 +223,4 @@ div.sidebar-tree .toctree-l2>.reference:hover {
 .evadb-logo svg {
     max-width: 100%;
     max-height: 100%;
-  }
-  
-  
-  
-  
-/* Styling the dropdown menus */
-.top-nav-content .menu {
-    display: flex;
 }
-.top-nav-content .menu > a > .down-caret {
-    margin-left: 8px;
-}
-.top-nav-content .menu > ul {
-    display: none;
-}
-
-
-.top-nav-content .menu:hover > ul {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    box-shadow: 0 5px 15px 0 rgb(0 0 0 / 10%);
-    padding: 15px;
-    width: 330px;
-    position: absolute;
-    z-index: 2000;
-    background-color: white;
-    top: 58px;
-}
-
-.top-nav-content .menu:hover > ul > li {
-    list-style: none;
-    padding: 5px 0;
-}
-
-.top-nav-content .menu:hover > ul > li span {
-    display: block;
-}
-
-.top-nav-content .menu:hover > ul > li span.secondary {
-    color: #787878;
-}
-
-
-/* Remove flicker for announcement top bar replacement */
-.announcement {
-    background-color: white;
-    color: white;
-    padding: 0;
-}
-
-

@@ -1,7 +1,7 @@
-.. _udf:
+.. _custom_ai_function:
 
-Functions
-======================
+Bring Your Own AI Function
+==========================
 
 This section provides an overview of how you can create and use a custom function in your queries. For example, you could write an function that wraps around your custom PyTorch model.
 

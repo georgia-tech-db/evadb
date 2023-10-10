@@ -1,7 +1,9 @@
 DELETE 
-=======
+======
 
-DELETE INTO TABLE
+.. _delete_from_table:
+
+DELETE FROM TABLE
 -----------------
 
 Delete a tuple from a table based on a predicate.
