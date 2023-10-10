@@ -45,10 +45,10 @@ from evadb.catalog.models.utils import (
     init_db,
     truncate_catalog_tables,
 )
+from evadb.catalog.services.column_catalog_service import ColumnCatalogService
 from evadb.catalog.services.configuration_catalog_service import (
     ConfigurationCatalogService,
 )
-from evadb.catalog.services.column_catalog_service import ColumnCatalogService
 from evadb.catalog.services.database_catalog_service import DatabaseCatalogService
 from evadb.catalog.services.function_cache_catalog_service import (
     FunctionCacheCatalogService,

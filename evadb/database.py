@@ -60,7 +60,6 @@ def init_evadb_instance(
     catalog_uri = custom_db_uri or get_default_db_uri(Path(db_dir))
 
     # load all the config into the configuration_catalog table
-    print("gg")
     bootstrap_configs(get_catalog_instance(catalog_uri), config_obj)
-    
+
     return EvaDBDatabase(db_dir, catalog_uri, get_catalog_instance)

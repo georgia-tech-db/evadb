@@ -21,21 +21,19 @@ rows = max(1, row_mem_size / batch_mem_size)
 """
 
 BASE_EVADB_CONFIG = {
-  "evadb_installation_dir": "",
-  "datasets_dir": "",
-  "catalog_database_uri": "",
-  "application": "evadb",
-  "mode": "release",
-  "batch_mem_size": 30000000,
-  "gpu_batch_size": 1, # batch size used for gpu_operations
-  "gpu_ids": [
-    0
-  ],
-  "host": "0.0.0.0",
-  "port": 8803,
-  "socket_timeout": 60,
-  "ray": False,
-  "OPENAI_KEY": "",
-  "PINECONE_API_KEY": "",
-  "PINECONE_ENV": ""
+    "evadb_installation_dir": "",
+    "datasets_dir": "",
+    "catalog_database_uri": "",
+    "application": "evadb",
+    "mode": "release",
+    "batch_mem_size": 30000000,
+    "gpu_batch_size": 1,  # batch size used for gpu_operations
+    "gpu_ids": [0],
+    "host": "0.0.0.0",
+    "port": 8803,
+    "socket_timeout": 60,
+    "ray": False,
+    "OPENAI_KEY": "",
+    "PINECONE_API_KEY": "",
+    "PINECONE_ENV": "",
 }

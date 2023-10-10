@@ -269,7 +269,7 @@ class StatementBinder:
         # we read the GPUs from the catalog and populate in the context
         gpus_ids = self._catalog().get_configuration_catalog_value("gpu_ids")
         node._context = Context(gpus_ids)
-        
+
         # handle the special case of "extract_object"
         if node.name.upper() == str(FunctionType.EXTRACT_OBJECT):
             handle_bind_extract_object_function(node, self)

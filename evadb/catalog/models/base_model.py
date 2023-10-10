@@ -12,16 +12,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import contextlib
-
-import sqlalchemy
 from sqlalchemy import Column, Integer
-from sqlalchemy.engine import Engine
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy_utils import database_exists
-
-from evadb.catalog.sql_config import CATALOG_TABLES
 from evadb.utils.logging_manager import logger
 
 

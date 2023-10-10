@@ -32,11 +32,10 @@ from evadb.catalog.models.utils import (
     TableCatalogEntry,
 )
 from evadb.catalog.sql_config import IDENTIFIER_COLUMN
-from evadb.configuration.configuration_manager import ConfigurationManager
 from evadb.expression.function_expression import FunctionExpression
 from evadb.expression.tuple_value_expression import TupleValueExpression
 from evadb.parser.create_statement import ColConstraintInfo, ColumnDefinition
-from evadb.utils.generic_utils import get_str_hash, remove_directory_contents
+from evadb.utils.generic_utils import get_str_hash
 
 
 def is_video_table(table: TableCatalogEntry):
@@ -303,7 +302,6 @@ def bootstrap_configs(catalog, configs: dict):
 
 
 def get_configuration_value(key: str):
-    
     catalog = get_catalog_instance()
     return catalog.get_configuration_catalog_value(key)
 

@@ -192,10 +192,7 @@ class RulesTest(unittest.TestCase):
 
         for rule in supported_logical_rules:
             self.assertTrue(
-                any(
-                    isinstance(rule, type(x))
-                    for x in RulesManager().logical_rules
-                )
+                any(isinstance(rule, type(x)) for x in RulesManager().logical_rules)
             )
 
         ray_enabled = self.evadb.config.get_value("experimental", "ray")

@@ -46,7 +46,7 @@ class OptimizerContext:
         # check if ray is enabled
         is_ray_enabled = self.db.catalog().get_configuration_catalog_value("ray")
         self._rules_manager = rules_manager or RulesManager({"ray": is_ray_enabled})
-        
+
     @property
     def db(self):
         return self._db

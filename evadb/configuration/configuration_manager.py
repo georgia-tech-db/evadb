@@ -21,7 +21,7 @@ from evadb.utils.logging_manager import logger
 
 
 class ConfigurationManager(object):
-    def __init__(self, evadb_dir: str = None, catalog_obj = None) -> None:
+    def __init__(self, evadb_dir: str = None, catalog_obj=None) -> None:
         self._evadb_dir = evadb_dir or EvaDB_DATABASE_DIR
         self._catalog_obj = catalog_obj
         self._populate_base_configs()

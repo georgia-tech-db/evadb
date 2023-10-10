@@ -149,7 +149,8 @@ class CreateFunctionExecutor(AbstractExecutor):
         aggregated_batch.frames.drop([arg_map["predict"]], axis=1, inplace=True)
         model.fit(X=aggregated_batch.frames, y=Y)
         model_path = os.path.join(
-            self.db.catalog().get_configuration_catalog_value("model_dir"), self.node.name
+            self.db.catalog().get_configuration_catalog_value("model_dir"),
+            self.node.name,
         )
         pickle.dump(model, open(model_path, "wb"))
         self.node.metadata.append(

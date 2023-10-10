@@ -17,7 +17,6 @@ import logging
 from pathlib import Path
 from typing import Union
 
-import yaml
 
 from evadb.configuration.constants import (
     CACHE_DIR,
@@ -31,7 +30,6 @@ from evadb.configuration.constants import (
     EvaDB_DATASET_DIR,
 )
 from evadb.evadb_config import BASE_EVADB_CONFIG
-from evadb.utils.generic_utils import parse_config_yml
 from evadb.utils.logging_manager import logger as evadb_logger
 
 

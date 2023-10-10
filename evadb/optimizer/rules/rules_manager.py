@@ -17,7 +17,6 @@ from __future__ import annotations
 from contextlib import contextmanager
 from typing import List
 
-from evadb.configuration.configuration_manager import ConfigurationManager
 from evadb.optimizer.rules.rules import (
     CacheFunctionExpressionInApply,
     CacheFunctionExpressionInFilter,
