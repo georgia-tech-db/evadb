@@ -66,7 +66,7 @@ from evadb.utils.generic_utils import is_ray_enabled_and_installed
 
 
 class RulesManager:
-    def __init__(self, configs: dict):
+    def __init__(self, configs: dict = {}):
         self._logical_rules = [
             LogicalInnerJoinCommutativity(),
             CacheFunctionExpressionInApply(),

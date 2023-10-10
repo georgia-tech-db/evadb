@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import importlib.resources as importlib_resources
 import logging
 from pathlib import Path
 from typing import Union
@@ -26,25 +25,10 @@ from evadb.configuration.constants import (
     MODEL_DIR,
     S3_DOWNLOAD_DIR,
     TMP_DIR,
-    EvaDB_CONFIG_FILE,
     EvaDB_DATASET_DIR,
 )
 from evadb.evadb_config import BASE_EVADB_CONFIG
 from evadb.utils.logging_manager import logger as evadb_logger
-
-
-def get_base_config(evadb_installation_dir: Path) -> Path:
-    """
-    Get path to .evadb_config.py source path.
-    """
-    return BASE_EVADB_CONFIG
-    # if evadb package is installed in environment
-    if importlib_resources.is_resource("evadb", EvaDB_CONFIG_FILE):
-        with importlib_resources.path("evadb", EvaDB_CONFIG_FILE) as config_path:
-            return config_path
-    else:
-        # For local dev environments without package installed
-        return evadb_installation_dir / EvaDB_CONFIG_FILE
 
 
 def get_default_db_uri(evadb_dir: Path):
@@ -67,7 +51,7 @@ def bootstrap_environment(evadb_dir: Path, evadb_installation_dir: Path):
         evadb_installation_dir: path to evadb package
     """
 
-    config_obj = get_base_config(evadb_installation_dir)
+    config_obj = BASE_EVADB_CONFIG
 
     # creates necessary directories
     config_default_dict = create_directories_and_get_default_config_values(

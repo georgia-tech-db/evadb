@@ -347,7 +347,7 @@ class StatementBinder:
                     )
                     properties["api_key"] = openapi_key
 
-                node.function = lambda: function_class(properties)
+                node.function = lambda: function_class(**properties)
             except Exception as e:
                 err_msg = (
                     f"{str(e)}. Please verify that the function class name in the "
