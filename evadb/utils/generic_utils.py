@@ -565,7 +565,7 @@ def try_to_import_chromadb_client():
 def try_to_import_milvus_client():
     try:
         import pymilvus
-    except:
+    except ImportError:
         raise ValueError(
             """Could not import pymilvus python package.
                 Please install it with 'pip install pymilvus`."""

@@ -142,7 +142,6 @@ class MilvusVectorStore(VectorStore):
 
         distances, ids = [], []
         for result in response:
-            print(result)
             distances.append(result["distance"])
             ids.append(result["id"])
 
