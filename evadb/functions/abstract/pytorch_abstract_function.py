@@ -73,7 +73,8 @@ class PytorchAbstractClassifierFunction(
         if isinstance(frames, pd.DataFrame):
             frames = frames.transpose().values.tolist()[0]
 
-        gpu_batch_size = None
+        # hardcoding it for now, need to be fixed @xzdandy
+        gpu_batch_size = 1
         import torch
 
         tens_batch = torch.cat([self.transform(x) for x in frames]).to(

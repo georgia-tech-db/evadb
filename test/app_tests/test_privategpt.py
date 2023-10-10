@@ -29,7 +29,9 @@ class PrivateGPTTest(unittest.TestCase):
     def setUpClass(cls):
         cls.evadb = get_evadb_for_testing()
         cls.evadb.catalog().reset()
-        os.environ["ray"] = cls.evadb.catalog().get_configuration_catalog_value("ray")
+        os.environ["ray"] = str(
+            cls.evadb.catalog().get_configuration_catalog_value("ray")
+        )
 
     @classmethod
     def tearDownClass(cls):

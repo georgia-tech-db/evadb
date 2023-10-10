@@ -53,8 +53,8 @@ class LoadMultimediaExecutor(AbstractExecutor):
 
             # If it is a s3 path, download the file to local
             if self.node.file_path.as_posix().startswith("s3:/"):
-                s3_dir = self.catalog().get_configuration_catalog_value(
-                    "s3_download_dir"
+                s3_dir = Path(
+                    self.catalog().get_configuration_catalog_value("s3_download_dir")
                 )
                 dst_path = s3_dir / self.node.table_info.table_name
                 dst_path.mkdir(parents=True, exist_ok=True)

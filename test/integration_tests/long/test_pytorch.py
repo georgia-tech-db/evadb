@@ -49,7 +49,9 @@ class PytorchTest(unittest.TestCase):
     def setUpClass(cls):
         cls.evadb = get_evadb_for_testing()
         cls.evadb.catalog().reset()
-        os.environ["ray"] = cls.evadb.catalog().get_configuration_catalog_value("ray")
+        os.environ["ray"] = str(
+            cls.evadb.catalog().get_configuration_catalog_value("ray")
+        )
 
         ua_detrac = f"{EvaDB_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
         mnist = f"{EvaDB_ROOT_DIR}/data/mnist/mnist.mp4"
@@ -295,7 +297,9 @@ class PytorchTest(unittest.TestCase):
         batch_res = execute_query_fetch_all(self.evadb, select_query)
         img = batch_res.frames["myvideo.data"][0]
 
-        tmp_dir_from_config = self.evadb.config.get_value("storage", "tmp_dir")
+        tmp_dir_from_config = self.evadb.catalog().get_configuration_catalog_value(
+            "tmp_dir"
+        )
 
         img_save_path = os.path.join(tmp_dir_from_config, "dummy.jpg")
         try:
