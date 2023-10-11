@@ -115,7 +115,7 @@ The following code can be used to create an Object Detection function using Yolo
     .. code-block:: python
 
       @setup(cacheable=True, function_type="object_detection", batchable=True)
-      def setup(self, threshold=0.85):
+      def setup(self, model: str, threshold=0.3):
          try_to_import_ultralytics() #function to try and import the YOLO library.
          from ultralytics import YOLO
     
@@ -248,9 +248,28 @@ The following code can be used to create an Object Detection function using Yolo
           ],
       )
       def forward(self, text_df):
-        <function definition>
+        #importing openai
+        try_to_import_openai()
+        import openai
 
-(Please refer to `ChatGPT <https://github.com/georgia-tech-db/evadb/blob/staging/evadb/functions/chatgpt.py>`_ function for full implementation.)
+        #setting up the key
+        openai.api_key = ConfigurationManager().get_value("third_party", "OPENAI_KEY")
+
+        #getting the data
+        content = text_df[text_df.columns[0]]
+        responses = []
+
+        for prompt in content:
+          response = openai.ChatCompletion.create(model="gpt-3.5-turbo", \
+                                                  temperature=0.2, \
+                                                  messages=[{"role": "user", "content": prompt}])
+          response_text = response.choices[0].message.content
+          responses.append(response_text)
+        
+        return_df = pd.DataFrame({"response": responses})
+
+
+(Please refer to `ChatGPT <https://github.com/georgia-tech-db/evadb/blob/staging/evadb/functions/chatgpt.py>`_ function for exact implementation in EvaDB.)
 
 3. Register the function
 
