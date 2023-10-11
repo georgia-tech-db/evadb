@@ -1,5 +1,5 @@
 from flask_restful import Resource, abort
-from evadb.api.rest.start import cursor
+from evadb.api.rest.resource.cursor import cursor
 from http import HTTPStatus
 from flask import request
 
@@ -13,20 +13,20 @@ class tableResource(Resource):
             if newCols == "":
                 newCols = key + " " + value
             else:
-                newCols += (",\n"+key+" "+value)
+                newCols += (",\n"+'                '+key+" "+value)
         
         query = """ 
-            CREATE TABLE IF NOT EXISTS {}
-                    {}
+            CREATE TABLE IF NOT EXISTS {}(
+                {}
             )
         """.format(tableName, newCols)
-
+        print(query)
         res = cursor.query(query).df()
         return {"msg" : "SELECT succeed" , "response" : res.to_json()}
 
     def delete(self, tableName):
         query = """ 
-            DROP TABLE {}
+            DROP TABLE IF EXISTS {}
         """.format(tableName)
 
         res = cursor.query(query).df()
