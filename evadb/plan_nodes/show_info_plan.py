@@ -12,25 +12,34 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import Optional
+
 from evadb.parser.types import ShowType
 from evadb.plan_nodes.abstract_plan import AbstractPlan
 from evadb.plan_nodes.types import PlanOprType
 
 
 class ShowInfoPlan(AbstractPlan):
-    def __init__(self, show_type: ShowType):
+    def __init__(self, show_type: ShowType, show_val: Optional[str] = ""):
         self._show_type = show_type
+        self._show_val = show_val
         super().__init__(PlanOprType.SHOW_INFO)
 
     @property
     def show_type(self):
         return self._show_type
 
+    @property
+    def show_val(self):
+        return self._show_val
+
     def __str__(self):
         if self._show_type == ShowType.FUNCTIONS:
             return "ShowFunctionPlan"
-        else:
+        elif self._show_type == ShowType.TABLES:
             return "ShowTablePlan"
+        elif self._show_type == ShowType.CONFIG:
+            return "ShowConfigPlan"
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(), self.show_type))
+        return hash((super().__hash__(), self.show_type, self.show_val))

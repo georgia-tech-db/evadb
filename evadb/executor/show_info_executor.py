@@ -30,7 +30,9 @@ class ShowInfoExecutor(AbstractExecutor):
         show_entries = []
 
         assert (
-            self.node.show_type is ShowType.FUNCTIONS or ShowType.TABLES
+            self.node.show_type is ShowType.FUNCTIONS
+            or ShowType.TABLES
+            or ShowType.CONFIG
         ), f"Show command does not support type {self.node.show_type}"
 
         if self.node.show_type is ShowType.FUNCTIONS:
@@ -43,5 +45,17 @@ class ShowInfoExecutor(AbstractExecutor):
                 if table.table_type != TableType.SYSTEM_STRUCTURED_DATA:
                     show_entries.append(table.name)
             show_entries = {"name": show_entries}
+        elif self.node.show_type is ShowType.CONFIG:
+            value = self._config.get_value(
+                category="default",
+                key=self.node.show_val.upper(),
+            )
+            show_entries = {}
+            if value is not None:
+                show_entries = {self.node.show_val: [value]}
+            else:
+                raise Exception(
+                    "No configuration found with key {}".format(self.node.show_val)
+                )
 
         yield Batch(pd.DataFrame(show_entries))
