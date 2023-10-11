@@ -103,6 +103,9 @@ class WeaviateVectorStore(VectorStore):
          Returns:
              None
          """
+        # Check if the class already exists
+        if self._client.schema.exists(class_name):
+            self._client.schema.delete_class(class_name)
 
         # Define the class object with provided parameters
         class_obj = {
@@ -114,14 +117,14 @@ class WeaviateVectorStore(VectorStore):
 
 
         # Call the Weaviate API to create the class
-        response = self._client.schema.create_class(class_obj)
+        self._client.schema.create_class(class_obj)
 
+        # response = client.schema.get(class_name)
         # Check the response for success or handle any errors
-        if response.status_code == 200:
+        if self._client.schema.get(class_name)['class'] == class_name:
             print(f"Successfully created Weaviate class '{class_name}'")
         else:
             print(f"Failed to create Weaviate class '{class_name}'")
-            print(response.text)
 
         return None
 
@@ -136,14 +139,15 @@ class WeaviateVectorStore(VectorStore):
             None
         """
         # Call the Weaviate API to delete the class
-        response = self._client.schema.delete_class(class_name)
+        self._client.schema.delete_class(class_name)
 
-        # Check the response for success or handle any errors
-        if response.status_code == 200:
-            print(f"Successfully deleted Weaviate class '{class_name}'")
-        else:
+        try:
+            # Attempt to retrieve the class, and if it results in an exception,
+            # consider the class as successfully deleted.
+            self._client.schema.get(class_name)
             print(f"Failed to delete Weaviate class '{class_name}'")
-            print(response.text)
+        except Exception as e:
+            print(f"Successfully deleted Weaviate class '{class_name}'")
 
         return None
 
