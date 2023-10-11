@@ -21,6 +21,7 @@ from evadb.binder.statement_binder_context import StatementBinderContext
 from evadb.catalog.catalog_type import ColumnType, NdArrayType
 from evadb.catalog.models.utils import ColumnCatalogEntry
 from evadb.catalog.sql_config import IDENTIFIER_COLUMN
+from evadb.expression.function_expression import FunctionExpression
 from evadb.expression.tuple_value_expression import TupleValueExpression
 from evadb.parser.alias import Alias
 from evadb.parser.create_statement import ColumnDefinition
@@ -332,10 +333,22 @@ class StatementBinderTests(unittest.TestCase):
             with self.assertRaises(AssertionError):
                 binder._bind_create_index_statement(create_index_statement)
 
-            create_index_statement.col_list = ["foo"]
+            col_def = MagicMock()
+            col_def.name = "a"
+            create_index_statement.col_list = [col_def]
+
+            col = MagicMock()
+            col.name = "a"
+            create_index_statement.table_ref.table.table_obj.columns = [col]
+
             function_obj = MagicMock()
             output = MagicMock()
             function_obj.outputs = [output]
+
+            create_index_statement.project_expr_list = [
+                FunctionExpression(MagicMock(), name="a"),
+                TupleValueExpression(name="*"),
+            ]
 
             with patch.object(
                 catalog(),
@@ -350,13 +363,7 @@ class StatementBinderTests(unittest.TestCase):
                 output.array_dimensions = [1, 100]
                 binder._bind_create_index_statement(create_index_statement)
 
-            create_index_statement.function = None
-            col_def = MagicMock()
-            col_def.name = "a"
-            create_index_statement.col_list = [col_def]
-            col = MagicMock()
-            col.name = "a"
-            create_index_statement.table_ref.table.table_obj.columns = [col]
+            create_index_statement.project_expr_list = [TupleValueExpression(name="*")]
 
             with self.assertRaises(AssertionError):
                 binder._bind_create_index_statement(create_index_statement)
@@ -567,51 +574,6 @@ class StatementBinderTests(unittest.TestCase):
             )
             self.assertEqual(create_function_statement.inputs, expected_inputs)
             self.assertEqual(create_function_statement.outputs, expected_outputs)
-
-    def test_bind_create_function_should_raise_forecast_with_unexpected_columns(self):
-        with patch.object(StatementBinder, "bind"):
-            create_function_statement = MagicMock()
-            create_function_statement.function_type = "forecasting"
-            id_col_obj = ColumnCatalogEntry(
-                name="type",
-                type=MagicMock(),
-                array_type=MagicMock(),
-                array_dimensions=MagicMock(),
-            )
-            ds_col_obj = ColumnCatalogEntry(
-                name="saledate",
-                type=MagicMock(),
-                array_type=MagicMock(),
-                array_dimensions=MagicMock(),
-            )
-            y_col_obj = ColumnCatalogEntry(
-                name="ma",
-                type=MagicMock(),
-                array_type=MagicMock(),
-                array_dimensions=MagicMock(),
-            )
-            create_function_statement.query.target_list = [
-                TupleValueExpression(
-                    name=id_col_obj.name, table_alias="a", col_object=id_col_obj
-                ),
-                TupleValueExpression(
-                    name=ds_col_obj.name, table_alias="a", col_object=ds_col_obj
-                ),
-                TupleValueExpression(
-                    name=y_col_obj.name, table_alias="a", col_object=y_col_obj
-                ),
-            ]
-            create_function_statement.metadata = [
-                ("predict", "ma"),
-                ("time", "saledate"),
-            ]
-            binder = StatementBinder(StatementBinderContext(MagicMock()))
-
-            with self.assertRaises(BinderError) as cm:
-                binder._bind_create_function_statement(create_function_statement)
-
-            err_msg = "Unexpected column type found for forecasting function."
-            self.assertEqual(str(cm.exception), err_msg)
 
     def test_bind_create_function_should_raise_forecast_missing_required_columns(self):
         with patch.object(StatementBinder, "bind"):

@@ -1,8 +1,7 @@
-SHOW 
-====
-
 SHOW FUNCTIONS
---------------
+==============
+
+.. _show_functions:
 
 List the registered user-defined functions
 

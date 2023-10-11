@@ -23,4 +23,4 @@ To use the `Sklearn framework <https://scikit-learn.org/stable/>`_, we need to i
    PREDICT 'rental_price';
 
 In the above query, you are creating a new customized function by training a model from the ``HomeRentals`` table using the ``Sklearn`` framework.
-The ``rental_price`` column will be the target column for predication, while the rest columns from the ``SELET`` query are the inputs. 
+The ``rental_price`` column will be the target column for predication, while the rest columns from the ``SELECT`` query are the inputs. 

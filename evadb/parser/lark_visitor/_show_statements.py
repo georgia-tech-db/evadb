@@ -23,7 +23,9 @@ class Show:
     def show_statement(self, tree):
         token = tree.children[1]
 
-        if str.upper(token) == "FUNCTIONS":
+        if isinstance(token, str) and str.upper(token) == "FUNCTIONS":
             return ShowStatement(show_type=ShowType.FUNCTIONS)
-        elif str.upper(token) == "TABLES":
+        elif isinstance(token, str) and str.upper(token) == "TABLES":
             return ShowStatement(show_type=ShowType.TABLES)
+        elif token is not None:
+            return ShowStatement(show_type=ShowType.CONFIG, show_val=self.visit(token))

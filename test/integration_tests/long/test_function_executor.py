@@ -309,7 +309,7 @@ class FunctionExecutorTest(unittest.TestCase):
                 "SELECT id,DummyObjectDetector(data) FROM MyVideo ORDER BY id;"
             )
 
-            # disabling warning for function modificiation for now
+            # disabling warning for function modification for now
             # with self.assertRaises(AssertionError):
             execute_query_fetch_all(self.evadb, select_query)
 

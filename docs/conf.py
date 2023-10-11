@@ -90,7 +90,7 @@ master_doc = "index"
 # General information about the project.
 project = "EvaDB"
 copyright = str(date.today().year) + ", EvaDB."
-author = u"EvaDB Team"
+author = u"EvaDB"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -98,7 +98,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "README.md", "images/ref
 
 
 # The name of the Pygments (syntax highlighting) style to use.
-# pygments_style = "lovelace"
+pygments_style = "github-dark"
 
 # List of substitutions
 rst_prolog = """
@@ -128,9 +128,13 @@ html_theme_options = {
     "light_css_variables": {
         "color-background-secondary": "#fff",
         "color-sidebar-background-border": "none",
+        "font-stack": "Inter, Arial, sans-serif",
+        "font-stack--monospace": "Fira Code, Courier, monospace"
     },
     "dark_css_variables": {
         "color-background-secondary": "#000",
+        "font-stack": "Inter, Arial, sans-serif",
+        "font-stack--monospace": "Fira Code, Courier, monospace"        
     },
     # Add important announcement here
     "announcement": "<div class='topnav'></div>",
@@ -147,12 +151,13 @@ intersphinx_mapping = {
 # Adding custom css file
 html_static_path = ["_static"]
 html_css_files = [
-                    "custom.css", 
-                    "algolia.css",
-                    "https://cdn.jsdelivr.net/npm/@docsearch/css@3",
-                    "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/fontawesome.min.css",
-                    "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/solid.min.css",
-                    "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/brands.min.css"]
+    "custom.css", 
+    "algolia.css",
+    "https://cdn.jsdelivr.net/npm/@docsearch/css@3",
+    "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/fontawesome.min.css",
+    "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/solid.min.css",
+    "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/brands.min.css"
+]
 
 # Check link: https://stackoverflow.com/questions/14492743/have-sphinx-report-broken-links/14735060#14735060
 nitpicky = True

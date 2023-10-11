@@ -16,6 +16,7 @@ from typing import Iterator
 
 from evadb.database import EvaDBDatabase
 from evadb.executor.abstract_executor import AbstractExecutor
+from evadb.executor.executor_utils import instrument_function_expression_cost
 from evadb.models.storage.batch import Batch
 from evadb.plan_nodes.function_scan_plan import FunctionScanPlan
 
@@ -41,17 +42,11 @@ class FunctionScanExecutor(AbstractExecutor):
         if not lateral_input.empty():
             res = self.func_expr.evaluate(lateral_input)
 
-            # persist stats of function expression
-            if self.func_expr.function_obj and self.func_expr._stats:
-                function_id = self.func_expr.function_obj.row_id
-                self.catalog().upsert_function_cost_catalog_entry(
-                    function_id,
-                    self.func_expr.function_obj.name,
-                    self.func_expr._stats.prev_cost,
-                )
-
             if not res.empty():
                 if self.do_unnest:
                     res.unnest(res.columns)
 
                 yield res
+
+            # persist stats of function expression
+            instrument_function_expression_cost(self.func_expr, self.catalog())

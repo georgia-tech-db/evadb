@@ -45,7 +45,7 @@ Creating Text Summarization Function in EvaDB
 
 .. code-block:: sql
 
-   CREATE UDF IF NOT EXISTS TextSummarizer
+   CREATE FUNCTION IF NOT EXISTS TextSummarizer
          TYPE HuggingFace
          TASK 'summarization'
          MODEL 'sshleifer/distilbart-cnn-12-6'
@@ -88,7 +88,7 @@ Setup SQLite Database
 Install MindsDB
 ~~~~~~~~~~~~~~~
 
-Follow the `MindsDB nstallation guide <https://docs.mindsdb.com/setup/self-hosted/pip/source>`_ to install it via ``pip``.
+Follow the `MindsDB installation guide <https://docs.mindsdb.com/setup/self-hosted/pip/source>`_ to install it via ``pip``.
 
 .. note::
 

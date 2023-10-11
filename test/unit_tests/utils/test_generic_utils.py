@@ -23,7 +23,7 @@ class GenericUtilsTests(unittest.TestCase):
 
     def test_string_matching_case_insensitive(self):
         """
-        A simple test for string_matching_case_insensitve in generic_utils
+        A simple test for string_matching_case_insensitive in generic_utils
         used by statement_binder
         """
 

@@ -10,6 +10,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### [Deprecated]
 ### [Removed]
 
+##  [0.3.7] - 2023-09-30
+
+* PR #1239: release 0.3.7 
+* PR #1238: Revert "add stable diffusion integration" 
+* PR #1111: add stable diffusion integration 
+* PR #1228: fix: improve messaging and fix bugs 
+* PR #1230: Force fresh .testmondata cache 
+* PR #1229: Fix staging CI setup 
+* PR #1225: fix: merging dataframes with None value 
+* PR #1223: fix: native db bugs 
+* PR #1209: feat: add testmon in pytest 
+* PR #1201: Improve Documentation For Model Training 
+* PR #1210: chore
+* PR #1212: fix: 1199 enhance similarity search test to make index is used 
+* PR #1211: fix: evadb_client fails on launch 
+* PR #1203: fix: chatgpt exact cache 
+* PR #1208: fix: if create table fails, we were not cleaning the entry in catalog 
+* PR #1204: feat: print error msg if creating built-in functions failed 
+* PR #1180: Adding SET statement for configuration management 
+* PR #1198: Chroma vector store 
+* PR #1162: Adding support for Sklearn linear regression in EvaDB 
+* PR #1196: bug: fix links in model training notebook 
+* PR #1167: Model training Colab Notebook 
+* PR #1185: Add support for function calls without input arguments: `FUNC
+* PR #1192: Skip pinecone test if pinecone is not installed 
+* PR #1191: fix: unclosed file error 
+* PR #1190: fix: release change log 
+* PR #1153: feat: integrate with pgvector 
+* PR #1135: Pinecone vector store 
+* PR #1165: bug: drop bug fix 
+* PR #1168: LLM app fixes 
+* PR #1182: Bump Version to v0.3.7+dev 
+* PR #1181: releass: bump a version further to skip cached wheel 
+
 ##  [0.3.6] - 2023-09-21
 
 * PR #1181: releass: bump a version further to skip cached wheel 
