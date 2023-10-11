@@ -26,7 +26,7 @@ class MariaDbHandler(DBHandler):
 
     """
     Class for implementing the Maria DB handler as a backend store for
-    EvaDb.
+    EvaDB.
     """
 
     def __init__(self, name: str, **kwargs):

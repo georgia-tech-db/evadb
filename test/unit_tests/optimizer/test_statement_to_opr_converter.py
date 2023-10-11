@@ -286,7 +286,13 @@ statement_to_opr_converter.metadata_definition_to_function_metadata"
             MagicMock(), MagicMock(), MagicMock(), MagicMock(), MagicMock(), MagicMock()
         )
         create_index_plan = LogicalCreateIndex(
-            MagicMock(), MagicMock(), MagicMock(), MagicMock(), MagicMock(), MagicMock()
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
         )
         delete_plan = LogicalDelete(MagicMock())
         insert_plan = LogicalInsert(

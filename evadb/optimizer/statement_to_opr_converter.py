@@ -345,7 +345,7 @@ class StatementToPlanConverter:
         self._plan = load_data_opr
 
     def visit_show(self, statement: ShowStatement):
-        show_opr = LogicalShow(statement.show_type)
+        show_opr = LogicalShow(statement.show_type, statement.show_val)
         self._plan = show_opr
 
     def visit_explain(self, statement: ExplainStatement):
@@ -359,7 +359,8 @@ class StatementToPlanConverter:
             statement.table_ref,
             statement.col_list,
             statement.vector_store_type,
-            statement.function,
+            statement.project_expr_list,
+            statement.index_def,
         )
         self._plan = create_index_opr
 

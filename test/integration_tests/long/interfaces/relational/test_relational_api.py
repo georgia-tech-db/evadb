@@ -57,6 +57,7 @@ class RelationalAPI(unittest.TestCase):
         # todo: move these to relational apis as well
         execute_query_fetch_all(self.evadb, """DROP TABLE IF EXISTS mnist_video;""")
         execute_query_fetch_all(self.evadb, """DROP TABLE IF EXISTS meme_images;""")
+        execute_query_fetch_all(self.evadb, """DROP TABLE IF EXISTS dummy_table;""")
 
     def test_relation_apis(self):
         cursor = self.conn.cursor()
@@ -254,6 +255,18 @@ class RelationalAPI(unittest.TestCase):
         labels = DummyObjectDetector().labels
         expected = [
             {
+                "id": i,
+                "label": np.array([labels[1 + i % 2]]),
+            }
+            for i in range(10)
+        ]
+        expected_batch = Batch(frames=pd.DataFrame(expected))
+        self.assertEqual(actual_batch, expected_batch)
+
+        # Without dropping alias
+        actual_batch = cursor.query(select_query_sql).execute(drop_alias=False)
+        expected = [
+            {
                 "dummy_video.id": i,
                 "dummyobjectdetector.label": np.array([labels[1 + i % 2]]),
             }
@@ -360,6 +373,10 @@ class RelationalAPI(unittest.TestCase):
         )
         output = query.df()
         self.assertEqual(len(output), 3)
+        self.assertTrue("data" in output.columns)
+
+        # Without dropping alias
+        output = query.df(drop_alias=False)
         self.assertTrue("pdfs.data" in output.columns)
 
         cursor.drop_index("faiss_index").df()

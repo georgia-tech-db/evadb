@@ -155,9 +155,10 @@ class CreateTable:
         token = tree.children[0]
         if str.upper(token) == "FLOAT":
             data_type = ColumnType.FLOAT
-            dimensions = self.visit(tree.children[1])
         elif str.upper(token) == "TEXT":
             data_type = ColumnType.TEXT
+
+        if len(tree.children) > 1:
             dimensions = self.visit(tree.children[1])
 
         return data_type, array_type, dimensions
@@ -256,22 +257,32 @@ class CreateIndex:
                 elif child.data == "index_elem":
                     index_elem = self.visit(child)
 
+        # Projection list of child of index creation.
+        project_expr_list = []
+
         # Parse either a single function call or column list.
-        col_list, function = None, None
         if not isinstance(index_elem, list):
-            function = index_elem
+            project_expr_list += [index_elem]
 
             # Traverse to the tuple value expression.
             while not isinstance(index_elem, TupleValueExpression):
                 index_elem = index_elem.children[0]
             index_elem = [index_elem]
+        else:
+            project_expr_list += index_elem
 
-        col_list = [
-            ColumnDefinition(tv_expr.name, None, None, None) for tv_expr in index_elem
-        ]
+        # Add tv_expr for projected columns.
+        col_list = []
+        for tv_expr in index_elem:
+            col_list += [ColumnDefinition(tv_expr.name, None, None, None)]
 
         return CreateIndexStatement(
-            index_name, if_not_exists, table_ref, col_list, vector_store_type, function
+            index_name,
+            if_not_exists,
+            table_ref,
+            col_list,
+            vector_store_type,
+            project_expr_list,
         )
 
     def vector_store_type(self, tree):

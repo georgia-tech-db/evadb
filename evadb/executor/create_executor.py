@@ -34,7 +34,7 @@ class CreateExecutor(AbstractExecutor):
         super().__init__(db, node)
 
     def exec(self, *args, **kwargs):
-        # create a table in the ative database if set
+        # create a table in the active database if set
         is_native_table = self.node.table_info.database_name is not None
 
         check_if_exists = handle_if_not_exists(

@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
 from pathlib import Path
 from typing import List
 
@@ -38,6 +39,16 @@ class FaissVectorStore(VectorStore):
         self._index_path = index_path
         self._index = None
 
+        import faiss
+
+        # Load index from disk if it exists.
+        self._existing_id_set = set([])
+        if self._index is None and os.path.exists(self._index_path):
+            self._index = faiss.read_index(self._index_path)
+            # Get existing IDs.
+            for i in range(self._index.ntotal):
+                self._existing_id_set.add(self._index.id_map.at(i))
+
     def create(self, vector_dim: int):
         import faiss
 
@@ -49,7 +60,8 @@ class FaissVectorStore(VectorStore):
             embedding = np.array(row.embedding, dtype="float32")
             if len(embedding.shape) != 2:
                 embedding = embedding.reshape(1, -1)
-            self._index.add_with_ids(embedding, np.array([row.id]))
+            if row.id not in self._existing_id_set:
+                self._index.add_with_ids(embedding, np.array([row.id]))
 
     def persist(self):
         assert self._index is not None, "Please create an index before calling persist."
@@ -58,10 +70,6 @@ class FaissVectorStore(VectorStore):
         faiss.write_index(self._index, self._index_path)
 
     def query(self, query: VectorIndexQuery) -> VectorIndexQueryResult:
-        import faiss
-
-        if self._index is None:
-            self._index = faiss.read_index(self._index_path)
         assert self._index is not None, "Cannot query as index does not exists."
         embedding = np.array(query.embedding, dtype="float32")
         if len(embedding.shape) != 2:

@@ -29,7 +29,7 @@ from evadb.database import EvaDBDatabase
 from evadb.models.storage.batch import Batch
 from evadb.parser.table_ref import TableInfo
 from evadb.storage.abstract_storage_engine import AbstractStorageEngine
-from evadb.utils.generic_utils import PickleSerializer, get_size
+from evadb.utils.generic_utils import PickleSerializer
 from evadb.utils.logging_manager import logger
 
 # Leveraging Dynamic schema in SQLAlchemy
@@ -189,23 +189,12 @@ class SQLStorageEngine(AbstractStorageEngine):
         try:
             table_to_read = self._try_loading_table_via_reflection(table.name)
             result = self._sql_session.execute(table_to_read.select()).fetchall()
-            data_batch = []
-            row_size = None
             for row in result:
-                # For table read, we provide row_id so that user can also retrieve
-                # row_id from the table.
-                data_batch.append(
-                    self._deserialize_sql_row(row._asdict(), table.columns)
+                yield Batch(
+                    pd.DataFrame(
+                        [self._deserialize_sql_row(row._asdict(), table.columns)]
+                    )
                 )
-                if row_size is None:
-                    row_size = 0
-                    row_size = get_size(data_batch)
-                if len(data_batch) * row_size >= batch_mem_size:
-                    yield Batch(pd.DataFrame(data_batch))
-                    data_batch = []
-            if data_batch:
-                yield Batch(pd.DataFrame(data_batch))
-
         except Exception as e:
             err_msg = f"Failed to read the table {table.name} with exception {str(e)}"
             logger.exception(err_msg)

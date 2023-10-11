@@ -72,6 +72,7 @@ class FuzzyJoinTests(unittest.TestCase):
         execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS MyVideo;")
         execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS MyVideoCSV;")
 
+    @pytest.mark.xfail(reason="https://github.com/georgia-tech-db/evadb/issues/1242")
     def test_fuzzyjoin(self):
         execute_query_fetch_all(self.evadb, fuzzy_function_query)
 

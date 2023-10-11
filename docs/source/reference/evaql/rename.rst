@@ -1,8 +1,7 @@
-RENAME
-======
-
 RENAME TABLE
-------------
+============
+
+.. _rename_table:
 
 .. code:: sql
 
