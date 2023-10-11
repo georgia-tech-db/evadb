@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.markers import ludwig_skip_marker, sklearn_skip_marker
+from test.markers import ludwig_skip_marker, sklearn_skip_marker, xgboost_skip_marker
 from test.util import get_evadb_for_testing, shutdown_ray
 
 import pytest
@@ -95,6 +95,7 @@ class ModelTrainTests(unittest.TestCase):
         self.assertEqual(len(result.columns), 1)
         self.assertEqual(len(result), 10)
 
+    @xgboost_skip_marker
     def test_xgboost_regression(self):
         create_predict_function = """
             CREATE FUNCTION IF NOT EXISTS PredictRent FROM

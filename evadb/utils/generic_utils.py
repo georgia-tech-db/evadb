@@ -377,7 +377,7 @@ def is_sklearn_available() -> bool:
         return False
 
 
-def try_to_import_automl():
+def try_to_import_xgboost():
     try:
         import flaml  # noqa: F401
         from flaml import AutoML  # noqa: F401
@@ -386,6 +386,14 @@ def try_to_import_automl():
             """Could not import Flaml AutoML.
                 Please install it with `pip install "flaml[automl]"`."""
         )
+
+
+def is_xgboost_available() -> bool:
+    try:
+        try_to_import_xgboost()
+        return True
+    except ValueError:  # noqa: E722
+        return False
 
 
 ##############################

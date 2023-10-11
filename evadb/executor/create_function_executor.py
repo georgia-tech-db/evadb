@@ -38,13 +38,13 @@ from evadb.utils.errors import FunctionIODefinitionError
 from evadb.utils.generic_utils import (
     load_function_class_from_file,
     string_comparison_case_insensitive,
-    try_to_import_automl,
     try_to_import_ludwig,
     try_to_import_neuralforecast,
     try_to_import_sklearn,
     try_to_import_statsforecast,
     try_to_import_torch,
     try_to_import_ultralytics,
+    try_to_import_xgboost,
 )
 from evadb.utils.logging_manager import logger
 
@@ -169,7 +169,7 @@ class CreateFunctionExecutor(AbstractExecutor):
 
         We use the Flaml AutoML model for training xgboost models.
         """
-        try_to_import_automl()
+        try_to_import_xgboost()
 
         assert (
             len(self.children) == 1
