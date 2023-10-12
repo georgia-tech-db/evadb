@@ -41,10 +41,10 @@ class StableDiffusionTest(unittest.TestCase):
     def tearDown(self) -> None:
         execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS ImageGen;")
 
-    @stable_diffusion_skip_marker
-    @pytest.mark.xfail(
-        reason="API call might be flaky due to rate limits or other issues."
-    )
+    # @stable_diffusion_skip_marker
+    # @pytest.mark.xfail(
+    #     reason="API call might be flaky due to rate limits or other issues."
+    # )
     def test_stable_diffusion_image_generation(self):
         function_name = "StableDiffusion"
 

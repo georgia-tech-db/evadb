@@ -63,11 +63,8 @@ class StableDiffusion(AbstractFunction):
         try_to_import_replicate()
         import replicate
 
-        if os.environ.get("REPLICATE_API_TOKEN") is None:
-            replicate_api_key = (
-                "r8_Q75IAgbaHFvYVfLSMGmjQPcW5uZZoXz0jGalu"  # token for testing
-            )
-            os.environ["REPLICATE_API_TOKEN"] = replicate_api_key
+        if not os.environ.get("REPLICATE_API_TOKEN"):
+            raise ValueError("REPLICATE_API_TOKEN environment variable is not set.")
 
         model_id = (
             replicate.models.get("stability-ai/stable-diffusion").versions.list()[0].id
