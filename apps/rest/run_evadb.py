@@ -20,7 +20,6 @@ app.secret_key = "evadb-rest-apis"
 def query_from_db():
     if request.method == 'POST':
         query = request.form['query']
-        print(query)
         res = cursor.query(query).df() 
         return {"response" : res.to_json()}
     return render_template('query.html')
