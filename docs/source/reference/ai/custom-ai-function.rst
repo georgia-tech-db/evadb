@@ -42,7 +42,7 @@ The abstract method `setup` must be implemented in your function. The setup func
   - False: Batching is disabled.
 
 Any additional arguments needed for creating the function must be passed as arguments to the setup function. (Please refer to the 
-`ChatGPT <https://github.com/georgia-tech-db/evadb/blob/master/evadb/functions/chatgpt.py>`_ function example).
+`ChatGPT <https://github.com/georgia-tech-db/evadb/blob/master/evadb/functions/chatgpt.py>`__ function example).
 
 The additional arguments are passed with the CREATE command. Please refer to `CREATE <https://evadb.readthedocs.io/en/stable/source/reference/evaql/create.html#create-function>`_ command documentation.
 
@@ -94,6 +94,7 @@ Now that you have implemented your function, we need to register it as a functio
   .. code-block:: sql
 
       DROP FUNCTION IF EXISTS <name>;
+
 ----------
 
 Examples
@@ -203,6 +204,7 @@ The following code can be used to create an Object Detection function using Yolo
       .. code-block:: sql
 
       DROP FUNCTION IF EXISTS Yolo;
+
 ----------
 
 2. ChatGPT function
@@ -269,7 +271,7 @@ The following code can be used to create an Object Detection function using Yolo
         return_df = pd.DataFrame({"response": responses})
 
 
-(Please refer to `ChatGPT <https://github.com/georgia-tech-db/evadb/blob/staging/evadb/functions/chatgpt.py>`_ function for exact implementation in EvaDB.)
+(Please refer to `ChatGPT <https://github.com/georgia-tech-db/evadb/blob/staging/evadb/functions/chatgpt.py>`__ function for exact implementation in EvaDB.)
 
 3. Register the function
 
