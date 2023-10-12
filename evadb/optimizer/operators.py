@@ -64,6 +64,7 @@ class OperatorType(IntEnum):
     LOGICAL_EXTRACT_OBJECT = auto()
     LOGICAL_VECTOR_INDEX_SCAN = auto()
     LOGICAL_USE = auto()
+    LOGICAL_REBATACH = auto()
     LOGICALDELIMITER = auto()
 
 
@@ -1220,6 +1221,34 @@ class LogicalApplyAndMerge(Operator):
                 self.do_unnest,
                 self.alias,
                 self._merge_type,
+            )
+        )
+
+
+class LogicalRebatch(Operator):
+    def __init__(
+        self, batch_mem_size: int = 1, batch_size: int = 1, children: List = None
+    ):
+        super().__init__(OperatorType.LOGICAL_REBATACH, children)
+        self.batch_mem_size = batch_mem_size
+        self.batch_size = batch_size
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalRebatch):
+            return False
+        return (
+            is_subtree_equal
+            and self.batch_mem_size == other.batch_mem_size
+            and self.batch_size == other.batch_size
+        )
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                super().__hash__(),
+                self.batch_mem_size,
+                self.batch_size,
             )
         )
 
