@@ -45,7 +45,6 @@ def upload_file():
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             path = Path(UPLOAD_FOLDER +"/"+ filename)
-            print()
             if path.is_file():
                 flash('File uploaded')
                 return {"response":"File saved"}
