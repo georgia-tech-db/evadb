@@ -39,11 +39,10 @@ class RebatchExecutor(AbstractExecutor):
     def exec(self, *args, **kwargs) -> Iterator[Batch]:
         child_iter = self.children[0].exec(**kwargs)
 
-        # Calculate the proper batch size, use the smaller one when both batch_mem_size and batch_size are set.
+        # Calculate the proper batch size, use the larger one when both batch_mem_size and batch_size are set.
         first_batch = next(child_iter)
         sample_size = get_size(first_batch[:1])
-        batch_size = int(min(self.batch_size, self.batch_mem_size / sample_size))
-        batch_size = max(1, batch_size)
+        batch_size = int(max(1, self.batch_size, self.batch_mem_size / sample_size))
 
         current_size = 0
         current_batches = []
