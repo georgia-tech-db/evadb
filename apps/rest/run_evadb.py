@@ -1,5 +1,5 @@
 from flask import Flask,flash, request, redirect,render_template
-from flask_restful import Api, Resource
+from flask_restful import Api
 import os
 from werkzeug.utils import secure_filename
 import evadb
@@ -16,11 +16,14 @@ api = Api(app)
 app.secret_key = "evadb-rest-apis"
 
 # Get Query response
-@app.route('/query/<query>',methods = ['GET'])
-
-def query_from_db(query):
-    res = cursor.query(query).df() 
-    return {"response" : res.to_json()}
+@app.route('/query',methods = ['POST','GET'])
+def query_from_db():
+    if request.method == 'POST':
+        query = request.form['query']
+        print(query)
+        res = cursor.query(query).df() 
+        return {"response" : res.to_json()}
+    return render_template('query.html')
 
 
 # Upload file to server
