@@ -69,6 +69,7 @@ parts:
           - file: source/reference/databases/sqlite
           - file: source/reference/databases/mysql
           - file: source/reference/databases/mariadb
+          - file: source/reference/databases/clickhouse
           - file: source/reference/databases/github
 
       - file: source/reference/vector_databases/index
