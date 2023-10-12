@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from flask import Flask,flash, request, redirect,render_template
 from flask_restful import Api
 import os
