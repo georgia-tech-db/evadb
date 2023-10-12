@@ -189,7 +189,7 @@ class CreateFunctionExecutor(AbstractExecutor):
 
         model = AutoML()
         settings = {
-            "time_budget": 120,
+            "time_budget": arg_map.get("time_limit", DEFAULT_TRAIN_TIME_LIMIT),
             "metric": "r2",
             "estimator_list": ["xgboost"],
             "task": "regression",

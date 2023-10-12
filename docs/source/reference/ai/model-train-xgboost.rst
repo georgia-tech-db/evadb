@@ -10,7 +10,7 @@ To use the `Flaml XGBoost AutoML framework <https://microsoft.github.io/FLAML/do
 
 .. code-block:: bash
 
-   pip install "flaml[automl] matplotlib openml"
+   pip install "flaml[automl]"
 
 2. Example Query
 ----------------
