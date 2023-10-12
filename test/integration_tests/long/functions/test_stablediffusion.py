@@ -14,12 +14,14 @@
 # limitations under the License.
 
 import unittest
-import pytest
 from test.markers import stable_diffusion_skip_marker
 from test.util import get_evadb_for_testing
+
 import numpy as np
+import pytest
 
 from evadb.server.command_handler import execute_query_fetch_all
+
 
 class StableDiffusionTest(unittest.TestCase):
     def setUp(self) -> None:
@@ -40,7 +42,9 @@ class StableDiffusionTest(unittest.TestCase):
         execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS ImageGen;")
 
     @stable_diffusion_skip_marker
-    @pytest.mark.xfail(reason="API call might be flaky due to rate limits or other issues.")
+    @pytest.mark.xfail(
+        reason="API call might be flaky due to rate limits or other issues."
+    )
     def test_stable_diffusion_image_generation(self):
         function_name = "StableDiffusion"
 
@@ -57,6 +61,8 @@ class StableDiffusionTest(unittest.TestCase):
         self.assertEqual(output_batch.columns, ["stablediffusion.response"])
 
         # Check if the returned data is an np.array representing an image
-        img_data = output_batch.frames['stablediffusion.response'][0]
+        img_data = output_batch.frames["stablediffusion.response"][0]
         self.assertIsInstance(img_data, np.ndarray)
-        self.assertEqual(img_data.shape[2], 3)  # Check if the image has 3 channels (RGB)
+        self.assertEqual(
+            img_data.shape[2], 3
+        )  # Check if the image has 3 channels (RGB)

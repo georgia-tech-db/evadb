@@ -14,13 +14,13 @@
 # limitations under the License.
 
 import unittest
-from unittest.mock import patch
-from unittest.mock import MagicMock
-
-from test.util import get_evadb_for_testing
-from evadb.server.command_handler import execute_query_fetch_all
-from PIL import Image
 from io import BytesIO
+from test.util import get_evadb_for_testing
+from unittest.mock import MagicMock, patch
+
+from PIL import Image
+
+from evadb.server.command_handler import execute_query_fetch_all
 
 
 class DallEFunctionTest(unittest.TestCase):
