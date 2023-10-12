@@ -22,11 +22,11 @@ import requests
 from PIL import Image
 
 from evadb.catalog.catalog_type import NdArrayType
+from evadb.configuration.configuration_manager import ConfigurationManager
 from evadb.functions.abstract.abstract_function import AbstractFunction
 from evadb.functions.decorators.decorators import forward
 from evadb.functions.decorators.io_descriptors.data_types import PandasDataframe
 from evadb.utils.generic_utils import try_to_import_replicate
-from evadb.configuration.configuration_manager import ConfigurationManager
 
 
 class StableDiffusion(AbstractFunction):
@@ -65,7 +65,9 @@ class StableDiffusion(AbstractFunction):
         import replicate
 
         # Register API key, try configuration manager first
-        replicate_api_key = ConfigurationManager().get_value("third_party", "REPLICATE_API_TOKEN")
+        replicate_api_key = ConfigurationManager().get_value(
+            "third_party", "REPLICATE_API_TOKEN"
+        )
         # If not found, try OS Environment Variable
         if len(replicate_api_key) == 0:
             replicate_api_key = os.environ.get("REPLICATE_API_TOKEN", "")
