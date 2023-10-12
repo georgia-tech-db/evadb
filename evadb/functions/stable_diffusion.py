@@ -14,18 +14,18 @@
 # limitations under the License.
 
 import os
+from io import BytesIO
 
+import numpy as np
 import pandas as pd
+import requests
+from PIL import Image
 
 from evadb.catalog.catalog_type import NdArrayType
 from evadb.functions.abstract.abstract_function import AbstractFunction
 from evadb.functions.decorators.decorators import forward
 from evadb.functions.decorators.io_descriptors.data_types import PandasDataframe
 from evadb.utils.generic_utils import try_to_import_replicate
-
-_VALID_STABLE_DIFFUSION_MODEL = [
-    "sdxl:af1a68a271597604546c09c64aabcd7782c114a63539a4a8d14d1eeda5630c33",
-]
 
 
 class StableDiffusion(AbstractFunction):
@@ -35,12 +35,8 @@ class StableDiffusion(AbstractFunction):
 
     def setup(
         self,
-        model="sdxl:af1a68a271597604546c09c64aabcd7782c114a63539a4a8d14d1eeda5630c33",
     ) -> None:
-        assert (
-            model in _VALID_STABLE_DIFFUSION_MODEL
-        ), f"Unsupported Stable Diffusion {model}"
-        self.model = model
+        pass
 
     @forward(
         input_signatures=[
@@ -56,9 +52,10 @@ class StableDiffusion(AbstractFunction):
             PandasDataframe(
                 columns=["response"],
                 column_types=[
-                    NdArrayType.STR,
+                    # FileFormatType.IMAGE,
+                    NdArrayType.FLOAT32
                 ],
-                column_shapes=[(1,)],
+                column_shapes=[(None, None, 3)],
             )
         ],
     )
@@ -72,17 +69,27 @@ class StableDiffusion(AbstractFunction):
             )
             os.environ["REPLICATE_API_TOKEN"] = replicate_api_key
 
-        # @retry(tries=5, delay=20)
+        model_id = (
+            replicate.models.get("stability-ai/stable-diffusion").versions.list()[0].id
+        )
+
         def generate_image(text_df: PandasDataframe):
             results = []
             queries = text_df[text_df.columns[0]]
             for query in queries:
                 output = replicate.run(
-                    "stability-ai/" + self.model, input={"prompt": query}
+                    "stability-ai/stable-diffusion:" + model_id, input={"prompt": query}
                 )
-                results.append(output[0])
+
+                # Download the image from the link
+                response = requests.get(output[0])
+                image = Image.open(BytesIO(response.content))
+
+                # Convert the image to an array format suitable for the DataFrame
+                frame = np.array(image)
+                results.append(frame)
+
             return results
 
         df = pd.DataFrame({"response": generate_image(text_df=text_df)})
-
         return df

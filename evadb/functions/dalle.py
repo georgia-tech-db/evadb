@@ -14,8 +14,12 @@
 # limitations under the License.
 
 import os
+from io import BytesIO
 
+import numpy as np
 import pandas as pd
+import requests
+from PIL import Image
 
 from evadb.catalog.catalog_type import NdArrayType
 from evadb.configuration.configuration_manager import ConfigurationManager
@@ -46,10 +50,8 @@ class DallEFunction(AbstractFunction):
         output_signatures=[
             PandasDataframe(
                 columns=["response"],
-                column_types=[
-                    NdArrayType.STR,
-                ],
-                column_shapes=[(1,)],
+                column_types=[NdArrayType.FLOAT32],
+                column_shapes=[(None, None, 3)],
             )
         ],
     )
@@ -71,9 +73,16 @@ class DallEFunction(AbstractFunction):
             queries = text_df[text_df.columns[0]]
             for query in queries:
                 response = openai.Image.create(prompt=query, n=1, size="1024x1024")
-                results.append(response["data"][0]["url"])
+
+                # Download the image from the link
+                image_response = requests.get(response["data"][0]["url"])
+                image = Image.open(BytesIO(image_response.content))
+
+                # Convert the image to an array format suitable for the DataFrame
+                frame = np.array(image)
+                results.append(frame)
+
             return results
 
         df = pd.DataFrame({"response": generate_image(text_df=text_df)})
-
         return df

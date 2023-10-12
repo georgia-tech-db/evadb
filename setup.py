@@ -125,6 +125,10 @@ forecasting_libs = [
     "neuralforecast" # MODEL TRAIN AND FINE TUNING
 ]
 
+imagegen_libs = [
+    "replicate"
+]
+
 ### NEEDED FOR DEVELOPER TESTING ONLY
 
 dev_libs = [
@@ -167,7 +171,7 @@ EXTRA_REQUIRES = {
     "sklearn": sklearn_libs,
     "forecasting": forecasting_libs,
     # everything except ray, qdrant, ludwig and postgres. The first three fail on pyhton 3.11.
-    "dev": dev_libs + vision_libs + document_libs + function_libs + notebook_libs + forecasting_libs + sklearn_libs,
+    "dev": dev_libs + vision_libs + document_libs + function_libs + notebook_libs + forecasting_libs + sklearn_libs + imagegen_libs,
 }
 
 setup(

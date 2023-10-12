@@ -208,7 +208,7 @@ stablediffusion_function_query = """CREATE FUNCTION IF NOT EXISTS StableDiffusio
     EvaDB_INSTALLATION_DIR
 )
 
-dalle_function_query = """CREATE FUNCTION IF NOT EXISTS StableDiffusion
+dalle_function_query = """CREATE FUNCTION IF NOT EXISTS DallE
         IMPL '{}/functions/dalle.py';
         """.format(
     EvaDB_INSTALLATION_DIR
@@ -259,6 +259,8 @@ def init_builtin_functions(db: EvaDBDatabase, mode: str = "debug") -> None:
         # Mvit_function_query,
         Sift_function_query,
         Yolo_function_query,
+        stablediffusion_function_query,
+        dalle_function_query,
     ]
 
     # if mode is 'debug', add debug functions
