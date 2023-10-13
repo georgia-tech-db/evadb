@@ -51,7 +51,8 @@ The custom setup operations for the function can be written inside the function 
 
 **Forward**
 
-The abstract method `forward` must be implemented in your function. The forward function receives the frames and runs the deep learning model on the data. The logic for transforming the frames and running the models must be provided by you.
+The abstract method `forward` must be implemented in your function. The forward function receives the frames and runs the deep learning model on the data. The logic for transforming the frames and running the models must be provided by you. Using the forward decorator is optional.
+
 The arguments that need to be passed are
 
 - input_signatures: List[IOArgument]
@@ -74,13 +75,16 @@ Now that you have implemented your function, we need to register it as a functio
 
 1. Register the function with a query that follows this template:
 
-  `CREATE FUNCTION [ IF NOT EXISTS ] <name>
-  IMPL <path_to_implementation>;`
+  .. code-block:: sql
 
-  where,
+    CREATE FUNCTION [ IF NOT EXISTS ] <name>
+    IMPL <path_to_implementation>;
 
-      * <name> - specifies the unique identifier for the function.
-      * <path_to_implementation> - specifies the path to the implementation class for the function
+
+where,
+
+* <name> - specifies the unique identifier for the function.
+* <path_to_implementation> - specifies the path to the implementation class for the function
 
 
 2. Execute your function on any data:
