@@ -102,7 +102,8 @@ class ModelTrainTests(unittest.TestCase):
             ( SELECT number_of_rooms, number_of_bathrooms, days_on_market, rental_price FROM HomeRentals )
             TYPE XGBoost
             PREDICT 'rental_price'
-            TIME_LIMIT 180;
+            TIME_LIMIT 180
+            METRIC 'r2';
         """
         execute_query_fetch_all(self.evadb, create_predict_function)
 

@@ -25,6 +25,7 @@ from evadb.catalog.models.function_catalog import FunctionCatalogEntry
 from evadb.catalog.models.function_io_catalog import FunctionIOCatalogEntry
 from evadb.catalog.models.function_metadata_catalog import FunctionMetadataCatalogEntry
 from evadb.configuration.constants import (
+    DEFAULT_TRAIN_REGRESSION_METRIC,
     DEFAULT_TRAIN_TIME_LIMIT,
     EvaDB_INSTALLATION_DIR,
 )
@@ -190,7 +191,7 @@ class CreateFunctionExecutor(AbstractExecutor):
         model = AutoML()
         settings = {
             "time_budget": arg_map.get("time_limit", DEFAULT_TRAIN_TIME_LIMIT),
-            "metric": "r2",
+            "metric": arg_map.get("metric", DEFAULT_TRAIN_REGRESSION_METRIC),
             "estimator_list": ["xgboost"],
             "task": "regression",
         }
