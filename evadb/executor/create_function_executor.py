@@ -406,7 +406,7 @@ class CreateFunctionExecutor(AbstractExecutor):
         if len(existing_model_files) == 0:
             logger.info("Training, please wait...")
             for column in data.columns:
-                if column != "ds":
+                if column != "ds" and column != "unique_id":
                     data[column] = data.apply(
                         lambda x: self.convert_to_numeric(x[column]), axis=1
                     )
