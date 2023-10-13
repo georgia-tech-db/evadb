@@ -15,7 +15,7 @@
 import os
 from pathlib import Path
 
-from flask import Flask, flash, redirect, render_template, request
+from flask import Flask, flash, redirect, request
 from flask_restful import Api
 from werkzeug.utils import secure_filename
 
@@ -39,7 +39,15 @@ def query_from_db():
         query = request.form["query"]
         res = cursor.query(query).df()
         return {"api response": res.to_json()}
-    return render_template("query.html")
+    return """<html>
+                <body>
+                    <form method="POST"
+                        enctype = "multipart/form-data">
+                        <input type = "input" name = "query" placeholder="Enter query"/>
+                        <input type = "submit"/>
+                    </form>
+                </body>
+            </html>"""
 
 
 # Upload file to server
@@ -67,7 +75,15 @@ def upload_file():
             else:
                 flash("Failed to upload file")
                 return redirect(request.url)
-    return render_template("upload.html")
+    return """<html>
+                <body>
+                    <form method="POST"
+                        enctype = "multipart/form-data">
+                        <input type = "file" name = "file" />
+                        <input type = "submit"/>
+                    </form>
+                </body>
+            </html>"""
 
 
 if __name__ == "__main__":
