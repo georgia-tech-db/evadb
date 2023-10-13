@@ -15,6 +15,7 @@
 import hashlib
 import os
 import pickle
+import re
 from pathlib import Path
 from typing import Dict, List
 
@@ -162,6 +163,16 @@ class CreateFunctionExecutor(AbstractExecutor):
             io_list,
             self.node.metadata,
         )
+
+    def convert_to_numeric(self, x):
+        x = re.sub("[^0-9.]", "", str(x))
+        try:
+            return int(x)
+        except ValueError:
+            try:
+                return float(x)
+            except ValueError:
+                return x
 
     def handle_ultralytics_function(self):
         """Handle Ultralytics functions"""
@@ -394,6 +405,11 @@ class CreateFunctionExecutor(AbstractExecutor):
         ]
         if len(existing_model_files) == 0:
             logger.info("Training, please wait...")
+            for column in data.columns:
+                if column != "ds":
+                    data[column] = data.apply(
+                        lambda x: self.convert_to_numeric(x[column]), axis=1
+                    )
             if library == "neuralforecast":
                 model.fit(df=data, val_size=horizon)
             else:
