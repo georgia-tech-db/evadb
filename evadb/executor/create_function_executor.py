@@ -195,7 +195,7 @@ class CreateFunctionExecutor(AbstractExecutor):
 
     def handle_forecasting_function(self):
         """Handle forecasting functions"""
-        os.environ["CUDA_VISIBLE_DEVICES"] = ""
+        os.environ["CUDA_VISIBLE_DEVICES"] = "0"
         aggregated_batch_list = []
         child = self.children[0]
         for batch in child.exec():
@@ -318,11 +318,11 @@ class CreateFunctionExecutor(AbstractExecutor):
             if "auto" not in arg_map["model"].lower():
                 model_args["input_size"] = 2 * horizon
                 model_args["early_stop_patience_steps"] = 20
-            else:
-                model_args["config"] = {
-                    "input_size": 2 * horizon,
-                    "early_stop_patience_steps": 20,
-                }
+            # else:
+            #     model_args["config"] = {
+            #         "input_size": 2 * horizon,
+            #         "early_stop_patience_steps": 20,
+            #     }
 
             if len(data.columns) >= 4:
                 exogenous_columns = [
@@ -331,7 +331,8 @@ class CreateFunctionExecutor(AbstractExecutor):
                 if "auto" not in arg_map["model"].lower():
                     model_args["hist_exog_list"] = exogenous_columns
                 else:
-                    model_args["config"]["hist_exog_list"] = exogenous_columns
+                    # model_args["config"]["hist_exog_list"] = exogenous_columns
+                    model_args["backend"] = "optuna"
 
             model_args["h"] = horizon
 
@@ -412,6 +413,7 @@ class CreateFunctionExecutor(AbstractExecutor):
                     )
             if library == "neuralforecast":
                 model.fit(df=data, val_size=horizon)
+                model.save(model_path, overwrite=True)
             else:
                 # The following lines of code helps eliminate the math error encountered in statsforecast when only one datapoint is available in a time series
                 for col in data["unique_id"].unique():
@@ -421,8 +423,8 @@ class CreateFunctionExecutor(AbstractExecutor):
                         )
 
                 model.fit(df=data[["ds", "y", "unique_id"]])
-            f = open(model_path, "wb")
-            pickle.dump(model, f)
+                f = open(model_path, "wb")
+                pickle.dump(model, f)
             f.close()
         elif not Path(model_path).exists():
             model_path = os.path.join(model_dir, existing_model_files[-1])
