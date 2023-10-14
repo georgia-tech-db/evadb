@@ -195,7 +195,12 @@ class CreateFunctionExecutor(AbstractExecutor):
 
     def handle_forecasting_function(self):
         """Handle forecasting functions"""
-        os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+        save_old_cuda_env = None
+        if "CUDA_VISIBLE_DEVICES" in os.environ:
+            save_old_cuda_env = os.environ["CUDA_VISIBLE_DEVICES"]
+            os.environ["CUDA_VISIBLE_DEVICES"] = save_old_cuda_env.split(",")[0]
+        else:
+            os.environ["CUDA_VISIBLE_DEVICES"] = "0"
         aggregated_batch_list = []
         child = self.children[0]
         for batch in child.exec():
@@ -332,9 +337,11 @@ class CreateFunctionExecutor(AbstractExecutor):
                     model_args["hist_exog_list"] = exogenous_columns
                 else:
                     model_args_config["hist_exog_list"] = exogenous_columns
+
                     def get_optuna_config(trial):
                         return model_args_config
-                    model_args['config'] = get_optuna_config
+
+                    model_args["config"] = get_optuna_config
                     model_args["backend"] = "optuna"
 
             model_args["h"] = horizon
@@ -428,7 +435,7 @@ class CreateFunctionExecutor(AbstractExecutor):
                 model.fit(df=data[["ds", "y", "unique_id"]])
                 f = open(model_path, "wb")
                 pickle.dump(model, f)
-            f.close()
+                f.close()
         elif not Path(model_path).exists():
             model_path = os.path.join(model_dir, existing_model_files[-1])
 
@@ -450,7 +457,10 @@ class CreateFunctionExecutor(AbstractExecutor):
             FunctionMetadataCatalogEntry("library", library),
         ]
 
-        os.environ.pop("CUDA_VISIBLE_DEVICES", None)
+        if save_old_cuda_env is not None:
+            os.environ["CUDA_VISIBLE_DEVICES"] = save_old_cuda_env
+        else:
+            os.environ.pop("CUDA_VISIBLE_DEVICES", None)
 
         return (
             self.node.name,

@@ -41,8 +41,9 @@ class ForecastModel(AbstractFunction):
         self.library = library
         if "neuralforecast" in self.library:
             from neuralforecast import NeuralForecast
+
             loaded_model = NeuralForecast.load(path=model_path)
-            self.model_name = model_name [4:] if "Auto" in model_name else model_name
+            self.model_name = model_name[4:] if "Auto" in model_name else model_name
         else:
             f = open(model_path, "rb")
             loaded_model = pickle.load(f)
