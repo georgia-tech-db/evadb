@@ -413,6 +413,13 @@ class CreateFunctionExecutor(AbstractExecutor):
             if library == "neuralforecast":
                 model.fit(df=data, val_size=horizon)
             else:
+                # The following lines of code helps eliminate the math error encountered in statsforecast when only one datapoint is available in a time series
+                for col in data["unique_id"].unique():
+                    if len(data[data["unique_id"] == col]) == 1:
+                        data = data._append(
+                            [data[data["unique_id"] == col]], ignore_index=True
+                        )
+
                 model.fit(df=data[["ds", "y", "unique_id"]])
             f = open(model_path, "wb")
             pickle.dump(model, f)
