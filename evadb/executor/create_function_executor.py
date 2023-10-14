@@ -318,11 +318,11 @@ class CreateFunctionExecutor(AbstractExecutor):
             if "auto" not in arg_map["model"].lower():
                 model_args["input_size"] = 2 * horizon
                 model_args["early_stop_patience_steps"] = 20
-            # else:
-            #     model_args["config"] = {
-            #         "input_size": 2 * horizon,
-            #         "early_stop_patience_steps": 20,
-            #     }
+            else:
+                model_args_config = {
+                    "input_size": 2 * horizon,
+                    "early_stop_patience_steps": 20,
+                }
 
             if len(data.columns) >= 4:
                 exogenous_columns = [
@@ -331,7 +331,10 @@ class CreateFunctionExecutor(AbstractExecutor):
                 if "auto" not in arg_map["model"].lower():
                     model_args["hist_exog_list"] = exogenous_columns
                 else:
-                    # model_args["config"]["hist_exog_list"] = exogenous_columns
+                    model_args_config["hist_exog_list"] = exogenous_columns
+                    def get_optuna_config(trial):
+                        return model_args_config
+                    model_args['config'] = get_optuna_config
                     model_args["backend"] = "optuna"
 
             model_args["h"] = horizon
