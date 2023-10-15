@@ -96,6 +96,8 @@ parts:
             title: OpenAI 
           - file: source/reference/ai/yolo
             title: YOLO 
+          - file: source/reference/ai/stablediffusion
+            title: Stable Diffusion
 
       - file: source/reference/ai/custom-ai-function
         title: Bring Your Own AI Function

@@ -27,3 +27,4 @@ third_party:
   OPENAI_KEY: ""
   PINECONE_API_KEY: ""
   PINECONE_ENV: ""
+  REPLICATE_API_TOKEN: ""
