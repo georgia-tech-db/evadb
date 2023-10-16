@@ -69,6 +69,7 @@ parts:
           - file: source/reference/databases/sqlite
           - file: source/reference/databases/mysql
           - file: source/reference/databases/mariadb
+          - file: source/reference/databases/clickhouse
           - file: source/reference/databases/github
 
       - file: source/reference/vector_databases/index
@@ -95,6 +96,8 @@ parts:
             title: OpenAI 
           - file: source/reference/ai/yolo
             title: YOLO 
+          - file: source/reference/ai/stablediffusion
+            title: Stable Diffusion
 
       - file: source/reference/ai/custom-ai-function
         title: Bring Your Own AI Function
