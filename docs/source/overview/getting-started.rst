@@ -35,7 +35,7 @@ Now, activate the virtual environment:
 
 .. code-block:: bash
 
-   pip install evadb --upgrade
+   pip install --upgrade evadb
 
 .. note::
 

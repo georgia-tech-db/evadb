@@ -42,6 +42,8 @@ def _get_database_handler(engine: str, **kwargs):
         return mod.MysqlHandler(engine, **kwargs)
     elif engine == "mariadb":
         return mod.MariaDbHandler(engine, **kwargs)
+    elif engine == "clickhouse":
+        return mod.ClickHouseHandler(engine, **kwargs)
     elif engine == "github":
         return mod.GithubHandler(engine, **kwargs)
     else:

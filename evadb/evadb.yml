@@ -32,3 +32,4 @@ third_party:
   MILVUS_PASSWORD: ""
   MILVUS_DB_NAME: ""
   MILVUS_TOKEN: ""
+  REPLICATE_API_TOKEN: ""

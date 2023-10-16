@@ -177,7 +177,7 @@ describe_statement: DESCRIBE table_name
     
 help_statement: HELP STRING_LITERAL
     
-show_statement: SHOW (FUNCTIONS | TABLES)
+show_statement: SHOW (FUNCTIONS | TABLES | uid)
 
 explain_statement: EXPLAIN explainable_statement
 
