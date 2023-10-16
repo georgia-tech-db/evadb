@@ -91,6 +91,9 @@ class ReuseTest(unittest.TestCase):
                 self.evadb, query, plan_generator=custom_plan_generator
             )
 
+        self.assertEqual(reuse_batch.columns, reuse_batch.columns)
+        reuse_batch.sort_orderby(by=[reuse_batch.columns[0]])
+        without_reuse_batch.sort_orderby(by=[reuse_batch.columns[0]])
         # printing the batches so that we can see the mismatch in the logs
         self.assertEqual(
             without_reuse_batch,

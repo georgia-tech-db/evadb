@@ -38,6 +38,6 @@ class SetExecutor(AbstractExecutor):
         """
         self._config.update_value(
             category="default",
-            key=self.node.config_name,
+            key=self.node.config_name.upper(),
             value=self.node.config_value.value,
         )
