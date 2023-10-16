@@ -41,7 +41,7 @@ class YoutubeChannelQATest(unittest.TestCase):
     def test_should_run_youtube_channel_qa_app(self):
         app_path = Path("apps", "youtube_channel_qa", "youtube_channel_qa.py")
         input1 = "\n\n\n"  # Download just one video from the default channel in the default order.
-        # Assuming that OPENAI_KEY is already set as an environment variable
+        # Assuming that OPENAI_API_KEY is already set as an environment variable
         input2 = "What is this video about?\n"  # Question
         input3 = "exit\n"  # Exit
         inputs = input1 + input2 + input3

@@ -33,7 +33,7 @@ BASE_EVADB_CONFIG = {
     "port": 8803,
     "socket_timeout": 60,
     "ray": False,
-    "OPENAI_KEY": "",
+    "OPENAI_API_KEY": "",
     "PINECONE_API_KEY": "",
     "PINECONE_ENV": "",
 }
