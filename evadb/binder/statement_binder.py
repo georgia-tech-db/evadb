@@ -341,7 +341,7 @@ class StatementBinder:
                 # OpenAPI key as part of the parameter
                 # ToDO: this should be better handled
                 properties = get_metadata_properties(function_obj)
-                if node.name.upper() == str("CHATGPT"):
+                if string_comparison_case_insensitive(node.name, "CHATGPT"):
                     openapi_key = self._catalog().get_configuration_catalog_value(
                         "OPENAI_KEY"
                     )

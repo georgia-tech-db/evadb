@@ -630,7 +630,7 @@ class CatalogManager(object):
         """
         self._config_catalog_service.upsert_entry(key, value)
 
-    def get_configuration_catalog_value(self, key: str) -> Any:
+    def get_configuration_catalog_value(self, key: str, default:Any = None) -> Any:
         """
         Returns the value entry for the given key
         Arguments:
@@ -643,4 +643,4 @@ class CatalogManager(object):
         table_entry = self._config_catalog_service.get_entry_by_name(key)
         if table_entry:
             return table_entry.value
-        return None
+        return default
