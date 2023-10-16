@@ -6,8 +6,6 @@ from flask import request
 class tableResource(Resource):
     def post(self, tableName):
         newCols = ""
-        if 'columns' not in request.json:
-            abort(HTTPStatus.BAD_REQUEST, 'Must provide "columns" parameter in POST body')
         cols = request.json['columns']
         for key, value in cols.items():
             if newCols == "":
@@ -33,9 +31,6 @@ class tableResource(Resource):
         return {"msg" : "DROP succeed" , "response" : res.to_json()}
 
     def put(self, tableName):
-        if 'new_name' not in request.json:
-            abort(HTTPStatus.BAD_REQUEST, 'Must provide "new_name" parameter in PUT body')
-        
         query = """ 
             RENAME TABLE {} TO {}
         """.format(tableName, request.json['new_name'])

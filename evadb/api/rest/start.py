@@ -1,7 +1,5 @@
 from flask import Flask, Response
 from flask_restful import Api, request
-import sys
-sys.path.append('/Users/ethanyang/Documents/GitHub/evadb')
 from evadb.api.rest.resource.table_resource import tableResource
 from evadb.api.rest.resource.function_resource import functionResource
 from evadb.api.rest.resource.entry_resource import entryResource
