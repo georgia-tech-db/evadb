@@ -84,12 +84,12 @@ class ChatGPT(AbstractFunction):
         self,
         model="gpt-3.5-turbo",
         temperature: float = 0,
-        api_key="",
+        openai_api_key="",
     ) -> None:
         assert model in _VALID_CHAT_COMPLETION_MODEL, f"Unsupported ChatGPT {model}"
         self.model = model
         self.temperature = temperature
-        self.api_key = api_key
+        self.openai_api_key = openai_api_key
 
     @forward(
         input_signatures=[
@@ -121,12 +121,12 @@ class ChatGPT(AbstractFunction):
         def completion_with_backoff(**kwargs):
             return openai.ChatCompletion.create(**kwargs)
 
-        openai.api_key = self.api_key
+        openai.api_key = self.openai_api_key
         if len(openai.api_key) == 0:
-            openai.api_key = os.environ.get("OPENAI_KEY", "")
+            openai.api_key = os.environ.get("OPENAI_API_KEY", "")
         assert (
             len(openai.api_key) != 0
-        ), "Please set your OpenAI API key in evadb.yml file (third_party, open_api_key) or environment variable (OPENAI_KEY)"
+        ), "Please set your OpenAI API key using SET OPENAI_API_KEY = 'sk-' or environment variable (OPENAI_API_KEY)"
 
         queries = text_df[text_df.columns[0]]
         content = text_df[text_df.columns[0]]

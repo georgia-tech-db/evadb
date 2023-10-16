@@ -46,8 +46,7 @@ class ShowInfoExecutor(AbstractExecutor):
                     show_entries.append(table.name)
             show_entries = {"name": show_entries}
         elif self.node.show_type is ShowType.CONFIG:
-            value = self._config.get_value(
-                category="default",
+            value = self.catalog().get_configuration_catalog_value(
                 key=self.node.show_val.upper(),
             )
             show_entries = {}
