@@ -51,7 +51,7 @@ function_metadata: function_metadata_key function_metadata_value
 
 function_metadata_key: uid
 
-function_metadata_value: string_literal | decimal_literal
+function_metadata_value: constant
 
 vector_store_type: USING (FAISS | QDRANT | PINECONE | PGVECTOR | CHROMADB)
 

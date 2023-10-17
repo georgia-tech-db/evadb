@@ -41,6 +41,12 @@ class Expressions:
         res = ConstantValueExpression(np.array(array_elements), ColumnType.NDARRAY)
         return res
 
+    def boolean_literal(self, tree):
+        text = tree.children[0]
+        if text == "TRUE":
+            return ConstantValueExpression(True, ColumnType.BOOLEAN)
+        return ConstantValueExpression(False, ColumnType.BOOLEAN)
+
     def constant(self, tree):
         for child in tree.children:
             if isinstance(child, Tree):
