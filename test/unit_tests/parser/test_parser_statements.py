@@ -80,6 +80,7 @@ class ParserStatementTests(unittest.TestCase):
             """,
             "SHOW TABLES;",
             "SHOW FUNCTIONS;",
+            "SHOW DATABASES;",
             "EXPLAIN SELECT a FROM foo;",
             "SELECT HomeRentalForecast(12);",
             """SELECT data FROM MyVideo WHERE id < 5
