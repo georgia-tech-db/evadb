@@ -397,22 +397,41 @@ class RelationalAPI(unittest.TestCase):
         load_pdf.execute()
 
         result1 = (
-            cursor.table("docs", chunk_size=2000, chunk_overlap=0).select("data").df()
+            cursor.table(
+                "docs", chunk_size=2000, chunk_overlap=DEFAULT_DOCUMENT_CHUNK_OVERLAP
+            )
+            .select("data")
+            .df()
         )
 
         result2 = (
-            cursor.table("docs", chunk_size=4000, chunk_overlap=2000)
+            cursor.table(
+                "docs", chunk_size=DEFAULT_DOCUMENT_CHUNK_SIZE, chunk_overlap=2000
+            )
             .select("data")
             .df()
         )
 
         result3 = (
-            cursor.table("docs", chunk_size=4000, chunk_overlap=0).select("data").df()
+            cursor.table(
+                "docs", chunk_size=DEFAULT_DOCUMENT_CHUNK_SIZE, chunk_overlap=0
+            )
+            .select("data")
+            .df()
         )
 
         self.assertGreater(len(result1), len(result2))
         self.assertGreater(len(result2), len(result3))
 
+        # should use default value of chunk_overlap and respect chunk_size
+        result5 = cursor.table("docs", chunk_size=2000).select("data").df()
+        self.assertEqual(len(result5), len(result1))
+
+        # should use the default value of chunk_size and should respect chunk_overlap
+        result4 = cursor.table("docs", chunk_overlap=0).select("data").df()
+        self.assertEqual(len(result3), len(result4))
+
+        # should use the default values
         result1 = cursor.table("docs").select("data").df()
 
         result2 = cursor.query(
