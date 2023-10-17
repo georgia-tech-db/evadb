@@ -45,9 +45,8 @@ class ForecastModel(AbstractFunction):
             loaded_model = NeuralForecast.load(path=model_path)
             self.model_name = model_name[4:] if "Auto" in model_name else model_name
         else:
-            f = open(model_path, "rb")
-            loaded_model = pickle.load(f)
-            f.close()
+            with open(model_path, "rb") as f:
+                loaded_model = pickle.load(f)
             self.model_name = model_name
         self.model = loaded_model
         self.predict_column_rename = predict_column_rename
