@@ -32,6 +32,7 @@ class ShowInfoExecutor(AbstractExecutor):
         assert (
             self.node.show_type is ShowType.FUNCTIONS
             or ShowType.TABLES
+            or ShowType.DATABASES
             or ShowType.CONFIG
         ), f"Show command does not support type {self.node.show_type}"
 
@@ -45,6 +46,10 @@ class ShowInfoExecutor(AbstractExecutor):
                 if table.table_type != TableType.SYSTEM_STRUCTURED_DATA:
                     show_entries.append(table.name)
             show_entries = {"name": show_entries}
+        elif self.node.show_type is ShowType.DATABASES:
+            databases = self.catalog().get_all_database_catalog_entries()
+            for db in databases:
+                show_entries.append(db.display_format())
         elif self.node.show_type is ShowType.CONFIG:
             value = self._config.get_value(
                 category="default",
