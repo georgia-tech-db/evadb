@@ -408,7 +408,14 @@ class RelationalAPI(unittest.TestCase):
         result2 = cursor.query(
             "SELECT data from docs chunk_size 4000 chunk_overlap 200"
         ).df()
+
         self.assertEqual(len(result1), len(result2))
+
+        result3 = cursor.query("SELECT data from docs;").df()
+        result4 = cursor.query(
+            "SELECT data from docs chunk_size 2000 chunk_overlap 50"
+        ).df()
+        self.assertEqual(len(result3), len(result4))
 
     def test_show_relational(self):
         video_file_path = create_sample_video(10)
