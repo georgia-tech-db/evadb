@@ -124,17 +124,23 @@ class VectorIndexScanExecutor(AbstractExecutor):
             )
 
         final_df = pd.DataFrame()
-        row_num_df = pd.DataFrame({'row_num_np': row_num_np})
+        row_num_df = pd.DataFrame({"row_num_np": row_num_np})
         for batch in self.children[0].exec(**kwargs):
             column_list = batch.columns
             if not row_num_col_name:
                 row_num_alias = get_row_num_column_alias(column_list)
                 row_num_col_name = "{}.{}".format(row_num_alias, ROW_NUM_COLUMN)
 
-            result_df = pd.merge(pd.DataFrame(batch.frames), row_num_df, left_on=row_num_col_name, right_on="row_num_np", how='inner')
+            result_df = pd.merge(
+                pd.DataFrame(batch.frames),
+                row_num_df,
+                left_on=row_num_col_name,
+                right_on="row_num_np",
+                how="inner",
+            )
             if not result_df.empty:
                 final_df = pd.concat([final_df, result_df], ignore_index=True)
-        
-        if 'row_num_np' in final_df:
-            del final_df['row_num_np']
+
+        if "row_num_np" in final_df:
+            del final_df["row_num_np"]
         yield Batch(final_df)
