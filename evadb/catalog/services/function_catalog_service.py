@@ -13,10 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import List
+
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import select
 
 from evadb.catalog.models.function_catalog import FunctionCatalog, FunctionCatalogEntry
+from evadb.catalog.models.utils import (
+    FunctionIOCatalogEntry,
+    FunctionMetadataCatalogEntry,
+)
 from evadb.catalog.services.base_service import BaseService
 from evadb.catalog.services.function_io_catalog_service import FunctionIOCatalogService
 from evadb.catalog.services.function_metadata_catalog_service import (
@@ -38,8 +43,8 @@ class FunctionCatalogService(BaseService):
         impl_path: str,
         type: str,
         checksum: str,
-        function_io_list: List["FunctionIOCatalogEntry"],
-        function_metadata_list: List["FunctionMetadataCatalogEntry"],
+        function_io_list: List[FunctionIOCatalogEntry],
+        function_metadata_list: List[FunctionMetadataCatalogEntry],
     ) -> FunctionCatalogEntry:
         """Insert a new function entry
 
@@ -56,10 +61,10 @@ class FunctionCatalogService(BaseService):
         function_obj = function_obj.save(self.session)
 
         for function_io in function_io_list:
-            function_io.function_id = function_obj.row_id
+            function_io.function_id = function_obj._row_id
         io_objs = self._function_io_service.create_entries(function_io_list)
         for function_metadata in function_metadata_list:
-            function_metadata.function_id = function_obj.row_id
+            function_metadata.function_id = function_obj._row_id
         metadata_objs = self._function_metadata_service.create_entries(
             function_metadata_list
         )

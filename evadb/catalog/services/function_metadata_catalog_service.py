@@ -38,6 +38,7 @@ class FunctionMetadataCatalogService(BaseService):
                     key=entry.key, value=entry.value, function_id=entry.function_id
                 )
                 metadata_objs.append(metadata_obj)
+            return metadata_objs
         except Exception as e:
             raise CatalogError(e)
 

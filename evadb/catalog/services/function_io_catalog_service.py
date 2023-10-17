@@ -82,3 +82,4 @@ class FunctionIOCatalogService(BaseService):
                 function_id=io.function_id,
             )
             io_objs.append(io_obj)
+        return io_objs
