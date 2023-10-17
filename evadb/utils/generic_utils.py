@@ -564,7 +564,7 @@ def try_to_import_chromadb_client():
 
 def try_to_import_milvus_client():
     try:
-        import pymilvus
+        import pymilvus  # noqa: F401
     except ImportError:
         raise ValueError(
             """Could not import pymilvus python package.
