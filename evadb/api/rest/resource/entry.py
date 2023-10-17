@@ -1,15 +1,16 @@
-from flask_restful import Resource, abort
-from evadb.api.rest.resource.cursor import cursor
-from http import HTTPStatus
-from flask import request
+from flask_restful import Resource, reqparse
+from evadb.api.rest.cursor import cursor
 
 class entryResource(Resource):
-    def post(self, tableName, predicates):
+    def post(self, tableName):
+        parser = reqparse.RequestParser()
+        parser.add_argument("value_to_insert", type=dict, required=True, help="values to insert should be provided as a dict")
+        args = parser.parse_args()
+
         colNames = ""
         colValues = ""
-        if 'value_to_insert' not in request.json:
-            abort(HTTPStatus.BAD_REQUEST, 'Must provide "value_to_insert" parameter in POST body')
-        for key, value in request.json['value_to_insert'].items():
+
+        for key, value in args['value_to_insert'].items():
             if colNames == "":
                 colNames = key
             else:
@@ -25,12 +26,13 @@ class entryResource(Resource):
         """.format(tableName, colNames, colValues)
         res = cursor.query(query).df()
 
-        return {"msg" : "INSERT succeed" , "response" : res.to_json()}
+        return {"msg" : "INSERT entry succeed" , "response" : res.to_json()}
 
     def delete(self, tableName, predicates):
+        
         query = """ 
             DELETE FROM {} WHERE {} 
         """.format(tableName, predicates)
-        print(query)
         res = cursor.query(query).df()
-        return {"msg" : "DELETE succeed" , "response" : res.to_json()}
+
+        return {"msg" : "DELETE entry succeed" , "response" : res.to_json()}
