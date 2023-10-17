@@ -17,9 +17,9 @@ import time
 import unittest
 from test.markers import (
     chromadb_skip_marker,
+    milvus_skip_marker,
     pinecone_skip_marker,
     qdrant_skip_marker,
-    milvus_skip_marker,
 )
 from test.util import (
     create_sample_image,

@@ -23,9 +23,9 @@ from evadb.utils.generic_utils import (
     is_forecast_available,
     is_gpu_available,
     is_ludwig_available,
+    is_milvus_available,
     is_pinecone_available,
     is_qdrant_available,
-    is_milvus_available,
     is_replicate_available,
     is_sklearn_available,
 )

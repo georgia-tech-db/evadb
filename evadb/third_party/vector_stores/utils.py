@@ -15,9 +15,9 @@
 from evadb.catalog.catalog_type import VectorStoreType
 from evadb.third_party.vector_stores.chromadb import ChromaDBVectorStore
 from evadb.third_party.vector_stores.faiss import FaissVectorStore
+from evadb.third_party.vector_stores.milvus import MilvusVectorStore
 from evadb.third_party.vector_stores.pinecone import PineconeVectorStore
 from evadb.third_party.vector_stores.qdrant import QdrantVectorStore
-from evadb.third_party.vector_stores.milvus import MilvusVectorStore
 from evadb.utils.generic_utils import validate_kwargs
 
 
