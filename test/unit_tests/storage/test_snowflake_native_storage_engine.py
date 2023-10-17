@@ -16,9 +16,7 @@
 import sys
 import unittest
 from test.util import get_evadb_for_testing
-from unittest.mock import patch
-from unittest.mock import MagicMock
-
+from unittest.mock import MagicMock, patch
 
 import pytest
 

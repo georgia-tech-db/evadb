@@ -12,15 +12,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import datetime
+
 import pandas as pd
 import snowflake.connector
-import datetime
 
 from evadb.third_party.databases.types import (
     DBHandler,
     DBHandlerResponse,
     DBHandlerStatus,
 )
+
 
 class SnowFlakeDbHandler(DBHandler):
 
@@ -57,7 +59,7 @@ class SnowFlakeDbHandler(DBHandler):
                 database=self.database,
                 warehouse=self.warehouse,
                 schema=self.schema,
-                account=self.account
+                account=self.account,
             )
             # Auto commit is off by default.
             self.connection.autocommit = True
