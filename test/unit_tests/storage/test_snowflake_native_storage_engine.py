@@ -13,14 +13,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import sys
 import unittest
 from test.util import get_evadb_for_testing
 from unittest.mock import patch
+from unittest.mock import MagicMock
+
 
 import pytest
 
 from evadb.catalog.models.utils import DatabaseCatalogEntry
 from evadb.server.command_handler import execute_query_fetch_all
+
+sys.modules["snowflake"] = MagicMock()
+sys.modules["snowflake.connector"] = MagicMock()
 
 
 class NativeQueryResponse:
