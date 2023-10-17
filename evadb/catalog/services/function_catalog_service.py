@@ -12,20 +12,34 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import List
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import select
 
 from evadb.catalog.models.function_catalog import FunctionCatalog, FunctionCatalogEntry
 from evadb.catalog.services.base_service import BaseService
+from evadb.catalog.services.function_io_catalog_service import FunctionIOCatalogService
+from evadb.catalog.services.function_metadata_catalog_service import (
+    FunctionMetadataCatalogService,
+)
+from evadb.utils.errors import CatalogError
 from evadb.utils.logging_manager import logger
 
 
 class FunctionCatalogService(BaseService):
     def __init__(self, db_session: Session):
         super().__init__(FunctionCatalog, db_session)
+        self._function_io_service = FunctionIOCatalogService(db_session)
+        self._function_metadata_service = FunctionMetadataCatalogService(db_session)
 
     def insert_entry(
-        self, name: str, impl_path: str, type: str, checksum: str
+        self,
+        name: str,
+        impl_path: str,
+        type: str,
+        checksum: str,
+        function_io_list: List["FunctionIOCatalogEntry"],
+        function_metadata_list: List["FunctionMetadataCatalogEntry"],
     ) -> FunctionCatalogEntry:
         """Insert a new function entry
 
@@ -40,7 +54,31 @@ class FunctionCatalogService(BaseService):
         """
         function_obj = self.model(name, impl_path, type, checksum)
         function_obj = function_obj.save(self.session)
-        return function_obj.as_dataclass()
+
+        for function_io in function_io_list:
+            function_io.function_id = function_obj.row_id
+        io_objs = self._function_io_service.create_entries(function_io_list)
+        for function_metadata in function_metadata_list:
+            function_metadata.function_id = function_obj.row_id
+        metadata_objs = self._function_metadata_service.create_entries(
+            function_metadata_list
+        )
+
+        # atomic operation for adding table and its corresponding columns.
+        try:
+            self.session.add_all(io_objs)
+            self.session.add_all(metadata_objs)
+            self.session.commit()
+        except Exception as e:
+            self.session.rollback()
+            self.session.delete(function_obj)
+            self.session.commit()
+            logger.exception(
+                f"Failed to insert entry into function catalog with exception {str(e)}"
+            )
+            raise CatalogError(e)
+        else:
+            return function_obj.as_dataclass()
 
     def get_entry_by_name(self, name: str) -> FunctionCatalogEntry:
         """return the function entry that matches the name provided.

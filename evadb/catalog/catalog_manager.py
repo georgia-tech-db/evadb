@@ -340,14 +340,13 @@ class CatalogManager(object):
 
         checksum = get_file_checksum(impl_file_path)
         function_entry = self._function_service.insert_entry(
-            name, impl_file_path, type, checksum
+            name,
+            impl_file_path,
+            type,
+            checksum,
+            function_io_list,
+            function_metadata_list,
         )
-        for function_io in function_io_list:
-            function_io.function_id = function_entry.row_id
-        self._function_io_service.insert_entries(function_io_list)
-        for function_metadata in function_metadata_list:
-            function_metadata.function_id = function_entry.row_id
-        self._function_metadata_service.insert_entries(function_metadata_list)
         return function_entry
 
     def get_function_catalog_entry_by_name(self, name: str) -> FunctionCatalogEntry:

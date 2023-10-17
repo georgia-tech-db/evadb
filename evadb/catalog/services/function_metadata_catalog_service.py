@@ -30,17 +30,15 @@ class FunctionMetadataCatalogService(BaseService):
     def __init__(self, db_session: Session):
         super().__init__(FunctionMetadataCatalog, db_session)
 
-    def insert_entries(self, entries: List[FunctionMetadataCatalogEntry]):
+    def create_entries(self, entries: List[FunctionMetadataCatalogEntry]):
+        metadata_objs = []
         try:
             for entry in entries:
                 metadata_obj = FunctionMetadataCatalog(
                     key=entry.key, value=entry.value, function_id=entry.function_id
                 )
-                metadata_obj.save(self.session)
+                metadata_objs.append(metadata_obj)
         except Exception as e:
-            logger.exception(
-                f"Failed to insert entry {entry} into function metadata catalog with exception {str(e)}"
-            )
             raise CatalogError(e)
 
     def get_entries_by_function_id(
