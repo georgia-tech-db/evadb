@@ -34,7 +34,7 @@ class functionResource(Resource):
         """.format(functionName, inputs, outputs, args['type'], args['impl'])
         res = cursor.query(query).df()
 
-        return {"msg" : "CREATE function succeed" , "response" : res.to_json()}
+        return {"message" : "CREATE function executed" , "response" : res.to_json()}
 
     def delete(self, functionName):
         query = """ 
@@ -42,4 +42,4 @@ class functionResource(Resource):
         """.format(functionName)
 
         res = cursor.query(query).df()
-        return {"msg" : "DROP function succeed" , "response" : res.to_json()}
+        return {"message" : "DROP function executed" , "response" : res.to_json()}

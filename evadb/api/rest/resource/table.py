@@ -21,7 +21,7 @@ class tableResource(Resource):
         """.format(tableName, newCols)
         res = cursor.query(query).df()
 
-        return {"msg" : "CREATE table succeed" , "response" : res.to_json()}
+        return {"message" : "CREATE table executed" , "response" : res.to_json()}
 
     def delete(self, tableName):
         query = """ 
@@ -29,7 +29,7 @@ class tableResource(Resource):
         """.format(tableName)
         res = cursor.query(query).df()
 
-        return {"msg" : "DROP table succeed" , "response" : res.to_json()}
+        return {"message" : "DROP table executed" , "response" : res.to_json()}
 
     def put(self, tableName):
         parser = reqparse.RequestParser()
@@ -41,4 +41,4 @@ class tableResource(Resource):
         """.format(tableName, args['new_name'])
         res = cursor.query(query).df()
 
-        return {"msg" : "RENAME table succeed" , "response" : res.to_json()}
+        return {"message" : "RENAME table executed" , "response" : res.to_json()}

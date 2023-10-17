@@ -1,0 +1,302 @@
+openapi: 3.0.3
+info:
+  title: EvaQL API
+  description: |-
+    RESTful APIs for EvaQL. You can access EvaDB using these APIs.
+  version: 0.1.0
+servers:
+  - url: localhost:5000/api
+tags:
+  - name: entry
+    description: manipulate entries in a specific table
+  - name: table
+    description: manipulate tables
+  - name: function
+    description: manipulate functions
+paths:
+  /entry/{tableName}:
+    post:
+      tags:
+        - entry
+      summary: insert a row
+      parameters:
+        - name: tableName
+          in: path
+          description: name of the table to insert
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/entry'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp'  
+
+    delete:
+      tags:
+        - entry
+      summary: delete the entry according to predicates
+      parameters:
+        - name: tableName
+          in: path
+          required: true
+          description: name of the table to delete
+          schema:
+            type: string
+        - name: predicates
+          in: query
+          description: predicates to select entries
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp'        
+  
+  /function/{functionName}:
+    post:
+      tags:
+        - function
+      summary: create a function
+      parameters:
+        - name: functionName
+          in: path
+          description: function name to create
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/function'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp'          
+    delete:
+      tags:
+        - function
+      summary: delect a function by name
+      parameters:
+        - name: functionName
+          in: path
+          description: function name to delete
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp'          
+  /table/{tableName}:
+    post:
+      tags:
+        - table
+      summary: create a table
+      parameters:
+        - name: tableName
+          in: path
+          description: table name to create
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/table'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp'          
+    
+    delete:
+      tags:
+        - table
+      summary: Drop a table by name
+      parameters:
+        - name: tableName
+          in: path
+          description: table name to drop
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp'
+  /show:
+    get:
+      tags:
+        - other
+      summary: execute SHOW query
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp'
+  /explain:
+    post:
+      tags:
+        - other
+      summary: explain a query
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/explain'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: integer
+                  format: int32
+
+  /load/{tableName}:
+    post:
+      tags:
+        - other
+      summary: load files into a table
+      parameters:
+        - name: tableName
+          in: path
+          description: table name to load
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/load'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp'
+  /select/{tableName}:
+    post:
+      tags:
+        - other
+      summary: select rows from a table
+      parameters:
+        - name: tableName
+          in: path
+          description: table name to drop
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/select'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/resp'          
+
+components:
+  schemas:
+    resp:
+      type: object
+      properties:
+        message:
+          type: string
+        response:
+          type: object
+    entry:
+      type: object
+      properties:
+        value_to_insert:
+          type: object
+          additionalProperties:
+            type: string
+    function:
+      type: object
+      properties:
+        input:
+          type: object
+          additionalProperties:
+            type: string
+        output:
+          type: object
+          additionalProperties:
+            type: string
+        type:
+          type: string
+        impl:
+          type: string
+    table:
+      type: object
+      properties:
+        columns:
+          type: object
+          additionalProperties:
+            type: string
+    load:
+      type: object
+      properties:
+        type:
+          type: string
+        path:
+          type: string
+        columns:
+          type: object
+          additionalProperties:
+            type: string
+    select:
+      type: object
+      properties:
+        where:
+          type: string
+        orderBy:
+          type: string
+        columns:
+          type: array
+          items:
+            type: string
+    explain:
+      type: object
+      properties:
+        query:
+          type: string
+      

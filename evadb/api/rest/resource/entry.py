@@ -11,6 +11,7 @@ class entryResource(Resource):
         colValues = ""
 
         for key, value in args['value_to_insert'].items():
+            value = str(value)
             if colNames == "":
                 colNames = key
             else:
@@ -26,13 +27,16 @@ class entryResource(Resource):
         """.format(tableName, colNames, colValues)
         res = cursor.query(query).df()
 
-        return {"msg" : "INSERT entry succeed" , "response" : res.to_json()}
+        return {"message" : "INSERT entry executed" , "response" : res.to_json()}
 
-    def delete(self, tableName, predicates):
+    def delete(self, tableName):
+        parser = reqparse.RequestParser()
+        parser.add_argument("predicates", type=str, required=True, help="predicates should be provided as a string")
+        args = parser.parse_args()
         
         query = """ 
             DELETE FROM {} WHERE {} 
-        """.format(tableName, predicates)
+        """.format(tableName, args['predicates'])
         res = cursor.query(query).df()
 
-        return {"msg" : "DELETE entry succeed" , "response" : res.to_json()}
+        return {"message" : "DELETE entry executed" , "response" : res.to_json()}

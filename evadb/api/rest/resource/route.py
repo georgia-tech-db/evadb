@@ -16,7 +16,7 @@ def gen_chunks(json_data, chunk_size=100):
 def init_routes(api, app):
     api.add_resource(tableResource, "/api/table/<string:tableName>")
     api.add_resource(functionResource, "/api/function/<string:functionName>")
-    api.add_resource(entryResource, "/api/entry/<string:tableName>/<string:predicates>", "/api/entry/<string:tableName>")
+    api.add_resource(entryResource, "/api/entry/<string:tableName>")
 
     @app.route('/api/show',methods = ['GET'])
     def show_functions():
@@ -25,7 +25,7 @@ def init_routes(api, app):
         """
         print(query)
         res = cursor.query(query).df()
-        return {"msg" : "SHOW succeed" , "response" : res.to_json()}
+        return {"message" : "SHOW executed" , "response" : res.to_json()}
 
     @app.route('/api/explain',methods = ['POST'])
     def explain_query():
@@ -38,7 +38,7 @@ def init_routes(api, app):
         """.format(args['query'])
         res = cursor.query(query).df()
 
-        return {"msg" : "EXPLAIN succeed" , "response" : res.to_json()}
+        return {"message" : "EXPLAIN executed" , "response" : res.to_json()}
 
     @app.route('/api/load/<tableName>', methods = ['POST'])
     def load_files(tableName):
@@ -68,10 +68,9 @@ def init_routes(api, app):
             """.format(args['type'], args['path'], tableName)
         res = cursor.query(query).df()
 
-        return {"msg" : "LOAD succeed" , "response" : res.to_json()}
+        return {"message" : "LOAD executed" , "response" : res.to_json()}
 
     @app.route('/api/select/<tableName>', methods = ['POST'])
-    @app.route('/api/select', methods = ['POST'])
     def post(tableName):
         parser = reqparse.RequestParser()
         parser.add_argument("columns", type=list, required=True, help="columns in the SELECT query should be provided as a list")
@@ -95,4 +94,4 @@ def init_routes(api, app):
                 query += "    ORDER BY {}".format(args['orderBy'])
         res = cursor.query(query).df()
 
-        return Response(gen_chunks({'msg': "SELECT succeed", "response":res.to_json}), content_type='application/json', status=200, direct_passthrough=True)
+        return Response(gen_chunks({'message': "SELECT executed", "response":res.to_json}), content_type='application/json', status=200, direct_passthrough=True)
