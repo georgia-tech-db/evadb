@@ -112,7 +112,6 @@ class VectorIndexScanExecutor(AbstractExecutor):
         # todo support queries over distance as well
         # distance_list = index_result.similarities
         row_num_np = index_result.ids
-
         # Load projected columns from disk and join with search results.
         row_num_col_name = None
 
@@ -124,20 +123,18 @@ class VectorIndexScanExecutor(AbstractExecutor):
                 f"The index {self.index_name} returned only {num_required_results} results, which is fewer than the required {self.limit_count.value}."
             )
 
-        res_row_list = [None for _ in range(num_required_results)]
+        final_df = pd.DataFrame()
+        row_num_df = pd.DataFrame({'row_num_np': row_num_np})
         for batch in self.children[0].exec(**kwargs):
             column_list = batch.columns
             if not row_num_col_name:
                 row_num_alias = get_row_num_column_alias(column_list)
                 row_num_col_name = "{}.{}".format(row_num_alias, ROW_NUM_COLUMN)
 
-            # Nested join.
-            for _, row in batch.frames.iterrows():
-                for idx, row_num in enumerate(row_num_np):
-                    if row_num == row[row_num_col_name]:
-                        res_row = dict()
-                        for col_name in column_list:
-                            res_row[col_name] = row[col_name]
-                        res_row_list[idx] = res_row
-
-        yield Batch(pd.DataFrame(res_row_list))
+            result_df = pd.merge(pd.DataFrame(batch.frames), row_num_df, left_on=row_num_col_name, right_on="row_num_np", how='inner')
+            if not result_df.empty:
+                final_df = pd.concat([final_df, result_df], ignore_index=True)
+        
+        if 'row_num_np' in final_df:
+            del final_df['row_num_np']
+        yield Batch(final_df)
