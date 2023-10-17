@@ -13,7 +13,7 @@ cursor.query("""
     );""").df()
 cursor.load('./cnn_news_test.csv', 'cnn_news_test', format="CSV").df()
 
-cursor.query("DROP UDF IF EXISTS TextSummarizer;").df()
+cursor.query("DROP FUNCTION IF EXISTS TextSummarizer;").df()
 cursor.query("""CREATE UDF IF NOT EXISTS TextSummarizer
                 TYPE HuggingFace
                 TASK 'summarization'

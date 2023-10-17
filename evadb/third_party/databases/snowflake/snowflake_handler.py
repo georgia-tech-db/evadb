@@ -93,7 +93,7 @@ class SnowFlakeDbHandler(DBHandler):
             return DBHandlerResponse(data=None, error="Not connected to the database.")
 
         try:
-            query = f"SELECT table_name as 'table_name' FROM information_schema.tables WHERE table_schema='{self.schema}'"
+            query = f"SELECT table_name as table_name FROM information_schema.tables WHERE table_schema='{self.schema}'"
             cursor = self.connection.cursor()
             cursor.execute(query)
             tables_df = self._fetch_results_as_df(cursor)
@@ -113,7 +113,7 @@ class SnowFlakeDbHandler(DBHandler):
             return DBHandlerResponse(data=None, error="Not connected to the database.")
 
         try:
-            query = f"SELECT column_name as 'name', data_type as 'dtype' FROM information_schema.columns WHERE table_name='{table_name}'"
+            query = f"SELECT column_name as name, data_type as dtype FROM information_schema.columns WHERE table_name='{table_name}'"
             cursor = self.connection.cursor()
             cursor.execute(query)
             columns_df = self._fetch_results_as_df(cursor)
