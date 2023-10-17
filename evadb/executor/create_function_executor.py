@@ -154,6 +154,10 @@ class CreateFunctionExecutor(AbstractExecutor):
         self.node.metadata.append(
             FunctionMetadataCatalogEntry("model_path", model_path)
         )
+        # Pass the prediction column name to sklearn.py
+        self.node.metadata.append(
+            FunctionMetadataCatalogEntry("predict_col", arg_map["predict"])
+        )
 
         impl_path = Path(f"{self.function_dir}/sklearn.py").absolute().as_posix()
         io_list = self._resolve_function_io(None)
@@ -204,6 +208,10 @@ class CreateFunctionExecutor(AbstractExecutor):
         pickle.dump(model, open(model_path, "wb"))
         self.node.metadata.append(
             FunctionMetadataCatalogEntry("model_path", model_path)
+        )
+        # Pass the prediction column to xgboost.py.
+        self.node.metadata.append(
+            FunctionMetadataCatalogEntry("predict_col", arg_map["predict"])
         )
 
         impl_path = Path(f"{self.function_dir}/xgboost.py").absolute().as_posix()

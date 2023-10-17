@@ -25,21 +25,22 @@ class GenericXGBoostModel(AbstractFunction):
     def name(self) -> str:
         return "GenericXGBoostModel"
 
-    def setup(self, model_path: str, **kwargs):
+    def setup(self, model_path: str, predict_col: str, **kwargs):
         try_to_import_xgboost()
 
         self.model = pickle.load(open(model_path, "rb"))
+        self.predict_col = predict_col
 
     def forward(self, frames: pd.DataFrame) -> pd.DataFrame:
-        # Last column is the value to predict, hence don't pass that to the
-        # predict method.
-        predictions = self.model.predict(frames.iloc[:, :-1])
+        # We do not pass the prediction column to the predict method of XGBoost
+        # AutoML.
+        frames.drop([self.predict_col], axis=1, inplace=True)
+        predictions = self.model.predict(frames)
         predict_df = pd.DataFrame(predictions)
         # We need to rename the column of the output dataframe. For this we
-        # shall rename it to the column name same as that of the last column of
-        # frames. This is because the last column of frames corresponds to the
-        # variable we want to predict.
-        predict_df.rename(columns={0: frames.columns[-1]}, inplace=True)
+        # shall rename it to the column name same as that of the predict column
+        # passed to EVA query.
+        predict_df.rename(columns={0: self.predict_col}, inplace=True)
         return predict_df
 
     def to_device(self, device: str):
