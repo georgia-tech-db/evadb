@@ -139,18 +139,18 @@ class Expressions:
         assert len(chunk_params) == 2 or len(chunk_params) == 4
         if len(chunk_params) == 4:
             return {
-                "chunk_size": ConstantValueExpression(chunk_params[1]),
-                "chunk_overlap": ConstantValueExpression(chunk_params[3]),
+                "chunk_size": chunk_params[1],
+                "chunk_overlap": chunk_params[3],
             }
 
         elif len(chunk_params) == 2:
             if chunk_params[0] == "CHUNK_SIZE":
                 return {
-                    "chunk_size": ConstantValueExpression(chunk_params[1]),
+                    "chunk_size": chunk_params[1],
                 }
             elif chunk_params[0] == "CHUNK_OVERLAP":
                 return {
-                    "chunk_overlap": ConstantValueExpression(chunk_params[1]),
+                    "chunk_overlap": chunk_params[1],
                 }
             else:
                 assert f"incorrect keyword found {chunk_params[0]}"

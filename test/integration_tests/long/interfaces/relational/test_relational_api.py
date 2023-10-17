@@ -27,7 +27,12 @@ import pandas as pd
 from pandas.testing import assert_frame_equal
 
 from evadb.binder.binder_utils import BinderError
-from evadb.configuration.constants import EvaDB_DATABASE_DIR, EvaDB_ROOT_DIR
+from evadb.configuration.constants import (
+    DEFAULT_DOCUMENT_CHUNK_OVERLAP,
+    DEFAULT_DOCUMENT_CHUNK_SIZE,
+    EvaDB_DATABASE_DIR,
+    EvaDB_ROOT_DIR,
+)
 from evadb.executor.executor_utils import ExecutorError
 from evadb.interfaces.relational.db import connect
 from evadb.models.storage.batch import Batch
@@ -401,21 +406,20 @@ class RelationalAPI(unittest.TestCase):
             .df()
         )
 
-        self.assertEqual(len(result1), len(result2))
+        result3 = (
+            cursor.table("docs", chunk_size=4000, chunk_overlap=0).select("data").df()
+        )
+
+        self.assertGreater(len(result1), len(result2))
+        self.assertGreater(len(result2), len(result3))
 
         result1 = cursor.table("docs").select("data").df()
 
         result2 = cursor.query(
-            "SELECT data from docs chunk_size 4000 chunk_overlap 200"
+            f"SELECT data from docs chunk_size {DEFAULT_DOCUMENT_CHUNK_SIZE} chunk_overlap {DEFAULT_DOCUMENT_CHUNK_OVERLAP}"
         ).df()
 
         self.assertEqual(len(result1), len(result2))
-
-        result3 = cursor.query("SELECT data from docs;").df()
-        result4 = cursor.query(
-            "SELECT data from docs chunk_size 2000 chunk_overlap 50"
-        ).df()
-        self.assertEqual(len(result3), len(result4))
 
     def test_show_relational(self):
         video_file_path = create_sample_video(10)
