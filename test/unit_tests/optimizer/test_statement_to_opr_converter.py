@@ -40,6 +40,7 @@ from evadb.optimizer.operators import (
     LogicalOrderBy,
     LogicalProject,
     LogicalQueryDerivedGet,
+    LogicalRebatch,
     LogicalRename,
     LogicalSample,
     LogicalShow,
@@ -323,6 +324,7 @@ statement_to_opr_converter.metadata_definition_to_function_metadata"
         extract_object_plan = LogicalExtractObject(
             MagicMock(), MagicMock(), MagicMock(), MagicMock()
         )
+        rebatch_plan = LogicalRebatch(MagicMock(), MagicMock())
 
         create_plan.append_child(create_function_plan)
 
@@ -335,6 +337,7 @@ statement_to_opr_converter.metadata_definition_to_function_metadata"
         plans.append(query_derived_plan)
         plans.append(load_plan)
         plans.append(limit_plan)
+        plans.append(rebatch_plan)
         plans.append(rename_plan)
         plans.append(drop_plan)
         plans.append(get_plan)
