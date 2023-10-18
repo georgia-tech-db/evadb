@@ -615,6 +615,7 @@ class CombineSimilarityOrderByAndLimitToVectorIndexScan(Rule):
 ##############################################
 # LOGICAL RULES START
 
+
 class BatchLogicalGet(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALGET)
@@ -633,9 +634,10 @@ class BatchLogicalGet(Rule):
         #    LogicalGet     ->              |
         #                              LogicalGet
         batch_mem_size = context.db.config.get_value("executor", "batch_mem_size")
-        rebatch = LogicalRebatch(batch_mem_size = batch_mem_size)
+        rebatch = LogicalRebatch(batch_mem_size=batch_mem_size)
         rebatch.append_child(before)
         return rebatch
+
 
 class LogicalInnerJoinCommutativity(Rule):
     def __init__(self):
@@ -1432,7 +1434,7 @@ class LogicalProjectToRayPhysical(Rule):
 
 class LogicalRebatchToPhysical(Rule):
     def __init__(self):
-        pattern = Pattern(OperatorType.LOGICALREBATCH)
+        pattern = Pattern(OperatorType.LOGICAL_REBATCH)
         pattern.append_child(Pattern(OperatorType.DUMMY))
         super().__init__(RuleType.LOGICAL_REBATCH_TO_PHYSICAL, pattern)
 
