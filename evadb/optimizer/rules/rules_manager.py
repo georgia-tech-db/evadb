@@ -19,6 +19,7 @@ from typing import List
 
 from evadb.configuration.configuration_manager import ConfigurationManager
 from evadb.optimizer.rules.rules import (
+    BatchLogicalGet,
     CacheFunctionExpressionInApply,
     CacheFunctionExpressionInFilter,
     CacheFunctionExpressionInProject,
@@ -74,6 +75,7 @@ class RulesManager:
             CacheFunctionExpressionInApply(),
             CacheFunctionExpressionInFilter(),
             CacheFunctionExpressionInProject(),
+            BatchLogicalGet(),
         ]
 
         self._stage_one_rewrite_rules = [

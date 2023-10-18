@@ -615,6 +615,27 @@ class CombineSimilarityOrderByAndLimitToVectorIndexScan(Rule):
 ##############################################
 # LOGICAL RULES START
 
+class BatchLogicalGet(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALGET)
+        super().__init__(RuleType.BATCH_LOGICAL_GET, pattern)
+
+    def promise(self):
+        return Promise.BATCH_LOGICAL_GET
+
+    def check(self, before: LogicalGet, context: OptimizerContext):
+        # We skip the video table, since it has its own batch implementation now.
+        # For long term, we should keep all table type consistent.
+        return not is_video_table(before.table_obj)
+
+    def apply(self, before: LogicalGet, context: OptimizerContext):
+        #                            LogicalRebatch
+        #    LogicalGet     ->              |
+        #                              LogicalGet
+        batch_mem_size = context.db.config.get_value("executor", "batch_mem_size")
+        rebatch = LogicalRebatch(batch_mem_size = batch_mem_size)
+        rebatch.append_child(before)
+        return rebatch
 
 class LogicalInnerJoinCommutativity(Rule):
     def __init__(self):
