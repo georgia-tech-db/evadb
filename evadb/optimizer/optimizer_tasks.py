@@ -268,14 +268,17 @@ class OptimizeGroup(OptimizerTask):
         if self.group.get_best_expr(PropertyType.DEFAULT):
             return
 
+        import pdb; pdb.set_trace()
         # optimize all the logical exprs with the same context
         for expr in self.group.logical_exprs:
+            print("Push Logical: {}".format(expr))
             self.optimizer_context.task_stack.push(
                 OptimizeExpression(expr, self.optimizer_context, explore=False)
             )
 
         # cost all the physical exprs with the same context
         for expr in self.group.physical_exprs:
+            print("Push physical: {}".format(expr))
             self.optimizer_context.task_stack.push(
                 OptimizeInputs(expr, self.optimizer_context)
             )

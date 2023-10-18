@@ -1446,6 +1446,8 @@ class LogicalRebatchToPhysical(Rule):
 
     def apply(self, before: LogicalRebatch, context: OptimizerContext):
         rebatch_plan = RebatchPlan(before.batch_mem_size, before.batch_size)
+        for child in before.children:
+            rebatch_plan.append_child(child)
         yield rebatch_plan
 
 

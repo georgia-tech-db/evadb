@@ -95,11 +95,13 @@ class PlanGenerator:
         )
         self.execute_task_stack(optimizer_context.task_stack)
 
+        print("We are done rewrite")
         # Optimize Expression (logical -> physical transformation)
         root_group = memo.get_group_by_id(root_grp_id)
         optimizer_context.task_stack.push(OptimizeGroup(root_group, optimizer_context))
         self.execute_task_stack(optimizer_context.task_stack)
 
+        print("We are done logical->physical")
         # Build Optimal Tree
         optimal_plan = self.build_optimal_physical_plan(root_grp_id, optimizer_context)
         return optimal_plan

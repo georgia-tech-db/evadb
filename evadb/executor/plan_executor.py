@@ -38,6 +38,7 @@ from evadb.executor.orderby_executor import OrderByExecutor
 from evadb.executor.pp_executor import PPExecutor
 from evadb.executor.predicate_executor import PredicateExecutor
 from evadb.executor.project_executor import ProjectExecutor
+from evadb.executor.rebatch_executor import RebatchExecutor
 from evadb.executor.rename_executor import RenameExecutor
 from evadb.executor.sample_executor import SampleExecutor
 from evadb.executor.seq_scan_executor import SequentialScanExecutor
@@ -153,6 +154,8 @@ class PlanExecutor:
             executor_node = VectorIndexScanExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.DELETE:
             executor_node = DeleteExecutor(db=self._db, node=plan)
+        elif plan_opr_type == PlanOprType.REBATCH:
+            executor_node = RebatchExecutor(db=self._db, node=plan)
 
         # EXPLAIN does not need to build execution tree for its children
         if plan_opr_type != PlanOprType.EXPLAIN:
