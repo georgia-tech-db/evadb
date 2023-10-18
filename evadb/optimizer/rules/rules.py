@@ -916,7 +916,25 @@ class LogicalLoadToPhysical(Rule):
         )
         yield after
 
+class BatchMemSizeCalculator:
+    def __init__(self, context: 'OptimizerContext'):
+        self.context = context
 
+    def calculate_batch_mem_size(self, before: 'LogicalGet') -> int:
+        import psutil
+        available_memory = psutil.virtual_memory().available
+        memory_fraction = 0.5
+
+        if before.target_list is None:
+            batch_mem_size = self.context.db.config.get_value("executor", "batch_mem_size")
+        else:
+            num_columns = len(before.target_list)
+            batch_mem_size = int(available_memory * memory_fraction / num_columns)
+
+        # Ensure batch_mem_size is within a certain range, e.g., between 100 and 1000
+        batch_mem_size = max(100, min(batch_mem_size, 1000))
+        return batch_mem_size
+    
 class LogicalGetToSeqScan(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALGET)
@@ -932,8 +950,9 @@ class LogicalGetToSeqScan(Rule):
         # Configure the batch_mem_size. It decides the number of rows
         # read in a batch from storage engine.
         # Todo: Experiment heuristics.
+        
+        batch_mem_size = self.batch_mem_size_calculator.calculate_batch_mem_size(before)
         after = SeqScanPlan(None, before.target_list, before.alias)
-        batch_mem_size = context.db.config.get_value("executor", "batch_mem_size")
         after.append_child(
             StoragePlan(
                 before.table_obj,
