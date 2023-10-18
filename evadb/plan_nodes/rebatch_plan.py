@@ -12,9 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import List
-
-from evadb.expression.abstract_expression import AbstractExpression
 from evadb.plan_nodes.abstract_plan import AbstractPlan
 from evadb.plan_nodes.types import PlanOprType
 
@@ -32,7 +29,9 @@ class RebatchPlan(AbstractPlan):
         super().__init__(PlanOprType.REBATCH)
 
     def __str__(self):
-        return "RebatchPlan(batch_mem_size={}, batch_size={})".format(self.batch_mem_size, self.batch_size)
+        return "RebatchPlan(batch_mem_size={}, batch_size={})".format(
+            self.batch_mem_size, self.batch_size
+        )
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(), self.batch_mem_size, self.batch_size)
+        return hash((super().__hash__(), self.batch_mem_size, self.batch_size))

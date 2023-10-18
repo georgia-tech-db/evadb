@@ -52,6 +52,7 @@ from evadb.optimizer.rules.rules import (
     LogicalProjectNoTableToPhysical,
     LogicalProjectToPhysical,
     LogicalProjectToRayPhysical,
+    LogicalRebatchToPhysical,
     LogicalRenameToPhysical,
     LogicalShowToPhysical,
     LogicalUnionToPhysical,
@@ -116,6 +117,7 @@ class RulesManager:
             LogicalCreateIndexToVectorIndex(),
             LogicalVectorIndexScanToPhysical(),
             LogicalProjectNoTableToPhysical(),
+            LogicalRebatchToPhysical(),
         ]
 
         # These rules are enabled only if

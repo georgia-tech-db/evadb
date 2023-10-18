@@ -47,6 +47,7 @@ from evadb.plan_nodes.hash_join_build_plan import HashJoinBuildPlan
 from evadb.plan_nodes.nested_loop_join_plan import NestedLoopJoinPlan
 from evadb.plan_nodes.predicate_plan import PredicatePlan
 from evadb.plan_nodes.project_plan import ProjectPlan
+from evadb.plan_nodes.rebatch_plan import RebatchPlan
 from evadb.plan_nodes.show_info_plan import ShowInfoPlan
 
 if TYPE_CHECKING:
@@ -74,6 +75,7 @@ from evadb.optimizer.operators import (
     LogicalOrderBy,
     LogicalProject,
     LogicalQueryDerivedGet,
+    LogicalRebatch,
     LogicalRename,
     LogicalSample,
     LogicalShow,
@@ -1405,6 +1407,23 @@ class LogicalProjectToRayPhysical(Rule):
             for child in before.children:
                 exchange_plan.append_child(child)
             yield exchange_plan
+
+
+class LogicalRebatchToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALREBATCH)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_REBATCH_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_REBATCH_TO_PHYSICAL
+
+    def check(self, before: LogicalRebatch, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalRebatch, context: OptimizerContext):
+        rebatch_plan = RebatchPlan(before.batch_mem_size, before.batch_size)
+        yield rebatch_plan
 
 
 # IMPLEMENTATION RULES END
