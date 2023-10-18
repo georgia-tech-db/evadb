@@ -41,6 +41,9 @@ CATALOG_TABLES = [
     "function_cost_catalog",
     "function_metadata_catalog",
 ]
+# Add all keywords that are restricted by EvaDB
+
+RESTRICTED_COL_NAMES = [IDENTIFIER_COLUMN]
 
 
 class SingletonMeta(type):

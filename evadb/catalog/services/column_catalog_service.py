@@ -63,7 +63,7 @@ class ColumnCatalogService(BaseService):
             return entry if return_alchemy else entry.as_dataclass()
         return entry
 
-    def insert_entries(self, column_list: List[ColumnCatalogEntry]):
+    def create_entries(self, column_list: List[ColumnCatalogEntry]):
         catalog_column_objs = [
             self.model(
                 name=col.name,
@@ -75,10 +75,7 @@ class ColumnCatalogService(BaseService):
             )
             for col in column_list
         ]
-        saved_column_objs = []
-        for column in catalog_column_objs:
-            saved_column_objs.append(column.save(self.session))
-        return [obj.as_dataclass() for obj in saved_column_objs]
+        return catalog_column_objs
 
     def filter_entries_by_table(
         self, table: TableCatalogEntry

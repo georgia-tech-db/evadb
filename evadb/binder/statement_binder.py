@@ -32,6 +32,7 @@ from evadb.binder.binder_utils import (
 from evadb.binder.statement_binder_context import StatementBinderContext
 from evadb.catalog.catalog_type import ColumnType, TableType
 from evadb.catalog.catalog_utils import get_metadata_properties, is_document_table
+from evadb.catalog.sql_config import RESTRICTED_COL_NAMES
 from evadb.configuration.constants import EvaDB_INSTALLATION_DIR
 from evadb.expression.abstract_expression import AbstractExpression, ExpressionType
 from evadb.expression.function_expression import FunctionExpression
@@ -101,7 +102,9 @@ class StatementBinder:
                         outputs.append(column)
                     else:
                         inputs.append(column)
-            elif string_comparison_case_insensitive(node.function_type, "sklearn"):
+            elif string_comparison_case_insensitive(
+                node.function_type, "sklearn"
+            ) or string_comparison_case_insensitive(node.function_type, "XGBoost"):
                 assert (
                     "predict" in arg_map
                 ), f"Creating {node.function_type} functions expects 'predict' metadata."
@@ -201,6 +204,12 @@ class StatementBinder:
 
     @bind.register(CreateTableStatement)
     def _bind_create_statement(self, node: CreateTableStatement):
+        # we don't allow certain keywords in the column_names
+        for col in node.column_list:
+            assert (
+                col.name.lower() not in RESTRICTED_COL_NAMES
+            ), f"EvaDB does not allow to create a table with column name {col.name}"
+
         if node.query is not None:
             self.bind(node.query)
 

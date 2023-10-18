@@ -17,7 +17,7 @@ from sqlalchemy import Column, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import relationship
 
 from evadb.catalog.models.base_model import BaseModel
-from evadb.catalog.models.utils import FunctionMetadataCatalogEntry
+from evadb.catalog.models.utils import FunctionMetadataCatalogEntry, TextPickleType
 
 
 class FunctionMetadataCatalog(BaseModel):
@@ -34,7 +34,7 @@ class FunctionMetadataCatalog(BaseModel):
     __tablename__ = "function_metadata_catalog"
 
     _key = Column("key", String(100))
-    _value = Column("value", String(100))
+    _value = Column("value", TextPickleType())
     _function_id = Column(
         "function_id", Integer, ForeignKey("function_catalog._row_id")
     )

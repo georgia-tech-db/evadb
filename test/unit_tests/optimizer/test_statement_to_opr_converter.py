@@ -63,11 +63,16 @@ class StatementToOprTest(unittest.TestCase):
     @patch("evadb.optimizer.statement_to_opr_converter.LogicalGet")
     def test_visit_table_ref_should_create_logical_get_opr(self, mock_lget):
         converter = StatementToPlanConverter()
-        table_ref = MagicMock(spec=TableRef, alias="alias")
+        table_ref = MagicMock(spec=TableRef, alias="alias", chunk_params={})
         table_ref.is_select.return_value = False
         table_ref.sample_freq = None
         converter.visit_table_ref(table_ref)
-        mock_lget.assert_called_with(table_ref, table_ref.table.table_obj, "alias")
+        mock_lget.assert_called_with(
+            table_ref,
+            table_ref.table.table_obj,
+            "alias",
+            chunk_params=table_ref.chunk_params,
+        )
         self.assertEqual(mock_lget.return_value, converter._plan)
 
     @patch("evadb.optimizer.statement_to_opr_converter.LogicalFilter")
