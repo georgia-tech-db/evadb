@@ -64,7 +64,7 @@ class OperatorType(IntEnum):
     LOGICAL_EXTRACT_OBJECT = auto()
     LOGICAL_VECTOR_INDEX_SCAN = auto()
     LOGICAL_USE = auto()
-    LOGICAL_REBATACH = auto()
+    LOGICAL_REBATCH = auto()
     LOGICALDELIMITER = auto()
 
 
@@ -1229,7 +1229,7 @@ class LogicalRebatch(Operator):
     def __init__(
         self, batch_mem_size: int = 1, batch_size: int = 1, children: List = None
     ):
-        super().__init__(OperatorType.LOGICAL_REBATACH, children)
+        super().__init__(OperatorType.LOGICAL_REBATCH, children)
         self.batch_mem_size = batch_mem_size
         self.batch_size = batch_size
 
