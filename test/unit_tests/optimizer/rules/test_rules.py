@@ -27,6 +27,7 @@ from evadb.optimizer.operators import (
     LogicalSample,
 )
 from evadb.optimizer.rules.rules import (
+    BatchLogicalGet,
     CacheFunctionExpressionInApply,
     CacheFunctionExpressionInFilter,
     CacheFunctionExpressionInProject,
@@ -60,6 +61,7 @@ from evadb.optimizer.rules.rules import (
     LogicalProjectNoTableToPhysical,
     LogicalProjectToPhysical,
     LogicalProjectToRayPhysical,
+    LogicalRebatchToPhysical,
     LogicalRenameToPhysical,
     LogicalShowToPhysical,
     LogicalUnionToPhysical,
@@ -142,17 +144,32 @@ class RulesTest(unittest.TestCase):
             Promise.LOGICAL_CREATE_INDEX_TO_VECTOR_INDEX,
             Promise.LOGICAL_APPLY_AND_MERGE_TO_PHYSICAL,
             Promise.LOGICAL_VECTOR_INDEX_SCAN_TO_PHYSICAL,
+            Promise.LOGICAL_REBATCH_TO_PHYSICAL,
         ]
 
         for promise in implementation_promises:
             self.assertTrue(promise < Promise.IMPLEMENTATION_DELIMITER)
 
+        transformation_promises = [
+            Promise.LOGICAL_INNER_JOIN_COMMUTATIVITY,
+            Promise.CACHE_FUNCTION_EXPRESISON_IN_APPLY,
+            Promise.CACHE_FUNCTION_EXPRESISON_IN_FILTER,
+            Promise.CACHE_FUNCTION_EXPRESISON_IN_PROJECT,
+            Promise.BATCH_LOGICAL_GET,
+        ]
+
+        for promise in transformation_promises:
+            self.assertTrue(promise > Promise.IMPLEMENTATION_DELIMITER)
+
         promise_count = len(Promise)
         rewrite_count = len(set(rewrite_promises))
         implementation_count = len(set(implementation_promises))
+        transformation_count = len(set(transformation_promises))
 
         # rewrite_count + implementation_count + 1 (for IMPLEMENTATION_DELIMITER)
-        self.assertEqual(rewrite_count + implementation_count + 4, promise_count)
+        self.assertEqual(
+            rewrite_count + implementation_count + transformation_count, promise_count
+        )
 
     def test_supported_rules(self):
         # adding/removing rules should update this test
@@ -180,6 +197,7 @@ class RulesTest(unittest.TestCase):
             self.assertTrue(any(isinstance(rule, type(x)) for x in rewrite_rules))
 
         supported_logical_rules = [
+            BatchLogicalGet(),
             LogicalInnerJoinCommutativity(),
             CacheFunctionExpressionInApply(),
             CacheFunctionExpressionInFilter(),
@@ -238,6 +256,7 @@ class RulesTest(unittest.TestCase):
             LogicalExplainToPhysical(),
             LogicalCreateIndexToVectorIndex(),
             LogicalVectorIndexScanToPhysical(),
+            LogicalRebatchToPhysical(),
         ]
 
         if ray_enabled_and_installed:

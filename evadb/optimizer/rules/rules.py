@@ -636,7 +636,7 @@ class BatchLogicalGet(Rule):
         batch_mem_size = context.db.config.get_value("executor", "batch_mem_size")
         rebatch = LogicalRebatch(batch_mem_size=batch_mem_size)
         rebatch.append_child(before)
-        return rebatch
+        yield rebatch
 
 
 class LogicalInnerJoinCommutativity(Rule):
