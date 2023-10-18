@@ -922,12 +922,18 @@ class BatchMemSizeCalculator:
 
     def calculate_batch_mem_size(self, before: 'LogicalGet') -> int:
         import psutil
+
+        # Get the available system memory
         available_memory = psutil.virtual_memory().available
+
+        # Define a fraction of available memory to be used for batch processing
         memory_fraction = 0.5
 
+        # If the target list is None, use a configuration value for batch_mem_size
         if before.target_list is None:
             batch_mem_size = self.context.db.config.get_value("executor", "batch_mem_size")
         else:
+            # Calculate batch_mem_size based on the number of columns and available memory
             num_columns = len(before.target_list)
             batch_mem_size = int(available_memory * memory_fraction / num_columns)
 
@@ -951,7 +957,11 @@ class LogicalGetToSeqScan(Rule):
         # read in a batch from storage engine.
         # Todo: Experiment heuristics.
         
+        # Calculate batch_mem_size using the defined heuristic in calculate_batch_mem_size function
+        
         batch_mem_size = self.batch_mem_size_calculator.calculate_batch_mem_size(before)
+        
+        # Create a SeqScanPlan for further processing
         after = SeqScanPlan(None, before.target_list, before.alias)
         after.append_child(
             StoragePlan(
