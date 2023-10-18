@@ -48,4 +48,5 @@ class PlanOprType(Enum):
     VECTOR_INDEX_SCAN = auto()
     NATIVE = auto()
     SQLALCHEMY = auto()
+    REBATCH = auto()
     # add other types
