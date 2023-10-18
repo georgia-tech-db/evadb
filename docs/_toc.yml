@@ -136,6 +136,8 @@ parts:
             title: Code Style
           - file: source/dev-guide/contribute/troubleshoot
             title: Troubleshooting
+          - file: source/dev-guide/contribute/unit-test
+            title: Unit Testing UDFs in EvaDB
 
       - file: source/dev-guide/debugging
         title: Debugging EvaDB
