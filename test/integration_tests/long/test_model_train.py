@@ -151,7 +151,6 @@ class ModelTrainTests(unittest.TestCase):
             SELECT PredictEmployee(payment_tier, age, gender, experience_in_current_domain, leave_or_not) FROM Employee LIMIT 10;
         """
         result = execute_query_fetch_all(self.evadb, predict_query)
-        print(result)
         self.assertEqual(len(result.columns), 1)
         self.assertEqual(len(result), 10)
 
