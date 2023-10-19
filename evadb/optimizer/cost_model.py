@@ -32,10 +32,7 @@ class CostEntry:
     num_calls: float = 1.0
 
     def __gt__(self, other):
-        return (
-            self.plan_cost * self.num_calls
-            > other.plan_cost * other.num_calls
-        )
+        return self.plan_cost * self.num_calls > other.plan_cost * other.num_calls
 
 
 class CostModel:
@@ -50,7 +47,9 @@ class CostModel:
     def zero_cost(self) -> CostEntry:
         return CostEntry(plan_cost=0)
 
-    def calculate_cost(self, gexpr: GroupExpression, children: List[CostEntry]) -> CostEntry:
+    def calculate_cost(
+        self, gexpr: GroupExpression, children: List[CostEntry]
+    ) -> CostEntry:
         """
         Return the cost of the group expression.
         """
@@ -63,17 +62,23 @@ class CostModel:
                 return CostEntry()
 
         @cost.register(NestedLoopJoinPlan)
-        def cost_nested_loop_join_build_plan(opr: NestedLoopJoinPlan, children: List[CostEntry]):
+        def cost_nested_loop_join_build_plan(
+            opr: NestedLoopJoinPlan, children: List[CostEntry]
+        ):
             new_plan_cost = children[0].plan_cost + 1.0
             return dataclasses.replace(children[0], plan_cost=new_plan_cost)
 
         @cost.register(HashJoinBuildPlan)
-        def cost_hash_join_build_plan(opr: HashJoinBuildPlan, children: List[CostEntry]):
+        def cost_hash_join_build_plan(
+            opr: HashJoinBuildPlan, children: List[CostEntry]
+        ):
             new_plan_cost = children[0].plan_cost + 1.0
             return dataclasses.replace(children[0], plan_cost=new_plan_cost)
 
         @cost.register(HashJoinProbePlan)
-        def cost_hash_join_probe_plan(opr: HashJoinProbePlan, children: List[CostEntry]):
+        def cost_hash_join_probe_plan(
+            opr: HashJoinProbePlan, children: List[CostEntry]
+        ):
             new_plan_cost = children[0].plan_cost + 1.0
             return dataclasses.replace(children[0], plan_cost=new_plan_cost)
 
@@ -91,7 +96,7 @@ class CostModel:
         @cost.register(ApplyAndMergePlan)
         def cost_apply_and_merge(opr: ApplyAndMergePlan, children: List[CostEntry]):
             if opr.func_expr.has_cache():
-                return dataclasses.replace(history[0])
+                return dataclasses.replace(children[0])
             new_plan_cost = children[0].plan_cost + 1.0
             return dataclasses.replace(children[0], plan_cost=new_plan_cost)
 
