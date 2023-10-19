@@ -929,23 +929,22 @@ class LogicalGetToSeqScan(Rule):
         return True
 
     def apply(self, before: LogicalGet, context: OptimizerContext):
-        # Configure the batch_mem_size. It decides the number of rows
-        # read in a batch from storage engine.
-        # Todo: Experiment heuristics.
-        after = SeqScanPlan(None, before.target_list, before.alias)
-        batch_mem_size = context.db.config.get_value("executor", "batch_mem_size")
-        after.append_child(
-            StoragePlan(
-                before.table_obj,
-                before.video,
-                predicate=before.predicate,
-                sampling_rate=before.sampling_rate,
-                sampling_type=before.sampling_type,
-                chunk_params=before.chunk_params,
-                batch_mem_size=batch_mem_size,
+        max_batch_mem_size = context.db.config.get_value("executor", "batch_mem_size")
+        # For now, we only sweep the min and max batch size.
+        for batch_mem_size in [1, max_batch_mem_size]:
+            after = SeqScanPlan(None, before.target_list, before.alias)
+            after.append_child(
+                StoragePlan(
+                    before.table_obj,
+                    before.video,
+                    predicate=before.predicate,
+                    sampling_rate=before.sampling_rate,
+                    sampling_type=before.sampling_type,
+                    chunk_params=before.chunk_params,
+                    batch_mem_size=batch_mem_size,
+                )
             )
-        )
-        yield after
+            yield after
 
 
 class LogicalDerivedGetToPhysical(Rule):
