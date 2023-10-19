@@ -525,6 +525,15 @@ def try_to_import_openai():
                 Please install them with `pip install openai`."""
         )
 
+def try_to_import_litellm():
+    try:
+        import litellm  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import litellm python package.
+                Please install them with `pip install litellm`."""
+        )
+
 
 def try_to_import_langchain():
     try:
