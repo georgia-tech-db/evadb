@@ -75,7 +75,7 @@ class RulesManager:
             CacheFunctionExpressionInApply(),
             CacheFunctionExpressionInFilter(),
             CacheFunctionExpressionInProject(),
-            BatchLogicalGet(),
+            # BatchLogicalGet(),
         ]
 
         self._stage_one_rewrite_rules = [

@@ -268,7 +268,7 @@ class OptimizeGroup(OptimizerTask):
         if self.group.get_best_expr(PropertyType.DEFAULT):
             return
 
-        import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
         # optimize all the logical exprs with the same context
         for expr in self.group.logical_exprs:
             print("Push Logical: {}".format(expr))

@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from __future__ import annotations
+import copy
 
 from typing import TYPE_CHECKING
 
@@ -619,6 +620,7 @@ class CombineSimilarityOrderByAndLimitToVectorIndexScan(Rule):
 class BatchLogicalGet(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALGET)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
         super().__init__(RuleType.BATCH_LOGICAL_GET, pattern)
 
     def promise(self):
@@ -959,18 +961,22 @@ class LogicalGetToSeqScan(Rule):
         # Todo: Experiment heuristics.
         after = SeqScanPlan(None, before.target_list, before.alias)
         batch_mem_size = context.db.config.get_value("executor", "batch_mem_size")
-        after.append_child(
-            StoragePlan(
-                before.table_obj,
-                before.video,
-                predicate=before.predicate,
-                sampling_rate=before.sampling_rate,
-                sampling_type=before.sampling_type,
-                chunk_params=before.chunk_params,
-                batch_mem_size=batch_mem_size,
-            )
+        stg_plan = StoragePlan(
+            before.table_obj,
+            before.video,
+            predicate=before.predicate,
+            sampling_rate=before.sampling_rate,
+            sampling_type=before.sampling_type,
+            chunk_params=before.chunk_params,
+            batch_mem_size=batch_mem_size,
         )
-        yield after
+        after.append_child(stg_plan)
+
+        rebatch_plan = RebatchPlan(batch_mem_size)
+        copy_after = SeqScanPlan(None, before.target_list, before.alias)
+        copy_after.append_child(copy.copy(stg_plan))
+        rebatch_plan.append_child(copy_after)
+        yield from [after, rebatch_plan]
 
 
 class LogicalDerivedGetToPhysical(Rule):

@@ -113,10 +113,15 @@ class Memo:
         If group_id is not specified, creates a new group
         Otherwise, inserts the expr into specified group.
         """
+
         # check duplicate expression
         duplicate_expr = self.find_duplicate_expr(expr)
         if duplicate_expr is not None:
-            return duplicate_expr
+            # if the duplicate expr has the same group id as the current expression we # skip it. Ideally, we should always be able to skip, but this is done to
+            # avoid bugs. We will revisist it later if optimizer gets time consuming
+            # because of skipping this optimization.
+            if duplicate_expr.group_id == group_id:
+                return duplicate_expr
 
         # did not find a duplicate expression
         expr.group_id = group_id

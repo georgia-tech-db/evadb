@@ -121,7 +121,7 @@ class Operator:
         return hash((self.opr_type, tuple(self.children)))
 
     def __copy__(self):
-        # deepcopy the children
+        # do not copy the children
         cls = self.__class__
         result = cls.__new__(cls)
         for k, v in self.__dict__.items():
