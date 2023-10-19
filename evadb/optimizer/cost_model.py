@@ -30,6 +30,12 @@ class CostEntry:
     plan_cost: float = 1.0
     amortize_factor: float = 1.0
 
+    def __gt__(self, other):
+        return self.plan_cost * self.amortize_factor > other.plan_cost * other.amortize_factor
+
+    def __add__(self, other):
+        return CostEntry(plan_cost = self.plan_cost + other.plan_cost,
+                amortize_factor = self.amortize_factor * other.amortize_factor)
 
 class CostModel:
     """
