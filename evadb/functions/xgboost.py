@@ -17,28 +17,29 @@ import pickle
 import pandas as pd
 
 from evadb.functions.abstract.abstract_function import AbstractFunction
-from evadb.utils.generic_utils import try_to_import_sklearn
+from evadb.utils.generic_utils import try_to_import_xgboost
 
 
-class GenericSklearnModel(AbstractFunction):
+class GenericXGBoostModel(AbstractFunction):
     @property
     def name(self) -> str:
-        return "GenericSklearnModel"
+        return "GenericXGBoostModel"
 
     def setup(self, model_path: str, predict_col: str, **kwargs):
-        try_to_import_sklearn()
+        try_to_import_xgboost()
 
         self.model = pickle.load(open(model_path, "rb"))
         self.predict_col = predict_col
 
     def forward(self, frames: pd.DataFrame) -> pd.DataFrame:
-        # Do not pass the prediction column in the predict method for sklearn.
+        # We do not pass the prediction column to the predict method of XGBoost
+        # AutoML.
         frames.drop([self.predict_col], axis=1, inplace=True)
         predictions = self.model.predict(frames)
         predict_df = pd.DataFrame(predictions)
         # We need to rename the column of the output dataframe. For this we
         # shall rename it to the column name same as that of the predict column
-        # passed in the training frames in EVA query.
+        # passed to EVA query.
         predict_df.rename(columns={0: self.predict_col}, inplace=True)
         return predict_df
 
