@@ -12,7 +12,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import contextlib
 import hashlib
+import locale
 import os
 import pickle
 import re
@@ -49,6 +51,31 @@ from evadb.utils.generic_utils import (
     try_to_import_xgboost,
 )
 from evadb.utils.logging_manager import logger
+
+
+# From https://stackoverflow.com/a/34333710
+@contextlib.contextmanager
+def set_env(**environ):
+    """
+    Temporarily set the process environment variables.
+
+    >>> with set_env(PLUGINS_DIR='test/plugins'):
+    ...   "PLUGINS_DIR" in os.environ
+    True
+
+    >>> "PLUGINS_DIR" in os.environ
+    False
+
+    :type environ: dict[str, unicode]
+    :param environ: Environment variables to set
+    """
+    old_environ = dict(os.environ)
+    os.environ.update(environ)
+    try:
+        yield
+    finally:
+        os.environ.clear()
+        os.environ.update(old_environ)
 
 
 class CreateFunctionExecutor(AbstractExecutor):
@@ -171,15 +198,14 @@ class CreateFunctionExecutor(AbstractExecutor):
         )
 
     def convert_to_numeric(self, x):
-        x = re.sub("[^0-9.]", "", str(x))
-        try:
+        x = re.sub("[^0-9.,]", "", str(x))
+        locale.setlocale(locale.LC_ALL, "")
+        x = float(locale.atof(x))
+        if x.is_integer():
             return int(x)
-        except ValueError:
-            try:
-                return float(x)
-            except ValueError:
-                return x
-            
+        else:
+            return x
+
     def handle_xgboost_function(self):
         """Handle xgboost functions
 
@@ -256,280 +282,280 @@ class CreateFunctionExecutor(AbstractExecutor):
 
     def handle_forecasting_function(self):
         """Handle forecasting functions"""
-        save_old_cuda_env = None
+        cuda_devices_here = "0"
         if "CUDA_VISIBLE_DEVICES" in os.environ:
-            save_old_cuda_env = os.environ["CUDA_VISIBLE_DEVICES"]
-            os.environ["CUDA_VISIBLE_DEVICES"] = save_old_cuda_env.split(",")[0]
-        else:
-            os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-        aggregated_batch_list = []
-        child = self.children[0]
-        for batch in child.exec():
-            aggregated_batch_list.append(batch)
-        aggregated_batch = Batch.concat(aggregated_batch_list, copy=False)
-        aggregated_batch.drop_column_alias()
+            cuda_devices_here = os.environ["CUDA_VISIBLE_DEVICES"].split(",")[0]
 
-        arg_map = {arg.key: arg.value for arg in self.node.metadata}
-        if not self.node.impl_path:
-            impl_path = Path(f"{self.function_dir}/forecast.py").absolute().as_posix()
-        else:
-            impl_path = self.node.impl_path.absolute().as_posix()
-        library = "statsforecast"
-        supported_libraries = ["statsforecast", "neuralforecast"]
+        with set_env(CUDA_VISIBLE_DEVICES=cuda_devices_here):
+            aggregated_batch_list = []
+            child = self.children[0]
+            for batch in child.exec():
+                aggregated_batch_list.append(batch)
+            aggregated_batch = Batch.concat(aggregated_batch_list, copy=False)
+            aggregated_batch.drop_column_alias()
 
-        if "horizon" not in arg_map.keys():
-            raise ValueError(
-                "Horizon must be provided while creating function of type FORECASTING"
-            )
-        try:
-            horizon = int(arg_map["horizon"])
-        except Exception as e:
-            err_msg = f"{str(e)}. HORIZON must be integral."
-            logger.error(err_msg)
-            raise FunctionIODefinitionError(err_msg)
-
-        if "library" in arg_map.keys():
-            try:
-                assert arg_map["library"].lower() in supported_libraries
-            except Exception:
-                err_msg = (
-                    "EvaDB currently supports " + str(supported_libraries) + " only."
+            arg_map = {arg.key: arg.value for arg in self.node.metadata}
+            if not self.node.impl_path:
+                impl_path = (
+                    Path(f"{self.function_dir}/forecast.py").absolute().as_posix()
                 )
+            else:
+                impl_path = self.node.impl_path.absolute().as_posix()
+            library = "statsforecast"
+            supported_libraries = ["statsforecast", "neuralforecast"]
+
+            if "horizon" not in arg_map.keys():
+                raise ValueError(
+                    "Horizon must be provided while creating function of type FORECASTING"
+                )
+            try:
+                horizon = int(arg_map["horizon"])
+            except Exception as e:
+                err_msg = f"{str(e)}. HORIZON must be integral."
                 logger.error(err_msg)
                 raise FunctionIODefinitionError(err_msg)
 
-            library = arg_map["library"].lower()
+            if "library" in arg_map.keys():
+                try:
+                    assert arg_map["library"].lower() in supported_libraries
+                except Exception:
+                    err_msg = (
+                        "EvaDB currently supports "
+                        + str(supported_libraries)
+                        + " only."
+                    )
+                    logger.error(err_msg)
+                    raise FunctionIODefinitionError(err_msg)
 
-        """
-        The following rename is needed for statsforecast/neuralforecast, which requires the column name to be the following:
-        - The unique_id (string, int or category) represents an identifier for the series.
-        - The ds (datestamp) column should be of a format expected by Pandas, ideally YYYY-MM-DD for a date or YYYY-MM-DD HH:MM:SS for a timestamp.
-        - The y (numeric) represents the measurement we wish to forecast.
-        For reference: https://nixtla.github.io/statsforecast/docs/getting-started/getting_started_short.html
-        """
-        aggregated_batch.rename(columns={arg_map["predict"]: "y"})
-        if "time" in arg_map.keys():
-            aggregated_batch.rename(columns={arg_map["time"]: "ds"})
-        if "id" in arg_map.keys():
-            aggregated_batch.rename(columns={arg_map["id"]: "unique_id"})
+                library = arg_map["library"].lower()
 
-        data = aggregated_batch.frames
-        if "unique_id" not in list(data.columns):
-            data["unique_id"] = [1 for x in range(len(data))]
+            """
+            The following rename is needed for statsforecast/neuralforecast, which requires the column name to be the following:
+            - The unique_id (string, int or category) represents an identifier for the series.
+            - The ds (datestamp) column should be of a format expected by Pandas, ideally YYYY-MM-DD for a date or YYYY-MM-DD HH:MM:SS for a timestamp.
+            - The y (numeric) represents the measurement we wish to forecast.
+            For reference: https://nixtla.github.io/statsforecast/docs/getting-started/getting_started_short.html
+            """
+            aggregated_batch.rename(columns={arg_map["predict"]: "y"})
+            if "time" in arg_map.keys():
+                aggregated_batch.rename(columns={arg_map["time"]: "ds"})
+            if "id" in arg_map.keys():
+                aggregated_batch.rename(columns={arg_map["id"]: "unique_id"})
 
-        if "ds" not in list(data.columns):
-            data["ds"] = [x + 1 for x in range(len(data))]
+            data = aggregated_batch.frames
+            if "unique_id" not in list(data.columns):
+                data["unique_id"] = [1 for x in range(len(data))]
 
-        """
-            Set or infer data frequency
-        """
+            if "ds" not in list(data.columns):
+                data["ds"] = [x + 1 for x in range(len(data))]
 
-        if "frequency" not in arg_map.keys() or arg_map["frequency"] == "auto":
-            arg_map["frequency"] = pd.infer_freq(data["ds"])
-        frequency = arg_map["frequency"]
-        if frequency is None:
-            raise RuntimeError(
-                f"Can not infer the frequency for {self.node.name}. Please explicitly set it."
-            )
+            """
+                Set or infer data frequency
+            """
 
-        season_dict = {  # https://pandas.pydata.org/docs/user_guide/timeseries.html#timeseries-offset-aliases
-            "H": 24,
-            "M": 12,
-            "Q": 4,
-            "SM": 24,
-            "BM": 12,
-            "BMS": 12,
-            "BQ": 4,
-            "BH": 24,
-        }
+            if "frequency" not in arg_map.keys() or arg_map["frequency"] == "auto":
+                arg_map["frequency"] = pd.infer_freq(data["ds"])
+            frequency = arg_map["frequency"]
+            if frequency is None:
+                raise RuntimeError(
+                    f"Can not infer the frequency for {self.node.name}. Please explicitly set it."
+                )
 
-        new_freq = (
-            frequency.split("-")[0] if "-" in frequency else frequency
-        )  # shortens longer frequencies like Q-DEC
-        season_length = season_dict[new_freq] if new_freq in season_dict else 1
-
-        """
-            Neuralforecast implementation
-        """
-        if library == "neuralforecast":
-            try_to_import_neuralforecast()
-            from neuralforecast import NeuralForecast
-            from neuralforecast.auto import AutoNBEATS, AutoNHITS
-            from neuralforecast.models import NBEATS, NHITS
-
-            model_dict = {
-                "AutoNBEATS": AutoNBEATS,
-                "AutoNHITS": AutoNHITS,
-                "NBEATS": NBEATS,
-                "NHITS": NHITS,
+            season_dict = {  # https://pandas.pydata.org/docs/user_guide/timeseries.html#timeseries-offset-aliases
+                "H": 24,
+                "M": 12,
+                "Q": 4,
+                "SM": 24,
+                "BM": 12,
+                "BMS": 12,
+                "BQ": 4,
+                "BH": 24,
             }
 
-            if "model" not in arg_map.keys():
-                arg_map["model"] = "NBEATS"
+            new_freq = (
+                frequency.split("-")[0] if "-" in frequency else frequency
+            )  # shortens longer frequencies like Q-DEC
+            season_length = season_dict[new_freq] if new_freq in season_dict else 1
 
-            if "auto" not in arg_map.keys() or (
-                arg_map["auto"].lower()[0] == "t"
-                and "auto" not in arg_map["model"].lower()
-            ):
-                arg_map["model"] = "Auto" + arg_map["model"]
+            """
+                Neuralforecast implementation
+            """
+            if library == "neuralforecast":
+                try_to_import_neuralforecast()
+                from neuralforecast import NeuralForecast
+                from neuralforecast.auto import AutoNBEATS, AutoNHITS
+                from neuralforecast.models import NBEATS, NHITS
 
-            try:
-                model_here = model_dict[arg_map["model"]]
-            except Exception:
-                err_msg = "Supported models: " + str(model_dict.keys())
-                logger.error(err_msg)
-                raise FunctionIODefinitionError(err_msg)
-            model_args = {}
-
-            if "auto" not in arg_map["model"].lower():
-                model_args["input_size"] = 2 * horizon
-                model_args["early_stop_patience_steps"] = 20
-            else:
-                model_args_config = {
-                    "input_size": 2 * horizon,
-                    "early_stop_patience_steps": 20,
+                model_dict = {
+                    "AutoNBEATS": AutoNBEATS,
+                    "AutoNHITS": AutoNHITS,
+                    "NBEATS": NBEATS,
+                    "NHITS": NHITS,
                 }
 
-            if len(data.columns) >= 4:
-                exogenous_columns = [
-                    x for x in list(data.columns) if x not in ["ds", "y", "unique_id"]
-                ]
+                if "model" not in arg_map.keys():
+                    arg_map["model"] = "NBEATS"
+
+                if "auto" not in arg_map.keys() or (
+                    arg_map["auto"].lower()[0] == "t"
+                    and "auto" not in arg_map["model"].lower()
+                ):
+                    arg_map["model"] = "Auto" + arg_map["model"]
+
+                try:
+                    model_here = model_dict[arg_map["model"]]
+                except Exception:
+                    err_msg = "Supported models: " + str(model_dict.keys())
+                    logger.error(err_msg)
+                    raise FunctionIODefinitionError(err_msg)
+                model_args = {}
+
                 if "auto" not in arg_map["model"].lower():
-                    model_args["hist_exog_list"] = exogenous_columns
+                    model_args["input_size"] = 2 * horizon
+                    model_args["early_stop_patience_steps"] = 20
                 else:
-                    model_args_config["hist_exog_list"] = exogenous_columns
+                    model_args_config = {
+                        "input_size": 2 * horizon,
+                        "early_stop_patience_steps": 20,
+                    }
 
-                    def get_optuna_config(trial):
-                        return model_args_config
+                if len(data.columns) >= 4:
+                    exogenous_columns = [
+                        x
+                        for x in list(data.columns)
+                        if x not in ["ds", "y", "unique_id"]
+                    ]
+                    if "auto" not in arg_map["model"].lower():
+                        model_args["hist_exog_list"] = exogenous_columns
+                    else:
+                        model_args_config["hist_exog_list"] = exogenous_columns
 
-                    model_args["config"] = get_optuna_config
-                    model_args["backend"] = "optuna"
+                        def get_optuna_config(trial):
+                            return model_args_config
 
-            model_args["h"] = horizon
+                        model_args["config"] = get_optuna_config
+                        model_args["backend"] = "optuna"
 
-            model = NeuralForecast(
-                [model_here(**model_args)],
-                freq=new_freq,
-            )
+                model_args["h"] = horizon
 
-        # """
-        #     Statsforecast implementation
-        # """
-        else:
-            if "auto" in arg_map.keys() and arg_map["auto"].lower()[0] != "t":
-                raise RuntimeError(
-                    "Statsforecast implementation only supports automatic hyperparameter optimization. Please set AUTO to true."
+                model = NeuralForecast(
+                    [model_here(**model_args)],
+                    freq=new_freq,
                 )
-            try_to_import_statsforecast()
-            from statsforecast import StatsForecast
-            from statsforecast.models import AutoARIMA, AutoCES, AutoETS, AutoTheta
 
-            model_dict = {
-                "AutoARIMA": AutoARIMA,
-                "AutoCES": AutoCES,
-                "AutoETS": AutoETS,
-                "AutoTheta": AutoTheta,
-            }
-
-            if "model" not in arg_map.keys():
-                arg_map["model"] = "ARIMA"
-
-            if "auto" not in arg_map["model"].lower():
-                arg_map["model"] = "Auto" + arg_map["model"]
-
-            try:
-                model_here = model_dict[arg_map["model"]]
-            except Exception:
-                err_msg = "Supported models: " + str(model_dict.keys())
-                logger.error(err_msg)
-                raise FunctionIODefinitionError(err_msg)
-
-            model = StatsForecast(
-                [model_here(season_length=season_length)], freq=new_freq
-            )
-
-        data["ds"] = pd.to_datetime(data["ds"])
-
-        model_save_dir_name = library + "_" + arg_map["model"] + "_" + new_freq
-        if len(data.columns) >= 4 and library == "neuralforecast":
-            model_save_dir_name += "_exogenous_" + str(sorted(exogenous_columns))
-
-        model_dir = os.path.join(
-            self.db.config.get_value("storage", "model_dir"),
-            "tsforecasting",
-            model_save_dir_name,
-            str(hashlib.sha256(data.to_string().encode()).hexdigest()),
-        )
-        Path(model_dir).mkdir(parents=True, exist_ok=True)
-
-        model_save_name = "horizon" + str(horizon) + ".pkl"
-
-        model_path = os.path.join(model_dir, model_save_name)
-
-        existing_model_files = sorted(
-            os.listdir(model_dir),
-            key=lambda x: int(x.split("horizon")[1].split(".pkl")[0]),
-        )
-        existing_model_files = [
-            x
-            for x in existing_model_files
-            if int(x.split("horizon")[1].split(".pkl")[0]) >= horizon
-        ]
-        if len(existing_model_files) == 0:
-            logger.info("Training, please wait...")
-            for column in data.columns:
-                if column != "ds" and column != "unique_id":
-                    data[column] = data.apply(
-                        lambda x: self.convert_to_numeric(x[column]), axis=1
-                    )
-            if library == "neuralforecast":
-                model.fit(df=data, val_size=horizon)
-                model.save(model_path, overwrite=True)
+            # """
+            #     Statsforecast implementation
+            # """
             else:
-                # The following lines of code helps eliminate the math error encountered in statsforecast when only one datapoint is available in a time series
-                for col in data["unique_id"].unique():
-                    if len(data[data["unique_id"] == col]) == 1:
-                        data = data._append(
-                            [data[data["unique_id"] == col]], ignore_index=True
+                if "auto" in arg_map.keys() and arg_map["auto"].lower()[0] != "t":
+                    raise RuntimeError(
+                        "Statsforecast implementation only supports automatic hyperparameter optimization. Please set AUTO to true."
+                    )
+                try_to_import_statsforecast()
+                from statsforecast import StatsForecast
+                from statsforecast.models import AutoARIMA, AutoCES, AutoETS, AutoTheta
+
+                model_dict = {
+                    "AutoARIMA": AutoARIMA,
+                    "AutoCES": AutoCES,
+                    "AutoETS": AutoETS,
+                    "AutoTheta": AutoTheta,
+                }
+
+                if "model" not in arg_map.keys():
+                    arg_map["model"] = "ARIMA"
+
+                if "auto" not in arg_map["model"].lower():
+                    arg_map["model"] = "Auto" + arg_map["model"]
+
+                try:
+                    model_here = model_dict[arg_map["model"]]
+                except Exception:
+                    err_msg = "Supported models: " + str(model_dict.keys())
+                    logger.error(err_msg)
+                    raise FunctionIODefinitionError(err_msg)
+
+                model = StatsForecast(
+                    [model_here(season_length=season_length)], freq=new_freq
+                )
+
+            data["ds"] = pd.to_datetime(data["ds"])
+
+            model_save_dir_name = library + "_" + arg_map["model"] + "_" + new_freq
+            if len(data.columns) >= 4 and library == "neuralforecast":
+                model_save_dir_name += "_exogenous_" + str(sorted(exogenous_columns))
+
+            model_dir = os.path.join(
+                self.db.config.get_value("storage", "model_dir"),
+                "tsforecasting",
+                model_save_dir_name,
+                str(hashlib.sha256(data.to_string().encode()).hexdigest()),
+            )
+            Path(model_dir).mkdir(parents=True, exist_ok=True)
+
+            model_save_name = "horizon" + str(horizon) + ".pkl"
+
+            model_path = os.path.join(model_dir, model_save_name)
+
+            existing_model_files = sorted(
+                os.listdir(model_dir),
+                key=lambda x: int(x.split("horizon")[1].split(".pkl")[0]),
+            )
+            existing_model_files = [
+                x
+                for x in existing_model_files
+                if int(x.split("horizon")[1].split(".pkl")[0]) >= horizon
+            ]
+            if len(existing_model_files) == 0:
+                logger.info("Training, please wait...")
+                for column in data.columns:
+                    if column != "ds" and column != "unique_id":
+                        data[column] = data.apply(
+                            lambda x: self.convert_to_numeric(x[column]), axis=1
                         )
+                if library == "neuralforecast":
+                    model.fit(df=data, val_size=horizon)
+                    model.save(model_path, overwrite=True)
+                else:
+                    # The following lines of code helps eliminate the math error encountered in statsforecast when only one datapoint is available in a time series
+                    for col in data["unique_id"].unique():
+                        if len(data[data["unique_id"] == col]) == 1:
+                            data = data._append(
+                                [data[data["unique_id"] == col]], ignore_index=True
+                            )
 
-                model.fit(df=data[["ds", "y", "unique_id"]])
-                f = open(model_path, "wb")
-                pickle.dump(model, f)
-                f.close()
-        elif not Path(model_path).exists():
-            model_path = os.path.join(model_dir, existing_model_files[-1])
+                    model.fit(df=data[["ds", "y", "unique_id"]])
+                    f = open(model_path, "wb")
+                    pickle.dump(model, f)
+                    f.close()
+            elif not Path(model_path).exists():
+                model_path = os.path.join(model_dir, existing_model_files[-1])
 
-        io_list = self._resolve_function_io(None)
+            io_list = self._resolve_function_io(None)
 
-        metadata_here = [
-            FunctionMetadataCatalogEntry("model_name", arg_map["model"]),
-            FunctionMetadataCatalogEntry("model_path", model_path),
-            FunctionMetadataCatalogEntry(
-                "predict_column_rename", arg_map.get("predict", "y")
-            ),
-            FunctionMetadataCatalogEntry(
-                "time_column_rename", arg_map.get("time", "ds")
-            ),
-            FunctionMetadataCatalogEntry(
-                "id_column_rename", arg_map.get("id", "unique_id")
-            ),
-            FunctionMetadataCatalogEntry("horizon", horizon),
-            FunctionMetadataCatalogEntry("library", library),
-        ]
+            metadata_here = [
+                FunctionMetadataCatalogEntry("model_name", arg_map["model"]),
+                FunctionMetadataCatalogEntry("model_path", model_path),
+                FunctionMetadataCatalogEntry(
+                    "predict_column_rename", arg_map.get("predict", "y")
+                ),
+                FunctionMetadataCatalogEntry(
+                    "time_column_rename", arg_map.get("time", "ds")
+                ),
+                FunctionMetadataCatalogEntry(
+                    "id_column_rename", arg_map.get("id", "unique_id")
+                ),
+                FunctionMetadataCatalogEntry("horizon", horizon),
+                FunctionMetadataCatalogEntry("library", library),
+            ]
 
-        if save_old_cuda_env is not None:
-            os.environ["CUDA_VISIBLE_DEVICES"] = save_old_cuda_env
-        else:
-            os.environ.pop("CUDA_VISIBLE_DEVICES", None)
-
-        return (
-            self.node.name,
-            impl_path,
-            self.node.function_type,
-            io_list,
-            metadata_here,
-        )
+            return (
+                self.node.name,
+                impl_path,
+                self.node.function_type,
+                io_list,
+                metadata_here,
+            )
 
     def handle_generic_function(self):
         """Handle generic functions
