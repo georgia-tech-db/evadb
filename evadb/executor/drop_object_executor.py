@@ -118,7 +118,9 @@ class DropObjectExecutor(AbstractExecutor):
             index = VectorStoreFactory.init_vector_store(
                 index_obj.type,
                 index_obj.name,
-                **handle_vector_store_params(index_obj.type, index_obj.save_file_path),
+                **handle_vector_store_params(
+                    index_obj.type, index_obj.save_file_path, self.catalog
+                ),
             )
             assert (
                 index is not None

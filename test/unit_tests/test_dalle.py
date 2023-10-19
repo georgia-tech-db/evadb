@@ -41,7 +41,7 @@ class DallEFunctionTest(unittest.TestCase):
     def tearDown(self) -> None:
         execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS ImageGen;")
 
-    @patch.dict("os.environ", {"OPENAI_KEY": "mocked_openai_key"})
+    @patch.dict("os.environ", {"OPENAI_API_KEY": "mocked_openai_key"})
     @patch("requests.get")
     @patch("openai.Image.create", return_value={"data": [{"url": "mocked_url"}]})
     def test_dalle_image_generation(self, mock_openai_create, mock_requests_get):

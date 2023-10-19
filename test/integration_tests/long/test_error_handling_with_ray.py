@@ -32,7 +32,9 @@ from evadb.server.command_handler import execute_query_fetch_all
 class ErrorHandlingRayTests(unittest.TestCase):
     def setUp(self):
         self.evadb = get_evadb_for_testing()
-        os.environ["ray"] = str(self.evadb.config.get_value("experimental", "ray"))
+        os.environ["ray"] = str(
+            self.evadb.catalog().get_configuration_catalog_value("ray")
+        )
         self.evadb.catalog().reset()
         # Load built-in Functions.
         load_functions_for_testing(self.evadb, mode="debug")
