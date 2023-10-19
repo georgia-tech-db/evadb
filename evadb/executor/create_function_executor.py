@@ -30,6 +30,7 @@ from evadb.catalog.models.function_metadata_catalog import FunctionMetadataCatal
 from evadb.configuration.constants import (
     DEFAULT_TRAIN_REGRESSION_METRIC,
     DEFAULT_TRAIN_TIME_LIMIT,
+    DEFAULT_XGBOOST_TASK,
     EvaDB_INSTALLATION_DIR,
 )
 from evadb.database import EvaDBDatabase
@@ -238,7 +239,7 @@ class CreateFunctionExecutor(AbstractExecutor):
             "time_budget": arg_map.get("time_limit", DEFAULT_TRAIN_TIME_LIMIT),
             "metric": arg_map.get("metric", DEFAULT_TRAIN_REGRESSION_METRIC),
             "estimator_list": ["xgboost"],
-            "task": "regression",
+            "task": arg_map.get("task", DEFAULT_XGBOOST_TASK),
         }
         model.fit(
             dataframe=aggregated_batch.frames, label=arg_map["predict"], **settings

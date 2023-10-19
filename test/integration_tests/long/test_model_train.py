@@ -47,6 +47,25 @@ class ModelTrainTests(unittest.TestCase):
         load_query = f"LOAD CSV '{path}' INTO HomeRentals;"
         execute_query_fetch_all(cls.evadb, load_query)
 
+        # Load data for classification tasks.
+        create_table_query = """
+           CREATE TABLE IF NOT EXISTS Employee (
+               education TEXT(128),
+               joining_year INTEGER,
+               city TEXT(128),
+               payment_tier INTEGER,
+               age INTEGER,
+               gender TEXT(128),
+               ever_benched TEXT(128),
+               experience_in_current_domain INTEGER,
+               leave_or_not INTEGER
+           );"""
+        execute_query_fetch_all(cls.evadb, create_table_query)
+
+        path = f"{EvaDB_ROOT_DIR}/data/classification/Employee.csv"
+        load_query = f"LOAD CSV '{path}' INTO Employee;"
+        execute_query_fetch_all(cls.evadb, load_query)
+
     @classmethod
     def tearDownClass(cls):
         shutdown_ray()
@@ -103,7 +122,8 @@ class ModelTrainTests(unittest.TestCase):
             TYPE XGBoost
             PREDICT 'rental_price'
             TIME_LIMIT 180
-            METRIC 'r2';
+            METRIC 'r2'
+            TASK 'regression';
         """
         execute_query_fetch_all(self.evadb, create_predict_function)
 
@@ -111,6 +131,27 @@ class ModelTrainTests(unittest.TestCase):
             SELECT PredictRent(number_of_rooms, number_of_bathrooms, days_on_market, rental_price) FROM HomeRentals LIMIT 10;
         """
         result = execute_query_fetch_all(self.evadb, predict_query)
+        self.assertEqual(len(result.columns), 1)
+        self.assertEqual(len(result), 10)
+
+    @xgboost_skip_marker
+    def test_xgboost_classification(self):
+        create_predict_function = """
+            CREATE FUNCTION IF NOT EXISTS PredictEmployee FROM
+            ( SELECT payment_tier, age, gender, experience_in_current_domain, leave_or_not FROM Employee )
+            TYPE XGBoost
+            PREDICT 'leave_or_not'
+            TIME_LIMIT 180
+            METRIC 'accuracy'
+            TASK 'classification';
+        """
+        execute_query_fetch_all(self.evadb, create_predict_function)
+
+        predict_query = """
+            SELECT PredictEmployee(payment_tier, age, gender, experience_in_current_domain, leave_or_not) FROM Employee LIMIT 10;
+        """
+        result = execute_query_fetch_all(self.evadb, predict_query)
+        print(result)
         self.assertEqual(len(result.columns), 1)
         self.assertEqual(len(result), 10)
 
