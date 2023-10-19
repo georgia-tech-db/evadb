@@ -287,7 +287,7 @@ class OptimizeInputs(OptimizerTask):
         super().__init__(optimizer_context, OptimizerTaskType.OPTIMIZE_INPUTS)
 
     def execute(self):
-        cost = 0
+        cost = self.optimizer_context.cost_model.zero_cost
         memo = self.optimizer_context.memo
         grp = memo.get_group_by_id(self.root_expr.group_id)
         for child_id in self.root_expr.children:

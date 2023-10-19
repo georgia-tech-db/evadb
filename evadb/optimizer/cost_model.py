@@ -31,11 +31,17 @@ class CostEntry:
     amortize_factor: float = 1.0
 
     def __gt__(self, other):
-        return self.plan_cost * self.amortize_factor > other.plan_cost * other.amortize_factor
+        return (
+            self.plan_cost * self.amortize_factor
+            > other.plan_cost * other.amortize_factor
+        )
 
     def __add__(self, other):
-        return CostEntry(plan_cost = self.plan_cost + other.plan_cost,
-                amortize_factor = self.amortize_factor * other.amortize_factor)
+        return CostEntry(
+            plan_cost=self.plan_cost + other.plan_cost,
+            amortize_factor=self.amortize_factor * other.amortize_factor,
+        )
+
 
 class CostModel:
     """
@@ -44,6 +50,10 @@ class CostModel:
 
     def __init__(self):
         pass
+
+    @property
+    def zero_cost(self) -> CostEntry:
+        return CostEntry(plan_cost=0)
 
     def calculate_cost(self, gexpr: GroupExpression) -> CostEntry:
         """
