@@ -69,7 +69,7 @@ class StableDiffusion(AbstractFunction):
             "third_party", "REPLICATE_API_TOKEN"
         )
         # If not found, try OS Environment Variable
-        if len(replicate_api_key) == 0:
+        if replicate_api_key is None:
             replicate_api_key = os.environ.get("REPLICATE_API_TOKEN", "")
         assert (
             len(replicate_api_key) != 0
