@@ -41,7 +41,7 @@ Create Connection
 
 .. warning::
 
-    In Snowflake Terminology, ``Database`` and ``Schema`` refer to the following.
-    A database is a logical grouping of schemas. Each database belongs to a single Snowflake account.
-    A schema is a logical grouping of database objects (tables, views, etc.). Each schema belongs to a single database.
+    | In Snowflake Terminology, ``Database`` and ``Schema`` refer to the following.
+    | A database is a logical grouping of schemas. Each database belongs to a single Snowflake account.
+    | A schema is a logical grouping of database objects (tables, views, etc.). Each schema belongs to a single database.
 
