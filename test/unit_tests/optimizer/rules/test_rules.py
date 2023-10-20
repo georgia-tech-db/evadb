@@ -168,8 +168,8 @@ class RulesTest(unittest.TestCase):
             XformExtractObjectToLinearFlow(),
         ]
         rewrite_rules = (
-            RulesManager(self.evadb.config).stage_one_rewrite_rules
-            + RulesManager(self.evadb.config).stage_two_rewrite_rules
+            RulesManager().stage_one_rewrite_rules
+            + RulesManager().stage_two_rewrite_rules
         )
         self.assertEqual(
             len(supported_rewrite_rules),
@@ -187,18 +187,15 @@ class RulesTest(unittest.TestCase):
         ]
         self.assertEqual(
             len(supported_logical_rules),
-            len(RulesManager(self.evadb.config).logical_rules),
+            len(RulesManager().logical_rules),
         )
 
         for rule in supported_logical_rules:
             self.assertTrue(
-                any(
-                    isinstance(rule, type(x))
-                    for x in RulesManager(self.evadb.config).logical_rules
-                )
+                any(isinstance(rule, type(x)) for x in RulesManager().logical_rules)
             )
 
-        ray_enabled = self.evadb.config.get_value("experimental", "ray")
+        ray_enabled = self.evadb.catalog().get_configuration_catalog_value("ray")
         ray_enabled_and_installed = is_ray_enabled_and_installed(ray_enabled)
 
         # For the current version, we choose either the distributed or the
@@ -244,14 +241,14 @@ class RulesTest(unittest.TestCase):
             supported_implementation_rules.append(LogicalExchangeToPhysical())
         self.assertEqual(
             len(supported_implementation_rules),
-            len(RulesManager(self.evadb.config).implementation_rules),
+            len(RulesManager().implementation_rules),
         )
 
         for rule in supported_implementation_rules:
             self.assertTrue(
                 any(
                     isinstance(rule, type(x))
-                    for x in RulesManager(self.evadb.config).implementation_rules
+                    for x in RulesManager().implementation_rules
                 )
             )
 
@@ -280,7 +277,7 @@ class RulesTest(unittest.TestCase):
         self.assertFalse(rule.check(logi_sample, MagicMock()))
 
     def test_disable_rules(self):
-        rules_manager = RulesManager(self.evadb.config)
+        rules_manager = RulesManager()
         with disable_rules(rules_manager, [PushDownFilterThroughApplyAndMerge()]):
             self.assertFalse(
                 any(

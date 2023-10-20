@@ -31,7 +31,6 @@ from evadb.executor.groupby_executor import GroupByExecutor
 from evadb.executor.hash_join_executor import HashJoinExecutor
 from evadb.executor.insert_executor import InsertExecutor
 from evadb.executor.join_build_executor import BuildJoinExecutor
-from evadb.executor.lateral_join_executor import LateralJoinExecutor
 from evadb.executor.limit_executor import LimitExecutor
 from evadb.executor.load_executor import LoadDataExecutor
 from evadb.executor.nested_loop_join_executor import NestedLoopJoinExecutor
@@ -128,12 +127,6 @@ class PlanExecutor:
             executor_node = SampleExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.NESTED_LOOP_JOIN:
             executor_node = NestedLoopJoinExecutor(db=self._db, node=plan)
-        elif plan_opr_type == PlanOprType.LATERAL_JOIN:
-            logger.warn(
-                "LateralJoin Executor should not be part of the execution plan."
-                "Please raise an issue with the current query. Thanks!"
-            )
-            executor_node = LateralJoinExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.HASH_JOIN:
             executor_node = HashJoinExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.HASH_BUILD:

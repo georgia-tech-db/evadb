@@ -38,11 +38,17 @@ class ForecastModel(AbstractFunction):
         horizon: int,
         library: str,
     ):
-        f = open(model_path, "rb")
-        loaded_model = pickle.load(f)
-        f.close()
+        self.library = library
+        if "neuralforecast" in self.library:
+            from neuralforecast import NeuralForecast
+
+            loaded_model = NeuralForecast.load(path=model_path)
+            self.model_name = model_name[4:] if "Auto" in model_name else model_name
+        else:
+            with open(model_path, "rb") as f:
+                loaded_model = pickle.load(f)
+            self.model_name = model_name
         self.model = loaded_model
-        self.model_name = model_name
         self.predict_column_rename = predict_column_rename
         self.time_column_rename = time_column_rename
         self.id_column_rename = id_column_rename

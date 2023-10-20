@@ -25,7 +25,7 @@ Simply point ``master`` head to the latest commit of ``staging``.
 Setup Credentials
 ~~~~~~~~~~~~~~~~~~
 
-Please check :ref:`setup_pypi_account` about how to setup PyPi account.
+Please check :ref:`setup_pypi_account` about how to setup PyPI account.
 
 Setup Github token. You can obtain a personal token from Github.
 

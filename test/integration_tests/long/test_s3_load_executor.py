@@ -41,7 +41,9 @@ class S3LoadExecutorTest(unittest.TestCase):
         self.evadb.catalog().reset()
         self.video_file_path = create_sample_video()
         self.multiple_video_file_path = f"{EvaDB_ROOT_DIR}/data/sample_videos/1"
-        self.s3_download_dir = self.evadb.config.get_value("storage", "s3_download_dir")
+        self.s3_download_dir = self.evadb.catalog().get_configuration_catalog_value(
+            "s3_download_dir"
+        )
 
         """Mocked AWS Credentials for moto."""
         os.environ["AWS_ACCESS_KEY_ID"] = "testing"

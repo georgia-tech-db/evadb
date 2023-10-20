@@ -77,7 +77,7 @@ class ReuseTest(unittest.TestCase):
         # surfaces when the system is running on low memory. Explicitly calling garbage
         # collection to reduce the memory usage.
         gc.collect()
-        rules_manager = RulesManager(self.evadb.config)
+        rules_manager = RulesManager()
         with disable_rules(
             rules_manager,
             [
@@ -91,6 +91,9 @@ class ReuseTest(unittest.TestCase):
                 self.evadb, query, plan_generator=custom_plan_generator
             )
 
+        self.assertEqual(reuse_batch.columns, reuse_batch.columns)
+        reuse_batch.sort_orderby(by=[reuse_batch.columns[0]])
+        without_reuse_batch.sort_orderby(by=[reuse_batch.columns[0]])
         # printing the batches so that we can see the mismatch in the logs
         self.assertEqual(
             without_reuse_batch,

@@ -49,7 +49,7 @@ class EvaServer:
         self._server = await asyncio.start_server(self.accept_client, host, port)
 
         # load built-in functions
-        mode = self._evadb.config.get_value("core", "mode")
+        mode = self._evadb.catalog().get_configuration_catalog_value("mode")
         init_builtin_functions(self._evadb, mode=mode)
 
         async with self._server:

@@ -93,10 +93,10 @@ def receive_user_input() -> Dict:
 
     # get OpenAI key if needed
     try:
-        api_key = os.environ["OPENAI_KEY"]
+        api_key = os.environ["OPENAI_API_KEY"]
     except KeyError:
         api_key = str(input("🔑 Enter your OpenAI key: "))
-        os.environ["OPENAI_KEY"] = api_key
+        os.environ["OPENAI_API_KEY"] = api_key
 
     return user_input
 

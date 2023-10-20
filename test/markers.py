@@ -25,7 +25,9 @@ from evadb.utils.generic_utils import (
     is_ludwig_available,
     is_pinecone_available,
     is_qdrant_available,
+    is_replicate_available,
     is_sklearn_available,
+    is_xgboost_available,
 )
 
 asyncio_skip_marker = pytest.mark.skipif(
@@ -88,6 +90,10 @@ sklearn_skip_marker = pytest.mark.skipif(
     is_sklearn_available() is False, reason="Run only if sklearn is available"
 )
 
+xgboost_skip_marker = pytest.mark.skipif(
+    is_xgboost_available() is False, reason="Run only if xgboost is available"
+)
+
 chatgpt_skip_marker = pytest.mark.skip(
     reason="requires chatgpt",
 )
@@ -95,4 +101,8 @@ chatgpt_skip_marker = pytest.mark.skip(
 forecast_skip_marker = pytest.mark.skipif(
     is_forecast_available() is False,
     reason="Run only if forecasting packages available",
+)
+
+stable_diffusion_skip_marker = pytest.mark.skipif(
+    is_replicate_available() is False, reason="requires replicate"
 )

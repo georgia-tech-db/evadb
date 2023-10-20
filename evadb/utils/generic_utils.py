@@ -377,6 +377,25 @@ def is_sklearn_available() -> bool:
         return False
 
 
+def try_to_import_xgboost():
+    try:
+        import flaml  # noqa: F401
+        from flaml import AutoML  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import Flaml AutoML.
+                Please install it with `pip install "flaml[automl]"`."""
+        )
+
+
+def is_xgboost_available() -> bool:
+    try:
+        try_to_import_xgboost()
+        return True
+    except ValueError:  # noqa: E722
+        return False
+
+
 ##############################
 ## VISION
 ##############################
@@ -629,3 +648,21 @@ def string_comparison_case_insensitive(string_1, string_2) -> bool:
         return False
 
     return string_1.lower() == string_2.lower()
+
+
+def try_to_import_replicate():
+    try:
+        import replicate  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import replicate python package.
+                Please install it with `pip install replicate`."""
+        )
+
+
+def is_replicate_available():
+    try:
+        try_to_import_replicate()
+        return True
+    except ValueError:
+        return False
