@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import datetime
 import shutil
 from pathlib import Path
 from typing import Any, List
@@ -39,6 +40,7 @@ from evadb.catalog.models.utils import (
     FunctionIOCatalogEntry,
     FunctionMetadataCatalogEntry,
     IndexCatalogEntry,
+    JobCatalogEntry,
     TableCatalogEntry,
     drop_all_tables_except_catalog,
     init_db,
@@ -61,6 +63,7 @@ from evadb.catalog.services.function_metadata_catalog_service import (
     FunctionMetadataCatalogService,
 )
 from evadb.catalog.services.index_catalog_service import IndexCatalogService
+from evadb.catalog.services.job_catalog_service import JobCatalogService
 from evadb.catalog.services.table_catalog_service import TableCatalogService
 from evadb.catalog.sql_config import IDENTIFIER_COLUMN, SQLConfig
 from evadb.expression.function_expression import FunctionExpression
@@ -85,6 +88,7 @@ class CatalogManager(object):
         self._config_catalog_service = ConfigurationCatalogService(
             self._sql_config.session
         )
+        self._job_catalog_service = JobCatalogService(self._sql_config.session)
         self._table_catalog_service = TableCatalogService(self._sql_config.session)
         self._column_service = ColumnCatalogService(self._sql_config.session)
         self._function_service = FunctionCatalogService(self._sql_config.session)
@@ -214,6 +218,71 @@ class CatalogManager(object):
                 return False
 
         return True
+
+
+    "Job catalog services"
+
+    def insert_job_catalog_entry(
+        self,
+        name: str,
+        queries: str,
+        start_time: datetime,
+        end_time: datetime,
+        repeat_interval: int,
+        repeat_period: str,
+        active: bool,
+        next_schedule_run: datetime
+    ) -> JobCatalogEntry:
+        """A new entry is persisted in the job catalog."
+
+        Args:
+            name: job name
+            queries: job's queries
+            start_time: job start time
+            end_time: job end time
+            repeat_interval: job repeat interval
+            repeat_period: job repeat period
+            active: job status
+            next_schedule_run: next run time as per schedule
+        """
+        job_entry = self._job_catalog_service.insert_entry(
+            name,
+            queries,
+            start_time,
+            end_time,
+            repeat_interval,
+            repeat_period,
+            active,
+            next_schedule_run
+        )
+
+        return job_entry
+
+    def get_job_catalog_entry(self, job_name: str) -> JobCatalogEntry:
+        """
+        Returns the job catalog entry for the given database_name
+        Arguments:
+            job_name (str): name of the job
+
+        Returns:
+            JobCatalogEntry
+        """
+
+        table_entry = self._job_catalog_service.get_entry_by_name(job_name)
+
+        return table_entry
+
+    def drop_job_catalog_entry(self, job_entry: JobCatalogEntry) -> bool:
+        """
+        This method deletes the job from  catalog.
+
+        Arguments:
+           job_entry: job catalog entry to remove
+
+        Returns:
+           True if successfully deleted else False
+        """
+        return self._job_catalog_service.delete_entry(job_entry)
 
     "Table catalog services"
 

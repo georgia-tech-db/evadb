@@ -245,3 +245,47 @@ class DropObjectExecutorTest(unittest.TestCase):
         result = execute_query_fetch_all(
             self.evadb, f"DROP DATABASE IF EXISTS {database_name}"
         )
+
+    def test_should_drop_job(self):
+        # Create database.
+        job_name = "test_async_job"
+
+        query = f"""CREATE JOB {job_name} AS (
+            SELECT * from job_catalog;
+        )
+        START '2023-04-01'
+        END '2023-05-01'
+        EVERY 2 week;"""
+
+        execute_query_fetch_all(self.evadb, query)
+        self.assertIsNotNone(
+            self.evadb.catalog().get_job_catalog_entry(job_name)
+        )
+
+        # DROP JOB
+        execute_query_fetch_all(self.evadb, f"DROP JOB {job_name}")
+        self.assertIsNone(
+            self.evadb.catalog().get_job_catalog_entry(job_name)
+        )
+
+        # DROP should pass with warning
+        result = execute_query_fetch_all(
+            self.evadb, f"DROP JOB IF EXISTS {job_name}"
+        )
+        self.assertTrue("does not exist" in result.frames.to_string())
+
+        # DROP should throw error
+        with self.assertRaises(ExecutorError):
+            execute_query_fetch_all(
+                self.evadb,
+                f"DROP JOB {job_name}",
+                do_not_print_exceptions=True,
+            )
+
+        # We should be able to add the database again
+        execute_query_fetch_all(self.evadb, query)
+
+        # clean up
+        result = execute_query_fetch_all(
+            self.evadb, f"DROP JOB IF EXISTS {job_name}"
+        )

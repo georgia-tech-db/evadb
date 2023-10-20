@@ -233,6 +233,7 @@ class CreateDatabaseStatement(AbstractStatement):
 class CreateJobStatement(AbstractStatement):
     job_name: str
     queries: list
+    if_not_exists: bool
     start_time: Optional[str] = None
     end_time: Optional[str] = None
     repeat_interval: Optional[int] = None

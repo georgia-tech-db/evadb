@@ -10,7 +10,8 @@ sql_statement: ddl_statement | dml_statement | utility_statement | context_state
 
 sql_statements: sql_statement (";" sql_statement)* ";"?
 
-ddl_statement: create_database | create_table | create_index | create_function |  drop_database | drop_table | drop_function | drop_index | rename_table
+ddl_statement: create_database | create_table | create_index | create_function |  drop_database
+    | drop_table | drop_function | drop_index | drop_job | rename_table
     
 dml_statement: select_statement | insert_statement | update_statement
     | delete_statement | load_statement | set_statement
@@ -36,13 +37,13 @@ create_index: CREATE INDEX if_not_exists? uid ON table_name index_elem vector_st
 
 create_table: CREATE TABLE if_not_exists? table_name (create_definitions | (AS select_statement))
 
-create_job: CREATE JOB uid AS "(" sql_statements ")" (start_time)? (end_time)? (repeat_clause)?
+create_job: CREATE JOB if_not_exists? uid AS "(" sql_statements ")" (start_time)? (end_time)? (repeat_clause)?
 
 start_time: START string_literal
 
 end_time: END string_literal
 
-repeat_clause: EVERY decimal_literal TIME_PERIOD
+repeat_clause: EVERY decimal_literal simple_id
 
 
 
@@ -95,6 +96,8 @@ drop_index: DROP INDEX if_exists? uid
 drop_table: DROP TABLE if_exists? uid
     
 drop_function: DROP FUNCTION if_exists? uid
+
+drop_job: DROP JOB if_exists? uid
     
 // SET statements (configuration)
 set_statement: SET config_name (EQUAL_SYMBOL | TO) config_value
@@ -587,9 +590,6 @@ REAL_LITERAL:                        (DEC_DIGIT+)? "." DEC_DIGIT+
 
 DOT_ID:                              "." ID_LITERAL
 
-
-// Time Period
-TIME_PERIOD:                        ("minute" | "minutes" | "min" | "hour" | "hours" | "day" | "days" | "week" | "weeks" | "month" | "months")
 
 // Identifiers
 

@@ -1198,4 +1198,4 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(job_stmt.start_time, "2023-04-01")
         self.assertEqual(job_stmt.end_time, "2023-05-01")
         self.assertEqual(job_stmt.repeat_interval, 2)
-        self.assertEqual(job_stmt.repeat_period, "h")
+        self.assertEqual(job_stmt.repeat_period, "hour")

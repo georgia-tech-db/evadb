@@ -347,9 +347,12 @@ class CreateJob:
         end_time = None
         repeat_interval = None
         repeat_period = None
+        if_not_exists = False
         for child in tree.children:
             
             if isinstance(child, Tree):
+                if child.data == "if_not_exists":
+                    if_not_exists = True
                 if child.data == "uid":
                     job_name = self.visit(child)
                 if child.data == "sql_statements":
@@ -362,7 +365,7 @@ class CreateJob:
                     repeat_interval, repeat_period = self.visit(child)
 
         create_job = CreateJobStatement(
-            job_name, queries, start_time, end_time, repeat_interval, repeat_period
+            job_name, queries, if_not_exists, start_time, end_time, repeat_interval, repeat_period
         )
 
         return create_job
@@ -374,7 +377,4 @@ class CreateJob:
         return self.visit(tree.children[1]).value
 
     def repeat_clause(self, tree):
-        print(tree)
-        # print(dir(tree.children[2]))
-        # return self.visit(tree.children[1]), None
-        return 1,2
+        return self.visit(tree.children[1]), self.visit(tree.children[2])
