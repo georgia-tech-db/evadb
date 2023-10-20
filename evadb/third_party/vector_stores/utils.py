@@ -41,6 +41,7 @@ class VectorStoreFactory:
             from evadb.third_party.vector_stores.pinecone import required_params
 
             validate_kwargs(kwargs, required_params, required_params)
+
             return PineconeVectorStore(index_name, **kwargs)
 
         elif vector_store_type == VectorStoreType.CHROMADB:

@@ -42,7 +42,8 @@ class ShowStatement(AbstractStatement):
             show_str = "TABLES"
         elif self.show_type == ShowType.CONFIG:
             show_str = self.show_val
-
+        elif self.show_type == ShowType.DATABASES:
+            show_str = "DATABASES"
         return f"SHOW {show_str}"
 
     def __eq__(self, other: object) -> bool:

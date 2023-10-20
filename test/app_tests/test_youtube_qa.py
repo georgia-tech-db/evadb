@@ -25,7 +25,9 @@ class YoutubeQATest(unittest.TestCase):
     def setUpClass(cls):
         cls.evadb = get_evadb_for_testing()
         cls.evadb.catalog().reset()
-        os.environ["ray"] = str(cls.evadb.config.get_value("experimental", "ray"))
+        os.environ["ray"] = str(
+            cls.evadb.catalog().get_configuration_catalog_value("ray")
+        )
 
     @classmethod
     def tearDownClass(cls):
@@ -41,7 +43,7 @@ class YoutubeQATest(unittest.TestCase):
     def test_should_run_youtube_qa_app(self):
         app_path = Path("apps", "youtube_qa", "youtube_qa.py")
         input1 = "yes\n\n"  # Go with online video and default URL
-        # Assuming that OPENAI_KEY is already set as an environment variable
+        # Assuming that OPENAI_API_KEY is already set as an environment variable
         input2 = "What is this video on?\n"  # Question
         input3 = "exit\nexit\n"  # Exit
         inputs = input1 + input2 + input3

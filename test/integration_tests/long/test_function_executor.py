@@ -199,8 +199,11 @@ class FunctionExecutorTest(unittest.TestCase):
                   OUTPUT (label NDARRAY STR(10))
                   TYPE  Classification
                   IMPL  'test/util.py'
-                  CACHE 'TRUE'
-                  BATCH 'FALSE';
+                  CACHE TRUE
+                  BATCH FALSE
+                  INT_VAL 1
+                  FLOAT_VAL 1.5
+                  STR_VAL "gg";
         """
         execute_query_fetch_all(self.evadb, create_function_query.format(function_name))
 
@@ -208,11 +211,17 @@ class FunctionExecutorTest(unittest.TestCase):
         entries = self.evadb.catalog().get_function_metadata_entries_by_function_name(
             function_name
         )
-        self.assertEqual(len(entries), 2)
+        self.assertEqual(len(entries), 5)
         metadata = [(entry.key, entry.value) for entry in entries]
 
         # metadata ultimately stored as lowercase string literals in metadata
-        expected_metadata = [("cache", "TRUE"), ("batch", "FALSE")]
+        expected_metadata = [
+            ("cache", True),
+            ("batch", False),
+            ("int_val", 1),
+            ("float_val", 1.5),
+            ("str_val", "gg"),
+        ]
         self.assertEqual(set(metadata), set(expected_metadata))
 
     def test_should_return_empty_metadata_list_for_missing_function(self):

@@ -62,7 +62,7 @@ class FunctionCostCatalogService(BaseService):
                 select(self.model).filter(self.model._function_id == function_id)
             ).scalar_one_or_none()
             if function_obj:
-                function_obj.update(self.session, cost=new_cost)
+                function_obj.update(self.session, _cost=new_cost)
             else:
                 self.insert_entry(function_id, name, new_cost)
         except Exception as e:

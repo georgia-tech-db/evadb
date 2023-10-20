@@ -44,7 +44,7 @@ The abstract method `setup` must be implemented in your function. The setup func
 Any additional arguments needed for creating the function must be passed as arguments to the setup function. (Please refer to the 
 `ChatGPT <https://github.com/georgia-tech-db/evadb/blob/master/evadb/functions/chatgpt.py>`__ function example).
 
-The additional arguments are passed with the CREATE command. Please refer to `CREATE <https://evadb.readthedocs.io/en/stable/source/reference/evaql/create.html#create-function>`_ command documentation.
+The additional arguments are passed with the CREATE command. Please refer to `CREATE <https://evadb.readthedocs.io/en/stable/source/reference/evaql/create_function.html>`_ command documentation.
 
 The custom setup operations for the function can be written inside the function in the child class. If there is no need for any custom logic, then you can just simply write "pass" in the function definition.
 
@@ -257,9 +257,6 @@ The following code can be used to create an Object Detection function using Yolo
         #importing openai
         try_to_import_openai()
         import openai
-
-        #setting up the key
-        openai.api_key = ConfigurationManager().get_value("third_party", "OPENAI_KEY")
 
         #getting the data
         content = text_df[text_df.columns[0]]

@@ -16,7 +16,6 @@ import os
 import random
 from typing import List
 
-from evadb.configuration.configuration_manager import ConfigurationManager
 from evadb.constants import NO_GPU
 from evadb.utils.generic_utils import get_gpu_count, is_gpu_available
 
@@ -28,13 +27,8 @@ class Context:
     if using horovod: current rank etc.
     """
 
-    def __new__(cls):
-        if not hasattr(cls, "_instance"):
-            cls._instance = super(Context, cls).__new__(cls)
-        return cls._instance
-
-    def __init__(self):
-        self._config_manager = ConfigurationManager()
+    def __init__(self, user_provided_gpu_conf=[]):
+        self._user_provided_gpu_conf = user_provided_gpu_conf
         self._gpus = self._populate_gpu_ids()
 
     @property
@@ -42,10 +36,8 @@ class Context:
         return self._gpus
 
     def _populate_gpu_from_config(self) -> List:
-        # Populate GPU IDs from yaml config file.
-        gpu_conf = self._config_manager.get_value("executor", "gpu_ids")
         available_gpus = [i for i in range(get_gpu_count())]
-        return list(set(available_gpus) & set(gpu_conf))
+        return list(set(available_gpus) & set(self._user_provided_gpu_conf))
 
     def _populate_gpu_from_env(self) -> List:
         # Populate GPU IDs from env variable.

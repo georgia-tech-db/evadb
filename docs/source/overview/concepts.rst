@@ -46,7 +46,7 @@ Here are some illustrative **AI queries** for a ChatGPT-based video question ans
     --- The 'transcripts' table has a column called 'text' with the transcript text
     --- Since ChatGPT is a built-in function in EvaDB, we don't have to define it
     --- We can directly use ChatGPT() in any query
-    --- We will only need to set the OPENAI_KEY as an environment variable
+    --- We will only need to set the OPENAI_API_KEY as an environment variable
     SELECT ChatGPT('Is this video summary related to Ukraine russia war', text) 
         FROM TEXT_SUMMARY;
 

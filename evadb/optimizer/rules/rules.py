@@ -836,7 +836,10 @@ class LogicalCreateIndexToVectorIndex(Rule):
             before.index_def,
         )
         child = SeqScanPlan(None, before.project_expr_list, before.table_ref.alias)
-        batch_mem_size = context.db.config.get_value("executor", "batch_mem_size")
+
+        batch_mem_size = context.db.catalog().get_configuration_catalog_value(
+            "batch_mem_size"
+        )
         child.append_child(
             StoragePlan(
                 before.table_ref.table.table_obj,
@@ -933,7 +936,9 @@ class LogicalGetToSeqScan(Rule):
         # read in a batch from storage engine.
         # Todo: Experiment heuristics.
         after = SeqScanPlan(None, before.target_list, before.alias)
-        batch_mem_size = context.db.config.get_value("executor", "batch_mem_size")
+        batch_mem_size = context.db.catalog().get_configuration_catalog_value(
+            "batch_mem_size"
+        )
         after.append_child(
             StoragePlan(
                 before.table_obj,
