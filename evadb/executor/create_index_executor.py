@@ -75,7 +75,7 @@ class CreateIndexExecutor(AbstractExecutor):
 
     # On-disk saving path for EvaDB index.
     def _get_evadb_index_save_path(self) -> Path:
-        index_dir = Path(self.config.get_value("storage", "index_dir"))
+        index_dir = Path(self.db.catalog().get_configuration_catalog_value("index_dir"))
         if not index_dir.exists():
             index_dir.mkdir(parents=True, exist_ok=True)
         return str(
@@ -121,7 +121,7 @@ class CreateIndexExecutor(AbstractExecutor):
                         self.vector_store_type,
                         self.name,
                         **handle_vector_store_params(
-                            self.vector_store_type, index_path
+                            self.vector_store_type, index_path, self.catalog
                         ),
                     )
                 else:
@@ -151,7 +151,7 @@ class CreateIndexExecutor(AbstractExecutor):
                             self.vector_store_type,
                             self.name,
                             **handle_vector_store_params(
-                                self.vector_store_type, index_path
+                                self.vector_store_type, index_path, self.catalog
                             ),
                         )
                         index.create(input_dim)

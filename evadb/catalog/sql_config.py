@@ -17,9 +17,6 @@ from weakref import WeakValueDictionary
 
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy.pool import NullPool
-
-from evadb.utils.generic_utils import is_postgres_uri, parse_config_yml
 
 # Permanent identifier column.
 IDENTIFIER_COLUMN = "_row_id"
@@ -32,6 +29,7 @@ CATALOG_TABLES = [
     "column_catalog",
     "table_catalog",
     "database_catalog",
+    "configuration_catalog",
     "depend_column_and_function_cache",
     "function_cache",
     "function_catalog",
@@ -41,6 +39,9 @@ CATALOG_TABLES = [
     "function_cost_catalog",
     "function_metadata_catalog",
 ]
+# Add all keywords that are restricted by EvaDB
+
+RESTRICTED_COL_NAMES = [IDENTIFIER_COLUMN]
 
 
 class SingletonMeta(type):
@@ -62,33 +63,17 @@ class SingletonMeta(type):
 
 class SQLConfig(metaclass=SingletonMeta):
     def __init__(self, uri):
-        """Initializes the engine and session for database operations
-
-        Retrieves the database uri for connection from ConfigurationManager.
-        """
+        """Initializes the engine and session for database operations"""
 
         self.worker_uri = str(uri)
         # set echo=True to log SQL
 
-        connect_args = {}
-        config_obj = parse_config_yml()
-        if is_postgres_uri(config_obj["core"]["catalog_database_uri"]):
-            # Set the arguments for postgres backend.
-            connect_args = {"connect_timeout": 1000}
-            # https://www.oddbird.net/2014/06/14/sqlalchemy-postgres-autocommit/
-            self.engine = create_engine(
-                self.worker_uri,
-                poolclass=NullPool,
-                isolation_level="AUTOCOMMIT",
-                connect_args=connect_args,
-            )
-        else:
-            # Default to SQLite.
-            connect_args = {"timeout": 1000}
-            self.engine = create_engine(
-                self.worker_uri,
-                connect_args=connect_args,
-            )
+        # Default to SQLite.
+        connect_args = {"timeout": 1000}
+        self.engine = create_engine(
+            self.worker_uri,
+            connect_args=connect_args,
+        )
 
         if self.engine.url.get_backend_name() == "sqlite":
             # enforce foreign key constraint and wal logging for sqlite

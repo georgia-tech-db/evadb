@@ -74,7 +74,12 @@ class StatementToPlanConverter:
         if table_ref.is_table_atom():
             # Table
             catalog_entry = table_ref.table.table_obj
-            self._plan = LogicalGet(table_ref, catalog_entry, table_ref.alias)
+            self._plan = LogicalGet(
+                table_ref,
+                catalog_entry,
+                table_ref.alias,
+                chunk_params=table_ref.chunk_params,
+            )
 
         elif table_ref.is_table_valued_expr():
             tve = table_ref.table_valued_expr

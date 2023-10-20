@@ -39,7 +39,9 @@ class PlanGenerator:
         cost_model: CostModel = None,
     ) -> None:
         self.db = db
-        self.rules_manager = rules_manager or RulesManager(db.config)
+        # check if ray is enabled
+        is_ray_enabled = self.db.catalog().get_configuration_catalog_value("ray")
+        self.rules_manager = rules_manager or RulesManager({"ray": is_ray_enabled})
         self.cost_model = cost_model or CostModel()
 
     def execute_task_stack(self, task_stack: OptimizerTaskStack):

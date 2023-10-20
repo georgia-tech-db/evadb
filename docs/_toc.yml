@@ -89,6 +89,8 @@ parts:
             title: Model Training with Ludwig
           - file: source/reference/ai/model-train-sklearn
             title: Model Training with Sklearn
+          - file: source/reference/ai/model-train-xgboost
+            title: Model Training with XGBoost
           - file: source/reference/ai/model-forecasting
             title: Time Series Forecasting
           - file: source/reference/ai/hf
@@ -135,6 +137,8 @@ parts:
             title: Code Style
           - file: source/dev-guide/contribute/troubleshoot
             title: Troubleshooting
+          - file: source/dev-guide/contribute/unit-test
+            title: Unit Testing UDFs in EvaDB
 
       - file: source/dev-guide/debugging
         title: Debugging EvaDB

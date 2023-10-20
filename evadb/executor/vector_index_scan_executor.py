@@ -102,7 +102,9 @@ class VectorIndexScanExecutor(AbstractExecutor):
         self.index = VectorStoreFactory.init_vector_store(
             self.vector_store_type,
             self.index_name,
-            **handle_vector_store_params(self.vector_store_type, self.index_path),
+            **handle_vector_store_params(
+                self.vector_store_type, self.index_path, self.db.catalog
+            ),
         )
 
         search_feat = self._get_search_query_results()

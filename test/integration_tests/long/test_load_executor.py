@@ -89,7 +89,9 @@ class LoadExecutorTests(unittest.TestCase):
         # check that the file is a symlink to self.video_file_path
         video_file_path = os.path.join(video_dir, video_file)
         self.assertTrue(os.path.islink(video_file_path))
-        self.assertEqual(os.readlink(video_file_path), self.video_file_path)
+        self.assertEqual(
+            os.readlink(video_file_path), str(Path(self.video_file_path).resolve())
+        )
 
         execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS MyVideo;")
 
