@@ -65,7 +65,7 @@ class ForecastModel(AbstractFunction):
             forecast_df = self.model.predict().reset_index()
 
         # Suggestions
-        if len(data) == 0 or list(data[0])[0].lower()[0] == "t":
+        if len(data) == 0 or list(data[0])[0] is True:
             suggestion_list = []
             # 1: Flat predictions
             if self.library == "statsforecast":

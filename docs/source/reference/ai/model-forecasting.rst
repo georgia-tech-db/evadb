@@ -39,7 +39,7 @@ This trains a forecasting model. The model can be called by providing the horizo
 
 .. note::
 
-   `Forecasting` function also provides suggestions by default. If you wish to turn it off, send "False" as an optional argument while calling the function. Eg. `SELECT Forecast("False");`
+   `Forecasting` function also provides suggestions by default. If you wish to turn it off, send `FALSE` as an optional argument while calling the function. Eg. `SELECT Forecast(FALSE);`
 
 Forecast Parameters
 -------------------
