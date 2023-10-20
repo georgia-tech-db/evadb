@@ -228,6 +228,9 @@ class NativeExecutorTest(unittest.TestCase):
         self._execute_native_query()
         self._execute_evadb_query()
 
+    @pytest.mark.skip(
+        reason="Snowflake does not come with a free version of account, so integration test is not feasible"
+    )
     def test_should_run_query_in_snowflake(self):
         # Create database.
         params = {
@@ -246,7 +249,6 @@ class NativeExecutorTest(unittest.TestCase):
         # Test executions.
         self._execute_native_query()
         self._execute_evadb_query()
-
 
     def test_should_run_query_in_sqlite(self):
         # Create database.

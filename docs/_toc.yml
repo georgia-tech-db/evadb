@@ -71,6 +71,7 @@ parts:
           - file: source/reference/databases/mariadb
           - file: source/reference/databases/clickhouse
           - file: source/reference/databases/github
+          - file: source/reference/databases/snowflake
 
       - file: source/reference/vector_databases/index
         title: Vector Databases
