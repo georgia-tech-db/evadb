@@ -139,7 +139,6 @@ class VectorIndexScanExecutor(AbstractExecutor):
                 row_dict = row.to_dict()
                 res_data_list.append(row_dict)
 
-
         result_df = pd.DataFrame(res_data_list)
 
         final_df = pd.merge(
@@ -147,7 +146,7 @@ class VectorIndexScanExecutor(AbstractExecutor):
             result_df,
             left_on="row_num_np",
             right_on=row_num_col_name,
-            how="inner"
+            how="inner",
         )
 
         if "row_num_np" in final_df:
