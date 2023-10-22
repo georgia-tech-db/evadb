@@ -6,6 +6,12 @@ EvaDB supports a wide range of data sources including SQL database systems, obje
 Connect to an Existing SQL Database System
 ------------------------------------------
 
+.. note::
+
+   Connecting to an existing SQL database is unnecessary for inserting or querying data in Eva. This step is only required if
+   users intend to work with data already present in some SQL DB. Eva has native storage support for SQLite, which can be utilized without
+   establishing any connection. Refer to :ref:`EvaQL<evaql>` page for more details.
+
 1. Use the :ref:`CREATE DATABASE<create-database>` statement to connect to an **existing** SQL database.
 
 .. code-block::
@@ -82,6 +88,6 @@ You can use the ``CREATE INDEX`` statement to connect to an existing vector data
 
 .. note::
 
-   Go over the :ref:`CREATE INDEX<create-index>` statement for more details. The :ref:`Vector Databases<databases>` page lists all the vector database systems that EvaDB currently supports.
+   Go over the :ref:`CREATE INDEX<create-index>` statement for more details. The :ref:`Vector Databases<vector_databases>` page lists all the vector database systems that EvaDB currently supports.
 
 .. include:: ../shared/designs/design3.rst
