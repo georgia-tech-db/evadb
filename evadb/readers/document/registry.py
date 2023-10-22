@@ -28,6 +28,8 @@ SUPPORTED_TYPES = [
     ".ppt",
     ".pptx",
     ".txt",
+    ".json",
+    ".py",
 ]
 
 
@@ -44,6 +46,8 @@ def _lazy_import_loader():
         UnstructuredMarkdownLoader,
         UnstructuredPowerPointLoader,
         UnstructuredWordDocumentLoader,
+        JSONLoader,
+        PythonLoader,
     )
 
     LOADER_MAPPING = {
@@ -59,6 +63,8 @@ def _lazy_import_loader():
         ".ppt": (UnstructuredPowerPointLoader, {}),
         ".pptx": (UnstructuredPowerPointLoader, {}),
         ".txt": (TextLoader, {"encoding": "utf8"}),
+        ".json": (JSONLoader, {}),
+        ".py": (PythonLoader, {}),
         # Add more mappings for other file extensions and loaders as needed
     }
     return LOADER_MAPPING
