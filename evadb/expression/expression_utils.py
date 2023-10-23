@@ -14,8 +14,8 @@
 # limitations under the License.
 
 from typing import List, Set
-from evadb.constants import LLM_FUNCTIONS
 
+from evadb.constants import LLM_FUNCTIONS
 from evadb.expression.abstract_expression import AbstractExpression, ExpressionType
 from evadb.expression.comparison_expression import ComparisonExpression
 from evadb.expression.constant_value_expression import ConstantValueExpression
@@ -304,7 +304,8 @@ def is_llm_expression(expr: AbstractExpression):
     if isinstance(expr, FunctionExpression) and expr.name.lower() in LLM_FUNCTIONS:
         return True
     return False
-        
+
+
 def extract_llm_expressions_from_project(exprs: List[AbstractExpression]):
     remaining_exprs = []
     llm_exprs = []

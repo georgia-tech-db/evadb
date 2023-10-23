@@ -13,13 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from evadb.plan_nodes.llm_plan import LLMPlan
-from test.util import (  # file_remove,
-    DummyLLM,
-    create_dummy_4d_batches,
-    create_dummy_batches,
-    create_sample_video,
-    create_table,
+from test.util import (
     file_remove,
     get_evadb_for_testing,
     get_logical_query_plan,
@@ -28,13 +22,12 @@ from test.util import (  # file_remove,
     shutdown_ray,
 )
 
-import numpy as np
 import pandas as pd
 import pytest
 
-from evadb.binder.binder_utils import BinderError
 from evadb.models.storage.batch import Batch
-from evadb.optimizer.operators import LogicalFilter, LogicalLLM, OperatorType
+from evadb.optimizer.operators import LogicalLLM
+from evadb.plan_nodes.llm_plan import LLMPlan
 from evadb.server.command_handler import execute_query_fetch_all
 
 NUM_FRAMES = 10
@@ -45,7 +38,7 @@ class LLMExecutorTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # add DummyLLM to LLM_FUNCTIONS, CACHEABLE_FUNCTIONS
-        from evadb.constants import LLM_FUNCTIONS, CACHEABLE_FUNCTIONS
+        from evadb.constants import CACHEABLE_FUNCTIONS, LLM_FUNCTIONS
 
         LLM_FUNCTIONS += ["DummyLLM".lower()]
         CACHEABLE_FUNCTIONS += ["DummyLLM".lower()]

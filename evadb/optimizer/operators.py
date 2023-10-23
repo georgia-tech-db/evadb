@@ -1273,7 +1273,6 @@ class LogicalVectorIndexScan(Operator):
 
 
 class LogicalLLM(Operator):
- 
     def __init__(
         self,
         llm_expr: FunctionExpression,
@@ -1282,15 +1281,11 @@ class LogicalLLM(Operator):
         super().__init__(OperatorType.LOGICAL_LLM, children)
         self.llm_expr = llm_expr
 
-
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
         if not isinstance(other, LogicalLLM):
             return False
-        return (
-            is_subtree_equal
-            and self.llm_expr == other.llm_expr
-        )
+        return is_subtree_equal and self.llm_expr == other.llm_expr
 
     def __hash__(self) -> int:
         return hash(

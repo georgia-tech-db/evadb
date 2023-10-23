@@ -264,5 +264,5 @@ class StatementBinder:
     @bind.register(FunctionExpression)
     def _bind_func_expr(self, node: FunctionExpression):
         from evadb.binder.function_expression_binder import bind_func_expr
-        
+
         bind_func_expr(self, node)

@@ -21,7 +21,6 @@ from evadb.plan_nodes.llm_plan import LLMPlan
 
 
 class LLMExecutor(AbstractExecutor):
-    
     def __init__(self, db: EvaDBDatabase, node: LLMPlan):
         super().__init__(db, node)
         self.llm_expr = node.llm_expr
@@ -33,5 +32,5 @@ class LLMExecutor(AbstractExecutor):
             llm_result = self.llm_expr.evaluate(batch)
 
             output = Batch.merge_column_wise([batch, llm_result])
-            
+
             yield output

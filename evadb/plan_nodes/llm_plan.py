@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from evadb.expression.function_expression import FunctionExpression
-from evadb.parser.alias import Alias
 from evadb.plan_nodes.abstract_plan import AbstractPlan
 from evadb.plan_nodes.types import PlanOprType
 

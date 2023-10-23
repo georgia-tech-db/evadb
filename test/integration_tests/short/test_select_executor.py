@@ -452,5 +452,3 @@ class SelectExecutorTest(unittest.TestCase):
             pd.DataFrame([{"dummynoinputfunction.label": "DummyNoInputFunction"}])
         )
         self.assertEqual(actual_batch, expected)
-
-
