@@ -6,10 +6,6 @@ EvaDB supports a wide range of data sources including SQL database systems, obje
 Connect to an Existing SQL Database System
 ------------------------------------------
 
-.. note::
-
-   For prototyping, users can opt to establish a connection to :ref:`SQLite<sqlite>`.
-
 1. Use the :ref:`CREATE DATABASE<create-database>` statement to connect to an **existing** SQL database.
 
 .. code-block::
@@ -27,6 +23,10 @@ Connect to an Existing SQL Database System
 .. note::
 
    Go over the :ref:`CREATE DATABASE<create-database>` statement for more details. The :ref:`Databases<databases>` page lists all the database systems that EvaDB currently supports.
+
+.. note::
+
+   For prototyping, users can opt to establish a connection to :ref:`SQLite<sqlite>`.
 
 2. Preview the data using ``SELECT``
 
