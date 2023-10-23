@@ -84,7 +84,7 @@ set_statement: SET config_name (EQUAL_SYMBOL | TO) config_value
 
 config_name: uid
 
-config_value: (string_literal | decimal_literal | boolean_literal | real_literal)
+config_value: constant
 
 // Data Manipulation Language
 

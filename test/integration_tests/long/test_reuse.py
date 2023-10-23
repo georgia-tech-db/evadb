@@ -77,7 +77,7 @@ class ReuseTest(unittest.TestCase):
         # surfaces when the system is running on low memory. Explicitly calling garbage
         # collection to reduce the memory usage.
         gc.collect()
-        rules_manager = RulesManager(self.evadb.config)
+        rules_manager = RulesManager()
         with disable_rules(
             rules_manager,
             [

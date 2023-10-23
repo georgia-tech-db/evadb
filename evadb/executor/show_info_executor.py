@@ -51,8 +51,7 @@ class ShowInfoExecutor(AbstractExecutor):
             for db in databases:
                 show_entries.append(db.display_format())
         elif self.node.show_type is ShowType.CONFIG:
-            value = self._config.get_value(
-                category="default",
+            value = self.catalog().get_configuration_catalog_value(
                 key=self.node.show_val.upper(),
             )
             show_entries = {}

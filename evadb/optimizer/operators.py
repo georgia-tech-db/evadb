@@ -64,6 +64,7 @@ class OperatorType(IntEnum):
     LOGICAL_EXTRACT_OBJECT = auto()
     LOGICAL_VECTOR_INDEX_SCAN = auto()
     LOGICAL_USE = auto()
+    LOGICAL_LLM = auto()
     LOGICALDELIMITER = auto()
 
 
@@ -1267,5 +1268,34 @@ class LogicalVectorIndexScan(Operator):
                 self.index,
                 self.limit_count,
                 self.search_query_expr,
+            )
+        )
+
+
+class LogicalLLM(Operator):
+ 
+    def __init__(
+        self,
+        llm_expr: FunctionExpression,
+        children: List = None,
+    ):
+        super().__init__(OperatorType.LOGICAL_LLM, children)
+        self.llm_expr = llm_expr
+
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalLLM):
+            return False
+        return (
+            is_subtree_equal
+            and self.llm_expr == other.llm_expr
+        )
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                super().__hash__(),
+                self.llm_expr,
             )
         )

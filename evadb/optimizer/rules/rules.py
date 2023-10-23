@@ -44,6 +44,7 @@ from evadb.plan_nodes.create_from_select_plan import CreateFromSelectPlan
 from evadb.plan_nodes.exchange_plan import ExchangePlan
 from evadb.plan_nodes.explain_plan import ExplainPlan
 from evadb.plan_nodes.hash_join_build_plan import HashJoinBuildPlan
+from evadb.plan_nodes.llm_plan import LLMPlan
 from evadb.plan_nodes.nested_loop_join_plan import NestedLoopJoinPlan
 from evadb.plan_nodes.predicate_plan import PredicatePlan
 from evadb.plan_nodes.project_plan import ProjectPlan
@@ -69,6 +70,7 @@ from evadb.optimizer.operators import (
     LogicalGroupBy,
     LogicalInsert,
     LogicalJoin,
+    LogicalLLM,
     LogicalLimit,
     LogicalLoadData,
     LogicalOrderBy,
@@ -836,7 +838,10 @@ class LogicalCreateIndexToVectorIndex(Rule):
             before.index_def,
         )
         child = SeqScanPlan(None, before.project_expr_list, before.table_ref.alias)
-        batch_mem_size = context.db.config.get_value("executor", "batch_mem_size")
+
+        batch_mem_size = context.db.catalog().get_configuration_catalog_value(
+            "batch_mem_size"
+        )
         child.append_child(
             StoragePlan(
                 before.table_ref.table.table_obj,
@@ -933,7 +938,9 @@ class LogicalGetToSeqScan(Rule):
         # read in a batch from storage engine.
         # Todo: Experiment heuristics.
         after = SeqScanPlan(None, before.target_list, before.alias)
-        batch_mem_size = context.db.config.get_value("executor", "batch_mem_size")
+        batch_mem_size = context.db.catalog().get_configuration_catalog_value(
+            "batch_mem_size"
+        )
         after.append_child(
             StoragePlan(
                 before.table_obj,
@@ -1405,6 +1412,25 @@ class LogicalProjectToRayPhysical(Rule):
             for child in before.children:
                 exchange_plan.append_child(child)
             yield exchange_plan
+
+
+class LogicalLLMToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICAL_LLM)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_LLM_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_LLM_TO_PHYSICAL
+
+    def check(self, grp_id: int, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalLLM, context: OptimizerContext):
+        after = LLMPlan(before.llm_expr)
+        for child in before.children:
+            after.append_child(child)
+        yield after
 
 
 # IMPLEMENTATION RULES END

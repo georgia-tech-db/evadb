@@ -26,7 +26,6 @@ from evadb.binder.binder_utils import (
     get_bound_func_expr_outputs_as_tuple_value_expr,
     get_column_definition_from_select_target_list,
 )
-from evadb.binder.function_expression_binder import bind_func_expr
 from evadb.binder.statement_binder_context import StatementBinderContext
 from evadb.catalog.catalog_type import ColumnType, TableType
 from evadb.catalog.catalog_utils import is_document_table
@@ -264,4 +263,6 @@ class StatementBinder:
 
     @bind.register(FunctionExpression)
     def _bind_func_expr(self, node: FunctionExpression):
+        from evadb.binder.function_expression_binder import bind_func_expr
+        
         bind_func_expr(self, node)

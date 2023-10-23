@@ -38,9 +38,7 @@ class BatchMemSizeTest(unittest.TestCase):
         the storage engine.
         """
         test_batch_mem_size = 100
-        self.evadb.config.update_value(
-            "executor", "batch_mem_size", test_batch_mem_size
-        )
+        execute_query_fetch_all(self.evadb, f"SET batch_mem_size={test_batch_mem_size}")
         create_table_query = """
             CREATE TABLE IF NOT EXISTS MyCSV (
                 id INTEGER UNIQUE,

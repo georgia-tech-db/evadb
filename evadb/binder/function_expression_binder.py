@@ -34,21 +34,26 @@ from evadb.utils.generic_utils import (
     string_comparison_case_insensitive,
 )
 from evadb.utils.logging_manager import logger
+from evadb.executor.execution_context import Context
 
 
 def bind_func_expr(binder: StatementBinder, node: FunctionExpression):
     
-    
-    # handle the special case of "completion or chatgpt"
-    if string_comparison_case_insensitive(node.name, "chatgpt") or string_comparison_case_insensitive(node.name, "completion"):
-        handle_bind_llm_function(node, binder)
-        return
-    
+    # setup the context
+    # we read the GPUs from the catalog and populate in the context
+    gpus_ids = binder._catalog().get_configuration_catalog_value("gpu_ids")
+    node._context = Context(gpus_ids)
+
     # handle the special case of "extract_object"
     if node.name.upper() == str(FunctionType.EXTRACT_OBJECT):
         handle_bind_extract_object_function(node, binder)
         return
 
+
+    # handle the special case of "completion or chatgpt"
+    if string_comparison_case_insensitive(node.name, "chatgpt") or string_comparison_case_insensitive(node.name, "completion"):
+        handle_bind_llm_function(node, binder)
+        
     # Handle Func(*)
     if (
         len(node.children) == 1
@@ -78,7 +83,9 @@ def bind_func_expr(binder: StatementBinder, node: FunctionExpression):
             "GenericLudwigModel",
         )
         function_metadata = get_metadata_properties(function_obj)
-        assert "model_path" in function_metadata, "Ludwig models expect 'model_path'."
+        assert (
+            "model_path" in function_metadata
+        ), "Ludwig models expect 'model_path'."
         node.function = lambda: function_class(
             model_path=function_metadata["model_path"]
         )
@@ -89,7 +96,9 @@ def bind_func_expr(binder: StatementBinder, node: FunctionExpression):
             # detection for now, hopefully this can be generalized
             function_dir = Path(EvaDB_INSTALLATION_DIR) / "functions"
             function_obj.impl_file_path = (
-                Path(f"{function_dir}/yolo_object_detector.py").absolute().as_posix()
+                Path(f"{function_dir}/yolo_object_detector.py")
+                .absolute()
+                .as_posix()
             )
 
         # Verify the consistency of the function. If the checksum of the function does not
@@ -107,9 +116,9 @@ def bind_func_expr(binder: StatementBinder, node: FunctionExpression):
             )
             # certain functions take additional inputs like yolo needs the model_name
             # these arguments are passed by the user as part of metadata
-            node.function = lambda: function_class(
-                **get_metadata_properties(function_obj)
-            )
+
+            properties = get_metadata_properties(function_obj)
+            node.function = lambda: function_class(**properties)
         except Exception as e:
             err_msg = (
                 f"{str(e)}. Please verify that the function class name in the "
@@ -119,13 +128,17 @@ def bind_func_expr(binder: StatementBinder, node: FunctionExpression):
             raise BinderError(err_msg)
 
     node.function_obj = function_obj
-    output_objs = binder._catalog().get_function_io_catalog_output_entries(function_obj)
+    output_objs = binder._catalog().get_function_io_catalog_output_entries(
+        function_obj
+    )
     if node.output:
         for obj in output_objs:
             if obj.name.lower() == node.output:
                 node.output_objs = [obj]
         if not node.output_objs:
-            err_msg = f"Output {node.output} does not exist for {function_obj.name}."
+            err_msg = (
+                f"Output {node.output} does not exist for {function_obj.name}."
+            )
             logger.error(err_msg)
             raise BinderError(err_msg)
         node.projection_columns = [node.output]
@@ -136,7 +149,20 @@ def bind_func_expr(binder: StatementBinder, node: FunctionExpression):
     resolve_alias_table_value_expression(node)
 
 
-def handle_bind_llm_function()
+def handle_bind_llm_function(node, binder):
+    # we also handle the special case of ChatGPT where we need to send the
+    # OpenAPI key as part of the parameter if not provided by the user
+    function_obj = binder._catalog().get_function_catalog_entry_by_name(node.name)
+    properties = get_metadata_properties(function_obj)
+    # if the user didn't provide any API_KEY, check if we have one in the catalog
+    if "OPENAI_API_KEY" not in properties.keys():
+        openapi_key = binder._catalog().get_configuration_catalog_value(
+            "OPENAI_API_KEY"
+        )
+        properties["openai_api_key"] = openapi_key
+
+
+
 
 def handle_bind_extract_object_function(
     node: FunctionExpression, binder_context: StatementBinder

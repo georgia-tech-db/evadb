@@ -32,11 +32,10 @@ from evadb.catalog.models.utils import (
     TableCatalogEntry,
 )
 from evadb.catalog.sql_config import IDENTIFIER_COLUMN
-from evadb.configuration.configuration_manager import ConfigurationManager
 from evadb.expression.function_expression import FunctionExpression
 from evadb.expression.tuple_value_expression import TupleValueExpression
 from evadb.parser.create_statement import ColConstraintInfo, ColumnDefinition
-from evadb.utils.generic_utils import get_str_hash, remove_directory_contents
+from evadb.utils.generic_utils import get_str_hash
 
 
 def is_video_table(table: TableCatalogEntry):
@@ -256,12 +255,6 @@ def construct_function_cache_catalog_entry(
     return entry
 
 
-def cleanup_storage(config):
-    remove_directory_contents(config.get_value("storage", "index_dir"))
-    remove_directory_contents(config.get_value("storage", "cache_dir"))
-    remove_directory_contents(config.get_value("core", "datasets_dir"))
-
-
 def get_metadata_entry_or_val(
     function_obj: FunctionCatalogEntry, key: str, default_val: Any = None
 ) -> str:
@@ -300,6 +293,19 @@ def get_metadata_properties(function_obj: FunctionCatalogEntry) -> Dict:
     return properties
 
 
+def bootstrap_configs(catalog, configs: dict):
+    """
+    load all the configuration values into the catalog table configuration_catalog
+    """
+    for key, value in configs.items():
+        catalog.upsert_configuration_catalog_entry(key, value)
+
+
+def get_configuration_value(key: str):
+    catalog = get_catalog_instance()
+    return catalog.get_configuration_catalog_value(key)
+
+
 #### get catalog instance
 # This function plays a crucial role in ensuring that different threads do
 # not share the same catalog object, as it can result in serialization issues and
@@ -308,7 +314,7 @@ def get_metadata_properties(function_obj: FunctionCatalogEntry) -> Dict:
 # instance across all objects within the same thread. It is worth investigating whether
 # SQLAlchemy already handles this optimization for us, which will be explored at a
 # later time.
-def get_catalog_instance(db_uri: str, config: ConfigurationManager):
+def get_catalog_instance(db_uri: str):
     from evadb.catalog.catalog_manager import CatalogManager
 
-    return CatalogManager(db_uri, config)
+    return CatalogManager(db_uri)

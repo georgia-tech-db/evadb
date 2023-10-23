@@ -12,13 +12,4 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-DISCRETE = 0
-CONTINUOUS = 1
-NO_GPU = -1
-UNDEFINED_GROUP_ID = -1
-# remove this when we implement the cacheable logic in the function itself
-CACHEABLE_FUNCTIONS = ["Yolo", "FaceDetector", "OCRExtractor", "HFObjectDetector"]
-IFRAMES = "IFRAMES"
-AUDIORATE = "AUDIORATE"
-DEFAULT_FUNCTION_EXPRESSION_COST = 100
-LLM_FUNCTIONS = ["chatgpt", "completion"]
+"""snowflake integrations"""
