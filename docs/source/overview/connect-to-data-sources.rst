@@ -8,9 +8,7 @@ Connect to an Existing SQL Database System
 
 .. note::
 
-   Connecting to an existing SQL database is unnecessary for inserting or querying data in Eva. This step is only required if
-   users intend to work with data already present in some SQL DB. Eva has native storage support for SQLite, which can be utilized without
-   establishing any connection. Refer to :ref:`EvaQL<evaql>` page for more details.
+   For prototyping, users can opt to establish a connection to :ref:`SQLite<sqlite>`.
 
 1. Use the :ref:`CREATE DATABASE<create-database>` statement to connect to an **existing** SQL database.
 
