@@ -22,7 +22,6 @@ import requests
 from PIL import Image
 
 from evadb.catalog.catalog_type import NdArrayType
-from evadb.configuration.configuration_manager import ConfigurationManager
 from evadb.functions.abstract.abstract_function import AbstractFunction
 from evadb.functions.decorators.decorators import forward
 from evadb.functions.decorators.io_descriptors.data_types import PandasDataframe
@@ -34,8 +33,8 @@ class DallEFunction(AbstractFunction):
     def name(self) -> str:
         return "DallE"
 
-    def setup(self) -> None:
-        pass
+    def setup(self, openai_api_key="") -> None:
+        self.openai_api_key = openai_api_key
 
     @forward(
         input_signatures=[
@@ -59,14 +58,13 @@ class DallEFunction(AbstractFunction):
         try_to_import_openai()
         import openai
 
-        # Register API key, try configuration manager first
-        openai.api_key = ConfigurationManager().get_value("third_party", "OPENAI_KEY")
+        openai.api_key = self.openai_api_key
         # If not found, try OS Environment Variable
         if len(openai.api_key) == 0:
-            openai.api_key = os.environ.get("OPENAI_KEY", "")
+            openai.api_key = os.environ.get("OPENAI_API_KEY", "")
         assert (
             len(openai.api_key) != 0
-        ), "Please set your OpenAI API key in evadb.yml file (third_party, open_api_key) or environment variable (OPENAI_KEY)"
+        ), "Please set your OpenAI API key using SET OPENAI_API_KEY = 'sk-'  or environment variable (OPENAI_API_KEY)"
 
         def generate_image(text_df: PandasDataframe):
             results = []

@@ -32,7 +32,9 @@ from evadb.binder.binder_utils import (
 from evadb.binder.statement_binder_context import StatementBinderContext
 from evadb.catalog.catalog_type import ColumnType, TableType
 from evadb.catalog.catalog_utils import get_metadata_properties, is_document_table
+from evadb.catalog.sql_config import RESTRICTED_COL_NAMES
 from evadb.configuration.constants import EvaDB_INSTALLATION_DIR
+from evadb.executor.execution_context import Context
 from evadb.expression.abstract_expression import AbstractExpression, ExpressionType
 from evadb.expression.function_expression import FunctionExpression
 from evadb.expression.tuple_value_expression import TupleValueExpression
@@ -101,7 +103,9 @@ class StatementBinder:
                         outputs.append(column)
                     else:
                         inputs.append(column)
-            elif string_comparison_case_insensitive(node.function_type, "sklearn"):
+            elif string_comparison_case_insensitive(
+                node.function_type, "sklearn"
+            ) or string_comparison_case_insensitive(node.function_type, "XGBoost"):
                 assert (
                     "predict" in arg_map
                 ), f"Creating {node.function_type} functions expects 'predict' metadata."
@@ -201,6 +205,12 @@ class StatementBinder:
 
     @bind.register(CreateTableStatement)
     def _bind_create_statement(self, node: CreateTableStatement):
+        # we don't allow certain keywords in the column_names
+        for col in node.column_list:
+            assert (
+                col.name.lower() not in RESTRICTED_COL_NAMES
+            ), f"EvaDB does not allow to create a table with column name {col.name}"
+
         if node.query is not None:
             self.bind(node.query)
 
@@ -264,6 +274,11 @@ class StatementBinder:
 
     @bind.register(FunctionExpression)
     def _bind_func_expr(self, node: FunctionExpression):
+        # setup the context
+        # we read the GPUs from the catalog and populate in the context
+        gpus_ids = self._catalog().get_configuration_catalog_value("gpu_ids")
+        node._context = Context(gpus_ids)
+
         # handle the special case of "extract_object"
         if node.name.upper() == str(FunctionType.EXTRACT_OBJECT):
             handle_bind_extract_object_function(node, self)
@@ -331,9 +346,18 @@ class StatementBinder:
                 )
                 # certain functions take additional inputs like yolo needs the model_name
                 # these arguments are passed by the user as part of metadata
-                node.function = lambda: function_class(
-                    **get_metadata_properties(function_obj)
-                )
+                # we also handle the special case of ChatGPT where we need to send the
+                # OpenAPI key as part of the parameter if not provided by the user
+                properties = get_metadata_properties(function_obj)
+                if string_comparison_case_insensitive(node.name, "CHATGPT"):
+                    # if the user didn't provide any API_KEY, check if we have one in the catalog
+                    if "OPENAI_API_KEY" not in properties.keys():
+                        openapi_key = self._catalog().get_configuration_catalog_value(
+                            "OPENAI_API_KEY"
+                        )
+                        properties["openai_api_key"] = openapi_key
+
+                node.function = lambda: function_class(**properties)
             except Exception as e:
                 err_msg = (
                     f"{str(e)}. Please verify that the function class name in the "

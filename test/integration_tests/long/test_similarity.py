@@ -112,7 +112,7 @@ class SimilarityTests(unittest.TestCase):
 
             # Create an actual image dataset.
             img_save_path = os.path.join(
-                self.evadb.config.get_value("storage", "tmp_dir"),
+                self.evadb.catalog().get_configuration_catalog_value("tmp_dir"),
                 f"test_similar_img{i}.jpg",
             )
             try_to_import_cv2()

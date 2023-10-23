@@ -156,7 +156,7 @@ def validate_media(file_path: Path, media_type: FileFormatType) -> bool:
 
 
 def handle_vector_store_params(
-    vector_store_type: VectorStoreType, index_path: str
+    vector_store_type: VectorStoreType, index_path: str, catalog
 ) -> dict:
     """Handle vector store parameters based on the vector store type and index path.
 
@@ -178,7 +178,12 @@ def handle_vector_store_params(
     elif vector_store_type == VectorStoreType.CHROMADB:
         return {"index_path": str(Path(index_path).parent)}
     elif vector_store_type == VectorStoreType.PINECONE:
-        return {}
+        return {
+            "PINECONE_API_KEY": catalog().get_configuration_catalog_value(
+                "PINECONE_API_KEY"
+            ),
+            "PINECONE_ENV": catalog().get_configuration_catalog_value("PINECONE_ENV"),
+        }
     elif vector_store_type == VectorStoreType.MILVUS:
         return {}
     else:
