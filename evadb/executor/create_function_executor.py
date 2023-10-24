@@ -336,6 +336,15 @@ class CreateFunctionExecutor(AbstractExecutor):
             aggregated_batch.rename(columns={arg_map["time"]: "ds"})
         if "id" in arg_map.keys():
             aggregated_batch.rename(columns={arg_map["id"]: "unique_id"})
+        if "conf" in arg_map.keys():
+            try:
+                conf = round(arg_map["conf"])
+            except Exception:
+                err_msg = "Confidence must be a number"
+                logger.error(err_msg)
+                raise FunctionIODefinitionError(err_msg)
+        else:
+            conf = 90
 
         data = aggregated_batch.frames
         if "unique_id" not in list(data.columns):
@@ -379,6 +388,7 @@ class CreateFunctionExecutor(AbstractExecutor):
             try_to_import_neuralforecast()
             from neuralforecast import NeuralForecast
             from neuralforecast.auto import AutoNBEATS, AutoNHITS
+            from neuralforecast.losses.pytorch import MQLoss
             from neuralforecast.models import NBEATS, NHITS
 
             model_dict = {
@@ -430,6 +440,8 @@ class CreateFunctionExecutor(AbstractExecutor):
                     model_args["backend"] = "optuna"
 
             model_args["h"] = horizon
+            if conf > 0:
+                model_args["loss"] = MQLoss(level=[conf])
 
             model = NeuralForecast(
                 [model_here(**model_args)],
@@ -474,7 +486,11 @@ class CreateFunctionExecutor(AbstractExecutor):
 
         data["ds"] = pd.to_datetime(data["ds"])
 
-        model_save_dir_name = library + "_" + arg_map["model"] + "_" + new_freq
+        model_save_dir_name = (
+            library + "_" + arg_map["model"] + "_" + new_freq
+            if "statsforecast" in library
+            else library + "_" + conf + "_" + arg_map["model"] + "_" + new_freq
+        )
         if len(data.columns) >= 4 and library == "neuralforecast":
             model_save_dir_name += "_exogenous_" + str(sorted(exogenous_columns))
 
@@ -545,6 +561,7 @@ class CreateFunctionExecutor(AbstractExecutor):
             ),
             FunctionMetadataCatalogEntry("horizon", horizon),
             FunctionMetadataCatalogEntry("library", library),
+            FunctionMetadataCatalogEntry("conf", conf),
         ]
 
         return (
