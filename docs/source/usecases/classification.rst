@@ -31,6 +31,10 @@ In this tutorial, we present how to to create and train a machine learning model
 We will assume that the input data is loaded into a ``PostgreSQL`` database. 
 To load the home rental data into your database, see the complete `home rental prediction notebook on Colab <https://colab.research.google.com/github/georgia-tech-db/eva/blob/staging/tutorials/17-home-rental-prediction.ipynb>`_.
 
+.. note::
+
+   For prototyping, users can opt to establish a connection to :ref:`SQLite<sqlite>`.
+
 Preview the Home Rental Price Data
 ----------------------------------
 

@@ -24,6 +24,10 @@ Connect to an Existing SQL Database System
 
    Go over the :ref:`CREATE DATABASE<create-database>` statement for more details. The :ref:`Databases<databases>` page lists all the database systems that EvaDB currently supports.
 
+.. note::
+
+   For prototyping, users can opt to establish a connection to :ref:`SQLite<sqlite>`.
+
 2. Preview the data using ``SELECT``
 
 You can now preview the data stored in the ``food_review`` table in the ``restaurant_reviews`` database with a :ref:`SELECT<select>` statement.
@@ -82,6 +86,6 @@ You can use the ``CREATE INDEX`` statement to connect to an existing vector data
 
 .. note::
 
-   Go over the :ref:`CREATE INDEX<create-index>` statement for more details. The :ref:`Vector Databases<databases>` page lists all the vector database systems that EvaDB currently supports.
+   Go over the :ref:`CREATE INDEX<create-index>` statement for more details. The :ref:`Vector Databases<vector_databases>` page lists all the vector database systems that EvaDB currently supports.
 
 .. include:: ../shared/designs/design3.rst
