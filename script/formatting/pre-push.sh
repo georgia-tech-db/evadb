@@ -19,7 +19,7 @@ if ! git diff-index --quiet HEAD -- ':!./script/formatting/spelling.txt'; then
     echo "Code was reformatted or you have unstaged changes." 
     echo "Please verify and stage the changes."
     echo "List of files updated."
-    git --no-pager diff
+    git --no-pager diff --name-only
     exit 1
 fi
 
