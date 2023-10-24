@@ -31,10 +31,6 @@ In this tutorial, we present how to create and train a machine learning model fo
 We will assume that the input data is loaded into a ``PostgreSQL`` database. 
 To load the home sales dataset into your database, see the complete `home sale forecasting notebook on Colab <https://colab.research.google.com/github/georgia-tech-db/eva/blob/staging/tutorials/16-homesale-forecasting.ipynb>`_.
 
-.. note::
-
-   For prototyping, users can opt to establish a connection to :ref:`SQLite<sqlite>`.
-
 Preview the Home Sale Price Data
 --------------------------------
 

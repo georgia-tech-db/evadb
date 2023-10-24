@@ -31,10 +31,6 @@ To load the food review data into your database, see the complete `sentiment ana
 
 .. include:: ../shared/postgresql.rst
 
-.. note::
-
-   For prototyping, users can opt to establish a connection to :ref:`SQLite<sqlite>`.
-
 Sentiment Analysis of Reviews using ChatGPT
 -------------------------------------------
 
