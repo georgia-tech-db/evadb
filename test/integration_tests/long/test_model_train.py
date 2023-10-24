@@ -86,7 +86,9 @@ class ModelTrainTests(unittest.TestCase):
             cls.evadb, "DROP FUNCTION IF EXISTS PredictEmployeeXgboost;"
         )
 
-    @pytest.marker.skip(reason="Model training intergration test takes too long to complete.")
+    @pytest.marker.skip(
+        reason="Model training intergration test takes too long to complete."
+    )
     @ludwig_skip_marker
     def test_ludwig_automl(self):
         create_predict_function = """
@@ -105,8 +107,9 @@ class ModelTrainTests(unittest.TestCase):
         self.assertEqual(len(result.columns), 1)
         self.assertEqual(len(result), 10)
 
-
-    @pytest.marker.skip(reason="Model training intergration test takes too long to complete.")
+    @pytest.marker.skip(
+        reason="Model training intergration test takes too long to complete."
+    )
     @sklearn_skip_marker
     def test_sklearn_regression(self):
         create_predict_function = """
@@ -123,7 +126,6 @@ class ModelTrainTests(unittest.TestCase):
         result = execute_query_fetch_all(self.evadb, predict_query)
         self.assertEqual(len(result.columns), 1)
         self.assertEqual(len(result), 10)
-
 
     @xgboost_skip_marker
     def test_xgboost_regression(self):
