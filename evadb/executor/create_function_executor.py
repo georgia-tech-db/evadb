@@ -340,11 +340,16 @@ class CreateFunctionExecutor(AbstractExecutor):
             try:
                 conf = round(arg_map["conf"])
             except Exception:
-                err_msg = "Confidence must be a number"
+                err_msg = "Confidence must be a number."
                 logger.error(err_msg)
                 raise FunctionIODefinitionError(err_msg)
         else:
             conf = 90
+
+        if conf > 100:
+            err_msg = "Confidence must <= 100."
+            logger.error(err_msg)
+            raise FunctionIODefinitionError(err_msg)
 
         data = aggregated_batch.frames
         if "unique_id" not in list(data.columns):

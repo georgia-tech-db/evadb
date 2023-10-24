@@ -98,7 +98,7 @@ class StatementBinder:
                 for column in all_column_list:
                     if column.name in predict_columns:
                         column.name = column.name + "_predictions"
-                        
+
                         outputs.append(column)
                     else:
                         inputs.append(column)
@@ -137,7 +137,22 @@ class StatementBinder:
             assert (
                 len(node.inputs) == 0 and len(node.outputs) == 0
             ), f"{node.function_type} functions' input and output are auto assigned"
-            outputs.extend([ColumnDefinition(arg_map.get("predict", "y")+"-lo", ColumnType.INTEGER, None, None), ColumnDefinition(arg_map.get("predict", "y")+"-hi", ColumnType.INTEGER, None, None)])
+            outputs.extend(
+                [
+                    ColumnDefinition(
+                        arg_map.get("predict", "y") + "-lo",
+                        ColumnType.INTEGER,
+                        None,
+                        None,
+                    ),
+                    ColumnDefinition(
+                        arg_map.get("predict", "y") + "-hi",
+                        ColumnType.INTEGER,
+                        None,
+                        None,
+                    ),
+                ]
+            )
             node.inputs, node.outputs = inputs, outputs
 
     @bind.register(SelectStatement)
