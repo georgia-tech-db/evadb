@@ -178,6 +178,7 @@ def handle_vector_store_params(
     elif vector_store_type == VectorStoreType.CHROMADB:
         return {"index_path": str(Path(index_path).parent)}
     elif vector_store_type == VectorStoreType.PINECONE:
+        # add the required API_KEYS
         return {
             "PINECONE_API_KEY": catalog().get_configuration_catalog_value(
                 "PINECONE_API_KEY"
@@ -185,7 +186,17 @@ def handle_vector_store_params(
             "PINECONE_ENV": catalog().get_configuration_catalog_value("PINECONE_ENV"),
         }
     elif vector_store_type == VectorStoreType.MILVUS:
-        return {}
+        return {
+            "MILVUS_URI": catalog().get_configuration_catalog_value("MILVUS_URI"),
+            "MILVUS_USER": catalog().get_configuration_catalog_value("MILVUS_USER"),
+            "MILVUS_PASSWORD": catalog().get_configuration_catalog_value(
+                "MILVUS_PASSWORD"
+            ),
+            "MILVUS_DB_NAME": catalog().get_configuration_catalog_value(
+                "MILVUS_DB_NAME"
+            ),
+            "MILVUS_TOKEN": catalog().get_configuration_catalog_value("MILVUS_TOKEN"),
+        }
     else:
         raise ValueError("Unsupported vector store type: {}".format(vector_store_type))
 

@@ -15,7 +15,6 @@
 import os
 from typing import List
 
-from evadb.configuration.configuration_manager import ConfigurationManager
 from evadb.third_party.vector_stores.types import (
     FeaturePayload,
     VectorIndexQuery,
@@ -24,6 +23,13 @@ from evadb.third_party.vector_stores.types import (
 )
 from evadb.utils.generic_utils import try_to_import_milvus_client
 
+allowed_params = [
+    "MILVUS_URI",
+    "MILVUS_USER",
+    "MILVUS_PASSWORD",
+    "MILVUS_DB_NAME",
+    "MILVUS_TOKEN",
+]
 required_params = []
 _milvus_client_instance = None
 
@@ -52,9 +58,9 @@ def get_milvus_client(
 
 
 class MilvusVectorStore(VectorStore):
-    def __init__(self, index_name: str) -> None:
+    def __init__(self, index_name: str, **kwargs) -> None:
         # Milvus URI is the only required
-        self._milvus_uri = ConfigurationManager().get_value("third_party", "MILVUS_URI")
+        self._milvus_uri = kwargs.get("MILVUS_URI")
 
         if not self._milvus_uri:
             self._milvus_uri = os.environ.get("MILVUS_URI")
@@ -64,30 +70,22 @@ class MilvusVectorStore(VectorStore):
         ), "Please set your Milvus URI in evadb.yml file (third_party, MILVUS_URI) or environment variable (MILVUS_URI)."
 
         # Check other Milvus variables for additional customization
-        self._milvus_user = ConfigurationManager().get_value(
-            "third_party", "MILVUS_USER"
-        )
+        self._milvus_user = kwargs.get("MILVUS_USER")
 
         if not self._milvus_user:
             self._milvus_user = os.environ.get("MILVUS_USER", "")
 
-        self._milvus_password = ConfigurationManager().get_value(
-            "third_party", "MILVUS_PASSWORD"
-        )
+        self._milvus_password = kwargs.get("MILVUS_PASSWORD")
 
         if not self._milvus_password:
             self._milvus_password = os.environ.get("MILVUS_PASSWORD", "")
 
-        self._milvus_db_name = ConfigurationManager().get_value(
-            "third_party", "MILVUS_DB_NAME"
-        )
+        self._milvus_db_name = kwargs.get("MILVUS_DB_NAME")
 
         if not self._milvus_db_name:
             self._milvus_db_name = os.environ.get("MILVUS_DB_NAME", "")
 
-        self._milvus_token = ConfigurationManager().get_value(
-            "third_party", "MILVUS_TOKEN"
-        )
+        self._milvus_token = kwargs.get("MILVUS_TOKEN")
 
         if not self._milvus_token:
             self._milvus_token = os.environ.get("MILVUS_TOKEN", "")

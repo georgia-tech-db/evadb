@@ -52,9 +52,9 @@ class VectorStoreFactory:
             return ChromaDBVectorStore(index_name, **kwargs)
 
         elif vector_store_type == VectorStoreType.MILVUS:
-            from evadb.third_party.vector_stores.milvus import required_params
+            from evadb.third_party.vector_stores.milvus import allowed_params, required_params
 
-            validate_kwargs(kwargs, required_params, required_params)
+            validate_kwargs(kwargs, allowed_params, required_params)
             return MilvusVectorStore(index_name, **kwargs)
         else:
             raise Exception(f"Vector store {vector_store_type} not supported")
