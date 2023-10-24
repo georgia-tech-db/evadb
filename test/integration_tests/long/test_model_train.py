@@ -86,7 +86,7 @@ class ModelTrainTests(unittest.TestCase):
             cls.evadb, "DROP FUNCTION IF EXISTS PredictEmployeeXgboost;"
         )
 
-    @pytest.marker.skip(
+    @pytest.mark.skip(
         reason="Model training intergration test takes too long to complete."
     )
     @ludwig_skip_marker
@@ -107,7 +107,7 @@ class ModelTrainTests(unittest.TestCase):
         self.assertEqual(len(result.columns), 1)
         self.assertEqual(len(result), 10)
 
-    @pytest.marker.skip(
+    @pytest.mark.skip(
         reason="Model training intergration test takes too long to complete."
     )
     @sklearn_skip_marker
