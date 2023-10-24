@@ -84,12 +84,13 @@ class ForecastModel(AbstractFunction):
 
             for suggestion in set(suggestion_list):
                 print("\nSUGGESTION: " + self.suggestion_dict[suggestion])
-
         forecast_df = forecast_df.rename(
             columns={
                 "unique_id": self.id_column_rename,
                 "ds": self.time_column_rename,
-                self.model_name: self.predict_column_rename,
+                self.model_name
+                if self.library == "statsforecast"
+                else self.model_name + "-median": self.predict_column_rename,
                 self.model_name
                 + "-lo-"
                 + str(self.conf): self.predict_column_rename

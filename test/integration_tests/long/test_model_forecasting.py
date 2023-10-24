@@ -94,7 +94,14 @@ class ModelTrainTests(unittest.TestCase):
         result = execute_query_fetch_all(self.evadb, predict_query)
         self.assertEqual(len(result), 12)
         self.assertEqual(
-            result.columns, ["airforecast.unique_id", "airforecast.ds", "airforecast.y"]
+            result.columns,
+            [
+                "airforecast.unique_id",
+                "airforecast.ds",
+                "airforecast.y",
+                "airforecast.y-lo",
+                "airforecast.y-hi",
+            ],
         )
 
         create_predict_udf = """
@@ -116,7 +123,13 @@ class ModelTrainTests(unittest.TestCase):
         self.assertEqual(len(result), 24)
         self.assertEqual(
             result.columns,
-            ["airpanelforecast.unique_id", "airpanelforecast.ds", "airpanelforecast.y"],
+            [
+                "airpanelforecast.unique_id",
+                "airpanelforecast.ds",
+                "airpanelforecast.y",
+                "airpanelforecast.y-lo",
+                "airpanelforecast.y-hi",
+            ],
         )
 
     @forecast_skip_marker
@@ -143,7 +156,13 @@ class ModelTrainTests(unittest.TestCase):
         self.assertEqual(len(result), 24)
         self.assertEqual(
             result.columns,
-            ["homeforecast.type", "homeforecast.saledate", "homeforecast.ma"],
+            [
+                "homeforecast.type",
+                "homeforecast.saledate",
+                "homeforecast.ma",
+                "homeforecast.ma-lo",
+                "homeforecast.ma-hi",
+            ],
         )
 
 

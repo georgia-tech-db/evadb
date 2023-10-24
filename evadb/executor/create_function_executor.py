@@ -493,7 +493,7 @@ class CreateFunctionExecutor(AbstractExecutor):
         model_save_dir_name = (
             library + "_" + arg_map["model"] + "_" + new_freq
             if "statsforecast" in library
-            else library + "_" + conf + "_" + arg_map["model"] + "_" + new_freq
+            else library + "_" + str(conf) + "_" + arg_map["model"] + "_" + new_freq
         )
         if len(data.columns) >= 4 and library == "neuralforecast":
             model_save_dir_name += "_exogenous_" + str(sorted(exogenous_columns))
