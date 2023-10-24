@@ -62,12 +62,9 @@ class ForecastModel(AbstractFunction):
 
     def forward(self, data) -> pd.DataFrame:
         if self.library == "statsforecast":
-            if self.conf > 0:
-                forecast_df = self.model.predict(
-                    h=self.horizon, level=[self.conf]
-                ).reset_index()
-            else:
-                forecast_df = self.model.predict(h=self.horizon).reset_index()
+            forecast_df = self.model.predict(
+                h=self.horizon, level=[self.conf]
+            ).reset_index()
         else:
             forecast_df = self.model.predict().reset_index()
 
@@ -88,30 +85,19 @@ class ForecastModel(AbstractFunction):
             for suggestion in set(suggestion_list):
                 print("\nSUGGESTION: " + self.suggestion_dict[suggestion])
 
-        if self.conf > 0:
-            forecast_df = forecast_df.rename(
-                columns={
-                    "unique_id": self.id_column_rename,
-                    "ds": self.time_column_rename,
-                    self.model_name: self.predict_column_rename,
-                    self.model_name
-                    + "-lo-"
-                    + str(self.conf): self.predict_column_rename
-                    + "-lo-"
-                    + str(self.conf),
-                    self.model_name
-                    + "-hi-"
-                    + str(self.conf): self.predict_column_rename
-                    + "-hi-"
-                    + str(self.conf),
-                }
-            )[: self.horizon * forecast_df["unique_id"].nunique()]
-        else:
-            forecast_df = forecast_df.rename(
-                columns={
-                    "unique_id": self.id_column_rename,
-                    "ds": self.time_column_rename,
-                    self.model_name: self.predict_column_rename,
-                }
-            )[: self.horizon * forecast_df["unique_id"].nunique()]
+        forecast_df = forecast_df.rename(
+            columns={
+                "unique_id": self.id_column_rename,
+                "ds": self.time_column_rename,
+                self.model_name: self.predict_column_rename,
+                self.model_name
+                + "-lo-"
+                + str(self.conf): self.predict_column_rename
+                + "-lo",
+                self.model_name
+                + "-hi-"
+                + str(self.conf): self.predict_column_rename
+                + "-hi",
+            }
+        )[: self.horizon * forecast_df["unique_id"].nunique()]
         return forecast_df

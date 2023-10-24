@@ -440,8 +440,7 @@ class CreateFunctionExecutor(AbstractExecutor):
                     model_args["backend"] = "optuna"
 
             model_args["h"] = horizon
-            if conf > 0:
-                model_args["loss"] = MQLoss(level=[conf])
+            model_args["loss"] = MQLoss(level=[conf])
 
             model = NeuralForecast(
                 [model_here(**model_args)],
