@@ -245,7 +245,8 @@ class CreateFunctionExecutor(AbstractExecutor):
             dataframe=aggregated_batch.frames, label=arg_map["predict"], **settings
         )
         model_path = os.path.join(
-            self.db.config.get_value("storage", "model_dir"), self.node.name
+            self.db.catalog().get_configuration_catalog_value("model_dir"),
+            self.node.name,
         )
         pickle.dump(model, open(model_path, "wb"))
         self.node.metadata.append(
