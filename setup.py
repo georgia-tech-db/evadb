@@ -81,6 +81,7 @@ document_libs = [
     "protobuf",
     "bs4",
     "openai>=0.27.4",  # CHATGPT
+    "tiktoken >= 0.3.3",  # For calculating tokens
     "gpt4all",  # PRIVATE GPT
     "sentencepiece",  # TRANSFORMERS
 ]
@@ -123,13 +124,11 @@ sklearn_libs = ["scikit-learn"]
 xgboost_libs = ["flaml[automl]"]
 
 forecasting_libs = [
-    "statsforecast", # MODEL TRAIN AND FINE TUNING
-    "neuralforecast" # MODEL TRAIN AND FINE TUNING
+    "statsforecast",  # MODEL TRAIN AND FINE TUNING
+    "neuralforecast",  # MODEL TRAIN AND FINE TUNING
 ]
 
-imagegen_libs = [
-    "replicate"
-]
+imagegen_libs = ["replicate"]
 
 ### NEEDED FOR DEVELOPER TESTING ONLY
 
@@ -174,7 +173,15 @@ EXTRA_REQUIRES = {
     "xgboost": xgboost_libs,
     "forecasting": forecasting_libs,
     # everything except ray, qdrant, ludwig and postgres. The first three fail on pyhton 3.11.
-    "dev": dev_libs + vision_libs + document_libs + function_libs + notebook_libs + forecasting_libs + sklearn_libs + imagegen_libs + xgboost_libs
+    "dev": dev_libs
+    + vision_libs
+    + document_libs
+    + function_libs
+    + notebook_libs
+    + forecasting_libs
+    + sklearn_libs
+    + imagegen_libs
+    + xgboost_libs,
 }
 
 setup(
