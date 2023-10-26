@@ -107,6 +107,9 @@ parts:
 
       - file: source/reference/optimizations
         title: Optimizations
+      
+      - file: source/reference/rest_api
+        title: REST API
         
       # - file: source/reference/io
       #   title: IO Descriptors
