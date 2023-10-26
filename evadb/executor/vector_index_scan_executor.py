@@ -114,7 +114,6 @@ class VectorIndexScanExecutor(AbstractExecutor):
         # todo support queries over distance as well
         # distance_list = index_result.similarities
         row_num_np = index_result.ids
-
         # Load projected columns from disk and join with search results.
         row_num_col_name = None
 
@@ -126,20 +125,35 @@ class VectorIndexScanExecutor(AbstractExecutor):
                 f"The index {self.index_name} returned only {num_required_results} results, which is fewer than the required {self.limit_count.value}."
             )
 
-        res_row_list = [None for _ in range(num_required_results)]
+        final_df = pd.DataFrame()
+        res_data_list = []
+        row_num_df = pd.DataFrame({"row_num_np": row_num_np})
         for batch in self.children[0].exec(**kwargs):
-            column_list = batch.columns
             if not row_num_col_name:
+                column_list = batch.columns
                 row_num_alias = get_row_num_column_alias(column_list)
                 row_num_col_name = "{}.{}".format(row_num_alias, ROW_NUM_COLUMN)
 
-            # Nested join.
-            for _, row in batch.frames.iterrows():
-                for idx, row_num in enumerate(row_num_np):
-                    if row_num == row[row_num_col_name]:
-                        res_row = dict()
-                        for col_name in column_list:
-                            res_row[col_name] = row[col_name]
-                        res_row_list[idx] = res_row
+            if not batch.frames[row_num_col_name].isin(row_num_df["row_num_np"]).any():
+                continue
 
-        yield Batch(pd.DataFrame(res_row_list))
+            for index, row in batch.frames.iterrows():
+                row_dict = row.to_dict()
+                res_data_list.append(row_dict)
+
+        result_df = pd.DataFrame(res_data_list)
+        result_df.set_index(row_num_col_name, inplace=True)
+        result_df = result_df.reindex(row_num_np)
+        row_num_df.set_index(pd.Index(row_num_np), inplace=True)
+
+        final_df = pd.merge(
+            row_num_df,
+            result_df,
+            left_index=True,
+            right_index=True,
+            how="left",
+        )
+
+        if "row_num_np" in final_df:
+            del final_df["row_num_np"]
+        yield Batch(final_df)
