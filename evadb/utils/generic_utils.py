@@ -526,6 +526,16 @@ def try_to_import_openai():
         )
 
 
+def try_to_import_tiktoken():
+    try:
+        import tiktoken  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import tiktoken python package.
+                Please install them with `pip install tiktoken`."""
+        )
+
+
 def try_to_import_langchain():
     try:
         import langchain  # noqa: F401

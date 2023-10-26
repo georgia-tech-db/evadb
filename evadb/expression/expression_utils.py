@@ -15,9 +15,11 @@
 
 from typing import List, Set
 
+from evadb.constants import LLM_FUNCTIONS
 from evadb.expression.abstract_expression import AbstractExpression, ExpressionType
 from evadb.expression.comparison_expression import ComparisonExpression
 from evadb.expression.constant_value_expression import ConstantValueExpression
+from evadb.expression.function_expression import FunctionExpression
 from evadb.expression.logical_expression import LogicalExpression
 from evadb.expression.tuple_value_expression import TupleValueExpression
 
@@ -296,3 +298,20 @@ def is_simple_predicate(predicate: AbstractExpression) -> bool:
     ]
 
     return _has_simple_expressions(predicate) and contains_single_column(predicate)
+
+
+def is_llm_expression(expr: AbstractExpression):
+    if isinstance(expr, FunctionExpression) and expr.name.lower() in LLM_FUNCTIONS:
+        return True
+    return False
+
+
+def extract_llm_expressions_from_project(exprs: List[AbstractExpression]):
+    remaining_exprs = []
+    llm_exprs = []
+    for expr in exprs:
+        if is_llm_expression(expr):
+            llm_exprs.append(expr.copy())
+        else:
+            remaining_exprs.append(expr)
+    return llm_exprs, remaining_exprs
