@@ -184,7 +184,7 @@ class StatementBinderTests(unittest.TestCase):
                 call2.args[0], TupleValueExpression(name=tvp2[1], table_alias=tvp2[0])
             )
 
-    @patch("evadb.binder.statement_binder.load_function_class_from_file")
+    @patch("evadb.binder.function_expression_binder.load_function_class_from_file")
     def test_bind_func_expr(self, mock_load_function_class_from_file):
         # setup
         func_expr = MagicMock(
