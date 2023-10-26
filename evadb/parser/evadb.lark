@@ -51,7 +51,7 @@ function_metadata: function_metadata_key function_metadata_value
 
 function_metadata_key: uid
 
-function_metadata_value: string_literal | decimal_literal
+function_metadata_value: constant
 
 vector_store_type: USING (FAISS | QDRANT | PINECONE | PGVECTOR | CHROMADB)
 
@@ -84,7 +84,7 @@ set_statement: SET config_name (EQUAL_SYMBOL | TO) config_value
 
 config_name: uid
 
-config_value: (string_literal | decimal_literal | boolean_literal | real_literal)
+config_value: constant
 
 // Data Manipulation Language
 
@@ -177,7 +177,7 @@ describe_statement: DESCRIBE table_name
     
 help_statement: HELP STRING_LITERAL
     
-show_statement: SHOW (FUNCTIONS | TABLES | uid)
+show_statement: SHOW (FUNCTIONS | TABLES | uid | DATABASES)
 
 explain_statement: EXPLAIN explainable_statement
 
@@ -341,6 +341,7 @@ CHUNK_OVERLAP:                       "CHUNK_OVERLAP"i
 COLUMN:                              "COLUMN"i
 CREATE:                              "CREATE"i
 DATABASE:                            "DATABASE"i
+DATABASES:                           "DATABASES"i
 DEFAULT:                             "DEFAULT"i
 DELETE:                              "DELETE"i
 DESC:                                "DESC"i

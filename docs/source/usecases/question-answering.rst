@@ -57,7 +57,7 @@ EvaDB has built-in support for ``ChatGPT`` function from ``OpenAI``. You will ne
 
     # Set OpenAI key
     import os
-    os.environ["OPENAI_KEY"] = "sk-..."
+    os.environ["OPENAI_API_KEY"] = "sk-..."
 
 .. note::
     

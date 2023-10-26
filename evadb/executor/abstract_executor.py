@@ -18,7 +18,6 @@ from typing import TYPE_CHECKING, Any, Generator, Iterable, List, TypeVar
 
 if TYPE_CHECKING:
     from evadb.catalog.catalog_manager import CatalogManager
-from evadb.configuration.configuration_manager import ConfigurationManager
 from evadb.database import EvaDBDatabase
 from evadb.models.storage.batch import Batch
 from evadb.plan_nodes.abstract_plan import AbstractPlan
@@ -36,7 +35,6 @@ class AbstractExecutor(ABC):
     def __init__(self, db: EvaDBDatabase, node: AbstractPlan):
         self._db = db
         self._node = node
-        self._config: ConfigurationManager = db.config if db else None
         self._children = []
 
     # @lru_cache(maxsize=None)
@@ -73,10 +71,6 @@ class AbstractExecutor(ABC):
     @property
     def db(self) -> EvaDBDatabase:
         return self._db
-
-    @property
-    def config(self) -> ConfigurationManager:
-        return self._config
 
     @abstractmethod
     def exec(self, *args, **kwargs) -> Iterable[Batch]:

@@ -57,8 +57,20 @@ class TableCatalogService(BaseService):
             # populate the table_id for all the columns
             for column in column_list:
                 column.table_id = table_catalog_obj._row_id
-            column_list = self._column_service.insert_entries(column_list)
+            column_list = self._column_service.create_entries(column_list)
 
+            # atomic operation for adding table and its corresponding columns.
+            try:
+                self.session.add_all(column_list)
+                self.session.commit()
+            except Exception as e:
+                self.session.rollback()
+                self.session.delete(table_catalog_obj)
+                self.session.commit()
+                logger.exception(
+                    f"Failed to insert entry into table catalog with exception {str(e)}"
+                )
+                raise CatalogError(e)
         except Exception as e:
             logger.exception(
                 f"Failed to insert entry into table catalog with exception {str(e)}"

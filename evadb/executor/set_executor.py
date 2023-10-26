@@ -36,8 +36,8 @@ class SetExecutor(AbstractExecutor):
         as a separate PR for the issue #1140, where all instances of config use
         will be replaced
         """
-        self._config.update_value(
-            category="default",
-            key=self.node.config_name.upper(),
+
+        self.catalog().upsert_configuration_catalog_entry(
+            key=self.node.config_name,
             value=self.node.config_value.value,
         )
