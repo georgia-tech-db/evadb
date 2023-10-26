@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from functools import singledispatchmethod
-from pathlib import Path
 from typing import Callable
 
 from evadb.binder.binder_utils import (
@@ -26,15 +25,11 @@ from evadb.binder.binder_utils import (
     extend_star,
     get_bound_func_expr_outputs_as_tuple_value_expr,
     get_column_definition_from_select_target_list,
-    handle_bind_extract_object_function,
-    resolve_alias_table_value_expression,
 )
 from evadb.binder.statement_binder_context import StatementBinderContext
 from evadb.catalog.catalog_type import ColumnType, TableType
-from evadb.catalog.catalog_utils import get_metadata_properties, is_document_table
+from evadb.catalog.catalog_utils import is_document_table
 from evadb.catalog.sql_config import RESTRICTED_COL_NAMES
-from evadb.configuration.constants import EvaDB_INSTALLATION_DIR
-from evadb.executor.execution_context import Context
 from evadb.expression.abstract_expression import AbstractExpression, ExpressionType
 from evadb.expression.function_expression import FunctionExpression
 from evadb.expression.tuple_value_expression import TupleValueExpression
@@ -47,13 +42,7 @@ from evadb.parser.rename_statement import RenameTableStatement
 from evadb.parser.select_statement import SelectStatement
 from evadb.parser.statement import AbstractStatement
 from evadb.parser.table_ref import TableRef
-from evadb.parser.types import FunctionType
-from evadb.third_party.huggingface.binder import assign_hf_function
-from evadb.utils.generic_utils import (
-    load_function_class_from_file,
-    string_comparison_case_insensitive,
-)
-from evadb.utils.logging_manager import logger
+from evadb.utils.generic_utils import string_comparison_case_insensitive
 
 
 class StatementBinder:
@@ -274,115 +263,6 @@ class StatementBinder:
 
     @bind.register(FunctionExpression)
     def _bind_func_expr(self, node: FunctionExpression):
-        # setup the context
-        # we read the GPUs from the catalog and populate in the context
-        gpus_ids = self._catalog().get_configuration_catalog_value("gpu_ids")
-        node._context = Context(gpus_ids)
+        from evadb.binder.function_expression_binder import bind_func_expr
 
-        # handle the special case of "extract_object"
-        if node.name.upper() == str(FunctionType.EXTRACT_OBJECT):
-            handle_bind_extract_object_function(node, self)
-            return
-
-        # Handle Func(*)
-        if (
-            len(node.children) == 1
-            and isinstance(node.children[0], TupleValueExpression)
-            and node.children[0].name == "*"
-        ):
-            node.children = extend_star(self._binder_context)
-        # bind all the children
-        for child in node.children:
-            self.bind(child)
-
-        function_obj = self._catalog().get_function_catalog_entry_by_name(node.name)
-        if function_obj is None:
-            err_msg = (
-                f"Function '{node.name}' does not exist in the catalog. "
-                "Please create the function using CREATE FUNCTION command."
-            )
-            logger.error(err_msg)
-            raise BinderError(err_msg)
-
-        if string_comparison_case_insensitive(function_obj.type, "HuggingFace"):
-            node.function = assign_hf_function(function_obj)
-
-        elif string_comparison_case_insensitive(function_obj.type, "Ludwig"):
-            function_class = load_function_class_from_file(
-                function_obj.impl_file_path,
-                "GenericLudwigModel",
-            )
-            function_metadata = get_metadata_properties(function_obj)
-            assert (
-                "model_path" in function_metadata
-            ), "Ludwig models expect 'model_path'."
-            node.function = lambda: function_class(
-                model_path=function_metadata["model_path"]
-            )
-
-        else:
-            if function_obj.type == "ultralytics":
-                # manually set the impl_path for yolo functions we only handle object
-                # detection for now, hopefully this can be generalized
-                function_dir = Path(EvaDB_INSTALLATION_DIR) / "functions"
-                function_obj.impl_file_path = (
-                    Path(f"{function_dir}/yolo_object_detector.py")
-                    .absolute()
-                    .as_posix()
-                )
-
-            # Verify the consistency of the function. If the checksum of the function does not
-            # match the one stored in the catalog, an error will be thrown and the user
-            # will be asked to register the function again.
-            # assert (
-            #     get_file_checksum(function_obj.impl_file_path) == function_obj.checksum
-            # ), f"""Function file {function_obj.impl_file_path} has been modified from the
-            #     registration. Please use DROP FUNCTION to drop it and re-create it # using CREATE FUNCTION."""
-
-            try:
-                function_class = load_function_class_from_file(
-                    function_obj.impl_file_path,
-                    function_obj.name,
-                )
-                # certain functions take additional inputs like yolo needs the model_name
-                # these arguments are passed by the user as part of metadata
-                # we also handle the special case of ChatGPT where we need to send the
-                # OpenAPI key as part of the parameter if not provided by the user
-                properties = get_metadata_properties(function_obj)
-                if string_comparison_case_insensitive(node.name, "CHATGPT"):
-                    # if the user didn't provide any API_KEY, check if we have one in the catalog
-                    if "OPENAI_API_KEY" not in properties.keys():
-                        openapi_key = self._catalog().get_configuration_catalog_value(
-                            "OPENAI_API_KEY"
-                        )
-                        properties["openai_api_key"] = openapi_key
-
-                node.function = lambda: function_class(**properties)
-            except Exception as e:
-                err_msg = (
-                    f"{str(e)}. Please verify that the function class name in the "
-                    "implementation file matches the function name."
-                )
-                logger.error(err_msg)
-                raise BinderError(err_msg)
-
-        node.function_obj = function_obj
-        output_objs = self._catalog().get_function_io_catalog_output_entries(
-            function_obj
-        )
-        if node.output:
-            for obj in output_objs:
-                if obj.name.lower() == node.output:
-                    node.output_objs = [obj]
-            if not node.output_objs:
-                err_msg = (
-                    f"Output {node.output} does not exist for {function_obj.name}."
-                )
-                logger.error(err_msg)
-                raise BinderError(err_msg)
-            node.projection_columns = [node.output]
-        else:
-            node.output_objs = output_objs
-            node.projection_columns = [obj.name.lower() for obj in output_objs]
-
-        resolve_alias_table_value_expression(node)
+        bind_func_expr(self, node)
