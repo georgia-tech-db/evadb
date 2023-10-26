@@ -3,9 +3,26 @@ Roadmap
 
 The goal of this doc is to align core and community efforts for the project and to share what's the focus for the next 6 months.
 
-What is the core Chroma team working on right now?
+What is the core EvaDB team working on right now?
 --------------------------------------------------
-aaa
+
+Our biggest priorities right now are improving the user experience of LLM data wrangling and classical AI tasks (e.g., regression, classification, and forecasting).
+
+LLM data wrangling
+~~~~~~~~~~~~~~~~~~
+
+* Prompt Engineering: more flexibility of constructing prompt and better experience/feedback to tune the prompt. 
+* LLM Cache: reuse the LLM calls based on the model, prompt, and input columns.
+* LLM Batch: intelligently group multiple LLM calls into one to reduce the cost and latency. 
+* Cost Calculation and Estimation: show the cost (i.e., time, token usage, and dollars) of the query at the plan time and after execution.
+
+Classical AI tasks
+~~~~~~~~~~~~~~~~~~
+
+* Accuracy: show the accuracy of the training.
+* Configuration guidance: provide guidance and suggestion on how to configure the AutoML framework (e.g., which frequency to use for forcasting).
+* Cost calculation and estimation: show the cost (i.e., time) of the query the plan time and after exectuion.
+* Path to Scale: improve the processing pipeline for large datasets.
 
 What areas are great for community contributions?
 --------------------------------------------------
