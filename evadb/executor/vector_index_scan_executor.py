@@ -150,7 +150,6 @@ class VectorIndexScanExecutor(AbstractExecutor):
             left_index=True,
             right_index=True,
             how="left",
-            # sort=False
         )
 
         if "row_num_np" in final_df:
