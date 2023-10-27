@@ -14,11 +14,7 @@
 # limitations under the License.
 
 import unittest
-from test.markers import stable_diffusion_skip_marker
 from test.util import get_evadb_for_testing
-
-import numpy as np
-import pytest
 
 from evadb.server.command_handler import execute_query_fetch_all
 
@@ -51,15 +47,15 @@ class StrHelperTest(unittest.TestCase):
         IMPL 'evadb/functions/helpers/upper.py';
         """
         execute_query_fetch_all(self.evadb, create_function_query)
-        query = f"SELECT UPPER(input) FROM Test;"
+        query = "SELECT UPPER(input) FROM Test;"
         output_batch = execute_query_fetch_all(self.evadb, query)
         self.assertEqual(len(output_batch), 1)
-        self.assertEqual(output_batch.frames['upper.output'][0], 'EVADB')
+        self.assertEqual(output_batch.frames["upper.output"][0], "EVADB")
 
-        query = f"SELECT UPPER('test5')"
+        query = "SELECT UPPER('test5')"
         output_batch = execute_query_fetch_all(self.evadb, query)
         self.assertEqual(len(output_batch), 1)
-        self.assertEqual(output_batch.frames['upper.output'][0], 'TEST5')
+        self.assertEqual(output_batch.frames["upper.output"][0], "TEST5")
 
     def test_lower_function(self):
         function_name = "LOWER"
@@ -71,20 +67,20 @@ class StrHelperTest(unittest.TestCase):
         IMPL 'evadb/functions/helpers/lower.py';
         """
         execute_query_fetch_all(self.evadb, create_function_query)
-        query = f"SELECT LOWER(input) FROM Test;"
+        query = "SELECT LOWER(input) FROM Test;"
         output_batch = execute_query_fetch_all(self.evadb, query)
         self.assertEqual(len(output_batch), 1)
-        self.assertEqual(output_batch.frames['lower.output'][0], 'evadb')
+        self.assertEqual(output_batch.frames["lower.output"][0], "evadb")
 
-        query = f"SELECT LOWER('TEST5')"
+        query = "SELECT LOWER('TEST5')"
         output_batch = execute_query_fetch_all(self.evadb, query)
         self.assertEqual(len(output_batch), 1)
-        self.assertEqual(output_batch.frames['lower.output'][0], 'test5')
+        self.assertEqual(output_batch.frames["lower.output"][0], "test5")
 
     def test_concat_function(self):
         function_name = "CONCAT"
         execute_query_fetch_all(self.evadb, f"DROP FUNCTION IF EXISTS {function_name};")
-        create_function_query = f"""CREATE FUNCTION IF NOT EXISTS {function_name}
+        create_function_query = """CREATE FUNCTION IF NOT EXISTS {function_name}
         INPUT  (inp ANYTYPE)
         OUTPUT (output ANYTYPE)
         TYPE HelperFunction
@@ -92,8 +88,8 @@ class StrHelperTest(unittest.TestCase):
         """
         execute_query_fetch_all(self.evadb, create_function_query)
 
-        execute_query_fetch_all(self.evadb, f"DROP FUNCTION IF EXISTS UPPER;")
-        create_function_query = f"""CREATE FUNCTION IF NOT EXISTS UPPER
+        execute_query_fetch_all(self.evadb, "DROP FUNCTION IF EXISTS UPPER;")
+        create_function_query = """CREATE FUNCTION IF NOT EXISTS UPPER
         INPUT  (inp ANYTYPE)
         OUTPUT (output ANYTYPE)
         TYPE HelperFunction
@@ -101,14 +97,12 @@ class StrHelperTest(unittest.TestCase):
         """
 
         execute_query_fetch_all(self.evadb, create_function_query)
-        query = f"SELECT CONCAT(UPPER('Eva'), 'DB');"
+        query = "SELECT CONCAT(UPPER('Eva'), 'DB');"
         output_batch = execute_query_fetch_all(self.evadb, query)
         self.assertEqual(len(output_batch), 1)
-        self.assertEqual(output_batch.frames['concat.output'][0], 'EVADB')
+        self.assertEqual(output_batch.frames["concat.output"][0], "EVADB")
 
-        query = f"SELECT CONCAT(input, '.com') FROM Test;"
+        query = "SELECT CONCAT(input, '.com') FROM Test;"
         output_batch = execute_query_fetch_all(self.evadb, query)
-        print(output_batch)
         self.assertEqual(len(output_batch), 1)
-        self.assertEqual(output_batch.frames['concat.output'][0], 'EvaDB.com')
-
+        self.assertEqual(output_batch.frames["concat.output"][0], "EvaDB.com")

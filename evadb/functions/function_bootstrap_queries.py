@@ -238,6 +238,7 @@ Concat_function_query = """CREATE FUNCTION IF NOT EXISTS CONCAT
     EvaDB_INSTALLATION_DIR
 )
 
+
 def init_builtin_functions(db: EvaDBDatabase, mode: str = "debug") -> None:
     """Load the built-in functions into the system during system bootstrapping.
 
@@ -286,7 +287,7 @@ def init_builtin_functions(db: EvaDBDatabase, mode: str = "debug") -> None:
         dalle_function_query,
         Upper_function_query,
         Lower_function_query,
-        Concat_function_query
+        Concat_function_query,
     ]
 
     # if mode is 'debug', add debug functions
