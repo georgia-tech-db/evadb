@@ -85,6 +85,8 @@ EvaDB enables software developers to build AI apps in a few lines of code. Its p
   <li> 📝 following us on <a href="https://medium.com/evadb-blog">Medium</a>
 </ul>
 
+We would love to learn about your AI app. Please complete this 1-minute form: https://v0fbgcue0cm.typeform.com/to/BZHZWeZm
+
 ## Quick Links
 
 - [Quick Links](#quick-links)
@@ -209,6 +211,8 @@ EvaDB's AI-centric query optimizer takes a query as input and generates a query 
 </details>
 
 ## Community and Support
+
+We would love to learn about your AI app. Please complete this 1-minute form: https://v0fbgcue0cm.typeform.com/to/BZHZWeZm
 
 <!--<p>
   <a href="https://evadb.ai/community">
