@@ -485,7 +485,7 @@ class CreateFunctionExecutor(AbstractExecutor):
                 raise FunctionIODefinitionError(err_msg)
 
             model = StatsForecast(
-                [model_here(season_length=season_length)], freq=new_freq
+                [model_here(season_length=season_length)], freq=new_freq, n_jobs=-1
             )
 
         data["ds"] = pd.to_datetime(data["ds"])
@@ -550,7 +550,7 @@ class CreateFunctionExecutor(AbstractExecutor):
             model_path = os.path.join(model_dir, existing_model_files[-1])
 
         io_list = self._resolve_function_io(None)
-
+        data["ds"] = data.ds.astype(str)
         metadata_here = [
             FunctionMetadataCatalogEntry("model_name", arg_map["model"]),
             FunctionMetadataCatalogEntry("model_path", model_path),
@@ -566,6 +566,9 @@ class CreateFunctionExecutor(AbstractExecutor):
             FunctionMetadataCatalogEntry("horizon", horizon),
             FunctionMetadataCatalogEntry("library", library),
             FunctionMetadataCatalogEntry("conf", conf),
+            FunctionMetadataCatalogEntry(
+                "data", data.to_json(path_or_buf=None, orient="split")
+            ),
         ]
 
         return (

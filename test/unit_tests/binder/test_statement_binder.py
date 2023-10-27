@@ -525,7 +525,6 @@ class StatementBinderTests(unittest.TestCase):
                     )
                 ]
             )
-            print(create_function_statement.outputs)
             self.assertEqual(create_function_statement.inputs, expected_inputs)
             self.assertEqual(create_function_statement.outputs, expected_outputs)
 
