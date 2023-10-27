@@ -230,16 +230,16 @@ jobs:
             pip install --upgrade pip
             if [ $RAY = "ENABLED" ]; then
               if [ $PY_VERSION != "3.11" ]; then
-                pip install ".[dev,ray,qdrant,pinecone,chromadb,milvus]"
+                pip install ".[dev,ray,qdrant,pinecone,chromadb]"
               else
-                pip install ".[dev,pinecone,chromadb,milvus]" # ray < 2.5.0 does not work with python 3.11 ray-project/ray#33864
+                pip install ".[dev,pinecone,chromadb]" # ray < 2.5.0 does not work with python 3.11 ray-project/ray#33864
               fi
               python -c "import evadb;cur=evadb.connect().cursor();cur.query('SET ray=True;')"
             else
               if [ $PY_VERSION != "3.11" ]; then
-                pip install ".[dev,ludwig,qdrant,pinecone,chromadb,milvus]"
+                pip install ".[dev,ludwig,qdrant,pinecone,chromadb]"
               else
-                pip install ".[dev,pinecone,chromadb,milvus]" # ray < 2.5.0 does not work with python 3.11 ray-project/ray#33864
+                pip install ".[dev,pinecone,chromadb]" # ray < 2.5.0 does not work with python 3.11 ray-project/ray#33864
               fi
             fi
 
