@@ -80,7 +80,7 @@ class StrHelperTest(unittest.TestCase):
     def test_concat_function(self):
         function_name = "CONCAT"
         execute_query_fetch_all(self.evadb, f"DROP FUNCTION IF EXISTS {function_name};")
-        create_function_query = """CREATE FUNCTION IF NOT EXISTS {function_name}
+        create_function_query = f"""CREATE FUNCTION IF NOT EXISTS {function_name}
         INPUT  (inp ANYTYPE)
         OUTPUT (output ANYTYPE)
         TYPE HelperFunction
