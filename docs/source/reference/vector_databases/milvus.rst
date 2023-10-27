@@ -21,11 +21,17 @@ If you are running it locally, the Milvus instance should be running on ``http:/
 * `MILVUS_DB_NAME` is the name of the database to be used. This will default to the `default` database if not provided.
 * `MILVUS_TOKEN` is the authorization token for the Milvus instance. 
 
-The above values can either be set in the evadb.yml config file, or in the os environment fields "MILVUS_URI", "MILVUS_USER", "MILVUS_PASSWORD", "MILVUS_DB_NAME", and "MILVUS_TOKEN"
+The above values can either be set via the ``SET`` statement, or in the os environment fields "MILVUS_URI", "MILVUS_USER", "MILVUS_PASSWORD", "MILVUS_DB_NAME", and "MILVUS_TOKEN"
+
+
+.. code-block:: sql
+
+   SET MILVUS_URI = 'http://localhost:19530';
+
 
 Create Index
 -----------------
 
-.. code-block:: text
+.. code-block:: sql
 
    CREATE INDEX index_name ON table_name (data) USING MILVUS;
