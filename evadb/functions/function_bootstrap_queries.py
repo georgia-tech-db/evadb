@@ -232,7 +232,7 @@ Lower_function_query = """CREATE FUNCTION IF NOT EXISTS LOWER
 
 Concat_function_query = """CREATE FUNCTION IF NOT EXISTS CONCAT
         INPUT  (input ANYTYPE)
-        OUTPUT (output ANYTYPE)
+        OUTPUT (output NDARRAY STR(ANYDIM))
         IMPL '{}/functions/helpers/concat.py';
         """.format(
     EvaDB_INSTALLATION_DIR

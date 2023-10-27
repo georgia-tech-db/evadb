@@ -82,7 +82,7 @@ class StrHelperTest(unittest.TestCase):
         execute_query_fetch_all(self.evadb, f"DROP FUNCTION IF EXISTS {function_name};")
         create_function_query = f"""CREATE FUNCTION IF NOT EXISTS {function_name}
         INPUT  (inp ANYTYPE)
-        OUTPUT (output ANYTYPE)
+        OUTPUT (output NDARRAY STR(ANYDIM))
         TYPE HelperFunction
         IMPL 'evadb/functions/helpers/concat.py';
         """
