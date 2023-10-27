@@ -2,8 +2,14 @@
 
 REST API Usage 
 ======================
+To start the EvaDB server, run the following command:
 
-We can access EvaDB through REST APIs using two endpoints shown below:
+.. code-block:: python
+
+    cd evadb/apps/rest
+    python run_evadb.py
+
+Now that the server is setup, we can access EvaDB through REST APIs using two endpoints shown below:
 
 Query API
 
