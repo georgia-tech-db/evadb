@@ -128,7 +128,7 @@ if __name__ == "__main__":
     params = {
         "owner": "georgia-tech-db",
         "repo": "evadb",
-        "github_token": "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",
+        "github_token": "...",
     }
     
     cursor.query("DROP DATABASE IF EXISTS github_data;").df()
@@ -156,8 +156,7 @@ if __name__ == "__main__":
         WHERE followers > 100
         LIMIT 10;
     """
-    baseline_query = "SELECT name2 FROM github_data.stargazers WHERE followers > 100 LIMIT 10;"
-    res = cursor.query(baseline_query).df()
+    res = cursor.query(query).df()
     end = time.perf_counter()
     print(res)
     print(end-start)
