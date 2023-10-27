@@ -229,7 +229,6 @@ class CatalogManager(object):
         start_time: datetime,
         end_time: datetime,
         repeat_interval: int,
-        repeat_period: str,
         active: bool,
         next_schedule_run: datetime
     ) -> JobCatalogEntry:
@@ -241,7 +240,6 @@ class CatalogManager(object):
             start_time: job start time
             end_time: job end time
             repeat_interval: job repeat interval
-            repeat_period: job repeat period
             active: job status
             next_schedule_run: next run time as per schedule
         """
@@ -251,7 +249,6 @@ class CatalogManager(object):
             start_time,
             end_time,
             repeat_interval,
-            repeat_period,
             active,
             next_schedule_run
         )
@@ -283,6 +280,27 @@ class CatalogManager(object):
            True if successfully deleted else False
         """
         return self._job_catalog_service.delete_entry(job_entry)
+
+    def get_next_executable_job(self, only_past_jobs: bool = False) -> JobCatalogEntry:
+        """Get the oldest job that is ready to be triggered by trigger time
+        Arguments:
+            only_past_jobs: boolean flag to denote if only jobs with trigger time in
+                past should be considered
+        Returns:
+            Returns the first job to be triggered
+        """
+        return self._job_catalog_service.get_next_executable_job(only_past_jobs)
+
+    def update_job_catalog_entry(self, job_name: str, next_scheduled_run: datetime, active: bool):
+        """Update the next_scheduled_run and active column as per the provided values
+        Arguments:
+            job_name (str): job which should be updated
+
+            next_run_time (datetime): the next trigger time for the job
+
+            active (bool): the active status for the job
+        """
+        self._job_catalog_service.update_next_scheduled_run(job_name, next_scheduled_run, active)
 
     "Table catalog services"
 

@@ -16,7 +16,7 @@
 import json
 import datetime
 
-from sqlalchemy import Column, Boolean, DateTime, Integer, String
+from sqlalchemy import Column, Boolean, DateTime, Index, Integer, String
 
 from evadb.catalog.models.base_model import BaseModel
 from evadb.catalog.models.utils import JobCatalogEntry
@@ -44,12 +44,13 @@ class JobCatalog(BaseModel):
     _start_time =  Column("start_time", DateTime, default=datetime.datetime.now)
     _end_time= Column("end_ts", DateTime)
     _repeat_interval = Column("repeat_interval", Integer)
-    _repeat_period = Column("repeat_period", String(20))
     _active = Column("active", Boolean, default=True)
     _next_scheduled_run = Column("next_scheduled_run", DateTime)
 
     _created_at = Column("created_at", DateTime, default=datetime.datetime.now)
     _updated_at =  Column("updated_at", DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
+
+    _next_run_index = Index('_next_run_index', _next_scheduled_run)
 
     def __init__(
         self, 
@@ -58,7 +59,6 @@ class JobCatalog(BaseModel):
         start_time: datetime,
         end_time: datetime,
         repeat_interval: Integer,
-        repeat_period: str,
         active: bool,
         next_schedule_run: datetime
     ):
@@ -67,7 +67,6 @@ class JobCatalog(BaseModel):
         self._start_time = start_time
         self._end_time = end_time
         self._repeat_interval = repeat_interval
-        self._repeat_period = repeat_period
         self._active = active
         self._next_scheduled_run = next_schedule_run
 
@@ -78,7 +77,6 @@ class JobCatalog(BaseModel):
             queries=json.loads(self._queries),
             start_time=self._start_time,
             end_time=self._end_time,
-            repeat_period=self._repeat_period,
             repeat_interval=self._repeat_interval,
             active=self._active,
             next_scheduled_run=self._next_scheduled_run,

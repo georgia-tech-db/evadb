@@ -51,6 +51,25 @@ class CreateJobExecutor(AbstractExecutor):
         else:
             raise ValueError(f"{datetime_str} does not match the expected date or datetime format")
 
+    def _get_repeat_time_interval_seconds(self, repeat_interval: int, repeat_period: str) -> int:
+        unit_to_seconds = {
+            "second": 1,
+            "minute": 60,
+            "minutes": 60,
+            "min": 60,
+            "hour": 3600,
+            "hours": 3600,
+            "day": 86400,
+            "days": 86400,
+            "week": 604800,
+            "weeks": 604800,
+            "month": 2592000,
+            "months": 2592000,
+        }
+        assert (repeat_period is None) or (repeat_period in unit_to_seconds), "repeat period should be one of these values: minute | minutes | min | hour | hours | day | days | week | weeks | month | months"
+
+        repeat_interval = 1 if repeat_interval is None else repeat_interval
+        return repeat_interval * unit_to_seconds.get(repeat_period, 0)
 
     def exec(self, *args, **kwargs):
         # Check if the job already exists.
@@ -72,8 +91,7 @@ class CreateJobExecutor(AbstractExecutor):
         queries = [str(q) for q in self.node.queries]
         start_time = self._parse_datetime_str(self.node.start_time) if self.node.start_time is not None else datetime.datetime.now()
         end_time = self._parse_datetime_str(self.node.end_time) if self.node.end_time is not None else None
-        repeat_interval = self.node.repeat_interval
-        repeat_period = self.node.repeat_period
+        repeat_interval = self._get_repeat_time_interval_seconds(self.node.repeat_interval, self.node.repeat_period)
         active = True
         next_schedule_run = start_time
 
@@ -83,7 +101,6 @@ class CreateJobExecutor(AbstractExecutor):
             start_time,
             end_time,
             repeat_interval,
-            repeat_period,
             active,
             next_schedule_run
         )

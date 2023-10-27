@@ -16,6 +16,7 @@
 import json
 import datetime
 
+from sqlalchemy import and_, asc, true
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import select
 
@@ -37,7 +38,6 @@ class JobCatalogService(BaseService):
         start_time: datetime,
         end_time: datetime,
         repeat_interval: int,
-        repeat_period: str,
         active: bool,
         next_schedule_run: datetime,
     ) -> JobCatalogEntry:
@@ -48,7 +48,6 @@ class JobCatalogService(BaseService):
                 start_time=start_time,
                 end_time=end_time,
                 repeat_interval=repeat_interval,
-                repeat_period=repeat_period,
                 active=active,
                 next_schedule_run=next_schedule_run,
             )
@@ -96,3 +95,58 @@ class JobCatalogService(BaseService):
             )
             logger.exception(err_msg)
             raise CatalogError(err_msg)
+
+    def get_all_overdue_jobs(self) -> list:
+        """Get the list of jobs that are overdue to be triggered
+        Arguments:
+            None
+        Returns:
+            Returns the list of all active overdue jobs
+        """
+        entries = self.session.execute(
+            select(self.model).filter(
+                and_(self.model._next_scheduled_run <= datetime.datetime.now(), self.model._active == true())
+            )
+        ).all()
+        entry = [row.as_dataclass() for row in entries]
+        return entry
+
+    def get_next_executable_job(self, only_past_jobs: bool) -> JobCatalogEntry:
+        """Get the oldest job that is ready to be triggered by trigger time
+        Arguments:
+            only_past_jobs (bool): boolean flag to denote if only jobs with trigger time in
+                past should be considered
+        Returns:
+            Returns the first job to be triggered
+        """
+        entry = self.session.execute(
+            select(self.model)
+            .filter(
+                and_(
+                    self.model._next_scheduled_run <= datetime.datetime.now(),
+                    self.model._active == true()
+                ) if only_past_jobs else self.model._active == true()
+            )
+            .order_by(self.model._next_scheduled_run.asc())
+            .limit(1)
+        ).scalar_one_or_none()
+        if entry:
+            return entry.as_dataclass()
+        return entry
+
+    def update_next_scheduled_run(self, job_name: str, next_scheduled_run : datetime, active: bool):
+        """Update the next_scheduled_run and active column as per the provided values
+        Arguments:
+            job_name (str): job which should be updated
+
+            next_run_time (datetime): the next trigger time for the job
+
+            active (bool): the active status for the job
+        Returns:
+            void
+        """
+        job = self.session.query(self.model).filter(self.model._name == job_name).first()
+        if job:
+            job._next_scheduled_run = next_scheduled_run
+            job._active = active
+            self.session.commit()

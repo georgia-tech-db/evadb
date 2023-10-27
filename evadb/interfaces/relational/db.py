@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import asyncio
-
+import multiprocessing
 import pandas
 
 from evadb.configuration.constants import EvaDB_DATABASE_DIR
@@ -44,6 +44,7 @@ from evadb.parser.utils import (
 from evadb.server.command_handler import execute_statement
 from evadb.utils.generic_utils import find_nearest_word, is_ray_enabled_and_installed
 from evadb.utils.logging_manager import logger
+from evadb.utils.job_scheduler import JobScheduler
 
 
 class EvaDBConnection:
@@ -53,6 +54,7 @@ class EvaDBConnection:
         self._cursor = None
         self._result: Batch = None
         self._evadb = evadb
+        self._jobs_process = None
 
     def cursor(self):
         """Retrieves a cursor associated with the connection.
@@ -80,6 +82,22 @@ class EvaDBConnection:
             self._cursor = EvaDBCursor(self)
         return self._cursor
 
+    def start_jobs(self):
+        if self._jobs_process and self._jobs_process.is_alive():
+            logger.debug("The job scheduler is already running")
+            return
+
+        job_scheduler = JobScheduler(self._evadb)
+        self._jobs_process = multiprocessing.Process(target=job_scheduler.execute)
+        self._jobs_process.daemon = True
+        self._jobs_process.start()
+        logger.debug("Job scheduler process started")
+
+    def stop_jobs(self):
+        if self._jobs_process is not None and self._jobs_process.is_alive():
+            self._jobs_process.terminate()
+            self._jobs_process.join()
+            logger.debug("Job scheduler process stopped")
 
 class EvaDBCursor(object):
     def __init__(self, connection):
