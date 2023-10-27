@@ -86,4 +86,4 @@ class DropObject:
                 elif child.data == "uid":
                     job_name = self.visit(child)
 
-        return DropObjectStatement(ObjectType.JOB , job_name, if_exists)
+        return DropObjectStatement(ObjectType.JOB, job_name, if_exists)

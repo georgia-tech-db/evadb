@@ -13,10 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
 import datetime
+import json
 
-from sqlalchemy import and_, asc, true
+from sqlalchemy import and_, true
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import select
 
@@ -58,7 +58,7 @@ class JobCatalogService(BaseService):
                 f"Failed to insert entry into job catalog with exception {str(e)}"
             )
             raise CatalogError(e)
-        
+
         return job_catalog_obj.as_dataclass()
 
     def get_entry_by_name(self, job_name: str) -> JobCatalogEntry:
@@ -90,9 +90,7 @@ class JobCatalogService(BaseService):
             job_catalog_obj.delete(self.session)
             return True
         except Exception as e:
-            err_msg = (
-                f"Delete Job failed for {job_entry} with error {str(e)}."
-            )
+            err_msg = f"Delete Job failed for {job_entry} with error {str(e)}."
             logger.exception(err_msg)
             raise CatalogError(err_msg)
 
@@ -105,7 +103,10 @@ class JobCatalogService(BaseService):
         """
         entries = self.session.execute(
             select(self.model).filter(
-                and_(self.model._next_scheduled_run <= datetime.datetime.now(), self.model._active == true())
+                and_(
+                    self.model._next_scheduled_run <= datetime.datetime.now(),
+                    self.model._active == true(),
+                )
             )
         ).all()
         entry = [row.as_dataclass() for row in entries]
@@ -124,8 +125,10 @@ class JobCatalogService(BaseService):
             .filter(
                 and_(
                     self.model._next_scheduled_run <= datetime.datetime.now(),
-                    self.model._active == true()
-                ) if only_past_jobs else self.model._active == true()
+                    self.model._active == true(),
+                )
+                if only_past_jobs
+                else self.model._active == true()
             )
             .order_by(self.model._next_scheduled_run.asc())
             .limit(1)
@@ -134,7 +137,9 @@ class JobCatalogService(BaseService):
             return entry.as_dataclass()
         return entry
 
-    def update_next_scheduled_run(self, job_name: str, next_scheduled_run : datetime, active: bool):
+    def update_next_scheduled_run(
+        self, job_name: str, next_scheduled_run: datetime, active: bool
+    ):
         """Update the next_scheduled_run and active column as per the provided values
         Arguments:
             job_name (str): job which should be updated
@@ -145,7 +150,9 @@ class JobCatalogService(BaseService):
         Returns:
             void
         """
-        job = self.session.query(self.model).filter(self.model._name == job_name).first()
+        job = (
+            self.session.query(self.model).filter(self.model._name == job_name).first()
+        )
         if job:
             job._next_scheduled_run = next_scheduled_run
             job._active = active

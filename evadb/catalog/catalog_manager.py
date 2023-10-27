@@ -219,7 +219,6 @@ class CatalogManager(object):
 
         return True
 
-
     "Job catalog services"
 
     def insert_job_catalog_entry(
@@ -230,7 +229,7 @@ class CatalogManager(object):
         end_time: datetime,
         repeat_interval: int,
         active: bool,
-        next_schedule_run: datetime
+        next_schedule_run: datetime,
     ) -> JobCatalogEntry:
         """A new entry is persisted in the job catalog."
 
@@ -250,7 +249,7 @@ class CatalogManager(object):
             end_time,
             repeat_interval,
             active,
-            next_schedule_run
+            next_schedule_run,
         )
 
         return job_entry
@@ -291,7 +290,9 @@ class CatalogManager(object):
         """
         return self._job_catalog_service.get_next_executable_job(only_past_jobs)
 
-    def update_job_catalog_entry(self, job_name: str, next_scheduled_run: datetime, active: bool):
+    def update_job_catalog_entry(
+        self, job_name: str, next_scheduled_run: datetime, active: bool
+    ):
         """Update the next_scheduled_run and active column as per the provided values
         Arguments:
             job_name (str): job which should be updated
@@ -300,7 +301,9 @@ class CatalogManager(object):
 
             active (bool): the active status for the job
         """
-        self._job_catalog_service.update_next_scheduled_run(job_name, next_scheduled_run, active)
+        self._job_catalog_service.update_next_scheduled_run(
+            job_name, next_scheduled_run, active
+        )
 
     "Table catalog services"
 

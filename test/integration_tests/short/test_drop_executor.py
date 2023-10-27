@@ -258,20 +258,14 @@ class DropObjectExecutorTest(unittest.TestCase):
         EVERY 2 week;"""
 
         execute_query_fetch_all(self.evadb, query)
-        self.assertIsNotNone(
-            self.evadb.catalog().get_job_catalog_entry(job_name)
-        )
+        self.assertIsNotNone(self.evadb.catalog().get_job_catalog_entry(job_name))
 
         # DROP JOB
         execute_query_fetch_all(self.evadb, f"DROP JOB {job_name}")
-        self.assertIsNone(
-            self.evadb.catalog().get_job_catalog_entry(job_name)
-        )
+        self.assertIsNone(self.evadb.catalog().get_job_catalog_entry(job_name))
 
         # DROP should pass with warning
-        result = execute_query_fetch_all(
-            self.evadb, f"DROP JOB IF EXISTS {job_name}"
-        )
+        result = execute_query_fetch_all(self.evadb, f"DROP JOB IF EXISTS {job_name}")
         self.assertTrue("does not exist" in result.frames.to_string())
 
         # DROP should throw error
@@ -286,6 +280,4 @@ class DropObjectExecutorTest(unittest.TestCase):
         execute_query_fetch_all(self.evadb, query)
 
         # clean up
-        result = execute_query_fetch_all(
-            self.evadb, f"DROP JOB IF EXISTS {job_name}"
-        )
+        result = execute_query_fetch_all(self.evadb, f"DROP JOB IF EXISTS {job_name}")

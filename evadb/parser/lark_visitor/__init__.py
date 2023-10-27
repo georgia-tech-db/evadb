@@ -20,8 +20,8 @@ from evadb.parser.lark_visitor._common_clauses_ids import CommonClauses
 from evadb.parser.lark_visitor._create_statements import (
     CreateDatabase,
     CreateIndex,
-    CreateTable,
     CreateJob,
+    CreateTable,
 )
 from evadb.parser.lark_visitor._delete_statement import Delete
 from evadb.parser.lark_visitor._drop_statement import DropObject

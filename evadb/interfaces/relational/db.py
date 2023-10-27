@@ -14,6 +14,7 @@
 # limitations under the License.
 import asyncio
 import multiprocessing
+
 import pandas
 
 from evadb.configuration.constants import EvaDB_DATABASE_DIR
@@ -43,8 +44,8 @@ from evadb.parser.utils import (
 )
 from evadb.server.command_handler import execute_statement
 from evadb.utils.generic_utils import find_nearest_word, is_ray_enabled_and_installed
-from evadb.utils.logging_manager import logger
 from evadb.utils.job_scheduler import JobScheduler
+from evadb.utils.logging_manager import logger
 
 
 class EvaDBConnection:
@@ -98,6 +99,7 @@ class EvaDBConnection:
             self._jobs_process.terminate()
             self._jobs_process.join()
             logger.debug("Job scheduler process stopped")
+
 
 class EvaDBCursor(object):
     def __init__(self, connection):

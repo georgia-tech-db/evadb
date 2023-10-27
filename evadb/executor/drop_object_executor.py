@@ -167,9 +167,7 @@ class DropObjectExecutor(AbstractExecutor):
     def _handle_drop_job(self, job_name: str, if_exists: bool):
         job_catalog_entry = self.catalog().get_job_catalog_entry(job_name)
         if not job_catalog_entry:
-            err_msg = (
-                f"Job {job_name} does not exist, therefore cannot be dropped."
-            )
+            err_msg = f"Job {job_name} does not exist, therefore cannot be dropped."
             if if_exists:
                 logger.warning(err_msg)
                 return Batch(pd.DataFrame([err_msg]))

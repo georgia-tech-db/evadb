@@ -14,14 +14,15 @@
 # limitations under the License.
 
 import datetime
-import time
 import sys
+import time
 
 from evadb.catalog.models.utils import JobCatalogEntry
 from evadb.database import EvaDBDatabase
 from evadb.server.command_handler import execute_query
 from evadb.utils.generic_utils import parse_config_yml
 from evadb.utils.logging_manager import logger
+
 
 class JobScheduler:
     # read jobs with next trigger in the past
@@ -31,38 +32,64 @@ class JobScheduler:
 
     def __init__(self, evadb: EvaDBDatabase) -> None:
         config_object = parse_config_yml()
-        self.jobs_config = config_object["jobs"] if config_object is not None else {"poll_interval": 30}
+        self.jobs_config = (
+            config_object["jobs"]
+            if config_object is not None
+            else {"poll_interval": 30}
+        )
         self._evadb = evadb
 
     def _update_next_schedule_run(self, job_catalog_entry: JobCatalogEntry) -> bool:
         job_end_time = job_catalog_entry.end_time
         active_status = False
         if job_catalog_entry.repeat_interval > 0:
-            next_trigger_time = datetime.datetime.now() + datetime.timedelta(seconds=job_catalog_entry.repeat_interval)
+            next_trigger_time = datetime.datetime.now() + datetime.timedelta(
+                seconds=job_catalog_entry.repeat_interval
+            )
             if next_trigger_time < job_end_time:
                 active_status = True
 
         self._evadb.catalog().update_job_catalog_entry(
             job_catalog_entry.name,
-            next_trigger_time if active_status else job_catalog_entry.next_scheduled_run,
-            active_status
+            next_trigger_time
+            if active_status
+            else job_catalog_entry.next_scheduled_run,
+            active_status,
         )
         return active_status
 
     def _scan_and_execute_jobs(self):
         while True:
             try:
-                for next_executable_job in iter(lambda: self._evadb.catalog().get_next_executable_job(only_past_jobs=True), None):
-                    execution_results = [execute_query(self._evadb, query) for query in next_executable_job.queries]
+                for next_executable_job in iter(
+                    lambda: self._evadb.catalog().get_next_executable_job(
+                        only_past_jobs=True
+                    ),
+                    None,
+                ):
+                    execution_results = [
+                        execute_query(self._evadb, query)
+                        for query in next_executable_job.queries
+                    ]
+                    logger.debug(
+                        f"Exection result for job: {next_executable_job.name} results: {execution_results}"
+                    )
                     self._update_next_schedule_run(next_executable_job)
 
-                next_executable_job = self._evadb.catalog().get_next_executable_job(only_past_jobs=False)
+                next_executable_job = self._evadb.catalog().get_next_executable_job(
+                    only_past_jobs=False
+                )
                 if next_executable_job.next_scheduled_run > datetime.datetime.now():
                     sleep_time = min(
                         self.jobs_config["poll_interval"],
-                        (next_executable_job.next_scheduled_run - datetime.datetime.now()).total_seconds()
+                        (
+                            next_executable_job.next_scheduled_run
+                            - datetime.datetime.now()
+                        ).total_seconds(),
                     )
-                    logger.debug(f"Job scheduler process sleeping for {sleep_time} seconds")
+                    logger.debug(
+                        f"Job scheduler process sleeping for {sleep_time} seconds"
+                    )
                     time.sleep(sleep_time)
             except Exception as e:
                 logger.error(f"Got an exception in job scheduler: {str(e)}")

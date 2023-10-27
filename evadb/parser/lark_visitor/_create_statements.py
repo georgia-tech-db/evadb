@@ -349,7 +349,6 @@ class CreateJob:
         repeat_period = None
         if_not_exists = False
         for child in tree.children:
-            
             if isinstance(child, Tree):
                 if child.data == "if_not_exists":
                     if_not_exists = True
@@ -365,7 +364,13 @@ class CreateJob:
                     repeat_interval, repeat_period = self.visit(child)
 
         create_job = CreateJobStatement(
-            job_name, queries, if_not_exists, start_time, end_time, repeat_interval, repeat_period
+            job_name,
+            queries,
+            if_not_exists,
+            start_time,
+            end_time,
+            repeat_interval,
+            repeat_period,
         )
 
         return create_job

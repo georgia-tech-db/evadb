@@ -17,8 +17,6 @@ import unittest
 from datetime import datetime
 from test.util import get_evadb_for_testing, shutdown_ray
 
-from mock import patch
-
 from evadb.executor.executor_utils import ExecutorError
 from evadb.server.command_handler import execute_query_fetch_all
 
@@ -30,8 +28,8 @@ class CreateJobTest(unittest.TestCase):
         # reset the catalog manager before running each test
         cls.evadb.catalog().reset()
         cls.db_path = f"{os.path.dirname(os.path.abspath(__file__))}/testing.db"
-        cls.job_name = 'test_async_job'
-        
+        cls.job_name = "test_async_job"
+
         execute_query_fetch_all(cls.evadb, f"DROP JOB IF EXISTS {cls.job_name};")
 
     @classmethod
@@ -49,27 +47,27 @@ class CreateJobTest(unittest.TestCase):
                 PREDICT 'price';""",
             "Select HomeSalesForecast(10);",
         ]
-        start = '2023-04-01 01:10:00'
-        end =  '2023-05-01'
+        start = "2023-04-01 01:10:00"
+        end = "2023-05-01"
         repeat_interval = 2
-        repeat_period = 'week'
+        repeat_period = "week"
 
         query = f"""CREATE JOB {self.job_name} AS (
                     {''.join(queries)}
                 )
                 START '{start}'
                 END '{end}'
-                EVERY {repeat_interval} {repeat_period}; 
+                EVERY {repeat_interval} {repeat_period};
             """
-        
-
         execute_query_fetch_all(self.evadb, query)
 
         datetime_format = "%Y-%m-%d %H:%M:%S"
         date_format = "%Y-%m-%d"
         job_entry = self.evadb.catalog().get_job_catalog_entry(self.job_name)
         self.assertEqual(job_entry.name, self.job_name)
-        self.assertEqual(job_entry.start_time, datetime.strptime(start, datetime_format))
+        self.assertEqual(
+            job_entry.start_time, datetime.strptime(start, datetime_format)
+        )
         self.assertEqual(job_entry.end_time, datetime.strptime(end, date_format))
         self.assertEqual(job_entry.repeat_interval, repeat_interval)
         self.assertEqual(job_entry.repeat_period, repeat_period)
@@ -86,28 +84,30 @@ class CreateJobTest(unittest.TestCase):
                 PREDICT 'price';""",
             "Select HomeSalesForecast(10);",
         ]
-        start = '2023-04-01 01:10:00'
-        end =  '2023-05-01'
-        repeat_interval = 2
-        repeat_period = 'week'
 
         query = """CREATE JOB {} {} AS (
                     {}
                 )
                 START '2023-04-01'
                 END '2023-05-01'
-                EVERY 2 week; 
+                EVERY 2 week;
             """
 
         # Create the database.
-        execute_query_fetch_all(self.evadb, query.format(if_not_exists, self.job_name, ''.join(queries)))
+        execute_query_fetch_all(
+            self.evadb, query.format(if_not_exists, self.job_name, "".join(queries))
+        )
 
         # Trying to create the same database should raise an exception.
         with self.assertRaises(ExecutorError):
-            execute_query_fetch_all(self.evadb, query.format("", self.job_name, ''.join(queries)))
+            execute_query_fetch_all(
+                self.evadb, query.format("", self.job_name, "".join(queries))
+            )
 
         # Trying to create the same database should warn if "IF NOT EXISTS" is provided.
-        execute_query_fetch_all(self.evadb, query.format(if_not_exists, self.job_name, ''.join(queries)))
+        execute_query_fetch_all(
+            self.evadb, query.format(if_not_exists, self.job_name, "".join(queries))
+        )
 
 
 if __name__ == "__main__":
