@@ -112,6 +112,8 @@ pinecone_libs = ["pinecone-client"]
 
 chromadb_libs = ["chromadb"]
 
+milvus_libs = ["pymilvus>=2.3.0"]
+
 postgres_libs = [
     "psycopg2",
 ]
@@ -123,8 +125,8 @@ sklearn_libs = ["scikit-learn"]
 xgboost_libs = ["flaml[automl]"]
 
 forecasting_libs = [
-    "statsforecast", # MODEL TRAIN AND FINE TUNING
-    "neuralforecast" # MODEL TRAIN AND FINE TUNING
+    "statsforecast",  # MODEL TRAIN AND FINE TUNING
+    "neuralforecast",  # MODEL TRAIN AND FINE TUNING
 ]
 
 imagegen_libs = [
@@ -168,6 +170,7 @@ EXTRA_REQUIRES = {
     "qdrant": qdrant_libs,
     "pinecone": pinecone_libs,
     "chromadb": chromadb_libs,
+    "milvus": milvus_libs,
     "postgres": postgres_libs,
     "ludwig": ludwig_libs,
     "sklearn": sklearn_libs,

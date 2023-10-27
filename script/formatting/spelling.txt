@@ -551,6 +551,11 @@ MaxPool
 MemeImages
 MemoTest
 MetaData
+MILVUS
+Milvus
+Milvus's
+MilvusClient
+MilvusVectorStore
 MindsDB
 MiniLM
 MnistImageClassifier
@@ -1402,6 +1407,7 @@ memeimages
 metaclass
 metafile
 metainfo
+milvus
 mindsdb
 miniconda
 mins
@@ -1526,6 +1532,7 @@ ptype
 pushdown
 px
 py
+pymilvus
 pymupdfs
 pypi
 pypirc
@@ -1655,6 +1662,7 @@ testCreateIndexName
 testDeleteOne
 testFaissIndexImageDataset
 testFaissIndexScanRewrite
+testMilvusIndexImageDataset
 testIndex
 testIndexAutoUpdate
 testOpenTable

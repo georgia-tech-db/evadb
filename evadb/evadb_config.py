@@ -36,4 +36,9 @@ BASE_EVADB_CONFIG = {
     "OPENAI_API_KEY": "",
     "PINECONE_API_KEY": "",
     "PINECONE_ENV": "",
+    "MILVUS_URI": "",
+    "MILVUS_USER": "",
+    "MILVUS_PASSWORD": "",
+    "MILVUS_DB_NAME": "",
+    "MILVUS_TOKEN": "",
 }

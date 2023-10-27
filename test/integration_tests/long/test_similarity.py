@@ -15,7 +15,12 @@
 import os
 import time
 import unittest
-from test.markers import chromadb_skip_marker, pinecone_skip_marker, qdrant_skip_marker
+from test.markers import (
+    chromadb_skip_marker,
+    milvus_skip_marker,
+    pinecone_skip_marker,
+    qdrant_skip_marker,
+)
 from test.util import (
     create_sample_image,
     get_evadb_for_testing,
@@ -130,6 +135,13 @@ class SimilarityTests(unittest.TestCase):
         os.environ["PINECONE_API_KEY"] = "657e4fae-7208-4555-b0f2-9847dfa5b818"
         os.environ["PINECONE_ENV"] = "gcp-starter"
 
+        self.original_milvus_uri = os.environ.get("MILVUS_URI")
+        self.original_milvus_db_name = os.environ.get("MILVUS_DB_NAME")
+
+        os.environ["MILVUS_URI"] = "http://localhost:19530"
+        # use default Milvus database for testing
+        os.environ["MILVUS_DB_NAME"] = "default"
+
     def tearDown(self):
         shutdown_ray()
 
@@ -148,6 +160,14 @@ class SimilarityTests(unittest.TestCase):
             os.environ["PINECONE_ENV"] = self.original_pinecone_env
         else:
             del os.environ["PINECONE_ENV"]
+        if self.original_milvus_uri:
+            os.environ["MILVUS_URI"] = self.original_milvus_uri
+        else:
+            del os.environ["MILVUS_URI"]
+        if self.original_milvus_db_name:
+            os.environ["MILVUS_DB_NAME"] = self.original_milvus_db_name
+        else:
+            del os.environ["MILVUS_DB_NAME"]
 
     def test_similarity_should_work_in_order(self):
         ###############################################
@@ -523,3 +543,33 @@ class SimilarityTests(unittest.TestCase):
 
             drop_index_query = "DROP INDEX testpineconeindeximagedataset;"
             execute_query_fetch_all(self.evadb, drop_index_query)
+
+    @pytest.mark.skip(reason="Requires running local Milvus instance")
+    @milvus_skip_marker
+    def test_end_to_end_index_scan_should_work_correctly_on_image_dataset_milvus(
+        self,
+    ):
+        for _ in range(2):
+            create_index_query = """CREATE INDEX testMilvusIndexImageDataset
+                                    ON testSimilarityImageDataset (DummyFeatureExtractor(data))
+                                    USING MILVUS;"""
+            execute_query_fetch_all(self.evadb, create_index_query)
+
+            select_query = """SELECT _row_id FROM testSimilarityImageDataset
+                                ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data))
+                                LIMIT 1;""".format(
+                self.img_path
+            )
+            explain_batch = execute_query_fetch_all(
+                self.evadb, f"EXPLAIN {select_query}"
+            )
+            self.assertTrue("VectorIndexScan" in explain_batch.frames[0][0])
+
+            res_batch = execute_query_fetch_all(self.evadb, select_query)
+            self.assertEqual(
+                res_batch.frames["testsimilarityimagedataset._row_id"][0], 5
+            )
+
+            # Cleanup
+            drop_query = "DROP INDEX testMilvusIndexImageDataset"
+            execute_query_fetch_all(self.evadb, drop_query)
