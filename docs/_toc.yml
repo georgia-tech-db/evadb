@@ -47,6 +47,8 @@ parts:
           - file: source/reference/evaql/select
           - file: source/reference/evaql/explain
           - file: source/reference/evaql/show_functions
+          - file: source/reference/evaql/show_config
+          - file: source/reference/evaql/set_config
           - file: source/reference/evaql/create_database
           - file: source/reference/evaql/create_function
           - file: source/reference/evaql/create_index
