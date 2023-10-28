@@ -72,7 +72,7 @@
 
 EvaDB enables software developers to build AI apps in a few lines of code. Its powerful SQL API simplifies AI app development for both structured and unstructured data. EvaDB's benefits include:
 <details>
-<summary> 🔮 Easy to <a href="https://evadb.readthedocs.io/en/latest/source/overview/connect-to-data-sources.html">connect EvaDB with your data sources</a>, such as PostgreSQL, S3, and Github, and build AI-powered apps with SQL queries </summary>
+<summary> 🔮 Easy to <a href="https://evadb.readthedocs.io/en/latest/source/overview/connect-to-data-sources.html">connect EvaDB with your data sources</a>, such as PostgreSQL, S3, and Github, and build AI-powered apps with SQL queries. </summary>
 <br/>
 <table>
 <tr>
@@ -159,8 +159,15 @@ Check more details on each supported data sources at [Data Sources documentation
 Check more details on each supported model at [AI Engines documentation page](https://evadb.readthedocs.io/en/latest/source/reference/ai/index.html)
 </details>
 
-- ⚡️ Faster queries thanks to AI-centric query optimization
-- 💰 Save money spent on running models by efficient CPU/GPU use
+<details>
+<summary> ⚡️ Faster queries thanks to <a href="https://evadb.readthedocs.io/en/latest/source/reference/optimizations.html">AI-centric query optimization </a> such as caching, batching, and parallel processing. </summary>
+
+- Function Result Caching to reuse the results from expensive AI function invocations.
+- LLM Batching to reduce the token usage and dollar spent. 
+- Parallel Query Processing to 💰 save money and time spent on running models by efficient CPU/GPU use.
+- Query Predicate Reordering and Pushdown.
+
+</details>
 - 🔧 Fine-tune your AI models to achieve better results
 
 👋 Hey! If you're excited about our vision of bringing AI inside database systems, show some ❤️ by: 
