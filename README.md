@@ -160,7 +160,7 @@ Check more details on each supported model at [AI Engines documentation page](ht
 </details>
 
 <details>
-<summary> 🔧 Create and Fine-tune your AI models for regression, classification, and time series forecasting</summary>.
+<summary> 🔧 Create and Fine-tune your AI models for regression, classification, and time series forecasting.</summary>
 <br/>
 <table>
 <tr>
@@ -191,16 +191,18 @@ Check more details on each supported model at [AI Engines documentation page](ht
 </tr>
 </table>
 
-Check more details on each supported AutoML frameworks at [AI Engines documentation page](https://evadb.readthedocs.io/en/latest/source/reference/ai/index.html)
+Check more details on each supported AutoML frameworks at [AI Engines documentation page](https://evadb.readthedocs.io/en/latest/source/reference/ai/index.html).
 </details>
 
 <details>
-<summary> ⚡️ Faster queries thanks to <a href="https://evadb.readthedocs.io/en/latest/source/reference/optimizations.html">AI-centric query optimization </a> such as caching, batching, and parallel processing. </summary>
+<summary> ⚡️ Faster queries thanks to AI-centric query optimization such as caching, batching, and parallel processing. </summary>
 
 - Function Result Caching to reuse the results from expensive AI function invocations.
 - LLM Batching to reduce the token usage and dollar spent. 
 - Parallel Query Processing to 💰 save money and time spent on running models by efficient CPU/GPU use.
 - Query Predicate Reordering and Pushdown.
+
+Check more details on optimizations in EvaDB at [Optimization documentation page](https://evadb.readthedocs.io/en/latest/source/reference/optimizations.html).
 
 </details>
 <br/>
