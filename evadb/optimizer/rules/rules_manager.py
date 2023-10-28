@@ -17,7 +17,6 @@ from __future__ import annotations
 from contextlib import contextmanager
 from typing import List
 
-from evadb.configuration.configuration_manager import ConfigurationManager
 from evadb.optimizer.rules.rules import (
     CacheFunctionExpressionInApply,
     CacheFunctionExpressionInFilter,
@@ -67,7 +66,7 @@ from evadb.utils.generic_utils import is_ray_enabled_and_installed
 
 
 class RulesManager:
-    def __init__(self, config: ConfigurationManager):
+    def __init__(self, configs: dict = {}):
         self._logical_rules = [
             LogicalInnerJoinCommutativity(),
             CacheFunctionExpressionInApply(),
@@ -121,9 +120,9 @@ class RulesManager:
         # These rules are enabled only if
         # (1) ray is installed and (2) ray is enabled
         # Ray must be installed using pip
-        # It must also be enabled in "evadb.yml"
+        # It must also be enabled using the SET command
         # NOTE: By default, it is not enabled
-        ray_enabled = config.get_value("experimental", "ray")
+        ray_enabled = configs.get("ray", False)
         if is_ray_enabled_and_installed(ray_enabled):
             self._implementation_rules.extend(
                 [

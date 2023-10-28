@@ -16,7 +16,11 @@ from typing import Iterator
 
 from evadb.database import EvaDBDatabase
 from evadb.executor.abstract_executor import AbstractExecutor
-from evadb.executor.executor_utils import apply_predicate, apply_project
+from evadb.executor.executor_utils import (
+    apply_predicate,
+    apply_project,
+    instrument_function_expression_cost,
+)
 from evadb.models.storage.batch import Batch
 from evadb.plan_nodes.seq_scan_plan import SeqScanPlan
 
@@ -44,9 +48,15 @@ class SequentialScanExecutor(AbstractExecutor):
                 batch.modify_column_alias(self.alias)
 
             # We do the predicate first
-            batch = apply_predicate(batch, self.predicate, self.catalog())
+            batch = apply_predicate(batch, self.predicate)
             # Then do project
-            batch = apply_project(batch, self.project_expr, self.catalog())
+            batch = apply_project(batch, self.project_expr)
 
             if not batch.empty():
                 yield batch
+
+        # instrument required stats
+        if self.predicate or self.project_expr:
+            catalog = self.catalog()
+            instrument_function_expression_cost(self.predicate, catalog)
+            instrument_function_expression_cost(self.project_expr, catalog)

@@ -57,7 +57,7 @@ class ExplainExecutorTest(unittest.TestCase):
             """|__ ProjectPlan\n    |__ SeqScanPlan\n        |__ StoragePlan\n"""
         )
         self.assertEqual(batch.frames[0][0], expected_output)
-        rules_manager = RulesManager(self.evadb.config)
+        rules_manager = RulesManager()
         with disable_rules(rules_manager, [XformLateralJoinToLinearFlow()]):
             custom_plan_generator = PlanGenerator(self.evadb, rules_manager)
             select_query = "EXPLAIN SELECT id, data FROM MyVideo JOIN LATERAL DummyObjectDetector(data) AS T ;"
@@ -68,7 +68,7 @@ class ExplainExecutorTest(unittest.TestCase):
             self.assertEqual(batch.frames[0][0], expected_output)
 
         # Disable more rules
-        rules_manager = RulesManager(self.evadb.config)
+        rules_manager = RulesManager()
         with disable_rules(
             rules_manager,
             [

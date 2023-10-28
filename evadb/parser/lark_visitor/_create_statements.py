@@ -155,9 +155,10 @@ class CreateTable:
         token = tree.children[0]
         if str.upper(token) == "FLOAT":
             data_type = ColumnType.FLOAT
-            dimensions = self.visit(tree.children[1])
         elif str.upper(token) == "TEXT":
             data_type = ColumnType.TEXT
+
+        if len(tree.children) > 1:
             dimensions = self.visit(tree.children[1])
 
         return data_type, array_type, dimensions
@@ -298,6 +299,8 @@ class CreateIndex:
             vector_store_type = VectorStoreType.PGVECTOR
         elif str.upper(token) == "CHROMADB":
             vector_store_type = VectorStoreType.CHROMADB
+        elif str.upper(token) == "MILVUS":
+            vector_store_type = VectorStoreType.MILVUS
         return vector_store_type
 
 

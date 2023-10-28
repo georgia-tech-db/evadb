@@ -14,6 +14,8 @@
 # limitations under the License.
 from typing import Callable, Dict, List, Tuple, Union
 
+from thefuzz import process
+
 from evadb.binder.binder_utils import (
     BinderError,
     check_data_source_and_table_are_valid,
@@ -144,7 +146,17 @@ class StatementBinderContext:
         col_name = col_name.lower()
 
         def raise_error():
-            err_msg = f"Found invalid column {col_name}"
+            all_columns = sorted(
+                list(set([col for _, col in self._get_all_alias_and_col_name()]))
+            )
+            res = process.extractOne(col_name, all_columns)
+            if res is not None:
+                guess_column, _ = res
+                err_msg = f"Cannnot find column {col_name}. Did you mean {guess_column}? The feasible columns are {all_columns}."
+            else:
+                err_msg = (
+                    f"Cannnot find column {col_name}. There are no feasible columns."
+                )
             logger.error(err_msg)
             raise BinderError(err_msg)
 

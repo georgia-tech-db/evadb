@@ -70,6 +70,8 @@ class FileFormatType(EvaDBEnum):
 class ShowType(EvaDBEnum):
     FUNCTIONS  # noqa: F821
     TABLES  # noqa: F821
+    CONFIG  # noqa: F821
+    DATABASES  # noqa: F821
 
 
 class FunctionType(EvaDBEnum):

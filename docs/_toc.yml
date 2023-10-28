@@ -7,19 +7,20 @@ parts:
         sections:
           - file: source/overview/getting-started/installation-options
             title: Installation Options
-      - file: source/overview/connect-to-database
-        title: Connect to Database
-      - file: source/overview/model-inference
-        title: Model inference
       - file: source/overview/concepts
         title: Concepts
-        sections:
-          - file: source/overview/concepts/data-sources
-            title: Data Sources
-        #- file: source/overview/faq
+      - file: source/overview/ai-queries
+        title: AI Queries
+      - file: source/overview/connect-to-data-sources
+        title: Connect to Data Sources
+      - file: source/overview/faq
 
   - caption: Use Cases
     chapters:
+      - file: source/usecases/forecasting.rst
+        title: Forecasting
+      - file: source/usecases/classification.rst
+        title: Classification
       - file: source/usecases/sentiment-analysis.rst
         title: Sentiment Analysis
       - file: source/usecases/question-answering.rst
@@ -34,31 +35,37 @@ parts:
         title: Object Detection
       - file: source/usecases/emotion-analysis.rst
         title: Emotion Analysis
-      - file: source/usecases/homesale-forecast.rst
-        title: Home Sale Forecasting
-      - file: source/usecases/homerental-predict.rst
-        title: Home Rental Prediction
-      # - file: source/usecases/privategpt.rst
-      #   title: PrivateGPT
 
   - caption: User Reference
     chapters:
       - file: source/reference/evaql      
-        title: EvaQL
+        title: Query Language
         sections:
-          - file: source/reference/evaql/load
+          - file: source/reference/evaql/load_csv
+          - file: source/reference/evaql/load_image
+          - file: source/reference/evaql/load_video
           - file: source/reference/evaql/select
           - file: source/reference/evaql/explain
-          - file: source/reference/evaql/show
-          - file: source/reference/evaql/create
-          - file: source/reference/evaql/drop
-          - file: source/reference/evaql/insert
-          - file: source/reference/evaql/delete
+          - file: source/reference/evaql/show_functions
+          - file: source/reference/evaql/show_config
+          - file: source/reference/evaql/set_config
+          - file: source/reference/evaql/create_database
+          - file: source/reference/evaql/create_function
+          - file: source/reference/evaql/create_index
+          - file: source/reference/evaql/create_table
+          - file: source/reference/evaql/drop_database
+          - file: source/reference/evaql/drop_function
+          - file: source/reference/evaql/drop_table
+          - file: source/reference/evaql/insert_table
+          - file: source/reference/evaql/delete_table
           - file: source/reference/evaql/rename
           - file: source/reference/evaql/use
 
       - file: source/reference/api
         title: Python API
+      
+      - file: source/reference/rest_api
+        title: REST API
 
       - file: source/reference/databases/index
         title: Data Sources
@@ -67,16 +74,19 @@ parts:
           - file: source/reference/databases/sqlite
           - file: source/reference/databases/mysql
           - file: source/reference/databases/mariadb
+          - file: source/reference/databases/clickhouse
           - file: source/reference/databases/github
+          - file: source/reference/databases/snowflake
 
-      - file: source/reference/vector_stores/index
-        title: Vector Stores
+      - file: source/reference/vector_databases/index
+        title: Vector Databases
         sections: 
-          - file: source/reference/vector_stores/faiss
-          - file: source/reference/vector_stores/chromadb
-          - file: source/reference/vector_stores/qdrant
-          - file: source/reference/vector_stores/pgvector
-          - file: source/reference/vector_stores/pinecone
+          - file: source/reference/vector_databases/faiss
+          - file: source/reference/vector_databases/chromadb
+          - file: source/reference/vector_databases/qdrant
+          - file: source/reference/vector_databases/pgvector
+          - file: source/reference/vector_databases/pinecone
+          - file: source/reference/vector_databases/milvus
 
       - file: source/reference/ai/index
         title: AI Engines
@@ -85,6 +95,8 @@ parts:
             title: Model Training with Ludwig
           - file: source/reference/ai/model-train-sklearn
             title: Model Training with Sklearn
+          - file: source/reference/ai/model-train-xgboost
+            title: Model Training with XGBoost
           - file: source/reference/ai/model-forecasting
             title: Time Series Forecasting
           - file: source/reference/ai/hf
@@ -93,8 +105,11 @@ parts:
             title: OpenAI 
           - file: source/reference/ai/yolo
             title: YOLO 
-          - file: source/reference/ai/custom
-            title: Custom Model
+          - file: source/reference/ai/stablediffusion
+            title: Stable Diffusion
+
+      - file: source/reference/ai/custom-ai-function
+        title: Bring Your Own AI Function
 
       - file: source/reference/optimizations
         title: Optimizations
@@ -113,7 +128,7 @@ parts:
       - file: source/benchmarks/text_summarization.rst
         title: Text Summarization
 
-  - caption: Developer Reference
+  - caption: Contribution Guide
     chapters:
       - file: source/dev-guide/contribute
         title: Contributing to EvaDB
@@ -128,6 +143,8 @@ parts:
             title: Code Style
           - file: source/dev-guide/contribute/troubleshoot
             title: Troubleshooting
+          - file: source/dev-guide/contribute/unit-test
+            title: Unit Testing UDFs in EvaDB
 
       - file: source/dev-guide/debugging
         title: Debugging EvaDB

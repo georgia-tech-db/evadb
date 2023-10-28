@@ -85,6 +85,8 @@ EvaDB enables software developers to build AI apps in a few lines of code. Its p
   <li> 📝 following us on <a href="https://medium.com/evadb-blog">Medium</a>
 </ul>
 
+We would love to learn about your AI app. Please complete this 1-minute form: https://v0fbgcue0cm.typeform.com/to/BZHZWeZm
+
 ## Quick Links
 
 - [Quick Links](#quick-links)
@@ -116,7 +118,7 @@ Our target audience is software developers who may not necessarily have a backgr
 
 <details>
 <ul>
-<li>Connect EvaDB to your SQL and vector database systems with the <a href="https://evadb.readthedocs.io/en/stable/source/reference/databases/postgres.html">`CREATE DATABASE`</a> and <a href="https://evadb.readthedocs.io/en/stable/source/reference/evaql/create.html#create-index">`CREATE INDEX`</a> statements.</li>
+<li>Connect EvaDB to your SQL and vector database systems with the <a href="https://evadb.readthedocs.io/en/stable/source/reference/databases/postgres.html">`CREATE DATABASE`</a> and <a href="https://evadb.readthedocs.io/en/stable/source/reference/evaql/create_index.html">`CREATE INDEX`</a> statements.</li>
 <li>Write SQL queries with AI functions to get inference results:</li>
    <ul>
    <li>Pick a pre-trained AI model from Hugging Face, Open AI, Ultralytics, PyTorch, and built-in AI frameworks for generative AI, NLP, and vision applications;</li>  
@@ -209,6 +211,8 @@ EvaDB's AI-centric query optimizer takes a query as input and generates a query 
 </details>
 
 ## Community and Support
+
+We would love to learn about your AI app. Please complete this 1-minute form: https://v0fbgcue0cm.typeform.com/to/BZHZWeZm
 
 <!--<p>
   <a href="https://evadb.ai/community">

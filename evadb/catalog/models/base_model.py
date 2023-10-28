@@ -12,16 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import contextlib
-
-import sqlalchemy
 from sqlalchemy import Column, Integer
-from sqlalchemy.engine import Engine
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy_utils import database_exists
 
-from evadb.catalog.sql_config import CATALOG_TABLES
 from evadb.utils.logging_manager import logger
 
 
@@ -100,33 +94,3 @@ class CustomModel:
 
 # Custom Base Model to be inherited by all models
 BaseModel = declarative_base(cls=CustomModel, constructor=None)
-
-
-def truncate_catalog_tables(engine: Engine):
-    """Truncate all the catalog tables"""
-    # https://stackoverflow.com/questions/4763472/sqlalchemy-clear-database-content-but-dont-drop-the-schema/5003705#5003705 #noqa
-    # reflect to refresh the metadata
-    BaseModel.metadata.reflect(bind=engine)
-    insp = sqlalchemy.inspect(engine)
-    if database_exists(engine.url):
-        with contextlib.closing(engine.connect()) as con:
-            trans = con.begin()
-            for table in reversed(BaseModel.metadata.sorted_tables):
-                if insp.has_table(table.name):
-                    con.execute(table.delete())
-            trans.commit()
-
-
-def drop_all_tables_except_catalog(engine: Engine):
-    """drop all the tables except the catalog"""
-    # reflect to refresh the metadata
-    BaseModel.metadata.reflect(bind=engine)
-    insp = sqlalchemy.inspect(engine)
-    if database_exists(engine.url):
-        with contextlib.closing(engine.connect()) as con:
-            trans = con.begin()
-            for table in reversed(BaseModel.metadata.sorted_tables):
-                if table.name not in CATALOG_TABLES:
-                    if insp.has_table(table.name):
-                        table.drop(con)
-            trans.commit()
