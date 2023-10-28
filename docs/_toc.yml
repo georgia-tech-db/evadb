@@ -63,6 +63,9 @@ parts:
 
       - file: source/reference/api
         title: Python API
+      
+      - file: source/reference/rest_api
+        title: REST API
 
       - file: source/reference/databases/index
         title: Data Sources
