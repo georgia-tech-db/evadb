@@ -160,6 +160,41 @@ Check more details on each supported model at [AI Engines documentation page](ht
 </details>
 
 <details>
+<summary> 🔧 Create and Fine-tune your AI models for regression, classification, and time series forecasting</summary>.
+<br/>
+<table>
+<tr>
+<th>Regression</th>
+<th>Classification</th>
+<th>Time Series Forecasting</th>
+</tr>
+<tr>
+<td>
+
+- Ludwig
+- Sklearn
+- Xgboost
+
+</td>
+<td>
+
+- Ludwig
+- Xboost
+
+</td>
+<td>
+
+- Statsforecast
+- Neuralforecast
+
+</td>
+</tr>
+</table>
+
+Check more details on each supported AutoML frameworks at [AI Engines documentation page](https://evadb.readthedocs.io/en/latest/source/reference/ai/index.html)
+</details>
+
+<details>
 <summary> ⚡️ Faster queries thanks to <a href="https://evadb.readthedocs.io/en/latest/source/reference/optimizations.html">AI-centric query optimization </a> such as caching, batching, and parallel processing. </summary>
 
 - Function Result Caching to reuse the results from expensive AI function invocations.
@@ -168,7 +203,7 @@ Check more details on each supported model at [AI Engines documentation page](ht
 - Query Predicate Reordering and Pushdown.
 
 </details>
-- 🔧 Fine-tune your AI models to achieve better results
+<br/>
 
 👋 Hey! If you're excited about our vision of bringing AI inside database systems, show some ❤️ by: 
 <ul>
