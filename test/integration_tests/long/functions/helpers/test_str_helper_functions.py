@@ -42,7 +42,7 @@ class StrHelperTest(unittest.TestCase):
         execute_query_fetch_all(self.evadb, f"DROP FUNCTION IF EXISTS {function_name};")
         create_function_query = f"""CREATE FUNCTION IF NOT EXISTS {function_name}
         INPUT  (inp ANYTYPE)
-        OUTPUT (output ANYTYPE)
+        OUTPUT (output NDARRAY STR(ANYDIM))
         TYPE HelperFunction
         IMPL 'evadb/functions/helpers/upper.py';
         """
@@ -62,7 +62,7 @@ class StrHelperTest(unittest.TestCase):
         execute_query_fetch_all(self.evadb, f"DROP FUNCTION IF EXISTS {function_name};")
         create_function_query = f"""CREATE FUNCTION IF NOT EXISTS {function_name}
         INPUT  (inp ANYTYPE)
-        OUTPUT (output ANYTYPE)
+        OUTPUT (output NDARRAY STR(ANYDIM))
         TYPE HelperFunction
         IMPL 'evadb/functions/helpers/lower.py';
         """
@@ -91,7 +91,7 @@ class StrHelperTest(unittest.TestCase):
         execute_query_fetch_all(self.evadb, "DROP FUNCTION IF EXISTS UPPER;")
         create_function_query = """CREATE FUNCTION IF NOT EXISTS UPPER
         INPUT  (inp ANYTYPE)
-        OUTPUT (output ANYTYPE)
+        OUTPUT (output NDARRAY STR(ANYDIM))
         TYPE HelperFunction
         IMPL 'evadb/functions/helpers/upper.py';
         """

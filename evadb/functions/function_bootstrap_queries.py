@@ -216,7 +216,7 @@ dalle_function_query = """CREATE FUNCTION IF NOT EXISTS DallE
 
 Upper_function_query = """CREATE FUNCTION IF NOT EXISTS UPPER
         INPUT  (input ANYTYPE)
-        OUTPUT (output ANYTYPE)
+        OUTPUT (output NDARRAY STR(ANYDIM))
         IMPL '{}/functions/helpers/upper.py';
         """.format(
     EvaDB_INSTALLATION_DIR
@@ -224,7 +224,7 @@ Upper_function_query = """CREATE FUNCTION IF NOT EXISTS UPPER
 
 Lower_function_query = """CREATE FUNCTION IF NOT EXISTS LOWER
         INPUT  (input ANYTYPE)
-        OUTPUT (output ANYTYPE)
+        OUTPUT (output NDARRAY STR(ANYDIM))
         IMPL '{}/functions/helpers/lower.py';
         """.format(
     EvaDB_INSTALLATION_DIR
