@@ -72,20 +72,38 @@
 
 EvaDB enables software developers to build AI apps in a few lines of code. Its powerful SQL API simplifies AI app development for both structured and unstructured data. EvaDB's benefits include:
 <details>
-<summary> 🔮 Easy to connect EvaDB with your <a href="https://evadb.readthedocs.io/en/stable/source/reference/databases/index.html">data sources</a>, such as PostgreSQL, S3, and Github, and build AI-powered apps with SQL queries </summary>
+<summary> 🔮 Easy to <a href="https://evadb.readthedocs.io/en/latest/source/overview/connect-to-data-sources.html">connect EvaDB with your data sources</a>, such as PostgreSQL, S3, and Github, and build AI-powered apps with SQL queries </summary>
 
-- Structured Data Sources
-  - PostgreSQL
-  - SQLite
-  - MySQL
-  - MariaDB
-  - Clickhouse
-  - Snowflake
-- Unstructured Data Sources
-  - Local disk
-  - S3 bucket
-- Application Data Sources
-  - Github
+<table>
+<tr>
+<th>Structured Data Sources</th>
+<th>Unstructured Data Sources</th>
+<th>Application Data Sources</th>
+</tr>
+<tr>
+<td>
+
+- PostgreSQL
+- SQLite
+- MySQL
+- MariaDB
+- Clickhouse
+- Snowflake
+
+</td>
+<td>
+
+- Local disk
+- S3 bucket
+
+</td>
+<td>
+
+- Github
+
+</td>
+</tr>
+</table>
 </details>
 
 - 🤝 Query your data with a pre-trained AI model from Hugging Face, OpenAI, YOLO, PyTorch, and other AI frameworks
