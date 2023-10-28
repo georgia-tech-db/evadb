@@ -109,7 +109,56 @@ Check more details on each supported data sources at [Data Sources documentation
 
 </details>
 
-- 🤝 Query your data with a pre-trained AI model from Hugging Face, OpenAI, YOLO, PyTorch, and other AI frameworks
+<details>
+<summary> 🤝 Query your data with a pre-trained AI model from Hugging Face, OpenAI, YOLO, and Stable Diffusion. </summary>
+<br/>
+<table>
+<tr>
+<th>Hugging Face</th>
+<th>OpenAI</th>
+<th>YOLO</th>
+</tr>
+<tr>
+<td>
+
+- Audio Classification
+- Automatic Speech Recognition
+- Text Classification
+- Summarization
+- Text2Text Generation
+- Text Generation
+- Image Classification
+- Image Segmentation
+- Image-to-Text
+- Object Detection
+- Depth Estimation
+
+</td>
+<td>
+
+- gpt-4
+- gpt-4-0314
+- gpt-4-32k
+- gpt-4-32k-0314
+- gpt-3.5-turbo
+- gpt-3.5-turbo-0301
+
+</td>
+<td>
+
+- yolov8n.pt
+- yolov8s.pt
+- yolov8m.pt
+- yolov8l.pt
+- yolov8x.pt
+
+</td>
+</tr>
+</table>
+
+Check more details on each supported model at [AI Engines documentation page](https://evadb.readthedocs.io/en/latest/source/reference/ai/index.html)
+</details>
+
 - ⚡️ Faster queries thanks to AI-centric query optimization
 - 💰 Save money spent on running models by efficient CPU/GPU use
 - 🔧 Fine-tune your AI models to achieve better results
