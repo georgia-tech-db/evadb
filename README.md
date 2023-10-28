@@ -110,7 +110,7 @@ Check more details on each supported data sources at [Data Sources documentation
 </details>
 
 <details>
-<summary> 🤝 Query your data with a pre-trained AI model from Hugging Face, OpenAI, YOLO, Stable Diffusion, and etc. </summary>
+<summary> 🤝 <a href="https://evadb.readthedocs.io/en/latest/source/overview/ai-queries.html">Query your data with a pre-trained AI model</a> from Hugging Face, OpenAI, YOLO, Stable Diffusion, and etc. </summary>
 <br/>
 <table>
 <tr>
