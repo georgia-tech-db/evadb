@@ -16,9 +16,7 @@
 
 import pickle
 
-import numpy as np
 import pandas as pd
-from sklearn.metrics import mean_squared_error
 
 from evadb.functions.abstract.abstract_function import AbstractFunction
 from evadb.functions.decorators.decorators import setup
@@ -40,7 +38,6 @@ class ForecastModel(AbstractFunction):
         horizon: int,
         library: str,
         conf: int,
-        data: pd.DataFrame,
     ):
         self.library = library
         if "neuralforecast" in self.library:
@@ -62,8 +59,8 @@ class ForecastModel(AbstractFunction):
             1: "Predictions are flat. Consider using LIBRARY 'neuralforecast' for more accrate predictions.",
         }
         self.conf = conf
-        self.training_data = pd.read_json(data, orient="split")
-        self.training_data.ds = pd.to_datetime(self.training_data.ds)
+        with open(model_path + "_rmse", "r") as f:
+            self.rmse = float(f.readline())
 
     def forward(self, data) -> pd.DataFrame:
         if self.library == "statsforecast":
@@ -92,27 +89,7 @@ class ForecastModel(AbstractFunction):
                 print("\nSUGGESTION: " + self.suggestion_dict[suggestion])
 
             # Metrics
-            if self.library == "statsforecast":
-                crossvalidation_df = self.model.cross_validation(
-                    df=self.training_data[["ds", "y", "unique_id"]],
-                    h=self.horizon,
-                    step_size=24,
-                    n_windows=1,
-                ).reset_index()
-                rmses = []
-                for uid in crossvalidation_df.unique_id.unique():
-                    crossvalidation_df_here = crossvalidation_df[
-                        crossvalidation_df.unique_id == uid
-                    ]
-                    rmses.append(
-                        mean_squared_error(
-                            crossvalidation_df_here.y,
-                            crossvalidation_df_here[self.model_name],
-                            squared=False,
-                        )
-                        / np.mean(crossvalidation_df_here.y)
-                    )
-                print("\nMean normalized RMSE: " + str(np.mean(rmses)))
+            print("\nMean normalized RMSE: " + str(self.rmse))
 
         forecast_df = forecast_df.rename(
             columns={

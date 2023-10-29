@@ -21,7 +21,9 @@ import re
 from pathlib import Path
 from typing import Dict, List
 
+import numpy as np
 import pandas as pd
+from sklearn.metrics import mean_squared_error
 
 from evadb.catalog.catalog_utils import get_metadata_properties
 from evadb.catalog.models.function_catalog import FunctionCatalogEntry
@@ -526,6 +528,7 @@ class CreateFunctionExecutor(AbstractExecutor):
                     data[column] = data.apply(
                         lambda x: self.convert_to_numeric(x[column]), axis=1
                     )
+            rmses = []
             if library == "neuralforecast":
                 cuda_devices_here = "0"
                 if "CUDA_VISIBLE_DEVICES" in os.environ:
@@ -534,6 +537,24 @@ class CreateFunctionExecutor(AbstractExecutor):
                 with set_env(CUDA_VISIBLE_DEVICES=cuda_devices_here):
                     model.fit(df=data, val_size=horizon)
                     model.save(model_path, overwrite=True)
+                    crossvalidation_df = model.cross_validation(
+                        df=data, val_size=horizon
+                    )
+                    for uid in crossvalidation_df.unique_id.unique():
+                        crossvalidation_df_here = crossvalidation_df[
+                            crossvalidation_df.unique_id == uid
+                        ]
+                        rmses.append(
+                            mean_squared_error(
+                                crossvalidation_df_here.y,
+                                crossvalidation_df_here[arg_map["model"] + "-median"],
+                                squared=False,
+                            )
+                            / np.mean(crossvalidation_df_here.y)
+                        )
+                        mean_rmse = np.mean(rmses)
+                        with open(model_path + "_rmse", "w") as f:
+                            f.write(str(mean_rmse) + "\n")
             else:
                 # The following lines of code helps eliminate the math error encountered in statsforecast when only one datapoint is available in a time series
                 for col in data["unique_id"].unique():
@@ -546,9 +567,29 @@ class CreateFunctionExecutor(AbstractExecutor):
                 f = open(model_path, "wb")
                 pickle.dump(model, f)
                 f.close()
+                crossvalidation_df = model.cross_validation(
+                    df=data[["ds", "y", "unique_id"]],
+                    h=horizon,
+                    step_size=24,
+                    n_windows=1,
+                ).reset_index()
+                for uid in crossvalidation_df.unique_id.unique():
+                    crossvalidation_df_here = crossvalidation_df[
+                        crossvalidation_df.unique_id == uid
+                    ]
+                    rmses.append(
+                        mean_squared_error(
+                            crossvalidation_df_here.y,
+                            crossvalidation_df_here[arg_map["model"]],
+                            squared=False,
+                        )
+                        / np.mean(crossvalidation_df_here.y)
+                    )
+                mean_rmse = np.mean(rmses)
+                with open(model_path + "_rmse", "w") as f:
+                    f.write(str(mean_rmse) + "\n")
         elif not Path(model_path).exists():
             model_path = os.path.join(model_dir, existing_model_files[-1])
-
         io_list = self._resolve_function_io(None)
         data["ds"] = data.ds.astype(str)
         metadata_here = [
@@ -566,9 +607,6 @@ class CreateFunctionExecutor(AbstractExecutor):
             FunctionMetadataCatalogEntry("horizon", horizon),
             FunctionMetadataCatalogEntry("library", library),
             FunctionMetadataCatalogEntry("conf", conf),
-            FunctionMetadataCatalogEntry(
-                "data", data.to_json(path_or_buf=None, orient="split")
-            ),
         ]
 
         return (
