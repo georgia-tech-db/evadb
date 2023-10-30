@@ -23,7 +23,7 @@ To use the `Flaml XGBoost AutoML framework <https://microsoft.github.io/FLAML/do
    PREDICT 'rental_price';
 
 In the above query, you are creating a new customized function by training a model from the ``HomeRentals`` table using the ``Flaml XGBoost`` framework.
-The ``rental_price`` column will be the target column for predication, while the rest columns from the ``SELET`` query are the inputs.
+The ``rental_price`` column will be the target column for predication, while the rest columns from the ``SELECT`` query are the inputs.
 
 3. Model Training Parameters
 ----------------------------

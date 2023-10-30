@@ -152,10 +152,10 @@ class StatementBinderContext:
             res = process.extractOne(col_name, all_columns)
             if res is not None:
                 guess_column, _ = res
-                err_msg = f"Cannnot find column {col_name}. Did you mean {guess_column}? The feasible columns are {all_columns}."
+                err_msg = f"Cannot find column {col_name}. Did you mean {guess_column}? The feasible columns are {all_columns}."
             else:
                 err_msg = (
-                    f"Cannnot find column {col_name}. There are no feasible columns."
+                    f"Cannot find column {col_name}. There are no feasible columns."
                 )
             logger.error(err_msg)
             raise BinderError(err_msg)
