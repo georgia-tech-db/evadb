@@ -71,11 +71,141 @@
 </p>
 
 EvaDB enables software developers to build AI apps in a few lines of code. Its powerful SQL API simplifies AI app development for both structured and unstructured data. EvaDB's benefits include:
-- 🔮 Easy to connect EvaDB with your SQL database system and build AI-powered apps with SQL queries
-- 🤝 Query your data with a pre-trained AI model from Hugging Face, OpenAI, YOLO, PyTorch, and other AI frameworks
-- ⚡️ Faster queries thanks to AI-centric query optimization
-- 💰 Save money spent on running models by efficient CPU/GPU use
-- 🔧 Fine-tune your AI models to achieve better results
+<details>
+<summary> 🔮 Easy to <a href="https://evadb.readthedocs.io/en/latest/source/overview/connect-to-data-sources.html">connect EvaDB with your data sources</a>, such as PostgreSQL, S3, and Github, and build AI-powered apps with SQL queries. </summary>
+<br/>
+<table>
+<tr>
+<th>Structured Data Sources</th>
+<th>Unstructured Data Sources</th>
+<th>Application Data Sources</th>
+</tr>
+<tr>
+<td>
+
+- PostgreSQL
+- SQLite
+- MySQL
+- MariaDB
+- Clickhouse
+- Snowflake
+
+</td>
+<td>
+
+- Local disk
+- S3 bucket
+
+</td>
+<td>
+
+- Github
+
+</td>
+</tr>
+</table>
+
+Check more details on each supported data sources at [Data Sources documentation page](https://evadb.readthedocs.io/en/latest/source/reference/databases/index.html).
+
+</details>
+
+<details>
+<summary> 🤝 <a href="https://evadb.readthedocs.io/en/latest/source/overview/ai-queries.html">Query your data with a pre-trained AI model</a> from Hugging Face, OpenAI, YOLO, Stable Diffusion, and etc. </summary>
+<br/>
+<table>
+<tr>
+<th>Hugging Face</th>
+<th>OpenAI</th>
+<th>YOLO</th>
+</tr>
+<tr>
+<td>
+
+- Audio Classification
+- Automatic Speech Recognition
+- Text Classification
+- Summarization
+- Text2Text Generation
+- Text Generation
+- Image Classification
+- Image Segmentation
+- Image-to-Text
+- Object Detection
+- Depth Estimation
+
+</td>
+<td>
+
+- gpt-4
+- gpt-4-0314
+- gpt-4-32k
+- gpt-4-32k-0314
+- gpt-3.5-turbo
+- gpt-3.5-turbo-0301
+
+</td>
+<td>
+
+- yolov8n.pt
+- yolov8s.pt
+- yolov8m.pt
+- yolov8l.pt
+- yolov8x.pt
+
+</td>
+</tr>
+</table>
+
+Check more details on each supported model at [AI Engines documentation page](https://evadb.readthedocs.io/en/latest/source/reference/ai/index.html)
+</details>
+
+<details>
+<summary> 🔧 Create and Fine-tune your AI models for regression, classification, and time series forecasting.</summary>
+<br/>
+<table>
+<tr>
+<th>Regression</th>
+<th>Classification</th>
+<th>Time Series Forecasting</th>
+</tr>
+<tr>
+<td>
+
+- Ludwig
+- Sklearn
+- Xgboost
+
+</td>
+<td>
+
+- Ludwig
+- Xboost
+
+</td>
+<td>
+
+- Statsforecast
+- Neuralforecast
+
+</td>
+</tr>
+</table>
+
+Check more details on each supported AutoML frameworks at [AI Engines documentation page](https://evadb.readthedocs.io/en/latest/source/reference/ai/index.html).
+</details>
+
+<details>
+<summary> ⚡️ Faster queries thanks to AI-centric query optimization such as caching, batching, and parallel processing. </summary>
+
+- Function Result Caching to reuse the results from expensive AI function invocations.
+- LLM Batching to reduce the token usage and dollar spent. 
+- Parallel Query Processing to 💰 save money and time spent on running models by efficient CPU/GPU use.
+- Query Predicate Reordering and Pushdown.
+
+Check more details on optimizations in EvaDB at [Optimization documentation page](https://evadb.readthedocs.io/en/latest/source/reference/optimizations.html).
+
+</details>
+<br/>
 
 👋 Hey! If you're excited about our vision of bringing AI inside database systems, show some ❤️ by: 
 <ul>
