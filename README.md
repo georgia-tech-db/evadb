@@ -72,7 +72,7 @@
 
 EvaDB enables software developers to build AI apps in a few lines of code. Its powerful SQL API simplifies AI app development for both structured and unstructured data. EvaDB's benefits include:
 <details>
-<summary> 🔮 Easy to <a href="https://evadb.readthedocs.io/en/latest/source/overview/connect-to-data-sources.html">connect EvaDB with your data sources</a>, such as PostgreSQL, S3, and Github, and build AI-powered apps with SQL queries. </summary>
+<summary> 🔮 Easy to <a href="https://evadb.readthedocs.io/en/latest/source/overview/connect-to-data-sources.html">connect the EvaDB query engine with your data sources</a>, such as PostgreSQL or S3 buckets, and build AI-powered apps with SQL queries. </summary>
 <br/>
 <table>
 <tr>
@@ -93,8 +93,8 @@ EvaDB enables software developers to build AI apps in a few lines of code. Its p
 </td>
 <td>
 
-- Local disk
-- S3 bucket
+- Local filesystem
+- AWS S3 bucket
 
 </td>
 <td>
@@ -105,12 +105,12 @@ EvaDB enables software developers to build AI apps in a few lines of code. Its p
 </tr>
 </table>
 
-Check more details on each supported data sources at [Data Sources documentation page](https://evadb.readthedocs.io/en/latest/source/reference/databases/index.html).
+More details on the supported data sources is [available here](https://evadb.readthedocs.io/en/latest/source/reference/databases/index.html).
 
 </details>
 
 <details>
-<summary> 🤝 <a href="https://evadb.readthedocs.io/en/latest/source/overview/ai-queries.html">Query your data with a pre-trained AI model</a> from Hugging Face, OpenAI, YOLO, Stable Diffusion, and etc. </summary>
+<summary> 🤝 <a href="https://evadb.readthedocs.io/en/latest/source/overview/ai-queries.html">Query your connected data with a pre-trained AI model</a> from Hugging Face, OpenAI, YOLO, Stable Diffusion, etc. </summary>
 <br/>
 <table>
 <tr>
@@ -156,11 +156,11 @@ Check more details on each supported data sources at [Data Sources documentation
 </tr>
 </table>
 
-Check more details on each supported model at [AI Engines documentation page](https://evadb.readthedocs.io/en/latest/source/reference/ai/index.html)
+More details on the supported AI models is [available here](https://evadb.readthedocs.io/en/latest/source/reference/ai/index.html)
 </details>
 
 <details>
-<summary> 🔧 Create and Fine-tune your AI models for regression, classification, and time series forecasting.</summary>
+<summary> 🔧 Create or fine-tune AI models for regression, classification, and time series forecasting.</summary>
 <br/>
 <table>
 <tr>
@@ -191,19 +191,19 @@ Check more details on each supported model at [AI Engines documentation page](ht
 </tr>
 </table>
 
-Check more details on each supported AutoML frameworks at [AI Engines documentation page](https://evadb.readthedocs.io/en/latest/source/reference/ai/index.html).
+More details on the supported AutoML frameworks is [available here](https://evadb.readthedocs.io/en/latest/source/reference/ai/index.html).
 </details>
 
 <details>
-<summary> ⚡️ Faster queries thanks to AI-centric query optimization such as caching, batching, and parallel processing. </summary>
+<summary> 💰 Faster AI queries thanks to AI-centric query optimizations such as caching, batching, and parallel processing. </summary>
+<br/>
+  
+- Function result caching helps reuse results of expensive AI function calls.
+- LLM batching reduces token usage and dollars spent on LLM calls. 
+- Parallel query processing saves money and time spent on running AI models by better utilizing CPUs and/or GPUs.
+- Query predicate re-ordering and predicate push-down accelerates queries over both structured and unstructured data.
 
-- Function Result Caching to reuse the results from expensive AI function invocations.
-- LLM Batching to reduce the token usage and dollar spent. 
-- Parallel Query Processing to 💰 save money and time spent on running models by efficient CPU/GPU use.
-- Query Predicate Reordering and Pushdown.
-
-Check more details on optimizations in EvaDB at [Optimization documentation page](https://evadb.readthedocs.io/en/latest/source/reference/optimizations.html).
-
+More details on the optimizations in EvaDB is [available here](https://evadb.readthedocs.io/en/latest/source/reference/optimizations.html).
 </details>
 <br/>
 
