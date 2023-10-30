@@ -42,17 +42,6 @@
 </a>
 </p>
 
-<p align="center"><b>Share EvaDB</b></p>
-
-<p align="center">
-
-<a href="https://twitter.com/intent/tweet?text=Check%20out%20EvaDB!%20Bring%20AI%20inside%20your%20database%20system%20and%20build%20AI-powered%20apps.%20&url=https://github.com/georgia-tech-db/evadb&hashtags=EvaDB,AI,Database" target="blank">
-<img src="https://img.shields.io/twitter/follow/_superAGI?label=Twitter&style=social" alt="Follow _superAGI"/></a> 
-<a href="https://t.me/share/url?text=Check%20out%20EvaDB!%20Bring%20AI%20inside%20your%20database%20and%20build%20AI-powered%20apps.%20&url=https://github.com/georgia-tech-db/evadb" target="_blank"><img src="https://img.shields.io/twitter/url?label=Telegram&logo=Telegram&style=social&url=https://github.com/georgia-tech-db/evadb" alt="Share on Telegram"/></a>
-<a href="https://api.whatsapp.com/send?text=Check%20out%20EvaDB!%20Bring%20AI%20inside%20your%20database%20and%20build%20AI-powered%20apps.%20https://github.com/georgia-tech-db/evadb"><img src="https://img.shields.io/twitter/url?label=whatsapp&logo=whatsapp&style=social&url=https://github.com/georgia-tech-db/evadb" /></a> <a href="https://www.reddit.com/submit?url=https://github.com/georgia-tech-db/evadb&title=Check%20out%20EvaDB!%20Bring%20AI%20inside%20your%20database%20and%20build%20AI-powered%20apps." target="blank">
-<img src="https://img.shields.io/twitter/url?label=Reddit&logo=Reddit&style=social&url=https://github.com/georgia-tech-db/evadb" alt="Share on Reddit"/>
-</p>
-
 <p align="center">
   <a href="https://colab.research.google.com/github/georgia-tech-db/evadb/blob/master/tutorials/03-emotion-analysis.ipynb">
       <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Launch EvaDB on Colab"/>
@@ -67,7 +56,6 @@
           <img alt="Downloads" src="https://static.pepy.tech/badge/evadb"/>
         </a> -->  
   <br />
-  <a href="https://gitpod.io/#https://github.com/georgia-tech-db/evadb" target="_blank"><img src="https://gitpod.io/button/open-in-gitpod.svg" alt="Open in Gitpod"></a>
 </p>
 
 EvaDB enables software developers to build AI apps in a few lines of code. Its powerful SQL API simplifies AI app development for both structured and unstructured data. EvaDB's benefits include:
