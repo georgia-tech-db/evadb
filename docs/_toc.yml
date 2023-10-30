@@ -14,6 +14,7 @@ parts:
       - file: source/overview/connect-to-data-sources
         title: Connect to Data Sources
       - file: source/overview/faq
+      - file: source/overview/roadmap
 
   - caption: Use Cases
     chapters:
