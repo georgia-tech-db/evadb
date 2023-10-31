@@ -33,7 +33,7 @@ from evadb.utils.generic_utils import try_to_import_faiss
 class CreateIndexTest(unittest.TestCase):
     def _index_save_path(self):
         return str(
-            Path(self.evadb.config.get_value("storage", "index_dir"))
+            Path(self.evadb.catalog().get_configuration_catalog_value("index_dir"))
             / Path("{}_{}.index".format("FAISS", "testCreateIndexName"))
         )
 

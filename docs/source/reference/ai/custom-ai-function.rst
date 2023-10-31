@@ -258,9 +258,6 @@ The following code can be used to create an Object Detection function using Yolo
         try_to_import_openai()
         import openai
 
-        #setting up the key
-        openai.api_key = ConfigurationManager().get_value("third_party", "OPENAI_KEY")
-
         #getting the data
         content = text_df[text_df.columns[0]]
         responses = []

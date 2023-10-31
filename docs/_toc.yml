@@ -14,6 +14,7 @@ parts:
       - file: source/overview/connect-to-data-sources
         title: Connect to Data Sources
       - file: source/overview/faq
+      - file: source/overview/roadmap
 
   - caption: Use Cases
     chapters:
@@ -47,6 +48,8 @@ parts:
           - file: source/reference/evaql/select
           - file: source/reference/evaql/explain
           - file: source/reference/evaql/show_functions
+          - file: source/reference/evaql/show_config
+          - file: source/reference/evaql/set_config
           - file: source/reference/evaql/create_database
           - file: source/reference/evaql/create_function
           - file: source/reference/evaql/create_index
@@ -61,6 +64,9 @@ parts:
 
       - file: source/reference/api
         title: Python API
+      
+      - file: source/reference/rest_api
+        title: REST API
 
       - file: source/reference/databases/index
         title: Data Sources
@@ -71,6 +77,7 @@ parts:
           - file: source/reference/databases/mariadb
           - file: source/reference/databases/clickhouse
           - file: source/reference/databases/github
+          - file: source/reference/databases/snowflake
 
       - file: source/reference/vector_databases/index
         title: Vector Databases
@@ -80,6 +87,7 @@ parts:
           - file: source/reference/vector_databases/qdrant
           - file: source/reference/vector_databases/pgvector
           - file: source/reference/vector_databases/pinecone
+          - file: source/reference/vector_databases/milvus
 
       - file: source/reference/ai/index
         title: AI Engines

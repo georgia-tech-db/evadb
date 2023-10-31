@@ -836,7 +836,10 @@ class LogicalCreateIndexToVectorIndex(Rule):
             before.index_def,
         )
         child = SeqScanPlan(None, before.project_expr_list, before.table_ref.alias)
-        batch_mem_size = context.db.config.get_value("executor", "batch_mem_size")
+
+        batch_mem_size = context.db.catalog().get_configuration_catalog_value(
+            "batch_mem_size"
+        )
         child.append_child(
             StoragePlan(
                 before.table_ref.table.table_obj,
@@ -929,7 +932,9 @@ class LogicalGetToSeqScan(Rule):
         return True
 
     def apply(self, before: LogicalGet, context: OptimizerContext):
-        max_batch_mem_size = context.db.config.get_value("executor", "batch_mem_size")
+        max_batch_mem_size = context.db.catalog().get_configuration_catalog_value(
+            "batch_mem_size"
+        )
         # For now, we only sweep the min and max batch size.
         for batch_mem_size in [1, max_batch_mem_size]:
             after = SeqScanPlan(None, before.target_list, before.alias)
