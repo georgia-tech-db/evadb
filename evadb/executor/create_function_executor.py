@@ -259,12 +259,16 @@ class CreateFunctionExecutor(AbstractExecutor):
 
         impl_path = Path(f"{self.function_dir}/xgboost.py").absolute().as_posix()
         io_list = self._resolve_function_io(None)
+        best_score = model.best_loss
+        train_time = model.best_config_train_time
         return (
             self.node.name,
             impl_path,
             self.node.function_type,
             io_list,
             self.node.metadata,
+            best_score,
+            train_time
         )
 
     def handle_ultralytics_function(self):
@@ -648,6 +652,8 @@ class CreateFunctionExecutor(AbstractExecutor):
                 function_type,
                 io_list,
                 metadata,
+                best_score,
+                train_time
             ) = self.handle_xgboost_function()
         elif string_comparison_case_insensitive(self.node.function_type, "Forecasting"):
             (
@@ -674,7 +680,10 @@ class CreateFunctionExecutor(AbstractExecutor):
             msg = f"Function {self.node.name} overwritten."
         else:
             msg = f"Function {self.node.name} added to the database."
-        yield Batch(pd.DataFrame([msg]))
+        if best_score and train_time:
+            yield Batch(pd.DataFrame([msg, best_score, train_time]))
+        else:
+            yield Batch(pd.DataFrame([msg]))
 
     def _try_initializing_function(
         self, impl_path: str, function_args: Dict = {}
