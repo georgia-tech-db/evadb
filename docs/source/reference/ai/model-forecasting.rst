@@ -3,6 +3,7 @@
 Time Series Forecasting
 ========================
 
+A Time Series is a series of data points recorded at different time intervals. Time series forecasting involves estimating future values of a time series by analyzing historical data.
 You can train a forecasting model easily in EvaDB.
 
 .. note::
