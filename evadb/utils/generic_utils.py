@@ -82,6 +82,12 @@ def load_function_class_from_file(filepath, classname=None):
         spec = importlib.util.spec_from_file_location(abs_path.stem, abs_path)
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
+    except ModuleNotFoundError as e:
+        err_msg = f"Couldn't load function from {filepath} : {str(e)}. This might be due to a missing Python package. Please ensure all requisite packages are installed."
+        raise RuntimeError(err_msg)
+    except FileNotFoundError as e:
+        err_msg = f"Couldn't load function from {filepath} : {str(e)}. This might be because the function implementation file does not exist. Please ensure the file exists at {abs_path}"
+        raise RuntimeError(err_msg)
     except Exception as e:
         err_msg = f"Couldn't load function from {filepath} : {str(e)}. This might be due to a missing Python package, or because the function implementation file does not exist, or it is not a valid Python file."
         raise RuntimeError(err_msg)
