@@ -268,7 +268,7 @@ class CreateFunctionExecutor(AbstractExecutor):
             io_list,
             self.node.metadata,
             best_score,
-            train_time
+            train_time,
         )
 
     def handle_ultralytics_function(self):
@@ -590,6 +590,8 @@ class CreateFunctionExecutor(AbstractExecutor):
         )
 
         overwrite = False
+        best_score = False
+        train_time = False
         # check catalog if it already has this function entry
         if self.catalog().get_function_catalog_entry_by_name(self.node.name):
             if self.node.if_not_exists:
@@ -653,7 +655,7 @@ class CreateFunctionExecutor(AbstractExecutor):
                 io_list,
                 metadata,
                 best_score,
-                train_time
+                train_time,
             ) = self.handle_xgboost_function()
         elif string_comparison_case_insensitive(self.node.function_type, "Forecasting"):
             (

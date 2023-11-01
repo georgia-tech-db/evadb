@@ -141,7 +141,6 @@ class ModelTrainTests(unittest.TestCase):
         result = execute_query_fetch_all(self.evadb, create_predict_function)
         self.assertEqual(len(result.columns), 1)
         self.assertEqual(len(result), 3)
-        print(result)
 
         predict_query = """
             SELECT PredictRentXgboost(number_of_rooms, number_of_bathrooms, days_on_market, rental_price) FROM HomeRentals LIMIT 10;
