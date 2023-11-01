@@ -59,8 +59,11 @@ class ForecastModel(AbstractFunction):
             1: "Predictions are flat. Consider using LIBRARY 'neuralforecast' for more accrate predictions.",
         }
         self.conf = conf
+        self.hypers = None
         with open(model_path + "_rmse", "r") as f:
             self.rmse = float(f.readline())
+            if "arima" in model_name.lower():
+                self.hypers = "p,d,q: " + f.readline()
 
     def forward(self, data) -> pd.DataFrame:
         if self.library == "statsforecast":
@@ -90,6 +93,8 @@ class ForecastModel(AbstractFunction):
 
             # Metrics
             print("\nMean normalized RMSE: " + str(self.rmse))
+            if self.hypers is not None:
+                print("Hyperparameters: " + self.hypers)
 
         forecast_df = forecast_df.rename(
             columns={

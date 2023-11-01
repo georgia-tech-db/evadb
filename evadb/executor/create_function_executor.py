@@ -564,6 +564,11 @@ class CreateFunctionExecutor(AbstractExecutor):
                         )
 
                 model.fit(df=data[["ds", "y", "unique_id"]])
+                hypers = ""
+                if "arima" in arg_map["model"].lower():
+                    from statsforecast.arima import arima_string
+
+                    hypers += arima_string(model.fitted_[0, 0].model_)
                 f = open(model_path, "wb")
                 pickle.dump(model, f)
                 f.close()
@@ -588,6 +593,7 @@ class CreateFunctionExecutor(AbstractExecutor):
                 mean_rmse = np.mean(rmses)
                 with open(model_path + "_rmse", "w") as f:
                     f.write(str(mean_rmse) + "\n")
+                    f.write(hypers + "\n")
         elif not Path(model_path).exists():
             model_path = os.path.join(model_dir, existing_model_files[-1])
         io_list = self._resolve_function_io(None)
