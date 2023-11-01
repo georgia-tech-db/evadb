@@ -89,7 +89,8 @@ def load_function_class_from_file(filepath, classname=None):
         err_msg = f"Couldn't load function from {filepath} : {str(e)}. This might be because the function implementation file does not exist. Please ensure the file exists at {abs_path}"
         raise RuntimeError(err_msg)
     except Exception as e:
-        err_msg = f"Couldn't load function from {filepath} : {str(e)}. This might be due to a missing Python package, or because the function implementation file does not exist, or it is not a valid Python file."
+        # Default exception, we don't know what exactly went wrong so we just output the error message
+        err_msg = f"Couldn't load function from {filepath} : {str(e)}."
         raise RuntimeError(err_msg)
 
     # Try to load the specified class by name
