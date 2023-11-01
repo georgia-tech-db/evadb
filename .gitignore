@@ -175,6 +175,7 @@ eva_dev_env/
 test_eva/
 test_eva_db/
 test_evadb/
+test_evadb_venv/
 
 # tutorials
 tutorials/*.py
