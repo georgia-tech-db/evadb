@@ -108,7 +108,7 @@ class SelectExecutorTest(unittest.TestCase):
         with self.assertRaises(BinderError) as ctx:
             execute_query_fetch_all(self.evadb, select_query)
         self.assertEqual(
-            "Cannnot find column b1. Did you mean a1? The feasible columns are ['_row_id', 'a0', 'a1', 'a2'].",
+            "Cannot find column b1. Did you mean a1? The feasible columns are ['_row_id', 'a0', 'a1', 'a2'].",
             str(ctx.exception),
         )
 
