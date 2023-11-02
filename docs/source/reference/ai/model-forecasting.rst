@@ -38,6 +38,9 @@ This trains a forecasting model. The model can be called by providing the horizo
 
 Here, the horizon is `12`, which represents the forecast 12 steps into the future.
 
+Forecasting vs Regression
+-------------------
+
 
 Forecast Parameters
 -------------------
