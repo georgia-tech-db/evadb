@@ -138,7 +138,9 @@ class ModelTrainTests(unittest.TestCase):
             METRIC 'r2'
             TASK 'regression';
         """
-        execute_query_fetch_all(self.evadb, create_predict_function)
+        result = execute_query_fetch_all(self.evadb, create_predict_function)
+        self.assertEqual(len(result.columns), 1)
+        self.assertEqual(len(result), 3)
 
         predict_query = """
             SELECT PredictRentXgboost(number_of_rooms, number_of_bathrooms, days_on_market, rental_price) FROM HomeRentals LIMIT 10;
@@ -158,7 +160,9 @@ class ModelTrainTests(unittest.TestCase):
             METRIC 'accuracy'
             TASK 'classification';
         """
-        execute_query_fetch_all(self.evadb, create_predict_function)
+        result = execute_query_fetch_all(self.evadb, create_predict_function)
+        self.assertEqual(len(result.columns), 1)
+        self.assertEqual(len(result), 3)
 
         predict_query = """
             SELECT PredictEmployeeXgboost(payment_tier, age, gender, experience_in_current_domain, leave_or_not) FROM Employee LIMIT 10;
