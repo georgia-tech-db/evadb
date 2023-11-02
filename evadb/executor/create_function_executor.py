@@ -683,7 +683,15 @@ class CreateFunctionExecutor(AbstractExecutor):
         else:
             msg = f"Function {self.node.name} added to the database."
         if best_score and train_time:
-            yield Batch(pd.DataFrame([msg, best_score, train_time]))
+            yield Batch(
+                pd.DataFrame(
+                    [
+                        msg,
+                        "Validation Score: " + best_score,
+                        "Training time: " + train_time,
+                    ]
+                )
+            )
         else:
             yield Batch(pd.DataFrame([msg]))
 
