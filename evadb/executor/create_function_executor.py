@@ -687,8 +687,8 @@ class CreateFunctionExecutor(AbstractExecutor):
                 pd.DataFrame(
                     [
                         msg,
-                        "Validation Score: " + best_score,
-                        "Training time: " + train_time,
+                        "Validation Score: " + str(best_score),
+                        "Training time: " + str(train_time),
                     ]
                 )
             )
