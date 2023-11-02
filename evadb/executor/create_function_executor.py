@@ -394,19 +394,55 @@ class CreateFunctionExecutor(AbstractExecutor):
         if library == "neuralforecast":
             try_to_import_neuralforecast()
             from neuralforecast import NeuralForecast
-            from neuralforecast.auto import AutoNBEATS, AutoNHITS
+            from neuralforecast.auto import (
+                AutoDeepAR,
+                AutoFEDformer,
+                AutoInformer,
+                AutoNBEATS,
+                AutoNHITS,
+                AutoPatchTST,
+                AutoTFT,
+                AutoTimesNet,
+            )
+
+            # from neuralforecast.auto import AutoAutoformer as AutoAFormer
             from neuralforecast.losses.pytorch import MQLoss
-            from neuralforecast.models import NBEATS, NHITS
+            from neuralforecast.models import (
+                NBEATS,
+                NHITS,
+                TFT,
+                DeepAR,
+                FEDformer,
+                Informer,
+                PatchTST,
+                TimesNet,
+            )
+
+            # from neuralforecast.models import Autoformer as AFormer
 
             model_dict = {
                 "AutoNBEATS": AutoNBEATS,
                 "AutoNHITS": AutoNHITS,
                 "NBEATS": NBEATS,
                 "NHITS": NHITS,
+                "PatchTST": PatchTST,
+                "AutoPatchTST": AutoPatchTST,
+                "DeepAR": DeepAR,
+                "AutoDeepAR": AutoDeepAR,
+                "FEDformer": FEDformer,
+                "AutoFEDformer": AutoFEDformer,
+                # "AFormer": AFormer,
+                # "AutoAFormer": AutoAFormer,
+                "Informer": Informer,
+                "AutoInformer": AutoInformer,
+                "TimesNet": TimesNet,
+                "AutoTimesNet": AutoTimesNet,
+                "TFT": TFT,
+                "AutoTFT": AutoTFT,
             }
 
             if "model" not in arg_map.keys():
-                arg_map["model"] = "NBEATS"
+                arg_map["model"] = "TFT"
 
             if "auto" not in arg_map.keys() or (
                 arg_map["auto"].lower()[0] == "t"
@@ -440,11 +476,13 @@ class CreateFunctionExecutor(AbstractExecutor):
                 else:
                     model_args_config["hist_exog_list"] = exogenous_columns
 
-                    def get_optuna_config(trial):
-                        return model_args_config
+            if "auto" in arg_map["model"].lower():
 
-                    model_args["config"] = get_optuna_config
-                    model_args["backend"] = "optuna"
+                def get_optuna_config(trial):
+                    return model_args_config
+
+                model_args["config"] = get_optuna_config
+                model_args["backend"] = "optuna"
 
             model_args["h"] = horizon
             model_args["loss"] = MQLoss(level=[conf])

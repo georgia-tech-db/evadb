@@ -14,6 +14,7 @@
 # limitations under the License.
 
 
+import os
 import pickle
 
 import pandas as pd
@@ -60,10 +61,12 @@ class ForecastModel(AbstractFunction):
         }
         self.conf = conf
         self.hypers = None
-        with open(model_path + "_rmse", "r") as f:
-            self.rmse = float(f.readline())
-            if "arima" in model_name.lower():
-                self.hypers = "p,d,q: " + f.readline()
+        self.rmse = None
+        if os.path.isfile(model_path + "_rmse"):
+            with open(model_path + "_rmse", "r") as f:
+                self.rmse = float(f.readline())
+                if "arima" in model_name.lower():
+                    self.hypers = "p,d,q: " + f.readline()
 
     def forward(self, data) -> pd.DataFrame:
         if self.library == "statsforecast":
@@ -92,7 +95,8 @@ class ForecastModel(AbstractFunction):
                 print("\nSUGGESTION: " + self.suggestion_dict[suggestion])
 
             # Metrics
-            print("\nMean normalized RMSE: " + str(self.rmse))
+            if self.rmse is not None:
+                print("\nMean normalized RMSE: " + str(self.rmse))
             if self.hypers is not None:
                 print("Hyperparameters: " + self.hypers)
 
