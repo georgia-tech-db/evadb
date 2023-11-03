@@ -575,24 +575,27 @@ class CreateFunctionExecutor(AbstractExecutor):
                 with set_env(CUDA_VISIBLE_DEVICES=cuda_devices_here):
                     model.fit(df=data, val_size=horizon)
                     model.save(model_path, overwrite=True)
-                    crossvalidation_df = model.cross_validation(
-                        df=data, val_size=horizon
-                    )
-                    for uid in crossvalidation_df.unique_id.unique():
-                        crossvalidation_df_here = crossvalidation_df[
-                            crossvalidation_df.unique_id == uid
-                        ]
-                        rmses.append(
-                            mean_squared_error(
-                                crossvalidation_df_here.y,
-                                crossvalidation_df_here[arg_map["model"] + "-median"],
-                                squared=False,
-                            )
-                            / np.mean(crossvalidation_df_here.y)
+                    if "metrics" in arg_map and arg_map["metrics"].lower()[0] == "t":
+                        crossvalidation_df = model.cross_validation(
+                            df=data, val_size=horizon
                         )
-                        mean_rmse = np.mean(rmses)
-                        with open(model_path + "_rmse", "w") as f:
-                            f.write(str(mean_rmse) + "\n")
+                        for uid in crossvalidation_df.unique_id.unique():
+                            crossvalidation_df_here = crossvalidation_df[
+                                crossvalidation_df.unique_id == uid
+                            ]
+                            rmses.append(
+                                mean_squared_error(
+                                    crossvalidation_df_here.y,
+                                    crossvalidation_df_here[
+                                        arg_map["model"] + "-median"
+                                    ],
+                                    squared=False,
+                                )
+                                / np.mean(crossvalidation_df_here.y)
+                            )
+                            mean_rmse = np.mean(rmses)
+                            with open(model_path + "_rmse", "w") as f:
+                                f.write(str(mean_rmse) + "\n")
             else:
                 # The following lines of code helps eliminate the math error encountered in statsforecast when only one datapoint is available in a time series
                 for col in data["unique_id"].unique():
@@ -610,28 +613,29 @@ class CreateFunctionExecutor(AbstractExecutor):
                 f = open(model_path, "wb")
                 pickle.dump(model, f)
                 f.close()
-                crossvalidation_df = model.cross_validation(
-                    df=data[["ds", "y", "unique_id"]],
-                    h=horizon,
-                    step_size=24,
-                    n_windows=1,
-                ).reset_index()
-                for uid in crossvalidation_df.unique_id.unique():
-                    crossvalidation_df_here = crossvalidation_df[
-                        crossvalidation_df.unique_id == uid
-                    ]
-                    rmses.append(
-                        mean_squared_error(
-                            crossvalidation_df_here.y,
-                            crossvalidation_df_here[arg_map["model"]],
-                            squared=False,
+                if "metrics" in arg_map and arg_map["metrics"].lower()[0] == "f":
+                    crossvalidation_df = model.cross_validation(
+                        df=data[["ds", "y", "unique_id"]],
+                        h=horizon,
+                        step_size=24,
+                        n_windows=1,
+                    ).reset_index()
+                    for uid in crossvalidation_df.unique_id.unique():
+                        crossvalidation_df_here = crossvalidation_df[
+                            crossvalidation_df.unique_id == uid
+                        ]
+                        rmses.append(
+                            mean_squared_error(
+                                crossvalidation_df_here.y,
+                                crossvalidation_df_here[arg_map["model"]],
+                                squared=False,
+                            )
+                            / np.mean(crossvalidation_df_here.y)
                         )
-                        / np.mean(crossvalidation_df_here.y)
-                    )
-                mean_rmse = np.mean(rmses)
-                with open(model_path + "_rmse", "w") as f:
-                    f.write(str(mean_rmse) + "\n")
-                    f.write(hypers + "\n")
+                    mean_rmse = np.mean(rmses)
+                    with open(model_path + "_rmse", "w") as f:
+                        f.write(str(mean_rmse) + "\n")
+                        f.write(hypers + "\n")
         elif not Path(model_path).exists():
             model_path = os.path.join(model_dir, existing_model_files[-1])
         io_list = self._resolve_function_io(None)
