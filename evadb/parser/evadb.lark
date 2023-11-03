@@ -580,8 +580,8 @@ GLOBAL_ID:                           "@" "@" (/[A-Z0-9._$]+/ | BQUOTA_STRING)
 
 EXPONENT_NUM_PART:          /"E" "-"? DEC_DIGIT+/
 ID_LITERAL:                 /[A-Za-z_$0-9]*?[A-Za-z_$]+?[A-Za-z_$0-9]*/
-DQUOTA_STRING:              /"[^";]*"/
-SQUOTA_STRING:              /'[^';]*'/
+DQUOTA_STRING:              "\"" /(?:[^"\\]|\\.)*"/
+SQUOTA_STRING:              "'" /(?:[^'\\]|\\.)*'/
 BQUOTA_STRING:              /`[^'`]*`/
 QUERY_STRING:               /[^{};]+/
 DEC_DIGIT:                  /[0-9]/

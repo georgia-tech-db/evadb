@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import json
 import unittest
 from pathlib import Path
 
@@ -458,6 +459,39 @@ class ParserTests(unittest.TestCase):
         parser = Parser()
 
         select_query = """SELECT '' FROM TAIPAI;"""
+
+        evadb_statement_list = parser.parse(select_query)
+        self.assertIsInstance(evadb_statement_list, list)
+        self.assertEqual(len(evadb_statement_list), 1)
+        self.assertEqual(evadb_statement_list[0].stmt_type, StatementType.SELECT)
+
+    def test_string_literal_with_escaped_single_quote(self):
+        parser = Parser()
+
+        select_query = """SELECT ChatGPT('Here\\'s a question', 'This is the context') FROM TAIPAI;"""
+
+        evadb_statement_list = parser.parse(select_query)
+        self.assertIsInstance(evadb_statement_list, list)
+        self.assertEqual(len(evadb_statement_list), 1)
+        self.assertEqual(evadb_statement_list[0].stmt_type, StatementType.SELECT)
+
+    def test_string_literal_with_semi_colon(self):
+        parser = Parser()
+
+        select_query = """SELECT ChatGPT("Here's a; question", "This is the context") FROM TAIPAI;"""
+
+        evadb_statement_list = parser.parse(select_query)
+        self.assertIsInstance(evadb_statement_list, list)
+        self.assertEqual(len(evadb_statement_list), 1)
+        self.assertEqual(evadb_statement_list[0].stmt_type, StatementType.SELECT)
+
+    def test_string_literal_with_single_quotes_from_variable(self):
+        parser = Parser()
+
+        question = json.dumps("Here's a question")
+        answer = json.dumps('This is "the" context')
+
+        select_query = f"""SELECT ChatGPT({question}, {answer}) FROM TAIPAI;"""
 
         evadb_statement_list = parser.parse(select_query)
         self.assertIsInstance(evadb_statement_list, list)
