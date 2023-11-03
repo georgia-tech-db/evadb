@@ -428,8 +428,7 @@ class SimilarityTests(unittest.TestCase):
             drop_query = "DROP INDEX testFaissIndexImageDataset"
             execute_query_fetch_all(self.evadb, drop_query)
 
-
-    def _helper_for_auto_update_during_insertion_with_faiss(self, if_exists : bool):
+    def _helper_for_auto_update_during_insertion_with_faiss(self, if_exists: bool):
         for i, img_path in enumerate(self.img_path_list):
             insert_query = (
                 f"INSERT INTO testIndexAutoUpdate (img_path) VALUES ('{img_path}')"
@@ -450,7 +449,6 @@ class SimilarityTests(unittest.TestCase):
 
         res_batch = execute_query_fetch_all(self.evadb, select_query)
         self.assertEqual(res_batch.frames["testindexautoupdate._row_id"][0], 5)
-
 
     def test_index_auto_update_on_structured_table_during_insertion_with_faiss(self):
         create_query = "CREATE TABLE testIndexAutoUpdate (img_path TEXT(100))"
