@@ -1190,7 +1190,6 @@ class ParserTests(unittest.TestCase):
 
         parser = Parser()
         job_stmt = parser.parse(job_query)[0]
-        print(job_stmt)
         self.assertEqual(job_stmt.job_name, "my_job")
         self.assertEqual(len(job_stmt.queries), 2)
         self.assertTrue(isinstance(job_stmt.queries[0], CreateFunctionStatement))

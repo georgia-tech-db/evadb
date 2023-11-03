@@ -20,43 +20,45 @@ import time
 from evadb.catalog.models.utils import JobCatalogEntry
 from evadb.database import EvaDBDatabase
 from evadb.server.command_handler import execute_query
-from evadb.utils.generic_utils import parse_config_yml
 from evadb.utils.logging_manager import logger
 
 
 class JobScheduler:
-    # read jobs with next trigger in the past
-    # execute the task with oldest trigger date
-    # update the next trigger date and TODO: update job history in one transaction
-    # sleep till next wakeup time
-
     def __init__(self, evadb: EvaDBDatabase) -> None:
-        config_object = parse_config_yml()
-        self.jobs_config = (
-            config_object["jobs"]
-            if config_object is not None
-            else {"poll_interval": 30}
-        )
+        self.poll_interval_seconds = 30
         self._evadb = evadb
 
     def _update_next_schedule_run(self, job_catalog_entry: JobCatalogEntry) -> bool:
         job_end_time = job_catalog_entry.end_time
         active_status = False
-        if job_catalog_entry.repeat_interval > 0:
+        if job_catalog_entry.repeat_interval and job_catalog_entry.repeat_interval > 0:
             next_trigger_time = datetime.datetime.now() + datetime.timedelta(
                 seconds=job_catalog_entry.repeat_interval
             )
             if next_trigger_time < job_end_time:
                 active_status = True
 
+        next_trigger_time = (
+            next_trigger_time if active_status else job_catalog_entry.next_scheduled_run
+        )
         self._evadb.catalog().update_job_catalog_entry(
             job_catalog_entry.name,
-            next_trigger_time
-            if active_status
-            else job_catalog_entry.next_scheduled_run,
+            next_trigger_time,
             active_status,
         )
-        return active_status
+        return active_status, next_trigger_time
+
+    def _get_sleep_time(self, next_job_entry: JobCatalogEntry) -> int:
+        sleep_time = self.poll_interval_seconds
+        if next_job_entry:
+            sleep_time = min(
+                sleep_time,
+                (
+                    next_job_entry.next_scheduled_run - datetime.datetime.now()
+                ).total_seconds(),
+            )
+        sleep_time = max(0, sleep_time)
+        return sleep_time
 
     def _scan_and_execute_jobs(self):
         while True:
@@ -67,6 +69,17 @@ class JobScheduler:
                     ),
                     None,
                 ):
+                    execution_time = datetime.datetime.now()
+
+                    # insert a job history record to mark start of this execution
+                    self._evadb.catalog().insert_job_history_catalog_entry(
+                        next_executable_job.row_id,
+                        next_executable_job.name,
+                        execution_time,
+                        None,
+                    )
+
+                    # execute the queries of the job
                     execution_results = [
                         execute_query(self._evadb, query)
                         for query in next_executable_job.queries
@@ -74,26 +87,30 @@ class JobScheduler:
                     logger.debug(
                         f"Exection result for job: {next_executable_job.name} results: {execution_results}"
                     )
+
+                    # update the next trigger time for this job
                     self._update_next_schedule_run(next_executable_job)
+
+                    # update the previosly inserted job history record with endtime
+                    self._evadb.catalog().update_job_history_end_time(
+                        next_executable_job.row_id,
+                        execution_time,
+                        datetime.datetime.now(),
+                    )
 
                 next_executable_job = self._evadb.catalog().get_next_executable_job(
                     only_past_jobs=False
                 )
-                if next_executable_job.next_scheduled_run > datetime.datetime.now():
-                    sleep_time = min(
-                        self.jobs_config["poll_interval"],
-                        (
-                            next_executable_job.next_scheduled_run
-                            - datetime.datetime.now()
-                        ).total_seconds(),
-                    )
+
+                sleep_time = self._get_sleep_time(next_executable_job)
+                if sleep_time > 0:
                     logger.debug(
                         f"Job scheduler process sleeping for {sleep_time} seconds"
                     )
                     time.sleep(sleep_time)
             except Exception as e:
                 logger.error(f"Got an exception in job scheduler: {str(e)}")
-                time.sleep(self.jobs_config["poll_interval"] * 0.2)
+                time.sleep(self.poll_interval_seconds * 0.2)
 
     def execute(self):
         try:

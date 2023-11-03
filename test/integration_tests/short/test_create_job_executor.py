@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import os
 import unittest
 from datetime import datetime
 from test.util import get_evadb_for_testing, shutdown_ray
@@ -27,17 +26,13 @@ class CreateJobTest(unittest.TestCase):
         cls.evadb = get_evadb_for_testing()
         # reset the catalog manager before running each test
         cls.evadb.catalog().reset()
-        cls.db_path = f"{os.path.dirname(os.path.abspath(__file__))}/testing.db"
         cls.job_name = "test_async_job"
-
         execute_query_fetch_all(cls.evadb, f"DROP JOB IF EXISTS {cls.job_name};")
 
     @classmethod
     def tearDownClass(cls):
         shutdown_ray()
         execute_query_fetch_all(cls.evadb, f"DROP JOB IF EXISTS {cls.job_name};")
-        if os.path.exists(cls.db_path):
-            os.remove(cls.db_path)
 
     def test_create_job_should_add_the_entry(self):
         queries = [
@@ -69,8 +64,7 @@ class CreateJobTest(unittest.TestCase):
             job_entry.start_time, datetime.strptime(start, datetime_format)
         )
         self.assertEqual(job_entry.end_time, datetime.strptime(end, date_format))
-        self.assertEqual(job_entry.repeat_interval, repeat_interval)
-        self.assertEqual(job_entry.repeat_period, repeat_period)
+        self.assertEqual(job_entry.repeat_interval, 2 * 7 * 24 * 60 * 60)
         self.assertEqual(job_entry.active, True)
         self.assertEqual(len(job_entry.queries), len(queries))
 

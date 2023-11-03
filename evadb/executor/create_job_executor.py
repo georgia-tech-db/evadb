@@ -56,7 +56,7 @@ class CreateJobExecutor(AbstractExecutor):
         self, repeat_interval: int, repeat_period: str
     ) -> int:
         unit_to_seconds = {
-            "second": 1,
+            "seconds": 1,
             "minute": 60,
             "minutes": 60,
             "min": 60,
@@ -71,7 +71,7 @@ class CreateJobExecutor(AbstractExecutor):
         }
         assert (repeat_period is None) or (
             repeat_period in unit_to_seconds
-        ), "repeat period should be one of these values: minute | minutes | min | hour | hours | day | days | week | weeks | month | months"
+        ), "repeat period should be one of these values: seconds | minute | minutes | min | hour | hours | day | days | week | weeks | month | months"
 
         repeat_interval = 1 if repeat_interval is None else repeat_interval
         return repeat_interval * unit_to_seconds.get(repeat_period, 0)

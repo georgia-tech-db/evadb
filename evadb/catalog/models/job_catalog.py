@@ -17,6 +17,7 @@ import datetime
 import json
 
 from sqlalchemy import Boolean, Column, DateTime, Index, Integer, String
+from sqlalchemy.orm import relationship
 
 from evadb.catalog.models.base_model import BaseModel
 from evadb.catalog.models.utils import JobCatalogEntry
@@ -56,6 +57,7 @@ class JobCatalog(BaseModel):
     )
 
     _next_run_index = Index("_next_run_index", _next_scheduled_run)
+    _job_history_catalog = relationship("JobHistoryCatalog", cascade="all, delete")
 
     def __init__(
         self,

@@ -305,3 +305,27 @@ class JobCatalogEntry:
             "created_at": self.created_at,
             "updated_at": self.updated_at,
         }
+
+
+@dataclass(unsafe_hash=True)
+class JobHistoryCatalogEntry:
+    """Dataclass representing an entry in the `JobHistoryCatalog`."""
+
+    job_id: int
+    job_name: str
+    execution_start_time: datetime
+    execution_end_time: datetime
+    created_at: datetime
+    updated_at: datetime
+    row_id: int = None
+
+    def display_format(self):
+        return {
+            "row_id": self.row_id,
+            "job_id": self.job_name,
+            "job_name": self.job_name,
+            "execution_start_time": self.execution_start_time,
+            "execution_end_time": self.execution_end_time,
+            "created_at": self.created_at,
+            "updated_at": self.updated_at,
+        }

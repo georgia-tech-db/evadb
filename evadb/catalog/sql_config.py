@@ -39,6 +39,7 @@ CATALOG_TABLES = [
     "function_cost_catalog",
     "function_metadata_catalog",
     "job_catalog",
+    "job_history_catalog",
 ]
 # Add all keywords that are restricted by EvaDB
 

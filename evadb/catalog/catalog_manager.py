@@ -41,6 +41,7 @@ from evadb.catalog.models.utils import (
     FunctionMetadataCatalogEntry,
     IndexCatalogEntry,
     JobCatalogEntry,
+    JobHistoryCatalogEntry,
     TableCatalogEntry,
     drop_all_tables_except_catalog,
     init_db,
@@ -64,6 +65,7 @@ from evadb.catalog.services.function_metadata_catalog_service import (
 )
 from evadb.catalog.services.index_catalog_service import IndexCatalogService
 from evadb.catalog.services.job_catalog_service import JobCatalogService
+from evadb.catalog.services.job_history_catalog_service import JobHistoryCatalogService
 from evadb.catalog.services.table_catalog_service import TableCatalogService
 from evadb.catalog.sql_config import IDENTIFIER_COLUMN, SQLConfig
 from evadb.expression.function_expression import FunctionExpression
@@ -89,6 +91,9 @@ class CatalogManager(object):
             self._sql_config.session
         )
         self._job_catalog_service = JobCatalogService(self._sql_config.session)
+        self._job_history_catalog_service = JobHistoryCatalogService(
+            self._sql_config.session
+        )
         self._table_catalog_service = TableCatalogService(self._sql_config.session)
         self._column_service = ColumnCatalogService(self._sql_config.session)
         self._function_service = FunctionCatalogService(self._sql_config.session)
@@ -231,7 +236,7 @@ class CatalogManager(object):
         active: bool,
         next_schedule_run: datetime,
     ) -> JobCatalogEntry:
-        """A new entry is persisted in the job catalog."
+        """A new entry is persisted in the job catalog.
 
         Args:
             name: job name
@@ -303,6 +308,51 @@ class CatalogManager(object):
         """
         self._job_catalog_service.update_next_scheduled_run(
             job_name, next_scheduled_run, active
+        )
+
+    "Job history catalog services"
+
+    def insert_job_history_catalog_entry(
+        self,
+        job_id: str,
+        job_name: str,
+        execution_start_time: datetime,
+        execution_end_time: datetime,
+    ) -> JobCatalogEntry:
+        """A new entry is persisted in the job history catalog.
+
+        Args:
+            job_id: job id for the execution entry
+            job_name: job name for the execution entry
+            execution_start_time: job execution start time
+            execution_end_time: job execution end time
+        """
+        job_history_entry = self._job_history_catalog_service.insert_entry(
+            job_id, job_name, execution_start_time, execution_end_time
+        )
+
+        return job_history_entry
+
+    def get_job_history_by_job_id(self, job_id: int) -> list[JobHistoryCatalogEntry]:
+        """Returns all the entries present for this job_id on in the history.
+
+        Args:
+            job_id: the id of job whose history should be fetched
+        """
+        return self._job_history_catalog_service.get_entry_by_job_id(job_id)
+
+    def update_job_history_end_time(
+        self, job_id: int, execution_start_time: datetime, execution_end_time: datetime
+    ) -> list[JobHistoryCatalogEntry]:
+        """Updates the execution_end_time for this job history matching job_id and execution_start_time.
+
+        Args:
+            job_id: id of the job whose history entry which should be updated
+            execution_start_time: the start time for the job history entry
+            execution_end_time: the end time for the job history entry
+        """
+        return self._job_history_catalog_service.update_entry_end_time(
+            job_id, execution_start_time, execution_end_time
         )
 
     "Table catalog services"

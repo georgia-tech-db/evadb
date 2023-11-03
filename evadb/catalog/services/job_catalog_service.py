@@ -108,9 +108,9 @@ class JobCatalogService(BaseService):
                     self.model._active == true(),
                 )
             )
-        ).all()
-        entry = [row.as_dataclass() for row in entries]
-        return entry
+        ).scalars().all()
+        entries = [row.as_dataclass() for row in entries]
+        return entries
 
     def get_next_executable_job(self, only_past_jobs: bool) -> JobCatalogEntry:
         """Get the oldest job that is ready to be triggered by trigger time
