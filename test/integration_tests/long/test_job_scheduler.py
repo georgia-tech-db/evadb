@@ -1,16 +1,27 @@
-import unittest
-import os
+# coding=utf-8
+# Copyright 2018-2023 EvaDB
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 import time
-
-from mock import ANY, MagicMock
+import unittest
 from datetime import datetime, timedelta
 from test.util import get_evadb_for_testing, shutdown_ray
 
-from evadb.catalog.models.utils import JobCatalogEntry
-from evadb.utils.job_scheduler import JobScheduler
-from evadb.executor.executor_utils import ExecutorError
-from evadb.server.command_handler import execute_query_fetch_all
+from mock import MagicMock
+
 from evadb.interfaces.relational.db import EvaDBConnection
+from evadb.server.command_handler import execute_query_fetch_all
+
 
 class JobSchedulerIntegrationTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
@@ -31,12 +42,11 @@ class JobSchedulerIntegrationTests(unittest.TestCase):
         execute_query_fetch_all(cls.evadb, f"DROP JOB IF EXISTS {cls.job_name_1};")
         execute_query_fetch_all(cls.evadb, f"DROP JOB IF EXISTS {cls.job_name_2};")
 
-
     def create_jobs(self):
         datetime_format = "%Y-%m-%d %H:%M:%S"
         start_time = (datetime.now() - timedelta(seconds=10)).strftime(datetime_format)
         end_time = (datetime.now() + timedelta(seconds=60)).strftime(datetime_format)
-        
+
         create_csv_query = """CREATE TABLE IF NOT EXISTS MyCSV (
                                     id INTEGER UNIQUE,
                                     frame_id INTEGER,
@@ -57,7 +67,7 @@ class JobSchedulerIntegrationTests(unittest.TestCase):
                         END '{end_time}'
                         EVERY 2 seconds;
                     """
-        
+
         execute_query_fetch_all(self.evadb, create_csv_query)
         execute_query_fetch_all(self.evadb, job_1_query)
         execute_query_fetch_all(self.evadb, job_2_query)
@@ -65,10 +75,10 @@ class JobSchedulerIntegrationTests(unittest.TestCase):
     def test_should_execute_the_scheduled_jobs(self):
         self.create_jobs()
         connection = EvaDBConnection(self.evadb, MagicMock(), MagicMock())
-        
+
         # start the job scheduler
         connection.start_jobs()
-        
+
         # let the job scheduler run for 10 seconds
         time.sleep(15)
         connection.stop_jobs()

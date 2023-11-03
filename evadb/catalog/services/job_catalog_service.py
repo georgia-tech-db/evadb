@@ -101,14 +101,18 @@ class JobCatalogService(BaseService):
         Returns:
             Returns the list of all active overdue jobs
         """
-        entries = self.session.execute(
-            select(self.model).filter(
-                and_(
-                    self.model._next_scheduled_run <= datetime.datetime.now(),
-                    self.model._active == true(),
+        entries = (
+            self.session.execute(
+                select(self.model).filter(
+                    and_(
+                        self.model._next_scheduled_run <= datetime.datetime.now(),
+                        self.model._active == true(),
+                    )
                 )
             )
-        ).scalars().all()
+            .scalars()
+            .all()
+        )
         entries = [row.as_dataclass() for row in entries]
         return entries
 

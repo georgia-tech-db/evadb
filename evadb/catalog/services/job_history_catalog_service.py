@@ -14,9 +14,8 @@
 # limitations under the License.
 
 import datetime
-import json
 
-from sqlalchemy import and_, true
+from sqlalchemy import and_
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import select
 
@@ -63,9 +62,13 @@ class JobHistoryCatalogService(BaseService):
         Returns:
             list[JobHistoryCatalogEntry]: all history catalog entries for given job id
         """
-        entries = self.session.execute(
-            select(self.model).filter(self.model._job_id == job_id)
-        ).scalars().all()
+        entries = (
+            self.session.execute(
+                select(self.model).filter(self.model._job_id == job_id)
+            )
+            .scalars()
+            .all()
+        )
         entries = [row.as_dataclass() for row in entries]
         return entries
 
@@ -83,9 +86,14 @@ class JobHistoryCatalogService(BaseService):
             void
         """
         job_history_entry = (
-            self.session.query(self.model).filter(
-                and_(self.model._job_id == job_id, self.model._execution_start_time == execution_start_time)
-            ).first()
+            self.session.query(self.model)
+            .filter(
+                and_(
+                    self.model._job_id == job_id,
+                    self.model._execution_start_time == execution_start_time,
+                )
+            )
+            .first()
         )
         if job_history_entry:
             job_history_entry._execution_end_time = execution_end_time

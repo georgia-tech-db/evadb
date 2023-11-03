@@ -16,12 +16,11 @@ from evadb.interfaces.relational.db import (  # noqa: E402,F401
     EvaDBConnection,
     EvaDBCursor,
     connect,
-    connect_remote,
 )
 from evadb.interfaces.relational.relation import EvaDBQuery  # noqa: E402,F401
 
 from .version import VERSION as __version__  # noqa: E402,F401
 
-PYTHON_APIS = ["connect", "connect_remote"]
+PYTHON_APIS = ["connect"]
 
 __all__ = list(PYTHON_APIS)

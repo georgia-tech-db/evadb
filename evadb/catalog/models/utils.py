@@ -276,7 +276,8 @@ class ConfigurationCatalogEntry:
             "key": self.key,
             "value": self.value,
         }
-    
+
+
 @dataclass(unsafe_hash=True)
 class JobCatalogEntry:
     """Dataclass representing an entry in the `JobCatalog`."""
