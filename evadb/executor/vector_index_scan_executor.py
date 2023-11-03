@@ -142,16 +142,13 @@ class VectorIndexScanExecutor(AbstractExecutor):
                 res_data_list.append(row_dict)
 
         result_df = pd.DataFrame(res_data_list)
-        result_df.set_index(row_num_col_name, inplace=True)
-        result_df = result_df.reindex(row_num_np)
-        row_num_df.set_index(pd.Index(row_num_np), inplace=True)
 
         final_df = pd.merge(
             row_num_df,
             result_df,
-            left_index=True,
-            right_index=True,
-            how="left",
+            left_on="row_num_np",
+            right_on=row_num_col_name,
+            how="inner",
         )
 
         if "row_num_np" in final_df:
