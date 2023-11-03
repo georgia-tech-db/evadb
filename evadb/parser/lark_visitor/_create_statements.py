@@ -299,6 +299,8 @@ class CreateIndex:
             vector_store_type = VectorStoreType.PGVECTOR
         elif str.upper(token) == "CHROMADB":
             vector_store_type = VectorStoreType.CHROMADB
+        elif str.upper(token) == "MILVUS":
+            vector_store_type = VectorStoreType.MILVUS
         return vector_store_type
 
 

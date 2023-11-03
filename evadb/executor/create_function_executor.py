@@ -32,6 +32,7 @@ from evadb.catalog.models.function_metadata_catalog import FunctionMetadataCatal
 from evadb.configuration.constants import (
     DEFAULT_TRAIN_REGRESSION_METRIC,
     DEFAULT_TRAIN_TIME_LIMIT,
+    DEFAULT_XGBOOST_TASK,
     EvaDB_INSTALLATION_DIR,
 )
 from evadb.database import EvaDBDatabase
@@ -240,13 +241,14 @@ class CreateFunctionExecutor(AbstractExecutor):
             "time_budget": arg_map.get("time_limit", DEFAULT_TRAIN_TIME_LIMIT),
             "metric": arg_map.get("metric", DEFAULT_TRAIN_REGRESSION_METRIC),
             "estimator_list": ["xgboost"],
-            "task": "regression",
+            "task": arg_map.get("task", DEFAULT_XGBOOST_TASK),
         }
         model.fit(
             dataframe=aggregated_batch.frames, label=arg_map["predict"], **settings
         )
         model_path = os.path.join(
-            self.db.config.get_value("storage", "model_dir"), self.node.name
+            self.db.catalog().get_configuration_catalog_value("model_dir"),
+            self.node.name,
         )
         pickle.dump(model, open(model_path, "wb"))
         self.node.metadata.append(
@@ -259,12 +261,16 @@ class CreateFunctionExecutor(AbstractExecutor):
 
         impl_path = Path(f"{self.function_dir}/xgboost.py").absolute().as_posix()
         io_list = self._resolve_function_io(None)
+        best_score = model.best_loss
+        train_time = model.best_config_train_time
         return (
             self.node.name,
             impl_path,
             self.node.function_type,
             io_list,
             self.node.metadata,
+            best_score,
+            train_time,
         )
 
     def handle_ultralytics_function(self):
@@ -694,6 +700,8 @@ class CreateFunctionExecutor(AbstractExecutor):
         )
 
         overwrite = False
+        best_score = False
+        train_time = False
         # check catalog if it already has this function entry
         if self.catalog().get_function_catalog_entry_by_name(self.node.name):
             if self.node.if_not_exists:
@@ -756,6 +764,8 @@ class CreateFunctionExecutor(AbstractExecutor):
                 function_type,
                 io_list,
                 metadata,
+                best_score,
+                train_time,
             ) = self.handle_xgboost_function()
         elif string_comparison_case_insensitive(self.node.function_type, "Forecasting"):
             (
@@ -782,7 +792,18 @@ class CreateFunctionExecutor(AbstractExecutor):
             msg = f"Function {self.node.name} overwritten."
         else:
             msg = f"Function {self.node.name} added to the database."
-        yield Batch(pd.DataFrame([msg]))
+        if best_score and train_time:
+            yield Batch(
+                pd.DataFrame(
+                    [
+                        msg,
+                        "Validation Score: " + str(best_score),
+                        "Training time: " + str(train_time),
+                    ]
+                )
+            )
+        else:
+            yield Batch(pd.DataFrame([msg]))
 
     def _try_initializing_function(
         self, impl_path: str, function_args: Dict = {}

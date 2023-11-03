@@ -214,6 +214,30 @@ dalle_function_query = """CREATE FUNCTION IF NOT EXISTS DallE
     EvaDB_INSTALLATION_DIR
 )
 
+Upper_function_query = """CREATE FUNCTION IF NOT EXISTS UPPER
+        INPUT  (input ANYTYPE)
+        OUTPUT (output NDARRAY STR(ANYDIM))
+        IMPL '{}/functions/helpers/upper.py';
+        """.format(
+    EvaDB_INSTALLATION_DIR
+)
+
+Lower_function_query = """CREATE FUNCTION IF NOT EXISTS LOWER
+        INPUT  (input ANYTYPE)
+        OUTPUT (output NDARRAY STR(ANYDIM))
+        IMPL '{}/functions/helpers/lower.py';
+        """.format(
+    EvaDB_INSTALLATION_DIR
+)
+
+Concat_function_query = """CREATE FUNCTION IF NOT EXISTS CONCAT
+        INPUT  (input ANYTYPE)
+        OUTPUT (output NDARRAY STR(ANYDIM))
+        IMPL '{}/functions/helpers/concat.py';
+        """.format(
+    EvaDB_INSTALLATION_DIR
+)
+
 
 def init_builtin_functions(db: EvaDBDatabase, mode: str = "debug") -> None:
     """Load the built-in functions into the system during system bootstrapping.
@@ -261,6 +285,9 @@ def init_builtin_functions(db: EvaDBDatabase, mode: str = "debug") -> None:
         Yolo_function_query,
         stablediffusion_function_query,
         dalle_function_query,
+        Upper_function_query,
+        Lower_function_query,
+        Concat_function_query,
     ]
 
     # if mode is 'debug', add debug functions

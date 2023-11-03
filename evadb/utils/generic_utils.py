@@ -581,6 +581,16 @@ def try_to_import_chromadb_client():
         )
 
 
+def try_to_import_milvus_client():
+    try:
+        import pymilvus  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import pymilvus python package.
+                Please install it with 'pip install pymilvus`."""
+        )
+
+
 def is_qdrant_available() -> bool:
     try:
         try_to_import_qdrant_client()
@@ -602,6 +612,14 @@ def is_chromadb_available() -> bool:
         try_to_import_chromadb_client()
         return True
     except ValueError:  # noqa: E722
+        return False
+
+
+def is_milvus_available() -> bool:
+    try:
+        try_to_import_milvus_client()
+        return True
+    except ValueError:
         return False
 
 
