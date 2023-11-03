@@ -102,6 +102,16 @@ class SelectExecutorTest(unittest.TestCase):
             BinderError, execute_query_fetch_all, self.evadb, select_query
         )
 
+    def test_should_raise_binder_error_on_non_existent_column(self):
+        select_query = "SELECT b1 FROM table1;"
+
+        with self.assertRaises(BinderError) as ctx:
+            execute_query_fetch_all(self.evadb, select_query)
+        self.assertEqual(
+            "Cannot find column b1. Did you mean a1? The feasible columns are ['_row_id', 'a0', 'a1', 'a2'].",
+            str(ctx.exception),
+        )
+
     def test_should_select_star_in_nested_query(self):
         select_query = """SELECT * FROM (SELECT * FROM MyVideo) AS T;"""
         actual_batch = execute_query_fetch_all(self.evadb, select_query)

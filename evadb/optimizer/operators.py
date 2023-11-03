@@ -15,7 +15,7 @@
 from collections import deque
 from enum import IntEnum, auto
 from pathlib import Path
-from typing import Any, List
+from typing import Any, List, Optional
 
 from evadb.catalog.catalog_type import VectorStoreType
 from evadb.catalog.models.column_catalog import ColumnCatalogEntry
@@ -1027,22 +1027,33 @@ class LogicalJoin(Operator):
 
 
 class LogicalShow(Operator):
-    def __init__(self, show_type: ShowType, children: List = None):
+    def __init__(
+        self, show_type: ShowType, show_val: Optional[str] = "", children: List = None
+    ):
         super().__init__(OperatorType.LOGICAL_SHOW, children)
         self._show_type = show_type
+        self._show_val = show_val
 
     @property
     def show_type(self):
         return self._show_type
 
+    @property
+    def show_val(self):
+        return self._show_val
+
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
         if not isinstance(other, LogicalShow):
             return False
-        return is_subtree_equal and self.show_type == other.show_type
+        return (
+            is_subtree_equal
+            and self.show_type == other.show_type
+            and self.show_val == other.show_val
+        )
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(), self.show_type))
+        return hash((super().__hash__(), self.show_type, self.show_val))
 
 
 class LogicalExchange(Operator):
@@ -1084,7 +1095,8 @@ class LogicalCreateIndex(Operator):
         table_ref: TableRef,
         col_list: List[ColumnDefinition],
         vector_store_type: VectorStoreType,
-        function: FunctionExpression = None,
+        project_expr_list: List[AbstractExpression],
+        index_def: str,
         children: List = None,
     ):
         super().__init__(OperatorType.LOGICALCREATEINDEX, children)
@@ -1093,7 +1105,8 @@ class LogicalCreateIndex(Operator):
         self._table_ref = table_ref
         self._col_list = col_list
         self._vector_store_type = vector_store_type
-        self._function = function
+        self._project_expr_list = project_expr_list
+        self._index_def = index_def
 
     @property
     def name(self):
@@ -1116,8 +1129,12 @@ class LogicalCreateIndex(Operator):
         return self._vector_store_type
 
     @property
-    def function(self):
-        return self._function
+    def project_expr_list(self):
+        return self._project_expr_list
+
+    @property
+    def index_def(self):
+        return self._index_def
 
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
@@ -1130,7 +1147,8 @@ class LogicalCreateIndex(Operator):
             and self.table_ref == other.table_ref
             and self.col_list == other.col_list
             and self.vector_store_type == other.vector_store_type
-            and self.function == other.function
+            and self.project_expr_list == other.project_expr_list
+            and self.index_def == other.index_def
         )
 
     def __hash__(self) -> int:
@@ -1142,7 +1160,8 @@ class LogicalCreateIndex(Operator):
                 self.table_ref,
                 tuple(self.col_list),
                 self.vector_store_type,
-                self.function,
+                tuple(self.project_expr_list),
+                self.index_def,
             )
         )
 

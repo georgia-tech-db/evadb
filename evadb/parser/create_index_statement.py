@@ -15,7 +15,9 @@
 from typing import List
 
 from evadb.catalog.catalog_type import VectorStoreType
+from evadb.expression.abstract_expression import AbstractExpression
 from evadb.expression.function_expression import FunctionExpression
+from evadb.expression.tuple_value_expression import TupleValueExpression
 from evadb.parser.create_statement import ColumnDefinition
 from evadb.parser.statement import AbstractStatement
 from evadb.parser.table_ref import TableRef
@@ -30,7 +32,7 @@ class CreateIndexStatement(AbstractStatement):
         table_ref: TableRef,
         col_list: List[ColumnDefinition],
         vector_store_type: VectorStoreType,
-        function: FunctionExpression = None,
+        project_expr_list: List[AbstractStatement],
     ):
         super().__init__(StatementType.CREATE_INDEX)
         self._name = name
@@ -38,16 +40,34 @@ class CreateIndexStatement(AbstractStatement):
         self._table_ref = table_ref
         self._col_list = col_list
         self._vector_store_type = vector_store_type
-        self._function = function
+        self._project_expr_list = project_expr_list
+
+        # Definition of CREATE INDEX.
+        self._index_def = self.__str__()
 
     def __str__(self) -> str:
-        print_str = "CREATE INDEX {} {} ON {} ({}{}) ".format(
-            self._name,
-            "IF NOT EXISTS" if self._if_not_exists else "",
-            self._table_ref,
-            "" if self._function else self._function,
-            tuple(self._col_list),
-        )
+        function_expr = None
+        for project_expr in self._project_expr_list:
+            if isinstance(project_expr, FunctionExpression):
+                function_expr = project_expr
+
+        print_str = "CREATE INDEX"
+        if self._if_not_exists:
+            print_str += " IF NOT EXISTS"
+        print_str += f" {self._name}"
+        print_str += " ON"
+        print_str += f" {self._table_ref.table.table_name}"
+        if function_expr is None:
+            print_str += f" ({self.col_list[0].name})"
+        else:
+
+            def traverse_create_function_expression_str(expr):
+                if isinstance(expr, TupleValueExpression):
+                    return f"{self.col_list[0].name}"
+                return f"{expr.name}({traverse_create_function_expression_str(expr.children[0])})"
+
+            print_str += f" ({traverse_create_function_expression_str(function_expr)})"
+        print_str += f" USING {self._vector_store_type};"
         return print_str
 
     @property
@@ -71,8 +91,16 @@ class CreateIndexStatement(AbstractStatement):
         return self._vector_store_type
 
     @property
-    def function(self):
-        return self._function
+    def project_expr_list(self):
+        return self._project_expr_list
+
+    @project_expr_list.setter
+    def project_expr_list(self, project_expr_list: List[AbstractExpression]):
+        self._project_expr_list = project_expr_list
+
+    @property
+    def index_def(self):
+        return self._index_def
 
     def __eq__(self, other):
         if not isinstance(other, CreateIndexStatement):
@@ -83,7 +111,8 @@ class CreateIndexStatement(AbstractStatement):
             and self._table_ref == other.table_ref
             and self.col_list == other.col_list
             and self._vector_store_type == other.vector_store_type
-            and self._function == other.function
+            and self._project_expr_list == other.project_expr_list
+            and self._index_def == other.index_def
         )
 
     def __hash__(self) -> int:
@@ -95,6 +124,7 @@ class CreateIndexStatement(AbstractStatement):
                 self._table_ref,
                 tuple(self.col_list),
                 self._vector_store_type,
-                self._function,
+                tuple(self._project_expr_list),
+                self._index_def,
             )
         )

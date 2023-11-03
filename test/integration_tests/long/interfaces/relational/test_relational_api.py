@@ -27,7 +27,12 @@ import pandas as pd
 from pandas.testing import assert_frame_equal
 
 from evadb.binder.binder_utils import BinderError
-from evadb.configuration.constants import EvaDB_DATABASE_DIR, EvaDB_ROOT_DIR
+from evadb.configuration.constants import (
+    DEFAULT_DOCUMENT_CHUNK_OVERLAP,
+    DEFAULT_DOCUMENT_CHUNK_SIZE,
+    EvaDB_DATABASE_DIR,
+    EvaDB_ROOT_DIR,
+)
 from evadb.executor.executor_utils import ExecutorError
 from evadb.interfaces.relational.db import connect
 from evadb.models.storage.batch import Batch
@@ -57,6 +62,7 @@ class RelationalAPI(unittest.TestCase):
         # todo: move these to relational apis as well
         execute_query_fetch_all(self.evadb, """DROP TABLE IF EXISTS mnist_video;""")
         execute_query_fetch_all(self.evadb, """DROP TABLE IF EXISTS meme_images;""")
+        execute_query_fetch_all(self.evadb, """DROP TABLE IF EXISTS dummy_table;""")
 
     def test_relation_apis(self):
         cursor = self.conn.cursor()
@@ -254,6 +260,18 @@ class RelationalAPI(unittest.TestCase):
         labels = DummyObjectDetector().labels
         expected = [
             {
+                "id": i,
+                "label": np.array([labels[1 + i % 2]]),
+            }
+            for i in range(10)
+        ]
+        expected_batch = Batch(frames=pd.DataFrame(expected))
+        self.assertEqual(actual_batch, expected_batch)
+
+        # Without dropping alias
+        actual_batch = cursor.query(select_query_sql).execute(drop_alias=False)
+        expected = [
+            {
                 "dummy_video.id": i,
                 "dummyobjectdetector.label": np.array([labels[1 + i % 2]]),
             }
@@ -360,6 +378,10 @@ class RelationalAPI(unittest.TestCase):
         )
         output = query.df()
         self.assertEqual(len(output), 3)
+        self.assertTrue("data" in output.columns)
+
+        # Without dropping alias
+        output = query.df(drop_alias=False)
         self.assertTrue("pdfs.data" in output.columns)
 
         cursor.drop_index("faiss_index").df()
@@ -375,22 +397,47 @@ class RelationalAPI(unittest.TestCase):
         load_pdf.execute()
 
         result1 = (
-            cursor.table("docs", chunk_size=2000, chunk_overlap=0).select("data").df()
-        )
-
-        result2 = (
-            cursor.table("docs", chunk_size=4000, chunk_overlap=2000)
+            cursor.table(
+                "docs", chunk_size=2000, chunk_overlap=DEFAULT_DOCUMENT_CHUNK_OVERLAP
+            )
             .select("data")
             .df()
         )
 
-        self.assertEqual(len(result1), len(result2))
+        result2 = (
+            cursor.table(
+                "docs", chunk_size=DEFAULT_DOCUMENT_CHUNK_SIZE, chunk_overlap=2000
+            )
+            .select("data")
+            .df()
+        )
 
+        result3 = (
+            cursor.table(
+                "docs", chunk_size=DEFAULT_DOCUMENT_CHUNK_SIZE, chunk_overlap=0
+            )
+            .select("data")
+            .df()
+        )
+
+        self.assertGreater(len(result1), len(result2))
+        self.assertGreater(len(result2), len(result3))
+
+        # should use default value of chunk_overlap and respect chunk_size
+        result5 = cursor.table("docs", chunk_size=2000).select("data").df()
+        self.assertEqual(len(result5), len(result1))
+
+        # should use the default value of chunk_size and should respect chunk_overlap
+        result4 = cursor.table("docs", chunk_overlap=0).select("data").df()
+        self.assertEqual(len(result3), len(result4))
+
+        # should use the default values
         result1 = cursor.table("docs").select("data").df()
 
         result2 = cursor.query(
-            "SELECT data from docs chunk_size 4000 chunk_overlap 200"
+            f"SELECT data from docs chunk_size {DEFAULT_DOCUMENT_CHUNK_SIZE} chunk_overlap {DEFAULT_DOCUMENT_CHUNK_OVERLAP}"
         ).df()
+
         self.assertEqual(len(result1), len(result2))
 
     def test_show_relational(self):

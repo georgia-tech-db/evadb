@@ -28,7 +28,7 @@ from evadb.database import EvaDBDatabase
 from evadb.models.storage.batch import Batch
 from evadb.storage.abstract_storage_engine import AbstractStorageEngine
 from evadb.third_party.databases.interface import get_database_handler
-from evadb.utils.generic_utils import PickleSerializer
+from evadb.utils.generic_utils import PickleSerializer, rebatch
 from evadb.utils.logging_manager import logger
 
 
@@ -103,11 +103,17 @@ class NativeStorageEngine(AbstractStorageEngine):
     def __init__(self, db: EvaDBDatabase):
         super().__init__(db)
 
+    def _get_database_catalog_entry(self, database_name):
+        db_catalog_entry = self.db.catalog().get_database_catalog_entry(database_name)
+        if db_catalog_entry is None:
+            raise Exception(
+                f"Could not find database with name {database_name}. Please register the database using the `CREATE DATABASE` command."
+            )
+        return db_catalog_entry
+
     def create(self, table: TableCatalogEntry):
         try:
-            db_catalog_entry = self.db.catalog().get_database_catalog_entry(
-                table.database_name
-            )
+            db_catalog_entry = self._get_database_catalog_entry(table.database_name)
             uri = None
             with get_database_handler(
                 db_catalog_entry.engine, **db_catalog_entry.params
@@ -122,9 +128,7 @@ class NativeStorageEngine(AbstractStorageEngine):
 
     def write(self, table: TableCatalogEntry, rows: Batch):
         try:
-            db_catalog_entry = self.db.catalog().get_database_catalog_entry(
-                table.database_name
-            )
+            db_catalog_entry = self._get_database_catalog_entry(table.database_name)
             with get_database_handler(
                 db_catalog_entry.engine, **db_catalog_entry.params
             ) as handler:
@@ -154,11 +158,49 @@ class NativeStorageEngine(AbstractStorageEngine):
             logger.exception(err_msg)
             raise Exception(err_msg)
 
-    def read(self, table: TableCatalogEntry) -> Iterator[Batch]:
+    def read(
+        self, table: TableCatalogEntry, batch_mem_size: int = 30000000
+    ) -> Iterator[Batch]:
         try:
-            db_catalog_entry = self.db.catalog().get_database_catalog_entry(
-                table.database_name
-            )
+            db_catalog_entry = self._get_database_catalog_entry(table.database_name)
+            with get_database_handler(
+                db_catalog_entry.engine, **db_catalog_entry.params
+            ) as handler:
+                handler_response = handler.select(table.name)
+                # we prefer the generator/iterator when available
+                result = []
+                if handler_response.data_generator:
+                    result = handler_response.data_generator
+                elif handler_response.data:
+                    result = handler_response.data
+
+                if handler.is_sqlalchmey_compatible():
+                    # For sql data source, we can deserialize sql rows into numpy array
+                    cols = result[0]._fields
+                    index_dict = {
+                        element.lower(): index for index, element in enumerate(cols)
+                    }
+                    try:
+                        ordered_columns = sorted(
+                            table.columns, key=lambda x: index_dict[x.name.lower()]
+                        )
+                    except KeyError as e:
+                        raise Exception(f"Column mismatch with error {e}")
+                    result = (
+                        _deserialize_sql_row(row, ordered_columns) for row in result
+                    )
+
+                for df in rebatch(result, batch_mem_size):
+                    yield Batch(pd.DataFrame(df))
+
+        except Exception as e:
+            err_msg = f"Failed to read the table {table.name} in data source {table.database_name} with exception {str(e)}"
+            logger.exception(err_msg)
+            raise Exception(err_msg)
+
+    def drop(self, table: TableCatalogEntry):
+        try:
+            db_catalog_entry = self._get_database_catalog_entry(table.database_name)
             with get_database_handler(
                 db_catalog_entry.engine, **db_catalog_entry.params
             ) as handler:
@@ -167,36 +209,15 @@ class NativeStorageEngine(AbstractStorageEngine):
             # Create a metadata object
             engine = create_engine(uri)
             metadata = MetaData()
-
             Session = sessionmaker(bind=engine)
             session = Session()
             # Retrieve the SQLAlchemy table object for the existing table
-            table_to_read = Table(table.name, metadata, autoload_with=engine)
-            result = session.execute(table_to_read.select()).fetchall()
-            data_batch = []
+            table_to_remove = Table(table.name, metadata, autoload_with=engine)
 
-            # Ensure that the order of columns in the select is same as in table.columns
-            # Also verify if the column names are consistent
-            if result:
-                cols = result[0]._fields
-                index_dict = {
-                    element.lower(): index for index, element in enumerate(cols)
-                }
-                try:
-                    ordered_columns = sorted(
-                        table.columns, key=lambda x: index_dict[x.name.lower()]
-                    )
-                except KeyError as e:
-                    raise Exception(f"Column mismatch with error {e}")
-
-            for row in result:
-                data_batch.append(_deserialize_sql_row(row, ordered_columns))
-
-            if data_batch:
-                yield Batch(pd.DataFrame(data_batch))
-
+            table_to_remove.drop(engine)
+            session.commit()
             session.close()
         except Exception as e:
-            err_msg = f"Failed to read the table {table.name} in data source {table.database_name} with exception {str(e)}"
-            logger.exception(err_msg)
+            err_msg = f"Failed to drop the table {table.name} in data source {table.database_name} with exception {str(e)}"
+            logger.error(err_msg)
             raise Exception(err_msg)

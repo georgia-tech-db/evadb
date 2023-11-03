@@ -53,6 +53,25 @@ class InsertExecutor(AbstractExecutor):
         storage_engine = StorageEngine.factory(self.db, table_catalog_entry)
         storage_engine.write(table_catalog_entry, batch)
 
+        # Index update if there is an index built on the table.
+        for index in self.db.catalog().get_all_index_catalog_entries():
+            is_index_on_current_table = False
+            for column in table_catalog_entry.columns:
+                if column == index.feat_column:
+                    is_index_on_current_table = True
+            if is_index_on_current_table:
+                create_index_query_list = index.index_def.split(" ")
+                if_not_exists = " ".join(create_index_query_list[2:5]).lower()
+                if if_not_exists != "if not exists":
+                    create_index_query = (
+                        " ".join(create_index_query_list[:2])
+                        + " IF NOT EXISTS "
+                        + " ".join(create_index_query_list[2:])
+                    )
+                from evadb.server.command_handler import execute_query_fetch_all
+
+                execute_query_fetch_all(self.db, create_index_query)
+
         yield Batch(
             pd.DataFrame([f"Number of rows loaded: {str(len(values_to_insert))}"])
         )

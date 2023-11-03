@@ -15,7 +15,6 @@
 import os
 from typing import List
 
-from evadb.configuration.configuration_manager import ConfigurationManager
 from evadb.third_party.vector_stores.types import (
     FeaturePayload,
     VectorIndexQuery,
@@ -30,34 +29,30 @@ _pinecone_init_done = False
 
 
 class PineconeVectorStore(VectorStore):
-    def __init__(self, index_name: str) -> None:
+    def __init__(self, index_name: str, **kwargs) -> None:
         try_to_import_pinecone_client()
         global _pinecone_init_done
         # pinecone only allows index names with lower alpha-numeric characters and '-'
         self._index_name = index_name.strip().lower()
 
         # Get the API key.
-        self._api_key = ConfigurationManager().get_value(
-            "third_party", "PINECONE_API_KEY"
-        )
+        self._api_key = kwargs.get("PINECONE_API_KEY")
 
         if not self._api_key:
             self._api_key = os.environ.get("PINECONE_API_KEY")
 
         assert (
             self._api_key
-        ), "Please set your Pinecone API key in evadb.yml file (third_party, pinecone_api_key) or environment variable (PINECONE_KEY). It can be found at Pinecone Dashboard > API Keys > Value"
+        ), "Please set your `PINECONE_API_KEY` using set command or environment variable (PINECONE_KEY). It can be found at Pinecone Dashboard > API Keys > Value"
 
         # Get the environment name.
-        self._environment = ConfigurationManager().get_value(
-            "third_party", "PINECONE_ENV"
-        )
+        self._environment = kwargs.get("PINECONE_ENV")
         if not self._environment:
             self._environment = os.environ.get("PINECONE_ENV")
 
         assert (
             self._environment
-        ), "Please set the Pinecone environment key in evadb.yml file (third_party, pinecone_env) or environment variable (PINECONE_ENV). It can be found Pinecone Dashboard > API Keys > Environment."
+        ), "Please set your `PINECONE_ENV` or environment variable (PINECONE_ENV). It can be found Pinecone Dashboard > API Keys > Environment."
 
         if not _pinecone_init_done:
             # Initialize pinecone.

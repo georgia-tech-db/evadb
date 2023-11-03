@@ -56,7 +56,18 @@ workflows:
                 ignore: 
                   - master
                   - staging
-
+        ################################
+        #### LONG INTEGRATION TESTS: PR
+        ################################
+        ################################
+        - Linux:
+            name: Long Integration Test (Cache) | v3.10 | Linux
+            mode: LONG INTEGRATION CACHE
+            filters:
+              branches:
+                ignore: 
+                  - master
+                  - staging
         ################################
         #### SHORT THIRDPARTY TESTS: PR
         ################################
@@ -201,6 +212,12 @@ jobs:
       - restore_cache:
           keys:
             - v1-model_cache-{{ checksum "setup.py" }}
+
+      # First try restoring the testmondata from PR, than staging.
+      - restore_cache:
+          keys:
+            - v1-testmon_cache-{{ .Branch }}-python<< parameters.v >>-ray<< parameters.ray >>-{{ checksum "setup.py" }}-
+            - v1-testmon_cache-staging-python3.10-rayDISABLED-{{ checksum "setup.py" }}-
       
       - run:
           name: Install EvaDB package from GitHub repo with all dependencies
@@ -217,7 +234,7 @@ jobs:
               else
                 pip install ".[dev,pinecone,chromadb]" # ray < 2.5.0 does not work with python 3.11 ray-project/ray#33864
               fi
-              python -c "import yaml;f = open('evadb/evadb.yml', 'r+');config_obj = yaml.load(f, Loader=yaml.FullLoader);config_obj['experimental']['ray'] = True;f.seek(0);f.write(yaml.dump(config_obj));f.truncate();"
+              python -c "import evadb;cur=evadb.connect().cursor();cur.query('SET ray=True;')"
             else
               if [ $PY_VERSION != "3.11" ]; then
                 pip install ".[dev,ludwig,qdrant,pinecone,chromadb]"
@@ -237,6 +254,7 @@ jobs:
             if [[ $PY_VERSION = "3.10" ]] || [[ $PY_VERSION = "3.11" ]]; then
               export SETUPTOOLS_USE_DISTUTILS=stdlib
             fi
+            set +e # To make sure the later cache step is not skipped.
             bash script/test/test.sh -m "<< parameters.mode >>"
 
       # Enable cache save conditionally (to avoid empty cache in Notebooks)
@@ -250,6 +268,25 @@ jobs:
                   - /home/circleci/.cache/huggingface/
                   - /home/circleci/.cache/torch/
                   - /home/circleci/.cache/gpt4all/
+
+    # Collect the testmondata only for long intergration tests
+      - when:
+          condition:
+            or:
+              - equal: [ LONG INTEGRATION CACHE, << parameters.mode >> ]
+              - and:
+                - equal: [ LONG INTEGRATION, << parameters.mode >> ]
+                - equal: [ staging, << pipeline.git.branch >> ]
+                - equal: [ "3.10", << parameters.v >> ]
+                - equal: [ DISABLED, << parameters.ray >>]
+          steps:
+          - save_cache:
+              key: v1-testmon_cache-{{ .Branch }}-python<< parameters.v >>-ray<< parameters.ray >>-{{ checksum "setup.py" }}-{{ epoch }}
+              paths:
+                - .testmondata
+                - .testmondata-shm
+                - .testmondata-wal
+
 
       - save_cache:
           key: v1-pip-wheel_cache-python<< parameters.v >>-ray<< parameters.ray >>-{{ checksum "setup.py" }}

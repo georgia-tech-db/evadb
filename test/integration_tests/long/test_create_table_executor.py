@@ -122,6 +122,15 @@ class CreateTableTest(unittest.TestCase):
         execute_query_fetch_all(self.evadb, create_table)
         execute_query_fetch_all(self.evadb, "DROP TABLE SlackCSV;")
 
+    def test_create_table_with_restricted_keywords(self):
+        create_table = "CREATE TABLE hello (_row_id INTEGER, price TEXT);"
+        with self.assertRaises(AssertionError):
+            execute_query_fetch_all(self.evadb, create_table)
+
+        create_table = "CREATE TABLE hello2 (_ROW_id INTEGER, price TEXT);"
+        with self.assertRaises(AssertionError):
+            execute_query_fetch_all(self.evadb, create_table)
+
 
 if __name__ == "__main__":
     unittest.main()

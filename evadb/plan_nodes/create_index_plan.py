@@ -15,6 +15,7 @@
 from typing import List
 
 from evadb.catalog.catalog_type import VectorStoreType
+from evadb.expression.abstract_expression import AbstractExpression
 from evadb.expression.function_expression import FunctionExpression
 from evadb.parser.create_statement import ColumnDefinition
 from evadb.parser.table_ref import TableRef
@@ -30,7 +31,8 @@ class CreateIndexPlan(AbstractPlan):
         table_ref: TableRef,
         col_list: List[ColumnDefinition],
         vector_store_type: VectorStoreType,
-        function: FunctionExpression = None,
+        project_expr_list: List[AbstractExpression],
+        index_def: str,
     ):
         super().__init__(PlanOprType.CREATE_INDEX)
         self._name = name
@@ -38,7 +40,8 @@ class CreateIndexPlan(AbstractPlan):
         self._table_ref = table_ref
         self._col_list = col_list
         self._vector_store_type = vector_store_type
-        self._function = function
+        self._project_expr_list = project_expr_list
+        self._index_def = index_def
 
     @property
     def name(self):
@@ -61,10 +64,19 @@ class CreateIndexPlan(AbstractPlan):
         return self._vector_store_type
 
     @property
-    def function(self):
-        return self._function
+    def project_expr_list(self):
+        return self._project_expr_list
+
+    @property
+    def index_def(self):
+        return self._index_def
 
     def __str__(self):
+        function_expr = None
+        for project_expr in self._project_expr_list:
+            if isinstance(project_expr, FunctionExpression):
+                function_expr = project_expr
+
         return "CreateIndexPlan(name={}, \
             table_ref={}, \
             col_list={}, \
@@ -74,7 +86,7 @@ class CreateIndexPlan(AbstractPlan):
             self._table_ref,
             tuple(self._col_list),
             self._vector_store_type,
-            "" if not self._function else "function={}".format(self._function),
+            "" if function_expr is None else "function={}".format(function_expr),
         )
 
     def __hash__(self) -> int:
@@ -86,6 +98,7 @@ class CreateIndexPlan(AbstractPlan):
                 self.table_ref,
                 tuple(self.col_list),
                 self.vector_store_type,
-                self.function,
+                tuple(self.project_expr_list),
+                self.index_def,
             )
         )

@@ -37,6 +37,7 @@ from evadb.parser.parser import Parser
 from evadb.parser.rename_statement import RenameTableStatement
 from evadb.parser.select_statement import SelectStatement
 from evadb.parser.set_statement import SetStatement
+from evadb.parser.show_statement import ShowStatement
 from evadb.parser.statement import AbstractStatement, StatementType
 from evadb.parser.table_ref import JoinNode, TableInfo, TableRef, TableValuedExpression
 from evadb.parser.types import (
@@ -44,6 +45,7 @@ from evadb.parser.types import (
     JoinType,
     ObjectType,
     ParserOrderBySortType,
+    ShowType,
 )
 from evadb.parser.use_statement import UseStatement
 
@@ -113,11 +115,23 @@ class ParserTests(unittest.TestCase):
                 ColumnDefinition("featCol", None, None, None),
             ],
             VectorStoreType.FAISS,
+            [TupleValueExpression(name="featCol")],
         )
         actual_stmt = evadb_stmt_list[0]
         self.assertEqual(actual_stmt, expected_stmt)
+        self.assertEqual(actual_stmt.index_def, create_index_query)
 
         # create if_not_exists
+        expected_stmt = CreateIndexStatement(
+            "testindex",
+            True,
+            TableRef(TableInfo("MyVideo")),
+            [
+                ColumnDefinition("featCol", None, None, None),
+            ],
+            VectorStoreType.FAISS,
+            [TupleValueExpression(name="featCol")],
+        )
         create_index_query = (
             "CREATE INDEX IF NOT EXISTS testindex ON MyVideo (featCol) USING FAISS;"
         )
@@ -125,6 +139,7 @@ class ParserTests(unittest.TestCase):
         actual_stmt = evadb_stmt_list[0]
         expected_stmt._if_not_exists = True
         self.assertEqual(actual_stmt, expected_stmt)
+        self.assertEqual(actual_stmt.index_def, create_index_query)
 
         # create index on Function expression
         create_index_query = (
@@ -147,10 +162,11 @@ class ParserTests(unittest.TestCase):
                 ColumnDefinition("featCol", None, None, None),
             ],
             VectorStoreType.FAISS,
-            func_expr,
+            [func_expr],
         )
         actual_stmt = evadb_stmt_list[0]
         self.assertEqual(actual_stmt, expected_stmt)
+        self.assertEqual(actual_stmt.index_def, create_index_query)
 
     @unittest.skip("Skip parser exception handling testcase, moved to binder")
     def test_create_index_exception_statement(self):
@@ -209,6 +225,51 @@ class ParserTests(unittest.TestCase):
         )
 
     def test_create_table_statement(self):
+        parser = Parser()
+
+        single_queries = []
+        single_queries.append(
+            """CREATE TABLE IF NOT EXISTS Persons (
+                  Frame_ID INTEGER UNIQUE,
+                  Frame_Data TEXT,
+                  Frame_Value FLOAT,
+                  Frame_Array NDARRAY UINT8(5, 100, 2432, 4324, 100)
+            );"""
+        )
+
+        expected_cci = ColConstraintInfo()
+        expected_cci.nullable = True
+        unique_cci = ColConstraintInfo()
+        unique_cci.unique = True
+        unique_cci.nullable = False
+        expected_stmt = CreateTableStatement(
+            TableInfo("Persons"),
+            True,
+            [
+                ColumnDefinition("Frame_ID", ColumnType.INTEGER, None, (), unique_cci),
+                ColumnDefinition("Frame_Data", ColumnType.TEXT, None, (), expected_cci),
+                ColumnDefinition(
+                    "Frame_Value", ColumnType.FLOAT, None, (), expected_cci
+                ),
+                ColumnDefinition(
+                    "Frame_Array",
+                    ColumnType.NDARRAY,
+                    NdArrayType.UINT8,
+                    (5, 100, 2432, 4324, 100),
+                    expected_cci,
+                ),
+            ],
+        )
+
+        for query in single_queries:
+            evadb_statement_list = parser.parse(query)
+            self.assertIsInstance(evadb_statement_list, list)
+            self.assertEqual(len(evadb_statement_list), 1)
+            self.assertIsInstance(evadb_statement_list[0], AbstractStatement)
+            self.assertEqual(evadb_statement_list[0], expected_stmt)
+
+    def test_create_table_with_dimension_statement(self):
+        # The test is for backwards compatibility
         parser = Parser()
 
         single_queries = []
@@ -726,6 +787,21 @@ class ParserTests(unittest.TestCase):
         )
 
         self.assertEqual(set_stmt, expected_stmt)
+
+    def test_show_config_statement(self):
+        parser = Parser()
+        show_config_statement = """SHOW OPENAIKEY"""
+        evadb_statement_list = parser.parse(show_config_statement)
+
+        self.assertIsInstance(evadb_statement_list, list)
+        self.assertEqual(len(evadb_statement_list), 1)
+        self.assertEqual(evadb_statement_list[0].stmt_type, StatementType.SHOW)
+
+        show_config_stmt = evadb_statement_list[0]
+
+        expected_stmt = ShowStatement(show_type=ShowType.CONFIG, show_val="OPENAIKEY")
+
+        self.assertEqual(show_config_stmt, expected_stmt)
 
     def test_create_predict_function_statement(self):
         parser = Parser()

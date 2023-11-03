@@ -16,7 +16,7 @@ sphinx-remove-toctrees==0.0.3
 sphinx_design==0.5.0
 sphinx_multiversion>=0.2.4
 sphinxcontrib-redoc==1.6.0
-sphinxcontrib-youtube==1.4.1
+sphinxcontrib-youtube==1.2.0
 furo>=2022.4.7
 
 setuptools>=41.0.1
@@ -37,4 +37,4 @@ jupytext==1.15.2
 urllib3 < 2
 
 # eva
-git+https://github.com/georgia-tech-db/eva.git@master
+git+https://github.com/georgia-tech-db/eva.git@staging

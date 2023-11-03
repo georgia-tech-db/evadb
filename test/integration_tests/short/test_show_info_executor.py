@@ -28,7 +28,7 @@ from evadb.functions.function_bootstrap_queries import (
 from evadb.models.storage.batch import Batch
 from evadb.server.command_handler import execute_query_fetch_all
 
-NUM_FRAMES = 10
+NUM_DATABASES = 6
 
 
 @pytest.mark.notparallel
@@ -48,11 +48,38 @@ class ShowExecutorTest(unittest.TestCase):
         execute_query_fetch_all(cls.evadb, f"LOAD VIDEO '{mnist}' INTO MNIST;")
         execute_query_fetch_all(cls.evadb, f"LOAD VIDEO '{actions}' INTO Actions;")
 
+        # create databases
+        import os
+
+        cls.current_file_dir = os.path.dirname(os.path.abspath(__file__))
+        for i in range(NUM_DATABASES):
+            database_path = f"{cls.current_file_dir}/testing_{i}.db"
+            params = {
+                "database": database_path,
+            }
+            query = """CREATE DATABASE test_data_source_{}
+                        WITH ENGINE = "sqlite",
+                        PARAMETERS = {};""".format(
+                i, params
+            )
+            execute_query_fetch_all(cls.evadb, query)
+
     @classmethod
     def tearDownClass(cls):
         execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS Actions;")
         execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS MNIST;")
         execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS MyVideo;")
+
+        # remove all the DATABASES
+        for i in range(NUM_DATABASES):
+            execute_query_fetch_all(
+                cls.evadb, f"DROP DATABASE IF EXISTS test_data_source_{i};"
+            )
+            database_path = f"{cls.current_file_dir}/testing_{i}.db"
+            import contextlib
+
+            with contextlib.suppress(FileNotFoundError):
+                os.remove(database_path)
 
     # integration test
     def test_show_functions(self):
@@ -88,3 +115,29 @@ class ShowExecutorTest(unittest.TestCase):
 
         # stop the server
         os.system("nohup evadb_server --stop")
+
+    def test_show_config_execution(self):
+        execute_query_fetch_all(self.evadb, "SET OPENAIKEY = 'ABCD';")
+        #
+        expected_output = Batch(pd.DataFrame({"OPENAIKEY": ["ABCD"]}))
+
+        show_config_value = execute_query_fetch_all(self.evadb, "SHOW OPENAIKEY")
+        self.assertEqual(show_config_value, expected_output)
+
+        # Ensure an Exception is raised if config is not present
+        with self.assertRaises(Exception):
+            execute_query_fetch_all(self.evadb, "SHOW BADCONFIG")
+
+    # integration test
+    def test_show_databases(self):
+        result = execute_query_fetch_all(self.evadb, "SHOW DATABASES;")
+        self.assertEqual(len(result.columns), 3)
+        self.assertEqual(len(result), 6)
+
+        expected = {
+            "name": [f"test_data_source_{i}" for i in range(NUM_DATABASES)],
+            "engine": ["sqlite" for _ in range(NUM_DATABASES)],
+        }
+        expected_df = pd.DataFrame(expected)
+        self.assertTrue(all(expected_df.name == result.frames.name))
+        self.assertTrue(all(expected_df.engine == result.frames.engine))

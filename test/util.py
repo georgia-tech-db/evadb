@@ -17,6 +17,7 @@ import multiprocessing as mp
 import os
 import shutil
 import socket
+import time
 from contextlib import closing
 from itertools import repeat
 from multiprocessing import Pool
@@ -29,8 +30,12 @@ from mock import MagicMock
 from evadb.binder.statement_binder import StatementBinder
 from evadb.binder.statement_binder_context import StatementBinderContext
 from evadb.catalog.catalog_type import NdArrayType
-from evadb.configuration.configuration_manager import ConfigurationManager
-from evadb.configuration.constants import EvaDB_DATABASE_DIR, EvaDB_INSTALLATION_DIR
+from evadb.configuration.constants import (
+    S3_DOWNLOAD_DIR,
+    TMP_DIR,
+    EvaDB_DATABASE_DIR,
+    EvaDB_INSTALLATION_DIR,
+)
 from evadb.database import init_evadb_instance
 from evadb.expression.function_expression import FunctionExpression
 from evadb.functions.abstract.abstract_function import (
@@ -66,7 +71,7 @@ def suffix_pytest_xdist_worker_id_to_dir(path: str):
         path = Path(str(worker_id) + "_" + path)
     except KeyError:
         pass
-    return path
+    return Path(path)
 
 
 def get_evadb_for_testing(uri: str = None):
@@ -78,14 +83,12 @@ def get_evadb_for_testing(uri: str = None):
 
 def get_tmp_dir():
     db_dir = suffix_pytest_xdist_worker_id_to_dir(EvaDB_DATABASE_DIR)
-    config = ConfigurationManager(Path(db_dir))
-    return config.get_value("storage", "tmp_dir")
+    return db_dir / TMP_DIR
 
 
 def s3_dir():
     db_dir = suffix_pytest_xdist_worker_id_to_dir(EvaDB_DATABASE_DIR)
-    config = ConfigurationManager(Path(db_dir))
-    return config.get_value("storage", "s3_download_dir")
+    return db_dir / S3_DOWNLOAD_DIR
 
 
 EvaDB_TEST_DATA_DIR = Path(EvaDB_INSTALLATION_DIR).parent
@@ -713,5 +716,6 @@ class DummyLLM(AbstractFunction):
             results.append(("" if prompt is None else prompt) + query + " " + content)
 
         df = pd.DataFrame({"response": results})
-
+        # Make it slower
+        time.sleep(1)
         return df

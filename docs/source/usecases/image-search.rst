@@ -8,13 +8,13 @@ Image Search
     <embed>
     <table align="left">
     <td>
-        <a target="_blank" href="https://colab.research.google.com/github/georgia-tech-db/eva/blob/staging/tutorials/11-similarity-search-for-motif-mining.ipynb"><img src="https://www.tensorflow.org/images/colab_logo_32px.png" /> Run on Google Colab</a>
+        <a target="_blank" href="https://colab.research.google.com/github/georgia-tech-db/eva/blob/staging/tutorials/11-similarity-search-for-motif-mining.ipynb"><img src="https://www.tensorflow.org/images/colab_logo_32px.png" width="24px" /> Run on Google Colab</a>
     </td>
     <td>
-        <a target="_blank" href="https://github.com/georgia-tech-db/eva/blob/staging/tutorials/11-similarity-search-for-motif-mining.ipynb"><img src="https://www.tensorflow.org/images/GitHub-Mark-32px.png" /> View source on GitHub</a>
+        <a target="_blank" href="https://github.com/georgia-tech-db/eva/blob/staging/tutorials/11-similarity-search-for-motif-mining.ipynb"><img src="https://www.tensorflow.org/images/GitHub-Mark-32px.png" width="24px" /> View source on GitHub</a>
     </td>
     <td>
-        <a target="_blank" href="https://github.com/georgia-tech-db/eva/raw/staging/tutorials/11-similarity-search-for-motif-mining.ipynb"><img src="https://www.tensorflow.org/images/download_logo_32px.png" /> Download notebook</a>
+        <a target="_blank" href="https://github.com/georgia-tech-db/eva/raw/staging/tutorials/11-similarity-search-for-motif-mining.ipynb"><img src="https://www.tensorflow.org/images/download_logo_32px.png" width="24px" /> Download notebook</a>
     </td>
     </table><br><br>
     </embed>
@@ -33,25 +33,11 @@ Create Image Feature Extraction Function
 
 To create a custom ``SiftFeatureExtractor`` function, use the ``CREATE FUNCTION`` statement. We will assume that the file is downloaded and stored as ``sift_feature_extractor.py``. Now, run the following query to register this function:
 
-.. tab-set::
-    
-    .. tab-item:: Python
+.. code-block:: sql
 
-        .. code-block:: python
-
-            cursor.query("""
-                CREATE FUNCTION 
-                IF NOT EXISTS SiftFeatureExtractor
-                IMPL  'evadb/udfs/sift_feature_extractor.py'
-            """).df()
-
-    .. tab-item:: SQL 
-
-        .. code-block:: sql
-
-            CREATE FUNCTION 
-                IF NOT EXISTS SiftFeatureExtractor
-                IMPL  'evadb/udfs/sift_feature_extractor.py'
+    CREATE FUNCTION 
+        IF NOT EXISTS SiftFeatureExtractor
+        IMPL  'evadb/udfs/sift_feature_extractor.py'
 
 
 Create Vector Index for Similar Image Search
@@ -63,62 +49,30 @@ EvaDB lets you connect to your favorite vector database via the ``CREATE INDEX``
 
 The following EvaQL statement creates a vector index on the ``SiftFeatureExtractor(data)`` column in the ``reddit_dataset`` table:
 
-.. tab-set::
-    
-    .. tab-item:: Python
+.. code-block:: sql
 
-        .. code-block:: python
-
-            cursor.query("""
-                CREATE INDEX reddit_sift_image_index 
-                ON reddit_dataset (SiftFeatureExtractor(data)) 
-                USING FAISS;
-            """).df()
-
-    .. tab-item:: SQL 
-
-        .. code-block:: sql
-
-            CREATE INDEX reddit_sift_image_index 
-                ON reddit_dataset (SiftFeatureExtractor(data)) 
-                USING FAISS;
+    CREATE INDEX reddit_sift_image_index 
+        ON reddit_dataset (SiftFeatureExtractor(data)) 
+        USING FAISS;
 
 Similar Image Search Powered By Vector Index
 --------------------------------------------
 
 EvaQL supports the ``ORDER BY`` and ``LIMIT`` clauses to retrieve the ``top-k`` most similar images for a given image. 
 
-EvaDB contains a built-in ``Similarity(x, y)`` function that computets the Euclidean distance between ``x`` and ``y``. We will use this function to compare the feature vector of image being search (i.e., the given image) and the feature vectors of all the images in the dataset that is stored in the vector index.
+EvaDB contains a built-in ``Similarity(x, y)`` function that computes the Euclidean distance between ``x`` and ``y``. We will use this function to compare the feature vector of image being search (i.e., the given image) and the feature vectors of all the images in the dataset that is stored in the vector index.
 
 EvaDB's query optimizer automatically picks the correct vector index to accelerate a given EvaQL query. It uses the vector index created in the prior step to accelerate the following image search query:
 
-.. tab-set::
-    
-    .. tab-item:: Python
 
-        .. code-block:: python
+.. code-block:: sql
 
-            query = cursor.query("""
-                SELECT name FROM reddit_dataset ORDER BY
-                Similarity(
-                    SiftFeatureExtractor(Open('reddit-images/g1074_d4mxztt.jpg')),
-                    SiftFeatureExtractor(data)
-                )
-                LIMIT 5
-            """).df()
-
-    .. tab-item:: SQL 
-
-        .. code-block:: sql
-
-            SELECT name FROM reddit_dataset ORDER BY
-            Similarity(
-                SiftFeatureExtractor(Open('reddit-images/g1074_d4mxztt.jpg')),
-                SiftFeatureExtractor(data)
-            )
-            LIMIT 5
-
-.. code-block:: python
+    SELECT name FROM reddit_dataset ORDER BY
+    Similarity(
+        SiftFeatureExtractor(Open('reddit-images/g1074_d4mxztt.jpg')),
+        SiftFeatureExtractor(data)
+    )
+    LIMIT 5
 
 This query returns the top-5 most similar images in a ``DataFrame``:
 
@@ -135,3 +89,5 @@ This query returns the top-5 most similar images in a ``DataFrame``:
     +---------------------------------+
 
 .. include:: ../shared/footer.rst
+
+.. include:: ../shared/designs/design8.rst

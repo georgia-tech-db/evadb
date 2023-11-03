@@ -10,6 +10,71 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### [Deprecated]
 ### [Removed]
 
+##  [0.3.8] - 2023-10-18
+
+* PR #1303: v0.3.8 - new release 
+* PR #1302: Reenable batch for release 
+* PR #1301: Add Documentation for UDF Unit Testing and Mocking 
+* PR #1232: Starting the change for XGBoost integration into EVADb. 
+* PR #1294: fix: improve testcase 
+* PR #1293: fix: make the table/function catalog insert operation atomic 
+* PR #1295: feat: add support for show databases 
+* PR #1296: feat: function_metadata supports boolean and float  
+* PR #1290: fix: text_summarization uses drop udf 
+* PR #1240: Add stable diffusion integration 
+* PR #1285: Update custom-ai-function.rst 
+* PR #1234: Added basic functionalities of REST apis 
+* PR #1281: Clickhouse integration 
+* PR #1273: Update custom-ai-function.rst 
+* PR #1274: Fix Notebook and Ray testcases at staging 
+* PR #1264: SHOW command for retrieveing configurations 
+* PR #1270: fix: Catalog init introduces significant overhead  
+* PR #1267: Improve the error message when there is a typo in the column name in the query.  
+* PR #1261: Remove dimensions from `TEXT` and `FLOAT` 
+* PR #1256: Remove table names from column names for `df
+* PR #1253: Collection of fixes for the staging branch 
+* PR #1246: feat: insertion update index 
+* PR #1245: Documentation on vector stores + vector benchmark 
+* PR #1244: feat: create index from projection 
+* PR #1233: GitHub Data Source Integration 
+* PR #1115: Add support for Neuralforecast 
+* PR #1241: Bump Version to v0.3.8+dev 
+* PR #1239: release 0.3.7 
+
+##  [0.3.7] - 2023-09-30
+
+* PR #1239: release 0.3.7 
+* PR #1238: Revert "add stable diffusion integration" 
+* PR #1111: add stable diffusion integration 
+* PR #1228: fix: improve messaging and fix bugs 
+* PR #1230: Force fresh .testmondata cache 
+* PR #1229: Fix staging CI setup 
+* PR #1225: fix: merging dataframes with None value 
+* PR #1223: fix: native db bugs 
+* PR #1209: feat: add testmon in pytest 
+* PR #1201: Improve Documentation For Model Training 
+* PR #1210: chore
+* PR #1212: fix: 1199 enhance similarity search test to make index is used 
+* PR #1211: fix: evadb_client fails on launch 
+* PR #1203: fix: chatgpt exact cache 
+* PR #1208: fix: if create table fails, we were not cleaning the entry in catalog 
+* PR #1204: feat: print error msg if creating built-in functions failed 
+* PR #1180: Adding SET statement for configuration management 
+* PR #1198: Chroma vector store 
+* PR #1162: Adding support for Sklearn linear regression in EvaDB 
+* PR #1196: bug: fix links in model training notebook 
+* PR #1167: Model training Colab Notebook 
+* PR #1185: Add support for function calls without input arguments: `FUNC
+* PR #1192: Skip pinecone test if pinecone is not installed 
+* PR #1191: fix: unclosed file error 
+* PR #1190: fix: release change log 
+* PR #1153: feat: integrate with pgvector 
+* PR #1135: Pinecone vector store 
+* PR #1165: bug: drop bug fix 
+* PR #1168: LLM app fixes 
+* PR #1182: Bump Version to v0.3.7+dev 
+* PR #1181: releass: bump a version further to skip cached wheel 
+
 ##  [0.3.6] - 2023-09-21
 
 * PR #1181: releass: bump a version further to skip cached wheel 

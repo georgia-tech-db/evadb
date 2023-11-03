@@ -21,7 +21,7 @@ import shutil
 import sys
 import uuid
 from pathlib import Path
-from typing import List
+from typing import Iterator, List
 from urllib.parse import urlparse
 
 from aenum import AutoEnum, unique
@@ -173,6 +173,28 @@ def get_size(obj, seen=None):
     return size
 
 
+def rebatch(it: Iterator, batch_mem_size: int = 30000000) -> Iterator:
+    """
+    Utility function to rebatch the rows
+    Args:
+        it (Iterator): an iterator for rows, every row is a dictionary
+        batch_mem_size (int): the maximum batch memory size
+    Yields:
+        data_batch (List): a list of rows, every row is a dictionary
+    """
+    data_batch = []
+    row_size = None
+    for row in it:
+        data_batch.append(row)
+        if row_size is None:
+            row_size = get_size(data_batch)
+        if len(data_batch) * row_size >= batch_mem_size:
+            yield data_batch
+            data_batch = []
+    if data_batch:
+        yield data_batch
+
+
 def get_str_hash(s: str) -> str:
     return hashlib.md5(s.encode("utf-8")).hexdigest()
 
@@ -270,13 +292,23 @@ def try_to_import_ray():
         )
 
 
-def try_to_import_forecast():
+def try_to_import_statsforecast():
     try:
         from statsforecast import StatsForecast  # noqa: F401
     except ImportError:
         raise ValueError(
             """Could not import StatsForecast python package.
                 Please install it with `pip install statsforecast`."""
+        )
+
+
+def try_to_import_neuralforecast():
+    try:
+        from neuralforecast import NeuralForecast  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import NeuralForecast python package.
+                Please install it with `pip install neuralforecast`."""
         )
 
 
@@ -319,7 +351,8 @@ def is_ludwig_available() -> bool:
 
 def is_forecast_available() -> bool:
     try:
-        try_to_import_forecast()
+        try_to_import_statsforecast()
+        try_to_import_neuralforecast()
         return True
     except ValueError:  # noqa: E722
         return False
@@ -334,6 +367,33 @@ def try_to_import_sklearn():
             """Could not import sklearn.
                 Please install it with `pip install scikit-learn`."""
         )
+
+
+def is_sklearn_available() -> bool:
+    try:
+        try_to_import_sklearn()
+        return True
+    except ValueError:  # noqa: E722
+        return False
+
+
+def try_to_import_xgboost():
+    try:
+        import flaml  # noqa: F401
+        from flaml import AutoML  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import Flaml AutoML.
+                Please install it with `pip install "flaml[automl]"`."""
+        )
+
+
+def is_xgboost_available() -> bool:
+    try:
+        try_to_import_xgboost()
+        return True
+    except ValueError:  # noqa: E722
+        return False
 
 
 ##############################
@@ -521,6 +581,16 @@ def try_to_import_chromadb_client():
         )
 
 
+def try_to_import_milvus_client():
+    try:
+        import pymilvus  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import pymilvus python package.
+                Please install it with 'pip install pymilvus`."""
+        )
+
+
 def is_qdrant_available() -> bool:
     try:
         try_to_import_qdrant_client()
@@ -542,6 +612,14 @@ def is_chromadb_available() -> bool:
         try_to_import_chromadb_client()
         return True
     except ValueError:  # noqa: E722
+        return False
+
+
+def is_milvus_available() -> bool:
+    try:
+        try_to_import_milvus_client()
+        return True
+    except ValueError:
         return False
 
 
@@ -588,3 +666,21 @@ def string_comparison_case_insensitive(string_1, string_2) -> bool:
         return False
 
     return string_1.lower() == string_2.lower()
+
+
+def try_to_import_replicate():
+    try:
+        import replicate  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import replicate python package.
+                Please install it with `pip install replicate`."""
+        )
+
+
+def is_replicate_available():
+    try:
+        try_to_import_replicate()
+        return True
+    except ValueError:
+        return False

@@ -35,22 +35,30 @@ class ForecastModel(AbstractFunction):
         predict_column_rename: str,
         time_column_rename: str,
         id_column_rename: str,
+        horizon: int,
+        library: str,
     ):
-        f = open(model_path, "rb")
-        loaded_model = pickle.load(f)
-        f.close()
+        self.library = library
+        if "neuralforecast" in self.library:
+            from neuralforecast import NeuralForecast
+
+            loaded_model = NeuralForecast.load(path=model_path)
+            self.model_name = model_name[4:] if "Auto" in model_name else model_name
+        else:
+            with open(model_path, "rb") as f:
+                loaded_model = pickle.load(f)
+            self.model_name = model_name
         self.model = loaded_model
-        self.model_name = model_name
         self.predict_column_rename = predict_column_rename
         self.time_column_rename = time_column_rename
         self.id_column_rename = id_column_rename
+        self.horizon = int(horizon)
 
     def forward(self, data) -> pd.DataFrame:
-        horizon = list(data.iloc[:, -1])[0]
-        assert (
-            type(horizon) is int
-        ), "Forecast UDF expects integral horizon in parameter."
-        forecast_df = self.model.predict(h=horizon)
+        if self.library == "statsforecast":
+            forecast_df = self.model.predict(h=self.horizon)
+        else:
+            forecast_df = self.model.predict()
         forecast_df.reset_index(inplace=True)
         forecast_df = forecast_df.rename(
             columns={
@@ -58,5 +66,5 @@ class ForecastModel(AbstractFunction):
                 "ds": self.time_column_rename,
                 self.model_name: self.predict_column_rename,
             }
-        )
+        )[: self.horizon * forecast_df["unique_id"].nunique()]
         return forecast_df
