@@ -83,7 +83,7 @@ def load_function_class_from_file(filepath, classname=None):
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
     except ImportError as e:
-        err_msg = f"Couldn't load function from {filepath} : {str(e)}. Not able to load the code provided in the file {abs_path}. Please ensure that the file contains the correct implementation code for the function."
+        err_msg = f"Couldn't load function from {filepath} : {str(e)}. Not able to load the code provided in the file {abs_path}. Please ensure that the file contains the implementation code for the function."
         raise RuntimeError(err_msg)
     except FileNotFoundError as e:
         err_msg = f"Couldn't load function from {filepath} : {str(e)}. This might be because the function implementation file does not exist. Please ensure the file exists at {abs_path}"

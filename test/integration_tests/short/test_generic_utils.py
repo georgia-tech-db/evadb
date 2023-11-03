@@ -50,6 +50,12 @@ class ModulePathTest(unittest.TestCase):
         assert vl.__qualname__ == DecordReader.__qualname__
 
     def test_should_raise_on_missing_file(self):
+        # Can assert on the error message, but that's brittle
+        with self.assertRaises(RuntimeError):
+            load_function_class_from_file("evadb/readers/opencv_reader_abdfdsfds.py")
+    
+    def test_should_raise_on_empty_file(self):
+        # Can assert on the error message, but that's brittle
         with self.assertRaises(RuntimeError):
             load_function_class_from_file("evadb/readers/opencv_reader_abdfdsfds.py")
 
