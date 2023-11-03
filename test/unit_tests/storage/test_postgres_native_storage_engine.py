@@ -77,7 +77,7 @@ class PostgresNativeStorageEngineTest(unittest.TestCase):
         self.get_database_catalog_entry_mock.return_value = DatabaseCatalogEntry(
             name="test_data_source",
             engine="postgres",
-            params=connection_params,            
+            params=connection_params,
             row_id=1,
         )
 

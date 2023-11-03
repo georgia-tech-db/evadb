@@ -30,7 +30,9 @@ class CreateDatabaseExecutor(AbstractExecutor):
 
     def exec(self, *args, **kwargs):
         # Check if database already exists.
-        db_catalog_entry = self.catalog().get_database_catalog_entry(self.node.database_name)
+        db_catalog_entry = self.catalog().get_database_catalog_entry(
+            self.node.database_name
+        )
 
         if db_catalog_entry is not None:
             if self.node.if_not_exists:
@@ -50,13 +52,13 @@ class CreateDatabaseExecutor(AbstractExecutor):
 
         logger.debug(f"Creating database {self.node}")
         self.catalog().insert_database_catalog_entry(
-            self.node.database_name,
-            self.node.engine,
-            self.node.param_dict,
+            self.node.database_name, self.node.engine, self.node.param_dict,
         )
 
         yield Batch(
             pd.DataFrame(
-                [f"The database {self.node.database_name} has been successfully created."]
+                [
+                    f"The database {self.node.database_name} has been successfully created."
+                ]
             )
         )

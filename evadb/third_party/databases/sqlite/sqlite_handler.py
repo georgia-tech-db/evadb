@@ -20,7 +20,7 @@ import pandas as pd
 from evadb.third_party.databases.types import (
     DBHandler,
     DBHandlerResponse,
-    DBHandlerStatus
+    DBHandlerStatus,
 )
 
 

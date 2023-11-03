@@ -190,7 +190,9 @@ class CreateTableStatement(AbstractStatement):
 
 
 class CreateDatabaseStatement(AbstractStatement):
-    def __init__(self, database_name: str, if_not_exists: bool, engine: str, param_dict: dict):
+    def __init__(
+            self, database_name: str, if_not_exists: bool, engine: str, param_dict: dict
+        ):
         super().__init__(StatementType.CREATE_DATABASE)
         self.database_name = database_name
         self.if_not_exists = if_not_exists

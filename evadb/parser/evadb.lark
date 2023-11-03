@@ -3,7 +3,7 @@
 start: (sql_statement? ";")+
 
 sql_statement: ddl_statement | dml_statement | utility_statement | context_statement
-
+        
 ddl_statement: create_database | create_table | create_index | create_function
     | drop_database | drop_table | drop_function | drop_index | rename_table
     

@@ -19,7 +19,7 @@ import psycopg2
 from evadb.third_party.databases.types import (
     DBHandler,
     DBHandlerResponse,
-    DBHandlerStatus
+    DBHandlerStatus,
 )
 
 
