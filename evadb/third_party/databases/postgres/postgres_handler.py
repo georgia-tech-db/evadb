@@ -16,7 +16,11 @@ import numpy as np
 import pandas as pd
 import psycopg2
 
-from evadb.third_party.types import DBHandler, DBHandlerResponse, DBHandlerStatus
+from evadb.third_party.databases.types import (
+    DBHandler,
+    DBHandlerResponse,
+    DBHandlerStatus
+)
 
 
 class PostgresHandler(DBHandler):

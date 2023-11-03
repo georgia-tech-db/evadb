@@ -149,14 +149,6 @@ class ParserStatementTests(unittest.TestCase):
                     "database": "demo"
                 };
             """,
-            """CREATE APPLICATION example_app
-                WITH ENGINE = "slack",
-                PARAMETERS = {
-                    "app_token": "abc123",
-                    "bot_token": "abc123",
-                    "open_ai_token": "abc123"
-                };
-            """,
         ]
         queries = queries + randomized_cases
         ref_stmt = parser.parse(queries[0])[0]

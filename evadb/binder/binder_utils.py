@@ -40,7 +40,7 @@ from evadb.expression.tuple_value_expression import TupleValueExpression
 from evadb.parser.alias import Alias
 from evadb.parser.create_statement import ColumnDefinition
 from evadb.parser.table_ref import TableInfo, TableRef
-from evadb.third_party.interface import get_database_handler
+from evadb.third_party.databases.interface import get_database_handler
 from evadb.utils.logging_manager import logger
 
 

@@ -19,26 +19,26 @@ from evadb.executor.abstract_executor import AbstractExecutor
 from evadb.executor.executor_utils import ExecutorError
 from evadb.models.storage.batch import Batch
 from evadb.parser.create_statement import CreateDatabaseStatement
-from evadb.third_party.interface import get_database_handler
+from evadb.third_party.databases.interface import get_database_handler
 from evadb.utils.logging_manager import logger
 
 
 class CreateDatabaseExecutor(AbstractExecutor):
-    def __init__(self, db: EvaDBDatabase, node: CreateDatabaseStatement, app_type):
+    def __init__(self, db: EvaDBDatabase, node: CreateDatabaseStatement):
         super().__init__(db, node)
         self.app_type = app_type
 
     def exec(self, *args, **kwargs):
         # Check if database already exists.
-        db_catalog_entry = self.catalog().get_database_catalog_entry(self.node.name)
+        db_catalog_entry = self.catalog().get_database_catalog_entry(self.node.database_name)
 
         if db_catalog_entry is not None:
             if self.node.if_not_exists:
-                msg = f"{self.node.name} already exists, nothing added."
+                msg = f"{self.node.database_name} already exists, nothing added."
                 yield Batch(pd.DataFrame([msg]))
                 return
             else:
-                raise ExecutorError(f"{self.node.name} already exists.")
+                raise ExecutorError(f"{self.node.database_name} already exists.")
 
         logger.debug(
             f"Trying to connect to the provided engine {self.node.engine} with params {self.node.param_dict}"
@@ -50,14 +50,13 @@ class CreateDatabaseExecutor(AbstractExecutor):
 
         logger.debug(f"Creating database {self.node}")
         self.catalog().insert_database_catalog_entry(
-            self.node.name,
-            self.app_type,
+            self.node.database_name,
             self.node.engine,
             self.node.param_dict,
         )
 
         yield Batch(
             pd.DataFrame(
-                [f"The database {self.node.name} has been successfully created."]
+                [f"The database {self.node.database_name} has been successfully created."]
             )
         )

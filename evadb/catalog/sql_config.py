@@ -29,7 +29,6 @@ ROW_NUM_COLUMN = "_row_number"
 ROW_NUM_MAGIC = 0xFFFFFFFF
 
 CATALOG_TABLES = [
-    "application_catalog",
     "column_catalog",
     "table_catalog",
     "database_catalog",

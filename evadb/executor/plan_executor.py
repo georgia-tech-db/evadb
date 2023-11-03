@@ -89,9 +89,7 @@ class PlanExecutor:
 
         # First handle cases when the plan is actually a parser statement
         if isinstance(plan, CreateDatabaseStatement):
-            return CreateDatabaseExecutor(
-                db=self._db, node=plan, app_type=plan.app_type
-            )
+            return CreateDatabaseExecutor(db=self._db, node=plan)
         elif isinstance(plan, UseStatement):
             return UseExecutor(db=self._db, node=plan)
         elif isinstance(plan, SetStatement):

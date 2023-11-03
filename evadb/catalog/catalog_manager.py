@@ -136,18 +136,15 @@ class CatalogManager(object):
 
     "Database catalog services"
 
-    def insert_database_catalog_entry(
-        self, name: str, app_type: str, engine: str, params: dict
-    ):
+    def insert_database_catalog_entry(self, name: str, engine: str, params: dict):
         """A new entry is persisted in the database catalog."
 
         Args:
             name: database name
-            app_type: type of 3rd party app
             engine: engine name
             params: required params as a dictionary for the database
         """
-        self._db_catalog_service.insert_entry(name, app_type, engine, params)
+        self._db_catalog_service.insert_entry(name, engine, params)
 
     def get_database_catalog_entry(self, database_name: str) -> DatabaseCatalogEntry:
         """

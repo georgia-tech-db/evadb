@@ -77,11 +77,7 @@ class MySQLNativeStorageEngineTest(unittest.TestCase):
         # set return values
         self.execute_native_query_mock.return_value = NativeQueryResponse()
         self.get_database_catalog_entry_mock.return_value = DatabaseCatalogEntry(
-            name="test_data_source",
-            engine="mysql",
-            params=connection_params,
-            app_type="database",
-            row_id=1,
+            name="test_data_source", engine="mysql", params=connection_params, row_id=1,
         )
 
     def tearDown(self):

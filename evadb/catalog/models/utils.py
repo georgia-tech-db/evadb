@@ -247,14 +247,12 @@ class DatabaseCatalogEntry:
 
     name: str
     engine: str
-    app_type: str
     params: dict
     row_id: int = None
 
     def display_format(self):
         return {
             "name": self.name,
-            "type": self.app_type,
             "engine": self.engine,
             "params": self.params,
         }

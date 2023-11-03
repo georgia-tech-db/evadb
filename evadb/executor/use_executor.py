@@ -19,7 +19,7 @@ from evadb.executor.abstract_executor import AbstractExecutor
 from evadb.executor.executor_utils import ExecutorError
 from evadb.models.storage.batch import Batch
 from evadb.parser.use_statement import UseStatement
-from evadb.third_party.interface import get_database_handler
+from evadb.third_party.databases.interface import get_database_handler
 
 
 class UseExecutor(AbstractExecutor):

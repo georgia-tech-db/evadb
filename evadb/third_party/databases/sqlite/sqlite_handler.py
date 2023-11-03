@@ -17,7 +17,11 @@ import sqlite3
 
 import pandas as pd
 
-from evadb.third_party.types import DBHandler, DBHandlerResponse, DBHandlerStatus
+from evadb.third_party.databases.types import (
+    DBHandler,
+    DBHandlerResponse,
+    DBHandlerStatus
+)
 
 
 class SQLiteHandler(DBHandler):

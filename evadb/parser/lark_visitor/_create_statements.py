@@ -13,8 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from enum import Enum
-
 from lark import Tree
 
 from evadb.catalog.catalog_type import ColumnType, NdArrayType, VectorStoreType
@@ -293,11 +291,6 @@ class CreateIndex:
         return vector_store_type
 
 
-class App_Type(str, Enum):
-    Application = "Application"
-    Database = "Database"
-
-
 class CreateDatabase:
     def create_database(self, tree):
         database_name = None
@@ -315,45 +308,11 @@ class CreateDatabase:
                     engine, param_dict = self.visit(child)
 
         create_stmt = CreateDatabaseStatement(
-            database_name, if_not_exists, engine, param_dict, App_Type.Database
+            database_name, if_not_exists, engine, param_dict
         )
         return create_stmt
 
     def create_database_engine_clause(self, tree):
-        engine = None
-        param_dict = {}
-        for child in tree.children:
-            if isinstance(child, Tree):
-                if child.data == "string_literal":
-                    engine = self.visit(child).value
-                elif child.data == "colon_param_dict":
-                    param_dict = self.visit(child)
-
-        return engine, param_dict
-
-
-class CreateApplication:
-    def create_application(self, tree):
-        app_name = None
-        if_not_exists = False
-        engine = None
-        param_dict = {}
-
-        for child in tree.children:
-            if isinstance(child, Tree):
-                if child.data == "if_not_exists":
-                    if_not_exists = True
-                elif child.data == "uid":
-                    app_name = self.visit(child)
-                elif child.data == "create_application_engine_clause":
-                    engine, param_dict = self.visit(child)
-
-        create_stmt = CreateDatabaseStatement(
-            app_name, if_not_exists, engine, param_dict, App_Type.Application
-        )
-        return create_stmt
-
-    def create_application_engine_clause(self, tree):
         engine = None
         param_dict = {}
         for child in tree.children:

@@ -27,9 +27,7 @@ def _get_database_handler(engine: str, **kwargs):
 
     # Dynamically import the top module.
     try:
-        mod = dynamic_import(
-            engine, "applications" if engine == "slack" else "databases"
-        )
+        mod = dynamic_import(engine)
     except ImportError:
         req_file = os.path.join(os.path.dirname(__file__), engine, "requirements.txt")
         if os.path.isfile(req_file):
@@ -44,8 +42,6 @@ def _get_database_handler(engine: str, **kwargs):
         return mod.MysqlHandler(engine, **kwargs)
     elif engine == "mariadb":
         return mod.MariaDbHandler(engine, **kwargs)
-    elif engine == "slack":
-        return mod.SlackHandler(engine, **kwargs)
     else:
         raise NotImplementedError(f"Engine {engine} is not supported")
 
@@ -62,6 +58,6 @@ def get_database_handler(engine: str, **kwargs):
         handler.disconnect()
 
 
-def dynamic_import(handler_dir, app_type):
-    import_path = f"evadb.third_party.{app_type}.{handler_dir}.{handler_dir}_handler"
+def dynamic_import(handler_dir):
+    import_path = f"evadb.third_party.databases.{handler_dir}.{handler_dir}_handler"
     return importlib.import_module(import_path)

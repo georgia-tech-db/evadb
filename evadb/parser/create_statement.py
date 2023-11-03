@@ -190,48 +190,37 @@ class CreateTableStatement(AbstractStatement):
 
 
 class CreateDatabaseStatement(AbstractStatement):
-    def __init__(
-        self,
-        name: str,
-        if_not_exists: bool,
-        engine: str,
-        param_dict: dict,
-        app_type: str,
-    ):
+    def __init__(self, database_name: str, if_not_exists: bool, engine: str, param_dict: dict):
         super().__init__(StatementType.CREATE_DATABASE)
-        self.name = name
+        self.database_name = database_name
         self.if_not_exists = if_not_exists
         self.engine = engine
         self.param_dict = param_dict
-        self.app_type = app_type
 
     def __eq__(self, other):
         if not isinstance(other, CreateDatabaseStatement):
             return False
         return (
-            self.name == other.name
+            self.database_name == other.database_name
             and self.if_not_exists == other.if_not_exists
             and self.engine == other.engine
             and self.param_dict == other.param_dict
-            and self.app_type == other.app_type
         )
 
     def __hash__(self) -> int:
         return hash(
             (
                 super().__hash__(),
-                self.name,
+                self.database_name,
                 self.if_not_exists,
                 self.engine,
                 hash(frozenset(self.param_dict.items())),
-                self.app_type,
             )
         )
 
     def __str__(self) -> str:
-        app_type_syntax = self.app_type.upper()
         return (
-            f"CREATE {app_type_syntax} {self.name} \n"
+            f"CREATE DATABASE {self.database_name} \n"
             f"WITH ENGINE '{self.engine}' , \n"
             f"PARAMETERS = {self.param_dict};"
         )

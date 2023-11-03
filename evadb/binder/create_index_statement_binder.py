@@ -16,7 +16,7 @@ from evadb.binder.binder_utils import BinderError
 from evadb.binder.statement_binder import StatementBinder
 from evadb.catalog.catalog_type import NdArrayType, VectorStoreType
 from evadb.parser.create_index_statement import CreateIndexStatement
-from evadb.third_party.interface import get_database_handler
+from evadb.third_party.databases.interface import get_database_handler
 
 
 def bind_create_index(binder: StatementBinder, node: CreateIndexStatement):

@@ -27,7 +27,7 @@ from evadb.catalog.schema_utils import SchemaUtils
 from evadb.database import EvaDBDatabase
 from evadb.models.storage.batch import Batch
 from evadb.storage.abstract_storage_engine import AbstractStorageEngine
-from evadb.third_party.interface import get_database_handler
+from evadb.third_party.databases.interface import get_database_handler
 from evadb.utils.generic_utils import PickleSerializer
 from evadb.utils.logging_manager import logger
 

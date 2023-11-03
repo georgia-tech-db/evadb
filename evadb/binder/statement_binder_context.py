@@ -25,7 +25,7 @@ from evadb.catalog.models.function_io_catalog import FunctionIOCatalogEntry
 from evadb.catalog.models.table_catalog import TableCatalogEntry
 from evadb.expression.function_expression import FunctionExpression
 from evadb.expression.tuple_value_expression import TupleValueExpression
-from evadb.third_party.interface import get_database_handler
+from evadb.third_party.databases.interface import get_database_handler
 from evadb.utils.logging_manager import logger
 
 CatalogColumnType = Union[ColumnCatalogEntry, FunctionIOCatalogEntry]

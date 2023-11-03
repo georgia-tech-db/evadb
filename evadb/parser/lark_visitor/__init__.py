@@ -18,7 +18,6 @@ from lark import Tree, visitors
 
 from evadb.parser.lark_visitor._common_clauses_ids import CommonClauses
 from evadb.parser.lark_visitor._create_statements import (
-    CreateApplication,
     CreateDatabase,
     CreateIndex,
     CreateTable,
@@ -80,7 +79,6 @@ class LarkInterpreter(
     Delete,
     Use,
     Set,
-    CreateApplication,
 ):
     def __init__(self, query):
         super().__init__()
