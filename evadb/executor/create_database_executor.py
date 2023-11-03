@@ -25,7 +25,7 @@ from evadb.utils.logging_manager import logger
 
 class CreateDatabaseExecutor(AbstractExecutor):
     def __init__(self, db: EvaDBDatabase, node: CreateDatabaseStatement):
-        super().__init__(db, node)        
+        super().__init__(db, node)
 
     def exec(self, *args, **kwargs):
         # Check if database already exists.
