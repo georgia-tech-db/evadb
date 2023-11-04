@@ -14,8 +14,8 @@
 # limitations under the License.
 
 import unittest
-from test.markers import windows_skip_marker
 from pathlib import Path
+from test.markers import windows_skip_marker
 
 from evadb.configuration.constants import EvaDB_DATASET_DIR
 from evadb.readers.decord_reader import DecordReader
@@ -54,15 +54,15 @@ class ModulePathTest(unittest.TestCase):
         # Asserting on the error message, but that's brittle
         with self.assertRaises(FileNotFoundError):
             load_function_class_from_file("evadb/readers/opencv_reader_abdfdsfds.py")
-    
+
     def test_should_raise_on_empty_file(self):
         # Asserting on the error message, but that's brittle
-        Path('/tmp/empty_file.py').touch()
+        Path("/tmp/empty_file.py").touch()
         with self.assertRaises(ImportError):
             load_function_class_from_file("/tmp/empty_file.py")
-        
+
         # Cleanup
-        Path('/tmp/empty_file.py').unlink()
+        Path("/tmp/empty_file.py").unlink()
 
     def test_should_raise_if_class_does_not_exists(self):
         with self.assertRaises(ImportError):
