@@ -65,13 +65,13 @@ class ModulePathTest(unittest.TestCase):
         Path('/tmp/empty_file.py').unlink()
 
     def test_should_raise_if_class_does_not_exists(self):
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ImportError):
             # evadb/utils/s3_utils.py has no class in it
             # if this test fails due to change in s3_utils.py, change the file to something else
             load_function_class_from_file("evadb/utils/s3_utils.py")
 
     def test_should_raise_if_multiple_classes_exist_and_no_class_mentioned(self):
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ImportError):
             # evadb/utils/generic_utils.py has multiple classes in it
             # if this test fails due to change in generic_utils.py, change the file to something else
             load_function_class_from_file("evadb/utils/generic_utils.py")
