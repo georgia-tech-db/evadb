@@ -15,6 +15,7 @@
 
 import unittest
 from test.markers import windows_skip_marker
+from pathlib import Path
 
 from evadb.configuration.constants import EvaDB_DATASET_DIR
 from evadb.readers.decord_reader import DecordReader
@@ -50,14 +51,18 @@ class ModulePathTest(unittest.TestCase):
         assert vl.__qualname__ == DecordReader.__qualname__
 
     def test_should_raise_on_missing_file(self):
-        # Can assert on the error message, but that's brittle
-        with self.assertRaises(RuntimeError):
+        # Asserting on the error message, but that's brittle
+        with self.assertRaises(FileNotFoundError):
             load_function_class_from_file("evadb/readers/opencv_reader_abdfdsfds.py")
     
     def test_should_raise_on_empty_file(self):
-        # Can assert on the error message, but that's brittle
-        with self.assertRaises(RuntimeError):
-            load_function_class_from_file("evadb/readers/opencv_reader_abdfdsfds.py")
+        # Asserting on the error message, but that's brittle
+        Path('/tmp/empty_file.py').touch()
+        with self.assertRaises(ImportError):
+            load_function_class_from_file("/tmp/empty_file.py")
+        
+        # Cleanup
+        Path('/tmp/empty_file.py').unlink()
 
     def test_should_raise_if_class_does_not_exists(self):
         with self.assertRaises(RuntimeError):
