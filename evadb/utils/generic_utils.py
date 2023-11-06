@@ -75,15 +75,26 @@ def load_function_class_from_file(filepath, classname=None):
         The class instance.
 
     Raises:
-        RuntimeError: If the class name is not found or there is more than one class in the file.
+        ImportError: If the module cannot be loaded.
+        FileNotFoundError: If the file cannot be found.
+        RuntimeError: Any othe type of runtime error.
     """
     try:
         abs_path = Path(filepath).resolve()
         spec = importlib.util.spec_from_file_location(abs_path.stem, abs_path)
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
+    except ImportError as e:
+        # ImportError in the case when we are able to find the file but not able to load the module
+        err_msg = f"ImportError : Couldn't load function from {filepath} : {str(e)}. Not able to load the code provided in the file {abs_path}. Please ensure that the file contains the implementation code for the function."
+        raise ImportError(err_msg)
+    except FileNotFoundError as e:
+        # FileNotFoundError in the case when we are not able to find the file at all at the path.
+        err_msg = f"FileNotFoundError : Couldn't load function from {filepath} : {str(e)}. This might be because the function implementation file does not exist. Please ensure the file exists at {abs_path}"
+        raise FileNotFoundError(err_msg)
     except Exception as e:
-        err_msg = f"Couldn't load function from {filepath} : {str(e)}. This might be due to a missing Python package, or because the function implementation file does not exist, or it is not a valid Python file."
+        # Default exception, we don't know what exactly went wrong so we just output the error message
+        err_msg = f"Couldn't load function from {filepath} : {str(e)}."
         raise RuntimeError(err_msg)
 
     # Try to load the specified class by name
@@ -97,7 +108,7 @@ def load_function_class_from_file(filepath, classname=None):
         if obj.__module__ == module.__name__
     ]
     if len(classes) != 1:
-        raise RuntimeError(
+        raise ImportError(
             f"{filepath} contains {len(classes)} classes, please specify the correct class to load by naming the function with the same name in the CREATE query."
         )
     return classes[0]
