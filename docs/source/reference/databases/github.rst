@@ -19,7 +19,7 @@ Required:
 
 Optional:
 
-* ``github_token`` is not required for public repositories. However, the rate limit is lower without a valid github_token. Check `Rate limits page <https://docs.github.com/en/rest/overview/resources-in-the-rest-api?apiVersion=2022-11-28#rate-limits>`_ to learn more about how to check your rate limit status. Check `Managing your personal access tokens page <https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens>`_ to learn how to create personal access tokens.
+* ``github_token`` is not required for public repositories. However, the rate limit is lower without a valid github_token. Check the `Rate limits page <https://docs.github.com/en/rest/overview/resources-in-the-rest-api>`_ to learn more about how to check your rate limit status. Check `Managing your personal access tokens page <https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens>`_ to learn how to create personal access tokens.
 
 Create Connection
 -----------------

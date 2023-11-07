@@ -83,7 +83,7 @@ class LoadMultimediaExecutor(AbstractExecutor):
 
                 invalid_files_str = "\n".join(invalid_files)
                 err_msg = f"no valid file found at -- '{invalid_files_str}'."
-                raise ValueError(err_msg)
+                logger.error(err_msg)
 
             # Get valid files.
             valid_files = [
