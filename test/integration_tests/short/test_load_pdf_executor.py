@@ -53,3 +53,26 @@ class LoadPDFExecutorTests(unittest.TestCase):
         result = execute_query_fetch_all(self.evadb, "SELECT * from MyPDFs;")
         self.assertEqual(len(result.columns), 5)
         self.assertEqual(len(result), number_of_paragraphs)
+
+    def test_load_broken_pdf(self):
+        pdf_path = f"{EvaDB_ROOT_DIR}/data/documents/broken.pdf"
+
+        import fitz
+
+        doc = fitz.open(pdf_path)
+        number_of_paragraphs = 0
+        for page in doc:
+            blocks = page.get_text("dict")["blocks"]
+            for b in blocks:
+                if b["type"] == 0:
+                    block_string = ""
+                    for lines in b["lines"]:
+                        for span in lines["spans"]:
+                            if span["text"].strip():
+                                block_string += span["text"]
+                    number_of_paragraphs += 1
+
+        execute_query_fetch_all(self.evadb, f"""LOAD PDF '{pdf_path}' INTO MyPDFs;""")
+        result = execute_query_fetch_all(self.evadb, "SELECT * from MyPDFs;")
+        self.assertEqual(len(result.columns), 5)
+        self.assertEqual(len(result), number_of_paragraphs)

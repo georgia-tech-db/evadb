@@ -102,6 +102,7 @@ venv.bak/
 env38/
 env_eva/
 test_eva_db/
+evadb_venv/
 
 # Spyder project settings
 .spyderproject
