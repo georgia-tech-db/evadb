@@ -139,6 +139,7 @@ class CreateFunctionExecutor(AbstractExecutor):
             self.node.name,
         )
         auto_train_results.best_model.save(model_path)
+        best_score = auto_train_results.experiment_analysis.best_result["metric_score"]
         self.node.metadata.append(
             FunctionMetadataCatalogEntry("model_path", model_path)
         )
@@ -151,6 +152,8 @@ class CreateFunctionExecutor(AbstractExecutor):
             self.node.function_type,
             io_list,
             self.node.metadata,
+            best_score,
+            "Train time for Ludwig is not available!!!",
         )
 
     def handle_sklearn_function(self):
@@ -638,6 +641,8 @@ class CreateFunctionExecutor(AbstractExecutor):
                 function_type,
                 io_list,
                 metadata,
+                best_score,
+                train_time,
             ) = self.handle_ludwig_function()
         elif string_comparison_case_insensitive(self.node.function_type, "Sklearn"):
             (
