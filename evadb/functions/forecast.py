@@ -69,6 +69,7 @@ class ForecastModel(AbstractFunction):
                     self.hypers = "p,d,q: " + f.readline()
 
     def forward(self, data) -> pd.DataFrame:
+        log_str = ""
         if self.library == "statsforecast":
             forecast_df = self.model.predict(
                 h=self.horizon, level=[self.conf]
@@ -92,13 +93,15 @@ class ForecastModel(AbstractFunction):
                         suggestion_list.append(1)
 
             for suggestion in set(suggestion_list):
-                print("\nSUGGESTION: " + self.suggestion_dict[suggestion])
+                log_str += "\nSUGGESTION: " + self.suggestion_dict[suggestion]
 
             # Metrics
             if self.rmse is not None:
-                print("\nMean normalized RMSE: " + str(self.rmse))
+                log_str += "\nMean normalized RMSE: " + str(self.rmse)
             if self.hypers is not None:
-                print("Hyperparameters: " + self.hypers)
+                log_str += "\nHyperparameters: " + self.hypers
+
+            print(log_str)
 
         forecast_df = forecast_df.rename(
             columns={

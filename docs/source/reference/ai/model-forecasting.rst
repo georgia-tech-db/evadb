@@ -38,9 +38,6 @@ This trains a forecasting model. The model can be called by providing the horizo
 
    SELECT Forecast();
 
-.. note::
-
-   `Forecasting` function also provides suggestions by default. If you wish to turn it off, send `FALSE` as an optional argument while calling the function. Eg. `SELECT Forecast(FALSE);`
 
 Forecast Parameters
 -------------------
@@ -69,9 +66,17 @@ EvaDB's default forecast framework is `statsforecast <https://nixtla.github.io/s
    * - FREQUENCY (str, default: 'auto')
      - A string indicating the frequency of the data. The common used ones are D, W, M, Y, which respectively represents day-, week-, month- and year- end frequency. The default value is M. Check `pandas available frequencies <https://pandas.pydata.org/pandas-docs/stable/user_guide/timeseries.html#offset-aliases>`_ for all available frequencies. If it is not provided, the frequency is attempted to be determined automatically.
    * - METRICS (str, default: 'True')
-     - Compute NRMSE by performing cross-validation. It is `False` by default if `LIBRARY` is `neuralforecast` as it can take an extensively long time.
+     - Compute NRMSE by performing cross-validation. It is `False` by default if `LIBRARY` is `neuralforecast` as it can take an extensively long time. The metrics are logged locally.
 
-Note: If columns other than the ones required as mentioned above are passed while creating the function, they will be treated as exogenous variables if LIBRARY is `neuralforecast`. Otherwise, they would be ignored.
+.. note::
+
+    If columns other than the ones required as mentioned above are passed while creating the function, they will be treated as exogenous variables if LIBRARY is `neuralforecast`. Otherwise, they would be ignored.
+
+
+.. note::
+  
+   `Forecasting` function also logs suggestions. Logged information, such as metrics and suggestions, is sent to STDOUT by default. If you wish not to print it, please send `FALSE` as an optional argument while calling the function. Eg. `SELECT Forecast(FALSE);`
+
 
 Below is an example query specifying the above parameters:
 
