@@ -646,6 +646,8 @@ class CreateFunctionExecutor(AbstractExecutor):
             model_path = os.path.join(model_dir, existing_model_files[-1])
         io_list = self._resolve_function_io(None)
         data["ds"] = data.ds.astype(str)
+        last_ds = list(data["ds"])[-2*horizon:]
+        last_y = list(data["y"])[-2*horizon:]
         metadata_here = [
             FunctionMetadataCatalogEntry("model_name", arg_map["model"]),
             FunctionMetadataCatalogEntry("model_path", model_path),
@@ -661,6 +663,8 @@ class CreateFunctionExecutor(AbstractExecutor):
             FunctionMetadataCatalogEntry("horizon", horizon),
             FunctionMetadataCatalogEntry("library", library),
             FunctionMetadataCatalogEntry("conf", conf),
+            FunctionMetadataCatalogEntry("last_ds", last_ds),
+            FunctionMetadataCatalogEntry("last_y", last_y),
         ]
 
         return (

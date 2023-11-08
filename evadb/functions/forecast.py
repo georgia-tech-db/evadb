@@ -39,6 +39,8 @@ class ForecastModel(AbstractFunction):
         horizon: int,
         library: str,
         conf: int,
+        last_ds: list,
+        last_y: list
     ):
         self.library = library
         if "neuralforecast" in self.library:
@@ -67,6 +69,8 @@ class ForecastModel(AbstractFunction):
                 self.rmse = float(f.readline())
                 if "arima" in model_name.lower():
                     self.hypers = "p,d,q: " + f.readline()
+        self.last_ds = last_ds
+        self.last_y = last_y
 
     def forward(self, data) -> pd.DataFrame:
         log_str = ""
@@ -100,6 +104,10 @@ class ForecastModel(AbstractFunction):
                 log_str += "\nMean normalized RMSE: " + str(self.rmse)
             if self.hypers is not None:
                 log_str += "\nHyperparameters: " + self.hypers
+            import pudb; pu.db
+
+            # Plot figure
+            
 
             print(log_str)
 
