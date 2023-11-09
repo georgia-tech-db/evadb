@@ -619,7 +619,7 @@ class CreateFunctionExecutor(AbstractExecutor):
                 f = open(model_path, "wb")
                 pickle.dump(model, f)
                 f.close()
-                if "metrics" in arg_map and arg_map["metrics"].lower()[0] == "f":
+                if "metrics" not in arg_map or arg_map["metrics"].lower()[0] == "t":
                     crossvalidation_df = model.cross_validation(
                         df=data[["ds", "y", "unique_id"]],
                         h=horizon,
