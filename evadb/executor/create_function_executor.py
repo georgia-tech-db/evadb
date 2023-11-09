@@ -18,6 +18,7 @@ import locale
 import os
 import pickle
 import re
+import time
 from pathlib import Path
 from typing import Dict, List
 
@@ -125,6 +126,7 @@ class CreateFunctionExecutor(AbstractExecutor):
         aggregated_batch.drop_column_alias()
 
         arg_map = {arg.key: arg.value for arg in self.node.metadata}
+        start_time = int(time.time())
         auto_train_results = auto_train(
             dataset=aggregated_batch.frames,
             target=arg_map["predict"],
@@ -134,6 +136,7 @@ class CreateFunctionExecutor(AbstractExecutor):
                 "tmp_dir"
             ),
         )
+        train_time = int(time.time()) - start_time
         model_path = os.path.join(
             self.db.catalog().get_configuration_catalog_value("model_dir"),
             self.node.name,
@@ -153,7 +156,7 @@ class CreateFunctionExecutor(AbstractExecutor):
             io_list,
             self.node.metadata,
             best_score,
-            "Train time for Ludwig is not available!!!",
+            train_time,
         )
 
     def handle_sklearn_function(self):
@@ -181,7 +184,10 @@ class CreateFunctionExecutor(AbstractExecutor):
         model = LinearRegression()
         Y = aggregated_batch.frames[arg_map["predict"]]
         aggregated_batch.frames.drop([arg_map["predict"]], axis=1, inplace=True)
+        start_time = int(time.time())
         model.fit(X=aggregated_batch.frames, y=Y)
+        train_time = int(time.time()) - start_time
+        score = model.score(X=aggregated_batch.frames, y=Y)
         model_path = os.path.join(
             self.db.catalog().get_configuration_catalog_value("model_dir"),
             self.node.name,
@@ -203,6 +209,8 @@ class CreateFunctionExecutor(AbstractExecutor):
             self.node.function_type,
             io_list,
             self.node.metadata,
+            score,
+            train_time,
         )
 
     def convert_to_numeric(self, x):
@@ -244,9 +252,11 @@ class CreateFunctionExecutor(AbstractExecutor):
             "estimator_list": ["xgboost"],
             "task": arg_map.get("task", DEFAULT_XGBOOST_TASK),
         }
+        start_time = int(time.time())
         model.fit(
             dataframe=aggregated_batch.frames, label=arg_map["predict"], **settings
         )
+        train_time = int(time.time()) - start_time
         model_path = os.path.join(
             self.db.catalog().get_configuration_catalog_value("model_dir"),
             self.node.name,
@@ -263,7 +273,6 @@ class CreateFunctionExecutor(AbstractExecutor):
         impl_path = Path(f"{self.function_dir}/xgboost.py").absolute().as_posix()
         io_list = self._resolve_function_io(None)
         best_score = model.best_loss
-        train_time = model.best_config_train_time
         return (
             self.node.name,
             impl_path,
@@ -651,6 +660,8 @@ class CreateFunctionExecutor(AbstractExecutor):
                 function_type,
                 io_list,
                 metadata,
+                best_score,
+                train_time,
             ) = self.handle_sklearn_function()
         elif string_comparison_case_insensitive(self.node.function_type, "XGBoost"):
             (
@@ -693,7 +704,7 @@ class CreateFunctionExecutor(AbstractExecutor):
                     [
                         msg,
                         "Validation Score: " + str(best_score),
-                        "Training time: " + str(train_time),
+                        "Training time: " + str(train_time) + " secs.",
                     ]
                 )
             )
