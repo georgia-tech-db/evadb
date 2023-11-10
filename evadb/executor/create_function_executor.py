@@ -24,7 +24,6 @@ from typing import Dict, List
 
 import numpy as np
 import pandas as pd
-from sklearn.metrics import mean_squared_error
 
 from evadb.catalog.catalog_utils import get_metadata_properties
 from evadb.catalog.models.function_catalog import FunctionCatalogEntry
@@ -55,6 +54,10 @@ from evadb.utils.generic_utils import (
     try_to_import_xgboost,
 )
 from evadb.utils.logging_manager import logger
+
+
+def root_mean_squared_error(y_true, y_pred):
+    return np.sqrt(np.mean(np.square(y_pred - y_true)))
 
 
 # From https://stackoverflow.com/a/34333710
@@ -602,12 +605,11 @@ class CreateFunctionExecutor(AbstractExecutor):
                                 crossvalidation_df.unique_id == uid
                             ]
                             rmses.append(
-                                mean_squared_error(
+                                root_mean_squared_error(
                                     crossvalidation_df_here.y,
                                     crossvalidation_df_here[
                                         arg_map["model"] + "-median"
                                     ],
-                                    squared=False,
                                 )
                                 / np.mean(crossvalidation_df_here.y)
                             )
@@ -643,10 +645,9 @@ class CreateFunctionExecutor(AbstractExecutor):
                             crossvalidation_df.unique_id == uid
                         ]
                         rmses.append(
-                            mean_squared_error(
+                            root_mean_squared_error(
                                 crossvalidation_df_here.y,
                                 crossvalidation_df_here[arg_map["model"]],
-                                squared=False,
                             )
                             / np.mean(crossvalidation_df_here.y)
                         )
