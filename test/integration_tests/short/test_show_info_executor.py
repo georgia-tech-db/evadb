@@ -126,10 +126,10 @@ class ShowExecutorTest(unittest.TestCase):
         # Ensure an Exception is raised if config is not present
         with self.assertRaises(Exception):
             execute_query_fetch_all(self.evadb, "SHOW BADCONFIG")
-            
+
     def test_show_all_configs(self):
         show_all_config_value = execute_query_fetch_all(self.evadb, "SHOW CONFIG")
-        
+
         # QUES : What do I test this against?
         print(show_all_config_value)
 
