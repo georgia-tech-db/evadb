@@ -86,7 +86,7 @@ class ForecastModel(AbstractFunction):
 
         # Feedback
         if len(data) == 0 or list(list(data.iloc[0]))[0] is True:
-            # Suggestions
+            ## Suggestions
             suggestion_list = []
             # 1: Flat predictions
             if self.library == "statsforecast":
@@ -102,7 +102,7 @@ class ForecastModel(AbstractFunction):
             for suggestion in set(suggestion_list):
                 log_str += "\nSUGGESTION: " + self.suggestion_dict[suggestion]
 
-            # Metrics
+            ## Metrics
             if self.rmse is not None:
                 log_str += "\nMean normalized RMSE: " + str(self.rmse)
             if self.hypers is not None:
@@ -142,7 +142,7 @@ class ForecastModel(AbstractFunction):
             plt.legend()
             plt.tight_layout()
 
-            # convert plt figure to opencv https://copyprogramming.com/howto/convert-matplotlib-figure-to-cv2-image-a-complete-guide-with-examples#converting-matplotlib-figure-to-cv2-image
+            # convert plt figure to opencv, inspired from https://copyprogramming.com/howto/convert-matplotlib-figure-to-cv2-image-a-complete-guide-with-examples#converting-matplotlib-figure-to-cv2-image
             # convert figure to canvas
             canvas = plt.get_current_fig_manager().canvas
 
@@ -156,12 +156,14 @@ class ForecastModel(AbstractFunction):
             # convert image to cv2 format
             cv2_img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
 
-            ## Conver to bytes
+            # Conver to bytes
             _, buffer = cv2.imencode(".jpg", cv2_img)
             img_bytes = buffer.tobytes()
 
-            ## Add to dataframe as a plot
+            # Add to dataframe as a plot
             forecast_df["plot"] = [img_bytes] + [None] * (len(forecast_df) - 1)
+
+            log_str += "\nA plot has been saved in the 'plot' column of the output table. It maybe rendered using the cv2.imdecode function."
 
             print(log_str)
 

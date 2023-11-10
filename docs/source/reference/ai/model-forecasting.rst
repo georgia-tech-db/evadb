@@ -75,7 +75,7 @@ EvaDB's default forecast framework is `statsforecast <https://nixtla.github.io/s
 
 .. note::
   
-   `Forecasting` function also logs suggestions. Logged information, such as metrics and suggestions, is sent to STDOUT by default. If you wish not to print it, please send `FALSE` as an optional argument while calling the function. Eg. `SELECT Forecast(FALSE);`
+   `Forecasting` function also logs suggestions. Logged information, such as metrics and suggestions, is sent to STDOUT by default. A figure is also plotted and is saved in a binary format supported by OpenCV in the `plot` column of the output table. It maybe rendered using the `cv2.imdecode` function. If you wish not to obtain the logged information, please send `FALSE` as an optional argument while calling the function. Eg. `SELECT Forecast(FALSE);`
 
 
 Below is an example query specifying the above parameters:
