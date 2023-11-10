@@ -235,7 +235,7 @@ class Batch:
     def file_paths(self) -> Iterable:
         yield from self._frames["file_path"]
 
-    def project(self, cols: None) -> Batch:
+    def project(self, cols: None, forecast: bool = False) -> Batch:
         """
         Takes as input the column list, returns the projection.
         We do a copy for now.
@@ -243,7 +243,9 @@ class Batch:
         cols = cols or []
         verified_cols = [c for c in cols if c in self._frames]
         unknown_cols = list(set(cols) - set(verified_cols))
-        assert len(unknown_cols) == 0, unknown_cols
+        assert len(unknown_cols) == 0 or (
+            forecast is True and unknown_cols == ["plot"]
+        ), unknown_cols
         return Batch(self._frames[verified_cols])
 
     @classmethod
@@ -405,14 +407,19 @@ class Batch:
         """Resets the index of the data frame in the batch"""
         self._frames.reset_index(drop=True, inplace=True)
 
-    def modify_column_alias(self, alias: Union[Alias, str]) -> None:
+    def modify_column_alias(
+        self, alias: Union[Alias, str], forecast: bool = False
+    ) -> None:
         # a, b, c -> table1.a, table1.b, table1.c
         # t1.a -> t2.a
         if isinstance(alias, str):
             alias = Alias(alias)
         new_col_names = []
         if len(alias.col_names):
-            if len(self.columns) != len(alias.col_names):
+            if (len(self.columns) != len(alias.col_names) and forecast is False) or (
+                forecast is True
+                and list(set(alias.col_names) - set(self.columns)) != ["plot"]
+            ):
                 err_msg = (
                     f"Expected {len(alias.col_names)} columns {alias.col_names},"
                     f"got {len(self.columns)} columns {self.columns}."
@@ -431,7 +438,10 @@ class Batch:
                 else:
                     new_col_names.append("{}.{}".format(alias.alias_name, col_name))
 
-        self._frames.columns = new_col_names
+        if forecast and list(set(alias.col_names) - set(self.columns)) == ["plot"]:
+            self._frames.columns = new_col_names[:-1]
+        else:
+            self._frames.columns = new_col_names
 
     def drop_column_alias(self) -> None:
         # table1.a, table1.b, table1.c -> a, b, c

@@ -134,6 +134,12 @@ class StatementBinder:
                             None,
                             None,
                         ),
+                        ColumnDefinition(
+                            "plot",
+                            ColumnType.ANY,
+                            None,
+                            None,
+                        ),
                     ]
                 )
             else:
