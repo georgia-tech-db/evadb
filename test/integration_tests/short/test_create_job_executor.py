@@ -34,6 +34,22 @@ class CreateJobTest(unittest.TestCase):
         shutdown_ray()
         execute_query_fetch_all(cls.evadb, f"DROP JOB IF EXISTS {cls.job_name};")
 
+    def test_invalid_query_in_job_should_raise_exception(self):
+        # missing closing paranthesis in the query
+        query = """
+            CREATE JOB test_async_job AS {
+                CREATE OR REPLACE FUNCTION HomeSalesForecast FROM
+                    ( SELECT * FROM postgres_data.home_sales
+                TYPE Forecasting
+                PREDICT 'price';
+            }
+            START '2023-04-01 01:10:00'
+            END '2023-05-01'
+            EVERY 2 week;
+        """
+        with self.assertRaisesRegex(Exception, "Failed to parse the job query"):
+            execute_query_fetch_all(self.evadb, query)
+
     def test_create_job_should_add_the_entry(self):
         queries = [
             """CREATE OR REPLACE FUNCTION HomeSalesForecast FROM
@@ -47,13 +63,14 @@ class CreateJobTest(unittest.TestCase):
         repeat_interval = 2
         repeat_period = "week"
 
-        query = f"""CREATE JOB {self.job_name} AS (
-                    {''.join(queries)}
-                )
+        all_queries = "".join(queries)
+        query = f"""CREATE JOB {self.job_name} AS {{
+                   {all_queries}
+                }}
                 START '{start}'
                 END '{end}'
-                EVERY {repeat_interval} {repeat_period};
-            """
+                EVERY {repeat_interval} {repeat_period};"""
+
         execute_query_fetch_all(self.evadb, query)
 
         datetime_format = "%Y-%m-%d %H:%M:%S"
@@ -79,9 +96,9 @@ class CreateJobTest(unittest.TestCase):
             "Select HomeSalesForecast(10);",
         ]
 
-        query = """CREATE JOB {} {} AS (
+        query = """CREATE JOB {} {} AS {{
                     {}
-                )
+                }}
                 START '2023-04-01'
                 END '2023-05-01'
                 EVERY 2 week;

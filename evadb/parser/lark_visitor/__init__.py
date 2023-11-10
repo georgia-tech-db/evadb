@@ -92,10 +92,10 @@ class LarkInterpreter(
     def sql_statement(self, tree):
         return self.visit(tree.children[0])
 
-    def sql_statements(self, tree):
+    def job_sql_statements(self, tree):
         sql_statements = []
         for child in tree.children:
             if isinstance(child, Tree):
-                if child.data == "sql_statement":
+                if child.data == "query_string":
                     sql_statements.append(self.visit(child))
         return sql_statements

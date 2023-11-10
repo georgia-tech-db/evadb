@@ -8,8 +8,6 @@ start: (sql_statement? ";")+ | (create_job ";")
 
 sql_statement: ddl_statement | dml_statement | utility_statement | context_statement
 
-sql_statements: sql_statement (";" sql_statement)* ";"?
-
 ddl_statement: create_database | create_table | create_index | create_function |  drop_database
     | drop_table | drop_function | drop_index | drop_job | rename_table
     
@@ -19,6 +17,8 @@ dml_statement: select_statement | insert_statement | update_statement
 utility_statement: describe_statement | show_statement | help_statement | explain_statement
 
 context_statement: use_statement
+
+job_sql_statements: query_string (";" query_string)* ";"?
 
 
 // Data Definition Language
@@ -37,7 +37,7 @@ create_index: CREATE INDEX if_not_exists? uid ON table_name index_elem vector_st
 
 create_table: CREATE TABLE if_not_exists? table_name (create_definitions | (AS select_statement))
 
-create_job: CREATE JOB if_not_exists? uid AS "(" sql_statements ")" (start_time)? (end_time)? (repeat_clause)?
+create_job: CREATE JOB if_not_exists? uid AS "{" job_sql_statements "}" (start_time)? (end_time)? (repeat_clause)?
 
 start_time: START string_literal
 

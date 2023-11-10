@@ -53,16 +53,16 @@ class JobSchedulerIntegrationTests(unittest.TestCase):
                                     video_id INTEGER
                                 );
                             """
-        job_1_query = f"""CREATE JOB IF NOT EXISTS {self.job_name_1} AS (
+        job_1_query = f"""CREATE JOB IF NOT EXISTS {self.job_name_1} AS {{
                                 SELECT * FROM MyCSV;
-                            )
+                            }}
                             START '{start_time}'
                             END '{end_time}'
                             EVERY 4 seconds;
                         """
-        job_2_query = f"""CREATE JOB IF NOT EXISTS {self.job_name_2} AS (
+        job_2_query = f"""CREATE JOB IF NOT EXISTS {self.job_name_2} AS {{
                             SHOW FUNCTIONS;
-                        )
+                        }}
                         START '{start_time}'
                         END '{end_time}'
                         EVERY 2 seconds;

@@ -250,9 +250,9 @@ class DropObjectExecutorTest(unittest.TestCase):
         # Create database.
         job_name = "test_async_job"
 
-        query = f"""CREATE JOB {job_name} AS (
+        query = f"""CREATE JOB {job_name} AS {{
             SELECT * from job_catalog;
-        )
+        }}
         START '2023-04-01'
         END '2023-05-01'
         EVERY 2 week;"""

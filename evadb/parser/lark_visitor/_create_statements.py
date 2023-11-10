@@ -354,7 +354,7 @@ class CreateJob:
                     if_not_exists = True
                 if child.data == "uid":
                     job_name = self.visit(child)
-                if child.data == "sql_statements":
+                if child.data == "job_sql_statements":
                     queries = self.visit(child)
                 elif child.data == "start_time":
                     start_time = self.visit(child)

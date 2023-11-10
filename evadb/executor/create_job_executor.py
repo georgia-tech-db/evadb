@@ -22,6 +22,7 @@ from evadb.executor.abstract_executor import AbstractExecutor
 from evadb.executor.executor_utils import ExecutorError
 from evadb.models.storage.batch import Batch
 from evadb.parser.create_statement import CreateJobStatement
+from evadb.parser.parser import Parser
 from evadb.utils.logging_manager import logger
 
 
@@ -93,7 +94,18 @@ class CreateJobExecutor(AbstractExecutor):
         logger.debug(f"Creating job {self.node}")
 
         job_name = self.node.job_name
-        queries = [str(q) for q in self.node.queries]
+        queries = []
+        parser = Parser()
+
+        for q in self.node.queries:
+            try:
+                curr_query = str(q)
+                parser.parse(curr_query)
+                queries.append(curr_query)
+            except Exception:
+                error_msg = f"Failed to parse the job query: {curr_query}"
+                logger.exception(error_msg)
+                raise ExecutorError(error_msg)
         start_time = (
             self._parse_datetime_str(self.node.start_time)
             if self.node.start_time is not None
