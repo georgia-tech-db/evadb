@@ -208,17 +208,16 @@ class LoadExecutorTests(unittest.TestCase):
                 self.evadb, "SELECT name FROM MyVideos", do_not_print_exceptions=True
             )
 
-    def test_should_rollback_if_video_load_fails(self):
+    def test_should_rollback_or_skip_if_video_load_fails(self):
         path_regex = Path(f"{EvaDB_ROOT_DIR}/data/sample_videos/1/*.mp4")
         valid_videos = glob.glob(str(path_regex.expanduser()), recursive=True)
 
         tempfile_name = os.urandom(24).hex()
         tempfile_path = os.path.join(tempfile.gettempdir(), tempfile_name)
         with open(tempfile_path, "wb") as empty_file:
-            # Load one correct file and one empty file
+            # Load  one empty file
             # nothing should be added
             with tempfile.TemporaryDirectory() as tmp_dir:
-                shutil.copy2(str(valid_videos[0]), tmp_dir)
                 shutil.copy2(str(empty_file.name), tmp_dir)
                 path = Path(tmp_dir) / "*"
                 query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
@@ -233,24 +232,32 @@ class LoadExecutorTests(unittest.TestCase):
                         do_not_print_exceptions=True,
                     )
 
+            # Load one correct file and one empty file
+            # one file should get added
+            with tempfile.TemporaryDirectory() as tmp_dir:
+                shutil.copy2(str(valid_videos[0]), tmp_dir)
+                shutil.copy2(str(empty_file.name), tmp_dir)
+                path = Path(tmp_dir) / "*"
+                query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
+                result = execute_query_fetch_all(self.evadb, query)
+                expected = Batch(
+                    pd.DataFrame([f"Number of loaded {FileFormatType.VIDEO.name}: 1"])
+                )
+                self.assertEqual(result, expected)
+
             # Load two correct file and one empty file
-            # nothing should be added
+            # two files should get added
             with tempfile.TemporaryDirectory() as tmp_dir:
                 shutil.copy2(str(valid_videos[0]), tmp_dir)
                 shutil.copy2(str(valid_videos[1]), tmp_dir)
                 shutil.copy2(str(empty_file.name), tmp_dir)
                 path = Path(tmp_dir) / "*"
                 query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
-                with self.assertRaises(Exception):
-                    execute_query_fetch_all(
-                        self.evadb, query, do_not_print_exceptions=True
-                    )
-                with self.assertRaises(BinderError):
-                    execute_query_fetch_all(
-                        self.evadb,
-                        "SELECT name FROM MyVideos",
-                        do_not_print_exceptions=True,
-                    )
+                result = execute_query_fetch_all(self.evadb, query)
+                expected = Batch(
+                    pd.DataFrame([f"Number of loaded {FileFormatType.VIDEO.name}: 2"])
+                )
+                self.assertEqual(result, expected)
 
     def test_should_rollback_and_preserve_previous_state(self):
         path_regex = Path(f"{EvaDB_ROOT_DIR}/data/sample_videos/1/*.mp4")
@@ -262,13 +269,12 @@ class LoadExecutorTests(unittest.TestCase):
             self.evadb, f"""LOAD VIDEO "{load_file}" INTO MyVideos;"""
         )
 
-        # Load one correct file and one empty file
-        # original file should remain
         tempfile_name = os.urandom(24).hex()
         tempfile_path = os.path.join(tempfile.gettempdir(), tempfile_name)
         with open(tempfile_path, "wb") as empty_file:
+            # Load one empty file
+            # original file should remain
             with tempfile.TemporaryDirectory() as tmp_dir:
-                shutil.copy2(str(valid_videos[1]), tmp_dir)
                 shutil.copy2(str(empty_file.name), tmp_dir)
                 path = Path(tmp_dir) / "*"
                 query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
@@ -281,6 +287,25 @@ class LoadExecutorTests(unittest.TestCase):
                 )
                 file_names = np.unique(result.frames)
                 self.assertEqual(len(file_names), 1)
+
+            # Load one correct file and one empty file
+            # original file should remain and the correct file should get added
+            with tempfile.TemporaryDirectory() as tmp_dir:
+                shutil.copy2(str(valid_videos[1]), tmp_dir)
+                shutil.copy2(str(empty_file.name), tmp_dir)
+                path = Path(tmp_dir) / "*"
+                query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
+                result = execute_query_fetch_all(self.evadb, query)
+                expected = Batch(
+                    pd.DataFrame([f"Number of loaded {FileFormatType.VIDEO.name}: 1"])
+                )
+                self.assertEqual(result, expected)
+
+                result = execute_query_fetch_all(
+                    self.evadb, "SELECT name FROM MyVideos"
+                )
+                file_names = np.unique(result.frames)
+                self.assertEqual(len(file_names), 2)
 
     ###########################################
     # integration testcases for load image
@@ -342,7 +367,7 @@ class LoadExecutorTests(unittest.TestCase):
                 self.evadb, "SELECT name FROM MyImages;", do_not_print_exceptions=True
             )
 
-    def test_should_rollback_if_image_load_fails(self):
+    def test_should_rollback_or_pass_if_image_load_fails(self):
         valid_images = glob.glob(
             str(self.image_files_path.expanduser()), recursive=True
         )
@@ -350,10 +375,9 @@ class LoadExecutorTests(unittest.TestCase):
         tempfile_name = os.urandom(24).hex()
         tempfile_path = os.path.join(tempfile.gettempdir(), tempfile_name)
         with open(tempfile_path, "wb") as empty_file:
-            # Load one correct file and one empty file
+            # Load one empty file
             # nothing should be added
             with tempfile.TemporaryDirectory() as tmp_dir:
-                shutil.copy2(str(valid_images[0]), tmp_dir)
                 shutil.copy2(str(empty_file.name), tmp_dir)
                 path = Path(tmp_dir) / "*"
                 query = f"""LOAD IMAGE "{path}" INTO MyImages;"""
@@ -368,26 +392,34 @@ class LoadExecutorTests(unittest.TestCase):
                         do_not_print_exceptions=True,
                     )
 
+            # Load one correct file and one empty file
+            # correct file should be added
+            with tempfile.TemporaryDirectory() as tmp_dir:
+                shutil.copy2(str(valid_images[0]), tmp_dir)
+                shutil.copy2(str(empty_file.name), tmp_dir)
+                path = Path(tmp_dir) / "*"
+                query = f"""LOAD IMAGE "{path}" INTO MyImages;"""
+                result = execute_query_fetch_all(self.evadb, query)
+                expected = Batch(
+                    pd.DataFrame([f"Number of loaded {FileFormatType.IMAGE.name}: 1"])
+                )
+                self.assertEqual(result, expected)
+
             # Load two correct file and one empty file
-            # nothing should be added
+            # two correct files should be added
             with tempfile.TemporaryDirectory() as tmp_dir:
                 shutil.copy2(str(valid_images[0]), tmp_dir)
                 shutil.copy2(str(valid_images[1]), tmp_dir)
                 shutil.copy2(str(empty_file.name), tmp_dir)
                 path = Path(tmp_dir) / "*"
                 query = f"""LOAD IMAGE "{path}" INTO MyImages;"""
-                with self.assertRaises(Exception):
-                    execute_query_fetch_all(
-                        self.evadb, query, do_not_print_exceptions=True
-                    )
-                with self.assertRaises(BinderError):
-                    execute_query_fetch_all(
-                        self.evadb,
-                        "SELECT name FROM MyImages;",
-                        do_not_print_exceptions=True,
-                    )
+                result = execute_query_fetch_all(self.evadb, query)
+                expected = Batch(
+                    pd.DataFrame([f"Number of loaded {FileFormatType.IMAGE.name}: 2"])
+                )
+                self.assertEqual(result, expected)
 
-    def test_should_rollback_and_preserve_previous_state_for_load_images(self):
+    def test_should_rollback_or_pass_and_preserve_previous_state_for_load_images(self):
         valid_images = glob.glob(
             str(self.image_files_path.expanduser()), recursive=True
         )
@@ -397,13 +429,12 @@ class LoadExecutorTests(unittest.TestCase):
             self.evadb, f"""LOAD IMAGE "{valid_images[0]}" INTO MyImages;"""
         )
 
-        # Load one correct file and one empty file
-        # original file should remain
         tempfile_name = os.urandom(24).hex()
         tempfile_path = os.path.join(tempfile.gettempdir(), tempfile_name)
         with open(tempfile_path, "wb") as empty_file:
+            # Load one empty file
+            # original file should remain
             with tempfile.TemporaryDirectory() as tmp_dir:
-                shutil.copy2(str(valid_images[1]), tmp_dir)
                 shutil.copy2(str(empty_file.name), tmp_dir)
                 path = Path(tmp_dir) / "*"
                 query = f"""LOAD IMAGE "{path}" INTO MyImages;"""
@@ -416,6 +447,37 @@ class LoadExecutorTests(unittest.TestCase):
                 )
                 self.assertEqual(len(result), 1)
                 expected = Batch(pd.DataFrame([{"myimages.name": valid_images[0]}]))
+                self.assertEqual(expected, result)
+
+            # Load one empty and one correct file
+            # original file should remaina and correct file should get added
+            with tempfile.TemporaryDirectory() as tmp_dir:
+                shutil.copy2(str(valid_images[1]), tmp_dir)
+                shutil.copy2(str(empty_file.name), tmp_dir)
+                path = Path(tmp_dir) / "*"
+                query = f"""LOAD IMAGE "{path}" INTO MyImages;"""
+                result = execute_query_fetch_all(self.evadb, query)
+                expected = Batch(
+                    pd.DataFrame([f"Number of loaded {FileFormatType.IMAGE.name}: 1"])
+                )
+                self.assertEqual(result, expected)
+
+                result = execute_query_fetch_all(
+                    self.evadb, "SELECT name FROM MyImages"
+                )
+                self.assertEqual(len(result), 2)
+                expected = Batch(
+                    pd.DataFrame(
+                        [
+                            {"myimages.name": valid_images[0]},
+                            {
+                                "myimages.name": os.path.join(
+                                    tmp_dir, os.path.basename(valid_images[1])
+                                )
+                            },
+                        ]
+                    )
+                )
                 self.assertEqual(expected, result)
 
     ###################################
@@ -471,7 +533,7 @@ class LoadExecutorTests(unittest.TestCase):
         # Clean up large scale image directory.
         shutil.rmtree(large_scale_image_files_path)
 
-    def test_parallel_load_should_raise_exception(self):
+    def test_parallel_load_should_raise_exception_or_pass(self):
         # Create images.
         large_scale_image_files_path = create_large_scale_image_dataset(
             mp.cpu_count() * 10
@@ -481,11 +543,22 @@ class LoadExecutorTests(unittest.TestCase):
         with open(os.path.join(large_scale_image_files_path, "img0.jpg"), "w") as f:
             f.write("aa")
 
-        with self.assertRaises(ExecutorError):
-            load_query = f"LOAD IMAGE '{large_scale_image_files_path}/**/*.jpg' INTO MyLargeScaleImages;"
-            execute_query_fetch_all(
-                self.evadb, load_query, do_not_print_exceptions=True
+        load_query = f"LOAD IMAGE '{large_scale_image_files_path}/**/*.jpg' INTO MyLargeScaleImages;"
+        result = execute_query_fetch_all(self.evadb, load_query)
+
+        file_count = len(
+            [
+                entry
+                for entry in os.listdir(large_scale_image_files_path)
+                if os.path.isfile(os.path.join(large_scale_image_files_path, entry))
+            ]
+        )
+        expected = Batch(
+            pd.DataFrame(
+                [f"Number of loaded {FileFormatType.IMAGE.name}: {file_count-1}"]
             )
+        )
+        self.assertEqual(result, expected)
 
         drop_query = "DROP TABLE IF EXISTS MyLargeScaleImages;"
         execute_query_fetch_all(self.evadb, drop_query)

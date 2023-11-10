@@ -45,6 +45,7 @@ parts:
           - file: source/reference/evaql/load_csv
           - file: source/reference/evaql/load_image
           - file: source/reference/evaql/load_video
+          - file: source/reference/evaql/load_pdf
           - file: source/reference/evaql/select
           - file: source/reference/evaql/explain
           - file: source/reference/evaql/show_functions
