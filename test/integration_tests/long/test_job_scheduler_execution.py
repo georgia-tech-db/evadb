@@ -35,10 +35,13 @@ class JobSchedulerIntegrationTests(unittest.TestCase):
         cls.job_name_1 = "test_async_job_1"
         cls.job_name_2 = "test_async_job_2"
 
+    def setUp(self):
+        execute_query_fetch_all(self.evadb, f"DROP JOB IF EXISTS {self.job_name_1};")
+        execute_query_fetch_all(self.evadb, f"DROP JOB IF EXISTS {self.job_name_2};")
+
     @classmethod
     def tearDownClass(cls):
         shutdown_ray()
-
         execute_query_fetch_all(cls.evadb, f"DROP JOB IF EXISTS {cls.job_name_1};")
         execute_query_fetch_all(cls.evadb, f"DROP JOB IF EXISTS {cls.job_name_2};")
 

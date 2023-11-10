@@ -27,7 +27,9 @@ class CreateJobTest(unittest.TestCase):
         # reset the catalog manager before running each test
         cls.evadb.catalog().reset()
         cls.job_name = "test_async_job"
-        execute_query_fetch_all(cls.evadb, f"DROP JOB IF EXISTS {cls.job_name};")
+
+    def setUp(self):
+        execute_query_fetch_all(self.evadb, f"DROP JOB IF EXISTS {self.job_name};")
 
     @classmethod
     def tearDownClass(cls):
@@ -36,17 +38,16 @@ class CreateJobTest(unittest.TestCase):
 
     def test_invalid_query_in_job_should_raise_exception(self):
         # missing closing paranthesis in the query
-        query = """
-            CREATE JOB test_async_job AS {
-                CREATE OR REPLACE FUNCTION HomeSalesForecast FROM
-                    ( SELECT * FROM postgres_data.home_sales
-                TYPE Forecasting
-                PREDICT 'price';
-            }
-            START '2023-04-01 01:10:00'
-            END '2023-05-01'
-            EVERY 2 week;
-        """
+        query = f"""CREATE JOB {self.job_name} AS {{
+                    CREATE OR REPLACE FUNCTION HomeSalesForecast FROM
+                        ( SELECT * FROM postgres_data.home_sales
+                    TYPE Forecasting
+                    PREDICT 'price';
+                }}
+                START '2023-04-01 01:10:00'
+                END '2023-05-01'
+                EVERY 2 week;
+            """
         with self.assertRaisesRegex(Exception, "Failed to parse the job query"):
             execute_query_fetch_all(self.evadb, query)
 

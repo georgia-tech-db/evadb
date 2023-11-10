@@ -35,7 +35,7 @@ class JobScheduler:
             next_trigger_time = datetime.datetime.now() + datetime.timedelta(
                 seconds=job_catalog_entry.repeat_interval
             )
-            if next_trigger_time < job_end_time:
+            if not job_end_time or next_trigger_time < job_end_time:
                 active_status = True
 
         next_trigger_time = (
