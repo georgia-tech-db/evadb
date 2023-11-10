@@ -17,6 +17,7 @@ import contextlib
 import pandas as pd
 
 from evadb.database import EvaDBDatabase
+from evadb.error_manager import ErrorManager
 from evadb.executor.abstract_executor import AbstractExecutor
 from evadb.executor.executor_utils import (
     create_table_catalog_entry_for_native_table,
@@ -27,6 +28,8 @@ from evadb.plan_nodes.create_plan import CreatePlan
 from evadb.storage.storage_engine import StorageEngine
 from evadb.utils.errors import CatalogError
 from evadb.utils.logging_manager import logger
+
+err_manager = ErrorManager()
 
 
 class CreateExecutor(AbstractExecutor):
@@ -66,8 +69,8 @@ class CreateExecutor(AbstractExecutor):
             if self.children != []:
                 assert (
                     len(self.children) == 1
-                ), "Create table from query expects 1 child, finds {}".format(
-                    len(self.children)
+                ), err_manager.get_error_message(err_manager.ErrorCode.QUERY_EXPECTS_ONE_CHILD, "Create table from query expects 1 child, finds {}".format(
+                    len(self.children))
                 )
                 child = self.children[0]
 
