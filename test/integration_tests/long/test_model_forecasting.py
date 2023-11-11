@@ -79,6 +79,7 @@ class ModelTrainTests(unittest.TestCase):
 
     @forecast_skip_marker
     def test_forecast(self):
+
         create_predict_udf = """
             CREATE FUNCTION AirForecast FROM
             (SELECT unique_id, ds, y FROM AirData)
@@ -131,7 +132,7 @@ class ModelTrainTests(unittest.TestCase):
                 "airpanelforecast.y-hi",
             ],
         )
-
+        
     @forecast_skip_marker
     def test_forecast_with_column_rename(self):
         create_predict_udf = """

@@ -423,7 +423,6 @@ class CreateFunctionExecutor(AbstractExecutor):
                 AutoNHITS,
                 AutoPatchTST,
                 AutoTFT,
-                AutoTimesNet,
             )
 
             # from neuralforecast.auto import AutoAutoformer as AutoAFormer
@@ -436,7 +435,6 @@ class CreateFunctionExecutor(AbstractExecutor):
                 FEDformer,
                 Informer,
                 PatchTST,
-                TimesNet,
             )
 
             # from neuralforecast.models import Autoformer as AFormer
@@ -456,8 +454,6 @@ class CreateFunctionExecutor(AbstractExecutor):
                 # "AutoAFormer": AutoAFormer,
                 "Informer": Informer,
                 "AutoInformer": AutoInformer,
-                "TimesNet": TimesNet,
-                "AutoTimesNet": AutoTimesNet,
                 "TFT": TFT,
                 "AutoTFT": AutoTFT,
             }
@@ -546,7 +542,7 @@ class CreateFunctionExecutor(AbstractExecutor):
                 raise FunctionIODefinitionError(err_msg)
 
             model = StatsForecast(
-                [model_here(season_length=season_length)], freq=new_freq, n_jobs=-1
+                [model_here(season_length=season_length)], freq=new_freq
             )
 
         data["ds"] = pd.to_datetime(data["ds"])
