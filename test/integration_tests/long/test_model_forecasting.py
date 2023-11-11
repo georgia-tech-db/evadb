@@ -79,7 +79,6 @@ class ModelTrainTests(unittest.TestCase):
 
     @forecast_skip_marker
     def test_forecast(self):
-
         create_predict_udf = """
             CREATE FUNCTION AirForecast FROM
             (SELECT unique_id, ds, y FROM AirData)
@@ -111,8 +110,6 @@ class ModelTrainTests(unittest.TestCase):
             TYPE Forecasting
             HORIZON 12
             PREDICT 'y'
-            LIBRARY 'neuralforecast'
-            AUTO 'false'
             FREQUENCY 'M';
         """
         execute_query_fetch_all(self.evadb, create_predict_udf)
@@ -132,7 +129,7 @@ class ModelTrainTests(unittest.TestCase):
                 "airpanelforecast.y-hi",
             ],
         )
-        
+
     @forecast_skip_marker
     def test_forecast_with_column_rename(self):
         create_predict_udf = """
