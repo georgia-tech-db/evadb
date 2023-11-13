@@ -16,11 +16,11 @@ import numpy as np
 from lark import Tree
 
 from evadb.catalog.catalog_type import ColumnType
-from evadb.utils.generic_utils import string_comparison_case_insensitive
 from evadb.expression.abstract_expression import ExpressionType
 from evadb.expression.comparison_expression import ComparisonExpression
 from evadb.expression.constant_value_expression import ConstantValueExpression
 from evadb.expression.logical_expression import LogicalExpression
+from evadb.utils.generic_utils import string_comparison_case_insensitive
 
 
 ##################################################################
