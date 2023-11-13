@@ -21,8 +21,8 @@ from evadb.expression.abstract_expression import ExpressionType
 from evadb.expression.comparison_expression import ComparisonExpression
 from evadb.expression.constant_value_expression import ConstantValueExpression
 from evadb.expression.function_expression import FunctionExpression
-from evadb.expression.tuple_value_expression import TupleValueExpression
 from evadb.expression.logical_expression import LogicalExpression
+from evadb.expression.tuple_value_expression import TupleValueExpression
 from evadb.parser.alias import Alias
 from evadb.parser.create_function_statement import CreateFunctionStatement
 from evadb.parser.create_index_statement import CreateIndexStatement
@@ -547,9 +547,13 @@ class ParserTests(unittest.TestCase):
             # target list
             self.assertIsNotNone(select_stmt.target_list)
             self.assertEqual(len(select_stmt.target_list), 2)
-            self.assertEqual(select_stmt.target_list[0].etype, ExpressionType.TUPLE_VALUE)
+            self.assertEqual(
+                select_stmt.target_list[0].etype, ExpressionType.TUPLE_VALUE
+            )
             self.assertEqual(select_stmt.target_list[0].name, "CLASS")
-            self.assertEqual(select_stmt.target_list[1].etype, ExpressionType.TUPLE_VALUE)
+            self.assertEqual(
+                select_stmt.target_list[1].etype, ExpressionType.TUPLE_VALUE
+            )
             self.assertEqual(select_stmt.target_list[1].name, "REDNESS")
 
             # from table
@@ -566,7 +570,7 @@ class ParserTests(unittest.TestCase):
             right = select_stmt.where_clause.children[1]
             self.assertEqual(left.etype, ExpressionType.COMPARE_EQUAL)
             self.assertEqual(right.etype, ExpressionType.COMPARE_LESSER)
-            
+
             self.assertEqual(len(left.children), 2)
             self.assertEqual(left.children[0].etype, ExpressionType.TUPLE_VALUE)
             self.assertEqual(left.children[0].name, "CLASS")
@@ -580,19 +584,24 @@ class ParserTests(unittest.TestCase):
             self.assertEqual(right.children[1].value, 400)
 
         parser = Parser()
-        select_query = "SELECT CLASS, REDNESS FROM TAIPAI WHERE CLASS = 'VAN' AND REDNESS < 400;"
+        select_query = (
+            "SELECT CLASS, REDNESS FROM TAIPAI WHERE CLASS = 'VAN' AND REDNESS < 400;"
+        )
         _verify_select_statement(parser.parse(select_query))
 
         # Case insensitive test
-        select_query = "select CLASS, REDNESS from TAIPAI where CLASS = 'VAN' and REDNESS < 400;"
+        select_query = (
+            "select CLASS, REDNESS from TAIPAI where CLASS = 'VAN' and REDNESS < 400;"
+        )
         _verify_select_statement(parser.parse(select_query))
 
         # Unsupported logical operator
-        select_query = "SELECT CLASS, REDNESS FROM TAIPAI WHERE CLASS = 'VAN' XOR REDNESS < 400;"
+        select_query = (
+            "SELECT CLASS, REDNESS FROM TAIPAI WHERE CLASS = 'VAN' XOR REDNESS < 400;"
+        )
         with self.assertRaises(NotImplementedError) as cm:
             parser.parse(select_query)
         self.assertEqual(str(cm.exception), "Unsupported logical operator: XOR")
-
 
     def test_select_statement_groupby_class(self):
         """Testing sample frequency"""
