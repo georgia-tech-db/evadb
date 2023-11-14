@@ -1243,3 +1243,30 @@ class ParserTests(unittest.TestCase):
         self.assertNotEqual(tuple_frame, table_ref)
         self.assertNotEqual(join_node, table_ref)
         self.assertNotEqual(table_ref, table_info)
+
+    def test_create_job(self):
+        queries = [
+            """CREATE OR REPLACE FUNCTION HomeSalesForecast FROM
+                ( SELECT * FROM postgres_data.home_sales )
+                TYPE Forecasting
+                PREDICT 'price';""",
+            "Select HomeSalesForecast(10);",
+        ]
+        job_query = f"""CREATE JOB my_job AS {{
+            {''.join(queries)}
+        }}
+        START '2023-04-01'
+        END '2023-05-01'
+        EVERY 2 hour
+        """
+
+        parser = Parser()
+        job_stmt = parser.parse(job_query)[0]
+        self.assertEqual(job_stmt.job_name, "my_job")
+        self.assertEqual(len(job_stmt.queries), 2)
+        self.assertTrue(queries[0].rstrip(";") == str(job_stmt.queries[0]))
+        self.assertTrue(queries[1].rstrip(";") == str(job_stmt.queries[1]))
+        self.assertEqual(job_stmt.start_time, "2023-04-01")
+        self.assertEqual(job_stmt.end_time, "2023-05-01")
+        self.assertEqual(job_stmt.repeat_interval, 2)
+        self.assertEqual(job_stmt.repeat_period, "hour")
