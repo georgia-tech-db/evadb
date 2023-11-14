@@ -46,9 +46,6 @@ class DropObjectExecutor(AbstractExecutor):
         elif self.node.object_type == ObjectType.DATABASE:
             yield self._handle_drop_database(self.node.name, self.node.if_exists)
 
-        elif self.node.object_type == ObjectType.JOB:
-            yield self._handle_drop_job(self.node.name, self.node.if_exists)
-
     def _handle_drop_table(self, table_name: str, if_exists: bool):
         if not self.catalog().check_table_exists(table_name):
             err_msg = "Table: {} does not exist".format(table_name)
@@ -160,27 +157,6 @@ class DropObjectExecutor(AbstractExecutor):
         return Batch(
             pd.DataFrame(
                 {f"Database {database_name} successfully dropped"},
-                index=[0],
-            )
-        )
-
-    def _handle_drop_job(self, job_name: str, if_exists: bool):
-        job_catalog_entry = self.catalog().get_job_catalog_entry(job_name)
-        if not job_catalog_entry:
-            err_msg = f"Job {job_name} does not exist, therefore cannot be dropped."
-            if if_exists:
-                logger.warning(err_msg)
-                return Batch(pd.DataFrame([err_msg]))
-            else:
-                raise RuntimeError(err_msg)
-
-        logger.debug(f"Dropping Job {job_name}")
-
-        self.catalog().drop_job_catalog_entry(job_catalog_entry)
-
-        return Batch(
-            pd.DataFrame(
-                {f"Job {job_name} successfully dropped"},
                 index=[0],
             )
         )
