@@ -500,6 +500,24 @@ def try_to_import_norfair():
             """Could not import norfair python package.
                 Please install it with `pip install norfair`."""
         )
+    
+def try_to_import_pytesseract():
+    try:
+        import cv2
+    except ImportError:
+        raise ValueError(
+            """Could not import opencv python package. 
+            Please install it with pip install opencv-python"""
+        )
+    
+    try:
+        import pytesseract
+    except ImportError:
+        raise ValueError(
+            """Could not import pytesseract python package. 
+            Please install it with pip install pytesseract"""
+        )
+        
 
 
 ##############################
