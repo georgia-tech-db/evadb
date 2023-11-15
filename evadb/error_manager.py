@@ -15,58 +15,67 @@
 from enum import Enum
 
 
+class ErrorCode:
+    def __init__(self, code, message=""):
+        self.code = code
+        self.default_message = message
+
+    def __str__(self):
+        return f"[{self.code}] {self.default_message}"
+
 class ErrorManager:
-    class ErrorCode(Enum):
-        # Generic Error
-        ERROR_GENERIC = 0
+    # Generic Error
+    ERROR_GENERIC = ErrorCode(0, "")
 
-        # Expected-Type Errors
-        EXPECTED_SELECTION_STATEMENT = 100
-        EXPECTED_CREATE_TABLE_STATEMENT = 101
-        EXPECTED_SHOW_STATEMENT = 102
-        EXPECTED_INSERT_STATEMENT = 103
-        EXPECTED_EXPLAIN_STATEMENT = 104
-        EXPECTED_LOAD_STATEMENT = 105
-        EXPECTED_DROP_OBJECT_STATEMENT = 106
-        EXPECTED_RENAME_STATEMENT = 107
-        EXPECTED_CREATE_FUNCTION_STATEMENT = 108
-        EXPECTED_COLUMNS_NUMBER_MISMATCH = 109
-        QUERY_EXPECTS_ONE_CHILD = 110
-        EXPECTED_API_TOKEN_SET = 111
-        EXPECTED_PD_DF = 112
+    # Expected-Type Errors
+    EXPECTED_SELECTION_STATEMENT = ErrorCode(100, "")
+    EXPECTED_CREATE_TABLE_STATEMENT = ErrorCode(101, "")
+    EXPECTED_SHOW_STATEMENT = ErrorCode(102, "")
+    EXPECTED_INSERT_STATEMENT = ErrorCode(103, "")
+    EXPECTED_EXPLAIN_STATEMENT = ErrorCode(104, "")
+    EXPECTED_LOAD_STATEMENT = ErrorCode(105, "")
+    EXPECTED_DROP_OBJECT_STATEMENT = ErrorCode(106, "")
+    EXPECTED_RENAME_STATEMENT = ErrorCode(107, "")
+    EXPECTED_CREATE_FUNCTION_STATEMENT = ErrorCode(108, "")
+    EXPECTED_COLUMNS_NUMBER_MISMATCH = ErrorCode(109, "")
+    QUERY_EXPECTS_ONE_CHILD = ErrorCode(110, "")
+    EXPECTED_API_TOKEN_SET = ErrorCode(111, "")
+    EXPECTED_PD_DF = ErrorCode(112, "")
 
-        # Index Errors
-        CANNOT_CREATE_INDEX_ON_MULIPLE_COLUMN = 1100
-        CREATE_INDEX_ONLY_ON_EXISTING_TABLE = 1101
-        CANNOT_CREATE_INDEX_ON_NONEXISTANT_COLUMN = 1102
-        INDEX_INPUT_TYPE_MISMATCH = 1103
-        INDEX_INPUT_DIM_MISMATCH = 1104
-        CREATE_INDEX_FIRST = 1105
+    # Index Errors
+    CANNOT_CREATE_INDEX_ON_MULIPLE_COLUMN = ErrorCode(1100, "")
+    CREATE_INDEX_ONLY_ON_EXISTING_TABLE = ErrorCode(1101, "")
+    CANNOT_CREATE_INDEX_ON_NONEXISTANT_COLUMN = ErrorCode(1102, "")
+    INDEX_INPUT_TYPE_MISMATCH = ErrorCode(1103, "")
+    INDEX_INPUT_DIM_MISMATCH = ErrorCode(1104, "")
+    CREATE_INDEX_FIRST = ErrorCode(1105, "")
 
-        # Type Errors
-        UNSUPPORTED_TYPE = 2100
-        UNSUPPORTED_OPERATION = 2101
-        UNSUPPORTED_CLAUSE = 2102
-        UNSUPPORTED_LIBRARY = 2103
-        CONCURRENT_CALLS_NOT_SUPPORTED = 2104
+    # Type Errors
+    UNSUPPORTED_TYPE = ErrorCode(2100, "")
+    UNSUPPORTED_OPERATION = ErrorCode(2101, "")
+    UNSUPPORTED_CLAUSE = ErrorCode(2102, "")
+    UNSUPPORTED_LIBRARY = ErrorCode(2103, "")
+    CONCURRENT_CALLS_NOT_SUPPORTED = ErrorCode(2104, "")
 
-        # Not Found/Already Exists Errors
-        TABLE_NOT_FOUND = 3100
-        TABLE_ALREADY_EXISTS = 3101
-        DIRECTORY_NOT_FOUND = 3102
-        DIRECTORY_ALREADY_EXISTS = 3103
-        FILE_NOT_FOUND = 3104
-        FILE_ALREADY_EXISTS = 3105
-        KEY_NOT_FOUND = 3106
+    # Not Found/Already Exists Errors
+    TABLE_NOT_FOUND = ErrorCode(3100, "")
+    TABLE_ALREADY_EXISTS = ErrorCode(3101, "")
+    DIRECTORY_NOT_FOUND = ErrorCode(3102, "")
+    DIRECTORY_ALREADY_EXISTS = ErrorCode(3103, "")
+    FILE_NOT_FOUND = ErrorCode(3104, "")
+    FILE_ALREADY_EXISTS = ErrorCode(3105, "")
+    KEY_NOT_FOUND = ErrorCode(3106, "")
 
-        # Failed-to Errors
-        DROP_TABLE_FAILED = 4100
-        VECTOR_STORE_HANDLER_INITALIZATION_FAILED = 4101
-        RELATION_EXECUTE_FAILED = 4102
+    # Failed-to Errors
+    DROP_TABLE_FAILED = ErrorCode(4100, "")
+    VECTOR_STORE_HANDLER_INITALIZATION_FAILED = ErrorCode(4101, "")
+    RELATION_EXECUTE_FAILED = ErrorCode(4102, "")
 
-        # Not implemented
-        NOT_IMPLEMENTED = 9999
+    # Not implemented
+    NOT_IMPLEMENTED = ErrorCode(9999, "")
 
     @staticmethod
-    def get_error_message(error_code, original_message):
-        return f"[{error_code.name} - {error_code.value}] {original_message}"
+    def get_error_message(error_code, additional_message=None):
+        if additional_message:
+            return f"{error_code} Details: {additional_message}"
+        return str(error_code)
