@@ -20,6 +20,7 @@ import pytest
 
 from evadb.utils.generic_utils import (
     is_chromadb_available,
+    is_flaml_automl_available,
     is_forecast_available,
     is_gpu_available,
     is_ludwig_available,
@@ -27,8 +28,6 @@ from evadb.utils.generic_utils import (
     is_pinecone_available,
     is_qdrant_available,
     is_replicate_available,
-    is_sklearn_available,
-    is_xgboost_available,
 )
 
 asyncio_skip_marker = pytest.mark.skipif(
@@ -93,11 +92,11 @@ ludwig_skip_marker = pytest.mark.skipif(
 )
 
 sklearn_skip_marker = pytest.mark.skipif(
-    is_sklearn_available() is False, reason="Run only if sklearn is available"
+    is_flaml_automl_available() is False, reason="Run only if Flaml AutoML is available"
 )
 
 xgboost_skip_marker = pytest.mark.skipif(
-    is_xgboost_available() is False, reason="Run only if xgboost is available"
+    is_flaml_automl_available() is False, reason="Run only if Flaml AutoML is available"
 )
 
 chatgpt_skip_marker = pytest.mark.skip(
