@@ -116,7 +116,8 @@ class ModelTrainTests(unittest.TestCase):
             CREATE OR REPLACE FUNCTION PredictHouseRentSklearn FROM
             ( SELECT number_of_rooms, number_of_bathrooms, days_on_market, rental_price FROM HomeRentals )
             TYPE Sklearn
-            PREDICT 'rental_price';
+            PREDICT 'rental_price'
+            MODEL 'extra_tree';
         """
         execute_query_fetch_all(self.evadb, create_predict_function)
 
