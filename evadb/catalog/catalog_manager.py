@@ -333,7 +333,7 @@ class CatalogManager(object):
 
         return job_history_entry
 
-    def get_job_history_by_job_id(self, job_id: int) -> list[JobHistoryCatalogEntry]:
+    def get_job_history_by_job_id(self, job_id: int) -> List[JobHistoryCatalogEntry]:
         """Returns all the entries present for this job_id on in the history.
 
         Args:
@@ -343,7 +343,7 @@ class CatalogManager(object):
 
     def update_job_history_end_time(
         self, job_id: int, execution_start_time: datetime, execution_end_time: datetime
-    ) -> list[JobHistoryCatalogEntry]:
+    ) -> List[JobHistoryCatalogEntry]:
         """Updates the execution_end_time for this job history matching job_id and execution_start_time.
 
         Args:
