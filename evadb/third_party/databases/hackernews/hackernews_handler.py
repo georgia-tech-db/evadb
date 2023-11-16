@@ -43,7 +43,7 @@ class HackernewsSearchHandler(DBHandler):
         def _hackernews_topics_generator():
             url = "http://hn.algolia.com/api/v1/search?"
             url += ("query=" + self.query)
-            url += ("" if self.tags == "" else "&tags=" + self.tags)
+            url += ("&tags=" + ("story" if self.tags == "" else + self.tags)) # search stories by default
             response = requests.get(url)
             if (response.status_code != 200):
                 raise Exception("Could not reach website.")
