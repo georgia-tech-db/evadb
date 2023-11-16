@@ -22,6 +22,7 @@ import time
 from pathlib import Path
 from typing import Dict, List
 
+import numpy as np
 import pandas as pd
 
 from evadb.catalog.catalog_utils import get_metadata_properties
@@ -53,6 +54,10 @@ from evadb.utils.generic_utils import (
     try_to_import_xgboost,
 )
 from evadb.utils.logging_manager import logger
+
+
+def root_mean_squared_error(y_true, y_pred):
+    return np.sqrt(np.mean(np.square(y_pred - y_true)))
 
 
 # From https://stackoverflow.com/a/34333710
@@ -354,6 +359,20 @@ class CreateFunctionExecutor(AbstractExecutor):
             aggregated_batch.rename(columns={arg_map["time"]: "ds"})
         if "id" in arg_map.keys():
             aggregated_batch.rename(columns={arg_map["id"]: "unique_id"})
+        if "conf" in arg_map.keys():
+            try:
+                conf = round(arg_map["conf"])
+            except Exception:
+                err_msg = "Confidence must be a number."
+                logger.error(err_msg)
+                raise FunctionIODefinitionError(err_msg)
+        else:
+            conf = 90
+
+        if conf > 100:
+            err_msg = "Confidence must <= 100."
+            logger.error(err_msg)
+            raise FunctionIODefinitionError(err_msg)
 
         data = aggregated_batch.frames
         if "unique_id" not in list(data.columns):
@@ -396,18 +415,51 @@ class CreateFunctionExecutor(AbstractExecutor):
         if library == "neuralforecast":
             try_to_import_neuralforecast()
             from neuralforecast import NeuralForecast
-            from neuralforecast.auto import AutoNBEATS, AutoNHITS
-            from neuralforecast.models import NBEATS, NHITS
+            from neuralforecast.auto import (
+                AutoDeepAR,
+                AutoFEDformer,
+                AutoInformer,
+                AutoNBEATS,
+                AutoNHITS,
+                AutoPatchTST,
+                AutoTFT,
+            )
+
+            # from neuralforecast.auto import AutoAutoformer as AutoAFormer
+            from neuralforecast.losses.pytorch import MQLoss
+            from neuralforecast.models import (
+                NBEATS,
+                NHITS,
+                TFT,
+                DeepAR,
+                FEDformer,
+                Informer,
+                PatchTST,
+            )
+
+            # from neuralforecast.models import Autoformer as AFormer
 
             model_dict = {
                 "AutoNBEATS": AutoNBEATS,
                 "AutoNHITS": AutoNHITS,
                 "NBEATS": NBEATS,
                 "NHITS": NHITS,
+                "PatchTST": PatchTST,
+                "AutoPatchTST": AutoPatchTST,
+                "DeepAR": DeepAR,
+                "AutoDeepAR": AutoDeepAR,
+                "FEDformer": FEDformer,
+                "AutoFEDformer": AutoFEDformer,
+                # "AFormer": AFormer,
+                # "AutoAFormer": AutoAFormer,
+                "Informer": Informer,
+                "AutoInformer": AutoInformer,
+                "TFT": TFT,
+                "AutoTFT": AutoTFT,
             }
 
             if "model" not in arg_map.keys():
-                arg_map["model"] = "NBEATS"
+                arg_map["model"] = "TFT"
 
             if "auto" not in arg_map.keys() or (
                 arg_map["auto"].lower()[0] == "t"
@@ -441,13 +493,16 @@ class CreateFunctionExecutor(AbstractExecutor):
                 else:
                     model_args_config["hist_exog_list"] = exogenous_columns
 
-                    def get_optuna_config(trial):
-                        return model_args_config
+            if "auto" in arg_map["model"].lower():
 
-                    model_args["config"] = get_optuna_config
-                    model_args["backend"] = "optuna"
+                def get_optuna_config(trial):
+                    return model_args_config
+
+                model_args["config"] = get_optuna_config
+                model_args["backend"] = "optuna"
 
             model_args["h"] = horizon
+            model_args["loss"] = MQLoss(level=[conf])
 
             model = NeuralForecast(
                 [model_here(**model_args)],
@@ -492,7 +547,11 @@ class CreateFunctionExecutor(AbstractExecutor):
 
         data["ds"] = pd.to_datetime(data["ds"])
 
-        model_save_dir_name = library + "_" + arg_map["model"] + "_" + new_freq
+        model_save_dir_name = (
+            library + "_" + arg_map["model"] + "_" + new_freq
+            if "statsforecast" in library
+            else library + "_" + str(conf) + "_" + arg_map["model"] + "_" + new_freq
+        )
         if len(data.columns) >= 4 and library == "neuralforecast":
             model_save_dir_name += "_exogenous_" + str(sorted(exogenous_columns))
 
@@ -524,6 +583,7 @@ class CreateFunctionExecutor(AbstractExecutor):
                     data[column] = data.apply(
                         lambda x: self.convert_to_numeric(x[column]), axis=1
                     )
+            rmses = []
             if library == "neuralforecast":
                 cuda_devices_here = "0"
                 if "CUDA_VISIBLE_DEVICES" in os.environ:
@@ -532,6 +592,26 @@ class CreateFunctionExecutor(AbstractExecutor):
                 with set_env(CUDA_VISIBLE_DEVICES=cuda_devices_here):
                     model.fit(df=data, val_size=horizon)
                     model.save(model_path, overwrite=True)
+                    if "metrics" in arg_map and arg_map["metrics"].lower()[0] == "t":
+                        crossvalidation_df = model.cross_validation(
+                            df=data, val_size=horizon
+                        )
+                        for uid in crossvalidation_df.unique_id.unique():
+                            crossvalidation_df_here = crossvalidation_df[
+                                crossvalidation_df.unique_id == uid
+                            ]
+                            rmses.append(
+                                root_mean_squared_error(
+                                    crossvalidation_df_here.y,
+                                    crossvalidation_df_here[
+                                        arg_map["model"] + "-median"
+                                    ],
+                                )
+                                / np.mean(crossvalidation_df_here.y)
+                            )
+                            mean_rmse = np.mean(rmses)
+                            with open(model_path + "_rmse", "w") as f:
+                                f.write(str(mean_rmse) + "\n")
             else:
                 # The following lines of code helps eliminate the math error encountered in statsforecast when only one datapoint is available in a time series
                 for col in data["unique_id"].unique():
@@ -541,14 +621,40 @@ class CreateFunctionExecutor(AbstractExecutor):
                         )
 
                 model.fit(df=data[["ds", "y", "unique_id"]])
+                hypers = ""
+                if "arima" in arg_map["model"].lower():
+                    from statsforecast.arima import arima_string
+
+                    hypers += arima_string(model.fitted_[0, 0].model_)
                 f = open(model_path, "wb")
                 pickle.dump(model, f)
                 f.close()
+                if "metrics" not in arg_map or arg_map["metrics"].lower()[0] == "t":
+                    crossvalidation_df = model.cross_validation(
+                        df=data[["ds", "y", "unique_id"]],
+                        h=horizon,
+                        step_size=24,
+                        n_windows=1,
+                    ).reset_index()
+                    for uid in crossvalidation_df.unique_id.unique():
+                        crossvalidation_df_here = crossvalidation_df[
+                            crossvalidation_df.unique_id == uid
+                        ]
+                        rmses.append(
+                            root_mean_squared_error(
+                                crossvalidation_df_here.y,
+                                crossvalidation_df_here[arg_map["model"]],
+                            )
+                            / np.mean(crossvalidation_df_here.y)
+                        )
+                    mean_rmse = np.mean(rmses)
+                    with open(model_path + "_rmse", "w") as f:
+                        f.write(str(mean_rmse) + "\n")
+                        f.write(hypers + "\n")
         elif not Path(model_path).exists():
             model_path = os.path.join(model_dir, existing_model_files[-1])
-
         io_list = self._resolve_function_io(None)
-
+        data["ds"] = data.ds.astype(str)
         metadata_here = [
             FunctionMetadataCatalogEntry("model_name", arg_map["model"]),
             FunctionMetadataCatalogEntry("model_path", model_path),
@@ -563,6 +669,7 @@ class CreateFunctionExecutor(AbstractExecutor):
             ),
             FunctionMetadataCatalogEntry("horizon", horizon),
             FunctionMetadataCatalogEntry("library", library),
+            FunctionMetadataCatalogEntry("conf", conf),
         ]
 
         return (
