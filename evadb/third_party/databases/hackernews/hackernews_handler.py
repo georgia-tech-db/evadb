@@ -12,10 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import json
+
 import github
 import pandas as pd
 import requests
-import json
 
 from evadb.third_party.databases.hackernews.table_column_info import HACKERNEWS_COLUMNS
 from evadb.third_party.databases.types import (
@@ -27,6 +28,7 @@ from evadb.third_party.databases.types import (
 
 class HackernewsSearchHandler(DBHandler):
     connection = lambda x: requests.get("https://www.google.com/").status_code == 200
+
     def __init__(self, name: str, **kwargs):
         """
         Initialize the handler.
@@ -42,10 +44,12 @@ class HackernewsSearchHandler(DBHandler):
     def supported_table(self):
         def _hackernews_topics_generator():
             url = "http://hn.algolia.com/api/v1/search?"
-            url += ("query=" + self.query)
-            url += ("&tags=" + ("story" if self.tags == "" else + self.tags)) # search stories by default
+            url += "query=" + self.query
+            url += "&tags=" + (
+                "story" if self.tags == "" else +self.tags
+            )  # search stories by default
             response = requests.get(url)
-            if (response.status_code != 200):
+            if response.status_code != 200:
                 raise Exception("Could not reach website.")
             json_result = response.content
             dict_result = json.loads(json_result)

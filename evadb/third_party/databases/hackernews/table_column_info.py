@@ -20,5 +20,5 @@ HACKERNEWS_COLUMNS = [
     ["author", str],
     ["points", int],
     ["story_text", str],
-    ["num_comments", int]
+    ["num_comments", int],
 ]
