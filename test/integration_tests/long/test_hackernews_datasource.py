@@ -18,7 +18,7 @@ from test.util import get_evadb_for_testing
 import pytest
 
 from evadb.server.command_handler import execute_query_fetch_all
-from evadb.third_party.databases.github.table_column_info import STARGAZERS_COLUMNS
+from evadb.third_party.databases.hackernews.table_column_info import HACKERNEWS_COLUMNS
 
 
 @pytest.mark.notparallel
@@ -32,7 +32,7 @@ class HackernewsDataSourceTest(unittest.TestCase):
         execute_query_fetch_all(self.evadb, "DROP DATABASE IF EXISTS hackernews_data;")
 
     @pytest.mark.xfail(reason="Flaky testcase due to `bad request` error message")
-    def test_should_run_select_query_in_github(self):
+    def test_should_run_select_query_in_hackernews(self):
         # Create database.
         params = {
             "query": "EVADB",
@@ -47,7 +47,7 @@ class HackernewsDataSourceTest(unittest.TestCase):
         batch = execute_query_fetch_all(self.evadb, query)
         self.assertEqual(len(batch), 10)
         expected_column = list(
-            ["search_results.{}".format(col) for col, _ in STARGAZERS_COLUMNS]
+            ["search_results.{}".format(col) for col, _ in HACKERNEWS_COLUMNS]
         )
         self.assertEqual(batch.columns, expected_column)
 
