@@ -26,7 +26,7 @@ from evadb.third_party.databases.types import (
 
 
 class HackernewsSearchHandler(DBHandler):
-    def connection ():
+    def connection():
         return requests.get("https://www.google.com/").status_code == 200
 
     def __init__(self, name: str, **kwargs):

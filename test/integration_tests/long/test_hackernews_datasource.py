@@ -51,5 +51,6 @@ class HackernewsDataSourceTest(unittest.TestCase):
         )
         self.assertEqual(batch.columns, expected_column)
 
+
 if __name__ == "__main__":
     unittest.main()
