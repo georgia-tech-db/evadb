@@ -14,7 +14,6 @@
 # limitations under the License.
 import json
 
-import github
 import pandas as pd
 import requests
 
@@ -27,7 +26,8 @@ from evadb.third_party.databases.types import (
 
 
 class HackernewsSearchHandler(DBHandler):
-    connection = lambda x: requests.get("https://www.google.com/").status_code == 200
+    def connection ():
+        return requests.get("https://www.google.com/").status_code == 200
 
     def __init__(self, name: str, **kwargs):
         """
