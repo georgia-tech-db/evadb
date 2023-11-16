@@ -93,7 +93,9 @@ class StatementBinder:
                         outputs.append(column)
                     else:
                         inputs.append(column)
-            elif string_comparison_case_insensitive(node.function_type, "sklearn"):
+            elif string_comparison_case_insensitive(
+                node.function_type, "sklearn"
+            ) or string_comparison_case_insensitive(node.function_type, "XGBoost"):
                 assert (
                     "predict" in arg_map
                 ), f"Creating {node.function_type} functions expects 'predict' metadata."
