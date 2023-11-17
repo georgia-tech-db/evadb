@@ -60,7 +60,7 @@ class ChatGPTTest(unittest.TestCase):
     def tearDown(self) -> None:
         execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS MyTextCSV;")
 
-    # @chatgpt_skip_marker
+    @chatgpt_skip_marker
     def test_openai_chat_completion_function(self):
         function_name = "ChatGPT"
         execute_query_fetch_all(self.evadb, f"DROP FUNCTION IF EXISTS {function_name};")
