@@ -80,7 +80,7 @@ document_libs = [
     "sentence-transformers",
     "protobuf",
     "bs4",
-    "openai==0.28",  # CHATGPT
+    "openai>=1.0",  # CHATGPT
     "gpt4all",  # PRIVATE GPT
     "sentencepiece",  # TRANSFORMERS
 ]
