@@ -112,15 +112,6 @@ class WeaviateVectorStore(VectorStore):
         # Call the Weaviate API to create the class
         self._client.schema.create_class(class_obj)
 
-        # response = client.schema.get(class_name)
-        # Check the response for success or handle any errors
-        if self._client.schema.get(class_name)['class'] == class_name:
-            print(f"Successfully created Weaviate class '{class_name}'")
-        else:
-            print(f"Failed to create Weaviate class '{class_name}'")
-
-        return None
-
     def delete_weaviate_class(self, class_name: str) -> None:
         """
         Delete a Weaviate class and its data.
@@ -133,16 +124,6 @@ class WeaviateVectorStore(VectorStore):
         """
         # Call the Weaviate API to delete the class
         self._client.schema.delete_class(class_name)
-
-        try:
-            # Attempt to retrieve the class, and if it results in an exception,
-            # consider the class as successfully deleted.
-            self._client.schema.get(class_name)
-            print(f"Failed to delete Weaviate class '{class_name}'")
-        except Exception:
-            print(f"Successfully deleted Weaviate class '{class_name}'")
-
-        return None
 
     def add_to_weaviate_class(self, class_name: str, data_objects: List[dict]) -> None:
         """
@@ -160,8 +141,6 @@ class WeaviateVectorStore(VectorStore):
         for data_object in data_objects:
             self._client.data_object.create(data_object, class_name)
 
-        return None
-
     def query_weaviate_class(self, class_name, properties_to_retrieve, query: VectorIndexQuery) -> List[dict]:
         """
         Perform a similarity-based search in Weaviate.
@@ -174,32 +153,21 @@ class WeaviateVectorStore(VectorStore):
         Returns:
             List[dict]: A list of dictionaries containing the retrieved properties.
         """
-        try:
-            # Define the similarity search query
-            response = (
-                self._client.query
-                .get(class_name, properties_to_retrieve)
-                .with_near_vector({
-                    "vector": query.embedding
-                })
-                .with_limit(query.top_k)
-                .with_additional(["distance"])
-                .do()
-            )
+        # Define the similarity search query
+        response = (
+            self._client.query
+            .get(class_name, properties_to_retrieve)
+            .with_near_vector({
+                "vector": query.embedding
+            })
+            .with_limit(query.top_k)
+            .with_additional(["distance"])
+            .do()
+        )
 
-            # Check if the response contains data
-            data = response.get('data', {})
-            if 'Get' not in data or class_name not in data['Get']:
-                print(f"No objects of class {class_name} found.")
-                return []
+        data = response.get('data', {})
 
-            # Extract the results
-            results = data['Get'][class_name]
+        # Extract the results
+        results = data['Get'][class_name]
 
-            return results
-
-        except Exception as e:
-            print(f"Failed to query Weaviate class '{class_name}'")
-            print(e)
-
-            return []
+        return results
