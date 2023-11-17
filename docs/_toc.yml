@@ -55,9 +55,11 @@ parts:
           - file: source/reference/evaql/create_function
           - file: source/reference/evaql/create_index
           - file: source/reference/evaql/create_table
+          - file: source/reference/evaql/create_job
           - file: source/reference/evaql/drop_database
           - file: source/reference/evaql/drop_function
           - file: source/reference/evaql/drop_table
+          - file: source/reference/evaql/drop_job
           - file: source/reference/evaql/insert_table
           - file: source/reference/evaql/delete_table
           - file: source/reference/evaql/rename

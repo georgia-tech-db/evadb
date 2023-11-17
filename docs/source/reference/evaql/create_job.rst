@@ -1,15 +1,16 @@
 CREATE JOB
 ===============
 
-.. _create-function:
+.. _create-job:
 
 The CREATE JOB statement allows us to create recurring or one-time jobs in EvaDB. These jobs can be associated with multiple queries, 
 all of which will be executed sequentially every time the created job is triggered according to the assigned schedule.
 
 
-.. code-block:: sql
+.. code-block:: text
 
-    CREATE JOB [IF NOT EXISTS] <job_name> AS {
+    CREATE JOB [IF NOT EXISTS] <job_name> AS
+    {
         <job_queries>...
     }
     [START <start_time>]
@@ -27,7 +28,8 @@ Examples
 
 .. code:: text
 
-    CREATE JOB forecasting_job AS {
+    CREATE JOB forecasting_job AS
+    {
         CREATE OR REPLACE FUNCTION HomeSalesForecast FROM
             ( SELECT * FROM postgres_data.home_sales )
         TYPE Forecasting
@@ -37,4 +39,3 @@ Examples
     START '2023-04-01 01:10:00'
     END '2023-05-01'
     EVERY 1 week;
-

@@ -1,7 +1,7 @@
 DROP JOB
 =============
 
-.. _drop_job:
+.. _drop-job:
 
 .. code:: mysql
 
