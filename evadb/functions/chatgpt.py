@@ -124,9 +124,7 @@ class ChatGPT(AbstractFunction):
             len(api_key) != 0
         ), "Please set your OpenAI API key using SET OPENAI_API_KEY = 'sk-' or environment variable (OPENAI_API_KEY)"
 
-        client = OpenAI(
-            api_key=api_key
-        )
+        client = OpenAI(api_key=api_key)
 
         @retry(tries=6, delay=20)
         def completion_with_backoff(**kwargs):

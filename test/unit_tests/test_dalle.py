@@ -16,14 +16,13 @@
 import unittest
 from io import BytesIO
 from test.util import get_evadb_for_testing
+from typing import List, Optional
 from unittest.mock import MagicMock, patch
 
 from PIL import Image as PILImage
+from pydantic import AnyUrl, BaseModel
 
 from evadb.server.command_handler import execute_query_fetch_all
-
-from typing import List, Optional
-from pydantic import BaseModel, AnyUrl
 
 
 class Image(BaseModel):
@@ -76,7 +75,7 @@ class DallEFunctionTest(unittest.TestCase):
                 Image(
                     b64_json=None,
                     revised_prompt=None,
-                    url="https://images.openai.com/1234.png"
+                    url="https://images.openai.com/1234.png",
                 )
             ]
         )

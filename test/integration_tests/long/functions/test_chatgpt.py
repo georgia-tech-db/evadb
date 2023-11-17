@@ -53,9 +53,7 @@ class ChatGPTTest(unittest.TestCase):
 
         csv_query = f"""LOAD CSV '{self.csv_file_path}' INTO MyTextCSV;"""
         execute_query_fetch_all(self.evadb, csv_query)
-        os.environ[
-            "OPENAI_API_KEY"
-        ] = "sk-..."
+        os.environ["OPENAI_API_KEY"] = "sk-..."
 
     def tearDown(self) -> None:
         execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS MyTextCSV;")
