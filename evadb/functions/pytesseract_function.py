@@ -16,9 +16,9 @@ class PyTesseractOCRFunction(AbstractFunction):
     
     @setup(cacheable=False, function_type="FeatureExtraction", batchable=False)
     def setup(self,\
-            convert_to_grayscale: bool = True, \
-            remove_noise: bool = True, \
-            tesseract_path:str = None) -> None:
+            convert_to_grayscale: str, \
+            remove_noise: str, \
+            tesseract_path:str = None) -> None: # type: ignore
         
         try_to_import_pytesseract()
         
