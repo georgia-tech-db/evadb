@@ -29,8 +29,6 @@ from evadb.storage.storage_engine import StorageEngine
 from evadb.utils.errors import CatalogError
 from evadb.utils.logging_manager import logger
 
-err_manager = ErrorManager()
-
 
 class CreateExecutor(AbstractExecutor):
     def __init__(self, db: EvaDBDatabase, node: CreatePlan):
@@ -67,10 +65,11 @@ class CreateExecutor(AbstractExecutor):
 
             msg = f"The table {name} has been successfully created"
             if self.children != []:
-                assert (
-                    len(self.children) == 1
-                ), err_manager.get_error_message(err_manager.QUERY_EXPECTS_ONE_CHILD, "Create table from query expects 1 child, finds {}".format(
-                    len(self.children))
+                assert len(self.children) == 1, ErrorManager.get_error_message(
+                    ErrorManager.QUERY_EXPECTS_ONE_CHILD,
+                    "Create table from query expects 1 child, finds {}".format(
+                        len(self.children)
+                    ),
                 )
                 child = self.children[0]
 
