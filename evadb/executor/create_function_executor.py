@@ -30,9 +30,11 @@ from evadb.catalog.models.function_catalog import FunctionCatalogEntry
 from evadb.catalog.models.function_io_catalog import FunctionIOCatalogEntry
 from evadb.catalog.models.function_metadata_catalog import FunctionMetadataCatalogEntry
 from evadb.configuration.constants import (
+    DEFAULT_SKLEARN_TRAIN_MODEL,
     DEFAULT_TRAIN_REGRESSION_METRIC,
     DEFAULT_TRAIN_TIME_LIMIT,
     DEFAULT_XGBOOST_TASK,
+    SKLEARN_SUPPORTED_MODELS,
     EvaDB_INSTALLATION_DIR,
 )
 from evadb.database import EvaDBDatabase
@@ -45,13 +47,12 @@ from evadb.utils.errors import FunctionIODefinitionError
 from evadb.utils.generic_utils import (
     load_function_class_from_file,
     string_comparison_case_insensitive,
+    try_to_import_flaml_automl,
     try_to_import_ludwig,
     try_to_import_neuralforecast,
-    try_to_import_sklearn,
     try_to_import_statsforecast,
     try_to_import_torch,
     try_to_import_ultralytics,
-    try_to_import_xgboost,
 )
 from evadb.utils.logging_manager import logger
 
@@ -169,8 +170,7 @@ class CreateFunctionExecutor(AbstractExecutor):
 
         Use Sklearn's regression to train models.
         """
-        try_to_import_sklearn()
-        from sklearn.linear_model import LinearRegression
+        try_to_import_flaml_automl()
 
         assert (
             len(self.children) == 1
@@ -186,13 +186,26 @@ class CreateFunctionExecutor(AbstractExecutor):
         aggregated_batch.drop_column_alias()
 
         arg_map = {arg.key: arg.value for arg in self.node.metadata}
-        model = LinearRegression()
-        Y = aggregated_batch.frames[arg_map["predict"]]
-        aggregated_batch.frames.drop([arg_map["predict"]], axis=1, inplace=True)
+        from flaml import AutoML
+
+        model = AutoML()
+        sklearn_model = arg_map.get("model", DEFAULT_SKLEARN_TRAIN_MODEL)
+        if sklearn_model not in SKLEARN_SUPPORTED_MODELS:
+            raise ValueError(
+                f"Sklearn Model {sklearn_model} provided as input is not supported."
+            )
+        settings = {
+            "time_budget": arg_map.get("time_limit", DEFAULT_TRAIN_TIME_LIMIT),
+            "metric": arg_map.get("metric", DEFAULT_TRAIN_REGRESSION_METRIC),
+            "estimator_list": [sklearn_model],
+            "task": arg_map.get("task", DEFAULT_XGBOOST_TASK),
+        }
         start_time = int(time.time())
-        model.fit(X=aggregated_batch.frames, y=Y)
+        model.fit(
+            dataframe=aggregated_batch.frames, label=arg_map["predict"], **settings
+        )
         train_time = int(time.time()) - start_time
-        score = model.score(X=aggregated_batch.frames, y=Y)
+        score = model.best_loss
         model_path = os.path.join(
             self.db.catalog().get_configuration_catalog_value("model_dir"),
             self.node.name,
@@ -232,7 +245,7 @@ class CreateFunctionExecutor(AbstractExecutor):
 
         We use the Flaml AutoML model for training xgboost models.
         """
-        try_to_import_xgboost()
+        try_to_import_flaml_automl()
 
         assert (
             len(self.children) == 1
