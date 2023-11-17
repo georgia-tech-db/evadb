@@ -9,7 +9,7 @@ Proper error handling is an essential aspect of robust software development. In 
 Error Codes Overview
 --------------------
 
-EvaDB implements an `ErrorManager` class with predefined error codes for various error scenarios. Each error code is associated with a default error message, which can be extended with additional information when required.
+EvaDB implements an `ErrorManager` class with predefined error codes for various error scenarios. Each error code is associated with a default error message, which can be extended with additional information when required. A list of all error codes can be found in `evadb/error_manager.py`.
 
 Using Error Codes without Additional Message
 --------------------------------------------
