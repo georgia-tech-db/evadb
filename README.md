@@ -42,17 +42,6 @@
 </a>
 </p>
 
-<p align="center"><b>Share EvaDB</b></p>
-
-<p align="center">
-
-<a href="https://twitter.com/intent/tweet?text=Check%20out%20EvaDB!%20Bring%20AI%20inside%20your%20database%20system%20and%20build%20AI-powered%20apps.%20&url=https://github.com/georgia-tech-db/evadb&hashtags=EvaDB,AI,Database" target="blank">
-<img src="https://img.shields.io/twitter/follow/_superAGI?label=Twitter&style=social" alt="Follow _superAGI"/></a> 
-<a href="https://t.me/share/url?text=Check%20out%20EvaDB!%20Bring%20AI%20inside%20your%20database%20and%20build%20AI-powered%20apps.%20&url=https://github.com/georgia-tech-db/evadb" target="_blank"><img src="https://img.shields.io/twitter/url?label=Telegram&logo=Telegram&style=social&url=https://github.com/georgia-tech-db/evadb" alt="Share on Telegram"/></a>
-<a href="https://api.whatsapp.com/send?text=Check%20out%20EvaDB!%20Bring%20AI%20inside%20your%20database%20and%20build%20AI-powered%20apps.%20https://github.com/georgia-tech-db/evadb"><img src="https://img.shields.io/twitter/url?label=whatsapp&logo=whatsapp&style=social&url=https://github.com/georgia-tech-db/evadb" /></a> <a href="https://www.reddit.com/submit?url=https://github.com/georgia-tech-db/evadb&title=Check%20out%20EvaDB!%20Bring%20AI%20inside%20your%20database%20and%20build%20AI-powered%20apps." target="blank">
-<img src="https://img.shields.io/twitter/url?label=Reddit&logo=Reddit&style=social&url=https://github.com/georgia-tech-db/evadb" alt="Share on Reddit"/>
-</p>
-
 <p align="center">
   <a href="https://colab.research.google.com/github/georgia-tech-db/evadb/blob/master/tutorials/03-emotion-analysis.ipynb">
       <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Launch EvaDB on Colab"/>
@@ -67,15 +56,144 @@
           <img alt="Downloads" src="https://static.pepy.tech/badge/evadb"/>
         </a> -->  
   <br />
-  <a href="https://gitpod.io/#https://github.com/georgia-tech-db/evadb" target="_blank"><img src="https://gitpod.io/button/open-in-gitpod.svg" alt="Open in Gitpod"></a>
 </p>
 
 EvaDB enables software developers to build AI apps in a few lines of code. Its powerful SQL API simplifies AI app development for both structured and unstructured data. EvaDB's benefits include:
-- 🔮 Easy to connect EvaDB with your SQL database system and build AI-powered apps with SQL queries
-- 🤝 Query your data with a pre-trained AI model from Hugging Face, OpenAI, YOLO, PyTorch, and other AI frameworks
-- ⚡️ Faster queries thanks to AI-centric query optimization
-- 💰 Save money spent on running models by efficient CPU/GPU use
-- 🔧 Fine-tune your AI models to achieve better results
+<details>
+<summary> 🔮 Easy to <a href="https://evadb.readthedocs.io/en/latest/source/overview/connect-to-data-sources.html">connect the EvaDB query engine with your data sources</a>, such as PostgreSQL or S3 buckets, and build AI-powered apps with SQL queries. </summary>
+<br/>
+<table>
+<tr>
+<th>Structured Data Sources</th>
+<th>Unstructured Data Sources</th>
+<th>Application Data Sources</th>
+</tr>
+<tr>
+<td>
+
+- PostgreSQL
+- SQLite
+- MySQL
+- MariaDB
+- Clickhouse
+- Snowflake
+
+</td>
+<td>
+
+- Local filesystem
+- AWS S3 bucket
+
+</td>
+<td>
+
+- Github
+
+</td>
+</tr>
+</table>
+
+More details on the supported data sources is [available here](https://evadb.readthedocs.io/en/latest/source/reference/databases/index.html).
+
+</details>
+
+<details>
+<summary> 🤝 <a href="https://evadb.readthedocs.io/en/latest/source/overview/ai-queries.html">Query your connected data with a pre-trained AI model</a> from Hugging Face, OpenAI, YOLO, Stable Diffusion, etc. </summary>
+<br/>
+<table>
+<tr>
+<th>Hugging Face</th>
+<th>OpenAI</th>
+<th>YOLO</th>
+</tr>
+<tr>
+<td>
+
+- Audio Classification
+- Automatic Speech Recognition
+- Text Classification
+- Summarization
+- Text2Text Generation
+- Text Generation
+- Image Classification
+- Image Segmentation
+- Image-to-Text
+- Object Detection
+- Depth Estimation
+
+</td>
+<td>
+
+- gpt-4
+- gpt-4-0314
+- gpt-4-32k
+- gpt-4-32k-0314
+- gpt-3.5-turbo
+- gpt-3.5-turbo-0301
+
+</td>
+<td>
+
+- yolov8n.pt
+- yolov8s.pt
+- yolov8m.pt
+- yolov8l.pt
+- yolov8x.pt
+
+</td>
+</tr>
+</table>
+
+More details on the supported AI models is [available here](https://evadb.readthedocs.io/en/latest/source/reference/ai/index.html)
+</details>
+
+<details>
+<summary> 🔧 Create or fine-tune AI models for regression, classification, and time series forecasting.</summary>
+<br/>
+<table>
+<tr>
+<th>Regression</th>
+<th>Classification</th>
+<th>Time Series Forecasting</th>
+</tr>
+<tr>
+<td>
+
+- Ludwig
+- Sklearn
+- Xgboost
+
+</td>
+<td>
+
+- Ludwig
+- Xboost
+
+</td>
+<td>
+
+- Statsforecast
+- Neuralforecast
+
+</td>
+</tr>
+</table>
+
+More details on the supported AutoML frameworks is [available here](https://evadb.readthedocs.io/en/latest/source/reference/ai/index.html).
+</details>
+
+<details>
+<summary> 💰 Faster AI queries thanks to AI-centric query optimizations such as caching, batching, and parallel processing. </summary>
+<br/>
+  
+- Function result caching helps reuse results of expensive AI function calls.
+- LLM batching reduces token usage and dollars spent on LLM calls. 
+- Parallel query processing saves money and time spent on running AI models by better utilizing CPUs and/or GPUs.
+- Query predicate re-ordering and predicate push-down accelerates queries over both structured and unstructured data.
+
+More details on the optimizations in EvaDB is [available here](https://evadb.readthedocs.io/en/latest/source/reference/optimizations.html).
+</details>
+<br/>
 
 👋 Hey! If you're excited about our vision of bringing AI inside database systems, show some ❤️ by: 
 <ul>
@@ -84,6 +202,8 @@ EvaDB enables software developers to build AI apps in a few lines of code. Its p
   <li> 🐦 following us on <a href="https://twitter.com/evadb_ai">Twitter</a>
   <li> 📝 following us on <a href="https://medium.com/evadb-blog">Medium</a>
 </ul>
+
+We would love to learn about your AI app. Please complete this 1-minute form: https://v0fbgcue0cm.typeform.com/to/BZHZWeZm
 
 ## Quick Links
 
@@ -116,7 +236,7 @@ Our target audience is software developers who may not necessarily have a backgr
 
 <details>
 <ul>
-<li>Connect EvaDB to your SQL and vector database systems with the <a href="https://evadb.readthedocs.io/en/stable/source/reference/databases/postgres.html">`CREATE DATABASE`</a> and <a href="https://evadb.readthedocs.io/en/stable/source/reference/evaql/create.html#create-index">`CREATE INDEX`</a> statements.</li>
+<li>Connect EvaDB to your SQL and vector database systems with the <a href="https://evadb.readthedocs.io/en/stable/source/reference/databases/postgres.html">`CREATE DATABASE`</a> and <a href="https://evadb.readthedocs.io/en/stable/source/reference/evaql/create_index.html">`CREATE INDEX`</a> statements.</li>
 <li>Write SQL queries with AI functions to get inference results:</li>
    <ul>
    <li>Pick a pre-trained AI model from Hugging Face, Open AI, Ultralytics, PyTorch, and built-in AI frameworks for generative AI, NLP, and vision applications;</li>  
@@ -209,6 +329,8 @@ EvaDB's AI-centric query optimizer takes a query as input and generates a query 
 </details>
 
 ## Community and Support
+
+We would love to learn about your AI app. Please complete this 1-minute form: https://v0fbgcue0cm.typeform.com/to/BZHZWeZm
 
 <!--<p>
   <a href="https://evadb.ai/community">

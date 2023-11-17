@@ -15,7 +15,7 @@
 import glob
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, Generator, List
+from typing import TYPE_CHECKING, Generator, List, Union
 
 from evadb.catalog.catalog_utils import xform_column_definitions_to_catalog_entries
 from evadb.catalog.models.utils import TableCatalogEntry
@@ -39,41 +39,45 @@ class ExecutorError(Exception):
     pass
 
 
-def apply_project(
-    batch: Batch, project_list: List[AbstractExpression], catalog: "CatalogManager"
+def instrument_function_expression_cost(
+    expr: Union[AbstractExpression, List[AbstractExpression]],
+    catalog: "CatalogManager",
 ):
+    """We are expecting an instance of a catalog. An optimization can be to avoid creating a catalog instance if there is no function expression. An easy fix is to pass the function handler and create the catalog instance only if there is a function expression. In the past, this was problematic because of Ray. We can revisit it again."""
+
+    if expr is None:
+        return
+
+    list_expr = expr
+    if not isinstance(expr, list):
+        list_expr = [expr]
+
+    # persist stats of function expression
+    for expr in list_expr:
+        for func_expr in expr.find_all(FunctionExpression):
+            if func_expr.function_obj and func_expr._stats:
+                function_id = func_expr.function_obj.row_id
+                catalog.upsert_function_cost_catalog_entry(
+                    function_id,
+                    func_expr.function_obj.name,
+                    func_expr._stats.prev_cost,
+                )
+
+
+def apply_project(batch: Batch, project_list: List[AbstractExpression]):
     if not batch.empty() and project_list:
         batches = [expr.evaluate(batch) for expr in project_list]
         batch = Batch.merge_column_wise(batches)
 
-        # persist stats of function expression
-        for expr in project_list:
-            for func_expr in expr.find_all(FunctionExpression):
-                if func_expr.function_obj and func_expr._stats:
-                    function_id = func_expr.function_obj.row_id
-                    catalog.upsert_function_cost_catalog_entry(
-                        function_id,
-                        func_expr.function_obj.name,
-                        func_expr._stats.prev_cost,
-                    )
     return batch
 
 
-def apply_predicate(
-    batch: Batch, predicate: AbstractExpression, catalog: "CatalogManager"
-) -> Batch:
+def apply_predicate(batch: Batch, predicate: AbstractExpression) -> Batch:
     if not batch.empty() and predicate is not None:
         outcomes = predicate.evaluate(batch)
         batch.drop_zero(outcomes)
         batch.reset_index()
 
-        # persist stats of function expression
-        for func_expr in predicate.find_all(FunctionExpression):
-            if func_expr.function_obj and func_expr._stats:
-                function_id = func_expr.function_obj.row_id
-                catalog.upsert_function_cost_catalog_entry(
-                    function_id, func_expr.function_obj.name, func_expr._stats.prev_cost
-                )
     return batch
 
 
@@ -152,7 +156,7 @@ def validate_media(file_path: Path, media_type: FileFormatType) -> bool:
 
 
 def handle_vector_store_params(
-    vector_store_type: VectorStoreType, index_path: str
+    vector_store_type: VectorStoreType, index_path: str, catalog
 ) -> dict:
     """Handle vector store parameters based on the vector store type and index path.
 
@@ -174,9 +178,36 @@ def handle_vector_store_params(
     elif vector_store_type == VectorStoreType.CHROMADB:
         return {"index_path": str(Path(index_path).parent)}
     elif vector_store_type == VectorStoreType.PINECONE:
-        return {}
+        # add the required API_KEYS
+        return {
+            "PINECONE_API_KEY": catalog().get_configuration_catalog_value(
+                "PINECONE_API_KEY"
+            ),
+            "PINECONE_ENV": catalog().get_configuration_catalog_value("PINECONE_ENV"),
+        }
     elif vector_store_type == VectorStoreType.WEAVIATE:
-        return {}
+        # Weaviate Configuration
+        # Weaviate API key and url Can be obtained from cluster details on Weaviate Cloud Services (WCS) dashboard
+        return {
+            "WEAVIATE_API_KEY": catalog().get_configuration_catalog_value(
+                "WEAVIATE_API_KEY"
+            ),
+            "WEAVIATE_API_URL": catalog().get_configuration_catalog_value(
+                "WEAVIATE_API_URL"
+            ),
+        }
+    elif vector_store_type == VectorStoreType.MILVUS:
+        return {
+            "MILVUS_URI": catalog().get_configuration_catalog_value("MILVUS_URI"),
+            "MILVUS_USER": catalog().get_configuration_catalog_value("MILVUS_USER"),
+            "MILVUS_PASSWORD": catalog().get_configuration_catalog_value(
+                "MILVUS_PASSWORD"
+            ),
+            "MILVUS_DB_NAME": catalog().get_configuration_catalog_value(
+                "MILVUS_DB_NAME"
+            ),
+            "MILVUS_TOKEN": catalog().get_configuration_catalog_value("MILVUS_TOKEN"),
+        }
     else:
         raise ValueError("Unsupported vector store type: {}".format(vector_store_type))
 

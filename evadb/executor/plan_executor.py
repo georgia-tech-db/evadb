@@ -21,6 +21,7 @@ from evadb.executor.create_database_executor import CreateDatabaseExecutor
 from evadb.executor.create_executor import CreateExecutor
 from evadb.executor.create_function_executor import CreateFunctionExecutor
 from evadb.executor.create_index_executor import CreateIndexExecutor
+from evadb.executor.create_job_executor import CreateJobExecutor
 from evadb.executor.delete_executor import DeleteExecutor
 from evadb.executor.drop_object_executor import DropObjectExecutor
 from evadb.executor.exchange_executor import ExchangeExecutor
@@ -31,7 +32,6 @@ from evadb.executor.groupby_executor import GroupByExecutor
 from evadb.executor.hash_join_executor import HashJoinExecutor
 from evadb.executor.insert_executor import InsertExecutor
 from evadb.executor.join_build_executor import BuildJoinExecutor
-from evadb.executor.lateral_join_executor import LateralJoinExecutor
 from evadb.executor.limit_executor import LimitExecutor
 from evadb.executor.load_executor import LoadDataExecutor
 from evadb.executor.nested_loop_join_executor import NestedLoopJoinExecutor
@@ -49,7 +49,7 @@ from evadb.executor.union_executor import UnionExecutor
 from evadb.executor.use_executor import UseExecutor
 from evadb.executor.vector_index_scan_executor import VectorIndexScanExecutor
 from evadb.models.storage.batch import Batch
-from evadb.parser.create_statement import CreateDatabaseStatement
+from evadb.parser.create_statement import CreateDatabaseStatement, CreateJobStatement
 from evadb.parser.set_statement import SetStatement
 from evadb.parser.statement import AbstractStatement
 from evadb.parser.use_statement import UseStatement
@@ -94,6 +94,8 @@ class PlanExecutor:
             return UseExecutor(db=self._db, node=plan)
         elif isinstance(plan, SetStatement):
             return SetExecutor(db=self._db, node=plan)
+        elif isinstance(plan, CreateJobStatement):
+            return CreateJobExecutor(db=self._db, node=plan)
 
         # Get plan node type
         plan_opr_type = plan.opr_type
@@ -128,12 +130,6 @@ class PlanExecutor:
             executor_node = SampleExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.NESTED_LOOP_JOIN:
             executor_node = NestedLoopJoinExecutor(db=self._db, node=plan)
-        elif plan_opr_type == PlanOprType.LATERAL_JOIN:
-            logger.warn(
-                "LateralJoin Executor should not be part of the execution plan."
-                "Please raise an issue with the current query. Thanks!"
-            )
-            executor_node = LateralJoinExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.HASH_JOIN:
             executor_node = HashJoinExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.HASH_BUILD:

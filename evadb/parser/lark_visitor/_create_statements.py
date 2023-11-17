@@ -22,6 +22,7 @@ from evadb.parser.create_statement import (
     ColConstraintInfo,
     ColumnDefinition,
     CreateDatabaseStatement,
+    CreateJobStatement,
     CreateTableStatement,
 )
 from evadb.parser.table_ref import TableRef
@@ -301,6 +302,8 @@ class CreateIndex:
             vector_store_type = VectorStoreType.CHROMADB
         elif str.upper(token) == "WEAVIATE":
             vector_store_type = VectorStoreType.WEAVIATE
+        elif str.upper(token) == "MILVUS":
+            vector_store_type = VectorStoreType.MILVUS
         return vector_store_type
 
 
@@ -336,3 +339,49 @@ class CreateDatabase:
                     param_dict = self.visit(child)
 
         return engine, param_dict
+
+
+class CreateJob:
+    def create_job(self, tree):
+        job_name = None
+        queries = []
+        start_time = None
+        end_time = None
+        repeat_interval = None
+        repeat_period = None
+        if_not_exists = False
+        for child in tree.children:
+            if isinstance(child, Tree):
+                if child.data == "if_not_exists":
+                    if_not_exists = True
+                if child.data == "uid":
+                    job_name = self.visit(child)
+                if child.data == "job_sql_statements":
+                    queries = self.visit(child)
+                elif child.data == "start_time":
+                    start_time = self.visit(child)
+                elif child.data == "end_time":
+                    end_time = self.visit(child)
+                elif child.data == "repeat_clause":
+                    repeat_interval, repeat_period = self.visit(child)
+
+        create_job = CreateJobStatement(
+            job_name,
+            queries,
+            if_not_exists,
+            start_time,
+            end_time,
+            repeat_interval,
+            repeat_period,
+        )
+
+        return create_job
+
+    def start_time(self, tree):
+        return self.visit(tree.children[1]).value
+
+    def end_time(self, tree):
+        return self.visit(tree.children[1]).value
+
+    def repeat_clause(self, tree):
+        return self.visit(tree.children[1]), self.visit(tree.children[2])

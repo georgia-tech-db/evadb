@@ -12,9 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import datetime
 import shutil
 from pathlib import Path
-from typing import List
+from typing import Any, List
 
 from evadb.catalog.catalog_type import (
     ColumnType,
@@ -23,7 +24,6 @@ from evadb.catalog.catalog_type import (
     VideoColumnName,
 )
 from evadb.catalog.catalog_utils import (
-    cleanup_storage,
     construct_function_cache_catalog_entry,
     get_document_table_column_definitions,
     get_image_table_column_definitions,
@@ -40,12 +40,17 @@ from evadb.catalog.models.utils import (
     FunctionIOCatalogEntry,
     FunctionMetadataCatalogEntry,
     IndexCatalogEntry,
+    JobCatalogEntry,
+    JobHistoryCatalogEntry,
     TableCatalogEntry,
     drop_all_tables_except_catalog,
     init_db,
     truncate_catalog_tables,
 )
 from evadb.catalog.services.column_catalog_service import ColumnCatalogService
+from evadb.catalog.services.configuration_catalog_service import (
+    ConfigurationCatalogService,
+)
 from evadb.catalog.services.database_catalog_service import DatabaseCatalogService
 from evadb.catalog.services.function_cache_catalog_service import (
     FunctionCacheCatalogService,
@@ -59,25 +64,36 @@ from evadb.catalog.services.function_metadata_catalog_service import (
     FunctionMetadataCatalogService,
 )
 from evadb.catalog.services.index_catalog_service import IndexCatalogService
+from evadb.catalog.services.job_catalog_service import JobCatalogService
+from evadb.catalog.services.job_history_catalog_service import JobHistoryCatalogService
 from evadb.catalog.services.table_catalog_service import TableCatalogService
 from evadb.catalog.sql_config import IDENTIFIER_COLUMN, SQLConfig
-from evadb.configuration.configuration_manager import ConfigurationManager
 from evadb.expression.function_expression import FunctionExpression
 from evadb.parser.create_statement import ColumnDefinition
 from evadb.parser.table_ref import TableInfo
 from evadb.parser.types import FileFormatType
 from evadb.third_party.databases.interface import get_database_handler
-from evadb.utils.generic_utils import generate_file_path, get_file_checksum
+from evadb.utils.generic_utils import (
+    generate_file_path,
+    get_file_checksum,
+    remove_directory_contents,
+)
 from evadb.utils.logging_manager import logger
 
 
 class CatalogManager(object):
-    def __init__(self, db_uri: str, config: ConfigurationManager):
+    def __init__(self, db_uri: str):
         self._db_uri = db_uri
         self._sql_config = SQLConfig(db_uri)
-        self._config = config
         self._bootstrap_catalog()
         self._db_catalog_service = DatabaseCatalogService(self._sql_config.session)
+        self._config_catalog_service = ConfigurationCatalogService(
+            self._sql_config.session
+        )
+        self._job_catalog_service = JobCatalogService(self._sql_config.session)
+        self._job_history_catalog_service = JobHistoryCatalogService(
+            self._sql_config.session
+        )
         self._table_catalog_service = TableCatalogService(self._sql_config.session)
         self._column_service = ColumnCatalogService(self._sql_config.session)
         self._function_service = FunctionCatalogService(self._sql_config.session)
@@ -130,10 +146,14 @@ class CatalogManager(object):
         logger.info("Clearing catalog")
         # drop tables which are not part of catalog
         drop_all_tables_except_catalog(self._sql_config.engine)
-        # truncate the catalog tables
-        truncate_catalog_tables(self._sql_config.engine)
+        # truncate the catalog tables except configuration_catalog
+        # We do not remove the configuration entries
+        truncate_catalog_tables(
+            self._sql_config.engine, tables_not_to_truncate=["configuration_catalog"]
+        )
         # clean up the dataset, index, and cache directories
-        cleanup_storage(self._config)
+        for folder in ["cache_dir", "index_dir", "datasets_dir"]:
+            remove_directory_contents(self.get_configuration_catalog_value(folder))
 
     "Database catalog services"
 
@@ -160,6 +180,9 @@ class CatalogManager(object):
         table_entry = self._db_catalog_service.get_entry_by_name(database_name)
 
         return table_entry
+
+    def get_all_database_catalog_entries(self):
+        return self._db_catalog_service.get_all_entries()
 
     def drop_database_catalog_entry(self, database_entry: DatabaseCatalogEntry) -> bool:
         """
@@ -200,6 +223,137 @@ class CatalogManager(object):
                 return False
 
         return True
+
+    "Job catalog services"
+
+    def insert_job_catalog_entry(
+        self,
+        name: str,
+        queries: str,
+        start_time: datetime,
+        end_time: datetime,
+        repeat_interval: int,
+        active: bool,
+        next_schedule_run: datetime,
+    ) -> JobCatalogEntry:
+        """A new entry is persisted in the job catalog.
+
+        Args:
+            name: job name
+            queries: job's queries
+            start_time: job start time
+            end_time: job end time
+            repeat_interval: job repeat interval
+            active: job status
+            next_schedule_run: next run time as per schedule
+        """
+        job_entry = self._job_catalog_service.insert_entry(
+            name,
+            queries,
+            start_time,
+            end_time,
+            repeat_interval,
+            active,
+            next_schedule_run,
+        )
+
+        return job_entry
+
+    def get_job_catalog_entry(self, job_name: str) -> JobCatalogEntry:
+        """
+        Returns the job catalog entry for the given database_name
+        Arguments:
+            job_name (str): name of the job
+
+        Returns:
+            JobCatalogEntry
+        """
+
+        table_entry = self._job_catalog_service.get_entry_by_name(job_name)
+
+        return table_entry
+
+    def drop_job_catalog_entry(self, job_entry: JobCatalogEntry) -> bool:
+        """
+        This method deletes the job from  catalog.
+
+        Arguments:
+           job_entry: job catalog entry to remove
+
+        Returns:
+           True if successfully deleted else False
+        """
+        return self._job_catalog_service.delete_entry(job_entry)
+
+    def get_next_executable_job(self, only_past_jobs: bool = False) -> JobCatalogEntry:
+        """Get the oldest job that is ready to be triggered by trigger time
+        Arguments:
+            only_past_jobs: boolean flag to denote if only jobs with trigger time in
+                past should be considered
+        Returns:
+            Returns the first job to be triggered
+        """
+        return self._job_catalog_service.get_next_executable_job(only_past_jobs)
+
+    def update_job_catalog_entry(
+        self, job_name: str, next_scheduled_run: datetime, active: bool
+    ):
+        """Update the next_scheduled_run and active column as per the provided values
+        Arguments:
+            job_name (str): job which should be updated
+
+            next_run_time (datetime): the next trigger time for the job
+
+            active (bool): the active status for the job
+        """
+        self._job_catalog_service.update_next_scheduled_run(
+            job_name, next_scheduled_run, active
+        )
+
+    "Job history catalog services"
+
+    def insert_job_history_catalog_entry(
+        self,
+        job_id: str,
+        job_name: str,
+        execution_start_time: datetime,
+        execution_end_time: datetime,
+    ) -> JobCatalogEntry:
+        """A new entry is persisted in the job history catalog.
+
+        Args:
+            job_id: job id for the execution entry
+            job_name: job name for the execution entry
+            execution_start_time: job execution start time
+            execution_end_time: job execution end time
+        """
+        job_history_entry = self._job_history_catalog_service.insert_entry(
+            job_id, job_name, execution_start_time, execution_end_time
+        )
+
+        return job_history_entry
+
+    def get_job_history_by_job_id(self, job_id: int) -> List[JobHistoryCatalogEntry]:
+        """Returns all the entries present for this job_id on in the history.
+
+        Args:
+            job_id: the id of job whose history should be fetched
+        """
+        return self._job_history_catalog_service.get_entry_by_job_id(job_id)
+
+    def update_job_history_end_time(
+        self, job_id: int, execution_start_time: datetime, execution_end_time: datetime
+    ) -> List[JobHistoryCatalogEntry]:
+        """Updates the execution_end_time for this job history matching job_id and execution_start_time.
+
+        Args:
+            job_id: id of the job whose history entry which should be updated
+            execution_start_time: the start time for the job history entry
+            execution_end_time: the end time for the job history entry
+        """
+        return self._job_history_catalog_service.update_entry_end_time(
+            job_id, execution_start_time, execution_end_time
+        )
 
     "Table catalog services"
 
@@ -340,14 +494,13 @@ class CatalogManager(object):
 
         checksum = get_file_checksum(impl_file_path)
         function_entry = self._function_service.insert_entry(
-            name, impl_file_path, type, checksum
+            name,
+            impl_file_path,
+            type,
+            checksum,
+            function_io_list,
+            function_metadata_list,
         )
-        for function_io in function_io_list:
-            function_io.function_id = function_entry.row_id
-        self._function_io_service.insert_entries(function_io_list)
-        for function_metadata in function_metadata_list:
-            function_metadata.function_id = function_entry.row_id
-        self._function_metadata_service.insert_entries(function_metadata_list)
         return function_entry
 
     def get_function_catalog_entry_by_name(self, name: str) -> FunctionCatalogEntry:
@@ -445,7 +598,7 @@ class CatalogManager(object):
     """ Function Cache related"""
 
     def insert_function_cache_catalog_entry(self, func_expr: FunctionExpression):
-        cache_dir = self._config.get_value("storage", "cache_dir")
+        cache_dir = self.get_configuration_catalog_value("cache_dir")
         entry = construct_function_cache_catalog_entry(func_expr, cache_dir=cache_dir)
         return self._function_cache_service.insert_entry(entry)
 
@@ -508,7 +661,7 @@ class CatalogManager(object):
         table_name = table_info.table_name
         column_catalog_entries = xform_column_definitions_to_catalog_entries(columns)
 
-        dataset_location = self._config.get_value("core", "datasets_dir")
+        dataset_location = self.get_configuration_catalog_value("datasets_dir")
         file_url = str(generate_file_path(dataset_location, table_name))
         table_catalog_entry = self.insert_table_catalog_entry(
             table_name,
@@ -608,14 +761,28 @@ class CatalogManager(object):
         )
         return obj
 
+    "Configuration catalog services"
 
-#### get catalog instance
-# This function plays a crucial role in ensuring that different threads do
-# not share the same catalog object, as it can result in serialization issues and
-# incorrect behavior with SQLAlchemy. Therefore, whenever a catalog instance is
-# required, we create a new one. One possible optimization is to share the catalog
-# instance across all objects within the same thread. It is worth investigating whether
-# SQLAlchemy already handles this optimization for us, which will be explored at a
-# later time.
-def get_catalog_instance(db_uri: str, config: ConfigurationManager):
-    return CatalogManager(db_uri, config)
+    def upsert_configuration_catalog_entry(self, key: str, value: any):
+        """Upserts configuration catalog entry"
+
+        Args:
+            key: key name
+            value: value name
+        """
+        self._config_catalog_service.upsert_entry(key, value)
+
+    def get_configuration_catalog_value(self, key: str, default: Any = None) -> Any:
+        """
+        Returns the value entry for the given key
+        Arguments:
+            key (str): key name
+
+        Returns:
+            ConfigurationCatalogEntry
+        """
+
+        table_entry = self._config_catalog_service.get_entry_by_name(key)
+        if table_entry:
+            return table_entry.value
+        return default

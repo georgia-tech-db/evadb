@@ -20,6 +20,7 @@ from evadb.expression.abstract_expression import ExpressionType
 from evadb.expression.comparison_expression import ComparisonExpression
 from evadb.expression.constant_value_expression import ConstantValueExpression
 from evadb.expression.logical_expression import LogicalExpression
+from evadb.utils.generic_utils import string_comparison_case_insensitive
 
 
 ##################################################################
@@ -40,6 +41,12 @@ class Expressions:
 
         res = ConstantValueExpression(np.array(array_elements), ColumnType.NDARRAY)
         return res
+
+    def boolean_literal(self, tree):
+        text = tree.children[0]
+        if text == "TRUE":
+            return ConstantValueExpression(True, ColumnType.BOOLEAN)
+        return ConstantValueExpression(False, ColumnType.BOOLEAN)
 
     def constant(self, tree):
         for child in tree.children:
@@ -95,10 +102,12 @@ class Expressions:
     def logical_operator(self, tree):
         op = str(tree.children[0])
 
-        if op == "OR":
+        if string_comparison_case_insensitive(op, "OR"):
             return ExpressionType.LOGICAL_OR
-        elif op == "AND":
+        elif string_comparison_case_insensitive(op, "AND"):
             return ExpressionType.LOGICAL_AND
+        else:
+            raise NotImplementedError("Unsupported logical operator: {}".format(op))
 
     def expressions_with_defaults(self, tree):
         expr_list = []
@@ -139,18 +148,18 @@ class Expressions:
         assert len(chunk_params) == 2 or len(chunk_params) == 4
         if len(chunk_params) == 4:
             return {
-                "chunk_size": ConstantValueExpression(chunk_params[1]),
-                "chunk_overlap": ConstantValueExpression(chunk_params[3]),
+                "chunk_size": chunk_params[1],
+                "chunk_overlap": chunk_params[3],
             }
 
         elif len(chunk_params) == 2:
             if chunk_params[0] == "CHUNK_SIZE":
                 return {
-                    "chunk_size": ConstantValueExpression(chunk_params[1]),
+                    "chunk_size": chunk_params[1],
                 }
             elif chunk_params[0] == "CHUNK_OVERLAP":
                 return {
-                    "chunk_overlap": ConstantValueExpression(chunk_params[1]),
+                    "chunk_overlap": chunk_params[1],
                 }
             else:
                 assert f"incorrect keyword found {chunk_params[0]}"

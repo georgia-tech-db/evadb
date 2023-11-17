@@ -16,6 +16,10 @@ from pathlib import Path
 from typing import Dict, Iterator
 
 from evadb.catalog.sql_config import ROW_NUM_COLUMN
+from evadb.configuration.constants import (
+    DEFAULT_DOCUMENT_CHUNK_OVERLAP,
+    DEFAULT_DOCUMENT_CHUNK_SIZE,
+)
 from evadb.readers.abstract_reader import AbstractReader
 from evadb.readers.document.registry import (
     _lazy_import_loader,
@@ -31,8 +35,10 @@ class DocumentReader(AbstractReader):
 
         # https://github.com/hwchase17/langchain/blob/5b6bbf4ab2a33ed0d33ff5d3cb3979a7edc15682/langchain/text_splitter.py#L570
         # by default we use chunk_size 4000 and overlap 200
-        self._chunk_size = chunk_params.get("chunk_size", 4000)
-        self._chunk_overlap = chunk_params.get("chunk_overlap", 200)
+        self._chunk_size = chunk_params.get("chunk_size", DEFAULT_DOCUMENT_CHUNK_SIZE)
+        self._chunk_overlap = chunk_params.get(
+            "chunk_overlap", DEFAULT_DOCUMENT_CHUNK_OVERLAP
+        )
 
     def _read(self) -> Iterator[Dict]:
         ext = Path(self.file_url).suffix

@@ -1,4 +1,4 @@
-personal_ws-1.1 en 1776 
+personal_ws-1.1 en 1845 
 ABCD
 ABCMeta
 ANYDIM
@@ -72,6 +72,7 @@ AutoTheta
 AutoTokenizer
 Autocommit
 AvgPool
+BADCONFIG
 BDD
 BGR
 BH
@@ -94,6 +95,7 @@ BottomUpRewrite
 BoundingBox
 BuildJoinExecutor
 ByteTracker
+BytesIO
 CHROMADB
 CLOB
 CMDClientTest
@@ -108,6 +110,7 @@ CVImageReader
 CacheFunctionExpressionInApply
 CacheFunctionExpressionInFilter
 CacheFunctionExpressionInProject
+Cannnot
 CascadeOptimizer
 CatalogColumnType
 CatalogError
@@ -118,6 +121,8 @@ ChatGPT
 ChatGPTTest
 ChromaDB
 ChromaDBVectorStore
+ClickHouseHandler
+ClickHouseNativeStorageEngineTest
 ColConstraintInfo
 Colab
 ColorSpace
@@ -136,6 +141,10 @@ CommandHandlerTests
 CommonClauses
 ComparisonExpression
 ComparisonExpressionsTest
+Concats
+ConfigurationCatalog
+ConfigurationCatalogEntry
+ConfigurationCatalogService
 ConfigurationFileTests
 ConfigurationManager
 ConfigurationManager's
@@ -184,6 +193,9 @@ DESC
 DETRACVideo
 DFS
 DailyMail
+DallE
+DallEFunction
+DallEFunctionTest
 Dask
 DataFrame
 DataFrameColumn
@@ -306,6 +318,7 @@ FileExistsError
 FileFormatType
 FileNotFoundError
 Finetuning
+Flaml
 FlipTests
 ForecastModel
 ForeignKey
@@ -351,6 +364,7 @@ GenericHuggingfaceModel
 GenericLudwigModel
 GenericSklearnModel
 GenericUtilsTests
+GenericXGBoostModel
 GithubDataSourceTest
 GithubHandler
 GroupBy
@@ -373,6 +387,7 @@ HashJoinBuildPlan
 HashJoinExecutor
 HashJoinPlan
 HashJoinProbePlan
+HelperFunction
 Helvetica
 HomeData
 HomeForecast
@@ -393,10 +408,13 @@ IMAGENET
 INFILE
 IOArgument
 IOColumnArgument
+IODescriptors
 IOs
 ImageColumnName
+ImageDownloadUDF
 ImageDraw
 ImageFeatureExtractor
+ImageGen
 ImageHFModel
 ImageStorageEngine
 ImportError
@@ -533,6 +551,7 @@ LogicalVectorIndexScan
 LogicalVectorIndexScanToPhysical
 LordDarkula
 LudwigModel
+MILVUS
 MLP
 MNIST
 MNISTVid
@@ -551,6 +570,10 @@ MaxPool
 MemeImages
 MemoTest
 MetaData
+Milvus
+Milvus's
+MilvusClient
+MilvusVectorStore
 MindsDB
 MiniLM
 MnistImageClassifier
@@ -618,6 +641,8 @@ ObjectRef
 ObjectType
 OpenAI
 OpenAIChatCompletion
+OpenAICompletion
+OpenAPI
 OpenCV
 OpenTests
 OperatorType
@@ -672,9 +697,13 @@ PostgresHandler
 PostgresNativeStorageEngineTest
 PredicateExecutor
 PredicatePlan
+PredictEmployee
+PredictEmployeeXgboost
 PredictHouseRent
 PredictHouseRentLudwig
 PredictHouseRentSklearn
+PredictRent
+PredictRentXgboost
 PrivateGPTTest
 ProgrammingError
 ProjectExecutor
@@ -687,6 +716,7 @@ PushDownFilterThroughJoin
 PyGithub
 PyMuPDF
 PyPI
+PyTesseract
 PyTorchTensor
 Pydoc
 Pythonic
@@ -707,6 +737,7 @@ Quadro
 QuerySpecification
 QueueReaderExecutor
 REUSEADDR
+RMSE
 Rajoria
 RayError
 RayTaskError
@@ -714,6 +745,7 @@ ReLU
 ReadTheDocs
 RecursiveCharacterTextSplitter
 Reddit
+Rekognition
 RelationalAPI
 RenameExecutor
 RenameExecutorTest
@@ -771,6 +803,8 @@ ServerTests
 SetExecutor
 SetExecutorTest
 SetStatement
+ShowConfigPlan
+ShowDatabasePlan
 ShowExecutorTest
 ShowFunctionPlan
 ShowInfoExecutor
@@ -786,7 +820,12 @@ SingleDocumentSimilarityTests
 SingletonMeta
 Sklearn's
 SlackCSV
+SnowFlake
+SnowFlakeDbHandler
+SnowFlakeNativeStorageEngineTest
 SpeechRecognizer
+StableDiffusion
+StableDiffusionTest
 StageCompleteSignal
 StatementBinder
 StatementBinderContext
@@ -801,6 +840,7 @@ StatsForecast
 StorageEngine
 StorageExecutor
 StoragePlan
+StrHelperTest
 StreamHandler
 StreamReader
 StreamReaderProtocol
@@ -935,10 +975,12 @@ VideoFormat
 VideoStorageEngineTest
 VideoWriter
 VisionEncoderDecoderModel
+WH
 WIP
 WMV
 WeakValueDictionary
 WEAVIATE
+XGBoost
 XdistTests
 Xeon
 XformExtractObjectToLinearFlow
@@ -958,6 +1000,7 @@ aaaa
 aaequality
 abc
 abdfdsfds
+aboe
 abspath
 abstractmethod
 abstractmethods
@@ -978,6 +1021,7 @@ anydim
 api
 apis
 appply
+arXiv
 arange
 arg
 argmax
@@ -1008,6 +1052,7 @@ astype
 async
 asyncio
 atleast
+atof
 attr
 audioless
 autofunction
@@ -1061,6 +1106,7 @@ ci
 classmethod
 classname
 cli
+clickhouse
 cln
 clna
 clova
@@ -1104,6 +1150,7 @@ cv
 cvtColor
 cwd
 cxt
+dalle
 dane
 darwin
 dask
@@ -1111,6 +1158,7 @@ dataclass
 dataclasses
 dataframe
 dataframes
+datapoint
 dataset
 datasets
 datasource
@@ -1230,6 +1278,7 @@ filesystem
 fillna
 finetuned
 fitz
+flaml
 fmt
 fn
 fname
@@ -1273,7 +1322,10 @@ getsizeof
 getsockname
 getsourcefile
 getstarted
+getvalue
 gexpr
+gg
+gif
 gifs
 gists
 github
@@ -1292,6 +1344,7 @@ grp
 grpcio
 gw
 hardcoded
+hardcoding
 hasattr
 hashjoin
 hashlib
@@ -1309,6 +1362,7 @@ hostname
 href
 hstack
 html
+http
 https
 hugGingFaCe
 huggingface
@@ -1340,6 +1394,7 @@ insp
 insrt
 integratedTerminal
 integrations
+intergration
 intp
 invaid
 inviter
@@ -1383,6 +1438,7 @@ lhs
 lineno
 linux
 listdir
+llamadb
 loc
 localhost
 logi
@@ -1403,6 +1459,7 @@ memeimages
 metaclass
 metafile
 metainfo
+milvus
 mindsdb
 miniconda
 mins
@@ -1425,6 +1482,7 @@ mvit
 mvitactionrecognition
 mxztt
 mydb
+myfiles
 myimages
 mypdf
 mypdfs
@@ -1467,6 +1525,7 @@ openaichatcompletion
 opencv
 opr
 optimizers
+optuna
 oq
 orderby
 orm
@@ -1491,6 +1550,7 @@ philschmid
 pinecone
 pkill
 pkl
+pks
 plangenerator
 pluggable
 png
@@ -1527,6 +1587,7 @@ ptype
 pushdown
 px
 py
+pymilvus
 pymupdfs
 pypi
 pypirc
@@ -1543,11 +1604,13 @@ rb
 rbatch
 rdb
 readlines
+readlink
 readme
 realimport
 rebatch
 recurse
 reddit
+reindex
 releaser
 relu
 repo
@@ -1561,6 +1624,7 @@ return
 rf
 rgb
 rhs
+rmse
 rmtree
 roadmap
 roberta
@@ -1578,6 +1642,8 @@ russia
 saledate
 saliency
 samsum
+scalable
+schemas
 scikit
 sdist
 sep
@@ -1615,6 +1681,7 @@ sqlite
 src
 sshleifer
 sst
+stablediffusion
 statementtoplanconverter
 staticmethod
 statsforecast
@@ -1658,6 +1725,7 @@ testFaissIndexImageDataset
 testFaissIndexScanRewrite
 testIndex
 testIndexAutoUpdate
+testMilvusIndexImageDataset
 testOpenTable
 testQdrantIndexImageDataset
 testRayErrorHandling
@@ -1760,6 +1828,7 @@ xc
 xdist
 xform
 xformed
+xgboost
 xlm
 xmax
 xmin

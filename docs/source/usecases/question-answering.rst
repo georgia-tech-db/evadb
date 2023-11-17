@@ -57,11 +57,11 @@ EvaDB has built-in support for ``ChatGPT`` function from ``OpenAI``. You will ne
 
     # Set OpenAI key
     import os
-    os.environ["OPENAI_KEY"] = "sk-..."
+    os.environ["OPENAI_API_KEY"] = "sk-..."
 
 .. note::
     
-    EvaDB has built-in support for a wide range of :ref:`OpenAI<openai>` models. You can also switch to another large language models that runs locally by defining a :ref:`Custom function<udf>`.
+    EvaDB has built-in support for a wide range of :ref:`OpenAI<openai>` models. You can also switch to another large language models that runs locally by defining a :ref:`custom AI function<custom_ai_function>`.
 
 
     ChatGPT function is a wrapper around OpenAI API call. You can also switch to other LLM models that can run locally.

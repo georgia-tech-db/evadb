@@ -13,7 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from evadb.parser.create_function_statement import CreateFunctionStatement
-from evadb.parser.create_statement import CreateDatabaseStatement, CreateTableStatement
+from evadb.parser.create_statement import (
+    CreateDatabaseStatement,
+    CreateJobStatement,
+    CreateTableStatement,
+)
 from evadb.parser.drop_object_statement import DropObjectStatement
 from evadb.parser.explain_statement import ExplainStatement
 from evadb.parser.insert_statement import InsertTableStatement
@@ -30,6 +34,7 @@ from evadb.parser.use_statement import UseStatement
 # directly to the executor.
 SKIP_BINDER_AND_OPTIMIZER_STATEMENTS = (
     CreateDatabaseStatement,
+    CreateJobStatement,
     UseStatement,
     SetStatement,
 )
@@ -51,9 +56,9 @@ def parse_predicate_expression(expr: str):
 
 def parse_table_clause(expr: str, chunk_size: int = None, chunk_overlap: int = None):
     mock_query_parts = [f"SELECT * FROM {expr}"]
-    if chunk_size:
+    if chunk_size is not None:
         mock_query_parts.append(f"CHUNK_SIZE {chunk_size}")
-    if chunk_overlap:
+    if chunk_overlap is not None:
         mock_query_parts.append(f"CHUNK_OVERLAP {chunk_overlap}")
     mock_query_parts.append(";")
     mock_query = " ".join(mock_query_parts)

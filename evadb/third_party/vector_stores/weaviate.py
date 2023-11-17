@@ -43,7 +43,8 @@ class WeaviateVectorStore(VectorStore):
 
         assert (
             self._api_key
-        ), "Please set your Weaviate API key in evadb.yml file (third_party, weaviate_api_key) or environment variable (WEAVIATE_API_KEY). It can be found at the Details tab in WCS Dashboard."
+        ), "Please set your Weaviate API key in evadb.yml file (third_party, weaviate_api_key) or " \
+           "environment variable (WEAVIATE_API_KEY). It can be found at the Details tab in WCS Dashboard."
 
         # Get the API Url.
         self._api_url = ConfigurationManager().get_value(
@@ -55,7 +56,8 @@ class WeaviateVectorStore(VectorStore):
 
         assert (
             self._api_url
-        ), "Please set your Weaviate API Url in evadb.yml file (third_party, weaviate_api_url) or environment variable (WEAVIATE_API_URL). It can be found at the Details tab in WCS Dashboard."
+        ), "Please set your Weaviate API Url in evadb.yml file (third_party, weaviate_api_url) or " \
+           "environment variable (WEAVIATE_API_URL). It can be found at the Details tab in WCS Dashboard."
 
 
         if not _weaviate_init_done:
@@ -157,7 +159,8 @@ class WeaviateVectorStore(VectorStore):
 
         Args:
             class_name (str): The name of the Weaviate class to add objects to.
-            data_objects (List[dict]): A list of dictionaries, where each dictionary contains property names and values.
+            data_objects (List[dict]): A list of dictionaries,
+            where each dictionary contains property names and values.
 
         Returns:
             None

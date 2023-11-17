@@ -77,4 +77,7 @@ class OpenTests(unittest.TestCase):
                 {"testopentable.num": [1, 2], "open.data": [expected_img, expected_img]}
             )
         )
+        # We need sort. With ray enabled, the order is not guaranteed.
+        batch_res.sort_orderby(by=["testopentable.num"])
+        expected_batch.sort_orderby(by=["testopentable.num"])
         self.assertEqual(expected_batch, batch_res)
