@@ -16,7 +16,6 @@ import os
 from typing import List
 
 from evadb.third_party.vector_stores.types import (
-    FeaturePayload,
     VectorIndexQuery,
     VectorStore,
 )
@@ -37,7 +36,6 @@ class WeaviateVectorStore(VectorStore):
         if not self._api_key:
             self._api_key = os.environ.get("WEAVIATE_API_KEY")
 
-
         assert (
             self._api_key
         ), "Please set your Weaviate API key in evadb.yml file (third_party, weaviate_api_key) or " \
@@ -53,7 +51,6 @@ class WeaviateVectorStore(VectorStore):
             self._api_url
         ), "Please set your Weaviate API Url in evadb.yml file (third_party, weaviate_api_url) or " \
            "environment variable (WEAVIATE_API_URL). It can be found at the Details tab in WCS Dashboard."
-
 
         if not _weaviate_init_done:
             # Initialize weaviate client
@@ -112,7 +109,6 @@ class WeaviateVectorStore(VectorStore):
             "properties": properties
         }
 
-
         # Call the Weaviate API to create the class
         self._client.schema.create_class(class_obj)
 
@@ -143,7 +139,7 @@ class WeaviateVectorStore(VectorStore):
             # consider the class as successfully deleted.
             self._client.schema.get(class_name)
             print(f"Failed to delete Weaviate class '{class_name}'")
-        except Exception as e:
+        except Exception:
             print(f"Successfully deleted Weaviate class '{class_name}'")
 
         return None

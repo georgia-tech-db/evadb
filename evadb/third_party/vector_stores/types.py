@@ -14,7 +14,6 @@
 # limitations under the License.
 from dataclasses import dataclass
 from typing import List
-from uuid import uuid5, NAMESPACE_DNS
 
 
 @dataclass
@@ -33,6 +32,7 @@ class VectorIndexQuery:
 class VectorIndexQueryResult:
     similarities: List[float]
     ids: List[int]
+
 
 class VectorStore:
     def create(self, vector_dim: int):
