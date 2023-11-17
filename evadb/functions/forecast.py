@@ -86,7 +86,7 @@ class ForecastModel(AbstractFunction):
 
         # Feedback
         if len(data) == 0 or list(list(data.iloc[0]))[0] is True:
-            ## Suggestions
+            # Suggestions
             suggestion_list = []
             # 1: Flat predictions
             if self.library == "statsforecast":
@@ -102,7 +102,7 @@ class ForecastModel(AbstractFunction):
             for suggestion in set(suggestion_list):
                 log_str += "\nSUGGESTION: " + self.suggestion_dict[suggestion]
 
-            ## Metrics
+            # Metrics
             if self.rmse is not None:
                 log_str += "\nMean normalized RMSE: " + str(self.rmse)
             if self.hypers is not None:
