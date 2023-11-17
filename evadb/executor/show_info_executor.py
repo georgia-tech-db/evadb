@@ -52,7 +52,7 @@ class ShowInfoExecutor(AbstractExecutor):
                 show_entries.append(db.display_format())
         elif self.node.show_type is ShowType.CONFIG:
             show_entries = {}
-            # CONFIG is a special work, which is used to display all the configurations
+            # CONFIG is a special word, which is used to display all the configurations
             if self.node.show_val.upper() == ShowType.CONFIG.name:
                 configs = self.catalog().get_all_configuration_catalog_entries()
                 for config in configs:

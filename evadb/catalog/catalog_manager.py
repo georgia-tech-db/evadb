@@ -647,5 +647,5 @@ class CatalogManager(object):
             return table_entry.value
         return default
 
-    def get_all_configuration_catalog_entries(self):
+    def get_all_configuration_catalog_entries(self) -> List:
         return self._config_catalog_service.get_all_entries()
