@@ -15,7 +15,6 @@
 import os
 from typing import List
 
-from evadb.configuration.configuration_manager import ConfigurationManager
 from evadb.third_party.vector_stores.types import (
     FeaturePayload,
     VectorIndexQuery,
@@ -28,14 +27,12 @@ _weaviate_init_done = False
 
 
 class WeaviateVectorStore(VectorStore):
-    def __init__(self) -> None:
+    def __init__(self, **kwargs) -> None:
         try_to_import_weaviate_client()
         global _weaviate_init_done
 
         # Get the API key.
-        self._api_key = ConfigurationManager().get_value(
-            "third_party", "WEAVIATE_API_KEY"
-        )
+        self._api_key = kwargs.get("WEAVIATE_API_KEY")
 
         if not self._api_key:
             self._api_key = os.environ.get("WEAVIATE_API_KEY")
@@ -47,9 +44,7 @@ class WeaviateVectorStore(VectorStore):
            "environment variable (WEAVIATE_API_KEY). It can be found at the Details tab in WCS Dashboard."
 
         # Get the API Url.
-        self._api_url = ConfigurationManager().get_value(
-            "third_party", "WEAVIATE_API_URL"
-        )
+        self._api_url = kwargs.get("WEAVIATE_API_URL")
 
         if not self._api_url:
             self._api_url = os.environ.get("WEAVIATE_API_URL")
