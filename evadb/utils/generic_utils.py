@@ -502,13 +502,7 @@ def try_to_import_norfair():
         )
     
 def try_to_import_pytesseract():
-    try:
-        import cv2
-    except ImportError:
-        raise ValueError(
-            """Could not import opencv python package. 
-            Please install it with pip install opencv-python"""
-        )
+    try_to_import_cv2()
     
     try:
         import pytesseract
