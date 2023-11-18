@@ -14,6 +14,7 @@
 # limitations under the License.
 import os
 from typing import List
+from evadb.catalog.models.utils import ColumnCatalogEntry
 
 from evadb.third_party.vector_stores.types import (
     FeaturePayload,
@@ -62,7 +63,7 @@ class PineconeVectorStore(VectorStore):
             _pinecone_init_done = True
         self._client = None
 
-    def create(self, vector_dim: int):
+    def create(self, vector_dim: int, *_):
         import pinecone
 
         pinecone.create_index(self._index_name, dimension=vector_dim, metric="cosine")

@@ -43,7 +43,7 @@ class ChromaDBVectorStore(VectorStore):
         self._client = get_chromadb_client(index_path)
         self._collection_name = index_name
 
-    def create(self, vector_dim: int):
+    def create(self, vector_dim: int, *_):
         self._client.create_collection(
             name=self._collection_name,
             metadata={"hnsw:construction_ef": vector_dim, "hnsw:space": "cosine"},
