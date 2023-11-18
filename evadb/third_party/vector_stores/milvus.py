@@ -30,14 +30,6 @@ from evadb.third_party.vector_stores.types import (
     VectorStore,
 )
 from evadb.utils.generic_utils import try_to_import_milvus_client
-from pymilvus import (
-    connections,
-    utility,
-    FieldSchema,
-    CollectionSchema,
-    DataType,
-    Collection,
-)
 
 allowed_params = [
     "MILVUS_URI",
@@ -50,6 +42,8 @@ required_params = []
 
 
 def column_type_to_milvus_type(column_type: ColumnType):
+    from pymilvus import DataType
+
     if column_type == ColumnType.BOOLEAN:
         return DataType.BOOL
     elif column_type == ColumnType.INTEGER:
@@ -104,7 +98,10 @@ def expression_to_milvus_expr(expr: AbstractExpression):
         else:
             return f"({expression_to_milvus_expr(expr.children[0])} {milvus_symbol} {expression_to_milvus_expr(expr.children[1])})"
     elif isinstance(expr, ConstantValueExpression):
-        return expr.value
+        if expr.v_type == ColumnType.TEXT:
+            return f'"{expr.value}"'
+        else:
+            return expr.value
     elif isinstance(expr, TupleValueExpression):
         return expr.name
 
@@ -144,6 +141,8 @@ class MilvusVectorStore(VectorStore):
 
         self._milvus_connection_alias = "evadb-milvus"
 
+        from pymilvus import connections
+
         connections.connect(
             self._milvus_connection_alias,
             user=self._milvus_user,
@@ -160,6 +159,14 @@ class MilvusVectorStore(VectorStore):
         vector_dim: int,
         metadata_column_catalog_entries: List[ColumnCatalogEntry] = None,
     ):
+        from pymilvus import (
+            utility,
+            FieldSchema,
+            DataType,
+            CollectionSchema,
+            Collection,
+        )
+
         # Check if collection always exists
         if utility.has_collection(
             self._collection_name, using=self._milvus_connection_alias
@@ -177,11 +184,18 @@ class MilvusVectorStore(VectorStore):
             name="id", dtype=DataType.INT64, is_primary=True, auto_id=False
         )
 
+        def construct_metadata_field_from_entry(entry: ColumnCatalogEntry):
+            dtype = column_type_to_milvus_type(entry.type)
+            if dtype == DataType.VARCHAR:
+                return FieldSchema(name=entry.name, dtype=dtype, max_length=1000)
+            else:
+                return FieldSchema(
+                    name=entry.name,
+                    dtype=column_type_to_milvus_type(entry.type),
+                )
+
         metadata_fields = [
-            FieldSchema(
-                name=entry.name,
-                dtype=column_type_to_milvus_type(entry.type),
-            )
+            construct_metadata_field_from_entry(entry)
             for entry in metadata_column_catalog_entries
         ]
 
@@ -208,6 +222,8 @@ class MilvusVectorStore(VectorStore):
         collection.load()
 
     def add(self, payload: List[FeaturePayload]):
+        from pymilvus import Collection
+
         milvus_data = [
             {
                 "id": feature_payload.id,
@@ -224,6 +240,8 @@ class MilvusVectorStore(VectorStore):
         collection.upsert(milvus_data)
 
     def persist(self):
+        from pymilvus import Collection
+
         collection = Collection(
             name=self._collection_name, using=self._milvus_connection_alias
         )
@@ -231,11 +249,15 @@ class MilvusVectorStore(VectorStore):
         collection.flush()
 
     def delete(self) -> None:
+        from pymilvus import utility
+
         utility.drop_collection(
             self._collection_name, using=self._milvus_connection_alias
         )
 
     def query(self, query: VectorIndexQuery) -> VectorIndexQueryResult:
+        from pymilvus import Collection
+
         collection = Collection(
             name=self._collection_name, using=self._milvus_connection_alias
         )
