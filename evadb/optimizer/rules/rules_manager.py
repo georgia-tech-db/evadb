@@ -21,6 +21,7 @@ from evadb.optimizer.rules.rules import (
     CacheFunctionExpressionInApply,
     CacheFunctionExpressionInFilter,
     CacheFunctionExpressionInProject,
+    CombineWhereSimilarityOrderByAndLimitToFilteredVectorIndexScan,
     CombineSimilarityOrderByAndLimitToVectorIndexScan,
     EmbedFilterIntoGet,
     EmbedSampleIntoGet,
@@ -85,6 +86,7 @@ class RulesManager:
             EmbedSampleIntoGet(),
             PushDownFilterThroughJoin(),
             PushDownFilterThroughApplyAndMerge(),
+            CombineWhereSimilarityOrderByAndLimitToFilteredVectorIndexScan(),
             CombineSimilarityOrderByAndLimitToVectorIndexScan(),
             ReorderPredicates(),
         ]

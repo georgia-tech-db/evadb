@@ -243,6 +243,7 @@ class CreateIndex:
         table_name = None
         vector_store_type = None
         index_elem = None
+        include_elem = None
 
         for child in tree.children:
             if isinstance(child, Tree):
@@ -257,6 +258,8 @@ class CreateIndex:
                     vector_store_type = self.visit(child)
                 elif child.data == "index_elem":
                     index_elem = self.visit(child)
+                elif child.data == "include_elem":
+                    include_elem = self.visit(child)[1]
 
         # Projection list of child of index creation.
         project_expr_list = []
@@ -271,17 +274,22 @@ class CreateIndex:
             index_elem = [index_elem]
         else:
             project_expr_list += index_elem
-
+        project_expr_list += include_elem
         # Add tv_expr for projected columns.
-        col_list = []
+        index_col_list = []
         for tv_expr in index_elem:
-            col_list += [ColumnDefinition(tv_expr.name, None, None, None)]
+            index_col_list += [ColumnDefinition(tv_expr.name, None, None, None)]
+
+        include_col_list = []
+        for tv_expr in include_elem:
+            include_col_list += [ColumnDefinition(tv_expr.name, None, None, None)]
 
         return CreateIndexStatement(
             index_name,
             if_not_exists,
             table_ref,
-            col_list,
+            index_col_list,
+            include_col_list,
             vector_store_type,
             project_expr_list,
         )

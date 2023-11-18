@@ -13,8 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import os
-from typing import List
+from typing import Dict, List
 
+from evadb.catalog.catalog_type import ColumnType
+from evadb.catalog.models.utils import ColumnCatalogEntry
 from evadb.third_party.vector_stores.types import (
     FeaturePayload,
     VectorIndexQuery,
@@ -22,6 +24,14 @@ from evadb.third_party.vector_stores.types import (
     VectorStore,
 )
 from evadb.utils.generic_utils import try_to_import_milvus_client
+from pymilvus import (
+    connections,
+    utility,
+    FieldSchema,
+    CollectionSchema,
+    DataType,
+    Collection,
+)
 
 allowed_params = [
     "MILVUS_URI",
@@ -31,10 +41,22 @@ allowed_params = [
     "MILVUS_TOKEN",
 ]
 required_params = []
-_milvus_client_instance = None
 
 
-def get_milvus_client(
+def column_type_to_milvus_type(column_type: ColumnType):
+    if column_type == ColumnType.BOOLEAN:
+        return DataType.BOOL
+    elif column_type == ColumnType.INTEGER:
+        return DataType.INT64
+    elif column_type == ColumnType.FLOAT:
+        return DataType.FLOAT
+    elif column_type == ColumnType.TEXT:
+        return DataType.VARCHAR
+    elif column_type == ColumnType.NDARRAY:
+        return DataType.FLOAT_VECTOR
+
+
+def try_to_connect_to_milvus(
     milvus_uri: str,
     milvus_user: str,
     milvus_password: str,
@@ -90,23 +112,44 @@ class MilvusVectorStore(VectorStore):
         if not self._milvus_token:
             self._milvus_token = os.environ.get("MILVUS_TOKEN", "")
 
-        self._client = get_milvus_client(
-            milvus_uri=self._milvus_uri,
-            milvus_user=self._milvus_user,
-            milvus_password=self._milvus_password,
-            milvus_db_name=self._milvus_db_name,
-            milvus_token=self._milvus_token,
+        self._milvus_connection_alias = "evadb-milvus"
+
+        connections.connect(
+            self._milvus_alias,
+            user=self._milvus_user,
+            password=self._milvus_password,
+            db_name=self._milvus_db_name,
+            token=self._milvus_token,
+            uri=self._milvus_uri,
         )
+
         self._collection_name = index_name
 
-    def create(self, vector_dim: int):
-        if self._collection_name in self._client.list_collections():
-            self._client.drop_collection(self._collection_name)
-        self._client.create_collection(
-            collection_name=self._collection_name,
-            dimension=vector_dim,
-            metric_type="COSINE",
+    def create(self, vector_dim: int, metadata_column_catalog_entries: List[ColumnCatalogEntry] = None):
+        # Check if collection always exists
+        if utility.has_collection(
+            self._collection_name, using=self._milvus_connection_alias
+        ):
+            utility.drop_collection(
+                self._collection_name, using=self._milvus_connection_alias
+            )
+
+        # Set the collection schema for vector embedding and metadata
+        embedding_field = FieldSchema(
+            name="embedding", dtype=DataType.FLOAT_VECTOR, dim=vector_dim
         )
+
+        metadata_fields = [FieldSchema(
+            name=entry.name,
+            dtype=column_type_to_milvus_type(entry.type),
+    
+        ) for entry in metadata_column_catalog_entries]
+
+        schema = CollectionSchema(fields=[embedding_field] + metadata_fields,
+                                  enable_dynamic_field=True)
+            
+        # Create collection
+        Collection(name=self._collection_name, schema=schema, using=self._milvus_connection_alias)
 
     def add(self, payload: List[FeaturePayload]):
         milvus_data = [

@@ -47,6 +47,7 @@ class VectorIndexScanExecutor(AbstractExecutor):
         self.feat_column = node.index.feat_column
         self.limit_count = node.limit_count
         self.search_query_expr = node.search_query_expr
+        self.filter_expr = node.filter_expr
 
     def exec(self, *args, **kwargs) -> Iterator[Batch]:
         if self.vector_store_type == VectorStoreType.PGVECTOR:
@@ -109,7 +110,7 @@ class VectorIndexScanExecutor(AbstractExecutor):
 
         search_feat = self._get_search_query_results()
         index_result = self.index.query(
-            VectorIndexQuery(search_feat, self.limit_count.value)
+            VectorIndexQuery(search_feat, self.limit_count.value, str(self.filter_expr or ''))
         )
         # todo support queries over distance as well
         # distance_list = index_result.similarities

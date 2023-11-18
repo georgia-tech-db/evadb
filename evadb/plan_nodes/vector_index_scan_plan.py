@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from evadb.catalog.models.utils import IndexCatalogEntry
+from evadb.expression.comparison_expression import ComparisonExpression
 from evadb.expression.constant_value_expression import ConstantValueExpression
 from evadb.expression.function_expression import FunctionExpression
 from evadb.plan_nodes.abstract_plan import AbstractPlan
@@ -36,11 +37,13 @@ class VectorIndexScanPlan(AbstractPlan):
         index: IndexCatalogEntry,
         limit_count: ConstantValueExpression,
         search_query_expr: FunctionExpression,
+        filter_expr: ComparisonExpression = None
     ):
         super().__init__(PlanOprType.VECTOR_INDEX_SCAN)
         self._index = index
         self._limit_count = limit_count
         self._search_query_expr = search_query_expr
+        self._filter_expr = filter_expr
 
     @property
     def index(self):
@@ -53,6 +56,10 @@ class VectorIndexScanPlan(AbstractPlan):
     @property
     def search_query_expr(self):
         return self._search_query_expr
+    
+    @property
+    def filter_expr(self):
+        return self._filter_expr
 
     def __str__(self):
         return "VectorIndexScan(index_name={}, vector_store_type={}, limit_count={}, search_query_expr={})".format(
