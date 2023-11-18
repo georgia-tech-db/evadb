@@ -30,7 +30,7 @@ from pymilvus import (
     FieldSchema,
     CollectionSchema,
     DataType,
-    Collection,
+    Collection
 )
 
 allowed_params = [
@@ -115,7 +115,7 @@ class MilvusVectorStore(VectorStore):
         self._milvus_connection_alias = "evadb-milvus"
 
         connections.connect(
-            self._milvus_alias,
+            self._milvus_connection_alias,
             user=self._milvus_user,
             password=self._milvus_password,
             db_name=self._milvus_db_name,
@@ -136,7 +136,11 @@ class MilvusVectorStore(VectorStore):
 
         # Set the collection schema for vector embedding and metadata
         embedding_field = FieldSchema(
-            name="embedding", dtype=DataType.FLOAT_VECTOR, dim=vector_dim
+            name="vector", dtype=DataType.FLOAT_VECTOR, dim=vector_dim
+        )
+
+        id_field = FieldSchema(
+            name="id", dtype=DataType.INT64, is_primary=True, auto_id=False
         )
 
         metadata_fields = [FieldSchema(
@@ -145,40 +149,50 @@ class MilvusVectorStore(VectorStore):
     
         ) for entry in metadata_column_catalog_entries]
 
-        schema = CollectionSchema(fields=[embedding_field] + metadata_fields,
-                                  enable_dynamic_field=True)
+        schema = CollectionSchema(fields=[id_field] + [embedding_field] + metadata_fields)
             
         # Create collection
-        Collection(name=self._collection_name, schema=schema, using=self._milvus_connection_alias)
+        collection = Collection(name=self._collection_name, schema=schema, using=self._milvus_connection_alias)
+
+        # Create index on collection
+        collection.create_index("vector", {
+            "metric_type": "COSINE",
+            "params": {},
+        })
 
     def add(self, payload: List[FeaturePayload]):
         milvus_data = [
             {
                 "id": feature_payload.id,
                 "vector": feature_payload.embedding.reshape(-1).tolist(),
+                **feature_payload.metadata
             }
             for feature_payload in payload
         ]
-        ids = [feature_payload.id for feature_payload in payload]
 
-        # Milvus Client does not have upsert operation, perform delete + insert to emulate it
-        self._client.delete(collection_name=self._collection_name, pks=ids)
+        collection = Collection(name=self._collection_name, using=self._milvus_connection_alias)
 
-        self._client.insert(collection_name=self._collection_name, data=milvus_data)
+        collection.upsert(milvus_data)
+        
 
     def persist(self):
-        self._client.flush(self._collection_name)
+        collection = Collection(name=self._collection_name, using=self._milvus_connection_alias)
+
+        collection.flush()
 
     def delete(self) -> None:
-        self._client.drop_collection(
-            collection_name=self._collection_name,
+        utility.drop_collection(
+            self._collection_name, using=self._milvus_connection_alias
         )
 
     def query(self, query: VectorIndexQuery) -> VectorIndexQueryResult:
-        response = self._client.search(
-            collection_name=self._collection_name,
+        collection = Collection(name=self._collection_name, using=self._milvus_connection_alias)
+
+        response = collection.search(
             data=[query.embedding.reshape(-1).tolist()],
-            limit=query.top_k,
+            anns_field="vector",
+            param={"metric_type": "COSINE"},
+            limit=query.top_k
         )[0]
 
         distances, ids = [], []
