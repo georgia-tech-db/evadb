@@ -116,6 +116,7 @@ class ParserTests(unittest.TestCase):
             [
                 ColumnDefinition("featCol", None, None, None),
             ],
+            [],
             VectorStoreType.FAISS,
             [TupleValueExpression(name="featCol")],
         )
@@ -131,6 +132,7 @@ class ParserTests(unittest.TestCase):
             [
                 ColumnDefinition("featCol", None, None, None),
             ],
+            [],
             VectorStoreType.FAISS,
             [TupleValueExpression(name="featCol")],
         )
@@ -163,6 +165,7 @@ class ParserTests(unittest.TestCase):
             [
                 ColumnDefinition("featCol", None, None, None),
             ],
+            [],
             VectorStoreType.FAISS,
             [func_expr],
         )
