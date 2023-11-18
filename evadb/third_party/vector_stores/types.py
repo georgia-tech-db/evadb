@@ -29,7 +29,7 @@ class FeaturePayload:
 class VectorIndexQuery:
     embedding: List[float]
     top_k: int
-    filter_expr_str: str
+    filter_expr_str: ComparisonExpression
 
 
 @dataclass

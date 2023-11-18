@@ -17,6 +17,12 @@ from typing import Dict, List
 
 from evadb.catalog.catalog_type import ColumnType
 from evadb.catalog.models.utils import ColumnCatalogEntry
+from evadb.expression.abstract_expression import AbstractExpression, ExpressionType
+from evadb.expression.arithmetic_expression import ArithmeticExpression
+from evadb.expression.comparison_expression import ComparisonExpression
+from evadb.expression.constant_value_expression import ConstantValueExpression
+from evadb.expression.logical_expression import LogicalExpression
+from evadb.expression.tuple_value_expression import TupleValueExpression
 from evadb.third_party.vector_stores.types import (
     FeaturePayload,
     VectorIndexQuery,
@@ -30,7 +36,7 @@ from pymilvus import (
     FieldSchema,
     CollectionSchema,
     DataType,
-    Collection
+    Collection,
 )
 
 allowed_params = [
@@ -56,28 +62,52 @@ def column_type_to_milvus_type(column_type: ColumnType):
         return DataType.FLOAT_VECTOR
 
 
-def try_to_connect_to_milvus(
-    milvus_uri: str,
-    milvus_user: str,
-    milvus_password: str,
-    milvus_db_name: str,
-    milvus_token: str,
-):
-    global _milvus_client_instance
-    if _milvus_client_instance is None:
-        try_to_import_milvus_client()
-        import pymilvus
+def etype_to_milvus_symbol(etype: ExpressionType):
+    if etype == ExpressionType.COMPARE_EQUAL:
+        return "=="
+    elif etype == ExpressionType.COMPARE_GREATER:
+        return ">"
+    elif etype == ExpressionType.COMPARE_LESSER:
+        return "<"
+    elif etype == ExpressionType.COMPARE_GEQ:
+        return ">="
+    elif etype == ExpressionType.COMPARE_LEQ:
+        return "<="
+    elif etype == ExpressionType.COMPARE_NEQ:
+        return "!="
+    elif etype == ExpressionType.COMPARE_LIKE:
+        return "LIKE"
+    elif etype == ExpressionType.LOGICAL_AND:
+        return "and"
+    elif etype == ExpressionType.LOGICAL_OR:
+        return "or"
+    elif etype == ExpressionType.LOGICAL_NOT:
+        return "not"
+    elif etype == ExpressionType.ARITHMETIC_ADD:
+        return '+'
+    elif etype == ExpressionType.ARITHMETIC_DIVIDE:
+        return '/'
+    elif etype == ExpressionType.ARITHMETIC_MULTIPLY:
+        return '*'
+    elif etype == ExpressionType.ARITHMETIC_SUBTRACT:
+        return '-'
 
-        _milvus_client_instance = pymilvus.MilvusClient(
-            uri=milvus_uri,
-            user=milvus_user,
-            password=milvus_password,
-            db_name=milvus_db_name,
-            token=milvus_token,
-        )
 
-    return _milvus_client_instance
-
+def expression_to_milvus_expr(expr: AbstractExpression):
+    if isinstance(expr, ComparisonExpression) or isinstance(expr, ArithmeticExpression):
+        milvus_symbol = etype_to_milvus_symbol(expr.etype)
+        return f"({expression_to_milvus_expr(expr.children[0])} {milvus_symbol} {expression_to_milvus_expr(expr.children[1])})"
+    elif isinstance(expr, LogicalExpression):
+        milvus_symbol = etype_to_milvus_symbol(expr.etype)
+        if expr.etype == ExpressionType.LOGICAL_NOT:
+            return f"({milvus_symbol} {expression_to_milvus_expr(expr.children[0])})"
+        else:
+            return f"({expression_to_milvus_expr(expr.children[0])} {milvus_symbol} {expression_to_milvus_expr(expr.children[1])})"
+    elif isinstance(expr, ConstantValueExpression):
+        return expr.value
+    elif isinstance(expr, TupleValueExpression):
+        return expr.name
+    
 
 class MilvusVectorStore(VectorStore):
     def __init__(self, index_name: str, **kwargs) -> None:
@@ -125,7 +155,11 @@ class MilvusVectorStore(VectorStore):
 
         self._collection_name = index_name
 
-    def create(self, vector_dim: int, metadata_column_catalog_entries: List[ColumnCatalogEntry] = None):
+    def create(
+        self,
+        vector_dim: int,
+        metadata_column_catalog_entries: List[ColumnCatalogEntry] = None,
+    ):
         # Check if collection always exists
         if utility.has_collection(
             self._collection_name, using=self._milvus_connection_alias
@@ -143,40 +177,56 @@ class MilvusVectorStore(VectorStore):
             name="id", dtype=DataType.INT64, is_primary=True, auto_id=False
         )
 
-        metadata_fields = [FieldSchema(
-            name=entry.name,
-            dtype=column_type_to_milvus_type(entry.type),
-    
-        ) for entry in metadata_column_catalog_entries]
+        metadata_fields = [
+            FieldSchema(
+                name=entry.name,
+                dtype=column_type_to_milvus_type(entry.type),
+            )
+            for entry in metadata_column_catalog_entries
+        ]
 
-        schema = CollectionSchema(fields=[id_field] + [embedding_field] + metadata_fields)
-            
+        schema = CollectionSchema(
+            fields=[id_field] + [embedding_field] + metadata_fields
+        )
+
         # Create collection
-        collection = Collection(name=self._collection_name, schema=schema, using=self._milvus_connection_alias)
+        collection = Collection(
+            name=self._collection_name,
+            schema=schema,
+            using=self._milvus_connection_alias,
+        )
 
         # Create index on collection
-        collection.create_index("vector", {
-            "metric_type": "COSINE",
-            "params": {},
-        })
+        collection.create_index(
+            "vector",
+            {
+                "metric_type": "COSINE",
+                "params": {},
+            },
+        )
+
+        collection.load()
 
     def add(self, payload: List[FeaturePayload]):
         milvus_data = [
             {
                 "id": feature_payload.id,
                 "vector": feature_payload.embedding.reshape(-1).tolist(),
-                **feature_payload.metadata
+                **feature_payload.metadata,
             }
             for feature_payload in payload
         ]
 
-        collection = Collection(name=self._collection_name, using=self._milvus_connection_alias)
+        collection = Collection(
+            name=self._collection_name, using=self._milvus_connection_alias
+        )
 
         collection.upsert(milvus_data)
-        
 
     def persist(self):
-        collection = Collection(name=self._collection_name, using=self._milvus_connection_alias)
+        collection = Collection(
+            name=self._collection_name, using=self._milvus_connection_alias
+        )
 
         collection.flush()
 
@@ -186,18 +236,18 @@ class MilvusVectorStore(VectorStore):
         )
 
     def query(self, query: VectorIndexQuery) -> VectorIndexQueryResult:
-        collection = Collection(name=self._collection_name, using=self._milvus_connection_alias)
+        collection = Collection(
+            name=self._collection_name, using=self._milvus_connection_alias
+        )
 
         response = collection.search(
             data=[query.embedding.reshape(-1).tolist()],
             anns_field="vector",
             param={"metric_type": "COSINE"},
-            limit=query.top_k
+            limit=query.top_k,
+            expr=expression_to_milvus_expr(query.filter_expr_str),
         )[0]
 
-        distances, ids = [], []
-        for result in response:
-            distances.append(result["distance"])
-            ids.append(result["id"])
+        distances, ids = response.distances, response.ids
 
         return VectorIndexQueryResult(distances, ids)

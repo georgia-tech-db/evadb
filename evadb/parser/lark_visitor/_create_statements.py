@@ -274,15 +274,18 @@ class CreateIndex:
             index_elem = [index_elem]
         else:
             project_expr_list += index_elem
-        project_expr_list += include_elem
+        
+        if include_elem:
+            project_expr_list += include_elem
         # Add tv_expr for projected columns.
         index_col_list = []
         for tv_expr in index_elem:
             index_col_list += [ColumnDefinition(tv_expr.name, None, None, None)]
 
         include_col_list = []
-        for tv_expr in include_elem:
-            include_col_list += [ColumnDefinition(tv_expr.name, None, None, None)]
+        if include_elem:
+            for tv_expr in include_elem:
+                include_col_list += [ColumnDefinition(tv_expr.name, None, None, None)]
 
         return CreateIndexStatement(
             index_name,

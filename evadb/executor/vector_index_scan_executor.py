@@ -110,7 +110,7 @@ class VectorIndexScanExecutor(AbstractExecutor):
 
         search_feat = self._get_search_query_results()
         index_result = self.index.query(
-            VectorIndexQuery(search_feat, self.limit_count.value, str(self.filter_expr or ''))
+            VectorIndexQuery(search_feat, self.limit_count.value, self.filter_expr)
         )
         # todo support queries over distance as well
         # distance_list = index_result.similarities
