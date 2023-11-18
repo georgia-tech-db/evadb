@@ -38,6 +38,7 @@ class CreateIndexExecutor(AbstractExecutor):
         self.if_not_exists = self.node.if_not_exists
         self.table_ref = self.node.table_ref
         self.col_list = self.node.col_list
+        self.include_list = self.node.include_list
         self.vector_store_type = self.node.vector_store_type
         self.project_expr_list = self.node.project_expr_list
         self.index_def = self.node.index_def
@@ -100,6 +101,12 @@ class CreateIndexExecutor(AbstractExecutor):
             col for col in feat_tb_catalog_entry.columns if col.name == feat_col_name
         ][0]
 
+        metadata_col_names = [include_col.name for include_col in self.include_list]
+        metadata_column_catalog_entries = [col for col in feat_tb_catalog_entry.columns 
+                                           if col.name in metadata_col_names]
+
+
+
         if function_expression is not None:
             feat_col_name = function_expression.output_objs[0].name
 
@@ -139,10 +146,13 @@ class CreateIndexExecutor(AbstractExecutor):
             for input_batch in self.children[0].exec():
                 input_batch.drop_column_alias()
                 feat = input_batch.column_as_numpy_array(feat_col_name)
+
+                metadata = {metadata_col_name: input_batch.column_as_numpy_array(metadata_col_name) for metadata_col_name in metadata_col_names}
                 row_num = input_batch.column_as_numpy_array(ROW_NUM_COLUMN)
 
                 for i in range(len(input_batch)):
                     row_feat = feat[i].reshape(1, -1)
+                    row_metadata = {metadata_col_name: metadata[metadata_col_name][i] for metadata_col_name in metadata_col_names}
 
                     # Create new index if not exists.
                     if index is None:
@@ -154,10 +164,10 @@ class CreateIndexExecutor(AbstractExecutor):
                                 self.vector_store_type, index_path, self.catalog
                             ),
                         )
-                        index.create(input_dim)
+                        index.create(input_dim, metadata_column_catalog_entries)
 
                     # Row ID for mapping back to the row.
-                    index.add([FeaturePayload(row_num[i], row_feat)])
+                    index.add([FeaturePayload(row_num[i], row_feat, row_metadata)])
 
             # Persist index.
             index.persist()

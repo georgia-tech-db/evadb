@@ -24,6 +24,7 @@ from evadb.catalog.models.function_metadata_catalog import FunctionMetadataCatal
 from evadb.catalog.models.table_catalog import TableCatalogEntry
 from evadb.catalog.models.utils import IndexCatalogEntry
 from evadb.expression.abstract_expression import AbstractExpression
+from evadb.expression.comparison_expression import ComparisonExpression
 from evadb.expression.constant_value_expression import ConstantValueExpression
 from evadb.expression.function_expression import FunctionExpression
 from evadb.parser.alias import Alias
@@ -1094,6 +1095,7 @@ class LogicalCreateIndex(Operator):
         if_not_exists: bool,
         table_ref: TableRef,
         col_list: List[ColumnDefinition],
+        include_list: List[ColumnDefinition],
         vector_store_type: VectorStoreType,
         project_expr_list: List[AbstractExpression],
         index_def: str,
@@ -1104,6 +1106,7 @@ class LogicalCreateIndex(Operator):
         self._if_not_exists = if_not_exists
         self._table_ref = table_ref
         self._col_list = col_list
+        self._include_list = include_list
         self._vector_store_type = vector_store_type
         self._project_expr_list = project_expr_list
         self._index_def = index_def
@@ -1123,6 +1126,10 @@ class LogicalCreateIndex(Operator):
     @property
     def col_list(self):
         return self._col_list
+    
+    @property
+    def include_list(self):
+        return self._include_list
 
     @property
     def vector_store_type(self):
@@ -1146,6 +1153,7 @@ class LogicalCreateIndex(Operator):
             and self.if_not_exists == other.if_not_exists
             and self.table_ref == other.table_ref
             and self.col_list == other.col_list
+            and self.include_list == other.include_list
             and self.vector_store_type == other.vector_store_type
             and self.project_expr_list == other.project_expr_list
             and self.index_def == other.index_def
@@ -1159,6 +1167,7 @@ class LogicalCreateIndex(Operator):
                 self.if_not_exists,
                 self.table_ref,
                 tuple(self.col_list),
+                tuple(self.include_list),
                 self.vector_store_type,
                 tuple(self.project_expr_list),
                 self.index_def,
@@ -1230,12 +1239,14 @@ class LogicalVectorIndexScan(Operator):
         index: IndexCatalogEntry,
         limit_count: ConstantValueExpression,
         search_query_expr: FunctionExpression,
+        filter_expr: ComparisonExpression = None,
         children: List = None,
     ):
         super().__init__(OperatorType.LOGICAL_VECTOR_INDEX_SCAN, children)
         self._index = index
         self._limit_count = limit_count
         self._search_query_expr = search_query_expr
+        self._filter_expr = filter_expr
 
     @property
     def index(self):
@@ -1248,6 +1259,10 @@ class LogicalVectorIndexScan(Operator):
     @property
     def search_query_expr(self):
         return self._search_query_expr
+    
+    @property
+    def filter_expr(self):
+        return self._filter_expr
 
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
@@ -1258,6 +1273,7 @@ class LogicalVectorIndexScan(Operator):
             and self.index == other.index
             and self.limit_count == other.limit_count
             and self.search_query_expr == other.search_query_expr
+            and self.filter_expr == other.filter_expr
         )
 
     def __hash__(self) -> int:
@@ -1267,5 +1283,6 @@ class LogicalVectorIndexScan(Operator):
                 self.index,
                 self.limit_count,
                 self.search_query_expr,
+                self.filter_expr,
             )
         )

@@ -13,19 +13,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from dataclasses import dataclass
-from typing import List
+from typing import List, Dict
+
+from evadb.expression.comparison_expression import ComparisonExpression
 
 
 @dataclass
 class FeaturePayload:
     id: int
     embedding: List[float]
+    metadata: Dict[str, any]
 
 
 @dataclass
 class VectorIndexQuery:
     embedding: List[float]
     top_k: int
+    filter_expr_str: str
 
 
 @dataclass

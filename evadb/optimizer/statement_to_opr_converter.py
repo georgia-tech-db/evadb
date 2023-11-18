@@ -363,6 +363,7 @@ class StatementToPlanConverter:
             statement.if_not_exists,
             statement.table_ref,
             statement.col_list,
+            statement.include_list,
             statement.vector_store_type,
             statement.project_expr_list,
             statement.index_def,

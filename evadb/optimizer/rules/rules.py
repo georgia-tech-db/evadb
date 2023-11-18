@@ -487,6 +487,126 @@ class XformExtractObjectToLinearFlow(Rule):
         yield tracker
 
 
+class CombineWhereSimilarityOrderByAndLimitToFilteredVectorIndexScan(Rule):
+    """
+    This rule currently rewrites Where + Order By + Limit to a filtered vector 
+    index scan. Because vector index only works for similarity search, the rule will
+    only be applied when the Order By is on Similarity expression. 
+
+    Limit(10)
+        |
+    OrderBy(func)
+        |
+    Where (expression)  ->        IndexScan(10)
+        |                               |
+        A                               A
+    """
+
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALLIMIT)
+        orderby_pattern = Pattern(OperatorType.LOGICALORDERBY)
+        where_pattern = Pattern(OperatorType.LOGICALFILTER)
+        where_pattern.append_child(Pattern(OperatorType.DUMMY))
+        orderby_pattern.append_child(where_pattern)
+        pattern.append_child(orderby_pattern)
+        super().__init__(
+            RuleType.COMBINE_WHERE_SIMILARITY_ORDERBY_AND_LIMIT_TO_FILTERED_VECTOR_INDEX_SCAN, pattern
+        )
+
+        # Entries populate after rule eligibility validation.
+        self._index_catalog_entry = None
+        self._query_func_expr = None
+    
+    def promise(self):
+        return Promise.COMBINE_WHERE_SIMILARITY_ORDERBY_AND_LIMIT_TO_FILTERED_VECTOR_INDEX_SCAN
+
+    def check(self, before: LogicalLimit, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalLimit, context: OptimizerContext):
+        catalog_manager = context.db.catalog
+
+        # Get corresponding nodes.
+        limit_node = before
+        orderby_node = before.children[0]
+        where_node = orderby_node.children[0]
+        sub_tree_root = where_node.children[0]
+
+        # Check that there is table in query
+        if not isinstance(sub_tree_root.opr, LogicalGet):
+            return
+
+        # Check if orderby runs on similarity expression.
+        # Current optimization will only accept Similarity expression.
+        func_orderby_expr = None
+        for column, sort_type in orderby_node.orderby_list:
+            if (
+                isinstance(column, FunctionExpression)
+                and sort_type == ParserOrderBySortType.ASC
+            ):
+                func_orderby_expr = column
+        if not func_orderby_expr or func_orderby_expr.name != "Similarity":
+            return
+
+        # Traverse to the LogicalGet operator.
+        tb_catalog_entry = list(sub_tree_root.opr.find_all(LogicalGet))[0].table_obj
+        db_catalog_entry = catalog_manager().get_database_catalog_entry(
+            tb_catalog_entry.database_name
+        )
+        is_postgres_data_source = (
+            db_catalog_entry is not None and db_catalog_entry.engine == "postgres"
+        )
+
+        # Check if there exists an index on table and column.
+        query_func_expr, base_func_expr = func_orderby_expr.children
+
+        # Get table and column of orderby.
+        tv_expr = base_func_expr
+        while not isinstance(tv_expr, TupleValueExpression):
+            tv_expr = tv_expr.children[0]
+
+        # Get column catalog entry and function_signature.
+        column_catalog_entry = tv_expr.col_object
+
+        # Only check the index existence when building on EvaDB data.
+        if not is_postgres_data_source:
+            # Get function_signature.
+            function_signature = (
+                None
+                if isinstance(base_func_expr, TupleValueExpression)
+                else base_func_expr.signature()
+            )
+
+            # Get index catalog. Check if an index exists for matching
+            # function signature and table columns.
+            index_catalog_entry = catalog_manager().get_index_catalog_entry_by_column_and_function_signature(
+                column_catalog_entry, function_signature
+            )
+            if not index_catalog_entry:
+                return
+        else:
+            index_catalog_entry = IndexCatalogEntry(
+                name="",
+                save_file_path="",
+                type=VectorStoreType.PGVECTOR,
+                feat_column=column_catalog_entry,
+            )
+
+        # Expression to perform filtering on
+        filter_expr = where_node.predicate
+
+        # Construct the Vector index scan plan (with filter condition).
+        vector_index_scan_node = LogicalVectorIndexScan(
+            index_catalog_entry,
+            limit_node.limit_count,
+            query_func_expr,
+            filter_expr
+        )
+        for child in orderby_node.children:
+            vector_index_scan_node.append_child(child)
+        yield vector_index_scan_node
+
+
 class CombineSimilarityOrderByAndLimitToVectorIndexScan(Rule):
     """
     This rule currently rewrites Order By + Limit to a vector index scan.
@@ -831,6 +951,7 @@ class LogicalCreateIndexToVectorIndex(Rule):
             before.if_not_exists,
             before.table_ref,
             before.col_list,
+            before.include_list,
             before.vector_store_type,
             before.project_expr_list,
             before.index_def,
@@ -1300,6 +1421,7 @@ class LogicalVectorIndexScanToPhysical(Rule):
             before.index,
             before.limit_count,
             before.search_query_expr,
+            before.filter_expr
         )
         for child in before.children:
             after.append_child(child)
