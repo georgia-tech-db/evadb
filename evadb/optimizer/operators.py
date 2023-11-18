@@ -24,7 +24,6 @@ from evadb.catalog.models.function_metadata_catalog import FunctionMetadataCatal
 from evadb.catalog.models.table_catalog import TableCatalogEntry
 from evadb.catalog.models.utils import IndexCatalogEntry
 from evadb.expression.abstract_expression import AbstractExpression
-from evadb.expression.comparison_expression import ComparisonExpression
 from evadb.expression.constant_value_expression import ConstantValueExpression
 from evadb.expression.function_expression import FunctionExpression
 from evadb.parser.alias import Alias
@@ -1126,7 +1125,7 @@ class LogicalCreateIndex(Operator):
     @property
     def col_list(self):
         return self._col_list
-    
+
     @property
     def include_list(self):
         return self._include_list
@@ -1239,7 +1238,7 @@ class LogicalVectorIndexScan(Operator):
         index: IndexCatalogEntry,
         limit_count: ConstantValueExpression,
         search_query_expr: FunctionExpression,
-        filter_expr: ComparisonExpression = None,
+        filter_expr: AbstractExpression = None,
         children: List = None,
     ):
         super().__init__(OperatorType.LOGICAL_VECTOR_INDEX_SCAN, children)
@@ -1259,7 +1258,7 @@ class LogicalVectorIndexScan(Operator):
     @property
     def search_query_expr(self):
         return self._search_query_expr
-    
+
     @property
     def filter_expr(self):
         return self._filter_expr

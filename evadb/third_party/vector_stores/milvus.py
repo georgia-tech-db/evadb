@@ -84,13 +84,13 @@ def etype_to_milvus_symbol(etype: ExpressionType):
     elif etype == ExpressionType.LOGICAL_NOT:
         return "not"
     elif etype == ExpressionType.ARITHMETIC_ADD:
-        return '+'
+        return "+"
     elif etype == ExpressionType.ARITHMETIC_DIVIDE:
-        return '/'
+        return "/"
     elif etype == ExpressionType.ARITHMETIC_MULTIPLY:
-        return '*'
+        return "*"
     elif etype == ExpressionType.ARITHMETIC_SUBTRACT:
-        return '-'
+        return "-"
 
 
 def expression_to_milvus_expr(expr: AbstractExpression):
@@ -107,7 +107,7 @@ def expression_to_milvus_expr(expr: AbstractExpression):
         return expr.value
     elif isinstance(expr, TupleValueExpression):
         return expr.name
-    
+
 
 class MilvusVectorStore(VectorStore):
     def __init__(self, index_name: str, **kwargs) -> None:

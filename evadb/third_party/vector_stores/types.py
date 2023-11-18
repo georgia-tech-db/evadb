@@ -14,8 +14,7 @@
 # limitations under the License.
 from dataclasses import dataclass
 from typing import List, Dict
-
-from evadb.expression.comparison_expression import ComparisonExpression
+from evadb.expression.abstract_expression import AbstractExpression
 
 
 @dataclass
@@ -29,7 +28,7 @@ class FeaturePayload:
 class VectorIndexQuery:
     embedding: List[float]
     top_k: int
-    filter_expr_str: ComparisonExpression
+    filter_expr_str: AbstractExpression
 
 
 @dataclass

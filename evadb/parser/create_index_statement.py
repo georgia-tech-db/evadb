@@ -40,7 +40,7 @@ class CreateIndexStatement(AbstractStatement):
         self._if_not_exists = if_not_exists
         self._table_ref = table_ref
         self._col_list = col_list
-        self._include_list = include_list;
+        self._include_list = include_list
         self._vector_store_type = vector_store_type
         self._project_expr_list = project_expr_list
 
@@ -70,7 +70,9 @@ class CreateIndexStatement(AbstractStatement):
 
             print_str += f" ({traverse_create_function_expression_str(function_expr)})"
         if len(self.include_list) > 0:
-            print_str += f" INCLUDE {','.join([col_def.name for col_def in self.include_list])}"
+            print_str += (
+                f" INCLUDE {','.join([col_def.name for col_def in self.include_list])}"
+            )
         print_str += f" USING {self._vector_store_type};"
         return print_str
 
@@ -89,7 +91,7 @@ class CreateIndexStatement(AbstractStatement):
     @property
     def col_list(self):
         return self._col_list
-    
+
     @property
     def include_list(self):
         return self._include_list

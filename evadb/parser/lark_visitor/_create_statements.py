@@ -274,7 +274,7 @@ class CreateIndex:
             index_elem = [index_elem]
         else:
             project_expr_list += index_elem
-        
+
         if include_elem:
             project_expr_list += include_elem
         # Add tv_expr for projected columns.

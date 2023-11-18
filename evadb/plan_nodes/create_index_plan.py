@@ -60,7 +60,7 @@ class CreateIndexPlan(AbstractPlan):
     @property
     def col_list(self):
         return self._col_list
-    
+
     @property
     def include_list(self):
         return self._include_list

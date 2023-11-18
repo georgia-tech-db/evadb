@@ -489,9 +489,9 @@ class XformExtractObjectToLinearFlow(Rule):
 
 class CombineWhereSimilarityOrderByAndLimitToFilteredVectorIndexScan(Rule):
     """
-    This rule currently rewrites Where + Order By + Limit to a filtered vector 
+    This rule currently rewrites Where + Order By + Limit to a filtered vector
     index scan. Because vector index only works for similarity search, the rule will
-    only be applied when the Order By is on Similarity expression. 
+    only be applied when the Order By is on Similarity expression.
 
     Limit(10)
         |
@@ -510,15 +510,18 @@ class CombineWhereSimilarityOrderByAndLimitToFilteredVectorIndexScan(Rule):
         orderby_pattern.append_child(where_pattern)
         pattern.append_child(orderby_pattern)
         super().__init__(
-            RuleType.COMBINE_WHERE_SIMILARITY_ORDERBY_AND_LIMIT_TO_FILTERED_VECTOR_INDEX_SCAN, pattern
+            RuleType.COMBINE_WHERE_SIMILARITY_ORDERBY_AND_LIMIT_TO_FILTERED_VECTOR_INDEX_SCAN,
+            pattern,
         )
 
         # Entries populate after rule eligibility validation.
         self._index_catalog_entry = None
         self._query_func_expr = None
-    
+
     def promise(self):
-        return Promise.COMBINE_WHERE_SIMILARITY_ORDERBY_AND_LIMIT_TO_FILTERED_VECTOR_INDEX_SCAN
+        return (
+            Promise.COMBINE_WHERE_SIMILARITY_ORDERBY_AND_LIMIT_TO_FILTERED_VECTOR_INDEX_SCAN
+        )
 
     def check(self, before: LogicalLimit, context: OptimizerContext):
         return True
@@ -597,10 +600,7 @@ class CombineWhereSimilarityOrderByAndLimitToFilteredVectorIndexScan(Rule):
 
         # Construct the Vector index scan plan (with filter condition).
         vector_index_scan_node = LogicalVectorIndexScan(
-            index_catalog_entry,
-            limit_node.limit_count,
-            query_func_expr,
-            filter_expr
+            index_catalog_entry, limit_node.limit_count, query_func_expr, filter_expr
         )
         for child in orderby_node.children:
             vector_index_scan_node.append_child(child)
@@ -1421,7 +1421,7 @@ class LogicalVectorIndexScanToPhysical(Rule):
             before.index,
             before.limit_count,
             before.search_query_expr,
-            before.filter_expr
+            before.filter_expr,
         )
         for child in before.children:
             after.append_child(child)
