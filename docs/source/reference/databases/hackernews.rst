@@ -26,8 +26,8 @@ Create Connection
 .. code-block:: text
 
    CREATE DATABASE hackernews_data WITH ENGINE = 'hackernews', PARAMETERS = {
-        "owner": "EVADB",
-        "repo": "story"
+        "query": "EVADB",
+        "tags": "story"
    };
 
 Supported Tables
