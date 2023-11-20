@@ -84,16 +84,7 @@ class SimilarityTests(unittest.TestCase):
         for i in range(5):
             storage_engine.write(
                 base_table_catalog_entry,
-                Batch(
-                    pd.DataFrame(
-                        [
-                            {
-                                "data_col": base_img,
-                                "dummy": i,
-                            }
-                        ]
-                    )
-                ),
+                Batch(pd.DataFrame([{"data_col": base_img, "dummy": i, }])),
             )
             storage_engine.write(
                 feature_table_catalog_entry,
@@ -143,12 +134,13 @@ class SimilarityTests(unittest.TestCase):
         # use default Milvus database for testing
         os.environ["MILVUS_DB_NAME"] = "default"
 
-        # Weaviate: WEAVIATE_API_KEY and WEAVIATE_API_URL
         self.original_weaviate_key = os.environ.get("WEAVIATE_API_KEY")
         self.original_weaviate_env = os.environ.get("WEAVIATE_API_URL")
 
         os.environ["WEAVIATE_API_KEY"] = "NM4adxLmhtJDF1dPXDiNhEGTN7hhGDpymmO0"
-        os.environ["WEAVIATE_API_URL"] = "https://cs6422-test2-zn83syib.weaviate.network"
+        os.environ[
+            "WEAVIATE_API_URL"
+        ] = "https://cs6422-test2-zn83syib.weaviate.network"
 
     def tearDown(self):
         shutdown_ray()
@@ -561,9 +553,7 @@ class SimilarityTests(unittest.TestCase):
 
     @pytest.mark.skip(reason="Requires running local Milvus instance")
     @milvus_skip_marker
-    def test_end_to_end_index_scan_should_work_correctly_on_image_dataset_milvus(
-        self,
-    ):
+    def test_end_to_end_index_scan_should_work_correctly_on_image_dataset_milvus(self,):
         for _ in range(2):
             create_index_query = """CREATE INDEX testMilvusIndexImageDataset
                                     ON testSimilarityImageDataset (DummyFeatureExtractor(data))
@@ -591,7 +581,9 @@ class SimilarityTests(unittest.TestCase):
 
     @pytest.mark.skip(reason="Requires running Weaviate instance")
     @weaviate_skip_marker
-    def test_end_to_end_index_scan_should_work_correctly_on_image_dataset_weaviate(self):
+    def test_end_to_end_index_scan_should_work_correctly_on_image_dataset_weaviate(
+        self,
+    ):
         for _ in range(2):
             create_index_query = """CREATE INDEX testWeaviateIndexImageDataset
                                     ON testSimilarityImageDataset (DummyFeatureExtractor(data))
