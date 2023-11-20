@@ -1,6 +1,6 @@
 import pandas as pd
 import os
-import fitz
+import unstructuredio as fitz
 import requests
 import csv
 
@@ -24,14 +24,21 @@ class PDFReader(AbstractReader):
         super().__init__(*args, **kwargs)
         try_to_import_fitz()
 
-    def _read(self) -> Iterator[str]:
-        import fitz
+    def _read(self) -> Iterator[Dict]:
+        import unstructuredio as fitz
 
         doc = fitz.open(self.file_url)
 
-        for page in doc:
-            text = page.get_text().encode("utf8").decode("utf-8")
-            yield text
+        # PAGE ID, PARAGRAPH ID, STRING
+        row_num = 0
+        for page_no, page in enumerate(doc):
+            blocks = page.get_text(\"dict\")[\"blocks\"]
+            # iterate through the text blocks
+            for paragraph_no, b in enumerate(blocks):
+                if 'lines' in b:
+                    for line in b['lines']:
+                        text = ' '.join([sp['text'] for sp in line['spans']])
+                        yield {'page_no': page_no, 'paragraph_no': paragraph_no, 'text': text}
 
 def process_text(raw_text: str) -> List[str]:
     lines = raw_text.split('\n')
