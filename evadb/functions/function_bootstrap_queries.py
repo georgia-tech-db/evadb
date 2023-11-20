@@ -17,6 +17,9 @@ from evadb.configuration.constants import EvaDB_INSTALLATION_DIR
 from evadb.database import EvaDBDatabase
 from evadb.server.command_handler import execute_query_fetch_all
 
+import sys
+import subprocess
+
 NDARRAY_DIR = "ndarray"
 TUTORIALS_DIR = "tutorials"
 
@@ -214,30 +217,6 @@ dalle_function_query = """CREATE FUNCTION IF NOT EXISTS DallE
     EvaDB_INSTALLATION_DIR
 )
 
-Upper_function_query = """CREATE FUNCTION IF NOT EXISTS UPPER
-        INPUT  (input ANYTYPE)
-        OUTPUT (output NDARRAY STR(ANYDIM))
-        IMPL '{}/functions/helpers/upper.py';
-        """.format(
-    EvaDB_INSTALLATION_DIR
-)
-
-Lower_function_query = """CREATE FUNCTION IF NOT EXISTS LOWER
-        INPUT  (input ANYTYPE)
-        OUTPUT (output NDARRAY STR(ANYDIM))
-        IMPL '{}/functions/helpers/lower.py';
-        """.format(
-    EvaDB_INSTALLATION_DIR
-)
-
-Concat_function_query = """CREATE FUNCTION IF NOT EXISTS CONCAT
-        INPUT  (input ANYTYPE)
-        OUTPUT (output NDARRAY STR(ANYDIM))
-        IMPL '{}/functions/helpers/concat.py';
-        """.format(
-    EvaDB_INSTALLATION_DIR
-)
-
 
 def init_builtin_functions(db: EvaDBDatabase, mode: str = "debug") -> None:
     """Load the built-in functions into the system during system bootstrapping.
@@ -285,9 +264,6 @@ def init_builtin_functions(db: EvaDBDatabase, mode: str = "debug") -> None:
         Yolo_function_query,
         stablediffusion_function_query,
         dalle_function_query,
-        Upper_function_query,
-        Lower_function_query,
-        Concat_function_query,
     ]
 
     # if mode is 'debug', add debug functions
@@ -306,6 +282,11 @@ def init_builtin_functions(db: EvaDBDatabase, mode: str = "debug") -> None:
     # ignore exceptions during the bootstrapping phase due to missing packages
     for query in queries:
         try:
+            #Uncomment to force pip installs onto local device
+            #subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'norfair'])
+            #subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'ultralytics'])
+            #subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'facenet-pytorch'])
+            #cursor.query("DROP FUNCTION IF EXISTS NorFairTracker;").df()
             execute_query_fetch_all(
                 db, query, do_not_print_exceptions=False, do_not_raise_exceptions=True
             )

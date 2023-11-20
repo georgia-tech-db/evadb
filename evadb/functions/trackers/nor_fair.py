@@ -14,6 +14,8 @@
 # limitations under the License.
 import numpy as np
 
+#import sys
+
 from evadb.functions.abstract.tracker_abstract_function import (
     EvaDBTrackerAbstractFunction,
 )
@@ -31,6 +33,8 @@ class NorFairTracker(EvaDBTrackerAbstractFunction):
     def setup(self, distance_threshold=DISTANCE_THRESHOLD_CENTROID) -> None:
         # https://github.com/tryolabs/norfair/blob/74b11edde83941dd6e32bcccd5fa849e16bf8564/norfair/tracker.py#L18
         try_to_import_norfair()
+        #sys.path.append('../norfair')
+        #from norfair.tracker import Tracker
         from norfair import Tracker
 
         self.tracker = Tracker(
