@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import List, Tuple, Type
+from typing import List, Tuple, Type, Optional
 
 from evadb.catalog.catalog_type import ColumnType, Dimension, NdArrayType
 from evadb.catalog.models.function_io_catalog import FunctionIOCatalogEntry
@@ -41,7 +41,22 @@ class NumpyArray(IOColumnArgument):
             array_dimensions=dimensions,
         )
 
+class PandasColumn:
+    def __init__(self, name: str, type: NdArrayType = NdArrayType.ANYTYPE,
+                 shape: Tuple = Dimension.ANYDIM, is_nullable: Optional[bool] = None):
+        self.name = name
+        self.type = type
+        self.shape = shape
+        self.is_nullable = is_nullable
 
+        assert self.name is not None, "Column name cannot be None"
+        assert self.type is not None, "Column type cannot be None"
+        assert self.shape is not None, "Column shape cannot be None. Did you mean (None,)?"
+
+class PandasColumnAsterick(PandasColumn):
+    def __init__(self):
+        super().__init__(name='*', type=NdArrayType.ANYTYPE, shape=Dimension.ANYDIM, is_nullable=None)
+        
 class PyTorchTensor(IOColumnArgument):
     """Descriptor data type for PyTorch Tensor"""
 
@@ -59,6 +74,19 @@ class PyTorchTensor(IOColumnArgument):
             array_type=type,
             array_dimensions=dimensions,
         )
+
+class NewPandasDataFrame(IOArgument):
+    """Descriptor data type for Pandas Dataframe"""
+
+    def __init__(self, columns=List[PandasColumn]) -> None:
+        super().__init__()
+        self.columns = columns
+    
+    def generate_catalog_entries(self, *args, **kwargs) -> List[type[FunctionIOCatalogEntry]]:
+
+
+
+    
 
 
 class PandasDataframe(IOArgument):
