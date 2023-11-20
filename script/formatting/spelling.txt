@@ -975,11 +975,13 @@ VideoFormat
 VideoStorageEngineTest
 VideoWriter
 VisionEncoderDecoderModel
+WEAVIATE
 WH
 WIP
 WMV
 WeakValueDictionary
-WEAVIATE
+Weaviate
+WeaviateVectorStore
 XGBoost
 XdistTests
 Xeon
@@ -1732,6 +1734,7 @@ testRayErrorHandling
 testSimilarityFeatureTable
 testSimilarityImageDataset
 testSimilarityTable
+testWeaviateIndexImageDataset
 testcase
 testcases
 testdeleteone

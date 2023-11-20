@@ -16,7 +16,9 @@ import os
 from typing import List
 
 from evadb.third_party.vector_stores.types import (
+    FeaturePayload,
     VectorIndexQuery,
+    VectorIndexQueryResult,
     VectorStore,
 )
 from evadb.utils.generic_utils import try_to_import_weaviate_client
@@ -24,11 +26,12 @@ from evadb.utils.generic_utils import try_to_import_weaviate_client
 required_params = []
 _weaviate_init_done = False
 
-
 class WeaviateVectorStore(VectorStore):
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, collection_name: str, **kwargs) -> None:
         try_to_import_weaviate_client()
         global _weaviate_init_done
+
+        self._collection_name = collection_name
 
         # Get the API key.
         self._api_key = kwargs.get("WEAVIATE_API_KEY")
@@ -38,8 +41,7 @@ class WeaviateVectorStore(VectorStore):
 
         assert (
             self._api_key
-        ), "Please set your Weaviate API key in evadb.yml file (third_party, weaviate_api_key) or " \
-           "environment variable (WEAVIATE_API_KEY). It can be found at the Details tab in WCS Dashboard."
+        ), "Please set your `WEAVIATE_API_KEY` using set command or environment variable (WEAVIATE_API_KEY). It can be found at the Details tab in WCS Dashboard."
 
         # Get the API Url.
         self._api_url = kwargs.get("WEAVIATE_API_URL")
@@ -49,8 +51,7 @@ class WeaviateVectorStore(VectorStore):
 
         assert (
             self._api_url
-        ), "Please set your Weaviate API Url in evadb.yml file (third_party, weaviate_api_url) or " \
-           "environment variable (WEAVIATE_API_URL). It can be found at the Details tab in WCS Dashboard."
+        ), "Please set your `WEAVIATE_API_URL` using set command or environment variable (WEAVIATE_API_URL). It can be found at the Details tab in WCS Dashboard."
 
         if not _weaviate_init_done:
             # Initialize weaviate client
@@ -66,108 +67,49 @@ class WeaviateVectorStore(VectorStore):
 
         self._client = client
 
-    def create_weaviate_class(self, class_name: str, vectorizer: str, module_config: dict, properties: list) -> None:
-        # In Weaviate, vector index creation and management is not explicitly done like Pinecone
-        # Need to typically define a property in the schema to hold vectors and insert data accordingly
+    def create(self, vectorizer: str = 'text2vec-openai', properties: list = None, module_config: dict = None):
+        properties = properties or []
+        module_config = module_config or {}
 
-        """
-         Create a Weaviate class with the specified configuration.
-
-         Args:
-             class_name (str): The name of the class to create, e.g., "Article".
-             vectorizer (str): The vectorizer module to use, e.g., "text2vec-cohere".
-             module_config (dict): Configuration for vectorizer and generative module, e.g.,
-                 {
-                     "text2vec-cohere": {
-                         "model": "embed-multilingual-v2.0",
-                     },
-                 }
-             properties (list): List of dictionaries specifying class properties, e.g.,
-                 [
-                     {
-                         "name": "title",
-                         "dataType": ["text"]
-                     },
-                     {
-                         "name": "body",
-                         "dataType": ["text"]
-                     },
-                 ]
-
-         Returns:
-             None
-         """
-        # Check if the class already exists
-        if self._client.schema.exists(class_name):
-            self._client.schema.delete_class(class_name)
-
-        # Define the class object with provided parameters
-        class_obj = {
-            "class": class_name,
-            "vectorizer": vectorizer,
-            "moduleConfig": module_config,
-            "properties": properties
+        collection_obj = {
+            'class': self._collection_name,
+            'properties': properties,
+            'vectorizer': vectorizer,
+            'moduleConfig': module_config
         }
 
-        # Call the Weaviate API to create the class
-        self._client.schema.create_class(class_obj)
+        if self._client.schema.exists(self._collection_name):
+            self._client.schema.delete_class(self._collection_name)
 
-    def delete_weaviate_class(self, class_name: str) -> None:
-        """
-        Delete a Weaviate class and its data.
+        self._client.schema.create_class(collection_obj)
 
-        Args:
-            class_name (str): The name of the Weaviate class to delete.
+    def add(self, payload: List[FeaturePayload]) -> None:
+        with self._client.batch as batch:
+            for item in payload:
+                data_object = {
+                    "id": item.id,
+                    "vector": item.embedding
+                }
+                batch.add_data_object(data_object, self._collection_name)
 
-        Returns:
-            None
-        """
-        # Call the Weaviate API to delete the class
-        self._client.schema.delete_class(class_name)
+    def delete(self) -> None:
+        self._client.schema.delete_class(self._collection_name)
 
-    def add_to_weaviate_class(self, class_name: str, data_objects: List[dict]) -> None:
-        """
-        Add objects to the specified Weaviate class.
-
-        Args:
-            class_name (str): The name of the Weaviate class to add objects to.
-            data_objects (List[dict]): A list of dictionaries,
-            where each dictionary contains property names and values.
-
-        Returns:
-            None
-        """
-        # Iterate over each data object and add it to the Weaviate class
-        for data_object in data_objects:
-            self._client.data_object.create(data_object, class_name)
-
-    def query_weaviate_class(self, class_name, properties_to_retrieve, query: VectorIndexQuery) -> List[dict]:
-        """
-        Perform a similarity-based search in Weaviate.
-
-        Args:
-            class_name (str): The name of the Weaviate class to perform the search on.
-            properties_to_retrieve (List[str]): A list of property names to retrieve.
-            query (VectorIndexQuery): A query object for similarity search, containing the query vector and top_k.
-
-        Returns:
-            List[dict]: A list of dictionaries containing the retrieved properties.
-        """
-        # Define the similarity search query
+    def query(self, query: VectorIndexQuery) -> VectorIndexQueryResult:
         response = (
             self._client.query
-            .get(class_name, properties_to_retrieve)
+            .get(self._collection_name, ['*'])
             .with_near_vector({
                 "vector": query.embedding
             })
             .with_limit(query.top_k)
-            .with_additional(["distance"])
             .do()
         )
 
         data = response.get('data', {})
+        results = data.get('Get', {}).get(self._collection_name, [])
 
-        # Extract the results
-        results = data['Get'][class_name]
+        similarities = [item['_additional']['distance'] for item in results]
+        ids = [item['id'] for item in results]
 
-        return results
+        return VectorIndexQueryResult(similarities, ids)

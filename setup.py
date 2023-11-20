@@ -174,6 +174,7 @@ EXTRA_REQUIRES = {
     "pinecone": pinecone_libs,
     "chromadb": chromadb_libs,
     "milvus": milvus_libs,
+    "weaviate": weaviate_libs,
     "postgres": postgres_libs,
     "ludwig": ludwig_libs,
     "sklearn": sklearn_libs,

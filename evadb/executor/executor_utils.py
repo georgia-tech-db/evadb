@@ -187,7 +187,7 @@ def handle_vector_store_params(
         }
     elif vector_store_type == VectorStoreType.WEAVIATE:
         # Weaviate Configuration
-        # Weaviate API key and url Can be obtained from cluster details on Weaviate Cloud Services (WCS) dashboard
+        # Weaviate API key and URL Can be obtained from cluster details on Weaviate Cloud Services (WCS) dashboard
         return {
             "WEAVIATE_API_KEY": catalog().get_configuration_catalog_value(
                 "WEAVIATE_API_KEY"
