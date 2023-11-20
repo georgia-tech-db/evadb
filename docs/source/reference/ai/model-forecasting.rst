@@ -44,7 +44,7 @@ Regression is a type of supervised machine learning problem where the goal is to
 
 Forecasting is a subset of regression that deals with time-ordered or sequential data. While time series data is a common application of forecasting, it can also be used for predicting future values in spatial data, financial data, and other contexts where there is an inherent notion of order or progression.
 
-Forecasting handles sequential data, while regression can be generalized for other problems. It is important to make sure that the user knows which option is ideal for their use case. 
+Forecasting handles sequential data, while regression can be generalized for other problems. It is important to make sure that the user knows which option is ideal for their use case. If regression is determined to be better for the user's use case, the Ludwig framework can be used with EvaDB. A tutorial for this pricess can be found `here <https://evadb.readthedocs.io/en/stable/source/reference/ai/model-train-ludwig.html#ludwig>`_.
 
 Forecast Parameters
 -------------------
