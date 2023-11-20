@@ -214,6 +214,12 @@ dalle_function_query = """CREATE FUNCTION IF NOT EXISTS DallE
     EvaDB_INSTALLATION_DIR
 )
 
+Dummy_function_query = """CREATE FUNCTION IF NOT EXISTS Dummy
+        IMPL '{}/functions/dummy.py';
+        """.format(
+    EvaDB_INSTALLATION_DIR
+)
+
 Upper_function_query = """CREATE FUNCTION IF NOT EXISTS UPPER
         INPUT  (input ANYTYPE)
         OUTPUT (output NDARRAY STR(ANYDIM))
@@ -285,9 +291,10 @@ def init_builtin_functions(db: EvaDBDatabase, mode: str = "debug") -> None:
         Yolo_function_query,
         stablediffusion_function_query,
         dalle_function_query,
-        Upper_function_query,
-        Lower_function_query,
-        Concat_function_query,
+        # Upper_function_query,
+        # Lower_function_query,
+        # Concat_function_query,
+        Dummy_function_query,
     ]
 
     # if mode is 'debug', add debug functions
@@ -309,5 +316,7 @@ def init_builtin_functions(db: EvaDBDatabase, mode: str = "debug") -> None:
             execute_query_fetch_all(
                 db, query, do_not_print_exceptions=False, do_not_raise_exceptions=True
             )
-        except Exception:
-            pass
+        except Exception as e:
+            print('Exception on ',query)
+            print('Exception: ', e)
+

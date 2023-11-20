@@ -16,6 +16,7 @@ from typing import List, Type
 
 from evadb.catalog.models.function_io_catalog import FunctionIOCatalogEntry
 from evadb.functions.abstract.abstract_function import AbstractFunction
+from evadb.utils.errors import FunctionIODefinitionError
 
 
 def load_io_from_function_decorators(
@@ -43,9 +44,16 @@ def load_io_from_function_decorators(
                     io_signature = base_class.forward.tags[tag_key]
                     break
 
+    if io_signature is None:
+        if not hasattr(function.forward, "tags"):
+            raise FunctionIODefinitionError("No tags found in the forward function. Please make sure to use the @forward decorator with both input and output signatures.")
+
+        if hasattr(function.forward, "tags") and tag_key not in function.forward.tags:
+            raise FunctionIODefinitionError("Neither input nor output tags found in forward header. Please set at least one of them.")
+
     assert (
         io_signature is not None
-    ), f"Cannot infer io signature from the decorator for {function}."
+    ), f"Cannot infer io signature from the decorator for {function}. Please check the {tag_key} of the forward function."
 
     result_list = []
     for io in io_signature:
