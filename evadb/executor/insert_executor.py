@@ -59,8 +59,10 @@ class InsertExecutor(AbstractExecutor):
             for column in table_catalog_entry.columns:
                 if column == index.feat_column:
                     is_index_on_current_table = True
+                    break
             if is_index_on_current_table:
-                create_index_query_list = index.index_def.split(" ")
+                create_index_query = index.index_def
+                create_index_query_list = create_index_query.split(" ")
                 if_not_exists = " ".join(create_index_query_list[2:5]).lower()
                 if if_not_exists != "if not exists":
                     create_index_query = (
