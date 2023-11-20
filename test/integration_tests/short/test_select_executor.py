@@ -313,16 +313,8 @@ class SelectExecutorTest(unittest.TestCase):
         for i in range(n):
             self.assertEqual(actual_batch.frames.iloc[i, 0], GROUPBY_SIZE)
 
-
-        # with open('test.txt', 'w') as file:
-        #     # Write content to the file
-        #     file.write(actual_batch.__str__())
-        #     file.write('\n')
-        #     file.write(str(len(actual_batch)))
-        #     file.write('\n')
-        #     file.write(str(len(all_pdf_batch)))
-        #     file.write('\n')
-        #     file.write(str(actual_batch.frames.iloc[0, 0]))
+        # tear down
+        execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS MyPDFs;")
 
 
 
