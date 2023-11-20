@@ -42,7 +42,6 @@ class StatementType(EvaDBEnum):
     CREATE_DATABASE  # noqa: F821
     USE  # noqa: F821
     SET  # noqa: F821
-    CREATE_JOB  # noqa: F821
     # add other types
 
 
@@ -84,4 +83,3 @@ class ObjectType(EvaDBEnum):
     FUNCTION  # noqa: F821
     INDEX  # noqa: F821
     DATABASE  # noqa: F821
-    JOB  # noqa: F821

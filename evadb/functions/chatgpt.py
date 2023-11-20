@@ -20,6 +20,7 @@ import pandas as pd
 from retry import retry
 
 from evadb.catalog.catalog_type import NdArrayType
+from evadb.configuration.configuration_manager import ConfigurationManager
 from evadb.functions.abstract.abstract_function import AbstractFunction
 from evadb.functions.decorators.decorators import forward, setup
 from evadb.functions.decorators.io_descriptors.data_types import PandasDataframe
@@ -84,12 +85,10 @@ class ChatGPT(AbstractFunction):
         self,
         model="gpt-3.5-turbo",
         temperature: float = 0,
-        openai_api_key="",
     ) -> None:
         assert model in _VALID_CHAT_COMPLETION_MODEL, f"Unsupported ChatGPT {model}"
         self.model = model
         self.temperature = temperature
-        self.openai_api_key = openai_api_key
 
     @forward(
         input_signatures=[
@@ -115,20 +114,20 @@ class ChatGPT(AbstractFunction):
     )
     def forward(self, text_df):
         try_to_import_openai()
-        from openai import OpenAI
-
-        api_key = self.openai_api_key
-        if len(self.openai_api_key) == 0:
-            api_key = os.environ.get("OPENAI_API_KEY", "")
-        assert (
-            len(api_key) != 0
-        ), "Please set your OpenAI API key using SET OPENAI_API_KEY = 'sk-' or environment variable (OPENAI_API_KEY)"
-
-        client = OpenAI(api_key=api_key)
+        import openai
 
         @retry(tries=6, delay=20)
         def completion_with_backoff(**kwargs):
-            return client.chat.completions.create(**kwargs)
+            return openai.ChatCompletion.create(**kwargs)
+
+        # Register API key, try configuration manager first
+        openai.api_key = ConfigurationManager().get_value("third_party", "OPENAI_KEY")
+        # If not found, try OS Environment Variable
+        if len(openai.api_key) == 0:
+            openai.api_key = os.environ.get("OPENAI_KEY", "")
+        assert (
+            len(openai.api_key) != 0
+        ), "Please set your OpenAI API key in evadb.yml file (third_party, open_api_key) or environment variable (OPENAI_KEY)"
 
         queries = text_df[text_df.columns[0]]
         content = text_df[text_df.columns[0]]

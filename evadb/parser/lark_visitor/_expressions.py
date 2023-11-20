@@ -20,7 +20,6 @@ from evadb.expression.abstract_expression import ExpressionType
 from evadb.expression.comparison_expression import ComparisonExpression
 from evadb.expression.constant_value_expression import ConstantValueExpression
 from evadb.expression.logical_expression import LogicalExpression
-from evadb.utils.generic_utils import string_comparison_case_insensitive
 
 
 ##################################################################
@@ -102,12 +101,10 @@ class Expressions:
     def logical_operator(self, tree):
         op = str(tree.children[0])
 
-        if string_comparison_case_insensitive(op, "OR"):
+        if op == "OR":
             return ExpressionType.LOGICAL_OR
-        elif string_comparison_case_insensitive(op, "AND"):
+        elif op == "AND":
             return ExpressionType.LOGICAL_AND
-        else:
-            raise NotImplementedError("Unsupported logical operator: {}".format(op))
 
     def expressions_with_defaults(self, tree):
         expr_list = []
