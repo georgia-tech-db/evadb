@@ -16,6 +16,7 @@
 from evadb.configuration.constants import EvaDB_INSTALLATION_DIR
 from evadb.database import EvaDBDatabase
 from evadb.server.command_handler import execute_query_fetch_all
+from evadb.configuration import constants
 
 NDARRAY_DIR = "ndarray"
 TUTORIALS_DIR = "tutorials"
@@ -197,6 +198,8 @@ chatgpt_function_query = """CREATE FUNCTION IF NOT EXISTS ChatGPT
     EvaDB_INSTALLATION_DIR
 )
 
+getdata_from_stats_query = "SELECT * FROM table_stats;"
+
 yolo8n_query = """CREATE FUNCTION IF NOT EXISTS Yolo
             TYPE  ultralytics
             MODEL 'yolov8n.pt';
@@ -237,6 +240,20 @@ Concat_function_query = """CREATE FUNCTION IF NOT EXISTS CONCAT
         """.format(
     EvaDB_INSTALLATION_DIR
 )
+
+create_buckets_query = """CREATE TABLE level_counts (
+    level Integer,
+    row_count INTEGER
+);"""
+
+insert_into_buckets = """INSERT INTO level_counts
+SELECT
+    level,
+    COUNT(*) AS row_count
+FROM mydata3
+GROUP BY level;"""
+
+extract_data_buckets = """Select * from level_counts"""
 
 
 def init_builtin_functions(db: EvaDBDatabase, mode: str = "debug") -> None:
@@ -281,6 +298,8 @@ def init_builtin_functions(db: EvaDBDatabase, mode: str = "debug") -> None:
         chatgpt_function_query,
         face_detection_function_query,
         # Mvit_function_query,
+        extract_data_buckets,
+        getdata_from_stats_query,
         Sift_function_query,
         Yolo_function_query,
         stablediffusion_function_query,
@@ -306,8 +325,20 @@ def init_builtin_functions(db: EvaDBDatabase, mode: str = "debug") -> None:
     # ignore exceptions during the bootstrapping phase due to missing packages
     for query in queries:
         try:
-            execute_query_fetch_all(
+            if query.startswith("SELECT"):
+                query_result = execute_query_fetch_all(
                 db, query, do_not_print_exceptions=False, do_not_raise_exceptions=True
             )
-        except Exception:
+                for _, row in query_result.iterrows():
+                    entry = {
+                        'table_name': row['table_stats.table_name'],
+                        'num_rows': row['table_stats.num_rows'],
+                        'hist': row['table_stats.hist']
+                    }
+                    constants.EVADB_STATS[row['table_stats.table_name']] = entry
+            else:
+                execute_query_fetch_all(
+                db, query, do_not_print_exceptions=False, do_not_raise_exceptions=True
+            )
+        except Exception as e:
             pass
