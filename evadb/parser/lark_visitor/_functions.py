@@ -151,6 +151,8 @@ class Functions:
                 # Support for COUNT(*)
                 if token != "*":
                     agg_func_name = token
+                elif token == "*":
+                    agg_func_arg = TupleValueExpression(name="_row_id")
                 else:
                     agg_func_arg = TupleValueExpression(name="id")
 
