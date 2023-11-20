@@ -572,6 +572,7 @@ def try_to_import_chromadb_client():
                 Please install it with 'pip install chromadb`."""
         )
 
+
 def try_to_import_weaviate_client():
     try:
         import weaviate  # noqa: F401
@@ -580,6 +581,7 @@ def try_to_import_weaviate_client():
             """Could not import weaviate python package.
                 Please install it with 'pip install weaviate-client`."""
         )
+
 
 def try_to_import_milvus_client():
     try:
@@ -614,12 +616,14 @@ def is_chromadb_available() -> bool:
     except ValueError:  # noqa: E722
         return False
 
+
 def is_weaviate_available() -> bool:
     try:
         try_to_import_weaviate_client()
         return True
     except ValueError:  # noqa: E722
         return False
+
 
 def is_milvus_available() -> bool:
     try:

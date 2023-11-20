@@ -120,6 +120,7 @@ class VectorStoreType(EvaDBEnum):
     WEAVIATE  # noqa: F821
     MILVUS  # noqa: F821
 
+
 class VideoColumnName(EvaDBEnum):
     name  # noqa: F821
     id  # noqa: F821

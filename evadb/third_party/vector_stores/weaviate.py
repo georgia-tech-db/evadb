@@ -26,6 +26,7 @@ from evadb.utils.generic_utils import try_to_import_weaviate_client
 required_params = []
 _weaviate_init_done = False
 
+
 class WeaviateVectorStore(VectorStore):
     def __init__(self, collection_name: str, **kwargs) -> None:
         try_to_import_weaviate_client()
@@ -67,15 +68,20 @@ class WeaviateVectorStore(VectorStore):
 
         self._client = client
 
-    def create(self, vectorizer: str = 'text2vec-openai', properties: list = None, module_config: dict = None):
+    def create(
+        self,
+        vectorizer: str = "text2vec-openai",
+        properties: list = None,
+        module_config: dict = None,
+    ):
         properties = properties or []
         module_config = module_config or {}
 
         collection_obj = {
-            'class': self._collection_name,
-            'properties': properties,
-            'vectorizer': vectorizer,
-            'moduleConfig': module_config
+            "class": self._collection_name,
+            "properties": properties,
+            "vectorizer": vectorizer,
+            "moduleConfig": module_config,
         }
 
         if self._client.schema.exists(self._collection_name):
@@ -86,10 +92,7 @@ class WeaviateVectorStore(VectorStore):
     def add(self, payload: List[FeaturePayload]) -> None:
         with self._client.batch as batch:
             for item in payload:
-                data_object = {
-                    "id": item.id,
-                    "vector": item.embedding
-                }
+                data_object = {"id": item.id, "vector": item.embedding}
                 batch.add_data_object(data_object, self._collection_name)
 
     def delete(self) -> None:
@@ -97,19 +100,16 @@ class WeaviateVectorStore(VectorStore):
 
     def query(self, query: VectorIndexQuery) -> VectorIndexQueryResult:
         response = (
-            self._client.query
-            .get(self._collection_name, ['*'])
-            .with_near_vector({
-                "vector": query.embedding
-            })
+            self._client.query.get(self._collection_name, ["*"])
+            .with_near_vector({"vector": query.embedding})
             .with_limit(query.top_k)
             .do()
         )
 
-        data = response.get('data', {})
-        results = data.get('Get', {}).get(self._collection_name, [])
+        data = response.get("data", {})
+        results = data.get("Get", {}).get(self._collection_name, [])
 
-        similarities = [item['_additional']['distance'] for item in results]
-        ids = [item['id'] for item in results]
+        similarities = [item["_additional"]["distance"] for item in results]
+        ids = [item["id"] for item in results]
 
         return VectorIndexQueryResult(similarities, ids)
