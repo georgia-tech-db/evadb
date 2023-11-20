@@ -56,24 +56,25 @@ class DallEFunction(AbstractFunction):
     )
     def forward(self, text_df):
         try_to_import_openai()
-        import openai
+        from openai import OpenAI
 
-        openai.api_key = self.openai_api_key
-        # If not found, try OS Environment Variable
-        if len(openai.api_key) == 0:
-            openai.api_key = os.environ.get("OPENAI_API_KEY", "")
+        api_key = self.openai_api_key
+        if len(self.openai_api_key) == 0:
+            api_key = os.environ.get("OPENAI_API_KEY", "")
         assert (
-            len(openai.api_key) != 0
-        ), "Please set your OpenAI API key using SET OPENAI_API_KEY = 'sk-'  or environment variable (OPENAI_API_KEY)"
+            len(api_key) != 0
+        ), "Please set your OpenAI API key using SET OPENAI_API_KEY = 'sk-' or environment variable (OPENAI_API_KEY)"
+
+        client = OpenAI(api_key=api_key)
 
         def generate_image(text_df: PandasDataframe):
             results = []
             queries = text_df[text_df.columns[0]]
             for query in queries:
-                response = openai.Image.create(prompt=query, n=1, size="1024x1024")
+                response = client.images.generate(prompt=query, n=1, size="1024x1024")
 
                 # Download the image from the link
-                image_response = requests.get(response["data"][0]["url"])
+                image_response = requests.get(response.data[0].url)
                 image = Image.open(BytesIO(image_response.content))
 
                 # Convert the image to an array format suitable for the DataFrame
