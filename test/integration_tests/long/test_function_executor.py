@@ -322,6 +322,22 @@ class FunctionExecutorTest(unittest.TestCase):
             # with self.assertRaises(AssertionError):
             execute_query_fetch_all(self.evadb, select_query)
 
+    def test_should_raise_error_for_multiple_dataframes(self):
+        # Checks for an error when multiple dataframes are used
+        create_function_query = """
+            CREATE FUNCTION IF NOT EXISTS FuzzDistance
+            IMPL 'evadb/functions/test_bad_fuzzyjoin_udf.py'
+        """
+        # Expect ExecutorError
+        with self.assertRaises(ExecutorError) as cm:
+            execute_query_fetch_all(
+                self.evadb, create_function_query, do_not_print_exceptions=True
+            )
+
+        # Check if the expected error message is in the exception
+        expected_error_msg = "forward() only takes one pandas dataframe as input."
+        self.assertIn(expected_error_msg, str(cm.exception))
+
     def test_create_function_with_decorators(self):
         execute_query_fetch_all(
             self.evadb, "DROP FUNCTION IF EXISTS DummyObjectDetectorDecorators;"
