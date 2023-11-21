@@ -45,7 +45,7 @@ VERSION = VERSION_DICT["VERSION"]
 
 minimal_requirements = [
     "numpy>=1.19.5",
-    "pandas>=1.1.5",
+    "pandas>=2.1.0", # DataFrame.map is available after v2.1.0
     "sqlalchemy>=2.0.0",
     "sqlalchemy-utils>=0.36.6",
     "lark>=1.0.0",
