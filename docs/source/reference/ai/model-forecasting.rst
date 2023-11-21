@@ -38,14 +38,6 @@ This trains a forecasting model. The model can be called by providing the horizo
 
    SELECT Forecast();
 
-Forecasting vs Regression
--------------------
-Regression is a type of supervised machine learning problem where the goal is to predict a continuous numerical output (dependent variable) based on one or more input features (independent variables). In other words, it can be applied to a wider range of problems beyond time series analysis, as you can perform regression on non-sequential data, such as predicting house prices based on features like square footage, number of bedrooms, etc.
-
-Forecasting is a subset of regression that deals with time-ordered or sequential data. While time series data is a common application of forecasting, it can also be used for predicting future values in spatial data, financial data, and other contexts where there is an inherent notion of order or progression.
-
-Forecasting handles sequential data, while regression can be generalized for other problems. It is important to make sure that the user knows which option is ideal for their use case. If regression is determined to be better for the user's use case, the Ludwig framework can be used with EvaDB. A tutorial for this process can be found `here <https://evadb.readthedocs.io/en/stable/source/reference/ai/model-train-ludwig.html#ludwig>`_.
-
 Forecast Parameters
 -------------------
 
