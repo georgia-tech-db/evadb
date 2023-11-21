@@ -84,7 +84,16 @@ class SimilarityTests(unittest.TestCase):
         for i in range(5):
             storage_engine.write(
                 base_table_catalog_entry,
-                Batch(pd.DataFrame([{"data_col": base_img, "dummy": i, }])),
+                Batch(
+                    pd.DataFrame(
+                        [
+                            {
+                                "data_col": base_img,
+                                "dummy": i,
+                            }
+                        ]
+                    )
+                ),
             )
             storage_engine.write(
                 feature_table_catalog_entry,
@@ -553,7 +562,9 @@ class SimilarityTests(unittest.TestCase):
 
     @pytest.mark.skip(reason="Requires running local Milvus instance")
     @milvus_skip_marker
-    def test_end_to_end_index_scan_should_work_correctly_on_image_dataset_milvus(self,):
+    def test_end_to_end_index_scan_should_work_correctly_on_image_dataset_milvus(
+        self,
+    ):
         for _ in range(2):
             create_index_query = """CREATE INDEX testMilvusIndexImageDataset
                                     ON testSimilarityImageDataset (DummyFeatureExtractor(data))
