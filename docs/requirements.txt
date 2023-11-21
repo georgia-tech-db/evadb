@@ -25,7 +25,7 @@ mock>=1.0.1
 pillow>=9.0.1
 readthedocs-sphinx-ext>1.1
 autodoc_pydantic
-
+alembic
 # MyST
 myst-parser
 myst-nb
