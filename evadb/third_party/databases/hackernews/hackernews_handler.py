@@ -17,7 +17,7 @@ from requests_html import HTMLSession
 import json
 import pandas as pd
 
-from evadb.third_party.databases.hackernews.table_column_info import *
+import evadb.third_party.databases.hackernews.table_column_info as column_info
 from evadb.third_party.databases.types import (
     DBHandler,
     DBHandlerResponse,
@@ -44,11 +44,11 @@ class HackerNewsHandler(DBHandler):
 
         # Define columns
         item = [
-                col_id, col_deleted, col_type, col_by, col_time, 
-                col_text, col_dead, col_parent, col_poll, col_kids, 
-                col_url, col_score, col_title, col_parts, col_descendants
+                column_info.col_id, column_info.col_deleted, column_info.col_type, column_info.col_by, column_info.col_time, 
+                column_info.col_text, column_info.col_dead, column_info.col_parent, column_info.col_poll, column_info.col_kids, 
+                column_info.col_url, column_info.col_score, column_info.col_title, column_info.col_parts, column_info.col_descendants
         ]
-        user = [col_id, col_created, col_karma, col_about, col_submitted]
+        user = [column_info.col_id, column_info.col_created, column_info.col_karma, column_info.col_about, column_info.col_submitted]
         self.columns = {
             "items": item,
             "top_stories": item,
@@ -58,7 +58,7 @@ class HackerNewsHandler(DBHandler):
             "show_stories": item,
             "job_stories": item,
             "users": user,
-            "updates": [col_items, col_profiles],
+            "updates": [column_info.col_items, column_info.col_profiles],
         }
 
     def connect(self):
