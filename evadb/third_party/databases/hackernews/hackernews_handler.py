@@ -12,23 +12,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+from requests_html import HTMLSession
 import json
-
 import pandas as pd
-import requests
 
-from evadb.third_party.databases.hackernews.table_column_info import HACKERNEWS_COLUMNS
+import evadb.third_party.databases.hackernews.table_column_info as column_info
 from evadb.third_party.databases.types import (
     DBHandler,
     DBHandlerResponse,
     DBHandlerStatus,
 )
 
-
-class HackernewsSearchHandler(DBHandler):
-    def connection():
-        return requests.get("https://www.google.com/").status_code == 200
-
+class HackerNewsHandler(DBHandler):
     def __init__(self, name: str, **kwargs):
         """
         Initialize the handler.
@@ -37,35 +33,33 @@ class HackernewsSearchHandler(DBHandler):
             **kwargs: arbitrary keyword arguments for establishing the connection.
         """
         super().__init__(name)
-        self.query = kwargs.get("query", "")
-        self.tags = kwargs.get("tags", "")
 
-    @property
-    def supported_table(self):
-        def _hackernews_topics_generator():
-            url = "http://hn.algolia.com/api/v1/search?"
-            url += "query=" + self.query
-            url += "&tags=" + (
-                "story" if self.tags == "" else +self.tags
-            )  # search stories by default
-            response = requests.get(url)
-            if response.status_code != 200:
-                raise Exception("Could not reach website.")
-            json_result = response.content
-            dict_result = json.loads(json_result)
-            for row in dict_result:
-                yield {
-                    property_name: row[property_name]
-                    for property_name, _ in HACKERNEWS_COLUMNS
-                }
+        self.max_item = int(kwargs.get("maxitem", False))   # Limits the number of rows for the table items
 
-        mapping = {
-            "search_results": {
-                "columns": HACKERNEWS_COLUMNS,
-                "generator": _hackernews_topics_generator(),
-            },
+        self.tables = [
+            "items", "users", "top_stories", 
+            "new_stories", "best_stories", "ask_stories", 
+            "show_stories", "job_stories", "updates"
+        ]
+
+        # Define columns
+        item = [
+                column_info.col_id, column_info.col_deleted, column_info.col_type, column_info.col_by, column_info.col_time, 
+                column_info.col_text, column_info.col_dead, column_info.col_parent, column_info.col_poll, column_info.col_kids, 
+                column_info.col_url, column_info.col_score, column_info.col_title, column_info.col_parts, column_info.col_descendants
+        ]
+        user = [column_info.col_id, column_info.col_created, column_info.col_karma, column_info.col_about, column_info.col_submitted]
+        self.columns = {
+            "items": item,
+            "top_stories": item,
+            "new_stories": item,
+            "best_stories": item,
+            "ask_stories": item,
+            "show_stories": item,
+            "job_stories": item,
+            "users": user,
+            "updates": [column_info.col_items, column_info.col_profiles],
         }
-        return mapping
 
     def connect(self):
         """
@@ -73,7 +67,11 @@ class HackernewsSearchHandler(DBHandler):
         Returns:
             DBHandlerStatus
         """
-        return DBHandlerStatus(status=True)
+        try:
+            self.connection = HTMLSession()
+            return DBHandlerStatus(status=True)
+        except Exception as e:
+            return DBHandlerStatus(status=False, error=str(e))
 
     def disconnect(self):
         """
@@ -87,10 +85,10 @@ class HackernewsSearchHandler(DBHandler):
         Returns:
             DBHandlerStatus
         """
-        if self.connection():
+        if self.connection:
             return DBHandlerStatus(status=True)
         else:
-            return DBHandlerStatus(status=False, error="Not connected to the internet.")
+            return DBHandlerStatus(status=False, error="Not connected to the database.")
 
     def get_tables(self) -> DBHandlerResponse:
         """
@@ -98,12 +96,12 @@ class HackernewsSearchHandler(DBHandler):
         Returns:
             DBHandlerResponse
         """
-        if not self.connection():
-            return DBHandlerResponse(data=None, error="Not connected to the internet.")
+        if not self.connection:
+            return DBHandlerResponse(data=None, error="Not connected to the database.")
 
         try:
             tables_df = pd.DataFrame(
-                list(self.supported_table.keys()), columns=["table_name"]
+                self.tables, columns=["table_name"]
             )
             return DBHandlerResponse(data=tables_df)
         except Exception as e:
@@ -117,15 +115,32 @@ class HackernewsSearchHandler(DBHandler):
         Returns:
             DBHandlerResponse
         """
-        if not self.connection():
-            return DBHandlerResponse(data=None, error="Not connected to the internet.")
+        if not self.connection:
+            return DBHandlerResponse(data=None, error="Not connected to the database.")
+        if table_name not in self.tables:
+            return DBHandlerResponse(
+                data=None,
+                error="{} is not supported or does not exist.".format(table_name),
+            )
         try:
             columns_df = pd.DataFrame(
-                self.supported_table[table_name]["columns"], columns=["name", "dtype"]
+                self.columns[table_name], columns=["name", "dtype"]
             )
             return DBHandlerResponse(data=columns_df)
         except Exception as e:
             return DBHandlerResponse(data=None, error=str(e))
+
+    def _fetch_json_data(self, key):
+        """
+        Fetch data from a URL and return it as a JSON object
+        """
+        url = "https://hacker-news.firebaseio.com/v0/{}.json?print=pretty".format(key)
+        response = self.connection.get(url)
+        if response.status_code == 200:
+            data = json.loads(response.text)
+            return data
+        else:
+            return None
 
     def select(self, table_name: str) -> DBHandlerResponse:
         """
@@ -135,18 +150,92 @@ class HackernewsSearchHandler(DBHandler):
         Returns:
             DBHandlerResponse
         """
+
         if not self.connection:
             return DBHandlerResponse(data=None, error="Not connected to the database.")
+        if table_name not in self.tables:
+            return DBHandlerResponse(
+                data=None,
+                error="{} is not supported or does not exist.".format(table_name),
+            )
+        if(not self.max_item):
+            self.max_item = self._fetch_json_data("maxitem")
         try:
-            if table_name not in self.supported_table:
-                return DBHandlerResponse(
-                    data=None,
-                    error="{} is not supported or does not exist.".format(table_name),
-                )
+            def _item_generator():
+                # Get all items from 1 to max_item
+                for index in range(1, self.max_item+1):
+                    row = self._fetch_json_data("item/{}".format(index))
+                    if row:
+                        yield {
+                            column_name: row[column_name]
+                            if column_name in row.keys() else None
+                            for column_name, _ in self.columns[table_name]
+                        }
+
+            def _user_generator():
+                visited = set()
+                # Search all valid users that created the items from 1 to max_item
+                for index in range(1, self.max_item+1):
+                    username = self._fetch_json_data("item/{}".format(index))["by"]
+                    if username not in visited:
+                        visited.add(username)
+                        row = self._fetch_json_data("user/{}".format(username))
+                        if row:
+                            yield {
+                                column_name: row[column_name]
+                                if column_name in row.keys() else None
+                                for column_name, _ in self.columns[table_name]
+                            }
+
+            def _updates_generator():
+                """
+                Generator function for the updates table
+                """
+                row = self._fetch_json_data("updates")
+                if row:
+                    yield {
+                        column_name: row[column_name]
+                        if column_name in row.keys() else None
+                        for column_name, _ in self.columns[table_name]
+                    }
+
+            def _catalog_generator():
+                """
+                Generator function for top_stories, new_stories, best_stores and
+                ask_stories
+                """
+                table_map = {
+                    "top_stories": "topstories",
+                    "new_stories": "newstories",
+                    "best_stories": "beststories",
+                    "ask_stories": "askstories",
+                    "show_stories": "showstories",
+                    "job_stories": "jobstories"
+                }
+
+                indexes = self._fetch_json_data(table_map[table_name])
+                for index in indexes:
+                    row = self._fetch_json_data("item/{}".format(index))
+                    if row:
+                        yield {
+                            column_name: row[column_name]
+                            if column_name in row.keys() else None
+                            for column_name, _ in self.columns[table_name]
+                        }
+
+            if (table_name == "items"):
+                generator = _item_generator
+            elif (table_name == "users"):
+                generator = _user_generator
+            elif (table_name == "updates"):
+                generator = _updates_generator
+            else:
+                generator = _catalog_generator
 
             return DBHandlerResponse(
                 data=None,
-                data_generator=self.supported_table[table_name]["generator"],
+                data_generator=generator(),
             )
+
         except Exception as e:
             return DBHandlerResponse(data=None, error=str(e))

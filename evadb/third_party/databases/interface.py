@@ -28,7 +28,7 @@ def _get_database_handler(engine: str, **kwargs):
     # Dynamically import the top module.
     try:
         mod = dynamic_import(engine)
-    except ImportError:
+    except (ImportError, ModuleNotFoundError):
         req_file = os.path.join(os.path.dirname(__file__), engine, "requirements.txt")
         if os.path.isfile(req_file):
             with open(req_file) as f:
@@ -49,9 +49,11 @@ def _get_database_handler(engine: str, **kwargs):
     elif engine == "github":
         return mod.GithubHandler(engine, **kwargs)
     elif engine == "hackernews":
-        return mod.HackernewsSearchHandler(engine, **kwargs)
+        return mod.HackerNewsHandler(engine, **kwargs)
     elif engine == "slack":
         return mod.SlackHandler(engine, **kwargs)
+    elif engine == "hackernews":
+        return mod.HackerNewsHandler(engine, **kwargs)
     else:
         raise NotImplementedError(f"Engine {engine} is not supported")
 
