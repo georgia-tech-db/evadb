@@ -112,7 +112,10 @@ pinecone_libs = ["pinecone-client"]
 
 chromadb_libs = ["chromadb"]
 
+weaviate_libs = ["weaviate-client"]
+
 milvus_libs = ["pymilvus>=2.3.0"]
+
 
 postgres_libs = [
     "psycopg2",
@@ -173,6 +176,7 @@ EXTRA_REQUIRES = {
     "pinecone": pinecone_libs,
     "chromadb": chromadb_libs,
     "milvus": milvus_libs,
+    "weaviate": weaviate_libs,
     "postgres": postgres_libs,
     "ludwig": ludwig_libs,
     "sklearn": sklearn_libs,

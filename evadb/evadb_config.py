@@ -41,4 +41,6 @@ BASE_EVADB_CONFIG = {
     "MILVUS_PASSWORD": "",
     "MILVUS_DB_NAME": "",
     "MILVUS_TOKEN": "",
+    "WEAVIATE_API_KEY": "",
+    "WEAVIATE_API_URL": "",
 }
