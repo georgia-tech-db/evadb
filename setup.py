@@ -127,6 +127,8 @@ sklearn_libs = ["scikit-learn"]
 
 xgboost_libs = ["flaml[automl]"]
 
+hackernews_libs = ["requests"]
+
 forecasting_libs = [
     "statsforecast",  # MODEL TRAIN AND FINE TUNING
     "neuralforecast",  # MODEL TRAIN AND FINE TUNING
@@ -180,6 +182,7 @@ EXTRA_REQUIRES = {
     "sklearn": sklearn_libs,
     "xgboost": xgboost_libs,
     "forecasting": forecasting_libs,
+    "hackernews": hackernews_libs,
     # everything except ray, qdrant, ludwig and postgres. The first three fail on pyhton 3.11.
     "dev": dev_libs + vision_libs + document_libs + function_libs + notebook_libs + forecasting_libs + sklearn_libs + imagegen_libs + xgboost_libs
 }
