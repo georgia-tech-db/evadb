@@ -88,23 +88,23 @@ Cross-validation is another technique used to examine the performance of a model
 
    import pandas as pd
 
-   k = 5
+   k = 5 # 5 folds will be used in this example 
    cursor.query("""
       USE postgres_data {
          CREATE TABLE IF NOT EXISTS dataset_indices AS
          SELECT customer_id, NTILE(5) OVER (ORDER BY customer_id) AS fold
          FROM bank_predictor
-      }
-   """).df()
-   answers_df = pd.DataFrame()
+      }""").df() #assigns a fold number 1-5 for each data point
    mse_scores = []
-   for i in range(1,k): 
+   for i in range(1,k):
+      # makes a table of the training set which includes all folds except the current fold 
       first_query = """
          USE postgres_data {
             CREATE TABLE IF NOT EXISTS training_set AS
             SELECT * FROM bank_predictor
             WHERE customer_id NOT IN (SELECT customer_id FROM dataset_indices WHERE fold = """
-            + str(i) + """)}"""
+            + str(i) + """)}""" 
+      # makes a table of the testing set which is the current fold 
       second_query = """
          USE postgres_data {
             CREATE TABLE IF NOT EXISTS testing_set AS
@@ -114,18 +114,21 @@ Cross-validation is another technique used to examine the performance of a model
       cursor.query(first_query).df()
       cursor.query(second_query).df()
 
+      # trains the model on the training set 
       cursor.query("""CREATE OR REPLACE FUNCTION BankPredictor FROM
           ( SELECT * FROM postgres_data.training_set )
           TYPE Ludwig
           PREDICT 'churn'
-          TIME_LIMIT 3600;
-      """).df()
+          TIME_LIMIT 3600;""").df()
 
+      # uses the model to predict the testing set values 
       predictions = cursor.query("""
         SELECT customer_id, churn, predicted_churn
         FROM postgres_data.testing_set
         JOIN LATERAL BankPredictor(*) AS Predicted(predicted_churn)
         """).df()
+
+      # finds the mean squared error between the expected and predicted values and appends to list 
       mse = (predictions['churn'] - predictions['predicted_churn'])**2
       mse_scores.append(mse.mean())
 
@@ -138,7 +141,9 @@ Cross-validation is another technique used to examine the performance of a model
         USE postgres_data {
            DROP TABLE IF EXISTS testing_set
         }""").df()
-      
+
+   # finds the overall mean of all mean squared error
+   # this value allows the user to judge how accurate the model is on independent data 
    final_mean = sum(mse_scores)/len(mse_scores)
 
 
