@@ -312,5 +312,5 @@ def init_builtin_functions(db: EvaDBDatabase, mode: str = "debug") -> None:
             execute_query_fetch_all(
                 db, query, do_not_print_exceptions=False, do_not_raise_exceptions=True
             )
-        except Exception as e:
+        except Exception:
             pass
