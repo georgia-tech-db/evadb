@@ -24,7 +24,6 @@ from evadb.third_party.databases.types import (
     DBHandlerStatus,
 )
 
-
 class HackerNewsHandler(DBHandler):
     def __init__(self, name: str, **kwargs):
         """
@@ -108,7 +107,6 @@ class HackerNewsHandler(DBHandler):
         except Exception as e:
             return DBHandlerResponse(data=None, error=str(e))
 
-
     def get_columns(self, table_name: str) -> DBHandlerResponse:
         """
         Returns the list of columns for the given table.
@@ -131,7 +129,6 @@ class HackerNewsHandler(DBHandler):
             return DBHandlerResponse(data=columns_df)
         except Exception as e:
             return DBHandlerResponse(data=None, error=str(e))
-
 
     def _fetch_json_data(self, key):
         """

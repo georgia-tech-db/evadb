@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 # Obtained from the official API documentation
 from requests_html import HTML
 
@@ -38,3 +37,4 @@ col_about = ["about", HTML]	        # The user's optional self-description in HT
 col_submitted = ["submitted", list]     # List of the user's stories, polls and comments
 col_items = ["items", list]	        # List of item ids
 col_profiles = ["profiles", list]       # List of profile names
+

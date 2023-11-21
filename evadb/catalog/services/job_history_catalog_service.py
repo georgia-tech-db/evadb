@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import datetime
+from typing import List
 
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
@@ -54,7 +55,7 @@ class JobHistoryCatalogService(BaseService):
 
         return job_history_catalog_obj.as_dataclass()
 
-    def get_entry_by_job_id(self, job_id: int) -> list[JobHistoryCatalogEntry]:
+    def get_entry_by_job_id(self, job_id: int) -> List[JobHistoryCatalogEntry]:
         """
         Get all the job history catalog entry with given job id.
         Arguments:

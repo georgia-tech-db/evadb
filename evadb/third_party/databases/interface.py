@@ -48,6 +48,8 @@ def _get_database_handler(engine: str, **kwargs):
         return mod.SnowFlakeDbHandler(engine, **kwargs)
     elif engine == "github":
         return mod.GithubHandler(engine, **kwargs)
+    elif engine == "hackernews":
+        return mod.HackernewsSearchHandler(engine, **kwargs)
     elif engine == "slack":
         return mod.SlackHandler(engine, **kwargs)
     elif engine == "hackernews":
