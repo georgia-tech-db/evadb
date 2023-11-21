@@ -76,9 +76,24 @@ One of the most common machine learning techniques is feature selection, the pro
    PREDICT 'rental_price'
    TIME_LIMIT 120;
 
-The slightly harder task is judging how effective a model is at predicting a certain value. Accuracy is one metric commonly used to judge ML models. An example of how accuracy can be calculated for our House Rent Predictor is shown below: 
+The slightly harder task is judging how effective a model is at predicting a certain value. To display the model's predictions alongside the actual values, a command like the following can be used: 
 
--- 
+.. code-block:: sql
+   SELECT customer_id, churn, predicted_churn
+   FROM postgres_data.bank_predictor
+   JOIN LATERAL BankPredictor(*) AS Predicted(predicted_churn)
+
+Accuracy is one metric commonly used to judge ML models. An example of how accuracy can be calculated for our House Rent Predictor is shown below: 
+
+.. code-block:: python
+
+   differences = cursor.query("""
+      SELECT customer_id, churn, predicted_churn
+      FROM postgres_data.bank_predictor
+      JOIN LATERAL BankPredictor(*) AS Predicted(predicted_churn)""").df()
+
+   accuracy = (differences['churn'] == differences['predicted_churn']).mean()
+   print(f'Accuracy: {accuracy * 100:.2f}%')
 
 The user can now test various combinations of features in order to determine which results in the best model. But there is a downside to calculating accuracy this way. Because the testing data is the same as the training data, it is difficult to judge if the model is too highly tuned to its training data, which will result in it not working as well when testing on independent data. 
 
