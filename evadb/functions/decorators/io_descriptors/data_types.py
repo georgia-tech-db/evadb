@@ -83,11 +83,23 @@ class NewPandasDataFrame(IOArgument):
         self.columns = columns
     
     def generate_catalog_entries(self, *args, **kwargs) -> List[type[FunctionIOCatalogEntry]]:
+        assert self.columns is not None, "Columns cannot be None"
+        assert len(self.columns) > 0, "Columns cannot be empty"
 
+        catalog_entries = []
+        for column in self.columns:
+            catalog_entries.append(
+                FunctionIOCatalogEntry(
+                    name=column.name,
+                    type=ColumnType.NDARRAY,
+                    is_nullable=column.is_nullable,
+                    array_type=column.type,
+                    array_dimensions=column.shape,
+                    is_input=True,
+                )
+            )
 
-
-    
-
+        return catalog_entries
 
 class PandasDataframe(IOArgument):
     """Descriptor data type for Pandas Dataframe"""

@@ -169,6 +169,7 @@ class FunctionIOCatalogEntry:
     function_id: int = None
     function_name: str = None
     row_id: int = None
+    asterisk: bool = False # Accept any number of additional arguments
 
     def display_format(self):
         data_type = self.type.name
