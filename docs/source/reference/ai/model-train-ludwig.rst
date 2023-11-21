@@ -84,7 +84,63 @@ The user can now test various combinations of features in order to determine whi
 
 Cross-validation is another technique used to examine the performance of a model, specifically to get an unbiased estimate of the model's performance on an independent dataset. The most common form of cross-validation is k-fold cross-validation, where the data is divided into k folds. It sidesteps the overfitting problem by training the model on some folds and then testing it on the remaining. An example of how k-fold cross-validation can be implemented using a mix of Python and EvaDB queries is shown below. 
 
---
+.. code-block:: python
+
+   import pandas as pd
+
+   k = 5
+   cursor.query("""
+      USE postgres_data {
+         CREATE TABLE IF NOT EXISTS dataset_indices AS
+         SELECT customer_id, NTILE(5) OVER (ORDER BY customer_id) AS fold
+         FROM bank_predictor
+      }
+   """).df()
+   answers_df = pd.DataFrame()
+   mse_scores = []
+   for i in range(1,k): 
+      first_query = """
+         USE postgres_data {
+            CREATE TABLE IF NOT EXISTS training_set AS
+            SELECT * FROM bank_predictor
+            WHERE customer_id NOT IN (SELECT customer_id FROM dataset_indices WHERE fold = """
+            + str(i) + """)}"""
+      second_query = """
+         USE postgres_data {
+            CREATE TABLE IF NOT EXISTS testing_set AS
+            SELECT * FROM bank_predictor
+            WHERE customer_id IN (SELECT customer_id FROM dataset_indices WHERE fold = """ 
+            + str(i) + """)}"""
+      cursor.query(first_query).df()
+      cursor.query(second_query).df()
+
+      cursor.query("""CREATE OR REPLACE FUNCTION BankPredictor FROM
+          ( SELECT * FROM postgres_data.training_set )
+          TYPE Ludwig
+          PREDICT 'churn'
+          TIME_LIMIT 3600;
+      """).df()
+
+      predictions = cursor.query("""
+        SELECT customer_id, churn, predicted_churn
+        FROM postgres_data.testing_set
+        JOIN LATERAL BankPredictor(*) AS Predicted(predicted_churn)
+        """).df()
+      mse = (predictions['churn'] - predictions['predicted_churn'])**2
+      mse_scores.append(mse.mean())
+
+      cursor.query("""
+        USE postgres_data {
+           DROP TABLE IF EXISTS training_set
+        }""").df()
+
+     cursor.query("""
+        USE postgres_data {
+           DROP TABLE IF EXISTS testing_set
+        }""").df()
+      
+   final_mean = sum(mse_scores)/len(mse_scores)
+
 
 A way to improve model performance is ensuring the data it is trained on is high-quality. Data preprocessing can remove undesired features from a dataset and go a long way in improving a model's generalization to independent data. For example, models are extremely sensitive to outliers in the training data by distorting the learned patterns and making the model harder to generalize. It is therefore in the user's best interest to remove outliers before the model training. One method to remove outliers is the IQR method, and an example of how it can be implemented on the House Rent data is shown below. 
 
