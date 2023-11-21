@@ -90,6 +90,7 @@ parts:
           - file: source/reference/vector_databases/pgvector
           - file: source/reference/vector_databases/pinecone
           - file: source/reference/vector_databases/milvus
+          - file: source/reference/vector_databases/weaviate
 
       - file: source/reference/ai/index
         title: AI Engines

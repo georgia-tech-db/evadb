@@ -71,7 +71,7 @@ function_metadata_key: uid
 
 function_metadata_value: constant
 
-vector_store_type: USING (FAISS | QDRANT | PINECONE | PGVECTOR | CHROMADB | MILVUS)
+vector_store_type: USING (FAISS | QDRANT | PINECONE | PGVECTOR | CHROMADB | WEAVIATE | MILVUS)
 
 index_elem: ("(" uid_list ")"
           | "(" function_call ")")
@@ -448,6 +448,7 @@ QDRANT:                              "QDRANT"i
 PINECONE:                            "PINECONE"i
 PGVECTOR:                            "PGVECTOR"i
 CHROMADB:                            "CHROMADB"i
+WEAVIATE:                            "WEAVIATE"i
 MILVUS:                              "MILVUS"i
 
 // Computer vision tasks

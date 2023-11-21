@@ -20,6 +20,7 @@ from test.markers import (
     milvus_skip_marker,
     pinecone_skip_marker,
     qdrant_skip_marker,
+    weaviate_skip_marker,
 )
 from test.util import (
     create_sample_image,
@@ -141,6 +142,14 @@ class SimilarityTests(unittest.TestCase):
         os.environ["MILVUS_URI"] = "http://localhost:19530"
         # use default Milvus database for testing
         os.environ["MILVUS_DB_NAME"] = "default"
+
+        self.original_weaviate_key = os.environ.get("WEAVIATE_API_KEY")
+        self.original_weaviate_env = os.environ.get("WEAVIATE_API_URL")
+
+        os.environ["WEAVIATE_API_KEY"] = "NM4adxLmhtJDF1dPXDiNhEGTN7hhGDpymmO0"
+        os.environ[
+            "WEAVIATE_API_URL"
+        ] = "https://cs6422-test2-zn83syib.weaviate.network"
 
     def tearDown(self):
         shutdown_ray()
@@ -579,4 +588,34 @@ class SimilarityTests(unittest.TestCase):
 
             # Cleanup
             drop_query = "DROP INDEX testMilvusIndexImageDataset"
+            execute_query_fetch_all(self.evadb, drop_query)
+
+    @pytest.mark.skip(reason="Requires running Weaviate instance")
+    @weaviate_skip_marker
+    def test_end_to_end_index_scan_should_work_correctly_on_image_dataset_weaviate(
+        self,
+    ):
+        for _ in range(2):
+            create_index_query = """CREATE INDEX testWeaviateIndexImageDataset
+                                    ON testSimilarityImageDataset (DummyFeatureExtractor(data))
+                                    USING WEAVIATE;"""
+            execute_query_fetch_all(self.evadb, create_index_query)
+
+            select_query = """SELECT _row_id FROM testSimilarityImageDataset
+                                ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data))
+                                LIMIT 1;""".format(
+                self.img_path
+            )
+            explain_batch = execute_query_fetch_all(
+                self.evadb, f"EXPLAIN {select_query}"
+            )
+            self.assertTrue("VectorIndexScan" in explain_batch.frames[0][0])
+
+            res_batch = execute_query_fetch_all(self.evadb, select_query)
+            self.assertEqual(
+                res_batch.frames["testsimilarityimagedataset._row_id"][0], 5
+            )
+
+            # Cleanup
+            drop_query = "DROP INDEX testWeaviateIndexImageDataset"
             execute_query_fetch_all(self.evadb, drop_query)

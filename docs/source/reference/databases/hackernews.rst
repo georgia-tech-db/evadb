@@ -18,7 +18,7 @@ Required:
 
 Optional:
 
-* ``tags`` is the tag used for filtering the query results. Check `available tags <https://hn.algolia.com/api#:~:text=filter%20on%20a%20specific%20tag.%20Available%20tags%3A>`_ to see a list of available filter tags.
+* ``tags`` is the tag used for filtering the query results. Check `available tags <https://hn.algolia.com/api>`_ to see a list of available filter tags.
 
 Create Connection
 -----------------
