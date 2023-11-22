@@ -66,8 +66,9 @@ class GmailHandler(DBHandler):
                     _, folder_name = folder_info_str.split(' "/" ')
                     folder_name = folder_name.strip('"')
                     folder_name_without_prefix = folder_name.split('/')[1] if '/' in folder_name else folder_name
-                    folder_list.append(folder_name_without_prefix)
-                    self.info[folder_name_without_prefix] = items
+                    if folder_name != "[Gmail]":
+                        folder_list.append(folder_name_without_prefix)
+                        self.info[folder_name_without_prefix] = items
 
                 # Create a DataFrame with table names
                 tables_df = pd.DataFrame(
