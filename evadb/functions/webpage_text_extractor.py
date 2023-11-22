@@ -15,6 +15,7 @@ from tqdm import tqdm
 
 reader = easyocr.Reader(["en"], gpu=True)
 
+#testtest
 
 def scrape_user_page(url):
     try:
