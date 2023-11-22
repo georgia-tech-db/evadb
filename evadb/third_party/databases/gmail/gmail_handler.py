@@ -121,7 +121,10 @@ class GmailHandler(DBHandler):
                         receiver = self._decode_header(msg["To"])
                         subject = self._decode_header(msg["Subject"])
                         date_str = self._decode_header(msg["Date"])
-                        date_object = parsedate_to_datetime(date_str)
+                        if date_str != "":
+                            date_object = parsedate_to_datetime(date_str)
+                        else:
+                            date_object = ""
                         body = ""
                         # Extract email body (text or HTML)
                         if msg.is_multipart():
@@ -140,10 +143,12 @@ class GmailHandler(DBHandler):
                             if payload is not None:
                                 body = payload.decode("utf-8", "ignore")
                         # Yield email data as a dictionary
+                        if (date_object != ""):
+                            date_object = date_object.strftime("%Y-%m-%d")
                         yield {
                             "sender": str(sender),
                             "receiver": str(receiver),
-                            "day": str(date_object.strftime("%Y-%m-%d")),
+                            "day": str(date_object),
                             "subject": str(subject),
                             "message": str(body)
                         }
