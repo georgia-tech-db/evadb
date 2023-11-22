@@ -12,7 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import List, Tuple
+from dataclasses import dataclass
+from typing import List, Optional, Tuple
 
 from evadb.catalog.catalog_type import ColumnType, NdArrayType
 from evadb.parser.select_statement import SelectStatement
@@ -225,4 +226,45 @@ class CreateDatabaseStatement(AbstractStatement):
             f"CREATE DATABASE {self.database_name} \n"
             f"WITH ENGINE '{self.engine}' , \n"
             f"PARAMETERS = {self.param_dict};"
+        )
+
+
+@dataclass
+class CreateJobStatement(AbstractStatement):
+    job_name: str
+    queries: list
+    if_not_exists: bool
+    start_time: Optional[str] = None
+    end_time: Optional[str] = None
+    repeat_interval: Optional[int] = None
+    repeat_period: Optional[str] = None
+
+    def __hash__(self):
+        return hash(
+            (
+                super().__hash__(),
+                self.job_name,
+                tuple(self.queries),
+                self.start_time,
+                self.end_time,
+                self.repeat_interval,
+                self.repeat_period,
+            )
+        )
+
+    def __post_init__(self):
+        super().__init__(StatementType.CREATE_JOB)
+
+    def __str__(self):
+        start_str = f"\nSTART {self.start_time}" if self.start_time is not None else ""
+        end_str = f"\nEND {self.end_time}" if self.end_time is not None else ""
+        repeat_str = (
+            f"\nEVERY {self.repeat_interval} {self.repeat_period}"
+            if self.repeat_interval is not None
+            else ""
+        )
+        return (
+            f"CREATE JOB {self.job_name} AS\n"
+            f"({(str(q) for q in self.queries)})"
+            f"{start_str} {end_str} {repeat_str}"
         )

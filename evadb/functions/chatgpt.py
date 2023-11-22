@@ -115,18 +115,20 @@ class ChatGPT(AbstractFunction):
     )
     def forward(self, text_df):
         try_to_import_openai()
-        import openai
+        from openai import OpenAI
+
+        api_key = self.openai_api_key
+        if len(self.openai_api_key) == 0:
+            api_key = os.environ.get("OPENAI_API_KEY", "")
+        assert (
+            len(api_key) != 0
+        ), "Please set your OpenAI API key using SET OPENAI_API_KEY = 'sk-' or environment variable (OPENAI_API_KEY)"
+
+        client = OpenAI(api_key=api_key)
 
         @retry(tries=6, delay=20)
         def completion_with_backoff(**kwargs):
-            return openai.ChatCompletion.create(**kwargs)
-
-        openai.api_key = self.openai_api_key
-        if len(openai.api_key) == 0:
-            openai.api_key = os.environ.get("OPENAI_API_KEY", "")
-        assert (
-            len(openai.api_key) != 0
-        ), "Please set your OpenAI API key using SET OPENAI_API_KEY = 'sk-' or environment variable (OPENAI_API_KEY)"
+            return client.chat.completions.create(**kwargs)
 
         queries = text_df[text_df.columns[0]]
         content = text_df[text_df.columns[0]]

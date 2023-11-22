@@ -293,6 +293,38 @@ class SelectExecutorTest(unittest.TestCase):
             expected_batch.project(["FIRST.id", "SEGMENT.data"]),
         )
 
+    def test_select_and_groupby_and_aggregate_with_pdf(self):
+        GROUPBY_SIZE = 8
+        execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS MyPDFs;")
+        # load from directory
+        pdf_path = (
+            "test/data/uadetrac/small-data/pdf_data/fall_2023_orientation_document.pdf"
+        )
+        load_query = f"LOAD PDF '{pdf_path}' INTO MyPDFs;"
+        execute_query_fetch_all(self.evadb, load_query)
+        select_all_query = "SELECT * FROM MyPDFs;"
+        all_pdf_batch = execute_query_fetch_all(self.evadb, select_all_query)
+
+        select_query = (
+            f"SELECT COUNT(*) FROM MyPDFs GROUP BY '{GROUPBY_SIZE} paragraphs';"
+        )
+        actual_batch = execute_query_fetch_all(self.evadb, select_query)
+
+        self.assertAlmostEqual(
+            len(all_pdf_batch),
+            len(actual_batch) * actual_batch.frames.iloc[0, 0],
+            None,
+            None,
+            GROUPBY_SIZE,
+        )
+        self.assertEqual(len(actual_batch), 99)
+        n = len(actual_batch)
+        for i in range(n):
+            self.assertEqual(actual_batch.frames.iloc[i, 0], GROUPBY_SIZE)
+
+        # tear down
+        execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS MyPDFs;")
+
     def test_lateral_join_with_unnest_and_sample(self):
         query = """SELECT id, label
                   FROM MyVideo SAMPLE 2 JOIN LATERAL
