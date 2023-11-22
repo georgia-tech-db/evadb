@@ -369,39 +369,20 @@ def is_forecast_available() -> bool:
         return False
 
 
-def try_to_import_sklearn():
-    try:
-        import sklearn  # noqa: F401
-        from sklearn.linear_model import LinearRegression  # noqa: F401
-    except ImportError:
-        raise ValueError(
-            """Could not import sklearn.
-                Please install it with `pip install scikit-learn`."""
-        )
-
-
-def is_sklearn_available() -> bool:
-    try:
-        try_to_import_sklearn()
-        return True
-    except ValueError:  # noqa: E722
-        return False
-
-
-def try_to_import_xgboost():
+def try_to_import_flaml_automl():
     try:
         import flaml  # noqa: F401
         from flaml import AutoML  # noqa: F401
     except ImportError:
         raise ValueError(
-            """Could not import Flaml AutoML.
+            """Could not import Flaml AutML.
                 Please install it with `pip install "flaml[automl]"`."""
         )
 
 
-def is_xgboost_available() -> bool:
+def is_flaml_automl_available() -> bool:
     try:
-        try_to_import_xgboost()
+        try_to_import_flaml_automl()
         return True
     except ValueError:  # noqa: E722
         return False
@@ -592,6 +573,16 @@ def try_to_import_chromadb_client():
         )
 
 
+def try_to_import_weaviate_client():
+    try:
+        import weaviate  # noqa: F401
+    except ImportError:
+        raise ValueError(
+            """Could not import weaviate python package.
+                Please install it with 'pip install weaviate-client`."""
+        )
+
+
 def try_to_import_milvus_client():
     try:
         import pymilvus  # noqa: F401
@@ -621,6 +612,14 @@ def is_pinecone_available() -> bool:
 def is_chromadb_available() -> bool:
     try:
         try_to_import_chromadb_client()
+        return True
+    except ValueError:  # noqa: E722
+        return False
+
+
+def is_weaviate_available() -> bool:
+    try:
+        try_to_import_weaviate_client()
         return True
     except ValueError:  # noqa: E722
         return False
