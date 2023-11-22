@@ -176,8 +176,8 @@ Sift_function_query = """CREATE FUNCTION IF NOT EXISTS SiftFeatureExtractor
     EvaDB_INSTALLATION_DIR
 )
 
-Web_text_query = """CREATE FUNCTION IF NOT EXISTS WebpageTextExtractor
-        IMPL  '{}/functions/webpage_text_extractor.py';
+Text_recognition_query = """CREATE FUNCTION IF NOT EXISTS TextRecognizer
+        IMPL  '{}/functions/text_recognition.py';
         """.format(
     EvaDB_INSTALLATION_DIR
 )
@@ -288,7 +288,7 @@ def init_builtin_functions(db: EvaDBDatabase, mode: str = "debug") -> None:
         face_detection_function_query,
         # Mvit_function_query,
         Sift_function_query,
-        Web_text_query,
+        Text_recognition_query,
         Yolo_function_query,
         stablediffusion_function_query,
         dalle_function_query,
