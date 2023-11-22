@@ -38,6 +38,7 @@ This trains a forecasting model. The model can be called by providing the horizo
 
    SELECT Forecast();
 
+
 Forecast Parameters
 -------------------
 
