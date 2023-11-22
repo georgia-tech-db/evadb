@@ -27,6 +27,7 @@ from evadb.plan_nodes.types import PlanOprType
 from evadb.utils.logging_manager import logger
 from evadb.configuration import constants
 import json
+import ast
 
 
 class CostEstimator:
@@ -158,9 +159,11 @@ class CostEstimator:
         if str(table_name) in constants.EVADB_STATS:
             table_data = constants.EVADB_STATS[str(table_name)]
             hist_data = table_data["hist"]
-            data_list = json.loads(hist_data)
+            my_list = ast.literal_eval(hist_data)
+            json_data = json.dumps(my_list)
+            data_list = json.loads(json_data)
             for item in data_list:
-                level_dict = item.get(column, {})
+                level_dict = item.get(table_name + "." + column, {})
                 for value in level_dict:
                     if self.evaluate(condition_value,condition,value):
                         self._cost += level_dict[value]

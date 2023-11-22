@@ -44,6 +44,7 @@ from evadb.parser.utils import (
 from evadb.server.command_handler import execute_statement
 from evadb.utils.generic_utils import find_nearest_word, is_ray_enabled_and_installed
 from evadb.utils.logging_manager import logger
+from evadb.executor.cost_estimator_utils import CostEstimatorUtils
 
 
 class EvaDBConnection:
@@ -444,6 +445,8 @@ class EvaDBCursor(object):
             1     3     4
             2     5     6
         """
+        #refresh the table_stats table to get the latest statistics of the database
+        CostEstimatorUtils.fetch_table_stats(self._evadb, "select * from table_stats;")
         stmt = parse_query(sql_query)
         return EvaDBQuery(self._evadb, stmt)
 

@@ -17,6 +17,7 @@ from evadb.configuration.constants import EvaDB_INSTALLATION_DIR
 from evadb.database import EvaDBDatabase
 from evadb.server.command_handler import execute_query_fetch_all
 from evadb.configuration import constants
+from collections import Counter
 
 NDARRAY_DIR = "ndarray"
 TUTORIALS_DIR = "tutorials"
@@ -198,8 +199,6 @@ chatgpt_function_query = """CREATE FUNCTION IF NOT EXISTS ChatGPT
     EvaDB_INSTALLATION_DIR
 )
 
-getdata_from_stats_query = "SELECT * FROM table_stats;"
-
 yolo8n_query = """CREATE FUNCTION IF NOT EXISTS Yolo
             TYPE  ultralytics
             MODEL 'yolov8n.pt';
@@ -241,19 +240,7 @@ Concat_function_query = """CREATE FUNCTION IF NOT EXISTS CONCAT
     EvaDB_INSTALLATION_DIR
 )
 
-create_buckets_query = """CREATE TABLE level_counts (
-    level Integer,
-    row_count INTEGER
-);"""
-
-insert_into_buckets = """INSERT INTO level_counts
-SELECT
-    level,
-    COUNT(*) AS row_count
-FROM mydata3
-GROUP BY level;"""
-
-extract_data_buckets = """Select * from level_counts"""
+get_all_tables = "show tables"
 
 
 def init_builtin_functions(db: EvaDBDatabase, mode: str = "debug") -> None:
@@ -298,8 +285,7 @@ def init_builtin_functions(db: EvaDBDatabase, mode: str = "debug") -> None:
         chatgpt_function_query,
         face_detection_function_query,
         # Mvit_function_query,
-        extract_data_buckets,
-        getdata_from_stats_query,
+        get_all_tables,
         Sift_function_query,
         Yolo_function_query,
         stablediffusion_function_query,
@@ -325,20 +311,38 @@ def init_builtin_functions(db: EvaDBDatabase, mode: str = "debug") -> None:
     # ignore exceptions during the bootstrapping phase due to missing packages
     for query in queries:
         try:
-            if query.startswith("SELECT"):
-                query_result = execute_query_fetch_all(
-                db, query, do_not_print_exceptions=False, do_not_raise_exceptions=True
-            )
-                for _, row in query_result.iterrows():
-                    entry = {
-                        'table_name': row['table_stats.table_name'],
-                        'num_rows': row['table_stats.num_rows'],
-                        'hist': row['table_stats.hist']
-                    }
-                    constants.EVADB_STATS[row['table_stats.table_name']] = entry
+            if query.startswith("show"):
+                tables = execute_query_fetch_all(
+                    db, query, do_not_print_exceptions=False, do_not_raise_exceptions=True
+                )
+                # delete all entries in table_stats table. This is a temporary fix because update query is not yet 
+                # available in EvaDB, the table_stats table is deleted and new data is inserted everytime
+                execute_query_fetch_all(db, "drop table table_stats", False, True)
+                execute_query_fetch_all(db, "create table table_stats(table_name TEXT, num_rows integer, hist TEXT)", False, True)
+                # get the histograms for each column for every table
+                row_count = 0
+                for _,table in tables.iterrows():
+                    if str(table['name']) != "table_stats":
+                        final_result = []
+                        result_dict = {}
+                        table_data_query = f"select * from {table['name']}"
+                        table_data = execute_query_fetch_all(db, table_data_query, False, True)
+                        for column in table_data.columns:
+                            try:
+                                column_dict = dict(Counter(table_data.column_as_numpy_array(column)))
+                                row_count = len(table_data.column_as_numpy_array(column))
+                                result_dict[column] = column_dict
+                            except Exception as e:
+                                print(e)
+                        final_result = [{key: value} for key, value in result_dict.items()]
+                        try:
+                            insert_into_table_stats = f"insert into table_stats(table_name, num_rows, hist) values(\"{table['name']}\",{row_count},\"{final_result}\");"
+                            execute_query_fetch_all(db, insert_into_table_stats, False, True)
+                        except Exception as e:
+                            print(e)
             else:
                 execute_query_fetch_all(
-                db, query, do_not_print_exceptions=False, do_not_raise_exceptions=True
-            )
+                    db, query, do_not_print_exceptions=False, do_not_raise_exceptions=True
+                )
         except Exception as e:
             pass
