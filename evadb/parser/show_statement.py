@@ -40,7 +40,7 @@ class ShowStatement(AbstractStatement):
             show_str = "FUNCTIONS"
         elif self.show_type == ShowType.TABLES:
             show_str = "TABLES"
-        elif self.show_type == ShowType.CONFIG:
+        elif self.show_type == ShowType.CONFIGS:
             show_str = self.show_val
         elif self.show_type == ShowType.DATABASES:
             show_str = "DATABASES"
