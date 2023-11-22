@@ -33,7 +33,7 @@ class ShowInfoExecutor(AbstractExecutor):
             self.node.show_type is ShowType.FUNCTIONS
             or ShowType.TABLES
             or ShowType.DATABASES
-            or ShowType.CONFIG
+            or ShowType.CONFIGS
         ), f"Show command does not support type {self.node.show_type}"
 
         if self.node.show_type is ShowType.FUNCTIONS:
@@ -50,13 +50,13 @@ class ShowInfoExecutor(AbstractExecutor):
             databases = self.catalog().get_all_database_catalog_entries()
             for db in databases:
                 show_entries.append(db.display_format())
-        elif self.node.show_type is ShowType.CONFIG:
+        elif self.node.show_type is ShowType.CONFIGS:
             show_entries = {}
-            # CONFIG is a special word, which is used to display all the configurations
-            if self.node.show_val.upper() == ShowType.CONFIG.name:
+            # CONFIGS is a special word, which is used to display all the configurations
+            if self.node.show_val.upper() == ShowType.CONFIGS.name:
                 configs = self.catalog().get_all_configuration_catalog_entries()
                 for config in configs:
-                    show_entries[config.key] = [config.value]
+                    show_entries[config.key] = config.value
             else:
                 value = self.catalog().get_configuration_catalog_value(
                     key=self.node.show_val.upper(),

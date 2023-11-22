@@ -16,7 +16,7 @@ from evadb.database import EvaDBDatabase
 from evadb.executor.abstract_executor import AbstractExecutor
 from evadb.parser.set_statement import SetStatement
 
-RESERVED_CONFIG_KEYWORDS = ["CONFIG"]
+RESERVED_CONFIG_KEYWORDS = ["CONFIG","CONFIGS"]
 
 
 class SetExecutor(AbstractExecutor):

@@ -1,4 +1,4 @@
-SHOW CONFIG
+SHOW CONFIGS
 ==============
 
 .. _show_config:

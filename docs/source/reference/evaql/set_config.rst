@@ -1,4 +1,4 @@
-SET CONFIG
+SET CONFIGS
 ==============
 
 .. _set_config:

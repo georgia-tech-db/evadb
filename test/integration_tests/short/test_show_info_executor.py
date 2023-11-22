@@ -27,6 +27,7 @@ from evadb.functions.function_bootstrap_queries import (
 )
 from evadb.models.storage.batch import Batch
 from evadb.server.command_handler import execute_query_fetch_all
+from evadb.evadb_config import BASE_EVADB_CONFIG
 
 NUM_DATABASES = 6
 
@@ -128,10 +129,12 @@ class ShowExecutorTest(unittest.TestCase):
             execute_query_fetch_all(self.evadb, "SHOW BADCONFIG")
 
     def test_show_all_configs(self):
-        show_all_config_value = execute_query_fetch_all(self.evadb, "SHOW CONFIG")
+        show_all_config_value = execute_query_fetch_all(self.evadb, "SHOW CONFIGS")
 
-        # QUES : What do I test this against?
-        print(show_all_config_value)
+        # NOTE :- Since the values of configs like the paths are not user/machine/installation agnostic,
+        # It doesn't make sense to test for the values. Hence, we are only testing for the keys
+        columns = show_all_config_value.columns
+        self.assertEqual(columns == list(BASE_EVADB_CONFIG.keys()), True)
 
     # integration test
     def test_show_databases(self):
