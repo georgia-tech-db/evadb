@@ -63,4 +63,3 @@ Below is an example query specifying the above parameters:
    PREDICT 'rental_price'
    TIME_LIMIT 3600
    TUNE_FOR_MEMORY True;
-
