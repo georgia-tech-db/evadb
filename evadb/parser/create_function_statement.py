@@ -15,6 +15,7 @@
 from pathlib import Path
 from typing import List, Tuple
 
+from evadb.configuration.constants import EvaDB_INSTALLATION_DIR
 from evadb.parser.create_statement import ColumnDefinition
 from evadb.parser.select_statement import SelectStatement
 from evadb.parser.statement import AbstractStatement
