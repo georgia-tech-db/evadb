@@ -905,7 +905,7 @@ class ParserTests(unittest.TestCase):
 
         show_config_stmt = evadb_statement_list[0]
 
-        expected_stmt = ShowStatement(show_type=ShowType.CONFIG, show_val="OPENAIKEY")
+        expected_stmt = ShowStatement(show_type=ShowType.CONFIGS, show_val="OPENAIKEY")
 
         self.assertEqual(show_config_stmt, expected_stmt)
 

@@ -16,6 +16,8 @@ from evadb.database import EvaDBDatabase
 from evadb.executor.abstract_executor import AbstractExecutor
 from evadb.parser.set_statement import SetStatement
 
+RESERVED_CONFIG_KEYWORDS = ["CONFIG", "CONFIGS"]
+
 
 class SetExecutor(AbstractExecutor):
     def __init__(self, db: EvaDBDatabase, node: SetStatement):
@@ -36,6 +38,13 @@ class SetExecutor(AbstractExecutor):
         as a separate PR for the issue #1140, where all instances of config use
         will be replaced
         """
+
+        if self.node.config_name in RESERVED_CONFIG_KEYWORDS:
+            raise Exception(
+                "{} is a reserved keyword for configurations. Please use a word other than the following list: {}".format(
+                    self.node.config_name, RESERVED_CONFIG_KEYWORDS
+                )
+            )
 
         self.catalog().upsert_configuration_catalog_entry(
             key=self.node.config_name,

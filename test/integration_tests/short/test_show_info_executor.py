@@ -21,6 +21,7 @@ import pandas as pd
 import pytest
 
 from evadb.configuration.constants import EvaDB_ROOT_DIR
+from evadb.evadb_config import BASE_EVADB_CONFIG
 from evadb.functions.function_bootstrap_queries import (
     ArrayCount_function_query,
     Fastrcnn_function_query,
@@ -118,7 +119,6 @@ class ShowExecutorTest(unittest.TestCase):
 
     def test_show_config_execution(self):
         execute_query_fetch_all(self.evadb, "SET OPENAIKEY = 'ABCD';")
-        #
         expected_output = Batch(pd.DataFrame({"OPENAIKEY": ["ABCD"]}))
 
         show_config_value = execute_query_fetch_all(self.evadb, "SHOW OPENAIKEY")
@@ -127,6 +127,14 @@ class ShowExecutorTest(unittest.TestCase):
         # Ensure an Exception is raised if config is not present
         with self.assertRaises(Exception):
             execute_query_fetch_all(self.evadb, "SHOW BADCONFIG")
+
+    def test_show_all_configs(self):
+        show_all_config_value = execute_query_fetch_all(self.evadb, "SHOW CONFIGS")
+
+        # NOTE :- Since the values of configs like the paths are not user/machine/installation agnostic,
+        # It doesn't make sense to test for the values. Hence, we are only testing for the keys
+        columns = show_all_config_value.columns
+        self.assertEqual(columns == list(BASE_EVADB_CONFIG.keys()), True)
 
     # integration test
     def test_show_databases(self):
