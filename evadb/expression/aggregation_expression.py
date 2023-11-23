@@ -54,6 +54,8 @@ class AggregationExpression(AbstractExpression):
             batch.aggregate("min")
         elif self.etype == ExpressionType.AGGREGATION_MAX:
             batch.aggregate("max")
+        elif self.etype == ExpressionType.AGGREGATION_STRING_AGG:
+            batch = Batch.string_agg(batch)
         batch.reset_index()
 
         column_name = self.etype.name
@@ -82,6 +84,8 @@ class AggregationExpression(AbstractExpression):
             return "MIN"
         elif self.etype == ExpressionType.AGGREGATION_MAX:
             return "MAX"
+        elif self.etype == ExpressionType.AGGREGATION_STRING_AGG:
+            return "STRING_AGG"
         else:
             raise NotImplementedError
 

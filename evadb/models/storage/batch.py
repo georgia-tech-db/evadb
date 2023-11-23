@@ -209,6 +209,36 @@ class Batch:
             by, ascending=sort_type, ignore_index=True, inplace=True
         )
 
+    def join_columns_for_agg(self, by) -> None:
+        """
+        joins columns for aggregation
+
+        Args:
+            by: list of column names
+        """
+
+        assert by is not None
+        for column in by:
+            assert (
+                column in self._frames.columns
+            ), "Can not join columns for agg in non-projected column: {}".format(column)
+
+        count = 0
+        for frame in self._frames:
+            for column in by:
+                if isinstance(column, str):
+                    if "combined" in frame:
+                        self._frames[count]["combined"] = self._frames[count]["combined"] + column
+                    else:
+                        self._frames[count]["combined"] = column
+                else:
+                    if "combined" in frame:
+                        self._frames[count]["combined"] = self._frames[count]["combined"] + self._frames[count][column.col_alias].astype(str)
+                    else:
+                        self._frames[count]["combined"] = self._frames[count][column.col_alias].astype(str)
+            count += 1
+        return self._frames
+
     def invert(self) -> None:
         self._frames = ~self._frames
 
@@ -310,6 +340,23 @@ class Batch:
         return Batch(frame)
 
     @classmethod
+    def string_agg(cls, separator: str, batch_list: Iterable[Batch], copy=True) -> Batch:
+        """Concat a list of joined column values with a separator.
+        Notice: only frames are considered.
+        """
+
+        # pd.concat will convert generator into list, so it does not hurt
+        # if we convert ourselves.
+        frame_list = list([batch.frames for batch in batch_list])
+        if len(frame_list) == 0:
+            return Batch()
+        frame = pd.concat(frame_list, ignore_index=True, copy=copy)
+
+        stringagg = separator.join(frame["combined"])
+        frame["string_agg"] = stringagg
+        return Batch(frame)
+
+    @classmethod
     def stack(cls, batch: Batch, copy=True) -> Batch:
         """Stack a given batch along the 0th dimension.
         Notice: input assumed to contain only one column with video frames
@@ -369,7 +416,7 @@ class Batch:
     def aggregate(self, method: str) -> None:
         """
         Aggregate batch based on method.
-        Methods can be sum, count, min, max, mean
+        Methods can be sum, count, min, max, mean, string_agg
 
         Arguments:
             method: string with one of the five above options
