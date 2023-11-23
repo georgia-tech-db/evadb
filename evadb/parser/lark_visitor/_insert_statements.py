@@ -43,6 +43,9 @@ class Insert:
                     # Support only (value1, value2, .... value n)
                     value_list = insrt_value[0]
 
+        for i in range(len(column_list)):
+            column_list[i].name = column_list[i].name.lower()
+
         insert_stmt = InsertTableStatement(table_ref, column_list, value_list)
         return insert_stmt
 

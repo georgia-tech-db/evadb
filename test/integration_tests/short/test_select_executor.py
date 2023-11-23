@@ -18,6 +18,7 @@ from test.util import (  # file_remove,
     create_dummy_batches,
     create_sample_video,
     create_table,
+    create_table_with_uppercase_columns,
     file_remove,
     get_evadb_for_testing,
     get_logical_query_plan,
@@ -53,6 +54,7 @@ class SelectExecutorTest(unittest.TestCase):
         cls.table1 = create_table(cls.evadb, "table1", 100, 3)
         cls.table2 = create_table(cls.evadb, "table2", 500, 3)
         cls.table3 = create_table(cls.evadb, "table3", 1000, 3)
+        create_table_with_uppercase_columns(cls.evadb, "table_col", 3)
 
     @classmethod
     def tearDownClass(cls):
@@ -62,7 +64,20 @@ class SelectExecutorTest(unittest.TestCase):
         execute_query_fetch_all(cls.evadb, """DROP TABLE IF EXISTS table1;""")
         execute_query_fetch_all(cls.evadb, """DROP TABLE IF EXISTS table2;""")
         execute_query_fetch_all(cls.evadb, """DROP TABLE IF EXISTS table3;""")
+        execute_query_fetch_all(cls.evadb, """DROP TABLE IF EXISTS table_col;""")
         execute_query_fetch_all(cls.evadb, "DROP TABLE IF EXISTS MyVideo;")
+
+    def test_select_from_table_with_uppercase_columns(self):
+        select_query = "SELECT Col FROM table_col;"
+        actual_batch = execute_query_fetch_all(self.evadb, select_query)
+        expected_rows = [
+            {
+                "table_col.col": i
+            }
+            for i in range(3)
+        ]
+        expected_batch = Batch(frames=pd.DataFrame(expected_rows))
+        self.assertEqual(actual_batch, expected_batch)
 
     def test_should_load_and_sort_in_table(self):
         select_query = "SELECT data, id FROM MyVideo ORDER BY id;"
