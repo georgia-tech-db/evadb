@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import inspect
 from pathlib import Path
 
 from evadb.binder.binder_utils import (
@@ -31,9 +32,9 @@ from evadb.expression.tuple_value_expression import TupleValueExpression
 from evadb.parser.types import FunctionType
 from evadb.third_party.huggingface.binder import assign_hf_function
 from evadb.utils.generic_utils import (
-    load_function_class_from_file,
     string_comparison_case_insensitive,
 )
+from evadb.utils.load_function_class_from_file import load_function_class_from_file
 from evadb.utils.logging_manager import logger
 
 
@@ -117,7 +118,10 @@ def bind_func_expr(binder: StatementBinder, node: FunctionExpression):
                     )
                     properties["openai_api_key"] = openai_key
 
-            node.function = lambda: function_class(**properties)
+            if inspect.isclass(function_class):
+                node.function = lambda: function_class(**properties)
+            else:
+                node.function = function_class
         except Exception as e:
             err_msg = (
                 f"{str(e)}. Please verify that the function class name in the "

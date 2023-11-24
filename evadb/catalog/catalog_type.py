@@ -74,6 +74,23 @@ class NdArrayType(EvaDBEnum):
     ANYTYPE  # noqa: F821
 
     @classmethod
+    def from_python_type(cls, t):
+        from decimal import Decimal
+
+        if t == int:
+            return cls.INT64
+        elif t == str:
+            return cls.STR
+        elif t == bool:
+            return cls.BOOL
+        elif t == float:
+            return cls.FLOAT64
+        elif t == Decimal:
+            return cls.DECIMAL
+        else:
+            return cls.ANYTYPE
+
+    @classmethod
     def to_numpy_type(cls, t):
         from decimal import Decimal
 

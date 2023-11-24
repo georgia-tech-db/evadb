@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from dataclasses import dataclass
+import inspect
 from typing import Callable, List, Tuple
 
 import numpy as np
@@ -163,7 +164,10 @@ class FunctionExpression(AbstractExpression):
 
     def _gpu_enabled_function(self):
         if self._function_instance is None:
-            self._function_instance = self.function()
+            if inspect.isclass(self.function):
+                self._function_instance = self.function()
+            else:
+                self._function_instance = self.function
             if isinstance(self._function_instance, GPUCompatible):
                 device = self._context.gpu_device()
                 if device != NO_GPU:
