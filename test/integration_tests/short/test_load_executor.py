@@ -19,6 +19,7 @@ from pathlib import Path
 from test.util import (
     create_dummy_csv_batches,
     create_sample_csv,
+    create_csv_with_comlumn_name_spaces,
     create_sample_video,
     file_remove,
     get_evadb_for_testing,
@@ -45,6 +46,7 @@ class LoadExecutorTests(unittest.TestCase):
             f"{EvaDB_ROOT_DIR}/test/data/uadetrac/small-data/MVI_20011/*.jpg"
         )
         self.csv_file_path = create_sample_csv()
+        self.csv_file_with_spaces_path = create_csv_with_comlumn_name_spaces()
 
     def tearDown(self):
         shutdown_ray()
@@ -84,7 +86,7 @@ class LoadExecutorTests(unittest.TestCase):
 
             CREATE TABLE IF NOT EXISTS MyVideoCSV (
                 id INTEGER UNIQUE,
-                `frame_id` INTEGER,
+                frame_id INTEGER,
                 video_id INTEGER,
                 dataset_name TEXT(30),
                 label TEXT(30),
@@ -100,9 +102,50 @@ class LoadExecutorTests(unittest.TestCase):
         execute_query_fetch_all(self.evadb, load_query)
 
         # execute a select query
-        select_query = """SELECT id, `frame_id`, video_id,
+        select_query = """SELECT id, frame_id, video_id,
                           dataset_name, label, bbox,
                           object_id
+                          FROM MyVideoCSV;"""
+
+        actual_batch = execute_query_fetch_all(self.evadb, select_query)
+        actual_batch.sort()
+
+        # assert the batches are equal
+        expected_batch = next(create_dummy_csv_batches())
+        expected_batch.modify_column_alias("myvideocsv")
+        self.assertEqual(actual_batch, expected_batch)
+
+        # clean up
+        drop_query = "DROP TABLE IF EXISTS MyVideoCSV;"
+        execute_query_fetch_all(self.evadb, drop_query)
+
+    ###################################
+    # integration tests for csv files with spaces in column names
+    def test_should_load_csv_in_table_with_spaces_in_column_name(self):
+        # loading a csv requires a table to be created first
+        create_table_query = """
+
+            CREATE TABLE IF NOT EXISTS MyVideoCSV (
+                id INTEGER UNIQUE, 
+                `frame id` INTEGER,
+                `video id` INTEGER,
+                `dataset name` TEXT(30),
+                label TEXT(30),
+                bbox NDARRAY FLOAT32(4),
+                `object id` INTEGER
+            );
+
+            """
+        execute_query_fetch_all(self.evadb, create_table_query)
+
+        # load the CSV
+        load_query = f"LOAD CSV '{self.csv_file_with_spaces_path}' INTO MyVideoCSV;"
+        execute_query_fetch_all(self.evadb, load_query)
+
+        # execute a select query
+        select_query = """SELECT id, `frame id`, `video id`,
+                          `dataset name`, label, bbox,
+                          `object id`
                           FROM MyVideoCSV;"""
 
         actual_batch = execute_query_fetch_all(self.evadb, select_query)
