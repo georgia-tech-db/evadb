@@ -52,7 +52,7 @@ class AggregationExpressionsTest(unittest.TestCase):
 
     def test_aggregation_segment(self):
         columnName = TupleValueExpression(name=0)
-        columnName.col_alias = 0
+        columnName.col_alias = 0 # sets the col to use 
         aggr_expr = AggregationExpression(
             ExpressionType.AGGREGATION_SEGMENT, None, columnName
         )
@@ -115,6 +115,37 @@ class AggregationExpressionsTest(unittest.TestCase):
         batch = aggr_expr.evaluate(tuples, None)
         self.assertEqual(3, batch.frames.iloc[0][0])
         self.assertNotEqual(str(aggr_expr), None)
+
+    def test_aggregation_string_agg(self):
+        columnName = TupleValueExpression(name=0)
+        columnName.col_alias = 0
+        aggr_expr = AggregationExpression(
+            ExpressionType.AGGREGATION_STRING_AGG, None, columnName
+        )
+        tuples = Batch(pd.DataFrame({0: ["Hello", "World", "EvaDB" "Here"], 1: ["Goodbye", "Everyone", "EvaDB" "Out"]}))
+        batch = aggr_expr.evaluate(tuples, delimiter=" ")
+        self.assertEqual("Hello World EvaDB Here", batch.frames.iloc[0][0])
+        self.assertNotEqual(str(aggr_expr), None)
+
+    def test_aggregation_string_agg_incorrect_column(self):
+        columnName = TupleValueExpression(name=0)
+        columnName.col_alias = 2
+        aggr_expr = AggregationExpression(
+            ExpressionType.AGGREGATION_STRING_AGG, None, columnName
+        )
+        tuples = Batch(pd.DataFrame({0: ["Hello", "World", "EvaDB" "Here"], 1: ["Goodbye", "Everyone", "EvaDB" "Out"]}))
+        with pytest.raises(KeyError):
+            batch = aggr_expr.evaluate(tuples, delimiter=" ")
+
+    def test_aggregation_string_agg_incorrect_delimiter(self):
+        columnName = TupleValueExpression(name=0)
+        columnName.col_alias = 0
+        aggr_expr = AggregationExpression(
+            ExpressionType.AGGREGATION_STRING_AGG, None, columnName
+        )
+        tuples = Batch(pd.DataFrame({0: ["Hello", "World", "EvaDB" "Here"], 1: ["Goodbye", "Everyone", "EvaDB" "Out"]}))
+        with pytest.raises(ValueError):
+            batch = aggr_expr.evaluate(tuples, delimiter=0)
 
     def test_aggregation_incorrect_etype(self):
         incorrect_etype = 100
