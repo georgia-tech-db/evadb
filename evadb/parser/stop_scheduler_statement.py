@@ -12,15 +12,25 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import multiprocessing
-from evadb.database import EvaDBDatabase
-from evadb.executor.abstract_executor import AbstractExecutor
-from evadb.parser.start_scheduler_statement import StartSchedulerStatement
-from evadb.utils.logging_manager import logger
+from __future__ import annotations
 
-class StartSchedulerExecutor(AbstractExecutor):
-    def __init__(self, db: EvaDBDatabase, node: StartSchedulerStatement):
-        super().__init__(db, node)
+from typing import Any
 
-    def exec(self, *args, **kwargs):
-        logger.debug("No op for StartSchedulerExecutor")
+from evadb.parser.statement import AbstractStatement
+from evadb.parser.types import StatementType
+
+
+class StopSchedulerStatement(AbstractStatement):
+    def __init__(self):
+        super().__init__(StatementType.STOP)
+
+    def __str__(self):
+        return "STOP JOB_SCHEDULER"
+
+    def __eq__(self, other):
+        if not isinstance(other, StopSchedulerStatement):
+            return False
+        return True
+    
+    def __hash__(self) -> int:
+        return super().__hash__()

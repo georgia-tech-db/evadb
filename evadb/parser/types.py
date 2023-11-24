@@ -44,6 +44,7 @@ class StatementType(EvaDBEnum):
     SET  # noqa: F821
     CREATE_JOB  # noqa: F821
     START # noqa: F821
+    STOP # noqa: F821
     # add other types
 
 

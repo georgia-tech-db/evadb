@@ -18,7 +18,7 @@ from evadb.parser.start_scheduler_statement import StartSchedulerStatement
 
 
 ##################################################################
-# START STATEMENT
+# START SCHEDULER STATEMENT
 ##################################################################
 class StartScheduler:
     def start_scheduler_statement(self, tree):

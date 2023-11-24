@@ -15,12 +15,12 @@
 import multiprocessing
 from evadb.database import EvaDBDatabase
 from evadb.executor.abstract_executor import AbstractExecutor
-from evadb.parser.start_scheduler_statement import StartSchedulerStatement
+from evadb.parser.stop_scheduler_statement import StopSchedulerStatement
 from evadb.utils.logging_manager import logger
 
-class StartSchedulerExecutor(AbstractExecutor):
-    def __init__(self, db: EvaDBDatabase, node: StartSchedulerStatement):
+class StopSchedulerExecutor(AbstractExecutor):
+    def __init__(self, db: EvaDBDatabase, node: StopSchedulerStatement):
         super().__init__(db, node)
 
     def exec(self, *args, **kwargs):
-        logger.debug("No op for StartSchedulerExecutor")
+        logger.debug("No op for StopSchedulerExecutor")

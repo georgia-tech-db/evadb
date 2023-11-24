@@ -28,6 +28,7 @@ from evadb.parser.select_statement import SelectStatement
 from evadb.parser.set_statement import SetStatement
 from evadb.parser.show_statement import ShowStatement
 from evadb.parser.start_scheduler_statement import StartSchedulerStatement
+from evadb.parser.stop_scheduler_statement import StopSchedulerStatement
 from evadb.parser.types import ObjectType
 from evadb.parser.use_statement import UseStatement
 
@@ -39,6 +40,7 @@ SKIP_BINDER_AND_OPTIMIZER_STATEMENTS = (
     UseStatement,
     SetStatement,
     StartSchedulerStatement,
+    StopSchedulerStatement,
 )
 
 

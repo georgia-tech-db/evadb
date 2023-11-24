@@ -12,15 +12,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import multiprocessing
-from evadb.database import EvaDBDatabase
-from evadb.executor.abstract_executor import AbstractExecutor
-from evadb.parser.start_scheduler_statement import StartSchedulerStatement
-from evadb.utils.logging_manager import logger
+from lark.tree import Tree
 
-class StartSchedulerExecutor(AbstractExecutor):
-    def __init__(self, db: EvaDBDatabase, node: StartSchedulerStatement):
-        super().__init__(db, node)
+from evadb.parser.stop_scheduler_statement import StopSchedulerStatement
 
-    def exec(self, *args, **kwargs):
-        logger.debug("No op for StartSchedulerExecutor")
+
+##################################################################
+# STOP SCHEDULER STATEMENT
+##################################################################
+class StopScheduler:
+    def stop_scheduler_statement(self, tree):
+        stop_stmt = StopSchedulerStatement()
+        return stop_stmt
