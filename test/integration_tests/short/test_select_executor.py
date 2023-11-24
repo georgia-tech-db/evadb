@@ -70,12 +70,7 @@ class SelectExecutorTest(unittest.TestCase):
     def test_select_from_table_with_uppercase_columns(self):
         select_query = "SELECT Col FROM table_col;"
         actual_batch = execute_query_fetch_all(self.evadb, select_query)
-        expected_rows = [
-            {
-                "table_col.col": i
-            }
-            for i in range(3)
-        ]
+        expected_rows = [{"table_col.col": i} for i in range(3)]
         expected_batch = Batch(frames=pd.DataFrame(expected_rows))
         self.assertEqual(actual_batch, expected_batch)
 

@@ -381,14 +381,15 @@ def create_table(db, table_name, num_rows, num_columns):
     df.columns = [f"{table_name}.{col}" for col in df.columns]
     return df
 
+
 def create_table_with_uppercase_columns(db, table_name, num_rows):
     create_table_query = f"CREATE TABLE IF NOT EXISTS {table_name} (Col INTEGER);"
     execute_query_fetch_all(db, create_table_query)
-    columns = ["Col1"] #, "Col2", "Col3"]
     insert_query = "INSERT INTO {}(Col) VALUES ({});"
     for i in range(num_rows):
         execute_query_fetch_all(db, insert_query.format(table_name, i))
     # Add df stuff later on...
+
 
 def create_sample_image():
     img_path = os.path.join(get_tmp_dir(), "dummy.jpg")
