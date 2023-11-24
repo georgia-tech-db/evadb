@@ -43,6 +43,11 @@ class CommonClauses:
             return (self.visit(tree.children[0]), self.visit(tree.children[1]))
 
     def uid(self, tree):
+        if (hasattr(tree.children[0],"type") and tree.children[0].type == "REVERSE_QUOTE_ID"):
+            # tree.children[0].value = tree.children[0].value.replace("`","")
+            temp = str(tree.children[0]).replace("`","")
+            tree.children[0].type = "simple_id"
+            return temp
         return self.visit(tree.children[0])
 
     def full_column_name(self, tree):

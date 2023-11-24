@@ -84,7 +84,7 @@ class LoadExecutorTests(unittest.TestCase):
 
             CREATE TABLE IF NOT EXISTS MyVideoCSV (
                 id INTEGER UNIQUE,
-                frame_id INTEGER,
+                `frame_id` INTEGER,
                 video_id INTEGER,
                 dataset_name TEXT(30),
                 label TEXT(30),
@@ -100,7 +100,7 @@ class LoadExecutorTests(unittest.TestCase):
         execute_query_fetch_all(self.evadb, load_query)
 
         # execute a select query
-        select_query = """SELECT id, frame_id, video_id,
+        select_query = """SELECT id, `frame_id`, video_id,
                           dataset_name, label, bbox,
                           object_id
                           FROM MyVideoCSV;"""

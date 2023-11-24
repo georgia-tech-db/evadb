@@ -304,7 +304,7 @@ def create_sample_csv(num_frames=NUM_FRAMES):
             random_coords = 200 + 300 * np.random.random(4)
             sample_meta[index] = {
                 "id": index,
-                "frame_id": frame_id,
+                "frame id": frame_id,
                 "video_id": video_id,
                 "dataset_name": "test_dataset",
                 "label": sample_labels[np.random.choice(len(sample_labels))],
