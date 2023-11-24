@@ -34,6 +34,7 @@ from evadb.parser.lark_visitor._rename_statement import RenameTable
 from evadb.parser.lark_visitor._select_statement import Select
 from evadb.parser.lark_visitor._set_statement import Set
 from evadb.parser.lark_visitor._show_statements import Show
+from evadb.parser.lark_visitor._start_scheduler_statement import StartScheduler
 from evadb.parser.lark_visitor._table_sources import TableSources
 from evadb.parser.lark_visitor._use_statement import Use
 
@@ -81,6 +82,7 @@ class LarkInterpreter(
     Delete,
     Use,
     Set,
+    StartScheduler,
 ):
     def __init__(self, query):
         super().__init__()
