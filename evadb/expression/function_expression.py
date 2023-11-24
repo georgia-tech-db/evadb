@@ -68,6 +68,7 @@ class FunctionExpression(AbstractExpression):
         self.alias = alias
         self.function_obj: FunctionCatalogEntry = None
         self.output_objs: List[FunctionIOCatalogEntry] = []
+        self.input_objs: List[FunctionIOCatalogEntry] = []
         self.projection_columns: List[str] = []
         self._cache: FunctionExpressionCache = None
         self._stats = FunctionStats()
@@ -183,6 +184,9 @@ class FunctionExpression(AbstractExpression):
         func_args = Batch.merge_column_wise(
             [child.evaluate(batch, **kwargs) for child in self.children]
         )
+
+        io_names_and_rename_rules = [(o.name, o.rename_rules) for o in self.input_objs]
+        func_args.rename_for_function_io(self._name, io_names_and_rename_rules)
 
         if not self._cache:
             return func_args.apply_function_expression(func)

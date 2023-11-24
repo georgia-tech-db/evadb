@@ -92,10 +92,15 @@ class PandasDataframe(IOArgument):
         for column_name, column_type, column_shape in zip(
             self.columns, self.column_types, self.column_shapes
         ):
+            rename_rules = column_name
+            if " as " in column_name:
+                rename_rules, column_name = column_name.split(" as ")
+
             catalog_entries.append(
                 FunctionIOCatalogEntry(
                     name=column_name,
                     type=ColumnType.NDARRAY,
+                    rename_rules=rename_rules,
                     is_nullable=False,
                     array_type=column_type,
                     array_dimensions=column_shape,

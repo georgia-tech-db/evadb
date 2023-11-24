@@ -128,6 +128,7 @@ def bind_func_expr(binder: StatementBinder, node: FunctionExpression):
 
     node.function_obj = function_obj
     output_objs = binder._catalog().get_function_io_catalog_output_entries(function_obj)
+    input_objs = binder._catalog().get_function_io_catalog_input_entries(function_obj)
     if node.output:
         for obj in output_objs:
             if obj.name.lower() == node.output:
@@ -141,6 +142,7 @@ def bind_func_expr(binder: StatementBinder, node: FunctionExpression):
         node.output_objs = output_objs
         node.projection_columns = [obj.name.lower() for obj in output_objs]
 
+    node.input_objs = input_objs
     resolve_alias_table_value_expression(node)
 
 

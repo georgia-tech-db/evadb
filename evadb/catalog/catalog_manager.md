@@ -73,6 +73,7 @@ Fields:
 ```
 name: str  
 type: ColumnType  
+rename_rules: str  
 is_nullable: bool 
 array_type: NdArrayType
 array_dimensions: Tuple[int] 
