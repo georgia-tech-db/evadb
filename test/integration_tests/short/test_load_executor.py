@@ -46,7 +46,6 @@ class LoadExecutorTests(unittest.TestCase):
             f"{EvaDB_ROOT_DIR}/test/data/uadetrac/small-data/MVI_20011/*.jpg"
         )
         self.csv_file_path = create_sample_csv()
-        self.csv_file_with_spaces_path = create_csv_with_comlumn_name_spaces()
 
     def tearDown(self):
         shutdown_ray()
@@ -126,7 +125,7 @@ class LoadExecutorTests(unittest.TestCase):
         create_table_query = """
 
             CREATE TABLE IF NOT EXISTS MyVideoCSV (
-                id INTEGER UNIQUE, 
+                id INTEGER UNIQUE,
                 `frame id` INTEGER,
                 `video id` INTEGER,
                 `dataset name` TEXT(30),
@@ -139,7 +138,7 @@ class LoadExecutorTests(unittest.TestCase):
         execute_query_fetch_all(self.evadb, create_table_query)
 
         # load the CSV
-        load_query = f"LOAD CSV '{self.csv_file_with_spaces_path}' INTO MyVideoCSV;"
+        load_query = f"LOAD CSV '{create_csv_with_comlumn_name_spaces()}' INTO MyVideoCSV;"
         execute_query_fetch_all(self.evadb, load_query)
 
         # execute a select query
