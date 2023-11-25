@@ -50,7 +50,7 @@ def missing_io_signature_helper() -> str:
     More information on the how to create the forward decorator can be found here:
     https://evadb.readthedocs.io/en/stable/source/reference/ai/custom-ai-function.html#part-1-writing-a-custom-function
     """
-    print(signature_template)
+
     return signature_template
 
 def load_io_from_function_decorators(
