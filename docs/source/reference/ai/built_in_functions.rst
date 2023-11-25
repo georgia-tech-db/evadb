@@ -4,7 +4,7 @@ Built-In Functions
 MnistImageClassifier
 --------------------
 - **Defined in:** evadb/functions/mnist_image_classifier.py
-- **Usage:** `MnistImageClassifier(input).label`
+- **Usage:** ``MnistImageClassifier(input).label``
 - **Description:** Recognizes and classifies images of handwritten numbers.
 
 FastRCNNObjectDetector
