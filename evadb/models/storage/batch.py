@@ -459,7 +459,7 @@ class Batch:
                 new_col_names.append(col_name)
                 # Iterate over each column in the dataframe
         self._frames.columns = new_col_names
-        if metadata is not None and isinstance(input_meta, pd.DataFrame):
+        if metadata is not None and isinstance(metadata[0], pd.DataFrame):
             input_meta, output_meta = metadata
             defined_column_names = [entry for entry in input_meta.columns]
             defined_column_types = [entry for entry in input_meta.column_types]
@@ -599,7 +599,9 @@ class Batch:
                     for i, def_name in enumerate(list(defined_column_names)):
                         # check if shape match
                         sample_data = self._frames[col_name].iloc[0]
-                        if hasattr(sample_data,'shape') and is_shape_matching(sample_data, defined_column_shapes[i]):
+                        if hasattr(sample_data, "shape") and is_shape_matching(
+                            sample_data, defined_column_shapes[i]
+                        ):
                             basic_element = get_basic_element(sample_data)
                             if deduce_and_map_type(
                                 basic_element, defined_column_types[i]
