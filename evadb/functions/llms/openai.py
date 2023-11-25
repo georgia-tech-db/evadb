@@ -40,7 +40,6 @@ MODEL_CHOICES = [
 _DEFAULT_PARAMS = {
     "model": "gpt-3.5-turbo",
     "temperature": 0.0,
-    "request_timeout": 30,
     "max_tokens": 1000,
     "messages": [],
 }
@@ -60,14 +59,16 @@ class OpenAILLM(BaseLLM):
         super().setup(**kwargs)
 
         try_to_import_openai()
-        import openai
+        from openai import OpenAI
 
-        openai.api_key = openai_api_key
-        if len(openai.api_key) == 0:
-            openai.api_key = os.environ.get("OPENAI_API_KEY", "")
+        api_key = openai_api_key
+        if len(openai_api_key) == 0:
+            api_key = os.environ.get("OPENAI_API_KEY", "")
         assert (
-            len(openai.api_key) != 0
+            len(api_key) != 0
         ), "Please set your OpenAI API key using SET OPENAI_API_KEY = 'sk-' or environment variable (OPENAI_API_KEY)"
+
+        self.client = OpenAI(api_key=api_key)
 
         validate_kwargs(kwargs, allowed_keys=_DEFAULT_PARAMS.keys(), required_keys=[])
         self.model_params = {**_DEFAULT_PARAMS, **kwargs}
@@ -90,13 +91,11 @@ class OpenAILLM(BaseLLM):
     def generate(self, queries: List[str], contents: List[str], prompt: str) -> List[str]:
         budget = int(os.environ.get("OPENAI_BUDGET", None))
         cost = 0
-        
-        import openai
 
         @retry(tries=6, delay=20)
         def completion_with_backoff(**kwargs):
-            return openai.ChatCompletion.create(**kwargs)
-
+            return self.client.chat.completions.create(**kwargs)
+        
         results = []
         models = []
 
