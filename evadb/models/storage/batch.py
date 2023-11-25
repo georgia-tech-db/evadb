@@ -390,9 +390,7 @@ class Batch:
         if not delimiter or not isinstance(delimiter, str):
             raise ValueError("Delimiter must be a string")
 
-        self._frames = self._frames.agg(lambda x: delimiter.join(x.astype(str)), axis=0)[column_name]
-        if isinstance(self._frames, str):
-            raise TypeError(f"ERROR: self._frames converted to a string: {self._frames}")
+        self._frames = self._frames[[column_name]].agg(lambda x: delimiter.join(x.astype(str)), axis=0)
         
     def empty(self):
         """Checks if the batch is empty
