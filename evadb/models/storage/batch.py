@@ -385,14 +385,12 @@ class Batch:
             delimiter (str): The delimiter to use for concatenation.
         """
         if column_name not in self._frames.columns:
-            raise KeyError(f"ERROR: column '{column_name}' does not exist in columns: {self._frames.columns}")
+            raise KeyError(f"ERROR: column '{column_name}' does not exist in columns: {self.columns}")
 
         if not delimiter or not isinstance(delimiter, str):
             raise ValueError("Delimiter must be a string")
 
-        self._frames = self._frames.agg(lambda x: delimiter.join(x.astype(str)), axis=0)[column_name]
-        if isinstance(self._frames, str):
-            raise TypeError(f"ERROR: self._frames converted to a string: {self._frames}")
+        self._frames = pd.DataFrame({column_name: [self._frames[column_name].astype(str).agg(delimiter.join)]})
         
     def empty(self):
         """Checks if the batch is empty
