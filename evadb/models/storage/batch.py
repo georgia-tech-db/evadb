@@ -384,15 +384,13 @@ class Batch:
             column_name (str): The name of the column to aggregate.
             delimiter (str): The delimiter to use for concatenation.
         """
-        verified_col = column_name if column_name in self._frames else None 
-        
-        if not verified_col:
+        if column_name not in self._frames.columns:
             raise KeyError(f"ERROR: column '{column_name}' does not exist in columns: {self._frames.columns}")
 
         if not delimiter or not isinstance(delimiter, str):
             raise ValueError("Delimiter must be a string")
 
-        self._frames = self._frames.agg(lambda x: delimiter.join(x.astype(str)), axis=0)[verified_col]
+        self._frames = self._frames.agg(lambda x: delimiter.join(x.astype(str)), axis=0)[column_name]
 
     def empty(self):
         """Checks if the batch is empty
