@@ -4,7 +4,7 @@
 // because we assume that inside the job, the user can specify multiple sql_statements
 // but not a create_job within a create_job.
 
-start: (sql_statement? ";")+ | (create_job ";") | (start_scheduler_statement ";") | (stop_scheduler_statement ";")
+start: (sql_statement? ";")+ | (create_job ";")
 
 sql_statement: ddl_statement | dml_statement | utility_statement | context_statement
 
@@ -14,7 +14,7 @@ ddl_statement: create_database | create_table | create_index | create_function |
 dml_statement: select_statement | insert_statement | update_statement
     | delete_statement | load_statement | set_statement
     
-utility_statement: describe_statement | show_statement | help_statement | explain_statement
+utility_statement: describe_statement | show_statement | help_statement | explain_statement | start_scheduler_statement | stop_scheduler_statement
 
 context_statement: use_statement
 
