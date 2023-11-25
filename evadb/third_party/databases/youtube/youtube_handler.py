@@ -13,9 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import pandas as pd
 import requests
 from pytube import extract
-import pandas as pd
+
 from evadb.third_party.types import DBHandler, DBHandlerResponse, DBHandlerStatus
 
 
@@ -36,11 +37,18 @@ class YoutubeHandler(DBHandler):
         "favoriteCount",
         "commentCount",
     ]
+
     def __init__(self, name: str, **kwargs):
+        """
+        Initialize the handler.
+        Args:
+            name (str): name of the DB handler instance
+            **kwargs: arbitrary keyword arguments for establishing the connection.
+        """
         super().__init__(name)
         urls = kwargs.get("youtube_urls")
         if urls is not None:
-            self.url_list = str(urls).strip().split(',')
+            self.url_list = str(urls).strip().split(",")
         else:
             self.url_list = []
         query = kwargs.get("search_query")
@@ -56,6 +64,11 @@ class YoutubeHandler(DBHandler):
         self.api_key = str(kwargs.get("youtube_token"))
 
     def connect(self):
+        """
+        Set up the connection required by the handler.
+        Returns:
+            DBHandlerStatus
+        """
         try:
             response = self._api_call(self.url_list[0], "snippet")
             if response.status_code == 200:
@@ -66,9 +79,17 @@ class YoutubeHandler(DBHandler):
             return DBHandlerStatus(status=False, error=str(e))
 
     def disconnect(self):
+        """
+        Close any existing connections.
+        """
         pass
 
     def check_connection(self) -> DBHandlerStatus:
+        """
+        Check connection to the handler.
+        Returns:
+            DBHandlerStatus
+        """
         try:
             response = self._api_call(self.url_list[0], "snippet")
             if response.status_code == 200:
@@ -79,10 +100,22 @@ class YoutubeHandler(DBHandler):
             return DBHandlerStatus(status=False, error=str(e))
 
     def get_tables(self) -> DBHandlerResponse:
+        """
+        Return the list of tables in the database.
+        Returns:
+            DBHandlerResponse
+        """
         tables_df = pd.DataFrame(["snippet", "statistics"], columns=["table_name"])
         return DBHandlerResponse(data=tables_df)
 
     def get_columns(self, table_name: str) -> DBHandlerResponse:
+        """
+        Returns the list of columns for the given table.
+        Args:
+            table_name (str): name of the table whose columns are to be retrieved.
+        Returns:
+            DBHandlerResponse
+        """
         if table_name == "snippet":
             columns_df = pd.DataFrame(self.SNIPPET_COLUMNS, columns=["column_name"])
             return DBHandlerResponse(data=columns_df)
@@ -93,32 +126,42 @@ class YoutubeHandler(DBHandler):
             return DBHandlerResponse(status=False, error="Invalid table name.")
 
     def _api_call(self, url: str, table_name: str) -> requests.models.Response:
-        """Retrieves YouTube video information such as view count, title, etc.
+        """
+        Calls the YouTube Data API with a specific video ID.
+        Args:
+            url (str): YouTube url of video we are retrieving information of.
+            table_name (str): name of table to determine which information to retrieve.
+        Returns:
+            requests.models.Response
         """
 
         video_id = extract.video_id(url)
-        url = f'https://youtube.googleapis.com/youtube/v3/videos?part={table_name}&id={video_id}&key={self.api_key}'
-        headers = {
-          'Accept': 'application/json'
-        }
+        url = f"https://youtube.googleapis.com/youtube/v3/videos?part={table_name}&id={video_id}&key={self.api_key}"
+        headers = {"Accept": "application/json"}
         response = requests.request("GET", url, headers=headers, data={})
 
         return response
 
     def _search_api_call(self) -> requests.models.Response:
-        """Retrieves YouTube video information such as view count, title, etc.
         """
-        
-        maxResults = "" if self.maxResults is None else f'&maxResults={self.maxResults}'
-        url = f'https://youtube.googleapis.com/youtube/v3/search?part=snippet{maxResults}&q={self.query}&type=video&key={self.api_key}'
-        headers = {
-          'Accept': 'application/json'
-        }
+        Calls the YouTube Data API with a search query.
+        Returns:
+            requests.models.Response
+        """
+
+        maxResults = "" if self.maxResults is None else f"&maxResults={self.maxResults}"
+        url = f"https://youtube.googleapis.com/youtube/v3/search?part=snippet{maxResults}&q={self.query}&type=video&key={self.api_key}"
+        headers = {"Accept": "application/json"}
         response = requests.request("GET", url, headers=headers, data={})
 
         return response
 
     def _get_snippet_info(self) -> pd.DataFrame:
+        """
+        Retrieves snippet information and converts it into a DataFrame.
+        Returns:
+            pd.DataFrame
+        """
         df = pd.DataFrame(columns=self.SNIPPET_COLUMNS)
         for url_index in range(len(self.url_list)):
             url = self.url_list[url_index]
@@ -137,6 +180,11 @@ class YoutubeHandler(DBHandler):
         return df
 
     def _get_statistics_info(self) -> pd.DataFrame:
+        """
+        Retrieves statistics information and converts it into a DataFrame.
+        Returns:
+            pd.DataFrame
+        """
         df = pd.DataFrame(columns=self.STATISTICS_COLUMNS)
         for url_index in range(len(self.url_list)):
             url = self.url_list[url_index]
@@ -146,17 +194,16 @@ class YoutubeHandler(DBHandler):
             else:
                 statistics = response["items"][0]["statistics"]
                 df.loc[url_index] = statistics
-        if self.query != None:
+        if self.query is not None:
             response = self._search_api_call().json()
             results = len(response["items"])
             for result_index in range(results):
                 videoId = response["items"][result_index]["id"]["videoId"]
-                url = f'https://www.youtube.com/watch?v={videoId}'
+                url = f"https://www.youtube.com/watch?v={videoId}"
                 stat_response = self._api_call(url, "statistics").json()
                 statistics = stat_response["items"][0]["statistics"]
                 df.loc[len(df)] = statistics
         return df
-
 
     def select(self, table_name: str) -> DBHandlerResponse:
         """
