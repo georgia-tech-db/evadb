@@ -26,13 +26,15 @@ from evadb.utils.generic_utils import (
     validate_kwargs,
 )
 
-_VALID_MODELs = [
+MODEL_CHOICES = [
     "gpt-4",
     "gpt-4-0314",
     "gpt-4-32k",
     "gpt-4-32k-0314",
     "gpt-3.5-turbo",
     "gpt-3.5-turbo-0301",
+    "gpt-3.5-turbo-16k",
+    "gpt-3.5-turbo-16k-0613",
 ]
 _DEFAULT_PARAMS = {
     "model": "gpt-3.5-turbo",
@@ -42,6 +44,7 @@ _DEFAULT_PARAMS = {
     "messages": [],
 }
 
+DEFAULT_PROMPT = "You are a helpful assistant that accomplishes user tasks."
 
 class OpenAILLM(BaseLLM):
     @property
@@ -68,9 +71,13 @@ class OpenAILLM(BaseLLM):
         validate_kwargs(kwargs, allowed_keys=_DEFAULT_PARAMS.keys(), required_keys=[])
         self.model_params = {**_DEFAULT_PARAMS, **kwargs}
 
-        self.model_name = self.model_params["model"]
+    def model_selection(self, prompt: str, query: str, content: str, cost: float, budget: float):
+        return self.model_params["model"]
 
     def generate(self, queries: List[str], contents: List[str], prompt: str) -> List[str]:
+        budget = int(os.environ.get("OPENAI_BUDGET", None))
+        cost = 0
+        
         import openai
 
         @retry(tries=6, delay=20)
@@ -84,8 +91,11 @@ class OpenAILLM(BaseLLM):
                 "role": "system",
                 "content": prompt
                 if prompt is not None
-                else "You are a helpful assistant that accomplishes user tasks.",
+                else DEFAULT_PROMPT,
             }
+
+            # select model
+            self.model_params["model"] = self.model_selection(prompt, query, content, cost, budget)
 
             self.model_params["messages"].append(def_sys_prompt_message)
             self.model_params["messages"].extend(
@@ -103,6 +113,13 @@ class OpenAILLM(BaseLLM):
 
             response = completion_with_backoff(**self.model_params)
             answer = response.choices[0].message.content
+
+            # cost_query = 0.0001
+            cost_query = self.get_cost(prompt, query, content, answer)[1]
+
+            cost += cost_query
+            budget -= cost_query
+
             results.append(answer)
 
         return results
@@ -111,15 +128,18 @@ class OpenAILLM(BaseLLM):
         try_to_import_tiktoken()
         import tiktoken
 
-        encoding = tiktoken.encoding_for_model(self.model_name)
-        num_prompt_tokens = len(encoding.encode(prompt))
+        encoding = tiktoken.encoding_for_model(self.model_params["model"])
+        # print(type(prompt), type(query), type(content), type(response))
+        num_prompt_tokens = len(encoding.encode(DEFAULT_PROMPT))
+        if prompt is not None:
+            num_prompt_tokens = len(encoding.encode(prompt))
         num_query_tokens = len(encoding.encode(query))
         num_content_tokens = len(encoding.encode(content))
         num_response_tokens = self.model_params["max_tokens"]
         if response is not None:
             num_response_tokens = len(encoding.encode(response))
 
-        model_stats = self.get_model_stats(self.model_name)
+        model_stats = self.get_model_stats(self.model_params["model"])
 
         token_consumed = (num_prompt_tokens+num_query_tokens+num_content_tokens, num_response_tokens)
         dollar_cost = (

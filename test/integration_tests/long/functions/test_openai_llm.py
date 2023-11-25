@@ -35,6 +35,7 @@ NUM_FRAMES = 10
 
 # set OPENAI_API_KEY
 os.environ["OPENAI_API_KEY"] = "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"
+os.environ["OPENAI_BUDGET"] = "10"
 
 @pytest.mark.notparallel
 class OpenAILLM(unittest.TestCase):
@@ -85,9 +86,6 @@ class OpenAILLM(unittest.TestCase):
         assert len(list(physical_plan.find_all(LLMPlan))) > 0
         batches = execute_query_fetch_all(self.evadb, select_query)
         self.assertEqual(batches.columns, [f"{self.function_name.lower()}.response"])
-
-        print(batches)
-
 
 if __name__ == "__main__":
     unittest.main()
