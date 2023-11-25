@@ -28,7 +28,6 @@ from evadb.utils.generic_utils import (
     is_pinecone_available,
     is_qdrant_available,
     is_replicate_available,
-    is_weaviate_available,
 )
 
 asyncio_skip_marker = pytest.mark.skipif(
@@ -53,11 +52,6 @@ chromadb_skip_marker = pytest.mark.skipif(
 milvus_skip_marker = pytest.mark.skipif(
     is_milvus_available() is False,
     reason="Skipping since pymilvus is not installed",
-)
-
-weaviate_skip_marker = pytest.mark.skipif(
-    is_weaviate_available() is False,
-    reason="Skipping since weaviate is not installed",
 )
 
 windows_skip_marker = pytest.mark.skipif(

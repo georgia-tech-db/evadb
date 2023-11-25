@@ -53,7 +53,6 @@ def forward(input_signatures: List[IOArgument], output_signatures: List[IOArgume
         input_signature (List[IOArgument]): List of input arguments for the function
         output_signature ( List[IOArgument])): List of output arguments for the function
     """
-
     def inner_fn(arg_fn):
         def wrapper(*args):
             # calling the forward function defined by the user inside the function implementation
@@ -62,6 +61,7 @@ def forward(input_signatures: List[IOArgument], output_signatures: List[IOArgume
         tags = {}
         tags["input"] = input_signatures
         tags["output"] = output_signatures
+        print("tags created here",tags)
         wrapper.tags = tags
         return wrapper
 

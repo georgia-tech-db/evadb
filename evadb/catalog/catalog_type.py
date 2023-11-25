@@ -117,7 +117,6 @@ class VectorStoreType(EvaDBEnum):
     PINECONE  # noqa: F821
     PGVECTOR  # noqa: F821
     CHROMADB  # noqa: F821
-    WEAVIATE  # noqa: F821
     MILVUS  # noqa: F821
 
 

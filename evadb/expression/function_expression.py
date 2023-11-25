@@ -126,8 +126,10 @@ class FunctionExpression(AbstractExpression):
         # note the function might be using cache
         with self._stats.timer:
             # apply the function and project the required columns
+            print("function output names",self.function_obj.outputs)
+            # print("function input names",self.function_obj.inputs)
             outcomes = self._apply_function_expression(func, batch, **kwargs)
-
+            print("RUN PASSEd THIS POINT?")
             # process outcomes only if output is not empty
             if outcomes.frames.empty is False:
                 outcomes = outcomes.project(self.projection_columns)
@@ -183,7 +185,7 @@ class FunctionExpression(AbstractExpression):
         func_args = Batch.merge_column_wise(
             [child.evaluate(batch, **kwargs) for child in self.children]
         )
-
+        # print("these are function args!!!",func.forward.tags)
         if not self._cache:
             return func_args.apply_function_expression(func)
 
@@ -229,6 +231,7 @@ class FunctionExpression(AbstractExpression):
             results[cache_miss] = cache_miss_results.to_numpy()
 
         # 5. return the correct batch
+        print("results after function", results)
         return Batch(pd.DataFrame(results, columns=output_cols))
 
     def __str__(self) -> str:
