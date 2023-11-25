@@ -6,7 +6,6 @@ Built-In Functions
 
 MnistImageClassifier
 Defined in: evadb/functions/mnist_image_classifier.py
-.. code:: mysql
    MnistImageClassifier(input).label
 Recognizes and classifies images of handwritten numbers.
 
