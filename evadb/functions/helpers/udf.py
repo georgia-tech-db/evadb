@@ -48,11 +48,12 @@ class UserDefinedFunction(AbstractFunction):
         )
 
         output_io_arg = PandasDataframe(
-            columns=[self.name],
+            columns=[self.name.lower()],
             column_types=[NdArrayType.from_python_type(self._output)],
             column_shapes=[(1,)],
         )
 
+        # set the input and output tags (similar to @forward decorator)
         self.forward.tags["input"] = [input_io_arg]
         self.forward.tags["output"] = [output_io_arg]
 
@@ -62,11 +63,8 @@ class UserDefinedFunction(AbstractFunction):
     )
     def forward(self, in_df: pd.DataFrame):
         out_df = pd.DataFrame()
-
-        for inp in self._inputs:
-            assert inp.name in in_df.columns
-
-        out_df[self.name] = in_df.apply(self._func, axis=1)
+        # apply the function to each row
+        out_df[self.name.lower()] = in_df.apply(self._func, axis=1)
 
         return out_df
     
