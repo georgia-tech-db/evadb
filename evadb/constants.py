@@ -21,3 +21,5 @@ CACHEABLE_FUNCTIONS = ["Yolo", "FaceDetector", "OCRExtractor", "HFObjectDetector
 IFRAMES = "IFRAMES"
 AUDIORATE = "AUDIORATE"
 DEFAULT_FUNCTION_EXPRESSION_COST = 100
+DBFUNCTIONS = __file__[0: -13] + "/functions/"
+ENVFUNCTIONS = "./Lib/site-packages/evadb/functions/"
