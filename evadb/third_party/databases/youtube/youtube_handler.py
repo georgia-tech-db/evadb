@@ -70,7 +70,9 @@ class YoutubeHandler(DBHandler):
             DBHandlerStatus
         """
         try:
-            response = self._api_call(self.url_list[0], "snippet")
+            response = self._api_call(
+                "https://www.youtube.com/watch?v=BYVZh5kqaFg", "snippet"
+            )
             if response.status_code == 200:
                 return DBHandlerStatus(status=True)
             else:
@@ -91,7 +93,9 @@ class YoutubeHandler(DBHandler):
             DBHandlerStatus
         """
         try:
-            response = self._api_call(self.url_list[0], "snippet")
+            response = self._api_call(
+                "https://www.youtube.com/watch?v=BYVZh5kqaFg", "snippet"
+            )
             if response.status_code == 200:
                 return DBHandlerStatus(status=True)
             else:
