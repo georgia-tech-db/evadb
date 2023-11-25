@@ -114,7 +114,7 @@ class ParserTests(unittest.TestCase):
             False,
             TableRef(TableInfo("MyVideo")),
             [
-                ColumnDefinition("featCol", None, None, None),
+                ColumnDefinition("featcol", None, None, None),
             ],
             VectorStoreType.FAISS,
             [TupleValueExpression(name="featCol")],
@@ -129,10 +129,10 @@ class ParserTests(unittest.TestCase):
             True,
             TableRef(TableInfo("MyVideo")),
             [
-                ColumnDefinition("featCol", None, None, None),
+                ColumnDefinition("featcol", None, None, None),
             ],
             VectorStoreType.FAISS,
-            [TupleValueExpression(name="featCol")],
+            [TupleValueExpression(name="featcol")],
         )
         create_index_query = (
             "CREATE INDEX IF NOT EXISTS testindex ON MyVideo (featCol) USING FAISS;"
@@ -155,13 +155,13 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(evadb_stmt_list[0].stmt_type, StatementType.CREATE_INDEX)
 
         func_expr = FunctionExpression(None, "FeatureExtractor")
-        func_expr.append_child(TupleValueExpression("featCol"))
+        func_expr.append_child(TupleValueExpression("featcol"))
         expected_stmt = CreateIndexStatement(
             "testindex",
             False,
             TableRef(TableInfo("MyVideo")),
             [
-                ColumnDefinition("featCol", None, None, None),
+                ColumnDefinition("featcol", None, None, None),
             ],
             VectorStoreType.FAISS,
             [func_expr],
@@ -823,8 +823,8 @@ class ParserTests(unittest.TestCase):
         expected_stmt = InsertTableStatement(
             TableRef(TableInfo("MyVideo")),
             [
-                TupleValueExpression("Frame_ID"),
-                TupleValueExpression("Frame_Path"),
+                TupleValueExpression("frame_id"),
+                TupleValueExpression("frame_path"),
             ],
             [
                 ConstantValueExpression(1),
