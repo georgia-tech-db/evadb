@@ -52,7 +52,7 @@ class AggregationExpressionsTest(unittest.TestCase):
 
     def test_aggregation_segment(self):
         columnName = TupleValueExpression(name=0)
-        columnName.col_alias = 0 # sets the col to use 
+        columnName.col_alias = 0  # sets the col to use
         aggr_expr = AggregationExpression(
             ExpressionType.AGGREGATION_SEGMENT, None, columnName
         )
@@ -122,7 +122,14 @@ class AggregationExpressionsTest(unittest.TestCase):
         aggr_expr = AggregationExpression(
             ExpressionType.AGGREGATION_STRING_AGG, None, columnName
         )
-        tuples = Batch(pd.DataFrame({0: ["Hello", "World", "EvaDB" "Here"], 1: ["Goodbye", "Everyone", "EvaDB" "Out"]}))
+        tuples = Batch(
+            pd.DataFrame(
+                {
+                    0: ["Hello", "World", "EvaDB", "Here"],
+                    1: ["Goodbye", "Everyone", "EvaDB", "Out"],
+                }
+            )
+        )
         batch = aggr_expr.evaluate(tuples, delimiter=" ")
         self.assertEqual("Hello World EvaDB Here", batch.frames.iloc[0][0])
         self.assertNotEqual(str(aggr_expr), None)
@@ -133,8 +140,15 @@ class AggregationExpressionsTest(unittest.TestCase):
         aggr_expr = AggregationExpression(
             ExpressionType.AGGREGATION_STRING_AGG, None, columnName
         )
-        tuples = Batch(pd.DataFrame({0: ["Hello", "World", "EvaDB" "Here"], 1: ["Goodbye", "Everyone", "EvaDB" "Out"]}))
-        with pytest.raises(KeyError):
+        tuples = Batch(
+            pd.DataFrame(
+                {
+                    0: ["Hello", "World", "EvaDB" "Here"],
+                    1: ["Goodbye", "Everyone", "EvaDB" "Out"],
+                }
+            )
+        )
+        with pytest.raises(AssertionError):
             aggr_expr.evaluate(tuples, delimiter=" ")
 
     def test_aggregation_string_agg_incorrect_delimiter(self):
@@ -143,7 +157,14 @@ class AggregationExpressionsTest(unittest.TestCase):
         aggr_expr = AggregationExpression(
             ExpressionType.AGGREGATION_STRING_AGG, None, columnName
         )
-        tuples = Batch(pd.DataFrame({0: ["Hello", "World", "EvaDB" "Here"], 1: ["Goodbye", "Everyone", "EvaDB" "Out"]}))
+        tuples = Batch(
+            pd.DataFrame(
+                {
+                    0: ["Hello", "World", "EvaDB" "Here"],
+                    1: ["Goodbye", "Everyone", "EvaDB" "Out"],
+                }
+            )
+        )
         with pytest.raises(ValueError):
             aggr_expr.evaluate(tuples, delimiter=0)
 

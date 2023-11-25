@@ -57,7 +57,7 @@ class ExpressionType(IntEnum):
     AGGREGATION_FIRST = auto()
     AGGREGATION_LAST = auto()
     AGGREGATION_SEGMENT = auto()
-    AGGREGATION_STRING_AGG = auto() 
+    AGGREGATION_STRING_AGG = auto()
 
     CASE = auto()
     # add other types

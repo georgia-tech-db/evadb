@@ -376,22 +376,21 @@ class Batch:
         """
         self._frames = self._frames.agg([method])
 
-    def aggregate_string_agg(self, column_name: str, delimiter: str) -> None:
+    def aggregate_string_agg(self, delimiter: str) -> None:
         """
-        Aggregate strings in a column using a specified delimiter.
+        Aggregate strings using a specified delimiter.
 
         Arguments:
-            column_name (str): The name of the column to aggregate.
             delimiter (str): The delimiter to use for concatenation.
         """
-        if column_name not in self._frames.columns:
-            raise KeyError(f"ERROR: column '{column_name}' does not exist in columns: {self.columns}")
-
-        if not delimiter or not isinstance(delimiter, str):
+        if not isinstance(delimiter, str):
             raise ValueError("Delimiter must be a string")
 
-        self._frames = pd.DataFrame({column_name: [self._frames[column_name].astype(str).agg(delimiter.join)]})
-        
+        aggregated_data = {
+            col: [delimiter.join(self._frames[col].astype(str))] for col in self._frames
+        }
+        self._frames = pd.DataFrame(aggregated_data)
+
     def empty(self):
         """Checks if the batch is empty
         Returns:

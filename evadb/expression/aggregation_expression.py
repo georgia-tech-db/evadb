@@ -37,7 +37,7 @@ class AggregationExpression(AbstractExpression):
         )  # can also be a float
 
     def evaluate(self, *args, **kwargs):
-        batch: Batch = self.get_child(0).evaluate(*args, **kwargs) 
+        batch: Batch = self.get_child(0).evaluate(*args, **kwargs)
         if self.etype == ExpressionType.AGGREGATION_FIRST:
             batch = batch[0]
         elif self.etype == ExpressionType.AGGREGATION_LAST:
@@ -55,14 +55,13 @@ class AggregationExpression(AbstractExpression):
         elif self.etype == ExpressionType.AGGREGATION_MAX:
             batch.aggregate("max")
         elif self.etype == ExpressionType.AGGREGATION_STRING_AGG:
-            column_name = self.get_child(0).col_alias 
-            delimiter = kwargs.get('delimiter')
-            batch.aggregate_string_agg(column_name, delimiter)
+            delimiter = kwargs.get("delimiter")
+            batch.aggregate_string_agg(delimiter)
 
         batch.reset_index()
 
         column_name = self.etype.name
-        if column_name.find("AGGREGATION_") != -1: 
+        if column_name.find("AGGREGATION_") != -1:
             # AGGREGATION_MAX -> MAX
             updated_column_name = column_name.replace("AGGREGATION_", "")
             batch.modify_column_alias(updated_column_name)
@@ -87,6 +86,8 @@ class AggregationExpression(AbstractExpression):
             return "MIN"
         elif self.etype == ExpressionType.AGGREGATION_MAX:
             return "MAX"
+        elif self.etype == ExpressionType.AGGREGATION_STRING_AGG:
+            return "STRING_AGG"
         else:
             raise NotImplementedError
 
