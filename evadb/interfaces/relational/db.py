@@ -45,6 +45,7 @@ from evadb.parser.utils import (
 from evadb.server.command_handler import execute_statement
 from evadb.utils.generic_utils import find_nearest_word, is_ray_enabled_and_installed
 from evadb.utils.job_scheduler import JobScheduler
+from evadb.utils.bootstrap_jobs_scheduler import start_jobs_process
 from evadb.utils.logging_manager import logger
 
 
@@ -605,6 +606,9 @@ def connect(
     # reader and writer parameters are not relevant in the serverless approach.
     evadb = init_evadb_instance(evadb_dir, custom_db_uri=sql_backend)
     init_builtin_functions(evadb, mode="release")
+    
+    # TODO: Preserve jobs process object if needed
+    jobs_process = start_jobs_process(evadb)
     return EvaDBConnection(evadb, None, None)
 
 

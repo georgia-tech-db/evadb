@@ -29,6 +29,7 @@ INDEX_DIR = "index"
 CACHE_DIR = "cache"
 DATASET_DATAFRAME_NAME = "dataset"
 DB_DEFAULT_NAME = "evadb.db"
+JOB_SCHEDULER_FLAG = "jobs"
 S3_DOWNLOAD_DIR = "s3_downloads"
 TMP_DIR = "tmp"
 DEFAULT_TRAIN_TIME_LIMIT = 120

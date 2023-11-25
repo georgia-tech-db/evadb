@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from evadb.configuration.constants import JOB_SCHEDULER_FLAG
+
 """
 EvaDB configuration dict
 
@@ -39,6 +41,7 @@ BASE_EVADB_CONFIG = {
     "port": 8803,
     "socket_timeout": 60,
     "ray": False,
+    JOB_SCHEDULER_FLAG: False,
     "OPENAI_API_KEY": "",
     "PINECONE_API_KEY": "",
     "PINECONE_ENV": "",
