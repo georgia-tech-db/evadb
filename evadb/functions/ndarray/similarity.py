@@ -14,7 +14,7 @@
 # limitations under the License.
 import pandas as pd
 
-from evadb.catalog.catalog_type import NdArrayType, Dimension
+from evadb.catalog.catalog_type import Dimension, NdArrayType
 from evadb.functions.abstract.abstract_function import AbstractFunction
 from evadb.functions.decorators.decorators import forward
 from evadb.functions.decorators.io_descriptors.data_types import PandasDataframe
@@ -41,7 +41,10 @@ class Similarity(AbstractFunction):
                     "base_feat_np,* as base_feat_np",
                 ],
                 column_types=[NdArrayType.UINT8, NdArrayType.UINT8],
-                column_shapes=[(3, Dimension.ANYDIM, Dimension.ANYDIM), (3, Dimension.ANYDIM, Dimension.ANYDIM)],
+                column_shapes=[
+                    (3, Dimension.ANYDIM, Dimension.ANYDIM),
+                    (3, Dimension.ANYDIM, Dimension.ANYDIM),
+                ],
             )
         ],
         output_signatures=[

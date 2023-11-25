@@ -452,18 +452,20 @@ class Batch:
         self._frames.rename(columns=columns, inplace=True)
 
     def rename_for_function_io(self, func_name, io_names_and_rename_rules) -> None:
-        def raise_column_mapping_not_satified(
-            func_name, target_columns, source_columns
-        ):
+        def do_simply_renaming(func_name, target_columns, source_columns):
             rules = "; ".join(
                 [
                     f"{target_rule} as {target_name}"
                     for target_name, target_rule in target_columns
                 ]
             )
-            raise RuntimeError(
-                f"Could not satisfy column mapping for function call to {func_name}. Rules: ({rules}). Input Columns: {source_columns}"
+            logger.warn(
+                f"Could not satisfy column mapping for function call to {func_name}. Rules: ({rules}). Input Columns: {source_columns}. Doing simple mapping with index"
             )
+            bound_columns = {}
+            for i in range(len(target_columns)):
+                bound_columns[i] = target_columns[i][0]
+            return bound_columns
 
         def column_map(func_name, target_columns, source_columns):
             bound_target_columns = set()
@@ -484,7 +486,7 @@ class Batch:
                                 bound_columns[i] = target_name
                                 break
                         else:
-                            raise_column_mapping_not_satified(
+                            return do_simply_renaming(
                                 func_name, target_columns, source_columns
                             )
 
@@ -509,7 +511,7 @@ class Batch:
                                 break
                     else:
                         if not optional:
-                            raise_column_mapping_not_satified(
+                            return do_simply_renaming(
                                 func_name, target_columns, source_columns
                             )
 
@@ -524,7 +526,7 @@ class Batch:
                             bound_columns[i] = target_name
                             break
                     else:
-                        raise_column_mapping_not_satified(
+                        return do_simply_renaming(
                             func_name, target_columns, source_columns
                         )
 
