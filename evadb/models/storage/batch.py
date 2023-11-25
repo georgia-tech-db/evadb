@@ -177,7 +177,7 @@ class Batch:
         if (
             hasattr(expr, "forward")
             and hasattr(expr.forward, "tags")
-            and (len(expr.forward.tags['input']) == 0)
+            and (len(expr.forward.tags["input"]) != 0)
         ):
             input_tags = expr.forward.tags["input"][0]
             output_tags = expr.forward.tags["output"][0]
