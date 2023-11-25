@@ -45,7 +45,7 @@ VERSION = VERSION_DICT["VERSION"]
 
 minimal_requirements = [
     "numpy>=1.19.5",
-    "pandas>=1.1.5",
+    "pandas>=2.1.0", # DataFrame.map is available after v2.1.0
     "sqlalchemy>=2.0.0",
     "sqlalchemy-utils>=0.36.6",
     "lark>=1.0.0",
@@ -112,7 +112,10 @@ pinecone_libs = ["pinecone-client"]
 
 chromadb_libs = ["chromadb"]
 
+weaviate_libs = ["weaviate-client"]
+
 milvus_libs = ["pymilvus>=2.3.0"]
+
 
 postgres_libs = [
     "psycopg2",
@@ -123,6 +126,8 @@ ludwig_libs = ["ludwig[hyperopt,distributed]"]  # MODEL TRAIN AND FINE TUNING
 sklearn_libs = ["scikit-learn"]
 
 xgboost_libs = ["flaml[automl]"]
+
+hackernews_libs = ["requests"]
 
 forecasting_libs = [
     "statsforecast",  # MODEL TRAIN AND FINE TUNING
@@ -171,11 +176,13 @@ EXTRA_REQUIRES = {
     "pinecone": pinecone_libs,
     "chromadb": chromadb_libs,
     "milvus": milvus_libs,
+    "weaviate": weaviate_libs,
     "postgres": postgres_libs,
     "ludwig": ludwig_libs,
     "sklearn": sklearn_libs,
     "xgboost": xgboost_libs,
     "forecasting": forecasting_libs,
+    "hackernews": hackernews_libs,
     # everything except ray, qdrant, ludwig and postgres. The first three fail on pyhton 3.11.
     "dev": dev_libs + vision_libs + document_libs + function_libs + notebook_libs + forecasting_libs + sklearn_libs + imagegen_libs + xgboost_libs
 }
