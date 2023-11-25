@@ -489,7 +489,7 @@ FCOUNT: 						     "FCOUNT"i
 FIRST:                               "FIRST"i
 LAST:                                "LAST"i
 SEGMENT:                             "SEGMENT"i
-STRING_AGG                           "STRING_AGG"i 
+STRING_AGG:                          "STRING_AGG"i 
 
 // Keywords, but can be ID
 // Common Keywords, but can be ID
