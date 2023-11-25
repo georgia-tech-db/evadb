@@ -33,7 +33,6 @@ class AbstractFunction(metaclass=ABCMeta):
         self.setup(*args, **kwargs)
 
     def __call__(self, *args, **kwargs):
-        print("In abstract_function",self.name," name on the left")
         return self.forward(args[0])
 
     def __str__(self):

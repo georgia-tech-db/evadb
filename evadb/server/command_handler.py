@@ -69,7 +69,6 @@ def execute_query(
 
     with query_compile_time:
         stmt = Parser().parse(query)[0]
-        print("START EXECUTE HERE",stmt)
         res_batch = execute_statement(
             evadb, stmt, do_not_raise_exceptions, do_not_print_exceptions, **kwargs
         )

@@ -12,18 +12,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Callable, Iterable, List, TypeVar, Union
 from datetime import datetime
+from decimal import Decimal
+from typing import Callable, Iterable, List, TypeVar, Union
+
 import numpy as np
 import pandas as pd
-from decimal import Decimal
-import numbers
 
+from evadb.catalog.catalog_type import NdArrayType
 from evadb.expression.abstract_expression import ExpressionType
 from evadb.parser.alias import Alias
 from evadb.utils.generic_utils import PickleSerializer
 from evadb.utils.logging_manager import logger
-from evadb.catalog.catalog_type import ColumnType, NdArrayType
+
 Batch = TypeVar("Batch")
 
 
@@ -172,12 +173,11 @@ class Batch:
         """
         Execute function expression on frames.
         """
-        input_tags = expr.forward.tags['input'][0]
-        output_tags = expr.forward.tags['output'][0]
+        input_tags = expr.forward.tags["input"][0]
+        output_tags = expr.forward.tags["output"][0]
 
+        self.drop_column_alias(metadata=(input_tags, output_tags))
 
-        self.drop_column_alias(metadata=(input_tags,output_tags))
-        
         return Batch(expr(self._frames))
 
     def iterrows(self):
@@ -440,11 +440,9 @@ class Batch:
 
         self._frames.columns = new_col_names
 
-    def drop_column_alias(self, metadata =None) -> None:
+    def drop_column_alias(self, metadata=None) -> None:
         # table1.a, table1.b, table1.c -> a, b, c
-        print(self._frames.info())
-        input_meta,output_meta=metadata
-        
+        input_meta, output_meta = metadata
 
         new_col_names = []
         for col_name in self.columns:
@@ -459,6 +457,7 @@ class Batch:
         defined_column_types = [entry for entry in input_meta.column_types]
         defined_column_shapes = [entry for entry in input_meta.column_shapes]
         column_rename_map = {}
+
         def is_shape_matching(data, expected_shape):
             """
             Check if the shape of the data matches the expected shape..
@@ -473,6 +472,7 @@ class Batch:
                     return False
 
             return True
+
         def get_basic_element(data):
             # Check if the data is iterable (but not a string, as strings are also iterable)
             if isinstance(data, Iterable) and not isinstance(data, (str, bytes)):
@@ -483,8 +483,9 @@ class Batch:
                 return get_basic_element(data[0])
             else:
                 # If the data is not iterable, return it as is
-                return data  
-        def deduce_and_map_type(element,check_type):
+                return data
+
+        def deduce_and_map_type(element, check_type):
             python_type_to_ndarray_type = {
                 int: NdArrayType.INT64,  # Python's int is commonly mapped to NumPy's np.int64
                 float: NdArrayType.FLOAT64,  # Python's float maps to np.float64
@@ -507,35 +508,85 @@ class Batch:
                 np.datetime64: NdArrayType.DATETIME,
             }
             flexible_type_mapping = {
-                NdArrayType.INT8: [NdArrayType.INT16, NdArrayType.INT32, NdArrayType.INT64, NdArrayType.FLOAT32, NdArrayType.FLOAT64],
-                NdArrayType.UINT8: [NdArrayType.INT16, NdArrayType.INT32, NdArrayType.INT64, NdArrayType.FLOAT32, NdArrayType.FLOAT64],
-                NdArrayType.INT16: [NdArrayType.INT8, NdArrayType.INT32, NdArrayType.INT64, NdArrayType.FLOAT32, NdArrayType.FLOAT64],
-                NdArrayType.INT32: [NdArrayType.INT8, NdArrayType.INT16, NdArrayType.INT64, NdArrayType.FLOAT32, NdArrayType.FLOAT64],
-                NdArrayType.INT64: [NdArrayType.INT8, NdArrayType.INT16, NdArrayType.INT32, NdArrayType.FLOAT32, NdArrayType.FLOAT64],
-                NdArrayType.FLOAT32: [NdArrayType.FLOAT64, NdArrayType.INT8, NdArrayType.INT16, NdArrayType.INT32, NdArrayType.INT64],
-                NdArrayType.FLOAT64: [NdArrayType.FLOAT32, NdArrayType.INT8, NdArrayType.INT16, NdArrayType.INT32, NdArrayType.INT64]
-            } 
+                NdArrayType.INT8: [
+                    NdArrayType.INT16,
+                    NdArrayType.INT32,
+                    NdArrayType.INT64,
+                    NdArrayType.FLOAT32,
+                    NdArrayType.FLOAT64,
+                ],
+                NdArrayType.UINT8: [
+                    NdArrayType.INT16,
+                    NdArrayType.INT32,
+                    NdArrayType.INT64,
+                    NdArrayType.FLOAT32,
+                    NdArrayType.FLOAT64,
+                ],
+                NdArrayType.INT16: [
+                    NdArrayType.INT8,
+                    NdArrayType.INT32,
+                    NdArrayType.INT64,
+                    NdArrayType.FLOAT32,
+                    NdArrayType.FLOAT64,
+                ],
+                NdArrayType.INT32: [
+                    NdArrayType.INT8,
+                    NdArrayType.INT16,
+                    NdArrayType.INT64,
+                    NdArrayType.FLOAT32,
+                    NdArrayType.FLOAT64,
+                ],
+                NdArrayType.INT64: [
+                    NdArrayType.INT8,
+                    NdArrayType.INT16,
+                    NdArrayType.INT32,
+                    NdArrayType.FLOAT32,
+                    NdArrayType.FLOAT64,
+                ],
+                NdArrayType.FLOAT32: [
+                    NdArrayType.FLOAT64,
+                    NdArrayType.INT8,
+                    NdArrayType.INT16,
+                    NdArrayType.INT32,
+                    NdArrayType.INT64,
+                ],
+                NdArrayType.FLOAT64: [
+                    NdArrayType.FLOAT32,
+                    NdArrayType.INT8,
+                    NdArrayType.INT16,
+                    NdArrayType.INT32,
+                    NdArrayType.INT64,
+                ],
+            }
             element_type = type(element)
-            if isinstance(element,int):
-                return check_type in [NdArrayType.INT16, NdArrayType.INT32, NdArrayType.INT64, NdArrayType.FLOAT32, NdArrayType.FLOAT64]
-            if isinstance(element,float):
+            if isinstance(element, int):
+                return check_type in [
+                    NdArrayType.INT16,
+                    NdArrayType.INT32,
+                    NdArrayType.INT64,
+                    NdArrayType.FLOAT32,
+                    NdArrayType.FLOAT64,
+                ]
+            if isinstance(element, float):
                 return check_type in [NdArrayType.FLOAT32, NdArrayType.FLOAT64]
 
             # Special handling for numpy types
             if isinstance(element, np.generic):
                 element_type = np.dtype(type(element)).type
-            print("BEFORE MAP TYPE: ",element_type)
-            deduced_type = python_type_to_ndarray_type.get(element_type) 
-            if deduced_type==check_type:
+            deduced_type = python_type_to_ndarray_type.get(element_type)
+            if deduced_type == check_type:
                 return True
-            if deduced_type in flexible_type_mapping and check_type in flexible_type_mapping[deduced_type]:
+            if (
+                deduced_type in flexible_type_mapping
+                and check_type in flexible_type_mapping[deduced_type]
+            ):
                 return True
 
             return False
-    
+
         for col_name in self.columns:
             match = False
-            for i,def_name in enumerate(list(defined_column_names)):
+            for i, def_name in enumerate(list(defined_column_names)):
                 # If the column name matches, keep it as is
                 if def_name == col_name:
                     column_rename_map[col_name] = col_name
@@ -545,32 +596,17 @@ class Batch:
                     match = True
             # if the column name doesnt match
             if not match:
-                for i,def_name in enumerate(list(defined_column_names)):
-                    # check for data type match
-                    print(self._frames.dtypes)
-                    print(self._frames.head(3))
-
-                    shape_match = False
-                    type_match = False
+                for i, def_name in enumerate(list(defined_column_names)):
                     # check if shape match
                     sample_data = self._frames[col_name].iloc[0]
-                    if is_shape_matching(sample_data,defined_column_shapes[i]):
-                        shape_match=True
-                        print(def_name,"'s shape match with ",col_name)
-                        basic_element=get_basic_element(sample_data)
-                        if deduce_and_map_type(basic_element,defined_column_types[i]):
-                            type_match = True
-                            column_rename_map[col_name]=def_name
+                    if is_shape_matching(sample_data, defined_column_shapes[i]):
+                        basic_element = get_basic_element(sample_data)
+                        if deduce_and_map_type(basic_element, defined_column_types[i]):
+                            column_rename_map[col_name] = def_name
                             defined_column_names.remove(def_name)
                             defined_column_types.pop(i)
                             defined_column_shapes.pop(i)
-                            break 
-                            print("all matches")
-                        else:
-                            print("Name and Shape match, type didnt match ")
-                    else:
-                        print("Name and Shape match failed on column: ",col_name)
-
+                            break
 
         # Rename columns in the dataframe
         self._frames.rename(columns=column_rename_map, inplace=True)
