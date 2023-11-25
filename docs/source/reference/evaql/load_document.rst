@@ -23,8 +23,7 @@ Load Document
 
 Loads a document into a table.
 
-```mysql
-LOAD DOCUMENT 'test_doc.doctype' INTO MyDOCs;```
+``LOAD DOCUMENT 'test_doc.doctype' INTO MyDOCs;``
 
 Description:
 Documents can be directly imported into a table using this function. The method of adding the document to the table varies depending on the document type.
