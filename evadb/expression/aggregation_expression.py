@@ -38,8 +38,6 @@ class AggregationExpression(AbstractExpression):
 
     def evaluate(self, *args, **kwargs):
         batch: Batch = self.get_child(0).evaluate(*args, **kwargs) 
-        column_name = self.get_child(0).col_alias 
-        print(column_name, batch.columns)
         if self.etype == ExpressionType.AGGREGATION_FIRST:
             batch = batch[0]
         elif self.etype == ExpressionType.AGGREGATION_LAST:
