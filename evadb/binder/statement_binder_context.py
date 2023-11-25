@@ -143,7 +143,7 @@ class StatementBinderContext:
         """
 
         # binder is case insensitive
-        col_name = col_name.lower()
+        # col_name = col_name.lower()
 
         def raise_error():
             all_columns = sorted(
