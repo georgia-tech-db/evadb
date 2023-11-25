@@ -135,7 +135,7 @@ class AggregationExpressionsTest(unittest.TestCase):
         )
         tuples = Batch(pd.DataFrame({0: ["Hello", "World", "EvaDB" "Here"], 1: ["Goodbye", "Everyone", "EvaDB" "Out"]}))
         with pytest.raises(KeyError):
-            batch = aggr_expr.evaluate(tuples, delimiter=" ")
+            aggr_expr.evaluate(tuples, delimiter=" ")
 
     def test_aggregation_string_agg_incorrect_delimiter(self):
         columnName = TupleValueExpression(name=0)
@@ -145,7 +145,7 @@ class AggregationExpressionsTest(unittest.TestCase):
         )
         tuples = Batch(pd.DataFrame({0: ["Hello", "World", "EvaDB" "Here"], 1: ["Goodbye", "Everyone", "EvaDB" "Out"]}))
         with pytest.raises(ValueError):
-            batch = aggr_expr.evaluate(tuples, delimiter=0)
+            aggr_expr.evaluate(tuples, delimiter=0)
 
     def test_aggregation_incorrect_etype(self):
         incorrect_etype = 100
