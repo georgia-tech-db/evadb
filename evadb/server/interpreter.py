@@ -70,8 +70,8 @@ async def read_from_client_and_send_to_server(
     cursor = connection.cursor()
 
     # Tasks to run concurrently to remove requests/responses that the server sends/recieves.
-    client_request  = asyncio.create_task(handle_client_requests(cursor, client_request_queue))
-    server_response = asyncio.create_task(handle_server_response(cursor))
+    asyncio.create_task(handle_client_requests(cursor, client_request_queue))
+    asyncio.create_task(handle_server_response(cursor))
 
     while True:
         sys.stdout.write(prompt)
