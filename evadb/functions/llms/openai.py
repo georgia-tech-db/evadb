@@ -98,6 +98,7 @@ class OpenAILLM(BaseLLM):
             return openai.ChatCompletion.create(**kwargs)
 
         results = []
+        models = []
 
         for query, content, idx in zip(queries, contents, range(len(queries))):
             def_sys_prompt_message = {
@@ -111,6 +112,7 @@ class OpenAILLM(BaseLLM):
             model = self.model_selection(idx, prompt, queries, contents, cost, budget)
             assert model is not None, "OpenAI budget exceeded!"
 
+            models.append(model)
             self.model_params["model"] = model
 
             self.model_params["messages"].append(def_sys_prompt_message)
@@ -137,7 +139,7 @@ class OpenAILLM(BaseLLM):
 
             results.append(answer)
 
-        return results
+        return results, models
 
     def get_cost(self, prompt: str, query: str, content: str, response: str):
         try_to_import_tiktoken()

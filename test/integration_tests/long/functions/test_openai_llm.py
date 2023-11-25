@@ -85,7 +85,7 @@ class OpenAILLM(unittest.TestCase):
         physical_plan = get_physical_query_plan(self.evadb, select_query)
         assert len(list(physical_plan.find_all(LLMPlan))) > 0
         batches = execute_query_fetch_all(self.evadb, select_query)
-        self.assertEqual(batches.columns, [f"{self.function_name.lower()}.response"])
+        self.assertEqual(batches.columns, [f"{self.function_name.lower()}.response", f"{self.function_name.lower()}.model"])
 
 if __name__ == "__main__":
     unittest.main()

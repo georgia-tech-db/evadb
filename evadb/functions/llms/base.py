@@ -52,11 +52,12 @@ class BaseLLM(AbstractFunction):
         ],
         output_signatures=[
             PandasDataframe(
-                columns=["response"],
+                columns=["response", "model"],
                 column_types=[
                     NdArrayType.STR,
+                    NdArrayType.STR,
                 ],
-                column_shapes=[(1,)],
+                column_shapes=[(1,), (1,)],
             )
         ],
     )
@@ -71,8 +72,8 @@ class BaseLLM(AbstractFunction):
         if len(text_df.columns) > 2:
             prompt = text_df.iloc[0, 2]
 
-        responses = self.generate(queries, contents, prompt)
-        return pd.DataFrame({"response": responses})
+        responses, models = self.generate(queries, contents, prompt)
+        return pd.DataFrame({"response": responses, "model": models})
 
     @abstractmethod
     def generate(self, queries: List[str], contents: List[str], prompt: str) -> List[str]:
