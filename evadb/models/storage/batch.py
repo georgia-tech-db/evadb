@@ -173,7 +173,7 @@ class Batch:
         """
         Execute function expression on frames.
         """
-        if hasattr(expr.forward, "tags"):
+        if hasattr(expr.forward, "tags") and (len(expr.forward.tags) != 0):
             input_tags = expr.forward.tags["input"][0]
             output_tags = expr.forward.tags["output"][0]
             self.drop_column_alias(metadata=(input_tags, output_tags))
@@ -511,6 +511,7 @@ class Batch:
                 }
                 flexible_type_mapping = {
                     NdArrayType.INT8: [
+                        NdArrayType.INT8,
                         NdArrayType.INT16,
                         NdArrayType.INT32,
                         NdArrayType.INT64,
@@ -518,6 +519,8 @@ class Batch:
                         NdArrayType.FLOAT64,
                     ],
                     NdArrayType.UINT8: [
+                        NdArrayType.UINT8,
+                        NdArrayType.INT8,
                         NdArrayType.INT16,
                         NdArrayType.INT32,
                         NdArrayType.INT64,
@@ -526,6 +529,7 @@ class Batch:
                     ],
                     NdArrayType.INT16: [
                         NdArrayType.INT8,
+                        NdArrayType.INT16,
                         NdArrayType.INT32,
                         NdArrayType.INT64,
                         NdArrayType.FLOAT32,
@@ -534,6 +538,7 @@ class Batch:
                     NdArrayType.INT32: [
                         NdArrayType.INT8,
                         NdArrayType.INT16,
+                        NdArrayType.INT32,
                         NdArrayType.INT64,
                         NdArrayType.FLOAT32,
                         NdArrayType.FLOAT64,
@@ -542,23 +547,12 @@ class Batch:
                         NdArrayType.INT8,
                         NdArrayType.INT16,
                         NdArrayType.INT32,
+                        NdArrayType.INT64,
                         NdArrayType.FLOAT32,
                         NdArrayType.FLOAT64,
                     ],
-                    NdArrayType.FLOAT32: [
-                        NdArrayType.FLOAT64,
-                        NdArrayType.INT8,
-                        NdArrayType.INT16,
-                        NdArrayType.INT32,
-                        NdArrayType.INT64,
-                    ],
-                    NdArrayType.FLOAT64: [
-                        NdArrayType.FLOAT32,
-                        NdArrayType.INT8,
-                        NdArrayType.INT16,
-                        NdArrayType.INT32,
-                        NdArrayType.INT64,
-                    ],
+                    NdArrayType.FLOAT32: [NdArrayType.FLOAT64, NdArrayType.FLOAT32],
+                    NdArrayType.FLOAT64: [NdArrayType.FLOAT64, NdArrayType.FLOAT32],
                 }
                 element_type = type(element)
                 if isinstance(element, int):
@@ -579,11 +573,10 @@ class Batch:
                 if deduced_type == check_type:
                     return True
                 if (
-                    deduced_type in flexible_type_mapping
+                    deduced_type is not None
                     and check_type in flexible_type_mapping[deduced_type]
                 ):
                     return True
-
                 return False
 
             for col_name in self.columns:
