@@ -94,9 +94,21 @@ class ModelTrainTests(unittest.TestCase):
         result = execute_query_fetch_all(self.evadb, predict_query)
         self.assertEqual(len(result), 12)
         self.assertEqual(
-            result.columns, ["airforecast.unique_id", "airforecast.ds", "airforecast.y"]
+            result.columns,
+            [
+                "airforecast.unique_id",
+                "airforecast.ds",
+                "airforecast.y",
+                "airforecast.y-lo",
+                "airforecast.y-hi",
+            ],
         )
 
+    @pytest.mark.skip(
+        reason="Neuralforecast intergration test takes too long to complete without GPU."
+    )
+    @forecast_skip_marker
+    def test_forecast_neuralforecast(self):
         create_predict_udf = """
             CREATE FUNCTION AirPanelForecast FROM
             (SELECT unique_id, ds, y, trend FROM AirDataPanel)
@@ -116,7 +128,13 @@ class ModelTrainTests(unittest.TestCase):
         self.assertEqual(len(result), 24)
         self.assertEqual(
             result.columns,
-            ["airpanelforecast.unique_id", "airpanelforecast.ds", "airpanelforecast.y"],
+            [
+                "airpanelforecast.unique_id",
+                "airpanelforecast.ds",
+                "airpanelforecast.y",
+                "airpanelforecast.y-lo",
+                "airpanelforecast.y-hi",
+            ],
         )
 
     @forecast_skip_marker
@@ -143,7 +161,13 @@ class ModelTrainTests(unittest.TestCase):
         self.assertEqual(len(result), 24)
         self.assertEqual(
             result.columns,
-            ["homeforecast.type", "homeforecast.saledate", "homeforecast.ma"],
+            [
+                "homeforecast.type",
+                "homeforecast.saledate",
+                "homeforecast.ma",
+                "homeforecast.ma-lo",
+                "homeforecast.ma-hi",
+            ],
         )
 
 

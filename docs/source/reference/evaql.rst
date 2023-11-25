@@ -1,3 +1,5 @@
+.. _evaql:
+
 EvaDB Query Language (EvaQL)
 ============================
 

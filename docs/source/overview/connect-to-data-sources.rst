@@ -6,7 +6,7 @@ EvaDB supports a wide range of data sources including SQL database systems, obje
 Connect to an Existing SQL Database System
 ------------------------------------------
 
-1. Use the :ref:`CREATE DATABASE<create-database>` statement to connect to an **existing** SQL database.
+1. Use the :ref:`CREATE DATABASE<create-database>` statement to connect to an **existing** SQL database server. For example, here is the SQL command to connect EvaDB with a locally running :ref:`PostgreSQL<postgresql>` database server running on port ``5432``.
 
 .. code-block::
 
@@ -20,9 +20,20 @@ Connect to an Existing SQL Database System
        "database": "restaurant_reviews"
    };
 
+For quick prototyping, you can use an embedded :ref:`SQLite<sqlite>` database. Here, the SQLite database file is called ``evadb.db``.
+
+.. code-block::
+
+   CREATE DATABASE restaurant_reviews 
+   WITH ENGINE = 'sqlite', 
+   PARAMETERS = {
+       "database": "evadb.db"
+   };
+
 .. note::
 
    Go over the :ref:`CREATE DATABASE<create-database>` statement for more details. The :ref:`Databases<databases>` page lists all the database systems that EvaDB currently supports.
+
 
 2. Preview the data using ``SELECT``
 
@@ -82,6 +93,6 @@ You can use the ``CREATE INDEX`` statement to connect to an existing vector data
 
 .. note::
 
-   Go over the :ref:`CREATE INDEX<create-index>` statement for more details. The :ref:`Vector Databases<databases>` page lists all the vector database systems that EvaDB currently supports.
+   Go over the :ref:`CREATE INDEX<create-index>` statement for more details. The :ref:`Vector Databases<vector_databases>` page lists all the vector database systems that EvaDB currently supports.
 
 .. include:: ../shared/designs/design3.rst

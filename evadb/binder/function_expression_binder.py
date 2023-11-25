@@ -113,7 +113,17 @@ def bind_func_expr(binder: StatementBinder, node: FunctionExpression):
             # certain functions take additional inputs like yolo needs the model_name
             # these arguments are passed by the user as part of metadata
 
+            # we also handle the special case of ChatGPT where we need to send the
+            # OpenAPI key as part of the parameter if not provided by the user
             properties = get_metadata_properties(function_obj)
+            if string_comparison_case_insensitive(node.name, "CHATGPT"):
+                # if the user didn't provide any API_KEY, check if we have one in the catalog
+                if "OPENAI_API_KEY" not in properties.keys():
+                    openai_key = binder._catalog().get_configuration_catalog_value(
+                        "OPENAI_API_KEY"
+                    )
+                    properties["openai_api_key"] = openai_key
+
             node.function = lambda: function_class(**properties)
         except Exception as e:
             err_msg = (
@@ -139,7 +149,6 @@ def bind_func_expr(binder: StatementBinder, node: FunctionExpression):
         node.projection_columns = [obj.name.lower() for obj in output_objs]
 
     resolve_alias_table_value_expression(node)
-
 
 def handle_bind_llm_function(node, binder):
     # we also handle the special case of ChatGPT where we need to send the

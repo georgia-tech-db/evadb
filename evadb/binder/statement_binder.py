@@ -89,6 +89,7 @@ class StatementBinder:
                 for column in all_column_list:
                     if column.name in predict_columns:
                         column.name = column.name + "_predictions"
+
                         outputs.append(column)
                     else:
                         inputs.append(column)
@@ -122,6 +123,22 @@ class StatementBinder:
                 assert (
                     len(required_columns) == 0
                 ), f"Missing required {required_columns} columns for forecasting function."
+                outputs.extend(
+                    [
+                        ColumnDefinition(
+                            arg_map.get("predict", "y") + "-lo",
+                            ColumnType.FLOAT,
+                            None,
+                            None,
+                        ),
+                        ColumnDefinition(
+                            arg_map.get("predict", "y") + "-hi",
+                            ColumnType.FLOAT,
+                            None,
+                            None,
+                        ),
+                    ]
+                )
             else:
                 raise BinderError(
                     f"Unsupported type of function: {node.function_type}."

@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 import unittest
 from test.markers import chatgpt_skip_marker
 from test.util import get_evadb_for_testing
@@ -22,9 +23,8 @@ import pandas as pd
 from evadb.server.command_handler import execute_query_fetch_all
 
 
-def create_dummy_csv_file(config) -> str:
-    tmp_dir_from_config = config.get_value("storage", "tmp_dir")
-
+def create_dummy_csv_file(catalog) -> str:
+    tmp_dir_from_config = catalog.get_configuration_catalog_value("tmp_dir")
     df_dict = [
         {
             "prompt": "summarize",
@@ -49,17 +49,18 @@ class ChatGPTTest(unittest.TestCase):
             );"""
         execute_query_fetch_all(self.evadb, create_table_query)
 
-        self.csv_file_path = create_dummy_csv_file(self.evadb.config)
+        self.csv_file_path = create_dummy_csv_file(self.evadb.catalog())
 
         csv_query = f"""LOAD CSV '{self.csv_file_path}' INTO MyTextCSV;"""
         execute_query_fetch_all(self.evadb, csv_query)
+        os.environ["OPENAI_API_KEY"] = "sk-..."
 
     def tearDown(self) -> None:
         execute_query_fetch_all(self.evadb, "DROP TABLE IF EXISTS MyTextCSV;")
 
     @chatgpt_skip_marker
     def test_openai_chat_completion_function(self):
-        function_name = "OpenAIChatCompletion"
+        function_name = "ChatGPT"
         execute_query_fetch_all(self.evadb, f"DROP FUNCTION IF EXISTS {function_name};")
 
         create_function_query = f"""CREATE FUNCTION IF NOT EXISTS{function_name}
@@ -69,4 +70,4 @@ class ChatGPTTest(unittest.TestCase):
 
         gpt_query = f"SELECT {function_name}('summarize', content) FROM MyTextCSV;"
         output_batch = execute_query_fetch_all(self.evadb, gpt_query)
-        self.assertEqual(output_batch.columns, ["openaichatcompletion.response"])
+        self.assertEqual(output_batch.columns, ["chatgpt.response"])

@@ -1,11 +1,15 @@
 // Top Level Description
 
-start: (sql_statement? ";")+
+// create_job is intentionally not treated as an sql_statement to keep the parser clean 
+// because we assume that inside the job, the user can specify multiple sql_statements
+// but not a create_job within a create_job.
+
+start: (sql_statement? ";")+ | (create_job ";")
 
 sql_statement: ddl_statement | dml_statement | utility_statement | context_statement
-        
-ddl_statement: create_database | create_table | create_index | create_function
-    | drop_database | drop_table | drop_function | drop_index | rename_table
+
+ddl_statement: create_database | create_table | create_index | create_function |  drop_database
+    | drop_table | drop_function | drop_index | drop_job | rename_table
     
 dml_statement: select_statement | insert_statement | update_statement
     | delete_statement | load_statement | set_statement
@@ -13,6 +17,9 @@ dml_statement: select_statement | insert_statement | update_statement
 utility_statement: describe_statement | show_statement | help_statement | explain_statement
 
 context_statement: use_statement
+
+job_sql_statements: query_string (";" query_string)* ";"?
+
 
 // Data Definition Language
 
@@ -29,7 +36,18 @@ create_database_engine_clause: WITH ENGINE "=" string_literal "," PARAMETERS "="
 create_index: CREATE INDEX if_not_exists? uid ON table_name index_elem vector_store_type?
 
 create_table: CREATE TABLE if_not_exists? table_name (create_definitions | (AS select_statement))
-    
+
+create_job: CREATE JOB if_not_exists? uid AS "{" job_sql_statements "}" (start_time)? (end_time)? (repeat_clause)?
+
+start_time: START string_literal
+
+end_time: END string_literal
+
+repeat_clause: EVERY decimal_literal simple_id
+
+
+
+
 // Rename statements
 
 rename_table: RENAME TABLE table_name TO table_name
@@ -53,7 +71,7 @@ function_metadata_key: uid
 
 function_metadata_value: constant
 
-vector_store_type: USING (FAISS | QDRANT | PINECONE | PGVECTOR | CHROMADB)
+vector_store_type: USING (FAISS | QDRANT | PINECONE | PGVECTOR | CHROMADB | WEAVIATE | MILVUS)
 
 index_elem: ("(" uid_list ")"
           | "(" function_call ")")
@@ -78,6 +96,8 @@ drop_index: DROP INDEX if_exists? uid
 drop_table: DROP TABLE if_exists? uid
     
 drop_function: DROP FUNCTION if_exists? uid
+
+drop_job: DROP JOB if_exists? uid
     
 // SET statements (configuration)
 set_statement: SET config_name (EQUAL_SYMBOL | TO) config_value
@@ -348,7 +368,9 @@ DESC:                                "DESC"i
 DESCRIBE:                            "DESCRIBE"i
 DISTINCT:                            "DISTINCT"i
 DROP:                                "DROP"i
+END:                                 "END"i
 ENGINE:                              "ENGINE"i
+EVERY:                               "EVERY"i
 EXIT:                                "EXIT"i
 EXISTS:                              "EXISTS"i
 EXPLAIN:                             "EXPLAIN"i
@@ -364,6 +386,7 @@ INTO:                                "INTO"i
 INDEX:                               "INDEX"i
 INSERT:                              "INSERT"i
 IS:                                  "IS"i
+JOB:                                 "JOB"i
 JOIN:                                "JOIN"i
 KEY:                                 "KEY"i
 LATERAL:                             "LATERAL"i
@@ -392,6 +415,7 @@ SET:                                 "SET"i
 SHUTDOWN:                            "SHUTDOWN"i
 SHOW:                                "SHOW"i
 SOME:                                "SOME"i
+START:                               "START"i
 TABLE:                               "TABLE"i
 TABLES:                              "TABLES"i
 TO:                                  "TO"i
@@ -424,6 +448,8 @@ QDRANT:                              "QDRANT"i
 PINECONE:                            "PINECONE"i
 PGVECTOR:                            "PGVECTOR"i
 CHROMADB:                            "CHROMADB"i
+WEAVIATE:                            "WEAVIATE"i
+MILVUS:                              "MILVUS"i
 
 // Computer vision tasks
 
@@ -566,7 +592,6 @@ REAL_LITERAL:                        (DEC_DIGIT+)? "." DEC_DIGIT+
 DOT_ID:                              "." ID_LITERAL
 
 
-
 // Identifiers
 
 ID:                                  ID_LITERAL
@@ -579,8 +604,8 @@ GLOBAL_ID:                           "@" "@" (/[A-Z0-9._$]+/ | BQUOTA_STRING)
 
 EXPONENT_NUM_PART:          /"E" "-"? DEC_DIGIT+/
 ID_LITERAL:                 /[A-Za-z_$0-9]*?[A-Za-z_$]+?[A-Za-z_$0-9]*/
-DQUOTA_STRING:              /"[^";]*"/
-SQUOTA_STRING:              /'[^';]*'/
+DQUOTA_STRING:              "\"" /(?:[^"\\]|\\.)*"/
+SQUOTA_STRING:              "'" /(?:[^'\\]|\\.)*'/
 BQUOTA_STRING:              /`[^'`]*`/
 QUERY_STRING:               /[^{};]+/
 DEC_DIGIT:                  /[0-9]/

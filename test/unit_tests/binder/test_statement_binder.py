@@ -184,7 +184,7 @@ class StatementBinderTests(unittest.TestCase):
                 call2.args[0], TupleValueExpression(name=tvp2[1], table_alias=tvp2[0])
             )
 
-    @patch("evadb.binder.statement_binder.load_function_class_from_file")
+    @patch("evadb.binder.function_expression_binder.load_function_class_from_file")
     def test_bind_func_expr(self, mock_load_function_class_from_file):
         # setup
         func_expr = MagicMock(
@@ -475,6 +475,16 @@ class StatementBinderTests(unittest.TestCase):
                 array_type=MagicMock(),
                 array_dimensions=MagicMock(),
             )
+            y_lo_col_obj = ColumnCatalogEntry(
+                name="y-lo",
+                type=ColumnType.FLOAT,
+                array_type=None,
+            )
+            y_hi_col_obj = ColumnCatalogEntry(
+                name="y-hi",
+                type=ColumnType.FLOAT,
+                array_type=None,
+            )
             create_function_statement.query.target_list = [
                 TupleValueExpression(
                     name=id_col_obj.name, table_alias="a", col_object=id_col_obj
@@ -506,7 +516,13 @@ class StatementBinderTests(unittest.TestCase):
                         col_obj.array_type,
                         col_obj.array_dimensions,
                     )
-                    for col_obj in (id_col_obj, ds_col_obj, y_col_obj)
+                    for col_obj in (
+                        id_col_obj,
+                        ds_col_obj,
+                        y_col_obj,
+                        y_lo_col_obj,
+                        y_hi_col_obj,
+                    )
                 ]
             )
             self.assertEqual(create_function_statement.inputs, expected_inputs)
@@ -533,6 +549,16 @@ class StatementBinderTests(unittest.TestCase):
                 type=MagicMock(),
                 array_type=MagicMock(),
                 array_dimensions=MagicMock(),
+            )
+            y_lo_col_obj = ColumnCatalogEntry(
+                name="ma-lo",
+                type=ColumnType.FLOAT,
+                array_type=None,
+            )
+            y_hi_col_obj = ColumnCatalogEntry(
+                name="ma-hi",
+                type=ColumnType.FLOAT,
+                array_type=None,
             )
             create_function_statement.query.target_list = [
                 TupleValueExpression(
@@ -569,7 +595,13 @@ class StatementBinderTests(unittest.TestCase):
                         col_obj.array_type,
                         col_obj.array_dimensions,
                     )
-                    for col_obj in (id_col_obj, ds_col_obj, y_col_obj)
+                    for col_obj in (
+                        id_col_obj,
+                        ds_col_obj,
+                        y_col_obj,
+                        y_lo_col_obj,
+                        y_hi_col_obj,
+                    )
                 ]
             )
             self.assertEqual(create_function_statement.inputs, expected_inputs)
