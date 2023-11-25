@@ -145,6 +145,35 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(actual_stmt, expected_stmt)
         self.assertEqual(actual_stmt.index_def, create_index_query)
 
+        # create index with included columns
+        create_index_query = "CREATE INDEX testindex ON MyVideo (featCol) INCLUDE (extraCol) USING FAISS;"
+        evadb_stmt_list = parser.parse(create_index_query)
+
+        # check stmt itself
+        self.assertIsInstance(evadb_stmt_list, list)
+        self.assertEqual(len(evadb_stmt_list), 1)
+        self.assertEqual(evadb_stmt_list[0].stmt_type, StatementType.CREATE_INDEX)
+
+        expected_stmt = CreateIndexStatement(
+            "testindex",
+            False,
+            TableRef(TableInfo("MyVideo")),
+            [
+                ColumnDefinition("featCol", None, None, None),
+            ],
+            [
+                ColumnDefinition("extraCol", None, None, None),
+            ],
+            VectorStoreType.FAISS,
+            [
+                TupleValueExpression(name="featCol"),
+                TupleValueExpression(name="extraCol"),
+            ],
+        )
+        actual_stmt = evadb_stmt_list[0]
+        self.assertEqual(actual_stmt, expected_stmt)
+        self.assertEqual(actual_stmt.index_def, create_index_query)
+
         # create index on Function expression
         create_index_query = (
             "CREATE INDEX testindex ON MyVideo (FeatureExtractor(featCol)) USING FAISS;"

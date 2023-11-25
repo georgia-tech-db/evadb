@@ -70,9 +70,7 @@ class CreateIndexStatement(AbstractStatement):
 
             print_str += f" ({traverse_create_function_expression_str(function_expr)})"
         if len(self.include_list) > 0:
-            print_str += (
-                f" INCLUDE {','.join([col_def.name for col_def in self.include_list])}"
-            )
+            print_str += f" INCLUDE ({','.join([col_def.name for col_def in self.include_list])})"
         print_str += f" USING {self._vector_store_type};"
         return print_str
 

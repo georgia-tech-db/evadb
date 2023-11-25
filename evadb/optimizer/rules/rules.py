@@ -21,6 +21,7 @@ from evadb.catalog.catalog_utils import is_video_table
 from evadb.catalog.models.utils import IndexCatalogEntry
 from evadb.constants import CACHEABLE_FUNCTIONS
 from evadb.executor.execution_context import Context
+from evadb.expression.abstract_expression import AbstractExpression
 from evadb.expression.expression_utils import (
     conjunction_list_to_expression_tree,
     to_conjunction_list,
@@ -551,15 +552,6 @@ class CombineWhereSimilarityOrderByAndLimitToFilteredVectorIndexScan(Rule):
         if not func_orderby_expr or func_orderby_expr.name != "Similarity":
             return
 
-        # Traverse to the LogicalGet operator.
-        tb_catalog_entry = list(sub_tree_root.opr.find_all(LogicalGet))[0].table_obj
-        db_catalog_entry = catalog_manager().get_database_catalog_entry(
-            tb_catalog_entry.database_name
-        )
-        is_postgres_data_source = (
-            db_catalog_entry is not None and db_catalog_entry.engine == "postgres"
-        )
-
         # Check if there exists an index on table and column.
         query_func_expr, base_func_expr = func_orderby_expr.children
 
@@ -571,32 +563,47 @@ class CombineWhereSimilarityOrderByAndLimitToFilteredVectorIndexScan(Rule):
         # Get column catalog entry and function_signature.
         column_catalog_entry = tv_expr.col_object
 
-        # Only check the index existence when building on EvaDB data.
-        if not is_postgres_data_source:
-            # Get function_signature.
-            function_signature = (
-                None
-                if isinstance(base_func_expr, TupleValueExpression)
-                else base_func_expr.signature()
-            )
+        # Get function_signature.
+        function_signature = (
+            None
+            if isinstance(base_func_expr, TupleValueExpression)
+            else base_func_expr.signature()
+        )
 
-            # Get index catalog. Check if an index exists for matching
-            # function signature and table columns.
-            index_catalog_entry = catalog_manager().get_index_catalog_entry_by_column_and_function_signature(
+        # Get index catalog. Check if an index exists for matching
+        # function signature and table columns.
+        index_catalog_entry = (
+            catalog_manager().get_index_catalog_entry_by_column_and_function_signature(
                 column_catalog_entry, function_signature
             )
-            if not index_catalog_entry:
-                return
-        else:
-            index_catalog_entry = IndexCatalogEntry(
-                name="",
-                save_file_path="",
-                type=VectorStoreType.PGVECTOR,
-                feat_column=column_catalog_entry,
-            )
+        )
+        if not index_catalog_entry:
+            return
 
         # Expression to perform filtering on
         filter_expr = where_node.predicate
+
+        def get_columns_used_by_filter_expr(curr_expr: AbstractExpression) -> set[str]:
+            if isinstance(curr_expr, TupleValueExpression):
+                return set([curr_expr.name])
+            else:
+                curr_column_set = set()
+                for next_expr in curr_expr.children:
+                    curr_column_set.update(get_columns_used_by_filter_expr(next_expr))
+                return curr_column_set
+
+        # Check that there are no non included columns in filtered expression
+        filter_column_names = get_columns_used_by_filter_expr(filter_expr)
+        included_column_names = set(
+            [
+                entry.name
+                for entry in index_catalog_entry.include_columns
+                + [index_catalog_entry.feat_column]
+            ]
+        )
+
+        if len(filter_column_names.difference(included_column_names)) > 0:
+            return
 
         # Construct the Vector index scan plan (with filter condition).
         vector_index_scan_node = LogicalVectorIndexScan(

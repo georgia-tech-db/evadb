@@ -190,6 +190,7 @@ class CreateIndexExecutor(AbstractExecutor):
                     feat_col_catalog_entry,
                     function_expression_signature,
                     self.index_def,
+                    metadata_column_catalog_entries,
                 )
         except Exception as e:
             # Delete index.

@@ -21,12 +21,16 @@ from evadb.catalog.catalog_type import VectorStoreType
 from evadb.catalog.models.index_catalog import IndexCatalog, IndexCatalogEntry
 from evadb.catalog.models.utils import ColumnCatalogEntry
 from evadb.catalog.services.base_service import BaseService
+from evadb.catalog.services.column_catalog_service import ColumnCatalogService
 from evadb.utils.logging_manager import logger
+
+from typing import List
 
 
 class IndexCatalogService(BaseService):
     def __init__(self, db_session: Session):
         super().__init__(IndexCatalog, db_session)
+        self._column_service: ColumnCatalogService = ColumnCatalogService(db_session)
 
     def insert_entry(
         self,
@@ -36,6 +40,7 @@ class IndexCatalogService(BaseService):
         feat_column: ColumnCatalogEntry,
         function_signature: str,
         index_def: str,
+        include_columns: List[ColumnCatalogEntry],
     ) -> IndexCatalogEntry:
         index_entry = IndexCatalog(
             name,
@@ -45,6 +50,12 @@ class IndexCatalogService(BaseService):
             function_signature,
             index_def,
         )
+
+        index_entry._dep_include_columns = [
+            self._column_service.get_entry_by_id(entry.row_id, return_alchemy=True)
+            for entry in include_columns
+        ]
+
         index_entry = index_entry.save(self.session)
         return index_entry.as_dataclass()
 

@@ -87,7 +87,7 @@ def etype_to_milvus_symbol(etype: ExpressionType):
         return "-"
 
 
-def expression_to_milvus_expr(expr: AbstractExpression):
+def expression_to_milvus_expr(expr: AbstractExpression) -> str:
     if isinstance(expr, ComparisonExpression) or isinstance(expr, ArithmeticExpression):
         milvus_symbol = etype_to_milvus_symbol(expr.etype)
         return f"({expression_to_milvus_expr(expr.children[0])} {milvus_symbol} {expression_to_milvus_expr(expr.children[1])})"
