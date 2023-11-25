@@ -41,17 +41,33 @@ class NumpyArray(IOColumnArgument):
             array_dimensions=dimensions,
         )
 
-class PandasColumn:
-    def __init__(self, name: str, type: NdArrayType = NdArrayType.ANYTYPE,
-                 shape: Tuple = Dimension.ANYDIM, is_nullable: Optional[bool] = None):
-        self.name = name
-        self.type = type
-        self.shape = shape
-        self.is_nullable = is_nullable
+# class PandasColumn:
+#     def __init__(self, name: str, type: NdArrayType = NdArrayType.ANYTYPE,
+#                  shape: Tuple = (None,), is_nullable: Optional[bool] = None):
+#         self.name = name
+#         self.type = type
+#         self.shape = shape
+#         self.is_nullable = is_nullable
 
-        assert self.name is not None, "Column name cannot be None"
-        assert self.type is not None, "Column type cannot be None"
-        assert self.shape is not None, "Column shape cannot be None. Did you mean (None,)?"
+#         assert self.name is not None, "Column name cannot be None"
+#         assert self.type is not None, "Column type cannot be None"
+#         assert self.shape is not None, "Column shape cannot be None. Did you mean (None,)?"
+
+class PandasColumn(IOColumnArgument):
+    def __init__(self, name: str, type: NdArrayType = NdArrayType.ANYTYPE,
+                 shape: Tuple = None, is_nullable: Optional[bool] = None):
+
+        assert name is not None, "Column name cannot be None"
+        assert type is not None, "Column type cannot be None"
+        assert shape is not None, "Column shape cannot be None. Did you mean (None,) to indicate any shape?"
+
+        super().__init__(
+            name=name,
+            type=ColumnType.NDARRAY,
+            is_nullable=is_nullable,
+            array_type=type,
+            array_dimensions=shape,
+        )
 
 class PandasColumnAsterick(PandasColumn):
     def __init__(self):

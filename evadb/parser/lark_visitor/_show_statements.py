@@ -23,11 +23,15 @@ class Show:
     def show_statement(self, tree):
         token = tree.children[1]
 
+        print('this is token', str.upper(token))
+
         if isinstance(token, str) and str.upper(token) == "FUNCTIONS":
             return ShowStatement(show_type=ShowType.FUNCTIONS)
         elif isinstance(token, str) and str.upper(token) == "TABLES":
             return ShowStatement(show_type=ShowType.TABLES)
         elif isinstance(token, str) and str.upper(token) == "DATABASES":
             return ShowStatement(show_type=ShowType.DATABASES)
+        elif isinstance(token, str) and str.upper(token) == "FUNCTIONS_ALL":
+            return ShowStatement(show_type=ShowType.FUNCTIONS_ALL)
         elif token is not None:
             return ShowStatement(show_type=ShowType.CONFIG, show_val=self.visit(token))

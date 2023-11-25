@@ -238,8 +238,22 @@ class FunctionCatalogEntry:
             "inputs": [_to_str(col) for col in self.args],
             "outputs": [_to_str(col) for col in self.outputs],
             "type": self.type,
+            # "impl": self.impl_file_path,
+            # "metadata": self.metadata,
+        }
+
+    def display_format_with_metadata(self):
+        def _to_str(col):
+            col_display = col.display_format()
+            return f"{col_display['name']} {col_display['data_type']}"
+
+        return {
+            "name": self.name,
+            "inputs": [_to_str(col) for col in self.args],
+            "outputs": [_to_str(col) for col in self.outputs],
+            "type": self.type,
             "impl": self.impl_file_path,
-            "metadata": self.metadata,
+            "metadata": [m.display_format() for m in self.metadata],
         }
 
 
