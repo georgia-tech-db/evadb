@@ -461,7 +461,7 @@ class LogicalInsert(Operator):
         super().__init__(OperatorType.LOGICALINSERT, children)
         self._table = table
         self._column_list = column_list
-        self._value_list = value_list       # we might need to support value_lists. So LogicalInsert is just a container.
+        self._value_list = value_list
 
     @property
     def table(self):
