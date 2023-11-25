@@ -27,9 +27,8 @@ def missing_io_signature_helper() -> str:
     Returns:
         str: Error message
     """
-    signature_template = """ 
+    signature_template = """
     You can define the io signature using the decorator as follows:
-    
     @forward(
         input_signatures=[
             PandasDataframe(
@@ -46,12 +45,12 @@ def missing_io_signature_helper() -> str:
             )
         ],
     )
-    
     More information on the how to create the forward decorator can be found here:
     https://evadb.readthedocs.io/en/stable/source/reference/ai/custom-ai-function.html#part-1-writing-a-custom-function
     """
 
     return signature_template
+
 
 def load_io_from_function_decorators(
     function: Type[AbstractFunction], is_input=False
