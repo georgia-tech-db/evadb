@@ -82,7 +82,14 @@ class BaseLLM(AbstractFunction):
         raise NotImplementedError
 
     @abstractmethod
-    def get_cost(self, prompt: str, response: str = "") -> tuple(tuple, float):
+    def get_cost(self, prompt: str, query: str, content: str, response: str = "") -> tuple(tuple, float):
+        """
+        Return the token usage as tuple of input_token_usage, output_token_usage, and dollar cost of running the LLM on the prompt and the getting the provided response.
+        """
+        pass
+
+    @abstractmethod
+    def get_max_cost(self, prompt: str, query: str, content: str) -> tuple(tuple, float):
         """
         Return the token usage as tuple of input_token_usage, output_token_usage, and dollar cost of running the LLM on the prompt and the getting the provided response.
         """

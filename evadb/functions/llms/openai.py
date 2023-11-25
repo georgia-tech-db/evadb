@@ -117,7 +117,7 @@ class OpenAILLM(BaseLLM):
         num_query_tokens = len(encoding.encode(query))
         num_content_tokens = len(encoding.encode(content))
         num_response_tokens = self.model_params["max_tokens"]
-        if response:
+        if response is not None:
             num_response_tokens = len(encoding.encode(response))
 
         model_stats = self.get_model_stats(self.model_name)
@@ -128,3 +128,6 @@ class OpenAILLM(BaseLLM):
             + model_stats["output_cost_per_token"] * token_consumed[1]
         )
         return token_consumed, dollar_cost
+    
+    def get_max_cost(self, prompt: str, query: str, content: str):
+        return self.get_cost(prompt, query, content, response=None)
