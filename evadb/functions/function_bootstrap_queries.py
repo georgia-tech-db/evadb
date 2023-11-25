@@ -310,13 +310,13 @@ def init_builtin_functions(db: EvaDBDatabase, mode: str = "debug") -> None:
     # ignore exceptions during the bootstrapping phase due to missing packages
     for query in queries:
         try:
-            #Uncomment to force pip installs onto local device
-            #import sys
-            #import subprocess
-            #subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'norfair'])
-            #subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'ultralytics'])
-            #subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'facenet-pytorch'])
-            #cursor.query("DROP FUNCTION IF EXISTS NorFairTracker;").df()
+            # Uncomment to force pip installs onto local device
+            # import sys
+            # import subprocess
+            # subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'norfair'])
+            # subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'ultralytics'])
+            # subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'facenet-pytorch'])
+            # cursor.query("DROP FUNCTION IF EXISTS NorFairTracker;").df()
             execute_query_fetch_all(
                 db, query, do_not_print_exceptions=False, do_not_raise_exceptions=True
             )
