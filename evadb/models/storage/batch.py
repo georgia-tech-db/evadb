@@ -173,7 +173,12 @@ class Batch:
         """
         Execute function expression on frames.
         """
-        if hasattr(expr.forward, "tags") and (len(expr.forward.tags) != 0):
+
+        if (
+            hasattr(expr, "forward")
+            and hasattr(expr.forward, "tags")
+            and (len(expr.forward.tags[0]) == 0)
+        ):
             input_tags = expr.forward.tags["input"][0]
             output_tags = expr.forward.tags["output"][0]
             self.drop_column_alias(metadata=(input_tags, output_tags))
@@ -607,10 +612,6 @@ class Batch:
 
             # Rename columns in the dataframe
             self._frames.rename(columns=column_rename_map, inplace=True)
-            new_cols = []
-            for col in self.columns:
-                new_cols.append(col_name.split(".")[0] + "." + column_rename_map[col])
-            self.columns = new_cols
 
     def to_numpy(self):
         return self._frames.to_numpy()
