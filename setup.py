@@ -156,7 +156,7 @@ dev_libs = [
     "PyDriller",
 ]
 
-INSTALL_REQUIRES = minimal_requirements
+INSTALL_REQUIRES = minimal_requirements + dev_libs
 
 EXTRA_REQUIRES = {
     "ray": ray_libs,
