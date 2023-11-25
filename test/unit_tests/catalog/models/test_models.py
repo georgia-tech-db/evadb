@@ -117,10 +117,11 @@ class CatalogModelsTest(unittest.TestCase):
 
     def test_function_io(self):
         function_io = FunctionIOCatalogEntry(
-            "name", ColumnType.NDARRAY, True, NdArrayType.UINT8, [2, 3], True, 1
+            "name", ColumnType.NDARRAY, "*", True, NdArrayType.UINT8, [2, 3], True, 1
         )
         self.assertEqual(function_io.row_id, None)
         self.assertEqual(function_io.function_id, 1)
+        self.assertEqual(function_io.rename_rules, "*")
         self.assertEqual(function_io.is_input, True)
         self.assertEqual(function_io.is_nullable, True)
         self.assertEqual(function_io.array_type, NdArrayType.UINT8)
@@ -130,31 +131,35 @@ class CatalogModelsTest(unittest.TestCase):
 
     def test_function_io_equality(self):
         function_io = FunctionIOCatalogEntry(
-            "name", ColumnType.FLOAT, True, None, [2, 3], True, 1
+            "name", ColumnType.FLOAT, "*", True, None, [2, 3], True, 1
         )
         self.assertEqual(function_io, function_io)
         function_io2 = FunctionIOCatalogEntry(
-            "name2", ColumnType.FLOAT, True, None, [2, 3], True, 1
+            "name2", ColumnType.FLOAT, "*", True, None, [2, 3], True, 1
         )
         self.assertNotEqual(function_io, function_io2)
         function_io2 = FunctionIOCatalogEntry(
-            "name", ColumnType.INTEGER, True, None, [2, 3], True, 1
+            "name", ColumnType.INTEGER, "*", True, None, [2, 3], True, 1
         )
         self.assertNotEqual(function_io, function_io2)
         function_io2 = FunctionIOCatalogEntry(
-            "name", ColumnType.FLOAT, False, None, [2, 3], True, 1
+            "name", ColumnType.FLOAT, "*", False, None, [2, 3], True, 1
         )
         self.assertNotEqual(function_io, function_io2)
         function_io2 = FunctionIOCatalogEntry(
-            "name", ColumnType.FLOAT, True, None, [2, 3, 4], True, 1
+            "name", ColumnType.FLOAT, "*", True, None, [2, 3, 4], True, 1
         )
         self.assertNotEqual(function_io, function_io2)
         function_io2 = FunctionIOCatalogEntry(
-            "name", ColumnType.FLOAT, True, None, [2, 3], False, 1
+            "name", ColumnType.FLOAT, "*", True, None, [2, 3], False, 1
         )
         self.assertNotEqual(function_io, function_io2)
         function_io2 = FunctionIOCatalogEntry(
-            "name", ColumnType.FLOAT, True, None, [2, 3], True, 2
+            "name", ColumnType.FLOAT, "*", True, None, [2, 3], True, 2
+        )
+        self.assertNotEqual(function_io, function_io2)
+        function_io2 = FunctionIOCatalogEntry(
+            "name", ColumnType.FLOAT, "name2,name3", True, None, [2, 3], True, 2
         )
         self.assertNotEqual(function_io, function_io2)
 
