@@ -82,6 +82,9 @@ class GroupExpression:
             and self.children == other.children
         )
 
+    def __repr__(self) -> str:
+        return self.__str__()
+
     def __str__(self) -> str:
         return "%s(%s)" % (
             type(self).__name__,
