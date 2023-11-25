@@ -16,6 +16,7 @@ from typing import List, Type
 
 from evadb.catalog.models.function_io_catalog import FunctionIOCatalogEntry
 from evadb.functions.abstract.abstract_function import AbstractFunction
+from evadb.executor.executor_utils import ExecutorError
 
 
 def load_io_from_function_decorators(
@@ -45,7 +46,13 @@ def load_io_from_function_decorators(
 
     assert (
         io_signature is not None
-    ), f"Cannot infer io signature from the decorator for {function}."
+    ), f"No io signature was given for function {function}."
+    
+    if len(io_signature) > 1:
+        if is_input:
+            raise ExecutorError("forward method can only have single DataFrame as input")
+        else:
+            raise ExecutorError("forward method can only output single DataFrame")
 
     result_list = []
     for io in io_signature:

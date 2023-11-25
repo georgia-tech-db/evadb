@@ -84,9 +84,12 @@ def load_function_class_from_file(filepath, classname=None):
         spec = importlib.util.spec_from_file_location(abs_path.stem, abs_path)
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
+    except ModuleNotFoundError as e:
+        err_msg = f"ModuleNotFoundError : Couldn't load function from {filepath} : {str(e)}. Not able to load the code provided in the file {abs_path}. Please ensure that the file contains the implementation code for the function."
+        raise ModuleNotFoundError(err_msg)
     except ImportError as e:
         # ImportError in the case when we are able to find the file but not able to load the module
-        err_msg = f"ImportError : Couldn't load function from {filepath} : {str(e)}. Not able to load the code provided in the file {abs_path}. Please ensure that the file contains the implementation code for the function."
+        err_msg = f"ImportError : Couldn't load function from {filepath} : {str(e)}. Please ensure that all the correct packages are installed correctly."
         raise ImportError(err_msg)
     except FileNotFoundError as e:
         # FileNotFoundError in the case when we are not able to find the file at all at the path.
