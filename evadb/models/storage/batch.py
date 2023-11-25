@@ -384,11 +384,10 @@ class Batch:
             column_name (str): The name of the column to aggregate.
             delimiter (str): The delimiter to use for concatenation.
         """
-        updated_column_name = f"STRING_AGG.{column_name}"
-        verified_col = updated_column_name if updated_column_name in self._frames else None 
+        verified_col = column_name if column_name in self._frames else None 
         
         if not verified_col:
-            raise KeyError(f"ERROR: column '{updated_column_name}' does not exist in columns: {self._frames.columns}")
+            raise KeyError(f"ERROR: column '{column_name}' does not exist in columns: {self._frames.columns}")
 
         if not delimiter or not isinstance(delimiter, str):
             raise ValueError("Delimiter must be a string")
