@@ -173,10 +173,12 @@ class Batch:
         """
         Execute function expression on frames.
         """
-        input_tags = expr.forward.tags["input"][0]
-        output_tags = expr.forward.tags["output"][0]
-
-        self.drop_column_alias(metadata=(input_tags, output_tags))
+        if expr.forward.tags is not None:
+            input_tags = expr.forward.tags["input"][0]
+            output_tags = expr.forward.tags["output"][0]
+            self.drop_column_alias(metadata=(input_tags, output_tags))
+        else:
+            self.drop_column_alias()
 
         return Batch(expr(self._frames))
 
@@ -614,7 +616,7 @@ class Batch:
             self._frames.rename(columns=column_rename_map, inplace=True)
             new_cols = []
             for col in self.columns:
-                new_cols.append(column_rename_map[col])
+                new_cols.append(col_name.split(".")[0] + "." + column_rename_map[col])
             self.columns = new_cols
 
     def to_numpy(self):
