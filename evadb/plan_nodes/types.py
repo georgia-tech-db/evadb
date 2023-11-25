@@ -23,6 +23,7 @@ class PlanOprType(Enum):
     PP_FILTER = auto()
     INSERT = auto()
     DELETE = auto()
+    UPDATE = auto()
     CREATE = auto()
     RENAME = auto()
     DROP_OBJECT = auto()
