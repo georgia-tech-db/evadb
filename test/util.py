@@ -381,6 +381,7 @@ def create_table(db, table_name, num_rows, num_columns):
     df.columns = [f"{table_name}.{col}" for col in df.columns]
     return df
 
+
 def create_table_with_uppercase_columns(db, table_name, num_rows):
     create_table_query = f"CREATE TABLE IF NOT EXISTS {table_name} (Col INTEGER);"
     execute_query_fetch_all(db, create_table_query)
