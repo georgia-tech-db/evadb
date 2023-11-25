@@ -35,3 +35,15 @@ Create Index
 .. code-block:: sql
 
    CREATE INDEX index_name ON table_name (data) USING MILVUS;
+
+EvaDB's integration with Milvus also supports the inclusion of other columns in the vector database
+
+.. code-block:: sql
+
+   CREATE INDEX index_name ON table_name (data) INCLUDE (metadata_col1, metadata_col2) USING MILVUS;
+
+Select statements with a Where predicate on these included columns will be performed on the Milvus database level. Example:
+
+.. code-block:: sql
+   
+   SELECT data FROM table1 WHERE metadata_col1 == 3 ORDER BY Similarity(query, features) LIMIT 5;

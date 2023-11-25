@@ -49,6 +49,7 @@ from evadb.plan_nodes.nested_loop_join_plan import NestedLoopJoinPlan
 from evadb.plan_nodes.predicate_plan import PredicatePlan
 from evadb.plan_nodes.project_plan import ProjectPlan
 from evadb.plan_nodes.show_info_plan import ShowInfoPlan
+from evadb.third_party.vector_stores.utils import supports_hybrid_search
 
 if TYPE_CHECKING:
     from evadb.optimizer.optimizer_context import OptimizerContext
@@ -571,13 +572,17 @@ class CombineWhereSimilarityOrderByAndLimitToFilteredVectorIndexScan(Rule):
         )
 
         # Get index catalog. Check if an index exists for matching
-        # function signature and table columns.
+        # function signature and table columns. Also check if vector store
+        # supports hybrid search
         index_catalog_entry = (
             catalog_manager().get_index_catalog_entry_by_column_and_function_signature(
                 column_catalog_entry, function_signature
             )
         )
         if not index_catalog_entry:
+            return
+
+        if not supports_hybrid_search(index_catalog_entry.type):
             return
 
         # Expression to perform filtering on

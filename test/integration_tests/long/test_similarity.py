@@ -580,3 +580,51 @@ class SimilarityTests(unittest.TestCase):
             # Cleanup
             drop_query = "DROP INDEX testMilvusIndexImageDataset"
             execute_query_fetch_all(self.evadb, drop_query)
+
+    @pytest.mark.skip(reason="Requires running local Milvus instance")
+    @milvus_skip_marker
+    def test_end_to_end_hybrid_index_scan_should_work_correctly_on_image_dataset_milvus(
+        self,
+    ):
+        # Execution without filtered index scan.
+        select_query = """SELECT feature_col FROM testSimilarityFeatureTable
+                        WHERE dummy < 3
+                        ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), feature_col)
+                        LIMIT 3;""".format(
+            self.img_path
+        )
+        expected_batch = execute_query_fetch_all(self.evadb, select_query)
+
+        # Execution with filtered index scan.
+        create_index_query = """CREATE INDEX testMilvusIndexScanRewrite
+                                    ON testSimilarityFeatureTable (feature_col)
+                                    INCLUDE (dummy)
+                                    USING MILVUS;"""
+        execute_query_fetch_all(self.evadb, create_index_query)
+        select_query = """SELECT feature_col FROM testSimilarityFeatureTable
+                            WHERE dummy < 3
+                            ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), feature_col)
+                            LIMIT 3;""".format(
+            self.img_path
+        )
+        explain_query = """EXPLAIN {}""".format(select_query)
+        explain_batch = execute_query_fetch_all(self.evadb, explain_query)
+        self.assertTrue("VectorIndexScan" in explain_batch.frames[0][0])
+        actual_batch = execute_query_fetch_all(self.evadb, select_query)
+
+        self.assertEqual(len(actual_batch), 3)
+        for i in range(3):
+            self.assertTrue(
+                np.array_equal(
+                    expected_batch.frames[
+                        "testsimilarityfeaturetable.feature_col"
+                    ].to_numpy()[i],
+                    actual_batch.frames[
+                        "testsimilarityfeaturetable.feature_col"
+                    ].to_numpy()[i],
+                )
+            )
+
+        # Cleanup
+        drop_query = "DROP INDEX testMilvusIndexScanRewrite"
+        execute_query_fetch_all(self.evadb, drop_query)
