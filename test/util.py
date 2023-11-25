@@ -388,7 +388,6 @@ def create_table_with_uppercase_columns(db, table_name, num_rows):
     insert_query = "INSERT INTO {}(Col) VALUES ({});"
     for i in range(num_rows):
         execute_query_fetch_all(db, insert_query.format(table_name, i))
-    # Add df stuff later on...
 
 
 def create_sample_image():
