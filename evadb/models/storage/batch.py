@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from datetime import datetime
-from decimal import Decimal
 from typing import Callable, Iterable, List, TypeVar, Union
 
 import numpy as np
@@ -502,7 +501,6 @@ class Batch:
                     str: NdArrayType.STR,  # Python's str maps to np.str_
                     bytes: NdArrayType.UINT8,  # Python's bytes type maps to np.uint8 (common for byte data)
                     complex: NdArrayType.FLOAT64,  # Python's complex type maps to np.float64 (real part)
-                    Decimal: NdArrayType.DECIMAL,  # Decimal maps to a Decimal type in your NdArrayType
                     datetime: NdArrayType.DATETIME,  # datetime maps to np.datetime64
                     np.int8: NdArrayType.INT8,
                     np.uint8: NdArrayType.UINT8,
