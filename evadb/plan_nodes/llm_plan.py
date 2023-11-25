@@ -12,13 +12,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-DISCRETE = 0
-CONTINUOUS = 1
-NO_GPU = -1
-UNDEFINED_GROUP_ID = -1
-# remove this when we implement the cacheable logic in the function itself
-CACHEABLE_FUNCTIONS = ["Yolo", "FaceDetector", "OCRExtractor", "HFObjectDetector"]
-IFRAMES = "IFRAMES"
-AUDIORATE = "AUDIORATE"
-DEFAULT_FUNCTION_EXPRESSION_COST = 100
-LLM_FUNCTIONS = ["chatgpt", "completion"]
+from evadb.expression.function_expression import FunctionExpression
+from evadb.plan_nodes.abstract_plan import AbstractPlan
+from evadb.plan_nodes.types import PlanOprType
+
+
+class LLMPlan(AbstractPlan):
+    def __init__(self, llm_expr: FunctionExpression):
+        self.llm_expr = llm_expr
+        self.alias = llm_expr.alias
+        super().__init__(PlanOprType.LLM)
+
+    def __str__(self):
+        return f"LLMPlan(llm_expr={self.llm_expr})"
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(), self.llm_expr, self.alias))

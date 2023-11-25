@@ -33,6 +33,7 @@ from evadb.executor.hash_join_executor import HashJoinExecutor
 from evadb.executor.insert_executor import InsertExecutor
 from evadb.executor.join_build_executor import BuildJoinExecutor
 from evadb.executor.limit_executor import LimitExecutor
+from evadb.executor.llm_executor import LLMExecutor
 from evadb.executor.load_executor import LoadDataExecutor
 from evadb.executor.nested_loop_join_executor import NestedLoopJoinExecutor
 from evadb.executor.orderby_executor import OrderByExecutor
@@ -152,6 +153,8 @@ class PlanExecutor:
             executor_node = CreateIndexExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.APPLY_AND_MERGE:
             executor_node = ApplyAndMergeExecutor(db=self._db, node=plan)
+        elif plan_opr_type == PlanOprType.LLM:
+            executor_node = LLMExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.VECTOR_INDEX_SCAN:
             executor_node = VectorIndexScanExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.DELETE:

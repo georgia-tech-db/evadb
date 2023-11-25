@@ -80,6 +80,7 @@ document_libs = [
     "sentence-transformers",
     "protobuf",
     "bs4",
+    "tiktoken >= 0.3.3",  # For calculating tokens
     "openai>=1.0",  # CHATGPT
     "gpt4all",  # PRIVATE GPT
     "sentencepiece",  # TRANSFORMERS
@@ -134,9 +135,7 @@ forecasting_libs = [
     "neuralforecast",  # MODEL TRAIN AND FINE TUNING
 ]
 
-imagegen_libs = [
-    "replicate"
-]
+imagegen_libs = ["replicate"]
 
 ### NEEDED FOR DEVELOPER TESTING ONLY
 
@@ -164,7 +163,7 @@ dev_libs = [
     "PyDriller",
 ]
 
-INSTALL_REQUIRES = minimal_requirements
+INSTALL_REQUIRES = minimal_requirements + dev_libs
 
 EXTRA_REQUIRES = {
     "ray": ray_libs,
@@ -184,7 +183,15 @@ EXTRA_REQUIRES = {
     "forecasting": forecasting_libs,
     "hackernews": hackernews_libs,
     # everything except ray, qdrant, ludwig and postgres. The first three fail on pyhton 3.11.
-    "dev": dev_libs + vision_libs + document_libs + function_libs + notebook_libs + forecasting_libs + sklearn_libs + imagegen_libs + xgboost_libs
+    "dev": dev_libs
+    + vision_libs
+    + document_libs
+    + function_libs
+    + notebook_libs
+    + forecasting_libs
+    + sklearn_libs
+    + imagegen_libs
+    + xgboost_libs,
 }
 
 setup(

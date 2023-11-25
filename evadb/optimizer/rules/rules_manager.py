@@ -46,6 +46,7 @@ from evadb.optimizer.rules.rules import (
     LogicalJoinToPhysicalNestedLoopJoin,
     LogicalLateralJoinToPhysical,
     LogicalLimitToPhysical,
+    LogicalLLMToPhysical,
     LogicalLoadToPhysical,
     LogicalOrderByToPhysical,
     LogicalProjectNoTableToPhysical,
@@ -115,6 +116,7 @@ class RulesManager:
             LogicalCreateIndexToVectorIndex(),
             LogicalVectorIndexScanToPhysical(),
             LogicalProjectNoTableToPhysical(),
+            LogicalLLMToPhysical(),
         ]
 
         # These rules are enabled only if

@@ -1,0 +1,128 @@
+{
+    "gpt-4": {
+        "max_token_context": 8192,
+        "input_cost_per_token": 0.00003,
+        "output_cost_per_token": 0.00006,
+        "provider": "openai",
+        "mode": "chat"
+    },
+    "gpt-4-0314": {
+        "max_token_context": 8192,
+        "input_cost_per_token": 0.00003,
+        "output_cost_per_token": 0.00006,
+        "provider": "openai",
+        "mode": "chat"
+    },
+    "gpt-4-0613": {
+        "max_token_context": 8192,
+        "input_cost_per_token": 0.00003,
+        "output_cost_per_token": 0.00006,
+        "provider": "openai",
+        "mode": "chat"
+    },
+    "gpt-4-32k": {
+        "max_token_context": 32768,
+        "input_cost_per_token": 0.00006,
+        "output_cost_per_token": 0.00012,
+        "provider": "openai",
+        "mode": "chat"
+    },
+    "gpt-4-32k-0314": {
+        "max_token_context": 32768,
+        "input_cost_per_token": 0.00006,
+        "output_cost_per_token": 0.00012,
+        "provider": "openai",
+        "mode": "chat"
+    },
+    "gpt-4-32k-0613": {
+        "max_token_context": 32768,
+        "input_cost_per_token": 0.00006,
+        "output_cost_per_token": 0.00012,
+        "provider": "openai",
+        "mode": "chat"
+    },
+    "gpt-3.5-turbo": {
+        "max_token_context": 4097,
+        "input_cost_per_token": 0.0000015,
+        "output_cost_per_token": 0.000002,
+        "provider": "openai",
+        "mode": "chat"
+    },
+    "gpt-3.5-turbo-0301": {
+        "max_token_context": 4097,
+        "input_cost_per_token": 0.0000015,
+        "output_cost_per_token": 0.000002,
+        "provider": "openai",
+        "mode": "chat"
+    },
+    "gpt-3.5-turbo-0613": {
+        "max_token_context": 4097,
+        "input_cost_per_token": 0.0000015,
+        "output_cost_per_token": 0.000002,
+        "provider": "openai",
+        "mode": "chat"
+    },
+    "gpt-3.5-turbo-16k": {
+        "max_token_context": 16385,
+        "input_cost_per_token": 0.000003,
+        "output_cost_per_token": 0.000004,
+        "provider": "openai",
+        "mode": "chat"
+    },
+    "gpt-3.5-turbo-16k-0613": {
+        "max_token_context": 16385,
+        "input_cost_per_token": 0.000003,
+        "output_cost_per_token": 0.000004,
+        "provider": "openai",
+        "mode": "chat"
+    },
+    "text-davinci-003": {
+        "max_token_context": 4097,
+        "input_cost_per_token": 0.000002,
+        "output_cost_per_token": 0.000002,
+        "provider": "openai",
+        "mode": "completion"
+    },
+    "text-curie-001": {
+        "max_token_context": 2049,
+        "input_cost_per_token": 0.000002,
+        "output_cost_per_token": 0.000002,
+        "provider": "openai",
+        "mode": "completion"
+    },
+    "text-babbage-001": {
+        "max_token_context": 2049,
+        "input_cost_per_token": 0.0000004,
+        "output_cost_per_token": 0.0000004,
+        "provider": "openai",
+        "mode": "completion"
+    },
+    "text-ada-001": {
+        "max_token_context": 2049,
+        "input_cost_per_token": 0.0000004,
+        "output_cost_per_token": 0.0000004,
+        "provider": "openai",
+        "mode": "completion"
+    },
+    "babbage-002": {
+        "max_token_context": 16384,
+        "input_cost_per_token": 0.0000004,
+        "output_cost_per_token": 0.0000004,
+        "provider": "openai",
+        "mode": "completion"
+    },
+    "davinci-002": {
+        "max_token_context": 16384,
+        "input_cost_per_token": 0.000002,
+        "output_cost_per_token": 0.000002,
+        "provider": "openai",
+        "mode": "completion"
+    },
+    "gpt-3.5-turbo-instruct": {
+        "max_token_context": 8192,
+        "input_cost_per_token": 0.0000015,
+        "output_cost_per_token": 0.000002,
+        "provider": "openai",
+        "mode": "completion"
+    }
+}

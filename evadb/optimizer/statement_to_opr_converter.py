@@ -14,6 +14,7 @@
 # limitations under the License.
 from evadb.binder.binder_utils import get_bound_func_expr_outputs_as_tuple_value_expr
 from evadb.expression.abstract_expression import AbstractExpression
+from evadb.expression.expression_utils import extract_llm_expressions_from_project
 from evadb.expression.function_expression import FunctionExpression
 from evadb.optimizer.operators import (
     LogicalCreate,
@@ -30,6 +31,7 @@ from evadb.optimizer.operators import (
     LogicalInsert,
     LogicalJoin,
     LogicalLimit,
+    LogicalLLM,
     LogicalLoadData,
     LogicalOrderBy,
     LogicalProject,
@@ -228,9 +230,35 @@ class StatementToPlanConverter:
         self._plan.append_child(right_child_plan)
 
     def _visit_projection(self, select_columns):
+        def __construct_llm_nodes(llm_exprs):
+            return [LogicalLLM(llm_expr) for llm_expr in llm_exprs]
+
+        llm_exprs, remaining_exprs = extract_llm_expressions_from_project(
+            select_columns
+        )
+        llm_nodes = __construct_llm_nodes(llm_exprs)
+
+        select_columns = []
+        for expr in llm_exprs:
+            select_columns.extend(get_bound_func_expr_outputs_as_tuple_value_expr(expr))
+
+        select_columns.extend(remaining_exprs)
+
+        # add llm plan nodes
+        if llm_nodes:
+            # add existing plan as a child of llm
+            plan_root = LogicalLLM(llm_exprs[0])
+            plan_root.append_child(self._plan)
+            for expr in llm_exprs[1:]:
+                new_root = LogicalLLM(expr)
+                new_root.append_child(plan_root)
+                plan_root = new_root
+            self._plan = plan_root
+
         projection_opr = LogicalProject(select_columns)
         if self._plan is not None:
             projection_opr.append_child(self._plan)
+
         self._plan = projection_opr
 
     def _visit_select_predicate(self, predicate: AbstractExpression):

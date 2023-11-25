@@ -48,6 +48,12 @@ def bind_func_expr(binder: StatementBinder, node: FunctionExpression):
         handle_bind_extract_object_function(node, binder)
         return
 
+    # handle the special case of "completion or chatgpt"
+    if string_comparison_case_insensitive(
+        node.name, "chatgpt"
+    ) or string_comparison_case_insensitive(node.name, "completion"):
+        handle_bind_llm_function(node, binder)
+
     # Handle Func(*)
     if (
         len(node.children) == 1
@@ -106,6 +112,7 @@ def bind_func_expr(binder: StatementBinder, node: FunctionExpression):
             )
             # certain functions take additional inputs like yolo needs the model_name
             # these arguments are passed by the user as part of metadata
+
             # we also handle the special case of ChatGPT where we need to send the
             # OpenAPI key as part of the parameter if not provided by the user
             properties = get_metadata_properties(function_obj)
@@ -143,6 +150,18 @@ def bind_func_expr(binder: StatementBinder, node: FunctionExpression):
 
     resolve_alias_table_value_expression(node)
 
+def handle_bind_llm_function(node, binder):
+    # we also handle the special case of ChatGPT where we need to send the
+    # OpenAPI key as part of the parameter if not provided by the user
+    function_obj = binder._catalog().get_function_catalog_entry_by_name(node.name)
+    properties = get_metadata_properties(function_obj)
+    # if the user didn't provide any API_KEY, check if we have one in the catalog
+    if "OPENAI_API_KEY" not in properties.keys():
+        openapi_key = binder._catalog().get_configuration_catalog_value(
+            "OPENAI_API_KEY"
+        )
+        properties["openai_api_key"] = openapi_key
+
 
 def handle_bind_extract_object_function(
     node: FunctionExpression, binder_context: StatementBinder
@@ -154,9 +173,11 @@ def handle_bind_extract_object_function(
             Its inputs are id, data, output of detector.
         4. Bind the EXTRACT_OBJECT function expression and append the new children.
         5. Handle the alias and populate the outputs of the EXTRACT_OBJECT function
+
     Args:
         node (FunctionExpression): The function expression representing the extract object operation.
         binder_context (StatementBinder): The binder object used to bind expressions in the statement.
+
     Raises:
         AssertionError: If the number of children in the `node` is not equal to 3.
     """
