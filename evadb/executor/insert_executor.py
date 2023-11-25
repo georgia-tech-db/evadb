@@ -42,12 +42,11 @@ class InsertExecutor(AbstractExecutor):
             table_catalog_entry.table_type == TableType.STRUCTURED_DATA
         ), "INSERT only implemented for structured data"
 
-        values_to_insert = [val_node.value for val_node in self.node.value_list]
-        tuple_to_insert = tuple(values_to_insert)
+        tuples_to_insert = [tuple(i.value for i in val_node) for val_node in self.node.value_list]
         columns_to_insert = [col_node.name for col_node in self.node.column_list]
 
         # Adding all values to Batch for insert
-        dataframe = pd.DataFrame([tuple_to_insert], columns=columns_to_insert)
+        dataframe = pd.DataFrame(tuples_to_insert, columns=columns_to_insert)
         batch = Batch(dataframe)
 
         storage_engine = StorageEngine.factory(self.db, table_catalog_entry)
@@ -75,5 +74,5 @@ class InsertExecutor(AbstractExecutor):
                 execute_query_fetch_all(self.db, create_index_query)
 
         yield Batch(
-            pd.DataFrame([f"Number of rows loaded: {str(len(values_to_insert))}"])
+            pd.DataFrame([f"Number of rows loaded: {str(len(tuples_to_insert))}"])      # wrong!!!! But will become right
         )
