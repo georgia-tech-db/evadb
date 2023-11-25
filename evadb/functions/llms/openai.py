@@ -39,6 +39,7 @@ _DEFAULT_PARAMS = {
     "temperature": 0.0,
     "request_timeout": 30,
     "max_tokens": 1000,
+    "messages": [],
 }
 
 
@@ -57,14 +58,14 @@ class OpenAILLM(BaseLLM):
         try_to_import_openai()
         import openai
 
-        openai.api_key = self.openai_api_key
+        openai.api_key = openai_api_key
         if len(openai.api_key) == 0:
             openai.api_key = os.environ.get("OPENAI_API_KEY", "")
         assert (
             len(openai.api_key) != 0
         ), "Please set your OpenAI API key using SET OPENAI_API_KEY = 'sk-' or environment variable (OPENAI_API_KEY)"
 
-        validate_kwargs(kwargs, allowed_keys=_DEFAULT_PARAMS.keys())
+        validate_kwargs(kwargs, allowed_keys=_DEFAULT_PARAMS.keys(), required_keys=[])
         self.model_params = {**_DEFAULT_PARAMS, **kwargs}
 
         self.model_name = self.model_params["model"]
@@ -77,8 +78,6 @@ class OpenAILLM(BaseLLM):
             return openai.ChatCompletion.create(**kwargs)
 
         results = []
-
-
 
         for query, content in zip(queries, contents):
             def_sys_prompt_message = {
