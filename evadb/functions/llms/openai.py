@@ -72,7 +72,12 @@ class OpenAILLM(BaseLLM):
         self.model_params = {**_DEFAULT_PARAMS, **kwargs}
 
     def model_selection(self, prompt: str, query: str, content: str, cost: float, budget: float):
-        return self.model_params["model"]
+        for model in MODEL_CHOICES:
+            self.model_params["model"] = model
+            token_consumed, dollar_cost = self.get_max_cost(prompt, query, content)
+            if budget - dollar_cost >= 0:
+                return model        
+        return None
 
     def generate(self, queries: List[str], contents: List[str], prompt: str) -> List[str]:
         budget = int(os.environ.get("OPENAI_BUDGET", None))
@@ -95,7 +100,10 @@ class OpenAILLM(BaseLLM):
             }
 
             # select model
-            self.model_params["model"] = self.model_selection(prompt, query, content, cost, budget)
+            model = self.model_selection(prompt, query, content, cost, budget)
+            assert model is not None, "OpenAI budget exceeded!"
+
+            self.model_params["model"] = model
 
             self.model_params["messages"].append(def_sys_prompt_message)
             self.model_params["messages"].extend(
