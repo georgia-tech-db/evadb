@@ -173,16 +173,18 @@ class Batch:
         """
         Execute function expression on frames.
         """
-
-        if (
-            hasattr(expr, "forward")
-            and hasattr(expr.forward, "tags")
-            and (len(expr.forward.tags["input"]) != 0)
-        ):
-            input_tags = expr.forward.tags["input"][0]
-            output_tags = expr.forward.tags["output"][0]
-            self.drop_column_alias(metadata=(input_tags, output_tags))
-        else:
+        try:
+            if (
+                hasattr(expr, "forward")
+                and hasattr(expr.forward, "tags")
+                and (len(expr.forward.tags["input"]) != 0)
+            ):
+                input_tags = expr.forward.tags["input"][0]
+                output_tags = expr.forward.tags["output"][0]
+                self.drop_column_alias(metadata=(input_tags, output_tags))
+            else:
+                self.drop_column_alias()
+        except (TypeError, KeyError):
             self.drop_column_alias()
 
         return Batch(expr(self._frames))
