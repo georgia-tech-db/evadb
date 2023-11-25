@@ -309,6 +309,9 @@ class CatalogManager(object):
         self._job_catalog_service.update_next_scheduled_run(
             job_name, next_scheduled_run, active
         )
+    
+    def get_all_job_catalog_entry_names(self):
+        return self._job_catalog_service.get_all_job_names()
 
     "Job history catalog services"
 

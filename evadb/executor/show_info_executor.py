@@ -34,6 +34,7 @@ class ShowInfoExecutor(AbstractExecutor):
             or ShowType.TABLES
             or ShowType.DATABASES
             or ShowType.CONFIGS
+            or ShowType.JOBS
         ), f"Show command does not support type {self.node.show_type}"
 
         if self.node.show_type is ShowType.FUNCTIONS:
@@ -68,5 +69,11 @@ class ShowInfoExecutor(AbstractExecutor):
                     raise Exception(
                         "No configuration found with key {}".format(self.node.show_val)
                     )
+                    
+        elif self.node.show_type is ShowType.JOBS:
+            job_names = self.catalog().get_all_job_catalog_entry_names()
+            for name in job_names:
+                show_entries.append(name)
+            show_entries = {"Job Names": show_entries}
 
         yield Batch(pd.DataFrame(show_entries))

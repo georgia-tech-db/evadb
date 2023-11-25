@@ -29,5 +29,7 @@ class Show:
             return ShowStatement(show_type=ShowType.TABLES)
         elif isinstance(token, str) and str.upper(token) == "DATABASES":
             return ShowStatement(show_type=ShowType.DATABASES)
+        elif isinstance(token, str) and str.upper(token) == "JOBS":
+            return ShowStatement(show_type=ShowType.JOBS)
         elif token is not None:
             return ShowStatement(show_type=ShowType.CONFIGS, show_val=self.visit(token))
