@@ -318,6 +318,7 @@ def create_sample_csv(num_frames=NUM_FRAMES):
     df_sample_meta.to_csv(os.path.join(get_tmp_dir(), "dummy.csv"), index=False)
     return os.path.join(get_tmp_dir(), "dummy.csv")
 
+
 def create_csv_with_comlumn_name_spaces(num_frames=NUM_FRAMES):
     try:
         os.remove(os.path.join(get_tmp_dir(), "dummy.csv"))
@@ -334,7 +335,7 @@ def create_csv_with_comlumn_name_spaces(num_frames=NUM_FRAMES):
             random_coords = 200 + 300 * np.random.random(4)
             sample_meta[index] = {
                 "id": index,
-                "frame id": frame_id, 
+                "frame id": frame_id,
                 "video id": video_id,
                 "dataset name": "test_dataset",
                 "label": sample_labels[np.random.choice(len(sample_labels))],

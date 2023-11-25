@@ -43,9 +43,12 @@ class CommonClauses:
             return (self.visit(tree.children[0]), self.visit(tree.children[1]))
 
     def uid(self, tree):
-        if (hasattr(tree.children[0],"type") and tree.children[0].type == "REVERSE_QUOTE_ID"):
+        if (
+            hasattr(tree.children[0], "type")
+            and tree.children[0].type == "REVERSE_QUOTE_ID"
+        ):
             tree.children[0].type = "simple_id"
-            non_tick_string = str(tree.children[0]).replace("`","")
+            non_tick_string = str(tree.children[0]).replace("`", "")
             return non_tick_string
         return self.visit(tree.children[0])
 

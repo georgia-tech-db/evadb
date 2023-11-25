@@ -17,9 +17,9 @@ import os
 import unittest
 from pathlib import Path
 from test.util import (
+    create_csv_with_comlumn_name_spaces,
     create_dummy_csv_batches,
     create_sample_csv,
-    create_csv_with_comlumn_name_spaces,
     create_sample_video,
     file_remove,
     get_evadb_for_testing,
@@ -138,7 +138,9 @@ class LoadExecutorTests(unittest.TestCase):
         execute_query_fetch_all(self.evadb, create_table_query)
 
         # load the CSV
-        load_query = f"LOAD CSV '{create_csv_with_comlumn_name_spaces()}' INTO MyVideoCSV;"
+        load_query = (
+            f"LOAD CSV '{create_csv_with_comlumn_name_spaces()}' INTO MyVideoCSV;"
+        )
         execute_query_fetch_all(self.evadb, load_query)
 
         # execute a select query
