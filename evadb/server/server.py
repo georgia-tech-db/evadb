@@ -22,6 +22,7 @@ from evadb.utils.logging_manager import logger
 
 
 class EvaServer:
+    _request_queue = None
     """
     Receives messages and offloads them to another task for processing them.
     """
@@ -41,9 +42,13 @@ class EvaServer:
         hostname: hostname of the server
         port: port of the server
         """
+  
         from pprint import pprint
 
         pprint(f"EvaDB server started at host {host} and port {port}")
+
+        self._request_queue = asyncio.Queue()
+
         self._evadb = init_evadb_instance(db_dir, host, port, custom_db_uri)
 
         self._server = await asyncio.start_server(self.accept_client, host, port)
@@ -51,6 +56,10 @@ class EvaServer:
         # load built-in functions
         mode = self._evadb.catalog().get_configuration_catalog_value("mode")
         init_builtin_functions(self._evadb, mode=mode)
+
+        # task to handle requests in queue.
+        from evadb.server.command_handler import handle_requests
+        asyncio.create_task(handle_requests(self))
 
         async with self._server:
             await self._server.serve_forever()
@@ -93,9 +102,8 @@ class EvaServer:
                     return
 
                 logger.debug("Handle request")
-                from evadb.server.command_handler import handle_request
-
-                asyncio.create_task(handle_request(self._evadb, client_writer, message))
+                # When a new request comes in from a client, it to the queue.
+                await self._request_queue.put((self._evadb, client_writer, message))
 
         except Exception as e:
             logger.critical("Error reading from client.", exc_info=e)

@@ -53,7 +53,7 @@ async def create_stdin_reader() -> StreamReader:
 
 
 async def read_from_client_and_send_to_server(
-    stdin_reader: StreamReader, writer: StreamWriter, server_reader: StreamReader
+    stdin_reader: StreamReader, writer: StreamWriter, server_reader: StreamReader, client_request_queue: asyncio.Queue
 ):
     VERSION = VERSION_DICT["VERSION"]
     intro = f"evadb (v{VERSION})\nType 'EXIT;' to exit the client \n"
@@ -69,6 +69,10 @@ async def read_from_client_and_send_to_server(
     connection = EvaDBConnection(None, server_reader, writer)
     cursor = connection.cursor()
 
+    # Tasks to run concurrently to remove requests/responses that the server sends/recieves.
+    client_request  = asyncio.create_task(handle_client_requests(cursor, client_request_queue))
+    server_response = asyncio.create_task(handle_server_response(cursor))
+
     while True:
         sys.stdout.write(prompt)
         sys.stdout.flush()
@@ -79,11 +83,9 @@ async def read_from_client_and_send_to_server(
         query = query.rstrip()
         if query.upper() in ["EXIT", "QUIT"]:
             return
-
-        await cursor.execute_async(query)
-        response = await cursor.fetch_all_async()
-        sys.stdout.write(str(response) + "\n")
-        sys.stdout.flush()
+        
+        # Store the query inside the client_request_queue instead of immediately calling execute_async().
+        await client_request_queue.put(query) 
 
 
 async def start_cmd_client(host: str, port: int):
@@ -94,9 +96,10 @@ async def start_cmd_client(host: str, port: int):
         reader, writer = None, None
         reader, writer = await asyncio.open_connection(host, port)
         stdin_reader = await create_stdin_reader()
+        client_request_queue = asyncio.Queue()
 
         input_listener = asyncio.create_task(
-            read_from_client_and_send_to_server(stdin_reader, writer, reader)
+            read_from_client_and_send_to_server(stdin_reader, writer, reader, client_request_queue)
         )
 
         await asyncio.wait([input_listener], return_when=asyncio.FIRST_COMPLETED)
@@ -105,3 +108,16 @@ async def start_cmd_client(host: str, port: int):
         if writer is not None:
             writer.close()
         # await writer.wait_closed()
+
+async def handle_client_requests(cursor, client_request_queue: asyncio.Queue):
+    while True:
+        # Remove request from the queue. If there are no pending requests, this call blocks.
+        query  = await client_request_queue.get()
+        await cursor.execute_async(query)
+
+async def handle_server_response(cursor):
+    while True:
+        # Gets response from server. If there are current no responses, this call blocks.
+        response = await cursor.fetch_all_async()
+        sys.stdout.write(str(response) + "\n")
+        sys.stdout.flush()

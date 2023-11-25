@@ -112,11 +112,6 @@ class EvaDBCursor(object):
         """
         Send query to the EvaDB server.
         """
-        if self._pending_query:
-            raise SystemError(
-                "EvaDB does not support concurrent queries. \
-                    Call fetch_all() to complete the pending query"
-            )
         query = self._multiline_query_transformation(query)
         self._connection._writer.write((query + "\n").encode())
         await self._connection._writer.drain()
