@@ -41,11 +41,13 @@ class BaseLLM(AbstractFunction):
     @forward(
         input_signatures=[
             PandasDataframe(
-                columns=["prompt"],
+                columns=["query", "content", "prompt"],
                 column_types=[
                     NdArrayType.STR,
+                    NdArrayType.STR,
+                    NdArrayType.STR,
                 ],
-                column_shapes=[(None,)],
+                column_shapes=[(1,), (1,), (None,)],
             )
         ],
         output_signatures=[
@@ -54,17 +56,26 @@ class BaseLLM(AbstractFunction):
                 column_types=[
                     NdArrayType.STR,
                 ],
-                column_shapes=[(None,)],
+                column_shapes=[(1,)],
             )
         ],
     )
     def forward(self, text_df):
-        prompts = text_df[text_df.columns[0]]
-        responses = self.generate(prompts)
+        queries = text_df[text_df.columns[0]]
+        contents = text_df[text_df.columns[0]]
+        if len(text_df.columns) > 1:
+            queries = text_df.iloc[:, 0]
+            contents = text_df.iloc[:, 1]
+
+        prompt = None
+        if len(text_df.columns) > 2:
+            prompt = text_df.iloc[0, 2]
+
+        responses = self.generate(queries, contents, prompt)
         return pd.DataFrame({"response": responses})
 
     @abstractmethod
-    def generate(self, prompts: List[str]) -> List[str]:
+    def generate(self, queries: List[str], contents: List[str], prompt: str) -> List[str]:
         """
         All the child classes should overload this function
         """
