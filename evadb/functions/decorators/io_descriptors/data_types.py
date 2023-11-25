@@ -63,7 +63,7 @@ class PandasColumn(IOColumnArgument):
 
         super().__init__(
             name=name,
-            type=ColumnType.NDARRAY,
+            type=NdArrayType.ANYTYPE,
             is_nullable=is_nullable,
             array_type=type,
             array_dimensions=shape,
@@ -110,7 +110,7 @@ class NewPandasDataFrame(IOArgument):
                     type=ColumnType.NDARRAY,
                     is_nullable=column.is_nullable,
                     array_type=column.type,
-                    array_dimensions=column.shape,
+                    array_dimensions=column.array_dimensions,
                     is_input=True,
                 )
             )
