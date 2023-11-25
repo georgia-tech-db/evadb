@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import pandas as pd
+from sqlalchemy import and_, or_
 
 from evadb.catalog.catalog_type import TableType
 from evadb.database import EvaDBDatabase
@@ -43,7 +44,9 @@ class UpdateExecutor(AbstractExecutor):
 
         if isinstance(left, TupleValueExpression):
             column = left.name
-            x = table.columns[column]
+            # get index of column in table
+            x = [i for i, x in enumerate(table.columns) if x.name == column][0]
+            x = table.columns[x]
         elif isinstance(left, ConstantValueExpression):
             value = left.value
             x = value
@@ -52,7 +55,8 @@ class UpdateExecutor(AbstractExecutor):
 
         if isinstance(right, TupleValueExpression):
             column = right.name
-            y = table.columns[column]
+            y = [i for i, y in enumerate(table.columns) if y.name == column][0]
+            y = table.columns[y]
         elif isinstance(right, ConstantValueExpression):
             value = right.value
             y = value
@@ -69,7 +73,7 @@ class UpdateExecutor(AbstractExecutor):
             assert (
                 predicate_node.etype != ExpressionType.COMPARE_CONTAINS
                 and predicate_node.etype != ExpressionType.COMPARE_IS_CONTAINED
-            ), f"Predicate type {predicate_node.etype} not supported in delete"
+            ), f"Predicate type {predicate_node.etype} not supported in update"
 
             if predicate_node.etype == ExpressionType.COMPARE_EQUAL:
                 filter_clause = x == y
@@ -101,6 +105,11 @@ class UpdateExecutor(AbstractExecutor):
         assert (
             table_catalog_entry.table_type == TableType.STRUCTURED_DATA
         ), "UPDATE only implemented for structured data"
+        
+        storage_engine = StorageEngine.factory(self.db, table_catalog_entry)
+        table_to_update = storage_engine._try_loading_table_via_reflection(
+            table_catalog_entry.name
+        )
 
         values_to_update = [val_node.value for val_node in self.node.value_list]
         tuple_to_update = tuple(values_to_update)
@@ -109,16 +118,16 @@ class UpdateExecutor(AbstractExecutor):
         # Adding all values to Batch for update
         dataframe = pd.DataFrame([tuple_to_update], columns=columns_to_update)
         batch = Batch(dataframe)
-
-        sqlalchemy_filter_clause = self.predicate_node_to_filter_clause(
-            table_catalog_entry, predicate_node=self.predicate
-        )
-
-        storage_engine = StorageEngine.factory(self.db, table_catalog_entry)
-        # TODO: Storage engine does not support update yet
+        
+        sqlalchemy_filter_clause = None
+        
+        if self.predicate != None:
+            sqlalchemy_filter_clause = self.predicate_node_to_filter_clause(
+                table_to_update, predicate_node=self.predicate
+            )
+        
         storage_engine.update(table_catalog_entry, batch, sqlalchemy_filter_clause)
-
-
+        
         yield Batch(pd.DataFrame(["Updated rows"]))
         # yield Batch(
         #     pd.DataFrame([f"Number of rows loaded: {str(len(values_to_insert))}"])

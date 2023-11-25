@@ -221,6 +221,35 @@ class SQLStorageEngine(AbstractStorageEngine):
             )
             logger.exception(err_msg)
             raise Exception(err_msg)
+    
+    def update(
+        self, table: TableCatalogEntry, rows: Batch, sqlalchemy_filter_clause: "ColumnElement[bool]"
+    ):
+        """Updates tuples from the table where rows satisfy the where_clause.
+        The current implementation only handles equality predicates.
+
+        Argument:
+            table: table metadata object of the table
+            rows: batch to be persisted in the storage.
+            where_clause: clause used to find the tuples to remove.
+        """
+        try:
+            assert len(rows.frames.values) == 1
+            table_to_update_from = self._try_loading_table_via_reflection(table.name)
+            columns = rows.frames.keys()
+            values = rows.frames.values[0]
+            x = {}
+            for col, val in zip(columns, values):
+                x[col] = val
+            u = table_to_update_from.update().values(x).where(sqlalchemy_filter_clause)
+            self._sql_session.execute(u)
+            self._sql_session.commit()
+        except Exception as e:
+            err_msg = (
+                f"Failed to update the table {table.name} with exception {str(e)}"
+            )
+            logger.exception(err_msg)
+            raise Exception(err_msg)
 
     def rename(self, old_table: TableCatalogEntry, new_name: TableInfo):
         raise Exception("Rename not supported for structured data table")

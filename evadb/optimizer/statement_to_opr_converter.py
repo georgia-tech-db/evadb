@@ -38,6 +38,7 @@ from evadb.optimizer.operators import (
     LogicalSample,
     LogicalShow,
     LogicalUnion,
+    LogicalUpdate,
 )
 from evadb.optimizer.optimizer_utils import (
     column_definition_to_function_io,
@@ -57,6 +58,7 @@ from evadb.parser.show_statement import ShowStatement
 from evadb.parser.statement import AbstractStatement
 from evadb.parser.table_ref import JoinNode, TableRef, TableValuedExpression
 from evadb.parser.types import FunctionType, JoinType
+from evadb.parser.update_statement import UpdateTableStatement
 from evadb.utils.logging_manager import logger
 
 
@@ -375,6 +377,21 @@ class StatementToPlanConverter:
             statement.where_clause,
         )
         self._plan = delete_opr
+        
+    def visit_update(self, statement: AbstractStatement):
+        """Converter for parsed update statement
+
+        Arguments:
+            statement {AbstractStatement} - - [input update statement]
+        """
+        # not removing previous commented code
+        update_data_opr = LogicalUpdate(
+            statement.table_ref,
+            statement.column_list,
+            statement.value_list,
+            statement.where_clause,
+        )
+        self._plan = update_data_opr
 
     def visit(self, statement: AbstractStatement):
         """Based on the instance of the statement the corresponding
@@ -406,6 +423,8 @@ class StatementToPlanConverter:
             self.visit_create_index(statement)
         elif isinstance(statement, DeleteTableStatement):
             self.visit_delete(statement)
+        elif isinstance(statement, UpdateTableStatement):
+            self.visit_update(statement)
         return self._plan
 
     @property

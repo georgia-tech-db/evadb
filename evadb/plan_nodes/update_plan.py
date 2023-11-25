@@ -40,14 +40,22 @@ class UpdatePlan(AbstractPlan):
         where_clause: AbstractExpression = None,
     ):
         super().__init__(PlanOprType.UPDATE)
-        self.table_ref = table_ref
-        self.column_list = column_list
-        self.value_list = value_list
-        self.where_clause = where_clause
+        self._table_ref = table_ref
+        self._column_list = column_list
+        self._value_list = value_list
+        self._where_clause = where_clause
 
     @property
     def table_ref(self):
         return self._table_ref
+    
+    @property
+    def column_list(self):
+        return self._column_list
+    
+    @property
+    def value_list(self):
+        return self._value_list
 
     @property
     def where_clause(self):

@@ -63,6 +63,7 @@ class OperatorType(IntEnum):
     LOGICAL_APPLY_AND_MERGE = auto()
     LOGICAL_EXTRACT_OBJECT = auto()
     LOGICAL_VECTOR_INDEX_SCAN = auto()
+    LOGICAL_UPDATE = auto()
     LOGICAL_USE = auto()
     LOGICALDELIMITER = auto()
 
@@ -1269,3 +1270,69 @@ class LogicalVectorIndexScan(Operator):
                 self.search_query_expr,
             )
         )
+
+class LogicalUpdate(Operator):
+    """[Logical Node for Update operation]
+
+    Arguments:
+        table(TableCatalogEntry): table to update data
+        column_list{List[AbstractExpression]}:
+            [After binding annotated column_list]
+        value_list{List[AbstractExpression]}:
+            [value list to update]
+        where_clause(AbstractExpression): the predicate used to select which row to update,
+    """
+
+    def __init__(
+        self,
+        table: TableCatalogEntry,
+        column_list: List[AbstractExpression],
+        value_list: List[AbstractExpression],
+        where_clause: AbstractExpression = None,
+        children: List = None,
+    ):
+        super().__init__(OperatorType.LOGICAL_UPDATE, children)
+        self._table = table
+        self._column_list = column_list
+        self._value_list = value_list
+        self._where_clause = where_clause
+
+    @property
+    def table(self):
+        return self._table
+
+    @property
+    def value_list(self):
+        return self._value_list
+
+    @property
+    def column_list(self):
+        return self._column_list
+    
+    @property
+    def where_clause(self):
+        return self._where_clause
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalUpdate):
+            return False
+        return (
+            is_subtree_equal
+            and self.table == other.table
+            and self.value_list == other.value_list
+            and self.column_list == other.column_list
+            and self.where_clause == other.where_clause
+        )
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                super().__hash__(),
+                self.table,
+                tuple(self.value_list),
+                tuple(self.column_list),
+                self.where_clause,
+            )
+        )
+        

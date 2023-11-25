@@ -54,6 +54,7 @@ from evadb.optimizer.rules.rules import (
     LogicalRenameToPhysical,
     LogicalShowToPhysical,
     LogicalUnionToPhysical,
+    LogicalUpdateToPhysical,
     LogicalVectorIndexScanToPhysical,
     PushDownFilterThroughApplyAndMerge,
     PushDownFilterThroughJoin,
@@ -115,6 +116,7 @@ class RulesManager:
             LogicalCreateIndexToVectorIndex(),
             LogicalVectorIndexScanToPhysical(),
             LogicalProjectNoTableToPhysical(),
+            LogicalUpdateToPhysical(),
         ]
 
         # These rules are enabled only if

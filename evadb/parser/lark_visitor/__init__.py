@@ -35,6 +35,7 @@ from evadb.parser.lark_visitor._select_statement import Select
 from evadb.parser.lark_visitor._set_statement import Set
 from evadb.parser.lark_visitor._show_statements import Show
 from evadb.parser.lark_visitor._table_sources import TableSources
+from evadb.parser.lark_visitor._update_statement import Update
 from evadb.parser.lark_visitor._use_statement import Use
 
 # To add new functionality to the parser, create a new file under
@@ -79,6 +80,7 @@ class LarkInterpreter(
     Show,
     Explain,
     Delete,
+    Update,
     Use,
     Set,
 ):
