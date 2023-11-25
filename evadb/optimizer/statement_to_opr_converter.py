@@ -37,6 +37,7 @@ from evadb.optimizer.operators import (
     LogicalRename,
     LogicalSample,
     LogicalShow,
+    LogicalStringAgg,
     LogicalUnion,
 )
 from evadb.optimizer.optimizer_utils import (
@@ -187,6 +188,9 @@ class StatementToPlanConverter:
 
         if statement.orderby_list is not None:
             self._visit_orderby(statement.orderby_list)
+
+        if statement.string_agg_list is not None:
+            self._visit_string_agg(statement.string_agg_list)
 
         if statement.limit_count is not None:
             self._visit_limit(statement.limit_count)
@@ -352,6 +356,11 @@ class StatementToPlanConverter:
     def visit_show(self, statement: ShowStatement):
         show_opr = LogicalShow(statement.show_type, statement.show_val)
         self._plan = show_opr
+
+    def _visit_string_agg(self, string_agg_list):
+        string_agg_opr = LogicalStringAgg(string_agg_list)
+        string_agg_opr.append_child(self._plan)
+        self._plan = string_agg_opr
 
     def visit_explain(self, statement: ExplainStatement):
         explain_opr = LogicalExplain([self.visit(statement.explainable_stmt)])

@@ -33,6 +33,7 @@ from evadb.parser.statement import AbstractStatement
 from evadb.parser.table_ref import JoinNode, TableRef
 from evadb.parser.types import JoinType
 from evadb.parser.utils import parse_sql_orderby_expr
+from evadb.parser.utils import parse_sql_string_agg_expr
 from evadb.server.command_handler import execute_statement
 
 
@@ -263,6 +264,30 @@ class EvaDBQuery:
         batch = self.execute()
         assert batch is not None, "relation execute failed"
         return batch.frames
+
+    def string_agg(self, string_agg_expr: str) -> "EvaDBQuery":
+        """Reorder the relation based on the order_expr
+
+        Args:
+            string_agg_expr (str): sql expression to perform string aggregation
+
+        Returns:
+            EvaDBQuery: A EvaDBQuery ordered based on the string_agg_expr.
+
+        Examples:
+            >>> relation = cursor.table("PDFs")
+            >>> relation.order("Similarity(SentenceTransformerFeatureExtractor('When was the NATO created?'), SentenceTransformerFeatureExtractor(data) ) DESC")
+
+        """
+
+        parsed_expr = parse_sql_string_agg_expr(string_agg_expr)
+        self._query_node = handle_select_clause(
+            self._query_node, self._alias, "string_agg_list", parsed_expr
+        )
+
+        try_binding(self._evadb.catalog, self._query_node)
+
+        return self
 
     def sql_query(self) -> str:
         """Get the SQL query that is equivalent to the relation

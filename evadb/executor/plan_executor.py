@@ -28,6 +28,7 @@ from evadb.executor.executor_utils import ExecutorError
 from evadb.executor.explain_executor import ExplainExecutor
 from evadb.executor.function_scan_executor import FunctionScanExecutor
 from evadb.executor.groupby_executor import GroupByExecutor
+from evadb.executor.string_agg_executor import StringAggExecutor
 from evadb.executor.hash_join_executor import HashJoinExecutor
 from evadb.executor.insert_executor import InsertExecutor
 from evadb.executor.join_build_executor import BuildJoinExecutor
@@ -119,6 +120,8 @@ class PlanExecutor:
             executor_node = LoadDataExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.GROUP_BY:
             executor_node = GroupByExecutor(db=self._db, node=plan)
+        elif plan_opr_type == PlanOprType.STRING_AGG:
+            executor_node = StringAggExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.ORDER_BY:
             executor_node = OrderByExecutor(db=self._db, node=plan)
         elif plan_opr_type == PlanOprType.LIMIT:

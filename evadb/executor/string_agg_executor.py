@@ -23,6 +23,7 @@ from evadb.models.storage.batch import Batch
 from evadb.parser.types import ParserOrderBySortType
 from evadb.plan_nodes.orderby_plan import OrderByPlan
 from evadb.plan_nodes.string_agg_plan import StringAggPlan
+from evadb.expression.constant_value_expression import ConstantValueExpression
 
 
 class StringAggExecutor(AbstractExecutor):
@@ -30,13 +31,13 @@ class StringAggExecutor(AbstractExecutor):
     Sort the frames which satisfy the condition
 
     Arguments:
-        node (AbstractPlan): The OrderBy Plan
+        node (AbstractPlan): The StringAgg Plan
 
     """
 
     def __init__(self, db: EvaDBDatabase, node: StringAggPlan):
         super().__init__(db, node)
-        self._string_agg_list = node.string_agg_list
+        self._string_agg_list = node.string_agg_clause
         self._columns = node.columns
         self._separator = node.separator
         self._order_by = node.order_by
@@ -46,6 +47,8 @@ class StringAggExecutor(AbstractExecutor):
         col_name = []
         if isinstance(col, TupleValueExpression):
             col_name += [col.col_alias]
+        elif isinstance(col, ConstantValueExpression):
+            col_name += [col.value]
         elif isinstance(col, FunctionExpression):
             col_name += col.col_alias
         elif isinstance(col, str):
@@ -107,9 +110,18 @@ class StringAggExecutor(AbstractExecutor):
             #     by=self.extract_column_names(),
             #     sort_type=self.extract_sort_types(),
             # )
-            aggregated_batch.join_columns_for_agg(self._columns)
-            aggregated_batch.string_agg(self._separator, aggregated_batch_list, True)
-            aggregated_batch.concat()
+            column_strings = []
+            cols = []
+            for col in self._columns:
+                if isinstance(col, ConstantValueExpression):
+                    column_strings.append(col.value)
+                elif isinstance(col, TupleValueExpression):
+                    column_strings.append(col.col_alias)
+                    cols.append(col)
+                else:
+                    column_strings.append(col)
+            frames = aggregated_batch.join_columns_for_agg(cols, column_strings, aggregated_batch_list)
+            aggregated_batch = aggregated_batch.string_agg(str(self._separator.value), frames, True)
         except KeyError:
             # raise ExecutorError(str(e))
             pass

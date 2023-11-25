@@ -209,7 +209,7 @@ class Batch:
             by, ascending=sort_type, ignore_index=True, inplace=True
         )
 
-    def join_columns_for_agg(self, by) -> None:
+    def join_columns_for_agg(self, by, column_strings, batch_list: Iterable[Batch]) -> None:
         """
         joins columns for aggregation
 
@@ -220,24 +220,27 @@ class Batch:
         assert by is not None
         for column in by:
             assert (
-                column in self._frames.columns
+                column.col_alias in self._frames.columns
             ), "Can not join columns for agg in non-projected column: {}".format(column)
-
+        
+        frames = list([batch.frames for batch in batch_list])
         count = 0
-        for frame in self._frames:
-            for column in by:
+        for frame in frames:
+            for column in column_strings:
                 if isinstance(column, str):
                     if "combined" in frame:
-                        self._frames[count]["combined"] = self._frames[count]["combined"] + column
+                        if column in frame:
+                            frames[count]["combined"] = frames[count]["combined"] + frames[count][column].astype(str)
+                        else:
+                            frames[count]["combined"] = frames[count]["combined"] + column
                     else:
-                        self._frames[count]["combined"] = column
-                else:
-                    if "combined" in frame:
-                        self._frames[count]["combined"] = self._frames[count]["combined"] + self._frames[count][column.col_alias].astype(str)
-                    else:
-                        self._frames[count]["combined"] = self._frames[count][column.col_alias].astype(str)
+                        if column in frame:
+                            frames[count]["combined"] = frames[count][column].astype(str)
+                        else:
+                            frames[count]["combined"] = column
             count += 1
-        return self._frames
+        self._frames = frames
+        return frames
 
     def invert(self) -> None:
         self._frames = ~self._frames
@@ -340,20 +343,22 @@ class Batch:
         return Batch(frame)
 
     @classmethod
-    def string_agg(cls, separator: str, batch_list: Iterable[Batch], copy=True) -> Batch:
+    def string_agg(cls, separator: str, frames: List[pd.DataFrame], copy=True) -> Batch:
         """Concat a list of joined column values with a separator.
         Notice: only frames are considered.
         """
 
         # pd.concat will convert generator into list, so it does not hurt
         # if we convert ourselves.
-        frame_list = list([batch.frames for batch in batch_list])
-        if len(frame_list) == 0:
+        if len(frames) == 0:
             return Batch()
-        frame = pd.concat(frame_list, ignore_index=True, copy=copy)
-
-        stringagg = separator.join(frame["combined"])
-        frame["string_agg"] = stringagg
+        count = 0
+        for frame in frames:
+            stringagg = separator.join(list(frames[count]["combined"].astype(str)))
+            print(separator.join(list(frames[count]["combined"].astype(str))))
+            frames[count]["string_agg"] = stringagg
+            count += 1
+        frame = pd.concat(frames, ignore_index=True, copy=copy)
         return Batch(frame)
 
     @classmethod

@@ -185,7 +185,7 @@ def create_row_num_tv_expr(table_alias):
 
 def check_groupby_pattern(table_ref: TableRef, groupby_string: str) -> None:
     # match the pattern of group by clause (e.g., 16 frames or 8 samples)
-    pattern = re.search(r"^\d+\s*(?:frames|samples|paragraphs)$", groupby_string)
+    pattern = re.search(r"^\d+\s*(?:frames|samples|paragraphs|chunks)$", groupby_string)
     # if valid pattern
     if not pattern:
         err_msg = "Incorrect GROUP BY pattern: {}".format(groupby_string)
@@ -193,7 +193,7 @@ def check_groupby_pattern(table_ref: TableRef, groupby_string: str) -> None:
     match_string = pattern.group(0)
     suffix_string = re.sub(r"^\d+\s*", "", match_string)
 
-    if suffix_string not in ["frames", "samples", "paragraphs"]:
+    if suffix_string not in ["frames", "samples", "paragraphs", "chunks"]:
         err_msg = "Grouping only supported by frames for videos, by samples for audio, and by paragraphs for documents"
         raise BinderError(err_msg)
 
@@ -207,6 +207,9 @@ def check_groupby_pattern(table_ref: TableRef, groupby_string: str) -> None:
 
     if suffix_string == "paragraphs" and not is_pdf_table(table_ref.table.table_obj):
         err_msg = "Grouping by paragraphs only supported for pdf tables"
+        raise BinderError(err_msg)
+    if suffix_string == "chunks" and not is_document_table(table_ref.table.table_obj):
+        err_msg = "Grouping by chunks only supported for document tables"
         raise BinderError(err_msg)
 
     # TODO ACTION condition on segment length?

@@ -33,4 +33,6 @@ class ProjectPlan(AbstractPlan):
         return "ProjectPlan(target_list={})".format(self.target_list)
 
     def __hash__(self) -> int:
+        if isinstance(self.target_list[0], List):
+            return hash((super().__hash__(), tuple(self.target_list[0])))
         return hash((super().__hash__(), tuple(self.target_list)))

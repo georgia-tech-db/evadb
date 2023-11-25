@@ -15,6 +15,9 @@
 from evadb.expression.constant_value_expression import ConstantValueExpression
 from evadb.plan_nodes.abstract_plan import AbstractPlan
 from evadb.plan_nodes.types import PlanOprType
+from typing import List
+from evadb.expression.abstract_expression import AbstractExpression
+from evadb.expression.tuple_value_expression import TupleValueExpression
 
 
 class StringAggPlan(AbstractPlan):
@@ -35,7 +38,10 @@ class StringAggPlan(AbstractPlan):
 
     @property
     def columns(self):
-        return self._string_agg_clause[0]
+        if isinstance(self._string_agg_clause[0], List):
+            return self._string_agg_clause[0]
+        else:
+            return [self._string_agg_clause[0]]
 
     @property
     def separator(self):
@@ -43,7 +49,10 @@ class StringAggPlan(AbstractPlan):
 
     @property
     def order_by(self):
-        return self._string_agg_clause[2]
+        if len(self._string_agg_clause) == 3:
+            return self._string_agg_clause[2]
+        else:
+            return None
 
     @property
     def string_agg_clause(self):
@@ -53,4 +62,7 @@ class StringAggPlan(AbstractPlan):
         return "StringAggPlan(string_agg_clause={})".format(self._string_agg_clause)
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(), self.string_agg_clause))
+        if isinstance(self.string_agg_clause[0], List):
+            return hash((super().__hash__(), tuple(self.string_agg_clause[0])))
+        else:
+            return hash((super().__hash__(), tuple(self.string_agg_clause)))

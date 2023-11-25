@@ -103,6 +103,7 @@ class TableSources:
         groupby_clause = None
         orderby_clause = None
         limit_count = None
+        string_agg_clause = None
 
         # first child is a SELECT terminal token
         for child in tree.children[1:]:
@@ -116,6 +117,8 @@ class TableSources:
                     groupby_clause = clause.get("groupby", None)
                 elif child.data == "order_by_clause":
                     orderby_clause = self.visit(child)
+                elif child.data == "string_agg_clause":
+                    string_agg_clause = self.visit(child)
                 elif child.data == "limit_clause":
                     limit_count = self.visit(child)
 
@@ -133,6 +136,7 @@ class TableSources:
             where_clause,
             groupby_clause=groupby_clause,
             orderby_list=orderby_clause,
+            string_agg_list=string_agg_clause,
             limit_count=limit_count,
         )
 

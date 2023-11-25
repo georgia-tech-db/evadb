@@ -57,6 +57,7 @@ class SelectStatement(AbstractStatement):
         self._union_all = False
         self._groupby_clause = kwargs.get("groupby_clause", None)
         self._orderby_list = kwargs.get("orderby_list", None)
+        self._string_agg_list = kwargs.get("string_agg_list", None)
         self._limit_count = kwargs.get("limit_count", None)
 
     @property
@@ -116,6 +117,14 @@ class SelectStatement(AbstractStatement):
         self._orderby_list = orderby_list
 
     @property
+    def string_agg_list(self):
+        return self._string_agg_list
+
+    @string_agg_list.setter
+    def string_agg_list(self, string_agg_list):
+        self._string_agg_list = string_agg_list
+
+    @property
     def limit_count(self):
         return self._limit_count
 
@@ -129,6 +138,8 @@ class SelectStatement(AbstractStatement):
             for expr in self._target_list:
                 target_list_str += str(expr) + ", "
             target_list_str = target_list_str.rstrip(", ")
+        if self._string_agg_list is not None:
+            select_str += " STRING_AGG(" + " ".join(string_agg_list) + ")"
 
         orderby_list_str = ""
         if self._orderby_list is not None:
@@ -175,6 +186,7 @@ class SelectStatement(AbstractStatement):
             and self.union_all == other.union_all
             and self._groupby_clause == other.groupby_clause
             and self.orderby_list == other.orderby_list
+            and self.string_agg_list == other.string_agg_list
             and self.limit_count == other.limit_count
         )
 
@@ -189,6 +201,7 @@ class SelectStatement(AbstractStatement):
                 self.union_all,
                 self.groupby_clause,
                 tuple(self.orderby_list or []),
+                tuple(self.string_agg_list or []),
                 self.limit_count,
             )
         )
