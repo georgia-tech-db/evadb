@@ -442,7 +442,6 @@ class Batch:
 
     def drop_column_alias(self, metadata=None) -> None:
         # table1.a, table1.b, table1.c -> a, b, c
-        
 
         new_col_names = []
         for col_name in self.columns:
@@ -602,7 +601,9 @@ class Batch:
                         sample_data = self._frames[col_name].iloc[0]
                         if is_shape_matching(sample_data, defined_column_shapes[i]):
                             basic_element = get_basic_element(sample_data)
-                            if deduce_and_map_type(basic_element, defined_column_types[i]):
+                            if deduce_and_map_type(
+                                basic_element, defined_column_types[i]
+                            ):
                                 column_rename_map[col_name] = def_name
                                 defined_column_names.remove(def_name)
                                 defined_column_types.pop(i)
@@ -611,11 +612,11 @@ class Batch:
 
             # Rename columns in the dataframe
             self._frames.rename(columns=column_rename_map, inplace=True)
-            new_cols=[]
+            new_cols = []
             for col in self.columns:
                 new_cols.append(column_rename_map[col])
-            self.columns=new_cols
-                
+            self.columns = new_cols
+
     def to_numpy(self):
         return self._frames.to_numpy()
 
