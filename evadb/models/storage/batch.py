@@ -388,7 +388,7 @@ class Batch:
         verified_col = updated_column_name if updated_column_name in self._frames else None 
         
         if not verified_col:
-            raise KeyError(f"ERROR: column '{column_name}' does not exist")
+            raise KeyError(f"ERROR: column '{updated_column_name}' does not exist in columns: {self._frames.columns}")
 
         if not delimiter or not isinstance(delimiter, str):
             raise ValueError("Delimiter must be a string")
