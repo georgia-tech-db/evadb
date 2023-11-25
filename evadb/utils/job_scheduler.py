@@ -62,67 +62,79 @@ class JobScheduler:
         return sleep_time
 
     def _scan_and_execute_jobs(self):
+        try:
+            logger.debug("Scanning for jobs to execute")
+            for next_executable_job in iter(
+                lambda: self._evadb.catalog().get_next_executable_job(
+                    only_past_jobs=True
+                ),
+                None,
+            ):
+                
+                logger.debug(
+                    f"Executing job: {next_executable_job.name}"
+                )
+                                
+                execution_time = datetime.datetime.now()
+
+                # insert a job history record to mark start of this execution
+                self._evadb.catalog().insert_job_history_catalog_entry(
+                    next_executable_job.row_id,
+                    next_executable_job.name,
+                    execution_time,
+                    None,
+                )
+
+                # execute the queries of the job
+                execution_results = [
+                    execute_query(self._evadb, query)
+                    for query in next_executable_job.queries
+                ]
+                logger.debug(
+                    f"Exection result for job: {next_executable_job.name} results: {execution_results}"
+                )
+
+                # update the next trigger time for this job
+                self._update_next_schedule_run(next_executable_job)
+
+                # update the previosly inserted job history record with endtime
+                self._evadb.catalog().update_job_history_end_time(
+                    next_executable_job.row_id,
+                    execution_time,
+                    datetime.datetime.now(),
+                )
+
+            next_executable_job = self._evadb.catalog().get_next_executable_job(
+                only_past_jobs=False
+            )
+
+            sleep_time = self._get_sleep_time(next_executable_job)
+            if sleep_time > 0:
+                logger.debug(
+                    f"Job scheduler process sleeping for {sleep_time} seconds"
+                )
+                time.sleep(sleep_time)
+        except Exception as e:
+            logger.error(f"Got an exception in job scheduler: {str(e)}")
+            time.sleep(self.poll_interval_seconds * 0.2)
+
+    def scheduler_process(self):
         while True:
             try:
                 job_scheduler_run_flag = self._evadb.catalog().get_configuration_catalog_value(JOB_SCHEDULER_FLAG, False)
-                print("job_scheduler_run_flag: ", job_scheduler_run_flag)
+                                
                 if job_scheduler_run_flag:
-                    print("Executing jobs...")
-                    for next_executable_job in iter(
-                        lambda: self._evadb.catalog().get_next_executable_job(
-                            only_past_jobs=True
-                        ),
-                        None,
-                    ):
-                        execution_time = datetime.datetime.now()
-
-                        # insert a job history record to mark start of this execution
-                        self._evadb.catalog().insert_job_history_catalog_entry(
-                            next_executable_job.row_id,
-                            next_executable_job.name,
-                            execution_time,
-                            None,
-                        )
-
-                        # execute the queries of the job
-                        execution_results = [
-                            execute_query(self._evadb, query)
-                            for query in next_executable_job.queries
-                        ]
-                        logger.debug(
-                            f"Exection result for job: {next_executable_job.name} results: {execution_results}"
-                        )
-
-                        # update the next trigger time for this job
-                        self._update_next_schedule_run(next_executable_job)
-
-                        # update the previosly inserted job history record with endtime
-                        self._evadb.catalog().update_job_history_end_time(
-                            next_executable_job.row_id,
-                            execution_time,
-                            datetime.datetime.now(),
-                        )
-
-                    next_executable_job = self._evadb.catalog().get_next_executable_job(
-                        only_past_jobs=False
-                    )
-
-                    sleep_time = self._get_sleep_time(next_executable_job)
-                    if sleep_time > 0:
-                        logger.debug(
-                            f"Job scheduler process sleeping for {sleep_time} seconds"
-                        )
-                        time.sleep(sleep_time)
+                    self._scan_and_execute_jobs()
                 else:
-                    print("Job scheduler disabled, sleeping for ", str(self.poll_interval_seconds), " seconds")
                     time.sleep(self.poll_interval_seconds)
             except Exception as e:
-                logger.error(f"Got an exception in job scheduler: {str(e)}")
+                logger.error(f"Exception occurred in scheduler process: {str(e)}")
                 time.sleep(self.poll_interval_seconds * 0.2)
-
+                        
+    
     def execute(self):
         try:
-            self._scan_and_execute_jobs()
+            self.scheduler_process()
         except KeyboardInterrupt:
             logger.debug("Exiting the job scheduler process due to interrupt")
             sys.exit()
