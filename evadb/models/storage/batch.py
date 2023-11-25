@@ -533,7 +533,10 @@ class Batch:
             return bound_columns
 
         cur_names = self._frames.columns.values
-        io_names_and_rename_rules = [(target_name, target_rule if target_rule is not None else target_name) for target_name, target_rule in io_names_and_rename_rules]
+        io_names_and_rename_rules = [
+            (target_name, target_rule if target_rule is not None else target_name)
+            for target_name, target_rule in io_names_and_rename_rules
+        ]
         mapping = column_map(func_name, io_names_and_rename_rules, cur_names)
         new_names = []
         for i in range(len(cur_names)):
