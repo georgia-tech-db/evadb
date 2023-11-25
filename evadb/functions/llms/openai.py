@@ -27,15 +27,16 @@ from evadb.utils.generic_utils import (
 )
 
 MODEL_CHOICES = [
-    "gpt-4",
+    # "gpt-4-32k",
+    # "gpt-4-32k-0314",
+    "gpt-4",    
     "gpt-4-0314",
-    "gpt-4-32k",
-    "gpt-4-32k-0314",
-    "gpt-3.5-turbo",
-    "gpt-3.5-turbo-0301",
     "gpt-3.5-turbo-16k",
     "gpt-3.5-turbo-16k-0613",
+    "gpt-3.5-turbo",
+    "gpt-3.5-turbo-0301",
 ]
+
 _DEFAULT_PARAMS = {
     "model": "gpt-3.5-turbo",
     "temperature": 0.0,
@@ -71,13 +72,20 @@ class OpenAILLM(BaseLLM):
         validate_kwargs(kwargs, allowed_keys=_DEFAULT_PARAMS.keys(), required_keys=[])
         self.model_params = {**_DEFAULT_PARAMS, **kwargs}
 
-    def model_selection(self, prompt: str, query: str, content: str, cost: float, budget: float):
+    def model_selection(self, idx: int, prompt: str, queries: str, contents: str, cost: float, budget: float):
+        query = queries[idx]
+        content = contents[idx]
+
         for model in MODEL_CHOICES:
             self.model_params["model"] = model
-            token_consumed, dollar_cost = self.get_max_cost(prompt, query, content)
+            _, dollar_cost = self.get_max_cost(prompt, query, content)
+            for i in range(idx+1, len(queries)):
+                self.model_params["model"] = MODEL_CHOICES[-1]
+                dollar_cost += self.get_max_cost(None, queries[i], contents[i])[1]
             if budget - dollar_cost >= 0:
-                return model        
-        return None
+                return model
+      
+        return MODEL_CHOICES[-1]
 
     def generate(self, queries: List[str], contents: List[str], prompt: str) -> List[str]:
         budget = int(os.environ.get("OPENAI_BUDGET", None))
@@ -91,7 +99,7 @@ class OpenAILLM(BaseLLM):
 
         results = []
 
-        for query, content in zip(queries, contents):
+        for query, content, idx in zip(queries, contents, range(len(queries))):
             def_sys_prompt_message = {
                 "role": "system",
                 "content": prompt
@@ -100,7 +108,7 @@ class OpenAILLM(BaseLLM):
             }
 
             # select model
-            model = self.model_selection(prompt, query, content, cost, budget)
+            model = self.model_selection(idx, prompt, queries, contents, cost, budget)
             assert model is not None, "OpenAI budget exceeded!"
 
             self.model_params["model"] = model
@@ -122,7 +130,6 @@ class OpenAILLM(BaseLLM):
             response = completion_with_backoff(**self.model_params)
             answer = response.choices[0].message.content
 
-            # cost_query = 0.0001
             cost_query = self.get_cost(prompt, query, content, answer)[1]
 
             cost += cost_query
