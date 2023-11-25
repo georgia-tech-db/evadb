@@ -173,7 +173,7 @@ class Batch:
         """
         Execute function expression on frames.
         """
-        if expr.forward.tags is not None:
+        if hasattr(expr.forward, "tags"):
             input_tags = expr.forward.tags["input"][0]
             output_tags = expr.forward.tags["output"][0]
             self.drop_column_alias(metadata=(input_tags, output_tags))
