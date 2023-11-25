@@ -187,6 +187,10 @@ class FunctionExpression(AbstractExpression):
         if not self._cache:
             return func_args.apply_function_expression(func)
 
+        for column_name, obj_column in zip(func_args.columns, self.function_obj.args):
+            if obj_column.name != column_name:
+                raise RuntimeError(f"Column name {column_name} is not matching")
+            
         output_cols = [obj.name for obj in self.function_obj.outputs]
 
         # 1. check cache

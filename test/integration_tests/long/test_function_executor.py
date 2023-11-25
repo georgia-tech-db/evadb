@@ -321,6 +321,20 @@ class FunctionExecutorTest(unittest.TestCase):
             # disabling warning for function modification for now
             # with self.assertRaises(AssertionError):
             execute_query_fetch_all(self.evadb, select_query)
+            
+    def test_should_raise_with_multiple_input_dataframes(self):
+        with self.assertRaises(ExecutorError) as cm:
+            execute_query_fetch_all(
+                self.evadb, "CREATE FUNCTION IF NOT EXISTS InvalidInput IMPL 'evadb/functions/test_invalid_signature_input.py'"
+            )
+        self.assertEqual(str(cm.exception), "forward method can only have single DataFrame as input")
+        
+    def test_should_raise_with_multiple_output_dataframes(self):
+        with self.assertRaises(ExecutorError) as cm:
+            execute_query_fetch_all(
+                self.evadb, "CREATE FUNCTION IF NOT EXISTS InvalidOutput IMPL 'evadb/functions/test_invalid_signature_output.py'"
+            )
+        self.assertEqual(str(cm.exception), "forward method can only output single DataFrame")
 
     def test_create_function_with_decorators(self):
         execute_query_fetch_all(
