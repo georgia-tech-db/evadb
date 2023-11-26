@@ -1,8 +1,3 @@
-import ast
-import types
-
-import os
-
 import pandas as pd
 
 from evadb.catalog.catalog_type import NdArrayType

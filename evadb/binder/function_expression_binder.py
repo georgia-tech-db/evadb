@@ -29,6 +29,7 @@ from evadb.configuration.constants import EvaDB_INSTALLATION_DIR
 from evadb.executor.execution_context import Context
 from evadb.expression.function_expression import FunctionExpression
 from evadb.expression.tuple_value_expression import TupleValueExpression
+from evadb.functions.helpers.udf import UserDefinedFunction
 from evadb.parser.types import FunctionType
 from evadb.third_party.huggingface.binder import assign_hf_function
 from evadb.utils.generic_utils import (
@@ -118,10 +119,10 @@ def bind_func_expr(binder: StatementBinder, node: FunctionExpression):
                     )
                     properties["openai_api_key"] = openai_key
 
-            if inspect.isclass(function_class):
-                node.function = lambda: function_class(**properties)
-            else:
+            if isinstance(function_class, UserDefinedFunction):
                 node.function = function_class
+            else:
+                node.function = lambda: function_class(**properties)
         except Exception as e:
             err_msg = (
                 f"{str(e)}. Please verify that the function class name in the "

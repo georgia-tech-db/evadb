@@ -25,6 +25,7 @@ from evadb.constants import NO_GPU
 from evadb.executor.execution_context import Context
 from evadb.expression.abstract_expression import AbstractExpression, ExpressionType
 from evadb.functions.gpu_compatible import GPUCompatible
+from evadb.functions.helpers.udf import UserDefinedFunction
 from evadb.models.storage.batch import Batch
 from evadb.parser.alias import Alias
 from evadb.utils.kv_cache import DiskKVCache
@@ -164,10 +165,10 @@ class FunctionExpression(AbstractExpression):
 
     def _gpu_enabled_function(self):
         if self._function_instance is None:
-            if inspect.isclass(self.function):
-                self._function_instance = self.function()
-            else:
+            if isinstance(self.function, UserDefinedFunction):
                 self._function_instance = self.function
+            else:
+                self._function_instance = self.function()
             if isinstance(self._function_instance, GPUCompatible):
                 device = self._context.gpu_device()
                 if device != NO_GPU:

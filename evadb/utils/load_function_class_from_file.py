@@ -54,11 +54,15 @@ def load_function_class_from_file(filepath, classname=None):
         if obj.__module__ == module.__name__
     ]
     if len(classes) != 1:
+        functions = [
+            obj
+            for _, obj in inspect.getmembers(module, inspect.isfunction)
+            if obj.__module__ == module.__name__
+        ]
+        if len(functions) == 1:
+            return UserDefinedFunction(functions[0])
         raise ImportError(
             f"{filepath} contains {len(classes)} classes, please specify the correct class to load by naming the function with the same name in the CREATE query."
         )
-
-    if not inspect.isclass(classes[0]):
-        return UserDefinedFunction(classes[0])
-
+    
     return classes[0]
