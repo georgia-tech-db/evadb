@@ -55,7 +55,8 @@ class NumpyArray(IOColumnArgument):
 
 class PandasColumn(IOColumnArgument):
     def __init__(self, name: str, type: NdArrayType = NdArrayType.ANYTYPE,
-                 shape: Tuple = None, is_nullable: Optional[bool] = None):
+                 shape: Tuple = None, is_nullable: Optional[bool] = None,
+                 required: bool = True):
 
         assert name is not None, "Column name cannot be None"
         assert type is not None, "Column type cannot be None"
@@ -67,11 +68,12 @@ class PandasColumn(IOColumnArgument):
             is_nullable=is_nullable,
             array_type=type,
             array_dimensions=shape,
+            required=required,
         )
 
-class PandasColumnAsterick(PandasColumn):
-    def __init__(self):
-        super().__init__(name='*', type=NdArrayType.ANYTYPE, shape=Dimension.ANYDIM, is_nullable=None)
+# class PandasColumnAsterick(PandasColumn):
+#     def __init__(self):
+#         super().__init__(name='*', type=NdArrayType.ANYTYPE, shape=Dimension.ANYDIM, is_nullable=None)
         
 class PyTorchTensor(IOColumnArgument):
     """Descriptor data type for PyTorch Tensor"""
@@ -98,9 +100,9 @@ class NewPandasDataFrame(IOArgument):
         super().__init__()
         self.columns = columns
     
-    def generate_catalog_entries(self, *args, **kwargs) -> List[type[FunctionIOCatalogEntry]]:
+    def generate_catalog_entries(self, is_input) -> List[type[FunctionIOCatalogEntry]]:
         assert self.columns is not None, "Columns cannot be None"
-        assert len(self.columns) > 0, "Columns cannot be empty"
+        # assert len(self.columns) > 0, "Columns cannot be empty"
 
         catalog_entries = []
         for column in self.columns:
@@ -111,7 +113,8 @@ class NewPandasDataFrame(IOArgument):
                     is_nullable=column.is_nullable,
                     array_type=column.type,
                     array_dimensions=column.array_dimensions,
-                    is_input=True,
+                    required=column.required,
+                    is_input=is_input,
                 )
             )
 

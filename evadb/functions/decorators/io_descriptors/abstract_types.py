@@ -55,6 +55,7 @@ class IOColumnArgument(IOArgument):
         is_nullable: bool = None,
         array_type: NdArrayType = None,
         array_dimensions: Tuple[int] = None,
+        required: bool = True,
     ) -> None:
         """The parameters like shape, data type are passed as parameters to be initialized
 
@@ -68,6 +69,7 @@ class IOColumnArgument(IOArgument):
         self.is_nullable = is_nullable
         self.array_type = array_type
         self.array_dimensions = array_dimensions
+        self.required = required
 
     def generate_catalog_entries(
         self, is_input=False
@@ -85,6 +87,7 @@ class IOColumnArgument(IOArgument):
                 is_nullable=self.is_nullable,
                 array_type=self.array_type,
                 array_dimensions=self.array_dimensions,
+                required=self.required,
                 is_input=is_input,
             )
         ]

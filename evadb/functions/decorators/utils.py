@@ -49,11 +49,11 @@ def load_io_from_function_decorators(
             raise FunctionIODefinitionError("No tags found in the forward function. Please make sure to use the @forward decorator with both input and output signatures.")
 
         if hasattr(function.forward, "tags") and tag_key not in function.forward.tags:
-            raise FunctionIODefinitionError("Neither input nor output tags found in forward header. Please set at least one of them.")
+            raise FunctionIODefinitionError(f"Could not detect {tag_key} signature for {function}. Please check the @forward decorator for {function}")
 
-    assert (
-        io_signature is not None
-    ), f"Cannot infer io signature from the decorator for {function}. Please check the {tag_key} of the forward function."
+    # assert (
+    #     io_signature is not None
+    # ), f"Cannot infer io signature from the decorator for {function}. Please check the {tag_key} of the forward function."
 
     result_list = []
     for io in io_signature:

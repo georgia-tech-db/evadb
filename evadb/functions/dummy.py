@@ -6,7 +6,7 @@ from evadb.functions.decorators.decorators import forward, setup
 from evadb.functions.decorators.io_descriptors.data_types import PandasDataframe, PandasColumn, NewPandasDataFrame
 
 class Dummy(AbstractFunction):
-    @setup(cacheable=True, function_type='dummy', batchable=True)
+    @setup(cacheable=False, function_type='dummy', batchable=True)
     def setup(self, metric:Optional[str]=None):
         self.metric = metric
         self.count = 0
@@ -19,9 +19,18 @@ class Dummy(AbstractFunction):
         input_signatures=[
             NewPandasDataFrame(
                 columns=[
+                    PandasColumn('race', type=NdArrayType.STR, shape=(None,), is_nullable=False),
+                    PandasColumn('age', type=NdArrayType.INT16, shape=(None,), is_nullable=False),
+                    PandasColumn('sex', type=NdArrayType.STR, shape=(None,), is_nullable=False),
+                    PandasColumn('charge', type=NdArrayType.STR, shape=(None,), is_nullable=False),
+                    PandasColumn('n_prior', type=NdArrayType.STR, shape=(None,), is_nullable=False),
+                    PandasColumn('stay', type=NdArrayType.STR, shape=(None,), is_nullable=False),
+                    PandasColumn('huh', type=NdArrayType.STR, shape=(None,), is_nullable=False),
+
+                    # Should let users know that this column was not found
+                    # PandasColumn('non-extant_col', type=NdArrayType.ANYTYPE, shape=(None,), is_nullable=False, required=False),
                     # PandasColumn('class', type=NdArrayType.STR, shape=(None,), is_nullable=False),
                     # PandasColumn('predicted', type=NdArrayType.STR, shape=(None,), is_nullable=False),
-                    PandasColumn('*', type=NdArrayType.ANYTYPE, shape=(None,), is_nullable=False),
                 ]
             )
         ],
@@ -35,41 +44,4 @@ class Dummy(AbstractFunction):
         ]
     )
     def forward(self, data: PandasDataframe) -> PandasDataframe:
-        print('Running forward')
-        print(data.columns)
-        print(len(data))
-        data['class'] = data['class'].astype(str) + ' ' + str(self.count)
-        data['count'] = self.count
-        self.count += 1 
         return data
-
-
-    # @forward(
-    #         input_signatures=[
-    #             PandasDataframe(
-    #                 columns=[
-    #                     # "class",
-    #                     # "predicted"
-    #                 ],
-    #                 # column_types=[NdArrayType.STR, NdArrayType.STR],
-    #                 # column_shapes=[(None,), (None,)],
-    #             )
-    #         ],
-    #         output_signatures=[
-    #             PandasDataframe(
-    #                 columns=["class", "predicted",],
-    #                 column_types=[NdArrayType.STR, NdArrayType.STR, ],
-    #                 column_shapes=[(None,), (None,), ]
-    #             )
-    #         ]
-    # )
-    # # TODO: allow columns=['*'] so that we can pass through all columns that were passed by users
-    # def forward(self, data: PandasDataframe) -> PandasDataframe:
-    #     print('Running forward')
-    #     print(data.columns)
-    #     data['class'] = data['class'].astype(str) + ' ' + str(self.count)
-    #     data['count'] = self.count
-    #     self.count += 1 
-    #     return data
-
-    
