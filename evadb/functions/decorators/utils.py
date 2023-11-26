@@ -19,7 +19,7 @@ from evadb.functions.abstract.abstract_function import AbstractFunction
 from evadb.utils.errors import FunctionIODefinitionError
 
 HELP_LINK = 'https://evadb.readthedocs.io/en/stable/source/reference/ai/custom-ai-function.html#yolo-object-detection'
-HELP_DESCRIPTOR = 'Please refer to the documentation for more information: ' + HELP_LINK
+HELP_DESCRIPTOR = 'Refer to the documentation for more information: ' + HELP_LINK
 
 def load_io_from_function_decorators(
     function: Type[AbstractFunction], is_input=False
@@ -48,10 +48,13 @@ def load_io_from_function_decorators(
 
     if io_signature is None:
         if not hasattr(function.forward, "tags"):
-            raise FunctionIODefinitionError("No tags found in the forward function. Please make sure to use the @forward decorator with both input and output signatures.\n{HELP_DESCRIPTOR}}")
+            raise FunctionIODefinitionError("No tags found in the forward function. Please make sure to use the @forward decorator with both input and output signatures.\n"+HELP_DESCRIPTOR)
 
         if hasattr(function.forward, "tags") and tag_key not in function.forward.tags:
-            raise FunctionIODefinitionError(f"Could not detect {tag_key} signature for {function}. Please check the @forward decorator for {function}.\n{HELP_DESCRIPTOR}")
+            raise FunctionIODefinitionError(f"Could not detect {tag_key} signature for {function}. Please check the @forward decorator for {function}.\n"+HELP_DESCRIPTOR)
+
+    if (type(io_signature) is list) and (len(io_signature) == 0):
+        raise FunctionIODefinitionError(f"Could not detect {tag_key} signature for {function}. Please check the @forward decorator for {function}.\n"+HELP_DESCRIPTOR)
 
     # assert (
     #     io_signature is not None
