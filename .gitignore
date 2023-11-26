@@ -226,5 +226,3 @@ eva_db/*
 eva/*
 
 blog.md
-
-tests/integration_tests/short/*.db

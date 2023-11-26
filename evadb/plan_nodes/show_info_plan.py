@@ -40,7 +40,7 @@ class ShowInfoPlan(AbstractPlan):
             return "ShowDatabasePlan"
         elif self._show_type == ShowType.TABLES:
             return "ShowTablePlan"
-        elif self._show_type == ShowType.CONFIGS:
+        elif self._show_type == ShowType.CONFIG:
             return "ShowConfigPlan"
 
     def __hash__(self) -> int:
