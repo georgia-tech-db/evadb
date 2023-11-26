@@ -59,6 +59,8 @@ The arguments that need to be passed are
    
   Data types of the inputs to the forward function must be specified. If no constraints are given, then no validation is done for the inputs.
 
+  It is essential to adhere to the requirement of a single DataFrame input for the `forward` function. Providing multiple DataFrames or inputs that do not conform to the specified input signature will result in errors. This design choice is made to ensure consistency and efficiency in the processing of UDFs within EvaDB.
+
 - output_signatures: List[IOArgument]
 
   Data types of the outputs to the forward function must be specified. If no constraints are given, then no validation is done for the inputs.
