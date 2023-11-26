@@ -28,6 +28,7 @@ from aenum import AutoEnum, unique
 
 from evadb.configuration.constants import EvaDB_INSTALLATION_DIR
 from evadb.utils.logging_manager import logger
+from evadb.configuration.constants import EvaDB_ROOT_DIR
 
 
 def validate_kwargs(
@@ -79,6 +80,14 @@ def load_function_class_from_file(filepath, classname=None):
         FileNotFoundError: If the file cannot be found.
         RuntimeError: Any othe type of runtime error.
     """
+    simple_udf_filepath = None
+    simple_udf_classname = None
+    if classname and "_SimpleUDF" in classname:
+        simple_udf_classname = classname
+        classname = "SimpleUDF"
+        simple_udf_filepath = filepath
+        filepath = f"{EvaDB_ROOT_DIR}/evadb/functions/simple_udf.py"
+
     try:
         abs_path = Path(filepath).resolve()
         spec = importlib.util.spec_from_file_location(abs_path.stem, abs_path)
@@ -99,6 +108,10 @@ def load_function_class_from_file(filepath, classname=None):
 
     # Try to load the specified class by name
     if classname and hasattr(module, classname):
+        if classname == "SimpleUDF":
+            cls = getattr(module, classname)
+            cls.set_udf(cls, simple_udf_classname, simple_udf_filepath)
+            return cls
         return getattr(module, classname)
 
     # If class name not specified, check if there is only one class in the file
