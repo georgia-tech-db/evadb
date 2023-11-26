@@ -20,6 +20,7 @@ from evadb.server.command_handler import execute_query_fetch_all
 NDARRAY_DIR = "ndarray"
 TUTORIALS_DIR = "tutorials"
 
+
 DummyObjectDetector_function_query = """CREATE FUNCTION IF NOT EXISTS DummyObjectDetector
                   INPUT  (Frame_Array NDARRAY INT8(3, ANYDIM, ANYDIM))
                   OUTPUT (label NDARRAY STR(1))
