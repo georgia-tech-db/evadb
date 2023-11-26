@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from dataclasses import dataclass
-import inspect
 from typing import Callable, List, Tuple
 
 import numpy as np

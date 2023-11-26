@@ -22,6 +22,7 @@ import evadb
 from evadb.functions.abstract.abstract_function import AbstractFunction
 from evadb.functions.abstract.hf_abstract_function import AbstractHFFunction
 from evadb.functions.yolo_object_detector import Yolo
+from evadb.functions.helpers.udf import UserDefinedFunction
 
 
 class AbstractFunctionTest(unittest.TestCase):
@@ -32,6 +33,13 @@ class AbstractFunctionTest(unittest.TestCase):
             # skip yolo and HF to avoid downloading model
             if issubclass(derived_function_class, (Yolo, AbstractHFFunction)):
                 continue
+            # if class is UserDefinedFunction
+            if issubclass(derived_function_class, UserDefinedFunction):
+                temp_fun = lambda x: x
+                dummy_object = UserDefinedFunction(temp_fun)
+                self.assertTrue(str(dummy_object.name) is not None)
+                continue
+
             if isabstract(derived_function_class) is False:
                 class_type = derived_function_class
                 # Check class init signature

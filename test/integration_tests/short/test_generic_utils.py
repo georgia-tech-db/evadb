@@ -25,7 +25,8 @@ from evadb.utils.generic_utils import (
     str_to_class,
     validate_kwargs,
 )
-import evadb.utils.load_function_class_from_file as load_function_class_from_file
+
+from evadb.utils.load_function_class_from_file import load_function_class_from_file
 
 
 class ModulePathTest(unittest.TestCase):

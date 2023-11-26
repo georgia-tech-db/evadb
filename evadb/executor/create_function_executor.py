@@ -14,8 +14,6 @@
 # limitations under the License.
 import contextlib
 import hashlib
-import inspect
-import locale
 import os
 import pickle
 import re
