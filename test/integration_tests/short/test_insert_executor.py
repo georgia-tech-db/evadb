@@ -124,7 +124,7 @@ class InsertExecutorTest(unittest.TestCase):
         self.assertEqual(len(batch._frames), 2)
 
     def test_insert_one_tuple_in_table(self):
-        query = f"""
+        query = """
             INSERT INTO books (name, author, year) VALUES (
                 'Harry Potter', 'JK Rowling', 1997
             );
@@ -168,7 +168,7 @@ class InsertExecutorTest(unittest.TestCase):
         )
 
     def test_insert_multiple_tuples_in_table(self):
-        query = f"""
+        query = """
             INSERT INTO books (name, author, year) VALUES
             ('Fantastic Beasts Collection', 'JK Rowling', 2001),
             ('Magic Tree House Collection', 'Mary Pope Osborne', 1992),
