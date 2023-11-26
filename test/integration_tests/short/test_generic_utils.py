@@ -25,7 +25,6 @@ from evadb.utils.generic_utils import (
     str_to_class,
     validate_kwargs,
 )
-
 from evadb.utils.load_function_class_from_file import load_function_class_from_file
 
 

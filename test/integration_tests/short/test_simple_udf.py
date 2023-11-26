@@ -12,11 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import unittest
 import os
-import pandas as pd
 import tempfile
+import unittest
 from test.util import get_evadb_for_testing
+
+import pandas as pd
 
 from evadb.server.command_handler import execute_query_fetch_all
 

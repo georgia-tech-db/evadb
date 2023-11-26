@@ -31,9 +31,7 @@ from evadb.expression.tuple_value_expression import TupleValueExpression
 from evadb.functions.helpers.udf import UserDefinedFunction
 from evadb.parser.types import FunctionType
 from evadb.third_party.huggingface.binder import assign_hf_function
-from evadb.utils.generic_utils import (
-    string_comparison_case_insensitive,
-)
+from evadb.utils.generic_utils import string_comparison_case_insensitive
 from evadb.utils.load_function_class_from_file import load_function_class_from_file
 from evadb.utils.logging_manager import logger
 
