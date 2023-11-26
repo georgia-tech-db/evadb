@@ -16,6 +16,7 @@
 
 import os
 import pickle
+import numpy as np
 
 import pandas as pd
 
@@ -39,6 +40,8 @@ class ForecastModel(AbstractFunction):
         horizon: int,
         library: str,
         conf: int,
+        start: str,
+        frequency: str,
     ):
         self.library = library
         if "neuralforecast" in self.library:
@@ -62,6 +65,8 @@ class ForecastModel(AbstractFunction):
         self.conf = conf
         self.hypers = None
         self.rmse = None
+        self.start = start
+        self.frequency = frequency
         if os.path.isfile(model_path + "_rmse"):
             with open(model_path + "_rmse", "r") as f:
                 self.rmse = float(f.readline())
@@ -70,12 +75,25 @@ class ForecastModel(AbstractFunction):
 
     def forward(self, data) -> pd.DataFrame:
         log_str = ""
+
+        dates = None
+        if self.start:
+            # dates = pd.DataFrame(columns=['unique_id', 'ds'])
+            # dates = dates.assign(unique_id=1)
+            dates = pd.date_range(start=self.start, periods=self.horizon, freq=self.frequency).to_numpy()
+
         if self.library == "statsforecast":
-            forecast_df = self.model.predict(
-                h=self.horizon, level=[self.conf]
-            ).reset_index()
+            if dates is None:
+                forecast_df = self.model.predict(
+                    h=self.horizon, level=[self.conf]
+                ).reset_index()
+            else:
+                forecast_df = self.model.fitted_[0, 0].forward(y=dates, h=self.horizon, level=[self.conf])
         else:
-            forecast_df = self.model.predict().reset_index()
+            if dates is None:
+                forecast_df = self.model.predict().reset_index()
+            else:
+                forecast_df = self.model.predict(futr_df=dates).reset_index()
 
         # Feedback
         if len(data) == 0 or list(list(data.iloc[0]))[0] is True:
