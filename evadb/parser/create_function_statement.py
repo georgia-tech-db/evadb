@@ -67,7 +67,7 @@ class CreateFunctionStatement(AbstractStatement):
         self._outputs = outputs
 
         if impl_path:
-            if len(str(impl_path)) <= 13:
+            if len(str(impl_path)) < 12:
                 self._impl_path = Path(impl_path)
             elif "DBFUNCTIONS" == str(impl_path)[0:11] and (str(impl_path)[11:12] == "." or str(impl_path)[11:12] == "\\" or str(impl_path)[11:12] == "/"):
                 self._impl_path = Path(str(EvaDB_INSTALLATION_DIR) + "\\functions\\" + str(impl_path)[12:])
