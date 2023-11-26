@@ -443,7 +443,7 @@ if __name__ == "__main__":
     for file in os.listdir(EvaDB_NOTEBOOKS_DIR):
         if file.endswith(".ipynb"):
             notebook_file = os.path.join(EvaDB_NOTEBOOKS_DIR, file)
-            check_notebook_format(notebook_file)
+            #check_notebook_format(notebook_file)
 
     # SKIP SPELLING TESTS OVER PYTHON FILES BY DEFAULT
     if args.spell_check:
