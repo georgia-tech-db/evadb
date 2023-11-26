@@ -71,11 +71,14 @@ class SQLConfig(metaclass=SingletonMeta):
         # set echo=True to log SQL
 
         # Default to SQLite.
-        connect_args = {"timeout": 1000}
-        self.engine = create_engine(
-            self.worker_uri,
-            connect_args=connect_args,
-        )
+        # connect_args = {"timeout": 1000}
+        # self.engine = create_engine(
+        #     self.worker_uri,
+        #     connect_args=connect_args,
+        # )
+
+        # Postgres version
+        self.engine = create_engine(self.worker_uri)
 
         if self.engine.url.get_backend_name() == "sqlite":
             # enforce foreign key constraint and wal logging for sqlite
