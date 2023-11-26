@@ -102,7 +102,9 @@ class ParserTests(unittest.TestCase):
         parser = Parser()
 
         create_index_query = "CREATE INDEX testindex ON MyVideo (featCol) USING FAISS;"
-        modified_index_query = "CREATE INDEX testindex ON MyVideo (featcol) USING FAISS;"
+        modified_index_query = (
+            "CREATE INDEX testindex ON MyVideo (featcol) USING FAISS;"
+        )
         evadb_stmt_list = parser.parse(create_index_query)
 
         # check stmt itself
